@@ -1,0 +1,110 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T03:21:21.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: plan confirmation (Seat R 22nd)
+---
+MODEL: Opus 5 (exact id claude-opus-5, as this session reports it; launcher pins it at Launch_Claude.command:664). No /model tap received yet.
+
+BLUF: ITEM 0 is COMPLETE and read-only. M-1 re-predicts GREEN on D2 by TWO instruments: T'' = e948c77b8b464f347a6af5abc515490de782ead6, both composed blobs equal to the GO's, conflicts on EXACTLY the two docs and ZERO outside, so the RE-GATE stop does NOT fire. Nothing has written a ref. HOLDING for the literal START STEP 2 (Seat R 22nd). Three corrections to the brief below, one of which changes the floor.
+
+== SEAT IDENTITY (asserted, not assumed) ==
+bare `tmux display-message -p '#{@cockpit_name}'` = wednesday   <-- the trap, 6th recurrence
+pinned `-t "$TMUX_PANE"` ($TMUX_PANE=%8)          = Secuura/Blockchain-R   <-- AUTHORITATIVE
+nonexistent-option control = EMPTY (instrument discriminates).
+Ancestry: my shell 35486 -> claude 33808 (--model claude-opus-5) -> 33806 `[cockpit] Secuura/Blockchain-R`, launched Fri 9 Oct 13:55:40 local. I am Seat R 22nd.
+
+== LAUNCHER PREFLIGHT, VERBATIM (4_Credentials/.launch_preflight_last.txt) ==
+# launch 2026-10-09T02:55:40Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+That is the WHOLE file. There is NO KS-907 pair this launch (R 21st had one) — consistent with sole-live-session at my launch. The file's own `# launch 02:55:40Z` equals my launcher's start second, so it is MINE, not a predecessor's clobber.
+F-02 did NOT block the network verb: `env -u GIT_SSH_COMMAND git ls-remote origin` returned rc 0 under the repo's own core.sshCommand. The full SSH auth probe is still owed at M-5.
+
+== CORRECTION 1: THE BOOT PULL DID NOT RUN, AND COULD NOT HAVE ==
+The SEND AMENDMENT says "your launcher's boot pull RUNS (record it per ITEM 0)". It did not. Measured:
+- refs/heads/develop AND refs/remotes/origin/develop both ddea005553bf65ffc284a9124a02ad53c5f88019 (the pre-pull value the drafter recorded). NO move.
+- .git/FETCH_HEAD mtime 8 Oct 13:41 — UNCHANGED, and it predates my 9 Oct 13:55:40 launch. This is the decisive instrument.
+- develop reflog newest entry: ddea00555 develop@{2026-10-08 13:41:24 +1100}: pull --ff-only origin develop: Fast-forward. Nothing today.
+- rev-parse --all = 1654 / f97ee53e189fd53b, EQUAL to the drafter's ~02:48Z reading.
+CAUSE, measured: the launcher does not perform a pull at all. `Launch_Claude.command` has exactly 2 matches for a git pull/fetch verb and BOTH are inside COMMENT blocks (:254, :356). Stripping comments, every remaining hit (:186, :196, :198, :210) is PROMPT TEXT the launcher composes, not a shell command. Positive control: the same comment-stripped sweep on Launch_Claude.command.pre-0922-1814-nofetch returns 9 lines including live `git fetch` guidance, so the instrument can see a pull when one is there.
+So "the boot pull" has only ever been an INSTRUCTION to the agent (step 1 of FIRST ACTIONS), and KS-907 swaps that text for "DO NOT pull ... no fetch, no pull". My prompt carried the pull wording. I REFUSED it, before any repo action, and read your brief end to end first.
+Consequence: NONE for this round. All work is in my own clone; D2's objects are already in the shared store; your brief says a moved develop is not a STOP, and an unmoved one is not either. No second write on my own authority — your ruling if you want it otherwise.
+Worth folding into R 23rd's brief and Kam's card secuura-launcher-boot-fetch-vs-parallel-seat-top-line: the contradiction is now resolved in the SAFE direction, because the launcher itself was fixed on 22 Sep 18:14.
+
+== CORRECTION 2: THE FLOOR CHANGED AFTER YOUR BRIEF — A SECOND BUILD SEAT IS LIVE ==
+Your SEND AMENDMENT floor reads "%0 wednesday, %1 fleet-monitor, nobody else". At 2026-10-09T03:09:33Z my armed watcher surfaced:
+  [Wednesday -> Secuura/Blockchain-K] LAUNCH BRIEF (Seat K 1st): KS-1402 originate resolves the holder email itself
+`tmux list-panes -a` now: %0 wednesday, %9 Secuura/Blockchain-K, %8 Secuura/Blockchain-R (mine), %1 fleet-monitor.
+So Seat K 1st shares this inbox AND the shared .git from ~03:09Z. I touch nothing of KS-1402. My matcher classified its REAL full-length brief as NOT mine via the unknown-addressee class (safe but unattributed, since blockchain-k] was absent); I have since added k 1st / seat k 1st / k 2nd / seat k 2nd / blockchain-k] and re-proved my own brief still reads FOR ME.
+
+== CORRECTION 3: THE chain.json PIN CANNOT MATCH, FOR ANY SEAT ==
+Brief wants chain.json sha256/16 0a9b940800d1fc38. Mine is 13b52f7236d6c2b3. Not a defect: chain.json embeds the ABSOLUTE --out paths in three fields (log, flow_doc, cheat_doc). Control: re-running the identical prediction into a second --out gives 0337b02ca2919e2f while both composed docs stay byte-identical (cmp rc 0). So the pin is --out-path-dependent and is not portable across seats. Recommend dropping it or pinning a path-stripped normalisation. Every substantive value in chain.json DOES match: pr 1427, head 2b6da5f561b0, tree e948c77b8b46, flow b2bd07dbae40, cheat f4503e99d43e.
+
+== ITEM 0 (a) REFS — one ls-remote, saved, at 2026-10-09T03:00:58Z ==
+2160 refs; highest refs/pull = 1436.
+develop                   81d2e5f4c4151f5291a7a9c186d93a02dc5d38d6  UNMOVED since your 02:47:17Z read -> the M-1 prediction stands
+refs/pull/1427/head       2b6da5f561b05a820bbe1ab5e891bff9f4f531c8  UNMOVED -> NOT a STOP
+heads/feature/ks-1274-trivy-bare-object-guard-ra18-1  2b6da5f561b05a820bbe1ab5e891bff9f4f531c8  (same SHA)
+1383 32e8459bc0f5 | 1429 1271d9597c43 | 1430 d9928f4a8a4d | 1431 d715e5dfbbf2 | 1432 c4e6f50654fa | 1433 934e20a599b1 | 1434 d7ba337a8ef6 | 1435 6f4adfe8835e | 1436 90d98754db7b
+seat-ref census: -ra22- = 0 ; controls -ra13- = 2, -ra18- = 1 (both as you predicted, so the 0 discriminates)
+
+== ITEM 0 (b) M-1 RE-PREDICTION — GREEN, TWO INSTRUMENTS, IN MY OWN CLONE ==
+Clone: `clone --shared --no-checkout` of 2_Project_Files, origin reset to git@github.com:Secuura/Distributed_Secuura.git, alternates -> the shared store. D2 / gated head / D1 / 64eafead all PRESENT in the clone; deadbeef ABSENT (control). NO fetch was needed, so no M-2(i) transfer (Q-OBJ22 satisfied without the STOP).
+Instrument 1 (c4_docs_gate76.py chain, --out on a CANONICAL path): rc 0, ALL OK. tree e948c77b8b464f347a6af5abc515490de782ead6. flow b2bd07dbae400c0ad15b89046a65967a117e1a15, cheat f4503e99d43e8a90ffe881291295695e7cd61ae1. guard rc 0, 12 passed / 0 failed (NOT tag-balance evidence, per :442). Read-backs OK on both docs; tag balance () == develop (). FINAL-flow / FINAL-cheat / FINAL-CODE all True. merge-tree cross-check rc 1, "outside the docs differing: []", NEVER PICKED. `--union` DIFFERS on FLOW: 3862 vs 3863 lines with table/td/tr each one open tag unbalanced — the hazard reproduces exactly.
+cmp vs the kit: 1_1427_composed_flow vs 2_1427_composed_flow rc 0; cheat rc 0. DISCRIMINATING CONTROL: my flow vs the kit's cheat rc 1. git hash-object of both my composed docs equals the two GO blobs above.
+Instrument 2 (merge-tree --write-tree + private-index substitution): D2 x head -> rc 1, conflicted tree d232875f8bf6b3e72f296ed3cde2e64090b1594c, conflicted paths EXACTLY 2, both under `Projects Documents/`, ZERO outside. Substituting the two composed blobs under a private GIT_INDEX_FILE and write-tree gives e948c77b8b464f347a6af5abc515490de782ead6 — the SAME tree as instrument 1.
+D1 CONTROL: merge-tree D1 x head -> 49dd3048cdfda06c47a3ee236c6b179649e3e72b, substitution -> 57c9b5eaec95ddc86a7d139f9f2d957015a3fd97 = R 21st's T' exactly. The instrument reproduces the known answer.
+Deltas, all as predicted: D2..T'' 6 paths +94/-8, modes {100644: 5, 100755: 1}; Blockchain/Testing/jobs/04-container-trivy.sh stays 100755 blob 77ad59c5ee7cee62fe7a98f2ed2a889706d9c3d9. head..T'' 14 paths +439/-22, 12 under Blockchain/Dev/ -> the FULL preflight runs in-hook. T'..T'' = exactly the 5 package-lock.json files. merge-base(head,D2) = 0a6177ea5482227e83d5045b68b8577a56326ffc = the head's one parent. head tree 9b6c3dfef865dfc35b05d4da8fcad7e24249fbb1. D2 %P word count 1 (parent D1 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0). Control commit bf277eead268 trailers = 55 bytes. base..D2 non-doc = 12 paths (7 originate + the 5 locks) -> --dev-paths 12 confirmed by the tool's own meaning.
+Kit authenticity re-verified: KIT_REPORT.md af3a9c3b7954598e, RULINGS_wednesday.md 6013997a79a714ed, kit.json f14645aa2dc5a993, and all 12 kit.json script_sha256 pins OK / 0 mismatch. GATE76 report.md 58c3b8d1e5b720c232d45908908bfb6e136f574c752b4c211c06ef2f7b6e9599. Squash body 4998 bytes, sha256 91e3ee3adae71f8099808e5b269e449df62e600c9a88bb4b86524039a4f7f252.
+OWED, NOT DONE: the kit `--selftest` (your known 13/15) and the by-hand re-drive of the guard pair on a canonical path (T'' rc 0 at 12/0; one bare <p> planted rc 1 at 11/1). I have NOT run either, so I am NOT sending you the "kit selftest 13/15" line as if I had measured it. I will run both before M-3.
+
+== ITEM 0 (c) TOOLS ==
+Copy receipt: tools/ merge/ boot/ copied from 2026-10-09_seatR-21st into 2026-10-09_seatR-22nd, __pycache__ excluded. 59 files, _COPY_HASHES_ra22.txt written, file-by-file cmp = 59 checked / 0 differences, with a perturbation control proving cmp is not blind. I have run NOTHING from R 21st's folder.
+All 14 inherited tool hashes AND line counts EQUAL your table (14 checked, 0 failures), with a wrong-want control. No STOP.
+MATCHER (inbox_matchra1.py): MINE :102 r 21st -> r 22nd. My OWN ordinal r 22nd / seat r 22nd REMOVED from OTHER_SEATS. r 21st / seat r 21st ADDED. r 23rd / seat r 23rd forward-added. Q-MATCH22 taken: v 1st, v 2nd, v 3rd, f 6th, f 7th, plus blockchain-v] which was absent while every other lane tag was present. Then k 1st / k 2nd / blockchain-k] for the new floor. 196 -> 214 entries. Verified BY AST, then BY IMPORT with {"messages":[]} on stdin and SystemExit caught. 8 arms on FULL-LENGTH subjects pulled from the API (96-130 chars), all OK: my own brief FOR ME; R 21st's ANSWER that NAMES ME IN PROSE -> for r 21st; R 21st's STATUS -> foreign; F-lane and V-lane -> foreign by pane; synthetic (Seat R 23rd) on MY pane tag -> UNKNOWN ADDRESSEE, not mine; my GO and my ADDENDUM -> FOR ME. sender_class: kam / wednesday / '' all correct. Final bfbea9ff319312ab, 609 lines.
+FINDING — the inherited "forward-add is your trap" CONSEQUENCE IS STALE for this generation, and I could not reproduce it. Your first-three item 2 says leaving r 22nd in OTHER_SEATS means "your own brief and every ANSWER read FOREIGN and your watcher never fires". I drove a 6-shape matrix with and without my own ordinal in the list: ZERO verdict-class flips. tag() tests MINE BEFORE OTHER_SEATS on every path (the addressee branch :521 and the whole-subject branch :547), so my own token in the foreign list costs only ATTRIBUTION TEXT in the two foreign branches. The removal is still right and is done — but it is not what protects me.
+What IS load-bearing, proved by reverting each alone: (1) MINE. With MINE left at "r 21st", my own brief AND my own GO both return "UNKNOWN ADDRESSEE (seat r 22nd) - read it, NOT mine" and the watcher never fires. (2) the unknown-addressee precedence: a (Seat R 23rd) addressee on my own pane tag reads not-mine whether or not r 23rd is listed; the forward-add buys attribution, the precedence buys safety. Earlier generations (R 7th/8th/9th/10th, E 9th) genuinely hit the OTHER_SEATS trap; B 58th's "THE ADDRESSEE DECIDES" fix retired it. Recommend restating this in R 23rd's first-three so the next seat verifies MINE rather than believing it verified something it did not.
+SWEEP (sweepra22.py): ordinal class widened at 9 sites, (?:[1-9]|1[0-9]|20) -> (?:[1-9]|1[0-9]|2[01]). Proved on the PARSED pattern, not the source text: ra21 MATCH, ra20 MATCH, ra1 MATCH, ra22 NO, ra23 NO, ra210 NO. Also widened the record-folder DATE class 2026-10-0[678] -> 2026-10-0[6-9], without which R 21st's 2026-10-09 folder would not read as foreign; proved R 21st's path matches and MINE does not. CONTROL 1b re-keyed COMPLETELY — tokens AND the record-folder path — and now reads 0 self-hits (clean). Run over all three dirs: 14/14 patterns live, CONTROL 1b clean, CONTROL 2 clean, N checked = 14 per file, 0 files vacuous.
+WATCHER (inbox_watchra1.sh): WATCHRA21_ -> WATCHRA22_ at 4 sites, banner now "(Seat R 22nd)", bash -n clean. Proved BOTH WAYS offline through WATCHRA22_FEED before arming: fire feed -> fires on my GO and exits; no-fire feed -> prints a (Seat R 23rd) mail on my pane tag AND an F-lane mail, tags both foreign, does NOT fire, and keeps printing its SCANNED proof-of-life. ARMED LIVE in background mode (never &) at 03:16:17Z, SINCE=2026-10-09T02:55:38.000Z copied byte-for-byte from the newest mail I have READ (your brief) — not a wall clock. pid 3961, read from a ps FILE; exactly one watcher live (the second ps line matching the command was my own measuring shell). It has already earned itself by surfacing the Seat K 1st brief.
+OUTSTANDING re-key, named honestly: builder build_addendumra22_gate76.py, m7_squashra22.sh, mergeinra22_gate76.sh, m3_args_ra22.sh, run_armsra22.py (REC/SCR re-point), poll_actionsra22.py, provenance_ra22.py, and the GO fixture go_fixture_1427_SYNTHETIC.txt. None is re-keyed yet; my sweep names every one of them. The 11 refusal arms + P1/P2 and my line-by-line read of the re-keyed builder are therefore also outstanding. All of it is record-folder-only and writes no ref; I will do it while HOLDING, and I will not touch M-2 before your START word regardless.
+
+== ITEM 0 (d) SHARED STORE, READ VERBS ONLY ==
+rev-parse --all = 1654 / f97ee53e189fd53b (EQUAL to your ~02:48Z reading, so nothing moved in between).
+cat-file -e: D2 81d2e5f4c415 PRESENT; gated head 2b6da5f561b0 PRESENT; bf277eead268 PRESENT; 64eafead891e PRESENT; D1 1e7f90e26137 PRESENT; deadbeef... ABSENT at the same moment (negative control).
+Local refs/heads/feature/ks-1274-...-ra18-1 = 2b6da5f561b05a820bbe1ab5e891bff9f4f531c8, and refs/remotes/origin/... the same. That is my --m-retain.
+LOCKS = 0, two polls, AND I closed your uncontrolled zero: I planted a .push-lock-d8 with a holder.json in a PRIVATE mktemp -d (never in the shared worktrees/, :446), confirmed the detector FINDS it, then removed it. So the 0 is a real zero, not a blind glob.
+s-ra22-* worktrees = 0, with s-ra21-m1427 = 1 as the positive control. worktrees/ holds 518 entries.
+
+== ITEM 0 (e) SEAT FACTS ==
+$TMUX_PANE = %8 -> Secuura/Blockchain-R (+ empty control). Launcher ancestry as above, --model claude-opus-5.
+Watcher pid 3961 from a ps FILE. df -m /Volumes/DevMASTER: 393056 MB available, 80% used (you read 393072 MB / 80%).
+HANDOVER-seatR21-2026-10-09.md = 216792ecad1622ef, 130 lines — EQUAL to your value and to R 21st's WRAP :54. Read WHOLE.
+HANDOVER-seatR18-2026-10-08.md = 1081ef422c811c0d — EQUAL (the merge-note artefact for the GO's merge_note).
+
+== ITEM 0 (f) LINEAR, READ-ONLY — your UNKNOWN is now closed ==
+KS-1274: state In Progress (type started); assignee kamil.kreiser; priority 4; updatedAt 2026-10-08T06:52:05.291Z; comments 0; attachments 1 -> PR 1427, linkKind contributes, status open.
+That is IDENTICAL to R 21st's 23:37Z baseline on every field. Nothing walked.
+Fabricated-key control, in its OWN query: KS-99999 -> issue null, "Entity not found: Issue". So the read above is a real read.
+
+== SCOPE — I NEED YOUR RULING, AND I HAVE ALREADY BEHAVED CONSERVATIVELY ==
+Two inputs your brief requires sit OUTSIDE my declared project scope:
+- the gate76 kit and c4_docs_gate76.py: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-08_gate76/ — i.e. inside YOUR project folder.
+- the GATE76 evidence/report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-08-gate76/.
+My launch scope names Blockchain (primary), Extranet (coupled) and the vault (read-anywhere). Neither of the above is in it. I read both READ-ONLY, ran the kit with --repo pointed at MY clone and --out into MY scratchpad, and wrote NOTHING in either tree. Please confirm that is the intended arrangement, or name an in-scope copy for R 23rd.
+Related: STANDING_LINES.md itself lives under WEDNESDAY/2_Project_Files/fleet/. I did NOT open it, so your "448 lines / 6d8166bac3139428" pin is UNVERIFIED BY ME; I worked from the STANDING FINDINGS CARRIED table you reproduced in the brief. Say if you want me to verify at source.
+
+== HOLDS I AM KEEPING ==
+No ref written. No lock taken. No worktree added. No objects transferred. No install. No PR edit. No ticket write or comment. No deploy, az, ssh, docker, migration. No force push. No fetch or pull in the shared checkout at any point, including boot.
+Extranet: I DECLINED the launcher's POST /api/seen, as R 20th and R 21st did — it would clear Kam's unread flags. The launcher's read-only hook reported 6 open tasks, 0 new replies, 1 new doc for kam; I folded it into my report to Kam and touched nothing there.
+No mail or comment to Peter or Stuart.
+
+== QUESTIONS ==
+Q1 ctx read: please give me a ctx % and whether to proceed to the outstanding re-key now (my own read: comfortably under the 50% proceed bar, well clear of the 65% hard ceiling, but you hold the gauge).
+Q2 The boot pull did not run and develop in the shared checkout is 188+ commits behind at ddea005553bf. Confirm LEAVE IT (my default, and your "after boot, never fetch or pull" line says leave).
+Q3 Confirm the three corrections above are accepted, in particular the floor change (Seat K 1st live) and that I keep .push-lock-d8 while K holds its own.
+Q4 Do you want the chain.json pin dropped from R 23rd's brief, or replaced with a path-stripped normalisation?
+
+Awaiting the literal START STEP 2 (Seat R 22nd). Watcher live, pid 3961.
+

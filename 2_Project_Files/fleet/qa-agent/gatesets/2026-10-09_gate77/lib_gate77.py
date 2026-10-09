@@ -3,8 +3,12 @@
 the RAISE_BASE 0a6177ea5482, gated against a develop that has MOVED since they were cut (1e7f90e26137 = #1428 at draft; #1427 is GO'd and
 will move it again). Carried from lib_gate76.py (git / wgit / readers / GH GETs / Tally) and widened by the gate77 drafter:
 G76_ -> GATE77_, two rows -> six, plus the keep-both DOCS composer (block extraction, compose, read-back) used by c2_merge_gate77.py.
+EXTENDED 2026-10-09 (drafter, `.pre-1009-1436` beside every changed file): a SEVENTH row, #1436 KS-808, which is NOT one commit on the
+RAISE_BASE but a conflict-free MERGE-IN M (parents [its pre-merge commit, develop 81d2e5f4c415]). Every per-row measurement now runs from
+ROW_BASE(R): kit `rows.<n>.base` when present (#1436: the develop it merged in), else the RAISE_BASE (the six original rows, unchanged).
 
-  ROW                  `--pr <n>` on the command line. There is NO default row (six rows make a default a trap).
+  ROW                  `--pr <n>` on the command line. There is NO default row (seven rows make a default a trap).
+  row_base(R)          the sha a row's diff is measured from: rows.<n>.base if present, else RAISE_BASE.
   K                    the kit (kit.json beside this file; GATE77_KITJSON overrides it for self-tests and launcher arms ONLY).
   git(repo, *args)     READ verbs only. Any other verb raises.
   wgit(repo, *args)    WRITE verbs ONLY in a repository OUTSIDE K['forbidden_root'] (lexical AND realpath). GIT_SSH_COMMAND dropped.
@@ -34,12 +38,19 @@ def opt(A, k, d=None):
 
 def row_arg():
     r = opt(sys.argv, '--pr')
-    if r is None: raise SystemExit('lib_gate77: REFUSED — no row (pass --pr <%s>); six rows, no default' % '|'.join(ROWS))
+    if r is None: raise SystemExit('lib_gate77: REFUSED — no row (pass --pr <%s>); %d rows, no default' % ('|'.join(ROWS), len(ROWS)))
     if r not in ROWS: raise SystemExit('lib_gate77: REFUSED — unknown row %r (kit rows %s)' % (r, list(ROWS)))
     return r
 
 
 def code_paths(R): return sorted(p for p in R['numstat'] if p not in DOC_PATHS)
+
+
+def row_base(R):
+    """The sha a row's diff (numstat, END_TREE control, doc block, code-unmoved) is measured from. The six original rows: RAISE_BASE.
+    A merge-in row (#1436) names its own `base` = the develop it merged in (its SECOND parent), so develop's own advance is never
+    mistaken for the row's change (vs RAISE_BASE its doc diff would carry #1428's block 39 as well as its own 41)."""
+    return R.get('base') or RAISE_BASE
 
 
 # ---------------- composee5's flow reader, extracted, never re-typed (carried from lib_gate76) ----------------

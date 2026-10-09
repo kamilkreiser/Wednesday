@@ -2,6 +2,7 @@
 """gh_gate77.py — read-only GitHub REST GETs for gate77 (GH_TOKEN read BY NAME inside lib_gate77, never printed). No write of any kind.
 
   gh_gate77.py api --pr <n>                         the PR is open, unmerged, base develop, head == kit head, file set == kit numstat paths
+                                                    (#1436, a merge-in: GitHub lists files vs the merge base 81d2e5f4c415 == kit numstat, 4)
   gh_gate77.py census                               every OTHER open PR touching a platform doc or any row's code path (REPORTED, rc 0)
   gh_gate77.py actions --pr <n> --develop <40-hex>  per workflow: the head's failing jobs vs the develop run's (SUBSET, never equality);
                                                     PENDING is never a pass; a workflow with NO comparator run is named, never assumed green
@@ -40,7 +41,7 @@ def census(T):
     T.info('CENSUS', '%d open PRs on develop; %d OTHER PRs touch a watched path' % (len(prs), len(hits)))
     for n, ref, fs in hits:
         T.info('CENSUS', '#%s %s -> %s' % (n, ref, [f.split('/')[-1] for f in fs]))
-    T.check('CENSUS-READ', len(prs) >= len(ROWS), 'the census read at least the six rows themselves (%d open)' % len(prs))
+    T.check('CENSUS-READ', len(prs) >= len(ROWS), 'the census read at least the %d rows themselves (%d open)' % (len(ROWS), len(prs)))
 
 
 def runs_for(sha):

@@ -79,6 +79,8 @@ for t in "$JOBS"/*.plist.template; do
   case "$job" in ornith-*) if [ "$SEAT" != "wednesday" ]; then echo "skip $job — Ornith is Wednesday's; seat is $SEAT"; continue; fi ;; esac
   # naspush (2026-10-04, Kam's one-way NAS leg) is Wednesday's only; nas_push.sh refuses any other seat anyway.
   case "$job" in naspush) if [ "$SEAT" != "wednesday" ]; then echo "skip $job — the one-way NAS leg is Wednesday's; seat is $SEAT"; continue; fi ;; esac
+  # trmnlpush (2026-10-09, Kam's TRMNL view) is Wednesday's only: one pusher per webhook, or two seats share TRMNL's 12/hour limit and overwrite each other.
+  case "$job" in trmnlpush) if [ "$SEAT" != "wednesday" ]; then echo "skip $job — the TRMNL push is Wednesday's; seat is $SEAT"; continue; fi ;; esac
   # HELD 2026-10-04 (deletion incident): never (re)install a nassync leg whose hold file exists — re-arming is Kam's word.
   if [ "$job" = "nassync" ] && [ -e "$PROJECT_DIR/2_Project_Files/scheduler/NASSYNC_HOLD_$SEAT" ]; then echo "skip $job — HELD (2_Project_Files/scheduler/NASSYNC_HOLD_$SEAT); re-arm only on Kam's word"; continue; fi
   label="com.$SEAT.$job"

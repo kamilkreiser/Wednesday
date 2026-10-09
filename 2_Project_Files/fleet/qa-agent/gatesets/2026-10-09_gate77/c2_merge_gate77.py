@@ -17,10 +17,14 @@ only: it is how a closing tag gets dropped). Read-back per doc per step: the cur
 and LAST, every flow number / cheat key UNIQUE, whole-doc tag balance == the current doc's, the block alone balanced, and new-minus-block ==
 current byte for byte. Code paths: develop's blob must still equal raise_base's (else RE-GATE, refused), then the head's blob is taken.
 CROSS-CHECK: `git merge-tree --write-tree <cur> <head>` must conflict on docs only and agree with the composed tree on every non-doc path.
+EXTENDED 2026-10-09 for #1436 (a MERGE-IN row, parents [pre-merge commit, develop 81d2e5f4c415]): "raise_base" above reads lib.row_base(R)
+for every row — the block, the code set and CODE-UNMOVED are measured from the row's OWN base — and a merge-in row additionally needs the
+develop-so-far to CARRY its base (BASE-CONTAINED; else landing it would drag develop's advance in with it). The gate76 calibration always
+runs on kit develop_at_draft (it is a fact about that develop, not about the one you pass).
 """
 import json, os, re, subprocess, sys
 import lib_gate77 as L
-from lib_gate77 import K, ROWS, RAISE_BASE, DOCS, git, git_bytes, wgit, opt, obj_at, mode_at, changed_paths, refuse_absent, Tally
+from lib_gate77 import K, ROWS, RAISE_BASE, DOCS, git, git_bytes, wgit, opt, obj_at, mode_at, changed_paths, refuse_absent, Tally, row_base
 
 SIM_ENV = {'GIT_AUTHOR_NAME': 'gate77 SIM', 'GIT_AUTHOR_EMAIL': 'sim@gate77.invalid', 'GIT_COMMITTER_NAME': 'gate77 SIM',
            'GIT_COMMITTER_EMAIL': 'sim@gate77.invalid', 'GIT_AUTHOR_DATE': '2026-10-09T00:00:00Z', 'GIT_COMMITTER_DATE': '2026-10-09T00:00:00Z'}
@@ -28,9 +32,9 @@ SIM_ENV = {'GIT_AUTHOR_NAME': 'gate77 SIM', 'GIT_AUTHOR_EMAIL': 'sim@gate77.inva
 
 def row_info(n):
     if n in ROWS:
-        R = ROWS[n]; return dict(pr=n, head=R['head_expected'], own_flow=R['flow_number'], own_key=R['cheat_key'])
+        R = ROWS[n]; return dict(pr=n, head=R['head_expected'], own_flow=R['flow_number'], own_key=R['cheat_key'], base=row_base(R))
     for p in K['pending_before_gate']:
-        if p['pr'] == n: return dict(pr=n, head=p['head'], own_flow=p['flow_number'], own_key=p['cheat_key'])
+        if p['pr'] == n: return dict(pr=n, head=p['head'], own_flow=p['flow_number'], own_key=p['cheat_key'], base=p.get('base') or RAISE_BASE)
     raise SystemExit('c2: REFUSED — unknown row %r' % n)
 
 
@@ -89,17 +93,22 @@ def ls_nondoc(repo, tree):
 
 
 def step(repo, cur, n, out, i, T):
-    info = row_info(n); h = info['head']; tag = '#%s step %d' % (n, i)
-    paths = changed_paths(repo, RAISE_BASE, h); code = [p for p in paths if p not in L.DOC_PATHS]
-    moved = [p for p in code if obj_at(repo, cur, p) != obj_at(repo, RAISE_BASE, p)]
+    info = row_info(n); h = info['head']; tag = '#%s step %d' % (n, i); B = info['base']
+    if B != RAISE_BASE:
+        inside = git(repo, 'merge-base', '--is-ancestor', B, cur, check=False)[0] == 0
+        if not T.check('BASE-CONTAINED', inside, '%s: MERGE-IN row; the develop-so-far %s carries its merged-in base %s: %s%s' % (
+                tag, cur[:12], B[:12], inside, '' if inside else ' — landing it here would drag that develop advance in with it: refused')):
+            return None
+    paths = changed_paths(repo, B, h); code = [p for p in paths if p not in L.DOC_PATHS]
+    moved = [p for p in code if obj_at(repo, cur, p) != obj_at(repo, B, p)]
     if moved:
-        T.check('CODE-UNMOVED', False, '%s: develop-so-far moved this row\'s CODE path(s) %s since raise_base — RE-GATE, refused' % (tag, moved))
+        T.check('CODE-UNMOVED', False, '%s: develop-so-far moved this row\'s CODE path(s) %s since its base %s — RE-GATE, refused' % (tag, moved, B[:12]))
         return None
-    T.check('CODE-UNMOVED', True, '%s: %d code path(s), each still == raise_base at %s' % (tag, len(code), cur[:12]))
+    T.check('CODE-UNMOVED', True, '%s: %d code path(s), each still == its base %s at %s' % (tag, len(code), B[:12], cur[:12]))
     entries = {p: ((mode_at(repo, h, p), obj_at(repo, h, p)) if obj_at(repo, h, p) else ('', None)) for p in code}
     docs = {}
     for key, path in (('flow', DOCS['flow']), ('cheat', DOCS['cheat'])):
-        base_t = git_bytes(repo, RAISE_BASE, path).decode('utf-8'); head_t = git_bytes(repo, h, path).decode('utf-8')
+        base_t = git_bytes(repo, B, path).decode('utf-8'); head_t = git_bytes(repo, h, path).decode('utf-8')
         cur_t = git_bytes(repo, cur, path).decode('utf-8')
         try:
             blk = L.block_of(base_t, head_t)
@@ -147,12 +156,12 @@ def chain(repo, dev, order, out, T, expect_final=None):
     for key, path in (('flow', DOCS['flow']), ('cheat', DOCS['cheat'])):
         t = git_bytes(repo, dev, path).decode('utf-8')
         for n in order:
-            h = row_info(n)['head']
-            t = L.compose(t, L.block_of(git_bytes(repo, RAISE_BASE, path).decode('utf-8'), git_bytes(repo, h, path).decode('utf-8')))
+            ri = row_info(n); h = ri['head']
+            t = L.compose(t, L.block_of(git_bytes(repo, ri['base'], path).decode('utf-8'), git_bytes(repo, h, path).decode('utf-8')))
         entries[path] = (mode_at(repo, dev, path), hash_blob(repo, t.encode('utf-8')))
     for n in order:
-        h = row_info(n)['head']
-        for p in changed_paths(repo, RAISE_BASE, h):
+        ri = row_info(n); h = ri['head']
+        for p in changed_paths(repo, ri['base'], h):
             if p not in L.DOC_PATHS: entries[p] = (mode_at(repo, h, p), obj_at(repo, h, p))
     one = build_tree(repo, dev, entries, os.path.join(out, '_idx_onepass'))
     T.check('ONEPASS', one == steps[-1]['tree'], 'one-pass composition %s == chain final %s' % (one[:12], steps[-1]['tree'][:12]))
@@ -163,14 +172,14 @@ def chain(repo, dev, order, out, T, expect_final=None):
 
 
 def collide(repo, dev, T, extra=None):
-    sets = {n: changed_paths(repo, RAISE_BASE, R['head_expected']) for n, R in ROWS.items()}
+    sets = {n: changed_paths(repo, row_base(R), R['head_expected']) for n, R in ROWS.items()}
     for p in K['pending_before_gate']: sets['%s(pending)' % p['pr']] = changed_paths(repo, RAISE_BASE, p['head'])
     sets['develop-advance'] = changed_paths(repo, RAISE_BASE, dev)
     if extra: sets.update(extra)
     by = {}
     for n, ps in sets.items():
         for p in ps: by.setdefault(p, []).append(n)
-    print('COLLISION TABLE (paths touched by more than one of: six rows, pending #1427, develop since raise_base):')
+    print('COLLISION TABLE (paths touched by more than one of: %d rows (each from its own base), pending #1427, develop since raise_base):' % len(ROWS))
     shared = {p: ns for p, ns in by.items() if len(ns) > 1}
     for p, ns in sorted(shared.items()): print('  %-100s %s' % (p, ' '.join(ns)))
     rows_only = [n for n in sets if n in ROWS or (extra and n in extra)]
@@ -232,10 +241,28 @@ def selftest(repo, dev, out):
     arm('S6 clean reports a CODE conflict', 'CLEAN-1431' in T6.fails and data2 != git_bytes(repo, dev, p))
     T7 = Tally(); collide(repo, dev, T7, extra={'9999(planted)': [p]})
     arm('S7 collide reports a shared code path', 'CODE-DISJOINT' in T7.fails)
+    # #1436 (the MERGE-IN row, added 2026-10-09): a SIM develop editing run-migrations.sh -> chain refuses; a planted row sharing it ->
+    # collide refuses; #1436 onto a develop that does NOT carry its merged-in base (the draft develop) -> BASE-CONTAINED refuses
+    q = 'Blockchain/Dev/scripts/run-migrations.sh'
+    data3 = git_bytes(repo, dev, q) + b'\n# gate77 SELFTEST plant: a develop-side edit of #1436\'s code path\n'
+    t3 = build_tree(repo, dev, {q: (mode_at(repo, dev, q), hash_blob(repo, data3))}, os.path.join(out, '_idx_s5b'))
+    simdev3 = commit_tree(repo, t3, [dev], 'SIM gate77 selftest develop touching run-migrations.sh (never pushed)')
+    T5b = Tally(); r = chain(repo, simdev3, ['1436'], os.path.join(out, 's5b'), T5b)
+    arm('S5b chain refuses #1436 on a moved code path', r is None and 'CODE-UNMOVED' in T5b.fails)
+    T7b = Tally(); collide(repo, dev, T7b, extra={'9998(planted)': [q]})
+    arm('S7b collide reports a path shared with #1436', 'CODE-DISJOINT' in T7b.fails)
+    T8b = Tally(); r = chain(repo, K['develop_at_draft'], ['1436'], os.path.join(out, 's8b'), T8b)
+    arm('S8b #1436 refused on a develop lacking its base', r is None and 'BASE-CONTAINED' in T8b.fails)
     # positive controls
-    T8 = Tally(); r = chain(repo, dev, ['1427'], os.path.join(out, 'calib'), T8, expect_final=K['pending_before_gate'][0]['predicted_tree_on_develop_at_draft'])
+    D0 = K['develop_at_draft']
+    T8 = Tally(); r = chain(repo, D0, ['1427'], os.path.join(out, 'calib'), T8, expect_final=K['pending_before_gate'][0]['predicted_tree_on_develop_at_draft'])
     cal = r is not None and not T8.fails
-    print('POSITIVE CONTROL gate76 calibration: #1427 alone onto develop %s == gate76 predicted 57c9b5eaec95: %s' % (dev[:12], cal))
+    print('POSITIVE CONTROL gate76 calibration: #1427 alone onto develop_at_draft %s == gate76 predicted 57c9b5eaec95: %s' % (D0[:12], cal))
+    six = [x for x in K['merge_order_default'] if x != '1436']
+    T8c = Tally(); r = chain(repo, D0, ['1427'] + six, os.path.join(out, 'calib6'), T8c, expect_final=K['predicted_chain_with1427']['final_tree'])
+    cal6 = r is not None and not T8c.fails
+    print('POSITIVE CONTROL six-row chain (1427 + the original six) onto develop_at_draft == the original kit final 8ce413c386c6: %s' % cal6)
+    cal = cal and cal6
     T9 = Tally(); r = chain(repo, dev, ['1427'] + K['merge_order_default'], os.path.join(out, 'real'), T9)
     real = r is not None and not T9.fails
     print('POSITIVE CONTROL real chain 1427 + default order: %s' % real)
@@ -250,7 +277,8 @@ def main():
         print(__doc__); return 9
     if not L.outside_forbidden(repo): print('REFUSED: --repo %s is under %s — use YOUR scratch clone' % (repo, L.FORBIDDEN)); return 16
     if out and not L.outside_forbidden(out): print('REFUSED: --out %s is under %s' % (out, L.FORBIDDEN)); return 16
-    need = [('develop', dev), ('raise_base', RAISE_BASE)] + [('#' + n, R['head_expected']) for n, R in ROWS.items()] + \
+    need = [('develop', dev), ('raise_base', RAISE_BASE), ('develop_at_draft', K['develop_at_draft'])] + \
+           [('#' + n, R['head_expected']) for n, R in ROWS.items()] + [('#%s base' % n, R['base']) for n, R in ROWS.items() if R.get('base')] + \
            [('#%s (pending)' % p['pr'], p['head']) for p in K['pending_before_gate']]
     if refuse_absent(repo, need): return 2
     T = Tally()

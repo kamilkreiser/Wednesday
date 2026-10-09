@@ -1,0 +1,112 @@
+diff --git a/systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh b/systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh
+new file mode 100644
+index 000000000..b98e6f38d
+--- /dev/null
++++ b/systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh
+@@ -0,0 +1,93 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for systemTest/scripts/check-package-format.sh - KS-998 robustness
++# note: a package's format:check must NOT inherit the gate's own stdin.
++# =============================================================================
++# The gate reads its selected packages one per line from a here-string on
++# stdin (`done <<< "$selected"`), and runs each package's
++# `npm run --silent format:check` INSIDE that loop with no redirect. npm passes
++# its stdin to the script, so a format:check that reads stdin swallows the
++# names of every package after it in the list. Those packages are never
++# checked, and a red one among them passes the gate. `< /dev/null` on the npm
++# call closes that.
++#
++# Same fixture method as package_format_gate.test.sh: a copy of the gate inside
++# a temp tree, fixture packages whose `format:check` is plain shell, so no npm
++# install and no real prettier is needed (npm itself must be on PATH, as it is
++# for that suite).
++#
++# Usage: bash systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++GATE_SRC="${PACKAGE_FORMAT_GATE_SH:-$HERE/../scripts/check-package-format.sh}"
++PASS=0; FAIL=0
++
++[[ -f "$GATE_SRC" ]] || { echo "FATAL: gate script not found at $GATE_SRC" >&2; exit 2; }
++
++FIX="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks998-stdin.XXXXXX")"
++trap 'rm -rf "$FIX"' EXIT INT TERM
++
++check() {
++    local desc="$1" want="$2" got="$3"
++    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
++    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
++}
++
++GATE="$FIX/systemTest/scripts/check-package-format.sh"
++mkdir -p "$FIX/systemTest/scripts"
++cp "$GATE_SRC" "$GATE"
++
++# mk_pkg <name> <format:check shell command> - deps always present
++mk_pkg() {
++    local name="$1" cmd="$2"
++    local dir="$FIX/systemTest/$name"
++    mkdir -p "$dir/node_modules/.bin"
++    cat > "$dir/package.json" <<JSON
++{ "name": "fixture-$name", "version": "0.0.0", "scripts": { "format:check": "$cmd" } }
++JSON
++    printf '#!/bin/sh\nexit 0\n' > "$dir/node_modules/.bin/prettier"
++    chmod +x "$dir/node_modules/.bin/prettier"
++}
++
++# `drain` sorts first, so the gate runs it before `green` and `red`. Its
++# format:check is clean but reads whatever is on its stdin.
++mk_pkg drain "cat >/dev/null; exit 0"
++mk_pkg green "exit 0"
++mk_pkg red   "echo '[warn] src/a.ts'; exit 1"
++
++# --- CELL 1 (RED at the tip): the package after a stdin reader is still checked --
++out="$(printf '%s\n' 'systemTest/drain/src/a.ts
++systemTest/green/src/b.ts' | bash "$GATE" 2>&1)"
++check "drain then green -> both packages checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '2 package(s) checked, 0 skipped, 0 failed')"
++check "drain then green -> green reports format:check OK" "1" \
++    "$(printf '%s\n' "$out" | grep -cF 'systemTest/green ')"
++
++# --- CELL 2 (RED at the tip): a red package after a stdin reader still fails ----
++out="$(printf '%s\n' 'systemTest/drain/src/a.ts
++systemTest/red/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "drain then red -> the gate fails (exit 1)" "1" "$rc"
++
++# --- CELL 3 (CONTROL, tip AND after): each package alone behaves as before -------
++out="$(printf '%s\n' 'systemTest/drain/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "CONTROL drain alone -> exit 0" "0" "$rc"
++check "CONTROL drain alone -> one package checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '1 package(s) checked, 0 skipped, 0 failed')"
++out="$(printf '%s\n' 'systemTest/red/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "CONTROL red alone -> exit 1" "1" "$rc"
++check "CONTROL red alone -> names the file" "1" \
++    "$(printf '%s\n' "$out" | grep -cF 'systemTest/red/src/a.ts   (in this push)')"
++
++# --- CELL 4 (CONTROL, tip AND after): no stdin reader, both packages checked -----
++out="$(printf '%s\n' 'systemTest/green/src/b.ts
++systemTest/red/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "CONTROL green then red -> exit 1" "1" "$rc"
++check "CONTROL green then red -> both packages checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '2 package(s) checked, 0 skipped, 1 failed')"
++
++echo ""
++echo "ks998_format_gate_stdin_isolated: ${PASS} passed, ${FAIL} failed"
++(( FAIL == 0 ))
+diff --git a/systemTest/scripts/check-package-format.sh b/systemTest/scripts/check-package-format.sh
+index 8254cf40d..2f57177ba 100644
+--- a/systemTest/scripts/check-package-format.sh
++++ b/systemTest/scripts/check-package-format.sh
+@@ -152,4 +152,7 @@ while IFS= read -r p; do
+-    out="$(cd "$dir" && npm run --silent format:check 2>&1)"
++    # KS-998: `< /dev/null`. This loop reads its package list from the
++    # here-string at its `done` on stdin, and npm hands its stdin to the script:
++    # a format:check that reads stdin would swallow every package after it.
++    out="$(cd "$dir" && npm run --silent format:check < /dev/null 2>&1)"
+     rc=$?
+     checked=$((checked + 1))
+     if [ "$rc" -eq 0 ]; then

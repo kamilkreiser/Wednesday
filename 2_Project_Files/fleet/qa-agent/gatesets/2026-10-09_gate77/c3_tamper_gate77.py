@@ -16,6 +16,8 @@ run, in order (any failure stops with rc 1 and the worktree RESTORED; a refusal 
       want_ok_both line marked ok (shell suites); a run with NO summary line is a LOADFAIL, never a red
   X   RESTORE the saved bytes; assert hash-object == the HEAD blob for every file and porcelain EMPTY; G2 the command again == green
 The JSON records every run's rc, the summary lines, the needles hit/missed, the blob shas, and the UTC times.
+EXTENDED 2026-10-09 for #1436 (a MERGE-IN row): revert_to_base takes the blob at the ROW'S OWN base (kit rows.<n>.base, the develop it
+merged in) when the row names one, else the RAISE_BASE. For #1436 run-migrations.sh is 7318c392c1f2 at raise_base, 1e7f90e26137 and 81d2e5f4c415.
 """
 import datetime, hashlib, json, os, re, subprocess, sys
 import lib_gate77 as L
@@ -92,7 +94,7 @@ def do_run(n, name, wt, outp):
         for f in rec['files']:
             p = os.path.join(wt, f)
             if rec['kind'] == 'revert_to_base':
-                b = subprocess.run(['git', '-C', wt, 'show', '%s:%s' % (RAISE_BASE, f)], capture_output=True).stdout
+                b = subprocess.run(['git', '-C', wt, 'show', '%s:%s' % (R.get('base') or RAISE_BASE, f)], capture_output=True).stdout
                 open(p, 'wb').write(b)
             elif rec['kind'] == 'replace_once':
                 t = saved[f][0].decode('utf-8'); c = t.count(rec['old'])

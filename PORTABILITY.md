@@ -511,3 +511,10 @@ NIGHT_MODEL=ornith:35b`, item 15) is the named fallback; the runner never switch
   backend default and WARNS when the server is down (normal while idle; night_run starts it on demand).
 - **Degrades to:** the runner refuses at G5 with the reason (rc 3) — run Ornith 1.0 deliberately with
   `NIGHT_BACKEND=ollama NIGHT_MODEL=ornith:35b`.
+
+## 24. TRMNL "Kam view" push — Wednesday seat only, machine-local (2026-10-09)
+Kam's e-ink view (design `1_Project_Definition/Architecture/2026-10-09_trmnl-view-design.md`, code `2_Project_Files/trmnl/`).
+- **Machine-local:** the launchd job `com.wednesday.trmnlpush` (every 900 s, RunAtLoad), rendered from `scheduler/jobs/trmnlpush.plist.template` by `install_all_jobs.sh`, which installs it for the **wednesday** seat only (one pusher per webhook; TRMNL allows 12 posts/hour). Logs: `~/Library/Logs/wednesday_trmnlpush.{out,err}` plus `2_Project_Files/trmnl/logs/push.log`.
+- **On-drive:** `TRMNL_WEBHOOK_URL` in `4_Credentials/.env` (0600, gitignored; Kam accepted the URL's exposure on the panel 14:32:47). `push.sh` never prints it and posts at most every 300 s.
+- **New Mac:** run `install_all_jobs.sh` from the WEDNESDAY tree with `WED_AGENT` unset; `doctor.sh` warns on the job if it is missing (via `install_all_jobs.sh --check`). Verify one push lands: `push.log` shows `OK: HTTP 200`, then GET the plugin's `merge_variables` (URL via `curl -K -` from stdin) and check `updated`.
+- **Not needed:** the `_preview/` render tooling (liquidjs under `_preview/node_modules`, gitignored) is design-time only.

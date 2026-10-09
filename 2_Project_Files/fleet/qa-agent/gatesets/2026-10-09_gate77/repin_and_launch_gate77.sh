@@ -1,15 +1,17 @@
 #!/bin/bash
 # repin_and_launch_gate77.sh — the LAUNCH ACTION (and the REPIN) for gate77: six rows (#1429 #1430 #1431 #1432 #1433 #1434), batched, each its
 # own verdict. NOT RUN BY THE DRAFTER except `--dry-run`. Carried from repin_and_launch_gate76.sh and widened to six rows by the gate77 drafter.
+# EXTENDED 2026-10-09 to SEVEN rows: + #1436 KS-808 (Seat F 6th, T2), a MERGE-IN row (parents [a24efb3c5e04, develop 81d2e5f4c415]);
+# `--head-1436` is REQUIRED like the other six, and its merged-in base is fetched by sha with the heads. Backups: `*.pre-1009-1436`.
 # THE REPIN RULE (minimise gate duplication): run IMMEDIATELY before launch. It re-reads develop and every head; a head that moved REFUSES
 # (that row needs a re-draft; an unchanged diff is never re-gated); a develop that moved is read by WHAT moved (c1 P7: a row's CODE path moved
 # = RE-GATE, refused; docs-only = the chain is RE-PREDICTED) and needs `--repin-develop <origin's 40-hex>` to proceed.
 # CHANGED from gate76: NO WED_USAGE_STOP override. gate76's grant (2026-10-08 new-account) expired on an EVENT, the account renewal: at draft
 # `usage_gate.sh --check` read 1% at the default 90. This script runs the usage check at the default and refuses rc 12 above it (Q-USAGE77).
 # EVERY PR-SPECIFIC CONSTANT IS A REQUIRED ARGUMENT, compared with kit.json AND with what this script reads live:
-#   (V)  --head-<n> for all six + --develop (the DRAFT develop): present, full 40-hex — rc 9; each == kit.json — rc 11
+#   (V)  --head-<n> for all seven + --develop (the DRAFT develop): present, full 40-hex — rc 9; each == kit.json — rc 11
 #   (A)  each READY mail names its head in full and #<n>                                                              — rc 18
-#   (2)  ONE `git ls-remote` of develop + six refs/pull/<n>/head + six branches + pull/1427/head, from the Secuura checkout, GIT_SSH_COMMAND
+#   (2)  ONE `git ls-remote` of develop + seven refs/pull/<n>/head + seven branches + pull/1427/head, from the Secuura checkout, GIT_SSH_COMMAND
 #        UNSET, `-c core.sshCommand=<the checkout's own>` (a read verb); each head == pull/head == branch                — rc 11 (MOVED HEAD)
 #   (1)  gh_gate77.py api per row (rc 3 API failure; rc 11 not open / merged / not develop / head or files differ) + census (REPORTED).
 #        `--no-api` skips both ONLY with --dry-run.
@@ -19,13 +21,13 @@
 #        rc 13. c2 chain in the EFFECTIVE order (#1427 prefixed when develop does not yet carry it) — rc 13; at the draft develop the final tree
 #        must equal kit.json predicted_chain_with1427.final_tree — rc 13.
 #   (S)  the Actions comparator and the merge seat are RULED (kit.json) — rc 8 (a dry run REPORTS it instead)
-#   (R)  render prompt_gate77.txt -> prompt_gate77.rendered.txt + head_at_launch.txt (P x6 / B / D / S / C / O / T / Q)       — rc 9
+#   (R)  render prompt_gate77.txt -> prompt_gate77.rendered.txt + head_at_launch.txt (P x7 / B / D / S / C / O / T / Q)       — rc 9
 #   (0)  the pane is routed in inbox_routing.conf — rc 1 (a dry run REPORTS it instead)
 #   (4)  GATE77_* overrides refuse a real launch — rc 16;  (5) usage --check at the default — rc 12;  (6) the launcher's --check — rc 13;
 #   (7)  cockpit add — rc 14
 # Controls-only overrides (DRY RUN ONLY): GATE77_ROUTING, GATE77_LSFILE, GATE77_KITJSON, GATE77_CLONE (an existing clone OUTSIDE !CODING).
 # Usage (run under `script -q /dev/null`):
-#   repin_and_launch_gate77.sh --head-1429 <h> --head-1430 <h> --head-1431 <h> --head-1432 <h> --head-1433 <h> --head-1434 <h> --develop <d>
+#   repin_and_launch_gate77.sh --head-1429 <h> --head-1430 <h> --head-1431 <h> --head-1432 <h> --head-1433 <h> --head-1434 <h> --head-1436 <h> --develop <d>
 #                              [--dry-run [--no-api]] [--repin-develop <40-hex>]
 set -u
 export PYTHONDONTWRITEBYTECODE=1
@@ -36,26 +38,26 @@ KJ() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))
 for k in sys.argv[2].split("."): v=v[int(k)] if isinstance(v,list) else v[k]
 print(" ".join(map(str,v)) if isinstance(v,list) else ("" if v is None else v))' "$KITJSON" "$1"; }
 ROUTING="${GATE77_ROUTING:-$(KJ routing)}"; PANE="$(KJ pane)"; LINE="$(KJ routing_line)"; URL="$(KJ github_url)"
-L="$GS/$(KJ launcher)"; CL="${GATE77_CLONE:-$GS/_scratch/clone}"; ROWS='1429 1430 1431 1432 1433 1434'
+L="$GS/$(KJ launcher)"; CL="${GATE77_CLONE:-$GS/_scratch/clone}"; ROWS='1429 1430 1431 1432 1433 1434 1436'
 ORDER="$(KJ merge_order_default | tr ' ' ',')"; P27="$(KJ pending_before_gate.0.head)"
-USAGE="usage: repin_and_launch_gate77.sh --head-1429 <h> --head-1430 <h> --head-1431 <h> --head-1432 <h> --head-1433 <h> --head-1434 <h> --develop <d> [--dry-run [--no-api]] [--repin-develop <40-hex>]"
-H1429=""; H1430=""; H1431=""; H1432=""; H1433=""; H1434=""; DEV=""; DRY=0; NOAPI=0; REPIN=""
+USAGE="usage: repin_and_launch_gate77.sh --head-1429 <h> --head-1430 <h> --head-1431 <h> --head-1432 <h> --head-1433 <h> --head-1434 <h> --head-1436 <h> --develop <d> [--dry-run [--no-api]] [--repin-develop <40-hex>]"
+H1429=""; H1430=""; H1431=""; H1432=""; H1433=""; H1434=""; H1436=""; DEV=""; DRY=0; NOAPI=0; REPIN=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    --head-1429|--head-1430|--head-1431|--head-1432|--head-1433|--head-1434) eval "H${1#--head-}=\"\${2:-}\""; shift 2 2>/dev/null || shift;;
+    --head-1429|--head-1430|--head-1431|--head-1432|--head-1433|--head-1434|--head-1436) eval "H${1#--head-}=\"\${2:-}\""; shift 2 2>/dev/null || shift;;
     --develop) DEV="${2:-}"; shift 2 2>/dev/null || shift;;  --repin-develop) REPIN="${2:-}"; shift 2 2>/dev/null || shift;;
     --dry-run) DRY=1; shift;; --no-api) NOAPI=1; shift;;
     *) echo "$USAGE"; exit 9;;
   esac
 done
 echo "--- V. required arguments, each well-formed and == the kit's pin (a wrong value refuses BY NAME)"
-for _a in H1429 H1430 H1431 H1432 H1433 H1434 DEV; do eval "_v=\$$_a"; [ -n "$_v" ] || { echo "REFUSING: a REQUIRED argument is missing ($_a)"; echo "$USAGE"; exit 9; }; done
-for _a in H1429 H1430 H1431 H1432 H1433 H1434 DEV; do eval "_v=\$$_a"; printf '%s' "$_v" | grep -qE '^[0-9a-f]{40}$' || { echo "REFUSING: $_a must be the FULL 40-hex sha, got '$_v'"; exit 9; }; done
+for _a in H1429 H1430 H1431 H1432 H1433 H1434 H1436 DEV; do eval "_v=\$$_a"; [ -n "$_v" ] || { echo "REFUSING: a REQUIRED argument is missing ($_a)"; echo "$USAGE"; exit 9; }; done
+for _a in H1429 H1430 H1431 H1432 H1433 H1434 H1436 DEV; do eval "_v=\$$_a"; printf '%s' "$_v" | grep -qE '^[0-9a-f]{40}$' || { echo "REFUSING: $_a must be the FULL 40-hex sha, got '$_v'"; exit 9; }; done
 [ -z "$REPIN" ] || printf '%s' "$REPIN" | grep -qE '^[0-9a-f]{40}$' || { echo "REFUSING: --repin-develop must be the FULL 40-hex sha, got '$REPIN'"; exit 9; }
 [ "$NOAPI" = 0 ] || [ "$DRY" = 1 ] || { echo "REFUSING: --no-api is a dry-run option only (a real launch reads the PR API)"; exit 9; }
 for ROW in $ROWS; do eval "_H=\$H$ROW"; [ "$_H" = "$(KJ rows.$ROW.head_expected)" ] || { echo "REFUSING: WRONG VALUE --head-$ROW '$_H' != kit.json $(KJ rows.$ROW.head_expected) — re-draft"; exit 11; }; done
 [ "$DEV" = "$(KJ develop_at_draft)" ] || { echo "REFUSING: WRONG VALUE --develop '$DEV' != kit.json develop_at_draft $(KJ develop_at_draft) (pass the DRAFT develop; a moved develop is handled by --repin-develop)"; exit 11; }
-echo "  six heads + develop present, well-formed and == kit.json"
+echo "  seven heads + develop present, well-formed and == kit.json"
 [ -z "${GATE77_CLONE:-}" ] || [ "$DRY" = 1 ] || { echo "REFUSING: GATE77_CLONE is a dry-run control only"; exit 16; }
 case "$(/bin/realpath "$CL" 2>/dev/null || echo "$CL")" in "/Volumes/DevMASTER/!CODING"*) echo "REFUSING: the kit clone $CL is under !CODING"; exit 16;; esac
 mkdir -p "$GS/_scratch/runs"
@@ -115,7 +117,7 @@ if [ ! -d "$CL/.git" ] && [ ! -f "$CL/HEAD" ]; then
 fi
 git -C "$CL" config remote.origin.url "$URL"
 git -C "$CL" config core.sshCommand "$(git -C "$CHECKOUT" config --get core.sshCommand)"
-for s in $H1429 $H1430 $H1431 $H1432 $H1433 $H1434 "$P27" "$CUR_DEV" "$(KJ raise_base)" "$(KJ trailer_control)" "$(KJ merge_tree_control.ours)" "$(KJ merge_tree_control.theirs)"; do
+for s in $H1429 $H1430 $H1431 $H1432 $H1433 $H1434 $H1436 "$(KJ rows.1436.base)" "$(KJ rows.1436.pre_merge_base)" "$(KJ develop_at_draft)" "$P27" "$CUR_DEV" "$(KJ raise_base)" "$(KJ trailer_control)" "$(KJ merge_tree_control.ours)" "$(KJ merge_tree_control.theirs)"; do
   git -C "$CL" cat-file -e "$s^{commit}" 2>/dev/null || env -u GIT_SSH_COMMAND git -C "$CL" fetch --quiet --no-tags --no-write-fetch-head origin "$s" >> "$OUTP.fetch.out" 2>> "$OUTP.fetch.err"
   git -C "$CL" cat-file -e "$s^{commit}" 2>/dev/null || { echo "REFUSING: $s is ABSENT from the kit clone after a by-sha fetch"; tail -3 "$OUTP.fetch.err" 2>/dev/null; exit 19; }
 done
@@ -137,6 +139,8 @@ python3 "$GS/c2_merge_gate77.py" chain --repo "$CL" --develop "$CUR_DEV" --order
 grep -E '^(STEP|FINAL|FAIL|CHAIN)' "$OUTP.c2chain.out" | sed 's/^/    /' | cut -c1-200; echo "  c2 chain (order $EFF) rc=$rcq"
 [ "$rcq" -eq 0 ] || { echo "REFUSING TO LAUNCH: the chain onto develop $CUR_DEV is NOT predicted (read $OUTP.c2chain.out). A moved CODE path is a RE-GATE; never --no-verify."; exit 13; }
 FINAL="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["final_tree"])' "$OUTP.chain/chain.json")"
+# (2026-10-09, seven rows) origin develop is already 81d2e5f4c415, a descendant of develop_at_draft, so DEV_MOVED=0 cannot recur; were it
+# reached, the chain above already refused rc 13 (c2 BASE-CONTAINED: #1436 carries 81d2e5f4c415). The 7-row predictions are kit predicted_chain7_*.
 if [ "$DEV_MOVED" = 0 ]; then
   _W="$(KJ predicted_chain_with1427.final_tree)"
   [ "$FINAL" = "$_W" ] || { echo "REFUSING TO LAUNCH: at the draft develop the chain's final tree $FINAL != kit.json predicted $_W"; exit 13; }
@@ -154,10 +158,11 @@ if [ -z "$COMP" ] || [ -z "$SEAT" ]; then
   else echo "REFUSING TO LAUNCH: RULING NEEDED — kit.json actions_comparator / merge_seat_ordinal is null"; exit 8; fi
 else echo "  comparator: $COMP | merge seat: $SEAT ($(KJ merge_seat))"; fi
 
-echo "--- R. render the prompt (six heads, develop $CUR_DEV, merge seat $SEAT, comparator $COMP, order $EFF, final tree $FINAL)"
-python3 - "$GS/prompt_gate77.txt" "$GS/prompt_gate77.rendered.txt" "$GS/head_at_launch.txt" "$KITJSON" "$CUR_DEV" "$SEAT" "$FINAL" "$COMP" "$EFF" "$PEND" "$H1429" "$H1430" "$H1431" "$H1432" "$H1433" "$H1434" <<'PYEOF' || { echo "REFUSING: render failed"; exit 9; }
+echo "--- R. render the prompt (seven heads, develop $CUR_DEV, merge seat $SEAT, comparator $COMP, order $EFF, final tree $FINAL)"
+python3 - "$GS/prompt_gate77.txt" "$GS/prompt_gate77.rendered.txt" "$GS/head_at_launch.txt" "$KITJSON" "$CUR_DEV" "$SEAT" "$FINAL" "$COMP" "$EFF" "$PEND" "$H1429" "$H1430" "$H1431" "$H1432" "$H1433" "$H1434" "$H1436" <<'PYEOF' || { echo "REFUSING: render failed"; exit 9; }
 import json, sys
-src, dst, hf, kj, dev, seat, final, comp, order, pend = sys.argv[1:11]; heads = dict(zip(['1429', '1430', '1431', '1432', '1433', '1434'], sys.argv[11:17]))
+src, dst, hf, kj, dev, seat, final, comp, order, pend = sys.argv[1:11]; heads = dict(zip(['1429', '1430', '1431', '1432', '1433', '1434', '1436'], sys.argv[11:18]))
+if len(heads) != 7 or any(len(h) != 40 for h in heads.values()): raise SystemExit('render: seven 40-hex heads required, got %r' % heads)
 K = json.load(open(kj)); t = open(src, encoding='utf-8').read()
 need = {'{{DEVELOP}}': 3, '{{MERGE_SEAT}}': 7, '{{PREDICTED_FINAL_TREE}}': 1, '{{COMPARATOR}}': 2, '{{ORDER}}': 3, '{{PENDING_1427}}': 1}
 need.update({'{{HEAD_%s}}' % n: 1 for n in heads})
@@ -171,7 +176,7 @@ open(dst, 'w', encoding='utf-8').write(t)
 lines = ['P %s %s %s %s' % (n, K['rows'][n]['branch'], h, K['rows'][n]['end_tree']) for n, h in heads.items()]
 lines += ['B %s 1' % K['raise_base'], 'D %s' % dev, 'S %s' % seat, 'C %s' % comp, 'O %s' % order, 'T %s' % final, 'Q %s' % pend]
 open(hf, 'w').write('\n'.join(lines) + '\n')
-print('  rendered -> %s (%d bytes); head file %s (P x6 / B / D / S / C / O / T / Q)' % (dst, len(t.encode()), hf))
+print('  rendered -> %s (%d bytes); head file %s (P x7 / B / D / S / C / O / T / Q)' % (dst, len(t.encode()), hf))
 PYEOF
 
 echo "--- 0. routing: the pane must be in inbox_routing.conf"

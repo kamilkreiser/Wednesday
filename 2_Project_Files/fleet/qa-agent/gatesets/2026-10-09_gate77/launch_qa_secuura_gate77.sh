@@ -3,6 +3,8 @@
 # #1430 KS-1328, #1431 KS-1355, #1432 KS-1410, #1433 KS-1139, #1434 KS-1171. Carried from launch_qa_secuura_gate76.sh and widened to six rows by
 # the gate77 drafter: the head file carries P x6 / B / D / S / C / O (the effective landing order) / T (the predicted FINAL tree) / Q (the #1427
 # state); SIX GO strings from the ONE merge seat ordinal; the merge seat is never an AUTHOR seat.
+# EXTENDED 2026-10-09 to SEVEN rows (+ #1436 KS-808, Seat F 6th, T2, a MERGE-IN row): P x7, SEVEN GO strings, two more by-name keywords
+# (EXIT-INVARIANT, NO-EVIL-MERGE). Backups `*.pre-1009-1436` beside every changed kit file.
 # NO PR-SPECIFIC LITERAL lives in this file: heads, branches, raise_base, END_TREEs, develop, merge seat, comparator, order and the final tree
 # come from head_at_launch.txt (written by repin_and_launch_gate77.sh from its REQUIRED arguments) and each is compared with kit.json (rc 7).
 # Every run (--check included) re-hashes EVERY pinned kit file against kit.json `script_sha256` and re-reads origin by ls-remote.
@@ -10,7 +12,7 @@
 # exit 30: a REQUIRED kit file is missing, empty, or has no pin.            exit 31: a kit file's sha256 != its pin (BAD PIN).
 # exit 7: head_at_launch.txt missing / malformed / a value != kit.json (WRONG VALUE).
 # exit 8: comparator / merge seat unruled, malformed or an author / thinking directive / kit files named / report dir / an unfilled token /
-#         the GO strings (exactly the six, from the merge seat ordinal) / six heads + develop + the final tree in full.
+#         the GO strings (exactly the seven, from the merge seat ordinal) / seven heads + develop + the final tree in full.
 # exit 33: measurement rules + by-name keywords.   exit 39: HOLDS + named exceptions.   exit 25: addendum + REPORT-HASH-LAST + subject + sender.
 # exit 6: origin pull/head or branch != a head.  exit 17: origin develop != the rendered develop, or not a descendant of the raise_base.
 # exit 21: a LAUNCH (not --check) with stdin not a TTY.   exit 16: a launch with a GATE77_* test override set.
@@ -26,7 +28,7 @@ KITJSON="${GATE77_KITJSON:-$GS/kit.json}"
 FILES_DIR="${GATE77_FILES_DIR:-$GS}"
 REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
 REQUIRED='lib_gate77.py composee5_copy.py c1_pin_gate77.py c2_merge_gate77.py c3_tamper_gate77.py gh_gate77.py prompt_gate77.txt launch_qa_secuura_gate77.sh repin_and_launch_gate77.sh'
-ROWS='1429 1430 1431 1432 1433 1434'
+ROWS='1429 1430 1431 1432 1433 1434 1436'
 KJ() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))
 for k in sys.argv[2].split("."): v=v[int(k)] if isinstance(v,list) else v[k]
 print(" ".join(map(str,v)) if isinstance(v,list) else ("" if v is None else v))' "$KITJSON" "$1"; }
@@ -60,8 +62,8 @@ case " $(KJ author_seats | sed 's/Seat \([A-Z]\) /Seat_\1_/g') " in *" $(printf 
 [ -s "$PROMPT_FILE" ] || { echo "prompt file missing or empty: $PROMPT_FILE (render it with repin_and_launch_gate77.sh)" >&2; exit 4; }
 [ -d "$REPO" ]        || { echo "repo under test missing: $REPO" >&2; exit 5; }
 [ -s "$HEADFILE" ]    || { echo "REFUSING: $HEADFILE missing" >&2; exit 7; }
-# --- the head file: P x6, B, D, S, C, O, T, Q; each value compared with kit.json (WRONG VALUE -> rc 7) ---
-[ "$(grep -c '^P ' "$HEADFILE")" = 6 ] || { echo "REFUSING: head file must carry exactly six 'P ' lines" >&2; exit 7; }
+# --- the head file: P x7, B, D, S, C, O, T, Q; each value compared with kit.json (WRONG VALUE -> rc 7) ---
+[ "$(grep -c '^P ' "$HEADFILE")" = 7 ] || { echo "REFUSING: head file must carry exactly seven 'P ' lines" >&2; exit 7; }
 for _t in B D S C O T Q; do [ "$(grep -c "^$_t " "$HEADFILE")" = 1 ] || { echo "REFUSING: head file must carry exactly one '$_t ' line" >&2; exit 7; }; done
 for ROW in $ROWS; do
   set -- $(grep "^P $ROW " "$HEADFILE"); _br="${3:-}"; _sha="${4:-}"; _tree="${5:-}"; set --
@@ -99,7 +101,7 @@ grep -qwF "$T_TREE" "$PROMPT_FILE"            || { echo "REFUSING: the prompt do
 PROMPT_JOINED="$(python3 -c 'import re,sys; print(re.sub(r"\n\s*", " ", open(sys.argv[1], encoding="utf-8").read()))' "$PROMPT_FILE")"
 has() { printf '%s' "$PROMPT_JOINED" | grep -qF -- "$1"; }
 has 'MEASURE, not conclude' && has 'RULE WHETHER IT BLOCKS' && has 'NAMES THE TREE' && has 'A check that prints nothing needs a control that prints' && has 'ASSERT THE FILENAME TOO' && has 'ASSERT THE TAMPER LANDED' && has 'A SKIP is NEVER a pass' && has 'NOT RUN is never a pass' && has 'COULD-NOT-CHECK IS A SKIP' && has 'THE HEAD IS A PARAMETER' && has 'ONE PARSER FOR BEFORE AND AFTER' && has 'SUBSET, never equality' && has 'RESTORE TO THE HEAD STATE' && has 'is NOT tag-balance evidence' && has 'a red from the WRONG CELL is not the arm' && has 'VERBATIM' && has 'NEVER `git merge-file --union`' && has 'the discriminator is the diff, not the SHA' && has 'NEVER `npm test` in services/api-gateway' || { echo "REFUSING: the measurement rules / head-parameter rule / one parser / subset / restore-to-head / tag balance / wrong-cell / keep-both verbatim / union hazard / diff-not-sha / api-gateway watch trap" >&2; exit 33; }
-_KW="C1-PIN END-TREE BRANCH-TRAILER KEYS-ATTACH CLOSE-RESIDUE MERGE-CLEAN THROUGH-CODE TICKET-CLAIM SECURITY-SURFACE DECISION-INVARIANT SERVED-SPEC BASH-41 RED-PROOF REDGREEN-RERUN RESTORE-HEAD-STATE FULL-SUITE OWN-ARM PREFLIGHT-BY-HAND SIM-FINAL DOCS-PARITY TAG-BALANCE KEEP-BOTH UNION-HAZARD CHAIN-PREDICT COLLISION-TABLE C5-PR-TEXT SQUASH-SUBJECT SQUASH-BODY ATTRIBUTION BODY-CORRECTION ACTIONS-SUBSET ADVISORY-FREEZE CI-CORROBORATION READY-CLAIMS COLLISION-CENSUS NOT-TESTED-LIST TIERING SKILL-MUSTS LIVE-SWEEP-OWED REPIN DISK-ENOSPC REPORT-HASH-LAST"
+_KW="NO-EVIL-MERGE EXIT-INVARIANT C1-PIN END-TREE BRANCH-TRAILER KEYS-ATTACH CLOSE-RESIDUE MERGE-CLEAN THROUGH-CODE TICKET-CLAIM SECURITY-SURFACE DECISION-INVARIANT SERVED-SPEC BASH-41 RED-PROOF REDGREEN-RERUN RESTORE-HEAD-STATE FULL-SUITE OWN-ARM PREFLIGHT-BY-HAND SIM-FINAL DOCS-PARITY TAG-BALANCE KEEP-BOTH UNION-HAZARD CHAIN-PREDICT COLLISION-TABLE C5-PR-TEXT SQUASH-SUBJECT SQUASH-BODY ATTRIBUTION BODY-CORRECTION ACTIONS-SUBSET ADVISORY-FREEZE CI-CORROBORATION READY-CLAIMS COLLISION-CENSUS NOT-TESTED-LIST TIERING SKILL-MUSTS LIVE-SWEEP-OWED REPIN DISK-ENOSPC REPORT-HASH-LAST"
 _NKW=0
 for _w in $_KW; do
   _NKW=$((_NKW + 1))
@@ -123,10 +125,10 @@ if git -C "$REPO" cat-file -e "$CUR_DEV^{commit}" 2>/dev/null; then
   _DEVNOTE="descends from ${B_SHA:0:12}"
 else _DEVNOTE="NOT in the local store: descent NOT checked here (the repin checked it in the kit clone; the gate checks it in ITS OWN clone)"; fi
 _ANY_OVR="$(env | grep -c '^GATE77_')"
-NOTE="six rows at pull/head AND branch | raise_base ${B_SHA:0:12} x1 | origin develop ${CUR_DEV:0:12} == rendered ($_DEVNOTE) | order $O_ORD, final tree ${T_TREE:0:12} | merge seat $SEAT ($LANE) | comparator $COMP | $_NPIN pins EQUAL | prompt sha256 $(shasum -a 256 "$PROMPT_FILE" | cut -c1-16)"
+NOTE="seven rows at pull/head AND branch | raise_base ${B_SHA:0:12} x1 | origin develop ${CUR_DEV:0:12} == rendered ($_DEVNOTE) | order $O_ORD, final tree ${T_TREE:0:12} | merge seat $SEAT ($LANE) | comparator $COMP | $_NPIN pins EQUAL | prompt sha256 $(shasum -a 256 "$PROMPT_FILE" | cut -c1-16)"
 if [ "$MODE" = "--check" ]; then
   echo "all guards pass:"; echo "  $NOTE"
-  echo "  QA project, kit at its home, kit.json, $_NPIN pinned kit files hashing to their pins, KIT_REPORT.md, rendered prompt, head file (P x6 + B + D + S + C + O + T + Q == kit), repo; thinking directive; 8 kit files named; report dir; no fill token; the SIX GO strings from the merge seat ordinal; six heads + develop + the final tree in full"
+  echo "  QA project, kit at its home, kit.json, $_NPIN pinned kit files hashing to their pins, KIT_REPORT.md, rendered prompt, head file (P x7 + B + D + S + C + O + T + Q == kit), repo; thinking directive; 8 kit files named; report dir; no fill token; the SEVEN GO strings from the merge seat ordinal; seven heads + develop + the final tree in full"
   echo "  the prompt carries the measurement rules, $_NKW by-name keywords (as tokens), the holds + named exceptions, the addendum + REPORT-HASH-LAST rules, the verdict subject + sender"
   [ "$_ANY_OVR" != 0 ] && echo "  (a GATE77_* TEST OVERRIDE is set)"
   echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"; exit 0

@@ -3,7 +3,7 @@
 One full-screen TRMNL private plugin. The left half shows meetings from the three dashboard calendars. The right half shows each agent's weekly-plan usage, with the open decision cards that need Kam underneath.
 Design and sources: `1_Project_Definition/Architecture/2026-10-09_trmnl-view-design.md`.
 
-**Status:** draft only. Nothing has been published and nothing has been sent to TRMNL. No job is installed.
+**Status:** LIVE since 2026-10-09 14:33. Kam supplied the webhook URL (panel 14:32:29; he accepted its exposure at 14:32:47). Wednesday pushed once by hand (`OK: HTTP 200`) and verified it AT TRMNL (GET `merge_variables.updated` == "Fri 9 Oct 14:33"), then armed `com.wednesday.trmnlpush` from `scheduler/jobs/trmnlpush.plist.template` (Wednesday seat only; PORTABILITY item 24). The physical screen was not seen by Wednesday.
 
 | File | What it is |
 |---|---|

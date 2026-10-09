@@ -2,15 +2,28 @@
 
 Every OPEN question carries the drafter's recommendation and a DEFAULT. The default is what kit.json and the prompt already assume, so ruling "as recommended" changes no file. **None blocks the dry run** (rc 0 at the defaults). Q-SEAT77, Q-ORDER77 and Q-MERGEINS77 bind the MERGE SEAT more than the gate.
 
+## EXTENSION 2026-10-09 (~14:10 AEDT, extension drafter): a SEVENTH row, #1436 KS-808 (Seat F 6th, T2)
+Full record: `KIT_REPORT_ADDENDUM_1436.md`. Backups of every changed file: `<name>.pre-1009-1436`. Every default below is what kit.json and the prompt now assume; ruling "as recommended" changes no file.
+- **#1436 is a MERGE-IN row**, not one commit on the raise_base: head M `90d98754db7b`, parents [`a24efb3c5e04` (one commit on 1e7f90e26137), develop `81d2e5f4c415`]. The kit measures it from its own base 81d2e5f4c415 (`rows.1436.base`), adds c1 P2M (NO-EVIL-MERGE: merge-tree a24efb3c5e04 x 81d2e5f4c415 == M's tree 43a9d3089e19) and c2 BASE-CONTAINED (#1436 is refused onto a develop that lacks 81d2e5f4c415).
+- **develop moved** 1e7f90e26137 -> `81d2e5f4c4151f5291a7a9c186d93a02dc5d38d6` (#1435, 5 package-lock.json files). The launch command keeps `--develop 1e7f90e26137…` and must carry `--repin-develop <origin develop at launch>`.
+- **Q-ORDER77 (amended default):** `1432,1433,1429,1434,1436,1431,1430` (flow 36 37 38 40 **41** 42 43; T1 first). Predicted final trees at develop 81d2e5f4c415: with #1427 first `550d0ef42882fd861a9781622681094caa545bf8`, without `408cae8897302aea5ece58f4d0ff7831421d1265`.
+- **Q-TIER808 — #1436 T2 or T1?** run-migrations.sh is a deploy-path script (the `migrations` image), the tier-1 class "anything deploying to dev or demo". But the diff moves ONLY a report counter (applied_count / skipped_count feed two echo lines); failed_count, the return codes, `exit 3` and all SQL are byte-unchanged, and no non-test, non-doc code reads `Summary: applied=`. *Rec / default:* **T2 + a mandatory EXIT-INVARIANT arm** (exit code + per-file lines identical base vs head over the four stub fixtures; drafter: rc 0 0 0 3 both sides). T1 if the gate finds any decision consuming applied=.
+- **Q-SEAT77 (re-asked):** the default `Seat R 20th` predates R 22nd (live now, rebuilding #1427). Q-SEAT77's own rec is "whichever R seat merges #1427 merges gate77". *Rec:* if R 22nd lands #1427, put its ordinal (or its successor's) in kit.json `merge_seat_ordinal` before the repin. Not an author of any row (author_seats now include Seat F 6th).
+- **Q-KEY1452 — the MERGE commit's subject hyphenates a foreign key** (`… (KS-1452 lock refresh in, no conflict)`), while F 6th's body spaces it on purpose ("would have linked #1436 to that ticket"). F 6th's board control read KS-1452 without #1436 afterwards. The squash replaces the commit message, so nothing lands. *Rec / default:* Minor, not a blocker. The gate reads whether the integration linked it.
+- **Q-ERRTEXT808 — the runner's own ERROR text (:187-188) still says "the remaining applied=N-counts-skips defect is KS-808"**, and the diff leaves it in place. After this PR that sentence is false at runtime, the same class as a doc that states more than the code. *Rec / default:* the gate rules it. If it is Minor, it rides a one-line follow-up. Not a reason to hold the row.
+- **Q-PROSE808:** seven prose sites still describe the old `applied=N` line. They are named in the body, not edited (no MD edits in this PR). *Rec / default:* accept as named, with a follow-up ticket.
+- **Q-ATTR77 / Q-SUBJ77 / Q-LIVE77 extended:** #1436's body carries a `Generated with` line (drop it in the squash). The title is de-hyphenated `KS 808:`; it is staged as `KS-808: run-migrations.sh no longer counts skipped migrations as applied` (72). KS-808 does not move to Done: a live run is owed (a rebuilt `migrations` service against a real PostgreSQL with a skip).
+- **Q-1427REBUILD:** R 22nd is rebuilding #1427 onto 81d2e5f4c415, and its M' is not pushed. The kit still pins #1427's OLD head `2b6da5f561b0` as the modelled step 1, and decides "landed" by the job-04 blob. If the rebuilt #1427 lands with a job-04 blob different from the old head's, the repin reads it as NOT landed and models the old head onto a develop that already moved job-04. CODE-UNMOVED then refuses rc 13. That refusal is SAFE: re-draft the pending pin, never force.
+
 ## CARRIED (binding on the gate, written into the prompt)
-- **R1 TIER.** #1432 T1 (security surface: error-text disclosure on the public edge). #1429 #1430 #1431 #1433 #1434 T2. Reasons per row in kit.json `rows.<n>.tier_reason`. The gate may go UP, never down.
+- **R1 TIER.** #1432 T1 (security surface: error-text disclosure on the public edge). #1429 #1430 #1431 #1433 #1434 #1436 T2. Reasons per row in kit.json `rows.<n>.tier_reason`. The gate may go UP, never down.
 - **R2 ACTIONS.** SUBSET, never equality; PENDING never a pass; classify by WORKFLOW ID (three workflows are named `pr`). Security Scanning, PR Security Gates (KS-168) and pr-platform-suites fail on develop itself (R 19th, measured by id): base-state, classified, never a new red by default.
 - **R3 PRE-EXISTING MISMATCH.** `VERDICT: MISMATCH — STOP` inside a green run is the F-925-3 fixture arm (gate73 R3, G 5th re-verified it as an asserted `expect` arm at preflight_deps.test.sh:459-460).
 - **R4 PLATFORM SUITES** UNMEASURED locally, never counted as passing.
-- **R5 MERGE SEAT** never an author (E 11th, F 5th, R 19th, G 5th): the launcher refuses an author ordinal (rc 8).
+- **R5 MERGE SEAT** never an author (E 11th, F 5th, R 19th, G 5th, F 6th): the launcher refuses an author ordinal (rc 8).
 - **R6 CONTROLS.** Every check can fail; every zero has a control; an arm counts only if it refuses at its OWN assert.
 - **R7 RESTORE TO THE HEAD STATE**, never checkout / restore / reset / clean.
-- **R8 Q-UNION (gate73, binding, re-measured on THIS batch).** `merge-file --union` leaves table/tr/td +1 open on the flow doc at every step and div/table/tr/td +1 on the cheat doc from step 3; keep-both composition is balanced at every step.
+- **R8 Q-UNION (gate73, binding, re-measured on THIS batch).** `merge-file --union` leaves table/tr/td +1 open on the flow doc at every step and div/table/tr/td +1 on the cheat doc from step 3; keep-both composition is balanced at every step. **CORRECTED 2026-10-09 (extension drafter):** the six-row draft's own chain output (`_scratch/runs/dry_225602.c2chain.out`) shows union BALANCED on the flow doc at the #1434 and #1431 steps, so "every step" over-stated it. Re-measured on seven rows at 81d2e5f4c415 with #1427: flow +1 at 6 of 8 steps, cheat +1 at 4 of 8. The binding rule (never union) is unchanged.
 - **R9** No `--no-verify`. A refused push is a STOP.
 - **R10 SUBJECTS LAND AS WRITTEN** (STANDING_LINES :320-322): no `(#n)` suffix in any declared subject or addendum, no suffix-length arithmetic; `len(declared) <= 92`, ASCII, own key first.
 
@@ -88,3 +101,10 @@ Every OPEN question carries the drafter's recommendation and a DEFAULT. The defa
 - *Rec / default:* none of KS-1449 / KS-1355 / KS-1410 / KS-1139 moves to Done on this merge. The tests-only rows (#1430, #1434) owe none of their own: KS-1328 is a pin, and KS-1171's live sweep is owed by the ticket, not this PR.
 
 ## WEDNESDAY'S RULINGS — (to be written by Wednesday)
+
+## Wednesday's rulings on the #1436 addendum (14:3x 2026-10-09, after reading the drafter's report)
+1. **Merge seat:** NOT R 20th. Named at launch, after #1427 lands (R 22nd is live on #1427 now). Edit `kit.json` `merge_seat` / `merge_seat_ordinal` then, before the repin.
+2. **#1436 tier = TIER 1** (not 2): `run-migrations.sh` is on the deploy path, and the tiered gate gives deploys full weight. The batch already runs at T1 weight for #1432. Keep the mandatory exit-code-unchanged arm.
+3. **`run-migrations.sh:187-188` stale "applied=N defect remains" text** and **the hyphenated KS-1452 in #1436's merge-commit subject:** input findings for the GATE to grade, not drafter verdicts.
+4. **#1427 pin:** if the rebuilt #1427 lands with different job-04 bytes, rc 13 is the intended refusal; re-draft that one pin.
+5. **Union-hazard correction** (6 of 8 steps on the flow doc, not "every step"): accepted.
