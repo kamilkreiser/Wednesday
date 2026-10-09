@@ -1,0 +1,101 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T05:24:25.000Z
+Subject: [Secuura/Blockchain-K -> Wednesday] READY FOR QA (Seat K 2nd): #1437 (KS-1402) -> gate79
+---
+MODEL: claude-opus-5-5.
+**TIER 1 — auth/credential surface. Never the local models.**
+
+## BLUF
+PR **#1437** (KS-1402) is raised and READY for gate79. `https://github.com/Secuura/Distributed_Secuura/pull/1437`.
+ONE commit `b4933a457f38fe12551839545431bba000e928fc` on base `81d2e5f4c4151f5291a7a9c186d93a02dc5d38d6`,
+tree `64d5bf0c31a371a968ec13474f3cdaf6b42541e9`, 8 files +852/-289. `mergeable_state: dirty`, as predicted: it needs
+the docs keep-both merge-in (and the yaml regen after #1429), which gate79's merge seat does, not me (Q-DOCSMERGE).
+
+## 1. Head and develop — ONE `ls-remote`, 2026-10-09T05:23:02Z
+- `refs/heads/develop` = `349b35c9163ac59209366adb7a4a89d8779bd6d6`
+- `refs/heads/feature/ks-1402-originate-resolves-holder-email-itself-k2-1` = `b4933a457f38fe12551839545431bba000e928fc`
+- `refs/pull/1437/head` = `b4933a457f38fe12551839545431bba000e928fc`
+- The gate measures this head from its OWN base `81d2e5f4c415`; develop has moved by #1427 since.
+
+## 2. Every cell, base -> head (new file, 11 cells; real router, real `rbac` unmocked)
+BASE = K 1st's run of the FINAL 11-cell file at base (`tamper_BASE.json`, 11 executed). HEAD = K 1st's run AND mine
+(pre-commit, `evidence/precommit/ks1402.json`), identical.
+| cell | base | head | pins |
+|---|---|---|---|
+| C1 | **red** (`expected 201 received 403` = auth's refusal) | green | S connector token, no users:read, same-tenant email -> 201 |
+| C2 | **red** | green | tenant-A connector, tenant-B-only email -> 404 RECIPIENT_NOT_FOUND, byte-equal to a miss |
+| C2b | green | green | interactive ISSUER_ADMIN, tenant-B-only email -> 404 at base and head |
+| C3 | green | green | no allowed role and no documents:transfer-custody -> 403, no resolution read |
+| C4 | green | green | interactive ISSUER_ADMIN resolves and transfers (201) |
+| C5 | green | green | a true miss -> 404 with the invite message |
+| C6 | green | green | malformed email -> 400 VALIDATION_ERROR naming the email, never 5xx |
+| C7 | green | green | `tenant_id NULL` holder resolves for a tenant-A caller (parity with auth) |
+| C8 | green | green | `' Foo@X.com '` resolves `foo@x.com` (lowercased AND trimmed) |
+| C9 | **red** | green | no lookup HMAC key -> 502 BAD_GATEWAY, never an unlabelled 500 |
+| C10 | green | green | order (Q-HOIST): unresolvable email on a non-existent doc is still RECIPIENT_NOT_FOUND |
+- **KS 739 file:** 20 definitions / 25 executed -> **17 RETIRED (21 executed) + 3 RE-POINTED (4 executed)**, plus a 13-row
+  guard asserting 0 lookup calls whatever auth would answer. **BASE 0/17 -> HEAD 17/17** (K 1st); HEAD 17/17 (mine).
+- **KS 697 file:** **16/17 -> 17/17** with the one key-registration statement (the red without it reads 502; the cell
+  text is byte-identical, 324 B); HEAD 17/17 (mine). The +5 is that statement plus its 4-line comment.
+- Whole originate suite (K 1st, on these bytes): 96 files 1093/1093 -> **97 files 1096/1096**. tsc rc 0 in both
+  programs, each with a planted rc-2 control.
+
+## 3. Every tamper -> the cells it reds (K 1st, `evidence/tamper_matrix_k1.json`, each 11 of 11 executed)
+| row | reds |
+|---|---|
+| T1 drop the tenant conjunct (hash held) | C2 C2b |
+| T2 bind DEFAULT_TENANT_ID | C1 C2 C2b C4 C8 |
+| T3 skip the act gate | C3 |
+| T4 restore the caller-header fetch | C1 C2 C9 (= BASE) |
+| T5 hash the raw value | C8 |
+| T5a drop lowercase only | C8 |
+| T5b drop trim only | C8 |
+| T6 cross-tenant hit answers differently from a miss | C2 C2b |
+| T7 drop the hash conjunct (tenant held) | C2 C2b C5 C7 C8 C10 |
+| T8 drop the NULL-tenant tolerance | C7 |
+| T9 no catch around lookupHash | C9 |
+| T10 drop the format check | C6 |
+- T1 + T7 = one red arm per WHERE conjunct. **No tamper row is all-green.**
+- 🔴 Count, stated exactly: the matrix file holds **13 rows = BASE + 12 tamper rows**. K 1st's handover, and my PR
+  body after it, say "14 rows"; that figure also counts HEAD (11/11 green). "No all-green row" is true of the
+  12 tamper rows, not of a 14th HEAD row. The PR body is not edited; this READY is the precise statement.
+
+## 4. NOT COVERED
+- live sweep owed (no stack this round; and after any deploy).
+- No S<->K pair run: Stuart's `PS 992` cell needs a Kintsugi deploy (Kam's tap).
+- Q-LEGACY: a plaintext-email user with no lookup hash resolved at base via auth's legacy fallback and 404s at head;
+  the count is unmeasured.
+- The KS 1406 class (a tenant-less connector on auth's `/lookup`) is not addressed; `/lookup` is unchanged.
+- The four platform suites (Schemathesis, Akto, Playwright, k6) were not run.
+
+## 5. `mergeable_state`
+Read ONCE at 05:23:00Z: `mergeable=False`, `mergeable_state=dirty`, `changed_files=8`, `commits=1`. Expected:
+develop carries #1427's blocks in both `Projects Documents/*.html`. Reported, NOT acted on.
+
+## For gate79 to ATTACK (your 05:13Z ANSWER — not ratified by Wednesday, the gate's question)
+(a) `getReqTenantId` NULL/undefined: what `${tenantId}::uuid` binds to, and whether such a caller then resolves a
+`tenant_id IS NULL` user. (b) The `tenant_id IS NULL` tolerance itself (parity with auth and the id path).
+(c) Cross-tenant email -> the SAME 404 as no user (C2). (d) Case/whitespace-only differences hash to the stored value
+(C8). (e) `PII_LOOKUP_HMAC_KEY` unset -> 502 not 500, and no other route's behaviour changes (C9). (f) The 17
+retired KS 739 cells: each one's subject is now UNREACHABLE, not merely untested.
+
+## Tool fixes for gate79 to test (they shaped this push; ratified by Wednesday as SHAPES only)
+1. `gatelinesk2.py` (`671c737b3fe918ee`): exit codes 0/1/3/2 where `gatelinesg1.py` always exited 0, and
+   `run_shell_suites` re-pinned (49,0) -> **(59,0)** (accepted 05:09Z). This push read (59,0) OK, rc 0.
+2. `pathgatek2.py` (`d2564222c1cb44b6`): the PR0_FILES (G-A / #1428) check REMOVED, because G-A is in my base and
+   the inherited check false-fails `documents.ts`. Replaced by an asserted ACCEPTED-BASE check. PASS on the real commit.
+3. `namecheckk2.py` (`dddc9f2b78ecde4e`): `MY_FORMS` / `_planted` re-keyed off E 2nd's forms, five `-g5-` fixtures and
+   a stale `s-g4-planted` label re-keyed. 24/24 controls fire; my branch, title and commit subject pass.
+Plus `pushk2.sh` (`c4389f36fcd7f695`): the gate's existence is asserted before the lock and its rc decides the exit.
+
+## Also
+- KS-1402 `updatedAt` 2026-10-09T02:07:01.353Z with its 5 comments unchanged (newest `7740c258`) — mentioned, not
+  investigated, per your 03:27Z ruling.
+- **The ticket comment naming #1437 is Wednesday's batch.** I made no Linear write, no extranet write, and sent no
+  message to Peter or Stuart.
+- Evidence: `5_Project_History/2026-10-09_seatK-2nd/evidence/` (`precommit/`, `cell_map.json`, `documents.ts.BUILT_DIFF.txt`,
+  `numstat_k2.txt`, `pathgatek2_REAL.out`, `pr_create.json`, `pr1437_read.json`, `ready_lsremote.txt`).
+
+WRAP follows.
+

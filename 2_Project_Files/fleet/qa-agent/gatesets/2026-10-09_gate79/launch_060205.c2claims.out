@@ -1,0 +1,72 @@
+documents.ts base 81d2e5f4c415 sha256/16 bce2be6366e815be | head b4933a457f38 sha256/16 637b23f246e0cd07
+PASS D0 OUTSIDE the handler (code-only): +3 ['const HOLDER_EMAIL_SCHEMA = z.string().trim().email().min(3).max(320);', "import { verifyMessageSignature, hasNulByte, runWithTenantId, lookupHash } from '@secuura/shared';", "import { z } from 'zod';"] | -1 ["import { verifyMessageSignature, hasNulByte, runWithTenantId } from '@secuura/shared';"] (want exactly kit adds 3 / dels 1)
+PASS D1 PURE-MOVE: hoisted statements once each base [1, 1, 1] head [1, 1, 1] | handler minus block minus hoist: 161 vs 161 lines, first difference NONE
+PASS D2 ORDER at the head (char offsets) [82189, 88493, 89188, 91314, 92436] for ['isAllowedByRoleOrScope(req, ', 'HOLDER_EMAIL_SCHEMA.safePars', 'lookupHash(normalisedHolderE', 'await db.$queryRaw`', 'getDocument(id, tenantId, (r'] | act gate returns 403 next: True
+PASS D3a SQL-SAFETY in the block: unsafe/raw/join {'queryRawUnsafe': 0, 'executeRawUnsafe': 0, 'Prisma.raw': 0, 'Prisma.join': 0} | interpolations ['holderEmailHash', 'tenantId'] (want [holderEmailHash, tenantId]) | concatenation False | template text 'SELECT id FROM users WHERE email_lookup_hash = ${holderEmailHash} AND (tenant_id IS NULL OR tenant_id = ${tenantId}::uuid) LIMIT 1'
+PASS D3b originate src (51 / 51 .ts, tests excluded) code-only [raw] base -> head: $queryRawUnsafe( 9[9] -> 9[9]; $executeRawUnsafe( 14[14] -> 14[14]; CONTROL tagged $queryRaw` 138[141] -> 139[142]
+PASS D3c tenant predicate text in the handler (code-only): 2 (want 2: the email read AND the id path's existence read — textual parity, attack b)
+PASS D4 RETIRED-SUBJECT fetch users/lookup                     IN THE HANDLER code-only base 1 -> head 0 (raw 1 -> 0; CONTROL: base > 0) | whole originate src code-only 1 -> 0
+PASS D4 RETIRED-SUBJECT lookupRes                              IN THE HANDLER code-only base 13 -> head 0 (raw 13 -> 0; CONTROL: base > 0) | whole originate src code-only 13 -> 0
+PASS D4 RETIRED-SUBJECT RECIPIENT_LOOKUP_FAILED                IN THE HANDLER code-only base 1 -> head 0 (raw 1 -> 0; CONTROL: base > 0) | whole originate src code-only 1 -> 0
+PASS D4 RETIRED-SUBJECT caller Authorization forward           IN THE HANDLER code-only base 1 -> head 0 (raw 1 -> 0; CONTROL: base > 0) | whole originate src code-only 6 -> 5
+INFO D4-CLASS 'caller Authorization forward' survives ELSEWHERE in originate src at the head (5): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+PASS D4 RETIRED-SUBJECT 401 re-authenticate hint               IN THE HANDLER code-only base 1 -> head 0 (raw 1 -> 0; CONTROL: base > 0) | whole originate src code-only 1 -> 0
+PASS D4 RETIRED-SUBJECT 403 users:read hint                    IN THE HANDLER code-only base 1 -> head 0 (raw 1 -> 0; CONTROL: base > 0) | whole originate src code-only 1 -> 0
+PASS D4 RETIRED-SUBJECT Recipient lookup service unavailable   IN THE HANDLER code-only base 1 -> head 0 (raw 1 -> 0; CONTROL: base > 0) | whole originate src code-only 2 -> 1
+INFO D4-CLASS 'Recipient lookup service unavailable' survives ELSEWHERE in originate src at the head (1): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+PASS D4 RETIRED-SUBJECT lookup 502 via users/lookup            IN THE HANDLER code-only base 1 -> head 0 (raw 1 -> 0; CONTROL: base > 0) | whole originate src code-only 1 -> 0
+INFO D4-CLASS certifications.ts at the HEAD: Blockchain/Dev/services/originate/src/routes/certifications.ts:229       // so a POST /api/users/stub through it is rejected with
+INFO D4-CLASS certifications.ts at the HEAD: Blockchain/Dev/services/originate/src/routes/certifications.ts:242           const stubRes = await fetch(`${authBase}/api/users/stub`, {
+INFO D4-CLASS certifications.ts at the HEAD: Blockchain/Dev/services/originate/src/routes/certifications.ts:246               ...(authHeader ? { Authorization: authHeader } : {}),
+PASS D5a SCHEMA auth base z.string().trim().email().min(3).max(320) | auth head z.string().trim().email().min(3).max(320) | originate z.string().trim().email().min(3).max(320) | kit z.string().trim().email().min(3).max(320)
+PASS D5b NORMALISATION auth getUserByEmail toLowerCase().trim() base True head True | originate String(raw).toLowerCase().trim() True
+INFO D5c auth /lookup tenant compare at BASE (NULL-tenant tolerance AND skip-when-caller-tenantless): Blockchain/Dev/services/auth/src/routes/users.ts:306     if (!user || (callerTenantId && user.tenantId && user.tenantId !== callerTenantId)) {
+INFO D5c auth /lookup tenant compare at BASE (NULL-tenant tolerance AND skip-when-caller-tenantless): Blockchain/Dev/services/auth/src/routes/users.ts:311         crossTenant: !!(user && callerTenantId && user.tenantId !== callerTenantId),
+PASS D6 BYTES validation message 'newHolderEmail is not a valid email address': base 1 occurrence(s) -> head 1
+PASS D6 BYTES not_found message 'No user with that email in this tenant. Invite the': base 1 occurrence(s) -> head 1
+INFO D6 key-absent 502 message at the head: 1 occurrence(s) of 'Could not resolve recipient email: the recipient lookup is not configured'
+INFO D7 tenantless-caller reading at the HEAD: Blockchain/Dev/services/originate/src/routes/documents.ts:240 const DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+INFO D7 tenantless-caller reading at the HEAD: Blockchain/Dev/services/originate/src/routes/documents.ts:249 function getReqTenantId(req: Request): string {
+INFO D7 tenantless-caller reading at the HEAD: Blockchain/Dev/services/originate/src/routes/documents.ts:250   const tid = (req as any).tenantId as string | undefined;
+INFO D7 tenantless-caller reading at the HEAD: Blockchain/Dev/services/originate/src/routes/documents.ts:251   return tid || DEFAULT_TENANT_ID;
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:33 import { extractTenantContext, tenantGucContext, rejectNulBytes } from '@secuura/shared';
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:218 if (process.env.MULTI_TENANCY_ENABLED === 'true') {
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:222       extractTenantContext(mgr)(req, res, () => {
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:245 // tenantGucContext() seeds AsyncLocalStorage from req.tenantId so the db.ts
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:257 app.use(tenantGucContext());
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/routes/users.ts:300     const user = await userRepo.getUserByEmail(email);
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/repositories/userRepo.ts:575   const normalised = email.toLowerCase().trim();
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/repositories/userRepo.ts:591       'SELECT * FROM auth_find_user_by_email_legacy($1)',
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/repositories/userRepo.ts:641   const normalised = email.toLowerCase().trim();
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/repositories/userRepo.ts:652       'SELECT EXISTS(SELECT 1 FROM auth_find_user_by_email_legacy($1)) AS exists',
+INFO D8 legacy function definition: 81d2e5f4c4151f5291a7a9c186d93a02dc5d38d6:Blockchain/Dev/migrations/039_rls_fail_closed.sql:191:CREATE OR REPLACE FUNCTION auth_find_user_by_email_legacy(p_email_lower TEXT)
+INFO D8 POPULATION (plaintext-email users with NO email_lookup_hash that auth resolved at base): UNMEASURED — no database in this kit
+INFO D9 RLS readings in migrations at the HEAD: 42 line(s) (CONTROL: 0 means the grep is blind, not that RLS is absent)
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:16:--   3. FORCE row level security on each table so the table owner role
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:39:--                    ALTER TABLE <t> NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:79:    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', t);
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:128:      EXECUTE format('ALTER TABLE %I NO FORCE ROW LEVEL SECURITY', t);
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/011_documents_tenant_id.sql:45:--   6. Enable + FORCE row level security on documents with the same
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/011_documents_tenant_id.sql:59:--   ALTER TABLE documents NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/011_documents_tenant_id.sql:157:  EXECUTE 'ALTER TABLE documents FORCE ROW LEVEL SECURITY';
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/011_documents_tenant_id.sql:186:    EXECUTE 'ALTER TABLE documents NO FORCE ROW LEVEL SECURITY';
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/012_peer_tables_tenant_isolation.sql:41:--     ALTER TABLE <t> NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/012_peer_tables_tenant_isolation.sql:144:    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', tbl);
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/012_peer_tables_tenant_isolation.sql:184:      EXECUTE format('ALTER TABLE %I NO FORCE ROW LEVEL SECURITY', tbl);
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/013_charge_events_tenant_isolation.sql:38:--     ALTER TABLE <t> NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/013_charge_events_tenant_isolation.sql:112:    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', tbl);
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/013_charge_events_tenant_isolation.sql:147:      EXECUTE format('ALTER TABLE %I NO FORCE ROW LEVEL SECURITY', tbl);
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/014_svc_dids_tenant_isolation.sql:32:--   ALTER TABLE svc_dids NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: b4933a457f38fe12551839545431bba000e928fc:Blockchain/Dev/migrations/014_svc_dids_tenant_isolation.sql:119:  ALTER TABLE svc_dids FORCE ROW LEVEL SECURITY;
+INFO D9 files naming KS-160 at the HEAD: 5 (read them: is tenant RLS on `users` INERT, or FORCE fail-closed under the request GUC?)
+INFO D9 the claims to reconcile (documents.ts at the HEAD): Blockchain/Dev/services/originate/src/routes/documents.ts:1756         // tenant GUC (KS-458), but tenant RLS has been inert before now (KS-160), so the BOUND
+INFO D9 the claims to reconcile (documents.ts at the HEAD): Blockchain/Dev/services/originate/src/routes/documents.ts:1812       // GUC, and `users` is FORCE RLS fail-closed — so a holder in another tenant
+INFO D9 the claims to reconcile (documents.ts at the HEAD): Blockchain/Dev/services/originate/src/routes/documents.ts:1818       // has been inert before now — KS-160/KS-458); `tenant_id IS NULL` is tolerated
+INFO D10 ks739 it()/it.each titles: base 20, head 4, kept verbatim 0, base-only 20, head-only 4 (the READY: 20 definitions -> 17 RETIRED + 3 RE-POINTED + 13 guard rows)
+INFO D10 head title: auth would answer %s: the route makes 0 lookup calls, answers its own 404, and writes nothing
+INFO D10 head title: R-KS74 (was :327): an unknown email is the typed RECIPIENT_NOT_FOUND with its invite path, from originate, 0 lookup calls
+INFO D10 head title: R-KS536 (was :336): the malformed email %p is 400 VALIDATION_ERROR about the email, 0 lookup calls, nothing written
+INFO D10 head title: R-200 (was :375): a recipient the tenant can see is resolved by originate and transferred (201), 0 lookup calls
+INFO D11 PATCH-SHA claimed ab8e9e441864e05c | {'git diff base head': '81ae2f5accfb93a4', 'git diff base head -- (non-doc)': '07514e3674e5641a', 'git show head (format=)': '81ae2f5accfb93a4', 'git diff --binary base head': '81ae2f5accfb93a4'} | UNREPRODUCED by these 4 instruments (instrument unnamed in the commit)
+CHECKED 18
+0 FAIL

@@ -1,0 +1,442 @@
+{
+ "kit": "gate79",
+ "kind": "SINGLE-PR tier-1 (auth / credential surface) gate, round 1: #1437 (KS-1402) moves transfer-custody's holder-EMAIL resolution out of auth's GET /api/users/lookup (which received the caller's forwarded credential and refused Platform S's connector, 403) into originate: zod format check (auth's schema), auth's normalisation toLowerCase().trim(), lookupHash (HMAC), one bound $queryRaw on users.email_lookup_hash with the request tenant bound in the WHERE (tenant_id IS NULL OR tenant_id = $tenant). Auth unchanged; act gate unchanged and first; tenant/db hoisted above resolution. 8 files +852/-289. Shape carried from gate78 (#1435); the lock / registry / legs / reach machinery dropped (no lock touched); code-claim, cell, tamper and tool-fix instruments built for THIS change.",
+ "drafted": "2026-10-09 05:27Z-xx:xxZ UTC by one Wednesday drafting subagent",
+ "NOTE_pins": "Every PR-specific value below is the DRAFTER'S pin. The repin script and every check script take the live values as REQUIRED arguments and compare them with these; nothing defaults to them.",
+ "client_project": "Secuura/Blockchain",
+ "tier": "T1",
+ "round": "1",
+ "routing": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf",
+ "pane": "QA/Secuura-gate79",
+ "routing_line": "QA/Secuura-gate79|coagent@agentmail.to|yes",
+ "report_dir": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-09-gate79",
+ "report_dir_name": "2026-10-09-gate79",
+ "verdict_subject": "[QA -> Wednesday] GATE79 (T1): #1437 KS-1402 originate resolves holder email",
+ "go_string": "GO (Seat K 3rd): merge 1437 on gate79",
+ "go_source": "DRAFTER'S DEFAULT (Q-SEAT79): no ANSWER names the merge seat; Wednesday edits go_string + the GO lines in prompt_gate79.txt (pinned) if another seat merges",
+ "no_go_template": "NO GO (gate79): 1437 at <head 12-hex> — <N-1437-n: the blocker, one line>",
+ "develop_at_draft": "349b35c9163ac59209366adb7a4a89d8779bd6d6",
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "forbidden_root": "/Volumes/DevMASTER/!CODING",
+ "secuura_env": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env",
+ "gh_repo": "Secuura/Distributed_Secuura",
+ "github_url": "git@github.com:Secuura/Distributed_Secuura.git",
+ "qa_dir": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN",
+ "charter": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md",
+ "usage_gate": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/usage_gate.sh",
+ "cockpit": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/cockpit/cockpit.sh",
+ "prompt": "prompt_gate79.txt",
+ "launcher": "launch_qa_secuura_gate79.sh",
+ "repin": "repin_and_launch_gate79.sh",
+ "pr": {
+  "pr": "1437",
+  "ticket": "KS-1402",
+  "author_seat": "Seat K 2nd (built by Seat K 1st + K 2nd)",
+  "branch": "feature/ks-1402-originate-resolves-holder-email-itself-k2-1",
+  "head_expected": "b4933a457f38fe12551839545431bba000e928fc",
+  "end_tree": "64d5bf0c31a371a968ec13474f3cdaf6b42541e9",
+  "parent_count": 1,
+  "parents": [
+   "81d2e5f4c4151f5291a7a9c186d93a02dc5d38d6"
+  ],
+  "subject": "fix(KS-1402): originate resolves a transfer-custody holder email itself",
+  "subject_max": 92,
+  "ready": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-09_seatK2_READY.txt",
+  "answer_push": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-09_seatK2_ANSWER_push.md",
+  "builder_records": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatK-2nd",
+  "builder_records_k1": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatK-1st",
+  "builder_worktree": "worktrees/s-k1-ks1402",
+  "numstat": {
+   "Blockchain/Dev/docs/openapi/secuura-api.yaml": [
+    13,
+    11
+   ],
+   "Blockchain/Dev/services/originate/src/__tests__/ks1402-transfer-custody-resolves-holder-email-in-originate.test.ts": [
+    436,
+    0
+   ],
+   "Blockchain/Dev/services/originate/src/__tests__/ks697-transfer-custody-holder-existence.test.ts": [
+    5,
+    0
+   ],
+   "Blockchain/Dev/services/originate/src/__tests__/ks739-transfer-custody-lookup-4xx-mapping.test.ts": [
+    115,
+    165
+   ],
+   "Blockchain/Dev/services/originate/src/originate.openapi.ts": [
+    22,
+    11
+   ],
+   "Blockchain/Dev/services/originate/src/routes/documents.ts": [
+    124,
+    102
+   ],
+   "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html": [
+    109,
+    0
+   ],
+   "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html": [
+    28,
+    0
+   ]
+  },
+  "added_paths": [
+   "Blockchain/Dev/services/originate/src/__tests__/ks1402-transfer-custody-resolves-holder-email-in-originate.test.ts"
+  ],
+  "file_count": 8,
+  "adds_dels": [
+   852,
+   289
+  ]
+ },
+ "known_develop_overlap": [
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html",
+  "Blockchain/Dev/docs/openapi/secuura-api.yaml"
+ ],
+ "NOTE_known_develop_overlap": "base..develop may touch ONLY these PR paths (the docs keep-both merge-in and the yaml regen after #1429 are the MERGE SEAT's job, Q-DOCSMERGE). base..develop touching any OTHER PR path or any tooling / code-surface path refuses (c1 P12, repin rc 13).",
+ "route_file": "Blockchain/Dev/services/originate/src/routes/documents.ts",
+ "route_anchor": "'/:id/transfer-custody'",
+ "test_files": {
+  "ks1402": "Blockchain/Dev/services/originate/src/__tests__/ks1402-transfer-custody-resolves-holder-email-in-originate.test.ts",
+  "ks697": "Blockchain/Dev/services/originate/src/__tests__/ks697-transfer-custody-holder-existence.test.ts",
+  "ks739": "Blockchain/Dev/services/originate/src/__tests__/ks739-transfer-custody-lookup-4xx-mapping.test.ts"
+ },
+ "originate_dir": "Blockchain/Dev/services/originate",
+ "dev_dir": "Blockchain/Dev",
+ "cells": [
+  "C1",
+  "C2",
+  "C2b",
+  "C3",
+  "C4",
+  "C5",
+  "C6",
+  "C7",
+  "C8",
+  "C9",
+  "C10"
+ ],
+ "cells_ready": {
+  "BASE": [
+   "C1",
+   "C2",
+   "C9"
+  ],
+  "HEAD": []
+ },
+ "NOTE_cells_ready": "The READY's base->head table: reds at BASE = C1 C2 C9 (the head's 11-cell file run against base's documents.ts); HEAD all 11 green.",
+ "tampers": [
+  {
+   "id": "T1",
+   "what": "drop the tenant conjunct (hash held)",
+   "ready_reds": [
+    "C2",
+    "C2b"
+   ],
+   "edits": [
+    [
+     "\n             AND (tenant_id IS NULL OR tenant_id = ${tenantId}::uuid)\n",
+     "\n"
+    ]
+   ],
+   "scope": "block"
+  },
+  {
+   "id": "T2",
+   "what": "bind DEFAULT_TENANT_ID",
+   "ready_reds": [
+    "C1",
+    "C2",
+    "C2b",
+    "C4",
+    "C8"
+   ],
+   "edits": [
+    [
+     "tenant_id = ${tenantId}::uuid)",
+     "tenant_id = ${DEFAULT_TENANT_ID}::uuid)"
+    ]
+   ],
+   "scope": "block"
+  },
+  {
+   "id": "T3",
+   "what": "skip the act gate",
+   "ready_reds": [
+    "C3"
+   ],
+   "edits": [
+    [
+     "if (!isAllowedByRoleOrScope(req, ALLOWED_TRANSFER_CUSTODY_ROLES, 'documents:transfer-custody')) {",
+     "if (false && !isAllowedByRoleOrScope(req, ALLOWED_TRANSFER_CUSTODY_ROLES, 'documents:transfer-custody')) {"
+    ]
+   ],
+   "scope": "file"
+  },
+  {
+   "id": "T4",
+   "what": "restore the caller-header fetch (= base's documents.ts, whole file)",
+   "ready_reds": [
+    "C1",
+    "C2",
+    "C9"
+   ],
+   "edits": "BASE_BLOB",
+   "scope": "file"
+  },
+  {
+   "id": "T5",
+   "what": "hash the raw value",
+   "ready_reds": [
+    "C8"
+   ],
+   "edits": [
+    [
+     "holderEmailHash = lookupHash(normalisedHolderEmail);",
+     "holderEmailHash = lookupHash(String(newHolderEmail) || normalisedHolderEmail);"
+    ]
+   ],
+   "scope": "block",
+   "note": "[g79] the drafter's first T5 (`lookupHash(String(newHolderEmail))`) left normalisedHolderEmail unread: TS6133 under ts-jest, the suite failed to LOAD (TAMPER-INVALID, quarantined _quarantine/c3_tamper_first_run_T5_load_failed). The `|| normalised` keeps it read and still hashes the RAW value (always non-empty here)."
+  },
+  {
+   "id": "T5a",
+   "what": "drop lowercase only",
+   "ready_reds": [
+    "C8"
+   ],
+   "edits": [
+    [
+     "const normalisedHolderEmail = String(newHolderEmail).toLowerCase().trim();",
+     "const normalisedHolderEmail = String(newHolderEmail).trim();"
+    ]
+   ],
+   "scope": "block"
+  },
+  {
+   "id": "T5b",
+   "what": "drop trim only",
+   "ready_reds": [
+    "C8"
+   ],
+   "edits": [
+    [
+     "const normalisedHolderEmail = String(newHolderEmail).toLowerCase().trim();",
+     "const normalisedHolderEmail = String(newHolderEmail).toLowerCase();"
+    ]
+   ],
+   "scope": "block"
+  },
+  {
+   "id": "T6",
+   "what": "cross-tenant hit answers differently from a miss",
+   "ready_reds": [
+    "C2",
+    "C2b"
+   ],
+   "edits": [
+    [
+     "\n             AND (tenant_id IS NULL OR tenant_id = ${tenantId}::uuid)\n",
+     "\n"
+    ],
+    [
+     "        if (holderByEmail.length === 0) {",
+     "        if (holderByEmail.length > 0 && (holderByEmail[0] as any).tenant_id && (holderByEmail[0] as any).tenant_id !== tenantId) {\n          return res.status(404).json({ success: false, error: { code: 'RECIPIENT_IN_OTHER_TENANT', message: 'gate79 T6 planted' } });\n        }\n        if (holderByEmail.length === 0) {"
+    ]
+   ],
+   "scope": "block"
+  },
+  {
+   "id": "T7",
+   "what": "drop the hash conjunct (tenant held)",
+   "ready_reds": [
+    "C2",
+    "C2b",
+    "C5",
+    "C7",
+    "C8",
+    "C10"
+   ],
+   "edits": [
+    [
+     "WHERE email_lookup_hash = ${holderEmailHash}\n",
+     "WHERE ${holderEmailHash}::text IS NOT NULL\n"
+    ]
+   ],
+   "scope": "block"
+  },
+  {
+   "id": "T8",
+   "what": "drop the NULL-tenant tolerance",
+   "ready_reds": [
+    "C7"
+   ],
+   "edits": [
+    [
+     "AND (tenant_id IS NULL OR tenant_id = ${tenantId}::uuid)",
+     "AND (tenant_id = ${tenantId}::uuid)"
+    ]
+   ],
+   "scope": "block"
+  },
+  {
+   "id": "T9",
+   "what": "no catch around lookupHash (the throw reaches the outer catch)",
+   "ready_reds": [
+    "C9"
+   ],
+   "edits": [
+    [
+     "} catch (keyErr: any) {\n",
+     "} catch (keyErr: any) {\n          if (keyErr) throw keyErr;\n"
+    ]
+   ],
+   "scope": "block"
+  },
+  {
+   "id": "T10",
+   "what": "drop the format check",
+   "ready_reds": [
+    "C6"
+   ],
+   "edits": [
+    [
+     "if (!HOLDER_EMAIL_SCHEMA.safeParse(newHolderEmail).success) {",
+     "if (false && !HOLDER_EMAIL_SCHEMA.safeParse(newHolderEmail).success) {"
+    ]
+   ],
+   "scope": "block"
+  }
+ ],
+ "NOTE_tampers": "The READY's 12 rows, re-implemented by the DRAFTER from the row names (K 1st's own tamper code is in its records, evidence/tamper_matrix_k1.json, and was NOT copied). Each edit's anchor must occur EXACTLY ONCE (asserted), the tamper is asserted LANDED (sha differs, marker present), and a suite that fails to LOAD is TAMPER-INVALID, never a red. A drafter re-implementation that reds a DIFFERENT set from the READY is a question about the row's meaning, not automatically a defect: the gate rules it. [scope] 'block' = the anchor is searched ONLY inside the email-resolution block (resolution_block.start .. end, first occurrence after the route anchor): the tenant predicate text also appears in the id path's existence query (documents.ts:1825 at the head), which a file-wide replace would also tamper.",
+ "tooling_paths_unchanged": [
+  ".githooks/pre-push",
+  "Blockchain/Dev/scripts/preflight/preflight.sh",
+  "Blockchain/Dev/package.json",
+  "Blockchain/Dev/package-lock.json",
+  "Blockchain/Dev/services/originate/package.json",
+  "Blockchain/Dev/services/originate/package-lock.json",
+  "Blockchain/Dev/services/originate/jest.config.js",
+  "Blockchain/Dev/services/originate/tsconfig.json",
+  "Blockchain/Dev/services/originate/Dockerfile",
+  "Blockchain/Dev/services/originate/src/index.ts",
+  "Blockchain/Dev/services/originate/src/db.ts",
+  "Blockchain/Dev/services/originate/src/middleware/rbac.ts",
+  "Blockchain/Dev/services/originate/src/middleware/documentWriteRoles.ts",
+  "Blockchain/Dev/services/originate/src/__tests__/helpers/sharedModuleMock.ts",
+  "Blockchain/Dev/services/auth/src/routes/users.ts",
+  "Blockchain/Dev/services/auth/src/repositories/userRepo.ts",
+  "Blockchain/Dev/packages/shared/src/crypto/encryptedField.ts",
+  "Blockchain/Dev/packages/shared/src/db/tenant-context.ts",
+  "Blockchain/Dev/packages/shared/src/index.ts",
+  ".github/workflows/security-scan.yml",
+  ".github/workflows/pr-security-gates.yml",
+  ".github/workflows/pr-platform-suites.yml",
+  ".claude/skills/secuura-test-discipline/SKILL.md",
+  "CLAUDE.md"
+ ],
+ "auth_prefix": "Blockchain/Dev/services/auth/",
+ "code_surface_prefixes": [
+  "Blockchain/Dev/services/",
+  "Blockchain/Dev/packages/",
+  "Blockchain/Dev/database/",
+  ".githooks/",
+  ".github/"
+ ],
+ "messages": {
+  "validation": "newHolderEmail is not a valid email address",
+  "not_found": "No user with that email in this tenant. Invite them first (KS-74 pending-invite UX).",
+  "key_absent_502": "Could not resolve recipient email: the recipient lookup is not configured"
+ },
+ "holder_email_schema": "z.string().trim().email().min(3).max(320)",
+ "hoisted_lines": [
+  "const tenantId = getReqTenantId(req);",
+  "const { prisma: defaultPrisma, withTenant } = await import('../db');",
+  "const db = (req as any).db || defaultPrisma;"
+ ],
+ "resolution_block": {
+  "start": "let resolvedHolderId = newHolderId;",
+  "end": "if (!resolvedHolderId) {"
+ },
+ "order_anchors": [
+  "isAllowedByRoleOrScope(req, ALLOWED_TRANSFER_CUSTODY_ROLES, 'documents:transfer-custody')",
+  "HOLDER_EMAIL_SCHEMA.safeParse(newHolderEmail)",
+  "lookupHash(normalisedHolderEmail)",
+  "await db.$queryRaw`",
+  "getDocument(id, tenantId, (req as any).db)"
+ ],
+ "expected_outside_handler_adds": [
+  "import { z } from 'zod';",
+  "import { verifyMessageSignature, hasNulByte, runWithTenantId, lookupHash } from '@secuura/shared';",
+  "const HOLDER_EMAIL_SCHEMA = z.string().trim().email().min(3).max(320);"
+ ],
+ "expected_outside_handler_dels": [
+  "import { verifyMessageSignature, hasNulByte, runWithTenantId } from '@secuura/shared';"
+ ],
+ "trailer_control": "bf277eead268",
+ "closing_rx": "\\b(close[sd]?|fix(e[sd])?|resolve[sd]?|complete[sd]?)\\b[\\s:(]*(#\\d+|KS-\\d+)",
+ "closing_rx_note": "[g79] the class includes `(`: the commit subject is `fix(KS-1402): …`, a conventional-commit prefix. Whether Linear's GitHub integration treats `fix(KS-1402)` as a closing magic word is NOT measured by the kit (Q-FIXPREFIX); the kit COUNTS it and names it, the gate rules it.",
+ "linear_ok_states": [
+  "In Progress",
+  "In Review"
+ ],
+ "linear_ready_claims": {
+  "comments": 5,
+  "newest_comment": "7740c258",
+  "updatedAt": "2026-10-09T02:07:01.353Z"
+ },
+ "ready_claims": {
+  "tamper_rows_file": 13,
+  "tamper_rows_body_says": 14,
+  "suite_before": "96 files 1093/1093",
+  "suite_after": "97 files 1096/1096",
+  "ks739": "20 definitions / 25 executed -> 17 RETIRED (21 executed) + 3 RE-POINTED (4 executed)",
+  "ks697": "16/17 -> 17/17",
+  "patch_sha256_16": "ab8e9e441864e05c"
+ },
+ "tools": {
+  "dir": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatK-2nd/tools",
+  "push_log": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatK-2nd/tools/s-k1-ks1402-b4933a457f38-push.out",
+  "declared": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatK-2nd/tools/declared_k2.txt",
+  "sha256_16": {
+   "gatelinesk2.py": "671c737b3fe918ee",
+   "pathgatek2.py": "d2564222c1cb44b6",
+   "namecheckk2.py": "dddc9f2b78ecde4e",
+   "pushk2.sh": "c4389f36fcd7f695",
+   "gatelinesg1.py": "b5e7923f605af9da"
+  }
+ },
+ "actions": {
+  "comparator_note": "Classify by workflow PATH (gate76 lesson): security-scan.yml triggers on pull_request + workflow_dispatch only (re-read it at develop), so it has NO develop push run; its comparator is the newest completed failing pull_request run of the SAME path on another head. pr-security-gates.yml and pr-platform-suites.yml: develop's own push run is the first comparator.",
+  "positive_control": "##[group]",
+  "fabricated_control": "gate79-fabricated-needle-QZX9",
+  "needles_change": [
+   "ks1402",
+   "transfer-custody",
+   "lookupHash",
+   "RECIPIENT_NOT_FOUND",
+   "HOLDER_EMAIL_SCHEMA",
+   "email_lookup_hash",
+   "ks739",
+   "ks697"
+  ],
+  "expected_pr_workflows": [
+   ".github/workflows/security-scan.yml",
+   ".github/workflows/pr-security-gates.yml",
+   ".github/workflows/pr-platform-suites.yml"
+  ]
+ },
+ "script_sha256": {
+  "lib_gate79.py": "da80359134a5da33f6b5b6b976fadae42a96e1e2164b22314cb9ef2d98a36d1e",
+  "c1_pin_gate79.py": "b3f3e8962cac822c22ecc889c6b381d4718e05577fbf024eda7516da1e87f203",
+  "c2_code_gate79.py": "c5db6df0f213257de2da1efccda93eec2650001293b79d34b7ca14bda026b2d9",
+  "c3_cells_gate79.py": "b478103a142d1a8d45236ac97c89ec5ebcb7f31dd958ec3e7fdf921f8a5ecfe7",
+  "c4_tools_gate79.py": "4c78caa236c12b2403c33f7c31a3b808b3dfd48ceff30202af803e37dca151bb",
+  "gh_gate79.py": "1346aaa0e4bd7143045c269ccd4947d8cf7fc8d15841ba125df5d4448d8317fc",
+  "probe_block_gate79.ts.txt": "8d7f2ca5fe2958c55c7c9a5a75f05d338ab906dd1f1ea88987dc2c1343b79226",
+  "prompt_gate79.txt": "95b292c6b682630caefad7efa887baf49f7f7f4bd6b99d463189457a6fdf1df6",
+  "launch_qa_secuura_gate79.sh": "473320c60e6862d3495c5a65623fceb36554fe4a2450b9e3ed78528454dfad0d",
+  "repin_and_launch_gate79.sh": "10ceae4e18fb53d161f70cc54b41b8a3afbddd26e6d1190ef7f161debd9c25fb"
+ }
+}

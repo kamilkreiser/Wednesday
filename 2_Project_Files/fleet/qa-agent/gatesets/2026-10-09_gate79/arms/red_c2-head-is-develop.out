@@ -1,0 +1,93 @@
+documents.ts base 81d2e5f4c415 sha256/16 bce2be6366e815be | head 349b35c9163a sha256/16 bce2be6366e815be
+FAIL D0 OUTSIDE the handler (code-only): +0 [] | -0 [] (want exactly kit adds 3 / dels 1)
+PASS D1 PURE-MOVE: hoisted statements once each base [1, 1, 1] head [1, 1, 1] | handler minus block minus hoist: 161 vs 161 lines, first difference NONE
+FAIL D2 ORDER at the head (char offsets) [81078, -1, -1, 91796, -1] for ['isAllowedByRoleOrScope(req, ', 'HOLDER_EMAIL_SCHEMA.safePars', 'lookupHash(normalisedHolderE', 'await db.$queryRaw`', 'getDocument(id, tenantId, (r'] | act gate returns 403 next: True
+FAIL D3a SQL-SAFETY in the block: unsafe/raw/join {'queryRawUnsafe': 0, 'executeRawUnsafe': 0, 'Prisma.raw': 0, 'Prisma.join': 0} | interpolations None (want [holderEmailHash, tenantId]) | no tagged $queryRaw in the block
+PASS D3b originate src (51 / 51 .ts, tests excluded) code-only [raw] base -> head: $queryRawUnsafe( 9[9] -> 9[9]; $executeRawUnsafe( 14[14] -> 14[14]; CONTROL tagged $queryRaw` 138[141] -> 138[141]
+FAIL D3c tenant predicate text in the handler (code-only): 1 (want 2: the email read AND the id path's existence read — textual parity, attack b)
+FAIL D4 RETIRED-SUBJECT fetch users/lookup                     IN THE HANDLER code-only base 1 -> head 1 (raw 1 -> 1; CONTROL: base > 0) | whole originate src code-only 1 -> 1
+INFO D4-CLASS 'fetch users/lookup' survives ELSEWHERE in originate src at the head (1): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+FAIL D4 RETIRED-SUBJECT lookupRes                              IN THE HANDLER code-only base 13 -> head 13 (raw 13 -> 13; CONTROL: base > 0) | whole originate src code-only 13 -> 13
+INFO D4-CLASS 'lookupRes' survives ELSEWHERE in originate src at the head (13): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+FAIL D4 RETIRED-SUBJECT RECIPIENT_LOOKUP_FAILED                IN THE HANDLER code-only base 1 -> head 1 (raw 1 -> 1; CONTROL: base > 0) | whole originate src code-only 1 -> 1
+INFO D4-CLASS 'RECIPIENT_LOOKUP_FAILED' survives ELSEWHERE in originate src at the head (1): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+FAIL D4 RETIRED-SUBJECT caller Authorization forward           IN THE HANDLER code-only base 1 -> head 1 (raw 1 -> 1; CONTROL: base > 0) | whole originate src code-only 6 -> 6
+INFO D4-CLASS 'caller Authorization forward' survives ELSEWHERE in originate src at the head (6): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+FAIL D4 RETIRED-SUBJECT 401 re-authenticate hint               IN THE HANDLER code-only base 1 -> head 1 (raw 1 -> 1; CONTROL: base > 0) | whole originate src code-only 1 -> 1
+INFO D4-CLASS '401 re-authenticate hint' survives ELSEWHERE in originate src at the head (1): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+FAIL D4 RETIRED-SUBJECT 403 users:read hint                    IN THE HANDLER code-only base 1 -> head 1 (raw 1 -> 1; CONTROL: base > 0) | whole originate src code-only 1 -> 1
+INFO D4-CLASS '403 users:read hint' survives ELSEWHERE in originate src at the head (1): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+FAIL D4 RETIRED-SUBJECT Recipient lookup service unavailable   IN THE HANDLER code-only base 1 -> head 1 (raw 1 -> 1; CONTROL: base > 0) | whole originate src code-only 2 -> 2
+INFO D4-CLASS 'Recipient lookup service unavailable' survives ELSEWHERE in originate src at the head (2): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+FAIL D4 RETIRED-SUBJECT lookup 502 via users/lookup            IN THE HANDLER code-only base 1 -> head 1 (raw 1 -> 1; CONTROL: base > 0) | whole originate src code-only 1 -> 1
+INFO D4-CLASS 'lookup 502 via users/lookup' survives ELSEWHERE in originate src at the head (1): the KS-1402 CLASS (a caller credential forwarded to auth for user resolution) — hunt it, report it; not this PR's diff
+INFO D4-CLASS certifications.ts at the HEAD: Blockchain/Dev/services/originate/src/routes/certifications.ts:229       // so a POST /api/users/stub through it is rejected with
+INFO D4-CLASS certifications.ts at the HEAD: Blockchain/Dev/services/originate/src/routes/certifications.ts:242           const stubRes = await fetch(`${authBase}/api/users/stub`, {
+INFO D4-CLASS certifications.ts at the HEAD: Blockchain/Dev/services/originate/src/routes/certifications.ts:246               ...(authHeader ? { Authorization: authHeader } : {}),
+FAIL D5a SCHEMA auth base z.string().trim().email().min(3).max(320) | auth head z.string().trim().email().min(3).max(320) | originate None | kit z.string().trim().email().min(3).max(320)
+FAIL D5b NORMALISATION auth getUserByEmail toLowerCase().trim() base True head True | originate String(raw).toLowerCase().trim() False
+INFO D5c auth /lookup tenant compare at BASE (NULL-tenant tolerance AND skip-when-caller-tenantless): Blockchain/Dev/services/auth/src/routes/users.ts:306     if (!user || (callerTenantId && user.tenantId && user.tenantId !== callerTenantId)) {
+INFO D5c auth /lookup tenant compare at BASE (NULL-tenant tolerance AND skip-when-caller-tenantless): Blockchain/Dev/services/auth/src/routes/users.ts:311         crossTenant: !!(user && callerTenantId && user.tenantId !== callerTenantId),
+PASS D6 BYTES validation message 'newHolderEmail is not a valid email address': base 1 occurrence(s) -> head 1
+PASS D6 BYTES not_found message 'No user with that email in this tenant. Invite the': base 1 occurrence(s) -> head 1
+INFO D6 key-absent 502 message at the head: 0 occurrence(s) of 'Could not resolve recipient email: the recipient lookup is not configured'
+INFO D7 tenantless-caller reading at the HEAD: Blockchain/Dev/services/originate/src/routes/documents.ts:235 const DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+INFO D7 tenantless-caller reading at the HEAD: Blockchain/Dev/services/originate/src/routes/documents.ts:244 function getReqTenantId(req: Request): string {
+INFO D7 tenantless-caller reading at the HEAD: Blockchain/Dev/services/originate/src/routes/documents.ts:245   const tid = (req as any).tenantId as string | undefined;
+INFO D7 tenantless-caller reading at the HEAD: Blockchain/Dev/services/originate/src/routes/documents.ts:246   return tid || DEFAULT_TENANT_ID;
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:33 import { extractTenantContext, tenantGucContext, rejectNulBytes } from '@secuura/shared';
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:218 if (process.env.MULTI_TENANCY_ENABLED === 'true') {
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:222       extractTenantContext(mgr)(req, res, () => {
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:245 // tenantGucContext() seeds AsyncLocalStorage from req.tenantId so the db.ts
+INFO D7 originate index.ts tenant mount at the HEAD: Blockchain/Dev/services/originate/src/index.ts:257 app.use(tenantGucContext());
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/routes/users.ts:300     const user = await userRepo.getUserByEmail(email);
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/repositories/userRepo.ts:575   const normalised = email.toLowerCase().trim();
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/repositories/userRepo.ts:591       'SELECT * FROM auth_find_user_by_email_legacy($1)',
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/repositories/userRepo.ts:641   const normalised = email.toLowerCase().trim();
+INFO D8 Q-LEGACY at BASE: Blockchain/Dev/services/auth/src/repositories/userRepo.ts:652       'SELECT EXISTS(SELECT 1 FROM auth_find_user_by_email_legacy($1)) AS exists',
+INFO D8 legacy function definition: 81d2e5f4c4151f5291a7a9c186d93a02dc5d38d6:Blockchain/Dev/migrations/039_rls_fail_closed.sql:191:CREATE OR REPLACE FUNCTION auth_find_user_by_email_legacy(p_email_lower TEXT)
+INFO D8 POPULATION (plaintext-email users with NO email_lookup_hash that auth resolved at base): UNMEASURED — no database in this kit
+INFO D9 RLS readings in migrations at the HEAD: 42 line(s) (CONTROL: 0 means the grep is blind, not that RLS is absent)
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:16:--   3. FORCE row level security on each table so the table owner role
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:39:--                    ALTER TABLE <t> NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:79:    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', t);
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/009_rls_tenant_isolation.sql:128:      EXECUTE format('ALTER TABLE %I NO FORCE ROW LEVEL SECURITY', t);
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/011_documents_tenant_id.sql:45:--   6. Enable + FORCE row level security on documents with the same
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/011_documents_tenant_id.sql:59:--   ALTER TABLE documents NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/011_documents_tenant_id.sql:157:  EXECUTE 'ALTER TABLE documents FORCE ROW LEVEL SECURITY';
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/011_documents_tenant_id.sql:186:    EXECUTE 'ALTER TABLE documents NO FORCE ROW LEVEL SECURITY';
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/012_peer_tables_tenant_isolation.sql:41:--     ALTER TABLE <t> NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/012_peer_tables_tenant_isolation.sql:144:    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', tbl);
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/012_peer_tables_tenant_isolation.sql:184:      EXECUTE format('ALTER TABLE %I NO FORCE ROW LEVEL SECURITY', tbl);
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/013_charge_events_tenant_isolation.sql:38:--     ALTER TABLE <t> NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/013_charge_events_tenant_isolation.sql:112:    EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', tbl);
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/013_charge_events_tenant_isolation.sql:147:      EXECUTE format('ALTER TABLE %I NO FORCE ROW LEVEL SECURITY', tbl);
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/014_svc_dids_tenant_isolation.sql:32:--   ALTER TABLE svc_dids NO FORCE ROW LEVEL SECURITY;
+INFO D9 RLS: 349b35c9163ac59209366adb7a4a89d8779bd6d6:Blockchain/Dev/migrations/014_svc_dids_tenant_isolation.sql:119:  ALTER TABLE svc_dids FORCE ROW LEVEL SECURITY;
+INFO D9 files naming KS-160 at the HEAD: 5 (read them: is tenant RLS on `users` INERT, or FORCE fail-closed under the request GUC?)
+INFO D9 the claims to reconcile (documents.ts at the HEAD): Blockchain/Dev/services/originate/src/routes/documents.ts:1790       // GUC, and `users` is FORCE RLS fail-closed — so a holder in another tenant
+INFO D9 the claims to reconcile (documents.ts at the HEAD): Blockchain/Dev/services/originate/src/routes/documents.ts:1796       // has been inert before now — KS-160/KS-458); `tenant_id IS NULL` is tolerated
+INFO D10 ks739 it()/it.each titles: base 20, head 20, kept verbatim 20, base-only 0, head-only 0 (the READY: 20 definitions -> 17 RETIRED + 3 RE-POINTED + 13 guard rows)
+INFO D10 head title: 401 surfaces as 401, never 502, and the message says to re-authenticate
+INFO D10 head title: 403 surfaces as 403, never 502, and the message NAMES the missing scope
+INFO D10 head title: the upstream message is carried through, not replaced
+INFO D10 head title: a 4xx with no parseable body still answers that 4xx, with a typed fallback code
+INFO D10 head title: %i passes through too — the fix is the 4xx CLASS, not four enumerated codes
+INFO D10 head title: KS-739 F1: a 403 whose body is not JSON (json() rejects) still answers 403 RECIPIENT_LOOKUP_FAILED, never 502
+INFO D10 head title: RED KS-739 N66-1: a 401 and a 429 whose body is not JSON (json() rejects) still answer that 4xx RECIPIENT_LOOKUP_FAILED, never 502
+INFO D10 head title: RED KS-739 N75-1: a 404 whose body is not JSON (json() rejects) is still the typed RECIPIENT_NOT_FOUND, never 502
+INFO D10 head title: RED KS-739 N75-1: a 500 whose body is not JSON (json() rejects) is still 502 BAD_GATEWAY from the upstream branch, not the catch
+INFO D10 head title: RED KS-739 N82-1: a 400 whose body is not JSON (json() rejects) is still 400 VALIDATION_ERROR, never 502
+INFO D10 head title: RED KS-739 N82-1: a 503 whose body is not JSON (json() rejects) is still 502 BAD_GATEWAY from the upstream branch, not the catch
+INFO D10 head title: RED KS-739 N89-1: a 422 whose body is not JSON (json() rejects) is still 400 VALIDATION_ERROR, never 502
+INFO D10 head title: RED KS-739 N89-1: a 502 whose body is not JSON (json() rejects) is still 502 BAD_GATEWAY from the upstream branch, not the catch
+INFO D10 head title: RED KS-739 N89-1: a 504 whose body is not JSON (json() rejects) is still 502 BAD_GATEWAY from the upstream branch, not the catch
+INFO D10 head title: no anchor is minted and no custody row is written on a 403
+INFO D10 head title: 404 is still the typed RECIPIENT_NOT_FOUND with its invite path (KS-74)
+INFO D10 head title: %i is still flattened to 400 VALIDATION_ERROR about the email (KS-536)
+INFO D10 head title: %i is a GENUINE upstream failure and must still be 502 BAD_GATEWAY
+INFO D10 head title: an UNREACHABLE auth service is still 502, from the catch, with its own message
+INFO D10 head title: 200 from the lookup still completes the transfer
+INFO D11 PATCH-SHA claimed ab8e9e441864e05c | {'git diff base head': 'fcd08eaa2090ea2f', 'git diff base head -- (non-doc)': '31457f1695ff9447', 'git show head (format=)': 'fcd08eaa2090ea2f', 'git diff --binary base head': 'fcd08eaa2090ea2f'} | UNREPRODUCED by these 4 instruments (instrument unnamed in the commit)
+CHECKED 18
+14 FAIL (D0 D2 D3a D3c D4 D4 D4 D4 D4 D4 D4 D4 D5a D5b)

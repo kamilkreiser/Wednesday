@@ -1,0 +1,19 @@
+2026-10-09T05:40:53Z TAMPER over Blockchain/Dev/services/originate/src/routes/documents.ts (head b4933a457f38, base 81d2e5f4c415): 14 row(s)
+ROW HEAD  the head, unchanged                                     landed sha256/16 637b23f246e0cd07 | tests 11 passed 11 | reds [] | OK all green | restore OK
+ROW CTRL  CONTROL: a no-op comment planted in the block           landed sha256/16 463ceed605366e5f | tests 11 passed 11 | reds [] | OK all green | restore OK
+ROW T1    drop the tenant conjunct (hash held)                    landed sha256/16 8873881baf240799 | tests 11 passed 9 | reds ['C2', 'C2b'] | MATCH | restore OK
+ROW T2    bind DEFAULT_TENANT_ID                                  landed sha256/16 4d51b5830ad5604b | tests 11 passed 6 | reds ['C1', 'C2', 'C2b', 'C4', 'C8'] | MATCH | restore OK
+ROW T3    skip the act gate                                       landed sha256/16 be4fe03b14119c8a | tests 11 passed 10 | reds ['C3'] | MATCH | restore OK
+ROW T4    restore the caller-header fetch (= base's documents.ts, landed sha256/16 bce2be6366e815be | tests 11 passed 8 | reds ['C1', 'C2', 'C9'] | MATCH | restore OK
+ROW T5    hash the raw value                                      landed sha256/16 ad7a4cbbe704091b | tests 0 passed 0 | reds ['C1', 'C10', 'C2', 'C2b', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9'] | TAMPER-INVALID (suite failed to LOAD:   ● Test suite failed to run
+
+    [96msrc/routes/documents.ts[0m:[93m1730[0m:[93m15[0m - [91merror[0m[90m TS613) | restore OK
+ROW T5a   drop lowercase only                                     landed sha256/16 dcc580c57f18ad50 | tests 11 passed 10 | reds ['C8'] | MATCH | restore OK
+ROW T5b   drop trim only                                          landed sha256/16 7a3b34f317287f99 | tests 11 passed 10 | reds ['C8'] | MATCH | restore OK
+ROW T6    cross-tenant hit answers differently from a miss        landed sha256/16 bae8eaf0a595cfa2 | tests 11 passed 9 | reds ['C2', 'C2b'] | MATCH | restore OK
+ROW T7    drop the hash conjunct (tenant held)                    landed sha256/16 7c5b24eaa4151145 | tests 11 passed 5 | reds ['C10', 'C2', 'C2b', 'C5', 'C7', 'C8'] | MATCH | restore OK
+ROW T8    drop the NULL-tenant tolerance                          landed sha256/16 d570aed3626764dd | tests 11 passed 10 | reds ['C7'] | MATCH | restore OK
+ROW T9    no catch around lookupHash (the throw reaches the outer landed sha256/16 99e0ef79099c09a5 | tests 11 passed 10 | reds ['C9'] | MATCH | restore OK
+ROW T10   drop the format check                                   landed sha256/16 f026d821fac9fac4 | tests 11 passed 10 | reds ['C6'] | MATCH | restore OK
+SUMMARY 11/12 tamper rows MATCH the READY; HEAD OK all green; CTRL OK all green
+porcelain after (node_modules / dist excluded): ''

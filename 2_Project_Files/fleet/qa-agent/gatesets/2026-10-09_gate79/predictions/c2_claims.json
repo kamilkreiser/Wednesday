@@ -1,0 +1,188 @@
+{
+ "D0": {
+  "added": [
+   "const HOLDER_EMAIL_SCHEMA = z.string().trim().email().min(3).max(320);",
+   "import { verifyMessageSignature, hasNulByte, runWithTenantId, lookupHash } from '@secuura/shared';",
+   "import { z } from 'zod';"
+  ],
+  "removed": [
+   "import { verifyMessageSignature, hasNulByte, runWithTenantId } from '@secuura/shared';"
+  ]
+ },
+ "D1": {
+  "hoisted_counts": {
+   "base": [
+    1,
+    1,
+    1
+   ],
+   "head": [
+    1,
+    1,
+    1
+   ]
+  },
+  "first_diff": null,
+  "lens": [
+   161,
+   161
+  ]
+ },
+ "D2": {
+  "positions": [
+   82189,
+   88493,
+   89188,
+   91314,
+   92436
+  ],
+  "gate403": true
+ },
+ "D3": {
+  "bad": {
+   "queryRawUnsafe": 0,
+   "executeRawUnsafe": 0,
+   "Prisma.raw": 0,
+   "Prisma.join": 0
+  },
+  "interp": [
+   "holderEmailHash",
+   "tenantId"
+  ],
+  "census": {
+   "base": {
+    "$queryRawUnsafe(": [
+     9,
+     9
+    ],
+    "$executeRawUnsafe(": [
+     14,
+     14
+    ],
+    "CONTROL tagged $queryRaw`": [
+     138,
+     141
+    ]
+   },
+   "head": {
+    "$queryRawUnsafe(": [
+     9,
+     9
+    ],
+    "$executeRawUnsafe(": [
+     14,
+     14
+    ],
+    "CONTROL tagged $queryRaw`": [
+     139,
+     142
+    ]
+   }
+  }
+ },
+ "D4": {
+  "base_src": {
+   "fetch users/lookup": [
+    1,
+    1
+   ],
+   "lookupRes": [
+    13,
+    13
+   ],
+   "RECIPIENT_LOOKUP_FAILED": [
+    1,
+    1
+   ],
+   "caller Authorization forward": [
+    6,
+    6
+   ],
+   "401 re-authenticate hint": [
+    1,
+    1
+   ],
+   "403 users:read hint": [
+    1,
+    1
+   ],
+   "Recipient lookup service unavailable": [
+    2,
+    2
+   ],
+   "lookup 502 via users/lookup": [
+    1,
+    1
+   ]
+  },
+  "head_src": {
+   "fetch users/lookup": [
+    0,
+    0
+   ],
+   "lookupRes": [
+    0,
+    0
+   ],
+   "RECIPIENT_LOOKUP_FAILED": [
+    0,
+    0
+   ],
+   "caller Authorization forward": [
+    5,
+    5
+   ],
+   "401 re-authenticate hint": [
+    0,
+    0
+   ],
+   "403 users:read hint": [
+    0,
+    0
+   ],
+   "Recipient lookup service unavailable": [
+    1,
+    1
+   ],
+   "lookup 502 via users/lookup": [
+    0,
+    0
+   ]
+  }
+ },
+ "D5": {
+  "auth_base": "z.string().trim().email().min(3).max(320)",
+  "auth_head": "z.string().trim().email().min(3).max(320)",
+  "originate": "z.string().trim().email().min(3).max(320)"
+ },
+ "D10": {
+  "base": [
+   "401 surfaces as 401, never 502, and the message says to re-authenticate",
+   "403 surfaces as 403, never 502, and the message NAMES the missing scope",
+   "the upstream message is carried through, not replaced",
+   "a 4xx with no parseable body still answers that 4xx, with a typed fallback code",
+   "%i passes through too \u2014 the fix is the 4xx CLASS, not four enumerated codes",
+   "KS-739 F1: a 403 whose body is not JSON (json() rejects) still answers 403 RECIPIENT_LOOKUP_FAILED, never 502",
+   "RED KS-739 N66-1: a 401 and a 429 whose body is not JSON (json() rejects) still answer that 4xx RECIPIENT_LOOKUP_FAILED, never 502",
+   "RED KS-739 N75-1: a 404 whose body is not JSON (json() rejects) is still the typed RECIPIENT_NOT_FOUND, never 502",
+   "RED KS-739 N75-1: a 500 whose body is not JSON (json() rejects) is still 502 BAD_GATEWAY from the upstream branch, not the catch",
+   "RED KS-739 N82-1: a 400 whose body is not JSON (json() rejects) is still 400 VALIDATION_ERROR, never 502",
+   "RED KS-739 N82-1: a 503 whose body is not JSON (json() rejects) is still 502 BAD_GATEWAY from the upstream branch, not the catch",
+   "RED KS-739 N89-1: a 422 whose body is not JSON (json() rejects) is still 400 VALIDATION_ERROR, never 502",
+   "RED KS-739 N89-1: a 502 whose body is not JSON (json() rejects) is still 502 BAD_GATEWAY from the upstream branch, not the catch",
+   "RED KS-739 N89-1: a 504 whose body is not JSON (json() rejects) is still 502 BAD_GATEWAY from the upstream branch, not the catch",
+   "no anchor is minted and no custody row is written on a 403",
+   "404 is still the typed RECIPIENT_NOT_FOUND with its invite path (KS-74)",
+   "%i is still flattened to 400 VALIDATION_ERROR about the email (KS-536)",
+   "%i is a GENUINE upstream failure and must still be 502 BAD_GATEWAY",
+   "an UNREACHABLE auth service is still 502, from the catch, with its own message",
+   "200 from the lookup still completes the transfer"
+  ],
+  "head": [
+   "auth would answer %s: the route makes 0 lookup calls, answers its own 404, and writes nothing",
+   "R-KS74 (was :327): an unknown email is the typed RECIPIENT_NOT_FOUND with its invite path, from originate, 0 lookup calls",
+   "R-KS536 (was :336): the malformed email %p is 400 VALIDATION_ERROR about the email, 0 lookup calls, nothing written",
+   "R-200 (was :375): a recipient the tenant can see is resolved by originate and transferred (201), 0 lookup calls"
+  ]
+ }
+}

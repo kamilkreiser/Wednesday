@@ -1,0 +1,93 @@
+
+// ============================================================================================
+// gate79 PROBE BLOCK — appended by c3_cells_gate79.py to a COPY of the head's ks1402 file, in the
+// GATE's OWN worktree only, named gate79-probe.test.ts, moved out (quarantined) after the run.
+// Every probe RECORDS facts to $G79_PROBE_OUT (one JSON object per line) and asserts only that it
+// RAN. The gate rules the facts; a probe never decides a verdict by passing.
+// ============================================================================================
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const g79fs = require('fs');
+function g79rec(id: string, facts: Record<string, unknown>) {
+  g79fs.appendFileSync(String(process.env.G79_PROBE_OUT), JSON.stringify({ id, ...facts }) + '\n');
+}
+
+describe('gate79 probes (facts only)', () => {
+  it('P-a1: a caller whose request carries NO tenant — what the email read binds, and whom it resolves', async () => {
+    (CALLERS as any)['conn-none'] = { userId: 'c0000000-0000-4000-8000-0000000000ff', role: 'CONNECTOR', scopes: S_CONNECTOR_SCOPES, tenantId: undefined };
+    (CALLERS as any)['issuer-none'] = { userId: 'c0000000-0000-4000-8000-0000000000fe', role: 'ISSUER_ADMIN', scopes: [], tenantId: undefined };
+    const out: Record<string, unknown> = {};
+    for (const who of ['conn-none', 'issuer-none']) {
+      for (const email of ['only.in.b@example.com', 'null.tenant@example.com', 'holder.a@example.com']) {
+        primeDb();
+        const r = await transfer(who as any, { newHolderEmail: email });
+        const bound = mockUserQueries.filter((q) => 'hash' in q.bound).map((q) => q.bound.tenant);
+        out[`${who} ${email}`] = { status: r.status, code: r.payload?.error?.code ?? null, boundTenant: bound, inserted: insertedHolder() };
+      }
+    }
+    g79rec('P-a1', { TENANT_B_is_DEFAULT: TENANT_B, results: out });
+    expect(true).toBe(true);
+  });
+
+  it('P-a2: what the request-db adapter BINDS for an undefined tenant (createPoolProxy, the multi-tenancy req.db)', async () => {
+    const facts: Record<string, unknown> = {};
+    try {
+      const actualDb = jest.requireActual('../db') as any;
+      const seen: Array<{ text: string; params: unknown[] }> = [];
+      const fakePool = { query: async (text: string, params: unknown[]) => { seen.push({ text, params }); return { rows: [], rowCount: 0 }; } };
+      const px = actualDb.createPoolProxy({ ...fakePool, release: () => undefined });
+      const h = 'h'.repeat(8); const tid: string | undefined = undefined;
+      await px.$queryRaw`SELECT id FROM users WHERE email_lookup_hash = ${h} AND (tenant_id IS NULL OR tenant_id = ${tid}::uuid) LIMIT 1`;
+      facts.poolProxy = seen.map((s) => ({ text: s.text.replace(/\s+/g, ' '), params: s.params.map((p) => (p === undefined ? '<undefined>' : p)) }));
+    } catch (e: any) { facts.poolProxyError = String(e?.message ?? e); }
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const pg = require('pg');
+      const pv = pg?.utils?.prepareValue ?? pg?.default?.utils?.prepareValue;
+      facts.pgPrepareUndefined = pv ? JSON.stringify(pv(undefined)) : '<pg.utils.prepareValue not found>';
+    } catch (e: any) { facts.pgError = String(e?.message ?? e); }
+    g79rec('P-a2', facts);
+    expect(true).toBe(true);
+  });
+
+  it('P-c: a cross-tenant hit and a true miss — status, body BYTES and response headers', async () => {
+    const strip = (h: Headers) => { const o: Record<string, string> = {}; h.forEach((v, k) => { if (k !== 'date') o[k] = v; }); return o; };
+    const call = async (email: string) => {
+      primeDb();
+      const res = await realFetch(`${baseUrl}/api/documents/${DOC_ID}/transfer-custody`, {
+        method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer k1:conn-a' }, body: JSON.stringify({ newHolderEmail: email }),
+      });
+      return { status: res.status, body: await res.text(), headers: strip(res.headers) };
+    };
+    const cross = await call('only.in.b@example.com'); const miss = await call('nobody.anywhere@example.com');
+    g79rec('P-c', { cross, miss, bodyEqual: cross.body === miss.body, headersEqual: JSON.stringify(cross.headers) === JSON.stringify(miss.headers) });
+    expect(true).toBe(true);
+  });
+
+  it('P-d: case / whitespace variants — originate normalisation vs auth flow (zod trim, then toLowerCase().trim()), and the route', async () => {
+    const variants = [' Foo@X.com ', '\tFOO@x.COM\n', ' foo@x.com', '﻿foo@x.com', 'foo@x.com​', 'FOO@X.COM', 'foo@x.com ', 'Foo@X.com\r\n'];
+    const rows: unknown[] = [];
+    for (const v of variants) {
+      const parsed = z.string().trim().email().min(3).max(320).safeParse(v);
+      const authNorm = parsed.success ? parsed.data.toLowerCase().trim() : null;
+      const origNorm = String(v).toLowerCase().trim();
+      primeDb();
+      const r = await transfer('issuer-a', { newHolderEmail: v });
+      rows.push({ v: JSON.stringify(v), schemaAccepts: parsed.success, authNorm, origNorm, sameNorm: authNorm === origNorm,
+        sameHash: authNorm !== null && sharedActual.lookupHash(authNorm) === sharedActual.lookupHash(origNorm),
+        route: r.status, resolvedFoo: insertedHolder() === FOO_ID });
+    }
+    g79rec('P-d', { rows });
+    expect(true).toBe(true);
+  });
+
+  it('P-e: key ABSENT — the email path, the id path and a malformed email on this route', async () => {
+    mockKey.unregistered = true;
+    const facts: Record<string, unknown> = {};
+    primeDb(); let r = await transfer('issuer-a', { newHolderEmail: 'holder.a@example.com' }); facts.email = { status: r.status, code: r.payload?.error?.code };
+    primeDb(); r = await transfer('issuer-a', { newHolderId: HOLDER_A_ID }); facts.idPath = { status: r.status, code: r.payload?.error?.code };
+    primeDb(); r = await transfer('issuer-a', { newHolderEmail: 'not-an-email' }); facts.malformed = { status: r.status, code: r.payload?.error?.code };
+    mockKey.unregistered = false;
+    g79rec('P-e', facts);
+    expect(true).toBe(true);
+  });
+});

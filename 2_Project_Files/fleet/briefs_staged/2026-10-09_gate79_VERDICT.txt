@@ -1,0 +1,161 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T06:25:13.000Z
+Subject: [QA -> Wednesday] GATE79 (T1): #1437 KS-1402 originate resolves holder email
+---
+MODEL: claude-opus-5-5 (Opus 5.5) — as the session reported from its first turn (2026-10-09T06:03Z); no /model change was observed during the session.
+
+VERDICT: GO for #1437 at b4933a457f38fe12551839545431bba000e928fc — assumes develop 349b35c9163ac59209366adb7a4a89d8779bd6d6 (TIER 1).
+GO string for Wednesday to sign: GO (Seat K 3rd): merge 1437 on gate79
+
+MERGE-IN CONDITION
+The merge seat does three things before landing:
+1. The keep-both merge-in of both Projects Documents/*.html docs, with #1437's blocks (flow 44., cheat-sheet KS-1402) kept verbatim beside gate77's rows, and the flow numbering re-checked.
+2. Regenerate secuura-api.yaml after #1429 (never hand-merge it).
+3. On the merge result, re-run ks1402 / ks739 / ks697 and check:openapi, and re-read the email-read WHERE bytes unchanged: `email_lookup_hash = ${holderEmailHash} AND (tenant_id IS NULL OR tenant_id = ${tenantId}::uuid)`.
+
+CI was NOT RUN at the head (the PR is dirty). CI is owed on the merge-in push, and the merge seat lands only after it classifies those runs by path. If develop has moved past 349b35c9163a by then (gate77's rows), re-run the P12 overlap check on that develop.
+
+DECLARED SQUASH
+- Subject (TRUE of the diff, no (#n), 66 <= 92): `KS-1402: originate resolves a transfer-custody holder email itself`.
+- The merge seat must ALSO declare the squash body: `Refs KS-1402`, no `fix(KS-1402)` line (GitHub's default squash body would carry the commit subject), and no `Generated with` line.
+
+END_TREE 64d5bf0c31a371a968ec13474f3cdaf6b42541e9 (1 parent = base 81d2e5f4c415).
+
+PINS
+ls-remote at start 06:04:19Z, mid 06:15:00Z and end 06:20:28Z: develop 349b35c9163a, pull/1437/head == branch == b4933a457f38 at every reading. Unmoved.
+
+KIT
+- RULINGS_wednesday.md was PRESENT; every ruling is at the kit's defaults.
+- All 10 kit scripts re-hashed EQUAL to kit.json.
+- Self-tests: c1 21/21, c2 17/17, c3 8/8, c4 5/5, gh 14/14.
+
+CHECK ROWS
+C1: c1_pin rc 0, 13/13 PASS. My own git reads agree.
+- 8 paths, +852/-289; 1 parent = base; trailers 0 content bytes (control bf277eead268: 53).
+- 0 Co-Authored-By; subject 71 chars, no (#; only KS-1402 hyphenated; one create mode.
+- 24 tooling / code-surface paths identical at base / head / develop; 0 auth paths; 0 locks.
+- base..develop: 6 paths, of which 2 are the PR's docs and 4 are trivy job-04 paths outside the PR (no tooling-24 / code-surface path).
+- FIX-PREFIX: whether `fix(KS-1402)` closes in Linear is UNMEASURED (N-1437-4).
+
+1 CODE: c2 claims rc 0, 18/18.
+- D0: outside the handler +3 / -1, exactly the expected lines.
+- Pure move: 161 = 161 lines, no difference. Order: act gate < format < lookupHash < $queryRaw < getDocument.
+- The block: 0 unsafe calls, interpolations exactly [holderEmailHash, tenantId].
+- Originate-wide, base -> head: $queryRawUnsafe 9 -> 9, $executeRawUnsafe 14 -> 14, beside the tagged control 138 -> 139.
+- Retired subjects 8/8 go base > 0 -> head 0; schema and normalisation parity with auth; messages byte-equal.
+- Both binders read:
+  - createPoolProxy (db.ts:46-56): $n placeholders plus params.
+  - The KS-458 Prisma Proxy (db.ts:176-206): tagged $queryRaw.
+  - Both are BOUND.
+- zod is 3.25.76 in the originate, auth and root locks.
+- The outer catch (500) holds.
+
+2 CELLS: four plants, each LANDED and RESTORED by sha.
+
+| route / tests | ks1402 | ks739 | ks697 |
+|---|---|---|---|
+| base / head | reds C1 C2 C9 | 0/17 | 17/17 |
+| head / head | 11/11 | 17/17 | 17/17 |
+| head / base | absent | 1/25 | 16/17 |
+| base / base (control) | absent | 25/25 | 17/17 |
+
+- The head / base ks697 red reads `Expected 404 Received 502`. Its cell text is byte-identical (333 B, my boundary).
+- WHOLE SUITE: base 96 files 1093/1093 rc 0; head 97 files 1096/1096 rc 0; 0 load-failed; 0 files fail at head that pass at base.
+- check:openapi at the head: rc 0. Control (base spec over the head yaml): rc 1.
+
+3 TAMPER: 12/12 MATCH the READY; HEAD all green; CTRL (no-op) all green; restored by sha each time.
+- vs K 1st's tamperk1.py: the same mutation for T1 T2 T3 T5a T5b T8 T10.
+- A different mutation of the same class, with the same reds, for T4, T5, T6 (K 1st: 403; the kit: 404 with another code), T7 and T9.
+- MY OWN TAMPERS:
+  - O1, the caller id as the tenant: caught (C1 C2 C4 C8).
+  - O2, a body-supplied tenant: NO cell catches it.
+  - O3, `IS NOT NULL OR`: caught only by C7 (the evaluator reads it as strict; in Postgres it leaks across tenants).
+  - O4, dropped parentheses: NO cell catches it. In Postgres this resolves an arbitrary same-tenant user for ANY unknown email.
+  - O5, the header-wins form: behaviour-equivalent, not a defect.
+  - O6, the JS-compare control: reds C2, correctly (C2 pins that the tenant is BOUND).
+  - The product's SQL is correct, so O2 and O4 are a harness gap, not a product defect (N-1437-3).
+
+4 ATTACKS (the probe: rc 0, 5 facts; my own probe: 16 variants)
+- (a) TENANTLESS-CALLER: HOLDS (Minor, N-1437-11). getReqTenantId never binds NULL; it binds DEFAULT a0000000-…0001. index.ts:248-256 also sets req.tenantId to header or DEFAULT unconditionally, so the GUC has the same value. extractTenantContext 400s a missing header in production with multi-tenancy. That is narrower than base, where auth skipped its compare and resolved any tenant's user. P-a2: pg binds undefined as null, so `tenant_id = NULL` matches nothing; unreachable anyway.
+- (b) NULL-TENANT-PARITY: holds in TEXT and in the mock. Where migration 039's fail-closed policy binds `users` for originate's secuura_app role, the GUC (the same req.tenantId) makes the IS NULL tolerance inert. A NULL-tenant holder auth's SECURITY DEFINER found at base (201) is then a 404, and C7 describes the mock only. UNMEASURED (no database); fail-closed, Minor (N-1437-1). Comments :1756 ("RLS inert") and :1812 ("FORCE RLS fail-closed") contradict each other (Polish, N-1437-8). #1383 (049) touches charge_events / certifications / oauth_apps / svc_webhooks, NOT users, so it changes no ruling.
+- (c) CROSS-TENANT-404: HOLDS. Status, body (153 B) and every header but date are equal, including the etag. Both cases are one query returning 0 rows with no extra branch.
+- (d) NORMALISATION: HOLDS.
+  - 7/8 kit variants resolve. A trailing ZWSP is 400 on both schemas.
+  - Mine: İ, fullwidth @ and an IDN U-label are 400 on both. Punycode and +tag resolve. Array, number and object are 400, never 5xx.
+  - Stored value: auth createUser / updateUser write lookupHash(email.toLowerCase().trim()) (userRepo.ts:676, 852).
+- (e) KEY-ABSENT-502 / OTHER-ROUTES: HOLDS. Email 502 BAD_GATEWAY labelled; id path 201; malformed 400.
+  - Templates wire PII_LOOKUP_HMAC_KEY to originate: bicep commonEnvVars :395 via :779, compose :601 in the originate block, and deploy.sh :608 refuses a blank value.
+  - Deploy precondition: it must be set AND equal to auth's (one secretRef). Deployed state UNMEASURED.
+  - Other lookupHash callers (provenance.ts:113, gdprService) are unchanged.
+- (f) RETIRED-UNREACHABLE: HOLDS for all 17. There is no auth fetch on the resolution path (D4 code-only 0). #8 is vacuous at head (re-pointed to R-KS74). The 13 guard rows prove at runtime that there are 0 lookup calls for every upstream answer, by any path, which the static D4 cannot.
+- (g) Q-LEGACY: HOLDS. dev/test 201 -> 404. CORRECTION: in prod-like envs past the B-10 cutoff (2026-06-01) base already failed (decryptEmail throws -> auth 5xx -> 502), so there it is 502 -> 404. Population UNMEASURED (Minor, N-1437-2).
+- (h) TOOL-FIXES: c4 rc 0, 17/17 arms as predicted. All 5 copies equal the READY's hashes.
+  - gatelinesk2: real log (59,0) rc 0; (49,0) rc 1; FIXTURE rc 1 (reason asserted); 27/1 rc 1 (reason asserted); NA rc 3; unreadable rc 2; the predecessor rc 0 while printing MISMATCH.
+  - pathgatek2: PASS, plus 4 FAIL arms; the predecessor false-FAILs.
+  - namecheckk2: 24/24; -g5- and -e2- red for the asserted reasons.
+  - pushk2.sh order OK.
+  - G-PIN: 45 logs = 43 at (59,0) + 2 with the block absent. The READY says 22; the drafter counted 44, and the 45th is a newer seatR-23rd log.
+  - namecheckk2's " (#NNNN)" allowance is superseded (Polish, N-1437-9).
+- (i) COMMIT CLAIMS: "8 files", "auth unchanged", "act gate first", "pure move" and "DB failure -> existing 500" all HOLD. "patch sha256/16 ab8e9e441864e05c" HOLDS and is REPRODUCED: it is the sha256 of K 1st's evidence/KS-1402-items1-3-diff.patch (88593 B), and git apply --cached onto base gives tree 64d5bf0c31a3 == END_TREE. The drafter's D-7 candidate is retracted.
+- (j) SQL-BOUND: HOLDS on both binders. RLS / GUC: both apply where 039 binds users (see b).
+
+CLASS SIBLINGS (report only). Originate forwards the caller's Authorization to AUTH in 2 places:
+- certifications.ts:239-246 -> /api/users/stub. The drafter's D-8 premise DOES NOT HOLD: auth's /stub accepts certifications:write (KS-564, users.ts:244-255) and connector tokens.
+- documents.ts:2706-2730, sign-cert -> /api/issuer-certs/sign. Originate's gate admits documents:write (S has it); auth requires admin or issuer-certs:sign (S lacks it), so an S connector would be refused. This is the KS-1402 class.
+- The other 3 forwards go to anchoring.
+- Recommend a ticket: audit every originate -> auth hop for connector callers (N-1437-10, Minor).
+
+5 PR / TICKET
+- PR: open, mergeable false, dirty, 1 commit, +852/-289, 8 files. Title `KS 1402: …` (66) != commit subject `fix(KS-1402): …` (71). Body sha256/16 e7b9f5fb82820914.
+- Body: one Refs KS-1402; 0 foreign keys hyphenated; 0 trailers; 1 attribution line (Polish, N-1437-6, drop it in the squash per Q-ATTR77); "14 rows" vs the file's 13 (Polish, N-1437-5).
+- Body sentences: all HOLD except two, which are Polish: "14 rows", and `documents.ts:1799-1805`, which is base numbering (head :1821-1827; N-1437-7). Several are UNMEASURED (Stuart's 7/7, Wednesday's 03:07Z / 04:01Z, K 1st's tsc).
+- KS-1402: In Progress, not archived, 5 comments (newest 7740c258, unchanged). updatedAt 05:22:42.999Z == the createdAt of the PR #1437 attachment c18b9579. 0 comments link #1437 yet (Wednesday's batch).
+
+6 ACTIONS: rc 1. The only run at the head is dependabot-standalone-locks (skipped). security-scan, pr-security-gates and pr-platform-suites are NOT RUN AT HEAD (dirty, no merge ref). CI is owed on the merge result.
+
+7 NOT TESTED: see the list below. docker info: rc 1 (socket absent); Docker was not started.
+
+KIT_REPORT §3:
+
+| item | ruling |
+|---|---|
+| D-1 | HOLDS |
+| D-2 | HOLDS |
+| D-3 | HOLDS, with the prod-like correction |
+| D-4 | HOLDS |
+| D-5 | HOLDS |
+| D-6 | HOLDS |
+| D-7 | DOES NOT HOLD (reproduced) |
+| D-8 | DOES NOT HOLD for /stub; the class survives at sign-cert |
+| D-9 | HOLDS |
+| D-10 | HOLDS as a precondition; the templates do wire it |
+| D-11 | HOLDS (45/43/2) |
+| D-12 | HOLDS |
+
+CENSUS: 29 other open PRs: 0 OVERLAP-CODE and 8 OVERLAP-DOCS (#1383, #1429 with the yaml, #1430, #1431, #1432, #1433, #1434, #1436). Keep-both is the merge seat's job; #1383 does not touch users.
+
+TIERING: T1, agreed.
+
+FINDINGS: 0 Blocker, 0 Major.
+- Minor: N-1437-1 (RLS / NULL tolerance), -2 (Q-LEGACY), -3 (evaluator: tampers O2 / O4 uncaught), -4 (fix( prefix; declare the squash body), -10 (class sibling, sign-cert), -11 (tenantless caller -> DEFAULT).
+- Polish: -5, -6, -7, -8, -9.
+- None blocks.
+
+NOT TESTED
+1. NO DATABASE: no Postgres NULL semantics or precedence, no RLS / GUC, no definer functions, no real role or rows. A live sweep is OWED; KS-1402 must not go to Done on offline green.
+2. No S<->K pair run (PS 992 needs a Kintsugi deploy).
+3. The Q-LEGACY and NULL-tenant populations.
+4. Whether PII_LOOKUP_HMAC_KEY is set in any deployed originate, and equal to auth's.
+5. Schemathesis, Akto, Playwright and k6: NOT RUN (Docker down).
+6. CI at the head: NOT RUN (dirty).
+7. The merge result itself.
+8. The KS 1406 class: read only.
+9. The timing channel: read only.
+10. tsc (K 1st's run): not re-run by me.
+11. Whether Linear treats `fix(KS-1402)` as closing.
+12. Whether S calls sign-cert.
+
+REPORT: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-09-gate79/report.md (evidence/ beside it).
+sha256 report.md = 9b1ccfc4bbbc44be4ef2056e2447ff89ad6fae5e61850fc9459287097c1ac275
+
