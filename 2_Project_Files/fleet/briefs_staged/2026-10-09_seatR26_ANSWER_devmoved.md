@@ -1,0 +1,17 @@
+## BLUF
+**No GO for #1436: develop MOVED under your M.** Wednesday's ls-remote at 12:16:20Z reads develop **`09a7b2ec8c11a211a0ffe2a4dca87e6100345cb8`**, not `44753e3e7f4e`. **Peter merged two PRs** at about 13:01 and 13:14 UK time: **#1438** (KS-1455, Schemathesis 4.29.4 → 4.30.0 + systemTest packages) and **#1439** (a history-entry docs PR). Between them they touch **both `Projects Documents/*.html` files** and systemTest files: 25 paths, and **0 of them are a row code path** for #1436, #1431 or #1430. That is the **RE-PREDICT, not re-gate** case (`…_seatR21_ANSWER_refused.md` ruling 1). Send `STATUS: re-prediction on 09a7b2ec8c11 (Seat R 26th)` before any ref write. Your M `a9f823f61b93` stays on the branch as it is.
+
+## Recommendation (your next steps)
+1. **R-0 again**, then **R-1 the chain on the REAL develop `09a7b2ec8c11…`**, `--order 1436,1431,1430 --drop 1432,1433,1429,1434`, **WITHOUT `--expect-final`**: gate77's final `550d0ef42882` is VOID, because the docs on develop changed. CODE-UNMOVED must PASS for all three rows (Wednesday measured 0 of their code paths in the delta; your tool is the authority). BASE-CONTAINED #1436 must PASS. Report the new step trees and composed blobs for all three rows.
+2. **The branch already holds M, so a rebuilt M from the gated head would need a FORCE push, which is FORBIDDEN.** The non-force shape is a SECOND docs-only keep-both merge-in, **M2, with parents [M `a9f823f61b93`, develop `09a7b2ec8c11`]**: a fast-forward of the branch, whose tree == the chain's new #1436 step tree. **If your merge-in tool cannot take M as its "ours" (it gates `:141` origin `$BR` == OURS, which M satisfies), say so in the STATUS and STOP. Do NOT edit the tool, and do NOT force.** Name the other option you see.
+3. Then qm on M2, S-1, legs 6/7, push, Actions (Schemathesis is now 4.30.0 on develop: record what you see), and mail `STATUS: merge-in 1436 pushed (Seat R 26th)` naming M2. Wednesday builds the GO with T' = the new step tree and PR head = the gated head `90d98754db7b`, exactly as before. The body and subject are unchanged. The ADDENDUM is re-measured on M2.
+4. Ctx: Wednesday's pane read is **49%** at 23:16 AEDT. This re-prediction finishes #1436 to its push (a started merge-in finishes), then the ctx QUESTION decides between FOLLOW-UP 3 and a WRAP.
+
+## Why this is not a STOP for the whole batch
+Your brief's STOP list says "develop moved by anyone but you". This answer IS Wednesday's ruling on that STOP, which is what the list asks for. No row's code moved. The docs are what the merge-in composes, and the chain tool proves the composition. A re-gate would be owed only if a row path had moved, and none did.
+
+## What Wednesday measured (read verbs in Wednesday's own scratch clone, fetch by sha)
+- ls-remote 12:16:20Z: develop `09a7b2ec8c11`; `refs/pull/1436/head` = branch = M `a9f823f61b93`.
+- `log 44753e3e7f4e..09a7b2ec8c11`: e919265db (Merge PR #1438, PeterObeden), 09a7b2ec8 (Merge PR #1439, PeterObeden), plus their branch commits.
+- `diff --name-only` 25 paths: both Projects Documents HTML files, systemTest/schemathesis/*, systemTest/playwright/package{,-lock}.json, and the like. Row code paths (kit.json `code_paths` for 1436/1431/1430): 0 hits each (control: the flow doc path hits 1).
+- Your M checked out against the old develop exactly as you reported: parents [90d98754db7b, 44753e3e7f4e], tree eaacabd0d735, flow/cheat == composed, run-migrations.sh 100755 in M, body 8071 B f67d768d…, F 6th handover de74b5dc4f57e7ec, subject 72.
