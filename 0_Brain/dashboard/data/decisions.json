@@ -29059,18 +29059,18 @@
   "id": "mpscalc-codeql-javascript-web-1009",
   "client_project": "Datasec/MPS-Calculator",
   "title": "MPS Calculator: turn on CodeQL for the new web screens (TypeScript) before they merge",
-  "bluf": "I need you (or Datasec IT) to add JavaScript/TypeScript to the CodeQL setup of the MPS repo. Open https://github.com/datasecau/MPS-Commercial-Calculator/settings/security_analysis → Code scanning → CodeQL default setup → Edit → tick JavaScript/TypeScript → Save. Why: today's web screens (PR #7, 58 files under web/) are TypeScript, and the repo's CodeQL scans only C# and Python (measured on PRs #6 and #7 at 10:4x: Analyze (csharp) and Analyze (python) only). Datasec policy is that only CodeQL-scanned commits reach main, and in C-08 the setting was 'controlled by organization administrators', so Friday's login cannot change it. Monday's showcase does NOT depend on this: Friday can run the demo from the three branches merged locally.",
-  "default_action": "If you do not rule: (c) — PR #6 (API) and #8 (demo) merge after the QA gate; PR #7 (web) waits unmerged; Monday's showcase runs from a local merge of the three branches; Friday re-raises this on Monday morning.",
+  "bluf": "Correction (Friday's error): JavaScript/TypeScript cannot be ticked yet — GitHub only lists languages already on main, and the web screens are in the unmerged PR #7 (measured: main's languages are C#, Python, Shell). So the choice is the ORDER. Recommended: Friday merges PR #7 once without the TypeScript scan (it passed the full QA gate; C# and Python scans clean; the same one-time exception you approved for the first C# merge, C-08), then you open https://github.com/datasecau/MPS-Commercial-Calculator/settings/security_analysis → CodeQL default setup → Edit → tick JavaScript/TypeScript (now listed) → Save; CodeQL scans main and any alert is fixed in code, never dismissed.",
+  "default_action": "If you do not rule: (c) — PR #7 waits unmerged; Monday's showcase runs from a local merge on the laptop; Friday re-raises this Monday morning.",
   "options": [
    {
     "key": "a",
     "label": "I'll enable JavaScript/TypeScript scanning (steps above)",
-    "detail": "Friday re-runs the scan on PR #7 and merges #6 → #7 → #8 after the QA gate and green CodeQL."
+    "detail": "Not possible yet as written: the TypeScript option appears only after the web code is on main. Choose b to do it in the right order."
    },
    {
     "key": "b",
     "label": "Merge PR #7 once without the web scan, enable later",
-    "detail": "A one-time exception like C-08's; #6 (C#) and #8 are scanned as usual."
+    "detail": "Recommended. Friday merges PR #7 once (gated, head 1d23c45), then you tick JavaScript/TypeScript on the page above; any alert is fixed in code."
    },
    {
     "key": "c",
@@ -29100,7 +29100,26 @@
    "CARD composer-designer-rename-scope-1009",
    "CARD composer-version-edition-lookup-1009",
    "CARD hpsmpoc-paul-showcase-feedback-1009"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-10-09T12:31:56.561368+11:00",
+    "reason": "Kam 12:30:59 showed the CodeQL page: only languages detected on main are offered (C#, Python); Friday's step a was unverifiable as written. Measured: code-scanning/default-setup languages [csharp, python]; repo languages C#, Python, Shell (gh api, 12:3x).",
+    "changed": [
+     "bluf",
+     "default_action",
+     "option:a",
+     "option:b"
+    ],
+    "before": {
+     "bluf": "I need you (or Datasec IT) to add JavaScript/TypeScript to the CodeQL setup of the MPS repo. Open https://github.com/datasecau/MPS-Commercial-Calculator/settings/security_analysis → Code scanning → CodeQL default setup → Edit → tick JavaScript/TypeScript → Save. Why: today's web screens (PR #7, 58 files under web/) are TypeScript, and the repo's CodeQL scans only C# and Python (measured on PRs #6 and #7 at 10:4x: Analyze (csharp) and Analyze (python) only). Datasec policy is that only CodeQL-scanned commits reach main, and in C-08 the setting was 'controlled by organization administrators', so Friday's login cannot change it. Monday's showcase does NOT depend on this: Friday can run the demo from the three branches merged locally.",
+     "default_action": "If you do not rule: (c) — PR #6 (API) and #8 (demo) merge after the QA gate; PR #7 (web) waits unmerged; Monday's showcase runs from a local merge of the three branches; Friday re-raises this on Monday morning.",
+     "option:a": "Friday re-runs the scan on PR #7 and merges #6 → #7 → #8 after the QA gate and green CodeQL.",
+     "option:b": "A one-time exception like C-08's; #6 (C#) and #8 are scanned as usual."
+    }
+   }
+  ],
+  "amended_ts": "2026-10-09T12:31:56.561424+11:00"
  },
  {
   "id": "composer-b102-new-words-1009",
@@ -29127,9 +29146,9 @@
   ],
   "recommended": "b",
   "ts": "2026-10-09T12:20:58.248271+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-10-09T12:25:15.888587+11:00",
   "seat": "friday",
   "prior_rulings_overridden": [
    "2026-09-10 09:01",
