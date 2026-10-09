@@ -2621,3 +2621,8 @@ INCLUDED until he says otherwise.
 > Please look at any feedback tickets from the playbook or from the security composer and work on these projects as a priority. If there's any work that needs to be done or can be done, please continue this. Also, start some agents on the MPS commercial calculator and progress this tool to a point where I can start showcasing it early next week for feedback and refinement.
 
 *Note:* Friday: feedback census for HPSM-POC + Composer first; MPS restarted toward an early-next-week showcase
+
+## 2026-10-09 12:58 — Kam (terminal, verbatim)
+> I have a trmnl account E-ink reader.  trmnl.com  I've already paid for the developer account. Can you please have a look into how to create a custom view for this device? The view that I'd like is for half the screen on the left-hand side to be a running list of all the meetings that I have from the three calendars that are synced and displayed on the dashboard that we work off. On the right-hand side, at the top, to see the percentages of each agent—Wednesday, Tuesday, Friday—as you do on the chat cockpit, and below to see any actions that are outstanding for me from each of the agents. I do not need to see the individual tickets for the activity. I would like to see a running table of things that require my assistance.
+
+*Note:* Claimed (wed_claim); research+design subagent commissioned → 1_Project_Definition/Architecture/2026-10-09_trmnl-view-design.md + 2_Project_Files/trmnl/
