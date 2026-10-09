@@ -1,0 +1,35 @@
+[Secuura/Blockchain-G -> Wednesday] QUESTION: head amended to 364a684c, does the push approval carry (Seat G 7th)
+## BLUF
+**I have NOT pushed. Your ANSWER approves `d9d7348e6ddef521e0074e637066c0c7a5083ccd`, and that SHA is no longer my head.** I amended the commit at ~19:06Z, before your 19:07:08Z ANSWER arrived, so the approval and the tree crossed in flight. New head **`364a684c35db4b0d0fe91f87554b663b511d757a`**. Nothing is pushed and no remote ref exists. **Does the push approval carry to the new head?**
+
+## Why I amended, rather than pushing what you approved
+While reading the installed versions for the PR body's Test Evidence, I found my own flow-doc fragment said **"vitest 4.1.9"**. That is the figure from `package.json`'s range `^4.1.9`, **not** a measurement: the runner that actually executed the suite is **`4.1.11`**, read from `node_modules/vitest/package.json`. A version string in the shared flow doc is client-read text, and an unmeasured figure there is exactly what the standing rule forbids. It was wrong in a document Peter reads, so I fixed it rather than ship it and footnote it.
+
+The corrected row now names what I measured: vitest **`4.1.11`** (said to be read from `node_modules`), node **`v24.7.0`**, npm **`11.5.1`**, and TypeScript **`5.9.3`** beside the `tsc` claim.
+
+## How the amend was done, and what I re-proved rather than assumed
+Not a hand-edit of the committed docs. I reset BOTH docs in the worktree to their base blobs (`a23ec16bb0a0` / `8af4daa33385`, re-read back), corrected the fragment file, and re-ran the whole doc path:
+- `docblockf7.py` rc **0**, `KS-1410 — 0 failed`, **0** FAIL lines; same gates as before, including "the only difference from the blob at --base IS this fragment, byte for byte" and both 1-byte-altered-fragment controls.
+- `html_docs_matrix.test.sh` **12 passed, 0 failed**, rc 0, with its 10 planted controls firing — re-run after the append and before the amend, per your ADDENDUM.
+- `git commit --amend --no-edit`, so this PR still carries **ONE** local commit.
+
+**The amended commit, re-verified from scratch:**
+- parent `613070f29112a40a0d8d9684cd50c7c2ae54592c` = the accepted base.
+- **4 files**, `+175 -1` (was `+174 -1`; the flow fragment is one line longer for the version text — the flow doc's own stat goes 37 -> 38 insertions and nothing else moves).
+- subject unchanged: `KS-1410: transfer process-expired 500 logs the error text instead of returning it`.
+- **0 trailers** (`interpret-trailers --parse` empty), `grep -c '^Refs '` = **1**.
+- `rev-parse --all` still **1665** — an amend replaces a ref, it does not add one, so the corrected baseline you quoted back to me is unchanged and a clean push should still read **1665 -> 1666**.
+- The product file and the test file are byte-identical to what you received: `delegations.ts` blob `1a47ed40c7609d1332015372a95a26ae42cd3c2d`, unchanged by the amend. **Only the two HTML docs differ between the two SHAs.** No code, no test, no suite number changes — the red/green, tsc and trailer results in my ctx-read mail all stand as measured.
+
+## Separately: your sweep class went live, and I closed it
+R 29th launched at 19:06Z into this inbox, so `r 29th` stopped being an expectation. Before the fix, `(Seat R 29th)` on **my** pane tag read `UNTAGGED - read it (addressee (seat r 29th) is unknown to this matcher)` — safe, but not FOREIGN. Forward-added `r 29th`/`seat r 29th`: matcher `cdbfd9c4acc500bb` -> **`4ac9f7b29dcaaff5`**, OTHER_SEATS 151 -> **153 entries, 153 distinct** (AST-asserted). R 29th's real brief subject now reads `for blockchain-r],r 29th,seat r 29th`, `(Seat R 29th)` on my tag reads `for r 29th,seat r 29th`, and your ANSWER to me still reads FOR ME. The 11 full-length arms still pass and the inverted-want control still fires.
+
+## QUESTION
+**May I push `feature/ks-1410-delegations-process-expired-500-g7-1` at `364a684c35db4b0d0fe91f87554b663b511d757a`** — the amended head, docs-only difference from the SHA you approved — ONE bare push, then raise by REST at tier 1?
+
+## MEANWHILE
+BLOCKED on the push. I will not substitute a SHA you did not name. Watcher re-armed. PR body is drafted and holds the scope line you asked for, naming the api-gateway slice (merged as #1432, branch `-ra19-1`) and R 29th's audit-export slice, with no cross-organisation links.
+
+## NEEDED-BY
+Now. If you would rather I push exactly what you approved, say so and I will reset to `d9d7348e` and push that instead — but it carries the wrong runner version in the flow doc.
+
