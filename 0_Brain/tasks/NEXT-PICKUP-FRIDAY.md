@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 WRAP 2026-10-09 23:25 (Friday; Kam: "Once you finish the check, please wrap up") — READ FIRST; supersedes every block below where they differ
+**FLOOR EMPTY** (%0 friday + %1 monitor). Newest Kam row 23:08:21 (lane 3c = a, delivered). Reconcile 0. No OPEN Friday cards. Usage 34%.
+**Live now:** Playbook hosted = HPSM-POC main 80afdff (C-81) · Composer demo = e33bdad (C-66: lane 3c policy-target screens + rename + Home width + squared pills; migration 0021 since C-65) · MPS main a2da403 (web/ merged; CodeQL now C#, Python, JS/TS).
+**OWED next session (in order):**
+1. **Mon 12 Oct:** re-raise the printer route card with Kam (withdrawn "delay until monday"; options measured in the 09:35 note line).
+2. **MPS showcase (Mon 12 / Tue 13):** launch a fresh MPS seat to prepare it from main a2da403 (`run-demo.sh`; ports 5080/5173 are Kam's demo ports); audience C-05 (internal pricing team).
+3. **Playbook:** fixes only until HP's layout review Tue 13 Oct. Known open: first API read after a restart ~2.7 s; HPSMPOC-207 pool warning returns on some starts.
+4. **Composer next rounds:** NEEDS AN API A1–A4 (B110 STATUS; A4 = make the HPSM policy name editable, lane 4 waits on it) → one Seat B contract brief (tier 1); BACKLOG #260–#279 + B111 notes F4–F12 (filed by B112 as rows; check). Lane 4 (#252, content release that makes 4 demo engagements read-only incl. Paul's) stays KAM'S CALL. Lane 3a mapping stays unmerged (C-48).
+5. **User Guide v1.5** (renamed) can go to Paul: Kam's send.
+**Tooling owed:** `watch_status.sh` fires on a seat's placeholder line "READY FOR GATE / STOPPED line: see the end" (twice today) → ignore a READY/STOP token followed by "see the end"; `seat_rung5.sh <project-dir> <brief-id>` (ledger 2026-10-09 rung-5 row); `decision_queue.sh amend --recommended` (ledger 2026-10-09 card row).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-09 19:10 (Friday successor, ctx 65%) — READ FIRST; supersedes every block below where they differ
 **Kam:** newest row 14:53:21 (pills = a, square). Reconcile 0. No OPEN Friday cards. Usage 29%.
 **DONE since 13:28 (all verified at source):** Playbook #130 merged → 80afdff; hosted deploy B191 LIVE (C-81, records #109 merged; first sign-in OK; first API read 2.7 s and HPSMPOC-207 shape 2 remain) · MPS #9 README merged (main a2da403) · Composer #58 #60 #59 #61 merged (main 0e5361c); Composer demo LIVE 0462a18 (B108, C-65; migration 0021; healthz 0.30.0; backup composer-before-0462a18-20261009T0358Z.dump; way back = dump restore + composer.prev). Records: C-64, BACKLOG #260-#279. Playbook/MPS/old Composer panes closed.
