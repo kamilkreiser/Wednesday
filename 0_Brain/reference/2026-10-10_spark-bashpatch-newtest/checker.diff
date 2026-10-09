@@ -1,0 +1,23 @@
+--- /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/checker.sh.pre-1010-bashnewtest	2026-10-10 06:14:43
++++ /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/bash_patch/checker.sh	2026-10-10 06:14:47
+@@ -96,8 +96,20 @@
+     cur["lines"].append(ln)
+     if ln.startswith("+++ ") and cur["path"] is None:
+         cur["path"]=re.sub(r"^\+\+\+ (b/)?","",ln).strip()
++# 2026-10-10 (bashnewtest, KS-1456 control): the split is at `--- ` lines, so the git PREAMBLE of the NEXT file
++# (`diff --git` / `new file mode` / `index` ...) lands at the TAIL of the previous section. For a modify-then-new-file
++# patch that tail is a header-only "create this file" fragment: B5 applying the product section re-created the test
++# file B4 had already written ("already exists"). Peel the trailing preamble off every section but the last-opened
++# one's own head (kept beside as section_N.diff.peeled, never lost); the `--- /dev/null` header still implies the add.
++PRE=re.compile(r"^(diff --git |index [0-9a-f]+\.\.[0-9a-f]+|new file mode |deleted file mode |old mode |new mode |similarity index |rename (from|to) |copy (from|to) )")
++for k in range(len(secs)-1):
++    L=secs[k]["lines"]; moved=[]
++    while L and (L[-1].strip()=="" or PRE.match(L[-1])):
++        moved.append(L.pop())
++    secs[k]["peeled"]=[m for m in reversed(moved) if m.strip()]
+ out=[]
+ for i,s in enumerate(secs,1):
++    if s.get("peeled"): open(f"{rep}/section_{i}.diff.peeled","w",encoding="utf-8").write("\n".join(s["peeled"])+"\n")
+     p=f"{rep}/section_{i}.diff"; open(p,"w",encoding="utf-8").write("\n".join(s["lines"]).rstrip("\n")+"\n"); out.append({"path":s["path"],"file":p})
+ json.dump(out,open(f"{rep}/sections.json","w"))
+ print("sections:",[o["path"] for o in out])
