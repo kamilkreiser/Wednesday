@@ -108,3 +108,4 @@ Full record: `KIT_REPORT_ADDENDUM_1436.md`. Backups of every changed file: `<nam
 3. **`run-migrations.sh:187-188` stale "applied=N defect remains" text** and **the hyphenated KS-1452 in #1436's merge-commit subject:** input findings for the GATE to grade, not drafter verdicts.
 4. **#1427 pin:** if the rebuilt #1427 lands with different job-04 bytes, rc 13 is the intended refusal; re-draft that one pin.
 5. **Union-hazard correction** (6 of 8 steps on the flow doc, not "every step"): accepted.
+6. **Q-SEAT77 RULED (15:2x):** merge seat = **Seat R 23rd** on `Secuura/Blockchain-R` (R 22nd merged #1427 as `349b35c9163a`, verified by Wednesday at source, and wraps; the R lane holds the keep-both merge-in tooling). `kit.json` `merge_seat_ordinal` edited (backup `kit.json.pre-1009-seat77`). R 22nd's handover is the source for R 23rd's tools.
