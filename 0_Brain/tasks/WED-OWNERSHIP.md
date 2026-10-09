@@ -153,3 +153,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-09 09:28 | Kamils-Mac-Studio | boot-time latest-Claude-models check + per-launch deliberate model choice (Kam 2026-10-09 09:3x); feeds fleet/specs/model-routing.md (WED-153) | OPEN | |
 | 2026-10-09 12:57 | Kamils-Mac-Studio | TRMNL e-ink custom view (meetings + agent gauges + Kam's actions) | OPEN | |
 | 2026-10-09 14:33 | Kamils-Mac-Studio | install_all_jobs.sh: add trmnlpush job, wednesday seat only (Kam TRMNL view) | CLOSED |  2026-10-09 14:36 done: guard + template + PORTABILITY 24, job loaded |
+| 2026-10-09 17:27 | Kamils-Mac-Studio | hosted-model replay harness (OpenRouter, MiMo/GLM/DeepSeek on the 46 Spark tasks) for card wed-hosted-replay-key-and-code-1009 | OPEN | |
