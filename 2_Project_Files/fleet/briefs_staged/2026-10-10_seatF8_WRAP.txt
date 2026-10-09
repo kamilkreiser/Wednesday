@@ -1,0 +1,37 @@
+MODEL: claude-sonnet-5-5 (as my session reports it). By step: ITEM 0 ran on claude-opus-5; from your switch after the plan ANSWER (22:32Z) everything ran on Sonnet 5.5: the F-A build, commit, push, raise, both STATUS/QUESTION mails after it, and this wrap.
+SEAT: F 8th, %28. This seat = 1 Claude launch, clause: raise (carrying 3 Spark tasks). Wrapped at ctx 46% on your word (your read 22:57Z).
+
+== WHERE THINGS STAND ==
+RAISED: #1447 (KS-1456, tier 2), branch feature/ks-1456-run-migrations-failed-run-message-f8-1, head 68a20b9bd374d1a83d1f626fd6dac6caf0b80136, base 76b683c7dcd06d53a4a8ac7759010756a68a171b. #1447 is RAISED AND WAITING FOR ITS BATCH: no READY from me, per your ANSWER; you gate it with F-B and F-C as one tier-2 gate.
+UNRAISED (named as such): F-B KS-1417 (flow 52.) and F-C KS-1426 (flow 53.) are UNBUILT. They go to Seat F 9th. I read F-B's READY whole; I did NOT read F-C's.
+develop at my last read (23:02:55Z, ls-remote): 76b683c7dcd0, UNMOVED since your accepted RAISE_BASE. Gate81 pull heads at that read: 1443 d5e685925953 (CHANGED, which is R 31st's merge-in pushed to that PR's branch), 1444 12487cdcde15, 1445 364a684c35db, 1446 d343a3c93860, 1447 68a20b9bd374 (mine, unchanged); (the SEND AMENDMENT pins were 1443 4547234c8c79, 1444 12487cdcde15, 1445 364a684c35db, 1446 d343a3c93860; the difference on 1443 is R 31st's, not mine). At 22:59Z the only lock was R 31st's .push-lock-d8 (holder seat field "Secuura/Blockchain-R ra31"); by 23:02Z it was released and NO .push-lock-* existed.
+
+== PROOFS ==
+LIVE WATCHERS: 0. The ps file 5_Project_History/2026-10-10_seatF-8th/wrap_ps_final.txt has 0 lines (the grep for inbox_watchf3.sh, minus the grep itself). My watcher pid 6429 had ALREADY exited before my kill ("no such process"): it fires on a FOR-ME mail and exits by design, and your wrap ANSWER was that mail.
+LOCKS HELD BY ME: 0. `find` over worktrees/ for .push-lock-*, attributed by each holder file's `seat` field: zero read "Blockchain-F f8"; at 22:59Z the only lock present was R 31st's .push-lock-d8, and at 23:02Z none existed. The same find saw a POSITIVE control planted in a mktemp -d (1).
+
+== HANDOVER, HISTORY, RECORD ==
+Handover: 5_Project_History/HANDOVER-seatF8-2026-10-10.md, 118 lines, 20,903 B, sha256/16 a6dfae278cc44aeb (wc -l and grep -c '' both 118). It opens "FOR F 9th, THE FIRST THREE THINGS": (1) the RESUME for F-B/F-C with each READY path, the apply results I measured at 76b683c7dcd0 and flow 52./53. held; (2) the forward-add trap (matcher at 178 entries; f 9th ALREADY in it and must be removed first; f 10th and g 9th absent) and the case-insensitive sweep, with every live f8 site by line; (3) what lied to me, 13 items. Plus a RESUME block, a Measured section, a findings ledger, the tool-hash table (15 files) and a RECORD of every ref write.
+History entry at the TOP of 5_Project_History/history.md. INSERT-ONLY PROVED by sha: the file minus my entry hashes to fef91faac4c3f8a3, the value I recorded before the insert (22,003 lines / 3,895,228 B before; 22,038 / 3,899,168 after).
+Daily note: my "Priorities today" section was appended at boot and my Outcome block inserted directly under it today, both insert-only by sha (pre 5d2a05f487b09c62 == file-minus-block). The VAULT IS NOT COMMITTED OR PUSHED by me: it holds 22 uncommitted files from other seats' in-flight work and a `git add -A` would sweep them. Your call, or the next R seat's.
+Records: 5_Project_History/2026-10-10_seatF-8th/ (boot/ commit/ objwt/ push_a/ pr/ fa/ raise/ plus FINDINGS_LEDGER.md).
+
+== RECORD OF REF WRITES (shared store; full detail in the handover) ==
+(1) ONE objects-only transfer: rev-parse --all BYTE-IDENTICAL 1,668 d3405914b7cb8cd4, .git/config and FETCH_HEAD unchanged, + one detached worktree add. (2) Local branch + commit: 1,668 -> 1,669. (3) ONE bare push: remote-tracking ref added, 1,669 -> 1,670. (4) PR by REST #1447, HTTP 201, body round-trip IDENTICAL. NOTHING else: no fetch or pull in the shared checkout, no write to either develop ref, no force, no --no-verify, no --admin, no merge, no gate, no deploy, no board write, no extranet, no POST /api/seen, no az, no ticket move.
+
+== UNMERGED / UNRAISED / UNMEASURED / UNFILED ==
+UNMERGED: #1447. UNRAISED: F-B, F-C. UNMEASURED: the four platform suites (SKIP lines only: "local stack not up on http://localhost:6882", legs 3 4 8); Security Scanning, pr and PR Security Gates on #1447's head (in progress at my last read; I quoted no result); shellcheck (not installed); a live run of the migration runner (owed on F-A). UNFILED: findings 1 and 3 below (this seat files nothing).
+
+== TWO FINDINGS FOR YOU TO ROUTE (a board search by symbol/path/error string is yours) ==
+1. (already mailed 22:43Z) run-migrations.sh:195-196 still says "KS-808 carries what is left." In #1447's NOT-covered list, one line; no edit.
+2. NEW, UNMAILED until now: the F-B test (ks1417_env_example_no_dead_gateway_port.test.sh) runs the REAL bootstrap-env.sh from a scratch copy but never cd's into the scratch tree. bootstrap-env.sh:315-324 runs `git rev-parse --show-toplevel` against the CALLER'S cwd and, if core.hooksPath is not ".githooks" there, runs `git config core.hooksPath .githooks` on that repo. So a test run on a clone with it unset silently switches the pre-push gate on. At the shared checkout it is ALREADY ".githooks" (.git/config sha256/16 4f624a213933d54b), so the script takes its "already active" branch and writes nothing; NOT triggered, NOT measured by running it (I did not run the F-B test). The payload is untouched (byte-for-byte ruling). F 9th is told to hash .git/config around the run and to drive a scratch-repo control for the unset case.
+
+== MAIL COUNTED BOTH DIRECTIONS (before this WRAP) ==
+SENT by me: 4 — plan QUESTION 22:30:28Z, ctx QUESTION 22:43:48Z, STATUS 22:54:59Z, ctx QUESTION 22:55:22Z. RECEIVED from you for this seat: 4 — LAUNCH BRIEF 22:14:08Z, ANSWER 22:32:10Z, ANSWER 22:44:32Z, ANSWER 22:58:01Z. (From the API listing, 100 messages back to 17:41Z, filtered on "(Seat F 8th)".) This WRAP is the 5th sent. The 22:55:22Z ctx QUESTION for F-B is MOOT: your wrap ANSWER answered it by wrapping.
+
+== df -m /Volumes/DevMASTER, available ==
+Boot 320,858 MB · after S-1 317,883 MB · at wrap 314,960 MB. Worktree s-f8-ks1456 = 2,737 MB, KEPT (PR #1447 open); I removed nothing.
+
+== TRIAL RECORD (Sonnet 5.5, from the switch) ==
+Steps where I needed a correction or an extra instrument: all 13 are in the handover's "what lied to me". The short list: zsh no-wordsplit on `for s in $SIBS` (honest rc 127); PIPESTATUS empty under zsh; my `raise rc` line read the wrong `$?`; a header comment with wrong line numbers (:40/:89 vs :42/:91); a fragment citing :188 for a line at :189; a control commit that printed no trailer; a PASS-grep on an `ok`-format suite; stray characters from two sloppy expansions. Every one was caught by a read-back or a control before it left my hands, except the `raise rc` line, which I disclosed in the STATUS mail. None changed a PR byte.
+
