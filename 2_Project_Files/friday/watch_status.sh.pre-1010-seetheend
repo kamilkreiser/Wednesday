@@ -43,7 +43,7 @@ for i in $(seq 1 "${WATCH_LOOPS:-110}"); do
       [ -f "$f" ] || continue   # 2026-10-05: an unmatched glob or a not-yet-written STATUS is skipped, not grep'd (it errored 100+ lines per loop)
       # A seat's DRAFT carries a placeholder line ("READY FOR REVIEW `<when-filled>`", B05 2026-09-25): lines holding a
       # `<…>` placeholder are not a READY, or the watcher fires early and then misses the real one (same count).
-      rl=$(/usr/bin/grep -n -i -E 'READY FOR (REVIEW|RE-GATE|GATE)' "$f" | /usr/bin/grep -v -i -E '\bnot ready for' | /usr/bin/grep -v -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b' | /usr/bin/grep -v -i -E '(\bat|until|end at|ends at|to|before)[ *`]+READY FOR (REVIEW|RE-GATE|GATE)' | /usr/bin/grep -v -i -E 'see the end')
+      rl=$(/usr/bin/grep -n -i -E 'READY FOR (REVIEW|RE-GATE|GATE)' "$f" | /usr/bin/grep -v -i -E '\bnot ready for' | /usr/bin/grep -v -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b' | /usr/bin/grep -v -i -E '(\bat|until|end at|ends at|to|before)[ *`]+READY FOR (REVIEW|RE-GATE|GATE)')
       n=$(printf '%s' "$rl" | /usr/bin/grep -c .); ln=$(printf '%s\n' "$rl" | tail -1 | cut -d: -f1)   # a line that PROMISES a future READY ("full table at READY FOR REVIEW", Composer B09 2026-09-25) is not one   # also READY_TIME-style tokens (Composer B06, 2026-09-25)   # "NOT READY FOR REVIEW" is not one (2026-10-03)
       # A SKELETON STATUS (READY line written first, body still template tokens: @@BODY@@, __VERDICT__,
       # CI_RESULT_PLACEHOLDER, CI-RUN2-LINE) is not a READY yet: count none until every token is gone, so the
@@ -52,7 +52,7 @@ for i in $(seq 1 "${WATCH_LOOPS:-110}"); do
       # and KNOWN_PLACEHOLDER_ENTRIES is a real identifier (HPSM-POC B111): only *_PLACEHOLDER as a whole token holds.
       s=$(/usr/bin/grep -c -E '@@[A-Za-z0-9_]+@@|__[A-Z][A-Z0-9_]*__|(^|[^A-Za-z0-9_])[A-Z0-9]+(_[A-Z0-9]+)*_PLACEHOLDER([^A-Za-z0-9_]|$)|(^|[^A-Za-z0-9-])[A-Z0-9]+(-[A-Z0-9]+)+-(LINE|ROW|FILE)([^A-Za-z0-9-]|$)' "$f")
       [ "$s" -gt 0 ] && n=0
-      m=$(/usr/bin/grep -E '^(\*\*State:\*\* *)?(BLOCKED|STOP)|STOPPED|NEEDS FRIDAY' "$f" | /usr/bin/grep -v -i -E 'see the end' | /usr/bin/grep -c .)   # 2026-10-10: a pointer line ("READY FOR GATE / STOPPED line: see the end", 2x on 10-09) is neither a READY nor a STOP
+      m=$(/usr/bin/grep -c -E '^(\*\*State:\*\* *)?(BLOCKED|STOP)|STOPPED|NEEDS FRIDAY' "$f")
       if [ "$n" -gt 0 ] || [ "$m" -gt 0 ]; then
         for key in "$f READY#$n@L${ln:-0}" "$f STOP#$m"; do
           case "$key" in *"#0"|*"#0@L"*) continue;; esac

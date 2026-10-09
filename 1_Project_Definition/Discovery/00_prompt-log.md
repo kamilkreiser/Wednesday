@@ -2626,3 +2626,8 @@ INCLUDED until he says otherwise.
 > I have a trmnl account E-ink reader.  trmnl.com  I've already paid for the developer account. Can you please have a look into how to create a custom view for this device? The view that I'd like is for half the screen on the left-hand side to be a running list of all the meetings that I have from the three calendars that are synced and displayed on the dashboard that we work off. On the right-hand side, at the top, to see the percentages of each agent—Wednesday, Tuesday, Friday—as you do on the chat cockpit, and below to see any actions that are outstanding for me from each of the agents. I do not need to see the individual tickets for the activity. I would like to see a running table of things that require my assistance.
 
 *Note:* Claimed (wed_claim); research+design subagent commissioned → 1_Project_Definition/Architecture/2026-10-09_trmnl-view-design.md + 2_Project_Files/trmnl/
+
+## 2026-10-10 09:16 — Kam (terminal (Friday), received ~09:1x, verbatim)
+> How is the MPS calculator coming along? Please do as much of it as possible today so that it can be ready to showcase on Monday. Host it live on Azure and once ready send me the link and logon details on email so I can test it out.   If there's anything else that needs to be done on the HPSM POC or security control creation tool, go ahead with those as well
+
+*Note:* Friday: two read-only censuses; cards mpscalc-azure-login-for-hosting-1010 + mpscalc-showcase-known-limits-1010; MPS hosted lanes A/B/C + Composer + HPSM-POC fix lanes to be briefed.

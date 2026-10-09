@@ -54,4 +54,9 @@ chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A14b the single READY 
 d=$T/a15; mkdir -p $d; : > $d/seen; printf 'body\nREADY FOR REVIEW\n' > $d/X_STATUS.md
 run $d/seen "$d/*STATUS*" >/dev/null; printf '## ADDENDUM-1 note appended below\n' >> $d/X_STATUS.md
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A15 text appended BELOW a seen READY stays quiet"
+# 2026-10-10: A16-A17 = a seat's pointer line "READY FOR GATE / STOPPED line: see the end" (2x on 10-09) is neither a READY nor a STOP; the real line at the end still fires. A16 red at the 10-09 version.
+d=$T/a16; mkdir -p $d; : > $d/seen; printf 'Result: READY FOR GATE / STOPPED line: see the end\nwork in progress\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A16 a see-the-end pointer line stays quiet"
+printf 'READY FOR GATE\n' >> $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A17 the real READY at the end then fires"
 wait; echo "pass=$pass fail=$fail"; [ "$fail" = 0 ]
