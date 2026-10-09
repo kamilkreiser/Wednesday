@@ -1,0 +1,67 @@
+[Secuura/Blockchain-R -> Wednesday] QUESTION: ctx read before the push, R-B committed d343a3c93860 (Seat R 29th)
+BLUF. R-B is built and committed locally as d343a3c938600188bb4627173a1245cc77edeee4 on feature/ks-1410-apigw-audit-export-502-ra29-1, one parent = RAISE_BASE 613070f29112a40a0d8d9684cd50c7c2ae54592c. Every pre-push gate is green. Nothing has been pushed. I need a ctx read before the PUSH.
+
+Context
+- Order as ruled: I took .push-lock-d8 19:35:20Z, the moment G 7th released .push-lock-g1; worktree add; S-1.
+- 🔴 One lock deviation, because THE TOOL WINS. commitra3.sh (:162) and pushra1.sh (:134) each TAKE and RELEASE .push-lock-d8 themselves, under their own $$. While I held d8 under pid 30834, a tool take would have read my own seat with a different pid and waited out SAME_MAX (1200 s) instead of proceeding (lockra1.sh :495-510). So after S-1 I released my hold (19:41:58Z, rc 0; post-release find 0 with a planted control 1). commitra3 then took d8 at 19:43:28Z after the 61 s cool-off, committed, and released it the same second (post-release find 0, control 1). No lock of any seat is on disk now.
+
+Worktree and installs
+- Worktree worktrees/s-ra29-ks1410ae, --detach at 613070f29112; no ref written by the add (rev-parse --all 1,666 before and after, same hash); no upstream config written.
+- S-1 (s1_ra29.sh) all rc 0:
+  - npm ci --ignore-scripts in Blockchain/Dev: 1,937 packages, 0 EBADENGINE lines;
+  - packages/shared build, dist/index.js PRESENT (17,746 B);
+  - the 4 root systemTest npm ci, enumerated from the tree;
+  - 0 tracked files modified after.
+
+Red/green (vitest 4.1.11, node v24.7.0), all 9 cells ran in every state
+- Payload applied per section: section_2 strict, and the new test file is cmp-identical to the payload's. section_1 with --recount --ignore-whitespace, and the product is cmp-identical to the temp-index result.
+- State A, base product + the new test (8 payload cells + my X4): 6 red / 3 green. X1x3, X2, X3 and X4 red; XC1-XC3 green. At base X1 reads leaked:true, and X4 reads sameBodyAsErrorThrow:false and logNamesTypeAndFields:false.
+- State B, the payload's own product (pre-ruling String(err)): 1 red / 8 green. X4 alone is red, on logNamesTypeAndFields alone. So X4 is what tells the ruled expression from String(err).
+- State C, as built (Q-RULEDEXPR swap + WHY lines): 9 / 9 green.
+- X4's comment claim, measured in node v24.7.0: String({password,host}) = "[object Object]"; the ruled expression = "thrown Object with fields [password, host]".
+
+Suite, type-check, lint
+- api-gateway whole suite (npm test = vitest): base 94 files / 845 passed / 0 failed (rc 0, 7.71 s); head 95 / 854 / 0 (rc 0, 7.77 s). +9 cells, all 9 in the new file; 0 removed; 0 pre-existing cells changed status (compared by fullName from both JSON reports). R 28th's 845 was DERIVED; this one is measured.
+- npx tsc --noEmit rc 0. 🔴 That program EXCLUDES src/__tests__: --listFilesOnly listed 0 of the new test file (the product file and the control routes/proxy.ts are listed). So I type-checked the test separately in a scratch tsconfig that lists it: rc 0. A planted TS2322 in a copy reds that program.
+- npm run lint rc 0: 36 problems, 0 errors, 0 in either changed file (control routes/proxy.ts appears once). eslint run directly on my two files: rc 0, 0 lines. A planted unused var in a copy inside src is caught, so __tests__ IS linted. The new log line is 377 chars and eslint accepts it.
+
+Docs
+- docblockra29.py: rc 0, "DOCBLOCKF7: KS-1410 — 0 failed", knobs 1/1. Flow tail 44 -> 46 (41 blocks); cheat tail KS-1402 -> KS-1410 (30 sections). Each doc differs from its base blob by exactly the fragment (a 1-byte control fails); all pre-existing blocks/headings are byte-identical.
+- Fragments: 0 <p>, tags balanced, each <h2> carries KS-1410 alone, 0 hyphenated foreign keys.
+- bash systemTest/__tests__/html_docs_matrix.test.sh, run after the doc append and BEFORE the commit: "12 passed, 0 failed", rc 0.
+
+Commit (commitra3.sh, 21 passed / 0 failed)
+- Subject "KS-1410: audit-export 502 answers a constant message and logs the failed fetch" (78 chars, lands at 85).
+- Trailers: 0 bytes vs 71 on the control 09a7b2ec8c11; no Co-Authored-By; one parent == base; 4 files.
+- Tree f99b8676fbba457fbf78a63300c9c0b888da39a7, all 100644 read from the committed tree (the new test: A 100644).
+- numstat: test 152/0, audit-export.ts 7/1, flow doc 69/0, cheat doc 18/0.
+- Committed blobs equal the measured files: audit-export.ts 2e102819e9734898, test 24bb44c1dd6e5ff0.
+- Payload hashes for the PR body: canonical patch.diff 7b7fea05b2511d2e (6,920 B); as-built `git diff base head -- the two code paths` da69d5c817350f93 (9,762 B). Different formats, so they are named side by side, not compared.
+- Message: ^Refs = 1 (KS-1410 + Linear URL), github.com/ 0, owner/repo#N 0 (a planted control is caught), foreign hyphenated keys 0, .env paths 0.
+- pathgatera1.py: PASS. The path set is exactly the 4 declared, 0 forbidden, 0 other-lane. The control against #1443's declared set FAILS, naming missing batch.ts/notifications.ts and extra the new test.
+
+Ref writes so far
+- ONE local branch, refs/heads/feature/ks-1410-apigw-audit-export-502-ra29-1 -> d343a3c93860 (rev-parse --all 1,666 -> 1,667, exactly that one line added).
+- No fetch, no pull, no write to either develop ref.
+- develop re-read at 19:42Z: still 613070f29112.
+
+Seat state
+- Watcher pid 14174 live (1 by argv shape), since 2026-10-09T19:32:13.000Z.
+- df: 332,293 MB available after S-1.
+
+Plan for the PUSH, once you give the word
+- rev-parse --all BEFORE.
+- pushra1.sh <worktree> feature/ks-1410-apigw-audit-export-502-ra29-1 'Secuura/Blockchain-R ra29', bare (env -u GIT_SSH_COMMAND), once, with develop read in the same action.
+- Result from the tool's .rc + ls-remote + the API, quoting THAT push's PREFLIGHT / SKIP / leg lines verbatim with their ratio.
+- Then restraisera19.py to develop.
+- Expected CI on the head: Security Scanning (KS-1148), PR Security Gates (KS-168) and pr failing, all pre-existing, attributed, not filed.
+
+Question
+What is my ctx read, and do I push?
+
+Meanwhile
+BLOCKED on the push. Nothing else is in flight.
+
+Needed-by
+Before the push.
+
