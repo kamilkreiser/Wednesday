@@ -1,0 +1,115 @@
+[QA -> Wednesday] GATE80 (T2): #1441 KS-1345 deliveries + #1442 KS-998 format-gate stdin
+MODEL: claude-opus-5-5 (Opus 5.5), as the session reported from its first turn (2026-10-09T19:52Z UTC). I observed no /model change.
+
+VERDICT #1441: GO for #1441 at 7685e79af2c437b1e6cc8fe2e57b1b0771f576d5. It assumes develop 613070f29112a40a0d8d9684cd50c7c2ae54592c.
+VERDICT #1442: GO for #1442 at a7ec5746cb8b43313d55d73185ada4931b17c5be. It assumes develop 613070f29112a40a0d8d9684cd50c7c2ae54592c.
+GO strings (quoted, for you to sign):
+  GO (Seat R 30th): merge 1441 on gate80
+  GO (Seat R 30th): merge 1442 on gate80
+
+MERGE-IN CONDITION
+- Both PRs append at the tail of the two Projects Documents/*.html docs.
+- A textual merge CONFLICTS in either order: 1 hunk per doc.
+- The merge seat does KEEP-BOTH in numeric order (#1441's block 48. and its cheat section, then #1442's 49. and its section). I built both orders with real git merge, and they compose to the IDENTICAL tree 3cc9ca91b2e1. html_docs_matrix is 12/0 on each.
+- After the merge-in, re-run: #1441 ks1341c and html_docs_matrix; #1442 ks998_format_gate_stdin_isolated and html_docs_matrix.
+- base..develop touches 0 paths today. If develop moves and touches a code path of either PR, the code legs must be re-run.
+- MERGE-SEAT NOTE: develop's flow tail is 42. 43. 44., so the next free number is 45, not 47. The PRs use 48 and 49. Five other open PRs append to the same docs: #1443, #1444, #1445, #1446, #1383. Renumbering is your call.
+
+DECLARED SQUASH SUBJECTS (TRUE of each diff, no (#n), measured with python len):
+  #1441: KS-1345: webhook deliveries answer 500 when the query fails, not an empty 200  (77)
+  #1442: KS-998: the format gate runs each format:check with an empty stdin  (66)
+The squash body must carry Refs KS-<n>. The 1441 commit-message sentence "keeps its 200 [] answer" is inaccurate (N-1441-2), so do not paste it. Each PR body has 1 "Generated with" line (counted only, per Q-ATTR77).
+
+32-HEX RULING (G), N-1441-1: Minor, does not block.
+- I probed the real router with a modelled db: the kit's probe plus my own independent probe (db injected via req.db, a PG-uuid-input model that self-tests 10/10). They agree.
+- At head, a 32-hex id without hyphens (also upper-case without hyphens, and hyphens after groups of four) gets 200 {"success":true,"deliveries":[]} with 0 db calls.
+- At base the same id was bound to the ::uuid query. PostgreSQL docs §8.12 (READ, not fetched; this stack's version unmeasured; no database) say Postgres accepts these forms, so base returned the webhook's rows.
+- So this is a data-visible change for a narrow, non-canonical input. The server emits only canonical ids. The 4 sibling routes already refuse the form with 404: I measured DELETE and rotate-secret, 404 with 0 db calls.
+- The deliveries route now matches the siblings in refusing to resolve the id, but differs in status (200 [] vs 404).
+- The PR body names this case accurately. The commit message and the code comment at webhooks.ts:407 ("keeps its current 200 []") do not.
+- Moving it to 404 is an owner decision. Wording goes to Seat G 6th via you.
+
+F RULING: the redirect WAS exercised on real packages.
+- I ran npm ci --ignore-scripts (X9) in akto, api-explorer, performance and playwright: rc 0 each, prettier 3.9.9 executable in all four.
+- --list and --all with the base script and the head script: byte-identical stdout and stderr, 4 checked, 0 skipped, 0 failed.
+- Stdin census: none of the 4 format:check scripts reads stdin. Today the redirect guards a consumer that does not exist yet, which is the ticket's robustness note, not a defect.
+- Same-tree control: a stdin-draining fixture plus akto plus a REAL prettier red in performance (my tree only). Base script: rc 0, 1 checked, the red swallowed. Head script: rc 1, 3 checked, 1 failed, naming the file.
+- Hook path: #1442's 4 paths select 0 packages (silent, rc 0). Control: performance/package.json selects 1.
+- I did not run the live push hook.
+
+CHECK ROWS
+- C1: c1_pin rc 0 for both, 13/13 each; pair 3/3. My own git reads agree.
+  - Trailers: 0 content bytes (control 53). Co-Authored-By: 0 (control 1).
+  - Only the own key is hyphenated in each commit message and body.
+  - #1442 has 1 create mode (the 100644 suite; run-shell-suites runs `bash <file>`, so no exec bit is needed).
+  - 36 tooling paths are identical at base, head and develop; 0 manifests or locks; base..develop overlap 0.
+  - The #1441 PR TITLE is `KS-1345:` with its own key hyphenated, not `KS 1345:`. That is not a defect.
+- CHECK 1: c2 claims rc 0, 13/13 and 10/10. Every claim HOLDS.
+  - #1442's stdin census of the loop: npm is the only child that inherits the loop's stdin. There is no second consumer.
+  - C0's removal drops no needed guarantee: C0 pinned the defect.
+- CHECK 2:
+  - ks1341c: (route base, tests head) 3 of 11 red (D0, D3, D4); head 11/11; base/base 8/8.
+  - (route head, tests base) is 7/8 with C0 red. The brief said 8/8; that is a prediction slip, and the red is by design.
+  - Whole originate suite: head 1099/1099, base 1096/1096, 97 suites, 0 load failures.
+  - tsc rc 0; a planted control gives rc 2.
+- CHECK 3:
+  - New suite: head 9/0; with the base script 6/3 rc 1. The 3 reds are the drain cells, and I read why each is red.
+  - Siblings 33/0 and 8/0, html_docs_matrix 12/0, identical at base and head.
+  - --list goes 73 to 74.
+  - Full run-shell-suites.sh at the head, locally: 74 passed, 0 failed, 0 skipped (of 74). The new suite printed 9/0.
+  - Homebrew bash is absent, so NOT RUN there.
+- CHECK 4: see the merge-in condition above.
+- CHECK 5:
+  - Each head has 6 runs, 0 pending.
+  - Dependency Audit red = KS-1148, VERIFIED. audit-locks.mjs:50 reads `import { satisfies as semverSatisfies } from 'semver';` at base, at both heads and at dce5fdc3c952. The failed step logs "Cannot find package 'semver' imported from .../audit-locks.mjs" x2 on #1441, on #1442 and on the reference's own run 37959601456 (same job and step). Neither PR touches the file, a manifest or a lock.
+  - Platform suites (k6, Akto, Playwright): PRE-EXISTING. The steps and signatures equal develop's push run.
+  - Code Security Gates / All shell test suites: the kit read it as UNCLASSIFIED. I RECLASSIFY it PRE-EXISTING: the same 5 FAILED suites and the same 27 failing-cell lines as develop's run, apart from one timing figure. On #1442 the new suite ran in CI, 9/0, with 69/5 of 74 against develop's 68/5 of 73.
+- CHECK 6:
+  - #1442's body figures HOLD (6/3, 9/0, 33/0, 8/0, 12/0, 73->74, line refs, fragment tag counts).
+  - #1441's commit figures HOLD (1096/1096, 1099/1099, 3 of 11).
+  - Linear: KS-1345 and KS-998 are both In Progress, not archived, with the PR attached. No comment names either PR (your batch). Both must stay open.
+
+TAMPERS (measured by me; every anchor once, LANDED and restored by sha)
+- #1441 kit:
+  - T1 (guard removed): D4 goes red, but on a missing deliveries key, not a ::uuid cast. The mock never throws, so the brief's "reds because the cast throws" does not hold under the mock.
+  - T2 and T4: D4. T5: D0 and D3. T6: C1 GET, C2 GET, C3 and D0.
+  - T3 (guard before the id-format regex): green in ks1341c.
+- #1441 mine:
+  - O1 = T3 across 3 files: ks423 catches it (400 -> 200). Not a gap.
+  - O2: dropping /i from UUID_PATTERN leaves the WHOLE originate suite at 1099/1099. No cell catches it (N-1441-4, Minor).
+- #1442 kit:
+  - U1 (/dev/zero): the suite hangs and is killed at 20 s (N-1442-2, Polish).
+  - U3, U4 and U5: 6/3 for the asserted reason.
+  - U2 (drop 2>&1): all green.
+- #1442 mine: U2 with REAL prettier. The gate still exits 1, but it loses the file name and the "(in this push)" attribution, because real prettier prints [warn] on stderr. 0 of the 50 format-gate shell cells catch it, because the fixtures print [warn] on stdout. This is a pre-existing fixture gap (N-1442-1, Minor).
+
+FINDINGS (none blocks)
+- N-1441-1 Minor: the 32-hex change. PROBED with a mocked db; Postgres acceptance READ ONLY.
+- N-1441-2 Polish: commit message and code comment wording.
+- N-1441-3 Polish: SKILL §5d. The removed-.catch line `;` has no WHY of its own.
+- N-1441-4 Minor: no cell pins UUID_PATTERN's /i.
+- N-1441-5 Polish: D4's base red is a mock artefact. The ks423 wh_12345 cell no longer reaches the query.
+- N-1442-1 Minor: the U2 fixture-fidelity gap.
+- N-1442-2 Polish: the U1 hang.
+- G80-1 (merge-seat note): the docs conflict and the numbering gap.
+TIERING: T2 agreed.
+
+END_TREE: #1441 4c5002a04c8cc11760f99a0ee66027c577e76f03, #1442 f400aabef2c3dda518ceb9678786da18e5cee750.
+PINS: ls-remote at 19:53:15Z, 20:03:13Z and 20:17:19Z (UTC). Every reading: develop 613070f29112, both pull/heads == branches == the pins. Unmoved.
+KIT: 9 files re-hashed EQUAL. Self-tests c1 32/32, c2 20/20, c3 24/24, gh 23/23.
+
+CENSUS: 26 other open PRs. OVERLAP-CODE 0. OVERLAP-DOCS 5 (#1446, #1445, #1444, #1443, #1383). WATCH: #1250 touches run-shell-suites.sh.
+
+NOT TESTED
+- No database: Postgres 32-hex acceptance is UNMEASURED, and a live run is OWED on #1441.
+- No live hook or push.
+- Platform suites NOT RUN: docker info rc 1 (no daemon socket), and Docker was not started.
+- Homebrew bash absent.
+- KS-998 items 1-3, which are out of scope.
+- Not re-run: the builders' separate test-file compile, audit:gate/audit:locks, PREFLIGHT 12/15, and the shell runner at base locally.
+- CI on the composition.
+Disk: no ENOSPC. 320Gi / 422Gi available at the end.
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-10-gate80/report.md
+sha256 report.md = d912191ce2a3af921289ee170eaaebf874a7ff07c544eafddde1c6dd1a7b7d4e
+
