@@ -1,0 +1,60 @@
+[Secuura/Blockchain-G -> Wednesday] STATUS: push REFUSED at leg 2, cause NOT mine + a gate finding (Seat G 7th)
+## BLUF
+**The push was REFUSED by the hook at preflight leg 2. NO ref was written — `-g7-` is still 0 at origin.** Cause is **NOT mine and NOT the lock**: a transient `Abort trap: 6` (SIGABRT) killed `npm ci --dry-run` for `services/governance` once, inside a window when R 29th was also installing. **I have not regenerated anything.** Request: **may I re-push the same head `364a684c35db4b0d0fe91f87554b663b511d757a`?**
+
+## THAT push's gate lines, verbatim with their ratios
+```
+shell suites: 73 passed, 0 failed, 0 skipped (of 73)
+shell suites wall-clock: 406s
+OK — 13 code guards passed.
+PREFLIGHT FAILED on leg(s) 2 - fix the above before pushing. (12/15 legs ran)
+[pre-push] preflight failed — fix the above, or bypass with: git push --no-verify
+error: failed to push some refs to 'github.com:Secuura/Distributed_Secuura.git'
+```
+`gatelinesg1.py` read from `pushg1.out` (the wrapper's stdout, not the hook log, per the kit's own trap):
+```
+pre_push_hook_base.test.sh                   (28, 0)  OK
+pre_push_hook_base_fixture_guard.test.sh     (6, 0)  OK
+run_shell_suites.test.sh                     (59, 0)  OK
+VERDICT: MATCHES the declared fleet STOP condition
+```
+**Your `(59,0)` re-pin is correct at my base** — the suite ran 59 and the pin matched, so G 6th's re-pin holds a round later.
+
+## Leg 2, verbatim
+```
+=== 2/15  Lockfile clean-room (npm ci --dry-run per standalone lock) ===
+scripts/preflight/lockfile-cleanroom.sh: line 68: 42587 Abort trap: 6           npm ci --dry-run --ignore-scripts --no-workspaces > /dev/null 2>&1
+FAIL  services/governance
+1 lock(s) fail clean-room npm ci. Regenerate each inside node:24-alpine:
+  docker run --rm -v "$PWD/services/governance":/app -w /app node:24-alpine npm install --package-lock-only --ignore-scripts
+FAIL — see regeneration commands above
+```
+**35 of 36 locks read OK, including `services/transfer` — my own payload's package.**
+
+## Why it is not mine, and not the lock — measured, three ways
+1. **My commit does not touch governance at all:** 0 of its 4 files mention `governance`.
+2. **Byte-identical to the base:** `services/governance/package-lock.json` blob `0ef6ee870ae2` and `package.json` blob `7d10ab12c03c` at BOTH `613070f29112` and my head. I could not have changed what the leg read.
+3. **The command passes on re-run: 6 clean of 6.** I ran the exact clean-room command (`npm ci --dry-run --ignore-scripts --no-workspaces`) in `services/governance` six times: **rc 0 every time**. Control: the same command in `services/transfer` also rc 0, so the crash is not my host or npm being broken across the board.
+
+**`Abort trap: 6` is SIGABRT — a crash, not a non-zero exit.** The shell printed the signal line itself. Concurrency fits: **R 29th launched 19:06Z** (pid 30832) and my hook ran 19:10:31Z -> 19:21:43Z, with load average **11.18** when I measured just after. Two seats' installs overlapping my preflight is the only variable that changed between the failing run and six clean ones.
+
+## 🔴 THE FINDING, and why it is worth more than my push
+**Leg 2 turns a transient SIGABRT into a verdict that names an innocent lock, and prints a remedy that would damage it.** The gate cannot tell "this lock is inconsistent" from "npm died", because it reads only the exit status. Had I followed its printed instruction I would have regenerated a lock that is byte-identical to develop's and passes 6/6 — rewriting a good lock, moving resolved versions, and very likely tripping the platform-discriminator class in KS 1290. **I did not run it**, both because the brief forbids a dependency/lock/manifest edit and because the evidence says the lock is fine.
+- A fix shape, for whoever owns it: distinguish a signal death from a non-zero exit (`rc > 128`, or trap the signal) and **retry once** before failing; a SIGABRT should read as `INDETERMINATE — re-run`, never as `FAIL <path>` plus a regeneration command.
+- **Board search done, by symbol and error string, before calling it new** (`lockfile clean-room`, `Abort trap`, `governance lock`, `clean-room npm ci`): the near misses are **KS-1426** (leg 2's clean-room scans four directories, so 6 of 36 locks are unscanned — a COVERAGE gap, not this), **KS-1394** (audit-locks' regen command cannot regenerate systemTest locks — a different wrong-remedy defect, adjacent in kind), **KS 1290** (lockfile edits move platform discriminators silently — the damage my non-action avoided). **Nothing covers "leg 2 fails a lock because npm was signalled".** I file nothing; it is yours to place, and I would not put it on my own ticket.
+
+## State right now
+- **`rev-parse --all` = 1665**, unchanged — the refusal wrote no ref, and `ls-remote` after the push shows `-g7-` still **0** at origin.
+- Lock **released** cleanly by the tool (`LOCK RELEASED by Secuura/Blockchain-G g7 pid 40294`), cool-off stamped; my next take waits 90 s.
+- Post-push orphan check: **0** of my own `login_stub` pids under my worktree.
+- Head unchanged at `364a684c35db4b0d0fe91f87554b663b511d757a`. Nothing re-run, re-applied or re-committed; the suites, tsc and doc gates from my ctx-read mail stand untouched.
+
+## QUESTION
+**May I re-push the same head now?** I expect leg 2 to pass on a run that is not sharing the host with another install. If you would rather I wait for R 29th's install window to clear, name a time and I will hold.
+
+## MEANWHILE
+Holding. Never `--no-verify` — the hook's own suggestion is not an option I will take. Watcher re-armed.
+
+## NEEDED-BY
+Now; the branch is committed and unpushed, and the PR body is ready.
+
