@@ -1,0 +1,235 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -407,6 +407,15 @@ function makeBlockPendingApproval(deps: Pick<VerificationRouteDeps, 'redisServic
+   };
+ }
+ 
++/**
++ * KS-1432: the shape test POST /api/documents applies to the JSON body it parses by hand (KS-529). Only a plain
++ * object may continue, because everything after it reads properties off the body. Exported so the unit tests pin
++ * THIS function and not a copy of it.
++ */
++export function isAcceptableDocumentBody(body: unknown): boolean {
++  return !(body === null || typeof body !== 'object' || Array.isArray(body));
++}
++
+ // ---------------------------------------------------------------------------
+ // Factory
+ // ---------------------------------------------------------------------------
+@@ -1149,7 +1158,7 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+         // escaped as an unhandledRejection and took the whole gateway down
+         // (one authenticated request = platform-wide outage). Same family as
+         // KS-501, which fixed the non-string case but not the non-object one.
+-        if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
++        if (!isAcceptableDocumentBody(parsed)) {
+           res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Request body must be a JSON object' } });
+           return;
+         }
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks529-non-object-body-guard.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks529-non-object-body-guard.test.ts
+@@ -17,13 +17,21 @@
+  *
+  * These pin the parse-guard predicate. The live proof (9 malformed bodies →
+  * 400 each, RestartCount unchanged) is recorded on the ticket.
++ *
++ * KS-1432: they used to pin a PRIVATE COPY of the predicate defined in this file, so deleting or inverting the
++ * real check in routes/verification.ts left every cell green. They now call the predicate the route module
++ * EXPORTS (`isAcceptableDocumentBody`); the route's own use of it is pinned in
++ * ks1432-documents-route-uses-the-exported-body-predicate.test.ts.
+  */
+ 
+ import { describe, it, expect } from 'vitest';
++import * as verification from '../routes/verification';
+ 
+-/** Mirrors the guard in routes/verification.ts POST /api/documents. */
++/** The REAL predicate, read off the route module (KS-1432). A missing export is an assertion failure, not a TypeError. */
+ function isAcceptableBody(parsed: unknown): boolean {
+-  return !(parsed === null || typeof parsed !== 'object' || Array.isArray(parsed));
++  const exported = (verification as unknown as Record<string, unknown>).isAcceptableDocumentBody;
++  expect(typeof exported).toBe('function');
++  return (exported as (value: unknown) => boolean)(parsed);
+ }
+ 
+ describe('KS-529 — non-object request bodies are refused, not crashed on', () => {
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1432-documents-route-uses-the-exported-body-predicate.test.ts
+@@ -0,0 +1,179 @@
++// =============================================================================
++// KS-1432 - POST /api/documents must refuse a non-object JSON body THROUGH the exported predicate
++// =============================================================================
++//
++// KS-529: the route parses its body by hand, and a literal `null` (or an array, number, string, boolean) made
++// `body.documentType` throw inside an async 'end' listener - an unhandledRejection that took the whole gateway
++// down. The fix was an inline check; its unit test pinned a private COPY of that check, so deleting the real one
++// failed nothing. The predicate is now exported (`isAcceptableDocumentBody`), the unit cells in
++// ks529-non-object-body-guard.test.ts call it, and THIS file pins the route's use of it:
++//
++//   - the three `control` cells drive the REAL router over HTTP and are green before and after the change: a
++//     non-object body is a 400 that never reaches enforcement, bad JSON is a 400, a plain object goes through;
++//   - the two RED cells read routes/verification.ts and require the route to ask the exported predicate (and
++//     to carry no second inline copy of the shape test).
++//
++// Harness: the ks1231 pattern - the real verification router and the real enforceDocumentTypeRules over the
++// seeded catalogue; the workflow gate is a spy that answers 201 past enforcement.
++// =============================================================================
++
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import express from 'express';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++
++const catalogue = vi.hoisted(() => ({ types: [] as Array<Record<string, unknown>> }));
++
++// enforceDocumentTypeRules resolves document types through this module directly.
++vi.mock('../services/redis', () => ({
++  getAllDocumentTypes: vi.fn(async () => catalogue.types),
++}));
++
++import { meetsVerificationLevel, enforceDocumentTypeRules } from '../services/enforcement';
++import { SEED_DOCUMENT_TYPES } from '../routes/admin';
++
++const CONTENT_HASH = 'd'.repeat(64);
++const CONNECTOR_ID = 'ks1432-c1';
++
++/** The user object authenticateToken builds for an sk_ key (middleware/auth.ts). */
++const CONNECTOR = {
++  userId: 'connector:ks1432-c1',
++  email: 'connector@secuura.io',
++  role: 'connector',
++  organizationId: 'org-1',
++  verificationLevel: 'api_key',
++  authMethod: 'api_key',
++  connectorId: CONNECTOR_ID,
++  rateLimit: 100,
++  rateLimitWindow: 60,
++  scopes: ['documents:write'],
++  tenantId: 't1',
++};
++const CONNECTOR_META = {
++  connectorId: CONNECTOR_ID,
++  scopes: ['documents:write'],
++  organizationId: 'org-1',
++  tenantId: 't1',
++  rateLimit: 100,
++  rateLimitWindow: 60,
++};
++
++const DOCUMENT_TYPE = SEED_DOCUMENT_TYPES.find((dt) => (dt as { code?: string }).code === 'DOCUMENT') as Record<string, unknown>;
++
++const enforceSpy = vi.fn(enforceDocumentTypeRules);
++const workflowSpy = vi.fn(async () => ({ gated: true as const, response: { success: true, data: { ks1432: 'past-enforcement' } } }));
++
++let gateway: Server;
++let gatewayPort: number;
++const realFetch = globalThis.fetch;
++/** No upstream is ever reached: the workflow spy answers before the forward. */
++const originate = { url: 'http://127.0.0.1:1' };
++
++beforeAll(async () => {
++  catalogue.types = [DOCUMENT_TYPE];
++  // The verify route chain scan answers no live hit (never reached by these cells).
++  globalThis.fetch = (async () => ({ ok: false, status: 404, json: async () => ({}), text: async () => '' })) as never;
++
++  const { createVerificationRoutes } = await import('../routes/verification');
++  const mockBodyParser: RequestHandler = express.json({ limit: '1mb' });
++
++  const app = express();
++  app.use(
++    createVerificationRoutes({
++      authenticateToken: () => (req, _res, next) => {
++        (req as { user?: unknown }).user = { ...CONNECTOR };
++        (req as { connectorMeta?: unknown }).connectorMeta = { ...CONNECTOR_META };
++        next();
++      },
++      mockBodyParser,
++      query: vi.fn(async () => ({ rows: [] })) as never,
++      isDbAvailable: () => false,
++      redisService: {
++        isRedisAvailable: () => true,
++        getPendingDocument: vi.fn(async () => null),
++        deletePendingDocument: vi.fn(async () => undefined),
++        getAllDocumentTypes: vi.fn(async () => catalogue.types),
++        getAllWorkflowInstances: vi.fn(async () => []),
++        getNotificationSettings: vi.fn(async () => null),
++        getRejectedDocument: vi.fn(async () => null),
++        setRejectedDocument: vi.fn(async () => undefined),
++        getWorkflowDocumentMapping: vi.fn(async () => null),
++        getWorkflowInstance: vi.fn(async () => null),
++        setWorkflowInstance: vi.fn(async () => undefined),
++      } as never,
++      services: { originate, anchoring: originate } as never,
++      log: () => undefined,
++      memWorkflowToDocumentMap: new Map(),
++      memRejectedDocuments: new Map(),
++      dbSaveRejection: vi.fn(async () => undefined),
++      ADMIN_ROLES: ['ADMIN', 'admin'],
++      enforceDocumentTypeRules: enforceSpy as never,
++      createWorkflowInstanceIfRequired: workflowSpy as never,
++      meetsVerificationLevel,
++    }),
++  );
++
++  gateway = app.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => gateway.once('listening', () => r()));
++  gatewayPort = (gateway.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  globalThis.fetch = realFetch;
++  await new Promise<void>((r) => gateway.close(() => r()));
++});
++
++/** POST /api/documents with a RAW body string; returns status, the error code and message, and the enforcement call count. */
++async function post(raw: string): Promise<[number, unknown, unknown, number]> {
++  enforceSpy.mockClear();
++  workflowSpy.mockClear();
++  const r = await realFetch('http://127.0.0.1:' + gatewayPort + '/api/documents', {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer t' },
++    body: raw,
++  });
++  const json = (await r.json()) as { error?: { code?: unknown; message?: unknown }; data?: { ks1432?: unknown } };
++  return [r.status, json.error?.code ?? json.data?.ks1432, json.error?.message, enforceSpy.mock.calls.length];
++}
++
++describe('KS-1432 - the route refuses a non-object body, and asks the exported predicate to do it', () => {
++  it.each([
++    ['null', 'null'],
++    ['an array', '[]'],
++    ['a number', '42'],
++    ['a string', '"str"'],
++    ['a boolean', 'true'],
++  ])('control KS-1432 R1: %s is a 400 BAD_REQUEST that never reaches enforcement', async (_label, raw) => {
++    expect(await post(raw)).toEqual([400, 'BAD_REQUEST', 'Request body must be a JSON object', 0]);
++    expect(workflowSpy).not.toHaveBeenCalled();
++  });
++
++  it('control KS-1432 R2: unparseable JSON is still a 400 Invalid JSON body', async () => {
++    expect(await post('{"title":')).toEqual([400, 'BAD_REQUEST', 'Invalid JSON body', 0]);
++  });
++
++  it('control KS-1432 R3: a plain object still goes through to enforcement and the workflow gate', async () => {
++    const answer = await post(JSON.stringify({ title: 'KS-1432', contentHash: CONTENT_HASH }));
++    expect(answer).toEqual([201, 'past-enforcement', undefined, 1]);
++    expect(workflowSpy).toHaveBeenCalledTimes(1);
++  });
++
++  // The two source cells read the route module's text, comment lines skipped. Weaker than the HTTP cells and
++  // deliberately so: they are what stop the route and its unit test drifting apart again.
++  const code = readFileSync(join(__dirname, '..', 'routes', 'verification.ts'), 'utf8')
++    .split('\n')
++    .filter((l) => !l.trim().startsWith('//') && !l.trim().startsWith('*') && !l.trim().startsWith('/*'));
++
++  it('RED KS-1432 S1: the route refuses through the exported predicate, called exactly once on the parsed body', () => {
++    const calls = code.filter((l) => /\bif\s*\(\s*!\s*isAcceptableDocumentBody\(\s*parsed\s*\)\s*\)/.test(l));
++    expect(calls.length).toBe(1);
++  });
++
++  it('RED KS-1432 S2: no second inline copy of the shape test is left on the parsed body', () => {
++    const inline = code.filter((l) => l.includes('Array.isArray(parsed)') || l.includes("typeof parsed !== 'object'"));
++    expect(inline).toEqual([]);
++  });
++});
