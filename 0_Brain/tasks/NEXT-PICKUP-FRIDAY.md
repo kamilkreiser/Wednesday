@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-09 11:36 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
+**Kam:** no rows since 10:03:01; reconcile 0. OPEN card: **mpscalc-codeql-javascript-web-1009** (default c). Printer re-raise **Mon 12 Oct**. HP layout review Tue 13 Oct → Playbook fixes only.
+**MERGED today:** Composer **#57** (lane 3b, B103) → main **26deed0** (tree = gated head eec3ccb; gate B105 GO WITH NOTES: F1 Minor accepted → backlog; F2 coverage readings → SME; F3/F5 notes). NOT deployed.
+**IN FLIGHT:**
+- Composer %8 A = B102 lane 2 + rename (+ADDENDUM-1; tab-title script line granted) — waiting on its e2e; branch from a32f9ce → will need rebase onto 26deed0 at PR time (files disjoint from #57's 13 web files, checked). %9 C = B104 CSS (+ADDENDUM-1 User Guide) — e2e running (~test 578 at 11:0x). Then: tier-2 rendered gate for B102+B104 together; deploy HELD until PDFs renamed (packages/** follow-up round, now that #57 is in).
+- Playbook: **PR #129** (B188 feedback) + **PR #130** (B187 sign-in, 369eb4d) → **gate B189 on %12** (tier 1, batched, scratch merge). %3 (B187) + %7 (B188) idle, kept for fixes. After GO: merge both, then ONE hosted deploy seat (push-to-demo grant; report after). Keep-alive (HPSMPOC-235) = proposal needing a new npm dependency: not this round.
+- MPS: gate **B11** (%11) round 1: #6 GO WITH NOTES (G-2, G-3), **#7 NO GO (G-1 Blocker: Vite proxy admits IP-literal Hosts)**, #8 GO WITH NOTES (G-4, G-5). Fix round 1 of 2 tapped: %5 A (G-1), %4 B (G-2 + direct allow-list test for G-3), %6 C (G-4, G-5). Then re-gate the deltas on %11; merge #6 → #7 → #8 (merge_when_green.sh) if CodeQL allows (web/ unscanned → the card). Monday showcase: local; from branches if #7 is held.
+**Records owed after the gates:** MPS BACKLOG (B09's two rows, README line); Composer BACKLOG (#250/#238 merged; F1, F3, F5, B103 n1–n7; F2 to SME list); C-61..C-63 via B102.
+**Watchers:** Composer `seen` (%8 %9) · HPSM `seen_hp` (%12) · MPS `seen_mps` (%4 %5 %6). Re-arm on the existing seen file after each fire.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-09 10:54 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
 **Kam's rulings today (all reconciled, cards hidden):** paul-showcase-feedback = a (his note on HPSMPOC-242 as comment 39278, delivered) · composer-version-edition-lookup = a (E8 with the policy-target lanes; other four in the next content release) · composer-designer-rename-scope = a (screens, PDFs, footers, short form, User Guide; repo/domain unchanged) · printer = withdrawn "delay until monday" → **re-raise Mon 12 Oct**. HP reviews the Playbook structure/layout Tue 13 Oct → Playbook = fixes only. OPEN card: **mpscalc-codeql-javascript-web-1009** (rec a: Kam enables JS/TS CodeQL; default c: merge #6/#8 after gate, #7 waits; Monday showcase from a local merge).
 **LIVE SEATS (each rung-5 verified from its TRANSCRIPT; pane scrollback is unreliable):**
