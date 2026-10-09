@@ -1,0 +1,79 @@
+//@@ BLOCK 1443
+// ===== gate81 PROBE for #1443 (appended by c3_cells_gate81.py to a COPY of the head's own ks1346 test file; uses its ROUTES / drive / mockLoggerError) =====
+// FACTS only: what each of the three fail500 copies LOGS and ANSWERS for each KIND of thrown value. The routers and the response writer are REAL; the logger
+// is MODELLED. The object whose ownKeys trap throws is NOT sent here (it would reject inside fail500 and escape the cell as an unhandled rejection): the
+// c2 `A3` table EVALUATES the expression over it and reads THROWS.
+import fs from 'fs';
+
+describe('GATE81 PROBE #1443 (facts, never a verdict)', () => {
+  const OUT = process.env.G81_PROBE_OUT;
+  const rec = (o: unknown) => { if (OUT) fs.appendFileSync(OUT, JSON.stringify(o) + '\n'); };
+  const SECRET = 'gate81-probe-secret-value';
+  const nullProto = Object.create(null); nullProto.password = SECRET;
+  const VALUES: Array<[string, () => unknown]> = [
+    ['Error(message carries the secret)', () => new Error('boom ' + SECRET)],
+    ['thrown STRING carrying the secret', () => 'text ' + SECRET],
+    ['plain object {password}', () => ({ password: SECRET })],
+    ['class instance DbFault', () => new DbFault()],
+    ['null-prototype object', () => nullProto],
+    ['array', () => [SECRET, 2]],
+    ['number 42', () => 42],
+    ['null', () => null],
+    ['undefined', () => undefined],
+    ['boolean', () => true],
+    ['function', () => function foo() {}],
+    ['symbol', () => Symbol('s')],
+  ];
+  for (const route of ROUTES) {
+    for (const [label, mk] of VALUES) {
+      it(`P-1443 ${route.label} ${label}`, async () => {
+        mockLoggerError.mockClear();
+        let res: any = null; let escaped: string | null = null;
+        try { res = await Promise.race([drive(route, mk()), new Promise((_r, rej) => setTimeout(() => rej(new Error('probe timeout')), 3000))]); } catch (e: any) { escaped = String(e && e.message); }
+        const logged = JSON.stringify(mockLoggerError.mock.calls);
+        rec({ id: 'P-1443', route: route.label, thrown: label, status: res ? res._status : null, body: res ? res._json : null, loggerCalls: mockLoggerError.mock.calls.length,
+              loggedError: (mockLoggerError.mock.calls[0] || [])[1], logCarriesSecret: logged.includes(SECRET), escaped });
+      });
+    }
+  }
+});
+// ===== end gate81 PROBE #1443 =====
+//@@ END 1443
+//@@ BLOCK 1446
+// ===== gate81 PROBE for #1446 (appended by c3_cells_gate81.py to a COPY of the head's own ks1410 audit-export test file; uses dispatch / ADMIN / QUERY / mockLoggerError) =====
+// FACTS only: the 502 catch's answer and its log line for each KIND of rejected fetch. The router and the response writer are REAL; fetch and the logger are MODELLED.
+import fs from 'fs';
+
+describe('GATE81 PROBE #1446 (facts, never a verdict)', () => {
+  const OUT = process.env.G81_PROBE_OUT;
+  const rec = (o: unknown) => { if (OUT) fs.appendFileSync(OUT, JSON.stringify(o) + '\n'); };
+  const SECRET = 'gate81-probe-secret-value';
+  class DbFault { code = 'ECONNREFUSED'; dsn = 'postgres://svc:' + SECRET + '@10.0.4.17/app'; }
+  const nullProto = Object.create(null); nullProto.password = SECRET;
+  const VALUES: Array<[string, () => unknown]> = [
+    ['Error(message carries the secret)', () => new Error('boom ' + SECRET)],
+    ['thrown STRING carrying the secret', () => 'text ' + SECRET],
+    ['plain object {password}', () => ({ password: SECRET })],
+    ['class instance DbFault', () => new DbFault()],
+    ['null-prototype object', () => nullProto],
+    ['array', () => [SECRET, 2]],
+    ['number 42', () => 42],
+    ['null', () => null],
+    ['undefined', () => undefined],
+  ];
+  for (const env of ['production', 'test']) {
+    for (const [label, mk] of VALUES) {
+      it(`P-1446 NODE_ENV=${env} ${label}`, async () => {
+        vi.stubEnv('NODE_ENV', env); mockLoggerError.mockClear();
+        vi.stubGlobal('fetch', vi.fn().mockRejectedValue(mk()));
+        let res: any = null; let escaped: string | null = null;
+        try { res = await dispatch(auditExportRouter, { user: ADMIN, query: QUERY }); } catch (e: any) { escaped = String(e && e.message); }
+        const logged = JSON.stringify(mockLoggerError.mock.calls);
+        rec({ id: 'P-1446', NODE_ENV: env, thrown: label, status: res ? res._status : null, body: res ? res._json : null, bodyCarriesSecret: res ? JSON.stringify(res._json).includes(SECRET) : null,
+              loggerCalls: mockLoggerError.mock.calls.length, loggedError: (mockLoggerError.mock.calls[0] || [])[1], logCarriesSecret: logged.includes(SECRET), escaped });
+      });
+    }
+  }
+});
+// ===== end gate81 PROBE #1446 =====
+//@@ END 1446

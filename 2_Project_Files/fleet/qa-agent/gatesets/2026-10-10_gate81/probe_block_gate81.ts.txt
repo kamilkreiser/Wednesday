@@ -1,0 +1,60 @@
+// ===== gate81 PROBE for #1445 (appended by c3_cells_gate81.py to a COPY of the head's own ks1410-delegations-process-expired-500 test file) =====
+// FACTS only, never a verdict: what POST /api/delegations/admin/process-expired answers and logs for each KIND of thrown value, with and without the
+// shared errorHandler mounted after the router (the real transfer app mounts it: services/transfer/src/index.ts `app.use(errorHandler)`), in
+// production and in development. The builder's cells throw only an Error. The router, express and the shared errorHandler are REAL; the delegation
+// service and the logger are MODELLED (the file's own mocks).
+import fs from 'fs';
+import { errorHandler as gate81ErrorHandler } from '@secuura/shared';
+
+describe('GATE81 PROBE #1445 (facts, never a verdict)', () => {
+  const OUT = process.env.G81_PROBE_OUT;
+  const rec = (o: unknown) => { if (OUT) fs.appendFileSync(OUT, JSON.stringify(o) + '\n'); };
+  const SECRET = 'gate81-probe-secret-value';
+  class DbFault { code = 'ECONNREFUSED'; dsn = 'postgres://svc:' + SECRET + '@10.0.4.17/app'; }
+  const VALUES: Array<[string, () => unknown]> = [
+    ['Error(message carries the secret)', () => new Error('boom ' + SECRET)],
+    ['thrown STRING carrying the secret', () => 'text ' + SECRET],
+    ['plain object {password}', () => ({ password: SECRET })],
+    ['class instance DbFault', () => new DbFault()],
+    ['number 42', () => 42],
+    ['null', () => null],
+    ['undefined', () => undefined],
+  ];
+  async function start(withHandler: boolean): Promise<{ server: http.Server; url: string }> {
+    const app = express();
+    app.use(express.json());
+    app.use((req: any, _res, next) => { req.user = { userId: '00000000-0000-4000-8000-000000000001' }; next(); });
+    app.use('/api/delegations', delegationRoutes);
+    if (withHandler) app.use(gate81ErrorHandler as any);
+    const server: http.Server = await new Promise((resolve) => { const s = app.listen(0, '127.0.0.1', () => resolve(s)); });
+    return { server, url: `http://127.0.0.1:${(server.address() as AddressInfo).port}` };
+  }
+  function postTo(url: string): Promise<{ status: number; raw: string }> {
+    return new Promise((resolve, reject) => {
+      const u = new URL('/api/delegations/admin/process-expired', url);
+      const req = http.request({ hostname: u.hostname, port: u.port, path: u.pathname, method: 'POST', headers: { 'Content-Type': 'application/json' } }, (res) => {
+        let raw = ''; res.on('data', (c) => (raw += c)); res.on('end', () => resolve({ status: res.statusCode || 0, raw }));
+      });
+      req.on('error', reject); req.end();
+    });
+  }
+  for (const withHandler of [false, true]) {
+    for (const env of ['production', 'development']) {
+      for (const [label, mk] of VALUES) {
+        it(`P-THROW handler=${withHandler} NODE_ENV=${env} ${label}`, async () => {
+          vi.stubEnv('NODE_ENV', env);
+          processExpiredDelegations.mockReset(); mockLoggerError.mockClear();
+          processExpiredDelegations.mockRejectedValue(mk());
+          const { server, url } = await start(withHandler);
+          try {
+            const r = await postTo(url);
+            const logged = JSON.stringify(mockLoggerError.mock.calls);
+            rec({ id: 'P-THROW-1445', errorHandlerMounted: withHandler, NODE_ENV: env, thrown: label, status: r.status, bodyCarriesSecret: r.raw.includes(SECRET), bodyHead: r.raw.slice(0, 140).replace(/\s+/g, ' '),
+                  loggerCalls: mockLoggerError.mock.calls.length, logCarriesSecret: logged.includes(SECRET), loggedError: (mockLoggerError.mock.calls[0] || [])[1] });
+          } finally { await new Promise<void>((resolve) => server.close(() => resolve())); vi.unstubAllEnvs(); }
+        });
+      }
+    }
+  }
+});
+// ===== end gate81 PROBE #1445 =====

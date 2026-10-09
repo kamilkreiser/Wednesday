@@ -1,0 +1,13 @@
+C2 claims #1444 head 12487cdcde15d742dbc7e043892e022dfb2c8e4f base 613070f29112a40a0d8d9684cd50c7c2ae54592c repo /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-10_gate81/_scratch/clone
+PASS R0 CODE-ONLY (full-line # comments blanked) added 2 removed 2 | RAW added 10 removed 2 (numstat [10, 2]: the other 8 added lines are comments) | added ['if (L ~ /ln[ \\t]+-[A-Za-z]*s[A-Za-z]*[ \\t]+\\/shared[ \\t]+([^ \\t]*\\/)?n', 'sub(/^USER[ \\t]+/, "", u); sub(/[ \\t].*$/, "", u); if (u !~ /^:/) sub(']
+PASS R1 the relink regex line differs by EXACTLY the prefix group (\/[^ \t]*\/)?node_modules -> ([^ \t]*\/)?node_modules (the rest of the line is byte-identical): True
+PASS R2 the USER line carries the ruled deviation guard `if (u !~ /^:/) sub(/:.*$/, "", u)` exactly once (file-wide code-only count head 1, base 0): ['sub(/^USER[ \\t]+/, "", u); sub(/[ \\t].*$/, "", u); if (u !~ /^:/) sub(/:.*$/, "", u)']
+PASS R3 effective_user_is_unprivileged() is byte-identical base/head: True; its first lines: ['function effective_user_is_unprivileged(st, at, i, u) {', 'u = ""', 'for (i = 1; i <= nuser[st]; i++) {', 'if (user_ord[st, i] < at) u = user_val[st, i]', '}', 'if (u == "") return 0']
+PASS R4 suite diff: one insertion of 80 line(s) at head line 221 of 1309 (base 1229 lines); head minus block == base: True; first line ''; next line '' | NEW cells 6: ['F-C: a ./node_modules re-link destination is the', 'F-C: an app/node_modules re-link destination und', 'F-E: USER root:root -> re-link -> drop privilege', 'F-E: USER 0:0 -> re-link -> drop privileges pass', 'F-E control: USER secuura:root is not root, and ', 'F-E pin: USER :root has an empty user part, is n'] | declared-cell census base {'expect': 46, 'row_case': 34, 'nonjs_case': 10} (sum 90; the PR body says expect 28 + row_case 31 + nonjs_case 7 = 66) -> head {'expect': 52, 'row_case': 34, 'nonjs_case': 10} (sum 96)
+PASS R5 both files are 100755 at base AND head (script 100755, suite 100755)
+PASS D1 API_Security_Functional_Testing_Architecture_Flow_Diagrams.html: one insertion of 16 line(s) at head line 4321 of 4339 (base 4323 lines); head minus block == base: True; first line '<h2>50. The re-link guard accepts relative re-link destinati'; next line '</body>'
+PASS D1 QA_Tool_Cheat_Sheet_Secuura_API_Testing.html: one insertion of 15 line(s) at head line 4403 of 4420 (base 4405 lines); head minus block == base: True; first line '<h2>The re-link guard accepts relative destinations and uid-'; next line '</body>'
+PASS D1b flow doc fragment opens with <h2>50. (flow numbers in the fragment: ['50'])
+PASS D1-CONTROL CONTROL: the head doc with one base byte altered is NOT a pure insertion (the instrument can fail)
+CHECKED 10
+0 FAIL

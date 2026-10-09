@@ -1,0 +1,14 @@
+C2 claims #1446 head d343a3c938600188bb4627173a1245cc77edeee4 base 613070f29112a40a0d8d9684cd50c7c2ae54592c repo /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-10_gate81/_scratch/clone
+PASS B0 CODE-ONLY multiset in audit-export.ts base 02aaec78cba8 -> head 30d31a77b2df: added 2 removed 1 | RAW added 7 removed 1 (numstat [7, 1]: the rest are WHY comments) | added ["logger.error('Audit export could not reach the security serv", "message: 'Failed to reach security service',"] | removed ['message: `Failed to reach security service: ${err.message}`,']
+PASS B1 the new expression == adminConfig.ts:104 at base: True | == #1443's fail500 expression: True | length 262 bytes (this PR's body says 262 B; #1443's says 263 B)
+PASS B2 CODE-ONLY `err.message` occurrences in audit-export.ts base 2 -> head 2 (the 502 template `${err.message}` is GONE: base had it True, head has it False; the new log line's expression adds the one that replaces it); remaining sites by line: base [25, 175] -> head [25, 174]
+PASS B3 the fetch / non-ok region (it passes the upstream status and error through) is byte-identical base/head: True (607 chars)
+PASS B4 logger.error (offset 6413) PRECEDES res.status(502) (offset 6777) inside the catch; res.status(502) occurs 1 time(s)
+PASS B5 test file ks1410-audit-export-502-never-answers-err-message.test.ts: 7 definitions (X1 is it.each x3) = 9 cells (the seat claims 9); X4 names `thrown Object with fields [password, host]` (asserted IN THIS FILE): True
+PASS B6 THIS head's own fail500 (audit-export.ts, :24) is still the PRE-ruling `String(err)` line: True | #1443's head changes exactly that line (the cross-PR fact the composition proof covers)
+PASS D1 API_Security_Functional_Testing_Architecture_Flow_Diagrams.html: one insertion of 69 line(s) at head line 4321 of 4392 (base 4323 lines); head minus block == base: True; first line '<h2>46. audit-export 502 answers a constant message, and log'; next line '</body>'
+PASS D1 QA_Tool_Cheat_Sheet_Secuura_API_Testing.html: one insertion of 18 line(s) at head line 4403 of 4423 (base 4405 lines); head minus block == base: True; first line '<h2>audit-export 502 answers a constant message when the sec'; next line '</body>'
+PASS D1b flow doc fragment opens with <h2>46. (flow numbers in the fragment: ['46'])
+PASS D1-CONTROL CONTROL: the head doc with one base byte altered is NOT a pure insertion (the instrument can fail)
+CHECKED 11
+0 FAIL
