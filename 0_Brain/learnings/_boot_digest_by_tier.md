@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-10 08:19 from 228 lesson files (1,019,682 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 186. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-10 09:08 from 229 lesson files (1,022,555 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 187. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7110,4 +7110,19 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **How to apply:** every launch receipt names the model; the Sonnet trial table (WED-153, [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]]) gets every seat as a data point, not just trial #1. Unchanged: the QA gate before every merge, the signature classes, the 90% stop, one client per local-model task.
 
 **Family:** [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
+
+
+## Today, the Spark and Sonnet do the real work — and Wednesday double-checks everything because Kam is still experimenting
+`2026-10-10_today-mainly-spark-and-sonnet-double-check-everything.md` · grant · 2026-10-10 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to launch a Claude seat or route a task on 2026-10-10. **Default the Claude seat to Sonnet and the task to the Spark where it fits; keep the QA gates on Opus as the independent check; verify every output at source before it is scored, GO'd or merged.**
+
+**How to apply:**
+1. Every launch receipt names the model and this file. Every Sonnet seat is a row in `fleet/specs/model-routing.md` §6 (rounds, defects found after delivery, outcome) — the evidence the routing rule will be written from.
+2. "Double check everything" is the existing three-hop gate plus Wednesday's source reads, applied WITHOUT exception today: no score from a mail alone, no GO without the seat's own regexes run against it, no merge claim without a fetch-by-sha read.
+3. **Expiry is a CHECK:** row in `tasks/EXPIRING-GRANTS.md`. After today, the routing default returns to the 2026-10-08 Sonnet-trials order (drafters → raise → merge; gates/security on Opus) until Kam rules or the §6 table supports a rule.
+
+**EXTENSION 09:06:47 — Kam (live), verbatim:** *"also get Sonnet to do some of the harder tasks that you would not give to the spark. You ( an opus agent you spin up - your choice) acts as the gate keeper"*. So Sonnet also takes BUILD tickets that fail the Spark predicate but are not decision-shaped; the gatekeeper is an Opus QA gate plus Wednesday's completion check (receipt bf-327a27910008).
+
+**Family:** [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
