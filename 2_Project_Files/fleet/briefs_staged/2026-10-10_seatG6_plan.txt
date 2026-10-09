@@ -1,0 +1,157 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T17:34:30.000Z
+Subject: [Secuura/Blockchain-G -> Wednesday] QUESTION: plan confirmation (Seat G 6th)
+---
+MODEL: claude-opus-5 (launcher pin; your /model switch to Opus 5.5 not yet applied — I am at my idle prompt after this mail)
+
+## CONTEXT
+Seat G 6th, pane `Secuura/Blockchain-G` %20 (pinned `-t "$TMUX_PANE"` in my FIRST tool call; the bare
+`tmux display-message` read `wednesday` again — EIGHTH recurrence — and the process ancestry 38073 ->
+36709 -> 36707 agrees with %20). Brief read END TO END (214 lines), SEND AMENDMENT first and taken as
+governing. ITEM 0 complete except three items I deferred on purpose (section 5). Record folder
+`5_Project_History/2026-10-10_seatG-6th/`; scratch clone is a `--shared --no-checkout` clone outside
+the project, with the GitHub remote added as `gh` (origin in a `--shared` clone is the LOCAL path —
+that is the trap I avoided; every value below came from `gh` or from the shared store by read verbs).
+
+## QUESTION
+Do you accept this plan, exactly as below — ITEM 0 as measured, then RAISE_BASE named for your
+acceptance BY NAME, then G-A (KS-1345 deliveries, tier 2) and G-B (KS-1410 transfer, TIER 1), one PR
+each to READY FOR QA — with the three ITEM 0 (d) deferrals in section 5 taken AFTER your ANSWER and
+BEFORE my first commit?
+
+## LAUNCHER PREFLIGHT, VERBATIM (WED-90) — `4_Credentials/.launch_preflight_last.txt`, 7 lines
+```
+# launch 2026-10-09T17:19:31Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 1 other live session(s) on this project: PID 34608 (up since Sat 10 Oct 04:18:28 2026).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+```
+F-02 note: the repo-local `core.sshCommand` carried my `ls-remote` at rc 0, so an identity reaches
+GitHub for READ. That is **not** proof it can PUSH. I will prove the push identity with `ssh -T`
+before M-5, never with `push --dry-run`.
+
+## BOOT SYNC — what it actually did (KS-907)
+READ-ONLY, as the launcher printed. My only remote call in the shared checkout was `ls-remote`;
+**no fetch, no pull, no ref write, no checkout, no stash.** Shared `rev-parse --all` = **1656** at boot.
+Local `develop` in the shared checkout is `1fba82ddb2b8` — **0 ahead / >= 9 behind**. The 9 is measured
+against the LAST-KNOWN `refs/remotes/origin/develop` (`ae9bf6828f88`, left by an earlier seat); the true
+tip `613070f29112` is **ABSENT from the shared store** (`cat-file -e` ABSENT, with my local HEAD as the
+PRESENT control), and history.md shows three further squashes above `ae9bf6828f88`, so the real distance
+is ~12 and is **UNMEASURABLE without a fetch** I am forbidden this launch. I state it as `>= 9`, not 12.
+Working tree: **17 untracked paths, 0 modified, 0 staged, 0 conflicts** — all `systemTest/**` docs,
+2 generated/conflict snapshot files; none is mine and none is a payload path.
+
+## ITEM 0, AS MEASURED (every figure re-measured; where it matches the brief I say so)
+**(a) Refs — ONE `ls-remote` (17:22:23Z -> 17:22:28Z), 1,364 rows.**
+- develop `613070f29112a40a0d8d9684cd50c7c2ae54592c` — **UNMOVED** from your SEND AMENDMENT.
+- `refs/pull/1437/head` `dce5fdc3c952` · `refs/pull/1440/head` `e5663445c595` · `refs/pull/*/head` = **1,361**, highest **1440**. Matches P2.
+- `-g6-` **0** · `-ra28-` **0** · `-f7-` **0** (neither R 28th nor F 7th has pushed). Controls in the SAME call: `-ra19-` **2**, `-zzNOTREAL-` **0**.
+**(b) Doc tails at develop — CONFIRMS P3 exactly.** flow blob `a23ec16bb0a0` 311,353 B: **40** numbered
+`<h2>`, **0 dups**, max **44**, `32 33 34` absent, **45-50 all absent**. cheat blob `8af4daa33385`
+293,022 B: **29** `<h2>`, **0 dups**, tail `… KS-1355, KS-1328, KS-1402`. KS-1345 **1** existing cheat
+section, KS-1410 **1** — so Q-KEYDUP is live for BOTH of mine. (`${D}:path` braced: the unbraced
+`$D:Projects …` form is a zsh `:P` realpath modifier and read **0 bytes** of both docs. rc 128 kept as the control.)
+**(c) Payloads — bytes, sha and BOTH trees match your table.**
+- G-A `patch.diff` 6,425 `1a70f75e281f8d76`; `section_1.diff` 1,280 `92594284e9204936`; `section_2.diff` 5,145 `f3b4570cc1230d65`.
+- G-B `patch.diff` 6,181 `a9b70cd45a25fd92`; `section_1.diff` 891 `ae1713b0c9f4cfda`; `section_2.diff` 5,290 `dcd5026672d664ab`.
+- `--check` at develop, a FRESH temp index each time: GA-s1 strict **rc 128** (`corrupt patch at line 27`), with `--recount --ignore-whitespace` **rc 0** — the `.opts` file carries exactly those two flags. GA-s2, GB-s1, GB-s2 strict **rc 0**. GA whole `patch.diff` strict **rc 128** (your "does NOT strict-apply"); GB whole **rc 0**.
+- Sequential per-section apply -> **G-A tree `78202c558cc641405b38fad3ad48fbcc6b1cdc4c`** and **G-B tree `007affad1d70379242e1c4346c80bd0b98fde0c5`** — both IDENTICAL to the brief's 12-hex.
+- **The pair stacked applies clean in BOTH orders to the same tree `a0adcbe3debf414c6632b5abe9814943cb781ceb`** (NEW value — your `f0d7afd79f13` is all seven READYs, not my pair). Controls fired: re-applying GA-s2 on the GA stack **rc 1**; reverse-applying it **rc 0**.
+- Modes all `100644` at develop; `webhooks.ts` `49fa0f6be61b`, `ks1341c-…test.ts` `5bef74591397`, `delegations.ts` `33dd1f110f66`; `transfer/src/utils/logger.ts` **PRESENT** `8af1ba84ac9e`; `ks1410-delegations-process-expired-500.test.ts` **ABSENT** = the NEW file, as briefed.
+**(d) Tools — copy receipt: 15 of 15 declared tools BYTE-IDENTICAL to G 5th's `_FINAL_HASHES_g5.txt`**
+(`commitg1.sh` `bd59289cc0f53a6f`, `inbox_matchg1.py` `1361f23c2cd1f034`, `lockg1.sh` `2a539bce0edd856c`,
+`namecheckg1.py` `f3cbad9a834f2192`, `pushg1.sh` `825693eb5fbf76c7`, … all 15 MATCH on sha AND line
+count). `raise_rest_g5.sh` (37 lines, `d109febb06cd17d1`) is G 5th's NEW tool and is **not in that
+table** — I say so rather than calling it verified. G 5th's table also declares `reseat_g3.py`, which
+is **not in the source directory**: the table over-declares by one.
+**(e) Shared store, read verbs only:** `rev-parse --all` 1656, `worktree list` 527.
+**(f) Seat facts:** `date -u` 2026-10-09T17:22:18Z / 04:22 AEDT. `df -m /Volumes/DevMASTER` **354,846 MB
+available, 82%** (your drafter read 354,867 — 21 MB apart, same capacity line). Host `node v24.7.0`,
+`npm 11.5.1` — so the `engines.node >= 24.11.0` / `EBADENGINE` gap R 18th hit **is live on this host**
+and I expect it in my Test Evidence.
+**(g) Linear, read-only — all three are OURS, none on Peter or Stuart:**
+- **KS-1345** In Progress / started · P=**Medium** · kamil.kreiser · **0 comments**.
+- **KS-1410** In Progress / started · P=**High** · kamil.kreiser · 1 comment, newest **2026-10-09T07:38:58** by kamil.kreiser (gate77's facts-only read of #1432, naming `audit-export.ts:171-177` — R 28th's territory, not mine).
+- **KS-1402** In Progress / started · P=**High** · kamil.kreiser · 6 comments, newest **2026-10-09T08:22:19** by **stuart.jamieson**: #1437 is the fix S needs and S changes nothing for it. Consistent with #1437 having landed.
+(Board context, read-only: 238 active issues assigned to Kam on Secuura-PK; Backlog 245 = 3 Urgent /
+57 High / 124 Medium / 41 Low / 20 None; 5 tickets completed in the last 24 h, **all Peter's**
+schemathesis pin bumps KS-1455 / KS-1414 / KS-1353 / KS-1408 / KS-1439. The `first:60` I ran first
+returned exactly 60 and was TRUNCATED — the 238 is the `first:250` re-read.)
+
+## THE MATCHER RE-KEY — done FIRST, and it bit in the direction G 5th warned of
+`inbox_matchg1.py` `1361f23c2cd1f034` -> **`900fa0bc7efdd34e`** (432 -> 437 lines, `py_compile` rc 0),
+by **byte span from the AST**, never re-rendered: 4 splices, the pre-edit copy kept at
+`item0/inbox_matchg1.PRE-REKEY.py`.
+- `MINE` `"g 5th"` -> `"g 6th"`, **double quotes preserved** (asserted on the raw bytes before the write).
+- `OTHER_SEATS` **141 entries / 141 distinct -> 149 / 149 distinct**: `g 6th`/`seat g 6th` swapped IN PLACE to `g 5th`/`seat g 5th` (removes my successor, adds my predecessor, no comma surgery), then forward-added `g 7th`/`seat g 7th` and the live foreign seats `r 28th`, `f 7th`, `k 3rd` (+ their `seat ` forms). **`g 9th` is in NEITHER list**, by design.
+- **14/14 arms at their want CLASS**, on FULL-LENGTH subjects pulled from the API (I paginated to
+2026-10-08 to get G 5th's four REAL inbound subjects), each with a token assert and an
+**inverted-want control** (the arm must not read as its opposite). **10 of 14 verdict strings moved**
+between the pre-edit copy and the live one — a re-key that moved 0 would be inert.
+- The two load-bearing moves, same input bytes: **my own LAUNCH BRIEF `for g 6th,seat g 6th` -> `FOR ME`**,
+and **G 5th's `ANSWER: raise base accepted, build G-B` `FOR ME` -> `for g 5th,seat g 5th`** — i.e. before
+the re-key a predecessor's instruction that I would have WANTED read as mine.
+- Also driven: `-R]`/`-F]`/`-K]`/`-E]` -> FOREIGN **and now carrying the seat token**; the UNSUFFIXED
+tag -> FOREIGN; `(Seat G 9th)` on MY tag -> **UNKNOWN ADDRESSEE**; `(Seat E 12th)` on MY tag carrying an
+instruction I would want -> FOREIGN; a Kam-sender control -> the KAM-STOP tag.
+- **An error of mine, caught by its own control:** my first want column was PROSE (`"FOREIGN"`), so
+11 of 14 arms read as failures that were not — the tool returns `for <tokens>`, never that literal. I
+re-expressed the wants as verdict CLASSES read from the tool's own return sites `:350-395`. The arms
+were right; my assertion was wrong.
+
+## WATCHER — ARMED AND LIVE
+`inbox_watchg1.sh` banner re-keyed `(Seat G 5th)` -> `(Seat G 6th)` (sha `b69109d9b223882e` ->
+`304ee9e38707abf4`; exactly 1 occurrence asserted before the write). **pid 60382**, `ps` file
+`raise/ps_watch_g6.txt`, 60 s interval, `SINCE=2026-10-09T17:19:53.000Z` — **the newest mail I have
+READ** (F 7th's brief), not a wall clock. First live poll: `SCANNED 15 messages … no new Wednesday mail
+FOR ME`. **1 live watcher** (counted by the script path, excluding my own shell — `pgrep -fc` counts
+the command line that runs it). Fire rule driven both ways on a FEED first: positive fires on poll 1
+and exits 0; negative polls 4 times with **0** FIRE lines. Bounded with a python sleep, because macOS
+has no `timeout`.
+
+## THE PLAN I AM ASKING YOU TO ACCEPT
+1. **RAISE_BASE**: read develop FRESH, name its 40-hex in `STATUS: raise base (Seat G 6th)` with the doc
+   tails READ from it, the per-section applies at it and the objects result — then **HOLD for your
+   acceptance BY NAME**. Nothing takes `.push-lock-g1`, transfers objects, adds a worktree or writes a
+   ref before that.
+2. **G-A first, then G-B** (one PR at a time, ONE local commit each, `QUESTION: ctx read` before every
+   BUILD and every PUSH). Branches IN FULL:
+   `feature/ks-1345-webhooks-deliveries-failed-query-500-g6-1` and
+   `feature/ks-1410-delegations-process-expired-500-g6-2` (0 `-g6-` at origin).
+3. **Q-NUM as you ruled:** `47.` KS-1410 transfer, `48.` KS-1345 deliveries. Both docs in the SAME commit
+   as the test change; append-only at the tail; I quote the fragment's open/close tag counts and the
+   byte-for-byte read-back against the base blob, never `html_docs_matrix.test.sh 12/0` as evidence.
+4. **Q-GAHUNK:** I re-derive the three G-A behaviours (non-UUID -> 200 `[]`; well-formed UUID + FAILING
+   query -> 500; UUID + rows -> 200) against the route and the existing `ks1341c` cells, and add a cell
+   only where one has no RED/GREEN. I will not write "a failed query can no longer be hidden" without
+   the cell that proves it. **Q-RULEDEXPR, stated exactly as you asked:** G-B's new log line logs
+   `error.message` in its `if (error instanceof Error)` branch ONLY.
+5. **The three ITEM 0 (d) deferrals, taken after your ANSWER and before my FIRST COMMIT** — each holds
+   the commit, not the wait: (i) `namecheckg1.py:446` still ends `or "seat g 5th" in low or "seatg5" in
+   low`, so **re-seat to g6 and drive a quarantine-style ref** before I trust any namespace verdict;
+   (ii) `commitg1.sh` — R 19th's three tabulated lock-release defects are **already FIXED in my copy**
+   (`LOCK_SEAT` required with no default `:38-43`, `release rc=$RELRC` on its own line `:90-93`,
+   `trap release EXIT` `:102`), but it hard-pins `LOCK_SEAT` to `'Secuura/Blockchain-G g5'` and
+   `want 3` changed paths, so it **REFUSES for me** until re-keyed — and **G 5th's `:68` defect is
+   still present** (`git diff --name-only BASE | wc -l` is blind to untracked files; my PRs are 4 paths
+   each, product + test + both HTML docs), which I will fix with a **planted stray untracked file as
+   the control that must make it refuse**; (iii) the full shape SWEEP plus the trap4 / twolock /
+   pathgate suites, before any first run of those tools. Q-COMMITFIX is therefore answered by
+   measurement: verify first, fix only what is present, red-proof.
+6. **Locks:** 0 `.push-lock-*` exist anywhere under `worktrees/` right now. That zero is reported with a
+   planted control in a `mktemp -d` (never in the shared `worktrees/`) still owed — the bare
+   nonexistent-name `find` returned 0 as well, so **as it stands that zero is unverified and I say so.**
+
+## MEANWHILE
+HOLDING. Continuing with nothing that writes: no lock, no objects transfer, no worktree, no install,
+no ref write, no ticket write, no PR. I will keep reading my own payload hunks and the `ks1341c` cells
+read-only while I wait.
+
+## NEEDED-BY
+Whenever you get to it. I am at my idle prompt, so this is also the moment for the `/model` switch to
+Opus 5.5. Nothing is blocked behind anything but your ANSWER.
+
