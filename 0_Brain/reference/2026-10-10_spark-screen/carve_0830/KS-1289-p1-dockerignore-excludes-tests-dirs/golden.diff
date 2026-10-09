@@ -1,0 +1,87 @@
+--- a/Blockchain/Dev/.dockerignore
++++ b/Blockchain/Dev/.dockerignore
+@@ -29,6 +29,9 @@
+ !connectors/whatsapp-bot
+ connectors/whatsapp-bot/node_modules
+ connectors/whatsapp-bot/dist
++# KS-1289: `tests` above matches only a top-level tests/ directory. This matches every
++# __tests__ directory at any depth, and sits after the ! lines above because the last match wins.
++**/__tests__
+ sdk
+ *.log
+ *.env
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks1289_dockerignore_excludes_tests_dirs.test.sh
+@@ -0,0 +1,72 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Dev/.dockerignore - KS-1289: it must exclude __tests__
++# =============================================================================
++# The file's `tests` line matches only a top-level tests/ directory, so every
++# __tests__ directory stayed in the build context: test sources shipped into the
++# images, and one shared test change rebuilt 23 of 29 images. In a .dockerignore
++# the LAST matching line wins, and `!connectors/whatsapp-bot` re-includes that whole
++# directory, so the new line must come AFTER every `!` line or it excludes nothing
++# under whatsapp-bot. This suite reads the file only; it builds no image.
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks1289_dockerignore_excludes_tests_dirs.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++IGNORE="${DOCKERIGNORE_FILE:-$HERE/../../.dockerignore}"
++[[ -r "$IGNORE" ]] || { echo "FATAL: .dockerignore not readable at $IGNORE" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1289.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++
++# Line number of the first `**/__tests__` pattern in file $1 (empty when there is none).
++pattern_line() { grep -nE '^\*\*/__tests__/?$' "$1" | head -n1 | cut -d: -f1; }
++# Line number of the last `!` negation in file $1 (empty when there is none).
++last_negation_line() { grep -nE '^!' "$1" | tail -n1 | cut -d: -f1; }
++# 0 when the pattern exists and sits after every negation.
++excludes_tests_dirs() {
++  local p n
++  p="$(pattern_line "$1")"; n="$(last_negation_line "$1")"
++  [[ -n "$p" ]] || return 1
++  [[ -z "$n" || "$p" -gt "$n" ]]
++}
++
++# CELL 1 (RED at the tip) - a line excludes every __tests__ directory at any depth.
++if [[ -n "$(pattern_line "$IGNORE")" ]]; then
++  echo "PASS: .dockerignore has a **/__tests__ line"; PASS=$((PASS+1))
++else
++  echo "FAIL: .dockerignore has no **/__tests__ line (the \`tests\` line does not match __tests__)"; FAIL=$((FAIL+1))
++fi
++
++# CELL 2 (RED at the tip) - that line comes after the last negation, because the last match wins.
++if excludes_tests_dirs "$IGNORE"; then
++  echo "PASS: the **/__tests__ line sits after every ! line"; PASS=$((PASS+1))
++else
++  echo "FAIL: no **/__tests__ line after the last ! line (pattern at line '$(pattern_line "$IGNORE")', last ! at line '$(last_negation_line "$IGNORE")')"; FAIL=$((FAIL+1))
++fi
++
++# CELL 3 (GREEN CONTROL, tip AND after) - the checks can tell the cases apart.
++printf 'tests\nnode_modules\n' > "$WORK/only_tests.ignore"
++printf '**/__tests__\n!connectors/x\n' > "$WORK/pattern_before_negation.ignore"
++printf '!connectors/x\n**/__tests__\n' > "$WORK/pattern_after_negation.ignore"
++if ! excludes_tests_dirs "$WORK/only_tests.ignore" \
++   && ! excludes_tests_dirs "$WORK/pattern_before_negation.ignore" \
++   && excludes_tests_dirs "$WORK/pattern_after_negation.ignore"; then
++  echo "PASS: CONTROL \`tests\` alone and a pattern before a ! line are refused, a pattern after it is accepted"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL the checks do not tell the three planted files apart"; FAIL=$((FAIL+1))
++fi
++
++# CELL 4 (GREEN CONTROL, tip AND after) - the existing lines are still there.
++if grep -qxF 'tests' "$IGNORE" && grep -qxF 'node_modules' "$IGNORE" \
++   && grep -qxF '!docs/openapi' "$IGNORE" && grep -qxF '!connectors/whatsapp-bot' "$IGNORE" \
++   && grep -qxF 'connectors/whatsapp-bot/dist' "$IGNORE"; then
++  echo "PASS: CONTROL the tests, node_modules, docs/openapi and whatsapp-bot lines are all still present"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL an existing .dockerignore line was removed"; FAIL=$((FAIL+1))
++fi
++
++echo "ks1289_dockerignore_excludes_tests_dirs: $PASS passed, $FAIL failed"
++[[ $FAIL -eq 0 ]]

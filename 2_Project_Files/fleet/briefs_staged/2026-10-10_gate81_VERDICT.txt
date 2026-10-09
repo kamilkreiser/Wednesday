@@ -1,0 +1,159 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+MODEL: claude-opus-5-5 (Opus 5.5), as this session reported it from its first turn (2026-10-09T20:58:17Z UTC). I observed no /model change.
+
+VERDICT #1443: GO for #1443 at 4547234c8c798d4c54c82cf78b69c822766cae91. It assumes develop 7834fd8059da31025aba15a47c4b4d61447016ed.
+VERDICT #1444: GO for #1444 at 12487cdcde15d742dbc7e043892e022dfb2c8e4f. It assumes develop 7834fd8059da31025aba15a47c4b4d61447016ed.
+VERDICT #1445: GO for #1445 at 364a684c35db4b0d0fe91f87554b663b511d757a. It assumes develop 7834fd8059da31025aba15a47c4b4d61447016ed.
+VERDICT #1446: GO for #1446 at d343a3c938600188bb4627173a1245cc77edeee4. It assumes develop 7834fd8059da31025aba15a47c4b4d61447016ed.
+Develop moved during the gate, from 613070f29112 to 7834fd8059da: #1441 merged at 21:25:05Z. Among the PRs' paths it touches only the two docs; its one code change is originate's webhooks route. I proved the keep-both on the new develop. None of the four heads moved: I read them at 4 times (20:59, 21:21, 21:28, 21:33 UTC), and the END_TREEs are equal.
+
+GO strings (quoted, for you to sign):
+  GO (Seat R 31st): merge 1443 on gate81
+  GO (Seat R 31st): merge 1444 on gate81
+  GO (Seat R 31st): merge 1445 on gate81
+  GO (Seat R 31st): merge 1446 on gate81
+No PR has an open Blocker or Major. All findings are Minor or Polish, and none blocks.
+
+MERGE-IN CONDITION
+- Merge order #1443 -> #1446 -> #1445 -> #1444.
+- All four insert at the same base line of both Projects Documents html docs (flow 4321, cheat 4403), and so does develop's #1441 block. A textual merge of any second PR onto the first conflicts: 1 hunk per doc.
+- The merge seat does keep-both.
+- #1443 and #1446 also both edit audit-export.ts. That merge is CLEAN in both orders (below).
+- After each merge-in, re-run:
+  - #1443: the ks1346 file and the ks1410-audit-export file on the composed audit-export.ts (24/24 here).
+  - #1446: the same two files.
+  - #1445: the ks1410-delegations file.
+  - #1444: check_shared_relink.test.sh.
+  - All four: html_docs_matrix, PLUS a count of each PR's fragment (G81-2 below: html_docs_matrix stays 12/0 even with a whole block dropped).
+- base..develop touches no code path of any PR, so the code legs need no re-run beyond those.
+- MERGE-SEAT NOTE: develop's flow tail is now 44. 48. (#1441 took 48), so by max+1 the next free number is 49; 45-47 are unused below 48. The PRs use 45, 46, 47 and 50. They do not collide, but appending after 48 leaves the order non-monotonic. Renumbering is your call.
+
+DECLARED SQUASH SUBJECTS (each TRUE of its diff, no (#n), measured with python len):
+  #1443: KS-1346: api-gateway fail500 logs a thrown object's type and field names  (72)
+  #1444: KS-937: the re-link guard accepts relative destinations and uid-0 users with a group  (84)
+  #1445: KS-1410: transfer process-expired 500 logs the error text instead of returning it  (81)
+  #1446: KS-1410: audit-export 502 answers a constant message and logs the failed fetch  (78)
+These are the drafter's proposals; I re-measured them and agree. The squash body must carry Refs KS-<n>. #1444's PR title is "KS 937: …" (de-hyphenated); its commit subject is hyphenated.
+
+COMPOSITION
+- audit-export.ts, in a temp index of my clone:
+  - 1443 then 1446: git merge-file rc 0 (clean). 1446 then 1443: rc 0 (clean).
+  - The composed blob is 49ea090ff671 in both orders, byte-equal.
+  - The temp-index code trees are 0b85e1dfdf6cda4efd0f29e7f227fbb651d48a7d in BOTH orders.
+  - #1443's fail500 line survives at :28 and #1446's catch log at :177, with the constant at :184.
+  - Both new test files on the composed file: 24/24. Control: audit-export at #1446 alone reds 3.
+- Full four-PR trees: order A e7cfca57d63a8ab1fb5e4228d6d511a2165d6962, B 7c1470c77aec77277d5bfcfcca8b96ccf5738336, C 246b21e73c017946edb7b78ef4fc20cf9d52c134. The code-only tree is 8c654d8196c08fe68fc21a4b0ad06c0c3fb479c9. All equal the drafter's predictions.
+- merge-tree per pair (6 pairs): only the two docs conflict.
+- Docs keep-both, html_docs_matrix 12/0 on each:
+  - on base: order 1443,1446,1445,1444; the reverse; and 1445,1443,1444,1446
+  - on develop 7834fd8059da: develop's block then order A; order A before develop's block; develop's block then the reverse.
+  - In every composed tree each fragment is present exactly once.
+
+RULED EXPRESSION (#1443 and #1446)
+- The expression is 262 bytes, sha256/16 4623660d465c942a. It is byte-identical at all three #1443 sites, at #1446's catch (:174) and at adminConfig.ts:104 at base. The control (pre-ruling text, 48 B) differs.
+- #1443's body says "263 bytes", which does NOT hold (Polish, N-1443-1). Seat R 28th's STATUS records 263 and a 49-B control, so that instrument read +1 byte on both texts.
+- Evaluated with node over 20 thrown kinds:
+  - An Error's .message and a thrown string (a credential URL) are still logged verbatim.
+  - Objects, class instances, null-prototype objects and arrays log their type and field names.
+  - null, undefined, numbers, booleans, functions, symbols and bigints log "thrown <typeof>".
+  - A credential used as a field NAME or class NAME does reach the log. That is the ruling.
+- N-1443-2 (Minor, does not block): the expression itself THROWS for a Proxy with a throwing ownKeys or getPrototypeOf trap. At #1443's head, the async fail500 routes (batch, audit-export) then send NO RESPONSE and raise an unhandled rejection; the sync notifications route goes to next(err). At base that input got a 500.
+- The converse also holds: a null-prototype object did exactly that at base (String() throws), and at the head it answers 500.
+- This is contrived input, and it is the same exposure as the live adminConfig.ts:104.
+- Fix-shape: try/catch around the expression in fail500.
+- No sentence in either body or commit message claims "no longer leaks".
+
+WIDEN MATRIX (#1444), on probes I wrote
+- 45 probe Dockerfiles through `bash <guard> <dir>` (base guard 4e0704b6c7b9, head guard 27a2495c6eb2), with each expected class stated before running.
+- The seat's 32-row subset: 5 control / 9 newly accepted / 18 still refused / 0 newly refused / 0 unexpected, equal to the seat's matrix. All 45: 5/17/23/0/0. The kit's widen1444 agrees.
+- The ../node_modules row: `ln -s /shared ../node_modules/@secuura/shared` reads base rc 1, head rc 0: NEWLY ACCEPTED. So are ../../, ./x/../, ../../../../tmp/, ${APP_DIR}/, /node_modules, USER root:, USER 0: and USER root::x. /tmp/node_modules was already accepted at base.
+- Ruling, N-1444-1: Minor, does not block. It is a new spelling of the pre-existing class "the guard does not check where the link lands"; the effect is a crash on start, which is loud. On the real corpus (25 Dockerfiles) base and head give byte-identical output, rc 0.
+- Suite arms (mine, /bin/bash 3.2.57): head 112/0; BASE script 108/4 (F-C x2, F-E x2, each red for its own rule); minus the deviation guard 111/1 (the F-E pin red).
+- Static refusal-cell census: 66 at base (expect 28, row_case 31, nonjs_case 7), 68 at head. The head suite is 112/0/0. These are suite totals, not a per-cell trace.
+- Siblings 6/0, 6/0, 56/0. html_docs_matrix 12/0. --list 73. Homebrew bash is absent, so that leg is NOT RUN.
+- Docker's handling of USER :root (or root:, 0:) is UNMEASURED: no Docker here (docker info rc 1).
+
+NON-ERROR PROBE (#1445), my probe: 12 thrown kinds x {no handler, real-app order (404 handler + shared errorHandler)} x {production, development}, at head and at base
+- An Error at the head: constant 500 and 1 route log line. At base the marker was in the 500 body.
+- Every non-Error skips the route log and goes to next(error), with identical rows at base and head.
+  - Real-app order: string, object, {statusCode:400}, class instance, null-prototype, array, number and symbol give 500 "An unexpected error occurred" with no marker.
+  - Real-app order: null, undefined and false give 404 NOT_FOUND. That is a pre-existing mis-map (N-1445-2, Minor, not introduced).
+  - No handler, development: express's default HTML echoes a thrown string, array or symbol. The real transfer app mounts errorHandler (index.ts:1051), so that is not the deployed shape.
+- What the shared handler's own logger writes is UNMEASURED: my output capture was blind (0 bytes in every row).
+- No cell covers a non-Error throw. Z6 (next(error) removed) stays 85/85 green (N-1445-1, Minor).
+- Q-4XX: the four 4xx error.message sites (base :85 :208 :211 :213) are byte-identical. PASSED TO YOU AND KAM UNRULED.
+- #1443/#1446 beside it (my probe through the real routers): no marker in any 500 or 502 body at either head. #1446 also removes a base crash: `throw null` from fetch used to crash the catch into a 500, and now answers 502 "thrown object".
+
+CHECK ROWS
+- C1: all four PASS on my own instruments (trailers 0, control 47 B; Co-Authored-By 0, control 1; foreign hyphenated keys 0, control fires; modes unchanged; NO-NEW-LEG 48 paths identical across base, develop and each head; 0 locks). The kit's c1 agrees: 0 FAIL, also at the new develop.
+- CHECK 1: every code claim HOLDS on my code-only diffs.
+  - #1443: +1/-1 per file.
+  - #1446: +2/-1, the non-ok branch untouched, the log before the 502, its own fail500 still String(err).
+  - #1445: +3/-1, the instanceof-then-next(error) structure, the logger present at base.
+  - #1444: exactly the two awk lines, effective_user_is_unprivileged untouched, the suite an 80-line pure insertion.
+  - All 8 doc changes are pure insertions with flow 45/46/47/50.
+- CHECK 2 (base worktree, each plant landed by sha and restored by sha):
+  - #1443: 9F/6P, then 15/15.
+  - #1446: 6F/3P; 1F/8P with the payload's String(err) expression (X4 alone); 9/9.
+  - #1445: 4F/2P, then 6/6.
+  - Whole suites: api-gateway 94/845 at base, 95/860 (#1443), 95/854 (#1446), 96/869 composed; transfer 79, then 85. 0 load failures, 0 status changes.
+  - tsc rc 0 in all six states; the program lists 0 src/__tests__ files. Control: TS2322 gives rc 2.
+- CHECK 3: as above.
+- CHECK 4: as above.
+- CHECK 5: below.
+- CHECK 6:
+  - #1443's "263 bytes" DOES NOT HOLD.
+  - #1443's "Only objects, class instances and numbers are reduced" is an incomplete enumeration (N-1443-4, Polish).
+  - Every other measured figure HOLDS in all four bodies.
+  - Lint and the hook lines are UNMEASURED.
+  - Attribution "Generated with" lines: #1443 0, #1444 1, #1445 0, #1446 1.
+  - Linear: KS-1346, KS-937 and KS-1410 are all In Progress, not archived, each PR attached. No comment names the PRs yet (your batch). Nothing was moved.
+
+CI ATTRIBUTIONS (all VERIFIED by me from the logs, all six runs per head complete)
+- Security Scanning / Dependency Audit = KS-1148. Line 50 of audit-locks.mjs is `import { satisfies as semverSatisfies } from 'semver';`, the same blob aff23b0420ce at base and all four heads. Each PR's log carries ERR_MODULE_NOT_FOUND: Cannot find package 'semver'. No PR touches the file, a manifest or a lock.
+- PR Security Gates / "All shell test suites": `68 passed, 5 failed (of 73)`, the same FAILED set and identical per-suite lines as develop's push run 37962800621, on all four. On #1444, CI ran check_shared_relink.test.sh at 108/0/1 skip, against develop's 102/0/1; the skip is the shallow-clone historical red-proof.
+- pr (Akto, k6, Playwright): all 12 failing jobs' signatures equal develop run 37962800784's jobs.
+- Unclassified reds: 0.
+
+TAMPERS (mine; each plant landed by sha and restored by sha; ALL-GREEN rows re-run on the WHOLE suite)
+- #1443:
+  - A2 (log VALUES instead of keys): 9 red.
+  - A1 (`err !== null` dropped) and A3 (type taken from an own `constructor` field, which would log a secret placed there): ALL-GREEN 860/860 (N-1443-3, Minor).
+  - The kit's T6 (err.message in the 500 body) is ALL-GREEN on #1443's own file, but the whole suite catches it (11 red in the #1432 files).
+- #1446:
+  - B2: X2 red.
+  - B1 (null guard dropped) and B3 (the "constant" carries SECURITY_SERVICE_URL, an internal host:port): ALL-GREEN 854/854 (N-1446-1, Minor).
+  - X4 is the only cell that reds on the payload's String(err) expression.
+- #1445:
+  - Z2 and Z3: red.
+  - Z1 (`if (error)`) and Z6 (next(error) removed): ALL-GREEN 85/85.
+  - My first Z6 plant was TAMPER-INVALID (its anchor matched 4 times); I re-planted it with a unique anchor.
+- #1444:
+  - MT1 and MT2: red.
+  - MT3 (the prefix group spans whitespace): ALL-GREEN 112/0. A probe shows MT3 would accept `ln -s /shared /tmp/x && echo ./node_modules/@secuura/shared` (head rc 1). The kit's T4 (xnode_modules) is also ALL-GREEN (N-1444-2, Minor).
+- G81-2 (Minor): html_docs_matrix does not detect a dropped block.
+
+END_TREE: #1443 7b3c91d23920d340187a3eaaac5332d2949c0c54, #1444 8660c02e391409c5f209f4faad390bacf8fe0389, #1445 fa405296d8b4bae0334bba7093d53a1e0f5c1709, #1446 f99b8676fbba457fbf78a63300c9c0b888da39a7. All EQUAL at the end re-read.
+
+COLLISION CENSUS: 23 other open PRs. OVERLAP-CODE 0. OVERLAP-DOCS 2 (#1442, #1383). WATCHED 1: #1250 touches run-shell-suites.sh, which is not a PR path. #1441 is now merged.
+
+LIVE-RUN NOTE for #1446 (Seat R 29th's TEST BLOCK line, carried verbatim): on a stack with api-gateway running and the security service stopped or unreachable, `GET /api/admin/audit/export` as an admin answers 502 BAD_GATEWAY with message "Failed to reach security service", and the api-gateway log carries ONE "Audit export could not reach the security service (GET /api/admin/audit/export)" line; run it once with the security service up (expect 200 and the export) and once down. A live run is owed on #1443, #1445 and #1446, and none is run here. No ticket goes to Done on offline green.
+
+NOT TESTED
+- No live run of any route (the bodies and logs were measured in-process; the logger, fetch and the delegation service were modelled).
+- No Docker (docker info rc 1), so USER :root is UNMEASURED and no probe Dockerfile was built.
+- The four platform suites: NOT RUN.
+- No live hook run (I read it only).
+- Homebrew bash: absent, NOT RUN.
+- eslint and the hook lines quoted in the bodies: UNMEASURED.
+- The shared errorHandler's own log output: UNMEASURED (blind capture).
+- KS-937 F-A, F-B, F-D, F-F and the other KS-1410 sites: out of scope.
+- #1441 and #1442: not ruled.
+- The builders' 5_Project_History records: not read.
+- Self-correction: one command carried a stray `rm -f /dev/null`, which the OS refused, so it had no effect. It is recorded in the report. Nothing was deleted; everything removed went to quarantine.
+
+TIERING: T1, and I agree.
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-10-gate81/report.md (evidence/ beside it; NOT-TESTED.written-first.md was written before any check)
+sha256 report.md = 030a7b227ee818bc0c79f3cbc9a00a6e22b393f8d93b686880c3a6a0f39a676e
+

@@ -1,0 +1,30 @@
+WHY, per changed line.
+
+systemTest/scripts/check-package-format.sh:152 (now :155) -- `npm run --silent format:check 2>&1`
+becomes `npm run --silent format:check < /dev/null 2>&1`, with a three-line WHY comment above it.
+The package loop is `while IFS= read -r p; ... done <<< "$selected"` (:199), so the loop's stdin IS
+the remaining package list, and npm hands its stdin to the script it runs. Prior behaviour: a
+format:check that read stdin drained the list, so the package after it was not checked, and a red
+package after it let the gate exit 0. With `< /dev/null` each format:check reads an empty stdin and
+the loop keeps its list. This is the ticket's "Robustness note -- no finding attached", not one of
+its four items.
+
+systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh -- new, 93 lines, 100644. Nine
+cells: drain-then-green (x2), drain-then-red, and six CONTROLs. Red-first at base 613070f29112 with
+the product file unchanged: rc 1, 6 passed / 3 failed, all six CONTROLs green in that arm. With the
+change applied: 9 passed, 0 failed, rc 0. 100644 because run-shell-suites.sh runs suites with `bash <file>`
+and has no -x test; shell-suite discovery moves 73 to 74.
+
+Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html -- one new block
+49. appended at the tail. Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html -- one
+new section keyed KS-998 appended at the tail. Written by docblockf7.py with the existing-key count
+stated (2 in each doc); the only difference from each blob at the base is the fragment, byte for
+byte.
+
+NOT in this change: items 1 to 3 (the gate failing OPEN on missing dependencies, and reading the
+working tree rather than the pushed range) stay open, and the ticket does not move to Done. The
+cells use fixture packages whose format:check reads stdin on purpose; no real prettier ran against a
+real package. The four platform suites are UNMEASURED: the local stack is not up.
+
+Refs KS-998
+https://linear.app/secuura/issue/KS-998

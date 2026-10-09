@@ -1,0 +1,77 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+STATUS: merge-in 1442 pushed (Seat R 30th) + QUESTION: ctx read (Seat R 30th). MODEL: claude-opus-5-5 (Opus 5.5).
+
+## BLUF
+- **M = `da5642664ee1d81d06947b4deb8ecb7b4736e3c0` is PUSHED to `feature/ks-998-format-gate-npm-stdin-isolated-f7-1`** (`a7ec5746c..da5642664`, the tool's `.rc` 0). `ls-remote`: branch == `refs/pull/1442/head` == M; **develop unmoved at `7834fd8059da`**.
+- **tree(M) = `3cc9ca91b2e12361f49ad1984333611dc98e58a6`**, which equals gate80's prediction and my ITEM 0 dry run. Composed blobs: flow `f3fc0f18b941ef7abb39333c0c2716a165ba9464`, cheat `2e60b66d8b3d22bc3ac1ad73c50dc4e945b8454e`.
+- **Hook: `shell suites: 74 passed, 0 failed, 0 skipped (of 74)`, matching the expectation.** `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.`
+- **Actions on M: 0 NEW** at workflow and job level. ⚠ **One change you must see:** the `pr` workflow's BUILD job failed on M, so **Akto, k6, Playwright and Schemathesis were SKIPPED on M — the platform suites did NOT run.** Cause: a Docker Hub auth outage (`auth.docker.io/token` → **504 Gateway Timeout**), which hit develop's own push run of `7834fd8059da` in the same way. Attributed by log signature with controls (below). Not code: #1442 touches only `systemTest/` and the two docs.
+- **Safe boundary (b) reached:** M pushed, STATUS mailed. REQUEST: a ctx read, then the GO + ADDENDUM for 1442 (or a successor, if ctx says wrap).
+
+## Checks before the push, all on the REAL M
+- **R-4 `mergeinra30_gate80.sh`** (22 flags in `tools/m3_args_ra30_1442.sh`): **45 gates CHECKED, 45 passed, 0 failed, VERDICT: PASS.** It held `.push-lock-d8` itself, released 21:34:13Z. Parents [gated head, develop] in that order; tree == predicted; 0 trailers (1 B, vs its 72 B control `09a7b2ec8c11`); subject byte-equal at **81 chars** measured; non-doc paths == develop's / the head's.
+- **Q1–Q6 DIRECT** (your Q-PORT80 ruling): `row1442/q_direct_ra30_1442.py` → `q_direct_ra30_1442.out`, **rc 0, 31 checks, 31 passed** — two parents, count AND order (arm: reversed reads false); **Q2 tree STRICT, full 40-hex**; Q3 composed blobs and every marker UNIQUE and in order; **Q4 M minus #1442's block == develop's doc BYTE FOR BYTE (both docs)**; Q5 code blobs == the head's (#1442 paths) and == develop's (#1441 paths), diff develop..M == exactly the PR's 4 paths; Q6 `html_docs_matrix` AT M 12/0; 0 trailers (planted control 26 B).
+- **gate80's re-run list at M:** `ks998_format_gate_stdin_isolated` **9 passed, 0 failed** · `html_docs_matrix` **12 passed, 0 failed**.
+- **S-1 at M** (`s1_ra30.sh`, outside the lock): `npm ci --ignore-scripts` in `Blockchain/Dev` + all **4** systemTest packages, shared build, `dist/index.js` EXISTS, **legs 6 and 7 standalone rc 0 — no new advisory**, KS-1086 indicators + `.git/config` UNCHANGED, HEAD still M. The npm ci + shared build ran in the pushing worktree before the push (M carries #1435's five lockfiles).
+- **F-02:** `ssh -T` authenticates as Secuura/Distributed_Secuura; refused-key control → Permission denied. Not `push --dry-run`.
+
+## R-7 — the push, gate lines VERBATIM
+develop re-read 21:36Z `7834fd8059da` (unmoved) · `pushra1_ff.sh` FF_DRYPROOF rc 0 (FAST-FORWARD `a7ec5746cb8b` → M) · `r7_push_ra30.sh` 21:36:23Z → 21:43:34Z, lock taken/released by the tool, wrapper rc 0, push `.rc` 0.
+```
+OK — all 74 tracked shell suite(s) are reached by the runner.
+shell suites: 74 passed, 0 failed, 0 skipped (of 74)
+OK — 13 code guards passed.
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+To github.com:Secuura/Distributed_Secuura.git
+   a7ec5746c..da5642664  HEAD -> feature/ks-998-format-gate-npm-stdin-isolated-f7-1
+```
+`^FIXTURE BUILD FAILED` ×0. The 3 SKIPs are each `SKIP — local stack not up on http://localhost:6882`. **Ref side effect, as :434 predicts: exactly ONE ref moved in the shared store** — `refs/remotes/origin/feature/ks-998-…` `a7ec5746…` → `da5642664…` (for-each-ref diff 2 lines). The LOCAL branch ref is unmoved (`a7ec5746cb8b`). `rev-parse --all` 1,668 → **1,668**, hash `ffde3eb9ed4d7db0` → **`d3405914b7cb8cd4`** (that one tracking-ref value). KS-1086 UNCHANGED. Login stubs reaped: 0. Lock FREE. Inbox LISTED after the push: nothing new from you.
+
+## R-8 — Actions on M by FULL 40-hex `head_sha`
+`poll_actionsra30.py`, rc 0, fabricated-sha control 0, **TWO AGREEING TERMINAL POLLS** (13 polls, terminal 21:48:28Z), 6 runs / 6 workflow IDs.
+
+| wf id | workflow | M | D = develop `7834fd8059da` | H = gated head | class |
+|---|---|---|---|---|---|
+| 287315271 | PR Security Gates (KS-168) | failure | failure | failure | fails-on-D-too |
+| 307901253 | pr (platform suites) | failure | failure | failure | fails-on-D-too |
+| 243569498 | Security Scanning | failure | NO RUN | failure | D-absent, fails-on-H-too |
+| 312736089 / 306926425 / 309244197 | Dependabot / Lockfiles / pr-premerge-ack | skipped / success / success | — | — | pass |
+
+Failing JOBS on M, each on its own (**3 examined, 0 NEW**):
+- Code Security Gates → step 12 "All shell test suites" → fails-on-D-too (KS-168; gate80's PRE-EXISTING reclassification).
+- Dependency Audit → step 7 → D absent, H fail → **KS-1148, attributed on evidence: M's log carries `Cannot find package 'semver'` ×2 and names `audit-locks.mjs`** (the same as #1441's and #1442's heads).
+- **`build / Build + push platform images (fresh)` → step 8 "Build platform images (ghcr…)" → D FAIL, H PASS → fails-on-D-too.** This is the job that changed from gate80's picture.
+
+**The build job, attributed by LOG SIGNATURE with controls** (`row1442/r8_sig.py`):
+
+| build job | auth.docker.io token failure | `504 Gateway Timeout` | `##[error]` |
+|---|---|---|---|
+| **M** (fail, pull_request) | **4** | **4** | 1 |
+| **D `7834fd8059da`** (fail, push) | **3** | 0 | 1 |
+| H `a7ec5746cb8b` (pass, 797 KB log) | 0 | 0 | 0 |
+| B `613070f29112` (pass, 818 KB log) | 0 | 0 | 0 |
+
+The pattern finds a planted line (control True). On M, buildx reached Docker Hub and got `failed to fetch oauth token … https://auth.docker.io/token: 504 Gateway Timeout`. On D, an earlier step failed the same host (`Head "https://registry-1.docker.io/v2/moby/buildkit/…": Get "https://auth.docker.io/token…"`). **Same cause, an external Docker Hub auth outage; the passing runs carry none of it.** D's tree is #1441's head's tree, whose own build PASSED earlier on its pull_request run, which again points to the environment, not the code.
+
+**Consequences, stated plainly:**
+1. On M, **Akto, k6 (Performance), Playwright AND Schemathesis were SKIPPED**. The platform suites did NOT run on M, so gate80's "PRE-EXISTING, same steps and signatures as develop's push run" comparison for k6/Akto/Playwright **cannot be made on M**. They also did not run on develop `7834fd8059da`. Schemathesis colour on M: SKIPPED (no expectation either way; recorded).
+2. **develop's own push run at my #1441 squash `7834fd8059da` is red at the build job** for the same external reason, whereas develop `613070f29112`'s build was green. The cause is the registry, not #1441's code. Flagging it because it sits on develop.
+3. **I have not re-run any workflow**, and will not: a re-run is a GitHub write outside my partition (and KS-441's spirit). If you want CI on M after the registry recovers, that is your call — or Kam's. Otherwise I treat this as **not a STOP**: the tool's rule (fails on develop's own run too) holds, the cause is attributed, and the brief makes these suites non-blocking ("never a merge blocker by themselves").
+
+## Your #1442 GO — what my tools will assert (so there is no knob round trip)
+- `- develop D: 7834fd8059da31025aba15a47c4b4d61447016ed` · `- PR head: a7ec5746cb8b43313d55d73185ada4931b17c5be` (the GATED head) · `- PR base B: 613070f29112a40a0d8d9684cd50c7c2ae54592c` · `- END_TREE: f400aabef2c3dda518ceb9678786da18e5cee750` · `- Target tree T': 3cc9ca91b2e12361f49ad1984333611dc98e58a6`
+- flow/cheat lines carrying the **composed** blobs above (DOCS=merged).
+- **The literal strings `qm Q2 STRICT` and `qm green`** — the builder FORCES `QM=require` for a merge-in and asserts both (`build_addendumra30_gate80.py:227-229`).
+- `Declared squash subject: \`KS-998: the format gate runs each format:check with an empty stdin\`` · `66 chars, LANDS 66`.
+- `N bytes, sha256 <64-hex>` for `squash_body.GATE80.1442.txt`, and `merge_note: \`Merged by Seat R 30th on the authority of HANDOVER-seatF7-2026-10-10.md sha256 <16>\``.
+- **NO** `previous merge-in P1` line. **This time the merge-in knob IS legal: `RA30_MERGE_IN_HEAD` = M `da5642664ee1…`** (M ≠ the gated head; m7 checks the branch tip == M).
+- My m7 env/driver for 1442 are built and pass `bash -n`: `LANDING=merge-in`, `NO_MERGE_IN=0`, `QM=require`, `DOCS=merged`, `HEAD_TRAILER=refuse` (head trailers measured 0 B), `EXPECT_PATHS=4`, `MODE_CENSUS={"100644": 4}`. M is fetched into my scratch clone (the builder's read repo).
+
+## Ref writes by this seat, cumulative
+1. origin `develop` `613070f29112` → `7834fd8059da` (API squash of #1441).
+2. Shared store: objects-only transfer of `7834fd8059da` (refs byte-identical across it).
+3. Shared store: `worktree add --detach` ×2 (`s-ra30-m1441`, `s-ra30-m1442`), refs byte-identical across each.
+4. M `da5642664ee1` committed in `s-ra30-m1442` (detached; no ref).
+5. origin `feature/ks-998-…` `a7ec5746` → `da5642664` (the push) + its side effect: the shared tracking ref, the same move.
+No force, no `--no-verify`, no `-u`, no write to either develop ref in the shared checkout.
+

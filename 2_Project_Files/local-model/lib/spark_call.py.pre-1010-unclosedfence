@@ -50,21 +50,6 @@ KIT_CONTRACT = os.path.normpath(os.path.join(HERE, "..", "spark-kit", "01_FOR_TH
 DIFF_GRAMMAR = re.compile(r"^(--- |\+\+\+ |@@ -\d+(,\d+)? \+\d+(,\d+)? @@| |\+|-|\\ No newline|diff --git |index |new file mode )")
 
 
-
-def close_unclosed_fence(cleaned, finish):
-    """UNCLOSED FINAL FENCE (2026-10-10, KS-1417 p1 round 1): the answer starts with exactly one ```diff fence, has no
-    closing fence, the model stopped on its own (finish 'stop', never 'length'), and every non-empty line after the
-    opening fence is unified-diff grammar. Then the fence is closed and the caller records a CONTRACT BREACH.
-    Anything else is returned verbatim (checker B1 decides)."""
-    if finish != "stop" or not cleaned.startswith("```diff\n") or cleaned.count("```") != 1 or "~~~" in cleaned:
-        return cleaned, False
-    body = cleaned[len("```diff\n"):]
-    if not body.startswith("--- "):
-        return cleaned, False
-    if [l for l in body.split("\n") if l.strip() and not DIFF_GRAMMAR.match(l)]:
-        return cleaned, False
-    return cleaned + "\n```", True
-
 def main():
     if len(sys.argv) not in (8, 9):
         sys.stderr.write("spark_call: usage: spark_call.py <task.md> <input.json> <out.md> <meta.json> "
@@ -144,11 +129,6 @@ def main():
                              f"grammar ({cleaned.count(chr(10)) + 1} lines, 0 non-diff lines), so out.md carries it inside a ```diff fence "
                              f"(kit 04 failure mode 8). The raw body is in {out_path}.raw.json.\n")
             cleaned = "```diff\n" + cleaned + "\n```"
-    cleaned, unclosed_fence_closed = close_unclosed_fence(cleaned, finish)
-    if unclosed_fence_closed:
-        sys.stderr.write(f"spark_call: CONTRACT BREACH (format) — the answer OPENS one ```diff fence and never closes it, finish_reason "
-                         f"'stop', and every line after the fence is unified-diff grammar, so out.md closes the fence (2026-10-10, "
-                         f"KS-1417 p1). A 'length' cut is never repaired. The raw body is in {out_path}.raw.json.\n")
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(cleaned + ("\n" if not cleaned.endswith("\n") else ""))
 
@@ -172,7 +152,6 @@ def main():
         "done": finish is not None,
         "done_reason": finish,  # the key checker.sh A1 reads ("length" = a budget cut)
         "unfenced_wrapped": unfenced_wrapped,
-        "unclosed_fence_closed": unclosed_fence_closed,
         "content_chars": len(cleaned),
         "system_prompt_files": ["lib/lm_call.py:SYSTEM_PREAMBLE", KIT_CONTRACT],
     }

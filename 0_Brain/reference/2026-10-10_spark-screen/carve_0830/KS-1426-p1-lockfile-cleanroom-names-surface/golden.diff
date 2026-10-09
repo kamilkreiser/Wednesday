@@ -1,0 +1,159 @@
+--- a/Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh
++++ b/Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh
+@@ -88,6 +88,37 @@
+     fi
+ }
+ 
++# KS-1426: name the surface. "All N standalone lock(s) pass" reads like a total; it is
++# only the locks the discovery above reaches. List every tracked package-lock.json this
++# leg did NOT install, so the gap is on the screen. It reports only; the exit code is untouched.
++report_surface() {
++    local top prefix lock d covered covered_n=0 total=0 outside=0 lines=""
++    top="$(git rev-parse --show-toplevel 2>/dev/null)" || {
++        echo "  surface: not a git checkout - cannot list the tracked lockfiles this leg does not install"
++        return 0
++    }
++    prefix="$(git rev-parse --show-prefix)"
++    while IFS= read -r lock; do
++        total=$((total + 1))
++        covered=0
++        for d in ${CHECKED[@]+"${CHECKED[@]}"}; do
++            if [ "$lock" = "$prefix$d/package-lock.json" ]; then covered=1; fi
++        done
++        if [ "$covered" -eq 1 ]; then
++            covered_n=$((covered_n + 1))
++        else
++            outside=$((outside + 1))
++            lines="$lines    $lock"$'\n'
++        fi
++    done < <(git -C "$top" ls-files '*package-lock.json')
++    echo "  surface: $covered_n of $total tracked package-lock.json file(s) were installed by this leg"
++    if [ "$outside" -gt 0 ]; then
++        echo "  NOT installed by this leg ($outside):"
++        printf '%s' "$lines"
++    fi
++    return 0
++}
++
+ FAILED=()
+ CHECKED=()
+ INFRA_SKIP=0
+@@ -130,4 +161,7 @@
+ # the success line — so a corpus of zero standalone locks prints "All 0 ... pass"
+ # and then kills the gate. `${#CHECKED[@]}` on the line above is safe; only
+ # the `[*]` expansion is not. Not reachable while every member carries a lock.
+-echo "  covered: ${CHECKED[*]-}"
++echo "  covered: ${CHECKED[*]-}" # KS-1426: report_surface names what was NOT installed
++if [ "$#" -eq 0 ]; then
++    report_surface
++fi
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks1426_lockfile_cleanroom_names_its_surface.test.sh
+@@ -0,0 +1,107 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for scripts/preflight/lockfile-cleanroom.sh - KS-1426: the leg names the
++# tracked lockfiles it does NOT install
++# =============================================================================
++# The leg prints "All N standalone lock(s) pass" and reads like a total, but its
++# file list comes from four hardcoded directories (services packages frontend
++# scripts). Tracked locks elsewhere (connectors/, the workspace root, systemTest/)
++# are never installed by it. node and npm are stubs on a private PATH, so no
++# package is ever installed; the scratch tree is a throwaway git repo so the leg
++# can ask git which package-lock.json files are tracked.
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks1426_lockfile_cleanroom_names_its_surface.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUBJ="${LOCKFILE_CLEANROOM_SH:-$HERE/../preflight/lockfile-cleanroom.sh}"
++[[ -r "$SUBJ" ]] || { echo "FATAL: lockfile-cleanroom.sh not readable at $SUBJ" >&2; exit 2; }
++command -v git >/dev/null 2>&1 || { echo "FATAL: git required" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1426.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++
++# Stubs: node answers 24 (so the leg takes its host path, no docker); npm succeeds
++# unless the directory it runs in holds a file named FAIL_ME.
++mkdir -p "$WORK/bin"
++cat > "$WORK/bin/node" <<'STUB'
++#!/bin/sh
++echo 24
++STUB
++cat > "$WORK/bin/npm" <<'STUB'
++#!/bin/sh
++[ -e FAIL_ME ] && exit 1
++exit 0
++STUB
++chmod +x "$WORK/bin/node" "$WORK/bin/npm"
++
++# Scratch repo: three locks inside the leg's four directories, three outside.
++REPO="$WORK/repo"
++DEV="$REPO/Blockchain/Dev"
++mkdir -p "$DEV/scripts/preflight" "$DEV/services/a" "$DEV/packages/p" "$DEV/frontend" \
++         "$DEV/connectors/wa" "$REPO/systemTest/akto"
++cp "$SUBJ" "$DEV/scripts/preflight/lockfile-cleanroom.sh"
++touch "$DEV/frontend/.keep"
++for l in "$DEV/services/a" "$DEV/packages/p" "$DEV/scripts/preflight" "$DEV/connectors/wa" "$DEV" "$REPO/systemTest/akto"; do
++  echo '{}' > "$l/package-lock.json"
++done
++git -C "$REPO" init -q
++git -C "$REPO" add -A
++
++run_leg() {   # $@ = leg arguments -> output in $WORK/out.txt, prints rc
++  ( export PATH="$WORK/bin:/usr/bin:/bin"; bash "$DEV/scripts/preflight/lockfile-cleanroom.sh" "$@" ) >"$WORK/out.txt" 2>&1
++  echo $?
++}
++
++RC_ALL="$(run_leg)"
++cp "$WORK/out.txt" "$WORK/out_all.txt"
++RC_ONE="$(run_leg services/a)"
++cp "$WORK/out.txt" "$WORK/out_one.txt"
++touch "$DEV/services/a/FAIL_ME"
++RC_FAIL="$(run_leg)"
++cp "$WORK/out.txt" "$WORK/out_fail.txt"
++
++# CELL 1 (RED at the tip) - every tracked lock outside the four directories is named.
++if grep -qF 'Blockchain/Dev/connectors/wa/package-lock.json' "$WORK/out_all.txt" \
++   && grep -qF 'Blockchain/Dev/package-lock.json' "$WORK/out_all.txt" \
++   && grep -qF 'systemTest/akto/package-lock.json' "$WORK/out_all.txt"; then
++  echo "PASS: the leg names the three tracked locks it does not install"; PASS=$((PASS+1))
++else
++  echo "FAIL: the leg does not name the locks outside its four directories: $(tail -2 "$WORK/out_all.txt" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++# CELL 2 (RED at the tip) - the surface is stated as a count of the tracked locks.
++if grep -qF 'surface: 3 of 6 tracked package-lock.json file(s) were installed by this leg' "$WORK/out_all.txt"; then
++  echo "PASS: the leg states its surface as 3 of 6 tracked locks"; PASS=$((PASS+1))
++else
++  echo "FAIL: no 'surface: 3 of 6 tracked' line in the output"; FAIL=$((FAIL+1))
++fi
++
++# CELL 3 (GREEN CONTROL, tip AND after) - the existing OK line and exit code are kept.
++if [[ "$RC_ALL" == "0" ]] && grep -qF 'All 3 standalone lock(s) pass clean-room npm ci.' "$WORK/out_all.txt" \
++   && grep -qF 'OK    services/a' "$WORK/out_all.txt"; then
++  echo "PASS: CONTROL a clean run still exits 0 and prints 'All 3 standalone lock(s) pass'"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL clean run: rc=$RC_ALL, $(grep -F 'All ' "$WORK/out_all.txt" | head -1)"; FAIL=$((FAIL+1))
++fi
++
++# CELL 4 (GREEN CONTROL, tip AND after) - naming one directory on the command line prints no surface lines.
++if [[ "$RC_ONE" == "0" ]] && grep -qF 'All 1 standalone lock(s) pass' "$WORK/out_one.txt" \
++   && ! grep -qF 'surface:' "$WORK/out_one.txt" && ! grep -qF 'NOT installed' "$WORK/out_one.txt"; then
++  echo "PASS: CONTROL a run that names one directory prints no surface lines"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL one-directory run: rc=$RC_ONE, $(tail -3 "$WORK/out_one.txt" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++# CELL 5 (GREEN CONTROL, tip AND after) - a failing lock still fails the leg, exit 1, no OK line.
++if [[ "$RC_FAIL" == "1" ]] && grep -qF 'FAIL  services/a' "$WORK/out_fail.txt" \
++   && ! grep -qF 'standalone lock(s) pass' "$WORK/out_fail.txt"; then
++  echo "PASS: CONTROL a failing lock still exits 1 and prints no pass line"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL failing lock: rc=$RC_FAIL, $(tail -3 "$WORK/out_fail.txt" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++echo "ks1426_lockfile_cleanroom_names_its_surface: $PASS passed, $FAIL failed"
++[[ $FAIL -eq 0 ]]
