@@ -1,0 +1,80 @@
+[Secuura/Blockchain-G -> Wednesday] QUESTION: plan confirmation (Seat G 7th)
+## BLUF
+ITEM 0 complete, every arm with its control. **develop is UNMOVED at `613070f29112a40a0d8d9684cd50c7c2ae54592c`** (my `ls-remote` 18:30:50-55Z). The G-B payload re-hashes EQUAL and both sections apply strict at develop to the declared tree `007affad1d70379242e1c4346c80bd0b98fde0c5`. Toolkit 17/17 EQUAL. Matcher + watcher re-keyed to g7 and the watcher is ARMED. **One question, at the end. I take no lock, add no worktree and write no ref until your ANSWER.**
+
+## LAUNCHER PREFLIGHT WARNINGS — VERBATIM (`4_Credentials/.launch_preflight_last.txt`, 7 lines)
+```
+# launch 2026-10-09T18:26:54Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 2 other live session(s) on this project: PID 34608 (up since Sat 10 Oct 04:18:28 2026), PID 38378 (up since Sat 10 Oct 04:20:02 2026).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+```
+NOT clean. F-02 did not block me: `ls-remote` ran rc 0 twice through the repo-config `core.sshCommand`. The KS-907 pids match the panes I measured (34608 = R 28th `%19`, 38378 = F 7th `%21`).
+
+## SEAT IDENTITY — and the bare-read trap fired a SIXTH time
+Bare `tmux display-message -p '#{@cockpit_name}'` returned **`wednesday`** (`%0`) in my second tool call. The pinned read `-t "$TMUX_PANE"` (`%22`) returns **`Secuura/Blockchain-G`**; control `#{@not_a_real_option}` came back EMPTY, so the instrument discriminates. Corroborated independently by ancestry: my shell -> claude `32482` -> launcher `32480` running `Launch_Claude.command` with `[cockpit] Secuura/Blockchain-G`, not `Launch_Wednesday.command`. Floor now: `%0` wednesday, `%1` fleet-monitor, `%19` `-R`, `%21` `-F`, `%22` me. I ran the assert in my first call and corrected inside the same call, so no wrong seat name left this pane.
+
+## BOOT SYNC — what it did
+READ-ONLY, as the KS-907 line said. In the shared checkout I ran ONLY `git status` and `git ls-remote`. No fetch, no pull, no checkout, no ref write. Shared checkout: branch `develop` at `1fba82ddb2b8920bafc15c3cbd40b1c4dd346331`, **0 ahead / 12 behind** origin's `613070f29112` (`rev-list --left-right --count`; `merge-base --is-ancestor` rc 0, so no divergence). 17 untracked files, 0 modified, 0 staged, 0 conflicts — all 17 are `systemTest/**/docs/*.md` plus two `(conflict_on_2026-07-03)` snapshot files; none is mine and I touched none.
+
+## ITEM 0 (a) REFS — ONE `ls-remote`, 18:30:50Z -> 18:30:55Z
+- **develop `613070f29112a40a0d8d9684cd50c7c2ae54592c`** — UNMOVED since your 18:26:38Z read.
+- `refs/pull/1441/head` = `7685e79af2c437b1e6cc8fe2e57b1b0771f576d5` — EQUAL to the brief. `refs/pull/1440/head` = `e5663445c5950ceffac592570cf0d927a4c0d879`.
+- Highest `refs/pull` = **1441** (unchanged). Heads = **774** (drafter read 773 at 18:24Z; the +1 is F 7th's).
+- Tokens: `-g7-` **0** (my branch name is free) · `-g6-` **1** (`feature/ks-1345-webhooks-deliveries-failed-query-500-g6-1`, #1441) · `-ra28-` **0** · `-f7-` **1** (`feature/ks-998-format-gate-npm-stdin-isolated-f7-1` — NEW since the drafter).
+- Controls in the same call: `-ra19-` = **2**, `-zzNOTREAL-` = **0**. Both as the brief predicted.
+- ⚠ **One thing worth naming:** a KS-1410 branch already exists at origin — `feature/ks-1410-apigw-500-never-answers-err-message-ra19-1` (`5ed875dcb60a`). That is lane R's **api-gateway** slice of the same parent ticket, not my transfer slice. With R 28th's audit-export also on KS-1410, three lanes share the key; I name it so my `-g7-1` branch is not mistaken for a duplicate of it.
+
+## ITEM 0 (b) DOC TAILS — read FROM develop, not inherited
+Both blobs are byte-identical to G 6th's base (`a23ec16bb0a0` flow / `8af4daa33385` cheat), so nothing of `45.`-`50.` has landed yet. Measured anyway:
+- Flow: **40** numbered `<h2>`, **0 dups**, TAIL **`44`**. `32 33 34` absent; `45 46 47 48 49 50 51` ALL absent -> **`47.` is free and mine.**
+- Cheat: **29** `<h2>`, **0 duplicate keys**, TAIL key **`KS-1402`**.
+- **KNOBS N at MY base: flow `1` / cheat `1`** (`str.count`, word-bounded cross-check agrees, `KS-99999` control = 0 in both). Integers >= 1, so **Q-G7-COUNT resolves to `--flow-key-exists-ok 1 --cheat-key-exists-ok 1`**, the same values G 6th read — not a STOP.
+- Both existing KS-1410 mentions are the **api-gateway** item (flow block `36.`, and the cheat row "api-gateway 500 bodies no longer carry the thrown error's text"). My new section is a different ITEM under the same key, which is exactly the shape Q-KEYDUP ruled.
+- Minor pre-existing fact, not mine to change: cheat `<h2>` #4 carries TWO keys ("Observability images + native k6 guard — KS-1445 (with KS-1367)"), which is why 29 headings yield 30 keys. My heading will carry exactly one.
+
+## ITEM 0 (c) PAYLOAD — re-hashed and APPLIED at develop
+- `patch.diff` 6,181 B `a9b70cd45a25fd92` · `section_1.diff` 891 B `ae1713b0c9f4cfda` · `section_2.diff` 5,290 B `dcd5026672d664ab` — **all three EQUAL** to the brief.
+- Strict `--check` per section at develop: **rc 0, rc 0**. Applying both in order in a temp index gives tree **`007affad1d70379242e1c4346c80bd0b98fde0c5`** — **EQUAL to the declared tree.**
+- Changed paths vs develop: exactly **2** — `A` the NEW transfer test, `M` `delegations.ts`. Nothing else.
+- Controls: double-applying `section_1` refuses **rc 1** ("patch does not apply"); a fresh index at develop accepts it **rc 0**. I first read that control's rc through a `| head` and got a false `rc=0` — the carried pipe trap — so I re-read it from a file. The rc values above are the file reads.
+- Blobs at develop: `delegations.ts` `33dd1f110f66` EQUAL · `logger.ts` `8af1ba84ac9e` EQUAL · the test file **ABSENT**, as declared. Done in my own `--shared --no-checkout` scratch clone; the shared store got no write.
+
+## ITEM 0 (d) TOOLS
+- **Receipt: 17/17 EQUAL** (sha16 and line count) against your table, 0 differing, 2 extra copied for reference (`keydup_arms_g6.sh`, `raise_rest_g5.sh`). Copied into `5_Project_History/2026-10-10_seatG-7th/raise/`.
+- **G 6th's handover re-hashed EQUAL: 158 lines, `382829091833b14e`, 12,691 B.** Read end to end; the FIRST THREE THINGS are folded in above and below.
+- **SHAPE SWEEP before any first run:** 12 of 19 files carry the ordinal. `namecheckg1.py` is the heaviest (9 `-g6-`, 10 `g 6th`, 11 bare `g6`, 1 `seatg6`), which matches the handover's warning that it needs more than a re-seat. Controls: `-gZZ-` 0 everywhere; positive `g1` in 13 files.
+- **MATCHER re-keyed `900fa0bc7efdd34e` -> `cdbfd9c4acc500bb`**, 437 lines unchanged, diff exactly the two intended lines, by exact span — never re-rendered. `g 7th`/`seat g 7th` swapped IN PLACE to `g 6th`/`seat g 6th`; `g 8th`/`seat g 8th` FORWARD-ADDED; `MINE = "g 7th"` with its double quotes; `g 9th` in NEITHER list. OTHER_SEATS 149 -> **151 entries, 151 distinct**, asserted by AST.
+- **Arms on FULL-LENGTH subjects pulled from the API, wants as verdict CLASSES read from `tag()`'s return sites (not prose — that read 11 false failures for G 6th): 11/11 pass.** My brief and my ADDENDUM -> FOR_ME · F 7th's identically-titled ADDENDUM -> FOREIGN · G 6th's real READY and your G 6th ANSWER, both on MY pane tag -> FOREIGN · R 28th and F 7th ANSWERs -> FOREIGN · `(Seat G 8th)` on my tag -> FOREIGN · `(Seat G 9th)` on my tag -> UNKNOWN_ADDRESSEE · my pane with no seat named -> FOR_ME_PANE · K 3rd on its own tag -> FOREIGN. **Inverted-want control fired** (brief declared want FOREIGN -> FAIL-as-designed), so the harness can fail.
+- **WATCHER re-keyed `304ee9e38707abf4` -> `f1830f67b45ff661`** (1-line banner diff, 162 lines) and **ARMED 18:38:18Z**, SINCE `2026-10-09T18:33:24Z` = your ADDENDUM, the newest mail I have READ. Poll 1 scanned 15 messages, no new FOR-ME. **ONE watcher process, pid 12182** (parent shell 12180), read from a `ps` FILE — my first grep said "3" because it matched the wrapper lines, which is the `pgrep`-counts-itself class, not three watchers.
+- **NOT yet run:** the doc tool's e1/e3/ad3 arms on MY key, and the `namecheck`/`commit`/`push`/`twolock`/`trap4` re-keys. None is needed before your ANSWER; I run them while I wait and paste the doc-tool arms in my raise-base STATUS, as the brief asks.
+
+## ITEM 0 (e) SHARED STORE — read verbs only
+`rev-parse --all` **1662** refs (BASELINE, captured before any write of mine; G 6th wrapped at 1658). `FETCH_HEAD` sha16 `e2820982cb58f7f4`. `origin/develop` tracking ref still the stale `ae9bf6828f88131dfcc0b410f14c2f436903eb49`, untouched. 531 worktrees. Control: `refs/heads/zzNOTREAL-g7` absent.
+
+## ITEM 0 (f)(g)(h)
+- **(f)** `df -m /Volumes/DevMASTER`: **343,260 MB available, 83%** — effectively G 6th's wrap figure (343,301). No hygiene performed, nothing of mine to remove yet.
+- **(g) Linear, read-only, no write:** **KS-1410** In Progress / started, **High**, assignee `kamil.kreiser@secuura.ai`, title "28 unguarded err.message values land in 500 response bodies across six services - no NODE_ENV guard in any of the six files", **1 comment** (newest 2026-10-09T07:38:58Z, gate77's review of #1432, which names `api-gateway/src/routes/audit-export.ts:171-177` — R 28th's slice, not mine). **KS-1345** In Progress / started, **Medium**, same assignee, **0 comments** — so the #1441-naming comment is still yours to batch. Neither ticket is on Peter or Stuart.
+- **(h) Predecessor:** `worktrees/s-g6-ks1345` PRESENT (kept, PR open, not mine to touch). **`.push-lock-g1` NOT held — and NO `.push-lock-*` exists anywhere under the project right now**, so neither `.push-lock-d8` nor `.push-lock-f3` is held at 18:3xZ. Positive control: the same `find` predicate against a planted `mktemp -d` tree returns 1, so the 0 is a real zero, not a dead instrument. I planted nothing in the shared `worktrees/`. **0 live G 6th watchers** (no `inbox_watchg1.sh` process other than my own in the ps file).
+
+## YOUR ADDENDUM (18:33:24Z) — read, and I checked its claim myself
+Understood as a sequence line: `bash systemTest/__tests__/html_docs_matrix.test.sh` in my worktree after every doc append and BEFORE the commit, 0 failed, STOP and mail on a fail. I verified the house style it describes at MY base rather than taking the relay: flow doc **159** `<table class="pmatrix">`, **134** `<h3>` of which **132** match `NN.x`, and only **32** `<p>` in 311,353 B; cheat doc **75** `pmatrix` tables, **60** `<div class="note">`, **22** `<p>`. The last blocks' tag skeletons are `<h3>..</h3><table><tr><td>` (flow) and `<h2>..</h2><div><table><tr><td>` (cheat). So R 28th's measurement holds here, and I will shape both fragments to it. I still intend to quote open/close tag counts and the byte-for-byte read-back, since the brief is right that 12/0 alone is not evidence a block is well-formed.
+
+## THE PLAN I PROPOSE — unchanged from the brief, one item
+1. On your ANSWER and a ctx reading < 45%: re-read develop FRESH and send `STATUS: raise base (Seat G 7th)` naming its 40-hex, the doc tails read from it, the per-section applies at it, the objects result, and the doc-tool e1/e3/ad3 arms on my key. **Hold for acceptance BY NAME.**
+2. Then G-B, ONE PR: worktree `s-g7-ks1410-transfer` detached at the accepted base under `.push-lock-g1`; S-1 installs; apply per section with `--check` + `cmp`; the Q-5D (a) WHY line in the SAME commit; re-run red/green + `tsc` on the pinned-`typeRoots` instrument with its planted control inside `rootDir`; doc blocks via `docblockf7.py` (header attribution re-keyed to G 7th, old/new hashes recorded) at flow `47.` / cheat KS-1410 with knobs 1/1; **then `html_docs_matrix.test.sh`**; commit via the config-driven tool re-keyed to g7; `QUESTION: ctx read` BEFORE the push; `rev-parse --all` captured before; ONE bare push; raise by REST as `raise_rest_g7.sh`; end at ONE `READY FOR QA` with the CLAIM LEDGER.
+3. Branch `feature/ks-1410-delegations-process-expired-500-g7-1`. Tier 1. Change `:283` only. Live run owed, so KS-1410 does not move to Done. No merge, no gate, no deploy, no board write, no extranet.
+4. Q-4XX: I edit none of `:85 :208 :211 :213` and list them in the READY as a QUESTION.
+
+## QUESTION
+Do you accept this plan as stated — and in particular my ITEM 0 readings of **develop `613070f29112a40a0d8d9684cd50c7c2ae54592c`**, **knobs flow 1 / cheat 1**, **flow `47.` free**, and branch **`feature/ks-1410-delegations-process-expired-500-g7-1`** — so that I may proceed to the fresh RAISE_BASE read and hold for your acceptance BY NAME?
+
+## MEANWHILE
+Continuing, without any lock take, worktree add, install or ref write: the remaining re-keys (`namecheckg1.py` incl. the missing `foreign_of()` g6 arm, `commitg1.sh`, `pushg1.sh:170`, `twolockg1.sh:41`, `lockg1.sh` refusal strings, `trap4_g1.py`, `raise_rest_g7.sh`), their tamper/red proofs, and the doc tool's e1/e3/ad3 arms on my key. Watcher armed; I will also tap-check.
+
+## NEEDED-BY
+Before any build step. I am holding at ITEM 0 until you answer; nothing in the repo has been written.
+
