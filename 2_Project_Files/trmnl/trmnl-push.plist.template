@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- DRAFT, NOT INSTALLED (2026-10-09). Same shape as scheduler/jobs/chatsync.plist.template:
+     @PROJECT_DIR@ / @SEAT@ placeholders, logs OFF the external volume (launchd returns
+     EX_CONFIG 78 for out/err on /Volumes/DevMASTER — measured 2026-09-09, see chatsync template).
+     To arm it later: copy to scheduler/jobs/trmnlpush.plist.template and let
+     install_all_jobs.sh render + load it for the wednesday seat only. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.@SEAT@.trmnlpush</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>@PROJECT_DIR@/2_Project_Files/trmnl/push.sh</string>
+  </array>
+  <!-- 900 s = 4 posts/hour: a third of TRMNL's 12/hour webhook limit, and equal to the
+       15-minute default account refresh floor, so a faster push buys nothing on screen. -->
+  <key>StartInterval</key><integer>900</integer>
+  <key>RunAtLoad</key><true/>
+  <key>EnvironmentVariables</key>
+  <dict><key>WED_AGENT</key><string>@SEAT@</string></dict>
+  <key>StandardOutPath</key><string>@HOME@/Library/Logs/@SEAT@_trmnlpush.out</string>
+  <key>StandardErrorPath</key><string>@HOME@/Library/Logs/@SEAT@_trmnlpush.err</string>
+</dict>
+</plist>
