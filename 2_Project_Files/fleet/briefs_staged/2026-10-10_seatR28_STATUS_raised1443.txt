@@ -1,0 +1,100 @@
+[Secuura/Blockchain-R -> Wednesday] STATUS: pushed feature/ks-1346-apigw-fail500-type-and-field-names-ra28-1, raised #1443 (Seat R 28th) + QUESTION: ctx read (Seat R 28th)
+## BLUF
+**R-A is PUSHED and RAISED: PR #1443, head `4547234c8c798d4c54c82cf78b69c822766cae91`, base
+`develop`, tier 1 proposed.** The hook ran whole, nothing forced, nothing bypassed. One CI job
+completed `failure` and **it is not mine** — it reproduces on G 6th's #1441 and is already filed as
+KS-1148. Asking for a ctx read before R-B's build.
+
+## Branch and PR, both IN FULL
+- Branch: `feature/ks-1346-apigw-fail500-type-and-field-names-ra28-1`
+- PR **#1443**, state `open`, draft `false`, base `develop`, **6 changed files, +213 / -3**
+- HTTP **201** on create; head read from origin **in the same action** ==
+  `4547234c8c798d4c54c82cf78b69c822766cae91` == local tip; body read back **7,107 B, sha256/16
+  `935dc37970e1eab1`, ROUND-TRIP IDENTICAL**
+- The PR's file list is exactly my six: the three routes (+4/-1 each), the new test (+132), and the
+  two platform-k HTML docs (+45 and +24). No seventh path.
+- `mergeable_state` reads `unstable`. **I am not offering that as a testing claim** — the repo's own
+  rule is that the Test Evidence block carries the testing claim and `mergeable_state` carries none.
+
+## THAT push's gate lines, verbatim with their ratio
+```
+shell suites: 73 passed, 0 failed, 0 skipped (of 73)
+OK — 13 code guards passed.
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+```
+`.rc` file = **0**. **The verdict is "INCOMPLETE … 3 SKIPPED. Nothing failed." — not "passed", and I
+am not writing it as one.** All three skips print the same reason:
+`SKIP — local stack not up on http://localhost:6882 (start it to run this leg)`.
+Note `shell suites` went **72 passed / 1 failed → 73 passed / 0 failed** between the two attempts,
+which is the fix landing, measured rather than asserted.
+
+## Both ref side effects, and the lock
+- `rev-parse --all` **1,662 → 1,663**, sha256/16 `ee940aa69b99ecf2` → `3f047307f3c920ac`. Exactly ONE
+  new object, `4547234c8c79`, carrying BOTH `refs/heads/feature/ks-1346-…-ra28-1` and
+  `refs/remotes/origin/feature/ks-1346-…-ra28-1`. **0 refs removed.**
+- `develop` at origin `613070f29112` before and after; local `develop` still `1fba82ddb` with **0**
+  reflog entries dated 2026-10-10. No fetch, no pull, no develop ref write.
+- Post-push lock `find`: my `.push-lock-d8` **ABSENT**, and a planted `.push-lock-zzctl` in a
+  `mktemp -d` **WAS found (1)**, so the check could discriminate. 0 orphaned `login_stub` pids.
+- 🔴 **A nit in my own check, disclosed:** I first wrote that predicate as "real locks held MUST be
+  0" and it read 1 — which was F 7th's healthy `.push-lock-f3` (`Secuura/Blockchain-F f7`, pid
+  35318, branch `feature/ks-937-relink-guard-relative-dest-uid0-group-f7-2`). The correct predicate
+  is "MY lock is released", not "no lock exists anywhere". Attributed by holder field, not by path.
+
+## Actions — COMPLETED runs only, and one is a FAILURE that is NOT mine
+6 runs on my head. Completed, with conclusions:
+
+| run | conclusion |
+|---|---|
+| `PR — Lockfiles (path-skip twin)` | **success** |
+| `pr-premerge-ack` | **success** |
+| `Dependabot standalone locks` | skipped |
+| `Security Scanning` | 🔴 **failure** |
+
+Two were still `in_progress` when I read (`PR Security Gates (KS-168)`, `pr`) — no conclusion to
+quote for those. **Actions is clearly RUNNING on this repo**, which matches your brief's line that
+the project `CLAUDE.md` "Actions is retired" sentence is stale; I have not touched that file.
+
+**The failure, attributed rather than skipped:**
+- Job `Dependency Audit`, failed step 7 `Audit-contract suites (the gates' own validator)`. The other
+  six jobs in that run are success or skipped.
+- Root cause from the job log (fetched by job id `113971802691` — the only job with
+  `conclusion=failure` — through the 302 with the auth header dropped; 44,102 B; positive control
+  `audit-locks` 17 occurrences, absent-string control 0):
+  `Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'semver' imported from
+  Blockchain/Dev/scripts/audit/audit-locks.mjs`. **7 AssertionErrors, 6 of them "got 1"** — every one
+  cascades from the module failing to resolve, so the script dies before reaching the exit code each
+  assertion expects.
+- **Mechanism, measured locally:** `audit-locks.mjs:50` does
+  `import { satisfies as semverSatisfies } from 'semver'`, and `Blockchain/Dev/package.json`
+  **does not declare `semver`**. It is present in my `node_modules` as a transitive, which is exactly
+  why it resolves in-hook on this host and not on the runner.
+- **NOT ATTRIBUTABLE TO ME, by a second instrument:** G 6th's PR **#1441** (head `7685e79af2c4`,
+  nothing of mine in it) has the SAME `Security Scanning` run completed `failure` (run
+  `37971913943`).
+- **Already on the board — I filed nothing.** Board search by symbol and string
+  (`searchIssues`, three terms) returns **KS-1148** as the top hit on all three:
+  *"CI-runner environment gaps (one class, two jobs): `Security Scanning` runs `au…"*, **Backlog**,
+  assignee kamil.kreiser. K 3rd's wrap already carried a follow-up on KS-1148. So this is a known,
+  owned item and not a new finding; it is yours to route if the tier-1 gate wants it moved.
+
+## The earlier refused attempt, for the record
+`PREFLIGHT FAILED on leg(s) 14 … (12/15 legs ran)` at 18:21:56Z, cause mine (prose `<p>` fragments
+against the documents' `pmatrix` house style), nothing reached origin, branch deleted and the commit
+rebuilt through `commitra3.sh` rather than amended. Discarded commit
+`62002ce626571a96cc81f117aed8ec98927a0fba`, unreferenced, still in the worktree reflog. Never
+`--no-verify`, never a force-push.
+
+## Question
+What is my ctx reading? At your 18:32Z reading of 46% a BUILD is above the under-45% line, so R-B's
+build needs either a lower reading or your explicit word — and if the number says WRAP, say so and I
+will wrap cold rather than start R-B.
+
+## Meanwhile
+Holding. 0 locks of mine held, nothing further pushed. R-B (KS-1410 audit-export) is UNBUILT and
+UNRAISED; its doc hold is discharged by your ruling and I have the tool, the arms (9/9) and the
+measured knob Ns (1/1) ready for it. R-C KS-1432 stays UNRAISED.
+
+## Needed-by
+Next poll. develop was `613070f29112` at my 18:33:40Z read.
+
