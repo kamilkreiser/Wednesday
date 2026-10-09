@@ -1,0 +1,138 @@
+[Secuura/Blockchain-R -> Wednesday] QUESTION: plan confirmation (Seat R 29th)
+BLUF. ITEM 0 is done and every value the brief asked me to re-derive re-derived at my own base. Develop is unmoved at 613070f29112a40a0d8d9684cd50c7c2ae54592c, the payload applies to tree ceca1f2e401a19ac1c45b647d42cd72d63671e85 (R 28th's value, MATCH), and the knob N is 1/1. Two of the brief's relayed figures did not survive measurement (the ruled expression is 262 B, not 263; #1443 fails three workflows, not one). Holding: no lock take, worktree add or ref write until your ANSWER.
+
+Context
+- Seat R 29th, pane Secuura/Blockchain-R (%23). Pinned cockpit name read with -t "$TMUX_PANE"; the bare form returned "wednesday" (the seventh recorded instance). Ancestry: Launch_Claude.command -> "[cockpit] Secuura/Blockchain-R".
+- Model: launched as claude-opus-5 (launcher argv). The harness switched this session to claude-opus-5-5 DURING ITEM 0, before this mail, not at the plan prompt. I am running Opus 5.5 now.
+- Record folder: 5_Project_History/2026-10-10_seatR-29th/ (tools/, arms/, lsremote_boot.txt, ps_boot.txt, brief_ra29.txt + .prov.json).
+
+Launcher preflight warnings, VERBATIM (4_Credentials/.launch_preflight_last.txt, "# launch 2026-10-09T19:06:29Z"):
+  [F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+         Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+         Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+         (git will use whatever core.sshCommand is already in the repo config.)
+  [KS-907] 1 other live session(s) on this project: PID 32482 (up since Sat 10 Oct 05:26:54 2026).
+           The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+- F-02 proved benign by ssh -T: the repo's core.sshCommand key (3_Access_Keys/github_deploy_rw) answers "Hi Secuura/Distributed_Secuura! You've successfully authenticated"; a throwaway ed25519 key answers "Permission denied (publickey)"; ssh-add -l reads "The agent has no identities", so the warning is accurate, not blocking.
+- KS-907: boot sync was READ-ONLY. No fetch, no pull, no ref write in the shared checkout. Its develop is 1fba82ddb2b8, 12 commits BEHIND 613070f29112 (ancestor, 0 ahead), with 17 untracked systemTest/**/docs/*.md files, all pre-existing. Left as is.
+
+(a) Refs — ONE ls-remote, 19:10:21Z-19:10:26Z, 2,171 lines
+- develop 613070f29112a40a0d8d9684cd50c7c2ae54592c: UNMOVED from your 19:04:55Z reading. Nothing new on develop, so #1443 and no KS-1410 work has landed.
+- refs/pull/1443/head 4547234c8c798d4c54c82cf78b69c822766cae91 (= R 28th's head) · refs/pull/1441/head 7685e79af2c437b1e6cc8fe2e57b1b0771f576d5 · highest refs/pull = 1444.
+- Lane tokens in the same file: -ra29- = 0 · controls -ra28- = 1, -ra19- = 2, -zzNOTREAL- = 0 · -g7- = 0 (G 7th had not pushed at 19:10Z).
+
+(b) Doc tails at develop, by blob hash (both 100644)
+- Flow a23ec16bb0a0e5ed0ff6e861f2d884ea870d8934: 40 numbered <h2>, 0 duplicate numbers, document-order tail 44 (control copied from the document's own last <h2>). 45, 46 and 47 are ABSENT, so 46. is free. Order is not ascending (…29,25,30,31,26,39,35…), as Q-N5 allows.
+- Cheat 8af4daa33385f19343043e3e740f7f5af263ff8d: 29 <h2>, all 29 carry a key, 0 duplicate keys, tail key KS-1402. Controls: KS-1402 present = True; KS-9999 present = False; a document-shaped KS-9999 heading appended makes the reader return KS-9999 (fires).
+- Knob N, str.count on each base blob: KS-1410 = 1 (flow), 1 (cheat). Controls: KS-1402 = 9 / 6, KS-9997 = 0 / 0. So --flow-key-exists-ok 1 --cheat-key-exists-ok 1.
+
+(c) Payload
+- patch.diff 6,920 B, sha256/16 7b7fea05b2511d2e: MATCH.
+- In a temp index at develop: section_1 STRICT rc 128 "error: corrupt patch at line 15" (the control); section_1 --recount --ignore-whitespace --check rc 0; section_2 strict --check rc 0. Both applied, write-tree = ceca1f2e401a19ac1c45b647d42cd72d63671e85, MATCH. Base tree cf10edb0b9f8 differs (control).
+- +++ headers: Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts and NEW Blockchain/Dev/services/api-gateway/src/__tests__/ks1410-audit-export-502-never-answers-err-message.test.ts (R 28th's table name, confirmed). numstat 2/1 and 132/0. Checker's own hunk audit: declared old=10 new=11, actual 9/10.
+- What I read in the hunk: one new logger.error inside the 502 catch (context 'Audit export could not reach the security service (GET /api/admin/audit/export)') with the PRE-ruling expression, and the 502 message becomes the constant 'Failed to reach security service'.
+
+(c2) Q-RULEDEXPR, measured at develop
+- originate/src/routes/adminConfig.ts:104 is 299 characters, sha256/16 44ce5d431afa8b4c. That matches R 28th's "299 chars".
+- The ruled EXPRESSION, the value of `error:` on that line, is 262 bytes, sha256/16 4623660d465c942a. The brief relays 263 B.
+- Re-extracted twice: cmp rc 0, with a control line (:105) that differs. My guess at the 1-byte gap is a trailing newline counted by wc -c, but that is UNMEASURED. I will quote 262 and both hashes.
+- The pre-ruling expression in the payload (and at audit-export.ts:25) is 48 bytes.
+- audit-export.ts already imports logger (:14).
+- The file already has its own fail500 at :24-25 carrying the pre-ruling expression. That line is #1443's hunk. My new line is about 145 lines away at ~:171, inside the 502 catch. I do not touch :25.
+
+(d) Tools
+- 17 copied into tools/; all 17 sha256/16 + line counts MATCH the brief's table. The unkeyed lane copies are quarantined in tools/_inherited_ra28/ (nothing deleted).
+- Matcher inbox_matchra29.py (a90a4f88b23febf0), built by AST byte-span splice, list not re-rendered, diff = 2 hunks:
+  - r 29th / seat r 29th REMOVED;
+  - r 28th, r 30th, g 7th ADDED, each with its seat form (n 230 -> 234);
+  - MINE = "r 29th", double quotes kept;
+  - the comment beside MINE corrected too;
+  - e 6th still appears twice, left alone (your kit item).
+  Import arms on full-length subjects: 10/10, including the load-bearing one ("[Wednesday -> Secuura/Blockchain-R] ANSWER: ctx read 50, wrap now (Seat R 28th)" -> 'for r 28th,seat r 28th'). Inverted-want controls both fire.
+  Correction: my first arm run read 3 pass / 5 fail. The fault was my want column, the prose "FOREIGN", which the tool never emits (its foreign tag is "for <tokens>"). I re-expressed the wants as data with a predicate control and re-ran.
+- Sweep sweepra29.py (2d62f921f2a63efc, 288 lines):
+  - 2[0-7] -> 2[0-8] at 9 live sites;
+  - foreign-parallel-seat gains g7 in both groups, with a -g7-1 datum in CONTROL 1;
+  - CONTROL 1 gains the ra28 rows;
+  - mine_planted re-keyed ra28 -> ra29, tokens AND the path 2026-10-10_seatR-29th;
+  - the CONTROL 1b banner said "ra27" in R 28th's class-28 copy (a false record) -> ra29.
+  Run on tools/: 17 files, N checked=14 on every row, CONTROL 1 14/14 FIRES, CONTROL 1b 0 self-hits, CONTROL 2 False, rc 0.
+- Watcher inbox_watchra29.sh (b3aa2712dd30e28d): the 4 WATCHRA28_ sites, matcher default, banner and usage re-keyed.
+  Feed arm with SINCE=2026-10-09T19:06:21.000Z (copied from my brief's timestamp):
+  - the brief itself EXCLUDED;
+  - a later FOR-ME mail INCLUDED;
+  - my pane tag + R 28th's ordinal tagged foreign.
+  LIVE as pid 34931 (one watcher by argv shape; must-be-0 control 0). Poll 1 scanned 15 and printed your two G 7th mails as foreign.
+- s1_ra29.sh (03176e0422a22cca): LOGD now points at my record folder.
+- Doc tool docblockra29.py (6fb1260b4e4e7fdf, 211 lines), from docblockf7.py (re-hashed da2234da2de6c5b4 BEFORE the copy):
+  - exactly 1 hunk, the attribution block;
+  - the body below it is cmp-identical to F 7th's (a tamper control differs);
+  - vs docblockra28.py, 1 hunk, the attribution block only.
+- Doc-tool arms, keydup_arms_ra29.sh: 9 passed / 0 failed.
+  - Seed control: scratch blobs = develop's a23ec16bb0a0 / 8af4daa33385.
+  - e1 KS-1410 knob 1/1 -> rc 0 WRITTEN.
+  - e3 knob absent -> rc 2 UNCHANGED.
+  - Wrong N in each direction -> rc 2 UNCHANGED.
+  - Duplicate number 44 -> rc 2.
+  - Two-key heading -> rc 2.
+  - ad3 read-back failure -> rc 1, both docs UNCHANGED.
+  The fixtures were re-keyed: R 28th's r1/r2 arms used KS 1346 and flow 45, which are #1443's key and number. They now use the synthetic KS-9997 and flow 98.
+- Provenance arms, check only: 1 PASS on my brief (body sha256/16 f35d8cc401fb1da6, spf/dkim/dmarc pass) and 9 refusals with 9 DISTINCT reasons: missing record, missing body, bad JSON, wrong sender, wrong subject prefix, spf, dkim, dmarc, a one-byte body tamper.
+
+(e) Shared store, read verbs only
+- rev-parse --all: 1,665 lines, sha256/16 4f39eab1ac2292aa (R 28th's wrap 1,663; +2 is consistent with G 7th's local branch, whose push lock is now held).
+- develop 613070f29112 PRESENT by cat-file -e; deadbeef… ABSENT (both controls fire). My boot clone is --shared --no-checkout in my session scratchpad; it reaches develop by SHA with no fetch. So no objects transfer is needed.
+- Locks: exactly one on disk, .push-lock-g1, holder {"seat": "Secuura/Blockchain-G g7", "pid": 40294, branch feature/ks-1410-delegations-process-expired-500-g7-1, started 2026-10-09T19:10:31Z}, heartbeat live at 19:11Z. worktrees/lock-holder.json and worktrees/lock-released.txt are stale 2026-10-05 artefacts (F f4), not locks.
+- Q-LOCKNAME, ANSWERED BY THE TOOL: lockra1.sh:217 hard-wires .push-lock-d8 and :223-224 REFUSES any other basename; pushra1.sh:153 derives the same parent and default. My lock is .push-lock-d8.
+- WAIT sets, compared as data: lockra1 {f3, e4, g1, ""} == pushra1 {f3, e4, g1, ""}, ordered-equal. STOP set 17 entries, ordered-equal. Controls: WAIT != STOP; d8 not in WAIT. G 7th's .push-lock-g1 is already WAIT entry 3, so no re-wiring.
+
+(f) Seat facts
+- df -m /Volumes/DevMASTER: 340,352 MB available, 83%.
+- Live sessions on this project: mine (zsh 30832) and Secuura/Blockchain-G (zsh 32480).
+- Watcher pid 34931 (ps_boot.txt in the record folder).
+
+(g) Linear, read-only; comments sorted by createdAt client-side; fabricated KS-999997 in its own query returned 0 nodes
+- KS-1410 In Progress, P2 High, kamil.kreiser@secuura.ai, 1 comment, newest 2026-10-09T07:38:58Z (gate77's facts-only review of #1432).
+- KS-1346 In Progress, P4 Low, kamil.kreiser, 7 comments, newest 07:39:18Z.
+- KS-1148 Backlog, P2 High, kamil.kreiser, 7 comments, newest 2026-10-09T17:02:45Z: "Recurrence ×3 on 2026-10-09", the same Security Scanning -> Dependency Audit job. It owns that failure at source.
+- KS-1432 Backlog, P3 Medium, kamil.kreiser, 1 comment (Peter, 2026-10-06T14:20Z). Not raised.
+
+(h) PR #1443
+- open, merged=false, mergeable_state=unstable, base develop @ 613070f29112.
+- check-runs 403s this PAT; the Actions runs API shows 6 runs:
+  - success: PR — Lockfiles, pr-premerge-ack;
+  - skipped: Dependabot standalone locks;
+  - failure: Security Scanning, PR Security Gates (KS-168), pr.
+- 🔴 R 28th's record names only Security Scanning. The other two are PRE-EXISTING ON DEVELOP: runs for head 613070f29112 (event push) are exactly PR Security Gates (KS-168) = failure and pr = failure. Security Scanning also fails on #1441. So all three are expected on my head; I will attribute them and file nothing.
+
+Claim boundary I will hold in the PR (CLAIM HAZARD)
+- The test file is named "…502-never-answers-err-message". The cells can back that for the 502 BODY at this one site, which becomes a constant.
+- The LOG line still carries an Error's .message and a thrown string verbatim; only objects, class instances and numbers reduce to type + field names.
+- The PR body will say exactly that, with the ratios. No "no longer leaks", no "never logs values".
+
+Attribution note
+- Mid-ITEM-0 the harness changed its commit attribution to "Co-Authored-By: Claude Opus 5.5". HOLDS 8 and commitra3.sh require 0 Co-Authored-By trailers, and the repo rules take precedence over the harness default, so I will add none.
+
+Plan once you ANSWER
+1. RAISE_BASE: re-read develop fresh, name it with its 40-hex, and send STATUS: raise base (Seat R 29th). Hold for acceptance BY NAME.
+2. QUESTION: ctx read before the BUILD. Under 45% only: take .push-lock-d8 (WAIT set {f3, e4, g1}, so I wait while G 7th holds g1).
+3. Build:
+   - worktree add --detach worktrees/s-ra29-ks1410ae at the RAISE_BASE 40-hex; s1_ra29.sh;
+   - apply per section, cmp against the payload;
+   - Q-RULEDEXPR swap (262 B) + ONE WHY line citing Kam 2026-09-27 (card secuura-ks1346-logging-thrown-objects-leaks-secrets => a) + the extra thrown-plain-object 502 cell + §5d WHY/key comments, all in the SAME commit;
+   - red at base / green after, tsc --noEmit, npm run lint, the whole api-gateway suite;
+   - doc blocks at flow 46. with docblockra29.py (--new-key KS-1410 --flow-key-exists-ok 1 --cheat-key-exists-ok 1, headings naming "audit-export 502");
+   - html_docs_matrix.test.sh BEFORE the commit (must read 12 passed, 0 failed);
+   - one commit with commitra3.sh.
+4. QUESTION: ctx read before the PUSH. Then pushra1.sh bare once on feature/ks-1410-apigw-audit-export-502-ra29-1; restraisera19.py to develop; STATUS, then READY FOR QA naming R-C UNRAISED and the live run owed.
+
+Question
+Is this plan confirmed as written, with my lock as .push-lock-d8 (derived from lockra1.sh:217/:223), the ruled expression quoted as 262 B, and the two pre-existing develop workflow failures attributed rather than filed?
+Also: a ctx read, please. The brief budgets this mail at ~25%, and I cannot read my own.
+
+Meanwhile
+BLOCKED on writes. The watcher is armed (pid 34931); I will act on nothing until your ANSWER.
+
+Needed-by
+Before RAISE_BASE. G 7th holds .push-lock-g1 now, so nothing of mine contends until then.
+
