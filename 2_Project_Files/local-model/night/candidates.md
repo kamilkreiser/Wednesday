@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-10-09 08:38 from 272 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-09 17:54 from 273 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -121,7 +121,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-28)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
 
-## EXCLUDED by predicate — 195
+## EXCLUDED by predicate — 196
 - KS-1000 — has a PR attached
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-101 — on Peter/Stuart
@@ -233,6 +233,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1443 — names no product file (after basename/docs/route resolution)
 - KS-1446 — on Peter/Stuart
 - KS-1447 — names no product file (after basename/docs/route resolution)
+- KS-1453 — names no product file (after basename/docs/route resolution)
 - KS-188 — on Peter/Stuart
 - KS-239 — on Peter/Stuart
 - KS-263 — names no product file (after basename/docs/route resolution)
