@@ -1,0 +1,19 @@
+MATCH    c1-wrong-end-tree              rc 1 (want 1) | FAIL P4 END_TREE ccbb76460ad6 == --end-tree 85820a21f80c (kit ccbb76460ad6: True)
+MATCH    c1-wrong-base                  rc 1 (want 1) | FAIL P2 type commit | 1 parent(s) (want 1) | first 1e7f90e26137 (want b39051390ff6) ['first parent 1e7f90e26137 != base b39051390ff6']
+MATCH    c1-parents-n-2                 rc 1 (want 1) | FAIL P2 type commit | 1 parent(s) (want 2) | first 1e7f90e26137 (want 1e7f90e26137) ['parent count 1 != 2']
+MATCH    c1-missing-end-tree            rc 2 (want 2) | REFUSED: --end-tree is REQUIRED (no default: a kit default is the drafter's pin, not your measurement)
+MATCH    c2-diff-head-is-base           rc 1 (want 1) | FAIL L1 changed 0 paths == planned 5 locks: extra none missing ['Blockchain/Dev/package-lock.json', 'Blockchain/Dev/services/governance/package-lock.j
+MATCH    c2-diff-missing-base           rc 2 (want 2) | REFUSED: --base is REQUIRED (no default: a kit default is the drafter's pin, not your measurement)
+MATCH    c2-parse-base-expect-clean     rc 1 (want 1) | FAIL S2 EXPECT-CLEAN: in-scope vulnerable {'handlebars': 5} over 5 entries (want 0 over > 0)
+MATCH    c3-tarballs-head-is-base       rc 1 (want 1) | FAIL T3 changed head entries carrying integrity: 0, == the DOWNLOADED sri: 0, mismatches 0 []
+MATCH    c3-tarballs-reused-dir         rc 2 (want 2) | REFUSED: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-09_gate78/_scratch/tar_draft1 exists and is not empty — give a F
+MATCH    c5-legs-base-expect-pass       rc 1 (want 1) | FAIL G-HEAD HEAD: leg 6 rc 1, leg 7 rc 1 (want 0 / 0) | the three ids printed {'GHSA-8r5x-fm3f-whwj': 3, 'GHSA-p8wg-vrv2-v86f': 3, 'GHSA-xw65-4hp5-5hc
+MATCH    c5-legs-head-expect-fail       rc 1 (want 1) | FAIL G-BASE BASE CONTROL: leg 6 rc 0, leg 7 rc 0 (want 1 / 1, never 2) | ids in leg 6 {'GHSA-8r5x-fm3f-whwj': 0, 'GHSA-p8wg-vrv2-v86f': 0, 'GHSA-xw65-
+MATCH    c5-omit-head-tagged-base       rc 1 (want 1) | FAIL OMIT-BASE RUNTIME REACH BY INSTALL (base): handlebars ON DISK after `npm ci --omit=dev` {'governance': 'ABSENT', 'originate': '4.7.10', 'referral
+MATCH    c5-nc-legs-swapped             rc 1 (want 1) | FAIL NC1 package-lock.json handlebars put back to its BASE entry 4.7.9 ALONE (landed True) -> leg7 rc 0 ids {'GHSA-8r5x-fm3f-whwj': 0, 'GHSA-p8wg-vrv2
+MATCH    c6-reach-claims-planted        rc 1 (want 1) | FAIL R4 NEGATIVE CONTROLS: fabricated stage matches 0 Dockerfiles | of ['services/referral', 'services/vc-issuer'], shipping anyway: none | the shippi
+MATCH    gh-prtext-8-parents            rc 1 (want 1) | T6 CL-PARENTS       MISMATCH stated [(8,)] measured (7,)
+MATCH    gh-prtext-hyphen-sibling       rc 1 (want 1) | T3 hyphenated keys (title + body): ['KS-1452', 'KS-1453'] -> only KS-1452: False
+MATCH    gh-actions-needle-planted      rc 1 (want 1) |  CLASSIFY .github/workflows/pr-platform-suites.yml: UNCLASSIFIED by ['develop'] ["Akto suite (PR): change needles present {'##[error]': 3}", "Playwrig
+MATCH    gh-linear-state-planted        rc 1 (want 1) | VERDICT KS-1452 FINDING (want state ['Done'], not archived, >= 1 comment linking #1435) | KS-1453 OK (want state ['Backlog'], not archived, 0 attachme
+RED ARMS: 18 MATCH, 0 MISMATCH

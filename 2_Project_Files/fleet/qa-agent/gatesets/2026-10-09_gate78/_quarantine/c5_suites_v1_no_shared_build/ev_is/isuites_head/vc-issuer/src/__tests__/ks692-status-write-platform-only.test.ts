@@ -1,0 +1,81 @@
+// KS-692: /api/status writes are PLATFORM-ONLY (the interim posture Kam ruled 2026-09-16, card
+// secuura-ks692-status-revoke-interim-posture, option a: Narrow now, bind-creator later).
+// A status list lives in a process-local Map with no owning tenant, so there is no tenant to compare a
+// caller against, and an ISSUER_ADMIN in ANY tenant could revoke or un-revoke ANY tenant's credential.
+// Until a list carries an owner, the write gate admits the platform roles only. The harness is the one
+// ks586-status-write-authorization.test.ts uses: a real express app, the real router, the real
+// errorHandler, and an x-test-role header standing in for jwtAuthenticate. No database, no network.
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import express, { NextFunction, Request, Response } from 'express';
+import type { Server } from 'http';
+import { statusRoutes, STATUS_WRITE_ROLES } from '../routes/status';
+import { errorHandler } from '../middleware/errorHandler';
+
+const PLATFORM_ROLES = ['SYSTEM_ADMIN', 'SUPER_ADMIN', 'super_admin'];
+
+function buildApp(): express.Express {
+  const app = express();
+  app.use(express.json());
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    const role = req.header('x-test-role');
+    if (role) {
+      (req as Request & { user: unknown }).user = { userId: 'u-1', role, organizationId: 'org-1' };
+    }
+    next();
+  });
+  app.use('/api/status', statusRoutes);
+  app.use(errorHandler);
+  return app;
+}
+
+let server: Server;
+let baseUrl = '';
+
+async function call(method: string, path: string, role?: string): Promise<number> {
+  const headers: Record<string, string> = { 'content-type': 'application/json' };
+  if (role) headers['x-test-role'] = role;
+  const res = await fetch(baseUrl + '/api/status' + path, method === 'GET' ? { headers } : { method, headers, body: '{}' });
+  return res.status;
+}
+
+beforeAll(async () => {
+  const app = buildApp();
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  const address = server.address();
+  if (address === null || typeof address === 'string') throw new Error('no ephemeral port');
+  baseUrl = 'http://127.0.0.1:' + address.port;
+});
+
+afterAll(async () => {
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+});
+
+describe('KS-692: status list writes are platform-only until a list has an owner', () => {
+  it('RED KS-692 A1: the write gate holds the platform roles and nothing else', () => {
+    expect([...STATUS_WRITE_ROLES].sort()).toEqual([...PLATFORM_ROLES].sort());
+  });
+
+  it('RED KS-692 A2: an ISSUER_ADMIN is refused 403 on revoke and on unrevoke', async () => {
+    const seen = { revoke: await call('POST', '/default/revoke', 'ISSUER_ADMIN'), unrevoke: await call('POST', '/default/unrevoke', 'ISSUER_ADMIN') };
+    expect(seen).toEqual({ revoke: 403, unrevoke: 403 });
+  });
+
+  it('control KS-692 C1: every platform role still gets past the gate on revoke (never 401 or 403)', async () => {
+    const blocked: string[] = [];
+    for (const role of PLATFORM_ROLES) {
+      const status = await call('POST', '/default/revoke', role);
+      if (status === 401 || status === 403) blocked.push(role + ':' + status);
+    }
+    expect(blocked).toEqual([]);
+  });
+
+  it('control KS-692 C2: a non-admin OWNER is still 403 and an anonymous caller is still 401', async () => {
+    expect({ owner: await call('POST', '/default/revoke', 'OWNER'), anonymous: await call('POST', '/default/revoke') }).toEqual({ owner: 403, anonymous: 401 });
+  });
+
+  it('control KS-692 C3: reads stay authenticated-only, so an ISSUER_ADMIN is not 403 on GET revoked', async () => {
+    expect(await call('GET', '/default/revoked', 'ISSUER_ADMIN')).not.toBe(403);
+  });
+});

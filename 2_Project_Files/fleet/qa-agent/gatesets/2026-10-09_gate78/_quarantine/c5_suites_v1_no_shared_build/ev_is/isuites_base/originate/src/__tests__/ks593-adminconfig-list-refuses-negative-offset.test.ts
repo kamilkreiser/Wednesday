@@ -1,0 +1,94 @@
+// KS-593 (not_a_server_error register; the negative-offset sites listed in KS-565 section 2): GET /api/admin/audit-logs
+// and GET /api/admin/rights-holders read `offset` as `parseInt(req.query.offset as string) || 0`. The `|| 0` only
+// catches NaN, so `?offset=-1` reached Postgres as `OFFSET -1` ("OFFSET must not be negative") and the route
+// answered 500. The fix refuses a negative offset with the router's own 400 shape before any query runs.
+// Harness: the ks730c shape (the real adminConfigRouter on a loopback listener, prisma mocked, auth stubbed).
+// No database, no network beyond 127.0.0.1.
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+
+const mockQueryRaw = jest.fn();
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: mockQueryRaw, $executeRaw: jest.fn() },
+  refreshTenantConfigs: jest.fn(),
+  withTenant: (_t: unknown, fn: (tx: unknown) => unknown) => fn({ $queryRaw: mockQueryRaw }),
+  getTenantManager: () => null,
+}));
+
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const principal = { id: 'u-ks593', role: 'SYSTEM_ADMIN', tenantId: 'a0000000-0000-4000-8000-000000000593', organizationId: 'a0000000-0000-4000-8000-000000000593' };
+      req._secuuraUser = principal; req.user = principal; req.tenantId = principal.tenantId;
+      next();
+    },
+    requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  };
+});
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    ...(jest.requireActual('@secuura/shared') as Record<string, unknown>),
+    runWithPlatformScope: (fn: () => unknown) => fn(),
+    queryWithTenantGuc: jest.fn(),
+  }),
+);
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { adminConfigRouter } from '../routes/adminConfig';
+
+const app = express();
+app.use('/api/admin', express.json(), adminConfigRouter);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', () => resolve()); });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => { server?.close(); });
+beforeEach(() => {
+  mockQueryRaw.mockReset();
+  mockQueryRaw.mockResolvedValue([]);
+});
+
+async function get(path: string): Promise<{ status: number; code: string | null; queries: number; lastBound: unknown }> {
+  const res = await fetch(baseUrl + '/api/admin' + path);
+  const body: any = await res.json().catch(() => null);
+  const first = mockQueryRaw.mock.calls[0];
+  return { status: res.status, code: body?.error?.code ?? null, queries: mockQueryRaw.mock.calls.length, lastBound: first ? first[first.length - 1] : undefined };
+}
+
+describe('KS-593: the adminConfig list routes refuse a negative offset instead of sending it to Postgres', () => {
+  it('RED KS-593 AO1: GET /audit-logs?offset=-1 answers 400 BAD_REQUEST and runs no query', async () => {
+    const r = await get('/audit-logs?offset=-1');
+    expect([r.status, r.code, r.queries]).toEqual([400, 'BAD_REQUEST', 0]);
+  });
+
+  it('RED KS-593 AO2: GET /rights-holders?offset=-1 answers 400 BAD_REQUEST and runs no query', async () => {
+    const r = await get('/rights-holders?offset=-1');
+    expect([r.status, r.code, r.queries]).toEqual([400, 'BAD_REQUEST', 0]);
+  });
+
+  it('control KS-593 AOC1: GET /audit-logs?offset=5 answers 200 and binds OFFSET 5', async () => {
+    const r = await get('/audit-logs?offset=5');
+    expect([r.status, r.lastBound]).toEqual([200, 5]);
+  });
+
+  it('control KS-593 AOC2: GET /rights-holders?offset=3 answers 200 and binds OFFSET 3', async () => {
+    const r = await get('/rights-holders?offset=3');
+    expect([r.status, r.lastBound]).toEqual([200, 3]);
+  });
+
+  it('control KS-593 AOC3: GET /audit-logs with no offset still answers 200 and binds OFFSET 0', async () => {
+    const r = await get('/audit-logs');
+    expect([r.status, r.lastBound]).toEqual([200, 0]);
+  });
+});

@@ -1,0 +1,48 @@
+C2 diff #1435 head 6f4adfe8835ec8ece51653f3f758d6a55ce12348 base 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0
+INFO PLAN from the BASE 1e7f90e26137 + the registry: 44 in-scope locks of 45 tracked; 5 vulnerable entries in 5 locks: ['package-lock.json handlebars', 'services/governance handlebars', 'services/originate handlebars', 'services/referral handlebars', 'services/vc-issuer handlebars']
+PASS L1 changed 5 paths == planned 5 locks: extra none missing none | out-of-scope touched none
+WALK package-lock.json handlebars 4.7.10: parents ["node_modules/ts-jest dependencies '^4.7.9'", "services/originate dependencies '^4.7.9'"]
+  W4 node_modules/handlebars dependencies minimist '^1.2.8' -> node_modules/minimist 1.2.8 satisfied
+  W4 node_modules/handlebars dependencies neo-async '^2.6.2' -> node_modules/neo-async 2.6.2 satisfied
+  W4 node_modules/handlebars dependencies source-map '^0.6.1' -> node_modules/source-map 0.6.1 satisfied
+  W4 node_modules/handlebars dependencies wordwrap '^1.0.0' -> node_modules/wordwrap 1.0.0 satisfied
+  W4 node_modules/handlebars optionalDependencies uglify-js '^3.1.4' -> node_modules/uglify-js 3.19.3 satisfied
+WALK services/governance/package-lock.json handlebars 4.7.10: parents ["node_modules/ts-jest dependencies '^4.7.9'"]
+  W4 node_modules/handlebars dependencies minimist '^1.2.8' -> node_modules/minimist 1.2.8 satisfied
+  W4 node_modules/handlebars dependencies neo-async '^2.6.2' -> node_modules/neo-async 2.6.2 satisfied
+  W4 node_modules/handlebars dependencies source-map '^0.6.1' -> node_modules/source-map 0.6.1 satisfied
+  W4 node_modules/handlebars dependencies wordwrap '^1.0.0' -> node_modules/wordwrap 1.0.0 satisfied
+  W4 node_modules/handlebars optionalDependencies uglify-js '^3.1.4' -> node_modules/uglify-js 3.19.3 satisfied
+WALK services/originate/package-lock.json handlebars 4.7.10: parents ["<root> dependencies '^4.7.9'", "node_modules/ts-jest dependencies '^4.7.9'"]
+  W4 node_modules/handlebars dependencies minimist '^1.2.8' -> node_modules/minimist 1.2.8 satisfied
+  W4 node_modules/handlebars dependencies neo-async '^2.6.2' -> node_modules/neo-async 2.6.2 satisfied
+  W4 node_modules/handlebars dependencies source-map '^0.6.1' -> node_modules/source-map 0.6.1 satisfied
+  W4 node_modules/handlebars dependencies wordwrap '^1.0.0' -> node_modules/wordwrap 1.0.0 satisfied
+  W4 node_modules/handlebars optionalDependencies uglify-js '^3.1.4' -> node_modules/uglify-js 3.19.3 satisfied
+WALK services/referral/package-lock.json handlebars 4.7.10: parents ["node_modules/ts-jest dependencies '^4.7.9'"]
+  W4 node_modules/handlebars dependencies minimist '^1.2.8' -> node_modules/minimist 1.2.8 satisfied
+  W4 node_modules/handlebars dependencies neo-async '^2.6.2' -> node_modules/neo-async 2.6.2 satisfied
+  W4 node_modules/handlebars dependencies source-map '^0.6.1' -> node_modules/source-map 0.6.1 satisfied
+  W4 node_modules/handlebars dependencies wordwrap '^1.0.0' -> node_modules/wordwrap 1.0.0 satisfied
+  W4 node_modules/handlebars optionalDependencies uglify-js '^3.1.4' -> node_modules/uglify-js 3.19.3 satisfied
+WALK services/vc-issuer/package-lock.json handlebars 4.7.10: parents ["node_modules/ts-jest dependencies '^4.7.9'"]
+  W4 node_modules/handlebars dependencies minimist '^1.2.8' -> node_modules/minimist 1.2.8 satisfied
+  W4 node_modules/handlebars dependencies neo-async '^2.6.2' -> node_modules/neo-async 2.6.2 satisfied
+  W4 node_modules/handlebars dependencies source-map '^0.6.1' -> node_modules/source-map 0.6.1 satisfied
+  W4 node_modules/handlebars dependencies wordwrap '^1.0.0' -> node_modules/wordwrap 1.0.0 satisfied
+  W4 node_modules/handlebars optionalDependencies uglify-js '^3.1.4' -> node_modules/uglify-js 3.19.3 satisfied
+PASS M0 MODEL CONTROL: the model fed the OLD packument reproduces 5 base entries exactly 
+PASS L2 0 entries added, 0 removed, key order + top-level fields unchanged, no overrides, in 5 locks 
+PASS L3 SEMANTIC: changed entries 5 == plan 5; every changed entry == its base+registry model at every leaf and in key order 
+PASS L4 one integrity per new version {'handlebars': 'sha512-P5VJMVM7qgBn6vjXM'} | == registry dist.integrity True | == DOWNLOADED sri (NOT GIVEN: L4b NOT RUN) None
+PASS L5 entries 5 (kit 5) | leaf field writes 18 (kit 18) | per package {'handlebars': 5} | per-entry field sets == kit prediction True 
+PASS L6 indent preserved + byte-exact round-trip at base AND head in 5 locks  | head indents [2]
+PASS L7 MASKED BYTE COMPARE: every changed entry put back to its base entry -> each head lock byte-identical to its base blob: 5/5 
+PASS LT TEXTUAL: per lock -/+ lines == leaf writes, every line carries a planned old/new value 
+PASS W1 IN RANGE must-pass: 5 entries walked, 7 declaring parents in all, 0 parent ranges NOT admitting the new version [], 0 orphans []
+PASS W1f IN RANGE must-fail: parent ranges admitting the NEXT MAJOR 0 []
+PASS W2 parent declarations identical base vs head 
+PASS W4 NO CASCADE: every dependency of every changed head entry resolves and satisfies its range  | widened ranges: ["root handlebars dependencies/minimist '^1.2.5' -> '^1.2.8'", "governance handlebars dependencies/minimist '^1.2.5' -> '^1.2.8'", "originate handlebars dependencies/minimist '^1.2.5' -> '^1.2.8'", "referral handlebars dependencies/minimist '^1.2.5' -> '^1.2.8'", "vc-issuer handlebars dependencies/minimist '^1.2.5' -> '^1.2.8'"]
+JSON /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-09_gate78/predictions/c2_diff.json
+CHECKED 13
+0 FAIL

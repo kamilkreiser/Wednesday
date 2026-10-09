@@ -1,0 +1,16 @@
+CENSUS at 6f4adfe8835e: Dockerfiles (a) basename 37 | (b) any path containing "dockerfile" 38 (extra in (b): ['Blockchain/Dev/scripts/check-dockerfile-non-root.sh']) | compose (context, dockerfile) pairs 33
+CENSUS lock-copying Dockerfiles (a COPY source naming package*.json or package-lock.json): 31 (builder 31) | COPY sources naming the literal package-lock.json: 8 (builder 8) | the literal Dev/package-lock.json in any Dockerfile: 0 (builder 0)
+FLAGS handlebars in each changed standalone lock at 6f4adfe8835e: {'governance': 'dev', 'originate': 'PROD', 'referral': 'dev', 'vc-issuer': 'dev'}
+NOT SHIPPED Blockchain/Dev/services/governance/Dockerfile <- Blockchain/Dev/services/governance/package-lock.json at /app: prod-only (npm ci at /app -> npm prune --omit=dev at /app -> COPY --from=builder /app/node_modules) and handlebars is dev there
+NOT SHIPPED Blockchain/Dev/services/referral/Dockerfile <- Blockchain/Dev/services/referral/package-lock.json at /app: prod-only (npm ci at /app -> npm prune --omit=dev at /app -> COPY --from=builder /app/node_modules) and handlebars is dev there
+NOT SHIPPED Blockchain/Dev/services/vc-issuer/Dockerfile <- Blockchain/Dev/services/vc-issuer/package-lock.json at /app: prod-only (npm ci --omit=dev at /app) and handlebars is dev there
+SHIPS Blockchain/Dev/services/originate/Dockerfile <- Blockchain/Dev/services/originate/package-lock.json at /app via npm ci --omit=dev at /app (prod-only True)
+PASS R0 build context for every basename-Dockerfile: from compose 33 | INFERRED 4 ['Blockchain/Dev/connectors/whatsapp-bot/Dockerfile -> Blockchain/Dev', 'Blockchain/Dev/deployment/azure/migrate/Dockerfile -> Blockchain/Dev/deployment/azure/migrate', 'Blockchain/Dev/frontend/outlook-addin/Dockerfile -> Blockchain/Dev', 'systemTest/performance/docker/k6/Dockerfile -> NO COPY / NO npm (cannot carry a lock)'] | unresolved 0 []
+PASS R1 ROOT LOCK: stages installing from Blockchain/Dev/package-lock.json: 0 []
+INFO R2 images whose final stage carries handlebars from a changed standalone lock: ['services/originate'] (builder: ['services/originate', 'services/governance'])
+PASS R3 POSITIVE CONTROL: services/originate ships handlebars: True
+FAIL R4 NEGATIVE CONTROLS: fabricated stage matches 0 Dockerfiles | of ['services/referral', 'services/vc-issuer'], shipping anyway: none | the shipping set == builder False
+IMPORTERS handlebars 0 [] | CONTROL express importers 339 (builder 339) | CONTROL files naming ts-jest 9 (builder 14)
+PASS R5 IMPORTERS of handlebars: 0 (want 0) beside controls express 339 and ts-jest 9 (want > 0 each)
+CHECKED 5
+1 FAIL (R4)

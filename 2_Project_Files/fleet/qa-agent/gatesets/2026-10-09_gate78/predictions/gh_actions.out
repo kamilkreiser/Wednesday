@@ -1,0 +1,115 @@
+X0 runs at the full head 6f4adfe8835ec8ece51653f3f758d6a55ce12348: 6 | CONTROL fabricated sha: 0 runs | polls 1 -> PASS
+READ at 2026-10-09T00:54:32Z: head 6 paths | develop 1e7f90e26137 2 paths
+RUN .github/workflows/dependabot-standalone-locks.yml    Dependabot standalone locks      head pull_request_target/completed/skipped develop -/ABSENT/-
+RUN .github/workflows/pr-lockfiles.yml                   PR — Lockfiles                   head pull_request/completed/success     develop -/ABSENT/-
+RUN .github/workflows/pr-platform-suites.yml             pr                               head pull_request/completed/failure     develop push/completed/failure
+RUN .github/workflows/pr-premerge-ack.yml                pr-premerge-ack                  head pull_request/completed/success     develop -/ABSENT/-
+RUN .github/workflows/pr-security-gates.yml              PR Security Gates (KS-168)       head pull_request/completed/failure     develop push/completed/failure
+RUN .github/workflows/security-scan.yml                  Security Scanning                head pull_request/completed/failure     develop -/ABSENT/-
+RED .github/workflows/pr-platform-suites.yml (pr, run 37865013256)
+  JOB Akto suite (PR)                failing steps ['Boot Akto stack + import spec + load templates', 'Enforce Akto PR result (block on any failure)'] | log 738490 B, ##[group] 31, signature lines 2, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG ##[error]scan failed (outcome=skipped)
+  JOB Playwright suite               failing steps ['Quality gate — unit suite (test:unit)', 'Upload Playwright report'] | log 81167 B, ##[group] 21, signature lines 6, change needles 0, fabricated 0
+      SIG ##[error]No files were found with the provided path: systemTest/playwright/results/
+      SIG ##[error]Process completed with exit code 1.
+      SIG AssertionError [ERR_ASSERTION]: Missing expected exception: slot 1
+      SIG ✖ assertSlotNamedForLocalTarget
+      SIG ✖ failing tests:
+      SIG ✖ refuses every slot's gateway when no slot is named, naming both forms of the slot command
+  JOB Performance suite (k6 smoke)   failing steps ['Enforce Performance result (block on any failure)', 'Upload performance reports'] | log 475209 B, ##[group] 30, signature lines 4, change needles 0, fabricated 0
+      SIG ##[error]An error has occurred while creating the zip file for upload
+      SIG ##[error]Process completed with exit code 1.
+      SIG ##[error]Process completed with exit code 3.
+      SIG ##[error]k6 smoke failed (outcome=failure)
+ COMPARATOR develop 1e7f90e26137 push run 37760893371 (the path HAS a develop run)
+  JOB Playwright suite               failing steps ['Quality gate — unit suite (test:unit)', 'Upload Playwright report'] | log 80369 B, ##[group] 21, signature lines 6, change needles 0, fabricated 0
+      SIG ##[error]No files were found with the provided path: systemTest/playwright/results/
+      SIG ##[error]Process completed with exit code 1.
+      SIG AssertionError [ERR_ASSERTION]: Missing expected exception: slot 1
+      SIG ✖ assertSlotNamedForLocalTarget
+      SIG ✖ failing tests:
+      SIG ✖ refuses every slot's gateway when no slot is named, naming both forms of the slot command
+  JOB Akto suite (PR)                failing steps ['Boot Akto stack + import spec + load templates', 'Enforce Akto PR result (block on any failure)'] | log 591039 B, ##[group] 31, signature lines 2, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG ##[error]scan failed (outcome=skipped)
+  JOB Performance suite (k6 smoke)   failing steps ['Enforce Performance result (block on any failure)', 'Upload performance reports'] | log 541382 B, ##[group] 30, signature lines 4, change needles 0, fabricated 0
+      SIG ##[error]An error has occurred while creating the zip file for upload
+      SIG ##[error]Process completed with exit code 1.
+      SIG ##[error]Process completed with exit code 3.
+      SIG ##[error]k6 smoke failed (outcome=failure)
+  JOB Schemathesis suite             failing steps ['Install Schemathesis suite', 'Enforce Schemathesis result (block on any failure)'] | log 560911 B, ##[group] 28, signature lines 2, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG ##[error]spec-auth KS-380 failed (outcome=skipped)
+ HISTORY last 12 completed runs of .github/workflows/pr-platform-suites.yml: {'failure': 12} | events ['pull_request', 'push']
+ CLASSIFY .github/workflows/pr-platform-suites.yml: PRE-EXISTING by ['develop'] 
+ PLANTED-RULE CONTROL (develop-only classifier, NEVER the decision): PRE-EXISTING
+RED .github/workflows/pr-security-gates.yml (PR Security Gates (KS-168), run 37865012896)
+  JOB Code Security Gates            failing steps ['All shell test suites (KS-666 / KS-731 — globbed, not listed)'] | log 154093 B, ##[group] 24, signature lines 62, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG 0 passed, 1 failed (of 27 cells) — aborted
+      SIG 0 passed, 5 failed
+      SIG === CASE 4 — POSITIVE CONTROL: enumerating ZERO guards must FAIL, not pass ===
+      SIG === CASE 6 — POSITIVE CONTROL: running ZERO guards must FAIL, not pass ===
+      SIG === P-BADPY: python3 present but broken must FAIL CLOSED, and name the parser ===
+      SIG === P-NOPY: python3 absent must FAIL CLOSED, and name the parser ===
+      SIG FAIL '   ' -> unslotted — expected all four = 'actors-unslotted.json'; writer='actors-unslotted.json' playwright='actors-unslotted.json' performance='actors-unslotted.json' schemathesis='ERROR'
+      SIG FAIL ' 2 ' -> slot 2 — expected all four = 'actors-slot2.json'; writer='actors-slot2.json' playwright='actors-slot2.json' performance='actors-slot2.json' schemathesis='ERROR'
+      SIG FAIL CONTROL - a down service still fails the smoke test (rc 1, Failed: 1, postgres named twice: the line and the FAILURES list)
+ COMPARATOR develop 1e7f90e26137 push run 37760892712 (the path HAS a develop run)
+  JOB Code Security Gates            failing steps ['All shell test suites (KS-666 / KS-731 — globbed, not listed)'] | log 153335 B, ##[group] 24, signature lines 62, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG 0 passed, 1 failed (of 27 cells) — aborted
+      SIG 0 passed, 5 failed
+      SIG === CASE 4 — POSITIVE CONTROL: enumerating ZERO guards must FAIL, not pass ===
+      SIG === CASE 6 — POSITIVE CONTROL: running ZERO guards must FAIL, not pass ===
+      SIG === P-BADPY: python3 present but broken must FAIL CLOSED, and name the parser ===
+      SIG === P-NOPY: python3 absent must FAIL CLOSED, and name the parser ===
+      SIG FAIL '   ' -> unslotted — expected all four = 'actors-unslotted.json'; writer='actors-unslotted.json' playwright='actors-unslotted.json' performance='actors-unslotted.json' schemathesis='ERROR'
+      SIG FAIL ' 2 ' -> slot 2 — expected all four = 'actors-slot2.json'; writer='actors-slot2.json' playwright='actors-slot2.json' performance='actors-slot2.json' schemathesis='ERROR'
+      SIG FAIL CONTROL - a down service still fails the smoke test (rc 1, Failed: 1, postgres named twice: the line and the FAILURES list)
+ HISTORY last 12 completed runs of .github/workflows/pr-security-gates.yml: {'failure': 12} | events ['pull_request', 'push']
+ CLASSIFY .github/workflows/pr-security-gates.yml: PRE-EXISTING by ['develop'] 
+ PLANTED-RULE CONTROL (develop-only classifier, NEVER the decision): PRE-EXISTING
+RED .github/workflows/security-scan.yml (Security Scanning, run 37865012899)
+  JOB Dependency Audit               failing steps ["Audit-contract suites (the gates' own validator)"] | log 44099 B, ##[group] 19, signature lines 17, change needles 0, fabricated 0
+      SIG [36;1m  *) echo "FAIL — new or lapsed advisories; triage them (fix, or a reasoned baseline entry with a ticket)"; exit 1 ;;[0m
+      SIG [36;1m  3) echo "FAIL — the audit gate REFUSED to report a verdict (see its line above)"; exit 1 ;;[0m
+      SIG ##[error]Process completed with exit code 1.
+      SIG AssertionError [ERR_ASSERTION]: AUDIT_ADVISORY_TIMEOUT_MS=abc should be refused, got 1
+      SIG AssertionError [ERR_ASSERTION]: The input did not match the regular expression /GHSA-redp-roof-0001/. Input:
+      SIG AssertionError [ERR_ASSERTION]: expected exit 0 (clean), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 2 (COULD-NOT-CHECK), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 3 (refused), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 3, got 1
+      SIG ✖ audit-locks: POSITIVE CONTROL — a reachable endpoint with no advisories is 0, not 1 and not 2
+ COMPARATOR develop 1e7f90e26137: 0 runs of .github/workflows/security-scan.yml (the workflow has no develop push trigger) -> pull_request comparators on OTHER heads
+ COMPARATOR pr1434@d7ba337a8ef6 run 37756331228 (pull_request, feature/ks-1171-b1-absent-boundary-is-inclusive-g5, 2026-10-08T09:23:40Z)
+  JOB Dependency Audit               failing steps ["Audit-contract suites (the gates' own validator)"] | log 44064 B, ##[group] 19, signature lines 17, change needles 0, fabricated 0
+      SIG [36;1m  *) echo "FAIL — new or lapsed advisories; triage them (fix, or a reasoned baseline entry with a ticket)"; exit 1 ;;[0m
+      SIG [36;1m  3) echo "FAIL — the audit gate REFUSED to report a verdict (see its line above)"; exit 1 ;;[0m
+      SIG ##[error]Process completed with exit code 1.
+      SIG AssertionError [ERR_ASSERTION]: AUDIT_ADVISORY_TIMEOUT_MS=abc should be refused, got 1
+      SIG AssertionError [ERR_ASSERTION]: The input did not match the regular expression /GHSA-redp-roof-0001/. Input:
+      SIG AssertionError [ERR_ASSERTION]: expected exit 0 (clean), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 2 (COULD-NOT-CHECK), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 3 (refused), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 3, got 1
+      SIG ✖ audit-locks: POSITIVE CONTROL — a reachable endpoint with no advisories is 0, not 1 and not 2
+ COMPARATOR pr1433@934e20a599b1 run 37753634990 (pull_request, feature/ks-1139-smoke-test-counters-survive-errexi, 2026-10-08T09:00:19Z)
+  JOB Dependency Audit               failing steps ["Audit-contract suites (the gates' own validator)"] | log 44096 B, ##[group] 19, signature lines 17, change needles 0, fabricated 0
+      SIG [36;1m  *) echo "FAIL — new or lapsed advisories; triage them (fix, or a reasoned baseline entry with a ticket)"; exit 1 ;;[0m
+      SIG [36;1m  3) echo "FAIL — the audit gate REFUSED to report a verdict (see its line above)"; exit 1 ;;[0m
+      SIG ##[error]Process completed with exit code 1.
+      SIG AssertionError [ERR_ASSERTION]: AUDIT_ADVISORY_TIMEOUT_MS=abc should be refused, got 1
+      SIG AssertionError [ERR_ASSERTION]: The input did not match the regular expression /GHSA-redp-roof-0001/. Input:
+      SIG AssertionError [ERR_ASSERTION]: expected exit 0 (clean), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 2 (COULD-NOT-CHECK), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 3 (refused), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 3, got 1
+      SIG ✖ audit-locks: POSITIVE CONTROL — a reachable endpoint with no advisories is 0, not 1 and not 2
+ HISTORY last 12 completed runs of .github/workflows/security-scan.yml: {'failure': 12} | events ['pull_request']
+ CLASSIFY .github/workflows/security-scan.yml: PRE-EXISTING by ['pr1433@934e20a599b1', 'pr1434@d7ba337a8ef6'] 
+ PLANTED-RULE CONTROL (develop-only classifier, NEVER the decision): NEW (no develop run of this path: a develop-only rule calls every red NEW)
+PENDING NONE
+NOTE: CI `Dependency Audit` (security-scan.yml) runs the audit gates' own VALIDATOR suite in a CI checkout — a different instrument from the in-hook legs 6 / 7.

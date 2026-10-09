@@ -1,0 +1,84 @@
+  1  Refs KS-1452 https://linear.app/secuura/issue/KS-1452
+  2  `handlebars` 4.7.9 -> 4.7.10 in five `package-lock.json` files, nothing else.
+  3  Three advisories published 2026-10-08T17:52Z make pre-push preflight legs 6 (npm-audit) and 7 (standalone-lock advisories) refuse **every** push on develop `1e7f90e26137`:
+  4  | GHSA-8r5x-fm3f-whwj | critical | >=4.0.0 <=4.7.9 |
+  5  | GHSA-p8wg-vrv2-v86f | critical | >=4.0.0 <=4.7.9 |
+  6  | GHSA-xw65-4hp5-5hc7 | moderate | >=4.0.0 <=4.7.9 |
+  7  4.7.10 clears all three (npm bulk advisory endpoint:
+  8  4.7.9 returns the three, 4.7.10 returns `{}`), is `latest`, and is the only release above 4.7.9.
+  9  5 locks, 5 entries, 18 field writes
+ 10  | `Blockchain/Dev/package-lock.json` (workspace root, leg 6) | `version`, `dependencies.minimist` (the root entry carries no `resolved`/`integrity`) |
+ 11  | `services/governance` | `version`, `resolved`, `integrity`, `dependencies.minimist` |
+ 12  | `services/originate` | `version`, `resolved`, `integrity`, `dependencies.minimist` |
+ 13  | `services/referral` | `version`, `resolved`, `integrity`, `dependencies.minimist` |
+ 14  | `services/vc-issuer` | `version`, `resolved`, `integrity`, `dependencies.minimist` |
+ 15  4.7.10 itself moves `dependencies.minimist` from `^1.2.5` to `^1.2.8`.
+ 16  Every lock already resolves minimist 1.2.8, so no other entry moves.
+ 17  all 7 declaring parents say `^4.7.9`.
+ 18  **0 manifests, 0 `overrides`, 0 baseline rows, 0 source.**
+ 19  * `integrity` is the sha512 of the downloaded 4.7.10 tarball (712,317 B), equal to the registry's `dist.integrity`;
+ 20  the same pipeline reproduces the 4.7.9 value the locks carried.
+ 21  **WHY per changed line:** a JSON lock cannot carry a comment, so this description and the commit message are the WHY for every changed line (test-discipline §5d).
+ 22  **No platform-doc change:** test-discipline §4 binds a test change (backend unit, integration or systemTest).
+ 23  This PR changes no test, so neither `Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` nor `QA_Tool_Cheat_Sheet_Secuura_API_Testing.html` moves.
+ 24  | originate | **yes**, 4.7.10 after this PR | direct prod dependency;
+ 25  runner `npm ci --ignore-scripts --omit=dev` from its own lock (`services/originate/Dockerfile:79`);
+ 26  isolated `npm ci --omit=dev` from the committed lock installs 4.7.10 |
+ 27  | governance | no | `npm prune --omit=dev` before the runtime copy (`:54`);
+ 28  isolated `--omit=dev` install:
+ 29  | referral | no | `npm prune --omit=dev` (`:61`);
+ 30  isolated `--omit=dev` install:
+ 31  | vc-issuer | no | runner `npm ci --omit=dev` (`:86`);
+ 32  isolated `--omit=dev` install:
+ 33  | Dev root lock | no image | 0 Dockerfile references (control:
+ 34  `package-lock.json` 8) |
+ 35  0 files in the repo import or require handlebars (controls:
+ 36  express 339, ts-jest 14).
+ 37  originate's unused direct declaration is filed separately as KS 1453 and is **not** touched here.
+ 38  **Touched:** the five `package-lock.json` files above.
+ 39  exactly these 5).
+ 40  * Leg 6 `node scripts/audit/audit-gate.mjs`:
+ 41  develop rc 1 naming the three;
+ 42  this branch rc 0, the three named 0 times (control:
+ 43  the same output names 15 other GHSA ids).
+ 44  `audit-gate:
+ 45  9 distinct advisories reported, 24 baselined.`
+ 46  * Leg 7 `node scripts/audit/audit-locks.mjs`:
+ 47  develop rc 1, each `pinned:
+ 48  4.7.9 … in 4 lock(s)`;
+ 49  this branch rc 0, 0 mentions.
+ 50  * Leg 2 `scripts/preflight/lockfile-cleanroom.sh`:
+ 51  rc 0, "All 35 standalone lock(s) pass clean-room npm ci."
+ 52  * `npm run audit:contract`:
+ 53  tests 59, pass 59, fail 0 (= `expected-case-count` 59).
+ 54  exactly the 18 planned (entry, field) writes;
+ 55  key order and indent-2 round-trip equal;
+ 56  the root entry back to 4.7.9 reddens leg 6 (leg 7 stays green);
+ 57  originate's standalone entry back to 4.7.9 reddens leg 7 (leg 6 stays green);
+ 58  a stale `minimist ^1.2.5` on one entry makes the differ fire.
+ 59  * Parse census over all 45 tracked locks:
+ 60  0 handlebars entries <= 4.7.9;
+ 61  exactly 5 at 4.7.10.
+ 62  `audit-baseline.json` blob `4af041e8d74a` and the `mobile/secuura-app` lock unchanged.
+ 63  * Regen cross-check (host npm 11.5.1, node v24.7.0, isolated dir with no workspace root, handlebars entry removed and re-resolved):
+ 64  all four standalone entries moved to 4.7.10 and equal the committed entry on version/resolved/integrity/dependencies/dev/license/engines/bin.
+ 65  The regen also churned unrelated optional platform bindings (up to 10 entries), which is why it was a cross-check, not the build.
+ 66  `npm ci --ignore-scripts` rc 0 on the root and on each standalone lock in isolation (lock byte-unchanged, handlebars 4.7.10 installed).
+ 67  * `services/originate` `npm run build`:
+ 68  rc 0.
+ 69  governance 115/115 (4 suites), originate 1,093/1,093 (96 suites), referral 34/34 (7 files), vc-issuer 159/159 (17 files).
+ 70  `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED.
+ 71  Nothing failed.` Legs 3, 4 and 8 skipped (local stack not up), so this is **not** a pass of all 15.
+ 72  leg 2 `OK — all locks clean-room-installable`;
+ 73  leg 5 `OK — 59 audit-contract cases pass (expected 59)`;
+ 74  leg 6 `audit-gate:
+ 75  9 distinct advisories reported, 24 baselined.` / `OK — no advisories outside the triaged baseline.`;
+ 76  leg 7 `OK — no standalone-lock advisories outside the triaged baseline.`;
+ 77  leg 14 `shell suites:
+ 78  71 passed, 0 failed, 0 skipped (of 71)`;
+ 79  leg 15 `OK — 13 code guards passed.`
+ 80  **NOT run:** the four platform suites (Schemathesis, Akto, Playwright, k6), image builds, any live or demo sweep — there is no local stack and Docker is down.
+ 81  Leg 6's 15-entry CLEANUP advisory block stays out (disposition KS 767).
+ 82  * The originate declaration (KS 1453):
+ 83  * This PR ends at READY FOR QA (tier 1, security);
+ 84  the same in-range lock-refresh shape as KS 1437 (#1406) and KS 1425 (#1397).

@@ -1,0 +1,16 @@
+PASS governance shape: prune --omit=dev before the runtime COPY: a DEV package does NOT ship
+PASS governance shape: a PROD package DOES ship (the prune keeps it)
+PASS PLANTED prune removed: the DEV package now SHIPS (the parser sees the prune, not the name)
+PASS originate shape: a runner re-install --omit=dev REPLACES the full copy; a PROD package ships prod-only: [('/app', 'npm ci --omit=dev at /app', True)]
+PASS originate shape: a DEV package does NOT ship after the --omit=dev re-install
+PASS vc-issuer shape: runner --omit=dev from its own lock, only dist copied: a DEV package does NOT ship
+PASS COPY --from a FULL-ci builder ships its node_modules WITH dev deps
+PASS PLANTED root `COPY package*.json` + npm ci FIRES R1
+PASS a service-dir COPY does not read as the root lock
+PASS PLANTED `COPY . .` + npm ci FIRES R1 (a whole-context copy carries the root lock)
+PASS `FROM <stage>` inherits that stage's node_modules
+PASS continuation lines join; comments drop
+PASS a final re-install from a DIFFERENT lock REPLACES the copied node_modules: nothing from ours ships
+PASS importer regex: require / import-from / dynamic import / side-effect import all match
+PASS importer regex: handlebars-helpers, a comment and express-handlebars do NOT match
+SELFTEST 15/15

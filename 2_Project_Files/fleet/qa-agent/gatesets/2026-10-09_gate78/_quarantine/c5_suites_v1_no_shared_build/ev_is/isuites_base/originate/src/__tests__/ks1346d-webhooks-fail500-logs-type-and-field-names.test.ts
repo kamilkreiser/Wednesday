@@ -1,0 +1,134 @@
+// KS-1346 part D (originate routes/webhooks.ts): fail500 logged a NON-Error throw through String(),
+// so a thrown plain object reached the log as [object Object] and its content was lost. The 500 BODY was
+// already constant (KS-1341); what this file pins is the LOG. Three write routes are driven end to end,
+// each by making ITS OWN database call reject, on a real loopback listener, exactly as the KS-1341
+// part B cells do. Error and string throws must log exactly what they logged before.
+// Kam ruled 2026-09-27 (card secuura-ks1346-logging-thrown-objects-leaks-secrets, option a): a non-Error,
+// non-string throw is logged as its TYPE and FIELD NAMES only, never its values, so no secret reaches the log.
+// D7 is the ticket's third Done-when: rotate-secret throwing AFTER newSecret exists, with the REAL
+// encryptField and a key loaded, and the new secret absent from the 500 body and from every logger call.
+const mockExecuteRaw = jest.fn();
+const mockExecuteRawUnsafe = jest.fn();
+const mockLoggerInfo = jest.fn();
+const mockLoggerWarn = jest.fn();
+const mockLoggerError = jest.fn();
+const mockLoggerDebug = jest.fn();
+
+jest.mock('../db', () => ({
+  prisma: {
+    $queryRaw: jest.fn(),
+    $executeRaw: mockExecuteRaw,
+    $executeRawUnsafe: mockExecuteRawUnsafe,
+  },
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    req.user = { userId: '11111111-2222-4333-8444-555555555555' };
+    next();
+  },
+}));
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    encryptField: jest.fn((plain: string, context: string) => jest.requireActual('@secuura/shared').encryptField(plain, context)),
+    decryptField: jest.fn(() => ''),
+    runWithTenantId: jest.fn(async (_tenantId: unknown, fn: () => unknown) => fn()),
+    assertSafeOutboundUrl: jest.fn(async (raw: unknown) => ({ ok: true as const, url: String(raw) })),
+  }),
+);
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: mockLoggerInfo, warn: mockLoggerWarn, error: mockLoggerError, debug: mockLoggerDebug },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { webhooksRouter } from '../routes/webhooks';
+
+const shared = jest.requireMock('@secuura/shared') as { encryptField: jest.Mock };
+const realShared = jest.requireActual('@secuura/shared') as { registerKey: (v: number, hex: string) => void; setActiveVersion: (v: number) => void };
+
+const DETAIL = 'ks1346d-private-detail';
+const SECRET = 'ks1346d-secret-value';
+const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
+const WEBHOOK_ID = 'a1b2c3d4-5678-4abc-9def-0123456789ab';
+const ROUTES = [
+  { label: 'PATCH /:id', method: 'PATCH', path: '/' + WEBHOOK_ID, mock: mockExecuteRawUnsafe, context: 'Webhook update failed (PATCH /api/webhooks/:id)' },
+  { label: 'DELETE /:id', method: 'DELETE', path: '/' + WEBHOOK_ID, mock: mockExecuteRaw, context: 'Webhook delete failed (DELETE /api/webhooks/:id)' },
+  { label: 'POST /:id/rotate-secret', method: 'POST', path: '/' + WEBHOOK_ID + '/rotate-secret', mock: mockExecuteRaw, context: 'Webhook secret rotation failed (POST /api/webhooks/:id/rotate-secret)' },
+] as const;
+
+const app = express();
+app.use('/api/webhooks', express.json(), webhooksRouter);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+
+beforeAll(async () => {
+  realShared.registerKey(1, 'ab'.repeat(32));
+  realShared.setActiveVersion(1);
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => server?.close());
+beforeEach(() => jest.clearAllMocks());
+
+async function callWithThrow(route: (typeof ROUTES)[number], thrown: unknown): Promise<{ status: number; text: string; calls: unknown[][] }> {
+  mockLoggerError.mockClear();
+  route.mock.mockRejectedValueOnce(thrown);
+  const res = await fetch(baseUrl + '/api/webhooks' + route.path, {
+    method: route.method,
+    headers: { 'content-type': 'application/json' },
+    ...(route.method === 'PATCH' ? { body: JSON.stringify({ description: 'ks1346d' }) } : {}),
+  });
+  return { status: res.status, text: await res.text(), calls: mockLoggerError.mock.calls };
+}
+
+describe('KS-1346 part D: webhooks fail500 keeps a non-Error throw readable in the log', () => {
+  it.each(ROUTES)('RED KS-1346 D1 $label: a thrown plain object is logged as its type and field names, once, under this route', async (route) => {
+    const reply = await callWithThrow(route, { code: 'KS1346D_OBJECT', detail: DETAIL, password: SECRET });
+    expect(reply.status).toBe(500);
+    expect(reply.calls.length).toBe(1);
+    const [context, meta] = reply.calls[0] as [string, { error: unknown }];
+    expect(context).toBe(route.context);
+    expect(meta.error).toBe('thrown Object with fields [code, detail, password]');
+  });
+
+  it.each(ROUTES)('control KS-1346 D6 $label: no VALUE of a thrown object reaches the log', async (route) => {
+    const reply = await callWithThrow(route, { code: 'KS1346D_OBJECT', detail: DETAIL, password: SECRET });
+    const logged = JSON.stringify(reply.calls);
+    expect({ secret: logged.includes(SECRET), detail: logged.includes(DETAIL), code: logged.includes('KS1346D_OBJECT') }).toEqual({ secret: false, detail: false, code: false });
+  });
+
+  it.each(ROUTES)('control KS-1346 D2 $label: the 500 body stays the constant text for an object throw', async (route) => {
+    const reply = await callWithThrow(route, { code: 'KS1346D_OBJECT', detail: DETAIL });
+    expect({ status: reply.status, leaked: reply.text.includes(DETAIL) }).toEqual({ status: 500, leaked: false });
+    expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY);
+  });
+
+  it('control KS-1346 D3: an Error throw still logs exactly its message', async () => {
+    const reply = await callWithThrow(ROUTES[0], new Error(DETAIL));
+    expect(reply.calls).toEqual([[ROUTES[0].context, { error: DETAIL }]]);
+  });
+
+  it('control KS-1346 D4: a string throw still logs exactly itself, not a quoted rendering', async () => {
+    const reply = await callWithThrow(ROUTES[1], DETAIL);
+    expect(reply.calls).toEqual([[ROUTES[1].context, { error: DETAIL }]]);
+  });
+
+  it('control KS-1346 D5: String() of the thrown object really is the lossy text, so D1 is not vacuous', () => {
+    expect(String({ code: 'KS1346D_OBJECT', detail: DETAIL })).toBe('[object Object]');
+  });
+
+  it('control KS-1346 D7: rotate-secret failing AFTER the new secret exists keeps it out of the body and every log call', async () => {
+    const reply = await callWithThrow(ROUTES[2], new Error(DETAIL));
+    const newSecret = String(shared.encryptField.mock.calls[0][0]);
+    expect(newSecret).toMatch(/^whsec_[0-9a-f]{48}$/);
+    expect(String(shared.encryptField.mock.results[0].value)).toMatch(/^v1:/);
+    expect(reply.calls).toEqual([[ROUTES[2].context, { error: DETAIL }]]);
+    const everyLogCall = JSON.stringify([mockLoggerInfo.mock.calls, mockLoggerWarn.mock.calls, mockLoggerError.mock.calls, mockLoggerDebug.mock.calls]);
+    expect({ status: reply.status, inBody: reply.text.includes(newSecret), inLog: everyLogCall.includes(newSecret) }).toEqual({ status: 500, inBody: false, inLog: false });
+  });
+});

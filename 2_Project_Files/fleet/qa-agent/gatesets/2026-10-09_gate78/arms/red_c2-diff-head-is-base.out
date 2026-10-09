@@ -1,0 +1,17 @@
+C2 diff #1435 head 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 base 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0
+INFO PLAN from the BASE 1e7f90e26137 + the registry: 44 in-scope locks of 45 tracked; 5 vulnerable entries in 5 locks: ['package-lock.json handlebars', 'services/governance handlebars', 'services/originate handlebars', 'services/referral handlebars', 'services/vc-issuer handlebars']
+FAIL L1 changed 0 paths == planned 5 locks: extra none missing ['Blockchain/Dev/package-lock.json', 'Blockchain/Dev/services/governance/package-lock.json', 'Blockchain/Dev/services/originate/package-lock.json'] | out-of-scope touched none
+PASS M0 MODEL CONTROL: the model fed the OLD packument reproduces 5 base entries exactly 
+PASS L2 0 entries added, 0 removed, key order + top-level fields unchanged, no overrides, in 5 locks 
+FAIL L3 SEMANTIC: changed entries 0 == plan 5; every changed entry == its base+registry model at every leaf and in key order ["Blockchain/Dev/package-lock.json: changed entries: extra [] missing ['node_modules/handlebars']", "Blockchain/Dev/services/governance/package-lock.json: changed entries: extra [] missing ['node_modules/handlebars']", "Blockchain/Dev/services/originate/package-lock.json: changed entries: extra [] missing ['node_modules/handlebars']"]
+PASS L4 one integrity per new version {} | == registry dist.integrity True | == DOWNLOADED sri (NOT GIVEN: L4b NOT RUN) None
+FAIL L5 entries 0 (kit 5) | leaf field writes 0 (kit 18) | per package {} | per-entry field sets == kit prediction False {}
+PASS L6 indent preserved + byte-exact round-trip at base AND head in 5 locks  | head indents [2]
+FAIL L7 MASKED BYTE COMPARE: every changed entry put back to its base entry -> each head lock byte-identical to its base blob: 5/5 
+PASS LT TEXTUAL: per lock -/+ lines == leaf writes, every line carries a planned old/new value 
+PASS W1 IN RANGE must-pass: 0 entries walked, 0 declaring parents in all, 0 parent ranges NOT admitting the new version [], 0 orphans []
+FAIL W1f IN RANGE must-fail: parent ranges admitting the NEXT MAJOR 0 []
+PASS W2 parent declarations identical base vs head 
+FAIL W4 NO CASCADE: every dependency of every changed head entry resolves and satisfies its range  | widened ranges: []
+CHECKED 13
+6 FAIL (L1 L3 L5 L7 W1f W4)

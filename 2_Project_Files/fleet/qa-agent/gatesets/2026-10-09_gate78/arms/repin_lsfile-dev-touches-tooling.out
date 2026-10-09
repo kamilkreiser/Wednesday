@@ -1,0 +1,17 @@
+--- V. required arguments, each well-formed and == the kit's pin (a wrong value refuses BY NAME)
+  7 required arguments present, well-formed and == kit.json
+LAUNCH ACTION gate78 (DRY RUN) 2026-10-09 12:02:48 AEDT / 2026-10-09T01:02:48Z | #1435 6f4adfe8835ec8ece51653f3f758d6a55ce12348 | base 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 x1 | tree ccbb76460ad630ab9fdb74b31dfc16502eee94ac | develop 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 | repin-develop none | pane QA/Secuura-gate78
+--- A. the head must be the one the READY names
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-09_seatV1_READY.txt (sha256/16 ce6a5fe0d764f22d): lines naming the head in full 1 | naming #1435 2 | CONTROL lines naming 'READY' 2
+--- 2. ONE ls-remote (read verb) from the checkout, GIT_SSH_COMMAND unset, the checkout's own core.sshCommand
+  (CONTROL: ls-remote output read from the stand-in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-09_gate78/_scratch/arms/ls_dev_touches_tooling.txt)
+  ls-remote rc=0 at 01:02:48Z | develop 2f3fd22b580f866a10588d8b8d2bf52f68221ee5 | #1435 pull/head 6f4adfe8835ec8ece51653f3f758d6a55ce12348 | branch 6f4adfe8835ec8ece51653f3f758d6a55ce12348
+--- 1. PULLS API + census
+  SKIPPED BY NAME (--no-api, dry run only): the API state and the census are NOT read here
+--- 3b. develop: origin 2f3fd22b580f866a10588d8b8d2bf52f68221ee5 | --develop 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0
+  DEVELOP MOVED: 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 -> 2f3fd22b580f866a10588d8b8d2bf52f68221ee5 (step 3c checks descent and that the advance touches none of the 5 paths / tooling)
+--- 3c. the kit's own clone: fetch by sha if absent, C1 with every pin on the develop read now, the c2 prediction
+  c1 rc=1 | CHECKED 14 2 FAIL (P10 P12) 
+    FAIL P10 NO-NEW-LEG: 28 tooling paths present and identical at base / head / develop ["Blockchain/Dev/scripts/audit/audit-gate.mjs ['cffce234f221', 'cffce234f221', '655bffb18cee']"]
+    FAIL P12 base..develop: 1 path(s), 1 shared with the PR / tooling ['Blockchain/Dev/scripts/audit/audit-gate.mjs']
+REFUSING TO LAUNCH: C1 FAILED at the head (2 FAIL line(s), c1 rc 1)

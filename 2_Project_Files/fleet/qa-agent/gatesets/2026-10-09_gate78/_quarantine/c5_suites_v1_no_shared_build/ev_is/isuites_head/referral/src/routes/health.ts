@@ -1,0 +1,20 @@
+/**
+ * =============================================================================
+ * HEALTH CHECK ROUTES
+ * =============================================================================
+ */
+
+import { Router, Request, Response } from 'express';
+
+const router = Router();
+
+router.get('/', (_req: Request, res: Response) => {
+  res.json({
+    status: 'healthy',
+    service: 'referral-service',
+    version: '0.1.0',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+export { router as healthRoutes };
