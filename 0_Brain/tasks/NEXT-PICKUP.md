@@ -72,6 +72,7 @@ Each: read WHOLE, rule its Qs, SEND AMENDMENT (develop, floor, model), `brief_an
 
 ## OWED (Wednesday tooling)
 - `wed_claim.sh:54` / `safe_push.sh:108` internal `--autostash` (w=5 today; zero loss) → `safe_pull.sh`. After ANY `wed_claim.sh`, `git stash list` + `git status` before committing.
+- `safe_pull.sh` rc 4 twice at 11:00 ("cannot rebase: unstaged changes") with origin UNMOVED: `usage_wednesday.json` is rewritten by the statusline between the tool's reset and its rebase. Fix: skip the rebase when `ls-remote` equals the base, or reset immediately before it. Meanwhile, compare `ls-remote` against `origin/main` and push directly when they are equal.
 - `cockpit.sh model <pane> <id>` (idle-prompt send-keys + statusline verify), from today's waiter prototype.
 - Release the `wed_claim` claim for the models check once Kam has seen the spec (`wed_claim.sh release`).
 - Carried from 10-08: `Launch_Wednesday.command` step-5 seat-note resolver line; c4 selftest scratch reuse; `commitg1.sh:68` untracked blind spot; commit tools miss duplicate `Refs`; send_brief REFUSE unknown `Blockchain-*` tag; delivery sweep of the 64 undelivered secuura- cards; #1430/#1431 "unnamed legs" body polish (gate77); #1428 docs follow-up (N-1428-1/2/6).
