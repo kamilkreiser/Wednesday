@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-10 09:35 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
+**Kam today (live, view=friday):** terminal ~09:1x "MPS ready to showcase Monday, host it live on Azure, email link + logon details; also anything else on HPSM POC / security control creation tool" (prompt-logged) · 09:32:04 `mpscalc-showcase-known-limits-1010` = **b (fix F-12 + F-13 before Monday)** · 09:33:28 `mpscalc-azure-login-for-hosting-1010` = a (signed in; VERIFIED: MPS 4_Credentials/.azure → kamil@datasec-rd.com, tenant ec01829b, sub a6b8fe11; card delivered) · 09:34:35 "thank you". Reconcile 0 after apply.
+**LIVE SEATS (all Datasec):**
+- MPS: %2 MPS-A **B12** (API Entra JWT + act-as + /home/data store + same-origin SPA; ADDENDUM-1 = F-12 owner-only/no self-approval, F-13 GST fixed 0.10, app-only Seller tokens, records C-12 on `records/b12`) · %3 MPS-B **B13** (web MSAL; ADDENDUM-1 = GST read-only, owner/self-approval UI) · %4 MPS-C **B14** (infra Bicep, CI build-only, laptop deploy script, app regs, price-book runbook, hosted seed + DEMO.md; ADDENDUM-1 = app-only seed identity `mpscalc-showcase-seed` with Seller role). Briefs + addenda in MPS `1_Project_Definition/Briefs/2026-10-10_B1[234]_*`. Gate **B15** skeleton in Friday scratchpad `briefs/mps/` (TBD-FRIDAY fields) — fill and launch when B12–B14 READY.
+- Composer: %5 Security-Composer-B **B113** (tier 1: A4 name editable, A3 setPolicyTarget, A2 counts, contract 0.31.0; R-1..R-5 confirmed) · %6 Security-Composer-A **B114** (tier 2: DEPLOY.md 0021 rollback, timing tests, #279).
+- HPSM-POC: %7 HPSM-POC-A **B192** (tier 1, api/ only: per-stage first-read timing to the LOG, HPSMPOC-207 start-up pool, 243 N-1; Jira closes last; fixes only until HP review Tue 13 Oct).
+**Watchers (background, wake on exit):** MPS (seen file scratchpad/seen_mps_1010, panes %2-%4) · Composer+HPSM-POC (seen_cp_1010, panes %5-%7; HPSM glob includes `.tools/wt-B192-records/`). Re-arm WITHOUT --seed.
+**NEXT on each READY:** read STATUS at source → Friday opens PR (`friday_as.sh datasec gh pr create`) → tier gate → `merge_when_green.sh` → MPS: deploy under Kam's login via B14's script after B15 hosted pass → Friday's own live check → EMAIL Kam the link + account names (his own kamil@datasec-rd.com; no passwords by mail) → panel line.
+**Owed:** Mon 12 Oct printer card re-raise; tooling owed = pretooluse hook flag for unquoted `$VAR` in command position (ledger w=3, 2026-10-10).
+
 ## 🔴🔴🔴 WRAP 2026-10-09 23:25 (Friday; Kam: "Once you finish the check, please wrap up") — READ FIRST; supersedes every block below where they differ
 **FLOOR EMPTY** (%0 friday + %1 monitor). Newest Kam row 23:08:21 (lane 3c = a, delivered). Reconcile 0. No OPEN Friday cards. Usage 34%.
 **Live now:** Playbook hosted = HPSM-POC main 80afdff (C-81) · Composer demo = e33bdad (C-66: lane 3c policy-target screens + rename + Home width + squared pills; migration 0021 since C-65) · MPS main a2da403 (web/ merged; CodeQL now C#, Python, JS/TS).

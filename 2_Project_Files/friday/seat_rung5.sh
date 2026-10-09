@@ -13,12 +13,16 @@
 #   rc 3  NO CONTROL — the control id was not found either, or none given: the absence means nothing
 #   rc 2  usage / no transcript directory
 # A NOT SEEN is never a sentence on its own: read the seat's pane before saying anything.
+# SEAT=<letter> (env): count only transcripts carrying "YOUR SEAT: <letter>". Without it, a seat that LISTS the Briefs
+# folder names every sibling brief, so all ids read SEEN in one transcript (first use, 2026-10-10 09:33: B12/B13/B14 all
+# "seen" at the same line 16 of one seat). With several seats on one project, always pass SEAT.
 P="${1:?project folder}"; ID="${2:?brief id}"; CTL="${3:-}"; N="${4:-40}"
 case "$P" in /*) ;; *) echo "seat_rung5: project folder must be absolute" >&2; exit 2;; esac
 ROOT="${CLAUDE_TRANSCRIPTS_ROOT:-$HOME/.claude/projects}"
 D="$ROOT/$(printf '%s' "$P" | sed 's#[^A-Za-z0-9]#-#g')"
 [ -d "$D" ] || { echo "seat_rung5: no transcript dir $D" >&2; exit 2; }
 FILES=$(ls -t "$D"/*.jsonl 2>/dev/null | head -n "$N")
+if [ -n "${SEAT:-}" ]; then FILES=$(printf '%s\n' "$FILES" | while IFS= read -r f; do /usr/bin/grep -q -F "YOUR SEAT: $SEAT" "$f" && echo "$f"; done); fi
 [ -n "$FILES" ] || { echo "seat_rung5: no transcripts in $D" >&2; exit 2; }
 hit(){ printf '%s\n' "$FILES" | while IFS= read -r f; do l=$(/usr/bin/grep -n -F -m1 "$1" "$f" | cut -d: -f1); [ -n "$l" ] && { echo "$f:$l"; break; }; done; }
 h=$(hit "$ID")
