@@ -1,0 +1,75 @@
+[Secuura/Blockchain-G -> Wednesday] READY FOR QA (Seat G 7th): #1445 KS-1410 transfer tier 1 -> the gate you name
+## BLUF
+**READY FOR QA: PR #1445, head `364a684c35db4b0d0fe91f87554b663b511d757a` (read from origin in the same action as the raise), base develop `613070f29112`, TIER 1 → the gate you name.** KS-1410 transfer `process-expired`. ONE commit, 4 files, +175 −1. **A live run is owed, so KS-1410 does not move to Done.** The PR-naming ticket comment is yours to batch; this seat wrote nothing to the board.
+
+## The five READY components
+1. **PR number:** **#1445** (not a branch). HTTP **201** on create; `raise_rest_g7.sh` verified origin already held the head in the same action, and read the body back: sha16 `22b559b649be9c2b` at source == the file. Independent read-back: `state=open`, `draft=false`, `merged=false`, `commits=1`, `changed_files=4`, `additions=175`, `deletions=1`.
+2. **Head SHA from origin:** `364a684c35db4b0d0fe91f87554b663b511d757a`; `ls-remote` in the raise action and again after. Branch IN FULL: `feature/ks-1410-delegations-process-expired-500-g7-1`.
+3. **Ticket:** KS-1410, In Progress, High, assignee `kamil.kreiser@secuura.ai`. **Unchanged by me — no board write of any kind.** The comment naming #1445 is Wednesday's batch.
+4. **Test Evidence block:** written by me, who ran the tests, in the PR body — touched / ran / NOT run / migrations+config.
+5. **What was NOT done or covered:** below, and in the body.
+
+## CLAIM LEDGER
+| claim | instrument | result | UNMEASURED? |
+|---|---|---|---|
+| the 500 body no longer carries the thrown text | 3 `T1` cells, one per `NODE_ENV` | red at base, green after | offline only — live run owed |
+| the thrown text is logged once, server-side, route named | `T2` cell, `mockLoggerError` | red at base, green after | offline only |
+| a success still answers 200 + logs nothing | control `TC1` | passes at base AND after | — |
+| the revoke route still answers 404 with its business message | control `TC2` | passes at base AND after | — |
+| the new log line logs `error.message` in its `if (error instanceof Error)` branch only | read of `delegations.ts:283` region + the applied diff | that branch only; a non-Error throw takes `next(error)` | **no cell exercises a non-Error throw on this route** |
+| the six new cells actually ran | vitest JSON reporter, per-cell `fullName` + status | 6 enumerated, 6 passed | — |
+| whole suite did not regress | `npm test` in `services/transfer` | 79/79 → 85/85, rc 0 | — |
+| red→green holds after the WHY line | base-blob restore of `delegations.ts`, re-run, restore, re-hash | 4 failed/81 passed, then 85/85; blob+tree equal | — |
+| types are sound incl. the test file | `tsc --noEmit`, package + a `files`-listing config with pinned `typeRoots` | rc 0 and rc 0; 427 files in program incl. the test file | — |
+| that tsc rc 0 is not an empty-program pass | planted `TS2322` in a copy inside `rootDir` | rc 2, `error TS2322`, control removed | — |
+| the payload was applied byte-for-byte before the deviation | `git write-tree` vs the declared tree | `007affad1d70379242e1c4346c80bd0b98fde0c5`, EQUAL | — |
+| the WHY line is the only deviation | `diff` vs the byte-for-byte copy | exactly +1 line, 150 chars | — |
+| doc blocks are well-formed and append-only | `docblockf7.py` | 0 failed; flow 40→41 tail 44→47; cheat 29→30 tail KS-1402→KS-1410; both 1-byte-alter controls fired | — |
+| the doc fragments satisfy the house style | `html_docs_matrix.test.sh`, after append, before commit | **12 passed, 0 failed**, 10 planted controls fired | — |
+| the commit carries no trailers | `interpret-trailers --parse` + a control commit that prints one | 0 bytes vs 55 bytes | — |
+| the four platform suites | — | **NOT RUN. No local stack.** | **UNMEASURED — never read as a pass** |
+| a live run of the changed route | — | none exists | **UNMEASURED — the reason KS-1410 stays open** |
+| the 4xx `error.message` siblings (`:85 :208 :211 :213`) | read only | untouched by design | **a decision, not a measurement — see the question below** |
+
+## THAT push's gate lines, verbatim with their ratios
+```
+shell suites: 73 passed, 0 failed, 0 skipped (of 73)
+shell suites wall-clock: 380s
+OK — 13 code guards passed.
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+```
+`gatelinesg1.py`, read from `pushg1.out` (the wrapper's stdout, not the hook log):
+```
+pre_push_hook_base.test.sh                   (28, 0)  OK
+pre_push_hook_base_fixture_guard.test.sh     (6, 0)  OK
+run_shell_suites.test.sh                     (59, 0)  OK
+VERDICT: MATCHES the declared fleet STOP condition
+```
+The 3 SKIPPED legs each printed `SKIP — local stack not up on http://localhost:6882 (start it to run this leg)`: spec-auth conformance, path resolvability, served-spec consistency.
+
+**Leg 2 this run:** `OK    services/governance` and `All 35 standalone lock(s) pass clean-room npm ci.` — **0 `Abort trap` occurrences**, against 1 on the refused attempt. That is the transient confirmed, and nothing was regenerated.
+
+## Ref side effects, both of them
+- `rev-parse --all` **1665 → 1666**, exactly the one expected ref; `diff` of the before/after captures shows a single added line, `364a684c35db…`. The refused first attempt left refs **byte-identical** (1665) and `-g7-` at origin 0.
+- origin now: `refs/heads/feature/ks-1410-delegations-process-expired-500-g7-1` = `364a684c35db…`; **develop unmoved at `613070f29112`**.
+- **Post-push lock `find` with a planted control:** control tree returns **1**, so the check is live. The real tree returns **1** — and it is **NOT mine**: `.push-lock-d8`, holder `{"seat": "Secuura/Blockchain-R ra29", "pid": 30834, "branch": "feature/ks-1410-apigw-audit-export-502-ra29-1", "started_utc": "2026-10-09T19:35:20Z"}`. Attributed by the holder field, never by path. **`.push-lock-g1` is ABSENT** — mine released at 19:35:06Z, 14 s before R 29th took d8, so the two-lock precondition held in both directions. 0 orphaned `login_stub` pids under my worktree.
+
+## Actions — COMPLETED runs only, as the brief requires
+6 runs on my head. **Completed: `PR — Lockfiles (path-skip twin)` success · `Dependabot standalone locks` skipped · `pr-premerge-ack` success.** **In progress at the time of this mail, so I report no conclusion for them:** `pr`, `Security Scanning`, `PR Security Gates (KS-168)`.
+⚠ **A discrepancy worth your eyes, which I am not resolving from this seat:** the repo `CLAUDE.md` says GitHub Actions is retired for this repo and billing will not be fixed, yet **three workflows completed on my head and three are running**. Either the documented state is stale or something was re-enabled. I measured it; I am not asserting which. `mergeable_state` reads `unstable`, which given the in-progress runs carries no testing claim either way.
+
+## What I did NOT do / NOT cover
+- No merge, no gate, no deploy, no `az`, no SSH, no migration, no Docker, no observability stack. No board write, no extranet, no message to Peter or Stuart. No `--no-verify`, no force-push, no `--admin`.
+- No dependency, lockfile, manifest, baseline or spec-version edit. **I did not run the regeneration command leg 2 printed**, and the governance lock is untouched.
+- The four platform suites are UNMEASURED; three preflight legs SKIPPED for want of a local stack; no live run.
+- A non-Error throw on this route is not exercised by any new cell.
+
+## QUESTION carried into the gate (Q-4XX, as you ruled)
+The four 4xx `error.message` sites in the same file — `:85`, `:208`, `:211`, `:213` — are untouched. Whether they belong to KS-1410's scope or to a separate ticket is a decision I did not take, and it is stated in the PR body as a question rather than left silent.
+
+## Proposed TEST BLOCK line
+`Platform K · KS-1410 transfer slice · PR #1445 · the pass that proves it: services/transfer vitest 79→85 with 4 of 6 new cells red at the base and 6 of 6 after, plus html_docs_matrix 12/0 · what the human does: nothing yet — a live run on a booted stack is still owed before this can be called done.`
+
+## State
+One commit, one PR, one branch. Worktree `worktrees/s-g7-ks1410-transfer` KEPT (PR open). Watcher armed. `df -m` 340,373 MB / 83%. Holding for your gate word; I will WRAP on your next ctx read if it puts me past 64%.
+
