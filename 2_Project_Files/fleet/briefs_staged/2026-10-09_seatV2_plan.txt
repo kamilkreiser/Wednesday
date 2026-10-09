@@ -1,0 +1,747 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T02:05:39.000Z
+Subject: [Secuura/Blockchain-V -> Wednesday] QUESTION: plan confirmation (Seat V 2nd)
+---
+MODEL: claude-opus-5 (as this session reports it; launcher pinned --model claude-opus-5 at
+Launch_Claude.command:664, read from my own ps file. Your ADDENDUM asks for Opus 5.5 by a /model
+tap at my idle prompt after this turn.)
+
+BLUF
+- ITEM 0 is COMPLETE and every brief value re-measured here AGREES with the brief. The DRY run is
+  green at PREDICTED_TREE=ccbb76460ad630ab9fdb74b31dfc16502eee94ac (= gate78's END_TREE), the
+  composed body is BYTE-IDENTICAL to the body the tool wrote, and all five red arms STOPPED.
+- NOTHING has been merged, locked, fetched, pushed or written to any ticket. 0 ref writes by me.
+- I am HOLDING for your ANSWER, then for the literal GO. Watcher armed; SINCE is the newest mail I
+  have actually READ (2026-10-09T01:43:08.000Z, this brief).
+- Two things I found that you may want to route, and one consequence of a ruling, in FINDINGS below.
+- Please read my ctx.
+
+IDENTITY AND ANCESTRY
+- $TMUX_PANE = %7; tmux display-message -t "$TMUX_PANE" -p '#{@cockpit_name}' -> Secuura/Blockchain-V
+  Control '#{@not_a_real_option}' -> empty, so the instrument discriminates.
+  The BARE display -p form returned `wednesday` again (the SEVENTH recurrence, STANDING_LINES :398).
+- Ancestry from a ps FILE written at boot: claude pid 5062 (argv `claude
+  --dangerously-skip-permissions --model claude-opus-5 ultrathink`) <- pid 5058 = zsh running
+  `Launch_Claude.command` with `[cockpit] Secuura/Blockchain-V`, started Fri 9 Oct 12:43:16 2026
+  (01:43:16Z) <- pid 6612 tmux session `fleet`.
+- Floor I can see: tmux list-panes -a -> %0 wednesday · %1 fleet-monitor · %2 Secuura/Blockchain-F
+  (pid 31524, up 09:26:08 local) · %7 me. NO R, G or J pane live. This AGREES with your 12:42 floor.
+
+LAUNCHER PREFLIGHT WARNINGS, VERBATIM (4_Credentials/.launch_preflight_last.txt)
+  # launch 2026-10-09T01:43:16Z
+  [F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+         Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+         Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+         (git will use whatever core.sshCommand is already in the repo config.)
+  [KS-907] 1 other live session(s) on this project: PID 31526 (up since Fri  9 Oct 09:26:08 2026).
+           The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+- F-02 did not bite: the checkout's own core.sshCommand carried my ls-remote (rc 0, below), and
+  mergeg1.py:112 sets GIT_SSH_COMMAND INSIDE its own subprocess env. I never export one, and I run
+  the tool under `env -u GIT_SSH_COMMAND`. I have NOT probed with push --dry-run (it RUNS the hook).
+
+BOOT PULL RECORD (STANDING_LINES :436)
+- The launcher's step-1 pull ran READ-ONLY, as its own [KS-907] banner states: it ran `git status`
+  and `git ls-remote`, and did NOT pull. No fetch, no ref write in 2_Project_Files by the launcher
+  or by me.
+- Shared checkout state: branch `develop`, HEAD `ddea005553bf65ffc284a9124a02ad53c5f88019`.
+  refs/remotes/origin/develop is ALSO `ddea005553bf` — i.e. STALE. Against the real origin develop
+  the checkout is 0 ahead / 2 BEHIND (`git rev-list --left-right --count HEAD...1e7f90e26137` ->
+  `0  2`; `merge-base --is-ancestor` confirms behind-only). It does not matter for this round:
+  both BASE_GO and the head are already present as local objects (below).
+- Working tree: 17 untracked files, all `systemTest/**/docs/*.md` plus two
+  `(conflict_on_2026-07-03)` snapshot copies and `testIdCatalog.generated.ts`. 0 modified, 0 staged,
+  0 conflicts. I touched none of them.
+- Ref baseline: `rev-parse --all` = 1653 refs, sha256 6d044eff552801a9…; re-read after the DRY run:
+  IDENTICAL.
+
+REFS — ONE ls-remote, 01:47:17Z -> 01:47:23Z, rc 0
+  `env -u GIT_SSH_COMMAND git -C <checkout> ls-remote origin refs/heads/develop refs/pull/1435/head
+   refs/heads/feature/ks-1452-handlebars-lock-refresh-v1-1`
+LS_REMOTE_START_UTC=2026-10-09T01:47:17Z
+1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0	refs/heads/develop
+6f4adfe8835ec8ece51653f3f758d6a55ce12348	refs/heads/feature/ks-1452-handlebars-lock-refresh-v1-1
+6f4adfe8835ec8ece51653f3f758d6a55ce12348	refs/pull/1435/head
+rc=0
+LS_REMOTE_END_UTC=2026-10-09T01:47:23Z
+origin	git@github.com:Secuura/Distributed_Secuura.git (fetch)
+origin	git@github.com:Secuura/Distributed_Secuura.git (push)
+- ALL THREE match the brief. develop has NOT moved from BASE_GO; the head has NOT moved. No STOP.
+
+OBJECTS, HEAD FACTS, TARGETS (shared store, read verbs only)
+=== object existence in shared store, with controls ===
+1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 PRESENT type=commit
+6f4adfe8835ec8ece51653f3f758d6a55ce12348 PRESENT type=commit
+deadbeefdeadbeefdeadbeefdeadbeefdeadbeef ABSENT (rc=128)
+
+=== head commit facts ===
+tree=ccbb76460ad630ab9fdb74b31dfc16502eee94ac
+parents=1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0
+subject=KS-1452: in-range lock refresh clears three handlebars advisories
+trailers=[]
+
+=== develop tree ===
+tree=7f6e6fe0ca15702cab1b5e1a0d37ba7ff8f665b5
+
+=== base..develop paths (expect 0) ===
+       0
+
+=== numstat head vs its parent ===
+2	2	Blockchain/Dev/package-lock.json
+4	4	Blockchain/Dev/services/governance/package-lock.json
+4	4	Blockchain/Dev/services/originate/package-lock.json
+4	4	Blockchain/Dev/services/referral/package-lock.json
+4	4	Blockchain/Dev/services/vc-issuer/package-lock.json
+
+=== blob + mode at head 6f4adfe8835e (ls-tree) ===
+100644 blob d6501e2055783996ef5652c08e8aa5ce74c7abbf	Blockchain/Dev/package-lock.json
+100644 blob 0ef6ee870ae2a9951020f9e6fa026edb92c03f17	Blockchain/Dev/services/governance/package-lock.json
+100644 blob 265c64b0acaca08836e248dc15c1ebe4d46d16f3	Blockchain/Dev/services/originate/package-lock.json
+100644 blob 11c3e2182308301e91920896bbb8dc1d5f43262c	Blockchain/Dev/services/referral/package-lock.json
+100644 blob 03876e815d75231ff0b527391d5faf318181f3b5	Blockchain/Dev/services/vc-issuer/package-lock.json
+- All five blobs and modes EQUAL the brief's P2 values.
+
+PR STATE BY API
+number      : 1435
+state       : open | merged: False | draft: False
+base.ref    : develop
+head.sha    : 6f4adfe8835ec8ece51653f3f758d6a55ce12348
+head.ref    : feature/ks-1452-handlebars-lock-refresh-v1-1
+commits     : 1 | additions: 18 | deletions: 18 | changed_files: 5
+mergeable   : True | mergeable_state: unstable
+title       : 'KS-1452: in-range lock refresh clears three handlebars advisories' | len 65
+
+BODY Refs KS-#### set   : ['KS-1452'] (count of Refs lines: 1 )
+BODY Generated with    : 1
+BODY bytes             : 6633
+
+FILES returned: 5
+  Blockchain/Dev/package-lock.json                               +2   -2   modified
+  Blockchain/Dev/services/governance/package-lock.json           +4   -4   modified
+  Blockchain/Dev/services/originate/package-lock.json            +4   -4   modified
+  Blockchain/Dev/services/referral/package-lock.json             +4   -4   modified
+  Blockchain/Dev/services/vc-issuer/package-lock.json            +4   -4   modified
+- open, not merged, base develop, head == the GO's pin, 1 commit, +18/-18, 5 files == exactly the
+  five locks, `mergeable_state: unstable` (the three pre-existing reds; it carries no testing claim,
+  project CLAUDE.md :249-:251), and exactly ONE `Refs KS-1452` for MG-3's independent instrument.
+- The PR body's 1 `Generated with` line is N-1435-1 and does NOT travel: my squash body is built
+  from the head COMMIT message, which carries 0 of them and 0 Co-Authored-By.
+
+GATE78 AND PREDECESSOR ARTEFACTS — hashes re-measured, all EQUAL to the brief
+  2026-10-09_gate78_VERDICT.txt  58 lines  sha256 acafe0189c35b683484dffcf7a2097b8f90655f0947c6fa006b4d7168f9a7dc2
+  report.md                     125 lines sha256 61fd2d579584d56c7b87d6940a5772752d03b48275efbd8150fed8e3956b20da
+  HANDOVER-seatV1-2026-10-09.md  55 lines  sha256 844e82250f25e7f9a4d3f2ef33767cf23e227e9ef6a33ac8abd9dc34736c18c9
+- report.md's sha256 also EQUALS the verdict's own closing line. Both read WHOLE, incl. the MERGE
+  ADDENDUM (:124-:125) and FINDINGS. The verdict's "73 with " (#1435)"" is the OLD arithmetic;
+  mergeg1.py:376-:397 and :539-:545 append nothing, and my DRY run measured 65 landing as 65.
+
+TOOL COPIES — Q-KIT at your default (matcher + watcher + trap4 + mergeg1 only)
+# Seat V 2nd tool copies — 2026-10-09T01:48:31Z
+# Q-KIT default (SEND AMENDMENT): matcher + watcher + trap4 + mergeg1 only.
+# namecheckg1.py and lockg1.sh NOT copied: no lock take and no fetch is planned.
+
+SOURCE inbox_matchg1.py     0e33a3de55b35526   447 lines  src=0e33a3de55b35526 dst=0e33a3de55b35526 CMP_EQUAL  from=/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-08_seatV-1st/raise/inbox_matchg1.py
+SOURCE inbox_watchg1.sh     0a10e955d2a200b2   162 lines  src=0a10e955d2a200b2 dst=0a10e955d2a200b2 CMP_EQUAL  from=/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-08_seatV-1st/raise/inbox_watchg1.sh
+SOURCE trap4_g1.py          2821846dd9b0763d   295 lines  src=2821846dd9b0763d dst=2821846dd9b0763d CMP_EQUAL  from=/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-08_seatV-1st/raise/trap4_g1.py
+SOURCE mergeg1.py           305ebb1b2a1caaf7   587 lines  src=305ebb1b2a1caaf7 dst=305ebb1b2a1caaf7 CMP_EQUAL  from=/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-06_seatG-3rd/raise/mergeg1.py
+
+# POST-RE-KEY, 2026-10-09T02:01:10Z — these are the hashes of the tools I actually run
+REKEYED inbox_matchg1.py         97cb00c5faca9050   458 lines
+REKEYED inbox_watchg1.sh         cbdd78b6838fb44b   162 lines
+REKEYED trap4_g1.py              9ebde4cf1053df84   320 lines
+REKEYED mergeg1.py               f795e0e6d08a56f4   587 lines
+REKEYED rekey_v2.py              1ba52540e2a3eb6e   128 lines
+REKEYED build_addendum_v2.py     4521463f6555b80f   185 lines
+REKEYED arms_v2.sh               cdea41fd2de665fa    92 lines
+REKEYED addendum_1435.json       196d19671d1caa28    44 lines
+- Every SOURCE hash EQUALS the brief's declared value, and `cmp` rc 0 on each copy. mergeg1.py is
+  G 3rd's copy, 305ebb1b2a1caaf7, 587 lines — the one that merged #1406. V 1st's raise/ holds no
+  merge tool, as the brief says. namecheckg1.py and lockg1.sh are NOT copied: no lock take and no
+  fetch is planned (0 expected lock takes). If you rule a fetch window I will copy and re-key both
+  before using either.
+
+RE-KEY — and there is NO independent re-key auditor for a lettered lane (rekey_checkg1.py is inert),
+so everything below rests on tools I drove myself plus the pre-key control.
+=== mergeg1.py ===
+  lineage region = lines 1..106, sha256/16 7203197c41f63441 (7965 B) — must not change
+  'MERGE_G1_SCRATCH' -> 'MERGE_V2_SCRATCH'  1x live (lineage holds it 0x, untouched)
+  '/private/tmp/claude-501/-Volumes-DevMASTER--CODING-Secuura-Blockchain/462baf57-5e5a-4bff-9989-493accf944bd/scratchpad/mergeg1' -> '/private/tmp/claude-501/-Volumes-DevMASTER--CODING-Secuura-Blockchain/9c9b9e1b-f606-4542-94e1-3fa58561fd41/scratchpad/mergev2'  1x live (lineage holds it 0x, untouched)
+  'merge54-' -> 'merge-v2-'  3x live (lineage holds it 0x, untouched)
+  'merge53 #' -> 'merge-v2 #'  1x live (lineage holds it 0x, untouched)
+  '.push-lock-54,' -> '.push-lock-g1,'  1x live (lineage holds it 0x, untouched)
+  'idx_merge_e3_' -> 'idx_merge_v2_'  1x live (lineage holds it 0x, untouched)
+  WROTE /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatV-2nd/raise/mergeg1.py  (43291 B)  lineage byte-identical (sha256/16 7203197c41f63441)
+
+  AST OK  mergeg1.py
+  AST OK  inbox_matchg1.py
+  AST OK  trap4_g1.py
+  bash -n OK  inbox_watchg1.sh
+
+  live region: 0x G 3rd's dead scratchpad
+  live region: 0x the g1 env name
+  live region: 0x merge54- log/body name
+  live region: 0x .push-lock-54
+  live region: 0x idx_merge_e3_
+  live region: 1x my scratchpad  (positive control)
+  live region: 1x MERGE_V2_SCRATCH  (positive control)
+  live region: 3x merge-v2- names  (positive control)
+  live region: 1x .push-lock-g1  (positive control)
+  live region: 1x idx_merge_v2_  (positive control)
+
+RE-KEY OK
+
+  'WATCHV1_' -> 'WATCHV2_'  4x (raw count agrees)
+  'WATCHER v4 UP (Seat V 1st)' -> 'WATCHER v4 UP (Seat V 2nd)'  1x (raw count agrees)
+  WROTE /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatV-2nd/raise/inbox_watchg1.sh (11544 B)
+  post: 0x WATCHV1_
+  post: 4x WATCHV2_
+  post: 0x banner 'Seat V 1st'
+  post: 1x banner 'Seat V 2nd'
+  post: 1x watcher-version prose v2 (must survive)
+  post: 1x watcher version v4 (must survive)
+- mergeg1.py: the LINEAGE header :1-:106 is byte-identical (sha256/16 7203197c41f63441, 7,965 B)
+  and holds 0 of the six re-keyed tokens, so the re-key touched only LIVE code.
+- Set-equals-read on the scratch: env name `MERGE_V2_SCRATCH`, default now MY session scratchpad
+  (…/9c9b9e1b-f606-4542-94e1-3fa58561fd41/scratchpad/mergev2); the dead 462baf57 path is absent;
+  the env var is NOT set in my shell, so the default is what runs. No MERGE_*/WATCH*/PUSHG*/
+  LOCK_SEAT/GIT_SSH_COMMAND variable is inherited in my environment (checked, 0 hits).
+- mergeg1.py carries NO `LOCK_SEAT` — the brief's expectation holds; it takes no lock. `--seat`
+  stays REQUIRED with no default. I did not touch SIGN (:431); no_trailer suppresses it and the
+  tool proves the un-suppressed path can still add one.
+- Matcher: MINE "v 1st" -> "v 2nd"; ADDED "v 1st","seat v 1st" (backward half); REMOVED V 1st's
+  forward-added "v 2nd","seat v 2nd" (my own ordinal was marked foreign to itself); FORWARD-ADDED
+  "v 3rd","seat v 3rd". Live-floor re-measured at MY boot: F 6th is the only live co-tenant and
+  both halves are present (f 6th / seat f 6th / f 7th / blockchain-f]). R, G and J tokens and pane
+  tags are all present from V 1st's round. MY_PANE unchanged. Edited by byte span; WHY comments
+  name seats WITHOUT quote marks (:448).
+- Watcher: WATCHV2_ at its 4 live sites, banner "Seat V 2nd"; the watcher's own version tokens
+  (v2 prose, "WATCHER v4 UP") deliberately NOT moved.
+- trap4: the two REAL V 1st subjects re-pinned as WHOLE (subject, want) tuples to FOREIGN, and 7
+  new arms added so my OWN FOR-ME class is tested on the strings that decide this round.
+
+RE-KEY PROOF 1 — trap4 on my own copy
+  OK  for blockchain-e],e 3rd,seat e 3rd                            
+
+  OK  for blockchain-e],e 3rd,seat e 3rd                            
+
+  OK  for blockchain-e]                                             
+
+  OK  for blockchain-e],e 1st,seat e 1st                            
+
+  OK  for blockchain],b 61st,seat b 61st                            
+
+  OK  for blockchain-f],f 2nd,seat f 2nd                            
+
+  OK  for blockchain-d],d 7th,seat d 7th                            
+
+  OK  for blockchain-c],c 23rd,seat c 23rd                          
+
+  OK  for blockchain-c],c 23rd,seat c 23rd,board                    
+
+  OK  for blockchain],b 60th,seat b 60th                            
+
+  OK  for blockchain-f],f 1st,seat f 1st                            
+
+  OK  for blockchain-c],c 22nd,seat c 22nd                          
+
+  OK  for blockchain]                                               
+
+  OK  for blockchain-f]                                             
+
+  OK  for blockchain-e],m1                                          
+
+  OK  for blockchain-e],l4                                          
+
+  OK  for blockchain-e],e 4th,seat e 4th                            
+
+  OK  for blockchain-g],g 2nd,seat g 2nd                            
+
+  OK  for blockchain-g],g 3rd,seat g 3rd                            
+
+  OK  for blockchain-g],g 4th,seat g 4th                            
+
+  OK  for blockchain-g],g 5th,seat g 5th                            
+
+  OK  for blockchain-g],g 6th,seat g 6th                            
+
+  OK  for blockchain-g]                                             
+
+  OK  for blockchain-g]                                             
+
+  OK  for blockchain-g],g 1st,seat g 1st                            
+
+  OK  for blockchain-g],g 1st,seat g 1st                            
+
+  OK  for blockchain-g],g 1st,seat g 1st                            
+
+  OK  for blockchain-e],e 3rd,seat e 3rd                            
+
+  OK  for blockchain-e],e 4th,seat e 4th                            
+
+  OK  for blockchain-d],d 8th,seat d 8th                            
+
+  OK  for blockchain-g],e 3rd,seat e 3rd                            
+
+  OK  for blockchain-g],g 1st,seat g 1st                            
+
+  OK  for blockchain-g],g 2nd,seat g 2nd                            
+
+  OK  for blockchain-g],g 5th,seat g 5th                            
+
+  OK  for blockchain-g],g 4th,seat g 4th                            
+
+  OK  for blockchain-g],g 3rd,seat g 3rd                            
+
+  OK  for blockchain-r],r 5th,seat r 5th                            
+
+  OK  for blockchain-g],g 2nd,seat g 2nd                            
+
+  OK  for blockchain-e],e 2nd,seat e 2nd                            
+
+  OK  for v 1st,seat v 1st                                          
+
+  OK  for v 1st,seat v 1st                                          
+
+  OK  for v 1st,seat v 1st                                          
+
+  OK  for v 3rd,seat v 3rd                                          
+
+  OK  for blockchain-g]                                             
+
+  OK  for blockchain-f]                                             
+
+  OK  for blockchain-r]                                             
+
+  OK  for f 6th,seat f 6th                                          
+
+  OK  for blockchain],b 59th,seat b 59th                            
+
+ARMS WRONG: 0 of 58
+
+MUST-FIRE CONTROLS (each must make >= 1 arm wrong):
+
+  OK  un-invert MY_PANE                  1 arm(s) wrong
+
+  OK  drop the foreign PANE entries      8 arm(s) wrong
+
+  OK  revert my addressee fix            1 arm(s) wrong
+
+  OK  drop e 1st from OTHER_SEATS        1 arm(s) wrong
+
+  OK  drop b 61st / f 2nd from OTHER_SEATS 2 arm(s) wrong
+
+  OK  drop the FLEET list                2 arm(s) wrong
+
+  OK  drop b 60th / f 1st from OTHER_SEATS 2 arm(s) wrong
+
+  OK  drop the KAM sender class          1 arm(s) wrong
+
+CONTROLS FIRED: 9 of 9
+
+VERDICT: PASS -- 58 arms green and every constant they name is tested
+- 58 arms, 0 wrong; 9 of 9 must-fire controls FIRED (each reported as fired, not as "0 wrong").
+
+RE-KEY PROOF 2 — the matcher driven on the REAL 30-message inbox, POST-key
+NEW|2026-10-08T23:00:08.000Z|for blockchain-f],r 21st,f 6th,seat f 6th|[Wednesday -> Secuura/Blockchain-F] ANSWER: objects, wait for R 21st (Seat F 6th)
+NEW|2026-10-08T23:06:53.000Z|for blockchain-f],f 6th,seat f 6th|[Wednesday -> Secuura/Blockchain-F] ANSWER: raise base 1e7f90e26137 accepted (Seat F 6th)
+NEW|2026-10-08T23:10:34.000Z|for blockchain-r],r 21st,seat r 21st|[Wednesday -> Secuura/Blockchain-R] ANSWER: ctx 39%, proceed to M-3; hoist approved (Seat R 21st)
+NEW|2026-10-08T23:15:29.000Z|for blockchain-f],f 6th,seat f 6th|[Wednesday -> Secuura/Blockchain-F] ANSWER: read808 read, push a24efb3c5e04 (Seat F 6th)
+NEW|2026-10-08T23:18:13.000Z|for blockchain-j],j 1st,seat j 1st|[Wednesday -> Secuura/Blockchain-J] ANSWER: WRITE (Seat J 1st), KS-1172 only
+NEW|2026-10-08T23:27:57.000Z|for blockchain-f],f 6th,seat f 6th|[Wednesday -> Secuura/Blockchain-F] ANSWER: advisories, lock refresh first (Seat F 6th)
+NEW|2026-10-08T23:33:55.000Z|for blockchain-r],r 21st,seat r 21st,r 22nd|[Wednesday -> Secuura/Blockchain-R] ANSWER: refusal received, wrap cold, R 22nd rebuilds on D2 (Seat R 21st)
+NEW|2026-10-08T23:38:01.000Z|for v 1st,seat v 1st|[Wednesday -> Secuura/Blockchain-V] LAUNCH BRIEF (Seat V 1st): handlebars lock refresh, unfreeze the push gate
+NEW|2026-10-08T23:59:18.000Z|for v 1st,seat v 1st|[Wednesday -> Secuura/Blockchain-V] ANSWER: plan confirmed, build the lock refresh (Seat V 1st)
+NEW|2026-10-09T00:14:00.000Z|for v 1st,seat v 1st|[Wednesday -> Secuura/Blockchain-V] ANSWER: ctx 40%, proceed to ITEM 2 (Seat V 1st)
+NEW|2026-10-09T01:43:08.000Z|FOR ME|[Wednesday -> Secuura/Blockchain-V] LAUNCH BRIEF (Seat V 2nd): merge 1435 on gate78
+SCANNED 30 messages
+
+RE-KEY PROOF 3 — the PRE-KEY CONTROL, same inbox, pristine source matcher (0e33a3de55b35526)
+NEW|2026-10-08T23:00:08.000Z|for blockchain-f],r 21st,f 6th,seat f 6th|[Wednesday -> Secuura/Blockchain-F] ANSWER: objects, wait for R 21st (Seat F 6th)
+NEW|2026-10-08T23:06:53.000Z|for blockchain-f],f 6th,seat f 6th|[Wednesday -> Secuura/Blockchain-F] ANSWER: raise base 1e7f90e26137 accepted (Seat F 6th)
+NEW|2026-10-08T23:10:34.000Z|for blockchain-r],r 21st,seat r 21st|[Wednesday -> Secuura/Blockchain-R] ANSWER: ctx 39%, proceed to M-3; hoist approved (Seat R 21st)
+NEW|2026-10-08T23:15:29.000Z|for blockchain-f],f 6th,seat f 6th|[Wednesday -> Secuura/Blockchain-F] ANSWER: read808 read, push a24efb3c5e04 (Seat F 6th)
+NEW|2026-10-08T23:18:13.000Z|for blockchain-j],j 1st,seat j 1st|[Wednesday -> Secuura/Blockchain-J] ANSWER: WRITE (Seat J 1st), KS-1172 only
+NEW|2026-10-08T23:27:57.000Z|for blockchain-f],f 6th,seat f 6th|[Wednesday -> Secuura/Blockchain-F] ANSWER: advisories, lock refresh first (Seat F 6th)
+NEW|2026-10-08T23:33:55.000Z|for blockchain-r],r 21st,seat r 21st,r 22nd|[Wednesday -> Secuura/Blockchain-R] ANSWER: refusal received, wrap cold, R 22nd rebuilds on D2 (Seat R 21st)
+NEW|2026-10-08T23:38:01.000Z|FOR ME|[Wednesday -> Secuura/Blockchain-V] LAUNCH BRIEF (Seat V 1st): handlebars lock refresh, unfreeze the push gate
+NEW|2026-10-08T23:59:18.000Z|FOR ME|[Wednesday -> Secuura/Blockchain-V] ANSWER: plan confirmed, build the lock refresh (Seat V 1st)
+NEW|2026-10-09T00:14:00.000Z|FOR ME|[Wednesday -> Secuura/Blockchain-V] ANSWER: ctx 40%, proceed to ITEM 2 (Seat V 1st)
+NEW|2026-10-09T01:43:08.000Z|for v 2nd,seat v 2nd|[Wednesday -> Secuura/Blockchain-V] LAUNCH BRIEF (Seat V 2nd): merge 1435 on gate78
+SCANNED 30 messages
+- The control INVERTS EXACTLY, in both directions, on 4 subjects:
+  * V 1st's real LAUNCH BRIEF and its two ANSWERs read FOR ME un-re-keyed -> now `for v 1st,seat v 1st`.
+  * MY OWN LAUNCH BRIEF read `for v 2nd,seat v 2nd` un-re-keyed -> now FOR ME.
+  That second half is the one that would have cost the round: un-re-keyed, my watcher would NOT
+  have fired on my own GO.
+- `(Seat V 9th)` on my tag -> UNKNOWN ADDRESSEE ("UNTAGGED - read it (addressee (seat v 9th) is
+  unknown to this matcher)"), a trap4 arm. The GO string on a -G]/-F]/-R] tag -> FOREIGN by the
+  pane, three arms. The GO string naming V 1st or V 3rd on MY tag -> FOREIGN, two arms.
+
+WATCHER FIRE RULE, driven BOTH ways on a feed (never live mail)
+- a feed holding only `GO (Seat V 2nd): merge 1435 on gate78` -> FIRED, exit 0, printed
+  "NEW WEDNESDAY MAIL FOR ME (poll 1) — STOP HOLDING, READ IT".
+- a feed holding only `GO (Seat V 1st): …` + an F 6th ANSWER -> still polling after 7 s, 4 polls,
+  "no new Wednesday mail FOR ME since 2026-10-09T01:43:08.000Z". It does NOT fire on the identical
+  GO string addressed to my predecessor.
+
+THE ADDENDUM, WHOLE (raise/addendum_1435.json, 3,838 B, sha256/16 196d19671d1caa28)
+{
+  "_who": "Seat V 2nd, Secuura/Blockchain-V, 2026-10-09",
+  "_gate": "gate78 (T1, round 1): GO at 6f4adfe8835e, 0 Blocker / 0 Major / 0 Minor, 4 Polish",
+  "base_go": "1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0",
+  "prs": {
+    "1435": {
+      "head": "6f4adfe8835ec8ece51653f3f758d6a55ce12348",
+      "merged_tree": "ccbb76460ad630ab9fdb74b31dfc16502eee94ac",
+      "subject": "KS-1452: in-range lock refresh clears three handlebars advisories",
+      "own_keys": [
+        "KS-1452"
+      ],
+      "no_trailer": true,
+      "foreign_keys_never_hyphenated": [
+        "KS-1453"
+      ],
+      "targets": {
+        "Blockchain/Dev/package-lock.json": [
+          "d6501e2055783996ef5652c08e8aa5ce74c7abbf",
+          "100644"
+        ],
+        "Blockchain/Dev/services/governance/package-lock.json": [
+          "0ef6ee870ae2a9951020f9e6fa026edb92c03f17",
+          "100644"
+        ],
+        "Blockchain/Dev/services/originate/package-lock.json": [
+          "265c64b0acaca08836e248dc15c1ebe4d46d16f3",
+          "100644"
+        ],
+        "Blockchain/Dev/services/referral/package-lock.json": [
+          "11c3e2182308301e91920896bbb8dc1d5f43262c",
+          "100644"
+        ],
+        "Blockchain/Dev/services/vc-issuer/package-lock.json": [
+          "03876e815d75231ff0b527391d5faf318181f3b5",
+          "100644"
+        ]
+      },
+      "body_verbatim": "Refs KS-1452\n\nhandlebars 4.7.9 -> 4.7.10 in five package-lock.json files and nothing\nelse. Three advisories published 2026-10-08T17:52Z (GHSA-8r5x-fm3f-whwj\nand GHSA-p8wg-vrv2-v86f critical, GHSA-xw65-4hp5-5hc7 moderate, each\n>=4.0.0 <=4.7.9) made preflight legs 6 and 7 refuse every push.\n\nLocks: Blockchain/Dev (workspace root) and services/governance,\noriginate, referral and vc-issuer. 5 entries, 18 field writes: version\nand dependencies.minimist (^1.2.5 -> ^1.2.8, 4.7.10's own change) in all\nfive; resolved and integrity in the four standalone locks (the root\nentry carries neither). Every lock already resolves minimist 1.2.8.\nEvery declaring parent is ^4.7.9, which admits 4.7.10, so 0 manifests, 0\noverrides, 0 baseline rows, 0 source. Integrity is the sha512 of the\ndownloaded 4.7.10 tarball, equal to the registry's.\n\nRuntime reach: only services/originate ships handlebars (a direct prod\ndependency; its runner installs --omit=dev from its own lock,\nDockerfile:79). 0 files import it. That declaration is filed as KS 1453\nand is not touched here.\n\nA JSON lock cannot carry a comment, so this message and the PR are the\nWHY for every changed line (test-discipline 5d). No platform-doc change:\nno test changed, so neither Projects Documents file moves\n(test-discipline 4).\n\nProof: leg 6 rc 1 naming the three at develop, rc 0 and 0 mentions\nafter; leg 7 rc 1 naming the three, rc 0 and 0 mentions after; leg 2 rc\n0, all 35 standalone locks pass clean-room npm ci; audit:contract 59\ntests, 59 pass, 0 fail (= expected-case-count); semantic diff exactly\nthe 18 planned fields, every other byte identical; negative controls\nroot entry back to 4.7.9 reddens leg 6, originate back reddens leg 7, a\nstale minimist range fires the differ; installs and unit suites npm ci\nrc 0 on all five locks; --omit=dev puts handlebars only in originate;\noriginate build rc 0; governance 115/115, originate 1093/1093, referral\n34/34, vc-issuer 159/159. NOT run: the four platform suites, image\nbuilds, any live sweep (no local stack; Docker is down).",
+      "merge_note": "Merged by Seat V 2nd on Wednesday's GO naming this head, signed on QA\ngate78 (GO, 0 Blocker / 0 Major / 0 Minor, 4 Polish) under Kam's TESTED\ngrant of 2026-09-11; the author wrapped before this merge, as measured\nby HANDOVER-seatV1-2026-10-09.md sha256/16 844e82250f25e7f9.",
+      "wrap_artefact": "HANDOVER-seatV1-2026-10-09.md sha256/16 844e82250f25e7f9"
+    }
+  }
+}
+
+BODY PROOFS (build_addendum_v2.py, every control fired)
+=== PROOF 1: words-only rewrap (token-sequence equality) ===
+  original tokens : 313
+  rewrapped tokens: 313
+  token sequences EQUAL (list ==, order included)
+  CONTROL fired: a one-word edit makes the same comparison unequal
+
+=== PROOF 2: line lengths ===
+  max line length 72 <= 72; lines over: []
+  CONTROL (pre-rewrap, N-1435-4): 3 line(s) over -> [(27, 189), (28, 138), (29, 328)]
+
+=== PROOF 3: the note ===
+  1  69  Merged by Seat V 2nd on Wednesday's GO naming this head, signed on QA
+  2  71  gate78 (GO, 0 Blocker / 0 Major / 0 Minor, 4 Polish) under Kam's TESTED
+  3  70  grant of 2026-09-11; the author wrapped before this merge, as measured
+  4  60  by HANDOVER-seatV1-2026-10-09.md sha256/16 844e82250f25e7f9.
+  SEAT_TOKEN in note minus artefact: ['Seat V 2nd'] -> 0 other than 'Seat V 2nd'
+  note sentence count (full stops): 2
+
+=== PROOF 4: the COMPOSED body, exactly as mergeg1.py:458-459 builds it ===
+  'Merged by ' x1 (gate wants exactly 1)
+  the phrase is followed by 'Seat V 2nd' (merger identity)
+  hyphenated key set ['KS-1452'] (MG-3 wants ['KS-1452'])
+  'KS 1453' unhyphenated x1; 'KS-1453' hyphenated x0
+  'Co-Authored-By' x0
+  'Generated with' x0
+  composed max line length 72 <= 72
+  composed bytes 2316, sha256/16 4df2f5ec7a23b0c2
+
+=== PROOF 5: the last paragraph does NOT parse as trailers ===
+  git interpret-trailers --parse  rc 0  -> 0 bytes ''
+  CONTROL (same body + a real Key: value line) rc 0 -> 'Reviewed-by: nobody <nobody@example.invalid>'
+
+WROTE /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatV-2nd/raise/addendum_1435.json
+  addendum bytes 3838, sha256/16 196d19671d1caa28
+WROTE /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-09_seatV-2nd/squash_body_expected.txt (for byte-compare against the DRY body)
+
+ALL PROOFS PASSED
+
+THE DRY BODY, WHOLE — read from the file the TOOL wrote (raise/merge-v2-1435-body.DRY.txt,
+2,383 B, 44 lines, sha256/16 2633ed231c1bc56f), NOT from my input. `cmp` against my own
+composition: rc 0, BYTE-IDENTICAL; against a one-byte-altered copy: rc 1, so the compare
+discriminates. This is what lands on develop:
+--------------------------------------------------------------------------
+KS-1452: in-range lock refresh clears three handlebars advisories
+
+Refs KS-1452
+
+handlebars 4.7.9 -> 4.7.10 in five package-lock.json files and nothing
+else. Three advisories published 2026-10-08T17:52Z (GHSA-8r5x-fm3f-whwj
+and GHSA-p8wg-vrv2-v86f critical, GHSA-xw65-4hp5-5hc7 moderate, each
+>=4.0.0 <=4.7.9) made preflight legs 6 and 7 refuse every push.
+
+Locks: Blockchain/Dev (workspace root) and services/governance,
+originate, referral and vc-issuer. 5 entries, 18 field writes: version
+and dependencies.minimist (^1.2.5 -> ^1.2.8, 4.7.10's own change) in all
+five; resolved and integrity in the four standalone locks (the root
+entry carries neither). Every lock already resolves minimist 1.2.8.
+Every declaring parent is ^4.7.9, which admits 4.7.10, so 0 manifests, 0
+overrides, 0 baseline rows, 0 source. Integrity is the sha512 of the
+downloaded 4.7.10 tarball, equal to the registry's.
+
+Runtime reach: only services/originate ships handlebars (a direct prod
+dependency; its runner installs --omit=dev from its own lock,
+Dockerfile:79). 0 files import it. That declaration is filed as KS 1453
+and is not touched here.
+
+A JSON lock cannot carry a comment, so this message and the PR are the
+WHY for every changed line (test-discipline 5d). No platform-doc change:
+no test changed, so neither Projects Documents file moves
+(test-discipline 4).
+
+Proof: leg 6 rc 1 naming the three at develop, rc 0 and 0 mentions
+after; leg 7 rc 1 naming the three, rc 0 and 0 mentions after; leg 2 rc
+0, all 35 standalone locks pass clean-room npm ci; audit:contract 59
+tests, 59 pass, 0 fail (= expected-case-count); semantic diff exactly
+the 18 planned fields, every other byte identical; negative controls
+root entry back to 4.7.9 reddens leg 6, originate back reddens leg 7, a
+stale minimist range fires the differ; installs and unit suites npm ci
+rc 0 on all five locks; --omit=dev puts handlebars only in originate;
+originate build rc 0; governance 115/115, originate 1093/1093, referral
+34/34, vc-issuer 159/159. NOT run: the four platform suites, image
+builds, any live sweep (no local stack; Docker is down).
+
+Merged by Seat V 2nd on Wednesday's GO naming this head, signed on QA
+gate78 (GO, 0 Blocker / 0 Major / 0 Minor, 4 Polish) under Kam's TESTED
+grant of 2026-09-11; the author wrapped before this merge, as measured
+by HANDOVER-seatV1-2026-10-09.md sha256/16 844e82250f25e7f9.
+--------------------------------------------------------------------------
+
+THE MERGE NOTE, for your sign-off — it lands on develop permanently and the tool does not choose it
+(mergeg1.py:419-:430). ONE sentence, exactly one "Merged by " naming this seat, 0 other seat names
+outside the quoted artefact, every line <= 72:
+  Merged by Seat V 2nd on Wednesday's GO naming this head, signed on QA
+  gate78 (GO, 0 Blocker / 0 Major / 0 Minor, 4 Polish) under Kam's TESTED
+  grant of 2026-09-11; the author wrapped before this merge, as measured
+  by HANDOVER-seatV1-2026-10-09.md sha256/16 844e82250f25e7f9.
+
+THE DRY RUN, tool lines verbatim (rc 0)
+01:57:09Z merge-v2 #1435 (DRY) gate gate78 seat 'Seat V 2nd'
+  head 6f4adfe8835e == the GO's pin; open; base develop
+  develop at origin 1e7f90e26137 (== BASE_GO)
+  predicted tree ccbb76460ad6 (merge-tree over develop 1e7f90e26137 read this run)
+  three-dot file set 5 path(s), == the addendum's targets, == diff(develop 1e7f90e26137, predicted)
+  blob gate: 5/5 path(s) == the addendum's target, modes equal; every path also == the head's blob
+  predicted tree == the addendum's merged tree ccbb76460ad6
+  subject from the gate addendum (65 chars), REQUIRED; the PR title is 65 chars and is NOT used
+  MG-11: the subject LANDS at exactly 65 chars <= 92, no suffix appended by this tool
+  own_keys ['KS-1452'] == the PR body's independent Refs lines ['KS-1452']
+  squash body: VERBATIM from the gate addendum (its own Refs kept; none appended); NO TRAILER per the GO — append SUPPRESSED, composed body asserted trailer-free, and the un-suppressed path proved still able to add one
+  merger identity: exactly 1 'Merged by ' claim and it names 'Seat V 2nd'; 0 other seat names in the note outside the quoted artefact; wrap artefact 'HANDOVER-seatV1-2026-10-09.md sha256/16 844e82250f25e7f9' present in the note
+  MG-11 subject 65 chars ASCII; MG-3 body key set ['KS-1452'] == own ['KS-1452']; foreign keys asserted ABSENT in hyphenated form: ['KS-1453']
+DRY #1435: every pre-merge assertion passed; predicted tree ccbb76460ad630ab9fdb74b31dfc16502eee94ac; body written to merge-v2-1435-body.DRY.txt (2316 chars). NOTHING MERGED.
+PREDICTED_TREE=ccbb76460ad630ab9fdb74b31dfc16502eee94ac
+
+CONTAINMENT — and an honest reading
+- The shared store's `count-objects -v` is byte-identical before and after the DRY run (count 2055,
+  in-pack 108019, 5 packs), and the 1,653-ref set's sha256 is unchanged. 0 objects, 0 refs.
+- BUT `contained-objects` is EMPTY, so THIS RUN DID NOT EXERCISE the containment: the merged tree IS
+  the head's tree, which already exists, so merge-tree had nothing to write. I will not report
+  containment as proved by a run that had nothing to contain.
+- So I proved the MECHANISM separately, on a throwaway `git init` (git 2.51.0), both arms:
+=== CONTAINMENT MECHANISM CONTROL (this host, git 2.51.0) ===
+--- 1. hash-object -w WITHOUT the contained env ---
+blob b454758e1023bc9de4df0b74dabed02929b58d3d
+   in repo store: 1 object file(s)
+   in objdir    : 0 object file(s)
+--- 2. the SAME verb WITH GIT_OBJECT_DIRECTORY=objdir (what mergeg1.py:161-163 sets) ---
+blob ec9b48b258bd5c2082ef5aa641ce1cec523928af
+   in repo store: 1 object file(s)  (UNCHANGED = redirect works)
+   in objdir    : 1 object file(s)  (NEW = the write landed here)
+--- 3. is blob 2 absent from the repo store and present in objdir? ---
+   repo store: ABSENT  ✓
+   objdir    : PRESENT ✓
+
+THE FIVE RED ARMS — each its OWN run, each `--dry`, each from a scratch COPY of the tool
+(sha256/16 f795e0e6d08a56f4 = my re-keyed copy, so the arms tested the tool I will actually run)
+  arm (c): originate target blob 265c64b0acaca08836e248dc15c1ebe4d46d16f3 -> 265c64b0acaca08836e248dc15c1ebe4d46d16f0
+
+  arm (e): body 'KS 1453' -> 'KS-1453' (1 occurrence)
+
+================ ARM a: subject with ' (#1435)' appended -> MG-11 ================
+
+rc=3  (a STOP is exit 3)
+
+STOP: MG-11: the declared subject ALREADY ends in a (#n) suffix: 'KS-1452: in-range lock refresh clears three handlebars advisories (#1435)'. This tool appends nothing, so such a subject would land WITH the suffix and name the wrong PR.
+
+STOP: MG-11: the declared subject ALREADY ends in a (#n) suffix: 'KS-1452: in-range lock refresh clears three handlebars advisories (#1435)'. This tool appends nothing, so such a subject would land WITH the suffix and name the wrong PR.
+
+================ ARM b: --expect-develop one hex digit off -> the develop read ================
+
+rc=3  (a STOP is exit 3)
+
+STOP: develop 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 != the expected 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b1 (it moved under me)
+
+STOP: develop 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 != the expected 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b1 (it moved under me)
+
+================ ARM c: one target blob one digit off -> the per-path blob gate ================
+
+rc=3  (a STOP is exit 3)
+
+STOP: blob of Blockchain/Dev/services/originate/package-lock.json 265c64b0acac != the gate addendum's equality target 265c64b0acac
+
+STOP: blob of Blockchain/Dev/services/originate/package-lock.json 265c64b0acac != the gate addendum's equality target 265c64b0acac
+
+================ ARM d: --seat 'Seat V 1st' -> the merger-identity gate ================
+
+rc=3  (a STOP is exit 3)
+
+STOP: the body says 'Merged by "Seat V 2nd on Wednesday's GO naming this"...' but this seat is 'Seat V 1st' — a predecessor's name surviving a copy would write a FALSE merger onto develop, permanently
+
+STOP: the body says 'Merged by "Seat V 2nd on Wednesday's GO naming this"...' but this seat is 'Seat V 1st' — a predecessor's name surviving a copy would write a FALSE merger onto develop, permanently
+
+================ ARM e: KS-1453 hyphenated in the body -> MG-3 / foreign key ================
+
+rc=3  (a STOP is exit 3)
+
+STOP: MG-3: the body's hyphenated key set ['KS-1452', 'KS-1453'] != this PR's own keys ['KS-1452'] (a foreign key must be written un-hyphenated)
+
+STOP: MG-3: the body's hyphenated key set ['KS-1452', 'KS-1453'] != this PR's own keys ['KS-1452'] (a foreign key must be written un-hyphenated)
+
+================ ARM SUMMARY ================
+
+  arm a: STOPPED
+
+  arm b: STOPPED
+
+  arm c: STOPPED
+
+  arm d: STOPPED
+
+  arm e: STOPPED
+- 5 of 5 STOPPED at exit 3. Asserting lines, in order: MG-11 `(#n)` suffix refusal; the
+  `--expect-develop` develop read; the per-path blob gate; the merger-identity gate; MG-3's key set.
+
+LOCK CENSUS
+=== LOCK CENSUS 2026-10-09T02:00:50Z ===
+--- 1. the real census of /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees ---
+   .push-lock-* entries: 0
+
+--- 2. POSITIVE CONTROL: plant a lock in a mktemp -d and re-run the SAME census verb ---
+   control dir: /var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T/tmp.okyI5xFt3q
+   census verb on the control dir: 1 entry(ies)  <- must be >= 1, or my census is blind
+.push-lock-g1
+   holder file read back: {"seat":"CONTROL ONLY - mktemp, not the shared worktrees","pid":0}
+   control dir removed: yes
+
+--- 3. verdict ---
+   0 locks on disk in the shared worktrees/, and the census instrument is PROVEN able to see one.
+- 0 `.push-lock-*` in the shared `worktrees/`, and the census instrument is PROVEN able to see one
+  (control planted in a `mktemp -d`, never in `worktrees/`). 0 expected takes for this round.
+
+LINEAR, READ-ONLY (key sourced transiently, never printed)
+==============================================================
+KS-1452 | In Progress ( started ) | prio 1
+  title: Three new advisories freeze every push: in-range lock refresh for handlebars 4.7.9 -> 4.7.
+  updatedAt: 2026-10-09T00:29:09.052Z
+  attachments: 1 ['/Distributed_Secuura/pull/1435']
+  comments: 1
+   id: 59f4cc96-7764-4b9b-ab5b-557f127a75e4
+   created: 2026-10-09T00:29:30.356Z | editedAt: None | by: kamil.kreiser
+   bytes: 971 | sha256/16: f75191164ea2e846
+==============================================================
+KS-1453 | Backlog ( backlog ) | prio 3
+  title: originate declares handlebars as a direct prod dependency that no source file imports
+  updatedAt: 2026-10-09T00:02:48.375Z
+  attachments: 0 []
+  comments: 0
+==============================================================
+KS-99999 ERRORS: [{"message": "Entity not found: Issue", "path": ["issue"], "locations": [{"line": 1, "column": 20}], "extensions": {"type": "invalid input", "code": "INPUT_ERROR", "statusCode": 400, "userError": true
+KS-99999 -> issue is NULL (control expected for KS-99999)
+- EVERY figure matches gate78 row 7: KS-1452 In Progress / Urgent, exactly 1 comment
+  59f4cc96-7764-4b9b-ab5b-557f127a75e4, 971 B, sha256/16 f75191164ea2e846, editedAt None, 1
+  attachment = #1435. KS-1453 Backlog / P3, 0 attachments, untouched. The KS-99999 control returns
+  "Entity not found: Issue", so the instrument discriminates.
+
+PROJECT RULE, QUOTED FROM DEVELOP (not the working tree)
+- `.claude/skills/secuura-test-discipline/SKILL.md` at develop 1e7f90e26137, blob
+  b59b74a592e9474546a547de571eac3c7df40f5c, 659 lines. §5f, :540:
+    "A runtime-behaviour change is not done — and the ticket does not move to Done — on offline
+     quality-gate green alone." It needs a live sweep on the correct host, against a fully
+     torn-down and rebuilt environment, with all containers verified up.
+- handlebars is a PROD dependency of the shipped services/originate image (gate78 row 6), so
+  KS-1452 STAYS In Progress after the merge. I will read its state before the merge, after the
+  merge and after the edit; if it reads Done at any read I STOP and mail rather than move it back.
+
+ITEM 3 — the comment draft, WHOLE (1,483 B, sha256/16 bb869ea8016f3751; <SQUASH> filled from ITEM 2)
+`commentUpdate` on 59f4cc96-7764-4b9b-ab5b-557f127a75e4, NOT a new comment. Round-trip proof: undoing
+both replacements reproduces the stored 971-B body BYTE-EQUAL; undoing only one does not, so the
+round-trip discriminates. Every other byte unchanged.
+--------------------------------------------------------------------------
+Edited 2026-10-09 after QA gate78: PR raised: https://github.com/Secuura/Distributed_Secuura/pull/1435 (head `6f4adfe8835ec8ece51653f3f758d6a55ce12348`, base develop `1e7f90e26137`, branch `feature/ks-1452-handlebars-lock-refresh-v1-1`).
+
+It changes exactly the five `package-lock.json` files in this ticket's table: 5 handlebars entries 4.7.9 -> 4.7.10, 18 field writes, 0 manifests, 0 baseline rows, 0 source.
+
+In-hook pre-push preflight on that push: `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 skipped (no local stack); legs 2, 5, 6, 7 and 14 ran and passed, including leg 6 `OK — no advisories outside the triaged baseline.` and leg 7 `OK — no standalone-lock advisories outside the triaged baseline.`
+
+Local unit suites, corrected after QA gate78 (N-1435-3): the four suites ran in WORKSPACE mode against the ROOT lock `Blockchain/Dev/package-lock.json` — governance 115/115, originate 1,093/1,093, referral 34/34, vc-issuer 159/159 — and the four standalone locks were exercised by installs only (isolated `npm ci` 4/4, `--omit=dev`), never by a suite. Not run: the four platform suites, image builds, any live sweep (no local stack). Merged <SQUASH> (PR #1435, five package-lock.json files); offline gates green; NOT Done per secuura-test-discipline §5f — live sweep owed (torn-down rebuilt stack, all containers verified up), unverified: originate image build and runtime load of handlebars (static census only, gate78).
+--------------------------------------------------------------------------
+
+Q-WT READING (your default: LEAVE it)
+- `worktrees/s-v1-hbslock`: HEAD 6f4adfe8835ec8ece51653f3f758d6a55ce12348 (= the PR head), branch
+  `feature/ks-1452-handlebars-lock-refresh-v1-1`, `status --porcelain` 0 lines, `du -sm` 2729 MB.
+  Co-tenant worktrees `s-f6-ks808` and `s-ra21-m1427` both PRESENT and untouched by me.
+- I will leave it, name it retire-able in my handover, and retire it only on an explicit ruling.
+
+TOOLCHAIN AND DISK
+- node v24.7.0, npm 11.5.1 (as the drafter's predecessor read). Docker NOT needed and NOT started.
+- `df -m /Volumes/DevMASTER`: 1907529 total, 1512401 used, 394842 available, 80% capacity.
+
+FINDINGS — two for you to route, one consequence of a ruling
+1. mergeg1.py's blob-gate refusal message is UNREADABLE for a tail-digit difference. Red arm (c)
+   tampered the LAST hex digit of originate's target blob. The refusal truncates BOTH sides to 12
+   chars, so it printed:
+     STOP: blob of Blockchain/Dev/services/originate/package-lock.json 265c64b0acac != the gate
+     addendum's equality target 265c64b0acac
+   "X != X". The LOGIC is correct and it STOPped correctly — but a human reading that line would
+   take a correct refusal for a spurious one, and the obvious next move is to loosen the guard.
+   One-line fix (print the full 40 hex, or the differing suffix). NOT MINE TO FIX: it is a guard
+   edit and your HOLDS forbid it. Yours to route.
+2. `inbox_watchg1.sh:3` asserts the env prefix is `WATCHG1_*` and "is NOT re-keyed", while its four
+   LIVE sites read `WATCHV1_` — V 1st re-keyed them and left the comment, so the file's own comment
+   is now stale by two generations and contradicts its own code. I re-keyed to `WATCHV2_` per the
+   brief and the file's own rationale at :67/:83. Observation; nothing rests on it.
+3. CONSEQUENCE OF Q-BODY, disclosed because you ruled it and it lands on develop: the words-only
+   rewrap moves `NOT run:` off a line start. In the head message it OPENED line 32; rewrapped at
+   <= 72 it falls mid-line 38. Token sequence is provably identical (313 == 313 tokens, list ==),
+   so the ruling is honoured to the letter — but the honest NOT-RUN disclosure is visually less
+   prominent in the commit that lands. Say the word if you want the paragraph break kept (that is
+   still words-only: a blank line adds no token), and I will re-measure and re-run the DRY.
+
+Q-* ANSWERS I PROPOSE (all at your SEND AMENDMENT rulings; nothing of mine deviates)
+- Q-BODY: words-only rewrap. DONE, token-sequence equality proved with a control. See FINDING 3.
+- Q-5F: YES — the status sentence replaced in the SAME in-place edit, with your text, `<SQUASH>`
+  filled from my ITEM 2 reading. Drafted above; comment count stays 1.
+- Q-WT: LEAVE `s-v1-hbslock`; readings above.
+- Q-KIT: matcher + watcher + trap4 + mergeg1 only. DONE.
+- Q-ARMS: all five arms. DONE, 5 of 5 STOPPED, none dropped.
+
+WHAT I WILL DO ON THE GO, AND NOTHING ELSE
+1. One `ls-remote`: develop == 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 AND refs/pull/1435/head ==
+   6f4adfe8835ec8ece51653f3f758d6a55ce12348, or STOP and mail. Any movement at all is a STOP.
+2. The DRY command without `--dry`, `--go-ts` = the GO mail's Date header. No `--admin`, no force,
+   no `--no-verify`. If it STOPs I mail; I do not retry with any guard loosened.
+3. ITEM 2: verify at SOURCE (ls-remote + GitHub API, each fact with its own wrong-value arm), then
+   legs 6 and 7 at the NEW develop from a fresh `clone --shared` with the base control at
+   1e7f90e26137 expected rc 1 / rc 1. Then `STATUS: merged 1435 (Seat V 2nd)`.
+4. ITEM 3: the in-place comment edit, read back by id. Then WRAP.
+- Before the merge I will LIST the inbox by API (not trust the watcher) and re-census locks; after
+  the merge, before the comment edit, I will LIST the inbox again — a merge is exactly the kind of
+  long side-effecting action that opens a gap for a "before your next ref write" instruction.
+
+HOLDING. Nothing merges, locks, fetches or writes to a ticket before your ANSWER and then the
+literal GO. Please read my ctx.
+

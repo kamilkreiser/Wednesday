@@ -1,0 +1,87 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T02:42:42.000Z
+Subject: [Secuura/Blockchain-F -> Wednesday] STATUS: pushed feature/ks-808-run-migrations-counts-skips-apart-f6-1, raised #1436 (Seat F 6th)
+---
+STATUS: pushed feature/ks-808-run-migrations-counts-skips-apart-f6-1, raised #1436 (Seat F 6th)
+
+MODEL: claude-opus-5-5 (as my session reports it)
+
+## BLUF
+The ONE re-push LANDED, and PR #1436 is raised.
+- Head `90d98754db7bb2addc6b7f83f12e3c6685b026a5` = local = origin = the PR head at GitHub.
+- Legs 6 and 7 PASS. Nothing failed: 12/15 legs ran, and legs 3, 4 and 8 SKIPPED because the local stack is not up.
+- KS-808 gained exactly one attachment (#1436), with no state change.
+- The tool also measured these, all within your predicted values: the push `.rc` 0; `ls-remote` = head; HTTP 201; the body round-trip IDENTICAL.
+
+## Push (`raise/s-f6-ks808-90d98754db7b-push.out`, 1,664 lines, 97,931 B, READ WHOLE)
+- `pushf3.sh`, run bare under `env -u GIT_SSH_COMMAND`, took 02:31:20Z → 02:38:16Z. It held `.push-lock-f3` (pid 60750), with the STOP set (16) and all four co-tenant locks ABSENT before and after the take.
+- The tool `.rc` is 0. After the push, `ls-remote` reads `90d98754…` on `refs/heads/feature/ks-808-run-migrations-counts-skips-apart-f6-1`.
+- The remote printed `* [new branch] HEAD -> feature/ks-808-run-migrations-counts-skips-apart-f6-1`.
+- 0 orphaned login_stub pids.
+
+**Gate lines, verbatim:**
+- leg 1 `OK — spec is in sync`
+- leg 2 `All 35 standalone lock(s) pass clean-room npm ci.`
+- leg 5 `OK — 59 audit-contract cases pass (expected 59)`
+- leg 6 `audit-gate: 9 distinct advisories reported, 24 baselined.` … `OK — no advisories outside the triaged baseline.`
+- leg 7 `audit-locks: 43 standalone lockfiles …` … `OK — no standalone-lock advisories outside the triaged baseline.`
+- leg 9 `OK — no tracked credential files, no un-ignoring negations.`
+- leg 10 `OK — 4 bare-path .sh invocation(s) are tracked at mode 100755 (21 invoked via an interpreter, mode not applicable) across 49 tracked package.json files …`
+- leg 11 `OK — 66 SHA-pinned action reference(s) across 12 distinct SHA(s) …`
+- leg 12 `OK — all 72 tracked shell suite(s) are reached by the runner.`
+- leg 13 `OK — 25 Dockerfile(s) consume shared-builder; …`
+- leg 14 `ks808_run_migrations_counts_skips_apart: 5 passed, 0 failed` · ks949 `27 passed, 0 failed (of 27 cells); wall-clock 8s` (PostgreSQL 15.14) · `run_migrations_failure_exit_code: 7 passed, 0 failed` · `ks1054 deploy startupMigrations: 40 passed, 0 failed` · `shell suites: 72 passed, 0 failed, 0 skipped (of 72)` · `shell suites wall-clock: 332s`
+- leg 15 `OK — all 21 tracked guards accounted for (21 buckets entries).` … `OK — 13 code guards passed.`
+- `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.`
+- `  legs 3 4 8 — local stack not up; you can clear this by starting it.`
+- `  This is NOT a pass. Do not quote it as one — say which legs ran.`
+- `pushf3.sh:257` gatelines: `(28, 0) OK` `(6, 0) OK` `(59, 0) OK`, `VERDICT: MATCHES the declared fleet STOP condition`.
+
+**Finding (advisory, not mine to act on):** leg 6 printed `CLEANUP (advisory): 15 baseline entries are no longer reported — remove:`. That is 12 undici rows plus ip-address and @hono/node-server under KS-470, and 3 undici rows under KS-559. The SAME 15-row line is in my REFUSED push's log at `1e7f90e26137`, so it predates the merge-in. It is a baseline-hygiene item, and I made no baseline edit.
+
+## Ref side effects (named refs, `for-each-ref`, before and after the push)
+- The ONLY line is `> refs/remotes/origin/feature/ks-808-run-migrations-counts-skips-apart-f6-1 90d98754db7b…` (the push's remote-tracking ref).
+- HEAD, develop and origin/develop are `ddea005553bf`, unmoved. `.git/config` `4f624a213933d54b` is unchanged. No `branch.<name>.remote` was written (no upstream).
+- This round's full record:
+  - the objects transfer wrote no ref;
+  - the merge-in moved my branch `a24efb3c5e04` → `90d98754db7b`;
+  - the push added the tracking ref above.
+
+## Post-push lock find
+`find worktrees -maxdepth 1 -type d -name '.push-lock-*'` reads **0**. Its `mktemp -d` control, holding a planted `.push-lock-zz`, reads **1**.
+
+## Raise (`raise_run.log`)
+- `restraisef5.py` (base `develop`): **HTTP 201, PR #1436**.
+- Title: `KS 808: run-migrations.sh no longer counts skipped migrations as applied`.
+- Local head = origin head = `90d98754…`, read in the same action. Body round-trip IDENTICAL, sha256/16 `a7572d440d27b316`. Base `develop`, state open, `mergeable_state: clean` (which carries no testing claim).
+- The tool printed "7338 bytes": that is a CHARACTER count. The file is 7,373 B and its sha matches.
+
+**One correction after the raise, disclosed:** the body as raised lacked the brief's item 13 (docblock's byte-for-byte read-back and tag counts). I added one Test Evidence bullet from `docblock.out`:
+- flow doc 31 → 32 blocks, tail `39.` → `41.`;
+- cheat sheet 20 → 21 sections, tail `KS 593` → this ticket;
+- only difference from the base = the fragment, with a 1-byte-altered control;
+- `0 failed`.
+
+The doc blobs are identical at `a24efb3c5e04` and `90d98754db7b` (flow `78eb740d0261`, cheat `31735cbcf73d`). I PATCHed the body: HTTP 200, read back IDENTICAL, 8,138 B, `2b4811c704c5430e`. Hygiene on the SENT body, each with a planted control that fires: broad closing regex 0, `Co-Authored-By` 0, github links 0, owner/repo#N 0, hyphenated non-808 keys 0, placeholders 0; exactly one `Refs KS-808` line.
+
+## Board (KS-808, read-only, before/after)
+- Before (02:3xZ): In Progress, 1 attachment (#1229), 4 comments.
+- After (02:40:32Z, and again at 02:42:05Z, after the body edit): **In Progress, 2 attachments (+#1436, 02:40:16Z), 4 comments**.
+- Controls: KS-1452 has #1435 but NOT #1436, and KS-593 does NOT have #1436. Neither foreign key linked.
+
+## Actions (COMPLETED runs only, `head_sha=90d98754…`)
+- `PR — Lockfiles (path-skip twin)` success
+- `pr-premerge-ack` success ×2 (02:40:15Z, and 02:41:36Z, re-triggered by the body edit)
+- `Dependabot standalone locks` skipped
+
+Three more are not completed (`PR Security Gates (KS-168)`, `pr`, `Security Scanning`) and are not read.
+
+## Watcher
+LIVE: 1. `ps_after_raise.txt` shows pid 57954, `inbox_watchf3.sh 2026-10-09T02:27:46.000Z 60` (parent 57952, my tool shell). Its SINCE is your GO, the newest mail I have READ.
+
+## S-1 note
+S-1b re-ran only `Blockchain/Dev` (`npm ci` + shared build), as planned and GO'd. The four `systemTest/*` installs from S-1 (23:09Z) still stand: develop changed no systemTest path, and leg 14 ran every systemTest suite green.
+
+Next: READY FOR QA, then WRAP.
+

@@ -1,0 +1,89 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T00:30:57.000Z
+Subject: [Secuura/Blockchain-V -> Wednesday] READY: 1435 handlebars lock refresh (Seat V 1st)
+---
+MODEL: claude-opus-5-5 (Opus 5.5).
+
+READY FOR QA — TIER 1 (security). PR #1435, KS-1452. NOT merged; I do not merge on this brief.
+
+== THE HEAD ==
+- PR:     https://github.com/Secuura/Distributed_Secuura/pull/1435  (open, base develop, not draft)
+- Head:   6f4adfe8835ec8ece51653f3f758d6a55ce12348
+- Tree:   ccbb76460ad630ab9fdb74b31dfc16502eee94ac
+- Parent: 1e7f90e261379e58eadc3ca0bbcc8d7e9e6938b0 = origin develop, re-read by ls-remote in the SAME action as the push decision (00:20Z) and unmoved since boot.
+- Branch: feature/ks-1452-handlebars-lock-refresh-v1-1 (worktree worktrees/s-v1-hbslock, LEFT for the gate)
+- Subject: "KS-1452: in-range lock refresh clears three handlebars advisories" (65 chars, measured)
+- Trailers: 0 bytes. Control commit 0861f8f83 prints 55 bytes, so the check discriminates.
+
+== PATHS (git diff --numstat develop; GitHub's /files says the same, 5 files) ==
+  2  2  Blockchain/Dev/package-lock.json
+  4  4  Blockchain/Dev/services/governance/package-lock.json
+  4  4  Blockchain/Dev/services/originate/package-lock.json
+  4  4  Blockchain/Dev/services/referral/package-lock.json
+  4  4  Blockchain/Dev/services/vc-issuer/package-lock.json
+= 18 lines each way = the 18 planned field writes, one line per field. 0 manifests, 0 baseline, 0 source, 0 untracked.
+
+== IN-HOOK PREFLIGHT, quoted from the push's own log (raise/s-v1-hbslock-6f4adfe8835e-push.out) ==
+"PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed."
+"  legs 3 4 8 — local stack not up; you can clear this by starting it."
+Ran and passed:
+- leg 2  "OK — all locks clean-room-installable"
+- leg 5  "OK — 59 audit-contract cases pass (expected 59)"
+- leg 6  "audit-gate: 9 distinct advisories reported, 24 baselined." / "OK — no advisories outside the triaged baseline."
+- leg 7  "OK — no standalone-lock advisories outside the triaged baseline."
+- leg 14 "shell suites: 71 passed, 0 failed, 0 skipped (of 71)"
+- leg 15 "OK — 13 code guards passed."
+Push: pushg1.sh exited rc 0; the tool's .rc read AFTER exit = 0; ls-remote = 6f4adfe8835e on my branch; "* [new branch] HEAD -> feature/ks-1452-…". BARE first push, under env -u GIT_SSH_COMMAND, LOCK_SEAT 'Secuura/Blockchain-V v1'. 0 orphaned login_stub pids. 0 locks after. No --no-verify, no force, no --dry-run.
+F-02: proved first by an ssh -T probe under the repo's deploy key ("Hi Secuura/Distributed_Secuura!", rc 1) beside a throwaway key refused ("Permission denied (publickey)", rc 255).
+Tracking-ref side effect: refs/remotes/origin/feature/ks-1452-handlebars-lock-refresh-v1-1 created at 6f4adfe8835e alongside the local branch; ref count 1,651 -> 1,653 (those two refs only).
+
+== ARMS ==
+proofv1.py (record folder raise/; logs in proof/): 43 ok, 0 FAIL.
+- Apply: applylocksv1 --apply rc 0 on the derived plan (5 entries, 18 writes).
+- Path set (replaces pathgate): exactly the 5 locks; 0 untracked.
+- Independent differ, not the editor's own: per lock, semantic diff == planned; key order + indent-2 round-trip equal; with the handlebars entry MASKED every lock is byte-identical to develop; total 18 == plan. CONTROL: a planted stale minimist ^1.2.5 makes it fire.
+- Census, all 45 tracked locks: 0 entries <= 4.7.9; CONTROL exactly 5 at 4.7.10. Baseline blob 4af041e8d74a and mobile lock unchanged; 0 package.json changed.
+- Fix: leg 6 rc 0 and leg 7 rc 0, the three ids named 0 times (CONTROL: leg 6 names 15 other GHSA ids). Leg 2 rc 0, "All 35 standalone lock(s) pass clean-room npm ci." audit:contract tests 59 / pass 59 / fail 0 = expected-case-count 59.
+- Base control, clean clone at develop: leg 6 rc 1 and leg 7 rc 1, both naming the three.
+- Negative controls in scratch, each restored with sha256 verified: root entry back to 4.7.9 -> leg 6 rc 1, leg 7 rc 0; originate standalone back -> leg 7 rc 1, leg 6 rc 0. Clone back to develop, 0 dirty.
+🔴 One arm of mine was vacuous and I replaced it before relying on it: "audit:contract reports 59" first tested `"59" in output`, which matched a TIMING value (0.028459ms). Now it parses the runner's own "ℹ tests/pass/fail" lines against the expected-case-count file; planted "tests 58" and "fail 1" both make it read FAIL.
+testsv1.py: 22 ok, 0 FAIL.
+- Regen cross-check (host npm 11.5.1, node v24.7.0, isolated dir with no workspace root; Docker down, so no container): base lock with the handlebars entry REMOVED, then npm install --package-lock-only. All four standalone entries MOVED absent -> 4.7.10 and equal my committed entry on version/resolved/integrity/dependencies/dev/license/engines/bin. I used remove-and-re-resolve because `npm update --package-lock-only` is inert on host npm 11.5.1 (that is in my memory notes). The regen also churned unrelated optional platform bindings (referral 10, vc-issuer 10, originate 0) — that is why it was the cross-check and not the build.
+- Installs from the COMMITTED locks: root npm ci rc 0 (lock byte-unchanged, installed handlebars 4.7.10); each standalone in isolation rc 0, lock unchanged, 4.7.10 installed.
+- originate npm run build rc 0.
+- Unit suites, workspace install after the edit: governance 115/115 (4 suites), originate 1,093/1,093 (96), referral 34/34 (7 files), vc-issuer 159/159 (17 files). No pre-existing red to attribute.
+
+== RUNTIME REACH ==
+| service    | handlebars at runtime | evidence |
+| originate  | YES, 4.7.10 after this PR | Dockerfile:79 npm ci --omit=dev from its own lock; isolated --omit=dev install from the committed lock = 4.7.10 |
+| governance | no | prune --omit=dev :54; isolated --omit=dev install: absent |
+| referral   | no | prune --omit=dev :61; isolated --omit=dev install: absent |
+| vc-issuer  | no | runner npm ci --omit=dev :86; isolated --omit=dev install: absent |
+| Dev root   | no image | 0 Dockerfile references (control 8) |
+The --omit=dev installs are new this round: runtime reach is now MEASURED by an actual install, not only read from Dockerfiles. 0 importers repo-wide. Code path into it: none found.
+
+== ACTIONS ON THE HEAD (actions API, read 00:30:14Z) ==
+- PR — Lockfiles               completed  success   run 37865012913
+- pr-premerge-ack              completed  success   run 37865012895
+- Dependabot standalone locks  completed  skipped   run 37865012921
+- Security Scanning            in_progress (pending) run 37865012899
+- PR Security Gates (KS-168)   in_progress (pending) run 37865012896
+- pr                           in_progress (pending) run 37865013256
+Security Scanning and PR Security Gates had NOT concluded, so I cannot name a failure by log, and I will not assume one. mergeable_state reads "unstable" while they run.
+
+== BOARD ==
+- KS-1452: ONE comment 59f4cc96-7764-4b9b-ab5b-557f127a75e4 linking the PR, stored token-equal. State In Progress BEFORE and AFTER (+20 s): the integration attached PR #1435 and did NOT move the state.
+- KS-1453: Backlog, 0 attachments — the unhyphenated "KS 1453" in the commit and PR did not link it.
+- No other ticket touched. Never the extranet.
+
+== NOT DONE / DISCLOSED ==
+- 0 trailers in the commit, overriding the harness's Co-Authored-By instruction, as your brief rules (ruling 3).
+- Leg 6's 15-entry CLEANUP block: out (KS 767).
+- KS-1453 (originate's unused direct declaration): filed, not built.
+- NOT run: Schemathesis, Akto, Playwright, k6; image builds; any live or demo sweep. No local stack; Docker down; no deploy on this brief.
+- pushg1.sh pipes its log through `gatelinesg1.py`, which is NOT in my kit; its "|| true" made the absence silent. I did not copy an unhashed tool from G 5th's folder. The gate lines above are quoted straight from the push log instead.
+- Also found while preparing the push: pushg1.sh carried a FOURTH live env site, PUSHG1_NO_SSH, which my prefix sweep missed (it looked for the `${PUSHG1_…:-` form); renamed to PUSHV1_NO_SSH before the push, receipted.
+
+WRAP follows.
+
