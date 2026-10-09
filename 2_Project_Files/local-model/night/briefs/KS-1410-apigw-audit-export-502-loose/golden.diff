@@ -1,0 +1,151 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+@@ -168,11 +168,12 @@
+         return;
+       }
+     } catch (err: any) {
++      logger.error('Audit export could not reach the security service (GET /api/admin/audit/export)', { error: err instanceof Error ? err.message : String(err) });
+       res.status(502).json({
+         success: false,
+         error: {
+           code: 'BAD_GATEWAY',
+-          message: `Failed to reach security service: ${err.message}`,
++          message: 'Failed to reach security service',
+         },
+       });
+       return;
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1410-audit-export-502-never-answers-err-message.test.ts
+@@ -0,0 +1,132 @@
++/**
++ * KS-1410 gate77 N-1432-1 (api-gateway routes/audit-export.ts): when the fetch to the security service THROWS, the
++ * catch answered a 502 whose message interpolated the thrown error's own text
++ * (`Failed to reach security service: ${err.message}`), so a driver message or an internal host:port reached the
++ * client in every environment. Fix shape named by the gate: a constant body plus a server-side log.
++ *
++ * These cells are deliberately LOOSE about the exact wording: any constant 502 message passes, and any logger.error
++ * call that carries the thrown text passes. What they pin is the contract: 502 + BAD_GATEWAY, the thrown text absent
++ * from the body, present in the server log.
++ *
++ * Harness: the fake req/res dispatch of the KS-1410 api-gateway tests (the real router, no server); global fetch is
++ * stubbed per cell, so no network.
++ */
++import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
++import type { Request, Response, Router } from 'express';
++
++const mockLoggerError = vi.hoisted(() => vi.fn());
++vi.mock('../utils/logger', () => ({
++  logger: { error: mockLoggerError, warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
++}));
++
++import auditExportRouter from '../routes/audit-export';
++
++// THE FIXTURE IS LOAD-BEARING: a private host:port and a marker no other code path could produce.
++const LEAK = 'connect ECONNREFUSED 10.0.4.17:4008 ks1410-n1432-private-detail';
++const ADMIN = { userId: 'u-ks1410', role: 'super_admin' };
++const QUERY = { format: 'json', from: '2026-01-01', to: '2026-01-02' };
++
++type CapturedRes = Response & { _status: number; _json: unknown; _headers: Record<string, string> };
++
++function makeRes(onFinish: () => void): CapturedRes {
++  const res: any = {
++    _status: 200,
++    _json: null,
++    _headers: {},
++    status(code: number) {
++      res._status = code;
++      return res;
++    },
++    json(body: unknown) {
++      res._json = body;
++      onFinish();
++      return res;
++    },
++    send(body: unknown) {
++      res._json = body;
++      onFinish();
++      return res;
++    },
++    setHeader(name: string, value: string) {
++      res._headers[name] = value;
++      return res;
++    },
++  };
++  return res;
++}
++
++function dispatch(router: Router, opts: { user?: unknown; query?: Record<string, string> }): Promise<CapturedRes> {
++  return new Promise((resolve, reject) => {
++    const res = makeRes(() => resolve(res));
++    const req = {
++      method: 'GET',
++      url: '/export',
++      headers: {},
++      body: {},
++      query: opts.query ?? {},
++      user: opts.user,
++      get(name: string) {
++        return (this as any).headers[name?.toLowerCase()];
++      },
++    } as unknown as Request;
++    router(req, res as any, (err: unknown) => (err ? reject(err) : resolve(res)));
++  });
++}
++
++beforeEach(() => mockLoggerError.mockClear());
++afterEach(() => {
++  vi.unstubAllGlobals();
++  vi.unstubAllEnvs();
++});
++
++describe('KS-1410 N-1432-1 audit export: an unreachable security service answers 502 without the thrown text', () => {
++  it.each(['production', 'development', 'test'])('RED KS-1410 X1 NODE_ENV=%s: the 502 body does not carry the thrown text', async (nodeEnv) => {
++    vi.stubEnv('NODE_ENV', nodeEnv);
++    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error(LEAK)));
++    const res = await dispatch(auditExportRouter, { user: ADMIN, query: QUERY });
++    const body = res._json as any;
++    expect({ status: res._status, success: body.success, code: body.error.code, leaked: JSON.stringify(body).includes(LEAK) }).toEqual({
++      status: 502,
++      success: false,
++      code: 'BAD_GATEWAY',
++      leaked: false,
++    });
++    expect(typeof body.error.message === 'string' && body.error.message.length > 0).toBe(true);
++  });
++
++  it('RED KS-1410 X2: the thrown text is logged server-side', async () => {
++    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error(LEAK)));
++    const res = await dispatch(auditExportRouter, { user: ADMIN, query: QUERY });
++    expect(res._status).toBe(502);
++    expect(JSON.stringify(mockLoggerError.mock.calls).includes(LEAK)).toBe(true);
++  });
++
++  it('RED KS-1410 X3: the 502 body is the same constant for two different thrown texts', async () => {
++    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error(LEAK)));
++    const first = await dispatch(auditExportRouter, { user: ADMIN, query: QUERY });
++    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('getaddrinfo ENOTFOUND security.internal')));
++    const second = await dispatch(auditExportRouter, { user: ADMIN, query: QUERY });
++    expect(second._json).toEqual(first._json);
++  });
++
++  it('control KS-1410 XC1: an upstream non-ok answer still passes its status and error through', async () => {
++    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503, json: async () => ({ error: 'upstream says no' }) }));
++    const res = await dispatch(auditExportRouter, { user: ADMIN, query: QUERY });
++    expect([res._status, res._json]).toEqual([503, { success: false, error: { code: 'BAD_GATEWAY', message: 'upstream says no' } }]);
++  });
++
++  it('control KS-1410 XC2: a reachable security service still exports its rows as JSON and logs nothing', async () => {
++    const logs = [{ id: 'a1', timestamp: '2026-01-01T00:00:00Z', type: 'auth', action: 'login', userId: 'u1', outcome: 'success' }];
++    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ success: true, data: { logs } }) }));
++    const res = await dispatch(auditExportRouter, { user: ADMIN, query: QUERY });
++    expect([res._status, (res._json as any).meta.totalEntries, (res._json as any).data]).toEqual([200, 1, logs]);
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
++
++  it('control KS-1410 XC3: no req.user still answers 401 and never calls the security service', async () => {
++    const fetchSpy = vi.fn();
++    vi.stubGlobal('fetch', fetchSpy);
++    const res = await dispatch(auditExportRouter, { query: QUERY });
++    expect([res._status, (res._json as any).error.code, fetchSpy.mock.calls.length]).toEqual([401, 'UNAUTHORIZED', 0]);
++  });
++});

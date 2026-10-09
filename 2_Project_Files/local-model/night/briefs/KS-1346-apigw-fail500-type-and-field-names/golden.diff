@@ -1,0 +1,165 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/notifications.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/notifications.ts
+@@ -24,6 +24,6 @@
+  * the route named, answer the constant body.
+  */
+ function fail500(res: Response, context: string, err: unknown): void {
+-  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
++  logger.error(context, { error: err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err });
+   res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+ }
+--- a/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
+@@ -22,6 +22,6 @@
+  * the route named, answer the constant body.
+  */
+ function fail500(res: Response, context: string, err: unknown): void {
+-  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
++  logger.error(context, { error: err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err });
+   res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+ }
+--- a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+@@ -22,6 +22,6 @@
+  * the route named, answer the constant body.
+  */
+ function fail500(res: Response, context: string, err: unknown): void {
+-  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
++  logger.error(context, { error: err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err });
+   res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+ }
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1346-apigw-fail500-logs-type-and-field-names.test.ts
+@@ -0,0 +1,132 @@
++/**
++ * KS-1346 (api-gateway routes/notifications.ts, routes/batch.ts, routes/audit-export.ts): the three fail500 copies
++ * #1432 added log `err instanceof Error ? err.message : String(err)`, so a thrown NON-Error object is logged as
++ * "[object Object]" and its content is lost (gate77 N-1432-2). The owner ruling of 2026-09-27 (option a, "type and
++ * field names only") is already the helper line in originate's four copies (adminConfig.ts:104 at develop
++ * e919265db717): an Error logs its message, a string logs itself, an object logs its TYPE and FIELD NAMES only, never
++ * a value, and any other primitive logs its typeof.
++ *
++ * Harness: the fake req/res dispatch of the KS-1410 api-gateway tests (the real routers, no server, no network), with
++ * the notifications router's router-wide authenticateToken replaced by a pass-through. Every route below reads
++ * req.user FIRST inside its try; the fake user's field getter throws the value under test, so it lands in fail500.
++ */
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++import type { Request, Response, Router } from 'express';
++
++const mockLoggerError = vi.hoisted(() => vi.fn());
++vi.mock('../utils/logger', () => ({
++  logger: { error: mockLoggerError, warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
++}));
++vi.mock('../middleware/auth', () => ({
++  authenticateToken: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++
++import notificationsRouter from '../routes/notifications';
++import batchRouter from '../routes/batch';
++import auditExportRouter from '../routes/audit-export';
++
++// THE FIXTURE IS LOAD-BEARING: values that must never reach a log line.
++const SECRET_DSN = 'postgres://svc:ks1346-planted-secret@10.0.4.17:5432/app';
++const SECRET_EMAIL = 'ks1346.person@example.invalid';
++const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++
++type CapturedRes = Response & { _status: number; _json: unknown };
++
++function makeRes(onFinish: () => void): CapturedRes {
++  const res: any = {
++    _status: 200,
++    _json: null,
++    status(code: number) {
++      res._status = code;
++      return res;
++    },
++    json(body: unknown) {
++      res._json = body;
++      onFinish();
++      return res;
++    },
++    setHeader() {
++      return res;
++    },
++  };
++  return res;
++}
++
++function dispatch(router: Router, opts: { method: string; url: string; user?: unknown; body?: unknown }): Promise<CapturedRes> {
++  return new Promise((resolve, reject) => {
++    const res = makeRes(() => resolve(res));
++    const req = {
++      method: opts.method,
++      url: opts.url,
++      headers: {},
++      body: opts.body,
++      query: {},
++      user: opts.user,
++      get(name: string) {
++        return (this as any).headers[name?.toLowerCase()];
++      },
++    } as unknown as Request;
++    router(req, res as any, (err: unknown) => (err ? reject(err) : resolve(res)));
++  });
++}
++
++/** A req.user whose `field` getter throws `thrown` (any value, not only an Error). */
++function throwingUser(field: string, thrown: unknown): Record<string, unknown> {
++  return Object.defineProperty({}, field, {
++    enumerable: true,
++    get() {
++      throw thrown;
++    },
++  });
++}
++
++class DbFault {
++  code = 'ECONNREFUSED';
++  dsn = SECRET_DSN;
++}
++
++const ROUTES = [
++  { label: 'notifications GET /', router: notificationsRouter, method: 'GET', url: '/', field: 'userId', context: 'Notification list failed (GET /api/notifications)' },
++  { label: 'batch POST /certifications', router: batchRouter, method: 'POST', url: '/certifications', field: 'userId', context: 'Batch certify failed (POST /api/batch/certifications)' },
++  { label: 'audit GET /export', router: auditExportRouter, method: 'GET', url: '/export', field: 'role', context: 'Audit export failed (GET /api/admin/audit/export)' },
++];
++
++async function drive(route: (typeof ROUTES)[number], thrown: unknown): Promise<CapturedRes> {
++  return dispatch(route.router, { method: route.method, url: route.url, user: throwingUser(route.field, thrown), body: {} });
++}
++
++beforeEach(() => mockLoggerError.mockClear());
++
++describe('KS-1346 api-gateway fail500: a non-Error throw logs its type and field names, never its values', () => {
++  it.each(ROUTES)('RED KS-1346 G1 $label: a thrown plain object is logged as its type and field names', async (route) => {
++    const res = await drive(route, { dsn: SECRET_DSN, owner: SECRET_EMAIL });
++    expect(res._status).toBe(500);
++    expect(mockLoggerError.mock.calls).toEqual([[route.context, { error: 'thrown Object with fields [dsn, owner]' }]]);
++  });
++
++  it.each(ROUTES)('RED KS-1346 G2 $label: a thrown class instance is logged with its class name', async (route) => {
++    await drive(route, new DbFault());
++    expect(mockLoggerError.mock.calls).toEqual([[route.context, { error: 'thrown DbFault with fields [code, dsn]' }]]);
++  });
++
++  it.each(ROUTES)('RED KS-1346 G3 $label: a thrown number is logged as its type', async (route) => {
++    await drive(route, 42);
++    expect(mockLoggerError.mock.calls).toEqual([[route.context, { error: 'thrown number' }]]);
++  });
++
++  it.each(ROUTES)('control KS-1346 GC1 $label: no VALUE of a thrown object reaches the log, and the body stays constant', async (route) => {
++    const res = await drive(route, { dsn: SECRET_DSN, owner: SECRET_EMAIL });
++    const logged = JSON.stringify(mockLoggerError.mock.calls);
++    expect([logged.includes(SECRET_DSN), logged.includes(SECRET_EMAIL)]).toEqual([false, false]);
++    expect(res._json).toEqual(CONSTANT_BODY);
++  });
++
++  it.each(ROUTES)('control KS-1346 GC2 $label: an Error still logs its message, a string still logs itself', async (route) => {
++    await drive(route, new Error('ks1346-error-text'));
++    await drive(route, 'ks1346-string-text');
++    expect(mockLoggerError.mock.calls).toEqual([
++      [route.context, { error: 'ks1346-error-text' }],
++      [route.context, { error: 'ks1346-string-text' }],
++    ]);
++  });
++});
