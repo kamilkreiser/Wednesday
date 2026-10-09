@@ -1,0 +1,24 @@
+C2 claims #1441 head 7685e79af2c437b1e6cc8fe2e57b1b0771f576d5 base 613070f29112a40a0d8d9684cd50c7c2ae54592c repo /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-10_gate80/_scratch/clone
+PASS W0 CODE-ONLY multiset in webhooks.ts base 5d2e4984a1ec -> head 1364d7101fa4: added ['if (!UUID_PATTERN.test(req.params.id)) {', 'return res.json({ success: true, deliveries: [] });', '}', '`;'] removed ['`.catch(() => []);'] (raw numstat +6/-1 beside; the 5 other added raw lines are comments)
+PASS W1 .catch(() => []) CODE-ONLY base 2 (raw 3) -> head 1 (raw 2); survivor offset [24107] is after `export async function dispatchEvent` 23779: True | CONTROL planted extra reads 2 (must be head+1)
+PASS W2 ORDER inside the deliveries handler (code-only; name, offset, count): [('!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127', 362, 1), ('!UUID_PATTERN.test(req.params.id)', 767, 1), ('const db = (req as any).db || pris', 872, 1), ('db.$queryRaw`', 933, 1), ('deliveries: rows', 1212, 1)]
+PASS W3 handler queries 1, interpolations ['req.params.id'], Unsafe calls in handler 0 | file-wide (queryRawUnsafe, executeRawUnsafe, tagged $queryRaw) base (0, 1, 4) -> head (0, 1, 4)
+PASS W4 outer catch identical base/head: True | fail500 identical: True | its response body "{ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } }" carries no `err` / `.message` (the .message goes only to logger.error)
+PASS W5 UUID_PATTERN ['const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;'] | WEBHOOK_ID_PATTERN ['const WEBHOOK_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;'] | sibling helper identical base/head: True (it answers 404 for a non-UUID id on the OTHER routes)
+PASS W6-PRE the python UUID regex mirrors the declared one (hex class 0-9a-f, /i flag): True
+INFO W6 hyphenated lowercase UUID              '7a1f3d2b-2c3d-4e4f-9051-6b7c8d9e0f1a'   HEAD route predicts: query | the sibling helper would answer: query
+INFO W6 same UUID UPPERCASED                   '7A1F3D2B-2C3D-4E4F-9051-6B7C8D9E0F1A'   HEAD route predicts: query | the sibling helper would answer: query
+INFO W6 same 32 hex WITHOUT hyphens            '7a1f3d2b2c3d4e4f90516b7c8d9e0f1a'       HEAD route predicts: 200 [] (no query) | the sibling helper would answer: 404
+INFO W6 32 hex, hyphens in the wrong places    '7a1f-3d2b2c3d-4e4f9051-6b7c8d9e0f1a'    HEAD route predicts: 200 [] (no query) | the sibling helper would answer: 404
+INFO W6 36-char non-hex (hyphenated)           'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'   HEAD route predicts: 200 [] (no query) | the sibling helper would answer: 404
+INFO W6 the string 0                           '0'                                      HEAD route predicts: 200 [] (no query) | the sibling helper would answer: 404
+INFO W6 garbage string                         'not-a-uuid'                             HEAD route predicts: 200 [] (no query) | the sibling helper would answer: 404
+INFO W6 fails the id-format regex              '-bad id'                                HEAD route predicts: 400 | the sibling helper would answer: 400
+PASS W6 PREDICTION (READ, never evidence): the unhyphenated 32-hex id passes the id-format regex and FAILS UUID_PATTERN -> head answers 200 [] with 0 db calls; the hyphenated UUID reaches the query. Whether POSTGRES accepts the unhyphenated form in ::uuid is UNMEASURED (no database); the gate PROBES the router, and cites Postgres docs or says UNMEASURED
+PASS W7 ks1341c `it(` / `it.each(` definitions base 6 -> head 9 (executed counts differ: the two it.each expand per route); gone ['control KS-1341 C0: a REJECTED deliveries query is']; new ['RED KS-1345 D0: a REJECTED deliveries query ', 'control KS-1345 D: a deliveries query that R', 'RED KS-1345 D4: a well-formed id that is not', 'RED KS-1345 D3 SOURCE: exactly one best-effo']
+PASS W7b test files touched other than ks1341c: 0
+PASS D1 API_Security_Functional_Testing_Architecture_Flow_Diagrams.html: one insertion of 34 line(s) at head line 4321 of 4357 (base 4323 lines); head minus block == base: True; first line '<h2>48. webhook deliveries &mdash; a failed delivery-history'; next line '</body>'
+PASS D1 QA_Tool_Cheat_Sheet_Secuura_API_Testing.html: one insertion of 13 line(s) at head line 4403 of 4418 (base 4405 lines); head minus block == base: True; first line '<h2>Webhook deliveries: a failed history query answers 500 ('; next line '</body>'
+PASS D1-CONTROL CONTROL: the head doc with one base byte altered is NOT a pure insertion (the instrument can fail)
+CHECKED 13
+0 FAIL

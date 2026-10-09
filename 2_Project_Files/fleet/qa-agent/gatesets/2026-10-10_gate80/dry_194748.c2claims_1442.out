@@ -1,0 +1,24 @@
+C2 claims #1442 head a7ec5746cb8b43313d55d73185ada4931b17c5be base 613070f29112a40a0d8d9684cd50c7c2ae54592c repo /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-10_gate80/_scratch/clone
+PASS S0 CODE-ONLY (full-line # comments blanked) added ['out="$(cd "$dir" && npm run --silent format:check < /dev/null 2>&1)"'] removed ['out="$(cd "$dir" && npm run --silent format:check 2>&1)"'] | RAW added 4 removed 1 (numstat +4/-1: the 3 comment lines + the npm line)
+PASS S1 npm lines at head 1; `< /dev/null` count CODE-ONLY in the file 1 (raw 2: the comment names it); on the npm command inside $( ... ) after `cd "$dir" &&` and before `2>&1`: True
+PASS S2 `2>&1` is still the last redirect, so stderr lands in $out: out="$(cd "$dir" && npm run --silent format:check < /dev/null 2>&1)"
+PASS S3 `done <<< "$selected"` x1 (base x1), `changed_paths="$(cat)"` x1, mode `case` block identical base/head: True
+PASS S4 STDIN-CONSUMER CENSUS: 11 command line(s) inside the loop; a bare `cat` in the loop: False; the npm line carries `< /dev/null`: True (each row below is for the gate to RULE)
+INFO S4 loop line   1 read   explicit-null-stdin=False pipe-on-line=False while IFS= read -r p; do
+INFO S4 loop line  18 npm    explicit-null-stdin=True  pipe-on-line=False out="$(cd "$dir" && npm run --silent format:check < /dev/null 2>&1)"
+INFO S4 loop line  18 cd     explicit-null-stdin=True  pipe-on-line=False out="$(cd "$dir" && npm run --silent format:check < /dev/null 2>&1)"
+INFO S4 loop line  29 grep   explicit-null-stdin=False pipe-on-line=True  warns="$(printf '%s\n' "$out" | grep '^\[warn\] ' | grep -v 'Code style issues' || true)"
+INFO S4 loop line  29 printf explicit-null-stdin=False pipe-on-line=True  warns="$(printf '%s\n' "$out" | grep '^\[warn\] ' | grep -v 'Code style issues' || true)"
+INFO S4 loop line  36 sed    explicit-null-stdin=False pipe-on-line=True  printf '%s\n' "$out" | sed 's/^/[format-gate]   | /' >&2
+INFO S4 loop line  36 printf explicit-null-stdin=False pipe-on-line=True  printf '%s\n' "$out" | sed 's/^/[format-gate]   | /' >&2
+INFO S4 loop line  40 printf explicit-null-stdin=False pipe-on-line=True  printf '%s\n' "$warns" | while IFS= read -r w; do
+INFO S4 loop line  40 read   explicit-null-stdin=False pipe-on-line=True  printf '%s\n' "$warns" | while IFS= read -r w; do
+INFO S4 loop line  49 grep   explicit-null-stdin=False pipe-on-line=True  if [ "$MODE" != "all" ] && printf '%s\n' "$changed_paths" | grep -qxF "$full"; then
+INFO S4 loop line  49 printf explicit-null-stdin=False pipe-on-line=True  if [ "$MODE" != "all" ] && printf '%s\n' "$changed_paths" | grep -qxF "$full"; then
+PASS S4-CONTROL CONTROL: a planted bare `cat` inside a loop IS listed by the census
+PASS S5 new suite ks998_format_gate_stdin_isolated.test.sh: mode 100644, `check "` call sites 9 (the READY says 9 cells; some cells call check twice), usage line says `bash <file>`
+PASS D1 API_Security_Functional_Testing_Architecture_Flow_Diagrams.html: one insertion of 20 line(s) at head line 4321 of 4343 (base 4323 lines); head minus block == base: True; first line '<h2>49. The formatting gate gives each package&rsquo;s forma'; next line '</body>'
+PASS D1 QA_Tool_Cheat_Sheet_Secuura_API_Testing.html: one insertion of 16 line(s) at head line 4403 of 4421 (base 4405 lines); head minus block == base: True; first line '<h2>The format gate gives each package&rsquo;s format:check '; next line '</body>'
+PASS D1-CONTROL CONTROL: the head doc with one base byte altered is NOT a pure insertion (the instrument can fail)
+CHECKED 10
+0 FAIL

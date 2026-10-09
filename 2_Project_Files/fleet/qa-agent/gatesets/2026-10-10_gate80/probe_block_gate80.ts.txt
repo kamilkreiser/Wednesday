@@ -1,0 +1,82 @@
+
+// ============================================================================================
+// gate80 PROBE BLOCK — appended by c3_cells_gate80.py to a COPY of the head's ks1341c file, in the
+// GATE's OWN worktree only, named gate80-probe.test.ts, moved out (quarantined) after the run.
+// It reuses the file's own harness (the real webhooksRouter on a real express app, mockQueryRaw as the
+// MODELLED database, the mocked logger). Every probe RECORDS facts to $G80_PROBE_OUT (one JSON object
+// per line) and asserts only that it RAN. The gate rules the facts; a probe never decides a verdict by
+// passing. REAL: the router, the id-format regex, UUID_PATTERN, the response writer, fail500.
+// Each probe call starts from mockReset() (NOT mockClear): a queued mockResolvedValueOnce that the head route never consumed (an id
+// answered before the query) would otherwise leak into the NEXT call (the drafter's first run did exactly that, quarantined).
+// MODELLED: $queryRaw (a jest.fn that resolves one row), the logger, authenticate(). The mock CANNOT say
+// whether POSTGRES accepts an unhyphenated 32-hex string in a `::uuid` cast.
+// ============================================================================================
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const g80fs = require('fs');
+function g80rec(id: string, facts: Record<string, unknown>) {
+  g80fs.appendFileSync(String(process.env.G80_PROBE_OUT), JSON.stringify({ id, ...facts }) + '\n');
+}
+
+describe('gate80 probes (facts only)', () => {
+  it('P-32HEX: what the deliveries route answers, and whether it reaches the query, per id', async () => {
+    const U = '7a1f3d2b-2c3d-4e4f-9051-6b7c8d9e0f1a';
+    const ids: Array<[string, string]> = [
+      ['uuid-lower-hyphenated', U],
+      ['uuid-UPPER-hyphenated', U.toUpperCase()],
+      ['32-hex-no-hyphens', U.replace(/-/g, '')],
+      ['32-hex-hyphens-in-wrong-places', '7a1f-3d2b2c3d-4e4f9051-6b7c8d9e0f1a'],
+      ['36-char-non-hex', 'zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz'],
+      ['the-string-0', '0'],
+      ['garbage-string', 'not-a-uuid'],
+      ['fails-id-format-regex', '-bad id'],
+      ['129-chars-fails-id-format', 'a'.repeat(129)],
+    ];
+    const row = { id: '11111111-2222-4333-8444-555555555555', event_type: 'document.created', success: true };
+    const out: Record<string, unknown> = {};
+    for (const [label, id] of ids) {
+      setNodeEnv('production');
+      mockQueryRaw.mockReset();
+      mockLoggerError.mockClear();
+      mockQueryRaw.mockResolvedValueOnce([row]);
+      const res = await fetch(baseUrl + '/api/webhooks/' + encodeURIComponent(id) + '/deliveries');
+      const text = await res.text();
+      const call = mockQueryRaw.mock.calls[0];
+      out[label] = {
+        id,
+        status: res.status,
+        body: text.slice(0, 300),
+        dbCalls: mockQueryRaw.mock.calls.length,
+        boundValues: call ? call.slice(1) : null,
+        loggerErrors: mockLoggerError.mock.calls.length,
+      };
+    }
+    g80rec('P-32HEX', { results: out });
+    expect(true).toBe(true);
+  });
+
+  it('P-ORDER: a malformed id answers 400 BEFORE any other branch (id-format first, guard second)', async () => {
+    setNodeEnv('production');
+    mockQueryRaw.mockReset();
+    const r1 = await fetch(baseUrl + '/api/webhooks/' + encodeURIComponent('-bad id') + '/deliveries');
+    const t1 = await r1.text();
+    g80rec('P-ORDER', { status: r1.status, body: t1.slice(0, 200), dbCalls: mockQueryRaw.mock.calls.length });
+    expect(true).toBe(true);
+  });
+
+  it('P-REJECT: a rejected query on a UUID id answers the constant 500 (and logs once); a SYNCHRONOUS throw too', async () => {
+    const U = '7a1f3d2b-2c3d-4e4f-9051-6b7c8d9e0f1a';
+    const out: Record<string, unknown> = {};
+    for (const mode of ['rejected-promise', 'sync-throw']) {
+      setNodeEnv('production');
+      mockQueryRaw.mockReset();
+      mockLoggerError.mockClear();
+      if (mode === 'rejected-promise') mockQueryRaw.mockRejectedValueOnce(new Error('gate80-private-detail'));
+      else mockQueryRaw.mockImplementationOnce(() => { throw new Error('gate80-private-detail'); });
+      const res = await fetch(baseUrl + '/api/webhooks/' + U + '/deliveries');
+      const text = await res.text();
+      out[mode] = { status: res.status, body: text.slice(0, 200), leaked: text.includes('gate80-private-detail'), loggerErrors: mockLoggerError.mock.calls.length };
+    }
+    g80rec('P-REJECT', { results: out });
+    expect(true).toBe(true);
+  });
+});
