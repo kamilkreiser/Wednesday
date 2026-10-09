@@ -6,7 +6,7 @@
 # Prints a one-line reason and exits 1 when it is a placeholder; prints nothing and exits 0 otherwise. bash 3.2.
 set -u
 pf="${1:-}"; [ -n "$pf" ] && [ -f "$pf" ] || { echo "usage: a2b_placeholder.sh <section.diff>" >&2; exit 2; }
-nplus="$(/usr/bin/grep -c -E "^\+\s*(it|test)\(" "$pf")"; nminus="$(/usr/bin/grep -c -E "^-\s*(it|test)\(" "$pf")"
+nplus="$(/usr/bin/grep -c -E "^\+\s*(it|test)(\.(each|only|skip|concurrent|todo|fails))?\(" "$pf")"; nminus="$(/usr/bin/grep -c -E "^-\s*(it|test)(\.(each|only|skip|concurrent|todo|fails))?\(" "$pf")"
 if /usr/bin/grep -q -E '^--- (a/|"a/)' "$pf"; then
   if [ "$nminus" -gt "$nplus" ]; then echo "existing file: $nminus cell(s) removed, $nplus added"; exit 1; fi
 else
