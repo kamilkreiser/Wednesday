@@ -16,19 +16,30 @@ Every request carries provider routing {"only": [<pinned provider>], "allow_fall
 A budget guard (state/budget.json, all models together) refuses the next request when spent + this request's
 WORST-CASE cost would exceed HOSTED_BUDGET_USD (default 5.00).
 
+Rate limits (2026-10-09, after DeepInfra 429'd deepseek + mimo on request 2): HTTP 429/502/503 retries the SAME
+request (same body, same routing pin — never another provider) up to RETRY_ATTEMPTS times with exponential backoff +
+jitter (20/40/80/160/300 s, cap 300; a Retry-After header wins, capped at 300). Every attempt goes through send(), so
+assert_routing and the budget reserve run on each one. Exhausted -> the task is recorded SKIPPED-RATE-LIMIT in
+done_<model>.md, the drain CONTINUES, and the run exits 4 at the end.
+Resume: a Spark task that already has a PASS or FAIL row in done_<model>.md is not resent. Identity = the row's
+"spark run dir" column (the Spark run dir's path, unique per round) — or its "tag" column (that dir's basename).
+HARNESS / UNCHECKED / SKIPPED-RATE-LIMIT rows are not real verdicts and are retried.
+
 Usage:
   replay.py --model mimo|glm|deepseek [--dry-run] [--only TAG[,TAG...]] [--limit N] [--keep-clone] [--no-check]
 Exit: 0 all done · 1 at least one model FAIL verdict · 2 refused (no key, routing, budget, byte-identity) ·
-      4 HTTP/shape failure · 5 HARNESS (checker leg) · 64 usage.
+      4 HTTP/shape failure, or any task SKIPPED-RATE-LIMIT · 5 HARNESS (checker leg) · 64 usage.
 The key is read from 4_Credentials/.env by name (OPENROUTER_API_KEY) and is never printed or written.
 Python 3 stdlib only.
 """
 import argparse
 import datetime
+import email.utils
 import fcntl
 import hashlib
 import json
 import os
+import random
 import re
 import shutil
 import subprocess
@@ -54,6 +65,11 @@ WORK = os.environ.get("HOSTED_WORK", os.path.join(HERE, "work"))
 DONE_DIR = os.environ.get("HOSTED_DONE_DIR", HERE)
 DEFAULT_CAP = 5.00
 PROMPT_TOKEN_MARGIN = 1.30   # a different tokenizer may count the same bytes as more tokens than the Spark's did
+RETRY_STATUSES = (429, 502, 503)
+RETRY_ATTEMPTS = 6                       # total attempts per task, the first included
+RETRY_BACKOFF = (20, 40, 80, 160, 300)   # seconds before attempt 2..6, x jitter
+RETRY_CAP = 300
+_sleep = time.sleep  # tests replace it
 
 # Prices are USD per token, read from HOSTED_API.md and re-confirmed by GET /api/v1/models/<id>/endpoints 2026-10-09.
 MODELS = {
@@ -307,9 +323,26 @@ def send(body, model_key, key, budget, tag, worst, post=None):
     rid = budget.reserve(model_key, tag, worst)
     post = post or _http_post
     t0 = time.time()
-    raw = post(API_URL, json.dumps(body).encode("utf-8"),
-               {"Content-Type": "application/json", "Authorization": "Bearer " + key,
-                "X-Title": "Wednesday hosted replay"}, int(os.environ.get("HOSTED_HTTP_TIMEOUT", "1800")))
+    try:
+        raw = post(API_URL, json.dumps(body).encode("utf-8"),
+                   {"Content-Type": "application/json", "Authorization": "Bearer " + key,
+                    "X-Title": "Wednesday hosted replay"}, int(os.environ.get("HOSTED_HTTP_TIMEOUT", "1800")))
+    except urllib.error.HTTPError as e:
+        try:
+            e.hosted_body = e.read()[:1500]
+        except Exception:  # noqa: BLE001 — an unreadable error body must not mask the HTTP error itself
+            e.hosted_body = b""
+        if e.code == 429:
+            # A 429 is a rejection before generation. Settle to the usage it reports, if any; with none it was not
+            # billed, so the worst-case hold is released (else 6 retries x worst case would eat the cap for nothing).
+            # 502/503 (and every other failure) keep the worst case charged, as before.
+            try:
+                usage = (json.loads(e.hosted_body) or {}).get("usage") or {}
+                usd, source = cost_of(model_key, usage)
+            except (ValueError, AttributeError, TypeError):
+                usage, usd, source = {}, 0.0, "HTTP 429 without usage: rejected before generation, not billed"
+            budget.settle(rid, usd, source, usage)
+        raise
     wall = time.time() - t0
     try:
         j = json.loads(raw)
@@ -318,6 +351,50 @@ def send(body, model_key, key, budget, tag, worst, post=None):
     except (ValueError, KeyError):
         usd, source = worst, "unknown-usage: worst case kept"
     return raw, usd, source, wall
+
+
+class RateLimited(Exception):
+    """Every retry of one request came back 429/502/503."""
+
+    def __init__(self, code, attempts, body):
+        super().__init__(f"HTTP {code} on all {attempts} attempts: {body!r}")
+        self.code, self.attempts, self.body = code, attempts, body
+
+
+def retry_wait(attempt, headers):
+    """Seconds to wait before attempt `attempt + 1`: Retry-After (seconds or HTTP date) when present, else the
+    backoff step x jitter 0.85-1.15; always within [1, RETRY_CAP]. Returns (seconds, why)."""
+    ra = headers.get("Retry-After") if headers is not None else None
+    if ra:
+        try:
+            return min(RETRY_CAP, max(1.0, float(ra))), f"Retry-After {ra}"
+        except ValueError:
+            try:
+                dt = email.utils.parsedate_to_datetime(ra)
+                return min(RETRY_CAP, max(1.0, dt.timestamp() - time.time())), f"Retry-After {ra}"
+            except (TypeError, ValueError):
+                pass
+    base = RETRY_BACKOFF[min(attempt - 1, len(RETRY_BACKOFF) - 1)]
+    return min(RETRY_CAP, max(1.0, base * random.uniform(0.85, 1.15))), f"backoff {base}s+jitter"
+
+
+def send_with_retry(body, model_key, key, budget, tag, worst, post=None):
+    """send() the SAME body until it is not 429/502/503, at most RETRY_ATTEMPTS times. Each attempt is a full send():
+    routing asserted and budget reserved/settled per attempt. Raises RateLimited when exhausted."""
+    for attempt in range(1, RETRY_ATTEMPTS + 1):
+        try:
+            return send(body, model_key, key, budget, tag, worst, post=post)
+        except urllib.error.HTTPError as e:
+            if e.code not in RETRY_STATUSES:
+                raise
+            txt = getattr(e, "hosted_body", b"")
+            if attempt == RETRY_ATTEMPTS:
+                raise RateLimited(e.code, attempt, txt)
+            wait, why = retry_wait(attempt, e.headers)
+            print(f"replay: HTTP {e.code} on {tag} (attempt {attempt}/{RETRY_ATTEMPTS}) — waiting {wait:.0f}s ({why}), then "
+                  f"the SAME request to the SAME pinned provider: {txt[:160]!r}", flush=True)
+            _sleep(wait)
+    raise AssertionError("unreachable")
 
 
 # ------------------------------------------------------------------------------------------------ run dir
@@ -381,7 +458,29 @@ def append_done(model_key, row):
                     "| when | tag | verdict | model s | tokens (prompt+completion) | reasoning tok | cost USD | spark verdict | golden | run dir | spark run dir |\n"
                     "|---|---|---|---|---|---|---|---|---|---|---|\n")
     with open(path, "a", encoding="utf-8") as f:
-        f.write("| " + " | ".join(str(x).replace("|", "/") for x in row) + " |\n")
+        f.write("| " + " | ".join(str(x).replace("|", "/").replace("\n", " ") for x in row) + " |\n")
+
+
+def finished(model_key):
+    """(spark run dirs, tags) of the tasks done_<model>.md already holds a real PASS/FAIL verdict for."""
+    path = os.path.join(DONE_DIR, f"done_{model_key}.md")
+    runs, tags = set(), set()
+    if not os.path.exists(path):
+        return runs, tags
+    for line in _rtext(path).splitlines():
+        if not line.startswith("| 20"):
+            continue
+        c = [x.strip() for x in line.strip().strip("|").split("|")]
+        if len(c) < 11 or not (c[2].startswith("PASS") or c[2].startswith("FAIL")):
+            continue
+        tags.add(c[1])
+        runs.add(os.path.normpath(c[10]))
+    return runs, tags
+
+
+def is_finished(row, done):
+    runs, tags = done
+    return os.path.normpath(row["run"]) in runs or os.path.basename(row["run"]) in tags
 
 
 # ------------------------------------------------------------------------------------------------ main
@@ -407,6 +506,9 @@ def main(argv=None, post=None):
     if a.only:
         want = set(x.strip() for x in a.only.split(",") if x.strip())
         rows = [r for r in rows if r["tag"] in want or os.path.basename(r["run"]) in want]
+    done = finished(mk)
+    resumed = [r for r in rows if is_finished(r, done)]
+    rows = [r for r in rows if not is_finished(r, done)]
     if a.limit:
         rows = rows[:a.limit]
 
@@ -436,6 +538,9 @@ def main(argv=None, post=None):
     if mk == "glm":
         print("replay: NOTE glm thinks at effort=low (cannot be disabled); its output tokens are unmeasured — the estimate "
               "uses the Spark's thinking-OFF completion counts and is a FLOOR")
+    if resumed:
+        print(f"replay: RESUME — {len(resumed)} task(s) already have a PASS/FAIL row in done_{mk}.md (matched on the "
+              f"spark run dir / tag) and are NOT resent")
     for r, why in refused:
         print(f"replay: REFUSED {r['tag']}: {why}")
 
@@ -453,6 +558,7 @@ def main(argv=None, post=None):
         return 2 if refused else 0
 
     worst_rc = 2 if refused else 0
+    skipped = []
     for r, body, info in plan:
         tag = os.path.basename(r["run"])
         wc = worst_case_usd(mk, info["spark_prompt_tokens"])
@@ -462,13 +568,22 @@ def main(argv=None, post=None):
         req_record = dict(body)
         _wjson(os.path.join(run, "request.json"), req_record)  # no key in body
         try:
-            raw, usd, source, wall = send(body, mk, key, budget, tag, wc, post=post)
+            raw, usd, source, wall = send_with_retry(body, mk, key, budget, tag, wc, post=post)
         except Refused as e:
             print(f"replay: REFUSED {tag}: {e}")
             _wtext(os.path.join(run, "run.log"), f"REFUSED: {e}\n")
             return 2  # budget/routing refusal stops the drain
+        except RateLimited as e:
+            _wtext(os.path.join(run, "run.log"), f"SKIPPED-RATE-LIMIT: {e}\n")
+            append_done(mk, [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), tag,
+                             f"SKIPPED-RATE-LIMIT (HTTP {e.code} x{e.attempts}: {e.body[:200]!r})", "-", "-", "-",
+                             "0.00000", info["spark_verdict"], "-", run, r["run"]])
+            print(f"HOSTED {mk} {tag}: SKIPPED-RATE-LIMIT — HTTP {e.code} on all {e.attempts} attempts; continuing "
+                  f"(re-run later: resume skips the finished tasks)", flush=True)
+            skipped.append(tag)
+            continue
         except urllib.error.HTTPError as e:
-            body_txt = e.read()[:1500]
+            body_txt = getattr(e, "hosted_body", None) or e.read()[:1500]
             _wtext(os.path.join(run, "run.log"), f"HTTP {e.code}: {body_txt!r}\n")
             print(f"replay: HTTP {e.code} on {tag} (routing pinned; a 404/no-endpoints here means the zdr+only pin found "
                   f"no endpoint — NOT a model verdict): {body_txt[:300]!r}")
@@ -521,6 +636,10 @@ def main(argv=None, post=None):
               f"spent ${budget.total():.4f}/{cap:.2f}")
         rc = {"PASS": 0, "FAIL": 1, "HARNESS": 5}.get(verdict, 0)
         worst_rc = max(worst_rc, rc) if rc != 0 else worst_rc
+    if skipped:
+        print(f"replay: {len(skipped)} task(s) SKIPPED-RATE-LIMIT ({', '.join(skipped)}) — exit 4; re-run the same "
+              f"command later to send only those (and any not yet done)")
+        worst_rc = max(worst_rc, 4)
     return worst_rc
 
 

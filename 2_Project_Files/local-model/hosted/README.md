@@ -9,7 +9,7 @@ Model facts and prices: `0_Brain/reference/2026-10-09_studio-128-vs-256/HOSTED_A
 |---|---|
 | `replay.py --model mimo\|glm\|deepseek [--dry-run] [--only TAG,..] [--limit N] [--keep-clone]` | the replay |
 | `check.sh <run> <tier> <tip> <work> [golden]` | round.sh steps 7/9/10: clone at the Spark's tip, the SAME checker, golden compare |
-| `tests/test_replay.py` | 15 tests (below) |
+| `tests/test_replay.py` | 19 tests (below) |
 | `done_<model>.md` | one row per replayed task (tracked, like `spark/done.md`) |
 | `runs/ work/ state/` | gitignored — they hold Secuura code (see `.gitignore`) |
 
@@ -59,6 +59,17 @@ Model facts and prices: `0_Brain/reference/2026-10-09_studio-128-vs-256/HOSTED_A
   golden cmp / tree compare. The clone is removed after the check (`--keep-clone` keeps it); nothing is written under
   `!CODING/`.
 
+## Rate limits and resume (added 2026-10-09 after DeepInfra 429'd deepseek + mimo on request 2)
+
+- **Retry:** HTTP 429 / 502 / 503 re-sends the SAME body (same routing pin — never another provider) up to 6 attempts,
+  waiting 20/40/80/160/300 s × jitter 0.85–1.15 (cap 300 s); a `Retry-After` header wins (capped at 300). Each wait is
+  printed. Every attempt goes through `send()`, so `assert_routing` and the budget reserve run on each one. A 429 with
+  no usage is released from the budget (rejected before generation); 502/503 keep the worst case charged.
+- **Exhausted:** the task gets a `SKIPPED-RATE-LIMIT` row in `done_<model>.md`, the drain continues, and the run exits 4.
+- **Resume:** a task already holding a `PASS`/`FAIL` row in `done_<model>.md` is not resent. Identity = the row's
+  `spark run dir` column (the Spark round's dir, unique per round), or its `tag` (that dir's basename). `HARNESS`,
+  `UNCHECKED` and `SKIPPED-RATE-LIMIT` rows are retried. Re-running the same command is the recovery.
+
 ## The cap
 
 `state/budget.json` holds ONE running total for all three models. Each request is RESERVED at its worst case
@@ -92,4 +103,4 @@ zero network calls with the socket layer blocked (control: the block catches a r
 line · byte identity on 3 real inputs (code_patch KS-723, bash_patch KS-998, code_patch2 KS-1410 = 70,129 B, the
 QWEN122_AB reference) + red (one byte changed → refused) · checker positive controls on real Spark outputs: KS-998
 PASS (TREE-IDENTICAL), KS-723 code_patch PASS (prepare_clone + jest), KS-1438 r2 FAIL at B3x — each reproduces the
-recorded RESULT / SPARK RESULT lines and golden · end to end: `main()` with a fake POST returning the Spark's own KS-998 answer -> out.md -> check.sh -> PASS TREE-IDENTICAL row in done_deepseek.md, clone removed, no key in request.json.
+recorded RESULT / SPARK RESULT lines and golden · rate limit: 429 (Retry-After 7) + 429 then 200 → same request completes, waits 7 s then ~40 s, 429s not charged · 429 forever → SKIPPED-RATE-LIMIT row, next task still sent, rc 4 · non-retryable 404 stops at once · resume: a FAIL row is not resent, a SKIPPED row is · end to end: `main()` with a fake POST returning the Spark's own KS-998 answer -> out.md -> check.sh -> PASS TREE-IDENTICAL row in done_deepseek.md, clone removed, no key in request.json.

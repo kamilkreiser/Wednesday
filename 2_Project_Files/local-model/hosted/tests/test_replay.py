@@ -6,6 +6,7 @@ the network function is replaced by a fake, and the dry-run test blocks the sock
 The checker positive control (CheckerControl) clones the Spark cache at a recorded tip and runs the real checker;
 skip it with HOSTED_SKIP_CHECKER=1.
 """
+import email.message
 import io
 import json
 import os
@@ -15,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import urllib.error
 import urllib.request
 from contextlib import redirect_stdout
 
@@ -255,7 +257,108 @@ class ByteIdentity(Isolated):
         self.assertIn("byte-identity", str(cm.exception))
 
 
-# ------------------------------------------------------------------------------------------------ 5. checker positive control
+# ------------------------------------------------------------------------------------------------ 5. rate limit + resume
+def http_error(code, retry_after=None):
+    hdrs = email.message.Message()
+    if retry_after is not None:
+        hdrs["Retry-After"] = str(retry_after)
+    body = json.dumps({"error": {"code": code, "message": "temporarily rate-limited upstream. Please retry shortly"}}).encode()
+    return urllib.error.HTTPError(replay.API_URL, code, "rate limited", hdrs, io.BytesIO(body))
+
+
+class ScriptedPost(FakePost):
+    """Each scripted entry is bytes (returned) or a zero-arg callable that builds an exception (raised)."""
+
+    def __call__(self, url, data, headers, timeout):
+        self.calls.append((url, json.loads(data)))
+        r = self.responses.pop(0)
+        if callable(r):
+            raise r()
+        return r
+
+
+class RateLimitAndResume(Isolated):
+    T1 = os.path.basename(REAL["bash_patch"])
+    T2 = os.path.basename(REAL["code_patch"])
+
+    def setUp(self):
+        super().setUp()
+        self.with_key()
+        self.waits = []
+        self.saved_sleep = replay._sleep
+        replay._sleep = self.waits.append
+
+    def tearDown(self):
+        replay._sleep = self.saved_sleep
+        super().tearDown()
+
+    def rows(self):
+        p = os.path.join(replay.DONE_DIR, "done_deepseek.md")
+        return [l for l in replay._rtext(p).splitlines() if l.startswith("| 20")] if os.path.exists(p) else []
+
+    def run_main(self, fp, only):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            rc = replay.main(["--model", "deepseek", "--no-check", "--only", ",".join(only)], post=fp)
+        return rc, out.getvalue()
+
+    def test_red_429_twice_then_200_completes_the_same_request(self):
+        fp = ScriptedPost([lambda: http_error(429, retry_after=7), lambda: http_error(429), fake_response(cost=0.001)])
+        rc, out = self.run_main(fp, [self.T1])
+        self.assertEqual(rc, 0, out[-800:])
+        self.assertEqual(len(fp.calls), 3)
+        self.assertTrue(all(c[1] == fp.calls[0][1] for c in fp.calls), "a retry changed the request")
+        for _, b in fp.calls:
+            replay.assert_routing(b, "deepseek")
+            self.assertEqual(b["provider"]["only"], ["deepinfra"])
+        self.assertEqual(self.waits[0], 7, "Retry-After not honoured")
+        self.assertTrue(40 * 0.85 <= self.waits[1] <= 40 * 1.15, self.waits)  # after attempt 2: backoff step 2 = 40s x jitter
+        rows = self.rows()
+        self.assertEqual(len(rows), 1)
+        self.assertIn("UNCHECKED", rows[0])
+        self.assertNotIn("SKIPPED", rows[0])
+        # budget: the two 429s (no usage) were released; only the 200's usage.cost is counted
+        self.assertAlmostEqual(replay.Budget(os.path.join(replay.STATE, "budget.json"), 5).total(), 0.001, places=9)
+
+    def test_red_429_forever_is_skipped_and_the_run_continues(self):
+        fp = ScriptedPost([lambda: http_error(429)] * replay.RETRY_ATTEMPTS + [fake_response(cost=0.001)])
+        rc, out = self.run_main(fp, [self.T1, self.T2])
+        self.assertEqual(rc, 4, out[-800:])
+        self.assertEqual(len(fp.calls), replay.RETRY_ATTEMPTS + 1, "the drain did not continue to the next task")
+        self.assertEqual(len(self.waits), replay.RETRY_ATTEMPTS - 1)
+        self.assertTrue(all(1 <= w <= replay.RETRY_CAP for w in self.waits), self.waits)
+        self.assertGreater(self.waits[-1], self.waits[0])
+        rows = self.rows()
+        self.assertEqual(len(rows), 2)
+        skipped = [r for r in rows if "SKIPPED-RATE-LIMIT" in r]
+        self.assertEqual(len(skipped), 1)
+        self.assertEqual(skipped[0].split("|")[2].strip(), [t for t in (self.T1, self.T2) if t in skipped[0]][0])
+        self.assertIn("UNCHECKED", [r for r in rows if r not in skipped][0])
+        self.assertIn("SKIPPED-RATE-LIMIT", out)
+
+    def test_non_retryable_http_error_still_stops_at_once(self):
+        fp = ScriptedPost([lambda: http_error(404), fake_response(cost=0.001)])
+        rc, out = self.run_main(fp, [self.T1])
+        self.assertEqual(rc, 4)
+        self.assertEqual(len(fp.calls), 1)
+        self.assertEqual(self.waits, [])
+
+    def test_resume_a_done_row_is_not_resent_and_skipped_rows_are(self):
+        a = [r for r in replay.spark_rows() if os.path.basename(r["run"]) == self.T1][0]
+        b = [r for r in replay.spark_rows() if os.path.basename(r["run"]) == self.T2][0]
+        replay.append_done("deepseek", ["2026-10-09 18:00:00", self.T1, "FAIL (x)", 1, "1+1", 0, "0.001", "FAIL", "-", "/r", a["run"]])
+        replay.append_done("deepseek", ["2026-10-09 18:00:01", self.T2, "SKIPPED-RATE-LIMIT (HTTP 429 x6)", "-", "-", "-",
+                                        "0.00000", "PASS", "-", "/r2", b["run"]])
+        fp = ScriptedPost([fake_response(cost=0.001)])
+        rc, out = self.run_main(fp, [self.T1, self.T2])
+        self.assertEqual(rc, 0, out[-800:])
+        self.assertEqual(len(fp.calls), 1, "a task with a PASS/FAIL row was resent")
+        sent_user = fp.calls[0][1]["messages"][1]["content"]
+        self.assertIn(replay._rtext(os.path.join(b["run"], "input.json")).strip(), sent_user)
+        self.assertIn("RESUME — 1 task(s)", out)
+
+
+# ------------------------------------------------------------------------------------------------ 6. checker positive control
 @unittest.skipIf(os.environ.get("HOSTED_SKIP_CHECKER") == "1", "HOSTED_SKIP_CHECKER=1")
 class CheckerControl(unittest.TestCase):
     """check.sh on a REAL Spark output (copied out.md + input.json) must reproduce the verdict the Spark round recorded."""
