@@ -242,27 +242,6 @@ def _apply_to_tip(patch_file, files_at_tip, scratch_parent, opts=()):
     finally:
         shutil.rmtree(td, ignore_errors=True)
 
-def _apply_sections_to_tip(secs, files_at_tip, scratch_parent):
-    """2026-10-10 (loose-recount): apply each (section_file, opts) in order, with its own opts, onto the tip content in ONE tempdir;
-    returns (rc, stderr, {path: sha256}) like _apply_to_tip (rc is the first non-zero section rc)."""
-    import tempfile, hashlib, shutil
-    td = tempfile.mkdtemp(prefix='hold_ready_apply_', dir=scratch_parent)
-    try:
-        for path, content in files_at_tip.items():
-            fp = os.path.join(td, path); os.makedirs(os.path.dirname(fp), exist_ok=True)
-            if isinstance(content, dict):
-                r = subprocess.run(['git', '-C', inp['source_checkout'], 'show', f"{inp['tip']}:{path}"], capture_output=True, text=True)
-                if r.returncode != 0: die(f"excerpted file {path}: git show at the tip failed: {r.stderr.strip()[:200]}")
-                content = r.stdout
-            open(fp, 'w').write(content)
-        for sf, opts in secs:
-            r = subprocess.run(['git', 'apply', '-p1', *opts, sf], cwd=td, capture_output=True, text=True)
-            if r.returncode != 0: return r.returncode, r.stderr.strip(), {}
-        digests = {p: hashlib.sha256(open(os.path.join(td, p), 'rb').read()).hexdigest() for p in files_at_tip}
-        return 0, '', digests
-    finally:
-        shutil.rmtree(td, ignore_errors=True)
-
 # 2026-10-10 (Wednesday): rung 6 (a PROSE-only change description) is unfenced the same way as rung 4; it is accepted only on an
 # explicit `RUNG 6 … prose` declaration (KS-1345, the first rung-6 PASS). Anything else still refuses at A3c.
 LOOSE_RE = re.compile(r'rung:?\s*\**\s*4\s*\**\s*\(\s*(?:a\s+)?looser brief|rung:?\s*\**\s*6\b[^\n]{0,80}?prose', re.I)
@@ -444,7 +423,6 @@ def hold_code_patch():
     if newreds_line.strip() != 'NEW reds: []': die(f"suite_delta.out reports new reds: {newreds_line}")
 
     # 7. the golden — CONTENT compared, each measurement its own clause; never a byte-identity claim unless cmp said so
-    loose_apply_mode = ''; loose_apply_strict_err = ''
     golden_clause = "golden not located — no identity claim is made"; same_bytes = None; applied_same = None
     if golden != '-':
         gpath = os.path.join(golden, 'out.md.checker', 'patch.diff')
@@ -477,25 +455,6 @@ def hold_code_patch():
                     scratch = os.environ.get('CLAUDE_SCRATCHPAD') or None
                     rc_r, err_r, dg_r = _apply_to_tip(patch_path, files_at_tip, scratch)
                     rc_g, err_g, dg_g = _apply_to_tip(gpath, files_at_tip, scratch)
-                    # 2026-10-10 (loose-recount): a LOOSE rung (4 or 6: the model writes the product lines) whose checker passed A2 only with
-                    # `--recount` (the model miscounted a hunk header; KS-1345 rung 6) is applied with EXACTLY the --recount /
-                    # --ignore-whitespace options the checker recorded in section_<k>.opts (never anything wider) when the strict apply
-                    # refuses. A NON-loose rung still dies on a strict failure. The mode is recorded in the READY (never 'strict').
-                    if rc_r != 0 and loose_info and any_recount:
-                        # PER SECTION, exactly as the checker applied them (a concatenated patch.diff does not recount reliably: the
-                        # recount of a miscounted hunk swallows the next file header). Only a pure recount accommodation qualifies:
-                        # the section applied must be the model's own section file, and every opt must be one of the allowed set.
-                        ok_ = all(r_[3] == r_[2] and all(t_ in ('--recount', '--ignore-whitespace') or t_.startswith('--directory=') for t_ in r_[4].split()) for r_ in sec_rows)
-                        if ok_:
-                            rc_r2, err_r2, dg_r2 = _apply_sections_to_tip([(r_[2], r_[4].split()) for r_ in sec_rows], files_at_tip, scratch)
-                            if rc_r2 == 0:
-                                rc_r, dg_r = 0, dg_r2
-                                loose_apply_mode = '; '.join(f"section {r_[0]}: `git apply -p1" + (' ' + r_[4] if r_[4] else '') + '`' for r_ in sec_rows)
-                                loose_apply_strict_err = err_r[:200]
-                                rc_g1, err_g1, dg_g1 = _apply_to_tip(gpath, files_at_tip, scratch)
-                                if rc_g1 != 0: rc_g, err_g, dg_g = _apply_to_tip(gpath, files_at_tip, scratch, ['--recount'])
-                                else: rc_g, err_g, dg_g = rc_g1, err_g1, dg_g1
-                                parts.append(f"RUN PATCH APPLY MODE: NOT STRICT (strict=False) — whole-file `git apply -p1` strict refused ({loose_apply_strict_err}); applied PER SECTION with the options the checker recorded for this LOOSE rung (miscounted hunk header): {loose_apply_mode}")
                     if rc_r != 0: die(f"the run's patch does not apply strictly (git apply -p1) to the tip content in input.json['files']: {err_r[:200]}")
                     if rc_g != 0:
                         parts.append(f"APPLIED RESULT not compared: the golden does not apply strictly to the tip content in input.json['files'] ({err_g[:120]})")
@@ -541,9 +500,6 @@ def hold_code_patch():
         extra_notes += (f"- CODE_PATCH2 (rung 3, {len(cp2_products)} product files + {len(cp2_tests)} test file(s)) — identity was PER-FILE A3x, not a single-file A3i. Product files (brief `File:` lines == input.json product_files): "
                         + ', '.join('`' + p + '`' for p in cp2_products) + "; test(s): " + ', '.join('`' + p + '`' for p in cp2_tests)
                         + f". [checker.out PASS A3x, verbatim]: `{a3x_line}`. [brief_bytes.out, verbatim]: `{a3x_sum}`\n")
-    if loose_apply_mode:
-        extra_notes += (f"- **APPLY MODE: NOT STRICT (strict=False) — recount only.** The run's `patch.diff` does not apply under strict `git apply -p1` ({loose_apply_strict_err}); it applies with [{loose_apply_mode}] (the options the checker recorded in section_<k>.opts for this LOOSE rung). "
-                        "Raise it with those options, or rewrite the hunk header and assert the blob equals the recounted result.\n")
     if loose_info:
         gcmp = ''
         gp = os.path.join(run, 'golden_cmp.out')

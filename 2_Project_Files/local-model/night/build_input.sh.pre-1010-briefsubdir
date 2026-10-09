@@ -19,21 +19,12 @@
 #   - names MORE than one product file (unless `product=` pins one) or NONE;
 #   - has no fix shape (no "Fix shape" / "Recommendation" / "Fix:" / "Acceptance"
 #     section) — a ticket that asks a question is a ruling, not a task;
-#   - the service is neither vitest nor jest (2026-09-15 18:2x: jest services — originate, governance — are IN; see the
-#     runner_kind branch, `refuse(... runs vitest or jest only)`) — or is not a services/* | packages/shared path;
+#   - the service is not on vitest (the checker runs `npx vitest run`; originate and
+#     governance are jest) — or is not a services/* | packages/shared path;
 #   - no in-process test under the service's src/__tests__ imports the product
 #     module (nothing to copy the mock shape from) — unless `ref=` pins one;
 #   - no defect line can be found (`<file>:NNN` in the ticket, or `line=`).
 #
-# BRIEF RESOLUTION (2026-10-10, night-brief-subdirs): the Wednesday brief is `<briefs>/<TICKET>.md` (flat) OR
-# `<briefs>/<dir>/<TICKET>.md` (the Spark shape: a dir holding the brief + golden.diff + spark.pins). Order:
-#   1. `brief_dir=<name|abs path>` pin (queue line) -> that dir must hold <TICKET>.md, else REFUSED
-#   2. flat `<briefs>/<TICKET>.md` (unchanged)
-#   3. exactly ONE `<briefs>/<TICKET>-*/` dir (or `<briefs>/<TICKET>/`) holding <TICKET>.md -> used, and SAID so
-#   4. MORE than one such dir and no pin -> REFUSED naming them (never picks one)
-#   5. none -> the bare ticket description (the python's `prompt source: the ticket description` warning, unchanged)
-# The winner is exported as NIGHT_BRIEFS_DIR (what the Spark round already does), so the three readers below are untouched.
-# BUILD_INPUT_RESOLVE_ONLY=1 prints the resolution and exits before any network/.env read (used by the arms).
 # Never writes anywhere but <out>. Never touches the source checkout (git READ
 # verbs only: ls-remote, cat-file, show, ls-tree). rc 0 ok · 2 refused · 1 error.
 # stderr never discarded. bash 3.2 + python3.
@@ -45,37 +36,6 @@ if [ -z "$TICKET" ] || [ -z "$OUT" ]; then
   exit 1
 fi
 case "$TICKET" in KS-[0-9]*) ;; *) echo "build_input: not a KS id: $TICKET" >&2; exit 1 ;; esac
-
-# --- brief resolution (see header). bash 3.2: no arrays-of-assoc, no nullglob reliance. ---
-BRIEFS_ROOT="${NIGHT_BRIEFS_DIR:-$(dirname "$0")/briefs}"
-BRIEF_DIR_PIN=""; for a in "$@"; do case "$a" in brief_dir=*) BRIEF_DIR_PIN="${a#brief_dir=}";; esac; done
-RESOLVED_DIR=""; RESOLVED_WHY=""
-if [ -n "$BRIEF_DIR_PIN" ]; then
-  BRIEF_DIR_PIN="${BRIEF_DIR_PIN%/}"
-  case "$BRIEF_DIR_PIN" in /*) _cand="$BRIEF_DIR_PIN" ;; *) _cand="$BRIEFS_ROOT/$BRIEF_DIR_PIN" ;; esac
-  if [ -f "$_cand/$TICKET.md" ]; then RESOLVED_DIR="$_cand"; RESOLVED_WHY="named by the brief_dir= pin"
-  else echo "build_input: REFUSED $TICKET — brief_dir=$BRIEF_DIR_PIN names $_cand, which does not hold $TICKET.md" >&2; exit 2; fi
-elif [ -f "$BRIEFS_ROOT/$TICKET.md" ]; then
-  RESOLVED_DIR="$BRIEFS_ROOT"; RESOLVED_WHY="flat file"
-else
-  _n=0; _names=""
-  for _d in "$BRIEFS_ROOT/$TICKET"-*/ "$BRIEFS_ROOT/$TICKET"/; do
-    [ -f "${_d}$TICKET.md" ] || continue
-    _n=$((_n + 1)); _names="$_names $(basename "$_d")"; _one="${_d%/}"
-  done
-  if [ "$_n" -eq 1 ]; then RESOLVED_DIR="$_one"; RESOLVED_WHY="the ONLY brief subdirectory for $TICKET (no brief_dir= pin, no flat file)"
-  elif [ "$_n" -gt 1 ]; then
-    echo "build_input: REFUSED $TICKET — $_n brief subdirectories match and no brief_dir= pin names one:$_names — add brief_dir=<name> to the queue line (never picking one)" >&2; exit 2
-  fi
-fi
-if [ -n "$RESOLVED_DIR" ]; then
-  export NIGHT_BRIEFS_DIR="$RESOLVED_DIR"
-  echo "build_input: brief resolved — $RESOLVED_DIR/$TICKET.md ($RESOLVED_WHY)"
-else
-  export NIGHT_BRIEFS_DIR="$BRIEFS_ROOT"
-  echo "build_input: brief resolved — none for $TICKET under $BRIEFS_ROOT (flat or subdirectory)"
-fi
-if [ "${BUILD_INPUT_RESOLVE_ONLY:-0}" = "1" ]; then echo "NIGHT_BRIEFS_DIR=$NIGHT_BRIEFS_DIR"; exit 0; fi
 
 SRC="${NIGHT_SOURCE_CHECKOUT:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files}"
 ENV_FILE="${NIGHT_SECUURA_ENV:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env}"
