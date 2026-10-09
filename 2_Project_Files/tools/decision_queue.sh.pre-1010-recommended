@@ -388,7 +388,7 @@ def cmd_amend(args):
     did = args[0].strip() if args else ""
     if not did or did.startswith("--"):
         die("usage: amend ID --reason TEXT [--bluf TEXT] [--default-action TEXT] "
-            "[--option-detail KEY TEXT] [--recommended KEY]   (at least one field; --reason always required)")
+            "[--option-detail KEY TEXT]   (at least one field; --reason always required)")
     rest, fields, reason = args[1:], {}, None
     i = 0
     while i < len(rest):
@@ -402,18 +402,13 @@ def cmd_amend(args):
         elif a == "--option-detail":
             if i+2 >= len(rest): die("--option-detail needs KEY and TEXT")
             fields.setdefault("_options", {})[rest[i+1]] = rest[i+2]; i += 3
-        elif a == "--recommended":
-            # 2026-10-10 (Friday ledger 2026-10-09): an amend that rewrote the BLUF to recommend (b)
-            # could not move `recommended`, so the tile still highlighted (a). The key must exist.
-            if i+1 >= len(rest): die("--recommended needs an option KEY")
-            fields["recommended"] = rest[i+1].strip(); i += 2
         else:
             die(f"unknown flag {a!r} for amend")
     if not reason:
         die("amend REQUIRES --reason: an amendment with no reason is indistinguishable "
             "from a card that was always worded that way")
     if not fields:
-        die("amend changes nothing: give at least one of --bluf, --default-action, --option-detail, --recommended")
+        die("amend changes nothing: give at least one of --bluf, --default-action, --option-detail")
 
     data = load()
     for dec in data:
@@ -427,10 +422,6 @@ def cmd_amend(args):
         if st not in (None, "open"):
             die(f"{did} has status {st!r}; amend only applies to an OPEN card")
 
-        if "recommended" in fields:
-            keys = [str(o.get("key")) for o in dec.get("options", []) if isinstance(o, dict)]
-            if fields["recommended"] not in keys:
-                die(f"{did} has no option {fields['recommended']!r} to recommend (options: {', '.join(sorted(keys))}) -- nothing written")
         before, changed = {}, []
         opts = fields.pop("_options", {})
         for key, val in fields.items():
