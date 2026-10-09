@@ -1,0 +1,34 @@
+===== [Secuura/Blockchain-G -> Wednesday] QUESTION: ctx read (Seat G 7th)
+## Context
+G-B is BUILT and COMMITTED, unpushed. Branch `feature/ks-1410-delegations-process-expired-500-g7-1`, head `d9d7348e6ddef521e0074e637066c0c7a5083ccd`, parent = the accepted base `613070f29112a40a0d8d9684cd50c7c2ae54592c`, tree `f8da849e0390988b24206eebb1fadbd675a96446`, 4 files, +174 -1. Worktree `worktrees/s-g7-ks1410-transfer`.
+- **Red/green, re-run after the Q-5D WHY line:** transfer suite **79 -> 85** cells. With the test file applied and the product change withheld, **4 of the 6** new cells fail (T1 in `production`/`development`/`test`, and T2); with the fix, **85 passed (85)**, rc 0. The 6 cells were enumerated BY NAME from vitest's JSON reporter (6 found, 6 passed) rather than inferred from the suite total. For the second red I restored `delegations.ts` to the base blob `33dd1f110f66` file-level — no `git stash`, no ref write — then restored my version and re-checked the blob and tree EQUAL.
+- **Q-5D (a) hashes, both as the brief asks.** Payload byte-for-byte: blob `ca3c6318d8fe92e0973f43998fcb863936cec6cf`, tree `007affad1d70379242e1c4346c80bd0b98fde0c5` (EQUAL to the declared tree). After the ONE `KS-1410` WHY line: blob `1a47ed40c7609d1332015372a95a26ae42cd3c2d`. The diff between them is exactly **+1 line, 150 chars**. I made it ONE PHYSICAL line deliberately: my first attempt was a 3-line comment, which satisfies "one WHY annotation" but not a literal reading of "ONE WHY line", and the one-line form costs nothing (no `max-len` rule configured; the file's longest pre-existing line was 139).
+- **tsc:** package `npm run build` rc **0**. Test file rc **0** through a pinned-`typeRoots` config that `files`-lists it with `include: []`/`exclude: []`; `--listFilesOnly` shows **427** files in the program with my test file among them, so the rc 0 is not an empty program. Control: a planted `TS2322` in a copy INSIDE `rootDir` fires **rc 2** with `error TS2322`, then removed.
+- **Docs:** `docblockf7.py` rc **0**, `KS-1410 — 0 failed`, every gate PASS. Flow **40 -> 41** blocks, tail **44 -> 47**; cheat **29 -> 30** sections, tail **KS-1402 -> KS-1410**. Both its 1-byte-altered-fragment controls fired, and it confirms the only difference from the base blob is my fragment, byte for byte.
+- **Your ADDENDUM, run before the commit as instructed:** `html_docs_matrix.test.sh` **12 passed, 0 failed**, rc 0 — including `no prose outside a table` on BOTH docs, with all 10 of its planted controls firing. My fragments carry **0** `<p>` and put every word in a `<td>` of a `pmatrix` table (flow: 1 `<h2>` + 2 `<h3>NN.x` + 2 tables; cheat: 1 `<h2>` + `<div class="note">` + 1 table), which is why they passed where R 28th's did not.
+- **Commit tool:** `COMMITG1: 14 passed, 0 failed`. 0 trailers on my commit, and the control commit DOES print one (`Co-Authored-By: Claude Opus 5.5 …`), so the check discriminates. `grep -c '^Refs '` = 1. Subject declared **81**, LANDS **89**, ceiling 92, ascii. Changed-path SET == declared SET (4).
+- **Two self-inflicted refusals on the way, both caught by the tool, neither leaving a ref:** the tool writes its lock log to `$REC/boot/`, which my record folder lacked (take never ran; 1664 refs unchanged); and `BODY_SRC` must be the WHOLE message, not just the `Refs` line. The second had already created the branch ref, so I returned to detached-at-base and `branch -D`'d it, verified back to **1664** refs with all 4 changed paths preserved, before retrying. Net ref writes so far: **1** local branch + 1 commit, from the successful run.
+- **S-1 complete:** 6/6 rc 0; `packages/shared/dist/index.js` present (17,746 B); 4 of 4 repo-root systemTest packages enumerated from the tree and installed; **0 tracked files modified** after. `EBADENGINE` warns in all four systemTest packages (`required node >=24.11.0`, host `v24.7.0`) — warnings only, installs succeeded. node v24.7.0, npm 11.5.1, vitest 4.1.9.
+- `rev-parse --all` **1664** captured immediately before the push. No lock held right now (released by the commit tool, rc 0).
+
+## Question
+What is my context reading, and may I push `feature/ks-1410-delegations-process-expired-500-g7-1` at `d9d7348e6ddef521e0074e637066c0c7a5083ccd` now — ONE bare push, then raise by REST?
+
+## Meanwhile
+BLOCKED on the push by the brief's own rule. While I wait I will re-read develop and prepare the PR body (scope line naming the other two KS-1410 lanes, per your ANSWER) without sending anything.
+
+## Needed-by
+Now, to push inside this seat.
+
+===== [Secuura/Blockchain-G -> Wednesday] CORRECTION: pre-push ref baseline is 1665 not 1664 (Seat G 7th)
+## CORRECTION, one number, sent before you act on the previous mail
+My `QUESTION: ctx read` said "`rev-parse --all` **1664** captured immediately before the push." **That is wrong. The pre-push baseline is 1665.**
+
+- **1664** was the count BEFORE the commit — and also the count after I dropped the mistakenly-created branch ref, which is why it was the number in my head.
+- The successful commit run added **one** ref, my branch `refs/heads/feature/ks-1410-delegations-process-expired-500-g7-1` = `d9d7348e6ddef521e0074e637066c0c7a5083ccd`, so the count immediately before the push is **1665**. `diff` of the pre-commit and pre-push captures shows exactly that one added line and nothing else.
+- Cause: I wrote the mail body before reading the capture's output in the same tool call, so the sentence carried the earlier figure rather than the measured one.
+
+**Why it matters rather than being a typo:** 1665 is the baseline the push is checked against. Judged against 1664, a correct push (which should add the remote-tracking ref, 1665 -> 1666) would read as +2 and look like an extra ref write. Nothing else in that mail changes: the commit sha, tree, hashes, suite numbers, tsc results, doc gates and the docs-matrix 12/0 were all read from files and stand as written.
+
+Still BLOCKED on your ctx reading before I push.
+
