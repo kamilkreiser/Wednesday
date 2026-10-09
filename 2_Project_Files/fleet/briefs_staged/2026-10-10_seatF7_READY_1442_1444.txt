@@ -1,0 +1,101 @@
+[Secuura/Blockchain-F -> Wednesday] READY FOR QA (Seat F 7th): #1442 (KS-998, tier 2) + #1444 (KS-937, tier 1) -> tier-2 batch gate / tier-1 gate
+READY FOR QA, Seat F 7th: both rows of QUEUE F are RAISED. 0 UNRAISED.
+  #1442 goes to the tier-2 batch gate with #1441, as you named it at 18:40:51Z.
+  #1444 goes to the TIER-1 gate you name; its headline is the WIDEN matrix.
+Base for both: develop 613070f29112. ls-remote at 18:48:48Z, in the same action as F-B's push, still reads
+613070f29112.
+
+== #1442: F-A, KS-998 (stdin isolation), tier 2 ==
+1. PR #1442. Branch feature/ks-998-format-gate-npm-stdin-isolated-f7-1. Head a7ec5746cb8b43313d55d73185ada4931b17c5be,
+   the same at origin (ls-remote in the push action), locally, and as GitHub's PR head.
+   Body sha256/16 879a11a7e49aaa83, read back IDENTICAL.
+2. Ticket KS-998: not moved, and stays In Progress. The comment naming #1442 is your batch.
+3. Test Evidence, written by me, who ran the tests:
+     red 6/3 at the base -> green 9/0;
+     siblings 33/0 and 8/0, identical at base and head;
+     html_docs_matrix 12/0;
+     hook: shell suites 74/74, 13 code guards, 12/15 legs with 3 SKIPPED (3, 4, 8: stack not up),
+       nothing failed, gatelines MATCH.
+4. NOT done or covered:
+     items 1-3 of KS-998;
+     the four platform suites (UNMEASURED);
+     any real prettier run;
+     the hook's format gate selected 0 packages and printed nothing, so the patched loop ran only through
+       the fixtures.
+5. Actions at the head, COMPLETED, all 6:
+     pr-premerge-ack success; Lockfiles (path-skip twin) success; Dependabot standalone locks skipped.
+     5 failed JOBS: Code Security Gates / "All shell test suites"; Dependency Audit / "Audit-contract
+       suites"; pr / Akto, Performance (k6), Playwright.
+     All 5 fail, with IDENTICAL failed step names, at the reference dce5fdc3c952 (K 3rd's #1437 merge-in),
+       measured through the jobs API at both heads. 0 NEW against that reference.
+
+== #1444: F-B, KS-937 (relink guard), TIER 1, carrying your ruled USER :root deviation ==
+1. PR #1444. Branch feature/ks-937-relink-guard-relative-dest-uid0-group-f7-2. Head 12487cdcde15d742dbc7e043892e022dfb2c8e4f,
+   the same at origin (same action), locally, and as the PR head.
+   Body sha256/16 38e1c8e56a1ebff5, read back IDENTICAL.
+2. Ticket KS-937: not moved. The comment naming #1444 is your batch.
+3. Test Evidence, written by me:
+     the pin in three arms: base guard 108/4, payload without the deviation 111/1, head 112/0;
+     WIDEN 5 / 9 / 18 / 0 / 0-unexpected;
+     66 of 66 base refusal cells pass;
+     siblings 6/0, 6/0 and 56/0, identical at base and head;
+     html_docs_matrix 12/0;
+     hook: shell suites 73/73 (as predicted), 13 code guards, 12/15 legs with 3 SKIPPED, nothing
+       failed, check_shared_relink 112/0 in-hook, gatelines MATCH.
+4. NOT done or covered:
+     items F-A, F-B, F-D and F-F;
+     the `../node_modules` location gap, measured and NOT fixed (your KS-930 routing);
+     whether Docker builds `USER :root` (no Docker run);
+     the four platform suites (UNMEASURED).
+5. Actions at the head at 18:49:30Z: pr-premerge-ack success, Lockfiles success, Dependabot skipped. The
+   other 3 were still in_progress and are NOT reported as results.
+
+== Ref writes, both PRs ==
+- 2 local branches, from commitf7.sh.
+- 2 remote-tracking refs, one per push. No upstream configured.
+- 2 PRs created, each by HTTP 201. No PATCH.
+- No board write, no ticket comment, no extranet.
+
+== CLAIM LEDGER: claim | instrument | result | UNMEASURED? ==
+- F-A stops a stdin-reading format:check swallowing the next package | new suite, red/green at base and
+  head | 6/3 -> 9/0 | real prettier UNMEASURED
+- F-A's red is the defect, not the harness | 6 CONTROL cells in the red arm | 6/6 pass | -
+- F-A needs no exec bit | run-shell-suites.sh:50/65/360 + pre-push:246, read from source | bash <file> | -
+- the hook exercised F-A's gate on real packages | push log + check-package-format.sh:126-128 | NO: 0
+  selected, silent | stated in #1442
+- F-B still refuses what it exists to catch | widen_f7_dev.sh, 32 probes, base vs head | 18 refused by both,
+  0 newly refused | Docker builds UNMEASURED
+- the F-B pin can fail | the canonical payload without the deviation | 111/1, the pin red | -
+- F-B existing refusals intact | static count + head run 112/0 | 66 of 66 | static count, not a per-cell
+  trace
+- F-B relaxes location checking | widen probe `../` + `/tmp` control | `../` newly accepted; `/tmp` already
+  accepted at base | named in #1444, not fixed
+- each doc pair is base + fragment only | docblockf7.py byte-for-byte read-back + 1-byte control | 0 failed
+  (both) | -
+- each doc pair matches the house form | html_docs_matrix.test.sh pre-commit, on the committed tree, and
+  in-hook | 12/0 x3 | -
+- 0 NEW CI failures on #1442 | jobs API, failed jobs and steps vs dce5fdc3c952 | 5 of 5 shared | the
+  #1444 runs were incomplete
+
+== Proposed TEST BLOCK lines (you build the block) ==
+- #1442 -> Peter (stream KS 485, systemTest is his on test design). The pass that proves it:
+  `bash systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh` -> 9/0 at the head (6/3 against the
+  base script). What the human does: review the design of the three cells (drain-then-green x2,
+  drain-then-red). Nothing to rebuild.
+- #1444 -> the tier-1 gate, then the push-path owner. The pass that proves it:
+  `bash Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh` -> 112/0, plus the 32-probe WIDEN
+  matrix 5/9/18/0. What the human does: nothing to rebuild; pull at convenience. Exception: it is a
+  push-path GUARD relaxation, so it belongs with the gate's widen review rather than a functional test
+  block.
+- Q-PETER: per your default, I flag that #1442's three red cells are Peter's to see before merge if you so
+  decide.
+
+== Next ==
+Queue F is complete, so the queue is DRY. Unless you stop me, I go to WRAP:
+  HANDOVER-seatF7-2026-10-10.md, opening "FOR F 8th, THE FIRST THREE THINGS";
+  the history entry at the TOP;
+  my daily-note line;
+  0 watchers and 0 locks proved;
+  the WRAP mail.
+Worktrees s-f7-ks998 and s-f7-ks937 are KEPT: open PRs keep their worktrees.
+Watcher: 0 live. It fired on your 18:40:51Z ANSWER and exited. I re-arm for the WRAP window.
