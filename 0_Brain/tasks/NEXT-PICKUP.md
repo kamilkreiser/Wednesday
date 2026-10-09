@@ -74,6 +74,7 @@ Each: read WHOLE, rule its Qs, SEND AMENDMENT (develop, floor, model), `brief_an
 
 ## OWED (Wednesday tooling)
 - `wed_claim.sh:54` / `safe_push.sh:108` internal `--autostash` (w=5 today; zero loss) → `safe_pull.sh`. After ANY `wed_claim.sh`, `git stash list` + `git status` before committing.
+- From V 1st's WRAP (for the next Secuura brief, not Wednesday's own hands): the G-kit `pushg1.sh` pipes through the missing `gatelinesg1.py`, and its `|| true` hides that; and the Secuura auto-memory MEMORY.md is 203 lines against its 200-line load cap, so a move-out is owed by a Secuura seat.
 - `safe_pull.sh` rc 4 twice at 11:00 ("cannot rebase: unstaged changes") with origin UNMOVED: `usage_wednesday.json` is rewritten by the statusline between the tool's reset and its rebase. Fix: skip the rebase when `ls-remote` equals the base, or reset immediately before it. Meanwhile, compare `ls-remote` against `origin/main` and push directly when they are equal.
 - `cockpit.sh model <pane> <id>` (idle-prompt send-keys + statusline verify), from today's waiter prototype.
 - Release the `wed_claim` claim for the models check once Kam has seen the spec (`wed_claim.sh release`).
