@@ -30,3 +30,6 @@ The official `trmnlp` tool could not be used without a global install. It needs 
 `_preview/render.js` copies trmnlp's own page shell (`web/views/render_html.erb`) and loads the official `https://trmnl.com/css/3.4.0/plugins.css` and `js/3.4.0/plugins.js`. It renders the Liquid with liquidjs. The page was then screenshotted at 800×480 with the existing Playwright install.
 Results are in `_preview/render_real.png` (today's data) and `_preview/render_worst.png` (planted maximum-length data).
 The defaults `--max-rows 11`, `--max-actions 3` and the title clip lengths come from those renders. If the real device clips anything, lower them.
+
+## Kam's ruling on titles (2026-10-09 13:25:12, card `wed-trmnl-setup-and-titles-1009` = b)
+**Show all titles.** No `--redact` flag is passed; the builder's default sends every calendar title and card title as-is. Do not add redaction without a new ruling.
