@@ -1,0 +1,88 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T18:15:41.000Z
+Subject: [Secuura/Blockchain-G -> Wednesday] READY FOR QA (Seat G 6th): #1441 KS-1345 deliveries -> the gate you name
+---
+MODEL: claude-opus-5-5
+
+## BLUF
+**READY FOR QA (Seat G 6th): G-A = PR #1441 (KS-1345 deliveries) -> the gate you name. Proposed tier 2.**
+**G-B (KS-1410 transfer) is UNRAISED and UNBUILT**: my last ctx reading (47%, yours) is above the 45% build line.
+
+## Recommendation
+Gate #1441 at tier 2. Hand G-B to my successor: its ITEM 0 rows are already measured. G-B's payload tree is
+`007affad1d70` at `613070f29112`; flow `47.` / cheat KS-1410 with knobs flow 1 / cheat 1; docblockf7's arms
+already ran green on the KS-1410 key. I wait for your ctx reading and your WRAP / continue word.
+
+## THE FIVE (STANDING_LINES :17-46)
+1. **PR #1441**, OPEN, base `develop`. Raised by REST: HTTP 201; `head.sha` == origin; body sha16
+   `7c619c09f5c658d6` read back IDENTICAL.
+2. **Head `7685e79af2c437b1e6cc8fe2e57b1b0771f576d5`**, read from origin by `ls-remote` in the same action as this
+   mail. Branch IN FULL `feature/ks-1345-webhooks-deliveries-failed-query-500-g6-1`. Tree
+   `4c5002a04c8cc11760f99a0ee66027c577e76f03`, parent `613070f29112`.
+3. **Ticket KS-1345.** In Progress, kamil.kreiser, 0 comments at my ITEM 0 read. The comment naming the PR is
+   YOUR batch; this seat wrote nothing to the board. It stays open: live run owed.
+4. **Test Evidence, written by me who ran it.** It is in the PR body: Touched / Ran / NOT run / Migrations + config.
+5. **NOT done / not covered:**
+   - the four platform suites (no local stack);
+   - a live run;
+   - the 32-hex-without-hyphens id case (read, not tested; needs a cell or a QA probe);
+   - Actions: 3 of 6 runs not yet completed (below);
+   - a behavioural diff against the Spark golden (`golden_cmp.out` holds only "DIFFERS").
+
+## PUSH + ACTIONS (completed runs only)
+- **Hook gate lines, verbatim:**
+  - `shell suites: 73 passed, 0 failed, 0 skipped (of 73)`
+  - `OK — 13 code guards passed.`
+  - `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.`
+  - Each skip printed `SKIP — local stack not up on http://localhost:6882 (start it to run this leg)`.
+- **gatelinesg1, re-pinned as you approved:** `b5e7923f605af9da` -> `3465ab231ca75bf3`, 1 site, the old pin kept in a
+  comment. On THIS push log:
+  - (a) new pin -> `run_shell_suites (59, 0) OK`, "VERDICT: MATCHES the declared fleet STOP condition". That is
+    the tool's pass state: all three pins OK and 0 `FIXTURE BUILD FAILED`.
+  - (b) old (49,0) pin, G 5th's byte-identical file -> MISMATCH.
+  - (c) planted `59 passed, 1 failed` -> MISMATCH.
+  - (d) block header removed -> ABSENT, MISMATCH.
+  - **4/4 at want.**
+- **Actions on head `7685e79af2c4`** (API, 6 runs; a control query on develop's tip returns runs).
+  - Completed, 3: `PR — Lockfiles (path-skip twin)` success · `pr-premerge-ack` success ·
+    `Dependabot standalone locks` skipped.
+  - In progress at the read, 3, **UNMEASURED**: `PR Security Gates (KS-168)` · `Security Scanning` · `pr`.
+- **Ref side effects of the push:** `rev-parse --all` 1657 -> 1658; the one new line is the tracking ref. The PR
+  raise wrote no ref.
+
+## CLAIM LEDGER (claim | instrument | result | UNMEASURED?)
+- A rejected deliveries query answers the constant 500, logged once | cell D0 (body equality + `mockLoggerError` calls) | RED at base, GREEN after | measured
+- That same rejection answered 200 [] at the base | control C0, at the base | passed 8/8 | measured
+- A well-formed non-UUID id answers 200 [] and the query is not called | cell D4 | RED at base, GREEN after | measured
+- A query that resolves still answers 200 with its rows, nothing logged | control D | GREEN at base-with-tests and after | measured
+- Exactly one `.catch(() => [])` remains, the `dispatchEvent` one | cell D3 (source read) | RED at base, GREEN after | measured
+- The test file: 8/8 -> 3 of 11 failing -> 11/11 | jest `--json` | as stated | measured
+- Whole originate suite: 1096/1096 -> 1099/1099 | `npm test --json`, base by reverse-apply | as stated | measured
+- tsc rc 0 for the package and for the test file | `tsc --noEmit`; test-file config with a planted-TS2322 control that fired | rc 0 / 0 errors | measured
+- A non-hyphenated 32-hex id now reads 200 [] instead of its rows | code read only (`webhooks.ts:78`, `:98`) | — | **UNMEASURED (read, not tested)**
+- The list route is a separate, earlier KS-1345 change | brief census (`f01c1da5717f`, #1381) | not re-measured by me | **inherited**
+- Docs are append-only, flow +34 / −0 and cheat +13 / −0 | `git diff --numstat`; docblockf7 read-back vs the base blob | 0 failed | measured
+- The four platform suites | none (no local stack) | — | **UNMEASURED**
+- Live behaviour on kintsugi / demo | none | — | **UNMEASURED — live run owed**
+
+## PROPOSED TEST BLOCK LINE (the one pass that proves it)
+#1441 — run `npx jest src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts` in `services/originate`
+(11/11). Then, on a live stack, `GET /api/webhooks/<a real webhook uuid>/deliveries` with the database read made to
+fail must answer `500` with the constant body, not `200 []`; and `GET /api/webhooks/0/deliveries` must answer
+`200 []`. A QA probe of a non-hyphenated 32-hex id settles the one READ-only claim.
+
+## TOOLS AT READY
+Re-keyed this round (old -> new sha16):
+- commitg1 `bd59289c` -> `1cdb0f69`
+- namecheckg1 `f3cbad9a` -> `0c1331e9`
+- inbox_matchg1 `1361f23c` -> `900fa0bc`
+- inbox_watchg1 `b69109d9` -> `304ee9e3`
+- lockg1 `2a539bce` -> `0a8ef566`
+- twolockg1 `8de9efea` -> `facd1109`
+- pushg1 `825693eb` -> `d2520c51`
+- trap4_g1 `6deaf8d1` -> `f0bf75dd`
+- gatelinesg1 `b5e7923f` -> `3465ab23`
+Adopted: docblockf7 `da2234da` -> `7eec1dda` (header line only). New: raise_rest_g6.sh.
+Watcher **pid 21140 (LIVE)**, SINCE `2026-10-09T18:13:09.000Z`. **0 locks held.**
+
