@@ -1,0 +1,112 @@
+[Secuura/Blockchain-R -> Wednesday] WRAP (Seat R 28th): #1443 RAISED tier 1, R-B unbuilt to R 29th, R-C unraised, wrapped cold at ctx 50%
+## BLUF
+**WRAPPED COLD on your 18:51:00Z word (ctx 50%).** Delivered: **PR #1443** (KS-1346, tier 1 proposed,
+READY FOR QA, **not merged**). **R-B (KS-1410 audit-export) goes UNBUILT to R 29th** fully prepared;
+**R-C (KS-1432) stays UNRAISED**. No merge, gate, deploy, `az`, board write or extranet call in this
+seat. This seat = **1 Claude launch, clause: raise (carrying 2 Spark tasks)**.
+
+## READY FOR QA (Seat R 28th) — one PR, all five things exist
+**#1443** · head **`4547234c8c798d4c54c82cf78b69c822766cae91`** (read from origin in the same action
+as the raise) · ticket **KS-1346** (the comment naming the PR is **your** batch — this seat wrote no
+board comment) · Test Evidence block written by me, who ran the tests · and what was NOT done, below.
+- Branch IN FULL: `feature/ks-1346-apigw-fail500-type-and-field-names-ra28-1`; base `develop`;
+  6 files, +213 / -3; HTTP 201; body 7,107 B sha256/16 `935dc37970e1eab1` round-trip identical.
+- **Proposed TEST BLOCK line:** *"api-gateway 500 logs: a thrown non-Error now logs its type and
+  field names instead of `[object Object]` — #1443. The one pass that proves it:
+  `npx vitese run src/__tests__/ks1346-apigw-fail500-logs-type-and-field-names.test.ts` in
+  `Blockchain/Dev/services/api-gateway` (15 cells; 9 of them fail against the unfixed product). What
+  the human does: throw a non-Error from one of the three routes and read the LOG, not the response —
+  the 500 body is the constant `INTERNAL_ERROR` body either way."*
+  (Correction to my own line: the command is `npx vitest run`, not `vitese`. Stated here rather than
+  left for you to catch.)
+
+## CLAIM LEDGER
+| claim | instrument | result | UNMEASURED? |
+|---|---|---|---|
+| ruled expression identical to the landed precedent | `cmp` of the extracted expression vs `originate/.../adminConfig.ts:104`, + a pre-ruling-text control | IDENTICAL, 263 B both; control differs (49 B) | no |
+| 3 sites are the ones QA measured | `ls-tree` blobs at my base vs gate77's at `eb19d99d3ace` | `5ae6c0788dfd` / `75e84b3aa06c` / `893669657db0` — identical | no |
+| new cells RED at base, GREEN after | vitest on my worktree | 9 failed / 6 passed of 15 → 15/15 → 15/15 after §5d | no |
+| whole api-gateway suite | `npx vitest run` | 95 files, 860 passed, 0 failed | no |
+| suite count at base = 845 | **derived** (860 − my 15 cells) | consistent with the checker's figure | **yes — not independently re-measured** |
+| types clean | `npx tsc --noEmit` | rc 0, 0 output lines | no |
+| lint accepts the long line | `npm run lint`; line length by `awk` | rc 0, 36 problems / **0 errors**; 299 chars; my 4 files 0 hits, control `proxy.ts` 1 hit | no |
+| doc form acceptable to the push gate | `html_docs_matrix.test.sh` locally | 12 passed, 0 failed | no — but that proves only its own checks |
+| four platform suites | none — no booted local stack | **NOT RUN**; only the SKIP lines quoted | **yes** |
+| behaviour live | none | **live run OWED**; ticket does NOT move to Done | **yes** |
+| `Security Scanning` failure not mine | same run on G 6th's #1441 + the job log's root cause | reproduced on #1441; `semver` undeclared | no |
+
+## WHAT WAS NOT DONE OR COVERED
+- **R-B unbuilt** (your ctx ruling), **R-C unraised** (Q-1432HOLD — the hold's reason is unrecorded,
+  so not released by inference; Linear has KS-1432 in Backlog).
+- The four platform suites: no figure quoted, only the hook's `SKIP — local stack not up on
+  http://localhost:6882` lines, 3 of them.
+- **A live run is owed on #1443.** KS-1346 does not move to Done on offline green.
+- The ruled expression does **not** stop thrown TEXT being logged verbatim, nor an `Error`'s
+  `.message`. gate77's credential-shaped URL case stays open on KS-1346. Written that way in the PR
+  body and both documents; no "never logs values", no "no longer leaks".
+
+## RECORD OF EVERY REF WRITE
+1. `refs/heads/feature/ks-1346-…-ra28-1` created at `62002ce62657` (18:10:26Z) — then **DELETED**
+   when I rebuilt the commit after the leg-14 refusal.
+2. Same branch re-created at **`4547234c8c79`** (18:30:01Z), pushed 18:40:58Z, which also created
+   `refs/remotes/origin/feature/ks-1346-…-ra28-1`.
+**No develop ref write. No fetch. No pull. No force-push. No `--no-verify`. No `--admin`.**
+`rev-parse --all` at the push: **1,662 → 1,663** (`ee940aa69b99ecf2` → `3f047307f3c920ac`), exactly
+ONE new object, **0 removed**. Local `develop` still `1fba82ddb2b8920bafc15c3cbd40b1c4dd346331`,
+**0** reflog entries dated 2026-10-10; `.git/config` sha256/16 `4f624a213933d54b` unchanged.
+Discarded commit `62002ce626571a96cc81f117aed8ec98927a0fba` is unreferenced, reflog only — quarantined
+in place, **deleted nothing**.
+
+## RESUME — the next item, exactly
+**Build R-B (KS-1410 audit-export)** after ITEM 0 and a plan confirmation. **Nothing is
+built-but-unpushed. Nothing is pushed-but-unraised.** One worktree handed over as-is:
+`/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-ra28-ks1346` at `4547234c8c79`, installs
+present (S-1 green), PR #1443 open — kept because `merged` reads false.
+R-B's prepared state, all measured at base `613070f29112`: payload `7b7fea05b2511d2e`;
+`section_1.diff` needs `--recount --ignore-whitespace` (strict rc **128**, driven as a control),
+`section_2.diff` strict; tree **`ceca1f2e401a`**; **flow number `46.` held** (45-50 were absent at
+base, `45.` now taken by #1443); knobs **`--flow-key-exists-ok 1 --cheat-key-exists-ok 1`** measured
+by `str.count` on each base blob; Q-RULEDEXPR swap 49 B → 263 B plus one extra thrown-plain-object
+cell. Suggested branch `feature/ks-1410-apigw-audit-export-502-ra29-1` (0 `-ra29-` at origin).
+
+## HANDOVER + HISTORY
+- `5_Project_History/HANDOVER-seatR28-2026-10-10.md` — **251 lines, 19,651 B, sha256/16
+  `50146d019d909cff`**, opening **"FOR R 29th, THE FIRST THREE THINGS"**. Every lesson is in the
+  handover itself, including the forward-add trap (`r 29th` is ALREADY in my `OTHER_SEATS` — R 29th
+  must remove it FIRST) and the next sweep class as an expectation (**1-28**, and the `mine_planted`
+  / CONTROL-1 fixture data must be re-keyed with it).
+- History entry at the **TOP** of `5_Project_History/history.md` (now line 24, above F 7th's and
+  G 6th's, both intact; file `1a5d2585552e98f2` → `6524cf996058afdb`).
+- Vault daily note: my outcome block appended **inside my own section**. ⚠ I first appended it to
+  EOF, where a G 7th section had landed meanwhile, so it read as G 7th's; I moved it and proved
+  G 7th's section byte-identical (2,775 B, `e552efd1c9924c5f` before and after).
+- `_TOOL_HASHES_ra28.txt`, 17 rows, in my record folder.
+
+## UNMERGED / UNRAISED / UNMEASURED / UNFILED
+- **UNMERGED:** #1443. **UNRAISED:** R-B (unbuilt) and R-C (struck).
+- **UNMEASURED:** the four platform suites; live behaviour of #1443; whether 845 holds at base
+  independently; the two Actions runs still `in_progress` at my last read (`PR Security Gates
+  (KS-168)`, `pr`) — no conclusion quoted for either.
+- **UNFILED:** nothing. No ticket created, no board comment, no extranet call, no `POST /api/seen`,
+  no message to Peter or Stuart.
+
+## HOUSEKEEPING
+- **0 live watchers** at wrap (`awk` instrument requiring argv to BEGIN `bash <abs path>`, which an
+  eval string cannot satisfy; positive control `launchd` = 13 in the same ps file,
+  `measure/ps-wrap-after.txt` sha256/16 `7002428b74858b06`). My watcher exited by design on your
+  wrap ANSWER.
+- **No lock of mine held:** `.push-lock-d8` ABSENT. (F 7th's `.push-lock-f3` was healthy and held at
+  one point — attributed by holder field, never by path.)
+- `df -m /Volumes/DevMASTER`: **354,846 MB avail (82%) at boot → 343,275 MB (83%) at wrap**,
+  11,571 MB for the worktree and its installs.
+- **Mail counted both directions: 6 sent by me, 7 received for me.**
+- Model: launcher-pinned `claude-opus-5` throughout — your Opus 5.5 switch never arrived at an idle
+  prompt, and nothing waited on it.
+- Carried for the next Wednesday seat: the **docs-matrix sequence line** (run
+  `html_docs_matrix.test.sh` after the doc append, before the commit) now applies to G 7th too;
+  **KS-1148** owns the `semver` CI gap; and **Actions IS running** on this repo despite the project
+  `CLAUDE.md` line, which I have not edited.
+
+Thank you for the two rulings that unblocked this round — the Q-KEYDUP withdrawal and the
+`docblockf7` adoption — and for taking the partial-write finding straight to F 7th.
+
