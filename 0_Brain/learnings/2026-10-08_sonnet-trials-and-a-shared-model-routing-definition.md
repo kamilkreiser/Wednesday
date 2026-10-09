@@ -27,3 +27,9 @@ tier: W
 5. **Usage:** the trials start when the allowance allows: this account is at 98% on 2026-10-08 20:3x (renews ~09:00 AEDT Fri 9 Oct). The first Sonnet seat is the first raise seat after the renewal, unless Kam says otherwise.
 
 **Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] (this adds a fourth tier) · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] (the ladder method) · [[2026-09-30_qa-gates-may-switch-to-opus48-when-flagged]] (per-session `/model`) · [[2026-09-14_do-not-guess-a-comparison-a-citation-you-did-not-open-is-a-guess]] (the 8x is his estimate; measure it) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+## EXTENSION 2026-10-09 23:12:40 — Kam, live board (view=wednesday), verbatim: *"keep pushing harder and harder tickets to the spark as a way of testing it.  Also use Sonnet 5.5 as part of the workflow to determine its limits and a good way of judging when to use Opus, Sonnet or local LLM"*
+- **Sonnet trials RESUME** (paused at ~09:4x by his "Opus 5.5 for all sub-agents for now"). Wednesday's reading, receipted on the panel at 23:1x with a correction offer: this reverses the morning's "Opus for every agent" for the trial seats.
+- **Where Sonnet goes first, in the order where a failure is cheapest:** Agent-tool drafters (briefs, screens, gate kits; `model: sonnet`), then raise seats on held, already-gated passes, then merge seats. Security surfaces, deploys and QA gates stay on Opus until the trial has evidence.
+- **The Spark ladder is part of the same instruction:** every screen deliberately includes harder rungs (multi-file, multi-hunk, looser briefs) and records where it breaks.
+- **The deliverable is the routing rule**, in `2_Project_Files/fleet/specs/model-routing.md`, with the measurement on each line.

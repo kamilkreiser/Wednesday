@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-09 19:19 from 228 lesson files (1,018,344 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-09 23:13 from 228 lesson files (1,019,472 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7131,6 +7131,8 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 
 **The operative case, so the headline matches it:** Wednesday is about to launch a Claude seat, or to choose which worker takes a task. **The worker is no longer "Opus 5.5 by default."** There are now four tiers to route between (Ornith 1.5 · the Spark · Sonnet · Opus). Until the definition below exists and has evidence behind it, Sonnet seats are TRIALS: measured, never assumed equivalent to Opus.
 
+sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live board (view=wednesday), verbatim: *"keep pushing harder and harder tickets to the spark as a way of testing it.  Also use Sonnet 5.5 as part of the workflow to determine its limits and a good way of judging when to use Opus, Sonnet or local LLM"*
+
 **How to apply:**
 1. **The mechanism, measured 2026-10-08:** the model is pinned in each PROJECT's launcher (`--model`), which Wednesday never edits. A trial switches ONE seat after launch with `/model claude-sonnet-5-5` in that seat's pane (the 2026-09-30 per-session precedent for QA gates), and the seat is told by mail which model it runs on. A durable per-launch knob is a project-launcher change: the project's own agent makes it on a brief, or Kam does.
 2. **Trial design (Wednesday's, to be shown to Kam with the first results):** same brief shape and same gates as an Opus seat; record per seat: model, task rung, rounds, defects the QA gate found, Wednesday's corrections, wall-clock, ctx used, and the weekly gauge before and after. Compare with the Spark on tasks of the same rung, and with the Opus seats of the same week. **The QA gate still precedes every merge; a Sonnet seat never merges without it.**
@@ -7139,6 +7141,12 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 5. **Usage:** the trials start when the allowance allows: this account is at 98% on 2026-10-08 20:3x (renews ~09:00 AEDT Fri 9 Oct). The first Sonnet seat is the first raise seat after the renewal, unless Kam says otherwise.
 
 **Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] (this adds a fourth tier) · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] (the ladder method) · [[2026-09-30_qa-gates-may-switch-to-opus48-when-flagged]] (per-session `/model`) · [[2026-09-14_do-not-guess-a-comparison-a-citation-you-did-not-open-is-a-guess]] (the 8x is his estimate; measure it) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+## EXTENSION 2026-10-09 23:12:40 — Kam, live board (view=wednesday), verbatim: *"keep pushing harder and harder tickets to the spark as a way of testing it.  Also use Sonnet 5.5 as part of the workflow to determine its limits and a good way of judging when to use Opus, Sonnet or local LLM"*
+- **Sonnet trials RESUME** (paused at ~09:4x by his "Opus 5.5 for all sub-agents for now"). Wednesday's reading, receipted on the panel at 23:1x with a correction offer: this reverses the morning's "Opus for every agent" for the trial seats.
+- **Where Sonnet goes first, in the order where a failure is cheapest:** Agent-tool drafters (briefs, screens, gate kits; `model: sonnet`), then raise seats on held, already-gated passes, then merge seats. Security surfaces, deploys and QA gates stay on Opus until the trial has evidence.
+- **The Spark ladder is part of the same instruction:** every screen deliberately includes harder rungs (multi-file, multi-hunk, looser briefs) and records where it breaks.
+- **The deliverable is the routing rule**, in `2_Project_Files/fleet/specs/model-routing.md`, with the measurement on each line.
 
 
 ## Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
