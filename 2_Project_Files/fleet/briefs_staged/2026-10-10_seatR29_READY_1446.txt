@@ -1,0 +1,49 @@
+[Secuura/Blockchain-R -> Wednesday] READY FOR QA (Seat R 29th): #1446 KS-1410 audit-export 502 tier 1 -> the gate you name
+BLUF. #1446 (KS-1410, audit-export 502) is READY FOR QA, proposed tier 1, for the gate you name. Head d343a3c938600188bb4627173a1245cc77edeee4 is read from origin in the same action. Base is develop 613070f29112, still unmoved. R-C (KS-1432) is UNRAISED. A live run is owed, so the ticket does not move to Done.
+
+The five things READY requires
+1. PR: #1446, https://github.com/Secuura/Distributed_Secuura/pull/1446, base develop, open.
+2. Head: d343a3c938600188bb4627173a1245cc77edeee4, read from origin at 2026-10-09T20:29:04Z in the same action as this mail's composition.
+3. Ticket: KS-1410 (In Progress, High, ours). The PR body carries Refs KS-1410 + its URL. The ticket comment naming the PR is Wednesday's batch; this seat wrote no board entry.
+4. Test Evidence: in the PR body, written by me from my own runs (table + this push's hook lines verbatim).
+5. NOT done / NOT covered:
+   - no live run (no stack was built);
+   - the four platform suites were not run (the hook's 3 SKIPs are the record);
+   - no tamper matrix beyond the base and payload states;
+   - this file's own fail500 at :24-25 is untouched (#1443's line);
+   - the other KS-1410 sites are untouched;
+   - nothing filed.
+
+CI on d343a3c93860, completed runs
+- Read 20:28Z, all 6 runs completed: pr-premerge-ack success · PR — Lockfiles (path-skip twin) success · Dependabot standalone locks skipped · Security Scanning FAILURE · PR Security Gates FAILURE · pr FAILURE.
+- Attributed job by job (jobs API, failed job :: failed step), each set-equal to its reference:
+  - PR Security Gates: "Code Security Gates :: All shell test suites (KS-666 / KS-731 — globbed, not listed)". IDENTICAL to develop's own push run 37962800621 at 613070f29112.
+  - pr: Akto suite (PR) :: Boot Akto stack + import spec + load templates | Enforce Akto PR result; Performance suite (k6 smoke) :: Enforce Performance result | Upload performance reports; Playwright suite :: Quality gate — unit suite (test:unit) | Upload Playwright report. IDENTICAL to develop's own push run 37962800784.
+  - Security Scanning: "Dependency Audit :: Audit-contract suites (the gates' own validator)". IDENTICAL to #1443's (KS 1148's class).
+- None of the three is new. Filed nothing.
+- An oddity I cannot explain from here: my 60 s poller read one run incomplete until 20:27Z, while the run's own updated_at is 20:10:40Z. The direct read at 20:28Z is what is quoted.
+
+CLAIM LEDGER (claim | instrument | result | UNMEASURED?)
+- The 502 body at this site no longer carries the thrown text | X1 x3 (production/development/test) + X3, vitest, real router, fetch stubbed | red at base (X1 leaked:true), green as built | live run UNMEASURED
+- The thrown text is logged server-side | X2 | red at base, green as built | log sink in a running stack UNMEASURED
+- A thrown plain object is logged by type and field names, not values, and answers the Error-throw body | X4 | red at base, red on the payload's product (logNamesTypeAndFields false), green as built | —
+- The log expression is the ruled one | cmp vs originate/src/routes/adminConfig.ts:104 at the base, with a control line | 262 B, sha256/16 4623660d465c942a, identical | —
+- Upstream non-ok, the success path and the 401 path are not changed by this | XC1, XC2, XC3 | green at base, payload and built | —
+- No pre-existing api-gateway cell changed result | whole suite, fullName diff of two JSON reports | 845 -> 854, +9 in the new file, 0 status changes | —
+- Type-safe | tsc --noEmit (product) + a program listing the test | rc 0 + rc 0 (a planted TS2322 reds the second) | —
+- Lint-clean in the changed files | npm run lint + eslint on the two files | 0 errors; 0 findings in my files; a planted unused var is caught | —
+- The docs carry exactly one new block each, in house style | docblockra29 (0 failed) + html_docs_matrix | flow 44->46, cheat KS-1402->KS-1410, each differs from base by the fragment only; 12/0 | the matrix proves only its own checks
+- The hook gate | THIS push's lines | "PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed." | the 3 skipped legs UNMEASURED
+NOT claimed: that the log no longer carries secrets. An Error's .message and a thrown string are still logged as they are.
+
+Proposed TEST BLOCK line (for Peter, via the stream you name)
+- KS-1410 audit-export 502: PR #1446.
+- The one pass that proves it: on a stack with api-gateway running and the security service stopped (or unreachable), GET /api/admin/audit/export as an admin answers 502 BAD_GATEWAY with message "Failed to reach security service", and the api-gateway log carries one "Audit export could not reach the security service (GET /api/admin/audit/export)" line.
+- What the human does: run that request once with the security service up (expect 200 and the export) and once with it down (expect the 502 above), and read the log line.
+
+For the gate
+- Tier 1 proposed.
+- #1443 and #1446 both edit routes/audit-export.ts, in hunks about 145 lines apart (#1443 at :25, #1446 inside the 502 catch at ~:171). Whichever lands second takes a keep-both merge-in; the order is yours. Neither PR folds the other's hunk.
+- The doc blocks: #1443 holds flow 45., #1446 holds 46., G 7th's #1445 holds 47. A keep-both merge-in at the doc tails is expected.
+- Flag, not mine to edit: #1443's PR body still quotes the ruled expression as "263 bytes"; measured, it is 262.
+
