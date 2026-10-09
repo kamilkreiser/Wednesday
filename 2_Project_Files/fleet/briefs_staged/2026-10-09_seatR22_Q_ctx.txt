@@ -1,0 +1,77 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T03:36:33.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: ctx read (Seat R 22nd)
+---
+MODEL: Opus 5 (exact id claude-opus-5, as this session reports it). No /model tap or confirmation received yet.
+
+BLUF: STEP 2 is done up to and including M-2, all green. The re-key is COMPLETE, the ARMS SUITE PASSES 11/11 at their own asserts with both positive controls, the kit selftest is MEASURED, the guard pair is driven both ways, and the worktree is added with ZERO refs written. I am holding at the X-0 ctx handshake before M-3, as you ordered. Three findings below, one of which is a brief gap that would have cost R 23rd the same hour.
+
+== ANSWER RECEIPT ==
+Your `ANSWER: plan confirmed, step 2 released (Seat R 22nd)` read at source by API (not from the pane tap), 2026-10-09T03:22:47.000Z, DKIM/SPF/DMARC all `pass` from the message's own authentication_results. The literal `START STEP 2 (Seat R 22nd)` is present exactly once; the control string with a different ordinal is absent. My watcher ALSO fired on it independently at 03:23:29Z (poll 8) and exited 0 — the tap was first by ~40 s, which is why I do not treat the tap as the channel. Re-armed at SINCE=2026-10-09T03:22:47.000Z, the newest mail I have READ.
+
+== RE-KEY COMPLETE — final hashes, what R 23rd inherits ==
+inbox_matchra1.py              bfbea9ff319312ab  609
+sweepra22.py                   d774105d2039e0f1  276
+inbox_watchra1.sh              1e77cbb2e42904b1  159
+mergeinra22_gate76.sh          b07ab2f2671aef60  323
+m3_args_ra22.sh                93cff6294cfb4ab8   43
+poll_actionsra22.py            03a14d63b48402ef   49
+provenance_ra22.py             d215ce0275a6e3f9   91   <-- byte-identical to ra21's, correctly: it carries no lane token
+build_addendumra22_gate76.py   b1cda447e22f3784  529
+run_armsra22.py                ecc61f08e44932bc  157
+go_fixture_1427_SYNTHETIC.txt  50a4587d89b69e8c   24
+go_fixture_1428_SYNTHETIC.txt  e0565d3a5b84fa5c   22
+m7_squashra22.sh               7b4dce48e69ded3c  104
+Mechanical pass: ra21->ra22 and RA21->RA22, case-sensitively, with per-file asserts that `push-lock-d8` survived (3 in the mergein, unchanged) and that 0 residual ra21/RA21 remain. All six parse (AST or bash -n). The mergein's HOISTED PUSH_LOCK_DIR check and its `.push-lock-d8` basename assert are intact at :111-112.
+Targeted: builder GO-clause regex -> `GO \(Seat R 22nd\): merge \d{3,5} on [a-z0-9]+`, proved by pulling the pattern out with `ast` and feeding it three clause strings (R 22nd matches, R 21st and R 23rd do not). PREDECESSOR_CLAIMS now 26 entries with Seat R 21st, Seat V 1st and Seat V 2nd added per Q-PRED22, Seat R 22nd asserted ABSENT, and all three added to the meta-assert so a successor cannot silently drop them. run_arms REC and SCR re-pointed to MY record folder and MY scratchpad (0 residual `seatR-21st` / `028f980d`).
+R 21st's ORIGINALS re-hashed at the end: all 8 UNCHANGED. I ran nothing from, and edited nothing in, their folder.
+
+== ARMS SUITE: PASS ==
+arms=11  refused=11  at-own-assert=11  distinct-reasons=11/11
+P1 (row #1428, on-develop, real gated head) rc 0 — before AND after the arms.
+P2 (row #1427, merge-in, synthetic M_OK) rc 0 — before AND after the arms.
+Synthetic arm commits rebuilt ON D2 in my own clone, fixed SYNTHETIC author/date:
+  M_OK      f4a3a48898fc0b20dbb9fc5be19c8d5d5cf7793d  tree T'', parents [gated head, D2]
+  M_SWAP    5ce58c7dab944dd2b2e86a2e7829a0cd9a3add7a  same tree, parents SWAPPED
+  M_BADTREE 813ce96b636abcc041242fe052e108382fbabcc9  tree ccbb76460ad6 (D2's own tree), parents [head, D2]
+5/5 fixture asserts pass, including M_OK != M_SWAP.
+
+🔴 FINDING 1 — A BRIEF GAP THAT MADE THE SUITE FAIL, AND IT IS NOT IN YOUR FIRST-THREE.
+Your re-key list names `merge/go_fixture_1427_SYNTHETIC.txt` and not `go_fixture_1428_SYNTHETIC.txt`. On my first run the suite read: arms=11 refused=11 but at-own-assert=**7**, distinct-reasons=**8/11**, and **P1 rc 1**. Cause: the 1428 fixture still carried `GO (Seat R 21st): merge 1428 on gate76`, so with the builder's regex now requiring my ordinal, P1 and the four row-1428 arms (A5, A7, A8, A11) all refused at the GO-CLAUSE gate instead of their own. Re-keying that fixture's 5 anchors (GO clause, merge_note, provenance_ra22, RA22_QM, provenance line) took it to 11/11 and 11/11. The generic clause covers it and the tool won, exactly as you wrote — but the EXPLICIT list is what a seat follows under budget pressure. Recommend R 23rd's list names BOTH GO fixtures and the addendum fixture.
+🔴 FINDING 2 — the same class, one file deeper, and this one is live code. `run_armsra21.py` carried `RA22_GO_CLAUSE="GO (Seat R 21st): merge 1428 on gate76"` and `...merge 1427...` as LIVE fixture values at :33 and :44 (not comments). Your first-three item 2(c) says to re-key an inherited probe's DATA as well as its tokens and names REC/SCR; it does not name these two. Same consequence: every arm refuses at the wrong gate. Both re-keyed. A6 deliberately keeps a wrong ordinal (R 17th) as its negative fixture and is untouched.
+
+== KIT SELFTEST — MEASURED, AND THE CAUSE IS NOT A KIT DEFECT ==
+`SELFTEST 13/15`, measured, scratch `/var/folders/xl/.../g76c4st.vwblwgpy`. The two failing arms, by their printed text:
+  FAIL guard POSITIVE CONTROL: planted prose block rc 1 (3, 9) vs #1428 END_TREE rc 1 (3, 9)
+  FAIL TAG BALANCE: a composed cheat missing ONE `</table>` -> read-back REFUSES (tag balance (('table', 80, 79),) == develop ()) while the repo guard reads rc 1 (3, 9) (BLIND)
+🔴 FINDING 3 — I then changed ONE variable and it went to 15/15. Re-running the identical selftest with `TMPDIR` forced to a CANONICAL path gives `SELFTEST 15/15`, rc 0, zero FAIL lines. So the 13/15 is entirely an invocation-path artefact of the macOS `/var -> /private/var` symlink, and there is no kit arm that actually fails. Your brief frames the `html_docs_check.mjs:120` entry guard as a defect for you to file; on this measurement the operational fix is one env var — set a canonical TMPDIR for the whole kit — and the "re-drive the guard pair by hand on a canonical path" instruction generalises to that. Worth putting in R 23rd's brief as a one-liner instead of a known-bad 13/15.
+Mechanism, read at source: `:120` is `if (import.meta.url === `file://${process.argv[1]}`)`. `import.meta.url` is the REALPATH while `argv[1]` keeps the path as given, so through a symlink the equality fails and the whole CLI block is skipped — exit 0, nothing checked.
+
+== THE GUARD PAIR, DRIVEN BOTH WAYS (and two errors of mine, corrected) ==
+  T'' untampered          rc 0 | 12 passed, 0 failed
+  ONE planted prose <p>   rc 1 | 11 passed, 1 failed  ("prose outside a table in <p>: \"Lead.\"")
+So the guard DISCRIMINATES on a canonical path and the 12/0 on T'' is a real pass. Per STANDING :442 I am NOT offering 12/0 as tag-balance evidence.
+Two things I got wrong on the way, both mine, both caught by driving the negative half:
+ (a) I first invoked `html_docs_check.mjs` directly with NO file arguments. It takes its targets from `process.argv.slice(2)`, so it looped over an empty list and exited 0 with no output — for BOTH the clean and tampered copies. I had written "the guard discriminates" off two rc 0s; that was a non-run, not a pass, and I retract it. The real suite is `systemTest/__tests__/html_docs_matrix.test.sh`, which is what the kit runs (`c4_docs_gate76.py:250`, `bash <dir>/<suite>` with TMPDIR set).
+ (b) my first tamper was an EMPTY `<p>`, which the checker correctly does not call prose. The suite's own control plants `<p><strong>Lead.</strong> A sentence of prose...</p>`; I used that shape and it fired. An empty-`<p>` arm would have been a vacuous negative half that LOOKED like a disproof of the guard.
+
+== M-2 DONE — ONE lock take, ZERO refs written ==
+Lock: TAKEN by `Secuura/Blockchain-R ra22` pid 57258 at 03:34:34Z for the KS-1274 branch, poll 1, waited 0s. The two-lock precondition held with all three WAIT entries ABSENT — `.push-lock-f3`, `.push-lock-e4` and **`.push-lock-g1`**; note `.push-lock-g1` is ALREADY hard-wired as WAIT entry 3, so K 1st's lock was covered without any edit from me. "no UNATTRIBUTED lock dirs, 0 lock dir(s) CHECKED against 21 known names". RELEASED at 03:34:39Z using the HOLDER FILE's pid 57258, never a later `$$`; `.push-lock-d8` is gone.
+Worktree: `git worktree add --detach <worktrees>/s-ra22-m1427 2b6da5f561b0...` (never `-b`, Q-WT22). HEAD = 2b6da5f561b05a820bbe1ab5e891bff9f4f531c8, detached (no symbolic HEAD), porcelain EMPTY.
+`rev-parse --all` 1654 / f97ee53e189fd53b BEFORE and 1654 / f97ee53e189fd53b AFTER, `cmp` BYTE-IDENTICAL — the worktree add wrote NO ref.
+D2 reads PRESENT from INSIDE the worktree (STANDING :408), with deadbeef ABSENT as the control at the same moment. No objects transfer needed; Q-OBJ22 satisfied without its STOP.
+A third, independent reproduction of T'' fell out of staging the arms: the arms clone did not hold T'' (I had only ever written it into my first clone's store), so I re-derived it there by the same merge-tree + private-index construction and got e948c77b8b464f347a6af5abc515490de782ead6 again, from conflicted tree d232875f8bf6b3e72f296ed3cde2e64090b1594c. Three instruments, two clones, one answer.
+
+== QUESTION: ctx read (Seat R 22nd) ==
+You read 28% at 03:22Z. Since then I have done the whole re-key, two full arms runs, two selftest runs, four guard runs and M-2, so I am materially higher now — my own sense is comfortably past half, and I cannot read the statusline myself.
+M-3 to M-6 is the big block: build M', read it at source with a wrong-value arm per fact, qm Q1-Q6, P2 on the real M', `npm ci --ignore-scripts` plus the shared build plus every `systemTest/*` package, legs 6 and 7 standalone, then the real push with the FULL in-hook preflight, then Actions by head_sha. Your brief is explicit that a merge-in started and not pushed is the one state that must not be left for a successor, and the 65% ceiling is a WRAP COLD.
+So, specifically:
+Q1 Please read my pane and give me the number.
+Q2 If it is under 50: I proceed M-3 -> M-6 in one run and mail you `STATUS: merge-in 1427 pushed (Seat R 22nd)`.
+Q3 If it is 50-64: do you give the explicit word to proceed anyway, or do you prefer I WRAP COLD now with the worktree added, the re-key done, the arms green and NO merge-in started — which is the clean handover boundary, and the only one left before the forbidden state?
+Q4 If you want me to stop, say so plainly and I will wrap on the spot and hand R 23rd a round that needs only M-3 onward.
+My recommendation: Q3's wrap-cold-now option is the safe read unless your gauge says under 50, because the next step cannot be left half-done and I would rather hand over a clean boundary than a started merge-in.
+
+HOLDS kept: no push, no squash, no second lock take, no fetch or pull in the shared checkout, no ticket write or comment, no extranet POST, no mail to Peter or Stuart, no deploy/az/ssh/docker, nothing of K 1st's or any other lane's touched. Watcher live at SINCE=2026-10-09T03:22:47.000Z.
+
