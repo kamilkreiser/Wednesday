@@ -1,0 +1,4 @@
+# hosted/done_mimo.md — one row per hosted replay of a Spark task (xiaomi/mimo-v2.6-flash via OpenRouter, pinned deepinfra/fp8, zdr) — newest at the bottom
+| when | tag | verdict | model s | tokens (prompt+completion) | reasoning tok | cost USD | spark verdict | golden | run dir | spark run dir |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-10-09 18:02:53 | spark_secuura_2026-10-05_KS-1278-revoke-atomic | FAIL (FAIL (checker rc=1; A2a rc=0) / checker=FAIL (1 failed) — stopped at A3 (cannot sequence red-first without exactly one test file)) | 34.254 | 25585+3376 | 0 | 0.00453 | FAIL | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/hosted/runs/mimo/hosted_mimo_2026-10-09_spark_secuura_2026-10-05_KS-1278-revoke-atomic | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-05_KS-1278-revoke-atomic |
