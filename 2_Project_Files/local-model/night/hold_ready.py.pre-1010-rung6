@@ -242,9 +242,7 @@ def _apply_to_tip(patch_file, files_at_tip, scratch_parent, opts=()):
     finally:
         shutil.rmtree(td, ignore_errors=True)
 
-# 2026-10-10 (Wednesday): rung 6 (a PROSE-only change description) is unfenced the same way as rung 4; it is accepted only on an
-# explicit `RUNG 6 … prose` declaration (KS-1345, the first rung-6 PASS). Anything else still refuses at A3c.
-LOOSE_RE = re.compile(r'rung:?\s*\**\s*4\s*\**\s*\(\s*(?:a\s+)?looser brief|rung:?\s*\**\s*6\b[^\n]{0,80}?prose', re.I)
+LOOSE_RE = re.compile(r'rung:?\s*\**\s*4\s*\**\s*\(\s*(?:a\s+)?looser brief', re.I)
 def _loose_declared(brief_path):
     """(source, text) if the brief header (before its first '## ') or the spark.pins beside it declares the rung-4 loose brief."""
     if not brief_path or not os.path.isfile(brief_path): return None
