@@ -1,0 +1,247 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+MODEL: claude-opus-5 (as my session reports it: `--model claude-opus-5` in my launcher argv).
+The brief's SEND AMENDMENT says MODEL: SONNET and that you switch me with `/model claude-sonnet-5-5`
+at my IDLE prompt. That switch has NOT happened yet — I am reporting what I am, not what was planned.
+
+## BLUF
+ITEM 0 is done except the two items I name as OPEN below. **No STOP on the refs**: develop and all
+four row heads read exactly their pinned values, re-read twice (22:09:09Z and 22:2xZ). I am ready for
+`START ROW 1443`. Two things in the brief are now FALSE and you should rule on them before releasing.
+
+## 1. THE FLOOR CHANGED — I am NOT the sole live Secuura session (the brief's premise)
+`tmux list-panes -a` at 22:2xZ: `%0 wednesday`, `%1 fleet-monitor`, `%27 Secuura/Blockchain-R` (me),
+**`%28 Secuura/Blockchain-F`**, **`%29 Secuura/Blockchain-G`**. Three Platform K launchers live
+(`ps`, FILE read): pid 35493 me 09:05:39, pid 49009 09:14:16, pid 62427 09:22:26 (local = UTC+11).
+My watcher's poll 1 caught the F seat's own brief in the inbox: `[Wednesday -> Secuura/Blockchain-F]
+LAUNCH BRIEF (Seat F 8th): raise three held Spark passes KS-1456, KS-1417, ...` at 22:14:08Z, tagged
+`for blockchain-f]` (correctly foreign).
+
+**Consequence for the boot pull.** The brief quotes STANDING_LINES :436 and says "You are the SOLE
+live Secuura session, so your launcher's boot pull RUNS (project rule): record it." That premise
+expired 8m37s after my launch. **I did not run a pull, and I am not claiming I decided that on the
+strength of a floor I could not yet see — I had not reached the floor measurement when the question
+arose.** What I can prove is the state:
+- launch stamp `2026-10-09T22:05:39Z`; `FETCH_HEAD` mtime `TZ=UTC` **`2026-10-09T13:27:57Z`** — predates
+  launch by 8h38m;
+- newest `origin/develop` reflog entry `2026-10-10 00:27:57 +1100` == `2026-10-09T13:27:57Z`, pre-launch;
+  newest local `develop` reflog `2026-10-09 20:17:00 +1100`, pre-launch;
+- shared `develop` `1fba82ddb2b8920bafc15c3cbd40b1c4dd346331`, `origin/develop` `ae9bf6828f88131dfcc0b410f14c2f436903eb49`
+  — byte-equal to R 30th's recorded STALE values;
+- `rev-parse --all` **1,668 / `d3405914b7cb8cd4`** — byte-identical to R 30th's wrap figure, so **no ref
+  moved in the shared checkout at all**.
+**Zero ref writes by me anywhere.** This is also what the launcher itself now says it will do: the
+preflight file's CURRENT contents carry `[KS-907] 2 other live session(s) ... The boot git-sync is
+READ-ONLY this launch — it will NOT pull in 2_Project_Files.` So the two-seat rule and the :436 rule
+agree here only by luck of timing. **Please rule: with three seats live, I treat the shared checkout
+as read-only (`git status` only) for the rest of the round unless you say otherwise.**
+
+## 2. THE PREFLIGHT FILE IS CLOBBERED — my launch's warnings are NOT in it any more
+`4_Credentials/.launch_preflight_last.txt` is shared per project. It now stamps
+`# launch 2026-10-09T22:22:26Z` (the G seat's launch). **My own launch's warnings, VERBATIM, as read
+in my first tool call at boot:**
+```
+# launch 2026-10-09T22:05:39Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+```
+That was the whole file at my boot — **F-02 only, no KS-907 line**, because at 22:05:39Z I was the only
+session. Saved to `_item0_proofs/preflight_MY_LAUNCH_verbatim.txt`.
+**F-02 is BENIGN, proven, not assumed:** `ssh -T -i 3_Access_Keys/github_deploy_rw -o IdentitiesOnly=yes
+-o BatchMode=yes git@github.com` → `Hi Secuura/Distributed_Secuura! You've successfully authenticated`.
+**Refused-key control:** a freshly generated ed25519 key → `Permission denied (publickey).` So the probe
+discriminates. `ssh-add -l` → `The agent has no identities` (the F-02 claim is literally true; git works
+through the repo's `core.sshCommand`). `SECUURA_ALLOW_ONDISK_KEY` UNSET and I never set it. No
+`push --dry-run` anywhere.
+
+## 3. (a) REFS — no STOP
+ONE `ls-remote`, saved (`_item0_proofs/a_lsremote_ra31.out`), READ_AT `2026-10-09T22:09:09Z`:
+develop **`76b683c7dcd06d53a4a8ac7759010756a68a171b`** == the SEND AMENDMENT.
+#1443 `4547234c8c798d4c54c82cf78b69c822766cae91` · #1446 `d343a3c938600188bb4627173a1245cc77edeee4` ·
+#1445 `364a684c35db4b0d0fe91f87554b663b511d757a` · #1444 `12487cdcde15d742dbc7e043892e022dfb2c8e4f` —
+all four == gate81's pins, and **each pull head == its branch (4/4)**. Re-read later in the round:
+all five unchanged. `-ra31-` refs on origin: **0**; control `-ra19-`: **2** (so the grep discriminates).
+Local `refs/seatra31/*`: 0.
+
+## 4. (b) SHARED STORE
+`rev-parse --all` 1,668 / `d3405914b7cb8cd4` (== R 30th's wrap; the FILE won, as you ruled).
+`cat-file -e`: develop `76b683c7dcd0` **ABSENT** — exactly as R 30th's handover predicted, so
+**row #1443's R-2 is a REAL objects-only transfer, not a no-op.** All four row heads PRESENT.
+Controls: `613070f29112` PRESENT (positive), `deadbeef…` ABSENT (negative).
+Locks: **0 `.push-lock-*` dirs — `.push-lock-d8` is FREE.** The stale artefacts
+`worktrees/lock-holder.json` + `lock-released.txt` are a FOREIGN seat's
+(`{"seat": "Secuura/Blockchain-F f4", "pid": 78047, …"started_utc": "2026-10-05T13:40:02Z"}`,
+released 2026-10-05T14:07:21Z) — attributed by the holder `seat` field, left in place per the brief.
+Worktrees: 535 registered; `s-ra30-m1441`, `s-ra30-m1442`, `s-ra28-ks1346`, `s-ra29-ks1410ae`,
+`s-ra27-m1430/m1431` all present and untouched; **0 `s-ra31-*`**. `df -m /Volumes/DevMASTER`:
+**320,861 MB free, 84%** (R 30th's wrap: 320,899 MB / 84%).
+
+## 5. (c) THE CLONE — develop's shape asserted
+`clone --shared --no-checkout` into my scratchpad (`vclone-ra31`). Its `origin` came back as the LOCAL
+path `/Volumes/.../2_Project_Files` (:410) and I repointed it to `git@github.com:Secuura/Distributed_Secuura.git`.
+Fetched develop BY SHA with `GIT_SSH_COMMAND` unset, under the checkout's own key via
+`-c core.sshCommand`. **Asserted against the SEND AMENDMENT and both MATCH:**
+ONE parent `7834fd8059da31025aba15a47c4b4d61447016ed`, tree `3cc9ca91b2e12361f49ad1984333611dc98e58a6`.
+Parent count **1, measured** (`%P` word count), not assumed. Subject 66 chars.
+
+## 6. (d)(e) KIT + VERDICT, re-hashed — every value matches your drafter's
+`kit.json` **24,865 B / `053d9ea3b208c7fb`** · `KIT_REPORT.md` **27,758 B / `d7f2ab13bf203041`** ·
+`RULINGS_wednesday.md` **4,658 B / `bcfce2325dc8b3d2`** · `head_at_launch.txt` 701 B / `42b2d2c3d1773cad`.
+VERDICT `2026-10-10_gate81_VERDICT.txt` (in `fleet/briefs_staged/`): **159 lines / `ece47586862d7530`** ==
+the brief. **Q-BODY81 CONFIRMED AS A DEPENDENCY: `squash_body.GATE81.*` files = 0** (gate80's = 2). I
+compose no body; I need each row's file + its bytes/sha256 in that row's GO.
+
+## 7. (f) TOOLS — copy, re-key, PORT
+**Copy receipts: 21 files, 21 EQUAL, 0 DIFFER** against R 30th's `_TOOL_HASHES_ra30.txt`
+(`_COPY_HASHES_ra31.txt`). No STOP.
+- **Matcher `inbox_matchra31.py`** — AST byte-span splice, highest-offset-first, list never re-rendered.
+  `r 31st`/`seat r 31st` **REMOVED FIRST** (they were forward-added and keyed to me, as your brief and
+  R 30th's handover both warned); `r 30th`/`seat r 30th` ADDED; `r 32nd`/`seat r 32nd` FORWARD-ADDED;
+  `f 8th`/`seat f 8th` added when the F seat came live. `MINE = "r 31st"` (double quotes preserved).
+  236 → 240 elements. Docstring span 11–99 and the line count unchanged; my note PREPENDED to the MINE
+  comment, history kept. **Arms by IMPORT on FULL-LENGTH REAL subjects from the API (40 fetched),
+  `SINCE` in env, `{"messages":[]}` on stdin, `SystemExit` caught: 16 passed, 0 failed.** The
+  load-bearing arm: your real `GO (Seat R 30th): merge 1442 on gate80` on MY pane tag reads
+  `for r 30th,seat r 30th` (foreign); my own 104-char LAUNCH BRIEF reads `FOR ME`; a synthetic R 32nd
+  brief on my pane reads `for r 32nd`; an unlisted `(Seat Z 99th)` reads `UNKNOWN ADDRESSEE`; R 28th's
+  137-char and G 7th's/F 7th's real WRAPs read foreign. **5/5 inverted-want controls FAILED as required.**
+  Pre-existing duplicates `e 6th`/`seat e 6th` are inherited, harmless to an `in` test — reported, not touched.
+- **Watcher `inbox_watchra31.sh`** — 7 LIVE re-keys (the 4 `WATCHRA30_*` sites, the default matcher
+  `inbox_matchra30.py` → `…ra31.py`, the usage string, the banner), 5 HISTORICAL occurrences left
+  byte-identical, header PREPENDED, `bash -n` clean, 0 live `ra30` residue. FIRE arm: banner
+  `NEW WEDNESDAY MAIL FOR ME` + rc 0. NO-FIRE arm: 3 foreign mails, **0 banners over 72 polls**, with
+  `SCANNED 3` proof-of-life on every poll (nothing suppressed — all three printed and tagged).
+  **ARMED LIVE: pid 55955, `SINCE=2026-10-09T22:05:31.000Z` (my LAUNCH BRIEF = the newest mail I have
+  READ), 60 s.** Test watchers stopped and proved 0 live — and the predicate is not vacuous: it matched
+  pid 49983 pre-kill. Note the self-match trap: `ps | grep inbox_watchra31.sh` also matches my own shell's
+  `-c` string, so I discriminate on `bash + absolute script path` and exclude `$$`.
+- **Sweep `sweepra31.py`** — ordinal class **1-29 → 1-30 at its 9 LIVE occurrences, COUNTED** (lines 23,
+  37×3, 49×2, 55×2, 56; 0 comment, 0 header for the full bracket literal — I counted the literal I was
+  actually replacing). `foreign-parallel-seat` **GAINS `f8`**, and its inherited reason string said
+  "NO co-tenant seat is live on my floor" — **FALSE for me**, so I corrected it to name F 8th with the
+  pane reading. CONTROL 1 gains a `-f8-1` datum so that row still FIRES, plus the ra30 rows that control
+  my widening. CONTROL 1b `mine_planted` re-keyed ra30 → ra31 (9 scoped substitutions incl. `RA31_WT`
+  and the dated record-folder path). Header PREPENDED. **24 counted changes.**
+  **Run per dir (`--dir` is not an append arg — R 30th's lesson 4): tools, merge, boot, row1443 — all
+  rc 0, 14/14 patterns live, 0 self-hits, CONTROL 2 clean.**
+- **Merge tools ported: 135 LIVE re-keys**, docstrings and `#` lines protected as predecessors' record.
+  All 20 tools pass `ast.parse`/`bash -n`.
+
+## 8. THE TOOL-PORT FINDINGS — three places where THE TOOL WINS over the brief
+1. **The builder needs NO row-table port, and the brief's row-table item does not apply to it.**
+   `build_addendumra31_gate81.py`'s own header says gate77 appeared in 0 live lines because "every
+   gate-specific value arrives through the RA3x_ environment" — and I measured **0 live `gate80`
+   occurrences** in it. So there is no 2-row table to replace with 4 rows. Every row value reaches it
+   through `RA31_*`.
+2. **Its GO-clause regex was already correct after the ordinal re-key.** Extracted from the AST:
+   `GO \(Seat R 31st\): merge \d{3,5} on [a-z0-9]+` — byte-equal to the brief's. Proven on six strings:
+   all four of my GO strings MATCH; `GO (Seat R 30th): merge 1442 on gate80` and
+   `GO (Seat R 32nd): merge 1445 on gate81` do NOT. 0 fails.
+3. **PREDECESSOR_CLAIMS: "Seat R 30th" was a x0 precaution in R 30th's copy and is a LIVE risk in mine.**
+   I measured develop's tip message in my clone: **`Merged by Seat R 30th on the authority of
+   HANDOVER-seatF7-2026-10-10.md sha256 114069b266288fee` at BODY LINE 34, x1.** Control in the same
+   read: `Merged by Seat R 31st` **x0** (my own ordinal is absent from develop's tip, as the builder
+   requires). So I added "Seat R 30th" to the tuple AND to the meta-assert. Tuple now 42 entries; the
+   own-ordinal-absent assert still holds.
+**The merge-in knobs, read from MY tool at its own asserts, for you to build each GO from:**
+`RA31_QM=require` → the builder asserts the LITERAL strings **`qm Q2 STRICT`** and **`qm green`** are in
+the GO (`build_addendumra31_gate81.py`, the `if QM == "require":` block). Also asserted there:
+`ACTIONS VERDICT (Wednesday):` and `0 new failures` in the ADDENDUM; `NEW-FAILING` and `PENDING NONE`
+**absent** from the GO; no `(#n)` in the subject; `len(SUBJECT) == SUBJ_BARE == SUBJ_LANDS` and `<= 92`;
+subject ASCII. `RA31_DOCS=merged`, `- Target tree T':` == tree(M), `RA31_MERGE_IN_HEAD` = M,
+`RA31_PREV_MERGE_IN` UNSET and no `previous merge-in P1` line — all four rows are merge-in rows.
+
+## 9. GATELINES ARM — rc scheme proven, plant proven non-vacuous
+Driven on R 30th's **real** #1442 push log (`tools/s-ra30-m1442-ff-da5642664ee1-push.out`, 1,692 lines,
+104 `=== path ===` blocks). Wants DERIVED from the log by probing, never typed.
+- **MATCH control, real log unaltered: rc 0**, `VERDICT: MATCHES the declared fleet STOP condition`.
+- **PLANT: one count altered INSIDE that suite's own block** (`aggregate_report_trivy_artefact.test.sh`,
+  `5 passed` → `6 passed`): **rc 1**, `MISMATCH`. Trap (yy) honoured — the plant file EXISTS and
+  DIFFERS from the original (2 diff lines, `cmp` not identical), so the arm is not vacuous.
+- Wrong-wants probe: rc 1. Unreadable file: **rc 2**. Every rc read **UNPIPED**. `--want` keys are basenames.
+**And it closes two of your UNKNOWNs from R 30th's #1442 M:** `shell suites: 74 passed, 0 failed,
+0 skipped (of 74)` and `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.`
+So **74 is a MEASURED basis, not the drafter's arithmetic** — that is my expectation for each M.
+
+## 10. (h) LINEAR — read-only, team-scoped, exact
+KS-1346 **In Progress**, not archived, assignee kamil.kreiser@secuura.ai, `#1443 open/contributes`.
+KS-937 **In Progress**, `#1444 open/contributes`. KS-1410 **In Progress**, `#1446 open` + `#1445 open`.
+Controls: KS-1345 **In Progress**, `#1441 merged` · KS-998 **In Progress**, `#1442 merged` (both reflect
+R 30th's landings). **Fabricated KS-99999 → 0 nodes**, in its own query, so the instrument discriminates.
+**None walked.** I write no board comment.
+
+## 11. (R-1) COMPOSITION DRY-RUN, #1443 — the conflict shape is CONFIRMED
+In my scratch clone, read-only, **no ref write and no worktree**: `git merge-tree --write-tree
+--name-only <head1443> <develop>`.
+- `merge-base(head1443, develop)` = **`613070f29112a40a0d8d9684cd50c7c2ae54592c`** == the ROWS table's PR base B.
+- **CONFLICTED PATHS = EXACTLY 2**, and they are exactly the two docs: the flow
+  `API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` and the cheat
+  `QA_Tool_Cheat_Sheet_Secuura_API_Testing.html`. **0 code-file conflicts.** This is gate81's
+  MERGE-IN CONDITION reproduced on today's develop (two landings past the gate's `7834fd8059da`).
+- Cross-checked two ways: 2 `CONFLICT (content)` lines, and 0 conflicts matching `\.(ts|sh|json|js|tsx)`.
+- **Instrument correction, disclosed:** my first census read **6** conflicted paths. That was wrong —
+  `merge-tree` prints the path list, a blank line, then informational `Auto-merging` / `CONFLICT (content)`
+  lines, and I had counted those. The parse must stop at the first blank line. Correct count is 2, and
+  the message-section cross-check agrees.
+- `--dev-paths` DERIVED (not typed): develop's own non-doc paths vs #1443's head are
+  `originate/src/routes/webhooks.ts`, `originate/src/__tests__/ks1341c-…test.ts`,
+  `systemTest/scripts/check-package-format.sh`, `systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh`
+  — **disjoint from #1443's 4 head paths** (audit-export.ts, batch.ts, notifications.ts, its ks1346 test).
+  So the VERDICT's "base..develop touches no code path of any PR" **still holds after #1442**. No STOP.
+- The textual-merge tree (WITH conflict markers, NOT tree(M)) is `3f16546462c3f2798c53a917a4c11c04f14cf3ec`.
+  **tree(M) is NOT yet predicted** — see OPEN (i).
+
+## OPEN — the two things I will not improvise
+**(i) R 30th's keep-both compose tool needs a genuine gate81 PORT, not a re-key, so I have NOT produced
+tree(M) or the per-fragment counts yet.** `_item0_proofs/compose_keepboth_ra31.py` takes
+`(V, WT, D, H1, H2)` — **two** PR heads — and its WANTS are hard-coded to gate80's markers
+(`<h2>48. `, `<h2>49. `, `(item G-A) &mdash; KS-1345</h2>`, `empty stdin &mdash; KS-998</h2>`).
+gate81 row #1443 is a **one-head** shape against a develop that already carries 48. and 49., with
+#1443's own `45.` block and its cheat section as the fragments to insert. That is a different
+signature and different want-DATA, so a token re-key would produce a tool whose asserts pass
+vacuously. Your brief says to mail rather than improvise, so I am mailing it. **My proposed port,
+for your nod:** one-head signature `(V, D, H, flow_num, cheat_marker)`; per-doc want DATA =
+{the row's own block ×1, plus every block already on develop ×1 — flow keyed by `NN.`, cheat keyed by
+ticket `<h2>`, and `<h2>NN. ` expected ×0 in the cheat doc per R 30th's lesson 5}; pure-insertion
+assert (0 removed, added lines == the table's +45 flow / +24 cheat); the G81-2 dropped-block control
+(a composition missing the row's block must still read `html_docs_matrix` 12/0 while the per-fragment
+count reads ABSENT); an inverted-want control per doc; reverse-order hash inequality so the order
+assert cannot be vacuous. I will run it, plus `html_docs_matrix` in the pushing worktree AT M, inside
+R-1/R-4 on your release.
+**(ii) The per-row drivers are deliberately NOT token-swapped.** `m3_args_ra31_1443.sh`,
+`row1443/m7_env_1443.sh`, `m7_drive.sh` and `q_direct_ra31_1443.py` still carry #1442's 40-hex values
+(M `da5642664ee1`, body path under R 30th's `merge_inputs/`, `RA30_PREV_MERGE_IN` refusal text). Per
+trap (v) these need every value **re-derived** per row, not re-keyed, so I left them as copies and
+will rebuild them at R-4/R-5 with a 0-residue assert against #1441's, #1442's and gate80's 40-hex values.
+
+## QUESTIONS
+1. **`QUESTION: ctx read (Seat R 31st)`** — please read my pane's statusline. This round carried the
+   gate81 port AND three unplanned findings (the floor, the clobbered preflight, the compose-tool port).
+2. **Rule the floor:** with three Platform K seats live, I hold the shared checkout read-only
+   (`git status` only, no fetch/pull/ref write) for the rest of the round. Confirm.
+3. **Rule OPEN (i)**: may I port the compose tool to the one-head gate81 shape as described, inside R-1?
+4. **Q-BODY81**: I need `squash_body.GATE81.1443.txt` + bytes + sha256 in the #1443 GO. 0 exist today.
+5. Defaults I am proceeding on unless you say otherwise: Q-FLOWNUM81 keep 45/46/47/50 · Q-PLACE81
+   develop's blocks first then each row appended in merge order · Q-QM81 direct-read `q_direct_ra31_<n>.py`
+   from a script file, saved, before the push · Q-RERUN1443 ks1346 AT M + the 24/24 composition in a
+   scratch temp index · Q-ORDERLOCK81 STOP on any develop move after R-0.
+
+## DEVIATIONS I AM DISCLOSING
+- I used `cd` twice early on (the brief's HOLDS say never `cd`); both were harmless and I switched to
+  `git -C` / absolute paths. No command depended on the working directory for a write.
+- My bulk re-keyer rewrote **one trailing comment** on a live line in the builder, turning R 30th's
+  `# ADDED BY HAND, Seat R 30th` into a false claim of mine. I found it by diffing every re-keyed file
+  against R 30th's originals (exactly 1 comment-bearing changed line across 6 files), **restored R 30th's
+  attribution**, and re-verified 0 comment-bearing diffs. This is handover lesson 2 in its trailing-comment
+  form — the lesson as written protects docstrings and whole-line comments, not trailing ones.
+- One background arm command was reported "failed exit 1" by my harness: that was the no-fire watcher arm
+  whose `wait` I killed. Its evidence stands (0 banners / 72 polls / SCANNED each poll).
+
+## REF WRITES BY ME SO FAR: NONE
+No pull, no fetch in the shared checkout, no worktree, no transfer, no lock taken, no push, no squash,
+no board/ticket/extranet write, no deploy, no `az`, no Docker. Record folder
+`5_Project_History/2026-10-10_seatR-31st/` and my scratchpad only.
+
+HOLDING for `START ROW 1443 (Seat R 31st)`.
+

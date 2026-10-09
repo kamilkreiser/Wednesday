@@ -1,0 +1,42 @@
+[Secuura/Blockchain-F -> Wednesday] STATUS: pushed feature/ks-1456-run-migrations-failed-run-message-f8-1, raised #1447 (Seat F 8th)
+MODEL: claude-sonnet-5-5 (as my session reports it).
+SEAT: F 8th, %28. LIVE WATCHER: pid 6429, 1 live (ps file boot/watch_f8_ps.txt), SINCE 2026-10-09T22:44:32Z. MY LOCKS HELD: 0.
+
+== PUSHED AND RAISED ==
+Branch (in full): feature/ks-1456-run-migrations-failed-run-message-f8-1
+PR: #1447  https://github.com/Secuura/Distributed_Secuura/pull/1447  (open, not draft, base develop) · tier 2 as ruled
+Head READ FROM ORIGIN in the same action (pushwrap AFTER-block `ls-remote`): 68a20b9bd374d1a83d1f626fd6dac6caf0b80136 == local HEAD == the PR's head.sha read back from the GitHub API. 1 commit, 4 changed files, +131 -2 (API: commits 1, changed_files 4, additions 131, deletions 2).
+DEVELOP, re-read in the SAME action as the push: 76b683c7dcd06d53a4a8ac7759010756a68a171b BEFORE (my own check, 22:45:07Z, and pushwrap's BEFORE ls-remote) and AFTER (pushwrap AFTER ls-remote) — UNMOVED. Exactly ONE PR exists for the branch.
+
+== THIS PUSH'S GATE LINES, VERBATIM WITH THEIR RATIOS ==
+  shell suites: 75 passed, 0 failed, 0 skipped (of 75)
+  OK — 13 code guards passed.
+  PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  pre_push_hook_base.test.sh (28, 0) OK · pre_push_hook_base_fixture_guard.test.sh (6, 0) OK · run_shell_suites.test.sh (59, 0) OK
+  VERDICT: MATCHES the declared fleet STOP condition
+`[format-gate]` line: ABSENT (0 occurrences in the 1,703-line hook log). The SKIP lines this push printed: `SKIP — local stack not up on http://localhost:6882 (start it to run this leg)` x3 (legs 3 4 8; the hook's own line: "legs 3 4 8 — local stack not up"). The four platform suites are UNMEASURED; none is claimed as a pass.
+The 75 equals my two-instrument population (run-shell-suites.sh --list AND the glob, 56 + 19), so the hook's ratio and mine agree; I predicted 75 and the hook printed 75.
+Push duration (the tool's own .start/.end): 22:45:39Z -> 22:52:34Z = 6 min 55 s, rc 0. It crossed the 6-minute mark and did NOT hit the rc 141 idle cutoff (pushf3.sh sets ServerAliveInterval=30).
+Before the push (pushwrap): ssh -T deploy-key probe authenticated ("successfully authenticated"); the REFUSED-KEY control was refused ("Permission denied (publickey)") so the probe discriminates; audit:gate rc 0 and audit:locks rc 0, standalone, in the pushing worktree.
+
+== REF SIDE EFFECTS, BOTH ==
+1. LOCAL branch + commit, at commit time: `rev-parse --all` 1,668 -> 1,669 (one line added = 68a20b9bd374).
+2. REMOTE-TRACKING ref, at push time: 1,669 -> 1,670; named-ref diff = exactly ONE line: `> refs/remotes/origin/feature/ks-1456-run-migrations-failed-run-message-f8-1 68a20b9bd374…`. No upstream configured for the branch. The shared checkout is unchanged: branch develop, HEAD 1fba82ddb2b8, porcelain 17 (the 17 pre-existing untracked). origin/develop in the shared checkout is still the stale ae9bf6828f88 (no fetch by me).
+The R-2 transfer earlier: byte-identical `rev-parse --all`, as already mailed.
+
+== LOCKS, POST-PUSH ==
+Immediately after the push (pushwrap, same action): `locks:` EMPTY, with a POSITIVE control planted in a `mktemp -d` that the same `find` saw (1). At 22:54Z, one lock exists: `.push-lock-d8`, holder file `{"seat": "Secuura/Blockchain-R ra31", "pid": 38625, "branch": "feature/ks-1346-apigw-fail500-type-and-field-names-ra28-1", "started_utc": "2026-10-09T22:52:50Z"}`; pid 38625 is a live bash (ps), started 16 s AFTER my release at 22:52:34Z. ATTRIBUTED to R 31st by its `seat` field; not mine; I did nothing to it.
+
+== ACTIONS, on COMPLETED runs only ==
+On head 68a20b9bd374 at 22:5xZ: `pr-premerge-ack` completed/success · `PR — Lockfiles (path-skip twin)` completed/success · `Dependabot standalone locks` completed/skipped. THREE more (`Security Scanning`, `pr`, `PR Security Gates (KS-168)`) are in_progress: I quote NO result for them. The PR's mergeable_state reads `unstable`, which I do not read as a verdict (checks pending). Per R 29th/G 7th's records, `pr` and Security Scanning have been red on develop's own push runs; I will read their COMPLETED conclusions before the READY and set-compare them to develop's.
+
+== PR BODY ==
+4,414 characters (4,425 B), sha256/16 956152296bca81b4; the tool read it back from the created PR: IDENTICAL; I read it again via the API: same hash. `grep -c '^Refs '` = 1 (control two-Refs text = 2); closing-keyword regex 0 (control fires); github.com / owner/repo#N 0 (control fires); Co-Authored-By 0. BOTH hashes in the body (7fd5f2ef2969 payload / 1ba0f332a807 as-committed). The stale `:195-196` comment is in the body's NOT-covered list in ONE line, per your ruling. The body ends with the harness's "Generated with Claude Code" line only (no trailer on the commit).
+
+== MY OWN SLIP, caught by reading it ==
+My raise wrapper printed a `raise rc` line that actually read `$?` from the preceding `echo`, so its `0` was meaningless. I make NO claim from it. The evidence for the raise is the tool's own output: HTTP 201, `head == origin: OK`, `BODY ROUND-TRIP: IDENTICAL`, PR_NUMBER=1447, plus my independent API read.
+
+== NOT DONE / WHAT IS LEFT ==
+F-A: no live run (the runner was not run against a database); KS-1456 does NOT move; no board comment, no extranet, no message to Peter or Stuart. F-B (KS-1417) and F-C (KS-1426) are UNBUILT and UNRAISED. No READY yet: it comes after F-C (or on your word to wrap earlier).
+Record: 5_Project_History/2026-10-10_seatF-8th/ (push_a/, pr/, commit/, objwt/, boot/, raise/, fa/).
+

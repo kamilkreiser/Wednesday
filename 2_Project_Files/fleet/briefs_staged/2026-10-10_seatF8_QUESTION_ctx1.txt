@@ -1,0 +1,43 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+MODEL: claude-sonnet-5-5 (my session reports "Sonnet 5.5"; the switch took effect after your plan ANSWER).
+SEAT: F 8th, %28. LIVE WATCHER: pid 1585, 1 live (ps file boot/watch_f8_ps.txt), SINCE 2026-10-09T22:32:10Z. LOCKS HELD: 0 (find, maxdepth 1 under worktrees/, 22:4xZ).
+
+== QUESTION ==
+ctx read (Seat F 8th) before F-A's PUSH, and your per-step word to push F-A (KS-1456) if the reading is 45-64%.
+
+== CONTEXT: F-A IS BUILT AND COMMITTED, NOT PUSHED ==
+Branch (in full): feature/ks-1456-run-migrations-failed-run-message-f8-1
+Local head: 68a20b9bd374d1a83d1f626fd6dac6caf0b80136 · ONE commit · ONE parent 76b683c7dcd06d53a4a8ac7759010756a68a171b (your accepted RAISE_BASE) · tree d8aa7825f12cb6e7f1e718c5ee4f08e0ba3f36ab
+Worktree: worktrees/s-f8-ks1456 (detached at the base, then branched), porcelain 0, no upstream.
+Files (4): run-migrations.sh +2/-2 · NEW ks1456_run_migrations_failed_run_names_no_closed_defect.test.sh +92 · flow doc +21 (block 51.) · cheat doc +16 (KS-1456). Total 131/-2 by `git diff --numstat` AND `--shortstat` (agree).
+
+PAYLOAD: applied byte-for-byte; the worktree tree before my WHY line was 2e752151f35c8c33a5e52bc62281143ebe10c5f5 == your table. The committed test blob equals the payload tree's blob (0ef305a4a013, IDENTICAL). The committed script differs from the payload tree by EXACTLY ONE added line (Q-5D1456), a shell comment after the last echo at :189:
+  `  # KS-1456: this message used to call the applied=N-counts-skips defect open; KS-808 (2) closed it.`
+BOTH HASHES for the PR body, git blob ids of run-migrations.sh: payload-only 7fd5f2ef2969 (`git hash-object` of my saved copy; its sha256/16 is 8f6c1092260c1e44, 200 lines) · as-committed 1ba0f332a807 (`git rev-parse HEAD:<path>`). Both also appear as the `index` lines of the two diffs I printed.
+The WHY line changed NO test result: green before it and after it are BYTE-IDENTICAL output (4 passed, 0 failed, rc 0). It also prints nothing: the failed branch driven with stub psql under BOTH scripts gives byte-identical output, 897 B, rc 3 each; control (base script vs payload script) differs by 3 lines, so the driver can tell a changed message from an unchanged one.
+
+RED/GREEN, mine, on my worktree at 76b683c (your table's figures were the checker's on 613070f; these are mine):
+  RED  (new test, script at base blob): rc 1, `3 passed, 1 failed`; the FAIL is cell 1; cells 2-4 are the CONTROLS and pass. Two instruments agree (suite summary line; my count of PASS/FAIL lines 3/1).
+  GREEN (payload only): rc 0, `4 passed, 0 failed`; GREEN again with the WHY line: identical.
+  bash -n rc 0 on the script and the test. 0.63-0.68 s over 3 runs. /bin/bash 3.2.57, node v24.7.0, npm 11.5.1, Kamils-Mac-Studio, 2026-10-09 UTC.
+SIBLINGS (all three that mention run-migrations.sh): ks808_run_migrations_counts_skips_apart 5/0 at base AND after · run_migrations_failure_exit_code 7/0 at base AND after · ks949_main_seed_idempotence 27/0 AFTER. ks949's BASE arm is INVALID and I am not claiming a comparison for it: my base export held only Blockchain/Dev/scripts, and the suite aborted with "product source not found: …/services/api-gateway/src/startup-migrations.ts". It mentions run-migrations ONCE, in a comment at :201, and never executes it. It is hermetic: own initdb in a temp dir, socket only, no port, no Docker.
+SHELL-SUITE POPULATION 74 -> 75, TWO instruments agreeing: `run-shell-suites.sh --list` (75 .test.sh lines) and a shell glob over both roots (56 + 19). The "before" 74 is `ls-tree` and the same glob at the base (55 + 19), and R 30th's hook line on the #1442 merge-in.
+DOCS: docblockf7.py (hash da2234da2de6c5b4 verified before use) rc 0, `0 failed`: flow 42 -> 43 numbered blocks, tail 49 -> 51, KS-1456 0 -> present; cheat 31 -> 32 sections, tail KS-998 -> KS-1456; all 42 + 31 pre-existing blocks byte-identical. Independently of the tool: each doc MINUS its fragment == the base blob byte-for-byte, and the length deltas (4,453 B and 2,247 B) equal the fragment sizes exactly. `html_docs_matrix.test.sh` run AFTER the append and BEFORE the commit: `12 passed, 0 failed` (the tally is not my evidence; the byte-for-byte read-back is).
+COMMITTED MODES (git ls-tree on the commit): run-migrations.sh 100755 (== base), new test 100644 (Q-FMODE). On-disk, `git apply` under core.filemode=false left the script at 0644 (the trap you named); I restored 0755 and the commit carries the index's 100755. Invocation I read: `bash <file>` (run-shell-suites.sh:360), no -x test.
+LANDED MESSAGE (read back from the commit): 82-char subject; `git interpret-trailers --parse` = EMPTY against a control (0861f8f830a5, `Co-Authored-By: Claude Opus 5.5`) that prints one; `grep -c '^Refs '` = 1 (control with two Refs reads 2); closing-keyword regex 0 (control fires); github.com / owner/repo#N 0; foreign keys de-hyphenated outside the one quoted file sentence.
+TREE-BY-TOOL: commitf8.sh `14 passed, 0 failed (of 14 arms)`.
+REF SIDE EFFECTS of the commit: `rev-parse --all` 1,668 -> 1,669, ONE line added = 68a20b9bd374 (the local branch). develop/HEAD of the shared checkout unmoved at 1fba82ddb2b8. Earlier, the objects-only transfer (R-2): `rev-parse --all` BYTE-IDENTICAL (1,668 d3405914b7cb8cd4), .git/config byte-unchanged, FETCH_HEAD unchanged (e2820982cb58f7f4, 13:27:57Z), no .git/shallow, closure 10 objects / 0 missing, tree 3cc9ca91b2e1 as predicted. Source was my depth-1 scratch clone (local path); rehearsed first in a throwaway --shared clone.
+
+== FINDINGS, NOT FIXED (never-skip: reported here, not silently carried) ==
+1. STALE COMMENT, adjacent, mine to REPORT not widen: run-migrations.sh :195-196 (in the existing `# KS-808 (3)` block) still says "KS-808 carries what is left." After this change the message no longer says that, and KS-808 (2) closed the counting defect. Q-5D1456 allowed exactly one WHY line, so I did not touch it. Board search NOT done by me (no board write in this seat); your call whether it is a comment on KS-1456 or a new item.
+2. The harness's commit-attribution instruction for this session asks for a `Co-Authored-By: Claude Sonnet 5.5` trailer on commits. I followed your brief's HOLDS and the fleet's standing line (0 trailers) and did NOT add it. Tell me if you want it otherwise.
+
+== THE TRIAL'S DATA (steps where I needed a correction or an extra instrument) ==
+(1) zsh did not word-split `for s in $SIBS`: both arms ran a non-existent path and reported rc 127 with 0 lines — an honest failure, no false green; fixed with an array. (2) `${PIPESTATUS[0]}` reads empty under zsh; I did not claim a script rc from it. (3) My commitf8.sh authorship comment cited :40/:89; the diff showed :42/:91; I corrected it from the measured lines. (4) My flow fragment cited `:188` for the comment; grep -n and awk NR both read :189; corrected BEFORE docblock ran. (5) My first CONTROL_COMMIT candidate printed NO trailer (the grep matched body text); I printed it, rejected it, and used F 7th's 0861f8f830a5. (6) A matrix "instrument 2" grepped `^ *PASS` on a suite that prints `ok`; I discarded that count. (7) My ITEM 0 sweep was case-sensitive (already mailed). (8) A first-attempt tool call used a wrong tool name; no effect.
+
+== MEANWHILE ==
+HOLDING for your reading and word. Pushwrap is re-keyed (pushwrap_f8.sh; three line-anchored substitutions, bash -n rc 0, diff reviewed); pushf3.sh unchanged at its hash (085a4ed6a42f76e8) and already mirrors the g1/d8 WAIT set. At the push I will re-read develop in the SAME action; if it has moved since 76b683c7dcd0 I mail `QUESTION: develop moved` and hold.
+
+== NEEDED-BY ==
+At your convenience; F-B and F-C are queued behind F-A's push, and the base must be re-accepted by name for each if develop has moved.
+
