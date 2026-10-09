@@ -10086,5 +10086,89 @@
   "project": "Secuura",
   "ts": "2026-10-09T16:06:03.102938+11:00",
   "text": "No action needed. Gate 77 passed all seven Secuura PRs. I've checked its pins against GitHub myself, and I'm drafting the brief for a merge seat to land them one at a time. One thing for your awareness: the gate found a serious bug that was already there before these PRs. Any logged-in user can post a notification into any other user's feed. The merge seat will ticket it, and a fix seat will follow."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T16:38:48.578452+11:00",
+  "text": "Received: which models a 128 GB versus a 256 GB Studio can run, and whether 256 opens up anything much stronger than Flash. I'm checking it against today's measured analysis and the current model sizes, not from memory. Answer in about 20 to 30 minutes."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T16:56:00.575465+11:00",
+  "text": "Studio question. No action needed; the money call is yours. My recommendation is the 256 GB, if you want a local tier above the Spark.\n\nThe 128 GB is an M5 Max. It runs the Spark's DeepSeek Flash at about 2.4 bits, at about 44 tokens a second, or Flash Next at about 78. It runs only one of them at a time, never alongside Ornith. So it is a second Spark, not a better one.\n\nThe 256 GB is an M5 Ultra with twice the memory speed. It runs the Spark's model unpruned at 4 bits, about 1.5 times faster, with Ornith alongside. It's also the only one that can try the stronger models: MiMo, GLM 5.3 Flash, and DeepSeek V4.1. Their makers score them 9 to 20 points above Flash on coding, but only GLM has an independent check, and V4.1 is slow at that size.\n\nTwo things to weigh. Apple says a 512 GB Ultra is coming late October, and that's the real size for V4.1 at full quality. And I couldn't read the 128 GB price; the 256 GB works out at about A$17,449.\n\nEvery figure is someone else's measurement, read today; none of these models has run on our tickets yet. Full report attached.\n📎 file in the live drawer: REPORT.md (id f-7931e688c3)"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T17:09:01.770812+11:00",
+  "text": "Yes, MiMo should run on the 256 GB, but not on the 128 GB.\n\nOn the 256: the 4-bit build is about 164 GB, against a usable budget of roughly 206 to 223 GB. That's arithmetic from the published file size, because nobody has published a measured memory footprint for it. Someone else's run on the same 80-core Ultra measured about 69 tokens a second, which is a working speed. It won't fit alongside Ornith, though; that would leave only about 5 GB spare.\n\nOn the 128: no. It's over the budget even with the limit raised.\n\nOn the cost, my honest view: the case for the 256 rests on maker scores that nobody has checked independently for MiMo, and these models have never run on our tickets. Before spending twice as much, I'd measure. If MiMo or GLM 5.3 Flash is offered through a hosted API (I haven't checked), I can replay the same 46 Spark tasks there over a day or two. That tells us whether the stronger tier actually closes more of our tickets. The 512 GB arriving late October is a second reason to wait a couple of weeks."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T17:10:03.059838+11:00",
+  "text": "Received: the new Studio would run its models alongside cloud Claude. That helps the case. It means the box is a dedicated model server, so the full memory budget is usable and nothing else competes for it. It also sharpens the question: is the stronger tier worth twice the cost in cloud work it takes off Claude? Only a measurement on our own tickets answers that. I've put it on the board as a card: measure first (my recommendation), buy the 256 GB, wait for the 512 GB, or buy the 128 GB. If you don't answer, nothing is bought and I only check, read-only, whether those models are offered as a hosted API."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T17:22:48.813532+11:00",
+  "text": "Received: measure first. I'm checking now whether MiMo and GLM 5.3 Flash are offered as a hosted API, and at what price. That costs nothing. Once I know, I'll bring you one ask with a total cost estimate for running the 46 tasks. Nothing gets spent before you say yes to that."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T17:26:06.734912+11:00",
+  "text": "I need you to do three things on the new card when you have a minute. One: create an OpenRouter account and add about ten US dollars of credit. Two: create an API key. Three: put it in the Wednesday credentials file as OPENROUTER_API_KEY. Why: MiMo and GLM 5.3 Flash are both hosted there, and replaying our 46 Spark tasks on both costs about 44 cents, under two dollars in the worst case. The tasks are Secuura code, so I'd send them only to providers listed as keeping nothing, and that choice is on the card too. One caveat: GLM can't turn its thinking off, so its score won't be strictly like-for-like."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T17:27:13.686561+11:00",
+  "text": "Received: yes, send the Secuura tasks, to zero-retention providers only, with a five-dollar cap. There's no OpenRouter key in the credentials file yet, so nothing has been sent. While you set that up, I'm getting the replay harness built, so it can run as soon as the key is in."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T17:45:02.899574+11:00",
+  "text": "The hosted replay is ready and only needs your key. I ran its tests and a dry run myself: it builds all 48 Spark tasks for each model, and every request is pinned to a provider listed as keeping nothing. It made no network calls. Without the key it refuses and sends nothing. Estimated total for all three models is under 50 cents, about a dollar sixty worst case, under a five-dollar cap. Once OPENROUTER_API_KEY is in the Wednesday credentials file, I'll run one task as a smoke test, then the rest, and report the pass rates against the Spark."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-09T17:54:51.339178+11:00",
+  "text": "Ornith has had nothing queued since 08:38 — the coordinator owes it a brief or a reason (never-idle, 2026-09-15 18:19)."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T18:00:40.636777+11:00",
+  "text": "Got the key. It's in the Wednesday credentials file now, and the test is running. The smoke test worked end to end: DeepInfra served it with thinking off, it cost about a fifth of a cent, and our checker graded it. That task was one the Spark also failed in round 1. The full run of 48 tasks each on DeepSeek, MiMo and GLM is going now, under the five-dollar cap, and should take an hour or two. I'll report pass rates against the Spark when it finishes.\n\nOne recommendation, no action needed now: the key was pasted on the board, so it sits in the board's history. I checked, and it isn't in git or any local file. Once the run is done, I'd revoke this key on OpenRouter and create a fresh one. Put that one straight into the credentials file, not the chat."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-09T18:40:00.604786+11:00",
+  "text": "Ornith has been gate-refused for 30 minutes on G2-panes — nothing has run since it started. Remedy: read night/log/night_2026-10-09.log for the refusal line."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-09T18:40:10.642790+11:00",
+  "text": "First result from the hosted test. GLM 5.3 Flash passed 45 of the 48 Spark tasks, against the Spark's 43 of 48 on the exact same inputs and the same checker. It passed three the Spark failed, and failed one the Spark passed. Total cost was about 20 cents. Two caveats: GLM can't turn its thinking off, so it ran at low thinking rather than none, and these are tasks the Spark was already briefed for, so the test favours tasks the Spark can do. DeepSeek and MiMo were rate-limited by their provider on the second task. I'm adding retries and will run them next, then send you the full comparison."
  }
 ]
