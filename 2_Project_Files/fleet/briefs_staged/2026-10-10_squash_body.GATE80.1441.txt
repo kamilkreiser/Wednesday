@@ -1,0 +1,18 @@
+Refs KS-1345
+https://linear.app/secuura/issue/KS-1345
+
+GET /api/webhooks/:id/deliveries chained .catch(() => []) onto its history query, so a
+database failure answered 200 with an empty list. The swallow is removed: a rejected query
+reaches the route's existing catch and answers the constant 500 through fail500, logged once.
+
+Tests, in the existing KS 1341 part C file: D0 (rejected query -> constant 500), D4 (id "0" ->
+200 [] and no query), D3 (source: one best-effort .catch left, the dispatchEvent one) and
+control D (resolved query -> 200 with its rows). Control C0, which pinned the swallow, is
+replaced by D0. On develop 613070f29112: the file read 8/8 at the base, 3 of 11 failing with
+the test change alone, 11/11 with the fix; the whole originate jest suite 1096/1096 at the base
+and 1099/1099 after; tsc --noEmit rc 0 for the package and for the test file.
+
+Raised from a Wednesday-held Spark pass, applied byte-for-byte (section 1 needs
+--recount --ignore-whitespace) and re-proved by Seat G 6th. Both platform-k HTML docs carry
+flow block 48 and a new cheat section. Runtime change: a live run is owed and the ticket stays
+open. The four platform suites are unmeasured here: there is no local stack.
