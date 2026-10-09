@@ -1,0 +1,44 @@
+[Secuura/Blockchain-R -> Wednesday] STATUS: pushed feature/ks-1410-apigw-audit-export-502-ra29-1, raised #1446 (Seat R 29th)
+BLUF. Pushed feature/ks-1410-apigw-audit-export-502-ra29-1 once, bare, through pushra1.sh: .rc 0. Raised #1446 by REST: HTTP 201, head == origin in the same action, body round-trip IDENTICAL. Three Actions runs are still in progress; READY follows when they complete.
+
+Push (one push, no --no-verify, env -u GIT_SSH_COMMAND)
+- pushra1.sh took .push-lock-d8 itself and released it at 19:54:37Z.
+- PUSH START 19:46:36Z, push rc=0 at 19:54:37Z. The tool's .rc file reads 0 (tools/s-ra29-ks1410ae-d343a3c93860-push.rc).
+- ls-remote in the same action: d343a3c938600188bb4627173a1245cc77edeee4 refs/heads/feature/ks-1410-apigw-audit-export-502-ra29-1.
+- develop in the same action: 613070f29112a40a0d8d9684cd50c7c2ae54592c, BEFORE and AFTER.
+- Hook lines, verbatim from THIS push (99,201 B log):
+    shell suites: 73 passed, 0 failed, 0 skipped (of 73)
+    OK — 13 code guards passed.
+    PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+    SKIP — local stack not up on http://localhost:6882 (start it to run this leg)   [x3, log lines 52, 55, 89]
+  Not "preflight passed".
+- gatelinesra1.py, pinned at pre_push_hook_base 28,0 / fixture_guard 6,0 / run_shell_suites 59,0 (those suites' counts in R 28th's push from the SAME base 613070f29112): "VERDICT: MATCHES the declared fleet STOP condition".
+  Control: run_shell_suites pinned 58,0 reads "VERDICT: MISMATCH — STOP".
+  Both exit rc 0, so the VERDICT line is the instrument, not the rc. The wrapper's own gatelines call passes no --want and so prints no verdict.
+- Orphaned login_stub pids under my worktree, reaped by the tool: 0.
+
+Ref side effects
+- rev-parse --all: 1,667 (85c497094c630650, captured just before) -> 1,668 (ffde3eb9ed4d7db0). Exactly ONE line added: refs/remotes/origin/feature/ks-1410-apigw-audit-export-502-ra29-1 -> d343a3c93860. No upstream config written.
+- Every ref write this seat has made:
+  (1) local refs/heads/feature/ks-1410-apigw-audit-export-502-ra29-1, created by commitra3 at 19:43:28Z;
+  (2) that remote-tracking ref, written by the push;
+  (3) the origin branch itself.
+  No fetch, no pull, no write to either develop ref.
+
+Post-push lock find, with a planted control in a mktemp dir: my .push-lock-d8 = 0 (MUST be 0); planted = 1 (MUST be 1); lock dirs of ANY seat on disk = 0.
+
+Raise (restraisera19.py, base develop)
+- HTTP 201: #1446, https://github.com/Secuura/Distributed_Secuura/pull/1446
+- Local HEAD == origin HEAD d343a3c938600188bb4627173a1245cc77edeee4. PR head at GitHub: the same.
+- Body 7,541 chars, sha256/16 1e5ec41db1f40b9a, read back IDENTICAL.
+- Title "KS-1410: audit-export 502 answers a constant message and logs the failed fetch" (78 chars).
+- Body checks: ^Refs = 1 (KS-1410 + Linear URL); 0 placeholders; 0 hyphenated foreign keys; github.com/ 0; owner/repo#N 0; strict closing-keyword regex 0 (a planted "Closes KS-1410" control hits 1).
+- keyscanra1.py on title+body: PASS (subject 78 ch; a 143-ch control title FAILS with MG-11). Its un-hyphenated hits are the card name secuura-ks1346-… and the test file name ks1410-…, both verbatim.
+- mergeable_state "clean" at creation: no CI had completed, so it says nothing about testing.
+
+Actions on head d343a3c93860, COMPLETED runs only (19:56:34Z): pr-premerge-ack success · PR — Lockfiles (path-skip twin) success · Dependabot standalone locks skipped. Still in progress: Security Scanning, PR Security Gates, pr (the three expected pre-existing failures). Not quoted until they complete.
+
+Watcher: pid 64446 live (ps_postpush.txt), since 2026-10-09T19:45:38.000Z.
+
+Next: wait for the three runs to complete, attribute them, then READY FOR QA (Seat R 29th), then WRAP.
+
