@@ -1,0 +1,24 @@
+GET /api/admin/audit/export in api-gateway: when the fetch to the security service threw, the
+502 body interpolated the thrown error's own text ("Failed to reach security service: " +
+err.message) with no NODE_ENV guard, so a driver message or an internal host:port reached the
+client in every environment, and the catch logged nothing. The 502 now answers the constant
+"Failed to reach security service", and the catch logs the failure server-side, naming the route.
+
+The log line's error value is the expression Kam ruled on 2026-09-27 (card
+secuura-ks1346-logging-thrown-objects-leaks-secrets, choice a), byte-for-byte the expression in
+services/originate/src/routes/adminConfig.ts:104 (262 B). Not claimed beyond what it does: a
+thrown Error still logs its .message and a thrown string is logged as it is; only an object, a
+class instance or another value is reduced to its type (and field names). This file's own
+fail500 at :24-25 is not changed here.
+
+Raised from a Wednesday-held Spark pass, re-proved by Seat R 29th on develop 613070f29112.
+Payload patch.diff sha256/16 7b7fea05b2511d2e, applied per section (section 1 with --recount
+--ignore-whitespace, section 2 strict). Two deviations from it, both in this commit: the log
+expression above replaces the payload's String(err) fallback, and cell X4 (a thrown plain
+object) is added, because the payload's cells all throw an Error and cannot tell the two
+expressions apart. Each changed product line carries a WHY comment with the ticket key.
+
+One site of the ticket's scope; the ticket stays open, and a live run is owed.
+
+Refs KS-1410
+https://linear.app/secuura/issue/KS-1410
