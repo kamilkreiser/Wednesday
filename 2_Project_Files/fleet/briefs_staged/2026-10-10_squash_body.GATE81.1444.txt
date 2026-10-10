@@ -1,0 +1,39 @@
+WHY, per changed line.
+
+Blockchain/Dev/scripts/check-shared-relink.sh:418, now :420 (F-C) -- the re-link destination prefix group
+`(\/[^ \t]*\/)?` becomes `([^ \t]*\/)?`. Prior behaviour: the destination had to be
+node_modules/... or an absolute /.../node_modules/..., so `ln -s /shared ./node_modules/@secuura/shared`
+and `app/node_modules/...` read as "final stage has NO re-link", a false BLOCK on a link that is
+there.
+
+Blockchain/Dev/scripts/check-shared-relink.sh:435, now :443 (F-E) -- the USER value drops its :group part
+before the privilege comparison, but only when a user part is present:
+`if (u !~ /^:/) sub(/:.*$/, "", u)`. Prior behaviour: USER root:root and USER 0:0 were compared
+whole, read as non-root, and the re-link after them was refused on the privilege rule.
+
+DEVIATION from the Spark payload (ruled): the payload dropped the group unconditionally, which left
+USER :root (an empty user part) as an empty value, and the guard treats an empty value as root.
+Nothing has measured that USER :root runs as root, so the guard keeps comparing it as non-root, as at
+the base. Hashes: payload patch.diff sha256/16 49f69f7d29a4f628; git blob ids, canonical -> built,
+script d3dfb93c029e -> 27a2495c6eb2, test 9daab0ecba9c -> a2961a4e9039 (the pin cell).
+
+Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh -- six new expect() cells: F-C x2,
+F-E x2, the F-E control (USER secuura:root still fails), and a regression pin (USER :root still
+fails). Base guard: rc 1, 108 passed / 4 failed. Payload without the deviation: 111 passed /
+1 failed (the pin). This change: 112 passed, 0 failed, rc 0.
+
+Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html -- one new block
+50. appended at the tail. Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html -- one
+new section keyed KS-937 appended at the tail, by docblockf7.py; the only difference from each blob
+at the base is the fragment, byte for byte.
+
+Widening, measured over 32 probe Dockerfiles against the base guard: 5 accepted by both, 9 newly
+accepted, 18 refused by both, 0 newly refused. A measured gap is NOT fixed here: ../node_modules/...
+is newly accepted, and an absolute wrong place such as /tmp/node_modules/... already passed at the
+base, so the guard does not check where the link lands.
+
+NOT in this change: KS-937 items F-A, F-B, F-D and F-F stay open, and the ticket does not move to
+Done. The four platform suites are UNMEASURED: the local stack is not up.
+
+Refs KS-937
+https://linear.app/secuura/issue/KS-937

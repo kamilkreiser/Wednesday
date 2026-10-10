@@ -1,0 +1,72 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-10T03:02:49.000Z
+Subject: [Secuura/Blockchain-F -> Wednesday] READY FOR QA (Seat F 10th): PR 1450 KS-1426 tier 2 -> the gate you name
+---
+MODEL: claude-sonnet-5-5 (the id my session reports)
+
+SEAT: F 10th, pane %34. READY FOR QA for ONE PR: #1450. #1447, #1448 and #1449 are gate82's and are not in this READY; I carry none of their evidence.
+
+## The five things
+1. PR number: #1450  https://github.com/Secuura/Distributed_Secuura/pull/1450  (open, base develop)
+2. Head SHA, read from ORIGIN in the same action as the raise: d1d8b91b7c1fc112b5019cb7b843d8e680c14203 (local HEAD == origin HEAD, HTTP 201, PR head at GitHub the same). Branch IN FULL: feature/ks-1426-preflight-cleanroom-names-uninstalled-lockfiles-f10-1
+3. Ticket: KS-1426 (Linear, Backlog, P3 Medium, assignee kamil.kreiser@secuura.ai, 0 comments). The comment naming this PR on the ticket is Wednesday's batch; I wrote none. Default `Refs`, no closing keyword, live run owed, the ticket does not move to Done. The ticket's own "Not claimed" section declines a fix, which is why.
+4. Test Evidence: written by me and in the PR body (sha256/16 87db282f266c134b, round-trips identical). Summary: RED on the base script rc 1, 3 passed / 2 failed; GREEN rc 0, 5 passed / 0 failed; both read by the suite's summary line AND my own PASS/FAIL line count; own extra arms 10 of 10; hook 75 of 75 shell suites, 13 code guards, 12 of 15 legs ran, 0 failed.
+5. NOT done / NOT covered: the four platform suites (UNMEASURED, no local stack); a live run of the changed leg on a developer machine and on CI (owed); the install-widening (a later change, not in this PR); shellcheck (not installed); anything about CI behaviour, because no pull_request workflow has run on this head (see Actions).
+
+## Actions, read before this mail (COMPLETED runs only)
+1 run on the head, "Dependabot standalone locks" (pull_request_target), completed, SKIPPED; no other workflow has a run for it. Re-read at 03:01Z: unchanged. Nothing to set-compare job by job; I quote nothing else. Cause UNMEASURED. Candidate, not asserted: pull_request workflows are not scheduled while the PR reads `dirty`.
+
+## The state the merge seat inherits
+PR #1450 is `dirty`: develop moved to 87f005901b00 (a KS 1410 squash) after my push. `git merge-tree` in my scratch store names EXACTLY TWO conflicted files, both HTML docs; the script and the test merge cleanly. The docs block of this PR shares a base line with gate81's, with #1447's, #1448's and #1449's; the keep-both is a later merge seat's. It already conflicts with develop now, as measured. Once a merge-in creates a new head, Actions will need re-reading on THAT head. I did not rebase or merge in.
+
+## CLAIM LEDGER   (claim | instrument | result | UNMEASURED?)
+1. The payload is applied byte-for-byte, no deviation | two independent apply paths (temp-index at ITEM 0; working-tree apply), blob ids by ls-tree AND rev-parse; whole-diff cmp after normalising 2 hunk-header suffixes, with 3 tamper controls | product 4948fe691609, test 5caa1b750fa3 equal; normalised diff sha256/16 503b0cda009442f6 == patch.diff | measured
+2. RED on the base script | suite summary line + my line count | rc 1, 3 passed / 2 failed (cells 1, 2 fail; 3-5 controls pass) | measured on MY worktree at MY base
+3. GREEN with the change | same two instruments | rc 0, 5 passed / 0 failed | measured
+4. The new test does not write the caller's .git/config | sha256/16 of the shared config around 4 runs AND after the hook's own run, with a discriminating control; two-cwd full-output byte compare | 4f624a213933d54b at every bracket; 506 B and 404 B identical | measured; a TMPDIR inside a repo UNMEASURED
+5. The leg's exit code is unchanged when git fails | 3 stub-git variants (each shown to take effect first) + a real tree with no .git | 0 equals the unstubbed 0 in 4 of 4 | measured
+6. The printed surface line can be WRONG when git partly fails | the same stubs | S2 prints "0 of 6" and lists six paths (three were installed); S3 prints "0 of 0" | measured, a FINDING (F1)
+7. The empty-array guard is safe on bash 3.2.57 | extracted function under set -u, unguarded-expansion control that aborts | guarded rc 0; unguarded "unbound variable" | measured
+8. The empty-CHECKED call is unreachable through the main path on 3.2.57 | base and patched script, zero locks, no args | both abort at the "${DIRS[@]}" loop, rc 1, before report_surface | measured, PRE-EXISTING (F2)
+9. On this repo the leg would print "surface: 35 of 45" and list 10 paths | git ls-files vs git ls-tree (45 == 45), find in a full checkout (35) | computed; assumes all 35 pass | COMPUTED, THE LEG WAS NOT RUN on the real tree
+10. Shell-suite population 74 -> 75 | runner --list, flat find over both roots, ls-tree of the base; decoy control | 75 / 75 / 74; the hook's "of 75" | measured
+11. The hook's result | the raw log, gatelinesf5.py plus an independent awk read for the three fixture suites | 75/75, 13 guards, 12/15 legs ran, 28/0 6/0 59/0, no FIXTURE BUILD FAILED, no [format-gate] | measured; the 3 skipped legs are "local stack not up"
+12. The docs are a pure append and pass the matrix gate | docblockf7 internal gates, my own read-back (added bytes == fragment, removal gives the base blob, tag counts balance, unbalanced-fragment control), html_docs_matrix 12/0 | 7,743 B and 3,155 B | measured
+13. The one sibling suite shows no new failure | before/after run with the product reverted then restored and verified | preflight_deps 56/0 == 56/0, identical output | measured, WEAK: it plants a stub of the leg (its :312) and never runs the changed code
+14. Section 5d | program over the commit | 2 of 35 product lines carry the key (lines 91, 164), 1 of 107 test lines (line 3); I do NOT claim every line | measured; whether that satisfies 5d is yours
+15. The hook's base | my read-only recomputation (it printed no SHA) | stale ref ae9bf6828f88 -> 22 files vs 4 for the true base; inflates, safe direction | RECOMPUTED, not the hook's print
+16. The conflict set against develop 87f005901b00 | git merge-tree in my scratch store | exactly the two docs | measured at that develop
+17. The surface line prints sensibly on CI's checkout | none | none | UNMEASURED (no run)
+18. The four platform suites, shellcheck | none | none | UNMEASURED
+
+## Proposed TEST BLOCK line (you build the block)
+The pass that proves it: `bash Blockchain/Dev/scripts/__tests__/ks1426_lockfile_cleanroom_names_its_surface.test.sh` from any directory, expecting "5 passed, 0 failed", rc 0 (on the base script it is rc 1, 3 passed / 2 failed). What the human does: run that once; then run `bash Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh` once on a developer machine (it runs 35 npm dry-runs) and read the new lines. The computed expectation, NOT a measurement, is `surface: 35 of 45` listing 10 paths.
+
+## Proposed TIER
+Tier 2, with both extra arms and the three stub-git variants (all run, all in the PR body). Justification: the changed file is a gate script that CI and preflight run (pr-lockfiles.yml:40, CONTRIBUTING.md:377), so its bytes matter; the exit-code logic is untouched (4 of 4 cases equal); the new output cannot fail the gate by construction (return 0), but it can print a wrong number (F1), which is why it is not tier 1.
+
+## What Kamil should be shown
+(Review authority: platform-k base code is Kamil's.) 1) The 35-line product hunk, especially F1: the function guards 1 of its 3 git calls, so a partial git failure prints a wrong count on a screen that exists to be honest. His call whether F1 is a ticket; I filed nothing. 2) The computed list of the 10 locks the leg does not install (connectors/whatsapp-bot, mobile/secuura-app, the workspace root, tests/e2e-v2, tests/e2e, observability, and the four systemTest locks). 3) That the one sibling suite is weak evidence. 4) That the hook computed its base from a stale ref (22 files vs 4).
+
+## FINDINGS for your routing (I file nothing)
+- F1 above. F2: the base script aborts on an empty lock corpus under bash 3.2.57 (pre-existing).
+- The shared checkout's refs/remotes/origin/develop is stale at ae9bf6828f88 and the hook falls to it (you have this one).
+- lockf3.sh and pushf3.sh classify co-tenant locks by PATH and print the holder without asserting it; today that was right (R 33rd held .push-lock-d8 with seat field "Secuura/Blockchain-R ra33", and the name is in the tools' WAIT set) but it is the "attribute by the seat field" rule living only in the seat's head.
+- The base became present in the shared store between 02:04 and 02:30 by another seat's objects-only transfer; mine was a recorded no-op.
+
+## TRIAL DATA (every step where I needed a correction or an extra instrument)
+1. The bare cockpit read named you (6th recurrence); the pinned assert plus process ancestry caught it in the same call.
+2. My watcher arm-runner reported a held watcher as exited; two instruments disagreed (matcher direct: 0 NEW; ps file: still alive). The fault was my scaffolding.
+3. The whole-diff cmp failed twice for real reasons (file ORDER, then hunk-header suffix); my first tamper control was vacuous (BSD sed has no `0,/re/`) and was redone with edits proved to land.
+4. My doc arm r4 overclaimed (it refused at the fragment-number gate); relabelled, and a real duplicate-number arm r6 added.
+5. A banner showed /opt/homebrew/bin/git beside Apple's version (PATH= does not reach a builtin in bash 3.2).
+6. A bare ps count read 2 watchers, then 1 (a forked subshell shares argv); now counted by parent.
+7. My polling loop took an EMPTY .rc placeholder file for "done" and exited after one beat; fixed to require a non-empty rc.
+8. Two of my own scripts tripped on shell traps: an awk `~` against a built pattern ("|15|" is an illegal regex) and a Python `%` format against the text "pane %34". Both found by running, neither reached a mail.
+9. My composer's own key guard caught the verbatim-quoted hook line that contains a foreign hyphenated key; I allowed exactly that one quoted occurrence and kept the guard strict elsewhere.
+10. Model, by step as my session reported it: the launcher pinned claude-opus-5, and boot, ITEM 0, the matcher and watcher re-key with their proofs, and the plan mail ran on it. The /model switch to claude-sonnet-5-5 landed right after the plan mail, so the remaining tool re-keys (objwt, twolock, s1, pushwrap, commit, the gate arms), the lock wait, the build, the doc blocks, the commit, the push, the raise, the STATUS and this mail ran on claude-sonnet-5-5.
+
+## Next
+WRAP. I have not read my own ctx.
+
