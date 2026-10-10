@@ -1,0 +1,75 @@
+--- a/Blockchain/Dev/services/demo-service/src/routes/reset.ts
++++ b/Blockchain/Dev/services/demo-service/src/routes/reset.ts
+@@ -69,6 +69,6 @@
+     return res.status(500).json({
+       success: false,
+-      error: { code: 'INTERNAL_ERROR', message: message, failedStep },
++      error: { code: 'INTERNAL_ERROR', message: 'Internal server error', failedStep },
+     });
+   }
+ });
+--- a/Blockchain/Dev/services/demo-service/src/__tests__/reset.test.ts
++++ b/Blockchain/Dev/services/demo-service/src/__tests__/reset.test.ts
+@@ -237,4 +237,62 @@ describe('POST /demo-api/reset', () => {
+     // KS-150: envelope shape — the human-readable text is `error.message`.
+     expect(body.error.message).toContain('X-Demo-Reset');
+   });
++
++  // KS-1410: the 500 catch answered the thrown error's own text (`message: message`) with no NODE_ENV guard,
++  // so a driver message or an internal host:port reached the client. The fix answers a constant message and
++  // keeps the log (`logger.error`) and `failedStep`. The marker below is one no other code path could produce.
++  const KS1410_LEAK = 'connect ECONNREFUSED 10.0.4.17:5432 ks1410-demo-private-detail';
++
++  function failPgRestoreWithLeak() {
++    vi.spyOn(fs, 'accessSync').mockReturnValue(undefined);
++    const mockExecFile = vi.mocked(execFile);
++    mockExecFile.mockImplementation((_cmd: any, _args: any, callback: any) => {
++      callback(new Error(KS1410_LEAK), { stdout: '', stderr: '' });
++      return undefined as any;
++    });
++  }
++
++  it('RED KS-1410 R1: the 500 body never carries the thrown error text', async () => {
++    failPgRestoreWithLeak();
++
++    const app = createApp();
++    const res = await startServer(app, 'POST', '/demo-api/reset', {
++      'X-Demo-Reset': 'true',
++    });
++
++    expect(res.status).toBe(500);
++
++    const body = await res.json();
++    expect(JSON.stringify(body)).not.toContain('ks1410-demo-private-detail');
++    expect(body.error.message).toBe('Internal server error');
++  });
++
++  it('control KS-1410 RC1: the 500 body keeps success false, the INTERNAL_ERROR code and failedStep', async () => {
++    failPgRestoreWithLeak();
++
++    const app = createApp();
++    const res = await startServer(app, 'POST', '/demo-api/reset', {
++      'X-Demo-Reset': 'true',
++    });
++
++    expect(res.status).toBe(500);
++
++    const body = await res.json();
++    expect([body.success, body.error.code, body.error.failedStep]).toEqual([false, 'INTERNAL_ERROR', 'database']);
++  });
++
++  it('control KS-1410 RC2: the thrown error text is still logged server-side', async () => {
++    failPgRestoreWithLeak();
++    const { logger } = await import('../utils/logger');
++
++    const app = createApp();
++    await startServer(app, 'POST', '/demo-api/reset', {
++      'X-Demo-Reset': 'true',
++    });
++
++    expect(logger.error).toHaveBeenCalledWith(
++      'Demo reset failed',
++      expect.objectContaining({ failedStep: 'database', error: expect.stringContaining('ks1410-demo-private-detail') }),
++    );
++  });
+ });

@@ -1,0 +1,66 @@
+Refs KS-1426 — https://linear.app/secuura/issue/KS-1426/preflight-leg-2s-clean-room-install-scans-four-directories-so-6-of-the
+
+Raised from a Wednesday-held Spark pass, re-proved by Seat F 10th on develop `a78413d3de3e`, then fixed by Seat F 11th with a second commit (`bbcbea0e3157`) after the QA gate returned NO GO on the first. This PR refs the ticket and leaves it open: it makes the gap visible and does not close it. A live run on a developer machine and on CI is owed, and the ticket does not move to Done.
+
+## What changes
+
+`Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh` (preflight leg 2) prints `All N standalone lock(s) pass clean-room npm ci.`, where N counts the locks that a `find` over `services packages frontend scripts` reaches. That line reads like a total; it is a surface. The ticket measured 6 of the 36 locks one earlier PR changed as outside it.
+
+`report_surface` runs after that line when the leg was started with no arguments. It runs `report_surface_lines` in a subshell with git's own list of repository-local variables unset (`git rev-parse --local-env-vars`), asks git for the tracked `package-lock.json` files, prints how many of them the leg installed, and lists the paths of the rest. It ends in `return 0` whatever its subshell does, and the leg's exit-code lines are not edited. What the leg installs is not widened: the `find` line is untouched, so the install-widening is a later change.
+
+**Why a second commit.** The first commit printed the wrong count from a linked worktree. git exports `GIT_DIR` to a pre-push hook that runs in a linked worktree, and with `GIT_DIR` set `git rev-parse --show-prefix` prints an empty string at rc 0 while `ls-files` still lists repository-relative paths, so no lock matched the prefix. The pre-push run of the first commit, from a linked worktree, printed `surface: 0 of 45` and listed 45 of 45 paths (line 49 of its push log). In a scratch repo with a real `pre-push` hook and a real `git push`, the first commit printed `3 of 6` from a main checkout and `0 of 6` from a linked worktree; this head prints `3 of 6` from both. The same four pushes with Apple git 2.50.1 first on `PATH` gave the same four lines.
+
+At the base git tracks 45 `package-lock.json` files (`git ls-files` and `git ls-tree` agree) and the `find` reaches 35. **Computed from those two file lists:** if all 35 pass, the new lines read `surface: 35 of 45` and list 10 paths. The pre-push hook's own run of this head, from a linked worktree, printed `surface: 35 of 45`, equal to the computation; the first commit's run printed `0 of 45`.
+
+## Payload
+
+The first commit (`d1d8b91b7c1f`) applied the canonical payload byte-for-byte; **no deviation**. Both sections passed `git apply --check`, and the committed blobs (`4948fe691609` for the script, `5caa1b750fa3` for the test) equal the blobs from an independent temp-index apply at the start of that session. Against `patch.diff` (sha256/16 `503b0cda009442f6`) the applied diff differs in the function-context text git appends to its two hunk headers and in no other line; that normalisation was checked against three tamper controls that each change the verdict. The second commit (`bbcbea0e3157`) is not part of that payload: it is the fix round, written for this ticket.
+
+Section 5d, counted by program against the base: 74 lines were added to the script and 6 carry `KS-1426` (new-file lines 91, 100, 106, 113, 134, 203); 248 were added to the test and 2 carry it (lines 3, 107). The remaining added lines do not repeat the key; the guard messages and the wrapper body sit directly under a comment that does.
+
+## Test Evidence
+
+**Touched** (4 files, 365 insertions, 1 deletion by `git diff --numstat` against the base; 4 files changed, 365 insertions(+), 1 deletion(-) by `--shortstat`)
+- `Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh` (+74/-1, committed mode 100644)
+- NEW `Blockchain/Dev/scripts/__tests__/ks1426_lockfile_cleanroom_names_its_surface.test.sh` (+248, committed mode 100644)
+- `Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` (+23, block 53.)
+- `Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html` (+20, section KS-1426)
+
+**Ran** (Seat F 11th for the second commit, Kamils-Mac-Studio, 2026-10-10 UTC, `/bin/bash` 3.2.57; the leg's git in the suite is Apple git 2.50.1 and my shell's is Homebrew git 2.51.0; node and npm are stubs, no package was installed; the suites run as `bash <file>` and no vitest or jest process is involved)
+- New suite, 14 cells (cells 1 to 5 are the first commit's, byte-identical): script at the base blob **rc 1, 4 passed / 10 failed**; script at the first commit **rc 1, 9 passed / 5 failed** (cells 6, 7, 8, 9 and 13: an inherited `GIT_DIR`, a real linked worktree, a failing `--show-prefix`, a failing `ls-files`, an unusable local-variable list); with the change **rc 0, 14 passed / 0 failed**. Each count was read from the suite's own summary line and from a count of its `PASS:` and `FAIL:` lines; the two agree in all runs.
+- Run from a non-repo directory and from the worktree, the full output was byte-identical (1,136 B), and the shared `.git/config` hash was the same before and after. This agrees with line 35 of the script, `cd "$(dirname "$0")/../.."`, which puts the leg's git calls inside the scratch repo.
+- Tamper proofs: 13 mutated copies of the changed script, each shown to differ by hash before the suite ran; 11 turn at least one cell red, a no-op edit stays 14 / 0, and a non-git `return 1` alone stays green because the wrapper's `return 0` discards the body's status (an equivalent mutant; with that `return 0` also removed, cell 12 fails). All 9 new cells turn red under at least one copy.
+- My own extra arms, 33 of 33 assertions: the leg's exit code equals the first commit's in 12 of 12 cases (main checkout, inherited `GIT_DIR`, five stub-git variants, a tree with no `.git`, a failing lock, one directory on the command line, all locks untracked, node 18 with no Docker); the output is byte-identical to the first commit's in 7 and different, as intended, in the 5 that exercise the fix.
+- Real `pre-push` hook, scratch repo and bare remote outside any project repo, a real `git push` from a main checkout and from a `git worktree add`-ed linked worktree: the first commit printed `surface: 3 of 6` from the main checkout and `surface: 0 of 6` (6 paths listed, 3 of them installed by the leg) from the linked worktree; this head prints `surface: 3 of 6` (3 paths listed) from both. The hook logged `GIT_DIR` as unset from the main checkout and as the worktree's gitdir from the linked worktree. Same results with Homebrew git 2.51.0 first on `PATH` and with Apple git 2.50.1 first (8 pushes).
+- An empty `CHECKED` under `set -u` on `/bin/bash` 3.2.57: the unguarded expansion aborts with `unbound variable` and the guarded form `${CHECKED[@]+"${CHECKED[@]}"}` returns 0, driven on the extracted functions (`report_surface_lines` and `report_surface`). The in-repo comment at lines 128-132 of the base script documents the same hazard as measured.
+- The one suite that names the leg, `preflight_deps.test.sh`: 56 passed / 0 failed with the changed script. **Weak evidence:** it plants a stub in place of the leg (its line 312), so it does not run the changed code.
+- Shell-suite discovery **74 -> 75**, read by `run-shell-suites.sh --list` (75 suites listed, the new one included) and by the pre-push hook's own `of 75`; this PR adds no suite file beyond the one in the first commit.
+- The pre-push hook on this head (`bbcbea0e3157`) printed:
+```
+shell suites: 75 passed, 0 failed, 0 skipped (of 75)
+OK — 13 code guards passed.
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+(fixture suites, extracted from the same log by gatelinesf5.py: passed, failed)
+pre_push_hook_base.test.sh                   (28, 0)  OK
+pre_push_hook_base_fixture_guard.test.sh     (6, 0)  OK
+run_shell_suites.test.sh                     (59, 0)  OK
+```
+- `html_docs_matrix.test.sh`: 12 passed, 0 failed, run after the doc edits and before the commit. Each doc minus its fragment equals its base blob byte-for-byte (checked by program for both documents: the fragment is an exact insert before the closing tags), and the length deltas (12,055 B and 3,825 B) equal the fragment sizes. The fragments were edited in place by hand; removing the edits reproduces the first commit's blobs. The key block appears once per document and flow `53.` once.
+
+**NOT run**
+- A live run of the changed leg on a developer machine and on CI. The ticket does not move to Done.
+- The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are UNMEASURED and are not claimed as passing. The hook's skipped legs each printed a `SKIP` line (3 `SKIP — local stack not up` lines in this push's log); see the PREFLIGHT line above.
+- `shellcheck` (not installed on the host that ran this).
+- The timings already in the two documents were not re-measured, and this change adds none.
+- GitHub Actions results for this head are read by the coordinator at the gate and are not quoted here.
+
+**NOT covered, noted and not changed**
+- The leg's surface line is not printed when the leg exits early (a Docker advisory SKIP, an infra SKIP, a FAIL); the `OK` line preflight prints afterwards is not qualified in those cases. A follow-up, not part of this PR.
+- Clearing git's repository-local variables also clears `GIT_CONFIG_PARAMETERS` (a `git -c` option), which is on git's own list; the first commit's real push had it set. If that made git refuse the repository, the line would read `not a git checkout - cannot list` at rc 0. On this head's real push the surface line printed `surface: 35 of 45`, so the clear did not stop git from reading the repository there.
+- Beside the change, measured on the base script as well: with zero locks in the four directories and no arguments, `/bin/bash` 3.2.57 aborts at the `for dir in "${DIRS[@]}"` loop with `unbound variable` (rc 1) before `report_surface` is reached. This PR does not cause it.
+- Whether the surface line prints sensibly on CI's own checkout is not measured here; a depth-1 clone of the base gave the same 45 locks. CI cannot show it: 1 of the 17 workflow files runs this leg (`pr-lockfiles.yml`, line 40), that workflow is path-filtered to `**/package.json` and `**/package-lock.json` (lines 18 to 20), and this PR touches neither. The instruments are the pre-push hook's own line and a live run on a developer machine, in a main checkout and in a linked worktree; that run is owed.
+- The install-widening the ticket discusses is not in this PR.
+
+**Migrations / config:** none. No SQL, manifest, lock, baseline or spec edit.
+
+**Docs.** Flow block 53. and cheat section KS-1426 sit at the end of both documents, before the closing tags, and were edited in place by the second commit; no flow number was added.
