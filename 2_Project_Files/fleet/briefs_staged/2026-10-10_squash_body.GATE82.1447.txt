@@ -1,0 +1,9 @@
+Refs KS-1456 — https://linear.app/secuura/issue/KS-1456
+
+run-migrations.sh printed "the remaining applied=N-counts-skips defect is KS 808" on every failed run. Commit ae9bf6828f88 (KS 808 item 2) made the runner count skipped migrations apart from applied ones, so that sentence named a defect the runner no longer has. The two echo lines that carried it are now one.
+
+The exit code (3), the Summary line and the clean-run path are asserted by cells 2-4 of the new suite, which pass at the base and after the change. One shell comment line after the message states the prior behaviour and carries the ticket key; it prints nothing (the failed-run output with and without it is byte-identical: 897 bytes, rc 3 each).
+
+Raised from a Wednesday-held Spark pass, re-proved by Seat F 8th on develop 76b683c7dcd0. The payload was applied byte-for-byte (tree 2e752151f35c); the one comment line is the only addition to it, per Wednesday's ruling on the key-in-comment rule.
+
+New suite: Blockchain/Dev/scripts/__tests__/ks1456_run_migrations_failed_run_names_no_closed_defect.test.sh. Base: rc 1, 3 passed / 1 failed. After: rc 0, 4 passed / 0 failed. Shell-suite discovery 74 -> 75. The migration runner was not run against a database; a live run is owed and the ticket does not move to Done.

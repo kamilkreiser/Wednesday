@@ -1,0 +1,33 @@
+MODEL: claude-sonnet-5-5 (as my session reports it).
+
+BLUF. **Actions on M for #1447 are TERMINAL: 0 NEW failures, at workflow level AND job level** (poll_actionsra34.py rc 0, read UNPIPED). Five jobs fail on M; every one fails identically on develop's own push run or on the gated head, with the same failing STEPS. Schemathesis is GREEN. No STOP. The squash waits for your body, GO and ADDENDUM; my R-9 scripts for this row are instantiated and waiting on them.
+
+Poll: started 05:02:22Z by FULL head_sha d4491564bbde5dccd0bd513b1e471e2dc6b816d6; fabricated-sha control total_count 0 (enforced by the tool); TWO AGREEING TERMINAL POLLS at 05:21:54Z (19 min 32 s: longer than R 33rd's ~15 because the `pr` build job took ~12 min before the four platform suites started at 05:13:57Z). References: develop's own runs at 40ed3573b491 (D) and the gated head 68a20b9bd374's pull_request runs (H). Output: row1447/r8_poll.out; detail: row1447/r8_detail.out.
+
+WORKFLOW LEVEL, by workflow id
+ 312736089 Dependabot standalone locks  M=skipped  D=no run  H=skipped  -> pass
+ 287315271 PR Security Gates (KS-168)   M=failure  D=failure H=failure  -> fails-on-D-too
+ 306926425 PR - Lockfiles (path-skip)   M=success  D=no run  H=success  -> pass
+ 243569498 Security Scanning            M=failure  D=no run  H=failure  -> fails-on-H-too (no develop run exists)
+ 307901253 pr                           M=failure  D=failure H=failure  -> fails-on-D-too
+ 309244197 pr-premerge-ack              M=success  D=no run  H=success  -> pass
+CLASSES: workflow {pass 3, fails-on-D-too 2, fails-on-H-too 1, NEW 0}; job {fails-on-D-too 4, fails-on-H-too 1, NEW 0}.
+
+JOB LEVEL, every failing job on M on its own (5 examined)
+ 287315271 Code Security Gates     D=FAIL H=FAIL -> fails-on-D-too   step 12 "All shell test suites (KS-66..)"
+ 243569498 Dependency Audit        D=absent H=FAIL -> fails-on-H-too step 7 "Audit-contract suites (the g..)"
+ 307901253 Akto suite (PR)         D=FAIL H=FAIL -> fails-on-D-too   steps 8 "Boot Akto stack + import spec", 16 "Enforce Akto PR result"
+ 307901253 Performance (k6 smoke)  D=FAIL H=FAIL -> fails-on-D-too   steps 10 "Enforce Performance result", 11 "Upload performance reports"
+ 307901253 Playwright suite        D=FAIL H=FAIL -> fails-on-D-too   steps 7 "Quality gate - unit suite", 11 "Upload Playwright report"
+**ALL failing-STEP sets equal their reference: True** (the poll classifies by job NAME, so I compared the steps inside each failing job separately; a NEW failing step could otherwise hide in an already-failing job).
+
+RECORDED FROM THE FULL JOB LIST of the `pr` workflow: **Schemathesis suite = success**; `build / Build + push platform images (fresh)` = success (no Docker Hub outage on this run).
+
+CI SHELL SUITES, KS-168 job log, M vs develop (job logs 302 to a signed URL: followed WITHOUT the Authorization header, with a positive control `'shell suites' in log` True on both, so an empty body cannot read as zero): **M 70 passed, 5 failed, 0 skipped (of 75); develop 69 passed, 5 failed, 0 skipped (of 74).** One more passing, the same five failing: exactly the gate's V:74 expectation for the new ks1456 suite. Not identical to develop's figures, as it should not be: M carries one more suite.
+
+DEPENDENCY AUDIT (no develop run exists): the log signature on M == the gated head's: ERR_MODULE_NOT_FOUND x6 and "Cannot find package 'semver'" x2 on BOTH (M log 43,881 B, H log 43,889 B). That is the KS-1148 class the gate attributed. One honest note: the literal `audit-locks.mjs:50` reads 0 occurrences in BOTH logs, so it is not what discriminates here; the identical M == H counts are. No PR touches that file, a manifest or a lock.
+
+#1447 carries none of the special Actions conditions (those are #1448's Q-NOCI and #1449's Q-INFRA).
+
+STATE. M is pushed; origin branch and refs/pull/1447/head both read M; develop 40ed3573b491 unmoved. Per your ruling at ctx 58: no new row from me, #1449 and #1448 go to Seat R 35th; I finish #1447 through the squash, then WRAP. Waiting for `squash_body.GATE82.1447.txt` (KS-808 de-hyphenated), the GO and the separate ADDENDUM. My go_checks takes the body file path as a REQUIRED argument (I do not guess where you write it), so please name the path in the GO's `Squash body:` line as R 33rd's GOs did.
+Watcher armed (SINCE 05:05:06.000Z). No ticket, board, comment or extranet write.
