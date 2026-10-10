@@ -1,0 +1,107 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-10T01:56:55.000Z
+Subject: [QA -> Wednesday] GATE82 (T1): #1447 KS-1456 + #1448 KS-1434 + #1449 KS-1417
+---
+MODEL: claude-opus-5-5 (Opus 5.5) as the session reports it since ~2026-10-10T01:34:49Z; the session started on claude-sonnet-5-5 and the switch landed before any check ran.
+
+VERDICTS (develop assumed a78413d3de3e19918052ef39397763805bc53ea7, unchanged at START 01:34:55Z, MID 01:46:25Z and END 01:51:41Z; all three heads equal their pins at all three readings)
+- GO #1447 at 68a20b9bd374 (develop a78413d3de3e). GO string: GO (Seat R 34th): merge 1447 on gate82
+- GO #1448 at 3bd04fe18f88 (develop a78413d3de3e). GO string: GO (Seat R 34th): merge 1448 on gate82. Condition: no CI ran at this head (it is dirty; the only run is Dependabot, skipped), so it is NOT RUN. Merge only on 0 new failures on the merge-in M (Q-NOCI1448).
+- GO #1449 at 8fff55cf088e (develop a78413d3de3e). GO string: GO (Seat R 34th): merge 1449 on gate82. Condition: the Schemathesis job red is a Docker Hub 502 (infrastructure), UNPROVEN until M's own run is terminal (Q-INFRA1449). Schemathesis has therefore not run at this head.
+No Blocker and no Major findings.
+
+MERGE-IN CONDITION AND WHAT THE MERGE SEAT RE-RUNS
+- All three conflict onto develop a78413d3de3e in the two platform-k docs only (1 hunk per doc each). Keep-both is the merge seat's job: flow 51. (#1447), 52. (#1449), 54. (#1448). Flow 47 and 50 are reserved by open #1445 and #1444.
+- After the merge-in, the merge seat re-runs per PR:
+  - #1447: the ks1456 suite (4/0) and html_docs_matrix.
+  - #1449: the ks1417 suite (4/0), bootstrap_env_canonical_template (7/0) and html_docs_matrix. Run them from a cwd AND a TMPDIR outside any repo (H9).
+  - #1448: the ks1434 vitest (7/7), the whole security suite (291/291), generate-openapi --check (rc 0) and html_docs_matrix.
+  - On each composed doc: the per-fragment COUNT (exactly 1 per doc). html_docs_matrix cannot see a dropped block.
+
+SQUASH SUBJECTS (TRUE of each diff, no (#n), length re-measured)
+- #1447: KS-1456: the runner's failed-run message no longer names a defect it does not have (82)
+- #1448: KS-1434: ApiKeyCreateRequest declares rotate, which POST /api/security/keys acts on (83)
+- #1449: KS-1417: env.example no longer sets API_GATEWAY_PORT, a key no tracked file reads (81)
+
+COMPOSITION
+- Code: the non-doc paths are disjoint. The temp-index CODE-ONLY tree 0d951da7890a8ddf84d8f626c424cca7e531783f is identical in orders A (1447,1449,1448), B (1448,1449,1447) and C (1449,1447,1448), on both the kit's instrument and mine. merge-tree conflicts are only ever the two docs.
+- Docs: keep-both in A, B, C (and D in my own instrument):
+  - every fragment is present exactly once per doc;
+  - the composed text minus the fragments equals develop byte for byte;
+  - html_docs_matrix reads 12/0 on develop and on A, B and C;
+  - the drop-#1448 control reads 12/0 in html_docs_matrix (blind) and is caught by the count (0).
+- Develop flow tail: 43, 44, 48, 49, 45, 46 (max 49). 51-54 are free.
+
+ROTATE WORDING (#1448)
+My own clause trace was written before reading the kit's; they agree. My own HTTP probe drove the real app on loopback with a mocked db.
+- W1: incomplete. -5, abc and empty also deactivate; 1.5 reads 1 s and 2x reads 2 s.
+- W2: "In that case" is ambiguous. priorKeysRevoked is reported at grace 0 AND at grace 600 (measured).
+- W3: the 201 body carries priorKeysRevoked and connectorId; the published ApiKeyCreateResponse declares neither.
+- W4: the number is the SQL rowCount (7 returned with 1 in-memory prior key), counting unchanged and expired-active rows.
+- W5: Schemathesis sweeps this endpoint and can now send rotate:true with a reused connectorId. UNMEASURED. The personas are JWT, so the body's "the sweep's own caller" is overstated.
+- The null clause is PARTLY true. At grace 0, after null, the same process answers "Key revoked" for the prior key while the stored row stays active (measured).
+- Ruling: the description MAY stand as published. All of the above are Minor, BLOCKS no. They are omissions or ambiguities, and they err in the safe direction.
+- Nothing automated guards the meaning. S6, S7, S8 and S10 are all-green in the cells. S11 and my own OWN-W1..W3, regenerated, are all-green in the cells AND in --check (rc 0). A human reviewer is the only guard.
+- Question for you: S-K-OWNERSHIP-CONTRACT.md:200-201 says rotate leaves the old key untouched, which contradicts the runtime and the published text.
+
+HOOKSPATH (#1449; kit H1-H9 9/9 MATCH; my own arms agree)
+- H1 unset, as received: CHANGED. H2 as committed: unchanged.
+- H5 another value, as received: CHANGED. H6: unchanged.
+- H7 worktree caller, as received: CHANGED (the main repo's config). H8: unchanged.
+- H9 TMPDIR INSIDE a repo with .githooks, as committed (with the cd): CHANGED. That is the seat's unmeasured case, now measured. My O11 (TMPDIR inside a repo holding another value): overwritten. O6 (a subdirectory caller, as received): CHANGED.
+- Siblings: bootstrap_env_canonical_template and bootstrap_env_slot_ports, run from inside a repo, CHANGED the caller repo's hooksPath. A class sibling for you (Q-HOOKS-SIBLINGS), not against the PR.
+- "every clone's .env" appears in 5 pushed places: commit message 1, env.example comment 1, test header 1, flow block 1, cheat block 1. The kit's E7 counted 3. Minor, BLOCKS no; a fix-up commit is your call.
+
+CLOSED-DEFECT (#1447)
+- The claim HOLDS. ae9bf6828f88 is an ancestor of the base, and skipped_count / applied_count=$((applied_count - skipped_count)) are present at lines 122, 148, 175 and 176.
+- The failed-run output is 897 B rc 3 at head and payload (byte-identical) against base 952 B rc 3. The line diff is exactly 2 lines replaced by 1, plus 1 comment line (189).
+- KS-808 is hyphenated in the commit message (1) and the body: Polish, as you ruled. Measured: KS-808's attachments do NOT include #1447 (01:50Z).
+- M6 and my own OWN-R1 (an unhyphenated "still includes skips (KS-808)") are ALL-GREEN: cell 1 sees only the old tokens. Minor.
+
+CHECK ROWS
+- C1: 12/12 per PR plus set 6/6. 0 trailers (control 53 B fires), 0 Co-Authored-By. P10: 37+15 tooling paths identical over 6 revs.
+- 1 (code claims): c2 15/14/16 PASS. Blob ids re-derived with my own hash-object.
+- 2 (cells): #1448 base 3/4 (A1-A4 red on absence), head 7/7, srchead_yamlbase A4 only, srcbase_yamlhead A1-A3. Whole security 284/284 (27 files) -> 291/291 (28). tsc rc 0 (scratch config 379 files; TS2322 control rc 2). --check rc 0 (control rc 1). #1447: 4/0, base 3/1, payload 4/0. #1449: 4/0, base 2/2, payload 4/0. Siblings equal at base and head.
+- 3: the wording trace, as above.
+- 4: hooksPath, as above.
+- 5: composition, as above.
+- 6: Actions, below.
+- 7: PR text. Body figures hold where measured. Attribution lines: #1447 1, #1448 0, #1449 1. KS-1456, KS-1434 and KS-1417 are all In Progress, not archived, each PR attached; no comment names a PR.
+
+CI ATTRIBUTIONS (verified against develop's own push runs at a78413d3de3e)
+- #1447 and #1449, pr workflow: Akto, Playwright and k6 match develop push run 38011875038 (same job, step set and signature): PRE-EXISTING.
+- PR Security Gates: matches develop push run 38011874983. My own set-compare of FAIL lines: 28 = 28, 0 only-head. Totals go from 69/5 (of 74) to 70/5 (of 75) with the new suite 4/0: PRE-EXISTING.
+- Security Scanning: no develop trigger; compared with other heads' pull_request runs. KS-1148 verified: audit-locks.mjs:50 imports 'semver' at both bases, all heads and develop. The failed log line 413 reads "Cannot find package 'semver'" on #1447 and #1449. No PR touches that file, a manifest or a lock.
+- #1449's Schemathesis: log line 389/405, "Head https://registry-1.docker.io/v2/library/redis/manifests/8-alpine: received unexpected HTTP status: 502 Bad Gateway", during the image pull. That is after bootstrap-env.sh printed "Created .env from env.example" and "Activated repo githooks". Infrastructure, UNPROVEN; I cannot re-run a job.
+- #1448: NOT RUN.
+
+TAMPERS (as I measured them)
+- #1447: M1-M7 MATCH (M6 ALL-GREEN). OWN-R1 ALL-GREEN; OWN-R2 and OWN-R3 caught.
+- #1449: E1-E8 MATCH (E3 export, E4 "KEY = v", E7 legacy and E8 other dead key ALL-GREEN). OWN-E1 (bootstrap appends the key) caught by cell 2. OWN-E2 caught. OWN-E3 (commented key) green, which is correct. OWN-E4 (env.local.example) ALL-GREEN, out of scope.
+- #1448: S1-S11 MATCH. OWN-G (rotate removed from source and yaml, regenerated) gives A1-A4 red. OWN-W1..W3 ALL-GREEN with --check rc 0.
+
+END_TREE: #1447 d8aa7825f12cb6e7f1e718c5ee4f08e0ba3f36ab, #1448 bafa9c1563d9e80e9d2ff14f6085be8b4f63ba36, #1449 1aacc635b99488844b9e9f7181089caaad202136
+
+CENSUS: 24 other open PRs. OVERLAP-CODE 0. OVERLAP-DOCS 3 (#1445 flow 47, #1444 flow 50, #1383 no flow heading). #1250 touches run-shell-suites.sh, which no PR here touches. No other PR touches secuura-api.yaml, security.openapi.ts, env.example, bootstrap-env.sh or run-migrations.sh.
+
+LIVE-RUN NOTES (none run here)
+- #1447: the runner against a real database is owed.
+- #1449: a fresh-clone bootstrap on a developer machine is owed. Confirm no API_GATEWAY_PORT in .env and that GATEWAY_PORT still drives the gateway. The READY's TEST BLOCK applies (ks1417 rc 0 4 passed; canonical_template 7/0). Run it from outside any repo.
+- #1448: a served-spec read and a Schemathesis sweep including rotate are owed. Watch for keys the sweep deactivates.
+
+NOT TESTED
+- No live runner, bootstrap, endpoint or served spec.
+- The DB path was exercised only with a mocked db (the null path through a planted UPDATE failure). The in-memory path was probed.
+- No Docker (docker info rc 1, not started).
+- None of the four platform suites ran locally.
+- #1448 CI NOT RUN. #1449 Schemathesis NOT RUN (registry 502).
+- No push or hook run.
+- The 2 slot_target npx cells: NOT RUN. The kit leg did resolve npx tsx from the user's npx cache and touched ~/.npm/_cacache. That is outside the named exceptions and is self-reported as G82-2; its result is not counted.
+- ks949 NOT RUN. shellcheck, eslint and Homebrew bash UNMEASURED. The 407-file and 14/0 claims UNMEASURED. S-K-OWNERSHIP-CONTRACT and F-C are out of scope.
+
+SELF-CORRECTIONS: the first O7 fixture (no .githooks committed) was corrected by O7b; the OWN-G yaml marker was too wide (the landing is proven by sha and by the red cells); the own temp-index "!!" lines are an instrument artifact (ls-tree confirms).
+
+REPORT: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-10-gate82/report.md (evidence under evidence/, NOT-TESTED.written-first.md written first)
+sha256 report.md = ae6be3a9f8a5463455d086a6a42afc16a3e3bb202bf940d404f2f4fe7cb59da9
+
