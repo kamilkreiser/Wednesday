@@ -1,0 +1,56 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-10T06:53:54.000Z
+Subject: [Secuura/Blockchain-F -> Wednesday] READY FOR QA (Seat F 11th): #1450 at bbcbea0e3157f703b85282506a7697a7580de1b4 -> gate84
+---
+MODEL: claude-sonnet-5-5
+RESEND: this supersedes the identical-body copy sent 06:53:42Z, whose subject lacked the "[Secuura/Blockchain-F -> Wednesday] " routing prefix (my slip). Nothing else differs.
+
+## READY FOR QA: PR #1450 at bbcbea0e3157f703b85282506a7697a7580de1b4 -> gate84
+
+PR #1450, head bbcbea0e3157f703b85282506a7697a7580de1b4 (read from origin 06:49:37Z, parent d1d8b91b7c1fc112b5019cb7b843d8e680c14203, branch feature/ks-1426-preflight-cleanroom-names-uninstalled-lockfiles-f10-1), ticket KS-1426 (stays OPEN; the ticket comment is your batch). Proposed TIER: 2 (the gate rated T2 right). One fix commit for gate83's NO GO; no merge-in; the PR is `dirty` against develop 8a7b7ece07dc on exactly the two docs (the merge seat's keep-both).
+
+## Test Evidence (what I wrote; the PR body is NOT edited, see PREPARED BODY)
+
+Fix: report_surface is now a wrapper running report_surface_lines (the old body) in a SUBSHELL with git's own `--local-env-vars` list unset (GIT_DIR must be among the parsed names, else "cannot list"), always `return 0`; the two unguarded git calls print "cannot list" instead of a number. Net vs the base a78413d3de3e: script +74/-1 (133 -> 206 lines), suite +248 (14 cells), docs +23 / +20 lines (fragments +12,055 B / +3,825 B, each an exact insert before `</body></html>`; removing it reproduces the base blob, checked by program).
+Section 5d, literally: 6 of the 74 added script lines carry KS-1426 (new-file lines 91, 100, 106, 113, 134, 203) and 2 of the 248 test lines (3, 107). I do NOT claim every changed line carries the key: the guard messages and the wrapper body sit directly under a comment that does.
+
+## CLAIM LEDGER (claim | instrument | result | UNMEASURED?)
+
+N-1450-1 DEFECT REPRODUCED at d1d8b91b7c1f | scratch repo, the head's blob (hash-object == 4948fe691609), node/npm stubs, 3 arms | main 3 of 6; inherited GIT_DIR 0 of 6; real linked worktree 0 of 6; rc 0 all | measured
+N-1450-1 MECHANISM | per-arm read of the three git calls | with GIT_DIR set --show-prefix prints "" at rc 0, ls-files still lists repo-relative paths | measured (sharper than "resolves the wrong repo")
+N-1450-1 FIXED, main AND worktree | same 3 arms on the fixed leg; 8 REAL `git push` runs through a scratch pre-push hook (Homebrew 2.51.0 and Apple 2.50.1 first), hook logged GIT_DIR unset / worktree gitdir | previous head 3 of 6 main, 0 of 6 worktree (6 listed); this head 3 of 6 both (3 listed); 8 of 8 as predicted | measured
+N-1450-1 IN THE FIELD | the hook's own line on THIS push, from the linked worktree | `surface: 35 of 45`, heading (10), 10 listed; F 10th's push of the previous head printed `0 of 45` | measured (the one real-tree run); CI and a developer-machine run still OWED
+N-1450-2 FAILURE CELLS | cells 8 (--show-prefix), 9 (ls-files) + my 12 (--show-toplevel), 13 (unusable list) | RED at the previous head: "0 of 6", "0 of 0", (12 green both ways), "3 of 6"; GREEN after, all say "cannot list", rc 0, no number | measured
+N-1450-6 SUITE BLIND SPOTS | 13 mutated copies, each LANDED (count==1, sha differs), original sha 2209767b6cfc17bf identical before and after | CAUGHT by cells: env-not-cleared 6,7; prefix guard 8; ls-files guard 9; toplevel guard 12 ALONE; list check 13; empty-line skip 14; T5b / T7 / T8 (heading shapes) 10 (+6,7); T11 (surface on a failing run) 11 (+4,10); T9x 12. STILL GREEN: the no-op control, and T9 as gate83 wrote it (a non-git `return 1` alone), an EQUIVALENT MUTANT because the wrapper's `return 0` discards the body's status. So 11 of 13 turn a cell red, and the other 2 are the control and the equivalent mutant; ALL 9 new cells turn red under some copy. T10 (CHECKED guard) skipped as ruled (unreachable on bash 3.2.57 via the main path; F2). | measured
+EXIT CODE EQUAL per case | extra arms against the previous head's script, 12 cases | equal in 12 of 12 (main, GIT_DIR, 5 stubs, no .git, failing lock, one-dir arg, all-untracked, node18+no-Docker); output byte-identical in 7, different as declared in 5; 33 of 33 assertions | measured
+SUITE | base script / previous head / this head | 4 passed 10 failed / 9 passed 5 failed / 14 passed 0 failed rc 0; summary line == my PASS/FAIL count in every run; output byte-identical from a non-repo dir and the worktree (1,136 B) | measured
+SIBLING | preflight_deps.test.sh | 56 passed 0 failed, ok-lines 56 | measured but WEAK (it plants an exit-0 stub for the leg, line 312; N-1450-8)
+DOCS | html_docs_matrix; per-fragment COUNT; tag deltas; rowspans; reverse-edit read-back | matrix 12/0 (12 ok lines agree); flow 53. x1, KS-1426 section x1; every tag open delta == close delta; rowspans == rows; reversing all 20 replacements + the 53.4 block reproduces both head blobs; no new flow number | measured (the matrix is blind to duplicates; the COUNT is the instrument)
+CONFLICT SET | `git merge-tree --write-tree --name-only` in a SCRATCH store (alternates, seeded, fetched develop 8a7b7ece07dc) | BEFORE d1d8b91b7c1f and AFTER bbcbea0e3157: rc 1, exactly the two Projects Documents HTML docs both times | measured
+0 TRAILERS | `%(trailers)` on the commit vs a control (f7ac5fd18fc3, 55 B) | 0 B vs 55 B; message byte-identical to my file (raw object); Refs x1; 0 foreign keys; 0 closing keywords (planted control fires) | measured
+COMMIT TOOL | commitf11.sh: 7 scratch gate arms before, 16 of 16 arms in the real run | inverted branch gate refused for a missing branch (and did NOT create it), a worktree on another branch, a wrong seat x3, a bad base | measured
+PUSH TOOL | pushf3ff_f11.sh FF guard, 7 scratch arms against a local bare remote + scratch lock dir; the real push | not-on-origin, wrong origin head, malformed FF_BASE, not-a-descendant, 2-ahead all refused BEFORE the lock; the real shape + a planted STOP lock stopped at the lock; the clean arm landed A->B | measured
+AUDITS | audit-gate.mjs, audit-locks.mjs in the pushing worktree | rc 0, rc 0, no advisory outside the baseline | measured
+ACTIONS | API, COMPLETED runs only | head bbcbea0e3157: 1 run, "Dependabot standalone locks", completed / skipped (same as the previous head); nothing else exists | measured; the four platform suites and shellcheck UNMEASURED
+N-1450-3, N-1450-4 | prepared sentences, see below | N-1450-3's two false sentences now say the hook's run printed `0 of 45` for the previous head and `35 of 45` for this one; N-1450-4 names 1 of 17 workflow files running the leg (pr-lockfiles.yml:40), path-filtered to **/package.json and **/package-lock.json (lines 18-20), which this PR does not touch | measured (workflow facts by git grep and a read of lines 1-30)
+
+## PREPARED BODY (Q-BODY1450: prepared, NOT sent; the live body is untouched at 87db282f266c134b, 7,923 B)
+  fc/pr_body_f11.md  (11,055 B, sha256/16 8a2562e19f21f997) built by program (fc/gen_pr_body_f11.py + fc/pr_body_f11.tmpl) from git objects and saved run outputs; every unfilled placeholder is an error; Refs x1, 0 closing keywords (control fires), 0 github.com links, 0 foreign hyphenated keys, 0 banned absolutes, Linear URL present.
+  fc/pr_body_f11.sentence_diff.txt: 40 live sentences kept, 43 removed, 50 added. The 43 include N-1450-3's two sentences, N-1450-4's, "no deviation" (true of the FIRST commit only, now scoped), +35/-1 / +107 / 5 passed / 10 of 10 / "guards one of its three git calls" / "No edit was made", and the hook block (now this push's).
+  Needs regenerating only if the head moves. Quoted hook lines are verified verbatim against the raw log (3 raw gate lines) and the extractor output (3 fixture lines, labelled).
+  THE TRUE DOC SENTENCE (your item): "Each doc minus its fragment equals its base blob byte-for-byte" IS true, but the fragment is NOT at the byte tail: both docs end `</body>\n</html>\n` and the fragment is an exact insert just before it: the flow doc by 12,055 B, the cheat sheet by 3,825 B. My generator's first assertion ("base is a prefix of new") was wrong and failed; I replaced it with the exact-insert test.
+
+## PROPOSED TEST BLOCK
+  Pass that proves it: `bash Blockchain/Dev/scripts/__tests__/ks1426_lockfile_cleanroom_names_its_surface.test.sh` from any directory: "14 passed, 0 failed", rc 0 (output byte-identical from a non-repo dir and the worktree). Human step still OWED: ONE live run of the fixed leg in a main checkout AND a linked worktree on a developer machine (35 npm dry-runs each), and on CI.
+
+## WHAT WAS NOT DONE
+No merge-in or conflict resolution; no PR body edit; no ticket comment, board or extranet write; no fetch/pull in the shared checkout; nothing for N-1450-5 (surface not printed on SKIP/FAIL) or F2 (bash 3.2.57 empty DIRS, pre-existing) or KS-1426 piece 2; the four platform suites; shellcheck; bash >= 4; twolockf3.sh (the lock tool's own proof) not re-keyed or run; the clearing of GIT_CONFIG_PARAMETERS is measured on ONE real push only.
+
+## WHAT KAMIL SHOULD BE SHOWN
+That the previous head's real pre-push run said "0 of 45" and this head's says "35 of 45" from the same linked worktree; that the same suite is red on 5 cells against the old script and green on all 14 against the new; and that the two "ALL-GREEN" gaps gate83 listed now each have a cell. Not the plumbing.
+
+## TRIAL DATA
+Model: claude-opus-5 for ITEM 0 and the plan (06:03-06:09Z); claude-sonnet-5-5 from the 06:09:20Z switch for everything else (the build, the commit, the push). Your ctx reads: 25 -> 48 -> 53%. Slips of mine caught by a control before any effect: an ls-remote glob control that could not fail; a ps liveness check with no positive control; a zsh `$VAR:ref` modifier mangling a refspec (the fetch failed before transferring anything); a `$WT` used before it was set; a harness label with a "/" so an arm never ran; a "base is a prefix" assertion that was wrong; a fixture-suite regex that matched the extractor's format, not the raw log's. One slip that cost a round trip: assuming the push tool could do a fast-forward.
+The docs block of this PR still shares a base line with the other open PRs' blocks; the keep-both is a later merge seat's.
+
