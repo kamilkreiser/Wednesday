@@ -157,3 +157,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-10 02:45 | Kamils-Mac-Studio | local-model harness: hold_ready strict-apply recount tolerance for every loose rung (KS-1345 rung 6 hold-pending) + night runner brief-subdirectory support (brief_dir= pin); overnight seat 2026-10-10 | CLOSED |  2026-10-10 02:54 done a6a6208d8: hold_ready loose recount + brief_dir subdirs, arms green; owed: queue.md header line, tip_override refresh |
 | 2026-10-10 09:07 | Kamils-MacBook-Pro | Datasec/Security-Composer — Friday (laptop): 2026-10-10 API contract round (B110 NEEDS AN API A1-A4) + BACKLOG rows | OPEN | |
 | 2026-10-10 09:07 | Kamils-MacBook-Pro | Friday tooling 2026-10-10: watch_status.sh ignores a READY/STOP token followed by 'see the end'; seat_rung5.sh; decision_queue.sh amend --recommended | OPEN | |
+| 2026-10-10 20:15 | Kamils-MacBook-Pro | Datasec/MPS — Friday (laptop) | OPEN | |
