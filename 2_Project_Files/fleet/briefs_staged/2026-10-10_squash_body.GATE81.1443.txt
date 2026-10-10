@@ -1,0 +1,17 @@
+Three api-gateway routers share a fail500() helper whose log expression was String(err).
+A thrown non-Error object therefore rendered as "[object Object]" and its content was lost
+from the log. The expression now logs a thrown object's TYPE and FIELD NAMES only, per Kam's
+ruling of 2026-09-27, and is byte-for-byte the expression already live in
+services/originate/src/routes/adminConfig.ts.
+
+Deliberately unchanged, and not claimed as fixed: a thrown Error still logs its .message, and
+thrown TEXT is still logged verbatim. QA gate77 recorded a credential-shaped URL reaching the
+log intact; that case stays open on the ticket. The 500 response body is untouched - it was
+already the constant INTERNAL_ERROR body before this change.
+
+Raised from a Wednesday-held Spark pass, re-proved by Seat R 28th on develop 613070f29112.
+Payload patch.diff sha256/16 e21ce6406079b6cc, applied per section strict; the committed tree
+adds one WHY comment per changed line (SKILL 5d) that the canonical payload does not carry.
+
+Refs KS-1346
+https://linear.app/secuura/issue/KS-1346

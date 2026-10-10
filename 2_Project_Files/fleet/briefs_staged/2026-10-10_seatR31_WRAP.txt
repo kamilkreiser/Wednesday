@@ -1,0 +1,63 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-09T23:35:51.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] WRAP (Seat R 31st): GATE81 row 1443 landed, develop f247ff85b612, #1446 #1445 #1444 to R 32nd, 0 watchers 0 locks
+---
+MODEL: claude-sonnet-5-5 (switched by you at 22:37:06Z; launched as claude-opus-5).
+
+## BLUF
+**GATE81 is 1 of 4. #1443 (KS-1346) is MERGED: squash `f247ff85b6120afd310054e7f6f7cddf142107ca` (23:25:16Z), verified at source by me and by you. NEXT ROW = #1446, then #1445, then #1444. Real develop = `f247ff85b6120afd310054e7f6f7cddf142107ca`** (ONE parent `76b683c7dcd0`, tree `6d66465f0b36434a06e7ff4a0c00dcf75a19d0ce`), NOT in the shared store. KS-1346, KS-1410, KS-937 all OPEN, none walked. **0 watchers live, 0 locks held, proved below.**
+
+## RECOMMENDATION (one item needs you before R 32nd builds anything)
+**Row #1446 will FAIL `mergeinra31_gate81.sh` as written, and the tool has no knob for it.** `audit-export.ts` is now touched on BOTH sides: base `893669657db0`, develop (#1443's change) `80116c9456bf`, #1446's head `24c4490330ba`, clean merge `49ea090ff67195427c42e0697f50d355a7134d3d` (I reproduced it: `git merge-file` rc 0, and the code-only tree on the PR base `0b85e1dfdf6cda4efd0f29e7f227fbb651d48a7d`, both == gate81). The merge-in tool's three blob checks (`:279-282` named develop paths, `:284-287` the PR's own paths, `:308-325` every non-doc path matches develop) compare M's blob to develop's or to the head's; the merged blob is neither, so one reads FAIL whichever list the path is in. The builder has a related `merged_blob_paths` branch (`build_addendumra31_gate81.py:359-404`) that the tool does not use. **Please rule a `--merged-path PATH=BLOB` extension to the merge-in tool (and the same special case in `q_direct`'s Q5) before you release #1446.** It is item 1 of the handover. I did not touch the tool: it is the batch's tool, and you ruled "do not edit mid-batch".
+
+## Handover and record
+- **`5_Project_History/HANDOVER-seatR31-2026-10-10.md`: 95 lines, sha256/16 `4371550f268d6672`**, opening "FOR R 32nd, THE FIRST THREE THINGS": (1) the next row and the merge-in tool defect; (2) the `r 32nd` traps and the tools by measured hash; (3) what lied to me (16 lessons) plus the row recipe, the complete ref-write record, the CARRIED findings and the trial record by model. It covers what you asked for: the compose port and its arms, the regenerated m7 drivers, every residue assert I ran (with their controls), the P2 arms NOT RUN for gate81, and the order 1446, 1445, 1444.
+- **History entry inserted at the TOP of `5_Project_History/history.md`**, insert-only PROVEN by hash: removing the entry's bytes from the new file hashes to `127b0c0e5eed77a2`, the pre-edit hash (`3,902,677 B -> 3,907,342 B`). (My first proof line printed a False from a mislabeled slice in my own script; the hash proof above is the real one.)
+- **Vault**: today's daily note appended (insert-only proven), then committed and pushed: `0a681d4..9ecfcd2`, **exactly 1 path staged**, the commit message names all 15 headings in the staged diff and whose they are. The vault working tree also holds 21 unrelated dirty paths (older daily notes, `*conflict_on_*` copies) that I left untouched rather than sweep into the commit. Project repo `2_Project_Files`: 0 tracked changes by me (my records live in `5_Project_History/`), so nothing to commit; no `.env` staged anywhere.
+- **Skill steps not done, with reasons**: 2b (archive Done tickets): not done, the brief forbids any board write; yours to batch. 2c (your index card): SKIPPED on purpose, the file `Secuura__Blockchain.md` carries "DO NOT OVERWRITE" (933 lines, curated; last touched 09-09) and the skill's "overwrite" would destroy it; this mail carries the card content instead.
+
+## 0 watchers, 0 locks (proved)
+- Watchers: the last one FIRED at poll 8 on your wrap ANSWER (23:28:52Z) and exited by itself. I then checked with a ps FILE: **0 processes EXECUTING `inbox_watchra31.sh`** (predicate: command STARTS with `bash <abs path>/inbox_watchra31.sh`, `$$` excluded), with a **planted-line control that matches** (pid 4242). My bare grep first read 1: that was my own earlier `zsh -c` wrapper, adjudicated by printing the pid and its command. 0 other processes of mine (m7/mergein/push/s1/poll).
+- Locks: `find worktrees -name '.push-lock-*'` returns none; `.push-lock-d8` absent. The stale `worktrees/lock-holder.json` / `lock-released.txt` artefact (`Secuura/Blockchain-F f4`, 2026-10-05) was left as the brief said.
+
+## EVERY REF WRITE (complete)
+Boot pull: DID NOT RUN (FETCH_HEAD `2026-10-09T13:27:57Z` predates launch `22:05:39Z`; `rev-parse --all` byte-equal to R 30th's wrap at ITEM 0).
+1. R-2 for #1443: recorded **no-op** (objects PRESENT; `r2.sh` refused at its own pre-check before any lock or fetch; ruling 6.1 accepted).
+2. R-3: `worktree add --detach worktrees/s-ra31-m1443` at `4547234c8c79`, under my lock 22:43:29Z-22:43:30Z; refs byte-identical, `.git/config` unchanged.
+3. R-4: merge-in M `d5e685925953b4f0e1747a3c2642de0072a51616` committed in that detached worktree (49/49 gates; no ref).
+4. R-7: push of M to `feature/ks-1346-apigw-fail500-type-and-field-names-ra28-1`, `4547234c8..d5e685925`, lock 22:52:50Z-22:59:50Z, rc 0, bare through the hook; the shared tracking ref moved with it (:434); the local branch ref did not.
+5. R-9: API squash, origin `develop` `76b683c7dcd0` -> `f247ff85b612`, PINNED at M, no `--admin`.
+My scratch clone also holds `refs/seatra31/develop` (clone only). No force, no `--no-verify`, no `-u`, no write to either develop ref in the shared checkout (`1fba82ddb2b8` / `ae9bf6828f88`, STALE and untouched), no board/ticket/extranet write.
+
+## Tickets BEFORE (22:09Z) -> AFTER (now): KS-1346, KS-1410, KS-937 all OPEN
+- KS-1346 In Progress -> In Progress, `updatedAt` `2026-10-09T18:43:25.536Z` unmoved; KS-937 In Progress, `18:49:20.082Z` unmoved; KS-1410 In Progress, `19:56:18.286Z` unmoved. Controls: KS-1345 In Progress (`#1441 merged`); KS-99999 -> 0 nodes.
+- Bot attachment change REPORTED, not reverted: KS-1346's `#1443` `open` -> `merged`. `#1444`, `#1445`, `#1446` still `open`. Live runs owed on KS-1346 (landed), KS-1410 (#1445, #1446) and gate80's KS-1345.
+
+## gate81's findings, CARRIED (not mine to fix; nothing filed)
+N-1443-1 (Polish, "263 bytes" -> 262) · N-1443-2 (Minor, the ruled expression THROWS for a Proxy with a throwing `ownKeys`/`getPrototypeOf` trap, so async `fail500` routes send NO RESPONSE) · N-1443-3 (Minor, tampers A1/A3 ALL-GREEN 860/860) · N-1443-4 (Polish) · N-1444-1 (Minor, `ln -s /shared ../node_modules/@secuura/shared` and 8 more spellings newly accepted; Docker's `USER :root` unmeasured) · N-1444-2 (Minor, tamper MT3/T4) · N-1445-1 (Minor, no cell for a non-Error throw; Z6 ALL-GREEN 85/85) · N-1445-2 (Minor, null/undefined/false map to 404) · N-1446-1 (Minor, tampers B1/B3 ALL-GREEN 854/854) · **G81-2 (Minor, `html_docs_matrix` does not see a dropped block: my compose tool PROVES it and the per-fragment count answers it; the test fix is yours)** · Q-4XX (the four 4xx `error.message` sites at base `:85 :208 :211 :213`, UNRULED).
+
+## UNMERGED / UNMEASURED
+Rows #1446, #1445, #1444 not started. Not measured by anyone this round: preflight legs 3/4/8 (no stack), Homebrew bash, Docker's `USER :root`, the live behaviour of every route. CI on M: `shell suites: 69 passed, 5 failed, 0 skipped (of 74)` on M and develop with the identical failed set; Security Scanning / Dependency Audit = KS-1148 (`semver` x2, control 0); the `pr` build job passed (no Docker Hub outage), Schemathesis success, Akto/k6/Playwright fail on develop with equal steps. **The P2 fixture arms were NOT RUN for gate81** (`run_armsra31.py` is R 30th's unported copy); stand-ins: Q1-Q6 48/48, compose 45/45, merge-in 49/49, six provenance refusal arms per mail, `m7 dry`.
+
+## Drive hygiene (left in place for Kam's word; never another seat's)
+`worktrees/s-ra31-m1443` **2,737 MB**; record folder ~10 MB; scratchpad ~35 MB (temp, goes with the session); `df -m /Volumes/DevMASTER` free **312,033 MB**. Shared `rev-parse --all` at wrap `1,672 / ef56973d283f2529` (my ITEM 0 baseline was `1,668 / d3405914b7cb8cd4`; F 8th and G 8th added the rest).
+
+## Tool hashes a successor inherits, RE-MEASURED at wrap (`_TOOL_HASHES_ra31.txt`, 29 rows)
+matcher `40f9ff948d1fae92` · watcher `b76f03fdc067604f` · sweep `c0171e2be6d18638` · lock `b7aa55e5574362e9` · pushra1_ff `dd8b1083a37fb82d` · provenance `d215ce0275a6e3f9` (tools/ and merge/) · gatelines `6fc6ff72c06a9f4c` · mergein `4b0e386d36c65750` · poll_actions `688f33e5b00b8e75` · s1 `6a15aadefef0dee5` · r7_push `c0ce03ed50ba8273` · builder `dfcc2d2f16c8bff0` · mergera1 `aaf230e7d1975213` · m7 `505424b901b8c4c1` · **compose `bad527a9effaf76a`** · **prov_arms `45e51a31c8139eff`** · q_direct (#1443) `7be4e7018a9aec32` · gen_m3_args `ce983facd634857d` · gen_m7_1443 `d7c6b0eaaf86ef8f` · m7_env/m7_drive/go_values `d52ed5497a3ab830`/`33e334713a3e9dde`/`4a2be1cba946c3aa`. **R 30th's 21 originals re-hashed: 21/21 EQUAL.** Final sweep per dir (tools, merge, boot): rc 0, 14/14 patterns live, 0 self-hits, N checked=14.
+
+## Two small things for the next brief
+1. **The matcher is missing `f 9th`** (you launched F 9th at 23:19Z). A subject addressed to F 9th reads `UNKNOWN ADDRESSEE` on my pane tag, which is the safe direction, but R 32nd's matcher should carry every live seat. Its `OTHER_SEATS` already holds `r 32nd`/`seat r 32nd` (forward-added): R 32nd must REMOVE them first.
+2. **An independent datum for the R-2 attribution**: Seat G 8th's own history entry says "the base arrived in the shared store via F 8th's branch". That agrees with F 8th as the source, but I still cannot prove who moved the objects, and my mail said so.
+
+## Trial record by model (Sonnet 5.5 on a merge seat)
+Ctx: 33% (22:33) -> 34% (22:37, release) -> 49% (23:13) -> 58% (23:28). First row ~24 points including the compose port, the regenerated drivers and the provenance harness; expect ~12-15 for later rows. 0 STOPs. Disclosed deviations: two early `cd`s; one forged trailing-comment attribution by my own re-keyer (caught by diff, restored, 0 left); one over-strong R-2 attribution (corrected); my own wrong-expectation checks (`%(trailers)` is 1 B, the `.DRY` newline, `merge-tree` output sections, `ls-tree`'s TAB). The two things your GO text did that the tool did not care about (the words "263 bytes" once in prose; two brief-listed PRESENT lines absent) were reported, and you accepted them.
+
+## Index card (the skill's Step 2c/2d content)
+**Last session (2026-10-10):** Seat R 31st landed gate81 row #1443 (KS-1346) as squash `f247ff85b612`, on a Sonnet trial. New one-head compose tool, provenance refusal-arm harness and regenerated m7 drivers; P2 arms not run (ruled).
+**Open / next:** R 32nd takes #1446 -> #1445 -> #1444 on develop `f247ff85b612`; first get your ruling on the `audit-export.ts` merge-in gate; carry gate81's findings; KS-1346/KS-1410/KS-937 stay open.
+**Blockers:** the merge-in tool cannot express a path whose M blob is the merged one (row #1446).
+**Notes for Wednesday:** please relay nothing to Kam from this mail; the ruling above is yours to give. Suggested opening prompt for R 32nd is at the end of the history entry.
+
+Subject lines I answered: `[Wednesday -> Secuura/Blockchain-R] LAUNCH BRIEF (Seat R 31st): merge gate81 rows 1443, 1446, 1445, 1444` and your `ANSWER: 1443 verified, ctx 58, wrap now (Seat R 31st)`.
+
