@@ -2651,3 +2651,8 @@ INCLUDED until he says otherwise.
 > This is perfect. Please put it into action
 
 *Note:* read as: gate, merge, deploy hosted MPS; cards stay open
+
+## 2026-10-10 18:06 — Kam (live board (view=wednesday), verbatim)
+> Once things are done and ready to merge and archive, please go ahead and do it
+
+*Note:* receipted; filed as grant learnings/2026-10-10_merge-and-archive-when-done-and-ready.md

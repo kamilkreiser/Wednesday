@@ -1,0 +1,9 @@
+Refs KS-1417 — https://linear.app/secuura/issue/KS-1417
+
+env.example set API_GATEWAY_PORT=6882. At the base, the key appears on two tracked lines outside the HTML docs, both templates (env.example:361 and env.local.example:56), and no other tracked file names it. The gateway's host port is GATEWAY_PORT (stack_env.sh:56). bootstrap-env.sh creates .env from env.example (its own log line reads "Created .env from env.example"), so a clone bootstrapped that way carried the slot-1 value 6882 under a name nothing reads. The line is now three comment lines.
+
+This refs the ticket and leaves it open: env.local.example:56 still carries the same key.
+
+Raised from a Wednesday-held Spark pass, re-proved by Seat F 9th on develop f247ff85b612. The payload was applied byte-for-byte, with two additions of mine: one comment line in env.example carrying the key and the prior behaviour, and one cd line in the new test. The test runs the real bootstrap-env.sh, which sets core.hooksPath on the repo it is run from when the value is not .githooks (bootstrap-env.sh:315-324). Measured in throwaway repos, the test as received changed an unset caller's config and the edited test did not.
+
+New suite: Blockchain/Dev/scripts/__tests__/ks1417_env_example_no_dead_gateway_port.test.sh. Base: rc 1, 2 passed / 2 failed. After: rc 0, 4 passed / 0 failed. Four other suites that name the template are rc 0 with the same counts at base and after; one of them now probes AUTH0_CLIENT_ID instead of API_GATEWAY_PORT. Shell-suite discovery at the PR's base 74 -> 75 (76 on the merge-in, which also carries the KS 1456 suite). A fresh-clone bootstrap was not run on a developer machine; a live run is owed and the ticket does not move to Done.
