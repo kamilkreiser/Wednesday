@@ -158,3 +158,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-10 09:07 | Kamils-MacBook-Pro | Datasec/Security-Composer — Friday (laptop): 2026-10-10 API contract round (B110 NEEDS AN API A1-A4) + BACKLOG rows | OPEN | |
 | 2026-10-10 09:07 | Kamils-MacBook-Pro | Friday tooling 2026-10-10: watch_status.sh ignores a READY/STOP token followed by 'see the end'; seat_rung5.sh; decision_queue.sh amend --recommended | OPEN | |
 | 2026-10-10 20:15 | Kamils-MacBook-Pro | Datasec/MPS — Friday (laptop) | OPEN | |
+| 2026-10-10 20:19 | Kamils-MacBook-Pro | pretooluse hooks: no_autostash holes ($VAR prefix, WEDNESDAY-only -C) + unquoted multi-word $VAR flag — Friday (laptop) | OPEN | |
