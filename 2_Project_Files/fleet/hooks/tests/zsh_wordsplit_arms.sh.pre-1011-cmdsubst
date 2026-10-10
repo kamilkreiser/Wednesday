@@ -28,12 +28,6 @@ arm "L bash \$SCRIPT args"                 'S="/abs/my tool.sh"; bash "$S" --x' 
 arm "M bash -c inside a longer command"    'echo start; bash -c '\''G="git -C /x"; $G status'\''' 0
 arm "N set -- quoted"                      'for p in "a b" "c d"; do set -- "$p"; echo "$1"; done' 0
 arm "O bash heredoc-fed"                   $'bash <<\'EOF\'\nG="git -C /x"; $G status\nEOF' 0
-arm "P w=4 instance: P=\$(pgrep), for p in \$P"   'P=$(pgrep -f watch_status); for p in $P; do kill $p; done' 2
-arm "Q quoted subst then set -- \$X"         'X="$(ls /tmp)"; set -- $X; echo $1' 2
-arm "R backtick subst, command position"     'C=`which git`; $C status' 2
-arm "S subst used only as a plain argument"  'P=$(pgrep -f x); kill $P' 0
-arm "T subst used quoted"                    'P=$(pgrep -f x); for p in "$P"; do echo "$p"; done' 0
-arm "U P wrapped in bash -c"                 'bash -c '\''P=$(pgrep -f x); for p in $P; do kill $p; done'\''' 0
 got=$(printf 'not json' | bash "$H" 2>/dev/null; echo $?)
 if [ "$got" = 0 ]; then P=$((P+1)); echo "ok   fail-open on bad input"; else F=$((F+1)); echo "FAIL fail-open got $got"; fi
 echo "== $P pass, $F fail"; [ "$F" = 0 ]

@@ -11,9 +11,7 @@
 #   - the command is not bash-wrapped (first word is not `bash`, so `bash -c '…'`, `bash script`
 #     and `bash <<EOF` all pass); `bash -c '…'` / `sh -c '…'` strings elsewhere are ignored too;
 #   - a variable is assigned a quoted value containing whitespace (NAME="a b", NAME='a b'), or a
-#     `for x in` list has a quoted item containing whitespace, or (Friday ledger w=4, 2026-10-10
-#     23:18: P=$(pgrep …); for p in $P; do kill …) it is assigned from a COMMAND SUBSTITUTION
-#     (NAME=$(…), NAME="$(…)", NAME=`…`), whose output is usually several words;
+#     `for x in` list has a quoted item containing whitespace;
 #   - that variable is then used UNQUOTED in a splitting position: command position
 #     ($NAME args / ${NAME} args), `set [--] … $NAME`, or `for y in … $NAME`.
 # PASSES: "$NAME" quoted uses; values without whitespace; heredoc bodies; bash-wrapped snippets.
@@ -52,8 +50,6 @@ try:
     for m in re.finditer(r"(?:^|(?<=[\s;&|(`]))([A-Za-z_]\w*)=(?:\"((?:[^\"\\]|\\.)*)\"|'([^']*)')", text):
         val = m.group(2) if m.group(2) is not None else m.group(3)
         if re.search(r"\s", val): ws.add(m.group(1))
-    for m in re.finditer(r"(?:^|(?<=[\s;&|(`]))([A-Za-z_]\w*)=\"?(?:\$\(|`)", text):
-        ws.add(m.group(1))                                  # output of a command: assume several words
     for m in re.finditer(r"\bfor\s+([A-Za-z_]\w*)\s+in\s+([^;\n]*)", text):
         if re.search(r"\"[^\"]*\s[^\"]*\"|'[^']*\s[^']*'", m.group(2)): ws.add(m.group(1))
     if not ws: sys.exit(0)
