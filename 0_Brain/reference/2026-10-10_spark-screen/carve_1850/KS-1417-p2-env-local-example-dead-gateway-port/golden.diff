@@ -1,0 +1,36 @@
+--- a/Blockchain/Dev/env.local.example
++++ b/Blockchain/Dev/env.local.example
+@@ -53,7 +53,9 @@
+ # =============================================================================
+ # SERVICE PORTS
+ # =============================================================================
+-API_GATEWAY_PORT=6882
++# The gateway's host port is GATEWAY_PORT, which scripts/stack_env.sh derives per slot.
++# Nothing is set here on purpose: a port written in this file would be a slot-1 literal.
++# KS-1417: this block used to set API_GATEWAY_PORT (6882), which nothing reads; it was copied into every clone's .env.
+ ORIGINATE_PORT=6000
+ PRISM_PORT=6001
+ WALLET_PORT=6002
+--- a/Blockchain/Dev/scripts/__tests__/ks1417_env_example_no_dead_gateway_port.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1417_env_example_no_dead_gateway_port.test.sh
+@@ -75,5 +75,20 @@
+   echo "FAIL: CONTROL bootstrap rc=$BOOT_RC, .env present=$([[ -f "$TREE/.env" ]] && echo yes || echo NO)"; FAIL=$((FAIL+1))
+ fi
+ 
++# CELL 5 (RED at the tip) - the local template (env.local.example, PIECE 2) does not set the dead key either.
++LOCAL="${ENV_LOCAL_EXAMPLE_SH:-$DEV_DIR/env.local.example}"
++if [[ -f "$LOCAL" ]] && ! has_dead_key "$LOCAL"; then
++  echo "PASS: env.local.example does not set API_GATEWAY_PORT"; PASS=$((PASS+1))
++else
++  echo "FAIL: env.local.example still sets API_GATEWAY_PORT (nothing reads it)"; FAIL=$((FAIL+1))
++fi
++
++# CELL 6 (GREEN CONTROL, tip AND after) - env.local.example was really read: it keeps its heading and a neighbouring port.
++if [[ -f "$LOCAL" ]] && grep -qF '# SERVICE PORTS' "$LOCAL" && grep -qE '^ORIGINATE_PORT=' "$LOCAL"; then
++  echo "PASS: CONTROL env.local.example is present and keeps the SERVICE PORTS heading and ORIGINATE_PORT"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL env.local.example is missing, or lost the SERVICE PORTS heading or ORIGINATE_PORT"; FAIL=$((FAIL+1))
++fi
++
+ echo "ks1417_env_example_no_dead_gateway_port: $PASS passed, $FAIL failed"
+ [[ $FAIL -eq 0 ]]
