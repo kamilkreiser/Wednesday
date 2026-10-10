@@ -43,7 +43,7 @@ for i in $(seq 1 "${WATCH_LOOPS:-110}"); do
       [ -f "$f" ] || continue   # 2026-10-05: an unmatched glob or a not-yet-written STATUS is skipped, not grep'd (it errored 100+ lines per loop)
       # A seat's DRAFT carries a placeholder line ("READY FOR REVIEW `<when-filled>`", B05 2026-09-25): lines holding a
       # `<…>` placeholder are not a READY, or the watcher fires early and then misses the real one (same count).
-      rl=$(/usr/bin/grep -n -i -E 'READY FOR (REVIEW|RE-GATE|GATE|QA)' "$f" | /usr/bin/grep -v -i -E '\bnot ready for' | /usr/bin/grep -v -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b' | /usr/bin/grep -v -i -E '(\bat|until|end at|ends at|to|before)[ *`]+READY FOR (REVIEW|RE-GATE|GATE|QA)' | /usr/bin/grep -v -i -E 'see the end')
+      rl=$(/usr/bin/grep -n -i -E 'READY FOR (REVIEW|RE-GATE|GATE)' "$f" | /usr/bin/grep -v -i -E '\bnot ready for' | /usr/bin/grep -v -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b' | /usr/bin/grep -v -i -E '(\bat|until|end at|ends at|to|before)[ *`]+READY FOR (REVIEW|RE-GATE|GATE)' | /usr/bin/grep -v -i -E 'see the end')
       n=$(printf '%s' "$rl" | /usr/bin/grep -c .); ln=$(printf '%s\n' "$rl" | tail -1 | cut -d: -f1)   # a line that PROMISES a future READY ("full table at READY FOR REVIEW", Composer B09 2026-09-25) is not one   # also READY_TIME-style tokens (Composer B06, 2026-09-25)   # "NOT READY FOR REVIEW" is not one (2026-10-03)
       # A SKELETON STATUS (READY line written first, body still template tokens: @@BODY@@, __VERDICT__,
       # CI_RESULT_PLACEHOLDER, CI-RUN2-LINE) is not a READY yet: count none until every token is gone, so the
