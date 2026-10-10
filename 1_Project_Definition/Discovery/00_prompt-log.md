@@ -2631,3 +2631,8 @@ INCLUDED until he says otherwise.
 > How is the MPS calculator coming along? Please do as much of it as possible today so that it can be ready to showcase on Monday. Host it live on Azure and once ready send me the link and logon details on email so I can test it out.   If there's anything else that needs to be done on the HPSM POC or security control creation tool, go ahead with those as well
 
 *Note:* Friday: two read-only censuses; cards mpscalc-azure-login-for-hosting-1010 + mpscalc-showcase-known-limits-1010; MPS hosted lanes A/B/C + Composer + HPSM-POC fix lanes to be briefed.
+
+## 2026-10-10 14:25 — Kam (email to friday-laptop-agent@ (03:23Z), from kreiser.org@me.com, verbatim)
+> This is an actual quote produced for a client. Please align the output of the quote tool to this do. Make it the same or as close to this as possible. Do this now if you can.
+
+*Note:* Friday: receipt on panel; attachment saved to 4_Credentials/clients/datasec/inbound (git-ignored); handed to the successor seat as OWED #1 (MPS proposal output aligned to the example).
