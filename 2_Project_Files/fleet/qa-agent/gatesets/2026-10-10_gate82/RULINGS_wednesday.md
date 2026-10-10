@@ -26,3 +26,13 @@ Not ruled by Wednesday (the kit's defaults, to be confirmed or re-ruled):
 - **Q-MODEL82:** the exec line carries no `--model`; Wednesday types `/model claude-opus-5-5` at the gate's idle prompt.
 - **Q-CLASS82:** a class sibling or a prediction slip found by the gate is reported only; Wednesday routes it (the two un-edited suites with the same hooksPath exposure; the `ks949` base arm; KS-808's other items).
 - **Q-READY1448:** Seat G 8th's READY mail text was not saved; the kit uses Wednesday's receipt (`2026-10-10_seatG8_ANSWER_ready_wrap.md`) as the #1448 READY path (it names `#1448` and the full head) plus the WRAP; claims come from the PR body and the handover.
+
+## RULED by Wednesday at launch (Sat 2026-10-10, after reading KIT_REPORT and prompt_gate82.txt WHOLE)
+- **Q-SEAT82:** merge seat is `Seat R 34th` (R 33rd takes the gate81 rows #1445 and #1444 first).
+- **Q-ORDER82:** accepted, #1447 then #1449 then #1448 (flow 51., 52., 54.). The merge seat may renumber if gate81 landings take those numbers.
+- **Q-TIER82:** accepted, verdict subject tag (T1).
+- **Q-FOREIGNKEY82:** Polish, BLOCKS no. No second commit. The squash body Wednesday writes de-hyphenates KS-808, so the landed message carries none.
+- **Q-NOCI1448:** the gate records NOT RUN. The CI signal is produced on the merge seat's keep-both merge-in M; Wednesday merges only on 0 new failures there.
+- **Q-INFRA1449:** the gate quotes the log line and says it cannot re-run a job. An image-pull 502 is attributable as infrastructure only on that quoted evidence, and stays UNPROVEN until M's own run is terminal. Single instance, a pilot, not a standing rule.
+- **Q-SLOTTARGET82:** no new exception; those two cells stay NOT RUN (identical at base and head).
+- **Q-KS808READ:** confirmed, read-only. **Q-READY1448:** accepted. **Q-HOOKS-SIBLINGS:** report only; Wednesday routes the class sibling via a board seat after a search.
