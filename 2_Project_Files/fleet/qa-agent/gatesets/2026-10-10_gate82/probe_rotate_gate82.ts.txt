@@ -1,0 +1,70 @@
+
+// ==== gate82 PROBE BLOCK (appended by c3_cells_gate82.py `probe` to a COPY of #1448's host test, services/security/src/__tests__/ks577-revoke-on-rotate.test.ts,
+// which already imports the real ../index and exposes revokePriorConnectorKeys + memApiKeys (SECURITY_DISABLE_BOOT=1). It uses that file's own helpers
+// (seed, T1, T2, memApiKeys, revokePriorConnectorKeys). FACTS only: it asserts nothing about the description; each record is one measured behaviour of the
+// IN-MEMORY path of revokePriorConnectorKeys, the clause of the published `rotate` description it bears on, written to $G82_PROBE_OUT as one JSON line.
+// NOT covered, by construction: the DB path (no database), the `null` result (only a DB failure returns null), the HTTP handler and the 201 body (auth + HTTP). ====
+import { appendFileSync as g82Append } from 'node:fs';
+
+describe('gate82 probe — the rotate description vs revokePriorConnectorKeys (FACTS, in-memory path)', () => {
+  const rec = (o: Record<string, unknown>) => g82Append(process.env.G82_PROBE_OUT as string, JSON.stringify(o) + '\n');
+  const snap = (id: string) => {
+    const k = memApiKeys.get(id);
+    if (!k) return null;
+    return { active: k.isActive, expiresInS: k.expiresAt ? Math.round((k.expiresAt.getTime() - Date.now()) / 1000) : null };
+  };
+  const seedAll = () => {
+    memApiKeys.clear();
+    seed('old', 'platform-s:ref', T1);
+    memApiKeys.set('sooner', { id: 'sooner', connectorId: 'platform-s:ref', tenantId: T1, isActive: true, expiresAt: new Date(Date.now() + 30_000) } as any);
+    memApiKeys.set('later', { id: 'later', connectorId: 'platform-s:ref', tenantId: T1, isActive: true, expiresAt: new Date(Date.now() + 3_600_000) } as any);
+    seed('inactive', 'platform-s:ref', T1, false);
+    memApiKeys.set('expiredActive', { id: 'expiredActive', connectorId: 'platform-s:ref', tenantId: T1, isActive: true, expiresAt: new Date(Date.now() - 60_000) } as any);
+    seed('otherConnector', 'platform-s:other', T1);
+    seed('otherTenant', 'platform-s:ref', T2);
+    seed('noConnector', undefined, T1);
+    seed('new', 'platform-s:ref', T1);
+  };
+  const ids = ['old', 'sooner', 'later', 'inactive', 'expiredActive', 'otherConnector', 'otherTenant', 'noConnector', 'new'];
+
+  it.each([[undefined, 'unset'], ['0', '0'], ['-5', '-5'], ['abc', 'abc'], ['', 'empty string'], ['600', '600'], ['1.5', '1.5'], ['2x', '2x'], [' 600', 'leading space 600']])(
+    'GATE82 PROBE R1 grace %s (%s): which keys are retired, and how',
+    async (raw, label) => {
+      seedAll();
+      if (raw === undefined) delete process.env.API_KEY_ROTATION_GRACE_SECONDS; else process.env.API_KEY_ROTATION_GRACE_SECONDS = raw as string;
+      const returned = await revokePriorConnectorKeys('platform-s:ref', T1, 'new');
+      const keys: Record<string, unknown> = {};
+      for (const i of ids) keys[i] = snap(i);
+      rec({ probe: 'R1-grace', grace: label, returned, keys,
+        clause: 'unset or 0 -> deactivated; positive -> expiry that many seconds from now if earlier than the current one; "the other active API keys for that connector in the same tenant"' });
+      expect(true).toBe(true);
+    },
+  );
+
+  it('GATE82 PROBE R2 the key being minted is never retired, and a rotate with no prior key returns 0', async () => {
+    memApiKeys.clear(); seed('new', 'platform-s:ref', T1);
+    delete process.env.API_KEY_ROTATION_GRACE_SECONDS;
+    const returned = await revokePriorConnectorKeys('platform-s:ref', T1, 'new');
+    rec({ probe: 'R2-self', returned, new: snap('new'), clause: 'the other active API keys (not the minted one)' });
+    expect(true).toBe(true);
+  });
+
+  it('GATE82 PROBE R3 an empty-string connectorId matches only keys whose connectorId is the empty string (the handler never calls with a falsy connectorId)', async () => {
+    memApiKeys.clear(); seed('old', 'platform-s:ref', T1); memApiKeys.set('emptyc', { id: 'emptyc', connectorId: '', tenantId: T1, isActive: true } as any);
+    delete process.env.API_KEY_ROTATION_GRACE_SECONDS;
+    const returned = await revokePriorConnectorKeys('', T1, 'new');
+    rec({ probe: 'R3-empty-connector', returned, old: snap('old'), emptyc: snap('emptyc'), handlerGate: "index.ts: `if (data.rotate && data.connectorId)` — the empty string is falsy, so the handler would not call it", clause: 'when true and a connectorId is supplied' });
+    expect(true).toBe(true);
+  });
+
+  it('GATE82 PROBE R4 a tenant boundary: a key of the SAME connector in ANOTHER tenant is untouched in both grace modes', async () => {
+    for (const g of [undefined, '600']) {
+      seedAll();
+      if (g === undefined) delete process.env.API_KEY_ROTATION_GRACE_SECONDS; else process.env.API_KEY_ROTATION_GRACE_SECONDS = g;
+      const returned = await revokePriorConnectorKeys('platform-s:ref', T1, 'new');
+      rec({ probe: 'R4-tenant', grace: g ?? 'unset', returned, otherTenant: snap('otherTenant'), otherConnector: snap('otherConnector'), clause: 'in the same tenant' });
+    }
+    delete process.env.API_KEY_ROTATION_GRACE_SECONDS;
+    expect(true).toBe(true);
+  });
+});
