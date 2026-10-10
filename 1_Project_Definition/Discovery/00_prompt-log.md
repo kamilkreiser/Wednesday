@@ -2636,3 +2636,18 @@ INCLUDED until he says otherwise.
 > This is an actual quote produced for a client. Please align the output of the quote tool to this do. Make it the same or as close to this as possible. Do this now if you can.
 
 *Note:* Friday: receipt on panel; attachment saved to 4_Credentials/clients/datasec/inbound (git-ignored); handed to the successor seat as OWED #1 (MPS proposal output aligned to the example).
+
+## 2026-10-10 16:24 — Kam (email 03:23Z kreiser.org@me.com, verbatim)
+> This is an actual quote produced for a client. Please align the output of the quote tool to this do. Make it the same or as close to this as possible. Do this now if you can.
+
+*Note:* MPS B16-B18 round launched
+
+## 2026-10-10 16:24 — Kam (email 03:28Z kreiser.org@me.com, verbatim)
+> This is the source document with calculations and detail. The quoting tool should contain all these line items and inventory. The inventory and price list was previously submitted and the quote tool should have inventory section and an ability to add and modify prices as well as margins. As is the case with this client, there was an item that was not available through the distributor and had to be added manually so this feature should also be there. Please work on all of these today and tomorrow. I will review fleet activities later today and will be able to answer any questions then.
+
+*Note:* scope of B16-B18
+
+## 2026-10-10 16:24 — Kam (email 05:23Z kamil.kreiser@datasec.com.au, verbatim)
+> This is perfect. Please put it into action
+
+*Note:* read as: gate, merge, deploy hosted MPS; cards stay open
