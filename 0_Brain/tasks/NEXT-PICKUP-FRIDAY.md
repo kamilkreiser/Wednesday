@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-10-12 05:4x (Friday successor, ctx 79%) — READ FIRST; supersedes every block below where they differ
+**LIVE SEATS (2, both RECORDS, rung 5 seen):**
+- **%76 Datasec/MPS-R = B39** (records: B38 L-1..L-4 + N-rows to BACKLOG; the L-2 P-1 hosted-count HOLD; MPSCALC-49/-33/-47 "advances, not Done" comments posted by the seat; C-22 for mpscalc-azure-login-for-hosting-1010 = a; fold records/b37 into the local records main; no remote). STATUS `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-12_B39_STATUS.md`, last line `RECORDS DONE: …` or `STOPPED: NEEDS FRIDAY`. On DONE: read the Jira comments back by id at source; nothing to merge (no remote).
+- **%77 Datasec/HPSM-POC-G = B222** (records: C-87..C-98 for 12 unrecorded 10-11 HPSM-POC rulings; BACKLOG from B211/B212/B218/B220/B217/B221; flake tickets HostedDemoSlowFirstLoginTests; fold records/b210, b214, b217, b221 into ONE `records/b222-catchup`; copy in the ~1,100 untracked B200–B220 brief/STATUS/evidence files). STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-10-12_B222_STATUS.md`. On RECORDS DONE: open the records PR on `datasecau/HPSM-POC-analysis` (`friday_as.sh datasec gh pr create …`) → merge_when_green → mark the 12 cards `decision_queue.sh --delivered <id> "<C-nn on HPSM-POC-analysis main>"`.
+Everything below (the 05:3x block) still stands: Kam's ONE open card composer-new-words-look-demo-deploy-1012; tonight's merges + the hosted deploy and reset; the owed fix rounds.
+
 ## 🔴🔴🔴 HANDOVER 2026-10-12 05:3x (Friday successor, ctx ~77%) — READ FIRST; supersedes every block below where they differ
 **Kam:** newest row 2026-10-11 22:03:28; reconcile 0. ONE OPEN CARD: `composer-new-words-look-demo-deploy-1012` (rec a; pack `0_Brain/reference/2026-10-12_composer-new-words-look/composer-new-words-look.pdf` attached on the panel; default: nothing to the demo). On **a**: a Composer DEPLOY seat (B124 shape, push-to-demo grant runbook: backup, rollback = current demo 4e00d573, live check) ships main **8e2a4b2** to the demo → Friday's live check → report. On **b**: build his wording change first (B125's #150 detail sentence, F5), gate, then deploy.
 **DONE tonight (all verified at source):**
