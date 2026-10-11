@@ -1,0 +1,25 @@
+From Friday (laptop seat), Datasec / HPSM-POC. Replies and wraps go to friday-laptop-agent@agentmail.to.
+
+# BRIEF B200 (SEAT A): HPSM-POC — (1) BUILD an "industry" field beside the customer name; (2) MAP HP's attribution + data-model feedback against the product (no build)
+**From:** Friday, 12:07 AEDT 2026-10-11. **Seat:** Datasec/HPSM-POC-A (newest `Briefs/` file containing `_SEAT-A_`). Report `Briefs/2026-10-11_B200_STATUS.md` (BLUF · FOUND · TESTED · HOW · NOT TESTED · PRIOR WORK · NEW WORDS · Records). Last line `READY FOR GATE` (head via ls-remote) or `STOPPED: NEEDS FRIDAY` + one question.
+
+## AUTHORITY (Kam, verbatim)
+- Live board 2026-10-11 12:06:06: *"If any of my comment don't make sense or are not clear, please clarify before actioning.  If they are clear, please incorporate these into the HPSM POC"*
+- Live board 2026-10-11 12:06:08: *"- In addition to customer name, let’s also include “industry” which will help us prioritize end customer security maturity (e.g., Healthcare (HIPAA); Finance (PCI DSS); etc."*
+- Email forwards to Friday, 2026-10-11 12:02 and 12:03 AEDT (signed: spf/dkim/dmarc pass): *"Further clarification for the HPSM POC. Please incorporate this feedback into the site. If you have any questions, please put them on the fleet activity board."* and *"More feedback for the HPSM POC project. Please incorporate these."* — forwarding Steve Inch (HP)'s two emails of 11 Oct (an anonymised ERD; and Paul Waite's five attribution metrics). **The forwards' full text is at Friday's path below; COPY it (never move) into this project's git-ignored `Source_Documents/2026-10-11_hp-feedback-steve-inch/` first, sha256 both.**
+  `/Volumes/Laptop-DEV/FRIDAY/4_Credentials/clients/datasec/inbound/2026-10-11_hpsmpoc-hp-feedback-steve-inch/forward_1.txt` (ERD + metrics) and `forward_0.txt` (metrics). The email footer says HP CONFIDENTIAL: keep the copy git-ignored; quote it only into this project's records, never into the code repo, Jira text beyond a one-line pointer, or any AI tool outside this seat.
+
+## PART 1 — BUILD (clear; tier 1 because it changes the customer record)
+- **PRIOR-WORK CHECK first:** where the customer name is captured, stored, shown and exported (create/edit forms, API DTO + validation, DB column + migration history, any report/PDF/narrative that prints the customer). Cite file:line at origin main `a50b22d7b1c51121f68235d02ccd0efeb97d058e` (Friday read it from the API; STOP if `ls-remote` differs).
+- **WHAT:** an optional **industry** on the customer, chosen from a fixed list (not free text), each entry carrying the regulatory framework it implies, per Kam's examples (Healthcare → HIPAA; Finance → PCI DSS). Propose the list from the project's OWN content first (CLARIFICATIONS, the content packs, the Q&A master); where the content has nothing, keep the list short and put every entry under NEW WORDS for Kam — **do not present a regulatory mapping as fact without its source line**. Show it beside the customer name wherever the name is shown in the app. Whether it ALSO changes scoring, priorities or recommendations is NOT clear from Kam's words ("help us prioritise") → do NOT change scoring; list the options in the STATUS for Friday to card.
+- Branch `b200/industry-field` from `a50b22d`; red-first per behaviour; push the branch only; Friday opens the PR; QA gate; merge via CodeQL. **No deploy** in this brief (the site is fixes-only until HP's review Tue 13 Oct unless Kam rules otherwise; Friday asks him).
+
+## PART 2 — MAP, do NOT build (Kam: clarify before actioning anything unclear)
+Write `1_Project_Definition/Analysis/2026-10-11_hp-attribution-and-erd-map.md`:
+- Steve's ERD entity by entity (Organization, Assessment, FleetProfile, AssessmentResponse, … every entity and field in `forward_1.txt`) against the product's actual tables/DTOs at `a50b22d`: EXISTS (cite) · PARTIAL (what differs) · ABSENT.
+- Paul's five metrics (Security Assessments Created; Hardware / Supplies / Solutions-Software / Services Revenue Influenced) and the attribution keys (Playbook engagement ID, Partner ID, masked Customer ID, activity date, revenue category): for each, what data the product has today, what would have to come from HP's back-end systems (and that the POC has no such feed — measure, don't assume), and an effort size.
+- A short list of the QUESTIONS only Kam (or HP via Kam) can answer, each with options and a recommendation — e.g. POC phase vs next phase; whether a demo dashboard on synthetic data is wanted for Tuesday; where revenue data would come from. Friday turns these into cards.
+
+## HOLDS
+- **No HP Restricted document (the executive deck, the financial model, anything HP marks Restricted) is given to ANY AI tool — Claude seats, subagents, the product's model, Ornith or the Spark — without HP's written approval (signed SOW §4.1.4(c)).**
+- Datasec only; no other client's names, tickets or paths · CodeQL policy: push your branch only; never push to main; never dismiss an alert · No deploy, no Azure, no setting change · Nothing to HP or any human (Kam relays) · Never delete; quarantine · Never print a secret.
