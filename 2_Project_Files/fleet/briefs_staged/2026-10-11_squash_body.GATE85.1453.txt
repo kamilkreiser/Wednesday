@@ -1,0 +1,78 @@
+Refs KS-1432 — https://linear.app/secuura/issue/KS-1432
+
+Raised from the Wednesday-held Spark pass `apigw-ks529-guard-real-predicate`, re-proved by Seat F 14th on develop `4a7cc1f697f8`. That commit is #1450's squash (KS 1426): this branch is one commit on it, and `merge-base --is-ancestor 4a7cc1f697f8 <develop>` read rc 0 with a failing control (the squash against its own parent, rc 1). This PR refs the ticket and leaves it open: no live run against a running gateway was made.
+
+## What changes
+
+`ks529-non-object-body-guard.test.ts` defined its own copy of the `POST /api/documents` body guard and tested that copy, so its cells did not run the route's code. Measured: with the route's inline check deleted at the base, all 8 of that file's cells still pass. `routes/verification.ts` now exports the guard as `isAcceptableDocumentBody`, the route's body check calls it, and the test calls the same export.
+
+In the route, the one existing line that changes is the condition of the 400 branch, `if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed))` becoming `if (!isAcceptableDocumentBody(parsed))`, with one comment line above it that carries the key. The `res.status(400)` lines appear as context lines in the diff, not as changes.
+
+**The accept and refuse decision is the same for the values checked.** The old inline condition (read as text from the base file) and the new predicate (read from the changed file) were evaluated over 16 values that `JSON.parse` can return: 12 are refused and 4 accepted by both, 0 disagreements. A mutant that drops the array check disagrees with the old condition on 3 of the 16, so the comparison can fail. Of the 11 changed lines in `verification.ts`, 0 match an authentication-identifier pattern (a planted `req.user.role` line matches it). This is a statement about those 16 values and those lines, not a proof over every input.
+
+## What the cells do and do not see
+
+Three deletions, each measured with the file restored byte-identical afterwards (blob hashes asserted):
+
+| deletion | guard test | whole api-gateway suite | what failed |
+|---|---|---|---|
+| base bytes, inline check deleted | 8 of 8 pass | 868 of 869 | the null-body control in `ks815-verification-router-guards-its-own-body.test.ts` (`expected 502 to be 400`) |
+| after this change, predicate returns `true` | 6 of 10 fail | 864 of 871 | the 6 guard cells and the same `ks815` cell |
+| after this change, call-site block deleted | 10 of 10 pass | 870 of 871 | the same `ks815` cell only |
+
+So the guard test now runs the route's predicate, and it fails when that predicate stops refusing. **It does not detect a deleted call site**, and no cell for array, number, string or boolean bodies went red in any of the three runs (inferred from the failing set, not read from the cells). UNMEASURED: the route's behaviour for the four non-null shapes with the check deleted.
+
+**UNVERIFIED text in the diff.** The Spark comment at the top of the changed test says the file "now calls the predicate routes/verification.ts exports and uses at the POST /api/documents call site". The first half is true and was measured; the second half describes the route, and the call-site deletion above shows the test does not exercise it. I committed the comment as received.
+
+## Deviation from the canonical payload (Q-5D)
+
+The payload was applied byte-for-byte first and proved red, then green. One addition followed, with both hashes: **one comment line carrying this PR's key, directly above the changed call-site line**:
+
+`// KS-1432: this is the exported isAcceptableDocumentBody, the predicate ks529-non-object-body-guard.test.ts calls.`
+
+| object 1: Spark payload (`patch.diff`, both files) | object 2: as committed (`git diff 4a7cc1f697f8 28a9c306a3b3 -- <product> <test>`) |
+|---|---|
+| sha256/16 `b94af8557c45087d` | `a238f5791bdcd1d9` |
+
+The two objects are different formats, so their hashes are not meant to be equal. The comparisons that carry the claim: product blob after the Spark section alone `d7e9c8c8696d`, as committed `970d0a381f01`, and removing the one line returns `d7e9c8c8696d` exactly; the test blob `661e3e5c6fa4` equals the blob a temporary-index apply produced at the base; and as multisets, the committed `+`/`-` lines minus the comment line equal the Spark section lines once the one blank line git cancels in each file is removed (product +10/-1 both sides, test +19/-3 both sides; with the comment line left in, the product comparison reads unequal). The changed existing code line is directly preceded by a line carrying `KS-1432` (1 of 1, from the diff's line numbers). Of the 10 product `+` lines before that comment line was added, 1 carried the key; I make no "every changed line" claim for the new function's lines.
+
+The comment line changes no result: the pass test, whole suite, `tsc` and lint were run on the final bytes.
+
+## Test Evidence
+
+**Touched** (4 files, 60 insertions and 4 deletions by `git diff --numstat`)
+- `Blockchain/Dev/services/api-gateway/src/routes/verification.ts` (+11/-1)
+- `Blockchain/Dev/services/api-gateway/src/__tests__/ks529-non-object-body-guard.test.ts` (+19/-3, an existing file, committed mode 100644)
+- `Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` (+15, block 57.) and `Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html` (+15, section KS-1432)
+
+The Spark patch itself counts +11/-2 and +20/-4. git's counts before the comment line were 10/1 and 19/3: each patch section holds exactly one bare removed blank line, which git cancels against a re-added blank line.
+
+**Ran** (Seat F 14th, Kamil’s Mac Studio (2), 2026-10-11 AEDT; node v24.7.0, npm 11.5.1, vitest 4.1.11, TypeScript 5.9.3, each read from the installed package)
+- At the base the 8 existing guard cells pass, 8 of 8. With only the new test section applied: **rc 1, 1 passed / 9 failed of 10**. The export-presence cell (`RED KS-1432 R1`) fails with `expected 'undefined' to be 'function'`; the 8 pre-existing cells fail because they now call the missing export (`expected undefined to be false` or `to be true`); the control cell (`control KS-1432 C1`) passes. With the product section applied: **rc 0, 10 passed, 0 failed**. The counts agree between the runner's JSON total and a sum of per-cell rows, and with the runner's text summary on the committed tree (`Tests 10 passed (10)`).
+- Whole api-gateway suite, base → with the change: **869 → 871 tests, 96 files before and after** (the test file is changed, not added), 0 failed before and after. Text summary on the committed tree: `Test Files 96 passed (96)`, `Tests 871 passed (871)`.
+- `tsc --noEmit`: rc 0 at the base and with the change. The package excludes `src/__tests__`, so the changed test was type-checked separately in a program that names it beside the package sources (88 own-source files, 1 test file): rc 0, 0 errors. A planted TS2322 named in the same kind of program gives rc 2 with TS2322 count 1 and TS6059 count 0, so the check can fail.
+- `npm run lint` (`eslint src`): rc 0, 0 errors, 36 warnings at the base bytes and 36 at the changed bytes. The five warnings in `verification.ts` shift by +9 or +10 lines and none is on a changed line (checked against the diff's hunk ranges, not by text search); the output lists file headers, so a name match was possible.
+- The documented run commands, run as written on the committed tree: `npx vitest run src/__tests__/ks529-non-object-body-guard.test.ts` rc 0 (10 cells), `npx vitest run` rc 0 (871 tests in 96 files).
+- `html_docs_matrix.test.sh`: 12 passed, 0 failed, run after the doc append and before the commit. Its tally is not evidence of well-formedness, so separately: each fragment has balanced opening and ending tags and one `<h2>`, and each doc minus its fragment equals its base blob byte for byte (a 1-byte-altered fragment does not restore it; the length deltas, 5,350 B and 2,251 B, equal the fragment sizes). The doc tool reported 24 passed, 0 failed.
+- `npm run audit:gate` rc 0 and `npm run audit:locks` rc 0, run standalone in this worktree before the push.
+- Pre-push hook, this branch's one push (bare, `--no-verify` not used; `PUSH START` 2026-10-11T02:44:04Z, `push rc=0` 2026-10-11T02:51:14Z, UTC, 7 min 10 s). The stream printed these gate lines exactly: `shell suites: 77 passed, 0 failed, 0 skipped (of 77)`, `OK — 13 code guards passed.`, `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` The three skipped legs each printed `SKIP — local stack not up on http://localhost:6882 (start it to run this leg)`, so the four platform suites are UNMEASURED and this is not a pass. No `[format-gate]` line was printed. The stream contains no `not ok` line and no suite line with a non-zero failed count.
+- The stream also printed the hook's base-selection notice for a stale local `develop` (KS 991): the checkout's tracking ref is one landing behind this branch's base, so the hook's base was `f8c86f859fe0` and its changed-file set is wider than this PR's. The stream prints no count; by my count the range is 6 files (this PR's 4 plus 2 code files from #1450's landing, whose two docs overlap this PR's), 4 of them under `Blockchain/Dev/`. That over-reports the range against the exact 4 and does not narrow it.
+- The clean-room leg printed `surface: 35 of 45 tracked package-lock.json file(s) were installed by this leg`. That line comes from #1450's change, which is in this PR's base.
+
+**Checker versus mine.** The held pass's checker measured on an older tip (`69f2045af2a4`): 9 failed of 10 red-first, 10 of 10 green, whole suite 818 → 820, `tsc` rc 0. Mine agree on the red and green counts and on the +2 on the suite; the suite totals differ because develop has gained tests since (869 → 871). The figures above are mine.
+
+**NOT run**
+- The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are UNMEASURED and are not claimed as passing.
+- A live run against a running gateway. The ticket stays open on this PR.
+- The route's behaviour for array, number, string and boolean bodies with the check deleted.
+- `shellcheck` is not relevant (no shell file changed).
+- GitHub Actions results for this head are read by the coordinator at the gate and are not quoted here.
+
+**NOT covered, noted and not changed**
+- The call site: no cell in the changed file exercises it, as the deletion table shows. The only cell in the suite that went red when it was deleted is the `ks815` null-body control.
+- The Spark comment in the test about the call site (UNVERIFIED above).
+- Existing test files that `tsc` excludes carry pre-existing type errors in api-gateway (30 across 10 files in a program that names every test file). Noted, not changed, not filed by this PR.
+
+**Migrations / config:** none. No SQL, manifest, lock, baseline, openapi file or generated yaml, and no spec-version edit.
+
+**Docs.** Flow block 57. and the cheat section KS-1432 are appended at the tail of both documents (the flow document's last block in file order was 53. at the base). Their base line is shared with other open PRs' blocks (#1451's 55. and #1452's 56.), so the docs will conflict textually at merge; the keep-both is a later merge seat's.
