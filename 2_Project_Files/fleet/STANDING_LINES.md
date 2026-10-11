@@ -457,3 +457,17 @@ Rewriting audit-baseline.json with `json.dumps` re-escaped em-dashes in 7 unrela
 - **The author-name check is GO/ADDENDUM-scoped,** never applied to the squash body (landed bodies routinely say "re-proved by Seat X"). Basis: Wednesday's ruling 2026-10-10 on R 34th's dry check.
 - **Wednesday's pre-send residue check covers EVERY mail of a GO pair (GO and ADDENDUM),** with the seat's own token list. Basis: Wednesday's miss on #1449, seat-caught.
 - **A round whose SHAPE differs from the lineage's usual one (fix commit on an existing branch, fast-forward push) checks every inherited tool's shape guard at ITEM 0;** the tool wins and the seat proposes a variant. Basis: F 11th (`pushf3.sh` first-push-only), single instance.
+
+## 2026-10-12 additions (Wednesday, from Seats R 40th and R 41st WRAPs; each SEAT-REPORTED, single instance unless stated; NOT re-run by Wednesday; pilot only)
+- **A digit-only port shift PRESERVES the source's ordinal suffix** ("R 40th" -> "R 41th": 88 sites, four load-bearing: GO clause, merge_note regex, M7_SEAT, watcher MINE_ORD, which then never fires). Suffix follows the TARGET number; test the port on constructed strings (42 -> "42nd", 43 -> "43rd"). Basis: R 41st, measured, single instance.
+- **A claim that a generator reproduces a hand edit is a claim to RUN:** byte-compare the regenerated output (H40's claim was false: FROM did not match its source; the generator is not atomic). Basis: R 41st.
+- **Probe the sweep per generation; widen by the EXACT alternative, never a bracket class** (`[34][0-9]` also matches your own and your successor's). A whole-line control cannot see the newest generation. Basis: R 41st.
+- **`gatelines` keys on the EXACT BASENAME** in the `=== path/name.test.sh ===` header; a bare name reads `ABSENT  MISMATCH`, which looks like a real gate failure. Known-bad control = a suite that is PRESENT with a WRONG count. Basis: R 41st.
+- **Use ONE lock-tool copy:** the r2 and r3 templates disagree on the lock path and the cool-off stamp lives beside whichever copy runs. Basis: R 41st.
+- **Templates carry the previous row's literals** (V2, r2, r3 carried R 33rd's): generate instances by COUNT-ASSERTED substitution and scan for stale tokens. Basis: R 41st.
+- **`instantiate_*` and `port_*` need `REC` in the environment;** `prov_arms` takes `<message_id> <exact subject> <outdir>`. Basis: R 41st.
+- **Anchor any FAIL grep to the line START** (it matched NEW-FAILING and FAILS inside PASS lines); **print times with `TZ=UTC`** before labelling them Z. Basis: R 41st.
+- **The merge chain runs from a FLAT `$REC/{tools,merge,boot}`;** `ported/` is not the run home. Basis: R 40th.
+- **The GO checker needs `ruling` or `ruled` in the ADDENDUM** (`go_checks:133`): run the seat's go_checks wording asserts over BOTH texts before sending. Basis: R 40th, and Wednesday's own refusal on #1451 (ledger 2026-10-11).
+- **A batch brief says on-develop rows become MERGE-IN rows after the FIRST landing** (it happened after one, not two). Q5's mode arm needs a develop code path at 100755: check per row. Basis: R 40th.
+- **After an ADDENDUM re-issue the dry differs in two identity lines: mail it again.** R-10 verification is a FILE in the record folder. Basis: R 40th.
