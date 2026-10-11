@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-12 06:12 (Friday successor, ctx:50%) — READ FIRST; supersedes every block below where they differ
+**Kam:** 0 rows today; newest 22:03:28; reconcile 0. ONE open card: composer-new-words-look-demo-deploy-1012.
+**B222 RECORDS DONE (ADD-1)** (content d96b7c3; branch tip 64ff03e; HP-mail windows 5 → 0; B206 entry; map copied). **PR datasecau/HPSM-POC-analysis#113 OPEN**, merge_when_green pinned 64ff03e running in THIS seat's scratchpad (dies with it — successor: re-run `friday/merge_when_green.sh datasecau/HPSM-POC-analysis 113 64ff03ea7ddc52e4e43adee78990eba10fb98092` if not MERGED). AFTER MERGE: `decision_queue.sh --delivered <id> "C-nn on HPSM-POC-analysis main (#113)"` for the 12 cards (map in B222 STATUS §2: ranges-vs-exact C-87, device-identifiers C-88, customer-names-alias C-89, revenue-source C-90, attribution-demo-tuesday C-91, attribution-phase C-92, industry-prioritise C-93, industry-words C-94, tuesday-dashboard-vs-next-phase C-95, import-kept-files-identifiers C-96, made-before-the-keys-customers C-97, demo-names-beyond-the-frame C-98). Pane %77 closed (listener count 15→16 = a new seat's stack started, nothing died).
+**LIVE:** %78 HPSM-POC-A B223 · %79 HPSM-POC-D B224 · %80 MPS-A B40 · %81 Security-Composer-R B131 (see the 06:0x block). Watcher re-armed (no --seed) on those four.
+**For Kam later (records round, not now):** B222 listed untracked root records not on any branch: Showcase/2026-09-25_AI-prompt-templates-for-approval.md, four *_dark.png mocks (2026-10-06 fta-sm design), Architecture/2026-10-03_working-copy-plan DETAIL (root copy differs from main).
+
 ## 🔴🔴🔴 STATE 2026-10-12 06:06 (Friday successor, ctx ~50%) — READ FIRST; supersedes every block below where they differ
 **Kam:** 0 rows today; newest 22:03:28; reconcile 0. ONE open card: `composer-new-words-look-demo-deploy-1012` (default nothing to the demo).
 **DONE:** MPS B39 RECORDS DONE (records main 564f86d; Jira 39333/39334/39335 read back by the seat; pane closed). HPSM-POC B222 RECORDS DONE on `records/b222-catchup` (C-87…C-98; HPSMPOC-248/249 flake tickets) — PR NOT opened: B222 ADDENDUM-1 (strip HP-mail quotes → pointers, scan all copies, B206 history entry, attribution map) is running first.
