@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-11 23:50 (Friday successor, ctx:65%) — READ FIRST; supersedes every block below where they differ
+**Kam:** newest row 22:03:28 (reset-confirm = b); reconcile 0; NO open Friday cards. Gauge 19%. Launch rule tonight: read load in its OWN command; no `cockpit.sh add` above ~30 (ledger 10-11).
+**MERGED tonight:** HPSM-POC **#139** (B208 frame alias + B216 CodeQL fix) → main **4229be3** · MPS **#26** (B37) → main **4437460** (tree 2c1fd884 = gate B38's). Neither deployed.
+**LIVE SEATS (find each STATUS with `find <project> -name '*B<id>*STATUS*'`):**
+- **%69 Datasec/HPSM-POC-A = B215** (Demo alias in page headings + executive PDF; tier 1; ports 6890–99). Q-B215-1 answered by Friday (ADDENDUM-1 22:32 = (a): on-demand render served only when its text equals the stored PDF with name→alias, else a Demo 409; NEW WORDS; post-deploy re-issue). On READY FOR GATE → tier-1 gate (B212 shape) → PR → merge.
+- **%70 Datasec/HPSM-POC-E = gate B218** (tier 2) on B213 `b213/timing-bounds-import-followups` 4a2d3806 (Row 1 RequestTimingLog bounds, Row 1b NarrativePipelineTests.B170, Row 2 N-1/N-2/N-5; contract 0.17.0→0.17.1 text-only + the pin edit to grade). Ports 6920–29. On GO → PR (base main 4229be3) → merge_when_green.
+- **%71 Datasec/HPSM-POC-B = B219** (web BFF limit 30→90 s for POST /api/v1/admin/demo/reset ONLY; bff.ts + bff.timing.test.ts; tier 2; ports 6930–39). On READY → tier-2 gate → PR → merge.
+- **%63 Datasec/Security-Composer-E = gate B127** (tier 2 rendered) on B126 57f6f6ec; long e2e, logs moving. On GO → PR → merge → card to Kam: NEW WORDS (B126 1 latent) + NEW LOOK L1–L5 before demo.
+- **%65 Datasec/Security-Composer-F = gate B128** (tier 1) on B125 68e11a6e. On GO → PR → merge (if B126 merges first, B128's MERGE line covers it) → card to Kam: #150 refusal words on S9 + the F5 caveat.
+**THE HOSTED HPSM-POC SEQUENCE (Kam ruled; nothing more to ask):** after B215 + B219 (+ B213 if ready) are gated and merged → ONE 2nd hosted deploy (B210 shape, push-to-demo grant; Kam 16:30:47 a / 16:30:41 b) → THEN ONE press of "Reset demo" by a fresh seat (Kam 20:50:48 a + 22:03:28 b; the 4 records are ALREADY saved on records/b217 4fad6074; B217 STATUS = the evidence) → Friday's live check (B214's predicted preview numbers) → report to Kam. B217's press at 11:27Z rolled back on the 30 s BFF cut (hosted unchanged). Open: an orphan PDF may be in Blob (read-only check); the "may still finish" timeout wording → NEW WORDS card.
+**FOR KAM'S NEW WORDS CARDS:** Composer #150 (S9) + F5; B126 latent sentence + L1–L5; MPS K-7 (B37 STATUS); B215 Demo 409 words; the reset-timeout message.
+**OWED:** MPS: BACKLOG rows for B38 L-1..L-4 + Jira "advances" lines for MPSCALC-49/33/47 (records seat); L-2 hosted count before any MPS deploy. HPSM-POC records seat (13 + tonight's cards → CLARIFICATIONS incl. "keep names; alias where data leaves the partner"; BACKLOG; records PRs for records/b214, b217). Composer records fold.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-11 20:45 (Friday successor, ctx:50%) — READ FIRST; supersedes every block below where they differ
 **Kam:** newest row still 17:05:23; reconcile 0. Gauge 15%. Open Friday cards (2, both with defaults): `hpsmpoc-hosted-preview-shows-no-sample-data-1011`, `hpsmpoc-demo-names-beyond-the-frame-1011`.
 **LIVE SEATS (each STATUS last line read this action; STATUS files can live in a records worktree, so `find <project> -name '*B<id>*STATUS*'`):**
