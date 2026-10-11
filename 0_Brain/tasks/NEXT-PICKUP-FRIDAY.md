@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-12 00:35 (Friday successor, ctx:70%) — READ FIRST; supersedes every block below where they differ
+**Kam:** newest row 2026-10-11 22:03:28; reconcile 0; NO open Friday cards. Gauge 20%. Load rule: read load in its OWN command; no launch above ~30.
+**MERGED since 23:50 (none deployed):** HPSM-POC **#140** (B213) → main **da58da9** (tree 9e77e5ff = gate B218's). Composer **#69** (B126) → 72c038d, then **#70** (B125) → main **898ec99** (tree d1cd5818 = gate B128's merged tree).
+**LIVE SEATS:**
+- **%72 Datasec/HPSM-POC-E = gate B220** (tier 1, round 1/2): subject 1 **B215** `b215/demo-alias-headings-and-pdf` 1da119f6 (Demo alias headings + exec PDF; Friday's ADDENDUM-1 (a) text-equality gate — B215 compares whole bytes instead: the gate grades it), subject 2 **B219** `b219/demo-reset-upstream-timeout` 98158dfd (BFF 90 s for the reset route), batched. Ports 6950–59. STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-10-12_B220_STATUS.md`. On GO for both: two PRs (or one each) → merge_when_green each → THE 2nd HOSTED DEPLOY (B210 shape; push-to-demo grant + Kam 16:30:47 a / 16:30:41 b) of main → ONE press of "Reset demo" by a fresh seat (Kam 20:50:48 a + 22:03:28 b; the 4 records already on records/b217 4fad6074) → Friday's live check (B214's predicted preview numbers; the Demo PDF opens) → report to Kam.
+- **%73 Datasec/Security-Composer-B = B129** (fix round 2/2 for B127-F1: 601–900 band word breaks; bar = 0 NEW broken words and NO NEW overflow vs base 4e00d573 across the band; base main 898ec99; ports 6820–29). On READY FOR QA → tier-2 rendered gate (B127 shape) → merge → THEN Kam's Composer NEW WORDS/LOOK card (#150 S9 refusal + F5 caveat; B126 latent sentence + L1–L5 + B129's look) before any demo deploy.
+**Composer notes to carry:** B128-N1 (#177 auditor id: masked as built; records lean "Datasec") → BACKLOG + mention on Kam's card.
+**OWED (records seats, none launched):** HPSM-POC: CLARIFICATIONS for today's cards incl. "keep names; alias where data leaves the partner"; BACKLOG rows (B211, B212 N-1/N-2, B218 m-1 + N-4 "no version bump for prose", B220 notes); records PRs for records/b214, b217. MPS: B38 L-1..L-4 BACKLOG + Jira "advances, not Done" lines MPSCALC-49/33/47; the L-2 hosted count before any MPS deploy. Composer: records fold (b119, b124, b125, b126, b127, b128).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-11 23:50 (Friday successor, ctx:65%) — READ FIRST; supersedes every block below where they differ
 **Kam:** newest row 22:03:28 (reset-confirm = b); reconcile 0; NO open Friday cards. Gauge 19%. Launch rule tonight: read load in its OWN command; no `cockpit.sh add` above ~30 (ledger 10-11).
 **MERGED tonight:** HPSM-POC **#139** (B208 frame alias + B216 CodeQL fix) → main **4229be3** · MPS **#26** (B37) → main **4437460** (tree 2c1fd884 = gate B38's). Neither deployed.
