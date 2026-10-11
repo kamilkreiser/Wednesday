@@ -1,4 +1,4 @@
-# Model routing -- v0 (2026-10-09) -- DRAFT, Wednesday reviews before it is shared
+# Model routing -- v0.1 (2026-10-11) -- DRAFT, Wednesday reviews before it is shared
 
 One definition for every coordinator seat (Wednesday, Tuesday, Friday). Client-neutral: no client names, tickets or code.
 Evidence tags: **RULED** = Kam's words, dated. **OBSERVED** = measured here. **SINGLE TRIAL IN PROGRESS -- pilot only** = one data point, not a rule. **ASSUMED** = reasoning, untested.
@@ -32,6 +32,16 @@ Project launchers pin their own model, and launchers are the project's files, wh
    Reading: every Claude worker -- pane seats and in-session sub-agents -- runs on the **newest Opus** from `models_latest.json` (today `claude-opus-5-5`; do not type it). The Spark and Ornith still go first wherever the section-1 predicate fits. **Expiry: the "next model review phase"** -- the date is not stated; ask Kam when that phase is, and until then this stands. After it, Opus on a sub-agent must be a recorded, deliberate choice (section 2).
 2. **PAUSED:** the earlier instruction (Kam, same morning) that Claude workers run on Sonnet until Monday 2026-10-12. The Sonnet trial resumes at the model-review phase; tier 3 evidence stays SINGLE TRIAL IN PROGRESS -- pilot only until then.
 3. **Stale launcher pins are prominent, not cosmetic (OBSERVED 2026-10-09):** several project launchers pin an older Opus (and older Fable). A seat launched from one runs on the pinned model regardless of this document until `/model <id>` is sent (section 3). The list is in `models_latest.json -> stale_pins` and the doctor output.
+
+## 7. Decision ladder (v0.1, 2026-10-11 -- Kam 12:56 live board: "Work mainly on tickets with the spark and Sonnet. Priority for now is to refine a structure that identifies where to use Opus, Sonnet, Spark and Ornith. Do this on live tickets and work through the secuura tickets as you do")
+This SUPERSEDES section 4 item 1 (Opus for all) for Secuura work; evidence tags below are honest: every line is a hypothesis scored by section 6 rows, not a rule.
+Ask in order; the first YES picks the tier, and the receipt names the question that decided it.
+1. Does the ticket's fix shape fit in ONE brief: 1-3 edits, the line text known, a runnable in-process test, no auth/credential/security/money surface? -> **Spark** first (Ornith only for the simplest one-file). Evidence: Spark 24/24 first-round PASS over 2026-09-29..10-05 (OBSERVED, ~13 min machine time); Ornith 1.5 harder rungs (OBSERVED, per-task). Counter: original + ONE rebrief, then tier 2.
+2. Must a seat RAISE a PR, run a tool chain, write docs blocks, or merge on a GO, and is the surface not security/deploy? -> **Sonnet seat**. Evidence: 12+ Sonnet seat rows 0.95-0.98, one Major past a seat caught by the gate (OBSERVED, section 6 reading). Pattern: launch, switch to Sonnet at the first idle prompt, say so on the receipt.
+3. Is it a BUILD that fails question 1 (multi-file, design choices) but is not decision-shaped? -> **Sonnet build seat with an Opus QA gate** as gatekeeper (Kam 2026-10-10 09:06). Evidence: one row (G 8th, 0.98), pilot only.
+4. Is it a QA gate, a security/auth/money/deploy surface, or work a cheaper tier has measurably failed twice? -> **Opus** (newest in models_latest.json). Evidence: gate83 caught a Major the builder's log showed (OBSERVED); the rest ASSUMED.
+5. Is it a decision for Kam (ruling, comms, money)? -> a CARD, no worker.
+Each live-ticket outcome adds a row to section 6; rule text is promoted from hypothesis only at >= 5 rows of a kind.
 
 ## 5. Open items
 - Date and content of the "model review phase" (ASSUMED to include a Sonnet vs Opus comparison on the same tasks).

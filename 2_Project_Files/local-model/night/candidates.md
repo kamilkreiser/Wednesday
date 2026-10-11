@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-10-11 04:27 from 270 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-11 14:44 from 269 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -119,12 +119,11 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 9
+## HELD (READY_* or done.md PASS) — 8
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1186 userRepo.ts: five sibling reads still return fromRow unawaited inside try, so a 
 - KS-1219 OAuth /authorize answers 500 server_error for an array-valued scope (repeated qu
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1432 api-gateway's KS-529 guard test tests a copy of the guard, not the guard — delet
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-884 pre-push resolves the bare name `develop`, so a TAG named develop beats the bran

@@ -1,0 +1,13 @@
+PASS DB1 docs_base = merge-base(develop 4a7cc1f697f8, head 28a9c306a3b3) = 4a7cc1f697f8 == --base 4a7cc1f697f8; head^ = 4a7cc1f697f8 (a single commit directly on the base: head^ == the base HERE; the gate84 PR was different)
+PASS DB2 API_Security_Functional_Testing_Architec: head doc == base prefix + ONE fragment + '</body>\n</html>\n': True (ok) | fragment 5350 B (kit 5350) sha256/16 42366142c417390c (kit 42366142c417390c) | flow heading `<h2>57.` x1
+PASS DB3-CONTROL API_Security_Functional_Testing_Architec CONTROL (an unrelated OLDER commit bf277eead268 given as the base): the same extraction reads NOT an exact insert (the head doc does not start with the whole base prefix (a base byte changed, or a second edit elsewhere)) (-1 B != the real 5350 B) -> the instrument can tell a wrong base from the right one
+PASS DB3b-CONTROL API_Security_Functional_Testing_Architec CONTROL (the head given as its own base): NOT an exact insert (empty fragment) -> an empty fragment is refused
+PASS DB3c-CONTROL API_Security_Functional_Testing_Architec CONTROL (ONE byte of the fragment flipped): the size still equals the kit's 5350 B but the sha256/16 reads bf9c79966d7d4d65 != 42366142c417390c -> the sha, not the size, is the instrument
+INFO DB4 API_Security_Functional_Testing_Architec: develop 4a7cc1f697f8 doc vs base: identical | flow numbers in document order, last 8: ['45', '46', '47', '50', '51', '52', '54', '53']
+PASS DB2 QA_Tool_Cheat_Sheet_Secuura_API_Testing.: head doc == base prefix + ONE fragment + '</body>\n</html>\n': True (ok) | fragment 2251 B (kit 2251) sha256/16 2c9d368eba515cc9 (kit 2c9d368eba515cc9) | cheat <h2> carrying `KS-1432` x1 (mentions 1)
+PASS DB3-CONTROL QA_Tool_Cheat_Sheet_Secuura_API_Testing. CONTROL (an unrelated OLDER commit bf277eead268 given as the base): the same extraction reads NOT an exact insert (the head doc does not start with the whole base prefix (a base byte changed, or a second edit elsewhere)) (-1 B != the real 2251 B) -> the instrument can tell a wrong base from the right one
+PASS DB3b-CONTROL QA_Tool_Cheat_Sheet_Secuura_API_Testing. CONTROL (the head given as its own base): NOT an exact insert (empty fragment) -> an empty fragment is refused
+PASS DB3c-CONTROL QA_Tool_Cheat_Sheet_Secuura_API_Testing. CONTROL (ONE byte of the fragment flipped): the size still equals the kit's 2251 B but the sha256/16 reads 7d555ea0a139d143 != 2c9d368eba515cc9 -> the sha, not the size, is the instrument
+INFO DB4 QA_Tool_Cheat_Sheet_Secuura_API_Testing.: develop 4a7cc1f697f8 doc vs base: identical
+CHECKED 9
+0 FAIL
