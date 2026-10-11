@@ -31298,5 +31298,67 @@
    "CARD hpsmpoc-ranges-vs-exact-1011",
    "CARD hpsmpoc-tuesday-dashboard-vs-next-phase-1011"
   ]
+ },
+ {
+  "id": "hpsmpoc-import-kept-files-identifiers-1011",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Uploaded import files still hold device identifiers: what should be stored?",
+  "bluf": "Your ruling (drop identifiers at import) is built and on its way through the QA gate (B205). The database and every API answer now keep no serial, IP, MAC, host name or location for new uploads; firmware, model and counts are kept. One part is left over: the uploaded CSV file itself is still stored byte for byte, so it still holds every identifier, and the download serves it. Changing that touches the database schema and the API contract, so it is your call. Nothing changes until you choose. Imports are switched OFF on the hosted site and every upload so far is synthetic. Why this is a new question and not a re-ask (read from your 12:50:15 card hpsmpoc-device-identifiers-1011): its BLUF listed 'the uploaded files' among what is kept; you chose (b) drop identifiers at import and not (c) discard the files. So the files stay, but your ruling does not say whether a kept file may still hold identifiers.",
+  "default_action": "Nothing changes: files stay as uploaded (option a), and Friday raises this again before any real customer upload is allowed.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep the files as they are for now",
+    "detail": "No change. Fine while imports are off on hosted and every upload is synthetic. Revisit before any real customer upload."
+   },
+   {
+    "key": "b",
+    "label": "Store a cleaned copy instead (recommended)",
+    "detail": "The stored CSV has the identifier cells blanked, so a file is still kept as evidence but holds no identifier. Needs a second hash column (or a redefined hash) and a one-line contract change. One build round plus a gate, before any real customer upload."
+   },
+   {
+    "key": "c",
+    "label": "Do not store CSV files at all; keep only their hash",
+    "detail": "Strongest privacy. Download of an imported file stops working (404). Needs a schema change. You did not pick 'discard the files' this morning, so this reverses that."
+   },
+   {
+    "key": "d",
+    "label": "Keep files but delete them after N days",
+    "detail": "Needs a purge job, a delete on a store that is write-once today, a new column and a setting for N."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-11T14:15:39.784823+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD vault-add-a-stages-another-clients-files",
+   "CARD secuura-gate-stack-slots-full-of-kept-volumes",
+   "CARD nexusai-release-package-files-into-main",
+   "CARD nexusai-package-files-scope",
+   "CARD secuura-ks1348-log-files-persist-secrets",
+   "CARD secuura-ks1348-r2-files-still-leak-allowlist",
+   "CARD hpsmpoc-hosted-clean-old-static-files-1005",
+   "CARD hpsmpoc-feedback-files-route-1006",
+   "CARD hpsmpoc-feedback-files-third-round-1007",
+   "CARD mpscalc-new-words-hosted-deploy-1011",
+   "CARD composer-two-lanes-past-90pct-1011",
+   "CARD mpscalc-b30-new-words-hosted-deploy-1011",
+   "CARD hpsmpoc-industry-words-1011",
+   "CARD hpsmpoc-industry-prioritise-1011",
+   "CARD hpsmpoc-attribution-phase-1011",
+   "CARD hpsmpoc-attribution-demo-tuesday-1011",
+   "CARD hpsmpoc-revenue-source-1011",
+   "CARD hpsmpoc-customer-names-alias-1011",
+   "CARD hpsmpoc-device-identifiers-1011",
+   "CARD hpsmpoc-ranges-vs-exact-1011",
+   "CARD hpsmpoc-tuesday-dashboard-vs-next-phase-1011",
+   "CARD composer-4e00d57-words-look-demo-deploy-1011"
+  ]
  }
 ]
