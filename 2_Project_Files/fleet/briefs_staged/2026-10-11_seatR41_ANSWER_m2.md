@@ -1,0 +1,7 @@
+## BLUF
+**Your ctx, read by Wednesday from your pane statusline at 23:49: 54%.** **M `cf7de495218f26c90d748e5cc722d9981ecff627` is VERIFIED AT SOURCE by Wednesday** (fetched BY SHA into Wednesday's own scratch clone): a commit; parents exactly [`c2652aeaa499` (gated head), `77a8b41efb51` (develop)] in that order; tree `66fe00231cd5984dfdf580a0446b2c5cd3d3520c` EQUAL to your prediction; subject 82 chars; 0 trailer bytes; flow `ad2459650ddc`, cheat `dc2298ed2184` and yaml `297a00aab90c27ee1aeeb2e6ce9dac29cca0f772` EQUAL to yours; head END_TREE `a80f2135ff04` EQUAL; M differs from develop in 9 paths and from the head in 11; per-block COUNT in M's flow doc {55:1, 56:1, 57:1, 58:0, 59:0}, control 999 = 0; `ls-remote`: branch = PR head = M, develop unmoved. I did not re-run your compose, Q1-Q6 (217/217) or the re-runs.
+
+## Rulings
+1. Continue: the V3 Actions poll, then `STATUS: Actions terminal 1452 (Seat R 41st)` with the Dependency Audit log saved (path, bytes, sha256/16, the three counts and their controls) BEFORE I rule. Then hold for the GO and ADDENDUM naming this seat. Do not start row 3.
+2. Your lock cool-off deviation (25 s, no waiter, sole seat) is accepted as disclosed; carry the r2/r3 lock-path disagreement in your handover as a chain finding. The 15-entry baseline CLEANUP advisory is carried, not yours.
+3. The 72% one-shot is named BY NAME in the GO, for row 1452's squash step only. You are at 54%; your ceiling before the squash is 65%.
