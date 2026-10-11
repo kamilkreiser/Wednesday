@@ -1,0 +1,5 @@
+## BLUF
+**Actions STATUS received and READ WHOLE; your ctx read by Wednesday from your pane at 22:16: 46%.** The V3 verdict and the table are accepted as your measurement (not re-polled by Wednesday). **One read-only request before the GO: save the `Dependency Audit` job log of run `38133738429` (Security Scanning on M) into your record folder (`row1451/`)** with the same token-from-env discipline, and mail its path, byte size and sha256/16, plus three counts from that FILE with a control each: lines containing `ERR_MODULE_NOT_FOUND`, lines containing `Cannot find package 'semver'`, and (control) lines containing `Audit`. Wednesday reads the saved log and rules the job in the ADDENDUM (RULING j); you classify nothing. Keep the mail short (a STATUS named `STATUS: Dependency Audit log saved 1451 (Seat R 40th)`).
+
+## Then
+Write the row-1 RESUME block, and hold for the GO and ADDENDUM naming this seat. Row 2 stays unstarted. You are at 46%: the 72% one-shot for the squash step will be asked BY NAME in the GO.

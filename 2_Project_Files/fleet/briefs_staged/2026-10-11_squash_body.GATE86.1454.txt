@@ -1,0 +1,53 @@
+Refs KS-1355 — https://linear.app/secuura/issue/KS-1355
+
+Raised from the Wednesday-held Spark pass `dev-reload-slot-container-r2`, re-proved by Seat F 15th on develop `e27b9dceff39`. That commit is #1453's squash (KS 1432) and its parent `4a7cc1f697f8` is #1450's squash (KS 1426), so both PRs are in this branch's history: `merge-base --is-ancestor 4a7cc1f697f8 e27b9dceff39` read rc 0, with a failing control (the same test with the arguments swapped, rc 1). This PR is one commit on that base.
+
+**This is a partial change for KS-1355 and the ticket stays open.** It changes `dev-reload.sh`, one of the two scripts named in spot 2 of the ticket. It does not change `start-local.sh`, `check-stack-safety.sh`, the compose defaults (spot 3), the preflight (spot 4) or the ticket's shared-acceptance points. No live run against a running slot-N stack was made.
+
+## What changes
+
+`dev-reload.sh` named its target container `secuura-<service>`, which is slot 1's name, and never read `stack_env.sh`. With `SECUURA_STACK_SLOT=2` it looked for slot 1's container, and with slots 1 and 2 both running the new test records one restart of slot 1's container where it wants none. The script now sources `stack_env.sh` and takes the name from `${STACK_PREFIX}`; `start-secuura.sh` and `stop-secuura.sh` both source the same file (`git grep` over the tracked scripts).
+
+Slot rules, measured through the real script with `docker` off the `PATH`: `SECUURA_STACK_SLOT` set to `5`, `0` and `abc` each exit 2 with the `stack_env.sh` error as the first line (the three values run). A copy of the base file given slot 5 prints no slot error. With no slot named the container is still `secuura-<service>`: that is `stack_env.sh`'s current default, and two control cells pin the names for no slot and for slot 1.
+
+The payload is the Spark pass byte for byte. The committed product blob is `a0fe62e9924d` and the committed test blob is `851a0030d589`; each equals the blob a temporary-index apply of the Spark section produced at the base, compared by git object id (a file the commit does not touch compared equal too, and the base product blob `f74b7aee6833` compared different). **No extra WHY line was added.** Stated literally: 1 of the 7 added product lines names KS-1355 (the first line of the 3-line comment block directly above the changed code, which gives the reason); the other 6 sit under that block. The new test names it on 1 of its 99 lines (the header comment). The Spark patch (`patch.diff`) hashes to `c9e9d772affa3597`; `git diff e27b9dceff39 <head> -- <product> <test>` is a different object (git headers) and hashes to `fe2bd556100926fb`.
+
+## Test Evidence
+
+**Touched** (4 files, 137 insertions and 1 deletion by `git diff --numstat`)
+- `Blockchain/Dev/scripts/dev-reload.sh` (+7/-1)
+- `Blockchain/Dev/scripts/__tests__/ks1355_dev_reload_slot_container.test.sh` (new, +99, committed mode 100644; the shell-suite runner executes suites as `bash <file>`)
+- `Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` (+16, block 58.) and `Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html` (+15, section KS-1355)
+
+The Spark patch counts +8/-2 for `dev-reload.sh`. The difference from git's 7/1 is one bare added blank line and one bare removed blank line, which git cancels against each other (counted in the patch: 1 bare `+`, 1 bare `-`).
+
+**Ran** (Seat F 15th, Kamil’s Mac Studio (2), 2026-10-11 AEDT; macOS 27.0.1 arm64; `/bin/bash` 3.2.57(1)-release, the only `bash` on that machine's `PATH`; `LANG=en_AU.UTF-8`, and the test runs the script under `LC_ALL=C`; `docker` and `npm` are stubs inside the test)
+- With only the new test section applied at the base: **rc 1, 3 passed / 4 failed of 7**. The four failing cells equal the READY's four by name: `slot 2: reload of demo exits 0 when secuura-s2-demo is running` (want 0, got 1), `slot 2: it restarts secuura-s2-demo` (want 1, got 0), `slot 2: it copies dist into secuura-s2-demo:/app/dist` (want 1, got 0), `slot 2 with slot 1 also up: slot 1's secuura-demo is NOT restarted` (want 0, got 1). The three `CONTROL` cells pass at the base and are controls, not reds.
+- With the product section applied: **rc 0, 7 passed / 0 failed**, and `bash -n` on the script rc 0. The applied `dev-reload.sh` equals the checker's own `after.sh` (`cmp` rc 0).
+- Siblings: `stack_guard.test.sh` 27 passed / 0 failed, rc 0, at the base and after the change. No other script or test names `dev-reload.sh` (`git grep` over the committed tree: the only hits besides the script and the new test are `Blockchain/Dev/docs/local-dev-build.md` and the two documents this commit edits).
+- Shell-suite set: **77 → 78**, by three instruments (`run-shell-suites.sh --list`, a flat glob over `git ls-tree` at the base, a flat glob on disk). The runner's list names the new file once; a fabricated name reads 0.
+- Hermetic: run with `PATH=/usr/bin:/bin` only (no `docker`, no `npm`), the new test passes 7 of 7 and leaves no fixture directory behind; the same minimal environment against the base script gives 3 passed / 4 failed, so that run can fail.
+- `html_docs_matrix.test.sh`: 12 passed, 0 failed, run after the doc append and before the commit. Its tally is not evidence of well-formedness, so separately: each fragment has balanced opening and ending tags (flow 8 element kinds, cheat 10, one `<h2>` each), and each doc minus its fragment equals its base blob byte for byte (a 1-byte-altered fragment does not restore it). Flow doc 51 → 52 numbered blocks (added exactly 1, lost 0); cheat doc 40 → 41 sections (added exactly 1, lost 0). The doc tool reported 0 failed with both of its controls firing; the key-collision arms of that tool pass 14 of 14 against a depth-2 clone of the base (2 not run).
+**Pre-push hook, this push** (the hook's own output, `s-f15-c2-d3375905adc4-push.out`; push rc 0 in 7 min 38 s, one attempt; each line below occurs once in that file)
+- `shell suites: 78 passed, 0 failed, 0 skipped (of 78)`: the new suite is the 78th (77 before).
+- `OK — 13 code guards passed.`
+- `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` The 3 skipped legs are 3/15 (spec-auth conformance), 4/15 (path resolvability) and 8/15 (served-spec consistency); each printed `SKIP — local stack not up on http://localhost:6882 (start it to run this leg)`. The four platform suites are not among the hook's legs and were not run by this push.
+- No `[format-gate]` line was printed (0 occurrences). The hook's first line was `KS 991: local 'develop' is BEHIND origin/develop — ignoring the stale ref for base selection`, and it prints no file count. My count of the range against the tracking ref `f8c86f859fe0` (the stale local `develop` is the one ignored): 3 commits and 8 changed files, 6 of them under `Blockchain/Dev/`. That is this PR's 4 files plus 4 more from #1450 and #1453; the two documents are edited by both, so the union is 8, not 10. The hook does not name its base sha, so that base is inferred from its message.
+
+**Checker versus mine.** The held pass's checker measured on an older tip (`4eaf7741a6a4`): RED rc 1 with 4 failing and 3 passing lines, GREEN rc 0 with 7 passing lines, no sibling suite naming the script, `shellcheck` not installed. Mine agree on every count at `e27b9dceff39`. The READY does not record the checker's `bash` version, so whether it ran the cells under the same shell is UNMEASURED. The figures above are mine.
+
+**NOT run**
+- The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are UNMEASURED and are not claimed as passing.
+- A live run: `SECUURA_STACK_SLOT=N ./scripts/dev-reload.sh api-gateway` against a running slot-N stack (the ticket's own check). The cells run a copy of the script with stub `docker` and `npm`; they show which container name is looked for and which `cp` and `restart` commands are issued, not a real build or a real container.
+- `shellcheck` is not installed on the measuring machine.
+- The whole shell-suite set outside the pre-push hook: I ran the new test and the sibling directly and quote the hook's lines only.
+
+**NOT covered, noted and not changed**
+- **A separate, unticketed defect in the same file, not changed by this PR.** The diff to `dev-reload.sh` is one hunk at base line 45, and the text of the line below is identical at the base (line 73) and at the head (line 79). `dev-reload.sh` base line 73, `echo "▸ [3/3] restart $CONTAINER…"`, aborts under `/bin/bash` 3.2.57 in a UTF-8 locale. Run verbatim under `set -euo pipefail`: with `LC_ALL=en_US.UTF-8` rc 1, stdout empty, stderr `CONTAINER…: unbound variable`; with `LC_ALL=C` rc 0 and both lines print; with `${CONTAINER}…` rc 0 under UTF-8. It is the only line in the file with a variable directly before the ellipsis. That the `docker restart` on the next line then does not run is INFERRED from the line order and was not run against a live stack. The new test sets `LC_ALL=C` to stay clear of it; a board search by symbol (five search terms) found no ticket for it at the time of writing. Filing one is for a board seat, not this PR.
+- The two control cells ("no slot set", "slot 1") pin `stack_env.sh`'s current slot-1 default. The ticket's shared-acceptance point 2 (no silent default) would change that default and says such a change re-runs every test in the group.
+- `start-local.sh`, `check-stack-safety.sh`, spots 1, 3 and 4 and the shared-acceptance points: not touched by this PR.
+- A slot given as the empty string falls back to slot 1 (measured on `stack_env.sh`: rc 0, prefix `secuura`); it is not one of the three values run through the script.
+
+**Migrations / config:** none. No SQL, manifest, lock, baseline, openapi file or generated yaml, and no spec-version edit.
+
+**Docs.** Flow block 58. and the cheat section KS-1355 are appended at the tail of both documents (the flow document's last block in file order was 57. at the base).

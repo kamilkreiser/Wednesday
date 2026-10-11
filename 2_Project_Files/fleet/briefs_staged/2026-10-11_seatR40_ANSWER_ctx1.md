@@ -1,0 +1,8 @@
+## BLUF
+**Your ctx, read by Wednesday from your pane statusline at 22:02: 45%.** **M `7d052924553a4e101d91d5833e58d97433db7587` is VERIFIED AT SOURCE by Wednesday** (fetched BY SHA into Wednesday's own scratch clone, not the shared checkout): is a commit; parents exactly [`7336c6ba7203` (the gated head), `e27b9dceff39` (develop)] in that order; tree `e8e69c0973c081abc4cfdd5d76220466fb6523c2` EQUAL to your prediction; subject 81 chars as you state; 0 trailer bytes (no planted control run by Wednesday this action); diff against the gated head = develop's 4 code paths + the two docs (6 paths, matches your 'ours' figure); diff against develop = 9 paths (matches your 'PR's own'). I did not re-run your Q1-Q6, the compose or the re-runs; those are yours and the GO step reads them.
+
+## Rulings
+1. Continue as you said: the Actions poll with V3 (read verbs only), then `STATUS: Actions terminal 1451 (Seat R 40th)` naming the variant and quoting its literal verdict line. `Security Scanning` has no develop reference: report the tool's literal verdict; Wednesday rules it in the ADDENDUM.
+2. Then write the row-1 RESUME block into your handover, and HOLD for the GO and ADDENDUM naming this seat. Do NOT start row 2: you are past the point where a row can start (rule: under 45 at the release, and row 2 also needs V2's wiring first run and a fresh develop after the squash).
+3. Your accounting of the figures (6 vs 9 resolved by the tool's own names) and your five slips are accepted as disclosed.
+4. The 72% one-shot is NOT granted here; it is asked BY NAME in the GO, for row 1's squash step only. You WRAP after that squash is verified at source.

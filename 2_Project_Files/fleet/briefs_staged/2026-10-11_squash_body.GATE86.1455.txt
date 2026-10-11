@@ -1,0 +1,67 @@
+Refs KS-1417 — https://linear.app/secuura/issue/KS-1417
+
+Raised from the Wednesday-held Spark pass `KS-1417-p2-env-local-example-dead-gateway-port`, re-proved by Seat F 16th on develop `e27b9dceff39`. That commit is #1453's squash (KS 1432) and its parent `4a7cc1f697f8` is #1450's squash (KS 1426), so both PRs are in this branch's history (instrument: `git merge-base --is-ancestor` of the parent against the base, rc 0; a control against `origin/main`, which is not an ancestor, reads rc 1).
+
+**This is piece 2 of a multi-piece ticket and the ticket stays open.** Piece 1 changed the canonical template `env.example` and landed as #1449. This change leaves KS 1417 In Progress, and a fresh-clone bootstrap on a real machine is still owed.
+
+## What changes
+
+`Blockchain/Dev/env.local.example` set `API_GATEWAY_PORT=6882` at line 56. That line is replaced by three comment lines: two say the gateway's host port is `GATEWAY_PORT` (derived per slot by `scripts/stack_env.sh:56`, published by `docker-compose.yml:2282`) and that nothing is set here on purpose, and the third carries the ticket key. Cells 5 and 6 are appended to the existing suite `Blockchain/Dev/scripts/__tests__/ks1417_env_example_no_dead_gateway_port.test.sh`; no suite file is added.
+
+**What reads this file, measured.** Two tracked templates differ by one leading dot: `Blockchain/Dev/.env.local.example` (5,393 B, 0 line-start assignments of the key) and `Blockchain/Dev/env.local.example` (5,251 B, 1). `scripts/bootstrap-env.sh` writes `.env` from `env.example` (declared at `:36`, copied at `:79`) and `.env.local` from the dot-prefixed `.env.local.example` (declared at `:41`, copied at `:90`). It names the undotted `env.local.example` 0 times; the dotted name occurs 3 times in the same file and is the positive control. Across the tracked files, the two HTML documents excluded, the undotted name has two references: `.planning/codebase/STRUCTURE.md:166` and its own line 5, `cp env.local.example .env`, a manual step. Instrument: `git grep -P` with a negative lookbehind, because the dotted name contains the undotted one; a name that cannot exist returns 0. This is a source measurement at the base. It is not a statement of anyone's intent, and I did not run a clone.
+
+## Deviation from the Spark payload (declared)
+
+Lines 1 and 2 of the added comment are the payload's, byte for byte. The payload's third line ended with a clause about `.env`:
+
+`# KS-1417: this block used to set API_GATEWAY_PORT (6882), which nothing reads; it was copied into every clone's .env.`
+
+That is the line `env.example:363` carries. It holds there, because `bootstrap-env.sh` copies `env.example` into `.env`. The measurement above contradicts it for `env.local.example`, so the committed line ends at `which nothing reads.` The reword was ruled before the commit and is declared here as a deviation.
+
+- Hashes, naming the object: `Blockchain/Dev/env.local.example` with the payload's section 1 applied at the base by a strict temp-index apply is blob `fdfaeac882e9c800c35f1f8183f195348a2dd5e0`; as committed it is blob `5fc1bfc3fba72f77505ff930226d3e4d32ace5ed` (`git ls-tree -r` on the commit). The two files differ by one line, one insertion and one deletion.
+- The test file is NOT a deviation: the committed blob `a278294b0582b82f8807dc86c6f71199c4206801` equals the blob a strict temp-index apply of the payload's section 2 produces at the base.
+- The reword changed no result: the suite's output after it is byte-identical to its output before it (`diff -q` quiet).
+- The same clause remains in `env.example`, where it holds.
+
+## Test Evidence
+
+**Touched** (4 files, +40/-1 by `git diff --numstat` and by `--shortstat`)
+- `Blockchain/Dev/env.local.example` (+3/-1)
+- `Blockchain/Dev/scripts/__tests__/ks1417_env_example_no_dead_gateway_port.test.sh` (+15/-0, committed mode 100644; the runner executes suites as `bash <file>`)
+- `Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` (+15, block 59.) and `Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html` (+7, the KS 1417 section)
+
+The payload's counts agree with the commit's: section 1 is +3/-1 and section 2 is +15/-0, by counting the changed lines and by `git apply --numstat`, so there is no blank-line difference this time.
+
+**Ran** (Seat F 16th, Kamil’s Mac Studio (2), 2026-10-11 AEDT; macOS 27.0.1 arm64; GNU bash 3.2.57(1)-release at `/bin/bash`, `LANG=en_AU.UTF-8`; node v24.7.0 and npm 11.5.1 are present and not used by this suite). Every count below was read twice, from the suite's own summary line and from a separate count of its `PASS:` and `FAIL:` lines, and the two agreed each time.
+- Baseline at the base, nothing applied: rc 0, **4 passed / 0 failed** (4 cells). An independent scratch clone at the base reads the same.
+- With only the new test section applied: rc 1, **5 passed / 1 failed** (6 cells). The one red is `FAIL: env.local.example still sets API_GATEWAY_PORT (nothing reads it)`, which is cell 5. `bash -n` on the changed suite rc 0.
+- With the product section applied as well, and then with the reworded line: rc 0, **6 passed / 0 failed**.
+- Mutation control, run on the payload-applied file before the one-line reword: re-inserting `API_GATEWAY_PORT=6882` into the real template returns rc 1, 5 passed / 1 failed, on the same cell; restoring it byte for byte (sha256/16 `5e6e43a15206a724` before and after) returns rc 0, 6 passed / 0 failed. Cell 6 is a control and passed in every run.
+- Four sibling suites, at the base and after the change: `bootstrap_env_canonical_template` 7 passed / 0 failed, `bootstrap_env_slot_ports` 51 / 0, `prometheus_targets` 6 / 0, `slot_target` 174 / 0. Each ratio is the same at the base and after. They are the four suites the piece-1 doc block ran; they name the dot-prefixed `.env.example`. None of the 77 suites names the undotted `env.local.example` (0; the control is that two suites name `env.example`).
+- Shell-suite population: **77 before and 77 after**, by `run-shell-suites.sh --list`, by a flat `*.test.sh` glob, and (at the base) by `git ls-files`, because no suite file is added.
+- `html_docs_matrix.test.sh`: 12 passed, 0 failed, run after the doc append and before the commit. Its tally is not evidence of well-formedness, so separately: the fragments have balanced tags (flow: table 5/5, tr 14/14, td 19/19; cheat: table 3/3, div 3/3, tr 7/7, td 10/10), and removing each fragment from the committed document reproduces the base blob exactly. The doc tool `docblockf7.py` reports 0 failed, 24 passed.
+- **The hook, this push** (the hook's own log, each line once, read with `gatelinesf5.py`; one push, 7 min 47 s by the driver's start and end lines):
+  - `shell suites: 77 passed, 0 failed, 0 skipped (of 77)`. This equals my own count of 77 before and after.
+  - `OK — 13 code guards passed.`
+  - `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` The skipped legs are 3/15 (spec-auth conformance), 4/15 (path resolvability) and 8/15 (served-spec consistency), each printing `SKIP — local stack not up on http://localhost:6882`.
+  - No `[format-gate]` line was printed.
+  - The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) were not run, and nothing in this push's log is a pass for them.
+- **KS 991.** The hook's first lines say local `develop` is behind `origin/develop` and that it ignores the stale ref; it prints no sha and no count, so its base is inferred from that message. My count against the tracking ref `f8c86f859fe0` is 3 commits and 8 files, 6 of them under `Blockchain/Dev/` (`git rev-list --count`, and `git diff --name-only` with `--shortstat` agreeing at 8 files). That range includes the two squashes already in this branch's history; this PR's own range against the base is 1 commit and 4 files.
+
+**Checker versus mine.** The held pass's checker measured on an older tip (`785cb671557a`): RED rc 1 with 1 failing line and 5 passing, GREEN rc 0 with 0 failing and 6 passing, no sibling suite naming `env.local.example`, `shellcheck` not installed. Mine, on `e27b9dceff39`, agree on every one of those counts, and add the baseline 4/0, the mutation control, the consumer measurement, and the declared deviation.
+
+**NOT run**
+- The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are UNMEASURED and are not claimed as passing.
+- A fresh-clone bootstrap on a developer machine, which the ticket asks for. Whether a developer who follows line 5 of the file ends up with a working stack was not run.
+- `shellcheck` is not installed on the measuring machine, so the changed suite was not linted.
+- The whole shell-suite set outside the pre-push hook: I ran the changed suite and the four siblings directly and quote the hook's lines only.
+
+**NOT covered, noted and not changed**
+- `GATEWAY_PORT=6882` in the same file (line 88 at the base, line 90 after this change) under the LOCAL GATEWAY heading is untouched. KS 1417's text says the other slot-1 literals in templates are on KS 1381; I read the description of KS 1381 and it names `env.local.example` once, at line 117 for `FRONTEND_URL`, and does not name this line. Whether any ticket covers it is UNMEASURED beyond that read.
+- `.planning/codebase/STRUCTURE.md:166` calls the undotted file the template for `.env.local`; `bootstrap-env.sh` reads the dot-prefixed file for that. Noted, not changed.
+- The dot-prefixed `.env.local.example` carries no line-start assignment of the key and is untouched.
+- A residue ticket covering both templates is owed to a board seat. This seat files none.
+
+**Migrations / config:** none. The four files above are the whole diff: no SQL, manifest, lock, baseline, openapi file or generated yaml, and no spec-version edit.
+
+**Docs.** Flow block 59. and the cheat section for KS 1417 are appended at the tail of both documents (the flow document's last block in file order was 57. at the base, and the cheat sheet's last key was KS 1432).
