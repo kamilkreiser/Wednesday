@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-10-11 13:58 (Friday, ctx:80%) — READ FIRST; supersedes every block below where they differ
+**Account:** fresh (Kam /login ~11:5x, seats too); gauge ~3%; 90% stop normal. Kam today: all MPS + 9 HPSM-POC + 1 Composer card ruled; reconcile 0 at 12:53.
+**OPEN CARD (1):** `composer-4e00d57-words-look-demo-deploy-1011` (rec a). On a → a Composer deploy seat ships main 4e00d57 to the demo (push-to-demo grant runbook: backup, rollback a3502002, live check), report after.
+**FIRST ACTION — re-arm the merge my rotation killed:** `bash 2_Project_Files/friday/merge_when_green.sh datasecau/HPSM-POC 135 f18359b70060f2035238025ece0518966a356185` (PR #135 = B200 industry field + placeholder; gate B201 GO WITH NOTES). Check `gh pr view 135` first — it may already be merged.
+**HPSM-POC live seats:** %46 Datasec/HPSM-POC-C = gate **B204** (tier 1) on `b202/attribution-preview` 62bc3c5 (stacked on b200; keys tables customer_key/partner_org/revenue_win, stored ORG-nnnnn alias, derived ranges, "Preview: next phase" page /metrics/attribution-preview, synthetic wins only). %45 Datasec/HPSM-POC-D = **B203** import identifier minimisation (Ingest/* only, from a50b22d). Poll each STATUS last line + seat_idle.sh (watch_status false-fires).
+**After B204 GO:** PR (base = main after #135) → merge_when_green → ONE card to Kam BEFORE Tuesday 13 Oct: screenshots of the preview + industry field, NEW WORDS (B200 + B202), and three questions in one card's options or separate cards: deploy to hosted before Tue (his dashboard ruling c lifts the freeze for the preview; industry rides along?), **Q-B202-1 back-fill** of pre-key customers (else hosted shows them "made before the keys" until an Admin resetDemoData), and B203's kept-upload-files identifiers (schema change). Deploy seat = B198-shaped (push-to-demo grant covers hosted HPSM-POC; READY = gate + Friday check + merged via CodeQL).
+**Owed records (one HPSM-POC records seat):** the 9 HPSM-POC rulings → CLARIFICATIONS (`decision_queue --delivered`); BACKLOG: B201 M-1, M-2; B197 M-1 done earlier. **Composer records seat:** BACKLOG B123-F1 (820 px breaks), B122-N1 (setPolicyTarget ETag), B122-N3 (wording families). **MPS:** fold local records/b12,b21,b25,b30 (no remote).
+**Kam's own to-do:** MPS Approver account first sign-in (MFA) + his test quote.
+**Tooling owed:** decision_queue refuse `_override_prior` without a logged refusal (ledger w=3 today); watch_status false-fires.
+
 ## 🔴🔴🔴 HANDOVER 2026-10-11 12:55 (Friday, ctx:77%) — READ FIRST; supersedes every block below where they differ
 **Account:** fresh since ~11:5x (Kam /login'd Friday's pane AND the seats' default login). Gauge ~1% (renews ~6d 16h). The 10-10 past-90% lift is EXPIRED; normal 90% stop. **Kam on the board today:** 9 HPSM-POC cards ruled 12:49–12:53 + the morning's MPS/Composer ones; reconcile 0. No open Friday cards.
 **HPSM-POC (Kam 11:5x: continue HPSM-POC, Composer, MPS; HP feedback via 2 signed forwards = Steve Inch's ERD + Paul's 5 metrics, saved 0600 in FRIDAY/4_Credentials/clients/datasec/inbound/2026-10-11_hpsmpoc-hp-feedback-steve-inch/):**
