@@ -74,9 +74,6 @@ DQ_SEAT="${WED_AGENT:-}"
 if [ -z "$DQ_SEAT" ]; then case "$(basename "$(cd -P "$DIR/../.." && pwd)")" in TUESDAY|Tuesday|tuesday) DQ_SEAT=tuesday ;; WEDNESDAY|Wednesday|wednesday) DQ_SEAT=wednesday ;; FRIDAY|Friday|friday) DQ_SEAT=friday ;; esac; fi
 export DQ_SEAT
 export DQ_CHAT="${DQ_CHAT:-$DIR/../../0_Brain/dashboard/data/chat_log.json}"
-# OVERRIDE NEEDS A READ (Friday ledger w=3, 2026-10-11): a plain add refused by the prior-ruling gate logs the card id
-# here; an override is accepted only when a refusal for the SAME id was logged in the last hour.
-export DQ_REFUSAL_LOG="${DQ_REFUSAL_LOG:-$DIR/../fleet/state/dq_prior_refusals.jsonl}"
 # STORE GUARD (2026-09-08) — refuse a write when origin is ahead on this file, or
 # when it carries conflict markers. WRITE commands only: `list`/`show` must stay
 # readable on a stale store, because a guard that blocks reading gets routed around.
@@ -297,41 +294,7 @@ def cmd_add(args):
     # in the receipt). In the path, not in memory.
     override = bool(d.pop("_override_prior", False))
     prior = prior_rulings(d)
-    # OVERRIDE NEEDS A READ (Friday ledger w=3, 2026-10-11: three cards went out with the override on the FIRST attempt,
-    # so the gate's matches were never shown). The override is an answer to a refusal the writer has READ: it is accepted
-    # only if a plain add of the SAME card id was refused here within the last hour. Only a plain refusal logs, so a
-    # second override attempt cannot pass on its own refusal.
-    _rlog = os.environ.get("DQ_REFUSAL_LOG", "")
-    _cid = str(d.get("id") or "")
-    if prior and override:
-        _ok = False
-        try:
-            _now = datetime.datetime.now(datetime.timezone.utc)
-            for _ln in open(_rlog, encoding="utf-8"):
-                try:
-                    _r = json.loads(_ln)
-                except Exception:
-                    continue
-                if _cid and _r.get("id") == _cid:
-                    _age = (_now - datetime.datetime.fromisoformat(_r["ts"])).total_seconds()
-                    if 0 <= _age <= 3600:
-                        _ok = True
-        except FileNotFoundError:
-            pass
-        if not _ok:
-            print("decision_queue: REFUSED — --override-prior-rulings / _override_prior on a card whose plain add was "
-                  f"not refused in the last hour (id {_cid or '<none>'}). Run the add WITHOUT the override first, read "
-                  "every match it prints, then re-run with the override and the measurement in the BLUF.", file=sys.stderr)
-            sys.exit(3)
     if prior and not override:
-        if _rlog and _cid:
-            try:
-                os.makedirs(os.path.dirname(_rlog), exist_ok=True)
-                with open(_rlog, "a", encoding="utf-8") as _f:
-                    _f.write(json.dumps({"id": _cid, "ts": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                                         "matches": len(prior)}) + "\n")
-            except OSError as _e:
-                print(f"decision_queue: could not log this refusal ({_e}); an override of {_cid} will be refused", file=sys.stderr)
         print("decision_queue: REFUSED — Kam has already written on this subject on the panel "
               f"({len(prior)} message(s)). Read them; if the card is still warranted, re-run with "
               "--override-prior-rulings and say why in the BLUF:", file=sys.stderr)
