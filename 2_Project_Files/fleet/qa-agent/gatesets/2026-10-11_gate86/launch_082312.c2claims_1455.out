@@ -1,0 +1,10 @@
+PASS F0 numstat for 4 paths equals the kit (+40/-1); non-blank line deltas for the non-doc paths: {'env.local.example': 2, 'ks1417_env_example_no_dead_gat': 13}
+PASS E1 env.local.example: removed ['API_GATEWAY_PORT=6882']; added 3 lines, all comments, no assignment: ["# The gateway's host port is GATEWAY_PORT, which scripts/stack_env.sh derives per slot.", '# Nothing is set here on purpose: a port written in this file would be a slot-1 literal.', '# KS-1417: this block used to set API_GATEWAY_PORT (6882), which nothing reads.']
+PASS E1-CONTROL CONTROL: a re-added assignment, a missing comment line and a missing removal each FAIL the same predicate
+INFO E4 the declared deviation: the THIRD added comment line reads '# KS-1417: this block used to set API_GATEWAY_PORT (6882), which nothing reads.' (the Spark original had a longer third line with a final clause about `.env`; the original payload is NOT in this kit: the byte comparison is NOT RUN; the PR body carries both blob ids)
+PASS E2 env.local.example non-comment hits of API_GATEWAY_PORT: develop (1, 1) -> head (1, 0) (raw, code-only) [want code-only >=1 -> 0]; per file (raw, code-only) develop {'env.example': (1, 0), 'env.local.example': (1, 1), 'ks1417_env_example_no_dead_gat': (10, 8)} | head {'env.example': (1, 0), 'env.local.example': (1, 0), 'ks1417_env_example_no_dead_gat': (12, 10)} (git grep -n, the two HTML docs excluded)
+INFO E2b code-only (non-comment) hits at head in files other than env.local.example: {'ks1417_env_example_no_dead_gateway_port.': 10} (the READY: 2 references: .planning/codebase/STRUCTURE.md:166 and the template's own line 5; this census counts the suite's own string literals too)
+PASS E2-CONTROL CONTROL: the live key GATEWAY_PORT reads 2 hit(s) in stack_env.sh; an impossible name reads 0
+PASS E3 ks1417_env_example_no_dead_gateway_port.test.sh: +15/-0 (an existing file; cells 5 and 6 appended; `# CELL` markers 4 -> 6)
+CHECKED 6
+0 FAIL

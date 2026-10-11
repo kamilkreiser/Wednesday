@@ -1,0 +1,32 @@
+INFO C-SOLO-1451 develop + #1451: rc 1, conflicted paths ['API_Security_Functional_Testing_Ar', 'QA_Tool_Cheat_Sheet_Secuura_API_Te']
+INFO C-SOLO-1452 develop + #1452: rc 1, conflicted paths ['API_Security_Functional_Testing_Ar', 'QA_Tool_Cheat_Sheet_Secuura_API_Te']
+INFO C-SOLO-1454 develop + #1454: rc 0, conflicted paths []
+INFO C-SOLO-1455 develop + #1455: rc 0, conflicted paths []
+INFO C-PAIR-1451-1452 #1451 vs #1452: rc 1, conflicted paths ['API_Security_Functional_Testing_Ar', 'QA_Tool_Cheat_Sheet_Secuura_API_Te']
+INFO C-PAIR-1451-1454 #1451 vs #1454: rc 1, conflicted paths ['API_Security_Functional_Testing_Ar', 'QA_Tool_Cheat_Sheet_Secuura_API_Te']
+INFO C-PAIR-1451-1455 #1451 vs #1455: rc 1, conflicted paths ['API_Security_Functional_Testing_Ar', 'QA_Tool_Cheat_Sheet_Secuura_API_Te']
+INFO C-PAIR-1452-1454 #1452 vs #1454: rc 1, conflicted paths ['API_Security_Functional_Testing_Ar', 'QA_Tool_Cheat_Sheet_Secuura_API_Te']
+INFO C-PAIR-1452-1455 #1452 vs #1455: rc 1, conflicted paths ['API_Security_Functional_Testing_Ar', 'QA_Tool_Cheat_Sheet_Secuura_API_Te']
+INFO C-PAIR-1454-1455 #1454 vs #1455: rc 1, conflicted paths ['API_Security_Functional_Testing_Ar', 'QA_Tool_Cheat_Sheet_Secuura_API_Te']
+PASS C-CONTROL-CODE CONTROL: two synthetic commits editing the same tail of stack_env.sh read rc 1 with conflicted ['Blockchain/Dev/scripts/stack_env.sh'] (a code conflict is detectable by this instrument)
+PASS C-CONTROL-NOOP CONTROL: develop merged with itself reads rc 0, no conflicts
+PASS C-ORDERS 24 merge orders composed; 24 fully resolved by keep-both on the two docs; unresolvable: []
+INFO C-POS-1 merge position 1 over all prefixes: rc0 2, rc1 2 (docs-only conflicts: [('1451', 2), ('1452', 2)] distinct (PR,n-docs) cases)
+INFO C-POS-2 merge position 2 over all prefixes: rc0 0, rc1 12 (docs-only conflicts: [('1451', 2), ('1452', 2), ('1454', 2), ('1455', 2)] distinct (PR,n-docs) cases)
+INFO C-POS-3 merge position 3 over all prefixes: rc0 0, rc1 24 (docs-only conflicts: [('1451', 2), ('1452', 2), ('1454', 2), ('1455', 2)] distinct (PR,n-docs) cases)
+INFO C-POS-4 merge position 4 over all prefixes: rc0 0, rc1 24 (docs-only conflicts: [('1451', 2), ('1452', 2), ('1454', 2), ('1455', 2)] distinct (PR,n-docs) cases)
+PASS C-COMPOSED every one of the 24 composed states: each of the 4 fragments present ONCE in each doc, composed minus the four fragments == develop's doc byte for byte, every non-doc non-yaml path blob == that PR's head blob, and the yaml differs from develop by exactly +11/-0 lines
+PASS C-NONDOC-IDENTICAL the non-doc paths (code, tests, scripts, templates) are IDENTICAL across all 24 orders: 1 distinct state(s)
+PASS C-YAML-IDENTICAL the yaml blob is IDENTICAL across all 24 orders (the two PRs' hunks are disjoint): 1 distinct blob(s) ['297a00aab90c']
+PASS C-DOCS-SET-flow API_Security_Functional_Testing_Architecture: 24 distinct composed document(s) over 24 orders; all contain the same four fragments once each (checked above); only the ORDER of the appended blocks differs
+PASS C-DOCS-DISTINCT-flow CONTROL: the order of the appended blocks is OBSERVABLE (24 orders give 24 distinct documents), so an order-insensitive checker would be blind here
+PASS C-DOCS-SET-cheat QA_Tool_Cheat_Sheet_Secuura_API_Testing.html: 24 distinct composed document(s) over 24 orders; all contain the same four fragments once each (checked above); only the ORDER of the appended blocks differs
+PASS C-DOCS-DISTINCT-cheat CONTROL: the order of the appended blocks is OBSERVABLE (24 orders give 24 distinct documents), so an order-insensitive checker would be blind here
+INFO C-TAIL-natural order 1451-1452-1454-1455: flow-doc heading numbers in document order (last 9): ['51', '52', '54', '53', '57', '55', '56', '58', '59'] ; composed commit c5e7faab86ce
+INFO C-TAIL-reverse order 1455-1454-1452-1451: flow-doc heading numbers in document order (last 9): ['51', '52', '54', '53', '57', '59', '58', '56', '55'] ; composed commit 794c4eb59215
+INFO C-STEPS-natural natural order steps: [('1451', 1, 'keep-both on 2 doc(s)'), ('1452', 1, 'keep-both on 2 doc(s)'), ('1454', 1, 'keep-both on 2 doc(s)'), ('1455', 1, 'keep-both on 2 doc(s)')]
+INFO C-STEPS-reverse reverse order steps: [('1455', 0, 'clean'), ('1454', 1, 'keep-both on 2 doc(s)'), ('1452', 1, 'keep-both on 2 doc(s)'), ('1451', 1, 'keep-both on 2 doc(s)')]
+PASS C-CONTROL-DUP CONTROL: a planted duplicate of block 55 reads count 2 where the composed document reads 1
+PASS C-CONTROL-KEEPBOTH CONTROL: keep_both REFUSES to insert a fragment that is already present
+CHECKED 12
+0 FAIL

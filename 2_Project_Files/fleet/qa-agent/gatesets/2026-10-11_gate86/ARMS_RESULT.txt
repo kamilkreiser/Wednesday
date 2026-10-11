@@ -1,0 +1,86 @@
+== family R: repin_and_launch_gate86.sh argument arms (rc 9 malformed/missing, rc 11 WRONG VALUE vs kit.json) — none of these reaches the network
+ARM R1_missing_seat rc=9 want=9 reason(REQUIRED argument is missing (SEAT))=found -> OK
+ARM R2_bad_seat rc=9 want=9 reason(--seat must read)=found -> OK
+ARM R3_short_head rc=9 want=9 reason(must be the FULL 40-hex)=found -> OK
+ARM R4_missing_base rc=9 want=9 reason(REQUIRED argument is missing (BS_1455))=found -> OK
+ARM R5_wrong_head rc=11 want=11 reason(WRONG VALUE --head-1452)=found -> OK
+ARM R6_wrong_branch rc=11 want=11 reason(WRONG VALUE --branch-1454)=found -> OK
+ARM R7_wrong_tree rc=11 want=11 reason(WRONG VALUE --tree-1455)=found -> OK
+ARM R8_wrong_base_1451 rc=11 want=11 reason(WRONG VALUE --base-1451)=found -> OK
+ARM R9_wrong_base_1452 rc=11 want=11 reason(WRONG VALUE --base-1452)=found -> OK
+ARM R10_parents_2 rc=11 want=11 reason(WRONG VALUE --parents-n)=found -> OK
+ARM R11_wrong_develop rc=11 want=11 reason(WRONG VALUE --develop)=found -> OK
+ARM R12_unknown_flag rc=9 want=9 reason(usage: repin_and_launch_gate86.sh)=found -> OK
+ARM R13_pr_not_in_batch rc=9 want=9 reason(not in this batch)=found -> OK
+ARM R14b_noapi_needs_dry rc=9 want=9 reason(--no-api is a dry-run option only)=found -> OK
+ARM R15b_clone_override_needs_dry rc=16 want=16 reason(G86_CLONE is a dry-run control only)=found -> OK
+== family D: dry runs against stand-ins (the kit clone override points at YOUR scratch clone; the ls-remote output is a file under the scratch dir)
+synthetic develop-child bcee51949eb5e11cbdae2a0c1305e4c2b4bd0993 (touches only ZZ_gate86_arm.txt)
+ARM D0_positive_control rc=0 want=0 reason(DRY RUN COMPLETE)=found -> OK
+== family L: launch_qa_secuura_gate86.sh --check arms (overrides G86_PROMPT / G86_HEADFILE / G86_LS / G86_KITJSON / G86_FILES_DIR point at files under the scratch dir)
+ARM L0_positive_control rc=0 want=0 reason(all guards pass)=found -> OK
+ARM L1_unfilled_double_brace rc=8 want=8 reason(unfilled double-brace token)=found -> OK
+ARM L2_unfilled_merge_seat rc=8 want=8 reason(@MERGE_SEAT@ is unfilled)=found -> OK
+ARM L3_wrong_go_string rc=8 want=8 reason(GO strings must be exactly)=found -> OK
+ARM L4_no_thinking_directive rc=8 want=8 reason(thinking directive)=found -> OK
+ARM L5_missing_keyword rc=33 want=33 reason(by-name keyword)=found -> OK
+ARM L6_missing_hold rc=39 want=39 reason(the HOLDS)=found -> OK
+ARM L7_missing_addendum_rule rc=25 want=25 reason(MERGE ADDENDUM)=found -> OK
+ARM L8_missing_named_exception_x9 rc=39 want=39 reason(the HOLDS)=found -> OK
+ARM L9_prompt_lacks_a_head_in_full rc=8 want=8 reason(does not name the #1455 head)=found -> OK
+ARM L10_headfile_wrong_head rc=7 want=7 reason(WRONG VALUE #1452 head)=found -> OK
+ARM L11_headfile_wrong_base_for_one_pr rc=7 want=7 reason(WRONG VALUE #1454 base)=found -> OK
+ARM L12_headfile_missing_a_P_line rc=7 want=7 reason(must carry exactly 4 'P ' lines)=found -> OK
+ARM L13_headfile_bad_seat rc=7 want=7 reason(is not 'Seat X nth')=found -> OK
+ARM L14_moved_pull_head rc=6 want=6 reason(a verdict is valid ONLY at its head)=found -> OK
+ARM L15_moved_develop rc=17 want=17 reason(origin develop)=found -> OK
+ARM L16_bad_pin rc=31 want=31 reason(BAD PIN)=found -> OK
+ARM L17_files_dir_positive_control rc=0 want=0 reason(all guards pass)=found -> OK
+ARM L18_ready_copy_tampered rc=31 want=31 reason(ready_sha256_16)=found -> OK
+ARM L19_rulings_empty rc=30 want=30 reason(MISSING or empty)=found -> OK
+ARM L20_launch_without_tty rc=21 want=21 reason(stdin is not a TTY)=found -> OK
+== family D (continued): the dry runs D1..D6 (D5 leaves a test develop in the rendered prompt / head file; D6 restores the real one)
+ARM D1_moved_head rc=11 want=11 reason(MISMATCH)=found -> OK
+ARM D2_branch_not_head rc=11 want=11 reason(MISMATCH)=found -> OK
+ARM D3_moved_develop_no_repin rc=10 want=10 reason(develop moved)=found -> OK
+ARM D4_moved_develop_stale_repin rc=10 want=10 reason(stale re-pin)=found -> OK
+ARM D5_moved_develop_with_repin rc=0 want=0 reason(RE-PINNED develop)=found -> OK
+ARM D6_restore_real_render rc=0 want=0 reason(DRY RUN COMPLETE)=found -> OK
+(D0 and D5 are the POSITIVE controls of this family; D6 re-renders the kit against the real develop again, because D5 leaves a test develop in the rendered files: the refusals D1..D4 are not an artefact of the stand-in; D5 also proves the --repin-develop path end to end, launcher --check included)
+== family C: the tools' required knobs (a missing / wrong value must refuse BY NAME; stderr or stdout carries the reason)
+ARM C1_0_positive_control rc=0 want=0 reason(0 FAIL)=found -> OK
+ARM C1_1_missing_pr rc=1 want=1 reason(--pr is REQUIRED)=found -> OK
+ARM C1_2_short_head rc=1 want=1 reason(must be a FULL 40-hex)=found -> OK
+ARM C1_3_foreign_pr rc=1 want=1 reason(is not a kit PR)=found -> OK
+ARM C1_4_wrong_base_is_a_FAIL rc=1 want=1 reason(FAIL P0)=found -> OK
+ARM C1_5_wrong_end_tree_is_a_FAIL rc=1 want=1 reason(FAIL P0)=found -> OK
+ARM C1_6_parents_2_is_a_FAIL rc=1 want=1 reason(FAIL P0)=found -> OK
+ARM C1_7_unresolvable_sha rc=1 want=1 reason(is not in)=found -> OK
+ARM C1_8_docsbase_wrong_base rc=1 want=1 reason(pinned branch point)=found -> OK
+ARM C1_9_isolation_missing_a_head rc=1 want=1 reason(--head must be given for exactly)=found -> OK
+ARM C1_10_isolation_wrong_head rc=1 want=1 reason(FAIL I0-1454)=found -> OK
+ARM C2_0_positive_control rc=0 want=0 reason(0 FAIL)=found -> OK
+ARM C2_1_missing_base rc=1 want=1 reason(--base is REQUIRED)=found -> OK
+ARM C2_2_head_differs_from_kit rc=1 want=1 reason(differ from the kit pins)=found -> OK
+ARM C2_3_base_differs_from_kit rc=1 want=1 reason(differ from the kit pins)=found -> OK
+ARM C2_4_foreign_pr rc=1 want=1 reason(is not a kit PR)=found -> OK
+ARM C2_5_handlers_for_a_script_pr rc=1 want=1 reason(handlers is for the contract PRs)=found -> OK
+ARM C3_0_positive_control_selftest rc=0 want=0 reason(0 FAIL)=found -> OK
+ARM C3_1_prep_onto_existing_tree rc=2 want=2 reason(exists)=found -> OK
+ARM C3_2_prep_tree_under_forbidden_root rc=1 want=1 reason(not a canonical /private/tmp/claude-501/)=found -> OK
+ARM C3_3_prep_tree_not_canonical rc=1 want=1 reason(not a canonical /private/tmp/claude-501/)=found -> OK
+ARM C3_4_prep_short_rev rc=1 want=1 reason(must be a FULL 40-hex)=found -> OK
+ARM C3_5_compose_missing_a_head rc=1 want=1 reason(--head for exactly)=found -> OK
+ARM C3_6_compose_head_differs_from_kit rc=1 want=1 reason(differs from the kit pin)=found -> OK
+ARM C3_7_compose_clone_under_forbidden_root rc=1 want=1 reason(REFUSED)=found -> OK
+ARM C3_8_vitest_for_a_shell_pr rc=1 want=1 reason(vitest is for)=found -> OK
+ARM C3_9_shell_for_a_contract_pr rc=1 want=1 reason(shell is for)=found -> OK
+ARM C3_10_regen_without_tsx rc=1 want=1 reason(tsx missing)=found -> OK
+ARM GH_0_positive_control_selftest rc=0 want=0 reason(SELFTEST)=found -> OK
+ARM GH_1_foreign_pr rc=2 want=2 reason(is not a kit PR)=found -> OK
+ARM GH_2_missing_head rc=2 want=2 reason(--head is REQUIRED)=found -> OK
+ARM GH_3_wrong_head_rc1 rc=1 want=1 reason(BODY sha256/16)=found -> OK
+ARM GH_4_audit_missing_a_pin rc=2 want=2 reason(is REQUIRED)=found -> OK
+
+ARMS DRIVEN: 76 | MISMATCHES: 0
+NOT RUN BY NAME (each could reach a real launch / a pane / the usage gate if the guard under test failed): a real launch with a G86_* override set (rc 16 after the TTY check), rc 12 (usage gate), rc 14 (cockpit add), rc 1 (routing row absent on a REAL run: a dry run only reports it), rc 18 (READY copy sha mismatch inside the repin script: the launcher's own rc 31 on the same copy IS driven as L18).

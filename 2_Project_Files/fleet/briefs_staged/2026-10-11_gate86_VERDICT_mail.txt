@@ -1,0 +1,144 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-11T08:52:05.678Z
+Subject: [QA -> Wednesday] GATE86 (T2): #1451 KS-591 + #1452 KS-1364 + #1454 KS-1355 + #1455 KS-1417
+---
+MODEL: claude-opus-5-5 (Opus 5.5) since ~2026-10-11T08:25Z. The session started on claude-sonnet-5-5 at 08:24Z; the charter read, NOT-TESTED, START ls-remote and hash checks ran on Sonnet. Every check from the clone onward ran on Opus 5.5.
+
+VERDICTS (develop e27b9dceff390d8048e8970efd2eab15f21b01fe; START/MID/END ls-remote 08:25:11Z / 08:42:42Z / 08:48:05Z; no head and no develop moved)
+GO for #1451 at 7336c6ba7203, assuming develop e27b9dceff390d8048e8970efd2eab15f21b01fe
+GO for #1452 at c2652aeaa499, assuming develop e27b9dceff390d8048e8970efd2eab15f21b01fe
+GO for #1454 at d3375905adc4, assuming develop e27b9dceff390d8048e8970efd2eab15f21b01fe
+GO for #1455 at 5a28783cf22f, assuming develop e27b9dceff390d8048e8970efd2eab15f21b01fe
+TIER 1451: T2 (agreed)
+TIER 1452: T2 (agreed)
+TIER 1454: T2 (agreed)
+TIER 1455: T2 (agreed)
+GO strings: GO (Seat R 39th): merge 1451 on gate86 | GO (Seat R 39th): merge 1452 on gate86 | GO (Seat R 39th): merge 1454 on gate86 | GO (Seat R 39th): merge 1455 on gate86
+No Blocker, no Major. Minor: N-1454-1, N-1452-2, N-1451-1, G86-3, B86-1 (all BLOCKS no).
+
+DISTINCTIVE QUESTIONS
+#1451 / #1452: CONTRACT
+- yaml +6 / +5: pure `required: true` insertions directly under `requestBody:`.
+- PyYAML deep equality over 344 operations: head minus the declared keys == base.
+- openapi.ts shape holds (2 line + 4 inline / 2 line + 3 inline); no handler or route file in either diff.
+- My own instrument agrees: BSD patch of both yaml diffs onto develop gives blob 297a00aab90c == the composed yaml, +11 pairs.
+- "Declares, does not enforce" HOLDS. No request validator exists. The api-gateway DOES read the yaml at runtime (index.ts:561-576, fs.watch :618) to serve /api/docs and build a path/method map; it never reads requestBody.
+- HANDLER PROBE (MEASURED, modelled harness; real routes or the real index app; stubbed services/DB/auth; ephemeral 127.0.0.1). Body modes: absent (CL 0, with and without a JSON content type), {}, [], "x".
+  - Answer 400 in every mode, with the service never called: transfers, stake/complete-unstake, delegations, delegations/validate, analytics/exports, batch/certifications, batch/delegations, teams/notify.
+  - teams/webhook-config answers 503 when M365 is not configured (requireM365 runs before the body is validated) and 400 when configured.
+  - anchors and anchors/thread-mint: schema-level only (both schemas refuse every mode); handler-level NOT RUN.
+#1454: CELLS + LINE-79
+- Cells: R 3/4 -> G 7/0, tamper red; stack_guard 27/0 base==head; stack_env 24/1 in both states (the scratch tree is no git repo).
+- LINE-79, MEASURED by my own fixture (real script, stub docker/npm, /bin/bash 3.2.57, run through the shebang):
+  - Under LANG=en_AU.UTF-8, LC_ALL=en_AU.UTF-8 or LC_ALL=en_US.UTF-8, the head copies dist into the RIGHT container (secuura-s2-demo), then exits rc 1 at line 79 (CONTAINER…: unbound variable) BEFORE docker restart.
+  - Under LC_ALL=C it copies and restarts secuura-s2-demo, and slot 1 is untouched.
+  - The braced ${CONTAINER} variant restarts under UTF-8.
+  - The base under UTF-8 copies into slot 1's secuura-demo and aborts.
+- Ruling: the title is true only under LC_ALL=C, not in the default locale. The body discloses the defect as not changed by this PR, so it is Minor, BLOCKS no.
+- Gate-proposed alternative subject, true of the diff in every locale: "KS-1355: dev-reload.sh names the current slot's container, not slot 1's" (71). Wednesday's choice; the declared subject (73) is otherwise acceptable with the body's disclosure.
+- Slots 5 / 0 / abc exit 2 (HOLDS); an empty slot falls back to secuura-demo (measured); the live slot-2 run is OWED.
+#1455: CELLS + CENSUS + DEVIATION
+- Cells: R 5/1 (cell 5) -> G 6/0; re-inserting the key into the real template turns cell 5 red. Run only through c3 shell (X9).
+- API_GATEWAY_PORT readers outside the KS-1417 suite: 0 code-only (13 raw in 3 files; the control key GATEWAY_PORT has 28 reader files). The detector misses `export KEY=` and `KEY = v` (Polish).
+- Deviation: the shortened third line "# KS-1417: this block used to set API_GATEWAY_PORT (6882), which nothing reads." is true of the file, and it is declared in the body under its own heading with both blob ids (committed 5fc1bfc3fba7 verified; the Spark blob is UNMEASURED).
+- Template line 5 (`cp env.local.example .env`) means a developer who follows it does copy this file into .env. The fresh-clone bootstrap stays owed.
+
+CELLS TABLE (R = base .openapi.ts + head tests; G = head)
+- #1451: anchoring R 3/2 (AB1 AB2) G 5/0 | staking R 3/1 (SU1) G 4/0 | transfer R 3/3 (TB1-3) G 6/0. Every red reads `expected undefined to be true`, 0 load failures.
+- #1452: analytics R 4/1 (AE1) G 5/0 | api-gateway R 3/2 (BA1 BA2) G 5/0 | m365 R 4/2 (TW1 TW2) G 6/0.
+- Suites, before -> after (before = the PR's tests excluded):
+  - anchoring 365 -> 370 (1 pre-existing threadTokenMint red on both sides)
+  - staking 61 -> 65; transfer 85 -> 91
+  - analytics 32 -> 37; api-gateway 869 -> 874; m365 57 -> 63
+  - 0 new reds.
+MUTATIONS
+- Drop one declaration at a time: 11/11 mutants red on exactly the named cell, no other cell red; unmutated controls green.
+- My own mutants: flipping TB1 to `false` turns TB1 red; adding `required: true` to /api/batch/verify turns control BAC3 red. #1451's extra-declaration mutant is N/A (every transfer body is already required at the head).
+
+COMPOSITION
+- compose 12/12 over the 24 orders:
+  - every order resolved by the keep-both on the two docs only
+  - 1 non-doc state; 1 yaml blob 297a00aab90c (+11/-0)
+  - 24 distinct docs; every fragment present once; composed minus the fragments == develop
+- Plain merges:
+  - solo onto develop: #1451 and #1452 conflict on the 2 docs; #1454 and #1455 are clean
+  - all 6 pairs conflict on exactly the 2 docs
+  - position 1: rc 0 for 1454/1455, docs conflict for 1451/1452; positions 2-4: docs-only conflicts in 12/12, 24/24, 24/24
+- regen (generate-openapi --check): natural rc 0, reverse rc 0, PR heads rc 0; tamper rc 1 with a distinct message.
+- docs matrix: natural 12/0, reverse 12/0; COUNT 1 each of 55 56 57 58 59. Natural tail ... 53 57 55 56 58 59; reverse ... 57 59 58 56 55.
+- The matrix is MEASURED blind: 12/0 with block 58 dropped and with block 55 duplicated. The COUNT catches both (B86-1).
+- My own composition instrument (patch + string assembly, no merge-tree) agrees on the yaml blob, both docs in both orders and all non-doc blobs.
+- Conflict set predicted: the two HTML docs and nothing else; the yaml auto-merges.
+
+MERGE-IN CONDITION
+- The merge seat does the keep-both on the 2 docs onto the CURRENT develop before each squash. Merge order assumed 1451, 1452, 1454, 1455 (flow 55, 56, 58, 59).
+- Re-run after each keep-both:
+  - the PR's new tests (vitest for #1451/#1452; the shell suite for #1454/#1455)
+  - generate-openapi --check (after #1451 and #1452)
+  - html_docs_matrix AND the per-block COUNT
+- Declared squash subjects, all true of the diffs, no (#n):
+  - #1451 "KS-591: six POST request bodies are declared required in the published contract" (79)
+  - #1452 "KS-1364: five POST request bodies are declared required in the published contract" (81)
+  - #1454 "KS-1355: dev-reload.sh reloads the current slot's container, not slot 1's" (73; over-claims in the default locale, alternative above, 71)
+  - #1455 "KS-1417: env.local.example drops API_GATEWAY_PORT, a key no tracked file reads" (78)
+
+BODY SENTENCES (each with its instrument: evidence/body_sentences_judged.md)
+- Judged (HOLDS/MEASURED, PARTLY, UNMEASURED, false):
+  - #1451: 47 — 28 / 8 / 11 / 0
+  - #1452: 58 — 29 / 7 / 22 / 0
+  - #1454: 55 — 39 / 5 / 11 / 0
+  - #1455: 58 — 39 / 10 / 9 / 0
+- FALSE: one #1451 sentence outside the T7 list: "git grep ... finds ... no reader of the yaml other than comments". Wrong: api-gateway/src/index.ts:561-576 reads the yaml (N-1451-1, Minor).
+- Stale figures: 0. "77 -> 78" reconciles with the kit's 58 -> 59 (tracked *.test.sh over both roots: scripts 58 -> 59 + systemTest 19); run-shell-suites --list NOT RUN.
+- KS-991 ruling: in #1452 and #1454 it sits inside a verbatim quote of the hook's own line. Measured: KS-991 (Done) is NOT attached to either PR. Polish, BLOCKS no.
+- m365 test header "Both handlers refuse an absent body with 400": does not hold for webhook-config when M365 is unconfigured (N-1452-2, Minor; already flagged UNVERIFIED in the body).
+
+CHECK ROWS
+- C1: pin 17/17 ×4 rc 0 (controls 53 B / 1 CAB fire); docsbase 11/11 ×4; isolation 25/25.
+- 1: claims 16/16 ×2 rc 0 + my own patch instrument.
+- 2: claims 11/11 and 6/6 rc 0 + my LINE-79, slot and dead-key probes.
+- 3: vitest 13/13 ×2, mutate 13/13 and 12/12, shell 8/8 ×2, all rc 0.
+- 4: compose 12/12, regen 3/3 ×4, docs 3/3 ×2, all rc 0 + my own compose.
+- 5: actions ×4 rc 0, audit rc 0.
+- 6: api ×4 rc 0, prtext T3 FAIL on 1452/1454 (KS-991 in hook quotes), linear ×4 OK.
+- 7: census rc 0.
+- 8: NOT-TESTED written first.
+
+CI
+- Per head: 6 runs, 0 pending, 0 NOT RUN. Reds: pr (Akto/k6/Playwright), PR Security Gates, Security Scanning — all PRE-EXISTING.
+  - pr and PR Security Gates: equal job, steps and signature to develop push runs 38113120900 and 38113120677.
+  - Security Scanning: KS-1148 VERIFIED. audit-locks.mjs:50 imports semver at all 4 bases and heads; no PR touches a manifest or lock; the log shows "Cannot find package 'semver' imported from .../audit-locks.mjs".
+  - The kit compared Security Scanning only against batch siblings; I added #1453's run 38106564569 (outside the batch): 19/19 signature lines match for all four (G86-3).
+- CI-REACH: no automatic runner (CI or the pre-push hook) ever runs the 6 new vitest files (pr-platform-suites' test:unit is systemTest/playwright; ci.yml is workflow_dispatch). The shell suites do run in CI (ks1355 7/0 on #1454's run, ks1417 6/0 on #1455's run).
+
+END_TREEs
+- #1451 952dea8d1487c92754a59d2072fdfb7dd89d9e23
+- #1452 a80f2135ff04e0ddd11c792b5eaa4b1e1564274a
+- #1454 a33ede92b9ac0579d3a2ba1aed710d6726360987
+- #1455 0c336c5ee7efd8e2e858d754f9df277097da4374
+
+CENSUS
+- 22 other open PRs: OVERLAP-CODE 0, OVERLAP-YAML 0, OVERLAP-DOCS 1 (#1383 KS-1401).
+- run-shell-suites.sh is touched only by #1250. No other open PR touches stack_env.sh, dev-reload.sh, env.example, any *.openapi.ts, generate-openapi.ts or the yaml.
+- #1451/#1452 are mergeable False / dirty; #1454/#1455 are unstable.
+- Tickets KS-591, KS-1364, KS-1355, KS-1417: In Progress, not archived, PR attached, 0 comments naming the PR (Wednesday's batch; reported, not required).
+
+LIVE-RUN NOTES: #1454 live slot-2 dev-reload is OWED; #1455 fresh-clone bootstrap is OWED; no stack and no Docker were used (docker info rc 1).
+
+NOT TESTED
+- No live stack; the four platform suites were NOT COMMISSIONED; the effect on a Schemathesis sweep is unmeasured.
+- Anchoring handler-level absent body.
+- Real authenticate ordering (stubbed in the probes).
+- run-shell-suites --list; shellcheck; the pre-push hook.
+- The Spark payloads; tsc / eslint / check:openapi / audit scripts.
+- The humans' npx commands as written.
+- The #1455 sibling suites (hold).
+- The matrix on 22 of the 24 orders.
+- bash >= 4 behaviour of line 79; ticket texts beyond metadata.
+- Stream parent: not determined by the gate.
+- Kit findings G86-1/2/4/5: see report.
+
+REPORT: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-11-gate86/report.md
+sha256 report.md = 16f898da6604908845c3541d961316ac68b41f52ca1380c786782598b573cd09
+

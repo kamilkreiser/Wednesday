@@ -1,0 +1,19 @@
+gate86 ROUTING PROPOSAL (Wednesday applies it; the kit builder did NOT edit inbox_routing.conf)
+
+File:      /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf
+Read at the draft: 218 lines, ends with a newline; line 218 is `QA/Secuura-gate85|coagent@agentmail.to|yes`; 0 lines naming gate86.
+
+THE EXACT ROUTING ROW (one line, no trailing space, the same shape as lines 213-218):
+QA/Secuura-gate86|coagent@agentmail.to|yes
+
+THE EXACT LINE PROPOSED (backup first, then append; run in a shell, not inside the QA session):
+cp /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf.pre-1011-gate86 && printf '%s\n' 'QA/Secuura-gate86|coagent@agentmail.to|yes' >> /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf
+
+VERIFY after applying (both must hold):
+  /usr/bin/grep -c -x -F 'QA/Secuura-gate86|coagent@agentmail.to|yes' /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf     -> 1
+  wc -l < /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf                                                                 -> 219   (control: 218 before)
+
+A real launch (`repin_and_launch_gate86.sh` without --dry-run) refuses rc 1 until the exact row is present; a dry run only REPORTS it.
+The pane name in kit.json is `QA/Secuura-gate86`; the verdict mail the gate sends has the subject
+  [QA -> Wednesday] GATE86 (T2): #1451 KS-591 + #1452 KS-1364 + #1454 KS-1355 + #1455 KS-1417
+(From coagent@agentmail.to to wednesday-agent@agentmail.to, the same routing family as the gate85 row).

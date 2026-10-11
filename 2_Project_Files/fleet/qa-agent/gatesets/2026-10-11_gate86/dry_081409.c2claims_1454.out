@@ -1,0 +1,13 @@
+PASS F0 numstat for 4 paths equals the kit (+137/-1); non-blank line deltas for the non-doc paths: {'ks1355_dev_reload_slot_contain': 87, 'dev-reload.sh': 6}
+PASS S1 dev-reload.sh: removed ['CONTAINER="secuura-$SVC"']; added 7 lines (4 comment lines, PROJECT_ROOT, source stack_env.sh, CONTAINER from ${STACK_PREFIX}): ['PROJECT_ROOT="$(cd "$ROOT/../.." && pwd)"', 'source "$ROOT/scripts/stack_env.sh"', 'CONTAINER="${STACK_PREFIX}-$SVC"']
+PASS S1-CONTROL CONTROL: an extra removed line, a missing added line and the slot-1 literal as the last added line each FAIL the same predicate
+PASS S2 stack_env.sh assigns STACK_PREFIX (2 line(s): ['STACK_PREFIX="${STACK_PREFIX:-secuura-s${SECUURA_STACK_SLOT}}"', 'STACK_PREFIX="${STACK_PREFIX:-secuura}"']); start-secuura.sh and stop-secuura.sh both mention stack_env.sh: ['Start_Up/start-secuura.sh', 'Blockchain/Dev/stop-secuura.sh']
+PASS S2-CONTROL CONTROL: an impossible name (NO_SUCH_NAME_QZX) reads absent from stack_env.sh while STACK_PREFIX reads present, with the same read
+PASS S3 `bash -n` of the head script text: rc 0
+PASS S3-CONTROL CONTROL: `bash -n` on a planted syntax error reads rc 2 (non-zero)
+PASS S4 line-73 defect census over 192 tracked *.sh at the head: 1 script(s) hold a `$NAME` directly followed by a non-ASCII char: {'dev-reload.sh': [79]} (the READY: 1 of 192; this count is code AND comment lines, raw); base dev-reload.sh hits: [73]
+PASS S4-CONTROL CONTROL: the matcher fires on `$X…` and not on the braced `${X}…`
+PASS S5 new suite ks1355_dev_reload_slot_container.test.sh: 99 lines, 7 `check ` call lines (the READY: 7 cells; call lines are fewer than cells where a loop runs)
+PASS S5b `*.test.sh` under scripts/ (flat glob over the tree): base 58 -> head 59 (+1: the new suite). The READY counts 77 -> 78 via run-shell-suites.sh --list (NOT RUN here: the glob and the list can differ)
+CHECKED 11
+0 FAIL

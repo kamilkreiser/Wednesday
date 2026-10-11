@@ -1,0 +1,18 @@
+PASS F0 numstat for 9 paths equals the kit (+204/-3); non-blank line deltas for the non-doc paths: {'secuura-api.yaml': 5, 'ks1364-analytics-exports-body-': 37, 'analytics.openapi.ts': 1, 'ks1364-batch-certifications-de': 43, 'api-gateway.openapi.ts': 4, 'ks1364-teams-webhook-config-no': 48, 'm365-integration.openapi.ts': 2}
+PASS Y1 yaml diff: 5 added / 0 removed lines; all `        required: true`: True; each directly under `requestBody:`: True; 5 distinct operations, all POST: ['POST /api/analytics/exports', 'POST /api/batch/certifications', 'POST /api/batch/delegations', 'POST /api/teams/webhook-config', 'POST /api/teams/notify']
+PASS Y1-CONTROL CONTROL: the shape check FAILS on a flipped value (True), on an extra removed line (True) and on a wrong declared count (True)
+PASS Y1b `requestBody:` + `required: true` pairs in the whole yaml: base 79 -> head 84 (+5 = the declared 5)
+PASS Y2 PyYAML (CSafeLoader): operations whose requestBody.required went absent/false -> true: 5 EQUAL to the diff-resolved set; head minus exactly those keys == base (deep equality): True; operations in head: 344
+PASS Y2-CONTROL CONTROL: head != base before stripping, and a planted summary change makes the stripped copy != base (the equality can fail)
+PASS O1 analytics.openapi.ts: +2/-1; 1 comment line(s) naming the ticket, 0 `required: true,` lines, 1 replaced lines (the removed line reappears + `, required: true`); stray added [] stray removed []
+PASS O1 api-gateway.openapi.ts: +4/-0; 2 comment line(s) naming the ticket, 2 `required: true,` lines, 0 replaced lines (the removed line reappears + `, required: true`); stray added [] stray removed []
+PASS O1 m365-integration.openapi.ts: +4/-2; 2 comment line(s) naming the ticket, 0 `required: true,` lines, 2 replaced lines (the removed line reappears + `, required: true`); stray added [] stray removed []
+PASS O1-TOTAL declarations in the three *.openapi.ts files: 2 `required: true,` lines + 3 inline = 5 == the declared 5 operations
+PASS O1-CONTROL CONTROL: a changed body line (not the same line + required) is reported stray; a faithful one is not
+PASS T1 ks1364-analytics-exports-body-required.test.ts: 5 cells (the READY: 5), every title names KS-1364, asserts `.required).toBe(true)`: True
+PASS T1 ks1364-batch-certifications-delegations-body-require: 5 cells (the READY: 5), every title names KS-1364, asserts `.required).toBe(true)`: True
+PASS T1 ks1364-teams-webhook-config-notify-body-required.tes: 6 cells (the READY: 6), every title names KS-1364, asserts `.required).toBe(true)`: True
+PASS T1-CONTROL CONTROL: the cell counter reads 2 on two planted `it(` lines and 0 on none
+PASS R1 no handler / route / source path in base..head (only the .openapi.ts declarations, the yaml, tests, two docs); CONTROL: the same filter returns the planted route path
+CHECKED 16
+0 FAIL

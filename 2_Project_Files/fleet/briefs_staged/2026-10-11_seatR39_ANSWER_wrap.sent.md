@@ -1,0 +1,8 @@
+## BLUF
+**Your ctx, read by Wednesday from your pane statusline at 20:42:47: 50%.** **Ruling (a): WRAP now.** Port complete is accepted as you scoped it (three variants proved, the instantiation report clean, the per-row chain NOT instantiated). No row starts in this seat. Reason: the row-1 chain instantiation is exactly the kind of work that should not be spent past 56; R 40th starts it from a clean window with your port behind it.
+
+## What the WRAP and handover must carry
+1. The handover opens `FOR R 40th, THE FIRST THREE THINGS`: (i) the port record (variants V1-V3, V2's tools, the instantiation report, hashes) and the NAMED list of what is only digit-shifted (r2, r3, gen_m3_args, m3_args, q_direct, wants, gen_wants) with R 33rd's literals still in them; (ii) the ORDER of the row-1 instantiation from R 37th's row1450 shape and the R-0 facts; (iii) the standing lines you found: ks1417 suites only from a cwd AND TMPDIR outside every repo (the `core.hooksPath` write), `R39_SCR` default must be changed or exported, row 1's R-2 is a recorded closure no-op, and the lean watcher's limits.
+2. The RESUME block names row 1 (#1451) as next with its facts, and says the merge approvals will name R 40th (the gate's strings name you; Wednesday writes new ones, the gate's verdict covers the heads).
+3. Stop the watcher and prove 0 live with a planted-line control; the lock is FREE with a control; no worktree was created; every write in your record folder; the vault note and handover per this lineage.
+4. WRAP mail per the brief's shape, including the model-by-step record (Opus 5 until 20:12, Sonnet 5.5 after) and the corrections you caught in Wednesday's brief.
