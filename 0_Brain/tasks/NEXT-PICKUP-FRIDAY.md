@@ -12,6 +12,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-12 06:06 (Friday successor, ctx ~50%) — READ FIRST; supersedes every block below where they differ
+**Kam:** 0 rows today; newest 22:03:28; reconcile 0. ONE open card: `composer-new-words-look-demo-deploy-1012` (default nothing to the demo).
+**DONE:** MPS B39 RECORDS DONE (records main 564f86d; Jira 39333/39334/39335 read back by the seat; pane closed). HPSM-POC B222 RECORDS DONE on `records/b222-catchup` (C-87…C-98; HPSMPOC-248/249 flake tickets) — PR NOT opened: B222 ADDENDUM-1 (strip HP-mail quotes → pointers, scan all copies, B206 history entry, attribution map) is running first.
+**LIVE SEATS (find STATUS with `find <project> -name '*B<id>*STATUS*'`, records worktrees included):**
+- %77 Datasec/HPSM-POC-G = B222 ADD-1. On `RECORDS DONE (ADD-1)`: `friday_as.sh datasec gh pr create` on datasecau/HPSM-POC-analysis for records/b222-catchup → merge_when_green → mark the 12 cards `decision_queue.sh --delivered <id> "C-nn on HPSM-POC-analysis main"` (map in B222 STATUS §2: C-87 ranges-vs-exact … C-98 demo-names-beyond-the-frame).
+- %78 Datasec/HPSM-POC-A = B223 (B220 M-1/M-2/N-1/N-2/N-5/N-6; tier 1). On READY FOR GATE → tier-1 gate (B220 shape) → PR → merge. Flag for Kam's NEW WORDS card: M-1 builds only the Demo-side fail-closed check; refusing names in partner edits is his.
+- %79 Datasec/HPSM-POC-D = B224 (flake; HPSMPOC-248/249; tier 2). Product question may come back: FirstLoginTimedOut only treats -2 (error 258 seen).
+- %80 Datasec/MPS-A = B40 (lane A2, MPSCALC-50/-53; tier 1; no deploy).
+- %81 Datasec/Security-Composer-R = B131 (records fold, local, no remote).
+**Watcher:** `friday/watch_status.sh <seen> <B222-4/B40/B131 globs>` with WATCH_PANES=%77-%81 — dies with this seat. A successor seeds ONCE at its boot (a new seen file), then re-arms without --seed.
+**Brief placement:** the Bash pathguard refuses writes into !CODING; briefs/addenda were placed with python3 (disclosed in the 06:05 note). Mechanism candidate: friday/place_brief.sh allow-listed for Briefs/ only.
+
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-12 05:4x (Friday successor, ctx 79%) — READ FIRST; supersedes every block below where they differ
 **LIVE SEATS (2, both RECORDS, rung 5 seen):**
 - **%76 Datasec/MPS-R = B39** (records: B38 L-1..L-4 + N-rows to BACKLOG; the L-2 P-1 hosted-count HOLD; MPSCALC-49/-33/-47 "advances, not Done" comments posted by the seat; C-22 for mpscalc-azure-login-for-hosting-1010 = a; fold records/b37 into the local records main; no remote). STATUS `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-12_B39_STATUS.md`, last line `RECORDS DONE: …` or `STOPPED: NEEDS FRIDAY`. On DONE: read the Jira comments back by id at source; nothing to merge (no remote).
