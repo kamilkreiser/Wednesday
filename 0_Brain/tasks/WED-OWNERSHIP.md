@@ -160,3 +160,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-10 20:15 | Kamils-MacBook-Pro | Datasec/MPS — Friday (laptop) | OPEN | |
 | 2026-10-10 20:19 | Kamils-MacBook-Pro | pretooluse hooks: no_autostash holes ($VAR prefix, WEDNESDAY-only -C) + unquoted multi-word $VAR flag — Friday (laptop) | CLOSED |  2026-10-10 20:32 done |
 | 2026-10-11 01:32 | Kamils-MacBook-Pro | Friday tooling 2026-10-11: pretooluse_zsh_wordsplit.sh also refuses an unquoted $VAR word-split when VAR is assigned from $(…) in the same call (ledger w=4) | CLOSED |  2026-10-11 01:34 shipped 8c1756b (arms 22/22, live refusal) |
+| 2026-10-11 14:12 | Kamils-MacBook-Pro | decision_queue.sh: refuse _override_prior / --override-prior-rulings unless a prior-ruling refusal for the same card id was logged in the last hour (Friday ledger w=3, 2026-10-11) — Friday (laptop) | OPEN | |
