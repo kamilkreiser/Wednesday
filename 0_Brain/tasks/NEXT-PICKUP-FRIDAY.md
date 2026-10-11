@@ -12,6 +12,11 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-11 18:1x (Friday successor, ctx ~73%) — READ FIRST; supersedes every block below where they differ
+**LIVE SEATS (6):** %55 HPSM-POC-F = **B210 hosted deploy**, PAUSED on Q-B210-1, answered by B210 ADDENDUM-1: Friday re-ran main's ci run 38116913868 (attempt 2); the seat resumes from step 3 when it is green; a second red on RequestTimingLogTests → STOP + hold. · %53/%54 Composer-A/-B = B125/B126 (B126 running an ~80-min full e2e, holding by design) · %56 HPSM-POC-A = **B208** frame alias · %57 HPSM-POC-D = **B206** cleaned stored CSV (Friday's ruling: unknown-column kept CSVs are stored with every data cell blanked) · %58 MPS-E = **B36** tier-1 gate on MPS B35 `b35/api-quote-lifecycle-audit` 08c5f43 (round 1/2; on GO: PR → merge_when_green; Kam has nothing to see unless NEW WORDS).
+**NEW OWED, priority:** a small TEST-ONLY seat to fix `RequestTimingLogTests` bounds (Hosting lane; 4 CI failures today: 1128>1050, B205 N-3, 899<900, 2521>1250; each tree passed elsewhere). Board search first (a ticket may exist), then tier 2 through-code. This flake is now blocking deploys.
+**Stopped:** the Composer drafter's stray port scan (TaskStop). **Rule learned:** launch two seats of ONE project a few seconds apart (a simultaneous launch raced on `.git/config`; no harm).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-11 17:1x (Friday successor, ctx:70%) — READ FIRST; supersedes every block below where they differ
 **Kam:** 32 rows today; newest 17:05:23 (no Tuesday deadline; same quality). Reconcile 0. Mail: nothing new for Friday. Gauge ~6%. Open Friday cards: 0 (all ruled).
 **LIVE SEATS (5), each with a STATUS poll or rung-5 wait in THIS session's scratchpad (they die with the seat; successor: poll each STATUS's last line + `friday/seat_idle.sh`):**
