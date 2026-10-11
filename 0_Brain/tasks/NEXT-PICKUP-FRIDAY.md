@@ -12,6 +12,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-12 10:17 (Friday successor, ctx:65%) — READ FIRST; supersedes every block below where they differ
+**Kam:** newest row 07:07:31; reconcile 0; no open Friday cards. Gauge 31%.
+**LIVE SEATS:** **%89 Datasec/MPS-E = gate B43** (tier 1, round 2 OF 2 for the source-lifecycle class) on B42 `b42/gate-b41-fix-round` ab8fdf1d vs main 44374606; ports 6650-59; STATUS `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-12_B43_STATUS.md`. On GO: PR (base main) → merge_when_green → nothing deployed (P-1 + Q-09 holds; admin screens/per-type/expire are later lanes). On NO GO: ship the closed rows, ticket the rest (cap).
+**DRAFTING (Agent-tool, dies with this seat):** HPSM-POC gate **B227 SEAT-E** = subject 1 B226 `b226/demo-name-matching` bef5f7ea (round 2 OF 2 for the Demo name-check class) + subject 2 B224 `b224/slow-first-login-deterministic` ddd693d8 (tier 2, test-only) → `friday/briefs_drafts/2026-10-12_B227_SEAT-E_QA-gate-b226-b224.md`. If absent at boot, re-commission from B226/B224 STATUS. On GO: PRs (B226 base main; B224 base main) → merge_when_green each → HPSM-POC hosted deploy question (push-to-demo grant covers the hosted site once READY).
+**FOR KAM AFTER B227 GRADES IT:** card on N-3: approved narrative text containing the customer's name is still served to Demo logins (B226 matrix row :83; LEFT by brief). Plus the 4 new fail-closed refusals of ordinary edits for common-word names.
+**Panes closed today:** %76 %77 %78 %79 %80 %81 %82 %83 %84 %85 %86 %87 %88.
+
 ## 🔴🔴🔴 STATE 2026-10-12 08:49 (Friday successor, ctx ~62%) — READ FIRST; supersedes every block below where they differ
 **Kam:** rows today 06:36:45 (composer card = b, no note) and 07:07:31 ("how is it going? … Keep going on the plan", answered). No open Friday cards.
 **DONE since 06:1x:** HPSM-POC records #113 merged (bb1e888) + 11 cards delivered C-87…C-97 · Composer records fold B131 (records main dab4854) · Composer B132 wording (Kam's b default: "… and Generate lists it/them on Controls & policy.") PR #72 merged → main 7910674 → **B133 DEPLOYED to the Composer demo** (Friday's live check: /api/healthz 0.32.0, bundles index-BroQFugO.js / index-DvaqW66Q.css, markers present); card composer-new-words-look-demo-deploy-1012 delivered.
