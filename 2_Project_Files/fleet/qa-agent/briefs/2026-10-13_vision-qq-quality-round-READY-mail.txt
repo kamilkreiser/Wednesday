@@ -1,0 +1,49 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-12T23:13:46.000Z
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA (tier 1): QuickQuote quality round PR #6 @ d030674 — tests.yml green (first since 2026-08-10), CodeQL 0 of the 14 on the PR; screenshots for Kam
+---
+READY FOR QA (tier-1 weight, one gate): QuickQuote quality round, PR #6.
+https://github.com/datasecau/vision_hpas-quickquote/pull/6 . Branch fix/qq-quality-round-2026-10-13 @ d030674, off main 108bbb4 (main unchanged, ls-remote before push). Nothing merged, published or deployed.
+
+RESULT
+- tests.yml on the PR: all 5 jobs GREEN on both runs, 38320719480 (push) and 38320741967 (pull_request). The first green since 2026-08-10.
+- CodeQL 38320739869: Analyze actions and javascript-typescript pass, ruleset check pass. No instance of #1-#14 on refs/pull/6/merge (alerts/N/instances?ref=refs/pull/6/merge is empty for each), and no new alert numbers. Control: main still shows 14 open until the merge.
+- Local (macOS, Chrome, node 26.8.1): pricing 69/69; npm test 132/132 from a clean checkout; test:print 170/170; test:xlsx 6/6; real PDFs through the Print button, light and dark: 2 pages, one A4 each.
+
+COMMITS (tier each)
+1. f84f12f, tier 2: npm test runs strip.js first. Red-first: forced serial order without generated files: 124/127 (13, 69, 97) before, 127/127 after.
+2. d05cf11, tier 2: tests.yml top-level permissions: contents: read (#1-#5).
+3. 537d672, tier 1: email check, over 254 chars refused, then /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/ (#6). Red-first on the server path: a ~250 KB body was refused after 20,601 ms at base, now under 1 s; the shape cell was red at base ("a@@b.io" got 200). Mutants caught: no cap; old regex behind the cap. Behaviour change for malformed input only ("a@@b.io", "a@b..io", "a@.io", 255+ chars now 400). C-F5's fixture "junk@@x.example" became "junk@x.example", because "@@" no longer reaches the provider. Its assertion is unchanged.
+4. 1e1d78d, tier 1, v2.35: esc() at docLogoTag's src and the footer currency (#7-#11). New test/doc-escape.mjs: cell 1 red at v2.34 (a masthead src with "#a&amp;b&quot;c&lt;d" printed as "#a&b%22c%3Cd"); cell 2 is a GUARD, green at base by construction (fmt() throws on any non-code currency before the footer is built, so it cannot be red). Byte identity: the quote document for 5 shapes x 2 builds equals v2.34's except the version string.
+5. 0b8bbb1, tier 1: express-rate-limit 8.7.0, pinned exactly, published 2026-08-29T00:49:51Z (8.7.1, 2026-10-06, is under two weeks old so not used). One shared per-source budget, 300 per 10 min, on GET /, /login and /api/advanced/module, keyed by clientKey() (server.js, the XFF-safe derivation). 429 text/plain with Retry-After. /healthz is not limited. The number is generous because Datasec's reps share the office's one egress address; a tight limit would lock the office out first. Override PAGE_RATE_LIMIT_PER_10_MIN, validated at boot. New lockfile entries: express-rate-limit 8.7.0 plus its own debug 4.4.3 and ms 2.1.3; ip-address 10.5.0 shared. Cells red at base: the 301st load is 429 on all three routes (and /healthz stays 200); another source unaffected; two forged-left XFF chains still count as the rightmost source; the setting is validated. Mutants caught: raw-XFF key, /login unlimited, module unlimited, one global key, unvalidated setting.
+6. d030674, tier 2, v2.35: .app-row wraps at every width and .price keeps margin-left: auto. The row breaks only when its pieces can't fit, which is exactly when it used to clip. New WIDE-sans cells in phone-layout.mjs (heavy, 481/520/543, light and dark, both builds): red at v2.34 at 481 px (4 of 12), green now. On CI the six original 481 px cells now pass.
+
+USER-VISIBLE, FOR KAM (screenshots, Vision project root v235-evidence/):
+- Panel screenshots at 2x, heavy AUD state, 481/520/543 plus a 1280 desktop control, light and dark, normal and wide fonts: before-*.png (v2.34) and after-*.png (v2.35).
+- 14 of 16 are byte-identical before and after. The 2 that differ are 481 px wide-font, light and dark: the mandatory row's A$7.42 was cut off at the panel edge, and now sits on its own line at the right. Look at before-481-light-widefont.png vs after-481-light-widefont.png.
+- With macOS fonts nothing moves at any width checked. Reps whose fonts are wider than a Mac's, at about 481 px, see the price instead of a clipped one.
+- v235-print-light.pdf / v235-print-dark.pdf: the printed quote (customer name with metacharacters, shown as text), 2 pages.
+
+DEPLOY-ON-MERGE (read, az tenant d500ebad / sub 0c57ab37 / SP bc1e3581, and gh api): ACR hpasqqacr tasks [] and webhooks []; webapp hpas-quickquote deployment source repoUrl null, branch null, isGitHubAction false; no DOCKER_ENABLE_CI setting; repo webhooks none; workflows tests, CodeQL, Dependabot only; live linuxFxVersion hpasqqacr.azurecr.io/hpas-quickquote:v0.6.2-tool2.34-108bbb4. A merge to main deploys nothing.
+
+PRIOR WORK
+- The strip race was latent from the first stage3 suite. 13 has been red on main since b7043cf (2026-08-12); 69 and 97 since they were added (763269d, 2026-09-22). Local verifies were green because strip usually won the race (measured: default order passes locally, forced order fails).
+- The 481 px cells came with v2.32 A-6 (ac0a8d2/54a7202, merged f2b2b4e 2026-09-22T14:50) and were red on main from that run. Gate 3/4 ran on a Mac, where they pass.
+- 1270b71 (v2.34) made strip.js writes atomic. That fixed partial reads, not absent files, so it did not touch this race.
+- The alerts were first raised 2026-09-28 (first CodeQL analysis). None was dismissed; none is dismissed here.
+
+NOT TESTED
+- Windows/Segoe UI rendering: unmeasured. The wide-font cells stand in for "any font wider than macOS's"; CI's Linux render is the real-world instance.
+- test:azurite locally (no Azurite here); it passed on CI on the PR. Store code untouched.
+- No test pins where a wrapped price sits (margin-left: auto); only that it is visible. The screenshots show it.
+- The rate limit on the live front end (real App Service XFF) is not exercised; the cells use the same clientKey() the OTP budgets use, with trustForwardedFor on.
+- Footer-currency escape has only a guard (reason above).
+- Dependabot branches (proxy-addr-2.0.8 5470013, multi-b04dc22ff7 13910d9, brace-expansion, ip-address, multi-fe93483a4d): out of scope, not rebased or run. They should go green once rebased on a green main (unmeasured).
+
+HOLDS (state, unchanged): local QQ main 8b29136 unpushed; worktree qq-108bbb4 registered @ 108bbb4; qq-986f7b8 registered, prunable. This seat's own worktree qq-main (my scratchpad) is on the round branch, to be moved aside at wrap. Rollback image v0.6.1-tool2.33-986f7b8 untouched (not read this round).
+
+RECORDS: CLARIFICATIONS C-17; BACKLOG.md (both QuickQuote entries marked BUILT, pending merge); history.md entry; vault daily note.
+
+Waiting for the gate and your GO. On GO: merge PR #6 through GitHub with a merge commit (--match-head-commit d030674), read main back, check tests.yml + CodeQL on main and that the 14 show fixed, then MERGED mail.
+-- Vision_Sales_Portal seat (pane %12)

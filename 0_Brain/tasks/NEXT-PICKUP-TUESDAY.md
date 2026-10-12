@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 179 — 2026-10-13 10:5x (s104, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST. It supersedes 178's STATE where they differ; 178's turn order and standing lines stand.**
+### STATE (measured this seat)
+- **main = 944ca97** (RD-823, PR #81). TEN NexusAI merges since 12 Oct morning (… RD-795, RD-823).
+- **IN FLIGHT: RD-823 push Build 38322159678** (background poll dies at rotation: re-read with `gh run view 38322159678 -R datasecau/Reporting_Dashboard_Au`, NexusAI GH_CONFIG_DIR). **On green: TURN -> O RD-828+833 (item 11)**; O's RD-840/841 proof may hold the lock (merge-first; no pre-emption).
+- **GATE 17 (Vision, QuickQuote quality round, PR #6 @ d030674) LAUNCHED in pane %13** ('QA/Vision-gate17') at ~10:4x via `cockpit.sh add 'QA/Vision-gate17' 'bash fleet/qa-agent/launchers/launch_qa_vision_gate17.sh'`. Brief fleet/qa-agent/briefs/2026-10-13_vision-gate17-qq-quality-round.md (stamped D1 READ-ONLY-VISION-TOKEN via the GET-only shim · D2 R4 not measurable pre-merge, GO conditional on main's post-merge scan showing #1-#14 fixed · D3 Azure relayed · D4 round 1 of 2). Route QA/Vision-gate17 added. **A first launch ran the launcher in this seat's background shell (no pane) and was STOPPED within ~3 min** (it wrote only setup files under Testing Agent MAIN/projects/vision/reports/2026-10-13-vision-gate17-qq-quality-round/evidence: heads-start.txt + tools copies; report.md absent; --check rc 0 afterwards). **Rung-5 receipt OWED** (the pane was still thinking at 3 min). On its verdict mail: read the report WHOLE, score, pane_close.sh, then GO/fix-round to the Vision seat (%12), whose merge is via PR #6 with --match-head-commit d030674; then the PUBLISH card to Kam with the v235-evidence screenshots (Vision project root).
+- **NEXUSAI GATE OWED (one batch):** RD-839 READY @ 057a69d (T1, saved) + RD-840/841 READY @ 88bba37 (T2 + browser leg; saved fleet/qa-agent/briefs/2026-10-13_nexusai-rd840-841-READY-mail.txt; ls-remote verified; screenshots session-tools/s96o/screens/ go to Kam before any demo) + RD-838 (T1, READY due from N). Commission ONE gate when RD-838's READY lands (draft it with a subagent from the gate-21 kit).
+- **Seats:** %2 N (RD-838 build) · %3 M (next 13 RD-817) · %4 O (RD-840/841 READY sent; next item 11) · %11 P (RD-823 Build verdict, then 12 RD-751) · %12 Vision (waits gate 17) · %13 gate 17 · %1 monitor. R not live (launch before item 16).
+- **Kam:** all three 09:46 cards ruled, receipted and DELIVERED (Jira 39396/39397/39398; Vision C-17). 0 open Datasec cards from this seat.
+
 ## 🟢 DELTA 178 — 2026-10-13 09:5x (s104, ctx 65% light checkpoint; band 80-90). **READ THIS FIRST. It supersedes 177's STATE and FIRST WORK; 177's standing rules and OWED lines stand.**
 ### STATE (each line measured this seat)
 - **main = 08a81e2** (RD-795, PR #80). NINE NexusAI merges since 12 Oct morning: RD-608, RD-657, RD-690, RD-649, RD-675, RD-614, RD-629, RD-591, RD-795.

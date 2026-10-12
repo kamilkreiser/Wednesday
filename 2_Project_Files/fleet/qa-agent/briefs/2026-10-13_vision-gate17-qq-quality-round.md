@@ -1,0 +1,665 @@
+# QA Agent Invocation Brief — Datasec/Vision_Sales_Portal, GATE 17: ONE TIER-1-weight QuickQuote gate — the QuickQuote quality round (PR #6, v2.35) @ `d030674` on QuickQuote main `108bbb4` — one verdict, one report
+
+**TIER-1 WEIGHT for the whole round (Tuesday's ruling R1), each commit's own tier named per row. FULL WEIGHT: through the code, the
+server path in-process, AND a real browser.** ROUND 1 of this ticket. A NO GO sends it to its round 2; it does not go to Kam.
+
+**Drafted for Tuesday on 2026-10-13 at 10:16-10:5x AEDT by a read-only drafting agent. Tuesday reviews, stamps and launches it.**
+Template: gate 16's brief `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-10-12_vision-gate16-qq-v234-cad.md`
+and its launcher `launch_qa_vision_gate16.sh` (method, standing rules, section shape, QuickQuote browser instrument). **This brief governs where
+they differ.**
+
+**WHY ONE TARGET, SIX COMMITS, AND WHY THE BROWSER AND THE SERVER PATH.** PR #6 carries six commits: two test/CI-only (tier 2), three security
+fixes on the sign-in surface and the customer-shown quote document (tier 1), and one CSS change a rep can see (tier 2, user-visible). The
+security fixes close GitHub code-scanning alerts #1-#14, and **the round's main claim — "CodeQL 0 of the 14 on the PR" — rests on an instrument
+the drafter measured as blind (WRONG (a))**. So this gate re-derives every claim from the code, the in-process server, the page in a real
+Chrome, and reads GitHub only as far as GitHub can actually answer. **§N1 re-runs the builder's suites as sets; §N2-§N7 take the six commits one
+by one; §N8 is the CodeQL leg (R4); §N9 is deploy-on-merge (R8, READ ONLY); §N10 is brand/style and version discipline.**
+
+The builder's READY mail under test (on disk, read whole by the drafter):
+- `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-10-13_vision-qq-quality-round-READY-mail.txt`
+**Every builder statement below comes from that mail, the commit messages or the code at each sha. Each one is a CLAIM. Every red, every
+mutant, every suite set and every timing must be RE-DERIVED by the gate. None is taken from the READY.**
+The launcher parses §PIN, refuses any placeholder, and re-reads EVERY row (and `refs/pull/6/head`) by `git ls-remote` immediately before launch,
+refusing on any mismatch — **including any move of QuickQuote main** (this gate pins main exactly; it does not allow a descendant). The verified
+table is appended to your prompt.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-13 10:39
+Self-check note: Tuesday read the drafter's report (WRONG list a-o first), D1-D4 and the PIN section at source, and stamped D1-D4; the base 108bbb4 carries b102b56 + 1270b71 that merged after gate 16 without a gate of their own (WRONG 8): the gate names that in its report and reads both commits as context, no verdict on them. 2026-10-13 10:39
+
+NODE20-LEG: NOT-RUN
+<!-- Drafter's setting, for Tuesday to confirm at stamp. Docker was DOWN at drafting (`docker info` failed, 10:23 AEDT), so `node:20` cannot
+     be run. Production's container is `node:20-bookworm-slim` with Debian `chromium` (stage3/Dockerfile, same blob 8311ebe at base and head).
+     CI ran the five jobs on Node 22 (tests.yml at the head, READ); the gate's Mac runs Node 26.x. Carried as NOT TESTED (§14). -->
+
+GH-API-LEG: READ-ONLY-VISION-TOKEN
+<!-- Drafter's open setting (decision D1 below). R4 says "Verify independently from the API" and R8 says repo hooks and workflows are READ
+     again. The repo is PRIVATE (`gh api repos/datasecau/vision_hpas-quickquote` .visibility = "private", read 10:1x), so every such read needs an
+     authenticated token. Gate 16's launcher pointed GH_CONFIG_DIR at an EMPTY dir and its brief said "no gh" — and gate 16's NOT TESTED line
+     "gh not authenticated" is now STALE: Vision's `4_Credentials/.gh-config` is logged in (account kamilDatasec, scopes gist, read:org, repo,
+     workflow — a WRITE-capable token; `gh auth status`, 10:1x). Tuesday sets EXACTLY one of:
+       READ-ONLY-VISION-TOKEN  the launcher exports GH_CONFIG_DIR = Vision's .gh-config behind a PATH shim that refuses every gh call except
+                               `gh api <GET path>` (no -X/--method, no -f/-F/--field/--raw-field/--input, no graphql); the brief's rules
+                               bind the rest. A write-capable token reaches a QA agent: that is the cost.
+       NOT-RUN                 GH_CONFIG_DIR stays EMPTY (gate 16's posture). Every GitHub read in §N8/§N9 is NOT RUN; the drafter's
+                               readings below are carried as READ-BY-DRAFTER, never as the gate's evidence.
+     The launcher refuses while this line reads TUESDAY-DECIDES. -->
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent
+tester. You did not build this change and you owe the builder nothing. **Every line below that reports what the builder says is a CLAIM,
+never evidence.**
+
+**One gate, ONE target, ONE verdict: GO / GO WITH FINDINGS / NO GO, at its pinned sha.**
+- **QQQR** at `d030674` — **TIER 1 (weight for the whole round, Tuesday's ruling R1; each commit's own tier per row below).** ROUND 1.
+  QuickQuote quality round, PR #6, `toolVersion` 2.34 → **2.35**. Six commits over main `108bbb4` (live v2.34):
+
+| # | commit | tier (per commit) | what it claims | alerts / CI |
+|---|---|---|---|---|
+| 1 | `f84f12f` | tier 2 (test script only) | `npm test` runs `node strip.js` first; red-first 124/127 (13, 69, 97) → 127/127 | CI red 13/69/97 |
+| 2 | `d05cf11` | tier 2 (CI config only) | tests.yml top-level `permissions: contents: read` | CodeQL #1-#5 |
+| 3 | `537d672` | **tier 1** (sign-in) | email check: over 254 chars refused, then `/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/`; ~250 KB body 20,601 ms at base → under 1 s | CodeQL #6 (ReDoS) |
+| 4 | `1e1d78d` | **tier 1** (customer-shown document), v2.35 | `esc()` at `docLogoTag`'s src and at the footer currency; new `doc-escape.mjs`; byte identity 5 shapes × 2 builds | CodeQL #7-#11 |
+| 5 | `0b8bbb1` | **tier 1** (sign-in surface) | express-rate-limit 8.7.0 on GET `/`, `/login`, `/api/advanced/module`, one shared 300 / source / 10 min budget | CodeQL #12-#14 |
+| 6 | `d030674` | tier 2 (layout), **user-visible**, v2.35 | `.app-row` wraps at every width, `.price` keeps `margin-left: auto` | CI print-fit 6 cells (481 px) |
+
+**Names, written out every time:**
+- **QQQR** = branch `fix/qq-quality-round-2026-10-13` = PR #6 = QuickQuote **v2.35** = the six commits above. **C-17** = Kam's ruling, card
+  `quickquote-ci-red-codeql-14-1013` = (a) "Commission a fix round now". **v2.34** = QuickQuote main `108bbb4` = the live build (C-16).
+- **"#1-#14"** = the fourteen open code-scanning alerts on main (CodeQL, default setup). **"cells"** = the builder's red-first cells as its commit
+  messages number them; **"M-…"** = the builder's mutants; **G-M1 ..** = yours.
+
+Branch: `fix/qq-quality-round-2026-10-13`. **It is NOT on main. PR #6 is open, not merged** (`gh api …/pulls/6`: state open, merged false,
+mergeable_state clean, head `d030674…`, base `108bbb4…`, read 10:1x — READ-BY-DRAFTER).
+
+## RULED BY KAM, AND SETTLED
+- **Vision `1_Project_Definition/CLARIFICATIONS.md`** (`/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/1_Project_Definition/CLARIFICATIONS.md`):
+  read it whole. It carries C-01..C-17 (read 10:2x). **Cite only what you open.** The entries this gate turns on:
+  - **C-17 (Kam, live board 2026-10-13 09:46:52 AEDT, card `quickquote-ci-red-codeql-14-1013`):** "Commission a fix round now" (option (a)).
+    Scope as its brief sets it: triage main's failing tests.yml suite and its 14 open code-scanning alerts; fix what is real, ticket the rest;
+    QA gate; merge through a CodeQL-scanned PR on Tuesday's GO. "A CodeQL alert is fixed in the code, never dismissed by a seat (Datasec org
+    policy)." **Not covered:** publishing or deploying any QuickQuote version, any image build for release, any Azure change (Kam's card each
+    time); the portal, ATTIO and the rest of the Vision backlog; realigning or pruning local main `8b29136` or the registered v2.34 build worktree.
+  - **C-15** (Tuesday 2026-10-12T07:16:42Z): PR #3 (v2.34) merged onto a red main for "this exact known set only" — stage3-server 13, 69, 97 and
+    the six print-fit 481 px cells. **C-16** (Kam 2026-10-12 19:12:23 AEDT): v2.34 published as image `v0.6.2-tool2.34-108bbb4`, rollback
+    `v0.6.1-tool2.33-986f7b8` kept. **C-14** (CAD), **C-13** (feedback lift): background only.
+- **PRODUCTION IS LIVE for this project.** Live QuickQuote (`hpas-quickquote`, `hpas-quickquote-rg`, its registry `hpasqqacr`, its Table
+  Storage and its log workspace) and the live portal (`datasec-sales-portal.azurewebsites.net`, `datasec-sales-portal-rg`) are PRODUCTION.
+  **Nothing in this gate touches either** (§13, HELD). Live QuickQuote is v2.34 (the builder's relayed read: `linuxFxVersion
+  hpasqqacr.azurecr.io/hpas-quickquote:v0.6.2-tool2.34-108bbb4` — RELAYED, the gate never reads Azure).
+- **Deploys and publishing are HELD for Kam. Nothing merges on your word.** A merge is Tuesday's GO on a pinned head. A publish is Kam's word
+  (C-17: not covered).
+- **The BUILDER's choices, each judged by the gate (say whether each needs Kam):** (1) the rate-limit number 300 / source / 10 min, shared by
+  three routes (**ruled acceptable by Tuesday, R3** — test that it works; do not re-rule the number); (2) express-rate-limit (a library) rather
+  than the repo's own `windowBudget()` "because code scanning only recognises a known limiter"; (3) the library's `xForwardedForHeader`
+  validation turned OFF because `clientKey()` reads the header itself; (4) the doc-escape footer cell is a GUARD (green at base by
+  construction); (5) the C-F5 fixture `junk${i}@@x.example` → `junk${i}@x.example` (assertion unchanged); (6) the CSS wrap applies at EVERY
+  width, not a new breakpoint; (7) v2.35 bumped in `1e1d78d` and `d030674` ships in the same unreleased version.
+
+## PRIOR ROUND
+PRIOR ROUND: none on this ticket — **ROUND 1** of QQQR. The last QuickQuote gate was **gate 16** (QA/Vision-gate16, 2026-10-12): **QQCAD GO
+WITH FINDINGS at `9bd21c0`** (G16-P1, G16-P2 test gaps; G16-P3 stale doc; observations O-1..O-5). **Then, NOT gated by gate 16:** PR #3 merged
+`1270b71` = `9bd21c0` + `b102b56` ("tests+docs: gate 16 follow-ups for v2.34 CAD (no product change)") + `1270b71` ("stage3: strip.js writes its
+three outputs atomically") as main `108bbb4` (parents `e408904` + `1270b71`, C-15), and **v2.34 was published from `108bbb4`** (C-16). So the
+base of THIS gate (`108bbb4`) differs from gate 16's gated head in `BACKLOG.md`, `HANDOVER/02-business-rules.md`, `stage3/package.json`,
+`stage3/strip.js`, `stage3/test/cad-amounts.mjs` (new), `stage3/test/print-fit.mjs` (`git diff --stat 9bd21c0 108bbb4`, 6 files, read 10:2x).
+Those two commits are NOT this gate's target; they are in its base, and every base suite run includes them.
+ITS REPORT IS ON DISK AT: gate 16 `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-10-12-vision-gate16-qq-v234-cad`
+(`report.md`, `sections/`, `evidence/`, `evidence/tools/`). The QuickQuote browser instrument's originals: gate 8
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-25-vision-qq-gate8` (`evidence/`) and gate 9
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-27-vision-gate9-vsp65-qqpurge` (`evidence/tools/`).
+Findings carried forward and their disposition: G16-P1 / G16-P2 → `b102b56` (claimed fixed in tests; NOT gated — say whether `cad-amounts.mjs`
+still passes at base and head, as part of the suite sets); G16-P3 → `b102b56` (doc); O-2 → BACKLOG at `b102b56`. None is re-graded here.
+- **Instruments are REUSED BY COPY,** preferably from gate 16's `evidence/tools/` (the latest, already QuickQuote-shaped): `qa-run.py`,
+  `qa-g16-lib.mjs`, `qa-harness-g16-shots.mjs`, `qa-harness-g16-n2.mjs`, `qa-g16-workbook.cjs`, `qa-netlog-scan.py`, `g16-mutate.py`,
+  `g16-run-suites.sh`, `tapsets.py`, `lockcmp.py`, `lockwalk.py`, `qa-chrome-egressblock.sh`, `qa-chrome-census.py`, `qa-egress-posctl.mjs`,
+  `qa-floorcount.py`, `qa-harness-floorctl.mjs`, `mktree-qq.sh`. Their originals: gate 8's `evidence/` (`qa-chrome-egressblock.sh`,
+  `qa-egress-monitor.py`, `qa-egress-posctl.mjs`, `qa-chrome-census.py`, `qa-floorcount.py`, `qa-harness-floorctl.mjs`, `mktree-qq.sh`,
+  `lockcmp.py`, `lockwalk.py`) and gate 9's `evidence/tools/` (`mutate-qq.py`, `run-suite.sh`, `tapsets.py`). **COPY what you use into THIS
+  gate's own `evidence/tools/`, read it before you trust it, and RE-POINT every hard-coded path** (gate 16's copies hard-code `work-g16` and the
+  gate-16 report folder, including `qa-run.py`'s `PUPPETEER_EXECUTABLE_PATH`). **Never edit, run from, or write into gate 1-16's copies,
+  evidence or trees.** Record the sha1 of each copy before and after your edits.
+- **Self-findings from earlier gates bind you:** quote every path (the project path has a space and a `!`, and the QuickQuote repo sits under
+  `Quoting Tool/`); run every loop and every `git show <sha>:<path>` under **bash, not zsh**; run `node strip.js` before any lone browser file;
+  assert every tamper landed before reading its result; npm's update-notifier egresses unless you disable it; record the load average beside
+  every timing number; `git branch` and `git for-each-ref` are NOT read verbs here (gate 16 SF-1, SF-5); wait for a drawer/toggle to settle and
+  click the `.toggle-track` a user clicks, not the hidden input (gate 16 SF-3, SF-4).
+- **PRIOR WORK: verify every claim against git history, the Actions API (if GH-API-LEG allows) and gates 8-16's evidence, never against this
+  brief.** The READY's PRIOR WORK lines (13 red since `b7043cf` 2026-08-12; 69 and 97 since `763269d` 2026-09-22; the 481 px cells red on main
+  from `f2b2b4e` 2026-09-22T14:50; `1270b71` fixed partial reads, not absent files; alerts first raised 2026-09-28; none dismissed) are each
+  re-derived or marked UNVERIFIED.
+
+## PIN — HEADS (parsed and verified by the launcher)
+**The launcher enforces these rules:** every row has a 40-hex head and no `@`; the head is a commit; for QQQR the base is an ancestor AND the
+merge-base with MAIN; `git rev-list --count base..head` equals `commits`; `git ls-remote origin refs/heads/<branch>` equals the head NOW **for
+BOTH rows — main included; a moved main REFUSES (re-pin and re-brief)**; `refs/pull/6/head` equals the QQQR head NOW; QQQR is not on main and
+is 0 behind it. Non-merge commits over the base must be exactly the six below, with NO merges. **Never rebased:** each commit's single parent is
+the one before it, `f84f12f`'s is `108bbb4`; `108bbb4`'s two parents are `e408904` + `1270b71`; gate 16's head `9bd21c0` is on main.
+
+<!-- PIN-HEADS:BEGIN -->
+| id | repo | branch | head | base | commits | status |
+|---|---|---|---|---|---|---|
+| MAIN-Q | quickquote | main | 108bbb443647e0f1c8ec2f426e9f33c15585eaa2 | - | - | IN |
+| QQQR | quickquote | fix/qq-quality-round-2026-10-13 | d030674694279be3159d67de4a10f220ea6b8335 | 108bbb443647e0f1c8ec2f426e9f33c15585eaa2 | 6 | IN |
+<!-- PIN-HEADS:END -->
+
+Both rows: `git -C <quickquote> ls-remote origin` read by the drafter at **2026-10-13 10:16:14 AEDT** and again over HTTPS
+(`git ls-remote https://github.com/datasecau/vision_hpas-quickquote.git refs/heads/main refs/heads/fix/qq-quality-round-2026-10-13`), both equal
+to the heads above; `refs/pull/6/head` = `d030674…`, `refs/pull/6/merge` = `f1a106629389187f9288968b4a805269812db353` (NOT in the local object
+store — `cat-file -t` fails; it is GitHub's test merge). `cat-file -t` = commit for both heads; `rev-list --count` = 6; 0 behind; tree of
+`d030674` = `d4f2f22…`.
+
+**The chain (READ, `log --format='%H %P %s'`):** `f84f12f` (parent `108bbb4`; "stage3: npm test builds the page before the server suite reads it
+(CI red 13/69/97)") → `d05cf11` ("ci: tests.yml runs with a read-only GITHUB_TOKEN (CodeQL #1-#5)") → `537d672` ("stage3: the sign-in email check
+is length-capped and linear (CodeQL #6 ReDoS)") → `1e1d78d` ("v2.35: the quote builder escapes the logo src and the footer currency (CodeQL
+#7-#11)") → `0b8bbb1` ("stage3: page loads are rate-limited per source, 300 per 10 min (CodeQL #12-#14)") → `d030674` ("v2.35: app rows wrap
+instead of clipping their price (CI print-fit red, 6 cells)"). Main `108bbb4` = "Merge pull request #3 from datasecau/feat/qq-cad-currency-2026-10-12".
+
+Repo: quickquote = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/Quoting Tool/hpas-quoting-tool` (remote
+`datasecau/vision_hpas-quickquote`). Its rules: the repo's own `CLAUDE.md` (read it at the head with `git show`; its deploy and publish lines are
+NOT for you) and `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/CLAUDE.md` (its QuickQuote section). **⚠ The builder's
+checkout is LIVE and its LOCAL `main` is `8b29136` (unpushed; same tree `e4c688c` as `108bbb4`, different commit) — never use the name `main`
+in the repo: always the pinned 40-hex sha. Its working tree is checked out on local main and registered worktrees `qq-108bbb4`, `qq-986f7b8`,
+`qq-main` (the last on the round branch) live in other seats' scratchpads (read from `.git/worktrees/*/HEAD`, 10:2x). Never read any working
+tree as evidence; build every tree from the object store.**
+
+**The shape (READ at the pinned shas; re-derive it):** `git diff --numstat 108bbb4 d030674` = 8 files:
+| file | +/− | commit(s) |
+|---|---|---|
+| `.github/workflows/tests.yml` | +5 / −0 | `d05cf11` |
+| `index.html` | +13 / −5 | `1e1d78d` (esc ×2, `toolVersion` 2.35), `d030674` (CSS) |
+| `stage3/package-lock.json` | +43 / −0 | `0b8bbb1` (express-rate-limit 8.7.0, nested debug 4.4.3, ms 2.1.3) |
+| `stage3/package.json` | +3 / −2 | `f84f12f` (test script), `1e1d78d` (test:print + doc-escape), `0b8bbb1` (dependency) |
+| `stage3/server.js` (the hosted server module) | +37 / −4 | `537d672` (email), `0b8bbb1` (limiter) |
+| `stage3/test/doc-escape.mjs` | +82 (new; 2 `test(` in a 2-build loop = 4 cells) | `1e1d78d` |
+| `stage3/test/phone-layout.mjs` | +19 / −1 (the WIDE-sans loop: 3 widths × 2 themes × 2 builds = 12 cells) | `d030674` |
+| `stage3/test/server.test.mjs` | +82 / −1 (`test(` 101 → 106; the −1 is the C-F5 fixture) | `537d672`, `0b8bbb1` |
+**Same blob at base and head (READ):** `stage3/lib/xlsx.js` `10bf4d7`, `stage3/lib/pdf.js` `783ebea`, `stage3/lib/store.js` `0609594`,
+`stage3/lib/mail.js` `3aa8922`, `stage3/lib/sendFailure.js` `f3981f6`, `stage3/strip.js` `2fc3bd6`, `stage3/login.html` `f362b45`,
+`stage3/Dockerfile` `8311ebe`, `.dockerignore` `acf7db8`, `quote-engine.test.mjs` `2d193b6`, `stage3/test/print-fit.mjs` `543f4c1`,
+`stage3/test/xlsx-parity.mjs` `f81a82c`, `BACKLOG.md` `483bac6`, `CLAUDE.md` `af402a7`, `HANDOVER/02-business-rules.md` `4c523e4`. The launcher
+re-proves every one. **Note: alerts #8 (`lib/pdf.js:159`), #9/#10 (`print-fit.mjs:125`, `:309`) and #11 (`xlsx-parity.mjs:114`) sit in files this
+PR does NOT change** — the claimed fix is at the two sources in `index.html` (§N8).
+
+**The code (READ at `d030674`; re-derive line numbers):** `index.html` `.app-row` `:275-278` (`flex-wrap: wrap; row-gap: .35rem;`), `.price`
+`:285` (`margin-left: auto`), the pre-existing `@media screen and (max-width: 480px)` block `:809-812` (still sets `.app-row .name { min-width: 0;
+flex: 1 1 60%; }`), `--mono` `:30` = `"Consolas", "SF Mono", "Cascadia Mono", "Liberation Mono", monospace` (the PRICE font), `--sans` `:31` =
+`"Segoe UI", system-ui, …` (the NAME font), `toolVersion` `:1732`, `esc()` `:2442-2445` (replaces `& < > " '`), `docLogoTag` `:2481-2486` (the `esc(src)` line `:2485`), the
+rounding footer `:2760`. Hosted server module: `clientKey()` `:87-104`, `budgetSetting()` `:112-119`, `PAGE_RATE_LIMIT_PER_10_MIN = 300` `:78`,
+`pageLimiter` `:278-293` (in memory, per container), `/healthz` `:405` (no limiter), `/` `:410`, `/login` `:415`, `/favicon.ico` `:420` (no
+limiter), the email check `:428`, `/api/advanced/module` `:618` (limiter BEFORE `requireAuth`), `/api/quote/:qnum` `:725` and `GET /api/feedback`
+`:851` (no limiter; auth-gated; not flagged by CodeQL), `module.exports` `:907`, entry point guarded by `require.main === module` `:910`.
+
+## WRONG OR UNVERIFIABLE IN THE COMMISSION AND THE READY — found by the drafter (verify each; all are claims)
+- **(a) THE CODEQL PROOF CANNOT FAIL.** READY: "No instance of #1-#14 on refs/pull/6/merge (alerts/N/instances?ref=refs/pull/6/merge is empty
+  for each), and no new alert numbers." Drafter's reads (`gh api`, Vision's gh-config, read-only, 10:1x-10:2x — READ-BY-DRAFTER):
+  - `alerts/N/instances?ref=refs/pull/6/merge` = `0` for N = 1..14 — **and the SAME query answers `0` for `refs/pull/3/head` and
+    `refs/pull/3/merge`** (PR #3's head `1270b71` has tree `e4c688c`, IDENTICAL to main `108bbb4`'s, which carries all 14 open) **and for a ref that
+    does not exist, `refs/pull/999/merge`.** `alerts?ref=refs/pull/3/head` and `alerts?pr=3` are empty too, while `alerts?ref=refs/heads/main`
+    lists all 14.
+  - `code-scanning/analyses?ref=refs/pull/6/merge` is EMPTY: the PR's analyses are recorded on **`refs/pull/6/head`** at `d030674`
+    (ids 1939671154 javascript-typescript, 1939670510 actions; `results_count` 0, `rules_count` 103 / 23) — not on the merge ref.
+  - The PR analyses' SARIF (`Accept: application/sarif+json`) carries **0 results for PR #6 AND 0 for PR #3** (ids 1934432168, 1934429246),
+    while main `108bbb4`'s SARIF carries 9 + 5 (`js/polynomial-redos` 1, `js/xss-through-dom` 5, `js/missing-rate-limiting` 3,
+    `actions/missing-workflow-permissions` 5).
+  - The CodeQL check run on both PRs reads **"No new alerts in code changed by this pull request"** — a statement about NEW alerts in CHANGED
+    code, not about the 14. Default setup is `configured`, query suite `extended`, schedule weekly.
+  **So nothing GitHub shows before the merge can tell "fixed" from "not looked at":** PR #3, whose tree carries every one of the 14, reads exactly
+  as PR #6 does. **R4 ("every alert #1-#14 must read as not present on the PR's merge ref") is NOT MEASURABLE pre-merge from GitHub.** What the
+  gate can do: re-run the blind-instrument control itself (if GH-API-LEG allows), READ each alert's sink/source at `d030674` (§N8), and name the
+  post-merge read (main's analysis on the merge commit shows each of #1-#14 `fixed`, none `dismissed`) as the condition. **Decision D2.**
+- **(b) R8 asks for reads R2 forbids.** R8: "ACR tasks/webhooks, webapp deployment source" are Azure reads; R2: "the gate never … touches Azure".
+  The gate therefore RELAYS the builder's Azure reads ("az tenant d500ebad / sub 0c57ab37 / SP bc1e3581": ACR `hpasqqacr` tasks [] and webhooks
+  []; webapp `hpas-quickquote` deployment source repoUrl null, branch null, isGitHubAction false; no DOCKER_ENABLE_CI) and re-reads only the GitHub
+  side. Drafter's GitHub reads (READ-BY-DRAFTER, 10:2x): repo hooks `[]`; environments 0; deployments 0; Actions secrets `[]`; workflows = `tests`
+  (`.github/workflows/tests.yml`), `Dependabot Updates` (dynamic), `CodeQL` (dynamic); branch protection on main: none (404); one ruleset
+  `24139430` "Security scan rule", active, target branch. **Decision D3** (Tuesday may re-read the Azure side herself; the gate does not).
+- **(c) R3 needs the npm registry, which gate 16 forbade.** This brief carves ONE exception (§N6.7): `curl -s -m 30
+  https://registry.npmjs.org/<pkg>` for express-rate-limit, debug, ms, ip-address, from YOUR OWN shell, never npm, never from a product
+  process. Drafter's read (10:19:40 AEDT): express-rate-limit **8.7.0 published 2026-08-29T00:49:51.601Z** (45 days before 2026-10-13: ≥ 2 weeks
+  ✔), **8.7.1 2026-10-06T02:04:46.635Z** (7 days: not used ✔), `latest` = 8.7.1; 8.7.0's registry `dependencies` = `debug ^4.4.3`, `ip-address
+  ^10.2.0` and its integrity `sha512-hOwV7WOx…MyY26g==` both EQUAL the lockfile's; published by "GitHub Actions" (trusted publisher, OIDC) with
+  attestations; maintainers nfriedly, gamemaker1. debug **4.4.3** 2025-09-13 (integrity = lockfile's); the registry document holds NO dist for
+  debug **4.4.2** (2025-09-08) — the drafter's recollection, UNMEASURED, is that 4.4.2 was the September 2025 compromised release; verify that
+  nothing in the tree resolves to it. ms 2.1.3 2020-12-08; ip-address 10.5.0 2026-08-10 (already in the base lockfile, shared).
+- **(d) The R5 evidence is one currency, one state, four widths, and a SANS-only wide font — but the clipped element is the PRICE, set in
+  `--mono`.** READY/commit: panel screenshots "heavy AUD state; 481/520/543 plus a 1280 control"; the WIDE cells inject only `:root { --sans:
+  Verdana, "DejaVu Sans", sans-serif; }` (`phone-layout.mjs:49`). READ: the price's font is `--mono`, whose FIRST choice is `"Consolas"` (Windows);
+  a rep on Windows renders the name in Segoe UI and the price in Consolas, neither of which the cells exercise. And the widest prices are not AUD's:
+  `Intl` `en-US` prints `CA$`, `NZ$`, and a three-letter code plus a space for DKK/SGD (drafter's expectation, UNMEASURED). **§N7 adds a wide-MONO
+  arm, the widest currency, CAD, and a 1 px sweep;** the READY's own NOT TESTED names Windows/Segoe UI.
+- **(e) "Where it fits, nothing moves" was checked at 4 widths.** The CSS now applies at EVERY width (`.app-row` base rule, not a media query).
+  Claim to measure with a 1 px sweep, normal fonts, base vs head (§N7.3). The builder's 16 screenshots (Vision root `v235-evidence/`): the
+  drafter's sha1 comparison gives **14 identical, 2 differ (`481-light-widefont`, `481-dark-widefont`)** — consistent with the READY (READ of the
+  builder's artefacts, NOT evidence).
+- **(f) The behaviour change for malformed emails is wider than the READY lists.** READY: "(\"a@@b.io\", \"a@b..io\", \"a@.io\", 255+ chars now
+  400)". READ of the two regexes: the new one ALSO refuses `a@b@c.io` (an `@` inside the domain), `a@b.io.` (trailing dot), and any address with
+  an empty domain label; the old `/^\S+@\S+\.\S+$/` accepted each. The gate enumerates base vs head over a corpus (§N4.3) and states the full
+  list. Real addresses (plus-addressing, `o'brien@`, sub-domains, `.com.au`, hyphens, digits, uppercase folded by the route's `toLowerCase()`)
+  must stay accepted.
+- **(g) A stale comment now says the opposite of the code.** `stage3/lib/sendFailure.js:7` (unchanged blob `f3981f6`): "an address the provider
+  rejects (junk@@x.example passes the route's shape check)". At `d030674` `junk@@x.example` is refused with 400 at the shape check (the builder's
+  own C-F5 comment says so). Polish, introduced by `537d672`'s behaviour change.
+- **(h) Base for "v2.34" in R5/R6 is `108bbb4`, NOT gate 16's `9bd21c0`.** `108bbb4` carries `b102b56` + `1270b71` (strip.js atomic writes,
+  `cad-amounts.mjs`), both ungated (PRIOR ROUND). Byte identity (R6) and the screenshots (R5) compare against `108bbb4`.
+- **(i) "No visible change" (`1e1d78d`) is false by one string:** the version badge and every document footer read v2.35 (R6 already
+  exempts the version string). Polish at most.
+- **(j) Dates of "first green".** READY "The first green since 2026-08-10": READ-BY-DRAFTER (Actions API, `tests.yml` runs, `status=success`): the
+  last success before PR #6 is `31385330061` on main @ `ed5b995`, 2026-08-10T11:51:13Z; the next successes are PR #6's `38320719480` (push) and
+  `38320741967` (pull_request), all five jobs `success`. C-15 says "Red on main since 2026-08-11" (local date); `f84f12f` says 13 red "since
+  2026-08-12". Consistent across time zones; re-read if the leg allows.
+- **(k) The READY's RECORDS line "BACKLOG.md (both QuickQuote entries marked BUILT, pending merge)" is the Vision project's root `BACKLOG.md`
+  (lines 32, 41, read 10:2x), NOT QuickQuote's** — QuickQuote's `BACKLOG.md` is the same blob at base and head (`483bac6`). Vision BACKLOG:32 records
+  the blind CodeQL proof of (a) as "BUILT". Not a defect of the code; say which file.
+- **(l) Pre-existing doc staleness on the same regex:** `HANDOVER/02-business-rules.md:316` says print is blocked until "the email matches
+  `/^\S+@\S+\.\S+$/` (`validate()`, `index.html:1762`)"; `index.html` at `d030674` has no `validate` at all (removed at v2.17, `0574db9`,
+  2026-08-10, "nothing on the form is mandatory"). Observation (pre-existing, not touched by this PR).
+- **(m) Rate limiter scope (READ):** in memory, per container (the code comment says so): a restart resets it, a scale-out multiplies it. `GET
+  /api/quote/:qnum` and `GET /api/feedback` (auth-gated, Table reads) and `/favicon.ico` are unlimited (not flagged by CodeQL's file-system rule).
+  The limiter runs BEFORE `requireAuth` on the module route, so unauthenticated module requests spend the shared budget. Observations under R3,
+  not FAILs, unless §N6 measures behaviour other than claimed.
+- **(n) The window reset is untested by every cell** (the 10-minute window is a constant, `PAGE_RATE_WINDOW_MS`, not injectable through
+  `createApp()`; READ). §N6.5.
+- **(o) UNVERIFIABLE by design, and you must not try:** whether a merge deploys anything on the Azure side (registry, webapp — RELAYED only),
+  the live front end's real `X-Forwarded-For`, Windows/Segoe UI/Consolas rendering unless those fonts exist on this Mac, the production
+  container's Chromium, Node 20, the live FX providers, Azure Table Storage, CodeQL's post-merge verdict. **Carry each as NOT TESTED.**
+- **Verified TRUE at source (READ 10:16-10:4x):** both heads + `refs/pull/6/head` by `ls-remote` = the READY's; the chain and parents above; the
+  8-file set and numstat; per-commit file sets; the unchanged-blob list; `server.test.mjs` `test(` 101 → 106 (+2 email, +3 rate limit) and npm test
+  127 → 132 by count (101+16+6+4 → 106+16+6+4); `doc-escape.mjs` 2 `test(` in a build loop; express-rate-limit pinned exactly `"8.7.0"`; the
+  lockfile entries; the email regexes; `tests.yml` five jobs on `node-version: 22`, top-level `permissions: contents: read` at the head, no
+  `permissions` at base; `.github` at the head holds only `tests.yml`; C-17 present; the builder's `v235-evidence/` (32 PNG + 2 PDF) exists
+  (opened only to hash, never as evidence).
+
+## THE READY — its claims and NOT TESTED (the gate rules on every claim)
+Read the READY whole. Its NOT TESTED lines are carried VERBATIM here (the launcher checks it):
+
+QQQR NOT TESTED
+```
+NOT TESTED
+- Windows/Segoe UI rendering: unmeasured. The wide-font cells stand in for "any font wider than macOS's"; CI's Linux render is the real-world instance.
+- test:azurite locally (no Azurite here); it passed on CI on the PR. Store code untouched.
+- No test pins where a wrapped price sits (margin-left: auto); only that it is visible. The screenshots show it.
+- The rate limit on the live front end (real App Service XFF) is not exercised; the cells use the same clientKey() the OTP budgets use, with trustForwardedFor on.
+- Footer-currency escape has only a guard (reason above).
+- Dependabot branches (proxy-addr-2.0.8 5470013, multi-b04dc22ff7 13910d9, brace-expansion, ip-address, multi-fe93483a4d): out of scope, not rebased or run. They should go green once rebased on a green main (unmeasured).
+```
+
+**The claims, in one line each (each a CLAIM, re-derived in §N):** tests.yml all 5 jobs GREEN on runs 38320719480 (push) and 38320741967
+(pull_request), "the first green since 2026-08-10"; CodeQL run 38320739869 pass, ruleset check pass, "no instance of #1-#14 on refs/pull/6/merge"
+(WRONG (a)), no new alert numbers, main still 14 open; local (macOS, Chrome, node 26.8.1): pricing 69/69, `npm test` 132/132 from a clean checkout,
+`test:print` 170/170, `test:xlsx` 6/6, real PDFs through the Print button, light and dark, 2 pages, one A4 each. Per commit: `f84f12f` 124/127
+(13, 69, 97) → 127/127 under forced serial order without generated files; `537d672` ~250 KB body 20,601 ms at base → under 1 s, shape cell red at
+base ("a@@b.io" got 200), mutants "no cap" and "old regex behind the cap" caught; `1e1d78d` doc-escape cell 1 red at v2.34 ("#a&amp;b&quot;c&lt;d"
+printed as "#a&b%22c%3Cd"), cell 2 a GUARD, byte identity 5 shapes × 2 builds = v2.34 except the version; `0b8bbb1` 301st load 429 on all three
+routes, /healthz 200, other source unaffected, two forged-left XFF chains count as the rightmost, setting validated, 429 text/plain with
+Retry-After, mutants raw-XFF key / /login unlimited / module unlimited / one global key / unvalidated setting caught; `d030674` WIDE-sans cells red
+at v2.34 at 481 px (4 of 12), green now, the six original 481 px cells pass on CI, 14 of 16 panel screenshots byte-identical. Deploy-on-merge: "A
+merge to main deploys nothing" (Azure part RELAYED, WRONG (b)).
+
+**How you treat these:** every NOT TESTED line you CAN test locally, you test (the wrapped price's position — measure it; the footer-currency
+guard's reason — force a non-code currency at the head and quote the throw; the rate limit with trustForwardedFor ON and OFF in-process).
+`test:azurite`, the live front end's XFF, Windows rendering and the Dependabot branches you carry into your own NOT TESTED.
+
+## 2a. LEGITIMATE SHAPES — not a checker
+Not a checker: this is a product change (plus a CI permissions block). The ordinary shapes a rep and the office produce are §N rows instead
+(the office's shared egress address, a page reload, an advanced user loading the module, an email with `+` or an apostrophe, a Windows font).
+**Until a row below is measured, the instruction on ANY unexpected result is STOP and record it, never a remedy.**
+
+## N1. THE BUILDER'S SUITES, RE-RUN — at the head, and red at base (TIER 1)
+**FAIL condition, stated BEFORE the runs:** any suite red at `d030674` on a clean tree; a name passing at `108bbb4` that does not pass at the
+head (SETS, NOT COUNTS); a claimed red-at-base cell that is green at base; a red-at-base that is red for a reason other than the missing fix (a
+module error, `express-rate-limit` not installed, a missing generated file); any builder mutant that stays green; a mutant red that does not parse
+(`node --check` rc ≠ 0 or the HTML no longer loads) counted as a red — that arm is VOID.
+1. **Suites at the head, each ×2 on fresh trees, as SETS:** root pricing pack `node --test quote-engine.test.mjs` (READY 69); in `stage3/`:
+   `npm test` (132), `npm run test:print` (170), `npm run test:xlsx` (6), `node strip.js` (quote the byte count of `public/index.html`). The same
+   five at base `108bbb4` in the same session. Report vs base by test NAME: lost (must be empty), added, removed, duplicates. **Base expectation
+   (C-15, re-derive): the 3 stage3-server names and the 6 print-fit 481 px names may fail at base on THIS Mac or not — they were red on CI's Linux
+   and green on Macs; record which, and say why.** `test:print` and `test:xlsx` drive Chrome: every Chrome runs under YOUR egress-block wrapper as
+   `PUPPETEER_EXECUTABLE_PATH` (§13.3).
+2. **Red at base for every new cell:** copy the head's `stage3/test/server.test.mjs`, `stage3/test/doc-escape.mjs`, `stage3/test/phone-layout.mjs`
+   and `stage3/package.json` (hash-verified) onto a fresh archive of `108bbb4` (the base's lockfile: express-rate-limit is ABSENT there, so the
+   rate-limit cells' red at base must come from the missing limiter, not a `MODULE_NOT_FOUND` — if the head's `server.test.mjs` cannot load
+   at base, run the rate-limit cells against a base tree with the head's lockfile + `npm ci --offline --ignore-scripts` and SAY so). Quote each
+   red's first assertion message. Predicted (READY): email ~250 KB cell red (20.6 s), shape cell red ("a@@b.io" got 200), the three rate-limit cells
+   red, doc-escape cell 1 red ("#a&b%22c%3Cd"), doc-escape cell 2 GREEN (guard), WIDE-sans 4 of 12 red (481 px only). Confirm every OTHER cell in
+   those files is green at base (a red the change does not explain is a base defect: name it).
+3. **The two GUARDS (green at base by construction):** doc-escape cell 2 — confirm green at base and READ why (the READY: "fmt() throws on any
+   non-code currency before the footer is built"); then force a non-code currency value (e.g. `"<b>"`) into `#currency` at the head and quote the
+   throw and whether any footer HTML is produced. **Prove the guard bites something:** a mutant that deletes the rounding footer must redden it.
+4. **The builder's mutants, re-derived (fresh tree per arm, tamper asserted, parse-checked):** email: no length cap; the old regex behind the cap.
+   Rate limit: raw-XFF key; `/login` unlimited; module unlimited; one global key; unvalidated setting. doc-escape: `esc()` removed at the src
+   (cell 1 must redden). CSS: `flex-wrap` removed from the base `.app-row` rule (the 481 px WIDE cells must redden).
+5. **Yours (fresh tree per arm, tamper asserted, parse-checked):** **G-M1** cap at 256 instead of 254 — does any cell see it? **G-M2** the new
+   regex with `[^\s]` (allowing `@` in the domain) — which cell? **G-M3** the limiter moved AFTER `requireAuth` on the module route — which cell?
+   **G-M4** `/healthz` given the limiter — the "/healthz stays 200" assertion must redden. **G-M5** `margin-left: auto` removed from `.price` — any
+   cell? (the READY's NOT TESTED predicts NONE). **G-M6** `npm test` script back to no `strip.js` — does the forced serial order reproduce the 3
+   reds? Say which cell sees each, or NONE (a NONE is a finding against the suite, not a FAIL of the head unless the product is wrong).
+6. **The changed fixture (builder's choice 5):** diff the C-F5 test base → head whole; confirm only the address changed and the assertions
+   (6 attempts reach the provider, the 7th is refused) are byte-identical; run C-F5 at the head and confirm the fake still rejects every recipient.
+
+## N2. `f84f12f` — `npm test` builds the page first (tier 2)
+**FAIL condition:** at the head, `npm test` red on a tree with NO generated `public/`/`private/`; at base, forced serial order (server suite first,
+`--test-concurrency=1`) green — i.e. the race the commit claims to fix does not reproduce.
+1. On a fresh archive of `108bbb4` with `public/` and `private/` ABSENT (assert absent): `node --test --test-concurrency=1 test/server.test.mjs
+   test/strip.test.mjs test/mail.test.mjs test/store.test.mjs` — record which names fail (READY: 3, the C-15 set 13/69/97; name them by test name).
+   Then default order ×3; record pass/fail per run (the READY: "default order passes locally").
+2. The same at `f84f12f` (its own archive) via `npm test`, generated files absent at start: 127/127. Then at `d030674`: 132/132.
+3. READ: `test:print` and `test:xlsx` already began with `node strip.js` at base (confirm in `stage3/package.json`).
+
+## N3. `d05cf11` — tests.yml top-level permissions (tier 2, READ + GitHub read)
+**FAIL condition:** any job at the head that overrides `permissions` upward, or a step that needs a write scope (pushes, comments, uploads
+needing write, `actions: write`); a `permissions` block not at top level; CI at the head red on the pull_request run.
+1. `git show d030674:.github/workflows/tests.yml` whole: name every job, trigger, Node version, every `uses:` action and its version, and whether any
+   step deploys, builds or pushes an image, logs into Azure, or references a secret. Same at `108bbb4` (diff: exactly the 5-line block).
+2. If GH-API-LEG = READ-ONLY-VISION-TOKEN: `actions/runs/38320741967/jobs` — five jobs, each `success`; and the run's `head_sha` = `d030674…`.
+   Re-read the "first green since 2026-08-10" claim (WRONG (j)). Otherwise NOT RUN.
+
+## N4. `537d672` — the email check, ReDoS (TIER 1, R7, MEASURED on the server path)
+**FAIL condition:** at the head, either red-at-base input takes ≥ 1 s on the server path (at a stated load); at base, the same input takes < 2 s
+(the red is not real); a real address the base accepts that the head refuses; a 400 answered for any reason other than the shape/length check;
+any process-level stall visible to a concurrent `/healthz` request during the run at the head.
+1. **Instrument:** the hosted server module's `createApp()` export, in-process, under YOUR runner, listening on a kernel-chosen port bound to
+   127.0.0.1, with the in-memory store and stub mail the repo's own server suite uses (READ it in `server.test.mjs`); `NODE_ENV=test`; never the
+   module's own entry point; never port 8080. Base `108bbb4` and head `d030674`, separate trees, same session.
+2. **R7's measurement:** POST `/auth/request` with the builder's two inputs (`"!@".repeat(125000)` and `"!@!." + "!.".repeat(124998)`) and one of
+   yours (e.g. `"a@" + "!@".repeat(120000) + ".x"`), each ×3, at base and head; record wall time, status, body, and the 1-minute load beside each.
+   **Concurrent probe:** while each base request runs, a second client polls `/healthz` every 250 ms; record the longest gap (the READY: "all of it
+   holding the one Node process"). Expected: base multi-second (READY 20,601 ms), head < 1 s, `/healthz` unblocked at the head.
+3. **The behaviour change, enumerated (WRONG (f)):** a corpus run through the ROUTE at base and head (status per address): the READY's four;
+   `a@b@c.io`, `a@b.io.`, `.a@b.io`, `a.@b.io`, `a@-b.io`, `a@b.c`, `"a b"@c.io`, `a@[127.0.0.1]`, `ä@b.io`, `a@bü.de`, `rep.name+qq@partner.example.com.au`,
+   `o'brien@x.io`, `UPPER@X.IO`, `  x@y.io  ` (whitespace), exactly 254 and 255 chars. A table: base status, head status, changed?, and whether the
+   READY named the change. **Real-shaped addresses refused at the head that the base accepted are a FINDING** (severity by blast radius: a rep cannot
+   sign in).
+4. **Stale comment (WRONG (g)):** confirm `sendFailure.js:7` at the head and that `junk@@x.example` now gets 400 at the route.
+
+## N5. `1e1d78d` — `esc()` at the logo src and the footer currency (TIER 1, R6)
+**FAIL condition:** any byte of the quote document (page 1 + page 2, both builds) at the head that differs from `108bbb4` other than the version
+string, for a shape whose masthead src carries no `&`; a masthead src with entities that does NOT print byte for byte at the head; any new page
+error; the emailed (hosted) render differing from the on-screen one.
+1. **R6, re-measured, not accepted:** the builder's five shapes (USD default; AUD heavy with metacharacters in the customer name; CAD bundle; EUR;
+   GBP with notes) PLUS two of yours (e.g. NZD with every app and a long customer name containing `<b>&"'`; DKK whole-unit rounding so the footer
+   currency line appears) on BOTH builds (offline `file://` and YOUR stripped hosted build at `http://qq.test` by interception), base vs head:
+   `#quoteDoc.innerHTML` after the page's own quote build, and the printed PDF's text (`pdftotext`). Normalise ONLY the version (`2.34`→`2.35`),
+   date and quote number; diff. Report N/N identical. Every FX answer a stub.
+2. **Cell 1's claim:** set `#mastheadLogo.src` to a URL with `#a&amp;b&quot;c&lt;d` (the builder's) and one of yours (`?x=1&y=2`); read the printed
+   `<img>` src at base and head; quote both.
+3. **The hosted path:** the emailed PDF's HTML comes from the unchanged `lib/pdf.js` driving the stripped page in-process (READ how the hosted
+   server calls it; gate 16 §N2.6 did the same with `qa-g16-workbook.cjs`): render one shape at base and head, compare `#quoteDoc` / the PDF text.
+4. **Print as a real PDF** (Vision CLAUDE.md: both themes, page 1 and page 2 each on one A4): one shape, light and dark, at the head: page count and
+   page size.
+
+## N6. `0b8bbb1` — express-rate-limit on `/`, `/login`, `/api/advanced/module` (TIER 1, R3)
+**FAIL condition:** any of: the 301st request from one source on any of the three routes is not 429, or a request ≤ 300 is 429; `/healthz`
+limited; a second source affected by the first; a forged-left `X-Forwarded-For` chain (trustForwardedFor ON) dodging the limit; a bad setting
+accepted (the app boots) or a good one refused; a 429 without `Retry-After` in (0, 600] or not `text/plain`; any `express-rate-limit`
+`ValidationError` / `ERR_ERL_*` line on stderr; the installed package not byte-equal to the lockfile's integrity; 8.7.0's publish date < 2 weeks
+before 2026-10-13.
+1. **Instrument:** as §N4.1, in-process `createApp()` on a kernel port bound 127.0.0.1; trustForwardedFor passed as the `createApp()` OPTION
+   (`true` and `false` arms) — **never by setting `WEBSITE_SITE_NAME`** (forbidden in a product process, §13.2). Capture the process's stderr whole.
+2. **R3 arms (each at the head, and the same at base to show the base has NO limit):** (i) 300 GETs spread over `/`, `/login`,
+   `/api/advanced/module` from one source, then the 301st on EACH route → 429 (fresh app per route arm, or say how you reset); (ii) `/healthz` ×400
+   from the same source → all 200; (iii) a second source (a second loopback address or a distinct rightmost XFF with trustForwardedFor ON) → 200
+   after source 1 is limited; (iv) **forged XFF does not dodge:** two chains with forged LEFT entries and the same rightmost → one budget; with
+   trustForwardedFor OFF, any XFF is ignored (socket address only) — prove both; (v) IPv6 arm: two addresses in one /64 share a budget, a different
+   /64 does not (`clientKey()` READ: first four hextets + `::/64`) — via XFF with trustForwardedFor ON; (vi) **setting validated:**
+   `PAGE_RATE_LIMIT_PER_10_MIN` = `"abc"`, `"0"`, `"-1"`, `"1.5"`, `"Infinity"`, `" 300 "`, `""`, `"5"` via the `createApp()` option `pageRateLimit`
+   AND once via the environment variable of that name in a fresh product process (the one env arm allowed; print the env KEY NAMES) — which
+   throw, which boot, and with `"5"` the 6th request is 429.
+3. **The 429 itself:** status, `Content-Type`, body text verbatim, `Retry-After` value; `RateLimit-*` / `X-RateLimit-*` headers absent
+   (`standardHeaders: false, legacyHeaders: false`).
+4. **The builder's mutants (§N1.4) re-derived here if not there.**
+5. **Window reset (WRONG (n)):** the 10-minute window cannot be shortened through `createApp()`. Either measure it with Node's own mock timers
+   (`node:test` `mock.timers` on `Date`, if express-rate-limit's MemoryStore honours it — say whether it did) or carry it NOT RUN (10 min > the 420 s
+   deadline). Never wait 10 minutes.
+6. **The office (observation only, R3 stands):** READ how many limited requests one rep's page load costs (`/` once; `/api/advanced/module` once
+   per advanced unlock) and state the arithmetic for N reps behind one address. Do not re-rule the number.
+7. **The package (R3: publish date):** `npm ci --offline --ignore-scripts` at the head (the three new tarballs were in the user npm cache's index
+   at drafting: `express-rate-limit-8.7.0.tgz`, `debug-4.4.3.tgz`, `ms-2.1.3.tgz`, grep of `~/.npm/_cacache/index-v5`, 10:2x — a cache miss FAILS,
+   then NOT RUN with the tarball named); prove `node_modules/.package-lock.json` against the lockfile entry by entry (`lockcmp.py` AND
+   `lockwalk.py`); `node_modules/express-rate-limit/package.json` version 8.7.0 and its declared deps; then the registry (WRONG (c), the ONE
+   exception): `curl -s -m 30 https://registry.npmjs.org/express-rate-limit` (and `debug`, `ms`, `ip-address`) from YOUR shell: `time["8.7.0"]`,
+   `time["8.7.1"]`, `dist-tags`, `versions["8.7.0"].dist.integrity` and `.dependencies` vs the lockfile; no resolved `debug@4.4.2` anywhere in the
+   tree. State the days between 8.7.0's publish and 2026-10-13.
+
+## N7. `d030674` — the 481 px wrap (tier 2, USER-VISIBLE, R5: a REAL browser, LOCAL BUILD ONLY)
+**FAIL condition:** at the head, any `.app-row .price` whose box extends past its panel's content box (or is hidden/clipped) at any width or font arm
+in §N7.2; at the head with NORMAL fonts, any element in the app panel whose box differs from `108bbb4`'s at any width where `108bbb4` did not clip
+(the "nothing moves" claim); any horizontal page scroll at the head that the base did not have; the printed PDF changing (page count, A4, text).
+**Instrument (as gate 16 ruling 1):** a REAL local Google Chrome (`/Applications/Google Chrome.app`), driven by YOUR puppeteer-core harness from
+YOUR tree's `node_modules`, each Chrome under YOUR egress-block wrapper with its own `--user-data-dir` in a fresh `mktemp -d`; **at least one run
+HEADFUL** for the screenshots; offline `file://` build AND YOUR stripped hosted build at `http://qq.test` by interception. **Never the live site,
+never Claude in Chrome.** Every FX answer a stub or a block.
+1. **R5's grid:** widths **481, 520, 543** and a desktop control (**1280**), **light and dark** (the page's toggle), **normal fonts AND a wide
+   fallback font**, base `108bbb4` vs head, the builder's heavy AUD state. The wide arm is THREE arms: (a) wide SANS (the builder's `--sans:
+   Verdana, "DejaVu Sans", sans-serif`); (b) **wide MONO** (`--mono` set to a measurably wider monospace present on this Mac — measure the advance
+   width of `A$7.42` in each candidate and pick the widest; say which); (c) both. Record, per cell, which platform font each of `.name` and `.price`
+   actually rendered in (CDP `CSS.getPlatformFontsForNode`), and whether `Consolas` / `Segoe UI` exist on this Mac (`document.fonts.check`).
+2. **Where it used to clip (WRONG (d)):** the heavy state in **AUD**, **CAD**, and the currency whose price strings are widest under `en-US` (measure;
+   the drafter expects DKK or SGD); per row: `.price` box vs panel content box (px of overflow), `.price` visible text (`elementFromPoint` at its
+   centre), and whether the row wrapped (price on its own line, right-aligned — measure its right edge vs the row's). Expected at the head: zero
+   overflow everywhere; at base: the builder's two wide-SANS 481 cells overflow.
+3. **"Nothing moves" (WRONG (e)):** a **1 px sweep** 320-1440 (or 1 px across 470-560 and 8 px elsewhere — say which), NORMAL fonts, light theme,
+   base vs head, heavy AUD state: every element box in the app panel and the page's `scrollWidth`; report every width where any box differs, and
+   whether that width clipped at base. Repeat the 470-560 band in dark and in CAD.
+4. **Screenshots for Kam (R5):** panel screenshots at 2x of every §N7.1 cell, base and head, file names `before-<w>-<theme>-<font>.png` /
+   `after-…`, into YOUR evidence folder; the report embeds (or links by relative path) at least the 481 wide-SANS pair, the 481 wide-MONO pair and the
+   widest-currency pair, light and dark. Compare YOUR pairs to the builder's `v235-evidence/` (READ as claims only; never copied as evidence).
+5. **The six original 481 px cells and the 12 WIDE cells** pass at the head in §N1 (name them).
+6. **Print:** the printed quote at the head, light and dark: 2 pages, each one A4 (`pdfinfo`), text identical to base except the version (§N5.1).
+
+## N8. CODEQL #1-#14 (R4) — what can be measured, and what cannot (WRONG (a))
+**FAIL condition:** any of #1-#14 `dismissed` (state, `dismissed_at`, `dismissed_reason`); any NEW alert number on the PR or main; a READ of an
+alert's sink/source at `d030674` showing the flagged flow intact (the fix does not reach the flagged location); **the gate reporting R4 as MEASURED
+on the strength of a query its own control shows is blind.**
+1. **If GH-API-LEG = READ-ONLY-VISION-TOKEN:** `code-scanning/alerts?per_page=100` (all states): 14 alerts, each `open`, none dismissed,
+   `fixed_at` null, no number above 14; `alerts?ref=refs/heads/main` = 14; `code-scanning/analyses?per_page=12` — which refs carry PR #6's
+   analyses and at which commit; `alerts/N/instances?ref=refs/pull/6/merge` AND `?ref=refs/pull/6/head` for N = 1..14. **THE CONTROL that decides
+   whether those zeros mean anything, same session:** the same instances queries for `refs/pull/3/head` and a nonexistent `refs/pull/999/merge`;
+   and the SARIF of the PR #3 analyses (`Accept: application/sarif+json`) — if PR #3 (tree = main, all 14 present) also reads 0, the PR-side
+   zeros are BLIND and R4 is NOT MEASURABLE pre-merge; say so in those words. Otherwise NOT RUN (D1) and the drafter's readings in WRONG (a) stand
+   as READ-BY-DRAFTER only.
+2. **Per alert, READ at `d030674` (always):** a table #1-#14: rule, location on main (path:line from `most_recent_instance`, if readable; else from
+   the code), what changed at that location or at its source in the PR, and your READ judgement of whether CodeQL's query would still report it
+   (e.g. #1-#5: the workflow-level `permissions` block; #6: the regex is no longer polynomial — show why; #7-#11: `esc()` at both DOM sources —
+   whether `esc` is a replace-based sanitiser CodeQL models, READ ONLY; #12-#14: `express-rate-limit` middleware on each route — whether CodeQL
+   models `rateLimit()` from that package, READ ONLY). Every judgement labelled READ ONLY.
+3. **Post-merge condition (for Tuesday's GO wording, not your action):** main's first CodeQL analysis on the merge commit must show each of #1-#14
+   `fixed` and none `dismissed`; name it as the first read at merge. **Local CodeQL is NOT authorised** (no `codeql` binary on this Mac, `which
+   codeql` = not found, 10:2x; installing one is a new tool and an egress): NOT TESTED.
+
+## N9. DEPLOY-ON-MERGE (R8 — READ ONLY; never Azure)
+**FAIL condition:** a deploy, publish or image-build step reachable from a merge to `main` that the READY did not name: in `.github/` at the head,
+in a repo webhook, a GitHub environment, a deployment, or an Actions secret that names a registry or Azure.
+1. `git ls-tree -r d030674 .github` and `tests.yml` whole (§N3.1).
+2. **If GH-API-LEG = READ-ONLY-VISION-TOKEN:** `repos/…/hooks`, `…/environments`, `…/deployments`, `…/actions/secrets` (names only), `…/actions/workflows`,
+   `…/rulesets`, `…/branches/main/protection`. Otherwise NOT RUN (the drafter's readings in WRONG (b) are READ-BY-DRAFTER).
+3. **You do NOT run `az` of any kind (R2).** The builder's Azure reads (ACR `hpasqqacr` tasks [] and webhooks []; webapp `hpas-quickquote`
+   deployment source null, isGitHubAction false; no DOCKER_ENABLE_CI; live `v0.6.2-tool2.34-108bbb4`) are RELAYED: say so. State whether a merge
+   deploys anything, with each statement's evidence class (READ ONLY / RELAYED / UNMEASURED).
+
+## N10. BRAND / STYLE AND VERSION DISCIPLINE (READ + MEASURED)
+**FAIL condition:** any new colour, font, CSS custom property, inline style or token introduced by the change; a version rule of the repo's
+`CLAUDE.md` broken.
+1. **READ:** `git diff -U0 108bbb4 d030674 -- index.html`: the added lines carry no hex/rgb/hsl colour, no `--token:` definition, no `style=`, no
+   `<style`; the only `var(--…)` / `font-family` in an added line is the `.price` line, whose base version carried the same (the launcher proves the
+   exact delta by hash). Confirm.
+2. **Version discipline** (repo `CLAUDE.md` at the head, "Version discipline": "Bump it in the **same commit** as the change it describes"):
+   `1e1d78d` bumps 2.34 → 2.35; `d030674` changes behaviour without a bump, inside the same unreleased v2.35. Judge it (a ruling for Tuesday, not a
+   FAIL by itself), and confirm `0b8bbb1`/`537d672` (server-only) carry no `toolVersion` change by design.
+3. **Contrast:** the wrapped price in both themes (computed styles, WCAG) vs the base's unwrapped price: same colour pair expected.
+
+## 12. The merge and the queue
+**The drafter did NOT run `merge-tree`.** QQQR is 6 ahead and 0 behind `108bbb4`: the builder plans a merge COMMIT through GitHub
+(`--match-head-commit d030674`), whose tree equals `d030674`'s (prove 0 behind with `rev-list --count`; if you want the tree check, run `git
+merge-tree --write-tree` only from YOUR OWN object dir, or skip it and say so). **Cells to re-run at merge** (name at least): the five suites;
+§N4.2 (ReDoS timing, head path); §N6.2 (i)-(iv); §N7.2 one wide arm; **tests.yml's five Node 22 jobs and CodeQL's main analysis showing #1-#14
+`fixed` (the first reads at merge).** After any publish (Kam's, not yours, C-17: not covered): the rate limit on the live front end's real XFF
+(READY NOT TESTED).
+
+## 13. FLOOR AND PORT DISCIPLINE — Vision has NO jest lock, plus THE DEADLINE RULE (and HELD)
+**There is no shared lock or queue on this project, and you must NOT borrow NexusAI's.**
+1. **Never use `4848` (portal), `8080` (QuickQuote's stage3 dev port) or `47787` (Tuesday's dashboard)**, or any port another seat holds. Take
+   every port from the kernel and bind `127.0.0.1` (§N4/§N6 need one per app; the browser leg serves the hosted build by interception and needs
+   none). **Never start the hosted server module's own entry point**; use its `createApp()` export in-process. **No database, no Postgres, no
+   Azurite, no docker** (NODE20-LEG is NOT-RUN).
+2. **Every product process runs under `env -i` with an explicit ALLOWLIST** (PATH; HOME = a fresh mktemp dir; NODE_ENV = `test`, never
+   `production`; `PUPPETEER_EXECUTABLE_PATH` = YOUR egress-block wrapper; `npm_config_update_notifier=false`; `npm_config_offline=true`;
+   `npm_config_cache` = the user cache, read for `npm ci --offline` only). **NEVER set in a product process:** `AGENTMAIL_API_KEY`,
+   `AGENTMAIL_INBOX` (with both set, QuickQuote SENDS FOR REAL), any real `ACS_*` / `MAIL_SENDER`, `TABLES_CONNECTION_STRING`, `SALES_COPY_EMAIL`,
+   `HPAM_WORD`, `ADVANCED_UNLOCK_SECRET`, `WEBSITE_SITE_NAME`, `GH_TOKEN`, `GITHUB_TOKEN`. `PAGE_RATE_LIMIT_PER_10_MIN` only in the one §N6.2 (vi) env
+   arm. Print each product process's env KEY NAMES (never values) and assert none is forbidden. 
+   `NTFY_SERVER=http://ntfy.invalid`; never contact ntfy.sh.
+3. **EGRESS INCLUDING CHROME CHILDREN:** the page calls three public FX APIs whenever the currency is not USD. Every Chrome you start runs under
+   YOUR copy of the egress-block wrapper; prove the block with its positive control (`qa-egress-posctl.mjs`) and run the net-log scan at the end;
+   record GoogleUpdater and chrome_crashpad_handler at start and end (`qa-chrome-census.py`). Reap every Chrome you start by the pid you started.
+   **Your own shell's ONLY permitted internet reads:** `git ls-remote origin` (head readings), the §N6.7 registry `curl`s, and — if GH-API-LEG allows
+   — `gh api` GETs. Nothing else.
+4. **Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid** (`qa-floorcount.py`, copied): "ours" = the ancestor chain CONTAINS your
+   claude pid. **Negative controls, same run, must classify FOREIGN.** **Seats read at drafting (10:23:26 AEDT, `ps -axo` + `tmux list-panes -a` +
+   `lsof -d cwd`; load 2.98 / 4.01 / 6.32):** Tuesday `3983` (`%0`), the Vision builder `39098` (`%12`, live, cwd Vision_Sales_Portal), NexusAI
+   `84103` (`%11`), `72238` (`%4`), `33350` (`%3`), `12326` (`%2`). Gate 16's negative controls 2388 / 37670 / 23252 have exited. The launcher's
+   negative controls: `3983`, `39098`, `84103`. **Re-read the seat list at start**; say which have exited. **A zero is reportable only beside a
+   control that fired in the same window.** **Record the 1-minute load beside every timing number.**
+5. **THE DEADLINE RULE:** every step has a written DEADLINE built into your runner (no `timeout` binary here) and a client timeout on every
+   request; a step past its deadline is ABORTED and reported. Deadlines: one page cell 120 s; one server-path timing request 120 s; a whole
+   `test:print` run 420 s; a whole `test:xlsx` run 300 s; a whole `npm test` run 300 s; root pack 120 s; one mutant arm 420 s; the §N7.3 sweep in
+   chunks of ≤ 420 s. **Nothing above 420 s.** **Every Chrome, page, child, app server and temp profile you start is released in a `finally`.** **Log
+   a HEARTBEAT line (timestamp, step, pid, elapsed) at least every 2 minutes; a step with no heartbeat for 5 minutes is aborted and reported.**
+
+**Reap everything you start.** An orphan Chrome or listener of yours is someone else's foreign process.
+
+### Drivable surface — LOCAL ONLY. **NEVER the live QuickQuote or the live portal.**
+- **NEVER the live** QuickQuote (`hpas-quickquote`, `hpas-quickquote-rg`, `hpasqqacr`, its Table Storage, its log workspace) and **NEVER the live**
+  portal (`https://datasec-sales-portal.azurewebsites.net`, resource group `datasec-sales-portal-rg` — PRODUCTION). **No request, not even a GET.
+  No `az` of any kind — no reads, no writes, no app-setting change, no deploy, no publish.** Never the FX hosts (stubbed or blocked only), never
+  ntfy.sh, never the npm registry except the §N6.7 reads. **Never Claude in Chrome** (Kam's real Chrome with his sign-ins). Never open anything
+  under `Vision_Sales_Portal/4_Credentials/` (the launcher wires the gh config itself when D1 allows; you never read its files), and never type an
+  HPAM word.
+
+### HELD (R10 included)
+- No merge, no deploy, **no publish**, no registry push, **no production**, no money, **no mail to any human**, no external comms. **No comment,
+  review, label, approval or status on PR #6 or any GitHub object; no re-run of any workflow; no alert dismissal of any kind.**
+- **R10 — the READY's HOLDS stand, untouched:** local QuickQuote main `8b29136` (unpushed), worktrees `qq-108bbb4` and `qq-986f7b8` (and the
+  builder's `qq-main`), rollback image `v0.6.1-tool2.33-986f7b8`. You read none of their working trees and change none of them.
+- **No `az`, no `docker`, no `npm install`, no `npm ci` without `--offline --ignore-scripts`, never npm audit, and no `npx` of anything not already in
+  your tree. `gh` only as GH-API-LEG allows: `gh api` GET reads, nothing else.** The launcher points `AZURE_CONFIG_DIR` at an EMPTY directory and
+  `GH_CONFIG_DIR` at an EMPTY directory unless GH-API-LEG = READ-ONLY-VISION-TOKEN.
+- **Trees:** build every tree INSIDE YOUR OWN PROJECT from the object store (`git -C <repo> archive <sha> | tar -x -C <fresh mktemp -d under
+  projects/vision/work-g17/>`). **Each tree is EXCLUSIVE to this gate and to ONE purpose; never touch `work/` or `work-g2/` … `work-g16/`.**
+  Dependencies (in `stage3/` only): **`npm ci --offline --ignore-scripts`** and nothing else; a cache miss FAILS rather than fetches (then NOT RUN,
+  tarballs named). Prove `node_modules/.package-lock.json` against `git show <sha>:stage3/package-lock.json` **entry by entry**, with `lockcmp.py`
+  AND `lockwalk.py`. In the repo use ONLY read verbs (show, log, diff, ls-remote, rev-parse, ls-tree, cat-file, grep, merge-base, archive);
+  **never fetch, pull, checkout, switch, worktree, commit, stash, reset, clean, gc, branch or for-each-ref.** `merge-tree --write-tree` only from
+  your OWN object dir.
+- **CONTROLS MUST BE ABLE TO FAIL INDEPENDENTLY:** every control is a separate measurement that could have come out the other way on its own.
+  **For this gate: the base has NO limit before the head's 429 is believed; the base's ReDoS input is slow before the head's fast answer is
+  believed; PR #3's instance query reads before PR #6's zero is believed; the base clips at 481 wide-SANS before the head's "visible" is believed;
+  normal-font base boxes equal head boxes at a width that never clipped before "nothing moves" is believed; the egress block's positive control
+  fires; the floor count rises on its attached control; each mutant's tamper is asserted landed.**
+- **Findings only:** do not commit, do not move any branch, do not file a ticket. **Make no writes in the QuickQuote repo** (its working tree is
+  the builder's, live) **and none inside `Vision_Sales_Portal/`**, none in gate 1-16's report folders or trees. Describe fix-shapes in prose.
+- **NEVER `rm`.** Quarantine instead.
+
+## THE MODEL RULE
+(Kam, live board 2026-09-30 09:07, card `nexusai-gate11-opus55-safeguard-model-switch`, option (b) — QA gates may switch to Opus 4.8 when flagged,
+PER SESSION. Tuesday's ruling R9 applies it to this gate exactly as gate 16 did.) You start on Opus 5.5. You run the FULL rows. If one of your
+responses is stopped by the safeguards: that step is NOT RUN (never re-worded to slip past); write ONE line to `evidence/classifier-stops.txt`;
+reap any Chrome and app server you started; mail `tuesday-agent@agentmail.to` with the subject exactly
+`[QA/Datasec-Vision -> Tuesday] STATUS: flagged — requesting the Opus 4.8 switch`;
+then end your turn with the line `PARKED: flagged — awaiting the Opus 4.8 switch` and wait. Tuesday
+switches THIS pane's model and taps you by mail. You never answer the model dialog yourself, and nobody ever chooses "Switch automatically". After
+the switch, resume at the stopped row. The report states which rows ran on which model, with the switch time, and quotes `classifier-stops.txt`
+whole.
+
+## TUESDAY'S RULINGS AT STAMP (2026-10-13)
+**R1-R10 are Tuesday's rulings, carried VERBATIM from the commission. They are not the drafter's inference. Apply them; do not re-rule them.**
+- R1: ONE gate for the whole round at TIER-1 weight; each commit's own tier is named per row.
+- R2: Kam's ruling is card quickquote-ci-red-codeql-14-1013 = a "Commission a fix round now" (live board 2026-10-13 09:46:52 AEDT), recorded as Vision CLARIFICATIONS C-17. Publishing is NOT covered: the gate never deploys, publishes, builds a release image or touches Azure.
+- R3: The rate limit (express-rate-limit 8.7.0, 300/source/10 min) is ruled acceptable by Tuesday; the gate tests that it works as claimed (301st -> 429 on each route, other source unaffected, forged XFF does not dodge, /healthz unlimited, setting validated) and that the pinned version's publish date is >= 2 weeks before 2026-10-13 (read the npm registry).
+- R4: Every CodeQL alert #1-#14 must read as not present on the PR's merge ref; none may be dismissed (Datasec org policy). Verify independently from the API.
+- R5: The 481 px change is user-visible: the gate drives a REAL browser (local build only, never the live site) at 481/520/543 and a desktop control, light and dark, normal fonts AND a wide fallback font, and confirms the price is visible where it used to clip and that nothing else moved. Screenshots go into the report for Kam.
+- R6: Byte identity claim for the quote document (5 shapes x 2 builds equal to v2.34 except the version string) is re-measured, not accepted.
+- R7: The ReDoS fix is measured on the server path with the red-at-base input (multi-second at base, < 1 s at head), plus the behaviour change for malformed emails stated in the READY.
+- R8: Deploy-on-merge is READ again (ACR tasks/webhooks, webapp deployment source, repo hooks, workflows) and the gate states whether a merge deploys anything. READ ONLY.
+- R9: Model rule as in gate 16 (Opus 5.5; if Opus 5.5's safeguards stop the session, the per-session Opus 4.8 switch per Kam's 2026-09-30 ruling, never "Switch automatically").
+- R10: The HOLDS in the READY stand (local QQ main 8b29136 unpushed, worktrees qq-108bbb4 and qq-986f7b8, rollback image v0.6.1-tool2.33-986f7b8): untouched.
+
+**Drafter's open decisions for Tuesday (the launcher refuses until each RULED line is stamped):**
+- **D1 — GitHub access for R4/R8.** *Drafter's reading:* R4's "verify independently from the API" needs an authenticated read of a private repo;
+  set `GH-API-LEG: READ-ONLY-VISION-TOKEN` (launcher-side GET-only shim; a write-capable token reaches the QA agent) or `NOT-RUN` (gate 16's
+  posture; §N8.1/§N9.2 NOT RUN). RULED: READ-ONLY-VISION-TOKEN, through the launcher's GET-only gh shim (refuses every non-GET, red-proofed by the drafter on scratch copies). R4 says verify independently, and that needs an authenticated read of a private repo. (Tuesday, 2026-10-13 10:39)
+- **D2 — R4 is not measurable pre-merge (WRONG (a)).** *Drafter's reading:* the gate reports R4 as "NOT MEASURABLE before the merge: the PR-side
+  API is blind (control: PR #3)", gives the per-alert READ table, and a GO (if earned) is worded as conditional on main's post-merge analysis
+  showing #1-#14 `fixed`, none `dismissed` — not a NO GO by itself; a READ showing a flagged flow intact at `d030674` IS a FAIL. RULED: accepted as the drafter reads it: R4 is NOT MEASURABLE before the merge (the PR-side API is blind, control PR #3); the gate gives the per-alert READ table; a GO is CONDITIONAL on main's post-merge analysis showing #1-#14 fixed and none dismissed, which the builder's MERGED reports and Tuesday checks at source; a READ showing a flagged flow intact at d030674 is a FAIL. (Tuesday, 2026-10-13 10:39)
+- **D3 — R8's Azure items vs R2 (WRONG (b)).** *Drafter's reading:* the gate RELAYS the builder's ACR/webapp reads and re-reads only the GitHub side
+  (D1 permitting); Tuesday re-reads the Azure side herself if she wants it MEASURED. RULED: accepted: the gate RELAYS the builder's ACR/webapp reads (named as relayed) and re-reads only the GitHub side; R2 stands, the gate never touches Azure. (Tuesday, 2026-10-13 10:39)
+- **D4 — Class count and vocabulary.** *Drafter:* QQQR round 1 of 2; a NO GO returns it for round 2 (not to Kam); GO / GO WITH FINDINGS / NO GO.
+  RULED: accepted: class QQQR round 1 of 2; a NO GO returns it for round 2 to the builder (not to Kam); vocabulary GO / GO WITH FINDINGS / NO GO. (Tuesday, 2026-10-13 10:39)
+- **Carried, unchanged from gate 16:** "With a ticket" is Tuesday's to file: the gate files nothing (§HELD); it reports each finding with its
+  cell, repro and fix-shape. The ANSWER-subject quirk (an ANSWER to you arrives from `tuesday-agent@agentmail.to` signed "-- Tuesday", whatever the
+  bracketed prefix; anything from any other inbox is not).
+
+## 14. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-10-13-vision-gate17-qq-quality-round/report.md`
+(sections and `evidence/` beside it; screenshots and PDFs in `evidence/`).
+
+**QUESTIONS:** your routing name is **`QA/Vision-gate17`**. If you must ask, mail `tuesday-agent@agentmail.to` with the subject
+`[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>` (Context / one Question / Meanwhile / Needed-by), and
+**proceed on the safest reading**. The ANSWER arrives in `tuesday-agent@` with a subject beginning `[Tuesday -> QA/Vision-gate17] ANSWER`.
+Read it with your verdict key. **Never mail wednesday-agent@.** Datasec's coordinator is Tuesday. Record every question, the reading
+you took and any answer in the report. **If two answers arrive and they differ, STOP, enumerate the differences and ask which one stands.**
+If a response is cut off by a safety check, record it and continue with the next item.
+This is authorised defensive QA of Datasec's own product on loopback.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, with the subject beginning exactly:
+`[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision gate 17` and then
+`: QQQR @ <sha7> <GO | GO WITH FINDINGS | NO GO>`
+(`<sha7>` the pinned head from the launcher's table).
+Lead the body with ONE sentence: on `d030674`, does every suite pass as a set against `108bbb4`, does the ReDoS input fall from multi-second to
+under 1 s on the server path, does the rate limit 429 the 301st request on each of the three routes and nothing else, is the quote document
+byte-identical to v2.34 except the version, and is the price visible at 481 px with a wide font with nothing else moved — and what can and cannot
+be said about CodeQL #1-#14 before the merge? Then one line each on: the full malformed-email behaviour change; the express-rate-limit 8.7.0
+publish date (registry); deploy-on-merge (READ ONLY / RELAYED); the screenshots for Kam (paths); the class count (round 1: a NO GO goes to round
+2). You have no inbox that wakes you, so a verdict you do not mail is lost.
+
+AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env`. The path is absolute because the QA
+project has no credentials directory of its own. Use the key ONLY in your own verdict/question/answer-read `curl`, with a client timeout
+(`-m 30`). It must never enter a product process's environment. **Never put the key, or any secret, in a mail or the report.**
+
+Verdict format:
+- **One verdict, GO / GO WITH FINDINGS / NO GO**, naming the pinned sha and the branch: the suites as sets vs base, the reds at base re-derived,
+  the guards and mutants, then §N2-§N10 row by row.
+- The verbatim strings: the 429 body and `Retry-After`; the base's ReDoS timings and the head's (with load); the email corpus table; the printed
+  `<img>` src at base and head for the builder's masthead src; the throw for a non-code currency at the head; the express-rate-limit registry
+  dates; every `ValidationError` / `ERR_ERL_*` line (or "none", beside the stderr capture's byte count).
+- **A table with one row per §N item: MEASURED / NOT TESTED / NOT MEASURABLE, and HOW (command, harness, build, theme, font, browser, load).** No
+  row without a HOW.
+- **Rule 2: what you did NOT test is first-class output.** A NOT TESTED section covering at least **CodeQL's verdict on #1-#14 before the merge
+  (NOT MEASURABLE, WRONG (a))**, **local CodeQL (not authorised)**, **the Azure side of deploy-on-merge (RELAYED)**, **the stage3 container and its
+  Debian Chromium**, **Node 20 (NODE20-LEG NOT-RUN) and Node 22 (CI's)**, **`test:azurite` / real Azure Table Storage**, **the live front end's
+  real X-Forwarded-For**, **the window reset (if not measured)**, **Windows / Segoe UI / Consolas rendering (unless present on this Mac)**, **the
+  account managers' real browsers (Safari, Edge, Firefox) and locales**, **the Dependabot branches**, **Claude in Chrome (not used)**, and every §N
+  row you did not run, with the reason. **Every action recommendation carries its evidence class: MEASURED AT RUNTIME / PROBED / READ ONLY.**
+- Report the pinned head and main as three timestamped readings (**start / mid / end**), each with its branch name.
+
+PROVENANCE:
+- heads: main `108bbb443647…`, `fix/qq-quality-round-2026-10-13` `d030674694279…`, `refs/pull/6/head` `d030674…`, `refs/pull/6/merge` `f1a10662…` |
+  `git -C <quickquote> ls-remote origin` + HTTPS `git ls-remote` + `cat-file -t` | read 2026-10-13 10:16:14 AEDT
+- chain, count 6, parents, per-commit file sets, numstat, the `index.html` −U0 delta and hunk map, the unchanged-blob list, trees `e4c688c` (=
+  `108bbb4` = `8b29136` = `1270b71`) and `d4f2f22` | `log --format`, `rev-list --count`, `diff --numstat`, `diff -U0`, `diff-tree`, `rev-parse <sha>:<path>`,
+  `rev-parse <sha>^{tree}` under bash | read 10:16-10:4x
+- the code at `d030674` (CSS, `esc`, `docLogoTag`, footer, `--mono`/`--sans`, the 480 px block, `clientKey`, `budgetSetting`, `pageLimiter`, the routes,
+  the email check, `module.exports`, `require.main`), `sendFailure.js:7`, `HANDOVER/02:316`, the C-F5 test, the new cells' names, `tests.yml` whole,
+  repo `CLAUDE.md` "Version discipline" | `git show` | read 10:2x-10:4x
+- GitHub (READ-BY-DRAFTER, `gh api` with Vision's gh-config, GET only): PR #6; repo visibility; alerts (all states, per-ref, `pr=`); instances for
+  #1-#14 on `refs/pull/6/merge`, `refs/pull/6/head`, `refs/pull/3/head`, `refs/pull/3/merge`, `refs/pull/999/merge`; analyses; SARIF of six analyses;
+  check runs on `d030674` and `1270b71`; default-setup; Actions runs/jobs/workflows; hooks; environments; deployments; secrets; protection; rulesets
+  | read 10:1x-10:2x
+- npm registry: express-rate-limit, debug, ms, ip-address documents | `curl -s -m 30 https://registry.npmjs.org/<pkg>` | read 10:19:40 AEDT; npm
+  cache index grep for the three new tarballs | `grep -rl ~/.npm/_cacache/index-v5` | read 10:2x
+- the READY (read whole); CLARIFICATIONS C-13..C-17 (C-17 whole); Vision CLAUDE.md QuickQuote section; Vision root `BACKLOG.md` lines 31-41;
+  gate 16's brief and launcher (whole), gate 16's report (verdict, findings, NOT TESTED, tools listing); the charter and BRIEF_TEMPLATE | read
+  10:1x-10:3x
+- the builder's `v235-evidence/`: sha1 of 16 before/after pairs (14 identical, 2 differ) | `python3 -I` hashlib | read 10:2x (claims only)
+- seats and panes; load; Docker daemon down; Google Chrome present; `which codeql` not found; routing lines up to `QA/Vision-gate16` (no gate 17
+  route yet) | `ps -axo`, `tmux list-panes -a`, `lsof -d cwd`, `uptime`, `docker info`, `ls`, `grep` of `fleet/inbox_routing.conf` | read 10:23 AEDT
+- no merge-tree, no fetch, no docker run, no product process, no browser, no `az` was run by the drafter; `gh` was used for GET reads only

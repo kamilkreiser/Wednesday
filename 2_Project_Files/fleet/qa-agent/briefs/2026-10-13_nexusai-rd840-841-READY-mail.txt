@@ -1,0 +1,65 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-12T23:45:56.000Z
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA (tier 2 + browser leg): RD-840 + RD-841 @ 88bba37 — values align, tiles lighter/full-width, circled i; verify 4462/4462, C-68 1090/1090, browser cells red-at-base; screenshots both themes
+---
+## BLUF
+RD-840 + RD-841 are READY FOR QA, tier 2 with a browser leg. Branch rd-840-841-sustainability-feedback-s96o @ 88bba375d836e2d2edca0046ad8db84818d8e818 (git ls-remote).
+- Verify: "VERDICT: PASS — 4462/4462 tests passed across 280 suites (jest exit 0)".
+- C-68 set by name: 52 files, 1090/1090.
+- Browser: the new cells are red at base 08a81e2 and green at head; the 40 existing Sustainability e2e cells pass at head.
+- Screenshots: before/after, both themes, four states, in session-tools/s96o/screens/, for Kam through you before any demo deploy.
+Jira: RD-840 and RD-841 in Testing (comments 39405, 39406).
+
+## Choice Kam can overrule
+Q1 (a): the DARK tile ground stays #262626 (--nx-surface-raised dark). Only the light tile is lighter (#f8f9fa, --nx-surface-page). The dark screenshots show it as it is.
+
+## Surface the testing agent can drive
+- A local run at the head on a fresh data dir, in open mode (SESSION_SECRET unset; first run completed through POST /api/setup/complete-first-run with a CSRF token). Env: NODE_ENV=development, SEED_DEMO_DATA=true, USE_AZURE_LOG_ANALYTICS=true, SYNTHETIC_DEMO_FEED=true, plus raised rate limits; the same as your gate-21 surface.
+- This is the same commit, not the demo image (RD-76 still gates the demo).
+- My launcher: session-tools/s96o/surface.sh <worktree> <datadir> <port>. My screenshot driver: session-tools/s96o/shots.js. Browser: system Chrome through a config copy, session-tools/s96o/pw-chrome.config.js (the bundled headless shell is not installed; nothing was downloaded).
+
+## Detail (as on Jira)
+READY FOR QA (tier 2 with a browser leg; S96O, 2026-10-12). Branch rd-840-841-sustainability-feedback-s96o @ 88bba375d836e2d2edca0046ad8db84818d8e818 (git ls-remote), off main 08a81e2. One combined branch for RD-840 + RD-841, per Kam's ruling (a) and Tuesday's plan confirmation (Q1 a, Q2 a).
+Commits:
+- b675427: red-first jest cells (7 red at 08a81e2, 6 controls green).
+- b2a9f19: the change.
+- 88bba37: counts once, 4462/280.
+Files: static/js/sustainability-ui.js (infoGlyph replaces eyeGlyph); static/css/sustainability.css; scripts/derive-brand-tokens.js, static/css/tokens.css (regenerated), docs/BRAND.md (counts 51->54/35->32, table 49->52/31->28); __tests__/rd840-841-sustainability-feedback.test.js (new); tests/e2e/sustainability-layout.spec.js (7 new cells).
+RD-841: each figure control holds <i class="bi bi-info-circle" aria-hidden="true">; button, aria-label, nx-eye hook, wireDisclosure unchanged.
+RD-840: metric row grid "lbl unit val eye" with DOM order unchanged (RD-279). Tiles: #e9ecef -> #f8f9fa (--nx-surface-page; #333333 11.986:1, #495057 7.757:1), flex 1 1 150px. Dark tile unchanged at #262626 (Q1 a; Kam may overrule at the screenshots).
+Proof (hold s96o-rd840-proof, session-tools/s96o/rd840-proof.log):
+- verify --update-counts "VERDICT: PASS — 4462/4462 tests passed across 280 suites (jest exit 0)".
+- C-68 set by name, 52 files: "Tests: 1090 passed, 1090 total".
+Browser (Playwright 1.62.1, system Chrome channel, local runs, open mode, synthetic demo feed; base 08a81e2 on :3196, head on :3197):
+- New cells: base 4 red / 3 controls green; head 7/7.
+- Existing Sustainability specs on head b2a9f19: sustainability-layout, sustainability-contrast-margin, improvements-pane-spacing and rd286-ground-and-geometry, 40 passed.
+Screenshots: session-tools/s96o/screens/ (before-*/after-*, light and dark; populated 1440, evidence open, one column 820, empty window "Today"; per-shot facts in before-facts.json/after-facts.json).
+Merge: merge-tree onto main 944ca97 = counts-only (C-89). It adds no conflict to rd-427/rd-828/rd-801/rd-802/rd-839 (conflict sets equal to each head vs main).
+
+## Flows and screens changed
+Sustainability tab only:
+- Metrics tile rows: unit drawn before the value, values right-aligned.
+- Improvements figure tiles: lighter in light theme, each row fills the column.
+- Every figure control (13 on the seeded window, 1 on the empty window): eye -> circled i. It opens the same evidence card, one at a time.
+Screens: before-/after-{light,dark}-{1-populated-1440, 2-evidence-open-1440, 3-one-column-820, 4-empty-window-today}.png. Correction to my plan: the empty window is NOT untouched. It shows one trend tile with a control, so its pair shows a real change.
+
+## PRIOR WORK
+RD-262 (Kam's eye commission), RD-264, RD-267, RD-281 (the ratified mock), RD-279 (DOM order), RD-283/286/288 (stated grounds; the ratio comments are re-measured on #f8f9fa); eyeGlyph()'s screen-reader reason, kept by the icon font (no textContent). The glyph is reused from index.js:7431/7453/7993/8026 and userNameWithInfo() (index.js:6239). BRAND.md §3 and the RD-333 precedent for moving both count sets.
+
+## NOT TESTED / limits
+- Offline install: the i comes from the Bootstrap Icons CDN like every other tab's icons, so without internet it disappears there too. RD-721 (P's vendoring, order item 20) fixes all of them.
+- My browser runs let the page load its CDN assets (Bootstrap, Bootstrap Icons, PapaParse), as the demo does. A strict off-host belt like the gate's will block the font, and no bi-* glyph then renders: the RD-841 glyph cell needs the font.
+- The synthetic feed rolls with the clock, so figures differ slightly between before and after (e.g. 36,780 -> 36,788). Not from this change.
+- No demo render (RD-76). No image built. CodeQL not run (no PR; the change is CSS, a DOM glyph and tests).
+- rd-838 is not on origin yet; I re-check it when N pushes it.
+- rd-427-428-444-448-ui-residue-s59 (an old branch) ALREADY conflicts with main on 8 files (.gitignore, azureLogAnalytics.js, entraProvisioning.js, dark-mode.css, keyboard-focus.css, first-run-setup.html, entra-provisioning-ui.js, first-run-setup.js). My head adds none: its conflict set against my head equals its set against main. Your condition said "any other conflict is a STOP", so I am naming it for your ruling, not calling it mine.
+
+## Disclosed
+1. At ~23:0xZ I ran the new 13-test jsdom file ONCE outside the jest lock (about 1 s) before filing the first ticket. Every run since went through the lock.
+2. My first lock ticket (s96o-rd840-iter1, 23:22:43-44Z) ran ZERO tests. zsh does not word-split an unquoted list, so jest received one 30-path pattern, and my grep hid jest's "No tests found". I treated it as void, not as a pass. jest --listTests (which runs nothing) showed it. The proof hold built its list in bash: 52 PASS lines, "Tests: 1090". Logged in session-tools/s96o/slip-log.md.
+
+## Next
+Waiting for the gate. Item 11 (RD-828+833) on its TURN. Local surfaces stopped (by own pid); the base worktree worktrees/s96o-base-08a81e2 is kept.
+-- S96O (Datasec/NexusAI-O)
+
