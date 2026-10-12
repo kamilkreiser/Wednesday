@@ -34163,5 +34163,49 @@
    "CARD quickquote-v234-gh-login-for-pr-1012",
    "CARD quickquote-v234-publish-1012"
   ]
+ },
+ {
+  "id": "nexusai-rd838-rd640-round3-1013",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: allow a third test-gate round on the erasure symlink fix (RD-640, now RD-838)?",
+  "bluf": "RD-640 (how data erasure handles symlink chains) stopped at your two-NO-GO cap on 5-12 Oct; its fix never merged. The gate's blocker: one rare link shape (a hard-linked symlink in a long chain that ends at real data) is wrongly treated as a loop, so the link is removed and recorded as purged while the data survives elsewhere. A second finding: a chain of exactly 256 links is kept when it should be walked. N filed the remainder as RD-838 and proposes finishing it on top of RD-640's work: key the loop check by path instead of inode (the gate itself tested that fix and it held), fix the off-by-one, and add the missing cells. Because it reuses RD-640's unmerged change, it is in effect round 3 of a capped class, which needs your word. Erasure is a data-destruction surface, so it gets the full tier-1 gate; nothing merges without that gate's GO. (Override note: the prior-ruling gate matched only the word 'round3' on the VSP-74 and RD-686 cards, which were different tickets and classes.)",
+  "default_action": "RD-838 is NOT built until you choose; N builds RD-839 meanwhile, so nothing idles.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, round 3 under RD-838",
+    "detail": "N builds RD-838 on RD-640's branch with the two fixes and the missing cells; full tier-1 gate; merges in turn only on a GO."
+   },
+   {
+    "key": "b",
+    "label": "No, rebuild from main",
+    "detail": "N starts RD-838 fresh from main, re-using only what the gate proved; slower, and the same gate."
+   },
+   {
+    "key": "c",
+    "label": "Park it",
+    "detail": "RD-838 waits; erasure keeps its current behaviour (RD-640 is not on main)."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-13T06:05:42.436342+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks843-half2-round3",
+   "CARD secuura-ks949-round3-cap-and-the-cutoff",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD nexusai-rd361-round3-blocker-survives",
+   "CARD nexusai-rd369-round3-or-ship-at-the-cap",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD hpsm-composer-round3-approver-guard",
+   "CARD nexusai-rd436-round3-authorise",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD rd518-round3",
+   "CARD secuura-pr1245-round3-failed-at-cap",
+   "CARD vision-vsp74-cap-reached-ship-or-round3",
+   "CARD nexusai-rd686-round2-cap-ship-words-or-round3"
+  ]
  }
 ]
