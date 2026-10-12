@@ -34325,5 +34325,45 @@
    "CARD composer-k-q32-refuse-names-1013",
    "CARD composer-docker-prune-stale-seat-stacks-1013"
   ]
+ },
+ {
+  "id": "secuura-ks1557-certify-hash-semantics-1013",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1557: when a certificate is issued from a parent document, must the new record keep the PARENT's content hash?",
+  "bluf": "Your choice needed: (a) the certificate keeps the parent's hash, (b) the caller may send a different hash, or (c) wait for Stuart. Seat J measured that two recorded design statements disagree: KS-70 (yours, 2026-05-14) says certify makes a document B with its own contentHash; the KS-84 operation description says certify never modifies the original bytes, so the hash stays the parent's. Verification only reads certificate evidence from rows with the SAME hash, which is the KS-84 reading. Today a caller who omits the hash gets a certificate that is NOT visible on the parent's bytes. Seat J also measured that the issue route lets a caller overwrite the certificate id, date and issuer fields (KS-1557, High; Kintsugi/demo code only, no production). Override note: the prior-ruling gate matched only on the words semantics and 1013 (smoke-test, erase-connector, HPSM and Composer cards); none of Kam's earlier words concern certification hashes.",
+  "default_action": "If Kam does not answer: the write side of KS-1557 is NOT built; J builds only the read-side fix (it works under either answer); the question to Stuart goes on the ticket; Wednesday re-raises this in the next morning receipt.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep the parent's hash",
+    "detail": "A different hash from the caller gets a 400 (use /version for new bytes); an omitted hash now works and the certificate shows on the parent's bytes. Recommended once Stuart confirms Platform S does not send a different hash."
+   },
+   {
+    "key": "b",
+    "label": "Caller may send its own hash",
+    "detail": "Keeps KS-70 callers at 201, but their certificate stays invisible on the parent's bytes, as today. Read-side fix still excludes such rows from evidence."
+   },
+   {
+    "key": "c",
+    "label": "Wait for Stuart's answer first",
+    "detail": "One facts-only question goes on the ticket (which hash Platform S sends). Nothing on the write side is built meanwhile."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-13T07:28:08.864260+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 17:03",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-hash-population-count",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks1245-smoke-test-degraded-semantics",
+   "CARD secuura-ks695-erase-connector-retry-semantics",
+   "CARD hpsmpoc-words-b230-b231-1013",
+   "CARD composer-k-q32-refuse-names-1013",
+   "CARD composer-docker-prune-stale-seat-stacks-1013"
+  ]
  }
 ]
