@@ -1,0 +1,16 @@
+CONTROL (no mutation): red=set() n=16
+B1 gate tamper: positive BigInt accepted | red=['BIGINT'] of 16 | expected=['BIGINT'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+B2 -0 accepted via Object.is, +0 still refused | red=['NEGZERO'] of 16 | expected=['NEGZERO'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+B3 lower edge > 0 -> >= 0 | red=['0 (never: the request hangs)', 'NEGZERO'] of 16 | expected=['0 (never: the request hangs)', 'NEGZERO'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+B4 BigInt coerced through Number() before the check | red=['BIGINT'] of 16 | expected=['BIGINT'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O1 accept every bigint (incl 0n) | red=['BIGINT'] of 16 | expected=['BIGINT'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O2 accept -0 and +0 both (value === 0) | red=['0 (never: the request hangs)', 'NEGZERO'] of 16 | expected=['0 (never: the request hangs)', 'NEGZERO'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O3 accept 2147483648 (<= MAX+1) | red=['2147483648 (truncated to 24.8 days: never)'] of 16 | expected=['2147483648 (truncated to 24.8 days: never)'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O4 swap upper bound (<= -> <) | red=['2147483647 ms, the upper edge Node honours, builds'] of 16 | expected=['2147483647 ms, the upper edge Node honours, builds'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O5 reject every non-number up front (typeof !== number), same message | red=['null', "the string '800'", 'true'] of 16 | expected=[] -> DIFF | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O6 bigint refused but with an error NOT naming the property | red=['BIGINT'] of 16 | expected=['BIGINT'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O7 -0 refused but with an error NOT naming the property | red=['NEGZERO'] of 16 | expected=['NEGZERO'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O8 Number.isInteger(Number(value)) (coerce everything) | red=['BIGINT', "the string '800'", 'true'] of 16 | expected=['BIGINT', "the string '800'", 'true'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O9 lower edge > 0 -> > -1 (accept 0 and -0) | red=['0 (never: the request hangs)', 'NEGZERO'] of 16 | expected=['0 (never: the request hangs)', 'NEGZERO'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O10 bigint refused at REQUEST time not construction: bigint returns a value (accepted at build) | red=['BIGINT'] of 16 | expected=['BIGINT'] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
+O11 -0 normalised to 0 first (still refused by > 0: expected equivalent, no red) | red=[] of 16 | expected=[] -> EXACT | sha b82b86a9d8038c57=b82b86a9d8038c57 restored-identical
