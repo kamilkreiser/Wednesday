@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 178 — 2026-10-13 09:5x (s104, ctx 65% light checkpoint; band 80-90). **READ THIS FIRST. It supersedes 177's STATE and FIRST WORK; 177's standing rules and OWED lines stand.**
+### STATE (each line measured this seat)
+- **main = 08a81e2** (RD-795, PR #80). NINE NexusAI merges since 12 Oct morning: RD-608, RD-657, RD-690, RD-649, RD-675, RD-614, RD-629, RD-591, RD-795.
+- **IN FLIGHT: P (S98P, %11) RD-823 merge hold** (ticket s98p-merge-rd823, lock since 2026-10-12T21:59:14Z). On P's MERGED: verify at source (ls-remote + gh pr view), watch the push Build (gh run view; background polls die at rotation), then **TURN -> O RD-828+833 (item 11)**; O pauses its RD-840/841 build for it. Then 12 P RD-751, 13 M RD-817, 14 N RD-747, 15 P RD-831, 16 R RD-777+776 (**R is NOT live: launch R's successor from HANDOVER-S97R.md + HANDOVER-S92R.md before item 16**), 17 R RD-761, 18 O RD-801+822, 19 O RD-802, 20 P RD-721 (screenshots to Kam before demo), 21 R RD-794, 22 R RD-819, 23 R RD-807, 24 N RD-131, 25 R RD-775. Carry each item's gate duty (read the gate RELEASE / report row first).
+- **KAM RULED 3 CARDS 09:46 (all a):** RD-838 round 3 → N building (ruling on Jira 39396, C-213; delivered) · RD-840+841 do both → O building (rulings on Jira 39397/39398; delivered; Q1 dark unchanged, Q2 bi-info-circle) · QuickQuote fix round → **Vision seat %12 LAUNCHED 22:49:31Z, its PLAN CONFIRMATION is OWED** (brief fleet/briefs_staged/2026-10-13_vision_qq_ci_codeql_fixround.md; no publish/deploy; card quickquote-ci-red-codeql-14-1013 gets --delivered when Vision mails its C-number).
+- **GATE OWED: one tier-1 erasure gate for RD-839 (READY @ 057a69d, saved fleet/qa-agent/briefs/2026-10-13_nexusai-rd839-READY-mail.txt) + RD-838 (READY due from N).** Commission it when RD-838's READY lands (minimise-gate-duplication). RD-840/841 READY (tier 2 + browser leg) can join or follow.
+- **Other tickets filed today:** RD-837 (C-57 runner install; held: shared tooling), RD-842 (fax/scan seed data; read-first, unassigned), RD-843 (Low, RD-795 R8 blind spot = WRONG-16).
+- **Seats:** %2 N (RD-838 build) · %3 M (next item 13) · %4 O (RD-840/841 build; item 11 first) · %11 P (RD-823 merge) · %12 Vision (plan owed) · %1 monitor. A background timer (12:00) is moot: ignore its wake.
+- **Kam:** 3 cards ruled + receipted; 0 open Datasec cards from this seat. The morning receipt was posted 06:0x.
+### LEDGER this seat: 2 rows (w=2 question inside a MERGED; w=4 count from memory in a TURN). Digests regenerated.
+
 ## 🟢 DELTA 177 — 2026-10-13 05:3x (s104, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST. It supersedes 176's FIRST WORK and STATE. 175's OWED list stands, plus the OWED lines below.**
 ### STATE (each line measured this seat)
 - **main = cc42c42** (RD-591, PR #79; ls-remote). EIGHT NexusAI merges since 12 Oct morning: RD-608, RD-657, RD-690, RD-649, RD-675, RD-614, RD-629, RD-591. Each one verified by ls-remote + gh pr view.
