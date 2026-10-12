@@ -1,0 +1,60 @@
+      at Object.<anonymous> (src/__tests__/ks1538-legacy-certify-needs-document-access.test.ts:221:43)
+
+  ● KS-1538 the legacy certify path needs access to the document › one refusal, and an order that leaves nothing behind › a database error while reading the document fails closed: not a 201, nothing persisted, no UPDATE
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 500
+    Received:    201
+
+      227 |       asHuman(OWNER);
+      228 |       const r = await issue({ documentId: 'doc-ks1538' });
+    > 229 |       expect(r.status).toBeGreaterThanOrEqual(500);
+          |                        ^
+      230 |       expect(mockSaveCertification).not.toHaveBeenCalled();
+      231 |       expect(mockExecuteRaw).not.toHaveBeenCalled();
+      232 |     });
+
+      at Object.<anonymous> (src/__tests__/ks1538-legacy-certify-needs-document-access.test.ts:229:24)
+
+  ● KS-1538 the legacy certify path needs access to the document › the UPDATE's swallowed error is logged, and the response is unchanged › a failing UPDATE still answers 201 and writes ONE error line carrying ids only, never the certification data
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      257 |       expect(r.status).toBe(201);
+      258 |       const lines = mockLog.error.mock.calls.filter(([m]) => /KS-1538/.test(String(m)));
+    > 259 |       expect(lines).toHaveLength(1);
+          |                     ^
+      260 |       const dump = JSON.stringify(lines[0]);
+      261 |       expect(dump).toContain('deadlock detected');
+      262 |       expect(dump).toContain('doc-ks1538');
+
+      at Object.<anonymous> (src/__tests__/ks1538-legacy-certify-needs-document-access.test.ts:259:21)
+
+  ● KS-1538 the legacy certify path needs access to the document › the UPDATE's swallowed error is logged, and the response is unchanged › a REFUSAL is logged with the tenant and the actor id only, at info
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      270 |       await issue({ documentId: 'doc-ks1538' });
+      271 |       const lines = mockLog.info.mock.calls.filter(([m]) => /KS-1538/.test(String(m)));
+    > 272 |       expect(lines).toHaveLength(1);
+          |                     ^
+      273 |       const dump = JSON.stringify(lines[0]);
+      274 |       expect(dump).toContain(TENANT);
+      275 |       expect(dump).toContain(OTHER);
+
+      at Object.<anonymous> (src/__tests__/ks1538-legacy-certify-needs-document-access.test.ts:272:21)
+
+Test Suites: 1 failed, 1 total
+Tests:       13 failed, 6 passed, 19 total
+Snapshots:   0 total
+Time:        3.888 s, estimated 4 s
+Ran all test suites matching /ks1538-legacy-certify-needs-document-access.test.ts/i.

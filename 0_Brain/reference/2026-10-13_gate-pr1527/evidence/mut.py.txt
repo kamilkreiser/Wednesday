@@ -1,0 +1,15 @@
+import sys
+p, m = sys.argv[1], sys.argv[2]
+s = open(p).read()
+M = {
+ 'M1_nolock': ("      await client.query('SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))', [k.tenantId, connectorId]);\n", "      /*GATE_M1*/\n"),
+ 'M2_insert_other_conn': ("      await client.query(ins.text, ins.values);\n", "      await query(ins.text, ins.values); /*GATE_M2*/\n"),
+ 'M3_no_guc': ("      await applyTenantGuc(client);\n", "      /*GATE_M3*/\n"),
+ 'M4_mem_not_told': ("        retireInMemory(m, grace);\n", "        /*GATE_M4*/\n"),
+ 'M5_no_savepoint': ("        await client.query('ROLLBACK TO SAVEPOINT ks1549_retire');\n", "        /*GATE_M5*/ throw err;\n"),
+}
+old, new = M[m]
+assert s.count(old) == 1, f'anchor count {s.count(old)} for {m}'
+s = s.replace(old, new)
+open(p, 'w').write(s)
+print('mutated', m)

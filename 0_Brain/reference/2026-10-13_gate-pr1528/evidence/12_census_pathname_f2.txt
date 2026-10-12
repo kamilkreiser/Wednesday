@@ -1,0 +1,25 @@
+== files with BOTH import.meta.url and .pathname (variable-held form), head
+Blockchain/Dev/scripts/__tests__/ks1347_proxy_out_dir_spaced_checkout.test.sh:7:# `new URL(import.meta.url).pathname`. A URL pathname is PERCENT-ENCODED, so from a checkout
+Blockchain/Dev/scripts/__tests__/ks1347_proxy_out_dir_spaced_checkout.test.sh:101:expect "🔴 server.ts takes its path through fileURLToPath, not URL.pathname" "0 1" \
+Blockchain/Dev/scripts/__tests__/ks1347_proxy_out_dir_spaced_checkout.test.sh:102:  "$(grep -c 'import\.meta\.url)\.pathname' "$SUBJ") $(grep -c 'fileURLToPath(import\.meta\.url)' "$SUBJ")"
+Blockchain/Dev/scripts/openapi-examples/proxy/server.ts:32:// KS-1347: fileURLToPath, never `new URL(...).pathname`. A URL pathname is PERCENT-ENCODED, so
+Blockchain/Dev/services/auth/src/__tests__/ks847-no-raw-control-bytes.test.ts:46: * `fileURLToPath`, NOT `.pathname`. A file URL percent-encodes its path, and
+Blockchain/Dev/services/auth/src/__tests__/ks847-no-raw-control-bytes.test.ts:47: * `.pathname` hands that encoding straight through: a checkout under a
+Blockchain/Dev/services/auth/src/__tests__/ks847-no-raw-control-bytes.test.ts:52: *     new URL('..', 'file:///tmp/a%20b/svc/src/__tests__/x.ts').pathname
+Blockchain/Testing/ci/tools/reconfirm-5xx.mjs:34:  return baseUrl.replace(/\/+$/, '') + u.pathname + u.search;
+systemTest/akto/tests/unit/setup/ks1337-preSuiteSetupPathWithASpace.test.ts:3: * new URL(...).pathname. A URL pathname is percent-encoded, so a checkout whose directory holds a
+systemTest/performance/runner/cli.ts:169:// KS-1337: fileURLToPath, not .pathname - a URL pathname is percent-encoded, so a checkout directory
+systemTest/performance/tests/unit/runner/ks1337-preSuitePathWithASpace.test.ts:2: * KS-1337: runner/cli.ts resolved the pre-suite step with new URL(...).pathname. A URL pathname is
+systemTest/playwright/global-setup.ts:42:    const step = new URL('../fixtures/pre-suite.ts', import.meta.url).pathname;
+(control: global-setup.ts must appear above)
+== KS-1137 F-2 at DEV: digit-bearing image regex in 04 job + dev cell
+5:# Trivy scans every locally-built secuura image (dev-* tags from docker
+62:done < <(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '^dev-[A-Za-z0-9._-]+:latest$' | sort -u)
+63:# KS-867 — the class above was `[a-z-]`, which admits no digit: `dev-auth2:latest`
+69:# from the ticket). The `dev-` prefix and `:latest` stay: they are what this
+78:  echo '{"error":"no dev-* images found — the CVE scan examined NOTHING; run `docker compose build` first","reason":"no-images","images":[]}' > "$OUT"
+79:  echo "  → FAILED: docker is up but no dev-* images exist — nothing was scanned"
+Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh:141:# CELL 3b - KS-1137 F-2. The ESTATE's real digit-bearing image. dev-auth2 is a
+Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh:155:  ok "KS-1137 F-2 - the estate's real digit-bearing image (dev-m365-integration:latest) IS scanned, once, and the artefact nam
+Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh:157:  bad "KS-1137 F-2 - the estate's real digit-bearing image (dev-m365-integration:latest) is scanned" "rc=$rc_estate, scanned $
+== job diff dev..head (expect empty)

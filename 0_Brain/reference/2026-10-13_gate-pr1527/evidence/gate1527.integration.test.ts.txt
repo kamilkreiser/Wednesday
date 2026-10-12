@@ -1,0 +1,358 @@
+/**
+ * PR #1527 gate harness (independent of the author's cells). Lives ONLY in the gate's scratch clone.
+ * Every cell states its FAIL condition in its name/message. Superuser pool = instrument; app role = service.
+ */
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import crypto from 'crypto';
+import type { Server } from 'http';
+import type { AddressInfo } from 'net';
+import { Pool, PoolClient } from 'pg';
+import fs from 'fs';
+
+process.env.SECURITY_DISABLE_BOOT = '1';
+
+const T1 = 'a0000000-0000-4000-8000-000000001527';
+const T2 = 'a0000000-0000-4000-8000-000000002527';
+const ORG = 'abcdef00-1527-4527-8527-000000001527';
+const PREFIX = 'gate1527:';
+const SUPER_URL = process.env.TEST_DATABASE_URL!;
+const APP_URL = process.env.TEST_APP_DATABASE_URL!;
+const EVID = process.env.GATE_EVID!;
+
+const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+const PUBLIC_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+const b64url = (b: Buffer): string => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+function token(): string {
+  const header = b64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
+  const now = Math.floor(Date.now() / 1000);
+  const payload = b64url(Buffer.from(JSON.stringify({ sub: 'gate1527', iat: now, exp: now + 600, role: 'super_admin' })));
+  const sig = b64url(crypto.sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), PRIVATE_PEM));
+  return `${header}.${payload}.${sig}`;
+}
+
+let server: Server; let base: string; let superPool: Pool;
+let mem: Map<string, any>;
+const results: Record<string, unknown> = {};
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+type Minted = { status: number; id: string | null; key: string | null; priorKeysRevoked: unknown; ms: number };
+async function mint(tenant: string, connectorId: string, rotate: boolean, name: string): Promise<Minted> {
+  const t0 = Date.now();
+  const res = await fetch(`${base}/api/keys`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+    body: JSON.stringify({ name, scopes: ['documents:read'], tenantId: tenant, organizationId: ORG, connectorId, rotate }),
+  });
+  const text = await res.text();
+  let d: any = {};
+  try { d = JSON.parse(text).data ?? {}; } catch { /* */ }
+  return { status: res.status, id: d.id ?? null, key: d.key ?? null, priorKeysRevoked: d.priorKeysRevoked, ms: Date.now() - t0 };
+}
+async function validate(key: string): Promise<{ status: number; valid: unknown; reason: unknown; ms: number }> {
+  const t0 = Date.now();
+  const res = await fetch(`${base}/api/keys/validate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
+  const j: any = await res.json().catch(() => ({}));
+  return { status: res.status, valid: j?.data?.valid, reason: j?.data?.reason ?? j?.error?.message, ms: Date.now() - t0 };
+}
+type Row = { id: string; is_active: boolean; expires_at: Date | null; name: string };
+async function rowsOf(tenant: string, c: string): Promise<Row[]> {
+  return (await superPool.query<Row>('SELECT id, is_active, expires_at, name FROM svc_api_keys WHERE connector_id=$1 AND tenant_id=$2::uuid', [c, tenant])).rows;
+}
+const act = (rows: Row[]) => rows.filter((r) => r.is_active).map((r) => r.id).sort();
+const memActive = (tenant: string, c: string) => [...mem.values()].filter((k) => k.connectorId === c && k.tenantId === tenant && k.isActive).map((k) => k.id).sort();
+/** Every DB row's is_active must equal memory's; returns the disagreements. */
+function memDisagree(rows: Row[]): string[] {
+  const bad: string[] = [];
+  for (const r of rows) {
+    const m = mem.get(r.id);
+    if (!m) { bad.push(`${r.id}: in DB, absent from memory`); continue; }
+    if (m.isActive !== r.is_active) bad.push(`${r.id}: db=${r.is_active} mem=${m.isActive}`);
+  }
+  return bad;
+}
+const conn = (cell: string) => `${PREFIX}${cell}:${crypto.randomUUID()}`;
+async function seeded(tenant: string, c: string): Promise<Minted> {
+  const s = await mint(tenant, c, false, 'seed');
+  expect(s.status, 'arrange: seed 201').toBe(201);
+  return s;
+}
+function settledFlag<T>(p: Promise<T>) { const f = { done: false }; p.then(() => { f.done = true; }, () => { f.done = true; }); return f; }
+
+beforeAll(async () => {
+  if (!SUPER_URL || !APP_URL || !EVID) throw new Error('need TEST_DATABASE_URL, TEST_APP_DATABASE_URL, GATE_EVID');
+  superPool = new Pool({ connectionString: SUPER_URL, max: 6 });
+  await superPool.query('DELETE FROM svc_api_keys WHERE connector_id LIKE $1', [`${PREFIX}%`]);
+  process.env.DATABASE_URL = APP_URL;
+  process.env.JWT_PUBLIC_KEY = Buffer.from(PUBLIC_PEM, 'utf8').toString('base64');
+  delete process.env.JWT_JWKS_URL; delete process.env.AUTH_SERVICE_URL; delete process.env.API_KEY_ROTATION_GRACE_SECONDS;
+  const db = await import('../db');
+  if (!(await db.initDb()) || !db.isDbAvailable()) throw new Error('initDb failed');
+  const mod = await import('../index');
+  mem = (mod as any).memApiKeys;
+  await new Promise<void>((r) => { server = (mod as any).default.listen(0, '127.0.0.1', r); });
+  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+});
+afterAll(async () => {
+  fs.writeFileSync(`${EVID}/gate_harness_results_${process.env.GATE_RUN ?? 'x'}.json`, JSON.stringify(results, null, 2));
+  if (server) await new Promise<void>((r) => server.close(() => r()));
+  await superPool.query('DROP TRIGGER IF EXISTS gate1527_sleep ON svc_api_keys');
+  await superPool.query('DROP TRIGGER IF EXISTS gate1527_cf ON svc_api_keys');
+  await superPool.query('DROP TRIGGER IF EXISTS gate1527_rf ON svc_api_keys');
+  await superPool.query('DELETE FROM svc_api_keys WHERE connector_id LIKE $1', [`${PREFIX}%`]);
+  await superPool.end();
+  const db = await import('../db'); await db.closeDb();
+});
+
+describe('gate1527', () => {
+  it('A1 mixed rotate/non-rotate N=2..50: FAIL if any non-201, rotate-key actives != 1, actives == 0, or memory != DB', async () => {
+    const out: any[] = []; const bad: string[] = [];
+    for (const N of [2, 3, 5, 10, 20, 35, 50]) {
+      for (let t = 0; t < 3; t += 1) {
+        const c = conn(`a1-${N}-${t}`);
+        await seeded(T1, c);
+        const kinds = Array.from({ length: N }, (_, i) => (i % 3 !== 1)); // >=1 rotate, >=1 plain when N>=2
+        const res = await Promise.all(kinds.map((rot, i) => mint(T1, c, rot, `a1 ${rot ? 'rot' : 'plain'} ${i}`)));
+        const rows = await rowsOf(T1, c);
+        const rotIds = new Set(res.filter((_, i) => kinds[i]).map((r) => r.id));
+        const activeRot = rows.filter((r) => r.is_active && rotIds.has(r.id)).length;
+        const a = act(rows);
+        const dis = memDisagree(rows);
+        const non201 = res.filter((r) => r.status !== 201).length;
+        const nullRevoked = res.filter((r, i) => kinds[i] && typeof r.priorKeysRevoked !== 'number').length;
+        out.push({ N, t, rows: rows.length, active: a.length, activeRot, non201, nullRevoked, memDisagree: dis.length });
+        if (non201 || activeRot !== 1 || a.length < 1 || dis.length || rows.length !== N + 1 || nullRevoked) bad.push(JSON.stringify(out[out.length - 1]) + ' ' + dis.join(';'));
+        if (JSON.stringify(memActive(T1, c)) !== JSON.stringify(a)) bad.push(`N=${N} t=${t} memActive != dbActive`);
+      }
+    }
+    results.A1 = out;
+    expect(bad).toEqual([]);
+  }, 120_000);
+
+  it('A2 same connector id, two tenants: FAIL if T2 rotate blocks on T1 lock, T1 rotate does NOT block (control), or a tenant ends != 1 active', async () => {
+    const c = conn('a2');
+    const s1 = await seeded(T1, c); const s2 = await seeded(T2, c);
+    const holder: PoolClient = await superPool.connect();
+    await holder.query('BEGIN');
+    await holder.query('SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))', [T1, c]);
+    const p1 = mint(T1, c, true, 'a2 t1 rot'); const f1 = settledFlag(p1);
+    const t0 = Date.now();
+    const r2 = await Promise.race([mint(T2, c, true, 'a2 t2 rot'), sleep(3000).then(() => null)]);
+    const t2ms = Date.now() - t0;
+    await sleep(Math.max(0, 1500 - t2ms));
+    const t1BlockedWhileHeld = !f1.done;
+    const t1rowsWhileHeld = (await rowsOf(T1, c)).length;
+    await holder.query('COMMIT'); holder.release();
+    const r1 = await p1;
+    const a1 = act(await rowsOf(T1, c)); const a2 = act(await rowsOf(T2, c));
+    // concurrent double-submits in both tenants on the same id, 10 trials
+    const bad: string[] = [];
+    for (let t = 0; t < 10; t += 1) {
+      const cc = conn(`a2x-${t}`);
+      await seeded(T1, cc); await seeded(T2, cc);
+      const rs = await Promise.all([mint(T1, cc, true, 'x1a'), mint(T2, cc, true, 'x2a'), mint(T1, cc, true, 'x1b'), mint(T2, cc, true, 'x2b')]);
+      const x1 = act(await rowsOf(T1, cc)); const x2 = act(await rowsOf(T2, cc));
+      if (rs.some((r) => r.status !== 201) || x1.length !== 1 || x2.length !== 1 || !rs.map((r) => r.id).includes(x1[0]) || !rs.map((r) => r.id).includes(x2[0])) bad.push(`trial ${t}: t1=${x1.length} t2=${x2.length}`);
+      const dis = memDisagree([...(await rowsOf(T1, cc)), ...(await rowsOf(T2, cc))]); if (dis.length) bad.push(`trial ${t} mem: ${dis.join(';')}`);
+    }
+    results.A2 = { t2Status: r2 && (r2 as Minted).status, t2ms, t1BlockedWhileHeld, t1rowsWhileHeld, r1: r1.status, a1, a2, s1: s1.id, s2: s2.id, r1id: r1.id, r2id: r2 && (r2 as Minted).id, bad };
+    expect(r2 && (r2 as Minted).status, 'T2 rotate completes while T1 lock held').toBe(201);
+    expect(t1BlockedWhileHeld, 'CONTROL: T1 rotate blocked by externally held (hashtext(T1),hashtext(c))').toBe(true);
+    expect(t1rowsWhileHeld, 'CONTROL: T1 insert had not landed while lock held').toBe(1);
+    expect(a1).toEqual([r1.id]); expect(a2).toEqual([(r2 as Minted).id]);
+    expect(bad).toEqual([]);
+  }, 60_000);
+
+  it('A3 hashtext collision: FAIL if colliding connectors do not serialise on each other (control) or either ends != 1 active', async () => {
+    const col = await superPool.query<{ h: number; s: string[] }>(
+      `SELECT h, array_agg(s ORDER BY s) s FROM (SELECT '${PREFIX}col:'||g s, hashtext('${PREFIX}col:'||g) h FROM generate_series(1,400000) g) x GROUP BY h HAVING count(*)>1 LIMIT 2`);
+    expect(col.rows.length, 'arrange: a collision was found').toBeGreaterThan(0);
+    const [ca, cb] = col.rows[0].s;
+    const hh = await superPool.query('SELECT hashtext($1) a, hashtext($2) b', [ca, cb]);
+    expect(hh.rows[0].a, 'collision real').toBe(hh.rows[0].b);
+    // control: hold lock on ca; a rotate on cb must block
+    await seeded(T1, ca); await seeded(T1, cb);
+    const holder = await superPool.connect(); await holder.query('BEGIN');
+    await holder.query('SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))', [T1, ca]);
+    const pb = mint(T1, cb, true, 'a3 cb rot'); const fb = settledFlag(pb);
+    await sleep(1500); const blocked = !fb.done;
+    await holder.query('COMMIT'); holder.release(); await pb;
+    const bad: string[] = [];
+    for (let t = 0; t < 10; t += 1) {
+      await superPool.query('DELETE FROM svc_api_keys WHERE connector_id = ANY($1)', [[ca, cb]]);
+      for (const k of [...mem.values()]) if (k.connectorId === ca || k.connectorId === cb) mem.delete(k.id);
+      await seeded(T1, ca); await seeded(T1, cb);
+      const rs = await Promise.all([mint(T1, ca, true, 'a'), mint(T1, cb, true, 'b'), mint(T1, ca, true, 'a2'), mint(T1, cb, true, 'b2')]);
+      const xa = act(await rowsOf(T1, ca)); const xb = act(await rowsOf(T1, cb));
+      if (rs.some((r) => r.status !== 201) || xa.length !== 1 || xb.length !== 1) bad.push(`trial ${t}: a=${xa.length} b=${xb.length}`);
+    }
+    await superPool.query('DELETE FROM svc_api_keys WHERE connector_id = ANY($1)', [[ca, cb]]);
+    results.A3 = { pair: [ca, cb], hash: hh.rows[0].a, collisionsFound: col.rows.length, blockedByCollidingLock: blocked, bad };
+    expect(blocked).toBe(true);
+    expect(bad).toEqual([]);
+  }, 60_000);
+
+  it('A4 client killed mid-transaction holding the lock: FAIL if the queued rotate does not finish <3s after the kill, or state is wrong', async () => {
+    const c = conn('a4');
+    const s = await seeded(T1, c);
+    await superPool.query(`CREATE OR REPLACE FUNCTION gate1527_sleep() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.name = 'gate1527 sleepy' THEN PERFORM pg_sleep(20); END IF; RETURN NEW; END $$`);
+    await superPool.query('CREATE TRIGGER gate1527_sleep BEFORE INSERT ON svc_api_keys FOR EACH ROW EXECUTE FUNCTION gate1527_sleep()');
+    try {
+      const ps = mint(T1, c, true, 'gate1527 sleepy');
+      await sleep(600);
+      const pf = mint(T1, c, true, 'a4 fast'); const ff = settledFlag(pf);
+      await sleep(1200);
+      const fastBlocked = !ff.done;
+      const lockWaiters = (await superPool.query(`SELECT count(*)::int n FROM pg_locks WHERE locktype='advisory' AND NOT granted`)).rows[0].n;
+      const victim = await superPool.query(`SELECT pid FROM pg_stat_activity WHERE usename='secuura_app' AND state='active' AND query LIKE '%INSERT INTO svc_api_keys%'`);
+      expect(victim.rows.length, 'arrange: exactly one backend sleeping in the INSERT').toBe(1);
+      const tk = Date.now();
+      await superPool.query('SELECT pg_terminate_backend($1)', [victim.rows[0].pid]);
+      const [rs, rf] = await Promise.all([ps, pf]);
+      const afterKillMs = Date.now() - tk;
+      const rows = await rowsOf(T1, c);
+      const after = await mint(T1, conn('a4-after'), false, 'a4 after');
+      results.A4 = { fastBlocked, lockWaiters, sleepy: { status: rs.status, id: rs.id }, fast: { status: rf.status, ms: rf.ms }, afterKillMs, rows: rows.map((r) => ({ name: r.name, active: r.is_active })),
+        sleepyInMemory: [...mem.values()].some((k) => k.name === 'gate1527 sleepy'), memDisagree: memDisagree(rows), poolAfter: after.status, seedActiveMem: mem.get(s.id!)?.isActive };
+      expect(fastBlocked, 'CONTROL: fast rotate queued behind the sleeping lock holder').toBe(true);
+      expect(rs.status, 'killed rotate answers 503 (infra)').toBe(503);
+      expect(rf.status).toBe(201);
+      expect(afterKillMs).toBeLessThan(3000);
+      expect(act(rows)).toEqual([rf.id]);
+      expect(rows.some((r) => r.name === 'gate1527 sleepy'), 'killed INSERT rolled back').toBe(false);
+      expect(memDisagree(rows)).toEqual([]);
+      expect(after.status).toBe(201);
+    } finally {
+      await superPool.query('DROP TRIGGER IF EXISTS gate1527_sleep ON svc_api_keys');
+    }
+  }, 60_000);
+
+  it('A6 KS-577 failed retire in GRACE mode and under concurrency: FAIL if non-201, revoked not null, new key unsaved, prior expiry changed (DB or memory)', async () => {
+    process.env.API_KEY_ROTATION_GRACE_SECONDS = '60';
+    await superPool.query(`CREATE OR REPLACE FUNCTION gate1527_rf() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.connector_id LIKE '${PREFIX}rf:%' AND NEW.expires_at IS DISTINCT FROM OLD.expires_at THEN RAISE EXCEPTION 'gate1527 injected retire failure'; END IF; RETURN NEW; END $$`);
+    await superPool.query('CREATE TRIGGER gate1527_rf BEFORE UPDATE ON svc_api_keys FOR EACH ROW EXECUTE FUNCTION gate1527_rf()');
+    try {
+      const c = `${PREFIX}rf:${crypto.randomUUID()}`;
+      const s = await seeded(T1, c);
+      const rs = await Promise.all([mint(T1, c, true, 'rf a'), mint(T1, c, true, 'rf b')]);
+      const rows = await rowsOf(T1, c);
+      results.A6 = { statuses: rs.map((r) => r.status), revoked: rs.map((r) => r.priorKeysRevoked), rows: rows.map((r) => ({ id: r.id === s.id ? 'seed' : r.id, a: r.is_active, exp: r.expires_at })),
+        memSeedExpires: mem.get(s.id!)?.expiresAt ?? null, memDisagree: memDisagree(rows) };
+      expect(rs.map((r) => r.status)).toEqual([201, 201]);
+      expect(rs.map((r) => r.priorKeysRevoked)).toEqual([null, null]);
+      expect(rows.length).toBe(3);
+      expect(rows.every((r) => r.is_active && r.expires_at === null), 'nothing expired in DB').toBe(true);
+      expect(mem.get(s.id!)?.expiresAt ?? null, 'memory seed expiry untouched').toBeNull();
+      expect(memDisagree(rows)).toEqual([]);
+    } finally {
+      delete process.env.API_KEY_ROTATION_GRACE_SECONDS;
+      await superPool.query('DROP TRIGGER IF EXISTS gate1527_rf ON svc_api_keys');
+    }
+  }, 60_000);
+
+  async function commitFailTrigger(sleepSec: number) {
+    await superPool.query(`CREATE OR REPLACE FUNCTION gate1527_cf() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.connector_id LIKE '${PREFIX}cf:%' AND NEW.name LIKE 'cf-rotate%' THEN PERFORM pg_sleep(${sleepSec}); RAISE EXCEPTION 'gate1527 injected commit failure'; END IF; RETURN NULL; END $$`);
+    await superPool.query('DROP TRIGGER IF EXISTS gate1527_cf ON svc_api_keys');
+    await superPool.query('CREATE CONSTRAINT TRIGGER gate1527_cf AFTER INSERT ON svc_api_keys DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION gate1527_cf()');
+  }
+
+  it('A7 KS-888 failed COMMIT (deferred trigger), immediate and grace: FAIL if 2xx, a key leaves, DB changed, or memory changed', async () => {
+    const out: any = {};
+    for (const grace of ['0', '60']) {
+      if (grace === '0') delete process.env.API_KEY_ROTATION_GRACE_SECONDS; else process.env.API_KEY_ROTATION_GRACE_SECONDS = grace;
+      const c = `${PREFIX}cf:${crypto.randomUUID()}`;
+      const s = await seeded(T1, c);
+      await commitFailTrigger(0);
+      try {
+        const memBefore = JSON.stringify(mem.get(s.id!));
+        const sizeBefore = mem.size;
+        const r = await mint(T1, c, true, 'cf-rotate');
+        const rows = await rowsOf(T1, c);
+        const memSeedSame = JSON.stringify(mem.get(s.id!)) === memBefore; const memAfter = JSON.stringify(mem.get(s.id!)); const memSizeSame = mem.size === sizeBefore;
+        const v = await validate(s.key!);
+        out[grace] = { status: r.status, keyReturned: r.key !== null, rows: rows.length, active: act(rows).length, seedExpDb: rows[0]?.expires_at ?? null,
+          memSeedSame, memSizeSame, seedValidates: v.valid };
+        expect(r.status === 500 || r.status === 503).toBe(true);
+        expect(r.key).toBeNull();
+        expect(act(rows)).toEqual([s.id]);
+        expect(rows.length).toBe(1);
+        expect(memAfter).toBe(memBefore);
+        expect(memSizeSame).toBe(true);
+        expect(v.valid).toBe(true);
+      } finally {
+        await superPool.query('DROP TRIGGER IF EXISTS gate1527_cf ON svc_api_keys');
+      }
+    }
+    delete process.env.API_KEY_ROTATION_GRACE_SECONDS;
+    results.A7 = out;
+  }, 60_000);
+
+  it('A8 KS-888 failed COMMIT raced by a validate of the prior key: FAIL if the prior key is refused after the failed rotate', async () => {
+    const out: any = {};
+    for (const variant of ['control-no-validate', 'validate-during-commit']) {
+      const c = `${PREFIX}cf:${crypto.randomUUID()}`;
+      const s = await seeded(T1, c);
+      const v0 = await validate(s.key!);
+      await commitFailTrigger(2);
+      try {
+        const p = mint(T1, c, true, 'cf-rotate slow');
+        let mid: any = null;
+        if (variant === 'validate-during-commit') { await sleep(800); mid = await validate(s.key!); }
+        const r = await p;
+        const rows = await rowsOf(T1, c);
+        const v1 = await validate(s.key!);
+        const v2 = await validate(s.key!);
+        out[variant] = { before: v0, rotateStatus: r.status, mid, dbActive: act(rows).length === 1 && act(rows)[0] === s.id, memSeedActive: mem.get(s.id!)?.isActive, after1: v1, after2: v2 };
+      } finally {
+        await superPool.query('DROP TRIGGER IF EXISTS gate1527_cf ON svc_api_keys');
+      }
+    }
+    results.A8 = out;
+    expect(out['control-no-validate'].after1.valid, 'CONTROL: un-raced failed commit leaves the prior key valid').toBe(true);
+    expect(out['validate-during-commit'].dbActive, 'DB still holds the prior key active').toBe(true);
+    expect(out['validate-during-commit'].after1.valid, 'KS-888: a failed rotate leaves the prior key working').toBe(true);
+  }, 60_000);
+
+  it('A9 grace mode, N=10 concurrent rotates: FAIL if memory expiry set != DB expiry set, or |mem-db| expiry > 1s', async () => {
+    process.env.API_KEY_ROTATION_GRACE_SECONDS = '60';
+    try {
+      const c = conn('a9');
+      await seeded(T1, c);
+      const rs = await Promise.all(Array.from({ length: 10 }, (_, i) => mint(T1, c, true, `a9 ${i}`)));
+      const rows = await rowsOf(T1, c);
+      const diffs: number[] = []; const shapeBad: string[] = [];
+      for (const r of rows) {
+        const m = mem.get(r.id);
+        const me = m?.expiresAt ? new Date(m.expiresAt).getTime() : null;
+        const de = r.expires_at ? new Date(r.expires_at).getTime() : null;
+        if ((me === null) !== (de === null)) shapeBad.push(`${r.id} mem=${me} db=${de}`);
+        else if (me !== null && de !== null) diffs.push(me - de);
+      }
+      const unexp = rows.filter((r) => r.is_active && r.expires_at === null).map((r) => r.id);
+      results.A9 = { statuses: rs.map((r) => r.status), unexpiring: unexp.length, shapeBad, maxAbsDiffMs: Math.max(0, ...diffs.map(Math.abs)), minDiffMs: Math.min(...diffs), maxDiffMs: Math.max(...diffs), n: diffs.length };
+      expect(unexp.length).toBe(1);
+      expect(shapeBad).toEqual([]);
+      expect(Math.max(0, ...diffs.map(Math.abs))).toBeLessThan(1000);
+    } finally { delete process.env.API_KEY_ROTATION_GRACE_SECONDS; }
+  }, 60_000);
+
+  it('A11 pool pressure: 50 rotates on one connector + 20 validates of another key: FAIL if any validate is not 200/valid or takes >5s', async () => {
+    const other = await seeded(T1, conn('a11-other'));
+    const c = conn('a11');
+    await seeded(T1, c);
+    const t0 = Date.now();
+    const rots = Array.from({ length: 50 }, (_, i) => mint(T1, c, true, `a11 ${i}`));
+    const vals = Array.from({ length: 20 }, async (_, i) => { await sleep(i * 5); return validate(other.key!); });
+    const [rr, vv] = await Promise.all([Promise.all(rots), Promise.all(vals)]);
+    const drainMs = Date.now() - t0;
+    const rows = await rowsOf(T1, c);
+    results.A11 = { drainMs, rotNon201: rr.filter((r) => r.status !== 201).length, rotMaxMs: Math.max(...rr.map((r) => r.ms)), valBad: vv.filter((v) => v.status !== 200 || v.valid !== true).length, valMaxMs: Math.max(...vv.map((v) => v.ms)), active: act(rows).length, memDisagree: memDisagree(rows).length };
+    expect(rr.filter((r) => r.status !== 201).length).toBe(0);
+    expect(act(rows).length).toBe(1);
+    expect(vv.filter((v) => v.status !== 200 || v.valid !== true).length).toBe(0);
+    expect(Math.max(...vv.map((v) => v.ms))).toBeLessThan(5000);
+  }, 120_000);
+});

@@ -1,0 +1,368 @@
+/**
+ * GATE PR #1525 probe (QA gate, scratch only - never committed). Real Postgres, real documents + certifications (+ verification) routers.
+ * Records every cell to PROBE_OUT as JSON; the cells themselves do not assert (the verdict is computed outside from the JSON),
+ * except SETUP preconditions, which DO assert (a probe whose precondition is false must go red).
+ */
+import { randomUUID, randomBytes } from 'crypto';
+import { Client } from 'pg';
+import * as fs from 'fs';
+import * as http from 'http';
+
+const SUPER_DB = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+const APP_DB = process.env.TEST_APP_DATABASE_URL;
+const MT = process.env.MULTI_TENANCY_ENABLED === 'true';
+const PLATFORM_DB = process.env.TEST_PLATFORM_DATABASE_URL || process.env.PLATFORM_DATABASE_URL;
+const OUT = process.env.PROBE_OUT as string;
+const TIMING_N = Number(process.env.PROBE_TIMING_N || '0');
+if (PLATFORM_DB) process.env.PLATFORM_DATABASE_URL = PLATFORM_DB;
+if (SUPER_DB) process.env.DATABASE_URL = APP_DB || SUPER_DB;
+process.env.SIMULATE_ANCHORING = 'true';
+// A local slow anchoring server is started in beforeAll; its port is filled in there (env read at request time in the route).
+process.env.AUTH_SERVICE_URL = 'http://probe-auth.invalid';
+process.env.PII_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+process.env.PII_LOOKUP_HMAC_KEY = randomBytes(32).toString('hex');
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({ ...jest.requireActual('@secuura/shared'), verifyMessageSignature: () => true }),
+);
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const u = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
+      if (Object.keys(u).length > 0) { req._secuuraUser = u; req.user = u; }
+      next();
+    },
+    optionalAuth: () => (_req: any, _res: unknown, next: () => void) => next(),
+  };
+});
+const mockSaveCertification = jest.fn(async (..._a: unknown[]) => undefined);
+jest.mock('../repositories/certificationRepo', () => ({
+  initRepo: jest.fn(async () => undefined),
+  getCertification: jest.fn(),
+  saveCertification: (...a: unknown[]) => mockSaveCertification(...a),
+  listCertifications: jest.fn(),
+  saveShare: jest.fn(),
+  getSharesByCertification: jest.fn(),
+  getLineageEvents: jest.fn(),
+}));
+jest.mock('../services/chargeEvents', () => ({
+  createChargeEvent: jest.fn(async () => ({ id: 'charge-gate1525' })),
+  getChargeEventsByCertification: jest.fn(),
+}));
+jest.mock('../utils/notificationClient', () => ({
+  notifyDocumentCertified: jest.fn(async () => undefined),
+  notifyDocumentRevoked: jest.fn(async () => undefined),
+  notifyDocumentShared: jest.fn(async () => undefined),
+}));
+jest.mock('../events', () => ({
+  publishEvent: jest.fn(async () => undefined),
+  EventTypes: new Proxy({}, { get: (_t, k) => String(k) }),
+}));
+
+const RUN = randomUUID().slice(0, 8);
+const T = randomUUID(); const T2 = randomUUID();
+const ORG_A = randomUUID(); const ORG_B = randomUUID(); const GUID_A = randomUUID(); const GUID_B = randomUUID();
+const U_A = randomUUID(); const U_B = randomUUID(); const U_ADMIN = randomUUID(); const U_RCPT = randomUUID(); const U_OA = randomUUID();
+const EMAIL_A = 'usera-' + RUN + '@gate1525.example'; const EMAIL_B = 'userb-' + RUN + '@gate1525.example';
+const RCPT_EMAIL = 'recipient-' + RUN + '@gate1525.example';
+const CONN_A = 'connector:platform-s:' + GUID_A; const CONN_B = 'connector:platform-s:' + GUID_B;
+const human = (userId: string, organizationId: string | null, role = 'ISSUER_ADMIN', email?: string) =>
+  ({ userId, role, tenantId: T, ...(organizationId ? { organizationId } : {}), ...(email ? { email } : {}), scopes: [] as string[] });
+const connector = (userId: string, organizationId: string) =>
+  ({ userId, role: 'connector', tenantId: T, organizationId, scopes: ['documents:write', 'documents:read', 'certifications:write'] });
+const P: Record<string, any> = {
+  userA: human(U_A, ORG_A, 'ISSUER_ADMIN', EMAIL_A),
+  orgAdminA: human(U_OA, ORG_A, 'ORG_ADMIN'),
+  connA: connector(CONN_A, ORG_A),
+  sysAdmin: human(U_ADMIN, null, 'SYSTEM_ADMIN'),
+  sysAdminLower: human(U_ADMIN, null, 'system_admin'),
+  superAdminLower: human(U_ADMIN, null, 'super_admin'),
+  superAdminUpper: human(U_ADMIN, null, 'SUPER_ADMIN'),
+  recipient: human(U_RCPT, ORG_A, 'ISSUER_ADMIN', RCPT_EMAIL),
+  userB: human(U_B, ORG_B, 'ISSUER_ADMIN', EMAIL_B),
+  connB: connector(CONN_B, ORG_B),
+};
+
+const results: any[] = [];
+const rec = (r: any) => { results.push(r); };
+
+describe('GATE1525 probe (' + (APP_DB ? 'secuura_app' : 'superuser') + ', MT=' + String(MT) + ')', () => {
+  let sql: Client; let server: any; let base = ''; let disconnect: () => Promise<void>; let db: any;
+  let anchorSrv: http.Server; let anchorDelayMs = 0; let onAnchor: (() => Promise<void>) | null = null;
+  const newHash = () => randomBytes(32).toString('hex');
+  const create = async (principal: object, extra: Record<string, unknown> = {}) => {
+    const res = await fetch(base + '/api/documents', { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(principal) },
+      body: JSON.stringify({ type: 'DOCUMENT', contentHash: newHash(), data: { title: 'gate1525 ' + RUN }, ...extra }) });
+    const j: any = await res.json().catch(() => null);
+    await new Promise((r) => setTimeout(r, 300));
+    return { status: res.status, id: (j?.document?.id ?? j?.id ?? j?.data?.id ?? null) as string | null };
+  };
+  const issue = async (principal: object, body: Record<string, unknown>) => {
+    mockSaveCertification.mockClear();
+    const t0 = process.hrtime.bigint();
+    const res = await fetch(base + '/api/certifications/issue', { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(principal) },
+      body: JSON.stringify({ type: 'verification_certificate', data: { title: 'gate1525 cert ' + RUN }, ...body }) });
+    const text = await res.text();
+    const ms = Number(process.hrtime.bigint() - t0) / 1e6;
+    await new Promise((r) => setTimeout(r, 250));
+    return { status: res.status, text, ms, saved: mockSaveCertification.mock.calls.length, certId: (mockSaveCertification.mock.calls[0]?.[0] as any)?.id as string | undefined };
+  };
+  const row = async (ext: string | null) => (await sql.query(
+    `SELECT id::text AS pkey, status, certified_at IS NOT NULL AS has_certified_at, certification_metadata->>'certificationId' AS cert_id,
+            certification_metadata->>'issuerId' AS cert_issuer, owner_user_id::text AS owner, updated_at FROM documents WHERE external_id = $1`, [ext])).rows[0];
+  const strip = (r: any) => r && ({ status: r.status, has_certified_at: r.has_certified_at, cert_id: r.cert_id, cert_issuer: r.cert_issuer, owner: r.owner });
+  const cell = async (name: string, who: string, docExt: string | null, body: Record<string, unknown>, extra: Record<string, unknown> = {}) => {
+    const before = docExt ? strip(await row(docExt)) : null;
+    const r = await issue(P[who], body);
+    const after = docExt ? strip(await row(docExt)) : null;
+    rec({ cell: name, who, status: r.status, saved: r.saved, body: r.text.slice(0, 200), before, after,
+      rowChanged: JSON.stringify(before) !== JSON.stringify(after), rowCarriesThisCert: !!(after && r.certId && after.cert_id === r.certId), ...extra });
+    return r;
+  };
+
+  beforeAll(async () => {
+    anchorSrv = http.createServer(async (_req, res) => {
+      if (onAnchor) { const f = onAnchor; onAnchor = null; await f(); }
+      setTimeout(() => { res.writeHead(500); res.end('{}'); }, anchorDelayMs);
+    });
+    await new Promise<void>((r) => anchorSrv.listen(0, '127.0.0.1', () => r()));
+    process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:' + (anchorSrv.address() as any).port;
+    require('@secuura/shared').initFromEnv();
+    db = require('../db'); await db.initDb(); disconnect = db.disconnectDb;
+    sql = new Client({ connectionString: SUPER_DB }); await sql.connect();
+    for (const t of [T, T2]) await sql.query(`INSERT INTO tenants (id,name,slug,status,created_at,updated_at) VALUES ($1,$2,$3,'active',NOW(),NOW())`, [t, 'g1525-' + t.slice(0, 8), 'g1525-' + t.slice(0, 8)]);
+    for (const [org, guid, tag] of [[ORG_A, GUID_A, 'a'], [ORG_B, GUID_B, 'b']] as const) {
+      await sql.query(`INSERT INTO organizations (id,name,slug,type,status,tenant_id,metadata) VALUES ($1,$2,$3,'issuer','active',$4,$5::jsonb)`,
+        [org, 'Org ' + tag + ' ' + RUN, 'g1525-' + tag + '-' + RUN, T, JSON.stringify({ externalRef: guid })]);
+    }
+    const { lookupHash } = jest.requireActual('@secuura/shared');
+    for (const [uid, email, org] of [[U_A, EMAIL_A, ORG_A], [U_B, EMAIL_B, ORG_B]] as const) {
+      await sql.query(`INSERT INTO users (id,email,role,status,tenant_id,organization_id,email_lookup_hash) VALUES ($1,$2,'issuer_admin','active',$3,$4,$5)`,
+        [uid, email, T, org, lookupHash(email.toLowerCase())]);
+    }
+    const express = require('express');
+    const { documentsRouter } = require('../routes/documents');
+    const { certificationsRouter } = require('../routes/certifications');
+    let verificationRouter: any = null;
+    try { verificationRouter = require('../routes/verification').verificationRouter; } catch (e) { rec({ cell: 'verification-router-load', error: String(e) }); }
+    const { tenantGucContext } = require('@secuura/shared');
+    const app = express();
+    app.use((req: any, _res: unknown, next: () => void) => { const u = JSON.parse(String(req.headers['x-probe-user'] || '{}')); req.user = u; req.tenantId = u.tenantId; next(); });
+    app.use(tenantGucContext());
+    app.use((req: any, _res: unknown, next: () => void) => { req.db = db.getRequestPrisma(req); next(); });
+    app.use('/api/documents', express.json(), documentsRouter);
+    app.use('/api/certifications', express.json(), certificationsRouter);
+    if (verificationRouter) app.use('/api/verification', express.json(), verificationRouter);
+    await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
+    base = 'http://127.0.0.1:' + server.address().port;
+  }, 60000);
+
+  afterAll(async () => {
+    if (OUT) fs.writeFileSync(OUT, JSON.stringify({ mode: { app: !!APP_DB, MT }, results }, null, 1));
+    if (server) await new Promise<void>((r) => server.close(() => r()));
+    if (anchorSrv) await new Promise<void>((r) => anchorSrv.close(() => r()));
+    for (const t of [T, T2]) {
+      await sql.query('DELETE FROM action_provenance WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('UPDATE documents SET parent_document_id=NULL WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM documents WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM users WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM organizations WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM tenants WHERE id=$1', [t]).catch(() => undefined);
+    }
+    const left = (await sql.query('SELECT count(*)::int AS n FROM documents WHERE tenant_id = ANY($1::uuid[])', [[T, T2]])).rows[0].n;
+    if (OUT) fs.appendFileSync(OUT + '.cleanup', 'documents left for this run: ' + left + '\n');
+    await sql.end().catch(() => undefined); if (disconnect) await disconnect().catch(() => undefined);
+  });
+
+  it('SETUP preconditions (asserting)', async () => {
+    const r = await db.withTenant(T, async (tx: any) => (await tx.$queryRaw`SELECT current_user AS who, r.rolsuper AS su, r.rolbypassrls AS bp FROM pg_roles r WHERE r.rolname = current_user`)[0]);
+    rec({ cell: 'SETUP', role: r.who, su: r.su, bp: r.bp, tenantManager: db.getTenantManager() !== null });
+    if (APP_DB) expect([r.su, r.bp]).toEqual([false, false]);
+    expect(db.getTenantManager() !== null).toBe(MT);
+  });
+
+  it('MATRIX (recording)', async () => {
+    // Targets
+    const docB = await create(P.userB); const docA = await create(P.userA);
+    const docBR = await create(P.userB, { recipientEmail: RCPT_EMAIL.toUpperCase() });
+    const ownerless = await create(P.connB, { organizationUuid: GUID_B });
+    const oboDoc = await create(P.connB, { onBehalfOf: { email: EMAIL_B } });
+    const oboUnknown = await create(P.connB, { onBehalfOf: { email: 'nobody-' + RUN + '@gate1525.example' } });
+    const pre = { docB: await row(docB.id), docA: await row(docA.id), ownerless: await row(ownerless.id), oboDoc: await row(oboDoc.id), oboUnknown: await row(oboUnknown.id),
+      provOboDoc: (await sql.query(`SELECT connector_id FROM action_provenance WHERE document_id=$1 AND action='create'`, [oboDoc.id])).rows,
+      provOwnerless: (await sql.query(`SELECT connector_id FROM action_provenance WHERE document_id=$1 AND action='create'`, [ownerless.id])).rows,
+      provOboUnknown: (await sql.query(`SELECT connector_id FROM action_provenance WHERE document_id=$1 AND action='create'`, [oboUnknown.id])).rows };
+    rec({ cell: 'TARGETS', created: { docB: docB.status, docA: docA.status, docBR: docBR.status, ownerless: ownerless.status, oboDoc: oboDoc.status, oboUnknown: oboUnknown.status },
+      docB_owner: pre.docB?.owner, docB_status: pre.docB?.status, ownerless_owner: pre.ownerless?.owner, oboDoc_owner: pre.oboDoc?.owner, oboUnknown_owner: pre.oboUnknown?.owner,
+      provOboDoc: pre.provOboDoc, provOwnerless: pre.provOwnerless, provOboUnknown: pre.provOboUnknown });
+
+    // Each attacker gets a fresh org-B document (so a successful attack on one cell cannot mask the next).
+    for (const who of ['userA', 'orgAdminA', 'connA', 'superAdminUpper']) {
+      const d = await create(P.userB);
+      await cell('docB-by-ext', who, d.id, { documentId: d.id });
+      const d2 = await create(P.userB); const pk = (await row(d2.id)).pkey;
+      await cell('docB-by-pkey', who, d2.id, { documentId: pk });
+    }
+    { const d = await create(P.userB);
+      await cell('docB-by-ext connA+onBehalfOf(userA email)', 'connA', d.id, { documentId: d.id, onBehalfOf: { email: EMAIL_A } }); }
+    { const d = await create(P.userB);
+      await cell('docB-by-ext connA+onBehalfOf(userB email, other org)', 'connA', d.id, { documentId: d.id, onBehalfOf: { email: EMAIL_B } }); }
+    for (const who of ['sysAdmin', 'sysAdminLower', 'superAdminLower']) { const d = await create(P.userB); await cell('docB-by-ext', who, d.id, { documentId: d.id }); }
+    { const d = await create(P.userB); const pk = (await row(d.id)).pkey; await cell('docB-by-pkey', 'sysAdmin', d.id, { documentId: pk }); }
+    // owner controls
+    { const d = await create(P.userB); await cell('own-by-ext', 'userB', d.id, { documentId: d.id }); }
+    { const d = await create(P.userB); const pk = (await row(d.id)).pkey; await cell('own-by-pkey', 'userB', d.id, { documentId: pk }); }
+    // recipient
+    await cell('recipient-doc (recipientEmail upper)', 'recipient', docBR.id, { documentId: docBR.id });
+    { const d = await create(P.userB, { recipientEmail: RCPT_EMAIL }); await cell('recipient-doc by non-recipient userA', 'userA', d.id, { documentId: d.id }); }
+    // creating connector, REAL create path
+    await cell('oboDoc by creating connector connB (real provenance)', 'connB', oboDoc.id, { documentId: oboDoc.id });
+    { const d = await create(P.connB, { onBehalfOf: { email: EMAIL_B } }); await cell('oboDoc by other connector connA', 'connA', d.id, { documentId: d.id }); }
+    { const d = await create(P.connB, { onBehalfOf: { email: EMAIL_B } }); await cell('oboDoc by its resolved owner userB', 'userB', d.id, { documentId: d.id }); }
+    await cell('oboUnknown-email doc by creating connector connB', 'connB', oboUnknown.id, { documentId: oboUnknown.id });
+    // ownerless
+    await cell('ownerless by its creating connector connB (DECISION)', 'connB', ownerless.id, { documentId: ownerless.id });
+    { const d = await create(P.connB, { organizationUuid: GUID_B }); await cell('ownerless by stranger userA', 'userA', d.id, { documentId: d.id }); }
+    // unknown ids
+    const unkExt = await issue(P.userA, { documentId: 'doc-' + randomUUID() });
+    const unkUuid = await issue(P.userA, { documentId: randomUUID() });
+    const unkConn = await issue(P.connA, { documentId: 'doc-' + randomUUID() });
+    const notYours = await issue(P.userA, { documentId: (await create(P.userB)).id });
+    const notYoursConn = await issue(P.connA, { documentId: (await create(P.userB)).id });
+    rec({ cell: 'ORACLE', unkExt: [unkExt.status, unkExt.saved], unkUuid: [unkUuid.status, unkUuid.saved], unkConn: [unkConn.status, unkConn.saved],
+      notYours: [notYours.status, notYours.saved], notYoursConn: [notYoursConn.status, notYoursConn.saved],
+      bodiesIdentical: new Set([unkExt.text, unkUuid.text, unkConn.text, notYours.text, notYoursConn.text]).size === 1, body: notYours.text,
+      headersNote: 'body compared; headers not compared' });
+
+    // Body-shape attacks on the guard condition
+    { const d = await create(P.userB); await cell('documentId as ARRAY [ext]', 'userA', d.id, { documentId: [d.id] }); }
+    { const d = await create(P.userB); await cell('documentId + parentDocumentId="" (empty)', 'userA', d.id, { documentId: d.id, parentDocumentId: '' }); }
+    { const d = await create(P.userB); await cell('documentId + parentDocumentId=own docA', 'userA', d.id, { documentId: d.id, parentDocumentId: docA.id }); }
+    { const d = await create(P.userB); await cell('documentId + parentDocumentId=null', 'userA', d.id, { documentId: d.id, parentDocumentId: null }); }
+    { const d = await create(P.userB); await cell('documentId + parentDocumentId=0 (number)', 'userA', d.id, { documentId: d.id, parentDocumentId: 0 }); }
+    { const d = await create(P.userB); await cell('documentId + parentDocumentId=false', 'userA', d.id, { documentId: d.id, parentDocumentId: false }); }
+    { const d = await create(P.userB); await cell('documentId upper-cased ext', 'userA', d.id, { documentId: (d.id as string).toUpperCase() }); }
+    { const d = await create(P.userB); await cell('documentId with trailing space', 'userA', d.id, { documentId: d.id + ' ' }); }
+  }, 240000);
+
+  it('ITEM1 external_id/pkey split: a UUID-shaped external_id equal to ANOTHER document\'s pkey (recording)', async () => {
+    // A's own document; then B (via connector documentUuid) tries to register an external_id equal to A's pkey (KS-596 guard should refuse);
+    // and the reverse ordering via superuser SQL (constructed state) to see what the check and the UPDATE address.
+    const a = await create(P.userA); const aPk = (await row(a.id)).pkey;
+    const shadow = await create(P.connB, { documentUuid: aPk, onBehalfOf: { email: EMAIL_B } });
+    rec({ cell: 'ITEM1 register documentUuid = another doc pkey (via route)', status: shadow.status, id: shadow.id });
+    // constructed: a doc owned by B whose external_id equals A's own document pkey (inserted directly, bypassing the route guard)
+    const b = await create(P.userB);
+    const bExtOld = b.id as string;
+    await sql.query(`UPDATE documents SET external_id=$1 WHERE external_id=$2`, [aPk, bExtOld]);
+    const beforeB = strip(await row(aPk)); const beforeA = strip(await row(a.id));
+    const r = await issue(P.userA, { documentId: aPk });
+    rec({ cell: 'ITEM1 constructed: userA names its OWN pkey which is B-doc external_id', status: r.status, saved: r.saved,
+      bDocBefore: beforeB, bDocAfter: strip(await row(aPk)), aDocBefore: beforeA, aDocAfter: strip(await row(a.id)) });
+  }, 60000);
+
+  it('ITEM2 wasCreatedByConnector on the global prisma: a provenance row in ANOTHER tenant naming this document (recording)', async () => {
+    const d = await create(P.userB);
+    await sql.query(`INSERT INTO action_provenance (tenant_id, document_id, action, connector_id) VALUES ($1,$2,'create',$3)`, [T2, d.id, CONN_A]);
+    await cell('ITEM2 provenance row in T2 names T-doc, connA certifies', 'connA', d.id, { documentId: d.id });
+    const d2 = await create(P.userB);
+    await sql.query(`INSERT INTO action_provenance (tenant_id, document_id, action, connector_id) VALUES ($1,$2,'create',$3)`, [T, d2.id, CONN_A]);
+    await cell('ITEM2 control: same row in T, connA certifies', 'connA', d2.id, { documentId: d2.id });
+    // connector_id that is a human userId in provenance: a non-connector role must not pass the arm
+    const d3 = await create(P.userB);
+    await sql.query(`INSERT INTO action_provenance (tenant_id, document_id, action, connector_id) VALUES ($1,$2,'create',$3)`, [T, d3.id, U_A]);
+    await cell('ITEM2 provenance names userA as connector, userA (human role) certifies', 'userA', d3.id, { documentId: d3.id });
+    // stale provenance after delete+re-register of the same external id (documentUuid)
+    const U = randomUUID();
+    const c1 = await create(P.connA, { documentUuid: U, onBehalfOf: { email: EMAIL_A } });
+    await sql.query(`DELETE FROM documents WHERE external_id=$1`, [U]);
+    const c2 = await create(P.userB, { documentUuid: U });
+    const r2 = await row(U);
+    await cell('ITEM2 stale provenance: connA created U, U deleted, userB re-registers U, connA certifies', 'connA', U, { documentId: U },
+      { c1: c1.status, c2: c2.status, ownerAfterReRegister: r2?.owner });
+  }, 60000);
+
+  it('ITEM4 check-then-UPDATE window: owner passes the check, ownership moves while anchoring is in flight (recording)', async () => {
+    const d = await create(P.userA);
+    anchorDelayMs = 1500;
+    onAnchor = async () => { await sql.query(`UPDATE documents SET owner_user_id=$1 WHERE external_id=$2`, [U_B, d.id]); };
+    const before = strip(await row(d.id));
+    const r = await issue(P.userA, { documentId: d.id });
+    anchorDelayMs = 0; onAnchor = null;
+    const after = strip(await row(d.id));
+    rec({ cell: 'ITEM4 owner flipped to B mid-flight (constructed via SQL, simulating transfer-custody)', status: r.status, ms: Math.round(r.ms), before, after,
+      updateLandedOnBsDocument: after?.owner === U_B && after?.cert_issuer === U_A });
+  }, 60000);
+
+  it('ITEM5 lineage path: parentDocumentId = another organisation\'s document (recording)', async () => {
+    const hashB = newHash();
+    const resB = await fetch(base + '/api/documents', { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(P.userB) },
+      body: JSON.stringify({ type: 'DOCUMENT', contentHash: hashB, data: { title: 'B original ' + RUN } }) });
+    const jB: any = await resB.json().catch(() => null); await new Promise((r) => setTimeout(r, 300));
+    const bExt = (jB?.document?.id ?? jB?.id ?? jB?.data?.id) as string;
+    const before = strip(await row(bExt));
+    const verify = async (who: object, body: object) => {
+      const res = await fetch(base + '/api/verification/verify', { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(who) }, body: JSON.stringify(body) });
+      const j: any = await res.json().catch(() => null);
+      return { status: res.status, verified: j?.verified, isCertified: j?.isCertified ?? j?.certified ?? j?.document?.isCertified, certification: j?.certification ?? j?.document?.certification,
+        newerVersions: (j?.newerVersions ?? j?.lineage?.newerVersions ?? j?.document?.newerVersions)?.length, keys: j ? Object.keys(j).slice(0, 40) : null, raw: JSON.stringify(j).slice(0, 1500) };
+    };
+    const vBefore = await verify(P.userB, { contentHash: hashB });
+    const vBeforeId = await verify(P.userB, { documentId: bExt });
+    // A attaches a derived document under B's document, carrying B's content hash and a chosen issuer name
+    const r = await issue(P.userA, { parentDocumentId: bExt, data: { title: 'A derived ' + RUN, contentHash: hashB, issuedBy: 'Org B Official Registrar' } });
+    const derived = (await sql.query(`SELECT external_id, owner_user_id::text AS owner, status, content_hash, parent_document_id::text AS parent,
+       metadata->>'certificationId' AS cert_id FROM documents WHERE parent_document_id = (SELECT id FROM documents WHERE external_id=$1)`, [bExt])).rows;
+    const after = strip(await row(bExt));
+    const vAfter = await verify(P.userB, { contentHash: hashB });
+    const vAfterId = await verify(P.userB, { documentId: bExt });
+    const vAnon = await verify({ tenantId: T }, { contentHash: hashB });
+    rec({ cell: 'ITEM5 lineage under B by userA', status: r.status, saved: r.saved, body: r.text.slice(0, 300), bRowBefore: before, bRowAfter: after,
+      derived, bOwner: before?.owner, vBefore, vBeforeId, vAfter, vAfterId, vAnon });
+    // same attack with documentId = B's doc AND parentDocumentId = A's own doc (the legacy branch is skipped)
+    const a = await create(P.userA);
+    const d = await create(P.userB);
+    const b4 = strip(await row(d.id));
+    const r2 = await issue(P.userA, { documentId: d.id, parentDocumentId: a.id });
+    rec({ cell: 'ITEM5b documentId=B doc + parentDocumentId=A own', status: r2.status, saved: r2.saved, bRowBefore: b4, bRowAfter: strip(await row(d.id)) });
+    // class check: the verify claim does not need B's document as the parent - A's OWN document as parent, B's bytes' hash in data
+    const hashC = newHash();
+    const resC = await fetch(base + '/api/documents', { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(P.userB) },
+      body: JSON.stringify({ type: 'DOCUMENT', contentHash: hashC, data: { title: 'B second ' + RUN } }) });
+    await resC.text(); await new Promise((r) => setTimeout(r, 300));
+    const vC0 = await verify({ tenantId: T }, { contentHash: hashC });
+    const a2 = await create(P.userA);
+    const r3 = await issue(P.userA, { parentDocumentId: a2.id, data: { title: 'A derived 2 ' + RUN, contentHash: hashC, issuedBy: 'Org B Official Registrar' } });
+    const vC1 = await verify({ tenantId: T }, { contentHash: hashC });
+    rec({ cell: 'ITEM5c parent = A OWN doc, data.contentHash = B bytes', status: r3.status, vBeforeCert: vC0.certification ?? null, vAfterCert: vC1.certification ?? null,
+      vBeforeVerified: vC0.verified, vAfterVerified: vC1.verified });
+  }, 90000);
+
+  it('ITEM3 timing: unknown vs not-yours (recording)', async () => {
+    if (!TIMING_N) { rec({ cell: 'ITEM3', skipped: 'PROBE_TIMING_N=0' }); return; }
+    const targets = { notYours: (await create(P.userB)).id as string };
+    const series: Record<string, number[]> = { userA_unknownExt: [], userA_notYours: [], userA_unknownExt_ctl: [], connA_unknownExt: [], connA_notYours: [], userA_unknownUuid: [] };
+    const time = async (who: object, documentId: string) => {
+      const t0 = process.hrtime.bigint();
+      const res = await fetch(base + '/api/certifications/issue', { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(who) },
+        body: JSON.stringify({ type: 'verification_certificate', data: { title: 't' }, documentId }) });
+      await res.text();
+      if (res.status !== 403) throw new Error('timing cell expected a refusal, got ' + res.status);
+      return Number(process.hrtime.bigint() - t0) / 1e6;
+    };
+    for (let i = 0; i < 20; i++) { await time(P.userA, 'doc-warm'); }
+    for (let i = 0; i < TIMING_N; i++) { // interleaved so drift hits every series alike
+      series.userA_unknownExt.push(await time(P.userA, 'doc-' + randomUUID()));
+      series.userA_notYours.push(await time(P.userA, targets.notYours));
+      series.userA_unknownExt_ctl.push(await time(P.userA, 'doc-' + randomUUID()));
+      series.connA_unknownExt.push(await time(P.connA, 'doc-' + randomUUID()));
+      series.connA_notYours.push(await time(P.connA, targets.notYours));
+      series.userA_unknownUuid.push(await time(P.userA, randomUUID()));
+    }
+    const med = (a: number[]) => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+    const p = (a: number[], q: number) => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length * q)]; };
+    rec({ cell: 'ITEM3', n: TIMING_N, summary: Object.fromEntries(Object.entries(series).map(([k, v]) => [k, { median: +med(v).toFixed(3), p10: +p(v, 0.1).toFixed(3), p90: +p(v, 0.9).toFixed(3) }])), series });
+  }, 600000);
+});

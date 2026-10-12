@@ -1,0 +1,64 @@
+== KS-1347 census at head: URL(...import.meta.url...).pathname, case-insens, any file type
+Blockchain/Dev/scripts/__tests__/ks1347_proxy_out_dir_spaced_checkout.test.sh:7:# `new URL(import.meta.url).pathname`. A URL pathname is PERCENT-ENCODED, so from a checkout
+systemTest/playwright/global-setup.ts:42:    const step = new URL('../fixtures/pre-suite.ts', import.meta.url).pathname;
+-- looser: any '.pathname' near import.meta.url / __dirname alternatives
+Blockchain/Dev/scripts/__tests__/ks1347_proxy_out_dir_spaced_checkout.test.sh:7:# `new URL(import.meta.url).pathname`. A URL pathname is PERCENT-ENCODED, so from a checkout
+systemTest/api-explorer/tests/unit/config/stackSlotParity.test.ts:27:const shared = (await import(new URL('../../../../fixtures/slot.ts', import.meta.url).href)) as SharedSlotModule;
+systemTest/fixtures/pre-suite.ts:251:    process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+systemTest/fixtures/provision-actors.ts:364:    process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+systemTest/playwright/global-setup.ts:42:    const step = new URL('../fixtures/pre-suite.ts', import.meta.url).pathname;
+-- CONTROL: same census on develop tree must find server.ts
+Blockchain/Dev/scripts/openapi-examples/proxy/server.ts:31:const OUT_DIR = process.env.OUT_DIR ?? path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'out');
+systemTest/playwright/global-setup.ts:42:    const step = new URL('../fixtures/pre-suite.ts', import.meta.url).pathname;
+-- global-setup.ts:42 at head
+ * @example
+ *   runPreSuiteStep('playwright');
+ */
+function runPreSuiteStep(label: string): void {
+    const step = new URL('../fixtures/pre-suite.ts', import.meta.url).pathname;
+    // KS-682: hand the pre-suite THIS run's gateway. The child inherits the environment, and
+    // provisioning read API_BASE_URL from it — which slot-target.sh exports but an unsourced
+    // `SECUURA_STACK_SLOT=N npx playwright test` does not. This suite resolves the slot itself
+    // (config/stackSlot.ts), so without this line it ran on slot N while provisioning its actors
+
+== other fileURLToPath users (is the fixed form used elsewhere?)
+Blockchain/Dev/frontend/issuer/scripts/check-bundle-size.mjs
+Blockchain/Dev/packages/shared/src/__tests__/ks256-spec-example-contract.test.ts
+Blockchain/Dev/scripts/audit/audit-gate.mjs
+Blockchain/Dev/scripts/audit/audit-locks.mjs
+Blockchain/Dev/scripts/audit/baseline-contract.test.mjs
+Blockchain/Dev/scripts/audit/gate-exit-codes.test.mjs
+Blockchain/Dev/scripts/deploy-preview.mjs
+Blockchain/Dev/scripts/generate-openapi.ts
+
+== KS-865 at DEV: header vs CHECK_FILES
+#
+# As a partial mitigation, we enforce that production-bound configs never
+# reference `:latest` — only date-pinned tags. That way, even though dev
+# pushes to the same ACR, demo deploys cannot accidentally pull a dev image.
+#
+# What's checked:
+#   - docker-compose.production.yml
+#   - deployment/azure/services.bicep / services.parameters.json
+#   - deployment/azure/main.bicep / main.parameters.json
+#   - .github/workflows/deploy-staging.yml (staging is also pinned in CI)
+#
+# What's allowed:
+#   - docker-compose.yml (dev compose, can use :latest implicit)
+#   - docker-compose.local.yml
+#   - Dockerfiles (FROM ... :latest is a separate concern; pinned by M16)
+CHECK_FILES=(
+  "docker-compose.production.yml"
+  "deployment/azure/services.bicep"
+  "deployment/azure/services.parameters.json"
+  "deployment/azure/main.bicep"
+  "deployment/azure/main.parameters.json"
+)
+== same at HEAD
+CHECK_FILES=(
+  "docker-compose.production.yml"
+  "deployment/azure/services.bicep"
+  "deployment/azure/services.parameters.json"
+  "deployment/azure/main.bicep"
+  "deployment/azure/main.parameters.json"
+)

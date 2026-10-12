@@ -1,0 +1,39 @@
+### CONTROL: unplanted
+  stack-safety.sh rc=0 :: OK — 105 shared-stack safety invariants hold (KS-666).
+  compose-stack-safety.mjs rc=0 :: OK — 25 compose-level shared-stack invariants hold (KS-666).
+### P1 literal slot-1 host URL INSIDE the mjs scope (an env value of a rendered service)
+  marker landed (count)=1
+  compose-stack-safety.mjs rc=1 :: ::error::1 env value(s) embed a slot-1 host port and do NOT move between slots (KS-1355).
+### P2a literal slot-1 port OUTSIDE the scope: a healthcheck/command string, not an env value
+  marker landed (count)=1
+  compose-stack-safety.mjs rc=1 :: ::error::1 env value(s) embed a slot-1 host port and do NOT move between slots (KS-1355).
+### P2b slot-1 literal for a slot-offset port the regex list omits (cardano mock 6090 is offset by stack_env.sh)
+  marker landed (count)=1
+  compose-stack-safety.mjs rc=0 :: OK — 25 compose-level shared-stack invariants hold (KS-666).
+### P2c a literal slot-1 port in a launcher script (outside both guards' scope)
+  stack-safety.sh rc=0 :: OK — 105 shared-stack safety invariants hold (KS-666).
+  compose-stack-safety.mjs rc=0 :: OK — 25 compose-level shared-stack invariants hold (KS-666).
+### P3a NEW launcher running the platform compose WITHOUT sourcing stack_env.sh - UNTRACKED
+  stack-safety.sh rc=0 :: OK — 105 shared-stack safety invariants hold (KS-666).
+### P3b same file, TRACKED (git add -N)
+  tracked: Blockchain/Dev/scripts/qa-plant-launcher.sh
+  stack-safety.sh rc=1 :: ::error::A script runs the platform compose stack but is in neither list (KS-1355): Blockchain/Dev/scripts/qa-plant-launcher.sh
+### P3c launcher variants (each tracked) - which does the census see?
+  v1 [docker compose \~  up -d postgres] -> rc=1 0 mentions
+  v2 [DC="docker compose"~$DC up -d postgres] -> rc=1 0 mentions
+  v3 [docker-compose up -d postgres] -> rc=1 1 mentions
+  v4 [exec docker compose -f x.yml up] -> rc=1 1 mentions
+  v5 [docker compose --project-name foo up -d] -> rc=1 1 mentions
+  v6 [compose_cmd="docker compose"; ${compose_cmd} up -d] -> rc=1 0 mentions
+  v7 [docker compose up] -> rc=1 1 mentions
+  v8 [sudo docker compose down] -> rc=1 1 mentions
+### P3d launcher WITH the source line, but not added to PLATFORM_LAUNCHERS (should it red?)
+  stack-safety.sh rc=1 :: ::error::A script runs the platform compose stack but is in neither list (KS-1355): Blockchain/Dev/scripts/qa-plant-launcher.sh Blockchain/Dev/scripts/qa-plant-sourced.sh
+### CONTROL after cleanup
+  stack-safety.sh rc=0 :: OK — 105 shared-stack safety invariants hold (KS-666).
+  compose-stack-safety.mjs rc=0 :: OK — 25 compose-level shared-stack invariants hold (KS-666).
+?? Blockchain/Dev/scripts/preflight/slice_gate.sh
+### P2a-redo: slot-1 literal in a non-env top-level key (outside scope)
+ marker landed=1
+OK — 25 compose-level shared-stack invariants hold (KS-666).
+OK — 105 shared-stack safety invariants hold (KS-666).

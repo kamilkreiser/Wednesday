@@ -1,0 +1,31 @@
+PASS src/__tests__/ks1538-legacy-certify-needs-document-access.test.ts
+  KS-1538 the legacy certify path needs access to the document
+    the rule, arm by arm
+      ✓ the OWNER is allowed: 201, the UPDATE runs (28 ms)
+      ✓ a SYSTEM_ADMIN is allowed on a document they do not own (3 ms)
+      ✓ the DESIGNATED RECIPIENT is allowed, compared case-insensitively (1 ms)
+      ✓ a different email is NOT the recipient: 403 (2 ms)
+      ✓ a NON-STRING recipientEmail fails closed (403), it does not throw into a 500 (1 ms)
+      ✓ the CREATING connector is allowed (wasCreatedByConnector asked with the document id and the connector user id) (1 ms)
+      ✓ a connector that did NOT create the document is refused (2 ms)
+      ✓ the creating-connector arm belongs to CONNECTORS: a human is not let in by it, and the provenance table is not even asked (1 ms)
+      ✓ an OWNERLESS document (owner id empty) is not open to everyone: a stranger gets 403
+      ✓ a caller with no user id at all is a 401 before the document is read, so an empty id can never meet an ownerless document's empty owner (1 ms)
+    one refusal, and an order that leaves nothing behind
+      ✓ an UNKNOWN document and SOMEONE ELSE'S document get the same status and the same body (2 ms)
+      ✓ a REFUSED request reaches no upstream, persists no certification and runs no UPDATE (the check is before the holder lookup, the anchoring submission and the save) (1 ms)
+      ✓ an ALLOWED request does reach the upstreams, after the document was read (the control that makes the cell above mean something) (1 ms)
+      ✓ the document is read in the REQUEST'S tenant
+      ✓ a database error while reading the document fails closed: not a 201, nothing persisted, no UPDATE (7 ms)
+    the check is engaged ONLY on the legacy path
+      ✓ no documentId: the document is never read (1 ms)
+      ✓ a parentDocumentId (the lineage path) does not run this check: the derived document is created as before (6 ms)
+    the UPDATE's swallowed error is logged, and the response is unchanged
+      ✓ a failing UPDATE still answers 201 and writes ONE error line carrying ids only, never the certification data (1 ms)
+      ✓ a REFUSAL is logged with the tenant and the actor id only, at info
+
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        2.664 s, estimated 4 s
+Ran all test suites matching /ks1538-legacy-certify-needs-document-access.test.ts/i.

@@ -1,0 +1,76 @@
+### CONTROL untampered
+    mjs                      rc=0 OK — 25 compose-level shared-stack invariants hold (KS-666).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=0 preflight_gateway_slot: 15 passed, 0 failed first: 
+    ks1355_slot_blind_launchers rc=0 ks1355_slot_blind_launchers: 14 passed, 0 failed first: 
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+### TAMPER T1 revert auth FRONTEND_URL to slot-1 literal (compose :767)
+  tamper landed (diff lines: 2)
+    mjs                      rc=1 ::error::auth.FRONTEND_URL is IDENTICAL on slot 1 and slot 2 — it still defaults to slot 1 (KS-1355 spot 3).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=0 preflight_gateway_slot: 15 passed, 0 failed first: 
+    ks1355_slot_blind_launchers rc=0 ks1355_slot_blind_launchers: 14 passed, 0 failed first: 
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+  restored clean
+### TAMPER T2 revert api-gateway CORS_ORIGINS (compose :503) to literals
+  tamper landed (diff lines: 2)
+    mjs                      rc=1 ::error::api-gateway.CORS_ORIGINS is IDENTICAL on slot 1 and slot 2 — it still defaults to slot 1 (KS-1355 spot 3).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=0 preflight_gateway_slot: 15 passed, 0 failed first: 
+    ks1355_slot_blind_launchers rc=0 ks1355_slot_blind_launchers: 14 passed, 0 failed first: 
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+  restored clean
+### TAMPER T3 revert demo-service CORS_ORIGINS (compose :2185) website half only
+  tamper landed (diff lines: 2)
+    mjs                      rc=0 OK — 25 compose-level shared-stack invariants hold (KS-666).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=0 preflight_gateway_slot: 15 passed, 0 failed first: 
+    ks1355_slot_blind_launchers rc=0 ks1355_slot_blind_launchers: 14 passed, 0 failed first: 
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+  restored clean
+### TAMPER T4 revert preflight derivation to the old one-liner (drop slot branch)
+  tamper landed (diff lines: 2)
+    mjs                      rc=0 OK — 25 compose-level shared-stack invariants hold (KS-666).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=1 preflight_gateway_slot: 8 passed, 7 failed first: FAIL 🔴 SECUURA_STACK_SLOT=2 probes slot 2's gateway
+    ks1355_slot_blind_launchers rc=0 ks1355_slot_blind_launchers: 14 passed, 0 failed first: 
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+  restored clean
+### TAMPER T5 preflight: swallow a malformed slot (fall back to :6882 instead of refusing)
+  tamper landed (diff lines: 2)
+    mjs                      rc=0 OK — 25 compose-level shared-stack invariants hold (KS-666).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=1 preflight_gateway_slot: 13 passed, 2 failed first: FAIL 🔴 a non-numeric slot REFUSES and does not fall back to 6882
+    ks1355_slot_blind_launchers rc=0 ks1355_slot_blind_launchers: 14 passed, 0 failed first: 
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+  restored clean
+### TAMPER T6 start-local: drop the stack_env source
+  tamper landed (diff lines: 2)
+    mjs                      rc=0 OK — 25 compose-level shared-stack invariants hold (KS-666).
+    check-stack-safety.sh    rc=1 ::error::/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/w/Blockchain/Dev/scripts/start-local.sh no longer matches /^
+    preflight_gateway_slot rc=0 preflight_gateway_slot: 15 passed, 0 failed first: 
+    ks1355_slot_blind_launchers rc=1 ks1355_slot_blind_launchers: 8 passed, 6 failed first: FAIL 🔴 slot 2: the banner names slot 2's gateway 6982
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+  restored clean
+### TAMPER T7 start-local: .env sourced AFTER stack_env (stale .env literal beats the slot)
+  tamper landed
+    mjs                      rc=0 OK — 25 compose-level shared-stack invariants hold (KS-666).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=0 preflight_gateway_slot: 15 passed, 0 failed first: 
+    ks1355_slot_blind_launchers rc=0 ks1355_slot_blind_launchers: 14 passed, 0 failed first: 
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+### TAMPER T8 start-local: one v1 docker-compose token reintroduced
+  tamper landed (diff lines: 2)
+    mjs                      rc=0 OK — 25 compose-level shared-stack invariants hold (KS-666).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=0 preflight_gateway_slot: 15 passed, 0 failed first: 
+    ks1355_slot_blind_launchers rc=1 ks1355_slot_blind_launchers: 13 passed, 1 failed first: FAIL 🔴 start-local.sh makes zero Compose v1 (docker-compose) calls
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+  restored clean
+### CONTROL after all
+    mjs                      rc=0 OK — 25 compose-level shared-stack invariants hold (KS-666).
+    check-stack-safety.sh    rc=0 OK — 105 shared-stack safety invariants hold (KS-666).
+    preflight_gateway_slot rc=0 preflight_gateway_slot: 15 passed, 0 failed first: 
+    ks1355_slot_blind_launchers rc=0 ks1355_slot_blind_launchers: 14 passed, 0 failed first: 
+    ks1417_env_example_no_dead_gateway_port rc=0 ks1417_env_example_no_dead_gateway_port: 10 passed, 0 failed first: 
+?? Blockchain/Dev/scripts/preflight/slice_gate.sh

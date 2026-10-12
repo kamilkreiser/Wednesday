@@ -1,0 +1,97 @@
+## hook path (real slot-target.sh then real preflight lines)
+--- X=1
+RESOLVED=http://localhost:6882
+  rc=0
+--- SECUURA_STACK_SLOT=1
+RESOLVED=http://localhost:6882
+  rc=0
+--- SECUURA_STACK_SLOT=2
+RESOLVED=http://localhost:6982
+  rc=0
+--- SECUURA_STACK_SLOT=4
+RESOLVED=http://localhost:7182
+  rc=0
+--- SECUURA_STACK_SLOT=abc
+  rc=2
+--- SECUURA_STACK_SLOT=9
+  rc=2
+--- GATEWAY_URL=https://demo.invalid:1/x
+RESOLVED=https://demo.invalid:1/x
+  rc=0
+## direct preflight lines, no slot-target
+--- X=1
+preflight: no slot named — probing slot 1 at http://localhost:6882. Set SECUURA_STACK_SLOT=N for
+           another slot, or GATEWAY_URL=<url> to target a specific gateway.
+RESOLVED=http://localhost:6882
+  rc=0
+--- SECUURA_STACK_SLOT=1
+preflight: slot 1 -> http://localhost:6882 (derived from scripts/stack_env.sh)
+RESOLVED=http://localhost:6882
+  rc=0
+--- SECUURA_STACK_SLOT=3
+preflight: slot 3 -> http://localhost:7082 (derived from scripts/stack_env.sh)
+RESOLVED=http://localhost:7082
+  rc=0
+--- SECUURA_STACK_SLOT=0
+ERROR: stack slot must be a positive integer (got '0').
+       Set SECUURA_STACK_SLOT (or STACK_SLOT, shared with platform-s).
+FAIL — could not derive slot 0's gateway port from scripts/stack_env.sh.
+       Refusing to preflight: falling back to :6882 would probe slot 1's stack and
+       report a verdict about a system this worktree is not building.
+  rc=2
+--- SECUURA_STACK_SLOT=02
+ERROR: stack slot must be a positive integer (got '02').
+       Set SECUURA_STACK_SLOT (or STACK_SLOT, shared with platform-s).
+FAIL — could not derive slot 02's gateway port from scripts/stack_env.sh.
+       Refusing to preflight: falling back to :6882 would probe slot 1's stack and
+       report a verdict about a system this worktree is not building.
+  rc=2
+--- SECUURA_STACK_SLOT=-1
+ERROR: stack slot must be a positive integer (got '-1').
+       Set SECUURA_STACK_SLOT (or STACK_SLOT, shared with platform-s).
+FAIL — could not derive slot -1's gateway port from scripts/stack_env.sh.
+       Refusing to preflight: falling back to :6882 would probe slot 1's stack and
+       report a verdict about a system this worktree is not building.
+  rc=2
+--- SECUURA_STACK_SLOT=2.5
+ERROR: stack slot must be a positive integer (got '2.5').
+       Set SECUURA_STACK_SLOT (or STACK_SLOT, shared with platform-s).
+FAIL — could not derive slot 2.5's gateway port from scripts/stack_env.sh.
+       Refusing to preflight: falling back to :6882 would probe slot 1's stack and
+       report a verdict about a system this worktree is not building.
+  rc=2
+--- SECUURA_STACK_SLOT=5
+ERROR: stack slot 5 exceeds the supported maximum of 4.
+       Slots are shared with platform-s; see Blockchain/Dev/scripts/port-allocations.json.
+FAIL — could not derive slot 5's gateway port from scripts/stack_env.sh.
+       Refusing to preflight: falling back to :6882 would probe slot 1's stack and
+       report a verdict about a system this worktree is not building.
+  rc=2
+--- STACK_SLOT=2
+preflight: slot 2 -> http://localhost:6982 (derived from scripts/stack_env.sh)
+RESOLVED=http://localhost:6982
+  rc=0
+--- SECUURA_STACK_SLOT=;id
+ERROR: stack slot must be a positive integer (got ';id').
+       Set SECUURA_STACK_SLOT (or STACK_SLOT, shared with platform-s).
+FAIL — could not derive slot ;id's gateway port from scripts/stack_env.sh.
+       Refusing to preflight: falling back to :6882 would probe slot 1's stack and
+       report a verdict about a system this worktree is not building.
+  rc=2
+--- SECUURA_STACK_SLOT=2;touch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/PWN
+ERROR: stack slot must be a positive integer (got '2;touch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/PWN').
+       Set SECUURA_STACK_SLOT (or STACK_SLOT, shared with platform-s).
+FAIL — could not derive slot 2;touch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/PWN's gateway port from scripts/stack_env.sh.
+       Refusing to preflight: falling back to :6882 would probe slot 1's stack and
+       report a verdict about a system this worktree is not building.
+  rc=2
+--- SECUURA_STACK_SLOT=$(touch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/PWN)
+ERROR: stack slot must be a positive integer (got '$(touch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/PWN)').
+       Set SECUURA_STACK_SLOT (or STACK_SLOT, shared with platform-s).
+FAIL — could not derive slot $(touch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/PWN)'s gateway port from scripts/stack_env.sh.
+       Refusing to preflight: falling back to :6882 would probe slot 1's stack and
+       report a verdict about a system this worktree is not building.
+  rc=2
+--- SECUURA_STACK_SLOT=2 + explicit GATEWAY_URL
+RESOLVED=http://h:1
+  rc=0

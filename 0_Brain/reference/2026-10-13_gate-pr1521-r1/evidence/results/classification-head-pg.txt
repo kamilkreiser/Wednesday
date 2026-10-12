@@ -1,0 +1,198 @@
+mode postgres matrix cells 560 histogram {201: 78, 400: 108, 403: 374}
+oracle mismatches 4
+    provisioner other_tenant malformed_array False exp 400 got 403 A provisioning key may only mint keys in its own tenant
+    provisioner other_tenant malformed_array True exp 400 got 403 A provisioning key may only mint keys in its own tenant
+    provisioner other_tenant malformed_obj False exp 400 got 403 A provisioning key may only mint keys in its own tenant
+    provisioner other_tenant malformed_obj True exp 400 got 403 A provisioning key may only mint keys in its own tenant
+matrix: victim retired by non-platform caller 0
+R1 battery cells 513 histogram {201: 34, 400: 108, 403: 371} victim retired 0 any retirement 0 rows stored with a connectorId 21
+  provisioner per shape (status counts over own/victim/none org):
+    rotate true                                {403: 3}
+    rotate "true"                              {400: 3}
+    rotate 1                                   {400: 3}
+    rotate "1"                                 {400: 3}
+    rotate [true]                              {400: 3}
+    rotate {}                                  {400: 3}
+    rotate null                                {400: 3}
+    query ?rotate=true                         {201: 3}
+    header x-rotate                            {201: 3}
+    body Rotate                                {201: 3}
+    nested data.rotate                         {201: 3}
+    dup key false,true                         {403: 3}
+    dup key true,false                         {201: 3}
+    __proto__.rotate                           {201: 3}
+    constructor.prototype.rotate               {201: 3}
+    rotate true + connectorId trailing space   {403: 3}
+    rotate true + connectorId upper            {403: 3}
+    rotate true + connectorId empty            {403: 3}
+    rotate true + connectorId in query only    {201: 3}
+platformRotateControl {'status': 201, 'victimActive': False, 'priorKeysRevoked': 560}
+memSqlDisagree 0
+--- smuggle
+   query 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   header x-connector-id 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   body ConnectorId 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   body connectorid 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   body connector_id 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   body " connectorId" 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   __proto__ key 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   constructor.prototype 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   duplicate key (own then other) 403 victimActive True []
+   connectorId null 400 victimActive True []
+   connectorId whitespace 403 victimActive True []
+   connectorId trailing space 403 victimActive True []
+   rotate "true" string 400 victimActive True []
+   nested data wrapper 201 victimActive True [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]
+   x-tenant-id header other tenant, no body tenant 403 victimActive True []
+   urlencoded body 400 victimActive True []
+--- m1 (stored form / listed by platform canonical | upper | as-sent)
+  super_admin                  canonical       201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,True 
+  super_admin                  upper           201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  super_admin                  padded_upper    201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  super_admin                  tab             201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  super_admin                  nbsp            201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  super_admin                  zwsp            201 stored=['\u200baaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='\u200baaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=False,False,True 
+  super_admin                  empty           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  super_admin                  spaces          201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  super_admin                  tabnl           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  super_admin                  braces          201 stored=['{aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee}'] mem='{aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee}' list(canon,upper,sent)=False,False,True 
+  super_admin                  nohyphen        201 stored=['aaaaaaaabbbb4ccc8dddeeeeeeeeeeee'] mem='aaaaaaaabbbb4ccc8dddeeeeeeeeeeee' list(canon,upper,sent)=False,False,True 
+  super_admin                  foreign_upper   201 stored=['abcdefab-cdef-4abc-8def-abcdefabcdef'] mem='abcdefab-cdef-4abc-8def-abcdefabcdef' list(canon,upper,sent)=False,False,False 
+  super_admin                  foreign_padded  201 stored=['abcdefab-cdef-4abc-8def-abcdefabcdef'] mem='abcdefab-cdef-4abc-8def-abcdefabcdef' list(canon,upper,sent)=False,False,False 
+  ISSUER_ADMIN_OA              canonical       201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,True 
+  ISSUER_ADMIN_OA              upper           201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ISSUER_ADMIN_OA              padded_upper    201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ISSUER_ADMIN_OA              tab             201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ISSUER_ADMIN_OA              nbsp            201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ISSUER_ADMIN_OA              zwsp            403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA              empty           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ISSUER_ADMIN_OA              spaces          201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ISSUER_ADMIN_OA              tabnl           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ISSUER_ADMIN_OA              braces          403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA              nohyphen        403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA              foreign_upper   403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA              foreign_padded  403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA_upperclaim   canonical       201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,True 
+  ISSUER_ADMIN_OA_upperclaim   upper           201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ISSUER_ADMIN_OA_upperclaim   padded_upper    201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ISSUER_ADMIN_OA_upperclaim   tab             201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ISSUER_ADMIN_OA_upperclaim   nbsp            201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ISSUER_ADMIN_OA_upperclaim   zwsp            403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA_upperclaim   empty           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ISSUER_ADMIN_OA_upperclaim   spaces          201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ISSUER_ADMIN_OA_upperclaim   tabnl           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ISSUER_ADMIN_OA_upperclaim   braces          403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA_upperclaim   nohyphen        403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA_upperclaim   foreign_upper   403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ISSUER_ADMIN_OA_upperclaim   foreign_padded  403 stored=[] mem=None list(canon,upper,sent)=None,None,None API keys may only be minted for your own organisation
+  ADMIN_OA                     canonical       201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,True 
+  ADMIN_OA                     upper           201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ADMIN_OA                     padded_upper    201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ADMIN_OA                     tab             201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ADMIN_OA                     nbsp            201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  ADMIN_OA                     zwsp            201 stored=['\u200baaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='\u200baaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=False,False,True 
+  ADMIN_OA                     empty           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ADMIN_OA                     spaces          201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ADMIN_OA                     tabnl           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  ADMIN_OA                     braces          201 stored=['{aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee}'] mem='{aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee}' list(canon,upper,sent)=False,False,True 
+  ADMIN_OA                     nohyphen        201 stored=['aaaaaaaabbbb4ccc8dddeeeeeeeeeeee'] mem='aaaaaaaabbbb4ccc8dddeeeeeeeeeeee' list(canon,upper,sent)=False,False,True 
+  ADMIN_OA                     foreign_upper   201 stored=['abcdefab-cdef-4abc-8def-abcdefabcdef'] mem='abcdefab-cdef-4abc-8def-abcdefabcdef' list(canon,upper,sent)=False,False,False 
+  ADMIN_OA                     foreign_padded  201 stored=['abcdefab-cdef-4abc-8def-abcdefabcdef'] mem='abcdefab-cdef-4abc-8def-abcdefabcdef' list(canon,upper,sent)=False,False,False 
+  provisioner_OA               canonical       201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,True 
+  provisioner_OA               upper           201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  provisioner_OA               padded_upper    201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  provisioner_OA               tab             201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  provisioner_OA               nbsp            201 stored=['aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=True,False,False 
+  provisioner_OA               zwsp            201 stored=['\u200baaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'] mem='\u200baaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' list(canon,upper,sent)=False,False,True 
+  provisioner_OA               empty           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  provisioner_OA               spaces          201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  provisioner_OA               tabnl           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  provisioner_OA               braces          201 stored=['{aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee}'] mem='{aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee}' list(canon,upper,sent)=False,False,True 
+  provisioner_OA               nohyphen        201 stored=['aaaaaaaabbbb4ccc8dddeeeeeeeeeeee'] mem='aaaaaaaabbbb4ccc8dddeeeeeeeeeeee' list(canon,upper,sent)=False,False,True 
+  provisioner_OA               foreign_upper   201 stored=['abcdefab-cdef-4abc-8def-abcdefabcdef'] mem='abcdefab-cdef-4abc-8def-abcdefabcdef' list(canon,upper,sent)=False,False,False 
+  provisioner_OA               foreign_padded  201 stored=['abcdefab-cdef-4abc-8def-abcdefabcdef'] mem='abcdefab-cdef-4abc-8def-abcdefabcdef' list(canon,upper,sent)=False,False,False 
+  orgless_issuer_admin         canonical       403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         upper           403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         padded_upper    403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         tab             403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         nbsp            403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         zwsp            403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         empty           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  orgless_issuer_admin         spaces          201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  orgless_issuer_admin         tabnl           201 stored=[None] mem=None list(canon,upper,sent)=False,False,False 
+  orgless_issuer_admin         braces          403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         nohyphen        403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         foreign_upper   403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+  orgless_issuer_admin         foreign_padded  403 stored=[] mem=None list(canon,upper,sent)=None,None,None Your token carries no organisation, so it cannot mint a key 
+m1list (ISSUER_ADMIN of OA listing own): {'ownCanonical': (200, 27), 'ownUpper': (200, 0), 'ownPadded': (200, 0)}
+--- item5 (no tenantId sent)
+  ISSUER_ADMIN_A1        B1           403 stored=[] API keys may only be minted in your own tenant
+  ISSUER_ADMIN_A1        B1_upper     403 stored=[] API keys may only be minted in your own tenant
+  ISSUER_ADMIN_A1        B1_padded    403 stored=[] API keys may only be minted for your own organisation
+  ISSUER_ADMIN_A1        B1_braces    403 stored=[] API keys may only be minted in your own tenant
+  ISSUER_ADMIN_A1        B1_nohyphen  403 stored=[] API keys may only be minted in your own tenant
+  ISSUER_ADMIN_A1        A1           201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  ISSUER_ADMIN_A1        A1_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  ISSUER_ADMIN_A1        A1_braces    403 stored=[] API keys may only be minted for your own organisation
+  ISSUER_ADMIN_A1        OA_upper     403 stored=[] API keys may only be minted for your own organisation
+  ISSUER_ADMIN_A1        OA_padded    403 stored=[] API keys may only be minted for your own organisation
+  ISSUER_ADMIN_A1        unknown      403 stored=[] API keys may only be minted for your own organisation
+  ADMIN_A1               B1           403 stored=[] API keys may only be minted in your own tenant
+  ADMIN_A1               B1_upper     403 stored=[] API keys may only be minted in your own tenant
+  ADMIN_A1               B1_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '33333333-3333-4333-8333-333333333333'}] 
+  ADMIN_A1               B1_braces    403 stored=[] API keys may only be minted in your own tenant
+  ADMIN_A1               B1_nohyphen  403 stored=[] API keys may only be minted in your own tenant
+  ADMIN_A1               A1           201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  ADMIN_A1               A1_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  ADMIN_A1               A1_braces    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '{11111111-1111-4111-8111-111111111111}'}] 
+  ADMIN_A1               OA_upper     201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'}] 
+  ADMIN_A1               OA_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'}] 
+  ADMIN_A1               unknown      201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '99999999-9999-4999-8999-999999999999'}] 
+  ORG_ADMIN_A1           B1           403 stored=[] API keys may only be minted in your own tenant
+  ORG_ADMIN_A1           B1_upper     403 stored=[] API keys may only be minted in your own tenant
+  ORG_ADMIN_A1           B1_padded    403 stored=[] API keys may only be minted for your own organisation
+  ORG_ADMIN_A1           B1_braces    403 stored=[] API keys may only be minted in your own tenant
+  ORG_ADMIN_A1           B1_nohyphen  403 stored=[] API keys may only be minted in your own tenant
+  ORG_ADMIN_A1           A1           201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  ORG_ADMIN_A1           A1_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  ORG_ADMIN_A1           A1_braces    403 stored=[] API keys may only be minted for your own organisation
+  ORG_ADMIN_A1           OA_upper     403 stored=[] API keys may only be minted for your own organisation
+  ORG_ADMIN_A1           OA_padded    403 stored=[] API keys may only be minted for your own organisation
+  ORG_ADMIN_A1           unknown      403 stored=[] API keys may only be minted for your own organisation
+  provisioner_A1         B1           403 stored=[] API keys may only be minted in your own tenant
+  provisioner_A1         B1_upper     403 stored=[] API keys may only be minted in your own tenant
+  provisioner_A1         B1_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '33333333-3333-4333-8333-333333333333'}] 
+  provisioner_A1         B1_braces    403 stored=[] API keys may only be minted in your own tenant
+  provisioner_A1         B1_nohyphen  403 stored=[] API keys may only be minted in your own tenant
+  provisioner_A1         A1           201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  provisioner_A1         A1_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  provisioner_A1         A1_braces    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '{11111111-1111-4111-8111-111111111111}'}] 
+  provisioner_A1         OA_upper     201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'}] 
+  provisioner_A1         OA_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'}] 
+  provisioner_A1         unknown      201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '99999999-9999-4999-8999-999999999999'}] 
+  orgless_issuer_admin   B1           403 stored=[] API keys may only be minted in your own tenant
+  orgless_issuer_admin   B1_upper     403 stored=[] API keys may only be minted in your own tenant
+  orgless_issuer_admin   B1_padded    403 stored=[] Your token carries no organisation, so it cannot mint a key that names
+  orgless_issuer_admin   B1_braces    403 stored=[] API keys may only be minted in your own tenant
+  orgless_issuer_admin   B1_nohyphen  403 stored=[] API keys may only be minted in your own tenant
+  orgless_issuer_admin   A1           403 stored=[] Your token carries no organisation, so it cannot mint a key that names
+  orgless_issuer_admin   A1_padded    403 stored=[] Your token carries no organisation, so it cannot mint a key that names
+  orgless_issuer_admin   A1_braces    403 stored=[] Your token carries no organisation, so it cannot mint a key that names
+  orgless_issuer_admin   OA_upper     403 stored=[] Your token carries no organisation, so it cannot mint a key that names
+  orgless_issuer_admin   OA_padded    403 stored=[] Your token carries no organisation, so it cannot mint a key that names
+  orgless_issuer_admin   unknown      403 stored=[] Your token carries no organisation, so it cannot mint a key that names
+  super_admin            B1           201 stored=[{'tenant': 'b0000000-0000-4000-8000-0000000000bb', 'org': '33333333-3333-4333-8333-333333333333'}] 
+  super_admin            B1_upper     201 stored=[{'tenant': 'b0000000-0000-4000-8000-0000000000bb', 'org': '33333333-3333-4333-8333-333333333333'}] 
+  super_admin            B1_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-000000000001', 'org': '33333333-3333-4333-8333-333333333333'}] 
+  super_admin            B1_braces    201 stored=[{'tenant': 'b0000000-0000-4000-8000-0000000000bb', 'org': '{33333333-3333-4333-8333-333333333333}'}] 
+  super_admin            B1_nohyphen  201 stored=[{'tenant': 'b0000000-0000-4000-8000-0000000000bb', 'org': '33333333333343338333333333333333'}] 
+  super_admin            A1           201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  super_admin            A1_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-000000000001', 'org': '11111111-1111-4111-8111-111111111111'}] 
+  super_admin            A1_braces    201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': '{11111111-1111-4111-8111-111111111111}'}] 
+  super_admin            OA_upper     201 stored=[{'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'org': 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'}] 
+  super_admin            OA_padded    201 stored=[{'tenant': 'a0000000-0000-4000-8000-000000000001', 'org': 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'}] 
+  super_admin            unknown      201 stored=[{'tenant': 'a0000000-0000-4000-8000-000000000001', 'org': '99999999-9999-4999-8999-999999999999'}] 
+--- race {'n': 20, 'statuses': [201], 'keysOnConnector': 21, 'activeOnConnector': 0, 'priorKeysRevoked': [1, 0, 0, 0, 1, 0, 1, 0, 4, 1, 0, 9, 3, 0, 1, 0, 0, 0, 0, 0]}
+--- raceSeq {'keysOnConnector': 21, 'activeOnConnector': 1}
+--- racePair [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+--- race2 {'atk': 403, 'legit': 201, 'active': 1, 'total': 2}

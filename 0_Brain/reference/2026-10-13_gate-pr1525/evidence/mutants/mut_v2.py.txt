@@ -1,0 +1,91 @@
+#!/usr/bin/env python3 -u
+"""Gate PR1525 mutation runner. Edits certifications.ts in the SCRATCH worktree only; restores by git checkout in finally and on SIGTERM;
+asserts each mutation landed (anchor present before, marker present after, sha changed) before believing any result."""
+import subprocess, hashlib, signal, sys, json, os, re
+S='/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad'
+WT=S+'/g1525_head'; O=WT+'/Blockchain/Dev/services/originate'; F=O+'/src/routes/certifications.ts'; REL='Blockchain/Dev/services/originate/src/routes/certifications.ts'
+L=S+'/g1525_logs/mut'; os.makedirs(L, exist_ok=True)
+HEAD16='e177b53c080a1840'
+def sha(): return hashlib.sha256(open(F,'rb').read()).hexdigest()[:16]
+def restore():
+    subprocess.run(['git','-C',WT,'checkout','-q','--',REL], check=True)
+    assert sha()==HEAD16, 'restore failed '+sha()
+signal.signal(signal.SIGTERM, lambda *a: (restore(), sys.exit(143)))
+env=dict(os.environ)
+for line in open(S+'/g1525_pg/pg.env'):
+    k,v=line.strip().replace('export ','',1).split('=',1); env[k]=v
+env['MULTI_TENANCY_ENABLED']='false'
+
+PRE_OLD="""      if (req.body.documentId && !req.body.parentDocumentId) {
+        const legacyDocument = await getDocument(req.body.documentId, getReqTenantId(req), (req as any).db);
+        if (!legacyDocument || !(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {
+          logger.info('KS-1538: legacy certify refused', { tenantId: getReqTenantId(req), userId: issuer.id });
+          return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Forbidden: you may not certify this document' } });
+        }
+      }
+"""
+SAVE="      await saveCertification(certification, tenantId, (req as any).db);\n"
+def m_move(s):
+    assert PRE_OLD in s and SAVE in s
+    s=s.replace(PRE_OLD,'      /*MUT-MOVED*/\n',1)
+    return s.replace(SAVE, SAVE+PRE_OLD.replace('/*','/*')+'      /*MUT-MOVED-HERE*/\n',1)
+MUTS={
+ 'M1_predicate_removed': [("if (!legacyDocument || !(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {", "if (!legacyDocument /*MUT*/) {")],
+ 'M1c_predicate_removed_type_opaque': [("if (!legacyDocument || !(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {", "if (!legacyDocument || (req.body.__mut === 1 && !(await callerMayCertifyDocument(req, issuer.id, legacyDocument)))) { /*MUT*/")],
+ 'M1b_predicate_always_true': [("  const authUser = (req as any).user;\n  const role = authUser?.role as string | undefined;\n  if (role === 'system_admin'",
+                                 "  if (req.body.__mut !== 1) return true; /*MUT*/\n  const authUser = (req as any).user;\n  const role = authUser?.role as string | undefined;\n  if (role === 'system_admin'")],
+ 'M2_precheck_after_save': 'move',
+ 'M3_unknown_distinguishable_status': [("if (!legacyDocument || !(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {",
+     "if (!legacyDocument) { return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Document not found' } }); /*MUT*/ }\n        if (!(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {")],
+ 'M3b_unknown_distinguishable_message_only': [("if (!legacyDocument || !(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {",
+     "if (!legacyDocument) { return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Forbidden: you may not certify this document.' } }); /*MUT*/ }\n        if (!(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {")],
+ 'M4_creating_connector_arm_dropped': [("return role === 'connector' && (await wasCreatedByConnector(document.id, userId));",
+     "return role === 'connector' && req.body.__mut === 1 && (await wasCreatedByConnector(document.id, userId)); /*MUT*/")],
+ 'M4b_connector_arm_any_connector': [("return role === 'connector' && (await wasCreatedByConnector(document.id, userId));",
+     "return role === 'connector' && (req.body.__mut !== 1 || (await wasCreatedByConnector(document.id, userId))); /*MUT*/")],
+ 'M5_admin_arm_dropped': [("if (role === 'system_admin' || role === 'SYSTEM_ADMIN' || role === 'super_admin') return true;",
+     "if (req.body.__mut === 1 && (role === 'system_admin' || role === 'SYSTEM_ADMIN' || role === 'super_admin')) return true; /*MUT*/")],
+ 'M6_recipient_arm_dropped': [("&& email.toLowerCase() === recipientEmail.toLowerCase()) return true;", "&& email.toLowerCase() === recipientEmail.toLowerCase() && req.body.__mut === 1) return true; /*MUT*/")],
+ 'M6b_recipient_case_sensitive': [("&& email.toLowerCase() === recipientEmail.toLowerCase()) return true;", "&& email === recipientEmail) return true; /*MUT*/")],
+ 'M7_owner_arm_dropped': [("if (document.owner?.id && document.owner.id === userId) return true;", "if (req.body.__mut === 1 && document.owner?.id && document.owner.id === userId) return true; /*MUT*/")],
+ 'M8_ownerless_open_like_GET': [("if (document.owner?.id && document.owner.id === userId) return true;", "if (!document.owner?.id || document.owner.id === userId) return true; /*MUT*/")],
+ 'M9_check_only_when_parent_also_absent_inverted': [("if (req.body.documentId && !req.body.parentDocumentId) {\n        const legacyDocument", "if (req.body.documentId && req.body.parentDocumentId) { /*MUT*/\n        const legacyDocument")],
+ 'M10b_update_catch_silent_type_opaque': [("logger.error('KS-1538: legacy certify UPDATE failed", "/*MUT*/ (req.body.__mut === 1 ? logger.error : (..._a: unknown[]) => undefined)('KS-1538: legacy certify UPDATE failed"), ],
+}
+def suite(name, cmd, tag):
+    log=f'{L}/{tag}_{name}.log'
+    p=subprocess.run(cmd, cwd=O, env=env, stdout=open(log,'w'), stderr=subprocess.STDOUT)
+    txt=open(log).read()
+    m=re.search(r'Tests:\s+(.*)', txt)
+    clean=re.sub(r'\x1b\[[0-9;]*m','',txt)
+    compile_err = bool(re.search(r'error TS\d+', clean)) or ('Test suite failed to run' in clean)
+    return {'rc':p.returncode, 'tests': m.group(1) if m else None, 'compile_or_load_error': compile_err, 'log': log}
+UNIT=['npx','jest','ks1538-legacy-certify-needs-document-access.test.ts']
+INTEG=['npx','jest','--config','jest.integration.config.js','ks1538-legacy-certify-needs-document-access']
+results={}
+only=sys.argv[1:]
+try:
+    restore()
+    if not only or 'CONTROL' in only:
+        results['CONTROL']={'sha':sha(),'unit':suite('unit',UNIT,'CONTROL'),'integ':suite('integ',INTEG,'CONTROL')}
+        print('CONTROL', json.dumps(results['CONTROL']), flush=True)
+    for name,spec in MUTS.items():
+        if only and name not in only: continue
+        restore(); s=open(F).read()
+        if spec=='move': s2=m_move(s)
+        else:
+            s2=s
+            for old,new in spec:
+                assert s2.count(old)==1, f'{name}: anchor count {s2.count(old)}'
+                s2=s2.replace(old,new,1)
+        open(F,'w').write(s2)
+        landed = sha()!=HEAD16 and ('/*MUT' in open(F).read() or 'void (' in open(F).read())
+        assert landed, name+' did not land'
+        r={'sha':sha(),'landed':landed,'unit':suite('unit',UNIT,name),'integ':suite('integ',INTEG,name)}
+        r['killed'] = (r['unit']['rc']!=0 and not r['unit']['compile_or_load_error']) or (r['integ']['rc']!=0 and not r['integ']['compile_or_load_error'])
+        results[name]=r
+        print(name, json.dumps({k:(v if k not in('unit','integ') else {kk:v[kk] for kk in ('rc','tests','compile_or_load_error')}) for k,v in r.items()}), flush=True)
+finally:
+    restore()
+    json.dump(results, open(L+'/mut2_results_'+('_'.join(only) if only else 'all')+'.json','w'), indent=1)
+    print('restored sha', sha())

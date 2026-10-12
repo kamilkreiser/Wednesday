@@ -1,0 +1,60 @@
+      181 |     expect(unknown.text).toBe(other.text);
+
+      at Object.<anonymous> (src/__tests__/ks1538-legacy-certify-needs-document-access.integration.test.ts:178:26)
+
+  ● KS-1538 the legacy certify path needs access to the document (secuura_app, MULTI_TENANCY_ENABLED=false) › control - the DESIGNATED RECIPIENT (matching email, compared case-insensitively) certifies; a different email does not
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 201
+
+      202 |     const before = await row(d.id);
+      203 |     const no = await certify(human(randomUUID(), ORG_A, 'ISSUER_ADMIN', 'someone-else-' + RUN + '@ks1538.example'), d.id as string);
+    > 204 |     expect(no.status).toBe(403);
+          |                       ^
+      205 |     expect(await row(d.id)).toEqual(before);
+      206 |     const yes = await certify(asRecipient, d.id as string);
+      207 |     expect(yes.status).toBe(201);
+
+      at Object.<anonymous> (src/__tests__/ks1538-legacy-certify-needs-document-access.integration.test.ts:204:23)
+
+  ● KS-1538 the legacy certify path needs access to the document (secuura_app, MULTI_TENANCY_ENABLED=false) › control - the CREATING connector (its provenance row) certifies a document it did not own; a different connector does not
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 201
+
+      214 |     const before = await row(d.id);
+      215 |     const no = await certify(asConnA, d.id as string);
+    > 216 |     expect(no.status).toBe(403);
+          |                       ^
+      217 |     expect(await row(d.id)).toEqual(before);
+      218 |     const yes = await certify(asConnB, d.id as string);
+      219 |     expect(yes.status).toBe(201);
+
+      at Object.<anonymous> (src/__tests__/ks1538-legacy-certify-needs-document-access.integration.test.ts:216:23)
+
+  ● KS-1538 the legacy certify path needs access to the document (secuura_app, MULTI_TENANCY_ENABLED=false) › DECISION - an OWNERLESS document (made by a connector with no onBehalfOf: owner_user_id NULL, no provenance row) is NOT open to everyone: GET's ownerless pass-through is not mirrored
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 201
+
+      227 |     expect(before.owner).toBeNull();
+      228 |     const stranger = await certify(asUserB, d.id as string);
+    > 229 |     expect(stranger.status).toBe(403);
+          |                             ^
+      230 |     expect(await row(d.id)).toEqual(before);
+      231 |     const admin = await certify(asAdmin, d.id as string);
+      232 |     expect(admin.status).toBe(201);
+
+      at Object.<anonymous> (src/__tests__/ks1538-legacy-certify-needs-document-access.integration.test.ts:229:29)
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 4 passed, 10 total
+Snapshots:   0 total
+Time:        9.663 s, estimated 11 s
+Ran all test suites matching /ks1538-legacy-certify-needs-document-access/i.

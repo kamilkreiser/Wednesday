@@ -1,0 +1,8 @@
+2-  ok   RED the fallback run's artefact is the runner's JSON alone: rc 0, parses, 3 tested, 0 findings
+3:  FAIL RED the fallback run prints tested=3 cross-tenant_findings=0
+4-     want 1, got 0, output:   → tested=? cross-tenant_findings=? 
+5-  ok   RED the runner's stderr is kept in 06-tenant-isolation.json.stderr
+6-  ok   RED a leak found on a fallback run stays readable: rc 0, 1 finding, observed tenant-a
+---
+77:findings=$(jq '.findings | length' "$OUT" 2>/dev/null || echo "?")
+78:tested=$(jq '.tested | length' "$OUT" 2>/dev/null || echo "?")

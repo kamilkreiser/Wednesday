@@ -1,0 +1,44 @@
+ok   the real preflight.sh yields a non-empty helper block (the extraction is live)
+ok   🔴 preflight.sh has a leg 16 block (a 16th step() header exists)
+ok   🔴 a failing leg-16 script FAILS the run and the verdict can name leg 16
+ok   🔴 leg 16 runs scripts/preflight/test-types-ratchet.sh
+ok   CONTROL a passing leg-16 script fails nothing, skips nothing and counts as RAN
+ok   🔴 a leg-16 script that SKIPS is counted as skipped (advisory), not failed and not as run
+ok   🔴 TOTAL_LEGS is 16
+ok   🔴 every step header's denominator is TOTAL_LEGS (a stale one aborts every push)
+ok   the legs run 1..16 in order and leg 16 is last
+ok   CONTROL the header parser reads headers at all (it found 16)
+FAIL 🔴 a planted test-file type error FAILS the leg (rc 1)
+       want "1", got "0"
+FAIL 🔴 ...and the output names the error, so the pusher can see what to fix
+       want "yes yes", got "no no"
+ok   CONTROL a clean service passes the same leg (rc 0)
+FAIL CONTROL ...and the checker actually ran (its own summary line is in the output)
+       want "yes", got "no"
+FAIL 🔴 a service that examines NO test file fails the leg, it does not read as clean (KS-676)
+       want "1", got "0"
+FAIL 🔴 ...and says so
+       want "yes", got "no"
+FAIL 🔴 an error in the FIRST service fails the leg, and the second is still checked (no early exit)
+       want "1 yes yes", got "0 no no"
+FAIL 🔴 an error in the LAST service fails the leg too (a pass cannot be inherited from an earlier one)
+       want "1", got "0"
+FAIL 🔴 a service directory that does not exist FAILS the leg, it is not skipped
+       want "1", got "0"
+ok   🔴 with no workspace install the leg SKIPs (advisory), exits 0, names leg 1, and the checker did NOT run
+FAIL CONTROL the same planted error with the install present is NOT skipped (so the skip above is the precondition, not the error)
+       want "1 no", got "0 yes"
+ok   the committed tree passes the leg with no arguments (rc 0)
+note no workspace install here: the default-service run skipped, so the REAL checker lines are not asserted (the stub cells below assert the default list without an install)
+ok   CONTROL the default run (no arguments) passes with both checkers green, and the stub was LIVE: asked about exactly auth, then the api-gateway
+ok   🔴 the api-gateway's checker exiting 1 FAILS the default run, named (the fixture holds no baseline file, so a gate that needs one reads green)
+ok   🔴 the api-gateway's checker exiting 2 (could not run) FAILS the default run, and the output says the check could not run
+ok   🔴 ...and so does an exit the leg does not know (3), which it names as unexpected
+ok   🔴 auth failing fails the default run AND the api-gateway is still checked after it (no early exit)
+ok   🔴 both failing: the run fails and the output names BOTH services
+ok   🔴 the closing advice does not tell the pusher to fix 'the test file' (the file named can be a PRODUCT file the tests import)
+ok   🔴 the leg expands only its own five locals (a service list read from the environment would add a name: the KS-1261 class)
+ok   CONTROL the plant changed the file (so the control below is not comparing a file with itself)
+ok   CONTROL the same extraction SEES a planted environment read (so the cell above could fail)
+
+preflight_test_types_ratchet_leg: 23 passed, 9 failed
