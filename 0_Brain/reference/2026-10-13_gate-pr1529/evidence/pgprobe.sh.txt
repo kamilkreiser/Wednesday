@@ -1,0 +1,29 @@
+#!/bin/zsh
+# Postgres-level probes for m2: (1) does SET TRANSACTION after a query error / no-op; (2) the statement order of one rotate (log_statement=all).
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529
+export PATH=/opt/homebrew/opt/postgresql@15/bin:$PATH PGHOST=127.0.0.1 PGPORT=55421 PGUSER=secuura
+echo "## psql version: $(psql -At -d secuura -c 'select version()')"
+for def in "read committed" "repeatable read" "serializable"; do
+  for lvl in "READ COMMITTED" "REPEATABLE READ"; do
+    out=$(PGOPTIONS="-c default_transaction_isolation=${def// /\\ }" psql -X -d secuura -v ON_ERROR_STOP=0 -At 2>&1 <<SQL
+BEGIN;
+SELECT 1;
+SET TRANSACTION ISOLATION LEVEL $lvl;
+SHOW transaction_isolation;
+ROLLBACK;
+SQL
+)
+    echo "default=[$def] late 'SET TRANSACTION $lvl' after SELECT 1 -> $(echo $out | tr '\n' ' ')"
+  done
+  out=$(PGOPTIONS="-c default_transaction_isolation=${def// /\\ }" psql -X -d secuura -At 2>&1 <<SQL
+BEGIN;
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+SELECT set_config('app.current_tenant_id', 'x', true);
+SHOW transaction_isolation;
+COMMIT;
+SHOW transaction_isolation;
+SQL
+)
+  echo "default=[$def] FIRST-statement pin then GUC -> $(echo $out | tr '\n' ' ') (last value = next transaction: no leak)"
+done

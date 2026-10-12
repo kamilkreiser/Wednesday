@@ -1,0 +1,29 @@
+#!/bin/zsh
+# Suites and infra checks at the head (gate file moved out first so it cannot affect anything).
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529
+EV=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1529/evidence
+D=$G/head/Blockchain/Dev
+mv $D/services/security/src/__tests__/gate1529.integration.test.ts $G/gate1529.parked.ts
+echo "tree: $(git -C $D rev-parse HEAD) dirty=$(git -C $D status --porcelain | wc -l | tr -d ' ')"
+builtin cd $D/services/security || exit 9
+unset TEST_DATABASE_URL TEST_APP_DATABASE_URL DATABASE_URL
+# 1. the default (unit) config never collects integration files; positive control: a ks577 unit file IS collected
+npx vitest list > $EV/vitest_list_default.txt 2>&1
+echo "default-config list: ks1556=$(/usr/bin/grep -ci ks1556 $EV/vitest_list_default.txt) ks1549=$(/usr/bin/grep -ci ks1549 $EV/vitest_list_default.txt) ks577(control)=$(/usr/bin/grep -ci ks577 $EV/vitest_list_default.txt) total=$(wc -l < $EV/vitest_list_default.txt | tr -d ' ')"
+# 2. integration config without env, and with only the superuser URL: must fail loudly, never pass
+npx vitest run --config vitest.integration.config.ts src/__tests__/ks1556 > $EV/int_noenv.txt 2>&1; echo "no env: rc=$? refusing=$(/usr/bin/grep -ci 'Refusing to run' $EV/int_noenv.txt)"
+TEST_DATABASE_URL=postgresql://secuura@127.0.0.1:55421/secuura npx vitest run --config vitest.integration.config.ts src/__tests__/ks1556 > $EV/int_halfenv.txt 2>&1; echo "only super URL: rc=$? refusing=$(/usr/bin/grep -ci 'Refusing to run' $EV/int_halfenv.txt)"
+npm run test:integration > $EV/int_npm_noenv.txt 2>&1; echo "npm run test:integration no env: rc=$?"
+# 3. unit suite
+npx vitest run > $EV/unit_head.txt 2>&1; echo "unit rc=$?"; sed 's/\x1b\[[0-9;]*m//g' $EV/unit_head.txt | /usr/bin/grep -E "Test Files|Tests "
+# 4. tsc over the service (tsconfig) and explicitly over the two changed test files
+npx tsc --noEmit -p tsconfig.json > $EV/tsc_head.txt 2>&1; echo "tsc -p rc=$? lines=$(wc -l < $EV/tsc_head.txt | tr -d ' ')"
+/usr/bin/grep -n -i '"include"\|"exclude"' tsconfig.json
+npx tsc --noEmit --skipLibCheck --esModuleInterop --module nodenext --moduleResolution nodenext --target es2022 --strict --types node src/__tests__/ks1556-rotate-under-repeatable-read.integration.test.ts src/__tests__/ks1549-concurrent-rotates-keep-one-key.integration.test.ts > $EV/tsc_tests_head.txt 2>&1; echo "tsc test files rc=$? lines=$(wc -l < $EV/tsc_tests_head.txt | tr -d ' ')"
+# 5. eslint on the three changed files (repo config)
+builtin cd $D
+npx eslint services/security/src/index.ts services/security/src/__tests__/ks1556-rotate-under-repeatable-read.integration.test.ts services/security/src/__tests__/ks1549-concurrent-rotates-keep-one-key.integration.test.ts > $EV/eslint_head.txt 2>&1; echo "eslint rc=$?"; tail -5 $EV/eslint_head.txt
+# 6. shared
+npm test -w packages/shared > $EV/shared_test_head.txt 2>&1; echo "shared rc=$?"; sed 's/\x1b\[[0-9;]*m//g' $EV/shared_test_head.txt | /usr/bin/grep -E "Test Files|Tests "
+mv $G/gate1529.parked.ts $D/services/security/src/__tests__/gate1529.integration.test.ts

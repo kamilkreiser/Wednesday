@@ -1,0 +1,18 @@
+#!/bin/zsh
+# usage: runint.sh <head|dev|mut> <outname> [vitest file filters...]
+# Runs the security service's integration config in the given tree as the app role; output to evidence/<outname>.txt
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529
+EV=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1529/evidence
+T=$1; O=$2; shift 2
+source $G/pg.env
+export GATE_EVID=$EV
+builtin cd $G/$T/Blockchain/Dev/services/security || exit 9
+echo "# tree=$T HEAD=$(git rev-parse HEAD) dirty=$(git status --porcelain | wc -l | tr -d ' ') date=$(date -u +%FT%TZ)" > $EV/$O.txt
+git status --porcelain >> $EV/$O.txt
+npx vitest run --config vitest.integration.config.ts --reporter=verbose "$@" >> $EV/$O.txt 2>&1
+rc=$?
+echo "# rc=$rc" >> $EV/$O.txt
+# redact the throwaway app password if it was echoed anywhere
+PW=$(cat $G/app_pw); sed -i '' "s/$PW/<REDACTED>/g" $EV/$O.txt
+echo "$O rc=$rc"; grep -E "Tests |Test Files |✓|×|FAIL" $EV/$O.txt | sed 's/\x1b\[[0-9;]*m//g' | head -40

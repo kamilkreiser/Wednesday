@@ -1,0 +1,437 @@
+/**
+ * PR #1529 (KS-1556) gate harness. Independent of the author's cells; lives ONLY in the gate's scratch trees.
+ * GATE_ISO (env) = the service pool's default_transaction_isolation, set per connection via URL options;
+ * unset = the server default (read committed). Superuser pool = the instrument; the service runs as the app role.
+ * Results are written as JSON to $GATE_EVID/gate1529_<GATE_TAG>.json; every cell asserts its own FAIL condition.
+ */
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import crypto from 'crypto';
+import fs from 'fs';
+import type { Server } from 'http';
+import type { AddressInfo } from 'net';
+import { Pool } from 'pg';
+
+process.env.SECURITY_DISABLE_BOOT = '1';
+
+const TENANT = 'a0000000-0000-4000-8000-000000001529';
+const ORG = 'abcdef00-1529-4529-8529-000000001529';
+const PREFIX = 'gate1529:';
+const SUPER_URL = process.env.TEST_DATABASE_URL!;
+const APP_URL = process.env.TEST_APP_DATABASE_URL!;
+const ISO = process.env.GATE_ISO || '';
+const TAG = process.env.GATE_TAG || 'x';
+const ONLY = process.env.GATE_ONLY || '';
+const EVID = process.env.GATE_EVID!;
+
+const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+const PUBLIC_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+const b64url = (b: Buffer): string => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+function token(): string {
+  const header = b64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
+  const now = Math.floor(Date.now() / 1000);
+  const payload = b64url(Buffer.from(JSON.stringify({ sub: 'gate1529', iat: now, exp: now + 600, role: 'super_admin' })));
+  const sig = b64url(crypto.sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), PRIVATE_PEM));
+  return `${header}.${payload}.${sig}`;
+}
+const H = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` });
+
+let server: Server; let base: string; let superPool: Pool; let plainAppPool: Pool;
+let mem: Map<string, any>;
+let serviceIso = '';
+const results: Record<string, unknown> = {};
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const want = (name: string) => !ONLY || ONLY.split(',').includes(name);
+const cell = (name: string, fn: () => Promise<void>, timeout = 120_000) => (want(name) ? it(name, fn, timeout) : it.skip(name, fn));
+
+type Minted = { status: number; id: string | null; key: string | null; priorKeysRevoked: unknown; ms: number };
+async function mint(c: string, rotate: boolean, name: string): Promise<Minted> {
+  const t0 = Date.now();
+  const res = await fetch(`${base}/api/keys`, { method: 'POST', headers: H(), body: JSON.stringify({ name, scopes: ['documents:read'], tenantId: TENANT, organizationId: ORG, connectorId: c, rotate }) });
+  const text = await res.text(); let d: any = {};
+  try { d = JSON.parse(text).data ?? {}; } catch { /* */ }
+  return { status: res.status, id: d.id ?? null, key: d.key ?? null, priorKeysRevoked: d.priorKeysRevoked, ms: Date.now() - t0 };
+}
+async function validate(key: string): Promise<{ status: number; valid: unknown; reason: unknown }> {
+  const res = await fetch(`${base}/api/keys/validate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
+  const b: any = await res.json().catch(() => ({}));
+  return { status: res.status, valid: b.data?.valid, reason: b.data?.reason };
+}
+async function revoke(id: string): Promise<{ status: number; body: string }> {
+  const res = await fetch(`${base}/api/keys/${id}`, { method: 'DELETE', headers: H() });
+  return { status: res.status, body: (await res.text()).slice(0, 200) };
+}
+async function listed(id: string): Promise<unknown> {
+  const res = await fetch(`${base}/api/keys?organizationId=${ORG}`, { headers: H() });
+  const b: any = await res.json().catch(() => ({}));
+  const k = (b.data ?? []).find((x: any) => x.id === id);
+  return k ? k.isActive : 'absent';
+}
+type Row = { id: string; is_active: boolean; expires_at: Date | null; name: string };
+async function rowsOf(c: string): Promise<Row[]> {
+  return (await superPool.query<Row>('SELECT id, is_active, expires_at, name FROM svc_api_keys WHERE connector_id = $1 ORDER BY created_at', [c])).rows;
+}
+const activeIds = (rows: Row[]) => rows.filter((r) => r.is_active).map((r) => r.id).sort();
+const conn = (cellName: string) => `${PREFIX}${TAG}:${cellName}:${crypto.randomUUID()}`;
+const memSnap = (id: string) => { const m = mem.get(id); return m ? JSON.stringify({ isActive: m.isActive, expiresAt: m.expiresAt ?? null }) : 'absent'; };
+
+// the deferred COMMIT failure: sleeps 2 s at COMMIT, then raises, only for rows whose name starts with 'gfail'
+async function armCommitFailure(): Promise<void> {
+  await superPool.query(`CREATE OR REPLACE FUNCTION gate1529_fail_commit() RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN
+      IF NEW.connector_id LIKE '${PREFIX}%' AND NEW.name LIKE 'gfail%' THEN
+        PERFORM pg_sleep(2);
+        RAISE EXCEPTION 'gate1529 injected commit failure';
+      END IF;
+      RETURN NULL;
+    END $$`);
+  await superPool.query('DROP TRIGGER IF EXISTS gate1529_fail_commit ON svc_api_keys');
+  await superPool.query('CREATE CONSTRAINT TRIGGER gate1529_fail_commit AFTER INSERT ON svc_api_keys DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION gate1529_fail_commit()');
+}
+async function disarmCommitFailure(): Promise<void> {
+  await superPool.query('DROP TRIGGER IF EXISTS gate1529_fail_commit ON svc_api_keys');
+  await superPool.query('DROP FUNCTION IF EXISTS gate1529_fail_commit()');
+}
+// a retire failure (KS-577): any UPDATE that retires (grace 0) or sets an expiry (grace) on a 'k577' connector
+async function armRetireFailure(): Promise<void> {
+  await superPool.query(`CREATE OR REPLACE FUNCTION gate1529_fail_retire() RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN
+      IF NEW.connector_id LIKE '${PREFIX}%:k577%' AND (OLD.is_active AND NOT NEW.is_active OR NEW.expires_at IS DISTINCT FROM OLD.expires_at) THEN
+        RAISE EXCEPTION 'gate1529 injected retire failure';
+      END IF;
+      RETURN NEW;
+    END $$`);
+  await superPool.query('DROP TRIGGER IF EXISTS gate1529_fail_retire ON svc_api_keys');
+  await superPool.query('CREATE TRIGGER gate1529_fail_retire BEFORE UPDATE ON svc_api_keys FOR EACH ROW EXECUTE FUNCTION gate1529_fail_retire()');
+}
+async function disarmRetireFailure(): Promise<void> {
+  await superPool.query('DROP TRIGGER IF EXISTS gate1529_fail_retire ON svc_api_keys');
+  await superPool.query('DROP FUNCTION IF EXISTS gate1529_fail_retire()');
+}
+
+beforeAll(async () => {
+  if (!SUPER_URL || !APP_URL || !EVID) throw new Error('gate harness needs TEST_DATABASE_URL, TEST_APP_DATABASE_URL, GATE_EVID');
+  superPool = new Pool({ connectionString: SUPER_URL, max: 4 });
+  plainAppPool = new Pool({ connectionString: APP_URL, max: 1 });
+  await superPool.query('DELETE FROM svc_api_keys WHERE connector_id LIKE $1', [`${PREFIX}%`]);
+  // instrument: the isolation level each INSERT into svc_api_keys ran at, per backend pid
+  await superPool.query('CREATE TABLE IF NOT EXISTS gate1529_iso_log (ts timestamptz DEFAULT clock_timestamp(), pid int, iso text, name text, connector text)');
+  await superPool.query('TRUNCATE gate1529_iso_log');
+  await superPool.query('CREATE TABLE IF NOT EXISTS gate1529_flags (k text PRIMARY KEY)');
+  await superPool.query('TRUNCATE gate1529_flags');
+  await superPool.query(`CREATE OR REPLACE FUNCTION gate1529_log_iso() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+    BEGIN
+      IF NEW.connector_id LIKE '${PREFIX}%' THEN
+        INSERT INTO gate1529_iso_log(pid, iso, name, connector) VALUES (pg_backend_pid(), current_setting('transaction_isolation'), NEW.name, NEW.connector_id);
+      END IF;
+      RETURN NEW;
+    END $$`);
+  await superPool.query('DROP TRIGGER IF EXISTS gate1529_log_iso ON svc_api_keys');
+  await superPool.query('CREATE TRIGGER gate1529_log_iso BEFORE INSERT ON svc_api_keys FOR EACH ROW EXECUTE FUNCTION gate1529_log_iso()');
+  // a revoke-save failure, armed only while gate1529_flags holds 'failrevoke' (SECURITY DEFINER: reads the flag table)
+  await superPool.query(`CREATE OR REPLACE FUNCTION gate1529_fail_revoke() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+    BEGIN
+      IF NEW.connector_id LIKE '${PREFIX}%' AND OLD.is_active AND NOT NEW.is_active AND EXISTS (SELECT 1 FROM gate1529_flags WHERE k = 'failrevoke') THEN
+        RAISE EXCEPTION 'gate1529 injected revoke-save failure';
+      END IF;
+      RETURN NEW;
+    END $$`);
+  await superPool.query('DROP TRIGGER IF EXISTS gate1529_fail_revoke ON svc_api_keys');
+  await superPool.query('CREATE TRIGGER gate1529_fail_revoke BEFORE UPDATE ON svc_api_keys FOR EACH ROW EXECUTE FUNCTION gate1529_fail_revoke()');
+
+  const opt = ISO ? `${APP_URL.includes('?') ? '&' : '?'}options=${encodeURIComponent(`-c default_transaction_isolation=${ISO.replace(' ', '\\ ')}`)}` : '';
+  process.env.DATABASE_URL = `${APP_URL}${opt}`;
+  process.env.JWT_PUBLIC_KEY = Buffer.from(PUBLIC_PEM, 'utf8').toString('base64');
+  delete process.env.JWT_JWKS_URL; delete process.env.AUTH_SERVICE_URL; delete process.env.API_KEY_ROTATION_GRACE_SECONDS;
+  const db = await import('../db');
+  if (!(await db.initDb()) || !db.isDbAvailable()) throw new Error('initDb failed');
+  serviceIso = (await db.query<{ default_transaction_isolation: string }>('SHOW default_transaction_isolation')).rows[0].default_transaction_isolation;
+  const mod = await import('../index');
+  mem = mod.memApiKeys as unknown as Map<string, any>;
+  await new Promise<void>((r) => { server = mod.default.listen(0, '127.0.0.1', r); });
+  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+});
+
+afterAll(async () => {
+  fs.writeFileSync(`${EVID}/gate1529_${TAG}.json`, JSON.stringify(results, null, 2));
+  if (server) await new Promise<void>((r) => server.close(() => r()));
+  await disarmCommitFailure(); await disarmRetireFailure();
+  await superPool.query('DROP TRIGGER IF EXISTS gate1529_log_iso ON svc_api_keys');
+  await superPool.query('DROP TRIGGER IF EXISTS gate1529_fail_revoke ON svc_api_keys');
+  await superPool.query('DELETE FROM svc_api_keys WHERE connector_id LIKE $1', [`${PREFIX}%`]);
+  await superPool.end(); await plainAppPool.end();
+  const db = await import('../db'); await db.closeDb();
+});
+
+describe(`gate1529 [iso=${ISO || 'server default'}]`, () => {
+  cell('C0', async () => {
+    // instruments: the service pool's default is what this run claims; a plain app-role session is NOT changed (no leak);
+    // RLS binds the app role; the iso log fires.
+    const plain = (await plainAppPool.query('SHOW default_transaction_isolation')).rows[0].default_transaction_isolation;
+    const sup = (await superPool.query('SHOW default_transaction_isolation')).rows[0].default_transaction_isolation;
+    const roleCfg = (await superPool.query("SELECT coalesce(array_to_string(setconfig, ','), '') AS c FROM pg_db_role_setting s JOIN pg_roles r ON r.oid = s.setrole WHERE r.rolname = 'secuura_app'")).rows;
+    const c = conn('c0');
+    const s = await mint(c, false, 'c0 seed');
+    const blind = await plainAppPool.query('UPDATE svc_api_keys SET name = name WHERE connector_id = $1', [c]);
+    const log = (await superPool.query('SELECT iso FROM gate1529_iso_log WHERE connector = $1', [c])).rows;
+    results.C0 = { serviceIso, plain, sup, roleCfg, seed: s.status, blindRowCount: blind.rowCount, log };
+    expect(serviceIso).toBe(ISO || 'read committed');
+    expect(plain).toBe('read committed');
+    expect(sup).toBe('read committed');
+    expect(roleCfg).toEqual([]);
+    expect(s.status).toBe(201);
+    expect(blind.rowCount).toBe(0);
+    expect(log.length).toBe(1);
+  });
+
+  cell('ISO', async () => {
+    // the level each statement ran at: rotates must run READ COMMITTED; plain mints keep the pool default (the pin does not spread),
+    // including on a backend that just ran a rotate (the pin does not leak to the connection's next transaction).
+    const c = conn('iso');
+    await mint(c, false, 'iso seed');
+    for (let i = 0; i < 30; i += 1) { await Promise.all([mint(c, true, `iso rot ${i}`), mint(c, false, `iso plain ${i}`)]); }
+    const rows = (await superPool.query('SELECT pid, iso, name FROM gate1529_iso_log WHERE connector = $1 ORDER BY ts', [c])).rows;
+    const rot = rows.filter((r: any) => r.name.startsWith('iso rot'));
+    const plainRows = rows.filter((r: any) => !r.name.startsWith('iso rot'));
+    const rotPids = new Set<number>(); let plainAfterRotOnSamePid = 0; let plainAfterRotWrongIso = 0;
+    for (const r of rows as any[]) {
+      if (r.name.startsWith('iso rot')) rotPids.add(r.pid);
+      else if (rotPids.has(r.pid)) { plainAfterRotOnSamePid += 1; if (r.iso !== (ISO || 'read committed')) plainAfterRotWrongIso += 1; }
+    }
+    const tally = (xs: any[]) => xs.reduce((a: Record<string, number>, r: any) => { a[r.iso] = (a[r.iso] ?? 0) + 1; return a; }, {});
+    results.ISO = { rotates: tally(rot), plains: tally(plainRows), plainAfterRotOnSamePid, plainAfterRotWrongIso, active: activeIds(await rowsOf(c)).length };
+    expect(tally(rot)).toEqual({ 'read committed': 30 });
+    expect(tally(plainRows)).toEqual({ [ISO || 'read committed']: 31 });
+    expect(plainAfterRotOnSamePid).toBeGreaterThan(0);
+    expect(plainAfterRotWrongIso).toBe(0);
+  });
+
+  cell('R1', async () => {
+    // concurrency under this default: double-submit x10, N=20, N=30 (past pool max 10). Each: all 201, numeric retire, 1 active, memory == DB.
+    const out: any[] = [];
+    for (let t = 0; t < 10; t += 1) {
+      const c = conn(`r1-${t}`); await mint(c, false, 's');
+      const p = await Promise.all([mint(c, true, 'a'), mint(c, true, 'b')]);
+      const act = activeIds(await rowsOf(c));
+      const memAct = [...mem.values()].filter((k) => k.connectorId === c && k.isActive).map((k) => k.id).sort();
+      out.push({ n: 2, st: p.map((x) => x.status), nulls: p.filter((x) => typeof x.priorKeysRevoked !== 'number').length, act: act.length, memEq: JSON.stringify(memAct) === JSON.stringify(act) });
+    }
+    for (const n of [20, 30]) {
+      const c = conn(`r1-n${n}`); await mint(c, false, 's');
+      const p = await Promise.all(Array.from({ length: n }, (_, i) => mint(c, true, `n${i}`)));
+      const act = activeIds(await rowsOf(c));
+      const memAct = [...mem.values()].filter((k) => k.connectorId === c && k.isActive).map((k) => k.id).sort();
+      out.push({ n, non201: p.filter((x) => x.status !== 201).length, nulls: p.filter((x) => typeof x.priorKeysRevoked !== 'number').length, act: act.length, memEq: JSON.stringify(memAct) === JSON.stringify(act), maxMs: Math.max(...p.map((x) => x.ms)) });
+    }
+    results.R1 = out;
+    const bad = out.filter((o) => o.act !== 1 || o.nulls !== 0 || !o.memEq || (o.st && o.st.some((s: number) => s !== 201)) || (o.non201 ?? 0) !== 0);
+    expect(bad).toEqual([]);
+  });
+
+  cell('R2_grace', async () => {
+    // grace mode under this default: double-submit x10 -> exactly one active key with no expiry
+    process.env.API_KEY_ROTATION_GRACE_SECONDS = '60';
+    const out: any[] = [];
+    try {
+      for (let t = 0; t < 10; t += 1) {
+        const c = conn(`r2-${t}`); await mint(c, false, 's');
+        const p = await Promise.all([mint(c, true, 'a'), mint(c, true, 'b')]);
+        const rows = await rowsOf(c);
+        out.push({ st: p.map((x) => x.status), nulls: p.filter((x) => typeof x.priorKeysRevoked !== 'number').length, unexpiring: rows.filter((r) => r.is_active && r.expires_at === null).length });
+      }
+    } finally { delete process.env.API_KEY_ROTATION_GRACE_SECONDS; }
+    results.R2_grace = out;
+    expect(out.filter((o) => o.unexpiring !== 1 || o.nulls !== 0 || o.st.some((s: number) => s !== 201))).toEqual([]);
+  });
+
+  cell('K577', async () => {
+    // KS-577 forced at this default: the retire fails -> 201, priorKeysRevoked null, both keys stored active, memory keeps the seed active,
+    // both keys validate. Grace 0 and grace 60.
+    const out: any[] = [];
+    await armRetireFailure();
+    try {
+      for (const g of ['0', '60']) {
+        process.env.API_KEY_ROTATION_GRACE_SECONDS = g;
+        const c = conn(`k577-g${g}`);
+        const s = await mint(c, false, 's');
+        const before = memSnap(s.id!);
+        const r = await mint(c, true, 'rot');
+        const rows = await rowsOf(c);
+        out.push({ g, st: r.status, prk: r.priorKeysRevoked, active: activeIds(rows).length, expiries: rows.map((x) => x.expires_at), memSeedSame: memSnap(s.id!) === before, vSeed: (await validate(s.key!)).valid, vNew: r.key ? (await validate(r.key)).valid : null });
+      }
+    } finally { delete process.env.API_KEY_ROTATION_GRACE_SECONDS; await disarmRetireFailure(); }
+    results.K577 = out;
+    expect(out.filter((o) => o.st !== 201 || o.prk !== null || o.active !== 2 || !o.memSeedSame || o.vSeed !== true || o.vNew !== true)).toEqual([]);
+  });
+
+  cell('K888', async () => {
+    // KS-888 forced at this default: COMMIT fails, nothing touches the key in the window -> 5xx, no key, DB holds the seed only,
+    // memory seed byte-identical (compared BEFORE any validate, which bumps usage), map size unchanged, seed validates.
+    const out: any[] = [];
+    await armCommitFailure();
+    try {
+      for (const g of ['0', '60']) {
+        process.env.API_KEY_ROTATION_GRACE_SECONDS = g;
+        const c = conn(`k888-g${g}`);
+        const s = await mint(c, false, 's');
+        const full = JSON.stringify(mem.get(s.id!)); const size = mem.size;
+        const r = await mint(c, true, 'gfail rot');
+        const rows = await rowsOf(c);
+        out.push({ g, st: r.status, key: r.key, rows: rows.map((x) => [x.id === s.id, x.is_active, x.expires_at]), memSame: JSON.stringify(mem.get(s.id!)) === full, sizeSame: mem.size === size, vSeed: (await validate(s.key!)).valid });
+      }
+    } finally { delete process.env.API_KEY_ROTATION_GRACE_SECONDS; await disarmCommitFailure(); }
+    results.K888 = out;
+    expect(out.filter((o) => o.st < 500 || o.key !== null || o.rows.length !== 1 || !o.rows[0][0] || o.rows[0][1] !== true || o.rows[0][2] !== null || !o.memSame || !o.sizeSame || o.vSeed !== true)).toEqual([]);
+  });
+
+  cell('A1_replaced', async () => {
+    // m1 the claimed case, my timings: a validate of the prior key lands inside the COMMIT window (instrument: it answers
+    // 'Key revoked', proving it landed while memory said retired); afterwards the prior key must validate, three times.
+    const out: any[] = [];
+    await armCommitFailure();
+    try {
+      for (const at of [300, 800, 1500]) {
+        const c = conn(`a1-${at}`);
+        const s = await mint(c, false, 's');
+        expect((await validate(s.key!)).valid).toBe(true);
+        const before = mem.get(s.id!);
+        const p = mint(c, true, 'gfail rot');
+        await sleep(at);
+        const mid = await validate(s.key!);
+        const replaced = mem.get(s.id!) !== before;
+        const r = await p;
+        const rows = await rowsOf(c);
+        const post = [await validate(s.key!), await validate(s.key!), await validate(s.key!)].map((v) => v.valid);
+        out.push({ at, mid: mid.reason ?? mid.valid, replaced, st: r.status, key: r.key, dbActive: activeIds(rows).length === 1 && activeIds(rows)[0] === s.id, memActive: mem.get(s.id!)?.isActive, post });
+      }
+    } finally { await disarmCommitFailure(); }
+    results.A1_replaced = out;
+    expect(out.filter((o) => o.mid !== 'Key revoked' || !o.replaced)).toEqual([]); // instrument: the race really happened
+    expect(out.filter((o) => o.st < 500 || o.key !== null || !o.dbActive || o.memActive !== true || o.post.some((v: unknown) => v !== true))).toEqual([]);
+  });
+
+  cell('A2_deleted', async () => {
+    // m1: the entry is DELETED from the map during the COMMIT window (test seam). The undo must not resurrect it, and the key
+    // must still validate (cache miss -> stored row, active).
+    const out: any[] = [];
+    await armCommitFailure();
+    try {
+      const c = conn('a2');
+      const s = await mint(c, false, 's');
+      const p = mint(c, true, 'gfail rot');
+      await sleep(800);
+      const hadIt = mem.has(s.id!); mem.delete(s.id!);
+      const r = await p;
+      const afterUndo = mem.has(s.id!);
+      const v = await validate(s.key!);
+      out.push({ hadIt, st: r.status, resurrected: afterUndo, v: v.valid, memAfterValidate: mem.get(s.id!)?.isActive });
+    } finally { await disarmCommitFailure(); }
+    results.A2_deleted = out;
+    expect(out.filter((o) => !o.hadIt || o.st < 500 || o.resurrected !== false || o.v !== true)).toEqual([]);
+  });
+
+  cell('A3_revoke_in_window', async () => {
+    // m1: an operator REVOKE of the prior key lands inside the COMMIT window (its save waits on the row lock the rotate holds).
+    // Single fault: the rotate's COMMIT fails, the revoke's save succeeds. Then the DB says revoked: does memory?
+    const out: any[] = [];
+    await armCommitFailure();
+    try {
+      for (let t = 0; t < 3; t += 1) {
+        const c = conn(`a3-${t}`);
+        const s = await mint(c, false, 's');
+        const p = mint(c, true, 'gfail rot');
+        await sleep(800);
+        const rv = revoke(s.id!);
+        await sleep(200);
+        const waiting = (await superPool.query("SELECT count(*)::int AS n FROM pg_stat_activity WHERE wait_event_type = 'Lock' AND query ILIKE 'INSERT INTO svc_api_keys%'")).rows[0].n;
+        const r = await p; const rvr = await rv;
+        const rows = await rowsOf(c);
+        out.push({ waitingOnRowLock: waiting, rotate: r.status, revoke: rvr.status, dbSeedActive: rows.find((x) => x.id === s.id)?.is_active, memSeedActive: mem.get(s.id!)?.isActive, listed: await listed(s.id!), v: (await validate(s.key!)).valid, memAfterValidate: mem.get(s.id!)?.isActive });
+      }
+    } finally { await disarmCommitFailure(); }
+    results.A3_revoke_in_window = out;
+    // record-only expectations (the verdict reads the JSON): the revoke must hold where it is checked (validate)
+    expect(out.filter((o) => o.revoke !== 200 || o.dbSeedActive !== false || o.v !== false)).toEqual([]);
+  });
+
+  cell('A3b_revoke_fail_in_window', async () => {
+    // m1 double fault: as A3, but the revoke's SAVE also fails -> KS-888 R2: "the in-memory revoke is KEPT, so the key stops
+    // working in this process". CONTROL first: the same failing revoke with no rotate in flight.
+    const out: any = {};
+    {
+      const c = conn('a3b-ctl');
+      const s = await mint(c, false, 's');
+      await superPool.query("INSERT INTO gate1529_flags VALUES ('failrevoke') ON CONFLICT DO NOTHING");
+      const rv = await revoke(s.id!);
+      await superPool.query('TRUNCATE gate1529_flags');
+      out.control = { revoke: rv.status, dbSeedActive: (await rowsOf(c))[0].is_active, memSeedActive: mem.get(s.id!)?.isActive, v: (await validate(s.key!)).valid };
+    }
+    await armCommitFailure();
+    const trials: any[] = [];
+    try {
+      for (let t = 0; t < 3; t += 1) {
+        const c = conn(`a3b-${t}`);
+        const s = await mint(c, false, 's');
+        const p = mint(c, true, 'gfail rot');
+        await sleep(800);
+        await superPool.query("INSERT INTO gate1529_flags VALUES ('failrevoke') ON CONFLICT DO NOTHING");
+        const rv = revoke(s.id!);
+        const r = await p; const rvr = await rv;
+        await superPool.query('TRUNCATE gate1529_flags');
+        const rows = await rowsOf(c);
+        trials.push({ rotate: r.status, revoke: rvr.status, dbSeedActive: rows.find((x) => x.id === s.id)?.is_active, memSeedActive: mem.get(s.id!)?.isActive, v1: (await validate(s.key!)).valid, v2: (await validate(s.key!)).valid });
+      }
+    } finally { await disarmCommitFailure(); await superPool.query('TRUNCATE gate1529_flags'); }
+    out.trials = trials;
+    results.A3b_revoke_fail_in_window = out;
+    expect(out.control.revoke).toBeGreaterThanOrEqual(500);
+    expect(out.control.v, 'control: a failed-save revoke stops the key in this process').toBe(false);
+    expect(trials.filter((o) => o.v1 !== false || o.v2 !== false), 'the same revoke during a failing rotate must also hold').toEqual([]);
+  });
+
+  cell('A4_second_rotate', async () => {
+    // m1: rotate A fails at COMMIT; rotate B on the same connector waits on the lock and commits as A unwinds.
+    // After: DB active = [B]; memory: seed retired, B active, A absent. Natural timing, 10 trials.
+    const out: any[] = [];
+    await armCommitFailure();
+    try {
+      for (let t = 0; t < 10; t += 1) {
+        const c = conn(`a4-${t}`);
+        const s = await mint(c, false, 's');
+        const pa = mint(c, true, 'gfail A');
+        await sleep(200);
+        const pb = mint(c, true, 'B');
+        const [a, b] = await Promise.all([pa, pb]);
+        const rows = await rowsOf(c);
+        out.push({ a: a.status, b: b.status, bPrk: b.priorKeysRevoked, dbActiveIsB: JSON.stringify(activeIds(rows)) === JSON.stringify([b.id]), memSeed: mem.get(s.id!)?.isActive, memB: b.id ? mem.get(b.id)?.isActive : null, aInMem: a.id ? mem.has(a.id) : false, vSeed: (await validate(s.key!)).valid, vB: b.key ? (await validate(b.key)).valid : null });
+      }
+    } finally { await disarmCommitFailure(); }
+    results.A4_second_rotate = out;
+    expect(out.filter((o) => o.a < 500 || o.b !== 201 || !o.dbActiveIsB || o.vSeed !== false || o.vB !== true)).toEqual([]);
+  });
+
+  cell('A5_db_only_prior', async () => {
+    // m1: a prior key the DB returns but memory does not hold (minted by another replica). Failing rotate: undo skips it, map stays
+    // without it, the key validates (cache miss). Succeeding rotate: DB retires it, the key is refused.
+    const out: any = {};
+    const mk = async (c: string) => {
+      const keyValue = `sk_gate_${crypto.randomBytes(16).toString('hex')}`;
+      const id = `key_${crypto.randomUUID()}`;
+      await superPool.query(`INSERT INTO svc_api_keys (id, organization_id, tenant_id, name, key_hash, key_prefix, scopes, rate_limit, rate_limit_window, usage_count, is_active, created_at, connector_id)
+        VALUES ($1,$2,$3::uuid,'other replica',$4,$5,'["documents:read"]',100,60,0,true,now(),$6)`, [id, ORG, TENANT, crypto.createHash('sha256').update(keyValue).digest('hex'), keyValue.slice(0, 12), c]);
+      return { id, keyValue };
+    };
+    await armCommitFailure();
+    try {
+      const c = conn('a5-fail'); const o = await mk(c);
+      const r = await mint(c, true, 'gfail rot');
+      out.fail = { st: r.status, inMemAfter: mem.has(o.id), v: (await validate(o.keyValue)).valid, dbActive: (await rowsOf(c)).map((x) => x.is_active) };
+    } finally { await disarmCommitFailure(); }
+    const c2 = conn('a5-ok'); const o2 = await mk(c2);
+    const r2 = await mint(c2, true, 'rot');
+    out.ok = { st: r2.status, prk: r2.priorKeysRevoked, inMemAfter: mem.has(o2.id), v: (await validate(o2.keyValue)).valid };
+    results.A5_db_only_prior = out;
+    expect(out.fail.st).toBeGreaterThanOrEqual(500); expect(out.fail.v).toBe(true);
+    expect(out.ok.st).toBe(201); expect(out.ok.prk).toBe(1); expect(out.ok.v).toBe(false);
+  });
+});

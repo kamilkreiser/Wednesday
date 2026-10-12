@@ -1,0 +1,36 @@
+import sys
+# usage: mut.py <index.ts> <mutant>; every anchor must occur exactly once, or the mutant refuses (no silent no-op).
+p, m = sys.argv[1], sys.argv[2]
+s = open(p).read()
+PIN = "      await client.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');\n"
+GUC = "      await applyTenantGuc(client);\n"
+UNDO = """        undo.push(() => {
+          const current = memApiKeys.get(id);
+          if (!current) return;
+          current.isActive = prev.isActive;
+          current.expiresAt = prev.expiresAt;
+        });
+"""
+SAVEPT = "      await client.query('SAVEPOINT ks1549_retire');\n      try {\n"
+CATCH = "  } catch (err) {\n    for (const u of undo.reverse()) u();\n"
+M = {
+  # the author's six
+  'U1_undo_captured_object': [(UNDO, "        undo.push(() => { m.isActive = prev.isActive; m.expiresAt = prev.expiresAt; }); /*GATE_U1*/\n")],
+  'U2_undo_leaves_retired': [(UNDO, "        /*GATE_U2*/\n")],
+  'I1_pin_removed': [(PIN, "      /*GATE_I1*/\n")],
+  'I2_pin_after_guc': [(PIN + GUC, GUC + PIN.replace(");\n", "); /*GATE_I2*/\n"))],
+  'I3_pin_repeatable_read': [(PIN, PIN.replace('READ COMMITTED', 'REPEATABLE READ').replace(");\n", "); /*GATE_I3*/\n"))],
+  'I4_pin_serializable': [(PIN, PIN.replace('READ COMMITTED', 'SERIALIZABLE').replace(");\n", "); /*GATE_I4*/\n"))],
+  # the gate's own
+  'G1_undo_by_id_only_if_same_object': [(UNDO, UNDO.replace("if (!current) return;", "if (current !== m) return; /*GATE_G1*/"))],
+  'G2_pin_inside_savepoint': [(PIN, "      /*GATE_G2a*/\n"), (SAVEPT, SAVEPT + "        await client.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED'); /*GATE_G2b*/\n")],
+  'G3_pin_skipped_on_grace_path': [(PIN, "      if (rotationGraceSeconds() === 0) await client.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED'); /*GATE_G3*/\n")],
+  'G4_undo_restores_isActive_only': [(UNDO, UNDO.replace("          current.expiresAt = prev.expiresAt;\n", "          /*GATE_G4*/\n"))],
+  # not a mutant: a widening probe. The undo waits 400 ms, so a second rotate's in-lock memory retire lands first.
+  'W1_undo_delayed_400ms': [(CATCH, "  } catch (err) {\n    await new Promise((r) => setTimeout(r, 400)); /*GATE_W1*/\n    for (const u of undo.reverse()) u();\n")],
+}
+for old, new in M[m]:
+    assert s.count(old) == 1, f'anchor count {s.count(old)} for {m}: {old[:60]!r}'
+    s = s.replace(old, new)
+open(p, 'w').write(s)
+print('mutated', m)

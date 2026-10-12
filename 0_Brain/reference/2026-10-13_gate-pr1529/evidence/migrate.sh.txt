@@ -1,0 +1,13 @@
+#!/bin/zsh
+# Runs the repo's migration runner from the Dev dir (it globs migrations/*.sql relative to cwd).
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529
+D=$G/head/Blockchain/Dev
+export PATH=/opt/homebrew/opt/postgresql@15/bin:$PATH PGHOST=127.0.0.1 PGPORT=55421 PGUSER=secuura
+builtin cd $D || exit 9
+DATABASE_URL=postgresql://secuura@127.0.0.1:55421/secuura sh scripts/run-migrations.sh > $G/migrations.log 2>&1; echo "run-migrations rc=$?"
+tail -3 $G/migrations.log
+psql -d secuura -At -c "SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname='svc_api_keys'"
+psql -d secuura -At -c "SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname='secuura_app'"
+psql -d secuura -At -c "SELECT count(*) FROM _secuura_migrations"
+psql -d secuura -At -c "SHOW default_transaction_isolation"

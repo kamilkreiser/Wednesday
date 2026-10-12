@@ -1,0 +1,15 @@
+import re, sys
+# usage: summ.py <evidence file>... ; prints per-cell pass/fail (short names) and counts
+for p in sys.argv[1:]:
+    s = re.sub(r'\x1b\[[0-9;]*m', '', open(p, encoding='utf-8', errors='replace').read())
+    head = s.splitlines()[0]
+    rows = []
+    for line in s.splitlines():
+        m = re.match(r'\s*([✓×↓])\s+\S+\.test\.ts > [^>]+> (.*?)(?:\s+\d+ms)?$', line)
+        if m:
+            rows.append((m.group(1), m.group(2)[:70]))
+    ok = sum(1 for r in rows if r[0] == '✓'); bad = [r[1] for r in rows if r[0] == '×']
+    rc = re.findall(r'# rc=(\d+)', s)
+    print(f'{p.split("/")[-1]}: pass={ok} fail={len(bad)} rc={rc[-1] if rc else "?"} | {head[:90]}')
+    for b in bad:
+        print('   FAIL:', b)

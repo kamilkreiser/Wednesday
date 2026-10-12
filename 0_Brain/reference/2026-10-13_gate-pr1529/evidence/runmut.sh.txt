@@ -1,0 +1,16 @@
+#!/bin/zsh
+# usage: runmut.sh <tree> <mutant> <outname> [vitest filters...]  (extra env passes through: GATE_ISO, GATE_ONLY, GATE_TAG)
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529
+T=$1; MU=$2; O=$3; shift 3
+F=$G/$T/Blockchain/Dev/services/security/src/index.ts
+git -C $G/$T checkout -q -- Blockchain/Dev/services/security/src/index.ts
+python3 -I $G/mut.py $F $MU || { echo "MUTANT REFUSED"; exit 7; }
+n=$(/usr/bin/grep -c "GATE_" $F); echo "marker count=$n"
+[ "$n" -ge 1 ] || { echo "no marker"; exit 8; }
+zsh $G/runint.sh $T $O "$@" > /dev/null
+EV=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1529/evidence
+{ echo "# mutant=$MU markers=$n"; /usr/bin/grep -n "GATE_" $F; } >> $EV/$O.txt
+git -C $G/$T checkout -q -- Blockchain/Dev/services/security/src/index.ts
+echo "restored: $(git -C $G/$T diff --stat -- Blockchain/Dev/services/security/src/index.ts | wc -l | tr -d ' ') changed lines-summary"
+python3 -I $G/summ.py $EV/$O.txt

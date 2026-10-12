@@ -1,0 +1,30 @@
+#!/bin/zsh
+# Throwaway PG15 for the PR1527 gate. Author's recipe: initdb -U secuura trust; init/* in order; run-migrations.sh
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529
+D=$G/head/Blockchain/Dev
+PORT=55421; PGBIN=/opt/homebrew/opt/postgresql@15/bin; PGD=$G/pgdata
+export PATH=$PGBIN:$PATH
+[ -d $PGD ] && { echo "pgdata exists"; exit 30; }
+initdb -D $PGD -U secuura --auth=trust -E UTF8 > $G/initdb.log || exit 31
+pg_ctl -D $PGD -o "-p $PORT -c unix_socket_directories='' -c listen_addresses=127.0.0.1 -c max_connections=200" -l $G/pg.log -w start > /dev/null || exit 32
+export PGHOST=127.0.0.1 PGPORT=$PORT PGUSER=secuura
+psql -d postgres -q -c "CREATE DATABASE secuura" || exit 33
+export POSTGRES_USER=secuura
+umask 077
+export APP_DB_PASSWORD=$(openssl rand -hex 16); print -n "$APP_DB_PASSWORD" > $G/app_pw
+for f in $D/docker/init/*; do
+  b=$(basename $f)
+  case $b in
+    *.sql) psql -d secuura -v ON_ERROR_STOP=1 -q -f $f > $G/init_$b.log 2>&1; echo "init $b rc=$?";;
+    *.sh) bash $f > $G/init_$b.log 2>&1; echo "init $b rc=$?";;
+  esac
+done
+psql -d postgres -tAc "SELECT datname FROM pg_database WHERE datname='secuura_platform'"
+DATABASE_URL=postgresql://secuura@127.0.0.1:$PORT/secuura sh $D/scripts/run-migrations.sh > $G/migrations.log 2>&1; echo "run-migrations rc=$?"
+tail -5 $G/migrations.log
+psql -d secuura -At -c "SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname='svc_api_keys'"
+psql -d secuura -At -c "SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname='secuura_app'"
+psql -d secuura -At -c "SHOW default_transaction_isolation"
+print "export TEST_DATABASE_URL=postgresql://secuura@127.0.0.1:$PORT/secuura\nexport TEST_APP_DATABASE_URL=postgresql://secuura_app:$APP_DB_PASSWORD@127.0.0.1:$PORT/secuura" > $G/pg.env
+echo SETUP DONE

@@ -1,0 +1,29 @@
+# PG15 log_statement=all (enabled for this one run, then reset; SHOW log_statement afterwards = none). Head c3b66f7f, service pool default REPEATABLE READ via URL options. Lines from the rotate backend [38456] only, LOG lines (parameters elided).
+statement: SELECT 1 AS ok
+statement: SHOW default_transaction_isolation
+statement: BEGIN
+statement: SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+execute <unnamed>: SELECT set_config('app.current_tenant_id', $1, true)
+execute <unnamed>: SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))
+execute <unnamed>: INSERT INTO svc_api_keys (id, organization_id, tenant_id, name, key_hash, key_prefix, scopes,
+statement: SAVEPOINT ks1549_retire
+execute <unnamed>: UPDATE svc_api_keys SET is_active = false
+statement: RELEASE SAVEPOINT ks1549_retire
+statement: COMMIT
+gate1529 injected commit failure
+statement: ROLLBACK
+execute <unnamed>: SELECT * FROM security_find_api_key_by_hash($1)
+statement: BEGIN
+execute <unnamed>: SELECT set_config('app.current_tenant_id', $1, true)
+execute <unnamed>: UPDATE svc_api_keys SET last_used_at = $2, usage_count = $3 WHERE id = $1
+statement: COMMIT
+statement: BEGIN
+statement: SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+execute <unnamed>: SELECT set_config('app.current_tenant_id', $1, true)
+execute <unnamed>: SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))
+execute <unnamed>: INSERT INTO svc_api_keys (id, organization_id, tenant_id, name, key_hash, key_prefix, scopes,
+statement: SAVEPOINT ks1549_retire
+execute <unnamed>: UPDATE svc_api_keys SET is_active = false
+statement: RELEASE SAVEPOINT ks1549_retire
+statement: COMMIT
+execute <unnamed>: SELECT * FROM security_find_api_key_by_hash($1)
