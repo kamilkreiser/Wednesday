@@ -2656,3 +2656,8 @@ INCLUDED until he says otherwise.
 > Once things are done and ready to merge and archive, please go ahead and do it
 
 *Note:* receipted; filed as grant learnings/2026-10-10_merge-and-archive-when-done-and-ready.md
+
+## 2026-10-12 19:17 — Kam (terminal, verbatim)
+> keep going and keep rolling out agents to work through all tickets and items for MPS Calculator, Security Controls creation tool and HPSM POC
+
+*Note:* Friday: three per-project lane sorts commissioned; seats launched in code-disjoint lanes.
