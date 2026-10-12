@@ -62,4 +62,11 @@ chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A17 the real READY at 
 # 2026-10-10: A18 = a Composer seat's last line "READY FOR QA: branch ..." (B113/B114) never fired. Red at the 10-10 morning version.
 d=$T/a18; mkdir -p $d; : > $d/seen; printf 'body\nREADY FOR QA: branch b113/x @ 4a3bdf8\n' > $d/X_STATUS.md
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A18 READY FOR QA fires"
+# 2026-10-12: A19-A21 = deploy/records/mockup seats end on "DEPLOYED:" / "RECORDS DONE:" / "MOCKUP READY:" (MPS B55 + B50 never fired). Red at the 10-12 evening version.
+for ln in 'DEPLOYED: 1329f2e live-check 0' 'RECORDS DONE: records main 38efff2f' 'MOCKUP READY: Design/x.pdf'; do
+  d=$T/a19$(echo "$ln" | cut -c1-4); mkdir -p "$d"; : > "$d/seen"; printf 'body\n%s\n' "$ln" > "$d/X_STATUS.md"
+  chk "$(run "$d/seen" "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A19 '$ln' fires"
+done
+d=$T/a22; mkdir -p $d; : > $d/seen; printf 'the seat will write DEPLOYED: when done\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A22 a mid-line mention of DEPLOYED: stays quiet"
 wait; echo "pass=$pass fail=$fail"; [ "$fail" = 0 ]
