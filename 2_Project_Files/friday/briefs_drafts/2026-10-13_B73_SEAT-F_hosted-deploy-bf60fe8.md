@@ -1,16 +1,16 @@
 From Friday (laptop seat), Datasec / MPS Commercial Calculator. Replies go to `friday-laptop-agent@agentmail.to`. If `4_Credentials/.env` has no `AGENTMAIL_API_KEY`, the STATUS file is the wrap.
 
 # BRIEF B73 · SEAT-F: HOSTED DEPLOY of MPS main `bf60fe83c02c703d5df11253629b268d25c78ab0` (PRs #29 to #33: source-store hardening, overlay fixes, leak scanner, feedback pill, overlay timing) to the existing showcase. Code only, plus PART B (one feedback-store setting) ONLY if Friday's placement note says Kam ruled **b**. B55 runbook, with five mandatory pre-swap STOP checks.
-**From:** Friday (laptop seat), @NOW@. **Seat:** pane `Datasec/MPS-F`. Your commission is THIS file at `/Volumes/Laptop-DEV/FRIDAY/2_Project_Files/friday/briefs_drafts/2026-10-13_B73_SEAT-F_hosted-deploy-bf60fe8.md` (Friday's tree, read-only to you). Step 0: copy it unchanged into your `1_Project_Definition/Briefs/` as the project's record (`cmp` equal, sha256 in STATUS).
-**Fired:** @NOW@
-**FRIDAY'S NOTE AT PLACEMENT:** @FRIDAY_CHECK@
+**From:** Friday (laptop seat), 2026-10-13 10:32 AEDT. **Seat:** pane `Datasec/MPS-F`. Your commission is THIS file at `/Volumes/Laptop-DEV/FRIDAY/2_Project_Files/friday/briefs_drafts/2026-10-13_B73_SEAT-F_hosted-deploy-bf60fe8.md` (Friday's tree, read-only to you). Step 0: copy it unchanged into your `1_Project_Definition/Briefs/` as the project's record (`cmp` equal, sha256 in STATUS).
+**Fired:** 2026-10-13 10:32 AEDT
+**FRIDAY'S NOTE AT PLACEMENT:** Kam ruled **b** on card mpscalc-hosted-deploy-bf60fe8-1013, live board 2026-10-13 10:32:01 AEDT (view=friday), verbatim: "Decision mpscalc-hosted-deploy-bf60fe8-1013: b — Deploy now and switch feedback saving on" → **PART B: run**. Friday 10:32: main read bf60fe83 (GitHub commits API) = the brief's target; main ci 38321338442 success; brief read whole by Friday.
 **Client:** Datasec only. **Project:** MPS Commercial Calculator only. **Tier:** 2. Production-class steps run only in the order below.
 **Report:** `1_Project_Definition/Briefs/2026-10-13_B73_STATUS.md` only. Its exact LAST line is **`DEPLOYED: <sha> live-check <n>`** (with ` feedback-store on` appended if PART B ran and passed) or **`STOPPED: NEEDS FRIDAY`**, followed by the one question that blocks you.
 **Launch:** Friday runs `bash /Volumes/Laptop-DEV/FRIDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/MPS-F "bash '/Volumes/Laptop-DEV/FRIDAY/2_Project_Files/friday/brief_seat.sh' datasec '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator' '../../../FRIDAY/2_Project_Files/friday/briefs_drafts/2026-10-13_B73_SEAT-F_hosted-deploy-bf60fe8.md'"` (path relative to the project dir, resolving into Friday's tree; `ls`-checked in the launch command). The form is `brief_seat.sh:3-4`. Friday does not use the project's own `Launch_Claude.command` (its rule 4: no Azure tenant assigned to the project; ask before any az command). B55 was launched the same way.
 - **Consequence you must handle:** `brief_seat.sh` runs through `friday_as.sh datasec`, which exports Friday's `AZURE_CONFIG_DIR`, NOT this project's. **Set `AZURE_CONFIG_DIR="$PWD/4_Credentials/.azure"` on every `az` call and every script that calls `az`** (B55 did, `B55_STATUS.md` § C-2). Never run `az` with Friday's directory or `~/.azure`.
 - There is no launcher preflight in this launch. Write "none (brief_seat launch)" in STATUS.
 
-**Convention.** Records under `1_Project_Definition/Briefs/` are untracked working-tree files; `file:line` means the file as Friday's drafter read it at @NOW@. Code is cited as `path:line @ <sha>` in `2_Project_Files`. The drafter used read-only git verbs only (`--no-optional-locks`, no fetch) and `friday_as.sh datasec gh api` GETs. "UNMEASURED" means the drafter did not read it, so you measure it.
+**Convention.** Records under `1_Project_Definition/Briefs/` are untracked working-tree files; `file:line` means the file as Friday's drafter read it at 2026-10-13 10:32 AEDT. Code is cited as `path:line @ <sha>` in `2_Project_Files`. The drafter used read-only git verbs only (`--no-optional-locks`, no fetch) and `friday_as.sh datasec gh api` GETs. "UNMEASURED" means the drafter did not read it, so you measure it.
 
 ## AUTHORITY
 - **Deploy card `mpscalc-hosted-deploy-bf60fe8-1013`** (Friday's board). Friday launches this seat only after Kam taps **a** (code only) or **b** (code + PART B). On **c** this seat is not launched. The placement note above names the ruling and its time; if it is missing or says anything else: **STOP: NEEDS FRIDAY** before step 0.
@@ -44,7 +44,7 @@ d711b42 Source version store hardening (B53; gate B57 GO WITH NOTES) (#29)
 `git diff --stat 1329f2e bf60fe8`: 44 files changed, +7,928 / −122. Per commit: #29 5 files · #30 5 · #31 3 (`tools/leakscan/` only) · #32 31 · #33 4 (one product line). Each commit's single parent is the previous one (`git rev-list --parents -n1`).
 
 ## Target asserts (in `2_Project_Files`; `git fetch origin` is allowed, then read-only verbs). Any mismatch: **STOP: NEEDS FRIDAY**
-1. `git ls-remote origin refs/heads/main` = **`bf60fe83c02c703d5df11253629b268d25c78ab0`**. Drafter: equal at @NOW@. Anything else (main moved): STOP.
+1. `git ls-remote origin refs/heads/main` = **`bf60fe83c02c703d5df11253629b268d25c78ab0`**. Drafter: equal at 2026-10-13 10:32 AEDT. Anything else (main moved): STOP.
 2. `git rev-parse bf60fe83…^{tree}` = **`c62dfb16f89b8419c9d001361068e4f8ce3ff667`** (= `3a037e24…^{tree}`, B71's merge tree). Drafter: equal.
 3. `git rev-list --parents -n1 bf60fe83…` = one parent **`220956b19ab104d1df33e643e238167a286673f2`** (a squash). Drafter: equal.
 4. `git merge-base --is-ancestor 1329f2e824e9237e44ebb01918993ec0111a6972 bf60fe83…` rc 0 (drafter: rc 0). Record `git log --oneline --first-parent 1329f2e..bf60fe83` verbatim; it must equal the five lines above.
@@ -59,7 +59,7 @@ d711b42 Source version store hardening (B53; gate B57 GO WITH NOTES) (#29)
    - Re-measure all of them and record the commands.
 
 **Live today:** main `1329f2e824e9237e44ebb01918993ec0111a6972`, deployed by B55 (`B55_STATUS.md:221`, last line `DEPLOYED: 1329f2e… live-check 0`).
-- Package `mpscalc.zip` sha256 **`54eff4f1592dbe6d7d7d9d1dbb547878405ac6028fd4c38dde972d1cf0556b69`**, 2,790,213 bytes, 48 files, kept at `.tools/wt-B55-release/.local/deploy-packages/1329f2e824e9237e44ebb01918993ec0111a6972/` (`B55_STATUS.md:81`). The drafter re-hashed it at @NOW@: **equal**, 2,790,213 bytes.
+- Package `mpscalc.zip` sha256 **`54eff4f1592dbe6d7d7d9d1dbb547878405ac6028fd4c38dde972d1cf0556b69`**, 2,790,213 bytes, 48 files, kept at `.tools/wt-B55-release/.local/deploy-packages/1329f2e824e9237e44ebb01918993ec0111a6972/` (`B55_STATUS.md:81`). The drafter re-hashed it at 2026-10-13 10:32 AEDT: **equal**, 2,790,213 bytes.
 - 16 app settings at B55's end (`B55_evidence/30_end_appsettings.tsv`; the drafter read the NAME column only): no `MpsCalc__Feedback__*`, no `MpsCalc__QuoteStore__HostedRoot` (the code default `/home/data/` applies, `QuoteFileStore.cs:20 @ bf60fe8`), no `MpsCalc__SourceVersions__Path`.
 
 **Site:** `app-mpscalc-showcase-u6agl3edszqvs` in RG `mpscalc-showcase-rg`, subscription `a6b8fe11-d1b5-4293-8727-b34aba08a705`, tenant `ec01829b-fdcb-4503-9834-eb2ffbd99169` (`B55_STATUS.md` § C-2).
