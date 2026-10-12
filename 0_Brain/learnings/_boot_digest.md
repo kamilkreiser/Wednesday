@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-12 20:54 from 235 lesson files (1,035,664 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 16 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-12 22:22 from 235 lesson files (1,035,965 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 16 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7236,6 +7236,8 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 3. The patched path still needs a real seat to prove end to end: the next real rotation is the test; read the pane list afterwards as in rule 1.
 
 **Family:** [[2026-08-06_artifact-presence-is-not-execution]] (a tap and a "waiting" line are not a rotation) · [[2026-08-06_exercise-mechanisms-before-arming]] (the disposable-pane test found the `setsid` defect before the patch went live) · [[2026-09-16_never-edit-a-bash-script-that-is-currently-running]] (checked: no rotate process was alive when I patched).
+
+**Confirmed in practice (22:2x same day):** K 5th ran the rotation DETACHED, logged it, and the lane respawned (pane %67, K 6th). The patch is no longer only disk-tested. Seats that run `cockpit.sh rotate` from inside their own pane now respawn; the pane-list read two minutes later stays the check.
 
 
 ## Be more careful, especially with coding files and deploys

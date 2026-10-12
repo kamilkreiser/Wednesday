@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-12 20:54 from 235 lesson files (1,035,874 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 190. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-12 22:22 from 235 lesson files (1,036,175 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 190. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7164,6 +7164,8 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 3. The patched path still needs a real seat to prove end to end: the next real rotation is the test; read the pane list afterwards as in rule 1.
 
 **Family:** [[2026-08-06_artifact-presence-is-not-execution]] (a tap and a "waiting" line are not a rotation) · [[2026-08-06_exercise-mechanisms-before-arming]] (the disposable-pane test found the `setsid` defect before the patch went live) · [[2026-09-16_never-edit-a-bash-script-that-is-currently-running]] (checked: no rotate process was alive when I patched).
+
+**Confirmed in practice (22:2x same day):** K 5th ran the rotation DETACHED, logged it, and the lane respawned (pane %67, K 6th). The patch is no longer only disk-tested. Seats that run `cockpit.sh rotate` from inside their own pane now respawn; the pane-list read two minutes later stays the check.
 
 
 ## Be more careful, especially with coding files and deploys
