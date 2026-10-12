@@ -1,0 +1,446 @@
+######## head-mem
+mode memory cells 560
+status histogram Counter({403: 362, 400: 108, 201: 90})
+mismatches 10
+   ('provisioner', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_tenant', 'malformed_array', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_array', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+victim retired by non-platform caller 3
+   ('provisioner', 'own_org', 'other', True, 201, 400, ['22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('provisioner', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('provisioner', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+--- smuggle
+   {'label': 'query', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'header x-connector-id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body ConnectorId', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connectorid', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connector_id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body " connectorId"', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': '__proto__ key', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'constructor.prototype', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'duplicate key (own then other)', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'connectorId null', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'connectorId whitespace', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'connectorId trailing space', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'rotate "true" string', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'nested data wrapper', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'x-tenant-id header other tenant, no body tenant', 'status': 403, 'msg': 'API keys may only be minted in your own tenant', 'victimActive': True, 'added': []}
+   {'label': 'urlencoded body', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+--- org variants
+   {'label': 'A2_upper', 'sent': '22222222-2222-4222-8222-222222222222', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'A2_padded', 'sent': ' 22222222-2222-4222-8222-222222222222 ', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'empty', 'sent': '', 'status': 201, 'msg': None, 'storedOrg': ['']}
+   {'label': 'spaces', 'sent': '   ', 'status': 201, 'msg': None, 'storedOrg': ['   ']}
+   {'label': 'A1_upper', 'sent': '11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['11111111-1111-4111-8111-111111111111']}
+   {'label': 'A1_padded', 'sent': ' 11111111-1111-4111-8111-111111111111 ', 'status': 201, 'msg': None, 'storedOrg': [' 11111111-1111-4111-8111-111111111111 ']}
+   {'label': 'A1_tab', 'sent': '\t11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['\t11111111-1111-4111-8111-111111111111']}
+   {'label': 'not_uuid', 'sent': 'org-b', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'number', 'sent': 7, 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+   {'label': 'array', 'sent': ['11111111-1111-4111-8111-111111111111'], 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+--- race {'n': 20, 'statuses': [201], 'keysOnConnector': 21, 'activeOnConnector': 1, 'priorKeysRevoked': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+--- race2 {'atk': 403, 'legit': 201, 'active': 1, 'total': 2}
+######## head-pg
+mode postgres cells 560
+status histogram Counter({403: 362, 400: 108, 201: 90})
+mismatches 10
+   ('provisioner', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_tenant', 'malformed_array', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_array', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+victim retired by non-platform caller 3
+   ('provisioner', 'own_org', 'other', True, 201, 400, ['22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('provisioner', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('provisioner', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+--- smuggle
+   {'label': 'query', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'header x-connector-id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body ConnectorId', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connectorid', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connector_id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body " connectorId"', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': '__proto__ key', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'constructor.prototype', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'duplicate key (own then other)', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'connectorId null', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'connectorId whitespace', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'connectorId trailing space', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'rotate "true" string', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'nested data wrapper', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'x-tenant-id header other tenant, no body tenant', 'status': 403, 'msg': 'API keys may only be minted in your own tenant', 'victimActive': True, 'added': []}
+   {'label': 'urlencoded body', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+--- org variants
+   {'label': 'A2_upper', 'sent': '22222222-2222-4222-8222-222222222222', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'A2_padded', 'sent': ' 22222222-2222-4222-8222-222222222222 ', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'empty', 'sent': '', 'status': 201, 'msg': None, 'storedOrg': ['']}
+   {'label': 'spaces', 'sent': '   ', 'status': 201, 'msg': None, 'storedOrg': ['   ']}
+   {'label': 'A1_upper', 'sent': '11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['11111111-1111-4111-8111-111111111111']}
+   {'label': 'A1_padded', 'sent': ' 11111111-1111-4111-8111-111111111111 ', 'status': 201, 'msg': None, 'storedOrg': [' 11111111-1111-4111-8111-111111111111 ']}
+   {'label': 'A1_tab', 'sent': '\t11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['\t11111111-1111-4111-8111-111111111111']}
+   {'label': 'not_uuid', 'sent': 'org-b', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'number', 'sent': 7, 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+   {'label': 'array', 'sent': ['11111111-1111-4111-8111-111111111111'], 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+--- race {'n': 20, 'statuses': [201], 'keysOnConnector': 21, 'activeOnConnector': 1, 'priorKeysRevoked': [1, 0, 0, 0, 0, 0, 1, 0, 0, 7, 1, 7, 1, 0, 1, 1, 0, 0, 0, 0]}
+--- race2 {'atk': 403, 'legit': 201, 'active': 1, 'total': 2}
+######## dev-pg
+mode postgres cells 560
+status histogram Counter({403: 232, 201: 220, 400: 108})
+mismatches 140
+   ('ADMIN', 'own_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'own_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'own_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'own_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'own_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'own_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'other_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'other_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'other_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'other_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'other_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'other_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'orgless', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'orgless', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'orgless', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'orgless', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'orgless', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'orgless', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ADMIN', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'own_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'own_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'own_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'own_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'own_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'own_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'orgless', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'orgless', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'orgless', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'orgless', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'orgless', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'orgless', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'own_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'own_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'own_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'own_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'own_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'own_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'orgless', 'own', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'orgless', 'own', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'orgless', 'other', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'orgless', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'orgless', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'orgless', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'own_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'own_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'own_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'own_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'own_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'own_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'orgless', 'own', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'orgless', 'own', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'orgless', 'other', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'orgless', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'orgless', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'orgless', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'own', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'own', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'other', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'orgless', 'own', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'orgless', 'own', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'orgless', 'other', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'orgless', 'malformed_empty', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'orgless', 'malformed_empty', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'orgless', 'malformed_case', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_tenant', 'malformed_array', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_array', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+victim retired by non-platform caller 18
+   ('ADMIN', 'own_org', 'other', True, 201, 8, ['22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('ADMIN', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('ADMIN', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+   ('ORG_ADMIN', 'own_org', 'other', True, 201, 72, [None, '22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('ORG_ADMIN', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('ORG_ADMIN', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+   ('org_admin_lc', 'own_org', 'other', True, 201, 16, [None, '22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('org_admin_lc', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('org_admin_lc', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+   ('ISSUER_ADMIN', 'own_org', 'other', True, 201, 16, [None, '22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('ISSUER_ADMIN', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('ISSUER_ADMIN', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+   ('orgless_issuer_admin', 'own_org', 'other', True, 201, 16, [None, '22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('orgless_issuer_admin', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('orgless_issuer_admin', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+   ('provisioner', 'own_org', 'other', True, 201, 72, [None, '22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('provisioner', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('provisioner', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+--- smuggle
+   {'label': 'query', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'header x-connector-id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body ConnectorId', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connectorid', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connector_id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body " connectorId"', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': '__proto__ key', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'constructor.prototype', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'duplicate key (own then other)', 'status': 201, 'msg': None, 'victimActive': False, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': 'platform-s:a2-ref'}]}
+--- org variants
+   {'label': 'A2_upper', 'sent': '22222222-2222-4222-8222-222222222222', 'status': 201, 'msg': None, 'storedOrg': ['22222222-2222-4222-8222-222222222222']}
+   {'label': 'A2_padded', 'sent': ' 22222222-2222-4222-8222-222222222222 ', 'status': 201, 'msg': None, 'storedOrg': [' 22222222-2222-4222-8222-222222222222 ']}
+   {'label': 'empty', 'sent': '', 'status': 201, 'msg': None, 'storedOrg': ['']}
+   {'label': 'spaces', 'sent': '   ', 'status': 201, 'msg': None, 'storedOrg': ['   ']}
+   {'label': 'A1_upper', 'sent': '11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['11111111-1111-4111-8111-111111111111']}
+   {'label': 'A1_padded', 'sent': ' 11111111-1111-4111-8111-111111111111 ', 'status': 201, 'msg': None, 'storedOrg': [' 11111111-1111-4111-8111-111111111111 ']}
+   {'label': 'A1_tab', 'sent': '\t11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['\t11111111-1111-4111-8111-111111111111']}
+   {'label': 'not_uuid', 'sent': 'org-b', 'status': 201, 'msg': None, 'storedOrg': ['org-b']}
+   {'label': 'number', 'sent': 7, 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+   {'label': 'array', 'sent': ['11111111-1111-4111-8111-111111111111'], 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+--- race {'n': 20, 'statuses': [201], 'keysOnConnector': 21, 'activeOnConnector': 0, 'priorKeysRevoked': [1, 0, 0, 1, 0, 1, 1, 0, 4, 1, 1, 7, 0, 3, 0, 0, 1, 0, 0, 0]}
+--- race2 {'atk': 201, 'legit': 201, 'active': 0, 'total': 3}
+######## mut-S
+mode memory cells 560
+status histogram Counter({403: 362, 400: 108, 201: 90})
+mismatches 10
+   ('provisioner', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_tenant', 'malformed_array', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_array', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+victim retired by non-platform caller 3
+   ('provisioner', 'own_org', 'other', True, 201, 400, ['22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('provisioner', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('provisioner', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+--- smuggle
+   {'label': 'query', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'header x-connector-id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body ConnectorId', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connectorid', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connector_id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body " connectorId"', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': '__proto__ key', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'constructor.prototype', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'duplicate key (own then other)', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'connectorId null', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'connectorId whitespace', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'connectorId trailing space', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'rotate "true" string', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'nested data wrapper', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'x-tenant-id header other tenant, no body tenant', 'status': 403, 'msg': 'API keys may only be minted in your own tenant', 'victimActive': True, 'added': []}
+   {'label': 'urlencoded body', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+--- org variants
+   {'label': 'A2_upper', 'sent': '22222222-2222-4222-8222-222222222222', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'A2_padded', 'sent': ' 22222222-2222-4222-8222-222222222222 ', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'empty', 'sent': '', 'status': 201, 'msg': None, 'storedOrg': ['']}
+   {'label': 'spaces', 'sent': '   ', 'status': 201, 'msg': None, 'storedOrg': ['   ']}
+   {'label': 'A1_upper', 'sent': '11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['11111111-1111-4111-8111-111111111111']}
+   {'label': 'A1_padded', 'sent': ' 11111111-1111-4111-8111-111111111111 ', 'status': 201, 'msg': None, 'storedOrg': [' 11111111-1111-4111-8111-111111111111 ']}
+   {'label': 'A1_tab', 'sent': '\t11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['\t11111111-1111-4111-8111-111111111111']}
+   {'label': 'not_uuid', 'sent': 'org-b', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'number', 'sent': 7, 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+   {'label': 'array', 'sent': ['11111111-1111-4111-8111-111111111111'], 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+--- race {'n': 20, 'statuses': [201], 'keysOnConnector': 21, 'activeOnConnector': 1, 'priorKeysRevoked': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+--- race2 {'atk': 403, 'legit': 201, 'active': 1, 'total': 2}
+######## mut-Ma
+mode memory cells 560
+status histogram Counter({403: 352, 400: 108, 201: 100})
+mismatches 20
+   ('ORG_ADMIN', 'other_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('ORG_ADMIN', 'other_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('org_admin_lc', 'other_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('ISSUER_ADMIN', 'other_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'own_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'absent', False, 'exp', 403, 'got', 201, None)
+   ('orgless_issuer_admin', 'other_org', 'absent', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'own_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'own_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_org', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'other_tenant', 'malformed_array', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_array', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'orgless', 'other', True, 'exp', 403, 'got', 201, None)
+   ('provisioner', 'orgless', 'malformed_case', True, 'exp', 403, 'got', 201, None)
+victim retired by non-platform caller 3
+   ('provisioner', 'own_org', 'other', True, 201, 400, ['22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'])
+   ('provisioner', 'other_org', 'other', True, 201, 16, ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'])
+   ('provisioner', 'orgless', 'other', True, 201, 30, ['22222222-2222-4222-8222-222222222222', None])
+--- smuggle
+   {'label': 'query', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'header x-connector-id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body ConnectorId', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connectorid', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body connector_id', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'body " connectorId"', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': '__proto__ key', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'constructor.prototype', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'duplicate key (own then other)', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'connectorId null', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'connectorId whitespace', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'connectorId trailing space', 'status': 403, 'msg': 'Only a platform role or a provisioning connector may set connectorId', 'victimActive': True, 'added': []}
+   {'label': 'rotate "true" string', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'nested data wrapper', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'x-tenant-id header other tenant, no body tenant', 'status': 403, 'msg': 'API keys may only be minted in your own tenant', 'victimActive': True, 'added': []}
+   {'label': 'urlencoded body', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+--- org variants
+   {'label': 'A2_upper', 'sent': '22222222-2222-4222-8222-222222222222', 'status': 201, 'msg': None, 'storedOrg': ['22222222-2222-4222-8222-222222222222']}
+   {'label': 'A2_padded', 'sent': ' 22222222-2222-4222-8222-222222222222 ', 'status': 201, 'msg': None, 'storedOrg': [' 22222222-2222-4222-8222-222222222222 ']}
+   {'label': 'empty', 'sent': '', 'status': 201, 'msg': None, 'storedOrg': ['']}
+   {'label': 'spaces', 'sent': '   ', 'status': 201, 'msg': None, 'storedOrg': ['   ']}
+   {'label': 'A1_upper', 'sent': '11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['11111111-1111-4111-8111-111111111111']}
+   {'label': 'A1_padded', 'sent': ' 11111111-1111-4111-8111-111111111111 ', 'status': 201, 'msg': None, 'storedOrg': [' 11111111-1111-4111-8111-111111111111 ']}
+   {'label': 'A1_tab', 'sent': '\t11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['\t11111111-1111-4111-8111-111111111111']}
+   {'label': 'not_uuid', 'sent': 'org-b', 'status': 201, 'msg': None, 'storedOrg': ['org-b']}
+   {'label': 'number', 'sent': 7, 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+   {'label': 'array', 'sent': ['11111111-1111-4111-8111-111111111111'], 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+--- race {'n': 20, 'statuses': [201], 'keysOnConnector': 21, 'activeOnConnector': 1, 'priorKeysRevoked': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+--- race2 {'atk': 403, 'legit': 201, 'active': 1, 'total': 2}
+######## mut-F
+mode memory cells 560
+status histogram Counter({403: 387, 400: 108, 201: 65})
+mismatches 23
+   ('ADMIN', 'own_org', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('ADMIN', 'other_org', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('ADMIN', 'orgless', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('ORG_ADMIN', 'own_org', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('ORG_ADMIN', 'orgless', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('org_admin_lc', 'own_org', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('org_admin_lc', 'orgless', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('ISSUER_ADMIN', 'own_org', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('ISSUER_ADMIN', 'orgless', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('orgless_issuer_admin', 'orgless', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'own_org', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'own_org', 'own', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'own_org', 'malformed_empty', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'other_org', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'other_org', 'own', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'other_org', 'malformed_empty', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'other_tenant', 'malformed_array', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_array', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', False, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'other_tenant', 'malformed_obj', True, 'exp', 400, 'got', 403, 'A provisioning key may only mint keys in its own tenant')
+   ('provisioner', 'orgless', 'absent', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'orgless', 'own', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+   ('provisioner', 'orgless', 'malformed_empty', True, 'exp', 201, 'got', 403, 'GATE-PROBE rotate')
+victim retired by non-platform caller 0
+--- smuggle
+   {'label': 'query', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'header x-connector-id', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'body ConnectorId', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'body connectorid', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'body connector_id', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'body " connectorId"', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': '__proto__ key', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'constructor.prototype', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'duplicate key (own then other)', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'connectorId null', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'connectorId whitespace', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'connectorId trailing space', 'status': 403, 'msg': 'GATE-PROBE rotate', 'victimActive': True, 'added': []}
+   {'label': 'rotate "true" string', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+   {'label': 'nested data wrapper', 'status': 201, 'msg': None, 'victimActive': True, 'added': [{'org': '11111111-1111-4111-8111-111111111111', 'tenant': 'a0000000-0000-4000-8000-0000000000aa', 'connector': None}]}
+   {'label': 'x-tenant-id header other tenant, no body tenant', 'status': 403, 'msg': 'API keys may only be minted in your own tenant', 'victimActive': True, 'added': []}
+   {'label': 'urlencoded body', 'status': 400, 'msg': 'Validation failed', 'victimActive': True, 'added': []}
+--- org variants
+   {'label': 'A2_upper', 'sent': '22222222-2222-4222-8222-222222222222', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'A2_padded', 'sent': ' 22222222-2222-4222-8222-222222222222 ', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'empty', 'sent': '', 'status': 201, 'msg': None, 'storedOrg': ['']}
+   {'label': 'spaces', 'sent': '   ', 'status': 201, 'msg': None, 'storedOrg': ['   ']}
+   {'label': 'A1_upper', 'sent': '11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['11111111-1111-4111-8111-111111111111']}
+   {'label': 'A1_padded', 'sent': ' 11111111-1111-4111-8111-111111111111 ', 'status': 201, 'msg': None, 'storedOrg': [' 11111111-1111-4111-8111-111111111111 ']}
+   {'label': 'A1_tab', 'sent': '\t11111111-1111-4111-8111-111111111111', 'status': 201, 'msg': None, 'storedOrg': ['\t11111111-1111-4111-8111-111111111111']}
+   {'label': 'not_uuid', 'sent': 'org-b', 'status': 403, 'msg': 'API keys may only be minted for your own organisation', 'storedOrg': []}
+   {'label': 'number', 'sent': 7, 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+   {'label': 'array', 'sent': ['11111111-1111-4111-8111-111111111111'], 'status': 400, 'msg': 'Validation failed', 'storedOrg': []}
+--- race {'n': 20, 'statuses': [201], 'keysOnConnector': 21, 'activeOnConnector': 1, 'priorKeysRevoked': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+--- race2 {'atk': 403, 'legit': 201, 'active': 1, 'total': 2}

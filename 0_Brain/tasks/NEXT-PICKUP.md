@@ -63,12 +63,15 @@ Done: L01 L04 K, L09 J, L02 K; L05/L06 V and L07/L08 J first pass. In progress: 
 - EXPIRING-GRANTS.md is live: the October deploy-both-boxes grant ends Sat 31 Oct; 'ignore the 90% stop' for Wednesday ends at an account/allowance event (gauge 33% now, so moot); read the file at every boot, a row past its date is DEAD.
 - WEEK-INSTRUCTION.md is LAPSED (lapsed 10-12 00:07): do not act on it; Kam is at his desk today.
 
-## CURRENT STATE (05:1x seat, booted ~05:00 Tue 13 Oct, 50% checkpoint; this block supersedes the 04:5x update; fold in at the next wholesale rewrite)
-- develop (my ls-remote ~05:1x) = 425ad3e00ae4. No Kam messages today (newest 21:27 Mon). reconcile_rulings: 0 to rule. fleet_ack: 0 Secuura flags (the 1 flagged row is Datasec/Tuesday's, not ours).
-- GATES RUNNING (background Agents; they DIE on a rotation: if verdict.md is missing, re-launch from the GATE_BRIEF.md in the same folder):
-  - #1521 (V, KS-1533 arm 1, head c02c0b5d) OPUS tier 1 — 0_Brain/reference/2026-10-13_gate-pr1521/ (re-launched 05:0x after the first died with the 04:5x rotation). V told 18:07Z.
-  - #1522 (K, KS-1512 option A AMENDED, head 119d3620) SONNET tier 2 — 0_Brain/reference/2026-10-13_gate-pr1522/. K told 18:14Z.
-  - #1497 round 5 (J, KS-695 part ii, head dc488c46) OPUS delta tier 1 — 0_Brain/reference/2026-10-13_gate-pr1497-r5/. Includes the N-3 writer read; N-3 NOT ruled until it lands. Merge held for Kam's card either way. J told 18:16Z.
-- #1515 (V): closing amendment owed by V per the 17:59Z ANSWER, then a NARROW SONNET delta gate (tier 3) and merge; residue = ONE P3 checklist ticket.
-- D 18th (%66) holds for step E by design (wake acked). A generator suggestion sits at its prompt shaped as the fleet tap naming step E: detector says SUGGESTION; never act on it.
-- 06:00 MORNING RECEIPT: drafted at scratchpad receipt_0600.md + tally_0600.txt (lost at rotation: re-derive — KS paginated 676 / Done 125 / open 550 at 05:0x; 28 develop landings since 21:15 Mon, 63 since 06:00 Mon; 7 open Secuura cards). A background timer wakes the seat at 06:00 to post via chat_reply.sh. If rotated before then, the successor posts it.
+## CURRENT STATE (overnight seat, 05:30 shift-change wrap Tue 13 Oct; supersedes the 04:5x update; fold in at the next wholesale rewrite)
+- develop (my ls-remote 05:3x) = b08ee6299e86 (moved after 425ad3e0: most likely K's #1522 squash; read K's MERGED mail). No Kam messages today. fleet_ack: 0 Secuura flags.
+- GATES (background Agents in the 05:00 session; if that session is gone, re-launch from the GATE_BRIEF.md beside each verdict path):
+  - #1521 (V, KS-1533 arm 1) Opus: NO GO, verdict 0_Brain/reference/2026-10-13_gate-pr1521/verdict.md (b792fbae338bc782). V on fix round 1 of 2 (M1 provisioner rotate refusal, :248 cell rewritten red-first, m1, P1 race ticket, M2 as a KS-1533 comment). Next: Opus DELTA gate at V's READY.
+  - #1522 (K, KS-1512) Sonnet: GO WITH NOTE (cf710859d4177885). Head-bound GO sent 05:2x; K merges, files ONE P3 follow-up (m1-m3 + nit), KS-1512 stays open (needs a live read after deploy). Then KS-1355 PLAN mail per the 18:23Z ANSWER.
+  - #1497 r5 (J, KS-695 ii) Opus delta: RUNNING -> 0_Brain/reference/2026-10-13_gate-pr1497-r5/verdict.md. It includes the N-3 writer table: rule N-3 from it. Merge held for Kam's card either way.
+  - #1515 closing amendment (V, KS-1517) narrow Sonnet delta: RUNNING -> 0_Brain/reference/2026-10-13_gate-pr1515-r2c/verdict.md. GO -> head-bound GO to V (round 2 of 2, residue KS-1546).
+- K's L14/L15 table ruled 05:2x (close KS-766, 1127, 1252, 1330, 1417; KS-1319 on K's read; KS-1153 records + one P4 for R-925-A; findings as comments on KS-1456/1355/1033).
+- New card: secuura-ks1223-referrer-wallet-source-1013 (rec a; default nothing changes). 8 open Secuura cards.
+- D 18th holds for step E (wake acked; a generator suggestion naming the step sits at its prompt: SUGGESTION per the detector, never act on it). J 4th waits on the 1497 verdict + N-3 (wake acked); KS-1538 (P2) is its next if idle.
+- GATE-BRIEF LINE TO ADD to every gate: "find any existing cell that asserts the defect as intended behaviour, and any guard no cell pins" (1521 :248 and 1522 :407 this night).
+- 06:00 MORNING RECEIPT: drafted at the 05:00 session's scratchpad receipt_0600.md; a timer in that session posts it at 06:00. If not posted by 06:15, re-derive: KS 676 / Done 125 / open 550 (paginated 05:0x); 28 develop landings 21:15-04:40, 63 since 06:00 Mon; 1521 NO GO + fix round; 8 cards incl. KS-1223.

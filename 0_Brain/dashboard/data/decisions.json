@@ -34052,5 +34052,42 @@
    "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
    "CARD hpsmpoc-demo-name-check-residue-1012"
   ]
+ },
+ {
+  "id": "secuura-ks1223-referrer-wallet-source-1013",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1223: a referral code's owner wallet comes from a header the caller sets; where should it come from?",
+  "bluf": "Your choice needed: (a) build a trusted source, (b) drop the header now, or (c) leave it open. Seat J measured on develop through the real gateway that any signed-in caller can set the referrer wallet on a new referral code with an x-wallet-address header, because no token carries a wallet. Impact measured as narrow: the stored wallet drives only the WALLET_COLLISION fraud flag, never a payout (rewards are paid to the wallet in the claim body). Main risk: someone can attribute a code to another person's wallet so that person's later referral is flagged. Not measured: any deployed box or a proxy in front of production. J raised it to High because it is reachable.",
+  "default_action": "If Kam does not answer: nothing changes in code, KS-1223 stays open at High, and Wednesday re-raises it in the next morning receipt. No seat starts on it without his tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build a trusted source",
+    "detail": "The referral service reads the wallet linked to the signed-in user (the User row, or a verified wallet login) and stops reading the header. A seat builds it with red-first cells, QA gate, merge on Wednesday's GO."
+   },
+   {
+    "key": "b",
+    "label": "Drop the header now",
+    "detail": "One-line change. The wallet-collision check then never fires for any code until a trusted source exists."
+   },
+   {
+    "key": "c",
+    "label": "Leave it, ticket stays open at High",
+    "detail": "Today's behaviour stays pinned by the two existing tests."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-13T05:25:40.070017+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 11:25",
+   "CARD nexusai-paper-factor-source",
+   "CARD hpsm-phase1-missing-source-workbook",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD composer-paul-110-questions-source",
+   "CARD hpsmpoc-revenue-source-1011"
+  ]
  }
 ]
