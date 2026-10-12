@@ -515,6 +515,18 @@ PYMAIL
       fi
     done
     # (c)/(d) kill either way — then relaunch fresh via the registered launcher
+    # 2026-10-12 21:0x (ledger: J and V seats vanished at 20:40/20:50, rotate.log had the tap line and
+    # NOTHING after it): when the seat runs `cockpit.sh rotate` from INSIDE the pane it is rotating, the
+    # kill-pane below kills THIS script (its parent shell is in that pane) before add_pane or the log
+    # line run, so no fresh seat is launched. K's rotation worked only because it ran detached. If the
+    # caller's pane IS the target, log first, then hand the kill+relaunch to a DETACHED helper
+    # (nohup; macOS has no setsid, found by the disposable-pane test) and exit.
+    if [ "${TMUX_PANE:-}" = "$PANE" ] && [ -n "$WRAPPED" ]; then
+      echo "$(date '+%F %T') rotate '$NAME': wrap mail at $WRAPPED UTC — clean rotation (self-rotation: detached relaunch)" >> "$RLOG"
+      echo "rotate: '$NAME' wrapped (mail at $WRAPPED UTC) — running from inside the target pane, so the kill + relaunch is detached"
+      nohup bash -c 'sleep 2; "$1" kill-pane -t "$2"; sleep 1; bash "$3" launch "$4"' _ "$TMUX_BIN" "$PANE" "$SCRIPT_DIR/cockpit.sh" "$NAME" >> "$RLOG" 2>&1 &
+      exit 0
+    fi
     "$TMUX_BIN" kill-pane -t "$PANE"
     add_pane "$NAME" "bash \"$LPATH\""
     if [ -n "$WRAPPED" ]; then
