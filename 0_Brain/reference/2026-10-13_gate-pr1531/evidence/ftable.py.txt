@@ -1,0 +1,9 @@
+import json,sys
+d=json.load(open(sys.argv[1]))
+for k in sorted(d):
+    v=d[k]
+    if k[:1] in 'FP' and isinstance(v,dict) and 'v1' in v:
+        a=v['v1']; b=v['v2']
+        print(f"{k:55s} issue={v.get('issueStatus','-')} v1.isCert={a['isCertified']} id={'REAL' if a['certificationId'] and a['certificationId']==v.get('realCertId') else (a['certificationId'] or '-')} at={(a['certifiedAt'] or '-')[:19]} by={a['certifiedBy']} org={a['certifierOrganizationId']} type={a['certificationType']} | v2n={len(b)} v2ids={[x['certificationId'][:12] if x['certificationId'] else None for x in b]} v2org={[x['certifierOrganizationId'] for x in b]}")
+for k in ['X1_same_id_two_tenants','X2_outsider','X3_span','X4_T2_row_cites_T_cert','X5_rls','setup']:
+    if k in d: print(k, json.dumps(d[k]))

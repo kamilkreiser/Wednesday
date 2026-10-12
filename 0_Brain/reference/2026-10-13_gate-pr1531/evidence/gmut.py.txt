@@ -1,0 +1,62 @@
+"""Gate mutant runner (PR1531). Loads the author's mutant DEFINITIONS (once + MUTS) from the evidence copy, ignores its constants/scoring,
+adds the gate's own mutants, applies each to the HEAD worktree, runs tsc + unit3 + integration F + integration T (+ optional gate harness),
+records EVERY red cell name per layer, restores and asserts byte-identity. Usage: gmut.py ID [ID...]"""
+import hashlib, json, re, subprocess, sys, os
+EVD = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1531/evidence'
+G = '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1531'
+O = G + '/head/Blockchain/Dev/services/originate'
+V = O + '/src/routes/verification.ts'; W = O + '/src/routes/verificationV2.ts'
+src = open(EVD + '/static_mut1557.py.txt').read().split('\n')
+ns = {'V': V, 'W': W}
+exec('\n'.join(src[21:91]), ns)   # lines 22..91: def once + MUTS list (definitions only)
+once = ns['once']; MUTS = {m[0]: m for m in ns['MUTS']}
+def own(i, f, a, b): MUTS[i] = (i, f, once(a, b), 'gate')
+own('G1-parent-hash-check-removed', V, "if (parentHash === null || parentHash !== own) continue;", "if (false) continue;")
+own('G2-cert-lookup-drops-tenant-clause', V, "FROM documents WHERE id = ${certId}::uuid AND tenant_id = ${tenant}::uuid LIMIT 1`);", "FROM documents WHERE id = ${certId}::uuid LIMIT 1`);")
+own('G3-parent-fetch-drops-tenant-clause', V, "SELECT content_hash FROM documents WHERE id = ${parent}::uuid AND tenant_id = ${tenant}::uuid LIMIT 1`);", "SELECT content_hash FROM documents WHERE id = ${parent}::uuid LIMIT 1`);")
+own('G4-resolves-to-nothing-accepted', V, "      if (!isCertificationRow(cert, claimed, r)) continue;", "      if (!cert) { trusted.set(r, { certificationId: claimed, certificationType: (r?.metadata || {}).certificationType ?? null, certifiedAt: null, certifiedBy: null, certifierOrganizationId: null }); continue; }\n      if (!isCertificationRow(cert, claimed, r)) continue;")
+own('G5-time-from-derived-row-created_at', V, "const at = cert.certified_at ?? cert.created_at ?? null;", "const at = r.created_at ?? cert.certified_at ?? null;")
+own('G6-cap-raised-1000', V, "export const MAX_EVIDENCE_LOOKUPS = 8;", "export const MAX_EVIDENCE_LOOKUPS = 1000;")
+own('G7-keyed-on-id-alone-no-suffix', V, "  if (!m || m[1].toLowerCase() !== certId.slice(0, 8).toLowerCase()) return null;", "  if (!m && certId === '') return null;")
+own('G8-xtenant-rows-not-tagged', V, "    for (const r of docRows.rows) r._tenantId = reg.tenant_id;\n", "")
+own('G9-readForRow-ignores-row-tenant-pool', V, "  if (row?._tenantId) {\n    const mgr = getTenantManager();", "  if (row?._tenantId && row?.__never) {\n    const mgr = getTenantManager();")
+own('G10-owner-binding-null-wildcard', V, "if (String(r.owner_user_id ?? '') !== String(cert.issuer_user_id ?? '')) continue;", "if (r.owner_user_id != null && cert.issuer_user_id != null && String(r.owner_user_id) !== String(cert.issuer_user_id)) continue;")
+def sha(p): return hashlib.sha256(open(p, 'rb').read()).hexdigest()
+def reds(text):
+    out = []
+    for l in text.splitlines():
+        m = re.match(r"\s+✕\s+(.*?)(?:\s+\(\d+ ms\))?$", l)
+        if m: out.append(m.group(1)[:160])
+    tl = re.findall(r"^Tests:.*$", text, re.M)
+    fail_suite = 'Test suite failed to run' in text
+    return {'reds': out, 'tests': (tl[-1] if tl else 'NO TESTS LINE'), 'suite_failed': fail_suite}
+def sh(cmd, env=None): return subprocess.run(cmd, cwd=O, capture_output=True, text=True, env={**os.environ, **(env or {})})
+pgenv = {}
+for l in open(G + '/pg.env'):
+    k, v = l.strip().replace('export ', '').split('=', 1); pgenv[k] = v
+pgenv['TEST_PLATFORM_DATABASE_URL'] = 'postgresql://secuura@127.0.0.1:55427/secuura'; pgenv['NODE_ENV'] = 'test'
+base = {V: sha(V), W: sha(W)}
+for mid in sys.argv[1:]:
+    i, f, fn, req = MUTS[mid]
+    orig = open(f).read(); new = fn(orig)
+    if new is None:
+        r = {'id': mid, 'error': 'ANCHOR NOT FOUND EXACTLY ONCE'}
+    else:
+        try:
+            open(f, 'w').write(new)
+            r = {'id': mid, 'file': os.path.basename(f), 'gate_own': req == 'gate', 'diff_lines': sum(1 for a, b in zip(orig.split('\n'), new.split('\n')) if a != b)}
+            tsc = sh(['npx', 'tsc', '--noEmit', '-p', 'tsconfig.json']); r['tsc_rc'] = tsc.returncode
+            if tsc.returncode != 0: r['tsc_err'] = tsc.stdout[-400:]
+            u = sh(['npx', 'jest', 'ks1557-trusted', 'ks584-p3-verify-list', 'ks584-verify-row-selection', '--verbose']); r['unit'] = reds(u.stdout + u.stderr)
+            for M in ['false', 'true']:
+                x = sh(['npx', 'jest', '--config', 'jest.integration.config.js', '--verbose', 'ks1557-verify-trusts'], {**pgenv, 'MULTI_TENANCY_ENABLED': M}); r['int_' + M[0].upper()] = reds(x.stdout + x.stderr)
+            if os.environ.get('GATE_HARN') == '1':
+                for M in ['false', 'true']:
+                    outp = f"{EVD}/mut_{mid}_harn_{M[0].upper()}.json"
+                    sh(['npx', 'jest', '--config', 'jest.integration.config.js', 'gate1531'], {**pgenv, 'MULTI_TENANCY_ENABLED': M, 'GATE_OUT': outp}); r['harn_' + M[0].upper()] = outp
+        finally:
+            open(f, 'w').write(orig)
+    assert sha(V) == base[V] and sha(W) == base[W], 'RESTORE FAILED'
+    print(json.dumps(r)[:1200], flush=True)
+    with open(EVD + '/mut_results.jsonl', 'a') as fh: fh.write(json.dumps(r) + '\n')
+print('RESTORE OK', sha(V)[:16], sha(W)[:16])

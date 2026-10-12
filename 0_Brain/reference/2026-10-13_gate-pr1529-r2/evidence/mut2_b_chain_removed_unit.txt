@@ -1,0 +1,83 @@
+
+ RUN  v4.1.11 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529r2/mut/Blockchain/Dev/services/security
+
+stdout | src/__tests__/ks1556-connector-chain.test.ts
+{"timestamp":"2026-10-12T22:48:30.037Z","level":"warn","service":"security","message":"PII_ENCRYPTION_KEY not set — audit_logs.details will store plaintext"}
+
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > runs callers of ONE key strictly one at a time, in arrival order 45ms
+   → no caller starts before the previous one ends: expected [ 'a:start', 'b:start', …(4) ] to deeply equal [ 'a:start', 'a:end', 'b:start', …(3) ]
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > does NOT serialise DIFFERENT keys (the chain is per connector) 31ms
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that THROWS does not poison the chain: the next caller runs at once and its own result stands 12ms
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that NEVER settles holds the next caller only for ROTATE_CHAIN_WAIT_MS, then it proceeds 0ms
+   → it waited for the predecessor first: expected 0 to be greater than or equal to 200
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > removes an entry when its last caller finishes: N rotates on N connectors leave the map EMPTY 0ms
+   → one entry per connector while they run: expected +0 to be 25 // Object.is equality
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 2 passed (5)
+   Start at  09:48:29
+   Duration  506ms (transform 85ms, setup 0ms, import 25ms, tests 378ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > runs callers of ONE key strictly one at a time, in arrival order
+AssertionError: no caller starts before the previous one ends: expected [ 'a:start', 'b:start', …(4) ] to deeply equal [ 'a:start', 'a:end', 'b:start', …(3) ]
+
+- Expected
++ Received
+
+  [
+    "a:start",
+-   "a:end",
+    "b:start",
+-   "b:end",
+    "c:start",
++   "b:end",
+    "c:end",
++   "a:end",
+  ]
+
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:41:69
+     39|     const results = await Promise.all([job('a', 40), job('b', 5), job(…
+     40|     expect(results).toEqual(['a', 'b', 'c']);
+     41|     expect(events, 'no caller starts before the previous one ends').to…
+       |                                                                     ^
+     42|   });
+     43|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that NEVER settles holds the next caller only for ROTATE_CHAIN_WAIT_MS, then it proceeds
+AssertionError: it waited for the predecessor first: expected 0 to be greater than or equal to 200
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:72:59
+     70|     const waited = Date.now() - started;
+     71|     expect(result).toBe('proceeded');
+     72|     expect(waited, 'it waited for the predecessor first').toBeGreaterT…
+       |                                                           ^
+     73|     expect(waited, 'and only for the stated timeout, not forever').toB…
+     74|     // ...and a THIRD caller is not held by the hung one at all: it wa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > removes an entry when its last caller finishes: N rotates on N connectors leave the map EMPTY
+AssertionError: one entry per connector while they run: expected +0 to be 25 // Object.is equality
+
+- Expected
++ Received
+
+- 25
++ 0
+
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:84:73
+     82|     const n = 25;
+     83|     const inFlight = Array.from({ length: n }, (_, i) => withConnector…
+     84|     expect(rotateChains.size, 'one entry per connector while they run'…
+       |                                                                         ^
+     85|     await Promise.all(inFlight);
+     86|     expect(rotateChains.size, 'and none afterwards').toBe(before);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+# rc=1

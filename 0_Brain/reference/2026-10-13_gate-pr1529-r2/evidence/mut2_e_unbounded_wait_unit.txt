@@ -1,0 +1,37 @@
+
+ RUN  v4.1.11 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529r2/mut/Blockchain/Dev/services/security
+
+stdout | src/__tests__/ks1556-connector-chain.test.ts
+{"timestamp":"2026-10-12T22:54:43.560Z","level":"warn","service":"security","message":"PII_ENCRYPTION_KEY not set — audit_logs.details will store plaintext"}
+
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > runs callers of ONE key strictly one at a time, in arrival order 55ms
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > does NOT serialise DIFFERENT keys (the chain is per connector) 32ms
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that THROWS does not poison the chain: the next caller runs at once and its own result stands 12ms
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that NEVER settles holds the next caller only for ROTATE_CHAIN_WAIT_MS, then it proceeds 5002ms
+   → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > removes an entry when its last caller finishes: N rotates on N connectors leave the map EMPTY 6ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  09:54:42
+   Duration  6.14s (transform 108ms, setup 0ms, import 26ms, tests 5.98s, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that NEVER settles holds the next caller only for ROTATE_CHAIN_WAIT_MS, then it proceeds
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:65:3
+     63|   });
+     64|
+     65|   it('a predecessor that NEVER settles holds the next caller only for …
+       |   ^
+     66|     process.env.ROTATE_CHAIN_WAIT_MS = '250';
+     67|     void withConnectorChain('t:c-hang', () => new Promise<never>(() =>…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# rc=1

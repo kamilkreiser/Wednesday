@@ -1,0 +1,89 @@
+# certifierOrganizationId consumers at head 1ffc0d7a (git grep over the tree, all paths) + Platform S contract docs outside the repo
+== git grep -i -c 'certifierOrganizationId' (whole tree, head):
+  files=10 hits=20
+== git grep -i -c 'certificationId' (whole tree, head):
+  files=55 hits=257
+== git grep -i -c 'certifierOrganisationId' (whole tree, head):
+  files=0 hits=0
+== git grep -i -c 'zzqxNonsenseToken17' (whole tree, head):
+  files=0 hits=0
+
+== every line naming certifierOrganizationId (head):
+BACKLOG.md:298:    certifiedBy, certifierOrganizationId }`. Measured on demo 2026-08-13: **0 of 16**
+Blockchain/Dev/docs/openapi/secuura-api.yaml:6344:        certifierOrganizationId:
+Blockchain/Dev/docs/openapi/secuura-api.yaml:6354:        - certifierOrganizationId
+Blockchain/Dev/docs/openapi/secuura-api.yaml:6440:          certifierOrganizationId: 00000000-0000-4000-8000-000000000002
+Blockchain/Dev/docs/openapi/secuura-api.yaml:6628:              certifierOrganizationId: 2f1c8a9e-6d4b-4f7a-9c2e-8b5d3a1f7e60
+Blockchain/Dev/frontend/shared/src/schemas/verify.ts:121:    certifierOrganizationId: z.string().nullable().optional(),
+Blockchain/Dev/scripts/spec-examples/spec-example-allowlist.json:5:    "reason": "KS-584 P3 leg 2 (d47f63202) authored this example on develop; the block is byte-identical to origin/develop and is not this branch's work. Its four identifier
+Blockchain/Dev/services/originate/src/__tests__/ks1557-trusted-certification-evidence.test.ts:82:      certifiedBy: 'Oxford University', certifierOrganizationId: null,
+Blockchain/Dev/services/originate/src/__tests__/ks1557-verify-trusts-certification-evidence.integration.test.ts:169:    expect(one.certification.certifierOrganizationId).not.toBe(ORG_B);
+Blockchain/Dev/services/originate/src/__tests__/ks1557-verify-trusts-certification-evidence.integration.test.ts:174:    expect(two[0].certifierOrganizationId).not.toBe(ORG_B);
+Blockchain/Dev/services/originate/src/__tests__/ks563-certified-vs-anchored.test.ts:175:      certifierOrganizationId: '22222222-2222-2222-2222-222222222222',
+Blockchain/Dev/services/originate/src/originate.openapi.ts:446:      certifierOrganizationId: z.string().nullable().openapi({ description: 'Organisation id of the certifying issuer.' }),
+Blockchain/Dev/services/originate/src/originate.openapi.ts:546:          certifierOrganizationId: FX.certification.organizationId,
+Blockchain/Dev/services/originate/src/originate.openapi.ts:729:              certifierOrganizationId: '2f1c8a9e-6d4b-4f7a-9c2e-8b5d3a1f7e60',
+Blockchain/Dev/services/originate/src/routes/verification.ts:146:    certifierOrganizationId: certMeta.issuerId ?? null,
+Blockchain/Dev/services/originate/src/routes/verification.ts:226: * `certifiedBy` stays the caller-asserted display string it always was (ruled); `certifierOrganizationId` is null here because the
+Blockchain/Dev/services/originate/src/routes/verification.ts:315:        certifierOrganizationId: null,
+Blockchain/Dev/services/originate/src/routes/verification.ts:717:                      certifierOrganizationId: chain.metadata?.issuerOrgId ?? null,
+Blockchain/Dev/services/originate/src/routes/verification.ts:1165:                            certifierOrganizationId: chain.metadata?.issuerOrgId ?? null,
+Blockchain/Dev/services/originate/src/routes/verificationV2.ts:262:            certifierOrganizationId: chain.metadata?.issuerOrgId ?? null,
+
+== per-area control: certificationId hits in each consumer area (proves the grep reaches them):
+  Blockchain/Dev/services                  certificationId=157 certifierOrganizationId=13
+  Blockchain/Dev/docs/openapi              certificationId=18 certifierOrganizationId=4
+  Blockchain/Dev/frontend                  certificationId=31 certifierOrganizationId=1
+  Blockchain/Dev/packages                  certificationId=0 certifierOrganizationId=0
+  Blockchain/Dev/sdk                       certificationId=4 certifierOrganizationId=0
+  Blockchain/Dev/contracts                 certificationId=0 certifierOrganizationId=0
+
+== openapi yaml VerifyCertification block (head):
+          type:
+            - string
+            - "null"
+          description: Id of the certification that certified this document.
+        certificationType:
+          type:
+            - string
+            - "null"
+          description: Certification type recorded at issue time.
+        certifiedAt:
+          type:
+            - string
+            - "null"
+          description: UTC ISO-8601 timestamp of the certification act.
+        certifiedBy:
+          type:
+            - string
+            - "null"
+          description: Display name of the certifying issuer.
+        certifierOrganizationId:
+          type:
+            - string
+            - "null"
+          description: Organisation id of the certifying issuer.
+      required:
+        - certificationId
+        - certificationType
+        - certifiedAt
+        - certifiedBy
+        - certifierOrganizationId
+      description: The certification act. Present ONLY when an issuer certified the document — its absence
+        means no certification happened (KS-563). Fields may be null for certifications issued
+        before a given field was recorded.
+    VerifyResponse:
+      type: object
+      properties:
+
+== Platform S contract / reference docs on disk (outside git; grep -r -i -l, text files):
+  /Volumes/DevMASTER/!CODING/Secuura/Blockchain/1_Project_Definition : files naming certifierOrganizationId=0 | control certificationId=0 | control 'Platform S'=7
+  /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Projects Documents : files naming certifierOrganizationId=0 | control certificationId=3 | control 'Platform S'=10
+  /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Reference Documents : files naming certifierOrganizationId=0 | control certificationId=0 | control 'Platform S'=0
+  /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/docs : files naming certifierOrganizationId=1 | control certificationId=2 | control 'Platform S'=21
+     /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/Blockchain/Dev/docs/openapi/secuura-api.yaml
+
+== SUMMARY (gate)
+- Producers at head: verification.ts:146 (buildCertification, legacy 'certified' rows: certMeta.issuerId, which is the issuer's USER id or connector principal - mislabel UNCHANGED on this path), :315 (new: null on trusted derived evidence), :717 and :1165 (chain metadata issuerOrgId), verificationV2.ts:262 (chain). So after this PR the field is null on derived evidence but still a USER id on legacy-certified rows: same field, two meanings by path (pre-existing, not introduced).
+- On develop the derived-row value was `meta.issuerId ?? null` of the DERIVED row; the certify route's server keys never include issuerId, so for a genuine row it was null unless the CALLER supplied data.issuerId. The brief's phrase "used to be the certification row's USER id" does not match the code; the PR body's "whatever the caller put in data.issuerId, or null" does.
+- Consumers: published spec types it ["string","null"] and lists it under required (present, nullable); description "Fields may be null..."; spec examples carry non-null literal UUIDs (6440, 6628) - examples, not constraints. frontend/shared/src/schemas/verify.ts:121 z.string().nullable().optional(); no frontend component reads it (only the schema hit in frontend). api-gateway, packages, sdk, contracts: 0 hits with a certificationId control that is non-zero in services/openapi/frontend/sdk (packages/contracts have 0 for both, so they are not shown to be reached by the control: the token simply does not occur there). Out-of-git Platform S docs (1_Project_Definition, Projects Documents, Reference Documents): 0 hits, control 'Platform S' 7/10/0 files. Nothing found requiring non-null.

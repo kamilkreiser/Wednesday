@@ -1,0 +1,27 @@
+import subprocess,sys
+R='/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1531/head'
+def g(*a): return subprocess.run(['git','-C',R,*a],capture_output=True,text=True).stdout
+DEV=g('rev-parse','refs/gate/develop').strip()
+mine=set(g('diff','--name-only',DEV,'refs/gate/pr1531').split())
+CTRL='Blockchain/Dev/services/originate/src/routes/certifications.ts'
+refs=[l.split() for l in g('for-each-ref','--format=%(refname) %(objectname)','refs/gate/pulls').splitlines()]
+refs=sorted(((int(r.split('/')[-1]),s) for r,s in refs))
+hits=[];ctrl=[]
+for n,s in refs:
+    if n<1000 or n==1531: continue
+    mb=g('merge-base',DEV,s).strip()
+    if not mb: continue
+    if mb==s: continue  # head is ancestor of develop: merged by merge commit
+    files=set(g('diff','--name-only',mb,s).split())
+    def landed(f):
+        return g('rev-parse',f'{DEV}:{f}').strip()==g('rev-parse',f'{s}:{f}').strip()
+    ov=mine&files
+    if ov:
+        hits.append((n,s[:10],sorted(ov),[landed(f) for f in sorted(ov)]))
+    if CTRL in files: ctrl.append((n,s[:10],landed(CTRL)))
+print('PR1531 files:',len(mine));[print(' ',f) for f in sorted(mine)]
+print('certifications.ts in PR1531 diff:',CTRL in mine)
+print('\nOVERLAP with the six files (PR, head, files, file-content-already-on-develop?):')
+for h in hits: print(' ',h)
+print('\nPLANTED CONTROL certifications.ts touched by PRs (landed-on-develop?):')
+for c in ctrl: print(' ',c)

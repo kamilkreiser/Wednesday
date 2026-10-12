@@ -1,0 +1,45 @@
+
+ RUN  v4.1.11 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529r2/mut/Blockchain/Dev/services/security
+
+stdout | src/__tests__/ks1556-connector-chain.test.ts
+{"timestamp":"2026-10-12T22:53:01.746Z","level":"warn","service":"security","message":"PII_ENCRYPTION_KEY not set — audit_logs.details will store plaintext"}
+
+stdout | src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that NEVER settles holds the next caller only for ROTATE_CHAIN_WAIT_MS, then it proceeds
+{"timestamp":"2026-10-12T22:53:02.100Z","level":"warn","service":"security","message":"KS-1556: a rotate waited the whole chain timeout for its predecessor and proceeds","key":"t:c-hang","waitMs":250}
+
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > runs callers of ONE key strictly one at a time, in arrival order 56ms
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > does NOT serialise DIFFERENT keys (the chain is per connector) 32ms
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that THROWS does not poison the chain: the next caller runs at once and its own result stands 11ms
+ ✓ src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that NEVER settles holds the next caller only for ROTATE_CHAIN_WAIT_MS, then it proceeds 254ms
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > removes an entry when its last caller finishes: N rotates on N connectors leave the map EMPTY 17ms
+   → and none afterwards: expected 30 to be 5 // Object.is equality
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  09:53:01
+   Duration  937ms (transform 91ms, setup 0ms, import 24ms, tests 803ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > removes an entry when its last caller finishes: N rotates on N connectors leave the map EMPTY
+AssertionError: and none afterwards: expected 30 to be 5 // Object.is equality
+
+- Expected
++ Received
+
+- 5
++ 30
+
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:86:54
+     84|     expect(rotateChains.size, 'one entry per connector while they run'…
+     85|     await Promise.all(inFlight);
+     86|     expect(rotateChains.size, 'and none afterwards').toBe(before);
+       |                                                      ^
+     87|   });
+     88| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# rc=1

@@ -1,0 +1,87 @@
+
+ RUN  v4.1.11 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529r2/dev/Blockchain/Dev/services/security
+
+stdout | src/__tests__/ks1556-connector-chain.test.ts
+{"timestamp":"2026-10-12T23:25:05.220Z","level":"warn","service":"security","message":"PII_ENCRYPTION_KEY not set — audit_logs.details will store plaintext"}
+
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > runs callers of ONE key strictly one at a time, in arrival order 2ms
+   → withConnectorChain is not a function
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > does NOT serialise DIFFERENT keys (the chain is per connector) 0ms
+   → withConnectorChain is not a function
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that THROWS does not poison the chain: the next caller runs at once and its own result stands 0ms
+   → withConnectorChain is not a function
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that NEVER settles holds the next caller only for ROTATE_CHAIN_WAIT_MS, then it proceeds 0ms
+   → withConnectorChain is not a function
+ × src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > removes an entry when its last caller finishes: N rotates on N connectors leave the map EMPTY 0ms
+   → Cannot read properties of undefined (reading 'size')
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > runs callers of ONE key strictly one at a time, in arrival order
+TypeError: withConnectorChain is not a function
+ ❯ job src/__tests__/ks1556-connector-chain.test.ts:33:47
+     31|   it('runs callers of ONE key strictly one at a time, in arrival order…
+     32|     const events: string[] = [];
+     33|     const job = (name: string, ms: number) => withConnectorChain('t:c-…
+       |                                               ^
+     34|       events.push(`${name}:start`);
+     35|       await sleep(ms);
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:39:40
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > does NOT serialise DIFFERENT keys (the chain is per connector)
+TypeError: withConnectorChain is not a function
+ ❯ job src/__tests__/ks1556-connector-chain.test.ts:46:34
+     44|   it('does NOT serialise DIFFERENT keys (the chain is per connector)',…
+     45|     const events: string[] = [];
+     46|     const job = (key: string) => withConnectorChain(key, async () => {
+       |                                  ^
+     47|       events.push(`${key}:start`);
+     48|       await sleep(30);
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:51:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that THROWS does not poison the chain: the next caller runs at once and its own result stands
+TypeError: withConnectorChain is not a function
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:57:21
+     55|   it('a predecessor that THROWS does not poison the chain: the next ca…
+     56|     process.env.ROTATE_CHAIN_WAIT_MS = '5000';
+     57|     const failing = withConnectorChain('t:c-throw', async () => { awai…
+       |                     ^
+     58|     const started = Date.now();
+     59|     const next = withConnectorChain('t:c-throw', async () => 'next ran…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > a predecessor that NEVER settles holds the next caller only for ROTATE_CHAIN_WAIT_MS, then it proceeds
+TypeError: withConnectorChain is not a function
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:67:10
+     65|   it('a predecessor that NEVER settles holds the next caller only for …
+     66|     process.env.ROTATE_CHAIN_WAIT_MS = '250';
+     67|     void withConnectorChain('t:c-hang', () => new Promise<never>(() =>…
+       |          ^
+     68|     const started = Date.now();
+     69|     const result = await withConnectorChain('t:c-hang', async () => 'p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/__tests__/ks1556-connector-chain.test.ts > KS-1556: withConnectorChain > removes an entry when its last caller finishes: N rotates on N connectors leave the map EMPTY
+TypeError: Cannot read properties of undefined (reading 'size')
+ ❯ src/__tests__/ks1556-connector-chain.test.ts:81:33
+     79|
+     80|   it('removes an entry when its last caller finishes: N rotates on N c…
+     81|     const before = rotateChains.size;
+       |                                 ^
+     82|     const n = 25;
+     83|     const inFlight = Array.from({ length: n }, (_, i) => withConnector…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed (5)
+   Start at  10:25:04
+   Duration  1.11s (transform 120ms, setup 0ms, import 24ms, tests 934ms, environment 0ms)
+

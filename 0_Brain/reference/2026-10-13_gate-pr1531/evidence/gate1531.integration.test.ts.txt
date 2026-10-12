@@ -1,0 +1,317 @@
+/**
+ * PR1531 gate harness (independent of the author's cells). RECORDS observations to GATE_OUT (JSON); asserts only infrastructure.
+ * Same app wiring as the author's integration file (real documents + certifications + verification v1/v2 routers, app role).
+ */
+import { randomUUID, randomBytes, createHash } from 'crypto';
+import { Client } from 'pg';
+import * as fs from 'fs';
+
+const SUPER_DB = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+const APP_DB = process.env.TEST_APP_DATABASE_URL;
+const MT = process.env.MULTI_TENANCY_ENABLED === 'true';
+const PLATFORM_DB = process.env.TEST_PLATFORM_DATABASE_URL || process.env.PLATFORM_DATABASE_URL;
+if (PLATFORM_DB) process.env.PLATFORM_DATABASE_URL = PLATFORM_DB;
+if (SUPER_DB) process.env.DATABASE_URL = APP_DB || SUPER_DB;
+process.env.SIMULATE_ANCHORING = 'true';
+process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
+process.env.AUTH_SERVICE_URL = 'http://gate1531-auth.invalid';
+process.env.PII_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+process.env.PII_LOOKUP_HMAC_KEY = randomBytes(32).toString('hex');
+const OUT = process.env.GATE_OUT || '/dev/null';
+const COST = process.env.GATE_COST === '1';
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({ ...jest.requireActual('@secuura/shared'), verifyMessageSignature: () => true }),
+);
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const u = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
+      if (Object.keys(u).length > 0) { req._secuuraUser = u; req.user = u; }
+      next();
+    },
+    optionalAuth: () => (_req: any, _res: unknown, next: () => void) => next(),
+  };
+});
+jest.mock('../services/chargeEvents', () => ({ createChargeEvent: jest.fn(async () => ({ id: 'charge-g1531' })), getChargeEventsByCertification: jest.fn() }));
+jest.mock('../utils/notificationClient', () => ({
+  notifyDocumentCertified: jest.fn(async () => undefined), notifyDocumentRevoked: jest.fn(async () => undefined), notifyDocumentShared: jest.fn(async () => undefined),
+}));
+jest.mock('../events', () => ({ publishEvent: jest.fn(async () => undefined), EventTypes: new Proxy({}, { get: (_t, k) => String(k) }) }));
+
+const RUN = randomUUID().slice(0, 8);
+const T = randomUUID(); const T2 = randomUUID(); const ORG_A = randomUUID(); const ORG_B = randomUUID(); const ORG_C = randomUUID();
+const U_A = randomUUID(); const U_B = randomUUID(); const U_C = randomUUID(); const HOLDER = randomUUID(); const HOLDER2 = randomUUID();
+const asA = { userId: U_A, role: 'ISSUER_ADMIN', tenantId: T, organizationId: ORG_A, scopes: [] as string[] };
+const asB = { userId: U_B, role: 'ISSUER_ADMIN', tenantId: T, organizationId: ORG_B, scopes: [] as string[] };
+const asC2 = { userId: U_C, role: 'ISSUER_ADMIN', tenantId: T2, organizationId: ORG_C, scopes: [] as string[] };
+const conn1 = { userId: 'connector:platform-s:g1531-one', role: 'API_KEY', tenantId: T, organizationId: ORG_A, scopes: ['certifications:write', 'documents:write'] };
+const anon = { tenantId: T };
+const outsider = { tenantId: T2 };
+
+const results: Record<string, any> = { meta: { MT, app: Boolean(APP_DB), run: RUN } };
+
+describe('gate1531 harness (MT=' + String(MT) + ')', () => {
+  let sql: Client; let mark: Client; let server: any; let base = ''; let disconnect: () => Promise<void>; let db: any;
+  const newHash = () => randomBytes(32).toString('hex');
+  const post = async (path: string, who: object, body: object, settle = 300) => {
+    const res = await fetch(base + path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(who) }, body: JSON.stringify(body) });
+    const text = await res.text(); await new Promise((r) => setTimeout(r, settle));
+    let j: any = null; try { j = JSON.parse(text); } catch { /* not json */ }
+    return { status: res.status, j, text };
+  };
+  const reg = async (who: object, hash: string, title: string) => {
+    const r = await post('/api/documents', who, { type: 'DOCUMENT', contentHash: hash, data: { title } });
+    return { status: r.status, id: (r.j?.document?.id ?? r.j?.id ?? r.j?.data?.id ?? null) as string | null };
+  };
+  const certify = (who: object, body: object) => post('/api/certifications/issue', who, { type: 'verification_certificate', ...body });
+  const strip = (o: any): any => JSON.parse(JSON.stringify(o ?? null, (k, v) => (['verifiedAt', 'timestamp', 'requestId', 'checkedAt', 'generatedAt'].includes(k) ? '<t>' : v)));
+  const v1 = async (hash: string, who: object = anon) => { const r = await post('/api/verification/verify', who, { contentHash: hash }); return { status: r.status, isCertified: r.j?.checks?.isCertified, certification: r.j?.certification, body: strip(r.j) }; };
+  const v1id = async (id: string, who: object = anon) => { const r = await post('/api/verification/verify', who, { documentId: id }); return { status: r.status, isCertified: r.j?.checks?.isCertified, certification: r.j?.certification, body: strip(r.j) }; };
+  const v2 = async (hash: string, who: object = anon) => { const r = await post('/api/v2/verification/verify', who, { contentHash: hash }); const m = (r.j?.matches ?? []) as any[]; return { status: r.status, certs: m.filter((x) => x.certification).map((x) => ({ doc: x.documentId, c: x.certification, isCertified: x.checks?.isCertified })), body: strip(r.j) }; };
+  const v2id = async (id: string, who: object = anon) => { const r = await post('/api/v2/verification/verify', who, { documentId: id }); const m = (r.j?.matches ?? []) as any[]; return { status: r.status, certs: m.filter((x) => x.certification).map((x) => ({ doc: x.documentId, c: x.certification })), body: strip(r.j) }; };
+  const pkey = async (ext: string, t = T) => (await sql.query(`SELECT id::text AS id FROM documents WHERE external_id=$1 AND tenant_id=$2`, [ext, t])).rows[0]?.id as string;
+  const docHash = async (ext: string) => (await sql.query(`SELECT content_hash, parent_document_id::text AS parent, owner_user_id::text AS owner, status, metadata FROM documents WHERE external_id=$1`, [ext])).rows[0];
+  const plant = async (o: { hash: string; parent: string | null; certId: string; ext?: string; tenant?: string; owner?: string | null; meta?: object }) => {
+    const ext = o.ext ?? ('doc-' + Date.now() + String(Math.floor(Math.random() * 1000)) + '-' + o.certId.slice(0, 8));
+    await sql.query(`INSERT INTO documents (id, tenant_id, external_id, title, document_type, content_hash, status, metadata, parent_document_id, owner_user_id)
+      VALUES ($1::uuid,$2,$3,$4,'verification_certificate',$5,'signed',$6::jsonb,$7::uuid,$8::uuid)`,
+      [randomUUID(), o.tenant ?? T, ext, 'planted ' + RUN, o.hash, JSON.stringify(o.meta ?? { certificationId: o.certId, certifiedAt: '2020-01-01T00:00:00.000Z', issuerName: 'Planted Registrar', issuerId: ORG_B }), o.parent, o.owner === undefined ? U_A : o.owner]);
+    return ext;
+  };
+  const summ = (r: any) => ({ v1: { status: r.one.status, isCertified: r.one.isCertified ?? null, certificationId: r.one.certification?.certificationId ?? null, certifiedAt: r.one.certification?.certifiedAt ?? null, certifiedBy: r.one.certification?.certifiedBy ?? null, certifierOrganizationId: r.one.certification?.certifierOrganizationId ?? null, certificationType: r.one.certification?.certificationType ?? null },
+    v2: r.two.certs.map((c: any) => ({ certificationId: c.c.certificationId, certifiedAt: c.c.certifiedAt, certifiedBy: c.c.certifiedBy, certifierOrganizationId: c.c.certifierOrganizationId ?? null, certificationType: c.c.certificationType })) });
+  const rec = async (name: string, hash: string, extra: Record<string, unknown> = {}) => {
+    const one = await v1(hash); const two = await v2(hash);
+    results[name] = { ...summ({ one, two }), ...extra };
+  };
+
+  beforeAll(async () => {
+    require('@secuura/shared').initFromEnv();
+    db = require('../db'); await db.initDb(); disconnect = db.disconnectDb;
+    sql = new Client({ connectionString: SUPER_DB }); await sql.connect();
+    mark = new Client({ connectionString: SUPER_DB, application_name: 'gatemark' } as any); await mark.connect();
+    for (const t of [T, T2]) await sql.query(`INSERT INTO tenants (id,name,slug,status,created_at,updated_at) VALUES ($1,$2,$3,'active',NOW(),NOW())`, [t, 'g1531-' + RUN + '-' + t.slice(0, 4), 'g1531-' + RUN + '-' + t.slice(0, 4)]);
+    for (const [o, tag, t] of [[ORG_A, 'a', T], [ORG_B, 'b', T], [ORG_C, 'c', T2]] as const) await sql.query(`INSERT INTO organizations (id,name,slug,type,status,tenant_id,metadata) VALUES ($1,$2,$3,'issuer','active',$4,'{}'::jsonb)`, [o, 'Org ' + tag + ' ' + RUN, 'g1531-' + tag + '-' + RUN, t]);
+    await sql.query(`INSERT INTO users (id,email,role,status,tenant_id) VALUES ($1,$2,'user','active',$3),($4,$5,'user','active',$6)`, [HOLDER, 'h1-' + RUN + '@g.invalid', T, HOLDER2, 'h2-' + RUN + '@g.invalid', T2]);
+    const express = require('express');
+    const { documentsRouter } = require('../routes/documents'); const { certificationsRouter } = require('../routes/certifications');
+    const { verificationRouter } = require('../routes/verification'); const { verificationV2Router } = require('../routes/verificationV2');
+    const { tenantGucContext } = require('@secuura/shared');
+    const app = express();
+    app.use((req: any, _res: unknown, next: () => void) => { const u = JSON.parse(String(req.headers['x-probe-user'] || '{}')); req.user = u; req.tenantId = u.tenantId; next(); });
+    app.use(tenantGucContext());
+    app.use((req: any, _res: unknown, next: () => void) => { req.db = db.getRequestPrisma(req); next(); });
+    app.use('/api/documents', express.json(), documentsRouter); app.use('/api/certifications', express.json(), certificationsRouter);
+    app.use('/api/verification', express.json(), verificationRouter); app.use('/api/v2/verification', express.json(), verificationV2Router);
+    app.use('/api/verification/verify-file', express.raw({ type: '*/*' }));
+    await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
+    base = 'http://127.0.0.1:' + server.address().port;
+  }, 60000);
+
+  afterAll(async () => {
+    fs.writeFileSync(OUT, JSON.stringify(results, null, 2));
+    if (server) await new Promise<void>((r) => server.close(() => r()));
+    for (const t of [T, T2]) {
+      await sql.query('DELETE FROM certification_events WHERE document_id IN (SELECT id FROM documents WHERE tenant_id=$1)', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM action_provenance WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('UPDATE documents SET parent_document_id=NULL WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM documents WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM platform_document_registry WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM users WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('DELETE FROM organizations WHERE tenant_id=$1', [t]).catch(() => undefined);
+    }
+    for (const t of [T, T2]) await sql.query('DELETE FROM tenants WHERE id=$1', [t]).catch(() => undefined);
+    await sql.end().catch(() => undefined); await mark.end().catch(() => undefined); if (disconnect) await disconnect().catch(() => undefined);
+  });
+
+  it('SETUP role and mode', async () => {
+    const r = await db.withTenant(T, async (tx: any) => (await tx.$queryRaw`SELECT current_user AS who, r.rolsuper AS su, r.rolbypassrls AS bp FROM pg_roles r WHERE r.rolname = current_user`)[0]);
+    results.setup = { who: r.who, su: r.su, bp: r.bp, tenantManager: db.getTenantManager() !== null };
+    expect(r.who).toBe('secuura_app'); expect(db.getTenantManager() !== null).toBe(MT);
+  });
+
+  if (!COST) {
+  it('FORGERY TABLE via the write route (develop certifications.ts, unchanged)', async () => {
+    const hashB = newHash(); const bDoc = await reg(asB, hashB, 'B victim ' + RUN);
+    expect(bDoc.status).toBe(201);
+    results.F00_baseline = summ({ one: await v1(hashB), two: await v2(hashB) });
+    const forge = async (name: string, data: Record<string, unknown>, parent?: string | null, who: object = asA) => {
+      const h = newHash(); const own = await reg(who, newHash(), 'A own ' + name + RUN);
+      const vh = newHash(); const victim = await reg(asB, vh, 'B victim ' + name + RUN);
+      const par = parent === undefined ? own.id : (parent === 'VICTIM' ? victim.id : parent);
+      const body: any = { data: { title: name + ' ' + RUN, contentHash: vh, ...data } };
+      if (par !== null) body.parentDocumentId = par;
+      const iss = await certify(who, body);
+      const derived = iss.j?.derivedDocumentId ? await docHash(iss.j.derivedDocumentId) : null;
+      await rec(name, vh, { issueStatus: iss.status, realCertId: iss.j?.id ?? null, derivedMetaCertId: derived?.metadata?.certificationId ?? null, derivedHashEqVictim: derived ? String(derived.content_hash) === vh : null });
+      return { vh, iss, victim, h };
+    };
+    await forge('F01_overwrite_all_fields_own_parent', { certificationId: 'FORGED-CERT-ID', certifiedAt: '2020-01-01T00:00:00.000Z', issuerName: 'Org B Official Registrar', issuedBy: 'Org B Official Registrar', issuerId: ORG_B, organizationId: ORG_B, certificationType: 'FORGED_TYPE' });
+    await forge('F02_certId_null', { certificationId: null });
+    await forge('F03_certId_empty', { certificationId: '' });
+    await forge('F04_certId_api-key', { certificationId: 'api-key' });
+    // F05: B's REAL certification id (same tenant)
+    const bp = await reg(asB, newHash(), 'B parent for real cert ' + RUN); const bReal = await certify(asB, { parentDocumentId: bp.id, data: { title: 'B real' } });
+    await forge('F05_certId_other_orgs_real_same_tenant', { certificationId: bReal.j?.id });
+    // F06: a certification id from ANOTHER tenant
+    const cReal = await certify(asC2, { data: { title: 'T2 real' } });
+    await forge('F06_certId_from_other_tenant', { certificationId: cReal.j?.id }, undefined);
+    // F07: A's own real certification that belongs to a DIFFERENT document
+    const ap = await reg(asA, newHash(), 'A other doc ' + RUN); const aOther = await certify(asA, { parentDocumentId: ap.id, data: { title: 'A other cert' } });
+    await forge('F07_certId_of_different_document', { certificationId: aOther.j?.id });
+    // F08: cites a document the CALLER legacy-certified
+    const leg = await reg(asA, newHash(), 'A legacy ' + RUN); await certify(asA, { documentId: leg.id, data: { title: 'legacy' } });
+    await forge('F08_certId_legacy_certified_by_caller', { certificationId: await pkey(leg.id as string) });
+    // F09: hash differs from parent (own parent, victim hash, no overrides)
+    await forge('F09_hash_differs_from_parent', {});
+    // F10: no parent link -> the route writes no derived row at all; issue only
+    await forge('F10_no_parent_link_route', {}, null);
+    // F11: parent belongs to someone else (victim's doc), victim hash, chosen display string  [named NOT closed]
+    await forge('F11_parent_is_victims_doc', { issuerName: 'Org B Official Registrar' }, 'VICTIM');
+    // F12: victim parent AND overridden fields
+    await forge('F12_victim_parent_plus_overrides', { certificationId: 'FORGED-CERT-ID', certifiedAt: '2020-01-01T00:00:00.000Z', issuerId: ORG_B }, 'VICTIM');
+    // F13: victim parent but override certifiedAt / type / issuerId only (certificationId intact)
+    await forge('F13_victim_parent_override_time_type_issuerId', { certifiedAt: '2020-01-01T00:00:00.000Z', certificationType: 'FORGED_TYPE', issuerId: ORG_B }, 'VICTIM');
+    // F14: caller in T2 names the T-victim's doc as parent (cross-tenant parent)
+    { const vh = newHash(); const victim = await reg(asB, vh, 'B victim x-tenant ' + RUN);
+      const iss = await certify(asC2, { parentDocumentId: victim.id, data: { title: 'x-tenant parent', contentHash: vh } });
+      const d = iss.j?.derivedDocumentId ? await docHash(iss.j.derivedDocumentId) : null;
+      await rec('F14_parent_in_other_tenant', vh, { issueStatus: iss.status, derivedParent: d?.parent ?? null });
+      const o = await v1(vh, outsider); results.F14_parent_in_other_tenant.v1_as_T2 = { isCertified: o.isCertified ?? null, certificationId: o.certification?.certificationId ?? null }; }
+    // F15: data.parentDocumentId override in data only (column stays the real parent = own doc), victim hash
+    await forge('F15_data_parentDocumentId_override', { parentDocumentId: 'VICTIM-STRING' });
+    // F16: Probe B shape: A registers the SAME hash itself, then lineage-certifies its own copy  [KS-1561]
+    { const vh = newHash(); await reg(asB, vh, 'B orig ' + RUN); const own = await reg(asA, vh, 'A copy ' + RUN);
+      const iss = await certify(asA, { parentDocumentId: own.id, data: { title: 'probeB', contentHash: vh, issuerName: 'Org B Official Registrar' } });
+      await rec('F16_probeB_same_hash_own_copy_lineage', vh, { issueStatus: iss.status }); }
+    // F17: Probe B legacy: A registers same hash and legacy-certifies its copy
+    { const vh = newHash(); await reg(asB, vh, 'B orig ' + RUN); const own = await reg(asA, vh, 'A copy legacy ' + RUN);
+      const iss = await certify(asA, { documentId: own.id, data: { title: 'probeB legacy', issuedBy: 'Org B Official Registrar' } });
+      await rec('F17_probeB_same_hash_own_copy_legacy', vh, { issueStatus: iss.status }); }
+    // F18: A legacy-certifies B's OWN document (no access check on the legacy path)  [PR 1525 surface]
+    { const vh = newHash(); const victim = await reg(asB, vh, 'B victim legacy ' + RUN);
+      const iss = await certify(asA, { documentId: victim.id, data: { title: 'legacy on victim', issuedBy: 'Org B Official Registrar' } });
+      await rec('F18_legacy_certify_victims_doc', vh, { issueStatus: iss.status }); }
+  }, 240000);
+
+  it('PLANTED shapes (no route writes them)', async () => {
+    // P01: no parent link, otherwise genuine (A's real cert, matching suffix, owner A)
+    { const vh = newHash(); await reg(asB, vh, 'B v P01 ' + RUN); const c = await certify(asA, { data: { title: 'P01' } });
+      await plant({ hash: vh, parent: null, certId: c.j.id }); await rec('P01_no_parent_link', vh); }
+    // P02: derived row whose hash differs from the parent (parent = victim doc with a different hash)
+    { const vh = newHash(); const other = await reg(asB, newHash(), 'B other P02 ' + RUN); await reg(asB, vh, 'B v P02 ' + RUN); const c = await certify(asA, { data: { title: 'P02' } });
+      await plant({ hash: vh, parent: await pkey(other.id as string), certId: c.j.id }); await rec('P02_hash_differs_parent_planted', vh); }
+    // P03: connector cross-citation: connector 2's NULL-owner row cites connector 1's certification (suffix matched by planting)
+    { const vh = newHash(); const victim = await reg(asB, vh, 'B v P03 ' + RUN); const c = await certify(conn1, { holderId: HOLDER, data: { title: 'conn1 cert' } });
+      const cr = (await sql.query(`SELECT issuer_user_id FROM documents WHERE id=$1::uuid`, [c.j?.id])).rows[0];
+      await plant({ hash: vh, parent: await pkey(victim.id as string), certId: c.j.id, owner: null, meta: { certificationId: c.j.id, issuerName: 'Connector Two' } });
+      await rec('P03_connector_cites_other_connectors_cert_planted_suffix', vh, { conn1IssueStatus: c.status, certIssuerUserId: cr?.issuer_user_id ?? null }); }
+    // P04: same as P03 but the suffix does NOT match (the real 32-bit binding) -> must be false
+    { const vh = newHash(); const victim = await reg(asB, vh, 'B v P04 ' + RUN); const c = await certify(conn1, { holderId: HOLDER, data: { title: 'conn1 cert b' } });
+      await plant({ hash: vh, parent: await pkey(victim.id as string), certId: c.j.id, owner: null, ext: 'doc-' + Date.now() + '-0badc0de', meta: { certificationId: c.j.id } });
+      await rec('P04_connector_cite_suffix_mismatch', vh); }
+    // P05: certification row REVOKED (status revoked) still counts? (disclosed: not examined)
+    { const vh = newHash(); const own = await reg(asA, vh, 'A P05 ' + RUN); const iss = await certify(asA, { parentDocumentId: own.id, data: { title: 'P05', contentHash: vh } });
+      await sql.query(`UPDATE documents SET status='revoked' WHERE id=$1::uuid`, [iss.j.id]); await rec('P05_cited_cert_revoked', vh); }
+  }, 240000);
+
+  it('TENANCY: same-id-two-tenants, outsider verifying, RLS on the lookup', async () => {
+    // X1: can the same certification id exist in two tenants? (documents PK)
+    { const id = randomUUID(); let err: string | null = null;
+      await sql.query(`INSERT INTO documents (id, tenant_id, title, document_type, content_hash, status, metadata) VALUES ($1::uuid,$2,'x1','t',$3,'certified','{}'::jsonb)`, [id, T, newHash()]);
+      try { await sql.query(`INSERT INTO documents (id, tenant_id, title, document_type, content_hash, status, metadata) VALUES ($1::uuid,$2,'x1','t',$3,'certified','{}'::jsonb)`, [id, T2, newHash()]); } catch (e: any) { err = e.message; }
+      results.X1_same_id_two_tenants = { secondInsertError: err }; }
+    // X2: a genuine act in T and a forged (F09 shape) in T, verified by an outsider in T2 (registry path), v1 and v2
+    { const gh = newHash(); const p = await reg(asA, gh, 'X2 genuine parent ' + RUN); const g = await certify(asA, { parentDocumentId: p.id, data: { title: 'X2 g', contentHash: gh } });
+      const fh = newHash(); await reg(asB, fh, 'X2 B ' + RUN); const own = await reg(asA, newHash(), 'X2 own ' + RUN);
+      await certify(asA, { parentDocumentId: own.id, data: { title: 'X2 f', contentHash: fh, certificationId: 'FORGED', issuerId: ORG_B } });
+      const ag = await v1(gh, outsider); const af = await v1(fh, outsider); const bg = await v2(gh, outsider); const bf = await v2(fh, outsider);
+      results.X2_outsider = { genuineCertId: g.j?.id, v1_genuine: { isCertified: ag.isCertified ?? null, certificationId: ag.certification?.certificationId ?? null, status: ag.status }, v1_forged: { isCertified: af.isCertified ?? null, certificationId: af.certification?.certificationId ?? null }, v2_genuine: bg.certs.map((c) => c.c.certificationId), v2_forged: bf.certs.map((c) => c.c.certificationId) };
+      // X3: the same hash ALSO registered in T2 (a same-hash set spanning tenants): T2 caller verifies
+      await reg(asC2, gh, 'X3 T2 copy ' + RUN);
+      const cg1 = await v1(gh, outsider); const cg2 = await v2(gh, outsider);
+      results.X3_span = { v1: { isCertified: cg1.isCertified ?? null, certificationId: cg1.certification?.certificationId ?? null, documentId: cg1.body?.documentId ?? null }, v2: cg2.certs.map((c) => c.c.certificationId), v2count: cg2.body?.count ?? null };
+      // X4: a T-caller verifying the T2-hosted shape: plant in T2 a derived row citing T's genuine cert id (suffix matched)
+      const xh = newHash(); const t2p = await reg(asC2, xh, 'X4 T2 parent ' + RUN);
+      await plant({ hash: xh, parent: await pkey(t2p.id as string, T2), certId: g.j.id, tenant: T2, owner: U_A });
+      const x4a = await v1(xh, outsider); const x4b = await v2(xh, anon); const x4c = await v2(xh, outsider);
+      results.X4_T2_row_cites_T_cert = { v1_asT2: { isCertified: x4a.isCertified ?? null, id: x4a.certification?.certificationId ?? null }, v2_asT: x4b.certs.map((c) => c.c.certificationId), v2_asT2: x4c.certs.map((c) => c.c.certificationId) };
+      // X5: RLS on the exact lookup statement as secuura_app, no GUC vs GUC
+      const app = new Client({ connectionString: APP_DB }); await app.connect();
+      const q = 'SELECT id FROM documents WHERE id = $1::uuid AND tenant_id = $2::uuid LIMIT 1';
+      const noGuc = (await app.query(q, [g.j.id, T])).rowCount;
+      await app.query('BEGIN'); await app.query(`SELECT set_config('app.current_tenant_id', $1, true)`, [T]); const withGuc = (await app.query(q, [g.j.id, T])).rowCount; await app.query('COMMIT');
+      await app.query('BEGIN'); await app.query(`SELECT set_config('app.current_tenant_id', $1, true)`, [T2]); const wrongGuc = (await app.query(q, [g.j.id, T])).rowCount; await app.query('COMMIT');
+      await app.end();
+      results.X5_rls = { noGuc, withGuc, wrongGuc };
+    }
+  }, 240000);
+
+  it('LEGIT shapes: full responses (diff head vs develop)', async () => {
+    const L: Record<string, any> = {};
+    // L1 genuine owner with the parent's hash
+    { const h = newHash(); const p = await reg(asA, h, 'L1 p ' + RUN); const i = await certify(asA, { parentDocumentId: p.id, data: { title: 'L1', contentHash: h, issuedBy: 'Org A' } });
+      L.L1 = { v1: await v1(h), v2: await v2(h), v2id: await v2id(i.j.derivedDocumentId), v1id: await v1id(i.j.derivedDocumentId) }; }
+    // L2 genuine certify with parent but NO data.contentHash (the spec does not ask for one)
+    { const h = newHash(); const p = await reg(asA, h, 'L2 p ' + RUN); const i = await certify(asA, { parentDocumentId: p.id, data: { title: 'L2' } });
+      const d = await docHash(i.j.derivedDocumentId);
+      L.L2 = { derivedHashEqParent: String(d.content_hash) === h, v1parent: await v1(h), v2parent: await v2(h), v1derived: await v1(String(d.content_hash)), v2derived: await v2(String(d.content_hash)), v2id: await v2id(i.j.derivedDocumentId) }; }
+    // L3 legacy-certified document
+    { const h = newHash(); const p = await reg(asA, h, 'L3 ' + RUN); await certify(asA, { documentId: p.id, data: { title: 'L3', issuedBy: 'Org A' } });
+      L.L3 = { v1: await v1(h), v2: await v2(h) }; }
+    // L4 connector (S-style) genuine lineage certify with the parent's hash
+    { const h = newHash(); const p = await reg(conn1, h, 'L4 p ' + RUN); const i = await certify(conn1, { holderId: HOLDER, parentDocumentId: p.id, data: { title: 'L4', contentHash: h } });
+      L.L4 = { regStatus: p.status, issueStatus: i.status, v1: await v1(h), v2: await v2(h), v2id: i.j?.derivedDocumentId ? await v2id(i.j.derivedDocumentId) : null }; }
+    // L5 no hash at all registered
+    { L.L5 = { v1: await v1(newHash()), v2: await v2(newHash()) }; }
+    // L6 genuine, then the HOLDER erased (step 6 shape, applied by SQL)
+    { const h = newHash(); const p = await reg(asA, h, 'L6 p ' + RUN); const i = await certify(asA, { holderId: HOLDER, parentDocumentId: p.id, data: { title: 'L6', contentHash: h } });
+      const before = await v1(h);
+      await sql.query(`UPDATE documents SET certification_metadata='{"anonymized": true}'::jsonb, metadata='{"anonymized": true}'::jsonb WHERE owner_user_id=$1::uuid`, [HOLDER]);
+      L.L6 = { issueStatus: i.status, before: { isCertified: before.isCertified }, after: await v1(h), afterV2: await v2(h) }; }
+    // L7 genuine, then custody transfer of the derived row (owner changes) by SQL
+    { const h = newHash(); const p = await reg(asA, h, 'L7 p ' + RUN); const i = await certify(asA, { parentDocumentId: p.id, data: { title: 'L7', contentHash: h } });
+      await sql.query(`UPDATE documents SET owner_user_id=$1::uuid WHERE external_id=$2`, [U_B, i.j.derivedDocumentId]);
+      L.L7 = { v1: await v1(h) }; }
+    // L8 v1 verify-file of a genuine
+    { const bytes = Buffer.from('g1531 L8 ' + RUN); const h = 'sha256:' + createHash('sha256').update(bytes).digest('hex');
+      const p = await reg(asA, h, 'L8 p ' + RUN); await certify(asA, { parentDocumentId: p.id, data: { title: 'L8', contentHash: h } });
+      const res = await fetch(base + '/api/verification/verify-file', { method: 'POST', headers: { 'content-type': 'application/octet-stream', 'x-probe-user': JSON.stringify(anon) }, body: bytes });
+      L.L8 = { status: res.status, body: strip(JSON.parse(await res.text())) }; }
+    results.LEGIT = L;
+  }, 240000);
+  }
+
+  if (COST) {
+  it('COST: marker-bracketed request shapes', async () => {
+    const m = async (tag: string) => { await mark.query(`SELECT 'GATEMARK ${tag}'`); };
+    const measured = async (name: string, fn: () => Promise<unknown>) => { await new Promise((r) => setTimeout(r, 400)); await m(name + ' BEGIN'); await fn(); await new Promise((r) => setTimeout(r, 400)); await m(name + ' END'); };
+    // C0 plain hash
+    const h0 = newHash(); await reg(asB, h0, 'C0 ' + RUN);
+    // C1 one genuine derived row
+    const h1 = newHash(); const p1 = await reg(asA, h1, 'C1 p ' + RUN); await certify(asA, { parentDocumentId: p1.id, data: { title: 'C1', contentHash: h1 } });
+    // C9 nine claimed rows (genuine-shaped: real certs of A, matching suffixes, parent with the same hash)
+    const h9 = newHash(); const p9 = await reg(asA, h9, 'C9 p ' + RUN); const pk9 = await pkey(p9.id as string);
+    for (let i = 0; i < 9; i++) { const c = await certify(asA, { data: { title: 'C9 cert ' + i } }); await plant({ hash: h9, parent: pk9, certId: c.j.id }); }
+    // C30: thirty claimed rows (is the cap per request?)
+    const h30 = newHash(); const p30 = await reg(asA, h30, 'C30 p ' + RUN); const pk30 = await pkey(p30.id as string);
+    for (let i = 0; i < 30; i++) { const c = await certify(asA, { data: { title: 'C30 cert ' + i } }); await plant({ hash: h30, parent: pk30, certId: c.j.id }); }
+    // CX: nine claimed rows whose parent is NOT in the set (parent hash fetched -> 2 lookups per row?)
+    const hx = newHash(); const px = await reg(asA, hx, 'CX p ' + RUN); const pkx = await pkey(px.id as string);
+    const hz = newHash();
+    for (let i = 0; i < 9; i++) { const c = await certify(asA, { data: { title: 'CX cert ' + i } }); await plant({ hash: hz, parent: pkx, certId: c.j.id }); }
+    // rows with a different hash cannot be in the same-hash set; v2-by-documentId of ONE such row is the parent-fetch shape:
+    const hy = newHash(); const py = await reg(asA, hy, 'CY p ' + RUN); const iy = await certify(asA, { parentDocumentId: py.id, data: { title: 'CY', contentHash: hy } });
+    for (const [label, fn] of [
+      ['C0_v1', () => v1(h0)], ['C1_v1', () => v1(h1)], ['C9_v1', () => v1(h9)], ['C30_v1', () => v1(h30)],
+      ['C0_v2', () => v2(h0)], ['C1_v2', () => v2(h1)], ['C9_v2', () => v2(h9)], ['C30_v2', () => v2(h30)],
+      ['CY_v2id', () => v2id(iy.j.derivedDocumentId)], ['CZ_v1_parent_outside_set', () => v1(hz)], ['CZ_v2_parent_outside_set', () => v2(hz)],
+      ['C9_v1_asT2', () => v1(h9, outsider)], ['C9_v2_asT2', () => v2(h9, outsider)],
+    ] as const) { await measured(label, fn as any); }
+    results.COST = { done: true, h9: h9.slice(0, 12) };
+  }, 600000);
+  }
+});

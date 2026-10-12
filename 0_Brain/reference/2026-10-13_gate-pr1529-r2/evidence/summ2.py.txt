@@ -1,0 +1,16 @@
+import json, sys
+for p in sys.argv[1:]:
+    d = json.load(open(p)); n = p.split('/')[-1]
+    a3 = d.get('A3_family', [])
+    bad = [o for o in a3 if o['v1'] is not False or o['v2'] is not False or o['memSeedActive'] is not False or o['listed'] is not False]
+    rv = [(o['g'], o['rotateFails'], o['revokeFails'], o['revoke'], o['dbSeedActive']) for o in a3 if o['revoke'] != (500 if o['revokeFails'] and (o['rotateFails'] or o['g'] == '60') else 200)]
+    a1 = d.get('A1_pending', [])
+    r1 = d.get('R1', [])
+    x1 = d.get('X1_cross_replica_app_role', [])
+    print(n, '| C0', d.get('C0', {}).get('serviceIso'), '| ISO', d.get('ISO', {}).get('rotates'), d.get('ISO', {}).get('plains'), 'wrong', d.get('ISO', {}).get('plainAfterRotWrong'),
+          '| R1 bad', sum(1 for o in r1 if o['act'] != 1 or o['nulls'] or not o['memEq']), 'of', len(r1), '| R2 bad', sum(1 for o in d.get('R2_grace', []) if o['unexpiring'] != 1 or o['nulls']),
+          '| X1 ok', sum(1 for o in x1 if o['ok']), '/', len(x1), 'waited', sum(1 for o in x1 if o['waitingAdvisory'] >= 1),
+          '| A1 pend', sum(1 for o in a1 if o['pendingAtIssue']), '/', len(a1), 'prod-bad', sum(1 for o in a1 if o['st'] < 500 or o['key'] is not None or not o['dbActive'] or o['memActive'] is not True or o['memExp'] is not None or any(v is not True for v in o['post'])), 'mid!=true', sum(1 for o in a1 if o['mid'] is not True),
+          '| A3 rows', len(a3), 'revoke-not-held', len(bad), 'revoke-status-mismatch', rv,
+          '| K577', [(o['g'], o['st'], o['prk'], o['active'], o['memSeedSame']) for o in d.get('K577', [])],
+          '| K888', [(o['g'], o['st'], o['memSame'], o['vSeed']) for o in d.get('K888', [])])

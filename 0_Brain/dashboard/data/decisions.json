@@ -34635,5 +34635,53 @@
   ],
   "delivered_artefact": "RD-840 Jira comment 39397 + RD-841 comment 39398 (verbatim ruling), by S96O 2026-10-12T22:52Z",
   "delivered_ts": "2026-10-13T09:54:14.494886+11:00"
+ },
+ {
+  "id": "secuura-ks1557-readside-hides-own-hash-certificates-1013",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1557: after the forgery fix, a certificate made with a hash the caller chose will show as certified on no bytes at all. Accept?",
+  "bluf": "Your choice needed: (a) accept, merge the forgery fix as built, or (b) hold it until we settle what such certificates should do. Your option b on the hash card means a caller may send its own hash when certifying. The gate on the forgery fix (PR 1531, GO WITH NOTE) measured the consequence, which my card text understated: today such a certificate is visible on its own hash; after the fix it is visible on NO hash, because the server never sees the bytes and so cannot tell a real certificate from a forged one, so it fails closed. A certify call that sends no hash is affected the same way. Everything else the fix closes stays closed. Platform S's payload shape is unconfirmed (Stuart has been asked). Nothing deploys without your round, so merging only puts it on develop. Override note: the prior-ruling gate matched only on the token 1013 in unrelated Datasec and other cards; none of Kam's earlier words concern this consequence.",
+  "default_action": "If Kam does not answer: Wednesday releases the merge after a short wait, J states the change in the pull request body and on KS-1557, and nothing deploys until your round.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept",
+    "detail": "merge the forgery fix as built:Recommended. Closes 13 measured forgery shapes. Certificates with a caller-chosen hash stop showing as certified anywhere; the write side later decides what to do with them."
+   },
+   {
+    "key": "b",
+    "label": "Hold the fix until we settle it",
+    "detail": "The forgery stays open on Kintsugi and demo meanwhile. Needs a decision on how a certificate with its own hash should be proved."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-13T10:30:32.266006+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-21 09:52",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-hash-population-count",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks695-erasure-merge-timing-1013",
+   "CARD hpsmpoc-words-b230-b231-1013",
+   "CARD secuura-ks1508-ask-stuart-versionedbyid-1013",
+   "CARD composer-k-q32-refuse-names-1013",
+   "CARD composer-docker-prune-stale-seat-stacks-1013",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1533-orgless-accounts-cannot-name-org-on-mint-1013",
+   "CARD secuura-ks1223-referrer-wallet-source-1013",
+   "CARD secuura-pr1497-round6-past-the-cap-1013",
+   "CARD quickquote-ci-red-codeql-14-1013",
+   "CARD nexusai-rd838-rd640-round3-1013",
+   "CARD hpsmpoc-docker-finished-seat-stacks-1013",
+   "CARD mpscalc-paul-invite-send-1013",
+   "CARD secuura-ks1557-certify-hash-semantics-1013",
+   "CARD mpscalc-feedback-pill-words-1013",
+   "CARD composer-b144-words-demo-1013",
+   "CARD hpsmpoc-docker-stacks-remove-not-compose-1013",
+   "CARD nexusai-sustainability-feedback-rd840-rd841-1013"
+  ]
  }
 ]

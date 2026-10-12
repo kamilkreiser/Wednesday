@@ -1,0 +1,8 @@
+#!/bin/zsh
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1531
+EV=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1531/evidence
+T=$1; MT=$2; N=$3
+off=$(stat -f %z $G/pg.log)
+GATE_COST=1 zsh $G/rungate.sh $T $MT $N
+tail -c +$((off+1)) $G/pg.log > $G/$N.pglog
+python3 -I $G/qcount.py $G/$N.pglog > $EV/$N.counts.txt; cat $EV/$N.counts.txt

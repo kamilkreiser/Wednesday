@@ -1,0 +1,38 @@
+/** Gate (PR1529 r2): the memory-only rotate path (no DATABASE_URL), driven through the HTTP route. Scratch tree only. */
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import crypto from 'crypto';
+import type { Server } from 'http';
+import type { AddressInfo } from 'net';
+process.env.SECURITY_DISABLE_BOOT = '1';
+delete process.env.DATABASE_URL;
+const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const PRIV = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+const b64 = (b: Buffer) => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const tok = () => { const h = b64(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))); const n = Math.floor(Date.now() / 1000); const p = b64(Buffer.from(JSON.stringify({ sub: 'g', iat: n, exp: n + 600, role: 'super_admin' }))); return `${h}.${p}.${b64(crypto.sign('RSA-SHA256', Buffer.from(`${h}.${p}`), PRIV))}`; };
+let server: Server; let base: string; let mod: any;
+const T = 'a0000000-0000-4000-8000-00000015292c'; const ORG = 'abcdef00-1529-4529-8529-00000015292c';
+async function mint(c: string, rotate: boolean) { const r = await fetch(`${base}/api/keys`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` }, body: JSON.stringify({ name: 'm', scopes: ['documents:read'], tenantId: T, organizationId: ORG, connectorId: c, rotate }) }); const b: any = await r.json(); return { status: r.status, id: b.data?.id, key: b.data?.key, prk: b.data?.priorKeysRevoked }; }
+async function validate(key: string) { const r = await fetch(`${base}/api/keys/validate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) }); const b: any = await r.json(); return b.data?.reason ?? b.data?.valid; }
+beforeAll(async () => {
+  process.env.JWT_PUBLIC_KEY = Buffer.from(publicKey.export({ type: 'spki', format: 'pem' }).toString()).toString('base64');
+  delete process.env.JWT_JWKS_URL; delete process.env.AUTH_SERVICE_URL;
+  mod = await import('../index');
+  await new Promise<void>((r) => { server = mod.default.listen(0, '127.0.0.1', r); });
+  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+});
+afterAll(async () => { await new Promise<void>((r) => server.close(() => r())); delete process.env.API_KEY_ROTATION_GRACE_SECONDS; });
+describe('gate memory-only rotate path', () => {
+  it.each([['0'], ['60']])('grace %s: rotate retires the prior key in memory, reports 1, never touches the chain', async (g) => {
+    process.env.API_KEY_ROTATION_GRACE_SECONDS = g;
+    const c = `memonly:${g}:${crypto.randomUUID()}`;
+    const s = await mint(c, false);
+    const pair = await Promise.all([mint(c, true), mint(c, true)]);
+    const active = [...mod.memApiKeys.values()].filter((k: any) => k.connectorId === c && k.isActive && !k.expiresAt).map((k: any) => k.id);
+    console.log('GATE_MEMONLY', JSON.stringify({ g, seed: s.status, st: pair.map((p) => p.status), prk: pair.map((p) => p.prk), unexpiringActive: active.length, chains: mod.rotateChains.size, vSeed: await validate(s.key) }));
+    expect(s.status).toBe(201); expect(pair.map((p) => p.status)).toEqual([201, 201]);
+    expect(pair.every((p) => typeof p.prk === 'number')).toBe(true);
+    expect(active).toHaveLength(1);
+    expect(mod.rotateChains.size).toBe(0);
+    expect(await validate(s.key)).toBe(g === '0' ? 'Key revoked' : true);
+  });
+});

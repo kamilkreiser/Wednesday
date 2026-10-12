@@ -1,0 +1,16 @@
+#!/bin/zsh
+# usage: runint.sh <head|dev|mut> <MT true|false> <outname> [jest args...] -> evidence/<outname>.txt (originate integration config, app role)
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1531
+EV=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1531/evidence
+T=$1; MT=$2; O=$3; shift 3
+source $G/pg.env
+export TEST_PLATFORM_DATABASE_URL=postgresql://secuura@127.0.0.1:55427/secuura
+export MULTI_TENANCY_ENABLED=$MT NODE_ENV=test
+builtin cd $G/$T/Blockchain/Dev/services/originate || exit 9
+{ echo "# tree=$T HEAD=$(git rev-parse HEAD) verification.ts sha16=$(shasum -a 256 src/routes/verification.ts | cut -c1-16) v2 sha16=$(shasum -a 256 src/routes/verificationV2.ts | cut -c1-16) MT=$MT date=$(date -u +%FT%TZ)"; git status --porcelain; } > $EV/$O.txt
+npx jest --config jest.integration.config.js --verbose "$@" >> $EV/$O.txt 2>&1
+rc=$?
+echo "# rc=$rc" >> $EV/$O.txt
+PW=$(cat $G/app_pw); sed -i '' "s/$PW/<REDACTED>/g" $EV/$O.txt
+grep -E "^\s+(✓|✕|○)|Tests:|# rc" $EV/$O.txt | sed 's/([0-9]* ms)//'

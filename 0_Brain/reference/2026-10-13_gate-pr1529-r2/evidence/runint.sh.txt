@@ -1,0 +1,16 @@
+#!/bin/zsh
+# usage: runint.sh <head|dev|oldhead> <outname> [vitest args...]  -> evidence/<outname>.txt (integration config, app role)
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529r2
+EV=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1529-r2/evidence
+T=$1; O=$2; shift 2
+source $G/pg.env
+export GATE_EVID=$EV
+builtin cd $G/$T/Blockchain/Dev/services/security || exit 9
+echo "# tree=$T HEAD=$(git rev-parse HEAD) index.ts sha16=$(shasum -a 256 src/index.ts | cut -c1-16) dirty=$(git status --porcelain | wc -l | tr -d ' ') date=$(date -u +%FT%TZ) env:GRACE=${API_KEY_ROTATION_GRACE_SECONDS:-} CHAINMS=${ROTATE_CHAIN_WAIT_MS:-} GATE_ISO=${GATE_ISO:-}" > $EV/$O.txt
+git status --porcelain >> $EV/$O.txt
+npx vitest run --config vitest.integration.config.ts --reporter=verbose "$@" >> $EV/$O.txt 2>&1
+rc=$?
+echo "# rc=$rc" >> $EV/$O.txt
+PW=$(cat $G/app_pw); sed -i '' "s/$PW/<REDACTED>/g" $EV/$O.txt
+python3 -I $G/summ.py $EV/$O.txt

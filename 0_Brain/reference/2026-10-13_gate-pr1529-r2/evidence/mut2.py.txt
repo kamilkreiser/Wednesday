@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""PR1529 round-2 gate mutant runner (gate's own; runs ONLY in the gate's scratch worktree `mut`).
+usage: mut2.py <id>[,<id>...] | all | author | gate
+Each mutant: snapshot index.ts sha256 -> exact-anchor replace (anchor count must be 1) -> marker asserted -> run
+(1) chain unit file, (2) the author's two integration files, (3) the gate harness (RC; plus RR for pin mutants)
+-> failing CELL NAMES recorded -> restore from snapshot -> sha256 asserted byte-identical.
+A suite with 0 passed and 0 failed is LOADFAIL, never a kill. Results append to evidence/mut2_results.jsonl.
+"""
+import hashlib, json, os, re, subprocess, sys
+
+G = "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529r2"
+SVC = f"{G}/mut/Blockchain/Dev/services/security"
+SRC = f"{SVC}/src/index.ts"
+EV = "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1529-r2/evidence"
+AUTHOR = "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-13_seatV-6th/tools/mutants_v6.py"
+PW = open(f"{G}/app_pw").read().strip()
+
+env = dict(os.environ)
+for line in open(f"{G}/pg.env"):
+    k, v = line.replace("export ", "").strip().split("=", 1)
+    env[k] = v
+env["GATE_EVID"] = EV
+
+def sha(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()
+
+def run(cmd, tag, extra=None):
+    e = dict(env); e.update(extra or {})
+    r = subprocess.run(cmd, cwd=SVC, capture_output=True, text=True, env=e)
+    out = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout + r.stderr).replace(PW, "<REDACTED>")
+    open(f"{EV}/mut2_{tag}.txt", "w").write(out + f"\n# rc={r.returncode}\n")
+    m = re.search(r"Tests\s+(?:(\d+) failed \| )?(\d+) passed", out)
+    failed = int(m.group(1) or 0) if m else 0
+    passed = int(m.group(2)) if m else 0
+    if not m:
+        mf = re.search(r"Tests\s+(\d+) failed", out)
+        failed = int(mf.group(1)) if mf else 0
+    cells = sorted({re.sub(r"\s+\d+ms$", "", re.sub(r"^.*> ", "", l)).strip() for l in out.splitlines() if re.match(r"\s*×", l)})
+    return {"passed": passed, "failed": failed, "cells": cells, "loadfail": passed == 0 and failed == 0, "rc": r.returncode}
+
+UNIT = ["npx", "vitest", "run", "src/__tests__/ks1556-connector-chain.test.ts", "--reporter=verbose"]
+INTEG = ["npx", "vitest", "run", "--config", "vitest.integration.config.ts", "--reporter=verbose",
+         "src/__tests__/ks1549-concurrent-rotates-keep-one-key.integration.test.ts",
+         "src/__tests__/ks1556-rotate-under-repeatable-read.integration.test.ts"]
+HARN = ["npx", "vitest", "run", "--config", "vitest.integration.config.ts", "--reporter=verbose",
+        "src/__tests__/gate1529r2.integration.test.ts"]
+
+# ---- the author's table, re-derived from their script's own definitions (data only: the text between the table marker and main) ----
+src = open(AUTHOR).read()
+tbl = src[src.index("# ---- the table."):src.index("def main():")]
+ns = {}
+exec(tbl, ns)
+AUTHOR_TABLE = {mid: (why, edits, marker) for (mid, why, edits, marker) in ns["TABLE"]}
+
+PIN = "await client.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');"
+GUC = "      await applyTenantGuc(client);\n"
+PINL = "      await client.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');\n"
+LOCK = "await client.query('SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))', [k.tenantId, connectorId]);"
+CHAINCALL = "  return withConnectorChain(`${k.tenantId}:${connectorId}`, async () => {\n    const grace = rotationGraceSeconds();\n    const retiredIds = await runWithTenantId("
+APPLY = "    // COMMITTED. Only now does memory change"
+TAIL = "    return retiredIds === null ? null : retiredIds.length;\n  });\n}"
+SAVEPT = "      await client.query('SAVEPOINT ks1549_retire');\n      try {\n"
+LOOP = "    for (const id of retiredIds ?? []) {\n      const current = memApiKeys.get(id);\n      if (current) retireInMemory(current, grace);\n    }\n"
+SETNEW = "    memApiKeys.set(k.id, k);\n    for (const id of retiredIds ?? []) {"
+
+GATE_TABLE = {
+  "M1_chain_key_no_tenant": ("the chain keyed by connector only (no tenant)",
+     [("withConnectorChain(`${k.tenantId}:${connectorId}`, async", "withConnectorChain(`${connectorId}` /*GATE_M1*/, async")], "GATE_M1"),
+  "M2_lock_tenant_only": ("the advisory lock keyed on tenant only",
+     [(LOCK, "await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [k.tenantId]); /*GATE_M2*/")], "GATE_M2"),
+  "M3_mem_retire_when_retire_failed": ("memory retires the connector's other keys although the DB retire returned null (ids it did not return)",
+     [("    for (const id of retiredIds ?? []) {", "    for (const id of retiredIds ?? [...memApiKeys.values()].filter((m) => m.connectorId === connectorId && m.tenantId === k.tenantId && m.id !== k.id).map((m) => m.id)) { /*GATE_M3*/")], "GATE_M3"),
+  "M3b_mem_retire_all_connector_keys": ("memory retires EVERY in-memory key of the connector, not the ids the retire returned",
+     [("    for (const id of retiredIds ?? []) {", "    for (const id of retiredIds === null ? [] : [...memApiKeys.values()].filter((m) => m.connectorId === connectorId && m.tenantId === k.tenantId && m.id !== k.id).map((m) => m.id)) { /*GATE_M3b*/")], "GATE_M3b"),
+  "M4_chain_released_before_apply": ("the chain covers only the transaction; memory applied after release, after a macrotask yield",
+     [(CHAINCALL, "  const grace = rotationGraceSeconds(); /*GATE_M4*/\n  const retiredIds = await withConnectorChain(`${k.tenantId}:${connectorId}`, async () => {\n    return runWithTenantId("),
+      (APPLY, "  });\n  await new Promise((r) => setImmediate(r)); /*GATE_M4*/\n  {\n" + APPLY),
+      (TAIL, "    return retiredIds === null ? null : retiredIds.length;\n  }\n}")], "GATE_M4"),
+  "M5_pin_after_guc": ("the pin after the tenant GUC query (round-1 I2)",
+     [(PINL + GUC, GUC + PINL.replace(";\n", "; /*GATE_M5*/\n"))], "GATE_M5"),
+  "M6_pin_inside_savepoint": ("the pin moved inside the savepoint (round-1 G2)",
+     [(PINL, "      /*GATE_M6a*/\n"), (SAVEPT, SAVEPT + "        await client.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED'); /*GATE_M6b*/\n")], "GATE_M6"),
+  "M7_grace_memory_not_applied": ("after COMMIT, the grace path does not give the prior key its expiry in memory",
+     [("      if (current) retireInMemory(current, grace);", "      if (current && grace === 0) retireInMemory(current, grace); /*GATE_M7*/")], "GATE_M7"),
+  "M8_new_key_not_in_memory": ("after COMMIT the new key is not put into memory (validate would have to warm it)",
+     [(SETNEW, "    /*GATE_M8*/\n    for (const id of retiredIds ?? []) {")], "GATE_M8"),
+  "M9_chain_waits_zero": ("the bounded wait is 0 ms (the chain never waits)",
+     [("  return Number.isFinite(raw) && raw > 0 ? raw : 10_000;", "  return 1; /*GATE_M9*/")], "GATE_M9"),
+  "M10_entry_deleted_unconditionally": ("the chain entry is deleted by whoever finishes, even if a later caller owns it",
+     [("    if (rotateChains.get(key) === mine) rotateChains.delete(key);", "    rotateChains.delete(key); /*GATE_M10*/")], "GATE_M10"),
+  # widening probe, not a mutant: delay the post-COMMIT memory apply of rotates named gdelay* by 1500 ms
+  "W2_probe_delay_apply": ("PROBE: post-COMMIT apply delayed 1500 ms for 'gdelay' rotates",
+     [(APPLY, "    if (k.name.startsWith('gdelay')) await new Promise((r) => setTimeout(r, 1500)); /*GATE_W2*/\n" + APPLY)], "GATE_W2"),
+}
+
+PIN_MUTANTS = {"i1_pin_removed", "i3_pin_repeatable_read", "i4_pin_serializable", "g3_pin_skips_grace", "M5_pin_after_guc", "M6_pin_inside_savepoint", "lock_removed", "M2_lock_tenant_only"}
+
+def apply(text, edits):
+    for find, repl in edits:
+        if text.count(find) != 1:
+            return None, f"anchor count {text.count(find)}: {find[:70]!r}"
+        text = text.replace(find, repl, 1)
+    return text, None
+
+def one(mid, why, edits, marker, origin):
+    base_text = open(SRC, encoding="utf8").read(); base_sha = sha(SRC)
+    text, err = apply(base_text, edits)
+    if text is None:
+        return {"id": mid, "origin": origin, "status": "ANCHOR_FAIL", "err": err}
+    open(SRC, "w", encoding="utf8").write(text)
+    try:
+        hits = open(SRC, encoding="utf8").read().count(marker)
+        assert hits >= 1, f"{mid}: marker {marker} absent"
+        res = {"id": mid, "origin": origin, "why": why, "marker_hits": hits}
+        if mid.startswith("W2"):
+            res["harness_rc"] = run(HARN, f"{mid}_harn", {"GATE_TAG": f"mut_{mid}", "GATE_ONLY": "W2"})
+            return res
+        res["unit"] = run(UNIT, f"{mid}_unit")
+        res["author_integ"] = run(INTEG, f"{mid}_integ")
+        res["harness_rc"] = run(HARN, f"{mid}_harn_rc", {"GATE_TAG": f"mut_{mid}_rc"})
+        if mid in PIN_MUTANTS:
+            res["harness_rr"] = run(HARN, f"{mid}_harn_rr", {"GATE_TAG": f"mut_{mid}_rr", "GATE_ISO": "repeatable read"})
+        suites = [res[k] for k in ("unit", "author_integ", "harness_rc", "harness_rr") if k in res]
+        if any(s["loadfail"] for s in suites):
+            res["status"] = "LOADFAIL"
+        else:
+            res["status"] = "KILLED" if any(s["cells"] for s in suites) else "SURVIVED"
+        return res
+    finally:
+        open(SRC, "w", encoding="utf8").write(base_text)
+        assert sha(SRC) == base_sha, f"{mid}: RESTORE FAILED"
+
+def main():
+    sel = sys.argv[1]
+    table = []
+    if sel in ("all", "author"):
+        table += [(m, *AUTHOR_TABLE[m], "author") for m in AUTHOR_TABLE]
+    if sel in ("all", "gate"):
+        table += [(m, *GATE_TABLE[m], "gate") for m in GATE_TABLE if not m.startswith("W2")]
+    if sel not in ("all", "author", "gate"):
+        for m in sel.split(","):
+            table.append((m, *(AUTHOR_TABLE.get(m) or GATE_TABLE[m]), "author" if m in AUTHOR_TABLE else "gate"))
+    base_sha = sha(SRC)
+    print("baseline index.ts sha256/16", base_sha[:16], flush=True)
+    for mid, why, edits, marker, origin in table:
+        r = one(mid, why, edits, marker, origin)
+        with open(f"{EV}/mut2_results.jsonl", "a") as f:
+            f.write(json.dumps(r) + "\n")
+        def s(k):
+            x = r.get(k)
+            return f"{x['passed']}p/{x['failed']}f" if x else "-"
+        print(f"{r.get('status','?'):9} {mid:36} unit {s('unit')} author {s('author_integ')} harnRC {s('harness_rc')} harnRR {s('harness_rr')}", flush=True)
+    assert sha(SRC) == base_sha
+    print("final sha ok", sha(SRC)[:16], flush=True)
+
+main()

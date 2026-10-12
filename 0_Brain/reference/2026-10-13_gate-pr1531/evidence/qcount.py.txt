@@ -1,0 +1,21 @@
+import re,sys,collections
+lines=open(sys.argv[1],errors='replace').read().split('\n')
+# a statement record starts with a timestamp prefix; continuation lines do not
+rec=re.compile(r'^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d+ \w+ \[(\d+)\] (\S*) (\S*) (LOG|ERROR|WARNING|STATEMENT|DETAIL):\s+(.*)$')
+cur=None; out=collections.OrderedDict(); kinds=collections.defaultdict(collections.Counter)
+for ln in lines:
+    m=rec.match(ln)
+    if not m: continue
+    pid,user,app,lvl,msg=m.groups()
+    mk=re.search(r"GATEMARK (\S+) (BEGIN|END)",msg)
+    if mk and app=='gatemark':
+        if mk.group(2)=='BEGIN': cur=mk.group(1); out[cur]=0
+        else: cur=None
+        continue
+    if cur is None or lvl!='LOG': continue
+    if not (msg.startswith('statement:') or msg.startswith('execute')): continue
+    out[cur]+=1
+    body=re.sub(r'^(statement|execute [^:]*):\s*','',msg)
+    k='BEGIN' if body.upper().startswith('BEGIN') else 'COMMIT' if body.upper().startswith('COMMIT') else 'set_config' if 'set_config' in body else ('LOOKUP' if re.search(r'FROM documents WHERE id = \$1::uuid AND tenant_id',body) else 'other')
+    kinds[cur][k]+=1
+for k,v in out.items(): print(f"{k:14s} statements={v:4d}  {dict(kinds[k])}")

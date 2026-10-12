@@ -1,0 +1,18 @@
+import re,sys
+KW=r'\b(close|closes|closed|closing|fix|fixes|fixed|fixing|resolve|resolves|resolved|resolving|complete|completes|completed|completing)\b'
+def scan(t):
+    hits=[]
+    for m in re.finditer(r'\b[A-Z]{2,}-\d+\b',t):
+        lo,hi=max(0,m.start()-40),min(len(t),m.end()+40)
+        w=t[lo:hi]
+        for k in re.finditer(KW,w,re.I):
+            hits.append((m.group(),k.group(),w.replace('\n',' ')))
+    return hits
+t=open(sys.argv[1]).read()
+t=re.sub(r'^<!--.*?-->\n','',t,count=1)
+ctrl="This PR fixes KS-9999 entirely."
+c=scan(ctrl); print("CONTROL hits:",len(c),c)
+h=scan(t); print("BODY ticket keys:",sorted(set(re.findall(r'\b[A-Z]{2,}-\d+\b',t))))
+print("BODY hits:",len(h))
+for x in h: print(" ",x)
+print("Refs lines:",[l for l in t.splitlines() if re.search(r'\bRefs\b',l)][:5])

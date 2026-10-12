@@ -1,0 +1,27 @@
+import json,sys,re
+def norm(o):
+    if isinstance(o,dict): return {k:norm(v) for k,v in o.items()}
+    if isinstance(o,list): return [norm(x) for x in o]
+    if isinstance(o,str):
+        s=re.sub(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}','<uuid>',o)
+        s=re.sub(r'(sha256:)?[0-9a-f]{64}','<hash>',s)
+        s=re.sub(r'doc-\d+-[0-9a-f]{8}','<doc>',s)
+        s=re.sub(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?Z','<ts>',s)
+        s=re.sub(r'[0-9a-f]{8}$','<r8>',s) if re.search(r'(L\d|p|g1531)',s) is None else s
+        s=re.sub(r'\b[0-9a-f]{8}\b','<r8>',s)
+        return s
+    return o
+def flat(o,p=''):
+    out={}
+    if isinstance(o,dict):
+        for k,v in o.items(): out.update(flat(v,p+'.'+k))
+    elif isinstance(o,list):
+        for i,v in enumerate(o): out.update(flat(v,p+f'[{i}]'))
+    else: out[p]=o
+    return out
+a=flat(norm(json.load(open(sys.argv[1]))['LEGIT'])); b=flat(norm(json.load(open(sys.argv[2]))['LEGIT']))
+n=0
+for k in sorted(set(a)|set(b)):
+    if a.get(k,'<absent>')!=b.get(k,'<absent>'):
+        n+=1; print(f"{k}: dev={a.get(k,'<absent>')!r} head={b.get(k,'<absent>')!r}")
+print('DIFFS',n)

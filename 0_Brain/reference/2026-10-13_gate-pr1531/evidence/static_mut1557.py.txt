@@ -1,0 +1,127 @@
+"""Planted-red mutation runner for the KS-1557 READ SIDE (seat J 5th). For each mutant of routes/verification.ts or verificationV2.ts: apply to the
+named file, require tsc rc 0 (a mutant that does not compile is DISCARDED, not a kill), run the unit files and the integration file (both tenancy
+modes, as secuura_app), RESTORE and prove byte-identical. A mutant with none of its named reds is a SURVIVOR. python3 -u; SIGTERM restores.
+Usage: mut1557.py [mutant-id ...]"""
+import hashlib, re, signal, subprocess, sys
+signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))   # sys.exit unwinds through the finally that restores the file
+
+SP = "/private/tmp/claude-501/-Volumes-DevMASTER--CODING-Secuura-Blockchain/0d81d930-fd40-4249-86d9-bd735e07d810/scratchpad/j6"
+O = SP + "/wt1557/Blockchain/Dev/services/originate"
+V = O + "/src/routes/verification.ts"; W = O + "/src/routes/verificationV2.ts"
+UNITS = ["ks1557-trusted-certification-evidence.test", "ks584-p3-verify-list.test", "ks584-verify-row-selection.test"]
+INTEG = "ks1557-verify-trusts"
+
+def sha(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()
+def run(cmd, cwd=None): return subprocess.run(cmd, capture_output=True, text=True, cwd=cwd)
+def reds(path):
+    out = []
+    for l in open(path, encoding="utf-8", errors="replace").read().splitlines():
+        m = re.match(r"\s+✕\s+(.*?)(?:\s+\(\d+ ms\))?$", l)
+        if m: out.append(m.group(1)[:400])
+    return out
+def once(old, new):
+    def f(s): return s.replace(old, new) if s.count(old) == 1 else None
+    return f
+
+# id, file, mutate-fn, required reds {unit:[needles], F:[..], T:[..]} (any ONE needle present in that layer = killed); None = control
+MUTS = [
+ ("CTL-comment", V, once("KS-1557 (read side). Which derived", "KS-1557x (read side). Which derived"), None),
+ ("V01-status-signed-dropped", V, once("if (row?.status !== 'signed' || !row?.parent_document_id) return null;", "if (!row?.parent_document_id) return null;"),
+    {"unit": ["status is not signed", "status is certified", "do NOT consume the lookup cap"], "F": [], "T": []}),
+ ("V02-uuid-check-dropped", V, once("if (typeof certId !== 'string' || !UUID_RE.test(certId)) return null;", "if (typeof certId !== 'string') return null;"),
+    {"unit": ["only the UUID guard rejects it", "do NOT consume the lookup cap"], "F": [], "T": []}),
+ ("V03-parent-link-dropped", V, once("if (row?.status !== 'signed' || !row?.parent_document_id) return null;", "if (row?.status !== 'signed') return null;"),
+    {"unit": ["the parent link is NULL", "do NOT consume the lookup cap"], "F": [], "T": []}),
+ ("V04-suffix-binding-dropped", V, once("if (!m || m[1].toLowerCase() !== certId.slice(0, 8).toLowerCase()) return null;", "if (!m) return null;"),
+    {"unit": ["ANOTHER certification's prefix"], "F": ["only the external-id binding rejects this"], "T": ["only the external-id binding rejects this"]}),
+ ("V05-suffix-slice-wrong", V, once("m[1].toLowerCase() !== certId.slice(0, 8).toLowerCase()", "m[1].toLowerCase() !== certId.slice(0, 7).toLowerCase()"),
+    {"unit": ["GENUINE child"], "F": ["GENUINE lineage certification"], "T": ["GENUINE lineage certification"]}),
+ ("V06-parent-hash-compare-dropped", V, once("if (parentHash === null || parentHash !== own) continue;", "if (parentHash === null || (parentHash !== own && own === '')) continue;"),
+    {"unit": ["parent is in the set but its hash differs"], "F": ["A's OWN parent with ANOTHER organisation's hash"], "T": ["A's OWN parent with ANOTHER organisation's hash"]}),
+ ("V07-hash-normalisation-dropped", V, once("const normaliseRowHash = (h: unknown): string => String(h ?? '').replace(/^sha256:/i, '').toLowerCase();", "const normaliseRowHash = (h: unknown): string => String(h ?? '');"),
+    {"unit": ["hash spelling is normalised"], "F": [], "T": []}),
+ ("V08-cert-type-check-dropped", V, once("return typeof cm.certificationType === 'string' && cm.certificationType.length > 0 && cm.holderId !== undefined && cm.holderId !== null;", "return cm.holderId !== undefined && cm.holderId !== null;"),
+    {"unit": ["has no certificationType", "has an empty certificationType"], "F": [], "T": []}),
+ ("V09-holderId-check-dropped", V, once("&& cm.holderId !== undefined && cm.holderId !== null;", "&& (cm.holderId !== undefined || true);"),
+    {"unit": ["has no holderId", "has a null holderId"], "F": ["only the holderId check rejects this"], "T": ["only the holderId check rejects this"]}),
+ ("V10-self-reference-dropped", V, once("|| String(cert.id) === String(derived?.id)) return false;", "|| (String(cert.id) === String(derived?.id) && false)) return false;"),
+    {"unit": ["cites ITSELF"], "F": [], "T": []}),
+ ("V11-cited-id-equality-dropped", V, once("if (!cert || String(cert.id).toLowerCase() !== certId ||", "if (!cert || (String(cert.id).toLowerCase() !== certId && false) ||"),
+    {"unit": ["is a different row than the one cited"], "F": [], "T": []}),
+ ("V12-type-from-derived-metadata", V, once("certificationType: cm.certificationType,", "certificationType: meta.certificationType ?? cm.certificationType,"),
+    {"unit": ["caller-filled metadata"], "F": ["TIME, TYPE or ISSUER ID"], "T": ["TIME, TYPE or ISSUER ID"]}),
+ ("V13-time-from-derived-metadata", V, once("const at = cert.certified_at ?? cert.created_at ?? null;", "const at = meta.certifiedAt ?? cert.certified_at ?? cert.created_at ?? null;"),
+    {"unit": ["caller-filled metadata"], "F": ["TIME, TYPE or ISSUER ID"], "T": ["TIME, TYPE or ISSUER ID"]}),
+ ("V14-org-id-from-derived-metadata", V, once("certifierOrganizationId: null,\n      });", "certifierOrganizationId: meta.issuerId ?? null,\n      });"),
+    {"unit": ["caller-filled metadata"], "F": ["TIME, TYPE or ISSUER ID"], "T": ["TIME, TYPE or ISSUER ID"]}),
+ ("V15-lookup-not-in-row-tenant", V, once("const tenant = String(r?._tenantId ?? r?.tenant_id ?? '');", "const tenant = String(r?._tenantId ?? 'a0000000-0000-4000-8000-0000000000aa');"),
+    {"unit": ["ROW'S OWN tenant"], "F": [], "T": []}),
+ ("V16-pool-path-ignored", V, once("if (row?._tenantId) {\n    const mgr = getTenantManager();", "if ((row as any)?.__x === 1 && row?._tenantId) {\n    const mgr = getTenantManager();"),
+    {"unit": ["read through THAT tenant's pool"], "F": [], "T": []}),
+ ("V17-fail-open-on-error", V, once("      logger.warn('KS-1557: certification evidence lookup failed - the row is not counted', { rowId: r?.id, error: err?.message });", "      logger.warn('KS-1557: certification evidence lookup failed - the row is not counted', { rowId: r?.id, error: err?.message });\n      trusted.set(r, { certificationId: claimed });"),
+    {"unit": ["FAILS CLOSED"], "F": [], "T": []}),
+ ("V18-cap-removed", V, once("if (examined >= MAX_EVIDENCE_LOOKUPS) break;", "if (examined >= 1e9) break;"),
+    {"unit": ["examines at most MAX_EVIDENCE_LOOKUPS"], "F": [], "T": []}),
+ ("V19-sibling-ignores-trusted", V, once("    const evidence = trusted.get(r);\n    if (evidence) return evidence;", "    const meta0 = (r?.metadata || {}) as Record<string, any>;\n    const evidence = r?.status === 'signed' && meta0.certificationId ? { certificationId: meta0.certificationId, certifiedAt: meta0.certifiedAt ?? null, certifiedBy: meta0.issuerName ?? null, certifierOrganizationId: meta0.issuerId ?? null } : trusted.get(r);\n    if (evidence) return evidence;"),
+    {"unit": [], "F": ["TIME, TYPE or ISSUER ID", "A's OWN parent with ANOTHER organisation's hash"], "T": ["TIME, TYPE or ISSUER ID", "A's OWN parent with ANOTHER organisation's hash"]}),
+ ("V20-verify-file-site-skips-resolution", V, once("siblingCertification(rows, doc, await resolveTrustedCertificationEvidence(rows, { db }))", "siblingCertification(rows, doc, new Map())"),
+    {"unit": [], "F": ["FILE routes"], "T": ["FILE routes"]}),
+ ("V21-by-hash-site-skips-resolution", V, once("siblingCertification(rows, docRow, await resolveTrustedCertificationEvidence(rows, { db }))", "siblingCertification(rows, docRow, new Map())"),
+    {"unit": ["surfaces the lineage-path certification", "does NOT smear"], "F": ["GENUINE lineage certification"], "T": ["GENUINE lineage certification"]}),
+ ("V22-cross-tenant-site-skips-resolution", V, once("const trusted = await resolveTrustedCertificationEvidence(docRows.rows, {});", "const trusted: TrustedEvidence = new Map();"),
+    {"unit": [], "F": [], "T": ["ANOTHER tenant reads the registry path"]}),
+ ("V23-by-hash-select-drops-parent-link", V, once("                   d.tenant_id, d.parent_document_id, d.owner_user_id, o.name AS organization_name\n            FROM documents d\n            LEFT JOIN organizations o ON d.issuer_organization_id = o.id\n            WHERE d.content_hash = ${computedHash}", "                   d.tenant_id, d.owner_user_id, o.name AS organization_name\n            FROM documents d\n            LEFT JOIN organizations o ON d.issuer_organization_id = o.id\n            WHERE d.content_hash = ${computedHash}"),
+    {"unit": [], "F": ["GENUINE lineage certification"], "T": ["GENUINE lineage certification"]}),
+ ("V24-verify-file-select-drops-parent-link", V, once("             d.tenant_id, d.parent_document_id, d.owner_user_id, o.name AS organization_name\n      FROM documents d\n      LEFT JOIN organizations o ON d.issuer_organization_id = o.id\n      WHERE d.content_hash = ${fileHash}", "             d.tenant_id, d.owner_user_id, o.name AS organization_name\n      FROM documents d\n      LEFT JOIN organizations o ON d.issuer_organization_id = o.id\n      WHERE d.content_hash = ${fileHash}"),
+    {"unit": [], "F": ["FILE routes"], "T": ["FILE routes"]}),
+ ("V25-owner-issuer-binding-dropped", V, once("if (String(r.owner_user_id ?? '') !== String(cert.issuer_user_id ?? '')) continue;", "if (String(r.owner_user_id ?? '') !== String(cert.issuer_user_id ?? '') && r.owner_user_id === 0) continue;"),
+    {"unit": ["was issued by SOMEONE ELSE", "CONNECTOR-issued certification"], "F": ["OWNED by someone else"], "T": ["OWNED by someone else"]}),
+ ("V26-cert-fetch-drops-issuer-column", V, once("SELECT id, status, document_type, certified_at, created_at, issuer_user_id, certification_metadata FROM documents WHERE id = $1::uuid", "SELECT id, status, document_type, certified_at, created_at, certification_metadata FROM documents WHERE id = $1::uuid"),
+    {"unit": [], "F": [], "T": []}),
+ ("V27-by-hash-select-drops-owner", V, once("                   d.tenant_id, d.parent_document_id, d.owner_user_id, o.name AS organization_name\n            FROM documents d\n            LEFT JOIN organizations o ON d.issuer_organization_id = o.id\n            WHERE d.content_hash = ${computedHash}", "                   d.tenant_id, d.parent_document_id, o.name AS organization_name\n            FROM documents d\n            LEFT JOIN organizations o ON d.issuer_organization_id = o.id\n            WHERE d.content_hash = ${computedHash}"),
+    {"unit": [], "F": ["GENUINE lineage certification"], "T": ["GENUINE lineage certification"]}),
+ ("W01-v2-hash-site-skips-resolution", W, once("  const trusted = await resolveTrustedCertificationEvidence(rows, { db });\n  return {", "  const trusted: TrustedEvidence = new Map();\n  return {"),
+    {"unit": ["does NOT smear"], "F": ["GENUINE lineage certification"], "T": ["GENUINE lineage certification"]}),
+ ("W02-v2-byid-site-skips-resolution", W, once("      const trusted = await resolveTrustedCertificationEvidence(rows, { db });\n      const matches", "      const trusted: TrustedEvidence = new Map();\n      const matches"),
+    {"unit": [], "F": ["v2 by documentId"], "T": ["v2 by documentId"]}),
+ ("W03-v2-own-row-ignores-trusted", W, once("  return trusted.get(row);\n}", "  const m0 = (row?.metadata || {}) as Record<string, any>;\n  return trusted.get(row) ?? (row?.status === 'signed' && m0.certificationId ? { certificationId: m0.certificationId } : undefined);\n}"),
+    {"unit": [], "F": ["A's OWN parent with ANOTHER organisation's hash", "v2 by documentId"], "T": ["A's OWN parent with ANOTHER organisation's hash", "v2 by documentId"]}),
+ ("W04-v2-local-select-drops-parent-link", W, once("           d.tenant_id, d.parent_document_id, d.owner_user_id, o.name AS organization_name\n    FROM documents d\n    LEFT JOIN organizations o ON d.issuer_organization_id = o.id\n    WHERE d.content_hash = ${computedHash}", "           d.tenant_id, d.owner_user_id, o.name AS organization_name\n    FROM documents d\n    LEFT JOIN organizations o ON d.issuer_organization_id = o.id\n    WHERE d.content_hash = ${computedHash}"),
+    {"unit": [], "F": ["GENUINE lineage certification"], "T": ["GENUINE lineage certification"]}),
+]
+
+def main(argv):
+    want = set(argv)
+    origs = {V: open(V, "rb").read(), W: open(W, "rb").read()}; h0 = {V: sha(V), W: sha(W)}
+    print("baseline sha256/16", h0[V][:16], h0[W][:16])
+    results = []
+    for mid, target, fn, req in MUTS:
+        if want and mid not in want: continue
+        m = fn(origs[target].decode())
+        if m is None: print(f"[{mid}] ANCHOR MISSING - mutant not applied (runner bug)"); results.append((mid, "ANCHOR-MISSING")); continue
+        try:
+            open(target, "w").write(m)
+            tsc = run(["npx", "tsc", "--noEmit", "-p", "tsconfig.json"], cwd=O)
+            if tsc.returncode != 0:
+                print(f"[{mid}] DID NOT COMPILE - discarded (not a kill): " + (tsc.stdout.splitlines() or ["?"])[0][:160]); results.append((mid, "NO-COMPILE")); continue
+            u = run(["npx", "jest", "--verbose"] + UNITS, cwd=O); open(f"{SP}/mut57_{mid}_unit.log", "w").write(u.stdout + u.stderr)
+            layers = {"unit": (bool(re.search(r"^Tests:", u.stdout + u.stderr, re.M)), reds(f"{SP}/mut57_{mid}_unit.log"))}
+            for mode, flag in (("F", "false"), ("T", "true")):
+                r = run(["env", "WT=" + SP + "/wt1557", "TZ=UTC", "zsh", SP + "/integ5.sh", f"mut57_{mid}_{mode}", "app", flag, INTEG], cwd=None)
+                layers[mode] = ("NO 'Tests:' LINE" not in r.stdout, reds(f"{SP}/integ_mut57_{mid}_{mode}.log"))
+            verdict = []
+            for layer, (has, rd) in layers.items():
+                if not has: verdict.append(f"{layer}=LOADFAIL"); continue
+                need = (req or {}).get(layer, [])
+                hit = [n for n in need if any(n in r for r in rd)]
+                if req is None: verdict.append(f"{layer}=reds:{len(rd)}")
+                elif need and not hit: verdict.append(f"{layer}=SURVIVED(need one of {need}; reds={len(rd)})")
+                else: verdict.append(f"{layer}=killed({len(rd)} red)" if need else f"{layer}=n/a({len(rd)} red)")
+            print(f"[{mid}] " + " | ".join(verdict)); results.append((mid, " | ".join(verdict)))
+        finally:
+            open(V, "wb").write(origs[V]); open(W, "wb").write(origs[W])
+            if sha(V) != h0[V] or sha(W) != h0[W]: print(f"[{mid}] !!! RESTORE NOT BYTE-IDENTICAL"); sys.exit(9)
+    print("restored byte-identical after every mutant:", sha(V) == h0[V] and sha(W) == h0[W])
+    bad = [r for r in results if "SURVIVED" in r[1] or "LOADFAIL" in r[1] or r[1] in ("ANCHOR-MISSING", "NO-COMPILE")]
+    print("PROBLEMS:", bad if bad else "none")
+main(sys.argv[1:])

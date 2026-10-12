@@ -1,0 +1,26 @@
+#!/bin/zsh
+set -u
+G=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1e3361cc-0129-4094-b817-bb570578f809/scratchpad/g1529r2
+EV=/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-13_gate-pr1529-r2/evidence
+D=$G/head/Blockchain/Dev
+unset TEST_DATABASE_URL TEST_APP_DATABASE_URL DATABASE_URL
+echo "tree: $(git -C $D rev-parse HEAD) untracked/dirty: $(git -C $D status --porcelain | tr '\n' ' ')"
+builtin cd $D/services/security || exit 9
+npx vitest list > $EV/vitest_list_default.txt 2>&1
+echo "default-config list: ks1556-rotate(integration)=$(/usr/bin/grep -ci 'ks1556-rotate-under' $EV/vitest_list_default.txt) ks1549=$(/usr/bin/grep -ci ks1549 $EV/vitest_list_default.txt) gate1529r2=$(/usr/bin/grep -ci gate1529r2 $EV/vitest_list_default.txt) ks1556-connector-chain(unit,control)=$(/usr/bin/grep -ci 'ks1556-connector-chain' $EV/vitest_list_default.txt) ks577(control)=$(/usr/bin/grep -ci ks577 $EV/vitest_list_default.txt)"
+npx vitest run --config vitest.integration.config.ts src/__tests__/ks1556-rotate-under-repeatable-read.integration.test.ts src/__tests__/ks1549-concurrent-rotates-keep-one-key.integration.test.ts > $EV/int_noenv.txt 2>&1; echo "integration, no env: rc=$? refusing=$(/usr/bin/grep -ci 'Refusing to run' $EV/int_noenv.txt) passed-lines=$(/usr/bin/grep -c '✓' $EV/int_noenv.txt)"
+TEST_DATABASE_URL=postgresql://secuura@127.0.0.1:55422/secuura npx vitest run --config vitest.integration.config.ts src/__tests__/ks1556-rotate-under-repeatable-read.integration.test.ts src/__tests__/ks1549-concurrent-rotates-keep-one-key.integration.test.ts > $EV/int_halfenv.txt 2>&1; echo "integration, super URL only: rc=$? refusing=$(/usr/bin/grep -ci 'Refusing to run' $EV/int_halfenv.txt)"
+for i in 1 2 3; do npx vitest run src/__tests__/ks1556-connector-chain.test.ts --reporter=verbose > $EV/chainunit_head_$i.txt 2>&1; echo "chain unit run $i rc=$?: $(sed 's/\x1b\[[0-9;]*m//g' $EV/chainunit_head_$i.txt | /usr/bin/grep -E '^ +Tests ')"; done
+npx vitest run > $EV/unit_head.txt 2>&1; echo "security unit rc=$?"; sed 's/\x1b\[[0-9;]*m//g' $EV/unit_head.txt | /usr/bin/grep -E "Test Files|Tests "
+npx tsc --noEmit -p tsconfig.json > $EV/tsc_head.txt 2>&1; echo "tsc -p rc=$? lines=$(wc -l < $EV/tsc_head.txt | tr -d ' ')"
+cat > $G/tsconfig.tests.json <<EOT
+{ "extends": "$D/services/security/tsconfig.json", "compilerOptions": { "noEmit": true, "rootDir": "$D/services/security/src" }, "include": [], "files": [
+ "$D/services/security/src/index.ts",
+ "$D/services/security/src/__tests__/ks1556-rotate-under-repeatable-read.integration.test.ts",
+ "$D/services/security/src/__tests__/ks1549-concurrent-rotates-keep-one-key.integration.test.ts",
+ "$D/services/security/src/__tests__/ks1556-connector-chain.test.ts" ] }
+EOT
+npx tsc -p $G/tsconfig.tests.json > $EV/tsc_tests_head.txt 2>&1; echo "tsc over index.ts + 3 changed test files rc=$? lines=$(wc -l < $EV/tsc_tests_head.txt | tr -d ' ')"; /usr/bin/grep -oE "src/[^(]+\([0-9]+" $EV/tsc_tests_head.txt | sed 's/(.*//' | sort | uniq -c
+builtin cd $D
+npx eslint services/security/src/index.ts services/security/src/__tests__/ks1556-rotate-under-repeatable-read.integration.test.ts services/security/src/__tests__/ks1549-concurrent-rotates-keep-one-key.integration.test.ts services/security/src/__tests__/ks1556-connector-chain.test.ts > $EV/eslint_head.txt 2>&1; echo "eslint rc=$?"; tail -3 $EV/eslint_head.txt
+npm test -w packages/shared > $EV/shared_test_head.txt 2>&1; echo "shared rc=$?"; sed 's/\x1b\[[0-9;]*m//g' $EV/shared_test_head.txt | /usr/bin/grep -E "Test Files|Tests "
