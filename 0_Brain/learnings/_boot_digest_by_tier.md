@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-12 20:41 from 234 lesson files (1,033,499 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 190. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-12 20:54 from 235 lesson files (1,035,874 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 190. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7151,6 +7151,19 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **EXTENSION 09:06:47 — Kam (live), verbatim:** *"also get Sonnet to do some of the harder tasks that you would not give to the spark. You ( an opus agent you spin up - your choice) acts as the gate keeper"*. So Sonnet also takes BUILD tickets that fail the Spark predicate but are not decision-shaped; the gatekeeper is an Opus QA gate plus Wednesday's completion check (receipt bf-327a27910008).
 
 **Family:** [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## A rotation command run from INSIDE the pane it rotates kills itself before it relaunches — tell a seat to run it detached, or use the patched script
+`2026-10-12_a-rotate-run-inside-its-own-pane-kills-itself.md` · correction · 2026-10-12 · status: live · tier: M
+
+**The operative case:** I am about to tell a seat (or myself) to rotate with `cockpit.sh rotate <lane>` and the command will be typed in that seat's OWN pane. **The script's `kill-pane` closes the pane its own parent shell lives in, so it dies before `add_pane` and before the log line. No fresh seat appears and rotate.log holds only the "tapped, waiting" line.**
+
+**How to apply:**
+1. **After any rotation I order, list the pane list ~2 minutes later** and read the last lines of `fleet/cockpit/logs/rotate.log`. "Tapped, waiting" with nothing after it means the seat is gone: relaunch the lane.
+2. **The script is patched (2026-10-12 21:0x):** when `$TMUX_PANE` equals the target pane it logs first and hands kill + `cockpit.sh launch <lane>` to a detached `nohup bash -c` helper. Proved in a disposable tmux pane (the helper survived the kill and ran the launch; the first version used `setsid`, which macOS does not have, and the test caught it). Backup: `cockpit.sh.pre-1012-2100-selfrotate`.
+3. The patched path still needs a real seat to prove end to end: the next real rotation is the test; read the pane list afterwards as in rule 1.
+
+**Family:** [[2026-08-06_artifact-presence-is-not-execution]] (a tap and a "waiting" line are not a rotation) · [[2026-08-06_exercise-mechanisms-before-arming]] (the disposable-pane test found the `setsid` defect before the patch went live) · [[2026-09-16_never-edit-a-bash-script-that-is-currently-running]] (checked: no rotate process was alive when I patched).
 
 
 ## Be more careful, especially with coding files and deploys
