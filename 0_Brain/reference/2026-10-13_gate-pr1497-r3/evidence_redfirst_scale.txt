@@ -1,0 +1,51 @@
+service swapped to 6454dc9c: aa085128cb99de62
+RF unit rc=1 | Tests: 0 total
+[rf_bounds_false] W=merged role=app MT=false rc=1 | Tests: 6 failed, 10 passed, 16 total
+    ✕ 🔴 M-A - M erases: the document a HUMAN derived, one with an arbitrary non-connector versionedById, and the grandchild under them are BLANKED with the issued origina
+    ✕ 🔴 N-B - a key whose stored organization_id ends in a TAB is revoked and answered completed (JS trim() and Postgres btrim() disagree on a TAB; the UPDATE used btrim)
+    ✕ 🔴 N-B - the same with a NBSP (U+00A0) after the organization_id
+    ✕ 🔴 N-B - a key whose is_active is NULL (state unknown) is REVOKED to false and answered completed, not a permanent 500
+    ✕ 🔴 m-2 - a statement that WAITS on a lock is cancelled by statement_timeout in the erasure transaction, in this tenancy mode, and nothing is written; the retry then 
+    ✕ 🔴 m-2 - a transaction that OUTLIVES its budget while every statement stays inside it (two 1.2 s triggers, a 2 s budget) is ROLLED BACK, never committed; with no tri
+[rf_r3_false] W=merged role=app MT=false rc=1 | Tests: 5 failed, 4 skipped, 4 passed, 13 total
+    ✕ E1 - real routes: A human /version, /sign-cert, /sign-wallet and a human grandchild are blanked with A's original; B connector's derivative survives; B human's deri
+    ✕ X3 - NULL is_active: the NAMED key is revoked to false; a sibling NULL key of the same org and another org's NULL key are untouched
+    ✕ X4 - a key MOVED to another organisation after the route resolved the target (stale target) is refused 403 inside the transaction, nothing erased, the moved key sta
+    ✕ X5 - two concurrent erasures of the SAME organisation: never a partial result, the doc blanked once
+    ✕ X6 - two concurrent erasures of DIFFERENT organisations whose lineages touch: each blanks only its own
+[rf_r3slow_false] W=merged role=app MT=false rc=0 | Tests: 12 skipped, 1 passed, 13 total
+    GATE r3 E1 A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} after {"src":"[erased]","hVersion":"A contract with Jane Citizen.pdf (watermarked)","hSignCert":"A contract with Jane Citizen.pdf (signed)","hSignWallet":"A contract with Jane Citizen.pdf (wallet-signed)","h
+    GATE r3 X3 500 undefined | repeat 500 undefined | named=null sib=null otherOrg=null
+    GATE r3 X4 Error erase-connector: the named key is still active after the revoke; refusing to answer completed title=K issued.pdf name=Org K Secret 36205fb0 key={"is_active":true,"organization_id":"e945f898-f069-4e64-a75e-c11f55272399"}
+      188 |     console.log('GATE r3 X3', r.status, JSON.stringify(r.j?.data), '| repeat', r2.status, JSON.stringify(r2.j?.data), '| named=' + (await keyRow(KEY('Z'))).is_active, 'sib=' + (await keyRow(sib)).is_active, 'otherOrg=' + (await keyRow(oth)).is_active);
+    GATE r3 B2 500 ms=26116 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} title=U2 issued.pdf name=Org U2 Secret 7d8d06c7 key=true
+[rf_bounds_true] W=merged role=app MT=true rc=1 | Tests: 6 failed, 10 passed, 16 total
+    ✕ 🔴 M-A - M erases: the document a HUMAN derived, one with an arbitrary non-connector versionedById, and the grandchild under them are BLANKED with the issued origina
+    ✕ 🔴 N-B - a key whose stored organization_id ends in a TAB is revoked and answered completed (JS trim() and Postgres btrim() disagree on a TAB; the UPDATE used btrim)
+    ✕ 🔴 N-B - the same with a NBSP (U+00A0) after the organization_id
+    ✕ 🔴 N-B - a key whose is_active is NULL (state unknown) is REVOKED to false and answered completed, not a permanent 500
+    ✕ 🔴 m-2 - a statement that WAITS on a lock is cancelled by statement_timeout in the erasure transaction, in this tenancy mode, and nothing is written; the retry then 
+    ✕ 🔴 m-2 - a transaction that OUTLIVES its budget while every statement stays inside it (two 1.2 s triggers, a 2 s budget) is ROLLED BACK, never committed; with no tri
+[rf_r3_true] W=merged role=app MT=true rc=1 | Tests: 5 failed, 4 skipped, 4 passed, 13 total
+    ✕ E1 - real routes: A human /version, /sign-cert, /sign-wallet and a human grandchild are blanked with A's original; B connector's derivative survives; B human's deri
+    ✕ X3 - NULL is_active: the NAMED key is revoked to false; a sibling NULL key of the same org and another org's NULL key are untouched
+    ✕ X4 - a key MOVED to another organisation after the route resolved the target (stale target) is refused 403 inside the transaction, nothing erased, the moved key sta
+    ✕ X5 - two concurrent erasures of the SAME organisation: never a partial result, the doc blanked once
+    ✕ X6 - two concurrent erasures of DIFFERENT organisations whose lineages touch: each blanks only its own
+[rf_r3slow_true] W=merged role=app MT=true rc=1 | Tests: 1 failed, 12 skipped, 13 total
+    ✕ B2 - two 13 s statements (each inside statement_timeout, 26 s together) are ROLLED BACK; nothing erased; key active
+    GATE r3 E1 A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} after {"src":"[erased]","hVersion":"A contract with Jane Citizen.pdf (watermarked)","hSignCert":"A contract with Jane Citizen.pdf (signed)","hSignWallet":"A contract with Jane Citizen.pdf (wallet-signed)","h
+    GATE r3 X3 500 undefined | repeat 500 undefined | named=null sib=null otherOrg=null
+    GATE r3 X4 Error erase-connector: the named key is still active after the revoke; refusing to answer completed title=K issued.pdf name=Org K Secret 8cfa1c14 key={"is_active":true,"organization_id":"766c7656-37ef-4182-8d69-def56808b1bc"}
+      188 |     console.log('GATE r3 X3', r.status, JSON.stringify(r.j?.data), '| repeat', r2.status, JSON.stringify(r2.j?.data), '| named=' + (await keyRow(KEY('Z'))).is_active, 'sib=' + (await keyRow(sib)).is_active, 'otherOrg=' + (await keyRow(oth)).is_active);
+    GATE r3 B2 200 ms=26047 {"status":"completed","alreadyErased":false,"documentsBlanked":1} title=[erased] name=[erased] key=false
+      261 |     console.log('GATE r3 B2', r.status, 'ms=' + r.ms, JSON.stringify(r.j?.data ?? r.j?.error), 'title=' + (await titleById(d)), 'name=' + (await orgName('U2')), 'key=' + (await keyRow(KEY('U2'))).is_active);
+[rf_human] W=merged role=app MT=false rc=1 | Tests: 1 failed, 1 total
+    ✕ HUMAN: a derivative of an A document made by an A-org HUMAN user (versionedById = the user id) vs the A erasure
+    GATE human A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} after {"src":"[erased]","human":"A contract with Jane Citizen.pdf (watermarked)","connector":"[erased]"}
+restored: 909c2cbe3630e713 (was 909c2cbe3630e713)
+[scale_false] W=merged role=app MT=false rc=0 | Tests: 1 passed, 1 total
+    GATE r2 scale {"N":149000,"BYST":20000,"DEEP":40,"PAD":0,"MT":false,"ms":6308,"out":{"status":"completed","alreadyErased":false,"documentsBlanked":149041},"err":null,"leftNullIssuer":0,"leftIssued":0,"bystErased":0,"keyActive":false}
+[scale_true] W=merged role=app MT=true rc=0 | Tests: 1 passed, 1 total
+    GATE r2 scale {"N":149000,"BYST":20000,"DEEP":40,"PAD":0,"MT":true,"ms":8073,"out":{"status":"completed","alreadyErased":false,"documentsBlanked":149041},"err":null,"leftNullIssuer":0,"leftIssued":0,"bystErased":0,"keyActive":false}
+porcelain: (empty=clean)

@@ -1,0 +1,92 @@
+"""Gate r3 mutation runner. Applies one mutant at a time to the MERGED tree, requires tsc rc 0, runs the named layers,
+restores the file and proves it byte-identical by sha256. Usage: python3 -I mut.py <id> [<id> ...]"""
+import hashlib, re, subprocess, sys, time, shutil, os
+
+G = "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/eaa04c5f-0a63-4ff7-879d-d52477f7a663/scratchpad/g1497r3"
+O = G + "/merged/Blockchain/Dev/services/originate"
+SV = O + "/src/services/connectorOrganisationErasure.ts"
+DB = O + "/src/db.ts"
+TD = O + "/src/__tests__"
+FIX2 = "c.metadata->>'versionedById' = ${connectorUser} OR c.metadata->>'versionedById' NOT LIKE 'connector:%')"
+OLD2 = "c.metadata->>'versionedById' = ${connectorUser})"
+LIN = "AND (c.issuer_organization_id IS NULL OR c.issuer_organization_id = ${organizationId}::uuid)"
+SEEDB = "OR (d.metadata->>'versionedById' = ${connectorUser}"
+
+def sha(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()
+def nth(s, old, new, n):
+    i = -1
+    for _ in range(n + 1):
+        i = s.find(old, i + 1)
+        assert i >= 0, ("anchor", old, n)
+    return s[:i] + new + s[i + len(old):]
+def rep(s, old, new, count):
+    assert s.count(old) == count, ("count", old, s.count(old), count); return s.replace(old, new)
+
+# id: (file, fn, layers)   layers: unit | bF bT (bounds) | aF aT (my attack, fast) | sF sT (my attack, slow B2) | r5F r5T
+M = {
+ "CTL":  (SV, lambda s: rep(s, "title = '[erased]',", "title = '[erasedX]',", 1), "unit bF bT"),
+ "MU1":  (SV, lambda s: nth(s, FIX2, OLD2, 1), "unit bF bT"),
+ "MU2":  (SV, lambda s: nth(s, FIX2, OLD2, 0), "unit bF bT"),
+ "MU3":  (SV, lambda s: rep(s, "NOT LIKE 'connector:%')", "LIKE 'connector:%')", 2), "unit bF bT"),
+ "MU4":  (SV, lambda s: rep(s, "await tx.$queryRaw`SELECT set_config('statement_timeout', ${String(budgetMs)}, true)`;", "await tx.$queryRaw`SELECT 1`;", 1), "unit bF bT"),
+ "MU5":  (SV, lambda s: rep(s, "${String(budgetMs)}, true)`", "${String(budgetMs)}, false)`", 1), "unit bF bT"),
+ "MU6":  (SV, lambda s: rep(s, "if (Date.now() - startedAt > budgetMs) {", "if (Date.now() - startedAt > budgetMs * 1e9) {", 1), "unit bF bT sT"),
+ "MU7":  (SV, lambda s: rep(s, "AND organization_id = ${keyRow.organization_id}", "AND lower(btrim(organization_id)) = ${organizationId}", 1), "unit bF bT"),
+ "MU8":  (SV, lambda s: rep(s, "AND is_active IS DISTINCT FROM false", "AND is_active = true", 1), "unit bF bT"),
+ "MU9":  (SV, lambda s: rep(s, "if (!keyRow || normaliseOrgId(keyRow.organization_id) !== organizationId) throw", "if (!keyRow || (false as boolean)) throw", 1), "unit bF bT aF"),
+ "MU10": (SV, lambda s: rep(s, "SELECT is_active FROM svc_api_keys WHERE id = ${keyId} AND tenant_id = ${tenantId}::uuid", "SELECT is_active FROM svc_api_keys WHERE organization_id = ${keyRow.organization_id} AND tenant_id = ${tenantId}::uuid ORDER BY is_active LIMIT 1", 1), "unit bF bT"),
+ "MU11": (DB, lambda s: rep(s, "  }, opts);\n}", "  }, opts && undefined);\n}", 1), "unit bF bT"),
+ # --- the gate's own ---
+ "G1_lineage_issuer_guard_dropped": (SV, lambda s: rep(s, LIN, "AND (true OR c.issuer_organization_id = ${organizationId}::uuid)", 2), "unit bF bT aF aT"),
+ "G2_revoke_org_predicate_dropped": (SV, lambda s: rep(s, "         AND organization_id = ${keyRow.organization_id}\n", "", 1), "unit bF bT aF aT"),
+ "G3_key_lock_FOR_UPDATE_dropped": (SV, lambda s: rep(s, "       WHERE id = ${keyId} AND tenant_id = ${tenantId}::uuid\n       FOR UPDATE\n", "       WHERE id = ${keyId} AND tenant_id = ${tenantId}::uuid\n", 1), "unit bF bT aF aT"),
+ "G4_db_pool_catch_COMMITs": (DB, lambda s: rep(s, "try { await client.query('ROLLBACK'); }", "try { await client.query('COMMIT'); }", 1), "unit bF bT sT"),
+ "G5_seedb_case_insensitive": (SV, lambda s: rep(s, SEEDB, "OR (lower(d.metadata->>'versionedById') = lower(${connectorUser})", 2), "unit bF bT aF aT"),
+ "G6_statement_timeout_plus_10s": (SV, lambda s: rep(s, "${String(budgetMs)}, true)`", "${String(budgetMs + 10000)}, true)`", 1), "unit bF bT"),
+ "G7_budget_clock_starts_after_lock": (SV, lambda s: rep(s, "if (Date.now() - startedAt > budgetMs) {", "if (Date.now() - startedAt > budgetMs + 2000) {", 1), "unit bF bT"),
+}
+
+def reds(t):
+    out = []
+    for l in t.splitlines():
+        m = re.match(r"\s+✕\s+(.*?)(?:\s+\(\d+ ms\))?$", l)
+        if m: out.append(re.sub(r"^🔴\s*", "", m.group(1))[:60])
+    return out
+
+def layer(name, tag):
+    if name == "unit":
+        r = subprocess.run(["npx", "jest", "ks695-ask3-erase-connector-erasure"], capture_output=True, text=True, cwd=O); t = r.stdout + r.stderr
+    else:
+        env = dict(os.environ)
+        if name in ("bF", "bT"): pat, extra = "ks695-ask3-erase-connector-selector-bounds", []
+        elif name in ("aF", "aT"): pat, extra = "gate1497r3-attack", []
+        elif name in ("sF", "sT"): pat, extra = "gate1497r3-attack", ["B2"]; env["GATE_SLOW"] = "1"; env["GATE_FAST"] = "0"
+        mt = "true" if name.endswith("T") else "false"
+        r = subprocess.run(["zsh", G + "/tools/integ.sh", "mut_" + tag + "_" + name, "app", mt, pat] + extra, capture_output=True, text=True, env=env)
+        t = open(G + "/logs/integ_mut_" + tag + "_" + name + ".log", encoding="utf-8", errors="replace").read()
+    has = bool(re.search(r"^Tests:", t, re.M))
+    tot = (re.search(r"^Tests:.*$", t, re.M) or [""])[0] if has else "NO Tests: LINE"
+    return has, reds(t), tot
+
+shutil.copy(G + "/gatefiles/gate1497r3-attack.integration.test.ts", TD + "/")
+try:
+    for mid in sys.argv[1:]:
+        path, fn, layers = M[mid]
+        orig = open(path, encoding="utf-8").read(); h0 = sha(path)
+        mut = fn(orig); assert mut != orig
+        open(path, "w", encoding="utf-8").write(mut); t0 = time.time()
+        try:
+            h1 = sha(path)
+            tsc = subprocess.run(["npx", "tsc", "--noEmit", "-p", "."], capture_output=True, text=True, cwd=O)
+            if tsc.returncode != 0:
+                print(f"{mid}: tsc rc={tsc.returncode} NO-COMPILE {tsc.stdout[:200]}", flush=True); continue
+            res = {l: layer(l, mid) for l in layers.split()}
+        finally:
+            open(path, "w", encoding="utf-8").write(orig)
+        ok = sha(path) == h0
+        print(f"{mid}: applied sha {h0[:12]}->{h1[:12]} | tsc rc 0 | {time.time()-t0:.0f}s | restored byte-identical: {ok}", flush=True)
+        for l, (has, rd, tot) in res.items():
+            print(f"    {l:4s} {tot.strip()} | red: {rd}", flush=True)
+finally:
+    os.remove(TD + "/gate1497r3-attack.integration.test.ts")
+print("porcelain:", subprocess.run(["git", "-C", G + "/merged", "status", "--porcelain"], capture_output=True, text=True).stdout.strip() or "(clean)")

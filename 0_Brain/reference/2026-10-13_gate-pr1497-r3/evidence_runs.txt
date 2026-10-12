@@ -1,0 +1,107 @@
+tree merged: 64698cca2198a5e138746808b94f4b52a43a9ac7
+originate jest #1 rc=0 | Test Suites: 102 passed, 102 total Tests: 1197 passed, 1197 total 
+shared vitest #1 rc=0 |  Test Files 49 passed (49)  Tests 954 passed (954) 
+originate jest #2 rc=0 | Test Suites: 102 passed, 102 total Tests: 1197 passed, 1197 total 
+shared vitest #2 rc=0 |  Test Files 49 passed (49)  Tests 954 passed (954) 
+unit file rc=0 | Tests: 28 passed, 28 total 
+tsc originate rc=0 lines=       0
+tsc shared rc=0 lines=       1
+eslint 9 files rc=0 lines=       0
+check:openapi rc=0 | [gen-openapi] CHECK PASS: on-disk YAML matches generated [check-spec-examples] docs/openapi/secuura-api.yaml — 414 example blocks 
+typecheck ratchet originate rc=2 | no tsconfig.test.json in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/eaa04c5f-0a63-4ff7-879d-d52477f7a663/scratchpad/g1497r3/merged/Blockchain/Dev/services/originate 
+SUITES_DONE
+
+[exited with code 0]
+== /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/eaa04c5f-0a63-4ff7-879d-d52477f7a663/scratchpad/g1497r3/logs/integ_bounds_false.log
+Tests:       16 passed, 16 total
+== /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/eaa04c5f-0a63-4ff7-879d-d52477f7a663/scratchpad/g1497r3/logs/integ_bounds_true.log
+Tests:       16 passed, 16 total
+== r3fast_false
+    GATE r3 role {"who":"secuura_app","su":false,"bp":false} MT=false
+    GATE r3 E1 statuses 201,404,404,404,404,404,404 [{"success":false,"error":{"code":"NOT_FOUND","message":"Document not found in this tenant"}},{"success":false,"error":{"code":"NOT_FOUND","message":"Document not found in this tenant"}}]
+    GATE r3 E1 before {}
+    GATE r3 E1 A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} after {} Bname=Org B Secret 3f2c64c9 Bkey=true
+    GATE r3 X1 L erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":5} {"root_noColon":"kept","root_capital":"kept","root_leadSpace":"kept","root_trailSpace":"kept","root_upperGuid":"kept","root_exactPOSCTL":"ERASED","bIssuedExact":"kept","bIssuedChildOfL":"kept","bConnChildOfL":"kept","bConnLookalikeChildOfL":"ERASED","bConnSpaceChildOfL":"ERASED","numericVbChildOfL":"ERASED"}
+    GATE r3 X2 403 {"success":false,"error":{"code":"FORBIDDEN","message":"the request names an organisation or key outside this connector's Organisation"}} title=N issued.pdf name=Org N Secret 3f2c64c9 key={"is_active":true,"organization_id":null}
+    GATE r3 X3 200 {"status":"completed","alreadyErased":false,"documentsBlanked":0} | repeat 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} | named=false sib=null otherOrg=null
+    GATE r3 X4 OrganisationErasureForbiddenError keyId does not belong to the calling connector's Organisation title=K issued.pdf name=Org K Secret 3f2c64c9 key={"is_active":true,"organization_id":"9d47be98-b682-4886-83a7-17427839d334"}
+    GATE r3 X4b erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} moveWaitedMs=1807 moveAfterErase=true title=[erased] key={"is_active":false,"organization_id":"9d47be98-b682-4886-83a7-17427839d334"}
+    GATE r3 X5 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} | 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} titles=[erased],[erased] key=false
+    GATE r3 X6 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} | 200 {"status":"completed","alreadyErased":false,"documentsBlanked":3} {"r1":"[erased]","r2":"[erased]","h1":"[erased]","c2d":"[erased]","c2own":"[erased]"}
+  GATE r3 1497 attack (secuura_app, MT=false)
+  ● GATE r3 1497 attack (secuura_app, MT=false) › E1 - real routes: A human /version, /sign-cert, /sign-wallet and a human grandchild are blanked with A's original; B connector's derivative survives; B human's derivative of A's doc: reported
+      141 |     console.log('GATE r3 E1 A erase', er.status, JSON.stringify(er.j?.data ?? er.j?.error), 'after', JSON.stringify(after), 'Bname=' + (await orgName('B')), 'Bkey=' + (await keyRow(KEY('B'))).is_active);
+Tests:       1 failed, 4 skipped, 8 passed, 13 total
+== r3fast_true
+    GATE r3 role {"who":"secuura_app","su":false,"bp":false} MT=true
+    GATE r3 E1 statuses 201,404,404,404,404,404,404 [{"success":false,"error":{"code":"NOT_FOUND","message":"Document not found in this tenant"}},{"success":false,"error":{"code":"NOT_FOUND","message":"Document not found in this tenant"}}]
+    GATE r3 E1 before {}
+    GATE r3 E1 A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} after {} Bname=Org B Secret b68a2bbd Bkey=true
+    GATE r3 X1 L erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":5} {"root_noColon":"kept","root_capital":"kept","root_leadSpace":"kept","root_trailSpace":"kept","root_upperGuid":"kept","root_exactPOSCTL":"ERASED","bIssuedExact":"kept","bIssuedChildOfL":"kept","bConnChildOfL":"kept","bConnLookalikeChildOfL":"ERASED","bConnSpaceChildOfL":"ERASED","numericVbChildOfL":"ERASED"}
+    GATE r3 X2 403 {"success":false,"error":{"code":"FORBIDDEN","message":"the request names an organisation or key outside this connector's Organisation"}} title=N issued.pdf name=Org N Secret b68a2bbd key={"is_active":true,"organization_id":null}
+    GATE r3 X3 200 {"status":"completed","alreadyErased":false,"documentsBlanked":0} | repeat 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} | named=false sib=null otherOrg=null
+    GATE r3 X4 OrganisationErasureForbiddenError keyId does not belong to the calling connector's Organisation title=K issued.pdf name=Org K Secret b68a2bbd key={"is_active":true,"organization_id":"de32aa3f-b58e-4b1d-84f1-a08c2c3a6b2a"}
+    GATE r3 X4b erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} moveWaitedMs=1805 moveAfterErase=true title=[erased] key={"is_active":false,"organization_id":"de32aa3f-b58e-4b1d-84f1-a08c2c3a6b2a"}
+    GATE r3 X5 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} | 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} titles=[erased],[erased] key=false
+    GATE r3 X6 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} | 200 {"status":"completed","alreadyErased":false,"documentsBlanked":3} {"r1":"[erased]","r2":"[erased]","h1":"[erased]","c2d":"[erased]","c2own":"[erased]"}
+  GATE r3 1497 attack (secuura_app, MT=true)
+  ● GATE r3 1497 attack (secuura_app, MT=true) › E1 - real routes: A human /version, /sign-cert, /sign-wallet and a human grandchild are blanked with A's original; B connector's derivative survives; B human's derivative of A's doc: reported
+      141 |     console.log('GATE r3 E1 A erase', er.status, JSON.stringify(er.j?.data ?? er.j?.error), 'after', JSON.stringify(after), 'Bname=' + (await orgName('B')), 'Bkey=' + (await keyRow(KEY('B'))).is_active);
+Tests:       1 failed, 4 skipped, 8 passed, 13 total
+== r3e1_false
+    GATE r3 E1 statuses 201,201,201,201,201,201,201 []
+    GATE r3 E1 before {"src":{"t":"A contract with Jane Citizen.pdf","vb":null,"iss":"bed63771-298f-42d5-9eab-0af07ddf53f6"},"hVersion":{"t":"A contract with Jane Citizen.pdf (watermarked)","vb":"98de3b03-12b3-426c-add9-0ba0ae3b0b25","iss":null},"hSignCert":{"t":"A contract with Jane Citizen.pdf (signed)","vb":"98de3b03-12b3-426c-add9-0ba0ae3b0b25","iss":null},"hSignWallet":{"t":"A contract with Jane Citizen.pdf (wallet-signed)","vb":"98de3b03-12b3-426c-add9-0ba0ae3b0b25","iss":null},"hGrandchild":{"t":"A contract with Jane Citizen.pdf (watermarked) (watermarked)","vb":"98de3b03-12b3-426c-add9-0ba0ae3b0b25","iss":null},"bConnector":{"t":"A contract with Jane Citizen.pdf (watermarked)","vb":"connector:platform-s:f56afbf1-bbaf-4fdb-b105-875e86776aef","iss":null},"bHuman":{"t":"B human own title.pdf","vb":"4d82c9be-5c5c-44db-8a60-faa1fde2fa2c","iss":null}}
+    GATE r3 E1 A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":6} after {"src":"[erased]","hVersion":"[erased]","hSignCert":"[erased]","hSignWallet":"[erased]","hGrandchild":"[erased]","bConnector":"A contract with Jane Citizen.pdf (watermarked)","bHuman":"[erased]"} Bname=Org B Secret 0c8f972c Bkey=true
+  GATE r3 1497 attack (secuura_app, MT=false)
+Tests:       12 skipped, 1 passed, 13 total
+== r3e1_true
+    GATE r3 E1 statuses 201,201,201,201,201,201,201 []
+    GATE r3 E1 before {"src":{"t":"A contract with Jane Citizen.pdf","vb":null,"iss":"e003302f-f5be-4f37-8602-148644a3ee64"},"hVersion":{"t":"A contract with Jane Citizen.pdf (watermarked)","vb":"d368a114-9d84-4da7-ad2e-9b2ae2a1e09f","iss":null},"hSignCert":{"t":"A contract with Jane Citizen.pdf (signed)","vb":"d368a114-9d84-4da7-ad2e-9b2ae2a1e09f","iss":null},"hSignWallet":{"t":"A contract with Jane Citizen.pdf (wallet-signed)","vb":"d368a114-9d84-4da7-ad2e-9b2ae2a1e09f","iss":null},"hGrandchild":{"t":"A contract with Jane Citizen.pdf (watermarked) (watermarked)","vb":"d368a114-9d84-4da7-ad2e-9b2ae2a1e09f","iss":null},"bConnector":{"t":"A contract with Jane Citizen.pdf (watermarked)","vb":"connector:platform-s:cf1e0dda-5398-4f4c-ad41-5bfbafd7e9ee","iss":null},"bHuman":{"t":"B human own title.pdf","vb":"5babf1d2-6e1f-421b-8bcd-566a0e977f7f","iss":null}}
+    GATE r3 E1 A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":6} after {"src":"[erased]","hVersion":"[erased]","hSignCert":"[erased]","hSignWallet":"[erased]","hGrandchild":"[erased]","bConnector":"A contract with Jane Citizen.pdf (watermarked)","bHuman":"[erased]"} Bname=Org B Secret 45fd4ef7 Bkey=true
+  GATE r3 1497 attack (secuura_app, MT=true)
+Tests:       12 skipped, 1 passed, 13 total
+== r3slow_false
+    GATE r3 role {"who":"secuura_app","su":false,"bp":false} MT=false
+    GATE r3 B1 200 ms=24034 {"status":"completed","alreadyErased":false,"documentsBlanked":1} title=[erased] key=false
+    GATE r3 B2 500 ms=26117 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} title=U2 issued.pdf name=Org U2 Secret a8c9cbc9 key=true
+    GATE r3 B4 ms=26021 
+  GATE r3 1497 attack (secuura_app, MT=false)
+Tests:       9 skipped, 4 passed, 13 total
+== r3slow_true
+    GATE r3 role {"who":"secuura_app","su":false,"bp":false} MT=true
+    GATE r3 B1 200 ms=24042 {"status":"completed","alreadyErased":false,"documentsBlanked":1} title=[erased] key=false
+    GATE r3 B2 500 ms=26011 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} title=U2 issued.pdf name=Org U2 Secret 4028d51a key=true
+    GATE r3 B3 poolMax=10 200 requestMs=27021 {"status":"completed","alreadyErased":false,"documentsBlanked":1} title=[erased] key=false
+    GATE r3 B4 ms=26009 completed title=[erased] key=false
+  GATE r3 1497 attack (secuura_app, MT=true)
+Tests:       8 skipped, 5 passed, 13 total
+== r5_false
+    GATE r2 R5 500 ms=25120 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} | S1=S doc.pdf orgName=Org S Secret Legal Name 6ed10730 keyActive=true
+  GATE r2 1497 attack (secuura_app, MT=false)
+Tests:       6 skipped, 1 passed, 7 total
+== r5_true
+    GATE r2 R5 500 ms=25033 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} | S1=S doc.pdf orgName=Org S Secret Legal Name 22a3ee3f keyActive=true
+  GATE r2 1497 attack (secuura_app, MT=true)
+Tests:       6 skipped, 1 passed, 7 total
+== gate_false
+      GATE r2 scale {"N":0,"BYST":0,"DEEP":0,"PAD":0,"MT":false,"ms":24,"out":{"status":"completed","alreadyErased":false,"documentsBlanked":0},"err":null,"leftNullIssuer":0,"leftIssued":0,"bystErased":0,"keyActive":false}
+      GATE r2 role {"who":"secuura_app","su":false,"bp":false}
+      GATE r2 R1 200 {"status":"completed","alreadyErased":false,"documentsBlanked":3} {"BB":"[erased]","BBC":"[erased]","AX2":"A issued, vb B, child of BB.pdf","AXC":"Unissued child of AX2.pdf","P1":"[erased]"} keyActive=false
+      GATE r2 R2 TAB 200 {"status":"completed","alreadyErased":false,"documentsBlanked":0} | retry 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} | orgName=[erased] keyActive=false
+      GATE r2 R2 NBSP 200 {"status":"completed","alreadyErased":false,"documentsBlanked":0} | retry 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} | orgName=[erased] keyActive=false
+      GATE r2 R3 500 {"success":false,"error":{"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."}} | logged: [[["erase-connector: the erasure failed and was rolled back",{"organizationId":"b5a083a2-3e7c-4f3e-a7ef-41d539f2ce3b","tenantId":"e169664d-1517-4a70-a541-2ee3d5e384fe","error":"\nInvalid `prisma.$queryRaw()` invocation:\n\n\nRaw query failed. Code: `23514`. Message: `new row for relation \"documents\" violates check constraint \"g97r2_chk\"`"}]],[]]
+      GATE r2e2e statuses 201 201 201 201 {"src":"doc-1791813511809-62805620","unissued":"doc-1791813512209-555e7a46","ver":"doc-1791813512519-fb32d9fa","verOk":"doc-1791813512827-57dbd7bf"}
+      GATE r2e2e before {"src":{"title":"A payroll 2026.pdf","issuer":"dc2be0de-5d23-4594-9f38-4c58bcc01e6d","vb":null,"owner":null,"prov":[]},"unissued":{"title":"A unissued claims B.pdf","issuer":null,"vb":"connector:platform-s:ff093122-138f-4000-ba91-98305b61263a","owner":null,"prov":[]},"ver":{"title":"A payroll 2026.pdf (watermarked)","issuer":null,"vb":"connector:platform-s:ff093122-138f-4000-ba91-98305b61263a","owner":null,"prov":[]},"verOk":{"title":"A payroll 2026.pdf (watermarked)","issuer":null,"vb":"connector:platform-s:303d1c2b-b3dc-4471-8eed-433378a00a72","owner":null,"prov":[]}}
+      GATE r2e2e B erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} after {"src":"A payroll 2026.pdf","unissued":"[erased]","ver":"[erased]","verOk":"A payroll 2026.pdf (watermarked)"}
+Tests:       1 skipped, 24 passed, 25 total
+== gate_true
+      GATE r2 scale {"N":0,"BYST":0,"DEEP":0,"PAD":0,"MT":true,"ms":13,"out":{"status":"completed","alreadyErased":false,"documentsBlanked":0},"err":null,"leftNullIssuer":0,"leftIssued":0,"bystErased":0,"keyActive":false}
+      GATE r2 role {"who":"secuura_app","su":false,"bp":false}
+      GATE r2 R1 200 {"status":"completed","alreadyErased":false,"documentsBlanked":3} {"BB":"[erased]","BBC":"[erased]","AX2":"A issued, vb B, child of BB.pdf","AXC":"Unissued child of AX2.pdf","P1":"[erased]"} keyActive=false
+      GATE r2 R2 TAB 200 {"status":"completed","alreadyErased":false,"documentsBlanked":0} | retry 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} | orgName=[erased] keyActive=false
+      GATE r2 R2 NBSP 200 {"status":"completed","alreadyErased":false,"documentsBlanked":0} | retry 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} | orgName=[erased] keyActive=false
+      GATE r2 R3 500 {"success":false,"error":{"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."}} | logged: [[["erase-connector: the erasure failed and was rolled back",{"organizationId":"d26b9795-20d4-41bb-9113-41c661ba2663","tenantId":"809d7f9c-c2ca-415f-b7f9-4fa49d319696","error":"new row for relation \"documents\" violates check constraint \"g97r2_chk\""}]],[]]
+      GATE r2e2e statuses 201 201 201 201 {"src":"doc-1791813541601-2a6b8040","unissued":"doc-1791813542142-748912d8","ver":"doc-1791813542491-c2803864","verOk":"doc-1791813542802-10172462"}
+      GATE r2e2e before {"src":{"title":"A payroll 2026.pdf","issuer":"dd0d9fc7-92b2-4bf2-9d27-c73300613dc4","vb":null,"owner":null,"prov":[]},"unissued":{"title":"A unissued claims B.pdf","issuer":null,"vb":"connector:platform-s:ae979903-717d-44ca-966c-c976789f44ac","owner":null,"prov":[]},"ver":{"title":"A payroll 2026.pdf (watermarked)","issuer":null,"vb":"connector:platform-s:ae979903-717d-44ca-966c-c976789f44ac","owner":null,"prov":[]},"verOk":{"title":"A payroll 2026.pdf (watermarked)","issuer":null,"vb":"connector:platform-s:ad6d944e-3b76-41e4-9fa3-f38a38fe9391","owner":null,"prov":[]}}
+      GATE r2e2e B erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} after {"src":"A payroll 2026.pdf","unissued":"[erased]","ver":"[erased]","verOk":"A payroll 2026.pdf (watermarked)"}
+Tests:       1 skipped, 24 passed, 25 total
