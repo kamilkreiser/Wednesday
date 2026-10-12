@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HPSM-POC New Words</title>
+<style>
+  :root { --ink:#1b1f24; --muted:#5a6470; --line:#d5dae0; --bg:#ffffff; --band:#f3f5f8; --accent:#0b5cad; --warn:#8a5a00; --warnbg:#fff6e0; }
+  @page { size: A4 portrait; margin: 13mm 12mm; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--ink); font:13px/1.4 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  header { border-bottom:2px solid var(--accent); padding-bottom:6px; margin-bottom:10px; }
+  h1 { font-size:18px; margin:0 0 2px; }
+  .meta { color:var(--muted); font-size:12px; }
+  .bluf { background:var(--band); border-left:4px solid var(--accent); padding:8px 10px; margin:0 0 10px; }
+  .note { background:var(--warnbg); border-left:4px solid var(--warn); padding:7px 10px; margin:10px 0; font-size:12.5px; }
+  h2 { font-size:14px; margin:12px 0 6px; }
+  table { width:100%; border-collapse:collapse; font-size:11.5px; }
+  th, td { border:1px solid var(--line); padding:5px 6px; vertical-align:top; text-align:left; }
+  th { background:var(--band); }
+  td.n { white-space:nowrap; font-weight:600; }
+  td.s { font-family:Georgia, serif; font-size:12px; }
+  tr { break-inside:avoid; }
+  .small { font-size:11px; color:var(--muted); }
+  @media (max-width:640px) {
+    table, thead, tbody, tr, th, td { display:block; width:100%; }
+    thead { display:none; }
+    tr { border:1px solid var(--line); margin-bottom:8px; }
+    td { border:none; border-top:1px solid var(--line); }
+    td:first-child { border-top:none; background:var(--band); }
+    td[data-l]::before { content:attr(data-l) ": "; font-weight:600; color:var(--muted); font-family:-apple-system, Arial, sans-serif; font-size:11px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>HPSM-POC: 11 new messages for your approval (import and demo reset)</h1>
+  <div class="meta">Datasec / HPSM-POC · Tuesday, 13 Oct 2026 · Source: <code>1_Project_Definition/Briefs/2026-10-13_B232_STATUS.md</code>, NEW WORDS</div>
+</header>
+
+<div class="bluf"><strong>BLUF:</strong> The QA gate (B232) passed B230 and B231 with notes, and those two changes add 11 sentences a user or the API can now show; they need your yes before the next hosted deploy. One more sentence (the hosted "Demo reset" success line) is already approved under POC-12 and is listed only for completeness.</div>
+
+<div class="note"><strong>Nothing reaches the hosted site before HP's 13 Oct review.</strong> These words stay off the hosted site until you approve them on the card; the next hosted deploy waits for this card and the timing card.</div>
+
+<h2>Already approved under POC-12 (no action)</h2>
+<table>
+<thead><tr><th>#</th><th>Sentence (verbatim)</th><th>Where it shows</th><th>When a user sees it</th><th>Seat</th></tr></thead>
+<tbody>
+<tr><td class="n">W-0</td><td class="s" data-l="Sentence">Demo reset: the sample customers and their assessments are back to their starting state.</td><td data-l="Where">Hosted site, top-bar "Reset demo" message (<code>AppShell.tsx:61</code>); replaces "…the offline demo is back…"</td><td data-l="When">Each time a hosted demo reset succeeds</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+</tbody>
+</table>
+
+<h2>For Kam: 11 sentences</h2>
+<p class="small">Unless the row says otherwise, each sentence is shown after this lead-in (<code>AppShell.tsx:66</code>, unchanged): "This screen's demo state was cleared, but the sample data could not be reset: ". "Laptop showcase" means the laptop demo; "Hosted demo" means the hosted site's demo reset.</p>
+<table>
+<thead><tr><th>#</th><th>Sentence (verbatim)</th><th>Where it shows</th><th>When a user sees it</th><th>Seat</th></tr></thead>
+<tbody>
+<tr><td class="n">W-1</td><td class="s" data-l="Sentence">Nothing was reset: the service took too long. Try again in a minute.</td><td data-l="Where">Reset message, hosted demo and laptop showcase (<code>client.ts:344</code>)</td><td data-l="When">A reset times out (504 at the 90 s limit). Shows as "…could not be reset: Nothing was reset: …" (double colon). QA: true, except if the reset finishes exactly as the timer fires (not tested)</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+<tr><td class="n">W-2</td><td class="s" data-l="Sentence">The reset failed part-way and was rolled back. Nothing changed: the showcase still shows the data it had before. Try again in a moment.</td><td data-l="Where">Reset message, laptop showcase</td><td data-l="When">A showcase reset fails part-way and is undone</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+<tr><td class="n">W-3</td><td class="s" data-l="Sentence">Another reset was still writing the showcase. Nothing changed: the showcase still shows the data it had before. Try again in a moment.</td><td data-l="Where">Reset message, laptop showcase</td><td data-l="When">Reset pressed while another reset is still running</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+<tr><td class="n">W-4</td><td class="s" data-l="Sentence">The reset's last step could not be confirmed, so it is not known whether it happened: the showcase now shows either freshly reset data or the data it had before. Reload to see which, and reset again only if it still shows the old data.</td><td data-l="Where">Reset message, laptop showcase</td><td data-l="When">The reset's final save can't be confirmed. QA flag: the lead-in says "could not be reset", which may be untrue here</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+<tr><td class="n">W-5</td><td class="s" data-l="Sentence">The reset failed part-way and was rolled back. Nothing changed: the demo still shows the data it had before. Try again in a moment.</td><td data-l="Where">Reset message, hosted demo</td><td data-l="When">A hosted demo reset fails part-way and is undone</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+<tr><td class="n">W-6</td><td class="s" data-l="Sentence">Another reset or a host start-up was still writing the demo data. Nothing changed: the demo still shows the data it had before. Try again in a moment.</td><td data-l="Where">Reset message, hosted demo</td><td data-l="When">Reset pressed while another reset or a server start-up is still writing</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+<tr><td class="n">W-7</td><td class="s" data-l="Sentence">The reset did not start: its seed would score the samples with a ruleset this demo is not set up to use. Nothing changed: the demo still shows the data it had before. Trying again will not help until the demo's configuration is corrected.</td><td data-l="Where">Reset message, hosted demo</td><td data-l="When">The demo's set-up has the wrong ruleset (checked before anything changes)</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+<tr><td class="n">W-8</td><td class="s" data-l="Sentence">The reset's last step could not be confirmed, so it is not known whether it happened: the demo now shows either freshly reset data or the data it had before. Reload to see which, and reset again only if it still shows the old data.</td><td data-l="Where">Reset message, hosted demo</td><td data-l="When">The reset's final save can't be confirmed. Same lead-in problem as W-4</td><td data-l="Seat">SEAT-B (B231)</td></tr>
+<tr><td class="n">W-9</td><td class="s" data-l="Sentence">…could not be reset: the service took too long, so nothing changed. Try again in a minute.</td><td data-l="Where">Alternative to W-1 (same place)</td><td data-l="When">Same as W-1; fixes the double colon. Same truth as W-1</td><td data-l="Seat">SEAT-B (B231, alternative 1)</td></tr>
+<tr><td class="n">W-10</td><td class="s" data-l="Sentence">…the service took too long and the reset was stopped. Reload to check, then try again if it still shows the old data.</td><td data-l="Where">Alternative to W-1 (same place)</td><td data-l="When">Same as W-1. QA: true on every path, including the finish-as-timer-fires case</td><td data-l="Seat">SEAT-B (B231, alternative 2)</td></tr>
+<tr><td class="n">W-11</td><td class="s" data-l="Sentence">The files could not be kept (the database refused a write); nothing was read.</td><td data-l="Where">API only: the import run's <code>reason</code> (<code>GET /imports/{id}</code>, <code>ImportEndpoints.cs:142</code>); no screen shows it</td><td data-l="When">An import fails because the database refused a write. B230 added this although its brief said stop for new words (QA conformance note)</td><td data-l="Seat">SEAT-A (B230)</td></tr>
+</tbody>
+</table>
+<p class="small">W-9 and W-10 are alternatives to W-1: if you approve all, the seat still needs to know which of W-1 / W-9 / W-10 to ship (QA's truth note favours W-10). Count: SEAT-B 10, SEAT-A 1. Also noted, not new: a reset that hits an unknown, blank or HTML 503 still says "The service is not configured on this server.", which is only true when the API is off.</p>
+</body>
+</html>
