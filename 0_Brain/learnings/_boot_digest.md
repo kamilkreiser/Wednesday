@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-12 17:02 from 232 lesson files (1,030,130 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 14 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-12 17:06 from 233 lesson files (1,031,509 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 15 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7223,6 +7223,24 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **EXTENSION 09:06:47 — Kam (live), verbatim:** *"also get Sonnet to do some of the harder tasks that you would not give to the spark. You ( an opus agent you spin up - your choice) acts as the gate keeper"*. So Sonnet also takes BUILD tickets that fail the Spark predicate but are not decision-shaped; the gatekeeper is an Opus QA gate plus Wednesday's completion check (receipt bf-327a27910008).
 
 **Family:** [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Be more careful, especially with coding files and deploys
+`2026-10-12_be-more-careful-with-coding-files-and-deploys.md` · feedback · 2026-10-12 · status: live
+
+(no rules-shaped section — file included WHOLE)
+
+# Be more careful, especially with coding files and deploys
+
+**Trigger:** minutes after I carded him a command copied from a launcher hint (the ssh-add path did not exist on this Mac, see the 2026-10-12 ledger row). His words are general, not only about that card.
+
+**Rule:** before anything touching a coding file or a deploy leaves my hands (a brief, a card, a tap, a queue line):
+1. Run the read-only precondition myself: the path exists, the sha is on the remote, the lock is free, the control passes. A launcher line, warning text or a drafter's report is a representation.
+2. Deploys stay with a deploy seat under the October grant rules (kintsugi first, backup/rollback, KS-535 wallet rule); the verify seats do not deploy; nothing goes to demo unless Kintsugi is verified first.
+3. Spark output is read at source (patch applied in a scratch clone, test run) before a raising seat gets it; no merge without the QA gate GO.
+4. When unsure which of two actions is safer, pick the one that is reversible and say so.
+
+**Why:** a wrong instruction to Kam costs his attention; a wrong code or deploy action costs the fleet. Same family as [[2026-08-03_mental-model-not-source-of-truth]].
 
 
 ## Every Tuesday boot sweeps ALL Datasec feedback repositories, and actionable feedback gets actioned. Excluded for now: HPSM-POC, the Security Configuration tool, the MPS Calculator
