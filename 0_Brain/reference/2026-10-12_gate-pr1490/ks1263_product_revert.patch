@@ -1,0 +1,222 @@
+commit 6e2a00bfed577528de1ee02b41cb5a0e99172b35
+Author: kksecura <kamil.kreiser@secuura.ai>
+Date:   Fri Sep 25 22:21:22 2026 +1000
+
+    KS-1263: make /share and /transfer-custody's multi-writes one transaction, via withTenant (#1239)
+    
+    The route-level rollback cell injects its failure with a NUL byte that production refuses before reaching the route, and it runs as a superuser because its harness omits the tenant-scope middleware; the rollback it proves holds regardless, and was re-measured red at develop and green at head as the app role inside that middleware. The custody-transfer rollback is pinned by structure and by a direct transaction cell, not yet by a committed route cell. The integration suite cannot run in single-tenant mode on a fresh worktree and fails loudly by name there.
+    
+    12/15 ran; legs 3, 4, 8 NOT run (local stack not up); no such surface
+    
+    Merged by Seat B 27th on Wednesday's signed GO (2026-09-25T12:17:23Z) naming head c8e1875c21e9, under Kam's open-ended TESTED grant of 2026-09-11 (gate tier-1 gate21T1d, report sha256 86dbbcab1585). Round 1 and the first half of round 2 were written by the previous seat, which wrapped; this seat completed round 2 (the route-level rollback cell and the transaction-client identity assertion) and the head merged here is therefore this seat's own commit. Recorded rather than left to be inferred.
+    
+    Refs KS-1263
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+diff --git a/Blockchain/Dev/services/originate/src/repositories/shareRepo.ts b/Blockchain/Dev/services/originate/src/repositories/shareRepo.ts
+index 55494e949..1329fceee 100644
+--- a/Blockchain/Dev/services/originate/src/repositories/shareRepo.ts
++++ b/Blockchain/Dev/services/originate/src/repositories/shareRepo.ts
+@@ -18,7 +18,7 @@
+  * =============================================================================
+  */
+ 
+-import { prisma } from '../db';
++import { prisma, type TenantTx } from '../db';
+ import { v4 as uuidv4 } from 'uuid';
+ import { logger } from '../utils/logger';
+ 
+@@ -69,7 +69,11 @@ export async function createShare(
+   input: Omit<ShareRecordV2, 'id' | 'createdAt' | 'updatedAt' | 'status'> & {
+     status?: ShareRecordV2['status'];
+   },
+-  db?: DbClient,
++  // KS-1263: `/share` now runs the per-recipient loop inside withTenant(), whose client is a
++  // TenantTx — the four raw methods without `$disconnect`. This function only ever calls
++  // `$executeRaw` (twice), so TenantTx satisfies everything it uses. Widened here only;
++  // the other two signatures in this file are untouched.
++  db?: DbClient | TenantTx,
+ ): Promise<ShareRecordV2> {
+   if (!input.recipientUserId && !input.recipientEmail) {
+     throw new Error('createShare: at least one of recipientUserId or recipientEmail is required');
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+index 799653068..492b46740 100644
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -1762,7 +1762,7 @@ documentsRouter.post(
+       // Use the existing db reference from the request (per-tenant if
+       // multi-tenancy is on, default prisma otherwise — same pattern as
+       // every other write route in this file).
+-      const { prisma: defaultPrisma } = await import('../db');
++      const { prisma: defaultPrisma, withTenant } = await import('../db');
+       const db = (req as any).db || defaultPrisma;
+ 
+       // KS-697: the id path never checked that the holder EXISTS. `custody_events`
+@@ -1803,13 +1803,24 @@ documentsRouter.post(
+         }
+       }
+ 
+-      // Two writes in a transaction would be cleanest, but Prisma's
+-      // $executeRaw doesn't compose nicely. We accept a small window
+-      // where the event row exists without the doc-owner update —
+-      // the API contract says "return 201 means the transfer is
+-      // recorded"; consumers re-read documents/{id} for the current
+-      // owner. The DB FK + ON DELETE CASCADE keeps the pairing safe.
+-      const eventRows: Array<{ id: string }> = await db.$queryRaw`
++      // KS-1263: the custody event and the owner flip are ONE transaction. They used to be two
++      // statements, and the comment here accepted the window between them ("Prisma's $executeRaw
++      // doesn't compose nicely ... we accept a small window where the event row exists without the
++      // doc-owner update"). A throw in that window left a custody event for a transfer that did not
++      // happen, and since KS-1228 no action_provenance row either.
++      // KS-1263: withTenant() is used UNCONDITIONALLY here, never `(req as any).db`. On a
++      // multi-tenant deployment (index.ts:225, gated on MULTI_TENANCY_ENABLED, which
++      // deployment/azure/services.bicep:798 sets to 'true') that reference is
++      // createPoolProxy(pool), which wraps BEGIN + set_config + COMMIT around EACH statement
++      // (db.ts:24-26) — two transactions again, which is the defect this ticket removes.
++      // withTenant checks out ONE client, runs BEGIN + both set_config GUCs + the callback on
++      // that client, then COMMIT, or ROLLBACK on a throw (db.ts:302-336); handed that open
++      // client, createPoolProxy queries it directly rather than re-bundling (db.ts:24-26,
++      // pinned by ks458-db-tenant-guc.test.ts:111).
++      let eventId: string;
++      try {
++        eventId = await withTenant(tenantId, async (tx) => {
++          const eventRows: Array<{ id: string }> = await tx.$queryRaw`
+         INSERT INTO custody_events (
+           tenant_id, document_id, from_holder_id, to_holder_id,
+           transferred_by_id, reason, effective_at
+@@ -1822,25 +1833,34 @@ documentsRouter.post(
+           ${reason ?? null},
+           ${eventEffectiveAt}
+         )
+-        RETURNING id::text AS id
+-      `;
+-      const eventId = eventRows[0]?.id;
+-      if (!eventId) {
+-        return res.status(500).json({
+-          success: false,
+-          error: { code: 'INTERNAL_ERROR', message: 'Failed to write custody event' },
++            RETURNING id::text AS id
++          `;
++          const written = eventRows[0]?.id;
++          if (!written) {
++            // Throw, never return: a `return res.json(...)` inside the callback resolves it
++            // normally and COMMITS. Throwing rolls the INSERT back; the 500 is mapped below.
++            throw Object.assign(new Error('custody event not written'), { code: 'CUSTODY_EVENT_NOT_WRITTEN' });
++          }
++          // Flip the owner. Use external_id as the lookup key to match
++          // the rest of the originate-route convention.
++          await tx.$executeRaw`
++            UPDATE documents
++               SET owner_user_id = ${resolvedHolderId}::uuid,
++                   updated_at = NOW()
++             WHERE external_id = ${id}
++               AND tenant_id = ${tenantId}::uuid
++          `;
++          return written;
+         });
++      } catch (err: any) {
++        if (err?.code === 'CUSTODY_EVENT_NOT_WRITTEN') {
++          return res.status(500).json({
++            success: false,
++            error: { code: 'INTERNAL_ERROR', message: 'Failed to write custody event' },
++          });
++        }
++        throw err;
+       }
+-
+-      // Flip the owner. Use external_id as the lookup key to match
+-      // the rest of the originate-route convention.
+-      await db.$executeRaw`
+-        UPDATE documents
+-           SET owner_user_id = ${resolvedHolderId}::uuid,
+-               updated_at = NOW()
+-         WHERE external_id = ${id}
+-           AND tenant_id = ${tenantId}::uuid
+-      `;
+       recordOnBehalfOf(req, id, 'transfer-custody', transferObo);
+ 
+       logger.info('Custody transferred', {
+@@ -2219,37 +2239,54 @@ documentsRouter.post(
+       const sharedByUuid = toActorUuid(user.id, shareObo.resolvedUserId);
+ 
+       const created: Array<{ id: string; recipientEmail?: string | null; recipientUserId?: string | null; shareType: ShareType }> = [];
+-      for (const r of recipients) {
+-        try {
+-          const share = await createShare(
+-            {
+-              tenantId,
+-              targetType: 'document',
+-              targetId: id,
+-              recipientUserId: r.userId ?? null,
+-              recipientEmail: r.email ?? null,
+-              shareType: (r.shareType ?? 'view') as ShareType,
+-              sharedById: sharedByUuid,
+-              expiresAt: expiresAt ?? null,
+-              message: message ?? null,
+-            },
+-            (req as any).db,
+-          );
+-          created.push({
+-            id: share.id,
+-            recipientEmail: share.recipientEmail,
+-            recipientUserId: share.recipientUserId,
+-            shareType: share.shareType,
+-          });
+-        } catch (err: any) {
+-          if (err?.code === 'SHARE_TARGET_NOT_FOUND') {
+-            return res.status(404).json({
+-              success: false,
+-              error: { code: 'NOT_FOUND', message: 'Document not found in this tenant (resolution failed at share time)' },
++      // KS-1263: every recipient's row is written in ONE transaction, so a refusal at recipient
++      // k > 1 rolls the earlier rows back rather than leaving them behind with no
++      // action_provenance row (which is what develop did after KS-1228).
++      // KS-1263: withTenant() is used UNCONDITIONALLY here, never `(req as any).db`. On a
++      // multi-tenant deployment (index.ts:225, gated on MULTI_TENANCY_ENABLED, which
++      // deployment/azure/services.bicep:798 sets to 'true') that reference is
++      // createPoolProxy(pool), which wraps BEGIN + set_config + COMMIT around EACH statement
++      // (db.ts:24-26) — two transactions again, which is the defect this ticket removes.
++      // withTenant checks out ONE client, runs BEGIN + both set_config GUCs + the callback on
++      // that client, then COMMIT, or ROLLBACK on a throw (db.ts:302-336); handed that open
++      // client, createPoolProxy queries it directly rather than re-bundling (db.ts:24-26,
++      // pinned by ks458-db-tenant-guc.test.ts:111).
++      const { withTenant } = await import('../db');
++      try {
++        await withTenant(tenantId, async (tx) => {
++          for (const r of recipients) {
++            const share = await createShare(
++              {
++                tenantId,
++                targetType: 'document',
++                targetId: id,
++                recipientUserId: r.userId ?? null,
++                recipientEmail: r.email ?? null,
++                shareType: (r.shareType ?? 'view') as ShareType,
++                sharedById: sharedByUuid,
++                expiresAt: expiresAt ?? null,
++                message: message ?? null,
++              },
++              tx,
++            );
++            created.push({
++              id: share.id,
++              recipientEmail: share.recipientEmail,
++              recipientUserId: share.recipientUserId,
++              shareType: share.shareType,
+             });
+           }
+-          throw err;
++        });
++      } catch (err: any) {
++        // The rollback has already happened; `created` describes rows that no longer exist, and
++        // nothing below this point reads it on an error path.
++        if (err?.code === 'SHARE_TARGET_NOT_FOUND') {
++          return res.status(404).json({
++            success: false,
++            error: { code: 'NOT_FOUND', message: 'Document not found in this tenant (resolution failed at share time)' },
++          });
+         }
++        throw err;
+       }
+       recordOnBehalfOf(req, id, 'share', shareObo);
+ 
