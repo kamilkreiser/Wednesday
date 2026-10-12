@@ -1,0 +1,50 @@
+fetched 2026-10-13 05:17 AEDT into scratch clone (push URLs DISABLED): refs/pull/1497/head=dc488c460f794dc476ce3460eabd44c9d6e138fe develop=425ad3e00ae40ddbce6ead62c127c610e2e67a16
+bundle sha256/16: full 1379e0d584d363fd, delta bf766f1f934e0c25 (both match brief); git bundle verify in scratch clone: ok both
+worktree HEAD: dc488c460f794dc476ce3460eabd44c9d6e138fe; merge-base(head, develop)=425ad3e00ae40ddbce6ead62c127c610e2e67a16 (head already contains develop tip: head tree IS the merged tree)
+-- delta 4ca14654..head
+dc488c460 df2c279bb 425ad3e00 Merge origin/develop (425ad3e00ae4) into the KS-695 ask 3 erase-connector branch
+425ad3e00 250596098 KS-1511: pin that an array or repeated audit-log limit is refused
+250596098 898a1ae11 KS-1518: forward bound refusal message tells 1n from 1 and -0 from 0
+df2c279bb 91f3cbb04 KS-695 ask 3 (ii) tests: scope the bounds file's slow triggers to its own tenant
+898a1ae11 b2085e99f KS-1532: info reader answers 503 when the settings read throws
+91f3cbb04 f4d4152b7 b2085e99f Merge origin/develop (b2085e99ff1c) into the KS-695 ask 3 erase-connector branch
+f4d4152b7 4ca146545 KS-695 ask 3 (ii): refuse when another key carries the connector id; qualify N2; reword the budget claim; kill G8
+b2085e99f f39104e71 KS-1508: versionedById is server-set; a caller can no longer plant it
+f39104e71 4ec53e187 KS-1232: connector/info refuses a non-array allow-list like the create path
+4ec53e187 551dc9808 KS-1519: auth ratchet cells fail with the checker's output as the message
+551dc9808 92f68da94 KS-1520: pin leg 16's default run without an install, fix its failure text
+92f68da94 629349dac KS-880: one home for the security row mappers; index.ts imports them
+629349dac f6f2a539f KS-1510: document-lookup logs the thrown error and keeps its constant 500
+-- merge reproduction (merge-tree --write-tree)
+merge1 f4d4152b7+b2085e99: mine=bfbda5b249396aaf01e7ead02a893c21144328d5 actual=bfbda5b249396aaf01e7ead02a893c21144328d5
+merge2 df2c279bb+425ad3e0: mine=35aad4ece203daf4fbaf80e28d26095b19282082 actual=35aad4ece203daf4fbaf80e28d26095b19282082
+-- PR's 10 files: blob at fix f4d4152b7 / after merge1 91f3cbb04 / df2c279bb / head
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/docs/openapi/secuura-api.yaml
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-erasure.test.ts
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts
+merge1:same merge2:same fix-vs-head:DIFF(df2c tests-only) Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-selector-bounds.integration.test.ts
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector.integration.test.ts
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/services/originate/src/db.ts
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/services/originate/src/originate.openapi.ts
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/services/originate/src/routes/platformOrganizations.ts
+merge1:same merge2:same fix-vs-head:same Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts
+-- develop 551dc980..425ad3e0 log touching the PR's 10 files (expect empty):
+(end)
+-- control: same log over services/originate/src:
+b2085e99f KS-1508: versionedById is server-set; a caller can no longer plant it
+-- develop delta files:
+ ...flow-approve-forward-bound-is-validated.test.ts |  48 +++-
+ ...o-reader-refuses-a-non-array-allow-list.test.ts | 244 +++++++++++++++++++++
+ ...audit-log-refuses-a-bad-limit-or-offset.test.ts |  17 ++
+ ...-fails-closed-on-a-thrown-settings-read.test.ts | 227 +++++++++++++++++++
+ .../src/__tests__/ks480-connector-auth.test.ts     |   9 +-
+ .../api-gateway/src/routes/verification.ts         |   3 +-
+ .../services/api-gateway/src/services/health.ts    |  31 ++-
+ ...pe-checked-against-a-shrinking-baseline.test.ts |  93 +++++++-
+ .../ks1293-originate-suite-is-hermetic.test.ts     |   1 +
+ ...versionedbyid-is-not-stored.integration.test.ts | 144 ++++++++++++
+ .../ks1508-versionedbyid-is-server-set.test.ts     | 243 ++++++++++++++++++++
+ .../originate/src/routes/certifications.ts         |   9 +-
+ .../Dev/services/originate/src/routes/documents.ts |  19 +-
+ 13 files changed, 1056 insertions(+), 32 deletions(-)

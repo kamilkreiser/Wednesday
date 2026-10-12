@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""r5 gate mutants on connectorOrganisationErasure.ts: apply one, run the layers, restore byte-identical (sha256 asserted)."""
+import hashlib, subprocess, sys, re, os
+
+G = '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/r5gate'
+OD = G + '/head/Blockchain/Dev/services/originate'
+SVC = OD + '/src/services/connectorOrganisationErasure.ts'
+ORIG = open(SVC).read()
+SHA0 = hashlib.sha256(ORIG.encode()).hexdigest()
+
+ARMB = "(d.metadata->>'versionedById' = ${connectorUser}\n                    AND (d.issuer_organization_id IS NULL"
+GUARD_THROW = "if (sharing.some((k) => normaliseOrgId(k.organization_id) !== organizationId)) throw new OrganisationErasureConnectorSharedError();"
+GUARD_SQL = "SELECT organization_id FROM svc_api_keys WHERE tenant_id = ${tenantId}::uuid AND connector_id = ${connectorId}"
+CHECK6 = """    if (performance.now() - startedAtMs > budgetMs) {
+      throw new Error(`erase-connector: the request outlived its ${budgetMs} ms budget; rolled back, not committed`);
+    }
+"""
+REVOKE5 = "    // 5. Revoke the named key, LAST."
+
+def m_n3(s):  return s.replace(ARMB, ARMB.replace("${connectorUser}\n", "${connectorUser} AND d.parent_document_id IS NOT NULL\n"), 2), 2, ARMB
+def m_g0(s):  return s.replace(GUARD_THROW, GUARD_THROW.replace('if (sharing.some', 'if (false && sharing.some')), 1, GUARD_THROW
+def m_g1(s):  return s.replace(GUARD_SQL, GUARD_SQL + ' AND is_active IS DISTINCT FROM false'), 1, GUARD_SQL
+def m_g2(s):  return s.replace(GUARD_THROW, GUARD_THROW.replace('sharing.some((k) => normaliseOrgId', 'sharing.some((k) => k.organization_id !== null && normaliseOrgId')), 1, GUARD_THROW
+def m_g3(s):  return s.replace(GUARD_THROW, GUARD_THROW.replace('normaliseOrgId(k.organization_id) !== organizationId', 'k.organization_id !== organizationId')), 1, GUARD_THROW
+def m_g4(s):  return s.replace(GUARD_SQL, GUARD_SQL.replace('tenant_id = ${tenantId}::uuid AND ', '')), 1, GUARD_SQL
+def m_g8(s):
+    assert s.count(CHECK6) == 1 and s.count(REVOKE5) == 1
+    t = s.replace(CHECK6, '')
+    return t.replace(REVOKE5, CHECK6 + REVOKE5), 1, CHECK6
+def m_m2a(s): return s.replace(CHECK6, ''), 1, CHECK6
+def m_m2b(s): return s.replace('{ timeout: ORGANISATION_ERASURE_TX_TIMEOUT_MS,', '{ timeout: 5000,'), 1, '{ timeout: ORGANISATION_ERASURE_TX_TIMEOUT_MS,'
+
+MUTANTS = {'CTL': None, 'N3': m_n3, 'G0': m_g0, 'G1': m_g1, 'G2': m_g2, 'G3': m_g3, 'G4': m_g4, 'G8': m_g8, 'M2a': m_m2a, 'M2b': m_m2b}
+
+def run(cmd):
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, executable='/bin/zsh')
+    return p.returncode, p.stdout + p.stderr
+
+def main():
+    names = sys.argv[1].split(',')
+    layers = sys.argv[2].split(',')
+    only = os.environ.get('GATE_ONLY_ATTACK', 'K1,C1,C2,C3,C4,C5,C6,N3,P8')
+    for name in names:
+        f = MUTANTS[name]
+        s = ORIG
+        if f:
+            s, expect, anchor = f(ORIG)
+            n = ORIG.count(anchor)
+            assert n == expect, f'{name}: anchor count {n} != {expect}'
+            assert s != ORIG, f'{name}: no change'
+        open(SVC, 'w').write(s)
+        try:
+            out = [f'== {name} ==']
+            if 'tsc' in layers:
+                rc, o = run(f'builtin cd {OD} && npx tsc --noEmit'); out.append(f'tsc rc={rc}')
+            if 'unit' in layers:
+                rc, o = run(f'builtin cd {OD} && npx jest src/__tests__/ks695-ask3-erase-connector-erasure.test.ts 2>&1')
+                m = re.search(r'^Tests:.*$', o, re.M); out.append(f'unit rc={rc} {m.group(0) if m else "NO Tests LINE"}')
+            for mt in ('false', 'true'):
+                if 'bounds' in layers:
+                    rc, o = run(f'zsh {G}/integ.sh mut_{name}_bounds_{mt} app {mt} ks695-ask3-erase-connector-selector-bounds')
+                    out.append(o.strip().splitlines()[0] + ' || ' + ' | '.join(l.strip()[:110] for l in o.splitlines()[1:] if '✕' in l))
+                if 'attack' in layers:
+                    rc, o = run(f'GATE_ONLY={only} zsh {G}/integ.sh mut_{name}_attack_{mt} app {mt} gate1497r5-attack')
+                    out.append(o.strip().splitlines()[0] + ' || ' + ' | '.join(l.strip()[:60] for l in o.splitlines()[1:] if '✕' in l))
+            print('\n'.join(out), flush=True)
+        finally:
+            open(SVC, 'w').write(ORIG)
+            sha = hashlib.sha256(open(SVC).read().encode()).hexdigest()
+            assert sha == SHA0, 'RESTORE FAILED'
+            print(f'   restored sha256={sha[:12]} ok', flush=True)
+
+if __name__ == '__main__':
+    main()

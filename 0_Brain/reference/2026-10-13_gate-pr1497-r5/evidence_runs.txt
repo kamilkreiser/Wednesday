@@ -1,0 +1,154 @@
+######## r5_false
+    GATE r5 role {"who":"secuura_app","su":false,"bp":false} MT=false poolBranch=false
+    GATE r5 K1 statuses 201,201,201,201 before {"src":{"id":"7df78af9-6c51-4b14-b1f7-e81eeec888c3","title":"B payroll 2026.pdf","iss":"b6795463-ef96-42c7-af01-7366a47d0f46","vb":null,"parent":null},"bv":{"id":"c602f80b-ff95-44d1-919d-0f335af60dbc","title":"B payroll 2026.pdf (watermarked)","iss":null,"vb":"connector:api-key","parent":"7df78af9-6c51-4b14-b1f7-e81eeec888c3"},"nv":{"id":"9d1999ff-f95d-479c-a51d-f78fb009dd02","title":"B payroll 2026.pdf (watermarked)","iss":null,"vb":"connector:api-key","parent":"7df78af9-6c51-4b14-b1f7-e81eeec888c3"},"bvChild":{"id":"4e856171-8e64-4e26-be8a-ecbce6a75c6c","title":"B payroll 2026.pdf (watermarked) (watermarked)","iss":null,"vb":"3d47ec9f-8871-4035-adb0-832368036412","parent":"c602f80b-ff95-44d1-919d-0f335af60dbc"}}
+    GATE r5 K1 guardView(keys per connector_id in tenant) {"api-key":1,"NULL":2,"empty":1} | A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":4} | after {"aDoc":"[erased]","src":"B payroll 2026.pdf","bv":"[erased]","nv":"[erased]","bvChild":"[erased]"} | Bname=Org K1B c7459f1a BkeyNull=true BkeyEmpty=true NkeyNull=true
+    GATE r5 C1 403 {"code":"FORBIDDEN","message":"the request names an organisation or key outside this connector's Organisation"} diff=[] {"a":"C1 A.pdf","broot":"C1 B root.pdf","Aname":"Org C1A c7459f1a","Akey":true,"Bkey":true}
+    GATE r5 C2 [{"active":true,"status":403,"diff":[],"a":"C2 A.pdf"},{"active":false,"status":403,"diff":[],"a":"C2 A.pdf"}]
+    GATE r5 C3 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} diff=["documents","organizations","svc_api_keys"] {"a":"[erased]","key":false,"old":false,"sib":true,"odd":true}
+    GATE r5 C4 [{"k":"upper","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root upper.pdf","bIssuedClaimsA":"C4 B claims A exact upper.pdf"},{"k":"lead","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root lead.pdf","bIssuedClaimsA":"C4 B claims A exact lead.pdf"},{"k":"trail","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root trail.pdf","bIssuedClaimsA":"C4 B claims A exact trail.pdf"},{"k":"tab","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root tab.pdf","bIssuedClaimsA":"C4 B claims A exact tab.pdf"},{"k":"zw","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root zw.pdf","bIssuedClaimsA":"C4 B claims A exact zw.pdf"},{"k":"nfd","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root nfd.pdf","bIssuedClaimsA":"C4 B claims A exact nfd.pdf"},{"k":"ext","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root ext.pdf","bIssuedClaimsA":"C4 B claims A exact ext.pdf"},{"k":"prefix","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root prefix.pdf","bIssuedClaimsA":"C4 B claims A exact prefix.pdf"}]
+    GATE r5 C5 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} {"broot":"[erased]","bsrc":"C5 B issued.pdf","bder":"[erased]","Bname":"Org C5B c7459f1a"}
+    GATE r5 C6 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} {"a":"[erased]","t2":"C6 T2 root.pdf","k2":true}
+    GATE r5 R1 N=150000 count-running (count still running after the insert committed) insertedAtMs=8 | A 500 ms=25082 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} | Bdoc=R1 B root (minted in window).pdf Bkey=true
+    GATE r5 P8 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} Bname=[erased] Bdoc=[erased] forgedKey=false BrealKey=true
+  GATE r5 1497 attack (secuura_app, MT=false)
+    ✓ SETUP - product role and tenancy branch (8 ms)
+    ✕ K1 - "api-key" collapse: A's key carries connector_id 'api-key'; B's (and an org-less) key carry NULL / '' -> same principal. Does the guard see the collision? (1276 ms)
+    ✓ C1 - another organisation's key carries A's connector id: 403, and the database is byte-identical afterwards (76 ms)
+    ✓ C2 - an ORG-LESS key carries A's connector id (active, then the same with it inactive): 403 both, nothing written (50 ms)
+    ✓ C3 - same-organisation rotation (older inactive key, a sibling active key, a key whose organization_id is stored " UPPER\t"): 200 completed; snapshot DOES change (control) (23 ms)
+    ✓ C4 - spellings of the connector id on B's key (and on B's documents): case, lead/trail space, TAB, zero-width, NFD vs NFC, prefix-extended (49 ms)
+    ✓ C5 - deleted-key reuse: B's key X made B's NULL-issuer connector documents; B's key row is DELETED; A gets a key X; A erases (11 ms)
+    ✓ C6 - same connector id in ANOTHER tenant: not a collision (200) and the other tenant's documents are untouched (6 ms)
+    ✓ R1 - a key (and its document) minted between the guard read and the blanking UPDATE (27905 ms)
+    ✓ P8 - path 1 still open: a key minted FOR org B with a unique forged connector id erases B (39 ms)
+  ● GATE r5 1497 attack (secuura_app, MT=false) › K1 - "api-key" collapse: A's key carries connector_id 'api-key'; B's (and an org-less) key carry NULL / '' -> same principal. Does the guard see the collision?
+Tests:       1 failed, 9 passed, 10 total
+######## r5_true
+    GATE r5 role {"who":"secuura_app","su":false,"bp":false} MT=true poolBranch=true
+    GATE r5 K1 statuses 201,201,201,201 before {"src":{"id":"61ec211e-999a-4174-be2f-5924cff71134","title":"B payroll 2026.pdf","iss":"5b4f0bd9-30b6-4a2f-837c-dbfdf6b99941","vb":null,"parent":null},"bv":{"id":"bc225200-1904-4857-9cf4-e6b472493df8","title":"B payroll 2026.pdf (watermarked)","iss":null,"vb":"connector:api-key","parent":"61ec211e-999a-4174-be2f-5924cff71134"},"nv":{"id":"5a947c06-5d4b-422c-b310-08020279af09","title":"B payroll 2026.pdf (watermarked)","iss":null,"vb":"connector:api-key","parent":"61ec211e-999a-4174-be2f-5924cff71134"},"bvChild":{"id":"7921450d-c3b5-412f-a832-27a687c03776","title":"B payroll 2026.pdf (watermarked) (watermarked)","iss":null,"vb":"5b17df08-50ae-4182-a7c5-8111d16ee071","parent":"bc225200-1904-4857-9cf4-e6b472493df8"}}
+    GATE r5 K1 guardView(keys per connector_id in tenant) {"api-key":1,"NULL":2,"empty":1} | A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":4} | after {"aDoc":"[erased]","src":"B payroll 2026.pdf","bv":"[erased]","nv":"[erased]","bvChild":"[erased]"} | Bname=Org K1B ebb5b99c BkeyNull=true BkeyEmpty=true NkeyNull=true
+    GATE r5 C1 403 {"code":"FORBIDDEN","message":"the request names an organisation or key outside this connector's Organisation"} diff=[] {"a":"C1 A.pdf","broot":"C1 B root.pdf","Aname":"Org C1A ebb5b99c","Akey":true,"Bkey":true}
+    GATE r5 C2 [{"active":true,"status":403,"diff":[],"a":"C2 A.pdf"},{"active":false,"status":403,"diff":[],"a":"C2 A.pdf"}]
+    GATE r5 C3 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} diff=["documents","organizations","svc_api_keys"] {"a":"[erased]","key":false,"old":false,"sib":true,"odd":true}
+    GATE r5 C4 [{"k":"upper","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root upper.pdf","bIssuedClaimsA":"C4 B claims A exact upper.pdf"},{"k":"lead","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root lead.pdf","bIssuedClaimsA":"C4 B claims A exact lead.pdf"},{"k":"trail","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root trail.pdf","bIssuedClaimsA":"C4 B claims A exact trail.pdf"},{"k":"tab","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root tab.pdf","bIssuedClaimsA":"C4 B claims A exact tab.pdf"},{"k":"zw","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root zw.pdf","bIssuedClaimsA":"C4 B claims A exact zw.pdf"},{"k":"nfd","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root nfd.pdf","bIssuedClaimsA":"C4 B claims A exact nfd.pdf"},{"k":"ext","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root ext.pdf","bIssuedClaimsA":"C4 B claims A exact ext.pdf"},{"k":"prefix","status":200,"blanked":1,"a":"[erased]","broot":"C4 B root prefix.pdf","bIssuedClaimsA":"C4 B claims A exact prefix.pdf"}]
+    GATE r5 C5 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} {"broot":"[erased]","bsrc":"C5 B issued.pdf","bder":"[erased]","Bname":"Org C5B ebb5b99c"}
+    GATE r5 C6 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} {"a":"[erased]","t2":"C6 T2 root.pdf","k2":true}
+    GATE r5 R1 N=150000 count-running (count still running after the insert committed) insertedAtMs=4 | A 500 ms=25233 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} | Bdoc=R1 B root (minted in window).pdf Bkey=true
+    GATE r5 P8 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} Bname=[erased] Bdoc=[erased] forgedKey=false BrealKey=true
+  GATE r5 1497 attack (secuura_app, MT=true)
+    ✓ SETUP - product role and tenancy branch (7 ms)
+    ✕ K1 - "api-key" collapse: A's key carries connector_id 'api-key'; B's (and an org-less) key carry NULL / '' -> same principal. Does the guard see the collision? (1302 ms)
+    ✓ C1 - another organisation's key carries A's connector id: 403, and the database is byte-identical afterwards (89 ms)
+    ✓ C2 - an ORG-LESS key carries A's connector id (active, then the same with it inactive): 403 both, nothing written (73 ms)
+    ✓ C3 - same-organisation rotation (older inactive key, a sibling active key, a key whose organization_id is stored " UPPER\t"): 200 completed; snapshot DOES change (control) (36 ms)
+    ✓ C4 - spellings of the connector id on B's key (and on B's documents): case, lead/trail space, TAB, zero-width, NFD vs NFC, prefix-extended (146 ms)
+    ✓ C5 - deleted-key reuse: B's key X made B's NULL-issuer connector documents; B's key row is DELETED; A gets a key X; A erases (18 ms)
+    ✓ C6 - same connector id in ANOTHER tenant: not a collision (200) and the other tenant's documents are untouched (20 ms)
+    ✓ R1 - a key (and its document) minted between the guard read and the blanking UPDATE (28186 ms)
+    ✓ P8 - path 1 still open: a key minted FOR org B with a unique forged connector id erases B (322 ms)
+  ● GATE r5 1497 attack (secuura_app, MT=true) › K1 - "api-key" collapse: A's key carries connector_id 'api-key'; B's (and an org-less) key carry NULL / '' -> same principal. Does the guard see the collision?
+Tests:       1 failed, 9 passed, 10 total
+######## r5R1_false
+    GATE r5 role {"who":"secuura_app","su":false,"bp":false} MT=false poolBranch=false
+    GATE r5 R1 N=150000 count-running (count still running after the insert committed) insertedAtMs=40 | A 200 ms=5163 {"status":"completed","alreadyErased":false,"documentsBlanked":150001} | Bdoc=[erased] Bkey=true
+  GATE r5 1497 attack (secuura_app, MT=false)
+    ✓ SETUP - product role and tenancy branch (11 ms)
+    ✓ R1 - a key (and its document) minted between the guard read and the blanking UPDATE (8735 ms)
+Tests:       8 skipped, 2 passed, 10 total
+######## r5R1_true
+    GATE r5 role {"who":"secuura_app","su":false,"bp":false} MT=true poolBranch=true
+    GATE r5 R1 N=150000 count-running (count still running after the insert committed) insertedAtMs=19 | A 503 ms=156 {"code":"ORGANISATION_TOO_LARGE","message":"This organisation is too large to erase in one synchronous request. Nothing was erased."} | Bdoc=R1 B root (minted in window).pdf Bkey=true
+  GATE r5 1497 attack (secuura_app, MT=true)
+    ✓ SETUP - product role and tenancy branch (7 ms)
+    ✓ R1 - a key (and its document) minted between the guard read and the blanking UPDATE (3847 ms)
+Tests:       8 skipped, 2 passed, 10 total
+######## r5R1b_false
+    GATE r5 role {"who":"secuura_app","su":false,"bp":false} MT=false poolBranch=false
+    GATE r5 R1 N=100000 count-running (count still running after the insert committed) insertedAtMs=27 | A 200 ms=2959 {"status":"completed","alreadyErased":false,"documentsBlanked":100001} | Bdoc=[erased] Bkey=true
+  GATE r5 1497 attack (secuura_app, MT=false)
+    ✓ SETUP - product role and tenancy branch (9 ms)
+    ✓ R1 - a key (and its document) minted between the guard read and the blanking UPDATE (5726 ms)
+Tests:       8 skipped, 2 passed, 10 total
+######## r5R1b_true
+    GATE r5 role {"who":"secuura_app","su":false,"bp":false} MT=true poolBranch=true
+    GATE r5 R1 N=100000 count-running (count still running after the insert committed) insertedAtMs=20 | A 200 ms=3454 {"status":"completed","alreadyErased":false,"documentsBlanked":100001} | Bdoc=[erased] Bkey=true
+  GATE r5 1497 attack (secuura_app, MT=true)
+    ✓ SETUP - product role and tenancy branch (6 ms)
+    ✓ R1 - a key (and its document) minted between the guard read and the blanking UPDATE (5842 ms)
+Tests:       8 skipped, 2 passed, 10 total
+######## r5N3_false
+    GATE r5 role {"who":"secuura_app","su":false,"bp":false} MT=false poolBranch=false
+    GATE r5 N3 statuses 201,201,201 before {"src":{"id":"d99c0952-ab96-48aa-bb92-cfbb8a981907","title":"A board minutes 2026.pdf","iss":"9ea7d362-43a3-47f9-a035-76ed91959ed4","vb":null,"parent":null},"apiDocumentUuidIsPkey":true,"vExt":{"id":"52eb033c-5fd7-4828-92e0-b79d1ab812ac","title":"A board minutes 2026.pdf (watermarked)","iss":null,"vb":"connector:platform-s:5374e99d-4953-41e7-a805-eb4bcc0ecf82","parent":"d99c0952-ab96-48aa-bb92-cfbb8a981907","metaParent":"doc-1791829952842-4f47d4aa"},"vUuid":{"id":"cc79cc40-490f-4cbe-9ecc-fe6d28dbe63c","title":"A board minutes 2026.pdf (watermarked)","iss":null,"vb":"connector:platform-s:5374e99d-4953-41e7-a805-eb4bcc0ecf82","parent":null,"metaParent":"d99c0952-ab96-48aa-bb92-cfbb8a981907"}} | A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":3} | after {"src":"[erased]","vExt":"[erased]","vUuid":"[erased]"}
+  GATE r5 1497 attack (secuura_app, MT=false)
+    ✓ SETUP - product role and tenancy branch (8 ms)
+    ✓ N3 - a server-set versionedById on a ROOT row: /version addressed by documentUuid (1126 ms)
+Tests:       9 skipped, 2 passed, 11 total
+######## r5N3_true
+    GATE r5 role {"who":"secuura_app","su":false,"bp":false} MT=true poolBranch=true
+    GATE r5 N3 statuses 201,201,201 before {"src":{"id":"e3f03c90-4511-4cfb-a065-840c91b016d0","title":"A board minutes 2026.pdf","iss":"45092b9e-9bdf-43f2-9c77-8dc8fd8eb311","vb":null,"parent":null},"apiDocumentUuidIsPkey":true,"vExt":{"id":"b86aae5b-90c6-40dc-822b-c3b5b0efcd36","title":"A board minutes 2026.pdf (watermarked)","iss":null,"vb":"connector:platform-s:4d5b5448-886d-4e71-88b4-56ce2f4c6449","parent":"e3f03c90-4511-4cfb-a065-840c91b016d0","metaParent":"doc-1791829956286-5fe00efb"},"vUuid":{"id":"cd19801e-546a-4209-a909-9aad5a1a57f3","title":"A board minutes 2026.pdf (watermarked)","iss":null,"vb":"connector:platform-s:4d5b5448-886d-4e71-88b4-56ce2f4c6449","parent":null,"metaParent":"e3f03c90-4511-4cfb-a065-840c91b016d0"}} | A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":3} | after {"src":"[erased]","vExt":"[erased]","vUuid":"[erased]"}
+  GATE r5 1497 attack (secuura_app, MT=true)
+    ✓ SETUP - product role and tenancy branch (6 ms)
+    ✓ N3 - a server-set versionedById on a ROOT row: /version addressed by documentUuid (1104 ms)
+Tests:       9 skipped, 2 passed, 11 total
+######## r4file_false
+    GATE r4 role {"who":"secuura_app","su":false,"bp":false} MT=false poolBranch=false
+    GATE r4 P1 [{"r":-5,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25007.8,"consistent":true},{"r":0,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25002.3,"consistent":true},{"r":0.3,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25002,"consistent":true},{"r":1,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25001.3,"consistent":true},{"r":2,"outcome":" Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout`","spentAtReturnMs":25107.2,"consistent":true},{"r":5,"outcome":" Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout`","spentAtReturnMs":25007,"consistent":true},{"r":10,"outcome":" Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout`","spentAtReturnMs":25016.4,"consistent":true},{"r":20,"outcome":"completed","spentAtReturnMs":24997.7,"consistent":true},{"r":50,"outcome":"completed","spentAtReturnMs":24961.3,"consistent":true},{"r":100,"outcome":"completed","spentAtReturnMs":24909.3,"consistent":true},{"r":400,"outcome":"completed","spentAtReturnMs":24608.8,"consistent":true}]
+    GATE r4 P1b nowCalls=1 ms=16  Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout` {"name":"Org P1B 1eec981b","title":"P1B.pdf","key":true}
+    GATE r4 P5a ms=2006  Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout` mid={"name":"Org P5A 1eec981b","title":"P5A.pdf","key":true,"child":"P5A human child.pdf"} | retry 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} | third 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} final={"name":"[erased]","title":"[erased]","key":false} child=[erased]
+    GATE r4 P5b 500 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"Org P5B 1eec981b","title":"P5B.pdf","key":true}
+    GATE r4 P5c 500 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"Org P5C 1eec981b","title":"P5C.pdf","key":true}
+    GATE r4 P5d ms=2505 completed {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 P5e ms=2537 completed {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 P5f ms=2410 erase-connector: the request outlived its 2000 ms budget; rolled back, not committed {"name":"Org P5F 1eec981b","title":"P5F.pdf","key":true}
+    GATE r4 P4 200 {"status":"completed","alreadyErased":false,"documentsBlanked":4} {"a":"ERASED","bConn":"kept","bHuman":"ERASED","bIssued":"kept","bConn_humanChild":"kept","bHuman_connChild":"kept","bHuman_humanChild":"ERASED","bHuman_bIssuedChild":"kept","bIssued_humanChild":"kept","aConnOfB":"ERASED"} Bname=Org P4B 1eec981b Bkey=true
+    GATE r4 P6 403 {"code":"FORBIDDEN","message":"the request names an organisation or key outside this connector's Organisation"} {"a":"A issued.pdf","bRoot":"B connector root, unissued.pdf","bOwn":"B issued.pdf","bDerivOfOwn":"B connector derivative of B doc.pdf","bDerivOfA":"B connector derivative of A doc.pdf"} Bname=Org P6B 1eec981b Bkey=true
+    GATE r4 P8 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} Bname=[erased] Bdoc=[erased] forgedKey=false BrealKey=true
+    GATE r4 P7 erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written {"name":"Org P7 1eec981b","title":"P7.pdf","key":true}
+  GATE r4 1497 attack (secuura_app, MT=false)
+    ✓ SETUP - product role and tenancy branch (16 ms)
+    ✓ P1 - production budget nearly spent (remaining -5 .. 400 ms at the call): every outcome is either a full commit INSIDE the budget or nothing written (262 ms)
+    ✓ P1b - remaining forced into (0,1) ms (performance.now stubbed for the remaining-budget read only) while another session holds the organisation row: the 1 ms floor cancels the lock wait; a 0 (= no limit) would wait and then commit (2233 ms)
+    ✓ P5a - the REVOKE (last write) is cancelled by statement_timeout: names/titles roll back, key active; the retry completes; the third call is alreadyErased (2058 ms)
+    ✓ P5b - an error AFTER the revoke (AFTER UPDATE trigger on the key raises): nothing written, key active (11 ms)
+    ✓ P5c - the COMMIT itself fails (deferred constraint trigger raises at commit): 500, nothing written, key active (9 ms)
+    ✓ P5d - COMMIT-time work longer than the remaining budget (deferred trigger sleeps 2.5 s at commit, budget 2 s): is it committed after the budget? (2517 ms)
+    ✓ P5e - COMMIT-time work INSIDE statement_timeout but past the budget (statements 1.0 s, deferred 1.5 s, budget 2 s): recorded (3550 ms)
+    ✓ P5f - time spent IN the revoke counts: docs 1.2 s + revoke 1.2 s against a 2 s budget (each statement inside statement_timeout) is ROLLED BACK, key active (2415 ms)
+    ✓ P4 - A erases while B's connector derivative, B's human derivative, a B-issued derivative and their own children coexist under A's document (16 ms)
+    ✕ P6 - two organisations whose keys SHARE one connector_id (the DB allows it; the security mint takes any string): what does A's erasure reach of B's? (8 ms)
+    ✓ P8 - the originate half of the forged-key path: a key row for org B with an ARBITRARY connector_id (what an org-scoped admin of ANOTHER org can mint through /api/security/keys) erases B in full; B's own provisioned connector key stays active (7 ms)
+    ✓ P7 -a request that SPENT its budget is refused with nothing written even when the org row is free and the key is valid (route-level refusal wording is logged, the answer is a 5xx, never 200) (3 ms)
+  ● GATE r4 1497 attack (secuura_app, MT=false) › P6 - two organisations whose keys SHARE one connector_id (the DB allows it; the security mint takes any string): what does A's erasure reach of B's?
+      281 |     console.log('GATE r4 P6', r.status, JSON.stringify(r.j?.data ?? r.j?.error), JSON.stringify(after), 'Bname=' + (await orgName(B)), 'Bkey=' + (await keyActive(B)));
+Tests:       1 failed, 4 skipped, 12 passed, 17 total
+######## r4file_true
+    GATE r4 role {"who":"secuura_app","su":false,"bp":false} MT=true poolBranch=true
+    GATE r4 P1 [{"r":-5,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25005.9,"consistent":true},{"r":0,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25000.4,"consistent":true},{"r":0.3,"outcome":"canceling statement due to statement timeout","spentAtReturnMs":25003.9,"consistent":true},{"r":1,"outcome":"erase-connector: the request outlived its 25000 ms budget; rolled back, not committed","spentAtReturnMs":25001.6,"consistent":true},{"r":2,"outcome":"completed","spentAtReturnMs":25000.4,"consistent":true},{"r":5,"outcome":"completed","spentAtReturnMs":24997.6,"consistent":true},{"r":10,"outcome":"completed","spentAtReturnMs":24992.4,"consistent":true},{"r":20,"outcome":"completed","spentAtReturnMs":24982.1,"consistent":true},{"r":50,"outcome":"completed","spentAtReturnMs":24951.9,"consistent":true},{"r":100,"outcome":"completed","spentAtReturnMs":24902.2,"consistent":true},{"r":400,"outcome":"completed","spentAtReturnMs":24602.4,"consistent":true}]
+    GATE r4 P1b nowCalls=1 ms=12 canceling statement due to statement timeout {"name":"Org P1B 6e18af22","title":"P1B.pdf","key":true}
+    GATE r4 P5a ms=2002 canceling statement due to statement timeout mid={"name":"Org P5A 6e18af22","title":"P5A.pdf","key":true,"child":"P5A human child.pdf"} | retry 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} | third 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} final={"name":"[erased]","title":"[erased]","key":false} child=[erased]
+    GATE r4 P5b 500 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"Org P5B 6e18af22","title":"P5B.pdf","key":true}
+    GATE r4 P5c 500 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"Org P5C 6e18af22","title":"P5C.pdf","key":true}
+    GATE r4 P5d ms=2505 completed {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 P5e ms=2507 completed {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 P5f ms=2407 erase-connector: the request outlived its 2000 ms budget; rolled back, not committed {"name":"Org P5F 6e18af22","title":"P5F.pdf","key":true}
+    GATE r4 P4 200 {"status":"completed","alreadyErased":false,"documentsBlanked":4} {"a":"ERASED","bConn":"kept","bHuman":"ERASED","bIssued":"kept","bConn_humanChild":"kept","bHuman_connChild":"kept","bHuman_humanChild":"ERASED","bHuman_bIssuedChild":"kept","bIssued_humanChild":"kept","aConnOfB":"ERASED"} Bname=Org P4B 6e18af22 Bkey=true
+    GATE r4 P6 403 {"code":"FORBIDDEN","message":"the request names an organisation or key outside this connector's Organisation"} {"a":"A issued.pdf","bRoot":"B connector root, unissued.pdf","bOwn":"B issued.pdf","bDerivOfOwn":"B connector derivative of B doc.pdf","bDerivOfA":"B connector derivative of A doc.pdf"} Bname=Org P6B 6e18af22 Bkey=true
+    GATE r4 P8 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} Bname=[erased] Bdoc=[erased] forgedKey=false BrealKey=true
+    GATE r4 P7 erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written {"name":"Org P7 6e18af22","title":"P7.pdf","key":true}
+  GATE r4 1497 attack (secuura_app, MT=true)
+    ✓ SETUP - product role and tenancy branch (7 ms)
+    ✓ P1 - production budget nearly spent (remaining -5 .. 400 ms at the call): every outcome is either a full commit INSIDE the budget or nothing written (43 ms)
+    ✓ P1b - remaining forced into (0,1) ms (performance.now stubbed for the remaining-budget read only) while another session holds the organisation row: the 1 ms floor cancels the lock wait; a 0 (= no limit) would wait and then commit (2220 ms)
+    ✓ P5a - the REVOKE (last write) is cancelled by statement_timeout: names/titles roll back, key active; the retry completes; the third call is alreadyErased (2040 ms)
+    ✓ P5b - an error AFTER the revoke (AFTER UPDATE trigger on the key raises): nothing written, key active (8 ms)
+    ✓ P5c - the COMMIT itself fails (deferred constraint trigger raises at commit): 500, nothing written, key active (8 ms)
+    ✓ P5d - COMMIT-time work longer than the remaining budget (deferred trigger sleeps 2.5 s at commit, budget 2 s): is it committed after the budget? (2509 ms)
+    ✓ P5e - COMMIT-time work INSIDE statement_timeout but past the budget (statements 1.0 s, deferred 1.5 s, budget 2 s): recorded (2512 ms)
+    ✓ P5f - time spent IN the revoke counts: docs 1.2 s + revoke 1.2 s against a 2 s budget (each statement inside statement_timeout) is ROLLED BACK, key active (2412 ms)
+    ✓ P4 - A erases while B's connector derivative, B's human derivative, a B-issued derivative and their own children coexist under A's document (13 ms)
+    ✕ P6 - two organisations whose keys SHARE one connector_id (the DB allows it; the security mint takes any string): what does A's erasure reach of B's? (7 ms)
+    ✓ P8 - the originate half of the forged-key path: a key row for org B with an ARBITRARY connector_id (what an org-scoped admin of ANOTHER org can mint through /api/security/keys) erases B in full; B's own provisioned connector key stays active (5 ms)
+    ✓ P7 -a request that SPENT its budget is refused with nothing written even when the org row is free and the key is valid (route-level refusal wording is logged, the answer is a 5xx, never 200) (2 ms)
+  ● GATE r4 1497 attack (secuura_app, MT=true) › P6 - two organisations whose keys SHARE one connector_id (the DB allows it; the security mint takes any string): what does A's erasure reach of B's?
+      281 |     console.log('GATE r4 P6', r.status, JSON.stringify(r.j?.data ?? r.j?.error), JSON.stringify(after), 'Bname=' + (await orgName(B)), 'Bkey=' + (await keyActive(B)));
+Tests:       1 failed, 4 skipped, 12 passed, 17 total

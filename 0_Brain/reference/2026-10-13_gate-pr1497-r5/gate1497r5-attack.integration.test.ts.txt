@@ -1,0 +1,318 @@
+/** QA GATE r5 PR #1497 (scratch, never committed). Head dc488c46 (develop 425ad3e0 merged in). Real Postgres as secuura_app, real routes. */
+import { randomUUID, randomBytes } from 'crypto';
+import { Client } from 'pg';
+
+const SUPER_DB = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+const APP_DB = process.env.TEST_APP_DATABASE_URL;
+const MT = process.env.MULTI_TENANCY_ENABLED === 'true';
+const PLATFORM_DB = process.env.TEST_PLATFORM_DATABASE_URL || process.env.PLATFORM_DATABASE_URL;
+if (PLATFORM_DB) process.env.PLATFORM_DATABASE_URL = PLATFORM_DB;
+if (SUPER_DB) process.env.DATABASE_URL = APP_DB || SUPER_DB;
+process.env.SIMULATE_ANCHORING = 'true';
+process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
+process.env.AUTH_SERVICE_URL = 'http://gate-auth.invalid';
+process.env.PII_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+process.env.PII_LOOKUP_HMAC_KEY = randomBytes(32).toString('hex');
+const ONLY = process.env.GATE_ONLY || '';
+const cell = (name: string) => (!ONLY || ONLY.split(',').some((p) => name.startsWith(p)) ? it : it.skip);
+
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const u = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
+      if (Object.keys(u).length > 0) { req._secuuraUser = u; req.user = u; }
+      next();
+    },
+  };
+});
+
+const RUN = randomUUID().slice(0, 8);
+const T = randomUUID();
+const T2 = randomUUID();
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+interface Org { tag: string; id: string; guid: string; conn: string | null; key: string }
+
+describe('GATE r5 1497 attack (' + (APP_DB ? 'secuura_app' : 'superuser') + ', MT=' + String(MT) + ')', () => {
+  let sql: Client; let server: any; let base = ''; let disconnect: () => Promise<void>; let db: any;
+  let n = 0;
+  /** an organisation and ONE key for it; conn === null stores a NULL connector_id; orgOverride stores a different organization_id text */
+  const mkOrg = async (tag: string): Promise<Org> => {
+    const o: Org = { tag, id: randomUUID(), guid: randomUUID(), conn: null, key: '' };
+    await sql.query(`INSERT INTO organizations (id,name,slug,type,status,tenant_id,metadata) VALUES ($1,$2,$3,'issuer','active',$4,$5::jsonb)`,
+      [o.id, 'Org ' + tag + ' ' + RUN, 'g97r5-' + tag.toLowerCase() + '-' + RUN, T, JSON.stringify({ externalRef: o.guid })]);
+    return o;
+  };
+  const mkKey = async (orgIdText: string | null, conn: string | null, active = true, tenant = T) => {
+    const id = 'g97r5-k' + (n++) + '-' + RUN;
+    await sql.query(`INSERT INTO svc_api_keys (id,organization_id,name,key_hash,key_prefix,connector_id,tenant_id,is_active) VALUES ($1,$2,'k','h'||$1,'sk_x',$3,$4,$5)`,
+      [id, orgIdText, conn, tenant, active]);
+    return id;
+  };
+  const mk = async (tag: string, conn: string | null): Promise<Org> => {
+    const o = await mkOrg(tag); o.conn = conn; o.key = await mkKey(o.id, conn); return o;
+  };
+  /** the principal the gateway / auth would build for this key: userId = `connector:${connectorId || 'api-key'}` (api-gateway auth.ts:392, auth jwt.ts:289) */
+  const asConn = (o: Org, orgless = false) => ({ userId: 'connector:' + (o.conn || 'api-key'), role: 'connector', tenantId: T, ...(orgless ? {} : { organizationId: o.id }), scopes: ['documents:write', 'documents:read'] });
+  const call = async (who: object, path: string, body: object) => {
+    const t0 = Date.now();
+    const res = await fetch(base + path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(who) }, body: JSON.stringify(body) });
+    const j: any = await res.json().catch(() => null);
+    return { status: res.status, j, ms: Date.now() - t0, id: j?.document?.id ?? j?.id ?? j?.data?.id ?? null };
+  };
+  const erase = (o: Org, keyId = o.key) => call(asConn(o), '/api/platform/organizations/erase-connector', { externalRef: o.guid, keyId });
+  const title = async (id: string) => (await sql.query('SELECT title FROM documents WHERE id::text = $1 OR external_id = $1', [id])).rows[0]?.title;
+  const docRow = async (ext: string) => (await sql.query(`SELECT id::text, title, issuer_organization_id::text AS iss, metadata->>'versionedById' AS vb, parent_document_id::text AS parent FROM documents WHERE external_id = $1`, [ext])).rows[0];
+  const orgName = async (o: Org) => (await sql.query('SELECT name FROM organizations WHERE id = $1', [o.id])).rows[0].name;
+  const keyActive = async (k: string) => (await sql.query('SELECT is_active FROM svc_api_keys WHERE id = $1', [k])).rows[0]?.is_active;
+  const ins = async (t: string, issuer: string | null, meta: object, parent: string | null, tenant = T) => {
+    const id = randomUUID();
+    await sql.query(`INSERT INTO documents (id,external_id,tenant_id,title,description,document_type,content_hash,status,issuer_organization_id,metadata,parent_document_id,created_at,updated_at)
+                     VALUES ($1,$2,$3,$4,$5,'DOCUMENT',$6,'anchored',$7,$8::jsonb,$9,NOW(),NOW())`,
+      [id, 'g97r5-' + id.slice(0, 8), tenant, t, 'desc ' + t, 'c'.repeat(64), issuer, JSON.stringify({ title: t, description: 'desc ' + t, ...meta }), parent]);
+    return id;
+  };
+  /** whole-database fingerprint: md5 of every row of the three written tables in BOTH tenants, plus a row count of EVERY public table */
+  const snapshot = async () => {
+    const out: Record<string, string> = {};
+    for (const t of ['documents', 'organizations', 'svc_api_keys']) {
+      out[t] = (await sql.query(`SELECT count(*)::text || ':' || coalesce(md5(string_agg(x::text, '|' ORDER BY x::text)), '-') AS h FROM ${t} x WHERE tenant_id IN ($1::uuid, $2::uuid)`, [T, T2])).rows[0].h;
+    }
+    const tabs = (await sql.query(`SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY 1`)).rows.map((r: any) => r.tablename);
+    const counts: string[] = [];
+    for (const t of tabs) counts.push(t + '=' + (await sql.query(`SELECT count(*)::int AS c FROM "${t}"`)).rows[0].c);
+    out.allTableCounts = counts.join(',');
+    return out;
+  };
+  const diffSnap = (a: Record<string, string>, b: Record<string, string>) => {
+    const d: string[] = [];
+    for (const k of Object.keys(a)) if (a[k] !== b[k]) {
+      if (k === 'allTableCounts') { const A = a[k].split(','), B = b[k].split(','); A.forEach((x, i) => { if (x !== B[i]) d.push(x + '->' + B[i]); }); } else d.push(k);
+    }
+    return d;
+  };
+  const shared = async (conn: string) => (await sql.query(`SELECT id, organization_id, connector_id, is_active FROM svc_api_keys WHERE tenant_id=$1 AND connector_id IS NOT DISTINCT FROM $2`, [T, conn])).rows.length;
+
+  beforeAll(async () => {
+    require('@secuura/shared').initFromEnv?.();
+    db = require('../db'); await db.initDb(); disconnect = db.disconnectDb;
+    sql = new Client({ connectionString: SUPER_DB }); await sql.connect();
+    for (const t of [T, T2]) await sql.query(`INSERT INTO tenants (id,name,slug,status,created_at,updated_at) VALUES ($1,$2,$3,'active',NOW(),NOW())`, [t, 'g97r5-' + t.slice(0, 8), 'g97r5-' + t.slice(0, 8)]);
+    if (MT) { const m = db.getTenantManager(); if (m?.refreshConfigs) await m.refreshConfigs(); if (m?.getTenantStatus && m.getTenantStatus(T) === undefined) throw new Error('MT tenant not loaded'); }
+    const express = require('express');
+    const { documentsRouter } = require('../routes/documents');
+    const { platformOrganizationsRouter } = require('../routes/platformOrganizations');
+    const { tenantGucContext } = require('@secuura/shared');
+    const app = express();
+    app.use((req: any, _res: unknown, next: () => void) => { const u = JSON.parse(String(req.headers['x-probe-user'] || '{}')); req.user = u; req.tenantId = u.tenantId || undefined; next(); });
+    app.use(tenantGucContext());
+    app.use((req: any, _res: unknown, next: () => void) => { req.db = db.getRequestPrisma(req); next(); });
+    app.use('/api/documents', express.json(), documentsRouter);
+    app.use('/api/platform/organizations', express.json(), platformOrganizationsRouter);
+    await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
+    base = 'http://127.0.0.1:' + server.address().port;
+  }, 60000);
+
+  afterAll(async () => {
+    if (server) await new Promise<void>((r) => server.close(() => r()));
+    for (const t of [T, T2]) {
+      await sql.query('DELETE FROM action_provenance WHERE tenant_id=$1', [t]).catch(() => undefined);
+      await sql.query('UPDATE documents SET parent_document_id=NULL WHERE tenant_id=$1', [t]).catch(() => undefined);
+      for (const x of ['documents', 'svc_api_keys', 'organizations']) await sql.query(`DELETE FROM ${x} WHERE tenant_id=$1`, [t]).catch(() => undefined);
+      await sql.query('DELETE FROM tenants WHERE id=$1', [t]).catch(() => undefined);
+    }
+    await sql.end().catch(() => undefined); if (disconnect) await disconnect().catch(() => undefined);
+  }, 120000);
+
+  it('SETUP - product role and tenancy branch', async () => {
+    const row = await db.withTenant(T, async (tx: any) => (await tx.$queryRaw`SELECT current_user AS who, r.rolsuper AS su, r.rolbypassrls AS bp FROM pg_roles r WHERE r.rolname = current_user`)[0]);
+    console.log('GATE r5 role', JSON.stringify(row), 'MT=' + MT, 'poolBranch=' + Boolean(MT && db.getTenantManager?.()));
+    if (APP_DB) expect([row.su, row.bp]).toEqual([false, false]);
+  });
+
+  // FAIL condition: A's erasure answers 200 and B's connector derivative (made through the REAL /version route by B's key whose
+  // connector_id is NULL, so its principal is `connector:api-key`) is '[erased]'. PASS: a 403 with nothing written, or B's rows kept.
+  cell('K1')('K1 - "api-key" collapse: A\'s key carries connector_id \'api-key\'; B\'s (and an org-less) key carry NULL / \'\' -> same principal. Does the guard see the collision?', async () => {
+    const A = await mk('K1A', 'api-key');
+    const B = await mk('K1B', null);
+    const Bempty = await mkKey(B.id, '');            // a key minted with connectorId '' (z.string() accepts it)
+    const N: Org = { tag: 'K1N', id: '', guid: '', conn: null, key: await mkKey(null, null) }; // org-less, NULL connector id
+    // B's connector creates its own issued document, then versions it (NULL-issuer derivative, versionedById = 'connector:api-key')
+    const src = await call(asConn(B), '/api/documents', { type: 'DOCUMENT', organizationUuid: B.guid, contentHash: randomBytes(32).toString('hex'), data: { title: 'B payroll 2026.pdf' } });
+    await sleep(300);
+    const bv = await call(asConn(B), `/api/documents/${src.id}/version`, { action: 'watermark', newContentHash: randomBytes(32).toString('hex') });
+    await sleep(300);
+    const nv = await call(asConn(N, true), `/api/documents/${src.id}/version`, { action: 'watermark', newContentHash: randomBytes(32).toString('hex') });
+    await sleep(300);
+    const bvChild = bv.id ? await call({ userId: randomUUID(), role: 'ISSUER_ADMIN', tenantId: T, organizationId: B.id, scopes: ['documents:write', 'documents:read'] }, `/api/documents/${bv.id}/version`, { action: 'watermark', newContentHash: randomBytes(32).toString('hex') }) : { status: 0, id: null } as any;
+    await sleep(300);
+    const aDoc = await ins('A own.pdf', A.id, {}, null);
+    const before: any = { src: await docRow(src.id), bv: await docRow(bv.id), nv: nv.id ? await docRow(nv.id) : null, bvChild: bvChild.id ? await docRow(bvChild.id) : null };
+    const guardView = { 'api-key': await shared('api-key'), NULL: await shared(null as any), empty: await shared('') };
+    const r = await erase(A);
+    const after = { aDoc: await title(aDoc), src: await title(src.id), bv: await title(bv.id), nv: nv.id ? await title(nv.id) : null, bvChild: bvChild.id ? await title(bvChild.id) : null };
+    console.log('GATE r5 K1 statuses', [src.status, bv.status, nv.status, bvChild.status].join(','), 'before', JSON.stringify(before));
+    console.log('GATE r5 K1 guardView(keys per connector_id in tenant)', JSON.stringify(guardView), '| A erase', r.status, JSON.stringify(r.j?.data ?? r.j?.error), '| after', JSON.stringify(after),
+      '| Bname=' + (await orgName(B)), 'BkeyNull=' + (await keyActive(B.key)), 'BkeyEmpty=' + (await keyActive(Bempty)), 'NkeyNull=' + (await keyActive(N.key)));
+    expect([src.status, bv.status, nv.status]).toEqual([201, 201, 201]);
+    expect(before.bv.vb).toBe('connector:api-key');
+    // the gate's oracle: another organisation's connector derivative must survive (published N2) or the request must be refused
+    expect({ status: r.status, bv: after.bv, nv: after.nv }).toEqual(r.status === 403 ? { status: 403, bv: before.bv.title, nv: before.nv?.title } : { status: 200, bv: before.bv.title, nv: before.nv?.title });
+  }, 60000);
+
+  // FAIL condition: 200, or any row / table count differs after the 403.
+  cell('C1')('C1 - another organisation\'s key carries A\'s connector id: 403, and the database is byte-identical afterwards', async () => {
+    const A = await mk('C1A', 'platform-s:' + randomUUID());
+    const B = await mk('C1B', A.conn);
+    const a = await ins('C1 A.pdf', A.id, {}, null);
+    const broot = await ins('C1 B root.pdf', null, { versionedById: 'connector:' + A.conn }, null);
+    const s0 = await snapshot();
+    const r = await erase(A);
+    const s1 = await snapshot();
+    console.log('GATE r5 C1', r.status, JSON.stringify(r.j?.error ?? r.j?.data), 'diff=' + JSON.stringify(diffSnap(s0, s1)), JSON.stringify({ a: await title(a), broot: await title(broot), Aname: await orgName(A), Akey: await keyActive(A.key), Bkey: await keyActive(B.key) }));
+    expect(r.status).toBe(403);
+    expect(diffSnap(s0, s1)).toEqual([]);
+  }, 60000);
+
+  cell('C2')('C2 - an ORG-LESS key carries A\'s connector id (active, then the same with it inactive): 403 both, nothing written', async () => {
+    const out: any[] = [];
+    for (const active of [true, false]) {
+      const A = await mk('C2A' + active, 'platform-s:' + randomUUID());
+      await mkKey(null, A.conn, active);
+      const a = await ins('C2 A.pdf', A.id, {}, null);
+      const s0 = await snapshot(); const r = await erase(A); const s1 = await snapshot();
+      out.push({ active, status: r.status, diff: diffSnap(s0, s1), a: await title(a) });
+    }
+    console.log('GATE r5 C2', JSON.stringify(out));
+    for (const x of out) expect([x.status, x.diff]).toEqual([403, []]);
+  }, 60000);
+
+  // FAIL condition: a 403 (or anything but 200 completed) for a same-organisation rotation; or a snapshot that does NOT change (control on the snapshot).
+  cell('C3')('C3 - same-organisation rotation (older inactive key, a sibling active key, a key whose organization_id is stored " UPPER\\t"): 200 completed; snapshot DOES change (control)', async () => {
+    const A = await mk('C3A', 'platform-s:' + randomUUID());
+    const old = await mkKey(A.id, A.conn, false);
+    const sib = await mkKey(A.id, A.conn, true);
+    const odd = await mkKey(' ' + A.id.toUpperCase() + '\t', A.conn, true);
+    const a = await ins('C3 A.pdf', A.id, {}, null);
+    const s0 = await snapshot(); const r = await erase(A); const s1 = await snapshot();
+    console.log('GATE r5 C3', r.status, JSON.stringify(r.j?.data ?? r.j?.error), 'diff=' + JSON.stringify(diffSnap(s0, s1)), JSON.stringify({ a: await title(a), key: await keyActive(A.key), old: await keyActive(old), sib: await keyActive(sib), odd: await keyActive(odd) }));
+    expect([r.status, r.j?.data?.status, r.j?.data?.documentsBlanked]).toEqual([200, 'completed', 1]);
+    expect(diffSnap(s0, s1).length).toBeGreaterThan(0);
+  }, 60000);
+
+  // FAIL condition: B's NULL-issuer root carrying the VARIANT spelling is erased by A (selector looser than the guard).
+  cell('C4')('C4 - spellings of the connector id on B\'s key (and on B\'s documents): case, lead/trail space, TAB, zero-width, NFD vs NFC, prefix-extended', async () => {
+    const out: any[] = [];
+    const g = randomUUID();
+    const base = 'platform-s:café-' + g;
+    const variants: Record<string, string> = {
+      upper: base.toUpperCase(), lead: ' ' + base, trail: base + ' ', tab: base + '\t', zw: base + '​', nfd: base.normalize('NFD'), ext: base + ':x', prefix: base.slice(0, -1),
+    };
+    for (const [k, v] of Object.entries(variants)) {
+      await sql.query('DELETE FROM svc_api_keys WHERE tenant_id=$1 AND connector_id LIKE $2', [T, '%caf%' + g.slice(0, 8) + '%']).catch(() => undefined);
+      const A = await mk('C4A' + k, base);
+      const B = await mk('C4B' + k, v);
+      const a = await ins('C4 A ' + k + '.pdf', A.id, {}, null);
+      const broot = await ins('C4 B root ' + k + '.pdf', null, { versionedById: 'connector:' + v }, null);
+      const bexact = await ins('C4 B claims A exact ' + k + '.pdf', B.id, { versionedById: 'connector:' + base }, null);
+      const r = await erase(A);
+      out.push({ k, status: r.status, blanked: r.j?.data?.documentsBlanked, a: await title(a), broot: await title(broot), bIssuedClaimsA: await title(bexact) });
+      // each variant's B key is revoked-in-place so the next variant's A is not refused by it
+      await sql.query('UPDATE svc_api_keys SET connector_id = connector_id || $2 WHERE id IN ($1, $3)', [B.key, '-retired-' + k, A.key]);
+    }
+    console.log('GATE r5 C4', JSON.stringify(out));
+    for (const x of out) expect([x.k, x.broot]).toEqual([x.k, 'C4 B root ' + x.k + '.pdf']);
+    for (const x of out) expect([x.k, x.bIssuedClaimsA]).toEqual([x.k, 'C4 B claims A exact ' + x.k + '.pdf']);
+  }, 120000);
+
+  cell('C5')('C5 - deleted-key reuse: B\'s key X made B\'s NULL-issuer connector documents; B\'s key row is DELETED; A gets a key X; A erases', async () => {
+    const X = 'platform-s:' + randomUUID();
+    const B = await mk('C5B', X);
+    const broot = await ins('C5 B root.pdf', null, { versionedById: 'connector:' + X }, null);
+    const bsrc = await ins('C5 B issued.pdf', B.id, {}, null);
+    const bder = await ins('C5 B derivative.pdf', null, { versionedById: 'connector:' + X }, bsrc);
+    await sql.query('DELETE FROM svc_api_keys WHERE id=$1', [B.key]);
+    const A = await mk('C5A', X);
+    const r = await erase(A);
+    console.log('GATE r5 C5', r.status, JSON.stringify(r.j?.data ?? r.j?.error), JSON.stringify({ broot: await title(broot), bsrc: await title(bsrc), bder: await title(bder), Bname: await orgName(B) }));
+    expect(r.status).toBeGreaterThan(0); // measurement cell: the outcome is reported, not asserted
+  }, 60000);
+
+  cell('C6')('C6 - same connector id in ANOTHER tenant: not a collision (200) and the other tenant\'s documents are untouched', async () => {
+    const A = await mk('C6A', 'platform-s:' + randomUUID());
+    const k2 = await mkKey(null, A.conn, true, T2);
+    const o2 = await ins('C6 T2 root.pdf', null, { versionedById: 'connector:' + A.conn }, null, T2);
+    const a = await ins('C6 A.pdf', A.id, {}, null);
+    const r = await erase(A);
+    console.log('GATE r5 C6', r.status, JSON.stringify(r.j?.data ?? r.j?.error), JSON.stringify({ a: await title(a), t2: await title(o2), k2: await keyActive(k2) }));
+    expect([r.status, await title(o2)]).toEqual([200, 'C6 T2 root.pdf']);
+  }, 60000);
+
+  // Race: B's key X and B's NULL-issuer connector document are committed AFTER A's guard read and BEFORE A's documents UPDATE.
+  // FAIL condition (for the claim "nothing of another organisation's is written"): A answers 200 and B's document is '[erased]'.
+  cell('R1')('R1 - a key (and its document) minted between the guard read and the blanking UPDATE', async () => {
+    const X = 'platform-s:' + randomUUID();
+    const A = await mk('R1A', X);
+    const BN = Number(process.env.GATE_R1_N || 150000);
+    await sql.query(`INSERT INTO documents (id,external_id,tenant_id,title,description,document_type,content_hash,status,issuer_organization_id,metadata,created_at,updated_at)
+                     SELECT gen_random_uuid(), 'g97r5r1-' || i, $1, 'R1 bulk ' || i, NULL, 'DOCUMENT', repeat('c',64), 'anchored', $2, '{}'::jsonb, NOW(), NOW() FROM generate_series(1,$3) i`, [T, A.id, BN]);
+    await sql.query('ANALYZE documents'); await sql.query('ANALYZE svc_api_keys');
+    const B = await mkOrg('R1B');
+    const watcher = new Client({ connectionString: SUPER_DB }); await watcher.connect();
+    const p = erase(A);
+    let seen = ''; let insertedAtMs = -1; const t0 = Date.now(); let bdoc = ''; let bkey = '';
+    while (Date.now() - t0 < 20000) {
+      const q = (await watcher.query(`SELECT query FROM pg_stat_activity WHERE usename = current_setting('is_superuser')::text OR true`)).rows
+        .map((x: any) => String(x.query)).find((s) => s.includes('count(*)::int AS n FROM lineage'));
+      if (q) {
+        seen = 'count-running';
+        bkey = await mkKey(B.id, X);
+        bdoc = await ins('R1 B root (minted in window).pdf', null, { versionedById: 'connector:' + X }, null);
+        insertedAtMs = Date.now() - t0;
+        const still = (await watcher.query(`SELECT query FROM pg_stat_activity`)).rows.map((x: any) => String(x.query)).some((s) => s.includes('count(*)::int AS n FROM lineage'));
+        seen += still ? ' (count still running after the insert committed)' : ' (count finished before the insert committed)';
+        break;
+      }
+      await sleep(5);
+    }
+    const r = await p;
+    await watcher.end();
+    console.log('GATE r5 R1', 'N=' + BN, seen || 'WINDOW NOT SEEN', 'insertedAtMs=' + insertedAtMs, '| A', r.status, 'ms=' + r.ms, JSON.stringify(r.j?.data ?? r.j?.error), '| Bdoc=' + (bdoc ? await title(bdoc) : 'n/a'), 'Bkey=' + (bkey ? await keyActive(bkey) : 'n/a'));
+    expect(seen).not.toBe('');
+  }, 120000);
+
+  // N-3 premise. A's OWN connector versions A's OWN document through the REAL /version route, addressed (a) by external id and (b) by the
+  // `documentUuid` the API hands out (the pkey when external_id is not UUID-shaped, documentRepo.ts:169-171). FAIL condition for the
+  // premise "the version routes that set versionedById also set a parent": a /version row with versionedById set and parent_document_id NULL.
+  cell('N3')('N3 - a server-set versionedById on a ROOT row: /version addressed by documentUuid', async () => {
+    const A = await mk('N3A', 'platform-s:' + randomUUID());
+    const src = await call(asConn(A), '/api/documents', { type: 'DOCUMENT', organizationUuid: A.guid, contentHash: randomBytes(32).toString('hex'), data: { title: 'A board minutes 2026.pdf' } });
+    await sleep(300);
+    const row = await docRow(src.id);
+    const apiUuid = src.j?.document?.documentUuid ?? src.j?.data?.documentUuid ?? src.j?.documentUuid ?? null;
+    const vExt = await call(asConn(A), `/api/documents/${src.id}/version`, { action: 'watermark', newContentHash: randomBytes(32).toString('hex') });
+    await sleep(300);
+    const vUuid = await call(asConn(A), `/api/documents/${apiUuid || row.id}/version`, { action: 'watermark', newContentHash: randomBytes(32).toString('hex') });
+    await sleep(300);
+    const meta = async (ext: string) => (await sql.query(`SELECT metadata->>'parentDocumentId' AS mparent FROM documents WHERE external_id=$1`, [ext])).rows[0]?.mparent;
+    const before = { src: row, apiDocumentUuidIsPkey: apiUuid === row.id, vExt: { ...(await docRow(vExt.id)), metaParent: await meta(vExt.id) }, vUuid: { ...(await docRow(vUuid.id)), metaParent: await meta(vUuid.id) } };
+    const r = await erase(A);
+    const after = { src: await title(src.id), vExt: await title(vExt.id), vUuid: await title(vUuid.id) };
+    console.log('GATE r5 N3 statuses', [src.status, vExt.status, vUuid.status].join(','), 'before', JSON.stringify(before), '| A erase', r.status, JSON.stringify(r.j?.data ?? r.j?.error), '| after', JSON.stringify(after));
+    expect([src.status, vExt.status, vUuid.status]).toEqual([201, 201, 201]);
+    expect(after).toEqual({ src: '[erased]', vExt: '[erased]', vUuid: '[erased]' });
+  }, 60000);
+
+  // Path 1 (KS-1533, NOT this PR's): a key row for org B with a forged connector id, as the admin mint writes it. It must still erase B
+  // (so that the PR's "M-1 PATH 1 IS NOT CLOSED BY THIS PR" is TRUE). FAIL condition for the statement: 403 / B untouched.
+  cell('P8')('P8 - path 1 still open: a key minted FOR org B with a unique forged connector id erases B', async () => {
+    const B = await mk('P8B', 'platform-s:' + randomUUID());
+    const forged: Org = { ...B, conn: 'forged-by-org-a-admin-' + RUN, key: await mkKey(B.id, 'forged-by-org-a-admin-' + RUN) };
+    const d = await ins('P8 B.pdf', B.id, {}, null);
+    const r = await erase(forged);
+    console.log('GATE r5 P8', r.status, JSON.stringify(r.j?.data ?? r.j?.error), 'Bname=' + (await orgName(B)), 'Bdoc=' + (await title(d)), 'forgedKey=' + (await keyActive(forged.key)), 'BrealKey=' + (await keyActive(B.key)));
+    expect([r.status, await orgName(B), await title(d)]).toEqual([200, '[erased]', '[erased]']);
+  }, 60000);
+});

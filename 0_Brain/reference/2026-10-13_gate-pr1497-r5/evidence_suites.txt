@@ -1,0 +1,44 @@
+postgres (PostgreSQL) 15.14 (Homebrew)
+[18:21:48Z] init sql applied=11 failed=0
+[18:21:51Z] migrations applied=49 failed=0
+[18:21:51Z] platform tenancy applied
+postgres|t|t
+secuura_app|f|f
+action_provenance|t|t
+documents|t|t
+organizations|t|t
+svc_api_keys|t|t
+49
+connector_id|YES|
+is_active|YES|true
+organization_id|YES|
+tenant_id|NO|
+svc_api_keys_pkey|CREATE UNIQUE INDEX svc_api_keys_pkey ON public.svc_api_keys USING btree (id)
+idx_svc_api_keys_org|CREATE INDEX idx_svc_api_keys_org ON public.svc_api_keys USING btree (organization_id)
+idx_svc_api_keys_prefix|CREATE INDEX idx_svc_api_keys_prefix ON public.svc_api_keys USING btree (key_prefix)
+idx_svc_api_keys_tenant_id|CREATE INDEX idx_svc_api_keys_tenant_id ON public.svc_api_keys USING btree (tenant_id)
+svc_api_keys_auth_lookup|true
+tenant_isolation|(((current_setting('app.current_tenant_id'::text, true) IS NOT NULL) AND (current_setting('app.current_tenant_id'::text, true) <> ''::text) AND ((tenant_id)::text = current_setting('app.current_tenant_id'::text, true))) OR (current_setting('app.tenant_scope_bypass'::text, true) = 'platform_admin'::text))
+[18:21:52Z] PG_DONE
+(port moved 55471 -> 55417 for the KS-1310 port guard in ks1263; same data dir)
+[bounds_false] role=app MT=false rc=0 fallbackWarn=0 | Tests: 25 passed, 25 total
+[older_false] role=app MT=false rc=0 fallbackWarn=0 | Tests: 15 passed, 15 total
+[all8_false] role=app MT=false rc=1 fallbackWarn=0 | Tests: 3 failed, 85 passed, 88 total
+[bounds_true] role=app MT=true rc=0 fallbackWarn=0 | Tests: 25 passed, 25 total
+[older_true] role=app MT=true rc=0 fallbackWarn=0 | Tests: 15 passed, 15 total
+[all8_true] role=app MT=true rc=1 fallbackWarn=0 | Tests: 3 failed, 85 passed, 88 total
+[ctl_noplat_bounds] role=app MT=true rc=0 fallbackWarn=2 | Tests: 25 passed, 25 total
+AUTHOR_DONE
+all8 on 55471 failures = ks1263 port guard (3 cells, both modes; 'required ... port 55410-55419')
+[all8b_false] role=app MT=false rc=0 fallbackWarn=0 | Tests: 88 passed, 88 total
+[all8b_true] role=app MT=true rc=0 fallbackWarn=0 | Tests: 88 passed, 88 total
+unit rc=0 | Tests:       39 passed, 39 total
+refusals+ks1508 rc=0 | Tests:       73 passed, 73 total
+originate jest #1 rc=0 | Test Suites: 103 passed, 103 total Tests:       1254 passed, 1254 total 
+originate jest #2 rc=0 | Test Suites: 103 passed, 103 total Tests:       1254 passed, 1254 total 
+shared vitest rc=0 |  Test Files  49 passed (49)       Tests  954 passed (954) 
+tsc originate rc=0 lines=       0
+eslint 9 PR ts files rc=0 lines=       0
+check:openapi rc=1 | npm error Lifecycle script `check:openapi` failed with error: 
+SUITES_DONE
+check:openapi rc=0 | [gen-openapi] CHECK PASS: on-disk YAML matches generated [check-spec-examples] docs/openapi/secuura-api.yaml — 414 example blocks 
