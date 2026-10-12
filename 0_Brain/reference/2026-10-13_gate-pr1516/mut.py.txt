@@ -1,0 +1,110 @@
+"""Gate PR1516 mutation runner. One mutant at a time on the COMBO tree (develop + #1516 + #1497). Requires tsc rc 0 for the
+mutant (else reported UNCOMPILABLE, not killed). Layers: U = author unit file, AF/AT = author real-PG file MT=false/true,
+GF/GT = gate attack file MT=false/true. Restores and proves byte-identical by sha256. Usage: python3 -I mut.py <id> ..."""
+import hashlib, subprocess, sys, os, re
+
+G = "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/ad6cb59d-4a2f-44e5-b355-5685c7d2a2e1/scratchpad/t16"
+O = G + "/combo/Blockchain/Dev/services/originate"
+DOC = O + "/src/routes/documents.ts"
+CER = O + "/src/routes/certifications.ts"
+
+def sha(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()
+def rep(s, old, new, count=1):
+    assert s.count(old) == count, ("count", old[:70], s.count(old), count); return s.replace(old, new)
+
+SRV = "          versionAction: action,\n          versionedAt: now,\n          versionedById: user.id,\n          parentDocumentId: id,\n"
+SC = "          versionAction: 'sign-cert',\n          versionedAt: now,\n          versionedById: user.id,\n          parentDocumentId: id,\n"
+SW = "          versionAction: 'sign-wallet',\n          versionedAt: now,\n          versionedById: user.id,\n          parentDocumentId: id,\n"
+MV = "          ...metadata,\n"
+STRIP = """      if (Object.prototype.hasOwnProperty.call(data, 'versionedById')) {
+        delete data.versionedById;
+        logger.info('KS-1508: a caller-supplied data.versionedById was dropped on create', { tenantId: getReqTenantId(req), userId: owner?.id });
+      }
+"""
+HASH = "      const hash = clientHash || generateContentHash(data);\n"
+
+def revert_order(block):
+    def f(s):
+        i = s.index(block); j = s.rfind(MV, 0, i); assert j >= 0 and i - j < 400
+        s = s[:j] + s[j + len(MV):]
+        return rep(s, block, block + MV)
+    return f
+
+def strip_after_hash(s):
+    s = rep(s, STRIP, ""); return rep(s, HASH, HASH + STRIP)
+
+def x3(s):
+    i = s.index(SRV); j = s.rfind(MV, 0, i); assert j >= 0 and i - j < 400
+    nb = "          versionAction: action,\n          versionedAt: now,\n          parentDocumentId: id,\n"
+    s = s[:j] + nb + s[j:]
+    return rep(s, SRV, "          versionedById: user.id,\n")
+
+L_ALL = ["U", "AF", "AT", "GF", "GT"]
+M = {
+  # author-shaped (the PR's own 12 were not published to me; these target the same lines)
+  "A1_create_delete_disabled": (DOC, lambda s: rep(s, "        delete data.versionedById;\n", "        void data.versionedById;\n"), L_ALL),
+  "A2_create_strip_block_removed": (DOC, lambda s: rep(s, STRIP, ""), L_ALL),
+  "A3_version_order_reverted": (DOC, revert_order(SRV), L_ALL),
+  "A4_signcert_order_reverted": (DOC, revert_order(SC), L_ALL),
+  "A5_signwallet_order_reverted": (DOC, revert_order(SW), L_ALL),
+  "A6_cert_derived_spreads_data": (CER, lambda s: rep(s, "            ...dataWithoutVersionedById,\n", "            ...data,\n"), L_ALL),
+  "A6b_cert_derived_spreads_data_compiles": (CER, lambda s: rep(s, "            ...dataWithoutVersionedById,\n", "            ...dataWithoutVersionedById,\n            ...(data as Record<string, unknown> | undefined),\n"), L_ALL),
+  "A7_create_log_removed": (DOC, lambda s: rep(s, "        logger.info('KS-1508: a caller-supplied data.versionedById was dropped on create', { tenantId: getReqTenantId(req), userId: owner?.id });\n", ""), L_ALL),
+  "A8_cert_log_carries_value": (CER, lambda s: rep(s, "{ tenantId: getReqTenantId(req), userId: issuer.id });", "{ tenantId: getReqTenantId(req), userId: issuer.id, value: droppedVersionedById });"), L_ALL),
+  "A9_version_actor_from_metadata": (DOC, lambda s: rep(s, "          versionAction: action,\n          versionedAt: now,\n          versionedById: user.id,", "          versionAction: action,\n          versionedAt: now,\n          versionedById: (metadata.versionedById as string) ?? user.id,"), L_ALL),
+  "A10_create_log_without_tenant": (DOC, lambda s: rep(s, "dropped on create', { tenantId: getReqTenantId(req), userId: owner?.id });", "dropped on create', { userId: owner?.id });"), L_ALL),
+  # the gate's own
+  "X1_strip_after_hash": (DOC, strip_after_hash, L_ALL),
+  "X2_strip_on_a_throwaway_copy": (DOC, lambda s: rep(s, "        delete data.versionedById;\n", "        delete ({ ...data } as Record<string, unknown>).versionedById;\n"), L_ALL),
+  "X3_version_neighbours_before_metadata": (DOC, x3, L_ALL),
+  "X4_cert_strip_case_variant_only": (CER, lambda s: rep(s, "const { versionedById: droppedVersionedById, ...dataWithoutVersionedById }", "const { VersionedById: droppedVersionedById, ...dataWithoutVersionedById }"), L_ALL),
+}
+
+def run(cmd, env=None, timeout=600):
+    p = subprocess.run(cmd, cwd=O, env=env, capture_output=True, text=True, timeout=timeout)
+    return p.returncode, p.stdout + p.stderr
+
+def jest_summary(out):
+    out = re.sub(r"\x1b\[[0-9;]*m", "", out)
+    t = [l.strip() for l in out.splitlines() if l.startswith("Tests:")]
+    fails = [re.sub(r" \(\d+ ms\)", "", l.strip()) for l in out.splitlines() if l.strip().startswith("✕")]
+    return (t[0] if t else "NO Tests: line"), fails
+
+PGENV = {}
+for line in open(G + "/pg.env"):
+    m = re.match(r"export (\w+)=(.*)", line.strip())
+    if m: PGENV[m.group(1)] = m.group(2)
+
+def layer(name):
+    env = dict(os.environ)
+    if name == "U":
+        return run(["npx", "jest", "ks1508-versionedbyid-is-server-set"], env)
+    env.update(PGENV); env["PLATFORM_DATABASE_URL"] = PGENV["TEST_PLATFORM_DATABASE_URL"]
+    env["MULTI_TENANCY_ENABLED"] = "true" if name.endswith("T") else "false"
+    f = "ks1508-a-planted" if name.startswith("A") else "gate1516-attack"
+    return run(["npx", "jest", "--config", "jest.integration.config.js", f], env)
+
+for mid in sys.argv[1:]:
+    path, fn, layers = M[mid]
+    before = sha(path); orig = open(path, "rb").read()
+    try:
+        new = fn(orig.decode())
+        open(path, "w").write(new)
+        assert sha(path) != before
+        rc, out = run(["npx", "tsc", "--noEmit", "-p", "."])
+        if rc != 0:
+            print(f"[{mid}] UNCOMPILABLE tsc rc={rc}: {out.strip().splitlines()[:3]}"); continue
+        res = []
+        for ly in layers:
+            rc, out = layer(ly)
+            t, fails = jest_summary(out)
+            res.append(f"{ly}:{'RED' if rc else 'green'}")
+            print(f"[{mid}] {ly} rc={rc} | {t}")
+            for f in fails[:6]: print(f"      {f[:150]}")
+        killed = any(r.endswith("RED") for r in res)
+        print(f"[{mid}] {'KILLED' if killed else 'SURVIVED'} by {' '.join(res)}")
+    finally:
+        open(path, "wb").write(orig)
+        after = sha(path)
+        print(f"[{mid}] restored sha256 {after[:16]} == before {before[:16]}: {after == before}")
+        sys.stdout.flush()

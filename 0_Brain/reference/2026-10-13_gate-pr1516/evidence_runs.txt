@@ -1,0 +1,126 @@
+# gate PR1516 evidence: author files, suites, static (secuura_app unless stated). DB: throwaway PG15 127.0.0.1 (55516, then 55416 for the ks1263 port guard)
+===== integ auth_merged_false
+PASS src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts (7.741 s)
+Tests:       6 passed, 6 total
+===== integ auth_merged_true
+PASS src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts
+Tests:       6 passed, 6 total
+===== integ auth_dev_red_false
+FAIL src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts (7.668 s)
+    ✕ RED create: data.versionedById is dropped, the stored metadata has no such key (310 ms)
+    ✕ RED /version: a planted metadata.versionedById is ignored, the stored value is the ACTOR (310 ms)
+    ✕ RED /sign-cert: a planted metadata.versionedById is ignored, the stored value is the ACTOR (310 ms)
+    ✕ RED /sign-wallet: a planted metadata.versionedById is ignored, the stored value is the ACTOR (307 ms)
+Tests:       4 failed, 2 passed, 6 total
+===== integ auth_dev_red_true
+FAIL src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts
+    ✕ RED create: data.versionedById is dropped, the stored metadata has no such key (308 ms)
+    ✕ RED /version: a planted metadata.versionedById is ignored, the stored value is the ACTOR (309 ms)
+    ✕ RED /sign-cert: a planted metadata.versionedById is ignored, the stored value is the ACTOR (309 ms)
+    ✕ RED /sign-wallet: a planted metadata.versionedById is ignored, the stored value is the ACTOR (306 ms)
+Tests:       4 failed, 2 passed, 6 total
+===== integ ctl_noplat
+    [DB] MULTI_TENANCY_ENABLED=true but PLATFORM_DATABASE_URL not set — falling back to single-tenant mode
+      366 |     const platformUrl = process.env.PLATFORM_DATABASE_URL;
+    > 368 |       console.warn('[DB] MULTI_TENANCY_ENABLED=true but PLATFORM_DATABASE_URL not set — falling back to single-tenant mode');
+FAIL src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts
+    ✕ SETUP - the role in this run's title is the role the product really connects as, and the branch is the branch the title says (5 ms)
+    > 114 |     expect(db.getTenantManager() !== null).toBe(MT); // MULTI_TENANCY_ENABLED=true without PLATFORM_DATABASE_URL falls back to single-tenant: then this reds
+Tests:       1 failed, 5 passed, 6 total
+===== integ allint_merged_false
+PASS src/__tests__/ks597-b-caller-org-externalref.integration.test.ts
+PASS src/__tests__/ks597-issuer-organization-id.integration.test.ts
+PASS src/__tests__/rightsHolders.tenant-scope.integration.test.ts
+PASS src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts
+PASS src/__tests__/ks1124-blockchain-blob-writes-are-atomic.integration.test.ts
+PASS src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts
+Tests:       48 passed, 48 total
+===== integ allint_ib_merged_true
+PASS src/__tests__/ks1124-blockchain-blob-writes-are-atomic.integration.test.ts
+PASS src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts
+PASS src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts
+PASS src/__tests__/rightsHolders.tenant-scope.integration.test.ts
+PASS src/__tests__/ks597-issuer-organization-id.integration.test.ts
+PASS src/__tests__/ks597-b-caller-org-externalref.integration.test.ts
+Tests:       48 passed, 48 total
+===== integ allint_ib_merged_false
+PASS src/__tests__/ks1124-blockchain-blob-writes-are-atomic.integration.test.ts
+PASS src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts
+PASS src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts
+PASS src/__tests__/rightsHolders.tenant-scope.integration.test.ts
+PASS src/__tests__/ks597-issuer-organization-id.integration.test.ts
+PASS src/__tests__/ks597-b-caller-org-externalref.integration.test.ts
+Tests:       48 passed, 48 total
+===== integ allint_merged_true
+PASS src/__tests__/ks597-b-caller-org-externalref.integration.test.ts
+PASS src/__tests__/ks597-issuer-organization-id.integration.test.ts
+PASS src/__tests__/rightsHolders.tenant-scope.integration.test.ts
+FAIL src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts (61.984 s)
+FAIL src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts (212.275 s)
+      114 |     expect(db.getTenantManager() !== null).toBe(MT); // MULTI_TENANCY_ENABLED=true without PLATFORM_DATABASE_URL falls back to single-tenant: then this reds
+FAIL src/__tests__/ks1124-blockchain-blob-writes-are-atomic.integration.test.ts (220.092 s)
+Tests:       14 failed, 34 passed, 48 total
+===== unit file on develop 4ec53e18 (red-first)
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+      ✕ RED a planted metadata.versionedById is ignored: the stored value is the ACTOR (user.id)
+      ✕ RED the neighbouring server-owned keys are not the caller's either: versionAction, versionedAt and parentDocumentId
+    ✕ RED a supplied data.versionedById is dropped, never stored
+    ✕ RED a supplied data.versionedById is dropped, never stored
+    ✕ RED a supplied data.versionedById is dropped, never stored
+    ✕ RED a supplied data.versionedById is dropped from the derived row
+    ✕ RED a supplied data.versionedById is dropped from the derived row
+    ✕ RED a supplied data.versionedById is dropped from the derived row
+    ✕ RED a create that carried the key logs that it did, with the tenant, and never the planted value
+    ✕ RED a certification derived row that carried the key logs that it did, with the tenant, and never the planted value
+Tests:       26 failed, 20 passed, 46 total
+===== suites on merged tree eb9d42a7
+unit file rc=0 | Tests: 46 passed, 46 total 
+originate jest #1 rc=0 | Test Suites: 102 passed, 102 total Tests: 1215 passed, 1215 total 
+shared vitest #1 rc=0 |  Test Files 49 passed (49)  Tests 949 passed (949) 
+originate jest #2 rc=0 | Test Suites: 102 passed, 102 total Tests: 1215 passed, 1215 total 
+shared vitest #2 rc=0 |  Test Files 49 passed (49)  Tests 949 passed (949) 
+tsc originate rc=0 lines=       0
+eslint 5 files rc=0 lines=       0
+check:openapi rc=0 | [gen-openapi] CHECK PASS: on-disk YAML matches generated [check-spec-examples] docs/openapi/secuura-api.yaml — 413 example blocks 
+SUITES_DONE
+
+[exited with code 0]
+===== integ allint_merged_true_r1 (parallel workers)
+PASS src/__tests__/ks597-b-caller-org-externalref.integration.test.ts
+PASS src/__tests__/ks597-issuer-organization-id.integration.test.ts
+PASS src/__tests__/rightsHolders.tenant-scope.integration.test.ts
+PASS src/__tests__/ks1124-blockchain-blob-writes-are-atomic.integration.test.ts
+PASS src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts
+PASS src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts
+Tests:       48 passed, 48 total
+===== integ allint_merged_true_r2 (parallel workers)
+PASS src/__tests__/ks597-b-caller-org-externalref.integration.test.ts
+PASS src/__tests__/ks597-issuer-organization-id.integration.test.ts
+PASS src/__tests__/rightsHolders.tenant-scope.integration.test.ts
+PASS src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts
+PASS src/__tests__/ks1124-blockchain-blob-writes-are-atomic.integration.test.ts
+PASS src/__tests__/ks1508-a-planted-versionedbyid-is-not-stored.integration.test.ts
+Tests:       48 passed, 48 total
+===== integ allint_dev_true (parallel workers)
+PASS src/__tests__/ks597-b-caller-org-externalref.integration.test.ts
+PASS src/__tests__/ks597-issuer-organization-id.integration.test.ts
+PASS src/__tests__/ks1124-blockchain-blob-writes-are-atomic.integration.test.ts
+PASS src/__tests__/rightsHolders.tenant-scope.integration.test.ts
+PASS src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts
+Tests:       42 passed, 42 total
+first parallel MT=true run on merged (allint_merged_true) had 16 'Exceeded timeout' lines; not reproduced in r1/r2

@@ -1,0 +1,273 @@
+/** QA GATE PR #1516 (KS-1508), scratch, never committed. Real Postgres, real routes, org B's REAL erasure (PR #1497).
+ *  Expectations are written for the FIXED code; on develop+#1497 without #1516 the plant cells must go red. */
+import { randomUUID, randomBytes, createHash } from 'crypto';
+import { Client } from 'pg';
+
+const SUPER_DB = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+const APP_DB = process.env.TEST_APP_DATABASE_URL;
+const MT = process.env.MULTI_TENANCY_ENABLED === 'true';
+const PLATFORM_DB = process.env.TEST_PLATFORM_DATABASE_URL || process.env.PLATFORM_DATABASE_URL;
+if (PLATFORM_DB) process.env.PLATFORM_DATABASE_URL = PLATFORM_DB;
+if (SUPER_DB) process.env.DATABASE_URL = APP_DB || SUPER_DB;
+process.env.SIMULATE_ANCHORING = 'true';
+process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
+process.env.AUTH_SERVICE_URL = 'http://g1516-auth.invalid';
+process.env.PII_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+process.env.PII_LOOKUP_HMAC_KEY = randomBytes(32).toString('hex');
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({ ...jest.requireActual('@secuura/shared'), verifyMessageSignature: () => true }),
+);
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const u = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
+      if (Object.keys(u).length > 0) { req._secuuraUser = u; req.user = u; }
+      next();
+    },
+  };
+});
+const mintCalls: any[] = [];
+jest.mock('../services/threadTokenClient', () => ({
+  mintAndRegisterThreadToken: jest.fn(async (a: any) => { mintCalls.push(a); return { policyId: 'p', scriptAddress: 's', mintTxHash: 't', network: 'preprod' }; }),
+}));
+
+const realFetch = global.fetch;
+(global as any).fetch = async (url: any, init?: any) => {
+  if (String(url).includes('/api/issuer-certs/sign')) {
+    const body = { success: true, signature: 'ab', signatureAlgorithm: 'ES256', signedContentHash: 'x', signedAt: new Date().toISOString(),
+      cert: { id: 'c1', fingerprintSha256: 'f', subject: 'CN=g', issuer: 'CN=g', certPem: 'pem', validFrom: '2026-01-01', validUntil: '2027-01-01', trustLevel: 'self' } };
+    return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } });
+  }
+  return realFetch(url, init);
+};
+
+const RUN = randomUUID().slice(0, 8);
+const T = randomUUID();
+const O = { A: randomUUID(), B: randomUUID() };
+const GUID = { A: randomUUID(), B: randomUUID() };
+const CONN = (n: 'A' | 'B') => 'platform-s:' + GUID[n];
+const KEY = (n: 'A' | 'B') => 'g1516-k' + n + '-' + RUN;
+const HUMAN_A = randomUUID();
+const PLANT = 'connector:' + CONN('B'); // B's connector user id: what B's erasure selects by
+const asConn = (n: 'A' | 'B') => ({ userId: 'connector:' + CONN(n), role: 'connector', tenantId: T, organizationId: O[n], scopes: ['documents:write', 'documents:read', 'certifications:write'] });
+const asHumanA = { userId: HUMAN_A, role: 'ISSUER_ADMIN', tenantId: T, organizationId: O.A, scopes: ['documents:write', 'documents:read', 'certifications:write'] };
+const h = () => randomBytes(32).toString('hex');
+
+// every A document planted below; B's erasure must leave all of them alone
+const planted: Array<{ label: string; ext: string }> = [];
+
+describe('GATE 1516 attack (' + (APP_DB ? 'secuura_app' : 'superuser') + ', MT=' + String(MT) + ')', () => {
+  let sql: Client; let server: any; let base = ''; let disconnect: () => Promise<void>; let db: any;
+  const raw = async (who: object, path: string, body: string, ctype = 'application/json') => {
+    const res = await fetch(base + path, { method: 'POST', headers: { 'content-type': ctype, 'x-probe-user': JSON.stringify(who) }, body });
+    const j: any = await res.json().catch(() => null);
+    await new Promise((r) => setTimeout(r, 250));
+    return { status: res.status, j, id: (j?.derivedDocumentId ?? j?.document?.id ?? j?.id ?? null) as string | null };
+  };
+  const call = (who: object, path: string, body: object) => raw(who, path, JSON.stringify(body));
+  const row = async (ext: string | null) => (await sql.query(
+    `SELECT jsonb_exists(metadata,'versionedById') AS has_key, metadata->>'versionedById' AS vb, title, issuer_organization_id::text AS iss,
+            content_hash, (SELECT array_agg(k ORDER BY k) FROM jsonb_object_keys(metadata) k) AS keys, metadata
+       FROM documents WHERE external_id = $1 AND tenant_id = $2`, [ext, T])).rows[0];
+  const show = (label: string, r: any, x: any) => console.log('G1516', label, 'status=' + r.status, JSON.stringify({ has_key: x?.has_key, vb: x?.vb, iss: x?.iss, keys: x?.keys }));
+  let srcConn = ''; let srcHuman = '';
+
+  beforeAll(async () => {
+    require('@secuura/shared').initFromEnv?.();
+    db = require('../db'); await db.initDb(); disconnect = db.disconnectDb;
+    sql = new Client({ connectionString: SUPER_DB }); await sql.connect();
+    await sql.query(`INSERT INTO tenants (id,name,slug,status,created_at,updated_at) VALUES ($1,$2,$3,'active',NOW(),NOW())`, [T, 'g1516-' + RUN, 'g1516-' + RUN]);
+    if (MT) { const m = db.getTenantManager(); if (m?.refreshConfigs) await m.refreshConfigs(); }
+    for (const n of ['A', 'B'] as const) {
+      await sql.query(`INSERT INTO organizations (id,name,slug,type,status,tenant_id,metadata) VALUES ($1,$2,$3,'issuer','active',$4,$5::jsonb)`,
+        [O[n], 'Org ' + n + ' ' + RUN, 'g1516-' + n + '-' + RUN, T, JSON.stringify({ externalRef: GUID[n] })]);
+      await sql.query(`INSERT INTO svc_api_keys (id,organization_id,name,key_hash,key_prefix,connector_id,tenant_id,is_active) VALUES ($1,$2,'k','h'||$1,'sk_x',$3,$4,true)`,
+        [KEY(n), O[n], CONN(n), T]);
+    }
+    const express = require('express');
+    const { documentsRouter } = require('../routes/documents');
+    const { certificationsRouter } = require('../routes/certifications');
+    const { platformOrganizationsRouter } = require('../routes/platformOrganizations');
+    const { tenantGucContext } = require('@secuura/shared');
+    const app = express();
+    // production order (index.ts): json, then urlencoded extended, both app-wide
+    app.use(express.json({ limit: '10mb' }));
+    app.use(express.urlencoded({ extended: true }));
+    app.use((req: any, _res: unknown, next: () => void) => { const u = JSON.parse(String(req.headers['x-probe-user'] || '{}')); req.user = u; req.tenantId = u.tenantId || undefined; next(); });
+    app.use(tenantGucContext());
+    app.use((req: any, _res: unknown, next: () => void) => { req.db = db.getRequestPrisma(req); next(); });
+    app.use('/api/documents', documentsRouter);
+    app.use('/api/certifications', certificationsRouter);
+    app.use('/api/platform/organizations', platformOrganizationsRouter);
+    await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
+    base = 'http://127.0.0.1:' + server.address().port;
+    // A's NULL-issuer sources (no organizationUuid claim), one made by A's connector, one by A's human
+    srcConn = (await call(asConn('A'), '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: { title: 'A src conn ' + RUN } })).id as string;
+    srcHuman = (await call(asHumanA, '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: { title: 'A src human ' + RUN } })).id as string;
+    planted.push({ label: 'srcConn', ext: srcConn }, { label: 'srcHuman', ext: srcHuman });
+  }, 60000);
+
+  afterAll(async () => {
+    if (server) await new Promise<void>((r) => server.close(() => r()));
+    await sql.query('DELETE FROM action_provenance WHERE tenant_id=$1', [T]).catch(() => undefined);
+    await sql.query('UPDATE documents SET parent_document_id=NULL WHERE tenant_id=$1', [T]).catch(() => undefined);
+    for (const t of ['documents', 'svc_api_keys', 'organizations']) await sql.query(`DELETE FROM ${t} WHERE tenant_id=$1`, [T]).catch(() => undefined);
+    await sql.query('DELETE FROM tenants WHERE id=$1', [T]).catch(() => undefined);
+    await sql.end().catch(() => undefined); if (disconnect) await disconnect().catch(() => undefined);
+    (global as any).fetch = realFetch;
+  }, 60000);
+
+  it('SETUP - role, branch, sources', async () => {
+    const r = await db.withTenant(T, async (tx: any) => (await tx.$queryRaw`SELECT current_user AS who, r.rolsuper AS su, r.rolbypassrls AS bp FROM pg_roles r WHERE r.rolname = current_user`)[0]);
+    console.log('G1516 role', JSON.stringify(r), 'MT=' + MT, 'poolBranch=' + String(db.getTenantManager() !== null));
+    if (APP_DB) expect([r.su, r.bp]).toEqual([false, false]);
+    expect(db.getTenantManager() !== null).toBe(MT);
+    expect((await row(srcConn))?.iss).toBeNull();
+    expect((await row(srcHuman))?.iss).toBeNull();
+  });
+
+  it('P1 create (connector A and human A, NULL issuer): a planted data.versionedById is not stored; the log names no value', async () => {
+    const { logger } = require('../utils/logger');
+    const spy = jest.spyOn(logger, 'info');
+    for (const [who, lbl] of [[asConn('A'), 'P1conn'], [asHumanA, 'P1human']] as const) {
+      const r = await call(who, '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: { title: lbl + ' ' + RUN, versionedById: PLANT } });
+      const x = await row(r.id); show(lbl, r, x); planted.push({ label: lbl, ext: r.id as string });
+      expect([r.status, x.has_key]).toEqual([201, false]);
+    }
+    const hits = spy.mock.calls.filter((c: any[]) => /versionedById/.test(String(c[0])));
+    console.log('G1516 P1 log', JSON.stringify(hits));
+    expect(hits.length).toBe(2);
+    expect(JSON.stringify(hits)).not.toContain(GUID.B);
+    spy.mockRestore();
+  });
+
+  it.each([
+    ['version', (id: string) => [`/api/documents/${id}/version`, { action: 'watermark', newContentHash: h(), metadata: { versionedById: PLANT, versionAction: 'x', versionedAt: '1999', parentDocumentId: 'doc-x' } }]],
+    ['sign-cert', (id: string) => [`/api/documents/${id}/sign-cert`, { metadata: { versionedById: PLANT } }]],
+    ['sign-wallet', (id: string) => [`/api/documents/${id}/sign-wallet`, { walletAddress: 'addr_test1g', signature: 'ab', key: 'cd', metadata: { versionedById: PLANT } }]],
+  ] as const)('P2-4 %s (connector A and human A): the stored versionedById is the ACTOR', async (name, build) => {
+    for (const [who, src, actor] of [[asConn('A'), srcConn, 'connector:' + CONN('A')], [asHumanA, srcHuman, HUMAN_A]] as const) {
+      const [path, body] = (build as any)(src);
+      const r = await call(who, path, body);
+      const x = await row(r.id); show(name + (who === asHumanA ? '-human' : '-conn'), r, x);
+      planted.push({ label: name, ext: r.id as string });
+      expect([r.status, x?.vb]).toEqual([201, actor]);
+      if (name === 'version') expect([x.metadata.versionAction, x.metadata.parentDocumentId]).toEqual(['watermark', src]);
+    }
+  });
+
+  it('P5 certifications/issue with parentDocumentId (human A): the derived row stores no versionedById', async () => {
+    const r = await call(asHumanA, '/api/certifications/issue', { type: 'verification_certificate', parentDocumentId: srcHuman, data: { title: 'P5 ' + RUN, versionedById: PLANT } });
+    const x = await row(r.id); show('P5', r, x); console.log('G1516 P5 body', JSON.stringify(r.j).slice(0, 300));
+    planted.push({ label: 'P5', ext: r.id as string });
+    expect(r.status).toBe(201);
+    expect(x?.has_key).toBe(false);
+  });
+
+  it('P5b certifications/issue as connector A (holder defaults to the connector id): reported', async () => {
+    const r = await call(asConn('A'), '/api/certifications/issue', { type: 'verification_certificate', parentDocumentId: srcConn, data: { title: 'P5b ' + RUN, versionedById: PLANT } });
+    const x = r.id ? await row(r.id) : null; show('P5b', r, x); console.log('G1516 P5b body', JSON.stringify(r.j).slice(0, 300));
+    if (r.id) { planted.push({ label: 'P5b', ext: r.id }); expect(x?.has_key ?? false).toBe(false); }
+  });
+
+  // ---- bypass shapes against the fix ----
+  const BYP: Array<[string, () => Promise<{ status: number; id: string | null; j: any }>, (x: any, r: any) => void]> = [
+    ['b1 key case VersionedById', () => call(asConn('A'), '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: { title: 'b1 ' + RUN, VersionedById: PLANT } }), (x) => expect(x.vb).toBeNull()],
+    ['b2 __proto__ nested (raw JSON)', () => raw(asConn('A'), '/api/documents', `{"type":"DOCUMENT","contentHash":"${h()}","data":{"title":"b2 ${RUN}","__proto__":{"versionedById":"${PLANT}"}}}`), (x) => expect(x.vb).toBeNull()],
+    ['b3 duplicate keys (raw JSON)', () => raw(asConn('A'), '/api/documents', `{"type":"DOCUMENT","contentHash":"${h()}","data":{"title":"b3 ${RUN}","versionedById":"${PLANT}","versionedById":"${PLANT}"}}`), (x) => expect(x.has_key).toBe(false)],
+    ['b4 form-encoded data[versionedById]', () => raw(asConn('A'), '/api/documents', `type=DOCUMENT&contentHash=${h()}&data[title]=b4-${RUN}&data[versionedById]=${encodeURIComponent(PLANT)}`, 'application/x-www-form-urlencoded'), (x) => expect(x.has_key).toBe(false)],
+    ['b5 unicode lookalike key (fullwidth v, ZWSP)', () => call(asConn('A'), '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: { title: 'b5 ' + RUN, 'ｖersionedById': PLANT, 'versionedById​': PLANT } }), (x) => expect(x.vb).toBeNull()],
+    ['b6 nested object', () => call(asConn('A'), '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: { title: 'b6 ' + RUN, meta: { versionedById: PLANT } } }), (x) => expect(x.vb).toBeNull()],
+    ['b7 top-level body.versionedById', () => call(asConn('A'), '/api/documents', { type: 'DOCUMENT', contentHash: h(), versionedById: PLANT, data: { title: 'b7 ' + RUN } }), (x) => expect(x.vb).toBeNull()],
+    ['b9 array value', () => call(asConn('A'), '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: { title: 'b9 ' + RUN, versionedById: [PLANT] } }), (x) => expect(x.has_key).toBe(false)],
+    ['b10 legacy shape, no data: title + top-level only', () => call(asConn('A'), '/api/documents', { title: 'b10 ' + RUN, documentType: 'DOCUMENT', contentHash: h(), versionedById: PLANT }), (x) => expect(x.vb).toBeNull()],
+    ['b11 version, form-encoded metadata[versionedById]', () => raw(asConn('A'), `/api/documents/${srcConn}/version`, `action=watermark&newContentHash=${h()}&metadata[versionedById]=${encodeURIComponent(PLANT)}`, 'application/x-www-form-urlencoded'), (x) => expect(x.vb).toBe('connector:' + CONN('A'))],
+    ['b12 version, __proto__ in metadata (raw JSON)', () => raw(asConn('A'), `/api/documents/${srcConn}/version`, `{"action":"watermark","newContentHash":"${h()}","metadata":{"__proto__":{"versionedById":"${PLANT}"}}}`), (x) => expect(x.vb).toBe('connector:' + CONN('A'))],
+    ['b14 sign-cert, metadata duplicate keys (raw JSON)', () => raw(asConn('A'), `/api/documents/${srcConn}/sign-cert`, `{"metadata":{"versionedById":"${PLANT}","versionedById":"${PLANT}"}}`), (x) => expect(x.vb).toBe('connector:' + CONN('A'))],
+    ['b15 cert issue, form-encoded data[versionedById]', () => raw(asHumanA, '/api/certifications/issue', `type=verification_certificate&parentDocumentId=${srcHuman}&data[title]=b15-${RUN}&data[versionedById]=${encodeURIComponent(PLANT)}`, 'application/x-www-form-urlencoded'), (x) => expect(x.has_key).toBe(false)],
+    ['b16 cert issue, __proto__ in data (raw JSON)', () => raw(asHumanA, '/api/certifications/issue', `{"type":"verification_certificate","parentDocumentId":"${srcHuman}","data":{"title":"b16 ${RUN}","__proto__":{"versionedById":"${PLANT}"}}}`), (x) => expect(x.vb).toBeNull()],
+  ];
+  it.each(BYP)('BYPASS %s', async (label, go, check) => {
+    const r = await go();
+    const x = r.id ? await row(r.id) : null; show(label, r, x);
+    if (r.status >= 300) console.log('G1516 BYP body', label, JSON.stringify(r.j).slice(0, 300));
+    expect(r.status).toBe(201);
+    planted.push({ label, ext: r.id as string });
+    check(x, r);
+  });
+
+  it('b13 version with metadata as an ARRAY is refused (400 by the validator), nothing stored', async () => {
+    const before = (await sql.query('SELECT count(*)::int n FROM documents WHERE tenant_id=$1', [T])).rows[0].n;
+    const r = await call(asConn('A'), `/api/documents/${srcConn}/version`, { action: 'watermark', newContentHash: h(), metadata: [PLANT] });
+    const after = (await sql.query('SELECT count(*)::int n FROM documents WHERE tenant_id=$1', [T])).rows[0].n;
+    console.log('G1516 b13', r.status, before, after);
+    expect([r.status, after - before]).toEqual([400, 0]);
+  });
+
+  it('b8 data as a JSON STRING is refused (400), nothing stored', async () => {
+    const before = (await sql.query('SELECT count(*)::int n FROM documents WHERE tenant_id=$1', [T])).rows[0].n;
+    const r = await call(asConn('A'), '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: JSON.stringify({ title: 'b8', versionedById: PLANT }) });
+    const after = (await sql.query('SELECT count(*)::int n FROM documents WHERE tenant_id=$1', [T])).rows[0].n;
+    console.log('G1516 b8', r.status, before, after);
+    expect([r.status, after - before]).toEqual([400, 0]);
+  });
+
+  it('b17 legacy SOURCE row already carrying a planted versionedById: a /version of it stores the ACTOR', async () => {
+    const id = randomUUID(); const ext = 'g1516-legacy-' + id.slice(0, 8);
+    await sql.query(`INSERT INTO documents (id,external_id,tenant_id,title,document_type,content_hash,status,metadata,created_at,updated_at)
+                     VALUES ($1,$2,$3,$4,'DOCUMENT',$5,'anchored',$6::jsonb,NOW(),NOW())`, [id, ext, T, 'legacy ' + RUN, h(), JSON.stringify({ title: 'legacy ' + RUN, versionedById: PLANT })]);
+    const r = await call(asConn('A'), `/api/documents/${ext}/version`, { action: 'watermark', newContentHash: h() });
+    const x = await row(r.id); show('b17', r, x);
+    planted.push({ label: 'b17-derived', ext: r.id as string });
+    expect([r.status, x.vb]).toEqual([201, 'connector:' + CONN('A')]);
+    // the legacy row itself is NOT healed by this PR: B's erasure will still select it (reported, below)
+    (global as any).__legacyExt = ext;
+  });
+
+  it('HASH - create without contentHash: the server hash is computed over the STRIPPED blob', async () => {
+    const mk = (extra: object) => call(asConn('A'), '/api/documents', { type: 'DOCUMENT', organizationUuid: GUID.A, data: { title: 'hash ' + RUN, note: 'n', ...extra } });
+    const a = await mk({ versionedById: PLANT }); const b = await mk({}); const c = await mk({ other: 'x' });
+    const [xa, xb, xc] = [await row(a.id), await row(b.id), await row(c.id)];
+    console.log('G1516 HASH', xa.content_hash, xb.content_hash, xc.content_hash);
+    const { generateContentHash } = require('../repositories/documentRepo');
+    const withKey = generateContentHash({ title: 'hash ' + RUN, note: 'n', versionedById: PLANT });
+    console.log('G1516 HASH withKey', withKey);
+    expect(xa.content_hash).toBe(xb.content_hash); // planted == unplanted: the key never reached the hash
+    expect(xc.content_hash).not.toBe(xb.content_hash); // control: the hash does see an extra data key
+    expect(xa.content_hash).not.toBe(withKey);
+  });
+
+  it('HASH2 - thread-token metadataHashHex (STATE_THREAD_NFT_ENABLED) is sha256 of the STRIPPED blob', async () => {
+    process.env.STATE_THREAD_NFT_ENABLED = 'true'; process.env.SIMULATE_ANCHORING = 'false';
+    mintCalls.length = 0;
+    try {
+      const r = await call(asConn('A'), '/api/documents', { type: 'DOCUMENT', contentHash: h(), data: { title: 'T', versionedById: PLANT, note: 'n' } });
+      planted.push({ label: 'hash2', ext: r.id as string });
+      await new Promise((res) => setTimeout(res, 300));
+      const sha = (s: string) => createHash('sha256').update(s).digest('hex');
+      const got = mintCalls[0]?.metadataHashHex;
+      console.log('G1516 HASH2', r.status, got, sha('{"title":"T","note":"n"}'), sha(`{"title":"T","versionedById":"${PLANT}","note":"n"}`));
+      expect(mintCalls.length).toBe(1);
+      expect(got).toBe(sha('{"title":"T","note":"n"}'));
+      expect(got).not.toBe(sha(`{"title":"T","versionedById":"${PLANT}","note":"n"}`));
+    } finally { process.env.STATE_THREAD_NFT_ENABLED = 'false'; process.env.SIMULATE_ANCHORING = 'true'; }
+  });
+
+  it('ERASE - org B\'s REAL erasure leaves every A document planted above untouched; B\'s own document is blanked (control)', async () => {
+    const bOwn = await call(asConn('B'), '/api/documents', { type: 'DOCUMENT', organizationUuid: GUID.B, contentHash: h(), data: { title: 'B own ' + RUN } });
+    const legacyExt = (global as any).__legacyExt as string | undefined;
+    const er = await call(asConn('B'), '/api/platform/organizations/erase-connector', { externalRef: GUID.B, keyId: KEY('B') });
+    console.log('G1516 ERASE', er.status, JSON.stringify(er.j));
+    expect(er.status).toBe(200);
+    expect((await row(bOwn.id)).title).toBe('[erased]');
+    const res: Record<string, string> = {};
+    for (const p of planted) if (p.ext) res[p.label + ':' + p.ext.slice(-8)] = (await row(p.ext))?.title;
+    console.log('G1516 ERASE after', JSON.stringify(res));
+    const blanked = Object.entries(res).filter(([, t]) => t === '[erased]').map(([k]) => k);
+    if (legacyExt) console.log('G1516 ERASE legacy row (pre-existing plant, not healed by #1516):', (await row(legacyExt)).title);
+    expect(blanked).toEqual([]);
+  });
+});

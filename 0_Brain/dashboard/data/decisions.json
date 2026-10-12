@@ -33944,5 +33944,45 @@
    "CARD quickquote-v234-gh-login-for-pr-1012",
    "CARD secuura-vm-resize-window"
   ]
+ },
+ {
+  "id": "secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1533: may a tenant-level ADMIN still mint keys for any organisation in its tenant?",
+  "bluf": "Override reason (measured): the prior-rulings gate matched only the generic words admin and role; I read each matched card by id and none rules whether the ADMIN role may mint keys across organisations (the one Secuura match, secuura-kintsugi-issuer-role-account, is about a Kintsugi test account). Action: tap an option. V 5th, building the fix for the key-minting hole (an organisation admin of one organisation could mint a key for another and so make PR #1497's erasure erase it), found the fix as scoped does not reach the role ADMIN: it is neither a platform role nor an organisation-bounded role, so an ADMIN can still mint a key carrying any organisation's id inside its own tenant. V reads ADMIN as a tenant-level admin on purpose, which would make that by design; but the end point is an irreversible cross-organisation erasure, so whether a tenant admin may reach it is your policy call. Making ADMIN organisation-bounded is a one-line change to a shared role set that also governs key revocation, so it would need its own gate. The role sets are V's reading of the code, not re-derived by me.",
+  "default_action": "Wednesday leaves ADMIN unbounded, V's PR A states it, and a separate ticket records the question; the deploy gate on KS-695 stays open until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Leave ADMIN unbounded for now",
+    "detail": "PR A ships as scoped, the PR and KS-1533 say plainly that a tenant ADMIN can still mint across organisations, and a separate ticket records the question"
+   },
+   {
+    "key": "b",
+    "label": "Make ADMIN organisation-bounded",
+    "detail": "a separate PR changes the shared role set (revoke is affected too) with its own Opus gate before KS-695 can deploy"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-13T03:38:26.088574+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-01 13:45",
+   "2026-09-03 21:20",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD nexusai-setup-window-admin-gate-scope",
+   "CARD hpsmpoc-sm-admin-optin-1006",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD secuura-kintsugi-issuer-role-account"
+  ]
  }
 ]
