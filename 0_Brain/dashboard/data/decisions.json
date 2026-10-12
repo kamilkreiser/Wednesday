@@ -32588,5 +32588,48 @@
    "CARD hpsmpoc-demo-name-check-residue-1012",
    "CARD quickquote-cad-currency-1012"
   ]
+ },
+ {
+  "id": "secuura-ks695-erase-connector-retry-semantics",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-695 erase-connector: may we ask Stuart whether a refused call after the key is revoked counts as Confirmed?",
+  "bluf": "Override reason: your earlier KS-695 rulings set the response shape (one terminal POST) and allowed the narrow self-revoke rule; this is a NEW question about retries that those did not cover. Building is already authorised and starts now. Platform S is calling erase-connector today and getting 404s (12 in two idle minutes on 8 Oct, retrying without limit). Seat J's design note serves S's route exactly as it calls it, erasing first and revoking the key last. The consequence: the call revokes the very key it used, so a retry after a crash arrives with a revoked key and the gateway refuses it before the route runs; S would never see 'already erased'. That works only if S treats a refusal for a revoked key on this route as Confirmed. Asking is a message to a person at Platform S, so it is yours to approve; I would post it as a plain-English comment on KS-695 signed as the Platform K agent on your behalf, as with KS-843. Nothing deploys until it is answered. Design note: Blockchain project history, seatJ-2nd folder, DESIGN-KS-695-ask3-erase-connector.md.",
+  "default_action": "Build proceeds test-first; nothing deploys; the question is not posted.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Post the question to Stuart on KS-695 (recommended)",
+    "detail": "Plain English, one question, no change on his side until agreed; deployment waits for his answer."
+   },
+   {
+    "key": "b",
+    "label": "No question; add a narrow read-only exemption for the repeat call",
+    "detail": "The shape you declined on 2 Sep; K answers already erased to a revoked key on this route only."
+   },
+   {
+    "key": "c",
+    "label": "Do not build it",
+    "detail": "S keeps retrying against 404 and organisation dissolutions stall."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-12T18:45:37.195546+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 13:01",
+   "2026-08-21 20:06",
+   "2026-08-24 10:10",
+   "2026-09-02 19:28",
+   "CARD secuura-ks695-ask3-shape-stuart",
+   "CARD secuura-ks695-ask3-shape-ab",
+   "CARD secuura-805-guard5-node-rejection-retry",
+   "CARD secuura-ks1245-smoke-test-degraded-semantics",
+   "CARD secuura-ks1402-lookup-refuses-connector-tokens",
+   "CARD secuura-connector-allowlist-missing-setting-ks1256-1005",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-ks695-connector-may-revoke-own-key-1009"
+  ]
  }
 ]
