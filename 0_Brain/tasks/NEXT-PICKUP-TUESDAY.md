@@ -6,6 +6,24 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 172 — 2026-10-12 11:5x (s103, boot after the cap stop + a Mac mini reboot ~11:43). **READ THIS FIRST; it supersedes 171's FIRST WORK/STATE/FLOOR. 171's OWED list stands.**
+### STATE (each line measured this seat)
+- **Usage 7d 33%, renews 5d 17h.** The 10-08 99% cap is gone. The NexusAI merge-once-tested grant is read as standing (a renewal of the same account, no switch seen).
+- **REBOOT: every 10-08 pane died** (M N O P R, gates 19 + 20). main = **53b1ee5** (ls-remote): nothing has landed since RD-708. Jest lock: no holder, queue empty.
+- **RD-608** merge test (session-tools/c57-s87n-merge-rd608): C-57 OK, MERGED 3/4418 red = rd816-proxy-addr P1 x3, also red at main in that runner (RD-827 class, version UNMEASURED). Never pushed.
+- **N = S94N LAUNCHED (pane %2)**, brief fleet/briefs_staged/2026-10-12_nexusai_N_successor_S94N.md, verified 00:55:30Z. Rung 5 seen (diagnosing RD-608). **Its plan confirmation is OWED to this seat.**
+- **GATE 19 RELEASED on its own body-0.md verdicts** (the report was never assembled; H8-H10 full verifies all PASS). Mail "RELEASE gate 19: six released into turns 18-22, RD-640 NO GO at the cap, RD-807 and RD-821 fix rounds" (fleet/briefs_staged/2026-10-12_nexusai_gate19_RELEASE.md).
+### THE FULL TURN ORDER (derive any change from ALL released heads not on main)
+1 N RD-608 · 2 M RD-657 · 3 O RD-690 · 4 N RD-649 · 5 O RD-675 · 6 N RD-614 · 7 N RD-629 · 8 N RD-591 · 9 M RD-795 · 10 P RD-823 · 11 O RD-828+833 · 12 P RD-751 · 13 M RD-817 · 14 N RD-747 · 15 P RD-831 · 16 R RD-777+776 · 17 R RD-761 · 18 O RD-801+822 · 19 O RD-802 · 20 P RD-721 (screenshots to Kam before demo) · 21 R RD-794 · 22 R RD-819. Then RD-807 after its fix round.
+### FIRST WORK FOR THE NEXT SEAT
+1. Answer S94N's plan confirmation (RD-608 diagnosis). Launch M, then O, sequentially (shared launcher, ~20 s apart), each just before its turn. P and R only when their turns near. **Do not launch seats to sit idle.**
+2. **GATE 21 forms from:** RD-775 (R, T1, READY saved fleet/qa-agent/briefs/2026-10-08_nexusai-rd775-READY-mail.txt), RD-131 (N, T2+browser, proof2 result to read), the RD-807 F-807-1 fix round (R), the RD-821 F-821-1 fix round (O). Ruling (i), the by-hand gate yield, is RETIRED from gate 21 on.
+3. N files: an RD-640 residue ticket (High) and N-640-1 as its own security ticket (Medium).
+### KAM
+0 live-board messages in the 3-day window (view=tuesday). Morning receipt posted (HTTP 201 bf-8e2656bd3bb7). John Spears' QuickQuote CAD request (mail 10-09) left with Kam (Vision paused 09-29).
+### FLOOR
+%0 tuesday · %1 monitor · %2 N (S94N).
+
 ## 🔴 DELTA 171 — 2026-10-08 14:5x (s102, ctx 80%; ROTATION HELD: USAGE 99%). **READ THIS FIRST; it supersedes 170 and its UPDATE lines.**
 ### FIRST WORK FOR THE NEXT SEAT
 0. **UPDATE 16:4x — GATE 20 DELIVERED, ALL TEN GO; RELEASED (mail "RELEASE gate 20: all ten GO — appended to the merge turn order (items 9-18)").** Scored 0.95; pane %24 closed (listeners 12 -> 11, ports=[] on its tty, no node listener now). Main = 53b1ee5 (RD-708 landed, ELEVEN merges). FULL ORDER NOW: 1 N RD-608 (in flight) · 2 M RD-657 · 3 O RD-690 · 4 N RD-649 · 5 O RD-675 · 6 N RD-614 · 7 N RD-629 · 8 N RD-591 · 9 M RD-795 · 10 P RD-823 · 11 O RD-828+833 · 12 P RD-751 · 13 M RD-817 · 14 N RD-747 · 15 P RD-831 · 16 R RD-777/776 (#83/#84/#43 must read fixed on main post-merge) · 17 R RD-761 · 18 O RD-802 ONLY after RD-801 (gate 19). Gate 19 RELEASE inserts by name. The 22:17Z jest notice is OVER (H1 granted 05:15Z).
