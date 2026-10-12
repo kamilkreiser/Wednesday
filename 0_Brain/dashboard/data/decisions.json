@@ -34207,5 +34207,43 @@
    "CARD vision-vsp74-cap-reached-ship-or-round3",
    "CARD nexusai-rd686-round2-cap-ship-words-or-round3"
   ]
+ },
+ {
+  "id": "hpsmpoc-docker-finished-seat-stacks-1013",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC: take down finished test seats' stopped Docker stacks, data volumes kept?",
+  "bluf": "Kam: tap a to take down the stopped Docker stacks left by finished HPSM-POC test seats (b122, b128, b129: 31 networks), keeping every data volume, or c to leave them. Correction first: my earlier Composer Docker card said these networks were Security Composer's. They are not; they are HPSM-POC's (their containers mount the HPSM-POC folder). Your 'a' on that card is being applied to Composer's own two stacks only. Left alone, these leftovers slowly use up Docker's network pool and a later seat's stack can fail to start.",
+  "default_action": "Nothing is removed until Kam taps.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Take them down, keep the volumes",
+    "detail": "An HPSM-POC seat runs compose down (no -v) for each finished seat's stack, never a live seat's, and reports networks, containers and volumes before and after."
+   },
+   {
+    "key": "c",
+    "label": "Leave them",
+    "detail": "Nothing removed; seats keep explicit subnets."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-13T06:58:45.363899+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-03 21:20",
+   "2026-09-16 13:50",
+   "CARD secuura-studio-docker-wedge",
+   "CARD secuura-studio-docker-wedge-2",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD tuesday-seat-self-rotate-with-liveness-check",
+   "CARD secuura-launcher-boot-fetch-vs-parallel-seat-top-line",
+   "CARD composer-docker-networks-closed-seats-1003",
+   "CARD hpsmpoc-words-b230-b231-1013",
+   "CARD composer-k-q32-refuse-names-1013",
+   "CARD composer-docker-prune-stale-seat-stacks-1013"
+  ]
  }
 ]
