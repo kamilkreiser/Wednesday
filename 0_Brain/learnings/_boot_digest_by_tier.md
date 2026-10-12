@@ -7,9 +7,9 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-12 17:06 from 233 lesson files (1,031,719 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 1 · W 190. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-12 18:04 from 234 lesson files (1,033,499 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 190. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
-**UNTAGGED (1) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md
+**UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7185,6 +7185,22 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **Mechanism owed (a rule is not a mechanism):** the boot prompt is shared tooling (Launch_Tuesday.command), so the step is claimed with Wednesday via `wed_claim.sh` before it goes into the launcher. Until then, this file plus the pickup's FIRST WORK line carry it.
 
 **Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-08-12_morning-ticket-sweep-autostart]] (the board sweep this sits beside) · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] · [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]].
+
+
+## Clear the fleet activity flag as soon as a question is answered
+`2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md` · feedback · 2026-10-12 · status: live · tier: UNTAGGED
+
+(no rules-shaped section — file included WHOLE)
+
+# Clear the fleet activity flag as soon as a question is answered
+
+**Rule:** every QUESTION mail from a seat gets its flag cleared in the SAME step as its ANSWER is verified delivered: `bash 2_Project_Files/tools/fleet_ack.sh answered "<subject substring>" "<label>"` (rc 3 = no match yet: re-run after the collector ticks). Check `fleet_ack.sh list` at every checkpoint; it must read FLAGGED 0 unless a question is genuinely open. Only Wednesday's session writes "answered", only after delivery is verified (WED-73).
+
+**Why:** the tool and the 2026-09-08 ruling existed, but lived only in the tool's header and the archived ledger, never in a boot-read lesson, so this seat never saw it and Kam had to repeat it on 2026-10-12. A rule that is not in the boot digest is not a rule that fires.
+
+**Sequence per answer (the hook forbids chaining the note with the send):** (1) send_brief ... --kind answer; (2) cockpit.sh say ... --mail; (3) fleet_ack.sh answered; (4) note_entry.sh quoting the actual output lines.
+
+**Same family, same day (18:02):** Kam's card taps arrive as chat messages ("Decision <id>: a — ..."); they do not change the store. Rule the card in the same step as acting on it (`decision_queue.sh rule <id> <key>`), mark it `--delivered <id> "<artefact>"` when the ruling is in its artefact, and compare `decision_queue.sh list open` with what he can see at every checkpoint. On 2026-10-12 three cards stayed open for 1.5 hours after I had acted on his taps, and he re-tapped them.
 
 
 ## Secuura tickets go to Done once fully tested, working and deployed; the aim is to clear most of them by 31 October; never idle on the backlog; needs go on his board as cards
