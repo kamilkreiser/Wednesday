@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-12 11:58 from 230 lesson files (1,024,463 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 14 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-12 14:37 from 231 lesson files (1,027,026 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 14 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7223,4 +7223,20 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **EXTENSION 09:06:47 — Kam (live), verbatim:** *"also get Sonnet to do some of the harder tasks that you would not give to the spark. You ( an opus agent you spin up - your choice) acts as the gate keeper"*. So Sonnet also takes BUILD tickets that fail the Spark predicate but are not decision-shaped; the gatekeeper is an Opus QA gate plus Wednesday's completion check (receipt bf-327a27910008).
 
 **Family:** [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Every Tuesday boot sweeps ALL Datasec feedback repositories, and actionable feedback gets actioned. Excluded for now: HPSM-POC, the Security Configuration tool, the MPS Calculator
+`2026-10-12_boot-sweeps-all-feedback-repositories.md` · preference · 2026-10-12 · status: live
+
+**The operative case, so the headline matches it:** a Tuesday seat is booting, or Kam has pointed at a product's feedback. **Read every feedback store for the Datasec projects in scope, list what is new since the last sweep, and route each actionable item to its project's agent to fix.** Do not stop at telling Kam the feedback exists.
+
+**How to apply:**
+1. **Boot step:** after the mail check, run the feedback sweep across every in-scope project's feedback store (the inventory is `0_Brain/reference/2026-10-12_datasec-feedback-stores/inventory.md`). Report new items, by project, in the morning receipt.
+2. **"And action":** each actionable item goes to its project's agent as a brief item, through the normal path: the QA gate, the merge on Tuesday's GO, and a deploy only under that project's own grant. Feedback from a client human is answered only by Kam (external comms stay his signature class).
+3. **Exclusions are "at the moment"**: HPSM-POC, the Security Configuration tool and the MPS Calculator. They stay excluded until Kam says otherwise. He wrote "being worked on by tuesday". Tuesday's reading is that he meant they are already covered by a seat. It stands either way.
+4. **QuickQuote specifically:** his "action" lifts the 2026-09-29 Vision pause for QuickQuote FEEDBACK work only. That is Tuesday's reading, receipted on the board at 13:0x with a correction offer.
+
+**Mechanism owed (a rule is not a mechanism):** the boot prompt is shared tooling (Launch_Tuesday.command), so the step is claimed with Wednesday via `wed_claim.sh` before it goes into the launcher. Until then, this file plus the pickup's FIRST WORK line carry it.
+
+**Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-08-12_morning-ticket-sweep-autostart]] (the board sweep this sits beside) · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] · [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]].
 
