@@ -1,0 +1,85 @@
+== parents of head
+4ca146545f15010d5b2adf7e022ce3122498e065 1f0aa1ad4756dae8efc8bddb505b2e2b80c40066 f6f2a539f4a027a0bc60d7bf4b839a352f2b7032
+== log e6b52ee1..head first-parent
+4ca146545 1f0aa1ad4 f6f2a539f Merge origin/develop (f6f2a539f4a0) into the KS-695 ask 3 erase-connector branch
+1f0aa1ad4 e6b52ee15 KS-695 ask 3 (ii): the budget runs from the request, on a monotonic clock
+== the fix commit
+1f0aa1ad4756dae8efc8bddb505b2e2b80c40066 e6b52ee151fff5bb2687ee4c4d59c3a5974d61ba
+KS-695 ask 3 (ii): the budget runs from the request, on a monotonic clock
+
+ Blockchain/Dev/docs/openapi/secuura-api.yaml       |   8 +-
+ .../ks695-ask3-erase-connector-erasure.test.ts     |  80 ++++++++++--
+ ...e-connector-selector-bounds.integration.test.ts | 134 ++++++++++++++++++++-
+ .../services/originate/src/originate.openapi.ts    |   6 +-
+ .../originate/src/routes/platformOrganizations.ts  |   5 +-
+ .../src/services/connectorOrganisationErasure.ts   |  48 ++++++--
+ 6 files changed, 251 insertions(+), 30 deletions(-)
+merge 2nd parent=f6f2a539f4a027a0bc60d7bf4b839a352f2b7032
+92f68da9 ancestor of current develop rc=0
+merged-in develop ancestor of current develop rc=0
+== PR files base..head
+ Blockchain/Dev/docs/openapi/secuura-api.yaml       |  48 +-
+ .../ks764-key-revoke-call-site-guard.test.ts       |   9 +
+ .../ks695-ask3-erase-connector-erasure.test.ts     | 476 ++++++++++++++++++
+ .../ks695-ask3-erase-connector-refusals.test.ts    |  36 +-
+ ...e-connector-selector-bounds.integration.test.ts | 535 +++++++++++++++++++++
+ .../ks695-ask3-erase-connector.integration.test.ts | 310 ++++++++++++
+ Blockchain/Dev/services/originate/src/db.ts        |   5 +-
+ .../services/originate/src/originate.openapi.ts    |  45 +-
+ .../originate/src/routes/platformOrganizations.ts  |  62 ++-
+ .../src/services/connectorOrganisationErasure.ts   | 293 ++++++++++-
+ 10 files changed, 1768 insertions(+), 51 deletions(-)
+PR files: 10
+== PR files blob compare: fix commit vs head (across develop merge)
+SAME 7d194763f90f40345984496a87e5962e67f05dca Blockchain/Dev/docs/openapi/secuura-api.yaml
+SAME dcd9797052a3b0f5777525258b0cad622f4fb0c2 Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts
+SAME cc94546df27bf8610d6c94c86e305926dc712dc3 Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-erasure.test.ts
+SAME 183607183b72af2fc885be51cadbbec13ba70d00 Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts
+SAME 65a5e00da707764594e7f38ae96526bf605974b6 Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-selector-bounds.integration.test.ts
+SAME 526d3788807747cc801a088b9d23200a59e420d5 Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector.integration.test.ts
+SAME 490e219cfcb070aca82f9e62e08e78fa92b55507 Blockchain/Dev/services/originate/src/db.ts
+SAME d47d6a99ef5c0bcef36090bd918f36bc457d6a99 Blockchain/Dev/services/originate/src/originate.openapi.ts
+SAME f00ab45df0d0a526839f3caeb6edfd042f0622f0 Blockchain/Dev/services/originate/src/routes/platformOrganizations.ts
+SAME 568b1c9a0db7ae692561dbe5c26848243e87fba6 Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts
+== diff head vs merge-of-fix: diff 1f0aa1ad4756dae8efc8bddb505b2e2b80c40066 4ca146545f15010d5b2adf7e022ce3122498e065 restricted to PR files (expect empty)
+== develop commits since base touching PR files (merged-in develop)
+== current develop since base touching PR files
+== develop commits since merge-in
+551dc9808 KS-1520: pin leg 16's default run without an install, fix its failure text
+92f68da94 KS-880: one home for the security row mappers; index.ts imports them
+629349dac KS-1510: document-lookup logs the thrown error and keeps its constant 500
+== files they touch
+ .../preflight_test_types_ratchet_leg.test.sh       |  72 +++++++++-
+ .../Dev/scripts/preflight/test-types-ratchet.sh    |  31 ++--
+ ...0-document-lookup-logs-the-thrown-error.test.ts | 141 ++++++++++++++++++
+ .../services/api-gateway/src/routes/platform.ts    |   5 +
+ .../src/__tests__/ks880-one-mapper-home.test.ts    | 127 +++++++++++++++++
+ .../security/src/__tests__/row-converters.test.ts  |  70 +++++++--
+ Blockchain/Dev/services/security/src/converters.ts |  53 ++++++-
+ Blockchain/Dev/services/security/src/index.ts      | 158 +++------------------
+ 8 files changed, 487 insertions(+), 170 deletions(-)
+== diff head vs e6b52ee1 name-status (non-develop part = e6b52ee151fff5bb2687ee4c4d59c3a5974d61ba..1f0aa1ad4756dae8efc8bddb505b2e2b80c40066)
+ Blockchain/Dev/docs/openapi/secuura-api.yaml       |   8 +-
+ .../ks695-ask3-erase-connector-erasure.test.ts     |  80 ++++++++++--
+ ...e-connector-selector-bounds.integration.test.ts | 134 ++++++++++++++++++++-
+ .../services/originate/src/originate.openapi.ts    |   6 +-
+ .../originate/src/routes/platformOrganizations.ts  |   5 +-
+ .../src/services/connectorOrganisationErasure.ts   |  48 ++++++--
+ 6 files changed, 251 insertions(+), 30 deletions(-)
+== my own merge of fix 1f0aa1ad4 + f6f2a539 (reproduce the author's merge)
+rc=0 mytree=f4ed1f42565e274f02ae0d12a5c8f690d7042e43 headtree=f4ed1f42565e274f02ae0d12a5c8f690d7042e43
+== merge-tree head onto current develop 551dc9808aee1c89d217cd662628c17ef8ad3a0e
+rc=0 tree=0b9ca3143019ccc6e63ce9afe1906f1d91752ef5
+== merge-tree head onto 92f68da9
+rc=0 tree=e04e21b86bb13eada29efbf09be28527f8bf1944
+merge rc=0
+ create mode 100644 Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-erasure.test.ts
+ create mode 100644 Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-selector-bounds.integration.test.ts
+ create mode 100644 Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector.integration.test.ts
+head=4ca146545f15010d5b2adf7e022ce3122498e065 merged=a3b96d0fb9e7ddfc21bd466eadfee944f05a2240 mergedtree=0b9ca3143019ccc6e63ce9afe1906f1d91752ef5 (merge-tree said 0b9ca3143019ccc6e63ce9afe1906f1d91752ef5)
+head npm ci rc=0
+head shared build rc=0
+head generate rc=0
+merged npm ci rc=0
+merged shared build rc=0
+merged generate rc=0

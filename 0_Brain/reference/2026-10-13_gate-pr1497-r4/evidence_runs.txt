@@ -1,0 +1,90 @@
+bounds_false: Tests:       21 passed, 21 total
+older_false: Tests:       15 passed, 15 total
+bounds_true: Tests:       21 passed, 21 total
+older_true: Tests:       15 passed, 15 total
+ctl_noplat: Tests:       21 passed, 21 total
+    GATE r4 role {"who":"secuura_app","su":false,"bp":false} MT=false poolBranch=false
+    GATE r4 P1 [{"r":-5,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25006.6,"consistent":true},{"r":0,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25001.2,"consistent":true},{"r":0.3,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25000.8,"consistent":true},{"r":1,"outcome":" Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout`","spentAtReturnMs":25078.7,"consistent":true},{"r":2,"outcome":" Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout`","spentAtReturnMs":25003.4,"consistent":true},{"r":5,"outcome":"completed","spentAtReturnMs":24998.9,"consistent":true},{"r":10,"outcome":"completed","spentAtReturnMs":24993.1,"consistent":true},{"r":20,"outcome":"completed","spentAtReturnMs":24982.8,"consistent":true},{"r":50,"outcome":"completed","spentAtReturnMs":24953.3,"consistent":true},{"r":100,"outcome":"completed","spentAtReturnMs":24902.8,"consistent":true},{"r":400,"outcome":"completed","spentAtReturnMs":24602.6,"consistent":true}]
+    GATE r4 P1b nowCalls=1 ms=10  Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout` {"name":"Org P1B f0a3601e","title":"P1B.pdf","key":true}
+    GATE r4 P5a ms=2004  Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `57014`. Message: `canceling statement due to statement timeout` mid={"name":"Org P5A f0a3601e","title":"P5A.pdf","key":true,"child":"P5A human child.pdf"} | retry 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} | third 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} final={"name":"[erased]","title":"[erased]","key":false} child=[erased]
+    GATE r4 P5b 500 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"Org P5B f0a3601e","title":"P5B.pdf","key":true}
+    GATE r4 P5c 500 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"Org P5C f0a3601e","title":"P5C.pdf","key":true}
+    GATE r4 P5d ms=2506 completed {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 P5e ms=2509 completed {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 P5f ms=2412 erase-connector: the request outlived its 2000 ms budget; rolled back, not committed {"name":"Org P5F f0a3601e","title":"P5F.pdf","key":true}
+    GATE r4 P4 200 {"status":"completed","alreadyErased":false,"documentsBlanked":4} {"a":"ERASED","bConn":"kept","bHuman":"ERASED","bIssued":"kept","bConn_humanChild":"kept","bHuman_connChild":"kept","bHuman_humanChild":"ERASED","bHuman_bIssuedChild":"kept","bIssued_humanChild":"kept","aConnOfB":"ERASED"} Bname=Org P4B f0a3601e Bkey=true
+    GATE r4 P6 200 {"status":"completed","alreadyErased":false,"documentsBlanked":4} {"a":"[erased]","bRoot":"[erased]","bOwn":"B issued.pdf","bDerivOfOwn":"[erased]","bDerivOfA":"[erased]"} Bname=Org P6B f0a3601e Bkey=true
+    GATE r4 P7 erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written {"name":"Org P7 f0a3601e","title":"P7.pdf","key":true}
+  GATE r4 1497 attack (secuura_app, MT=false)
+    GATE r4 role {"who":"secuura_app","su":false,"bp":false} MT=true poolBranch=true
+    GATE r4 P1 [{"r":-5,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25005.7,"consistent":true},{"r":0,"outcome":"erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written","spentAtReturnMs":25000.3,"consistent":true},{"r":0.3,"outcome":"canceling statement due to statement timeout","spentAtReturnMs":25003.8,"consistent":true},{"r":1,"outcome":"erase-connector: the request outlived its 25000 ms budget; rolled back, not committed","spentAtReturnMs":25001.1,"consistent":true},{"r":2,"outcome":"completed","spentAtReturnMs":24999.9,"consistent":true},{"r":5,"outcome":"completed","spentAtReturnMs":24996.5,"consistent":true},{"r":10,"outcome":"completed","spentAtReturnMs":24991.6,"consistent":true},{"r":20,"outcome":"completed","spentAtReturnMs":24981.5,"consistent":true},{"r":50,"outcome":"completed","spentAtReturnMs":24951.6,"consistent":true},{"r":100,"outcome":"completed","spentAtReturnMs":24901.5,"consistent":true},{"r":400,"outcome":"completed","spentAtReturnMs":24601.5,"consistent":true}]
+    GATE r4 P1b nowCalls=1 ms=11 canceling statement due to statement timeout {"name":"Org P1B eb92ee0d","title":"P1B.pdf","key":true}
+    GATE r4 P5a ms=2002 canceling statement due to statement timeout mid={"name":"Org P5A eb92ee0d","title":"P5A.pdf","key":true,"child":"P5A human child.pdf"} | retry 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} | third 200 {"status":"completed","alreadyErased":true,"documentsBlanked":0} final={"name":"[erased]","title":"[erased]","key":false} child=[erased]
+    GATE r4 P5b 500 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"Org P5B eb92ee0d","title":"P5B.pdf","key":true}
+    GATE r4 P5c 500 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"Org P5C eb92ee0d","title":"P5C.pdf","key":true}
+    GATE r4 P5d ms=2505 completed {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 P5e ms=2507 completed {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 P5f ms=2409 erase-connector: the request outlived its 2000 ms budget; rolled back, not committed {"name":"Org P5F eb92ee0d","title":"P5F.pdf","key":true}
+    GATE r4 P4 200 {"status":"completed","alreadyErased":false,"documentsBlanked":4} {"a":"ERASED","bConn":"kept","bHuman":"ERASED","bIssued":"kept","bConn_humanChild":"kept","bHuman_connChild":"kept","bHuman_humanChild":"ERASED","bHuman_bIssuedChild":"kept","bIssued_humanChild":"kept","aConnOfB":"ERASED"} Bname=Org P4B eb92ee0d Bkey=true
+    GATE r4 P6 200 {"status":"completed","alreadyErased":false,"documentsBlanked":4} {"a":"[erased]","bRoot":"[erased]","bOwn":"B issued.pdf","bDerivOfOwn":"[erased]","bDerivOfA":"[erased]"} Bname=Org P6B eb92ee0d Bkey=true
+    GATE r4 P7 erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written {"name":"Org P7 eb92ee0d","title":"P7.pdf","key":true}
+  GATE r4 1497 attack (secuura_app, MT=true)
+[r4slow_false] W=merged role=app MT=false rc=1 fallbackWarn=0 | Tests: 1 failed, 11 skipped, 4 passed, 16 total
+    ✕ Q1 - the budget is spent INSIDE the route's pre-transaction key read (svc_api_keys locked 26 s): 5xx, the "already spent" refusal, nothing written
+    GATE r4 Q1 500 ms=26010 {"code":"INTERNAL_ERROR","message":"Organisation erasure check failed"} logged=["Transaction API error: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 25983 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction."] {"name":"Org Q1 652fde45","title":"Q1.pdf","key":true}
+    GATE r4 Q2 500 ms=24005 {"code":"INTERNAL_ERROR","message":"Organisation erasure check failed"} {"name":"Org Q2 652fde45","title":"Q2.pdf","key":true}
+    GATE r4 Q3 [{"secs":24.95,"status":500,"ms":24951,"body":"Organisation erasure check failed","consistent":true},{"secs":24.99,"status":500,"ms":24995,"body":"Organisation erasure check failed","consistent":true}]
+    GATE r4 Q4 200 ms=14014 {"status":"completed","alreadyErased":false,"documentsBlanked":1} | 500 ms=27106 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"[erased]","title":"[erased]","key":false}
+      307 |     console.log('GATE r4 Q1', r.status, 'ms=' + r.ms, JSON.stringify(r.j?.error ?? r.j?.data), 'logged=' + logged, JSON.stringify(await state(o, d)));
+[r3slow_false] W=merged role=app MT=false rc=0 fallbackWarn=0 | Tests: 9 skipped, 4 passed, 13 total
+    GATE r3 B1 200 ms=24045 {"status":"completed","alreadyErased":false,"documentsBlanked":1} title=[erased] key=false
+    GATE r3 B2 500 ms=26089 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} title=U2 issued.pdf name=Org U2 Secret 1a55099a key=true
+    GATE r3 B4 ms=26012 
+[r5_false] W=merged role=app MT=false rc=0 fallbackWarn=0 | Tests: 6 skipped, 1 passed, 7 total
+    GATE r2 R5 500 ms=25099 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} | S1=S doc.pdf orgName=Org S Secret Legal Name c96934e1 keyActive=true
+[r4slow_true] W=merged role=app MT=true rc=0 fallbackWarn=0 | Tests: 11 skipped, 5 passed, 16 total
+    GATE r4 Q1 500 ms=26012 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} logged=["erase-connector: the request had already spent its 25000 ms budget before the transaction began; nothing written"] {"name":"Org Q1 209b47f9","title":"Q1.pdf","key":true}
+    GATE r4 Q2 200 ms=24032 {"status":"completed","alreadyErased":false,"documentsBlanked":1} {"name":"[erased]","title":"[erased]","key":false}
+    GATE r4 Q3 [{"secs":24.95,"status":200,"ms":24958,"body":{"status":"completed","alreadyErased":false,"documentsBlanked":1},"consistent":true},{"secs":24.99,"status":200,"ms":24998,"body":{"status":"completed","alreadyErased":false,"documentsBlanked":1},"consistent":true}]
+    GATE r4 Q4 200 ms=14010 {"status":"completed","alreadyErased":false,"documentsBlanked":1} | 500 ms=27015 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} {"name":"[erased]","title":"[erased]","key":false}
+[r3slow_true] W=merged role=app MT=true rc=1 fallbackWarn=0 | Tests: 1 failed, 8 skipped, 4 passed, 13 total
+    ✕ B3 - MT pool wait: the budget clock starts INSIDE the callback, so a 4 s wait for a pooled connection plus a 23 s statement COMMITS at ~27 s of request time
+    GATE r3 B1 200 ms=24040 {"status":"completed","alreadyErased":false,"documentsBlanked":1} title=[erased] key=false
+    GATE r3 B2 500 ms=26010 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} title=U2 issued.pdf name=Org U2 Secret 4dc8dd05 key=true
+    GATE r3 B3 poolMax=10 500 requestMs=25004 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} title=U3 issued.pdf key=true
+    GATE r3 B4 ms=26009 erase-connector: the request outlived its 25000 ms budget; rolled back, not committed title=U4 issued.pdf key=true
+      277 |     console.log('GATE r3 B3 poolMax=' + max, r.status, 'requestMs=' + r.ms, JSON.stringify(r.j?.data ?? r.j?.error), 'title=' + (await titleById(d)), 'key=' + (await keyRow(KEY('U3'))).is_active);
+[r5_true] W=merged role=app MT=true rc=0 fallbackWarn=0 | Tests: 6 skipped, 1 passed, 7 total
+    GATE r2 R5 500 ms=25030 {"code":"INTERNAL_ERROR","message":"Organisation erasure failed. Nothing was erased."} | S1=S doc.pdf orgName=Org S Secret Legal Name 6f18424f keyActive=true
+SLOW_DONE
+[r4fast2_false] W=merged role=app MT=false rc=0 fallbackWarn=0 | Tests: 4 skipped, 13 passed, 17 total
+    GATE r4 P8 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} Bname=[erased] Bdoc=[erased] forgedKey=false BrealKey=true
+[r3fast_false] W=merged role=app MT=false rc=0 fallbackWarn=0 | Tests: 4 skipped, 9 passed, 13 total
+    GATE r3 E1 A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":6} after {"src":"[erased]","hVersion":"[erased]","hSignCert":"[erased]","hSignWallet":"[erased]","hGrandchild":"[erased]","bConnector":"A contract with Jane Citizen.pdf (watermarked)","bHuman":"[erased]"} Bname=Org B Secret 55a60f15 Bkey=true
+    GATE r3 X1 L erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":5} {"root_noColon":"kept","root_capital":"kept","root_leadSpace":"kept","root_trailSpace":"kept","root_upperGuid":"kept","root_exactPOSCTL":"ERASED","bIssuedExact":"kept","bIssuedChildOfL":"kept","bConnChildOfL":"kept","bConnLookalikeChildOfL":"ERASED","bConnSpaceChildOfL":"ERASED","numericVbChildOfL":"ERASED"}
+[oldgates_false] W=merged role=app MT=false rc=0 fallbackWarn=0 | Tests: 1 skipped, 19 passed, 20 total
+[n3_false] W=merged role=app MT=false rc=0 fallbackWarn=0 | Tests: 3 passed, 3 total
+      GATE e2e create 201 doc-1791820677471-40f87f7a {"title":"A payroll 2026.pdf","issuer":"c7ed2bea-4109-444a-91a1-3c4ca19b6b10","vb":"connector:platform-s:5071897d-58bf-4e2d-9cbf-4a95f217550e","mt":"A payroll 2026.pdf"} 201 {"title":"A control.pdf","issuer":"c7ed2bea-4109-444a-91a1-3c4ca19b6b10","vb":null,"mt":"A control.pdf"}
+      GATE e2e B erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":0}
+      GATE e2e after {"planted":{"title":"A payroll 2026.pdf","issuer":"c7ed2bea-4109-444a-91a1-3c4ca19b6b10","vb":"connector:platform-s:5071897d-58bf-4e2d-9cbf-4a95f217550e","mt":"A payroll 2026.pdf"},"control":{"title":"A control.pdf","issuer":"c7ed2bea-4109-444a-91a1-3c4ca19b6b10","vb":null,"mt":"A control.pdf"}}
+      GATE human A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":3} after {"src":"[erased]","human":"[erased]","connector":"[erased]"}
+      GATE r2e2e B erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} after {"src":"A payroll 2026.pdf","unissued":"[erased]","ver":"[erased]","verOk":"A payroll 2026.pdf (watermarked)"}
+[r4fast2_true] W=merged role=app MT=true rc=0 fallbackWarn=0 | Tests: 4 skipped, 13 passed, 17 total
+    GATE r4 P8 200 {"status":"completed","alreadyErased":false,"documentsBlanked":1} Bname=[erased] Bdoc=[erased] forgedKey=false BrealKey=true
+[r3fast_true] W=merged role=app MT=true rc=0 fallbackWarn=0 | Tests: 4 skipped, 9 passed, 13 total
+    GATE r3 E1 A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":6} after {"src":"[erased]","hVersion":"[erased]","hSignCert":"[erased]","hSignWallet":"[erased]","hGrandchild":"[erased]","bConnector":"A contract with Jane Citizen.pdf (watermarked)","bHuman":"[erased]"} Bname=Org B Secret 23ab1869 Bkey=true
+    GATE r3 X1 L erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":5} {"root_noColon":"kept","root_capital":"kept","root_leadSpace":"kept","root_trailSpace":"kept","root_upperGuid":"kept","root_exactPOSCTL":"ERASED","bIssuedExact":"kept","bIssuedChildOfL":"kept","bConnChildOfL":"kept","bConnLookalikeChildOfL":"ERASED","bConnSpaceChildOfL":"ERASED","numericVbChildOfL":"ERASED"}
+[oldgates_true] W=merged role=app MT=true rc=0 fallbackWarn=0 | Tests: 1 skipped, 19 passed, 20 total
+[n3_true] W=merged role=app MT=true rc=0 fallbackWarn=0 | Tests: 3 passed, 3 total
+      GATE e2e create 201 doc-1791820716307-09b92c8c {"title":"A payroll 2026.pdf","issuer":"ba78a75c-444e-4471-bc87-669578763ee8","vb":"connector:platform-s:053e2217-b7be-4f8c-816d-9fbf67a8699f","mt":"A payroll 2026.pdf"} 201 {"title":"A control.pdf","issuer":"ba78a75c-444e-4471-bc87-669578763ee8","vb":null,"mt":"A control.pdf"}
+      GATE e2e B erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":0}
+      GATE e2e after {"planted":{"title":"A payroll 2026.pdf","issuer":"ba78a75c-444e-4471-bc87-669578763ee8","vb":"connector:platform-s:053e2217-b7be-4f8c-816d-9fbf67a8699f","mt":"A payroll 2026.pdf"},"control":{"title":"A control.pdf","issuer":"ba78a75c-444e-4471-bc87-669578763ee8","vb":null,"mt":"A control.pdf"}}
+      GATE human A erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":3} after {"src":"[erased]","human":"[erased]","connector":"[erased]"}
+      GATE r2e2e B erase 200 {"status":"completed","alreadyErased":false,"documentsBlanked":2} after {"src":"A payroll 2026.pdf","unissued":"[erased]","ver":"[erased]","verOk":"A payroll 2026.pdf (watermarked)"}
+[n3_ctl_noplat] W=merged role=app MT=true rc=0 fallbackWarn=2 | Tests: 1 passed, 1 total
+[scale_false] W=merged role=app MT=false rc=0 fallbackWarn=0 | Tests: 1 passed, 1 total
+    GATE r2 scale {"N":149000,"BYST":20000,"DEEP":40,"PAD":0,"MT":false,"ms":6570,"out":{"status":"completed","alreadyErased":false,"documentsBlanked":149041},"err":null,"leftNullIssuer":0,"leftIssued":0,"bystErased":0,"keyActive":false}
+[scale_true] W=merged role=app MT=true rc=0 fallbackWarn=0 | Tests: 1 passed, 1 total
+    GATE r2 scale {"N":149000,"BYST":20000,"DEEP":40,"PAD":0,"MT":true,"ms":6532,"out":{"status":"completed","alreadyErased":false,"documentsBlanked":149041},"err":null,"leftNullIssuer":0,"leftIssued":0,"bystErased":0,"keyActive":false}
+porcelain: (empty=clean)
+POST_DONE

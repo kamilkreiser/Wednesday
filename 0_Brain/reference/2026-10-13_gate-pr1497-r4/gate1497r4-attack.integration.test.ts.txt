@@ -1,0 +1,357 @@
+/** QA GATE r4 PR #1497 (scratch, never committed). Head 4ca14654 merged on develop 551dc980. Real Postgres, real routes where it matters. */
+import { randomUUID, randomBytes } from 'crypto';
+import { Client } from 'pg';
+
+const SUPER_DB = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+const APP_DB = process.env.TEST_APP_DATABASE_URL;
+const MT = process.env.MULTI_TENANCY_ENABLED === 'true';
+const PLATFORM_DB = process.env.TEST_PLATFORM_DATABASE_URL || process.env.PLATFORM_DATABASE_URL;
+if (PLATFORM_DB) process.env.PLATFORM_DATABASE_URL = PLATFORM_DB;
+if (SUPER_DB) process.env.DATABASE_URL = APP_DB || SUPER_DB;
+process.env.SIMULATE_ANCHORING = 'true';
+process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
+process.env.AUTH_SERVICE_URL = 'http://gate-auth.invalid';
+process.env.PII_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+process.env.PII_LOOKUP_HMAC_KEY = randomBytes(32).toString('hex');
+const SLOW = process.env.GATE_SLOW === '1';
+const FAST = process.env.GATE_FAST !== '0';
+
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const u = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
+      if (Object.keys(u).length > 0) { req._secuuraUser = u; req.user = u; }
+      next();
+    },
+  };
+});
+
+const RUN = randomUUID().slice(0, 8);
+const T = randomUUID();
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+interface Org { tag: string; id: string; guid: string; conn: string; key: string }
+
+describe('GATE r4 1497 attack (' + (APP_DB ? 'secuura_app' : 'superuser') + ', MT=' + String(MT) + ')', () => {
+  let sql: Client; let server: any; let base = ''; let disconnect: () => Promise<void>; let db: any; let svc: any; let logger: any;
+  const mk = async (tag: string, conn?: string): Promise<Org> => {
+    const o: Org = { tag, id: randomUUID(), guid: randomUUID(), conn: '', key: 'g97r4-k' + tag + '-' + RUN };
+    o.conn = conn ?? 'platform-s:' + o.guid;
+    await sql.query(`INSERT INTO organizations (id,name,slug,type,status,tenant_id,metadata) VALUES ($1,$2,$3,'issuer','active',$4,$5::jsonb)`,
+      [o.id, 'Org ' + tag + ' ' + RUN, 'g97r4-' + tag.toLowerCase() + '-' + RUN, T, JSON.stringify({ externalRef: o.guid })]);
+    await sql.query(`INSERT INTO svc_api_keys (id,organization_id,name,key_hash,key_prefix,connector_id,tenant_id,is_active) VALUES ($1,$2,'k','h'||$1,'sk_x',$3,$4,true)`,
+      [o.key, o.id, o.conn, T]);
+    return o;
+  };
+  const target = (o: Org) => ({ organizationId: o.id, tenantId: T, connectorId: o.conn, externalRef: o.guid, keyId: o.key });
+  const asConn = (o: Org) => ({ userId: 'connector:' + o.conn, role: 'connector', tenantId: T, organizationId: o.id, scopes: ['documents:write', 'documents:read'] });
+  const call = async (who: object, path: string, body: object) => {
+    const t0 = Date.now();
+    const res = await fetch(base + path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(who) }, body: JSON.stringify(body) });
+    const j: any = await res.json().catch(() => null);
+    return { status: res.status, j, ms: Date.now() - t0 };
+  };
+  const erase = (o: Org) => call(asConn(o), '/api/platform/organizations/erase-connector', { externalRef: o.guid, keyId: o.key });
+  const titleById = async (id: string) => (await sql.query('SELECT title FROM documents WHERE id = $1', [id])).rows[0]?.title;
+  const orgName = async (o: Org) => (await sql.query('SELECT name FROM organizations WHERE id = $1', [o.id])).rows[0].name;
+  const keyActive = async (o: Org) => (await sql.query('SELECT is_active FROM svc_api_keys WHERE id = $1', [o.key])).rows[0]?.is_active;
+  const state = async (o: Org, d: string) => ({ name: await orgName(o), title: await titleById(d), key: await keyActive(o) });
+  const untouched = async (o: Org, d: string, title: string) => {
+    const s = await state(o, d);
+    return s.name === 'Org ' + o.tag + ' ' + RUN && s.title === title && s.key === true;
+  };
+  const fullyErased = async (o: Org, d: string) => {
+    const s = await state(o, d);
+    return s.name === '[erased]' && s.title === '[erased]' && s.key === false;
+  };
+  const ins = async (title: string, issuer: string | null, meta: object, parent: string | null) => {
+    const id = randomUUID();
+    await sql.query(`INSERT INTO documents (id,external_id,tenant_id,title,description,document_type,content_hash,status,issuer_organization_id,metadata,parent_document_id,created_at,updated_at)
+                     VALUES ($1,$2,$3,$4,$5,'DOCUMENT',$6,'anchored',$7,$8::jsonb,$9,NOW(),NOW())`,
+      [id, 'g97r4-' + id.slice(0, 8), T, title, 'desc ' + title, 'c'.repeat(64), issuer, JSON.stringify({ title, description: 'desc ' + title, ...meta }), parent]);
+    return id;
+  };
+  const TRIGS: Array<[string, string]> = [];
+  const trig = async (table: string, when: string, body: string, opts = '') => {
+    const n = 'g97r4_' + TRIGS.length;
+    await sql.query(`CREATE OR REPLACE FUNCTION ${n}_f() RETURNS trigger AS $$ BEGIN ${body}; RETURN NULL; END $$ LANGUAGE plpgsql`);
+    await sql.query(`CREATE ${opts.includes('CONSTRAINT') ? 'CONSTRAINT ' : ''}TRIGGER ${n} ${when} ON ${table} ${opts.replace('CONSTRAINT', '')} EXECUTE FUNCTION ${n}_f()`);
+    TRIGS.push([n, table]);
+  };
+  const dropTrigs = async () => {
+    while (TRIGS.length) { const [n, t] = TRIGS.pop()!; await sql.query(`DROP TRIGGER IF EXISTS ${n} ON ${t}`).catch(() => undefined); }
+  };
+  const msg = (e: any) => (e ? String(e.message ?? e).replace(/\s+/g, ' ').slice(-160) : 'RESOLVED');
+
+  beforeAll(async () => {
+    require('@secuura/shared').initFromEnv?.();
+    db = require('../db'); await db.initDb(); disconnect = db.disconnectDb;
+    svc = require('../services/connectorOrganisationErasure');
+    logger = require('../utils/logger').logger;
+    sql = new Client({ connectionString: SUPER_DB }); await sql.connect();
+    await sql.query(`INSERT INTO tenants (id,name,slug,status,created_at,updated_at) VALUES ($1,$2,$3,'active',NOW(),NOW())`, [T, 'g97r4-' + RUN, 'g97r4-' + RUN]);
+    if (MT) { const m = db.getTenantManager(); if (m?.refreshConfigs) await m.refreshConfigs(); if (m?.getTenantStatus && m.getTenantStatus(T) === undefined) throw new Error('MT tenant not loaded'); }
+    const express = require('express');
+    const { platformOrganizationsRouter } = require('../routes/platformOrganizations');
+    const { tenantGucContext } = require('@secuura/shared');
+    const app = express();
+    app.use((req: any, _res: unknown, next: () => void) => { const u = JSON.parse(String(req.headers['x-probe-user'] || '{}')); req.user = u; req.tenantId = u.tenantId || undefined; next(); });
+    app.use(tenantGucContext());
+    app.use((req: any, _res: unknown, next: () => void) => { req.db = db.getRequestPrisma(req); next(); });
+    app.use('/api/platform/organizations', express.json(), platformOrganizationsRouter);
+    await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
+    base = 'http://127.0.0.1:' + server.address().port;
+  }, 60000);
+
+  afterEach(async () => { await dropTrigs(); jest.restoreAllMocks(); });
+
+  afterAll(async () => {
+    if (server) await new Promise<void>((r) => server.close(() => r()));
+    await dropTrigs();
+    await sql.query('UPDATE documents SET parent_document_id=NULL WHERE tenant_id=$1', [T]).catch(() => undefined);
+    for (const t of ['documents', 'svc_api_keys', 'organizations']) await sql.query(`DELETE FROM ${t} WHERE tenant_id=$1`, [T]).catch(() => undefined);
+    await sql.query('DELETE FROM tenants WHERE id=$1', [T]).catch(() => undefined);
+    await sql.end().catch(() => undefined); if (disconnect) await disconnect().catch(() => undefined);
+  }, 60000);
+
+  it('SETUP - product role and tenancy branch', async () => {
+    const row = await db.withTenant(T, async (tx: any) => (await tx.$queryRaw`SELECT current_user AS who, r.rolsuper AS su, r.rolbypassrls AS bp FROM pg_roles r WHERE r.rolname = current_user`)[0]);
+    console.log('GATE r4 role', JSON.stringify(row), 'MT=' + MT, 'poolBranch=' + Boolean(MT && db.getTenantManager?.()));
+    if (APP_DB) expect([row.su, row.bp]).toEqual([false, false]);
+  });
+
+  // ---------------------------------------------------------------- the 1 ms floor and nearly-spent budgets
+  (FAST ? it : it.skip)('P1 - production budget nearly spent (remaining -5 .. 400 ms at the call): every outcome is either a full commit INSIDE the budget or nothing written', async () => {
+    const rows: any[] = [];
+    for (const r of [-5, 0, 0.3, 1, 2, 5, 10, 20, 50, 100, 400]) {
+      const o = await mk('P1_' + String(r).replace('.', '_').replace('-', 'm'));
+      const d = await ins('P1 ' + r + '.pdf', o.id, {}, null);
+      const startedAtMs = performance.now() - (25_000 - r);
+      const out = await svc.eraseConnectorOrganisation(target(o), { startedAtMs }).then((x: any) => x, (e: any) => e);
+      const spent = performance.now() - startedAtMs;
+      const ok = out?.status === 'completed';
+      const consistent = ok ? await fullyErased(o, d) : await untouched(o, d, 'P1 ' + r + '.pdf');
+      rows.push({ r, outcome: ok ? 'completed' : msg(out), spentAtReturnMs: Math.round(spent * 10) / 10, consistent });
+    }
+    console.log('GATE r4 P1', JSON.stringify(rows));
+    for (const x of rows) expect([x.r, x.consistent]).toEqual([x.r, true]);
+    for (const x of rows) if (x.outcome === 'completed') expect(x.spentAtReturnMs).toBeLessThan(25_000 + 200);
+  }, 60000);
+
+  (FAST ? it : it.skip)('P1b - remaining forced into (0,1) ms (performance.now stubbed for the remaining-budget read only) while another session holds the organisation row: the 1 ms floor cancels the lock wait; a 0 (= no limit) would wait and then commit', async () => {
+    const o = await mk('P1B');
+    const d = await ins('P1B.pdf', o.id, {}, null);
+    const holder = new Client({ connectionString: SUPER_DB }); await holder.connect();
+    await holder.query('BEGIN'); await holder.query('SELECT 1 FROM organizations WHERE id = $1 FOR UPDATE', [o.id]);
+    const S = performance.now(); const budgetMs = 5000;
+    const real = performance.now.bind(performance); let n = 0;
+    // only the service's FIRST read (the remaining-budget computation) is moved; every other caller and the commit check see the real clock
+    jest.spyOn(performance, 'now').mockImplementation(() => {
+      if (n === 0 && String(new Error().stack).includes('connectorOrganisationErasure')) { n++; return S + budgetMs - 0.5; }
+      return real();
+    });
+    setTimeout(() => { holder.query('COMMIT').catch(() => undefined); }, 2000);
+    const t0 = real();
+    const out = await svc.eraseConnectorOrganisation(target(o), { startedAtMs: S, budgetMs }).then((x: any) => x, (e: any) => e);
+    const ms = real() - t0;
+    (performance.now as any).mockRestore?.();
+    await sleep(2200); await holder.end();
+    const st = await state(o, d);
+    console.log('GATE r4 P1b', 'nowCalls=' + n, 'ms=' + Math.round(ms), msg(out), JSON.stringify(st));
+    expect(out?.status).toBeUndefined();
+    expect(msg(out)).toMatch(/statement timeout/i);
+    expect(ms).toBeLessThan(1500);
+    expect(await untouched(o, d, 'P1B.pdf')).toBe(true);
+  }, 30000);
+
+  // ---------------------------------------------------------------- partial failures, commit-time, re-run
+  (FAST ? it : it.skip)('P5a - the REVOKE (last write) is cancelled by statement_timeout: names/titles roll back, key active; the retry completes; the third call is alreadyErased', async () => {
+    const o = await mk('P5A');
+    const d = await ins('P5A.pdf', o.id, {}, null);
+    const k = await ins('P5A human child.pdf', null, { versionedById: 'user-' + RUN }, d);
+    await trig('svc_api_keys', 'BEFORE UPDATE', 'PERFORM pg_sleep(2.5)', 'FOR EACH STATEMENT');
+    const t0 = performance.now();
+    const e1 = await svc.eraseConnectorOrganisation(target(o), { budgetMs: 2000 }).then((x: any) => x, (e: any) => e);
+    const ms = performance.now() - t0;
+    const mid = { ...(await state(o, d)), child: await titleById(k) };
+    await dropTrigs();
+    const r2 = await erase(o); const r3 = await erase(o);
+    console.log('GATE r4 P5a', 'ms=' + Math.round(ms), msg(e1), 'mid=' + JSON.stringify(mid), '| retry', r2.status, JSON.stringify(r2.j?.data), '| third', r3.status, JSON.stringify(r3.j?.data), 'final=' + JSON.stringify(await state(o, d)), 'child=' + (await titleById(k)));
+    expect(msg(e1)).toMatch(/statement timeout/i);
+    expect(mid).toEqual({ name: 'Org P5A ' + RUN, title: 'P5A.pdf', key: true, child: 'P5A human child.pdf' });
+    expect([r2.status, r2.j?.data?.alreadyErased, r2.j?.data?.documentsBlanked]).toEqual([200, false, 2]);
+    expect([r3.status, r3.j?.data?.alreadyErased, r3.j?.data?.documentsBlanked]).toEqual([200, true, 0]);
+    expect(await fullyErased(o, d)).toBe(true);
+  }, 30000);
+
+  (FAST ? it : it.skip)('P5b - an error AFTER the revoke (AFTER UPDATE trigger on the key raises): nothing written, key active', async () => {
+    const o = await mk('P5B');
+    const d = await ins('P5B.pdf', o.id, {}, null);
+    await trig('svc_api_keys', 'AFTER UPDATE', "RAISE EXCEPTION 'g97r4 after-revoke failure'", 'FOR EACH STATEMENT');
+    const r = await erase(o);
+    console.log('GATE r4 P5b', r.status, JSON.stringify(r.j?.error), JSON.stringify(await state(o, d)));
+    expect(r.status).toBe(500);
+    expect(await untouched(o, d, 'P5B.pdf')).toBe(true);
+  }, 30000);
+
+  (FAST ? it : it.skip)('P5c - the COMMIT itself fails (deferred constraint trigger raises at commit): 500, nothing written, key active', async () => {
+    const o = await mk('P5C');
+    const d = await ins('P5C.pdf', o.id, {}, null);
+    await trig('organizations', 'AFTER UPDATE', "RAISE EXCEPTION 'g97r4 commit-time failure'", 'CONSTRAINT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW');
+    const r = await erase(o);
+    console.log('GATE r4 P5c', r.status, JSON.stringify(r.j?.error ?? r.j?.data), JSON.stringify(await state(o, d)));
+    expect(r.status).toBe(500);
+    expect(await untouched(o, d, 'P5C.pdf')).toBe(true);
+  }, 30000);
+
+  (FAST ? it : it.skip)('P5d - COMMIT-time work longer than the remaining budget (deferred trigger sleeps 2.5 s at commit, budget 2 s): is it committed after the budget?', async () => {
+    const o = await mk('P5D');
+    const d = await ins('P5D.pdf', o.id, {}, null);
+    await trig('organizations', 'AFTER UPDATE', 'PERFORM pg_sleep(2.5)', 'CONSTRAINT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW');
+    const t0 = performance.now();
+    const out = await svc.eraseConnectorOrganisation(target(o), { budgetMs: 2000 }).then((x: any) => x, (e: any) => e);
+    const ms = performance.now() - t0;
+    const st = await state(o, d);
+    console.log('GATE r4 P5d', 'ms=' + Math.round(ms), out?.status ?? msg(out), JSON.stringify(st));
+    // the invariant: never a half state
+    expect((await untouched(o, d, 'P5D.pdf')) || (await fullyErased(o, d))).toBe(true);
+  }, 30000);
+
+  (FAST ? it : it.skip)('P5e - COMMIT-time work INSIDE statement_timeout but past the budget (statements 1.0 s, deferred 1.5 s, budget 2 s): recorded', async () => {
+    const o = await mk('P5E');
+    const d = await ins('P5E.pdf', o.id, {}, null);
+    await trig('documents', 'BEFORE UPDATE', 'PERFORM pg_sleep(1.0)', 'FOR EACH STATEMENT');
+    await trig('organizations', 'AFTER UPDATE', 'PERFORM pg_sleep(1.5)', 'CONSTRAINT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW');
+    const t0 = performance.now();
+    const out = await svc.eraseConnectorOrganisation(target(o), { budgetMs: 2000 }).then((x: any) => x, (e: any) => e);
+    const ms = performance.now() - t0;
+    console.log('GATE r4 P5e', 'ms=' + Math.round(ms), out?.status ?? msg(out), JSON.stringify(await state(o, d)));
+    expect((await untouched(o, d, 'P5E.pdf')) || (await fullyErased(o, d))).toBe(true);
+  }, 30000);
+
+  (FAST ? it : it.skip)('P5f - time spent IN the revoke counts: docs 1.2 s + revoke 1.2 s against a 2 s budget (each statement inside statement_timeout) is ROLLED BACK, key active', async () => {
+    const o = await mk('P5F');
+    const d = await ins('P5F.pdf', o.id, {}, null);
+    await trig('documents', 'BEFORE UPDATE', 'PERFORM pg_sleep(1.2)', 'FOR EACH STATEMENT');
+    await trig('svc_api_keys', 'BEFORE UPDATE', 'PERFORM pg_sleep(1.2)', 'FOR EACH STATEMENT');
+    const t0 = performance.now();
+    const out = await svc.eraseConnectorOrganisation(target(o), { budgetMs: 2000 }).then((x: any) => x, (e: any) => e);
+    const ms = performance.now() - t0;
+    console.log('GATE r4 P5f', 'ms=' + Math.round(ms), out?.status ?? msg(out), JSON.stringify(await state(o, d)));
+    expect(msg(out)).toMatch(/outlived/i);
+    expect(await untouched(o, d, 'P5F.pdf')).toBe(true);
+  }, 30000);
+
+  // ---------------------------------------------------------------- lineage: coexisting derivatives of other organisations
+  (FAST ? it : it.skip)('P4 - A erases while B\'s connector derivative, B\'s human derivative, a B-issued derivative and their own children coexist under A\'s document', async () => {
+    const A = await mk('P4A'); const B = await mk('P4B');
+    const humanB = 'user-b-' + RUN;
+    const a = await ins('A original.pdf', A.id, {}, null);
+    const ids: Record<string, string> = { a };
+    ids.bConn = await ins('A original.pdf (watermarked) by B connector', null, { versionedById: 'connector:' + B.conn }, a);
+    ids.bHuman = await ins('B human wrote this title.pdf', null, { versionedById: humanB }, a);
+    ids.bIssued = await ins('B issued derivative.pdf', B.id, { versionedById: humanB }, a);
+    ids.bConn_humanChild = await ins('human child under B connector derivative.pdf', null, { versionedById: humanB }, ids.bConn);
+    ids.bHuman_connChild = await ins('B connector child under B human derivative.pdf', null, { versionedById: 'connector:' + B.conn }, ids.bHuman);
+    ids.bHuman_humanChild = await ins('B human child under B human derivative.pdf', null, { versionedById: humanB }, ids.bHuman);
+    ids.bHuman_bIssuedChild = await ins('B issued child under B human derivative.pdf', B.id, {}, ids.bHuman);
+    ids.bIssued_humanChild = await ins('human child under B-issued derivative.pdf', null, { versionedById: humanB }, ids.bIssued);
+    ids.aConnOfB = await ins('B doc (watermarked) by A connector', null, { versionedById: 'connector:' + A.conn }, await ins('B own.pdf', B.id, {}, null));
+    const r = await erase(A);
+    const after: any = {}; for (const [k, id] of Object.entries(ids)) after[k] = (await titleById(id)) === '[erased]' ? 'ERASED' : 'kept';
+    console.log('GATE r4 P4', r.status, JSON.stringify(r.j?.data), JSON.stringify(after), 'Bname=' + (await orgName(B)), 'Bkey=' + (await keyActive(B)));
+    expect(r.status).toBe(200);
+    expect(after).toEqual({ a: 'ERASED', bConn: 'kept', bHuman: 'ERASED', bIssued: 'kept', bConn_humanChild: 'kept', bHuman_connChild: 'kept',
+      bHuman_humanChild: 'ERASED', bHuman_bIssuedChild: 'kept', bIssued_humanChild: 'kept', aConnOfB: 'ERASED' });
+    expect([await orgName(B), await keyActive(B)]).toEqual(['Org P4B ' + RUN, true]);
+  }, 30000);
+
+  (FAST ? it : it.skip)('P6 - two organisations whose keys SHARE one connector_id (the DB allows it; the security mint takes any string): what does A\'s erasure reach of B\'s?', async () => {
+    const shared = 'shared-conn-' + RUN;
+    const A = await mk('P6A', shared); const B = await mk('P6B', shared);
+    const a = await ins('A issued.pdf', A.id, {}, null);
+    const bRoot = await ins('B connector root, unissued.pdf', null, { versionedById: 'connector:' + shared }, null);
+    const bOwn = await ins('B issued.pdf', B.id, {}, null);
+    const bDerivOfOwn = await ins('B connector derivative of B doc.pdf', null, { versionedById: 'connector:' + shared }, bOwn);
+    const bDerivOfA = await ins('B connector derivative of A doc.pdf', null, { versionedById: 'connector:' + shared }, a);
+    const r = await erase(A);
+    const after = { a: await titleById(a), bRoot: await titleById(bRoot), bOwn: await titleById(bOwn), bDerivOfOwn: await titleById(bDerivOfOwn), bDerivOfA: await titleById(bDerivOfA) };
+    console.log('GATE r4 P6', r.status, JSON.stringify(r.j?.data ?? r.j?.error), JSON.stringify(after), 'Bname=' + (await orgName(B)), 'Bkey=' + (await keyActive(B)));
+    expect(r.status).toBe(200); // recorded: which of B's NULL-issuer connector documents fell
+  }, 30000);
+
+  (FAST ? it : it.skip)('P8 - the originate half of the forged-key path: a key row for org B with an ARBITRARY connector_id (what an org-scoped admin of ANOTHER org can mint through /api/security/keys) erases B in full; B\'s own provisioned connector key stays active', async () => {
+    const B = await mk('P8B');
+    const d = await ins('P8 B issued.pdf', B.id, {}, null);
+    const forged: Org = { ...B, conn: 'forged-by-org-a-admin-' + RUN, key: 'g97r4-forged-' + RUN };
+    await sql.query(`INSERT INTO svc_api_keys (id,organization_id,name,key_hash,key_prefix,connector_id,tenant_id,is_active) VALUES ($1,$2,'forged','h'||$1,'sk_x',$3,$4,true)`, [forged.key, B.id, forged.conn, T]);
+    const r = await erase(forged);
+    console.log('GATE r4 P8', r.status, JSON.stringify(r.j?.data ?? r.j?.error), 'Bname=' + (await orgName(B)), 'Bdoc=' + (await titleById(d)), 'forgedKey=' + (await sql.query('SELECT is_active FROM svc_api_keys WHERE id=$1', [forged.key])).rows[0].is_active, 'BrealKey=' + (await keyActive(B)));
+    expect(r.status).toBe(200); // recorded: nothing in originate distinguishes a provisioned connector key from an admin-minted one
+  });
+
+  (FAST ? it : it.skip)('P7 -a request that SPENT its budget is refused with nothing written even when the org row is free and the key is valid (route-level refusal wording is logged, the answer is a 5xx, never 200)', async () => {
+    const o = await mk('P7');
+    const d = await ins('P7.pdf', o.id, {}, null);
+    const out = await svc.eraseConnectorOrganisation(target(o), { startedAtMs: performance.now() - 25_001 }).then((x: any) => x, (e: any) => e);
+    console.log('GATE r4 P7', msg(out), JSON.stringify(await state(o, d)));
+    expect(msg(out)).toMatch(/already spent/);
+    expect(await untouched(o, d, 'P7.pdf')).toBe(true);
+  });
+
+  // ---------------------------------------------------------------- SLOW: the real route, the 25 s production budget
+  const lockKeysFor = async (secs: number) => {
+    const h = new Client({ connectionString: SUPER_DB }); await h.connect();
+    await h.query('BEGIN'); await h.query('LOCK TABLE svc_api_keys IN ACCESS EXCLUSIVE MODE');
+    setTimeout(() => { h.query('COMMIT').finally(() => h.end()); }, secs * 1000);
+  };
+
+  (SLOW ? it : it.skip)('Q1 - the budget is spent INSIDE the route\'s pre-transaction key read (svc_api_keys locked 26 s): 5xx, the "already spent" refusal, nothing written', async () => {
+    const o = await mk('Q1'); const d = await ins('Q1.pdf', o.id, {}, null);
+    const spy = jest.spyOn(logger, 'error');
+    await lockKeysFor(26);
+    const r = await erase(o);
+    const logged = JSON.stringify(spy.mock.calls.map((c: any[]) => c[1]?.error ?? c[0])).slice(0, 300);
+    console.log('GATE r4 Q1', r.status, 'ms=' + r.ms, JSON.stringify(r.j?.error ?? r.j?.data), 'logged=' + logged, JSON.stringify(await state(o, d)));
+    expect(r.status).toBe(500);
+    expect(logged).toMatch(/already spent/);
+    expect(await untouched(o, d, 'Q1.pdf')).toBe(true);
+  }, 90000);
+
+  (SLOW ? it : it.skip)('Q2 - 24.0 s spent in the pre-transaction read leaves ~1 s: the erasure commits inside the budget', async () => {
+    const o = await mk('Q2'); const d = await ins('Q2.pdf', o.id, {}, null);
+    await lockKeysFor(24.0);
+    const r = await erase(o);
+    console.log('GATE r4 Q2', r.status, 'ms=' + r.ms, JSON.stringify(r.j?.data ?? r.j?.error), JSON.stringify(await state(o, d)));
+    expect((r.status === 200 && (await fullyErased(o, d))) || (r.status === 500 && (await untouched(o, d, 'Q2.pdf')))).toBe(true);
+    if (r.status === 200) expect(r.ms).toBeLessThan(25_300);
+  }, 90000);
+
+  (SLOW ? it : it.skip)('Q3 - 24.97 s spent in the pre-transaction read leaves ~30 ms (the floor region): whole commit inside the budget, or nothing', async () => {
+    const rows: any[] = [];
+    for (const secs of [24.95, 24.99]) {
+      const o = await mk('Q3_' + String(secs).replace('.', '_')); const d = await ins('Q3.pdf', o.id, {}, null);
+      await lockKeysFor(secs);
+      const r = await erase(o);
+      const ok = r.status === 200 ? await fullyErased(o, d) : await untouched(o, d, 'Q3.pdf');
+      rows.push({ secs, status: r.status, ms: r.ms, body: r.j?.data ?? r.j?.error?.message, consistent: ok });
+    }
+    console.log('GATE r4 Q3', JSON.stringify(rows));
+    for (const x of rows) expect(x.consistent).toBe(true);
+    for (const x of rows) if (x.status === 200) expect(x.ms).toBeLessThan(25_300);
+  }, 120000);
+
+  (SLOW ? it : it.skip)('Q4 - concurrent erasure of the SAME organisation while the first holds the row 14 s: first 200, second waits on the lock, then its own 14 s statement runs past the budget -> rolled back 5xx; no double effect', async () => {
+    const o = await mk('Q4'); const d = await ins('Q4.pdf', o.id, {}, null);
+    await trig('documents', 'BEFORE UPDATE', 'PERFORM pg_sleep(14)', 'FOR EACH STATEMENT');
+    const p1 = erase(o); await sleep(1000); const p2 = erase(o);
+    const [a, b] = await Promise.all([p1, p2]);
+    console.log('GATE r4 Q4', a.status, 'ms=' + a.ms, JSON.stringify(a.j?.data ?? a.j?.error), '|', b.status, 'ms=' + b.ms, JSON.stringify(b.j?.data ?? b.j?.error), JSON.stringify(await state(o, d)));
+    expect(a.status).toBe(200);
+    expect(await fullyErased(o, d)).toBe(true);
+    expect([200, 500]).toContain(b.status);
+    if (b.status === 200) expect(b.j?.data?.alreadyErased).toBe(true);
+  }, 120000);
+});
