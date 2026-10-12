@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 175 — 2026-10-12 17:0x (s103, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST. It supersedes 174's STATE where they differ; 174's QuickQuote and OWED lines stand except as below.**
+### STATE
+- **MAIN = 5e78b4d** (RD-690, PR #74; THREE merges today: RD-608, RD-657, RD-690). Push Build 38209706388 was IN PROGRESS. The background watch dies with this seat, so re-read it with `gh run view 38209706388 -R datasecau/Reporting_Dashboard_Au` (NexusAI GH_CONFIG_DIR). **On green: TURN -> N RD-649 @ 20fea84 (item 4), in a SELF-CONTAINED mail** (main sha, head, recipe pointer HANDOVER-S87N; seats get compacted while idle). After that: O RD-675 (5), N RD-614 (6), N RD-629 (7), N RD-591 (8), M RD-795 (9), P RD-823 (10: P is NOT launched yet, so launch P's successor before item 10).
+- **GATE 21 RUNNING (%9)**: members RD-775, RD-131, RD-807 (fix), RD-821 r3 candidate. On its verdict: read it WHOLE, score, pane_close, RELEASE. The RD-821 swap happens only after a GO, with the lock empty.
+- **Seats:** N %2, M %3, O %4, R %6 (all waiting by design), gate 21 %9. Vision panes closed (both wrapped and scored).
+### QUICKQUOTE v2.34 CAD
+- On its branch, @ 1270b71, GATED and follow-ups checked. The push to main was REFUSED by the org CodeQL ruleset (GH013). **Waiting on Kam's GitHub login** (card quickquote-v234-gh-login-for-pr-1012). His 16:25 note asked for steps and links: ANSWERED 16:5x on the board (terminal one-liner with the Vision GH_CONFIG_DIR + github.com/login/device, or the click-only compare link). **On his "done": launch a Vision seat** with a PR brief (open the PR, CodeQL + tests.yml, merge commit, ls-remote main, CI ids, MERGED). **Then the PUBLISH card** with the screenshots (Vision root v234-*.png / v234-cad-print-*.pdf), the CA$ prefix, and the AUD-seed side note. The local unpushed merge 8b29136 in the QuickQuote checkout is not to be realigned without asking.
+### FIXED TODAY
+- **tap_tuesday.sh now resolves the pane** (commit 54bc2ef94; live fire proven 16:53:34, 5 rows tapped). Kam's board taps reach this seat again. kam_rulings_today at checkpoints stays as the belt.
+### OWED (carried)
+- ATTIO digest misroute · the subject-tag fix (mails still tag "[Wednesday -> ...]") · the feedback-sweep boot step in Launch_Tuesday.command (shared, claim it first) · score O and N at their wraps.
+
 ## 🟢 DELTA 174 — 2026-10-12 15:4x (s103, ctx 65% light checkpoint). **READ THIS FIRST, THEN 173 and 172 (the turn order in 172 stands, updated by the lines below).**
 ### STATE
 - **MAIN = b6c506a** (RD-608 + RD-657 landed today; both push Builds green). **TURN = O (S96O, %4): RD-690.** Merge ticket s96o-merge-rd690 holds the jest lock (pid 15751). On O's MERGED: verify at source, then TURN to N RD-649 (item 4). The TURN mail must be SELF-CONTAINED, because seats get compacted while idle.
