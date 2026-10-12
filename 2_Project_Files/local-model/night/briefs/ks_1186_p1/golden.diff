@@ -1,0 +1,153 @@
+diff --git a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+--- a/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
++++ b/Blockchain/Dev/services/auth/src/repositories/userRepo.ts
+@@ -445,3 +445,3 @@
+     );
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
++    if (result.rows.length > 0) return await fromRow(result.rows[0]);
+     return null;
+@@ -511,3 +511,3 @@
+     const result = await query(`SELECT ${USER_COLS} FROM auth_find_user_by_id($1)`, [id]);
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
++    if (result.rows.length > 0) return await fromRow(result.rows[0]);
+     return null;
+@@ -584,4 +584,4 @@
+     );
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
+-
++    if (result.rows.length > 0) return await fromRow(result.rows[0]);
++
+     // Legacy fallback: rows that pre-date the hash column still have
+@@ -593,3 +593,3 @@
+     );
+-    if (legacy.rows.length > 0) return fromRow(legacy.rows[0]);
++    if (legacy.rows.length > 0) return await fromRow(legacy.rows[0]);
+     return null;
+@@ -626,3 +626,3 @@
+     const result = await query(`SELECT ${USER_COLS} FROM auth_find_user_by_social($1, $2)`, [provider, providerId]);
+-    if (result.rows.length > 0) return fromRow(result.rows[0]);
++    if (result.rows.length > 0) return await fromRow(result.rows[0]);
+     return null;
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1186-userrepo-fromrow-sites-are-awaited.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1186-userrepo-fromrow-sites-are-awaited.test.ts
+new file mode 100644
+index 0000000..859c7e0
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1186-userrepo-fromrow-sites-are-awaited.test.ts
+@@ -0,0 +1,117 @@
++import { describe, it, expect, beforeEach, vi } from 'vitest';
++
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const actual = await importOriginal<Record<string, unknown>>();
++  return {
++    ...actual,
++    encryptField: async (v: string) => v,
++    decryptField: async (v: string) => v,
++    encryptFieldWithDek: async (v: string) => v,
++    decryptFieldWithDek: async (v: string) => v,
++    isSubjectDekCiphertext: (v: unknown) => typeof v === 'string' && v.startsWith('sdek:'),
++    isEncryptedPii: () => false,
++    lookupHash: (v: string) => `hash:${v}`,
++  };
++});
++
++vi.mock('../services/subjectDeks', () => ({
++  subjectDeks: {
++    getDek: vi.fn(async () => 'test-dek'),
++    getOrCreateDek: vi.fn(async () => 'test-dek'),
++  },
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
++}));
++
++const ROW = { id: 'ks1186-row', email: 'sdek:ciphertext', status: 'active', role: 'user', created_at: '2026-01-01T00:00:00.000Z', updated_at: '2026-01-01T00:00:00.000Z' };
++
++vi.mock('../db', () => ({
++  query: vi.fn(async (sql: string) => {
++    const text = String(sql);
++    if (/auth_find_user_by_email_hash/i.test(text)) {
++      return { rows: [], rowCount: 0 };
++    }
++    return { rows: [ROW], rowCount: 1 };
++  }),
++}));
++
++async function loadRepo() {
++  const saved = { ...process.env };
++  Object.assign(process.env, { NODE_ENV: 'development' });
++  vi.resetModules();
++  const repo = await import('../repositories/userRepo');
++  const deks = await import('../services/subjectDeks');
++  const log = await import('../utils/logger');
++  return { repo, deks, log, restore: () => { process.env = saved; } };
++}
++
++// Resolves with whatever the promise rejects with, so the cell fails by an assertion (not by an unhandled rejection).
++const rejection = (p: Promise<unknown>): Promise<unknown> => p.then(() => new Error('resolved without rejecting'), (e) => e);
++
++const INFRA = 'connection terminated unexpectedly';
++
++describe('KS-1186 - the five userRepo lookups await fromRow, so a fromRow-side DB failure is classified', () => {
++  beforeEach(() => { vi.clearAllMocks(); });
++
++  it('KS-1186 🔴 getUserByIdWithPasswordHash - an infrastructure failure inside fromRow becomes ServiceUnavailable', async () => {
++    const { repo, deks, restore } = await loadRepo();
++    try {
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error(INFRA));
++      expect(String(((await rejection(repo.getUserByIdWithPasswordHash(ROW.id))) as any)?.message)).toMatch(/temporarily unavailable/);
++    } finally { restore(); }
++  });
++
++  it('KS-1186 🔴 getUserByIdPreAuth - an infrastructure failure inside fromRow becomes ServiceUnavailable', async () => {
++    const { repo, deks, restore } = await loadRepo();
++    try {
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error(INFRA));
++      expect(String(((await rejection(repo.getUserByIdPreAuth(ROW.id))) as any)?.message)).toMatch(/temporarily unavailable/);
++    } finally { restore(); }
++  });
++
++  it('KS-1186 🔴 getUserByEmail hash arm - an infrastructure failure inside fromRow becomes ServiceUnavailable', async () => {
++    const { repo, deks, restore } = await loadRepo();
++    try {
++      const db = await import('../db');
++      vi.mocked(db.query).mockResolvedValueOnce({ rows: [ROW], rowCount: 1 } as any);
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error(INFRA));
++      expect(String(((await rejection(repo.getUserByEmail('a@example.com'))) as any)?.message)).toMatch(/temporarily unavailable/);
++    } finally { restore(); }
++  });
++
++  it('KS-1186 🔴 getUserByEmail legacy arm - an infrastructure failure inside fromRow becomes ServiceUnavailable', async () => {
++    const { repo, deks, restore } = await loadRepo();
++    try {
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error(INFRA));
++      expect(String(((await rejection(repo.getUserByEmail('a@example.com'))) as any)?.message)).toMatch(/temporarily unavailable/);
++    } finally { restore(); }
++  });
++
++  it('KS-1186 🔴 getUserBySocialId - an infrastructure failure inside fromRow becomes ServiceUnavailable', async () => {
++    const { repo, deks, restore } = await loadRepo();
++    try {
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error(INFRA));
++      expect(String(((await rejection(repo.getUserBySocialId('google', 'g-1'))) as any)?.message)).toMatch(/temporarily unavailable/);
++    } finally { restore(); }
++  });
++
++  it('KS-1186 control - a NON-infrastructure failure inside fromRow is rethrown as-is, before and after', async () => {
++    const { repo, deks, restore } = await loadRepo();
++    try {
++      vi.mocked(deks.subjectDeks.getDek).mockRejectedValueOnce(new Error('ks1186-not-an-infrastructure-fault'));
++      expect(String(((await rejection(repo.getUserByIdPreAuth(ROW.id))) as any)?.message)).toMatch(/ks1186-not-an-infrastructure-fault/);
++    } finally { restore(); }
++  });
++
++  it('KS-1186 control - with nothing rejecting, each lookup resolves the encrypted row', async () => {
++    const { repo, restore } = await loadRepo();
++    try {
++      expect((await repo.getUserByIdWithPasswordHash(ROW.id))?.id).toBe(ROW.id);
++      expect((await repo.getUserByIdPreAuth(ROW.id))?.id).toBe(ROW.id);
++      expect((await repo.getUserByEmail('a@example.com'))?.id).toBe(ROW.id);
++      expect((await repo.getUserBySocialId('google', 'g-1'))?.id).toBe(ROW.id);
++    } finally { restore(); }
++  });
++});

@@ -165,3 +165,4 @@ Rules:
 
 | Date | What happened (root cause) | Type | w | Lesson | Status |
 |---|---|---|---|---|---|
+| 2026-10-12 | Carded Kam to run `ssh-add ... ~/.ssh/secuura_blockchain_deploy_rw` copied from the Secuura launcher preflight text without checking the file exists; it does not on this Mac (Kam pasted the failure 15:55). Root cause: a launcher hint treated as a measured fact (mental-model-not-source-of-truth); the real key sits in the project 3_Access_Keys and is already wired as repo core.sshCommand. | verify-before-asking-Kam | 1 | Before a card asks Kam to run a command, run its read-only precondition myself (ls the path); a launcher/warning line is a representation. Card withdrawn, seats corrected by mail. | filed (no new lesson file, w=1) |

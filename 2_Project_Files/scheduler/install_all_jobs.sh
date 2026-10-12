@@ -77,6 +77,9 @@ for t in "$JOBS"/*.plist.template; do
   # ornith-* jobs are Wednesday's only. On any other seat they refused every cycle (G5: no ollama) and posted
   # duplicate receipts to the panel (Tuesday's 2026-09-22 04:26Z coordination; she booted them out by hand).
   case "$job" in ornith-*) if [ "$SEAT" != "wednesday" ]; then echo "skip $job — Ornith is Wednesday's; seat is $SEAT"; continue; fi ;; esac
+  # ORNITH PAUSED (Kam, live board 2026-10-12 16:24:43: "Stop all Ornith work for now."): while this flag file exists the
+  # ornith-* jobs are not installed. Remove the file to resume (then run this installer).
+  case "$job" in ornith-*) if [ -f "$PROJECT_DIR/0_Brain/tasks/ORNITH-PAUSED" ]; then echo "skip $job — Ornith paused by Kam 2026-10-12 (0_Brain/tasks/ORNITH-PAUSED)"; continue; fi ;; esac
   # naspush (2026-10-04, Kam's one-way NAS leg) is Wednesday's only; nas_push.sh refuses any other seat anyway.
   case "$job" in naspush) if [ "$SEAT" != "wednesday" ]; then echo "skip $job — the one-way NAS leg is Wednesday's; seat is $SEAT"; continue; fi ;; esac
   # trmnlpush (2026-10-09, Kam's TRMNL view) is Wednesday's only: one pusher per webhook, or two seats share TRMNL's 12/hour limit and overwrite each other.

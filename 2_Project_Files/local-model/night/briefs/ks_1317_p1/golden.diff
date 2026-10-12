@@ -1,0 +1,63 @@
+diff --git a/Blockchain/Dev/packages/shared/package.json b/Blockchain/Dev/packages/shared/package.json
+index 118e6a4..be9d7a3 100644
+--- a/Blockchain/Dev/packages/shared/package.json
++++ b/Blockchain/Dev/packages/shared/package.json
+@@ -113,7 +113,8 @@
+     "@types/jsonwebtoken": "^9.0.5",
+     "@types/node": "^20.11.5",
+     "@types/pg": "^8.16.0",
+-    "typescript": "^5.3.3"
++    "typescript": "^5.3.3",
++    "vitest": "^4.1.9"
+   },
+   "exports": {
+     ".": "./dist/index.js",
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1317-shared-declares-its-test-runner.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1317-shared-declares-its-test-runner.test.ts
+new file mode 100644
+index 0000000..3b16d87
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1317-shared-declares-its-test-runner.test.ts
+@@ -0,0 +1,43 @@
++/**
++ * =============================================================================
++ * KS-1317 - packages/shared declares the test runner its own `test` script runs
++ * =============================================================================
++ * `npm test` in this package runs `vitest run`, but vitest was declared nowhere
++ * in this package.json: an `npm ci` inside the package installed no
++ * node_modules/.bin/vitest and `npm test` exited 127, which reads like a broken
++ * checkout. Only the hoisted copy at the workspace root made it work.
++ *
++ * This guard reads the package's own package.json and pins both halves: the
++ * script that calls the runner, and the declaration of the runner. It does not
++ * install anything and does not look at any lockfile.
++ * =============================================================================
++ */
++
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const PKG = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf8')) as {
++  scripts?: Record<string, string>;
++  dependencies?: Record<string, string>;
++  devDependencies?: Record<string, string>;
++};
++const DECLARED: Record<string, string> = { ...(PKG.dependencies ?? {}), ...(PKG.devDependencies ?? {}) };
++
++describe('KS-1317 - the package declares the runner its test script invokes', () => {
++  it('the test script runs vitest', () => {
++    expect(PKG.scripts?.test).toBe('vitest run');
++  });
++
++  it('vitest is declared in dependencies or devDependencies', () => {
++    expect(DECLARED.vitest).toBeDefined();
++  });
++
++  it('the declared vitest range is a 4.x caret range', () => {
++    expect(String(DECLARED.vitest)).toMatch(/^\^4\.\d+\.\d+$/);
++  });
++
++  it('CONTROL typescript is declared, so this reader can see a declaration', () => {
++    expect(DECLARED.typescript).toBeDefined();
++  });
++});

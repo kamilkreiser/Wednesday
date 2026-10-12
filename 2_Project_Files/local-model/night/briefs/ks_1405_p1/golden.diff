@@ -1,0 +1,94 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1405_run_schemathesis_default_findings_dir.test.sh b/Blockchain/Dev/scripts/__tests__/ks1405_run_schemathesis_default_findings_dir.test.sh
+new file mode 100644
+index 0000000..d4790ca
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks1405_run_schemathesis_default_findings_dir.test.sh
+@@ -0,0 +1,75 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Testing/ci/tools/run-schemathesis.sh - KS-1405: with
++# FINDINGS_DIR unset the wrapper must not write schemathesis.json into the CWD.
++# =============================================================================
++# The wrapper copy lives in a fixture tree shaped like the repo (it finds the
++# repo root four levels above itself). The tracked runner is a stub that exits 0
++# and writes no NDJSON, so the wrapper takes its "emitting empty findings"
++# branch and node is never needed. The wrapper runs from a throwaway git repo
++# that stands in for "the repo root".
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks1405_run_schemathesis_default_findings_dir.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUBJ="${RUN_SCHEMATHESIS_SH:-$HERE/../../../Testing/ci/tools/run-schemathesis.sh}"
++[[ -r "$SUBJ" ]] || { echo "FATAL: run-schemathesis.sh not readable at $SUBJ" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1405.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++
++TOOLS="$WORK/fx/Blockchain/Testing/ci/tools"
++SC="$WORK/fx/Blockchain/Dev/systemTest/schemathesis"
++mkdir -p "$TOOLS" "$SC/scripts" "$SC/venv/bin"
++cp "$SUBJ" "$TOOLS/run-schemathesis.sh"
++printf '#!/bin/sh\nexit 0\n' > "$SC/venv/bin/python3"
++printf '# stub runner\n' > "$SC/scripts/run.py"
++chmod +x "$SC/venv/bin/python3"
++
++# run_case <name> [FINDINGS_DIR value]: run the wrapper from a fresh git repo
++# $WORK/<name>/cwd; its output goes to $WORK/<name>/out.txt.
++run_case() {
++  mkdir -p "$WORK/$1/cwd"
++  git -C "$WORK/$1/cwd" init -q
++  (
++    export TARGET_BASE="http://localhost:1"
++    unset FINDINGS_DIR
++    [[ $# -ge 2 ]] && export FINDINGS_DIR="$2"
++    cd "$WORK/$1/cwd" && bash "$TOOLS/run-schemathesis.sh"
++  ) >"$WORK/$1/out.txt" 2>&1
++  echo $?
++}
++
++RC_DEFAULT="$(run_case dflt)"
++CWD_DEFAULT="$WORK/dflt/cwd"
++mkdir -p "$WORK/expl/chosen"
++RC_EXPLICIT="$(run_case expl "$WORK/expl/chosen")"
++
++# CELL 1 (RED at the tip) - a bare run leaves the working tree clean.
++if [[ -z "$(git -C "$CWD_DEFAULT" status --porcelain)" && ! -e "$CWD_DEFAULT/schemathesis.json" ]]; then
++  echo "PASS: a run with FINDINGS_DIR unset leaves the working directory clean"; PASS=$((PASS+1))
++else
++  echo "FAIL: a run with FINDINGS_DIR unset left: $(git -C "$CWD_DEFAULT" status --porcelain | head -1)"; FAIL=$((FAIL+1))
++fi
++
++# CELL 2 (GREEN CONTROL, tip AND after) - the default run still exits 0 and still writes its findings somewhere.
++WROTE="$(sed -n 's/^\[run-schemathesis\] wrote //p' "$WORK/dflt/out.txt" | tail -1)"
++if [[ "$RC_DEFAULT" == "0" && -n "$WROTE" ]] && grep -qF 'no NDJSON at' "$WORK/dflt/out.txt"; then
++  echo "PASS: CONTROL the default run exits 0, takes the empty-findings branch and names its output file"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL default run: rc=$RC_DEFAULT, wrote='$WROTE'"; FAIL=$((FAIL+1))
++fi
++
++# CELL 3 (GREEN CONTROL, tip AND after) - an explicit FINDINGS_DIR (the orchestrator's call) is honoured.
++if [[ "$RC_EXPLICIT" == "0" && "$(cat "$WORK/expl/chosen/schemathesis.json" 2>/dev/null)" == "[]" \
++      && ! -e "$WORK/expl/cwd/schemathesis.json" ]]; then
++  echo "PASS: CONTROL an explicit FINDINGS_DIR still receives schemathesis.json"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL explicit FINDINGS_DIR: rc=$RC_EXPLICIT"; FAIL=$((FAIL+1))
++fi
++
++echo "ks1405_run_schemathesis_default_findings_dir: $PASS passed, $FAIL failed"
++[[ "$FAIL" -eq 0 && "$PASS" -eq 3 ]]
+diff --git a/Blockchain/Testing/ci/tools/run-schemathesis.sh b/Blockchain/Testing/ci/tools/run-schemathesis.sh
+--- a/Blockchain/Testing/ci/tools/run-schemathesis.sh
++++ b/Blockchain/Testing/ci/tools/run-schemathesis.sh
+@@ -23,6 +23,7 @@
+ TARGET_BASE="${TARGET_BASE:-http://localhost:6882}"
+ SC_PROFILE="${SC_PROFILE:-readonly}"
+-FINDINGS_DIR="${FINDINGS_DIR:-.}"
+-
++# KS-1405: default to a fresh temp dir, never the CWD (a bare run from the repo root left an untracked schemathesis.json).
++FINDINGS_DIR="${FINDINGS_DIR:-$(mktemp -d "${TMPDIR:-/tmp}/run-schemathesis.XXXXXX")}"
++
+ # Prefer the project venv (schemathesis lives there); fall back to python3.
+ PY="$SC_DIR/venv/bin/python3"

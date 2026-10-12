@@ -1,0 +1,70 @@
+diff --git a/Blockchain/Dev/frontend/admin/src/pages/Login.tsx b/Blockchain/Dev/frontend/admin/src/pages/Login.tsx
+index be9ec53..e1b0426 100644
+--- a/Blockchain/Dev/frontend/admin/src/pages/Login.tsx
++++ b/Blockchain/Dev/frontend/admin/src/pages/Login.tsx
+@@ -78,7 +78,7 @@ export default function Login() {
+                   required
+                   autoFocus
+                   data-testid="email-input"
+-                  placeholder="admin@secuura.com"
++                  placeholder="name@example.com"
+                 />
+               </div>
+ 
+diff --git a/systemTest/__tests__/ks1105_admin_login_placeholder_not_seed_address.test.sh b/systemTest/__tests__/ks1105_admin_login_placeholder_not_seed_address.test.sh
+new file mode 100644
+index 0000000..27f6580
+--- /dev/null
++++ b/systemTest/__tests__/ks1105_admin_login_placeholder_not_seed_address.test.sh
+@@ -0,0 +1,51 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Dev/frontend/admin/src/pages/Login.tsx - KS-1105: the admin
++# login email field must not show the SYSTEM_ADMIN seed address as its placeholder.
++# =============================================================================
++# The email Input carried placeholder="admin@secuura.com", the cross-tenant seed
++# account's address, on the public login page. This is a static source scan (the
++# admin frontend carries no unit-test runner): it fails when the file offers the seed
++# address as a placeholder, and a planted copy proves the scan can fail.
++# Usage: bash systemTest/__tests__/ks1105_admin_login_placeholder_not_seed_address.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++LOGIN="${LOGIN_TSX:-$HERE/../../Blockchain/Dev/frontend/admin/src/pages/Login.tsx}"
++[[ -r "$LOGIN" ]] || { echo "FATAL: Login.tsx not readable at $LOGIN" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1105.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++
++# Prints every line that offers the seed address as a placeholder.
++seed_placeholder_lines() { grep -n -i -E 'placeholder=.*admin@secuura\.com' "$1" || true; }
++
++printf '%s\n' '<Input placeholder="admin@secuura.com" />' > "$WORK/planted.tsx"
++
++# CELL 1 (RED at the tip) - the login page does not offer the seed address as a placeholder.
++HITS="$(seed_placeholder_lines "$LOGIN")"
++if [[ -z "$HITS" ]]; then
++  echo "PASS: the admin login does not use the seed address as a placeholder"; PASS=$((PASS+1))
++else
++  echo "FAIL: the admin login still uses the seed address as a placeholder: $HITS"; FAIL=$((FAIL+1))
++fi
++
++# CELL 2 (GREEN CONTROL, tip AND after) - the email field is still there.
++if grep -qF 'data-testid="email-input"' "$LOGIN" && grep -qF 'type="email"' "$LOGIN"; then
++  echo "PASS: CONTROL the email field and its test id are still present"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL the email field or its data-testid is missing from $LOGIN"; FAIL=$((FAIL+1))
++fi
++
++# CELL 3 (GREEN CONTROL, tip AND after) - the scan can fail: a planted copy is reported.
++if [[ -n "$(seed_placeholder_lines "$WORK/planted.tsx")" ]]; then
++  echo "PASS: CONTROL a planted seed-address placeholder is reported by the scan"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL the scan did not report a planted seed-address placeholder"; FAIL=$((FAIL+1))
++fi
++
++echo "ks1105_admin_login_placeholder_not_seed_address: $PASS passed, $FAIL failed"
++[[ "$FAIL" -eq 0 && "$PASS" -eq 3 ]]

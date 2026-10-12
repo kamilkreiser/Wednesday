@@ -1,0 +1,90 @@
+diff --git a/systemTest/__tests__/support/html_docs_check.mjs b/systemTest/__tests__/support/html_docs_check.mjs
+index dbb3eac..3906adc 100644
+--- a/systemTest/__tests__/support/html_docs_check.mjs
++++ b/systemTest/__tests__/support/html_docs_check.mjs
+@@ -16,7 +16,7 @@
+ //
+ // Usage: node html_docs_check.mjs <file.html>...   → one `file: finding` line each; exit 1 if any.
+ // =============================================================================
+-import { readFileSync } from 'node:fs';
++import { readFileSync, realpathSync } from 'node:fs';
+ 
+ const VOID = new Set(['br', 'img', 'hr', 'meta', 'link', 'input', 'wbr', 'col', 'source', 'area', 'base']);
+ // Text inside these is not prose: diagrams, code, headings, existing tables, controls.
+@@ -117,7 +117,7 @@ export function checkMermaid(src) {
+     return out;
+ }
+ 
+-if (import.meta.url === `file://${process.argv[1]}`) {
++if (process.argv[1] && realpathSync(new URL(import.meta.url)) === realpathSync(process.argv[1])) {
+     let bad = 0;
+     for (const file of process.argv.slice(2)) {
+         for (const f of check(readFileSync(file, 'utf8'))) {
+diff --git a/systemTest/__tests__/ks1438_html_docs_check_symlinked_invocation.test.sh b/systemTest/__tests__/ks1438_html_docs_check_symlinked_invocation.test.sh
+new file mode 100644
+index 0000000..e7bbed0
+--- /dev/null
++++ b/systemTest/__tests__/ks1438_html_docs_check_symlinked_invocation.test.sh
+@@ -0,0 +1,62 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for systemTest/__tests__/support/html_docs_check.mjs - KS-1438: the
++# main-module guard must hold when the checker is reached through a symlink.
++# =============================================================================
++# The guard compared import.meta.url (the resolved real path) with the path as
++# spelled on the command line, so a symlinked invocation never ran the main block
++# and exited 0 printing nothing on every input. This suite runs the checker by
++# its real path and through a symlink to it, on a broken page and a clean page.
++# Usage: bash systemTest/__tests__/ks1438_html_docs_check_symlinked_invocation.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++CHECK="${HTML_DOCS_CHECK:-$HERE/support/html_docs_check.mjs}"
++[[ -r "$CHECK" ]] || { echo "FATAL: html_docs_check.mjs not readable at $CHECK" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1438.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++
++printf '%s\n' '<html><head><title>t</title></head><body><div class="mermaid">graph TD' 'A[Start --> B[End]</div></body></html>' > "$WORK/bad.html"
++printf '%s\n' '<html><head><title>t</title></head><body><div class="mermaid">graph TD' 'A[Start] --> B[End]</div></body></html>' > "$WORK/ok.html"
++mkdir -p "$WORK/link"
++ln -s "$CHECK" "$WORK/link/html_docs_check.mjs"
++
++OUT_REAL="$(node "$CHECK" "$WORK/bad.html" 2>&1)"; RC_REAL=$?
++OUT_LINK="$(node "$WORK/link/html_docs_check.mjs" "$WORK/bad.html" 2>&1)"; RC_LINK=$?
++OUT_OK="$(node "$WORK/link/html_docs_check.mjs" "$WORK/ok.html" 2>&1)"; RC_OK=$?
++OUT_IMP="$(node --input-type=module -e "import('file://$CHECK').then(() => console.log('imported'))" 2>&1)"; RC_IMP=$?
++
++# CELL 1 (RED at the tip) - a symlinked invocation reports the broken page and exits 1.
++if [[ "$RC_LINK" == "1" ]] && grep -qF 'unbalanced []' <<<"$OUT_LINK"; then
++  echo "PASS: a symlinked invocation reports the broken page and exits 1"; PASS=$((PASS+1))
++else
++  echo "FAIL: symlinked invocation on a broken page: rc=$RC_LINK, output=${OUT_LINK:-nothing}"; FAIL=$((FAIL+1))
++fi
++
++# CELL 2 (GREEN CONTROL, tip AND after) - the real-path invocation reports the same page.
++if [[ "$RC_REAL" == "1" ]] && grep -qF 'unbalanced []' <<<"$OUT_REAL"; then
++  echo "PASS: CONTROL the real-path invocation reports the broken page and exits 1"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL real-path invocation: rc=$RC_REAL, output=${OUT_REAL:-nothing}"; FAIL=$((FAIL+1))
++fi
++
++# CELL 3 (GREEN CONTROL, tip AND after) - a clean page through the symlink exits 0 and prints nothing.
++if [[ "$RC_OK" == "0" && -z "$OUT_OK" ]]; then
++  echo "PASS: CONTROL a clean page through the symlink exits 0 and prints nothing"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL clean page through the symlink: rc=$RC_OK, output=$OUT_OK"; FAIL=$((FAIL+1))
++fi
++
++# CELL 4 (GREEN CONTROL, tip AND after) - importing the module does not run the main block.
++if [[ "$RC_IMP" == "0" && "$OUT_IMP" == "imported" ]]; then
++  echo "PASS: CONTROL importing the module runs no main block"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL import: rc=$RC_IMP, output=$OUT_IMP"; FAIL=$((FAIL+1))
++fi
++
++echo "ks1438_html_docs_check_symlinked_invocation: $PASS passed, $FAIL failed"
++[[ "$FAIL" -eq 0 && "$PASS" -eq 4 ]]
