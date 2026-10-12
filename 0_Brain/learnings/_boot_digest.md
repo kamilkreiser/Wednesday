@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-12 14:37 from 231 lesson files (1,027,026 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 14 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-12 15:27 from 232 lesson files (1,030,130 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 14 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7239,4 +7239,20 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **Mechanism owed (a rule is not a mechanism):** the boot prompt is shared tooling (Launch_Tuesday.command), so the step is claimed with Wednesday via `wed_claim.sh` before it goes into the launcher. Until then, this file plus the pickup's FIRST WORK line carry it.
 
 **Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-08-12_morning-ticket-sweep-autostart]] (the board sweep this sits beside) · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] · [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]].
+
+
+## Secuura tickets go to Done once fully tested, working and deployed; the aim is to clear most of them by 31 October; never idle on the backlog; needs go on his board as cards
+`2026-10-12_secuura-done-when-tested-works-deployed-and-never-idle.md` · grant · 2026-10-12 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is deciding whether a Secuura ticket whose fix is merged may move to Done, or whether the queue is thin enough to wait. **Done is allowed when the ticket is fully tested, works, and is deployed, and Wednesday controls every one of those steps. The queue is never allowed to sit idle: there is always backlog. Anything Kam must decide goes on his board as a card, and the work keeps moving.**
+
+**How to apply:**
+1. **The "no Done on an offline green" rule (SKILL 5f) is LIFTED as a blanket hold.** Its replacement is the condition he stated: fully tested + works + deployed. Evidence goes on the ticket (test run, live check, the deployed build including the commit) in the BLUF comment form before the move; a ticket with no live check possible stays open and is listed for him.
+2. **"Deployed" = Kintsugi under the October deploy grant (to 31 Oct), demo where that grant already allows it.** Production, money, comms to Stuart or Peter and anything irreversible still need Kam. Wednesday's reading, stated to him; his word corrects it.
+3. **Target:** clear all or most of the KS board by Saturday 2026-10-31. Baseline 15:0x 12 Oct: 509 open of 588 (Backlog 240, Todo 29, In Progress 222, In Review 13, Blocked 5), about 27 closed per day needed. Every receipt carries the pace, from a paginated read.
+4. **Never idle:** when nothing is running, the next action is a brief, a sweep or a launch, not a stand-down; an empty queue needs a written measured reason.
+5. **Needs go on his board:** one card per decision, action first, with a default, in the same action as any chat message. (2026-09-24 decisions-go-on-the-fleet-activity-panel and the 2026-10-09 ledger row are the same rule; this restates it with his 'keep things moving'.)
+6. **Models:** Spark, Sonnet and Opus per the ladder in `fleet/specs/model-routing.md` section 7, refined from outcomes.
+
+**Family:** [[2026-10-10_merge-and-archive-when-done-and-ready]] (merge and archive once done) · [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] · [[2026-09-24_decisions-go-on-the-fleet-activity-panel]] · [[2026-10-05_october-deploy-both-boxes-when-ready]] (the deploy that makes 'deployed' possible) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]].
 
