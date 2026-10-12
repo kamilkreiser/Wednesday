@@ -6,6 +6,20 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 177 — 2026-10-13 05:3x (s104, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST. It supersedes 176's FIRST WORK and STATE. 175's OWED list stands, plus the OWED lines below.**
+### STATE (each line measured this seat)
+- **main = cc42c42** (RD-591, PR #79; ls-remote). EIGHT NexusAI merges since 12 Oct morning: RD-608, RD-657, RD-690, RD-649, RD-675, RD-614, RD-629, RD-591. Each one verified by ls-remote + gh pr view.
+- **IN FLIGHT: RD-591 push Build 38290394099** (background poll from this seat; it dies at rotation, so re-read with `gh run view 38290394099 -R datasecau/Reporting_Dashboard_Au`, GH_CONFIG_DIR = NexusAI's 4_Credentials/.gh-config). **On green: TURN -> M RD-795 @ c14be9d** (rd-795-cap-line-truth-r8-widen-s86m, ls-remote). Gate 20 GO; Tuesday's record names no gate duty, so the TURN asks M to check its own gate-20 notes (N's RD-591 turned out to carry a duty the record lacked). Self-contained mail; template fleet/briefs_staged/2026-10-13_nexusai_N_TURN_rd591.md.
+- **AFTER M: item 10 P RD-823. P is NOT launched.** Launch P's successor (S98P) from HANDOVER-S91P.md before M's RD-795 lands. Then 11 O RD-828+833, 12 P RD-751, 13 M RD-817, 14 N RD-747, 15 P RD-831, 16 R RD-777+776, 17 R RD-761, 18 O RD-801+822, 19 O RD-802, 20 P RD-721 (screenshots to Kam before demo), 21 R RD-794, 22 R RD-819, 23 R RD-807, 24 N RD-131, 25 R RD-775 (C-209 #69 post-merge). **Carry each item's GATE DUTY into its TURN line** (a record fix owed: derive duties from the gate RELEASE mails before each TURN).
+- **RD-821 r3 lock tool INSTALLED** 10:53:52Z by O (sha256 3c33f5ae… verified by Tuesday); three live merge tickets through it, all clean.
+- **STANDING RULES given to N and M tonight (narrow):** (1) the rd327 R7 old/new title pair as the ONLY unaccounted C-57 id → ADDENDUM, report in MERGED; (2) an ABSENT file in c133 is accounted only with all four conditions (main deleted it in a named commit · B blob = base · under jest testPathIgnorePatterns · 0 mentions in B's C-57 JSON). Anything else = STOP + mail. Mails: 2026-10-13_nexusai_N_ANSWER_c133_rd649_rd614.md, _N_ANSWER_rd591_absent.md, _M_ANSWER_rd657_c133.md.
+- **Seats:** %2 N (run done; holds until named, its next is 14 RD-747 / 24 RD-131) · %3 M (next: RD-795) · %4 O (next: 11) · %6 R (next: 16; its prompt carries a recurring ghost "TURN mailed" SUGGESTION — none was sent). %1 monitor. Floor otherwise empty.
+- **Kam:** 0 messages on 13 Oct; reconcile_rulings: nothing to rule. Card quickquote-v234-gh-login-for-pr-1012 ruled a + delivered at 20:47.
+### LEDGER this seat: 1 row (2026-10-13, w=2: a question inside a MERGED went unanswered ~5 h). Digests regenerated + committed after it.
+### OWED (new)
+- A question can hide in any agent mail class: every agent mail body gets `/usr/bin/grep -niE '\?|confirm|overrule|say so'` with the subject id as the control, in the same action as verifying it. Enforcement candidate at w=3: inbox_digest.sh prints [ASKS].
+- fleet_ack does not collect "-> Tuesday" QUESTION subjects (N's 18:15Z question never appeared in its list). Shared tooling: claim with Wednesday before touching it.
+
 ## 🔴 DELTA 176 — 2026-10-12 19:4x ROTATION HANDOVER (s103, ctx ~77%; band 80-90). **READ THIS FIRST. It supersedes 175's STATE; 175's OWED stands. 172's turn order stands as updated below.**
 ### FIRST WORK FOR THE NEXT SEAT
 000. **ROTATION 20:4x (ctx 80%, safe boundary: no agent question unanswered; Kam 0 new since 19:12).** In flight: **O's RD-675 merge** (ticket s96o-merge-rd675; expect O's MERGED, then verify at source + watch its Build + TURN -> N RD-614, self-contained), then **O's RD-821 swap STATUS** (idle lock only). Vision seat %10 scored 0.97 and CLOSED (QuickQuote v2.34 LIVE). Floor: %0 · %1 monitor · %2 N · %3 M · %4 O · %6 R. No gate live. reconcile_rulings flags 1 'note' = Kam's 16:25 gh-steps note, already answered (card ruled a + delivered), so ignore it.
