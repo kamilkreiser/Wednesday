@@ -1,0 +1,104 @@
+# QUEUE_STALE (top 25 of 223; ranked HIGH confidence first, then priority, then most recently touched)
+
+Rows with all PRs merged/closed: PR merged, ticket open: needs a live run or a Done decision. Not verified at source.
+
+- **KS-1355** [In Progress, p1, kamil.kreiser@secuura.ai, STALE/LOW] Stack tooling is not slot-derived end to end: stack_guard lists a project twice under mixed marker labels, dev-reload.sh / start-local.sh by
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Stack tooling is not slot-derived end to end: stack_guard lists a project twice under mixed marker labels, dev-reload.sh / start-local.sh "
+  - area: schemathesis/systemTest
+- **KS-1452** [In Progress, p1, kamil.kreiser@secuura.ai, STALE/LOW] Three new advisories freeze every push: in-range lock refresh for handlebars 4.7.9 -> 4.7.10
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Three new advisories freeze every push: in-range lock refresh for handlebars 4.7.9 -> 4.7.10"
+  - area: services/governance
+- **KS-1437** [In Progress, p1, kamil.kreiser@secuura.ai, STALE/LOW] Three new advisories freeze every push: in-range lock refresh for shell-quote, MCP SDK and pbkdf2
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Three new advisories freeze every push: in-range lock refresh for shell-quote, MCP SDK and pbkdf2"
+  - area: Blockchain/Dev/package-lock
+- **KS-1374** [In Progress, p1, kamil.kreiser@secuura.ai, STALE/LOW] Akto scans are now paced to fit the platform's rate limit — test times went up; which way should we go?
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Akto scans are now paced to fit the platform's rate limit — test times went up; which way should we go?"
+  - area: akto
+- **KS-1425** [In Progress, p1, kamil.kreiser@secuura.ai, STALE/LOW] Five new advisories freeze every push: in-range lock refresh for four, baseline the two with no fix
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Five new advisories freeze every push: in-range lock refresh for four, baseline the two with no fix"
+  - area: services/governance
+- **KS-1378** [In Progress, p1, kamil.kreiser@secuura.ai, STALE/LOW] Five new advisories block EVERY push: bump morgan, nodemailer, ip-address and undici (Kam ruled (a))
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Five new advisories block EVERY push: bump morgan, nodemailer, ip-address and undici (Kam ruled (a))"
+  - area: services/auth
+- **KS-1369** [In Progress, p1, kamil.kreiser@secuura.ai, STALE/LOW] api-gateway crashes under load: onProxyReq calls setHeader after the proxied request's headers were sent — uncaught exception, 13 restarts, 
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | api-gateway crashes under load: onProxyReq calls setHeader after the proxied request's headers were sent — uncaught exception, 13 restarts"
+  - area: Blockchain/Dev/services
+- **KS-1187** [In Progress, p1, kamil.kreiser@secuura.ai, STALE/LOW] Security: an absolute-form request target bypasses the KS-843 erasure door's scope/role gate (a connector without subjects:erase reaches ori
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Security: an absolute-form request target bypasses the KS-843 erasure door's scope/role gate (a connector without subjects:erase reaches o"
+  - area: services/api-gateway
+- **KS-1402** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] auth GET /api/users/lookup refuses connector tokens, so every Platform-S transfer-custody 401s and falls back to a flat anchor — KS-739's us
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | auth GET /api/users/lookup refuses connector tokens, so every Platform-S transfer-custody 401s and falls back to a flat anchor — KS-739's "
+  - area: services/originate
+- **KS-695** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] S↔K (K-side): erasure by external_ref, documents.title coverage, and connector-scoped org erasure — PS-690 dependency
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | S↔K (K-side): erasure by external_ref, documents.title coverage, and connector-scoped org erasure — PS-690 dependency"
+  - area: platform-s
+- **KS-1410** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] 28 unguarded err.message values land in 500 response bodies across six services - no NODE_ENV guard in any of the six files
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | 28 unguarded err.message values land in 500 response bodies across six services - no NODE_ENV guard in any of the six files"
+  - area: api-gateway
+- **KS-998** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] KS-989 gate residue: the formatting gate fails OPEN on missing deps and reads the WORKING TREE, not the push — four items on one path
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | KS-989 gate residue: the formatting gate fails OPEN on missing deps and reads the WORKING TREE, not the push — four items on one path"
+  - area: akto
+- **KS-937** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] KS-921 residue: the re-link guard's awk parser is still case-sensitive — a lowercase `copy --from=builder … node_modules` reports 1 of 1 CLE
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | KS-921 residue: the re-link guard's awk parser is still case-sensitive — a lowercase `copy --from=builder … node_modules` reports 1 of 1 C"
+  - area: ?
+- **KS-723** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] Declare the remaining ~157 routed-but-undocumented /api operations in the OpenAPI spec — the KS-712 remainder
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Declare the remaining ~157 routed-but-undocumented /api operations in the OpenAPI spec — the KS-712 remainder"
+  - area: akto
+- **KS-591** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] positive_data_acceptance recurs at scale — 734 failures across 64 ops (KS-255 / KS-515 recurrence, full-2026-08-07 sweep)
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | positive_data_acceptance recurs at scale — 734 failures across 64 ops (KS-255 / KS-515 recurrence, full-2026-08-07 sweep)"
+  - area: services/originate
+- **KS-1284** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] cardano/transaction.ts: add_json_metadatum_with_schema throws on any metadata string over 64 bytes — KS-721's identityCommitment (≥69 bytes)
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | cardano/transaction.ts: add_json_metadatum_with_schema throws on any metadata string over 64 bytes — KS-721's identityCommitment (≥69 byte"
+  - area: Blockchain/Dev/services
+- **KS-1175** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] Anchor / originate / lifecycle-event schemas: accept and anchor platform-s's non-PII actor + organisation identity fields (actorDid, actorLe
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Anchor / originate / lifecycle-event schemas: accept and anchor platform-s's non-PII actor + organisation identity fields (actorDid, actor"
+  - area: akto
+- **KS-565** [Backlog, p2, kamil.kreiser@secuura.ai, STALE/LOW] Sweeps 2026-08-05: untracked failures across 10 ops — response-schema recurrence (KS-498 residual), 3 genuine 500s, non-envelope 5xx on by-d
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Sweeps 2026-08-05: untracked failures across 10 ops — response-schema recurrence (KS-498 residual), 3 genuine 500s, non-envelope 5xx on by"
+  - area: services/auth
+- **KS-1195** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] api-gateway per-key rate limiter never fires: enforceClientRateLimit is mounted before authenticateToken sets req.user (a 2/60s key answered
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | api-gateway per-key rate limiter never fires: enforceClientRateLimit is mounted before authenticateToken sets req.user (a 2/60s key answer"
+  - area: services/api-gateway
+- **KS-1164** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] gate/report.ts writeGateReport overwrites the input summary when --summary does not end in -summary.json
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | gate/report.ts writeGateReport overwrites the input summary when --summary does not end in -summary.json"
+  - area: systemTest
+- **KS-593** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] not_a_server_error recurs — 17 raw 5xx across 8 ops (KS-431 / KS-449 / KS-497 recurrence, full-2026-08-07 sweep)
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | not_a_server_error recurs — 17 raw 5xx across 8 ops (KS-431 / KS-449 / KS-497 recurrence, full-2026-08-07 sweep)"
+  - area: schemathesis/systemTest
+- **KS-1371** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] POST /api/status/{id}/unrevoke accepts `index: -1` (below the declared minimum) with 200 and performs the unrevoke — outside the KS-662 ruli
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | POST /api/status/{id}/unrevoke accepts `index: -1` (below the declared minimum) with 200 and performs the unrevoke — outside the KS-662 ru"
+  - area: schemathesis/systemTest
+- **KS-1269** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] POST /api/status/{id}/revoke accepts `index: {}` (object where integer is declared) with 200 — outside the KS-518/KS-662 ruling, which cover
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | POST /api/status/{id}/revoke accepts `index: {}` (object where integer is declared) with 200 — outside the KS-518/KS-662 ruling, which cov"
+  - area: schemathesis/systemTest
+- **KS-1207** [In Progress, p2, kamil.kreiser@secuura.ai, STALE/LOW] Security: an unknown sk_ key on an optional-auth mount skips the gateway's Bearer check, so a revoked-session JWT keeps working on credentia
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | Security: an unknown sk_ key on an optional-auth mount skips the gateway's Bearer check, so a revoked-session JWT keeps working on credent"
+  - area: services/api-gateway
+- **KS-724** [Todo, p2, kamil.kreiser@secuura.ai, STALE/LOW] A scan that logs in more than ten times as one user revokes its own bearer — the 10-session window evicts the token it is scanning with
+  - why: all attached PRs merged/closed
+  - quote: "PR merged, ticket open: needs a live run or a Done decision | A scan that logs in more than ten times as one user revokes its own bearer — the 10-session window evicts the token it is scanning with"
+  - area: akto

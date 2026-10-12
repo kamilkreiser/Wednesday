@@ -1,0 +1,34 @@
+# QUEUE_CARDS (top 25 of 8; ranked HIGH confidence first, then priority, then most recently touched)
+
+- **KS-1384** [Backlog, p2, kamil.kreiser@secuura.ai, CARD/LOW] One anchor row per (document_id, network): a repeat POST /api/anchors resets the existing row to pending and nulls its transaction hash — so
+  - why: decision or tracker/review-epic shape
+  - quote: "Migration 031 records the one-row-per-(document, network) decision. `anchorSubmission.ts:383-386` (guard 1) reads the row's `transaction_hash` to avoid a second fee-paying transaction — the upsert has"
+  - area: services/anchoring
+- **KS-772** [Todo, p2, kamil.kreiser@secuura.ai, CARD/LOW] Review stream: S<->K integration contract
+  - why: decision or tracker/review-epic shape
+  - quote: "Review stream: S<->K integration contract"
+  - area: systemTest
+- **KS-485** [Todo, p2, kamil.kreiser@secuura.ai, CARD/LOW] Security review — plan, methodology & handover (Platform K)
+  - why: decision or tracker/review-epic shape
+  - quote: "Security review — plan, methodology & handover (Platform K)"
+  - area: Blockchain/Dev/docker-compose
+- **KS-577** [In Review, p2, kamil.kreiser@secuura.ai, CARD/LOW] rotate: true mints a new key but never revokes the old one — implement revoke-on-rotate and agree the cutover window
+  - why: decision or tracker/review-epic shape
+  - quote: "Guardrail 1's own comment concedes it — *"it invalidates nothing by itself"* (`platform.ts:501`) — so this is known at code level. What is absent is any sign the semantics were decided deliberately fo"
+  - area: services/api-gateway
+- **KS-491** [Todo, p2, kamil.kreiser@secuura.ai, CARD/LOW] Review F — Edge, WAF, DDoS & anti-automation
+  - why: decision or tracker/review-epic shape
+  - quote: "Review F — Edge, WAF, DDoS & anti-automation"
+  - area: services/api-gateway
+- **KS-770** [Todo, p2, kamil.kreiser@secuura.ai, CARD/LOW] Review stream: API contract and the four platform suites
+  - why: decision or tracker/review-epic shape
+  - quote: "Review stream: API contract and the four platform suites"
+  - area: Blockchain/Dev/docs
+- **KS-775** [In Progress, p2, kamil.kreiser@secuura.ai, CARD/LOW] [Decision] Own the express 4 -> 5 call before the qs fuse lapses 2026-09-10 - KS-409 was archived and nothing replaced it
+  - why: decision or tracker/review-epic shape
+  - quote: "**Nothing currently owns the express 4 -> 5 decision, and the two qs advisories un-baseline on 2026-09-10.** KS-409 (*Express 4 -> 5 migration, all 15 services*) was **archived on 2026-09-02T10:26:32*"
+  - area: Blockchain/Dev/frontend
+- **KS-582** [Todo, p3, kamil.kreiser@secuura.ai, CARD/LOW] [Decision] Approval shape for bulk re-key — two approvers for a batch, one for a single-org rotation
+  - why: decision or tracker/review-epic shape
+  - quote: "@peter's proposal: a **batch** re-key needs two approvers; a **single-org** rotation needs one. The shape needs deciding, but it **cannot be implemented until** [KS-579](https://linear.app/secuura/iss"
+  - area: ?

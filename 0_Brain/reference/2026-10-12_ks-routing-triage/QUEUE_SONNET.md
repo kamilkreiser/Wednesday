@@ -1,0 +1,102 @@
+# QUEUE_SONNET (top 25 of 47; ranked HIGH confidence first, then priority, then most recently touched)
+
+- **KS-1400** [Backlog, p1, kamil.kreiser@secuura.ai, SONNET/LOW] 13 new advisories block every push: axios 1.18.1 ×12 (7 high — SSRF, proxy bypass, ReDoS, prototype pollution; runtime in services/kyc) and 
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**The push preflight fails legs 6 and 7 on** `develop`**'s own dependencies again, so no push on this repo succeeds until this lands.** Thirteen advisories published on 2026-09-30 are absent from `scr"
+  - area: services/kyc
+- **KS-1385** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET+OPUS_GATE/LOW] KS-1175 follow-on: the anchors K emits for share / transfer-custody / lifecycle-events carry no documentType and drop Platform-S's identity 
+  - why: multi-file or very long spec; Opus QA gate
+  - quote: "The S↔K compatibility review of 2026-09-29 (platform-k `0aa9b52c6`, platform-s `477eb57`)."
+  - area: services/anchoring
+- **KS-709** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] Akto reports a PASS for a test that executed NOTHING — 'clean 0 / not-applicable 969 ✓' is a second false-zero axis that richCaptureFailed d
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**KS-700 closes one false-zero axis and this is the other one.** On @PeterObeden's 2026-08-28 review run, `analytics: code injection` returned **clean 0 · not-applicable 969** and reported **✓**. The "
+  - area: akto
+- **KS-955** [Backlog, p2, UNASSIGNED, SONNET/LOW] A fresh clone cannot run the four platform suites, and fails in a way that reads like a product regression
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**BLUF** — on a fresh clone every platform suite fails at login, and the failure looks exactly like a routing regression. The #884 tier-1 gate hit this and spent a cycle on it before finding the cause"
+  - area: akto
+- **KS-939** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] Launcher: the assembled boot prompt is asserted by no cell — KS-907's fix can vanish at 18/0, and the seat sentence misled a live seat tonig
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**Nothing asserts what the boot prompt actually SAYS.** The launcher computes `$GIT_SYNC_STEP`, the suite reads it from a standalone marker, and the prompt the session actually receives is checked by "
+  - area: ?
+- **KS-1387** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET+OPUS_GATE/LOW] A clean image build of platform-k develop fails: services/governance does not compile (TS2742 on router's inferred type) — a new slot cannot
+  - why: multi-file or very long spec; Opus QA gate
+  - quote: "Starting a fresh stack slot with no cached images (`Start_Up/start-secuura.sh` via platform-s's `up-slot.sh 4`) fails at the governance image:"
+  - area: services/governance
+- **KS-734** [In Review, p2, kamil.kreiser@secuura.ai, SONNET/LOW] The e2e Playwright suite cannot run from a clean checkout — tests/e2e is not a workspace member and never gets installed; 20 of 82 fail once
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**The e2e Playwright suite cannot run from a clean checkout**, and that is why "Playwright — not run" keeps appearing in Test Evidence blocks. `Blockchain/Dev/tests/e2e` is **not a workspace member**,"
+  - area: Blockchain/Dev/tests
+- **KS-1379** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] PR #1339's standalone locks were re-resolved from bare manifests: ~1,000 non-target moves, incl. runtime bullmq/msgpackr 2 and @azure/identi
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "Raised from **gate41's finding N-1339-2** (Major, non-blocking) on PR #1339 (KS-1378, the four-package advisory bump). Wednesday ruled this a ticket rather than a fold-in for round 2, because the only"
+  - area: services/queue
+- **KS-725** [Todo, p2, kamil.kreiser@secuura.ai, SONNET/LOW] test:pr never re-imports the OpenAPI spec, so Akto scans a collection that has drifted from it — a declared operation is not a scanned one
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "> **Origin.** Parked on [KS-712](https://linear.app/secuura/issue/KS-712) comment `718362a9` (2026-08-28T22:30:04Z) under "Related, found today and unfiled for the same reason" — `issueCreate` was ref"
+  - area: akto
+- **KS-696** [Todo, p2, kamil.kreiser@secuura.ai, SONNET/LOW] Akto pr-scan is non-deterministic — three runs on near-identical code gave 1 HIGH / 1 HIGH (different endpoint) / 0 HIGH
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**Three Akto** `test:pr` **runs tonight, same harness, same command, gave three different answers — and none of the three carried a captured request or response.** A gate that answers differently on i"
+  - area: akto
+- **KS-1289** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] Blockchain/Dev/.dockerignore excludes `tests`, which does not match `__tests__` - test sources ship into runtime images and one shared test 
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "`Blockchain/Dev/.dockerignore:13` is the single line `tests`. **That pattern does not match** `__tests__`, so every `__tests__` directory sits inside the build context. Two consequences: **test source"
+  - area: Blockchain/Dev/services
+- **KS-598** [Todo, p2, kamil.kreiser@secuura.ai, SONNET/LOW] Architecture P1: defuse the MULTI_TENANCY registry upsert — it silently collapses registrations per (hash, tenant) if the flag is ever enabl
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**Ask:** In the same phase that touches registration (plan-sheet requirement — not later, not beside), defuse `platform_document_registry`'s armed landmine: UNIQUE `uq_pdr_hash_tenant (content_hash, t"
+  - area: ?
+- **KS-756** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET+OPUS_GATE/LOW] Wire up the opaque refresh token that createSession already mints — one write site, zero read sites (KS-329 ruling (a) prerequisite)
+  - why: multi-file or very long spec; Opus QA gate
+  - quote: "**BLUF —** `createSession` **has minted an opaque refresh token on every session since the session service was written, and nothing has ever read it. One write site, zero read sites, measured with a c"
+  - area: services/auth
+- **KS-735** [Todo, p2, kamil.kreiser@secuura.ai, SONNET+OPUS_GATE/LOW] Verify results show the user nothing about what was registered — a renamed file confirms green with no explanation (PS-723)
+  - why: multi-file or very long spec; Opus QA gate
+  - quote: "**A verify result shows the user nothing about what was registered, so a renamed file confirms green with no way to notice the rename.** Stuart hit this on PS-723 and ruled the direction: *"it should "
+  - area: services/api
+- **KS-683** [Todo, p2, kamil.kreiser@secuura.ai, SONNET+OPUS_GATE/LOW] Anchor-status standoff: a consumer repolls anchors K reports as terminally failed — K's labelling is already honest (KS-587), so the fix is 
+  - why: multi-file or very long spec; Opus QA gate
+  - quote: "**The standoff is real, but its stated mechanism is wrong — and measuring demo inverted the ownership.** The premise going in was *"K reports simulated anchors as* `confirmed`*; Platform S's honesty r"
+  - area: services/anchoring
+- **KS-1044** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] No independent liveness signal for our own VMs — kintsugi was dead for 53 h and Azure health read `Available` the whole time
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "`secuura02-kintsugi-vm` **was down for 53 hours and nothing told us. The first signal was Stuart's tooling — a person, not a monitor. And Azure's own platform health read** `Available` **for the whole"
+  - area: ?
+- **KS-996** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] 95 archived tickets sit in NON-TERMINAL states — measure whether a cascade put them there
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**97 archived tickets on the KS+PS boards are in non-terminal states.** Two were archived today (mine, restored the same session). **The other 95 predate this session and nobody has established how th"
+  - area: ?
+- **KS-995** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] Archiving a ticket silently archives its sub-issues, including NON-TERMINAL ones — and the parent-side check cannot detect it
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "`issueArchive` **cascades to sub-issues.** Archiving 23 terminal tickets on 2026-09-08 also archived **KS-918 (Backlog)** and **KS-920 (In Progress)** — children of **KS-490**. Neither was in any targ"
+  - area: ?
+- **KS-655** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] KS-78 drift check is wrong three ways — reports 7 commits of drift where 212 exist, labels `develop` as `main`, and anchors to a stock redis
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**The KS-78 local-drift check reports a number that is real but labelled with the wrong branch, anchored to the wrong containers, and computed from the wrong kind of timestamp.** Today it printed **7 "
+  - area: ?
+- **KS-624** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET+OPUS_GATE/LOW] prism issues VCs with random bytes as the Ed25519 proof and verifies them as passed — the A-11 fraud pattern fixed in vc-issuer, never fixed
+  - why: multi-file or very long spec; Opus QA gate
+  - quote: "`services/prism` issues verifiable credentials whose `Ed25519Signature2020` proof is **64 random bytes**, and its `/verify` returns `passed: true` without checking anything. This is the identical patt"
+  - area: services/prism
+- **KS-607** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] GET /api/anchors/{id} and verify report different statuses for the same anchor — 91 UAT anchors read "failed" while verify says confirmed
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "Raised from the S side 2026-08-12 (S ticket: [PS-577](<https://linear.app/secuura/issue/PS-577>)). @kamil.kreiser — one authenticated call settles this; details below."
+  - area: platform-s
+- **KS-603** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] BM-2: Verification is a configurable workflow via smart contracts — record the workflow path, not casual views
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**Verification is a CONFIGURABLE WORKFLOW, not a fixed function.** Clients configure verification workflows via smart contracts; Secuura does NOT prescribe compliance. The workflow PATH is verified ag"
+  - area: ?
+- **KS-602** [Backlog, p2, kamil.kreiser@secuura.ai, SONNET/LOW] BM-1: Certification model — certification = attestation + signing + optional watermarking; any modification → new version → mandatory re-cer
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "**Certification is an UMBRELLA term** = attestation + signing + (optional) watermarking. Attestation = a user attesting a document is correct — on-chain, distinct from the file itself. Watermarking is"
+  - area: ?
+- **KS-305** [Backlog, p3, kamil.kreiser@secuura.ai, SONNET/LOW] State the M365 source-document controller boundary in the customer DPA
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "Add wording to the customer **DPA** stating the M365 source-document controller boundary."
+  - area: m365
+- **KS-595** [Backlog, p3, kamil.kreiser@secuura.ai, SONNET/LOW] Three undeclared-verb catalogue skips cite CLOSED tickets (KS-406 / KS-421) — are the defects still live?
+  - why: open PR to carry, or build not obviously single-brief
+  - quote: "`tests/test_undeclared_method_safety.py::test_known_undeclared_verb_defect_is_tracked` skips three parametrised cases, each naming a ticket that is **Done and archived**:"
+  - area: schemathesis/systemTest

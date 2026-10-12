@@ -1,0 +1,102 @@
+# QUEUE_OPUS (top 25 of 58; ranked HIGH confidence first, then priority, then most recently touched)
+
+- **KS-1413** [Backlog, p1, kamil.kreiser@secuura.ai, OPUS/LOW] start-secuura.sh and start-local.sh print the demo issuer password in their startup banners
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "**Two platform-k start scripts print a password in clear on every successful start.** Both echo the demo issuer account's email *and its password* in their closing "Credentials" banner:"
+  - area: Blockchain/Dev/scripts
+- **KS-1076** [Todo, p1, kamil.kreiser@secuura.ai, OPUS/LOW] No Playwright e2e test has run on any PR since 2026-09-07 — the suite dies at a static lint gate before any browser opens, and the job name 
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "**BLUF — no Playwright test has executed on any PR since 2026-09-07. The** `Playwright suite` **job goes red at a static lint gate that runs BEFORE any browser opens, so the red names the wrong subjec"
+  - area: systemTest
+- **KS-785** [Backlog, p1, kamil.kreiser@secuura.ai, OPUS/LOW] Compose resolves the SHELL over .env while the checker resolves .env over the shell — a green credential check over a stack running the shar
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "`docker compose` resolves the **shell environment over the project** `.env`; `source` resolves the `.env` **over the shell**. The credential checker uses `source`. So in one shell, with one correctly-"
+  - area: ?
+- **KS-1148** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] CI-runner environment gaps (one class, two jobs): `Security Scanning` runs `audit:contract` with no install, so `audit-locks.mjs` dies on `C
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "Two CI jobs run test code whose runtime prerequisites the job never installs or builds. Both reds are **environment gaps on the runner**, not defects in the code under test — each suite is green local"
+  - area: Blockchain/Dev/scripts
+- **KS-693** [In Review, p2, kamil.kreiser@secuura.ai, OPUS/LOW] M365 routes answer 503 when ENTRA_* is unconfigured — 9 permanent Schemathesis failures on every dev machine, and the local sweep is now the
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "**Four M365 operations answer** `503 Service Unavailable` **when** `ENTRA_*` **is unconfigured, and a 503 is a server error — so every Schemathesis run on a normal dev machine records 9 failures that "
+  - area: schemathesis/systemTest
+- **KS-716** [Todo, p2, kamil.kreiser@secuura.ai, OPUS/LOW] The whole super-admin surface is silently unscanned — no system_admin block means the HAR replay fallback never fires (0 of 16 endpoints, in
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "Every **super-admin-only** endpoint is invisible to Akto on a stock local checkout, and nothing says so. `config/secrets.yml` carries no `system_admin` block — `config/secrets.example.yml` documents o"
+  - area: akto
+- **KS-1009** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous caller — enumeration surface, and nothing consumes the fields
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "`GET /api/auth/wallet/status/:walletAddress` **is unauthenticated by design and returns** `userId`**,**"
+  - area: services/auth
+- **KS-1382** [Todo, p2, kamil.kreiser@secuura.ai, OPUS/LOW] Blockchain/Testing: five audit/DAST/tenant-isolation entry points default TARGET_BASE to slot 1's gateway (:6882) — an unslotted run on a sl
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "Five `Blockchain/Testing` entry points fall back to `http://localhost:6882` **— slot 1's gateway — when** `TARGET_BASE` **is not passed**, instead of deriving it from `SECUURA_STACK_SLOT`. On a slot-N"
+  - area: Blockchain/Testing/ci
+- **KS-1381** [Todo, p2, kamil.kreiser@secuura.ai, OPUS/LOW] Slot-1 URLs outside KS-1355's four spots: m365's Entra redirect URI defaults to :6882 (compose + three code fallbacks), bootstrap leaves FRO
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "On a slot-N stack, **platform-k's M365 integration builds its Entra OAuth redirect URI on slot 1's gateway** (`http://localhost:6882/api/m365/callback`) unless someone sets `ENTRA_REDIRECT_URI` by han"
+  - area: Blockchain/Dev/docker-compose
+- **KS-576** [Todo, p2, kamil.kreiser@secuura.ai, OPUS/LOW] Bulk re-key: one admin-authorised rotate across a named set of externalRefs
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "@peter asked for **one** admin-authorised action that re-keys a named set of Organisations by `externalRef`, instead of N separate `register-connector` calls during an incident. The loop itself is **1"
+  - area: services/api-gateway
+- **KS-1051** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] develop is RED on the services/originate jest suite and NOTHING catches it — the suite is a blocking gate nowhere automated
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "`develop` **is RED on the** `services/originate` **jest suite right now, and no instrument in this repository objects.** Measured tonight: 2 of 4 cells in `ks444-webhooks-create-description-guard.test"
+  - area: services/originate
+- **KS-1038** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] tests/e2e auth-exhaustive races its OWN lockout — same commit gives 1 or 11 failures, so the suite cannot gate anything
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "`tests/e2e/tests/auth-exhaustive.spec.ts` **is non-deterministic against an unchanged product.** It brute-forces logins, `playwright.config.ts` sets `fullyParallel: true`, and every run leaves **4** `"
+  - area: Blockchain/Dev/tests
+- **KS-1380** [In Review, p2, kamil.kreiser@secuura.ai, OPUS/LOW] develop does not build since KS-1378 (#1339): analytics, billing and governance images fail `tsc` — packages/shared now locks @types/express
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "A clean build of platform-k `develop` at `0aa9b52c6` fails: `Start_Up/start-secuura.sh --rebuild` stops with *"Build FAILED for: analytics billing governance — not starting containers"*, so no stack c"
+  - area: services/analytics
+- **KS-1407** [Backlog, p2, UNASSIGNED, OPUS/LOW] a password change or reset leaves the account's other sessions live
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "A successful password change does not revoke the account's other sessions, and neither does the reset"
+  - area: ?
+- **KS-987** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] A deploy that rsyncs the OpenAPI spec and does not restart api-gateway ships a silently stale published contract — rsync breaks the bind mou
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "**The demo redeploy runbook can ship a stale published API contract with every check passing.** `docs/openapi/secuura-api.yaml` is a **file-level** bind mount into `api-gateway` (`docker-compose.yml:5"
+  - area: Blockchain/Dev/deployment
+- **KS-967** [Backlog, p2, UNASSIGNED, OPUS/LOW] Neither credential guard can see a value in a .env.example — one scans the wrong roots and extensions, the other excludes the file and self-
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "**Two credential guards run on every push and NEITHER could see the one that mattered.** KS-966 F1 was a live exposure — `Blockchain/Dev/.env.example` shipped a value for `ADMIN_USER_PASSWORD`, and `d"
+  - area: Blockchain/Dev/scripts
+- **KS-951** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] The default-password CI gate catches one shape and calls it clean — 16 published passwords are exempt by design, and 4 of 5 canaries walk pa
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "`Blockchain/Dev/scripts/check-no-default-passwords.sh` is a **live CI gate** (`pr-security-gates.yml:63`, `security-scan.yml:422`). It is far blinder than its name suggests, and the documented exempti"
+  - area: Blockchain/Dev/scripts
+- **KS-668** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] Compose seeds published *123 credentials by default, and the 11 rotation vars never reach the auth container from .env — every compose deplo
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "**Any compose deploy of this platform comes up seeding the published** `*123` **credentials, and the documented way to rotate them silently does nothing unless you happen to put them in the one undocu"
+  - area: Blockchain/Dev/docker-compose
+- **KS-1390** [Todo, p2, kamil.kreiser@secuura.ai, OPUS/LOW] The e2e-v2 harness is platform-k's only browser, portal and accessibility coverage — 222 tests, runnable by hand, named in no gate and absen
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "`Blockchain/Dev/tests/e2e-v2/` holds **24 spec files and 222 tests** across four tiers — including every browser journey and the only accessibility coverage platform-k has — and it is wired into nothi"
+  - area: Blockchain/Dev/tests
+- **KS-1376** [Backlog, p2, UNASSIGNED, OPUS/LOW] Security: certifications ends RLS FORCE with no tenant_isolation policy on every fresh database, permanently
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "On a **fresh bare database**, `public.certifications` ends with row-level security **ENABLED and FORCED but with no** `tenant_isolation` **policy**. RLS with no policy is **default-deny**, so the tabl"
+  - area: api-gateway
+- **KS-1372** [Todo, p2, kamil.kreiser@secuura.ai, OPUS/LOW] api-gateway failed-login lockout is inert: createBruteForceProtection installs recordFailure, but no production code ever calls it — it can 
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "For when you have a moment, Kamil. The gateway's failed-login lockout (`createBruteForceProtection`, `api-gateway/src/middleware/security.ts:146-192`) looks as though it never engages: it only blocks "
+  - area: services/api-gateway
+- **KS-1012** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] The `require-pr-gates` ruleset survived the Actions retirement: 7 required checks that can never report, 0 required approvals, and ALWAYS by
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "`develop` **and** `main` **carry an ACTIVE ruleset that enforces nothing for an admin and is unsatisfiable for everyone else.** It requires seven status-check contexts whose workflows no longer exist,"
+  - area: akto
+- **KS-665** [In Progress, p2, kamil.kreiser@secuura.ai, OPUS/LOW] KS-256 review follow-ups: 5 example-fixable 400s, the tsx transpile-only spec-gate trap (§10), and a new `userAgent: Demo Issuer` instance
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "The three items left open from @kksecura's 2026-08-19 review of PR #568. Split out per his own §8 reasoning — the parameter-example work is the bigger half of the same problem, and bundling it would e"
+  - area: openapi-spec
+- **KS-1235** [Backlog, p2, kamil.kreiser@secuura.ai, OPUS/LOW] Under multi-tenancy, auth's tenant-pool statements carry no tenant GUC: with fail-closed RLS every approve's level UPDATE matches 0 rows
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "**With** `MULTI_TENANCY_ENABLED` **on, auth's** `db.ts` **sends every statement that carries a tenant argument through** `tenantManager.getPool(tenantId).query()`**: a raw pool query with no tenant GU"
+  - area: services/auth
+- **KS-1055** [Backlog, p2, UNASSIGNED, OPUS/LOW] Per-tenant databases never receive the file migrations — CORE_MIGRATIONS FORCEs RLS with ZERO policies, so a per-tenant DB is dark on 5 core
+  - why: security/auth/key/gate wording in title or labels
+  - quote: "**Per-tenant databases receive** `CORE_MIGRATIONS` **and NEVER the file migrations — not on any boot.** Measured, not read. The consequence is not "039 is missing": `CORE_MIGRATIONS` **enables and FOR"
+  - area: services/api-gateway
