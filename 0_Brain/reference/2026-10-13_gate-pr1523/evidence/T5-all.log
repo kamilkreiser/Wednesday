@@ -1,0 +1,65 @@
+== T5b move tsconfig.test.json away
+   landed
+   rc=1
+   no tsconfig.test.json in <scratch>/wt-head/Blockchain/Dev/services/vc-issuer
+   FAIL — services/vc-issuer: the test-file type-check ratchet exited 2: the check could not run, examined no test file (a clean result would say nothing), or the baseline cannot be trusted (count-only, unparseable, no floor line, a duplicate line).
+   HARNESS: leg16 fail=1 skipped_advisory=''
+   restored, dirty=0
+== T5c1 move baseline away (clean tree)
+   landed
+   rc=0
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 30 files, 17 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   OK — 3 service(s) type-check against their baseline.
+   HARNESS: leg16 fail=0 skipped_advisory=''
+   restored, dirty=0
+== T5c2 move baseline away AND move a test file away
+   landed
+   rc=0
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 29 files, 16 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   OK — 3 service(s) type-check against their baseline.
+   HARNESS: leg16 fail=0 skipped_advisory=''
+   restored, dirty=0
+== T5e move one test file away (baseline present)
+   landed
+   rc=1
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 29 files, 16 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   EXAMINED test files fell below the baseline's floor: 16 examined, examined-test-files 17. A tsconfig narrowing, or a deleted test file? If it is deliberate, lower the floor with --update and have the diff reviewed.
+   FAIL — services/vc-issuer: the test-file type-check ratchet exited 1: a NEW test-file type error, a swap, a baseline entry that no longer reproduces, a tsc diagnostic with no file, a @ts-nocheck, or a fallen examined-test-files floor.
+   HARNESS: leg16 fail=1 skipped_advisory=''
+   restored, dirty=0
+== T5f add an 18th test file
+   landed
+   rc=0
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 31 files, 18 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   OK — 3 service(s) type-check against their baseline.
+   HARNESS: leg16 fail=0 skipped_advisory=''
+   restored, dirty=0
+== T5g @ts-nocheck in a vc-issuer test
+   landed: // @ts-nocheck
+   rc=1
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 30 files, 17 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   @ts-nocheck in an examined test file (it hides every error in the file from this check):
+   FAIL — services/vc-issuer: the test-file type-check ratchet exited 1: a NEW test-file type error, a swap, a baseline entry that no longer reproduces, a tsc diagnostic with no file, a @ts-nocheck, or a fallen examined-test-files floor.
+   HARNESS: leg16 fail=1 skipped_advisory=''
+   restored, dirty=0
+== T5h @ts-expect-error over a planted error (documented hole)
+   landed: 1
+   rc=0
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 30 files, 17 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   OK — 3 service(s) type-check against their baseline.
+   HARNESS: leg16 fail=0 skipped_advisory=''
+   restored, dirty=0
+== T5i hand-add a baseline entry admitting a planted error, in the same change
+   landed: src/__tests__/smoke.test.ts TS2322 0a58e37d 1
+   rc=0
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 30 files, 17 of them under __tests__; 1 errors: 1 in the baseline, 0 new; 0 stale baseline entries.
+   OK — 3 service(s) type-check against their baseline.
+   HARNESS: leg16 fail=0 skipped_advisory=''
+   restored, dirty=0
+== T5j hand-lower the floor to 16 and move a test file away
+   landed: 1
+   rc=0
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 29 files, 16 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   OK — 3 service(s) type-check against their baseline.
+   HARNESS: leg16 fail=0 skipped_advisory=''
+   restored, dirty=0

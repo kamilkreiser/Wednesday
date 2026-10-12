@@ -1,0 +1,51 @@
+== T6a fresh linked worktree at head, NO install
+   precondition: no node_modules
+   rc=0
+   SKIP (advisory) — the workspace install is absent or incomplete, so the compiler this check needs is not there.
+     ^ leg 16 counted as SKIPPED (advisory), not run: the workspace install is absent or incomplete, so the compiler this check needs is not there.
+   HARNESS: leg16 fail=0 skipped_advisory=' 16'
+== T6b install present, typescript package removed (deps-present still passes)
+   deps-present rc=0 (0 = precondition holds)
+   rc=1
+   cannot resolve typescript/bin/tsc from the service dir or this script: run `npm ci` first
+   FAIL — services/auth: the test-file type-check ratchet exited 2: the check could not run, examined no test file (a clean result would say nothing), or the baseline cannot be trusted (count-only, unparseable, no floor line, a duplicate line).
+   cannot resolve typescript/bin/tsc from the service dir or this script: run `npm ci` first
+   FAIL — services/api-gateway: the test-file type-check ratchet exited 2: the check could not run, examined no test file (a clean result would say nothing), or the baseline cannot be trusted (count-only, unparseable, no floor line, a duplicate line).
+   cannot resolve typescript/bin/tsc from the service dir or this script: run `npm ci` first
+   FAIL — services/vc-issuer: the test-file type-check ratchet exited 2: the check could not run, examined no test file (a clean result would say nothing), or the baseline cannot be trusted (count-only, unparseable, no floor line, a duplicate line).
+   HARNESS: leg16 fail=1 skipped_advisory=''
+   restored
+== T6c install present, packages/shared NOT built (dist moved away)
+   rc=1
+   typecheck-tests: auth (tsconfig.test.json): tsc examined 144 files, 93 of them under __tests__; 81 errors: 42 in the baseline, 39 new; 0 stale baseline entries.
+   FAIL — services/auth: the test-file type-check ratchet exited 1: a NEW test-file type error, a swap, a baseline entry that no longer reproduces, a tsc diagnostic with no file, a @ts-nocheck, or a fallen examined-test-files floor.
+   typecheck-tests: api-gateway (tsconfig.test.json): tsc examined 153 files, 118 of them under __tests__; 55 errors: 35 in the baseline, 20 new; 0 stale baseline entries.
+   FAIL — services/api-gateway: the test-file type-check ratchet exited 1: a NEW test-file type error, a swap, a baseline entry that no longer reproduces, a tsc diagnostic with no file, a @ts-nocheck, or a fallen examined-test-files floor.
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 30 files, 17 of them under __tests__; 17 errors: 0 in the baseline, 17 new; 0 stale baseline entries.
+   FAIL — services/vc-issuer: the test-file type-check ratchet exited 1: a NEW test-file type error, a swap, a baseline entry that no longer reproduces, a tsc diagnostic with no file, a @ts-nocheck, or a fallen examined-test-files floor.
+   HARNESS: leg16 fail=1 skipped_advisory=''
+   restored
+== T6d invoked through a symlinked spelling (/tmp -> /private/tmp)
+   path: /tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/gate1523/wt-merged/Blockchain/Dev
+   /tmp is a symlink
+   rc=0
+   typecheck-tests: auth (tsconfig.test.json): tsc examined 144 files, 93 of them under __tests__; 42 errors: 42 in the baseline, 0 new; 0 stale baseline entries.
+   typecheck-tests: api-gateway (tsconfig.test.json): tsc examined 153 files, 118 of them under __tests__; 35 errors: 35 in the baseline, 0 new; 0 stale baseline entries.
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 30 files, 17 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   OK — 3 service(s) type-check against their baseline.
+   HARNESS: leg16 fail=0 skipped_advisory=''
+== T6e path with spaces (linked worktree, own install)
+   ci rc=0
+   build rc=0
+   clean rc=0
+   typecheck-tests: auth (tsconfig.test.json): tsc examined 144 files, 93 of them under __tests__; 42 errors: 42 in the baseline, 0 new; 0 stale baseline entries.
+   typecheck-tests: api-gateway (tsconfig.test.json): tsc examined 152 files, 117 of them under __tests__; 35 errors: 35 in the baseline, 0 new; 0 stale baseline entries.
+   typecheck-tests: vc-issuer (tsconfig.test.json): tsc examined 30 files, 17 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
+   OK — 3 service(s) type-check against their baseline.
+   HARNESS: leg16 fail=0 skipped_advisory=''
+   plant landed: 1
+   plant rc=1
+     src/__tests__/smoke.test.ts(16,14): TS2322: Type 'string' is not assignable to type 'number'.
+   FAIL — services/vc-issuer: the test-file type-check ratchet exited 1: a NEW test-file type error, a swap, a baseline entry that no longer reproduces, a tsc diagnostic with no file, a @ts-nocheck, or a fallen examined-test-files floor.
+   HARNESS: leg16 fail=1 skipped_advisory=''
+   dirty=0
