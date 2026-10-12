@@ -968,3 +968,711 @@ PASS: CONTROL the KS-666 lease line is intact
 PASS=5 FAIL=0
 
 === Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh ===
+ok   slot 2: health wait sees all 27 containers (no 120 s timeout)
+ok   slot 2: PostgreSQL probe reports accepting connections
+ok   slot 2: Redis probe reports PONG
+ok   slot 2: pg_isready is exec'd in secuura-s2-postgres
+ok   slot 2: redis-cli is exec'd in secuura-s2-redis
+ok   slot 2: inspects 27 distinct secuura-s2-* names (positive control for the next case)
+ok   slot 2: never inspects a bare slot-1 name
+ok   slot 2: port pre-flight asks lsof about 6532/6479, not 6432/6379
+ok   slot 2: exits 0
+ok   slot 1: health wait sees all 27 containers
+ok   slot 1: pg_isready is exec'd in secuura-postgres
+ok   slot 1: redis-cli is exec'd in secuura-redis
+ok   slot 1: inspects 27 distinct secuura-* names
+ok   slot 1: port pre-flight still asks about 6432/6379
+ok   slot 1 --status: reports 27/27 running, 27 healthy
+ok   slot 1 --status: no container reported as not found
+ok   slot 1 --status: inspects 27 distinct secuura-* names
+ok   slot 3 --status: reports 27/27 running, 27 healthy
+ok   slot 3 --status: no container reported as not found
+ok   slot 3 --status: inspects 27 distinct secuura-s3-* names
+ok   slot 3 --status: never inspects a bare slot-1 name
+ok   slot 3 --status: port pre-flight asks about 6632/6579
+ok   control: slot-2 run against a slot-1-only daemon times out (stub discriminates by prefix)
+
+PASS=23 FAIL=0
+
+=== Blockchain/Dev/scripts/__tests__/stop_secuura.test.sh ===
+ok   the guard actually SEES the running stack (not a no-op pass)
+ok   invokes 'docker compose' (v2), never docker-compose
+ok   targets the ROOT docker-compose.local.yml, not Blockchain/Dev's
+ok   default teardown runs 'down' WITHOUT -v
+ok   --remove-volumes + confirmation runs 'down -v'
+ok   --remove-volumes + refusal destroys NOTHING
+ok   slot 2 resolves the secuura_slot2 project, not the directory default
+ok   foreign-owned stack: refuses and exits non-zero
+ok   foreign-owned stack: tears down NOTHING
+ok   foreign-owned stack + override: proceeds
+ok   unknown argument is rejected without touching the stack
+
+stop_secuura: 11 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/tenant_isolation_stderr_own_file.test.sh ===
+  ok   CONTROL - a runner with no stderr: rc 0, artefact parses, 3 tested, 0 findings
+  ok   RED the fallback run's artefact is the runner's JSON alone: rc 0, parses, 3 tested, 0 findings
+  ok   RED the fallback run prints tested=3 cross-tenant_findings=0
+  ok   RED the runner's stderr is kept in 06-tenant-isolation.json.stderr
+  ok   RED a leak found on a fallback run stays readable: rc 0, 1 finding, observed tenant-a
+
+  5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/validate_lint_errexit.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f2077cbf-bb12-49ee-8d59-f5f537b335e0/scratchpad/g1528/systemTest/schemathesis/validate-lint.sh
+        sha256 e12d7609c442d4f4cd8a04e7b5948c4899f9c630f9121a48d5951a76d232cb7f
+
+  ok   validate-lint.sh has NO bare arithmetic-command post-increment/decrement - ((X++)) exits 1 at 0 and bash >= 4.1 set -e dies on it (control fires: 1)
+  ok   both counters advance by assignment (2 matches)
+  ok   run_check survives bash -e from PASS_COUNT=0 to the second check (survived=2)
+  ok   validate-lint.sh parses (bash -n)
+
+  4 passed, 0 failed (of 4 cells)
+
+=== systemTest/__tests__/bootstrap_login_diagnosis.test.sh ===
+== B2: a refused connection names ECONNREFUSED and the PORT, not 'fetch failed' alone ==
+  ok   an unreachable target is DEGRADED, non-fatal (unchanged)
+  ok   the banner says ECONNREFUSED
+  ok   the banner names the refused port (60317)
+  ok   an unreachable target is NOT blamed on the password
+  ok   the banner points at the slot as the thing to check
+== B1: a 429 from the login limiter is named as the limiter, not as a wrong password ==
+  ok   a 429 leaves the bootstrap admin UNAVAILABLE (nothing created)
+  ok   the banner names the limiter and the 429
+  ok   the banner says the password was NOT checked
+  ok   the banner states the cooldown
+  ok   a 429 is NOT blamed on the password
+== CONTROL: a 401 IS blamed on the password, with the status, and never on the limiter ==
+  ok   a 401 says check the password (HTTP 401)
+  ok   a 401 does not mention the limiter
+  ok   the password value never reaches the banner
+== a 503 and a token-less 200 are gateway health, not credentials ==
+  ok   a 503 names the status and points at the gateway logs
+  ok   a 200 with no token says so
+  ok   a token-less 200 is NOT blamed on the password
+  ok   KS-1201 CONTROL: the listener count FIRES — it reads 1 with a stub deliberately running, so the 0 below is a measurement
+  ok   KS-1201: no login_stub.mjs listener from this run survives stop_stub (counted by the stub's own absolute path, not by name)
+
+bootstrap_login_diagnosis.test.sh: 18 passed, 0 failed
+
+=== systemTest/__tests__/doc_npm_scripts_exist.test.sh ===
+== every npm script a systemTest doc names exists (KS-1386) ==
+  ok   no doc names an npm script its package does not define
+  ok   the scan covers real references (360 'npm run' mentions)
+  ok   CONTROL — defined scripts (own package + Blockchain/Dev) pass
+  ok   PLANT — a missing script is reported with file:line
+  ok   MARKER — doc-script-ok: <reason> exempts its line
+  ok   MARKER — a bare doc-script-ok exempts nothing
+doc_npm_scripts_exist: 6 passed, 0 failed
+
+=== systemTest/__tests__/html_docs_matrix.test.sh ===
+== html_docs_matrix
+  ok   API_Security_Functional_Testing_Architecture_Flow_Diagrams.html has no prose outside a table, sane Mermaid, no placeholders
+  ok   QA_Tool_Cheat_Sheet_Secuura_API_Testing.html has no prose outside a table, sane Mermaid, no placeholders
+  ok   control: a bare paragraph is reported
+  ok   control: a list item is reported
+  ok   control: a note is reported
+  ok   control: a combo row is reported
+  ok   control: long text in a flex ck-item (the screenshot defect) is reported
+  ok   control: a long unwrapped text run is reported
+  ok   control: a placeholder row is reported
+  ok   control: a mermaid block with no diagram type is reported
+  ok   control: a mermaid block with an unbalanced bracket is reported
+  ok   control: a correct page reports nothing
+  12 passed, 0 failed
+
+=== systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh ===
+ok   a red src/a.b.ts NOT in the push (push has src/aXb.ts) is labelled inherited
+ok   ...and is NOT labelled as in this push
+ok   a red src/[id].ts IN the push is labelled (in this push)
+ok   CONTROL the dotted run still fails (exit 1)
+ok   CONTROL the bracket run still fails (exit 1)
+ok   CONTROL the bracket run trailer counts one failure
+ok   CONTROL a plain red file IN the push is labelled (in this push)
+ok   CONTROL a plain red file NOT in the push is labelled inherited
+
+ks998_format_gate_push_label_is_literal: 8 passed, 0 failed
+
+=== systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh ===
+ok   drain then green -> both packages checked
+ok   drain then green -> green reports format:check OK
+ok   drain then red -> the gate fails (exit 1)
+ok   CONTROL drain alone -> exit 0
+ok   CONTROL drain alone -> one package checked
+ok   CONTROL red alone -> exit 1
+ok   CONTROL red alone -> names the file
+ok   CONTROL green then red -> exit 1
+ok   CONTROL green then red -> both packages checked
+
+ks998_format_gate_stdin_isolated: 9 passed, 0 failed
+
+=== systemTest/__tests__/manifest_path.test.sh ===
+ok   nothing set -> actors-unslotted.json, never slot 1's
+ok   slot 1 unsourced -> actors-slot1.json
+ok   slot 1 sourced -> actors-slot1.json (both agree)
+ok   slot 2 unsourced -> actors-slot2.json
+ok   slot 2 sourced -> actors-slot2.json (both agree)
+ok   slot 3 unsourced -> actors-slot3.json
+ok   slot 3 sourced -> actors-slot3.json (both agree)
+ok   slot 4 unsourced -> actors-slot4.json
+ok   slot 4 sourced -> actors-slot4.json (both agree)
+ok   malformed slot is refused, not defaulted to slot 1
+ok   a slot above the ceiling is refused
+ok   the pre-KS-971 bare actors.json is never produced
+ok   rejected: nothing set -> actors.rejected-unslotted.json
+ok   rejected: slot 1 -> actors.rejected-slot1.json
+ok   rejected: slot 2 -> actors.rejected-slot2.json
+ok   rejected: slot 3 -> actors.rejected-slot3.json
+ok   rejected: slot 4 -> actors.rejected-slot4.json
+ok   manifest.ts imports without throwing
+ok   rejected manifests differ across slots (actors.rejected-slot2.json vs actors.rejected-slot3.json)
+ok   writeRejectedManifest writes the SLOT-SCOPED path it returns
+
+manifest_path: 20 passed, 0 failed
+
+=== systemTest/__tests__/manifest_quarantine.test.sh ===
+== manifest.ts quarantineManifest ==
+  ok   the stale manifest is gone from the path consumers read
+  ok   a superseded copy exists
+  ok   the superseded copy still carries the stale content (moved, not deleted)
+  ok   the copy is named for the rejecting run AND its (absent) slot: unslotted
+  ok   slot 3's copy carries its slot tag, so the same stamp on two slots cannot collide
+  ok   CONTROL: with no manifest present it reports nothing moved
+  ok   CONTROL: with no manifest present it creates nothing
+  ok   a second quarantine at the same stamp does not clobber the first
+  ok   the first quarantine still holds its own content
+== superseded copy carries its slot (KS-682 x KS-971) ==
+  ok   slot 1: superseded copy is actors.superseded-slot1-<stamp>.json
+  ok   slot 2: superseded copy is actors.superseded-slot2-<stamp>.json
+  ok   slot 3: superseded copy is actors.superseded-slot3-<stamp>.json
+  ok   slot 4: superseded copy is actors.superseded-slot4-<stamp>.json
+  ok   default path resolves at call time: slot set after import quarantines THAT slot's manifest
+
+  14 passed, 0 failed
+
+=== systemTest/__tests__/manifest_readers_agree.test.sh ===
+== every slot names ONE file, on all four sides ==
+ok   unset -> unslotted, never slot 1 -> actors-unslotted.json
+ok   slot 1 -> actors-slot1.json
+ok   slot 1, sourced shell (-slot1) -> actors-slot1.json
+ok   slot 2 -> actors-slot2.json
+ok   slot 2, sourced shell (-slot2) -> actors-slot2.json
+ok   slot 3 -> actors-slot3.json
+ok   slot 3, sourced shell (-slot3) -> actors-slot3.json
+ok   slot 4 -> actors-slot4.json
+ok   slot 4, sourced shell (-slot4) -> actors-slot4.json
+== the platform-s STACK_SLOT alias reaches all four sides, in stack_env.sh:37's order (KS-1016) ==
+ok   alias alone -> slot 2 -> actors-slot2.json
+ok   platform-k name wins over the alias -> actors-slot3.json
+ok   blank platform-k name falls through to the alias -> actors-slot2.json
+ok   malformed alias is refused too -> ERROR
+== a malformed slot is REFUSED on all four sides, never defaulted or interpolated ==
+ok   non-numeric 'two' -> ERROR
+ok   leading zero '01' -> ERROR
+ok   zero -> ERROR
+ok   negative -> ERROR
+ok   fraction -> ERROR
+ok   above the ceiling (5) -> ERROR
+ok   far above the ceiling (44) -> ERROR
+== whitespace is trimmed the same way everywhere ==
+ok   ' 2 ' -> slot 2 -> actors-slot2.json
+ok   '   ' -> unslotted -> actors-unslotted.json
+== CONTROL: the drivers can tell the readers apart (a driver that always printed the same thing would pass everything above) ==
+ok   CONTROL: writer distinguishes slot 2 from slot 3 (actors-slot2.json vs actors-slot3.json)
+ok   CONTROL: schemathesis distinguishes slot 2 from slot 3 (actors-slot2.json vs actors-slot3.json)
+
+manifest_readers_agree: 24 passed, 0 failed
+
+=== systemTest/__tests__/no_hardcoded_slot_literals.test.sh ===
+== the forbidden set is computed, and covers every family for every slot above 1 ==
+ok   forbidden set: 45 patterns = 3 slots x (11 port families + 4 name shapes)
+== the scanned roots hold no slot 2..4 literal ==
+ok   scanned 1209 files under: fixtures __tests__ scripts run-in-slot.sh performance playwright akto schemathesis api-explorer
+ok   no unmarked slot 2..4 value in fixtures __tests__ scripts run-in-slot.sh performance playwright akto schemathesis api-explorer
+== POSITIVE CONTROL: a planted literal is found, in every family and shape ==
+ok   CONTROL: all 54 planted literals are reported
+== NEGATIVE CONTROLS: what must NOT be reported ==
+ok   CONTROL: slot 1's base, a port above the ceiling, a longer number, 'slot1'/'unslotted' and a marked line are not reported
+ok   CONTROL: a marker with no reason does not exempt the line
+== GITIGNORED RUN OUTPUT is not source (KS-1386, found overnight 2026-09-29) ==
+ok   CONTROL: a slot value in a GITIGNORED cache file is not reported
+ok   CONTROL: an UNTRACKED (not ignored) file is still scanned
+ok   CONTROL: a directory that is not a git work tree is REFUSED, not scanned some other way
+== KS-1450: the provenance exemption drops ONLY $generated.from_runs members ==
+ok   provenance exemption: 2 exempted line(s), all of them $generated.from_runs members
+ok   CONTROL: a lone provenance-shaped string in ANOTHER array is exempted by the line filter (3) and CAUGHT by the membership check (1)
+
+no_hardcoded_slot_literals: 11 passed, 0 failed
+
+=== systemTest/__tests__/no_secret_prefix_echo.test.sh ===
+ok   scanned 39 shell scripts under systemTest/
+ok   no script prints a slice of a secret-named variable
+ok   CONTROL: all 3 planted secret slices are found
+ok   CONTROL: a length, a comment and a non-secret slice are not flagged
+
+no_secret_prefix_echo: 4 passed, 0 failed
+
+=== systemTest/__tests__/observability_discovery.test.sh ===
+ok   network: explicit override wins over discovery
+ok   pg: explicit DSN wins over discovery
+ok   redis: explicit password wins over discovery
+ok   network: discovered from the running gateway
+ok   pg: DSN assembled from the running container
+ok   redis: password read from --requirepass in the command vector
+ok   network: follows whatever the project is called
+ok   pg: platform not running -> empty, so compose's default applies
+ok   redis: platform not running -> empty
+ok   network: nothing discoverable -> the compose default, not an empty string
+ok   pg: a missing password yields empty, not a DSN with a blank password
+ok   redis: no --requirepass -> empty, not the next argument
+ok   redis: dangling --requirepass -> empty, no out-of-range read
+ok   redis: malformed docker output -> empty, not a crash
+
+observability_discovery: 14 passed, 0 failed
+
+=== systemTest/__tests__/package_format_gate.test.sh ===
+ok   discovers a package that declares format:check
+ok   discovers every such package (5 fixtures)
+ok   does NOT discover a package with no format:check
+ok   a path in green selects green
+ok   ...and does not run red
+ok   one package checked, none failed
+ok   no gated path -> exit 0
+ok   no gated path -> says nothing
+ok   systemTest path outside any package -> silent
+ok   a red package -> exit 1
+ok   ...names the offending file
+ok   ...and says how to fix it
+ok   a red file IN the push is labelled so
+ok   a red file NOT in the push is labelled so
+ok   deps missing, nothing else selected -> exit 1 (examined nothing)
+ok   deps missing -> SKIP names the package
+ok   deps missing -> names the remedy
+ok   deps missing -> counted as skipped
+ok   examined nothing -> says NOTHING CHECKED
+ok   examined nothing -> says it is NOT a formatting failure
+ok   one checked + one skipped -> exit 0
+ok   ...trailer counts both
+ok   ...and does NOT claim nothing was checked
+ok   two red packages -> exit 1
+ok   two red packages -> trailer counts BOTH
+ok   mixed run -> trailer counts one failure
+ok   non-zero with no [warn] lines -> exit 1
+ok   ...counted as a failure, not a pass
+ok   ...says prettier named no files
+ok   --all -> exit 1 (fixtures include reds)
+ok   --all checks the untouched green package
+ok   --all checks every deps-present package
+ok   an unknown flag -> exit 2
+
+package_format_gate: 33 passed, 0 failed
+
+=== systemTest/__tests__/pre_suite.test.sh ===
+== KS-1016: a LOCAL target with no slot named is REFUSED, naming the slot command ==
+  ok   no slot + local target: REFUSED, exit 1
+  ok   the refusal shows both forms of the slot command
+  ok   the refusal says the rule is local-only
+  ok   CI is exempt — its local stack is deliberately unslotted (falls through to DEGRADED)
+== pre-suite.ts ==
+  ok   remote target reports REFUSED
+  ok   REFUSED exits non-zero
+  ok   REFUSED stays fatal with the flag set
+  ok   CONTROL: a permitted target is not REFUSED
+  ok   unreachable stack reports DEGRADED
+  ok   DEGRADED is non-fatal by default
+  ok   DEGRADED names the seeded fallback in words
+  ok   SYSTEMTEST_REQUIRE_PROVISIONED=true makes DEGRADED fatal
+== F3: the strict flag does not fail open silently ==
+  ok   strict honours the spelling 'TRUE'
+  ok   strict honours the spelling ' true'
+  ok   strict honours the spelling 'true '
+  ok   an unrecognised value WARNS
+  ok   an unrecognised value stays permissive rather than silently strict
+  ok   CONTROL: 'false' is recognised and does not warn
+  NOT RUN  PROVISIONED arm — No stack slot named. Every LOCAL system-test run must say which Docker stack it targets.
+           SECUURA_STACK_SLOT=<n> bash systemTest/__tests__/pre_suite.test.sh
+           or: systemTest/run-in-slot.sh <n> bash systemTest/__tests__/pre_suite.test.sh
+           This arm CREATES accounts, so it never guesses a target. The three failure arms above ran.
+
+== F2: the four runner choke points are hooked ==
+  ok   playwright/global-setup.ts CALLS the pre-suite step
+  ok   performance/runner/cli.ts CALLS the pre-suite step
+  ok   akto/tests/preSuiteSetup.ts CALLS the pre-suite step
+  ok   schemathesis/scripts/run.py CALLS the pre-suite step
+  ok   CONTROL: manifest.ts does not invoke the step
+== F2: the playwright hook actually EXECUTES, not just exists in source ==
+  NOT RUN  playwright execution check — no stack slot named (globalSetup provisions accounts on the slot, so it runs only on the one you name: SECUURA_STACK_SLOT=N). No stack was contacted.
+== F2: performance hooks BEFORE the manifest is consumed ==
+  ok   provisioning runs before withGeneratedActors (line 182 < 189)
+== F2: no npm script re-introduces a per-script hook (they double-provision) ==
+  ok   no package.json carries a pre* hook
+== F2: schemathesis gates by COMMAND, and integration is NOT exempt ==
+  ok   run.py gates by command set
+  ok   integration is NOT exempt from provisioning
+  ok   CONTROL: report IS exempt, so the set is populated
+
+pre_suite.test.sh: 28 passed, 0 failed
+
+=== systemTest/__tests__/prove_slot_isolation.test.sh ===
+ok   all_slots is 1..SECUURA_MAX_STACK_SLOT, read from stack_env.sh
+ok   slot 1 service name is secuura-originate
+ok   slot 1 gateway name follows the same rule
+ok   slot 1 gateway port is the slot-1 base + 100*(N-1)
+ok   slot 2 service name is secuura-s2-originate
+ok   slot 2 gateway name follows the same rule
+ok   slot 2 gateway port is the slot-1 base + 100*(N-1)
+ok   slot 3 service name is secuura-s3-originate
+ok   slot 3 gateway name follows the same rule
+ok   slot 3 gateway port is the slot-1 base + 100*(N-1)
+ok   slot 4 service name is secuura-s4-originate
+ok   slot 4 gateway name follows the same rule
+ok   slot 4 gateway port is the slot-1 base + 100*(N-1)
+ok   slot 1 service name is BARE (stack_env.sh leaves the prefix off)
+ok   a slot above the ceiling names no container (stack_env.sh refuses it)
+ok   every slot names a different container
+ok   the victim's log is counted as a hit
+ok   a control log with only a threshold line is NOT a hit
+ok   a folder with no k6 log at all is 0, not an error
+ok   a missing folder is 0, not a crash
+ok   two matching lines in one log still counts as one file
+ok   two matching logs count as two
+ok   an unset VICTIM_SLOT is refused with exit 2 and NO docker call
+ok   the refusal names VICTIM_SLOT
+ok   a blank VICTIM_SLOT is refused like an unset one, with NO docker call
+ok   VICTIM_SLOT='0' is refused with exit 2 and NO docker call
+ok   VICTIM_SLOT='01' is refused with exit 2 and NO docker call
+ok   VICTIM_SLOT='abc' is refused with exit 2 and NO docker call
+ok   VICTIM_SLOT='5' is refused with exit 2 and NO docker call
+ok   slot 1: an unknown FAILURE_MODE is rejected (exit 1), not treated as 'pause', with NO docker call
+ok   slot 2: an unknown FAILURE_MODE is rejected (exit 1), not treated as 'pause', with NO docker call
+ok   slot 3: an unknown FAILURE_MODE is rejected (exit 1), not treated as 'pause', with NO docker call
+ok   slot 4: an unknown FAILURE_MODE is rejected (exit 1), not treated as 'pause', with NO docker call
+
+prove_slot_isolation: 33 passed, 0 failed
+
+=== systemTest/__tests__/provision_base_url.test.sh ===
+ok   bare gateway is unchanged (the header's documented form)
+ok   the wrapper's /api form is reduced to the root
+ok   slot 1's /api form
+ok   slot 2's /api form
+ok   slot 3's /api form
+ok   slot 4's /api form
+ok   a trailing slash after /api
+ok   a trailing slash with no /api
+ok   surrounding whitespace is trimmed
+ok   a host containing 'api' is untouched
+ok   an /api segment that is not last is untouched
+ok   register URL is /api/auth/register, not /api/api/auth/register
+ok   slot 1: wrapper exports 'http://localhost:6882/api' -> root 'http://localhost:6882'
+ok   slot 2: wrapper exports 'http://localhost:6982/api' -> root 'http://localhost:6982'
+ok   slot 3: wrapper exports 'http://localhost:7082/api' -> root 'http://localhost:7082'
+ok   slot 4: wrapper exports 'http://localhost:7182/api' -> root 'http://localhost:7182'
+ok   CONTROL: the wrapper does export the /api form, so normalisation is load-bearing
+ok   --base-url beats API_BASE_URL (global-setup's explicit slot wins over an inherited shell)
+ok   API_BASE_URL is used when no --base-url is given (the sourced route still works)
+ok   neither set (CI) announces NO target — nothing is resolved
+ok   --base-url on its own, bare root form
+== precedence chain through the real entry point (KS-971) ==
+ok   SECUURA_GATEWAY_URL (the wrapper's root) beats API_BASE_URL
+ok   SECUURA_GATEWAY_URL with a trailing /api is normalised too
+ok   --base-url still beats SECUURA_GATEWAY_URL
+ok   slot alone derives the slot's gateway (was: slot-1 literal)
+ok   slot 1 alone -> http://localhost:6882, derived not typed
+ok   slot 2 alone -> http://localhost:6982, derived not typed
+ok   slot 3 alone -> http://localhost:7082, derived not typed
+ok   slot 4 alone -> http://localhost:7182, derived not typed
+ok   slot 2 + API_BASE_URL on slot 2's port -> honoured
+== a LOCAL url on ANOTHER slot's port is refused, not obeyed (KS-971) ==
+ok   slot 3 requested, API_BASE_URL on slot 1's port -> refused
+ok   slot 2 requested, SECUURA_GATEWAY_URL on slot 4's port -> refused
+ok   no slot requested (CI) -> a slot-1 url is simply taken as given
+== KS-1016: a LOCAL target with NO slot named is refused, outside CI, for every slot's port ==
+ok   no slot, API_BASE_URL on slot 1's port -> REFUSED (No stack slot named)
+ok   no slot, API_BASE_URL on slot 2's port -> REFUSED (No stack slot named)
+ok   no slot, API_BASE_URL on slot 3's port -> REFUSED (No stack slot named)
+ok   no slot, API_BASE_URL on slot 4's port -> REFUSED (No stack slot named)
+ok   no slot, nothing set -> REFUSED, never the slot-1 default
+ok   no slot, nothing set, CI=true -> REFUSED: no default target
+ok   no slot, REMOTE target -> not this rule's business (refused as remote instead)
+ok   STACK_SLOT alias alone counts as naming the slot
+ok   the refusal shows both forms of the slot command and says local-only
+ok   nothing set: refused, naming the slot variable and the url variables, and no target announced
+ok   CI's 7282 names no slot, so it passes through under any slot
+ok   a remote url passes the slot check and is stopped by the remote-safety guard instead
+ok   --print-target via --base-url http://127.0.0.1:60746: resolved http://127.0.0.1:60746 and opened 0 connections
+ok   --print-target via API_BASE_URL: resolved http://127.0.0.1:60746 and opened 0 connections
+ok   --print-target via SECUURA_GATEWAY_URL: resolved http://127.0.0.1:60746 and opened 0 connections
+ok   --print-target says it sent no request
+ok   CONTROL: a real pass at the listener IS counted (0 -> 1), so 0 above means 0
+ok   slot 1 unsourced: suite gateway and provisioning root agree (http://localhost:6882)
+ok   slot 1 sourced: agree (http://localhost:6882)
+ok   slot 1 with a stale slot-1 API_BASE_URL in the shell: retargeted to slot 1 (http://localhost:6882)
+ok   slot 2 unsourced: suite gateway and provisioning root agree (http://localhost:6982)
+ok   slot 2 sourced: agree (http://localhost:6982)
+ok   slot 2 with a stale slot-1 API_BASE_URL in the shell: retargeted to slot 2 (http://localhost:6982)
+ok   slot 3 unsourced: suite gateway and provisioning root agree (http://localhost:7082)
+ok   slot 3 sourced: agree (http://localhost:7082)
+ok   slot 3 with a stale slot-1 API_BASE_URL in the shell: retargeted to slot 3 (http://localhost:7082)
+ok   slot 4 unsourced: suite gateway and provisioning root agree (http://localhost:7182)
+ok   slot 4 sourced: agree (http://localhost:7182)
+ok   slot 4 with a stale slot-1 API_BASE_URL in the shell: retargeted to slot 4 (http://localhost:7182)
+
+provision_base_url: 62 passed, 0 failed
+
+=== systemTest/__tests__/quarantine_call_sites.test.sh ===
+== quarantine call sites ==
+  ok   harness: pre-suite.ts runs and reaches the DEGRADED arm
+  ok   catch arm: the stale manifest is gone from the consumers' path
+  ok   catch arm: a superseded copy was written
+  ok   catch arm: the banner REPORTS the supersede instead of predicting
+  ok   CONTROL: with no manifest present the catch arm quarantines nothing
+  ok   strict catch arm: still FATAL (rc=1)
+  ok   strict catch arm: the stale manifest was moved aside
+  ok   strict catch arm: the banner NAMES where the manifest was moved
+  ok   strict CONTROL: with no manifest present the banner says none was moved
+  ok   strict catch arm: a manifest that could not be moved is REPORTED, and the run is still FATAL
+  ok   could-not-move advice names the real manifest file (actors-unslotted.json), not the pre-KS-971 actors.json
+  ok   permissive catch arm: could-not-move advice names the real manifest file
+  ok   REFUSED does NOT quarantine — a fatal refusal must not destroy a valid manifest
+  ok   harness: stub server is listening on 127.0.0.1:60885
+  ok   DRIFT arm reached (role collapse), not the catch arm
+  ok   DRIFT call site: provisionActors quarantined the stale manifest
+  ok   CONTROL: with no manifest present the drift arm quarantines nothing
+
+  17 passed, 0 failed
+
+=== systemTest/__tests__/run_in_slot.test.sh ===
+ok   runs the command with the slot exported
+ok   points the suite at that slot
+ok   passes the command's exit code through (success)
+ok   passes the command's exit code through (failure)
+ok   a second suite on the SAME slot is refused
+ok   a suite on a DIFFERENT slot still runs
+ok   the lock is released after a FAILED suite
+ok   no lock directory is left behind
+ok   control: the leftover-lock check can SEE a lock
+ok   control: the two worktrees are at DIFFERENT paths
+ok   control: an uncontended slot from a worktree runs
+ok   a second worktree on the SAME slot is refused
+ok   refused for the RIGHT reason (BLOCKED, not an error)
+ok   a second worktree on a DIFFERENT slot still runs
+ok   no arguments -> exit 2
+ok   slot but no command -> exit 2
+ok   non-numeric slot -> exit 2
+
+run_in_slot: 17 passed, 0 failed
+
+=== systemTest/__tests__/setup_env.test.sh ===
+== a named slot: the default is THAT slot's API root, for every slot ==
+ok   slot 1 named, empty answer -> http://localhost:6882/api
+ok   slot 1: the prompt offers slot 1's root
+ok   slot 2 named, empty answer -> http://localhost:6982/api
+ok   slot 2: the prompt offers slot 2's root
+ok   slot 3 named, empty answer -> http://localhost:7082/api
+ok   slot 3: the prompt offers slot 3's root
+ok   slot 4 named, empty answer -> http://localhost:7182/api
+ok   slot 4: the prompt offers slot 4's root
+ok   platform-s STACK_SLOT alias names the slot
+ok   SECUURA_STACK_SLOT wins over the alias
+ok   an explicit answer still wins over the slot default
+== no slot named: no default, and never slot 1's ==
+ok   no slot, empty answer -> refused (rc 1), nothing exported
+ok   the refusal names the slot variable
+ok   no slot: slot 1's gateway is never offered
+ok   no slot under CI, empty answer -> still no default (rc 1)
+ok   no slot, a LOCAL url typed -> refused outside CI
+ok   no slot, a LOCAL url typed under CI=true -> accepted (CI is exempt)
+ok   CI=false is not CI -> the LOCAL url is refused
+ok   no slot, a REMOTE url typed -> accepted (remote needs no slot)
+== an invalid slot is refused, not defaulted ==
+ok   slot above the ceiling -> refused (rc 1)
+ok   non-numeric slot -> refused (rc 1)
+== the API token: required, and never echoed (KS-1386) ==
+ok   an empty token is a failure (rc 1), not success
+ok   no character of the token is printed
+ok   the token's length is reported instead
+
+setup_env: 24 passed, 0 failed
+
+=== systemTest/__tests__/slot_target.test.sh ===
+ok   schemathesis slot 1
+ok   playwright gateway slot 1
+ok   BASE_URL is not exported (slot 1)
+ok   akto target slot 1
+ok   akto app-url slot 1
+ok   akto dashboard url slot 1
+ok   akto target == gateway root slot 1
+ok   performance slot 1
+ok   schemathesis slot 2
+ok   playwright gateway slot 2
+ok   BASE_URL is not exported (slot 2)
+ok   akto target slot 2
+ok   akto app-url slot 2
+ok   akto dashboard url slot 2
+ok   akto target == gateway root slot 2
+ok   performance slot 2
+ok   schemathesis slot 3
+ok   playwright gateway slot 3
+ok   BASE_URL is not exported (slot 3)
+ok   akto target slot 3
+ok   akto app-url slot 3
+ok   akto dashboard url slot 3
+ok   akto target == gateway root slot 3
+ok   performance slot 3
+ok   schemathesis slot 4
+ok   playwright gateway slot 4
+ok   BASE_URL is not exported (slot 4)
+ok   akto target slot 4
+ok   akto app-url slot 4
+ok   akto dashboard url slot 4
+ok   akto target == gateway root slot 4
+ok   performance slot 4
+ok   slot 1 akto prefix
+ok   slot 1 akto project
+ok   slot 1 akto dashboard port
+ok   slot 1 akto mongo port
+ok   slot 1 akto mongo-express port
+ok   slot 1 akto mongo volume
+ok   slot 1 akto dashboard volume
+ok   slot 2 akto prefix
+ok   slot 2 akto project
+ok   slot 2 akto dashboard port
+ok   slot 2 akto mongo port
+ok   slot 2 akto mongo-express port
+ok   slot 2 akto mongo volume
+ok   slot 2 akto dashboard volume
+ok   slot 3 akto prefix
+ok   slot 3 akto project
+ok   slot 3 akto dashboard port
+ok   slot 3 akto mongo port
+ok   slot 3 akto mongo-express port
+ok   slot 3 akto mongo volume
+ok   slot 3 akto dashboard volume
+ok   slot 4 akto prefix
+ok   slot 4 akto project
+ok   slot 4 akto dashboard port
+ok   slot 4 akto mongo port
+ok   slot 4 akto mongo-express port
+ok   slot 4 akto mongo volume
+ok   slot 4 akto dashboard volume
+ok   akto mongo VOLUMES differ (project scoping alone is not enough)
+ok   akto compose projects differ (no shared mongo)
+ok   COMPOSE_PROJECT_NAME does not leak (slot 1)
+ok   COMPOSE_PROJECT_NAME does not leak (slot 2)
+ok   COMPOSE_PROJECT_NAME does not leak (slot 3)
+ok   COMPOSE_PROJECT_NAME does not leak (slot 4)
+ok   slot 1 artifact tag
+ok   slot 1 names its slot
+ok   slot 1 records its gateway port
+ok   slot 1 website port
+ok   slot 1 tokenomics port
+ok   slot 2 artifact tag
+ok   slot 2 names its slot
+ok   slot 2 records its gateway port
+ok   slot 2 website port
+ok   slot 2 tokenomics port
+ok   slot 3 artifact tag
+ok   slot 3 names its slot
+ok   slot 3 records its gateway port
+ok   slot 3 website port
+ok   slot 3 tokenomics port
+ok   slot 4 artifact tag
+ok   slot 4 names its slot
+ok   slot 4 records its gateway port
+ok   slot 4 website port
+ok   slot 4 tokenomics port
+ok   the ticket is in the label
+ok   all 4 slots have distinct artifact suffixes
+ok   artifacts carry the Linear ticket
+ok   no ticket is invented when the branch has none
+ok   no akto side-stack port collides across slots 1-4
+ok   each slot has a distinct target URL
+ok   platform-s's STACK_SLOT selects the same slot
+ok   SECUURA_STACK_SLOT wins when both are set
+ok   requested slot retargets a preset LOCAL url
+ok   a preset REMOTE url is never retargeted
+ok   with no slot requested, a preset url is left alone
+ok   slot 4 (the ceiling) is supported
+ok   slot 5 is refused (ceiling is 4)
+ok   explicit GATEWAY_URL wins
+ok   explicit AKTO_DASHBOARD_PORT wins
+ok   non-numeric slot rejected (exit 2)
+ok   re-source 1->2 retargets AKTO_PREFIX
+ok   re-source 1->2 retargets AKTO_COMPOSE_PROJECT
+ok   re-source 1->2 retargets AKTO_MONGO_PORT
+ok   re-source 1->2 retargets AKTO_DASHBOARD_PORT
+ok   re-source 1->2 retargets AKTO_MONGO_VOLUME
+ok   re-source 1->2 keeps the URL correct too
+ok   re-source 1->2 retargets OVERRIDE_APP_URL
+ok   re-source 1->2 retargets AKTO_DASHBOARD_URL
+ok   re-source 1->2 retargets SECUURA_ARTIFACT_SUFFIX
+ok   re-source 1->2 drops a pinned SECUURA_ARTIFACT_LABEL
+ok   re-source 2->3 retargets AKTO_PREFIX
+ok   re-source 2->3 retargets AKTO_COMPOSE_PROJECT
+ok   re-source 2->3 retargets AKTO_MONGO_PORT
+ok   re-source 2->3 retargets AKTO_DASHBOARD_PORT
+ok   re-source 2->3 retargets AKTO_MONGO_VOLUME
+ok   re-source 2->3 keeps the URL correct too
+ok   re-source 2->3 retargets OVERRIDE_APP_URL
+ok   re-source 2->3 retargets AKTO_DASHBOARD_URL
+ok   re-source 2->3 retargets SECUURA_ARTIFACT_SUFFIX
+ok   re-source 2->3 drops a pinned SECUURA_ARTIFACT_LABEL
+ok   re-source 3->4 retargets AKTO_PREFIX
+ok   re-source 3->4 retargets AKTO_COMPOSE_PROJECT
+ok   re-source 3->4 retargets AKTO_MONGO_PORT
+ok   re-source 3->4 retargets AKTO_DASHBOARD_PORT
+ok   re-source 3->4 retargets AKTO_MONGO_VOLUME
+ok   re-source 3->4 keeps the URL correct too
+ok   re-source 3->4 retargets OVERRIDE_APP_URL
+ok   re-source 3->4 retargets AKTO_DASHBOARD_URL
+ok   re-source 3->4 retargets SECUURA_ARTIFACT_SUFFIX
+ok   re-source 3->4 drops a pinned SECUURA_ARTIFACT_LABEL
+ok   re-source 4->1 retargets AKTO_PREFIX
+ok   re-source 4->1 retargets AKTO_COMPOSE_PROJECT
+ok   re-source 4->1 retargets AKTO_MONGO_PORT
+ok   re-source 4->1 retargets AKTO_DASHBOARD_PORT
+ok   re-source 4->1 retargets AKTO_MONGO_VOLUME
+ok   re-source 4->1 keeps the URL correct too
+ok   re-source 4->1 retargets OVERRIDE_APP_URL
+ok   re-source 4->1 retargets AKTO_DASHBOARD_URL
+ok   re-source 4->1 retargets SECUURA_ARTIFACT_SUFFIX
+ok   re-source 4->1 drops a pinned SECUURA_ARTIFACT_LABEL
+ok   explicit AKTO_MONGO_PORT override is preserved
+ok   live-slot: no slot named -> no gateway, exit 1 (never slot 1)
+ok   live-slot: no slot named -> live_slot_named exits 1
+ok   live-slot: slot 1 named -> slot 1's base + 100*(1-1)
+ok   live-slot: slot 2 named -> slot 1's base + 100*(2-1)
+ok   live-slot: slot 3 named -> slot 1's base + 100*(3-1)
+ok   live-slot: slot 4 named -> slot 1's base + 100*(4-1)
+ok   live-slot: platform-s STACK_SLOT alias counts as naming the slot
+ok   live-slot: SECUURA_STACK_SLOT wins over the alias
+ok   live-slot: an explicit SYSTEMTEST_BASE_URL is the caller naming a target
+ok   live-slot: a slot stack_env.sh rejects -> no gateway, exit 1
+ok   live-slot: sourcing the wrapper stays inside a subshell (no GATEWAY_URL leak)
+ok   tripwire: no __tests__/*.test.sh defaults a slot or gateway to slot 1
+ok   hermetic-env: measured 46 slot variables (>= 20)
+ok   hermetic-env strips SECUURA_GATEWAY_URL
+ok   hermetic-env strips API_BASE_URL
+ok   hermetic-env strips SECUURA_STACK_SLOT
+ok   hermetic-env strips STACK_SLOT
+ok   hermetic-env strips CI
+ok   hermetic-env strips AKTO_PREFIX
+ok   hermetic-env strips SECUURA_API_URL
+ok   hermetic-env strips SECUURA_ARTIFACT_SUFFIX
+ok   hermetic-env leaves bash's own HOME alone
+ok   hermetic-env leaves bash's own PATH alone
+ok   hermetic-env leaves bash's own PWD alone
+ok   hermetic-env leaves bash's own SHLVL alone
+ok   hermetic-env leaves bash's own _ alone
+ok   hermetic-env leaves bash's own OLDPWD alone
+ok   hermetic_strip_except keeps the named variable and strips the rest
+ok   a wrapper that cannot be measured is FATAL (exit 2), never an empty strip
+ok   CONTROL: without the strip a sourced shell redirects the cell to slot 2's gateway (http://localhost:6982) — the leak is real
+ok   with the strip the cell resolves the closed port it named, not the sourced slot
+
+slot_target: 174 passed, 0 failed
+
+shell suites: 82 passed, 2 failed, 0 skipped (of 84)
+FAILED: Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh
+FAILED: Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+RUNNER rc=1
