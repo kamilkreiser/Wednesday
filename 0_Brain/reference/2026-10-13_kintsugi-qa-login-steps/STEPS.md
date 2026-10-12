@@ -18,6 +18,11 @@
 - NOT VERIFIED: the exact JSON shape of the login response (I say "copy the access token"); the password-strength rule beyond "at least 8 characters" (use 20+ characters, upper, lower, digit, symbol); whether `admin/create` lets you set the organisation directly (it does not take `organizationId` in the create payload I read; step 5 sets it afterwards with the admin update route, whose payload in the Users page carries `organizationId`); that your own account on Kintsugi is ORG_ADMIN or SYSTEM_ADMIN.
 - I asked **V 6th** to run the same steps against its own local copy of the service and mail me any correction; I will post a second message here if it changes anything.
 
+## READ THIS BEFORE STEP 4 — two corrections from V 6th (read from the code at develop b28bfaec; V is also measuring them on its own copy)
+**A. The new user's TENANT is fixed when you create it, and the API cannot change it afterwards.** If you do step 4 signed in as a **platform admin (SYSTEM_ADMIN / SUPER_ADMIN)**, the new user lands in the platform default tenant `a0000000-0000-4000-8000-000000000001`. Step 5 sets the organisation but cannot move the tenant. If the organisation from step 2 is in a *different* tenant, the key list in step 7 answers **200 with zero keys, which looks like success and is not**, and the seats' organisation checks read the wrong tenant. Two safe ways: **(a)** in step 2 pick an organisation that is in tenant `a0000000-0000-4000-8000-000000000001`; or **(b)** do step 4 signed in as an **ORG_ADMIN of that organisation's own tenant** (then the new user lands in that tenant, and step 5 refuses a foreign organisation). If you have already created the user in the wrong tenant: make a new one the safe way, or tell me and the deploy seat fixes the one row.
+**B. Step 7's URL was wrong.** Through the gateway the key list is `/api/security/keys`, not `/api/keys` (the Admin Dashboard itself calls that path). Use the corrected command in step 7.
+**Smaller, from V:** step 4 answers **201**; its refusals are 403 not-admin, 403 "Tenant context required", 409 email already exists, and 400 for a reserved `*.wallet.local` email; the create route checks **no password strength at all** (only non-empty), so the "8 characters" above is not enforced there, but a strong password is still right; the token for step 7 must be minted **after step 5** (the organisation is read from the user row at login), which "log in as the new user" already implies.
+
 ## Steps
 1. **You need an admin session.** Sign in at https://kintsugi.secuura.net/admin/ with *your* platform-admin (SYSTEM_ADMIN) or an ORG_ADMIN account. If you have neither on Kintsugi, stop and tell me: then the fallback is option (c) on the card (the deploy seat inserts one row) and I will plan it.
 2. **Pick the organisation.** In the Admin Dashboard open **Organizations** and copy the **id (a UUID)** of an organisation that has API keys (the one the connector registrations use is best). The test login will be bounded to this one organisation.
@@ -44,9 +49,9 @@
    The existing `KINTSUGI_QA_GATE_OWNER_EMAIL` / `…_PASSWORD` stay as they are. I never read the values; the seats read them from the file.
 7. **Check it yourself (optional, 30 seconds):** log in as the new user (step 3 with its email and password), then
    ```
-   curl -s "https://kintsugi.secuura.net/api/keys?organizationId=<ORG_UUID>" -H "Authorization: Bearer <NEW_TOKEN>"
+   curl -s "https://kintsugi.secuura.net/api/security/keys?organizationId=<ORG_UUID>" -H "Authorization: Bearer <NEW_TOKEN>"
    ```
-   Expected: **200** with that organisation's keys. The existing OWNER QA login returns **403** here; a 200 is the proof the new role works.
+   (Corrected path: `/api/security/keys`.) Expected: **200** with that organisation's keys, **and at least one key in the list** (a 200 with an empty list may mean the user is in the wrong tenant: see correction A). The existing OWNER QA login returns **403** here; a 200 is the proof the new role works.
 8. **Tell me "done"** on the panel. I then mark the card delivered and the verify-and-close tickets proceed.
 
 ## One more thing the checks need (separate, not this login)
