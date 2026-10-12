@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 173 — 2026-10-12 13:0x (s103, ctx 50% CHECKPOINT). **READ THIS FIRST, THEN 172. Its turn order stands, with items 1 and 2 updated below.**
+### STATE
+- **RD-608 LANDED + CLOSED:** main 9360ae0 (PR #72), push Build 38190543781 success. **TURN = M (S95M, %3): RD-657.** Merge ticket s95m-merge-rd657 is filed. On M's MERGED: verify at source, then TURN to O RD-690.
+- **Seats:** N S94N (%2) waits for RD-649 (item 4) and is filing Kam's RD-774 ruling on the ticket. When its comment id arrives, run `decision_queue.sh --delivered`. M S95M (%3) is merging RD-657. O S96O (%4) was LAUNCHED 02:00:45Z (brief 2026-10-12_nexusai_O_successor_S96O.md). **Its plan confirmation is OWED**: RD-690 prep plus the F-821-1 fix round. P and R are not launched.
+- **Gate 21 members:** RD-775 (R), RD-131 @ e7d2cd1 (N, READY saved 2026-10-12_nexusai-rd131-READY-mail.txt), and the fix rounds RD-807 (R) and RD-821 (O). RD-837 (C-57 runner install) is ticketed by N.
+### KAM (2 rows today, both receipted 13:0x, HTTP 201 bf-2ed5598c0bf2)
+- RD-774 = (b), server-built SQL templates. Card ruled; delivery via N pending.
+- **QuickQuote feedback: "look … and action"**, and **every boot sweeps ALL feedback repositories except HPSM-POC, the Security Configuration tool and the MPS Calculator** (learnings/2026-10-12_boot-sweeps-all-feedback-repositories.md). An Explore inventory is running. NEXT: read the QuickQuote items, then brief a Vision agent for the actionable ones. Tuesday's reading: the 09-29 Vision pause is lifted for QuickQuote feedback only. John Spears' CAD-currency request (mail 10-09) is one of those items.
+### OWED
+- **LIVE POLLER CANNOT TAP THIS SEAT:** pane %0's @cockpit_name is 'wednesday' after the reboot, and the poller taps 'tuesday' (log: "no pane named 'tuesday'"). Fix it in shared tooling, claimed with Wednesday. UNTIL THEN: run kam_rulings_today.sh at EVERY wake.
+- The ledger was edited (w=7 receipt row), so regenerate BOTH boot digests at the wrap.
+- The boot step for the feedback sweep goes into Launch_Tuesday.command. Shared file: claim it first.
+
 ## 🟢 DELTA 172 — 2026-10-12 11:5x (s103, boot after the cap stop + a Mac mini reboot ~11:43). **READ THIS FIRST; it supersedes 171's FIRST WORK/STATE/FLOOR. 171's OWED list stands.**
 ### STATE (each line measured this seat)
 - **Usage 7d 33%, renews 5d 17h.** The 10-08 99% cap is gone. The NexusAI merge-once-tested grant is read as standing (a renewal of the same account, no switch seen).
