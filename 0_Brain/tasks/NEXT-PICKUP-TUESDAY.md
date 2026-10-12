@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 176 — 2026-10-12 19:4x ROTATION HANDOVER (s103, ctx ~77%; band 80-90). **READ THIS FIRST. It supersedes 175's STATE; 175's OWED stands. 172's turn order stands as updated below.**
+### FIRST WORK FOR THE NEXT SEAT
+1. **RD-649 LANDED** (main **76c5c48**, PR #75; FOUR merges today: RD-608, RD-657, RD-690, RD-649). Its push Build **38223245718** was IN PROGRESS. The background watch dies with this seat, so read it with `gh run view 38223245718 -R datasecau/Reporting_Dashboard_Au` (GH_CONFIG_DIR=NexusAI's 4_Credentials/.gh-config). **On green: TURN -> O RD-675 @ 12de511** (item 5) in a SELF-CONTAINED mail: main sha, head by ls-remote, recipe HANDOVER-S87O.md top block / session-tools/s87o, the RD-827 own install, merge-first, the alert read before the push, and "read the hold's VERDICT line, not the C-57 failed count (RD-837)". Then N RD-614 (6), N RD-629 (7), N RD-591 (8), M RD-795 (9), **P RD-823 (10): P is NOT launched. Launch P's successor (S98P) before item 10**, from HANDOVER-S91P.md.
+2. **GATE 21 (%9)** is running: members RD-775 (R), RD-131 (N), RD-807 fix (R), RD-821 r3 candidate (O). On its verdict mail: read the report WHOLE, score, pane_close.sh, RELEASE. Insert RD-775/RD-131/RD-807 into the turn order by name. The RD-821 swap happens only after a GO, with the lock empty (O does it).
+3. **Kam's taps now reach this seat** (tap_tuesday.sh resolver fix 54bc2ef94, proven 4x today). Still run kam_rulings_today.sh at every checkpoint.
+### STATE
+- **Seats:** N %2 (waits RD-614), M %3 (waits RD-795), O %4 (waits RD-675), R %6 (waits gate 21), gate 21 %9, the Vision seat %10 (DEPLOYED, wrapping: read its wrap mail, score it, pane_close).
+- **QUICKQUOTE v2.34 IS LIVE (Kam-signed 19:12, card quickquote-v234-publish-1012 = a).** Image v0.6.2-tool2.34-108bbb4; rollback v0.6.1-tool2.33-986f7b8 kept in ACR. Kam was told with the live screenshot (HTTP 201 bf-b7f2e2c5f984); he tells John Spears. Open for Kam, pre-existing: QuickQuote CI red since 08-11, and 14 CodeQL alerts (9 high). Offered a fix round, no card yet. The local QQ main holds the unpushed 8b29136 (ask before realigning). The build worktree is still registered (pruning = a delete, so it is Kam's).
+- Cards ruled today: nexusai-rd774-free-form-sql-1008 = b (delivered, RD-774 comment 39347) · quickquote-cad-currency-1012 = a · quickquote-v234-gh-login-for-pr-1012 = a (delivered) · quickquote-v234-publish-1012 = a.
+### LEDGER this seat: 3 rows (w=7 + w=8: a receipt in a PARALLEL call beside a send; the zsh `!` quoting in a command handed to Kam). Enforcement OWED for the parallel-call class (a turn marker file; claim with Wednesday). Boot digests were regenerated at 17:0x, but the ledger has been edited since, so regenerate BOTH at the next wrap.
+### FLOOR
+%0 tuesday (named 'wednesday') · %1 monitor · %2 N · %3 M · %4 O · %6 R · %9 gate 21 · %10 Vision (wrapping).
+
 ## 🟢 DELTA 175 — 2026-10-12 17:0x (s103, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST. It supersedes 174's STATE where they differ; 174's QuickQuote and OWED lines stand except as below.**
 ### STATE
 - **MAIN = 5e78b4d** (RD-690, PR #74; THREE merges today: RD-608, RD-657, RD-690). Push Build 38209706388 was IN PROGRESS. The background watch dies with this seat, so re-read it with `gh run view 38209706388 -R datasecau/Reporting_Dashboard_Au` (NexusAI GH_CONFIG_DIR). **On green: TURN -> N RD-649 @ 20fea84 (item 4), in a SELF-CONTAINED mail** (main sha, head, recipe pointer HANDOVER-S87N; seats get compacted while idle). After that: O RD-675 (5), N RD-614 (6), N RD-629 (7), N RD-591 (8), M RD-795 (9), P RD-823 (10: P is NOT launched yet, so launch P's successor before item 10).
