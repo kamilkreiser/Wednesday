@@ -1,0 +1,43 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-12T21:28:29.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA (tier 1): RD-839 @ 057a69d — outside paths withheld in the first-run window; red-first, 4 mutants bite, verify 4458/4458; STOP: counts-file-only conflict on the 4 server.js heads
+---
+## BLUF
+RD-839 READY FOR QA (tier 1) @ 057a69d960d12ba090fea160ba8dfee4c70a0aa6, branch rd-839-erasure-status-window-paths-s94n (pushed). Red at main, green 9/9, all 4 mutants bite, C-68 69 files 1142/1142, verify PASS 4458/4458. ONE STOP under C-212's letter: the merge-tree onto each of the 4 overlapping heads conflicts in scripts/verify-expected-counts.json ONLY (server.js auto-merges cleanly in all four). Please rule whether that counts-file conflict is the standing C-89 one (regenerated at the merge turn) or a STOP. Onto main 08a81e2: clean.
+
+## What changed (C-212, your 19:05:56Z ruling)
+- backend/server.js only, inside the erasure-status route plus two helpers directly above it (+66/-1): erasurePathsWithheldFor(req) and withholdOutsidePaths(filesFailed, dataDir).
+- When the caller is NOT a signed-in admin AND !(firstRunComplete && hasUsers): every absolute path outside DATA_DIR in filesFailed (the file label, survivingTarget, the error text, then a free-text backstop for any other absolute token) becomes "[path outside the data directory — withheld until setup is finished or an admin signs in]"; the body adds pathsWithheld: true and a sentence pointing to the erasure record on the data volume and the server log line "Erasure INCOMPLETE" (which logs failures in full: dataErasure.js purgeNow, read).
+- A signed-in admin and open mode after setup: filesFailed as stored. The stored record: never written.
+- No jsonStorage at all (the gate cannot tell the window): withheld, the safe direction.
+
+## Surface for the gate
+Local run of 057a69d, open mode, fresh DATA_DIR (same commit, not the demo). The cells boot real servers via the rd395 harness; the failure record comes from the product's own purge in-process (RD-684's linked-store shape) plus three named shapes the product writes (the pre-RD-684 error-text form; a recovery copy labelled by its absolute path, per purgeNow's forAudit; a Node fs message quoting an outside path). Driving it by hand: create a purged_incomplete record with an outside link, boot without completing first run, GET /api/admin/erasure-status anonymously.
+
+## Proof (hold s94n-rd839-proof2, session-tools/s94n/rd839-proof.out; run 1 kept as rd839-proof.r1.out)
+- (0) red at main cc42c42's server.js: W1, W3, W4 red (the anonymous body carried the /private/var/... outside path; no pathsWithheld); W0, W2, W5, A0, A1, O1 green.
+- (1) green 9/9.
+- (2) mutants, each LANDED and parsed, server.js restored by trap: M-noRedact -> W1 W3 W4; M-targetOnly -> W1 W4; M-everyone -> A1 O1; M-noBackstop -> W1 W4.
+- (3) C-68 by name, 69 files (session-tools/s94n/set-rd839.lst: erasure / data-rights / admin-gate tests by grep, rd839, static/js walkers, image-manifest requirers, rd385, rd411, rd200-js-colour-corpus): 1142/1142.
+- (4) "VERDICT: PASS — 4458/4458 tests passed across 280 suites (jest exit 0)"; counts 4449/279 -> 4458/280.
+- Run 1 found a defect of MINE, fixed before this run: the pointer sentence spelled the state file's name, so server.js joined the N6-4 erasure-writer corpus (erasure-ledger-survives-every-writer, which greps backend for that name) and acorn cannot parse server.js ('return' outside of function at :10). The sentence now names "the erasure record on the data volume"; a comment above the constants says why. Run 1 also showed M-noBackstop SURVIVING; the Node-fs-message entry now kills it.
+
+## PRIOR WORK (C-49)
+- No test drove /api/admin/erasure-status before (git grep, cc42c42).
+- The route's R-4 comment (names on purpose, for the operator) is kept and still true for an admin.
+- The boot and seeded admin session are rd495's (enforcedBoot); the in-process purge on a linked store is rd684's (runOneOnLinkedStore). Nothing replaced.
+- C-139 ADDENDUM 3 (absolute target kept in the stored failure) unchanged: W5 asserts the stored file byte for byte.
+
+## Partition (C-212): merge-tree --write-tree of 057a69d onto each
+- main 08a81e2: rc 0, clean.
+- rd-721 64ee309, rd-761 7f1881e, rd-794 cd171f9, rd-819 fdd07af: rc 1, conflict = scripts/verify-expected-counts.json ONLY. In each merged tree server.js carries my helper (2 matches) and that head's first added line, and passes node --check.
+- This is the STOP and mail C-212 asks for; I resolved nothing.
+
+## NOT TESTED
+The Linux runner (no PR, so no CI Build; this was macOS, where the outside path is /private/var/...); CodeQL (no PR); Windows-style absolute paths (the backstop matches POSIX tokens only); the demo (RD-76). A signed-in admin IN the window cannot exist on a real deployment without sign-in configured; not driven.
+
+## Jira
+RD-839: Testing, comment 39395. RD-838: not built (waits for Kam's card nexusai-rd838-rd640-round3-1013).
+-- S94N (Datasec/NexusAI-N)
+
