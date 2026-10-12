@@ -4268,5 +4268,40 @@
   "project": "Datasec",
   "ts": "2026-10-12T16:52:08.222000+11:00",
   "text": "Sorry for the delay: your note reached me 26 minutes late. Here are the steps, and the Vision pane I mentioned has since closed, so this works from any terminal.\n\nI need you to log GitHub in for the Vision project (one time):\n\n1. Open Terminal on the Mac mini.\n\n2. Paste this one line and press Enter:\nGH_CONFIG_DIR=\"/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/4_Credentials/.gh-config\" gh auth login --hostname github.com --git-protocol https --web\n\n3. It prints a one-time code. Open https://github.com/login/device, enter the code, and approve as your Datasec GitHub account.\n\n4. Tell me \"done\" here. I'll start a Vision agent that opens the pull request, waits for CodeQL and the tests, and merges. Then the publish card comes to you.\n\nWhy: the Datasec org rule only lets code reach main through a pull request that CodeQL has scanned, and the Vision project has no GitHub login. The login is saved only in the Vision project's credentials folder.\n\nIf you'd rather click than log in: open https://github.com/datasecau/vision_hpas-quickquote/compare/main...feat/qq-cad-currency-2026-10-12 and press \"Create pull request\". When its checks are green, merge it with a merge commit. Merging doesn't publish anything."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-12T18:04:38.240359+11:00",
+  "text": "CORRECTED command (it repeats the earlier one on purpose; only the quotes changed). That error was my fault: zsh treats the ! in !CODING as a history command inside double quotes. Single quotes fix it. Paste this exact line:\n\nGH_CONFIG_DIR='/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/4_Credentials/.gh-config' gh auth login --hostname github.com --git-protocol https --web\n\nThen enter the code at https://github.com/login/device and approve with your Datasec account."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-12T18:08:01.644427+11:00",
+  "text": "Thanks. I've checked, and the login hasn't landed yet: the Vision GitHub folder is still empty, and gh reports \"not logged into any GitHub hosts\".\n\nUsually the device step didn't finish. Could you look at that Terminal window? If it's still waiting, finish entering the code at https://github.com/login/device. It should end with \"✓ Logged in as …\".\n\nIf it shows an error, paste the last few lines here and I'll sort it out."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-12T18:10:33.947461+11:00",
+  "text": "Confirmed. gh is now logged in for the Vision project as kamilDatasec (your Datasec account), with push access to datasecau/vision_hpas-quickquote. Thank you. I'm starting the Vision agent now to open the pull request, wait for CodeQL and the tests, and merge v2.34. The publish card follows the merge."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-12T18:20:38.696602+11:00",
+  "text": "QuickQuote v2.34 (Canadian dollars) is MERGED to main (108bbb4) and ready for you to decide on publishing. The decision is on the card 'QuickQuote v2.34: publish to the live site?'.\n\nAttached: the currency list with CAD, a CAD quote in light and dark, and the printed PDF. CAD amounts show as \"CA$\" (e.g. CA$40,971).\n\nTwo things you should know before deciding. Neither comes from v2.34:\n• QuickQuote's GitHub tests have failed on main since 11 Aug (the same 9 tests; locally they pass). It's ticketed first in the backlog.\n• Main has 14 open CodeQL security alerts, 9 rated high: 3 missing rate limits and 1 regex slowdown risk in server.js, plus cross-site-scripting warnings (two in live code, three in test files). They date from 28 Sep. Fixing them would be its own round.\n📎 files in the live drawer: v234-currency-select-open-light.png v234-cad-simple-light.png v234-cad-simple-dark.png v234-cad-print-light.pdf (id f-57f55d43cd,f-0c0e9251e2,f-34629cb774,f-7529d13d30)"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-12T19:12:58.219222+11:00",
+  "text": "Received: publish v2.34 now. I'm starting a Vision agent to deploy it. It will:\n• record the current live image tag first, to roll back to;\n• build v2.34 from main 108bbb4 and switch the live QuickQuote app to it;\n• check the live page itself (CAD offered, a CAD quote prices, version 2.34).\nIf the live check fails, it rolls back to the old tag and tells me. You'll get the old and new tags when it's done. Then John Spears is yours to tell."
  }
 ]

@@ -32631,5 +32631,50 @@
    "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
    "CARD secuura-ks695-connector-may-revoke-own-key-1009"
   ]
+ },
+ {
+  "id": "quickquote-v234-publish-1012",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "QuickQuote v2.34: publish to the live site? (adds Canadian dollars)",
+  "bluf": "v2.34 is merged to QuickQuote main (108bbb4) after its QA gate (gate 16 GO WITH FINDINGS). It adds CAD to both currency lists, with an offline rate of 1.42 and professional services at the USD card x live FX, exactly as you ruled. Screenshots and the PDF are on the board. The live site is production, so publishing is yours. Publishing = build the image from main in the registry, point the live web app at the new tag (the previous tag is kept for rollback), then a live check by the agent. Two pre-existing issues sit beside it, not caused by v2.34: GitHub tests red since 11 Aug, and 14 open CodeQL alerts (9 high).",
+  "default_action": "Nothing is published. The live site stays on the current version until you choose.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Publish v2.34 now",
+    "detail": "A Vision agent builds the image from main 108bbb4, keeps the current live tag for rollback, switches the live web app, and checks the live page (CAD offered, a CAD quote prices). It reports the old and new tag. Then you tell John Spears."
+   },
+   {
+    "key": "b",
+    "label": "Fix the 9 high CodeQL alerts first, then publish",
+    "detail": "A round to fix the rate limits, the regex risk and the two live XSS warnings, gated. Then publish. Slower (likely a day or more)."
+   },
+   {
+    "key": "c",
+    "label": "Hold",
+    "detail": "v2.34 stays on main and is not live. No change for customers."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-12T18:21:00.887743+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD quickquote-otp-mail-spof",
+   "CARD quickquote-item12-layout",
+   "CARD quickquote-publish-v225",
+   "CARD quickquote-height-lever",
+   "CARD quickquote-per-day-precision",
+   "CARD vision-v230-publish",
+   "CARD quickquote-publish-51e9286-price-fix",
+   "CARD quickquote-bcr3-round4-fourth-round",
+   "CARD quickquote-publish-retention-purge-986f7b8",
+   "CARD composer-new-words-look-demo-deploy-1012",
+   "CARD mpscalc-paul-calculator-access-1012",
+   "CARD mpscalc-home-dashboard-mockup-1012",
+   "CARD hpsmpoc-demo-name-check-residue-1012",
+   "CARD quickquote-cad-currency-1012"
+  ]
  }
 ]
