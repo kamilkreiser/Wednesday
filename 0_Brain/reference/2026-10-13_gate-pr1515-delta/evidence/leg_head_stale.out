@@ -1,0 +1,12 @@
+typecheck-tests: auth (tsconfig.test.json): tsc examined 144 files, 93 of them under __tests__; 42 errors: 42 in the baseline, 0 new; 0 stale baseline entries.
+api-gateway: the @secuura/shared build is stale or incomplete, so this check CANNOT RUN.
+  A missing declaration target is not a type error in your test files, and --update will not admit it.
+  missing declaration target: dist/documents/defaultDocumentType.d.ts   (imported as '@secuura/shared/documents/default-type')
+  rebuild it:  npm run build -w @secuura/shared
+  (npm ci does not build it here: Blockchain/Dev/.npmrc sets ignore-scripts=true.)
+FAIL — services/api-gateway: the test-file type-check ratchet exited 2: the check could not run, examined no test file (a clean result would say nothing), or the baseline cannot be trusted (count-only, unparseable, no floor line, a duplicate line).
+
+  The lines above name the cause. For a type error, fix it in the file named: that can be a product file the
+  tests import, not only a test file. The baseline admits only the errors already recorded; 'check.cjs <service>
+  --update' LOWERS it (it refuses to admit anything new), so it cannot be used to silence a new error.
+  (KS-1000: scripts/typecheck-tests/check.cjs)

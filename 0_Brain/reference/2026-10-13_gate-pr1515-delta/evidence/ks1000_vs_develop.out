@@ -1,0 +1,154 @@
+
+ RUN  v4.1.10 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/ad6cb59d-4a2f-44e5-b355-5685c7d2a2e1/scratchpad/g1515d/base/Blockchain/Dev/services/auth
+
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts (57 tests | 7 failed) 23928ms
+     × RED (the TS7016 shape): the declaration target alone is missing -> exit 2 naming the package, the missing target and the build command 253ms
+     × RED (the TS2307 shape): BOTH targets missing (the directory is gone from dist) -> the same exit 2, not a NEW error 246ms
+     × an exports-only gap is DELIBERATELY NOT a failure: the .js is missing, the .d.ts is there, tsc is happy -> exit 0, and the run says so 254ms
+     × the stale-build check runs BEFORE the baseline comparison: a real test-file error AND a missing target reports the BUILD, not the test file 252ms
+     × CONTROL for those three: the SAME unbuilt target DOES exit 2 when the specifier is real code 253ms
+     × an `import type` specifier IS judged (the comment filter must not reject real code) 253ms
+     × a sibling subpath under the SAME trailing-* key resolves to its OWN target (a head off-by-one would cross them) 252ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts > KS-1517 - a missing @secuura/shared build target is "could not run" (exit 2), not a NEW test-file error > RED (the TS7016 shape): the declaration target alone is missing -> exit 2 naming the package, the missing target and the build command
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:533:22
+    531|     const dir = fixture(without(sharedPkg({}), DECL));
+    532|     const r = check(dir, '--baseline', bl(dir));
+    533|     expect(r.status).toBe(2);
+       |                      ^
+    534|     expect(r.out).toContain('@secuura/shared');
+    535|     expect(r.out).toContain('dist/thing/theThing.d.ts');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts > KS-1517 - a missing @secuura/shared build target is "could not run" (exit 2), not a NEW test-file error > RED (the TS2307 shape): BOTH targets missing (the directory is gone from dist) -> the same exit 2, not a NEW error
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:545:22
+    543|     const dir = fixture(without(sharedPkg({}), DECL, RUNTIME));
+    544|     const r = check(dir, '--baseline', bl(dir));
+    545|     expect(r.status).toBe(2);
+       |                      ^
+    546|     expect(r.out).toContain('dist/thing/theThing.d.ts');
+    547|     expect(r.out).toContain('npm run build -w @secuura/shared');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts > KS-1517 - a missing @secuura/shared build target is "could not run" (exit 2), not a NEW test-file error > an exports-only gap is DELIBERATELY NOT a failure: the .js is missing, the .d.ts is there, tsc is happy -> exit 0, and the run says so
+AssertionError: expected 'typecheck-tests: ks1000-bCETUU (tscon…' to contain 'dist/thing/theThing.js'
+
+- Expected
++ Received
+
+- dist/thing/theThing.js
++ typecheck-tests: ks1000-bCETUU (tsconfig.test.json): tsc examined 3 files, 1 of them under __tests__; 0 errors: 0 in the baseline, 0 new; 0 stale baseline entries.
++
+
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:556:19
+    554|     expect(r.status).toBe(0);
+    555|     // Not skipped in silence: the gap is named, as a note.
+    556|     expect(r.out).toContain('dist/thing/theThing.js');
+       |                   ^
+    557|     expect(r.out).not.toContain('NEW type errors');
+    558|   }, SLOW);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts > KS-1517 - a missing @secuura/shared build target is "could not run" (exit 2), not a NEW test-file error > the stale-build check runs BEFORE the baseline comparison: a real test-file error AND a missing target reports the BUILD, not the test file
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:563:22
+    561|     const dir = fixture(without(sharedPkg({ 'src/__tests__/a.test.ts':…
+    562|     const r = check(dir, '--baseline', bl(dir));
+    563|     expect(r.status).toBe(2);
+       |                      ^
+    564|     expect(r.out).toContain('npm run build -w @secuura/shared');
+    565|     expect(r.out).not.toContain('src/__tests__/a.test.ts');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts > KS-1517 - a missing @secuura/shared build target is "could not run" (exit 2), not a NEW test-file error > CONTROL for those three: the SAME unbuilt target DOES exit 2 when the specifier is real code
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:636:22
+    634|     });
+    635|     const r = check(dir, '--baseline', bl(dir));
+    636|     expect(r.status).toBe(2);
+       |                      ^
+    637|     expect(r.out).toContain('dist/thing/theThing.d.ts');
+    638|   }, SLOW);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts > KS-1517 - a missing @secuura/shared build target is "could not run" (exit 2), not a NEW test-file error > an `import type` specifier IS judged (the comment filter must not reject real code)
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:645:54
+    643|       'src/u.ts': "import type { X } from '@secuura/shared/thing';\nex…
+    644|     });
+    645|     expect(check(dir, '--baseline', bl(dir)).status).toBe(2);
+       |                                                      ^
+    646|   }, SLOW);
+    647|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts > KS-1517 - a missing @secuura/shared build target is "could not run" (exit 2), not a NEW test-file error > a sibling subpath under the SAME trailing-* key resolves to its OWN target (a head off-by-one would cross them)
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:654:22
+    652|     });
+    653|     const r = check(dir, '--baseline', bl(dir));
+    654|     expect(r.status).toBe(2);
+       |                      ^
+    655|     expect(r.out).toContain('dist/sub/b.d.ts');   // b, never a
+    656|     expect(r.out).not.toContain('dist/sub/a.d.ts');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 50 passed (57)
+   Start at  03:40:39
+   Duration  24.11s (transform 40ms, setup 33ms, import 40ms, tests 23.93s, environment 0ms)
+
