@@ -1,0 +1,29 @@
+A env: {"NODE_ENV":"production","RATE":"(unset)"}
+A statuses {"307":300,"429":30}  ctx-lines=0  all-lines=330  other-msgs=["log:info:Request completed"]
+A1 one request status 307 -> lines ["log:info:Request completed"]
+A0 control (404 path) status 307 -> lines ["log:info:Request completed"]
+B1 direct, XFF rotating single value: {"307":40} ctx-lines=0
+B2 appending-proxy shape (spoof, then REAL-appended last): {"307":5,"429":35} ctx-lines=0
+B3 rotating value in the LAST slot (gateway directly reachable): {"307":40} ctx-lines=0
+C control                GET     /api/platform/document-lookup?hash=abc                                 -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C verif-dotdot           GET     /api/verification/../platform/document-lookup?hash=abc                 -> 307,307,307,307,307,307,307,307,307,307,307,307  ctx-lines=0
+C health-dotdot          GET     /health/../api/platform/document-lookup?hash=abc                       -> 400,400,400,400,400,400,400,400,400,400,400,400  ctx-lines=0
+C developers-dotdot      GET     /developers/../api/platform/document-lookup?hash=abc                   -> 400,400,400,400,400,400,400,400,400,400,400,400  ctx-lines=0
+C apidocs-dotdot         GET     /api/docs/../platform/document-lookup?hash=abc                         -> 400,400,400,400,400,400,400,400,400,400,400,400  ctx-lines=0
+C trailing-slash         GET     /api/platform/document-lookup/?hash=abc                                -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C upper-case             GET     /API/PLATFORM/DOCUMENT-LOOKUP?hash=abc                                 -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C double-slash-mid       GET     /api//platform/document-lookup?hash=abc                                -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C double-slash-lead      GET     //api/platform/document-lookup?hash=abc                                -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C pct-encoded-p          GET     /api/%70latform/document-lookup?hash=abc                               -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C pct-encoded-slash      GET     /api%2Fplatform/document-lookup?hash=abc                               -> 404,404,404,404,404,429,429,429,429,429,429,429  ctx-lines=0
+C pct-verif-dotdot       GET     /api/verification%2F..%2Fplatform/document-lookup?hash=abc             -> 307,307,307,307,307,307,307,307,307,307,307,307  ctx-lines=0
+C semicolon              GET     /api/platform/document-lookup;x=1?hash=abc                             -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C v1-alias               GET     /api/v1/platform/document-lookup?hash=abc                              -> 500,500,500,500,500,429,429,429,429,429,429,429  ctx-lines=5
+C v2-alias               GET     /api/v2/platform/document-lookup?hash=abc                              -> 404,404,404,404,404,429,429,429,429,429,429,429  ctx-lines=0
+C query-has-skip         GET     /api/platform/document-lookup?hash=abc&p=/api/verification             -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C HEAD                   HEAD    /api/platform/document-lookup?hash=abc                                 -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C OPTIONS                OPTIONS /api/platform/document-lookup?hash=abc                                 -> 204,204,204,204,204,204,204,204,204,204,204,204  ctx-lines=0
+C absolute-form          GET     http://x.example/api/platform/document-lookup?hash=abc                 -> 307,307,307,307,307,429,429,429,429,429,429,429  ctx-lines=0
+C absolute-form-verif    GET     http://x.example/api/verification/x/../../platform/document-lookup?hash=abc -> 307,307,307,307,307,307,307,307,307,307,307,307  ctx-lines=0
+C verif-prefix-sibling   GET     /api/verificationX/../platform/document-lookup?hash=abc                -> 307,307,307,307,307,307,307,307,307,307,307,307  ctx-lines=0
+C other-mount            GET     /api/verification/api/platform/document-lookup?hash=abc                -> 307,307,307,307,307,307,307,307,307,307,307,307  ctx-lines=0

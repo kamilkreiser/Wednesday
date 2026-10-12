@@ -1,0 +1,27 @@
+D statuses {"429":30,"500":300} ctx-lines=300 all-lines=630 msgs=["error:Document lookup failed (GET /api/platform/document","log:info:Request completed"]
+D first ctx line meta={"error":"connect ECONNREFUSED 127.0.0.1:1"}
+E (follow) final statuses {"429":180,"500":150} ctx-lines=150
+F v1 control                   GET     /api/v1/platform/document-lookup?hash=abc                                -> 500,500,500,500,500,429,429,429,429,429,429,429 ctx-lines=5
+F V1 upper                     GET     /API/V1/PLATFORM/DOCUMENT-LOOKUP?hash=abc                                -> 500,500,500,500,500,429,429,429,429,429,429,429 ctx-lines=5
+F v1 trailing-slash            GET     /api/v1/platform/document-lookup/?hash=abc                               -> 500,500,500,500,500,429,429,429,429,429,429,429 ctx-lines=5
+F v1 double-slash              GET     /api/v1//platform/document-lookup?hash=abc                               -> 500,500,500,500,500,429,429,429,429,429,429,429 ctx-lines=5
+F v1 lead dbl-slash            GET     //api/v1/platform/document-lookup?hash=abc                               -> 500,500,500,500,500,429,429,429,429,429,429,429 ctx-lines=5
+F v1 verif-dotdot              GET     /api/v1/verification/../platform/document-lookup?hash=abc                -> 200,200,200,200,200,429,429,429,429,429,429,429 ctx-lines=0
+F v1 verif-pct-dotdot          GET     /api/v1/verification%2F..%2Fplatform/document-lookup?hash=abc            -> 404,404,404,404,404,429,429,429,429,429,429,429 ctx-lines=0
+F v1 health-dotdot             GET     /health/../api/v1/platform/document-lookup?hash=abc                      -> 400,400,400,400,400,400,400,400,400,400,400,400 ctx-lines=0
+F v1 HEAD                      HEAD    /api/v1/platform/document-lookup?hash=abc                                -> 500,500,500,500,500,429,429,429,429,429,429,429 ctx-lines=5
+F v1 OPTIONS                   OPTIONS /api/v1/platform/document-lookup?hash=abc                                -> 204,204,204,204,204,204,204,204,204,204,204,204 ctx-lines=0
+F v1 abs-form                  GET     http://x.example/api/v1/platform/document-lookup?hash=abc                -> 500,500,500,500,500,429,429,429,429,429,429,429 ctx-lines=5
+F v1 abs-form verif path       GET     http://x.example/api/verification/api/v1/platform/document-lookup?hash=abc -> 307,307,307,307,307,307,307,307,307,307,307,307 ctx-lines=0
+F verif then v1 (rewrite mid)  GET     /api/verification/api/v1/platform/document-lookup?hash=abc               -> 307,307,307,307,307,307,307,307,307,307,307,307 ctx-lines=0
+F health then v1 (rewrite mid) GET     /health/api/v1/platform/document-lookup?hash=abc                         -> 404,404,404,404,404,404,404,404,404,404,404,404 ctx-lines=0
+F developers then v1           GET     /developers/api/v1/platform/document-lookup?hash=abc                     -> 404,404,404,404,404,404,404,404,404,404,404,404 ctx-lines=0
+F v1 documentId                GET     /api/v1/platform/document-lookup?documentId=%00x                         -> 500,500,500,500,500,429,429,429,429,429,429,429 ctx-lines=5
+G1 direct, rotating XFF (single value): {"500":40} ctx-lines=40
+G2 behind appending proxy (spoof,REAL): {"429":35,"500":5} ctx-lines=5
+G3 rotating in LAST slot: {"500":40} ctx-lines=40
+G4 X-Real-IP rotating (nginx sets it too; gateway ignores?): {"429":35,"500":5} ctx-lines=5
+I subject doc-lookup prod -> false; v1 -> false
+I POSITIVE CONTROL /api/verification/anything prod -> true
+I DISABLE_RATE_LIMIT=true prod -> false ; control same in staging -> true
+I Bearer test_token_ prod -> false

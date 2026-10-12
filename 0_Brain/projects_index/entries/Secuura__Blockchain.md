@@ -21,6 +21,18 @@ updated: 2026-09-23
 > his queue to reconcile.** Until it is, this warning is the only thing standing between the
 > list and the next agent that follows the skill literally.
 
+## Last session — 2026-10-12 (Seat V 4th, pane `Secuura/Blockchain-V`, 09:52Z to ~14:55Z; rotating on Wednesday's "one more job, then wrap")
+
+**Merged on head-bound GOs, each verified at source from git, nothing deployed:** #1491 KS-811 `092da3ae7f3f`, #1476 KS-806 `efc84906f92a`, #1498 KS-1477 `06d33fb4b321`, #1499 KS-1487 `6b978ca38442` (leg 16), **#1508 KS-1328 `c63cec1f6070`** (the other 16 services' `db.retry.test.ts` 60 s budget; governance is JEST), **#1506 KS-1489 `f6f2a539f4a0`** (ratchet hardening; round 1 was a NO GO for a path-bound fingerprint, round 2 a Sonnet delta GO). **KS-1489 closed (Done)** on the first post-merge hook line. KS-1328 sits In Review, NOT Done (the ks742 `fetch failed` cell is uncovered). Follow-ups filed (all P3): KS-1500, 1501, 1507, 1513, 1514, **1521**, **1523**.
+**Open / next:** **PR #1511 (KS-880, one home for the five security row mappers) is at an OPUS gate (launched 14:43Z; the verdict is an ANSWER to the V lane)**, head `c6567a74493f`, bundle `bundles/ks880-c6567a744932.bundle`; no merge before her head-bound GO. Released to this lane by #1506: **KS-1517** (detect missing export targets in the shared build and say so; test first) and **KS-1351 item 3** (vc-issuer under the ratchet: `tsconfig.test.json`, an EMPTY baseline, one name added to leg 16's list; separate PR, OPUS gate); then KS-1513, 1514, 1507, 1501, 1500. KS-1520/1519 go to the K lane.
+**Notes for Wednesday:** I could not read a context figure either. I did NOT run Step 2b (archive Done tickets) for the same reason as Seat K 6th (`issueArchive` cascades and hides relations/PR attachments). New memory this session: a fingerprint of tool output can embed the checkout path; BusyBox `grep -oF | wc -l` counts lines; governance is jest; a merge-tree conflict control must edit a line the PR changes. Handover `5_Project_History/2026-10-12_seatV-4th/HANDOVER-seatV-4th-2026-10-12.md`.
+
+## Last session — 2026-10-12 (Seat K 6th, pane `Secuura/Blockchain-K`, 11:20Z to ~14:25Z; rotated on Wednesday's "wrap now")
+
+**Seven PRs merged on head-bound GOs, all verified at source from git, nothing deployed:** #1501 KS-1359, #1503 KS-1180 P-1005-3, #1504 KS-1090 gateway ratchet, #1505 KS-1185 F1, #1507 KS-1090 leg 16, #1509 KS-1237 MSG1, **#1510 KS-1518 test half `8573851a2d80`** (develop tip at wrap). KS-1359/1180/1090/1185/1237/1518 stay In Progress. Seven follow-ups filed (KS-1510 1511 1512 1517 1518 1519 1520).
+**Open / next:** KS-1510 (document-lookup logging) is built and committed LOCALLY as `2eaf60f`, NOT pushed (bundle in `2026-10-12_seatK-6th/bundles/ks1510_local_UNPUSHED/`); the successor pushes it to a Sonnet gate (two attack points; unbounded log volume escalates to Opus), then the read-only L03 lot. KS-1517/1520/1519 held until V's #1506 lands.
+**Notes for Wednesday:** I could not read a context figure from my pane; you read it for me. I did NOT run the skill's Step 2b (archive Done tickets): `issueArchive` cascades and hides relations and PR attachments other seats read. Handover `5_Project_History/HANDOVER-seatK6-2026-10-12.md`.
+
 ## Last session — 2026-09-23 (Seat B 22nd, pane `Secuura/Blockchain-B`)
 
 **ROUND 20 CLOSED: 11 PRs raised, 11 MERGED**, on three signed GOs — tier 2 (four), tier 1 (six),
