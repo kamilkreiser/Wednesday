@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 174 — 2026-10-12 15:4x (s103, ctx 65% light checkpoint). **READ THIS FIRST, THEN 173 and 172 (the turn order in 172 stands, updated by the lines below).**
+### STATE
+- **MAIN = b6c506a** (RD-608 + RD-657 landed today; both push Builds green). **TURN = O (S96O, %4): RD-690.** Merge ticket s96o-merge-rd690 holds the jest lock (pid 15751). On O's MERGED: verify at source, then TURN to N RD-649 (item 4). The TURN mail must be SELF-CONTAINED, because seats get compacted while idle.
+- **GATE 21 RUNNING (%9)**, brief fleet/qa-agent/briefs/2026-10-12_nexusai-gate-batch21.md, launcher launchers/launch_qa_nexusai_gate_batch21.sh (every T-ruling at its default, slots EMPTY). Members: A RD-775 537741c (T1), B RD-131 e7d2cd1 (T2+browser), C RD-807 ff5d725 (T2), D RD-821 r3 candidate sha 3c33f5ae (T2, scratch bases only). On its verdict: read it WHOLE, score, pane_close, RELEASE. The RD-821 swap happens only after a GO, with the lock empty.
+- **Seats:** N (%2) waits for RD-649 · M (%3) waits for RD-795 (item 9) · O (%4) is merging RD-690 · R (%6) waits for gate 21 · Vision builder (%7) is on the gate-16 FOLLOW-UP · P not launched.
+### QUICKQUOTE v2.34 CAD (Kam ruled card quickquote-cad-currency-1012 = a, 14:31)
+- Gate 16 = GO WITH FINDINGS @ 9bd21c0 (scored 0.97, pane closed). The builder now owes: P1/P2 test cells, P3 docs, a BACKLOG ticket, and ONE `az webapp deployment source show`. Then Tuesday reads the diff (tier 2 through code) and gives the merge GO to QuickQuote main (merging does not publish: tests.yml only, ACR tasks [], the webapp source is still to be read).
+- **PUBLISH = Kam's card**, with the screenshots in the Vision project root (v234-*.png, v234-cad-print-*.pdf) and the CA$ prefix named. Also tell Kam: the AUD seed (1.55) pre-fills the Settings PS rates (backlog branch e1a865c, not merged).
+### OWED (carried)
+- The live poller cannot tap this pane (@cockpit_name 'wednesday'). Run kam_rulings_today.sh at every wake. The fix is shared tooling, claimed with Wednesday.
+- The ledger was edited, so regenerate BOTH boot digests at the wrap. The feedback-sweep boot step goes into the launcher (shared, claim it first). ATTIO digest misroute. Subject-tag fix.
+
 ## 🟢 DELTA 173 — 2026-10-12 13:0x (s103, ctx 50% CHECKPOINT). **READ THIS FIRST, THEN 172. Its turn order stands, with items 1 and 2 updated below.**
 ### STATE
 - **RD-608 LANDED + CLOSED:** main 9360ae0 (PR #72), push Build 38190543781 success. **TURN = M (S95M, %3): RD-657.** Merge ticket s95m-merge-rd657 is filed. On M's MERGED: verify at source, then TURN to O RD-690.

@@ -1,0 +1,39 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-12T03:53:24.000Z
+Subject: [Datasec/NexusAI-R -> Tuesday] READY FOR QA (tier 2, gate 21): RD-807 F-807-1 fix round 1 @ ff5d725 — atomic probe write; torn-read cell red at 408115c, green after; M1/M2/M3 bite; verify 4312/4312
+---
+BLUF — RD-807 F-807-1 fix round 1 of 2 is READY FOR QA. It is tier 2 through code and joins gate 21. Branch rd-807-incidents-prototype-key-s89r @ ff5d725, pushed fast-forward 9b15a99..ff5d725 (no force). It is test-only. The new cell is red at the red-first commit and green after, each of the three mutants bites, and the full verify reads VERDICT: PASS — 4312/4312 tests passed across 265 suites.
+
+BRIEF: qa-briefs/2026-10-12_nexusai-rd807-f8071-fixround-tier2-gate21.md
+
+WHAT (git diff --stat 9b15a99 ff5d725: 4 files, +130/-3; no product file; backend/incidents.js unchanged)
+- 408115c red-first: __tests__/helpers/rd807-torn-write-widener.js, a node -r shim, inert unless RD807_TEAR_STALL_MS is set. It keeps writeFileSync's truncate-then-write order and stalls 40 ms between the two. Also two cells in a new describe in the rd807 file, each a plain child with no server, reading every 2 ms for 1.5 s as readProbe reads: T1 CONTROL (an in-place writer is seen torn) and T2 (the real preload: 0 empty, 0 bad, ok > 0, seq advanced).
+- 3705e03 fix: the preload writes <file>.<pid>.tmp and renameSyncs it onto probe.json.
+- ff5d725: counts 4310/265 -> 4312/265.
+- One line, as you asked: readProbe() has no retry on purpose, because a retry on empty would also mask a dead or stale probe, which the precondition cell exists to see.
+
+PROOF (hold 01: session-tools/s97r/hold-01.sh; ticket s97r-rd807-f8071-proof, 03:29:08-03:51:41Z; names from jest JSON in session-tools/s97r/h01/)
+- Own install in worktrees/s97r-rd807: proxy-addr 2.0.7 resolves from its own path, matching 9b15a99's lock (pre-90b2556).
+- 408115c: 13 tests, 1 RED, which is T2. T1 CONTROL and the 11 original cells are green.
+- 3705e03: 13/13 green in each of three runs.
+- M1 (preload back to an in-place writeFileSync): RED T2 only. M2 (const tmp = file): RED T2 only. M3 (widener stall removed): RED T1 CONTROL only. The mutant tree was restored to 0 dirty after each.
+- Full verify on 3705e03 with --update-counts: VERDICT: PASS — 4312/4312 tests passed across 265 suites (jest exit 0).
+- Pre-measure, plain node, outside jest: your gate's qa-d807race19.js (sha256 face4538dfc4e959…), 200,000 reads at gap 0, gave 24 empty on base and 0 on the fix. Widened to 40 ms: base 269/274/277, fix 0/0/0.
+
+PRIOR WORK
+- The preload and route cell are S89R's (4c8c698, 52f8cd9). The reproducer shape is the gate's.
+- git grep at ff5d725: only the rd807 test file references either rd807 helper (control: 29 test files reference rd395-server-harness). The 11 original cells are unchanged; the new describe is appended after them.
+
+NOT TESTED
+1. The C-68 union under load and the Linux CI runner. The only loaded run was the one full verify.
+2. M3 is probabilistic in principle. Without the stall, a natural tear has about a 0.09 expected count in ~750 reads. It was red in its one run.
+3. The rename on Windows or a network filesystem (CI is Linux; this was APFS).
+4. A leftover .tmp if the child dies between the write and the rename. It is inside a mkdtemp dir that afterAll removes; this was not driven.
+5. The forward merge onto main b6c506a (lock 2.0.8). That is the merge turn's job, with a fresh RD-827 own install, C-57 and C-68.
+6. No PR CodeQL run (no PR exists for this branch yet) and no CI Build.
+
+Jira RD-807: comment 39351, In Progress -> Testing (REST 204).
+Lane R is now DRY until a TURN mail. My turns are 16 RD-777+776, 17 RD-761, 21 RD-794 and 22 RD-819, and RD-807 comes after gate 21. Inbox watcher armed.
+-- S97R (Datasec/NexusAI-R)
+

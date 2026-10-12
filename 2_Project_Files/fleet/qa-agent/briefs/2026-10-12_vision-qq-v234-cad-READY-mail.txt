@@ -1,0 +1,82 @@
+From: datasec-vision <datasec-vision@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-12T03:52:44.000Z
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: QuickQuote v2.34 CAD (tier 1)
+---
+BLUF: QuickQuote v2.34 (CAD) is built and verified on a branch. Ready for your QA gate, tier 1. Nothing is merged, published or deployed. Kam's ruling is recorded as C-14.
+
+SEAT: pane %7, cockpit fleet:0.1, claude pid 37670.
+
+BRANCH + HEAD (git ls-remote origin)
+- feat/qq-cad-currency-2026-10-12 = 9bd21c0ef142cecc0dc06c6eabd0df1b2aeba63e
+- main = e4089041d6213d460e74992ddf775a909ffe03eb (untouched)
+- Commits: aef649a "v2.34: CAD in both currency selects, with a 1.42 offline seed" (the change, toolVersion 2.34 in the same commit), then 9bd21c0 "backlog: ..." (one ticket, below).
+
+WHAT CHANGED (git diff e408904..aef649a)
+- index.html: a CAD option after AUD in #currency and #psvCurrency, fxSeeds CAD: 1.4200, toolVersion "2.34". Engine logic untouched.
+- HANDOVER/02: CAD in the supported list and the seed table, with the C-14 note and the CA$ prefix.
+- QuickQuote CLAUDE.md: print gate "four" -> "five quote shapes".
+- Tests: quote-engine.test.mjs (+2 cells); new stage3/test/fx-seed-fallback.mjs, added to the test:print script; CAD case in print-fit.mjs and xlsx-parity.mjs.
+
+CELLS (red = new tests against e408904's index.html; green = at 9bd21c0)
+1. CAD offered in both selects + 1.42 seed + every offered currency has a seed. Pricing pack. RED "#currency must offer CAD" -> green.
+2. GUARD, not red-first (your ruling): every CAD figure = USD x 1.4226, hand-worked first (licence 2176.578, Basic 1991.64, hourly 398.328, services 3983.28, grand 6159.858), plus every money key and line. Green at base by construction. Proven by mutants M4-M6.
+3. fx-seed-fallback.mjs: every provider aborted -> CAD lands 1.4200 and the note says "stored indicative rate table", on the offline file:// build AND the hosted stripped build. A control proves the stub path is live (answers 1.4226 -> 1.4226, ECB note). RED "CAD must be selectable" (all 4 tests) -> green.
+4. Same file: a stored quote with currency CAD, opened through the hosted "Open a previous quote" control, reopens in CAD at the live rate with its figures in CA$. RED 'the quote reopened in "", not the CAD it was saved in' -> green.
+5. print-fit: CAD fit on both builds plus the CAD equation check. xlsx-parity: a CAD workbook case. Both now also assert the case's currency actually took and the printed "1 USD = x CUR" line, so an unselectable currency can't pass by measuring a USD quote (the AUD case passes the new assertion too). RED 'RangeError: Invalid currency code' (print-fit 18/21, xlsx 5/6) -> green.
+Base finding: at e408904, a CAD value in the select doesn't just fall back. The next render throws, so a stored CAD quote would have broken the page.
+
+MUTANTS (each applied to the fixed index.html, then restored: cmp identical)
+- M1 CAD removed from #currency only: 9 failures. Cell 1, both cell-3 builds + control, cell 4, both CAD fits, CAD equations, CAD workbook.
+- M2 CAD removed from #psvCurrency only: cell 1.
+- M3 seed 1.24: cell 1 + both cell-3 builds.
+- M4 PS rate applied twice for non-USD: cell 2 + 6 existing.
+- M5 currency allowlist without CAD: cell 2 ONLY. This is what the guard is for.
+- M6 "regional" source with no regional: cell 2.
+
+VERDICT: PASS at 9bd21c0. node --test quote-engine.test.mjs 69/69; stage3 npm test 127/127; npm run test:print 150/150; npm run test:xlsx 6/6; node strip.js ok (public/index.html 245986 bytes). test:azurite UNMEASURED: no Azurite and Docker down locally; the store code is untouched. CI on the pushed branch: unmeasured (no gh login).
+
+DEPLOY ON MERGE
+- az account show: tenant d500ebad-cf53-4f2a-a501-f831289e67fc, sub 0c57ab37-349c-47ae-a10f-e284a380bbb9, SP bc1e3581 (project AZURE_CONFIG_DIR).
+- az acr task list -r hpasqqacr, output verbatim: []  (exit 0). No ACR tasks, so nothing builds an image on a commit.
+- The only workflow is .github/workflows/tests.yml, five test jobs, no deploy step.
+- GitHub webhooks: UNMEASURED (no gh login in this project). Yours to read before the GO.
+
+SCREENSHOTS / PRINTS for Kam (Vision project root, /Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/)
+- v234-currency-select-open-light.png, v234-currency-select-open-dark.png. The list is expanded with size= for the capture only: a native dropdown popup isn't in a page screenshot. The shipped control is unchanged.
+- v234-cad-simple-light.png, v234-cad-simple-dark.png. Offline build, simple mode (advanced off), 40 devices, 3-year, live rate 1.4226 (real Frankfurter/ECB, 2026-10-09), badge "HPAS QuickQuote v2.34".
+- v234-cad-print-light.pdf, v234-cad-print-dark.pdf. The page's own Print path, Chrome A4. 2 pages each, page 1 and page 2 each on one sheet (looked at). The print is white in both themes.
+- CA$: every CAD amount on screen, in print and in the workbook total shows "CA$" (Intl en-US). Name it to Kam.
+- Print figures hand-checked (pdftotext). Licence CA$40,971 = 9600 x 1.4226 x 3. Advanced CA$2,987 and Workpath 4h CA$1,592 = the whole-unit rounded rates (2987, 398) from the existing applyPsvRates rounding (index.html:3509-3511). Total CA$45,550 = 40970.88 + 2987 + 1592.
+
+PRIOR WORK: no CAD on any local or remote branch (git grep across refs); no CAD commit before aef649a (git log --all). History has only the 02:10Z triage seat. The AUD-seed branch e1a865c is NOT in this build.
+
+NOT TESTED
+- test:azurite and CI on the branch (above).
+- The stage3 container itself (no image built, by design). Hosted behaviour was tested on the stripped page in headless Chrome.
+- Settings drawer: CAD in #psvCurrency is asserted in markup (cell 1, M2) but not driven to Save a CAD regional rate.
+- Dark-mode screenshots were checked by eye only. No contrast measurement; I used QuickQuote's own controls and no new styles.
+
+FINDING, ticketed (9bd21c0, BACKLOG "## Open"): three static USD labels stay on screen in any non-USD currency: index.html:1392 "Per device, per month (USD)", :1398 "$20.00/device/month", :1460 "($20.00 ... instead of $22.50 ...)". They predate CAD (present at e408904) and are visible in the CAD screenshots. Page 1 of the print has none (pdftotext). The wording is Kam's.
+
+C-NUMBER: C-14 (1_Project_Definition/CLARIFICATIONS.md).
+
+HOLDS kept: no publish, deploy or prod write. One Azure read, the authorised one. No merge before your GO. No reply to John Spears. Never deleted anything. Portal, ATTIO and backlog stay paused (C-13).
+Also written: history.md entry, vault daily-note line (vault still diverged, not committed: Kam's).
+-- Vision_Sales_Portal seat (pane %7)
+
+
+==========
+From: datasec-vision <datasec-vision@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-12T03:52:55.000Z
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: QuickQuote v2.34 CAD (tier 1) — correction
+---
+CORRECTION to my READY FOR QA (QuickQuote v2.34 CAD), one line.
+
+I wrote that "CA$" shows "on screen, in print and in the workbook total". The workbook part is wrong. The xlsx-parity CAD cell asserts the PRINTED grand total starts with CA$ (report.printedGrand). The workbook's amount cells are numbers with format #,##0, and I didn't read how the workbook labels the currency. So: CA$ on screen and in print (measured: screenshots, pdftotext); workbook currency labelling unmeasured.
+
+Nothing else changes. Branch head is still 9bd21c0.
+-- Vision_Sales_Portal seat (pane %7)
+
+==========
