@@ -32284,5 +32284,207 @@
    "CARD hpsmpoc-demo-name-check-residue-1012",
    "CARD quickquote-cad-currency-1012"
   ]
+ },
+ {
+  "id": "secuura-ssh-keychain-seed",
+  "client_project": "Secuura/Blockchain",
+  "title": "Seed the Secuura SSH deploy key so seats can push",
+  "bluf": "Override reason: the prior hit is a Datasec demo-seed card, unrelated word match. The verify seats booted with F-02: no SSH identity for git, so none can push a fix branch. Verify work continues read-only; any fix PR is blocked. One command from you in a terminal: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw. I did not run it: it changes machine keychain state.",
+  "default_action": "Seats keep verifying read-only; fix branches wait",
+  "options": [
+   {
+    "key": "a",
+    "label": "I run ssh-add now",
+    "detail": "seats can push afterwards"
+   },
+   {
+    "key": "b",
+    "label": "Allow on-disk key fallback (SECUURA_ALLOW_ONDISK_KEY=1)",
+    "detail": "needs relaunch of the seats"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-12T15:51:00.472034+11:00",
+  "status": "withdrawn",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-hosted-seed-owner"
+  ],
+  "withdrawn_at": "2026-10-12T15:56:14.651940+11:00",
+  "withdrawn_reason": "Kam 15:55:37: ssh-add failed, ~/.ssh/secuura_blockchain_deploy_rw does not exist on this Mac. The launcher hint is stale; the project's real key is 3_Access_Keys/github_deploy_rw, wired as repo core.sshCommand (served ls-remote for seat J). Card premise was my unverified copy of the launcher text."
+ },
+ {
+  "id": "secuura-ks843-cutover-timing",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-843: erasure gate built but not enforcing. Platform S's keys need rotating first. When?",
+  "bluf": "Override reason: the 16 prior panel hits are generic word matches (Peter's PR, archive, Stuart's anchor report); none concerns KS-843 timing. Your 2026-09-06 card ruled the SHAPE (option A, logged grace); this asks only for TIMING. The erasure scope gate is merged and running on Kintsugi in logged-grace mode, so a connector key without the scope is still admitted. Enforcing needs Stuart to rotate Platform S's connector keys, then one flag flipped; nothing has been rotated or flipped. Measured 2026-10-12 05:15Z: flag unset on Kintsugi, 0 grace log lines since the 10-07 deploy. Demo 2026-09-06: 32 active keys with no connector id, backfill recovers 5 of 32, so a re-mint is the only path. Rotation with default grace 0 seconds revokes the old key at once (401 on every S endpoint), so the window must be set. Evidence: KS-843 comment 4b55641a. Anything to Stuart goes only through you.",
+  "default_action": "Grace stays on, nothing rotated. KS-843 stays In Progress past 31 Oct; any connector key keeps the right to request an erasure.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Logged grace, start now (recommended)",
+    "detail": "Ask Stuart for a rotation window this week, agree the grace value, rotate with it set, flip the flag when the log shows S on the new key. S is never broken."
+   },
+   {
+    "key": "b",
+    "label": "Sequenced swap",
+    "detail": "Rotate, Stuart deploys the new key in a window, flag flips straight after. Closes the hole sooner; needs Stuart's window; a slip breaks S's erasures."
+   },
+   {
+    "key": "c",
+    "label": "Gate the POST only",
+    "detail": "Smaller blast radius but any connector key can still read erasure status; reduces what is built. Not recommended."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-12T16:21:42.492461+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-21 10:28",
+   "2026-08-21 20:06",
+   "2026-09-02 19:28",
+   "2026-09-03 18:01",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-11 08:18",
+   "2026-09-14 07:20",
+   "CARD nexusai-rd296-deploy-timing",
+   "CARD secuura-ks843-cutover-stuart",
+   "CARD secuura-ks843-half2-round3",
+   "CARD secuura-f5-disclosure-timing",
+   "CARD secuura-880-merge-kam-platform-s-cutover",
+   "CARD nexusai-220-image-build-timing"
+  ]
+ },
+ {
+  "id": "secuura-kintsugi-issuer-role-account",
+  "client_project": "Secuura/Blockchain",
+  "title": "Kintsugi: create an issuer-role test account so seats can run live checks?",
+  "bluf": "Override reason: the prior hits are an HPSM demo-login card and a Docker cache card, unrelated word matches. Seats can verify tests and deployed code but cannot run the live check on document routes: the only Kintsugi login they hold is the OWNER QA account, and OWNER cannot write documents. An issuer-role test account on Kintsugi (same shape as your earlier KS-1100 OWNER account) unlocks the live leg on at least 5 tickets now and most route tickets in other lots. Creating a credential on Kintsugi is yours. Seats would use it refusal-only wherever possible and bring me any step that writes rows or triggers a real anchor first.",
+  "default_action": "No account; the affected tickets stay In Progress.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Create the issuer-role test account (recommended)",
+    "detail": "You or a seat you name creates it on Kintsugi only; the password goes in the project's 4_Credentials, never in a ticket."
+   },
+   {
+    "key": "b",
+    "label": "No account; accept test and deployed-bytes evidence",
+    "detail": "Tickets whose live leg needs it stay In Progress and are listed; closure rate drops."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-12T16:24:09.665916+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-08-21 09:59",
+   "2026-08-21 13:58",
+   "2026-08-24 11:27",
+   "2026-09-09 17:39",
+   "2026-09-09 17:42",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-889-issuer-org-caller-asserted",
+   "CARD secuura-kintsugi-whole-estate-rebuild",
+   "CARD secuura-kintsugi-build-cache-prune",
+   "CARD secuura-kintsugi-refresh-notice-release",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD datasec-90pct-gates-wait-for-fresh-account-1001",
+   "CARD secuura-kintsugi-deploy-for-31oct-1005",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006"
+  ]
+ },
+ {
+  "id": "secuura-vm-disk-grow-figures",
+  "client_project": "Secuura/Blockchain",
+  "title": "Grow the demo and kintsugi VM disks? Exact prices measured today",
+  "bluf": "Override reason: two earlier cards ruled the demo disk question in principle (secuura-demo-disk-too-small-to-rebuild-1007 = a, grow it, figure to be carded first) and the archive-and-remove route for one earlier deploy; this card supplies the exact figures you required and adds kintsugi. Both Secuura boxes are at their disk floor. Demo 64 GiB (E6, 4.80 USD/mo) to 256 GiB (E15, 19.20) = +14.40 USD/mo; the 128 GiB option (+4.80) leaves almost no headroom for a full rebuild (needs about 124 GB). Kintsugi 128 GiB (E10, 9.60) to 256 GiB (E15, 19.20) = +9.60 USD/mo; it loses about 55 MB a day and sat at 97 percent used, below its build floor. Prices: Azure retail price API, southeastasia, read 2026-10-12 by Seat D 17th. This deploy round is unblocked without it by your one-off kintsugi cache prune ruling, which will be needed every deploy. Nothing has been resized.",
+  "default_action": "Nothing resized; kintsugi deploys with the one-off cache prune; demo stays on its old build.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Grow both to 256 GiB (+24 USD/mo total) (recommended)",
+    "detail": "A deploy seat resizes kintsugi first, then demo, each with a before/after check; demo swap then resumes."
+   },
+   {
+    "key": "b",
+    "label": "Grow kintsugi only (+9.60 USD/mo)",
+    "detail": "Demo stays on the old build until you rule."
+   },
+   {
+    "key": "c",
+    "label": "Neither; keep pruning",
+    "detail": "Each deploy needs a cache prune ruling; demo cannot be rebuilt."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-12T16:33:19.385086+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD wed-laptop-dev-copy-disk-full",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006",
+   "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
+   "CARD secuura-followup-deploy-disk-archive-1007",
+   "CARD secuura-demo-disk-too-small-to-rebuild-1007"
+  ]
+ },
+ {
+  "id": "secuura-kintsugi-issuer-account-how",
+  "client_project": "Secuura/Blockchain",
+  "title": "Kintsugi issuer test account: no route lets the QA login create one. Which way?",
+  "bluf": "Override reason: the prior hits are old unrelated panel messages (ATTIO project, wallet steps); this follows your 16:24 ruling to create the account. Seat J tried the one sanctioned call: the admin user-create route answered 403 Admin access required to the OWNER QA login, so nothing was created. Only an admin credential can mint an issuer. Nothing was written anywhere. Three live checks (KS-928, KS-1202, KS-1228) wait on this. Option 1 is the smallest footprint but J has not confirmed that any seeded account exists on Kintsugi (the box has demo seeding switched on; the project's testing document lists sample logins but does not mention Kintsugi), so its first step would be one refusal-only login attempt; if none exists J stops and comes back to option 2.",
+  "default_action": "No change; the three live checks stay listed and In Progress.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Use one seeded account for refusal-only probes (recommended)",
+    "detail": "Departs from your dedicated-account ruling, so it needs your word. Creates nothing; J tries one documented login; if it does not exist, J stops."
+   },
+   {
+    "key": "b",
+    "label": "You give J a one-off Kintsugi admin login",
+    "detail": "J creates the dedicated issuer user through the admin route, keeps only the issuer credential in the project credentials file, discards the admin one."
+   },
+   {
+    "key": "c",
+    "label": "Neither; the three tickets stay In Progress",
+    "detail": "No change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-12T16:34:54.694169+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-08-21 09:59",
+   "2026-08-24 11:27",
+   "2026-09-09 17:39",
+   "2026-09-09 17:42",
+   "2026-09-12 11:34",
+   "CARD secuura-889-issuer-org-caller-asserted",
+   "CARD secuura-kintsugi-whole-estate-rebuild",
+   "CARD secuura-kintsugi-build-cache-prune",
+   "CARD secuura-kintsugi-refresh-notice-release",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD datasec-90pct-gates-wait-for-fresh-account-1001",
+   "CARD secuura-kintsugi-deploy-for-31oct-1005",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006"
+  ]
  }
 ]
