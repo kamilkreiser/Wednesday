@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datasec Decisions Pack</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1b1f24; --muted: #5b6470; --line: #d9dee5;
+  --head: #f2f4f7; --accent: #0b5cad; --def: #0d6b3a; --defbg: #eef7f1;
+  --band: #fafbfc; --warn: #8a5300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171b; --fg: #e6e9ee; --muted: #9aa4b1; --line: #2c333c;
+    --head: #1d2228; --accent: #6aa9ef; --def: #7fd4a2; --defbg: #17271e;
+    --band: #181c21; --warn: #e0a85a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171b; --fg: #e6e9ee; --muted: #9aa4b1; --line: #2c333c;
+  --head: #1d2228; --accent: #6aa9ef; --def: #7fd4a2; --defbg: #17271e;
+  --band: #181c21; --warn: #e0a85a;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; }
+h1 { font-size: 1.55rem; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 14px; font-size: .9rem; }
+.bluf {
+  border-left: 4px solid var(--accent); background: var(--band);
+  padding: 10px 14px; margin: 0 0 18px; border-radius: 4px;
+}
+.bluf b { color: var(--accent); }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }
+.counts li { border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font-size: .9rem; }
+.counts strong { font-size: 1.05rem; }
+h2 { font-size: 1.2rem; margin: 26px 0 4px; padding-bottom: 4px; border-bottom: 2px solid var(--accent); }
+.how { color: var(--muted); font-size: .88rem; margin: 2px 0 8px; }
+table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
+th { background: var(--head); font-weight: 600; }
+td.id { white-space: nowrap; font-weight: 700; width: 64px; }
+td.q { width: 31%; }
+td.o { width: 22%; }
+td.d { width: 20%; background: var(--defbg); }
+td.d b { color: var(--def); }
+td.r { width: 20%; }
+tr.grp td { background: var(--band); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.note { color: var(--warn); }
+h3 { font-size: 1rem; margin: 14px 0 4px; }
+.words td:first-child { white-space: nowrap; font-weight: 600; width: 64px; }
+.words .now { font-style: italic; }
+footer { margin-top: 24px; color: var(--muted); font-size: .8rem; }
+
+/* Phone: each decision becomes a card */
+@media screen and (max-width: 760px) {
+  table, thead, tbody, tr, th, td { display: block; width: auto !important; }
+  thead { display: none; }
+  tr { border: 1px solid var(--line); border-radius: 6px; margin: 0 0 10px; overflow: hidden; }
+  tr.grp { border: 0; margin: 14px 0 4px; }
+  tr.grp td { background: none; padding: 0; border: 0; }
+  td { border: 0; border-top: 1px solid var(--line); }
+  td:first-child { border-top: 0; }
+  td[data-l]::before { content: attr(data-l); display: block; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  td.id { background: var(--head); }
+}
+
+@page { size: A4 landscape; margin: 10mm 11mm; }
+@media print {
+  :root { --bg:#fff; --fg:#111; --muted:#555; --line:#c9ced6; --head:#eef1f4; --accent:#0b5cad; --def:#0d6b3a; --defbg:#f0f8f3; --band:#f7f8fa; --warn:#8a5300; }
+  body { font-size: 9.6pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  main { max-width: none; padding: 0; }
+  h1 { font-size: 16pt; }
+  h2 { font-size: 12.5pt; margin-top: 12px; }
+  table { font-size: 8.4pt; }
+  th, td { padding: 3px 6px; }
+  tr { break-inside: avoid; }
+  thead { display: table-header-group; }
+  h2, h3 { break-after: avoid; }
+  section.proj { break-before: auto; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Datasec decisions pack</h1>
+<p class="sub">For Kam · prepared by Friday · 12 October 2026 · Datasec only: MPS Commercial Calculator, Security Composer, HPSM-POC</p>
+
+<div class="bluf">
+<b>BLUF:</b> 42 decisions across three Datasec projects: <b>11 for MPS Calculator, 19 for Security Composer and 12 for HPSM-POC</b>. Each one has a recommended default (in bold). <b>Answering “all defaults” for a project is enough</b>; name only the IDs you want to change (for example “Composer: all defaults except COMP-6 show it”). Nothing here deploys, spends money or changes a live site on its own: anything that does says so in its row and goes through the normal gate and deploy card first. Questions that are unchanged since 11 October (the standing question registers) are not asked again here.
+</div>
+
+<ul class="counts">
+<li><strong>11</strong> MPS Calculator (MPS-1 to MPS-11)</li>
+<li><strong>19</strong> Security Composer (COMP-1 to COMP-19)</li>
+<li><strong>12</strong> HPSM-POC (POC-1 to POC-12)</li>
+</ul>
+
+<!-- ===================== MPS ===================== -->
+<section class="proj first">
+<h2>1 · MPS Commercial Calculator</h2>
+<p class="how">Order: things blocking work, then money / hosted site / security, then housekeeping and wording. Reply “MPS: all defaults” to accept every bold choice.</p>
+<table>
+<thead><tr><th>ID</th><th>The question</th><th>Options</th><th>Recommended default</th><th>If you pick the default</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="5">Blocking work</td></tr>
+<tr>
+<td class="id" data-l="ID">MPS-1</td>
+<td class="q" data-l="Question">A price-book upload that was started but never checked still counts as a copy of that document, so any later upload of the same document is refused. With no delete, one abandoned upload blocks that document for good. Should only checked versions count?</td>
+<td class="o" data-l="Options">(a) Only versions being checked, live or replaced count · (b) keep as is · (c) add a way to abandon a stuck draft</td>
+<td class="d" data-l="Default"><b>(a) Only checked, live or replaced versions count.</b></td>
+<td class="r" data-l="If default">A stuck draft no longer blocks re-uploading the same price book. A small rule change for a later build lane.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">MPS-2</td>
+<td class="q" data-l="Question">The sample purchase quote (demo scenario S4) cannot be loaded onto the hosted demo, because the account that loads demo data is only a Seller. Give that account the Pricing analyst role, or change the loading tool?</td>
+<td class="o" data-l="Options">(a) Change the loading tool · (b) give the account the Pricing analyst role (an Entra change)</td>
+<td class="d" data-l="Default"><b>(a) Change the loading tool. No new permissions.</b></td>
+<td class="r" data-l="If default">No Entra role change. A small tooling task lets the hosted demo show the purchase scenario.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">MPS-3</td>
+<td class="q" data-l="Question">The spec’s home work queue has a fifth tab, “Ready to Export”, which was not drawn in the approved mock-up and is not built. Add it? If so, what makes a quote “ready”?</td>
+<td class="o" data-l="Options">(a) Yes: an Approved quote that has not been exported yet · (b) yes, with another rule you name · (c) no tab</td>
+<td class="d" data-l="Default"><b>(a) Yes: Approved and not yet exported.</b></td>
+<td class="r" data-l="If default">The tab is added in a later round (a new label for you to see first). The work-queue ticket can then close.</td>
+</tr>
+<tr class="grp"><td colspan="5">Money · hosted site · security · product rules</td></tr>
+<tr>
+<td class="id" data-l="ID">MPS-4</td>
+<td class="q" data-l="Question">Should the hosted site have a default purchase markup? Today none is set, so a purchase section without its own markup is blocked (“markup not set”) and is never sold at cost.</td>
+<td class="o" data-l="Options">(a) Leave unset · (b) set a default markup you name</td>
+<td class="d" data-l="Default"><b>(a) Leave it unset.</b></td>
+<td class="r" data-l="If default">No change. Sellers must enter a markup per purchase section; nothing is ever priced at cost by accident.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">MPS-5</td>
+<td class="q" data-l="Question">A seller can enter a negative click-price override today, and it is accepted. Should negative overrides be allowed?</td>
+<td class="o" data-l="Options">(a) Refuse anything below 0 · (b) allow negatives</td>
+<td class="d" data-l="Default"><b>(a) Refuse below 0.</b></td>
+<td class="r" data-l="If default">A negative override is refused with a message. A small build item.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">MPS-6</td>
+<td class="q" data-l="Question">If a seller removes every device from a quote, it still calculates and prints a proposal with no lines. Should it?</td>
+<td class="o" data-l="Options">(a) No: show a blocking issue “Add at least one device” · (b) allow it</td>
+<td class="d" data-l="Default"><b>(a) No: block with “Add at least one device”.</b></td>
+<td class="r" data-l="If default">An empty quote cannot produce a proposal. The new message comes to you as wording before any deploy.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">MPS-7</td>
+<td class="q" data-l="Question">A Won or Lost result recorded by mistake cannot be changed today, so the closed-deal figures keep the error. Should someone be able to correct it?</td>
+<td class="o" data-l="Options">(a) An Approver may change or clear it, with a reason and an audit record; the owner may not · (b) owner or Approver · (c) keep it impossible</td>
+<td class="d" data-l="Default"><b>(a) Approver only, with a reason and an audit record.</b></td>
+<td class="r" data-l="If default">A small new feature in a later round. Every correction is logged.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">MPS-8</td>
+<td class="q" data-l="Question">When a price book that lacks a catalogue item goes live, an Administrator’s saved price edit for that item is hidden (not lost); it comes back if the old price book is restored. Show these hidden edits to Administrators?</td>
+<td class="o" data-l="Options">(a) Keep as is for now · (b) show them, with the reason (needs an interface change)</td>
+<td class="d" data-l="Default"><b>(a) Keep as is for now.</b></td>
+<td class="r" data-l="If default">No change. Nothing is lost; the edit returns on rollback.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">MPS-9</td>
+<td class="q" data-l="Question">The new in-app feedback stores every message forever, and could also raise Jira tickets from the hosted site (which needs a Jira credential and a new outbound connection). How long to keep feedback, and switch Jira on?</td>
+<td class="o" data-l="Options">(a) Keep everything, no hosted Jira, until the feedback-retention question is ruled · (b) set a retention period now · (c) switch on hosted Jira</td>
+<td class="d" data-l="Default"><b>(a) Keep everything; no hosted Jira for now.</b></td>
+<td class="r" data-l="If default">Feedback is stored on the site only. No credential is placed and no outbound connection is opened.</td>
+</tr>
+<tr class="grp"><td colspan="5">Housekeeping and wording</td></tr>
+<tr>
+<td class="id" data-l="ID">MPS-10</td>
+<td class="q" data-l="Question">Close three old questions that events have overtaken: the rest of your 30 Sep note (you have ruled 30+ cards since); output formats (format and footer are ruled; only a sharing integration is left); and the technology stack (the build already uses .NET and React).</td>
+<td class="o" data-l="Options">(a) Close all three · (b) keep any of them open</td>
+<td class="d" data-l="Default"><b>(a) Close all three.</b></td>
+<td class="r" data-l="If default">Three Jira questions close. A sharing integration stays unbuilt unless you raise it again.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">MPS-11</td>
+<td class="q" data-l="Question">New words: the home dashboard said “1 quotes” and “1 quotes need follow-up”. Approve the corrected singular forms in the words list at the end.</td>
+<td class="o" data-l="Options">(a) Approve as written · (b) change them</td>
+<td class="d" data-l="Default"><b>(a) Approve the listed wording as written.</b></td>
+<td class="r" data-l="If default">The grammar fix can deploy with the home dashboard.</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===================== COMPOSER ===================== -->
+<section class="proj">
+<h2>2 · Security Composer</h2>
+<p class="how">Order: things blocking work, then security, then product rules, then look and wording. Reply “Composer: all defaults” to accept every bold choice.</p>
+<table>
+<thead><tr><th>ID</th><th>The question</th><th>Options</th><th>Recommended default</th><th>If you pick the default</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="5">Blocking work</td></tr>
+<tr>
+<td class="id" data-l="ID">COMP-1</td>
+<td class="q" data-l="Question">Removing “HPSM” from the questions needs a new content release. Deploying it makes 4 of the demo’s 20 engagements read-only, including Paul’s review engagement. When?</td>
+<td class="o" data-l="Options">(a) Deploy, then rebuild the examples and a fresh review engagement for Paul · (b) after Paul’s current review round · (c) first build a “move to current content” feature</td>
+<td class="d" data-l="Default"><b>(b) After Paul’s current review round.</b></td>
+<td class="r" data-l="If default">Paul’s review is not disturbed. The release waits; a deploy card comes to you when his round ends.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-2</td>
+<td class="q" data-l="Question">Guided mode is switched off on the demo. Eight open items only matter in Guided mode. Build any of them while it is off?</td>
+<td class="o" data-l="Options">(a) Hold them all until you switch Guided back on · (b) build some now (name them)</td>
+<td class="d" data-l="Default"><b>(a) Hold them all.</b></td>
+<td class="r" data-l="If default">No Guided work until you turn it back on.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-3</td>
+<td class="q" data-l="Question">After a policy is released there is no button to start the next draft, although two screens tell users to do so. Build the button, or reword those screens?</td>
+<td class="o" data-l="Options">(a) Build “Start the next draft” (consultants only, on the engagement page) · (b) reword both screens</td>
+<td class="d" data-l="Default"><b>(a) Build the button.</b></td>
+<td class="r" data-l="If default">A small build (the server side already exists). The button label comes to you as wording first.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-4</td>
+<td class="q" data-l="Question">The app never sends email, but the create form says approvers “are invited to sign in”. Build notification email, or reword?</td>
+<td class="o" data-l="Options">(a) Reword now; email is a later product decision · (b) build notification email</td>
+<td class="d" data-l="Default"><b>(a) Reword now.</b></td>
+<td class="r" data-l="If default">The promise of an invitation is removed (see words list). No email feature is built.</td>
+</tr>
+<tr class="grp"><td colspan="5">Security and disclosure</td></tr>
+<tr>
+<td class="id" data-l="ID">COMP-5</td>
+<td class="q" data-l="Question">When the app refuses a value because it looks like a password or secret, the value stays visible in the box (and would show in a screenshot). Clear it?</td>
+<td class="o" data-l="Options">(a) Clear the box when it is refused · (b) leave it</td>
+<td class="d" data-l="Default"><b>(a) Clear it.</b></td>
+<td class="r" data-l="If default">A small security fix; no new words.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-6</td>
+<td class="q" data-l="Question">Is the auditor role Datasec staff or customer staff? Today a consultant’s internal user id is hidden from both the customer approver and the auditor. The records lean towards “Datasec staff”, which would mean showing it to the auditor.</td>
+<td class="o" data-l="Options">(a) Keep it hidden from the auditor (customer side) · (b) show it (Datasec side)</td>
+<td class="d" data-l="Default"><b>(a) Keep it hidden, and record the ruling.</b></td>
+<td class="r" data-l="If default">No change; the safer disclosure stays. The ruling is written down so it is not reopened.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-7</td>
+<td class="q" data-l="Question">The Evidence ZIP, signed file and package manifest are unavailable after release on the demo, because no release signing key is set. Set one up?</td>
+<td class="o" data-l="Options">(a) Yes, at the next deploy · (b) not now</td>
+<td class="d" data-l="Default"><b>(a) Yes, at the next deploy.</b></td>
+<td class="r" data-l="If default">Those three downloads start working on the demo. An operations step on the next deploy card.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-8</td>
+<td class="q" data-l="Question">Two Guided users from the same organisation can each create a client with the same name, so an Expert sees two identical names in the picker. Tighten the rule, or leave it as the spec says?</td>
+<td class="o" data-l="Options">(a) Leave as specified · (b) widen the duplicate check</td>
+<td class="d" data-l="Default"><b>(a) Leave as specified.</b></td>
+<td class="r" data-l="If default">No change. No demo persona can trigger it.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-9</td>
+<td class="q" data-l="Question">The Expert setup step accepts a request with neither a policy target nor a policy name. Making it strict would break today’s only screen path. Accept as built?</td>
+<td class="o" data-l="Options">(a) Accept as built; revisit when a release defines policies · (b) make it strict now</td>
+<td class="d" data-l="Default"><b>(a) Accept as built.</b></td>
+<td class="r" data-l="If default">No change now; it is revisited later.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-10</td>
+<td class="q" data-l="Question">77 internal “Composer” labels sit in the page’s code but never appear on screen; only “view source” shows them. Does view source count as “what users see”?</td>
+<td class="o" data-l="Options">(a) No; close the item · (b) yes; remove them</td>
+<td class="d" data-l="Default"><b>(a) No; close it.</b></td>
+<td class="r" data-l="If default">The item closes. Nothing changes on screen.</td>
+</tr>
+<tr class="grp"><td colspan="5">Product rules</td></tr>
+<tr>
+<td class="id" data-l="ID">COMP-11</td>
+<td class="q" data-l="Question">Marking secret fields as “supplied locally” needs a written justification each time (8 forms for 7 controls). Drop the justification for local values?</td>
+<td class="o" data-l="Options">(a) Yes, plus one “mark all secret fields local” action · (b) keep as is</td>
+<td class="d" data-l="Default"><b>(a) Yes, plus a “mark all local” action.</b></td>
+<td class="r" data-l="If default">Far fewer forms for consultants. A build item.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-12</td>
+<td class="q" data-l="Question">Cloning an engagement quietly resets its Essential Eight level to the target policy’s level. Is that wanted?</td>
+<td class="o" data-l="Options">(a) Keep it, and add one explaining sentence · (b) keep the source’s level</td>
+<td class="d" data-l="Default"><b>(a) Keep it, and add one sentence.</b></td>
+<td class="r" data-l="If default">Users are told why the level changed (sentence in the words list).</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-13</td>
+<td class="q" data-l="Question">If answers change after the documents were generated, the Controls screen and the documents disagree. Show a hint, a stale marker, or nothing?</td>
+<td class="o" data-l="Options">(a) A hint · (b) a stale marker · (c) as is</td>
+<td class="d" data-l="Default"><b>(a) A hint to generate again.</b></td>
+<td class="r" data-l="If default">A one-line hint appears (words list). Web only.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-14</td>
+<td class="q" data-l="Question">Due dates in the past or centuries ahead (1900, 9999) are accepted with no warning. Warn, refuse, or leave?</td>
+<td class="o" data-l="Options">(a) Warn on the form · (b) refuse · (c) as is</td>
+<td class="d" data-l="Default"><b>(a) Warn on the form.</b></td>
+<td class="r" data-l="If default">A warning appears; nothing is refused. The warning text comes to you as wording.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-15</td>
+<td class="q" data-l="Question">The policy PDF cover dates use UTC, so a release before 10 am Sydney time shows yesterday’s date. Add a time zone?</td>
+<td class="o" data-l="Options">(a) On the brand profile (Australia/Sydney), cover only · (b) on the customer · (c) as is</td>
+<td class="d" data-l="Default"><b>(a) Brand profile, Sydney time, cover only.</b></td>
+<td class="r" data-l="If default">Cover dates match the local day. The detailed appendix keeps exact times.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-16</td>
+<td class="q" data-l="Question">Two items are yours by ownership: the demo data behind the Guided persona (mostly finished examples), and a drafted note for Paul’s user guide about the changed sign-in page.</td>
+<td class="o" data-l="Options">(a) Hold both for now · (b) refresh the demo data · (c) approve the guide note</td>
+<td class="d" data-l="Default"><b>(a) Hold both.</b></td>
+<td class="r" data-l="If default">Demo data and the guide stay as they are until you raise them.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-17</td>
+<td class="q" data-l="Question">Six older open calls with no new facts: the Jira key for the Composer; non-Latin fonts in PDFs (+18 MB); unusual control characters in text; the Expert button layout rules; hiding or building the “not available” features; and the product name on screen.</td>
+<td class="o" data-l="Options">(a) Keep all six parked · (b) rule any of them now</td>
+<td class="d" data-l="Default"><b>(a) Keep all six parked.</b></td>
+<td class="r" data-l="If default">No work starts on them. Friday raises them one at a time when they unblock something.</td>
+</tr>
+<tr class="grp"><td colspan="5">Look and wording</td></tr>
+<tr>
+<td class="id" data-l="ID">COMP-18</td>
+<td class="q" data-l="Question">Seven small look items are waiting (a note badge, a long-name breadcrumb, a step tick, phone-width layout notes, an unexplained “Not chosen”, input widths, a 5-pixel radio shift).</td>
+<td class="o" data-l="Options">(a) Friday brings one look card with screenshots; the breadcrumb item is accepted as before · (b) rule now</td>
+<td class="d" data-l="Default"><b>(a) One look card with screenshots.</b></td>
+<td class="r" data-l="If default">You see the screenshots on one card before anything is built.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">COMP-19</td>
+<td class="q" data-l="Question">New words: approve the wording in the words list at the end, and let Friday put the seven other pending phrasings (error and refusal messages) on one words card with a proposal each.</td>
+<td class="o" data-l="Options">(a) Approve as written, and one card for the rest · (b) change some</td>
+<td class="d" data-l="Default"><b>(a) Approve the listed wording as written.</b></td>
+<td class="r" data-l="If default">The listed words are built; the other seven come to you on one card.</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===================== HPSM-POC ===================== -->
+<section class="proj">
+<h2>3 · HPSM-POC</h2>
+<p class="how">Order: things blocking work, then hosted site / money / security, then product rules and wording. Nothing here changes before HP’s review on 13 October. Reply “POC: all defaults” to accept every bold choice.</p>
+<table>
+<thead><tr><th>ID</th><th>The question</th><th>Options</th><th>Recommended default</th><th>If you pick the default</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="5">Blocking work</td></tr>
+<tr>
+<td class="id" data-l="ID">POC-1</td>
+<td class="q" data-l="Question">The automated test run for the server took 14 min 12 s against a 15-minute limit, and the next two lanes add more tests. Raise the limit?</td>
+<td class="o" data-l="Options">(a) Raise 15 → 25 minutes, change nothing else · (b) split the job in two, as the database tests already are</td>
+<td class="d" data-l="Default"><b>(a) Raise to 25 minutes.</b></td>
+<td class="r" data-l="If default">A one-line change through the normal code-scanning review. No test is skipped or trimmed.</td>
+</tr>
+<tr class="grp"><td colspan="5">Hosted site · money · security</td></tr>
+<tr>
+<td class="id" data-l="ID">POC-2</td>
+<td class="q" data-l="Question">The hosted demo has no monitoring or app logs. Adding them needs a new Azure resource (Application Insights, a small monthly cost) and removal of personal data before export. Build it after 13 Oct?</td>
+<td class="o" data-l="Options">(a) Yes, after 13 Oct · (b) not now</td>
+<td class="d" data-l="Default"><b>(a) Yes, after 13 Oct, with personal data scrubbed.</b></td>
+<td class="r" data-l="If default">One new Azure resource on the demo. You see the deploy card before it is created.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-3</td>
+<td class="q" data-l="Question">The hosted site does not tell browsers to always use HTTPS (the HSTS header is missing on all 6 checks). Add it?</td>
+<td class="o" data-l="Options">(a) Yes, after 13 Oct, for one year, not on the browsers’ preload list · (b) not now</td>
+<td class="d" data-l="Default"><b>(a) Yes, after 13 Oct (one year, no preload).</b></td>
+<td class="r" data-l="If default">A header change plus a deploy after HP’s review.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-4</td>
+<td class="q" data-l="Question">The security exception for one development tool’s known issue (“braces”) runs out on 31 Oct. Renew it, work around it, or remove the tool?</td>
+<td class="o" data-l="Options">(a) Renew to 30 Nov · (b) override the version · (c) remove the tool</td>
+<td class="d" data-l="Default"><b>(a) Renew to 30 Nov.</b></td>
+<td class="r" data-l="If default">The exception stays (development only; no fix has been published yet). It comes back before 30 Nov.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-5</td>
+<td class="q" data-l="Question">In Demo mode, a partner’s free-text answers are shown word for word, so a customer name typed there would be shown. Disguise or withhold free text in Demo?</td>
+<td class="o" data-l="Options">(a) Withhold free text in Demo · (b) disguise names in it · (c) as is</td>
+<td class="d" data-l="Default"><b>(a) Withhold free text in Demo.</b></td>
+<td class="r" data-l="If default">A priority lane after the current name-check gate. Demo shows no typed free text.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-6</td>
+<td class="q" data-l="Question">To be safe, Demo refuses customers whose name is a common word or a word the report prints (15 of 16 such names measured). Accept that as the trial’s known limit?</td>
+<td class="o" data-l="Options">(a) Accept, and word the alert better · (b) loosen the check</td>
+<td class="d" data-l="Default"><b>(a) Accept, and reword the alert.</b></td>
+<td class="r" data-l="If default">Safety stays as is. The alert’s new wording comes to you (POC-12).</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-7</td>
+<td class="q" data-l="Question">Six optional end-to-end tests against the live server are never run by the automated system. Add a job that runs them only on request?</td>
+<td class="o" data-l="Options">(a) Yes, on request only · (b) no</td>
+<td class="d" data-l="Default"><b>(a) Yes, on request only.</b></td>
+<td class="r" data-l="If default">A workflow change through the normal code-scanning review. It never runs on its own.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-8</td>
+<td class="q" data-l="Question">Two confirmations on feedback attachments: your Jira automation rule receives two small extra fields it should simply ignore; and a privacy export lists attachment details (name, size, type), not the files themselves.</td>
+<td class="o" data-l="Options">(a) Confirm both as built · (b) change either</td>
+<td class="d" data-l="Default"><b>(a) Confirm both as built.</b></td>
+<td class="r" data-l="If default">No change. Both are recorded as ruled.</td>
+</tr>
+<tr class="grp"><td colspan="5">Product rules and wording</td></tr>
+<tr>
+<td class="id" data-l="ID">POC-9</td>
+<td class="q" data-l="Question">Customer pages log a harmless error in the browser console whenever a profile or score does not exist yet. Fix it on the server or in the web page?</td>
+<td class="o" data-l="Options">(a) Server answers “empty” · (b) the web page only asks when the record says one exists</td>
+<td class="d" data-l="Default"><b>(b) Web page only.</b></td>
+<td class="r" data-l="If default">Console stays clean; no interface change.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-10</td>
+<td class="q" data-l="Question">Partners briefly see the word “Customer” before the real customer name loads. Accept?</td>
+<td class="o" data-l="Options">(a) Accept · (b) fix it</td>
+<td class="d" data-l="Default"><b>(a) Accept.</b></td>
+<td class="r" data-l="If default">No change.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-11</td>
+<td class="q" data-l="Question">The 90-second allowance for “Reset demo” leaves about 5 seconds spare if the database retries the whole reset once. Change it?</td>
+<td class="o" data-l="Options">(a) No change; record it · (b) raise the allowance</td>
+<td class="d" data-l="Default"><b>(a) No change; record it.</b></td>
+<td class="r" data-l="If default">Noted as a known margin.</td>
+</tr>
+<tr>
+<td class="id" data-l="ID">POC-12</td>
+<td class="q" data-l="Question">New words: the hosted “Reset demo” message (it wrongly says “the offline demo”), the report alert title, and two messages still to be drafted. Approve the listed wording and let Friday bring the rest on one card.</td>
+<td class="o" data-l="Options">(a) Approve as written, one card for the rest · (b) change some</td>
+<td class="d" data-l="Default"><b>(a) Approve the listed wording as written.</b></td>
+<td class="r" data-l="If default">The listed words are built in the current lanes; nothing deploys before 13 Oct.</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===================== WORDS LIST ===================== -->
+<section class="proj">
+<h2>Words list (for MPS-11, COMP-19 and POC-12)</h2>
+<p class="how">Exact proposed wording. “All defaults” approves these as written. Items marked “to be drafted” come to you on a later words card.</p>
+<table class="words">
+<thead><tr><th>For</th><th>Where it shows</th><th>Today</th><th>Proposed</th></tr></thead>
+<tbody>
+<tr><td data-l="For">MPS-11</td><td data-l="Where">Home dashboard, quote count</td><td data-l="Today">“1 quotes”</td><td class="now" data-l="Proposed">“1 quote” (0 and 2+ stay “quotes”)</td></tr>
+<tr><td data-l="For">MPS-11</td><td data-l="Where">Home dashboard, follow-up hint</td><td data-l="Today">“1 quotes need follow-up”</td><td class="now" data-l="Proposed">“1 quote needs follow-up”</td></tr>
+<tr><td data-l="For">COMP-19</td><td data-l="Where">Ready sheet footer</td><td data-l="Today">“Questions before the session? Reply to the email this came with.”</td><td class="now" data-l="Proposed">“Questions before the session? Ask your Datasec contact.”</td></tr>
+<tr><td data-l="For">COMP-4</td><td data-l="Where">Create form, approvers</td><td data-l="Today">“… are invited to sign in”</td><td class="now" data-l="Proposed">Remove “they are invited to sign in”</td></tr>
+<tr><td data-l="For">COMP-12</td><td data-l="Where">Start of a clone</td><td data-l="Today">(nothing)</td><td class="now" data-l="Proposed">“The source was at Level Three on Frameworks; the clone starts at the policy’s Level Two.” (levels filled in per case)</td></tr>
+<tr><td data-l="For">COMP-13</td><td data-l="Where">Controls, beside “Customer said”</td><td data-l="Today">(nothing)</td><td class="now" data-l="Proposed">“Answers changed after the documents were generated: Generate again”</td></tr>
+<tr><td data-l="For">COMP-19</td><td data-l="Where">Seven error and refusal messages</td><td data-l="Today">various</td><td class="now" data-l="Proposed">To be drafted: one words card with a proposal per message</td></tr>
+<tr><td data-l="For">POC-12</td><td data-l="Where">Hosted “Reset demo”, success</td><td data-l="Today">“Demo reset: the offline demo is back to its starting state.”</td><td class="now" data-l="Proposed">“Demo reset: the sample customers and their assessments are back to their starting state.” (offline wording unchanged)</td></tr>
+<tr><td data-l="For">POC-12</td><td data-l="Where">Report alert title (slow report)</td><td data-l="Today">“The report could not be made” (over a body saying it may still finish)</td><td class="now" data-l="Proposed">“The report is taking longer than usual”</td></tr>
+<tr><td data-l="For">POC-12</td><td data-l="Where">Demo refusal alert and “changed after it was issued” title; timed-out save sentences</td><td data-l="Today">says “changed after it was issued” when the cause is a name</td><td class="now" data-l="Proposed">To be drafted: a neutral title and the two timing sentences, on one card</td></tr>
+</tbody>
+</table>
+</section>
+
+<footer>Prepared by Friday from three lane tables written 12 October 2026 (19:19 AEDT). Sources and Friday’s own calls are kept separately in Friday’s notes. Datasec only.</footer>
+</main>
+</body>
+</html>

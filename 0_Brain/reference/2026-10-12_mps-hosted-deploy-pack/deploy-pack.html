@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPS Hosted Deploy Pack</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1b1f24; --muted: #5b6470; --line: #d9dee5;
+  --head: #f2f4f7; --accent: #0b5cad; --band: #fafbfc; --warn: #8a5300; --warnbg: #fff6e8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171b; --fg: #e6e9ee; --muted: #9aa4b1; --line: #2c333c;
+    --head: #1d2228; --accent: #6aa9ef; --band: #181c21; --warn: #e0a85a; --warnbg: #2a2116;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171b; --fg: #e6e9ee; --muted: #9aa4b1; --line: #2c333c;
+  --head: #1d2228; --accent: #6aa9ef; --band: #181c21; --warn: #e0a85a; --warnbg: #2a2116;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { max-width: 1180px; margin: 0 auto; padding: 18px 16px 32px; }
+h1 { font-size: 1.45rem; margin: 0 0 2px; }
+.sub { color: var(--muted); margin: 0 0 12px; font-size: .85rem; }
+.bluf { border-left: 4px solid var(--accent); background: var(--band); padding: 9px 13px; margin: 0 0 12px; border-radius: 4px; }
+.bluf b { color: var(--accent); }
+h2 { font-size: 1.1rem; margin: 18px 0 6px; padding-bottom: 3px; border-bottom: 2px solid var(--accent); }
+ul.prs { margin: 4px 0 0; padding-left: 18px; }
+ul.prs li { margin: 3px 0; }
+table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+th, td { border: 1px solid var(--line); padding: 4px 6px; vertical-align: top; text-align: left; }
+th { background: var(--head); font-weight: 600; }
+td.id { white-space: nowrap; font-weight: 700; }
+td.w { font-style: italic; }
+tr.grp td { background: var(--band); font-weight: 600; font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-style: normal; }
+.risk { border: 2px solid var(--warn); background: var(--warnbg); padding: 8px 12px; border-radius: 4px; margin: 12px 0; }
+.risk b { color: var(--warn); }
+.shots { display: grid; grid-template-columns: 3fr 1fr; gap: 12px; align-items: start; }
+figure { margin: 0; }
+figure img { width: 100%; height: auto; border: 1px solid var(--line); display: block; }
+figcaption { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+.small { font-size: .8rem; color: var(--muted); }
+code { font-size: .92em; }
+footer { margin-top: 14px; color: var(--muted); font-size: .74rem; }
+@media screen and (max-width: 760px) {
+  .shots { grid-template-columns: 1fr; }
+  table, thead, tbody, tr, th, td { display: block; width: auto !important; }
+  thead { display: none; }
+  tr { border: 1px solid var(--line); border-radius: 6px; margin: 0 0 8px; overflow: hidden; }
+  td { border: 0; border-bottom: 1px solid var(--line); }
+  tr.grp { border: 0; }
+}
+@media print {
+  @page { size: A4 landscape; margin: 8mm 10mm; }
+  body { font-size: 10.2px; line-height: 1.32; }
+  main { max-width: none; padding: 0; }
+  h2 { margin: 10px 0 4px; }
+  .bluf { margin-bottom: 8px; padding: 6px 10px; }
+  table { font-size: 9.6px; }
+  th, td { padding: 2.5px 5px; }
+  .pb { break-before: page; }
+  tr, .risk { break-inside: avoid; }
+  .risk { margin: 8px 0 0; padding: 6px 10px; }
+  .shots { display: flex; gap: 8mm; align-items: flex-start; }
+  .shots figure { flex: none; }
+  .shots figure:first-child { width: 180mm; }
+  .shots figure:first-child img { width: 180mm; height: auto; }
+  .shots figure:last-child { width: 60mm; }
+  .shots figure:last-child img { width: 32mm; height: auto; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>MPS calculator: what goes onto the hosted site with the home dashboard</h1>
+<p class="sub">Datasec / MPS Commercial Calculator · Monday, 12 Oct 2026 · Hosted now: <code>db8edfd</code> (deployed by B33) · Next hosted build: <code>main</code> after PR #28 merges (PR #28 head <code>c8eda15</code>; gate B52: GO WITH NOTES)</p>
+
+<div class="bluf">
+<b>Kam: look at the screenshots and the new-words table, then tap a, b or c on the card.</b>
+The next deploy ships <b>four merged rounds at once</b>, not only the dashboard. The headline is the new <b>Home screen</b> and <b>Won/Lost recording</b>. The other three rounds are behind-the-scenes and change no screen. <b>27 new strings</b> have not been on any card you approved. 22 of them can only be reached through the API, not from a screen.
+</div>
+
+<h2>What the hosted site gains (one line per PR)</h2>
+<ul class="prs">
+<li><b>PR #25 (B35, quote lifecycle audit):</b> each quote now keeps a behind-the-scenes history: created, saved, calculated, submitted, approved, rejected, and every proposal generated. Rental price-override changes are now logged, and a quote can be copied through the API. No screen changes, and the customer proposal is byte-for-byte unchanged.</li>
+<li><b>PR #26 (B37, fix round for gate B36):</b> fixes to #25. A failed save no longer leaves a false "proposal generated" record. Re-sending the same rental override no longer logs a false change. A draft whose fleet repeats a line number is now refused, with a message.</li>
+<li><b>PR #27 (lane A2, B40 + B42, source lifecycle admin):</b> groundwork for administrators to stage, check, switch and roll back price-book versions. It is <b>off on the hosted site</b>: off by default, and it refuses to start in hosted sign-in (Entra) mode. Hosted users see nothing new. An administrator who calls those API routes gets "the store is off".</li>
+<li><b>PR #28 (B46 home dashboard + B49 fix round):</b> the new <b>Home</b> start page. It has six figures (Quotes provided, Total value out, Needs follow-up, Deals closed this month and year to date, Awaiting approval), a Needs follow-up list and the work queue, plus a Quotes list filtered by whichever tile you click and <b>Record outcome (Won/Lost)</b>. B49 fixed the approval counts, the "1 quote" grammar, the failed-figures message and the days count.</li>
+</ul>
+<p class="small">Not in this deploy: the feedback pill (B47, branch <code>b47/feedback-pill</code>, is not part of PR #28). No setting changes come with it: the price-book version store stays off.</p>
+
+<h2>Behaviour changes a user will notice</h2>
+<table>
+<thead><tr><th style="width:20%">Change</th><th>What the user sees</th><th style="width:9%">From</th></tr></thead>
+<tbody>
+<tr><td>Home is the start page</td><td>The top bar reads Home · Quotes · Inventory. The old quote list now lives at Quotes, and each Home tile opens it already filtered. An Administrator with no quote role sees the figures only.</td><td>#28 (B46)</td></tr>
+<tr><td>Won/Lost recording</td><td>The quote's owner or an Approver can mark an <b>Approved</b> quote Won or Lost, from the follow-up row or the quote screen. A Won/Lost badge with the date and name follows. <b>Once recorded it cannot be changed</b> (a second try gets W-11). It feeds Deals closed and takes the quote out of Needs follow-up.</td><td>#28 (B46)</td></tr>
+<tr><td>Awaiting approval for Approvers</td><td>For anyone holding Approver, including the pricing analyst, the Home queue's Awaiting approval tab lists only the quotes <b>they may approve</b>. <b>Their own submitted quotes no longer appear there</b>; they are still in Quotes ("My quotes submitted"). Under My quotes, the analyst's tab now shows other people's quotes, while its "All my quotes →" link opens only their own.</td><td>#28 (B49)</td></tr>
+<tr><td>Seller "Awaiting approval" tile</td><td>It counts the Seller's own submitted quotes under both My quotes and All quotes. Under All quotes the queue tab below it still lists everyone's, so the tile and the tab can show different numbers (3 vs 7 on the gate's data).</td><td>#28 (B49)</td></tr>
+<tr><td>Phone width</td><td>Screens no longer scroll sideways at phone width: 13 of 14 screens were fixed, and the analyst's rental quote screen still scrolls, as before.</td><td>#28 (B46)</td></tr>
+<tr><td>Rare display glitches</td><td>Both clear on a refresh. If one of Home's three reads fails, the Awaiting approval tab can show "0" with no error while the tile shows the right count (D-F1). On a slow load, "14 days" can show under "more than 14 days ago" (D-N1).</td><td>#28 (B49)</td></tr>
+<tr><td>Quotes with no owner / shared names</td><td>Quotes made before owners were recorded belong to nobody: they are in no Seller's My quotes, and only an Approver can record their outcome. If Datasec sign-in tokens carry no display name, several people show as "Signed-in user".</td><td>#28 (B46)</td></tr>
+<tr><td>Repeated fleet line numbers</td><td>An older quote stored with a repeated fleet line number can no longer be saved until it is renumbered. It shows W-04. The app never creates such a quote, and the gates ask for a hosted count first (PRE-1).</td><td>#26 (B37)</td></tr>
+<tr><td>Behind the scenes only</td><td>Every proposal generated is recorded (who, when, draft or approved), without bumping the quote's revision. The rental override audit is not shown on any screen (the price-audit panel is purchase-only).</td><td>#25, #26</td></tr>
+</tbody>
+</table>
+
+<div class="risk"><b>Risk: recorded Won/Lost outcomes are lost if the site is rolled back to an older build.</b> The gates measured this twice (B48, B52): a pre-B46 build loads the quotes but silently drops each quote's outcome the next time that quote is saved. So before any rollback past B46, the outcomes must be counted and exported first (PRE-3).</div>
+
+<h2 class="pb">Screenshots of the new Home screen (synthetic data only)</h2>
+<p class="small">From QA gate B48's evidence (<code>Briefs/2026-10-12_B48_evidence/</code>), in live mode against a synthetic store. Both show commit <b><code>0c74086</code></b> (B46 head, before the B49 fix round); B49 left no screenshots. Since then, B49 changed: "14 days" on row A16 now reads "15 days", and "1 quotes" now reads "1 quote". The approval counts changed only for people holding both Seller and Approver, who are not shown here. The red "LOCAL DEMO" bar and the Persona picker belong to the dev shell. The hosted site shows "Signed in as … / Sign out" instead.</p>
+<div class="shots">
+<figure><img class="desk" src="2026-10-12_b48-home-seller-1440.png" alt="Home screen for a Seller at desktop width: six figure tiles, Needs follow-up list with Record outcome buttons, and the work queue">
+<figcaption>Desktop, 1440 px wide, Seller, My quotes. Commit <code>0c74086</code>. File <code>2026-10-12_b48-home-seller-1440.png</code> (sha256 <code>10ed9394d271…</code>).</figcaption></figure>
+<figure><img class="phone" src="2026-10-12_b48-home-seller-390-top.png" alt="Home screen for a Seller at phone width, tiles stacked">
+<figcaption>Phone, 390 px wide, Seller. Commit <code>0c74086</code>. Top 1500 px of <code>2026-10-12_b48-home-seller-390.png</code> (sha256 <code>ba6816b66810…</code>; the full-length file is in this folder).</figcaption></figure>
+</div>
+
+<h2 class="pb">New words since <code>db8edfd</code> that you have not approved on a card</h2>
+<p class="small">The table lists strings a person can meet on the hosted build (Entra sign-in, version store off), verbatim, from the STATUS NEW WORDS sections of B35, B37, B40, B42, B46 and B49 and from gates B36, B38, B41, B43, B48 and B52. W-10 to W-12 and W-21 to W-23 were on card <code>mpscalc-dashboard-words-and-queue-1012</code>, which was withdrawn without a ruling. The words of the approved home-dashboard mock (§A) are not repeated here. Left out, with counts: API documentation text (openapi/API.md descriptions), internal field and registry names (105 registry keys, B37), server-start messages only an operator sees, and every string of the price-book version store, which cannot be switched on hosted: B40 305 strings and B42 83 strings, counted 305/305 and 83/83 by gates B41 and B43.</p>
+<table>
+<thead><tr><th style="width:5%">ID</th><th style="width:47%">Words (verbatim)</th><th>Where it shows · who</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="3">PR #25 · B35 (3 rows) · API only</td></tr>
+<tr><td class="id">W-01</td><td class="w">Set when the quote was duplicated.</td><td>Price-audit panel (purchase quotes, internal-metrics users), as the "reason", on a quote copied with the API duplicate call. No app button makes a copy, so nobody sees it today.</td></tr>
+<tr><td class="id">W-02</td><td class="w">Reading a quote needs the role Seller or Approver (SEC-RBAC-001).</td><td>API 403 FORBIDDEN on the duplicate call. Unreachable today: every quote reader already has one of those roles.</td></tr>
+<tr><td class="id">W-03</td><td class="w">created · draft-updated · calculated · submitted · approved · rejected · new-version · duplicated-from · duplicated-to · proposal-generated</td><td>Event kinds in a quote's lifecycle history, in the API answer for internal-metrics callers only. No screen shows them, and they never appear on the proposal.</td></tr>
+<tr class="grp"><td colspan="3">PR #26 · B37 (1 row) · on screen, rare</td></tr>
+<tr><td class="id">W-04</td><td class="w">fleet[n].lineNumber is used by more than one fleet line; each line needs its own number.</td><td>Rental quote screen, after "400 BAD_REQUEST Bad Request: The draft is not valid.", when saving an older quote that repeats a fleet line number. Any Seller can hit it.</td></tr>
+<tr class="grp"><td colspan="3">PR #27 · lane A2, B40 + B42 (5 rows) · API only, Administrator</td></tr>
+<tr><td class="id">W-05</td><td class="w">The source version store is off on this server (MpsCalc:SourceVersions:Path is empty), so source versions cannot be staged, validated, activated or rolled back here. The active sources are the reference store file.</td><td>409 SOURCE_LIFECYCLE_OFF on any of the new admin source routes. This is what hosted answers.</td></tr>
+<tr><td class="id">W-06</td><td class="w">The list filters are not valid.</td><td>400 on <code>GET /admin/sources</code> with a bad <code>?type=</code> or <code>?state=</code>.</td></tr>
+<tr><td class="id">W-07</td><td class="w">type must be one of DeviceCatalogue, DeviceOptions, SoftwareCatalogue, CatalogueOverlay, once.</td><td>Detail line under W-06.</td></tr>
+<tr><td class="id">W-08</td><td class="w">state must be one of Draft, Validating, Active, Expired, Failed Validation, Superseded, once.</td><td>Detail line under W-06. These are the six state words.</td></tr>
+<tr><td class="id">W-09</td><td class="w">The source version request failed on the server. The fault is logged by its type only, never its text. Read the source list and the source events before you retry.</td><td>500 SOURCE_LIFECYCLE_FAILED, returned only if a source route hits a bug.</td></tr>
+<tr class="grp"><td colspan="3">PR #28 · B46 + B49 (18 rows)</td></tr>
+<tr><td class="id">W-10</td><td class="w">Only the quote's owner or an Approver can record its outcome.</td><td>On screen: the Record outcome control, after a refusal (403 OUTCOME_FORBIDDEN).</td></tr>
+<tr><td class="id">W-11</td><td class="w">This quote's outcome is already recorded; it cannot be changed.</td><td>On screen: the Record outcome control in a stale tab (409). The gate saw it on screen.</td></tr>
+<tr><td class="id">W-12</td><td class="w">Version {n} is {status}; an outcome is recorded on an Approved version only.</td><td>On screen: the Record outcome control when the quote is no longer Approved (409).</td></tr>
+<tr><td class="id">W-13</td><td class="w">outcome must be won or lost.</td><td>API only (400 on the outcome call).</td></tr>
+<tr><td class="id">W-14</td><td class="w">The figures take one optional query parameter, scope=mine or scope=all.</td><td>API only. It shows only for a hand-typed figures call.</td></tr>
+<tr><td class="id">W-15</td><td class="w">scope=mine counts your own quotes, which needs the role Seller. Leave scope out, or send scope=all.</td><td>API only (400 SCOPE_MINE_NEEDS_SELLER).</td></tr>
+<tr><td class="id">W-16</td><td class="w">Unknown query parameter. The quote list takes scope, status, outcome, followup, period, canApprove, group, q, owner.</td><td>API only (400 INVALID_FILTER). The app's own links drop unknown values.</td></tr>
+<tr><td class="id">W-17</td><td class="w">The query parameter {name} may be given once.</td><td>API only (400 INVALID_FILTER).</td></tr>
+<tr><td class="id">W-18</td><td class="w">{name} must be one of {values}.</td><td>API only (400 INVALID_FILTER).</td></tr>
+<tr><td class="id">W-19</td><td class="w">{name} is at most 200 characters, with no control character.</td><td>API only (400 INVALID_FILTER).</td></tr>
+<tr><td class="id">W-20</td><td class="w">period needs outcome=won or outcome=lost.</td><td>API only (400 INVALID_FILTER).</td></tr>
+<tr><td class="id">W-21</td><td class="w">Whose quotes</td><td>Screen-reader label on the My quotes / All quotes switch (Home).</td></tr>
+<tr><td class="id">W-22</td><td class="w">Quote groups</td><td>Screen-reader label on the work-queue tabs (Home).</td></tr>
+<tr><td class="id">W-23</td><td class="w">Quote list</td><td>Screen-reader label on the filtered Quotes table.</td></tr>
+<tr><td class="id">W-24</td><td class="w">1 quote · AUD ex GST</td><td>On screen: Home tile 2 when the count is 1. The mock had "quotes" for every count; B49 corrected it.</td></tr>
+<tr><td class="id">W-25</td><td class="w">1 quote needs follow-up</td><td>On screen: Needs follow-up header hint when the count is 1. B49 grammar correction.</td></tr>
+<tr><td class="id">W-26</td><td class="w">Quotes marked Won since 1 July 2026.</td><td>On screen: the Deals closed (year to date) tile. The mock showed both year forms; this one follows your financial-year default.</td></tr>
+<tr><td class="id">W-27</td><td class="w">No quotes yet.</td><td>On screen: an existing phrase, now also shown on a filtered Quotes list that matches nothing, even when quotes exist.</td></tr>
+</tbody>
+</table>
+<p class="small">Rows per PR: #25: 3 · #26: 1 · #27: 5 · #28: 18 · total 27. Of these, 10 can show on a screen (W-04, W-10 to W-12, W-21 to W-27). Pre-deploy checks the gates ask Friday to run, as counts only, before the switch: PRE-1, quotes with a repeated fleet line number; PRE-2, quotes with no owner (Submitted split out) and the number of distinct owner names; POST-1 to POST-3, the figures, the list and the analyst tile-equals-list check after the deploy.</p>
+
+<footer>Sources (read-only): <code>1_Project_Definition/Briefs/2026-10-1{1,2}_B35…B52_STATUS.md</code>; <code>git ls-remote origin</code> (main <code>b28c95e</code>, PR #28 head <code>c8eda15</code>); code at <code>b28c95e</code> / <code>c8eda15</code> via <code>git show</code> / <code>git grep</code>. Screenshots copied byte-for-byte from the B48 evidence folder (sha256 checked); the phone image is cropped. Synthetic data only.</footer>
+</main>
+</body>
+</html>
