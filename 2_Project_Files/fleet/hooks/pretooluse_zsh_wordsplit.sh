@@ -16,6 +16,8 @@
 #     (NAME=$(…), NAME="$(…)", NAME=`…`), whose output is usually several words;
 #   - that variable is then used UNQUOTED in a splitting position: command position
 #     ($NAME args / ${NAME} args), `set [--] … $NAME`, or `for y in … $NAME`.
+# ALSO REFUSES (2026-10-13, w=3): an unquoted word starting with `=` (zsh EQUALS expansion: `echo ===`,
+#   `[ a == b ]`); `[[ … ]]`, quoted text, heredoc bodies and bash-wrapped snippets pass.
 # PASSES: "$NAME" quoted uses; values without whitespace; heredoc bodies; bash-wrapped snippets.
 # NOT COVERED, stated: variables assigned in an earlier call or the environment; unquoted uses as
 # plain arguments (echo $G — zsh passes one word, usually what was meant); ${=NAME} (zsh's own
@@ -47,6 +49,21 @@ try:
     DQ = r'"(?:[^"\\]|\\.)*"'
     SQ = r"'[^']*'"
     text = re.sub(r"\b(?:bash|sh)\s+-c\s+(?:%s|%s)" % (SQ, DQ), " ", text)
+
+    # zsh EQUALS expansion (Friday ledger w=3, 2026-10-13: `echo ===` / `echo =====CARD` at boot, and
+    # `[ "$x" == 1 ]`): an unquoted word that STARTS with `=` and has more after it is looked up as a
+    # command path, so zsh prints "=== not found" and kills the rest of the chain. `[[ … ]]` is exempt.
+    eqbare = re.sub(r"%s|%s" % (DQ, SQ), '""', text)
+    eqbare = re.sub(r"\[\[.*?\]\]", " ", eqbare, flags=re.S)
+    eqbare = re.sub(r"\(\(.*?\)\)", " ", eqbare, flags=re.S)    # (( x == 1 )) is arithmetic
+    me = re.search(r"(?:^|(?<=[\s;&|(]))(=[^\s;&|()]+)", eqbare)
+    if me:
+        print(f"REFUSED by pretooluse_zsh_wordsplit.sh: the unquoted word {me.group(1)!r} starts with '=', "
+              f"which zsh (the Bash tool's shell) EXPANDS to a command path, so it fails with "
+              f"\"{me.group(1)[1:]} not found\" and kills the rest of the chain (Friday ledger w=3, 2026-10-13). "
+              f"Fix: use  echo ----  as a separator, quote it ('=='), use [[ … ]] for ==, or wrap in bash -c '…'.",
+              file=sys.stderr)
+        sys.exit(2)
 
     ws = set()
     for m in re.finditer(r"(?:^|(?<=[\s;&|(`]))([A-Za-z_]\w*)=(?:\"((?:[^\"\\]|\\.)*)\"|'([^']*)')", text):

@@ -34,6 +34,16 @@ arm "R backtick subst, command position"     'C=`which git`; $C status' 2
 arm "S subst used only as a plain argument"  'P=$(pgrep -f x); kill $P' 0
 arm "T subst used quoted"                    'P=$(pgrep -f x); for p in "$P"; do echo "$p"; done' 0
 arm "U P wrapped in bash -c"                 'bash -c '\''P=$(pgrep -f x); for p in $P; do kill $p; done'\''' 0
+arm "V w=3 instance 1: bare echo ===" 'tmux capture-pane -p -t %0 | tail -6; echo ===; tmux capture-pane -p -t %1' 2
+arm "W w=3 instance 2: echo =====CARD"     'cat a.md; echo; echo =====CARD; cat card.json' 2
+arm "X zsh [ a == b ] (== not found)"      'x=1; [ "$x" == 1 ] && echo yes' 2
+arm "Y quoted separator passes"            "echo '== x'; echo \"===\"" 0
+arm "Z dash separator passes"              'echo ----; ls' 0
+arm "AA assignment a=b and [ = ] pass"     'a=b; [ "$a" = b ] && echo ok; ls --color=auto' 0
+arm "AB [[ == ]] passes"                   '[[ "$a" == b* ]] && echo ok' 0
+arm "AC bash -c with === passes"           'bash -c '\''echo ===; ls'\''' 0
+arm "AD heredoc body with === passes"      $'cat > /private/tmp/x.md <<\'EOF\'\n=== heading\nEOF' 0
+arm "AE (( == )) arithmetic passes"        'x=1; (( x == 1 )) && echo ok; echo \$(( x == 1 ))' 0
 got=$(printf 'not json' | bash "$H" 2>/dev/null; echo $?)
 if [ "$got" = 0 ]; then P=$((P+1)); echo "ok   fail-open on bad input"; else F=$((F+1)); echo "FAIL fail-open got $got"; fi
 echo "== $P pass, $F fail"; [ "$F" = 0 ]
