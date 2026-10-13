@@ -35312,5 +35312,62 @@
    "CARD secuura-ks1570-admin-role-bound-shape-1013",
    "CARD quickquote-v235-publish-1013"
   ]
+ },
+ {
+  "id": "secuura-provisioning-scope-escapes-the-org-bound",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura / Blockchain — a tenant admin can mint a 'provisioning' key and use it to get a key for ANY organisation, which defeats the ADMIN bound: who may mint that key?",
+  "bluf": "Your choice needed, and it decides whether the ADMIN bound you ruled actually works. The Opus gate on KS-1570 PR A found that any ADMIN (even a scoped one) and any ISSUER_ADMIN can first mint a key carrying the scope 'organizations:register' for itself, and that key can then mint a key naming ANY other organisation in the tenant, bound to that organisation's connector. The gate measured this on the PR's head (the second call returned 201, with the other organisation stored on the row). It is identical on develop today, so it is not a new bug in the PR, but until it is closed the erasure change you ruled to merge can still be steered at the wrong organisation, and the deploy stays blocked. The gate's fix is to let only platform roles mint that scope (KS-480 limit 1). Not measured: whether any tenant admin legitimately mints provisioning keys today; the deploy seat can count existing keys with that scope on Kintsugi. Prior words read first: Kam's 11:47:35 ruling on the ADMIN bound (shape b, an explicit organisation scope) is the thing this finding bypasses; it does not rule who may mint a provisioning key.",
+  "default_action": "If Kam does not answer: no code changes and nothing deploys. Seat V 6th prepares a plan for option (a) so it is ready the moment you pick it. The deploy blocker stays on the list.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Only platform roles may mint a key with the provisioning scope (and wildcard scopes)",
+    "detail": "Tenant ADMINs and ISSUER_ADMINs can no longer mint 'organizations:register' or wildcard keys; platform roles still can. Closes the escape. Anyone who provisions connectors through a tenant admin today would need a platform admin to do it. Seat V 6th builds it as the fourth piece of the one KS-1570 round, behind its own gate. Recommended."
+   },
+   {
+    "key": "b",
+    "label": "Allow it, but bound the provisioning key to the minting admin's own scope",
+    "detail": "A tenant admin may mint the provisioning key, but the key inherits that admin's organisation scope and can only register or mint inside it. Keeps tenant-level provisioning, but is a larger change and needs the key to carry a scope list."
+   },
+   {
+    "key": "c",
+    "label": "Leave it for now and keep the deploy blocked",
+    "detail": "No code change. The ADMIN bound stays bypassable and no deploy goes out until you pick a or b."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-13T12:53:06.790892+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-10-13T12:55:49.588908+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-01 13:45",
+   "2026-09-03 09:50",
+   "2026-09-03 21:20",
+   "2026-09-07 19:00",
+   "CARD secuura-ks662-scope",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD nexusai-rd167-dark-mode-scope",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD nexusai-three-lineages-in-scope-or-parked",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD secuura-ks839-oauth-wildcard-scope-grants-everything",
+   "CARD t9-nas-leg-scope-mechanism",
+   "CARD hpsmpoc-partner-scope",
+   "CARD spark-studio-client-scope",
+   "CARD nexusai-customer-test-cost-bound",
+   "CARD nexusai-package-files-scope",
+   "CARD nexusai-setup-window-admin-gate-scope",
+   "CARD hpsmpoc-section-intro-video-scope",
+   "CARD hpsmpoc-good-better-best-tiers-scope",
+   "CARD composer-out-of-scope-answers-1002",
+   "CARD composer-designer-rename-scope-1009",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013"
+  ]
  }
 ]

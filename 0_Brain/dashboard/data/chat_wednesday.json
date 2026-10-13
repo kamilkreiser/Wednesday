@@ -11269,5 +11269,26 @@
   "project": "Secuura",
   "ts": "2026-10-13T11:48:56.277905+11:00",
   "text": "Secuura / Blockchain — QA login card ruled (a), you make it. I need you to run one script in a terminal on this Mac. Rationale: it signs in as you, creates a test ORG_ADMIN login, proves its key list works, and asks before saving it to the credentials file, so the live checks can run. My recommendation was exactly this.\n\nSTEP 1. Open a terminal and run the dry run first, which sends nothing:\nbash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/kintsugi_qa_login.sh --org 072c1f08-3a8d-4873-b29d-d5ea66d8b162 --platform-default-tenant-ok --dry-run\n\nSTEP 2. It asks for your admin email and password (hidden). Email: kreiser.org+kintsugi-admin@me.com. Password: the one in the encrypted file I sent you earlier.\n\nSTEP 3. If the dry run reads well, run the same line again without --dry-run. Answer y when it asks to save the two lines to the credentials file.\n\nWhy that organisation: the deploy seat's census shows 12 organisations, all in the one tenant, each with one key; this is the first listed. Tell me if a particular ticket needs a different one. Stop and tell me the exact text if any step refuses."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-13T12:53:13.989100+11:00",
+  "text": "Secuura / Blockchain — one new card needs you, and it matters for the ADMIN bound. The gate on KS-1570 PR A is GO to merge, but it found that a tenant admin can mint a 'provisioning' key for itself and use it to get a key for ANY organisation, which bypasses the bound you ruled. It is the same on develop today, not new in the PR. I recommend option (a): only platform roles may mint that kind of key. If you do not answer, nothing changes and nothing deploys. Meanwhile PR A merges, since it is correct and fails closed. The one deploy round now has four pieces: PR A, PR B, the dashboard fix, and this."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-13T12:55:52.900553+11:00",
+  "text": "Secuura / Blockchain — got it, Kam: option (b), a tenant admin may still mint the provisioning key, but that key is bounded to the minting admin's own organisation scope. I have ruled the card. It is a bigger change than (a), so Seat V 6th sends a plan first (where the key stores its bound, what a platform-minted key can still do, how it is tested), I review it, then it is built and gated as the fourth piece of the one KS-1570 round. Nothing deploys until all four pieces are merged and you have seen them."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-13T13:01:51.572076+11:00",
+  "text": "Secuura / Blockchain — one design note on your provisioning-key ruling, Kam, no action unless you object. Seat V's plan bounds each provisioning key to ONE organisation (the key's own), not to a list, because a list needs a second database migration. That is narrower than your wording, in the safe direction: an admin who needs two organisations mints two keys. Existing provisioning keys with no organisation stay as they are until deploy, when I bring you the list; I will not revoke any without your word."
  }
 ]
