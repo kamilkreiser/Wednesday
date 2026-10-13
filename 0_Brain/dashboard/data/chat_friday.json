@@ -4982,5 +4982,12 @@
   "project": "Datasec",
   "ts": "2026-10-14T06:47:31.455252+11:00",
   "text": "HPSM-POC: the last fix (the stuck-upload clean-up, HPSMPOC-229) passed its final check. All five Lane 1 fixes are now in one pull request, waiting only on Code Security:\nhttps://github.com/datasecau/HPSM-POC/pull/154\nOnce Code Security is back on, I'll merge it. Nothing changes on the hosted site today."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-14T06:54:20.217570+11:00",
+  "text": "HPSM-POC PR 154 — the cleanest way through is not a force, it's switching Code Security back on. That check fails only because Code Security is off ('Dependency review is not supported on this repository'). It passed on PR 152 the night before.\n\n1. Open https://github.com/datasecau/HPSM-POC/settings/security_analysis\n\n2. Turn on Code Security (and Dependency graph if it is off).\n\n3. Tell me 'done'. I re-run the checks and merge. The other checks are green or still running.\n\nA force alone would not get it in. I measured two locks:\n- Branch protection on main requires that check and applies to admins too ('Do not allow bypassing' is on). You would have to switch that off first.\n- The org ruleset needs CodeQL results on main. CodeQL can't run while Code Security is off, so you would also need to be on that ruleset's bypass list.\n\nIt would also break your own rule that a commit reaches main only after CodeQL scans it. If you still want to force, say so and I'll give you exact steps. I won't bypass it myself."
  }
 ]
