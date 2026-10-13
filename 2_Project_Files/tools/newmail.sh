@@ -12,8 +12,17 @@
 W="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 D="${WED_NEWMAIL_DIR:-/private/tmp/wed_newmail}"; mkdir -p "$D"
 set -a; . "$W/4_Credentials/.env"; set +a
-bash "$W/2_Project_Files/fleet/inbox_digest.sh" --all > "$D/inbox_cur.txt" 2>&1
+bash "${WED_NEWMAIL_DIGEST:-$W/2_Project_Files/fleet/inbox_digest.sh}" --all > "$D/inbox_cur.txt" 2>&1
+DIGRC=$?
 touch "$D/seen_ids.txt"
+# 2026-10-13 23:3x (ledger "NEW-ROWS: 0 ROWS-IN-DIGEST: 0", a false zero hid J 10th's READY ~3 min): a digest with
+# ZERO class rows is a FAILED read (the whole-inbox digest always holds rows), never "no new mail". Refuse loudly.
+DIGROWS=$(/usr/bin/grep -c -i -E '^\[(INBOUND|QUESTION|WRAP|OTHER)\]' "$D/inbox_cur.txt")
+if [ "$DIGROWS" -eq 0 ]; then
+  echo "FAILED: the inbox digest held 0 class rows (inbox_digest rc=$DIGRC). This is NOT 'no new mail': re-read the inbox by the API before any sentence. Digest output, first 10 lines:"
+  head -n 10 "$D/inbox_cur.txt"
+  exit 3
+fi
 SEED=0; [ "${1:-}" = "--seed" ] && SEED=1
 NEW="$D/new_rows.txt"; : > "$NEW"
 /usr/bin/grep -n -i -E '^\[(INBOUND|QUESTION|WRAP|OTHER)\]' "$D/inbox_cur.txt" | while IFS=: read -r n rest; do
