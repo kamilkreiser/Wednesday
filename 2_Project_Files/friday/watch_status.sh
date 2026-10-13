@@ -50,7 +50,7 @@ for i in $(seq 1 "${WATCH_LOOPS:-110}"); do
       # filled file is the one that fires (seen 4x on 2026-10-04: B57, B59, B61, B62). STOP lines still fire.
       # NOT bare PLACEHOLDER: finished Composer STATUS files say it in prose (the question texts ARE placeholders, E-01),
       # and KNOWN_PLACEHOLDER_ENTRIES is a real identifier (HPSM-POC B111): only *_PLACEHOLDER as a whole token holds.
-      s=$(/usr/bin/grep -c -E '@@[A-Za-z0-9_]+@@|__[A-Z][A-Z0-9_]*__|(^|[^A-Za-z0-9_])[A-Z0-9]+(_[A-Z0-9]+)*_PLACEHOLDER([^A-Za-z0-9_]|$)|(^|[^A-Za-z0-9-])[A-Z0-9]+(-[A-Z0-9]+)+-(LINE|ROW|FILE)([^A-Za-z0-9-]|$)' "$f")
+      s=$(/usr/bin/grep -c -E '@@[A-Za-z0-9_]+@@|__[A-Z][A-Z0-9_]*__|(^|[^A-Za-z0-9_])[A-Z0-9]+(_[A-Z0-9]+)*_PLACEHOLDER([^A-Za-z0-9_]|$)|(^|[^A-Za-z0-9-])[A-Z0-9]+(-[A-Z0-9]+)+-(LINE|ROW|FILE)([^A-Za-z0-9-]|$)|^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*_(LINE|SHA)[[:space:]]*$' "$f")
       [ "$s" -gt 0 ] && n=0
       m=$(/usr/bin/grep -E '^(\*\*State:\*\* *)?(BLOCKED|STOP)|STOPPED|NEEDS FRIDAY' "$f" | /usr/bin/grep -v -i -E 'see the end' | /usr/bin/grep -c .)   # 2026-10-10: a pointer line ("READY FOR GATE / STOPPED line: see the end", 2x on 10-09) is neither a READY nor a STOP
       if [ "$n" -gt 0 ] || [ "$m" -gt 0 ]; then

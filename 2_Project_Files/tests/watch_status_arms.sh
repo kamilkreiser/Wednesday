@@ -74,4 +74,11 @@ d=$T/a23; mkdir -p $d; : > $d/seen; printf 'body\nDONE: deployed dc136e6; live-c
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A23 DONE: deployed fires"
 d=$T/a24; mkdir -p $d; : > $d/seen; printf 'the last line will be DONE: deployed SHA when finished\n' > $d/X_STATUS.md
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A24 a mid-line mention of DONE: deployed stays quiet"
+# 2026-10-13: A25/A26 = MPS B83's STATUS template carries underscore tokens HEAD_SHA / PUSH_LINE / LINUX_CONTAINER_LINE while the seat is still running, and its BLUF says "Last line: READY FOR GATE." — the watcher fired early on that prose. Skeleton until filled; fires once filled.
+d=$T/a25; mkdir -p $d; : > $d/seen; printf 'BLUF. Last line: READY FOR GATE.\n## Push\nPUSH_LINE\n\nREADY FOR GATE: b83/x HEAD_SHA\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A25 a STATUS still holding HEAD_SHA/PUSH_LINE stays quiet"
+printf 'BLUF. Last line: READY FOR GATE.\n## Push\npushed b83/x 6cae6be\n\nREADY FOR GATE: b83/x 6cae6be\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A26 the same STATUS once filled fires"
+d=$T/a27; mkdir -p $d; : > $d/seen; printf 'body names `OPTIONAL_ITEMS_LINE` and +AWS_SHAPED_LINE in prose\n\nREADY FOR REVIEW: B88 gate b79 @ adacb7e on main 33f2cb4\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A27 a finished STATUS naming *_LINE identifiers in prose still fires"
 wait; echo "pass=$pass fail=$fail"; [ "$fail" = 0 ]
