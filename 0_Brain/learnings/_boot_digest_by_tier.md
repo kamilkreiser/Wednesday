@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-14 06:09 from 236 lesson files (1,038,986 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 191. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-14 06:49 from 237 lesson files (1,041,837 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 192. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7249,4 +7249,20 @@ sections (open the file for these): How to apply
 5. **What good looks like from the agent** (Vision did all of it): it recorded the dismissed dialog as not-an-answer, acted only on the mailed relay, quoted the authority in its STATUS, and rolled nothing forward until its own identity and rollback reads were done.
 
 **Family:** [[2026-08-06_ghost-suggestions-in-panes]] (prompt lines are never the principal) · [[2026-09-01_a-tap-is-a-pointer-not-a-message]] · [[2026-08-07_authorship-is-checkable-dkim]] · [[2026-09-18_use-the-fleets-own-tool-before-rebuilding-its-behaviour]] (the Esc is the one raw keypress, and it is disclosed).
+
+
+## From 80% to 90% of the weekly allowance, cloud agents are LIMITED and the work centres on Wednesday and the Spark; above 90% the hard stop stands
+`2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark.md` · grant · 2026-10-14 · status: live · tier: W · supersedes: the 70% thresholds in 2026-09-25_three-tier-routing-ornith-spark-cloud-always-on (rule 4) and 2026-10-06_past-70pct-spark-takes-80pct-of-tasks, for this seat — the band is now 80–90%
+
+**His words, verbatim (answering the morning receipt and card `secuura-92pct-stop-ready-work-waits-1014`):**
+> *"thank you. please move to working with the spark.  going forward once we reach 80 - 90% should be the start of limited cloud model usage and a focus on you and the spark"*
+
+**How to apply:**
+1. Read the gauge at every checkpoint and before every launch, in the same action as the decision.
+2. In the 80–90% band, every cloud launch receipt carries `cloud (80-90% band): <why not Spark/Wednesday>`.
+3. Brief-writing for the Spark in the band is Wednesday's own work first; a drafter is a cloud launch and follows rule 2.
+4. Unchanged: the QA gate before every merge, the signature classes, the Spark counter (original + one rebrief, then a Claude seat), one client per Spark task.
+5. **Mechanism:** the 80% advisory belongs in `fleet/usage_gate.sh` beside the 90% refusal (rc 0, loud, naming this file). Shared tooling: claim first (`wed_claim.sh`).
+
+**Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the hard stop above 90%, unchanged) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-10-06_past-70pct-spark-takes-80pct-of-tasks]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 

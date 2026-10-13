@@ -2666,3 +2666,8 @@ INCLUDED until he says otherwise.
 > once agents finish up, deploy everything and wrap up
 
 *Note:* Tuesday seat: QuickQuote 2.35 publish briefed (card ruled a); NexusAI demo after gate 22 + merges; then wrap all seats. Plan in NEXT-PICKUP-TUESDAY DELTA 181.
+
+## 2026-10-14 06:49 — Kam (terminal, verbatim)
+> thank you. please move to working with the spark.  going forward once we reach 80 - 90% should be the start of limited cloud model usage and a focus on you and the spark
+
+*Note:* card secuura-92pct-stop ruled b (stop not lifted); grant file 2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark; usage_gate advisory 80 for the Wednesday seat

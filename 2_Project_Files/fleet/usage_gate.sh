@@ -92,9 +92,14 @@ fi
 # launch still allowed when nothing local can do the work AND it matters now. So the gate says it LOUDLY
 # on stderr and the launcher's caller must state which of those holds in its launch receipt.
 # Grant file: 0_Brain/learnings/2026-09-25_three-tier-routing-ornith-spark-cloud-always-on.md (rule 4).
-ADVISE="${WED_USAGE_ADVISE:-70}"
+# WEDNESDAY SEAT: 80% (Kam 2026-10-14 06:47, Wednesday's terminal, verbatim: "going forward once we reach
+# 80 - 90% should be the start of limited cloud model usage and a focus on you and the spark").
+# Grant file: 0_Brain/learnings/2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark.md. Other seats keep 70.
+_ADV_DEFAULT=70; _ADV_WHY="Kam 2026-09-25: minimise cloud agents above 70%"
+if [ "$SEAT" = wednesday ]; then _ADV_DEFAULT=80; _ADV_WHY="Kam 2026-10-14: 80-90% = limited cloud, focus on Wednesday and the Spark"; fi
+ADVISE="${WED_USAGE_ADVISE:-$_ADV_DEFAULT}"
 if [ "$PCT" -ge "$ADVISE" ]; then
-  echo "usage_gate: ⚠ ADVISORY — weekly usage ${PCT}% >= ${ADVISE}% (Kam 2026-09-25: minimise cloud agents above 70%). Launch only if nothing local (Ornith/Spark) can do this AND it matters now; say which in the launch receipt. Hard stop at ${STOP}%." >&2
+  echo "usage_gate: ⚠ ADVISORY — weekly usage ${PCT}% >= ${ADVISE}% (${_ADV_WHY}). Launch only if nothing local (Ornith/Spark) can do this AND it matters now; say which in the launch receipt. Hard stop at ${STOP}%." >&2
 fi
 echo "usage_gate: OK — weekly usage ${PCT}% < ${STOP}% (gauge age ${AGE} min)"
 exit 0
