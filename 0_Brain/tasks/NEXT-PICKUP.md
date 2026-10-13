@@ -14,7 +14,17 @@ supersede: REPLACED WHOLESALE at the 80% rotation (~19:55 Tue 13 Oct) by the Son
 3. Re-read develop and each PR head with your own `git -C "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files" ls-remote origin ...` in its own call before any GO (use the literal path: the zsh hook refuses `$VAR` forms). Lanes: Secuura/Blockchain-V 8th %80, -K 9th %74 (WRAPPING, see 3), -J 8th %79; %0 me, %1 fleet monitor.
 4. DASHBOARD (Kam, live board 15:45, IMG_0040): DONE and DEPLOYED: label rules for Friday and Tuesday next to "Cockpit", the "chat view" link and the "live" indicator are removed (commented/hidden in dashboard-cloud/app/static/index.html; backup index.html.pre-1650-header). Deploy "Site started successfully" (246 s). Verified: the deployed zip carries the change (3 markers, control 0), app health 200, page gated 401. I could NOT view the signed-in page: Kam was told on the panel (bf-2a1d2f14d329) and asked to refresh; I removed the Tuesday label too and offered to restore it. WAIT for his reply; do NOT run 05_probe_live.sh with a made-up SCRATCH (it writes synthetic rows; it needs an existing scratch dir). PORTS.md has a TEMPORARY row for 47786 (stopped).
 
-## 00. LATEST STATE (70% checkpoint ~22:31; supersedes 0, 0a and everything below where they conflict)
+## 000. LATEST STATE (~22:50, 90% WEEKLY HARD STOP REACHED at ~22:42; supersedes everything below where they conflict)
+- STOP: usage_gate REFUSED at 90%. Kam's 2026-09-14 rule: no new agents or gates; in-flight finish and wrap; Wednesday + local models after. No lift for this seat. Kam told on the panel (bf-58163343249b).
+- develop = 0662f7213cc08d962b745fa6998fc2a3f47499a5 (#1545). Merged tonight: #1542, #1546, #1547, #1545; #1548 merging now (V 9th, GO head 03bdfc32, round-2 GO hash 6a41c4bef88d1e55). Nothing deployed. KS-1570 round 5/5 on develop.
+- K lane: NO seat (K 10th wrapped + pane closed). Queue for its next seat: KS-1605 (follow-up to the 1545 gate, items 1-5; branch local-only in K 10th's scratch clone, never pushed). HANDOVER-seatK10-2026-10-13.md.
+- V lane: V 9th merging #1548, then the KS-1598 info comment, team notes, WRAP. Verify the merge at source and retire the pane.
+- J lane: J 10th (%84) building the #1549 fix round (issuer-only; custody card pending). Its READY waits (no gate at 90%). Then it wraps; KS-1114 pushed at 7fdc179b, no PR.
+- OPEN KAM CARD: secuura-ks1385-custodian-may-update-anchor-identity-1013 (rec c, default a).
+- Non-urgent, for a later seat: the Secuura project's seat MEMORY.md is past its loader limit (K 10th, 201->203 lines; the loader cuts the tail). A Secuura seat consolidates it on a brief; not Wednesday's file.
+- AFTER THE STOP: Ornith/Spark only. The KS-1605 items and KS-1114 are candidates to look at for the Spark (shell/TS, one file each?) — screen before briefing.
+
+## 00. (older) STATE (70% checkpoint ~22:31; supersedes 0, 0a and everything below where they conflict)
 - develop = 92d1316ffe31cb13b3f7e843e7891225383b2f84. Usage 89% (90% hard stop; no lift for this seat). Kam last spoke 18:53.
 - K 10th (%83): merging #1545 (GO head 50f0552c, gate hash 4cb85c41ae671c0e) then one follow-up PR (npmrc redirect, stale tracking refs, X14/Y07 cells). Model switch OWED at idle.
 - V 9th (%82): #1547 MERGED. #1548 delta (head 03bdfc32) in its round-2 gate (0_Brain/reference/2026-10-13_gate-pr1548-r2/, background subagent of the 19:5x seat: RE-LAUNCH from GATE_BRIEF.md if verdict.md is missing). V told to wrap if past 65%. Model switch OWED at idle.
