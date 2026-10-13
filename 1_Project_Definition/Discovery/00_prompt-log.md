@@ -2661,3 +2661,8 @@ INCLUDED until he says otherwise.
 > keep going and keep rolling out agents to work through all tickets and items for MPS Calculator, Security Controls creation tool and HPSM POC
 
 *Note:* Friday: three per-project lane sorts commissioned; seats launched in code-disjoint lanes.
+
+## 2026-10-13 12:16 — Kam (terminal, verbatim)
+> once agents finish up, deploy everything and wrap up
+
+*Note:* Tuesday seat: QuickQuote 2.35 publish briefed (card ruled a); NexusAI demo after gate 22 + merges; then wrap all seats. Plan in NEXT-PICKUP-TUESDAY DELTA 181.
