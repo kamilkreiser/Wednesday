@@ -18,7 +18,8 @@ supersede: REPLACED WHOLESALE at the 80% rotation (~19:55 Tue 13 Oct) by the Son
 - STOP: usage_gate REFUSED at 90%. Kam's 2026-09-14 rule: no new agents or gates; in-flight finish and wrap; Wednesday + local models after. No lift for this seat. Kam told on the panel (bf-58163343249b).
 - develop = 0662f7213cc08d962b745fa6998fc2a3f47499a5 (#1545). Merged tonight: #1542, #1546, #1547, #1545; #1548 MERGED as 3c0a522216258040f32d400ede433e48e683f734 (develop now; my ls-remote). Nothing deployed. KS-1570 round 5/5 on develop.
 - K lane: NO seat (K 10th wrapped + pane closed). Queue for its next seat: KS-1605 (follow-up to the 1545 gate, items 1-5; branch local-only in K 10th's scratch clone, never pushed). HANDOVER-seatK10-2026-10-13.md.
-- V lane: V 9th merging #1548, then the KS-1598 info comment, team notes, WRAP. Verify the merge at source and retire the pane.
+- V lane: NO seat (V 9th wrapped ~22:57, pane closed; #1548 merged 3c0a5222). Next V brief carries: file_ticket.py's "description anchors: True" check cannot fail in other seats' copies (V 9th fixed its own); KS-1600/1601/1602/1606 open.
+- KS-1606 (statusline blank on ISO resets_at, "Setup and System/statusline.sh:85") is KAM's shared file: told on the panel 22:5x; do not edit.
 - J lane: J 10th (%84) building the #1549 fix round (issuer-only; custody card pending). Its READY waits (no gate at 90%). Then it wraps; KS-1114 pushed at 7fdc179b, no PR.
 - OPEN KAM CARD: secuura-ks1385-custodian-may-update-anchor-identity-1013 (rec c, default a).
 - Non-urgent, for a later seat: the Secuura project's seat MEMORY.md is past its loader limit (K 10th, 201->203 lines; the loader cuts the tail). A Secuura seat consolidates it on a brief; not Wednesday's file.
