@@ -1,0 +1,24 @@
+# Gate brief: Secuura Platform K PR #1536 (ticket KS-1582, the four Minors of the PR 1534 gate), SONNET tier 2 DELTA gate
+
+Commissioned 2026-10-13 ~12:4x AEDT by the Wednesday seat. All 0_Brain paths are relative to /Volumes/DevMASTER/WEDNESDAY/; project paths under /Volumes/DevMASTER/!CODING/Secuura/Blockchain/. "pull request 1536" is the PR number.
+
+## What you are gating
+- Head `03edb5164b9a515bd91cdeffb777ccec801fe34d` (Wednesday's ls-remote of refs/pull/1536/head; equals the author's), develop `0026a43e60337d81c3d2549f36de0507edc128f4`. The head is the author's commit on develop `c855cfc2` (pull request 1534, KS-1223); develop moved twice since (e4e320ba, 0026a43e); the author's overlap scan says 0 and merge-tree clean (predicted tree 3f7b33de7eddb8891ebc204252ab074ec3be51bc): verify.
+- THE PARENT GATE: read `0_Brain/reference/2026-10-13_gate-pr1534/verdict.md` first (GO WITH NOTE, 0 Major, 4 Minor m1-m4, plus notes). THIS PR closes those four Minors; it must land before any deploy of the referral service.
+- THE CHANGE (author's description, NOT evidence): services/referral only, `src/db.ts` (+35/-10) plus tests. m1: the wallet read runs in its own transaction (applyTenantGuc, then `SET LOCAL statement_timeout = 3000`, then the read); with users locked ACCESS EXCLUSIVE generate answers 500 in ~3 s and writes nothing. m2: `tenant_id::text = $2` in the SQL. m3: equivalents of the parent gate's cells X8, X9, X13, P1/P2, F1, C2, a Y9 cell and a default-run unit pin that the header is ignored. m4: cell G8 renamed to what it pins; its unused platform-row seeding removed.
+- Author's numbers, NOT evidence: on develop c855cfc2 the B1 (m1) cell and the m2 cell (run as a throwaway BYPASSRLS role) are red, the coverage cells green; head integration 3 files / 20 twice; unit 7 / 36; tsc 0 (planted control fires); eslint 0 on 5 files; mutants 9 of 9 killed (K1 m1 reverted; K2 m2 reverted; Y1, Y2, Y3, Y4, Y5, Y7, Y9) plus a comment-only control; preflight INCOMPLETE 13/16, nothing failed. The author disclosed one fault (an early P cell reused two users and hit the per-user active-code cap).
+- Evidence: the PR body (https://github.com/Secuura/Distributed_Secuura/pull/1536) and `5_Project_History/2026-10-13_seatV-6th/`. Read, trust none.
+
+## How to get the code (READ-ONLY on the project)
+`git clone --shared` of `2_Project_Files` into YOUR scratchpad, push URLs disabled; fetch refs/pull/1536/head and develop with the project's `core.sshCommand`; assert both shas. No git write verb in the project folder; no push; no GitHub or Linear write; no remote box. Own throwaway PostgreSQL 15 on a free port, repo `docker/init/*` in order, `scripts/run-migrations.sh` failed=0, the service as `secuura_app` (rolsuper f, rolbypassrls f, FORCE RLS on users). Stop it when done.
+
+## What to attack (delta: be thorough on 1 to 4, brief elsewhere)
+1. Re-run the integration (3 files) and unit suites on develop and the head, twice, with a control that the harness can fail. Confirm m1 B1 is red on c855cfc2 and green on the head; m2 red under a BYPASSRLS role on c855cfc2.
+2. m1: the timeout transaction. Does `SET LOCAL statement_timeout` apply to the read only; is the transaction always ended (commit/rollback on every path, including timeout and error), is the connection returned to the pool clean (statement_timeout and the GUC both reset; run two sequential requests on a pool of size 1 and show the second is unaffected); what does a 3 s timeout do to a SLOW but healthy read (a pg_sleep injected, or a lock released at 2 s); does the 5xx path still write NO code row.
+3. m2: tenant_id::text = $2 with every shape of tenantId (uuid, upper-case uuid, empty, null, non-uuid, array): no cast error, no wrong-tenant read, no 500 where develop gave 201 for a user with no wallet; a platform-scope token.
+4. m3/m4: do the new cells pin what they claim? Re-derive at least five mutants (the author's nine include K1, K2, Y1-Y9; add two of your own, for example the timeout set outside the transaction, the GUC set after the read) and report killed/survived BY CELL NAME. Does G8's rename describe what it asserts, and does it still pass for the right reason?
+5. Regressions: everything the parent gate checked (header ignored, null wallet for no linked wallet, 5xx on a failing read with no code row, uuid guard) still holds on the head.
+6. Scope: `git diff --stat` against develop and against c855cfc2; the live-tip merge-tree; PR body claims vs code.
+
+## Output
+`0_Brain/reference/2026-10-13_gate-pr1536/verdict.md` (this folder only, plus your scratchpad; raw outputs under `evidence/`, NEVER a directory named `out`). Head under test; every number with its instrument and a control; FOUND / TESTED / HOW; NOT tested; severities with file:line, the reproducing shape and the minimal fix. VERDICT (GO / GO WITH NOTE / NO GO) and sha256/16 of the report at the top (state your recipe). Do not recommend deploying.
