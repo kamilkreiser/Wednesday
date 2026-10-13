@@ -17,6 +17,8 @@ supersede: REPLACED WHOLESALE at the 80% rotation (~19:55 Tue 13 Oct) by the Son
 ## 0b. UPDATE by the successor seat (booted ~19:5x, see the note's 19:58 block) — read before section 1
 - K 9th WRAPPED and RETIRED (%74 closed, listeners 28 -> 28). **K 10th NOT launched on purpose:** KS-1583 and KS-1482 both touch `.githooks/pre-push`, which #1545 holds in gate. Launch K 10th when the 1545 verdict lands, SUCCESSOR mail first (carry: the head-bound GO, K 9th's HANDOVER-seatK9-2026-10-13.md, its three-ticket read).
 - **The previous seat's 1545 gate DIED at its rotation** (only evidence/logs/merge_scope.txt, no verdict). RE-LAUNCHED ~19:57 as a background Opus subagent of the 19:5x seat, told develop moved to 026c2d16. **It dies again if that seat rotates before verdict.md exists: if verdict.md is missing at your boot, re-launch from GATE_BRIEF.md** (same addendum: develop moved, overlap + merge-tree on the live tip).
+- **#1546 (KS-1032, J lane, head ad366066e620037d753f9421bcd051ad09a9a7af) Opus gate LAUNCHED ~20:07** from 0_Brain/reference/2026-10-13_gate-pr1546/GATE_BRIEF.md, also a background subagent of the 19:5x seat: same rule, re-launch from the brief if verdict.md is missing. GO goes to the J LANE's current seat; deploy only after GATEWAY_VOUCH_SECRET (DEPLOY-BLOCKERS).
+- V 8th KS-1594 PLAN CONFIRMED (cells widened to o1-o5, c6 required, census deferred to the deploy round): its READY FOR GATE is next from V.
 - #1542 MERGED: develop = 026c2d1614065c79fc8d96007ac0d80f19fb9363 (my own ls-remote). J 8th told to finish its follow-up ticket, the KS-1590 comment, the KS-772/KS-485 notes and the KS-1032 READY, then wrap; KS-1114 and KS-1385 go to J's successor with Kam's rulings verbatim.
 
 ## 1. STATE (measured today; re-measure before quoting)
