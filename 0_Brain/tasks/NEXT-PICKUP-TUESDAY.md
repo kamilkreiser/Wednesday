@@ -6,6 +6,20 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 180 — 2026-10-13 11:5x ROTATION HANDOVER (s104, ctx 77-80%; band 80-90). **READ THIS FIRST. It supersedes 179's STATE; 178's turn order and 177's standing rules stand.**
+### FIRST WORK FOR THE NEXT SEAT
+1. **O (%4) is merging RD-828+833 (item 11)**: merge ticket s96o-merge-rd828 (lock since 2026-10-13T00:23:36Z). On O's MERGED: verify at source (ls-remote + gh pr view, NexusAI GH_CONFIG_DIR), watch its push Build (`gh run view <id> -R datasecau/Reporting_Dashboard_Au`; a background poll from this seat dies at rotation), then **TURN -> P RD-751 (item 12)**, self-contained (template fleet/briefs_staged/2026-10-13_nexusai_P_TURN_rd823.md; read P's gate duty for RD-751 first: it is "gate tbd" in HANDOVER-S91P, so CHECK which gate released it before the TURN, and if none did, it is NOT in the turn order yet).
+2. **GATE 22 (%14, 'QA/NexusAI-batch22') is RUNNING**: members A RD-838 T1 @ 380bec3, B RD-839 T1 @ 057a69d, C RD-840+841 T2+browser @ 88bba37. Brief fleet/qa-agent/briefs/2026-10-13_nexusai-gate-batch22.md (T1-T10 at defaults; merge order B, A, C). Rung-5 receipt still OWED (the pane was thinking). On its verdict mail: read the report WHOLE, score, pane_close.sh, RELEASE into the turn order (B before A), and send O's RD-840/841 screenshots (session-tools/s96o/screens/ in the NexusAI folder) to Kam before any demo deploy.
+3. **QUICKQUOTE 2.35: merged (main 3dd15bc), D2 met (14 fixed, verified), NOT live.** Two cards with Kam: quickquote-v235-publish-1013 (rec a) and quickquote-dependabot-14-round-1013 (rec a). On "a" for the publish: brief the Vision seat (%12, idle) with the 2026-10-12 deploy brief shape (fleet/briefs_staged/2026-10-12_vision_qq_v234_DEPLOY.md: read the live tag first as the rollback, build at exactly 3dd15bc, switch, live checks, roll back on failure). PRODUCTION, so only on his tap. Score the Vision seat at its wrap (it built a first-rate round: 0.97 territory).
+### STATE
+- **main (NexusAI) = 944ca97.** TEN merges since 12 Oct morning. Lock queue: O's merge hold; nothing else queued (read at source 11:4x).
+- **Seats:** %2 N (RD-838/839 READY, waits gate 22; next merge items 14, 24) · %3 M (next item 13 RD-817) · %4 O (merging item 11) · %11 P (next item 12) · %12 Vision (idle; wraps or publishes) · %14 gate 22 · %1 monitor. **R is NOT live: launch R's successor before item 16** (HANDOVER-S97R.md + HANDOVER-S92R.md).
+- **Kam today:** 3 cards ruled 09:46 (all delivered: Jira 39396/39397/39398, Vision C-17); 2 new cards open (QuickQuote publish, Dependabot round). Morning receipt + 2.35 summary posted.
+- **Also filed today:** RD-837 (C-57 runner install; held), RD-842 (fax/scan seed data, read-first, unassigned), RD-843 (Low, WRONG-16), QuickQuote BACKLOG branch backlog/qq-g17-test-strength-2026-10-13 @ ebe0d1a (not merged).
+### LEDGER this seat: 2 rows (w=2 question inside a MERGED; w=4 count from memory). Plus a disclosed slip in the note: gate 17's first launch ran in this seat's background shell, not a pane (stopped in ~3 min; relaunched via cockpit.sh add). Digests regenerated at the last ledger edit.
+### FLOOR
+%0 tuesday · %1 monitor · %2 N · %3 M · %4 O · %11 P · %12 Vision · %14 gate 22.
+
 ## 🟢 DELTA 179 — 2026-10-13 10:5x (s104, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST. It supersedes 178's STATE where they differ; 178's turn order and standing lines stand.**
 ### STATE (measured this seat)
 - **main = 944ca97** (RD-823, PR #81). TEN NexusAI merges since 12 Oct morning (… RD-795, RD-823).
