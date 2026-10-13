@@ -451,7 +451,20 @@ else fail "B5 GREEN-AFTER: still red after the script hunk (rc=$g_rc, $g_nf FAIL
 i=0; NEWRED=""
 for s in $SIBS; do i=$((i+1)); rel="${s#$CLONE/}"; a="$(run_suite "$rel" "sib${i}_after")"; b="$(printf '%s' "$SIB_BEFORE" | tr '|' '\n' | /usr/bin/grep -F "$rel=" | sed 's/^[^=]*=//')"
   b_nf="$(printf '%s' "$b" | sed -E 's/.*fail_lines=([0-9]+).*/\1/')"; a_nf="$(printf '%s' "$a" | sed -E 's/.*fail_lines=([0-9]+).*/\1/')"
-  [ "${a_nf:-0}" -gt "${b_nf:-0}" ] && NEWRED="$NEWRED $rel(before=$b_nf after=$a_nf)"; done
+  if [ "${a_nf:-0}" -gt "${b_nf:-0}" ]; then
+    # B6 FLAKY discriminator (2026-10-14, IMPROVEMENTS row: KS-1547 failed twice at B6 on ks884 S10/S4, a fixture
+    # that STUBS preflight.sh and fails 2/6 at a clean tip): a newly red sibling is re-run once AFTER; if that retry is
+    # no worse than before, the script hunk is reverted and the sibling run up to 4 times at the UNTOUCHED tip. Only a
+    # sibling that ALSO fails at the tip is reported FLAKY (INFO, named, not counted); anything else stays a FAIL.
+    a2="$(run_suite "$rel" "sib${i}_after_retry")"; a2_nf="$(printf '%s' "$a2" | sed -E 's/.*fail_lines=([0-9]+).*/\1/')"
+    TIPRED=0
+    if [ "${a2_nf:-0}" -le "${b_nf:-0}" ] && git -C "$CLONE" apply -R -p1 $(cat "$PROD_SEC.opts" 2>/dev/null) "$PROD_SEC" > "$REP/b6_revert_${i}.out" 2>&1; then
+      for k in 1 2 3 4; do t="$(run_suite "$rel" "sib${i}_tip_rerun${k}")"; t_nf="$(printf '%s' "$t" | sed -E 's/.*fail_lines=([0-9]+).*/\1/')"; [ "${t_nf:-0}" -gt 0 ] && TIPRED=$((TIPRED+1)); done
+      git -C "$CLONE" apply -p1 $(cat "$PROD_SEC.opts" 2>/dev/null) "$PROD_SEC" > "$REP/b6_reapply_${i}.out" 2>&1 || { fail "B6 could not re-apply the script hunk after the flake probe: $(head -1 "$REP/b6_reapply_${i}.out")"; }
+    fi
+    if [ "$TIPRED" -gt 0 ]; then echo "INFO B6 FLAKY $rel: new failure after (before=$b_nf after=$a_nf), retry after=$a2_nf, and it fails at the UNTOUCHED tip in $TIPRED of 4 runs — pre-existing, not counted"
+    else NEWRED="$NEWRED $rel(before=$b_nf after=$a_nf retry=$a2_nf tip_reds=$TIPRED/4)"; fi
+  fi; done
 if [ -z "$SIBS" ]; then echo "INFO B6 no sibling suite in $TEST_DIR names $BASE — nothing else drives this script (stated, not counted)"
 elif [ -z "$NEWRED" ]; then pass "B6 sibling suite(s) that drive $BASE: no NEW failure after ($(printf '%s' "$SIBS" | /usr/bin/grep -c .) suite(s))"
 else fail "B6 NEW failure(s) in sibling suite(s) after the hunk:$NEWRED"; fi
