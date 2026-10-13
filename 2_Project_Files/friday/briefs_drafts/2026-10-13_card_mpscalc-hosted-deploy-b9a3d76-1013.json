@@ -1,0 +1,27 @@
+{
+  "id": "mpscalc-hosted-deploy-b9a3d76-1013",
+  "client_project": "Datasec/MPS-Calculator",
+  "title": "MPS calculator: put today's six merged changes on the hosted site (itemised prices, two print buttons + one-pager, feedback attachments), and approve their words?",
+  "bluf": "Kam: tap a to deploy the calculator's main (b9a3d76) to the hosted site and approve the new words listed below. Then Friday checks the live site and emails Paul with you on CC, as you asked at 18:48. b deploys with the words held; c holds everything.\n\nWhat users will see change: every price summary is itemised (rental: base, software, mono and colour print per month, adding up to the cent; purchase: hardware, software, supplies, services, other). The Proposal page has two buttons: 'Short-form proposal (PDF)' (your approved one-pager) and 'Full proposal (PDF)' (every page). Rental proposals are itemised, and the home tiles fill the row. Feedback can carry up to 3 pictures or PDFs, 5 MB each, which only an Administrator can download.\n\nShips since hosted bf60fe8 (Friday measured the live site: it serves bf60fe8's build). There are 6 merged PRs, all gated: #34 tests only · #35 invisible catalogue-edit author refused (B76, B78) · #36 itemised summaries (B84) · #37 rental parts in cents (B87) · #38 two buttons + one-pager + itemised rental proposal + tiles (B88 NO GO, fixed, B90 GO WITH NOTES) · #39 feedback attachments (B91 GO WITH NOTES, a full security test). Main CI is green. There is no migration and no new setting; feedback saving stays on.\n\nWords needing your yes (27). Buttons: 'Short-form proposal (PDF)', 'Full proposal (PDF)'. Price labels: 'Base charge (device and service) / month' (or 'Hardware / month'), 'Mono print / month', 'Colour print / month', 'Options are included in the base charge.', 'Hardware, ex GST', 'Software, ex GST', 'Supplies, ex GST', 'Services, ex GST', 'Other, ex GST', 'Package price by class', 'Breakdown not available for this calculation.'. Feedback: 'Attach files', 'Paste or drop a screenshot, or attach up to 3 files (PNG, JPEG or PDF, 5 MB each).', 'Only PNG, JPEG or PDF files can be attached.', 'Each file must be 5 MB or smaller.', 'You can attach up to 3 files.', 'This file is empty.', 'Attachments', 'The file could not be downloaded.', the file-size format, and the fallback file name 'attachment-n'. Screen-reader names: 'Short-form proposal', 'Monthly charge breakdown', 'Purchase total breakdown', 'Section n total by class'. Already approved with the one-pager mock: 9. Known look items: 'Software / month' shows twice on the price screen; 'and 1 more rates' is not singular.\n\nThe one-way part: after this deploy, rolling back to the current hosted code hides every quote submitted or approved after it (they show 'not found'; files stay on disk; drafts are fine; deploying forward brings them back) and sets aside feedback that has files until roll-forward. So roll forward, never back. Quotes approved before today show their total with 'Breakdown not available for this calculation.'\n\nThe deploy seat backs up first and runs the pre-checks on hosted. If any count is not zero, it stops and nothing is deployed.",
+  "default_action": "Nothing is deployed and Paul is not emailed; Friday asks again tomorrow.",
+  "options": [
+    {
+      "key": "a",
+      "label": "Deploy main and approve the words as listed",
+      "detail": "A deploy seat ships main b9a3d76 to the same hosted link after a backup and the pre-checks (PRE-1 in its B75 form, P-1). No setting change. The listed words are approved as written. The rollback package stays bf60fe8, with the warning above. After Friday's own live check, Friday emails Paul (Paul.waite@datasec.com.au) with you on CC."
+    },
+    {
+      "key": "b",
+      "label": "Deploy, words held",
+      "detail": "Same deploy and the same email to Paul. The words are not approved yet: Friday brings a words card with alternatives (for example 'Hardware / month'), and any word you change goes through a seat and a gate before a later deploy."
+    },
+    {
+      "key": "c",
+      "label": "Hold",
+      "detail": "The hosted site stays on bf60fe8; the six changes stay on main only. Paul is not emailed."
+    }
+  ],
+  "recommended": "a",
+  "status": "open",
+  "seat": "friday"
+}
