@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""r6 gate mutants on connectorOrganisationErasure.ts: apply one, run the layers, restore byte-identical (sha256 asserted)."""
+import hashlib, subprocess, sys, re, os
+
+G = '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/087c4316-bb15-4161-a5ec-601b737a6e98/scratchpad/r6gate'
+OD = G + '/head/Blockchain/Dev/services/originate'
+SVC = OD + '/src/services/connectorOrganisationErasure.ts'
+ORIG = open(SVC).read()
+SHA0 = hashlib.sha256(ORIG.encode()).hexdigest()
+
+RESOLVER_REFUSAL = "  if (isFallbackConnectorId(ctx.connectorId)) throw new OrganisationErasureFallbackPrincipalError();\n"
+SERVICE_REFUSAL = "  if (isFallbackConnectorId(connectorId)) throw new OrganisationErasureFallbackPrincipalError();\n"
+PRED = "return connectorId.trim() === '' || connectorId === FALLBACK_CONNECTOR_ID;"
+OWNED = "  const owned = key !== undefined && normaliseOrgId(key.organization_id) === organizationId && key.connector_id === ctx.connectorId;\n"
+RECHECK = "    // 3b. The guard again (m-1), as a new statement, so it reads the keys committed up to NOW. See step 1c.\n    await assertConnectorIdNotShared();\n"
+COUNT_GUARD_LINE = "    if (reached > max) throw new OrganisationTooLargeError(reached, max);\n"
+FIRST_GUARD = "    await assertConnectorIdNotShared();\n\n    // 2. How many documents"
+GUARD_SQL = "SELECT organization_id FROM svc_api_keys WHERE tenant_id = ${tenantId}::uuid AND connector_id = ${connectorId}"
+
+def one(s, a, b, n=1):
+    assert s.count(a) == n, (a[:60], s.count(a))
+    return s.replace(a, b)
+
+MUTANTS = {
+    'CTL':  lambda s: one(s, "// 3b. The guard again (m-1)", "// 3b. The guard again (m-1) [gate r6 comment-only control]"),
+    'N1':   lambda s: one(s, RESOLVER_REFUSAL, ''),
+    'N2':   lambda s: one(s, SERVICE_REFUSAL, ''),
+    'N1N2': lambda s: one(one(s, RESOLVER_REFUSAL, ''), SERVICE_REFUSAL, ''),
+    'N4':   lambda s: one(s, PRED, "return connectorId.trim() === '';"),
+    'N7':   lambda s: one(s, RECHECK, ''),
+    'N8':   lambda s: one(one(s, RECHECK, ''), FIRST_GUARD, "    await assertConnectorIdNotShared();\n    await assertConnectorIdNotShared();\n\n    // 2. How many documents"),
+    'N10':  lambda s: one(s, GUARD_SQL, GUARD_SQL + ' AND is_active IS DISTINCT FROM false'),
+    'X1':   lambda s: one(one(s, RESOLVER_REFUSAL, ''), OWNED, OWNED + RESOLVER_REFUSAL),
+    'X2':   lambda s: one(one(s, RECHECK, ''), COUNT_GUARD_LINE, COUNT_GUARD_LINE + "    await assertConnectorIdNotShared();\n"),
+    'X3':   lambda s: one(s, PRED, "return connectorId.trim() === '' || connectorId.toLowerCase() === FALLBACK_CONNECTOR_ID;"),
+    'X4':   lambda s: one(s, PRED, "return connectorId === '' || connectorId === FALLBACK_CONNECTOR_ID;"),
+    'X5':   lambda s: one(s, RECHECK, "    await assertConnectorIdNotShared().catch((e) => { throw new Error('gate X5: ' + String(e)); });\n"),
+}
+
+def run(cmd):
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, executable='/bin/zsh')
+    return p.returncode, p.stdout + p.stderr
+
+def reds(o):
+    return [l.strip()[2:90] for l in o.splitlines() if l.strip().startswith('✕')]
+
+def main():
+    names = sys.argv[1].split(',')
+    only = os.environ.get('GATE_ONLY_ATTACK', 'SETUP,K1,V1,D1,N4,R3,R2,R4')
+    for name in names:
+        s = MUTANTS[name](ORIG)
+        assert s != ORIG, name + ': no change'
+        open(SVC, 'w').write(s)
+        try:
+            out = [f'== {name} ==']
+            rc, o = run(f'builtin cd {OD} && npx tsc --noEmit'); out.append(f'  tsc rc={rc}')
+            rc, o = run(f'builtin cd {OD} && npx jest src/__tests__/ks695-ask3-erase-connector-erasure.test.ts src/__tests__/ks695-ask3-erase-connector-refusals.test.ts 2>&1')
+            m = re.search(r'^Tests:.*$', o, re.M); out.append(f'  unit rc={rc} {m.group(0) if m else "NO Tests LINE"} red={reds(o)}')
+            for mt in ('false', 'true'):
+                rc, o = run(f'zsh {G}/integ.sh mut_{name}_fp_{mt} app {mt} ks695-ask3-erase-connector-fallback-principal')
+                out.append(f'  fp[{mt}] ' + o.strip().splitlines()[0].split('|')[-1].strip() + f' red={reds(o)}')
+                rc, o = run(f'GATE_ONLY={only} zsh {G}/integ.sh mut_{name}_atk_{mt} app {mt} gate1497r6-attack')
+                out.append(f'  r6atk[{mt}] ' + o.strip().splitlines()[0].split('|')[-1].strip() + f' red={reds(o)}')
+            print('\n'.join(out), flush=True)
+        finally:
+            open(SVC, 'w').write(ORIG)
+            sha = hashlib.sha256(open(SVC).read().encode()).hexdigest()
+            assert sha == SHA0, 'RESTORE FAILED'
+            print(f'   restored sha256={sha[:12]} ok', flush=True)
+
+if __name__ == '__main__':
+    main()

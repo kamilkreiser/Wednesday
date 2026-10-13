@@ -1,0 +1,358 @@
+/** QA GATE r6 PR #1497 (scratch, never committed). Head c48d7163 (develop 7c6b3d88 merged in). Real Postgres as secuura_app, real routes. */
+import { randomUUID, randomBytes } from 'crypto';
+import { Client } from 'pg';
+
+const SUPER_DB = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+const APP_DB = process.env.TEST_APP_DATABASE_URL;
+const MT = process.env.MULTI_TENANCY_ENABLED === 'true';
+const PLATFORM_DB = process.env.TEST_PLATFORM_DATABASE_URL || process.env.PLATFORM_DATABASE_URL;
+if (PLATFORM_DB) process.env.PLATFORM_DATABASE_URL = PLATFORM_DB;
+if (SUPER_DB) process.env.DATABASE_URL = APP_DB || SUPER_DB;
+process.env.SIMULATE_ANCHORING = 'true';
+process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
+process.env.AUTH_SERVICE_URL = 'http://gate-auth.invalid';
+process.env.PII_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+process.env.PII_LOOKUP_HMAC_KEY = randomBytes(32).toString('hex');
+const ONLY = process.env.GATE_ONLY || '';
+const cell = (name: string) => (!ONLY || ONLY.split(',').some((p) => name.startsWith(p)) ? it : it.skip);
+
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const u = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
+      if (Object.keys(u).length > 0) { req._secuuraUser = u; req.user = u; }
+      next();
+    },
+  };
+});
+
+const RUN = randomUUID().slice(0, 8);
+const T = randomUUID();
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** The gateway / auth principal rule, verbatim: `connector:${meta.connectorId || 'api-key'}` (api-gateway auth.ts:392, auth jwt.ts:289). */
+const principalOf = (stored: string | null) => 'connector:' + (stored || 'api-key');
+
+interface Org { tag: string; id: string; guid: string; conn: string | null; key: string }
+
+describe('GATE r6 1497 attack (' + (APP_DB ? 'secuura_app' : 'superuser') + ', MT=' + String(MT) + ')', () => {
+  let sql: Client; let server: any; let base = ''; let disconnect: () => Promise<void>; let db: any; let svc: any;
+  let n = 0;
+  const mkOrg = async (tag: string): Promise<Org> => {
+    const o: Org = { tag, id: randomUUID(), guid: randomUUID(), conn: null, key: '' };
+    await sql.query(`INSERT INTO organizations (id,name,slug,type,status,tenant_id,metadata) VALUES ($1,$2,$3,'issuer','active',$4,$5::jsonb)`,
+      [o.id, 'Org ' + tag + ' ' + RUN, 'g97r6-' + tag.toLowerCase().replace(/[^a-z0-9]/g, '') + '-' + n + '-' + RUN, T, JSON.stringify({ externalRef: o.guid })]);
+    n++;
+    return o;
+  };
+  const mkKey = async (orgIdText: string | null, conn: string | null, active = true) => {
+    const id = 'g97r6-k' + (n++) + '-' + RUN;
+    await sql.query(`INSERT INTO svc_api_keys (id,organization_id,name,key_hash,key_prefix,connector_id,tenant_id,is_active) VALUES ($1,$2,'k','h'||$1,'sk_x',$3,$4,$5)`,
+      [id, orgIdText, conn, T, active]);
+    return id;
+  };
+  const mk = async (tag: string, conn: string | null): Promise<Org> => {
+    const o = await mkOrg(tag); o.conn = conn; o.key = await mkKey(o.id, conn); return o;
+  };
+  const asConn = (o: Org, orgless = false) => ({ userId: principalOf(o.conn), role: 'connector', tenantId: T, ...(orgless ? {} : { organizationId: o.id }), scopes: ['documents:write', 'documents:read'] });
+  const call = async (who: object, path: string, body: object) => {
+    const t0 = Date.now();
+    const res = await fetch(base + path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(who).replace(/[\u007f-\uffff]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')) }, body: JSON.stringify(body) });
+    const j: any = await res.json().catch(() => null);
+    return { status: res.status, j, ms: Date.now() - t0, id: j?.document?.id ?? j?.id ?? j?.data?.id ?? null };
+  };
+  const erase = (o: Org, keyId = o.key) => call(asConn(o), '/api/platform/organizations/erase-connector', { externalRef: o.guid, keyId });
+  const title = async (id: string) => (await sql.query('SELECT title FROM documents WHERE id::text = $1 OR external_id = $1', [id])).rows[0]?.title;
+  const orgName = async (o: Org) => (await sql.query('SELECT name FROM organizations WHERE id = $1', [o.id])).rows[0].name;
+  const keyActive = async (k: string) => (await sql.query('SELECT is_active FROM svc_api_keys WHERE id = $1', [k])).rows[0]?.is_active;
+  const ins = async (t: string, issuer: string | null, meta: object, parent: string | null = null) => {
+    const id = randomUUID();
+    await sql.query(`INSERT INTO documents (id,external_id,tenant_id,title,description,document_type,content_hash,status,issuer_organization_id,metadata,parent_document_id,created_at,updated_at)
+                     VALUES ($1,$2,$3,$4,$5,'DOCUMENT',$6,'anchored',$7,$8::jsonb,$9,NOW(),NOW())`,
+      [id, 'g97r6-' + id.slice(0, 8), T, t, 'desc ' + t, 'c'.repeat(64), issuer, JSON.stringify({ title: t, description: 'desc ' + t, ...meta }), parent]);
+    return id;
+  };
+  /** Whole-database fingerprint: md5 of every row of the three written tables in my tenant (rows whose id is in `exclude` left out),
+   *  md5 of action_provenance and audit_logs rows in my tenant if present, a row count of EVERY public table, and every sequence's last_value. */
+  const snapshot = async (exclude: string[] = []) => {
+    const out: Record<string, string> = {};
+    for (const t of ['documents', 'organizations', 'svc_api_keys']) {
+      out[t] = (await sql.query(`SELECT count(*)::text || ':' || coalesce(md5(string_agg(x::text, '|' ORDER BY x::text)), '-') AS h FROM ${t} x WHERE tenant_id = $1::uuid AND NOT (x.id::text = ANY($2::text[]))`, [T, exclude])).rows[0].h;
+    }
+    out.action_provenance = (await sql.query(`SELECT count(*)::text || ':' || coalesce(md5(string_agg(x::text, '|' ORDER BY x::text)), '-') AS h FROM action_provenance x WHERE tenant_id = $1::uuid`, [T])).rows[0].h;
+    const tabs = (await sql.query(`SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY 1`)).rows.map((r: any) => r.tablename);
+    const counts: string[] = [];
+    for (const t of tabs) counts.push(t + '=' + (await sql.query(`SELECT count(*)::int AS c FROM "${t}"`)).rows[0].c);
+    out.allTableCounts = counts.join(',');
+    out.sequences = (await sql.query(`SELECT string_agg(schemaname||'.'||sequencename||'='||coalesce(last_value::text,'null'), ',' ORDER BY sequencename) AS s FROM pg_sequences`)).rows[0].s ?? '';
+    return out;
+  };
+  const diffSnap = (a: Record<string, string>, b: Record<string, string>) => {
+    const d: string[] = [];
+    for (const k of Object.keys(a)) if (a[k] !== b[k]) {
+      if (k === 'allTableCounts' || k === 'sequences') { const A = a[k].split(','), B = b[k].split(','); A.forEach((x, i) => { if (x !== B[i]) d.push(x + '->' + B[i]); }); } else d.push(k);
+    }
+    return d;
+  };
+
+  beforeAll(async () => {
+    db = require('../db'); await db.initDb(); disconnect = db.disconnectDb;
+    svc = require('../services/connectorOrganisationErasure');
+    sql = new Client({ connectionString: SUPER_DB }); await sql.connect();
+    await sql.query(`INSERT INTO tenants (id,name,slug,status,created_at,updated_at) VALUES ($1,$2,$3,'active',NOW(),NOW())`, [T, 'g97r6-' + T.slice(0, 8), 'g97r6-' + T.slice(0, 8)]);
+    if (MT) { const m = db.getTenantManager(); if (m?.refreshConfigs) await m.refreshConfigs(); if (m?.getTenantStatus && m.getTenantStatus(T) === undefined) throw new Error('MT tenant not loaded'); }
+    const express = require('express');
+    const { documentsRouter } = require('../routes/documents');
+    const { platformOrganizationsRouter } = require('../routes/platformOrganizations');
+    const { tenantGucContext } = require('@secuura/shared');
+    const app = express();
+    app.use((req: any, _res: unknown, next: () => void) => { const u = JSON.parse(String(req.headers['x-probe-user'] || '{}')); req.user = u; req.tenantId = u.tenantId || undefined; next(); });
+    app.use(tenantGucContext());
+    app.use((req: any, _res: unknown, next: () => void) => { req.db = db.getRequestPrisma(req); next(); });
+    app.use('/api/documents', express.json(), documentsRouter);
+    app.use('/api/platform/organizations', express.json(), platformOrganizationsRouter);
+    await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
+    base = 'http://127.0.0.1:' + server.address().port;
+  }, 60000);
+
+  afterAll(async () => {
+    if (server) await new Promise<void>((r) => server.close(() => r()));
+    await sql.query('DELETE FROM action_provenance WHERE tenant_id=$1', [T]).catch(() => undefined);
+    await sql.query('UPDATE documents SET parent_document_id=NULL WHERE tenant_id=$1', [T]).catch(() => undefined);
+    for (const x of ['documents', 'svc_api_keys', 'organizations']) await sql.query(`DELETE FROM ${x} WHERE tenant_id=$1`, [T]).catch(() => undefined);
+    await sql.query('DELETE FROM tenants WHERE id=$1', [T]).catch(() => undefined);
+    await sql.end().catch(() => undefined); if (disconnect) await disconnect().catch(() => undefined);
+  }, 120000);
+
+  /** Every key and document in my tenant is dropped between cells, so one cell's NULL-id key cannot be another cell's collision. */
+  const reset = async () => {
+    await sql.query('DELETE FROM action_provenance WHERE tenant_id=$1', [T]);
+    await sql.query('UPDATE documents SET parent_document_id=NULL WHERE tenant_id=$1', [T]);
+    await sql.query('DELETE FROM documents WHERE tenant_id=$1', [T]);
+    await sql.query('DELETE FROM svc_api_keys WHERE tenant_id=$1', [T]);
+  };
+
+  it('SETUP - product role and tenancy branch', async () => {
+    const row = await db.withTenant(T, async (tx: any) => (await tx.$queryRaw`SELECT current_user AS who, r.rolsuper AS su, r.rolbypassrls AS bp, current_setting('transaction_isolation') AS iso FROM pg_roles r WHERE r.rolname = current_user`)[0]);
+    console.log('GATE r6 role', JSON.stringify(row), 'MT=' + MT, 'poolBranch=' + Boolean(MT && db.getTenantManager?.()));
+    if (APP_DB) expect([row.su, row.bp]).toEqual([false, false]);
+  });
+
+  // ---- M-2 over the real routes, whole-database byte identity -----------------------------------------------------------------
+  // FAIL: anything but 403 FORBIDDEN, or any diff in the whole-database snapshot.
+  cell('K1')('K1 - r5 shape through REAL create/version routes: A key "api-key"; B keys NULL and ""; org-less NULL; B human child. A erases', async () => {
+    await reset();
+    const A = await mk('K1A', 'api-key');
+    const B = await mk('K1B', null);
+    const Bempty = await mkKey(B.id, '');
+    const N: Org = { tag: 'K1N', id: '', guid: '', conn: null, key: await mkKey(null, null) };
+    const src = await call(asConn(B), '/api/documents', { type: 'DOCUMENT', organizationUuid: B.guid, contentHash: randomBytes(32).toString('hex'), data: { title: 'B payroll 2026.pdf' } });
+    await sleep(300);
+    const bv = await call(asConn(B), `/api/documents/${src.id}/version`, { action: 'watermark', newContentHash: randomBytes(32).toString('hex') });
+    await sleep(300);
+    const nv = await call(asConn(N, true), `/api/documents/${src.id}/version`, { action: 'watermark', newContentHash: randomBytes(32).toString('hex') });
+    await sleep(300);
+    const bvChild = await call({ userId: randomUUID(), role: 'ISSUER_ADMIN', tenantId: T, organizationId: B.id, scopes: ['documents:write', 'documents:read'] }, `/api/documents/${bv.id}/version`, { action: 'watermark', newContentHash: randomBytes(32).toString('hex') });
+    await sleep(300);
+    const aDoc = await ins('A own.pdf', A.id, {});
+    const vb = (await sql.query(`SELECT metadata->>'versionedById' AS vb FROM documents WHERE external_id = ANY($1) ORDER BY 1`, [[bv.id, nv.id]])).rows.map((r: any) => r.vb);
+    const s0 = await snapshot();
+    const r = await erase(A);
+    const s1 = await snapshot();
+    console.log('GATE r6 K1 statuses', [src.status, bv.status, nv.status, bvChild.status].join(','), 'vb=' + JSON.stringify(vb), '| A erase', r.status, JSON.stringify(r.j?.error ?? r.j?.data),
+      '| diff=' + JSON.stringify(diffSnap(s0, s1)), JSON.stringify({ aDoc: await title(aDoc), bv: await title(bv.id), nv: await title(nv.id), bvChild: await title(bvChild.id), Akey: await keyActive(A.key), BkeyNull: await keyActive(B.key), BkeyEmpty: await keyActive(Bempty) }));
+    expect([src.status, bv.status, nv.status, bvChild.status]).toEqual([201, 201, 201, 201]);
+    expect(vb).toEqual(['connector:api-key', 'connector:api-key']);
+    expect([r.status, r.j?.error?.code]).toEqual([403, 'FORBIDDEN']);
+    expect(diffSnap(s0, s1)).toEqual([]);
+  }, 90000);
+
+  // CONTROL for the snapshot instrument: one planted byte in one of B's rows, and one nextval, must both be seen.
+  cell('PC')('PC - planted-change control: the snapshot sees a one-character change in a document and one sequence step', async () => {
+    await reset();
+    const B = await mk('PCB', null);
+    const d = await ins('PC B.pdf', null, { versionedById: 'connector:api-key' });
+    const s0 = await snapshot();
+    await sql.query(`UPDATE documents SET description = description || 'x' WHERE id = $1`, [d]);
+    const seq = (await sql.query(`SELECT schemaname||'.'||sequencename AS s FROM pg_sequences ORDER BY 1 LIMIT 1`)).rows[0]?.s;
+    if (seq) await sql.query(`SELECT nextval($1)`, [seq]);
+    const s1 = await snapshot();
+    const s2 = await snapshot([d]);
+    console.log('GATE r6 PC diff=' + JSON.stringify(diffSnap(s0, s1)), 'seq=' + seq, 'excludeDiff=' + JSON.stringify(diffSnap(s0, s2).filter((x) => x === 'documents')), 'B=' + B.key);
+    expect(diffSnap(s0, s1)).toContain('documents');
+    if (seq) expect(diffSnap(s0, s1).some((x) => x.startsWith('public.'))).toBe(true);
+  }, 60000);
+
+  // Spellings of A's OWN stored connector id. The gateway builds principal = 'connector:' + (stored || 'api-key'). For each variant the
+  // tenant also holds B's NULL-id key and B's NULL-issuer `connector:api-key` derivative. FAIL: B's fallback-principal row is blanked.
+  cell('V1')('V1 - A key spelling variants near the label (case, spaces, NBSP, ZW, BOM, lookalikes, double prefix, whitespace-only)', async () => {
+    const variants: Record<string, string> = {
+      upper: 'API-KEY', title: 'Api-Key', lead: ' api-key', trail: 'api-key ', nl: 'api-key\n', tab: '\tapi-key',
+      nbspTrail: 'api-key ', zwLead: '​api-key', zwTrail: 'api-key​', bom: '﻿api-key', hyph2010: 'api‐key', hyph2011: 'api‑key',
+      cyrA: 'аpi-key', fullwidth: 'ａｐｉ-ｋｅｙ', doublePrefix: 'connector:api-key', apikey: 'apikey', api_key: 'api_key',
+      wsSpace: ' ', wsTab: '\t', wsNbsp: ' ', wsBom: '﻿', wsIdeo: '　', wsLS: ' ', zwOnly: '​', exact: 'api-key',
+    };
+    const out: any[] = [];
+    for (const [k, v] of Object.entries(variants)) {
+      await reset();
+      const A = await mk('V1A' + k, v);
+      const B = await mk('V1B' + k, null);
+      const aDoc = await ins('V1 A own ' + k + '.pdf', A.id, {});
+      const bFallback = await ins('V1 B fallback derivative ' + k + '.pdf', null, { versionedById: 'connector:api-key' });
+      const s0 = await snapshot();
+      const r = await erase(A);
+      const s1 = await snapshot();
+      out.push({ k, principal: JSON.stringify(principalOf(v)), status: r.status, code: r.j?.error?.code ?? r.j?.data?.status, blanked: r.j?.data?.documentsBlanked, aDoc: await title(aDoc), bFallback: await title(bFallback), diff: diffSnap(s0, s1).join('|') || '-', Bkey: await keyActive(B.key) });
+    }
+    console.log('GATE r6 V1', JSON.stringify(out));
+    for (const x of out) expect([x.k, x.bFallback]).toEqual([x.k, 'V1 B fallback derivative ' + x.k + '.pdf']);
+  }, 240000);
+
+  // The service's exported writer called DIRECTLY (a path that skips the route and the resolver), on the real database.
+  cell('D1')('D1 - eraseConnectorOrganisation called directly with the fallback id, "", whitespace: refused with nothing written; real id control', async () => {
+    await reset();
+    const A = await mk('D1A', 'api-key');
+    const B = await mk('D1B', null);
+    const aDoc = await ins('D1 A own.pdf', A.id, {});
+    const bDoc = await ins('D1 B fallback.pdf', null, { versionedById: 'connector:api-key' });
+    const out: any[] = [];
+    for (const c of ['api-key', '', ' ', ' ']) {
+      const s0 = await snapshot();
+      let err = '';
+      try { await svc.eraseConnectorOrganisation({ organizationId: A.id, tenantId: T, connectorId: c, externalRef: A.guid, keyId: A.key }); err = 'NO THROW'; } catch (e: any) { err = e?.name + (e instanceof svc.OrganisationErasureForbiddenError ? '(403-class)' : ''); }
+      const s1 = await snapshot();
+      out.push({ c: JSON.stringify(c), err, diff: diffSnap(s0, s1) });
+    }
+    // control: the same direct call with a real connector id DOES write
+    const C = await mk('D1C', 'platform-s:' + randomUUID());
+    const cDoc = await ins('D1 C own.pdf', C.id, {});
+    const s0 = await snapshot();
+    const ok = await svc.eraseConnectorOrganisation({ organizationId: C.id, tenantId: T, connectorId: C.conn, externalRef: C.guid, keyId: C.key });
+    const s1 = await snapshot();
+    console.log('GATE r6 D1', JSON.stringify(out), '| control', JSON.stringify(ok), 'diff=' + JSON.stringify(diffSnap(s0, s1)), JSON.stringify({ aDoc: await title(aDoc), bDoc: await title(bDoc), cDoc: await title(cDoc), Bkey: await keyActive(B.key) }));
+    for (const x of out) expect([x.c, x.err, x.diff]).toEqual([x.c, 'OrganisationErasureFallbackPrincipalError(403-class)', []]);
+    expect(ok.status).toBe('completed');
+  }, 60000);
+
+  // Item 3 / N-4: a key with a NULL id (and one with "") reaches the RESOLVER as ctx.connectorId 'api-key'. Which error refuses it?
+  cell('N4')('N4 - NULL-id and ""-id keys: the resolver refuses with the FALLBACK class (a refusal, not the ownership mismatch), route 403, nothing written', async () => {
+    await reset();
+    const out: any[] = [];
+    for (const conn of [null, ''] as Array<string | null>) {
+      const A = await mk('N4A' + String(conn), conn);
+      await ins('N4 A own ' + String(conn) + '.pdf', A.id, {});
+      let cls = '';
+      try { await svc.resolveOrganisationErasureTarget({ connectorId: principalOf(conn).replace(/^connector:/, ''), tenantId: T, organizationId: A.id }, { externalRef: A.id, keyId: A.key }, db.prisma); cls = 'RESOLVED'; } catch (e: any) { cls = e?.name; }
+      const s0 = await snapshot(); const r = await erase(A); const s1 = await snapshot();
+      out.push({ conn: JSON.stringify(conn), resolverError: cls, route: r.status, diff: diffSnap(s0, s1) });
+    }
+    console.log('GATE r6 N4', JSON.stringify(out));
+    for (const x of out) expect([x.resolverError, x.route, x.diff]).toEqual(['OrganisationErasureFallbackPrincipalError', 403, []]);
+  }, 60000);
+
+  // ---- m-1: commits DURING the blanking UPDATE ----------------------------------------------------------------------------------
+  // A holder takes `LOCK TABLE documents IN EXCLUSIVE MODE`: it conflicts with the UPDATE's ROW EXCLUSIVE lock but NOT with the count's
+  // ACCESS SHARE, so the erase passes guard 1 AND the count and stalls INSIDE the UPDATE statement. In that window the holder commits B's
+  // key (A's id) and B's NULL-issuer root carrying A's principal. FAIL: 200, or B's root blanked, or any of A's rows / any sequence differ.
+  const holdAndCommit = async (lockSql: string, waitPattern: string, withDoc: boolean, A: Org, B: Org) => {
+    const holder = new Client({ connectionString: SUPER_DB }); await holder.connect();
+    let r: any; let waitSeen = ''; const planted: string[] = [];
+    try {
+      await holder.query("SET lock_timeout = '10s'");
+      await holder.query('BEGIN');
+      await holder.query(lockSql);
+      const pending = erase(A);
+      for (let i = 0; i < 200 && !waitSeen; i++) {
+        const w = await sql.query(`SELECT left(regexp_replace(query, '\\s+', ' ', 'g'), 60) AS q FROM pg_stat_activity WHERE wait_event_type = 'Lock' AND query ILIKE $1 AND pid <> pg_backend_pid()`, [waitPattern]);
+        if (w.rows.length > 0) waitSeen = w.rows[0].q; else await sleep(25);
+      }
+      const bk = 'g97r6-late-' + (n++) + '-' + RUN;
+      await holder.query(`INSERT INTO svc_api_keys (id,organization_id,name,key_hash,key_prefix,connector_id,tenant_id,is_active) VALUES ($1,$2,'k','h'||$1,'sk_x',$3,$4,true)`, [bk, B.id, A.conn, T]);
+      planted.push(bk);
+      if (withDoc) {
+        const d = randomUUID();
+        await holder.query(`INSERT INTO documents (id,external_id,tenant_id,title,description,document_type,content_hash,status,issuer_organization_id,metadata,parent_document_id,created_at,updated_at)
+                            VALUES ($1,$2,$3,'late B root.pdf','desc','DOCUMENT',$4,'anchored',NULL,$5::jsonb,NULL,NOW(),NOW())`,
+          [d, 'g97r6-late-' + d.slice(0, 8), T, 'd'.repeat(64), JSON.stringify({ title: 'late B root.pdf', description: 'desc', versionedById: 'connector:' + A.conn })]);
+        planted.push(d);
+      }
+      await holder.query('COMMIT');
+      r = await pending;
+    } finally { await holder.query('ROLLBACK').catch(() => undefined); await holder.end().catch(() => undefined); }
+    return { r, waitSeen, planted };
+  };
+
+  cell('R3')('R3 - B key + B root commit WHILE the blanking UPDATE waits (EXCLUSIVE lock on documents): 403, full rollback, sequences unchanged', async () => {
+    await reset();
+    const A = await mk('R3A', 'platform-s:' + randomUUID());
+    const B = await mkOrg('R3B');
+    const aDoc = await ins('R3 A own.pdf', A.id, {});
+    const aChild = await ins('R3 A human child.pdf', null, { versionedById: randomUUID() }, aDoc);
+    const s0 = await snapshot();
+    const { r, waitSeen, planted } = await holdAndCommit('LOCK TABLE documents IN EXCLUSIVE MODE', '%UPDATE documents%', true, A, B);
+    const s1 = await snapshot(planted);
+    console.log('GATE r6 R3 waitSeen=' + JSON.stringify(waitSeen), '| A', r.status, JSON.stringify(r.j?.error ?? r.j?.data), '| diff(excluding the 2 planted rows)=' + JSON.stringify(diffSnap(s0, s1)),
+      JSON.stringify({ bRoot: await title(planted[1]), aDoc: await title(aDoc), aChild: await title(aChild), Aname: await orgName(A), Akey: await keyActive(A.key) }));
+    expect(waitSeen).not.toBe('');
+    expect([r.status, r.j?.error?.code]).toEqual([403, 'FORBIDDEN']);
+    expect(await title(planted[1])).toBe('late B root.pdf');
+  }, 90000);
+
+  // Same lock, but only B's KEY commits during the UPDATE wait (no document). What is the answer? (a spurious-refusal measurement)
+  cell('R3k')('R3k - only a B key (A\'s id) commits while the UPDATE waits: answer measured', async () => {
+    await reset();
+    const A = await mk('R3kA', 'platform-s:' + randomUUID());
+    const B = await mkOrg('R3kB');
+    const aDoc = await ins('R3k A own.pdf', A.id, {});
+    const s0 = await snapshot();
+    const { r, waitSeen, planted } = await holdAndCommit('LOCK TABLE documents IN EXCLUSIVE MODE', '%UPDATE documents%', false, A, B);
+    const s1 = await snapshot(planted);
+    console.log('GATE r6 R3k waitSeen=' + JSON.stringify(waitSeen), '| A', r.status, JSON.stringify(r.j?.error ?? r.j?.data), '| diff=' + JSON.stringify(diffSnap(s0, s1)), JSON.stringify({ aDoc: await title(aDoc), Akey: await keyActive(A.key) }));
+    expect(waitSeen).not.toBe('');
+  }, 90000);
+
+  // AFTER the second guard: a SHARE lock on svc_api_keys conflicts only with the revoke's ROW EXCLUSIVE, so the erase passes both guards,
+  // the UPDATE and the name, and stalls at the revoke. B's key and root commit there. Expected: 200, and B's root NOT blanked (it is
+  // newer than the UPDATE's snapshot). FAIL: B's root blanked.
+  cell('R4')('R4 - B key + B root commit AFTER the second guard (erase stalled at the revoke): B root must survive', async () => {
+    await reset();
+    const A = await mk('R4A', 'platform-s:' + randomUUID());
+    const B = await mkOrg('R4B');
+    const aDoc = await ins('R4 A own.pdf', A.id, {});
+    const { r, waitSeen, planted } = await holdAndCommit('LOCK TABLE svc_api_keys IN SHARE MODE', '%UPDATE svc_api_keys%', true, A, B);
+    console.log('GATE r6 R4 waitSeen=' + JSON.stringify(waitSeen), '| A', r.status, JSON.stringify(r.j?.error ?? r.j?.data), JSON.stringify({ bRoot: await title(planted[1]), aDoc: await title(aDoc), Akey: await keyActive(A.key) }));
+    expect(waitSeen).not.toBe('');
+    expect(await title(planted[1])).toBe('late B root.pdf');
+  }, 90000);
+
+  // The author's R2 window (ACCESS EXCLUSIVE: the erase stalls at the COUNT), re-measured with the whole-database snapshot and sequences.
+  cell('R2')('R2 - author shape (ACCESS EXCLUSIVE: stalls at the count): 403 and full rollback incl. sequences', async () => {
+    await reset();
+    const A = await mk('R2A', 'platform-s:' + randomUUID());
+    const B = await mkOrg('R2B');
+    const aDoc = await ins('R2 A own.pdf', A.id, {});
+    const s0 = await snapshot();
+    const { r, waitSeen, planted } = await holdAndCommit('LOCK TABLE documents IN ACCESS EXCLUSIVE MODE', '%WITH RECURSIVE seed%', true, A, B);
+    const s1 = await snapshot(planted);
+    console.log('GATE r6 R2 waitSeen=' + JSON.stringify(waitSeen), '| A', r.status, JSON.stringify(r.j?.error ?? r.j?.data), '| diff=' + JSON.stringify(diffSnap(s0, s1)), JSON.stringify({ bRoot: await title(planted[1]), aDoc: await title(aDoc) }));
+    expect(waitSeen).not.toBe('');
+    expect([r.status, await title(planted[1])]).toEqual([403, 'late B root.pdf']);
+  }, 90000);
+
+  // Cost of the added guard: EXPLAIN ANALYZE of the guard statement as secuura_app, tenant GUC set, with 50,000 extra keys in the tenant.
+  cell('COST')('COST - the guard statement with 50,000 keys in the tenant (as the app role, RLS on)', async () => {
+    await reset();
+    const X = 'platform-s:' + randomUUID();
+    await sql.query(`INSERT INTO svc_api_keys (id,organization_id,name,key_hash,key_prefix,connector_id,tenant_id,is_active)
+                     SELECT 'g97r6-bulk-' || i || '-' || $2, NULL, 'k', 'h' || i, 'sk_x', 'platform-s:bulk-' || i, $1, true FROM generate_series(1,50000) i`, [T, RUN]);
+    await sql.query('ANALYZE svc_api_keys');
+    const plans: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      const p = await db.withTenant(T, async (tx: any) => tx.$queryRaw`EXPLAIN (ANALYZE, BUFFERS) SELECT organization_id FROM svc_api_keys WHERE tenant_id = ${T}::uuid AND connector_id = ${X}`);
+      plans.push(p.map((x: any) => x['QUERY PLAN']).filter((l: string) => /Execution Time|Scan|Planning Time/.test(l)).join(' / '));
+    }
+    console.log('GATE r6 COST', JSON.stringify(plans));
+    await reset();
+  }, 120000);
+});

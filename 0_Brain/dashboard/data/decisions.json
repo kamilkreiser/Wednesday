@@ -33482,9 +33482,9 @@
   ],
   "recommended": "a",
   "ts": "2026-10-12T23:42:30.900911+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-13T11:48:29.280934+11:00",
   "prior_rulings_overridden": [
    "2026-08-10 08:45",
    "2026-08-17 20:23",
@@ -34656,9 +34656,9 @@
   ],
   "recommended": "a",
   "ts": "2026-10-13T10:30:32.266006+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-13T11:06:56.246652+11:00",
   "prior_rulings_overridden": [
    "2026-09-21 09:52",
    "CARD secuura-ks968-demo-hash-probe",
@@ -34682,7 +34682,9 @@
    "CARD composer-b144-words-demo-1013",
    "CARD hpsmpoc-docker-stacks-remove-not-compose-1013",
    "CARD nexusai-sustainability-feedback-rd840-rd841-1013"
-  ]
+  ],
+  "delivered_artefact": "PR 1531 squash 3a87133760595b625617617daa587f8af1b821a7 on develop, read by Wednesday's ls-remote 2026-10-13 11:03",
+  "delivered_ts": "2026-10-13T11:07:07.217430+11:00"
  },
  {
   "id": "mpscalc-hosted-deploy-bf60fe8-1013",
@@ -34821,5 +34823,97 @@
   ],
   "delivered_artefact": "B73 DEPLOYED bf60fe83 live-check 0 feedback-store on (MPS Briefs/2026-10-13_B73_STATUS.md); Friday's probe 10:5x: /health 200, /api/v1/feedback 401, /api/v1/quotes/figures 401 anonymous, bundle index-CRToBetw.js carries 'Send feedback'/'All feedback'/'Thanks, your feedback is saved.'",
   "delivered_ts": "2026-10-13T10:52:22.968975+11:00"
+ },
+ {
+  "id": "secuura-ks1570-admin-role-bound-shape-1013",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura / Blockchain — how should the tenant-level ADMIN role be bounded? Until it is, no later deploy can go out (KS-1570)",
+  "bluf": "Your choice needed, and it is now the critical path for every deploy. The organisation-erasure change (PR 1497) merged to develop at 11:42, as you ruled. Because develop has no feature switch, every later deploy now carries the live erasure, and your own note says the unbounded tenant-level ADMIN must be fixed before that. Seat V 6th filed KS-1570 (High) and listed four shapes; the shape is yours. Measured by V on develop: an ADMIN can mint keys for any organisation in its tenant, and by reading the code, revoke them too. Not measured: how many ADMIN accounts exist on Kintsugi or demo. The deploy seat saw no row with that role in its census of staff roles, but did not look for it by name. Prior words read first: Kam's 2026-09-07 19:00 ruling on card secuura-org-trust-boundary-within-tenant was 'bind - Bind the issuer to the actor, 403 on a mismatch', which supports option a; his 2026-10-13 09:53 ruling on the KS-1533 ADMIN card was 'leave ADMIN unbounded for now', about timing, not about the shape.",
+  "default_action": "If Kam does not answer: Wednesday briefs Seat V 6th to build shape (a) behind the normal Opus gate and the pull request is shown to Kam before anything deploys. Nothing deploys meanwhile. The deploy blocker stays on the list until KS-1570 is merged and Kam has seen it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Bound ADMIN to its own organisation, like ORG_ADMIN and ISSUER_ADMIN",
+    "detail": "Smallest change: ADMIN joins the organisation-bounded roles, so it can mint and revoke only for the organisation named in its own token. An ADMIN with no organisation can no longer mint for anyone (platform roles still can). One Opus-gated pull request, then deploys can resume. Recommended."
+   },
+   {
+    "key": "b",
+    "label": "Give each ADMIN an explicit organisation scope",
+    "detail": "Each ADMIN carries a list of organisations it may act for. More flexible, but needs a data change and a place to store the list: larger, later."
+   },
+   {
+    "key": "c",
+    "label": "Per-admin allow-list kept by the platform",
+    "detail": "A platform-managed allow-list decides which organisations each ADMIN may touch. Same size problem as b, plus a new admin surface."
+   },
+   {
+    "key": "d",
+    "label": "Remove ADMIN from the key-admin roles",
+    "detail": "ADMIN can no longer mint or revoke keys at all; only platform roles and the organisation-bounded roles can. Simplest and safest, but anyone relying on ADMIN to mint loses that today."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-13T11:46:21.338866+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-10-13T11:47:50.896471+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:05",
+   "2026-08-21 09:56",
+   "2026-08-21 19:49",
+   "2026-09-01 13:45",
+   "2026-09-02 16:08",
+   "2026-09-03 16:00",
+   "2026-09-05 21:26",
+   "2026-09-07 07:37",
+   "2026-09-07 09:53",
+   "2026-09-07 18:03",
+   "2026-09-07 18:54",
+   "2026-09-07 19:00",
+   "2026-09-09 12:12",
+   "2026-09-09 12:15",
+   "2026-09-12 08:50",
+   "2026-09-18 09:15",
+   "2026-09-21 10:15",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-ks695-ask3-shape-stuart",
+   "CARD secuura-ks695-ask3-shape-ab",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD nexusai-customer-test-cost-bound",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD nexusai-setup-window-admin-gate-scope",
+   "CARD secuura-ks1369-gateway-proxy-crash-guard-shape",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD wed-nassync-rearm-shape-1004",
+   "CARD hpsmpoc-sm-admin-optin-1006",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-ks695-erasure-merge-timing-1013",
+   "CARD hpsmpoc-words-b230-b231-1013",
+   "CARD secuura-ks1508-ask-stuart-versionedbyid-1013",
+   "CARD composer-k-q32-refuse-names-1013",
+   "CARD composer-docker-prune-stale-seat-stacks-1013",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1533-orgless-accounts-cannot-name-org-on-mint-1013",
+   "CARD secuura-ks1223-referrer-wallet-source-1013",
+   "CARD secuura-pr1497-round6-past-the-cap-1013",
+   "CARD quickquote-ci-red-codeql-14-1013",
+   "CARD nexusai-rd838-rd640-round3-1013",
+   "CARD hpsmpoc-docker-finished-seat-stacks-1013",
+   "CARD mpscalc-paul-invite-send-1013",
+   "CARD secuura-ks1557-certify-hash-semantics-1013",
+   "CARD mpscalc-feedback-pill-words-1013",
+   "CARD composer-b144-words-demo-1013",
+   "CARD hpsmpoc-docker-stacks-remove-not-compose-1013",
+   "CARD nexusai-sustainability-feedback-rd840-rd841-1013",
+   "CARD secuura-ks1557-readside-hides-own-hash-certificates-1013",
+   "CARD mpscalc-hosted-deploy-bf60fe8-1013"
+  ]
  }
 ]

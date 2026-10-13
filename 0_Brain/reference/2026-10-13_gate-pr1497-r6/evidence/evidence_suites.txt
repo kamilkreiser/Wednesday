@@ -1,0 +1,41 @@
+postgres (PostgreSQL) 15.14 (Homebrew)
+[00:11:48Z] init sql applied=11 failed=0
+[00:11:51Z] migrations applied=49 failed=0
+[00:11:51Z] platform tenancy applied
+postgres|t|t
+secuura_app|f|f
+action_provenance|t|t
+documents|t|t
+organizations|t|t
+svc_api_keys|t|t
+49
+connector_id|YES|
+is_active|YES|true
+organization_id|YES|
+tenant_id|NO|
+svc_api_keys_pkey|CREATE UNIQUE INDEX svc_api_keys_pkey ON public.svc_api_keys USING btree (id)
+idx_svc_api_keys_org|CREATE INDEX idx_svc_api_keys_org ON public.svc_api_keys USING btree (organization_id)
+idx_svc_api_keys_prefix|CREATE INDEX idx_svc_api_keys_prefix ON public.svc_api_keys USING btree (key_prefix)
+idx_svc_api_keys_tenant_id|CREATE INDEX idx_svc_api_keys_tenant_id ON public.svc_api_keys USING btree (tenant_id)
+svc_api_keys_auth_lookup|true
+tenant_isolation|(((current_setting('app.current_tenant_id'::text, true) IS NOT NULL) AND (current_setting('app.current_tenant_id'::text, true) <> ''::text) AND ((tenant_id)::text = current_setting('app.current_tenant_id'::text, true))) OR (current_setting('app.tenant_scope_bypass'::text, true) = 'platform_admin'::text))
+[00:11:52Z] PG_DONE
+
+[fp_false] role=app MT=false rc=0 fallbackWarn=0 | Test Suites: 1 passed, 1 total | Tests: 8 passed, 8 total
+[all9_false] role=app MT=false rc=0 fallbackWarn=0 | Test Suites: 9 passed, 9 total | Tests: 96 passed, 96 total
+[fp_true] role=app MT=true rc=0 fallbackWarn=0 | Test Suites: 1 passed, 1 total | Tests: 8 passed, 8 total
+[all9_true] role=app MT=true rc=0 fallbackWarn=0 | Test Suites: 9 passed, 9 total | Tests: 96 passed, 96 total
+[ctl_noplat_fp] role=app MT=true rc=1 fallbackWarn=2 | Test Suites: 1 failed, 1 total | Tests: 1 failed, 7 passed, 8 total
+    ✕ 🔴 SETUP - the role in this run's title is the role the product really connects as (constrained when TEST_APP_DATABASE_URL is set)
+AUTHOR_DONE
+
+unit 2 files rc=0 | Tests:       81 passed, 81 total
+originate jest #1 rc=0 | Test Suites: 103 passed, 103 total Tests:       1269 passed, 1269 total 
+originate jest #2 rc=0 | Test Suites: 103 passed, 103 total Tests:       1269 passed, 1269 total 
+shared vitest rc=0 |  Test Files  49 passed (49)       Tests  954 passed (954) 
+tsc originate rc=0 lines=       0
+eslint PR ts files rc=0 lines=       0
+check:openapi rc=0 | [gen-openapi] CHECK PASS: on-disk YAML matches generated [check-spec-examples] docs/openapi/secuura-api.yaml — 414 example blocks 
+SUITES_DONE
+eslint json: files 10 errors 0 warnings 0; positive control file: 1 warning reported
+database stopped: pg_isready rc after stop recorded in verdict

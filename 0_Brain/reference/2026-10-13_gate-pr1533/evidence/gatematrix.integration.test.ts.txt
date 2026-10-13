@@ -1,0 +1,74 @@
+import { describe, it, beforeAll, afterAll } from 'vitest';
+import crypto from 'crypto';
+import fs from 'fs';
+import type { Server } from 'http';
+import type { AddressInfo } from 'net';
+import { Pool } from 'pg';
+process.env.SECURITY_DISABLE_BOOT = '1';
+const T = 'a0000000-0000-4000-8000-0000000099a1', TB = 'b0000000-0000-4000-8000-0000000099b1';
+const NAME = 'gm:';
+const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const b64 = (b: Buffer) => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+function token(c: Record<string, unknown>) {
+  const h = b64(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))); const n = Math.floor(Date.now() / 1000);
+  const p = b64(Buffer.from(JSON.stringify({ sub: 'gm', iat: n, exp: n + 600, ...c })));
+  return `${h}.${p}.${b64(crypto.sign('RSA-SHA256', Buffer.from(`${h}.${p}`), privateKey.export({ type: 'pkcs8', format: 'pem' }).toString()))}`;
+}
+const CALLERS: Record<string, () => string> = {
+  platform_super: () => token({ role: 'super_admin' }),
+  platform_system: () => token({ role: 'SYSTEM_ADMIN' }),
+  tenantT_ADMIN_noorg: () => token({ role: 'ADMIN', tenantId: T }),
+  tenantT_ORGADMIN_own: () => token({ role: 'ORG_ADMIN', tenantId: T, organizationId: 'own-org' }),
+  tenantT_ISSUER_own: () => token({ role: 'ISSUER_ADMIN', tenantId: T, organizationId: 'own-org' }),
+  tenantTB_ISSUER: () => token({ role: 'ISSUER_ADMIN', tenantId: TB, organizationId: 'own-org' }),
+  tenantless_ISSUER: () => token({ role: 'ISSUER_ADMIN', organizationId: 'own-org' }),
+};
+const QUERIES: Record<string, string> = {
+  own_exact: 'organizationId=own-org', own_upper: 'organizationId=OWN-ORG', own_padded: 'organizationId=%20own-org%20', own_tab: 'organizationId=%09own-org%0A',
+  own_nbsp: 'organizationId=%C2%A0own-org', own_bom: 'organizationId=%EF%BB%BFown-org',
+  legacy_upper_exact: 'organizationId=LEG-UPPER', legacy_upper_lower: 'organizationId=leg-upper',
+  legacy_pad_exact: 'organizationId=%20%20leg-pad%20', legacy_pad_clean: 'organizationId=leg-pad',
+  coll_lower: 'organizationId=coll-org', coll_upper: 'organizationId=COLL-ORG', coll_mixed: 'organizationId=Coll-Org',
+  kelvin: 'organizationId=%E2%84%AAelvin-org', kelvin_ascii: 'organizationId=kelvin-org',
+  dotted_I: 'organizationId=%C4%B0stanbul', istanbul: 'organizationId=istanbul',
+  empty: 'organizationId=', ws: 'organizationId=%20%20', ws_nbsp: 'organizationId=%C2%A0', array2: 'organizationId=own-org&organizationId=other',
+  array_empty_first: 'organizationId=&organizationId=own-org', nul: 'organizationId=own%00org', nul_only: 'organizationId=%00',
+  bracket_obj: 'organizationId[a]=own-org', bracket_arr: 'organizationId[]=own-org', long: 'organizationId=' + 'a'.repeat(100000),
+  prefix: 'organizationId=own', default_org: 'organizationId=default-org', null_str: 'organizationId=null', undef_str: 'organizationId=undefined',
+  none: '', mid8k: 'organizationId=' + 'a'.repeat(8000), ws3: 'organizationId=%20%20%20', ws1: 'organizationId=%20', 
+};
+let server: Server, base: string, sp: Pool, loadFromDb: () => Promise<void>;
+beforeAll(async () => {
+  sp = new Pool({ connectionString: process.env.TEST_DATABASE_URL, max: 2 });
+  await sp.query('DELETE FROM svc_api_keys WHERE name LIKE $1', [`${NAME}%`]);
+  process.env.DATABASE_URL = process.env.TEST_APP_DATABASE_URL;
+  process.env.JWT_PUBLIC_KEY = Buffer.from(publicKey.export({ type: 'spki', format: 'pem' }).toString(), 'utf8').toString('base64');
+  delete process.env.JWT_JWKS_URL; delete process.env.AUTH_SERVICE_URL;
+  const db = await import('../db'); await db.initDb();
+  const mod = await import('../index'); loadFromDb = mod.loadFromDb;
+  await new Promise<void>((r) => { server = mod.default.listen(0, '127.0.0.1', r); });
+  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  const seed: Array<[string, string | null, string]> = [
+    ['own', 'own-org', T], ['orgless', null, T], ['leg-upper', 'LEG-UPPER', T], ['leg-pad', '  leg-pad ', T],
+    ['coll-A-upper', 'COLL-ORG', T], ['coll-B-lower', 'coll-org', T], ['coll-C-otherTenant', 'COLL-ORG', TB],
+    ['kelvin', 'kelvin-org', T], ['istanbul', 'istanbul', T], ['dottedI-stored', 'İstanbul', T],
+    ['own-otherTenant', 'own-org', TB], ['other-org-sameTenant', 'other', T], ['own-prefix-longer', 'own-org-2', T], ['own-padded-nbsp', ' own-org', T], ['ws-stored', '   ', T], ['empty-stored', '', T], ['ws1-stored', ' ', T],
+  ];
+  for (const [n, org, ten] of seed)
+    await sp.query(`INSERT INTO svc_api_keys (id, organization_id, tenant_id, name, key_hash, key_prefix, scopes, rate_limit, rate_limit_window, usage_count, is_active, created_at)
+      VALUES ($1,$2,$3::uuid,$4,$5,'sk_gm','[]'::jsonb,1000,3600,0,true,NOW())`, [`key_${crypto.randomUUID()}`, org, ten, `${NAME}${n}`, crypto.randomBytes(32).toString('hex')]);
+  await loadFromDb();
+});
+afterAll(async () => { if (server) await new Promise<void>((r) => server.close(() => r())); await sp.query('DELETE FROM svc_api_keys WHERE name LIKE $1', [`${NAME}%`]); await sp.end(); await (await import('../db')).closeDb(); });
+describe('matrix', () => {
+  it('dump', async () => {
+    const out: Record<string, string> = {};
+    for (const [cn, ct] of Object.entries(CALLERS)) for (const [qn, q] of Object.entries(QUERIES)) {
+      let r: Response;
+      try { r = await fetch(`${base}/api/keys?${q}`, { headers: { Authorization: `Bearer ${ct()}` } }); } catch (e) { out[`${cn}|${qn}`] = 'FETCHERR ' + String(e).slice(0, 40); continue; }
+      const j = (await r.json().catch(() => ({}))) as { data?: Array<{ name: string }> };
+      out[`${cn}|${qn}`] = `${r.status} ` + (Array.isArray(j.data) ? j.data.map((k) => k.name.replace(NAME, '')).sort().join(',') : '-');
+    }
+    fs.writeFileSync(process.env.MATRIX_OUT as string, JSON.stringify(out, null, 1));
+  });
+});
