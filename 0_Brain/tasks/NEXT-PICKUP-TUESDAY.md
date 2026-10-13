@@ -6,6 +6,23 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🌙 DELTA 183 — 2026-10-13 23:2x WRAP HANDOVER (s105). **READ THIS FIRST. It supersedes 182's IN FLIGHT list. Kam's 12:14 instruction is DONE except the NexusAI demo deploy, which is OWED.**
+### FIRST WORK FOR THE MORNING SEAT
+0. **Read card `nexusai-rd846-build-broken-demo-deploy-1013` first** (kam_rulings_today.sh + reconcile_rulings.py). Default (a) = fix tomorrow. If (b) was tapped overnight, he wanted it done tonight: say so and start at once.
+1. **RD-846 (High): main 3907c57 does not build into an image in ACR** ("failed to export image … layer does not exist" at `COPY --from=build /app/docs/ ./docs/`, ACR runs cr4m + cr4n, 2026-10-13 ~12:11Z). Everything a cold seat needs is in NexusAI `HANDOVER-S96O.md` item 0 and Jira RD-846 comment 39425 (the five build-context commits since 0677388: 1fd5d0f, 8de8e5c, 4016ba5, 3f7e263, e224ab9; the docs/ hypothesis already ruled out). Launch ONE NexusAI seat (successor to O, from HANDOVER-S96O.md): reproduce locally (classic + BuildKit), bisect, smallest Dockerfile fix on a branch, a **tier-1 gate** (the shipped build), merge on Tuesday's GO, push Build green.
+2. **Then the DEMO DEPLOY of main**: re-use fleet/briefs_staged/2026-10-13_nexusai_O_DEMO_DEPLOY.md, re-doing steps 0-2 FRESH (identity; rollback anchor = today's nexusaidev-app--s81j-220-fdda330 on nexusaireleaseacr…@sha256:fdda3309…7f66 unless it changed; share backup; the Entra pre-check, already ruled GO on the evidence in Tuesday's 12:10:10Z ANSWER). Authority: Kam 12:14 ("deploy everything") + 18:52:36 ("please make the change and push them live", C-214) + C-127. **Tell Kam with the live result, and that the demo then runs newer code than the 2.2.0 Marketplace package.**
+3. RD-846 also blocks any future release image from main: say so to Kam when the fix lands.
+### STATE at wrap (each measured this seat)
+- NexusAI main = **3907c57** (ls-remote), push Build 38387979577 GREEN 4506/4506. FOURTEEN merges since 12 Oct morning. Demo UNCHANGED on the 2.2.0 release digest, /api/health build b6f4bfddadcd4055 (O's 12:17Z read).
+- QuickQuote v2.35 LIVE (image v0.6.3-tool2.35-3dd15bc; rollback v0.6.2-tool2.34-108bbb4 kept). Open with Kam: card quickquote-dependabot-14-round-1013.
+- **Every Datasec seat WRAPPED and SCORED; floor = %0 tuesday + %1 fleet-monitor.** Queued for next seats (heads in their HANDOVERs): N → RD-747 @ 968ee14, RD-131 @ e7d2cd1, RD-845 (F-839-1, Low) · M → RD-817 @ e504339 · P → RD-751 @ 7a6d6bd (gate 20 S5), RD-831 @ e9eeceb, RD-721 r1 @ 64ee309 (screenshots before demo) · O → RD-846 (item 0), RD-844, RD-828 slice 2 (B-F1, C-F1/C-P1, E-F1) · R → RD-777+776, RD-761, RD-794, RD-819, RD-807, RD-775 (R NOT live: launch from HANDOVER-S97R.md). **The turn order resumes AFTER RD-846 and the demo deploy**, at item 12 P RD-751.
+- Usage 7d **92%** at 23:18 (this seat's hard stop 95%). Re-read the gauge before any launch.
+### OWED (shared tooling, claim with Wednesday first)
+- **safe_pull vs the statusline heartbeat:** when the committed usage_tuesday.json is >300 s old, safe_pull's reset re-dirties it within seconds (statusline_publish.sh rewrites a stale ts) and the pull refuses; worked around tonight by committing the fresh copy first. Fix: safe_pull commits the seat's own usage feed instead of resetting it.
+- fleet_ack does not collect "-> Tuesday" QUESTION subjects (since DELTA 177).
+- The vault (Notes (MASTER)) on this drive: 15 ahead / 598 behind, dirty with other sessions' edits; every seat leaves it (Kam's class, already ruled).
+### LEDGER this seat: 1 row (w=1: a "before/after" description of two "after" screenshots to Kam). Lesson filed: agent parked on its own question dialog. Both digests regenerated at wrap.
+
 ## 🟢 DELTA 182 — 2026-10-13 16:0x (s105, post-rotation seat). **READ THIS FIRST. It supersedes 181's in-flight lines; 181's three-step reading of Kam's 12:14 instruction stands.**
 ### DONE this seat
 - **QuickQuote v2.35 LIVE** (12:26; card quickquote-v235-publish-1013 --delivered; Kam told with the live screenshot). Vision seat scored 0.97, pane closed.
