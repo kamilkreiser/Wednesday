@@ -4989,5 +4989,26 @@
   "project": "Datasec",
   "ts": "2026-10-14T06:54:20.217570+11:00",
   "text": "HPSM-POC PR 154 — the cleanest way through is not a force, it's switching Code Security back on. That check fails only because Code Security is off ('Dependency review is not supported on this repository'). It passed on PR 152 the night before.\n\n1. Open https://github.com/datasecau/HPSM-POC/settings/security_analysis\n\n2. Turn on Code Security (and Dependency graph if it is off).\n\n3. Tell me 'done'. I re-run the checks and merge. The other checks are green or still running.\n\nA force alone would not get it in. I measured two locks:\n- Branch protection on main requires that check and applies to admins too ('Do not allow bypassing' is on). You would have to switch that off first.\n- The org ruleset needs CodeQL results on main. CodeQL can't run while Code Security is off, so you would also need to be on that ruleset's bypass list.\n\nIt would also break your own rule that a commit reaches main only after CodeQL scans it. If you still want to force, say so and I'll give you exact steps. I won't bypass it myself."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-14T06:55:37.193128+11:00",
+  "text": "Thanks Kam. Code Security is now ON for HPSM-POC (measured just now). One more switch on the same page, then I can merge (the link repeats because it is the same page, a different setting):\n\n1. Open https://github.com/datasecau/HPSM-POC/settings/security_analysis\n\n2. Under 'CodeQL analysis', click Set up, then Default, then Enable CodeQL. It reads 'not configured' now. Switching Code Security off reset it, and your org rule needs a CodeQL scan before anything reaches main.\n\n3. Say 'done'.\n\nI'll re-run the dependency check when the current CI run finishes; it can't be re-run while the run is still going.\n\nAlso still OFF: the MPS calculator, the Security Composer and the HPSM-POC analysis repo, plus NexusAI per Tuesday. The same two switches on each, or once at organisation level: https://github.com/organizations/datasecau/settings/security_analysis"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-14T06:59:22.764307+11:00",
+  "text": "Received, all four:\n- Code Security: recorded. HPSM-POC is on; CodeQL there still read 'not configured' at 06:5x, and I'm watching for it. MPS, Composer and the analysis repo were still off at 06:5x.\n- MPS rental book words: approved with the three fixes. A seat will change the three sentences (brief being drafted now), I check the change, then the hosted deploy, then I tell you.\n- Composer words and looks: approved. A seat builds the rows not yet in the code (brief being drafted now), it goes through its QA check, then the demo deploy.\nMerges on MPS and Composer wait until Code Security is on for those repos."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-14T07:01:10.585572+11:00",
+  "text": "HPSM-POC: that error was from the run before your switch. I re-ran the check after you saved, and the re-run PASSED (dependency review, attempt 2, success). PR 154 merges once the rest of its checks finish; I'll tell you when it's on main. No action needed from you."
  }
 ]
