@@ -1,0 +1,39 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-13T00:15:28.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA (tier 1): RD-838 @ 380bec3 — round 3 of RD-640 (C-213); canonical-path loop key + link cap; red-first x6, all mutants bite incl. both survivors, verify 4480/4480, Linux run
+---
+## BLUF
+RD-838 READY FOR QA (tier 1) @ 380bec32258337ef08eb7e8560077670b8c29264, branch rd-838-erasure-chain-canonical-key-s94n (pushed). Round 3 of the RD-640 class, by Kam's 09:46:48 ruling (C-213; Jira 39396). Red at b214f6f exactly where gate 19 measured; both fixes in; every mutant bites, including gate 19's two remaining survivors; verify PASS 4480/4480; Linux leg run. RD-839's READY (057a69d) is waiting with it for the one shared gate.
+
+## What changed (backend/dataErasure.js, +18/-6 vs b214f6f)
+- F-640-1: the loop key is `cur`, the hop's realpath'd directory plus its name, not `${st.dev}:${st.ino}`. One symlink inode at two paths resolves its text from two directories, so meeting it again is not a loop. A loop through a directory symlink still repeats the canonical path (W1 stays purged).
+- F-640-2: LINK_WALK_LIMIT bounds LINKS: the loop runs hops <= 256 (257 lstats), so a 256-link chain reaches its end; 257 is unwalkable and kept. The comment says the same number.
+- Diff to main 944ca97: 5 files +896/-30: RD-640's dataErasure.js, rd640 cell file and erasure-verdict cell (unchanged from b214f6f apart from the fixes), the new __tests__/rd838-chain-canonical-key-and-cap.test.js, counts.
+
+## Surface for the gate
+No server needed: the cells drive dataErasure in-process on temp DATA_DIRs (RD-640's freshStore). The F-640-1 plant needs a hard link of a SYMLINK: macOS link(2), and so Node's fs.linkSync, follows the symlink (measured: ENOENT), so the cells use `ln -P` (linkat without follow): one symlink inode at D1/L and D2/L, nlink 2, as gate 19 planted it.
+
+## Proof (hold s94n-rd838-proof, session-tools/s94n/rd838-proof.out)
+- (0) red at b214f6f's product: H at tree, tmp sibling, store, recovery copy (each listed in purged while the data at the chain end is intact: gate 19's false receipt), C1-256 (to nothing, link not removed), C2-256 (to data, reported unwalkable). Green there: 255 and 257 cases, U1, U2.
+- (1) union 40 files (session-tools/s94n/set-rd838.lst: dataErasure / customerDataFiles / sweeper requirers by grep, RD-640's 22-file union, rd838, image-manifest requirers, rd385, rd411, rd200-js-colour-corpus): 737/737.
+- (2) mutants on the whole union, each LANDED, restored by trap: M-inoKey -> H x4; M-capOffByOne -> C1-256, C2-256; M-walkErrPurges -> C1-257, C2-257, U1, U2; M-dirErrIsEnd -> U1; RD-640's M-oldEloop -> 14 incl. F1 x3, W2; M-noReason -> F2; M-followTree -> E1, E4, F1-tree, F3, H-tree; M-loopAsChain -> E1-E5, W1; M-noCanon -> W1, W2. M-noCanonStrKey is not separate any more: with the canonical-path key it IS M-noCanon (its dev:ino anchor no longer exists).
+- Gate 19's C-40 survivors: M-strKeyOnly is now the product (H x4 tell the keys apart); M-walkErrPurges and M-dirErrIsEnd are caught (U1, plus U2 and the 257 cells).
+- (3) "VERDICT: PASS — 4480/4480 tests passed across 281 suites (jest exit 0)"; counts 4449/279 -> 4480/281 (this branch counts RD-640's cells too).
+- (4) Linux node:24, uid 1000, node v24.21.0 (Docker Desktop started for this leg and quit after): the 26 suites that do not read git are all green, incl. rd838, rd640 and every erasure suite (the 41-link cells hold under Linux's 40-link resolver). The 14 image-manifest suites fail only with "fatal: not a git repository" (the container copy has no .git: S87N's recorded artefact for RD-640).
+
+## PRIOR WORK (C-49)
+- RD-640 r1 (588ec63: links that resolve to nothing are removed, C-139 ADDENDUM 2) and r2 (092ed9e: ELOOP walks the chain; b214f6f: each hop's directory realpath'd, loop keyed dev+ino, C-139 ADDENDUM 3) are kept whole; only the key line and the cap bound change.
+- Gate 19 (report 2026-10-07-gate-batch19, body-0 §0/0b, a3, a10): NO GO on F-640-1 at the cap, F-640-2, survivors M-walkErrPurges, M-dirErrIsEnd, M-strKeyOnly; its PROBED fix (canonical-path key) is what is built.
+- RD-640's E1-E5, W1, W2, F1-F3, K1-K3, T1, D1, Y5 cells are unchanged and green.
+
+## Partition
+No unmerged rd-* head touches dataErasure.js, the rd640 file, the erasure-verdict cell or rd838 (git diff --name-only origin/main...<head>, every head, after main 944ca97). Merge-tree onto main 944ca97: counts file only (C-89, reported per the C-212 addendum).
+
+## NOT TESTED
+The demo (RD-76); CodeQL (no PR); the git-reading suites on Linux (no .git in the container copy); a network filesystem; ENOTDIR's own ruling (U2 pins today's behaviour, which gate 19 a5 recorded as the accepted cost; RD-824 holds the question, and U2 changes with it).
+
+## Jira
+RD-838: Testing, comments 39396 (Kam's ruling), 39403 (progress), 39407 (READY). RD-839: Testing, 39395.
+-- S94N (Datasec/NexusAI-N)
+
