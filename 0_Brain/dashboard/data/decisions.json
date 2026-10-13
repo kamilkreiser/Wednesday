@@ -36384,5 +36384,57 @@
    "CARD mpscalc-rental-parts-cents-rounding-1013",
    "CARD mpscalc-hosted-deploy-b9a3d76-1013"
   ]
+ },
+ {
+  "id": "datasec-github-code-security-off-1014",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Datasec GitHub: code security is now OFF on the repos, so CodeQL cannot run and no PR can merge",
+  "bluf": "Kam: I need you (or Datasec IT) to switch GitHub Code Security back on for the datasecau repos, or tell me what changed.\n\nThe page:\nhttps://github.com/datasecau/HPSM-POC/settings/security_analysis\n\nWhat I measured at 05:0x: HPSM-POC, the MPS calculator, the Security Composer and the HPSM-POC analysis repo all report Code Security 'disabled'. GitHub now refuses CodeQL ('Code Security must be enabled for this repository to use code scanning', HTTP 403) and the dependency review check fails ('not supported on this repository'). The same check PASSED on HPSM-POC PR 152 last night at 21:2x, so it changed overnight.\n\nWhy it matters: your rule is that a commit reaches main only after CodeQL has scanned it. HPSM-POC PR 153 (four fixes that passed their QA check) is waiting on that and cannot merge. I will not bypass the check or ask for an exception.\n\nNothing is lost: work carries on in branches, and PRs merge as soon as the scans run again.\n\nWhy a new card although the gate matched earlier ones: I read the matches. They are about other GitHub subjects (a support purge, a repository's history, a UAT window). None is about Code Security being switched off on the Datasec repos, which happened overnight.",
+  "default_action": "Nothing merges to any Datasec main; seats keep working on branches; Friday asks again at your morning.",
+  "options": [
+   {
+    "key": "a",
+    "label": "I'll switch it back on",
+    "detail": "You or Datasec IT re-enable Code Security (and CodeQL default setup if it was removed). Friday re-runs the checks on PR 153 and merges once CodeQL is green."
+   },
+   {
+    "key": "b",
+    "label": "It was switched off on purpose",
+    "detail": "Tell me in a note what replaces CodeQL for Datasec repos. Until then Friday merges nothing to a Datasec main."
+   },
+   {
+    "key": "c",
+    "label": "Leave it until later",
+    "detail": "Builds continue on branches; nothing merges to a Datasec main until the scans run again."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-14T05:01:14+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-21 10:02",
+   "2026-09-05 09:15",
+   "2026-09-07 09:04",
+   "2026-09-07 18:04",
+   "2026-09-09 11:45",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-11 17:48",
+   "2026-09-14 13:04",
+   "2026-09-17 15:09",
+   "CARD attio-security-pack",
+   "CARD secuura-agent-github-identity",
+   "CARD secuura-793-security-expiry-two-triages-disagree",
+   "CARD secuura-four-advisories-in-shipped-code",
+   "CARD secuura-actions-alive-but-security-gates-red",
+   "CARD composer-github-support-purge",
+   "CARD secuura-ks1188-burnt-backup-code-wording-1005",
+   "CARD wed-hosted-replay-key-and-code-1009",
+   "CARD hpsmpoc-uat-login-window-1014"
+  ]
  }
 ]
