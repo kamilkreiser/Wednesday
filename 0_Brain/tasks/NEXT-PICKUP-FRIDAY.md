@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-13 16:12 (Friday successor, ctx:70%) — READ FIRST; supersedes every block below where they differ
+**FIRST:** TONIGHT after 18:00 (done before 23:59) **B238 HPSM-POC hosted deploy** (`friday/briefs_drafts/2026-10-13_B238_SEAT-F_hosted-deploy-tonight.md`, MAIN dc136e68; re-read HPSM-POC main first). Timer in THIS seat fires 18:05; a successor re-arms one.
+**MPS — Kam ruled ALL his cards (no open Friday cards):** rounding = a (15:35:32) · rental book mockup = a, all defaults (15:36:18) · uploads = a · tiles = c · rental full proposal = a.
+- **main d6361472** (B80 merged #36 squash, main ci 38345201994 SUCCESS). Hosted still bf60fe83.
+- **LIVE %157 Datasec/MPS-C = B85** (b85/rental-parts-cents; R-28 cents parts + E-3a/E-3c guards). Stopped on [B85-1] importer parity → **B85 ADDENDUM-1** (Friday: ±0.01 per InCents part AND exact Σ, partition +ParityProof.cs +ParityTests.cs; told card ruled a). On READY FOR GATE → tier-1 DELTAS gate (B84 shape, fresh MPS-E, ports 6750-59) → PR (number parsed) → merge_when_green pinned → main ci.
+- **LIVE %158 Datasec/MPS-B = B86** (B79 R2 on b79/proposal-two-buttons, merged up to d6361472; S10 + S12 itemised; ranked by server rankByTotal). Stopped on class-line fit → **B86 ADDENDUM-1** (Friday: B, class line only when ≤ 6 packages; keeps 3 mm worst case). Running suites (Linux web last). On READY FOR GATE → ONE tier-1 gate over the whole branch (R1 + ADD-1 + R2).
+- **NEXT, sequenced:** B83 uploads (staged brief, @NOW@/@BASE@) after B85 lands (shared openapi.json); **rental book BUILD** (Kam a; mock records main e9c50639; D-7 device count + D-8 rental editor need server fields) after B85 AND B86 land — brief owed.
+- **Hosted deploy CARD** (after the gates/merges): SHIPS-SINCE-HOSTED bf60fe83..main; words card (B80 §10, B84 extras, B86 words, O-3 duplicate Software/month); E-2 pre-deploy item (backup + restore data with any rollback; pre-B80 approved quotes show "Breakdown not available"); report the one-pager class-line choice (Friday's B). Then EMAIL Kam (he tests, then Paul).
+- **Tickets owed (records seat):** B80-1..4, B84 E-2/E-3b/E-4, B85 opens, stale census lines summaryCensus.test.tsx:163-164 (B86 reports), + the 12:51 block's MPS records list.
+**WAKES (die with this seat):** watchers seen_b85 (%157), seen_b86 (%158); 18:05 timer. Idle wakes on %158 = holding on its own suite monitor (wake_ack each time).
 ## 🔴🔴🔴 CHECKPOINT 2026-10-13 15:13 (Friday successor, ctx:65%) — READ FIRST; supersedes every block below where they differ
 **FIRST:** TONIGHT after 18:00 (done before 23:59) **B238 HPSM-POC hosted deploy** (`friday/briefs_drafts/2026-10-13_B238_SEAT-F_hosted-deploy-tonight.md`, MAIN dc136e68; re-read HPSM-POC main first). A tracked timer in THIS seat wakes it at 18:05 — a successor must re-arm one.
 **MPS (Kam's 12:31 priority) — STATE:**
