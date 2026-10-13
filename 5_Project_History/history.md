@@ -1,3 +1,7 @@
+## 2026-10-14 06:47 — Tuesday (Mac mini seat), s106 morning boot → wrap (Kam: "please wrap uup")
+- Datasec/NexusAI: both blockers on RD-846 + the demo deploy measured and put to Kam action-first: weekly usage 97% (usage_gate rc 3) and GitHub Code Security DISABLED on datasecau/Reporting_Dashboard_Au (code-scanning 403), the same overnight switch-off as Friday's card datasec-github-code-security-off-1014. Friday told by mail; no duplicate card. No seat launched; demo unchanged on 2.2.0.
+- Housekeeping: ledger rule 3c (19 rows archived, 216 conserved). Ledger +0. Handover = NEXT-PICKUP-TUESDAY.md DELTA 184.
+
 ## 2026-10-13 23:23 — Tuesday (Mac mini seat), s104 → s105 (rotation 12:18) → wrap (Kam 12:14: "once agents finish up, deploy everything and wrap up")
 - Datasec/Vision (QuickQuote): v2.35 PUBLISHED to production on Kam's typed 12:14 words, relayed by mail after the agent correctly paused at its own prompt; live 12:26, every live check passed, rollback 2.34 kept; Kam told with the live screenshot. Vision seat 0.97.
 - Datasec/NexusAI: 4 merges this seat, each verified at source + green push Build: RD-828+833 (b2eecdf; first Build red on an rd490 cdnjs flake, re-run green, RD-844), RD-839 (94cb067), RD-838 (8cc5597, the RD-640 class ships), RD-840+841 (3907c57, Kam approved the look 18:52 → C-214). Gate 22 read whole, scored 0.97, released B→A→C. Two narrow standing C-57 rules recorded by the seats (C-133 addendum line 1448).

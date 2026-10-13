@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🌙 DELTA 184 — 2026-10-14 06:4x WRAP (s106, Kam: "please wrap uup"). **READ THIS FIRST. DELTA 183's FIRST WORK stands, but it is BLOCKED TWICE; check both before anything else.**
+### BLOCKERS (each re-measured before acting)
+1. **Usage:** statusline 7d 97% at 06:08, renews ~3d 22h; `usage_gate.sh` rc 3. No seat launches until Kam signs in a fresh account, says go past the limit, or the allowance renews.
+2. **GitHub Code Security OFF** on datasecau/Reporting_Dashboard_Au (`gh api repos/datasecau/Reporting_Dashboard_Au --jq .security_and_analysis.code_security` = disabled; code-scanning default-setup 403), NexusAI GH_CONFIG_DIR. Same as Friday's card `datasec-github-code-security-off-1014`. No NexusAI merge can pass CodeQL until it is back on. Kam asked 06:08 (bf-dbc9641e5dea) with the repo link; Friday mailed; Friday re-asks on her card.
+### WHEN BOTH CLEAR
+Run DELTA 183 items 1-3 unchanged (RD-846 seat from HANDOVER-S96O.md item 0 → tier-1 gate → merge → demo deploy brief fleet/briefs_staged/2026-10-13_nexusai_O_DEMO_DEPLOY.md re-done fresh → tell Kam with the live result). Then the turn order from item 12.
+### STATE
+- Kam: 0 messages on 10-14 before the wrap instruction; cards open from this seat: nexusai-rd846-build-broken-demo-deploy-1013, quickquote-dependabot-14-round-1013. Floor: %0 tuesday + %1 fleet-monitor only.
+### OWED (shared tooling, claim with Wednesday first) — 183's list plus:
+- Boot-digest push conflict: every seat's launcher regenerates and a commit of it conflicts with the other seat's; resolved twice by dropping our copy (scratchpad). Fix: digests regenerated but never committed at boot, or a union/regenerate merge step in safe_pull.
+### LEDGER: 0 new rows. Rule 3c run: 19 rows (2026-10-08 and older) → _ledger_laptop_datasec_archive.md, 216 conserved.
+
 ## 🌙 DELTA 183 — 2026-10-13 23:2x WRAP HANDOVER (s105). **READ THIS FIRST. It supersedes 182's IN FLIGHT list. Kam's 12:14 instruction is DONE except the NexusAI demo deploy, which is OWED.**
 ### ⚠ UPDATE 2026-10-14 05:30 (shift-change checkpoint): the gauge reads **7d 96%** and `usage_gate.sh` REFUSES (rc 3, >= 95%), renews ~3 days. **Default (a) below CANNOT fire** — no seat may launch for RD-846 until Kam signs in a fresh account or says go past the limit. Asked him action-first on the board (HTTP 201 bf-15c27fc69fde). Check his answer FIRST; if none, RD-846 + the demo deploy wait for the renewal, and say so in the morning receipt.
 ### ⚠ UPDATE 2026-10-14 06:08 (s106 boot): a SECOND blocker, measured. **NexusAI's repo has GitHub Code Security DISABLED** (datasecau/Reporting_Dashboard_Au `security_and_analysis.code_security = disabled`; code-scanning default-setup → HTTP 403), the same overnight switch-off as Friday's card `datasec-github-code-security-off-1014`. CodeQL cannot run, so RD-846's fix cannot reach main even after usage renews. Kam asked on the live board 06:08 (bf-dbc9641e5dea), action first, pointing at Friday's card; Friday told by mail; no second card. **Before any NexusAI merge: re-read `gh api repos/datasecau/Reporting_Dashboard_Au --jq .security_and_analysis.code_security` (NexusAI GH_CONFIG_DIR).** Usage 97% at 06:08, gate rc 3. Kam: 0 messages today.
