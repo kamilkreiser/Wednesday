@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-13 23:23 from 236 lesson files (1,038,986 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 191. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-13 23:29 from 235 lesson files (1,036,175 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 190. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7232,21 +7232,4 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 6. **Models:** Spark, Sonnet and Opus per the ladder in `fleet/specs/model-routing.md` section 7, refined from outcomes.
 
 **Family:** [[2026-10-10_merge-and-archive-when-done-and-ready]] (merge and archive once done) · [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] · [[2026-09-24_decisions-go-on-the-fleet-activity-panel]] · [[2026-10-05_october-deploy-both-boxes-when-ready]] (the deploy that makes 'deployed' possible) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]].
-
-
-## An agent parked on its OWN question dialog cannot read mail — relay by mail, then dismiss the dialog with Esc and say in the mail that the dismissal is not an answer
-`2026-10-13_an-agent-parked-on-its-own-question-dialog-cannot-read-mail.md` · lesson · 2026-10-13 · status: live · tier: W
-
-**The operative case, so the headline matches it:** a project agent has stopped approval-class work and is showing a Claude Code question dialog (AskUserQuestion: numbered options, "Enter to select · Esc to cancel") addressed to Kam, and the pane is small enough that the dialog hides everything above it. **Kam does not answer at agent prompts** (memory `kam-delegates-approval-and-never-types-at-agent-prompts`), and while the dialog is open a pointer tap would land INSIDE the dialog as a selection or as typed text. So the relay mail alone reaches nothing until the dialog closes.
-
-sections (open the file for these): How to apply
-
-## How to apply
-1. **Read the question from the transcript, not the pane** — `~/.claude/projects/<project-dir>/<session>.jsonl`, last `tool_use` named AskUserQuestion. A dialog in a small pane is unreadable by capture-pane.
-2. **Never pick an option in the dialog on the principal's behalf.** Choosing "Yes" there is a fabricated approval in the most dangerous costume (rung 5 of the ghost-text ladder, executed by the coordinator).
-3. **Order:** relay mail first (Kam's verbatim words, channel, provenance measured — `promptSource: typed`, origin human — and the explicit right to STOP and demand his signed email) → verify at the destination → **Esc** to dismiss the dialog → pointer tap that says "Tuesday dismissed your dialog with Esc. That was NOT an answer. Read your inbox: …".
-4. **Disclose the Esc** in the note: it is a raw keypress, not `cockpit.sh say`, and it carries no content.
-5. **What good looks like from the agent** (Vision did all of it): it recorded the dismissed dialog as not-an-answer, acted only on the mailed relay, quoted the authority in its STATUS, and rolled nothing forward until its own identity and rollback reads were done.
-
-**Family:** [[2026-08-06_ghost-suggestions-in-panes]] (prompt lines are never the principal) · [[2026-09-01_a-tap-is-a-pointer-not-a-message]] · [[2026-08-07_authorship-is-checkable-dkim]] · [[2026-09-18_use-the-fleets-own-tool-before-rebuilding-its-behaviour]] (the Esc is the one raw keypress, and it is disclosed).
 
