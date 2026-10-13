@@ -16,7 +16,7 @@ supersede: REPLACED WHOLESALE at the 80% rotation (~19:55 Tue 13 Oct) by the Son
 
 ## 000. LATEST STATE (~22:50, 90% WEEKLY HARD STOP REACHED at ~22:42; supersedes everything below where they conflict)
 - STOP: usage_gate REFUSED at 90%. Kam's 2026-09-14 rule: no new agents or gates; in-flight finish and wrap; Wednesday + local models after. No lift for this seat. Kam told on the panel (bf-58163343249b).
-- develop = 0662f7213cc08d962b745fa6998fc2a3f47499a5 (#1545). Merged tonight: #1542, #1546, #1547, #1545; #1548 merging now (V 9th, GO head 03bdfc32, round-2 GO hash 6a41c4bef88d1e55). Nothing deployed. KS-1570 round 5/5 on develop.
+- develop = 0662f7213cc08d962b745fa6998fc2a3f47499a5 (#1545). Merged tonight: #1542, #1546, #1547, #1545; #1548 MERGED as 3c0a522216258040f32d400ede433e48e683f734 (develop now; my ls-remote). Nothing deployed. KS-1570 round 5/5 on develop.
 - K lane: NO seat (K 10th wrapped + pane closed). Queue for its next seat: KS-1605 (follow-up to the 1545 gate, items 1-5; branch local-only in K 10th's scratch clone, never pushed). HANDOVER-seatK10-2026-10-13.md.
 - V lane: V 9th merging #1548, then the KS-1598 info comment, team notes, WRAP. Verify the merge at source and retire the pane.
 - J lane: J 10th (%84) building the #1549 fix round (issuer-only; custody card pending). Its READY waits (no gate at 90%). Then it wraps; KS-1114 pushed at 7fdc179b, no PR.
