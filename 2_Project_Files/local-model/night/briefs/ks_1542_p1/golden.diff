@@ -1,0 +1,59 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+index ed8003e..8b63b67 100644
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -147,7 +147,16 @@ function resolveOriginateForwardTimeoutMs(value: unknown): number {
+   if (value === undefined) return ORIGINATE_FORWARD_TIMEOUT_MS;
+   if (Number.isInteger(value) && (value as number) > 0 && (value as number) <= MAX_FORWARD_TIMEOUT_MS) return value as number;
+   // String() flattens 1n to "1" and -0 to "0", which read as the valid 1 and the refused 0 (KS-1518): show the type for those two.
+-  const shown = typeof value === 'string' ? JSON.stringify(value) : typeof value === 'bigint' ? `${value}n` : Object.is(value, -0) ? '-0' : String(value);
++  // KS-1542: it also flattens [1] to "1" (the valid bound), [] to "" and {} to "[object Object]": an object prints as JSON, or as its
++  // type tag when JSON.stringify throws (a cycle, a BigInt inside).
++  let shown = typeof value === 'string' ? JSON.stringify(value) : typeof value === 'bigint' ? `${value}n` : Object.is(value, -0) ? '-0' : String(value);
++  if (typeof value === 'object' && value !== null) {
++    try {
++      shown = JSON.stringify(value);
++    } catch {
++      shown = Object.prototype.toString.call(value);
++    }
++  }
+   throw new Error(
+     `originateForwardTimeoutMs must be an integer from 1 to ${MAX_FORWARD_TIMEOUT_MS} milliseconds (got ${shown}); omit it for the ${ORIGINATE_FORWARD_TIMEOUT_MS} ms default`,
+   );
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f1-workflow-approve-forward-bound-is-validated.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f1-workflow-approve-forward-bound-is-validated.test.ts
+index bed106e..f1e6e96 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f1-workflow-approve-forward-bound-is-validated.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f1-workflow-approve-forward-bound-is-validated.test.ts
+@@ -138,6 +138,32 @@ describe('KS-1185 F1 - the approve forward bound override is validated when the
+     expect(collisionsOf([['a', 'x'], ['c', 'y'], ['d', null]])).toEqual([]);
+   });
+ 
++  // KS-1542: String() also flattened an array to its elements and an object to "[object Object]", so a refused [1] printed (got 1), the text
++  // of the VALID bound 1, and [] printed (got ). An object now prints as JSON. No refused bound may print what an accepted bound prints.
++  const ACCEPTED_TEXT = ['1', '800', String(NODE_MAX_TIMER_MS)];
++  const OBJECTS: Array<[string, unknown, string]> = [
++    ['[1]', [1], '[1]'], ['[]', [], '[]'], ['{}', {}, '{}'], ['[1,2]', [1, 2], '[1,2]'], ['[800]', [800], '[800]'],
++  ];
++
++  for (const [label, value, shown] of OBJECTS) {
++    it(`RED KS-1542 - the refused ${label} prints as JSON, (got ${shown}), not as its String() text`, () => {
++      expect(() => build(value)).toThrow(/originateForwardTimeoutMs/);
++      expect(shownIn(value)).toBe(shown);
++    });
++  }
++
++  it('RED KS-1542 - no refused bound prints the text of an accepted bound (1, 800, 2147483647)', () => {
++    const printed = [...DISTINCT.map(([, value]) => value), ...OBJECTS.map(([, value]) => value)].map((value) => shownIn(value));
++    expect(printed.filter((text) => text !== null && ACCEPTED_TEXT.includes(text))).toEqual([]);
++  });
++
++  it('GREEN KS-1542 control - an object JSON cannot print (a cycle) is still refused, and prints its type tag', () => {
++    const cyclic: Record<string, unknown> = {};
++    cyclic.self = cyclic;
++    expect(() => build(cyclic)).toThrow(/originateForwardTimeoutMs/);
++    expect(shownIn(cyclic)).toBe('[object Object]');
++  });
++
+   it('GREEN KS-1185 F1 control - no override still builds and means the production default', () => {
+     expect(() => build(undefined)).not.toThrow();
+   });

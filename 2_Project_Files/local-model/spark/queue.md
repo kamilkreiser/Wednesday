@@ -31,4 +31,5 @@
 # 2026-10-14 06:5x (Wednesday, morning seat; Kam 06:47 "move to working with the spark"): KS-1547 preflight step() denominator, bash_patch rung 1, brief by Wednesday by hand; dry-run rc 0 + CONTROL-PASS 7/7 golden byte-identical.
 # 2026-10-14 07:0x (Wednesday): KS-1547 HARNESS RE-RUN of the same brief (NOT a rebrief): round 1 FAILED only at B6 on the known ks884 S10 flake (KS-1605 item 5); its patch was tree-identical to the golden. IMPROVEMENTS row 2026-10-14.
 # 2026-10-14 07:1x (Wednesday): KS-1547 harness re-run #2 of the SAME brief (NOT a rebrief) on the patched B6 (FLAKY discriminator; arms: tampered golden still FAIL, real control PASS).
-ks_1547_p1
+# 2026-10-14 07:2x (Wednesday, by hand): KS-1542 forward-bound shown text, code_patch rung 2; dry-run rc 0 + CONTROL-PASS golden byte-identical (first control FAILED A4 because the brief listed 2 of 6 red cells: brief defect, fixed).
+ks_1542_p1
