@@ -81,4 +81,9 @@ printf 'BLUF. Last line: READY FOR GATE.\n## Push\npushed b83/x 6cae6be\n\nREADY
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A26 the same STATUS once filled fires"
 d=$T/a27; mkdir -p $d; : > $d/seen; printf 'body names `OPTIONAL_ITEMS_LINE` and +AWS_SHAPED_LINE in prose\n\nREADY FOR REVIEW: B88 gate b79 @ adacb7e on main 33f2cb4\n' > $d/X_STATUS.md
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A27 a finished STATUS naming *_LINE identifiers in prose still fires"
+# 2026-10-13: A28/A29 = Composer card-pack seats end on "CARDS READY: <pack dir>" (B151). Red at the earlier 10-13 version.
+d=$T/a28; mkdir -p $d; : > $d/seen; printf 'body\nCARDS READY: _wt_b151rec/1_Project_Definition/Cards/2026-10-13_B151/\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A28 CARDS READY fires"
+d=$T/a29; mkdir -p $d; : > $d/seen; printf 'the last line will be CARDS READY: when the packs are done\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A29 a mid-line mention of CARDS READY stays quiet"
 wait; echo "pass=$pass fail=$fail"; [ "$fail" = 0 ]
