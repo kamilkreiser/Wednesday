@@ -6,6 +6,22 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 182 — 2026-10-13 16:0x (s105, post-rotation seat). **READ THIS FIRST. It supersedes 181's in-flight lines; 181's three-step reading of Kam's 12:14 instruction stands.**
+### DONE this seat
+- **QuickQuote v2.35 LIVE** (12:26; card quickquote-v235-publish-1013 --delivered; Kam told with the live screenshot). Vision seat scored 0.97, pane closed.
+- **M (S95M) and P (S98P) WRAPPED** on WRAP NOW (nothing in flight); scored 0.95 / 0.96; panes closed. Queued for next seats: M 13 RD-817 @ e504339; P 12 RD-751 @ 7a6d6bd (gate 20 S5 member GO), 15 RD-831 @ e9eeceb, 20 RD-721 r1 @ 64ee309 (screenshots before demo).
+- **RD-828+833 MERGED** -> main **b2eecdf** (PR #82). Push Build 38340787055 RED on attempt 1 (rd490 cdnjs page-load timeout flake, RD-844 filed by O), GREEN on attempt 2 (4453/4453, read by Tuesday from the attempt-2 log).
+- **GATE 22 RELEASED** (report read whole; scored 0.97; pane %14 closed): B RD-839 GO WITH FINDINGS @ 057a69d (F-839-1 Minor, N files the ticket) · A RD-838 GO @ 380bec3 · C RD-840+841 GO @ 88bba37. **ORDER B -> A -> C is MEASURED (A alone leaks), not optional.**
+- O's Sustainability screenshots sent to Kam (HTTP 201 bf-57a72a0f3b08) — the before-demo condition is MET.
+- **DEMO DEPLOY MECHANISM MEASURED:** no `demo` GitHub environment (only `dev`), no CI_DEPLOY_ENABLED; deploy-demo.yml SKIPS (b2eecdf "Deploy demo" = skipped). No reviewer, no Kam link needed. The deploy is the MANUAL path by one NexusAI seat on Tuesday's GO under C-127 + Kam's 12:14 words (last: revision nexusaidev-app--0000099, 2026-09-21; method 5_Project_History/2026-09-21_S76D_demo-sync-measurement.md; RD-302 revision check per C-07).
+### IN FLIGHT / NEXT (in order)
+1. **N: RD-839 merge** (TURN sent 05:00:07Z). On MERGED: verify at source (ls-remote + gh pr view, NexusAI GH_CONFIG_DIR), watch the push Build (a background poll dies at rotation: `gh run view <id> -R datasecau/Reporting_Dashboard_Au`), then **TURN N: RD-838 @ 380bec3** (gate duty: F-640-1/F-640-2 closed, never-follow 0/88).
+2. After RD-838 green: **TURN O: RD-840+841 @ 88bba37** (O told it merges third, 05:00:24Z).
+3. After the third Build green: **brief ONE seat (O read the method file) for the MANUAL demo deploy of main** (backup/rollback revision first, RD-302 check, live check), then tell Kam with the live result.
+4. Then WRAP N and O (score, pane_close), then Tuesday's own session-end ritual (CLAUDE.md "Session end", both digests, ledger rule 3c, commit + push) and this pickup for the morning.
+### FLOOR at 16:0x
+%0 tuesday · %1 monitor · %2 N (merging RD-839) · %4 O (waits its TURN).
+
 ## 🔴 DELTA 181 — 2026-10-13 12:2x ROTATION HANDOVER (s104, ctx ~80%). **READ THIS FIRST. KAM GAVE A WRAP-UP INSTRUCTION; it supersedes 180's FIRST WORK. 180's STATE lines stand where not restated.**
 ### KAM'S INSTRUCTION (terminal, ~12:1x AEDT, verbatim): "once agents finish up, deploy everything and wrap up"
 Receipted on the live board with the reading below (HTTP 201 bf-7dfdbaafa567); recorded in EXPIRING-GRANTS (event-scoped). **The reading, which is the whole scope:**
