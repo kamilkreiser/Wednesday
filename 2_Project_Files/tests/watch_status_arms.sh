@@ -69,4 +69,9 @@ for ln in 'DEPLOYED: 1329f2e live-check 0' 'RECORDS DONE: records main 38efff2f'
 done
 d=$T/a22; mkdir -p $d; : > $d/seen; printf 'the seat will write DEPLOYED: when done\n' > $d/X_STATUS.md
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A22 a mid-line mention of DEPLOYED: stays quiet"
+# 2026-10-13: A23 = HPSM-POC deploy seats end on "DONE: deployed SHA; live-check RC; ..." (B238). Red at the 10-12 version.
+d=$T/a23; mkdir -p $d; : > $d/seen; printf 'body\nDONE: deployed dc136e6; live-check 0; x\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A23 DONE: deployed fires"
+d=$T/a24; mkdir -p $d; : > $d/seen; printf 'the last line will be DONE: deployed SHA when finished\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A24 a mid-line mention of DONE: deployed stays quiet"
 wait; echo "pass=$pass fail=$fail"; [ "$fail" = 0 ]
