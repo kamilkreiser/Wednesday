@@ -1,3 +1,9 @@
+## 2026-10-14 11:22 — Wednesday (Studio seat), 06:0x morning boot → wrap (Kam: "can you please wrap up for today? And I'll continue shortly")
+- Secuura: weekly usage 92%, hard stop held (card stop-1014 ruled b by Kam's "move to working with the spark"). Kam's new standing rule filed: 80-90% = limited cloud, focus on Wednesday + the Spark (lesson + usage_gate advisory 80 for SEAT=wednesday, 4 arms).
+- Spark: KS-1547 (bash_patch) and KS-1542 (code_patch) briefed by hand, both PASS 7/7 and HELD (patch body == golden); bash_patch checker B6 gained a FLAKY discriminator after the ks884 S10 flake (KS-1605 item 5) failed KS-1547 twice; tampered-golden arm still FAILs.
+- Kam ruled KS-1385 = c (issuer or custodian's org): undelivered, needs a J seat on #1549 before its gate. DEPLOY-BLOCKERS: Stuart's #972 merged on S, not deployed.
+- Ledger +1 row (brief contract vs checker). Handover = 0_Brain/tasks/NEXT-PICKUP.md (replaced wholesale).
+
 ## 2026-10-14 06:47 — Tuesday (Mac mini seat), s106 morning boot → wrap (Kam: "please wrap uup")
 - Datasec/NexusAI: both blockers on RD-846 + the demo deploy measured and put to Kam action-first: weekly usage 97% (usage_gate rc 3) and GitHub Code Security DISABLED on datasecau/Reporting_Dashboard_Au (code-scanning 403), the same overnight switch-off as Friday's card datasec-github-code-security-off-1014. Friday told by mail; no duplicate card. No seat launched; demo unchanged on 2.2.0.
 - Housekeeping: ledger rule 3c (19 rows archived, 216 conserved). Ledger +0. Handover = NEXT-PICKUP-TUESDAY.md DELTA 184.
