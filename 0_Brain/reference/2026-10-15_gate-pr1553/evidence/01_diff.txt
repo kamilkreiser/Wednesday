@@ -1,0 +1,22 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks884_pre_push_tag_named_develop.test.sh b/Blockchain/Dev/scripts/__tests__/ks884_pre_push_tag_named_develop.test.sh
+index 461a9dba8..8d314eee0 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks884_pre_push_tag_named_develop.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks884_pre_push_tag_named_develop.test.sh
+@@ -110,7 +110,7 @@ s4_out="$(
+   git branch develop refs/remotes/origin/develop~1
+   git tag develop "$(eval "$SIDE")"
+   git checkout -q -b docs/stale --no-track refs/remotes/origin/develop
+-  echo more >> docs/readme.md
++  echo s4-distinct >> docs/readme.md   # R45: must differ from the cell 1 commit on docs/tagged, or the two share a SHA
+   git add -A; git commit -qm "docs only"
+   git merge-base --is-ancestor refs/heads/develop refs/remotes/origin/develop || echo "PRECONDITION-LOST: local develop is not behind origin/develop"
+   [ "$(git rev-parse refs/heads/develop)" != "$(git rev-parse refs/remotes/origin/develop)" ] || echo "PRECONDITION-LOST: local develop equals origin/develop"
+@@ -125,7 +125,7 @@ s10_out="$(
+   git branch develop refs/remotes/origin/develop~1
+   git tag origin/develop "$(eval "$SIDE")"
+   git checkout -q -b docs/stale10 --no-track refs/remotes/origin/develop
+-  echo more >> docs/readme.md
++  echo s10-distinct >> docs/readme.md   # K10: must differ from the S4 commit, or the two share a SHA
+   git add -A; git commit -qm "docs only"
+   git merge-base --is-ancestor refs/heads/develop refs/remotes/origin/develop || echo "PRECONDITION-LOST: local develop is not behind origin/develop"
+   [ "$(git rev-parse refs/tags/origin/develop)" != "$(git rev-parse refs/remotes/origin/develop)" ] || echo "PRECONDITION-LOST: the tag equals the remote-tracking ref"
