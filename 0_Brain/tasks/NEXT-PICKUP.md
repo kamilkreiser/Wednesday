@@ -13,14 +13,14 @@ supersede: REPLACED WHOLESALE at the 50% checkpoint of the 06:0x Wednesday seat 
 2. **Kam's two standing words (EXPIRING-GRANTS top rows, end = the quota reset ~Sun 18 Oct 1pm):** (a) Spark only for new ticket work, briefed by Wednesday by hand; (b) push/merge/deploy what is ready FIRST, Claude seats past the stop for those jobs only. Weekly gauge 98% (renews ~2d 6h at 06:05 Fri). **Wednesday's reading told to Kam on the panel 06:1x (bf-b32dea7d8d2f), uncorrected so far: no Claude launches at >=99%, because at 100% this seat stops too.**
 3. **MONDAY 2026-10-19: WED-154**, the storage policy for old Blockchain files and old tests. Policy + dry-run + first measured report + a card; nothing removed before Kam sees it.
 
-## 1. STATE (08:3x Fri) — ONE Claude seat live: Seat R 46th (Secuura/Blockchain-R, pane %4, Opus 5.5)
+## 1. STATE (09:1x Fri) — NO Claude seat live (R 46th WRAPPED 22:12Z, pane closed, scored 0.95; handover Blockchain/5_Project_History/2026-10-16_seatR-46th/HANDOVER.md)
 - **develop = 76698952a75717bbcbc35ace85d08d6758d8844f** (Peter's #1557/#1559 on top of our 10-15 merges). **Nothing deployed.**
 - **R 46th raises the three held Spark passes as TWO PRs** (brief fleet/briefs_staged/2026-10-16_seatR46_raise_spark_1543p2p3_1462.md):
   - **PR A = #1560 (KS-1543 parts 2+3), head 180c7c822b571b8ff8b5ea15d4286277948c66c0**, base 76698952a, ESLint verification.ts 0/0, api-gateway full-suite reds identical to the tip's (0 new), KS-1543 linked contributes, stays In Progress.
-  - **PR B (KS-1462 item 1), commit ba8c18794beddd47e7704891e6cbd4efda7664f6**, pushing since 21:28:30Z (~35 min hook).
+  - **PR B = #1561 (KS-1462 item 1), head ba8c18794beddd47e7704891e6cbd4efda7664f6**, base 76698952a; KS-1462 moved to In Progress by the GitHub integration on PR open. Both PRs READY FOR GATE (batched; overlap 0; merge-tree clean either order).
   - Push transport: per-command `-c core.sshCommand` WITH ServerAliveInterval (the F-02 launcher branch leaves a keepalive-less config; STANDING_LINES has the full line). Wednesday's plan answer item 1 was SUPERSEDED for omitting it (ledger).
   - Ruled by Wednesday: gate on 13/16 legs (3/4/8 need the local stack; no route/spec change). The 35 api-gateway tsconfig.test errors are leg 16's baseline (no ticket).
-- **THE GATE WAITS ON KAM'S CARD `secuura-gate-at-99pct-two-spark-prs-1016`** (weekly gauge 99%). Default b: R sends READY for both, then WRAPS; gate + merges after Sunday's reset (~12:30) or at once if Kam /logins another account (rec a). When READY arrives: score R, pane_close.sh in the same action as reading its wrap.
+- **THE GATE WAITS ON KAM'S CARD `secuura-gate-at-99pct-two-spark-prs-1016`** (weekly gauge 99%). UNRULED at 09:10, so default b applied: R wrapped. NEXT: one batched Opus gate for #1560 + #1561 after Sunday's reset (~12:30) or at once if Kam /logins another account; the merging seat follows R 46th's HANDOVER section 1 (re-read develop, head == GO sha, one at a time, restore Linear to In Progress/contributes after each merge).
 - **Harness changes today:** checker.sh A6 isolation re-check (load-flakes vs real reds; arms tests/a6_isolation_arms.sh 4/4) and hold_ready.py honouring it (backup .pre-1016-a6flaky; the subset-refusal branch NOT yet exercised).
 - **HELD, waiting for Kam:** PR #1555 (KS-1114) head c85cc28d, card secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015.
 - **Waiting for the reset:** KS-1612 (needs real Postgres), KS-1613/1614, KS-1611.
