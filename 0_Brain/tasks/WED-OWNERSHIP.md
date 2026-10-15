@@ -165,3 +165,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-13 22:14 | Kamils-MacBook-Pro | WED tooling: pretooluse hook refusing bare =word separators in zsh Bash calls — Friday (laptop) | CLOSED |  2026-10-13 22:18 shipped e7efc82f1, arms 32/32, sisters mailed |
 | 2026-10-14 06:49 | Kamils-Mac-Studio | usage_gate.sh: Wednesday-seat advisory 70 -> 80 (Kam 2026-10-14 06:47) | CLOSED |  2026-10-14 06:49 done; 4 arms run (75 quiet, 85 advisory, 92 refused, friday 75 keeps 70) |
 | 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/HPSM-POC — Tuesday (handover from Friday 2026-10-15) | OPEN | |
+| 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/HPSM records — Tuesday (handover from Friday 2026-10-15) | OPEN | |
