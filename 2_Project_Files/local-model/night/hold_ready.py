@@ -92,6 +92,10 @@ if '--model-tag' in args:
     model_tag = args[i+1]; del args[i:i+2]
     if not re.match(r'^[a-z0-9][a-z0-9.-]*$', model_tag): die(f"--model-tag {model_tag!r} must be lower-case letters/digits/dots/dashes", 1)
     model_label = model_tag
+# 2026-10-15 (IMPROVEMENTS 2026-10-14 07:1x, OWED): a round.sh Spark run dir is named spark_<client>_<date>_<brief-dir>, so with
+# no --model-tag the writer reads the model from the run dir instead of defaulting to Ornith (KS-1547/KS-1542 READYs said "Ornith").
+elif os.path.basename(os.path.normpath(args[0] if args else '')).startswith('spark_'):
+    model_tag = 'spark-dsv4flash'; model_label = 'Spark (DeepSeek V4 Flash)'
 brief_given = None
 if '--brief' in args:
     i = args.index('--brief')
@@ -111,6 +115,13 @@ if not os.path.isdir(chk): die(f"no checker dir at {chk}")
 inp = json.load(open(os.path.join(run, 'input.json')))
 ticket = inp['ticket']['identifier'] if isinstance(inp.get('ticket'), dict) else str(inp.get('ticket'))
 NIGHT_DIR = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night'
+# 2026-10-15: round.sh briefs live in a DIRECTORY (night/briefs/<ks_N_pK>/KS-N.md) and the run dir carries that name; the flat-file scan
+# below never sees them ("brief NOT LOCATED" on KS-1547). Located from the run dir's own name first, and only if that file exists.
+def _brief_from_run_dir(run_dir, ticket):
+    m = re.search(r'(ks_\d+_p\d+)', os.path.basename(os.path.normpath(run_dir)))
+    if not m: return None
+    cand = os.path.join(NIGHT_DIR, 'briefs', m.group(1), f"{ticket}.md")
+    return cand if os.path.isfile(cand) else None
 
 # ------------------------------------------------------------------ --title-from-brief (2026-09-22 11:2x)
 # The title is DERIVED from the brief's own `File:` line, never typed: basename, `.test.sh`/`.test.ts`/`.test.js`/`.ts`/`.js`/`.sh`/`.md` stripped, upper-cased,
@@ -514,6 +525,8 @@ def hold_code_patch():
              if f.startswith(ticket + '-') and f.endswith('.md') and all(tok.lower() in f.lower() for tok in rowid.split('-'))]
     if len(cands) == 1: brief_clause = f"Brief (located by ticket + ROWID tokens under night/briefs/): `{cands[0]}`"
     elif cands: brief_clause = f"brief AMBIGUOUS under night/briefs/ ({len(cands)} match the ticket + ROWID tokens): " + ', '.join('`' + c + '`' for c in cands)
+    _bd = _brief_from_run_dir(run, ticket)
+    if _bd: brief_clause = f"Brief (located from the run dir's own name under night/briefs/): `{_bd}`"
     if brief_given is not None:
         if not os.path.isfile(brief_given): die(f"--brief: no such file: {brief_given}")
         _hl = next((l for l in open(brief_given, errors='replace').read().splitlines() if l.startswith('# ')), '')
@@ -781,6 +794,8 @@ def hold_bash_patch():
              if f.startswith(ticket + '-') and f.endswith('.md') and all(t.lower() in f.lower() for t in toks)]
     if len(cands) == 1: brief_clause = f"Brief (located by ticket + ROWID tokens {toks} under night/briefs/): `{cands[0]}`"
     elif cands: brief_clause = f"brief AMBIGUOUS under night/briefs/ ({len(cands)} match the ticket + ROWID tokens {toks}): " + ', '.join('`' + c + '`' for c in cands)
+    _bd = _brief_from_run_dir(run, ticket)
+    if _bd: brief_clause = f"Brief (located from the run dir's own name under night/briefs/): `{_bd}`"
     meta_p = os.path.join(run, 'night_meta.json'); input_name = ''
     if os.path.exists(meta_p):
         mi = re.search(r'input=(\S+)', json.load(open(meta_p)).get('queue_line', '') or ''); input_name = os.path.basename(mi.group(1)) if mi else ''
@@ -1060,6 +1075,8 @@ def hold_doc_patch():
              if f.startswith(ticket + '-') and f.endswith('.md') and all(t.lower() in f.lower() for t in toks)]
     if len(cands) == 1: brief_clause = f"Brief (located by ticket + ROWID tokens {toks} under night/briefs/): `{cands[0]}`"
     elif cands: brief_clause = f"brief AMBIGUOUS under night/briefs/ ({len(cands)} match the ticket + ROWID tokens {toks}): " + ', '.join('`' + c + '`' for c in cands)
+    _bd = _brief_from_run_dir(run, ticket)
+    if _bd: brief_clause = f"Brief (located from the run dir's own name under night/briefs/): `{_bd}`"
     if title_brief is not None:
         if len(cands) == 1 and os.path.realpath(cands[0]) != os.path.realpath(title_brief): die(f"--title-from-brief {title_brief} is not the brief located by ticket + ROWID tokens: {cands[0]}")
         if not cands: brief_clause = f"Brief (given by --title-from-brief; none located by ticket + ROWID tokens {toks}): `{os.path.abspath(title_brief)}`"
