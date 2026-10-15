@@ -76,3 +76,9 @@ drive is checked out on **`records/b08`** (last commit 2026-10-02) with **54 unc
 `modified_and_untracked.tgz` + `meta.txt`). Both repos now hold each other's commits under `refs/remotes/t9-drive-2026-10-15/*`
 (laptop) and `refs/remotes/laptop-drive-2026-10-15/*` (T9). Reconciling them is a records-seat job, and a Kam question if a
 choice is needed.
+
+**RULED by Kam, 2026-10-16 (terminal to Friday), verbatim: *"HPSM on laptop drive is the master, not the t9."*** The laptop
+drive's HPSM (on `records/b08`, with its uncommitted work) is authoritative. Never copy or sync the T9's HPSM over it. The T9 copy
+is a stale backup: its `main`-only commits are already present on the laptop as `refs/remotes/t9-drive-2026-10-15/*`, for
+reference only. The 2026-10-15 sync added only files the laptop lacked and overwrote nothing. It deliberately left out the T9's
+pre-separation `6_Policy_Composer`, which the laptop quarantined twice (09-25, 10-02).
