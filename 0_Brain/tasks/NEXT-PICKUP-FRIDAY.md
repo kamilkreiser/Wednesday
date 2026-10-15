@@ -10,6 +10,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 # NEXT PICKUP — FRIDAY
 
+## 🔴🔴🔴 WRAP 2026-10-16 (Friday, end of day) — READ FIRST; supersedes every block below where they differ
+**Friday no longer drives HPSM-POC, MPS calculator or Security Composer.** Kam handed all three (+ HPSM records) to TUESDAY on 2026-10-15. Package: `0_Brain/handover/2026-10-15_friday-to-tuesday/` (00–04, pushed); Friday's 7 project claims RELEASED; Tuesday mailed twice (CC Kam). Every block below about those projects is HISTORY, not work. Friday's remaining claims: Spark loop, live_chat_poll arming, Friday tooling (10-10).
+**Drive state:** Kam will give Friday a NEW external drive; the Laptop-DEV drive goes to Tuesday's machine. Laptop-DEV: Datasec synced from the T9 and VERIFIED by count (0 left to copy in every project); HPSM on Laptop-DEV = MASTER (Kam 10-16); Secuura Blockchain + Secuura test reports CLEARED from Laptop-DEV (Kam; master = Studio/DevMASTER; 6 laptop-only commits bundled at T9 `_SYNC_2026-10-15/`); Spotlight off (Kam's sudo); 974 GB free. Backups: T9 `_SYNC_2026-10-15/step1_uncommitted/` · laptop `_SYNC_2026-10-15_replaced_by_T9/`. G-DRIVE (/Volumes/G-DRIVE, Studio share, 3.6 TB free) = backup target for non-Secuura material (Kam 10-15). Family / Meeting Notes / !SYNC FILES stay on the T9 only (Kam).
+**OPEN for Kam (said once, not carded):** add Laptop-DEV to Spotlight Search Privacy; Disk Utility First Aid on Laptop-DEV (unexplained disconnect 10-15 ~11:4x).
+**OWED (Friday tooling):** wordsplit hook should refuse unquoted `$(ls …)` in a `for` list (ledger w=5, 10-15).
+**New lesson (all seats):** `learnings/2026-10-15_a-sync-is-not-done-until-every-folder-is-counted-on-both-sides.md`.
+
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
 ## 🔴🔴🔴 CHECKPOINT 2026-10-14 07:2x (Friday successor, ctx:50%) — READ FIRST; supersedes every block below where they differ

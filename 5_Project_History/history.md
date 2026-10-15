@@ -1,3 +1,8 @@
+## 2026-10-15 → 10-16 — Friday: handover of three Datasec projects to Tuesday; T9 → laptop Datasec sync (verified); laptop drive space recovered
+- Handover package `0_Brain/handover/2026-10-15_friday-to-tuesday/` (HPSM-POC, MPS calculator, Security Composer + learnings/rules); claims released; Tuesday mailed (CC Kam), plus an update with Kam's 10-16 ruling: the laptop drive's HPSM is the master.
+- Drive sync: uncommitted work of 15 repos backed up to the T9; commits cross-fetched; NexusAI/Vision/quoting tool moved to the T9's commits; Datasec files copied with backups; every project verified (0 left to copy). Secuura cleared from Laptop-DEV at Kam's word; Spotlight index erased; 27 GB → 974 GB free.
+- Lesson: `learnings/2026-10-15_a-sync-is-not-done-until-every-folder-is-counted-on-both-sides.md` (the "missing" folders were an unfinished 09-25 copy, not a deletion).
+
 ## 2026-10-15 18:15 — Wednesday (Studio seat), ~18:1x rotation boot → wrap (Kam: "wrap up when its safe to do so")
 - Day's outcome (from the 18:1x NEXT-PICKUP, verified unchanged): five Secuura merges to develop (#1553, #1549, #1554, #1552, #1556 → 695388d7), nothing deployed; KS-1543 p2 READY held for a raise seat; PR #1555 (KS-1114) held on Kam's card.
 - This seat: lean boot at 7d:98% (full digest not read, deliberately); 0 panel messages, 0 new mail, usage gate refused. Nothing launched. Ledger 3c: 10 rows (2026-10-11) archived, 1474 rows conserved.
