@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-15 13:39 from 238 lesson files (1,045,090 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 193. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-15 16:44 from 238 lesson files (1,045,014 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 193. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7267,15 +7267,18 @@ sections (open the file for these): How to apply
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the hard stop above 90%, unchanged) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-10-06_past-70pct-spark-takes-80pct-of-tasks]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
-## A sync is not done until every folder is counted on both sides; never delete or "clean space" on the strength of a folder existing
-`2026-10-15_a-sync-is-not-done-until-every-folder-is-counted-on-both-sides.md` · correction · 2026-10-15 · status: live · tier: W
+## On Monday 19 Oct, write a storage policy for old Blockchain files and old tests: what is not needed going forward may be REMOVED, and the clean-up runs regularly
+`2026-10-15_storage-policy-for-old-blockchain-files-and-tests-monday.md` · grant · 2026-10-15 · status: live · tier: W
 
-**Kam's words (verbatim):** *"so at some point these directories got deleted and lost. Not good. please make sure this never
-happens again especially through syncs or cleaning of space."*
+**His words, verbatim:** *"on monday, please create an efficient policy to create more efficient storage of old blockchain files and old tests.  If we do not need them going forward, they can be removed and this can / should be done regularly"*
 
-sections (open the file for these): What happened (measured 2026-10-15) · The rules (every seat, every sync, every space clean-up) · How to apply
+**How to apply (Wednesday's reading, receipted on the panel with a correction offer):**
+1. **Scope:** Secuura/Blockchain (Platform K): old worktrees and scratch clones, old run dirs and gate evidence, superseded test artefacts and fixtures, old local-model run dirs for Secuura tasks, and old build or docker leftovers on the boxes. Measure each class first (sizes, counts, ages) and write the numbers into the policy.
+2. **"If we do not need them going forward, they can be removed":** this NARROWS [[2026-08-26_never-delete-cleanup-means-quarantine]] for the classes the policy names. Every class carries its predicate for "not needed" (age, merged state, superseded-by, regenerable). The rest of the never-delete rule stands: files we are working on, records, the brain, credentials, anything unmerged, and anything a live seat holds are never in scope.
+3. **Order of preference:** regenerable leftovers are removed ([[2026-09-29_regenerable-build-leftovers-are-not-kept]]); bulky but possibly useful items go to G-DRIVE first and are cleared after about a month ([[2026-10-07_archive-bulky-leftovers-to-g-drive-clear-after-a-month]]); only then outright removal.
+4. **"Regularly" = a scheduled mechanism, not an intention** ([[2026-08-07_a-promise-is-not-a-mechanism]]): a dry-run report on a cadence (proposed: weekly), with the actual removal by the project's own seat under the policy. Exercise both branches before arming it. It cannot remove anything outside its named classes.
+5. **Hard rule 1 holds:** Wednesday writes the policy and the dry-run tool in her own tree. Removals inside the Secuura project are the project seat's acts.
+6. **Monday's output:** the policy file, the dry-run's first report with the numbers, and a card to Kam with the policy's BLUF and the first run's proposed removals (default: run the dry-run weekly and remove nothing until he taps).
 
-## How to apply
-Any seat asked to sync, move, copy, mirror, migrate or free space runs rules 1–5 as its checklist. It reports the per-folder
-count table to Kam BEFORE saying "done".
+**Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (narrowed, not retired) · [[2026-09-29_regenerable-build-leftovers-are-not-kept]] · [[2026-10-07_archive-bulky-leftovers-to-g-drive-clear-after-a-month]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] (the Monday date is the trigger) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 

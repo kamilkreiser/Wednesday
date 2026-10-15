@@ -37,6 +37,7 @@ supersede: REPLACED WHOLESALE at the ~11:2x wrap of the 06:0x morning seat (Kam:
 Standing lines for the next Secuura briefs: each lane watcher must treat a bare "Secuura/Blockchain" subject as broadcast (J fixed its copy, K/V not); file_ticket.py's "description anchors: True" check cannot fail (V 9th).
 
 ## 4. OWED BY WEDNESDAY (own tools, small)
+0. **MONDAY 2026-10-19 (Kam 2026-10-15 ~15:4x, WED-154): the storage POLICY for old Blockchain files and old tests.** Rule file learnings/2026-10-15_storage-policy-for-old-blockchain-files-and-tests-monday.md. Policy + dry-run tool + first measured report + a card to Kam; nothing removed before he sees it.
 1. hold_ready.py: read the model from round.json / the run-dir prefix (spark_*), and locate a brief DIRECTORY (night/briefs/<dir>/KS-<n>.md). IMPROVEMENTS 2026-10-14.
 2. cockpit.sh say --mail: stamp the mail's own timestamp into the pointer (stale queued taps; ledger 10-13).
 3. INDEX.md refresh (newest block 2026-09-23).

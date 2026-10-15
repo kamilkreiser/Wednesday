@@ -2671,3 +2671,18 @@ INCLUDED until he says otherwise.
 > thank you. please move to working with the spark.  going forward once we reach 80 - 90% should be the start of limited cloud model usage and a focus on you and the spark
 
 *Note:* card secuura-92pct-stop ruled b (stop not lifted); grant file 2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark; usage_gate advisory 80 for the Wednesday seat
+
+## 2026-10-15 12:55 — Kam (terminal, verbatim)
+> start working through tickets.  Do work with the spark only until the quota resets
+
+*Note:* Recorded in EXPIRING-GRANTS (event: the quota reset ~Sun 18 Oct)
+
+## 2026-10-15 12:55 — Kam (terminal, verbatim)
+> if anything needs to be pushed, merged or deployed, do that first as well
+
+*Note:* Read as Claude seats for push/merge/deploy only, past the 90% stop; receipted with a correction offer
+
+## 2026-10-15 16:43 — Kam (terminal, verbatim)
+> on monday, please create an efficient policy to create more efficient storage of old blockchain files and old tests.  If we do not need them going forward, they can be removed and this can / should be done regularly
+
+*Note:* Owed Monday 2026-10-19: storage policy draft; recorded in a lesson file, WED issue and the pickup
