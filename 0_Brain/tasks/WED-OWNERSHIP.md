@@ -166,3 +166,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-14 06:49 | Kamils-Mac-Studio | usage_gate.sh: Wednesday-seat advisory 70 -> 80 (Kam 2026-10-14 06:47) | CLOSED |  2026-10-14 06:49 done; 4 arms run (75 quiet, 85 advisory, 92 refused, friday 75 keeps 70) |
 | 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/HPSM-POC — Tuesday (handover from Friday 2026-10-15) | OPEN | |
 | 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/HPSM records — Tuesday (handover from Friday 2026-10-15) | OPEN | |
+| 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/MPS-Commercial-Calculator — Tuesday (handover from Friday 2026-10-15) | OPEN | |
