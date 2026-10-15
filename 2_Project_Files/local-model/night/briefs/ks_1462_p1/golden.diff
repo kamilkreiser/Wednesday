@@ -1,0 +1,67 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+index 2245495eb..066b8e95f 100644
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -2232,7 +2232,7 @@ adminConfigRouter.post('/migrate-tenant-data', async (_req: Request, res: Respon
+         // thrown text. The text goes to the server log with the route and the tenant named, as fail500 does.
+         logger.error('Admin config tenant step failed (POST /api/admin/migrate-tenant-data)', {
+           tenant: tenant.slug,
+-          error: err instanceof Error ? err.message : String(err),
++          error: err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err,
+         });
+         results.push({ tenant: tenant.slug, error: 'TENANT_COPY_FAILED' });
+       }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
+index b18e23a83..8f878ca3b 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
+@@ -373,3 +373,49 @@ describe('KS-1334 part C: migrate-tenant-data never answers a 200 carrying a ten
+     expect(KS1334_LEAK.length).toBeGreaterThan(60);
+   });
+ });
++
++// KS-1462 (item 1 of 2; item 2, the bare-string per-tenant code, is NOT changed here): the per-tenant catch logged
++// `String(err)`, so a thrown PLAIN OBJECT reached the server log as [object Object]. It now uses the same describer as
++// fail500: an Error by its message, a string verbatim, any other object by its type and field names (never values).
++async function postMigrateThrowing(thrown: unknown): Promise<number> {
++  setNodeEnv('development');
++  mockSharedForC.queryWithTenantGuc.mockResolvedValue({ rows: [] });
++  mockDb.getTenantManager = () => ({
++    getPlatformPool: () => ({ query: jest.fn().mockResolvedValue({ rows: [KS1334C_TENANT] }) }),
++    getDefaultPool: () => ({}),
++    getPool: () => { throw thrown; },
++  });
++  const res = await fetch(baseUrl + '/api/admin/migrate-tenant-data', {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    body: JSON.stringify({}),
++  });
++  await res.text();
++  return res.status;
++}
++
++describe('KS-1462 item 1: migrate-tenant-data logs a thrown non-Error the way fail500 does', () => {
++  beforeEach(() => { mockLoggerError.mockClear(); });
++  afterEach(() => {
++    mockDb.getTenantManager = () => null;
++    mockSharedForC.queryWithTenantGuc.mockReset();
++  });
++
++  it('RED KS-1462 C1 a per-tenant getPool that throws a plain object logs its type and field names, never [object Object]', async () => {
++    const status = await postMigrateThrowing({ code: 'ECONNREFUSED', detail: 'secret-value-not-logged' });
++    expect(status).toBe(200);
++    expect(mockLoggerError.mock.calls).toEqual([[KS1334C_CONTEXT, { tenant: KS1334C_TENANT.slug, error: 'thrown Object with fields [code, detail]' }]]);
++  });
++
++  it('control KS-1462 C2 a per-tenant getPool that throws an Error still logs its message', async () => {
++    const status = await postMigrateThrowing(new Error('ks1462 error message'));
++    expect(status).toBe(200);
++    expect(mockLoggerError.mock.calls).toEqual([[KS1334C_CONTEXT, { tenant: KS1334C_TENANT.slug, error: 'ks1462 error message' }]]);
++  });
++
++  it('control KS-1462 C3 a per-tenant getPool that throws a string still logs it verbatim', async () => {
++    const status = await postMigrateThrowing('ks1462 thrown string');
++    expect(status).toBe(200);
++    expect(mockLoggerError.mock.calls).toEqual([[KS1334C_CONTEXT, { tenant: KS1334C_TENANT.slug, error: 'ks1462 thrown string' }]]);
++  });
++});
