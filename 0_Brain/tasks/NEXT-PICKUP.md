@@ -24,7 +24,8 @@ supersede: REPLACED WHOLESALE at the 50% checkpoint of the 06:0x Wednesday seat 
 - **Harness changes today:** checker.sh A6 isolation re-check (load-flakes vs real reds; arms tests/a6_isolation_arms.sh 4/4) and hold_ready.py honouring it (backup .pre-1016-a6flaky; the subset-refusal branch NOT yet exercised).
 - **HELD, waiting for Kam:** PR #1555 (KS-1114) head c85cc28d, card secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015.
 - **Waiting for the reset:** KS-1612 (needs real Postgres), KS-1613/1614, KS-1611.
-- **Spark queue EMPTY** after KS-1462 (2 briefed by hand today, 2 PASS first round, 0 rebriefs). Next: section 3.
+- **HELD for the NEXT raise round (not R 46th's):** night/READY_KS-1541-REFUSALNOTE-1_spark-dsv4flash_BRIEFED-CODEPATCH-INFO-PASS-7of7_2026-10-16.diff.md (mcp-server tools/info.ts + a new test; disjoint from R 46th's files).
+- **Spark queue EMPTY** after KS-1541 (3 briefed by hand today, 3 PASS first round, 0 rebriefs). Next: section 3; second half of the title screen read; KS-1526 skipped as decision-shaped.
 
 ## 2. KAM'S CARDS OPEN
 secuura-ks724-locked-account-template-exclusion-1015 · secuura-ks1385-null-issuer-certifications-1015 · secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015 (all rec a) · secuura-gate-at-99pct-two-spark-prs-1016 (rec a switch account; default b wait). Plus 3 Datasec cards (Tuesday's/Friday's). Unanswered panel question (bf-f955bd7b56aa959f): lean boots at >=95% weekly gauge? Not a rule until he answers.
