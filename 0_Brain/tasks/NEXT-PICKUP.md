@@ -3,7 +3,7 @@ date: 2026-10-16
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
-supersede: REPLACED WHOLESALE at the 50% checkpoint of the 06:0x Wednesday seat (2026-10-16 ~06:4x). Replace wholesale again; never stack. The previous version is in git.
+supersede: REPLACED WHOLESALE at the 50% checkpoint of the 06:0x Wednesday seat (2026-10-16 ~06:4x); section 1 refreshed at the 65% checkpoint (~08:3x). Replace wholesale again; never stack. The previous version is in git.
 ---
 
 # NEXT PICKUP (Fri 16 Oct, refreshed at the ~06:4x 50% checkpoint)
@@ -13,25 +13,31 @@ supersede: REPLACED WHOLESALE at the 50% checkpoint of the 06:0x Wednesday seat 
 2. **Kam's two standing words (EXPIRING-GRANTS top rows, end = the quota reset ~Sun 18 Oct 1pm):** (a) Spark only for new ticket work, briefed by Wednesday by hand; (b) push/merge/deploy what is ready FIRST, Claude seats past the stop for those jobs only. Weekly gauge 98% (renews ~2d 6h at 06:05 Fri). **Wednesday's reading told to Kam on the panel 06:1x (bf-b32dea7d8d2f), uncorrected so far: no Claude launches at >=99%, because at 100% this seat stops too.**
 3. **MONDAY 2026-10-19: WED-154**, the storage policy for old Blockchain files and old tests. Policy + dry-run + first measured report + a card; nothing removed before Kam sees it.
 
-## 1. STATE (06:4x Fri; no Claude seat live; panes %0 + %1 only)
-- **develop = 76698952a75717bbcbc35ace85d08d6758d8844f** (ls-remote 06:1x). Moved overnight by PETER's own merges #1557 (KS-1615, systemTest app roll) and #1559 (KS-1447, schemathesis) — measured by `git log` in the Spark cache clone; systemTest only, api-gateway untouched. Our five 10-15 merges sit under it. **Nothing deployed.**
-- **HELD READYs, waiting for ONE batched raise seat:** KS-1543 part 2 (night/READY_KS-1543-UNUSEDBODY-2_..._2026-10-15.diff.md) + part 3 if its round passes (below). Plan told to Kam: raise them together under one batched tier-2 gate when 2-3 passes are held.
-- **SPARK ROUND IN FLIGHT:** `ks_1543_p3` (site :1579, GET /api/document-types logs the error it 500s on; brief night/briefs/ks_1543_p3/, CONTROL-PASS 7/7 at 76698952a). Drainer pid 37609; result lands in local-model/spark/done.md. On PASS: source-read patch vs golden, `hold_ready.py`. On FAIL: classify (model/harness/brief), counter = original + ONE rebrief.
-- **HARNESS FIX TODAY:** tasks/code_patch/checker.sh A6 re-runs each NEW red's file alone x2 with the patch (FLAKY-UNDER-LOAD vs real red); arms local-model/tests/a6_isolation_arms.sh 4/4; IMPROVEMENTS row 2026-10-16 06:36. The api-gateway health families (ks1101/1248/1258/1054/1246/864a/b) flake under full-suite load.
-- **HELD, waiting for Kam:** PR #1555 (KS-1114) head c85cc28d, card secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015 (default a: fix after the reset).
+## 1. STATE (08:3x Fri) — ONE Claude seat live: Seat R 46th (Secuura/Blockchain-R, pane %4, Opus 5.5)
+- **develop = 76698952a75717bbcbc35ace85d08d6758d8844f** (Peter's #1557/#1559 on top of our 10-15 merges). **Nothing deployed.**
+- **R 46th raises the three held Spark passes as TWO PRs** (brief fleet/briefs_staged/2026-10-16_seatR46_raise_spark_1543p2p3_1462.md):
+  - **PR A = #1560 (KS-1543 parts 2+3), head 180c7c822b571b8ff8b5ea15d4286277948c66c0**, base 76698952a, ESLint verification.ts 0/0, api-gateway full-suite reds identical to the tip's (0 new), KS-1543 linked contributes, stays In Progress.
+  - **PR B (KS-1462 item 1), commit ba8c18794beddd47e7704891e6cbd4efda7664f6**, pushing since 21:28:30Z (~35 min hook).
+  - Push transport: per-command `-c core.sshCommand` WITH ServerAliveInterval (the F-02 launcher branch leaves a keepalive-less config; STANDING_LINES has the full line). Wednesday's plan answer item 1 was SUPERSEDED for omitting it (ledger).
+  - Ruled by Wednesday: gate on 13/16 legs (3/4/8 need the local stack; no route/spec change). The 35 api-gateway tsconfig.test errors are leg 16's baseline (no ticket).
+- **THE GATE WAITS ON KAM'S CARD `secuura-gate-at-99pct-two-spark-prs-1016`** (weekly gauge 99%). Default b: R sends READY for both, then WRAPS; gate + merges after Sunday's reset (~12:30) or at once if Kam /logins another account (rec a). When READY arrives: score R, pane_close.sh in the same action as reading its wrap.
+- **Harness changes today:** checker.sh A6 isolation re-check (load-flakes vs real reds; arms tests/a6_isolation_arms.sh 4/4) and hold_ready.py honouring it (backup .pre-1016-a6flaky; the subset-refusal branch NOT yet exercised).
+- **HELD, waiting for Kam:** PR #1555 (KS-1114) head c85cc28d, card secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015.
 - **Waiting for the reset:** KS-1612 (needs real Postgres), KS-1613/1614, KS-1611.
+- **Spark queue EMPTY** after KS-1462 (2 briefed by hand today, 2 PASS first round, 0 rebriefs). Next: section 3.
 
 ## 2. KAM'S CARDS OPEN
-secuura-ks724-locked-account-template-exclusion-1015 · secuura-ks1385-null-issuer-certifications-1015 · secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015 (all rec a). Plus 3 Datasec cards (Tuesday's/Friday's). Unanswered panel question (bf-f955bd7b56aa959f): lean boots at >=95% weekly gauge? Not a rule until he answers.
+secuura-ks724-locked-account-template-exclusion-1015 · secuura-ks1385-null-issuer-certifications-1015 · secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015 (all rec a) · secuura-gate-at-99pct-two-spark-prs-1016 (rec a switch account; default b wait). Plus 3 Datasec cards (Tuesday's/Friday's). Unanswered panel question (bf-f955bd7b56aa959f): lean boots at >=95% weekly gauge? Not a rule until he answers.
 
 ## 3. NEXT SPARK CANDIDATES (screen of all 369 KS Backlog/Todo titles, first half read)
-- **KS-1462** (p4): originate migrate-tenant-data logs a non-Error throw as [object Object]; one file, log shape — most promising, read the ticket + file next.
+- KS-1462 item 1 DONE (Spark PASS, raised as PR B). Item 2 (TENANT_COPY_FAILED shape) is an either/or for a decision; the shared-helper extraction cannot go to the Spark (blank context line).
 - Read and rejected at title level: KS-1105 (frontend, no test script per KS-1391), KS-1471 (auth middleware surface), KS-1132 (platform-admin login, auth), KS-1115 (needs Postgres).
 - Second half of the title list (lines 190-370 of the screen) NOT read yet: re-pull with the Linear paginated query (the screen file was in a session scratchpad).
 
 ## 4. OWED BY WEDNESDAY (own tools, small)
 1. Spark tunnel: doctor.sh WARN for SEAT=wednesday on 47788 + a `spark/tunnel.sh up|check`.
-2. cockpit.sh say --mail: stamp the mail's own timestamp into the pointer.
+2. cockpit.sh say --mail: stamp the mail's own timestamp into the pointer. ALSO: `say %4 ...` (a pane id instead of the lane name) was a SILENT no-op on 10-16; make an unknown name fail loudly.
+6. Proposal for Kam (not urgent): Secuura launches default SECUURA_ALLOW_ONDISK_KEY=1 (or seed the keychain) so F-02 stops leaving a keepalive-less core.sshCommand.
 3. INDEX.md refresh (newest block 2026-09-23).
 4. Deploy round (Kintsugi) for what sits on develop: a READ-ONLY census seat first, ONLY once tasks/DEPLOY-BLOCKERS.md clears (GATEWAY_VOUCH_SECRET first). Not started; under the 99% reading above.
 5. stash@{0} from 10-14 is KEPT, never dropped.
