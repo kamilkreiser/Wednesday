@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-15 16:44 from 238 lesson files (1,044,804 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 16 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-15 18:12 from 239 lesson files (1,048,057 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 16 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7337,6 +7337,19 @@ sections (open the file for these): How to apply
 5. **Mechanism:** the 80% advisory belongs in `fleet/usage_gate.sh` beside the 90% refusal (rc 0, loud, naming this file). Shared tooling: claim first (`wed_claim.sh`).
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the hard stop above 90%, unchanged) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-10-06_past-70pct-spark-takes-80pct-of-tasks]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## A sync is not done until every folder is counted on both sides; never delete or "clean space" on the strength of a folder existing
+`2026-10-15_a-sync-is-not-done-until-every-folder-is-counted-on-both-sides.md` · correction · 2026-10-15 · status: live
+
+**Kam's words (verbatim):** *"so at some point these directories got deleted and lost. Not good. please make sure this never
+happens again especially through syncs or cleaning of space."*
+
+sections (open the file for these): What happened (measured 2026-10-15) · The rules (every seat, every sync, every space clean-up) · How to apply
+
+## How to apply
+Any seat asked to sync, move, copy, mirror, migrate or free space runs rules 1–5 as its checklist. It reports the per-folder
+count table to Kam BEFORE saying "done".
 
 
 ## On Monday 19 Oct, write a storage policy for old Blockchain files and old tests: what is not needed going forward may be REMOVED, and the clean-up runs regularly
