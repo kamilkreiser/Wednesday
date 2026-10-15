@@ -1,0 +1,1040 @@
+#!/bin/bash
+# checker.sh <input.json> <out.md> <clone-dir> — code_patch
+#
+# The mechanical verdict on a model-produced patch. It never edits the patch,
+# never judges its style, and never hand-fixes anything: it applies the diff
+# in a scratch clone pinned at the input's tip and measures. Assertions:
+#
+#   A1 output is exactly one fenced ```diff block, no prose outside it
+#   A2 the diff applies (`git apply --check`) at the pinned tip
+#      (strict first; then with --recount --ignore-whitespace, the ONE
+#      accommodation for model-miscounted hunk headers — reported apart;
+#      2026-09-18: then CONTEXT-WS REANCHORED at the header line, then FUZZY
+#      -C1 guarded by its measured offset — A2 FUZZY-MISPLACED never passes)
+#   A3 touched-file set == { product_file, ONE test file under test_dir }
+#      (never the reference test file, never a third file)
+#   A4 RED-FIRST: the test hunk ALONE, at the tip, runs and FAILS with >=1
+#      failed assertion (a file that fails to LOAD is a load error, not red)
+#   A5 GREEN-AFTER: product hunk applied, the same test file passes, 0 failed
+#   A6 whole-service suite after the patch: no NEW red vs the untouched tip
+#      (both measured here, same clone, same run; develop's own reds are
+#      attributed, not counted against the patch)
+#   A7 `tsc --noEmit` for the service: rc 0 after the patch
+#
+# Prints PASS/FAIL per assertion; rc 0 only when ALL pass. Every write verb
+# (git apply / checkout, vitest, tsc) runs inside <clone-dir>; the source
+# checkout is never touched. Reports land in <out.md>.checker/. Untracked
+# files a previous run left in the clone are QUARANTINED, never deleted.
+# stderr never discarded. bash 3.2.
+set -uo pipefail
+
+INPUT="${1:-}"; OUT="${2:-}"; CLONE="${3:-}"
+if [ -z "$INPUT" ] || [ -z "$OUT" ] || [ -z "$CLONE" ] || [ ! -f "$INPUT" ] || [ ! -f "$OUT" ] || [ ! -d "$CLONE/.git" ]; then
+  echo "usage: checker.sh <input.json> <out.md> <clone-dir>" >&2
+  exit 1
+fi
+
+field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])' "$INPUT" "$1"; }
+TIP="$(field tip)"
+SUBDIR="$(field repo_subdir)"
+SERVICE="$(field service_dir)"
+PRODUCT="$(field product_file)"
+TEST_DIR="$(field test_dir)"
+REF_TEST="$(field reference_test_file)"
+# 2026-09-15 12:xx TEST-ONLY mode (KS-1073 / KS-1123-F3 class: the code is right at the tip and a PIN is owed):
+# when the input's defect_line.tamper is set (parsed by build_input from the brief's `## Tamper` block), the diff
+# must touch ONLY one test file; A4 reds under the TAMPER (the product line replaced in the clone, then reverted)
+# instead of at the tip; A5 is green at the UNTOUCHED tip. Without a tamper the mode is code_patch, unchanged.
+TAMPER_LINE="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); t=(d.get("defect_line") or {}).get("tamper") or {}; print(t.get("line",""))' "$INPUT")"
+if [ -n "$TAMPER_LINE" ]; then MODE=test_only; else MODE=code_patch; fi
+# 2026-09-23 SELF-TESTING mode (IMPROVEMENTS 14:23/14:24 rows; KS-1143): the product file IS a test file, so the fix and
+# the cell that pins it are hunks of ONE file. The input carries `self_testing: {test_hunks:[k…]}` (build_input.sh parses
+# the brief's `## Self-testing — test hunks: N`). A3 accepts exactly that one file; before A4 the applied section is SPLIT
+# by hunk (tasks/code_patch/selftest_split.py): the TEST hunks alone at the tip must go RED (A4), the rest applied on top
+# must go GREEN (A5). An input without the key is unchanged. Arms: tests/selftest_mode_arms.sh.
+SELFTEST_HUNKS="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(",".join(str(k) for k in ((d.get("self_testing") or {}).get("test_hunks") or [])))' "$INPUT")"
+if [ -n "$SELFTEST_HUNKS" ]; then
+  if [ "$MODE" = test_only ]; then echo "checker: input declares BOTH a tamper (test-only) and self_testing — refusing (a brief carries one mode)" >&2; exit 1; fi
+  MODE=self_testing
+fi
+echo "mode: $MODE$( [ "$MODE" = test_only ] && echo " (tamper at $PRODUCT:$TAMPER_LINE)")$( [ "$MODE" = self_testing ] && echo " (one file; test hunk(s) $SELFTEST_HUNKS red alone, the rest green on top)")"
+SVC="$CLONE/$SUBDIR/$SERVICE"
+REP="$OUT.checker"
+mkdir -p "$REP"
+DIFF="$REP/patch.diff"
+
+FAILS=0
+pass() { echo "PASS $1"; }
+fail() { echo "FAIL $1"; FAILS=$((FAILS+1)); }
+
+# ---------------------------------------------------------------- A1 extract
+python3 - "$OUT" "$DIFF" > "$REP/extract.out" 2>&1 <<'PYEOF'
+import re, sys
+out_path, diff_path = sys.argv[1], sys.argv[2]
+text = open(out_path, encoding="utf-8").read()
+blocks = re.findall(r"```diff[^\n]*\n(.*?)```", text, flags=re.DOTALL)
+allblocks = re.findall(r"```[^\n]*\n.*?```", text, flags=re.DOTALL)
+# 2026-09-15 22:1x (KS-871 05:56 + KS-1097 C r2 — twice today): a SAMPLER LOOP (a 1-6-line cycle repeated to the token cut)
+# leaves no closed fence; name it here (rc 4) instead of "no diff block". Doc twin: tasks/doc_patch/checker.sh D1.
+tail0 = [l for l in text.split("\n") if l.strip()][-41:]
+for tail in (tail0, tail0[:-1]):
+    if len(tail) >= 12:
+        for k in (1, 2, 3, 4, 5, 6):
+            cyc = tail[-k:]; n = min(len(tail), 8 * k)
+            if all(tail[-(i + 1)] == cyc[-(i % k + 1)] for i in range(n)):
+                print(f"REPETITION LOOP: the output's last {n} non-blank lines repeat a {k}-line cycle starting {cyc[0][:60]!r}")
+                sys.exit(4)
+outside = re.sub(r"```[^\n]*\n.*?```", "", text, flags=re.DOTALL).strip()
+print(f"diff_blocks={len(blocks)} all_blocks={len(allblocks)} prose_outside_chars={len(outside)}")
+if outside:
+    print("prose_outside_head=" + repr(outside[:200]))
+if len(blocks) >= 1:
+    body = blocks[0]
+    if not body.endswith("\n"):
+        body += "\n"
+    open(diff_path, "w", encoding="utf-8").write(body)
+    print(f"wrote {diff_path} lines={body.count(chr(10))}")
+    sys.exit(0 if (len(blocks) == 1 and len(allblocks) == 1 and not outside) else 3)
+# no diff block: say whether the TOKEN BUDGET cut it (KS-871 05:56 — a property-repeat loop no line-cycle test sees)
+try:
+    import json
+    if json.load(open(out_path + ".meta.json")).get("done_reason") == "length":
+        print("TOKEN BUDGET CUT: done_reason=length and no closed diff fence — a runaway generation (repetition), not a diff"); sys.exit(4)
+except Exception:
+    pass
+sys.exit(2)
+PYEOF
+rc=$?
+cat "$REP/extract.out"
+if [ "$rc" -eq 4 ]; then
+  fail "A1 REPETITION LOOP — a sampler loop, not a diff (done_reason length): $(tail -1 "$REP/extract.out" | cut -c1-140)"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A1 (sampler loop)"
+  exit 1
+elif [ "$rc" -eq 2 ]; then
+  fail "A1 output contains no \`\`\`diff block — prose instead of a diff; nothing to apply"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A1"
+  exit 1
+elif [ "$rc" -eq 3 ]; then
+  fail "A1 output is not exactly one fenced diff block with nothing outside it (see extract.out) — continuing with the first block"
+else
+  pass "A1 output is exactly one fenced \`\`\`diff block, nothing outside it"
+fi
+
+# ---------------------------------------------------------------- reset clone
+HEAD_SHA="$(git -C "$CLONE" rev-parse HEAD)"
+if [ "$HEAD_SHA" != "$TIP" ]; then
+  echo "checker: clone HEAD $HEAD_SHA != pinned tip $TIP — refusing (prepare the clone first)" >&2
+  exit 1
+fi
+Q="$CLONE/../quarantine/$(date +%Y%m%d-%H%M%S)"
+# 2026-09-15 20:1x (KS-1164 Part B, tool mode): the previous round's untracked test file under tests/unit/ was not under
+# src/ — scan the input's TEST_DIR too, or a PASS leaves the next round "not clean" (r3 and Part B both hit it).
+git -C "$CLONE" status --porcelain --untracked-files=all -- "$SUBDIR/$SERVICE/src" "$TEST_DIR" > "$REP/pre_status.out" 2>&1
+while IFS= read -r line; do
+  [ -z "$line" ] && continue
+  st="${line:0:2}"; p="${line:3}"
+  case "$st" in
+    "??") mkdir -p "$Q/$(dirname "$p")"; mv "$CLONE/$p" "$Q/$p"; echo "quarantined untracked $p -> $Q" ;;
+  esac
+done < "$REP/pre_status.out"
+git -C "$CLONE" checkout -- "$SUBDIR/$SERVICE" > "$REP/reset.out" 2>&1
+n_dirty="$(git -C "$CLONE" status --porcelain --untracked-files=all -- "$SUBDIR/$SERVICE" | wc -l | tr -d ' ')"
+if [ "$n_dirty" -ne 0 ]; then
+  echo "checker: clone not clean under $SUBDIR/$SERVICE after reset ($n_dirty entries)" >&2
+  git -C "$CLONE" status --porcelain --untracked-files=all -- "$SUBDIR/$SERVICE" >&2
+  exit 1
+fi
+echo "clone clean at pinned tip $TIP"
+
+# 2026-09-15 18:2x (Kam 18:19 "extend the checker"): the runner KIND is the first word of repo.test_runner — vitest or
+# jest (originate, governance). jest's `--json --outputFile` writes the same report shape vitest's json reporter
+# mimics (numTotalTests / testResults[].assertionResults), so summ() reads both; a single file is a positional
+# path pattern for both. Name kept (run_vitest) so every call site stays as it was.
+RUNNER_KIND="$(python3 -c 'import json,sys; print((json.load(open(sys.argv[1])).get("repo",{}).get("test_runner","vitest").split(" ")[0]))' "$INPUT")"
+# 2026-09-15 19:5x TOOL MODE: a package whose unit config is named explicitly carries `--config <file>` inside
+# repo.test_runner (no new input key); pass it to every vitest run. Empty for the services.
+VITEST_CFG="$(python3 -c 'import json,re,sys; m=re.search(r"--config (\S+?)(?=[ )`])", json.load(open(sys.argv[1])).get("repo",{}).get("test_runner","")); print(m.group(1) if m else "")' "$INPUT")"
+VITEST_CFG_OPT=""; [ -n "$VITEST_CFG" ] && VITEST_CFG_OPT="--config $VITEST_CFG"
+case "$RUNNER_KIND" in vitest|jest) ;; *) echo "checker: unknown runner kind $RUNNER_KIND in repo.test_runner — refusing" >&2; exit 1;; esac
+echo "runner: $RUNNER_KIND"
+run_vitest() {
+  # run_vitest <label> [file]  -> writes $REP/<label>.json + .out; echoes rc
+  local label="$1"; shift
+  if [ "$RUNNER_KIND" = jest ]; then
+    ( cd "$SVC" && npx jest "$@" --json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
+  else
+    ( cd "$SVC" && npx vitest run $VITEST_CFG_OPT "$@" --reporter=json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
+  fi
+  echo $?
+}
+summ() {
+  # summ <label> -> "total=.. passed=.. failed=.. suites_failed=.. loaded=0|1 failed_names=[...]"
+  python3 - "$REP/$1.json" <<'PYEOF'
+import json, sys, os
+p = sys.argv[1]
+if not os.path.exists(p):
+    print("total=0 passed=0 failed=0 suites_failed=UNKNOWN loaded=0 failed_names=[] (no json report written)")
+    sys.exit(0)
+j = json.load(open(p))
+names = []
+for r in j.get("testResults", []):
+    for a in r.get("assertionResults", []):
+        if a.get("status") == "failed":
+            names.append(a.get("fullName") or a.get("title"))
+    if r.get("status") == "failed" and not r.get("assertionResults"):
+        names.append("<LOAD ERROR> " + os.path.basename(r.get("name", "?")) + ": " + (r.get("message") or "")[:200].replace("\n", " "))
+print(f"total={j['numTotalTests']} passed={j['numPassedTests']} failed={j['numFailedTests']} suites_failed={j['numFailedTestSuites']} loaded={1 if j['numTotalTests']>0 else 0} failed_names={names}")
+PYEOF
+}
+getn() { echo "$1" | tr ' ' '\n' | /usr/bin/grep "^$2=" | head -1 | cut -d= -f2; }
+
+# ---------------------------------------------------------------- baseline (untouched tip)
+echo "--- baseline at the untouched tip (whole $SERVICE suite + tsc)"
+rc_base="$(run_vitest baseline_suite)"
+BASE="$(summ baseline_suite)"
+echo "baseline suite rc=$rc_base $BASE"
+( cd "$SVC" && npx tsc --noEmit -p . ) > "$REP/baseline_tsc.out" 2>&1
+rc_base_tsc=$?
+echo "baseline tsc rc=$rc_base_tsc ($(wc -l < "$REP/baseline_tsc.out" | tr -d ' ') lines)"
+
+# ---------------------------------------------------------------- A2 applies
+# The diff is SPLIT per file and each section audited. git apply trusts
+# `@@ -a,b +c,d @@`: when a model under-counts a NEW-file hunk (declared 100,
+# actual 127 — attempt 2 of the KS-806 pilot) strict apply SUCCEEDS and
+# silently truncates the file at line 100, and the defect surfaces later as
+# a load error. `--recount` fixes THAT hunk but, on a multi-file diff, makes a
+# correctly-counted hunk swallow the next `--- /dev/null` header as a `-`
+# line (attempt 1's shape). So: one section per file, `--recount` only on a
+# section whose header is miscounted, reported as the accommodation it is.
+SUGGESTED_TEST_REL="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("suggested_test_file",""))' "$INPUT")"
+SUGGESTED_TEST_REL="$SUGGESTED_TEST_REL" python3 - "$DIFF" "$REP" > "$REP/hunk_audit.out" 2>&1 <<'PYEOF2'
+import re, sys, json, os
+diff_path, rep = sys.argv[1], sys.argv[2]
+SUGGESTED_TEST = os.environ.get("SUGGESTED_TEST_REL", "") or "UNKNOWN_TEST_PATH.test.ts"
+lines = open(diff_path, encoding="utf-8").read().split("\n")
+if lines and lines[-1] == "": lines.pop()
+# 2026-09-15 (KS-1073 q8, the real cause): the model wrote ` --- /dev/null` with ONE leading space — a context-line
+# prefix on a file header — so the header read as a context line and the following `+++ b/<test>` as a `+` line
+# INSIDE the product hunk (tsc: "Expected 0-1 arguments" from a `+++ b/…` line landing in a Boolean(...)). A file
+# header never carries a leading space; strip it and say so.
+for _i in range(len(lines)):
+    if re.match(r"^ (--- (/dev/null|a/)|\+\+\+ b/)", lines[_i]):
+        print(f"line {_i+1}: file header written with a leading space ({lines[_i][:24]!r}) — the space stripped, read as a header")
+        lines[_i] = lines[_i][1:]
+# split into file sections at each '--- ' header (a 'diff --git' line, if any, belongs to the following section)
+sections = []; cur = None
+for ln in lines:
+    if ln.startswith("diff --git ") or ln.startswith("--- "):
+        if ln.startswith("--- ") and cur is not None and cur["lines"] and cur["lines"][-1].startswith("diff --git "):
+            cur["lines"].append(ln); continue
+        if ln.startswith("--- ") and cur is not None and not cur["has_minus"]:
+            cur["lines"].append(ln); cur["has_minus"] = True; continue
+        cur = {"lines": [ln], "has_minus": ln.startswith("--- ")}; sections.append(cur)
+        continue
+    if cur is None:
+        cur = {"lines": [], "has_minus": False}; sections.append(cur)
+    # 2026-09-15 (KS-1073 q8): a `@@ -0,0 +1,N @@` NEW-FILE hunk that follows another hunk INSIDE a section is the
+    # model's test file with its `--- /dev/null` / `+++ b/<path>` header forgotten ("patch fragment without
+    # header"). The path is known: the input's suggested_test_file. Split it into its own section with the header
+    # synthesised, and say so — an accommodation the verdict names, never a silent repair.
+    if re.match(r"^@@ -0,0 \+1(,\d+)? @@", ln) and any(l.startswith("@@ ") for l in cur["lines"]):
+        # 2026-09-15 16:4x (KS-888 q4): the SAME shape inside a `--- /dev/null` section whose only hunk so far is a
+        # 1-2 line STUB ("// placeholder for new test file content below") is NOT a second file — it is the model
+        # writing the file's header once and its body as a second hunk. Drop the stub hunk and keep the body under the
+        # SAME path; name it. (Before this, the stub was judged A2b PLACEHOLDER at the model's path and the real test
+        # was split to a second, invented path.)
+        if cur["lines"][0].startswith("--- /dev/null"):
+            body = [l for l in cur["lines"] if not l.startswith(("---", "+++", "@@"))]
+            if len(body) <= 2:
+                hdr = [l for l in cur["lines"] if l.startswith(("---", "+++"))]
+                cur["lines"] = hdr + [ln]; cur["stub_dropped"] = len(body)
+                print(f"section {len(sections)}: STUB HUNK DROPPED — a {len(body)}-line new-file stub was followed by a second new-file hunk for the same path; the second hunk is the file (an accommodation the verdict names)")
+                continue
+        cur = {"lines": ["--- /dev/null", "+++ b/" + SUGGESTED_TEST, ln], "has_minus": True, "synth": True}; sections.append(cur)
+        print(f"section {len(sections)}: HEADERLESS NEW-FILE hunk split out of the previous section and given the header +++ b/{SUGGESTED_TEST} (the model forgot it)")
+        continue
+    cur["lines"].append(ln)
+out = []
+for k, sec in enumerate(sections, 1):
+    L = sec["lines"]
+    path = None
+    for ln in L:
+        if ln.startswith("+++ b/"): path = ln[6:].strip(); break
+        if ln.startswith("+++ "): path = ln[4:].strip(); break
+    # 2026-09-17 19:xx NEWFILE HEADER (KS-938 r1, runs/2026-09-17_ks938-ornith35b-night): the model wrote `--- /dev/null` /
+    # `+++ b/<test>` followed DIRECTLY by 141 `+` lines — no `@@ -0,0 +1,N @@` (the brief asked for `+1,141`) — and every
+    # apply mode said "No valid patches in input". A new file has exactly one hunk starting at line 1, so the header is
+    # determined by the body: synthesise `@@ -0,0 +1,N @@` (N = the body's line count) and let the normal apply modes run.
+    # Named in the verdict (A2 NEWFILE HEADER SYNTHESIZED), never silent; the as-written section is kept beside the
+    # repaired one as section_<k>.headerless.diff (both under out.md.checker/ — out.md itself is never touched).
+    # REFUSED (the section left as written, so A2 still FAILS, with the reason named) when: the section is not
+    # `--- /dev/null`; ANY line of the section begins `@@`; any body line after `+++` is not `+`-prefixed (a bare `+` is a
+    # blank line; a context/`-`/empty/`\` line is refused); or lines other than a git preamble precede the `---` header.
+    # The wider bash_patch twin (it also converts context lines) is NOT this: code_patch stays strict. Arms:
+    # tests/newfile_header_arms.sh.
+    nfh_n = 0; nfh_refused = ""
+    mi = next((i for i, l in enumerate(L) if l.startswith("--- ")), None)
+    pi = mi + 1 if (mi is not None and mi + 1 < len(L) and L[mi + 1].startswith("+++ ")) else None
+    if pi is not None and not any(l.startswith("@@") for l in L):
+        body = L[pi + 1:]
+        while body and body[-1] == "": body = body[:-1]
+        bad = [(i, l) for i, l in enumerate(body, 1) if not l.startswith("+")]
+        if not L[mi].startswith("--- /dev/null"):
+            nfh_refused = f"not a new file ({L[mi][:70]!r} is not --- /dev/null)"
+        elif any(not p.startswith(("diff --git ", "new file mode ", "index ")) for p in L[:mi]):
+            nfh_refused = "lines other than a git preamble precede the --- header"
+        elif not body:
+            nfh_refused = "no body lines after the +++ header"
+        elif bad:
+            nfh_refused = f"{len(bad)} body line(s) not '+'-prefixed (first: body line {bad[0][0]} {bad[0][1][:60]!r})"
+        if nfh_refused:
+            print(f"section {k} {path}: A2 NEWFILE HEADER NOT SYNTHESIZED — a headerless section, refused: {nfh_refused}")
+        else:
+            open(f"{rep}/section_{k}.headerless.diff", "w", encoding="utf-8").write("\n".join(L).rstrip("\n") + "\n")
+            nfh_n = len(body)
+            L = L[:pi + 1] + [f"@@ -0,0 +1,{nfh_n} @@"] + L[pi + 1:]; sec["lines"] = L
+            print(f"section {k} {path}: A2 NEWFILE HEADER SYNTHESIZED (model omitted it; N={nfh_n}) — `@@ -0,0 +1,{nfh_n} @@` inserted after the +++ line, every body line '+'; as written: section_{k}.headerless.diff (an accommodation the verdict names)")
+    miscount = 0; hunks = 0; i = 0
+    while i < len(L):
+        m = re.match(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", L[i])
+        if not m: i += 1; continue
+        hunks += 1
+        b = int(m.group(2) if m.group(2) is not None else 1); d = int(m.group(4) if m.group(4) is not None else 1)
+        j = i + 1; old = new = 0
+        while j < len(L) and L[j][:1] in (" ", "+", "-", "\\") and not re.match(r"^@@ ", L[j]):
+            c = L[j][:1]
+            if c == " ": old += 1; new += 1
+            elif c == "-": old += 1
+            elif c == "+": new += 1
+            j += 1
+        if (old, new) != (b, d):
+            miscount += 1
+            print(f"section {k} {path}: hunk {hunks} ({L[i]}) declared old={b} new={d} but actual old={old} new={new}")
+        i = j
+    fn = f"{rep}/section_{k}.diff"
+    # 2026-09-15: a diff line is never EMPTY (context lines start with a space) — a trailing empty line is
+    # the model's fence artefact, and --recount then reads it as a context line ("new file depends on old
+    # contents" on KS-871's test section). Strip trailing empty lines from every section.
+    while L and L[-1] == "":
+        L.pop()
+    open(fn, "w", encoding="utf-8").write("\n".join(L) + "\n")
+    out.append({"n": k, "path": path, "file": fn, "hunks": hunks, "miscount": miscount, "newfile_header_synth": nfh_n, "newfile_header_refused": nfh_refused})
+json.dump(out, open(f"{rep}/sections.json", "w"), indent=1)
+print(f"sections={len(out)} miscounted_sections={sum(1 for o in out if o['miscount'])}")
+PYEOF2
+cat "$REP/hunk_audit.out"
+N_SEC="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))))' "$REP/sections.json")"
+# ---------------------------------------------------------------- A3b ascii_proxy (2026-09-17 15:5x, BEFORE A2)
+# KS-839 r1 + retry (14:17/14:18) and KS-1180-P1: the model will not reproduce a '-' line carrying non-ASCII; it keeps it
+# as context and deletes an ASCII neighbour. A LINE-KEYED brief site may declare `ascii_proxy U+XXXX=<ascii>`
+# (night/build_input.sh stores the exact stand-in line as sites[].ascii_proxy.text). tasks/code_patch/a3b_proxy.py puts
+# the tip's real bytes back into the product section ONLY where the model's '-' text is byte-equal to that proxy text
+# AND the hunk's own old-side lines place it at the site's number; the model's section is kept as
+# <section>.model.diff. A proxy line its hunk places elsewhere (MISPLACED), or a '-' line its hunk places at the site
+# whose text is neither the tip's nor the declared proxy (TEXTMISMATCH), FAILS here as an A3b PARTIAL FIX naming the
+# site - before A2, because the unsubstituted stand-in could not apply anyway. An input with no ascii_proxy site
+# (every input built before this) skips the block without printing a line. a3b_line.py still measures the line the
+# applied section really removes. Arms: tests/a3b_ascii_proxy_arms.sh.
+N_PROXY="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(len([x for x in (d.get("defect_line") or {}).get("sites",[]) if x.get("ascii_proxy")]))' "$INPUT")"
+if [ "${N_PROXY:-0}" -gt 0 ]; then
+  python3 "$(dirname "$0")/a3b_proxy.py" "$INPUT" "$CLONE" "$REP/sections.json" "$PRODUCT" "$SUBDIR" > "$REP/a3b_proxy.out" 2>&1
+  PX_RC=$?
+  if [ "$PX_RC" -eq 0 ]; then
+    echo "A3b ascii_proxy: $N_PROXY site(s) declared (rc=0): $(tr '\n' ' ' < "$REP/a3b_proxy.out" | cut -c1-500)"
+  elif [ "$PX_RC" -eq 1 ]; then
+    PX_MC="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(len([x for x in (d.get("defect_line") or {}).get("sites",[]) if x.get("must_change")]))' "$INPUT")"
+    PX_N="$(/usr/bin/grep -E '^(MISPLACED|TEXTMISMATCH) :' "$REP/a3b_proxy.out" | sed -E 's/^[A-Z]+ :([0-9]+) .*/\1/' | sort -u | /usr/bin/grep -c .)"
+    fail "A3b PARTIAL FIX — the product hunk leaves $PX_N of $PX_MC named site(s) untouched: $(/usr/bin/grep -E '^(MISPLACED|TEXTMISMATCH) :' "$REP/a3b_proxy.out" | sed -E 's/^(MISPLACED|TEXTMISMATCH) (:[0-9]+ `[^`]*`) (.*)$/\2 ascii_proxy \1 \3/' | awk 'BEGIN{ORS=""} NR>1{print " · "} {print}' | cut -c1-700)"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A3b (a partial fix; the tests are not run)"
+    exit 1
+  else
+    fail "A3b PROXY MEASURE ERROR (rc=$PX_RC) — could not check the ascii_proxy sites: $(head -2 "$REP/a3b_proxy.out" | tr '\n' ' ' | cut -c1-300)"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at the ascii_proxy measure (a harness or input error; the tests are not run)"
+    exit 1
+  fi
+fi
+A2_OK=1; A2_MODE="strict"; A2_NOTE=""; A2_SYNTH=0; A2_FZM=0
+k=1
+while [ "$k" -le "$N_SEC" ]; do
+  SEC_FILE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["file"])' "$REP/sections.json" "$k")"
+  SEC_PATH="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$k")"
+  SEC_MIS="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["miscount"])' "$REP/sections.json" "$k")"
+  # 2026-09-17 NEWFILE HEADER (KS-938 r1): the section audit above synthesised a missing `@@ -0,0 +1,N @@` (N>0) or refused to
+  # (a reason). A synthesised header is an accommodation even when the section then applies strict — A2_SYNTH keeps the
+  # PASS line from reading "strict … hunk headers consistent". Arms: tests/newfile_header_arms.sh.
+  SEC_NFH="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1].get("newfile_header_synth",0))' "$REP/sections.json" "$k")"
+  SEC_NFR="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1].get("newfile_header_refused",""))' "$REP/sections.json" "$k")"
+  if [ "${SEC_NFH:-0}" -gt 0 ]; then
+    A2_SYNTH=1; A2_NOTE="$A2_NOTE [$SEC_PATH: A2 NEWFILE HEADER SYNTHESIZED (model omitted it; N=$SEC_NFH) — \`@@ -0,0 +1,$SEC_NFH @@\` inserted, every body line '+']"
+  fi
+  # 2026-09-15: the model writes paths RELATIVE TO THE SERVICE ROOT ("services/api-gateway/…") as often as
+  # repo-relative ("Blockchain/Dev/services/…") — three of three runs on 09-15 08:4x lacked the prefix and every
+  # one failed A2 with "No such file". A path form is not a code defect: when the section's path lacks the
+  # repo subdir, git apply gets --directory=<subdir> (recorded in the opts so every later apply uses it too).
+  DIROPT=""
+  case "$SEC_PATH" in "$SUBDIR"/*) ;; *) DIROPT="--directory=$SUBDIR"; echo "section $k $SEC_PATH: path lacks $SUBDIR/ — applying with $DIROPT" ;; esac
+  # 2026-09-15 (KS-908 q4): a section whose `--- a/<x>` and `+++ b/<y>` name DIFFERENT files (neither /dev/null) is
+  # a rename to git and applies nowhere — say so by name instead of "No such file" on the wrong path (task.md 2d).
+  HDR_MINUS="$(sed -n '1p' "$SEC_FILE" | sed -E 's#^--- (a/)?##')"; HDR_PLUS="$(sed -n '2p' "$SEC_FILE" | sed -E 's#^\+\+\+ (b/)?##')"
+  if [ "$HDR_MINUS" != "/dev/null" ] && [ "$HDR_PLUS" != "/dev/null" ] && [ "$HDR_MINUS" != "$HDR_PLUS" ]; then
+    echo "section $k: MISMATCHED HEADER — '--- $HDR_MINUS' paired with '+++ $HDR_PLUS' (two files in one section; git reads a rename)"
+    A2_NOTE="$A2_NOTE [section $k: MISMATCHED HEADER '--- $HDR_MINUS' vs '+++ $HDR_PLUS' — the model paired the product file's --- with another file's +++ (task.md 2d)]"
+  fi
+  git -C "$CLONE" apply --check -p1 $DIROPT "$SEC_FILE" > "$REP/apply_check_strict_$k.out" 2>&1
+  rc_strict=$?
+  git -C "$CLONE" apply --check -p1 $DIROPT --recount --ignore-whitespace "$SEC_FILE" > "$REP/apply_check_lenient_$k.out" 2>&1
+  rc_lenient=$?
+  if [ "$SEC_MIS" -eq 0 ] && [ "$rc_strict" -eq 0 ]; then
+    echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "$DIROPT" >> "$REP/section_$k.opts"
+    echo "section $k $SEC_PATH: applies (strict)"
+  elif [ "$rc_lenient" -eq 0 ]; then
+    echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "$DIROPT --recount --ignore-whitespace" >> "$REP/section_$k.opts"
+    A2_MODE="lenient"; A2_NOTE="$A2_NOTE [$SEC_PATH: --recount --ignore-whitespace needed; miscounted hunks=$SEC_MIS; strict rc=$rc_strict]"
+    echo "section $k $SEC_PATH: applies ONLY with --recount --ignore-whitespace (miscounted hunks=$SEC_MIS, strict rc=$rc_strict)"
+  else
+    case "$SEC_PATH" in "$SUBDIR"/*) SEC_ABS="$CLONE/$SEC_PATH" ;; *) SEC_ABS="$CLONE/$SUBDIR/$SEC_PATH" ;; esac
+    # 2026-09-18 CONTEXT-WS REANCHOR (KS-1229 r1 + retry, runs/2026-09-18_ks1229-ornith35b-night; IMPROVEMENTS 01:26 row):
+    # 43 '+' lines byte-exact, ONE trailing context `});` (column 0) written `  });`. Strict and --ignore-whitespace both
+    # refuse ("no leading space" never matches "some"), and FUZZY -C1 then matched the first `  });` of nine — "apply
+    # fragment at 174" for `@@ -204` — putting the cells in a scope without `issue`. Before fuzzy: when every context/'-'
+    # line of every hunk equals the tip's lines at the header's old-start (searched within 3 lines, nearest first, a tie
+    # refused) AFTER stripping whitespace, tasks/code_patch/a2_placement.py `ctxws` rebuilds the hunks with the tip's exact
+    # text there and the checker applies the rebuilt section STRICTLY. '+' lines are copied byte for byte (A3c/A3i still
+    # judge them). Recorded LOUDLY as "A2 CONTEXT-WS REANCHORED at <line>"; the as-written section stays section_<k>.diff.
+    # The bash tier's REANCHORED shape (a rebuilt file, then a strict --check). Arms: tests/a2_fuzzy_placement_arms.sh.
+    CTXWS="$REP/section_${k}.ctxws.diff"; rc_ctxws=1; CTXWS_NOTE=""; rc_guard=1
+    if [ -f "$SEC_ABS" ] && python3 "$(dirname "$0")/a2_placement.py" ctxws "$SEC_FILE" "$SEC_ABS" "$CTXWS" > "$REP/ctxws_$k.out" 2>&1; then
+      CTXWS_NOTE="$(tr '\n' ';' < "$REP/ctxws_$k.out")"
+      git -C "$CLONE" apply --check -p1 $DIROPT "$CTXWS" > "$REP/apply_check_ctxws_$k.out" 2>&1
+      rc_ctxws=$?
+      [ "$rc_ctxws" -ne 0 ] && CTXWS_NOTE="$CTXWS_NOTE rebuilt section did not apply strictly: $(head -1 "$REP/apply_check_ctxws_$k.out" | tr '\n' ' ')"
+    else
+      CTXWS_NOTE="$(head -1 "$REP/ctxws_$k.out" 2>/dev/null | tr '\n' ' ')"; [ -f "$SEC_ABS" ] || CTXWS_NOTE="not attempted (no file at the tip: new file)"
+    fi
+    CTXWS_AT="$(sed -n -E 's/^hunk [0-9]+: CONTEXT-WS at ([0-9]+) .*/\1/p' "$REP/ctxws_$k.out" 2>/dev/null | paste -sd, -)"
+    if [ "$rc_ctxws" -eq 0 ]; then
+      echo "$CTXWS" > "$REP/section_$k.opts"; echo "$DIROPT" >> "$REP/section_$k.opts"
+      A2_MODE="context-ws"; A2_NOTE="$A2_NOTE [$SEC_PATH: A2 CONTEXT-WS REANCHORED at $CTXWS_AT — the model's context/'-' lines equal the tip's there only with whitespace stripped; rebuilt with the tip's exact text and applied strictly, every '+' line as written ($CTXWS_NOTE); strict rc=$rc_strict lenient rc=$rc_lenient]"
+      echo "section $k $SEC_PATH: applies ONLY CONTEXT-WS REANCHORED at $CTXWS_AT ($CTXWS_NOTE)"
+    else
+    # 2026-09-15 third mode — FUZZY (-C1): the model's OUTER context line often differs by a word or a
+    # space while the inner lines match (KS-871 think=1: hunk 3 landed at :281 for a stated :277 once
+    # only one context line was required). Placement is then guarded by A4–A6 and the human source
+    # read; the mode is recorded LOUDLY in the verdict so a PASS says "fuzzy" beside its counts.
+    # 2026-09-18 FUZZY OFFSET GUARD (KS-1229): A4–A6 guard nothing when the wrong scope COMPILES — a false green. Where
+    # -C1 applied each reduced fragment is measured (`git apply --check -v`: "Context reduced to (l/t) to apply fragment
+    # at N") against where its header puts it: B = old-start + earlier hunks' net delta, D = leading lines git dropped;
+    # N outside [B-3, B+D+3] FAILS A2 FUZZY-MISPLACED naming both numbers, and an unmeasurable fragment fails closed
+    # (the window and its census are in a2_placement.py's docstring: no recorded PASS moves, KS-1229's 174-for-204 does).
+    git -C "$CLONE" apply --check -p1 $DIROPT --recount --ignore-whitespace -C1 "$SEC_FILE" > "$REP/apply_check_fuzzy_$k.out" 2>&1
+    rc_fuzzy=$?
+    if [ "$rc_fuzzy" -eq 0 ]; then
+      git -C "$CLONE" apply --check -v -p1 $DIROPT --recount --ignore-whitespace -C1 "$SEC_FILE" > "$REP/apply_check_fuzzy_v_$k.out" 2>&1
+      python3 "$(dirname "$0")/a2_placement.py" fuzzy "$SEC_FILE" "$REP/apply_check_fuzzy_v_$k.out" > "$REP/fuzzy_guard_$k.out" 2>&1
+      rc_guard=$?
+    fi
+    if [ "$rc_fuzzy" -eq 0 ] && [ "$rc_guard" -eq 0 ]; then
+      echo "$SEC_FILE" > "$REP/section_$k.opts"; echo "$DIROPT --recount --ignore-whitespace -C1" >> "$REP/section_$k.opts"
+      A2_MODE="fuzzy"; A2_NOTE="$A2_NOTE [$SEC_PATH: FUZZY — applies only with -C1 (one context line): $(head -1 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' '); strict rc=$rc_strict lenient rc=$rc_lenient]"
+      # the PASS A2 text above is kept byte-identical to the pre-0918 checker (recorded runs' PASS/FAIL lines stay comparable);
+      # the guard's measurement and the context-ws refusal go on the section line below and in fuzzy_guard_<k>.out / ctxws_<k>.out
+      echo "section $k $SEC_PATH: applies ONLY FUZZY (-C1): $(head -1 "$REP/apply_check_fuzzy_$k.out") — placement guard: $(tr '\n' ';' < "$REP/fuzzy_guard_$k.out") context-ws: $CTXWS_NOTE"
+    elif [ "$rc_fuzzy" -eq 0 ]; then
+      A2_OK=0; A2_FZM=1
+      A2_NOTE="$A2_NOTE [$SEC_PATH: $(/usr/bin/grep -E '^(MISPLACED|UNMEASURED)' "$REP/fuzzy_guard_$k.out" | sed -E 's/^MISPLACED hunk ([0-9]+) at ([0-9]+) \(header old-start ([0-9]+), expected ([0-9]+\.\.[0-9]+), off by ([-+0-9]+),/hunk \1: -C1 applied it at line \2 but its header says old-start \3 (expected \4, off by \5 — more than 3 lines),/' | tr '\n' ';') the placement is refused, not passed; strict rc=$rc_strict lenient rc=$rc_lenient context-ws: $CTXWS_NOTE]"
+      echo "section $k $SEC_PATH: FUZZY (-C1) applies but NOT where its header says (rc_guard=$rc_guard): $(tr '\n' ';' < "$REP/fuzzy_guard_$k.out")"
+    else
+      # 2026-09-15 fourth mode — REANCHORED: the model's `-`/`+` lines are kept and every hunk is rebuilt with the
+      # FILE's own context around the unique (or nearest-to-declared) location of its `-` block (tasks/code_patch/
+      # reanchor.py). Built from the ten-ticket test: KS-844 q4 (an import edit under neighbours ten lines away) and
+      # KS-1018 q8 (three identical catch lines, context drift) both apply strictly once reanchored; KS-864 q8 does
+      # not (a `-` line the file never had — a real model error, correctly refused). Recorded LOUDLY; a hunk the
+      # tool cannot place is kept as written, so a PASS here still says exactly which hunks were rebuilt.
+      REAN="$REP/section_${k}.reanchored.diff"; REAN_NOTE=""
+      case "$SEC_PATH" in "$SUBDIR"/*) SEC_ABS="$CLONE/$SEC_PATH" ;; *) SEC_ABS="$CLONE/$SUBDIR/$SEC_PATH" ;; esac
+      if [ -f "$SEC_ABS" ] && python3 "$(dirname "$0")/reanchor.py" "$SEC_FILE" "$SEC_ABS" "$REAN" > "$REP/reanchor_$k.out" 2>&1; then
+        REAN_NOTE="$(tr '\n' ';' < "$REP/reanchor_$k.out")"
+        git -C "$CLONE" apply --check -p1 $DIROPT "$REAN" > "$REP/apply_check_reanchored_$k.out" 2>&1
+        rc_rean=$?
+      else
+        rc_rean=1; REAN_NOTE="reanchor not attempted (new file or tool error: $(head -1 "$REP/reanchor_$k.out" 2>/dev/null))"
+      fi
+      if [ "$rc_rean" -eq 0 ]; then
+        echo "$REAN" > "$REP/section_$k.opts"; echo "$DIROPT" >> "$REP/section_$k.opts"
+        A2_MODE="reanchored"; A2_NOTE="$A2_NOTE [$SEC_PATH: REANCHORED — the model's context lines did not match the file; every hunk rebuilt from its -/+ lines at the file's real location ($REAN_NOTE); strict rc=$rc_strict lenient rc=$rc_lenient fuzzy rc=$rc_fuzzy]"
+        echo "section $k $SEC_PATH: applies ONLY REANCHORED ($REAN_NOTE)"
+      else
+        A2_OK=0; A2_NOTE="$A2_NOTE [$SEC_PATH: does not apply — strict: $(head -2 "$REP/apply_check_strict_$k.out" | tr '\n' ' ') | lenient: $(head -2 "$REP/apply_check_lenient_$k.out" | tr '\n' ' ') | context-ws: $CTXWS_NOTE | fuzzy(-C1): $(head -2 "$REP/apply_check_fuzzy_$k.out" | tr '\n' ' ') | reanchored: $REAN_NOTE $(head -1 "$REP/apply_check_reanchored_$k.out" 2>/dev/null | tr '\n' ' ')${SEC_NFR:+ | newfile header NOT SYNTHESIZED: $SEC_NFR}]"
+      fi
+    fi
+    fi
+  fi
+  k=$((k+1))
+done
+if [ "$A2_OK" -eq 1 ] && [ "$A2_MODE" = "strict" ] && [ "$A2_SYNTH" -eq 0 ]; then
+  pass "A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)"
+elif [ "$A2_OK" -eq 1 ]; then
+  pass "A2 diff applies at the tip — with an accommodation:$A2_NOTE"
+elif [ "$A2_FZM" -eq 1 ]; then
+  fail "A2 FUZZY-MISPLACED — the diff applies only with -C1, and not where its hunk header says (more than 3 lines outside it), so it is refused:$A2_NOTE"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A2 (a fuzzy placement the hunk header contradicts)"
+  exit 1
+else
+  fail "A2 diff does NOT apply at the tip:$A2_NOTE"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A2"
+  exit 1
+fi
+apply_section_for() {
+  # apply_section_for <path> — applies the section whose path matches, with its recorded opts
+  local want="$1" k=1
+  while [ "$k" -le "$N_SEC" ]; do
+    local p; p="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$k")"
+    if [ "$p" = "$want" ] || [ "$SUBDIR/$p" = "$want" ]; then
+      local f o; f="$(sed -n 1p "$REP/section_$k.opts")"; o="$(sed -n 2p "$REP/section_$k.opts")"
+      git -C "$CLONE" apply -p1 $o "$f"
+      return $?
+    fi
+    k=$((k+1))
+  done
+  echo "no section for $want" >&2; return 1
+}
+
+# ---------------------------------------------------------------- A2b placeholder test file (2026-09-15: KS-1130 ×2, KS-1120-F1)
+# A "test file" with no `it(`/`test(` is the model's shortcut output ("placeholder line; content below replaces
+# this"). Name it, do not let it reach A4 as a load error the reader has to decode.
+k=1; PH=""
+while [ "$k" -le "$N_SEC" ]; do
+  pf="$(sed -n 1p "$REP/section_$k.opts" 2>/dev/null)"; pp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$k")"
+  case "$pp" in *__tests__/*|*.test.ts)
+    # 2026-09-16 00:3x (KS-887 r1+retry — the first MODIFY-IN-PLACE test diff with NO new cell): a section that edits
+    # an EXISTING test file (`--- a/` header, not /dev/null) can legitimately add zero `it(` — it rewrites assertions
+    # inside a cell the tip already has. For those the stub property is "cells REMOVED, none added"; a new file's is
+    # "no cell at all". Before this the rule read every test section as a new file and refused a correct hunk twice.
+    # The predicate lives in a2b_placeholder.sh (armed by tests/a2b_arms.sh on real artefacts).
+    if [ -n "$pf" ]; then
+      why="$(bash "$(dirname "$0")/a2b_placeholder.sh" "$pf")" || PH="$PH $pp ($why)"
+    fi ;;
+  esac
+  k=$((k+1))
+done
+if [ -n "$PH" ]; then
+  fail "A2b PLACEHOLDER test file — no it()/test() cell in:$PH — the model emitted a stub instead of the test; retry the ticket (a fresh sample), do not read the load error"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A2b (placeholder test file)"
+  exit 1
+fi
+
+# ---------------------------------------------------------------- A3 touched set
+: > "$REP/numstat.out"
+k=1
+while [ "$k" -le "$N_SEC" ]; do
+  f="$(sed -n 1p "$REP/section_$k.opts")"; o="$(sed -n 2p "$REP/section_$k.opts")"
+  git -C "$CLONE" apply --numstat -p1 $o "$f" >> "$REP/numstat.out" 2>&1
+  k=$((k+1))
+done
+TOUCHED="$(awk '{print $3}' "$REP/numstat.out" | sort -u)"
+N_TOUCHED="$(echo "$TOUCHED" | /usr/bin/grep -c . )"
+ADDS="$(awk '{a+=$1} END{print a+0}' "$REP/numstat.out")"
+DELS="$(awk '{d+=$2} END{print d+0}' "$REP/numstat.out")"
+echo "touched files ($N_TOUCHED): $(echo "$TOUCHED" | tr '\n' ' ') (+$ADDS/-$DELS)"
+HAS_PRODUCT="$(echo "$TOUCHED" | /usr/bin/grep -c -x -F "$PRODUCT")"
+TEST_FILE="$(echo "$TOUCHED" | /usr/bin/grep -v -x -F "$PRODUCT" | /usr/bin/grep "^$TEST_DIR/" | head -1)"
+N_OTHER="$(echo "$TOUCHED" | /usr/bin/grep -v -x -F "$PRODUCT" | /usr/bin/grep -v "^$TEST_DIR/" | /usr/bin/grep -c .)"
+N_TESTS="$(echo "$TOUCHED" | /usr/bin/grep -v -x -F "$PRODUCT" | /usr/bin/grep -c "^$TEST_DIR/")"
+if [ "$MODE" = test_only ] && [ "$N_TOUCHED" -eq 1 ] && [ "$HAS_PRODUCT" -eq 0 ] && [ "$N_TESTS" -eq 1 ] && [ "$N_OTHER" -eq 0 ] && [ "$TEST_FILE" != "$REF_TEST" ]; then
+  pass "A3 (test-only) touched-file set == { $TEST_FILE } — the product file is untouched, as the ticket requires"
+elif [ "$MODE" = test_only ]; then
+  fail "A3 (test-only) touched-file set must be exactly ONE new test under $TEST_DIR and NOTHING else: n=$N_TOUCHED product=$HAS_PRODUCT tests=$N_TESTS other=$N_OTHER"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A3 (test-only mode: the product file must not change)"
+  exit 1
+elif [ "$MODE" = self_testing ] && [ "$N_TOUCHED" -eq 1 ] && [ "$HAS_PRODUCT" -eq 1 ] && [ "$N_OTHER" -eq 0 ] && [ "$PRODUCT" != "$REF_TEST" ] && case "$PRODUCT" in "$TEST_DIR"/*) true ;; *) false ;; esac; then
+  TEST_FILE="$PRODUCT"
+  pass "A3 (self-testing) touched-file set == { $PRODUCT } — one file that is both the product and its test (under $TEST_DIR)"
+elif [ "$MODE" = self_testing ]; then
+  # (a `case` inside $( ) in this string closed the substitution at its pattern's `)` — arm C3, 2026-09-23; computed first)
+  PUT=no; case "$PRODUCT" in "$TEST_DIR"/*) PUT=yes ;; esac
+  fail "A3 (self-testing) touched-file set must be exactly the ONE product file, itself under $TEST_DIR: n=$N_TOUCHED product=$HAS_PRODUCT tests=$N_TESTS other=$N_OTHER product_under_test_dir=$PUT"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A3 (self-testing mode: one file only)"
+  exit 1
+elif [ "$N_TOUCHED" -eq 2 ] && [ "$HAS_PRODUCT" -eq 1 ] && [ "$N_TESTS" -eq 1 ] && [ "$N_OTHER" -eq 0 ] && [ "$TEST_FILE" != "$REF_TEST" ]; then
+  pass "A3 touched-file set == { $PRODUCT , $TEST_FILE }"
+else
+  fail "A3 touched-file set is not {product, one test under $TEST_DIR}: n=$N_TOUCHED product=$HAS_PRODUCT tests=$N_TESTS other=$N_OTHER ref_test_touched=$([ "$TEST_FILE" = "$REF_TEST" ] && echo yes || echo no)"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A3 (cannot sequence red-first without exactly one test file)"
+  exit 1
+fi
+TEST_REL="${TEST_FILE#$SUBDIR/$SERVICE/}"; [ "$SERVICE" = "." ] && TEST_REL="${TEST_FILE#$SUBDIR/}"   # tool mode: service_dir is "."
+
+# ---------------------------------------------------------------- A3b named sites (2026-09-15)
+# Kam 09:28: "Is there a way to fix it going red through instructions or rules?" — the model fixed one
+# of the two sites the ticket names. The input's defect_line.sites (parsed from the ticket's Where
+# list at build time) is a checklist: every must_change site's text_at_tip must appear as a removed
+# ('-') line in the PRODUCT section. Refuses before any test runs, so a partial fix is named as
+# partial rather than surfacing as "the test is still red" three assertions later.
+A3B_MISSED=""
+N_SITES="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(len([x for x in d.get("defect_line",{}).get("sites",[]) if x.get("must_change")]))' "$INPUT")"
+if [ "${N_SITES:-0}" -gt 0 ]; then
+  PROD_SEC="$(python3 -c 'import json,sys; sub=sys.argv[3]; want=sys.argv[2]
+for o in json.load(open(sys.argv[1])):
+    if o["path"]==want or sub+"/"+o["path"]==want: print(o["file"]); break' "$REP/sections.json" "$PRODUCT" "$SUBDIR")"
+  # 2026-09-17 LINE-KEYED SITES (KS-1186: four of five '-' lines byte-identical at the tip — a TEXT match is satisfied
+  # by ANY one of the duplicates, so it cannot tell which was edited). A site whose input entry carries
+  # `"key": "line+text"` (build_input.sh writes it when the brief's heading is `## Where (line-keyed …)`) is graded by
+  # tasks/code_patch/a3b_line.py: proven edited only when the diff REMOVES the tip line AT THAT NUMBER (measured by
+  # applying the section, with its recorded opts, to a temp copy of the tip outside any repo) AND that line's tip text
+  # equals the brief's. Sites WITHOUT the key fall back to the text predicates below (PY3B / PY3E), unchanged — so every
+  # input built before this (no `key`) grades exactly as it did. Arms: tests/a3b_line_number_arms.sh.
+  N_LK="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(len([x for x in d.get("defect_line",{}).get("sites",[]) if x.get("key")=="line+text"]))' "$INPUT")"
+  A3B_LINE_MISSED=""; A3E_LINE_REMOVED=""
+  if [ "${N_LK:-0}" -gt 0 ]; then
+    LK_F=""; LK_O=""; lk=1
+    while [ "$lk" -le "$N_SEC" ]; do
+      lkp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$lk")"
+      if [ "$lkp" = "$PRODUCT" ] || [ "$SUBDIR/$lkp" = "$PRODUCT" ]; then LK_F="$(sed -n 1p "$REP/section_$lk.opts")"; LK_O="$(sed -n 2p "$REP/section_$lk.opts")"; break; fi
+      lk=$((lk+1))
+    done
+    # shellcheck disable=SC2086 — LK_O is the recorded opts string, word-split on purpose (as apply_section_for does)
+    python3 "$(dirname "$0")/a3b_line.py" "$INPUT" "$CLONE" "${LK_F:-/dev/null}" "$PRODUCT" $LK_O > "$REP/a3b_line.out" 2>&1
+    LK_RC=$?
+    echo "A3b line-keyed: $N_LK site(s) graded by LINE NUMBER + text (rc=$LK_RC): $(/usr/bin/grep '^REMOVED_LINES' "$REP/a3b_line.out" | head -1)"
+    if [ "$LK_RC" -eq 3 ]; then
+      fail "A3b SITE TEXT MISMATCH — a line-keyed site's text in the brief is NOT the tip's line at that number: $(/usr/bin/grep '^MISMATCH' "$REP/a3b_line.out" | sed 's/^MISMATCH //' | tr '\n' '·' | cut -c1-400) — the brief or its line numbers are stale; rebuild from the tip"
+      echo "RESULT: FAIL ($FAILS failed) — stopped at the site-text check (a brief/tip defect, not a model slip; the tests are not run)"
+      exit 1
+    elif [ "$LK_RC" -eq 2 ] || { [ "$LK_RC" -ne 0 ] && [ "$LK_RC" -ne 1 ] && [ "$LK_RC" -ne 4 ]; }; then
+      fail "A3b LINE MEASURE ERROR (rc=$LK_RC) — could not measure which tip lines the product section removes: $(head -2 "$REP/a3b_line.out" | tr '\n' ' ' | cut -c1-300)"
+      echo "RESULT: FAIL ($FAILS failed) — stopped at the line-keyed site measure (a harness error; the tests are not run)"
+      exit 1
+    fi
+    A3B_LINE_MISSED="$(/usr/bin/grep '^MISSED ' "$REP/a3b_line.out" | sed 's/^MISSED //' | awk 'BEGIN{ORS=""} NR>1{print " · "} {print}')"
+    A3E_LINE_REMOVED="$(/usr/bin/grep '^REMOVED :' "$REP/a3b_line.out" | sed 's/^REMOVED //' | awk 'BEGIN{ORS=""} NR>1{print " · "} {print}')"
+  fi
+  A3B_MISSED="$(python3 - "$INPUT" "$PROD_SEC" <<'PY3B'
+import json, sys
+d = json.load(open(sys.argv[1])); sec = open(sys.argv[2], encoding="utf-8", errors="replace").read().split("\n")
+removed = [l[1:].strip() for l in sec if l.startswith("-") and not l.startswith("---")]
+missed = []
+for x in d.get("defect_line", {}).get("sites", []):
+    if not x.get("must_change"): continue
+    if x.get("key") == "line+text": continue  # 2026-09-17: graded by LINE NUMBER in a3b_line.py; text is the fallback
+    t = (x.get("text_at_tip") or "").strip()
+    if t and t not in removed: missed.append(f":{x['line']} `{t[:70]}`")
+print(" · ".join(missed))
+PY3B
+)"
+  if [ -n "$A3B_LINE_MISSED" ]; then A3B_MISSED="${A3B_MISSED:+$A3B_MISSED · }$A3B_LINE_MISSED"; fi
+  if [ -z "$A3B_MISSED" ]; then
+    pass "A3b every must_change site the ticket names is changed by the product hunk ($N_SITES site(s)$( [ "${N_LK:-0}" -gt 0 ] && echo "; $N_LK line-keyed site(s), must_change and stays, matched by LINE NUMBER + text; the rest by text"))"
+    # A3e (2026-09-16, the vitest twin of bash_patch B3c): a site the brief marks "(correct) … stays" (must_change
+    # false) must not be REMOVED — a '-' line with no matching '+' (a rewrite that re-adds the line is fine). The
+    # model's insert-after dialect replaces its anchor (KS-1093 r1-r3); B3b/A3b were blind to a stays-line removed.
+    # Detection only here (no repair): the fix is the brief/retry, and the message names the line.
+    A3E_REMOVED="$(python3 - "$INPUT" "$PROD_SEC" <<'PY3E'
+import json, sys
+d = json.load(open(sys.argv[1])); sec = open(sys.argv[2], encoding="utf-8", errors="replace").read().split("\n")
+minus = {l[1:].strip() for l in sec if l.startswith("-") and not l.startswith("---")}
+plus  = {l[1:].strip() for l in sec if l.startswith("+") and not l.startswith("+++")}
+gone = []
+for x in d.get("defect_line", {}).get("sites", []):
+    if x.get("must_change"): continue
+    if x.get("key") == "line+text": continue  # 2026-09-17: graded by LINE NUMBER in a3b_line.py (the owed A3e line+text fix)
+    t = (x.get("text_at_tip") or "").strip()
+    if t and t in minus and t not in plus: gone.append(f":{x['line']} `{t[:70]}`")
+print(" · ".join(gone))
+PY3E
+)"
+    if [ -n "$A3E_LINE_REMOVED" ]; then A3E_REMOVED="${A3E_REMOVED:+$A3E_REMOVED · }$A3E_LINE_REMOVED"; fi
+    if [ -n "$A3E_REMOVED" ]; then
+      fail "A3e a line the brief says STAYS was REMOVED by the product hunk ('-' with no '+'): $A3E_REMOVED"
+      echo "RESULT: FAIL ($FAILS failed) — stopped at A3e (a stays-line removed; the tests are not run)"
+      exit 1
+    fi
+  else
+    fail "A3b PARTIAL FIX — the product hunk leaves $(echo "$A3B_MISSED" | awk -F' · ' '{print NF}') of $N_SITES named site(s) untouched: $A3B_MISSED"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A3b (a partial fix; the tests are not run)"
+    exit 1
+  fi
+  # A3c (2026-09-15 22:0x, KS-976 B r1): every '+' line the BRIEF's edit blocks add must be added — the twin of A3b for
+  # insertions (an insert-only helper hunk dropped by the model reached tsc as "Cannot find name" three assertions later).
+else
+  echo "A3b: no must_change sites in the input — skipped"
+fi
+# A3c/A3d run for EVERY brief with expected '+' lines — 2026-09-15 23:4x: until now this block sat inside the
+# must_change branch, so an INSERT-ONLY brief (0 must_change sites) was never measured by A3c at all (the 22:5x
+# row named the gap); KS-1133 A r1 then applied a hunk whose context lines were marked '+' and tsc caught it late.
+N_PLUS="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1])).get("defect_line",{}).get("expected_plus",[])))' "$INPUT" 2>/dev/null || echo 0)"
+if [ "${N_PLUS:-0}" -gt 0 ]; then
+  # 2026-09-16 00:3x (KS-887, the first TEST-ONLY brief with fenced '+' edits): in test-only mode the diff carries NO
+  # product section, so measuring the brief's '+' lines against $PRODUCT was a check with no subject — every line
+  # "absent", a false FAIL by construction. The section under test is the ONE file the diff touches: the test file
+  # in test-only mode, the product file otherwise; a3c_plus.py gets that path as argv[3] so A3d reads ITS tip.
+  if [ "$MODE" = test_only ]; then A3_TARGET="$TEST_FILE"; else A3_TARGET="$PRODUCT"; fi
+  PROD_SEC="$(python3 -c 'import json,sys; sub=sys.argv[3]; want=sys.argv[2]
+for o in json.load(open(sys.argv[1])):
+    if o["path"]==want or sub+"/"+o["path"]==want: print(o["file"]); break' "$REP/sections.json" "$A3_TARGET" "$SUBDIR")"
+  if [ -z "$PROD_SEC" ] || [ ! -s "$PROD_SEC" ]; then
+    fail "A3c has NO SECTION to measure for $A3_TARGET (mode $MODE) — the diff's sections do not carry the file the brief's '+' lines belong to"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A3c (no section for the brief's additions)"
+    exit 1
+  fi
+  # 2026-09-28 18:3x (KS-888 revoke, Spark output BYTE-IDENTICAL to its golden, FAILed A3c 22/43): a brief that edits an
+  # EXISTING test file in place puts that file's '+' lines in expected_plus too, so measuring them against the PRODUCT
+  # section alone reported them "absent" by construction. In code_patch mode, when the diff carries a section for the test
+  # file, A3c measures the product and test sections TOGETHER; A3d still reads the product tip (argv[3]).
+  if [ "$MODE" != test_only ] && [ -n "${TEST_FILE:-}" ]; then
+    TEST_SEC="$(python3 -c 'import json,sys; sub=sys.argv[3]; want=sys.argv[2]
+for o in json.load(open(sys.argv[1])):
+    if o["path"]==want or sub+"/"+o["path"]==want: print(o["file"]); break' "$REP/sections.json" "$TEST_FILE" "$SUBDIR")"
+    if [ -n "$TEST_SEC" ] && [ -s "$TEST_SEC" ]; then
+      cat "$PROD_SEC" "$TEST_SEC" > "$REP/a3c_union.diff"; PROD_SEC="$REP/a3c_union.diff"
+      echo "A3c: measuring the product + test sections together (the test file is in the diff)"
+    fi
+  fi
+  A3C_MISSING="$(python3 "$(dirname "$0")/a3c_plus.py" "$INPUT" "$PROD_SEC" "$A3_TARGET" 2>/dev/null)"; A3C_RC=$?
+  if [ "$A3C_RC" -eq 0 ]; then
+    pass "A3c every '+' line the brief adds is in the product hunk ($N_PLUS line(s)), and no tip line is re-added as a '+' (A3d)"
+  elif [ "$A3C_RC" -eq 2 ]; then
+    fail "A3d CONTEXT MARKED AS ADDITION — $(printf '%s\n' "$A3C_MISSING" | /usr/bin/grep -c .) '+' line(s) in the product hunk already exist at the tip and are not in the brief: $(printf '%s' "$A3C_MISSING" | sed 's/^A3D //' | head -3 | cut -c1-90 | tr '\n' '·') — the diff would DUPLICATE them"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A3d (a context line marked '+'; the tests are not run)"
+    exit 1
+  else
+    fail "A3c INCOMPLETE — $(printf '%s\n' "$A3C_MISSING" | /usr/bin/grep -c .) of $N_PLUS line(s) the brief adds are ABSENT from the product hunk: $(printf '%s' "$A3C_MISSING" | head -3 | cut -c1-90 | tr '\n' '·')"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A3c (a dropped addition; the tests are not run)"
+    exit 1
+  fi
+  # A3i INDENT-EXACT (2026-09-17 13:10 row, KS-623 r1): the model shifted every line of its product hunk right by 2
+  # spaces; only FUZZY (-C1, which carries --ignore-whitespace) applied it, the brief's `+` line landed at 4-space indent
+  # in a 2-space block, and A3c (whitespace-STRIPPED) plus the suite and tsc all passed: RESULT PASS 7/7. Rule: each
+  # brief `+` line must be in the APPLIED target file byte-exact INCLUDING leading whitespace, whatever the A2 mode.
+  # tasks/code_patch/a3i_indent.py applies the section with its recorded opts to a temp copy of the tip (the a3b_line.py
+  # pattern) and recovers the brief's unstripped lines from ticket.description (expected_plus is stored stripped). An
+  # input it cannot recover them from SKIPS with an INFO line (legacy behaviour). A refuse-only gate: success prints an
+  # `A3i:` line, NOT a PASS line, so every recorded PASS/FAIL/RESULT line set stays comparable. The FAIL line avoids the
+  # `:NNN \`` shape on purpose: night_run.sh's retry builder reads that shape as "missed sites".
+  # Arms: tests/a3i_indent_arms.sh.
+  A3I_F=""; A3I_O=""; ai=1
+  while [ "$ai" -le "$N_SEC" ]; do
+    aip="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$ai")"
+    if [ "$aip" = "$A3_TARGET" ] || [ "$SUBDIR/$aip" = "$A3_TARGET" ]; then A3I_F="$(sed -n 1p "$REP/section_$ai.opts")"; A3I_O="$(sed -n 2p "$REP/section_$ai.opts")"; break; fi
+    ai=$((ai+1))
+  done
+  python3 "$(dirname "$0")/a3i_indent.py" "$INPUT" "$CLONE" "${A3I_F:-/dev/null}" "$A3_TARGET" "$A3I_O" > "$REP/a3i_indent.out" 2>&1
+  A3I_RC=$?
+  if [ "$A3I_RC" -eq 0 ]; then
+    echo "A3i: every '+' line the brief adds is in the applied $A3_TARGET byte-exact incl. leading whitespace (apply mode $A2_MODE): $(/usr/bin/grep '^OK ' "$REP/a3i_indent.out" | head -1)$( /usr/bin/grep -q '^NOTADDED' "$REP/a3i_indent.out" && echo " · NOTE not added by the diff: $(/usr/bin/grep '^NOTADDED' "$REP/a3i_indent.out" | head -3 | tr '\n' ' ')")"
+  elif [ "$A3I_RC" -eq 5 ]; then
+    echo "INFO A3i skipped — $(head -1 "$REP/a3i_indent.out" | sed 's/^INFO //')"
+  elif [ "$A3I_RC" -eq 1 ]; then
+    A3I_MSG="$(python3 - "$REP/a3i_indent.out" "$N_PLUS" <<'PY3I'
+import re, sys
+rows = [re.match(r"^SHIFT :(\d+) observed=(\S+(?: \(tab\))?) expected=(\S+(?: \(tab\))?) delta=([+-]\d+) `(.*)`$", l) for l in open(sys.argv[1], encoding="utf-8", errors="replace").read().split("\n")]
+rows = [m for m in rows if m]
+deltas = sorted({int(m.group(4)) for m in rows})
+by = (f"{abs(deltas[0])} space(s) {'right' if deltas[0] > 0 else 'left'}" if len(deltas) == 1 else "varying amounts (" + ", ".join(f"{d:+d}" for d in deltas) + ")")
+lines = " · ".join(f":{m.group(1)} indent {m.group(2)}, brief {m.group(3)} (shifted {m.group(4)}) `{m.group(5)[:80]}`" for m in rows[:3])
+print(f"{len(rows)} of {sys.argv[2]} line(s) the brief adds landed in the applied file with DIFFERENT leading whitespace: {lines} — indentation shifted by {by}; copy the brief's lines byte-for-byte, including leading whitespace")
+PY3I
+)"
+    fail "A3i INDENT SHIFT — $A3I_MSG (apply mode $A2_MODE)"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A3i (an indentation shift; the tests are not run)"
+    exit 1
+  else
+    fail "A3i INDENT MEASURE ERROR (rc=$A3I_RC) — could not measure the applied $A3_TARGET: $(head -2 "$REP/a3i_indent.out" | tr '\n' ' ')"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at the A3i measure (a harness error; the tests are not run)"
+    exit 1
+  fi
+else
+  echo "INFO A3i skipped — the input carries no expected '+' lines (a legacy or brief-less input); indentation not measured"
+fi
+
+# ---------------------------------------------------------------- A4 red-first
+# 2026-09-15 TDZ-INLINE (KS-1050 ×2, KS-1018 ×3): a file-scope string const read inside `vi.hoisted(` kills the
+# file before any test runs; the repair is mechanical (tasks/code_patch/tdz_inline.py) and named loudly.
+TK=1
+while [ "$TK" -le "$N_SEC" ]; do
+  tp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$TK")"
+  if [ "$tp" = "$TEST_FILE" ] || [ "$SUBDIR/$tp" = "$TEST_FILE" ]; then
+    tf="$(sed -n 1p "$REP/section_$TK.opts")"; to="$(sed -n 2p "$REP/section_$TK.opts")"
+    # 2026-09-15 15:2x DECL-SPLICE (KS-1130 E7 twin, q8): the model copies the reference driver and PRUNES a file-scope
+    # `let` its copied helpers still read (`currentBlob`, `liveAnchorReply`) — every cell dies with a ReferenceError
+    # before an assertion runs. Where the reference declares it on one line, the harness restores it (decl_splice.py),
+    # named loudly; multi-line declarations are named as unrepairable, never guessed. Runs BEFORE the TDZ inline.
+    if [ -n "$REF_TEST" ] && [ -f "$CLONE/$REF_TEST" ]; then
+      python3 "$(dirname "$0")/decl_splice.py" "$tf" "$CLONE/$REF_TEST" "$REP/section_${TK}.decl.diff" > "$REP/decl_splice.out" 2>&1
+      if ! /usr/bin/grep -q "^spliced 0" "$REP/decl_splice.out"; then
+        tf="$REP/section_${TK}.decl.diff"
+        echo "$tf" > "$REP/section_$TK.opts"; echo "$to" >> "$REP/section_$TK.opts"
+        echo "A4 DECL-SPLICED (accommodation): $(tr '\n' ';' < "$REP/decl_splice.out")"
+      elif /usr/bin/grep -q "UNREPAIRABLE" "$REP/decl_splice.out"; then
+        echo "A4 DECL-SPLICE note: $(tr '\n' ';' < "$REP/decl_splice.out")"
+      fi
+    fi
+    python3 "$(dirname "$0")/tdz_inline.py" "$tf" "$REP/section_${TK}.tdz.diff" > "$REP/tdz_inline.out" 2>&1
+    if ! /usr/bin/grep -q "^inlined 0" "$REP/tdz_inline.out"; then
+      echo "$REP/section_${TK}.tdz.diff" > "$REP/section_$TK.opts"; echo "$to" >> "$REP/section_$TK.opts"
+      echo "A4 TDZ-INLINED (accommodation): $(tr '\n' ';' < "$REP/tdz_inline.out")"
+    fi
+  fi
+  TK=$((TK+1))
+done
+if [ "$MODE" = self_testing ]; then
+  # split the section AS IT WILL BE APPLIED (opts line 1 — reanchored / context-ws / decl / tdz copies included) by hunk,
+  # then apply ONLY the declared test hunk(s) at the tip. selftest_split.py refuses (rc 2) a wrong/out-of-range ordinal.
+  SK=1; ST_F=""; ST_O=""
+  while [ "$SK" -le "$N_SEC" ]; do
+    sp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$SK")"
+    if [ "$sp" = "$PRODUCT" ] || [ "$SUBDIR/$sp" = "$PRODUCT" ]; then ST_F="$(sed -n 1p "$REP/section_$SK.opts")"; ST_O="$(sed -n 2p "$REP/section_$SK.opts")"; break; fi
+    SK=$((SK+1))
+  done
+  python3 "$(dirname "$0")/selftest_split.py" "${ST_F:-/dev/null}" "$SELFTEST_HUNKS" "$REP/selftest.test.diff" "$REP/selftest.prod.diff" "$INPUT" > "$REP/selftest_split.out" 2>&1
+  rc_split=$?
+  echo "A4 (self-testing) split: rc=$rc_split $(tr '\n' ' ' < "$REP/selftest_split.out" | cut -c1-400)"
+  if [ "$rc_split" -ne 0 ]; then
+    fail "A4 (self-testing) the section could not be split into its declared test hunk(s) $SELFTEST_HUNKS and the rest: $(tr '\n' ' ' < "$REP/selftest_split.out" | cut -c1-400)"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (self-testing split)"
+    exit 1
+  fi
+  # shellcheck disable=SC2086 — ST_O is the recorded opts string, word-split on purpose (as apply_section_for does)
+  git -C "$CLONE" apply -p1 $ST_O "$REP/selftest.test.diff" > "$REP/apply_test.out" 2>&1
+  rc=$?
+else
+apply_section_for "$TEST_FILE" > "$REP/apply_test.out" 2>&1
+rc=$?
+fi
+if [ "$rc" -ne 0 ]; then
+  fail "A4 the test hunk alone did not apply (rc=$rc): $(head -3 "$REP/apply_test.out" | tr '\n' ' ')"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A4"
+  exit 1
+fi
+if [ "$MODE" = test_only ]; then
+  # plant the brief's tamper: the exact line at the tip is replaced; refuse if the text does not match
+  python3 - "$INPUT" "$CLONE/$PRODUCT" > "$REP/tamper.out" 2>&1 <<'PYT'
+import json, sys
+d = json.load(open(sys.argv[1])); t = d["defect_line"]["tamper"]; p = sys.argv[2]
+lines = open(p, encoding="utf-8").read().split("\n")
+i = int(t["line"]) - 1
+if lines[i].strip() != t["from"].strip():
+    print(f"TAMPER REFUSED: line {t['line']} at the tip is {lines[i]!r}, the brief says {t['from']!r}"); sys.exit(2)
+lines[i] = t["to"]; open(p, "w", encoding="utf-8").write("\n".join(lines)); print(f"tampered {p}:{t['line']}: {t['from']!r} -> {t['to']!r}")
+PYT
+  rc_t=$?
+  if [ "$rc_t" -ne 0 ]; then
+    fail "A4 (test-only) the tamper could not be planted: $(cat "$REP/tamper.out" | tr '\n' ' ')"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (tamper)"
+    exit 1
+  fi
+  echo "A4 (test-only): $(cat "$REP/tamper.out")"
+fi
+rc_red="$(run_vitest red_first "$TEST_REL")"
+RED="$(summ red_first)"
+echo "test-only at tip: rc=$rc_red $RED"
+if [ "$MODE" = test_only ]; then
+  git -C "$CLONE" checkout -- "$PRODUCT" > "$REP/tamper_revert.out" 2>&1 && echo "A4 (test-only): tamper reverted ($PRODUCT back to the tip)" || echo "A4 (test-only): WARNING tamper revert failed: $(cat "$REP/tamper_revert.out")"
+fi
+red_total="$(getn "$RED" total)"; red_failed="$(getn "$RED" failed)"; red_passed="$(getn "$RED" passed)"
+# 2026-09-15 A4 twin (KS-1087 night3): all three cells "failed" at the tip with `ReferenceError: deleteFn is
+# not defined` — a test-side bug read as a red, and the CONTROL cell red too. A red counts only when it is
+# an ASSERTION failure and every non-🔴 cell (the controls) PASSES at the untouched tip; otherwise the
+# harness cannot reach the code and the "red" proves nothing.
+# 2026-09-15 19:0x (KS-1172, modify-in-place): an EXISTING cell the brief DECLARES under `## Red cells`
+# (input defect_line.red_cells, title substrings) counts as a red when its failure is an ASSERTION —
+# a widened exact-set pin has no 🔴 in its title. Undeclared non-🔴 reds are still control reds.
+# 2026-09-17 17:xx A4 ALL-REDS (search 17l "Wednesday must read" item 2): A4 passed when ANY declared cell went red —
+# KS-1123 wrong_emptytwin (R1 fed '' instead of 0, so R1 GREEN under the tamper) got RESULT PASS (7/7) on 1 failed / 4
+# run. EVERY `## Red cells` entry must now fail BY ASSERTION in this run, or A4 FAILS naming the entries that did not.
+# Matching: a declaration that EQUALS a cell title (whitespace-normalised; every 09-16/09-17 brief) is satisfied only
+# by THAT cell failing — a longer failed title that merely contains it (a twin) does not count. A declaration equal to
+# no title is the documented "title substring" form (KS-1172 night9/10, KS-864-F1009): satisfied by >=1 assertion-red
+# title containing it at word boundaries ("KS-1 R1" never matches "KS-1 R10"). Declared-green names go to
+# $REP/a4_declared_green.out (always rewritten). The PASS line is byte-identical to before (golden checker.out arms
+# compare it). Arms: tests/a4_allreds_arms.sh.
+# 2026-09-18 A4-ASSERT (found by the test_only tier's ARM8): a red was classed as an assertion when its message contained
+# the substring "expected" (any case) — so `SyntaxError: Unexpected end of JSON input` / `Unexpected token` (a test that
+# never reached its assertion) counted as an assertion red, and a 🔴 cell failing that way passed A4. The predicate is now
+# the test_only tier's (tasks/test_only/checker.sh cells_of): `AssertionError` (vitest/chai) or an `expect(` frame (jest
+# `expect(received).toBe(expected)`), byte-identical — tests/code_patch_a4_assertion_arms.sh guards the two against drift.
+# EVERY failed cell that is not an assertion is now a non-assertion red (was: only a message naming Reference/Type/Syntax/
+# RangeError and lacking "expected" — "Error: Cannot find module …" or "Error: Cannot nest a describe …" slipped through),
+# and a file-level load error (a testResult failed with no assertionResults) is one too. Arms: tests/code_patch_a4_assertion_arms.sh.
+A4_NOTE="$(python3 - "$REP/red_first.json" "$INPUT" "$REP/a4_declared_green.out" <<'PY4'
+import json, sys, re
+open(sys.argv[3], "w").close()
+try: j = json.load(open(sys.argv[1]))
+except Exception as e: print(f"UNREADABLE {e}"); sys.exit()
+declared = ((json.load(open(sys.argv[2])).get("defect_line") or {}).get("red_cells")) or []
+ctrl_red = []; nonassert = []; declared_hit = []
+# the predicate of the test_only tier, verbatim: tasks/test_only/checker.sh cells_of. NOT a substring test for "expected"
+assertion = lambda msgs: ("AssertionError" in msgs) or bool(re.search(r"\bexpect\(", msgs))
+for tf in j.get("testResults", []):
+    if tf.get("status") == "failed" and not tf.get("assertionResults"):
+        nonassert.append("(file) " + (tf.get("name", "?").rsplit("/", 1)[-1]) + " -> " + (tf.get("message") or "").strip().split("\n")[0][:90])
+    for a in tf.get("assertionResults", []):
+        t = a.get("title", ""); msgs = " ".join(a.get("failureMessages") or [])
+        if a.get("status") == "failed":
+            is_assert = assertion(msgs)
+            if "🔴" not in t:
+                if any(d and d in t for d in declared) and is_assert: declared_hit.append(t[:60])
+                else: ctrl_red.append(t[:60])
+            if not is_assert:
+                nonassert.append(t[:60] + " -> " + msgs.strip().split("\n")[0][:90])
+out = []
+if ctrl_red: out.append("CONTROL cell(s) red at the tip: " + " | ".join(ctrl_red))
+if declared_hit: sys.stderr.write("A4 declared red cell(s) (brief ## Red cells, assertion red): " + " | ".join(declared_hit) + "\n")
+if nonassert: out.append("non-assertion failure(s): " + " | ".join(nonassert))
+nrm = lambda s: " ".join((s or "").split())
+cells = []
+for tf in j.get("testResults", []):
+    for a in tf.get("assertionResults", []):
+        msgs = " ".join(a.get("failureMessages") or [])
+        red = a.get("status") == "failed" and assertion(msgs)
+        cells.append((nrm(a.get("title", "")), red))
+green_decl = []
+for d in [nrm(x) for x in declared if nrm(x)]:
+    exact = [red for (t, red) in cells if t == d]
+    if exact:
+        if not all(exact): green_decl.append(d)
+        continue
+    pat = re.compile(("(?<!\\w)" if re.match(r"\w", d[0]) else "") + re.escape(d) + ("(?!\\w)" if re.match(r"\w", d[-1]) else ""))
+    if not any(red for (t, red) in cells if pat.search(t)): green_decl.append(d)
+if green_decl:
+    open(sys.argv[3], "w").write("\n".join(green_decl) + "\n")
+print(" ; ".join(out))
+PY4
+)"
+A4_GREEN_DECL="$(tr '\n' '|' < "$REP/a4_declared_green.out" 2>/dev/null | sed 's/|$//; s/|/ | /g')"
+if [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ] && [ -z "$A4_NOTE" ] && [ -z "$A4_GREEN_DECL" ]; then
+  pass "A4 RED-FIRST: $TEST_REL fails at the untouched tip ($red_failed failed / $red_total run; controls green; assertion reds)"
+elif [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ] && [ -n "$A4_NOTE" ]; then
+  fail "A4 RED-FIRST: the test is red at the tip but NOT for the right reason — $A4_NOTE ($red_failed failed / $red_total run); the harness does not reach the code, so the red proves nothing"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (a test-side defect, not a product red)"
+  exit 1
+elif [ "$rc_red" -ne 0 ] && [ "$red_total" -gt 0 ] && [ "$red_failed" -ge 1 ]; then
+  fail "A4 RED-FIRST: declared red cell(s) did NOT fail by assertion$( [ "$MODE" = test_only ] && echo " under the tamper" || echo " at the tip") — $A4_GREEN_DECL ($red_failed failed / $red_total run); every cell under the brief's ## Red cells must red, or the test does not prove what it declares"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (a declared red cell stayed green)"
+  exit 1
+elif [ "$red_total" -eq 0 ]; then
+  fail "A4 RED-FIRST: the test file did not run any test at the tip (load/compile error, not a red) — $(head -c 300 "$REP/red_first.out" | tr '\n' ' ')"
+else
+  fail "A4 RED-FIRST: the test file is NOT red at the untouched tip (rc=$rc_red, $red_failed failed / $red_total run) — it does not prove the defect"
+fi
+
+# ---------------------------------------------------------------- A5 green-after
+if [ "$MODE" = test_only ]; then
+  echo "A5 (test-only): no product hunk — the test must be GREEN at the untouched tip" > "$REP/apply_product.out"; rc=0
+elif [ "$MODE" = self_testing ]; then
+  # shellcheck disable=SC2086
+  git -C "$CLONE" apply -p1 $ST_O "$REP/selftest.prod.diff" > "$REP/apply_product.out" 2>&1
+  rc=$?
+else
+apply_section_for "$PRODUCT" > "$REP/apply_product.out" 2>&1
+rc=$?
+fi
+if [ "$rc" -ne 0 ]; then
+  fail "A5 the product hunk did not apply (rc=$rc): $(head -3 "$REP/apply_product.out" | tr '\n' ' ')"
+  echo "RESULT: FAIL ($FAILS failed) — stopped at A5"
+  exit 1
+fi
+rc_green="$(run_vitest green_after "$TEST_REL")"
+GREEN="$(summ green_after)"
+echo "test after product hunk: rc=$rc_green $GREEN"
+g_total="$(getn "$GREEN" total)"; g_failed="$(getn "$GREEN" failed)"; g_passed="$(getn "$GREEN" passed)"
+if [ "$rc_green" -eq 0 ] && [ "$g_total" -gt 0 ] && [ "$g_failed" -eq 0 ] && [ "$g_passed" -ge 1 ]; then
+  pass "A5 GREEN-AFTER: $TEST_REL passes with the product hunk ($g_passed passed / $g_total run)"
+else
+  fail "A5 GREEN-AFTER: $TEST_REL still red (or empty) after the product hunk (rc=$rc_green, $g_failed failed / $g_total run): $(getn "$GREEN" failed_names)"
+fi
+if [ "$red_passed" -ge 1 ] && [ "$g_passed" -ge 1 ]; then
+  echo "INFO control cell present: $red_passed cell(s) passed BEFORE and $g_passed AFTER (the harness reaches the code both times)"
+else
+  echo "INFO control cell present: NO ($red_passed passed before, $g_passed after) — the task asked for one; not gated"
+fi
+
+# ---------------------------------------------------------------- A6 whole suite
+rc_after="$(run_vitest after_suite)"
+AFTER="$(summ after_suite)"
+echo "after suite rc=$rc_after $AFTER"
+python3 - "$REP/baseline_suite.json" "$REP/after_suite.json" > "$REP/suite_delta.out" 2>&1 <<'PYEOF'
+import json, sys
+def failed(p):
+    j = json.load(open(p)); s = set()
+    for r in j.get("testResults", []):
+        for a in r.get("assertionResults", []):
+            if a.get("status") == "failed": s.add((r["name"].split("/")[-1], a.get("fullName")))
+        if r.get("status") == "failed" and not r.get("assertionResults"): s.add((r["name"].split("/")[-1], "<LOAD ERROR>"))
+    return j, s
+jb, fb = failed(sys.argv[1]); ja, fa = failed(sys.argv[2])
+new = sorted(fa - fb); fixed = sorted(fb - fa)
+print(f"baseline: total={jb['numTotalTests']} failed={jb['numFailedTests']} | after: total={ja['numTotalTests']} failed={ja['numFailedTests']}")
+print(f"develop's own reds (attributed, not counted): {sorted(fb)}")
+print(f"NEW reds: {new}")
+print(f"reds fixed by the patch: {fixed}")
+print(f"tests added: {ja['numTotalTests'] - jb['numTotalTests']}")
+sys.exit(0 if not new else 1)
+PYEOF
+rc=$?
+cat "$REP/suite_delta.out"
+if [ "$rc" -eq 0 ]; then
+  pass "A6 whole $SERVICE suite: no NEW red vs the untouched tip"
+else
+  fail "A6 whole $SERVICE suite: NEW red(s) vs the untouched tip (see suite_delta.out)"
+fi
+
+# ---------------------------------------------------------------- A7 tsc
+( cd "$SVC" && npx tsc --noEmit -p . ) > "$REP/after_tsc.out" 2>&1
+rc_tsc=$?
+if [ "$rc_tsc" -eq 0 ]; then
+  pass "A7 tsc --noEmit for $SERVICE: rc 0 after the patch (baseline rc=$rc_base_tsc)"
+else
+  fail "A7 tsc --noEmit for $SERVICE: rc=$rc_tsc after the patch (baseline rc=$rc_base_tsc): $(head -5 "$REP/after_tsc.out" | tr '\n' ' ')"
+fi
+# Informational: the test file is excluded from the service tsconfig, so
+# type-check it on its own (vitest/ts-jest-isolated runs transpile without checking types).
+# 2026-09-18 16:xx (IMPROVEMENTS 15:53 OWED row): the --types list was the constant node,vitest/globals, so a JEST
+# service (originate, governance) had no @types/jest and every jest.mock/jest.fn gave TS2708 (measured 64 on the
+# passing ks1213 reference test; 0 with node,jest). Pick it from the SERVICE'S OWN runner markers: jest.config.* /
+# scripts.test naming jest / jest|ts-jest dependency vs vitest.config.* / scripts.test naming vitest / vitest
+# dependency. Exactly one side seen -> that list; neither or both -> today's node,vitest/globals plus one INFO line.
+# BEGIN tsc_test_types (cut out verbatim by tests/checker_tsc_types_by_runner_arms.sh)
+tsc_test_types() {
+  # tsc_test_types <svc_dir> -> one line "<types>\t<why>"; <types> is empty when the runner could not be told
+  python3 - "$1" <<'PYEOF'
+import json, os, sys
+d = sys.argv[1]; jest = []; vit = []
+names = sorted(os.listdir(d)) if os.path.isdir(d) else []
+jest += [f for f in names if f.startswith("jest.config.")]
+vit += [f for f in names if f.startswith("vitest.config.")]
+p = os.path.join(d, "package.json")
+if os.path.isfile(p):
+    try:
+        j = json.load(open(p))
+    except Exception:
+        j = {}
+    toks = str((j.get("scripts") or {}).get("test") or "").replace("&&", " ").split()
+    if "jest" in toks: jest.append("scripts.test=jest")
+    if "vitest" in toks: vit.append("scripts.test=vitest")
+    deps = {**(j.get("dependencies") or {}), **(j.get("devDependencies") or {})}
+    jest += [k for k in ("jest", "ts-jest") if k in deps]
+    vit += [k for k in ("vitest",) if k in deps]
+why = f"jest:{jest or '-'} vitest:{vit or '-'}".replace("'", "")
+if jest and not vit: print("node,jest\t" + why)
+elif vit and not jest: print("node,vitest/globals\t" + why)
+else: print("\t" + why)
+PYEOF
+}
+# END tsc_test_types
+TSC_T_LINE="$(tsc_test_types "$SVC")"
+TSC_TYPES="${TSC_T_LINE%%	*}"; TSC_T_WHY="${TSC_T_LINE#*	}"
+if [ -z "$TSC_TYPES" ]; then
+  TSC_TYPES="node,vitest/globals"
+  echo "INFO tsc test-file types: could not tell $SERVICE's test runner ($TSC_T_WHY) — kept the old default --types $TSC_TYPES"
+fi
+( cd "$SVC" && npx tsc --noEmit --strict --esModuleInterop --skipLibCheck --target ES2022 --module commonjs --moduleResolution node --types "$TSC_TYPES" "$TEST_REL" ) > "$REP/after_tsc_testfile.out" 2>&1
+rc_tsc_t=$?
+echo "INFO tsc on the test file alone (--types $TSC_TYPES): rc=$rc_tsc_t ($(wc -l < "$REP/after_tsc_testfile.out" | tr -d ' ') lines; not gated — the runner does not type-check and the service tsconfig excludes __tests__)"
+
+echo "SUMMARY files=$N_TOUCHED +$ADDS/-$DELS test=$TEST_REL red_first=$([ "$rc_red" -ne 0 ] && [ "$red_failed" -ge 1 ] && echo yes || echo no) apply_mode=$A2_MODE"
+if [ "$FAILS" -eq 0 ]; then
+  echo "RESULT: PASS (7/7)"
+  exit 0
+fi
+echo "RESULT: FAIL ($FAILS failed)"
+exit 1
