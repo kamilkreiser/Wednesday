@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-15 12:47 from 237 lesson files (1,041,837 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 192. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-15 13:39 from 238 lesson files (1,045,090 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 193. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7265,4 +7265,17 @@ sections (open the file for these): How to apply
 5. **Mechanism:** the 80% advisory belongs in `fleet/usage_gate.sh` beside the 90% refusal (rc 0, loud, naming this file). Shared tooling: claim first (`wed_claim.sh`).
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the hard stop above 90%, unchanged) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-10-06_past-70pct-spark-takes-80pct-of-tasks]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## A sync is not done until every folder is counted on both sides; never delete or "clean space" on the strength of a folder existing
+`2026-10-15_a-sync-is-not-done-until-every-folder-is-counted-on-both-sides.md` · correction · 2026-10-15 · status: live · tier: W
+
+**Kam's words (verbatim):** *"so at some point these directories got deleted and lost. Not good. please make sure this never
+happens again especially through syncs or cleaning of space."*
+
+sections (open the file for these): What happened (measured 2026-10-15) · The rules (every seat, every sync, every space clean-up) · How to apply
+
+## How to apply
+Any seat asked to sync, move, copy, mirror, migrate or free space runs rules 1–5 as its checklist. It reports the per-folder
+count table to Kam BEFORE saying "done".
 
