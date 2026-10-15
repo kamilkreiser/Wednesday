@@ -452,7 +452,20 @@ def hold_code_patch():
     mt = re.search(r'baseline: total=(\d+) failed=(\d+) \| after: total=(\d+) failed=(\d+)', totals_line)
     if not mt or (int(mt.group(1)), int(mt.group(2)), int(mt.group(3)), int(mt.group(4))) != (bs['numTotalTests'], bs['numFailedTests'], af['numTotalTests'], af['numFailedTests']):
         die(f"suite_delta.out totals {totals_line!r} disagree with baseline_suite.json/after_suite.json ({bs['numTotalTests']}/{bs['numFailedTests']} vs {af['numTotalTests']}/{af['numFailedTests']})")
-    if newreds_line.strip() != 'NEW reds: []': die(f"suite_delta.out reports new reds: {newreds_line}")
+    a6_flaky_note = ''
+    if newreds_line.strip() != 'NEW reds: []':
+        # 2026-10-16 (KS-1543 p3): the checker's A6 ISOLATION RE-CHECK may PASS new reds whose files are green ALONE x2 with the
+        # patch (FLAKY-UNDER-LOAD). Accept ONLY when checker.out carries that PASS A6 line AND every new-red FILE is named in the
+        # INFO FLAKY-UNDER-LOAD list; anything else still refuses.
+        ck = _read(os.path.join(run, 'checker.out'), 'checker.out')
+        info = next((l for l in ck.splitlines() if l.startswith('INFO A6 FLAKY-UNDER-LOAD:')), '')
+        a6_passed = any(l.startswith('PASS A6 ') and 'FLAKY-UNDER-LOAD' in l for l in ck.splitlines())
+        flaky = set(info.split(':', 1)[1].split()) if info else set()
+        newfiles = set(re.findall(r"\('([^']+)'", newreds_line))
+        if not (a6_passed and newfiles and newfiles <= flaky):
+            die(f"suite_delta.out reports new reds not cleared by A6's isolation re-check: {newreds_line[:300]} (flaky list: {sorted(flaky)})")
+        a6_flaky_note = f"A6 FLAKY-UNDER-LOAD: new reds only in {len(newfiles)} file(s) green ALONE x2 with the patch ({', '.join(sorted(newfiles))})"
+        print('NOTE:', a6_flaky_note)
 
     # 7. the golden — CONTENT compared, each measurement its own clause; never a byte-identity claim unless cmp said so
     loose_apply_mode = ''; loose_apply_strict_err = ''
