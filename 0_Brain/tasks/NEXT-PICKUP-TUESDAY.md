@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟠 DELTA 185 — 2026-10-16 ~10:0x BOOT CORRECTION (s107, ctx 12%). **READ THIS FIRST, then DELTA 184 — 184's blockers and FIRST WORK stand, re-measured.**
+### WHAT HAPPENED
+- The cockpit booted Tuesday at 09:56 from **/Volumes/Laptop-DEV/TUESDAY on Kamils-Mac-mini**, whose checkout was the **2026-09-25 rsync copy** of DevMASTER (HEAD 05262d3 of 09-16, **7871 behind** origin; boot prompt, hooks and both digests came from that stale tree). T9 NOT mounted, DevMASTER NOT mounted; only Laptop-DEV (Friday's 10-16 wrap: "the Laptop-DEV drive goes to Tuesday's machine"; its Datasec projects were synced from the T9 and verified — **the TUESDAY brain folder was not**).
+- s107 fast-forwarded this checkout to origin/main (10:0x). **Nothing lost:** the copy's whole local state (incl. untracked) is `stash@{0}` "tuesday-boot-2026-10-16: Laptop-DEV 09-25 rsync copy state…". Of 187 modified tracked files, 180 local versions exist in origin history; the 7 that do not = 2 dashboard feeds (09-25), usage_tuesday.json, both digests (regenerated at 09:56 from stale lessons), the 09-25 NEXT-PICKUP-TUESDAY (superseded by DELTA 184), a night gate log.
+- s107 then self-rotated at ctx 12% so the CURRENT Launch_Tuesday.command boots you. No other action taken: no brief, no card, no mail sent, no Datasec repo touched.
+### FIRST, BEFORE 184's WORK
+1. **Friday handed you HPSM-POC, MPS Calculator, Security Composer (+ HPSM records)** on 10-15: mails in tuesday-agent@ "[Datasec/Friday -> Tuesday] HANDOVER …" (10-15 00:02Z) and "HANDOVER UPDATE: HPSM master = laptop drive; Datasec folder synced" (10-15 19:51Z); package `0_Brain/handover/2026-10-15_friday-to-tuesday/` (00–04). Unread by any Tuesday seat until now.
+2. **Blocker 1 (usage) looks CLEARED:** statusline at 09:59 read `7d:0% renews:6d 23h` (was 97% on 10-14). Re-measure with usage_gate.sh before any launch.
+3. **Blocker 2 (Code Security on datasecau/Reporting_Dashboard_Au): NOT re-measured.** Friday 10-13 19:55Z: back on for HPSM-POC only.
+4. **Datasec paths are now /Volumes/Laptop-DEV/!CODING/Datasec/** (DevMASTER unmounted). 4_Credentials/ (gitignored: .env, per-project .azure/.gh-config) on this drive is the 09-25 copy — verify identities at point of use.
+### OWED (shared tooling, claim with Wednesday first)
+- **Launcher booted a seat from a checkout 7871 commits behind without a word.** The launcher should fetch and REFUSE (or loudly warn) when HEAD is far behind origin/main, before generating digests from stale lessons.
+
 ## 🌙 DELTA 184 — 2026-10-14 06:4x WRAP (s106, Kam: "please wrap uup"). **READ THIS FIRST. DELTA 183's FIRST WORK stands, but it is BLOCKED TWICE; check both before anything else.**
 ### BLOCKERS (each re-measured before acting)
 1. **Usage:** statusline 7d 97% at 06:08, renews ~3d 22h; `usage_gate.sh` rc 3. No seat launches until Kam signs in a fresh account, says go past the limit, or the allowance renews.
