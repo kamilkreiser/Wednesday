@@ -6,6 +6,20 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 193 — 2026-10-16 16:40 (s110, post-rotation seat, ctx 29%; band 80-90). **READ THIS FIRST. It supersedes 192's FIRST WORK 1, 2 and 5; 192's items 3-4 and 189's STANDING (feedback sweep every boot) stand.**
+### DONE this seat (each verified at source)
+- **NexusAI RD-846 LIVE on demo**: DEPLOYED mail 05:20Z (DKIM pass); Tuesday's own curl 16:21:24 = 2.2.1 build def3ac7e654fdacd = own shasum of 17fc6c5 [:16]. Kam told (bf-616c5af03beb). O told (ANSWER mail) to re-read group logs ~05:50Z then WRAP without waiting; rollback to anchor on any hit. **On its WRAP mail: score, pane_close %2.** (send_brief tagged the mail "[Wednesday -> …]": the seat-label lookup is wrong for Tuesday — OWED, claim with Wednesday.)
+- Feedback sweep 2: 0 new since 12:58 (projects_index/2026-10-16_feedback-sweep-2.md; mailbox watermark 05:14:29Z, Jira 16:18 AEDT).
+- **B160 (MPS Pkcs-in-package, tier 1)** launched %27 Datasec/MPS-P (brief tuesday/briefs/2026-10-16_B160_…; STATUS …/Briefs/2026-10-16_B160_STATUS.md). On READY: PR, commission a tier-1 gate, merge after GO, then a hosted-deploy CARD to Kam.
+- **MPS READY inventory** (tuesday/briefs/2026-10-16_MPS-READY-INVENTORY.md): 31 READY (21 t2, 10 t1), 16 waiting. **Gates launched:** B158 %28 MPS-R (lane D 150/158/151/174c), B159 %29 MPS-S (C2 170/179, E 141/147/182, C1 136). B157 %26 MPS-Q still running (F+H). Last lines `VERDICT: B15x …`.
+- **RULING (Tuesday 16:3x): every stack merges as ONE squash PR from its top** (squash per member conflicts at every second member; measured by the drafter). 171 → B102 ADDENDUM-2 (lane C2 builds 171-r2 on main; tapped). 151/174c vs lane D need -r2 after 158 (174c regenerated with sync-contract.mjs, never hand-merged).
+- Tier-2 review at source: review subagent writing tuesday/briefs/2026-10-16_MPS-TIER2-REVIEW.md → then Tuesday spot-checks, opens PRs (stack tops), merges after CodeQL — **only after B157's verdict** (no main moves while B157 runs).
+### NEXT (in order)
+1. Verdicts B157 / B158 / B159: read STATUS whole, score, pane_close; merge GO branches one at a time in the inventory's order (tier 2 first, then 179 → 150→158 (as one PR) → 170 → 151-r2 → 174c-r2 → 143→147 → 141 → 182 → 136 last; 136's FOR KAM Entra step and the "four-role owner loses act-as" consequence go to Kam on a card before any hosted deploy).
+2. Kam's WORDS gate (before any MPS hosted deploy): lane D issue texts render on screen (PurchaseResultView.tsx:204, PriceView.tsx:257); all Table 2 last-column sentences.
+3. Lane panes %14-%23 are wrapped (STATUS DONE) except C2 (%16, doing 171-r2): close them with pane_close once their READY branches are merged or re-briefed (waiting items need lane D's contract).
+4. Vision fix 2 (PR #10) and gate 18 as 192 item 3. Digest: read to line 2400 of 7340 this seat.
+
 ## 🔴 DELTA 192 — 2026-10-16 16:15 ROTATION HANDOVER (s109, ctx ~78%; band 80-90). **READ THIS FIRST, then 191 (its DONE list) and 189's STANDING line (feedback sweep at EVERY boot: Kam 12:54:43).**
 ### FIRST WORK FOR THE NEXT SEAT (in order)
 1. **NexusAI-O (%2) demo deploy of main 17fc6c5 is IN FLIGHT** (RD-846 MERGED 04:16Z, verified by Tuesday: tree = gated head 9251106549ce; push Build 38849816252 success). On its DEPLOYED mail: curl the demo /api/health yourself, expect build `def3ac7e654fdacd` (= sha256("17fc6c5157d5446cc015e97555fdc1ffcdc986ee")[:16], the seat's computation: recompute it), then tell Kam (RD-846 fixed; the demo now runs newer code than the 2.2.0 Marketplace package; rollback anchor nexusaidev-app--s81j-220-fdda330 kept). Then WRAP O (score, pane_close).
