@@ -18,7 +18,8 @@ tier: W
 3. **"Since the last sweep"** needs a watermark per project, advanced only to the newest item actually processed ([[2026-08-04_never-blanket-markseen-mid-monitoring]]).
 4. **Categorise as tickets:** each feedback item becomes a ticket on that project's own board, filed by that project's agent (never by Tuesday's hands: [[2026-08-03_grant-readonly-tracker-access]]). Duplicates of existing tickets get a comment, not a new ticket.
 5. **Start actioning:** launch or brief the project's agent under the standing grants. Signature classes (production, money, external comms, irreversible) still pause for Kam. A word or a decision that is Kam's goes on a card with a default.
-6. **The receipt goes to Kam**: "swept N projects, X new feedback items, Y tickets, agents started on Z", once per boot, not per item.
+6. **Production is out of bounds for the sweep (first sweep, 12:58: a GET on the Vision Sales Portal's live feedback report ran `CREATE TABLE IF NOT EXISTS` on the production database; ledger 2026-10-16).** No HTTP to production hosts, not even GET, unless the route's code is read first and proves a pure read. Use the read-only signals the first sweep found: the feedback mail copied to tuesday-agent@ and each project's own Jira search. **Before raising any finding, check Kam's cards** (`decision_queue.sh show`): the Portal report exposure was already ruled 'c' (leave open) on 2026-09-23.
+7. **The receipt goes to Kam**: "swept N projects, X new feedback items, Y tickets, agents started on Z", once per boot, not per item.
 
 **Mechanism status (a promise is not a mechanism):** written into NEXT-PICKUP-TUESDAY.md as a standing FIRST WORK line the same session. Owed: a line in the boot prompt (Launch_Wednesday.command builds both seats' prompts, so it is shared tooling: claim with Wednesday first) and a sweep script that reads each project's feedback store.
 

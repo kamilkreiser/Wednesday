@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-16 13:12 from 240 lesson files (1,050,666 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 17 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-16 13:27 from 241 lesson files (1,054,069 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 17 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7366,6 +7366,25 @@ count table to Kam BEFORE saying "done".
 6. **Monday's output:** the policy file, the dry-run's first report with the numbers, and a card to Kam with the policy's BLUF and the first run's proposed removals (default: run the dry-run weekly and remove nothing until he taps).
 
 **Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (narrowed, not retired) · [[2026-09-29_regenerable-build-leftovers-are-not-kept]] · [[2026-10-07_archive-bulky-leftovers-to-g-drive-clear-after-a-month]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] (the Monday date is the trigger) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## At every boot and every rotation, Tuesday sweeps each Datasec project for new feedback items, tickets them, and starts agents on them
+`2026-10-16_tuesday-boot-sweeps-project-feedback-into-tickets.md` · preference · 2026-10-16 · status: live
+
+**Kam's words, verbatim (live board, 12:54:43 AEDT, view=tuesday):** "So, as part of your startup process, and every time you renew your seat, check whether any of the projects have feedback items that have been added and categorize these as tickets and start actioning them."
+
+sections (open the file for these): How to apply
+
+## How to apply
+1. **When:** every boot and every rotation, not only the morning one. It sits beside the morning ticket sweep ([[2026-08-12_morning-ticket-sweep-autostart]]), and unlike that grant it is not limited to mornings.
+2. **Where feedback lands is per project and must be measured, not assumed.** The in-app feedback buttons (MPS feedback pill, HPSM-POC Admin feedback screen to Jira, Composer, QuickQuote/Vision) and the reviews Kam forwards each land somewhere different. The first sweep's job includes writing down, per project, where its feedback lands and how to read it read-only. Record that map in `0_Brain/projects_index/` so later sweeps read it.
+3. **"Since the last sweep"** needs a watermark per project, advanced only to the newest item actually processed ([[2026-08-04_never-blanket-markseen-mid-monitoring]]).
+4. **Categorise as tickets:** each feedback item becomes a ticket on that project's own board, filed by that project's agent (never by Tuesday's hands: [[2026-08-03_grant-readonly-tracker-access]]). Duplicates of existing tickets get a comment, not a new ticket.
+5. **Start actioning:** launch or brief the project's agent under the standing grants. Signature classes (production, money, external comms, irreversible) still pause for Kam. A word or a decision that is Kam's goes on a card with a default.
+6. **Production is out of bounds for the sweep (first sweep, 12:58: a GET on the Vision Sales Portal's live feedback report ran `CREATE TABLE IF NOT EXISTS` on the production database; ledger 2026-10-16).** No HTTP to production hosts, not even GET, unless the route's code is read first and proves a pure read. Use the read-only signals the first sweep found: the feedback mail copied to tuesday-agent@ and each project's own Jira search. **Before raising any finding, check Kam's cards** (`decision_queue.sh show`): the Portal report exposure was already ruled 'c' (leave open) on 2026-09-23.
+7. **The receipt goes to Kam**: "swept N projects, X new feedback items, Y tickets, agents started on Z", once per boot, not per item.
+
+**Mechanism status (a promise is not a mechanism):** written into NEXT-PICKUP-TUESDAY.md as a standing FIRST WORK line the same session. Owed: a line in the boot prompt (Launch_Wednesday.command builds both seats' prompts, so it is shared tooling: claim with Wednesday first) and a sweep script that reads each project's feedback store.
 
 
 ## Grant: Friday's push-to-demo-when-ready now applies to Tuesday; hosted HPSM-POC is unfrozen; this account controls NexusAI and every Datasec project
