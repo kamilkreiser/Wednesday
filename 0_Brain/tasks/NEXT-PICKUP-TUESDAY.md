@@ -6,6 +6,27 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 186 — 2026-10-16 ~12:0x CHECKPOINT (s108, ctx 65%; band 80-90). **READ THIS FIRST. It supersedes 185 and 184's blockers (both CLEARED) and FIRST WORK.**
+### KAM TODAY (all recorded)
+- **Working drive = /Volumes/Laptop-DEV** (Kam ~11:2x "do a full check and transfer so that this (laptop drive) becomes your new working drive not the t9"). Transfer DONE + counted (note 11:29-11:34); T9 is a stale backup, read-only. Jobs reinstalled from Laptop-DEV; **Tuesday's NAS sync HELD** (hold file + launchctl disable) and carded: `tuesday-nassync-held-datasec-1016` (rec a, default nothing re-arms).
+- **Grant ~11:4x** (learnings/2026-10-16_tuesday-inherits-push-to-demo-hpsmpoc-unfrozen-account-controls-datasec.md + EXPIRING-GRANTS row): push-to-demo-when-ready is Tuesday's (Composer demo + hosted HPSM-POC; MPS hosted stays card-per-deploy); **HPSM-POC unfrozen, "keep working on it now"**; merge-once-tested on every Datasec project (this account).
+- GitHub logged in for HPSM-POC, MPS, Composer (kamilDatasec, push=true). Live board works (cert copied from T9, dashboard-cloud venv built; poller + usage publisher armed — re-arm after any reboot).
+- **~12:0x: Paul cannot sign in to Security Composer → "check why and resolve. Tell me once he can log in again."** → seat Composer-A (B154). **Tell Kam when B154 says DONE, with what to tell Paul.**
+- **~12:0x: MPS review with Paul (5 files in ~/Downloads) → tickets for everything + agents to action them + all feedback items** → seat MPS-B (B99, records + lanes); then LAUNCH THE LANES it proposes.
+### LIVE SEATS (briefs in 2_Project_Files/tuesday/briefs/ or fleet/briefs_staged/; launched via 2_Project_Files/tuesday/brief_seat.sh for Friday's projects)
+- %2 **NexusAI-O (S99O)**: RD-846 READY FOR GATE @ 3a459146919e (mail 00:48:02Z; ACR cr4q builds; /app identical; 4506/4506). **Gate 23 kit being drafted by a subagent** → fleet/qa-agent/briefs/2026-10-16_nexusai-gate-batch23.md + launchers/launch_qa_nexusai_gate_batch23.sh: READ WHOLE, launch, then merge on GO (gh pr via NexusAI GH_CONFIG_DIR) → demo deploy (steps 0-2 fresh). RD-847 filed: nexusai-lock.sh hard-codes the T9 lock path.
+- %3 **Composer-A (B154)**: Paul's sign-in. Demo = Caddy basic-auth (401 realm "restricted") in front of the app.
+- %8 **MPS-A (B98)**: Pkcs + Xml 10.0.10 advisory pin (dotnet CI red on #41 and will be on main). Then Tuesday: PR, merge, update #41 onto it, merge #41 (head 84210f78, CodeQL green), then card Kam for the MPS hosted deploy.
+- %6 **MPS-B (B99)**: the Paul-review tickets + feedback sweep + lanes.
+- %7 **HPSM-POC-G (B250)**: records owed (Jira closes, tickets, C-105). Final token `RECORDS DONE: B250 @`.
+- **NOT launched: HPSM-POC-F (B249 hosted deploy d916baf)**: brief ready at tuesday/briefs/2026-10-16_B249_…; it ships #152's Admin-screen words (B243: 1 approved, 9 for Kam), so **a words card to Kam comes first** (B243_STATUS.md:12, :95 for the sentences).
+### DONE today
+- Composer #79 MERGED → main 230f9fab (parent 45591406, tree = gated tree). Main CI not yet read. Demo stays on ef916ce2 until Kam taps `composer-l05-setup-card-too-1014`.
+- MPS #41 + Composer #79 re-triggered (identical-tree empty commits).
+### WATCH OUT
+- Trust dialog on every first launch in a new folder: default is "No, exit". One pane per call, read Yes selected, then Enter (ledger 2026-10-16).
+- Watchers: wake_watch fires on mail; there is no STATUS-file watcher for the brief_seat seats yet (Friday's watch_status.sh not armed here): check their STATUS files at each checkpoint.
+
 ## 🟠 DELTA 185 — 2026-10-16 ~10:0x BOOT CORRECTION (s107, ctx 12%). **READ THIS FIRST, then DELTA 184 — 184's blockers and FIRST WORK stand, re-measured.**
 ### WHAT HAPPENED
 - The cockpit booted Tuesday at 09:56 from **/Volumes/Laptop-DEV/TUESDAY on Kamils-Mac-mini**, whose checkout was the **2026-09-25 rsync copy** of DevMASTER (HEAD 05262d3 of 09-16, **7871 behind** origin; boot prompt, hooks and both digests came from that stale tree). T9 NOT mounted, DevMASTER NOT mounted; only Laptop-DEV (Friday's 10-16 wrap: "the Laptop-DEV drive goes to Tuesday's machine"; its Datasec projects were synced from the T9 and verified — **the TUESDAY brain folder was not**).
