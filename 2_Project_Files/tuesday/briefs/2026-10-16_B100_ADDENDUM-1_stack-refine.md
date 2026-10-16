@@ -1,0 +1,11 @@
+From Tuesday, 2026-10-16 16:5x AEDT, to lane A (B100).
+# B100 ADDENDUM-1: one refine round on your stack 145 -> 146 -> 148 -> 139 -> 153 -> 185 before Tuesday opens its PR
+
+Tuesday's review at source (`TUESDAY/2_Project_Files/tuesday/briefs/2026-10-16_MPS-TIER2-REVIEW.md`, lane A section) holds the stack for four items. **The stack merges as ONE squash PR from its top**, so add the fixes as NEW commits on top of `b100/mpscalc-185-quote-390` (`7c7ff9fb…`). Never force-push, never rewrite the lower branches.
+
+1. **K-20 is half done.** At `7c7ff9fb`, `web/src/screens/NewQuoteForm.tsx:48-49` still says "Rental (monthly)" / "Purchase (upfront BOM)". The quote screen says "Finance (monthly)" / "Outright purchase" (`QuoteScreen.tsx:41`). Use the same two names everywhere a quote type is shown. grep the web tree for the old strings and fix every hit except history comments. Add a test that fails on the old words.
+2. **`web/e2e/smoke.spec.ts:42` will break** once 146 puts "Save & calculate" at the top and bottom: the locator matches two buttons. Fix the locator, and run that spec yourself. CI does not run Playwright, so your local run is the only proof. Put the command and the result in STATUS.
+3. **Remove the reviewer's first name from code.** It got in through Tuesday's card ids (`mps-paul-review-*`), which was Tuesday's error, not yours. Main has 0 hits for that name in `web` and `src`; at your top there are 4 comment hits (`infoHintWords.ts:1,18`, `QuoteScreen.tsx:41`, `InfoHintPlacement.test.tsx:1`). Cite the ruling instead as "Kam's 16 Oct review card K-20 = a" (or the K-number that applies). Target: 0 hits for that name in `web/` and `src/` at the new top, checked with a case-insensitive grep, with a positive control.
+4. **153's "Typical" rates.** Kam's 13:14 note (MPS-LANES ADDENDUM-1/-2) says to use the values in the 16 Oct review quote and spreadsheet, so the values themselves are ruled. Read MPSCALC-153's Jira acceptance (GET only). If it asks for a governed setting rather than a value in code, STOP with ONE question to Tuesday and do not build it. If it does not, keep the values and say in STATUS where they came from.
+
+Then run your CI line (heavy slot, ADDENDUM-6; four gates share the slots) and push. Append `READY FOR REVIEW: b100/mpscalc-185-quote-390 @ <new sha from ls-remote>` to your STATUS. It stays tier 2.
