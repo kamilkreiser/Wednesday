@@ -18,6 +18,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - %9 HPSM-POC-G (B250 + ADDENDUM-1 HP answers): records → RECORDS DONE: Tuesday opens the records PR and merges.
 - %11 HPSM-POC-F (B249 + ADDENDUM-1): hosted deploy → DEPLOYED: verify /health yourself, tell Kam.
 - %12 Vision (QuickQuote Dependabot round): PLAN CONFIRMATION mail due → answer it.
+### ADDED 12:4x
+- %12 Vision: GO sent for QuickQuote PR #7 @ 5ad37f1a32 (12 of 14 Dependabot alerts; Tuesday's tier-2 check at source done). Await its MERGED mail: verify the merge at source (parents + tree), alerts on main (expect 2 open, #1 #4), and the pricing-difference ticket (server path vs printed page) it was told to file. Card quickquote-decision14-puppeteer25-node22-1016 open (rec a).
+- **OWED: the HPSM (parent) half of Kam's 01:37Z forward** ("review for the HPSM - POC and HPSM project. Decide if its relevant and file"): mail body at 2_Project_Files/tuesday/inbound/2026-10-16_kam-fw-hp-playbook-intro-dbs.txt. Needs an HPSM records seat (HPSM's records repo is on records/b08 with 54 uncommitted paths; read Friday's 01_HPSM-POC.md HPSM section before briefing). Card hpsmpoc-steve-dbs-pdfs-cleared-for-ai-1016 decides whether the two PDFs may be read.
+- Composer-A CLOSED: Paul can sign in (Kam told, with the text for Paul). Optional for Kam: release the guide update (COMP-16).
+
 ### HOW THE brief_seat SEATS WAKE YOU
 They write STATUS files, not mail (Composer-A, MPS-A/B, HPSM-POC-F/G). No STATUS watcher is armed: **at every checkpoint read the last line of each STATUS file** (paths: each project's 1_Project_Definition/Briefs/2026-10-16_B<nn>_STATUS.md).
 
