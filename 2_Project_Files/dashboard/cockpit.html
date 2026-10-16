@@ -868,7 +868,8 @@ function parseEvent(m) {
           excerpt: typeof m.excerpt === "string" ? m.excerpt : "",
           key: ts + "|" + subj};
 }
-const AEST = "Australia/Brisbane";
+const AEST = "Australia/Sydney"; // was Brisbane (no daylight saving): an hour behind from 2026-10-04 (Kam 2026-10-16 13:03)
+function tzAbbr(t) { try { return new Intl.DateTimeFormat("en-AU", { timeZone: AEST, timeZoneName: "short" }).formatToParts(new Date(t)).find(p => p.type === "timeZoneName").value; } catch (e) { return "Sydney"; } }
 function aest(t) {
   try {
     return new Intl.DateTimeFormat("en-AU", {timeZone: AEST,
@@ -992,7 +993,7 @@ function renderFilters(events, decisions) {
 function askWednesday(ev) {
   // reference line into the chat input, focused, NOT sent (round-2 item 4b)
   const topic = ev.topic.length > 160 ? ev.topic.slice(0, 157) + "…" : ev.topic;
-  textEl.value = `Re: [${ev.project}] ${topic} (${aest(ev.t)} AEST) — `;
+  textEl.value = `Re: [${ev.project}] ${topic} (${aest(ev.t)} ${tzAbbr(ev.t)}) — `;
   textEl.focus();
   try { textEl.setSelectionRange(textEl.value.length, textEl.value.length); } catch (e) {}
 }
@@ -1015,7 +1016,7 @@ function eventRow(ev) {
   ask.addEventListener("click", e => { e.stopPropagation(); askWednesday(ev); });
   top.appendChild(ask);
   const when = document.createElement("span"); when.className = "when";
-  when.textContent = aest(ev.t) + " AEST"; top.appendChild(when);
+  when.textContent = aest(ev.t) + " " + tzAbbr(ev.t); top.appendChild(when);
   const sum = document.createElement("div"); sum.className = "sum";
   sum.textContent = ev.sum || ev.topic;
   row.append(top, sum);
@@ -1030,7 +1031,7 @@ function eventRow(ev) {
   det.appendChild(mk("subject", ev.topic));
   if (ev.from) det.appendChild(mk("from", ev.from));
   if (ev.inboxes.length) det.appendChild(mk("inbox", ev.inboxes.join(", ")));
-  det.appendChild(mk("received", aestFull(ev.t) + " AEST"));
+  det.appendChild(mk("received", aestFull(ev.t) + " " + tzAbbr(ev.t)));
   if (ev.excerpt) {
     const ex = document.createElement("div"); ex.className = "excerpt";
     ex.textContent = ev.excerpt;
@@ -1094,7 +1095,7 @@ function decisionCard(dec) {
   proj.textContent = dec.project;
   top.append(chip, proj);
   const when = document.createElement("span"); when.className = "when";
-  when.textContent = dec.t ? aest(dec.t) + " AEST" : "";
+  when.textContent = dec.t ? aest(dec.t) + " " + tzAbbr(dec.t) : "";
   top.appendChild(when);
   const title = document.createElement("div"); title.className = "title";
   title.textContent = dec.title;
@@ -1248,7 +1249,7 @@ function ruledRow(dec) {
   const proj = document.createElement("span"); proj.className = "proj";
   proj.textContent = dec.project;
   const when = document.createElement("span"); when.className = "when";
-  when.textContent = aest(dec.ruledT) + " AEST";
+  when.textContent = aest(dec.ruledT) + " " + tzAbbr(dec.ruledT);
   top.append(chip, proj, when);
   const sum = document.createElement("div"); sum.className = "sum";
   const chosen = dec.options.find(o => o.key === dec.ruled_choice);

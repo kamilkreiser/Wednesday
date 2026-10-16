@@ -671,7 +671,8 @@ try { const raw = JSON.parse(localStorage.getItem(FILTER_KEY) || "{}");
   if (raw && Array.isArray(raw.types)) filters.types = raw.types.filter(x => typeof x === "string");
   if (raw && Array.isArray(raw.projects)) filters.projects = raw.projects.filter(x => typeof x === "string"); } catch (e) {}
 function saveFilters() { try { localStorage.setItem(FILTER_KEY, JSON.stringify(filters)); } catch (e) {} }
-const AEST = "Australia/Brisbane";
+const AEST = "Australia/Sydney"; // was Brisbane (no daylight saving): an hour behind from 2026-10-04 (Kam 2026-10-16 13:03)
+function tzAbbr(t) { try { return new Intl.DateTimeFormat("en-AU", { timeZone: AEST, timeZoneName: "short" }).formatToParts(new Date(t)).find(p => p.type === "timeZoneName").value; } catch (e) { return "Sydney"; } }
 function aest(t) { try { return new Intl.DateTimeFormat("en-AU", { timeZone: AEST, weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(t)); }
   catch (e) { return new Date(t).toISOString().slice(11, 16) + "Z"; } }
 function aestDay(t) { try { return new Intl.DateTimeFormat("en-CA", { timeZone: AEST, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(t)); }
@@ -725,7 +726,7 @@ function decisionCard(dec) {
   const chip = document.createElement("span"); chip.className = "chip t-decision"; chip.textContent = "DECISION";
   const proj = document.createElement("span"); proj.className = "proj"; proj.textContent = dec.project;
   top.append(chip, proj);
-  const when = document.createElement("span"); when.className = "when"; when.textContent = dec.t ? aest(dec.t) + " AEST" : ""; top.appendChild(when);
+  const when = document.createElement("span"); when.className = "when"; when.textContent = dec.t ? aest(dec.t) + " " + tzAbbr(dec.t) : ""; top.appendChild(when);
   const title = document.createElement("div"); title.className = "title"; title.textContent = dec.title;
   const rec = dec.options.find(o => o.key === dec.recommended);
   if (rec && !dec.locked) { const rb = document.createElement("span"); rb.className = "recbadge"; rb.textContent = "rec: " + rec.label; title.appendChild(rb); }
@@ -786,7 +787,7 @@ function ruledRow(dec) {
   const top = document.createElement("div"); top.className = "top";
   const chip = document.createElement("span"); chip.className = "chip t-ruled"; chip.textContent = "RULED";
   const proj = document.createElement("span"); proj.className = "proj"; proj.textContent = dec.project;
-  const when = document.createElement("span"); when.className = "when"; when.textContent = aest(dec.ruledT) + " AEST";
+  const when = document.createElement("span"); when.className = "when"; when.textContent = aest(dec.ruledT) + " " + tzAbbr(dec.ruledT);
   top.append(chip, proj, when);
   const sum = document.createElement("div"); sum.className = "sum";
   const chosen = dec.options.find(o => o.key === dec.ruled_choice);
