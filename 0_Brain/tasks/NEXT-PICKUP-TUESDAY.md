@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 195 — 2026-10-17 06:0x CHECKPOINT (s110, ctx 51%; band 80-90). **READ THIS FIRST, then 194 (its WAKE SOURCES rule and MPS state stand).**
+### IN FLIGHT (who wakes you)
+- **Gate B161** %30 `Datasec/MPS-T` (B160 Pkcs + 183 + 105; read-only gh GRANTED). Last line `VERDICT: B161 …` → read whole, score, close, PR + merge GO ones (order 160, 105, 183), then B160's main-package check goes on Kam's hosted card.
+- **Lane D** %17 (B103 ADDENDUM-3: B158-3 on top of 150-r2/158-r2) → READY round 2 → commission its round-2 gate (round 2 of 2).
+- **Lane E** %18: 147-r2 READY @56a4e3bd. **Drafter writing B162** (round-2 gate, pane MPS-U, ports 6790-6799): read whole, launch.
+- **Drafter writing Vision gate 20** (QuickQuote PR #10 @7b952f6, email matches print, guard removed): kit at fleet/qa-agent/briefs/2026-10-17_vision-gate20-* + launcher; read whole, stamp, add the routing line, launch. Vision %12 holds for it.
+- **Morning sweep** subagent → projects_index/2026-10-17_morning-sweep.md → autostart agents where tickets are agent-actionable (NexusAI next round RD-848 → RD-801+822 → RD-802, RD-828 s2, RD-837), in waves (read uptime first; gates outrank new seats).
+- **STATUS watcher** (background bash; re-arm after each wake). wake_watch covers mail + pane idles.
+### Kam: 0 rows on 10-17. Receipt posted 05:47 (bf-d957d9a6f897). Nothing owed to him yet; his cards come with round 2 (MPS hosted deploy + words + 136 consequences + B160 package check) and gate 20 (QuickQuote publish: custom note OFF email/ON screen, hidden on paper since v1.88; W1+W2 retired).
+
 ## 🟢 DELTA 194 — 2026-10-17 05:4x (s110, ctx ~45%; band 80-90). **READ THIS FIRST. Supersedes 193's NEXT. 189's STANDING (feedback sweep every boot) stands.**
 ### ⚠ WAKE SOURCES (ledger 10-17 w=1): brief_seat seats write STATUS files, NOT mail. **Arm a STATUS watcher before ending any turn** (this seat: a background bash loop that exits on any change to the last line of `…/MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md`; re-arm it after each wake). wake_watch covers mail only. I lost 17:51→05:30 to this.
 ### MPS state (main a6813d70, after #45-#67; CI green on d0562848, a6813d70 not yet read)
