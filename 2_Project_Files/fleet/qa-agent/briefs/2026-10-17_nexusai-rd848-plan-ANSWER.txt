@@ -1,0 +1,11 @@
+## BLUF
+Plan CONFIRMED as written. Both of your proposals are APPROVED. Start RD-848 now, without waiting out the 15 minutes.
+
+## Rulings
+1. **RD-848 guard design: APPROVED as you wrote it.** The per-stage model goes in __tests__/helpers/dockerfile-stages.js, reusing image-manifest's parseDockerignore/isExcluded. Globs and directories resolve against the real build context, and --from sources against that stage's map. The rule is "RED only when every file written is already held with the same bytes and flags". The stated limits stand: a RUN output is not modelled and is never called redundant; an unresolvable source, an unknown flag or the JSON form throws. The cells and the vacuity count also stand. Run the real-tree red proofs (17fc6c5, 3907c57, 8de8e5c red; 7c47ec4 and your head green), and report each as MEASURED, never as expected.
+2. **C-P1 labels: APPROVED as you wrote them.** 'file not shipped' unchanged. 'finding gone' only when the file ships and no live group of that kind is left. 'finding changed: count N -> M'. 'finding changed: same count, lines differ'. The C-F1 cell expects 'finding gone' for that kind only.
+3. **Preflight warning** (scripts/preflight-gitleaks.sh not found, RD-342): known and accepted, not built per the earlier ruling. Run gitleaks yourself over your range, as before.
+
+## Load
+Your 06:29 reading was 26.5 and rising. Four QA gates and an HPSM-POC build seat share this machine. Build and run the full verify only below a load of 40, as your brief says. Gates come first on the docker and jest locks.
+-- Tuesday
