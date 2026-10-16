@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 201 — 2026-10-17 08:59 CHECKPOINT (s111, ctx 70%; band 80-90). **READ THIS FIRST. Supersedes 200's IN FLIGHT. 197's hosted-card list is now FILED (below). 194's WAKE SOURCES rule stands.**
+### DONE since 200 (each verified at source)
+- **PR #73 MERGED** 12f8e566 (lane D stack + B163 tests; 9/9 checks incl. CodeQL; merge tree == gated head tree 0a040061). MPS main = 12f8e566.
+- **B164 records seat DONE**: 24 MPSCALC tickets (label mpscalc-b164, Jira TOTAL=24 by board_count), 36 merge comments; pane closed.
+- **9 Kam cards filed (HTTP 201 each)**, all `-1017`: mpscalc-hosted-deploy-12f8e56 (default c: not deployed, re-raise MONDAY), -deal-usage-proposal-rates, -feedback-401-words, -negative-input-headline, -deploy-overlay-copy-retention, -rental-caption-customisation, -panel-options-rental-and-tier, -e877-supply-cost-source, -large-format-manual-items. Words list W shared to his drawer (f-9a550df047; file 5_Project_History/2026-10-17_mps-words-list-W-12f8e56.md). Kam 10-17: 0 rows; reconcile: to rule 0.
+### IN FLIGHT (who wakes you)
+- **Gates:** B252 %36 HPSM-POC (STATUS watcher) · gate 24 %38 NexusAI RD-848 (verdict MAIL) · gate 21 %39 Vision QQ PR #10 r2 (verdict MAIL; D4: on NO GO nothing merges, one publish card default HOLD if an OPEN instance emails a wrong customer document).
+- **Gate B165 kit drafter** (lane D's READY f1a4b21 target-whatif-noaudit + 5d2d7ad care-key-pattern, one tier-1 gate, shared openapi/API.md) -> tuesday/briefs/2026-10-17_B165_SEAT-V2_*.md + DRAFTER-REPORT: read WHOLE, stamp, launch Datasec/MPS-V2 (brief_seat form), STATUS watcher.
+- **Lane D %17** (B103 ADDENDUM-6): PRE1_ITEM_CLASSES line (reassigned, no lane J pane) on 13295eb; waits lane E's CLASS_LABELS; then READY; owed name-in-comments cleanup branch.
+- **Lane E %18** (B104 ADDENDUM-4): CLASS_LABELS/ParseClass stacked on 13295eb; -140 = merge 5d2d7ad + e07/e08 (reassigned from lane F) -> READY.
+- **NexusAI-O %35**: queue 2 (RD-802 verify running 08:55; C-57 session copy accepted) -> READY FOR GATE mails.
+### OWED: send_brief subject label still "[Wednesday ->" (shared tooling, claim with Wednesday); STATUS watching inside wake_watch (same); pane_close.sh WARNING should subtract the closed pane's own tree (same); Vision C-entry for the 2026-08-11 access-word ruling (next Vision brief).
+
 ## 🟢 DELTA 200 — 2026-10-17 08:01 CHECKPOINT (s111, ctx 52%; band 80-90). **READ THIS FIRST. Supersedes 199's FIRST WORK (all four done). 197's KAM HOSTED CARD list stands; 194's WAKE SOURCES rule stands (STATUS watcher before ending any turn).**
 ### IN FLIGHT (who wakes you)
 - **Gate B252** %36 HPSM-POC-G2 (b251 @9195408f over d916baf, tier 1 r1/2): STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-17_B252_STATUS.md` → VERDICT → GO: Tuesday opens ONE PR, CodeQL, merge (push-to-demo grant: hosted deploy after merge + full verify); NO GO: fix round to a builder.

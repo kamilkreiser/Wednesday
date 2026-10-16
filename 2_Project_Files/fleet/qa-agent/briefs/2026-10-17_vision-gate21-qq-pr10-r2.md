@@ -29,8 +29,8 @@ every suite set, every browser result and every comparison is RE-DERIVED by the 
 The launcher parses §PIN, refuses any placeholder, and re-reads both rows (and `refs/pull/10/head`) by `git ls-remote` immediately before launch,
 refusing on any mismatch, **including any move of QuickQuote main** (this gate pins main exactly). The verified table is appended to your prompt.
 
-SELF-CHECK: re-read end-to-end for contradictions | @STAMP@
-Self-check note: @STAMP@
+SELF-CHECK: re-read end-to-end for contradictions | Tuesday read WHOLE (806 lines) and stamped 2026-10-17 08:02:02 AEDT
+Self-check note: traps (a)-(n) accepted as the attack plan; B-STATE's refused STANDARD email stays a FAIL (Tuesday agrees with the drafter); L-EDGE (A$0.00) is a finding, not a FAIL, unless it emails a document reading A$0.00/device/month as a Custom Quote, which is G20-F1's own class: report it OPEN; load ~23 at stamp with gates B252 and 24 running.
 
 GH-API-LEG: READ-ONLY-VISION-TOKEN
 <!-- As gate 20 (gate 17's D1). The launcher exports GH_CONFIG_DIR = Vision's .gh-config behind a GET-only `gh` shim first on PATH. Change it to
@@ -39,12 +39,12 @@ GH-API-LEG: READ-ONLY-VISION-TOKEN
 AZ-READ-LEG: TUESDAY-READS
 <!-- As gate 20. The gate runs NO az. Tuesday reads the live webapp's linuxFxVersion BEFORE launch, writes it on the line below, and reads it again
      at verdict. The gate RELAYS. -->
-AZ-PRE-READ: @STAMP@
+AZ-PRE-READ: linuxFxVersion DOCKER|hpasqqacr.azurecr.io/hpas-quickquote:v0.6.4-tool2.36-437ab4b ; read 2026-10-17 08:01:49 AEDT by Tuesday (az webapp config show, read only; Vision's own AZURE_CONFIG_DIR; account show = tenant d500ebad / sub 0c57ab37, servicePrincipal)
 <!-- One line, e.g. `linuxFxVersion DOCKER|hpasqqacr.azurecr.io/hpas-quickquote:<tag> ; read <YYYY-MM-DD HH:MM:SS AEDT> by Tuesday (az, Vision's own
      AZURE_CONFIG_DIR, tenant d500ebad / sub 0c57ab37)`. The launcher refuses until it names linuxFxVersion. Drafter's expectation (NOT a reading):
      v0.6.4-tool2.36-437ab4b (Tuesday's 10-17 note 07:17: post-read 07:16:24 = v0.6.4-tool2.36-437ab4b, unchanged). -->
 
-N4-METHOD: TUESDAY-DECIDES
+N4-METHOD: FULL-TEXT
 <!-- Decision D5 (§N4). Exactly one of:
        FULL-TEXT  (gate 20's ruling, the drafter's reading again) the emailed PDF's text (pdftotext -layout) must EQUAL the printed PDF's text (the
                   page's own Generate, print media, A4, same state) after normalising ONLY the quote-number token; any other differing line is a FAIL.
@@ -52,7 +52,7 @@ N4-METHOD: TUESDAY-DECIDES
        FIGURES    money figures equal, in order; other text differences are REPORTED, not FAILs. The FULL-TEXT rows still run and are reported.
      The launcher refuses while it reads TUESDAY-DECIDES. -->
 
-ROUTING-LINE: @STAMP@
+ROUTING-LINE: QA/Vision-gate21 added to inbox_routing.conf 08:0x by Tuesday (.pre-1017-gate21 backup)
 <!-- Tuesday adds `QA/Vision-gate21|tuesday-agent@agentmail.to|no` to /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/inbox_routing.conf (pattern:
      the QA/Vision-gate20 line) and stamps this line, e.g. `QA/Vision-gate21 added to inbox_routing.conf <HH:MM> by Tuesday (.pre-1017-gate21 backup)`.
      The launcher refuses while either the conf line is absent (guard 41) or this line carries the placeholder (guard 32). The drafter did NOT edit
@@ -719,9 +719,9 @@ re-rule them.**
   Kam's own publish word, C-20). **If §N2.1-N2.2 (the red-proofs and head runs), §N3.2's head grid (9 advanced cells), §N4's comparison of those
   cells, §N10's R1-F1 pair, or §N11's U-AT / U-OVER / B-STATE rows are NOT RUN (deadline, load), the verdict is PROVISIONAL — it releases nothing**,
   never a GO on the builder's evidence. §N3.3 probes, §N2.3 mutants and the phone widths NOT RUN do not make it provisional; they are NOT TESTED
-  lines. RULED: @STAMP@
+  lines. RULED: as drafted, PLUS (Tuesday 2026-10-17 08:02:02 AEDT): on a NO GO nothing merges on Tuesday's word; the §N10 CLOSED and OPEN instances go to Kam on ONE publish card with your measured table, and the card's default is HOLD (no publish) if any OPEN instance lets a rep email a customer document that is wrong (email != print, an inf/NaN figure, or a Custom Quote at A$0.00/device/month). A GO / GO WITH FINDINGS also ships only on Kam's word (C-20).
 - **D5 — N4-METHOD (§N4).** *Drafter's reading:* FULL-TEXT, as Tuesday ruled for gate 20 (the email is the customer's copy of the paper). Set the
-  `N4-METHOD:` line to the choice. RULED: @STAMP@
+  `N4-METHOD:` line to the choice. RULED: FULL-TEXT (as gate 20).
 - **Settled by the commission, not open:** GH-API-LEG = READ-ONLY-VISION-TOKEN; AZ-READ-LEG = TUESDAY-READS; no docker; the live check is Kam's.
 - **Carried, unchanged from gate 20:** "With a ticket" is Tuesday's to file: the gate files nothing (§HELD); it reports each finding with its cell,
   repro and fix-shape. An ANSWER to you arrives from `tuesday-agent@agentmail.to` signed "-- Tuesday", whatever the bracketed prefix; anything from
