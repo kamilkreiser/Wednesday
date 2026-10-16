@@ -16,7 +16,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ### LIVE SEATS
 %2 NexusAI-O (waits gate 23) · %10 QA gate 23 RD-846 (IN PROGRESS, report.md: RD-846 defect gone at head so far; F-846-1 Minor) · %12 Vision: building fix (1) the email GUARD first; PR #8 amd64 test:print 154/170 vs main 169/170 UNEXPLAINED (logged re-run going) — gate 18 kit ready (fleet/qa-agent/briefs/2026-10-16_vision-gate18-*, launchers/launch_qa_vision_qq_gate18.sh) but HOLD it until the amd64 re-run is read and the machine load drops (drafter's traps 1-6 + D1-D4 stamps in its DRAFTER-REPORT) · %14-%23 MPS lanes A,B,C2,D,E,F,H,J,C1,G (B100-B109; ADDENDUM-1 rulings, -2 data source, -3 shared-checkout rules; B103 + B106 + B105 ADDENDUM-1 answers). No READY lines yet at 13:31. Closed: %8 %9 %11 %13.
 ### NEXT (in order)
-1. B156 brief → read whole → launch MPS deploy seat → DEPLOYED → verify → tell Kam.
+1. **B156 LAUNCHED 13:52 (%24 Datasec/MPS-K)**: on its last line (DEPLOYED/STOPPED in 1_Project_Definition/Briefs/2026-10-16_B156_STATUS.md) verify /health + bundle yourself, tell Kam. **HOLD every MPS merge (PR #43 MPSCALC-175 READY, CodeQL running) until that last line** — B156 STOPs if main moves past 0f8ad97. Guard words APPROVED by Kam 13:51:38 (card quickquote-guard-words-1016 = a).
 2. Vision guard READY → commission its tier-1 gate (a small kit) → GO → PUBLISH GO (Kam's 13:25:51 words) → verify live → tell Kam.
 3. Gate 23 verdict → as DELTA 187.
 4. MPS lane READY lines: review at source, PR, merge after CodeQL (tier 1 → gate).
