@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 196 — 2026-10-17 06:5x CHECKPOINT (s110, ctx 67%; band 80-90). **READ THIS FIRST. Supersedes 195's IN FLIGHT; 194's WAKE SOURCES rule stands (arm a STATUS watcher before ending any turn).**
+### MPS: main 3478ff43 (after #69 147-r2, B162 GO WITH NOTES, scored 0.97). 25 PRs merged since 10-16 16:00 (#45-#69).
+### IN FLIGHT (who wakes you)
+- **Gate B161** %30 MPS-T (B160 Pkcs, b107/183, b102/105) → VERDICT in `…/Briefs/2026-10-17_B161_STATUS.md`. Merge GO ones in order 160, 105, 183 (names by sha). Then B160's main-package check (Pkcs DLL + deps.json; file count = main's CI package + 2) goes on Kam's hosted card.
+- **Gate B163** %33 MPS-V (lane D r2 150-r2 @847dc32 → 158-r2 @259cbc27, round 2 of 2) → VERDICT in `…/2026-10-17_B163_STATUS.md`. GO → one squash PR from the top 158-r2.
+- **Vision gate 20** %31 QA/Vision-gate20 (QuickQuote PR #10 @7b952f6) → its mail `[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision gate 20`. At verdict Tuesday RE-READS linuxFxVersion (AZ-PRE-READ was v0.6.4-tool2.36-437ab4b at 06:09:20) and says so. GO → merge #10 → publish card for Kam (C-20: his own word; custom note OFF email, hidden on paper in every PDF since v1.88; W1/W2 retired; rollback v2.36 with v2.37 tabs open silently emails standard; lone revert of a8d769b restores a false W1).
+- **HPSM-POC B251** %34 HPSM-POC-H (-251/-252/-253/-258/-256/-255) → `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-17_B251_STATUS.md` last line READY FOR GATE → commission its tier-1 gate. Watcher armed on that file. HPSMPOC-254 = Kam card candidate (hosted runtime 10.0.12, same class as MPS F-1).
+- **NexusAI S100O** %35 NexusAI-O: RD-848 READY FOR GATE soon (by mail) → commission gate 24 kit (model: gate 23's). Then its RD-801+822 / RD-802 READY mails: they carry GO verdicts from gates 19/20 (10-07/08) + a counts-only conflict → Tuesday decides re-gate vs merge TURN (RD-828 precedent: counts-only forward merge, land on the gated head).
+- Lanes D %17 (dry until B163) · E %18 (140 waits lane D's contract; rebase needed after #69) · Vision %12 (holds for gate 20).
+### OWED (records, one seat when the gates are done): tickets for B157-1..-13, B158-4/-5/-7/-8/-9, B159-1..-14 Minors/Notes, B162-1..-8, MPSCALC-153 governed half, N-801-1; the PROPOSED register row + B162's two clauses; send_brief's "[Wednesday ->" seat label (claim with Wednesday); STATUS watching inside wake_watch (claim with Wednesday).
+
 ## 🟢 DELTA 195 — 2026-10-17 06:0x CHECKPOINT (s110, ctx 51%; band 80-90). **READ THIS FIRST, then 194 (its WAKE SOURCES rule and MPS state stand).**
 ### IN FLIGHT (who wakes you)
 - **Gate B161** %30 `Datasec/MPS-T` (B160 Pkcs + 183 + 105; read-only gh GRANTED). Last line `VERDICT: B161 …` → read whole, score, close, PR + merge GO ones (order 160, 105, 183), then B160's main-package check goes on Kam's hosted card.

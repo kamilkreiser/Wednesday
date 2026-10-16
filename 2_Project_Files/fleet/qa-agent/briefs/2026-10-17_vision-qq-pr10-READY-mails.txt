@@ -1,0 +1,65 @@
+===  [Datasec/Vision_Sales_Portal -> Tuesday] STATUS: fix 2 (PR #10) rebased + full local suites/real PDFs green; note hidden on paper since v1.88
+Fix (2) is fully checked locally. PR #10 is pushed at head 7b952f6 (rebased onto 437ab4b) and is still DRAFT, waiting on your guard-removal ruling (my 05:30 QUESTION). CI is running now.
+
+LOCAL (machine load under 4 throughout)
+- Pricing 69/69. npm test 132/132. test:print 182/182 (includes email-matches-print 9/9 and the rewritten email-print-mode 3/3). test:xlsx 6/6.
+- test:azurite was not run locally (it needs an emulator, and the code it covers is untouched). CI's store-azurite job covers it.
+
+REAL PDFs (advanced AUD session, -10%, A4, light + dark)
+- Pages: default 2, custom 2, both 3. Each page is one A4.
+- Print text is identical to main's in all 6 mode/theme cases, so the shared-builder refactor changes nothing on paper.
+- Emailed figures equal printed figures, in order: 8/8, 8/8, 16/16. Custom now emails A$27.90/device/month and A$45,167; main emailed A$31.00 and A$49,631.
+- Evidence: <project>/fix2-email-matches-print-2026-10-17-evidence/
+
+NEW FINDING (pre-existing, not changed by fix 2) - goes to Kam
+Your 03:02Z ruling has the note OFF the email and ON the print. On paper, the print has hidden the Custom pricing note (and the standard "Value note") since v1.88: the print CSS rule `.q-savings { display:none }` (5ef2a60). It appears only in the on-screen preview. So today the note is on no paper copy at all.
+- I corrected the test's wording to say it asserts the on-screen half.
+- Backlog ticket cdcd490 (backlog branch, pushed).
+- Whether the note belongs on paper is Kam's product call. It is listed under FOR KAM in the PR body.
+
+NEXT
+CI green, plus your ruling on the guard, then I mark PR #10 ready and send READY FOR QA (tier 1). Nothing ships without Kam's word.
+
+===  [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA (tier 1): QuickQuote PR #10 @ 7b952f6 — email matches print, guard removed (v2.37)
+READY FOR QA, tier 1 (quote output).
+PR #10, datasecau/vision_hpas-quickquote, head 7b952f6. Ready for review; MERGEABLE/CLEAN against main 437ab4b.
+https://github.com/datasecau/vision_hpas-quickquote/pull/10
+
+WHAT IT DOES (v2.37)
+- 0fc280b: the emailed PDF and workbook now follow the rep's print mode and exact custom price.
+  - Print and email share one builder (buildPrintDoc / buildPrintRows).
+  - The collector posts custom.pdmUSD.
+  - An advanced render loads advanced.js, restores the price and re-applies the print mode.
+  - toolVersion 2.37 is in the same commit.
+- a8d769b: removes the v2.36 email guard, per your ANSWER. It is a separate commit, so it reverts on its own. G19-F1..F3 lapse with it.
+- 7b952f6: test wording only.
+
+TESTS
+- email-matches-print.mjs: 3 modes x AUD/USD/CAD, real Generate and Email buttons (ONE press), real renderQuotePdf. Red 9/9 on main's code, green 9/9.
+- email-print-mode.mjs pins the reverse of the guard: one press sends in every mode, no warning, and mode + custom price are in the post.
+  - Run at v2.36 strip.js: RED 2/3 (custom and both fail; the control passes).
+  - Run at a8d769b: GREEN 3/3.
+- Local: pricing 69/69, npm test 132/132, test:print 182/182, test:xlsx 6/6.
+- CI on 7b952f6: all green, including store-azurite and CodeQL. 0 open code-scanning alerts.
+
+REAL PDFs (advanced AUD, -10%, Chrome, A4, light + dark)
+- Pages: default 2, custom 2, both 3, each page one A4.
+- Print text is identical to main's in all 6 mode/theme cases.
+- Emailed figures equal printed figures, in order: 8/8, 8/8, 16/16. Custom emails A$27.90 and A$45,167 (main: A$31.00 and A$49,631).
+- Evidence: <project>/fix2-email-matches-print-2026-10-17-evidence/ (PDFs, xlsx, scripts, README).
+
+SUGGESTED QA FOCUS
+- An advanced session in each print mode x currency: compare the emailed PDF and workbook with the printed quote.
+- Simple (non-advanced) sessions are unchanged.
+- One press sends; no stale warning or label remains anywhere.
+- Reset form / Advanced off after a custom price, then email: it should send standard.
+- Opening a previous quote (C-05) and emailing it again.
+
+FOR KAM (for the publish card)
+1. RETIRED, verbatim. Kam approved both at 13:51, card quickquote-guard-words-1016 = a:
+   - W1: "This email sends standard pricing only. Your custom pricing is on the printable quote, but it will not be in the email. Choose “Standard pricing only” above, or press the button again to send standard pricing anyway."
+   - W2: "Send standard pricing anyway"
+2. Custom pricing note: OFF the emailed PDF, ON the print (your 03:02Z ruling). Kam can reverse it. Caveat: "ON the print" holds on screen only. On paper, print CSS has hidden it since v1.88 (backlog cdcd490). That is pre-existing and not changed here.
+
+Publishing needs Kam's word. Rollback for a v2.37 publish would be v0.6.4-tool2.36-437ab4b.
+
