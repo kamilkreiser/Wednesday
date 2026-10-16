@@ -6,6 +6,23 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 191 — 2026-10-16 15:07 CHECKPOINT (s109, ctx ~72%; band 80-90). **READ THIS FIRST. It supersedes 190's LIVE SEATS and NEXT; 190's KAM list and 189's STANDING (feedback sweep every boot) stand.**
+### DONE since 190 (each verified at source)
+- **MPS hosted deploy B156 DEPLOYED** main 0f8ad97 (Tuesday: /health 200, bundle index-Ag058Qr3.js; seat: words A 4/4 B 0/3 C 5/5 D 10/10, store 14/14 equal, settings 0/0/0). Kam told (rental book live). Pane closed. **F-1 OPEN: the Pkcs 10.0.13 pin is not in effect on the host (Azure runs .NET 10.0.12 shared framework).** Tuesday told Kam the default: the MPS team ships the fixed Pkcs inside the package (publish config) and tests it, unless he prefers to wait for Azure. → commission it (no lane owns csproj/publish config: a small seat, tier 2, card-per-deploy for the hosted push).
+- **MPS PR #43 (MPSCALC-175) + #44 (MPSCALC-177) MERGED** after B156 → main 621e3300 (parent 5d7e4813; 6 files = the two PRs). Main CI on 621e3300 not yet read.
+- **Gate 23 GO WITH FINDINGS** (RD-846, 0.97). NexusAI-O on its TURN: PR #86 open, RD-848 filed, deploy steps 0-2 fresh; next: merge after CodeQL → push Build → DEMO DEPLOY → DEPLOYED mail (verify /api/health digest yourself, tell Kam; demo then newer than the 2.2.0 package).
+- **Gate 19 GO WITH FINDINGS** (QuickQuote guard, 0.97). PUBLISH GO sent 15:03 (Kam 13:25:51 + 13:51:38 + 14:23:42 quoted; both cards marked delivered). Vision: merging #9, version bump 2.35→2.36 in its own PR, build + switch. **Check 2b (one live custom-mode press) moved to KAM** (ANSWER 15:1x: the seat must NOT read HPAM_WORD); its PUBLISHED mail carries the steps for him. On PUBLISHED: re-read linuxFxVersion (Vision's own az config) and tell Kam with G19-F1 (double-press within ~100 ms still sends standard; folded into fix 2) + the 2b steps.
+- **Clock card** tuesday-dashboard-clock-deploy-az-login-1016 posted (HTTP 201; the WED-partition copy was refused and withdrawn): Kam runs one az login into TUESDAY/4_Credentials/.azure-dashboard, then Tuesday runs a path-adjusted 04c deploy (index.html + cockpit.html, ac9fd3fb4). Default b: wait for Wednesday (no reply to the 13:35 mail).
+- Ledger rows today (s109): production GET by a sweep agent (w=1); launch count vs machine (w=1); chained git command + stash drop (w=1, recovered).
+### LIVE SEATS
+%2 NexusAI-O (RD-846 merge + demo deploy) · %12 Vision (guard publish; then fix 2 PR #10 rebase + F1-F3) · %14-%23 MPS lanes (A,B,C1,C2,D,E,F,G,H(done),J) under ADDENDUM-6 (max 3 heavy runs via .tools/heavy-slot-1..3). Lane H wrapped (pane %20 can close). Gate 18 (PR #8) kit stamped? NO: still held (stamp + launch after the guard publish, load permitting).
+### NEXT (in order)
+1. Vision PUBLISHED → verify → tell Kam (+ 2b steps, G19-F1).
+2. NexusAI DEPLOYED → verify → tell Kam.
+3. MPS: read main CI on 621e3300; lane READY lines (review, PR, merge; tier 1 → MPS gate kit: MPSCALC-174 waits for one); commission the Pkcs-in-package fix; lane D contract → unblocks H's rate limit, -176, A's T15 UI, C2's T26/BL-11/BL-08.
+4. Gate 18 (PR #8) when the machine is quiet; then PR #8 publish needs Kam's own word.
+5. Digest: read to line 5624 of 7322; the rest at a quiet point or the next seat reads it whole.
+
 ## 🟢 DELTA 190 — 2026-10-16 13:46 CHECKPOINT (s109, ctx 50%; band 80-90). **READ THIS FIRST. It supersedes 189's LIVE SEATS and NEXT. 189's STANDING line (feedback sweep every boot) stands.**
 ### KAM SINCE 189 (all recorded; reconcile_rulings: to rule 0)
 - 5 MPS cards = a (scope, roles, pricing, catalogue, words); data-asks closed by his note "use values in the woodbaggins quote and spreadsheet" (= the client's two proposals + Fleet_BOM in MPS Source_Documents/2026-10-16_paul-review/; the client's name never goes into app/tests/commits/Jira).
