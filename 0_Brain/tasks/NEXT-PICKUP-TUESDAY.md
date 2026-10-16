@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 192 — 2026-10-16 16:15 ROTATION HANDOVER (s109, ctx ~78%; band 80-90). **READ THIS FIRST, then 191 (its DONE list) and 189's STANDING line (feedback sweep at EVERY boot: Kam 12:54:43).**
+### FIRST WORK FOR THE NEXT SEAT (in order)
+1. **NexusAI-O (%2) demo deploy of main 17fc6c5 is IN FLIGHT** (RD-846 MERGED 04:16Z, verified by Tuesday: tree = gated head 9251106549ce; push Build 38849816252 success). On its DEPLOYED mail: curl the demo /api/health yourself, expect build `def3ac7e654fdacd` (= sha256("17fc6c5157d5446cc015e97555fdc1ffcdc986ee")[:16], the seat's computation: recompute it), then tell Kam (RD-846 fixed; the demo now runs newer code than the 2.2.0 Marketplace package; rollback anchor nexusaidev-app--s81j-220-fdda330 kept). Then WRAP O (score, pane_close).
+2. **MPS gate B157 (%26 Datasec/MPS-Q) running** on lanes F + H (8 branches; brief tuesday/briefs/2026-10-16_B157_SEAT-Q_mps-gate-lanes-F-H.md; STATUS 1_Project_Definition/Briefs/2026-10-16_B157_STATUS.md, last line `VERDICT: B157 …`). On verdict: read the STATUS whole, score, pane_close; for each GO/GO WITH NOTES branch: PR, CodeQL green, squash-merge --match-head-commit one at a time (stack 162 → 164 → 165 in order; 174 note: rate-limit half not in it). Avoid other MPS merges while it runs.
+3. **Vision (%12)**: fix (2) = PR #10 (draft): rebase onto QuickQuote main 437ab4b, fold G19-F1..F3, the custom-note ruling (note OFF the email, ON the print, both asserted), full suites → READY → tier-1 gate (gate 19's kit is the model) → its publish needs KAM's word (card it, with the custom-note line). PR #8 (puppeteer 25) held; gate 18 kit at fleet/qa-agent/briefs/2026-10-16_vision-gate18-* (stamp + launch when quiet; re-pin: QuickQuote main moved to 437ab4b).
+4. **MPS lanes** live: A %14, B %15, C2 %16, D %17, E %18, J %21, C1 %22, G %23 (F, H wrapped + closed). Their STATUS files: 1_Project_Definition/Briefs/2026-10-16_B10x_STATUS.md. Rules: ADDENDUM-1..-6 (rulings; data source; shared-checkout; hold lifted; max 3 heavy runs via .tools/heavy-slot-1..3). Lane D's contract unblocks H's rate limit + -176, F's 15 validation codes [B105-2], A's T15 UI, C2's T26/BL-11/BL-08.
+5. OWED: the MPS Pkcs-in-package fix (B156 F-1; Kam told the default 15:0x); B99 FOR TUESDAY items (page-volume email to Kam, 13 close candidates, [B93-V6]); B250 open items; 04c deploy script self-locating (claim with Wednesday); the boot digest rest (this seat read to line 5624 of 7322).
+### KAM TODAY after 191 (all recorded): quickquote-guard-words-1016 a; quickquote-guard-publish-includes-pr7-deps-1016 a; mpscalc-rental-pricing-callout-k15-vs-1014-1016 a (keep); tuesday-dashboard-clock-deploy-az-login-1016 a (he signed in; clock LIVE 15:13). reconcile_rulings at 15:0x: to rule 0.
+### LIVE ON KAM'S SIDE: the QuickQuote 2b live check (steps sent 15:25); MPS rental book in the browser (steps sent 15:0x).
+### FLOOR at rotation
+%0 tuesday · %1 fleet-monitor · %2 NexusAI-O (demo deploy) · %12 Vision (fix 2) · %14 %15 %16 %17 %18 %21 %22 %23 MPS lanes · %26 MPS gate B157.
+
 ## 🟢 DELTA 191 — 2026-10-16 15:07 CHECKPOINT (s109, ctx ~72%; band 80-90). **READ THIS FIRST. It supersedes 190's LIVE SEATS and NEXT; 190's KAM list and 189's STANDING (feedback sweep every boot) stand.**
 ### DONE since 190 (each verified at source)
 - **MPS hosted deploy B156 DEPLOYED** main 0f8ad97 (Tuesday: /health 200, bundle index-Ag058Qr3.js; seat: words A 4/4 B 0/3 C 5/5 D 10/10, store 14/14 equal, settings 0/0/0). Kam told (rental book live). Pane closed. **F-1 OPEN: the Pkcs 10.0.13 pin is not in effect on the host (Azure runs .NET 10.0.12 shared framework).** Tuesday told Kam the default: the MPS team ships the fixed Pkcs inside the package (publish config) and tests it, unless he prefers to wait for Azure. → commission it (no lane owns csproj/publish config: a small seat, tier 2, card-per-deploy for the hosted push).
@@ -17,9 +29,9 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ### LIVE SEATS
 %2 NexusAI-O (RD-846 merge + demo deploy) · %12 Vision (guard publish; then fix 2 PR #10 rebase + F1-F3) · %14-%23 MPS lanes (A,B,C1,C2,D,E,F,G,H(done),J) under ADDENDUM-6 (max 3 heavy runs via .tools/heavy-slot-1..3). Lane H wrapped (pane %20 can close). Gate 18 (PR #8) kit stamped? NO: still held (stamp + launch after the guard publish, load permitting).
 ### NEXT (in order)
-1. Vision PUBLISHED → verify → tell Kam (+ 2b steps, G19-F1).
+1. DONE 15:25: QuickQuote v2.36 LIVE (v0.6.4-tool2.36-437ab4b, verified; rollback 2.35 kept); Kam told with 2b steps. Vision next: fix (2) PR #10 (rebase onto 437ab4b, F1-F3, the custom-note ruling) → READY → tier-1 gate → publish needs Kam's word (card it then, with the custom-note line).
 2. NexusAI DEPLOYED → verify → tell Kam.
-3. MPS: read main CI on 621e3300; lane READY lines (review, PR, merge; tier 1 → MPS gate kit: MPSCALC-174 waits for one); commission the Pkcs-in-package fix; lane D contract → unblocks H's rate limit, -176, A's T15 UI, C2's T26/BL-11/BL-08.
+3. **MPS gate B157 (lanes F + H, 8 branches: 168/166/163/167, stack 162->164->165, 174) — drafter writing tuesday/briefs/2026-10-16_B157_SEAT-Q_mps-gate-lanes-F-H.md: READ WHOLE, launch (Datasec/MPS-Q), on VERDICT merge GO branches one at a time (stack in order), PR each, CodeQL first.** Lanes F and H wrapped, panes closed. MPS: read main CI on 621e3300; lane READY lines (review, PR, merge; tier 1 → MPS gate kit: MPSCALC-174 waits for one); commission the Pkcs-in-package fix; lane D contract → unblocks H's rate limit, -176, A's T15 UI, C2's T26/BL-11/BL-08.
 4. Gate 18 (PR #8) when the machine is quiet; then PR #8 publish needs Kam's own word.
 5. Digest: read to line 5624 of 7322; the rest at a quiet point or the next seat reads it whole.
 
