@@ -1,0 +1,40 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA (tier 1): QuickQuote PR #8 @ 4d6ed6e — puppeteer 25.0.2 + node 22 (C-19); audit 0; in-image PDFs pixel-identical vs main image; CI green
+Date: 2026-10-16T01:56:46.000Z
+Message-ID: <010001a1426d1114-336793cc-a7c9-4786-96b5-87d48486c6e6-000000@email.amazonses.com>
+
+BLUF: READY FOR QA, TIER 1: QuickQuote PR #8 @ 4d6ed6e (fix/qq-puppeteer-25-2026-09-22, forward-merged with main e4ce536). puppeteer-core 25.0.2 + node:22-bookworm-slim, per Kam's decision 14 = (b) (recorded C-19). npm audit --omit=dev -> 0. CI green, CodeQL 0 open on the PR refs. Inside locally built images (never pushed) the emailed PDF, the printed page in both themes and the workbook are identical between the node 20/pptr 23 image and the node 22/pptr 25 image. One amd64 run under emulation is still going; a STATUS mail will follow with it. Nothing merged, pushed to ACR or deployed.
+
+THE CHANGE vs main e4ce536 (git diff --stat: 5 files, +85/-522)
+- stage3/Dockerfile: FROM node:20-bookworm-slim -> node:22-bookworm-slim (September's commit, unchanged).
+- stage3/package.json: puppeteer-core ^23.5.0 -> ^25.0.2. Everything else is main's file (express-rate-limit, overrides uuid + basic-ftp).
+- stage3/package-lock.json: rebuilt from MAIN's lock with `npm install puppeteer-core@25.0.2 --package-lock-only`, so only the puppeteer subtree moves (python diff of the lock's packages map vs main):
+  changed: puppeteer-core 23.11.1->25.0.2, @puppeteer/browsers 2.6.1->3.0.2, chromium-bidi 0.11.0->16.0.1, devtools-protocol, plus patch bumps under tar-fs (b4a, bare-*, streamx, tar-stream) and zod 3.23.8->3.25.76.
+  removed 40: the whole proxy-agent / pac-proxy-agent / get-uri / basic-ftp / socks / extract-zip / yauzl chain. added 1: webdriver-bidi-protocol 0.4.1.
+  No express, exceljs, rate-limit or mail/storage package moved.
+- Version choice, mine, so you can overrule it: 25.0.2, the version September verified (byte-identical PDFs, gate-4 build), not the newest 25.14.0 (chromium-bidi 157, unverified against bookworm's Chromium 153). npm audit is clean at 25.0.2.
+- The basic-ftp override is now inert (no basic-ftp left in the tree). I kept it so main's package.json isn't touched beyond the one line. Removing it is a one-line cleanup if the gate wants it.
+- Two TEST files (harness, not product): stage3/test/fixtures/hang-close.cjs and lib-close-shared.test.mjs:19 stubbed CdpBrowser.prototype.close via require("puppeteer-core/lib/cjs/puppeteer/cdp/Browser.js"). puppeteer-core 25 is ESM-only ("type":"module") and that path is gone. Both now use "puppeteer-core/internal/cdp/Browser.js", which the package exports ("./internal/*" -> "./lib/puppeteer/*"). Assertions are untouched. Red first: before the fix, test:print was 167/169 (lib-close-shared failed at load, so 1 cell never registered; BC-F1's child died on MODULE_NOT_FOUND). After: 170/170, with the "killed the test's own Chrome" lines present, so the stub really hangs the same class lib/pdf.js uses. These fixtures post-date P5B (gate-5 BC rounds, 2026-09-23), which is why September never met them.
+- grep: no shipped file (lib/, server.js, strip.js) reaches into puppeteer internals; lib/pdf.js require("puppeteer-core") works through node's require(esm) (node >= 22.12; image node 22.23.2).
+
+VERIFIED
+1. npm: ls shows extract-zip, basic-ftp and proxy-agent absent, puppeteer-core@25.0.2, @puppeteer/browsers@3.0.2; npm ls --all rc 0, empty stderr. audit --omit=dev: high 3 -> 0 (0 of every severity).
+2. Local suites (macOS, node 26.8.1, Chrome 155.0.8059.84): pricing 69/69, npm test 132/132, test:print 170/170, test:xlsx 6/6 (main = same counts).
+3. Local puppeteer 23 vs 25 on the same Chrome: server-path PDF text-identical and pixel-identical (100 dpi, both pages). Printed page light + dark text- and pixel-identical once the harness is deterministic (live-rate request blocked, clock frozen). An earlier non-deterministic run differed only by the live-vs-seeded exchange-rate race (same as PR #7's run); every differing figure traced to that one rate line. Real advanced-session collector path (AUD): posted state, printed text and emailed text identical 23 vs 25.
+4. Images built LOCALLY for evidence (docker build -f stage3/Dockerfile ., tags qq-evidence-local:main-e4ce536 and :prb-node22-pptr25; arm64; never pushed, no release tag). Strip ok in both (public/index.html 246617 bytes).
+   - main image: node v20.20.2, puppeteer-core 23.11.1, extract-zip PRESENT. PR B image: node v22.23.2, puppeteer-core 25.0.2, extract-zip absent. Both: Chromium 153.0.8010.52 (Debian bookworm), the same as September.
+   - In each image, --network none, as root: npm test 132/132, test:print 170/170, test:xlsx 6/6, rc 0. Identical.
+   - Same fixture rendered in each image (AUD seeded 1.4324, 40 devices, 3 y, full bundle, Advanced + 10 h custom; fixed qnum, frozen clock): server-path PDF, printed light, printed dark are each 2 pages, A4, text-identical AND pixel-identical (100 dpi, both pages) between the two images. Workbook: identical part hash excluding core.xml. Fonts embedded: DejaVuSans + LiberationMono (pdffonts), not the mono fallback of 2026-08-10. I looked at page 1: one sheet, logo decoded.
+5. CI on PR #8: tests.yml 5/5 on push 38837565972 and pull_request 38837589895; Analyze (actions), Analyze (javascript-typescript), CodeQL pass; open code-scanning on refs/pull/8/head = 0 and refs/pull/8/merge = 0. MERGEABLE / CLEAN.
+
+PRIOR WORK
+- 3d0167e (2026-09-22): puppeteer-core 25.0.2 + node:22, verified then (PDFs byte-identical once dates masked; in-image stage3 88/88). 0d45100 forward-merge for gate 4. Gate 4: held on Kam decision 14. That verification is re-done on today's tree above, not assumed.
+- PR #7 (e4ce536) is in the base. The extract-zip ticket (backlog/qq-extract-zip-2026-10-16 @ 88ad5e8) now points at PR #8 and closes when #1 #4 read fixed on main.
+
+NOT TESTED
+- amd64: both images above are arm64; App Service runs amd64. An emulated linux/amd64 build + in-image render + test:print is RUNNING now; result to follow in a STATUS mail. The ACR build (amd64, native) is the publish step, which is Kam's tap.
+- Booting server.js inside the new image with production settings (ACS mail, Table storage, session secret): not done; no prod secrets used. stage3-server and store-azurite cover the server in CI on node 22.
+- The live site, or a real emailed quote through ACS on the new runtime: publish-time checks.
+
+ASK: commission the tier-1 gate on PR #8 @ 4d6ed6e. Merge only on your GO, through the PR. After merge: Dependabot #1 #4 states on main + the deploy-trigger read again. Publish stays Kam's tap.
+Meanwhile: running the amd64 check, then BLOCKED on the gate.
+-- Vision seat %12

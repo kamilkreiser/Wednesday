@@ -6,6 +6,25 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 189 — 2026-10-16 12:59 (s109, post-rotation seat, ctx ~28%). **READ THIS FIRST, then 188 (its list is updated below) and 187/186.**
+### STANDING (Kam 12:54:43, live board): at EVERY boot and EVERY rotation, sweep each Datasec project for new feedback items → tickets → agents actioning them. Lesson: learnings/2026-10-16_tuesday-boot-sweeps-project-feedback-into-tickets.md. First sweep's map/result: 0_Brain/projects_index/2026-10-16_feedback-sweep-1.md (a background agent was writing it at 12:59; if absent, re-run it). OWED: a boot-prompt line (Launch_Wednesday.command builds both seats' prompts: claim with Wednesday) + a sweep script.
+### DONE this seat (each verified at source)
+- QuickQuote PR #7 merged by Vision, verified (main e4ce5367, tree = head tree, CI + CodeQL green, Dependabot open #1 #4).
+- HPSM-POC records PR #117 MERGED → 6f5f0dc5 (tree = head 12dc2d6a). Pane %9 closed.
+- MPS #42 (B98 Pkcs/Xml 10.0.13 pin) MERGED → 7af91dec (tree = head). #41 update-branch → head 610ce028, checks were running. Pane %8 closed.
+- Terry's HP mail (live SFTP password) moved from tuesday/inbound/ to 4_Credentials/inbound_with_secrets/ (it was gitignored, never committed).
+- 6 grouped MPS cards posted (mps-paul-review-*-1016). 8 MPS lane seats launched.
+### LIVE SEATS NOW
+%2 NexusAI-O (waits gate 23) · %10 QA gate 23 (RD-846) · %11 HPSM-POC-F (B249 hosted deploy) · %12 Vision (PR #8 READY tier 1, gate being commissioned; then the 7-unknown-print-fields MEASUREMENT, no fix) · %13 Composer-A (B155: REMOVE the Caddy site gate, Kam 12:48:48; tell Kam when DONE with the live proof) · %14-%21 MPS lanes A, B, C2, D, E, F, H, J (B100-B107; STATUS files 1_Project_Definition/Briefs/2026-10-16_B10x_STATUS.md; each READY line → review at source, PR, merge after CodeQL; tier 1 → QA gate). Held lanes: C1 (K-01), G (K-15), I (phase 2), Later.
+### NEXT (in order)
+1. Gate 18 kit for QuickQuote PR #8 (a drafter subagent writes fleet/qa-agent/briefs/2026-10-16_vision-gate18-* + launchers/launch_qa_vision_qq_gate18.sh): READ WHOLE, launch, on verdict merge #8 (Kam's 12:41:19 b), then card-per-deploy? QuickQuote publish follows the existing publish card practice: ask Kam.
+2. B155 DONE → tell Kam the Composer site is open, with the curl/browser proof and the restore step.
+3. #41 green → merge (squash, --match-head-commit), then card Kam for the MPS hosted deploy.
+4. Gate 23 verdict, B249 DEPLOYED, as DELTA 188 items 3-4.
+5. MPS lane READY lines; FOR TUESDAY items in B99_STATUS (page-volume email to Kam drafted there; 13 close candidates; [B93-V6]).
+6. B250 open items (-246, -91, C-106 vs C-73, HP-asks register, B230-237 catch-up, records repo sshCommand).
+7. Digest: this seat read _boot_digest_by_tier.md only to line 2874 of 7322 (per-turn read limit); read the rest at a quiet point.
+
 ## 🔴 DELTA 188 — 2026-10-16 ~12:4x ROTATION HANDOVER (s108, ctx 77-78%; band 80-90). **READ THIS FIRST, then 187 (its LIVE SEATS list) and 186 (KAM TODAY + WATCH OUT).**
 ### FIRST WORK FOR THE NEXT SEAT (in order)
 1. **MPS: Kam asked for tickets from the Paul review AND agents to action them.** B99 is DONE: `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-16_B99_STATUS.md` (183 lines). 53 tickets (MPSCALC-136…188); **§"FOR KAM" (line ~103): 21 card candidates K-01…K-21** → post them as GROUPED cards (Friday's rule: group Kam's board items; one card per logical decision), each action-first with a default; **§"DO 5 · LANES" (line ~141): 9 file-disjoint build lanes** → launch one seat per lane via `2_Project_Files/tuesday/brief_seat.sh` (brief per lane in tuesday/briefs/, B100+; tier per the STATUS; pricing-register tickets T07/T12/T15/T16/T20/T23-25 are TIER 1 with a workbook-register row + red-first test). Respect the 90% gauge only (7d 4% now). Read §"FOR TUESDAY" (line ~126) first.
