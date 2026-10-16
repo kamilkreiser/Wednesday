@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 200 — 2026-10-17 08:01 CHECKPOINT (s111, ctx 52%; band 80-90). **READ THIS FIRST. Supersedes 199's FIRST WORK (all four done). 197's KAM HOSTED CARD list stands; 194's WAKE SOURCES rule stands (STATUS watcher before ending any turn).**
+### IN FLIGHT (who wakes you)
+- **Gate B252** %36 HPSM-POC-G2 (b251 @9195408f over d916baf, tier 1 r1/2): STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-17_B252_STATUS.md` → VERDICT → GO: Tuesday opens ONE PR, CodeQL, merge (push-to-demo grant: hosted deploy after merge + full verify); NO GO: fix round to a builder.
+- **Lane D** %17: B103 ADDENDUM-4 (`tuesday/briefs/2026-10-17_B103_ADDENDUM-4_b163-two-tests.md`): two test-only regression tests (B163-1/-2) proven RED on the gate's mutants r2-ii/r2-vii, main 798fe98 merged into 158-r2 → READY line in `2026-10-16_B103_STATUS.md`. THEN: tier-2 confirm (B163 seat %33 holds mutA/mutB — mail/file pointer it a B163 ADDENDUM-2: run the new tests on mutA/mutB/head, merge-tree on new main) → ONE squash PR from `b103/mpscalc-158-target-click-r2` (branch name by ls-remote) → CodeQL → merge. B163 closed in behaviour; cap ruled: no round 3.
+- **B164 records seat** %37 MPS-R: 24 tickets, 2 finding + 36 merge comments, BACKLOG rows → STATUS `2026-10-17_B164_STATUS.md` DONE line. Its K1-K8 FOR KAM go onto the MPS hosted card bundle (197's list); R14/R16 need-ruling are Tuesday's; R17/R24 need a lane; MPSCALC-157 has a comment carrying a lane-G branch name with a person's first name (clean-up owed).
+- **Gate 24** %38 QA/NexusAI-gate24 (RD-848 @065a0d8 over 17fc6c5, tier 1 r1/2; T1 (a) ACR legs allowed, dev registry only): verdict MAIL `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 24` → GO: merge per C-190 PR path.
+- **Vision gate 21 kit**: drafter still running → `fleet/qa-agent/briefs/2026-10-17_vision-gate21-*` + `launchers/launch_qa_vision_qq_gate21.sh` → read WHOLE, stamp (SELF-CHECK, D4, D5, AZ-PRE-READ = read linuxFxVersion yourself with Vision's AZURE_CONFIG_DIR, routing QA/Vision-gate21), --check, launch (load < 40).
+- **NexusAI-O** %35: queue 2 (RD-801+822 PASS 4525/285; RD-802 queued; C-57 via session copy ACCEPTED 07:56 with conditions) → READY FOR GATE mails → gate kits.
+### DECIDED THIS SEAT: QuickQuote access word NOT carded (Kam ruled 2026-08-11, server.js:155-160; Vision owes a C-entry). Target what-if audit = Tuesday's reading of K-11 (not a price) → lane D's next round. N-801-1 filed as RD-849.
+### WATCHERS: STATUS watcher = scratchpad `status_watch.sh` (MPS + HPSM-POC STATUS last lines; re-arm after each fire; copy it from this seat's scratchpad or rewrite: 30 s loop over `2026-10-1[6-9]_B*_STATUS.md` in both Briefs dirs). newmail.sh digest shows SUBJECTS only (body None): read bodies by the AgentMail API with a URL-encoded message_id.
+
 ## 🔴 DELTA 199 — 2026-10-17 07:3x ROTATION HANDOVER (s110, ctx ~79%; band 80-90). **READ THIS FIRST, then 198 (IN FLIGHT detail) and 197 (Kam's MPS hosted card list + OWED). 194's WAKE SOURCES rule stands.**
 ### FIRST WORK FOR THE NEXT SEAT (in order)
 1. **Re-arm watchers** (this seat's background watchers die with it): the MPS STATUS watcher (exits on any change to the last line of `…/MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md`), and one for any HPSM-POC gate STATUS you launch. wake_watch covers mail + pane idles.

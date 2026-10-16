@@ -131,4 +131,4 @@ Verdict lines first. Then: Step 0 (sha256 of both copies) · preflight "none (br
 - `VERDICT: B252 b251 GO on main <sha7>` · `VERDICT: B252 b251 GO WITH NOTES on main <sha7>` · `VERDICT: B252 b251 NO GO on main <sha7>` (main read by `ls-remote` at verdict)
 - `STOPPED: NEEDS TUESDAY` followed by ONE question.
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-10-17 07:3x (drafter; Tuesday re-stamps after her own read)
+SELF-CHECK: re-read end-to-end for contradictions | drafter 07:3x; Tuesday read WHOLE and re-stamped 2026-10-17 07:39:17 AEDT | Tuesday's own reads at the stamp: ls-remote main d916baf7 + b251 9195408f (equal to PINS), .tools/.git-lock absent, lsof 6990-6999 rc 1, load 9.2, pane HPSM-POC-H CLOSED 07:25 (no HPSM-POC pane live)
