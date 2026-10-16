@@ -6,6 +6,24 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 190 — 2026-10-16 13:46 CHECKPOINT (s109, ctx 50%; band 80-90). **READ THIS FIRST. It supersedes 189's LIVE SEATS and NEXT. 189's STANDING line (feedback sweep every boot) stands.**
+### KAM SINCE 189 (all recorded; reconcile_rulings: to rule 0)
+- 5 MPS cards = a (scope, roles, pricing, catalogue, words); data-asks closed by his note "use values in the woodbaggins quote and spreadsheet" (= the client's two proposals + Fleet_BOM in MPS Source_Documents/2026-10-16_paul-review/; the client's name never goes into app/tests/commits/Jira).
+- quickquote-email-sends-standard-not-custom-1016 = a: "Publish the guard as soon as it passes the gate, full fix after" — a PUBLISH grant for the GUARD ONLY. On the guard's gate GO: Tuesday sends Vision a PUBLISH GO quoting it; full fix (2) and PR #8 need his own words.
+- mpscalc-hosted-deploy-0f8ad97-1016 = a (13:25:47): deploy main 0f8ad97 to the hosted calculator. A drafter subagent is writing tuesday/briefs/2026-10-16_B156_SEAT-K_mps-hosted-deploy-0f8ad97.md (+ DRAFTER-REPORT): READ WHOLE, launch (command in the report), on DEPLOYED verify /health yourself and tell Kam.
+- Composer: B155 DONE (gate removed 13:00:50, Kam told). Paul's sign-in trouble was actually the HPSM-POC PLAYBOOK in Brave: signed in as paul.waite@datasec.com.au, not assigned to the app (AADSTS50105); his invited account paul.waite1@hp.com works in Chrome. Kam told (13:4x) with the steps; offered (needs his yes) to assign the Datasec account too, and to put the Composer password back. Default: nothing changes.
+- Dashboard clock: fix pushed ac9fd3fb4 (Australia/Sydney + AEST/AEDT label, index.html + cockpit.html), NOT LIVE: needs the dashboard az login (WEDNESDAY's 4_Credentials only; pathguard refused). Asked Wednesday to run 04c (02:35Z mail). Default 15:00: ask Kam for an az login into a Tuesday-owned config dir (e.g. 4_Credentials/.azure-dashboard). Release the wed_claim when live.
+### LIVE SEATS
+%2 NexusAI-O (waits gate 23) · %10 QA gate 23 RD-846 (IN PROGRESS, report.md: RD-846 defect gone at head so far; F-846-1 Minor) · %12 Vision: building fix (1) the email GUARD first; PR #8 amd64 test:print 154/170 vs main 169/170 UNEXPLAINED (logged re-run going) — gate 18 kit ready (fleet/qa-agent/briefs/2026-10-16_vision-gate18-*, launchers/launch_qa_vision_qq_gate18.sh) but HOLD it until the amd64 re-run is read and the machine load drops (drafter's traps 1-6 + D1-D4 stamps in its DRAFTER-REPORT) · %14-%23 MPS lanes A,B,C2,D,E,F,H,J,C1,G (B100-B109; ADDENDUM-1 rulings, -2 data source, -3 shared-checkout rules; B103 + B106 + B105 ADDENDUM-1 answers). No READY lines yet at 13:31. Closed: %8 %9 %11 %13.
+### NEXT (in order)
+1. B156 brief → read whole → launch MPS deploy seat → DEPLOYED → verify → tell Kam.
+2. Vision guard READY → commission its tier-1 gate (a small kit) → GO → PUBLISH GO (Kam's 13:25:51 words) → verify live → tell Kam.
+3. Gate 23 verdict → as DELTA 187.
+4. MPS lane READY lines: review at source, PR, merge after CodeQL (tier 1 → gate).
+5. Clock deploy (Wednesday or Kam's az login), then tell Kam it is live.
+6. Digest: read to line 5624 of 7322; the rest at a quiet point (this seat at 50%).
+7. B99 FOR TUESDAY items (page-volume email to Kam, 13 close candidates, [B93-V6]); B250 open items.
+
 ## 🟢 DELTA 189 — 2026-10-16 12:59 (s109, post-rotation seat, ctx ~28%). **READ THIS FIRST, then 188 (its list is updated below) and 187/186.**
 ### STANDING (Kam 12:54:43, live board): at EVERY boot and EVERY rotation, sweep each Datasec project for new feedback items → tickets → agents actioning them. Lesson: learnings/2026-10-16_tuesday-boot-sweeps-project-feedback-into-tickets.md. First sweep's map/result: 0_Brain/projects_index/2026-10-16_feedback-sweep-1.md (a background agent was writing it at 12:59; if absent, re-run it). OWED: a boot-prompt line (Launch_Wednesday.command builds both seats' prompts: claim with Wednesday) + a sweep script.
 ### DONE this seat (each verified at source)

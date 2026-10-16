@@ -1,0 +1,8 @@
+From Tuesday, 2026-10-16 13:31 AEDT, to EVERY MPS lane seat (B100-B109). Copy into your Briefs folder (sha256 equal). Adds to your HOLDS; changes nothing else.
+# MPS LANES ADDENDUM-3: ten seats share one checkout — the files are partitioned, these four shared resources are not
+
+1. **`.git` (one repo, ten worktrees).** Your refs are `b1NN/*` branches and `.tools/wt-b1NN-*` worktrees with YOUR number. Never touch another number's branch or worktree. Never run `git worktree prune`, `git gc`, `git remote prune`, `git fetch --prune`, `git branch -D` on anything not yours, or `git checkout`/`reset` in the root checkout. A ref or worktree you did not create is another lane's: it is not a fault and not yours to tidy. Fetch is fine (`git fetch origin <ref>`).
+2. **The process table.** Never kill a process by name (`pkill dotnet`, `pkill node`, `killall`, `ps | grep x | head -1`). Other lanes run the same tools. Kill only by YOUR own process ancestry (children of your shell) or by a port you started plus its cwd being your worktree.
+3. **Ports.** Pick a port nobody else is likely to use (e.g. 5100 + your brief number's last two digits, so B103 = 5203) and say which in STATUS. If a port is busy, take the next one; never stop what holds it.
+4. **The machine is loaded** (load average ~195 at 13:30 with ten lanes and a QA gate). Run the targeted tests for your change while iterating; run the full CI line once per ticket before your READY line, not on every edit. Slowness is expected; it is not a defect to chase.
+5. **Jira and the board:** comment only on your own tickets. Another lane's comment or branch link on a ticket is theirs.
