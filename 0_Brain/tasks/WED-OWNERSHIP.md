@@ -170,3 +170,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/Security-Composer — Tuesday (handover from Friday 2026-10-15) | OPEN | |
 | 2026-10-16 11:48 | Kamils-Mac-mini | 2_Project_Files/tuesday/brief_seat.sh — Tuesday's own seat launcher for Friday's handed-over Datasec projects (project-own gh/az config dirs, prompt names Tuesday) | OPEN | |
 | 2026-10-16 12:57 | Kamils-Mac-Studio | Spark tunnel 47788 guard for the Wednesday seat: local-model/spark/tunnel.sh up|check + doctor.sh WARN + queue/round self-heal before ENDPOINT DOWN | CLOSED |  2026-10-16 13:11 built: spark/tunnel.sh (5 arms), round.sh in-path heal (unexercised by a real round), doctor WARN leg (both ways) |
+| 2026-10-16 13:33 | Kamils-Mac-mini | live board + local cockpit clock: Australia/Brisbane -> Australia/Sydney (index.html:674, cockpit.html:871), Kam 13:03:13 | OPEN | |
