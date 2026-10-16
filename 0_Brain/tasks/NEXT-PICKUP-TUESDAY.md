@@ -6,6 +6,23 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 203 — 2026-10-17 09:24 ROTATION HANDOVER (s111, ctx 79%). **READ THIS FIRST, then 202 (its FIRST WORK 1-4 and IN FLIGHT stand; this adds Kam's rulings and puts the MPS deploy FIRST).**
+### KAM RULED 8 of 9 MPS cards, 09:22:27-09:23:45 (live, view=tuesday; each ruled in the queue HTTP 200; receipts posted HTTP 201 x3):
+- **mpscalc-hosted-deploy-12f8e56-1017 = a: "Deploy main 12f8e56 and approve list W"** — FIRST WORK below.
+- mpscalc-panel-options-rental-and-tier-1017 = a (confirm as built: no code).
+- mpscalc-negative-input-headline-1017 = a (headline 'Some values are below 0.' + column names in the error box: a lane builds it; words back at the gate).
+- mpscalc-large-format-manual-items-1017 = b (add the 3 LFP items AFTER MPSCALC-202's deploy-check fix and the safety-copy rule are live).
+- mpscalc-feedback-401-words-1017 = a (sentence: 'Your feedback could not be sent. Try again.' — MPSCALC-194 builds it).
+- mpscalc-e877-supply-cost-source-1017 = a (the book stays the E877 CPP source: no change).
+- mpscalc-deploy-overlay-copy-retention-1017 = b (keep the copy only when a deploy stops; remove after a clean check: MPSCALC-203).
+- mpscalc-deal-usage-proposal-rates-1017 = a (print the deal's mono/colour rates on the proposal: a lane builds, gate, words back).
+- STILL OPEN: mpscalc-rental-caption-customisation-1017 (default a: nothing changes).
+- **ALL of these go into MPS `1_Project_Definition/CLARIFICATIONS.md`** verbatim with tap times via the next MPS lane brief, then `decision_queue.sh --delivered <id> "<C-number>"` per card. The build items (negative headline, feedback words, overlay retention, deal-usage proposal rates) are lane work: brief lanes D/E (or new lanes) with those tickets; the deploy-check fix MPSCALC-202 gates the LFP items.
+### FIRST WORK (ahead of 202's list)
+1. **MPS hosted deploy of main 12f8e56** (Kam's tap 09:22:56 = a, list W approved): commission a deploy seat per the project's own runbook as B156 ran it (`…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-16_B156_*` = the template: backup first, previous build kept as the way back, the 50-file package incl. the 2 Pkcs paths, PRE-1 in the deploy, live check by Tuesday herself, report to Kam after it lands). Re-read main by ls-remote first (12f8e566 at 09:2x); if main moved, deploy ONLY 12f8e56 (that is what Kam approved) or re-card. Consequences on the card he accepted: four-role sign-ins lose act-as; the Entra group step is HIS after the deploy.
+2. Then 202's FIRST WORK (STATUS watcher, HPSM-POC hosted deploy + records, gates B165/24/21).
+### Lane E 09:23:41: DONE "3 ready, 0 waiting" (read its STATUS READY lines: -140 stacked on 5d2d7ad, -142/-155 labels 0281520, + one more) -> they follow B165's verdict and lane D's combined 142-155 READY.
+
 ## 🔴 DELTA 202 — 2026-10-17 09:14 ROTATION HANDOVER (s111, ctx ~78%; band 80-90). **READ THIS FIRST, then 201 (its DONE list + 9 Kam cards). 194's WAKE SOURCES rule stands: arm a STATUS watcher before ending ANY turn (this seat's scratchpad `status_watch.sh` dies with it: rewrite it — a 30 s bash loop that exits when the last line of any `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md` or `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-1[7-9]_B*_STATUS.md` changes; NOTE the MPS folder is `Datasec MPS Commercial Calculator`).**
 ### FIRST WORK FOR THE NEXT SEAT (in order)
 1. **Re-arm the STATUS watcher** (above). wake_watch covers mail + pane idles.
