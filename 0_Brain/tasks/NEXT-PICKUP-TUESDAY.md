@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 197 — 2026-10-17 07:1x CHECKPOINT (s110, ctx 72%; band 80-90). **READ THIS FIRST. Supersedes 196's IN FLIGHT. 194's WAKE SOURCES rule stands.**
+### MPS: main 798fe984 (#70 B160 Pkcs, #71 105, #72 183 merged after gate B161 GO WITH NOTES, scored 0.95). 28 PRs merged since 10-16 16:00 (#45-#72). Only lane D's stack and lane E's 140 remain in the Paul-review set.
+### IN FLIGHT (who wakes you)
+- **Gate B163** %33 MPS-V (lane D r2: 150-r2 @847dc32 → 158-r2 @259cbc27, round 2 of 2); fetch-main grant given (ANSWER-1; main moved again to 798fe984, the grant covers it). VERDICT in `…/MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-17_B163_STATUS.md` → GO: ONE squash PR from 158-r2 (branch name by sha), CodeQL, merge. NO GO: the stack does not ship this round; tell lane D, ticket the findings.
+- **Vision gate 20** %31: expected NO GO (Tuesday ruled 19:58Z that a pasted 1e308 price emailing "A$∞" trips the N3 FAIL clause). On its verdict mail: re-read linuxFxVersion (was v0.6.4-tool2.36-437ab4b at 06:09:20) and say so; NO GO → round-2 brief to Vision with the gate's fix-shapes (bound the custom price at the field and in lib/pdf.js; refuse non-finite) + any other findings.
+- **HPSM-POC B251** %34 (watcher on its STATUS): READY FOR GATE → commission its tier-1 gate kit (model: yesterday's HPSM-POC gates, e.g. B247/B243).
+- **NexusAI S100O** %35: RD-848 READY FOR GATE by mail → commission gate 24 kit (model gate 23). Then RD-801+822 / RD-802 READY mails → re-gate vs merge TURN.
+### KAM'S MPS HOSTED CARD (assemble when B163 is decided): main to hosted (card-per-deploy); words (B157 operator list, B158/B163 lane D words, B159 Check 10, B161 105 sentence + headline B161-10, tier-2 review words); 136 consequences (four-role tokens lose act-as; self-approval 403 until T02; Entra group FOR KAM with both flags every run); B160 package check (50 files = 48 + 2 Pkcs; Pkcs DLL + deps.json); B105-4 (GET the hosted overlay path first); PRE-1 now in the deploy (404 today); every deploy leaves an overlay copy with costs on the operator's machine (B161-4: Kam decides keep/STOP-only/remove).
+### OWED: records seat for every gate's Minor/Note tickets (B157, B158, B159, B161, B162; -153 governed half; N-801-1); PROPOSED register row + B162 clauses; send_brief seat label; STATUS watching inside wake_watch; HPSMPOC-254 hosted runtime card for Kam.
+
 ## 🟢 DELTA 196 — 2026-10-17 06:5x CHECKPOINT (s110, ctx 67%; band 80-90). **READ THIS FIRST. Supersedes 195's IN FLIGHT; 194's WAKE SOURCES rule stands (arm a STATUS watcher before ending any turn).**
 ### MPS: main 3478ff43 (after #69 147-r2, B162 GO WITH NOTES, scored 0.97). 25 PRs merged since 10-16 16:00 (#45-#69).
 ### IN FLIGHT (who wakes you)
