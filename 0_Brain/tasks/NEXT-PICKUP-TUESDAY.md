@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 202 — 2026-10-17 09:14 ROTATION HANDOVER (s111, ctx ~78%; band 80-90). **READ THIS FIRST, then 201 (its DONE list + 9 Kam cards). 194's WAKE SOURCES rule stands: arm a STATUS watcher before ending ANY turn (this seat's scratchpad `status_watch.sh` dies with it: rewrite it — a 30 s bash loop that exits when the last line of any `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md` or `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-1[7-9]_B*_STATUS.md` changes; NOTE the MPS folder is `Datasec MPS Commercial Calculator`).**
+### FIRST WORK FOR THE NEXT SEAT (in order)
+1. **Re-arm the STATUS watcher** (above). wake_watch covers mail + pane idles.
+2. **HPSM-POC: PR #156 MERGED 09:1x as 72073dac** (gate B252 GO WITH NOTES; 20/20 checks incl. CodeQL; merge tree == gated tree e161c831). OWED, in this order: (a) **hosted HPSM-POC deploy** under the push-to-demo grant (learnings 2026-10-16_tuesday-inherits-push-to-demo…; READY conditions all met) — commission a deploy seat brief per the project's own runbook (backup first, previous build kept, live check by Tuesday herself, ImportsEnabled stays false; report after it lands); (b) **HPSM-POC records**: B252's six Jira comment lines (`B252_STATUS.md:449-465`) + its 8 ticket candidates (`:438-447`), B252-1 Minor first; one records seat, no figures.
+3. **Gate B165** %40 MPS-V2 (lane D T f1a4b21 target-whatif-noaudit + C 5d2d7ad care-key-pattern; merge order predicted C then T) -> STATUS VERDICT -> GO: PRs in the gate's order (second branch's owner re-syncs `sync-contract.mjs` after the first merges; header-only per the drafter, the gate measures it).
+4. **Gate 24** %38 (NexusAI RD-848, verdict MAIL) and **gate 21** %39 (Vision QQ PR #10 r2, verdict MAIL; D4 ruled: on NO GO nothing merges, ONE publish card to Kam, default HOLD if an OPEN instance emails a wrong customer document). Live QuickQuote = production: publish is Kam's word only (C-20).
+### IN FLIGHT (seats)
+- **Lane D** %17: B103 ADDENDUM-7 (merge lane E's 0281520 into b103/mpscalc-142-155-item-classes @a4b7e92, CI, READY combined) -> its own tier-1 gate AFTER B165 (conflicts with 5d2d7ad in openapi.json:1863-1869). Then ADDENDUM-6 item 4 (reviewer's first name out of main's code comments, separate branch).
+- **Lane E** %18: B104 ADDENDUM-4 item 2 (-140: merge 5d2d7ad + e07/e08 reassigned from lane F) -> READY, stacked on 5d2d7ad (merges after C).
+- **NexusAI-O** %35: queue 2 (RD-802 verify + RD-828 mutants writing logs 09:12; C-57 via a session copy ACCEPTED with conditions) -> READY FOR GATE mails. Ghost text "carry on with queue 2" at its prompt: ignore (detector SUGGESTION).
+### KAM: 0 rows today. 9 MPS cards open (201's list), default-safe; hosted MPS deploy card default = not deployed, **re-raise Monday 19 Oct**. Monday also: Wednesday's storage-policy task is hers, not ours.
+### OWED (shared tooling, claim with Wednesday first): send_brief subject label "[Wednesday ->" for Tuesday; STATUS watching inside wake_watch; pane_close.sh listener WARNING should subtract the closed pane's own process tree (2 false alarms today). Vision: a CLARIFICATIONS C-entry for Kam's 2026-08-11 access-word ruling (next Vision brief).
+
 ## 🟢 DELTA 201 — 2026-10-17 08:59 CHECKPOINT (s111, ctx 70%; band 80-90). **READ THIS FIRST. Supersedes 200's IN FLIGHT. 197's hosted-card list is now FILED (below). 194's WAKE SOURCES rule stands.**
 ### DONE since 200 (each verified at source)
 - **PR #73 MERGED** 12f8e566 (lane D stack + B163 tests; 9/9 checks incl. CodeQL; merge tree == gated head tree 0a040061). MPS main = 12f8e566.
