@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 198 — 2026-10-17 07:2x (s110, ctx ~77%; band 80-90). **READ THIS FIRST. Supersedes 197's IN FLIGHT; 197's KAM HOSTED CARD list and OWED stand. 194's WAKE SOURCES rule stands (arm a STATUS watcher before ending any turn; check heavy-slot holders + pgrep before any MPS pane_close, ledger 10-17).**
+### IN FLIGHT (who wakes you)
+- **Gate B163** %33 MPS-V (lane D r2 stack; round 2 of 2; fetch-main grant given). VERDICT line in `…/MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-17_B163_STATUS.md` → GO: ONE squash PR from `b103/mpscalc-158-target-click-r2` (name by sha), CodeQL, merge; then the MPS hosted card (197's list). NO GO: the stack does not ship this round.
+- **B252 drafter** (HPSM-POC gate for b251/imports-bff-hardening @9195408f over main d916baf) → `tuesday/briefs/2026-10-17_B252_SEAT-G2_hpsmpoc-gate-b251.md` + DRAFTER-REPORT: read whole, launch (brief_seat form), arm a STATUS watcher on its report.
+- **Gate 24 drafter** (NexusAI RD-848 @065a0d8f over 17fc6c5) → `fleet/qa-agent/briefs/2026-10-17_nexusai-gate24-rd848.md` + launcher + DRAFTER-REPORT: read whole, stamp, add its routing line, `--check`, launch.
+- **Vision** %12: ROUND 2 of PR #10 (G20-F1 bound the custom price; F2 keystroke clobber; F7 a stress cell catching M2; F6/F8 its call; S5 question: is the offline access-word constant the live advanced word, answer without reading HPAM_WORD) → READY FOR QA round 2 → gate 21 (round 2 of 2; model gate 20's kit).
+- **NexusAI S100O** %35: after RD-848, RD-801+822 / RD-802 READY mails (GO from gates 19/20 + counts-only conflict) → Tuesday picks re-gate vs merge TURN.
+- **HPSM-POC B251** %34: done (READY) — close its pane after checking `pgrep -f b251` and its own STATUS for any background run.
+- Lanes D %17 / E %18 idle (wake_ack'd); Vision gate 20 CLOSED (NO GO, scored 0.95).
+### Publish-card facts for Kam, QuickQuote (carry when fix 2 passes round 2): G20-F3 (a v2.37 tab across a rollback to v2.36 silently emails standard), G20-F4 (lone revert of a8d769b restores a false W1), G20-F5 (custom note on no PDF/workbook in any mode; "Custom pricing only" shows it nowhere), custom note OFF email (Tuesday 10-16 14:02, reversible), W1+W2 retired.
+
 ## 🟢 DELTA 197 — 2026-10-17 07:1x CHECKPOINT (s110, ctx 72%; band 80-90). **READ THIS FIRST. Supersedes 196's IN FLIGHT. 194's WAKE SOURCES rule stands.**
 ### MPS: main 798fe984 (#70 B160 Pkcs, #71 105, #72 183 merged after gate B161 GO WITH NOTES, scored 0.95). 28 PRs merged since 10-16 16:00 (#45-#72). Only lane D's stack and lane E's 140 remain in the Paul-review set.
 ### IN FLIGHT (who wakes you)
