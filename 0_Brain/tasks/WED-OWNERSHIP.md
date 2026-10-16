@@ -168,3 +168,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/HPSM records — Tuesday (handover from Friday 2026-10-15) | OPEN | |
 | 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/MPS-Commercial-Calculator — Tuesday (handover from Friday 2026-10-15) | OPEN | |
 | 2026-10-16 10:09 | Kamils-Mac-mini | Datasec/Security-Composer — Tuesday (handover from Friday 2026-10-15) | OPEN | |
+| 2026-10-16 11:48 | Kamils-Mac-mini | 2_Project_Files/tuesday/brief_seat.sh — Tuesday's own seat launcher for Friday's handed-over Datasec projects (project-own gh/az config dirs, prompt names Tuesday) | OPEN | |
