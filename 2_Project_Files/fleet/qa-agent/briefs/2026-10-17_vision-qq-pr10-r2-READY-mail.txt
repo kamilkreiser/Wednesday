@@ -1,0 +1,47 @@
+READY FOR QA, round 2 of 2, tier 1.
+PR #10, head 3a3399e (new commits on 7b952f6, no force-push). Version is now 2.38, because gate 20 tested a build labelled 2.37. MERGEABLE/CLEAN.
+https://github.com/datasecau/vision_hpas-quickquote/pull/10
+
+REQUIRED ITEMS
+1. G20-F1 (a7e1835). One rule, cpCheck: a custom price must be a number, more than zero, and at most CONFIG.customPriceMaxRatio (10) x the standard per-device price.
+   - The page: the four fields and Apply % refuse anything else with a message (#cpRefused, role=alert). Custom pricing stays off, so a custom print mode can't be chosen and nothing says ∞.
+   - The renderer: lib/pdf.js refuses through cpRestore (the same cpCheck) before anything is drawn. It also refuses a custom print mode with a null/absent price, which is what a pre-v2.37 page posts.
+   - The route: /api/quote/email returns 422 with the sentence, mails nothing, and marks the reserved number "refused".
+   - Regression cells (test/custom-price-bounds.mjs), through the REAL server path: createApp + the real renderQuotePdf + capturing mail stub, a real Chrome signed in by its OTP and unlocked by the word through the UI, page and module served by the app, FX refused.
+     - Page: paste 1e308 (P8p) and -100 %.
+     - Crafted posts: pdmUSD 1e308 (custom and both), 0, -1, "27.9", {}, and pmBoth with a null price. All 422, 0 mails, row "refused".
+     - Plus a sane control.
+2. G20-F2 (a7e1835). renderCustom(skipId) no longer rewrites the field being typed; it is tidied on change. Cells type 27.37 (cpMonth), 0.9137 (cpDay), 333.33 (cpYear) and 999.99 (cpTerm) key by key. The field holds what was typed, and cpExport equals the typed value / rate to 1e-9.
+3. G20-F7 (1f7db41). Three fleet-scale cells (2,500 devices x 5 yr, -7.77 %: custom AUD, custom CAD, both AUD). Mutant M2 (restore from the rounded cpMonth) fails all 3, and the 9 existing cells still pass. The workbook loop now advances `at`, so order is enforced.
+   - custom-price-bounds.mjs: RED 14/15 on 7b952f6 (only the sane control passes), GREEN 15/15 at head.
+
+MY CALLS
+- G20-F6: FIXED (a7e1835, small). Reopen clears the custom price and print mode, and the note says so when it cleared one. Cell: email B standard, set -10 % + custom on the page, reopen B. Result: cpExport null, mode default, B emailed as default.
+  Behaviour note for QA: reopening A in the same page (P6a) now comes back standard too, the same as a fresh session (P6b). A quote is stored without its custom price.
+- G20-F8: TICKET (backlog 815aae7). It isn't trivial: it touches the print path and the FX provenance line.
+
+LOCAL (load under 8 at each start)
+- Pricing 69/69. npm test 132/132. test:print 200/200 (182 + 15 + 3). test:xlsx 6/6.
+- CI on 3a3399e: all green, including CodeQL, store-azurite, and test:print running both new files. 0 open code-scanning alerts.
+- Real PDFs (advanced AUD, -10 %, light + dark): all 9 are text-identical to round 1 apart from the version, with the same pages (2/2/3), all A4.
+- Refusal screenshots: light/dark at 1280 and 375 px, no horizontal overflow.
+- Evidence: <project>/fix2-email-matches-print-2026-10-17-evidence/round2-3a3399e/
+
+S5 ANSWER (from the code and CLARIFICATIONS only; HPAM_WORD and ADVANCED_UNLOCK_SECRET NOT read)
+- The offline index.html's constant sits in the "ADVANCED SEAM" region, which is the offline tool's own local check. Its comment calls it "a SPEED BUMP, not protection".
+- strip.js swaps that region out of the hosted build and fails the build if the constant's name leaks into public/ (the strip.js leak list).
+- The hosted word is checked server-side against ADVANCED_UNLOCK_SECRET, falling back to legacy HPAM_WORD (server.js:917).
+- So the code keeps them separate settings. Whether the live value happens to equal the offline constant I cannot tell without reading the secret, so I didn't check.
+- By design: server.js:155-160 records Kam's ruling 2026-08-11 (QA F2) that the word is a workflow gate, not a security control, and that "its being guessable (it is the product acronym) is by design". The hosted server logs a note of record when the configured word is derivable. ADVANCED_UNLOCK_SECRET is the rotation path if the posture changes.
+- I found no CLARIFICATIONS C-entry on it; the ruling lives in server.js.
+
+FOR KAM (new words; publish card)
+- Page refusal: "A custom price must be more than zero and no more than 10 times the standard price of A$31.00/device/month." followed by "Custom pricing is off until you change it." (fields) or "The percentage was not applied." (Apply %). The figure is the quote's own standard price.
+- Email refused: the same sentence plus "The quote was not sent."
+- Custom mode with no price: "This quote asks for custom pricing but carries no custom price, so it was not sent. Reload the page and press Email again."
+- Reopen: "Custom pricing is not saved with a quote, so it is off; enter it again if this quote needs it."
+- The ratio 10 is my choice and sits in CONFIG for Kam to change.
+- Still carried from round 1: W1/W2 RETIRED (verbatim in the PR body), and the custom-note ruling with its paper caveat.
+- Publish-card facts from the gate (F3, F4, F5) are untouched and yours to carry. Note on F3: a v2.37+ tab after a rollback to v2.36 still emails standard silently. The F1 refusal lives in the v2.38 renderer, so it can't help a v2.36 server.
+
+Holds unchanged: no merge, no publish, nothing to production.

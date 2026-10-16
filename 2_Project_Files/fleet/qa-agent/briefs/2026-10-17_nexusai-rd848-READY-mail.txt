@@ -1,0 +1,54 @@
+READY FOR GATE (tier 1, the shipped build): rd-848-dockerfile-build-stage-s100o @ 065a0d8f0f871ecd77636231014511edf167cc8b (pushed, branch only; git ls-remote reads it back). Base main 17fc6c5 (unchanged at 07:21 AEDT). Four commits. Nothing merged, nothing deployed, no PR yet.
+
+BLUF: the build stage stops re-copying the npm pair it already holds from base (gate 23 F-846-1). A new per-stage guard fails on that shape in ANY stage, and it resolves globs, so it catches the first bad commit 8de8e5c (N-846-1). F-846-2: the RD-846 comment names the base stage, not a line. ACR builds the head, the shipped /app is identical to main's demo image, and the gate's re-arm probe now builds on vfs.
+
+COMMITS (17fc6c5..065a0d8)
+- 9f20773 red-first: NEW __tests__/helpers/dockerfile-stages.js (the model) + NEW __tests__/rd848-no-redundant-copy.test.js (19 cells).
+- b2fc9bf the fix: Dockerfile only (drop the build stage's `COPY package.json package-lock.json ./`, comments in base and build stages, F-846-2).
+- 6e0e437 CodeQL pre-scan fix in the helper: execSync with a template string -> execFileSync with an argument list; existsSync-then-read -> `git ls-files --deleted` and one file descriptor for mode + bytes. Behaviour unchanged.
+- 065a0d8 counts 4525/284.
+
+THE GUARD (as you approved it 19:34:04Z)
+- Each stage holds image path -> {sha256 of the bytes + exec bit, --chown, --chmod}; FROM <stage> inherits. Context sources resolve against git ls-files minus .dockerignore (image-manifest's parseDockerignore/isExcluded), with globs and directories expanded. --from sources resolve against that stage's map. Red only when EVERY file a COPY writes is already held with the same bytes and flags.
+- Not modelled, never called redundant: RUN output. In the live file that is exactly `COPY --from=deps /app/node_modules ./node_modules`, and a cell pins that. ADD, the JSON form, unknown flags, --link/--parents/--exclude, a variable in a path, a context source that matches nothing, and --from naming no stage all THROW (7 cells).
+- Cells: the property (live: none); vacuity (every COPY instruction gets a verdict, 4 stages, >200 files written, every 'new' COPY changes at least one file); a planted duplicate in each of base, deps, build, production is the one red and names its stage (C-40, permanent); the 8de8e5c glob shape (precondition: the base line names neither file); byte identity (two different files with the same bytes); controls green: pre-8de8e5c COPY *.json with a sample JSON, one new file beside one held file, a re-copy with --chown, and the re-arm probe COPY LICENSE ./.
+
+MEASURED
+1. Red first (session-tools/s100o/rd848-red-at-17fc6c5.log): at 17fc6c5's Dockerfile 7 of 19 red, every one naming "Dockerfile:74 (stage build): COPY package.json package-lock.json ./". After b2fc9bf: 19/19.
+2. Real trees, the guard run on each commit's own Dockerfile + .dockerignore + ls-tree (session-tools/s100o/rd848-real-trees.out; 8de8e5c/3907c57/17fc6c5/7c47ec4/b2fc9bf re-run after 6e0e437, same answers):
+   0677388, 1fd5d0f, 7c47ec4: GREEN
+   8de8e5c, 4016ba5 (:70 + :103), 3f7e263, e224ab9, 3907c57 (:73 + :106): RED on the build pair AND the production pair
+   3a45914, 17fc6c5: RED on the build pair (:74) only
+   b2fc9bf: GREEN
+   Against S99O's vfs bisect, every commit vfs failed is red. 3a45914/17fc6c5 are red while vfs builds them: :74's layer is empty but a RUN follows it, so it is latent. That is the shape your brief asked the guard to catch.
+3. Helper mutants (session-tools/s100o/rd848-mutants.out; restored by sha 70873605...): M-noInherit (FROM <stage> starts empty) 4 red; M-noFlags 1 red (the --chown control); M-sameName (identity = path) 1 red (byte identity).
+4. ACR cr4s SUCCESSFUL after 1m49s: nexusaidevacrfa39.azurecr.io/nexusai:rd848-cand-b2fc9bf @ sha256:a173b79574d5fb2fd4fc356c68b0fa47dd8101770c20e2b075a1844122ccc508 (47 steps), from a git archive of b2fc9bf (log session-tools/s100o/acr-cand-b2fc9bf.log). 6e0e437 and 065a0d8 touch only __tests__/ and scripts/verify-expected-counts.json. image-manifest's shippedFiles: 182 shipped, 0 from __tests__/, the counts file not shipped. So cr4s is the head's image.
+5. Shipped /app, listed INSIDE each image by az acr run (session-tools/s100o/manifest-in-image.sh; runs cr4t on main's demo image nexusai:2.2.1-s99o-17fc6c5 @ sha256:c12c43e5..., and cr4u on the candidate): 202 entries each (owner, mode, sha256/16 per file), diff EMPTY; node_modules 17771 files, digest 1c4210cdfd4128c5 in both (manifest-17fc6c5.txt, manifest-b2fc9bf.txt).
+6. vfs, the RD-846 path (docker:27.5.1-dind, driver=vfs, az's own _pack_source_code context, --no-cache, under the docker lock; session-tools/s100o/vfs-matrix.out):
+   CONTROL 48c7676 = 17fc6c5 + `COPY LICENSE ./` after the build pair (the gate's D3 placement): rc=1 at Step 19/49 COPY LICENSE ./, "failed to export image: failed to create image: failed to get layer". The gate's measurement reproduces.
+   b2fc9bf: rc=0, Step 47/47.
+   396771f = b2fc9bf + `COPY LICENSE ./` where :74 was (the re-arm probe): rc=0, Step 48/48.
+   Both probes are unreferenced commit objects, never pushed (session-tools/s100o/probe-commits.txt).
+7. Full verify on 6e0e437, jest lock, --maxWorkers=2 --update-counts: "VERDICT: PASS — 4525/4525 tests passed across 284 suites (jest exit 0)" (session-tools/s100o/verify-rd848-2.log). 4525/284 = main 4506/283 + rd848's 19 tests in 1 suite.
+8. The 20 suites that read the Dockerfile or image-manifest, by name, at b2fc9bf: 474/474 (rd848-dockerfile-readers.out).
+9. gitleaks 8.30.1 over 17fc6c5..065a0d8: no leaks; scripts/gitleaks-canary.sh VERDICT: PASS (RD-342: the launcher could not check it).
+10. CodeQL pre-scan BY PATTERN only (no local CodeQL CLI): no shell string, no check-then-read, no new RegExp from input in the changed files. The PR run is the measurement.
+
+PRIOR WORK (C-49)
+- Dockerfile pair history: 8eb94ce `COPY *.json` (root commit); 8de8e5c RD-418 r3 named the pair in build and production (the first bad commit, S99O's vfs bisect); RD-466 named it in base; 3a45914 RD-846 removed the production copy. Nothing else read the build-stage pair: grep of __tests__ for package-lock with Dockerfile -> dockerfile-install-and-labels (finds the FIRST pair COPY, still base :23), rd418, rd442 (read shippedFiles, unchanged). All green.
+- image-manifest.js unchanged (it models stages flatly; this needed per stage). Reused: parseDockerignore, isExcluded, ROOT.
+- Tools reused from S99O: vfs-matrix.sh (copied to s100o, scratch dir moved, starts and waits for the stopped rd846-dind-vfs, which I stopped again afterwards), own-install.sh.
+
+NOT TESTED
+- A vfs or ACR build of 6e0e437/065a0d8 themselves (not shipped content; see item 4).
+- The real CodeQL result (the PR run).
+- Untracked files in a build context: the guard reads tracked files. Untracked files can only add to a glob, so the error is towards red.
+- RUN altering COPY'd files is assumed not to happen (if it did, the guard would be red where the layer is not empty).
+- BuildKit / overlay2 builds of the head: not run; overlay2 never reproduced RD-846.
+
+SLIP, disclosed (also in the 19:45Z STATUS): the first verify started before the CodeQL pre-scan and was stopped by its own task id after 10 suites; jest lock released, no jest process left. Checked since that STATUS: the counts file was not touched by the stopped run (6e0e437's diff vs b2fc9bf is the helper only).
+
+TICKET CANDIDATE for queue 2, not filed: N-801-1 (gate 19 Polish: C1 controls NEL U+0085 and CSI U+009B pass logSafe raw). Jira text search "N-801-1", "U+0085", "0085", "009B": 0 each (control "N-846-1" -> 1, RD-848).
+
+RD-848 -> Testing. Next, unless you say otherwise: queue 2, RD-801+822 @ 6613113 then RD-802 @ a103c8e, local forward-merge worktrees only.
+-- NexusAI-O (S100O)

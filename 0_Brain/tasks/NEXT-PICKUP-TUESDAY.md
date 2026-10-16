@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 199 — 2026-10-17 07:3x ROTATION HANDOVER (s110, ctx ~79%; band 80-90). **READ THIS FIRST, then 198 (IN FLIGHT detail) and 197 (Kam's MPS hosted card list + OWED). 194's WAKE SOURCES rule stands.**
+### FIRST WORK FOR THE NEXT SEAT (in order)
+1. **Re-arm watchers** (this seat's background watchers die with it): the MPS STATUS watcher (exits on any change to the last line of `…/MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md`), and one for any HPSM-POC gate STATUS you launch. wake_watch covers mail + pane idles.
+2. **Three drafter kits were commissioned by s110; their notifications died with it. CHECK FOR THE FILES:**
+   - `2_Project_Files/tuesday/briefs/2026-10-17_B252_SEAT-G2_hpsmpoc-gate-b251.md` + `…_B252_DRAFTER-REPORT.md` (HPSM-POC gate on b251/imports-bff-hardening @9195408f over d916baf) → read WHOLE, launch (brief_seat form), watcher on `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-17_B252_STATUS.md`.
+   - `2_Project_Files/fleet/qa-agent/briefs/2026-10-17_nexusai-gate24-rd848.md` + `launch_qa_nexusai_gate24.sh` + DRAFTER-REPORT (NexusAI RD-848 @065a0d8f over 17fc6c5) → read WHOLE, stamp, add the routing line it names, `--check`, launch.
+   - `2_Project_Files/fleet/qa-agent/briefs/2026-10-17_vision-gate21-qq-pr10-r2.md` + `launch_qa_vision_qq_gate21.sh` + DRAFTER-REPORT (QuickQuote PR #10 round 2 @3a3399e over 437ab4b) → read WHOLE, stamp (SELF-CHECK, AZ-PRE-READ: read linuxFxVersion yourself with Vision's AZURE_CONFIG_DIR; it was v0.6.4-tool2.36-437ab4b at 07:16:24), D4, routing line QA/Vision-gate21, `--check`, launch. **Launch in waves; read `uptime` first; B163 is still live.**
+   If any kit is missing, the drafter died: re-commission it (the prompts' substance is in 198 + this delta).
+3. **Gate B163** %33 (lane D r2; still running at 07:2x; fetch grant ANSWER-1): VERDICT → as 198.
+4. **NexusAI S100O** %35: doing queue 2 (RD-801+822 / RD-802 re-checks) → READY mails → re-gate vs merge TURN.
+### NEW KAM ITEM (for a card, with a default): QuickQuote's offline index.html holds an access-word constant ("speed bump"); whether the LIVE advanced word equals it is unknown without reading the secret (Vision S5 answer, code only). Ask Kam to confirm they differ, or to rotate the live word. Default: nothing changes until he answers. Plus the round-2 bound (ratio 10 in CONFIG) is a number for his publish card.
+### FLOOR at rotation
+%0 tuesday · %1 fleet-monitor · %12 Vision (round 2 READY, holds for gate 21) · %17 MPS-LD (idle; HOUSEKEEPING done) · %18 MPS-LE (idle; 140 waits lane D) · %33 MPS-V gate B163 · %35 NexusAI-O (queue 2).
+### Ledger this seat (s110): 6 rows (composed branch names w=2; card id carried a person's name; 11 h idle without a STATUS watcher; 143 squash against my own stack ruling; orphaned heavy slot via early pane_close; + the earlier 10-16 rows). Both digests regenerated at each ledger edit.
+
 ## 🟢 DELTA 198 — 2026-10-17 07:2x (s110, ctx ~77%; band 80-90). **READ THIS FIRST. Supersedes 197's IN FLIGHT; 197's KAM HOSTED CARD list and OWED stand. 194's WAKE SOURCES rule stands (arm a STATUS watcher before ending any turn; check heavy-slot holders + pgrep before any MPS pane_close, ledger 10-17).**
 ### IN FLIGHT (who wakes you)
 - **Gate B163** %33 MPS-V (lane D r2 stack; round 2 of 2; fetch-main grant given). VERDICT line in `…/MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-17_B163_STATUS.md` → GO: ONE squash PR from `b103/mpscalc-158-target-click-r2` (name by sha), CodeQL, merge; then the MPS hosted card (197's list). NO GO: the stack does not ship this round.
