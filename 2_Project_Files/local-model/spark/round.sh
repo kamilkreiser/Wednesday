@@ -119,11 +119,18 @@ if [ "$CONTROL" -eq 1 ]; then
   say "control: golden $B_GOLDEN (no model call; endpoint not checked)"
 else
 EP_CODE="$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$SPARK_URL/v1/models" 2>&1)"; EP_RC=$?
+# 2026-10-16 (two silent tunnel drops in two days): before refusing, re-open the LOCAL forward ONCE via
+# tunnel.sh (it never touches the box and never kills). Only for the default local tunnel URL, never a dry run.
+if { [ "$EP_RC" -ne 0 ] || [ "$EP_CODE" != "200" ]; } && [ "$DRY" -ne 1 ] && [ "$SPARK_URL" = "http://127.0.0.1:47788" ]; then
+  TUN_OUT="$(bash "$(dirname "${BASH_SOURCE[0]}")/tunnel.sh" up 2>&1)"; TUN_RC=$?
+  say "endpoint was DOWN (http=$EP_CODE); tunnel.sh up rc=$TUN_RC: $(echo "$TUN_OUT" | head -1)"
+  EP_CODE="$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$SPARK_URL/v1/models" 2>&1)"; EP_RC=$?
+fi
 if [ "$EP_RC" -ne 0 ] || [ "$EP_CODE" != "200" ]; then
   if [ "$DRY" -eq 1 ]; then
     say "endpoint: DOWN ($SPARK_URL/v1/models curl rc=$EP_RC http=$EP_CODE) — a real round would refuse rc 4"
   else
-    finish 4 "ENDPOINT DOWN — $SPARK_URL/v1/models curl rc=$EP_RC http=$EP_CODE. Check the tunnel (pgrep -fl 'L 47788:127.0.0.1:8888') then the box; this script never restarts either"
+    finish 4 "ENDPOINT DOWN — $SPARK_URL/v1/models curl rc=$EP_RC http=$EP_CODE. tunnel.sh up was tried once (it re-opens only the local forward); now check the box; this script never restarts the box"
   fi
 else
   say "endpoint: $SPARK_URL/v1/models 200"

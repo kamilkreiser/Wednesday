@@ -1,0 +1,18 @@
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f1-workflow-approve-forward-bound-is-validated.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1185-f1-workflow-approve-forward-bound-is-validated.test.ts
+@@ -163,7 +163,14 @@
+     expect(() => build(cyclic)).toThrow(/originateForwardTimeoutMs/);
+     expect(shownIn(cyclic)).toBe('[object Object]');
+   });
+-
++
++  // KS-1614: [1n] is the value where the catch's fallback decides the text. JSON.stringify throws on the BigInt inside, and
++  // String([1n]) is "1", the text of the VALID bound 1, so a fallback printing String(value) would show an accepted bound.
++  it('RED KS-1614 - a refused [1n], which JSON cannot print, shows its type tag [object Array], not the accepted text 1', () => {
++    expect(() => build([1n])).toThrow(/originateForwardTimeoutMs/);
++    expect(shownIn([1n])).toBe('[object Array]');
++  });
++
+   it('GREEN KS-1185 F1 control - no override still builds and means the production default', () => {
+     expect(() => build(undefined)).not.toThrow();
+   });

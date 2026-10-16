@@ -357,6 +357,17 @@ if [ "${WED_AGENT:-}" = "friday" ]; then
     warn "Spark endpoint not reachable on :8888" "tunnel down or container stopped — HANDOFF.md §1 tunnel line, then ssh ZGX-Nano-G1n '~/DeepSeek-v4-Flash-One-DGX-Spark/run-a2.sh' if /health fails there too"
   fi
 fi
+# --- Spark tunnel for the WEDNESDAY seat (added 2026-10-16, wrap rule 3a): the Studio reaches the Spark through a
+# local forward on 127.0.0.1:47788 (PORTS.md). It dropped silently on 10-15 and 10-16 and nothing said so. Check-only
+# here; local-model/spark/round.sh re-opens it in-path (tunnel.sh up) before refusing ENDPOINT DOWN.
+if [ "$_DOC_AGENT" = "wednesday" ]; then
+  TUN_OUT="$(bash "$PROJECT_DIR/2_Project_Files/local-model/spark/tunnel.sh" check 2>&1)"
+  if [ $? -eq 0 ]; then
+    ok "Spark tunnel 47788 up ($(echo "$TUN_OUT" | head -1 | cut -c1-80))"
+  else
+    warn "Spark tunnel 47788 DOWN: $(echo "$TUN_OUT" | head -1 | cut -c1-90)" "bash 2_Project_Files/local-model/spark/tunnel.sh up (re-opens the local forward only; if it refuses rc 4, the box is down — Spark kit RELOAD notes)"
+  fi
+fi
 
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---
 # A TRACKED master copy now lives beside the other hooks, so a stranded seat installs it
