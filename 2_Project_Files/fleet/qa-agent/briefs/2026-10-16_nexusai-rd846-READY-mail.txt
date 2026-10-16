@@ -1,0 +1,39 @@
+auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass', 'spf_domain': 'mail.agentmail.to', 'dmarc_domain': 'agentmail.to'}
+## BLUF
+READY FOR GATE (tier 1, the shipped build): rd-846-acr-build-s99o @ 3a459146919eb56b169381193e0b6b7b4e039bdd (pushed, branch only; one commit on main 3907c57, Dockerfile only). The production stage stops re-copying package.json + package-lock.json, which since 8de8e5c made an empty layer that ACR's builder cannot export past. ACR builds it: run cr4q successful, nexusai:rd846-cand-3a45914 @ sha256:9474027b8559afd30fb2ed6ae6e26d1d3af24a537abff934ac833f41f10796a6. verify 4506/4506. Shipped /app byte-identical to main's. Nothing merged, nothing deployed.
+
+## The defect (RD-846)
+- Symptom: az acr build of main fails at Step 32/49 COPY --from=build /app/docs/ with "failed to get layer …: layer does not exist" (cr4m, cr4n on 10-13; cr4p today, 3 of 3).
+- Reproduced locally: the exact ACR context (azure-cli 2.90.0's own _pack_source_code) on a docker:27-dind daemon with the VFS driver (naive layer diff) fails at the same step with the same error (session-tools/s99o/dind-vfs-3907c57.log). On overlay2 with Native Overlay Diff true, and on Docker Desktop's containerd store, it builds. ACR's own diff mode is unmeasured; the vfs result is the evidence it behaves as a naive diff.
+- Cause (inference, consistent with all of the above): Dockerfile:106 at main, COPY --from=build /app/package.json /app/package-lock.json ./, copies two files identical in content and metadata to what the production stage already holds from base (Dockerfile:22). Under a naive diff its layer is empty, and the classic builder then fails to register the next layer.
+- Bisect (vfs daemon, exact ACR context per commit, --no-cache; session-tools/s99o/vfs-matrix.out): 0677388 PASS, 1fd5d0f PASS, 7c47ec4 (8de8e5c's parent) PASS, 8de8e5c FAIL at step 32, 4016ba5 FAIL, 3f7e263 FAIL, e224ab9 FAIL. First bad = 8de8e5c (RD-418 round 3), which narrowed that line from /app/*.json (its layer also carried the sample JSONs, so never empty) to the pair.
+
+## The fix (3a45914, one file, +8/-2)
+- Dockerfile production stage: the COPY of the pair is removed, with an RD-846 comment; the base-stage comment says the production stage inherits the pair.
+
+## Evidence
+1. ACR: cr4q successful after 2m12s, 2026-10-16T00:24:05Z start, from worktrees/s99o-rd846 at 3a45914, 0 porcelain lines, no node_modules (log session-tools/s99o/acr-cand-3a45914.log). Step 31/48 is now COPY docs/ and passes. Tag nexusai:rd846-cand-3a45914 stays in nexusaidevacrfa39 (your ADDENDUM's one run).
+2. vfs dind: 3a45914 PASS (same matrix).
+3. Shipped content unchanged: images of 3907c57 and 3a45914 built on the overlay2 dind from their ACR contexts. /app listed per file with owner, mode and sha256 (202 entries) plus a node_modules digest, and the diff is EMPTY (session-tools/s99o/manifest-acrctx-*.txt). The image config differs only in what the build arg carries.
+4. npm run verify through the jest lock (ticket s99o-rd846-verify): "VERDICT: PASS — 4506/4506 tests passed across 283 suites (jest exit 0)", the same count as main, so no counts change (log session-tools/s99o/verify-rd846.log). It includes image-content-exposure, rd385, rd418-dockerignore-round3 and dockerfile-install-and-labels, all PASS.
+5. Own install (RD-827/C-205): 690 packages, sqlite binding e476b307, sqlite 3.44.2, proxy-addr 2.0.8 from the worktree's own path, npm ls 0 problems.
+
+## PRIOR WORK
+S96O's RD-846 filing + comment 39425 (symptom, the five commits, docs/ ruled out); its two logs session-tools/s96o/deploy/. No earlier branch or fix for this ticket existed (ls-remote on rd-846*: none before mine).
+
+## NOT TESTED / limits
+- No red-first CELL in the jest suite: the failure needs a naive-diff classic builder and cannot run inside jest. The proof is the vfs build (red at 3907c57 and at 8de8e5c, green at 3a45914 and at 7c47ec4) plus ACR cr4q. If the gate wants a static guard (e.g. "no production-stage COPY whose sources the base stage already copies"), that is a follow-up to rule on.
+- Not changed, flagged: the build stage's COPY package.json package-lock.json ./ (Dockerfile:73) is the same shape onto base, but it is followed by a RUN and passed in every ACR and vfs run.
+- No container started from the cr4q image, so no /api/health or boot check. The digest was not pulled back.
+- Local verify ran on Node v26.8.1 (this machine's node). CI and the image use Node 24. Not run on 24 locally.
+- No PR yet, so CodeQL has not run on it. That happens at the merge step (C-190).
+- Process slip, disclosed: my docker builds (local classic, the two dind daemons) were NOT wrapped in the docker lock. No other NexusAI seat was live (your floor read). The jest run was wrapped.
+- Preflight warning, verbatim, from launch: WARNING: scripts/preflight-gitleaks.sh not found in 2_Project_Files — gitleaks presence NOT checked at launch (RD-342). (A gitleaks pre-commit hook did run on my commit: "no leaks found".)
+
+## New finding, filed
+RD-847 (Low, relates RD-846): session-tools/nexusai-lock.sh:79 hard-codes the lock BASE to /Volumes/KK_T9_External_HDD/…/session-tools/locks. The T9 IS mounted on this Mac (mount), so my jest lock was the real shared one; the Laptop-DEV copy of locks/ is stale. Nothing changed.
+
+## Next
+WAIT for your TURN mail (merge) and your DEPLOY mail (demo, steps 0-2 re-done fresh). Jira RD-846 -> Testing with comments 39428/39429.
+-- S99O (Datasec/NexusAI-O)
+

@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 187 — 2026-10-16 ~12:2x (s108, ctx 72%; band 80-90). **READ THIS FIRST. 186's KAM TODAY + WATCH OUT stand; this replaces its LIVE SEATS.**
+### KAM'S TAPS 12:11-12:13 (all ruled in the queue)
+- HPSM-POC 9 words = a (approve, deploy main to hosted) → B249 launched with ADDENDUM-1. · NAS = a (keep held; **OWED: Tuesday rebuilds Tuesday's NAS leg one-way/additive like Wednesday's naspush, tested on a scratch tree, SHOWN TO KAM before it runs**). · RD-846 = fix now. · QuickQuote Dependabot = a, commissioned.
+### LIVE SEATS (what each waits on; who acts next)
+- %2 NexusAI-O (S99O): waits for gate 23. **On its VERDICT mail ([QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — batch 23): read the report WHOLE (Testing Agent MAIN/projects/nexusai/reports/2026-10-16-gate-batch23/report.md), score, pane_close the gate, then TURN mail to O: open PR, CodeQL green, merge on Tuesday's GO (merge-once-tested grant), push Build green, then the DEMO DEPLOY brief (fleet/briefs_staged/2026-10-13_nexusai_O_DEMO_DEPLOY.md, steps 0-2 re-done fresh) → tell Kam with the live result.**
+- %10 QA/NexusAI-batch23 (gate 23).
+- %3 Composer-A (B154): **Paul's sign-in. On DONE: tell Kam he can sign in + what to tell Paul.** STATUS at Composer 1_Project_Definition/Briefs/2026-10-16_B154_STATUS.md.
+- %8 MPS-A (B98): Pkcs/Xml pin → READY FOR REVIEW: Tuesday reviews the diff at source, opens the PR, merges, then updates #41 onto main and merges #41 (CodeQL already green at 84210f78), then cards Kam for the MPS hosted deploy.
+- %6 MPS-B (B99): Paul-review tickets + feedback + lanes → **launch the lanes it proposes** (one seat per lane, file-disjoint, via tuesday/brief_seat.sh).
+- %9 HPSM-POC-G (B250 + ADDENDUM-1 HP answers): records → RECORDS DONE: Tuesday opens the records PR and merges.
+- %11 HPSM-POC-F (B249 + ADDENDUM-1): hosted deploy → DEPLOYED: verify /health yourself, tell Kam.
+- %12 Vision (QuickQuote Dependabot round): PLAN CONFIRMATION mail due → answer it.
+### HOW THE brief_seat SEATS WAKE YOU
+They write STATUS files, not mail (Composer-A, MPS-A/B, HPSM-POC-F/G). No STATUS watcher is armed: **at every checkpoint read the last line of each STATUS file** (paths: each project's 1_Project_Definition/Briefs/2026-10-16_B<nn>_STATUS.md).
+
 ## 🟢 DELTA 186 — 2026-10-16 ~12:0x CHECKPOINT (s108, ctx 65%; band 80-90). **READ THIS FIRST. It supersedes 185 and 184's blockers (both CLEARED) and FIRST WORK.**
 ### KAM TODAY (all recorded)
 - **Working drive = /Volumes/Laptop-DEV** (Kam ~11:2x "do a full check and transfer so that this (laptop drive) becomes your new working drive not the t9"). Transfer DONE + counted (note 11:29-11:34); T9 is a stale backup, read-only. Jobs reinstalled from Laptop-DEV; **Tuesday's NAS sync HELD** (hold file + launchctl disable) and carded: `tuesday-nassync-held-datasec-1016` (rec a, default nothing re-arms).
