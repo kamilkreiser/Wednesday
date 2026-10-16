@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 194 — 2026-10-17 05:4x (s110, ctx ~45%; band 80-90). **READ THIS FIRST. Supersedes 193's NEXT. 189's STANDING (feedback sweep every boot) stands.**
+### ⚠ WAKE SOURCES (ledger 10-17 w=1): brief_seat seats write STATUS files, NOT mail. **Arm a STATUS watcher before ending any turn** (this seat: a background bash loop that exits on any change to the last line of `…/MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md`; re-arm it after each wake). wake_watch covers mail only. I lost 17:51→05:30 to this.
+### MPS state (main a6813d70, after #45-#67; CI green on d0562848, a6813d70 not yet read)
+- MERGED today/overnight: tier 2 #45-#54; B157 #55-#60; B158 #61 (151 warning half), #62 (174c contract); B159 #63 179, #64 170, #65 141, #66 182, #67 136. Tickets OPEN after merge: -151 (picker), -174 (rate limit), -163 (under load), -153 (governed setting).
+- **OPEN PR #68** = lane A stack top 32baa158 (tier 2, reviewed): merge after checks.
+- **IN FLIGHT:** lane D %17 (B103 ADDENDUM-3: B158-3 + merge main into 150-r2/158-r2 → READY round 2) · lane E %18 (B104 ADDENDUM-1: 147-r2) · drafter writing gate **B161** (B160 Pkcs + b107/183 + b102/105) → read WHOLE, launch `Datasec/MPS-T`.
+- **NEXT GATE after D and E READY:** round-2 gate for 150-r2→158-r2 and 147-r2 (round 2 of 2: a second NO GO means no ship this round).
+- **Kam's MPS hosted card (card-per-deploy), when round 2 lands:** words gate (B158 Check 8's 16 + lane D's 17-21; B159 Check 10; B157 operator list; tier-2 review words), 136 consequences (four-role tokens lose act-as at first deploy; self-approval 403 until T02; Entra group step FOR KAM, both script flags every run), B160's package check (48 → 50 files; Pkcs DLL + deps.json entries) and B105-4 (GET the hosted overlay path before a deploy carrying 162).
+### Vision: fix 2 (guard removal APPROVED by Tuesday 05:4x) → READY FOR QA tier 1 → gate → publish card for Kam (custom note OFF email / ON print; W1+W2 retired).
+### NexusAI: lane O wrapped (S99O). Next round NOT launched: RD-848, then RD-801+822 → RD-802, RD-828 s2, RD-837. Demo sign-in group check unexercised (see 193).
+
 ## 🟢 DELTA 193 — 2026-10-16 16:40 (s110, post-rotation seat, ctx 29%; band 80-90). **READ THIS FIRST. It supersedes 192's FIRST WORK 1, 2 and 5; 192's items 3-4 and 189's STANDING (feedback sweep every boot) stand.**
 ### DONE this seat (each verified at source)
 - **NexusAI RD-846 LIVE on demo**: DEPLOYED mail 05:20Z (DKIM pass); Tuesday's own curl 16:21:24 = 2.2.1 build def3ac7e654fdacd = own shasum of 17fc6c5 [:16]. Kam told (bf-616c5af03beb). O told (ANSWER mail) to re-read group logs ~05:50Z then WRAP without waiting; rollback to anchor on any hit. **On its WRAP mail: score, pane_close %2.** (send_brief tagged the mail "[Wednesday -> …]": the seat-label lookup is wrong for Tuesday — OWED, claim with Wednesday.)
