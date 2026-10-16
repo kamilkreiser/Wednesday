@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 188 — 2026-10-16 ~12:4x ROTATION HANDOVER (s108, ctx 77-78%; band 80-90). **READ THIS FIRST, then 187 (its LIVE SEATS list) and 186 (KAM TODAY + WATCH OUT).**
+### FIRST WORK FOR THE NEXT SEAT (in order)
+1. **MPS: Kam asked for tickets from the Paul review AND agents to action them.** B99 is DONE: `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-16_B99_STATUS.md` (183 lines). 53 tickets (MPSCALC-136…188); **§"FOR KAM" (line ~103): 21 card candidates K-01…K-21** → post them as GROUPED cards (Friday's rule: group Kam's board items; one card per logical decision), each action-first with a default; **§"DO 5 · LANES" (line ~141): 9 file-disjoint build lanes** → launch one seat per lane via `2_Project_Files/tuesday/brief_seat.sh` (brief per lane in tuesday/briefs/, B100+; tier per the STATUS; pricing-register tickets T07/T12/T15/T16/T20/T23-25 are TIER 1 with a workbook-register row + red-first test). Respect the 90% gauge only (7d 4% now). Read §"FOR TUESDAY" (line ~126) first.
+2. **MPS-A (B98, %8) Pkcs/Xml pin**: on its READY FOR REVIEW, review at source, PR, merge; then update #41 onto main, merge #41; then the MPS hosted deploy card (MPS hosted is card-per-deploy).
+3. **Gate 23 verdict (NexusAI RD-846)** → as DELTA 187 says (merge → demo deploy → tell Kam).
+4. **HPSM-POC-F (B249, %11) hosted deploy** → on DEPLOYED, curl /health yourself, tell Kam.
+5. **HPSM-POC-G (B250 + ADDENDA 1-3, %9)** → on RECORDS DONE, open the records PR (datasecau/HPSM-POC-analysis), merge.
+6. **Vision (%12)**: PR #7 GO sent → on MERGED verify at source; then PR B (decision 14 = b, Kam 12:41:19) per the ADDENDUM mail; tier-1 gate for PR B (commission it).
+7. **HPSM (parent) half of Steve's forward**: needs an HPSM records seat (see DELTA 187 "ADDED 12:4x"); the PDFs are CLEARED (card a, 12:40:56) and saved in tuesday/inbound/.
+8. NAS one-way rebuild (Kam a, 12:12:03): build + test on a scratch tree, show Kam before it runs.
+### KAM'S RULINGS TODAY (all recorded in the queue)
+hpsmpoc-hosted-words-9-b241-1016 a · tuesday-nassync-held-datasec-1016 a · nexusai-rd846 card b (fix now) · quickquote-dependabot-14-round-1013 a · hpsmpoc-steve-dbs-pdfs-cleared-for-ai-1016 a · quickquote-decision14-puppeteer25-node22-1016 b. Still open: composer-l05-setup-card-too-1014 (holds the Composer demo deploy of main 230f9fab).
+### FLOOR at rotation
+%0 tuesday · %1 fleet-monitor · %2 NexusAI-O (waits gate) · %8 MPS-A (B98) · %9 HPSM-POC-G · %10 QA/NexusAI-batch23 · %11 HPSM-POC-F · %12 Vision. Closed today: Composer-A (B154 done), MPS-B (B99 done).
+
 ## 🟢 DELTA 187 — 2026-10-16 ~12:2x (s108, ctx 72%; band 80-90). **READ THIS FIRST. 186's KAM TODAY + WATCH OUT stand; this replaces its LIVE SEATS.**
 ### KAM'S TAPS 12:11-12:13 (all ruled in the queue)
 - HPSM-POC 9 words = a (approve, deploy main to hosted) → B249 launched with ADDENDUM-1. · NAS = a (keep held; **OWED: Tuesday rebuilds Tuesday's NAS leg one-way/additive like Wednesday's naspush, tested on a scratch tree, SHOWN TO KAM before it runs**). · RD-846 = fix now. · QuickQuote Dependabot = a, commissioned.
