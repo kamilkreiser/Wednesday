@@ -1,0 +1,34 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA (tier 1): QuickQuote PR #9 @ 5f08fe0 — email guard (C-20); red->green, CI 175/175, CodeQL 0; sentences for Kam inside
+Date: 2026-10-16T02:58:54.000Z
+Message-ID: <010001a142a5f223-879477d5-59ff-4437-aadb-b71c78e3ad8b-000000@email.amazonses.com>
+
+BLUF: READY FOR QA, TIER 1: QuickQuote PR #9 @ 5f08fe0 (fix/qq-email-print-mode-guard-2026-10-16 off main e4ce536), the email guard Kam ruled first (C-20; card quickquote-email-sends-standard-not-custom-1016 = a). Red on main's code, green here. CI green: test:print 175/175 on Linux Chrome includes the new cells. CodeQL 0 open on the PR refs. Nothing merged or published. Publish only on your PUBLISH GO after the gate.
+
+THE CHANGE (git diff e4ce536..5f08fe0: 3 files)
+- stage3/strip.js, the hosted Email handler only (HOSTED_EXTRAS). In any print mode other than "Standard pricing only", the first press does NOT send: it shows the warning and arms the button for THAT mode. A second press sends, with standard pricing, unchanged. Any print-mode change disarms it and clears the warning. "Standard pricing only" is unchanged. The offline index.html is untouched (the guard lives only in the hosted build).
+- stage3/test/email-print-mode.mjs (new) + package.json: added to test:print, so CI's print-fit job runs it.
+
+FOR KAM, the rep-visible text, word for word:
+  Warning: This email sends standard pricing only. Your custom pricing is on the printable quote, but it will not be in the email. Choose “Standard pricing only” above, or press the button again to send standard pricing anyway.
+  Armed button: Send standard pricing anyway
+  Unchanged: "Email me this quote (PDF & XLS)", and the "Sent — quote …" line.
+  Styling: the page's own amber .svc-warn box (existing light + dark rules), no new colours.
+
+RED FIRST (test/email-print-mode.mjs: a real advanced session in Chrome; /api/advanced/unlock + /module stubbed the way server.js serves a verified session; nothing leaves the process; custom price via "% from standard" -10; mode picked by its label; then Email)
+- On main's code: 4 of 5 FAIL for the right reason. custom: POST on the first press (actual 1, expected 0). both: same. Switch-back: button never armed. No carry-over: the second mode sent instead of warning. The control (standard mode sends on one press) PASSES.
+- With the guard: 5/5.
+- Two harness missteps on the way, mine, fixed before calling it red (named in my 02:5xZ STATUS).
+
+VERIFIED
+- Local (macOS, node 26.8.1, Chrome 155): pricing 69/69, npm test 132/132, test:print 175/175 (was 170 + 5 new), test:xlsx 6/6.
+- CI on PR #9: tests.yml 5/5 on push 38842678755 and pull_request 38842703255. The print-fit log shows "ok 10 - guard (custom)…", "ok 11 - guard (both)…", "ok 14 - control…", "# tests 175 / # pass 175 / # fail 0". CodeQL: Analyze actions + js-ts pass; open code-scanning on refs/pull/9/head and /merge = 0. MERGEABLE.
+- Screenshots (Vision project guard-2026-10-16-evidence/): 1280 px light + dark, before the press and after it. I looked at both: the warning is legible in both themes, the armed label fits.
+- Phone: at 375 px, light + dark, after the first press: no sideways scroll, warning and button inside the viewport, button text fits (measured in the page).
+
+NOT TESTED / PENDING
+- 320 px: my run timed out in the harness (settings-drawer wait) while this machine was at load average ~200: other sessions' builds (33 dotnet processes) plus my amd64 emulation. Not a verdict either way. I'll re-run it when the amd64 job ends and report in a STATUS.
+- A real ACS send in a custom mode (the test stubs /api/quote/email; the posted body is asserted, the mail is not).
+- The live site: the publish step's checks (rollback image read first, post-deploy checks, as for v2.35).
+
+PRIOR WORK: none on this guard (new). The defect it guards is the 2026-10-16 measurement (STATUS mails 02:10Z and 02:3xZ; QQ BACKLOG @ fbd892e). The full fix, fix (2), is next on its own branch per your 02:12Z ANSWER. If it lands, the guard text may no longer be needed; I'll say so in its READY.
+-- Vision seat %12
