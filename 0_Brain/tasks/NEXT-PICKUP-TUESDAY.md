@@ -6,6 +6,24 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 207 — 2026-10-17 15:10 ROTATION HANDOVER (s112, ctx ~79%; band 80-90). **READ THIS FIRST, then 206/205/204 (their DONE + OWED). FIRST: rewrite + arm the STATUS watcher (scratchpad dies with the seat): a 30 s bash loop that exits when the last line of any `/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md` or `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-10-1[7-9]_B*_STATUS.md` changes (use bash -c; shopt -s nullglob).**
+### DONE since 206 (each verified at source)
+- **MPS main = 1e8a738f** (#78 CP care packs f1d5641 [B168 GWN r2], then #79 MPSCALC-194 feedback words [tier 2, Tuesday review]); trees verified each time. MPS hosted still 12f8e566.
+- **HPSM-POC main = 787d1590** (PR #157 HPSMPOC-254 Pkcs-in-package, gate B255 GWN; tree a5ac7f54 = gated).
+- **B169 records DONE**: MPS CLARIFICATIONS C-33..C-42 (commit efb2b69), 15 tickets MPSCALC-213..227, 11 comments; all 10 cards marked --delivered (HTTP 200 x10).
+- **Vision gate 22 = GO WITH FINDINGS** (QQ PR #10 r3 f31720e; D4 HOLD not triggered). Post-read 14:52:36 live = v2.36. **Kam card `quickquote-v239-custom-price-fix-publish-1017`** (rec a: publish 2.39 + 3 sentences; default b: nothing published, re-raise Mon 19 Oct). Board msg HTTP 201.
+- Gates B168, B255, 22 scored + panes closed. Ledger rows: lock base named before reading (w=1); a note said 'delivered' for a refused tap (REGRESSION w=9). Digests regenerated.
+### IN FLIGHT (who wakes you)
+- **B256** %49 Datasec/HPSM-POC-F4: hosted HPSM-POC deploy of 787d159 (waits for ci 39001143811 + CodeQL green; post-merge check 2/2/2/121). On `DEPLOYED:` -> curl the web root yourself (build id) + API /health (`https://app-hpsmpoc-web-demo-en46o7.azurewebsites.net/`, `https://app-hpsmpoc-api-demo-en46o7.azurewebsites.net/health`), tell Kam (HPSMPOC-254 package fix live; runtime still 10.0.12). THEN a Kam card for B254-1/G10: the hosted runtime 10.0.12 -> 10.0.13+ (Xml advisories; a stack change, not in the grant), with a default.
+- **Lane D** %17: ADDENDUM-10 (MPSCALC-213 negative headline tier 2 -> Tuesday review + PR; MPSCALC-214 deal rates tier 1) -> READY lines in `…/Briefs/2026-10-16_B103_STATUS.md`.
+- **Lane E** %18: DONE. Its MPSCALC-203 retention @ 9bcbecf01478 (tier 1) is HELD for ONE batched tier-1 gate with lane D's 214 (model: B168's brief; gate on main 1e8a738f or later).
+- **NexusAI-O** %35 (wake_ack'd): TURN step 2 = RD-801+822 on main 065a0d8, C-57 running on the NEW lock base `…/NexusAI/session-tools/locks-laptop-1017` (T9 UNMOUNTED) -> MERGED mail -> then RD-802, RD-828 s2 (each alone; deploy-demo must SKIP).
+- **Kam's open cards (Datasec):** quickquote-v239-custom-price-fix-publish-1017 (new). If he taps a: PUBLISH GO mail to Vision quoting his words + the 3 sentences (C-20), Vision merges #10 + publishes 2.39, keeps 2.36; then re-read linuxFxVersion yourself and tell him. (composer-l05-setup-card-too-1014 also still open.)
+### MPS NEXT HOSTED DEPLOY CARD (when 213/214/203 settle or Kam asks): main incl. #74-#79 (+ later); rollback doors (B167 1-2, B168-1): ROLL FORWARD ONLY once carePack/staging rows exist; PRE-1 passes class numbers 6/7 (B167-5 -> MPSCALC-202 comment); deploy-from-ci.sh takes PRE-1 from its own checkout; Kam's LFP items wait for MPSCALC-202 + 203 live (C-35).
+### OWED (carry)
+- HPSM-POC records seat: B252's six Jira lines + 8 candidates; B249/B253/B256 deploy records; B255 tickets (B255-1, T1, T2; B254-1/-2 reshaped); Kam's 10-16 12:11:53 ruling; the -229 words. (No inbox route for MPS/HPSM-POC answers: file in tuesday/briefs + tap.)
+- fleet_ack collector misses today's tuesday-agent QUESTION subjects; pane_close listener WARNING false alarms (both directions); send_brief "[Wednesday ->" label; STATUS watching inside wake_watch; the note-after-send turn-marker hook (ledger w=9). All shared tooling: claim with Wednesday.
+
 ## 🟢 DELTA 206 — 2026-10-17 14:40 CHECKPOINT (s112, ctx 70%; band 80-90). **READ THIS FIRST. Supersedes 205's IN FLIGHT. Re-arm the STATUS watcher before ending any turn.**
 ### DONE since 205
 - **MPS main = 725b4ef5** (#77 T-r2 422b87b, then #75 Deals won after update-branch; each tree verified = the head tree). Hosted still 12f8e566.
