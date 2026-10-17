@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 205 — 2026-10-17 13:50 CHECKPOINT (s112, ctx 65%; band 80-90). **READ THIS FIRST. Supersedes 204's IN FLIGHT; 204's DONE and OWED stand. Re-arm the STATUS watcher before ending any turn.**
+### DONE since 204
+- Gate 24 GO WITH FINDINGS (RD-848) -> TURN sent to NexusAI-O; **PR #87 (RD-848) MERGED**; O's MERGED mail is pending (it records push Build + Deploy demo conclusion). Tickets RD-850..854 filed by O. RD-837 CLOSED; RD-828 s2 accepted (tier 2).
+- Gate B167: T GWN, CL GWN, CP NO GO r1. **PR #76 (CL 142/155) MERGED 0217044e** (tree 50c52d2c = gated). MPS main = 0217044e.
+- T-r2 header regen ef8146c verified header-only by Tuesday (src/tests ± hash 358d626a both sides; only Contract source/blob header lines differ; blob 6b8f5c91) -> **PR #77 open, checks watcher bwuvbr3g3**.
+- B254 READY (HPSM-POC Pkcs 10.0.13 in package, 7a2c7ae) -> gate B255 launched %46.
+### IN FLIGHT (who wakes you)
+- **PR #77** checks -> all SUCCESS incl. CodeQL -> `gh pr merge 77 --squash --match-head-commit ef8146c875e7181e91d3ed7fbd8b04f60f42ff85` -> verify tree -> THEN PR #75 (Deals won, c5751fff; tier 2, reviewed; may need update-branch: check mergeable first).
+- **Gate B168** %47 Datasec/MPS-V4 (CP round 2 of 2 @ a3c9b9d; STATUS `…/Briefs/2026-10-17_B168_STATUS.md`). GO -> PR from b104/mpscalc-140-care-packs (name by ls-remote), CodeQL, merge. NO GO -> CP does not ship this round; ticket it.
+- **Gate B255** %46 Datasec/HPSM-POC-G3 (B254 Pkcs) -> GO -> PR, CodeQL, merge -> run B254's post-merge check (main artifact: Pkcs DLL 2, deps 2, fileversion 2; grep -c rc 1 on 0) -> hosted HPSM-POC deploy brief (expect 121 files) under the push-to-demo grant. Then a Kam card for B254-1 (hosted runtime 10.0.12 -> 10.0.13+, 3 Xml advisories: a stack change).
+- **Vision gate 22** %45 (QQ PR #10 r3 f31720e) -> verdict MAIL -> re-read linuxFxVersion -> ONE publish card to Kam (3 new words + range).
+- **NexusAI-O** %35: after the RD-848 MERGED mail -> RD-801+822, RD-802, RD-828 s2, each alone (TURN mail 02:02Z).
+- Lanes D %17 / E %18: idle (D done after #77; E waits B168).
+### MPS NEXT HOSTED DEPLOY CARD (when B168 is decided): main incl. #74, #76, #77, (#75), (CP); the rollback doors from B167 (overlay/quote with carePack/staging refused by older code) + B168's imported-carePack door; PRE-1 passes class numbers 6/7 the app refuses (B167-5); deploy-from-ci.sh takes PRE-1 from its own checkout.
+
 ## 🟢 DELTA 204 — 2026-10-17 12:00 CHECKPOINT (s112, ctx 50%; band 80-90). **READ THIS FIRST. Supersedes 203/202's FIRST WORK and IN FLIGHT (all done or launched). 194's WAKE SOURCES rule stands: re-arm the STATUS watcher (scratchpad `status_watch.sh`: 30 s loop over the last lines of `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md` + `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-1[7-9]_B*_STATUS.md`) before ending any turn.**
 ### DONE this seat (each verified at source)
 - **MPS hosted = main 12f8e566** (B166 DEPLOYED; Tuesday /health 200 + bundle index-CUvXVpZl.js 09:59:31; Kam told). Rollback 0f8ad97 kept. Overlay copy kept (54 B, never deleted; MPSCALC-203 builds the retention rule).
