@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 210 — 2026-10-17 19:15 CHECKPOINT (s113, ctx 70%; band 80-90). **READ THIS FIRST. Supersedes 209's IN FLIGHT and NEXT; 209's DONE stands. Kam: 0 new rows since 10:33 (kam_rulings_today 19:14); reconcile: to rule 0.**
+### DONE since 209 (each verified at source)
+- **MPS PR #82 MERGED** (MPSCALC-214): **MPS main = e6f92a5f** (compare cfe376d5...e6f92a5f = 4 files, each blob = PR head 74f66e0). Main CI 39009325479 success.
+- **Kam card `mpscalc-hosted-deploy-e6f92a5-1017` FILED** (rec a: deploy e6f92a5 + approve W2's 5 NEW words; b: cfe376d5 = all but #82's deal rates, CI 39008873514 success, package to 24 Oct; default c, re-raise Mon 19 Oct). W2 list `5_Project_History/2026-10-17_mps-words-list-W2-e6f92a5.md` in his drawer (f-ae0b5009eb). If he taps a or b: commission an MPS deploy seat from B166's brief (`tuesday/briefs/2026-10-17_B166_SEAT-K2_mps-hosted-deploy-12f8e56.md`) for THAT sha; way back = 12f8e566 build (cdfe793e…, 50 files, on disk; GitHub copy to 23 Oct 21:17Z); Tuesday's own live check after.
+- **NexusAI RD-801+822 MERGED** on main b89c9383 (Tuesday verified: #155/#158 fixed 06:44:11Z, main open alerts 246 -> 242, Deploy demo SKIPPED, Build success). Jira Release Ready.
+### IN FLIGHT (who wakes you)
+- **NexusAI-O** %35: RD-802 @ 55047f45 (PR #89) GO given 08:12:53Z, CONDITIONAL on PR #89 Build SUCCESS -> land-full.sh, deploy-demo SKIP -> MERGED mail with #154/#159/#160 re-read (any open = STOP). Then RD-828 s2 alone (expect a READY; Tuesday reviews at source). Rulings in that answer: header line kept; red intermediate 62a6fd8 ACCEPTED (Tuesday's order caused it; noted on Jira).
+- Lanes D %17 / E %18: idle, nothing queued. Vision %12: waits Kam's QuickQuote 2.39 card.
+### KAM's OPEN DATASEC CARDS (all default-safe): mpscalc-hosted-deploy-e6f92a5-1017 · hpsmpoc-hosted-runtime-10013-1017 · quickquote-v239-custom-price-fix-publish-1017 · composer-l05-setup-card-too-1014.
+### OWED (carry)
+- MPS records seat: Jira merge comments for MPSCALC-213/-214/-203 (+194 partly), B170 BACKLOG rows (-4/-5 for the card; -1/-2/-9 fixed), ticket for PriceBookImporter.cs:140 stale rule text (since #78), C-entries for today's rulings not yet recorded (check CLARIFICATIONS C-33..C-42 first).
+- 207's shared-tooling list (claim with Wednesday): fleet_ack collector misses tuesday-agent QUESTION subjects (refused again 15:57); pane_close listener WARNING false alarms (2 more today); send_brief "[Wednesday ->" label; STATUS watching inside wake_watch; note-after-send turn-marker hook. Plus: brief template says AGENTMAIL_API_KEY is in the project .env (HPSM-POC: it is not).
+
 ## 🟢 DELTA 209 — 2026-10-17 17:12 CHECKPOINT (s113, ctx 65%; band 80-90). **READ THIS FIRST. Supersedes 208's IN FLIGHT; 208's DONE and 207's OWED stand. Re-arm the STATUS watcher (scratchpad `status_watch.sh`) before ending any turn.**
 ### DONE since 208 (each verified at source)
 - **HPSM-POC hosted = main 787d159** (B256 DEPLOYED @ LnYu4WmaU5Sh4wYdmvgTN; Tuesday's own curl 16:02: web 200 new build id x1 / old x0; API /health 200). Kam told on the panel (bf-63eb3c59712f). **Card `hpsmpoc-hosted-runtime-10013-1017`** filed (rec a measure-then-move; default b, re-raise Mon 19 Oct). Panes %49 %51 closed.
