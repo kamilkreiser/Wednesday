@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 208 — 2026-10-17 15:48 CHECKPOINT (s113, ctx 50%; band 80-90). **READ THIS FIRST. Supersedes 207's IN FLIGHT; 207's OWED and MPS card list stand. Re-arm the STATUS watcher (scratchpad `status_watch.sh`, as 207 describes) before ending any turn.**
+### DONE since 207 (each verified at source)
+- Boot sweep (rotation) DONE: 0 feedback, 0 client-human responses; `projects_index/2026-10-17_rotation-sweep-1515.md` (watermarks out: mail 03:54:56Z, Jira >= "2026-10-17 15:00", GitHub since=2026-10-17T03:55:00Z). Note: HPSM-POC Jira still not updated for #156/#157 (records seat).
+- **HPSM-POC main ci 39001143811** red on attempt 1 (2/886, `__EFMigrationsLock` timeouts; same tree a5ac7f54 passed on PR run 39000249834) -> Tuesday `gh run rerun --failed` -> **attempt 2 success** 15:34:59; CodeQL x4 success. B256 answered twice by file + tap: `tuesday/briefs/2026-10-17_B256_ANSWER-1_ci-green.md`, `..._ANSWER-2_next-build-keys.md` (3 web files differ only by Next.js per-build keys: RULED expected). Ticket candidate for the records seat: the __EFMigrationsLock timeout class (2nd sight).
+- **MPS PR #80 MERGED** (MPSCALC-213 below-0 headline; tier 2, Tuesday reviewed at source; 9/9 checks incl. CodeQL) -> **MPS main = b8ea9027**, tree 28399af4 = head tree. New words for the next hosted card: "Line {n}, " prefix before the grid column header.
+### IN FLIGHT (who wakes you)
+- **Gate B170** %50 `Datasec/MPS-V5` (214 @607bfe5 lane D + 203 @9bcbecf lane E, tier 1, round 1 of 2 each; kit `tuesday/briefs/2026-10-17_B170_SEAT-V5_mps-gate-214-203.md`, rulings stamped 15:45: sandbox carve-out approved, E-vi = Major) -> STATUS `…/Briefs/2026-10-17_B170_STATUS.md` last line VERDICT -> merge members that GO, one at a time, in its order (203 is 2 behind main, 214 1 behind; API.md auto-merge with #80 predicted). Before pane_close: heavy-slot holders + pgrep qa-B170 (ledger 10-17).
+- **B256** %49 HPSM-POC hosted deploy 787d159 (resumed at step 5) -> `DEPLOYED:` -> Tuesday curls web root (build id) + API /health, tells Kam; THEN Kam card for the hosted runtime 10.0.12 -> 10.0.13+ (B254-1/G10, a stack change).
+- **NexusAI-O** %35: C-57 MERGED run for RD-801 (log `session-tools/c57-s100o-land801/MERGED.run.log`) -> MERGED mail -> RD-802, RD-828 s2 (each alone; deploy-demo must SKIP). wake_ack'd.
+- Lane D %17 and lane E %18: idle after READY, wait for B170. Vision %12 waits Kam's `quickquote-v239-custom-price-fix-publish-1017` card.
+### MPS NEXT HOSTED CARD now includes #80 (MPSCALC-213 + its new words) on top of 207's list.
+
 ## 🔴 DELTA 207 — 2026-10-17 15:10 ROTATION HANDOVER (s112, ctx ~79%; band 80-90). **READ THIS FIRST, then 206/205/204 (their DONE + OWED). FIRST: rewrite + arm the STATUS watcher (scratchpad dies with the seat): a 30 s bash loop that exits when the last line of any `/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md` or `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-10-1[7-9]_B*_STATUS.md` changes (use bash -c; shopt -s nullglob).**
 ### DONE since 206 (each verified at source)
 - **MPS main = 1e8a738f** (#78 CP care packs f1d5641 [B168 GWN r2], then #79 MPSCALC-194 feedback words [tier 2, Tuesday review]); trees verified each time. MPS hosted still 12f8e566.
