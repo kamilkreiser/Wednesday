@@ -1,0 +1,124 @@
+===== [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: QQEP round 3 — PR #10 @ f31720e (v2.39): G21-F1/F2 fixed, F4/F5/F7/F8 fixed, F3 ticketed
+## BLUF
+QuickQuote PR #10, round 3 (Kam authorised 2026-10-17 09:45:48), is READY FOR QA (gate 22, tier 1).
+- Head f31720ee677dbe2deb53dcb7991f1683a1b03ce1 (v2.39). One new commit on fix/qq-email-matches-print-2026-10-16, fast-forward from 3a3399e, no force-push.
+- G21-F1 and G21-F2 are fixed. G21-F4, F5, F7 and F8 are fixed in the same code.
+- G21-F3 and the email-matches-print route bypass are ticketed (backlog 01c8d7f). G21-F6 is a publish-card fact.
+- Holds unchanged: no merge, no publish, no docker push, no az write, nothing to any human.
+
+## What changed (f31720e: index.html, stage3/lib/pdf.js, stage3/test/custom-price-bounds.mjs)
+- G21-F1:
+  - The page re-checks a held price in renderCustom (index.html:3510-3524) whenever the standard price moves: apps, bundle, devices, currency, or a live rate landing. If it no longer fits, custom pricing is turned off before any press, with the round-2 sentence plus " Custom pricing is off until you change it.". The four fields are cleared and the print mode goes to default.
+  - The renderer (stage3/lib/pdf.js:153) restores and judges pdmUSD ONLY when the posted print mode is pmCustom or pmBoth. A stale price beside "Standard pricing only" is ignored.
+- G21-F2: a floor. CONFIG.customPriceMinPerMonth = 0.01 (index.html:1752), in the quote's own currency per device per month.
+  - Shape: the smallest price that prints as one cent in the displayed unit. Both bounds are inclusive, with a relative 1e-9 so a price set exactly at a bound survives the trip through USD.
+  - The floor moves with the FX rate, because it is in the quote currency. The ceiling does not, because it is a ratio. A price held at the floor can therefore be turned off (on screen, by F1's re-check) if a live rate lands lower.
+- G21-F4: a cleared field says "Custom pricing is off until you enter a price.". A non-number (badInput: "abc", "1e", 1e309) says "That is not a number. Custom pricing is off until you enter a price.". In both cases the other three fields are cleared.
+- G21-F5:
+  - Keystrokes (inputType insertText or delete*) through empty or a too-low figure turn custom pricing off quietly, with no alert, and the figure is judged on change (blur or Enter). Too high is said at once, because more digits only raise it. A paste, a drop or a synthetic event counts as committed.
+  - The rep's own choice of custom print mode is remembered (cpModeWanted) and comes back when a valid price is typed. It is cleared by Reset, reopen, and the F1 re-check.
+- G21-F8: when a field holds a bound's own shown figure, to no more decimal places than that field shows (the /day max A$10.1918), it is taken as that bound.
+- G21-F7: edge cells at both bounds (below).
+
+## THE NUMBERS FOR KAM'S CARD
+- Floor: 0.01 of the quote's currency per device per month (customPriceMinPerMonth).
+- Ceiling: 10 × the standard per-device price (customPriceMaxRatio).
+- Range: A$0.01–A$310.00 on the full bundle (US$0.01–US$200.00, CA$0.01–CA$284.00 at seed). On Manager only it is A$0.01–A$77.50.
+
+## RED at 3a3399e / GREEN at f31720e (my own runs; the round-3 test file run in a 3a3399e worktree, with the old sentence's regex)
+- custom-price-bounds.mjs: red 16 of 32 at 3a3399e, green 32 of 32 at f31720e. The 15 G20 cells pass on both. Of the 17 new cells, 16 are red at 3a3399e. The USD 200.00/200.01 edge cell already held there; it is a test-strength cell.
+- F1 pairs:
+  - A$300 on the bundle → Manager only, "Standard pricing only" → Email:
+    - 3a3399e: no sentence on screen before the press ('' at the assertion).
+    - f31720e: sentence on screen, "...standard price of A$7.75/device/month. Custom pricing is off until you change it."; Sent, 1 mail, printMode default, emailed money = printed money, in order.
+  - Same with "Custom pricing only" chosen first:
+    - 3a3399e: no sentence before the press.
+    - f31720e: sentence on screen, mode back to default, standard sent = print.
+  - P3' (A$100, Advanced off, Manager only):
+    - 3a3399e: "Send failed: A custom price must be more than zero and no more than 10 times the standard price of A$7.75/device/month. The quote was not sent."
+    - f31720e: Sent, = print.
+  - Crafted stale pdmUSD 193.5, USD, mode-mix + pmDefault:
+    - 3a3399e: 422.
+    - f31720e: 200, standard, no 193.50 in the PDF.
+  - Offline file://, A$300 then Mix-and-Match:
+    - 3a3399e: no sentence.
+    - f31720e: the sentence, cpExport null.
+- F2 pairs:
+  - Page 0.004 /month, 0.001 /month, 0.0001 /day, and 0.009 /month (one step below the floor):
+    - 3a3399e: all accepted, no sentence.
+    - f31720e: all refused with the sentence.
+  - Apply −99.99 %:
+    - 3a3399e: accepted.
+    - f31720e: refused, "The percentage was not applied."; A$0.01 accepted and printed as "A$0.01 / device / month".
+  - Crafted floor in AUD/USD/CAD (pdmUSD = 0.01/rate → 200 and the print shows 0.01; 0.0099/rate):
+    - 3a3399e: 0.0099/rate sent (200).
+    - f31720e: 0.0099/rate refused (422).
+  - Offline 0.004:
+    - 3a3399e: accepted.
+    - f31720e: refused; cpRestore(0.004/1.55) returns the sentence.
+- F7/F8:
+  - Page A$310.01 is refused and A$310.00 accepted. Then the shown /day 10.1918, pasted back, is accepted and equals the max.
+  - 3a3399e: 10.1918 refused.
+- F4 at 3a3399e: a cleared field gave no sentence. F5 at 3a3399e: two alerts flashed while typing 0.5 over 27.37.
+- Mutants on f31720e (scripts/r3-mutants.py), each patch checked to land before its run:
+  - A, renderer judges every mode: 6 cells. This mutant also leaves the no-price branch unconditional, so it hits 2 G20 cells too.
+  - B, no re-check: 3.
+  - C, floor back to >0 with the sentence kept: 9.
+  - D, ceiling ratio 1000 with the sentence kept (your M4b): 5, including the USD 200.01 and page 310.01 edges.
+  - E, no snap: 1.
+  - F, every keystroke treated as committed: 5, the 4 G20-F2 key-by-key cells plus F5.
+  - G, no mode restore: 1.
+  - H, other fields kept: 1.
+  - I, no 1e-9 floor tolerance: NONE. At these rates A$0.01 makes the round trip exactly, so the tolerance is unseen.
+
+## Suites as sets (host Node 26.8.1)
+- Totals: pricing 69/69, npm test 132/132, test:print 217/217, test:xlsx 6/6.
+- test:print over 3a3399e adds exactly the 17 new custom-price-bounds names and removes none. The G20 cells' names are unchanged; only their REFUSAL regex moved to the new sentence.
+
+## CI + CodeQL on f31720e
+- Runs 38986126280 and 38986121215 (tests) and 38986121428 (PR #10): success.
+- Jobs: pricing-pack 69, print-fit 217, xlsx-parity 6, stage3-server 132, store-azurite 2. CodeQL, Analyze (javascript-typescript) and Analyze (actions): success.
+- Code scanning: 0 open on the branch. PR mergeStateStatus CLEAN. Nothing dismissed.
+- Dependabot: 2 open high alerts on main for extract-zip (#1, #4). These are the alerts PR #8 (puppeteer 25) addresses; round 3 did not change them.
+
+## Real PDFs (adv-pdfs.cjs at f31720e, advanced AUD, −10 %)
+- All 9 (default/custom/both × light/dark print, plus the 3 emails) are text-identical to round 2 apart from v2.38→v2.39 and the print qnum timestamps. Pages 2/2/3, all A4.
+- Refusal screenshots (floor, −99.99 %, stale Manager-only, non-number) in light/dark at 1280 and 375 px: no overflow (docW = viewport).
+- Evidence: Vision_Sales_Portal/fix2-email-matches-print-2026-10-17-evidence/round3-f31720e/ (README section "Round 3").
+
+## PRIOR WORK
+- Backlog 01c8d7f (backlog/qq-extract-zip-2026-10-16, parent 815aae7), pushed. It holds:
+  - G21-F3, comma prices: deferred because the fix changes the input type and parsing of all four price fields.
+  - The email-matches-print route bypass (G20-F7/G21-O3), test strength.
+- PR #10 body updated: a Round 3 section, plus FOR KAM item 5.
+- history.md entry appended.
+
+## NOT TESTED
+- The published image, a real ACS send, and the live site.
+- A real live FX provider. The floor moving with a landed rate was reasoned from code; no cell drives it.
+- Currencies other than AUD/USD/CAD.
+- Locales other than Chrome's default here. Comma entry (F3) is unchanged and ticketed.
+- Windows, Safari, real phones and printers; screen readers (the alert is role=alert, DOM only).
+- The number-field spinner arrows: their input events carry no keystroke inputType, so they are judged as committed. Reasoned, not driven.
+- store-azurite still never meets status "refused".
+- CI's Node 22: read from CI only.
+
+## Behaviour changes for the card
+- A held price that stops fitting is CLEARED, not just flagged: the rep re-enters it after widening the selection again.
+- A crafted or old-page post can still get a 422, but only in a custom print mode.
+- Same-page reopen still comes back standard (round 2).
+- G21-F6 stands: a v2.36 tab open across the publish shows W1, then 422 "...carries no custom price...".
+
+## NEW WORDS FOR KAM (verbatim; nothing publishes without his word on them)
+1. CHANGED (replaces the round-2 page sentence "A custom price must be more than zero and no more than 10 times..."), index.html:3487:
+   "A custom price must be at least A$0.01/device/month and no more than 10 times the standard price of A$31.00/device/month."
+   The amounts follow the quote's currency and the standard price, so on Manager only it reads "...standard price of A$7.75/device/month.".
+   The suffixes are unchanged from round 2:
+   - " Custom pricing is off until you change it." (index.html:3457 for the fields; index.html:3521 when a held price stops fitting)
+   - " The percentage was not applied." (index.html:3622)
+   - " The quote was not sent." (stage3/lib/pdf.js:156)
+2. NEW, index.html:3438: "Custom pricing is off until you enter a price."
+3. NEW, index.html:3435: "That is not a number. Custom pricing is off until you enter a price."
+Unchanged from round 2: the no-price sentence (stage3/lib/pdf.js:160) and the reopen sentence.
+
+Holding for gate 22.

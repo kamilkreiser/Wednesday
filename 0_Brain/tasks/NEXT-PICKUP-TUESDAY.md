@@ -6,6 +6,27 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 204 — 2026-10-17 12:00 CHECKPOINT (s112, ctx 50%; band 80-90). **READ THIS FIRST. Supersedes 203/202's FIRST WORK and IN FLIGHT (all done or launched). 194's WAKE SOURCES rule stands: re-arm the STATUS watcher (scratchpad `status_watch.sh`: 30 s loop over the last lines of `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-1[6-9]_B*_STATUS.md` + `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-1[7-9]_B*_STATUS.md`) before ending any turn.**
+### DONE this seat (each verified at source)
+- **MPS hosted = main 12f8e566** (B166 DEPLOYED; Tuesday /health 200 + bundle index-CUvXVpZl.js 09:59:31; Kam told). Rollback 0f8ad97 kept. Overlay copy kept (54 B, never deleted; MPSCALC-203 builds the retention rule).
+- **HPSM-POC hosted = main 72073da** (B253 DEPLOYED @ B1eLcytzqcIm7ShOteAoa; Tuesday web 200 + build id + API health 200 at 10:08:39; Kam told). Way back d916baf until 2026-10-20T21:33Z.
+- **MPS PR #74 MERGED** ed72606 (B165 C care_ key; tree = gated 77b40d86). MPS main = ed72606.
+- **Kam ruled today:** all 9 MPS cards (09:22-09:23) incl. the caption card (a); quickquote-pr10-r2-publish-hold-1017 = a (round 3, 09:45:48); mpscalc-quote-list-deals-closed-title-1017 = a (10:33:19, 'Deals won'). All ruled in the queue; receipts on the board.
+- Gates closed + scored: 21 (NO GO, Vision), B165 (C GWN / T NO GO), B166 deploy, B253 deploy. Panes %36 %39 %40 %41 %42 closed.
+- Rotation feedback sweep 09:35: 0 new (projects_index/2026-10-17_rotation-sweep-0935.md; next watermarks in that file).
+### IN FLIGHT (who wakes you)
+- **Gate B167** %44 Datasec/MPS-V3 (T-r2 88c84cd round 2 of 2 + 142-155 b50441f + lane E -140 d355620; predicted order CP -> CL -> T) -> STATUS `…/Briefs/2026-10-17_B167_STATUS.md` VERDICT. ANSWER-1 given (the [null]-store 500 = pre-existing Minor). Tuesday ruled re-order/description test gaps = Minor. On verdict: PRs in its order (names by ls-remote), CodeQL, merge one at a time; THEN merge PR #75 (Deals won, tier 2 reviewed, HELD so main does not move under B167).
+- **Vision gate 22** %45 QA/Vision-gate22 (QQ PR #10 round 3 @ f31720e; D4 HOLD-default, D5 FULL-TEXT; AZ-PRE-READ 11:58:56 v2.36) -> verdict MAIL. At verdict: re-read linuxFxVersion yourself; ONE publish card to Kam incl. the 3 NEW WORDS and the range A$0.01-10x (GO or NO GO alike: publish is his word, C-20).
+- **Gate 24** %38 (NexusAI RD-848, running since 08:04) -> verdict MAIL -> then the TURN for RD-848 / RD-801+822 / RD-802 (all accepted counts-only, held; order then; PR + CodeQL, no demo step).
+- **HPSM-POC B254** %43 Datasec/HPSM-POC-H2 (Pkcs 10.0.13 in the API package, HPSMPOC-254; no deploy) -> STATUS READY FOR GATE -> commission its tier-1 gate -> merge -> hosted deploy under the push-to-demo grant.
+- **NexusAI-O** %35: RD-837 CLOSED (r2 self-locating ROOT, verified sha 1ae84a10); RD-828 slice 2 (26a4ec2) verify queued behind gate 24's jest lock -> READY FOR QA.
+- Lanes D %17 / E %18: idle until B167's verdict (fix rounds if any).
+### OWED
+- **Records seats** (one per project, after the merges settle): MPS = C-entries for today's 11 Kam rulings + B166 history + B165/B167 tickets + B166's 7 BACKLOG candidates; then `decision_queue.sh --delivered` per card. HPSM-POC = B252's 6 Jira lines + 8 candidates, B249 + B253 deploy records, Kam's 10-16 12:11:53 ruling, the -229 words.
+- **MPS build lanes for Kam's rulings:** negative-input headline, feedback 401 words (MPSCALC-194), overlay-copy retention (MPSCALC-203), deal-usage proposal rates, LFP items after MPSCALC-202.
+- fleet_ack collector does not index today's tuesday-agent QUESTION subjects (2 refusals); 2 stale 10-16 flags to verify. Shared tooling: claim with Wednesday.
+- Still owed from 202: send_brief "[Wednesday ->" seat label; STATUS watching inside wake_watch; pane_close WARNING tree; Vision C-entry for the 2026-08-11 access-word ruling. No inbox_routing entry for "Datasec/MPS Commercial Calculator" (answers go as tuesday/briefs files + tap).
+
 ## 🔴 DELTA 203 — 2026-10-17 09:24 ROTATION HANDOVER (s111, ctx 79%). **READ THIS FIRST, then 202 (its FIRST WORK 1-4 and IN FLIGHT stand; this adds Kam's rulings and puts the MPS deploy FIRST).**
 ### KAM RULED 8 of 9 MPS cards, 09:22:27-09:23:45 (live, view=tuesday; each ruled in the queue HTTP 200; receipts posted HTTP 201 x3):
 - **mpscalc-hosted-deploy-12f8e56-1017 = a: "Deploy main 12f8e56 and approve list W"** — FIRST WORK below.

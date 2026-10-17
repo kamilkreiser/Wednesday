@@ -1,0 +1,790 @@
+# QA Agent Invocation Brief — Datasec/Vision_Sales_Portal, GATE 22: ONE TIER-1 QuickQuote gate — PR #10 ROUND 3 (a held price re-checked as the form moves, judged only in a custom print mode; one-cent floor; v2.39) @ `f31720e` on QuickQuote main `437ab4b` — one verdict, one report
+
+**TIER 1 (quote output to customers: the PDF and workbook a rep emails, which a customer receives).** **ROUND 3 of PR #10, authorised by Kam** (live board
+2026-10-17 09:45:48 AEDT, view=tuesday, verbatim: *"Decision quickquote-pr10-r2-publish-hold-1017: a — Hold, and allow a round 3 fix"*; option a's own
+text: *"… then one more test gate. You decide the publish after that, on its own card."*). **There is no round 4 without Kam.** (Round 1 = gate 20, NO GO at
+`7b952f6` on G20-F1. Round 2 = gate 21, NO GO at `3a3399e` on G21-F1, with G21-F2 OPEN.) Your verdict must say, instance by instance, CLOSED / OPEN /
+NEW with evidence — that table (§N10) is what Kam's ONE publish card is built from. "Ships" for QuickQuote means Kam's own word to publish (C-20);
+nothing ships on your verdict.
+
+**Drafted for Tuesday on 2026-10-17 between 11:33 and ~12:1x AEDT by a read-only drafting agent. Tuesday reviews, stamps and launches it.**
+Model: gate 21's kit (`2026-10-17_vision-gate21-qq-pr10-r2.md`, its DRAFTER-REPORT, `launch_qa_vision_qq_gate21.sh`) and gate 21's REPORT
+(`/Volumes/Laptop-DEV/!CODING/Testing Agent MAIN/projects/vision/reports/2026-10-17-vision-gate21-qq-pr10-r2/report.md`, NO GO on `3a3399e`; G21-F1..F8,
+O1-O3, S1-S4). Section shape, identity rules (GET-only `gh` shim), the report-path convention, the verdict token, THE MODEL RULE, the floor and HELD
+rules are gate 21's. **Gate 21's whole matrix (§N3-§N5, §N11) is KEPT — it found real defects. This brief governs where they differ, and CHANGES the
+paste instrument (WRONG (b)) because round 3 judges an entry by its `inputType`.**
+
+**NO DOCKER, as gate 21.** The round-3 delta (READ, §Charter) touches `index.html`, `stage3/lib/pdf.js` and `stage3/test/custom-price-bounds.mjs` only.
+`stage3/server.js`, `stage3/strip.js`, `stage3/package.json`, `stage3/Dockerfile`, `stage3/package-lock.json`, `.dockerignore`, `lib/xlsx.js`,
+`lib/mail.js` and `lib/store.js` carry the SAME blob at round 2 and head. The image would run the same `node strip.js` and the same server module this
+gate runs in-process (its `createApp()` export), with the same lockfile. **So no image is built or run, and no `docker` command of any kind is issued**
+(not even a read). What the published image does is a publish-time check (§NOT TESTED).
+
+The builder's round-3 mail under test (the drafter copied lines 1-124 of Tuesday's saved READY batch — the Vision mail only; read it WHOLE; sha256
+`076c5afc0009aab58a823eed6335b9e62a6f9dfbd7d0e1a807e31b297db8fd39`, 9,948 B, 124 lines):
+- `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-10-17_vision-qq-pr10-r3-READY-mail.txt` (READY FOR QA round 3, 00:31Z
+  2026-10-17 UTC = 11:31 AEDT, per Tuesday's 10-17 note 11:32)
+**Every builder statement below comes from that mail, the commit message or the code at each sha. Each one is a CLAIM. Every red, every mutant, every
+suite set, every browser result and every comparison is RE-DERIVED by the gate. None is taken from the READY.**
+The launcher parses §PIN, refuses any placeholder, and re-reads both rows (and `refs/pull/10/head`) by `git ls-remote` immediately before launch,
+refusing on any mismatch, **including any move of QuickQuote main** (this gate pins main exactly). The verified table is appended to your prompt.
+
+SELF-CHECK: re-read end-to-end for contradictions | Tuesday 2026-10-17 11:59:24 AEDT: brief read WHOLE (790 lines), launcher --check run before launch
+Self-check note: R1-R8 match Tuesday's commission to the drafter; WRONG (a)-(q) accepted as traps to verify; D4 and D5 ruled below; AZ-PRE-READ is Tuesday's own read at 11:58:56.
+
+GH-API-LEG: READ-ONLY-VISION-TOKEN
+<!-- As gate 21. The launcher exports GH_CONFIG_DIR = Vision's .gh-config behind a GET-only `gh` shim first on PATH. Change it to NOT-RUN only if
+     Tuesday withdraws the token; then every GitHub read is NOT RUN and the drafter's readings stay READ-BY-DRAFTER. -->
+
+AZ-READ-LEG: TUESDAY-READS
+<!-- As gate 21. The gate runs NO az. Tuesday reads the live webapp's linuxFxVersion BEFORE launch, writes it on the line below, and reads it again
+     at verdict. The gate RELAYS. -->
+AZ-PRE-READ: linuxFxVersion DOCKER|hpasqqacr.azurecr.io/hpas-quickquote:v0.6.4-tool2.36-437ab4b ; read 2026-10-17 11:58:56 AEDT by Tuesday (az webapp config show, read only; Vision's own AZURE_CONFIG_DIR; account show = tenant d500ebad / sub 0c57ab37, servicePrincipal)
+<!-- One line, e.g. `linuxFxVersion DOCKER|hpasqqacr.azurecr.io/hpas-quickquote:<tag> ; read <YYYY-MM-DD HH:MM:SS AEDT> by Tuesday (az, Vision's own
+     AZURE_CONFIG_DIR, tenant d500ebad / sub 0c57ab37)`. The launcher refuses until it names linuxFxVersion. Drafter's expectation (NOT a reading):
+     v0.6.4-tool2.36-437ab4b (gate 21 relayed Tuesday's 08:01:49 read of it; Kam's 09:45:48 ruling held the publish). -->
+
+N4-METHOD: FULL-TEXT
+<!-- Decision D5 (§N4). Exactly one of:
+       FULL-TEXT  (gates 20-21's ruling, the drafter's reading again) the emailed PDF's text (pdftotext -layout) must EQUAL the printed PDF's text (the
+                  page's own Generate, print media, A4, same state) after normalising ONLY the quote-number token; any other differing line is a FAIL.
+                  The money multiset, page count, fonts and a pixel diff are reported beside it.
+       FIGURES    money figures equal, in order; other text differences are REPORTED, not FAILs. The FULL-TEXT rows still run and are reported.
+     The launcher refuses while it reads TUESDAY-DECIDES. -->
+
+ROUTING-LINE: QA/Vision-gate22 added to inbox_routing.conf 11:59 by Tuesday (.pre-1017-gate22 backup)
+<!-- Tuesday adds `QA/Vision-gate22|tuesday-agent@agentmail.to|no` to /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/inbox_routing.conf (pattern:
+     the QA/Vision-gate21 line, conf line 228 at drafting) and stamps this line, e.g. `QA/Vision-gate22 added to inbox_routing.conf <HH:MM> by Tuesday
+     (.pre-1017-gate22 backup)`. The launcher refuses while either the conf line is absent (guard 41) or this line carries the placeholder (guard 32).
+     The drafter did NOT edit the conf (at drafting it ends its Vision lines at QA/Vision-gate21). -->
+
+## Charter
+Read `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent tester. You did not
+build this change and you owe the builder nothing. **Every line below that reports what the builder says is a CLAIM, never evidence.**
+
+**One gate, ONE target, ONE verdict: GO / GO WITH FINDINGS / NO GO, at its pinned sha.**
+- **QQEP** at `f31720e` — **TIER 1 (quote output to customers).** ROUND 3 of PR #10 (Kam-authorised; round 1 = gate 20 NO GO at `7b952f6`; round 2 =
+  gate 21 NO GO at `3a3399e`). QuickQuote PR #10, branch `fix/qq-email-matches-print-2026-10-16`. SEVEN commits over main `437ab4b`, a straight line;
+  round 3 added ONE on top of round 2's head with no force-push (READ: `3a3399e` is an ancestor of `f31720e`; `7b952f6` too):
+
+| # | commit | parent | what it is |
+|---|---|---|---|
+| 1-3 | `0fc280b` / `a8d769b` / `7b952f6` | `437ab4b` … | round 1 (email matches print; the v2.36 guard removed; test wording). **ROUND 1'S HEAD `7b952f6` — gate 20's NO GO** |
+| 4-6 | `a7e1835` / `1f7db41` / `3a3399e` | `7b952f6` … | round 2 (the bound `cpCheck`, ratio 10; fleet cells; CSS inset). **ROUND 2'S HEAD `3a3399e` — gate 21's NO GO** |
+| 7 | `f31720e` (author = committer 2026-10-17 10:18:28 +1100) | `3a3399e` | "fix 2 round 3: a held price re-checked as the form moves, judged only in a custom print mode; one-cent floor (gate 21; v2.39)" — `index.html` +108/−30, `stage3/lib/pdf.js` +6/−2, `stage3/test/custom-price-bounds.mjs` +200/−3. THE HEAD |
+
+**THE DELTA THAT SHIPS is `git diff 437ab4b f31720e` (8 files, +942/−125)** — the same eight files and counts as the PR files API (READ-BY-DRAFTER,
+`gh api …/pulls/10/files`, 11:38:58 AEDT): `index.html` +199/−36 blob `e65f3b6`; `stage3/lib/pdf.js` +55/−13 `26825da`; `stage3/package.json` +1/−1
+`cd9118a`; `stage3/server.js` +9/−0 `e40c20e`; `stage3/strip.js` +25/−26 `9cddb70`; `stage3/test/custom-price-bounds.mjs` added +465 `b3c5345`;
+`stage3/test/email-matches-print.mjs` added +165 `bdb602b`; `stage3/test/email-print-mode.mjs` +23/−49 `9dd5311`. PR `changed_files` 8, additions 942,
+deletions 125, state open, merged false, draft false, mergeable_state clean, updated 2026-10-17T00:30:24Z, head `f31720e`, base `437ab4b`.
+
+**THE ROUND-3 DELTA is `git diff 3a3399e f31720e` (3 files)** — what round 3 changed on top of what gate 21 measured (READ at the pinned shas; line
+numbers are the head's `index.html` / `lib/pdf.js`):
+
+| file | +/− | r2 → head blob | what |
+|---|---|---|---|
+| `index.html` | +108 / −30 | `cf71c84` → `e65f3b6` | toolVersion `"2.38"` → `"2.39"` (:1735); **`CONFIG.customPriceMinPerMonth: 0.01`** (:1752) beside `customPriceMaxRatio: 10`; `let cpModeWanted = null` (the rep's chosen custom mode, kept through mid-entry); **`cpSyncFrom(sourceId, committed)`**: an `off(msg)` helper that nulls `cpState`, CLEARS the other three fields, refuses with `msg` (:3428-3433); `el.validity.badInput` → "That is not a number. Custom pricing is off until you enter a price." (:3435) and an empty/NaN entry → "Custom pricing is off until you enter a price." (:3438) — **each said only when `committed`, else silent**; **the F8 snap** (:3446-3453): a refused figure with no more decimals than its field shows (4 for `cpDay`, else 2) that equals a bound's own display is TAKEN AS that bound (max OR floor); a refusal is said at once only if `committed` or **too high** (:3456-3457), else silent; a valid price restores `cpModeWanted` by `$(id).checked = true` (no event) (:3462-3463); a committed entry tidies its own field; `cpMax()` and **`cpCheck`** now `usd >= min && usd <= cpMax()` with `min = 0.01 / fxRate × (1 − 1e-9)` and `max × (1 + 1e-9)`; the sentence (:3487-3488) "A custom price must be at least ${fmt(min)}/device/month and no more than 10 times the standard price of ${fmt(std)}/device/month."; `cpClear` clears `cpModeWanted`; **`renderCustom` re-checks a held `cpState` FIRST and, if it no longer fits, CLEARS it (price, four fields, `cpModeWanted`) with the sentence + " Custom pricing is off until you change it."** (:3515-3523); the field listeners: `input` → `cpSyncFrom(id, committed = !e.inputType \|\| insertFromPaste \|\| insertFromDrop)`, `change` → `cpSyncFrom(id, true)` (:3590-3593); a `change` listener on every print-mode radio sets `cpModeWanted` (:3598-3601); Apply % comment only |
+| `stage3/lib/pdf.js` | +6 / −2 | `257bbfa` → `26825da` | **`if (typeof window.cpRestore === "function" && wantsCustom)`** (:153): `pdmUSD` is restored and judged ONLY when the posted checks ask for `pmCustom`/`pmBoth`; inside it, a null/absent price → THE NO-PRICE SENTENCE (:160-161); in "Standard pricing only" a posted price — stale, crafted, absurd — is ignored |
+| `stage3/test/custom-price-bounds.mjs` | +200 / −3 | `76368d2` → `b3c5345` | `REFUSAL` regex (:37) now the new sentence; the drawer helpers hoisted; **17 new cells** (32 in all): G21-F1 B-STATE × {default, custom} (2), P3′, crafted stale `pdmUSD` beside pmDefault, G21-F2 page × 4 values, Apply −99.99 % + the floor, crafted floor × AUD/USD/CAD (3), USD 200.00/200.01, page 310.00/310.01 + the /day max, F4, F5, offline. **Its "paste" is a script** (`el.value = t; dispatchEvent(new InputEvent("input", {inputType: "insertFromPaste"}))`, :122-127), not Chrome's paste |
+
+**Same blob at base, round 2 and head (READ, `rev-parse <sha>:<path>`, 11:3x):** `stage3/package-lock.json` `01c5e5e`, `stage3/Dockerfile` `8311ebe`,
+`.dockerignore` `acf7db8`, `stage3/lib/xlsx.js` `10bf4d7`, `stage3/lib/mail.js` `3aa8922`, `stage3/lib/store.js` `0609594`, `stage3/login.html` `f362b45`,
+`.github/workflows/tests.yml` `ec450f5`, `quote-engine.test.mjs` `2d193b6`, `stage3/test/server.test.mjs` `b35a2eb`, `CLAUDE.md` `af402a7` (and
+`print-fit.mjs`, `email-collector.mjs`, `lib-close.mjs`, `xlsx-parity.mjs`, `strip.test.mjs`). **Same at round 2 and head:** `stage3/server.js` `e40c20e`,
+`stage3/strip.js` `9cddb70`, `stage3/package.json` `cd9118a`, `email-matches-print.mjs` `bdb602b`, `email-print-mode.mjs` `9dd5311`. Head tree `ee51fa7`;
+round-2 tree `ec15fb2`; round-1 tree `25ddfb8`; main tree `c71780c`.
+
+**Names, written out every time:**
+- **QQEP** = branch `fix/qq-email-matches-print-2026-10-16` = PR #10 = "fix (2)". **R2** = round 2's head `3a3399e` (gate 21). **R1** = `7b952f6` (gate 20).
+  **MAIN-Q** = QuickQuote main `437ab4b` = **what is LIVE** (v0.6.4-tool2.36-437ab4b, AZ-PRE-READ confirms). **C-20** = Kam's ruling, card
+  `quickquote-email-sends-standard-not-custom-1016` = (a). **THE R3 CARD** = `quickquote-pr10-r2-publish-hold-1017` = (a), Kam 09:45:48.
+- **THE RANGE** = `cpCheck`: a custom price (USD per device per month) is accepted only if it is a finite number, **at least
+  `customPriceMinPerMonth` (0.01) of the QUOTE's currency** (so 0.01 / fxRate in USD — it moves with the rate) and **at most `customPriceMaxRatio`
+  (10) × the standard per-device price** of the CURRENT form state (USD-invariant). Seeded rates (AUD 1.55, CAD 1.42), full bundle (USD 20.00):
+  **A$0.01–A$310.00 / US$0.01–US$200.00 / CA$0.01–CA$284.00**; Manager only (USD 5.00): A$0.01–A$77.50 / US$0.01–US$50.00 / CA$0.01–CA$71.00
+  (drafter arithmetic from CONFIG; gate 21 measured the bundle ceilings). The page prints USD as `$`, not `US$` (gate 21: "standard price of $20.00").
+- **THE SENTENCES** (round 3, verbatim at source): **S-RANGE** "A custom price must be at least <min>/device/month and no more than 10 times the standard
+  price of <std>/device/month." + " Custom pricing is off until you change it." (fields :3457; the re-check :3521) / " The percentage was not applied."
+  (:3622) / " The quote was not sent." (`pdf.js`:156, HTTP 422). **S-EMPTY** "Custom pricing is off until you enter a price." (:3438). **S-NAN** "That is
+  not a number. Custom pricing is off until you enter a price." (:3435). Unchanged from round 2: **THE NO-PRICE SENTENCE** (`pdf.js`:160-161) and **THE
+  REOPEN SENTENCE** (`strip.js`:367).
+- **COMMITTED** = an `input` event with NO `inputType`, or `insertFromPaste`/`insertFromDrop`, or any `change`. **A KEYSTROKE** = any other `inputType`
+  (`insertText`, `deleteContentBackward`, `insertCompositionText`, …). **This is the axis round 3 judges on** (WRONG (b)-(e)).
+- **W1 / W2 (RETIRED)** = Kam's two guard sentences (card `quickquote-guard-words-1016`), retired by PR #10. sha256 (absence checks only):
+  W1 `0d5beedb47709eed6c7c6eec5d8ced3e73c58069ea09f49f4495cde1abeb25b9`, W2 `4c73c1593e64f73dc84d24c48a69896307108d387b70a9318b0d7f7dd3ec797d`.
+- **THE NOTE** = the "Custom pricing note" (`.q-savings`); **PRINT CSS** = `#quoteDoc .q-savings { display: none !important; }` (`5ef2a60`, v1.88;
+  backlog `cdcd490`). `svc-warn` is legitimately the class of `#cpRefused`; "never `svc-warn`" applies to `#emailPdfNote` only.
+
+Branch status: **NOT on main. PR #10 open, not merged, not draft** (READ-BY-DRAFTER 11:38:58). `refs/pull/10/merge` = `75d7a8e936daf937536f6a32fb6284bb8e8e04b9`
+(GitHub's test merge, NOTE only). PR #8 (`4d6ed6e`) still open. (`refs/pull/11/head` = `818a019` is the v2.36 release PR, merged 2026-10-16: NOTE only.)
+
+## RULED BY KAM, AND SETTLED
+- **Vision `1_Project_Definition/CLARIFICATIONS.md`** (`/Volumes/Laptop-DEV/!CODING/Datasec/Vision_Sales_Portal/1_Project_Definition/CLARIFICATIONS.md`):
+  read it whole (C-01..C-20 at drafting). **Cite only what you open.** C-20 (Kam 2026-10-16 13:25:51, card `quickquote-email-sends-standard-not-custom-1016`
+  = (a)): "Publish the guard as soon as it passes the gate, full fix after"; **"Kam's grant covers the GUARD only. Fix (2) and PR #8 (C-19) each need
+  Kam's own word before any publish."**; "Do not contact anyone who received an emailed quote." C-05 (reopen by number) is background for P6.
+- **THE R3 CARD (Kam, 09:45:48; Tuesday's 10-17 note 09:48; `0_Brain/dashboard/data/decisions.json` ruled_choice a):** round 3 allowed; "then one more
+  test gate. You decide the publish after that, on its own card." Not in CLARIFICATIONS at drafting (last entry C-20).
+- **Tuesday's rulings already made — checked AS BUILT, not re-opened:**
+  - **The note** (Tuesday 2026-10-16 ~14:02): OFF the emailed PDF, ON the print; reversible by Kam on the publish card. (Gates 20-21 measured it is on
+    screen only, and only in "Standard + custom": G20-F5. Re-measured in §N4.4.)
+  - **W1/W2 RETIRED** (Tuesday 2026-10-17 05:4x): their absence is checked, their wording is not graded.
+  - **G20-F1's fix-shape** (Tuesday 06:58:14): *"bound the custom price both where it is set and where it is rendered … A non-finite or out-of-bound
+    pdmUSD is refused with a message, never rendered."* **Gate 21's stamp (08:02:02):** a refused STANDARD email for a rep-reachable state is a FAIL;
+    a document reading A$0.00/device/month as a Custom Quote is G20-F1's own class (OPEN if reachable).
+  - **Round-3 brief to the builder (Tuesday 09:48, mailed 22:47:55Z):** G21-F1 (judge `pdmUSD` only in custom/both; re-check a held price when the
+    standard price changes), G21-F2 (a floor so nothing prints as 0.00), the minors F4/F5/F7/F8 (F3 if small), NEW WORDS FOR KAM listed in the READY.
+    **The builder ticketed F3 and the route bypass (backlog `01c8d7f`)** — allowed by "F3 if small"; verify the ticket, do not grade the deferral.
+  - **The access word:** NOT this gate's subject. **You never read, print, grep for, type or reproduce the access word or the offline page's constant**
+    (gate 20 S5). The ADVANCED SEAM in the head's `index.html` is lines **3816-3827**: never print or grep it to your terminal or report.
+- **PRODUCTION IS LIVE for this project.** Live QuickQuote (`hpas-quickquote`, `hpas-quickquote-rg`, its registry `hpasqqacr`, its Table Storage and
+  its log workspace) and the live portal (`datasec-sales-portal.azurewebsites.net`, `datasec-sales-portal-rg`) are PRODUCTION. **Nothing in this gate
+  touches either** (§13, HELD). The gate makes no Azure contact at all (AZ-READ-LEG = TUESDAY-READS).
+- **THE LIVE CHECK IS KAM'S, NOT YOURS.** (Tuesday 2026-10-16 15:07: "do NOT read HPAM_WORD; live check 2b moves to Kam.") **You never press anything
+  on the live site, never request any URL of it, and never read, ask for or type the HPAM access word.** The unlock word in your harness is a fresh
+  random string you generate.
+- **Merging and publishing are HELD. Nothing merges or publishes on your word.**
+- **The BUILDER's round-3 choices, each judged by the gate (say whether each needs Kam):** (1) a held price that stops fitting is CLEARED, not flagged
+  (WRONG (f)); (2) the floor is 0.01 of the quote currency, so it moves with FX while the ceiling does not (WRONG (g)); (3) a keystroke that leaves the
+  figure empty or too low is silent until `change` (WRONG (c)); too high is said at once (WRONG (k)); (4) a shown bound figure is snapped to the bound,
+  the floor included (WRONG (i)); (5) the remembered custom mode comes back with a valid price (WRONG (j)); (6) the renderer ignores a posted price in
+  "Standard pricing only" (WRONG (l)); (7) F3 and the route bypass ticketed (`01c8d7f`); (8) the 1e-9 tolerance, which its own mutant I does not see (WRONG (h)).
+
+## PRIOR ROUND
+PRIOR ROUND: round 2 gated `3a3399e947bf5faf8a8e0c0d3e11956c6590db98` (gate 21), verdict NO GO (round 2, not PROVISIONAL), mailed 2026-10-17 09:27:13 AEDT.
+ITS REPORT IS ON DISK AT: `/Volumes/Laptop-DEV/!CODING/Testing Agent MAIN/projects/vision/reports/2026-10-17-vision-gate21-qq-pr10-r2`
+(`report.md`, 439 lines, sha256 `e1dafe8482d4dd71c8b5dce19f756fc0c8b3a28ccc1d5c7a97394826466d4f66` at drafting; `evidence/`, `evidence/tools/` (58 files),
+`evidence/mail/verdict-body.txt` sha256 `dcf1542b09374b9a710d2fe4984516ba664040b32feaf093c70ccfb780a7a274`). **Read `report.md` whole, and the verdict body.**
+Gate 20's report (`…/2026-10-17-vision-gate20-qq-pr10-email-matches-print/report.md`) is background for the G20 ids; read it as needed.
+Findings carried forward and their disposition (each a CLAIM until §N10 measures it):
+
+| round-2 finding | severity (gate 21) | builder's disposition (READY / commit) | §N10 check |
+|---|---|---|---|
+| **G21-F1** a stale in-bound price behind a STANDARD quote → 422 after the app selection shrinks (B-STATE, P3′) | **Major — the §N3 FAIL (NO GO)** | FIXED `f31720e` (re-check in `renderCustom` + renderer judges only custom/both) | R2-F1 |
+| **G21-F2** sub-cent prices email a Custom Quote at A$0.00/device/month | **Major — G20-F1's class, OPEN** | FIXED (floor 0.01 of the quote currency) | R2-F2 + §N11 |
+| G21-F3 a comma price changes silently ("2,50" → A$250.00) | Minor, pre-existing | TICKET `01c8d7f` | R2-F3 (ticket verified; re-measure, not graded) |
+| G21-F4 non-numeric/empty entry clears silently | Minor | FIXED (S-EMPTY / S-NAN, other fields cleared) | R2-F4 |
+| G21-F5 typing through empty/zero drops the custom mode; the alert flashes | Minor | FIXED (keystroke vs committed; `cpModeWanted`) | R2-F5 |
+| G21-F6 a v2.36 tab after the publish: W1, then 422 no-price | Minor, publish card | stands (publish-card fact) | R2-F6 (re-measure P11a) |
+| G21-F7 no edge cell; ratio 1000 unseen (M4b) | Minor, test strength | FIXED (edge cells at both bounds) | R2-F7 (mutant D re-derived) |
+| G21-F8 the ticket's own /day max (A$10.1918) refused | Polish | FIXED (the snap) | R2-F8 |
+| G21-O1..O3; G20-F3/F4/F5/F8; the route bypass (G20-F7/G21-O3) | publish card / pre-existing / ticketed | untouched / `815aae7` / `01c8d7f` | re-observe |
+
+**Instruments are REUSED BY COPY from gate 21's `evidence/tools/`** (it holds gate 19-20's copies as well): `qa-run.py`, `mktree-qq.sh`, `lockcmp.py`,
+`lockwalk.py`, `tapsets.py`, `g17-dupnames.py`, `g21-run-suites.sh`, `g21-mutate.py`, `g21-mutant-arm.sh`, `g21-arm.sh`, `g21-cell.sh`, `g21-grid.sh`,
+`g21-compare.py`, `g21-n4-run.py`, `g21-n4-multi.py`, `g21-n5.py`, `g21-gh.sh`, `g21-heads.sh`, `g21-infscan.py`, `g21-figures.py`, `g21-seq-n4.py`,
+`g21-steps.py`, `g21-tapfail.py`, `g21-run-cells.py`, `g21-aggregate.py`, `g21-cmdlog.py`, `g21-repoint.py`, `qa-harness-g21-drive.cjs`,
+`qa-harness-g21-offline.cjs`, `qa-harness-g16-shots.mjs`, `qa-chrome-egressblock.sh`, `qa-chrome-census.py`, `qa-egress-posctl.mjs`, `qa-floorcount.py`,
+`qa-harness-floorctl.mjs`, `qa-netlog-scan.py`. **COPY what you use into THIS gate's own `evidence/tools/`, read it before you trust it, and RE-POINT every
+hard-coded path** (gate 21's copies hard-code `work-g21`, the gate-21 report folder, `@qa-g21.invalid`, `g21-` unlock prefixes and `v2.38`). **Never
+edit, run from, or write into gate 1-21's copies, evidence or trees** (`work-g21/` and `work-g20/` included). Record the sha1 of each copy before and
+after your edits. Set `qa-run.py`'s deadline ceiling to §13.6's in YOUR copy only, and say so. **The drive harness's paste must be re-taught (WRONG (b)):
+gate 21's `how="insert"` is CDP `Input.insertText`, which round 3 treats as a KEYSTROKE.** Every entry route your harness uses records the `inputType`
+the page actually received (a capture-phase `input` listener installed before the entry), into the cell's log.
+
+**Self-findings from earlier gates bind you:** quote every path (space and `!`; the repo sits under `Quoting Tool/`); run every loop and every
+`git show <sha>:<path>` under **bash, not zsh**; run `node strip.js` before any lone browser file; assert every tamper landed before reading its result,
+and **never let your landed-check text quote the head form it replaces** (gate 21 S1, S2: two VOID arms); write scripts with the Write tool, not a
+quoted heredoc (S3); npm's update-notifier egresses unless disabled; record the load beside every timing; `git branch` and `git for-each-ref` are NOT
+read verbs here; puppeteer-core's `click({clickCount: 2})` is ONE press — two real clicks N ms apart are a double-press; the Settings drawer is 340 px
+wide and slides (wait for it in, as the head's bounds file does); take the floor count at START and at END; one tab, foreground, for every reopen;
+sign-in addresses lower-case; **never print the access word or the offline constant** (S5).
+
+**PRIOR WORK: verify every claim against git history and the Actions API (GH-API-LEG), never against this brief.** The READY's claims (red 16/32 at
+`3a3399e` "with the old sentence's regex", green 32/32; mutants A-I with their cell counts; 69/132/217/6; "test:print over 3a3399e adds exactly the 17
+new names and removes none"; "all 9 real PDFs text-identical to round 2 apart from v2.38→v2.39"; refusal screenshots without overflow; backlog `01c8d7f`
+"parent 815aae7, pushed"; CI green incl. CodeQL and store-azurite "2"; 0 open code-scanning; PR body "Round 3 section, plus FOR KAM item 5") are
+re-derived or marked UNVERIFIED.
+
+## PIN — HEADS (parsed and verified by the launcher)
+**The launcher enforces these rules:** every row has a 40-hex head and no `@`; the head is a commit; for QQEP the base is an ancestor AND the merge-base
+with MAIN; `git rev-list --count base..head` equals `commits`; the chain is exactly `437ab4b` ← `0fc280b` ← `a8d769b` ← `7b952f6` ← `a7e1835` ←
+`1f7db41` ← `3a3399e` ← `f31720e` (single parents); R1 `7b952f6` and R2 `3a3399e` are ancestors of the head; `git ls-remote origin refs/heads/<branch>`
+equals the head NOW **for BOTH rows — a moved main REFUSES (re-pin and re-brief)**; `refs/pull/10/head` equals the QQEP head NOW; QQEP is not on main
+and is 0 behind it.
+
+<!-- PIN-HEADS:BEGIN -->
+| id | repo | branch | head | base | commits | status |
+|---|---|---|---|---|---|---|
+| MAIN-Q | quickquote | main | 437ab4bc412bc74d8da3b66a6ac5c71d7335c5d6 | - | - | IN |
+| QQEP | quickquote | fix/qq-email-matches-print-2026-10-16 | f31720ee677dbe2deb53dcb7991f1683a1b03ce1 | 437ab4bc412bc74d8da3b66a6ac5c71d7335c5d6 | 7 | IN |
+<!-- PIN-HEADS:END -->
+
+Both rows: `git -C <quickquote> ls-remote origin` read by the drafter at **2026-10-17 11:33:28 AEDT**: `HEAD` = `refs/heads/main` = `437ab4b…`,
+`refs/heads/fix/qq-email-matches-print-2026-10-16` = `f31720e…` = `refs/pull/10/head`, `refs/pull/10/merge` = `75d7a8e…` (NOTE only), `refs/pull/8/head`
+= `4d6ed6e…` (open), `refs/heads/backlog/qq-extract-zip-2026-10-16` = `01c8d7f9c4d8…` (the builder's backlog tip: F3 + the route bypass; parent `815aae7`,
+F8's ticket). `rev-list --count 437ab4b..f31720e` = 7; `f31720e..437ab4b` = 0; `3a3399e..f31720e` = 1; merge-base `437ab4b`; `3a3399e` is an ancestor of
+`f31720e`. **The head did not move from the READY's `f31720e`.**
+
+Repo: quickquote = `/Volumes/Laptop-DEV/!CODING/Datasec/Vision_Sales_Portal/Quoting Tool/hpas-quoting-tool` (remote `datasecau/vision_hpas-quickquote`).
+**The T9 copy of this repo is STALE. Never read it.** Its rules: the repo's own `CLAUDE.md` (read at the head with `git show`; its deploy and publish
+lines are NOT for you) and `/Volumes/Laptop-DEV/!CODING/Datasec/Vision_Sales_Portal/CLAUDE.md` (its QuickQuote section). **The builder's checkout is
+LIVE: never use the name `main` in the repo, always the pinned 40-hex sha; never read any working tree as evidence; build every tree from the object
+store.** **If PR #8 merges while you run, main moves:** your pins stay valid (they are shas), say so in the three readings and do NOT re-base anything —
+the verdict is on `f31720e` over `437ab4b`.
+
+## WRONG OR UNVERIFIABLE IN THE COMMISSION AND THE READY — found by the drafter (verify each; all are claims)
+**These are the TRAPS: places where round 3 could pass the builder's cells, or gate 21's matrix, without fixing the defect, or fix it and break
+something else.**
+- **(a) The round-3 READY DOES carry a NOT TESTED block** (lines 96-104: the image, ACS, the live site; a real FX provider — "The floor moving with a
+  landed rate was reasoned from code; no cell drives it"; other currencies; other locales; Windows/Safari/phones/printers/screen readers; **"The
+  number-field spinner arrows … Reasoned, not driven."**; store-azurite never meets "refused"; CI's Node 22). Two of those are DRIVEN here (§N11 FLOOR-FX,
+  SPIN). Your §14 NOT TESTED list covers at least the READY's, with your reason for each.
+- **(b) The paste instrument changed meaning.** Round 3 decides "committed" by `inputType` (:3590-3591). **Gate 21's paste was CDP `Input.insertText`
+  (its `qa-harness-g21-drive.cjs` line 223), which Chrome reports as `insertText` — a KEYSTROKE to round 3.** The builder's own "paste" is a script that
+  sets `value` and dispatches a synthetic `insertFromPaste` (bounds file :122-127) — not Chrome's paste either. **So neither earlier instrument is a paste
+  any more.** Every PASTE row here is a REAL clipboard paste into the focused field (grant clipboard permission to YOUR loopback origin only; write the
+  text with `navigator.clipboard.writeText`, then the platform paste chord or CDP's `paste` editing command); **assert the page received `insertFromPaste`**
+  before reading the result (a paste whose recorded `inputType` is not `insertFromPaste` is VOID for that row). Chrome may refuse to paste a non-numeric
+  string into `type=number` at all (no `input` event): record that. The `insertText` route stays, reported as **TYPED-WHOLE** (the dictation/IME class:
+  Superwhisper-style dictation arrives this way). Gate 21's P8p "paste 1e308" is re-run by BOTH routes.
+- **(c) Keystroke-vs-committed: a too-low or empty figure reached by KEYSTROKES is silent until `change`** (:3438, :3457: `committed ? … : ""`). The
+  rep's next press usually blurs the field first (mousedown → `change` → S-RANGE, custom off, mode default) and THEN the click Generates or Emails —
+  the sentence appears in the same instant the standard quote is sent. **§N11 KEY-COMMIT measures the event order and what was sent for:** type `0.004`
+  key by key in "Custom pricing only" then (i) click Email directly, (ii) click Generate directly, (iii) press Enter in the field, (iv) Tab to the button
+  and press Enter/Space; and TYPED-WHOLE `0.004` (no `change` until blur). Record per step: `#cpRefused` text and `active`, the mode, `cpExport()`, the
+  POSTed body, what was printed and emailed. Email ≠ print is the §N3 FAIL; a standard quote sent the instant a sentence appears is a finding (severity
+  yours). Also: is there ANY route by which a keystroke-silenced too-low figure is never judged (no `change` ever fires — e.g. the value returns to its
+  focus-time value, or the page re-renders the field before blur)? Report it.
+- **(d) Spinner arrows, ArrowUp/ArrowDown and the wheel arrive with NO `inputType` → COMMITTED, judged at once.** The builder did not drive them. Steps
+  (READ :1630-1643): `cpDay` `step="0.0001"`, `cpMonth`/`cpYear`/`cpTerm` `step="0.01"`, all `min="0"`; spinners are not hidden by CSS (0 matches for
+  `spin-button` at the head). **§N11 SPIN drives, each by keyboard Arrow AND by a real mouse click on the spin button's coordinates:** ArrowDown from
+  A$0.01 (→ 0.00: refused at once?); ArrowUp from an EMPTY `cpMonth` (→ 0.01 = the floor?) and an empty `cpDay` (→ 0.0001 = 0.003/month, below floor);
+  ArrowUp at A$310.00 (→ 310.01) and at `cpDay` 10.1918 (→ 10.1919); a step from a non-grid value (A$27.373 → ?); the wheel over a focused field. Record
+  the field read back, the `inputType` received, the sentence, the mode, and email = print. Chrome's step behaviour is UNVERIFIED by the drafter.
+- **(e) THE RE-CHECK IS REACHED THROUGH `render()`** (:2450, called by the global listener :3211-3213 on every non-price input, by the currency change
+  :3183-3195 and by a live rate landing in `fetchLiveRate`, :3160-3167). It is therefore reached in the RENDERER page too (WRONG (m)). READ it; then
+  **mutant G22-M2 (the `render()` call after a live rate lands removed) shows whether any cell sees the live-rate path.** The READY's list "apps, bundle,
+  devices, currency, or a live rate landing" includes **devices, which do not move the standard price** (gate 21 READ: `stdPerDevMonth = toLocal(bundle ?
+  20 : 5 + 3.50·n)`): a wording inaccuracy, READ and say so.
+- **(f) A held price is CLEARED, not flagged — including on TRANSITIONAL states.** Choosing Mix-and-Match drops to Manager only (USD 5.00) on the first
+  click (gate 21 P3′/B-STATE); a price valid for the selection the rep is building (A$100 against Mix-and-Match with all apps ticked, if that is above
+  A$10 standard — MEASURE the standard there) is wiped on the first click, with its four fields and `cpModeWanted`, and does not come back when the
+  apps are ticked again. **§N11 B-TRANS measures it** (A$100 / A$250 on the bundle → Mix-and-Match → tick every app → what is held, what prints, what
+  is emailed). Not a FAIL if email = print; a behaviour change for Kam's card (the READY's "Behaviour changes" names it) and a finding if a rep loses a
+  valid price without seeing the sentence (e.g. Advanced off, the ticket hidden: P3″).
+- **(g) THE FLOOR MOVES WITH FX** (0.01 of the quote currency = 0.01 / rate USD). Drafter arithmetic (node over CONFIG seeds, not the page): a CA$0.01
+  price set at the seed (1.42) is **below the floor once gate 21's canned CAD live rate 1.3877 lands** (0.007042 < 0.007206 USD) → predicted CLEARED on
+  screen, with S-RANGE, while the rep works; an A$0.01 price survives AUD 1.6123 (0.006452 ≥ 0.006202) but **not a canned LOWER AUD rate (e.g. 1.50)**;
+  **a currency switch at the floor clears it** (A$0.01 → USD: 0.006452 < 0.01; → CAD: < 0.007042) but survives → NZD (1.67). **§N11 FLOOR-FX and
+  FLOOR-CUR measure each**; the READY says no cell drives it. Not a FAIL if email = print; a finding if a price disappears without the rep seeing why.
+- **(h) Mutant I (no 1e-9 tolerance) survives the builder's cells — does it matter?** Drafter arithmetic: at the seeds (AUD, CAD, EUR, GBP, NZD, SGD,
+  DKK) and at the canned live rates (AUD 1.6123, CAD 1.3877) every typed bound by `cpMonth`/`cpYear`/3-yr `cpTerm`, Apply +900 %, and the floor typed in
+  each field round-trip EXACTLY without the tolerance; a held A$310.00 / +900 % (USD 200) stays ≤ the max after either live rate lands. **Predicted: I is
+  EQUIVALENT at these rates on these routes.** The gate does not take the prediction: arm G22-MI in the BROWSER on §N11 U-AT ×3 currencies, F-AT ×3,
+  FX-LIVE, CUR and FLOOR-FX, and say whether any surface changes. Separately: **at the live rates the shown 2-dp maximum is ABOVE the true maximum**
+  (CA$277.54 vs 277.5399…; Manager-only A$80.62 vs 80.615 at 1.6123): typed back, it is refused unless the F8 snap takes it — §N11 CEIL-FX.
+- **(i) The F8 snap also snaps UP to the floor** (:3450: the bounds list holds the max AND `customPriceMinPerMonth`). `cpDay` `0.0003` (= A$0.0091/month,
+  below the floor) displays the floor's own 4-dp /day figure, so it is TAKEN AS A$0.01; `cpDay` `0.0002` is refused. The price taken differs from the
+  figure typed. **§N11 F-SNAP reports what the ticket, print, email and workbook show per field** (/day, /month, /year, term, totals).
+- **(j) `cpModeWanted` resurrects a custom mode.** It is set by the rep's own radio click (:3598-3601), restored by `.checked = true` with NO event
+  (:3463), and cleared ONLY by `cpClear` (Reset form, reopen) and the re-check (READ: 3 assignments). It is NOT cleared by Advanced off, by the ticket's
+  "Reset to default" (`btnResetCustom`), by a currency change, or by a committed S-EMPTY/S-RANGE. So: custom chosen → the field cleared (S-EMPTY; mode
+  default) → the rep moves on with a STANDARD quote → later types any valid price (even to try a figure) → **"Custom pricing only" comes back unasked**.
+  **§N11 MODE-WANTED measures each route** and that on-screen labels, the print and the email all follow the restored radio. Email = print → a finding,
+  not a FAIL.
+- **(k) Too high mid-entry is said at once and turns pricing off** (:3456-3457, `tooHigh`): editing inside a figure (A$31.05, delete the "." → 3105)
+  flashes S-RANGE, clears the other three fields, and `off()` keeps `cpModeWanted` so the mode returns on the next valid keystroke. G21-F5's flash survives
+  for too-high intermediates. **R2-F5′ samples `#cpRefused` after each key.**
+- **(l) The renderer now IGNORES any posted price in "Standard pricing only"** (`pdf.js`:153). By design: a crafted `pdmUSD` of 1e308 / "27.9" / {} / −1 /
+  0.004 beside `pmDefault` only is now **200 and a standard mail** (422 at R2). The gate checks (i) no part of a default-mode PDF or workbook depends on
+  `cpState` (head default emails WITH a price posted vs WITHOUT: identical), (ii) the no-price refusal now needs `wantsCustom` AND `cpRestore` (a simple
+  session posting `pmCustom: true` → what is rendered?), (iii) "A crafted or old-page post can still get a 422, but only in a custom print mode" (READY).
+- **(m) The re-check runs in the RENDERER page too.** `pdf.js` applies `checks`, then fields (currency first, then fxRate), then `cpRestore`. The
+  currency `change` it fires runs `fetchLiveRate` in the renderer page (:3189-3191); `pdf.js`'s header says the page is "Loaded from file:// … so FX is
+  the seeded table". **If a live rate ever landed inside the renderer** (a production container with egress; blocked here by your wrapper), `render()`
+  would re-check — and could CLEAR a just-restored FLOOR price mid-render (WRONG (g)), so the emailed document would be standard while the rep printed
+  custom. READ-ONLY-INFERRED. **READ whether the renderer's page issues the lookup (your net-log scan of the renderer's Chrome shows the attempt), and
+  time the render.** An INSTRUMENT arm (optional, YOUR tree copy only: answer the renderer page's FX request with a lower canned rate) is labelled
+  INSTRUMENT, never a product result. Otherwise NOT TESTED, named.
+- **(n) The builder's red at `3a3399e` is on a MODIFIED test file** ("the round-3 test file run in a 3a3399e worktree, with the old sentence's regex").
+  The head file's `REFUSAL` (:37) names S-RANGE, so on R2 the 15 G20 cells fail on WORDING. **Run both (§N2 R-G, R-G′)** and classify every red; several
+  new F1 cells assert the on-screen sentence FIRST ("'' at the assertion" at R2): NEW-SURFACE-ABSENT — the DEFECT red (a 422 on a standard email) comes
+  from YOUR drive at R2.
+- **(o) Number-field sanitising decides which S-NAN routes exist.** Chrome refuses typed letters other than `e`/`E`/`+`/`-`/`.` in `type=number`, so
+  `abc` cannot be TYPED; `1e`, `-`, `1e309` can, and a real paste of `abc` may be refused outright. Measure which real routes reach S-NAN; the READY's
+  "abc" claim may hold only for its synthetic event (WRONG (b)).
+- **(p) CodeQL on PR refs is a blind instrument** (gates 17-21). On `f31720e` (READ-BY-DRAFTER 11:38:58): `CodeQL` success "No new alerts in code changed
+  by this pull request", `Analyze (javascript-typescript)` and `Analyze (actions)` success; code-scanning open: main 0, `refs/pull/10/head` 0; Dependabot
+  open #1, #4 (extract-zip, high — PR #8's). Say only what they can show.
+- **(q) Version 2.39.** TRUE at source (:1735). `stage3/package.json` `version` stays `0.3.2` and the blob is unchanged since round 2. §N5 counts
+  `v2.36`→`v2.39` against main and `v2.38`→`v2.39` against R2.
+- **Verified TRUE at source (READ 11:33-12:0x):** both heads + `refs/pull/10/head` by `ls-remote`; the 7-commit chain and single parents; 7 ahead / 0
+  behind; 8 files whole (numstat = the PR files API), 3 in round 3; the unchanged-blob lists above; every file:line in the READY's NEW WORDS FOR KAM
+  (:3487-3488, :3457, :3521, :3622, :3438, :3435, `pdf.js`:156, :160-161) and its :1752 / :3510-3524 (the re-check block is :3515-3523) / `pdf.js`:153;
+  the reopen sentence at `strip.js`:367; the 422 at `server.js`:669-671; 18 `test(` calls = 32 cells (15 + 17) in `b3c5345`; CI runs 38986121215 (push),
+  38986126280 (pull_request) and 38986121428 (PR #10 dynamic) on `f31720e`, `completed success`; 13 check runs, all success; PR #10 open, not draft,
+  mergeable_state clean; backlog `01c8d7f` (2026-10-17 10:19:02, parent `815aae7`, BACKLOG.md +12: G21-F3 and the route bypass), not an ancestor of the
+  head; Vision's gh-config mtimes unchanged by the drafter's GETs (12 Oct 18:09:30).
+
+## THE READY — its claims and NOT TESTED (the gate rules on every claim)
+Read the mail whole. Its claims, one line each (each a CLAIM, re-derived in §N): round 3 (Kam 09:45:48), head `f31720e`, one commit fast-forward from
+`3a3399e`, v2.39; G21-F1 by the re-check in `renderCustom` ("apps, bundle, devices, currency, or a live rate landing"; four fields cleared; mode default)
+and the renderer judging `pdmUSD` only in `pmCustom`/`pmBoth`; G21-F2 by the floor `customPriceMinPerMonth = 0.01` "in the quote's own currency",
+"both bounds inclusive, with a relative 1e-9"; "The floor moves with the FX rate … The ceiling does not"; G21-F4 (S-EMPTY, S-NAN for `abc`, `1e`, 1e309;
+the other three fields cleared); G21-F5 (keystrokes through empty/too-low quiet, judged on change; too high said at once; paste/drop/synthetic =
+committed; `cpModeWanted`); G21-F8 (the snap); G21-F7 (edge cells); THE NUMBERS (A$0.01–A$310.00, US$0.01–US$200.00, CA$0.01–CA$284.00 on the bundle;
+A$0.01–A$77.50 on Manager only); the red/green pairs (bounds 16/32 red at `3a3399e`, 32/32 green; the F1, F2, F7/F8, F4, F5 pairs as listed); mutants A-I
+(A 6, B 3, C 9, D 5, E 1, F 5, G 1, H 1, I NONE); 69/69, 132/132, 217/217, 6/6; "+17 names, none removed"; CI runs 38986126280 / 38986121215 / 38986121428
+success, jobs pricing-pack 69, print-fit 217, xlsx-parity 6, stage3-server 132, store-azurite 2; 0 open code-scanning; 9 real PDFs text-identical to
+round 2 but for v2.38→v2.39 and the print qnum timestamps, pages 2/2/3 A4; refusal screenshots light/dark 1280/375 without overflow; backlog `01c8d7f`;
+the behaviour changes (cleared not flagged; 422 only in a custom mode; same-page reopen standard; G21-F6 stands); NEW WORDS FOR KAM 1-3.
+
+**How you treat these:** every claim you CAN test, you test. **test:azurite** stays NOT RUN here (no docker; `lib/store.js` is an unchanged blob) —
+relay CI's `store-azurite` as READ ONLY. **A real ACS send** stays NOT TESTED; its nearest substitute is §N3/§N4 (the real server path, a capturing stub
+mail). **The live site** stays NOT TESTED (Kam's check).
+
+## 2a. LEGITIMATE SHAPES — what an ordinary rep produces, and what the email must then be
+**Round 3 adds clearing and quiet judging on top of round 2's refusal. A false refusal, a silent clear or a resurrected mode on an ordinary quote is
+damage in its own right. So every ordinary shape below is MEASURED in §N3/§N11; until it is, the instruction on any unexpected result is STOP and
+record it, never a remedy.**
+
+| shape — its ordinary form, as a rep really produces it | expected email (PDF + workbook) | the code clause that yields it | predicted-by |
+|---|---|---|---|
+| simple (never-unlocked) session, any currency | = main's simple email except `v2.36`→`v2.39`; posts `custom: null`; never refused | stripped page: no `cpExport`; render not advanced | drafter |
+| advanced, "Standard pricing only", no price ever set | = main's except the version; posts `custom: {pdmUSD: null}`; never refused | `wantsCustom` false | drafter |
+| advanced, a price set (in range), mode left on "Standard pricing only" | standard; = the print; never refused; = the same email WITHOUT a price | `pdf.js`:153 skips the price | drafter |
+| advanced, "Custom pricing only" / "Standard + custom", −10 % (gate 21's grid) | custom (A$27.90 … A$45,167 AUD) / both (3 pages); = the print; = R2 but for the version | `cpRestore` passes | builder + gate 21 |
+| a deep discount or mark-up inside the range (−50 %, −90 %, −99.96 % = A$0.0124, +899 %) | accepted; = the print | inside [0.01, 10×] | drafter |
+| a price EXACTLY at a bound (A$0.01; A$310.00; Apply +900 %; `cpDay` 10.1918 / 0.0003 snapped) | ACCEPTED; = the print (the floor prints "A$0.01 / device / month") | inclusive + tolerance + snap | builder (READY) |
+| a price set, then the app selection REDUCED below fit, any mode | the price CLEARED on screen with S-RANGE before any press; standard; = the print; NOT refused | `renderCustom` re-check | builder (READY) |
+| a price set, then Advanced off, then fewer apps (P3′) | standard; = the print; NOT refused | re-check + `pdf.js`:153 | builder (READY) |
+| a price typed key by key over an old one, in a custom mode (`25.5`, `0.5`) | the custom mode kept; no alert flash; custom = the print | `committed` false + `cpModeWanted` | builder (READY) |
+| custom price set → Reset form / reopen (C-05) | standard; = the print; `cpModeWanted` cleared | `cpClear` | builder |
+
+## N1. THE DIFF, REVIEWED AGAINST THE READY'S CLAIMS (READ ONLY)
+**FAIL condition, stated BEFORE the read:** any line of the round-3 delta not explained by the READY or the commit message; any change to `strip.js`,
+`server.js`, `package.json` or a dependency at round 3; any change to the collector's field set; a round-2 hunk changed other than the lines round 3
+names; a bound expression other than `cpCheck`/`cpMax` in the page.
+1. `git diff 437ab4b f31720e` whole and `git diff 3a3399e f31720e`, quoted into `evidence/` **except any hunk inside the ADVANCED SEAM (none at drafting:
+   the round-3 hunks are :1732-:3625; the seam is :3816-3827)**; every round-3 hunk mapped to a claim (table: hunk, claim, holds yes/no, how).
+2. **One rule, now four places:** show `cpCheck` is the ONLY bound (the fields via `cpSyncFrom`, Apply %, the `renderCustom` re-check, `window.cpRestore`);
+   show `pdf.js` reaches it only through `window.cpRestore`, and only when `wantsCustom`; show the route still trusts `report.refused` only. Quote each
+   call site. Count the `cpModeWanted` assignments and `off(` call sites.
+3. **What the bounds are checked against:** the floor's denominator (`c.fxRate`) and the ceiling's (`stdPerDevMonth / fxRate`); which inputs move each
+   (WRONG (e), (g)); every path to `render()` and so to the re-check (listeners, currency, `fetchLiveRate`, the renderer's `fire()`s).
+4. **The renderer (`pdf.js` 100-170):** the order checks → currency/fxRate → fields → `cpRestore`; whether the renderer page's currency change launches
+   `fetchLiveRate` (WRONG (m)).
+5. Read the PR files API and show it equals `git diff --numstat 437ab4b f31720e` (8 rows, blobs).
+6. `stage3/package.json` blob unchanged at round 3 (`cd9118a`); `test:print` still lists `test/custom-price-bounds.mjs` once.
+7. **What strip.js generates:** fresh base, R2 and head trees, `node strip.js`; sha256 + bytes of `public/index.html`, `private/advanced.js`,
+   `private/svc.js`; `diff` head vs R2, every line mapped to a round-3 hunk (expected: `"2.39"` and `customPriceMinPerMonth` where CONFIG lands; the
+   `cpSyncFrom`/`cpCheck`/`cpMax`/`renderCustom`/listener changes in `advanced.js` only). Confirm `cpCheck`, `cpRestore`, `cpModeWanted` and
+   `id="cpRefused"` are NOT in the stripped `public/index.html`, and `strip.js`'s leak list still passes (rc 0).
+
+## N2. THE RED-PROOFS AND THE MUTANTS (MEASURED; never trust the mail; WRONG (n))
+**FAIL condition:** a new cell passing on R2 where the READY says red (other than the USD 200.00/200.01 cell it names); an R2 failure for a reason that
+is not the absence of the round-3 fix (setup, drawer timing, sign-in, Chrome launch) reported as the red; any cell failing at the head on a clean tree.
+1. **R2 and base trees (each fresh, `git archive`, `npm ci --offline --ignore-scripts`, the lockfile proven entry by entry by `lockcmp.py` AND `lockwalk.py`):**
+   - **R-G: `3a3399e` + the head's `test/custom-price-bounds.mjs`** (blob `b3c5345`, landed by `git hash-object`; `node --check` rc 0 — a test that does not
+     parse is VOID), UNMODIFIED. `node strip.js && node --test test/custom-price-bounds.mjs` under `qa-run.py` with `PUPPETEER_EXECUTABLE_PATH` = YOUR
+     egress wrapper. Quote every `not ok` with its FIRST failing assertion; classify **DEFECT-REASON** (a 422 on a standard email, an A$0.00 Custom Quote
+     sent, a clobbered/flashed field, a 0.0099/rate crafted price sent, 10.1918 refused) / **NEW-SURFACE-ABSENT** (a sentence that R2 cannot say) /
+     **WORDING** (S-RANGE vs R2's sentence).
+   - **R-G′: the same, with ONLY line 37's `REFUSAL` set back to R2's sentence** (the builder's method; the tamper's before/after sha256 and the one-line
+     diff recorded). READY: 16/32 red; the 15 G20 cells and the USD max cell pass.
+   - **R-H: `437ab4b` + the same unmodified file** (the live code): quote and classify (the F2 key-by-key cells red on the clobber, as at gate 21).
+2. **Head tree:** a fresh `git archive f31720e`, same install and proof; `custom-price-bounds.mjs`, `email-matches-print.mjs`, `email-print-mode.mjs`
+   alone, 3 runs each; each run's wall time with the load.
+3. **Mutants — each on a FRESH head tree, tamper asserted landed (a landed-check that does not quote the head form), `node --check` rc 0 on the changed
+   file, `node strip.js` rc 0, and the mutated text shown present in the generated file it reaches.** Run ALL THREE files per arm (`--test-concurrency=1`);
+   say which cells see it, or NONE (unseen = a finding against test strength, not a FAIL):
+   - **The builder's A-I, re-derived from the READY's one-line descriptions (G22-MA … G22-MI):** A the renderer judges every mode (READY: 6 cells + 2 G20
+     cells via the no-price branch); B no re-check; C the floor back to `> 0` with the sentence kept (9); D ratio 1000 with the sentence kept (5); E no snap
+     (1); F every keystroke committed (5); G no mode restore (1); H the other fields kept (1); **I no 1e-9 tolerance (NONE) — and arm I in the BROWSER as
+     WRONG (h) says**. Your mutation for each is yours; say where it differs from the READY's description.
+   - **New (G22-M1 … G22-M6):** M1 `committed` loses `insertFromPaste` (does any cell see a real-paste regression? the builder's paste is synthetic);
+     M2 the `render()` after a live rate lands removed (WRONG (e)); M3 the field `change` listener removed (is S-EMPTY/S-RANGE for a typed too-low figure
+     ever said?); M4 the re-check stops clearing `cpModeWanted`; M5 the snap restricted to the maximum (the floor snap unseen?); M6 the floor tolerance
+     sign flipped (`1 + 1e-9`: a hair below accepted).
+   - **Gate 21's arms re-run at the head, where they still land (G21-R2 the rounded restore, G21-M1 page-only bound off, G21-M3 the route's refusal
+     branch removed, G21-M7 F2 reverted, G21-M8 F6 reverted, G21-M9 the no-price refusal removed, G21-M10 the workbook block order):** say which no longer
+     land because round 3 rewrote the code (NOT LANDED is a reading, re-express the arm against the new code where meaningful, and say so).
+
+## N3. THE REAL-BROWSER DRIVE THROUGH THE REAL SERVER PATH (TIER 1; MEASURED; ONE browser at a time)
+**FAIL condition:** at the head, in ANY advanced cell, the emailed PDF or workbook disagreeing with the print of the same state (per D5, §N4); a press
+that does not send exactly once where a send is expected (one POST, one captured mail, both attachments); a mail captured, or a PDF rendered, for a
+refused price; W1 or W2, or `svc-warn` on `#emailPdfNote`, anywhere on the page at the head; a simple session or an advanced standard email differing
+from base's beyond the version tokens (§N5); **a refusal (422) of an email in "Standard pricing only", or of any in-range custom price, for a state a rep
+reaches through the page's own controls**; **a Custom Quote emailed or printed at A$0.00 (or $0.00 / CA$0.00) per device per month**; a render that
+throws, 500s or prints `NaN`/`undefined`/`Infinity`/`∞` for a shape a rep can produce through the page's own controls (a real paste, a keystroke, a
+spinner and dictation are all the page's own controls); a page or console error at the head that base does not also produce for the same steps.
+1. **Instrument (PRIMARY — the real server path), as gate 21:** YOUR harness `require`s the tree's own hosted server module's `createApp()` export
+   (NEVER its entry point, NEVER with a real secret), the repo's in-memory store pattern (lift `memStore()` from the tree's own `server.test.mjs`), a
+   CAPTURING stub mail (gate 21's `qa-harness-g21-drive.cjs`, copied, re-pointed, its paste re-taught per WRONG (b), its `inputType` log added), a
+   throwaway `sessionSecret` of 48 random chars and a throwaway `unlockSecret` (fresh random; never the HPAM word), `salesCopy` =
+   `sales-copy@qa.invalid` (an option, never an env var), the tree's OWN `renderQuotePdf` with `PUPPETEER_EXECUTABLE_PATH` = your egress wrapper,
+   `clock` FROZEN (prove it froze), `trustForwardedFor: false`, on 127.0.0.1 and a kernel-chosen port (`listen(0)`), under `qa-run.py` (`env -i`
+   allowlist). ONE Google Chrome (your egress wrapper) driven by the tree's puppeteer-core: `/login`, the captured OTP, Settings → Advanced → the
+   throwaway word → Unlock (the page's own controls), close the drawer, fill as a rep (40 devices, 3 years, the full bundle, customer
+   `Parity & <Probe> "QA" 'g22'`), the currency, a custom price the rep's way ("% from standard" `-10`, Apply), the print mode by its LABEL; then **(i) the
+   page's own Generate/Print control** with `window.print` neutralised and the page captured as a PDF in PRINT media, A4, and **(ii) the page's own Email
+   button, pressed ONCE**. Per cell record what gate 21 recorded (the POSTed body verbatim, POSTs, status, mails, the server's JSON, the store row,
+   `#emailPdfNote`, `#btnEmailPdf`, `#cpRefused` text and `active`, the load) **plus every `inputType` received and `cpModeWanted`'s observable effect
+   (the checked radio before and after each entry)**. SECONDARY (the builder's interception) only for phone widths; never for the grid or a refusal row.
+2. **THE REQUIRED GRID (head, R2 AND base, as gate 21):** advanced × {"Standard pricing only", "Custom pricing only", "Standard + custom pricing"} × {AUD,
+   USD, CAD} = 9 cells per side, plus simple × {AUD, USD, CAD} = 3, plus advanced "Standard pricing only" with no price ever set × 3. **At base (`437ab4b`,
+   live v2.36) custom/both are the guard (press 1 W1, press 2 STANDARD) — the base column must again show the emailed figure ≠ the printed custom figure
+   before "head email = print" is credited to fix (2).** The R2 column feeds §N5.4.
+3. **Probes (head; MEASURED; findings unless they hit the FAIL condition above) — gate 21's P1-P15 re-run, plus:**
+   - **P1** double-press (100 ms / 300 ms; after "Sent"; Enter) in "Custom pricing only", and on a refused state (a crafted custom-mode body, since the
+     page now refuses before the press): POSTs, 422s, numbers consumed.
+   - **P2** Reset form; **P3** Advanced off (record the posted stale `pdmUSD`: now IGNORED in default mode); **P3′** Advanced off then Manager only (R2:
+     422; head: predicted sent = print); **P3″ (NEW)** Advanced off, Manager only, then Advanced ON again: is the price gone, is S-RANGE showing, does
+     the rep ever see it while the ticket was hidden?; **P4** clear the /month figure (key by key AND committed: S-EMPTY when?); **P5** the ticket's "Reset
+     to default" (`cpModeWanted` kept?).
+   - **P6 C-05 reopen:** (a) same page: price + mode cleared, the reopen sentence; (b) fresh session; (c) B while A's price is live; (d) a refused number.
+   - **P7** a price set in AUD → CAD → USD → AUD (the ceiling is USD-invariant; the FLOOR is not: WRONG (g), §N11 FLOOR-CUR).
+   - **P8 entry routes:** each field (`cpDay`, `cpMonth`, `cpYear`, `cpTerm`, `cpPct`) **KEY BY KEY, by REAL PASTE, by TYPED-WHOLE (`insertText`) and by
+     SPINNER** (WRONG (b), (d)); the STRESS state (2,500 devices, 5 yr, −7.77 %, AUD and CAD: A$4,397,195 / CA$4,028,498 expected, = gates 20-21); **P8p:**
+     `1e308` into /device/month by real paste AND typed-whole: refused, S-RANGE, custom off, nothing says ∞, the email is the printed STANDARD quote.
+   - **P9** a canned "live" FX rate answered inside the drive Chrome (AUD 1.6123, CAD 1.3877 as gate 21, plus a canned LOWER AUD rate 1.50): email vs
+     print; the race (G20-F8, ticketed): re-measure, REPORT only; the floor and the ceiling held across the landing (§N11 FLOOR-FX, CEIL-FX).
+   - **P10 crafted bodies** (a `fetch` from the signed-in page to YOUR loopback server only), each × {`pmDefault` only, `pmCustom`, `pmBoth`}: `pdmUSD`
+     −1, `"27.9"`, `0`, `1e308`, `{}`, `1e-9`, `0.0099/rate` and `0.01/rate` per currency, `200`, `200.01`, `null`; a simple session posting `custom:
+     {pdmUSD: 1}` + `pmCustom: true`. Per body: status, error text, mails, store row, `unknownFields`, renderer page errors, renderer pages left open.
+   - **P11 mixed versions:** (a) the BASE page + module on the HEAD server (G21-F6: W1, press 2 → 422 no-price?); (b) the HEAD page on the BASE server
+     (G20-F3, a rollback with v2.39 tabs open); (c) the **R2 page on the HEAD server** (a v2.38 tab — v2.38 never shipped: NOTE only).
+   - **P12** the lone revert of `a8d769b` in YOUR fresh head tree only (`git show a8d769b -- stage3/strip.js` | `patch -R`; assert landed; record any
+     reject): custom mode, press 1, press 2 (G20-F4).
+   - **P13 no stale words:** W1/W2 absent from the head's generated files and the live DOM after every cell; `#emailPdfNote` never `svc-warn`;
+     `#cpRefused` `active` only with text. Control that can fail: the base page after a custom press 1 must FIND W1.
+   - **P14 themes and widths:** print light vs dark; 1280 / 375 / 320 px, light and dark, after a custom "Sent" AND with each of S-RANGE (floor and
+     ceiling), S-EMPTY and S-NAN showing: `scrollWidth <= innerWidth`, the sentence wraps inside the ticket, the label fits.
+   - **P15** a refused send end to end (crafted, custom mode): 422, the note, 0 mails, row `refused`, a number consumed, the renderer page closed.
+
+## N4. WHAT THE RECIPIENT GETS vs WHAT THE REP PRINTED (TIER 1; MEASURED; method per N4-METHOD, D5)
+**FAIL condition (FULL-TEXT):** for any head advanced cell or probe state a rep can reach through the page's own controls that SENDS, the emailed PDF's
+`pdftotext -layout` text differing from the printed PDF's after normalising ONLY the quote-number token (state the regex, count the substitutions); the
+money multiset differing; the page count differing; a workbook money figure absent from the printed quote or a printed section missing its block; THE
+NOTE, a margin or a "% below/above" figure in the emailed PDF or the workbook; `∞`, `Infinity`, `NaN`, `undefined` or a custom per-device figure of
+`0.00` in any emailed PDF or workbook. **(FIGURES):** the money multiset in order differing; other text differences reported. **A state that sends
+nothing has no emailed PDF: its row reports why (422 body, or "cleared before the press" with the sentence), and its printed PDF is still scanned.**
+1. **Method:** as gate 21 (`g21-compare.py`, `g21-infscan.py`, copied; add a `0.00`-per-device scan to your copy and prove it with a planted
+   `A$0.00 / device / month`): `pdftotext -layout` diff; the money multiset (state the regex); `pdftoppm -r 100` pixel diff in plain python on PPM (no
+   ImageMagick, PIL or numpy) with region bboxes; `pdfinfo` pages + A4; `pdffonts`. Workbook: every sheet part, every money cell and format, the title
+   rows, the qnum, a scan for `1e+308`, blank totals, `NaN`, a 0.00 custom rate.
+2. **The pairs:** every §N3.2 head cell; every §N3.3 probe state that sends; every §N11 row that sends; the base defect pair (must differ).
+3. **Controls that can fail, BEFORE any zero is believed:** a planted one-word, one-digit and one-pixel change each reported; the base defect pair
+   differs; head AUD vs head CAD differ; a planted `A$∞` and a planted `A$0.00 / device / month` are each found by your scans.
+4. **THE NOTE and THE VALUE NOTE, per mode (REPORT only; not graded):** rows default / custom / both, columns on screen / printed PDF / emailed PDF /
+   emailed workbook (gate 21's table, re-measured) — the "custom note per mode" fact for Kam's card.
+5. **What the recipient sees beyond the attachments:** `to`, `bcc`, `subject`, `text` (no price; say so); ONE send carries both attachments to both
+   recipients; a refused or cleared state reaches nobody.
+
+## N5. SIMPLE SESSIONS AND STANDARD EMAILS UNCHANGED vs MAIN — AND THE GRID UNCHANGED vs ROUND 2 (TIER 1; MEASURED; WRONG (q))
+**FAIL condition:** a simple-session email (AUD/USD/CAD) or an advanced "Standard pricing only" email at the head differing from base's for the same
+inputs in anything other than `v2.36`→`v2.39` and (if not frozen) the quote number; workbook parts differing other than `docProps/core.xml` and the
+version part (name each); the POSTed body differing other than round 1's `custom` key; **any §N3.2 head cell's emailed PDF differing from the R2 cell's
+other than `v2.38`→`v2.39`**; a head "Standard pricing only" email WITH a price posted differing from the same email WITHOUT one (WRONG (l)).
+1. Base vs head, same inputs, frozen clocks (count the version tokens: expected 2 per PDF; gate 21's `Issued …` re-flow reading re-measured).
+2. The posted body, head vs base: identical but for `custom: null` (simple) or `custom: {pdmUSD: …}` (advanced).
+3. The OFFLINE tool (`index.html` as a FILE, fresh base and head; advanced via the page's own stored setting as gates 20-21 did — never the word):
+   Generate in each mode × AUD/USD/CAD: base vs head text after version and qnum normalisation; **offline B-STATE (A$300 → Mix-and-Match: cleared with
+   S-RANGE?), offline 0.004 (refused?), offline `1e308` (refused), offline "2,50" (G21-F3, ticketed: report)**.
+4. **Head vs R2 (`3a3399e`), the 15 §N3.2 cells:** emailed PDF and workbook text after normalising `v2.38`→`v2.39` (and qnum): 0 lines expected (the
+   READY's claim).
+
+## N6. THE REPO'S CI SUITES, AS CI RUNS THEM, AT `f31720e` (and `437ab4b`, and `3a3399e`) — as SETS, NOT COUNTS (TIER 1)
+**FAIL condition:** any suite red at `f31720e` on a clean tree; a test NAME passing at `3a3399e` that does not pass at the head; `test:print`'s names
+added at the head over R2 other than exactly the 17 new `custom-price-bounds.mjs` names; a name passing at `437ab4b` that does not pass at the head other
+than gate 20's 4 lost guard names; `npm ls --all` rc ≠ 0 at the head; any installed package not byte-equal to the lockfile's integrity.
+1. **Trees:** fresh `git archive` extractions of `437ab4b`, `3a3399e` and `f31720e` under `projects/vision/work-g22/` (separate from §N2's); `npm ci
+   --offline --ignore-scripts` (a cache miss FAILS, then NOT RUN with the tarball named); lockfile proven entry by entry (`lockcmp.py` AND `lockwalk.py`);
+   `npm ls --all` rc and stderr.
+2. **The suites by PATH and command (tests.yml at the head, READ):** root `node --test quote-engine.test.mjs` (69); in `stage3/`: `npm test` (132), `npm run
+   test:print` (217 head / 200 R2 / 175 base expected), `npm run test:xlsx` (6). Each ×1 at base and R2 and ×2 at the head, same session, as SETS by test
+   NAME (`tapsets.py`, `g17-dupnames.py`): lost, added, removed, duplicates, head vs R2 AND head vs base. **Host Node is v26.8.1, not CI's 22: say so on
+   every row.** Every Chrome under YOUR egress wrapper. `npm run test:azurite` is NOT RUN (no docker) — relay CI's `store-azurite` on `f31720e` READ ONLY.
+3. Never `npm install`, never `npm audit fix`. The lockfile is an unchanged blob: no `npm audit` is required (say so).
+
+## N7. THE OFFLINE `index.html` AND THE GENERATED FILES (TIER 1 by the customer's printed quote; READ + MEASURED)
+**FAIL condition:** a change in the generated `public/index.html`, `private/advanced.js` or `private/svc.js` not explained by §N1's hunks; `cpExport`,
+`cpRestore`, `cpCheck`, `cpModeWanted` or `id="cpRefused"` reachable in the stripped (simple) page; the guard's text in any generated file.
+1. §N1.7's diffs, each line mapped.
+2. The OFFLINE advanced page: `window.cpRestore(1e308)`, `cpRestore(0.004/1.55)` return S-RANGE and change nothing; `cpRestore(0.01/1.55)` restores and
+   prints A$0.01; `cpRestore(25)` restores; nothing can be posted offline (say so).
+3. §N5.3's offline rows are the measurement.
+
+## N8. NOTHING PUSHED, MERGED OR PUBLISHED; LIVE SITE UNCHANGED; THE PUBLISH FACTS (commission; READ ONLY)
+**FAIL condition:** any `git push`, merge, PR comment/review/label/approval, workflow re-run, alert dismissal, `docker` command of ANY kind, `az`
+command, or deploy in your command log; any write in the QuickQuote repo or in `Vision_Sales_Portal/`; any HTTP request to the live QuickQuote or the
+live portal; the live webapp's `linuxFxVersion` at verdict (Tuesday's re-read) differing from AZ-PRE-READ without an explanation that is not you.
+1. **Your own discipline, MEASURED:** your shell history grepped for `push`, `merge`, `docker`, `az `, `gh pr`, `-X`, `azurewebsites.net`,
+   `hpas-quickquote` as a URL host (each beside a positive control that reads 1); `stat` the repo's `.git/index` mtime at start and end.
+2. **The Azure side (AZ-READ-LEG = TUESDAY-READS):** RELAY the `AZ-PRE-READ` line appended to your prompt; the post-read is Tuesday's at verdict.
+3. **What a publish of `f31720e` would ship (READ ONLY):** from the AZ-PRE-READ tag's trailing sha (expected `…-437ab4b`), `git log --oneline
+   --first-parent <live>..f31720e` (expected 7 commits) and `git diff --stat <live> f31720e`: name every file (expected the 8 of the delta, the hosted
+   server module included; no lockfile or Dockerfile change); the expected generated files' sha256 for the image (your head tree's).
+4. **THE PUBLISH FACTS for Kam's ONE card (READ + what you MEASURED):** the rollback tag (`v0.6.4-tool2.36-437ab4b`); P11b (v2.39 tabs open across a
+   rollback: G20-F3); P11a (v2.36 tabs open across a v2.39 publish: G21-F6); P12 (the lone revert: G20-F4); THE NOTE per mode (§N4.4); THE RANGE as
+   measured (THE NUMBER, §N11); the behaviour changes as measured (cleared not flagged, B-TRANS, FLOOR-FX/CUR, MODE-WANTED, same-page reopen standard).
+   **NEW WORDS FOR KAM — verify each VERBATIM at source with file:line at the pinned head (`git show f31720e:<path>`; never the seam) AND as the page
+   rendered it per currency** (the READY's three: S-RANGE at :3487-3488 with its suffixes :3457 / :3521 / :3622 / `pdf.js`:156; S-EMPTY :3438; S-NAN
+   :3435; unchanged: the no-price sentence `pdf.js`:160-161, the reopen sentence `strip.js`:367). Quote each rendered string in AUD, USD (`$`, not `US$`)
+   and CAD, full bundle and Manager only. A word the READY lists that the page does not render, or renders differently, is a finding.
+5. **Deploy-on-merge (READ ONLY):** `.github` at the head holds only `tests.yml`; if GH-API-LEG allows: repo hooks, environments, deployments.
+
+## N9. CI AND CODEQL ON PR #10 (READ ONLY; never caused)
+**FAIL condition:** a tests.yml run on `f31720e` not `success` on all five jobs; a CodeQL check run on `f31720e` failing; any alert dismissed.
+1. GH-API-LEG = READ-ONLY-VISION-TOKEN: `actions/runs/38986121215` (push) and `/38986126280` (pull_request) — READ-BY-DRAFTER `completed success`: head_sha,
+   conclusion, and their `/jobs` (five, each `success`); the print-fit job LOGS (check-run ids on `f31720e` at drafting 117257896765 and 117257881873):
+   the 17 new bounds lines and `# tests 217`; store-azurite's count (READY: 2); `commits/f31720e…/check-runs` (13 at drafting, all success);
+   code-scanning open on main and on `refs/pull/10/head` (0 / 0 at drafting); the dynamic CodeQL run 38986121428. If the shim or GitHub refuses, NOT RUN.
+2. **What CodeQL can say (WRONG (p)):** the PR-side zeros are blind. Name the post-merge reads. **Never dismiss an alert.**
+
+## N10. ROUND-2 FINDINGS, RE-TESTED — EACH A CHECK THAT CAN FAIL (TIER 1; MEASURED)
+**For each, state the FAIL condition before running it; show it RED at R2 `3a3399e` (or at base where named) in YOUR harness, then GREEN at
+`f31720e`. A check green on both sides proves nothing: VOID for closure. Close a finding only on a red→green pair from YOUR runs, never on the builder's
+cells (those are §N2's). Output a closure table: finding, instance, R2 result (with the figure), head result, CLOSED / OPEN / NEW.**
+- **R2-F1 (G21-F1, the NO GO):** FAIL if at the head any rep-reachable state refuses (422) a "Standard pricing only" email, or prints a custom price the
+  email then refuses, or emails ≠ prints. Instances, **each in default / custom / both × AUD / USD / CAD (27 browser cells per side) AND offline:** (i)
+  B-STATE: A$300 (US$193.55 / CA$274.84 — the same 9.68×) on the bundle → Mix-and-Match (R2: 422 in default; custom printed then refused — gate 21);
+  head: cleared before the press, S-RANGE on screen, standard sent = print; (ii) P3′ (A$100, Advanced off, Manager only); (iii) the crafted stale price
+  beside `pmDefault` (R2 422 → head 200 standard, no stale figure in the PDF); (iv) B-TRANS (WRONG (f)) — a NEW-or-not reading; (v) the same class by
+  the floor moving: FLOOR-FX / FLOOR-CUR (WRONG (g)) — a NEW-or-not reading.
+- **R2-F2 (G21-F2):** FAIL if at the head any rep-reachable route prints or emails a Custom Quote at 0.00 per device per month in ANY currency.
+  Instances × AUD / USD / CAD × custom / both, offline too: `0.004` /month, `0.001` /month, `0.0001` /day, Apply −99.99 %, **each by key by key, real
+  paste, typed-whole and spinner (WRONG (b)-(d))**; R2: accepted, A$0.00 Custom Quote emailed (gate 21); head: refused. Plus the edge: A$0.01 accepted and
+  prints "A$0.01"; −99.96 % (A$0.0124) accepted and prints "A$0.01"; `cpDay` 0.0003 snapped (WRONG (i)); crafted 0.0099/rate → 422 and 0.01/rate → sent.
+- **R2-F3 (G21-F3):** verify `01c8d7f` (READ: `git show 01c8d7f -- BACKLOG.md`); re-measure "2,50" by real paste and in a de-DE Chrome (key by key):
+  report unchanged or changed; ticketed, NOT graded.
+- **R2-F4 (G21-F4):** FAIL if at the head a COMMITTED empty or non-number entry turns custom pricing off with no sentence, or leaves the other three
+  fields showing the old price. Red at R2 (gate 21 measured silence). Routes per WRONG (o).
+- **R2-F5 (G21-F5):** FAIL if at the head retyping A$27.90 → `25.5` (backspace ×5, digits) or typing `0.5` over 27.37 in "Custom pricing only" ends in
+  standard mode, or `#cpRefused` goes `active` at any keystroke (sample after each key with a MutationObserver installed first). Red at R2 (gate 21:
+  mode fell, alert flashed). **R2-F5′ (WRONG (k)):** the too-high intermediate (A$31.05 → delete "." → 3105 → retype): report, a finding at most.
+- **R2-F6 (G21-F6):** P11a at v2.39 → expected unchanged (W1, then 422 no-price): CONFIRM for the card.
+- **R2-F7 (G21-F7):** G22-MD (ratio 1000, sentence literal kept) must now be SEEN (red) and the clean head green; quote the failing cells.
+- **R2-F8 (G21-F8):** `cpDay` 10.1918 (AUD) / 9.3370 (CAD) pasted AND typed: R2 refused (gate 21) → head accepted AND `cpExport()` equals the maximum
+  (to 1e-9), and the print/email show A$310.00; US$6.5753 still accepted.
+- **Still closed (regression of gate 21's CLOSED rows, each re-run at the head):** G20-F1 (i)-(iv) (P8p by BOTH routes; crafted 1e308 custom/both; 0
+  and −100 %; 1e304 / 999999999 / 1e6), G20-F2 (27.37 / 0.9137 / 333.33 / 999.99 key by key), G20-F6 (reopen B), G20-F7 (G21-R2 seen by the 3 fleet
+  cells; G21-M10 by the order). A row that was CLOSED at gate 21 and is not green at the head is NEW and Major.
+- **G20-F3 / F4 / F5 / F8, G21-O1..O3:** re-observe for the card (P11b, P12, G21-R4 through the real path, the P9 race; `815aae7` still the F8 ticket).
+
+## N11. THE RANGE AT ITS EDGES (TIER 1; MEASURED; THE NUMBERS Kam will see)
+**FAIL condition:** a price INSIDE [0.01, 10×] refused on any surface by a COMMITTED route (except where the snap is not offered — report it); a price
+OUTSIDE it accepted on any surface; a surface that refuses where another accepts for the SAME state (a FAIL for a standard email, §N3); `∞`/`NaN`/
+`undefined`/a 0.00 custom rate anywhere; a refused or cleared price leaving custom pricing ON or a custom print mode checked.
+**Columns: SCREEN (the four fields read back, `cpExport()`, `#cpRefused` text, the print-mode radios, the `inputType` received), PRINT (Generate → PDF in
+print media), EMAIL (one press: status, mails, the emailed PDF), WORKBOOK, OFFLINE (the file:// page's ticket + print, page-side rows). AUD (seed 1.55),
+full bundle, 40 devices, 3 yr, "Custom pricing only", unless the row says otherwise; repeat the boundary rows (U-AT, U-OVER, F-AT, F-UNDER) in USD and CAD.
+Each entry by COMMITTED route (real paste) unless the row names its routes.**
+
+| row | value and route | expected (drafter, from CONFIG and the code; MEASURE it) |
+|---|---|---|
+| U-AT / U-OVER | `cpMonth` A$310.00 / 310.01; Apply +900 / +900.01; `cpYear` 3,720.00; `cpTerm` 11,160.00; US$200.00 / 200.01; CA$284.00 / 284.01 | at: accepted; over: refused, S-RANGE, custom off |
+| U-AT-DAY | `cpDay` 10.1918 (AUD) / 9.3370 (CAD) / 6.5753 (USD), pasted AND typed | accepted, `cpExport` = the max (the snap, R2-F8) |
+| U-ABSURD | `1e308` (paste AND typed-whole), `1e304`, `999999999` | refused; nothing says ∞ |
+| F-AT | `cpMonth` 0.01; `cpYear` 0.12; `cpTerm` 0.36 (3 yr); Apply −99.96 %; US$0.01; CA$0.01 | accepted; prints "A$0.01" (or `$`/`CA$`) / device / month |
+| F-UNDER | `cpMonth` 0.009, 0.0099, 0.004, 0.001; `cpDay` 0.0002, 0.0001; Apply −99.97 %, −99.99 %; US$0.0099; CA$0.0099 | refused, S-RANGE quoting the floor, custom off |
+| F-SNAP | `cpDay` 0.0003 (WRONG (i)) | taken as A$0.01; report every surface's figure |
+| ZERO / NEG | 0; Apply −100; −1; −0; −0.01; Apply −150 | refused, S-RANGE |
+| NONNUM | `1e`, `1e309`, `-`, `abc` (each by the routes Chrome allows: WRONG (o)); an emptied field (committed and by keystrokes) | S-NAN / S-EMPTY when committed; silent mid-entry; other three fields empty; mode default |
+| LOCALE | `27.90 ` (trailing space), `1,234.50`, `27,90`, "2,50" (G21-F3, ticketed) | report; not graded |
+| KEY-COMMIT | WRONG (c): `0.004`, then each of the four ways to press; TYPED-WHOLE `0.004` | event order, sentence, what was sent; email = print |
+| SPIN | WRONG (d): each step listed there, keyboard AND mouse, plus the wheel | committed; judged at once |
+| B-STATE | A$300 on the bundle → Mix-and-Match, × default / custom / both × AUD / USD / CAD (R2-F1) | cleared before any press, S-RANGE, standard sent = print |
+| B-TRANS | A$100 and A$250 on the bundle → Mix-and-Match → tick every app (measure that standard first) | report what is held, printed, emailed (WRONG (f)) |
+| MODE-WANTED | WRONG (j): custom → committed empty → (a) type a price; (b) Advanced off → on → type; (c) ticket "Reset to default" → type; (d) currency change → type | report the radio, print and email after each |
+| CUR / FLOOR-CUR | A$310.00 → CAD → USD (kept); A$0.01 → USD, → CAD, → NZD (WRONG (g)) | ceiling kept; floor cleared except NZD; S-RANGE shown |
+| FX-LIVE / CEIL-FX | canned AUD 1.6123 / CAD 1.3877: +900 %, the shown max typed back (A$322.46; CA$277.54), Manager-only A$80.62 | accepted via the snap? (WRONG (h)) |
+| FLOOR-FX | CA$0.01 at the seed → canned live 1.3877 lands; A$0.01 → 1.6123 lands; A$0.01 → canned 1.50 lands | CAD cleared, AUD 1.6123 kept, AUD 1.50 cleared (drafter arithmetic) |
+| MUT-I | G22-MI armed (WRONG (h)): U-AT ×3, F-AT ×3, FX-LIVE, CUR, FLOOR-FX | report any surface that differs from the clean head |
+| CRAFTED | §N3 P10's bodies × modes | default: always sent standard; custom/both: in range sent, out 422 |
+
+Record for each accepted row email = print (§N4) and for each refused row the sentence (or the 422 body, 0 mails, store row, number consumed). **Report
+THE NUMBERS for Kam in one line:** "custom price range = <A$/US$/CA$ min> to 10 × standard = <max> per device per month on the full bundle and on Manager
+only; the floor moves with the exchange rate (<what FLOOR-FX measured>); the ceiling does not".
+
+## 12. The merge and the queue
+QQEP is 7 ahead and 0 behind `437ab4b`, so a GitHub merge commit's tree equals `f31720e`'s (`ee51fa7`) while main stays at `437ab4b` — prove 0 behind
+with `rev-list --count`; run `git merge-tree --write-tree` only from YOUR OWN object dir, or skip it and say so. **If PR #8 (C-19) merges first, PR #10
+must be re-merged over a moved main: name the cells to re-run then** (at least: §N6's four suites, §N2.2's head runs, §N3.2's head grid with §N4,
+§N11's U-AT / U-OVER / F-AT / F-UNDER / B-STATE rows on the merged tree). **Cells to re-run at merge:** tests.yml's five jobs on the merge commit. **At
+publish (Kam's word on his own card; not this gate):** the built image's generated files equal to this gate's head tree's (name the sha256s); Kam's live
+check (an advanced custom quote emailed to his own inbox vs its print; a refused price, to see the sentence); the rollback tag kept.
+
+## 13. FLOOR AND PORT DISCIPLINE — Vision has NO jest lock, plus THE DEADLINE RULE (and HELD)
+**There is no shared lock or queue on this project, and you must NOT borrow NexusAI's.**
+1. **Never use `4848` (portal), `8080` (QuickQuote's stage3 dev port) or `47787` (Tuesday's dashboard)** on the host. Host product processes take
+   ports from the kernel (`listen(0)`, as gate 21) and bind `127.0.0.1`. **If an instrument of yours needs a FIXED port, use only `47310`-`47319`**
+   (`lsof -nP -iTCP:47310-47319` rc 1 = free at drafting, 11:40:02; re-check with lsof before binding; never another seat's block, e.g. B252's
+   6990-6999). **Never start the hosted server module's own entry point; use its `createApp()` export.**
+2. **Every host product process runs under `env -i` with an explicit ALLOWLIST** (PATH; HOME = a fresh mktemp dir; NODE_ENV = `test`, never
+   `production`; `PUPPETEER_EXECUTABLE_PATH` = YOUR egress-block wrapper; `npm_config_update_notifier=false`; `npm_config_offline=true`;
+   `npm_config_cache` = the user cache, read for `npm ci --offline` only). **NEVER set in a product process:** `AGENTMAIL_API_KEY`, `AGENTMAIL_INBOX`
+   (with both set, QuickQuote SENDS FOR REAL), any real `ACS_*` / `MAIL_SENDER`, `TABLES_CONNECTION_STRING`, `SALES_COPY_EMAIL`, `HPAM_WORD`,
+   `ADVANCED_UNLOCK_SECRET`, `SESSION_SECRET`, `WEBSITE_SITE_NAME`, `GH_TOKEN`, `GITHUB_TOKEN`. Print each product process's env KEY NAMES (never values)
+   and assert none is forbidden. `NTFY_SERVER=http://ntfy.invalid`; never contact ntfy.sh.
+3. **EGRESS INCLUDING CHROME CHILDREN:** the page calls public FX APIs whenever the currency is not USD, **in the drive Chrome AND in the renderer's
+   Chrome (WRONG (m))**. Every Chrome runs under YOUR copy of the egress-block wrapper; P9's canned rates are served by request interception INSIDE the
+   drive Chrome; prove the block with its positive control (`qa-egress-posctl.mjs`) and run the net-log scan at the end; record GoogleUpdater and
+   chrome_crashpad_handler at start and end (`qa-chrome-census.py`). **The clipboard permission you grant is for YOUR loopback origin only.**
+4. **Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid** (`qa-floorcount.py`, copied). **Negative controls, same run, must classify
+   FOREIGN.** The launcher DERIVES the negative-control seats live from the cockpit panes (the `tuesday` pane, the `Datasec/Vision_Sales_Portal` builder
+   pane, and any live `QA/*` / `fleet-monitor` pane) and appends them to your prompt. **A zero is reportable only beside a control that fired in the same
+   window. Take it at START and at END.** **Record the 1-minute load beside every timing.**
+5. **ONE BROWSER AT A TIME.** Never two drive Chromes of yours alive at once (the suites' own Chromes count); never a suite and a §N3 drive concurrently.
+   Inside a §N3 send the renderer's headless Chrome runs while the drive Chrome is open: that pairing is mandated; release both in each cell's `finally`.
+   Never `docker` anything.
+6. **THE DEADLINE RULE:** every step has a written DEADLINE built into your runner (no `timeout` binary here) and a client timeout on every request;
+   a step past its deadline is ABORTED and reported. Deadlines: one browser cell 120 s; one §N2 arm 420 s; root pack 120 s; a whole `npm test` 300 s;
+   a whole `test:xlsx` 300 s; a whole `test:print` 900 s; nothing above 900 s. One retry per cell at most, then NOT RUN with the load. **Every Chrome, page,
+   child, app server and temp profile you start is released in a `finally`.** **Log a HEARTBEAT line (timestamp, step, pid, elapsed, load) at least every
+   2 minutes; a step with no heartbeat for 5 minutes is aborted and reported.**
+
+**Reap everything you start.** An orphan Chrome or listener of yours is someone else's foreign process.
+
+### Drivable surface — LOCAL ONLY. **NEVER the live QuickQuote or the live portal.**
+- **NEVER the live** QuickQuote (`hpas-quickquote`, `hpas-quickquote-rg`, `hpasqqacr`, its Table Storage, its log workspace) and **NEVER the live**
+  portal (`https://datasec-sales-portal.azurewebsites.net`, resource group `datasec-sales-portal-rg` — PRODUCTION). **No HTTP request to either, not
+  even a GET. Press nothing there. No az at all — no writes, no app-setting change, no deploy, no publish, no ACR build, no ACR push.** Never the FX
+  hosts (blocked by your wrapper; P9 answers them inside Chrome), never ntfy.sh. **Never Claude in Chrome** (Kam's real Chrome with his sign-ins).
+  Never open anything under `Vision_Sales_Portal/4_Credentials/` (the launcher wires the gh config itself), **never read, ask for or type the HPAM
+  word** (the live check is Kam's), and never read the builder's `fix2-email-matches-print-2026-10-17-evidence/` (incl. `round3-f31720e/`) or its
+  `scripts/r3-mutants.py` as evidence (you may LOOK at its PDFs and screenshots to compare with yours; say so).
+- **No email to any human address.** Every send goes to the capturing stub mail; recipients are your sign-in address on a `.invalid` domain
+  (`@qa-g22.invalid`, lower-case) and `sales-copy@qa.invalid`. Your own AgentMail calls go only to `tuesday-agent@agentmail.to`.
+- **Network, and ONLY this:** `git ls-remote origin` (head readings); `gh api` GETs (GH-API-LEG); your AgentMail calls. Nothing else reaches the
+  internet: no npm registry (`npm ci --offline`), no `npm audit`, no image pulls.
+
+### HELD
+- No merge, no deploy, **no publish**, **no registry push**, **no production**, no money, **no mail to any human**, no external comms. **No comment,
+  review, label, approval or status on PR #10, PR #8 or any GitHub object; no re-run of any workflow; no alert dismissal of any kind.**
+- **No `docker` at all, no `npm install`, no `npm ci` without `--offline --ignore-scripts`, no `npm audit fix`, no `npx` of anything not already in your
+  tree. `gh` only as GH-API-LEG allows; no `az`.** The launcher points `AZURE_CONFIG_DIR` at an EMPTY directory.
+- **Trees:** build every tree INSIDE YOUR OWN PROJECT from the object store (`git -C <repo> archive <sha> | tar -x -C <fresh mktemp -d under
+  projects/vision/work-g22/>`, in `/Volumes/Laptop-DEV/!CODING/Testing Agent MAIN`). **Each tree is EXCLUSIVE to this gate and to ONE purpose; never
+  touch any other `work*` directory** (`work-g21/`, `work-g20/` included). In the repo use ONLY read verbs (show, log, diff, ls-remote, rev-parse, ls-tree,
+  cat-file, grep, merge-base, archive); **never fetch, pull, checkout, switch, worktree, commit, stash, reset, clean, gc, branch, revert or for-each-ref.**
+  P12's reverse patch is applied to YOUR extracted tree by `patch`, never by git in the repo. `merge-tree --write-tree` only from your OWN object dir.
+- **CONTROLS MUST BE ABLE TO FAIL INDEPENDENTLY:** every control is a separate measurement that could have come out the other way on its own. **For this
+  gate: every §N10 closure needs its R2 (or base) red from YOUR run; the base column must show the emailed custom figure ≠ the printed custom figure;
+  the PDF comparator must report non-zero on a planted one-word, one-digit and one-pixel change, and the scans must find a planted `A$∞` and a planted
+  `A$0.00 / device / month`; the stale-words scan must FIND W1 on the base page; each mutant must be shown to have LANDED; every PASTE row must show the
+  page received `insertFromPaste`; the egress block's positive control fires; the floor count rises on its attached control.**
+- **Findings only:** do not commit, do not move any branch, do not file a ticket. **Make no writes in the QuickQuote repo** (its working tree is the
+  builder's, live) **and none inside `Vision_Sales_Portal/`**, none in gate 1-21's report folders or trees. Describe fix-shapes in prose.
+- **NEVER `rm`.** Quarantine instead.
+
+## THE MODEL RULE
+(Kam, live board 2026-09-30 09:07, card `nexusai-gate11-opus55-safeguard-model-switch`, option (b) — QA gates may switch to Opus 4.8 when flagged,
+PER SESSION.) You start on Opus 5.5 (the launcher reads the model id from Tuesday's `0_Brain/dashboard/data/models_latest.json`, `claude-opus-5-5` at
+drafting). You run the FULL rows. If one of your responses is stopped by the safeguards: that step is NOT RUN (never re-worded to slip past); write ONE
+line to `evidence/classifier-stops.txt`; reap any Chrome and app server you started; mail `tuesday-agent@agentmail.to` with the subject exactly
+`[QA/Datasec-Vision -> Tuesday] STATUS: flagged — requesting the Opus 4.8 switch`;
+then end your turn with the line `PARKED: flagged — awaiting the Opus 4.8 switch` and wait. Tuesday switches THIS pane's model and taps you by mail. You
+never answer the model dialog yourself, and nobody ever chooses "Switch automatically". After the switch, resume at the stopped row. The report states
+which rows ran on which model, with the switch time, and quotes `classifier-stops.txt` whole.
+
+## TUESDAY'S RULINGS AT STAMP (2026-10-17)
+**R1-R8 are the commission's requirements as Tuesday wrote them to the drafter (2026-10-17 ~11:32), carried as ruling lines. Apply them; do not
+re-rule them.**
+- R1: ONE gate, TIER 1 (customer document: the email must equal the print) on QuickQuote PR #10 ROUND 3 @ f31720e over main 437ab4b (= LIVE); round 3 is Kam-authorised (09:45:48, card quickquote-pr10-r2-publish-hold-1017 = a) and there is no round 4 without him.
+- R2: G21-F1 and G21-F2 CLOSED only on red-at-3a3399e / green-at-f31720e pairs the gate re-derives itself, through the real server path, in every print mode x AUD/USD/CAD, offline too; F4/F5/F7/F8 closures the same way; F3 and the route bypass are ticket facts (01c8d7f), F6 a publish-card fact.
+- R3: Grade the builder's mutant claims A-I (I survives: say whether that matters) and keep gate 21's email = print on ONE press across the grid.
+- R4: Hunt NEW regressions from round 3: the held price now CLEARED on a standard-price change; the floor moving with FX; keystroke-vs-committed judging; the spinner arrows the builder did not drive — drive them.
+- R5: The round-2 closures still closed; the CI suites as SETS vs round 2 (and base); CI + CodeQL on f31720e (never dismiss an alert); a PRIOR WORK check; a NOT TESTED section.
+- R6: The publish facts for Kam's ONE card: what 437ab4b..f31720e ships; rollback to v2.36 with G20-F3 / G20-F4 / G21-F6 behaviour; the custom note per mode; the NEW WORDS FOR KAM verified verbatim at source with file:line; the floor and ceiling numbers.
+- R7: HARD LIMITS as gate 21: no production access (hpas-quickquote / datasec-sales-portal-rg are production); no HTTP to the live site; press nothing there; never read the HPAM access word (the live check is Kam's); local/emulated only; no email to any real human address; no merge, no push, no deploy, no publish, no az.
+- R8: Standing rulings carried from gate 21: the custom pricing note OFF the emailed PDF, ON the print; W1/W2 retired; live = production and publish is Kam's own word (C-20); findings only; the live linuxFxVersion read by Tuesday before launch and at verdict; the verdict line as gate 21's.
+
+**Drafter's open decisions for Tuesday (the launcher refuses until each RULED line is stamped):**
+- **D4 — Class count and vocabulary.** *Drafter:* QQEP **round 3, Kam-authorised; there is no round 4 without Kam**; GO / GO WITH FINDINGS / NO GO.
+  **Gate 21's D4 shape is carried (Tuesday 2026-10-17 08:02:02):** on a NO GO nothing merges on Tuesday's word; the §N10 CLOSED and OPEN instances go to
+  Kam on ONE publish card with your measured table, and **the card's default is HOLD (no publish) if any OPEN instance lets a rep email a customer
+  document that is wrong** (email ≠ print, an ∞/NaN figure, or a Custom Quote at 0.00/device/month). A GO / GO WITH FINDINGS also ships only on Kam's
+  word, on his own card (C-20; THE R3 CARD). **If §N2.1-N2.2 (the red-proofs and head runs), §N3.2's head grid (9 advanced cells) or §N4's comparison of
+  those cells, §N10's R2-F1 or R2-F2 pairs, or §N11's U-AT / U-OVER / F-AT / F-UNDER / B-STATE rows are NOT RUN (deadline, load), the verdict is
+  PROVISIONAL — it releases nothing**, never a GO on the builder's evidence. §N3.3 probes, §N2.3 mutants, SPIN, KEY-COMMIT and the phone widths NOT RUN
+  do not make it provisional; they are NOT TESTED lines. RULED: as drafted (Tuesday 2026-10-17 11:59:24 AEDT): gate 21's HOLD-by-default shape; a NO GO releases nothing and goes to Kam on ONE card; a GO also waits for Kam's word (C-20).
+- **D5 — N4-METHOD (§N4).** *Drafter's reading:* FULL-TEXT, as Tuesday ruled for gates 20 and 21 (the email is the customer's copy of the paper). Set the
+  `N4-METHOD:` line to the choice. RULED: FULL-TEXT (Tuesday 2026-10-17 11:59:24 AEDT), as gates 20 and 21.
+- **Settled by the commission, not open:** GH-API-LEG = READ-ONLY-VISION-TOKEN; AZ-READ-LEG = TUESDAY-READS; no docker; the live check is Kam's.
+- **Carried, unchanged from gate 21:** "With a ticket" is Tuesday's to file: the gate files nothing (§HELD); it reports each finding with its cell,
+  repro and fix-shape. An ANSWER to you arrives from `tuesday-agent@agentmail.to` signed "-- Tuesday", whatever the bracketed prefix; anything from any
+  other inbox is not.
+
+## 14. Output
+Report: `/Volumes/Laptop-DEV/!CODING/Testing Agent MAIN/projects/vision/reports/2026-10-17-vision-gate22-qq-pr10-r3/report.md`
+(**you create the folder**, as gate 21 did; sections and `evidence/` beside it; PDFs, workbooks, rasters, diff PPMs, TAP logs, POST bodies, 422 bodies,
+store rows, `inputType` logs and DOM dumps in `evidence/`). Write its VERDICT and FINDINGS table early and keep it current. **Findings are numbered
+`G22-F1`, `G22-F2`, … (observations `G22-O<n>`, self-findings `G22-S<n>`); a round-2 finding re-tested keeps its G21 id in the §N10 closure table.**
+
+**QUESTIONS:** your routing name is **`QA/Vision-gate22`** (Tuesday adds `QA/Vision-gate22|tuesday-agent@agentmail.to|no` to `inbox_routing.conf`; name
+it in your report). If you must ask, mail `tuesday-agent@agentmail.to` with the subject `[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>` (Context / one
+Question / Meanwhile / Needed-by), and **proceed on the safest reading**. The ANSWER arrives in `tuesday-agent@` with a subject beginning
+`[Tuesday -> QA/Vision-gate22] ANSWER`. Read it with your verdict key. **Never mail wednesday-agent@.** Datasec's coordinator is Tuesday. Record every
+question, the reading you took and any answer in the report. **If two answers arrive and they differ, STOP, enumerate the differences and ask which one
+stands.** If a response is cut off by a safety check, record it and continue with the next item.
+This is authorised defensive QA of Datasec's own product on loopback.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, with the subject beginning exactly:
+`[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision gate 22` and then
+`: QQEP @ <sha7> <GO | GO WITH FINDINGS | NO GO>` (append ` PROVISIONAL` if D4's clause applies)
+(`<sha7>` the pinned head from the launcher's table).
+Lead the body with ONE sentence: on `f31720e`, are G21-F1 and G21-F2 (every instance, every print mode × AUD/USD/CAD, offline too) and F4/F5/F7/F8 CLOSED
+by red-at-`3a3399e`/green-at-head pairs from your own runs, do gate 21's CLOSED rows stay closed, does the real hosted page through the real server path
+still email exactly what the rep printed in every print mode × AUD/USD/CAD on ONE press, does the range refuse what it should and ONLY that on screen,
+print, email and workbook by every entry route (paste, keystrokes, typed-whole, spinner), did round 3 add a regression (clearing, the floor moving with
+FX, quiet judging, the resurrected mode), do the CI suites pass as sets, and was anything pushed, merged or published?
+Then one line each on: the §N10 closure table; THE NUMBERS (the range per currency, bundle and Manager only; how the floor moves); B-STATE and
+B-TRANS; FLOOR-FX / FLOOR-CUR; KEY-COMMIT; SPIN; MODE-WANTED; the snap (U-AT-DAY, F-SNAP); the base column; the mutants (G22-MA..MI with I's browser
+reading, G22-M1..M6, gate 21's arms); P1; P2-P5 and P3″; P6; P8 (routes and stress); P9; P10 (by mode); P11 (v2.36 tab after v2.39; rollback); P12; THE
+NOTE per mode; head vs R2 (§N5.4); the NEW WORDS FOR KAM as rendered; what a publish would ship; the live site read (RELAYED from AZ-PRE-READ); the class
+count (round 3, Kam-authorised: no round 4 without Kam; D4's HOLD default). You have no inbox that wakes you, so a verdict you do not mail is lost.
+
+AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/Laptop-DEV/TUESDAY/4_Credentials/.env`. The path is absolute because the QA project has no
+credentials directory of its own. Use the key ONLY in your own verdict/question/answer-read `curl`, with a client timeout (`-m 30`). It must never enter
+a product process's environment. **Never put the key, or any secret, in a mail or the report.**
+
+Verdict format (as gate 21's):
+- **One verdict, GO / GO WITH FINDINGS / NO GO (PROVISIONAL per D4)**, naming the pinned sha and the branch; and in the mail body, its own line:
+  `VERDICT: <GO | GO WITH FINDINGS | NO GO>, round 3 (Kam-authorised; <PROVISIONAL or not, and why>). <what happens next: Kam's ONE card, its default>`.
+  Then §N1's hunk table, §N2's red/green table with the quoted failure messages and their class, the mutant table, §N3's grid (cell × base/R2/head ×
+  POSTs/mails/status/qnum/unknown/printMode/load), §N4's comparison table and the note table, §N5, §N6 as sets, §N7, §N8 (with the publish facts), §N9,
+  §N10's closure table, §N11's matrix, row by row.
+- The verbatim strings: the R2 red messages, each mutant's failing cells, the P1 POST counts, the emailed and printed figures per head cell (and the base
+  defect pair), the stress-state totals, every sentence as the page and the route returned it, per currency, THE NUMBERS, the AZ reading "RELAYED from
+  AZ-PRE-READ".
+- **A table with one row per §N item: MEASURED / NOT TESTED / NOT RUN / VOID, and HOW (command, tree, browser, port, load).** No row without a HOW.
+- **Rule 2: what you did NOT test is first-class output.** Say the READY carried a NOT TESTED block and which of its lines you drove (WRONG (a)). A NOT
+  TESTED section covering at least **the published image (no docker by design)**, **a real ACS send (stub mail only)**, **the live site (Kam's check)**,
+  **CodeQL's verdict (blind pre-merge, WRONG (p))**, **CI's Node 22 (host is Node 26.8.1; CI read only)**, **store-azurite (READ from CI; it does not
+  exercise `status: "refused"`)**, **a real live FX provider, in the drive Chrome or the renderer (WRONG (m))**, **currencies other than AUD/USD/CAD**
+  unless you drove them, **Chrome locales other than the ones you ran**, **real dictation software and IMEs (TYPED-WHOLE is the stand-in)**, **Windows /
+  Safari / the account managers' real browsers and real phones and real printers**, **what a customer's mail client does with the attachments**, **screen
+  readers (the `role=alert` refusal is a DOM read)**, **Claude in Chrome (not used)**, **PR #8 (not this gate)**, and every §N row you did not run, with the
+  reason. **Every action recommendation carries its evidence class: MEASURED AT RUNTIME / PROBED / READ ONLY.**
+- Report the pinned head and main as three timestamped readings (**start / mid / end**), each with its branch name, plus `refs/pull/10/head`.
+
+PROVENANCE:
+- heads: main `437ab4bc412b…` (= HEAD), `fix/qq-email-matches-print-2026-10-16` `f31720ee677d…` = `refs/pull/10/head`, `refs/pull/10/merge` `75d7a8e9…`,
+  `refs/pull/8/head` `4d6ed6ef…`, `refs/pull/11/head` `818a019e…` (merged v2.36 release PR), `backlog/qq-extract-zip-2026-10-16` `01c8d7f9…` | `git -C
+  <quickquote on Laptop-DEV> ls-remote origin` | read 2026-10-17 11:33:28 AEDT
+- the chain (seven single parents), dates, counts 7 / 0 behind / 1 over R2, merge-base, R1 and R2 ancestors, numstat whole / round 3, blobs at base / R2
+  / head for the 8 changed files and the unchanged lists, trees `ee51fa7` / `ec15fb2` / `25ddfb8` / `c71780c`, the commit message whole | `log`, `rev-list
+  --count`, `merge-base`, `diff --numstat`, `rev-parse <sha>:<path>` | read 11:33-11:35
+- the code at `f31720e` vs `3a3399e` (the whole round-3 diff of `index.html` and `lib/pdf.js`, the seam located by line number only and never printed;
+  `render()`'s `renderCustom()` :2450, the FX landing :3150-3167, the currency handler :3183-3195, the global listener and `CP_FIELDS` :3195-3213,
+  `renderCustom` :3507-3586, the listeners :3589-3601, `btnResetCustom` / Apply % / `cpRestore` :3603-3640, the field markup :1630-1649, `fxSeeds` :1825,
+  `fxRate` hidden :1590, `calc` :1964-1975; `pdf.js` :1-12, :100-161; `strip.js` :367; `server.js` :669-671; the bounds file's `REFUSAL`, `pasteInto`,
+  the 18 `test(` names, the F2 and F5 cells) | `git show` under bash | read 11:35-11:5x
+- drafter arithmetic for the floor/ceiling round trips and FX moves (seeds AUD 1.55, CAD 1.42, EUR 0.93, GBP 0.79, NZD 1.67, SGD 1.35, DKK 6.93; canned
+  live AUD 1.6123, CAD 1.3877; a hypothetical AUD 1.50) | `node -e` over the CONFIG values, NOT the page | 11:5x
+- GitHub (READ-BY-DRAFTER, `gh api` GET with Vision's gh-config; its two files' mtimes unchanged, 12 Oct 18:09:30): PR #10 (open, not draft, clean, 8
+  files, +942/−125, updated 00:30:24Z); PR #10 files (8 rows, blobs); runs for head_sha `f31720e` (38986126280 tests pull_request, 38986121428 "PR #10"
+  dynamic, 38986121215 tests push — all completed success); check-runs on `f31720e` (13, all completed success; CodeQL "No new alerts in code changed by
+  this pull request"); code-scanning open main 0, `refs/pull/10/head` 0; open PRs #10, #8; PR #11 closed merged; Dependabot open #1, #4 | read 11:38:58
+- the round-3 READY (lines 1-124 of Tuesday's saved batch, copied; sha256 `076c5afc…`, 9,948 B; "not tested" 1, "not run" 0); THE R3 CARD in
+  `decisions.json` (ruled_choice a, ruled_ts 09:46:32); CLARIFICATIONS (last entry C-20); Tuesday's `0_Brain/daily_tuesday/2026-10-17.md` entries 09:48
+  and 11:32 | read 11:3x
+- gate 21's brief, its `.pre-stamp` diff, DRAFTER-REPORT and launcher (whole); gate 21's report (whole, sha256 `e1dafe84…`), its verdict body's sha256, its
+  `evidence/tools/` listing (58), its drive harness's paste route (:223) | read 11:3x-11:4x
+- load 4.85 9.48 11.90 (11:39); listening TCP ports (lsof) 5000, 6820-6824, 6829, 7000, 7122, 44760, 49152, 49181, 49183, 49185, 58384, 59869, 60098;
+  `47310-47319` free; `inbox_routing.conf` has `QA/Vision-gate21` at line 228, no gate-22 line; no gate-22 report folder; `work-g21` and `work-g20`
+  exist | `uptime`, `lsof`, `grep`, `ls` | read 11:39-11:40
+- no merge-tree, no fetch, no docker, no product process, no browser, no `az`, no npm, no mail was made by the drafter; `gh` was used for GET reads only
