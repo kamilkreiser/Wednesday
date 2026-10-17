@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 216 — 2026-10-18 10:01 CHECKPOINT (s114, ctx 71%; band 80-90). **READ THIS FIRST. Supersedes 215's gate-B259 line; 215's NexusAI line stands with the update below; 214's PR #8 OWED stands.**
+### DONE since 215 (each verified at source)
+- **Gate B259 = GO WITH FINDINGS on all six** (STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-18_B259_STATUS.md`); scored 0.98; pane %57 closed.
+- **PR #158 MERGED** (squash, `--match-head-commit 7fa59c5f`): **HPSM-POC main = d1fca809e28b**, tree a083966f = gated tree, parent 787d1590; 20/20 checks success.
+### IN FLIGHT (who wakes you)
+- **Deploy B260** pane **%58** `Datasec/HPSM-POC-F5` (brief `tuesday/briefs/2026-10-18_B260_SEAT-F_hpsmpoc-hosted-deploy-pr158.md`, stamped). STATUS `…/Briefs/2026-10-18_B260_STATUS.md`, last line `DEPLOYED: d1fca80 @ <web build id>` or `STOPPED: NEEDS TUESDAY` + one question. On DEPLOYED: Tuesday's own curl of `https://app-hpsmpoc-web-demo-en46o7.azurewebsites.net/` (new build id x1, old `LnYu4WmaU5Sh4wYdmvgTN` x0) + `https://app-hpsmpoc-api-demo-en46o7.azurewebsites.net/health` (200); tell Kam on the panel (what went live, sha, the live check; runtime still 10.0.12, card open); close pane; then ONE HPSM-POC records seat: Jira comments from B258 `Records` + B259 `Jira comment lines`, tickets B259-1/-2/-3 (Minor) + B259-4..-6 test gaps + F-3/F-4 (agreed Minor), the deploy C-entry, CLARIFICATIONS for today's Tuesday rulings, history; and the B172/MPS merge comment rides a MPS records pass later. HPSM-POC round 2 (-270, -272, -271 test, -273; -269 SDK swap = Tuesday ruling; -263 design card) after records.
+- **NexusAI-O** %56 S101O: RD-761 C-57 = STOP by the tool, triaged: 2 main-side retitles, **ACCOUNTED by Tuesday's ANSWER-3/-4** (3 conditions: branch = base blob, merged = main blob, retitled name passes; verified by rev-parse). RD-761 cells running, then RD-761 READY FOR GATE; RD-794 C-57 (stacked + main order) running. Decide per head: re-gate kit vs counts-only TURN (the RD-801/802 precedent).
+- STATUS watcher (background) + wake_watch (mail).
+
 ## 🟢 DELTA 215 — 2026-10-18 09:20 CHECKPOINT (s114, ctx 65%; band 80-90). **READ THIS FIRST. Supersedes 213's HPSM-POC line; 214's PR #8 OWED list and 213's NexusAI/OWED lines stand.**
 ### DONE since 214
 - **HPSM-POC B258 READY FOR GATE** @ `7fa59c5f` (b258/bff-imports-zstd-census, six commits: -260 ed378e3, -265 c2fb55a, -262 7051300, -261 17949a6, -264 3e6250e, -266 7fa59c5; STATUS read whole; 0 lost; no new words). Scored 0.97. Pane %55 closed. Builder's ticket candidates: F-3 (FailAsync own retry exhaustion), F-4 (phase 2 StoredAt catch lacks RetryLimitExceededException).
