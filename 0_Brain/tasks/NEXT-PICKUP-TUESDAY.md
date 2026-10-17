@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 215 — 2026-10-18 09:20 CHECKPOINT (s114, ctx 65%; band 80-90). **READ THIS FIRST. Supersedes 213's HPSM-POC line; 214's PR #8 OWED list and 213's NexusAI/OWED lines stand.**
+### DONE since 214
+- **HPSM-POC B258 READY FOR GATE** @ `7fa59c5f` (b258/bff-imports-zstd-census, six commits: -260 ed378e3, -265 c2fb55a, -262 7051300, -261 17949a6, -264 3e6250e, -266 7fa59c5; STATUS read whole; 0 lost; no new words). Scored 0.97. Pane %55 closed. Builder's ticket candidates: F-3 (FailAsync own retry exhaustion), F-4 (phase 2 StoredAt catch lacks RetryLimitExceededException).
+### IN FLIGHT (who wakes you)
+- **Gate B259** pane **%57** `Datasec/HPSM-POC-G4`, tier 1, six verdicts. Kit `tuesday/briefs/2026-10-18_B259_SEAT-G4_hpsmpoc-gate-b258.md` (stamped 08:13 with 5 rulings). STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-18_B259_STATUS.md`, last line `VERDICT: B259 b258 on main <sha7>: HPSMPOC-260 <tok> · … · HPSMPOC-266 <tok>`. On verdict: per-ticket GO tickets merge (PR from b258 branch; if any NO GO, the gate's Check 10 says which commits are separable -> merge those as a cherry-picked branch via a seat, the rest to a fix round, round 2 of 2) -> CodeQL + checks -> merge -> then a hosted HPSM-POC deploy seat under the push-to-demo grant (READY = gate GO at the deployed head + completion check + merged via CodeQL), Tuesday's own live check after (web root build id + API /health). Then a records seat (Jira comments from STATUS 'Records', F-3/F-4 tickets, CLARIFICATIONS). Gate ctx was 50% at 09:08: if ~80% with no VERDICT, tell it (file + tap) to write a PROVISIONAL partial.
+- **NexusAI-O** pane **%56** S101O: 1a RD-761 C-57 running (MERGED tree, under locks-laptop-1017), 1b RD-794 C-57 queued. READY FOR GATE mails per head -> Tuesday decides re-gate kit vs counts-only TURN (RD-801/802 precedent) per head. Then RD-476 (READY FOR QA; no merge until Kam sees old vs new prompts), then be0fe37 (C-170, expect a re-gate). The ~20 dropped NexusAI merges (213 note) still need a Tuesday turn-order rebuild.
+- Watchers: STATUS watcher (background; re-arm after each fire) + wake_watch (mail).
+
 ## 🟢 DELTA 214 — 2026-10-18 07:38 (s114). **READ THIS FIRST. Supersedes 213's gate-23 and MPS lines; 213's HPSM-POC, NexusAI and OWED lines stand.**
 ### DONE since 213 (each verified at source)
 - **MPS PR #83 MERGED** (MPSCALC-231): MPS main = **21c2aec71e66** (parent e6f92a5f; tree 7875fc3d = reviewed head e0c8c4a's tree); 9/9 checks incl. CodeQL. Not deployed (the open hosted card names e6f92a5/cfe376d5; this rides a later card). Pane %54 closed. Records seat later: merge comment on MPSCALC-231.
