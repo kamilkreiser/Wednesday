@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 211 — 2026-10-18 05:53 FLOOR CLEAR (s113, ctx ~77%). **READ THIS FIRST. Supersedes 210's IN FLIGHT and OWED-records lines; 210's KAM card list stands.**
+### State: NO agent pane live (floor = %0 tuesday + %1 monitor). Every Datasec queue item is either merged or waits on a Kam card.
+- **NexusAI main = c7ca0ed7** (RD-848, RD-801+822, RD-802, RD-828 s2 merged 10-17; CodeQL open on main 246 -> 239; no demo deploy). S100O WRAPPED (HANDOVER-S100O.md; its ticket candidates: T9 c57 tool copy pre-RD-837; stale `session-tools/locks/` holder 2026-09-22; rd737 tautological census cell; 2 Dependabot alerts). Lock base while the T9 is unmounted: `session-tools/locks-laptop-1017`. zsh rule for every NexusAI seat: bash for any loop or ref expansion (`$H:r`, `$c:s`).
+- **MPS main = e6f92a5f** (#74-#82). Records DONE (B171: MPSCALC-228..231 filed, 5 comments, root commit 5a03994). Lanes D/E closed (both DONE).
+- **HPSM-POC hosted = main 787d159** (B256), records DONE (B257 + PR #118).
+- **Vision**: QuickQuote PR #10 @ f31720e (v2.39) gate 22 GWN, waits ONLY on Kam's publish card; Vision WRAPPED (pane closed). Live QQ v2.36.
+### FIRST WORK for the next seat (06:00 boot)
+1. Boot sweep (feedback, every boot): watermarks from `projects_index/2026-10-17_rotation-sweep-1515.md` §4 (mail 03:54:56Z; Jira >= "2026-10-17 15:00"; GitHub since 2026-10-17T03:55:00Z).
+2. Kam's cards, if tapped: **mpscalc-hosted-deploy-e6f92a5-1017** (a: deploy e6f92a5 + W2 words; b: cfe376d5) -> MPS deploy seat from B166's brief for THAT sha, way back 12f8e566 (cdfe793e…, on disk; GitHub copy to 23 Oct 21:17Z), Tuesday's own live check; then C-43 via a records pass. **hpsmpoc-hosted-runtime-10013-1017** (a: measure-then-move seat, no new paid resource). **quickquote-v239-custom-price-fix-publish-1017** (a: fresh Vision seat, PUBLISH GO quoting his words + C-20, keep 2.36; Tuesday re-reads linuxFxVersion). **composer-l05-setup-card-too-1014**. Defaults: nothing changes; re-raise Mon 19 Oct.
+3. Morning ticket sweep (standing grant): NexusAI board next round (RD board: blockers RD-460, RD-361, RD-641 visible at S100O's boot) -> launch NexusAI with a TURN if agent-actionable tickets exist; MPS MPSCALC-228..231 are needs-ruling/lane items (N04 MPSCALC-231 is agent-actionable: a lane can take it).
+### OWED (carry): 207's shared-tooling list (claim with Wednesday) + brief template's AGENTMAIL line. Watchers: none armed (floor empty); wake_watch covers mail.
+
 ## 🟢 DELTA 210 — 2026-10-17 19:15 CHECKPOINT (s113, ctx 70%; band 80-90). **READ THIS FIRST. Supersedes 209's IN FLIGHT and NEXT; 209's DONE stands. Kam: 0 new rows since 10:33 (kam_rulings_today 19:14); reconcile: to rule 0.**
 ### DONE since 209 (each verified at source)
 - **MPS PR #82 MERGED** (MPSCALC-214): **MPS main = e6f92a5f** (compare cfe376d5...e6f92a5f = 4 files, each blob = PR head 74f66e0). Main CI 39009325479 success.
