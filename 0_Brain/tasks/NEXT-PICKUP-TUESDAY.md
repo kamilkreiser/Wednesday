@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 206 — 2026-10-17 14:40 CHECKPOINT (s112, ctx 70%; band 80-90). **READ THIS FIRST. Supersedes 205's IN FLIGHT. Re-arm the STATUS watcher before ending any turn.**
+### DONE since 205
+- **MPS main = 725b4ef5** (#77 T-r2 422b87b, then #75 Deals won after update-branch; each tree verified = the head tree). Hosted still 12f8e566.
+- NexusAI: RD-848 MERGED 065a0d8 (deploy-demo SKIPPED, 4525/4525). Kam typed "keep going" (~14:0x).
+- **T9 UNMOUNTED** (~03:30Z): NexusAI-O told to use a NEW lock base `…/NexusAI/session-tools/locks-laptop-1017` (2 ANSWER mails; the 2nd SUPERSEDES the stale `locks/` dir, which holds a 2026-09-22 s78g-regate lock: untouched, a ticket candidate). Ledger row filed; digests regenerated.
+### IN FLIGHT (who wakes you)
+- **Gate B168** %47 MPS-V4 (CP r2 a3c9b9d) -> GO: PR b104/mpscalc-140-care-packs, CodeQL, merge (update-branch first if behind main).
+- **Gate B255** %46 HPSM-POC-G3: verdict GWN in substance, placeholders (VERDICTMAIN7/LEAKRESULT/RELEASEPROOF) still being filled; wait for a real last line -> PR b254/pkcs-in-package, CodeQL, merge -> post-merge check (main artifact Pkcs 2/2/2) -> hosted deploy brief (121 files) -> Kam card B254-1 (runtime 10.0.13+, Xml advisories).
+- **Vision gate 22** %45 -> verdict MAIL -> linuxFxVersion re-read -> ONE publish card.
+- **B169 records** %48 MPS-R2 -> STATUS `BUILD KEYS: A=… D=…` line -> tap lane D `tuesday/briefs/2026-10-17_B103_ADDENDUM-10_kam-1017-builds.md` (READ IT WHOLE first, 45 lines; not yet read). DONE line -> `decision_queue.sh --delivered` for the 10 cards with C-33..C-42.
+- **Lane E** %18: ADDENDUM-8 (MPSCALC-194 words tier 2; MPSCALC-203 retention tier 1) -> READY lines -> one gate batch (with lane D's T01/T02 when ready).
+- **NexusAI-O** %35: TURN step 2 (RD-801 on 065a0d8, C-57 on the new base) -> MERGED; then RD-802, RD-828 s2.
+
 ## 🟢 DELTA 205 — 2026-10-17 13:50 CHECKPOINT (s112, ctx 65%; band 80-90). **READ THIS FIRST. Supersedes 204's IN FLIGHT; 204's DONE and OWED stand. Re-arm the STATUS watcher before ending any turn.**
 ### DONE since 204
 - Gate 24 GO WITH FINDINGS (RD-848) -> TURN sent to NexusAI-O; **PR #87 (RD-848) MERGED**; O's MERGED mail is pending (it records push Build + Deploy demo conclusion). Tickets RD-850..854 filed by O. RD-837 CLOSED; RD-828 s2 accepted (tier 2).
