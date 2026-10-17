@@ -24,8 +24,8 @@ The launcher parses §PIN, refuses any placeholder, re-reads both rows, `refs/pu
 and **refuses if QuickQuote main has moved** (this gate pins main exactly). It also **recomputes the merge result's tree hash read-only and refuses
 unless it equals GitHub's test merge** (`8077fdc`, §PIN). The verified table is appended to your prompt.
 
-SELF-CHECK: re-read end-to-end for contradictions | @STAMP@
-Self-check note: @STAMP@
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-18 06:39 AEDT, Tuesday (s114), kit + drafter report read whole
+Self-check note: Tuesday read the kit (693 lines) and the drafter report whole at 06:3x. Checked against each other: the D4 GO-releases-a-merge-only clause vs §12 and HELD (consistent); IMAGE-LEG ARM64-NATIVE vs §N5.5, §N6, §N9 and HELD (each already branches on the D7 value, so no NONE-only sentence binds); AZ-PRE-READ = the drafter's expectation; the routing name is the same in ROUTING-LINE, §14 and the conf. The merge ORDER is not ruled here: §12 measures both and Tuesday rules it at verdict.
 
 GH-API-LEG: READ-ONLY-VISION-TOKEN
 <!-- As gates 17-22. The launcher exports GH_CONFIG_DIR = Vision's .gh-config behind a GET-only `gh` shim first on PATH. Change it to NOT-RUN only if
@@ -34,13 +34,13 @@ GH-API-LEG: READ-ONLY-VISION-TOKEN
 AZ-READ-LEG: TUESDAY-READS
 <!-- As gates 20-22. The gate runs NO az. Tuesday reads the live webapp's linuxFxVersion BEFORE launch, writes it on the line below, and reads it again
      at verdict. The gate RELAYS. -->
-AZ-PRE-READ: @STAMP@
+AZ-PRE-READ: linuxFxVersion DOCKER|hpasqqacr.azurecr.io/hpas-quickquote:v0.6.4-tool2.36-437ab4b ; read 2026-10-18 06:38:48 AEDT by Tuesday (az webapp config show -g hpas-quickquote-rg -n hpas-quickquote --query linuxFxVersion, read only; Vision's own AZURE_CONFIG_DIR; tenant d500ebad / sub 0c57ab37, az account show 06:38)
 <!-- One line, e.g. `linuxFxVersion DOCKER|hpasqqacr.azurecr.io/hpas-quickquote:<tag> ; read <YYYY-MM-DD HH:MM:SS AEDT> by Tuesday (az webapp config
      show, read only; Vision's own AZURE_CONFIG_DIR; tenant d500ebad / sub 0c57ab37)`. The launcher refuses until it names linuxFxVersion.
      Drafter's expectation (NOT a reading): v0.6.4-tool2.36-437ab4b (Tuesday's 2026-10-17 11:58:56 read; the Vision wrap 2026-10-17 18:30Z says live is
      still v2.36 and the seat ran no az). The DOCKER| prefix is also the reading §N5.4 needs: it shows App Service runs the image's own Node. -->
 
-TARGET-MODE: TUESDAY-DECIDES
+TARGET-MODE: MERGE-TREE
 <!-- Decision D6 (see TUESDAY'S RULINGS). Exactly one of:
        MERGE-TREE          gate THE MERGE RESULT M8 = PR #8 merged onto main 437ab4b (tree 8077fdc = GitHub's test merge refs/pull/8/merge 7378a4e),
                            built by the gate from the object store (§N1.3), plus the raw head H8 = 4d6ed6e for the CI/READY comparison. A GO is a GO
@@ -49,7 +49,7 @@ TARGET-MODE: TUESDAY-DECIDES
                            scope line describes), waits for CI + CodeQL on the new head, and re-briefs. The launcher refuses to start under this value.
      The launcher refuses while it reads TUESDAY-DECIDES. -->
 
-IMAGE-LEG: TUESDAY-DECIDES
+IMAGE-LEG: ARM64-NATIVE
 <!-- Decision D7. Exactly one of:
        NONE           NO DOCKER: no docker command of any kind (not even a read). Node 22 is never EXECUTED by this gate: it is READ (§N5) and relayed
                       from CI's logs; the host runs Node 26.8.1 only (no Node 20 or 22 binary is installed here). (Drafter's reading: the commission's
@@ -59,13 +59,13 @@ IMAGE-LEG: TUESDAY-DECIDES
        AMD64          as ARM64-NATIVE, for linux/amd64 under emulation (what App Service runs). Gate 18's method; the builder saw emulation timeouts.
      The launcher refuses while it reads TUESDAY-DECIDES. -->
 
-NPM-AUDIT: TUESDAY-DECIDES
+NPM-AUDIT: NOT-RUN
 <!-- Decision D8. RUN = `npm audit --omit=dev --json` at BASE, H8 and M8 from the gate's own trees (network exception NX-2: the npm registry's audit
      endpoint). NOT-RUN = no registry contact; the builder's "high 3 -> 0" is re-derived from the GitHub advisory reads of §N7 instead, and the npm
      audit claim is marked NOT RUN. Drafter's reading: NOT-RUN (the GitHub Advisory Database, read by GET under GH-API-LEG, is the source npm's audit
      endpoint draws from; it needs no new egress). The launcher refuses while it reads TUESDAY-DECIDES. -->
 
-ROUTING-LINE: @STAMP@
+ROUTING-LINE: QA/Vision-gate23 added to inbox_routing.conf 06:39 by Tuesday (.pre-1018-gate23 backup)
 <!-- Tuesday adds `QA/Vision-gate23|tuesday-agent@agentmail.to|no` to /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/inbox_routing.conf (pattern:
      the QA/Vision-gate22 line, conf line 229 at drafting) and stamps this line, e.g. `QA/Vision-gate23 added to inbox_routing.conf <HH:MM> by Tuesday
      (.pre-1018-gate23 backup)`. The launcher refuses while the conf line is absent (guard 41) or this line carries the placeholder (guard 32).
@@ -600,18 +600,18 @@ re-rule them.**
   (C-19) **only while main is `437ab4b` and only in the order Tuesday rules (§12)**; it never releases a publish (C-19 "not covered"; C-20: Kam's own
   word). **If §N2 at M8 (the four suites as sets), §N3's S1-S12 at BASE and M8 with the BASE-vs-BASE control, §N7.1-§N7.3, or §N8.1-§N8.2 are NOT RUN
   (deadline, load), the verdict is PROVISIONAL — it releases nothing.** §N3.6 (the interaction column), §N4.2's mutants, §N6 and the human-eye rows NOT
-  RUN do not make it provisional; they are NOT TESTED lines, and a NOT RUN §N3.6 means order (B) is unmeasured. RULED: @STAMP@
+  RUN do not make it provisional; they are NOT TESTED lines, and a NOT RUN §N3.6 means order (B) is unmeasured. RULED: (Tuesday, 2026-10-18 06:39) as the drafter reads it. Round 1; GO / GO WITH FINDINGS / NO GO; a NO GO returns PR #8 to the builder (forward-merge + fix), not to Kam; a GO releases a MERGE only, only while main is 437ab4b, in the order Tuesday rules at verdict; never a publish (C-19, C-20). The PROVISIONAL clause stands as written.
 - **D6 — TARGET-MODE.** *Drafter's reading:* MERGE-TREE — the tree that would land (M8 = `8077fdc`, = GitHub's own test merge, reproduced read-only) is
   what a merge commit produces, and gating it costs no builder round; the cost is that CI and CodeQL have not run on it (WRONG (b)), which the gate
   states and Tuesday reads at merge. FORWARD-MERGE-FIRST follows C-19's scope line literally and gets CI on the real tree, at the price of a builder
-  round and a re-brief. Set the `TARGET-MODE:` line. RULED: @STAMP@
+  round and a re-brief. Set the `TARGET-MODE:` line. RULED: (Tuesday, 2026-10-18 06:39) MERGE-TREE. Gate M8 (8077fdc) and H8. Reason: M8 is what a merge commit produces and gating it costs no builder round; CI and CodeQL on the merge commit are read by Tuesday at merge time, before any GO is used.
 - **D7 — IMAGE-LEG.** *Drafter's reading:* NONE, because the commission scopes Node 22 as a READ ("as recorded in the repo"). **Weigh against:** gate 18's
   stamped-at-draft R2 ("Build the image from the PR head for linux/amd64 and run it; the gate verifies amd64 itself") and C-19's own evidence list (the image
   built locally with the PDF path run inside it — the builder did arm64 only, and its amd64 re-run timed out under emulation). Under NONE no gate ever
   executes Node 22 + Debian Chromium before a publish; ARM64-NATIVE closes the Node-22 half cheaply (load 1.55 at drafting); AMD64 is the faithful but
-  slow one. Set the `IMAGE-LEG:` line. RULED: @STAMP@
+  slow one. Set the `IMAGE-LEG:` line. RULED: (Tuesday, 2026-10-18 06:39) ARM64-NATIVE. Reason: C-19's own scope asks for the container image built LOCALLY with the PDF path run inside it, and under NONE no gate would ever execute Node 22 + Debian Chromium before a publish. arm64 is native on this Mac mini (load 1.2 at 06:36). AMD64 stays NOT TESTED (emulation timed out for the builder; the native amd64 build is ACR's at publish, Kam's step). NX-1 egress is allowed for this leg only. qa-g23-* names only; never a push, login, prune, rmi or rm.
 - **D8 — NPM-AUDIT.** *Drafter's reading:* NOT-RUN (§N7.2-3 read the same advisory source through GitHub without new egress). Set the `NPM-AUDIT:` line.
-  RULED: @STAMP@
+  RULED: (Tuesday, 2026-10-18 06:39) NOT-RUN. §N7.2-§N7.3 (GitHub advisory reads, with the extract-zip positive control) stand in; the READY's npm audit claim is marked NOT RUN.
 - **Settled by the commission, not open:** GH-API-LEG = READ-ONLY-VISION-TOKEN; AZ-READ-LEG = TUESDAY-READS; the live check is Kam's.
 - **Carried, unchanged from gate 22:** "With a ticket" is Tuesday's to file: the gate files nothing (§HELD); it reports each finding with its cell,
   repro and fix-shape. An ANSWER to you arrives from `tuesday-agent@agentmail.to` signed "-- Tuesday", whatever the bracketed prefix; anything from any
