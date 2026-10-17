@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 209 — 2026-10-17 17:12 CHECKPOINT (s113, ctx 65%; band 80-90). **READ THIS FIRST. Supersedes 208's IN FLIGHT; 208's DONE and 207's OWED stand. Re-arm the STATUS watcher (scratchpad `status_watch.sh`) before ending any turn.**
+### DONE since 208 (each verified at source)
+- **HPSM-POC hosted = main 787d159** (B256 DEPLOYED @ LnYu4WmaU5Sh4wYdmvgTN; Tuesday's own curl 16:02: web 200 new build id x1 / old x0; API /health 200). Kam told on the panel (bf-63eb3c59712f). **Card `hpsmpoc-hosted-runtime-10013-1017`** filed (rec a measure-then-move; default b, re-raise Mon 19 Oct). Panes %49 %51 closed.
+- **HPSM-POC records DONE**: B257 (7 comments, 6 Done, HPSMPOC-260..273, C-107..C-111); Tuesday ran the owed hpwin scan herself (source in 4_Credentials/inbound_with_secrets, never given to a seat): control 1 hit, scan 0 over 20 files + 22 Jira texts; **PR #118 merged** (HPSM-POC-analysis main 2e284455 = scanned tree). Nothing HPSM-POC records-owed remains except the runtime card's C-entry when ruled.
+- **Gate B170 = NO GO x2** (missing tests only) -> round-2 addenda (tests only) -> both READY -> Tuesday's through-code completion check (merge trees = B170's probed trees 81f604f8 / 0f42ab5c; one test file per round-2 commit; mutant tables) -> **PR #81 MPSCALC-203 MERGED: MPS main = cfe376d5**. **PR #82 MPSCALC-214 open** (checks waiter) -> merge on all-green incl. CodeQL with --match-head-commit 74f66e0ec4aeeafb8ab4c637186c2363720da22a, verify tree.
+- NexusAI RD-801: round 1 + round 2 STOPPED at CodeQL (logSafe not a barrier; the query's barrier is only replace(newline, "")). RULED (1) remove CR/LF, round 3 running (C-57 under locks-laptop-1017); READY mail -> Tuesday reviews diff at source + CodeQL 0 new AND #155-#158 fixed -> land (deploy-demo SKIP) -> then RD-802, RD-828 s2.
+### IN FLIGHT (who wakes you)
+- PR #82 checks (background waiter) · NexusAI-O %35 READY mail (wake_watch) · lanes D %17 / E %18 idle (DONE).
+### NEXT for this seat
+- After #82: **assemble Kam's MPS hosted-deploy card** (main incl. #74-#82): 207's list + #80's new words ("Line {n}, " prefix) + B170-3 (approved deal quotes gain 0->4 rows), B170-4 ("office prints" labels against other classes), B170-5 (one-pager 6-rate cap), B170-8 (stop after the clean check leaves no copy), OBS-1 (colour row for 0-colour class), OBS-2 (deal quote with no counted device prints no rows). Default: not deployed, re-raise Mon 19 Oct.
+- MPS records seat (later): B170 BACKLOG rows (B170-1/-2/-9 now fixed; -4/-5 for the card), MPSCALC-213/-214/-203 Jira merge comments, C-entries.
+- Brief template: the brief_seat brief's header says AGENTMAIL_API_KEY is in the project's .env; for HPSM-POC it is NOT (B257 FOUND 2). Say "if present; else the STOP line is the channel".
+
 ## 🟢 DELTA 208 — 2026-10-17 15:48 CHECKPOINT (s113, ctx 50%; band 80-90). **READ THIS FIRST. Supersedes 207's IN FLIGHT; 207's OWED and MPS card list stand. Re-arm the STATUS watcher (scratchpad `status_watch.sh`, as 207 describes) before ending any turn.**
 ### DONE since 207 (each verified at source)
 - Boot sweep (rotation) DONE: 0 feedback, 0 client-human responses; `projects_index/2026-10-17_rotation-sweep-1515.md` (watermarks out: mail 03:54:56Z, Jira >= "2026-10-17 15:00", GitHub since=2026-10-17T03:55:00Z). Note: HPSM-POC Jira still not updated for #156/#157 (records seat).
