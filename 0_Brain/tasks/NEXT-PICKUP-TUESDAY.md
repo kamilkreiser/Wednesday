@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 214 — 2026-10-18 07:38 (s114). **READ THIS FIRST. Supersedes 213's gate-23 and MPS lines; 213's HPSM-POC, NexusAI and OWED lines stand.**
+### DONE since 213 (each verified at source)
+- **MPS PR #83 MERGED** (MPSCALC-231): MPS main = **21c2aec71e66** (parent e6f92a5f; tree 7875fc3d = reviewed head e0c8c4a's tree); 9/9 checks incl. CodeQL. Not deployed (the open hosted card names e6f92a5/cfe376d5; this rides a later card). Pane %54 closed. Records seat later: merge comment on MPSCALC-231.
+- **Gate 23 = GO WITH FINDINGS** (PR #8 @ 4d6ed6e as M8 8077fdc; report `/Volumes/Laptop-DEV/!CODING/Testing Agent MAIN/projects/vision/reports/2026-10-18-vision-gate23-qq-pr8-puppeteer25-node22/report.md`). Pane %53 closed. Live post-read 07:37:14 v2.36 unchanged. Kam told (bf-5e074d1fcfce).
+- **RULED ORDER (A): PR #10 first, then PR #8.** PR #8 is HELD until Kam rules `quickquote-v239-custom-price-fix-publish-1017`.
+### OWED, PR #8 (after #10 is merged on Kam's word)
+1. A Vision seat forward-merges main into `fix/qq-puppeteer-25-2026-09-22` and applies **G23-F1**: in PR #10's `stage3/test/custom-price-bounds.mjs`, the two cells using `click(sel, {clickCount: 3})` -> `count: 3` (gate PROBED 32/32 under pptr 25). Test-only.
+2. CI (tests.yml five jobs) + CodeQL green on the NEW head (gate: "fresh CodeQL needed on the merge ref: UNVERIFIED"); Tuesday's through-code check of the delta vs the gated M8P10 tree `d809de1` (expected: only that test file differs).
+3. Merge with a merge commit (Vision CLAUDE.md), main re-read; then read Dependabot #1/#4 = fixed with fixed_at after the merge, code scanning 0 open.
+4. **The new runtime is NOT published by any of this.** A publish carrying Node 22 + pptr 25 needs Kam's own word (C-20): a card at that point.
+- Gate 23 tickets for the Vision records seat: G23-F2 (lib-close-shared stub-disarm seen by no cell, Minor), G23-O2 (live Node-20 image runs 12 @azure pkgs declaring node >=22), G23-O3 (floating FROM/Chromium inputs). Backlog branch `backlog/qq-extract-zip-2026-10-16` closes once #1/#4 read fixed.
+### OWED, routing: the vault (Notes (MASTER)) git sync is broken since 2026-09-27 (core.sshCommand -> unmounted DevMASTER key). Kam told 07:3x as info; heals on remount. Not this seat's fix.
+
 ## 🟢 DELTA 213 — 2026-10-18 06:48 CHECKPOINT (s114, ctx 50%; band 80-90). **READ THIS FIRST. Supersedes 212's FIRST WORK items 1, 3, 4 (all launched); 212 item 2 (NexusAI) is in flight as a draft; 211's Kam card list stands.**
 ### DONE this seat (each verified at source)
 - Boot: digest whole, own ledger whole, grants whole; Kam 0 rows on 10-18; mail 0 new since 18:30Z; WED Linear 5 in progress / 22 todo / 0 lessons; sweep (06:06) already done by s113.

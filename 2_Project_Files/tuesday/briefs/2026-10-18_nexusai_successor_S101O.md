@@ -1,0 +1,162 @@
+# BLUF — SUCCESSOR SEAT Datasec/NexusAI-O (lane 3), next round. Three queue items, ONE AT A TIME, each ending at a READY mail to Tuesday: (1) RD-478 through its already-gated slice RD-794, which Tuesday ordered to land after RD-761: re-check both gated heads against today's main, READY FOR GATE per branch. (2) RD-476: build the AI assistant's system-prompt refinement to READY FOR QA (tier 2). (3) RD-505 + RD-506: they close only when the gated C-170 package head be0fe37 lands, so re-check that head against today's main, READY FOR GATE (tier 1). No merge, no deploy, no gate of your own. A merge happens only on Tuesday's TURN mail. Send a PLAN CONFIRMATION first.
+
+**Addressed to the cockpit seat `Datasec/NexusAI-O` ONLY.** Establish your seat from your own pane's cockpit name (`tmux display -p '#{@cockpit_name}'`). The highest HANDOVER-S* file in the NexusAI folder is HANDOVER-S100O.md, and the newest HISTORY.md entry (branch `s100o-history-docs`) is S100O, so you are **S101O** and your handover is `HANDOVER-S101O.md`.
+
+## READ FIRST, in this order (all in the NexusAI folder unless named)
+1. `HANDOVER-S100O.md` WHOLE (§0 state, §3 lessons, §4 candidates, Identity: S100O's tools in `session-tools/s100o/`: land.sh, land-full.sh, jira.py, send-mail.py, inbox-watch.sh, own-install.sh).
+2. Jira, each WHOLE (description + every comment): RD-478, RD-761, RD-794, RD-476, RD-505, RD-506, RD-460 (comments 38236, 38272, 38288, 38547).
+3. The gate briefs that hold the gated heads' cells: `qa-briefs/2026-10-07_nexusai-rd761-fixround-tier1-gate.md`, `qa-briefs/2026-10-06_nexusai-rd794-tier1-gate.md`. The gate REPORTS for gates 19, 20 and 5b live only on the T9 (`Testing Agent MAIN/projects/nexusai/reports/`), which is unmounted; the Laptop-DEV copy of that folder has no batch19, batch20 or batch5b folder. Say in each READY which report you could not read.
+4. Tuesday's mails on the datasec-nexusai@ inbox since 2026-10-16T20:00Z naming O, read WHOLE (TURN 2026-10-17T02:02:12Z; ANSWERs 03:35:44Z, 08:12:53Z, 10:02:15Z among them).
+5. CLARIFICATIONS: C-40 (line 232), C-57 (418), C-133 + both addenda (1434), C-170 (1801), C-186 (2009), C-190 + addendum (2062), C-199 (2158), C-205 (2230), C-209 (2270).
+
+## MEASURED BY TUESDAY'S DRAFTER (2026-10-18 06:37-06:48 AEDT)
+- origin main = **c7ca0ed7113750b268028f12e8659bf1e3d34282** (`git ls-remote origin refs/heads/main`). It is PR #90 (RD-828 s2), S100O's last land.
+- `ls /Volumes` = Laptop-DEV, Macintosh HD, Recovery: **the T9 is UNMOUNTED** (06:38). The lock base `session-tools/locks-laptop-1017` exists and holds only `queue-jest/` (empty) and `released/` (29 entries, all S100O's): no holder, no queued ticket.
+- No NexusAI seat or NexusAI gate is live in the cockpit (`cockpit.sh status`: the only QA pane is QA/Vision-gate23). The lock base has one consumer: you.
+- Load 2.15 / 1.53 / 1.39 at 06:38 (`uptime`). Heavy runs (docker builds, full jest) only while the 1-minute load is below 8 (this Mac mini has 8 cores; SUPERSEDES the 40 figure in older briefs). The machine is shared: a tier-1 QA gate (`QA/Vision-gate23`, another project) builds docker images and runs browser suites, and two build seats (MPS, HPSM-POC) are live; they outrank you on CPU. One heavy job at a time; if the load is over, wait, never race.
+- GitHub Code Security ENABLED; secret scanning disabled (`gh api repos/datasecau/Reporting_Dashboard_Au --jq .security_and_analysis`). Ruleset 24139430 "Security scan rule" active. Open code-scanning alerts on refs/heads/main: **239** (paginated).
+- **#27 (critical, js/request-forgery, `backend/llm/ollamaAdapter.js:126`), #19 and #20 (high, js/polynomial-redos, `backend/server.js:16606` and `:16815`) are OPEN on main.** RD-794 removes those sites.
+- **Deploy demo cannot run today.** Repo Actions variables: 0. Organisation variables visible to the repo: 0. So `vars.CI_DEPLOY_ENABLED` is unset, and both jobs in `.github/workflows/deploy-demo.yml` need it to be `'true'` (`:53` build, `:91` deploy). The repo has one environment, `dev`; there is no `demo` environment. The last 3 Deploy demo runs (c7ca0ed, 55047f4, b89c938) concluded `skipped`.
+- Open PRs: #58 (`rd-761-law-endpoint-policy-s89r`), #67, #70. RD-794 has no PR yet.
+- Gated heads, none on main (`gh api …/compare/<head>...main`): RD-761 @ `7f1881eae1e816381f0f36f1c415bba7589cdb1a` (17 commits not on main; main 138 ahead; merge-base 8853e36). RD-794 @ `cd171f953a4cba86379b2343a5bd31f9cb74f0c1` (7 not on main; main 174 ahead; merge-base 3e6d02d). C-170 head `rd-460-pkg-into-main-s84m` @ `be0fe3704023d8f092da0be27f79b82fbc029085` (1 commit not on main; main 304 ahead; merge-base 1904765).
+- **Predicted conflicts (measure them yourself, `git merge-tree --write-tree` in your worktree):**
+  - RD-794 on c7ca0ed: the read-only legacy `git merge-tree <base> c7ca0ed7 cd171f9` shows `backend/server.js` changed on both sides but merging with NO conflict marker. The only conflict is `scripts/verify-expected-counts.json`.
+  - be0fe37 on c7ca0ed: the same instrument shows the counts file as the only file changed on both sides.
+  - RD-761: not measured. Its head is not in the local clone and the drafter may not fetch. By gh compare file lists, it and main both touch `backend/azureLogAnalytics.js`, `backend/server.js` and the counts file. RD-761 and RD-794 both touch `backend/server.js`.
+- `rd-460-pkg-into-main-s84m` adds `.github/workflows/arm-ttk.yml` (`git diff --stat 1904765 be0fe37`: 34 files, +2112/-602). The project's gh token has scopes `gist, read:org, repo`, so no `workflow` scope (`gh auth status`). Unmeasured: whether the land path's push will accept a workflow file. Measure it before you claim a land is possible.
+- The project's own `4_Credentials/.env` has NO Azure OpenAI variable (variable NAMES read, values not read). So RD-476's live-model eval has no credential this seat may use.
+- No branch exists for RD-476, RD-478, RD-505 or RD-506 (`git ls-remote origin 'refs/heads/rd-4*' 'refs/heads/rd-5*'`). No commit on any ref names RD-476 (`git log --all --grep RD-476`).
+
+RULED BY KAM, NOT YET IN AN ARTEFACT
+- `decision_queue.sh list ruled --undelivered nexusai` returns 0 cards. The unfiltered list holds two more cards labelled Datasec/NexusAI, whose ids lack the `nexusai-` prefix:
+  - `rd104-gh-identity-acceptance-false-premise`: choice "youcheck", 2026-09-07.
+  - `t9-nas-leg-direction`: choice "a" (one-way drive-to-NAS backup), 2026-09-21.
+- Both are about fleet tooling or identity, not this queue. **Nothing for you to do.** Tuesday records their delivery.
+
+## RULED BY TUESDAY FOR THIS PROJECT, STILL OPERATIVE
+- C-186: a merge turn opens only on Tuesday's TURN/RELEASE mail. Each land goes alone, never two in one push, and main is re-read by ls-remote after each.
+- C-190: every merge to main goes through a PR. CodeQL must finish on that PR (wait until every `Analyze (<language>)` run completes). Both thresholds apply (security high+ AND any rule-severity `error`). No alert is ever dismissed.
+- C-209: a main-born alert flips only on main's own analysis after the land. Re-read it by number; if it is still open, that is a STOP, never a dismissal (Tuesday 2026-10-17T06:39:39Z).
+- Lock base, while the T9 is unmounted: `NEXUSAI_LOCK_BASE=/Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/session-tools/locks-laptop-1017` on EVERY jest and docker step. Quote c57's resolved `LOCK_BASE=` and `ROOT=` lines in the mails. **Never** use the Laptop-DEV `session-tools/locks`: it holds a stale 2026-09-22 `s78g-regate` holder, and you leave it untouched. If the T9 returns, go back to the default base at the next step boundary and say so. A foreign holder in either base is a STOP and mail (ANSWER 2026-10-17T03:35:44Z, superseding 03:35:24Z).
+- **bash for any loop or ref expansion** (ANSWER 10:02:15Z). zsh ate `$H:r` in a refspec and `$c:s` in `git show $c:scripts/…`. Write `"${H}:refs/heads/${BR}"` under `bash -c`, and capture FULL push output, never `tail -1`.
+- A stacked branch whose base changed on main: merge main FIRST, then fix, so every commit stays green (ANSWER 08:12:53Z).
+- C-57 runs through the installed `session-tools/c57-id-superset.sh`: sha256 starts 1ae84a1083348be3 (RD-837 r2), with a self-locating ROOT. Quote its first output line (ANSWER 00:39:06Z).
+- Each MERGED mail carries:
+  - main by ls-remote, and the merge tree against your verified tree;
+  - the push Build run id and conclusion;
+  - the Deploy demo run id and conclusion;
+  - the alerts the land must close, re-read by number;
+  - the Jira comment (TURN 02:02:12Z).
+- A finding that needs no external input is FILED as a ticket on your board rules, not just listed (ANSWER 2026-10-16T20:42:52Z).
+- A gated head re-checked as a counts-only forward merge, with its gated files byte-identical, has landed without a re-gate when Tuesday accepted it (RD-801/802 precedent, ANSWERs 2026-10-16T22:36:35Z and 2026-10-17T00:32:03Z). **For your three heads that is Tuesday's decision per head, not yours.** Your READY gives her what she needs to make it.
+
+## AUTHORITY
+- **Merges:** Kam's grant to Tuesday, EXPIRING-GRANTS row 1, scope quoted exactly: *"READY = QA gate at the deployed head + Tuesday's completion check + merged via CodeQL; runbook unchanged (backup, rollback, live check); report each deploy after it lands. Merges: Tuesday's GO on a gated head, one at a time, CodeQL never bypassed. NOT: MPS hosted (still card-per-deploy), production (QuickQuote live), money, any human, new customer-facing words, read-only content releases."* Given by Kam, typed into the Tuesday terminal 2026-10-16 ~11:4x AEDT. For you: build, re-check, push your own branches, mail READY. **A merge happens only on Tuesday's TURN mail for a gated head.** RD-476's new prompt shapes what the assistant says to customers, so it counts as "new customer-facing words". Its merge waits for Kam's own look, via Tuesday, whatever a gate says.
+- **The demo deploy is NOT in this brief.** **Production (the Marketplace listing, Partner Center) is out of bounds:** no upload, no listing change, no zip leaves this machine.
+
+## QUEUE (one item at a time, in this order; finish each to its READY mail before starting the next)
+1. **RD-478** (Highest, To Do). The ticket's own scope (BLUF): *"the remaining VM and local-model material on main after the customer-reaching items are removed: Ollama/ONNX adapters and provider blocks, related routes and branches, about 10 VM/local shell scripts, both docker-compose files, .env.example/package.json/.gitignore/deploy.yml lines, and about 21 docs."* **This brief commissions a NARROWING: its first slice only, RD-794, which is already built and gated.** No new RD-478 removal is built in this brief. The remainder (comments 39086, 39134, 39144, including the two `/api/status` Ollama fetch sites) waits until RD-794 is on main.
+   - 1a. **RD-761 @ 7f1881e** (Highest, Testing; gate 20 GO; turn 17 in Tuesday's order). RD-794's own ticket records "RD-761 merges BEFORE RD-794 (Tuesday 13:13:22Z)", so RD-761 is re-checked first.
+     - Fetch, then in a fresh LOCAL worktree forward-merge c7ca0ed into 7f1881e. Never move the gated ref; never push the worktree.
+     - Run `git merge-tree --write-tree origin/main 7f1881e` and name the conflicting files.
+     - Regenerate the counts once, run C-57 / C-133, run the full verify, and confirm the rd761 cells pass by name.
+     - Landing conditions to state: #23-#26 must read fixed on main after the land (C-209); PR #58 already exists, so read its CodeQL state at its current head.
+   - 1b. **RD-794 @ cd171f9** (Highest, Testing; gate 19 GO WITH FINDINGS F-794-1, F-794-2, survivor MG-vc-fn -> RD-820; turn 21). Re-check it STACKED on the RD-761 merged tree, the same way RD-802 went on RD-801 (C-199 shape). Then re-check it on c7ca0ed alone, so Tuesday has both orders.
+     - Landing conditions to state: #27, #19 and #20 must read fixed on main after the land.
+   - These are lane R's branches (S89R/S92R). Lane R is not live. Read `HANDOVER-S97R.md` and `HANDOVER-S92R.md` for their state. Never push to either branch without Tuesday's word.
+   - End: ONE mail per head, `[Datasec/NexusAI-O -> Tuesday] READY FOR GATE: <branch> @ <head sha>`. Each carries:
+     - the merge-tree result (conflicting files by name) and the merged tree id;
+     - the verify line and the counts;
+     - the gate verdict the head already carries;
+     - whether anything except the counts file changed under the gated files (`git diff --quiet <head> <merged> -- <gated files>`);
+     - PRIOR WORK and NOT TESTED.
+     Tuesday then decides between a re-gate kit and a merge TURN.
+2. **RD-476** (High, To Do; Kam's commission 2026-09-17, reading confirmed by Kam 08:17:37). The ticket's SCOPE, quoted: *"(1) find every place the assistant's system/initial prompt is assembled (file:line) and quote it; (2) expand it, keeping what is there … (3) 'it learns': establish at source what learning or memory exists today and word the prompt only to what exists; if nothing, propose the smallest real mechanism as a separate ticket for Kam, not built here; (4) eval set on the old and new prompt, local run, model recorded; (5) READY FOR QA with the prompts side by side; Tuesday shows Kam before any merge. Tier 2 unless tool access or data scoping changes."*
+   - **Commissioned: (1), (2), (3) and (5) whole. (4) is NARROWED:** build the eval set, and run it only against the project's existing test LLM mock (the rd395 mock-preload helper). That proves the prompt is assembled and wired, not answer quality. A real-model run needs an Azure OpenAI credential this seat does not hold (see MEASURED) and would spend money. List the live run in your READY as "proposed, not run" (endpoint, number of calls) for Tuesday and Kam.
+   - Start from `model-config.js:266` (`systemPrompt: SYSTEM_PROMPT`) and every `MODEL_CONFIG.systemPrompt` reader in `backend/server.js`.
+   - State how the new prompt meets the per-deployment `system_prompt_override` (`backend/server.js:1944`, `:1961`).
+   - (3): put the mechanism in your READY as a ticket candidate. Do not file it, because it is addressed to Kam.
+   - Branch off the then-current main, e.g. `rd-476-assistant-prompt-s101o`. End: `READY FOR QA` (tier 2) with old and new prompts side by side. **No merge until Kam has seen them, via Tuesday.**
+3. **RD-505 + RD-506** (High, To Do). Neither has work of its own on main.
+   - Both were fixed on the release line: RD-505 by removing bring-your-own Key Vault on Kam's 2026-09-18 ruling (a643fe1); RD-506 by retiring `build-plan-packages.sh` (9eee3ff). RD-460 comment 38288 says both "close on main when merged" with the C-170 head **be0fe37**.
+   - RD-505's scope, quoted: *"fix the path … or remove the option with Kam's approval"* (approved: remove). RD-506's: *"Make build-plan-packages.sh fail closed by running the same checks (or retire it and point the docs at the checked build), red-first on the placeholder."*
+   - **Commissioned: a re-check of be0fe37 only, no new build.**
+   - be0fe37's history: gate 5b gave it GO WITH FINDINGS at tier 1 (2026-09-28). Tuesday released it on 2026-09-29, after RD-413 and before RD-696 and RD-594. It never landed: none of the eight remaining batch 5a/5b heads is on main.
+   - In a fresh LOCAL worktree, forward-merge c7ca0ed into be0fe37 and measure the merge-tree. Then:
+     - run C-57 with C-133 (gate 5b's A-F2: 19 ids accounted, named in `session-tools/s78g/c57-accounting.txt`);
+     - run the full verify;
+     - re-run set A's image guards by name: image-content-exposure, rd418, rd385, rd698, rd699, rd403, rd477, package-build, single-build-path, rd630 (`HANDOVER-S86M.md:108`);
+     - re-run C-170's acceptance: a non-draft 2.2.1 build from the merged tree reproduces the 2.2.1 MANIFEST, and the same build from c7ca0ed refuses. The zip stays on this machine.
+     - list every shipped-text file the head changes (gate 5b A-N1: the next image built from main carries the release-line `README.md` and `DEPLOYMENT_GUIDE.md`), so Tuesday can classify the words.
+   - Measure, without pushing, whether the land path can carry `.github/workflows/arm-ttk.yml` (see MEASURED).
+   - End: `READY FOR GATE: rd-460-pkg-into-main-s84m @ be0fe37` (tier 1). It carries what item 1's READY carries, plus the RD-413-first order question for Tuesday. **The head is 304 commits behind main; expect Tuesday to commission a re-gate.**
+
+## NOTE ONLY (no action)
+- RD-262 (an umbrella whose four children sit in Testing), RD-386 (round 3 already ran and came back NO GO at the cap, so a fourth round is Kam's), RD-50 (its work is in the Feedback System and Lead Bot folders) and RD-460 itself (Kam's monetisation and registry decisions) are not in this queue.
+- Other released, gated NexusAI heads that are not on main are Tuesday's turn order, not yours.
+- Do not sign in to the demo, and send no HTTP to it or to production.
+
+## STANDING LINES
+- **One ticket at a time.** A merge happens only on Tuesday's GO (her TURN mail). Tuesday reviews the diff at source before each land.
+- **C-190 PR path** on every land. **CodeQL: never push an unscanned commit to main, never dismiss an alert, never bypass the ruleset.**
+- **Deploy demo must SKIP on every merge. How you confirm it:**
+  - BEFORE the land: `gh api repos/datasecau/Reporting_Dashboard_Au/actions/variables` and `…/actions/organization-variables` both show no `CI_DEPLOY_ENABLED`.
+  - AFTER the land: `gh run list -R datasecau/Reporting_Dashboard_Au --workflow deploy-demo.yml --commit <sha>` concludes `skipped`. A docs-only push matches `paths-ignore` and makes no run; say "no run, paths-ignore" when that is what you see.
+  - If the variable exists, or a deploy job would run, STOP before the merge and mail Tuesday.
+- READY / STATUS / QUESTION / MERGED mails go to **tuesday-agent@agentmail.to**, subject `[Datasec/NexusAI-O -> Tuesday] …`. Every READY carries **PRIOR WORK** (`git log -S`/`--follow`, CLARIFICATIONS, HISTORY.md, the tickets: what existed and why) and **NOT TESTED**.
+- PRIOR-WORK CHECK before rebuilding, replacing or removing anything.
+- Client-facing comms = Jira ticket comments only. Production is out of bounds.
+- Never delete a file outside a gated git commit: move it aside (quarantine). Never edit a running script. Never kill by pattern (C-174).
+- Every factual sentence in a mail names its instrument, or says "unmeasured".
+- zsh does not word-split unquoted lists: build file lists in bash. Check for a real `Tests:` line. `npm run verify` needs `-- --maxWorkers=N`.
+- Run `uptime` before every docker build or full jest; start only below load 8 (8 cores). Gates outrank you on the lock and on CPU.
+- Write the handover when your pane first shows less than 10% before auto-compact.
+
+PROVENANCE:
+- origin main c7ca0ed7113750b2; no rd-476/478/505/506 branch; rd-460-pkg-into-main-s84m be0fe37; rd-794 cd171f9; rd-761 7f1881e | `git --no-optional-locks -C /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/2_Project_Files ls-remote origin refs/heads/main 'refs/heads/rd-4*' 'refs/heads/rd-5*' 'refs/heads/rd-7*'` | read 2026-10-18
+- gated heads not on main, ahead/behind, merge-bases, file overlaps | `gh api repos/datasecau/Reporting_Dashboard_Au/compare/<head>...main` and `compare/<mb>...main` with GH_CONFIG_DIR=/Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config | read 2026-10-18
+- RD-794 and be0fe37 predicted counts-only conflict; server.js clean auto-merge | `git merge-tree <mb> c7ca0ed7 <head>` (legacy read-only form) in /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/2_Project_Files | read 2026-10-18
+- be0fe37 adds .github/workflows/arm-ttk.yml, 34 files | `git diff --stat 1904765 be0fe37` in /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/2_Project_Files | read 2026-10-18
+- gh token scopes gist, read:org, repo (no workflow) | `gh auth status` with GH_CONFIG_DIR=/Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config | read 2026-10-18
+- code security enabled, ruleset 24139430 active, 239 open on main, #27/#19/#20 open with paths | `gh api repos/datasecau/Reporting_Dashboard_Au/code-scanning/alerts/<n>`, `…/rulesets`, paginated open alerts on refs/heads/main | read 2026-10-18
+- Actions variables 0, org variables 0, environment dev only, last 3 Deploy demo runs skipped, open PRs #58/#67/#70 | `gh api …/actions/variables`, `…/actions/organization-variables`, `…/environments`, `gh run list --workflow deploy-demo.yml`, `gh api …/pulls?state=open` | read 2026-10-18
+- deploy-demo.yml job conditions :53 and :91, paths-ignore | `git show c7ca0ed7:.github/workflows/deploy-demo.yml` in /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/2_Project_Files | read 2026-10-18
+- T9 unmounted; lock base contents; no NexusAI pane live | `ls /Volumes`; `find /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/session-tools/locks-laptop-1017`; `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh status` | read 2026-10-18
+- c57-id-superset.sh sha256 1ae84a1083348be3; lock tool BASE default :79 | `shasum -a 256` and `grep -n NEXUSAI_LOCK_BASE` on /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/session-tools/ | read 2026-10-18
+- no Azure OpenAI variable in the project .env (names only) | `grep -o '^[A-Z_]*='` on /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/4_Credentials/.env | read 2026-10-18
+- RD-478 scope, slice split, remainder, priority Highest (To Do) | Jira RD-478 description + comments 37644-39144 (GET /rest/api/3/issue/RD-478 and /comment, all 11) | read 2026-10-18
+- RD-794 Testing, scope, READY at cd171f9, RD-761-first order | Jira RD-794 description + comments 39087-39173 | read 2026-10-18
+- RD-801 and RD-802 Release Ready (merged by S100O, the stacked precedent only); RD-820 To Do (MG-vc-fn survivor, named only) | Jira RD-801, RD-802, RD-820 (GET /rest/api/3/issue/<key>) | read 2026-10-18
+- RD-761 Testing Highest, READY at 7f1881e, PR #58, #23-#26 post-merge | Jira RD-761 description + comments to 39203 | read 2026-10-18
+- RD-476 scope quoted, To Do, no comment after 37631 | Jira RD-476 description + comment 37631 | read 2026-10-18
+- RD-505 To Do, Kam's remove ruling, removal a643fe1 on the package line | Jira RD-505 description + comments 37696-37787 | read 2026-10-18
+- RD-506 To Do, retired in 9eee3ff on the package line | Jira RD-506 description + comments 37694, 37706 | read 2026-10-18
+- RD-460 Testing needs-decision; C-170 scope; be0fe37 READY; "also closes RD-505, RD-506"; gate 5b GO WITH FINDINGS, order after RD-413 | Jira RD-460 comments 38236, 38272, 38288, 38547 | read 2026-10-18
+- 5a+5b RELEASE sent to M 2026-09-29 (nine merges, C-170 seventh) | /Volumes/Laptop-DEV/TUESDAY/0_Brain/tasks/NEXT-PICKUP-TUESDAY.md:1159 - Tuesday's tree, not yours | read 2026-10-18
+- RD-413, RD-695, RD-696, RD-594 gated, not on main | Jira RD-413/695/696/594 last comments; `git merge-base --is-ancestor <head> c7ca0ed7` | read 2026-10-18
+- image guards by name at C-170 | /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/HANDOVER-S86M.md:108 | read 2026-10-18
+- gate 19 verdict RD-794 GO WITH FINDINGS, turn 21 | /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/briefs_staged/2026-10-12_nexusai_gate19_RELEASE.md - Tuesday's tree, not yours | read 2026-10-18
+- gate 20 all ten GO incl RD-761; turn 17 | /Volumes/Laptop-DEV/TUESDAY/0_Brain/tasks/NEXT-PICKUP-TUESDAY.md:588 - Tuesday's tree, not yours | read 2026-10-18
+- RD-386 round 3 ran, NO GO at the cap | `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tools/decision_queue.sh show nexusai-rd369-round3-or-ship-at-the-cap` + Jira RD-386 | read 2026-10-18
+- RD-262 umbrella, children Testing; RD-50 scope outside NexusAI | Jira RD-262 (comment 38207), RD-50 (comments 36457, 37256) | read 2026-10-18
+- undelivered cards: 0 with prefix nexusai; rd104-gh-identity-acceptance-false-premise and t9-nas-leg-direction labelled Datasec/NexusAI | `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tools/decision_queue.sh list ruled --undelivered [nexusai]` - Tuesday's tree, not yours | read 2026-10-18
+- Tuesday's 10-17 rulings (lock base, bash rule, merge-main-first, C-57 tool, MERGED contents, COO filing rule, counts-only precedent) | GET /v0/inboxes/tuesday-agent@agentmail.to/messages (ANSWERs 2026-10-16T20:42:52Z to 2026-10-17T10:02:15Z, TURN 02:02:12Z) | read 2026-10-18
+- S100O state, lessons, tools, seat number | /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/HANDOVER-S100O.md; HISTORY.md:8385 on `s100o-history-docs` @ 46bc7b1 | read 2026-10-18
+- grant scope, quoted | /Volumes/Laptop-DEV/TUESDAY/0_Brain/tasks/EXPIRING-GRANTS.md table row 1 - Tuesday's tree, not yours | read 2026-10-18
+- CLARIFICATIONS line numbers C-40 :232, C-57 :418, C-133 :1434, C-170 :1801, C-186 :2009, C-190 :2062, C-199 :2158, C-205 :2230, C-209 :2270 | /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md | read 2026-10-18
+- system prompt site model-config.js:266; override server.js:1944/:1961 | `git grep -n systemPrompt c7ca0ed7` in /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/2_Project_Files | read 2026-10-18
+- load 2.15 | `uptime` | read 2026-10-18
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-18 06:53 Tuesday (s114), read whole; load threshold corrected 40 -> 8 in both places | drafter 06:52
+
+## PLAN CONFIRMATION
+Mail `[Datasec/NexusAI-O -> Tuesday] QUESTION: plan confirmation`. Include:
+- your seat identity facts (pane id, cockpit name, claude pid);
+- what you read;
+- your first `git ls-remote origin refs/heads/main`;
+- `ls /Volumes`, and the lock base you will use;
+- whether Docker is up (`docker info`);
+- your launcher preflight warnings VERBATIM;
+- for item 2, the eval-set shape and the mock you will drive.
+Then start QUEUE 1 unless Tuesday says otherwise within 15 minutes. Your wake is Tuesday's mail plus a tap.
+-- Tuesday
