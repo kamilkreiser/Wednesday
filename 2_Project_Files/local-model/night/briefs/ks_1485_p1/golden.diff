@@ -1,0 +1,78 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+index 060bf1592..8e4007af1 100644
+--- a/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
++++ b/Blockchain/Dev/services/originate/src/services/anchorStateSync.ts
+@@ -79,5 +79,5 @@ export function authoritativeTxHash(anchor: AnchorReadState): string | null {
+   const raw = anchor.transactionHash || anchor.txHash || anchor.transactionId;
+   if (typeof raw !== 'string' || raw.length === 0) return null;
+-  if (raw.startsWith('tx_') || raw.startsWith('mock_tx_')) return null;
++  if (raw.startsWith('tx_') || raw.startsWith('mock_tx_') || raw.startsWith('mock_batch_tx_')) return null;
+   return raw;
+ }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1485-authoritative-tx-hash-rejects-the-batch-mock-prefix.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1485-authoritative-tx-hash-rejects-the-batch-mock-prefix.test.ts
+new file mode 100644
+index 000000000..d72e5153a
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1485-authoritative-tx-hash-rejects-the-batch-mock-prefix.test.ts
+@@ -0,0 +1,61 @@
++/**
++ * KS-1485 - authoritativeTxHash rejects the batch mock's placeholder prefix.
++ *
++ * `authoritativeTxHash` (anchorStateSync.ts) returns the tx hash of an anchor read, or null for a legacy dev-mode
++ * placeholder, which is not an on-chain transaction (the KS-522 honest-labelling family). It rejected `tx_` and
++ * `mock_tx_` only, so the non-production batch mock's `mock_batch_tx_...` (anchoring/src/index.ts) passed as a real hash
++ * in all three decisions that call it. A real Cardano transaction hash is hex and can never contain `_`, so the prefix
++ * cannot reject a real hash.
++ *
++ * The function is pure, so these cells call it directly. The module's own imports are mocked, as in the neighbouring
++ * KS-1158 R1 test, so loading it touches no database and writes no log.
++ */
++
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: jest.fn(),
++  updateDocument: jest.fn(),
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++import { authoritativeTxHash } from '../services/anchorStateSync';
++
++const REAL_TX = '9c2e4a6b8d0f1e3a5c7b9d2f4a6c8e0b1d3f5a7c9e2b4d6f8a0c2e4b6d8f0a1c';
++const BATCH_MOCK_TX = 'mock_batch_tx_0f3a9c1d5e7b2a4c';
++
++describe('KS-1485 - authoritativeTxHash and the batch mock placeholder', () => {
++  it('RED KS-1485 a mock_batch_tx_ txHash is not an authoritative hash', () => {
++    expect(authoritativeTxHash({ txHash: BATCH_MOCK_TX })).toBeNull();
++  });
++
++  it('RED KS-1485 a mock_batch_tx_ transactionHash is not an authoritative hash', () => {
++    expect(authoritativeTxHash({ transactionHash: BATCH_MOCK_TX })).toBeNull();
++  });
++
++  it('RED KS-1485 a mock_batch_tx_ transactionId is not an authoritative hash', () => {
++    expect(authoritativeTxHash({ transactionId: BATCH_MOCK_TX })).toBeNull();
++  });
++
++  it('CONTROL a real hex hash is returned unchanged from each of the three fields', () => {
++    expect(authoritativeTxHash({ txHash: REAL_TX })).toBe(REAL_TX);
++    expect(authoritativeTxHash({ transactionHash: REAL_TX })).toBe(REAL_TX);
++    expect(authoritativeTxHash({ transactionId: REAL_TX })).toBe(REAL_TX);
++  });
++
++  it('CONTROL the two older placeholder prefixes are still rejected', () => {
++    expect(authoritativeTxHash({ txHash: 'tx_sim_0f3a9c1d5e7b2a4c' })).toBeNull();
++    expect(authoritativeTxHash({ txHash: 'mock_tx_0f3a9c1d5e7b2a4c' })).toBeNull();
++  });
++
++  it('CONTROL absent, null and empty fields give null', () => {
++    expect(authoritativeTxHash({})).toBeNull();
++    expect(authoritativeTxHash({ txHash: null, transactionHash: null, transactionId: null })).toBeNull();
++    expect(authoritativeTxHash({ txHash: '' })).toBeNull();
++  });
++
++  it('CONTROL it is a prefix test, not a substring test: the text later in a value does not reject it', () => {
++    expect(authoritativeTxHash({ txHash: 'abc_mock_batch_tx_def' })).toBe('abc_mock_batch_tx_def');
++  });
++});

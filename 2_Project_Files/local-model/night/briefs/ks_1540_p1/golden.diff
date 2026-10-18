@@ -1,0 +1,119 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/health.ts b/Blockchain/Dev/services/api-gateway/src/services/health.ts
+index 561de476c..48aaf4dd3 100644
+--- a/Blockchain/Dev/services/api-gateway/src/services/health.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/health.ts
+@@ -21,2 +21,4 @@ interface RedisServiceLike {
+   getRedisClient(): import('ioredis').default | null;
++  // KS-1540: optional so that a double without it keeps working; only an explicit `false` refuses.
++  isRedisAvailable?(): boolean;
+ }
+@@ -46,2 +48,10 @@ export function createHealthRoutes(
+     let connectorConfig: Record<string, unknown> = {};
++    // KS-1540: in the Redis in-memory fallback mode the settings read RESOLVES to null instead of throwing, which
++    // used to answer allowedDocumentTypes [] - "all types permitted" - for a connector whose allow-list could not be
++    // read. The create path refuses with this 503 before its read (routes/verification.ts, KS-1256): the same status,
++    // code and text here. Only an explicit false refuses; a service object without the method is read as before.
++    if (redisService.isRedisAvailable?.() === false) {
++      res.status(503).json({ success: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'Connector allow-list configuration is currently unreadable; refusing until it can be read' } });
++      return;
++    }
+     // KS-1231 (#1035 gate N-1): the stored container is read FAIL CLOSED for the calling connector,
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1540-info-reader-refuses-when-redis-is-unavailable.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1540-info-reader-refuses-when-redis-is-unavailable.test.ts
+new file mode 100644
+index 000000000..4905de985
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1540-info-reader-refuses-when-redis-is-unavailable.test.ts
+@@ -0,0 +1,93 @@
++// =============================================================================
++// KS-1540 - GET /api/connector/info answers 503 when Redis is unavailable, as the create path does
++// =============================================================================
++//
++// In the Redis in-memory fallback mode the platform-settings read RESOLVES to null instead of throwing, so the info
++// reader answered 200 with allowedDocumentTypes [] ("all types permitted") for a connector whose allow-list it could not
++// read. The create path (routes/verification.ts, KS-1256) refuses with 503 SERVICE_UNAVAILABLE 'Connector allow-list
++// configuration is currently unreadable; refusing until it can be read' through an explicit isRedisAvailable() test
++// BEFORE its read. The info reader now does the same when the service object reports Redis unavailable.
++//
++// Harness: the ks1532 pattern, the real createHealthRoutes behind the real authenticateToken(true) with the sk_ key
++// pre-seeded in the gateway's caches.
++// =============================================================================
++
++import { describe, it, expect, beforeAll } from 'vitest';
++import type { Request, Response, Router } from 'express';
++import { apiKeyCache, connectorBearerCache } from '../middleware/auth';
++
++const CONNECTOR_ID = 'ks1540-c1';
++const META = { connectorId: CONNECTOR_ID, scopes: ['documents:write'], organizationId: 'org-1', tenantId: 'ten-1', rateLimit: 100, rateLimitWindow: 60 };
++const UNREADABLE = 'Connector allow-list configuration is currently unreadable; refusing until it can be read';
++
++let redisUp = true;
++let reads = 0;
++let stored: unknown = null;
++const readSettings = async (): Promise<unknown> => { reads += 1; return stored; };
++
++let infoRouter: Router;
++let olderInfoRouter: Router;
++
++function makeInfoReq(): Request {
++  return {
++    headers: { 'x-api-key': 'sk_ks1540' }, method: 'GET', url: '/api/connector/info',
++    get: function (name: string) { return (this as any).headers[name?.toLowerCase()]; },
++  } as unknown as Request;
++}
++function makeInfoRes(): Response & { _status: number } {
++  const res: any = { _status: 0, status(code: number) { res._status = code; return res; }, json(body: unknown) { return body; }, setHeader() { return res; } };
++  return res;
++}
++/** GET /api/connector/info through a router. `calls` counts res.json calls: a refusal that forgot its `return` would send a SECOND response. */
++async function info(router: Router): Promise<{ status: number; body: any; calls: number }> {
++  const req = makeInfoReq();
++  const res = makeInfoRes();
++  let calls = 0;
++  const body = await new Promise<any>((resolve) => {
++    res.json = (b: unknown) => { calls += 1; resolve(b); return res; };
++    router(req, res, () => resolve({ fellThrough: true }));
++  });
++  return { status: res._status || 200, body, calls };
++}
++
++beforeAll(async () => {
++  apiKeyCache.set('sk_ks1540', { result: META, expiresAt: Date.now() + 60000 });
++  connectorBearerCache.set('sk_ks1540', { token: 'connector.jwt.token', expiresAt: Date.now() + 60000 });
++  const { createHealthRoutes } = await import('../services/health');
++  infoRouter = createHealthRoutes({}, { getNotificationSettings: readSettings, getRedisClient: () => null, isRedisAvailable: () => redisUp } as any);
++  olderInfoRouter = createHealthRoutes({}, { getNotificationSettings: readSettings, getRedisClient: () => null } as any);
++});
++
++describe('KS-1540 - GET /api/connector/info refuses when Redis is unavailable', () => {
++  it('RED KS-1540: Redis unavailable and a read that resolves null answers 503 SERVICE_UNAVAILABLE ONCE with the create path\'s text, never 200 and never []', async () => {
++    redisUp = false; stored = null; reads = 0;
++    const r = await info(infoRouter);
++    expect([r.status, r.body?.error?.code, r.body?.error?.message, r.body?.allowedDocumentTypes, r.calls]).toEqual([503, 'SERVICE_UNAVAILABLE', UNREADABLE, undefined, 1]);
++  });
++
++  it('RED KS-1540: the refusal comes BEFORE the settings read, which is never made', async () => {
++    redisUp = false; stored = null; reads = 0;
++    await info(infoRouter);
++    expect(reads).toBe(0);
++  });
++
++  it('CONTROL KS-1540: Redis available and a read that resolves null (a genuinely empty store) still answers 200 with []', async () => {
++    redisUp = true; stored = null; reads = 0;
++    const r = await info(infoRouter);
++    expect([r.status, r.body?.allowedDocumentTypes, r.calls, reads]).toEqual([200, [], 1, 1]);
++  });
++
++  it('CONTROL KS-1540: Redis available and a stored list is answered byte for byte', async () => {
++    redisUp = true; stored = { integrations: [{ id: CONNECTOR_ID, config: { allowedDocumentTypes: ['SSD_DOCUMENT'] } }] };
++    const r = await info(infoRouter);
++    expect([r.status, JSON.stringify(r.body), r.calls]).toEqual([
++      200, '{"id":"ks1540-c1","name":"Connector ks1540-c1","scopes":["documents:write"],"allowedDocumentTypes":["SSD_DOCUMENT"],"workflowPolicy":"enforce","rateLimit":100}', 1,
++    ]);
++  });
++
++  it('CONTROL KS-1540: a service object WITHOUT isRedisAvailable is read as before (only an explicit false refuses)', async () => {
++    stored = null; reads = 0;
++    const r = await info(olderInfoRouter);
++    expect([r.status, r.body?.allowedDocumentTypes, r.calls, reads]).toEqual([200, [], 1, 1]);
++  });
++});

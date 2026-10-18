@@ -1,0 +1,53 @@
+diff --git a/Blockchain/Dev/services/governance/src/routes/governance.ts b/Blockchain/Dev/services/governance/src/routes/governance.ts
+index 7e9aca7ea..46ceb0b53 100644
+--- a/Blockchain/Dev/services/governance/src/routes/governance.ts
++++ b/Blockchain/Dev/services/governance/src/routes/governance.ts
+@@ -17,5 +17,5 @@ import {
+ } from '../types/governance.types';
+-
+-const router = Router();
+-
++
++const router: Router = Router();
++
+ // =============================================================================
+diff --git a/Blockchain/Dev/services/governance/src/__tests__/ks1387-governance-router-has-an-explicit-type.test.ts b/Blockchain/Dev/services/governance/src/__tests__/ks1387-governance-router-has-an-explicit-type.test.ts
+new file mode 100644
+index 000000000..893bd436a
+--- /dev/null
++++ b/Blockchain/Dev/services/governance/src/__tests__/ks1387-governance-router-has-an-explicit-type.test.ts
+@@ -0,0 +1,34 @@
++/**
++ * =============================================================================
++ * KS-1387 - the governance router is declared with an explicit type
++ * =============================================================================
++ * `const router = Router();` leaves the exported router's type to inference. When @secuura/shared brings its own
++ * @types/express-serve-static-core, the compiler cannot name the inferred type in the declaration file it emits
++ * (`declaration: true` in this service's tsconfig) and `npm run build` stops with TS2742. That broke a clean image build
++ * of the governance service. The usual remedy is an annotation, `const router: Router = Router();`.
++ *
++ * The compiler error only appears on some install layouts, so these cells read the route's own source text (as the
++ * other source-reading tests in this repo do) and pin the annotation itself.
++ * =============================================================================
++ */
++import * as fs from 'fs';
++import * as path from 'path';
++
++const SOURCE = fs.readFileSync(path.resolve(__dirname, '..', 'routes', 'governance.ts'), 'utf8');
++const DECLARATIONS = SOURCE.split('\n').filter((l) => /^(export\s+)?const\s+router\b/.test(l));
++
++describe('KS-1387 - the governance router has an explicit type annotation', () => {
++  it('CONTROL the instrument reads the real route file: one router declaration, imported Router, and routes on it', () => {
++    expect(DECLARATIONS).toHaveLength(1);
++    expect(SOURCE).toContain("import { Router, Request, Response, NextFunction } from 'express';");
++    expect(SOURCE).toContain("router.post('/participants/register'");
++  });
++
++  it('CONTROL the declaration is initialised from Router()', () => {
++    expect(DECLARATIONS[0]).toMatch(/=\s*Router\(\);\s*$/);
++  });
++
++  it('RED KS-1387 the router declaration carries an explicit Router type annotation', () => {
++    expect(DECLARATIONS[0]).toMatch(/^const router:\s*Router\s*=/);
++  });
++});

@@ -1,0 +1,108 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts b/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
+index 38222ac7b..7ddc994b5 100644
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/rateLimitEnforce.ts
+@@ -180,3 +180,3 @@ export function enforceClientRateLimit(injectedClient?: any) {
+       // KS-1464: throttled on the bucket (clientId), decided above, which carries the tenant.
+-      warnNoAllowance(clientId, String(user.connectorId || user.userId), String(user.tenantId || 'none'), String(user.authMethod));
++      warnNoAllowance(clientId, String(user.connectorId || user.userId), String(user.tenantId || 'none'), logField(user.authMethod));
+     }
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1504-no-allowance-warning-escapes-the-auth-method.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1504-no-allowance-warning-escapes-the-auth-method.test.ts
+new file mode 100644
+index 000000000..dd159f65c
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1504-no-allowance-warning-escapes-the-auth-method.test.ts
+@@ -0,0 +1,93 @@
++/**
++ * =============================================================================
++ * KS-1504 - the "no rateLimit" warning writes its authMethod through logField
++ * =============================================================================
++ * The warning in middleware/rateLimitEnforce.ts escapes its principal and its tenant (KS-1480) but wrote `authMethod`
++ * raw. That was safe only because the gate in front of it admits the two fixed tokens of MACHINE_AUTH_METHODS
++ * (`api_key`, `oauth_app`). Escaping the field removes the dependency on that set: a value that is not a clean token
++ * can no longer split or forge a log line, and the two real members are written byte for byte as before.
++ *
++ * The gate cannot be made to admit a hostile value from outside the module, so the user object below answers the gate's
++ * first read of `authMethod` with a real member and every later read (the warning's own) with the value under test.
++ * =============================================================================
++ */
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++
++const fakeRedis = vi.hoisted(() => ({ counts: new Map<string, number>() }));
++vi.mock('../services/redis', async (importOriginal) => {
++  const real = (await importOriginal()) as Record<string, unknown>;
++  const client = {
++    status: 'ready',
++    incr: async (k: string) => { const n = (fakeRedis.counts.get(k) ?? 0) + 1; fakeRedis.counts.set(k, n); return n; },
++    pexpire: async () => 1,
++    pttl: async () => 60000,
++  };
++  return { ...real, getRedisClient: () => client };
++});
++
++import { enforceClientRateLimit } from '../middleware/rateLimitEnforce';
++
++function makeRes() {
++  const res: any = { headers: {} as Record<string, string>, code: undefined as number | undefined };
++  res.setHeader = (k: string, v: string) => { res.headers[k] = v; };
++  res.status = (c: number) => { res.code = c; return res; };
++  res.json = () => res;
++  return res;
++}
++
++let warn: ReturnType<typeof vi.spyOn>;
++const lines = (): string[] => warn.mock.calls.map((c: unknown[]) => String(c[0])).filter((l: string) => l.includes('has no rateLimit'));
++
++/** One request of a machine principal with NO allowance; returns the new warning lines it logged. */
++async function warnFor(user: Record<string, unknown>): Promise<string[]> {
++  const before = lines().length;
++  await enforceClientRateLimit()({ user } as any, makeRes(), vi.fn());
++  return lines().slice(before);
++}
++
++/** A principal the gate admits as `api_key` on its first read of authMethod; every later read answers `later`. */
++function userWhoseMethodReadsBackAs(later: string, over: Record<string, unknown>): Record<string, unknown> {
++  let reads = 0;
++  return { ...over, get authMethod() { reads += 1; return reads === 1 ? 'api_key' : later; } };
++}
++
++beforeAll(() => { warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined); });
++afterAll(() => { warn.mockRestore(); vi.restoreAllMocks(); });
++
++describe('KS-1504 - the no-allowance warning escapes authMethod', () => {
++  it('CONTROL KS-1504 api_key is written byte for byte', async () => {
++    const out = await warnFor({ authMethod: 'api_key', tenantId: 'ks1504-t1', connectorId: 'ks1504-c1' });
++    expect(out).toHaveLength(1);
++    expect(out[0]).toContain('machine caller ks1504-c1 (api_key, tenant ks1504-t1) has no rateLimit');
++  });
++
++  it('CONTROL KS-1504 oauth_app is written byte for byte', async () => {
++    const out = await warnFor({ authMethod: 'oauth_app', tenantId: 'ks1504-t2', connectorId: 'ks1504-c2' });
++    expect(out).toHaveLength(1);
++    expect(out[0]).toContain('machine caller ks1504-c2 (oauth_app, tenant ks1504-t2) has no rateLimit');
++  });
++
++  it('CONTROL KS-1504 the getter user is a real machine principal: a clean later value gives the ordinary line', async () => {
++    const out = await warnFor(userWhoseMethodReadsBackAs('api_key', { tenantId: 'ks1504-t3', connectorId: 'ks1504-c3' }));
++    expect(out).toHaveLength(1);
++    expect(out[0]).toContain('machine caller ks1504-c3 (api_key, tenant ks1504-t3) has no rateLimit');
++  });
++
++  it('RED KS-1504 an authMethod holding a newline and a forged line is ONE log line with no raw line break', async () => {
++    const out = await warnFor(userWhoseMethodReadsBackAs('api_key\n[rateLimit] forged', { tenantId: 'ks1504-t4', connectorId: 'ks1504-c4' }));
++    expect(out, 'one request, one warning').toHaveLength(1);
++    expect(out[0].split(/\r\n|\r|\n/), 'no raw LF or CR survives into the line').toHaveLength(1);
++  });
++
++  it('RED KS-1504 the newline is written as the two characters backslash and n', async () => {
++    const out = await warnFor(userWhoseMethodReadsBackAs('api_key\n[rateLimit] forged', { tenantId: 'ks1504-t5', connectorId: 'ks1504-c5' }));
++    expect(out).toHaveLength(1);
++    expect(out[0]).toContain('(api_key\\n[rateLimit] forged, tenant ks1504-t5)');
++  });
++
++  it('RED KS-1504 the Unicode line and paragraph separators in an authMethod are escaped too', async () => {
++    const out = await warnFor(userWhoseMethodReadsBackAs('api_key' + String.fromCharCode(0x2028) + 'a' + String.fromCharCode(0x2029) + 'b', { tenantId: 'ks1504-t6', connectorId: 'ks1504-c6' }));
++    expect(out).toHaveLength(1);
++    expect(/[\u2028\u2029]/.test(out[0]), 'neither U+2028 nor U+2029 is raw in the line').toBe(false);
++  });
++});
