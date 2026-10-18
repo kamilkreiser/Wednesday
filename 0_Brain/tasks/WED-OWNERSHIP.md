@@ -173,3 +173,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-16 13:33 | Kamils-Mac-mini | live board + local cockpit clock: Australia/Brisbane -> Australia/Sydney (index.html:674, cockpit.html:871), Kam 13:03:13 | CLOSED |  2026-10-16 15:18 deployed 2026-10-16 04:13Z (deployment 540636b5, active); live index.html byte-identical to ac9fd3fb4's; Kam signed in az for the Tuesday seat |
 | 2026-10-18 16:40 | Kamils-Mac-mini | pane_close.sh: refuse a pane arg that starts with '-' (tmux fuzzy target resolved '--help' to gate 25's %60, 2026-10-18 16:4x) | OPEN | |
 | 2026-10-18 19:14 | Kamils-Mac-Studio | spark/round.sh + brief_lint.py: wire tier test_only (tasks/test_only builder + checker MODE=test_only), arms first; first run ks_1614_p1 golden (pickup OWED item 1, 2026-10-18) | OPEN | |
+| 2026-10-18 19:14 | Kamils-Mac-Studio | --force | OPEN | |
