@@ -39624,5 +39624,46 @@
    "CARD hpsmpoc-runtime-10013-route-1018",
    "CARD secuura-ks1114-deleted-status-found-by-title-1018"
   ]
+ },
+ {
+  "id": "secuura-ks1612-third-round-after-cap-1018",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1612 / KS-1385 (b): PR #1568 failed its last allowed gate round. Allow a third round, or hold it?",
+  "bluf": "Kam, PR #1568 was going to carry your KS-1385 (b) and the KS-1612 fix to real traffic. It is NO GO at round 2 of 2, the cap you set. Round 2 closed the first cross-tenant hole, exactly as ruled. The Opus gate then found a second one through a different kind of record: anchor rows with no matching document, which the system itself creates on every submit. Through those, a user in one client account can overwrite another account's anchored identity. Today's develop does not have this hole, so nothing can ship from #1568 as it stands. Nothing is merged or deployed. The gate measured this on a real service (sha 3486a4efab9b5d1f); Wednesday has not re-run it. The gate's suggested fixes: the guard refuses when the anchor row is older than the document now claiming it, or the database refuses those ids too, or a tenant column on anchor rows (KS-1384).",
+  "default_action": "If you don't answer: (b). #1568 stays held and unmerged, nothing ships, and develop stays safe. Wednesday raises it again tomorrow.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Allow a third round",
+    "detail": "Seat J designs the fix first, Wednesday rules it, then one more full Opus gate. If that also fails, it stops for you again."
+   },
+   {
+    "key": "b",
+    "label": "Hold #1568, re-plan around KS-1384",
+    "detail": "#1568 stays open and unmerged. Your (b) waits until anchor rows carry a tenant, which is a bigger schema change in its own ticket."
+   },
+   {
+    "key": "c",
+    "label": "Close #1568",
+    "detail": "The PR is closed unmerged and its work is kept on its branch. KS-1612 and KS-1385 (b) go back to the backlog."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-18T22:36:23.697876+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-07 12:07",
+   "CARD hpsmpoc-signin-hardening-third-round",
+   "CARD hpsmpoc-feedback-files-third-round-1007",
+   "CARD nexusai-rd476-assistant-prompt-words-1018",
+   "CARD nexusai-c170-shipped-docs-words-1018",
+   "CARD nexusai-rd476-two-wording-fixes-1018",
+   "CARD quickquote-v239-five-more-sentences-1018",
+   "CARD wed-model-routing-v10-approve-1018",
+   "CARD hpsmpoc-runtime-10013-route-1018",
+   "CARD secuura-ks1114-deleted-status-found-by-title-1018"
+  ]
  }
 ]
