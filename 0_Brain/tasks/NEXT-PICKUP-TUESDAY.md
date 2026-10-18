@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 224 — 2026-10-18 16:28 CHECKPOINT (s116, ctx 50%; band 80-90). **READ THIS FIRST. 223 stands; this adds.**
+- **RD-857 READY** (S101O 05:25Z) verified at source (1da0bd4 = 1 commit on RD-856, +42/-3 server.js, +150 test, +3/-3 counts); draft PR **#93**. Batch: RD-476 #91 + RD-856 #92 + RD-857 #93 = one tier-2 NexusAI gate AFTER gates 25 and 26 deliver. **ANSWER-11** sent (tap delivered 05:27:19Z): S101O runs a READ-ONLY candidate screen and mails a QUESTION "next ticket after RD-857" with 3 candidates; Tuesday answers. RD-262 (umbrella, children in Testing) and RD-386 (capped, Kam) are NOT candidates.
+- **B265 records brief DELIVERED** (unread whole by Tuesday; 8 RULED slots; R-C numbered C-113 is the one to decide; `@B264@` slot S-0..S-8 filled from B264 STATUS). Read whole + stamp on B264's DEPLOYED.
+- Checkpoint reads 16:27: Kam 0 rows; reconcile to rule 0; fleet_ack FLAGGED 0.
+
 ## 🟢 DELTA 223 — 2026-10-18 16:07 CHECKPOINT (s116, ctx 47%; band 80-90). **READ THIS FIRST. Supersedes 222's FIRST WORK items 1-2 (done / in flight); 222 items 3-6 and its OWED stand.**
 ### DONE since 222 (each verified at source; note lines 15:56-16:06)
 - **PR datasecau/HPSM-POC#159 MERGED** 05:04:56Z (20/20 checks pass, 0 open alerts on refs/pull/159/head with a fired control): **HPSM-POC main = dff401929dc3408de03e631cdf1255eb1d629975**, tree 5180070b0f31… = gated head tree = B263 prediction, parent d1fca80. Completion check B262/B263 PASS (note 16:05).
