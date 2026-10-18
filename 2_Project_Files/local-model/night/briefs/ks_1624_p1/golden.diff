@@ -1,0 +1,49 @@
+diff --git a/Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts b/Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts
+index d940e84f7..442aa9a3b 100644
+--- a/Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts
++++ b/Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts
+@@ -3,5 +3,5 @@ import { VerifyResult } from './messages';
+ 
+ // KS-1490: an override written with a trailing slash (https://host/) must not build https://host//api/verification/verify.
+-const SECUURA_API_URL = (process.env.SECUURA_API_URL || 'https://demo-pk.secuura.net').replace(/\/+$/, '');
++export const SECUURA_API_URL = (process.env.SECUURA_API_URL || 'https://demo-pk.secuura.net').replace(/\/+$/, '');
+ 
+ export function hashBuffer(buffer: Buffer): string {
+diff --git a/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh b/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
+index c0bb0ccbe..d66c17e77 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
+@@ -79,4 +79,33 @@ else
+   bad "KS-1490 a SECUURA_API_URL with a path and two trailing slashes keeps the path and builds a single slash" "requested: $URL_SLASHES"
+ fi
++# KS-1624: verify.ts EXPORTS the slash-stripped base it builds the request URL from, so index.ts can print the very value the bot uses.
++exported_base() {
++  VERIFY_TS="$SRC/verify.ts" TMP_DIR="$WORK" ENVVAL="$1" node -e '
++    const fs = require("fs");
++    const m = require("module");
++    const src = fs.readFileSync(process.env.VERIFY_TS, "utf8").replace(/^import .* from .\.\/messages.;\s*$/m, "");
++    const file = process.env.TMP_DIR + "/base-" + Date.now() + ".mjs";
++    fs.writeFileSync(file, m.stripTypeScriptTypes(src));
++    if (process.env.ENVVAL === "UNSET") delete process.env.SECUURA_API_URL; else process.env.SECUURA_API_URL = process.env.ENVVAL;
++    import(file).then((mod) => console.log(String(mod.SECUURA_API_URL)));
++  ' 2>/dev/null
++}
++if [ -n "$(exported_base UNSET)" ]; then
++  ok "CONTROL KS-1624 the instrument imports verify.ts and prints what it exports"
++else
++  bad "CONTROL KS-1624 the instrument imports verify.ts and prints what it exports" "printed nothing"
++fi
++BASE_SLASHES="$(exported_base "https://example.test/base//")"
++if [ "$BASE_SLASHES" = "https://example.test/base" ]; then
++  ok "KS-1624 verify.ts exports the base with its trailing slashes stripped"
++else
++  bad "KS-1624 verify.ts exports the base with its trailing slashes stripped" "exported: $BASE_SLASHES"
++fi
++BASE_UNSET="$(exported_base UNSET)"
++if [ "$BASE_UNSET" = "$VM_HOST" ]; then
++  ok "KS-1624 verify.ts exports the default base when SECUURA_API_URL is unset"
++else
++  bad "KS-1624 verify.ts exports the default base when SECUURA_API_URL is unset" "exported: $BASE_UNSET"
++fi
+ printf '\n  %d passed, %d failed\n' "$pass" "$fail"
+ [ "$fail" -eq 0 ] || exit 1

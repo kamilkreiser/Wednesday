@@ -1,0 +1,38 @@
+diff --git a/Blockchain/Dev/connectors/whatsapp-bot/src/index.ts b/Blockchain/Dev/connectors/whatsapp-bot/src/index.ts
+index 6f4398bee..aec529c79 100644
+--- a/Blockchain/Dev/connectors/whatsapp-bot/src/index.ts
++++ b/Blockchain/Dev/connectors/whatsapp-bot/src/index.ts
+@@ -2,4 +2,5 @@ import express from 'express';
+ import { rejectNulBytes } from '@secuura/shared';
+ import { verifyWebhook, handleWebhook } from './webhook';
++import { SECUURA_API_URL } from './verify';
+ 
+ const app = express();
+@@ -24,4 +25,4 @@ app.listen(PORT, () => {
+   console.log(`Secuura WhatsApp Bot listening on port ${PORT}`);
+   console.log(`Webhook URL: https://your-domain/webhook`);
+-  console.log(`API target: ${process.env.SECUURA_API_URL || 'https://demo-pk.secuura.net'}`);
++  console.log(`API target: ${SECUURA_API_URL}`);
+ });
+diff --git a/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh b/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
+index c0bb0ccbe..3fe0e43b3 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
+@@ -56,8 +56,14 @@ else
+   ok "no source file under src names the dead Container Apps host"
+ fi
+-if grep -qF "API target: \${process.env.SECUURA_API_URL || '$VM_HOST'}" "$SRC/index.ts"; then
+-  ok "index.ts prints the VM ingress as the default API target"
++# KS-1624: the banner prints the value verify.ts exports (slash-stripped, default included), not the raw env var.
++if [ "$(grep -c 'API target' "$SRC/index.ts")" = "1" ]; then
++  ok "CONTROL KS-1624 index.ts has exactly one API target banner line"
+ else
+-  bad "index.ts prints the VM ingress as the default API target" "$(grep -n 'API target' "$SRC/index.ts" | cut -c1-200)"
++  bad "CONTROL KS-1624 index.ts has exactly one API target banner line" "$(grep -n 'API target' "$SRC/index.ts" | cut -c1-200)"
++fi
++if grep -qF 'API target: ${SECUURA_API_URL}' "$SRC/index.ts" && grep -qF "import { SECUURA_API_URL } from './verify';" "$SRC/index.ts"; then
++  ok "index.ts prints the exported, slash-stripped API base as the API target"
++else
++  bad "index.ts prints the exported, slash-stripped API base as the API target" "$(grep -n 'API target\|from ./verify.' "$SRC/index.ts" | cut -c1-200)"
+ fi
+ if [ "$URL_SET" = "https://example.test/api/verification/verify" ]; then
