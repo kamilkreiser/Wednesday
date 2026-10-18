@@ -50,7 +50,18 @@ sync_in() {
   # sent to /dev/null and nothing looked afterwards. A conflict you cannot see is
   # a conflict you commit. stderr is kept, and the two irreplaceable files are
   # checked AFTER the pull, every time.
-  local out rc
+  local out rc dirty
+  # 2026-10-19 (ledger 2026-10-18 "autostash swept own work", w=4 of the family): --autostash
+  # swept a staged-but-uncommitted daily note, an EXPIRING-GRANTS edit and three prompt-log
+  # entries into a stash, and the pop did not return them. Autostash is only safe for the
+  # dashboard's own churn, so anything else tracked and dirty REFUSES (rc 9), as safe_pull does.
+  # Untracked files are not stashed by --autostash and are not checked here.
+  dirty="$(git -C "$PROJECT_DIR" status --porcelain --untracked-files=no 2>&1 | grep -v -E '^.. 0_Brain/dashboard/data/')"
+  if [ -n "$dirty" ]; then
+    echo "wed_claim: REFUSED — tracked files outside 0_Brain/dashboard/data are dirty; commit them by pathspec first (an autostash would sweep them):" >&2
+    printf '%s\n' "$dirty" >&2
+    exit 9
+  fi
   out="$( { { git -C "$PROJECT_DIR" fetch -q --no-write-fetch-head origin main || { sleep 1; git -C "$PROJECT_DIR" fetch -q --no-write-fetch-head origin main; }; } && git -C "$PROJECT_DIR" rebase --autostash origin/main; } 2>&1)"; rc=$?  # 2026-09-19 FETCH_HEAD race: never `pull`
   if [ $rc -ne 0 ]; then
     echo "wed_claim: WARNING — pull failed; this view may be stale and a claim may race" >&2
