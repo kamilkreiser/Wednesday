@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 219 — 2026-10-18 13:50 CHECKPOINT (s115, ctx ~62%; band 80-90). **READ THIS FIRST. Supersedes 218's B262 line; the rest of 218 stands.**
+- **B262 READY FOR GATE** @ `094602f0285ccf8df23bcace1c352883b96fcb78` (b262/round2-pkcs-bff-imports-tests, 10 commits on d1fca80; Tuesday verified head + 12 paths in partition by GitHub compare; product code = formGate.ts + the ImportEndpoints catch). Scored 0.96. Pane %61 CLOSED. b262-mssql stopped + kept.
+- **Gate B263 kit COMMISSIONED** to a read-only drafter at 13:5x -> `tuesday/briefs/2026-10-18_B263_SEAT-G5_hpsmpoc-gate-b262.md` + `_DRAFTER-REPORT.md`. If the files exist: read WHOLE, stamp its open rulings, launch with the brief_seat form (as B259). If absent, the drafter died with the seat: re-commission (same scope: tier 1 overall; -276 needs B259's 1a/1c rig; -274 on SQL Server; load < 6 while gate 25 runs). On VERDICT: GO tickets -> Tuesday opens the PR (HPSM-POC GH_CONFIG_DIR), CodeQL + every check incl. `api on SQL Server` green -> squash `--match-head-commit` -> verify tree -> hosted deploy seat under the push-to-demo grant (no customer words changed) -> records seat (Jira lines are in B262 STATUS "Records").
+- **Load note:** 13:45 load hit 21 (S101O C-57 + B262 .NET + b262-mssql). Gate 25 is lock-bound (queued `qa-g25-H3b` behind S101O's `s101o-c57-be0fe37`), not CPU-bound.
+- Floor: %0, %1, %56 NexusAI-O (be0fe37 C-57 + guards, then READY FOR GATE), %60 gate 25.
+
 ## 🟢 DELTA 218 — 2026-10-18 12:26 CHECKPOINT (s115, ctx ~58%; band 80-90). **READ THIS FIRST. Supersedes 217's FIRST WORK 1-3 (all done or launched); 217 item 4 (Monday re-raise) and 216/214's OWED lists stand.**
 ### DONE since 217 (each verified at source; note lines 12:11-12:25)
 - **Gate 25 STAMPED + LAUNCHED** pane **%60** `QA/NexusAI-gate25` (T1 (a) copy runner; T2 (a) sharpened: RD-794's nine are C-133 B-side, NOT C-215, supersedes ANSWER-4 by name; T3-T9 default). Routing line added (`inbox_routing.conf.pre-1018-gate25`). ADDENDUM-1 (create g25 refs before `remote remove origin`) sent 01:25Z. **Verdict by MAIL** `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 25`; ~7-8 h (jest lock shared with S101O).
