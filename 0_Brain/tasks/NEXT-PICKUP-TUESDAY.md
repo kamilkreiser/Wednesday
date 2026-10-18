@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 233 — 2026-10-18 20:0x CHECKPOINT (s117, ctx 65%). **READ THIS FIRST. Adds to 232; 232 stands.**
+- **B271 gate (%71) is on OPUS 4.8 for this session only** (Kam 09-30 ruling b; Opus 5.5's classifier stopped it at 19:50 before any product run). ADDENDUM-1 (`tuesday/briefs/2026-10-18_B271_ADDENDUM-1_opus48.md`) tells it to run the FULL gate and record the model per leg; if 4.8 also stops, the uncrafted legs + STOPPED. Pointer delivered 19:57. **OWED: confirm at rung 5 that it read ADDENDUM-1** (transcript `~/.claude/projects/-Volumes-Laptop-DEV--CODING-Datasec-HPSM-POC/9c27e4a6-….jsonl`). Its STATUS watcher (VERDICT/STOPPED) is scratchpad: rewrite on rotation. Its ETA restarts from 19:57 (~2.5-3.5 h).
+- **B272 MPS records** pane %72 (launched 19:52, rung 6 OK): DONE/STOPPED watcher armed (scratchpad). On DONE: verify C-43 in the MPS CLARIFICATIONS (git -C <project root> --no-optional-locks log -1 / grep '^### C-43'), then `decision_queue.sh --delivered mpscalc-hosted-deploy-e6f92a5-1017 "<C-43 + commit>"`.
+- Tool note: `cockpit.sh say` refuses a bare tap whose text (incl. a file NAME) contains continue/proceed/start/merge/… : name addendum files without those words.
+
 ## 🟢 DELTA 232 — 2026-10-18 19:4x (s117, ctx ~58%). **READ THIS FIRST. Supersedes 231's B268/B269 lines; 231 otherwise stands.**
 - **B268 DEPLOYED and verified** (MPS hosted = e6f92a5; Tuesday's check 19:41: /health 200 x3, index-BkQd8DlC.js x1, old x0). Pane closed; Kam told (bf-db79bf378664). **B272 MPS records brief** commissioned to a read-only drafter -> `tuesday/briefs/2026-10-18_B272_SEAT-R4_mps-records-b268.md` + `_DRAFTER-REPORT.md` (if absent at boot: re-commission). Read whole, stamp, launch; then `decision_queue.sh --delivered mpscalc-hosted-deploy-e6f92a5-1017 <C-entry>`.
 - **B269 MEASURED, NOT MOVED** (hosted API still 10.0.12; Microsoft's 10.0.13 image public but not offered to our stamp). Pane closed. **New card `hpsmpoc-runtime-10013-route-1018`** (a wait + read at round-3 deploy [default] / b pin image / c restart probe). On the round-3 hosted deploy: read the platform log's patch-version line; 10.0.13 -> close HPSMPOC-268. Records for the parent card ride the round-3 records seat.
