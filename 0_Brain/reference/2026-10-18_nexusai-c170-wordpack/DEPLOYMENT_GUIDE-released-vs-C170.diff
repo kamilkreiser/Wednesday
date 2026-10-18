@@ -1,0 +1,83 @@
+diff --git a/01c7c46711c93d193719cb37208ea79b88925204 b/3753a826300e8cdea78c469ac7357315842e32a0
+index 01c7c46..3753a82 100644
+--- a/01c7c46711c93d193719cb37208ea79b88925204
++++ b/3753a826300e8cdea78c469ac7357315842e32a0
+@@ -37,17 +37,48 @@ included, before running a command.
+ 
+ 1. Open the NexusAI offer on Azure Marketplace and choose **Create**.
+ 2. Pick the subscription, resource group and region to deploy into, and fill in the offer's
+-   settings (for example sizing, the Key Vault choice and an alert e-mail address). The Azure
+-   OpenAI endpoint and key may be entered here, in the offer's optional AI step, or both left
+-   empty and entered after deployment in the First-Run Setup wizard (step 5). Whatever is saved
+-   later in First-Run Setup is what the deployment uses from then on.
+-3. When the deployment completes, open it and find the Container App. Its **Application
+-   Url** is `https://<your-app-host>`.
+-4. Check the app answers: `curl -s https://<your-app-host>/api/health`. A new deployment answers
++   settings (for example sizing and an alert e-mail address). The region list
++   only shows regions that offer every service the deployment creates. The offer asks for no
++   container image, registry or registry credentials. The Azure OpenAI endpoint and key are optional
++   here: enter them in the offer's AI step, or leave them empty and configure them after deployment
++   in the First-Run Setup wizard (step 6). Whatever is saved and confirmed later in First-Run Setup
++   is what the deployment uses from then on.
++3. Before it creates the Container App, the deployment runs setup checks (a deployment script named
++   `<site name>-input-validation`). If one fails, the deployment stops and its error says what to
++   fix:
++   - **Every deployment:** it reads `session-secret` back from the Key Vault as the app's own identity
++     (`<site name>-app-uai`) and requires at least 32 characters. A missing secret, a missing
++     **Key Vault Secrets User** role for that identity, vault network settings that block the script,
++     or a short secret stops the deployment. A
++     role that was just granted can take a few minutes to apply, so the check retries for up to five
++     minutes before it fails.
++   - **When you entered Azure OpenAI settings:** it also reads `aoai-key` back, then sends a one-token
++     chat request to your deployment name with your API version, using that key. A rejected key
++     (HTTP 401), a refusal that can mean either a rejected key or the resource's network settings
++     (HTTP 403), an unknown deployment or API version (HTTP 404) or any other error stops the
++     deployment. HTTP 429 means the resource accepted the request and is throttled; after three
++     attempts the check passes with a warning.
++   - **When printer-data credentials were passed as parameters** (the offer never collects them): a
++     sign-in and a test query against the Log Analytics workspace.
++
++   The script's output is on the deployment script resource in `<your-resource-group>` (Azure portal
++   → the resource → **Logs**). It is kept for an hour after a failure. To run it, Azure temporarily
++   creates a storage account and a container instance in your subscription; they are billed while they
++   exist and removed when the script finishes (after a failure, when that hour is up).
++4. When the deployment completes, open it and read its **Outputs**. `postDeploySetupHint` lists the
++   next steps with your site's address, `appUrl` is `https://<your-app-host>/`, and `keyVaultUri`,
++   `runtimeLogsWorkspaceResourceId` (the workspace holding the app's own logs, not your printer data) and
++   `printerDataWorkspaceConfigured` are there for later administration. The Container App's
++   **Application Url** is the same address.
++5. Check the app answers: `curl -s https://<your-app-host>/api/health`. A new deployment answers
+    `"status": "OK"` even before any data source or AI provider is configured — `OK` means none of
+    the checks described under *Troubleshooting* found a problem, not that setup is finished.
+-5. Open `https://<your-app-host>` and complete the **First-Run Setup** wizard (Azure OpenAI
+-   endpoint and key, then your Log Analytics workspace). See `docs/USER_GUIDE.md`.
++6. Open `https://<your-app-host>/first-run-setup` and complete the **First-Run Setup** wizard straight
++   away: until sign-in is configured, anyone who can reach the site can open it. Its tabs, in order:
++   **AI Setup** (Azure OpenAI, if you did not enter it in step 2), **Log Analytics Access** (your
++   workspace), and **User Access** (Microsoft Entra ID sign-in: once configured, anyone in your Entra
++   tenant can sign in, and a security group, which is optional, restricts access to its members). See
++   `docs/USER_GUIDE.md`.
+ 
+ > **Finish User Access straight away.** A new deployment has no sign-in until an administrator
+ > completes **User Access** (Microsoft Entra ID) in First-Run Setup. Until then the site is open to
+@@ -105,8 +136,8 @@ az containerapp update -n <your-container-app> -g <your-resource-group> \
+   --set-env-vars KEY=value          # same command if env must change WITH the image
+ ```
+ 
+-The Container App runs more than one container (the dashboard and a redis sidecar), so name the
+-dashboard container with `--container-name`. `--set-env-vars` adds or updates only the names given
++Name the dashboard container with `--container-name`: deployments from earlier packages also run a
++redis sidecar in the same Container App. `--set-env-vars` adds or updates only the names given
+ and leaves the rest — but prove it rather than trust it (step 3 below).
+ 
+ **Before updating, record the image that is running now.** It is what you roll back to:
+@@ -156,7 +187,8 @@ Run these IN ORDER. Steps 1 and 2 are not optional and step 1 comes first.
+ 
+    It must return the new revision and nothing else. As it stops, the old revision's dashboard
+    container logs `Received SIGTERM, flushing audit buffer before exit…`. (A line beginning
+-   `Received SIGTERM scheduling shutdown` comes from the redis sidecar, not from the dashboard.)
++   `Received SIGTERM scheduling shutdown` comes from the redis sidecar that deployments from earlier
++   packages run, not from the dashboard.)
+ 
+ 2. **Name the revision you measured, in the receipt.** "The site returned X" is not a
+    measurement while two builds answer one host name.
