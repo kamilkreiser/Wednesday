@@ -1,0 +1,49 @@
+diff --git a/Blockchain/Dev/scripts/preflight/preflight.sh b/Blockchain/Dev/scripts/preflight/preflight.sh
+index 7ba5fec6d..6ec3f69b6 100644
+--- a/Blockchain/Dev/scripts/preflight/preflight.sh
++++ b/Blockchain/Dev/scripts/preflight/preflight.sh
+@@ -224,3 +224,3 @@ step() {
+     CURRENT_LEG="${1%%/*}"
+-    _hdr_total="${1#*/}"; _hdr_total="${_hdr_total%%[!0-9]*}"
++    _hdr_tail="${1#*/}"; _hdr_total="${_hdr_tail%%[!0-9]*}"
+     if [ "$_hdr_total" != "$TOTAL_LEGS" ]; then
+@@ -230,3 +230,3 @@ step() {
+         echo "  Fix the header or TOTAL_LEGS in scripts/preflight/preflight.sh, then push again."
+-        echo "  (step header $CURRENT_LEG/$_hdr_total disagrees with TOTAL_LEGS $TOTAL_LEGS)"
++        echo "  (step header $CURRENT_LEG/$_hdr_total disagrees with TOTAL_LEGS $TOTAL_LEGS; the header's text after the slash is \"$_hdr_tail\")"
+         exit 1
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1547_preflight_step_header_denominator.test.sh b/Blockchain/Dev/scripts/__tests__/ks1547_preflight_step_header_denominator.test.sh
+index 208c17cfa..b9181696a 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks1547_preflight_step_header_denominator.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1547_preflight_step_header_denominator.test.sh
+@@ -70,2 +70,30 @@ expect "CONTROL a wrong denominator followed by a TAB still aborts" "1 no yes" "
+ 
++# KS-1613 (the PR #1552 gate): the empty / non-digit denominator abort was pinned by no cell (mutant N7, a numeric -ne
++# compare, let 3/ and 3/x through), the digit class was never tested with a 0 in the total (mutant N4), and the abort
++# text dropped a non-digit tail, so step "3/x" said "/". The abort now also quotes the header's text after the slash.
++# call_step_total <total> <header>: as call_step, with TOTAL_LEGS overridden after the helpers (a total containing 0).
++call_step_total() {
++  {
++    printf 'set -uo pipefail\nGATEWAY=http://127.0.0.1:9\n'
++    cat "$tmp/helpers.sh"
++    printf 'TOTAL_LEGS=%s\nstep %q\necho STEP-RETURNED\n' "$1" "$2"
++  } > "$tmp/run.sh"
++  bash "$tmp/run.sh" > "$tmp/out.txt" 2>&1
++  RC=$?
++}
++
++call_step "3/"
++expect "CONTROL KS-1613 an empty denominator aborts" "1 no yes" "$RC $(has STEP-RETURNED) $(has 'PREFLIGHT ABORTED')"
++expect "RED KS-1613 the abort for an empty denominator quotes the empty text after the slash" "yes" "$(has "the header's text after the slash is \"\"")"
++
++call_step "3/x  Title"
++expect "CONTROL KS-1613 a non-digit denominator aborts" "1 no yes" "$RC $(has STEP-RETURNED) $(has 'PREFLIGHT ABORTED')"
++expect "RED KS-1613 the abort for a non-digit denominator quotes the text after the slash" "yes" "$(has "the header's text after the slash is \"x  Title\"")"
++
++call_step "3/$TOTAL)  Title"
++expect "CONTROL KS-1613 a closing bracket after the right denominator is accepted" "0 yes no" "$RC $(has STEP-RETURNED) $(has 'PREFLIGHT ABORTED')"
++
++call_step_total 20 "3/20  Title"
++expect "CONTROL KS-1613 a total containing 0 is read whole and accepted" "0 yes no" "$RC $(has STEP-RETURNED) $(has 'PREFLIGHT ABORTED')"
++
+ echo ""

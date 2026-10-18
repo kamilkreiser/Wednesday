@@ -1,0 +1,50 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+index 3741ef9f5..5a0531714 100644
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -1578,3 +1578,4 @@ export function createVerificationRoutes(deps: VerificationRouteDeps): Router {
+     } catch (err) {
+-      log('error', 'Failed to fetch document types', { error: err instanceof Error ? err.message : String(err) });
++      // KS-1619 (gate C INFO-1560-2): fail500's describer (routes/batch.ts, KS-1346), so a thrown plain object logs its TYPE and FIELD NAMES, not [object Object].
++      log('error', 'Failed to fetch document types', { error: err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch document types' } });
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts
+index e9c0c0426..554403c19 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts
+@@ -108 +108,35 @@ describe('KS-1543 part 3 - GET /api/document-types logs the error it answers a 5
+ });
++
++// KS-1619 part 3 (gate C INFO-1560-2): the :1579 log line described a thrown non-Error with String(err), so a plain
++// object logged "[object Object]" and null logged "null". It now uses fail500's describer (routes/batch.ts, KS-1346):
++// an Error by its message, a string verbatim, any other object by its TYPE and FIELD NAMES only (never values).
++describe('KS-1619 part 3 - GET /api/document-types describes a thrown non-Error the way fail500 does', () => {
++  it('RED KS-1619 D1 - a thrown plain object logs its type and field names, never [object Object] and never a value', async () => {
++    getAllDocumentTypes.mockRejectedValue({ code: 'ECONNRESET', detail: 'SECRET-VALUE-ks1619' });
++    const { status, body } = await documentTypes();
++    expect([status, body]).toEqual([500, CONSTANT_BODY]);
++    expect(errorLogs()).toEqual([['Failed to fetch document types', { error: 'thrown Object with fields [code, detail]' }]]);
++    expect(JSON.stringify(log.mock.calls)).not.toContain('SECRET-VALUE-ks1619');
++  });
++
++  it('RED KS-1619 D2 - a thrown null logs "thrown object", not "null"', async () => {
++    getAllDocumentTypes.mockRejectedValue(null);
++    const { status, body } = await documentTypes();
++    expect([status, body]).toEqual([500, CONSTANT_BODY]);
++    expect(errorLogs()).toEqual([['Failed to fetch document types', { error: 'thrown object' }]]);
++  });
++
++  it('RED KS-1619 D3 - a thrown number logs its typeof', async () => {
++    getAllDocumentTypes.mockRejectedValue(42);
++    const { status, body } = await documentTypes();
++    expect([status, body]).toEqual([500, CONSTANT_BODY]);
++    expect(errorLogs()).toEqual([['Failed to fetch document types', { error: 'thrown number' }]]);
++  });
++
++  it('GREEN KS-1619 control - a thrown TypeError still logs its message', async () => {
++    getAllDocumentTypes.mockRejectedValue(new TypeError('ks1619 type error'));
++    const { status, body } = await documentTypes();
++    expect([status, body]).toEqual([500, CONSTANT_BODY]);
++    expect(errorLogs()).toEqual([['Failed to fetch document types', { error: 'ks1619 type error' }]]);
++  });
++});

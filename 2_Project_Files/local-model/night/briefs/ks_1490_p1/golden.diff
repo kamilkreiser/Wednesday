@@ -1,0 +1,34 @@
+diff --git a/Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts b/Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts
+index d4cc091be..d940e84f7 100644
+--- a/Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts
++++ b/Blockchain/Dev/connectors/whatsapp-bot/src/verify.ts
+@@ -2,5 +2,6 @@ import * as crypto from 'crypto';
+ import { VerifyResult } from './messages';
+ 
+-const SECUURA_API_URL = process.env.SECUURA_API_URL || 'https://demo-pk.secuura.net';
++// KS-1490: an override written with a trailing slash (https://host/) must not build https://host//api/verification/verify.
++const SECUURA_API_URL = (process.env.SECUURA_API_URL || 'https://demo-pk.secuura.net').replace(/\/+$/, '');
+ 
+ export function hashBuffer(buffer: Buffer): string {
+diff --git a/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh b/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
+index d8af79803..c0bb0ccbe 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks812_whatsapp_bot_default_api_target.test.sh
+@@ -66,4 +66,17 @@ else
+   bad "a set SECUURA_API_URL still wins over the default" "requested: $URL_SET"
+ fi
++# KS-1490 (the KS-812 gate's note): an override written with a trailing slash built https://host//api/verification/verify.
++URL_SLASH="$(requested_url "https://example.test/")"
++if [ "$URL_SLASH" = "https://example.test/api/verification/verify" ]; then
++  ok "KS-1490 a SECUURA_API_URL with one trailing slash builds a single slash before /api"
++else
++  bad "KS-1490 a SECUURA_API_URL with one trailing slash builds a single slash before /api" "requested: $URL_SLASH"
++fi
++URL_SLASHES="$(requested_url "https://example.test/base//")"
++if [ "$URL_SLASHES" = "https://example.test/base/api/verification/verify" ]; then
++  ok "KS-1490 a SECUURA_API_URL with a path and two trailing slashes keeps the path and builds a single slash"
++else
++  bad "KS-1490 a SECUURA_API_URL with a path and two trailing slashes keeps the path and builds a single slash" "requested: $URL_SLASHES"
++fi
+ printf '\n  %d passed, %d failed\n' "$pass" "$fail"
+ [ "$fail" -eq 0 ] || exit 1

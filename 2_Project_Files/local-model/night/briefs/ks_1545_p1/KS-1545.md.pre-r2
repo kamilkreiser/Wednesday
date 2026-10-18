@@ -1,0 +1,216 @@
+# KS-1545 step 1 - GET /api/platform/audit-log drops the tenant-provisioning half invisibly; it now logs one warn line with the cause and how many windows had been read (RUNG 4, code_patch: one product file, fix SHAPE stated, exact lines NOT dictated, + one new test given whole)
+
+DRAFT by a Spark brief-writing sub-agent for Wednesday (Kam 2026-10-18 19:0x: "give it as many tickets as it can handle"; the calibration rule's harder rung). A local PASS is a candidate, never a merge; the normal QA gate before merge (api-gateway). Audit-log route: Wednesday reads this one at source herself (the 10-05 rule for audit surfaces).
+
+File: `Blockchain/Dev/services/api-gateway/src/routes/platform.ts`  (product, modified in place: you write the lines)
+Test file: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts`  (NEW, 130 lines, given in full below)
+Tip: `d2ec786e6130c7ce13384185c84cc1e7566d77cb` (origin/develop by `git ls-remote` at 2026-10-18 19:49 AEDT; fetched by SHA into a scratch clone). platform.ts there is 1067 lines.
+Runner: `vitest` (`npx vitest run src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts` from `Blockchain/Dev/services/api-gateway`)
+Tier: `code_patch`
+Rung: **4** (a LOOSER brief: one product file, three nearby sites, the product `+` lines are NOT given; the brief states the fix shape and the contract, the model writes the code. The test is given whole; it is loose about the log CONTEXT wording and exact about the log META). The ladder question: with the shape stated and the lines not dictated, does the Spark make a correct minimal edit across three dependent sites (a counter declared, incremented and logged) that the tests, not a byte comparison, accept?
+Routing: **Spark**. Not an auth surface: `authenticateToken()` and `requireSuperAdmin` (`:369-370`) are untouched; the change is one server-side log line in a catch and a counter; the response body and status are unchanged (every RED cell asserts them).
+
+Written 2026-10-18 20:22:55 AEDT (shell `date`) from `d2ec786e6130` (platform.ts lines 120-170 and 364-496 read, the whole audit-log handler; `ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts` lines 1-140 read for the harness; `routes/batch.ts:24-30` read for fail500's describer). A reference golden was made in a scratch clone at the tip (`golden.diff` beside this brief: one way to write it, NOT the required bytes).
+
+Source: KS-1545 (Backlog, unassigned): *"(1) Log it: a warn line from the `catch` naming the cause (a timeout, an HTTP failure, a window that was not a list, the budget spent), the route and how many windows had been read, never the rows. Test first with a captured logger: a failing stub produces exactly one line, a healthy read none. ... (2) Decide whether the caller should see it: ... a contract change ... needs Kam's ruling."*
+
+## Scope
+
+**Closes step 1 of KS-1545; step 2 (an in-band marker) is a contract change that needs a ruling, NOT in this diff.** Stated as narrowing: a FIRST window that answers a non-2xx with a JSON body (for example a 500) is not a throw at the tip (`:421` throws only when `collected.length > 0`; an empty first window ends the loop), so it reaches no catch and is NOT logged by this change; whether it should be is the same question as step 2. The `audit_logs` catch (`:486`) is NOT changed.
+
+## The mode - read this twice
+
+CODE+TEST. Your diff touches EXACTLY 2 files, in this order:
+1. `Blockchain/Dev/services/api-gateway/src/routes/platform.ts` - modified in place, inside the audit-log handler ONLY (`:393-:432`). You choose the exact lines (see `## The exact change`). Keep the change minimal: one counter declared, one increment, one catch binding, one comment line and one log line.
+2. `Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts` - a NEW file: `--- /dev/null`, ONE hunk adding lines 1-130, every line `+`, EXACTLY the text under `## The test`.
+
+You never touch any other file: not `utils/logger.ts` (already imported by platform.ts at `:19`), not the ks1512 test, not `routes/batch.ts`. The `reference_test_file` in your input is shape reference only; do NOT touch it.
+
+## What is wrong (one paragraph)
+
+The handler reads the platform half in windows inside a `try` (`:396-:429`); anything that throws there (a refused connection from `fetchWithTimeout`, the `UpstreamTimeoutError` when the one budget is spent at `:411` or inside `fetchWithTimeout`, the `not a list` Error at `:421`) lands in `} catch {` at `:430`, whose only content is the comment `// Tenant-provisioning down or slow ... serve only audit_logs.` (`:431`). The route then answers 200 with the audit_logs rows and their own total. Nothing is logged, so an operator cannot tell an audit log with no platform entries from one whose platform half was dropped (measured with the test below at the tip: W1, W2 and W3 each see zero warn calls).
+
+## Where
+
+- `:395` - (correct) `      let platformTotal = 0;` - stays; the counter is declared right after it, OUTSIDE the `try` (the catch must see it).
+- `:424` - (correct) `          collected.push(...rowsInWindow);` - stays; the counter is incremented right after it (a window counts as read once its rows are kept).
+- `:430` - **must change**: `      } catch {` (it must bind the error).
+- `:431` - (correct) the comment line `// Tenant-provisioning down or slow ...` - stays, unchanged, as the first line of the catch body.
+
+## The exact change
+
+No diff is given for the product file: you write it. The required shape, all of it:
+
+1. Declare `let windowsRead = 0;` on its own line directly after `:395` (`      let platformTotal = 0;`), at the same indentation.
+2. Directly after `:424` (`          collected.push(...rowsInWindow);`), add `          windowsRead += 1;`.
+3. Change `:430` to `      } catch (err: unknown) {`. Keep `:431`'s comment as it is. After it, add ONE comment line naming KS-1545 and ONE `logger.warn(<context>, { error: <describer>, windowsRead });` call, where `<context>` is a string literal that contains `GET /api/platform/audit-log`, and `<describer>` is EXACTLY fail500's expression from `routes/batch.ts:28` with `err`: `err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err`. The meta object has EXACTLY those two keys, `error` and `windowsRead`; never the rows, never `collected`.
+4. Change nothing else: not the loop, not the budget, not `platformEntries` / `platformTotal`, not the response (`:490-:494`), not the audit_logs catch (`:486`).
+
+**Do NOT touch**: `fetchWithTimeout` (`:147-:164`), `UpstreamTimeoutError` (`:137-:142`), `authenticateToken()` / `requireSuperAdmin` (`:369-370`), the validation at `:372-:378`, the audit_logs half (`:434-:488`).
+
+## The test
+
+File: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts`. The harness is ks1512's shape (the real router on loopback, a stub upstream, an in-memory audit_logs `query`, the budget set with `vi.hoisted` before the module loads, 400 ms here), with `logger.warn` spied. Write it EXACTLY as below:
+
+```diff
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts
+new file mode 100644
+index 000000000..b47c72c74
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts
+@@ -0,0 +1,130 @@
++/**
++ * KS-1545 (step 1 of 2; step 2, an in-band marker for the caller, is a contract change that needs a ruling and is NOT here) -
++ * GET /api/platform/audit-log merges the tenant-provisioning platform_audit_log half with audit_logs. When the platform half
++ * cannot be read (the upstream refuses the connection, a later window is not a list, or the one paging budget is spent), the
++ * route degrades to the audit_logs rows and answers 200, and it logged NOTHING: an operator could not tell an audit log with
++ * no platform entries from one whose platform half was dropped. It now logs ONE warn line naming the route, the cause (the
++ * thrown error, described as fail500 does) and how many upstream windows had been read; the response is unchanged.
++ *
++ * These cells are deliberately loose about the CONTEXT wording (it must name the route) and exact about the meta: the
++ * `error` text and `windowsRead`. Same harness as ks1512: the REAL createPlatformRoutes on 127.0.0.1 against a stub
++ * upstream, an in-memory audit_logs query, and the budget (PLATFORM_UPSTREAM_TIMEOUT_MS) set before the module loads.
++ */
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import express, { type RequestHandler } from 'express';
++import http from 'http';
++import type { AddressInfo } from 'net';
++import { createPlatformRoutes } from '../routes/platform';
++import { logger } from '../utils/logger';
++
++const BUDGET_MS = vi.hoisted(() => {
++  process.env.PLATFORM_UPSTREAM_TIMEOUT_MS = '400';
++  return 400;
++});
++
++const T0 = Date.UTC(2026, 0, 1);
++/** The stub upstream's behaviour for the current cell. */
++let mode: 'ok' | 'destroy' | 'second-not-a-list' | 'slow' = 'ok';
++const PLATFORM = Array.from({ length: 3 }, (_, i) => ({ id: `P-${i}`, action: 'tenant_created', created_at: new Date(T0 - (10 + i) * 1000).toISOString() }));
++const APP_IDS = ['A-0', 'A-1'];
++let calls = 0;
++
++let upstream: http.Server;
++let gateway: http.Server;
++let base = '';
++const warnSpy = vi.spyOn(logger, 'warn').mockImplementation((() => logger) as never);
++
++beforeAll(async () => {
++  upstream = http.createServer(async (req, res) => {
++    calls += 1;
++    if (mode === 'destroy') { req.socket.destroy(); return; }
++    if (mode === 'slow') await new Promise((r) => setTimeout(r, BUDGET_MS + 300));
++    if (mode === 'second-not-a-list' && calls === 2) {
++      res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ success: true }));
++      return;
++    }
++    const url = new URL(req.url ?? '/', 'http://x');
++    const limit = Number(url.searchParams.get('limit')) || 50;
++    const offset = Number(url.searchParams.get('offset')) || 0;
++    // second-not-a-list: the first window is short of the total, so the route must ask for a second one
++    const rowsOut = mode === 'second-not-a-list' ? PLATFORM.slice(offset, offset + 1) : PLATFORM.slice(offset, offset + limit);
++    res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ success: true, entries: rowsOut, total: PLATFORM.length }));
++  });
++  await new Promise<void>((r) => upstream.listen(0, '127.0.0.1', () => r()));
++  const superAdmin = (() => ((req, _res, next) => {
++    (req as unknown as { user: object }).user = { userId: 'u-ks1545', email: 'a@b.c', role: 'super_admin', verificationLevel: 'none' };
++    next();
++  }) as RequestHandler) as (required?: boolean) => RequestHandler;
++  const app = express();
++  app.use(createPlatformRoutes({
++    authenticateToken: superAdmin,
++    tenantProvisioningUrl: 'http://127.0.0.1:' + (upstream.address() as AddressInfo).port,
++    setTenantKey: () => {},
++    getTenantKey: () => undefined,
++    removeTenantKey: () => {},
++    query: async (sql: string) => {
++      if (/COUNT\(\*\)/.test(sql)) return { rows: [{ total: APP_IDS.length }] };
++      return { rows: APP_IDS.map((id, i) => ({ id, user_id: null, action: 'doc_verified', resource_type: null, resource_id: null, details: null, ip_address: null, success: true, created_at: new Date(T0 - i * 1000) })) };
++    },
++  }));
++  gateway = http.createServer(app);
++  await new Promise<void>((r) => gateway.listen(0, '127.0.0.1', () => r()));
++  base = 'http://127.0.0.1:' + (gateway.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  delete process.env.PLATFORM_UPSTREAM_TIMEOUT_MS;
++  upstream.closeAllConnections();
++  await new Promise<void>((r) => gateway.close(() => r()));
++  await new Promise<void>((r) => upstream.close(() => r()));
++  warnSpy.mockRestore();
++});
++
++beforeEach(() => {
++  mode = 'ok';
++  calls = 0;
++  warnSpy.mockClear();
++});
++
++async function auditLog(): Promise<{ status: number; ids: string[]; total: number }> {
++  const r = await fetch(`${base}/api/platform/audit-log?limit=50&offset=0`);
++  const body = (await r.json()) as { entries?: Array<{ id: string }>; total?: number };
++  return { status: r.status, ids: (body.entries ?? []).map((e) => String(e.id)), total: body.total ?? -1 };
++}
++
++/** The one warn call the cells expect: [context naming the route, meta]. */
++function droppedWarnings(): Array<[unknown, unknown]> {
++  return (warnSpy.mock.calls as unknown as unknown[][]).map((c) => [c[0], c[1]] as [unknown, unknown]);
++}
++
++describe('KS-1545 - the audit-log route logs it when it drops the platform half', () => {
++  it('RED KS-1545 W1 an upstream that refuses the connection: 200 with the audit_logs rows only, and ONE warn naming the route with the error and windowsRead 0', async () => {
++    mode = 'destroy';
++    const page = await auditLog();
++    expect([page.status, page.ids, page.total]).toEqual([200, APP_IDS, APP_IDS.length]);
++    expect(droppedWarnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { error: 'fetch failed', windowsRead: 0 }]]);
++  });
++
++  it('RED KS-1545 W2 a second window that is not a list: ONE warn with that cause and windowsRead 1, never the rows', async () => {
++    mode = 'second-not-a-list';
++    const page = await auditLog();
++    expect([page.status, page.ids, page.total]).toEqual([200, APP_IDS, APP_IDS.length]);
++    expect(droppedWarnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { error: 'tenant-provisioning audit-log window was not a list', windowsRead: 1 }]]);
++    expect(JSON.stringify(warnSpy.mock.calls)).not.toContain('P-0');
++  });
++
++  it('RED KS-1545 W3 the paging budget spent on a slow upstream: ONE warn whose error says it timed out, windowsRead 0', { timeout: 10_000 }, async () => {
++    mode = 'slow';
++    const page = await auditLog();
++    expect([page.status, page.ids, page.total]).toEqual([200, APP_IDS, APP_IDS.length]);
++    expect(droppedWarnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { error: expect.stringContaining('timed out'), windowsRead: 0 }]]);
++  });
++
++  it('GREEN KS-1545 control - a healthy upstream: both halves merged, no warn', async () => {
++    const page = await auditLog();
++    expect(page.status).toBe(200);
++    expect([...page.ids].sort()).toEqual([...APP_IDS, ...PLATFORM.map((p) => p.id)].sort());
++    expect(page.total).toBe(APP_IDS.length + PLATFORM.length);
++    expect(droppedWarnings()).toEqual([]);
++  });
++});
+```
+
+## Red cells
+- RED KS-1545 W1 an upstream that refuses the connection: 200 with the audit_logs rows only, and ONE warn naming the route with the error and windowsRead 0
+- RED KS-1545 W2 a second window that is not a list: ONE warn with that cause and windowsRead 1, never the rows
+- RED KS-1545 W3 the paging budget spent on a slow upstream: ONE warn whose error says it timed out, windowsRead 0
+
+## Cells and controls
+
+- RED `W1` (socket destroyed: `fetch` rejects `TypeError('fetch failed')`), `W2` (window 1 holds 1 of 3 rows, window 2 has no `entries`), `W3` (the upstream waits 700 ms against a 400 ms budget: `UpstreamTimeoutError`) - at the tip each sees `[]` warn calls, so the `toEqual([[...]])` fails; each also asserts the response is unchanged: 200, the audit_logs ids only, their total.
+- GREEN control - a healthy upstream: both halves merged, total 5, no warn, at the tip and after.
+
+## UNMEASURED - stated rather than glossed
+
+- The brief-writer did NOT run vitest or tsc by hand (no node_modules in the scratch clone): RED-at-tip / GREEN-after, the whole api-gateway suite (ks1512 included) and tsc are the `round.sh --control` run on the reference golden (recorded on the queue line).
+- The exact text node's `fetch` gives for a destroyed socket (`fetch failed`) is node 24's (the cell asserts it); a different runtime could word it differently.
+- `:431`'s comment carries a non-ASCII dash; your hunk's context must copy it exactly as the input shows it.
+- No real tenant-provisioning service; no deployed log transport.
+
+## Output
+
+Exactly ONE fenced ```diff block, nothing outside it:
+1. `--- a/Blockchain/Dev/services/api-gateway/src/routes/platform.ts` / `+++ b/...` with your hunks (three sites, as above);
+2. `--- /dev/null` / `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts` with the whole new file under "The test".
+Every `+` line on its own physical line. Every context line keeps its leading space.

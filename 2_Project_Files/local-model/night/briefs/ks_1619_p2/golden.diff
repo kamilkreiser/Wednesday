@@ -1,0 +1,51 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
+index 8f878ca3b..a935b40ad 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
+@@ -373,7 +373,45 @@
+     expect(KS1334_LEAK.length).toBeGreaterThan(60);
+   });
+ });
+-
++
++// KS-1619 part 2 (gate C LOW-1561-1): every cell above uses ONE tenant, so "a failed tenant does not stop the loop" was
++// pinned by nothing; the gate's mutant M4e (`break;` after the per-tenant results.push) survived the whole originate
++// suite. Three tenants, the MIDDLE one throwing: the third must still be read and copied, in order.
++describe('KS-1619 part 2: migrate-tenant-data goes on to the next tenant after one fails', () => {
++  const TENANTS = ['a', 'b', 'c'].map((k) => ({ id: `a0000000-0000-4000-8000-00000001619${k}`, slug: `ks1619-tenant-${k}`, db_name: `ks1619_${k}` }));
++  afterEach(() => {
++    mockDb.getTenantManager = () => null;
++    mockSharedForC.queryWithTenantGuc.mockReset();
++    mockLoggerError.mockClear();
++  });
++
++  it('RED KS-1619 T1 three tenants, the middle one throwing: all three are tried in order and the third still copies', async () => {
++    setNodeEnv('development');
++    mockSharedForC.queryWithTenantGuc.mockResolvedValue({ rows: [] });
++    const asked: string[] = [];
++    const tenantPool = { query: jest.fn().mockResolvedValue({ rows: [] }) };
++    mockDb.getTenantManager = () => ({
++      getPlatformPool: () => ({ query: jest.fn().mockResolvedValue({ rows: TENANTS }) }),
++      getDefaultPool: () => ({}),
++      getPool: (id: string) => { asked.push(id); if (id === TENANTS[1].id) throw new Error('ks1619 middle tenant down'); return tenantPool; },
++    });
++    const res = await fetch(baseUrl + '/api/admin/migrate-tenant-data', {
++      method: 'POST',
++      headers: { 'content-type': 'application/json' },
++      body: JSON.stringify({}),
++    });
++    const body = JSON.parse(await res.text()) as { success: boolean; results: Array<{ tenant: string; error?: string }> };
++    expect({ status: res.status, success: body.success }).toEqual({ status: 200, success: true });
++    expect(asked).toEqual(TENANTS.map((t) => t.id));
++    expect(body.results.map((r) => [r.tenant, r.error ?? 'copied'])).toEqual([
++      [TENANTS[0].slug, 'copied'],
++      [TENANTS[1].slug, KS1334C_CODE],
++      [TENANTS[2].slug, 'copied'],
++    ]);
++    expect(mockLoggerError.mock.calls).toEqual([[KS1334C_CONTEXT, { tenant: TENANTS[1].slug, error: 'ks1619 middle tenant down' }]]);
++  });
++});
++
+ // KS-1462 (item 1 of 2; item 2, the bare-string per-tenant code, is NOT changed here): the per-tenant catch logged
+ // `String(err)`, so a thrown PLAIN OBJECT reached the server log as [object Object]. It now uses the same describer as
+ // fail500: an Error by its message, a string verbatim, any other object by its type and field names (never values).

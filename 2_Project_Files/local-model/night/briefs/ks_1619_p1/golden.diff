@@ -1,0 +1,36 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts
+index 4450587dc..41c6c098d 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1087-workflow-approve-deletes-the-pending-document.test.ts
+@@ -141,4 +141,30 @@
+   res.end(body);
+ };
+-
++
++// KS-1619 part 1 (gate C LOW-1560-1): the forward's no-op 'data' listener (routes/verification.ts:1068) exists to DRAIN the
++// reply so its 'end' fires. Every other cell answers in ONE chunk, which still ends after a listener that pauses the
++// stream, so the gate's mutant M1c (the listener calls proxyRes.pause()) survived the whole suite. A reply in several
++// chunks, written apart in time, only reaches 'end' if every chunk is read.
++it('RED KS-1619 D1 a 201 whose body arrives in several chunks is drained to its end (the forwarded line is logged)', { timeout: 15_000 }, async () => {
++  const CHUNK = 'x'.repeat(64 * 1024);
++  behave = (_req, res) => {
++    res.writeHead(201, { 'Content-Type': 'application/json' });
++    let sent = 0;
++    const next = (): void => {
++      if (sent === 4) { res.end(); return; }
++      sent++;
++      res.write(CHUNK);
++      setTimeout(next, 25);
++    };
++    next();
++  };
++  const store = freshStore();
++  const log = vi.fn<Log>();
++  const out = await approve(await startGateway(store, undefined, log));
++  expect(out.status).toBe(200);
++  const forwarded = (): boolean => log.mock.calls.some(([, message]) => String(message).endsWith(' document forwarded to originate'));
++  for (let waited = 0; waited < 2_000 && !forwarded(); waited += 50) await new Promise<void>((r) => setTimeout(r, 50));
++  expect(forwarded(), 'the reply was read to its end').toBe(true);
++});
++
+ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));

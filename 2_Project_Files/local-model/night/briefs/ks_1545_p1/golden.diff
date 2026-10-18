@@ -1,0 +1,156 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/platform.ts b/Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+index 8bab36e7f..cb849a472 100644
+--- a/Blockchain/Dev/services/api-gateway/src/routes/platform.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+@@ -395,2 +395,3 @@ export function createPlatformRoutes(deps: PlatformRouteDeps): Router {
+       let platformTotal = 0;
++      let windowsRead = 0;
+       try {
+@@ -424,2 +425,3 @@ export function createPlatformRoutes(deps: PlatformRouteDeps): Router {
+           collected.push(...rowsInWindow);
++          windowsRead += 1;
+           if (rowsInWindow.length === 0) break;
+@@ -429,4 +431,6 @@ export function createPlatformRoutes(deps: PlatformRouteDeps): Router {
+         platformTotal = total ?? collected.length;
+-      } catch {
++      } catch (err: unknown) {
+         // Tenant-provisioning down or slow — degrade gracefully and serve only audit_logs.
++        // KS-1545: say so server-side (the cause, the route, how many windows had been read; never the rows), in fail500's describer.
++        logger.warn('Platform audit-log served without its tenant-provisioning half (GET /api/platform/audit-log)', { error: err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err, windowsRead });
+       }
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts
+new file mode 100644
+index 000000000..b47c72c74
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1545-platform-audit-log-logs-the-dropped-platform-half.test.ts
+@@ -0,0 +1,130 @@
++/**
++ * KS-1545 (step 1 of 2; step 2, an in-band marker for the caller, is a contract change that needs a ruling and is NOT here) -
++ * GET /api/platform/audit-log merges the tenant-provisioning platform_audit_log half with audit_logs. When the platform half
++ * cannot be read (the upstream refuses the connection, a later window is not a list, or the one paging budget is spent), the
++ * route degrades to the audit_logs rows and answers 200, and it logged NOTHING: an operator could not tell an audit log with
++ * no platform entries from one whose platform half was dropped. It now logs ONE warn line naming the route, the cause (the
++ * thrown error, described as fail500 does) and how many upstream windows had been read; the response is unchanged.
++ *
++ * These cells are deliberately loose about the CONTEXT wording (it must name the route) and exact about the meta: the
++ * `error` text and `windowsRead`. Same harness as ks1512: the REAL createPlatformRoutes on 127.0.0.1 against a stub
++ * upstream, an in-memory audit_logs query, and the budget (PLATFORM_UPSTREAM_TIMEOUT_MS) set before the module loads.
++ */
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import express, { type RequestHandler } from 'express';
++import http from 'http';
++import type { AddressInfo } from 'net';
++import { createPlatformRoutes } from '../routes/platform';
++import { logger } from '../utils/logger';
++
++const BUDGET_MS = vi.hoisted(() => {
++  process.env.PLATFORM_UPSTREAM_TIMEOUT_MS = '400';
++  return 400;
++});
++
++const T0 = Date.UTC(2026, 0, 1);
++/** The stub upstream's behaviour for the current cell. */
++let mode: 'ok' | 'destroy' | 'second-not-a-list' | 'slow' = 'ok';
++const PLATFORM = Array.from({ length: 3 }, (_, i) => ({ id: `P-${i}`, action: 'tenant_created', created_at: new Date(T0 - (10 + i) * 1000).toISOString() }));
++const APP_IDS = ['A-0', 'A-1'];
++let calls = 0;
++
++let upstream: http.Server;
++let gateway: http.Server;
++let base = '';
++const warnSpy = vi.spyOn(logger, 'warn').mockImplementation((() => logger) as never);
++
++beforeAll(async () => {
++  upstream = http.createServer(async (req, res) => {
++    calls += 1;
++    if (mode === 'destroy') { req.socket.destroy(); return; }
++    if (mode === 'slow') await new Promise((r) => setTimeout(r, BUDGET_MS + 300));
++    if (mode === 'second-not-a-list' && calls === 2) {
++      res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ success: true }));
++      return;
++    }
++    const url = new URL(req.url ?? '/', 'http://x');
++    const limit = Number(url.searchParams.get('limit')) || 50;
++    const offset = Number(url.searchParams.get('offset')) || 0;
++    // second-not-a-list: the first window is short of the total, so the route must ask for a second one
++    const rowsOut = mode === 'second-not-a-list' ? PLATFORM.slice(offset, offset + 1) : PLATFORM.slice(offset, offset + limit);
++    res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ success: true, entries: rowsOut, total: PLATFORM.length }));
++  });
++  await new Promise<void>((r) => upstream.listen(0, '127.0.0.1', () => r()));
++  const superAdmin = (() => ((req, _res, next) => {
++    (req as unknown as { user: object }).user = { userId: 'u-ks1545', email: 'a@b.c', role: 'super_admin', verificationLevel: 'none' };
++    next();
++  }) as RequestHandler) as (required?: boolean) => RequestHandler;
++  const app = express();
++  app.use(createPlatformRoutes({
++    authenticateToken: superAdmin,
++    tenantProvisioningUrl: 'http://127.0.0.1:' + (upstream.address() as AddressInfo).port,
++    setTenantKey: () => {},
++    getTenantKey: () => undefined,
++    removeTenantKey: () => {},
++    query: async (sql: string) => {
++      if (/COUNT\(\*\)/.test(sql)) return { rows: [{ total: APP_IDS.length }] };
++      return { rows: APP_IDS.map((id, i) => ({ id, user_id: null, action: 'doc_verified', resource_type: null, resource_id: null, details: null, ip_address: null, success: true, created_at: new Date(T0 - i * 1000) })) };
++    },
++  }));
++  gateway = http.createServer(app);
++  await new Promise<void>((r) => gateway.listen(0, '127.0.0.1', () => r()));
++  base = 'http://127.0.0.1:' + (gateway.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  delete process.env.PLATFORM_UPSTREAM_TIMEOUT_MS;
++  upstream.closeAllConnections();
++  await new Promise<void>((r) => gateway.close(() => r()));
++  await new Promise<void>((r) => upstream.close(() => r()));
++  warnSpy.mockRestore();
++});
++
++beforeEach(() => {
++  mode = 'ok';
++  calls = 0;
++  warnSpy.mockClear();
++});
++
++async function auditLog(): Promise<{ status: number; ids: string[]; total: number }> {
++  const r = await fetch(`${base}/api/platform/audit-log?limit=50&offset=0`);
++  const body = (await r.json()) as { entries?: Array<{ id: string }>; total?: number };
++  return { status: r.status, ids: (body.entries ?? []).map((e) => String(e.id)), total: body.total ?? -1 };
++}
++
++/** The one warn call the cells expect: [context naming the route, meta]. */
++function droppedWarnings(): Array<[unknown, unknown]> {
++  return (warnSpy.mock.calls as unknown as unknown[][]).map((c) => [c[0], c[1]] as [unknown, unknown]);
++}
++
++describe('KS-1545 - the audit-log route logs it when it drops the platform half', () => {
++  it('RED KS-1545 W1 an upstream that refuses the connection: 200 with the audit_logs rows only, and ONE warn naming the route with the error and windowsRead 0', async () => {
++    mode = 'destroy';
++    const page = await auditLog();
++    expect([page.status, page.ids, page.total]).toEqual([200, APP_IDS, APP_IDS.length]);
++    expect(droppedWarnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { error: 'fetch failed', windowsRead: 0 }]]);
++  });
++
++  it('RED KS-1545 W2 a second window that is not a list: ONE warn with that cause and windowsRead 1, never the rows', async () => {
++    mode = 'second-not-a-list';
++    const page = await auditLog();
++    expect([page.status, page.ids, page.total]).toEqual([200, APP_IDS, APP_IDS.length]);
++    expect(droppedWarnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { error: 'tenant-provisioning audit-log window was not a list', windowsRead: 1 }]]);
++    expect(JSON.stringify(warnSpy.mock.calls)).not.toContain('P-0');
++  });
++
++  it('RED KS-1545 W3 the paging budget spent on a slow upstream: ONE warn whose error says it timed out, windowsRead 0', { timeout: 10_000 }, async () => {
++    mode = 'slow';
++    const page = await auditLog();
++    expect([page.status, page.ids, page.total]).toEqual([200, APP_IDS, APP_IDS.length]);
++    expect(droppedWarnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { error: expect.stringContaining('timed out'), windowsRead: 0 }]]);
++  });
++
++  it('GREEN KS-1545 control - a healthy upstream: both halves merged, no warn', async () => {
++    const page = await auditLog();
++    expect(page.status).toBe(200);
++    expect([...page.ids].sort()).toEqual([...APP_IDS, ...PLATFORM.map((p) => p.id)].sort());
++    expect(page.total).toBe(APP_IDS.length + PLATFORM.length);
++    expect(droppedWarnings()).toEqual([]);
++  });
++});
