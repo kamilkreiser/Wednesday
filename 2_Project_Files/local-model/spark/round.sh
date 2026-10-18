@@ -19,13 +19,17 @@
 #                        builder for the first product, plus the declared multi-file set) |
 #                        tasks/bash_patch/build_bash_input.sh (bash_patch) |
 #                        tasks/bash_patch2/build_bash_input2.sh (bash_patch2, 2026-10-07: the same bash builder for the
-#                        first product + first RED test, plus the declared multi-file set), with
+#                        first product + first RED test, plus the declared multi-file set) |
+#                        test_only (2026-10-18): night/build_input.sh exactly as code_patch — the brief's `## Tamper`
+#                        block becomes input.json defect_line.tamper (no tamper parsed -> rc 2 REFUSED), and the
+#                        code_patch prepare/checker/task.md below run it in the checker's MODE=test_only, with
 #                        NIGHT_SOURCE_CHECKOUT=cache/src, NIGHT_BRIEFS_DIR=<brief_dir>; builder rc 2 -> rc 2 REFUSED
 #   7. clone             `git clone --shared --no-checkout cache/src` + `checkout --detach <tip>` under
 #                        spark/cache/work/<run-id>/clone; code_patch: tasks/code_patch/prepare_clone.sh
 #   8. model             local_model_task.sh with LM_BACKEND=spark, SPARK_THINK=0 (thinking OFF, always), the
 #                        harness's own timeouts (10 s health, SPARK_HTTP_TIMEOUT 1800 s in lib/spark_call.py)
-#   9. checker           code_patch: tasks/code_patch/spark_checker.sh (checker.sh + A2a)
+#   9. checker           code_patch, test_only: tasks/code_patch/spark_checker.sh (checker.sh + A2a; test_only = its
+#                        MODE=test_only: A3 the ONE test only, A4 red under the planted tamper, A5 green at the tip)
 #                        code_patch2: tasks/code_patch2/checker.sh, then A2a as for bash_patch (task.md DERIVED from
 #                        code_patch's by tasks/code_patch2/make_task.py into the run dir)
 #                        bash_patch2: tasks/bash_patch2/checker.sh, then A2a as for bash_patch (task.md DERIVED from
@@ -72,7 +76,7 @@ for a in "$@"; do
   case "$a" in
     --dry-run) DRY=1 ;;
     --control) CONTROL=1 ;;
-    -h|--help) sed -n 2,40p "$0"; exit 0 ;;
+    -h|--help) sed -n 2,44p "$0"; exit 0 ;;
     *=*) PINS+=("$a") ;;
     *) if [ -z "$BDIR" ]; then BDIR="$a"; else echo "round.sh: unexpected argument '$a'" >&2; exit 64; fi ;;
   esac
@@ -249,7 +253,7 @@ if [ "$B_TIER" = code_patch2 ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" NIGHT_BRIEFS_DIR="$BDIR" bash "$LM/tasks/code_patch2/build_input2.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
 elif [ "$B_TIER" = bash_patch2 ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" bash "$LM/tasks/bash_patch2/build_bash_input2.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
-elif [ "$B_TIER" = code_patch ]; then
+elif [ "$B_TIER" = code_patch ] || [ "$B_TIER" = test_only ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" NIGHT_BRIEFS_DIR="$BDIR" bash "$LM/night/build_input.sh" "$B_TICKET" "$RUN/input.json" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
 else
   NIGHT_SOURCE_CHECKOUT="$SRC" bash "$LM/tasks/bash_patch/build_bash_input.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
@@ -262,10 +266,17 @@ fi
 if [ "$B_TIER" != bash_patch ] && ! grep -q 'WEDNESDAY BRIEF' "$RUN/build_input.out"; then
   finish 2 "REFUSED — the builder did not read the brief as the prompt (no 'WEDNESDAY BRIEF' in build_input.out): a ticket-description fallback is a refusal (kit 02 §1)" "$RUN"
 fi
+if [ "$B_TIER" = test_only ]; then
+  # 2026-10-18 backstop: without a parsed tamper the checker runs plain code_patch mode and would grade a product hunk.
+  TO_LINE="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(((d.get("defect_line") or {}).get("tamper") or {}).get("line","") if not d.get("self_testing") else "")' "$RUN/input.json" 2>&1)"
+  echo "$TO_LINE" | grep -qE '^[0-9]+$' || finish 2 "REFUSED — tier test_only but the builder parsed no tamper (input.json defect_line.tamper: '${TO_LINE:-none}'): the checker would run plain code_patch mode. The brief needs night/build_input.sh's \`## Tamper\` block (that exact heading; line: / from: / to:)" "$RUN"
+  say "test-only: tamper at $B_FILE:$TO_LINE (checker MODE=test_only: A3 the test only, A4 red under the tamper, A5 green at the tip)"
+fi
 IN_TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("tip") or d.get("repo",{}).get("tip",""))' "$RUN/input.json")"
 [ "$IN_TIP" = "$TIP" ] || finish 5 "HARNESS — VOID: the builder pinned ${IN_TIP:-nothing}, the round prepared $TIP (develop moved mid-round?)" "$RUN"
 SELFTEST="$(python3 -c 'import json,sys; print(1 if json.load(open(sys.argv[1])).get("self_testing") else 0)' "$RUN/input.json")"
 TASK_MD="$LM/tasks/$B_TIER/task.md"
+[ "$B_TIER" = test_only ] && TASK_MD="$LM/tasks/code_patch/task.md"   # code_patch's input shape (tasks/test_only/task.md is the unwired tier's)
 [ "$B_TIER" = bash_patch ] && [ "$SELFTEST" = 1 ] && TASK_MD="$LM/tasks/bash_patch/task_selftest.md"
 if [ "$B_TIER" = code_patch2 ] || [ "$B_TIER" = bash_patch2 ]; then
   TASK_MD="$RUN/task.md"
@@ -290,7 +301,7 @@ git clone -q --shared --no-checkout "$SRC" "$CLONE" > "$WORK/clone.out" 2>&1 \
   || finish 5 "HARNESS — clone failed: $(tail -2 "$WORK/clone.out" | tr '\n' ' ')" "$RUN"
 [ "$(git -C "$CLONE" rev-parse HEAD)" = "$TIP" ] || finish 5 "HARNESS — clone HEAD is not $TIP" "$RUN"
 say "clone: $CLONE at ${TIP:0:12}"
-if [ "$B_TIER" = code_patch ] || [ "$B_TIER" = code_patch2 ]; then
+if [ "$B_TIER" = code_patch ] || [ "$B_TIER" = code_patch2 ] || [ "$B_TIER" = test_only ]; then
   bash "$LM/tasks/code_patch/prepare_clone.sh" "$RUN/input.json" "$CLONE" > "$RUN/prepare_clone.out" 2>&1 \
     || finish 5 "HARNESS — prepare_clone.sh failed: $(tail -2 "$RUN/prepare_clone.out" | tr '\n' ' ' | cut -c1-240)" "$RUN"
   say "prepare: $(grep -m1 'shared built' "$RUN/prepare_clone.out" || tail -1 "$RUN/prepare_clone.out")"
@@ -314,7 +325,7 @@ say "model: $(tail -1 "$RUN/run.log" | cut -c1-200)"
 fi
 
 # ------------------------------------------------------------------ 9. checker
-if [ "$B_TIER" = code_patch ]; then
+if [ "$B_TIER" = code_patch ] || [ "$B_TIER" = test_only ]; then
   bash "$LM/tasks/code_patch/spark_checker.sh" "$RUN/input.json" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1; CRC=$?
 else
   bash "$LM/tasks/$B_TIER/checker.sh" "$RUN/input.json" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1; BCRC=$?

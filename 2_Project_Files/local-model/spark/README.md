@@ -16,6 +16,7 @@ sequences `night/build_input.sh`, `tasks/bash_patch/build_bash_input.sh`, `tasks
 | `queue.md` / `done.md` | the queue (format in its header) / the results (`done.md` is created by the first drain) |
 | `tests/arms.sh` | refusal, endpoint-down, dry-run, busy, queue and ONE real round |
 | `tests/code_patch2_arms.sh` · `tests/bash_patch2_arms.sh` | the multi-file tiers (rung 3): red-proof arms, synthetic repos in scratch |
+| `tests/test_only_arms.sh` | tier test_only (2026-10-18): ks_1614_p1 control PASS, tampered goldens FAIL, product-touching briefs REFUSED, old-vs-new lint + dry-run regression |
 | `cache/` (gitignored) | `src/` = the durable cache clone of the Secuura repo; `work/<run-id>/clone` = per-round clones |
 | `state/` (gitignored) | `round.lock`, `queue.lock`, `dry/` inputs, `last_round.json`, `queue.log`, `stale_locks/` |
 
@@ -54,7 +55,8 @@ endpoint is down (round.sh rc 4) or free space on the runs volume is under `SPAR
 
 - a brief dir without exactly one `KS-<n>.md`, or missing a required header line / heading;
 - a brief naming a client other than Secuura (`Client:` line, a `!CODING/<other>/` path, another client's name);
-- a tier other than code_patch / code_patch2 / bash_patch / bash_patch2 (test_only has its own builder and is NOT wired here);
+- a tier other than code_patch / code_patch2 / bash_patch / bash_patch2 / test_only (2026-10-18; see Tiers — the
+  separate tasks/test_only/ builder, `## Tampers` with `### <ID>` entries, is still NOT wired here);
 - a STALE brief: a file it names changed between its `Tip:` and today's develop (override `allow_drift=1`);
 - anything the builders refuse (rc 2), and a code_patch input that did not use the brief as the prompt;
 - a round when the endpoint is down, or another round holds the lock.
@@ -93,6 +95,15 @@ before the disk fills.
   declared set exactly, B3b sites/A3c/A3d over the products, B3x byte identity, B4 every RED red + every SUPPORT green
   with all test sections and no product, B5 all green with every product, B6 undeclared suites naming a product's STEM no
   worse (before/after counts), B7 shellcheck info. Arms: tests/bash_patch2_arms.sh (22). First brief: KS-1274.
+- `test_only` (2026-10-18) — code_patch's TEST-ONLY mode, nothing new: the code is right at the tip and a pin is owed.
+  Header: `File:` = the product (the tamper target, NOT modified) + exactly one `Test file:`; the brief carries ONE
+  `## Tamper` block (`line: N` / from: `` `<tip line>` `` / to: `` `<line>` ``, + `statement_ok:` when mid-statement) and
+  `## Red cells`; `## The test` is not required. Select with `tier=test_only` (or `Tier: \`test_only\``, or a
+  `## Tamper` heading with no Tier line). Input: night/build_input.sh (as code_patch; round.sh REFUSES if it parsed no
+  tamper). Task: tasks/code_patch/task.md. Checker: tasks/code_patch/spark_checker.sh, which runs checker.sh in
+  MODE=test_only (A3 the one test only, A4 red under the planted tamper, A5 green at the untouched tip). Lint refuses
+  a diff file header naming any other file (the product above all) in `## The exact change` fences or golden.diff.
+  Arms: tests/test_only_arms.sh. First brief: night/briefs/ks_1614_p1.
 - A brief whose header says NOT RUNNABLE is refused unless pinned `override_not_runnable=<reason>` (recorded in
   round.json); a header declaring more files than the tier's contract is refused.
 - `golden` in round.json / done.md: `BYTE-IDENTICAL` (cmp), else `TREE-IDENTICAL` (2026-10-07: both diffs applied

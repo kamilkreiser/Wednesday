@@ -15,7 +15,13 @@ REFUSES (rc 2, one `REFUSED <reason>` line per reason on stderr):
   - a required header line or heading is missing (kit 03_BRIEF_TEMPLATE; case-insensitive);
   - the brief names a client other than Secuura (a `Client:` line that is not Secuura, a `!CODING/<other>/` path,
     or another client's name) — the Spark takes Secuura work under Kam's 2026-09-25 ruling, one client per task;
-  - the tier is not one round.sh runs (code_patch, code_patch2, bash_patch, bash_patch2); test_only is not wired here;
+  - the tier is not one round.sh runs (code_patch, code_patch2, bash_patch, bash_patch2, test_only);
+  - test_only (2026-10-18) = code_patch's TEST-ONLY mode (night/build_input.sh parses ONE `## Tamper` block — line: /
+    from: / to: — into defect_line.tamper; tasks/code_patch/checker.sh then runs MODE=test_only). Instead of
+    `## The test` it needs `## Tamper`; header = 1 product (the tamper target, NOT modified) + exactly 1 test; and the
+    product must not be modified: a diff file header (`--- a/` `+++ b/` `diff --git`) in `## The exact change`'s
+    fences or in golden.diff that names any file but the declared test is refused. `## Tampers` (`### <ID>` entries)
+    is tasks/test_only/build_test_only_input.sh's shape — that builder/checker pair is NOT wired here;
   - the HEADER (the lines before the first `## `) says "NOT RUNNABLE" — unless the pin
     `override_not_runnable=<reason>` is given (recorded in round.json; for a brief written before its tier existed);
   - the header's DECLARED touched set (`File:` lines = products; `Test …:` lines = tests) exceeds the tier's
@@ -54,7 +60,26 @@ TIER_CONTRACT = {
     "bash_patch": ((1, 1), (0, 1)),    # tasks/bash_patch/checker.sh B3: { product, one test } (self-testing: one file)
     "code_patch2": ((1, 3), (1, 2)),   # tasks/code_patch2/checker.sh A3: the declared set, 1-3 products + 1-2 tests
     "bash_patch2": ((1, 3), (1, 4)),   # tasks/bash_patch2/checker.sh B3: the declared set, 1-3 products + 1-4 tests (2026-10-07)
+    "test_only": ((1, 1), (1, 1)),     # code_patch checker A3 (test-only): { ONE test }; the product is the tamper target only
 }
+
+
+def diff_paths(diff_text):
+    """Every file a diff's file headers name: `diff --git a/X b/Y`, and a `--- X` line DIRECTLY followed by `+++ Y`
+    (a lone `---` is a removed `--` line, not a header). a/ b/ prefixes and tabs stripped; /dev/null dropped."""
+    out, lines = [], diff_text.split("\n")
+    for i, ln in enumerate(lines):
+        got = []
+        m = re.match(r"^diff --git a/(\S+) b/(\S+)", ln)
+        if m:
+            got = [m.group(1), m.group(2)]
+        elif ln.startswith("--- ") and i + 1 < len(lines) and lines[i + 1].startswith("+++ "):
+            got = [ln[4:], lines[i + 1][4:]]
+        for p in got:
+            p = re.sub(r"^[ab]/", "", p.split("\t")[0].strip())
+            if p and p != "/dev/null" and p not in out:
+                out.append(p)
+    return out
 
 
 def read_pins(path):
@@ -108,8 +133,12 @@ def main():
         reasons.append(f"HEADER: line 1 must be `# KS-<n> ...` (Secuura's Linear team is KS); got {title[:80]!r}")
 
     # --- required shape ---
+    test_heading_at = None   # `## The test` is not owed by a test_only brief; decided once the tier is known (same slot)
     for name, rx in REQUIRED_HEADER + REQUIRED_HEADINGS:
         if not re.search(rx, text, re.M | re.I):
+            if name.startswith("## The test"):
+                test_heading_at = (len(reasons), f"SHAPE: missing {name} (spark-kit 03_BRIEF_TEMPLATE)")
+                continue
             reasons.append(f"SHAPE: missing {name} (spark-kit 03_BRIEF_TEMPLATE)")
 
     # --- pins ---
@@ -138,6 +167,8 @@ def main():
             tier = "bash_patch"
         elif runner in ("vitest", "jest"):
             tier = "code_patch"
+    if test_heading_at and tier != "test_only":
+        reasons.insert(*test_heading_at)
     # --- the header: declared touched set + NOT RUNNABLE ---
     header = re.split(r"(?m)^##\s", text, maxsplit=1)[0]
     products = re.findall(r"(?m)^File:\s*`([^`]+)`", header)
@@ -159,9 +190,34 @@ def main():
                if bool(re.search(r"\bRED\b", m.group(2))) == bool(re.search(r"\bSUPPORT\b", m.group(2)))]
         if bad:
             reasons.append(f"CONTRACT: bash_patch2 test line(s) must say exactly one of RED / SUPPORT: {bad}")
-    if tier not in ("code_patch", "code_patch2", "bash_patch", "bash_patch2"):
-        reasons.append(f"TIER: {tier or 'undetermined'} — round.sh runs code_patch, code_patch2, bash_patch and bash_patch2 only "
-                       f"(test_only has its own builder, tasks/test_only/build_test_only_input.sh; not wired here). "
+    if tier == "test_only":
+        # 2026-10-18: code_patch's TEST-ONLY mode. The builder reads `## Tamper` (singular, case-sensitive) — see round.sh's
+        # post-build backstop for a heading this lint accepts and the builder does not read.
+        if not re.search(r"^##+\s*Tamper\b", text, re.M | re.I):
+            reasons.append("SHAPE: test_only needs a `## Tamper` block (line: N / from: `<tip line>` / to: `<line>`; "
+                           "night/build_input.sh 5b2)"
+                           + (" — `## Tampers` with `### <ID>` entries is tasks/test_only/build_test_only_input.sh's "
+                              "shape, which round.sh does not run; write the single code_patch `## Tamper` block"
+                              if re.search(r"^##+\s*Tampers\b", text, re.M | re.I) else ""))
+        test = tests[0] if len(tests) == 1 else None
+        if test and pins.get("test_file") and pins["test_file"] not in (test, test.split("/", 2)[-1]):
+            reasons.append(f"CONTRACT: the test_file= pin {pins['test_file']} is not the header's test {test} — two names for one file")
+        prod = set(products)
+        m_xs = re.search(r"^##+\s*The exact change\b.*?$(.*?)(?=^##\s|\Z)", text, re.M | re.S | re.I)
+        fences = re.findall(r"^```[^\n]*\n(.*?)^```", m_xs.group(1), re.M | re.S) if m_xs else []
+        golden_path = os.path.join(bdir, "golden.diff")
+        for where, body in ([("`## The exact change`", f) for f in fences]
+                            + ([("golden.diff", open(golden_path, encoding="utf-8").read())] if os.path.isfile(golden_path) else [])):
+            for p in diff_paths(body):   # repo-relative or a suffix of it (service-relative) both name the file
+                if test and (p == test or test.endswith("/" + p)):
+                    continue
+                reasons.append(f"PRODUCT: test_only, but {where} names {p} in a diff file header"
+                               + (" — THE PRODUCT: a test_only brief never modifies it (the tamper corrupts it in a clone only)"
+                                  if any(x == p or x.endswith("/" + p) for x in prod)
+                                  else f" — a test_only diff touches the ONE test {test} and nothing else"))
+    if tier not in ("code_patch", "code_patch2", "bash_patch", "bash_patch2", "test_only"):
+        reasons.append(f"TIER: {tier or 'undetermined'} — round.sh runs code_patch, code_patch2, bash_patch, bash_patch2 and test_only "
+                       f"(test_only = code_patch's TEST-ONLY mode, a `## Tamper` block). "
                        f"Pin tier= or add `Tier: \\`<tier>\\`` to the brief")
     selftest = bool(re.search(r"^##+\s*Self-testing\b", text, re.M | re.I))
     if tier in ("bash_patch", "bash_patch2") and not selftest and not pins.get("ref"):
