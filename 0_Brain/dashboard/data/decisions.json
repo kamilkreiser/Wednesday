@@ -39516,5 +39516,52 @@
    }
   ],
   "amended_ts": "2026-10-18T20:40:29.229233+11:00"
+ },
+ {
+  "id": "secuura-ks1385-cert-holder-can-rewrite-issuer-fields-1018",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1385: under your (b), a certificate holder's organisation can rewrite the issuer fields, and the issuing organisation cannot. Keep it?",
+  "bluf": "Kam, the #1568 gate (Opus, tier 1) measured exactly what your 15 Oct option (b) allows on a certification: the HOLDER's organisation may overwrite the anchored identity, one column (metadata_payload), and that includes issuerOrgId, orgDid, orgTrust and orgVerified. The organisation that actually ISSUED the certificate may not, because certification rows store no issuer. Your (b) said it 'gives a certificate holder's organisation a new write', so this is what you chose. This card only asks whether the issuer fields should be part of that write. #1568 is separately held on a cross-tenant defect that Seat J is fixing; that defect is not this question.",
+  "default_action": "If you don't answer: (a). It stays as you ruled, and #1568 ships it once its cross-tenant fix passes the gate.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it as ruled",
+    "detail": "The holder's organisation may update the whole anchored identity, issuer fields included. Nothing more to build."
+   },
+   {
+    "key": "b",
+    "label": "Holder may update, but not the issuer fields",
+    "detail": "A follow-up keeps issuerOrgId, orgDid, orgTrust and orgVerified as first anchored, and lets the holder change only the rest. A small build and its own gate."
+   },
+   {
+    "key": "c",
+    "label": "Also let the issuing organisation update",
+    "detail": "Needs the certificate's issuer recorded somewhere the guard can read. A bigger change and a design round."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-18T21:14:16.014922+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-01 17:25",
+   "CARD secuura-889-issuer-org-caller-asserted",
+   "CARD composer-sow-history-rewrite",
+   "CARD hpsmpoc-customer-profile-fields",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-kintsugi-issuer-account-how",
+   "CARD secuura-ks1385-anchor-identity-needs-ps895-ruling-1013",
+   "CARD secuura-ks1385-custodian-may-update-anchor-identity-1013",
+   "CARD secuura-ks1385-null-issuer-certifications-1015",
+   "CARD nexusai-rd476-assistant-prompt-words-1018",
+   "CARD nexusai-c170-shipped-docs-words-1018",
+   "CARD nexusai-rd476-two-wording-fixes-1018",
+   "CARD quickquote-v239-five-more-sentences-1018",
+   "CARD wed-model-routing-v10-approve-1018",
+   "CARD hpsmpoc-runtime-10013-route-1018",
+   "CARD secuura-ks1114-deleted-status-found-by-title-1018"
+  ]
  }
 ]
