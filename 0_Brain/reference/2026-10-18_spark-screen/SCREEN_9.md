@@ -118,3 +118,40 @@ The pins are Wednesday's to choose (and arguably wrong: `supersedes` claims a re
 - No query of anchoring's DB or a live service; the census is source-only at the tip.
 - The api-gateway reader (`routes/verification.ts:642`) was not re-read this session; its shape is quoted from the SCREEN_5 brief.
 - Whether KS-1628 has a separate L1/L6 ticket: not looked up.
+
+
+## Re-key to KS-1634 and rounds (09:12-09:25 AEDT, on Wednesday's instruction after the L1/L6 ticket was filed)
+
+**Re-key.** `night/briefs/ks_1628_l1l6_p1` and `_p2`: `KS-1628.md` renamed (mv) to `KS-1634.md`. Edited only: the `# ` title line, the DRAFT line ("KS-1634 (the filed L1/L6 follow-up of KS-1628)"), the Scope "Refs KS-1634, does NOT close it", and ONE sentence appended to "What is wrong" (R's sharpening: the presenter's only two simulated signals are the placeholder txHash and the `simulated` flag; anchoring removes the first at `anchorReadback.ts:116`, the site drops the second, so neither file looks wrong alone; both sites return top-level `verified: true` / `status: 'anchored'` as literals, so the honesty marker is the only load-bearing field). Product hunks, test file and cells UNCHANGED (cell titles still say KS-1628 because the test files are byte-for-byte the proved ones). Remaining "KS-1628" mentions in UNMEASURED/Collision (the lane) left alone. I did not read the ticket (no Linear reader of my own); the builder read it.
+
+**Lane guard:** passed for KS-1634 (no refusal). develop re-read before the rounds: `f95ad12fe5c22f8d037e7139d052363422463c79`, did NOT move. `tunnel.sh check` UP before each round.
+
+| step | p1 verify-file | p2 verify |
+|---|---|---|
+| brief_lint | rc 0 | rc 0 |
+| dry-run | rc 0 (`state/dry/ks_1628_l1l6_p1_20261019-091328`, 119383 B) | rc 0 (`state/dry/ks_1628_l1l6_p2_20261019-091347`, 119311 B) |
+| CONTROL | CONTROL-PASS, golden BYTE-IDENTICAL, 83 s, `runs/spark_secuura_2026-10-19_ks_1628_l1l6_p1-control-r2` | CONTROL-PASS, golden BYTE-IDENTICAL, 70 s, `runs/spark_secuura_2026-10-19_ks_1628_l1l6_p2-control` |
+| ONE real round | **PASS**, 144 s round, 69.891 s model, 35212+2122 tokens | **PASS**, 154 s round, 69.388 s model, 35216+2132 tokens |
+| run dir | `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-19_ks_1628_l1l6_p1` | `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-19_ks_1628_l1l6_p2` |
+| golden | **DIFFERS** (see below: two path lines only) | **DIFFERS** (same) |
+| rebrief | none spent | none spent |
+
+(The earlier refused control left `..._p1-control` empty; the passing one is `-control-r2`.)
+
+### Checker lines, verbatim (both rounds identical in shape; p1 / p2 differ only in the counts shown)
+- `PASS A3 touched-file set == { Blockchain/Dev/services/originate/src/routes/verification.ts , Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash.test.ts }`
+- `PASS A3b every must_change site the ticket names is changed by the product hunk (1 site(s))`
+- `PASS A3c every '+' line the brief adds is in the product hunk (2 line(s)), and no tip line is re-added as a '+' (A3d)`
+- `A3i: ... OK 2 line(s) byte-exact incl. leading whitespace (of 2; 2 line(s) added by the apply)`
+- `PASS A4 RED-FIRST: src/__tests__/ks1634-a-simulated-anchor-verified-by-hash.test.ts fails at the untouched tip (3 failed / 6 run; controls green; assertion reds)`
+- `PASS A5 GREEN-AFTER: ... passes with the product hunk (6 passed / 6 run)`
+- `INFO control cell present: 3 cell(s) passed BEFORE and 6 AFTER (the harness reaches the code both times)`
+- `baseline: total=1442 failed=0 | after: total=1448 failed=0` ; `NEW reds: []` ; `PASS A6 whole services/originate suite: no NEW red vs the untouched tip`
+- `PASS A7 tsc --noEmit for services/originate: rc 0 after the patch (baseline rc=0)`
+- p1: `SUMMARY files=2 +144/-1 ... red_first=yes apply_mode=strict` ; p2: `SUMMARY files=2 +149/-1 ...`
+- `RESULT: PASS (7/7)` ; `PASS A2a ANCHOR: every hunk's old side sits at its header's start line at the tip (SUMMARY hunks=2 ok=2 bad=0 skipped_newfile=1)` ; `SPARK RESULT: PASS (checker rc 0 + A2a anchor OK)`
+
+### The golden "DIFFERS", and the one thing Wednesday must read before holding
+`diff` of each model patch against the brief's `golden.diff`: exactly TWO lines differ per patch, the new test file's `diff --git` line and its `+++ b/` line. **The model named the new test file `ks1634-a-simulated-anchor-verified-by-hash.test.ts`, not the path the brief gives** (`ks1628-l1l6-verify-file-...` / `ks1628-l1l6-verify-...`). Cause, measured in `input.json`: the builder's `suggested_test_file` is derived from the KS-1634 ticket title, and the model took that over the brief's `Test file:` line (the brief path appears in the input too, once). Every other byte (product hunks, the whole test body) equals the golden. The checker passes because A3 takes the test set from the patch. **Both rounds therefore create the SAME file path**: p1 and p2 cannot both be applied as they stand (the second would collide on a new file). Classification: **brief/harness interaction, not a model fault** (the model followed an instruction present in its own input; the content is byte-identical to the proved golden). Fix for whoever applies them: rename one test file (or merge the two into one) before raising; or add `test_file=`-style pin and rebrief (not spent). The first brief's golden for the product is unaffected.
+
+Also: the model's patches were NOT read line by line beyond the golden diff above (`diff` is the evidence); no READY written, nothing held, raised or pushed.
