@@ -48,6 +48,16 @@ TYPED_OK=0; ARGS=()
 for a in "$@"; do case "$a" in --typed-ok) TYPED_OK=1 ;; *) ARGS+=("$a") ;; esac; done
 set -- "${ARGS[@]+"${ARGS[@]}"}"   # bash 3.2 + set -u: a bare "${ARGS[@]}" on an empty array is an error
 PANE="${1:?usage: pane_close.sh <pane> [port ...] [--typed-ok]}"; shift || true
+# (0) 2026-10-18 16:4x (Tuesday s116): `pane_close.sh --help` reached `tmux display -t --help`, tmux's
+#     loose target matching resolved it to a LIVE QA gate's pane (%60), and only the listener check
+#     stopped the close. The pane argument must be an exact %N id or an exact @cockpit_name, never
+#     anything tmux has to guess at. Refuse before any tmux call.
+case "$PANE" in
+  -*) echo "pane_close: REFUSED — '$PANE' looks like an option, not a pane (usage: pane_close.sh <%N | exact cockpit name> [port ...] [--typed-ok]); nothing was closed" >&2; exit 2 ;;
+  %[0-9]*) case "${PANE#%}" in *[!0-9]*) echo "pane_close: REFUSED — '$PANE' is not a %N pane id; nothing was closed" >&2; exit 2 ;; esac ;;
+  *) tmux list-panes -a -F '#{@cockpit_name}' 2>/dev/null | /usr/bin/grep -qxF -- "$PANE" \
+       || { echo "pane_close: REFUSED — no pane has @cockpit_name exactly '$PANE' (use the %ID from tmux list-panes); nothing was closed" >&2; exit 2; } ;;
+esac
 
 PTTY="$(tmux display -p -t "$PANE" '#{pane_tty}' 2>/dev/null)"
 PPID_PANE="$(tmux display -p -t "$PANE" '#{pane_pid}' 2>/dev/null)"
