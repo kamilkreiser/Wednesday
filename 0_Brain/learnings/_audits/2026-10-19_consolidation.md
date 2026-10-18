@@ -46,8 +46,11 @@ No ledger weight retired.
 - **Boot cost:** by-tier digest 530,265 B (09-23) → 620,572 B (10-18), +17%, with the last two weeks
   adding more than double the first two. Statusline after the brain load has NOT risen with it (29-42%
   across seats; this seat 33%). Standing item; no action proposed while the load stays near a third.
-- **KPI 1-4 (Secuura board split):** UNMEASURED — Wednesday's own key sees only the WED team. Re-run
-  from a Secuura seat (it holds the board identity), not from Wednesday.
+- **KPI 1-4 (Secuura board split):** UNMEASURED this time. **CORRECTED 07:5x:** the drafter's reason
+  ("no Secuura key reachable") is wrong. The 2026-08-03 read-only tracker grant lets Wednesday source the
+  key from Secuura's OWN `4_Credentials/.env` for read queries, and this seat used it all morning. The
+  KPIs are measurable from Wednesday's seat; OWED at the next consolidation (or a C8 drafter told the
+  exact env file, never a drive-wide search).
 - **KPI 5 (own volume vs retrieval, proxy):** of 63 lessons linked by window rows, 37 are named in a later
   ledger row and 9 in a later daily note. Proxy only: nothing records that a row was READ.
 - **Retro candidates never filed:** the draft lists five (cockpit `say` "queued", the "next-up" stall,
