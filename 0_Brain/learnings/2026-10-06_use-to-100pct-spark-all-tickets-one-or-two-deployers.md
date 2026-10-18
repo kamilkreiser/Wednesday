@@ -2,11 +2,13 @@
 date: 2026-10-06
 type: grant
 source: Kam, live board 2026-10-06 19:30:43 view=wednesday
-status: live
+status: expired — its end event happened 2026-10-07 ~08:4x (Kam's /login); see tasks/EXPIRING-GRANTS.md. Marked at the 2026-10-19 consolidation.
 tier: W
 ---
 
-# Grant: this seat may spend to 100% of the weekly allowance, shaped as card (a): the Spark on all tickets, one or two deployers
+# EXPIRED 2026-10-07 (do not apply): grant to spend to 100% of the weekly allowance, Spark on all tickets, one or two deployers
+
+*Original headline, kept verbatim:* Grant: this seat may spend to 100% of the weekly allowance, shaped as card (a): the Spark on all tickets, one or two deployers
 
 **The operative case, so the headline matches it:** the weekly gauge is between 90% and 100%, and Wednesday is about to launch a raise, gate, merge or deploy seat for Secuura. **The 90% stop does not apply to this seat until the allowance renews.** Launch with `WED_USAGE_STOP=100`, and name this file and the EXPIRING-GRANTS row as the authority. **The shape is not loosened:** the Spark takes every ticket it can be briefed for, and Claude seats only raise, gate, merge or deploy, with at most two deploy seats.
 

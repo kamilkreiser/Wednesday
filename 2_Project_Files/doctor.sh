@@ -597,6 +597,27 @@ else
   warn "boot_digest.py missing" "the seat will read every lesson file (34% boot) — restore 2_Project_Files/tools/boot_digest.py"
 fi
 
+# --- Weekly consolidation not lapsed (2026-10-19 consolidation catch-up): the ritual
+# (0_Brain/skills/weekly-consolidation.md) lapsed FOUR Sundays (09-27..10-18) because
+# nothing checked it; a ritual nothing triggers is a habit (learnings/2026-08-10_a-ritual-
+# nothing-triggers-is-not-a-ritual). Wednesday seat only: warn when the newest audit note
+# in 0_Brain/learnings/_audits/ is older than 8 days by its filename date.
+if [ "${_DOC_AGENT:-wednesday}" = "wednesday" ]; then
+  _CA_NEWEST="$(ls "$PROJECT_DIR/0_Brain/learnings/_audits/" 2>&1 | grep -E '^20[0-9]{2}-[0-9]{2}-[0-9]{2}_consolidation' | grep -v DRAFT | sort | tail -1)"
+  if [ -z "$_CA_NEWEST" ]; then
+    warn "weekly consolidation: no audit note" "0_Brain/learnings/_audits/ holds no *_consolidation* file; run skills/weekly-consolidation.md"
+  else
+    _CA_DATE="${_CA_NEWEST:0:10}"
+    _CA_EPOCH="$(date -j -f %Y-%m-%d "$_CA_DATE" +%s 2>&1)"
+    _CA_AGE=$(( ( $(date +%s) - ${_CA_EPOCH:-0} ) / 86400 ))
+    if [ "$_CA_AGE" -gt "${WED_CONSOL_MAX_DAYS:-8}" ]; then
+      warn "weekly consolidation LAPSED" "newest audit $_CA_NEWEST is $_CA_AGE days old; run 0_Brain/skills/weekly-consolidation.md this session"
+    else
+      ok "weekly consolidation current (newest audit $_CA_NEWEST, $_CA_AGE d)"
+    fi
+  fi
+fi
+
 # --- Two-agent path guard armed (Phase 2, Kam 2026-09-08: "a strong gate between
 # agents acting between the two"). A guard that can go MISSING is not a guard — the
 # file could be lost to a bad merge, a clone, or a tidy-up, and nothing else would say

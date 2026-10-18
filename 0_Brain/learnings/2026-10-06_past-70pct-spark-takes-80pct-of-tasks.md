@@ -2,11 +2,13 @@
 date: 2026-10-06
 type: grant
 source: Kam, live board 2026-10-06 09:37:54 (view=wednesday)
-status: live
+status: superseded — premise ended 2026-10-07 ~08:4x (account switch, gauge 49%); the band is now 80-90% per [[2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark]]. Marked at the 2026-10-19 consolidation.
 tier: W
 ---
 
-# Past 70% of the weekly allowance, the Spark takes 80% of tasks; Claude seats only for what it cannot do
+# SUPERSEDED (do not apply): "Past 70%, the Spark takes 80% of tasks" — the threshold is now the 80-90% band (2026-10-14)
+
+*Original headline, kept verbatim:* Past 70% of the weekly allowance, the Spark takes 80% of tasks; Claude seats only for what it cannot do
 
 **His words, verbatim (09:37:54):**
 > *"we are past 70% of the weekly allowance.  We now need to switch to using the spark for 80% of tasks"*

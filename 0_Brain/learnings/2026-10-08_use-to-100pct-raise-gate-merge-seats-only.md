@@ -2,11 +2,13 @@
 date: 2026-10-08
 type: grant
 source: Kam, live board 2026-10-08 09:17:17 view=wednesday (card secuura-usage-89pct-raise-backlog-1008 = a)
-status: live
+status: expired — its end event happened 2026-10-09 ~09:0x (allowance renewed, 7d:0%); see tasks/EXPIRING-GRANTS.md. Marked at the 2026-10-19 consolidation.
 tier: W
 ---
 
-# Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
+# EXPIRED 2026-10-09 (do not apply): grant to spend to 100% for raise, gate and merge seats only
+
+*Original headline, kept verbatim:* Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
 
 **The operative case, so the headline matches it:** the weekly gauge is between 90% and 100% and Wednesday is about to launch a Secuura seat. **If it raises, QA-gates or merges PRs (or deploys, at most two at once, per the card's option text), launch it with `WED_USAGE_STOP=100` and name this file and the EXPIRING-GRANTS row as the authority.** Any other kind of Claude seat still stops at 90%.
 

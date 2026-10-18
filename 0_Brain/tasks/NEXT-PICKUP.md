@@ -47,3 +47,5 @@ Secuura: `secuura-ks1612-third-round-after-cap-1018` (rec a third round; default
 6. Deploy round (Kintsugi): READ-ONLY census seat first, once tasks/DEPLOY-BLOCKERS.md clears.
 7. Fable 5.1 coordinator-task trial (routing decision 7) still owed.
 8. stash@{0} (10-18 autostash, restored) and older stashes are KEPT, never dropped.
+9. (from the 10-19 consolidation, retro candidates filed as TOOL items) cockpit `say` "queued" case; the "next-up" stall; `stamp.sh`; a DKIM helper. Details: learnings/_audits/2026-10-19_consolidation_DRAFT.md §6.
+10. PROMOTION OWED (w=21+ family, i-endorse-things-i-have-not-read): send_brief.sh --kind answer advisory for a RULED code shape with no `read <path>`/`unread` clause. Arms first. learnings/_audits/2026-10-19_consolidation.md §2.

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-19 06:00 from 243 lesson files (1,059,819 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 198. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-19 06:28 from 243 lesson files (1,061,093 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 198. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -6942,11 +6942,10 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 3).
 
 
-## Past 70% of the weekly allowance, the Spark takes 80% of tasks; Claude seats only for what it cannot do
-`2026-10-06_past-70pct-spark-takes-80pct-of-tasks.md` · grant · 2026-10-06 · status: live · tier: W
+## SUPERSEDED (do not apply): "Past 70%, the Spark takes 80% of tasks" — the threshold is now the 80-90% band (2026-10-14)
+`2026-10-06_past-70pct-spark-takes-80pct-of-tasks.md` · grant · 2026-10-06 · status: superseded — premise ended 2026-10-07 ~08:4x (account switch, gauge 49%); the band is now 80-90% per [[2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark]]. Marked at the 2026-10-19 consolidation. · tier: W
 
-**His words, verbatim (09:37:54):**
-> *"we are past 70% of the weekly allowance.  We now need to switch to using the spark for 80% of tasks"*
+*Original headline, kept verbatim:* Past 70% of the weekly allowance, the Spark takes 80% of tasks; Claude seats only for what it cannot do
 
 **How to apply:**
 1. **Measure the 80%, don't assert it.** At every checkpoint and in the daily receipt, count tasks routed to the Spark versus Claude seats/gates started since 2026-10-06 09:37 (from `local-model/spark/` run dirs and the cockpit launch log), and report the share.
@@ -6973,12 +6972,14 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 **Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] · [[2026-10-05_october-deploy-both-boxes-when-ready]] (the Secuura twin, Wednesday's) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
-## Grant: this seat may spend to 100% of the weekly allowance, shaped as card (a): the Spark on all tickets, one or two deployers
-`2026-10-06_use-to-100pct-spark-all-tickets-one-or-two-deployers.md` · grant · 2026-10-06 · status: live · tier: W
+## EXPIRED 2026-10-07 (do not apply): grant to spend to 100% of the weekly allowance, Spark on all tickets, one or two deployers
+`2026-10-06_use-to-100pct-spark-all-tickets-one-or-two-deployers.md` · grant · 2026-10-06 · status: expired — its end event happened 2026-10-07 ~08:4x (Kam's /login); see tasks/EXPIRING-GRANTS.md. Marked at the 2026-10-19 consolidation. · tier: W
 
 (no rules-shaped section — file included WHOLE)
 
-# Grant: this seat may spend to 100% of the weekly allowance, shaped as card (a): the Spark on all tickets, one or two deployers
+# EXPIRED 2026-10-07 (do not apply): grant to spend to 100% of the weekly allowance, Spark on all tickets, one or two deployers
+
+*Original headline, kept verbatim:* Grant: this seat may spend to 100% of the weekly allowance, shaped as card (a): the Spark on all tickets, one or two deployers
 
 **The operative case, so the headline matches it:** the weekly gauge is between 90% and 100%, and Wednesday is about to launch a raise, gate, merge or deploy seat for Secuura. **The 90% stop does not apply to this seat until the allowance renews.** Launch with `WED_USAGE_STOP=100`, and name this file and the EXPIRING-GRANTS row as the authority. **The shape is not loosened:** the Spark takes every ticket it can be briefed for, and Claude seats only raise, gate, merge or deploy, with at most two deploy seats.
 
@@ -7077,10 +7078,10 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 - **The deliverable is the routing rule**, in `2_Project_Files/fleet/specs/model-routing.md`, with the measurement on each line.
 
 
-## Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
-`2026-10-08_use-to-100pct-raise-gate-merge-seats-only.md` · grant · 2026-10-08 · status: live · tier: W
+## EXPIRED 2026-10-09 (do not apply): grant to spend to 100% for raise, gate and merge seats only
+`2026-10-08_use-to-100pct-raise-gate-merge-seats-only.md` · grant · 2026-10-08 · status: expired — its end event happened 2026-10-09 ~09:0x (allowance renewed, 7d:0%); see tasks/EXPIRING-GRANTS.md. Marked at the 2026-10-19 consolidation. · tier: W
 
-**The operative case, so the headline matches it:** the weekly gauge is between 90% and 100% and Wednesday is about to launch a Secuura seat. **If it raises, QA-gates or merges PRs (or deploys, at most two at once, per the card's option text), launch it with `WED_USAGE_STOP=100` and name this file and the EXPIRING-GRANTS row as the authority.** Any other kind of Claude seat still stops at 90%.
+*Original headline, kept verbatim:* Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
 
 **How to apply:**
 1. Every launch past 90% names this file, the card id, and which clause it falls under (raise / gate / merge / deploy).
@@ -7104,10 +7105,10 @@ sections (open the file for these): EXTENSION 2026-10-09 23:12:40 — Kam, live 
 **Family:** [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-ornith-sonnet-only-until-monday]] · [[2026-09-18_ornith-works-constantly-standing-rule]] (its 09-25 extension: an idle Ornith with a written reason is accepted) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
-## Until Monday, the work runs on the Spark, Ornith and SONNET seats — no new Opus seats, gates or drafters
-`2026-10-09_spark-ornith-sonnet-only-until-monday.md` · grant · 2026-10-09 · status: superseded in its MODEL half (2026-10-09 ~09:4x) — see the top block · tier: W
+## SUPERSEDED (do not apply): "Until Monday, Spark/Ornith/Sonnet only, no new Opus" — dead since 2026-10-09 ~09:4x; route by model-routing.md v1.0
+`2026-10-09_spark-ornith-sonnet-only-until-monday.md` · grant · 2026-10-09 · status: superseded — whole file (model half ~09:4x 2026-10-09 by "Opus 5.5 for all"; Sonnet trials resumed 23:12 the same day; routing now by fleet/specs/model-routing.md v1.0, Kam 2026-10-18). Marked at the 2026-10-19 consolidation. · tier: W
 
-**His words, verbatim (terminal, after pasting Stuart's message):** *"other than any actions relating to this message, focus on Spark, Onrith and Sonnet agents until monday when I will sign you into your own account"*
+*Original headline, kept verbatim:* Until Monday, the work runs on the Spark, Ornith and SONNET seats — no new Opus seats, gates or drafters
 
 **How to apply:** every launch receipt names the model; the Sonnet trial table (WED-153, [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]]) gets every seat as a data point, not just trial #1. Unchanged: the QA gate before every merge, the signature classes, the 90% stop, one client per local-model task.
 
