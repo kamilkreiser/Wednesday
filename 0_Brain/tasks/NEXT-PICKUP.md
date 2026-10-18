@@ -15,20 +15,13 @@ supersede: REPLACED WHOLESALE by the 22:4x (10-18) Wednesday seat at ~64% ctx, 2
 4. **Morning receipt to Kam (after 06:00, panel):** lead with the overnight result: 22 Secuura PRs merged since 19:00 Sun (count from the MERGED mails: R 47th 9, J 12th 1, R 48th 12 incl. the four below once merged; re-count from develop's log before quoting), nothing deployed, the two open cards, J's API-key-in-transcript disclosure (default: no rotation), and the /model "saved as default" side effect in the Secuura seat's Claude config.
 5. Commit your own files BEFORE any tool that pulls (wed_claim autostash, 10-18).
 
-## 1. LIVE WORK (updated 05:0x at the 70% checkpoint)
-- **develop = 5d1be7b06279950e3bfe176c237e5d640eb04581** (ls-remote 04:5x). H1 and H2 both GO'd and merged (#1581-#1584).
-- **Seat R 49th** (Secuura/Blockchain-R, pane %5, launched 04:57 AEDT): brief fleet/briefs_staged/2026-10-19_seatR49_gateI1_1585.md. RUNG-5 CHECK OWED (pane shows the brief received) and a /model claude-opus-5-5 switch at its first idle (busy marker = the "… (" spinner line; check in its own call), told by mail. Its plan-confirmation QUESTION is the next expected mail. R 48th wrapped 17:54Z (scored 0.95, pane %4 closed); handover `!CODING/Secuura/Blockchain/5_Project_History/2026-10-18_seatR-48th/HANDOVER.md`.
-- **Background sub-agents of THIS Wednesday seat (they die if it rotates before they report):**
-  - GATE I1 (Opus, tier 1): #1585 KS-1626 head 664d3fd2494b. Brief 0_Brain/reference/2026-10-19_gate-I1-pr1585/GATE_BRIEF.md. On the verdict: re-hash (line 3 deleted, one-byte control), ls-remote head + develop, head-bound GO to the R LANE.
-  - Spark brief-writer for KS-1627 (test-only, real redis module in fallback must give 503). Report 0_Brain/reference/2026-10-18_spark-screen/SCREEN_6.md. On a PASS: read at source, hold_ready with a bare ROWID + --title-from-brief, NEXT to R.
-  - **If this seat rotated first:** relaunch GATE I1 from its brief (re-read the head first) and the KS-1627 drafter from SCREEN_5/the KS-1627 ticket.
-- Overnight count from the MERGED mails: 22 Secuura PRs since 19:00 Sun (R 47th 9, J 12th 1, R 48th 12); re-count from develop's log before quoting to Kam.
-- **Seat J lane:** empty. #1568 (KS-1612 + KS-1385 b) HELD at the cap on Kam's card `secuura-ks1612-third-round-after-cap-1018`.
-- **Spark:** queue empty after tonight's screens (SCREEN_2/3/4.md in 0_Brain/reference/2026-10-18_spark-screen/). Next screen: re-run the SCREEN_4 method after these four merge; the pool is thin (361 enumerated, 4 briefable). Tunnel UP at 47788.
-
-## 1a. FIRST WORK AT 06:00 (added at the 05:30 wrap)
-- **Gate PR #1586 (KS-1627, test-only, tier 2 Sonnet)**, head b12f56e303ac36a3e7adecfa4aab9fdeda3c384a on develop 840ac4182d75 (ls-remote 05:3x, both equal to R 49th's 18:32Z READY). One new test file (real services/redis module in fallback -> GET /api/connector/info 503). Write the brief from 0_Brain/reference/2026-10-19_gate-G3-pr1579-pr1580/GATE_BRIEF.md's shape (own scratch subfolder named), re-hash the verdict, head-bound GO to the R LANE. R 49th was told the gate comes from the morning seat ("ANSWER: 1586 KS-1627 received - the morning seat runs its gate after 06:00").
-- No background sub-agent of the overnight seat is running.
+## 1. LIVE WORK (refreshed 06:5x 10-19 by the morning seat at its 50% checkpoint)
+- **develop = 83ed01af70fd5ed6cca9ac66f28ddcb8a1034105** (ls-remote 06:4x). #1586 KS-1627 merged on gate K1's GO. 24 merges since 19:00 Sun (develop first-parent log). Nothing deployed.
+- **Seat R 49th** (%5): holding; next = NEXT with SCREEN_7's held passes. KS-1627 stays In Progress (ruled (b): the real-module 200 control cell is SCREEN_7 item 5).
+- **Seat J 13th** (%6, launched 06:47 on fleet/briefs_staged/2026-10-19_seatJ13_1568_round3_design_ks1385b_issuer_freeze.md): Kam ruled KS-1612 = a (third round, design first) and KS-1385 = b (issuer fields frozen, own PR). OWED: rung-5 check; /model claude-opus-5-5 at its first idle (told by mail); its design QUESTION is Wednesday's to RULE (Stuart's 10-18 11:42Z KS-1612 comment: (i)/(ii) break no S flow, S prefers (iii) KS-1384; a (iii) answer may need Kam).
+- **Background sub-agents of THIS seat (die at rotation; relaunch from their prompts' outputs if missing):** SCREEN_7 Spark brief-writer (KS-1628 items 2-3, KS-1622, KS-1621, KS-1620, KS-1627 cell; report 0_Brain/reference/2026-10-18_spark-screen/SCREEN_7.md); WED-154 storage measurement + dry-run tool (0_Brain/reference/2026-10-19_storage-policy/MEASUREMENT.md, tools/storage_dryrun_secuura.sh); drive survey (0_Brain/reference/2026-10-19_dev-drive-survey/SURVEY.md). Consolidation catch-up DONE (learnings/_audits/2026-10-19_consolidation.md).
+- **WED-154 next:** read MEASUREMENT.md + run the tool's arms yourself, write the policy at 1_Project_Definition/Policies/2026-10-19_secuura-blockchain-storage-policy.md, ONE card to Kam (with the drive survey's G-DRIVE moves), default: weekly dry-run, remove nothing until he taps. Claimed (wed_claim.sh).
+- **Kam's cards open (Secuura):** secuura-ks1628-retire-deprecated-verify-route-1019 (default a: keep running, add the check).
 
 ## 1b. RULED BY WEDNESDAY, STILL OPERATIVE (Secuura)
 - KS-1624 F1 = (a) (export the stripped base; done, #1580 merged). F2/F3 and KS-1623 N2 UNRULED, not queued (tickets marked "needs a ruling").
