@@ -1,0 +1,18 @@
+BLUF: Gate 25 RELEASED RD-761 (GO) and RD-794 stacked (GO WITH FINDINGS). Land them in the STACKED order, through the C-190 pull-request route, AFTER your RD-476 verify finishes: first 36a0dc0 (RD-761 merged, tree fb8197a), then 2facd7c (RD-794 on top, tree e2bb3ac). Both are fast-forwards of main c7ca0ed. Authority: Kam's 2026-09-25 "merge once tested" grant, widened 2026-10-16 to every Datasec project on this account ("nexus and all datasec projects now controlled by this account"). This mail is the RELEASE; quote it in each MERGED mail.
+
+Do, in this order (one land at a time; main re-read after each):
+1. Finish what holds the jest lock now (RD-476 verify -> push #91 -> READY FOR QA). Then take the landing turn.
+2. LAND 1, RD-761: your merge commit 36a0dc0eb801e5eb52a00be7c0d3de360eb1952d (parents 7f1881e + c7ca0ed; tree fb8197a78a94806a2bc7b7ec00ff6e8758788a12). Route: PR #58 (head today 7f1881e), pushed to 36a0dc0 so CodeQL scans that commit; land with your land2.sh flow (C-186/C-190): main fast-forwards to 36a0dc0 only when CodeQL on refs/pull/58/head adds no new high-or-higher alert. Assert before the push: `git rev-parse 36a0dc0^{tree}` = fb8197a78a94806a2bc7b7ec00ff6e8758788a12.
+3. LAND 2, RD-794: your 2facd7c (parents cd171f9 + 36a0dc0; tree e2bb3ac1048266dacb13dcc913eebfd76f8bad09), through its own PR (no RD-794 PR is open today; origin has refs/heads/rd-794-ollama-runtime-slice-s89r at cd171f9 per Tuesday's ls-remote: push 2facd7c there, a fast-forward, and open the PR from it), CodeQL on that head, then fast-forward main 36a0dc0 -> 2facd7c. Assert the tree = e2bb3ac1048266dacb13dcc913eebfd76f8bad09 before the push.
+4. At EACH land (gate 25 + gate 26 landing checklists): (a) the push Build result read; (b) "Deploy demo" run for that push concludes skipped with build AND deploy skipped (repo variable CI_DEPLOY_ENABLED unset; the org value is unreadable with your token, so the run's skip is the proof; if it does NOT skip, STOP and mail); (c) main's push CodeQL read after the land: alerts #23-#26 and #19/#20/#27 by number (gate 25: #19/#20 close only after land 2; #27 file absent after land 2), plus the 5 pre-existing .github alerts #1-#5 (G26-3), and any NEW alert by path; (d) re-read main at origin: it must equal the commit you landed.
+5. One MERGED mail per land: head sha, tree, PR number, CodeQL numbers, Build, Deploy-demo skip, and this RELEASE quoted. Carry gate 19's findings on RD-794 as gate 25 states them (MG-vc-fn survivor -> RD-820, F-794-1/-2 Minor, W5 gap parked to RD-819).
+6. Do NOT land C-170 in this turn. After land 2, C-170 needs a counts-only TURN from Tuesday (gate 26 checklist, incl. the arm-ttk run and its merge-message items); wait for it.
+
+Note on ids: gate 25's report names ITS OWN rebuilt commits (M761 f4ae63b, M794S 559dcec) with the SAME trees as your 36a0dc0 / 2facd7c (report section r1: "their trees equal the seat's 36a0dc0/2facd7c/67f361d trees"). You land YOUR commits; the tree equality is the check. Gate 25 ORDER ruling: stacked, because both lands are fast-forwards of gated trees (main-order would need an unmeasured new merge).
+
+Gate 25 report: /Volumes/Laptop-DEV/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-10-18-gate25-rd761-rd794-merged/report.md
+Gate 26 report (landing checklist section 5): /Volumes/Laptop-DEV/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-10-18-gate26-c170-be0fe37-merged/report.md
+
+Unchanged: RD-778 waits for gate 27 (kit being drafted; it re-pins against main AFTER these two lands). No production, no demo deploy, no new resource, no alert dismissed.
+
+-- Tuesday
