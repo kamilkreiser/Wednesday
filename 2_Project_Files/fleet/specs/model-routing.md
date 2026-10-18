@@ -147,3 +147,7 @@ Project launchers pin their own model, and a coordinator does not edit them. Sen
 7. The 10-11 12:56 ruling lives only in a daily note. Owed: a lesson file.
 
 ---
+
+## Trial record: Fable 5.1, tier-1 gate (decision 7 of Kam's 2026-10-18 approval)
+- **2026-10-19, gate M1** (KS-1628: #1588 / #1587 / #1589, three PRs batched, tier 1), `claude-fable-5-1` via the Agent tool (`model: fable`). **Wall-clock 21 min.** Verdicts GO WITH NOTE / GO / GO WITH NOTE (two Majors on #1589: no gateway removal pin; two property blocks missing from the quarantine map). It planted a regression per re-homed property (8 originate mutants + the gateway mount), reproduced the builder's suite counts exactly, and disclosed one slip of its own (a subshell `cd` in its own clone). Report `0_Brain/reference/2026-10-19_gate-M1-pr1588-1587-1589/verdict.md`, sha256/16 8fe87e4fabd9d2dd (re-hashed by Wednesday).
+- **Same-day Opus tier-1 comparison:** gate L1 (#1568 round 3, one PR, a migration + a guard), 31 min, NO GO with a new Major (MAJ-B) and a MIN-A shape error both found by booting real services; gate K1 (#1586, one test file), ~10 min. Different work, so this is ONE data point, not a comparison: no routing row changes on it. A second Fable tier-1 gate on a single-PR security change is the next measurement. The coordinator-task trial (decision 7, second half) is still OWED.
