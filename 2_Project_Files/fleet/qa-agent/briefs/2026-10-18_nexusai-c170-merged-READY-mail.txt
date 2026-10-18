@@ -1,0 +1,96 @@
+BLUF: rd-460-pkg-into-main-s84m @ be0fe37 (C-170 / RD-460; closes RD-505 and RD-506 when it lands) is READY FOR GATE on main c7ca0ed, tier 1.
+- merge-tree: only the counts file conflicts, and it is the only file both sides changed (base 1904765; the head is 304 behind and 1 ahead).
+- Merged tree, local 88153c0 (never pushed): verify PASS 4706/4706 across 294 suites; set A's ten guards by name 260/260.
+- C-170 acceptance:
+  - The non-draft 2.2.1 build from the merge passes, 32 checks with 0 failed.
+  - The same build from c7ca0ed refuses: 15 FAILs, no zip.
+  - Every MANIFEST check line, every file sha256 and both zip sizes reproduce the 2.2.1 MANIFEST. The two zip-container digests do not. They never have between two builds, because zip entries carry the extract time. One ruling asked of you (§4).
+- C-57 prints STOP; c133 says "accounted 24, still missing 0".
+  - 19 are be0fe37's own, gate 5b's count.
+  - 5 are main-side. 2 of those (jsdom) pass 2 already absorbs, so 3 remain: rd327 R7 and 2 image-content-exposure ids. Ruling asked (§3).
+- arm-ttk.yml can ride the land path as measured (§6). CodeQL has never analysed it.
+I expect you to commission a re-gate.
+
+1. The merge. worktrees/s101o-merge-be0fe37 (absolute path), detached be0fe37, c7ca0ed merged in (main first). Counts placeholder from main, then regenerated once by npm run verify -- --maxWorkers=2 --update-counts.
+  - Commit 88153c09155feb1eaf29ea2c0f18c5039cc64c9b, tree 0f4602e01faecebf9cffb207da40144702445919.
+  - git merge-tree --write-tree c7ca0ed be0fe37: CONFLICT (content) in scripts/verify-expected-counts.json only.
+  - git diff --name-only from base 1904765 on each side: head 34 files, main 121; intersection = the counts file alone.
+  - So every head file in the merged tree is the head's blob, and every main file is main's. That covers the six package inputs: mainTemplate.json 93ecbca, createUiDefinition.json 6d87b9d, viewDefinition.json c8d5fd5, release-policy.json 241f983, listing-assets.txt be050c1, marketplace-package-build.sh 40ec7de, each checked against `git rev-parse be0fe37:<path>` = index.
+
+2. verify and guards (own offline install, proxy-addr 2.0.8 at its own path; lock base locks-laptop-1017):
+  VERDICT: PASS — 4706/4706 tests passed across 294 suites (jest exit 0)   (verify-merge-be0fe37.log; main 4559/287 plus a net 147 tests and 7 suites)
+  - Set A's image guards by name (HANDOVER-S86M.md:108): 10 suites, 260/260, 0 failed (be0fe37-guards.json):
+    - image-content-exposure 59;
+    - rd418-dockerignore-round3 10;
+    - rd385-shipped-root-markdown-identifiers 58;
+    - rd698-mixed-encoding-file 16;
+    - rd699-decode-branches-behaviour 21;
+    - rd403-first-run-no-publisher-identifiers 13;
+    - rd477-customer-leftovers 8;
+    - marketplace-package-build 55;
+    - marketplace-single-build-path 17;
+    - rd630-armttk-ci-workflow 3.
+
+3. C-57 + C-133. Tools: c57-id-superset.sh 1ae84a10…5581 and c133-accounting.py 6f938bfc…f972f, both unedited. A c7ca0ed, B be0fe37, merged 88153c0, base 1904765.
+  - Runs: A 4559 / B 4280 / merged 4706, failed 0 each. Pass 1 missing 24; pass 2 absorbed 2; still missing 22.
+  - Tool verdict, verbatim: VERDICT: STOP — the merged set is NOT a superset. Do not merge. (C-57 step 3)
+  - c133, verbatim: VERDICT: accounted 24, still missing 0, absent files 0. C-112: 349 merged test files; 336 = A blob, 13 = B blob, neither [], absent [] (c133-be0fe37.out).
+  (a) B side, 19 ids. A blob = base and merged = be0fe37's blob, commit be0fe37 itself:
+      - marketplace-package-build 15 (the RD-463 acrLoginServer and dev-image REDs, the B-2 resolution cells, --draft and the positive control);
+      - rd461-self-contained-and-template-toolkit 3 (the registry-step exclusion cells);
+      - rd503-r2-doc-claims-against-product 1 (the BYO-Key-Vault PRECONDITION, RD-505's removal).
+      These match gate 5b's A-F2 count of 19 (HANDOVER-S86M §2c: 13 renames + 6 retired). I could not compare them row by row against the gate's §9.9 table: that report is on the T9, which is unmounted. The 19 names are listed in c57-be0fe37.out.
+  (b) A side, 5 ids. B blob = base and merged = main's blob:
+      - jsdom-instrument-limits ×2 (172 -> 157; 5419285, 379b8b5): pass 2 absorbs them.
+      - rd327 R7 "still the product version 2.0.1" -> "it is package.json's version (one source, C-181)": a4db84d -> b34b7d7, commits 5584ea4, 20bf99c.
+      - image-content-exposure ×2, blob 94e6e4c -> 7e3262b, commits 8de8e5c (RD-418, .dockerignore round 3) and 3f7e263 (RD-466). This is a REWRITE, not a pure retitle: the file goes from 57 tests at B to 59 at merged. The 2 old titles (RD-385 CONTROL "…plus docs/test-files the production stage COPYs by name"; RD-391 ORDER ARM "(gate F1) … docs/test-files plants ship") are replaced by 4 titles, all PASSED in MERGED.json:
+          - RD-385 CONTROL "…and docs/test-files ships by NO path";
+          - RD-391 ORDER ARM (RD-418) "moved back above `!**/.env.example`";
+          - RD-391 ORDER ARM (gate F1, kept) "a DIRECTORY re-include…";
+          - RD-391 ORDER "…no .env.example under docs/ ships".
+        One meaning flips, by main's later ruling: docs/test-files no longer ships at all.
+  QUESTION 1: rule these 3 leftover ids (rd327 R7 and the 2 image-content-exposure ids) ACCOUNTED for this merge, or not. C-215's three conditions hold mechanically for all 3, but C-215 covers RD-761 and RD-794, not this lane, and the image-content-exposure pair is a 2 -> 4 rewrite. The merge commit at landing would list all 24 with side and commit.
+
+4. C-170 acceptance. scripts/marketplace-package-build.sh run from a git archive extract of 88153c0 (session-tools/s101/pkg-extract-88153c0), as S86M's P-2 did. Version 2.2.1, a fresh out-dir each time, listing list = the extract's azure-marketplace/listing-assets.txt.
+  - Merged 88153c0 (repo worktrees/s101o-merge-be0fe37): rc 0, "MANIFEST COMPLETE: 32 checks, 0 failed". Out-dir: MANIFEST-2.2.1_88153c0.txt plus the plan and listing zips.
+  - Control c7ca0ed (repo worktrees/s101-main): rc 1, "MANIFEST COMPLETE: 42 checks, 15 failed". Out-dir: FAILED-MANIFEST-2.2.1_c7ca0ed.txt only, no zip. That matches S86M's P-2 control at 1904765 (15 FAILs, all section 2, customer image).
+  - Against the 2.2.1 reference session-tools/s84m/pkg-build-final-be0fe37/MANIFEST-2.2.1_be0fe37.txt, after normalising the commit and the Built line:
+    - Identical: every [PASS] line, including the three blob sha256s (mainTemplate f91ee8f1…, createUiDefinition 51cb0b8d…, viewDefinition 3f3fc3b2…), the image line (nexusaireleaseacr.azurecr.io/nexusai@sha256:fdda3309…, HTTP 200 anonymous pull), all 7 listing files, and both zip byte counts (18022, 626778).
+    - Different: only the plan-zip sha256 (621b94b5… -> 2cd364f3…) and the listing-zip sha256 (0c6f40f0… -> 8749aa5c…).
+    - Every entry in both zips is byte-identical to the reference zips' entries (unzip + diff -r). The entry timestamps are the extract time (26-Oct-18 12:42 against 26-Sep-27 01:27).
+    - The container digests have never reproduced: S84M's own two 2.2.1 builds differ (f887a2d plan 34635bf6… vs be0fe37 621b94b5…).
+  QUESTION 2: is "reproduces the 2.2.1 MANIFEST sha256s" (C-170) met by entries, blob sha256s and check lines (my reading), or do you want the container digests too? The latter needs a fixed-timestamp zip, a change to the build, which is out of this re-check's scope.
+  - The build made one outbound call: the anonymous-pull probe to nexusaireleaseacr's token endpoint (unauthenticated, read-only, HTTP 200). The zips stay in session-tools/s101/ and have left nothing.
+
+5. Shipped text the head changes (gate 5b A-N1), for your classification (shipped-text-be0fe37.txt):
+  - In the IMAGE (Dockerfile COPY of root *.md; .dockerignore excludes docs/* except README, USER_GUIDE and SUPPORT, none of which the head touches):
+    - README.md (+3/-2, f129ff3 -> e23999f);
+    - DEPLOYMENT_GUIDE.md (+44/-12, 01c7c46 -> 3753a82).
+    Main has not changed either since base, so the merged tree carries the head's text, and the next image built from main ships it.
+  - In the PLAN ZIP (customer-facing wizard and template text): createUiDefinition.json (+16/-105) and mainTemplate.json (+42/-62). viewDefinition.json is unchanged.
+  - In the LISTING ZIP: listing-assets.txt (+7, the 7 media files).
+  - Not shipped by any build but listing copy (Partner Center, Kam's, C-23): docs/marketing/MARKETPLACE_LISTING_CONTENT.md (+1/-1).
+  - Not shipped: docs/HOSTING_AND_COST_ANALYSIS.md, MARKETPLACE_TEST_PROCEDURE.md, REFERENCE_ARCHITECTURE.md (excluded by .dockerignore docs/*), azure-marketplace/*/README.md, submission-readiness-checklist.md, scripts/*.
+
+6. arm-ttk.yml (measured, not pushed):
+  - Land path. Lands on this repo are local merge commits pushed over the SSH deploy key, not API merges. Evidence: PR #31's merge c0788b1, which carried a11eb5f's change to .github/workflows/build.yml, has committer Kam Kreiser, not GitHub (git log). c7ca0ed (RD-828) has the same shape. GitHub's "workflow scope" refusal applies to OAuth and PAT tokens, not deploy-key pushes. The same key already pushed arm-ttk.yml once: be0fe37 is on origin with it.
+  - main's ruleset "Security scan rule" (gh api rulesets): active, ~DEFAULT_BRANCH, bypass []. Rules: deletion, non_fast_forward, code_scanning (CodeQL: errors / high_or_higher), required_status_checks (empty list). No path restriction. No classic branch protection (404).
+  - NOT measured: CodeQL Analyze (actions) on arm-ttk.yml. be0fe37 has no PR, so no CodeQL run has ever seen it (check-runs at be0fe37: audit-production-deps only). By reading: permissions contents: read; no github.event expression in any run step; downloads pinned by version and sha256; actions/checkout@v4 is the same pin build.yml, npm-audit.yml and deploy-demo.yml use on main with 0 open alerts under .github/. A PR would measure it.
+  - arm-ttk itself (predicted 49/49) was NOT run here: no pwsh on this machine.
+
+7. Order (QUESTION 3, the RD-413-first question). Your 2026-09-29 release order was RD-413 -> C-170 (be0fe37) -> RD-696 (2c221fa) -> RD-594 (c7fbf33). None of these is on main (merge-base --is-ancestor: no). rd-413-truthful-mail-secret-storage-s84m is at f70594a, 328 behind main and 1 ahead. It and be0fe37 share only scripts/verify-expected-counts.json (git diff --name-only from each base). So there is no code dependency in either direction by file overlap. Does C-170 still wait for RD-413, or can it go on its own?
+
+8. Landing conditions: deploy-demo must SKIP (vars.CI_DEPLOY_ENABLED unset). The merged tree has had no CI. Its MERGED mail would quote: the Build run, arm-ttk, CodeQL (actions) on the new workflow, A-N1, and the 24-id table. RD-505 and RD-506 close on the land (RD-460 comment 38288).
+
+PRIOR WORK: S84M built be0fe37 and its MANIFEST; gate 5b GO WITH FINDINGS (2026-09-28); S86M's P-2 control. This seat ran the merge, verify, guards, C-57/C-133 and the two builds.
+NOT TESTED:
+  - the gate 5b report (§9.9 table) and the gate 20/19 reports (T9 unmounted);
+  - any CI on the merged tree;
+  - CodeQL on arm-ttk.yml, and arm-ttk itself;
+  - the 19 B-side ids row by row against the gate table;
+  - a deploy of anything.
+
+Asked of you: Questions 1-3, and the gate. Nothing pushed; rd-460-pkg-into-main-s84m untouched (ls-remote be0fe37).
+Next for me: nothing left in the queue. I will hold for your answers and keep the inbox watch armed. If none comes, I write HANDOVER-S101O.
+
+-- S101O
