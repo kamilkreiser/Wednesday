@@ -1,38 +1,34 @@
 ---
-date: 2026-10-16
+date: 2026-10-18
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
-supersede: REPLACED WHOLESALE by the 12:4x Wednesday seat at its 50% checkpoint (2026-10-16 ~13:11). Replace wholesale again; never stack. The previous version is in git.
+supersede: REPLACED WHOLESALE by the 18:5x Wednesday seat at its 51% checkpoint (2026-10-18 ~19:23). Replace wholesale again; never stack. Previous version: NEXT-PICKUP.md.pre-1018-1923 + git.
 ---
 
-# NEXT PICKUP (Fri 16 Oct afternoon)
+# NEXT PICKUP (Sun 18 Oct evening)
 
 ## 0. FIRST ACTIONS FOR THE NEXT WEDNESDAY SEAT
-1. Boot reads as the launcher says. Then `kam_rulings_today.sh`, `kam_msgs.sh 3`, `newmail.sh` (never piped), `fleet_ack.sh list`, `decision_queue.sh list open`, `fleet/usage_gate.sh --check`, `fleet/cockpit/pane_prompt_check.sh %0`, and NEW: `bash 2_Project_Files/local-model/spark/tunnel.sh check` (re-open with `tunnel.sh up`).
-2. **Kam's standing words (EXPIRING-GRANTS top rows, end = the quota reset ~Sun 18 Oct 1pm):** (a) Spark only for new ticket work, briefed by Wednesday by hand; (b) push/merge/deploy what is ready FIRST, Claude seats past the stop for those jobs only. Weekly gauge **99%** (statusline 7d:99% renews 2d 0h at 12:53 Fri). Wednesday's stated reading, uncorrected: **no Claude launches at >=99%** (at 100% this seat stops too).
-3. **MONDAY 2026-10-19: WED-154**, the storage policy for old Blockchain files and old tests (policy + dry-run + first measured report + a card; nothing removed before Kam sees it).
-4. **A checkpoint turn never ends on a declared default alone** (ledger 10-16): Spark round running, brief queued, a wake armed, or a measured WHY in spark/queue.md. The 06:0x seat sat idle 09:15 -> 12:45.
+1. Boot reads as the launcher says. Then kam_rulings_today.sh, reconcile_rulings.py, newmail.sh (to a file, never piped), fleet_ack.sh list, decision_queue.sh list open, fleet/usage_gate.sh --check, pane_prompt_check.sh %0, `local-model/spark/tunnel.sh check` (up if down; it was DOWN at this boot).
+2. **Kam's instruction in force (EXPIRING-GRANTS top row, 10-18 ~19:0x, no expiry, tied to this account):** "new account so please work on the tickets, backlog and definition of which agent to use for what. Spark connected so give it as many tickets as it can handle". Lesson learnings/2026-10-18_new-account-tickets-backlog-routing-definition-spark-max.md. The 10-15 Spark-only and push-first rows are EXPIRED. Gauge 1%.
+3. **MONDAY 2026-10-19: WED-154** storage policy (policy + dry-run + first measured report + a card; nothing removed before Kam sees it). Weekly consolidation is also due (first session after Sunday).
+4. **Commit your own files BEFORE any tool that pulls** (wed_claim, safe_pull, safe_push): wed_claim's autostash swallowed today's new note at 19:1x (ledger row 10-18; stash@{0} KEPT, restored).
 
-## 1. STATE (13:1x Fri) — NO Claude seat live; panes %0 + %1
-- **develop = 76698952a75717bbcbc35ace85d08d6758d8844f** (ls-remote 13:0x). Nothing deployed.
-- **#1560 (KS-1543 parts 2+3) head 180c7c822b571b8ff8b5ea15d4286277948c66c0 and #1561 (KS-1462 item 1) head ba8c18794beddd47e7704891e6cbd4efda7664f6**: READY FOR GATE (R 46th, wrapped; HANDOVER Blockchain/5_Project_History/2026-10-16_seatR-46th/HANDOVER.md). Gate waits on Kam's card `secuura-gate-at-99pct-two-spark-prs-1016` (default b: after Sunday's reset, or at once on a /login). One batched Opus gate on 13/16 legs (ruled); then merge one at a time, head == GO sha, restore Linear In Progress/contributes.
-- **HELD, waiting for Kam:** PR #1555 (KS-1114) head c85cc28d, card secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015.
-- **HELD Spark READY for the next raise round:** night/READY_KS-1541-REFUSALNOTE-1_spark-dsv4flash_BRIEFED-CODEPATCH-INFO-PASS-7of7_2026-10-16.diff.md.
-- **KS-1614 item 4 golden READY (not a Spark pass):** night/briefs/ks_1614_p1/ (test-only [1n] cell, kills mutant M2; golden proven to apply byte-identical at 76698952a757). Spark lint refuses test_only (not wired into round.sh). Either the next Claude raise seat carries the golden through a gate, or wire test_only first.
-- **Waiting for the reset:** KS-1612 (real Postgres), KS-1613 (test-only shell cells, same gap), KS-1611.
+## 1. LIVE WORK (19:2x Sun) — panes %0 (Wednesday), %2 J 12th, %3 R 47th
+- **develop = d0c5d2e0ef8bf8c1e70f9684503c5fb3a3e53c4f** (Peter merged his own #1562-#1564, systemTest, over the weekend; 0 overlap with ours).
+- **GATE C** (Opus background subagent of the Wednesday seat that launched it): #1560 (KS-1543 p2+3, 180c7c82) + #1561 (KS-1462 i1, ba8c1879). Verdict -> 0_Brain/reference/2026-10-18_gate-C-pr1560-pr1561/verdict.md. On GO: recompute sha (line 3 deleted), ls-remote the heads, mail the R LANE a head-bound GO per PR (one at a time). If this seat rotated, the subagent died with it: re-launch from the same GATE_BRIEF.md.
+- **Seat J 12th (%2)**: KS-1114 existence-only fix on #1555 (round 2 of 2) then KS-1385 (b) + KS-1612. Brief fleet/briefs_staged/2026-10-18_seatJ12_ks1114_fix_ks1385b_ks1612.md. Its plan confirmation not yet answered at 19:23. **Still on Opus 5: switch to claude-opus-5-5 at its first idle (idle check in its own call, then /model, then Enter on the dialog, then tell it in the ANSWER).**
+- **Seat R 47th (%3)**: on Opus 5.5 (switched 19:2x). Plan CONFIRMED (ANSWER 08:22Z): waits for gate C GO; then KS-1541 + KS-724 as two PRs in one batched gate; KS-1614 after #1560 merges; team-notify comments (KS-772 Stuart, KS-485 Peter) after merges. Brief fleet/briefs_staged/2026-10-18_seatR47_merge_gateC_raise_1541_1614_ks724.md.
+- **Background subagents (die with this seat on rotation; check their outputs on disk first):** Spark screen + brief-writer + rounds -> 0_Brain/reference/2026-10-18_spark-screen/SCREEN.md (it does NOT hold PASSes: Wednesday reads every PASS at source and holds it); test_only tier wiring -> spark/round.sh + brief_lint.py with .pre-1018-testonly backups + an IMPROVEMENTS row (claimed in wed_claim; commit it after reading the arms); model-routing v1.0 draft -> fleet/specs/model-routing.md.v1.0-draft + summary 0_Brain/reference/2026-10-18_model-routing/SUMMARY.md (claimed; review, swap in, publish the summary to Kam as a short doc with decisions + defaults). models_latest.json now lists a Fable level (claude-fable-5-1): a routing question for Kam, not assumed.
 
 ## 2. KAM'S CARDS OPEN
-secuura-ks724-locked-account-template-exclusion-1015 · secuura-ks1385-null-issuer-certifications-1015 · secuura-ks1114-title-reply-leaks-details-fix-now-or-wait-1015 · secuura-gate-at-99pct-two-spark-prs-1016. Plus 3 Datasec + 1 Tuesday NAS-sync (hers). Unanswered panel question (bf-f955bd7b56aa959f): lean boots at >=95%? Not a rule until he answers.
+Secuura: none (all four ruled 18:59-19:00 and reconciled). Datasec: composer-l05-setup-card-too-1014 (Tuesday's). Unanswered panel question from 10-16 (bf-f955bd7b56aa959f, lean boots at >=95%): not a rule.
 
-## 3. SPARK
-- Tunnel guard BUILT 10-16 13:0x: spark/tunnel.sh check|up (5 arms), doctor WARN leg (both ways). **round.sh's in-path `tunnel.sh up` before ENDPOINT DOWN is NOT yet exercised by a real round**: the next real round is the test (drop the tunnel first on purpose, read round.json for the "tunnel.sh up rc=0" line).
-- Queue EMPTY with a measured WHY (spark/queue.md 13:10). Next candidates need a fresh screen or the test_only tier.
-
-## 4. OWED BY WEDNESDAY (own tools, small)
-1. Wire tier test_only into spark/round.sh + brief_lint (tasks/test_only/build_test_only_input.sh + checker MODE=test_only), arms first; ks_1614_p1 is its first run (IMPROVEMENTS 10-16 13:10).
-2. cockpit.sh say --mail: stamp the mail's own timestamp into the pointer; `say %4 ...` (pane id) is a SILENT no-op: make an unknown name fail loudly.
-3. Proposal for Kam (not urgent): Secuura launches default SECUURA_ALLOW_ONDISK_KEY=1 (or seed the keychain) so F-02 stops leaving a keepalive-less core.sshCommand.
-4. INDEX.md refresh (newest block 2026-09-23).
-5. Deploy round (Kintsugi): READ-ONLY census seat first, only once tasks/DEPLOY-BLOCKERS.md clears (GATEWAY_VOUCH_SECRET first). After the reset.
-6. stash@{0} from 10-14 is KEPT, never dropped.
+## 3. OWED BY WEDNESDAY (own tools, small)
+1. wed_claim.sh: refuse to autostash when anything outside dashboard/data is dirty (safe_pull's rule).
+2. cockpit.sh say --mail: stamp the mail's own timestamp into the pointer; `say %4 ...` (pane id) is a silent no-op: fail loudly.
+3. pretooluse_no_cd.sh flags write verbs in the session SCRATCHPAD clone as "outside WEDNESDAY" (blocked a merge-tree in a scratch clone 19:0x): allow the scratchpad path.
+4. Proposal for Kam (not urgent): Secuura launches default SECUURA_ALLOW_ONDISK_KEY=1 (or seed the keychain), so F-02 stops leaving a keepalive-less core.sshCommand (R 47th's preflight, verbatim, repeated it).
+5. INDEX.md refresh (newest block 2026-09-23).
+6. Deploy round (Kintsugi): READ-ONLY census seat first, once tasks/DEPLOY-BLOCKERS.md clears (GATEWAY_VOUCH_SECRET first).
+7. stash@{0} (10-18 autostash, restored) and older stashes are KEPT, never dropped.
