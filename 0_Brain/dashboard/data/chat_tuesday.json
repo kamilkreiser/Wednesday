@@ -4807,5 +4807,12 @@
   "project": "Datasec",
   "ts": "2026-10-18T20:56:37.185597+11:00",
   "text": "Received: NexusAI RD-476, you approved both wording fixes. I'm telling the NexusAI agent now: it adds the two fixes, re-runs the two failing questions live on the dev AI for a few cents, and then RD-476 goes through its QA gate with RD-856 and RD-857."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-18T21:27:46.938005+11:00",
+  "text": "Datasec / QuickQuote: the 2.39 publish failed and the live site was down for about 10 minutes, 21:14 to 21:24 tonight. It's back on 2.36 and healthy, and I checked it myself at 21:27. No action needed right now.\n\nWhat happened: the publish seat built the 2.39 image from a copy of the code whose files only the system administrator could read. The app runs as an ordinary user, couldn't open its own server file, and never started. Azure had already stopped 2.36, so nothing was serving. The seat rolled back, but about eight minutes late, because its own monitor was broken. That part is on us: my brief checked the image's files but never tested that the app could actually start as its runtime user.\n\nWho noticed: the logs so far show only our own requests during those ten minutes, and 2.39 served no pages at all. No rep's quote, sign-in or email went through it.\n\nThe 2.39 code itself was fine and fully checked. Your approval for it is unused. I'll put the retry on a card."
  }
 ]
