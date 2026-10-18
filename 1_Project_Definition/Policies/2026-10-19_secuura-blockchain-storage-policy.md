@@ -2,7 +2,7 @@
 date: 2026-10-19
 type: policy
 source: Kam, terminal 2026-10-15 ~15:4x (WED-154), verbatim: "on monday, please create an efficient policy to create more efficient storage of old blockchain files and old tests.  If we do not need them going forward, they can be removed and this can / should be done regularly"
-status: PROPOSED — nothing is removed under it until Kam rules card wed-secuura-storage-policy-1019
+status: APPROVED — Kam ruled card wed-secuura-storage-policy-1019 = a "Approve the policy and the first removal" (live board 2026-10-19 07:24:57). Round 1 commissioned to Seat D (brief 2_Project_Files/fleet/briefs_staged/2026-10-19_seatD_storage_removal_round1.md).
 ---
 
 # Storage policy: old Secuura/Blockchain (Platform K) files and old tests
