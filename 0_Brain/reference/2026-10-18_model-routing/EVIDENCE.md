@@ -42,3 +42,16 @@ Table B, the 7 queue-era items that did not PASS on their first run:
 Opus comparator rows on the same client, 10-09..10-16: R 29th 1.0, R 30th 1.0, F 7th 0.98, J 1st 0.98, R 45th 1.0, R 46th 0.95, J 11th 0.90, D 17th 0.96, D 18th 0.96. That is n=9, mean 0.97, on a different work mix (deploys, a board seat). **Not a like-for-like comparison.**
 
 Majors that gates caught on Sonnet-built or Sonnet-raised PRs: #1450, #1474, #1476, #1484 and #1497 (5). Majors that reached develop: 0, as recorded. Sonnet-tier gates on 10-12: 11, with 1 real Major found (#1464).
+
+## Decision-7 trial row 1 — FABLE 5.1 vs OPUS 5.5 on the same tier-1 gate (gate E1, 2026-10-18 ~21:5x-22:2x AEDT)
+Same brief, independent, run in parallel: 0_Brain/reference/2026-10-18_gate-E1-pr1570-pr1572/GATE_BRIEF.md.
+| | Opus 5.5 (opus/verdict.md, sha cc91eb9abeaa70f0) | Fable 5.1 (fable/verdict.md, sha 6af5896fb794a797) |
+|---|---|---|
+| #1570 verdict | GO | GO WITH NOTE |
+| #1572 verdict | GO WITH NOTE | GO WITH NOTE |
+| #1572 minor (warn only on throw; r.ok unchecked; first window not a list) | found (platform.ts:421-423) | found (platform.ts:418-423) |
+| #1570 test gap: mutant `${1#*/}` -> `${1##*/}` survives, NOT equivalent (7 of 16 live headers carry a 2nd '/'; no cell drives one) | NOT reported | **found** (ks1547 test :56-97) |
+| extra notes | internal upstream URL in the timeout log text | JSON-parse err.message carries a <=10-char body snippet; pre-existing lenient header parse (3/16x etc.) |
+| wall-clock | 31 min | 35 min |
+| verdict file size | 91 lines | 57 lines |
+Reading (single instance, pilot): Fable matched Opus on the shared finding and caught one real test gap Opus missed, at ~13% more time. Not a rule yet (v1.0: >= 5 rows). The coordinator-task trial is still owed.
