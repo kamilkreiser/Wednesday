@@ -174,3 +174,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-18 16:40 | Kamils-Mac-mini | pane_close.sh: refuse a pane arg that starts with '-' (tmux fuzzy target resolved '--help' to gate 25's %60, 2026-10-18 16:4x) | OPEN | |
 | 2026-10-18 19:14 | Kamils-Mac-Studio | spark/round.sh + brief_lint.py: wire tier test_only (tasks/test_only builder + checker MODE=test_only), arms first; first run ks_1614_p1 golden (pickup OWED item 1, 2026-10-18) | OPEN | |
 | 2026-10-18 19:14 | Kamils-Mac-Studio | --force | CLOSED |  2026-10-18 19:15 mistaken claim: argument order slip (--force passed as the item), 2026-10-18 19:1x; real claim follows |
+| 2026-10-18 19:15 | Kamils-Mac-Studio | fleet/specs/model-routing.md v1.0: the which-agent-for-what decision table for Kam's approval (Kam 2026-10-18 19:0x 'definition of which agent to use for what'); extends the 10-09 claim on the same file | OPEN | |
