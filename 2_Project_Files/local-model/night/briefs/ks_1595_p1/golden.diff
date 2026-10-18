@@ -1,0 +1,134 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1595-gdpr-connector-context-reaches-the-service.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1595-gdpr-connector-context-reaches-the-service.test.ts
+new file mode 100644
+index 000000000..b98a1da38
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1595-gdpr-connector-context-reaches-the-service.test.ts
+@@ -0,0 +1,128 @@
++// KS-1595 item 1 (gate of PR 1543, KS-759): routes/gdpr.ts `connectorContext` had no runtime cell at all.
++// The gate's three mutants in gdpr.ts (tenantId and organizationId swapped, organizationId always undefined,
++// the whole function always null) passed every unit suite and every integration cell. The sibling copy in
++// platformOrganizations.ts is covered; this one is not. These cells mount the real gdprRouter on a loopback
++// listener, put a connector principal on the request the way the verified-JWT middleware does, and assert
++// which values reach the service call. The service and the logger are doubles (the KS-730 part B shape).
++const mockExecuteErasure = jest.fn();
++const mockGetErasureStatus = jest.fn();
++
++jest.mock('../services/gdprService', () => ({
++  executeErasureByExternalRef: mockExecuteErasure,
++  getErasureStatusByExternalRef: mockGetErasureStatus,
++  ConnectorErasureCrossOrgError: class ConnectorErasureCrossOrgError extends Error {},
++  ConnectorErasureUnresolvableError: class ConnectorErasureUnresolvableError extends Error {},
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireSelfOrRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  hasAnyRole: () => true,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { gdprRouter } from '../routes/gdpr';
++
++let principal: Record<string, unknown> | undefined;
++
++const app = express();
++app.use(
++  '/api/gdpr',
++  (req, _res, next) => {
++    if (principal) (req as unknown as { user: unknown }).user = principal;
++    next();
++  },
++  express.json(),
++  gdprRouter,
++);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => {
++  server?.close();
++});
++beforeEach(() => {
++  jest.clearAllMocks();
++  principal = undefined;
++});
++
++const DONE = { status: 'completed', alreadyErased: false };
++
++async function post(body: unknown): Promise<{ status: number; json: any }> {
++  const res = await fetch(baseUrl + '/api/gdpr/erasures', {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    body: JSON.stringify(body),
++  });
++  return { status: res.status, json: await res.json() };
++}
++
++async function get(externalRef: string): Promise<{ status: number; json: any }> {
++  const res = await fetch(baseUrl + '/api/gdpr/erasures/' + externalRef, { method: 'GET' });
++  return { status: res.status, json: await res.json() };
++}
++
++describe('KS-1595 routes/gdpr.ts connectorContext hands the verified claims to the erasure service', () => {
++  it('RED KS-1595 R1: POST /erasures passes the connector id, tenantId and organizationId of the principal to the service', async () => {
++    principal = { userId: 'connector:c-1', role: 'connector', tenantId: 't-1', organizationId: 'o-1' };
++    mockExecuteErasure.mockResolvedValueOnce(DONE);
++    const reply = await post({ externalRef: 'ref-1' });
++    expect([reply.status, reply.json]).toEqual([200, { success: true, data: DONE }]);
++    expect(mockExecuteErasure.mock.calls).toEqual([['ref-1', 'c-1', 't-1', 'o-1']]);
++  });
++
++  it('RED KS-1595 R2: GET /erasures/:externalRef passes the tenantId and organizationId of the principal to the service', async () => {
++    principal = { userId: 'connector:c-1', role: 'connector', tenantId: 't-1', organizationId: 'o-1' };
++    mockGetErasureStatus.mockResolvedValueOnce(DONE);
++    const reply = await get('ref-2');
++    expect([reply.status, reply.json]).toEqual([200, { success: true, data: DONE }]);
++    expect(mockGetErasureStatus.mock.calls).toEqual([['ref-2', 't-1', 'o-1']]);
++  });
++
++  it('RED KS-1595 R3: a principal with a tenant and no organization reaches the service with organizationId undefined', async () => {
++    principal = { userId: 'connector:c-1', role: 'connector', tenantId: 't-1' };
++    mockExecuteErasure.mockResolvedValueOnce(DONE);
++    const reply = await post({ externalRef: 'ref-3' });
++    expect(reply.status).toBe(200);
++    expect(mockExecuteErasure.mock.calls).toEqual([['ref-3', 'c-1', 't-1', undefined]]);
++  });
++
++  it('CONTROL KS-1595 C1: POST /erasures from a principal with no tenant is refused 403 and the service is not called', async () => {
++    principal = { userId: 'connector:c-1', role: 'connector' };
++    const reply = await post({ externalRef: 'ref-4' });
++    expect([reply.status, reply.json.error.code, reply.json.error.message]).toEqual([403, 'FORBIDDEN', 'Connector token carries no tenant']);
++    expect(mockExecuteErasure).not.toHaveBeenCalled();
++  });
++
++  it('CONTROL KS-1595 C2: GET /erasures/:externalRef from a principal with no tenant is refused 403 and the service is not called', async () => {
++    principal = { userId: 'connector:c-1', role: 'connector' };
++    const reply = await get('ref-5');
++    expect([reply.status, reply.json.error.code]).toEqual([403, 'FORBIDDEN']);
++    expect(mockGetErasureStatus).not.toHaveBeenCalled();
++  });
++
++  it('CONTROL KS-1595 C3: a request with no principal at all is refused 403 and the service is not called', async () => {
++    const reply = await post({ externalRef: 'ref-6' });
++    expect([reply.status, reply.json.error.code]).toEqual([403, 'FORBIDDEN']);
++    expect(mockExecuteErasure).not.toHaveBeenCalled();
++  });
++
++  it('CONTROL KS-1595 C4: an empty externalRef is refused 400 before the principal is read', async () => {
++    principal = { userId: 'connector:c-1', role: 'connector', tenantId: 't-1', organizationId: 'o-1' };
++    const reply = await post({ externalRef: '' });
++    expect([reply.status, reply.json.error.code]).toEqual([400, 'BAD_REQUEST']);
++    expect(mockExecuteErasure).not.toHaveBeenCalled();
++  });
++});

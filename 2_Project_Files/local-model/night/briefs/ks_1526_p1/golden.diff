@@ -1,0 +1,102 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/utils/logger.ts b/Blockchain/Dev/services/api-gateway/src/utils/logger.ts
+index 77200ea9c..aec0b69c3 100644
+--- a/Blockchain/Dev/services/api-gateway/src/utils/logger.ts
++++ b/Blockchain/Dev/services/api-gateway/src/utils/logger.ts
+@@ -31,4 +31,4 @@
+   transports.push(
+-    new winston.transports.File({ filename: 'logs/error.log', level: 'error', maxsize: 10_000_000, maxFiles: 5 }),
+-    new winston.transports.File({ filename: 'logs/combined.log', maxsize: 10_000_000, maxFiles: 5 }),
++    new winston.transports.File({ filename: 'logs/error.log', level: 'error', format: combine(json()), maxsize: 10_000_000, maxFiles: 5 }),
++    new winston.transports.File({ filename: 'logs/combined.log', format: combine(json()), maxsize: 10_000_000, maxFiles: 5 }),
+   );
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1526-production-file-logs-carry-the-entry.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1526-production-file-logs-carry-the-entry.test.ts
+new file mode 100644
+index 000000000..89b722c72
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1526-production-file-logs-carry-the-entry.test.ts
+@@ -0,0 +1,85 @@
++/**
++ * KS-1526 - under NODE_ENV=production the api-gateway's two File transports carried no format, so every
++ * log call was written to logs/error.log and logs/combined.log as the literal text `undefined` (the logger's
++ * own format has no final formatter; only the Console transport had one). Each File transport now gets
++ * `format: combine(json())`, the shape the originate service's fix (KS-1348) uses.
++ * The cells build the PRODUCTION logger in a scratch working directory, write one error and one info line,
++ * and read both files back. The module reads NODE_ENV once at import, hence vi.resetModules().
++ */
++import { describe, expect, it, vi, afterEach } from 'vitest';
++import * as fs from 'fs';
++import * as os from 'os';
++import * as path from 'path';
++
++const ORIGINAL_CWD = process.cwd();
++const ORIGINAL_NODE_ENV = process.env.NODE_ENV;
++
++afterEach(() => {
++  process.chdir(ORIGINAL_CWD);
++  if (ORIGINAL_NODE_ENV === undefined) delete process.env.NODE_ENV;
++  else process.env.NODE_ENV = ORIGINAL_NODE_ENV;
++  vi.resetModules();
++});
++
++/** Import a fresh logger module in a scratch working directory under the given NODE_ENV. */
++async function freshLogger(nodeEnv: string) {
++  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ks1526-'));
++  process.chdir(dir);
++  process.env.NODE_ENV = nodeEnv;
++  vi.resetModules();
++  const { logger } = await import('../utils/logger');
++  return { logger, dir };
++}
++
++/** Wait until `file` holds at least `lines` lines (or 5 s pass), then return its lines. */
++async function readLines(file: string, lines: number): Promise<string[]> {
++  const deadline = Date.now() + 5000;
++  let got: string[] = [];
++  while (Date.now() < deadline) {
++    got = fs.existsSync(file) ? fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.length > 0) : [];
++    if (got.length >= lines) break;
++    await new Promise((resolve) => setTimeout(resolve, 25));
++  }
++  return got;
++}
++
++/** JSON.parse that answers null instead of throwing, so a bad line fails an assertion and not a parse. */
++function parsed(line: string): any {
++  try {
++    return JSON.parse(line);
++  } catch {
++    return null;
++  }
++}
++
++describe('KS-1526 - the production file logs carry the log entries, not the text undefined', () => {
++  it('RED KS-1526 L1: logs/error.log holds one JSON line carrying level, message and service', async () => {
++    const { logger, dir } = await freshLogger('production');
++    logger.error('ks1526 boom');
++    logger.info('ks1526 hello');
++    const lines = await readLines(path.join(dir, 'logs', 'error.log'), 1);
++    expect(lines.length).toBe(1);
++    const entry = parsed(lines[0]);
++    expect([entry?.level, entry?.message, entry?.service]).toEqual(['error', 'ks1526 boom', 'api-gateway']);
++  });
++
++  it('RED KS-1526 L2: logs/combined.log holds both calls as JSON lines, in order', async () => {
++    const { logger, dir } = await freshLogger('production');
++    logger.error('ks1526 boom');
++    logger.info('ks1526 hello');
++    const lines = await readLines(path.join(dir, 'logs', 'combined.log'), 2);
++    expect(lines.length).toBe(2);
++    expect(lines.map((l) => parsed(l)?.message)).toEqual(['ks1526 boom', 'ks1526 hello']);
++  });
++
++  it('CONTROL KS-1526 L3: the production logger still has the Console transport and the two File transports', async () => {
++    const { logger } = await freshLogger('production');
++    expect(logger.transports.map((t) => t.constructor.name)).toEqual(['Console', 'File', 'File']);
++  });
++
++  it('CONTROL KS-1526 L4: outside production there is only the Console transport and no logs directory is made', async () => {
++    const { logger, dir } = await freshLogger('test');
++    expect(logger.transports.map((t) => t.constructor.name)).toEqual(['Console']);
++    expect(fs.existsSync(path.join(dir, 'logs'))).toBe(false);
++  });
++});
