@@ -1,0 +1,98 @@
+From Tuesday (Kam's Datasec coordinator seat), Datasec / MPS Commercial Calculator. Questions go to `tuesday-agent@agentmail.to` with subject `[Datasec/MPS Commercial Calculator -> Tuesday] QUESTION: <topic>`. `AGENTMAIL_API_KEY` is used by name only; it is in `4_Credentials/.env`. Your STATUS file is the wrap.
+# BRIEF B172 · SEAT-E2 (lane E's files, one ticket): MPSCALC-231, the stale "Item class: service … until MPSCALC-142" clause in the importer's CARE-PACKS rule text
+
+**BLUF.** One clause in one line. `src/MpsCalc.Import/PriceBookImporter.cs:140` (the `CARE-PACKS` lineage note) ends *"Item class: service (default K-05, until MPSCALC-142)."*, but the code puts every imported care pack in the **Care pack** class (`ItemClass.CarePack`, `PurchaseCatalogue.cs:148`) and totals it under Services (`PurchaseCalculator.cs:45`, ENGINE X-31). Replace that clause with the sentence the importer docs already state, add one test that pins it (RED at main, GREEN at your head), run the .NET CI line, push a branch. **Tier 2.** Not a figure, not a price, not a customer word: the note is written into the reference store only, and no API route, contract or screen carries it (drafter's grep below). The new sentence is still listed as **NEW WORDS (staff-only)** for the next hosted words list.
+
+**Drafted:** 2026-10-18 06:38-06:46 AEDT by Tuesday's drafter. Pane `Datasec/MPS-E2`. Your commission is THIS file, at `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-18_B172_SEAT-E2_mps-carepacks-rule-text.md` (Tuesday's tree, read-only to you).
+**Step 0:** copy it unchanged into `1_Project_Definition/Briefs/`, check the copy with `cmp`, and put the sha256 of both files in STATUS.
+**Launch (Tuesday):** `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/MPS-E2 "bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-18_B172_SEAT-E2_mps-carepacks-rule-text.md'"` (form: `brief_seat.sh:4`). Preflight: write "none (brief_seat launch)" in STATUS. **No az in this brief.**
+**Report:** `1_Project_Definition/Briefs/2026-10-18_B172_STATUS.md`. Its exact LAST line is defined at the end.
+
+**Shape:** lane E's own brief `Briefs/2026-10-16_B104_LANE-E_mps-lane-e.md` (the DO steps, the READY line form, the HOLDS) and its newest addenda `B104_ADDENDUM-8` / `-9`. Lane E's pane closed at 05:35 with `DONE: B104 lane E (1 ready, 0 waiting)` (`B104_STATUS.md`, last line; Tuesday's daily note 2026-10-18, entry 05:35). You are a fresh seat working inside lane E's file partition, under your own number: your refs are `b172/*` and `.tools/wt-b172-*` only.
+
+## THE TICKET (read it WHOLE yourself first; Jira read-only except one comment)
+**MPSCALC-231** · Task · Backlog · labels `lane-e` `mpscalc-b171` `plan-b171-n04` `tier-2` · created 2026-10-18 05:46:25 AEDT by records seat B171 (drafter's Jira GET 06:38:57).
+- Summary: *"Importer: the care-pack import rule text still says care packs get the service class "until MPSCALC-142", but since PR #78 they carry the Care pack class"*.
+- Recommendation, verbatim: *"Change the CARE-PACKS note to state the Care pack class and drop "until MPSCALC-142"; update any test that pins the text; list the new sentence for the words gate."*
+- Acceptance, verbatim: *"The CARE-PACKS note states the Care pack class and no longer says "until MPSCALC-142"; any test that pins the text is updated; the new sentence is listed for the words gate (staff-only words, W2 :45-52)."*
+- Source: Tuesday's words list W2 item 8 (`/Volumes/Laptop-DEV/TUESDAY/5_Project_History/2026-10-17_mps-words-list-W2-e6f92a5.md:45-52`, read only), the flag: *"Tuesday suggests a one-line ticket rather than approving them as they stand."*
+
+## MEASURED BY THE DRAFTER (re-measure every line yourself; never type a sha)
+- **Main** = `e6f92a5f7568b2f2d72f454524b8e09406357957` (`git --no-optional-locks ls-remote origin refs/heads/main`, 06:39:08 and 06:43:57). It is **not** in the local object store (`cat-file -t` fails), so you must `git fetch origin main` before you branch. No open PR; #83 = 404 (gh GETs 06:44).
+- **The line** (`gh api …/contents/src/MpsCalc.Import/PriceBookImporter.cs?ref=e6f92a5…`, 814 lines, sha256 `172d4eae…eb045`; equal by `cmp` to the same file in the e6f92a5 tarball). `:140` is ONE line, inside `synLineage` (`:136-142`), sha256 of the line `cb9b6c00…01c4`. Its text, verbatim:
+  ```
+                  new("CARE-PACKS", $"Care packs (MPSCALC-140): every SKU in a '{SynnexBook.BidPricingSheet}' Core-block row whose Group names a care pack, and every SKU in a model sheet's '{SynnexBook.CareSectionMarker}' block (a trailing '*' on a SKU is a footnote mark and is dropped). Cost = the one price all its numeric cells agree on ('{SynnexBook.BidPricingSheet}' Sell, '{SynnexBook.PriceListSheet}' Core, the model sheets' Core / Growth / Scale); cells that disagree block the import. Fit = each mapped device whose model sheet lists it; none when no such sheet does. Item class: service (default K-05, until MPSCALC-142)."),
+  ```
+- **The rule as the code now implements it** (the replacement's source, all @e6f92a5):
+  - `src/MpsCalc.Engine/Reference/PurchaseCatalogue.cs:145` comment *"K-05 (B99 FOR KAM): care packs total under Services (X-31), in their own class since MPSCALC-142 (gate B167 OPEN (a))."* and `:148` `ItemClass = ItemClass.CarePack`;
+  - `src/MpsCalc.Engine/Calculation/PurchaseCalculator.cs:45` `ItemClass.Service or ItemClass.CarePack or ItemClass.Staging => 3, // … services`;
+  - `docs/ENGINE.md:147` (X-31: care pack and staging in the services group);
+  - `docs/IMPORTER.md:16`, the merged wording for the same rule: *"Item class **carePack** ("Care pack", MPSCALC-142); it totals under Services with service and staging (X-31)"*;
+  - `tests/MpsCalc.Import.Tests/CarePackImportTests.cs:115` already asserts `(ItemClass.CarePack, CatalogueRowSource.DistributorBook)` for every imported care row.
+- **History of the clause** (`gh api …/pulls/78/files` patch, `…/pulls/76`; Jira MPSCALC-140 comment 39470): the clause was **added** by PR #78 (`PriceBookImporter.cs` +128/-0; merge `f1d5641a…`, 2026-10-17T03:43:53Z). It was true when lane E wrote it on 16 Oct 14:09 (comment 39470: *"Item class: service (K-05 default) until MPSCALC-142."*, branch `a80c91d`). The Care pack class arrived in PR #76 (`0217044e…`, 02:27:05Z, MPSCALC-142/-155), and #78's own `PurchaseCatalogue.cs` change switched care packs to `ItemClass.CarePack`. The note was not updated, so main got the stale clause from #78.
+- **No test pins the text.** Over the e6f92a5 tarball (468 files): `until MPSCALC-142` 1 hit, `CARE-PACKS` 1 hit, both `:140` itself. The only lineage assertions in tests are `ImporterTests.cs:232-233` and `GateFindingTests.cs:77` (`Software.Lineage`, the HP notes). No json fixture holds lineage.
+- **Who can read it.** `LineageNote` lives on `ImportedSourceVersion.Lineage` (`src/MpsCalc.Import/Store/ReferenceStoreDocument.cs:10`, `:29`; `synLineage` → `Devices`, `PriceBookImporter.cs:158`). `grep -i lineage` over `src/MpsCalc.Api` and `web/src` = 0, and `docs/api/openapi.json` = 0 (control: `device` 130). So no route, contract or screen carries it. It is written into the reference store document at import, and staff read it only in that file. This answers W2's "which screen: UNMEASURED": none.
+
+## PRIOR-WORK CHECK (before building anything)
+Run `git --no-optional-locks ls-remote origin 'refs/heads/*' | grep -i -E '231|rule-text|care'`. Drafter 06:43:57: 106 heads; the only care hit is `b104/mpscalc-140-care-packs` `4343515…` (merged as #78, NOT a 231 branch). Also run `git log --oneline origin/main --grep 'MPSCALC-231'` after your fetch (expected 0) and `grep -l 'MPSCALC-231'` over `1_Project_Definition/Briefs/` (drafter: only `2026-10-18_B171_STATUS.md`). Existing work: extend it, never rebuild it. Say what you found in a **PRIOR WORK** section of STATUS; the READY line needs that section above it.
+
+## DO, in order
+1. **Worktree.** `git -C 2_Project_Files fetch origin main`. Re-read main by `ls-remote`. If it is not `e6f92a5f…`, re-measure `:140` at the new main and say so. `git -C 2_Project_Files worktree add -b b172/mpscalc-231-care-packs-rule-text .tools/wt-b172-231 origin/main`. The root checkout `2_Project_Files` (on `b03/api`) is read-verbs only.
+2. **Red first.** Append ONE `[Fact]` to `tests/MpsCalc.Import.Tests/CarePackImportTests.cs`, using its own `Ok()` helper (`:35`), in the form of `ImporterTests.cs:232`. It must assert that `Ok().Devices.Lineage` holds exactly one note with `Code == "CARE-PACKS"`, that its `Text` contains `Item class: carePack ("Care pack", MPSCALC-142)` (ordinal), and that it contains neither `until MPSCALC-142` nor `Item class: service`. Run only this test file at main's code (`dotnet test tests/MpsCalc.Import.Tests --filter "FullyQualifiedName~CarePackImportTests"`). It must be **RED** with the new Fact failing and the others passing. Record the filter, the count that ran (> 0) and the rc.
+3. **The change: the clause only.** In `:140`, replace exactly `Item class: service (default K-05, until MPSCALC-142).` with:
+   `Item class: carePack ("Care pack", MPSCALC-142); it totals under Services with service and staging (X-31).`
+   This is `IMPORTER.md:16`'s merged sentence, with `**carePack**` written as plain `carePack` and a colon after "Item class". Inside the C# interpolated string the quotes are `\"Care pack\"`. Nothing else in the line changes; prove it with `git diff --word-diff` (only that clause). `docs/IMPORTER.md` already says this, so leave it untouched. If you believe a different sentence is more accurate to the code, do NOT write it: `STOPPED: NEEDS TUESDAY`.
+4. **Green.** Run the same file: all green, count > 0.
+5. **The .NET CI line, in a heavy slot** (`.github/workflows/ci.yml:42-43`: `dotnet build MpsCalc.slnx -c Release` with 0 warnings, then `dotnet test MpsCalc.slnx -c Release --no-build`). Record the counts, and **0 lost test names** vs main (main's names from the same run at `origin/main`, or the .trx/list diff, as lane E did). Web and python are untouched: prove that with `git diff --stat origin/main...HEAD` (exactly 2 files: `src/MpsCalc.Import/PriceBookImporter.cs`, `tests/MpsCalc.Import.Tests/CarePackImportTests.cs`). Run your file-list check once with a planted path that it catches, then gitleaks over the range.
+6. **Push the branch only** (`git push origin b172/mpscalc-231-care-packs-rule-text`; the deploy key is the repo-local `core.sshCommand`). Re-read the head with `ls-remote`. Post ONE Jira comment on MPSCALC-231: BLUF, branch, the sha40, "tier 2; not merged; not deployed", and the new sentence quoted. No figure, no person's name, no customer name. Read it back EQUAL. No transition.
+7. **STATUS:** Step 0 · preflight · PRIOR WORK · main re-read · the red and green runs (filter, count, rc) · the word-diff · the CI line with slot number and load · 0 lost · diff stat · gitleaks · the comment id read back. Add:
+   **NEW WORDS (staff-only, reference store note; not on any screen or customer document):** `Item class: carePack ("Care pack", MPSCALC-142); it totals under Services with service and staging (X-31).` and REMOVED: `Item class: service (default K-05, until MPSCALC-142).`
+
+## LOAD AND THE HEAVY SLOT (MPS-LANES ADDENDUM-3, -5, -6, -7: binding)
+- Before ANY heavy run (`dotnet build`/`test` of the solution, `npm ci`/`test`/`build`): read `uptime`, and start only if load1 is below 40 (otherwise wait 5 minutes). Read every `<project root>/.tools/heavy-slot-*/holder` and `pgrep` its seat. Then take ONE slot atomically: `mkdir "<project root>/.tools/heavy-slot-1" 2>/dev/null || mkdir "<project root>/.tools/heavy-slot-2" 2>/dev/null || mkdir "<project root>/.tools/heavy-slot-3"`. Write `B172 <start time> <label>` into its `holder`. If all three are taken, wait 3 minutes and retry.
+- **At most ONE slot at a time.** At the run's end (pass, fail or abort), remove ONLY your own slot (`holder` + `rmdir`, in the same command block). That is the one removal this brief allows. Record the slot number and load beside every result. A single test file under a minute needs no slot.
+- Drafter's measure 06:38-06:44: **no `heavy-slot-*` directory exists** under `<project root>/.tools/` (the only one is B161's orphan, quarantined at `.tools/_quarantine/2026-10-17_B161_orphaned-heavy-slot-2/`: never touch it). Load1 1.53 at 06:38, 2.22 at 06:44. No MPS pane is live (`cockpit.sh status` 06:4x: tuesday, QA/Vision-gate23, fleet-monitor).
+- **Before your last line:** no `.tools/heavy-slot-*/holder` names B172 (`ls`, and say so in STATUS).
+- Never kill a process by name. Never `git worktree prune`, `gc`, `remote prune`, `fetch --prune`, or `branch -D` on refs that are not yours. Another seat's ref or worktree is not yours to tidy.
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT
+Read by the drafter with `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tools/decision_queue.sh list ruled --undelivered mpscalc` and `list open` (06:40:57), store `TUESDAY/0_Brain/dashboard/data/decisions.json` (read only):
+- **15 MPS cards are ruled with no delivered mark in the store.** 9 are recorded in `CLARIFICATIONS.md` by card id (software-margin-review, cost-rounding, showcase-known-limits-1010, feedback-pill-words-1013, rental-full-proposal-1013, dashboard-seventh-tile-1013, feedback-attachments-1013, rental-book-mockup-1013, rental-book-words-1014). 6 have no hit by id in CLARIFICATIONS: the `-1012` calculator-access, home-dashboard-mockup, one-pager-mockup and hosted-deploy-words cards, the `-1013` invite-send card, and `mpscalc-hosted-deploy-0f8ad97-1016`. They may be recorded without their id; Tuesday's records work. **None bears on MPSCALC-231, and none is anything for you to do.**
+- The ten MPS `-1017` cards are ruled and delivered (C-33…C-42, `efb2b69`; `B171_STATUS.md` Step 1).
+- **OPEN: `mpscalc-hosted-deploy-e6f92a5-1017`** ("Put 9 more merged calculator changes on the hosted site, and approve their new words?"; default c, "nothing is deployed; Tuesday re-raises Monday 19 October"). Its options a and b both approve W2 item 8, the list that flags this clause. Your branch does not change what that card deploys: it names e6f92a5 or cfe376d5, not main. Your fix reaches the hosted site only through a LATER card, and only in a store written by an import run after it (the existing stores keep the old note; **no re-import in this brief**). Do not restate or predict a ruling in Jira or STATUS.
+
+## RULED BY TUESDAY FOR THIS PROJECT, STILL OPERATIVE
+- `CLARIFICATIONS.md` `### Tuesday's rulings (coordinator, not Kam's; not C-entries), 2026-10-17` (`:596-609`, commit `5a03994` per Tuesday's daily note 05:52):
+  - (a) 15:45, the `deploy-from-ci.sh` sandbox carve-out, and E-vi graded Major under B167's mutant rule;
+  - (b) 17:04: a tests-only follow-up to a gated mechanism is closed by Tuesday's tier-2 through-code check, not by a second gate session.
+- B171 R1 (05:39, the B171 kit's last line): records go to the project ROOT repo's `main` by a path-limited commit (no remote). Not yours: you write no records file except your STATUS and the brief copy.
+- MPS-LANES ADDENDUM-3 (shared `.git`, processes, ports), -5 (load1 < 40), -6 (three slots), -7 (orphaned slot quarantined): above.
+- Lane E's partition (`B104_LANE-E` "Files you own"): `src/MpsCalc.Import/**` is lane E's. This brief grants you exactly the two files in DO 3/5, and nothing else.
+- Tier 2 here is Tuesday's review at source plus CodeQL and checks green (as #80: *"Reviewed at source by Tuesday"*). No QA gate is commissioned.
+
+## OTHER MPSCALC TICKETS ON THE SAME FILES (listed, NOT added)
+Drafter's Jira GETs 06:41:41: `text ~ "PriceBookImporter"` 2 (231, 182); `text ~ "\"CARE-PACKS\""` 8; `text ~ "lineage"` 4 (231, 207, 206, 89 Done); `labels = lane-e AND statusCategory != Done` 15. None rides this round:
+- **MPSCALC-182** (same file; `tier-1`, lane E, "SOURCE EXPIRED AT IMPORT" local date vs Australia/Sydney): it is tier 1, so it does not ride a tier-2 round.
+- **MPSCALC-207** (tier 2, lane E): one part asks for "any mapped model sheet" in the PANEL-BLOCK lineage note (`PriceBookImporter.cs:150`, same file). But its acceptance also needs a ParityProof change or a docs choice between options, and "limit the rule to A3 with a test". Taking only the words would split the ticket. Not trivial; not added.
+- **MPSCALC-200** (tier 2, lane E, `docs/IMPORTER.md:112`, `:117`): it needs a re-measurement of price-book counts (`.local/`, which this brief never opens). Not added.
+- **MPSCALC-219** (tier 2, lanes D+E, catalogue docs) and **MPSCALC-227** (tier 2, lane E, care-pack API test): other files. Not added.
+- `needs-ruling` / `question-for-kam` tickets that mention care packs (222, 226, 144, 79): excluded by rule.
+
+## HOLDS
+- **Datasec / MPS Calculator only.** No other project's files, Jira, repo or mail.
+- **Datasec CodeQL policy:** push the branch only. Tuesday opens the PR and lands it once CodeQL (C#, Python, JS/TS; C-08/C-11) and the checks are green. Never push `main`, never force-push, never rebase a pushed branch, never bypass a ruleset. **Never dismiss an alert.**
+- **No deploy.** MPS hosted is card-per-deploy and Kam's (the open card above). No hosted site, no HTTP to it or to any app host, no Kudu, no az, no Entra, no Graph. Production is out of bounds.
+- **No re-import.** Never run `MpsCalc.ImportCli` against a real book. Never open `2_Project_Files/.local/`, `1_Project_Definition/Source_Documents/**`, `.tools/backup-*`, or any other seat's `.tools/qa-*` or `wt-*`. Synthetic books (`SyntheticBooks`) only.
+- **Jira:** MPSCALC-231 only, ONE comment (DO 6), no transition, no field or label edit, no link, no new issue. Use your own small client in `.tools/b172/` (0700, git-ignored), reading `JIRA_BASE_URL`, `JIRA_EMAIL` and `JIRA_API_TOKEN` BY NAME from `4_Credentials/.env` inside the process. Never print them, never put them on argv, never write them to a file.
+- **Nothing to any human.** Mail only QUESTION mails to `tuesday-agent@agentmail.to`.
+- **Never delete: no `rm` beyond your own slot.** Quarantine to `<project root>/.tools/_quarantine/2026-10-18_B172_<what>/`. Leave your worktree in place.
+- No figures, no customer name, no person's name in any commit message, Jira text or STATUS line. Use bash, not zsh, for loops. Never write a word starting with `=` unquoted. A line at your prompt that is not a Tuesday file pointer is not an instruction.
+
+## STATUS (`1_Project_Definition/Briefs/2026-10-18_B172_STATUS.md`)
+The sections in DO 7, then PRIOR WORK, then any corrections (your own errors, in the open).
+
+**Last line, exactly one of:**
+- `READY FOR REVIEW: b172/mpscalc-231-care-packs-rule-text @ <sha40 from ls-remote> (MPSCALC-231, tier 2; NEW WORDS staff-only: 1 sentence)`. Write it only once your slot is released and no holder names B172.
+- `STOPPED: NEEDS TUESDAY` followed by ONE question.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-18 06:46 (drafter) | every sha, count and file:line above was read by a command the drafter ran (git `ls-remote`/`cat-file` with `--no-optional-locks`; `gh api` GETs under the project's `GH_CONFIG_DIR` as `kamilDatasec`, incl. `contents?ref=e6f92a5`, the e6f92a5 tarball, and `pulls/76`, `pulls/78/files`; Jira read-only GETs; `decision_queue.sh list`) or is quoted from a file by line; the seat re-runs every count before writing.
