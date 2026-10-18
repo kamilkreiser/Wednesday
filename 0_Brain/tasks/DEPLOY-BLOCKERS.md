@@ -33,3 +33,7 @@
 ## When a row closes
 1. Kam's word or the named artefact (the ticket Done and deployed and live-checked).
 2. Move the row below a `## Closed` heading with the date and the evidence; never delete.
+
+## 2026-10-18 (Wednesday, 21:2x) — PR #1568 (KS-1612 + KS-1385 b) adds MIGRATION 050 (documents id-namespace-disjoint trigger)
+- Before migration 050 runs on ANY box (kintsugi first, then demo): run the migration's own READ-ONLY census query (named in its comment) on that box. The migration REFUSES to apply if any row's external_id equals any row's primary key (fail closed, ruled by Wednesday 10-18 on Seat J 12th's design). A non-zero census is a stop for Kam, not a fix-in-place.
+- Not yet merged: #1568 is in its round-2 (cap) fix; this line is here so the deploy round cannot miss it.

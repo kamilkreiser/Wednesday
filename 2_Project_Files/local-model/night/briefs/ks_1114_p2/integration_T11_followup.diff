@@ -1,0 +1,22 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1114-anonymous-title-lookup-one-tenant.integration.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1114-anonymous-title-lookup-one-tenant.integration.test.ts
+index e265b287d..8bc698b50 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1114-anonymous-title-lookup-one-tenant.integration.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1114-anonymous-title-lookup-one-tenant.integration.test.ts
+@@ -271,3 +271,3 @@ describe('KS-1114 — the title strategy, anonymous and in one tenant', () => {
+ 
+-  it('T11 every OTHER document status can be a hit; only draft and revoked are hidden', async () => {
++  it('T11 every OTHER document status can be a hit; draft, revoked, deleted and expired are hidden whatever their case or spacing', async () => {
+     // documents.status, measured 2026-10-18 at source (VARCHAR(20), no CHECK constraint). WRITTEN
+@@ -277,7 +277,7 @@ describe('KS-1114 — the title strategy, anonymous and in one tenant', () => {
+     // column cannot store it ("value too long for type character varying(20)"), so it is not here.
+-    // Kam named two to hide; nothing else is hidden by invention. `deleted` is pinned as a HIT on
+-    // purpose: it is a RESIDUAL — a legacy row carrying it would be found by title — so if it is
+-    // ruled hidden, this cell is the one that turns red.
+-    const HIT = ['pending_signature', 'signed', 'anchored', 'anchor_failed', 'certified', 'deleted'];
+-    const MISS = ['draft', 'revoked'];
++    // Kam named two to hide (draft, revoked). The follow-up (card secuura-ks1114-deleted-status-found-
++    // by-title-1018 = a) hides `deleted` and `expired` too and compares the status lower-cased and
++    // trimmed of spaces, so the case and space variants below are hidden as well (gate N1).
++    const HIT = ['pending_signature', 'signed', 'anchored', 'anchor_failed', 'certified'];
++    const MISS = ['draft', 'revoked', 'deleted', 'expired', 'REVOKED', 'Draft', 'DELETED', 'Expired', 'revoked ', ' draft', ' Deleted ', 'expired  '];
+     const got: Record<string, string> = {}; const want: Record<string, string> = {};
