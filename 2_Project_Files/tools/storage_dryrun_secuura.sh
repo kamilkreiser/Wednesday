@@ -91,9 +91,17 @@ if [ -n "$PROBE_ONLY" ]; then
     else
       mb=$(git -C "$P" merge-base "$hd" origin/develop 2>/dev/null)
       if [ -n "$mb" ]; then
-        files=$(git -C "$P" diff --name-only "$mb" "$hd" 2>/dev/null)
-        if [ -z "$files" ]; then m=ancestor
-        elif git -C "$P" diff --quiet "$hd" origin/develop -- $(echo "$files" | tr '\n' ' ') 2>/dev/null; then m=squash
+        # 2026-10-19 (Seat D 20th's STOP): the changed-file list was spliced UNQUOTED, so a path with a space
+        # word-split, `git diff` compared nothing and exited 0 = a false "squash". Now NUL-safe, quoted, literal
+        # pathspecs, and the rc is read three ways (0 squash, 1 differs, else a git error = never "merged").
+        CHF=()
+        while IFS= read -r -d '' f; do CHF+=("$f"); done < <(git -C "$P" diff -z --name-only "$mb" "$hd")
+        if [ "${#CHF[@]}" -eq 0 ]; then m=ancestor
+        else
+          sq_err=$(git -C "$P" --literal-pathspecs diff --quiet "$hd" origin/develop -- "${CHF[@]}" 2>&1); sq_rc=$?
+          if [ "$sq_rc" -eq 0 ]; then m=squash
+          elif [ "$sq_rc" -ne 1 ]; then m="giterr"; echo "squash test git error rc=$sq_rc in $P: $sq_err" >&2
+          fi
         fi
       fi
     fi

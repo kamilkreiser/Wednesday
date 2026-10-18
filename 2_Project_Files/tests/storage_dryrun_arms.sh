@@ -50,6 +50,21 @@ git clone -q "$FX/up" "$FX/proj/scratchpad/j1/repo"
 mkdir -p "$FX/proj/scratchpad/j1/repo/node_modules/p"; echo n > "$FX/proj/scratchpad/j1/repo/node_modules/p/i.js"
 find "$FX/proj/scratchpad" -exec touch -t 202609010000 {} +
 
+# (s) 2026-10-19 (Seat D 20th's STOP): a changed path with a SPACE. Branch changes "Docs X/a b.html"; develop later
+# changes the same file DIFFERENTLY -> must be KEEP (the unquoted test read it as squash). Control: the same shape where
+# develop holds the branch's exact bytes (a real squash) -> must be CANDIDATE, so the fix is not "refuse every space".
+mkdir -p "$FX/up/Docs X"; echo v0 > "$FX/up/Docs X/a b.html"; git -C "$FX/up" add "Docs X/a b.html"; git -C "$FX/up" commit -q -m docs
+for n in sp-differs sp-squash; do
+  mkclone "$n"; git -C "$FX/proj/worktrees/$n" checkout -q -b "feat/$n"
+  echo "branch-$n" > "$FX/proj/worktrees/$n/Docs X/a b.html"
+  git -C "$FX/proj/worktrees/$n" commit -q -am "$n"
+done
+echo develop-newer > "$FX/up/Docs X/a b.html"; git -C "$FX/up" commit -q -am "develop moves the doc (sp-differs)"
+git -C "$FX/proj/worktrees/sp-differs" fetch -q origin
+echo branch-sp-squash > "$FX/up/Docs X/a b.html"; git -C "$FX/up" commit -q -am "develop takes sp-squash's bytes"
+git -C "$FX/proj/worktrees/sp-squash" fetch -q origin
+age sp-differs; age sp-squash
+
 before=$(find "$FX/proj" "$FX/lm" "$FX/up" -type f -not -path '*/.git/*' | sort | xargs shasum 2>/dev/null | shasum | cut -d' ' -f1)
 OUT="$FX/out.txt"
 /bin/bash "$TOOL" --root "$FX/proj" --lm "$FX/lm" --report-dir "$FX/report" --date 2099-01-01 --jobs 2 > "$OUT" 2> "$FX/err.txt"
@@ -62,6 +77,8 @@ l=$(line old-merged);   echo "$l"; case "$l" in *"| CANDIDATE |"*) ok "(a) old m
 l=$(line old-dirty);    echo "$l"; case "$l" in *"| KEEP |"*DIRTY*) ok "(b) dirty working copy -> KEEP (DIRTY)";; *) bad "(b) expected KEEP DIRTY";; esac
 l=$(line live-now);     echo "$l"; case "$l" in *"| KEEP |"*LIVE*) ok "(c) folder modified now -> KEEP (LIVE)";; *) bad "(c) expected KEEP LIVE";; esac
 l=$(line old-unmerged); echo "$l"; case "$l" in *"| KEEP |"*UNMERGED*) ok "(x) old unmerged working copy -> KEEP (UNMERGED)";; *) bad "(x) expected KEEP UNMERGED";; esac
+l=$(line sp-differs); echo "$l"; case "$l" in *"| KEEP |"*) ok "(s) spaced changed path that DIFFERS from develop -> KEEP";; *) bad "(s) expected KEEP for sp-differs";; esac
+l=$(line sp-squash);  echo "$l"; case "$l" in *"| CANDIDATE |"*) ok "(s2) spaced changed path squash-merged into develop -> CANDIDATE";; *) bad "(s2) expected CANDIDATE for sp-squash";; esac
 nm=$(grep -F "| N | CANDIDATE |" "$OUT" | head -1)
 [ -z "$nm" ] && ok "(x) node_modules inside a W candidate is not double-counted in class N" || bad "(x) N double-count: $nm"
 l=$(grep -F 'scratchpad/j1/repo`' "$OUT" | grep -F '| P |' | head -1); echo "$l"

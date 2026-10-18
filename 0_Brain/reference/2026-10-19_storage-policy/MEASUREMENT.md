@@ -1,5 +1,7 @@
 # WED-154 measurement: old Secuura/Blockchain (Platform K) files and old tests -- 2026-10-19 (read-only)
 
+> **CORRECTION 2026-10-19 08:07 (Wednesday, from Seat D 20th's STOP at removal time):** the squash test spliced the changed-file list UNQUOTED, so a changed path with a space word-split and `git diff --quiet` compared nothing and exited 0. **27 of the 173 W worktree candidates were never proven merged** (each has the same two `Projects Documents/*.html` files differing from develop; develop's copies are newer). **Provable W candidates: 146** (53 ancestor + 93 squash). Tool fixed (`tools/storage_dryrun_secuura.sh`, backup `.pre-1019-quotepathspec`: NUL-safe quoted literal pathspecs, rc read three ways, stderr kept), arms (s)/(s2) added and red-proofed against the old tool. The 27 are round-2 material under a named predicate, Kam's to approve.
+
 Measured 2026-10-19 ~06:30-07:30 AEDT. Nothing was removed, moved, renamed or written in any project. Only writes: this folder, the arms/tool files in Wednesday's tree, and the session scratchpad (`.../scratchpad/storage/`). Git on `!CODING` used read verbs only (rev-parse, symbolic-ref, merge-base, diff, log, status with `GIT_OPTIONAL_LOCKS=0`, ls-files). No fetch.
 
 **Trees covered (every number below names its tree):**

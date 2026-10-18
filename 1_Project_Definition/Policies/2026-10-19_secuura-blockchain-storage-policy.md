@@ -24,7 +24,7 @@ removal, move or rename verb and refuses to run if one is planted in it; six pla
 
 | class | measured 2026-10-19 | "not needed" predicate (all must hold) | action |
 |---|---|---|---|
-| **W** worktrees + deploy clones | 578 items, 608 GiB | HEAD is in `origin/develop` (ancestor, or every changed file byte-identical in develop = squash-merged) · tree clean · idle ≥ 7 d · not held by a live seat (cwd/lsof) · not touched in 48 h | **remove** (`git worktree remove` by the Secuura seat): the content is in git. **181 items, 200 GiB.** |
+| **W** worktrees + deploy clones | 578 items, 608 GiB | HEAD is in `origin/develop` (ancestor, or every changed file byte-identical in develop = squash-merged) · tree clean · idle ≥ 7 d · not held by a live seat (cwd/lsof) · not touched in 48 h | **remove** (`git worktree remove` by the Secuura seat): the content is in git. **181 items, 200 GiB measured; CORRECTED 2026-10-19: 146 worktrees provable after the squash-test quoting fix (27 skipped, 8 deploy clones skipped).** |
 | **N** `node_modules` in kept working copies | 107 working copies | not live · idle ≥ 14 d | **remove** (regenerable by `npm ci`, the 2026-09-29 rule). **166 GiB.** |
 | **E** regenerable parts of `5_Project_History` | 6 items, 3.9 GiB | `node_modules` or a clean merged scratch clone, idle ≥ 14 d | **remove**. **1.4 GiB.** Records (reports, evidence, mail, HANDOVER, history.md) are **never** candidates. |
 | **P** seat scratch (`Blockchain/scratchpad`) | 43 items, 23 GiB | as W/N, idle ≥ 14 d; anything unclassified (pg data, logs) | regenerable parts **remove**; unclassified → **archive to G-DRIVE**, cleared after ~30 d. **0 today** (nothing 14 d old). |
