@@ -63,6 +63,27 @@ no expected '+' lines, the run is not code_patch2, and A4-A7 passed (already req
 product lines are NOT byte-checked and the reviewer reads the hunk, and records the golden verdict as reported (DIFFERS is fine).
 Arms: tests/hold_ready_rung34_arms.sh. Pre-edit copy: night/hold_ready.py.pre-1010-rung34.
 
+2026-10-18 (Wednesday's holdkinds tooling sub-agent): TWO more Spark run kinds that refused with "checker.out has no 'mode:
+code_patch' line", nothing else widened. Each is accepted ONLY when the input's task type, the checker's own mode line, round.json's
+`tier` (when the run dir has one) and the run's touched-file set all agree; every disagreement is a refusal.
+(a) TEST_ONLY through code_patch's checker (spark round.sh tier test_only: night/build_input.sh parses the brief's `## Tamper`
+block into defect_line.tamper; tasks/code_patch/checker.sh runs MODE=test_only). Signals: defect_line.tamper.line set <->
+checker.out `mode: test_only (tamper at <product_file>:<tamper line>)` (the product named as the tamper target, exactly) <->
+round.json tier=test_only. numstat's touched set must be exactly ONE test under test_dir (not the reference) and must NOT hold the
+product; no section may name the product; the `PASS A3 (test-only)` line must name that test; tamper.out must name the product at
+the tamper line, tamper_revert.out be empty and the "tamper reverted" line present; the tamper's `from` must be the product's tip
+line; the product must be BYTE-UNCHANGED by the patch (re-applied strictly to the tip content in a scratch tempdir, sha256 equal);
+the brief (required) must name the product as its `File:` line and the test as its `Test file:` line. The '+' compare runs on the
+TEST section. A4-A7 as code_patch. READY: BRIEFED-TESTONLY-…, "zero product bytes".
+(b) BASH_PATCH2 (rung 3, tasks/bash_patch2/checker.sh). Signals: input task_type=bash_patch2 <-> checker.out first line
+`mode: bash_patch2 (declared: …)` <-> round.json tier=bash_patch2. The touched set (sections.json paths AND `git apply --numstat`
+of each section with its own opts, which must agree) must EQUAL product_files + test_files — a declared file left untouched or an
+undeclared file is refused by name. Then: the mode line's counts == the input's, B0..B5 + B3x verbatim, the PASS B3 line == the
+declared set, B2 strict vs the per-section opts/rewrite artefacts (bash_patch's rule), every test's B4/B5 run line re-counted from
+red_first_<i>.out / green_after_<i>.out, B3x declared==measured==ok==N diff=0 unmeasured=0 with an `OK` per declared file in
+brief_bytes.out, B6 sibling count, the brief's `File:` lines == product_files and `Test …:` lines == test_files. READY:
+BRIEFED-BASHPATCH2-…. Arms: tests/hold_ready_holdkinds_arms.sh. Pre-edit copy: night/hold_ready.py.pre-1018-holdkinds.
+
 Usage: hold_ready.py <run-dir> <golden-run-dir-or-'-'> <ROWID> [<short-title-caps>] [--title-from-brief <brief.md>]
                      [--seat '<who>'] [--dry-run]
   run-dir     the runner's run directory (holds input.json, out.md.checker/, checker.out)
@@ -199,12 +220,35 @@ def _detect_doc_patch():
     if is_doc and ('product_file' not in inp or not isinstance(inp.get('defect_line'), dict)): die(f"the run is doc_patch but input.json lacks product_file / defect_line: keys {sorted(inp)}")
     return is_doc
 IS_DOC_PATCH = (not IS_BASH_PATCH) and _detect_doc_patch()
-IS_CODE_PATCH = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and ('test_file' not in inp and 'product_file' in inp and 'suggested_test_file' in inp)
-if brief_given is not None and not IS_CODE_PATCH:
-    die("--brief is supported on the code_patch path only (2026-09-25); this run is not code_patch")
-if model_tag != 'ornith35b-q4' and not (IS_CODE_PATCH or IS_BASH_PATCH):
+# 2026-10-18 (holdkinds): round.json (spark/round.sh) records the round's `tier`; when present it is a third signal for the two
+# kinds below and must agree. Absent (Ornith night runs) it is not consulted.
+def _round_tier():
+    rp = os.path.join(run, 'round.json')
+    if not os.path.exists(rp): return None
+    try: return json.load(open(rp)).get('tier')
+    except Exception as e: die(f"round.json is not readable JSON ({e}): {rp}")
+# 2026-10-18 (holdkinds): BASH_PATCH2 (rung 3). Its input has bash_patch's key shape (+ task_type, product_files, test_files) and
+# its checker prints `mode: bash_patch2 (declared: …)` FIRST, so the key predicate routed it into hold_code_patch(), which refused
+# it for lacking `mode: code_patch`. Detected from the input's task_type AND checker.out's mode line, which must agree (and
+# round.json's tier when present). A run dir with no checker.out, or with neither signal, is not touched by this rule.
+def _detect_bash_patch2():
+    co_p = os.path.join(run, 'checker.out')
+    if not os.path.exists(co_p): return False
+    sig_co = re.search(r'^mode: bash_patch2\b', open(co_p, errors='replace').read(), re.M) is not None
+    sig_in = (inp.get('task_type') == 'bash_patch2')
+    if not sig_co and not sig_in: return False
+    tier = _round_tier()
+    sigs = {'input.json task_type == bash_patch2': sig_in, "checker.out has a 'mode: bash_patch2' line": sig_co}
+    if tier is not None: sigs[f'round.json tier ({tier!r}) == bash_patch2'] = (tier == 'bash_patch2')
+    if len(set(sigs.values())) != 1: die(f"bash_patch2 signals disagree: {sigs}")
+    return True
+IS_BASH_PATCH2 = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and _detect_bash_patch2()
+IS_CODE_PATCH = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and (not IS_BASH_PATCH2) and ('test_file' not in inp and 'product_file' in inp and 'suggested_test_file' in inp)
+if brief_given is not None and not (IS_CODE_PATCH or IS_BASH_PATCH2):
+    die("--brief is supported on the code_patch path only (2026-09-25); this run is not code_patch")  # (+ bash_patch2, 2026-10-18)
+if model_tag != 'ornith35b-q4' and not (IS_CODE_PATCH or IS_BASH_PATCH or IS_BASH_PATCH2):
     die("--model-tag is supported on the code_patch and bash_patch paths only (2026-10-08); this run is neither")
-if not IS_BASH_PATCH and not IS_DOC_PATCH and not IS_CODE_PATCH and 'test_file' not in inp:
+if not IS_BASH_PATCH and not IS_DOC_PATCH and not IS_CODE_PATCH and not IS_BASH_PATCH2 and 'test_file' not in inp:
     die(f"input.json is neither test_only (test_file) nor code_patch (product_file + suggested_test_file), and the run's artefacts name neither bash_patch nor doc_patch: keys {sorted(inp)}")
 
 def _read(path, what):
@@ -298,7 +342,24 @@ def hold_code_patch():
     # 2026-09-23 SELF-TESTING (checker.sh MODE=self_testing, KS-1143): accepted ONLY when the input declares it — the one
     # product file IS the test; the touched set below is then exactly { product_file }.
     self_testing = bool((inp.get('self_testing') or {}).get('test_hunks'))
-    want_mode = 'self_testing' if self_testing else 'code_patch'
+    # 2026-10-18 (holdkinds): TEST_ONLY via this checker (checker.sh MODE=test_only — spark round.sh tier test_only). The input's
+    # defect_line.tamper, checker.out's `mode: test_only` line and round.json's tier (when present) must agree; with none of the
+    # three the path below is the code_patch one, unchanged.
+    tam = (inp.get('defect_line') or {}).get('tamper') or {}
+    sig_to_in = bool(str(tam.get('line', '')).strip()); sig_to_co = re.search(r'^mode: test_only\b', co, re.M) is not None
+    is_to = False
+    if sig_to_in or sig_to_co:
+        _tier = _round_tier()
+        _sigs = {'input.json defect_line.tamper.line set': sig_to_in, "checker.out has a 'mode: test_only' line": sig_to_co}
+        if _tier is not None: _sigs[f'round.json tier ({_tier!r}) == test_only'] = (_tier == 'test_only')
+        if len(set(_sigs.values())) != 1: die(f"test_only signals disagree: {_sigs}")
+        if self_testing: die("test_only with self_testing is not a supported shape (the checker refuses it too)")
+        if inp.get('task_type') not in (None, 'code_patch', 'test_only'): die(f"test_only: input.json task_type is {inp.get('task_type')!r}")
+        is_to = True
+        _ml = co.split('\n', 1)[0].rstrip()
+        _want_ml = f"mode: test_only (tamper at {product_file}:{tam['line']})"
+        if _ml != _want_ml: die(f"test_only: checker.out mode line does not name the input's product as the tamper target at the tamper line: {_ml!r} (want {_want_ml!r})")
+    want_mode = 'self_testing' if self_testing else ('test_only' if is_to else 'code_patch')
     if not re.search(rf'^mode: {want_mode}', co, re.M): die(f"checker.out has no 'mode: {want_mode}' line — the input says {want_mode} but the checker did not run it as one")
 
     # 2026-10-10: code_patch2 (rung 3) — two signals that must agree (input task_type, checker mode line)
@@ -366,6 +427,16 @@ def hold_code_patch():
         test_file = product_file
     tests_touched = [f for f in touched if f != product_file and test_dir and f.startswith(test_dir + '/')] if not self_testing else [product_file]
     others = [f for f in touched if f != product_file and f not in tests_touched]
+    if is_to:
+        # the product is the tamper target and must be untouched: not in numstat's set, not named by any section
+        if product_file in touched: die(f"test_only: the product (tamper target) {product_file} is in the touched set {touched} (numstat.out) — a test-only run must leave it byte-unchanged")
+        _psec = [s['path'] for s in sections if s['path'] == product_file or s['path'].endswith('/' + product_file) or product_file.endswith('/' + s['path'])]
+        if _psec: die(f"test_only: a section in sections.json names the product (tamper target) {product_file}: {_psec}")
+        if len(touched) != 1 or others or len(tests_touched) != 1 or tests_touched[0] == ref_test:
+            die(f"test_only: touched {touched} is not exactly ONE test under {test_dir} (tests={tests_touched}, other={others}, ref={ref_test})")
+        _a3 = a_lines['A3']
+        if not _a3.startswith(f"PASS A3 (test-only) touched-file set == {{ {tests_touched[0]} }}") or 'the product file is untouched' not in _a3:
+            die(f"test_only: the PASS A3 line does not name exactly the touched test with the product untouched: {_a3[:220]}")
     cp2_products = []; cp2_tests = []; a3x_line = ''; a3x_sum = ''
     if is_cp2:
         cp2_products = list(inp.get('product_files') or []); cp2_tests = [t['path'] for t in (inp.get('test_files') or [])]
@@ -396,7 +467,7 @@ def hold_code_patch():
         a3x_sum = '; '.join(l for l in bb if l.startswith('OK ') or l.startswith('SUMMARY'))
         tests_touched = list(cp2_tests); others = []
         product_file = cp2_products[0]; test_file = cp2_tests[0]
-    if not self_testing and not is_cp2 and (product_file not in touched or len(tests_touched) != 1 or others or tests_touched[0] == ref_test):
+    if not self_testing and not is_cp2 and not is_to and (product_file not in touched or len(tests_touched) != 1 or others or tests_touched[0] == ref_test):
         die(f"touched {touched} is not {{ product_file , ONE test under {test_dir} }} (product present={product_file in touched}, tests={tests_touched}, other={others}, ref={ref_test})")
     if tests_touched[0] != test_file:
         print(f"NOTE: the touched test {tests_touched[0]} differs from the builder's suggested_test_file {test_file} — the checker's A3 accepts it; the READY names the TOUCHED file", file=sys.stderr)
@@ -406,7 +477,7 @@ def hold_code_patch():
     if not a_lines['A3c']:
         if a3i_skipped and str(adds.get(product_file)) == '0':
             a_lines['A3c'] = f"[no PASS A3c line in checker.out — DELETION-ONLY product hunk: numstat.out +0/-{dels.get(product_file, '?')} on {product_file}; checker.out INFO A3i verbatim: `{a3i_skipped}`]"
-        elif (not is_cp2) and a3i_skipped and _loose_declared(decl_brief) and not (inp.get('defect_line') or {}).get('expected_plus') and not inp.get('expected_plus') and str(adds.get(product_file)) != '0':
+        elif (not is_cp2) and (not is_to) and a3i_skipped and _loose_declared(decl_brief) and not (inp.get('defect_line') or {}).get('expected_plus') and not inp.get('expected_plus') and str(adds.get(product_file)) != '0':
             loose = _loose_declared(decl_brief)
             a_lines['A3c'] = f"[no PASS A3c line in checker.out — LOOSE BRIEF declared by `{loose[0]}` (`{loose[1]}`); checker.out INFO A3i verbatim: `{a3i_skipped}`]"
         else:
@@ -416,8 +487,10 @@ def hold_code_patch():
     # 4. product hunk '+' lines vs the brief's expected_plus (whitespace-stripped ordered equality; A3i covers bytes)
     exp = (inp.get('defect_line') or {}).get('expected_plus') or inp.get('expected_plus') or []
     if isinstance(exp, str): exp = exp.split('\n')
-    prod_sec = next((s for s in sections if s['path'] == product_file or s['path'].endswith('/' + product_file) or product_file.endswith('/' + s['path'])), None)
-    if prod_sec is None: die(f"no section in sections.json for the product file {product_file}")
+    # test_only: the brief's '+' lines are the TEST's (there is no product section) — the compare runs on the test section
+    _plus_file = test_file if is_to else product_file
+    prod_sec = next((s for s in sections if s['path'] == _plus_file or s['path'].endswith('/' + _plus_file) or _plus_file.endswith('/' + s['path'])), None)
+    if prod_sec is None: die(f"no section in sections.json for the {'test' if is_to else 'product'} file {_plus_file}")
     prod_lines = open(prod_sec['file'], errors='replace').read().split('\n')
     if is_cp2:
         prod_lines = []
@@ -434,6 +507,47 @@ def hold_code_patch():
     if plus_ok is False: die(f"product hunk '+' lines ({len(prod_plus)}) are not ordered-equal (stripped) to the brief's expected_plus ({len([l for l in exp if l])})")
     nonascii = sum(1 for l in prod_plus for c in l if ord(c) > 127)
     a3i_out = open(os.path.join(chk, 'a3i_indent.out'), errors='replace').read().strip() if os.path.exists(os.path.join(chk, 'a3i_indent.out')) else ''
+
+    # 4b. test_only (2026-10-18): the tamper, its revert, and the product BYTE-UNCHANGED — each measured from an artefact
+    to_notes = ''; to_tamper_line = ''; to_prod_sha = ''
+    if is_to:
+        import hashlib
+        tl = int(tam['line'])
+        if not decl_brief: die("test_only: needs --title-from-brief or --brief so the brief's `File:` (the tamper target) and `Test file:` lines can be checked against the input")
+        if not os.path.isfile(decl_brief): die(f"test_only: no such brief file: {decl_brief}")
+        _bl = open(decl_brief, errors='replace').read().splitlines()
+        _bf = [m.group(1).strip() for m in (re.match(r'^File:\s*`([^`]+)`', l) for l in _bl) if m]
+        _bt = [m.group(1).strip() for m in (re.match(r'^Test file:\s*`([^`]+)`', l) for l in _bl) if m]
+        if _bf != [product_file] or _bt != [test_file]: die(f"test_only: the brief's `File:` lines {_bf} / `Test file:` lines {_bt} are not exactly [{product_file}] / [{test_file}]")
+        if not any(l.startswith('## Tamper') and not l.startswith('## Tampers') for l in _bl): die(f"test_only: the brief has no `## Tamper` block: {decl_brief}")
+        _ta = _read(os.path.join(chk, 'tamper.out'), 'tamper.out').strip()
+        if not _ta.startswith('tampered ') or f"/{product_file}:{tl}: " not in _ta: die(f"test_only: tamper.out does not name the product {product_file} at line {tl}: {_ta[:200]!r}")
+        _tr = _read(os.path.join(chk, 'tamper_revert.out'), 'tamper_revert.out').strip()
+        if _tr: die(f"test_only: tamper_revert.out is NON-EMPTY (the revert reported something): {_tr[:200]!r}")
+        _rv = f"A4 (test-only): tamper reverted ({product_file} back to the tip)"
+        if _rv not in [l.rstrip() for l in co.splitlines()]: die(f"test_only: checker.out lacks the line {_rv!r}")
+        _ap = _read(os.path.join(chk, 'apply_product.out'), 'apply_product.out').strip()
+        if not _ap.startswith('A5 (test-only): no product hunk'): die(f"test_only: apply_product.out does not say no product hunk was applied: {_ap[:160]!r}")
+        files_at_tip0 = inp.get('files') or {}
+        if product_file not in files_at_tip0 or test_file not in files_at_tip0: die(f"test_only: input.json['files'] lacks the product or the test ({product_file} / {test_file}) — the byte-unchanged measurement cannot be made")
+        def _tip_text(p):
+            c = files_at_tip0[p]
+            if isinstance(c, dict):
+                r = subprocess.run(['git', '-C', inp['source_checkout'], 'show', f"{inp['tip']}:{p}"], capture_output=True, text=True)
+                if r.returncode != 0: die(f"test_only: git show {p} at the tip failed: {r.stderr.strip()[:200]}")
+                c = r.stdout
+            return c
+        prod_tip = _tip_text(product_file)
+        _pl = prod_tip.split('\n')
+        if not (0 < tl <= len(_pl)) or _pl[tl - 1].strip() != (tam.get('from') or '').strip():
+            die(f"test_only: the tamper's `from` is not the product's tip line {tl}: tip {(_pl[tl - 1] if 0 < tl <= len(_pl) else None)!r} vs from {tam.get('from')!r}")
+        rc_u, err_u, dg_u = _apply_to_tip(patch_path, {product_file: prod_tip, test_file: _tip_text(test_file)}, os.environ.get('CLAUDE_SCRATCHPAD') or None)
+        if rc_u != 0: die(f"test_only: the run's patch does not apply strictly (git apply -p1) to the tip content in input.json['files']: {err_u[:200]}")
+        to_prod_sha = hashlib.sha256(prod_tip.encode('utf-8')).hexdigest()
+        if dg_u[product_file] != to_prod_sha: die(f"test_only: the product {product_file} CHANGES under the patch (sha256 {to_prod_sha[:16]} at the tip vs {dg_u[product_file][:16]} after)")
+        to_tamper_line = _ta
+        to_notes = (f"- **TEST-ONLY (code_patch checker MODE=test_only)** — the product `{product_file}` is the TAMPER TARGET and is BYTE-UNCHANGED: the run's `patch.diff` re-applied strictly (`git apply -p1`, scratch tempdir) to the tip content in input.json['files'] leaves it sha256 `{to_prod_sha[:16]}` = the tip's; numstat.out does not list it; no section names it. "
+                    f"[checker.out mode line, verbatim]: `{co.split(chr(10), 1)[0].rstrip()}` · [tamper.out, verbatim]: `{_ta}` · [checker.out, verbatim]: `{_rv}` (tamper_revert.out EMPTY) · the tamper's `from` equals the product's tip line {tl}. [apply_product.out, verbatim]: `{_ap}`\n")
 
     # 5. RED-FIRST / GREEN-AFTER — the A4/A5 lines verbatim, cross-checked against the jest json each came from
     rf = json.loads(_read(os.path.join(chk, 'red_first.json'), 'red_first.json'))
@@ -548,14 +662,14 @@ def hold_code_patch():
 
     now = datetime.datetime.now()
     stamp = now.strftime('%H:%M %Y-%m-%d'); day = now.strftime('%Y-%m-%d')
-    fname = f"READY_{ticket}-{rowid}_{model_tag}_BRIEFED-CODEPATCH{'2' if is_cp2 else ''}-{title}-PASS-{passed}of{total}_{day}.diff.md"
+    fname = f"READY_{ticket}-{rowid}_{model_tag}_BRIEFED-{'TESTONLY' if is_to else 'CODEPATCH'}{'2' if is_cp2 else ''}-{title}-PASS-{passed}of{total}_{day}.diff.md"
     out = os.path.join(NIGHT_DIR, fname)
     if os.path.exists(out) and not dry: die(f"READY already exists: {out}")
 
     sec_lines = '\n'.join(
         f"- section {k} `{os.path.basename(sf)}` → `{path}` (hunks={hunks}, miscount={mis}; applied file per `section_{k}.opts`: `{os.path.basename(applied)}`, git-apply options: `{opts or '(none — strict)'}`; `apply_check_strict_{k}.out`: {'EMPTY (strict apply --check clean)' if not so else 'NON-EMPTY: `' + so.splitlines()[0][:160] + '`'})"
         for k, path, sf, applied, opts, hunks, mis, so in sec_rows)
-    plus_clause = ((f" — product section `+` lines {len(prod_plus)} ordered-equal (whitespace-stripped) to the brief's `expected_plus` "
+    plus_clause = ((f" — {'test' if is_to else 'product'} section `+` lines {len(prod_plus)} ordered-equal (whitespace-stripped) to the brief's `expected_plus` "
                     f"({'ASCII' if nonascii == 0 else str(nonascii) + ' NON-ASCII chars'}); `-` lines {len(prod_minus)}") if plus_ok
                    else ' — no expected_plus in the input; not re-measured here')
     apply_steps = '; '.join((f"section {k} `{os.path.basename(applied)}`: `git apply -p1 {opts}`" if opts else f"section {k} `{os.path.basename(applied)}`: `git apply -p1` (strict)")
@@ -567,6 +681,7 @@ def hold_code_patch():
         extra_notes += (f"- CODE_PATCH2 (rung 3, {len(cp2_products)} product files + {len(cp2_tests)} test file(s)) — identity was PER-FILE A3x, not a single-file A3i. Product files (brief `File:` lines == input.json product_files): "
                         + ', '.join('`' + p + '`' for p in cp2_products) + "; test(s): " + ', '.join('`' + p + '`' for p in cp2_tests)
                         + f". [checker.out PASS A3x, verbatim]: `{a3x_line}`. [brief_bytes.out, verbatim]: `{a3x_sum}`\n")
+    extra_notes += to_notes
     if loose_apply_mode:
         extra_notes += (f"- **APPLY MODE: NOT STRICT (strict=False) — recount only.** The run's `patch.diff` does not apply under strict `git apply -p1` ({loose_apply_strict_err}); it applies with [{loose_apply_mode}] (the options the checker recorded in section_<k>.opts for this LOOSE rung). "
                         "Raise it with those options, or rewrite the hunk header and assert the blob equals the recounted result.\n")
@@ -577,18 +692,27 @@ def hold_code_patch():
         extra_notes += ("- **LOOSE BRIEF: product lines written by the model, not byte-checked against the brief; reviewer reads the hunk.** "
                         f"Declared by `{loose_info[0]}` (`{loose_info[1]}`); checker.out has `INFO A3i skipped` (no expected '+' lines) and no PASS A3c; A4-A7 passed (below). "
                         f"Golden comparison, as reported: {golden_clause}.{gcmp} A DIFFERS verdict is expected and acceptable for a loose brief — the verdict is A4-A7 plus the reviewer's read of the product hunk.\n")
-    body = f"""# READY — {ticket}-{rowid} ({model_label}, briefed, {'code_patch2' if is_cp2 else 'code_patch'}, {runner}) — PASS {passed}/{total} — HELD for QA
+    if is_to:
+        declared_line = f"- Declared set [input.json suggested_test_file; product_file = the TAMPER TARGET, not modified]: `{test_file}` (test) — equal to numstat.out's set ({len(touched)} file); `{product_file}` (product) untouched, measured above."
+        plus_label = "Test hunk `+` count [checker.out A3c, verbatim]"
+        pr_note = (f"TEST-ONLY — ZERO PRODUCT BYTES: one file, the test `{test_file}` (+{adds.get(test_file, '?')}/-{dels.get(test_file, '?')} per numstat.out); the product `{product_file}` is the tamper target and is byte-unchanged (sha256 {to_prod_sha[:16]}, measured). "
+                   f"Apply PER SECTION with the checker's apply mode — {apply_steps} — at the tip `{tip}` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: the gate decides (test file only).")
+    else:
+        declared_line = f"- Declared set [input.json product_file + suggested_test_file]: `{product_file}` (product) and `{test_file}` (test) — equal to numstat.out's set ({len(touched)} files)."
+        plus_label = "Product hunk `+` count [checker.out A3c, verbatim]"
+        pr_note = None
+    body = f"""# READY — {ticket}-{rowid} ({model_label}, briefed, {'code_patch2' if is_cp2 else ('test_only (code_patch checker, MODE=test_only)' if is_to else 'code_patch')}, {runner}) — PASS {passed}/{total} — HELD for QA
 
 > ⚠ **CANONICAL PATCH = `{patch_path}`** (from `ls` at {stamp}; it is `cat` of the section files in order: {'`cmp` rc 0' if cat_ok else 'NOTE — `cat section_*.diff | cmp patch.diff` rc 1, the sections are the applied units'}: {', '.join('`' + r[2] + '`' for r in sec_rows)}). Checker A2 (verbatim from checker.out): `{a2_line}`{strict_note}; {golden_clause}.
 
 **Held {stamp} by {seat} after a source read (hold_ready.py, code_patch path — every clause below is COPIED from the checker's own artefacts in `{chk}`, not typed; the artefact each came from is named in brackets).** Tip `{tip}`.
 - Touched-file set [checker.out A3, verbatim]: `{a_lines['A3']}`
-- Declared set [input.json product_file + suggested_test_file]: `{product_file}` (product) and `{test_file}` (test) — equal to numstat.out's set ({len(touched)} files).
+{declared_line}
 - numstat [out.md.checker/numstat.out, verbatim]:
 ```
 {numstat}
 ```
-- Product hunk `+` count [checker.out A3c, verbatim]: `{a_lines['A3c']}`{plus_clause}.
+- {plus_label}: `{a_lines['A3c']}`{plus_clause}.
 {('- Byte-exactness [checker.out A3i, verbatim]: `' + a3i_line + '`' + (' [a3i_indent.out: `' + a3i_out + '`]' if a3i_out else '')) if a3i_line else '- A3i line absent from checker.out (not claimed)'}
 {extra_notes}- Hunk audit [out.md.checker/hunk_audit.out, first line verbatim]: `{hunk_audit_line}`
 - Sections [out.md.checker/sections.json + section_<k>.opts + apply_check_strict_<k>.out]:
@@ -605,12 +729,19 @@ def hold_code_patch():
 {patch_text.rstrip()}
 ```
 """
+    kind_note = ''
+    if is_to:
+        # the code_patch PR NOTES sentence says PRODUCT BYTES CHANGE — replaced, for test_only only, by the measured one
+        _bl_ = body.split('\n'); _i = next(i for i, l in enumerate(_bl_) if l.startswith('**PR NOTES for the raise seat:** '))
+        _bl_[_i] = f"**PR NOTES for the raise seat:** {pr_note} Input: `{os.path.join(run, 'input.json')}`. {brief_clause}. Verdict source: `{os.path.join(run, 'checker.out')}`."
+        body = '\n'.join(_bl_)
+        kind_note = f" kind=test_only product_unchanged=True product_sha256={to_prod_sha[:16]}"
     gsum = ('BYTE-IDENTICAL' if same_bytes else ('bytes differ; applied result ' + ('IDENTICAL' if applied_same else ('DIFFERS' if applied_same is False else 'not compared')) if same_bytes is False else 'not compared'))
     if dry:
-        print(f"DRY-RUN OK → {fname}\n  golden: {golden_clause}\n  touched={touched} product_plus={len(prod_plus)} product_minus={len(prod_minus)} red={rf['numFailedTests']}/{rf['numTotalTests']} green={ga['numPassedTests']}/{ga['numTotalTests']} suite={bs['numTotalTests']}->{af['numTotalTests']} strict={strict_ok} nonascii={nonascii}\n  header: {body.splitlines()[2]}\n  prnote: {[l for l in body.splitlines() if l.startswith('**PR NOTES')][0][:400]}")
+        print(f"DRY-RUN OK → {fname}\n  golden: {golden_clause}\n  touched={touched} product_plus={len(prod_plus)} product_minus={len(prod_minus)} red={rf['numFailedTests']}/{rf['numTotalTests']} green={ga['numPassedTests']}/{ga['numTotalTests']} suite={bs['numTotalTests']}->{af['numTotalTests']} strict={strict_ok} nonascii={nonascii}{kind_note}\n  header: {body.splitlines()[2]}\n  prnote: {[l for l in body.splitlines() if l.startswith('**PR NOTES')][0][:400]}")
         sys.exit(0)
     open(out, 'w').write(body)
-    print(f"HELD → {out}\n  golden: {gsum}; touched={len(touched)} product_plus={len(prod_plus)} product_minus={len(prod_minus)} red={rf['numFailedTests']}/{rf['numTotalTests']} green={ga['numPassedTests']}/{ga['numTotalTests']} suite={bs['numTotalTests']}->{af['numTotalTests']} strict={strict_ok}")
+    print(f"HELD → {out}\n  golden: {gsum}; touched={len(touched)} product_plus={len(prod_plus)} product_minus={len(prod_minus)} red={rf['numFailedTests']}/{rf['numTotalTests']} green={ga['numPassedTests']}/{ga['numTotalTests']} suite={bs['numTotalTests']}->{af['numTotalTests']} strict={strict_ok}{kind_note}")
     sys.exit(0)
 
 # ================================================================== bash_patch path (2026-09-22 10:2x)
@@ -871,6 +1002,247 @@ def hold_bash_patch():
         sys.exit(0)
     open(out, 'w').write(body)
     print(f"HELD → {out}\n  golden: {gverdict}; touched={len(touched)} product_plus={len(prod_plus)} product_minus={len(prod_minus)} red=rc{red_rc}/{red_nf}FAIL green=rc{g_rc}/{g_np}pass sibs={n_sibs} strict={strict_ok} cat_ok={cat_ok} rewritten={[k for k, _, _ in rewritten]}")
+    sys.exit(0)
+
+# ================================================================== bash_patch2 path (2026-10-18, holdkinds)
+# tasks/bash_patch2/checker.sh writes (beside bash_patch's stage-1 artefacts: patch.diff, sections.json, section_<k>.diff + .opts
+# + .header_measure.out + .check.out): stage1_checker.out, brief_bytes.out (B3x), a3c_union.out / a3d_*.out (B3b), red_first_<i>.out
+# and green_after_<i>.out per declared test (i = the input's test_files order), after_<product basename> per product, sib<i>_*.out.
+# There is NO numstat.out: the touched set is measured here by `git apply --numstat` of each section with its own opts (in a
+# scratch tempdir outside any repository) and must equal sections.json's paths AND the declared set.
+def hold_bash_patch2():
+    import hashlib, difflib, tempfile, shutil
+    tip = inp.get('tip') or (inp.get('repo') or {}).get('tip') or die("input.json has no tip")
+    prods = list(inp.get('product_files') or []); tfs = list(inp.get('test_files') or [])
+    tests = [t.get('path') for t in tfs]; role = {t.get('path'): t.get('role') for t in tfs}; status = {t.get('path'): t.get('status') for t in tfs}
+    decl = sorted(set(prods) | set(tests)); ref_test = inp.get('reference_test_file') or ''; test_dir = (inp.get('test_dir') or '').rstrip('/')
+    if not prods or not tests or None in tests or len(decl) != len(prods) + len(tests): die(f"bash_patch2: input.json product_files/test_files are empty or overlap: {prods} / {tests}")
+    if any(role[t] not in ('red', 'support') for t in tests) or any(status[t] not in ('new', 'modified') for t in tests): die(f"bash_patch2: a test_files entry has a role/status outside red|support / new|modified: {tfs}")
+    co = _read(os.path.join(run, 'checker.out'), 'checker.out'); co_lines = [l.rstrip() for l in co.splitlines()]
+
+    # 1. verdict — RESULT PASS n/n, no FAIL line
+    m = re.search(r'^RESULT: (PASS|FAIL) \((\d+)/(\d+)\)', co, re.M)
+    if not m or m.group(1) != 'PASS':
+        die(f"checker.out RESULT is not PASS: {m.group(0) if m else next((l.strip() for l in co.splitlines() if l.startswith('RESULT:')), 'absent')}; FAIL lines: {[l.strip() for l in co.splitlines() if l.startswith('FAIL ')][:3]}")
+    passed, total = m.group(2), m.group(3); result_line = _line(co, 'RESULT: ', 'RESULT')
+    if passed != total: die(f"bash_patch2: RESULT is not n/n: {result_line}")
+    if any(l.startswith('FAIL ') for l in co_lines): die(f"bash_patch2: RESULT says PASS but checker.out carries FAIL line(s): {[l for l in co_lines if l.startswith('FAIL ')][:3]}")
+
+    # 2. the TOUCHED SET first (measured): sections.json paths == numstat of each section (own opts) == the declared set
+    patch_path = os.path.join(chk, 'patch.diff'); patch_text = _read(patch_path, 'patch.diff')
+    sections = json.loads(_read(os.path.join(chk, 'sections.json'), 'sections.json'))
+    if not sections: die("sections.json is empty")
+    norm = lambda p: p[2:] if p.startswith(('a/', 'b/')) else p
+    sec_rows = []; any_accom = False; rewritten = []
+    td = tempfile.mkdtemp(prefix='hold_ready_ns_', dir=os.environ.get('CLAUDE_SCRATCHPAD') or None); ns_paths = []
+    try:
+        for k, s in enumerate(sections, 1):
+            if os.path.basename(s['file']) != f'section_{k}.diff': die(f"sections.json order/name mismatch: entry {k} is {s['file']}")
+            sf = os.path.join(chk, f'section_{k}.diff'); st = _read(sf, f'section_{k}.diff')
+            opts = _read(sf + '.opts', f'section_{k}.diff.opts').strip()
+            hm = _read(sf + '.header_measure.out', f'section_{k}.diff.header_measure.out').strip()
+            chk_out = _read(sf + '.check.out', f'section_{k}.diff.check.out').strip()
+            r = subprocess.run(['git', 'apply', '--numstat', '-p1', *opts.split(), sf], cwd=td, capture_output=True, text=True)
+            if r.returncode != 0: die(f"bash_patch2: `git apply --numstat` of section_{k}.diff failed: {r.stderr.strip()[:200]}")
+            rows = [l.split('\t') for l in r.stdout.splitlines() if l.strip()]
+            ns_paths += [norm(x[2]) for x in rows if len(x) == 3]
+            kinds = []
+            if os.path.exists(sf + '.reanchored'): kinds.append('REANCHORED (as-written kept at section_%d.diff.as-written)' % k)
+            elif os.path.exists(sf + '.as-written'): kinds.append('NEW-FILE NORMALISED (as-written kept at section_%d.diff.as-written)' % k)
+            if os.path.exists(sf + '.pre-b3c'): kinds.append('B3c stays-site REPAIRED (pre-repair kept at section_%d.diff.pre-b3c)' % k)
+            if opts or kinds: any_accom = True
+            if kinds: rewritten.append((k, sf, '; '.join(kinds)))
+            n_plus = sum(1 for l in st.split('\n') if l.startswith('+') and not l.startswith('+++ '))
+            n_minus = sum(1 for l in st.split('\n') if l.startswith('-') and not l.startswith('--- '))
+            sec_rows.append((k, norm(s['path']), sf, opts, hm, chk_out, kinds, n_plus, n_minus, st))
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+    sec_paths = sorted(set(r_[1] for r_ in sec_rows)); ns_set = sorted(set(ns_paths))
+    if sec_paths != ns_set: die(f"bash_patch2: sections.json paths {sec_paths} != the sections' own `git apply --numstat` paths {ns_set}")
+    missing = sorted(set(decl) - set(ns_set)); undeclared = sorted(set(ns_set) - set(decl))
+    if missing or undeclared:
+        die(f"bash_patch2: touched set {ns_set} != the declared set {decl} (input.json product_files + test_files)" + (f"; declared but UNTOUCHED: {missing}" if missing else '') + (f"; touched but UNDECLARED: {undeclared}" if undeclared else ''))
+    if ref_test and ref_test in ns_set and ref_test not in decl: die(f"bash_patch2: the reference test {ref_test} was touched")
+    for t in tests:
+        if test_dir and t.rsplit('/', 1)[0] != test_dir: die(f"bash_patch2: declared test {t} is not in test_dir {test_dir}")
+        new_secs = [r_[9].startswith('--- /dev/null') for r_ in sec_rows if r_[1] == t]
+        if status[t] == 'new' and not all(new_secs): die(f"bash_patch2: {t} is declared NEW but its section is not `--- /dev/null`")
+        if status[t] == 'modified' and any(new_secs): die(f"bash_patch2: {t} is declared MODIFIED but its section is `--- /dev/null`")
+
+    # 3. the checker's own lines, verbatim, each cross-checked against the input
+    nr = sum(1 for t in tests if role[t] == 'red'); ns_ = len(tests) - nr
+    want_ml = f"mode: bash_patch2 (declared: {len(prods)} product(s), {len(tests)} test(s): {nr} red, {ns_} support)"
+    if co_lines[0] != want_ml: die(f"bash_patch2: checker.out's first line {co_lines[0]!r} != {want_ml!r} (the input's declared set)")
+    b = {k: _line(co, f'PASS {k} ', k) for k in ('B0', 'B1', 'B2', 'B3', 'B3b', 'B3x', 'B4', 'B5a', 'B5')}
+    b6_line = next((l for l in co_lines if l.startswith(('PASS B6 ', 'INFO B6 '))), '') or die("checker.out has no 'PASS B6'/'INFO B6' line — B6 cannot be asserted")
+    b7_line = next((l for l in co_lines if l.startswith('INFO B7 ')), '')
+    sections_line = _line(co, 'sections: ', 'sections'); summary_line = _line(co, 'SUMMARY ', 'SUMMARY')
+    a2a_line = next((l for l in co_lines if l.startswith('PASS A2a ')), '')
+    if tip not in b['B0']: die(f"bash_patch2: B0 line does not name the tip {tip}: {b['B0']}")
+    want_b3 = "PASS B3 (bash_patch2) touched-file set == the declared set: { " + " , ".join(prods) + " } + { " + " , ".join(tests) + " }"
+    if b['B3'] != want_b3: die(f"bash_patch2: the PASS B3 line is not exactly the declared set: {b['B3'][:240]!r}")
+    if f"files={len(decl)} products={len(prods)} tests={len(tests)} red={nr} support={ns_} red_first=yes" not in summary_line: die(f"bash_patch2: SUMMARY line does not fit the input: {summary_line}")
+    b2_line = b['B2']; strict_claimed = b2_line.endswith('(strict)')
+    if strict_claimed and any_accom: die(f"B2 line claims (strict) but a section carries an accommodation: {[(r_[0], r_[3], r_[6]) for r_ in sec_rows if r_[3] or r_[6]]}")
+    if not strict_claimed and 'accommodation' not in b2_line: die(f"B2 line is neither (strict) nor names an accommodation: {b2_line}")
+    if not strict_claimed and not any_accom: die(f"B2 line names an accommodation but no section's opts/as-written/pre-b3c artefact shows one: {b2_line}")
+    strict_ok = strict_claimed and not any_accom
+    if strict_ok != ('apply_mode=strict' in summary_line): die(f"bash_patch2: SUMMARY apply_mode disagrees with B2/opts (strict={strict_ok}): {summary_line}")
+    cat_ok = (subprocess.run('cat ' + ' '.join("'" + r_[2] + "'" for r_ in sec_rows) + " | cmp -s - '" + patch_path + "'", shell=True).returncode == 0)
+
+    # 4. B3b re-applied: the first product's must_change sites are '-' lines; every brief '+' line is a product '+' line (multiset)
+    dl = inp.get('defect_line') or {}; exp = [e for e in (dl.get('expected_plus') or []) if e.strip()]; sites = dl.get('sites') or []
+    prod_txt = '\n'.join(r_[9] for r_ in sec_rows if r_[1] in prods).split('\n')
+    p1_txt = '\n'.join(r_[9] for r_ in sec_rows if r_[1] == prods[0]).split('\n')
+    prod_plus = [l[1:] for l in prod_txt if l.startswith('+') and not l.startswith('+++ ')]
+    p1_minus = {l[1:].strip() for l in p1_txt if l.startswith('-') and not l.startswith('--- ')}
+    pool = [l.strip() for l in prod_plus]; miss_plus = []
+    for e in exp:
+        if e.strip() in pool: pool.remove(e.strip())
+        else: miss_plus.append(e)
+    if miss_plus: die(f"bash_patch2: brief '+' line(s) absent from the product sections (contradicts PASS B3b): {miss_plus[:2]}")
+    miss_sites = [s_ for s_ in sites if s_.get('must_change') and (s_.get('text_at_tip') or '').strip() not in p1_minus]
+    if miss_sites: die(f"bash_patch2: must_change site(s) of {prods[0]} not a '-' line (contradicts PASS B3b): {[(s_['line'], (s_.get('text_at_tip') or '')[:60]) for s_ in miss_sites]}")
+    rm_stays = [s_ for s_ in sites if not s_.get('must_change') and (s_.get('text_at_tip') or '').strip() and (s_.get('text_at_tip') or '').strip() in p1_minus]
+    if rm_stays: die(f"bash_patch2: a STAYS site of {prods[0]} is a '-' line: {[s_['line'] for s_ in rm_stays]}")
+    n_must = sum(1 for s_ in sites if s_.get('must_change'))
+    nonascii = sum(1 for l in prod_plus for c in l if ord(c) > 127)
+
+    # 5. B3x — per declared file byte identity, the checker's line and its brief_bytes.out
+    mx = re.search(r'\(SUMMARY declared=(\d+) measured=(\d+) ok=(\d+) diff=0 unmeasured=0\)$', b['B3x'])
+    if not mx or not (int(mx.group(1)) == int(mx.group(2)) == int(mx.group(3)) == len(decl)): die(f"bash_patch2: PASS B3x line does not show declared==measured==ok=={len(decl)} diff=0 unmeasured=0: {b['B3x'][:240]}")
+    bb = _read(os.path.join(chk, 'brief_bytes.out'), 'brief_bytes.out').splitlines()
+    bad_bb = [l for l in bb if l.startswith(('DIFF', 'UNMEASURED'))]
+    if bad_bb: die(f"bash_patch2: brief_bytes.out carries DIFF/UNMEASURED lines: {bad_bb[:2]}")
+    miss_bb = [p for p in decl if not any(l.startswith('OK ' + p + ' ') for l in bb)]
+    if miss_bb: die(f"bash_patch2: brief_bytes.out has no `OK <file>` line for declared file(s) {miss_bb}")
+    bb_sum = '; '.join(l for l in bb if l.startswith(('OK ', 'SUMMARY')))
+
+    # 6. B4 / B5 per declared test — the run line verbatim, re-counted from its own output file (the checker's regexes)
+    RL = r'rc=(\d+) fail_lines=(\d+) pass_lines=(\d+) load_error=(\d) timeout=(\d)'
+    per_test = []
+    for i, t in enumerate(tests, 1):
+        bn = os.path.basename(t); rl = 'RED' if role[t] == 'red' else 'SUPPORT'
+        l4 = next((l for l in co_lines if l.startswith(f"B4 {bn} ({rl}) with the test edits alone: ")), '') or die(f"bash_patch2: checker.out has no B4 run line for {bn} ({rl})")
+        l5 = next((l for l in co_lines if l.startswith(f"B5 {bn} after every product section: ")), '') or die(f"bash_patch2: checker.out has no B5 run line for {bn}")
+        m4 = re.search(RL, l4); m5 = re.search(RL, l5)
+        if not m4 or not m5: die(f"bash_patch2: B4/B5 run lines for {bn} do not carry rc/fail_lines/pass_lines: {l4!r} / {l5!r}")
+        r_rc, r_nf, r_np, r_ld, r_to = map(int, m4.groups()); g_rc, g_nf, g_np, g_ld, g_to = map(int, m5.groups())
+        ro = _read(os.path.join(chk, f'red_first_{i}.out'), f'red_first_{i}.out'); go = _read(os.path.join(chk, f'green_after_{i}.out'), f'green_after_{i}.out')
+        if _fail_lines(ro) != (r_nf, r_np): die(f"bash_patch2: red_first_{i}.out re-count FAIL/pass={_fail_lines(ro)} != the B4 run line for {bn} ({r_nf}/{r_np})")
+        if _fail_lines(go) != (g_nf, g_np): die(f"bash_patch2: green_after_{i}.out re-count FAIL/pass={_fail_lines(go)} != the B5 run line for {bn} ({g_nf}/{g_np})")
+        if r_ld or r_to or g_ld or g_to: die(f"bash_patch2: {bn} has a load error / timeout in B4 or B5: {l4!r} / {l5!r}")
+        if rl == 'RED' and (r_rc == 0 or r_nf < 1): die(f"bash_patch2: {bn} is declared RED but its B4 run is not red: {l4}")
+        if rl == 'SUPPORT' and (r_rc != 0 or r_nf != 0): die(f"bash_patch2: {bn} is declared SUPPORT but its B4 run is not green: {l4}")
+        if g_rc != 0 or g_nf != 0 or g_np < 1: die(f"bash_patch2: {bn}'s B5 run is not green: {l5}")
+        if rl == 'RED' and f" {bn}=RED(rc {r_rc}, {r_nf} FAIL)" not in b['B4']: die(f"bash_patch2: PASS B4 line does not carry {bn}=RED(rc {r_rc}, {r_nf} FAIL): {b['B4'][:200]}")
+        if f" {bn}({g_np} pass)" not in b['B5']: die(f"bash_patch2: PASS B5 line does not carry {bn}({g_np} pass): {b['B5'][:200]}")
+        red_fail = [l.strip() for l in ro.splitlines() if re.match(r'^\s*FAIL[: ]', l)]
+        per_test.append((t, rl, status[t], l4, l5, red_fail))
+    for p in prods: _read(os.path.join(chk, 'after_' + os.path.basename(p)), 'after_' + os.path.basename(p))
+    n_sibs = 0
+    if b6_line.startswith('PASS B6'):
+        m6 = re.search(r'\((\d+) suite\(s\):', b6_line); n_sibs = int(m6.group(1)) if m6 else -1
+        sib_files = sorted(f for f in os.listdir(chk) if re.match(r'sib\d+_after\.out$', f))
+        if len(sib_files) != n_sibs: die(f"bash_patch2: B6 line says {n_sibs} suite(s) but {len(sib_files)} sib<i>_after.out file(s) exist")
+
+    # 7. the brief (required): `File:` lines == product_files, `Test …:` lines == test_files
+    decl_brief = title_brief or brief_given
+    if not decl_brief: die("bash_patch2: needs --title-from-brief or --brief so the brief's `File:` / `Test …:` lines can be counted against the declared set")
+    if not os.path.isfile(decl_brief): die(f"bash_patch2: no such brief file: {decl_brief}")
+    _bl = open(decl_brief, errors='replace').read().splitlines()
+    if not any(ticket in l for l in _bl if l.startswith('# ')): die(f"bash_patch2: the brief's `# ` heading does not name the run's ticket {ticket}")
+    bfiles = [m_.group(1).strip() for m_ in (re.match(r'^File:\s*`([^`]+)`', l) for l in _bl) if m_]
+    btests = [m_.group(1).strip() for m_ in (re.match(r'^Test[^:`]*:\s*`([^`]+)`', l) for l in _bl) if m_]
+    if sorted(bfiles) != sorted(prods) or len(bfiles) != len(prods): die(f"bash_patch2: the brief's `File:` lines {bfiles} are not exactly the declared products {prods}")
+    if sorted(btests) != sorted(tests) or len(btests) != len(tests): die(f"bash_patch2: the brief's `Test …:` lines {btests} are not exactly the declared tests {tests}")
+
+    # 8. the golden — BYTE-IDENTICAL only from cmp; else CONTEXT-ONLY / DIFFERS (bash_patch's measure); each product's after_<p> cmp'd
+    golden_clause = "golden not located — no identity claim is made"; gverdict = 'not compared'
+    if golden != '-':
+        gpath = os.path.join(golden, 'out.md.checker', 'patch.diff')
+        if not os.path.exists(gpath):
+            golden_clause = f"golden path `{gpath}` does not exist — no identity claim is made"
+        else:
+            same_bytes = (subprocess.run(['cmp', '-s', patch_path, gpath]).returncode == 0)
+            ac = []
+            for p in prods:
+                a_r = os.path.join(chk, 'after_' + os.path.basename(p)); a_g = os.path.join(golden, 'out.md.checker', 'after_' + os.path.basename(p))
+                if os.path.exists(a_g):
+                    sa = (subprocess.run(['cmp', '-s', a_r, a_g]).returncode == 0); ac.append(f"`after_{os.path.basename(p)}` {'IDENTICAL' if sa else 'DIFFERS'} (`cmp` rc {0 if sa else 1})")
+                else: ac.append(f"`after_{os.path.basename(p)}` not compared (absent in the golden)")
+            after_clause = "APPLIED PRODUCT(S): the two checkers' own " + '; '.join(ac)
+            if same_bytes:
+                gverdict = 'BYTE-IDENTICAL'
+                golden_clause = f"the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s {patch_path} {gpath}` rc 0, {seat}); {after_clause}"
+            else:
+                rs = _bash_sections(patch_text); gs = _bash_sections(open(gpath, errors='replace').read())
+                if [(s_['minus'], s_['plus']) for s_ in rs] != [(s_['minus'], s_['plus']) for s_ in gs]:
+                    gverdict = 'DIFFERS (file headers)'
+                    golden_clause = f"DIFFERS from the drafter's golden `{gpath}` (`cmp` rc 1): file headers differ; {after_clause} — read the diff before raising"
+                else:
+                    n_diff = sum(sum(1 for l in difflib.ndiff(r_['chg'], g_['chg']) if l[:2] in ('+ ', '- ')) for r_, g_ in zip(rs, gs))
+                    gverdict = 'CONTEXT-ONLY' if n_diff == 0 else f'DIFFERS ({n_diff} change line(s))'
+                    golden_clause = (f"{'CONTEXT-ONLY difference from' if n_diff == 0 else 'DIFFERS from'} the drafter's golden `{gpath}` (bytes DIFFER: `cmp` rc 1): "
+                                     + ("change lines (`+`/`-`, ordered) IDENTICAL in every section" if n_diff == 0 else f"{n_diff} change line(s) (`+`/`-`, ndiff) differ — read the diff before raising") + f"; {after_clause}")
+    gco = os.path.join(run, 'golden_cmp.out')
+    gco_clause = f" Run's own golden_cmp.out [verbatim]: `{open(gco, errors='replace').read().strip()[:300]}`." if os.path.exists(gco) else ''
+
+    briefs_clause = f"Brief (given by --{'title-from-brief' if title_brief else 'brief'}): `{os.path.abspath(decl_brief)}`"
+    _bd = _brief_from_run_dir(run, ticket)
+    if _bd: briefs_clause = f"Brief (located from the run dir's own name under night/briefs/): `{_bd}`" + ('' if os.path.realpath(_bd) == os.path.realpath(decl_brief) else f" — NOTE: the brief given is `{os.path.abspath(decl_brief)}`")
+
+    now = datetime.datetime.now()
+    stamp = now.strftime('%H:%M %Y-%m-%d'); day = now.strftime('%Y-%m-%d')
+    fname = f"READY_{ticket}-{rowid}_{model_tag}_BRIEFED-BASHPATCH2-{title}-PASS-{passed}of{total}_{day}.diff.md"
+    out = os.path.join(NIGHT_DIR, fname)
+    if os.path.exists(out) and not dry: die(f"READY already exists: {out}")
+    patch_sha = hashlib.sha256(open(patch_path, 'rb').read()).hexdigest()[:16]; patch_bytes = os.path.getsize(patch_path)
+    sec_lines = '\n'.join(
+        f"- section {k} `{os.path.basename(sf)}` → `{path}` (+{np}/-{nm} counted from the applied section file; git-apply options per `section_{k}.diff.opts`: `{opts or '(none — strict)'}`; `.header_measure.out`: {'EMPTY' if not hm else 'NON-EMPTY: `' + hm.splitlines()[0][:160] + '`'}; `.check.out` (strict --check): {'EMPTY (clean)' if not co_ else 'NON-EMPTY: `' + co_.splitlines()[0][:160] + '`'}{'; checker-REWRITTEN: ' + '; '.join(kinds) if kinds else ''})"
+        for k, path, sf, opts, hm, co_, kinds, np, nm, _ in sec_rows)
+    test_lines = '\n'.join(f"- {rl} test `{t}` ({st_}) — B4 [verbatim]: `{l4}` [red FAIL lines: {rf_}] · B5 [verbatim]: `{l5}`" for t, rl, st_, l4, l5, rf_ in per_test)
+    apply_steps = '; '.join((f"section {k} `section_{k}.diff`: `git apply -p1 {opts}`" if opts else f"section {k} `section_{k}.diff`: `git apply -p1` (strict)") + (' — the CHECKER-REWRITTEN file, not the fence' if kinds else '')
+                            for k, _, _, opts, _, _, kinds, _, _, _ in sec_rows)
+    prod_counts = ', '.join(f"`{p}` (+{sum(r_[7] for r_ in sec_rows if r_[1] == p)}/-{sum(r_[8] for r_ in sec_rows if r_[1] == p)})" for p in prods)
+    test_counts = ', '.join(f"`{t}` ({status[t].upper()}, {role[t].upper()}, +{sum(r_[7] for r_ in sec_rows if r_[1] == t)}/-{sum(r_[8] for r_ in sec_rows if r_[1] == t)})" for t in tests)
+    strict_note = ('' if strict_ok else ' — STRICT APPLY NOT CLAIMED: apply PER SECTION with the options recorded in section_<k>.diff.opts (the raise seat states which)')
+    extra_fences = ''.join(f"\n**APPLIED `section_{k}.diff` ({kinds}) — byte for byte:**\n```diff\n{open(sf, errors='replace').read().rstrip()}\n```\n" for k, sf, kinds in rewritten)
+    body = f"""# READY — {ticket}-{rowid} ({model_label}, briefed, bash_patch2, bash) — PASS {passed}/{total} — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `{patch_path}`** (from `ls` at {stamp}; sha256[:16] {patch_sha}, {patch_bytes} B; {'it is `cat` of the section files in order: `cmp` rc 0' if cat_ok else 'NOTE — `cat section_*.diff | cmp patch.diff` rc 1: the SECTION FILES are the applied units'}: {', '.join('`' + r_[2] + '`' for r_ in sec_rows)}). Checker B2 (verbatim from checker.out): `{b2_line}`{strict_note}; {golden_clause}.{gco_clause}
+
+**Held {stamp} by {seat} after a source read (hold_ready.py, bash_patch2 path — every clause below is COPIED from the checker's own artefacts in `{chk}` or MEASURED here, not typed; the artefact each came from is named in brackets).** Tip `{tip}`.
+- Kind [three signals, all agree]: input.json task_type `bash_patch2`; checker.out's first line, verbatim: `{co_lines[0]}`{'; round.json tier `bash_patch2`' if _round_tier() is not None else ''}.
+- Subject [checker.out B0, verbatim]: `{b['B0']}`
+- Output shape [checker.out B1, verbatim]: `{b['B1']}` · sections [verbatim]: `{sections_line}`
+- Touched-file set [checker.out B3, verbatim]: `{b['B3']}` — MEASURED here: sections.json paths == each section's own `git apply --numstat` paths == the declared set ({len(decl)} files: {len(prods)} product(s) + {len(tests)} test(s)); reference test `{ref_test}` untouched.
+- Brief lines [checker.out B3b, verbatim]: `{b['B3b']}` — re-measured: all {len(exp)} brief `+` line(s) among the product sections' `+` lines (multiset; {'ASCII' if nonascii == 0 else str(nonascii) + ' NON-ASCII chars'}); must_change sites {n_must}/{n_must} of `{prods[0]}` each a `-` line; no stays-site removed.
+- Byte identity [checker.out B3x, verbatim]: `{b['B3x']}` · [brief_bytes.out, verbatim]: `{bb_sum}`
+- Brief header [`{os.path.abspath(decl_brief)}`]: `File:` lines == product_files {bfiles}; `Test …:` lines == test_files {btests}.
+- Sections [out.md.checker/sections.json + section_<k>.diff.opts + .header_measure.out + .check.out]:
+{sec_lines}
+- RED-FIRST [checker.out B4, verbatim]: `{b['B4']}`
+- Parse [checker.out B5a, verbatim]: `{b['B5a']}`
+- GREEN-AFTER [checker.out B5, verbatim]: `{b['B5']}`
+{test_lines}
+- Siblings [checker.out B6, verbatim]: `{b6_line}`{(' [' + str(n_sibs) + ' sib<i>_after.out file(s) present]') if n_sibs else ''}
+{('- Shellcheck [checker.out B7, verbatim]: `' + b7_line + '`') if b7_line else '- No B7 line in checker.out'}
+{('- Anchor [checker.out A2a, verbatim]: `' + a2a_line + '`') if a2a_line else '- No A2a line in checker.out'}
+- SUMMARY [checker.out, verbatim]: `{summary_line}`
+- RESULT [checker.out, verbatim]: `{result_line}`
+
+**PR NOTES for the raise seat:** BASH_PATCH2 — PRODUCT BYTES CHANGE: {prod_counts} (counted from the section files — the bash_patch2 checker writes no numstat.out) and the test(s) {test_counts}; {len(decl)} files in all. Apply PER SECTION with the checker's apply mode — {apply_steps} — at the tip `{tip}` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product bytes change) — the gate decides. Input: `{os.path.join(run, 'input.json')}`. {briefs_clause}. Verdict source: `{os.path.join(run, 'checker.out')}`.
+
+```diff
+{patch_text.rstrip()}
+```
+{extra_fences}"""
+    if dry:
+        print(f"DRY-RUN OK → {fname}\n  golden: {golden_clause}\n  touched={ns_set} products={len(prods)} tests={len(tests)} red={nr} support={ns_} sibs={n_sibs} strict={strict_ok} cat_ok={cat_ok} rewritten={[k for k, _, _ in rewritten]} nonascii={nonascii} kind=bash_patch2\n  header: {body.splitlines()[2]}\n  prnote: {[l for l in body.splitlines() if l.startswith('**PR NOTES')][0][:400]}")
+        sys.exit(0)
+    open(out, 'w').write(body)
+    print(f"HELD → {out}\n  golden: {gverdict}; touched={len(ns_set)} products={len(prods)} tests={len(tests)} red={nr} support={ns_} sibs={n_sibs} strict={strict_ok} cat_ok={cat_ok} kind=bash_patch2")
     sys.exit(0)
 
 # ================================================================== doc_patch path (2026-09-22 11:2x)
@@ -1138,6 +1510,8 @@ def hold_doc_patch():
     open(out, 'w').write(body)
     print(f"HELD → {out}\n  golden: {gverdict}; touched={paths} hunks={n_hunks} plus={len(patch_plus)} minus={len(patch_minus)} removed={n_rem} added={n_add} sections={len(req)} mode={mode} strict={strict_ok} fence_same={fence_same}")
     sys.exit(0)
+
+if IS_BASH_PATCH2: hold_bash_patch2()
 
 if IS_BASH_PATCH: hold_bash_patch()
 
