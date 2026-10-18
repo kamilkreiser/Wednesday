@@ -1,7 +1,7 @@
 #1566 KS-1541 @ 3697013868483a28c2da99169b5c8cdd4aef2427: GO WITH NOTE (tier 2; red-first 3/3 and green 6/6 reproduced, 13/16 mutants killed; the 3 survivors (M3, M8, and the M9 bound) are notes, not defects)
-#1565 KS-724 @ 47ca56213b6eb7b34d30fd91aea411478f33d9b1: GO WITH NOTE (tier 3; comment-only proven by token stream 270 = 270; quote "Accept as built" matches the card verbatim; the time in the header does not match the card's ruled_ts)
+#1565 KS-724 @ 47ca56213b6eb7b34d30fd91aea411478f33d9b1: GO WITH NOTE (tier 3; comment-only proven by token stream 270 = 270; quote "Accept as built" matches the card verbatim; the header's 19:00:36 is the live-board tap time from Wednesday's brief, not the card's ruled_ts 19:02:56)
 #1567 KS-1614 item 4 @ 09de80685fb6b0945cae4908723d67e6a10c76ce: GO (tier 3; test-only, byte-identical to the golden; green at the tip, red for the right reason under the :157 tamper; api-gateway 1166/1166)
-sha256/16: dacec9e78fccfe6e
+sha256/16: 01a7c05f90190b9a
 
 # GATE D, round 1 of 2: #1566 + #1565 + #1567 (Opus QA gate, findings only)
 
@@ -17,7 +17,7 @@ Live develop re-read 20:37:24 AEDT by `git ls-remote`: d2ec786e6130c7ce13384185c
 - Diff scope is clean: 2 files, +62/-1, exactly the named ones. Its +/- lines are the same 63 lines as night/briefs/ks_1541_p1/golden.diff (only the order of the files differs).
 
 ### #1565 KS-724 (tier 3)
-- **NOTE: the header's time does not match the card.** `systemTest/akto/src/scan/credentialLiveness.ts:88` says "2026-10-18 19:00:36 AEDT". decisions.json gives card secuura-ks724-locked-account-template-exclusion-1015 `ruled_ts` 2026-10-18T19:02:56.744834+11:00 (evidence/32_1565_card.txt). Wednesday's daily note puts the tap at 18:59-19:00 and says reconcile_rulings applied it at about 19:0x. So 19:00:36 is probably the tap time from the cloud chat and 19:02:56 the apply time. I could not find 19:00:36 in any local file, so it is not verified. The quoted words are verbatim: option (a) label "Accept as built", `ruled_choice` "a", status "ruled". The scope sentence ("covers this one id") matches option (a)'s detail.
+- **NOTE: the header's time does not match the card.** `systemTest/akto/src/scan/credentialLiveness.ts:88` says "2026-10-18 19:00:36 AEDT". decisions.json gives card secuura-ks724-locked-account-template-exclusion-1015 `ruled_ts` 2026-10-18T19:02:56.744834+11:00 (evidence/32_1565_card.txt). Wednesday's daily note puts the tap at 18:59-19:00 and says reconcile_rulings applied it at about 19:0x. So 19:00:36 is probably the tap time from the cloud chat and 19:02:56 the apply time. Source found: Wednesday's own staged brief to R, 2_Project_Files/fleet/briefs_staged/2026-10-18_seatR47_merge_gateC_raise_1541_1614_ks724.md:32, gives the tap as "(2026-10-18 19:00:36, live board)". So R quoted Wednesday's brief faithfully. Whether the comment should carry the tap time or the card's ruled_ts is Wednesday's choice, and it is cosmetic. The quoted words are verbatim: option (a) label "Accept as built", `ruled_choice` "a", status "ruled". The scope sentence ("covers this one id") matches option (a)'s detail.
 - Comment-only is proven. The TypeScript scanner token stream, comments skipped, is 270 = 270 tokens with the same sha (7c3dd36dcd67d686) at develop and the head. The comment-trivia count is 13 = 13, so the 5 lines are inside the existing JSDoc block. Planted control: removing one `readonly` token gives 269 tokens and a different sha, so the comparison can see a one-token change.
 
 ### #1567 KS-1614 item 4 (tier 3)
@@ -65,6 +65,6 @@ Live develop re-read 20:37:24 AEDT by `git ls-remote`: d2ec786e6130c7ce13384185c
 - **The full akto unit suite, as the author's 2035/2035:** here it is 5 failed / 2017 passed (2022). The failures are in lintOverrideHygiene, lintToolchainPins and lintConfigContract (the oxlint toolchain), and they are IDENTICAL on develop d2ec786e (evidence/31). The cause is my environment: node_modules is borrowed from the project checkout, which sits at 76698952. The PR cannot cause them, because its token stream is unchanged. akto `lint` (tsc + oxlint) was not run, for the same toolchain reason.
 - **node_modules** is symlinked read-only from the project checkout (develop 76698952). For api-gateway, the worktree got its own node_modules overlay, and `@secuura/shared` was rebuilt from the worktree's own source. The first run against the checkout's stale shared dist failed 9 tests on BOTH develop and the head (kept as evidence/20_1567_run1_stale-shared-dist.txt). The mcp-server and akto runs used the checkout's packages as they are.
 - I did not compare against R's preflight 13/16 (legs 3, 4 and 8 skipped).
-- Whether 19:00:36 is Kam's tap time: no local record found.
+- 19:00:36 was traced to Wednesday's brief (line 32) but not to the cloud chat record itself.
 
 Severities: #1566 1 LOW (info.ts:131, unbounded relay, unreachable against the real gateway) and 3 NOTE (info.ts:129/132 wording, M3/M8 test gaps, api-client.ts:125 typing). #1565 1 NOTE (credentialLiveness.ts:88 timestamp). #1567 none. No HIGH or MEDIUM. Merge only on Wednesday's head-bound GO; nothing deploys.
