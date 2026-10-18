@@ -1,0 +1,136 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/anchorHonesty.ts b/Blockchain/Dev/services/originate/src/services/anchorHonesty.ts
+index 29f5574d1..3a2339d90 100644
+--- a/Blockchain/Dev/services/originate/src/services/anchorHonesty.ts
++++ b/Blockchain/Dev/services/originate/src/services/anchorHonesty.ts
+@@ -27,5 +27,5 @@
+ /** Placeholder tx prefixes. Mirrors services/anchoring/src/honestAnchor.ts. */
+-export const FABRICATED_TX_PREFIX = /^(tx_sim_|mock_tx_|tx_)/;
+-
++export const FABRICATED_TX_PREFIX = /^(tx_sim_|mock_tx_|mock_batch_tx_|tx_)/;
++
+ /**
+  * A row/payload counts as simulated when its flag says so OR its hash carries
+diff --git a/Blockchain/Dev/services/originate/src/routes/verification.ts b/Blockchain/Dev/services/originate/src/routes/verification.ts
+index 980d71e2d..94773b51e 100644
+--- a/Blockchain/Dev/services/originate/src/routes/verification.ts
++++ b/Blockchain/Dev/services/originate/src/routes/verification.ts
+@@ -49,8 +49,8 @@
+ // nulled (the placeholder moves to `simulatedTxRef`), `anchored` flips false,
+ // and a machine-readable `simulated: true` marker is set (also surfaced
+ // top-level by the response builders).
+-const FABRICATED_TXHASH_RE = /^(tx_sim_|mock_tx_|tx_)/;
+-
++const FABRICATED_TXHASH_RE = /^(tx_sim_|mock_tx_|mock_batch_tx_|tx_)/;
++
+ export function presentBlockchainHonestly(blob: unknown): unknown {
+   if (!blob || typeof blob !== 'object') return blob;
+   const b = blob as Record<string, unknown>;
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1626-batch-mock-placeholder-is-read-as-a-placeholder.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1626-batch-mock-placeholder-is-read-as-a-placeholder.test.ts
+new file mode 100644
+index 000000000..538adc2a4
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1626-batch-mock-placeholder-is-read-as-a-placeholder.test.ts
+@@ -0,0 +1,103 @@
++/**
++ * KS-1626 - originate's two placeholder tests must read the batch mock's hash as a placeholder.
++ *
++ * The non-production batch mock in the anchoring service writes `mock_batch_tx_<64 hex>` as a confirmed anchor's
++ * transaction hash. Originate's two placeholder tests matched `/^(tx_sim_|mock_tx_|tx_)/`, which does not match it
++ * (`mock_b`, not `mock_t`): `FABRICATED_TX_PREFIX` (services/anchorHonesty.ts, used by isSimulatedAnchor,
++ * simulatedFieldsFromAnchor and composeHonestBlockchainBlob) and `FABRICATED_TXHASH_RE` (routes/verification.ts, used
++ * by presentBlockchainHonestly). The hash was therefore served as an on-chain transaction (the KS-522 / KS-587
++ * honest-labelling family). A real Cardano hash is 64 hex digits and can never contain `_`.
++ *
++ * Every function called here is pure; the module mocks below are the neighbouring KS-563 test's, so loading
++ * routes/verification touches no database.
++ */
++
++process.env.NODE_ENV = 'development';
++// routes/verification imports ../db (via the logger), whose config demands
++// DATABASE_URL at module load - same shim the other unit suites here use.
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
++
++const mockQueryRaw = jest.fn();
++
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: mockQueryRaw },
++  getTenantManager: () => null,
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    runWithTenantId: (_t: unknown, fn: () => unknown) => fn(),
++    queryWithTenantGuc: jest.fn(),
++  }),
++);
++
++// The lineage walks are not under test here.
++jest.mock('../repositories/documentRepo', () => ({
++  walkAncestors: jest.fn().mockResolvedValue({ lineage: [], truncated: false }),
++  walkDescendants: jest.fn().mockResolvedValue({ descendants: [], truncated: false }),
++  MAX_LINEAGE_DEPTH: 10,
++}));
++
++import {
++  FABRICATED_TX_PREFIX,
++  composeHonestBlockchainBlob,
++  isSimulatedAnchor,
++  simulatedFieldsFromAnchor,
++} from '../services/anchorHonesty';
++import { presentBlockchainHonestly } from '../routes/verification';
++
++const REAL_TX = '4f1e6a8d2c7b9e3f1a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e0f2a4b6c8d0e2f';
++const BATCH_MOCK_TX = 'mock_batch_tx_' + 'c'.repeat(64);
++const OLDER_PLACEHOLDERS = ['tx_sim_' + 'c'.repeat(64), 'mock_tx_' + 'c'.repeat(64), 'tx_' + 'c'.repeat(40)];
++
++describe('KS-1626 - the batch mock placeholder is read as a placeholder in originate', () => {
++  it('RED KS-1626 O1 anchorHonesty reads a mock_batch_tx_ hash as a placeholder', () => {
++    expect(FABRICATED_TX_PREFIX.test(BATCH_MOCK_TX)).toBe(true);
++    expect(isSimulatedAnchor(BATCH_MOCK_TX, false)).toBe(true);
++    expect(simulatedFieldsFromAnchor({ transactionHash: BATCH_MOCK_TX })).toEqual({
++      simulated: true,
++      simulatedTxRef: BATCH_MOCK_TX,
++    });
++    const blob = composeHonestBlockchainBlob({ txHash: BATCH_MOCK_TX, status: 'confirmed' }) as Record<string, unknown>;
++    expect(blob.txHash).toBeNull();
++    expect(blob.simulated).toBe(true);
++    expect(blob.simulatedTxRef).toBe(BATCH_MOCK_TX);
++  });
++
++  it('RED KS-1626 O2 presentBlockchainHonestly reads a mock_batch_tx_ txHash as a placeholder', () => {
++    const out = presentBlockchainHonestly({ txHash: BATCH_MOCK_TX, anchored: true, status: 'confirmed', blockHeight: 4242 }) as Record<string, unknown>;
++    expect(out.simulated).toBe(true);
++    expect(out.anchored).toBe(false);
++    expect(out.txHash).toBeNull();
++    expect(out.simulatedTxRef).toBe(BATCH_MOCK_TX);
++  });
++
++  it('CONTROL KS-1626 O3 a real 64-hex hash is still read as real by both', () => {
++    expect(FABRICATED_TX_PREFIX.test(REAL_TX)).toBe(false);
++    expect(isSimulatedAnchor(REAL_TX, false)).toBe(false);
++    expect(simulatedFieldsFromAnchor({ transactionHash: REAL_TX })).toEqual({});
++    const blob = { txHash: REAL_TX, anchored: true, status: 'confirmed', blockHeight: 4242 };
++    expect(composeHonestBlockchainBlob(blob)).toBe(blob);
++    expect(presentBlockchainHonestly(blob)).toBe(blob);
++  });
++
++  it('CONTROL KS-1626 O4 the three older placeholder prefixes are still read as placeholders by both', () => {
++    for (const placeholder of OLDER_PLACEHOLDERS) {
++      expect(isSimulatedAnchor(placeholder, false)).toBe(true);
++      const out = presentBlockchainHonestly({ txHash: placeholder, anchored: true }) as Record<string, unknown>;
++      expect(out.simulated).toBe(true);
++      expect(out.txHash).toBeNull();
++    }
++  });
++
++  it('CONTROL KS-1626 O5 it is a prefix test: the text later in a value does not make it a placeholder', () => {
++    expect(FABRICATED_TX_PREFIX.test('abc_mock_batch_tx_def')).toBe(false);
++    const blob = { txHash: 'abc_mock_batch_tx_def', anchored: true };
++    expect(presentBlockchainHonestly(blob)).toBe(blob);
++  });
++});

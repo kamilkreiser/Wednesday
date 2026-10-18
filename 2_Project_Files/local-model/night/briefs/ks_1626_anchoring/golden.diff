@@ -1,0 +1,98 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/honestAnchor.ts b/Blockchain/Dev/services/anchoring/src/honestAnchor.ts
+index 325ed023c..573a968ce 100644
+--- a/Blockchain/Dev/services/anchoring/src/honestAnchor.ts
++++ b/Blockchain/Dev/services/anchoring/src/honestAnchor.ts
+@@ -14,8 +14,8 @@
+  * the flag can lie (they were written `simulated = false`).
+  */
+-
+-export const FABRICATED_TX_PREFIX = /^(tx_sim_|mock_tx_|tx_)/;
+-
++
++export const FABRICATED_TX_PREFIX = /^(tx_sim_|mock_tx_|mock_batch_tx_|tx_)/;
++
+ export interface HonestTxView {
+   /** Real on-chain hash, or null when the stored hash is a placeholder. */
+   txHash: string | null;
+diff --git a/Blockchain/Dev/services/anchoring/src/anchorReadback.ts b/Blockchain/Dev/services/anchoring/src/anchorReadback.ts
+index cfac4f9aa..03c0bf00d 100644
+--- a/Blockchain/Dev/services/anchoring/src/anchorReadback.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchorReadback.ts
+@@ -112,7 +112,7 @@
+   // dev mock). Never present it as an on-chain claim: the placeholder moves
+   // to `simulatedTxRef`, `simulated: true` is machine-readable, and no
+   // explorer URL is fabricated for a non-existent tx.
+-  const simulated = typeof rawTxHash === 'string' && /^(tx_sim_|mock_tx_|tx_)/.test(rawTxHash);
++  const simulated = typeof rawTxHash === 'string' && /^(tx_sim_|mock_tx_|mock_batch_tx_|tx_)/.test(rawTxHash);
+   const txHash = simulated ? null : rawTxHash;
+   // KS-726 (#805 review F1): the DB query admits 'submitting' rows, whose
+   // transaction the node has NOT acknowledged. `verified: true` alone cannot
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1626-batch-mock-placeholder-is-read-as-a-placeholder.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1626-batch-mock-placeholder-is-read-as-a-placeholder.test.ts
+new file mode 100644
+index 000000000..00c0d42da
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1626-batch-mock-placeholder-is-read-as-a-placeholder.test.ts
+@@ -0,0 +1,63 @@
++/**
++ * KS-1626 - the anchoring service's two placeholder tests must read the batch mock's hash as a placeholder.
++ *
++ * The non-production batch mock (index.ts, the batch anchor mock branch) writes `mock_batch_tx_<64 hex>` as a confirmed
++ * anchor's transaction hash. Both placeholder tests on the READ paths - `honestTxView` (honestAnchor.ts, the
++ * anchor-by-id and by-document reads) and `buildVerifyResponse` (anchorReadback.ts, the verify read) - matched
++ * `/^(tx_sim_|mock_tx_|tx_)/`, which does not match `mock_batch_tx_` (it starts `mock_b`, not `mock_t`), so the hash
++ * was presented as an on-chain transaction: `txHash` set, no `simulated` marker, a cardanoscan URL for a transaction
++ * that does not exist (the KS-522 / KS-587 honest-labelling family). A real Cardano hash is 64 hex digits and can
++ * never contain `_`, so the prefix cannot reject a real hash.
++ *
++ * Both functions are pure, so these cells call them directly and boot nothing.
++ */
++
++import { describe, it, expect } from 'vitest';
++
++import { honestTxView, FABRICATED_TX_PREFIX } from '../honestAnchor';
++import { buildVerifyResponse } from '../anchorReadback';
++
++const HASH = 'a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9';
++const CTX = { hash: HASH, network: 'preview' };
++const REAL_TX = '4f1e6a8d2c7b9e3f1a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e0f2a4b6c8d0e2f';
++const BATCH_MOCK_TX = 'mock_batch_tx_' + 'c'.repeat(64);
++const OLDER_PLACEHOLDERS = ['tx_sim_' + 'c'.repeat(64), 'mock_tx_' + 'c'.repeat(64), 'tx_' + 'c'.repeat(40)];
++
++describe('KS-1626 - the batch mock placeholder is read as a placeholder on the anchoring read paths', () => {
++  it('RED KS-1626 A1 honestTxView reads a mock_batch_tx_ hash as a placeholder', () => {
++    const view = honestTxView(BATCH_MOCK_TX, false);
++    expect(view.txHash).toBeNull();
++    expect(view.simulated).toBe(true);
++    expect(view.simulatedTxRef).toBe(BATCH_MOCK_TX);
++  });
++
++  it('RED KS-1626 A2 buildVerifyResponse reads a mock_batch_tx_ hash as a placeholder', () => {
++    const body = buildVerifyResponse('db', {}, { transaction_hash: BATCH_MOCK_TX, status: 'confirmed' }, CTX);
++    expect(body.txHash).toBeNull();
++    expect(body.simulated).toBe(true);
++    expect(body.simulatedTxRef).toBe(BATCH_MOCK_TX);
++    expect(body.cardanoScanUrl).toBeNull();
++  });
++
++  it('CONTROL KS-1626 A3 a real 64-hex hash is still read as real by both', () => {
++    expect(honestTxView(REAL_TX, false)).toEqual({ txHash: REAL_TX, simulated: false });
++    const body = buildVerifyResponse('db', {}, { transaction_hash: REAL_TX, status: 'confirmed' }, CTX);
++    expect(body.txHash).toBe(REAL_TX);
++    expect(body.simulated).toBeUndefined();
++    expect(body.cardanoScanUrl).toBe('https://preview.cardanoscan.io/transaction/' + REAL_TX);
++  });
++
++  it('CONTROL KS-1626 A4 the three older placeholder prefixes are still read as placeholders by both', () => {
++    for (const placeholder of OLDER_PLACEHOLDERS) {
++      expect(honestTxView(placeholder, false).simulated).toBe(true);
++      const body = buildVerifyResponse('db', {}, { transaction_hash: placeholder, status: 'confirmed' }, CTX);
++      expect(body.txHash).toBeNull();
++      expect(body.simulated).toBe(true);
++    }
++  });
++
++  it('CONTROL KS-1626 A5 it is a prefix test: the text later in a value does not make it a placeholder', () => {
++    expect(FABRICATED_TX_PREFIX.test('abc_mock_batch_tx_def')).toBe(false);
++    expect(honestTxView('abc_mock_batch_tx_def', false)).toEqual({ txHash: 'abc_mock_batch_tx_def', simulated: false });
++  });
++});
