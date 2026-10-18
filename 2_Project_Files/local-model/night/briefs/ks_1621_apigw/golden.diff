@@ -1,0 +1,19 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts
+index 554403c19..e64748fff 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1543-document-types-catch-logs-the-error.test.ts
+@@ -141,2 +141,14 @@
+   });
++
++  it('RED KS-1621 D4 - a thrown instance of a class logs its constructor name and field names, never a value', async () => {
++    class Ks1621Fault {
++      code = 'E_KS1621';
++      detail = 'SECRET-VALUE-ks1621';
++    }
++    getAllDocumentTypes.mockRejectedValue(new Ks1621Fault());
++    const { status, body } = await documentTypes();
++    expect([status, body]).toEqual([500, CONSTANT_BODY]);
++    expect(errorLogs()).toEqual([['Failed to fetch document types', { error: 'thrown Ks1621Fault with fields [code, detail]' }]]);
++    expect(JSON.stringify(log.mock.calls)).not.toContain('SECRET-VALUE-ks1621');
++  });
+ });

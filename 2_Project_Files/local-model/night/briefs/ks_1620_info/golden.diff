@@ -1,0 +1,65 @@
+diff --git a/Blockchain/Dev/services/mcp-server/src/tools/info.ts b/Blockchain/Dev/services/mcp-server/src/tools/info.ts
+index d29df8194..1cd978016 100644
+--- a/Blockchain/Dev/services/mcp-server/src/tools/info.ts
++++ b/Blockchain/Dev/services/mcp-server/src/tools/info.ts
+@@ -131,4 +131,5 @@
+         const refusalText = typeof gatewayError === 'string' ? gatewayError : typeof (gatewayError as { message?: unknown } | undefined)?.message === 'string' ? (gatewayError as { message: string }).message : '';
++        // KS-1620: bound the relayed gateway text to 200 characters (a non-gateway upstream, such as a proxy, can send any length).
+         const connectorNote = connectorResult && !connectorResult.ok && connectorResult.status !== 401 && connectorResult.status !== 404
+-          ? `Connector info refused by the gateway (${connectorResult.status})${refusalText ? ': ' + refusalText : ''}`
++          ? `Connector info refused by the gateway (${connectorResult.status})${refusalText ? ': ' + refusalText.slice(0, 200) : ''}`
+           : 'Connector info not available (endpoint may not exist yet or no API key set)';
+diff --git a/Blockchain/Dev/services/mcp-server/src/__tests__/ks1620-get-info-bounds-the-relayed-gateway-text.test.ts b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1620-get-info-bounds-the-relayed-gateway-text.test.ts
+new file mode 100644
+index 000000000..207ea84da
+--- /dev/null
++++ b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1620-get-info-bounds-the-relayed-gateway-text.test.ts
+@@ -0,0 +1,48 @@
++/**
++ * KS-1620 - secuura_get_connector_info (tools/info.ts) relays the gateway's own error text into the note when the gateway
++ * refuses (KS-1541). The text was copied as it came: a 503 carrying a 100,000-character message produced a 100,045-character
++ * note (gate D, finding LOW). The real gateway's texts on this route are short fixed literals, so the case needs an upstream
++ * that is not the gateway (a proxy, a misconfigured SECUURA_API_URL), but the note should not be unbounded. It is now cut to
++ * the first 200 characters of the text. Same duck-typed server and stubbed api-client as ks1541-get-info-names-a-gateway-refusal.test.ts.
++ */
++import { describe, it, expect, vi } from 'vitest';
++const api = vi.hoisted(() => ({
++  getConnectorInfo: vi.fn(async () => ({ ok: true, status: 200, data: {} })),
++  getVerificationPolicy: vi.fn(async () => ({ ok: false, status: 404, data: {} })),
++  getApiUrl: () => 'http://gateway.ks1620.test',
++  hasApiKey: () => true,
++  listDocuments: vi.fn(),
++  getWorkflowInstance: vi.fn(),
++}));
++vi.mock('../api-client.js', () => api);
++import { registerInfoTools } from '../tools/info.js';
++type ToolResult = { content: Array<{ type: string; text: string }>; isError?: boolean };
++type Handler = () => Promise<ToolResult>;
++/** Register the info tools on a duck-typed server, run secuura_get_connector_info, return the parsed JSON text's connector */
++async function connectorOf(): Promise<unknown> {
++  const handlers: Record<string, Handler> = {};
++  const server = { tool: (name: string, _desc: string, _shape: unknown, handler: Handler) => { handlers[name] = handler; } };
++  registerInfoTools(server as never);
++  const result = await handlers['secuura_get_connector_info']();
++  return (JSON.parse(result.content[0].text) as { connector: unknown }).connector;
++}
++describe('KS-1620: secuura_get_connector_info bounds the gateway text it relays', () => {
++  it('RED KS-1620 B1: a 503 whose error message is 5000 characters relays only the first 200', async () => {
++    const message = 'a'.repeat(200) + 'b'.repeat(4800);
++    api.getConnectorInfo.mockResolvedValueOnce({ ok: false, status: 503, data: { error: { code: 'X', message } } } as never);
++    expect(await connectorOf()).toEqual({ note: 'Connector info refused by the gateway (503): ' + 'a'.repeat(200) });
++  });
++  it('RED KS-1620 B2: a 403 whose string error is 500 characters relays only the first 200', async () => {
++    const text = 'c'.repeat(200) + 'd'.repeat(300);
++    api.getConnectorInfo.mockResolvedValueOnce({ ok: false, status: 403, data: { error: text } } as never);
++    expect(await connectorOf()).toEqual({ note: 'Connector info refused by the gateway (403): ' + 'c'.repeat(200) });
++  });
++  it('CONTROL KS-1620 B3: a text of exactly 200 characters is relayed whole', async () => {
++    api.getConnectorInfo.mockResolvedValueOnce({ ok: false, status: 403, data: { error: 'e'.repeat(200) } } as never);
++    expect(await connectorOf()).toEqual({ note: 'Connector info refused by the gateway (403): ' + 'e'.repeat(200) });
++  });
++  it('CONTROL KS-1620 B4: a short text is relayed whole', async () => {
++    api.getConnectorInfo.mockResolvedValueOnce({ ok: false, status: 503, data: { error: { message: 'allow-list unreadable' } } } as never);
++    expect(await connectorOf()).toEqual({ note: 'Connector info refused by the gateway (503): allow-list unreadable' });
++  });
++});

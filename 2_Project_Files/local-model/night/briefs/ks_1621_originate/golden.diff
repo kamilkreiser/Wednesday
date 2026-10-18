@@ -1,0 +1,12 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1333-sync-writers-persist-null-not-zero.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1333-sync-writers-persist-null-not-zero.test.ts
+index e2fcff083..d652e2126 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1333-sync-writers-persist-null-not-zero.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1333-sync-writers-persist-null-not-zero.test.ts
+@@ -160,2 +160,7 @@
+   });
++
++  it('RED KS-1621 F5 a real prior height of 0 is carried forward as 0, not collapsed to null', async () => {
++    const blob = await failWith({ txHash: null, blockHeight: 0, status: 'submitted', anchorId: 'anchor_1' });
++    expect([blob.status, 'blockHeight' in blob, blob.blockHeight]).toEqual(['anchor_failed', true, 0]);
++  });
+ });

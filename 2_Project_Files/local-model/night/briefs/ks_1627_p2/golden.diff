@@ -1,0 +1,36 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1627-info-reader-real-redis-fallback-refuses.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1627-info-reader-real-redis-fallback-refuses.test.ts
+index 0886e4639..aa10b4599 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1627-info-reader-real-redis-fallback-refuses.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1627-info-reader-real-redis-fallback-refuses.test.ts
+@@ -14,2 +14,2 @@
+-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+ import express from 'express';
+@@ -21 +21,16 @@
++const FAKE = vi.hoisted(() => ({ store: new Map<string, string>() }));
++
++// KS-1627 R3: a fake ioredis (the ks1233 shape, with a store) so the REAL services/redis module can be put in Redis mode by initRedis().
++vi.mock('ioredis', () => ({
++  default: class FakeRedis {
++    constructor(_url?: string, _opts?: unknown) { /* initRedis only calls the methods below */ }
++    on(): this { return this; }
++    async connect(): Promise<void> { /* the fake is always connected */ }
++    async ping(): Promise<string> { return 'PONG'; }
++    async get(key: string): Promise<string | null> { return FAKE.store.get(key) ?? null; }
++    async set(key: string, value: string): Promise<string> { FAKE.store.set(key, value); return 'OK'; }
++    async setex(key: string, _ttl: number, value: string): Promise<string> { FAKE.store.set(key, value); return 'OK'; }
++  },
++}));
++
+ const CONNECTOR_ID = 'ks1627-c1';
+@@ -67,2 +82,10 @@
+   });
++
++  it('RED KS-1627 R3: with the real module in REDIS mode (over a fake ioredis) the stored list is read and answered with 200, never refused', async () => {
++    expect(await realRedis.initRedis()).toBe(true);
++    expect(realRedis.isRedisAvailable()).toBe(true);
++    await realRedis.setNotificationSettings('platform-settings', { integrations: [{ id: CONNECTOR_ID, config: { allowedDocumentTypes: ['KS1627_REDIS_DOC'] } }] });
++    const r = await getInfo();
++    expect([r.status, r.body?.id, r.body?.allowedDocumentTypes]).toEqual([200, CONNECTOR_ID, ['KS1627_REDIS_DOC']]);
++  });
+ });
