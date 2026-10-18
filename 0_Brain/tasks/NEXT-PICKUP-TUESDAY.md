@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 225 — 2026-10-18 17:10 CHECKPOINT (s116, ctx ~60%; band 80-90). **READ THIS FIRST. Supersedes 223's IN FLIGHT (B264/B265 done) and 222's FIRST WORK 1-3 (ALL DONE). 222 items 4-6 + OWED and 224's NexusAI lines stand.**
+### DONE (each verified at source; note lines 16:40-17:10)
+- **HPSM-POC round 2 CLOSED END TO END:** #159 merged (main dff4019) -> **B264 DEPLOYED** hosted (web build 3s6IRO2rD-OZcIwNaXvDb, API live 05:27:27Z; Tuesday's own check: new id x1, old x0, /health 200 x3; Kam told bf-fc0c71b413fd + correction bf-9ddbe2205096) -> **B265 records** (C-113/114/115; 12 Jira comments; 9 Done; HPSMPOC-281..287 filed) -> Tuesday's HP-window scan 0 hits (control 1; 29 files) -> **records PR #120 MERGED**, records main **d479cb67**, tree = head tree.
+- RD-857 READY verified (draft PR #93); ANSWER-12: S101O builds **RD-778** (8 js/xss-through-dom sites, off main c7ca0ed, tier 1 with a browser leg), then RD-771 stacked, then RD-768 -> RD-767.
+- pane_close.sh hardened (commit 73fef031b: refuses option-shaped / non-exact pane args); Wednesday told (+ a correction mail for a typed sha).
+### IN FLIGHT (who wakes you)
+- **HPSM-POC round 3 drafter** (read-only Opus) -> `tuesday/briefs/2026-10-18_B266_SEAT-T1_hpsmpoc-269-sdk-tooling.md` + `…B267_SEAT-H5_hpsmpoc-round3.md` (HPSMPOC-281..287) + `…B266-B267_DRAFTER-REPORT.md`. If absent at your boot, re-commission (scope: -269 tooling seat per R-1/C-113; round 3 = -281..-287; parallel-or-sequence ruling with the jest load in mind). Read whole, stamp, launch (load < 6 while gates 25/26 run jest).
+- NexusAI: gate 25 (%60) C1 C-57 run holds the jest lock; gate 26 (%63) queued behind it; S101O (%56) on RD-778. Wake = mail (wake_watch).
+### Ledger today (this seat): 4 rows since the 50% checkpoint, all "typed not read" (pane_close --help, composed sha w=3, weekday/UTC, a stamp claiming a report read whole). Rule in force: every id/date/count is printed by the command that builds the message.
+
 ## 🟢 DELTA 224 — 2026-10-18 16:28 CHECKPOINT (s116, ctx 50%; band 80-90). **READ THIS FIRST. 223 stands; this adds.**
 - **RD-857 READY** (S101O 05:25Z) verified at source (1da0bd4 = 1 commit on RD-856, +42/-3 server.js, +150 test, +3/-3 counts); draft PR **#93**. Batch: RD-476 #91 + RD-856 #92 + RD-857 #93 = one tier-2 NexusAI gate AFTER gates 25 and 26 deliver. **ANSWER-11** sent (tap delivered 05:27:19Z): S101O runs a READ-ONLY candidate screen and mails a QUESTION "next ticket after RD-857" with 3 candidates; Tuesday answers. RD-262 (umbrella, children in Testing) and RD-386 (capped, Kam) are NOT candidates.
 - **B265 records brief DELIVERED** (unread whole by Tuesday; 8 RULED slots; R-C numbered C-113 is the one to decide; `@B264@` slot S-0..S-8 filled from B264 STATUS). Read whole + stamp on B264's DEPLOYED.
