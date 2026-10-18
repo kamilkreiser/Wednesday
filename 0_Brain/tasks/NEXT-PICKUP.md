@@ -25,8 +25,14 @@ supersede: REPLACED WHOLESALE by the 18:5x Wednesday seat at its 51% checkpoint 
 - **Raise plan for the held READYs:** one raise seat (R lane after its merges, or R 48th) takes KS-1509, KS-1613, KS-1619 p1-p3, KS-1490 (+ KS-1545 by Opus) as file-disjoint PRs, gated in batches.
 - **DONE this seat:** test_only tier wired (arms 15/15); model-routing v1.0 draft + Kam's doc https://claude.ai/code/artifact/b5262ba7-a5a1-468e-bb36-51fa4c7e5e90 + card wed-model-routing-v10-approve-1018 (default c).
 
+
+## 1b. KAM 20:55 RULINGS — APPLY THEM (added 20:5x)
+- **Routing v1.0 IN FORCE** (card wed-model-routing-v10-approve-1018 = a, all seven). Spec `2_Project_Files/fleet/specs/model-routing.md` swapped in; boot line changed; lesson `learnings/2026-10-18_model-routing-v10-approved-route-by-the-table.md`. Every launch receipt carries `model: <id> -- <row> -- <P1-P4> -- <gauge>`. **Tier-2 gates now on Sonnet** (Agent tool `model: sonnet`). **FABLE 5.1 TRIAL OWED:** the NEXT tier-1 gate (R's batch: KS-1613 preflight is tier 1) runs on Fable (Agent tool `model: fable`), and the same PR also gets its normal Opus tier-1 gate, so the two verdicts compare; plus one coordinator-task trial. Record both in model-routing.md section 6-style rows.
+- **KS-1114 deny-list follow-up** (card secuura-ks1114-deleted-status-found-by-title-1018 = a): after #1555 merges, brief the Spark: make the hidden set case- and space-insensitive and add 'deleted' and 'expired' (the r2 gate's N1; verdict 0_Brain/reference/2026-10-18_gate-pr1555-r2/verdict.md). It is an auth-adjacent public route: row says Spark may take a spelled-out edit there with a tier-1 Opus gate.
+- Tuesday told (coordination mail, 20:5x).
+
 ## 2. KAM'S CARDS OPEN
-Secuura: secuura-ks1114-deleted-status-found-by-title-1018 (default a). WED: wed-model-routing-v10-approve-1018 (default c). The four 18:59-19:00 cards are ruled and reconciled. Datasec: composer-l05-setup-card-too-1014 (Tuesday's). Unanswered panel question from 10-16 (bf-f955bd7b56aa959f, lean boots at >=95%): not a rule.
+Secuura: none open (deleted-status card ruled a 20:55:56). WED: none open (routing v1.0 ruled a 20:55:59). The four 18:59-19:00 cards are ruled and reconciled. Datasec: composer-l05-setup-card-too-1014 (Tuesday's). Unanswered panel question from 10-16 (bf-f955bd7b56aa959f, lean boots at >=95%): not a rule.
 
 ## 3. OWED BY WEDNESDAY (own tools, small)
 1. wed_claim.sh: refuse to autostash when anything outside dashboard/data is dirty (safe_pull's rule).

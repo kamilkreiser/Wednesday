@@ -2701,3 +2701,8 @@ INCLUDED until he says otherwise.
 > which account are you logged in as?
 
 *Note:* Answered: kreiser.org@me.com (from ~/.claude.json oauthAccount), statusline 7d:0%.
+
+## 2026-10-18 20:59 — Kam (live board, verbatim)
+> Decision secuura-ks1114-deleted-status-found-by-title-1018: a — Ship as built, hide 'deleted' in a follow-up | Decision wed-model-routing-v10-approve-1018: a — Approve all seven recommendations
+
+*Note:* Both ruled + applied: routing v1.0 in force (spec swapped, boot line changed, lesson), KS-1114 follow-up queued for the Spark.
