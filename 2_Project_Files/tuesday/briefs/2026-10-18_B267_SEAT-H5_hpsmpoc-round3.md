@@ -131,5 +131,6 @@ Drafter's defaults (Tuesday: confirm or change each, then fill the two lines bel
 - R-6 (-283): **(a) also correct the stale comment `PkcsInPackageTests.cs:156-158` in -283's commit, only if B266's STATUS ends READY** · (b) leave it. Default (a).
 - R-7 partition and records: only your own `2026-10-18_B267_*` files under `Briefs/`; no git verb on the project root; `api/src` untouched. Default as written.
 - Gate after READY: tier 1 overall (items 2-4), with B266 as its item 0 (B266's R-2).
-RULED: ____ (Tuesday, time, session)
-SELF-CHECK: ____
+RULED (2026-10-18 17:50 AEDT, Tuesday s116; brief read whole; the drafter's summary read, its report file not read whole): R-1 (a): B266 has finished and its pane is closed; its STATUS last line, read by program: `READY FOR GATE: tooling .tools/dotnet = SDK 10.0.402 + 10.0.401 · runtimes 10.0.13 + 10.0.12 · m1 m3 m4a m4b RED @ 2026-10-18 17:46 AEDT`. R-2 (a) decode as .NET is measured to decode, count anything else encoded-word. R-3 (a) isFilePart only. R-4 (a) count in the test, no product seam, STOP if impossible. R-5 (a) first branch only, last and droppable. R-6 (a): B266 ended READY, so correct the stale comment at PkcsInPackageTests.cs:156-158 in -283's commit. R-7 as written. The gate after READY is tier 1 overall, with B266 as its item 0.
+CORRECTION to this brief (B266 FOUND F-2, measured): brief_seat.sh's `.tools/dotnet` exports are at :27-29, not :30-32 (the file was modified 2026-10-16). The behaviour is unchanged.
+SELF-CHECK: re-read end to end; every ruling is the drafter's default; R-1's precondition (B266 done, pane closed) measured; placeholder token count 0 after stamping (control: the .pre-stamp copy) | Tuesday, 2026-10-18 17:50 AEDT
