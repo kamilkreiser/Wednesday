@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-18 19:16 from 241 lesson files (1,054,069 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 17 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-18 19:38 from 242 lesson files (1,057,144 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 18 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7409,4 +7409,29 @@ sections (open the file for these): How to apply
 **Expiry:** none stated. It is tied to this account controlling the Datasec projects; re-read it if he switches accounts or says stop.
 
 **Family:** [[2026-10-06_push-to-demo-when-ready-no-card]] (the original, Friday's) · [[2026-09-29_datasec-github-commits-go-through-codeql]] · [[2026-08-07_protocol-v1.3-signed-delegation]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
+`2026-10-18_new-account-tickets-backlog-routing-definition-spark-max.md` · grant · 2026-10-18 · status: live
+
+(no rules-shaped section — file included WHOLE)
+
+# Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
+
+**The operative case, so the headline matches it:** Wednesday is on the account Kam announced on 2026-10-18 and is choosing what to start. **Start the work, not a question.** Every ticket the Spark can be briefed for goes to the Spark; Claude seats raise, gate, merge and build what the Spark cannot; and the routing definition is written as a document Kam approves.
+
+**His words, verbatim:**
+> *"new account so please work on the tickets, backlog and definition of which agent to use for what.  Spark connected so give it as many tickets as it can handle"*
+
+**Wednesday's reading, receipted on the panel at 19:0x with a correction offer:**
+1. **"New account"** ends the 10-15 Spark-only and push-first rows (their end event, the allowance renewal or an account switch, has happened: statusline `7d:0% renews:6d 17h`). Both moved to EXPIRED in `tasks/EXPIRING-GRANTS.md`.
+2. **"The tickets, backlog"** = the Secuura (Platform K) board: the held work first (gate C for #1560/#1561, the KS-1114 existence-only fix on #1555, the KS-1385 follow-up he ruled (b), the KS-724 constant comment he ruled (a)), then the Backlog/Todo easy to hard. Datasec stays Tuesday's.
+3. **"Give it as many tickets as it can handle"** = the Spark is never idle while a briefable ticket exists; brief drafters (Agent tool, Sonnet first) are allowed again on this account, so brief-writing is no longer the bottleneck it was at the 99% stop. The Spark runs one request at a time (`MAX_NUM_SEQS=1`), so "as many as it can handle" is a queue kept full, not parallel calls.
+4. **"Definition of which agent to use for what"** = `2_Project_Files/fleet/specs/model-routing.md` rewritten as a decision table (Ornith 1.5 / the Spark / Sonnet / Opus, per task class), with the measurement behind each line, delivered to Kam as a short document for approval. His 10-09 "you can decide between the three models" stands; this makes the decision written and checkable.
+
+**Unchanged:** the v1.3 signature classes; the QA gate before every merge; the October deploy grant's order (kintsugi first, then demo); one client per Spark task; the counter (original + one rebrief, then a Claude seat); the 90% usage stop.
+
+**Expiry:** none stated. Tied to this account; re-read if he switches accounts, the gauge reaches 90%, or he says stop.
+
+**Family:** [[2026-10-04_as-much-secuura-work-as-possible-spark-and-claude]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis]] · [[2026-09-16_new-account-spin-up-agents-to-test-approve-merge]] (the same shape on 09-16 and 09-20) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
