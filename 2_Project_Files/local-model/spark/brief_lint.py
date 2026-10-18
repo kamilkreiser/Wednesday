@@ -215,6 +215,24 @@ def main():
                                + (" — THE PRODUCT: a test_only brief never modifies it (the tamper corrupts it in a clone only)"
                                   if any(x == p or x.endswith("/" + p) for x in prod)
                                   else f" — a test_only diff touches the ONE test {test} and nothing else"))
+    if tier in ("code_patch", "code_patch2") and len(tests) == 1:
+        # 2026-10-19 (SCREEN_9 / SCREEN_10): the builder takes the new test's path from a `File:` line INSIDE
+        # `## The test`, not from the header's `Test file:` line. With no such line it falls back to its own
+        # suggested_test_file (derived from the ticket title), so two briefs on one ticket created ONE colliding
+        # path and the golden DIFFERED. Refuse a brief whose `## The test` does not name the header's test file.
+        m_tt = re.search(r"^##+\s*The test\b.*?$(.*?)(?=^##\s|\Z)", text, re.M | re.S | re.I)
+        tfiles = re.findall(r"(?m)^\s*File:\s*`([^`]+)`", m_tt.group(1)) if m_tt else []
+        want = tests[0]
+        same = lambda a, b: a == b or a.endswith("/" + b) or b.endswith("/" + a)
+        if m_tt and not tfiles:
+            # WARN, not refuse: 14 of 139 lint-clean briefs on 2026-10-19 lack the line and several PASSed golden-identical
+            # because the invented name happened to match. Harmful only when it does not — read the dry-run's
+            # suggested_test_file against the header before the control round.
+            print(f"WARNING TEST PATH: `## The test` has no `File: `<path>`` line, so the builder will name the test from the "
+                  f"ticket title. Check the dry-run's suggested_test_file equals {want}, or add `File: `{want}`` there "
+                  f"(SCREEN_9: two briefs on one ticket got ONE colliding path)", file=sys.stderr)
+        elif tfiles and not any(same(t, want) for t in tfiles):
+            reasons.append(f"TEST PATH: `## The test` names {tfiles} but the header's test file is {want} — two names for one file")
     if tier not in ("code_patch", "code_patch2", "bash_patch", "bash_patch2", "test_only"):
         reasons.append(f"TIER: {tier or 'undetermined'} — round.sh runs code_patch, code_patch2, bash_patch, bash_patch2 and test_only "
                        f"(test_only = code_patch's TEST-ONLY mode, a `## Tamper` block). "
