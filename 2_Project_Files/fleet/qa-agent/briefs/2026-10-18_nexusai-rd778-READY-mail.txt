@@ -1,0 +1,55 @@
+BLUF: RD-778 is READY FOR QA, tier 1. Branch rd-778-xss-through-dom-s101o @ 3047ae92b4179adf5ae1bf6e1b60825af2e296e3, one commit on main c7ca0ed (not stacked), pushed. The draft PR opens right after this mail.
+- All 8 open js/xss-through-dom sites are fixed in code. No dismissal, and no customer-facing word changes.
+- Red-first in jsdom: on c7ca0ed the 10 payload cells fail and the 6 controls pass; all 16 pass on the branch.
+- Rendered output is unchanged for ordinary values, by a base-vs-branch comparison (§3).
+- verify: PASS 4575/4575 across 288 suites.
+- git diff --numstat c7ca0ed 3047ae9: chart-details.js +12/-2, first-run-setup.js +12/-2, index-offline.js +6/-1, index.js +22/-19, settings.js +1/-1, the new test +294, counts +3/-3.
+
+1. The alerts BEFORE (code-scanning API, open on refs/heads/main), with each one's data-flow source from main's own CodeQL SARIF (analysis 1972429266, javascript-typescript), and the fix:
+  #29 chart-details.js:542   <- :536/:537 the jobs/table title's textContent -> <title> and <h1> escaped (new local escapeHtml)
+  #30 first-run-setup.js:3068 <- :3012 the #table-name input's value -> <code>${currentTable}</code> escaped (new local escapeHtml). Also, per your ruling, data.errorCode in the same panel is escaped.
+  #31 index-offline.js:81     <- :89 the chat input's value -> the message is built from nodes (<strong> label + a text node)
+  #32 index.js:672            <- :670 the button's data-original-text attribute -> LoadingManager keeps the original markup in a WeakMap; nothing else read the attribute (grep: index.js only; two rd395 tests stub LoadingManager whole)
+  #34 index.js:5413, #35 :5475 <- :5272/:5273 the userFilter/dateRange selects -> userFilterHtml / dateLabelHtml / escapeHtml(span) wherever interpolated (three titleSuffix lines, the empty-window <small>, the per-user <small>); the comparisons keep the raw values
+  #36 index.js:5557           <- :5481 the userFilter select -> both user-table cells escaped (:5562, plus :5565, which the alert list does not name)
+  #33 settings.js:1756        <- :1540 the condition input's value -> escapeHtml(originalCondition) at :1701 (the existing helper)
+  AFTER: not measured yet. CodeQL runs on the draft PR; I mail the open-alert list at the PR head when it lands.
+
+2. Cells: __tests__/rd778-dom-text-stays-text.test.js (new, 16). jsdom; the shipped functions are lifted brace-balanced from the files, as in the rd395 UI cells. The payloads are <img src="x" onerror="…"> and <script>…</script>.
+                                                                       c7ca0ed   3047ae9
+  index-offline: user message <img onerror> stays text                   FAIL      pass
+  index-offline: user message <script> stays text                        FAIL      pass
+  CONTROL index-offline: exact HTML for an ordinary AI and user message   pass      pass
+  first-run-setup: table name typed in the form stays text                FAIL      pass
+  first-run-setup: server errorCode stays text (your ruling)              FAIL      pass
+  CONTROL first-run-setup: exact <code>…</code> and "Error code: SEM0100"  pass      pass
+  chart-details: page title stays text in the print window                FAIL      pass
+  CONTROL chart-details: exact <title>, <h1> and table                    pass      pass
+  index LoadingManager: markup planted in the DOM is not restored         FAIL      pass
+  CONTROL LoadingManager: original markup back exactly, both call shapes   pass      pass
+  index updateMetrics: user filter stays text in the cards                 FAIL      pass
+  index updateMetrics: date filter stays text in the empty-window card     FAIL      pass
+  index updateUserTable: user filter stays text in the table               FAIL      pass
+  CONTROL metrics + table: exact strings for Daniel Hughes and last7       pass      pass
+  settings: typed condition stays text in the validation modal             FAIL      pass
+  CONTROL settings: exact strings for an ordinary condition                pass      pass
+  (rd778-cells-base.json / rd778-cells-new.json). Every one of the 8 sites was reachable by a cell.
+
+3. Render identity (your rule 3). session-tools/s101/rd778-render-identity.js runs each changed function from c7ca0ed and from 3047ae9 in jsdom on the SAME ordinary inputs (with &, quotes and O'Brien where a value can carry them) and compares the full HTML (rd778-render-identity.out):
+  - 5 of 7 scenarios are byte-identical: addMessage, testConnection ×2 (table-not-found and permission), updateMetrics+updateUserTable (4 shapes), and showValidationModal (content and footer).
+  - printTable: the source differs only by & -> &amp; in the title. Parsed, the title ("Printer Summary & Costs"), the body text and the whole DOM are identical.
+  - LoadingManager: the button's visible markup is identical in all 4 states. The only difference is that the hidden data-original-text attribute is no longer set while loading, which is the fix.
+  No site needed a visible change.
+
+PRIOR WORK: RD-778 was filed by S88Q (census, 2026-09-28 baseline). The existing escapeHtml helpers in index.js:109 and settings.js:89 are older work and reused. The cell method (lifting shipped functions) is the rd395 UI cells'.
+NOT TESTED:
+  - A real browser render. Your gate's browser leg compares renders; mine is jsdom.
+  - The AFTER alert list (CodeQL on the PR).
+  - The 9th open js/xss-through-dom alert, docs/test-files/test-import.html:41 (not shipped). It is already RD-790 (To Do, "CodeQL baseline (test code): js/xss-through-dom in docs/test-files/test-import.html"; found by searching the path), so it is not a new ticket and not fixed here.
+  - Server- or AI-supplied fields still written as HTML in the same functions. These are not DOM sources and not these alerts, and they are left unchanged because escaping could change a render:
+    - settings.js showValidationModal: validationResult.suggestion (:1709), .message (:1716, with \n -> <br>) and .suggestions (:1723);
+    - first-run-setup.js testConnection: data.message (:~2998) and data.troubleshooting tips (the <li> list).
+    That is a candidate ticket, if you want one filed.
+QA surface: a local run of 3047ae9 in open mode: the dashboard (metric cards, user table and the filters), chart-details (Print), the setup wizard's Log Analytics test, Settings > risk conditions (validation modal), and index-offline.html's chat. Same commit, not the demo.
+
+-- S101O

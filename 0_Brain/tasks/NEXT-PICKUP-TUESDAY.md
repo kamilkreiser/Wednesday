@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 239 — 2026-10-19 05:1x CHECKPOINT (s118, ctx 70%). **READ THIS FIRST. Supersedes 238's gate 27 line; 238 otherwise stands.**
+- **GATE 27 LAUNCHED** pane **%76 `QA/NexusAI-gate27`** 05:12 (launcher `fleet/qa-agent/launchers/launch_qa_nexusai_gate27.sh`, `--check` all guards pass 05:11:55; rung 5 seen: it read its brief and started its re-pin readings). Kit `fleet/qa-agent/briefs/2026-10-18_nexusai-gate27-rd778-xss.md` stamped by T-label (T0 a on M0 888203c; T5 a = Chrome may fetch the pinned cdn.jsdelivr URLs; others default; T9 payload-line correction); `.pre-stamp` and `.pre-amend` beside it. Route line added to inbox_routing.conf (backup `.pre-1019-gate27`). **Verdict by MAIL `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 27`**. If it parks "flagged — awaiting the Opus 4.8 switch": switch THAT pane with /model (never "Switch automatically"), mail + tap (by NAME).
+- On GO: landing via a counts-only TURN on then-main (C-190 PR #94; landing checklist in the verdict: #29-#36 by number fixed after land, #28 open as control; deploy-demo skipped).
+- **Gate 28** still to amend (add the C-170 test-delta item after S101O's "READY FOR QA: C-170 delta") + read whole + stamp + launch; run it after gate 27 finishes or when load allows (both need the jest lock).
+### FLOOR: %0 tuesday, %1 fleet-monitor, %56 Datasec/NexusAI-O (C-170 test fix), %76 QA/NexusAI-gate27.
+
 ## 🟢 DELTA 238 — 2026-10-19 04:5x CHECKPOINT (s118, ctx 67%). **READ THIS FIRST. Supersedes 237's NexusAI and HPSM-POC lines.**
 - **HPSM-POC round 3 CLOSED end to end:** #160 merged (befd45e) -> B273 deployed (Tuesday live check 23:12) -> B274 records -> Tuesday's HP-window scan 0 (control fired) -> records PR #121 MERGED (records main 47a9896e). Card hpsmpoc-runtime-10013-route-1018 delivered (still 10.0.12; HPSMPOC-268 open).
 - **NexusAI main = 888203c8c50e** (chain: RD-761 36a0dc0 -> RD-775 5eb80a7 [inserted by ANSWER-17 after PR #95's CodeQL flagged #69] -> RD-794 888203c [forward-merged; accepted, NO delta gate, ANSWER-18]). Open alerts 239 -> 226.
