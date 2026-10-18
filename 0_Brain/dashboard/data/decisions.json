@@ -39667,5 +39667,51 @@
    "CARD hpsmpoc-runtime-10013-route-1018",
    "CARD secuura-ks1114-deleted-status-found-by-title-1018"
   ]
+ },
+ {
+  "id": "secuura-ks1628-retire-deprecated-verify-route-1019",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1628: retire the old document-verify route, or keep it running with the honesty check added?",
+  "bluf": "Kam, an old verify route in Platform K (POST /api/documents/:id/verify, originate service) was due to be switched off on 14 August 2026 and is still running. The overnight Opus gate found it returns stored anchors with no honesty check, so a fake mock anchor could read as real there. Its code names the Platform S connector (the SSD) as a caller, so switching it off could break Stuart's side. Wednesday will add the honesty check either way (technical, reversible). The only question for you is whether to retire the route, which would need Stuart told first. Source: seat R 49th's read of the code (DEPRECATED_VERIFY_SUNSET = 'Thu, 14 Aug 2026', successor /api/verification/verify); Wednesday has not re-read it. Prior-ruling check: your KS-622 ruling retired the MFA /verify route (a different route), and your #965 'accept-split' ruling documented v1 and v2 verify hash order without deciding whether v1 retires; neither answers this.",
+  "default_action": "If you don't answer: (a). The route stays up, Wednesday has a seat add the honesty check through a gated PR, and nothing goes to Stuart.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it running, add the check",
+    "detail": "The route stays up for any Platform S caller; it gains the same mock-anchor honesty check as the new route. No message to Stuart."
+   },
+   {
+    "key": "b",
+    "label": "Retire it after asking Stuart",
+    "detail": "You ask Stuart whether the SSD still calls it. If not, a seat removes it in a gated PR; if it does, it stays as in (a)."
+   },
+   {
+    "key": "c",
+    "label": "Retire it now",
+    "detail": "A seat removes the route in a gated PR without checking with Stuart. Risk: the SSD connector breaks if it still calls it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-19T06:13:04.860855+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-08-26 17:11",
+   "2026-09-13 16:55",
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD nexusai-rd135-scim-route",
+   "CARD secrev-verify-23-and-batch1-filing",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1114-verify-title-strategy",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
+   "CARD secuura-ks1352-revoked-credentials-still-verify",
+   "CARD hpsmpoc-c30-feedback-route",
+   "CARD hpsmpoc-feedback-files-route-1006",
+   "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
+   "CARD hpsmpoc-runtime-10013-route-1018"
+  ]
  }
 ]
