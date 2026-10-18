@@ -15,14 +15,14 @@ supersede: REPLACED WHOLESALE by the 22:4x (10-18) Wednesday seat at ~64% ctx, 2
 4. **Morning receipt to Kam (after 06:00, panel):** lead with the overnight result: 22 Secuura PRs merged since 19:00 Sun (count from the MERGED mails: R 47th 9, J 12th 1, R 48th 12 incl. the four below once merged; re-count from develop's log before quoting), nothing deployed, the two open cards, J's API-key-in-transcript disclosure (default: no rotation), and the /model "saved as default" side effect in the Secuura seat's Claude config.
 5. Commit your own files BEFORE any tool that pulls (wed_claim autostash, 10-18).
 
-## 1. LIVE WORK (03:5x)
-- **develop = 385fc288fae831f2ca15b9d091c844f33285b784** (ls-remote 03:5x).
-- **Seat R 48th** (Secuura/Blockchain-R, pane %4, Opus 5.5, ctx ~65%): holding for GOs on four PRs. Handover of its predecessor: `!CODING/Secuura/Blockchain/5_Project_History/2026-10-18_seatR-47th/HANDOVER.md`.
-- **At gate (background sub-agents of THIS Wednesday seat; they die if it rotates before they report):**
-  - GATE H1 (Opus, tier 1): #1582 KS-1540 c86b91c5a7c2 + #1584 KS-1504 e8b4206f09d2. Brief 0_Brain/reference/2026-10-19_gate-H1-pr1582-pr1584/GATE_BRIEF.md.
-  - GATE H2 (Sonnet, tier 2): #1583 KS-1485 16fc1d201fc0 + #1581 KS-1387 6b4bcaec11fa. Brief 0_Brain/reference/2026-10-19_gate-H2-pr1583-pr1581/GATE_BRIEF.md.
-  - **If this seat rotated before the verdicts:** relaunch both from those two GATE_BRIEF.md files (same models), re-read the heads first. R predicts all four land tree 47a455d77dec.
-  - On each verdict: re-hash (line 3 deleted, one-byte control), ls-remote heads + develop, completion check, head-bound GO per PR to the R LANE via send_brief.sh --kind answer, tap with --mail.
+## 1. LIVE WORK (updated 05:0x at the 70% checkpoint)
+- **develop = 5d1be7b06279950e3bfe176c237e5d640eb04581** (ls-remote 04:5x). H1 and H2 both GO'd and merged (#1581-#1584).
+- **Seat R 49th** (Secuura/Blockchain-R, pane %5, launched 04:57 AEDT): brief fleet/briefs_staged/2026-10-19_seatR49_gateI1_1585.md. RUNG-5 CHECK OWED (pane shows the brief received) and a /model claude-opus-5-5 switch at its first idle (busy marker = the "… (" spinner line; check in its own call), told by mail. Its plan-confirmation QUESTION is the next expected mail. R 48th wrapped 17:54Z (scored 0.95, pane %4 closed); handover `!CODING/Secuura/Blockchain/5_Project_History/2026-10-18_seatR-48th/HANDOVER.md`.
+- **Background sub-agents of THIS Wednesday seat (they die if it rotates before they report):**
+  - GATE I1 (Opus, tier 1): #1585 KS-1626 head 664d3fd2494b. Brief 0_Brain/reference/2026-10-19_gate-I1-pr1585/GATE_BRIEF.md. On the verdict: re-hash (line 3 deleted, one-byte control), ls-remote head + develop, head-bound GO to the R LANE.
+  - Spark brief-writer for KS-1627 (test-only, real redis module in fallback must give 503). Report 0_Brain/reference/2026-10-18_spark-screen/SCREEN_6.md. On a PASS: read at source, hold_ready with a bare ROWID + --title-from-brief, NEXT to R.
+  - **If this seat rotated first:** relaunch GATE I1 from its brief (re-read the head first) and the KS-1627 drafter from SCREEN_5/the KS-1627 ticket.
+- Overnight count from the MERGED mails: 22 Secuura PRs since 19:00 Sun (R 47th 9, J 12th 1, R 48th 12); re-count from develop's log before quoting to Kam.
 - **Seat J lane:** empty. #1568 (KS-1612 + KS-1385 b) HELD at the cap on Kam's card `secuura-ks1612-third-round-after-cap-1018`.
 - **Spark:** queue empty after tonight's screens (SCREEN_2/3/4.md in 0_Brain/reference/2026-10-18_spark-screen/). Next screen: re-run the SCREEN_4 method after these four merge; the pool is thin (361 enumerated, 4 briefable). Tunnel UP at 47788.
 
