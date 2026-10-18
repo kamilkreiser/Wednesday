@@ -39418,5 +39418,44 @@
    "CARD nexusai-rd476-assistant-prompt-words-1018",
    "CARD nexusai-c170-shipped-docs-words-1018"
   ]
+ },
+ {
+  "id": "hpsmpoc-runtime-10013-route-1018",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC demo .NET 10.0.13: wait for Azure, or pin Microsoft's image now?",
+  "bluf": "Nothing needs your hands. This follows your 'measure how, then move it' (card hpsmpoc-hosted-runtime-10013-1017 = a): the seat measured and changed nothing. The demo API still runs .NET 10.0.12 and is healthy. Microsoft's App Service image with 10.0.13 (the 44-CVE release) has been public since 16 Oct, but Azure has not offered it to our server yet (6 of 6 restarts since then got the old image), and Azure has no setting that asks for a patch version. So there was no allowed move, and the only fast route changes how the site is hosted, which is more than your card covered. Three ways on.",
+  "default_action": "Tuesday does (a): no change now; reads the runtime after the round-3 hosted deploy, closes HPSMPOC-268 if it reads 10.0.13, and re-raises otherwise.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Wait for Azure, read it at the next deploy",
+    "detail": "Free, no stack change. HPSM-POC round 3 is in its QA gate now, and its hosted deploy creates a new container. Tuesday reads which .NET it got from the platform log. If it is 10.0.13, HPSMPOC-268 closes. If not, Tuesday comes back to you."
+   },
+   {
+    "key": "b",
+    "label": "Pin Microsoft's 10.0.13 image now",
+    "detail": "No cost (public image, no new resource) and 10.0.13 today, but it changes how the site is hosted, adds settings, drifts from the infrastructure code, and stops Azure patching it automatically: every later fix becomes a manual bump. A seat would measure the start-up settings first, with the way back recorded."
+   },
+   {
+    "key": "c",
+    "label": "One restart now as a probe",
+    "detail": "Costs nothing and changes no setting. It only helps if Azure already offers the new image to our server, which nothing read-only can tell. The demo is down for about a minute while it restarts."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-18T19:46:59.923166+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "CARD nexusai-rd135-scim-route",
+   "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
+   "CARD hpsmpoc-c30-feedback-route",
+   "CARD hpsmpoc-feedback-files-route-1006",
+   "CARD hpsmpoc-hosted-runtime-10013-1017",
+   "CARD nexusai-rd476-assistant-prompt-words-1018",
+   "CARD nexusai-c170-shipped-docs-words-1018"
+  ]
  }
 ]
