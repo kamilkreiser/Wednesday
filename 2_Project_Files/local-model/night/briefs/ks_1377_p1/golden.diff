@@ -1,0 +1,46 @@
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+index c945b2f2d..07ac412a4 100644
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -498,4 +498,4 @@
+     await runWithTenantId(k.tenantId, () => query(
+-      `UPDATE svc_api_keys SET last_used_at = $2, usage_count = $3 WHERE id = $1`,
+-      [k.id, k.lastUsedAt || null, k.usageCount]
++      `UPDATE svc_api_keys SET last_used_at = GREATEST(last_used_at, $2), usage_count = usage_count + 1 WHERE id = $1`,
++      [k.id, k.lastUsedAt || null]
+     ));
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1370-validate-reads-stored-revoke.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1370-validate-reads-stored-revoke.test.ts
+index 81f5ed5b9..b356aa2de 100644
+--- a/Blockchain/Dev/services/security/src/__tests__/ks1370-validate-reads-stored-revoke.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1370-validate-reads-stored-revoke.test.ts
+@@ -33,2 +33,4 @@
+ 
++const usageParams = vi.hoisted(() => [] as unknown[][]);
++
+ vi.mock('../db', () => ({
+@@ -47,2 +49,3 @@
+       state.usageSql.push(sql);
++      usageParams.push(params ?? []);
+       return { rows: [], rowCount: 1 };
+@@ -135,2 +138,17 @@
+ 
++  it('RED KS-1377 W3 N-1338-3: the usage write counts IN the database and does not write the process-local count back', async () => {
++    state.stored.set(HASH, storedRow(true));
++    cacheKey(true);
++    usageParams.length = 0;
++    await validate();
++    const sql = state.usageSql.join('\n');
++    expect({
++      writes: state.usageSql.length,
++      incrementsInSql: /usage_count\s*=\s*usage_count\s*\+\s*1/.test(sql),
++      lastUsedNeverMovesBack: /last_used_at\s*=\s*GREATEST\(\s*last_used_at\s*,\s*\$2\s*\)/.test(sql),
++      writesOwnCopy: /\$3/.test(sql),
++      paramCount: usageParams.length === 1 ? usageParams[0].length : -1,
++    }).toEqual({ writes: 1, incrementsInSql: true, lastUsedNeverMovesBack: true, writesOwnCopy: false, paramCount: 2 });
++  });
++
+   it('V1 half (ii): a STALE cache saying active cannot honour a key the store has revoked', async () => {
+@@ -165,2 +183,3 @@
+       .toEqual({ valid: false, reason: 'Key not found', evicted: true });
++    expect(state.usageSql.length, 'a vanished row is answered, not written: no INSERT and no UPDATE was issued').toBe(0);
+   });

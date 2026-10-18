@@ -1,0 +1,59 @@
+diff --git a/Blockchain/Dev/scripts/typecheck-tests/check.cjs b/Blockchain/Dev/scripts/typecheck-tests/check.cjs
+index 6babf105b..641385c3e 100644
+--- a/Blockchain/Dev/scripts/typecheck-tests/check.cjs
++++ b/Blockchain/Dev/scripts/typecheck-tests/check.cjs
+@@ -302,3 +302,3 @@
+   if (!pkgRoot) return undefined; // not installed: leg 1 owns the install and tsc's message is the right one
+-  try { return { pkgRoot, pkg: JSON.parse(fs.readFileSync(path.join(pkgRoot, 'package.json'), 'utf8')) }; }
++  try { return { pkgRoot, pkg: JSON.parse(fs.readFileSync(path.join(pkgRoot, 'package.json'), 'utf8')) || {} }; }
+   catch { return undefined; }
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts
+index f76917e4e..1532b054b 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts
+@@ -716,2 +716,22 @@
+ 
++  it('CONTROL KS-1546 (b) C2: an INSTALLED third-party package with an unbuilt typesVersions target is an author error, never a stale build', () => {
++    // The sibling of the totally-absent-pkg cell above: that package is not installed, so the fatal loop never reads a manifest for
++    // it. This one IS installed and maps its `sub` subpath through typesVersions to a declaration that does not exist, so tsc says
++    // TS2307 and a resolver that judged ANY package (not only @secuura/*) would answer exit 2 "rebuild it". It must stay a NEW error.
++    const dir = fixture({
++      'node_modules/thirdparty/package.json': JSON.stringify({
++        name: 'thirdparty', version: '0.0.0', main: 'index.js', types: 'index.d.ts', typesVersions: { '*': { sub: ['dist/sub.d.ts'] } },
++      }),
++      'node_modules/thirdparty/index.js': 'module.exports = {};\n',
++      'node_modules/thirdparty/index.d.ts': 'export {};\n',
++      'src/u.ts': "import { X } from 'thirdparty/sub';\nexport const t: number = X;\n",
++      'src/__tests__/a.test.ts': CLEAN,
++      'baseline.txt': ZERO_FLOOR,
++    });
++    const r = check(dir, '--baseline', bl(dir));
++    expect(r.status, r.out).toBe(1);
++    expect(r.out).toContain('NEW type errors');
++    expect(r.out).not.toContain('CANNOT RUN');
++  }, SLOW);
++
+   it('tsc complains, but the target THIS resolver names DOES exist -> the author keeps the error; it is not relabelled a stale build', () => {
+@@ -831,2 +851,22 @@
+ 
++  it('RED KS-1546 (d): a package.json that is literally null on the FATAL side leaves the author error as a plain NEW type error, not a TypeError crash', () => {
++    // The sibling of the MJ1 cell above. There the import is the package ROOT, which tsc resolves through index.d.ts, so only the
++    // note side reads the null manifest. Here the import is a SUBPATH: tsc cannot resolve it through a null manifest, reports
++    // TS2307, and the fatal loop then reads the same package.json. It used to throw `Cannot read properties of null` (rc 1, a stack
++    // trace). Now the null reads as an empty manifest: the package declares nothing for this subpath, so tsc's message stands.
++    const dir = fixture({
++      'node_modules/@secuura/shared/package.json': 'null',
++      'node_modules/@secuura/shared/index.d.ts': 'export declare const X: number;\n',
++      'node_modules/@secuura/shared/index.js': 'module.exports = { X: 1 };\n',
++      'src/u.ts': useSub('thing'),
++      'src/__tests__/a.test.ts': CLEAN,
++      'baseline.txt': ZERO_FLOOR,
++    });
++    const r = check(dir, '--baseline', bl(dir));
++    expect(r.status, r.out).toBe(1);
++    expect(r.out, 'control: tsc really did complain about the subpath, so the fatal loop ran').toContain('NEW type errors');
++    expect(r.out).not.toMatch(/TypeError/);
++    expect(r.out).not.toContain('CANNOT RUN');
++  }, SLOW);
++
+   // ---- round 2 gate, m2: only TS2307 / TS7016 are ever reinterpreted ----

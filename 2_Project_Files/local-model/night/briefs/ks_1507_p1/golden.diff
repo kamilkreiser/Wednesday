@@ -1,0 +1,29 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1477-the-verification-store-is-memory-only-only-when-no-database-is-configured.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1477-the-verification-store-is-memory-only-only-when-no-database-is-configured.test.ts
+index 08257baca..253dc75cc 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks1477-the-verification-store-is-memory-only-only-when-no-database-is-configured.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1477-the-verification-store-is-memory-only-only-when-no-database-is-configured.test.ts
+@@ -187,3 +187,23 @@
+   });
+-
++
++  // KS-1507 note 3: "configured" is `!process.env.DATABASE_URL` (db.ts getPool/initDb read it the same way), so an EMPTY string is memory-only
++  // and a whitespace-only value is CONFIGURED (it fails closed with a 503 for as long as the probe fails). The next two cells fix that
++  // meaning in place; a predicate that trimmed the value would flip the whitespace cell.
++  it('RED KS-1507 note 3 whitespace - a whitespace-only DATABASE_URL counts as CONFIGURED: the boot window answers 503 and files nothing', async () => {
++    process.env.DATABASE_URL = '   ';
++    asUser('ks1507-blank');
++    state.dbAvailable = false;
++    const r = await submit();
++    expect([r.status, code(r)]).toEqual([503, 'SERVICE_UNAVAILABLE']);
++    expect(state.inserts).toBe(0);
++  });
++
++  it('CONTROL KS-1507 note 3 empty - an EMPTY DATABASE_URL is memory-only, exactly as an unset one: the request is accepted into memory', async () => {
++    process.env.DATABASE_URL = '';
++    asUser('ks1507-empty');
++    state.dbAvailable = false;
++    const r = await submit();
++    expect([r.status, r.json.data?.status, state.inserts]).toEqual([200, 'PENDING', 0]);
++  });
++
+   it('CONTROL KS-1477 - a read that SUCCEEDS with no row answers 404 (the map is empty here by construction, so this passes on the base too; the orphan cell below is the one that can tell)', async () => {

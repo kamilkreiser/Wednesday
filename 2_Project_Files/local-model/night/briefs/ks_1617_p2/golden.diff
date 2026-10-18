@@ -1,0 +1,52 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+index ded3800b1..00023447b 100644
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -1015,2 +1015,3 @@
+         providerError: String(req.query.error).slice(0, 200),
++        providerErrorDescription: req.query.error_description === undefined ? undefined : String(req.query.error_description).slice(0, 200),
+       });
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks819-oauth-state-consume-order.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks819-oauth-state-consume-order.test.ts
+index 2d27f24b5..d7060708f 100644
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks819-oauth-state-consume-order.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks819-oauth-state-consume-order.test.ts
+@@ -298,2 +298,39 @@
+ 
++  // KS-1617 A.2: the provider's explanation is LOGGED, never echoed. `error_description` is where a provider says WHICH thing is
++  // wrong (a redirect-URI mismatch, an unauthorised client); only `error` used to be logged, so a misconfigured provider and a
++  // user who pressed Cancel looked the same to an operator. The structured warning is read through the shared silent logger.
++  const providerErrorLogs = (): Array<Record<string, unknown>> =>
++    silentLogger.warn.mock.calls.map((c) => c[1] as Record<string, unknown>).filter((m) => m && m.providerError !== undefined);
++
++  it('RED KS-1617 A2-1 - the provider error_description reaches the server-side log, next to its error', async () => {
++    const { state } = await initiate('google');
++    silentLogger.warn.mockClear();
++    const r = await callback(
++      'google',
++      `?error=invalid_request&error_description=${encodeURIComponent('redirect_uri_mismatch: ks1617')}&state=${encodeURIComponent(state!)}`,
++    );
++    expect(r.code).toBe('OAUTH_PROVIDER_ERROR');
++    expect(providerErrorLogs()).toEqual([
++      { provider: 'google', providerError: 'invalid_request', providerErrorDescription: 'redirect_uri_mismatch: ks1617' },
++    ]);
++  });
++
++  it('RED KS-1617 A2-2 - the logged error_description is trimmed to 200 characters, like the error beside it', async () => {
++    const { state } = await initiate('google');
++    silentLogger.warn.mockClear();
++    await callback('google', `?error=invalid_request&error_description=${'d'.repeat(500)}&state=${encodeURIComponent(state!)}`);
++    const logged = providerErrorLogs();
++    expect(logged).toHaveLength(1);
++    expect(String(logged[0].providerErrorDescription)).toBe('d'.repeat(200));
++  });
++
++  it('CONTROL KS-1617 A2-3 - a cancel with no error_description logs the error alone, and the caller still gets the generic refusal', async () => {
++    const { state } = await initiate('google');
++    silentLogger.warn.mockClear();
++    const r = await callback('google', `?error=access_denied&state=${encodeURIComponent(state!)}`);
++    expect([r.status, r.code]).toEqual([400, 'OAUTH_PROVIDER_ERROR']);
++    expect(providerErrorLogs()).toEqual([{ provider: 'google', providerError: 'access_denied' }]);
++    expect(r.raw).not.toContain('access_denied');
++  });
++
+   it('and does not burn the state on the way out', async () => {
