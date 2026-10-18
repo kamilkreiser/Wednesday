@@ -74,3 +74,8 @@
 | 2026-10-16 06:43:13 | ks_1543_p3 | PASS (PASS (7/7)) | 388 | 62.701 | 34099+1763 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-16_ks_1543_p3 | ks_1543_p3 ctx=131072 |
 | 2026-10-16 07:03:27 | ks_1462_p1 | PASS (PASS (7/7)) | 429 | 63.695 | 47002+1090 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-16_ks_1462_p1 | ks_1462_p1 ctx=131072 |
 | 2026-10-16 08:46:14 | ks_1541_p1 | PASS (PASS (7/7)) | 276 | 36.006 | 10771+1530 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-16_ks_1541_p1 | ks_1541_p1 ctx=131072 |
+| 2026-10-18 19:33:59 | ks_1509_p1 | PASS (PASS (7/7)) | 101 | 38.998 | 19784+1054 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-18_ks_1509_p1 | ks_1509_p1 |
+| 2026-10-18 19:48:52 | ks_1490_p1 | PASS (PASS (10/10)) | 197 | 19.389 | 8737+584 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-18_ks_1490_p1 | ks_1490_p1 |
+| 2026-10-18 19:59:35 | ks_1613_p1 | PASS (PASS (7/7)) | 160 | 38.825 | 22707+905 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-18_ks_1613_p1 | ks_1613_p1 |
+| 2026-10-18 20:04:47 | ks_1619_p3 | PASS (PASS (7/7)) | 107 | 49.57 | 32798+980 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-18_ks_1619_p3 | ks_1619_p3 |
+| 2026-10-18 20:11:50 | ks_1619_p2 | PASS (PASS (7/7)) | 124 | 61.655 | 48827+890 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-18_ks_1619_p2 | ks_1619_p2 |
