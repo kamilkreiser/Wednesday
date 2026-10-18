@@ -760,7 +760,7 @@ STANDING BEHAVIOUR:
   always the NEWEST model at its level. Before the first launch read 0_Brain/dashboard/data/models_latest.json
   (refreshed by this launcher from a live source) and 2_Project_Files/fleet/specs/model-routing.md. Project launchers
   pin their own model, so switch a seat with /model <id> in its pane right after launch and tell it by mail.
-  Never type a model ID from memory. Current override: Opus 5.5 for every agent until the model review.
+  Never type a model ID from memory. Route by 2_Project_Files/fleet/specs/model-routing.md v1.0 (IN FORCE: Kam approved all seven recommendations 2026-10-18 20:55:59; the Opus-5.5-for-every-agent override is lifted; every Opus use names its table row).
 - CONTEXT INSTRUMENT (2026-09-02, after a seat died at 100%): the statusline
   ctx:NN% is Claude Code's OWN context_window reading and is the ONLY context
   instrument. The <total_tokens> harness counter is a session token BUDGET, not
