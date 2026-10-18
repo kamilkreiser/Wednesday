@@ -39793,5 +39793,57 @@
    "CARD secuura-ks1628-retire-deprecated-verify-route-1019",
    "CARD wed-secuura-storage-policy-1019"
   ]
+ },
+ {
+  "id": "secuura-ks1612-round3-nogo-1019",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1612 / #1568: round 3 is NO GO. The cross-tenant hole is closed, but the fix breaks certifications. Allow a fourth round, or hold?",
+  "bluf": "Kam, #1568's third and last allowed round came back NO GO from the Opus gate (verdict 0_Brain/reference/2026-10-19_gate-L1-pr1568-r3/verdict.md, sha 92e27bf688ddaf7f, re-hashed by Wednesday). The good news: the attack it was for is now closed through all four routes that create orphan anchors, measured on running services. The problem is the new database check (migration 051): it treats a certification's id as a stolen anchor id, because certifications are anchored first and registered second. So issuing a certification, and revoking an anchored one, would fail with a 500. On any box that already has issued certifications, the migration would refuse to apply at all. The second fix (MIN-A) is also still open: the real Prisma error is shaped differently from the test's, so a refusal still shows as a 500. Nothing is merged or deployed; develop is unaffected. Prior-ruling check: the matches are other PRs' round caps; your own card for this PR (secuura-ks1612-third-round-after-cap-1018 = a) said a third-round failure stops for you again, which is this card.",
+  "default_action": "If you don't answer: (b). #1568 stays held and unmerged, nothing ships, develop stays safe. Wednesday raises it again tomorrow.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Allow a fourth round, narrowly",
+    "detail": "Seat J fixes only the gate's two findings: the certification flows (the id check must not refuse a certification's own anchor) and the 409 mapping against the real Prisma error, with tests that drive the real error and the real certification routes. Wednesday rules the design first, then one more full Opus gate. If it fails again, it stops for you."
+   },
+   {
+    "key": "b",
+    "label": "Hold and re-plan around KS-1384",
+    "detail": "#1568 stays open and unmerged. The structural fix, a tenant column on anchor records (the one Stuart prefers), becomes its own project. Develop keeps today's behaviour, which does not have this hole."
+   },
+   {
+    "key": "c",
+    "label": "Close #1568",
+    "detail": "The PR is closed unmerged and its work kept on its branch. KS-1612 and KS-1385 (b) go back to the backlog."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-19T08:21:01.228109+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:00",
+   "2026-09-10 09:17",
+   "CARD secuura-ks843-half2-round3",
+   "CARD secuura-ks949-round3-cap-and-the-cutoff",
+   "CARD nexusai-rd361-blocker-vs-nogo-cap",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD nexusai-rd361-round3-blocker-survives",
+   "CARD nexusai-rd369-round3-or-ship-at-the-cap",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD hpsm-composer-round3-approver-guard",
+   "CARD nexusai-rd436-round3-authorise",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD nexusai-round4-nogo-selfheal-round5",
+   "CARD rd518-round3",
+   "CARD secuura-pr1245-round3-failed-at-cap",
+   "CARD vision-vsp74-cap-reached-ship-or-round3",
+   "CARD nexusai-rd686-round2-cap-ship-words-or-round3",
+   "CARD nexusai-rd838-rd640-round3-1013",
+   "CARD secuura-ks1612-third-round-after-cap-1018",
+   "CARD secuura-ks1628-retire-deprecated-verify-route-1019",
+   "CARD wed-secuura-storage-policy-1019"
+  ]
  }
 ]
