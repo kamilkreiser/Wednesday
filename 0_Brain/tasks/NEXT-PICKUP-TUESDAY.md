@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 218 — 2026-10-18 12:26 CHECKPOINT (s115, ctx ~58%; band 80-90). **READ THIS FIRST. Supersedes 217's FIRST WORK 1-3 (all done or launched); 217 item 4 (Monday re-raise) and 216/214's OWED lists stand.**
+### DONE since 217 (each verified at source; note lines 12:11-12:25)
+- **Gate 25 STAMPED + LAUNCHED** pane **%60** `QA/NexusAI-gate25` (T1 (a) copy runner; T2 (a) sharpened: RD-794's nine are C-133 B-side, NOT C-215, supersedes ANSWER-4 by name; T3-T9 default). Routing line added (`inbox_routing.conf.pre-1018-gate25`). ADDENDUM-1 (create g25 refs before `remote remove origin`) sent 01:25Z. **Verdict by MAIL** `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 25`; ~7-8 h (jest lock shared with S101O).
+- **RD-476 READY FOR QA** (S101O, 393929057997, one commit on c7ca0ed; diff verified = mail). **Kam card `nexusai-rd476-assistant-prompt-words-1018`** (rec b: approve + live 12-question dev-AOAI check; default nothing merges) + panel msg with the 3 prompt files (`0_Brain/reference/2026-10-18_nexusai-rd476-prompts/`) bf-525b2c717366. ANSWER-6: open PR as DRAFT, no merge; tier 2, batched with the next NexusAI gate (and AFTER RD-794 lands: census says RD-476 touches RD-794's files).
+- **B261 RECORDS DONE** (6 Done, 7 tickets -274..-280, 8 comments, C-112); pane %59 closed. **Tuesday's HP-window scan: 0 hits** (control fired; tool now tracked at `2_Project_Files/tuesday/tools/hpwin.py`, HPWIN_SRC = `4_Credentials/inbound_with_secrets/2026-10-16_kam-fw-terry-hp-answers.txt`). **PR datasecau/HPSM-POC-analysis#119 OPEN** (head 2e29dfa); checks waiter armed. **MERGED 12:26** (checks 3/3 success, 0 alerts): records main = 5d45352a4b32, tree = head tree, parent 2e284455.
+- **B262 HPSM-POC round 2 STAMPED + LAUNCHED** pane **%61** `Datasec/HPSM-POC-H4` (R-1 b, R-2 as rec, R-3 b, R-4 build, R-5 Tuesday rules -263 (c) no card, LOAD < 6). STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-18_B262_STATUS.md`, last line `READY FOR GATE: b262/round2-pkcs-bff-imports-tests @ <sha40>` -> commission tier-1 gate B263 (needs B259's 1a/1c Content-Disposition rig for -276).
+- Rotation feedback sweep: 0 new (`projects_index/2026-10-18_rotation-sweep-1215.md`). Midday receipt to Kam bf-1fdf2e4f9bae.
+- **NexusAI off-main census** `tuesday/briefs/2026-10-18_nexusai-offmain-heads-census.md`: 20 heads off main, all counts-only conflicts; proposed gate 26 chain + counts-only TURNs. **Rule it after gate 25 lands** (tier-1 heads vs the RD-801/802 precedent is Tuesday's ruling).
+### IN FLIGHT (who wakes you)
+- STATUS watcher (scratchpad `status_watch.sh`, background; re-arm after each fire; rewrite if the seat rotated). Mail: wake_watch (gate 25 verdict, S101O PR number + checks). PR #119 checks waiter (background).
+- Floor: %0 tuesday, %1 monitor, %56 NexusAI-O (S101O: RD-476 PR draft, then be0fe37), %60 gate 25, %61 B262.
+
 ## 🔴 DELTA 217 — 2026-10-18 12:05 ROTATION HANDOVER (s114, ctx ~77%; band 80-90; rotating at a safe boundary because the next task — stamping gate 25 — needs a fresh window). **READ THIS FIRST, then 216 and 214 (their OWED lists stand).**
 ### DONE since 216 (each verified at source)
 - **HPSM-POC hosted = d1fca80** (B260 DEPLOYED @ wtvXPznjRbFfbsdXE3fpr, live 2026-10-18T00:15:53Z after one rollback: round 2 rolled back on start-up warnings 3213+3211, which the unchanged 787d159 also logged; Tuesday's ANSWER-2 accepted the pair for ONE redeploy under 5 conditions; all held). Tuesday's own check 11:27:58: new build id x1, old x0, API /health 200 x3. Kam told (bf-68427517f210) + a correction (bf-f717cbc1a197: "ticketed" was false). Pane %58 closed. Ledger row filed; both digests regenerated.
