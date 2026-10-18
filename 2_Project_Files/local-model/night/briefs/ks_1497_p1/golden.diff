@@ -1,0 +1,93 @@
+diff --git a/Blockchain/Dev/scripts/prisma-generate.cjs b/Blockchain/Dev/scripts/prisma-generate.cjs
+index 42fed508e..86d394fa0 100644
+--- a/Blockchain/Dev/scripts/prisma-generate.cjs
++++ b/Blockchain/Dev/scripts/prisma-generate.cjs
+@@ -66,4 +66,17 @@ if (check) {
+ 
+ const staging = path.join(svc, 'node_modules', '.generate');
++// KS-1497: never stage the schema through a symlink (the copy would land in its target) or onto a file (mkdir throws a stack trace).
++let stagingStat = null;
++try {
++  stagingStat = fs.lstatSync(staging);
++} catch (err) {
++  if (err.code !== 'ENOENT') throw err;
++}
++if (stagingStat && stagingStat.isSymbolicLink()) {
++  fail(`${staging} is a symbolic link; refusing to stage the schema through it. Remove it and run again.`);
++}
++if (stagingStat && !stagingStat.isDirectory()) {
++  fail(`${staging} exists and is not a directory. Remove it and run again.`);
++}
+ fs.mkdirSync(staging, { recursive: true });
+ const staged = path.join(staging, 'schema.prisma');
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1497_prisma_generate_refuses_a_bad_staging_dir.test.sh b/Blockchain/Dev/scripts/__tests__/ks1497_prisma_generate_refuses_a_bad_staging_dir.test.sh
+new file mode 100644
+index 000000000..5798886b8
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks1497_prisma_generate_refuses_a_bad_staging_dir.test.sh
+@@ -0,0 +1,65 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Dev/scripts/prisma-generate.cjs - KS-1497 items 2 and 4:
++# the staging directory node_modules/.generate must be a plain directory.
++# =============================================================================
++# The script copies the schema into node_modules/.generate, runs prisma generate, and removes
++# the directory. A .generate that is a SYMLINK made it write the schema into the link's target
++# (and delete only the link); a .generate that is a FILE made mkdirSync throw an uncaught
++# stack trace (rc 1). Both now stop with a "generate:" message and exit 2 before anything is
++# written. This suite runs the REAL script against a fixture service whose prisma CLI is a stub.
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks1497_prisma_generate_refuses_a_bad_staging_dir.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SCRIPT="${PRISMA_GENERATE_CJS:-$HERE/../prisma-generate.cjs}"
++[[ -r "$SCRIPT" ]] || { echo "FATAL: prisma-generate.cjs not readable at $SCRIPT" >&2; exit 2; }
++command -v node >/dev/null 2>&1 || { echo "FATAL: node is required" >&2; exit 2; }
++
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1497.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++cell() { if [[ "$3" == "$2" ]]; then echo "PASS: $1"; PASS=$((PASS+1)); else echo "FAIL: $1 (want '$2', got '$3')"; FAIL=$((FAIL+1)); fi; }
++
++# fixture <name>: a service dir with a stub prisma CLI (generate writes node_modules/.prisma/client/default.js) and a schema.
++fixture() {
++  local svc="$WORK/$1/svc"
++  mkdir -p "$svc/node_modules/prisma/build" "$svc/node_modules/@prisma/client"
++  printf '{ "name": "prisma", "version": "0.0.0", "bin": "build/index.js" }\n' > "$svc/node_modules/prisma/package.json"
++  printf '%s\n' "const fs = require('fs');" "fs.mkdirSync('node_modules/.prisma/client', { recursive: true });" "fs.writeFileSync('node_modules/.prisma/client/default.js', '');" > "$svc/node_modules/prisma/build/index.js"
++  printf '{ "name": "@prisma/client", "version": "0.0.0" }\n' > "$svc/node_modules/@prisma/client/package.json"
++  printf 'model Thing {\n  id Int @id\n}\n' > "$WORK/$1/schema.prisma"
++}
++# run_generate <name>: the real script against that fixture; sets RC and ERR (stderr).
++run_generate() {
++  ERR="$(PRISMA_GENERATE_SVC_DIR="$WORK/$1/svc" PRISMA_SCHEMA_SRC="$WORK/$1/schema.prisma" node "$SCRIPT" 2>&1 >/dev/null)"; RC=$?
++}
++has() { if grep -qF -- "$2" <<<"$1"; then echo yes; else echo no; fi; }
++
++# CONTROL - no staging directory at all: generates, and leaves no .generate behind.
++fixture plain; run_generate plain
++cell "CONTROL KS-1497 with no .generate the script generates and removes its staging directory" "0/gone" "$RC/$([[ -e "$WORK/plain/svc/node_modules/.generate" || -L "$WORK/plain/svc/node_modules/.generate" ]] && echo left || echo gone)"
++
++# CONTROL - a stale REAL directory from an earlier interrupted run is reused and removed.
++fixture stale; mkdir -p "$WORK/stale/svc/node_modules/.generate"; echo old > "$WORK/stale/svc/node_modules/.generate/schema.prisma"
++run_generate stale
++cell "CONTROL KS-1497 a stale real .generate directory is reused and removed" "0/gone" "$RC/$([[ -e "$WORK/stale/svc/node_modules/.generate" ]] && echo left || echo gone)"
++
++# A symlinked .generate: refused before anything is written through it.
++fixture link; mkdir -p "$WORK/link/elsewhere"; ln -s "$WORK/link/elsewhere" "$WORK/link/svc/node_modules/.generate"
++run_generate link
++cell "RED KS-1497 a symlinked .generate is refused with exit 2" "2" "$RC"
++cell "RED KS-1497 the refusal for a symlinked .generate says so" "yes/yes" "$(has "$ERR" 'generate: ')/$(has "$ERR" 'symbolic link')"
++cell "RED KS-1497 nothing is written into the symlink's target" "0" "$(ls -A "$WORK/link/elsewhere" | wc -l | tr -d ' ')"
++
++# A .generate that is a FILE: a message, not a stack trace.
++fixture file; echo not-a-dir > "$WORK/file/svc/node_modules/.generate"
++run_generate file
++cell "RED KS-1497 a .generate that is a file is refused with exit 2" "2" "$RC"
++cell "RED KS-1497 the refusal for a .generate that is a file says so" "yes/yes" "$(has "$ERR" 'generate: ')/$(has "$ERR" 'is not a directory')"
++
++echo "ks1497_prisma_generate_refuses_a_bad_staging_dir: $PASS passed, $FAIL failed"
++[[ "$FAIL" -eq 0 && "$PASS" -eq 7 ]]

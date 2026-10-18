@@ -1,0 +1,47 @@
+diff --git a/.githooks/pre-push b/.githooks/pre-push
+index b63a7a46d..7838fb8b6 100755
+--- a/.githooks/pre-push
++++ b/.githooks/pre-push
+@@ -127,5 +127,5 @@ _judge_ref() {
+         fi
+         if [ -n "$_jr_b" ]; then
+-            all_changed=$(git -c core.quotePath=false diff --name-only "$_jr_b" "$_tip" 2>/dev/null || true)
++            all_changed=$(git -c core.quotePath=false diff --no-renames --name-only "$_jr_b" "$_tip" 2>/dev/null || true)
+             changed=$(printf '%s\n' "$all_changed" | grep '^Blockchain/Dev/' || true)
+             return 0
+@@ -141,5 +141,5 @@ _judge_ref() {
+     esac
+     if [ -n "$_jr_up" ]; then
+-        all_changed=$(git -c core.quotePath=false diff --name-only "$_jr_up" "$_tip" 2>/dev/null || true)
++        all_changed=$(git -c core.quotePath=false diff --no-renames --name-only "$_jr_up" "$_tip" 2>/dev/null || true)
+         changed=$(printf '%s\n' "$all_changed" | grep '^Blockchain/Dev/' || true)
+         # KS-998 item 1 / KS-1422: an upstream that is NOT this branch's own counterpart (e.g. the trunk, left
+diff --git a/Blockchain/Dev/scripts/__tests__/ks998_pre_push_judges_the_push.test.sh b/Blockchain/Dev/scripts/__tests__/ks998_pre_push_judges_the_push.test.sh
+index 3ba33596d..b8ecd8c1a 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks998_pre_push_judges_the_push.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks998_pre_push_judges_the_push.test.sh
+@@ -411,4 +411,24 @@ cell "SC21 a tag whose commit every base contains (and the remote lacks) lands w
+ cell "...and the note says nothing new lands on a branch"                    "1" "$(n_of "$out" 'nothing new lands on a branch')"
+ 
++# ---------------------------------------------------------------------------
++# SC22b / SC22c - KS-1482: a file renamed OUT of Blockchain/Dev. Git's default rename detection lists the move by its NEW path
++# only, so the ^Blockchain/Dev/ filter found nothing and the preflight was skipped. Two of the three base paths of _judge_ref:
++# a branch that already EXISTS at the remote, and a branch with an UPSTREAM (SC22a, the new-branch path, sits after SC17).
++# ---------------------------------------------------------------------------
++build_fixture "$WORK/sc22b"; cd "$WORK/sc22b/fresh"
++git checkout -q -b ren2 --no-track origin/develop; commit_in docs/readme.md edited
++git push -q origin ren2 >/dev/null 2>&1
++git mv Blockchain/Dev/file.txt docs/moved.txt; git commit -qm "move file.txt out of Blockchain/Dev"
++cell "CONTROL KS-1482 git lists the moved file as a rename (branch that exists at the remote): only docs/moved.txt, never the old Blockchain/Dev path" "0/1" \
++  "$(git diff --name-only HEAD~1 HEAD | grep -c '^Blockchain/Dev/')/$(git diff --name-only HEAD~1 HEAD | grep -c '^docs/moved.txt')"
++out="$(git push origin ren2 2>&1)"; rc=$?
++cell "RED KS-1482 a file renamed out of Blockchain/Dev, pushed to a branch that EXISTS at the remote: the preflight runs" "0/1" "$rc/$(n_of "$out" '[preflight] ran')"
++build_fixture "$WORK/sc22c"; cd "$WORK/sc22c/fresh"
++git checkout -q -b ren3 --track origin/develop
++git mv Blockchain/Dev/file.txt docs/moved.txt; git commit -qm "move file.txt out of Blockchain/Dev"
++cell "CONTROL KS-1482 the renaming branch tracks origin/develop" "origin/develop" "$(git rev-parse --abbrev-ref '@{upstream}')"
++out="$(git push origin HEAD:refs/heads/ren3-up 2>&1)"; rc=$?
++cell "RED KS-1482 a file renamed out of Blockchain/Dev, pushed from a branch with an UPSTREAM: the preflight runs" "0/1" "$rc/$(n_of "$out" '[preflight] ran')"
++
+ echo ""
+ echo "ks998_pre_push_judges_the_push: ${pass} passed, ${fail} failed"

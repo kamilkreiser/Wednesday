@@ -1,0 +1,32 @@
+diff --git a/.githooks/pre-push b/.githooks/pre-push
+index b63a7a46d..ca9b92578 100755
+--- a/.githooks/pre-push
++++ b/.githooks/pre-push
+@@ -250,5 +250,5 @@ if [ -z "$_jr_up" ]; then
+         [ "$_b" = "$_head" ] && continue
+         _informative=1
+-        _files=$(git -c core.quotePath=false diff --name-only "$_b" "$_tip" || true)
++        _files=$(git -c core.quotePath=false diff --no-renames --name-only "$_b" "$_tip" || true)
+         # KS-989: keep the union of every ref consulted, for the systemTest gate.
+         # The Blockchain/Dev decision on the next lines is byte-for-byte what it
+diff --git a/Blockchain/Dev/scripts/__tests__/ks998_pre_push_judges_the_push.test.sh b/Blockchain/Dev/scripts/__tests__/ks998_pre_push_judges_the_push.test.sh
+index 3ba33596d..8fa9efa0d 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks998_pre_push_judges_the_push.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks998_pre_push_judges_the_push.test.sh
+@@ -334,4 +334,16 @@ cell "SC17 a HEAD push from a tracking branch that changes Blockchain/Dev is not
+   "$rc/$(n_of "$out" '[preflight] ran')/$(n_of "$out" 'REFUSED')/$(remote_has . refs/heads/tracked-up)"
+ 
++# ---------------------------------------------------------------------------
++# SC22a - KS-1482: a file renamed OUT of Blockchain/Dev, pushed as a NEW branch with no upstream (the merge-base path of
++# _judge_ref). Git's default rename detection lists the move by its NEW path only, so the preflight was skipped.
++# ---------------------------------------------------------------------------
++build_fixture "$WORK/sc22a"; cd "$WORK/sc22a/fresh"
++git checkout -q -b ren1 --no-track origin/develop
++git mv Blockchain/Dev/file.txt docs/moved.txt; git commit -qm "move file.txt out of Blockchain/Dev"
++cell "CONTROL KS-1482 git lists the moved file as a rename (new branch): only docs/moved.txt, never the old Blockchain/Dev path" "0/1" \
++  "$(git diff --name-only HEAD~1 HEAD | grep -c '^Blockchain/Dev/')/$(git diff --name-only HEAD~1 HEAD | grep -c '^docs/moved.txt')"
++out="$(git push origin ren1 2>&1)"; rc=$?
++cell "RED KS-1482 a file renamed out of Blockchain/Dev, pushed as a NEW branch: the preflight runs" "0/1" "$rc/$(n_of "$out" '[preflight] ran')"
++
+ # ---------------------------------------------------------------------------
+ # SC18 - MINOR 2 (hook half): a package whose name is NOT ASCII. git quotes such a path in `git diff --name-only`
