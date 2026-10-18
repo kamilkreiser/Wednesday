@@ -1,0 +1,149 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+index 72819e0e7..87f2103ef 100644
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -1300,3 +1300,3 @@ export const UpdateOAuthAppSchema = z.object({
+   name: z.string().trim().min(1).max(100).optional(),
+-  redirectUris: z.array(z.string().url()).optional(),
++  redirectUris: z.array(z.string().url()).min(1).optional(),
+   // KS-1210: same closed vocabulary as the create path; KS-451's NUL guard is
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks805-oauth-app-update-refuses-empty-redirect-uris.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks805-oauth-app-update-refuses-empty-redirect-uris.test.ts
+new file mode 100644
+index 000000000..4f20eb248
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks805-oauth-app-update-refuses-empty-redirect-uris.test.ts
+@@ -0,0 +1,134 @@
++/**
++ * KS-805 (Q5) - PATCH /api/oauth/apps/:id accepted an EMPTY `redirectUris` array, while POST /api/oauth/apps refuses
++ * one (`.min(1)` on create, none on update). An app could be created valid and then patched into the zero-URI state.
++ * `UpdateOAuthAppSchema.redirectUris` now carries `.min(1)` like the create schema; omitting the key stays legal.
++ * Q3 of the same ticket (the authorize DENY branch building `Location: undefined?error=...` for a zero-URI app,
++ * and GET answering 500) was closed at the resolver by KS-822 (RULE 2c): the two CONTROL cells below keep it so.
++ * The service layer is mocked as in the KS-431 and KS-797 files; the router is real, on a real listener.
++ */
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++import express from 'express';
++
++const ZERO_URI_CLIENT = 'sec_ks805zero';
++const VALID_ID = '11111111-2222-4333-8444-555555555555';
++const { updateApp, getAppById } = vi.hoisted(() => ({
++  updateApp: vi.fn(async () => ({ id: 'app_1', name: 'x' })),
++  getAppById: vi.fn(async () => ({ id: 'app_1', name: 'x', createdBy: 'u1' })),
++}));
++
++const silentLogger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() };
++vi.mock('../utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger }));
++vi.mock('../services/accountLockout', () => ({
++  isLockedOut: vi.fn(async () => false),
++  recordFailure: vi.fn(async () => 1),
++  recordSuccess: vi.fn(async () => undefined),
++}));
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => ({ id: 's' })),
++  getRedisClient: vi.fn(() => null),
++}));
++vi.mock('../services/password', () => ({ verifyPassword: vi.fn(async () => true) }));
++vi.mock('../services/totp', () => ({
++  verifyTotpCode: vi.fn(() => true),
++  verifyBackupCode: vi.fn(async () => ({ valid: false, index: -1 })),
++}));
++vi.mock('../services/oauth', () => ({
++  createAuthorizationCode: vi.fn(async () => 'MINTED_CODE_805'),
++  getAppByClientId: vi.fn(async (id: string) =>
++    id === ZERO_URI_CLIENT
++      ? { id: 'app-0', name: 'KS-805 Zero URI App', clientId: ZERO_URI_CLIENT, appType: 'confidential',
++          redirectUris: [], allowedScopes: ['openid'] }
++      : null),
++  createApp: vi.fn(), getAppById, listApps: vi.fn(), updateApp,
++  rotateSecret: vi.fn(), exchangeCode: vi.fn(),
++  validateScopes: vi.fn((r: string[]) => r ?? []),
++  parseScopeString: vi.fn((s?: string) => (s ? s.split(/[\s,]+/).filter((x) => x.length > 0) : [])),
++  AVAILABLE_SCOPES: ['verify:read', 'documents:read', 'documents:write', 'certifications:read',
++    'certifications:write', 'users:read', 'webhooks:manage', 'admin:read', 'admin:write'],
++}));
++vi.mock('../repositories/userRepo', () => ({
++  getUserByEmail: vi.fn(async () => ({
++    id: 'u1', email: 'user@secuura.local', passwordHash: '$argon2id$stub',
++    status: 'ACTIVE', mfaEnabled: false, mfaSecret: null, mfaBackupCodes: null,
++  })),
++  updateUser: vi.fn(async () => null),
++  reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++  getPlatformAdmin: vi.fn(async () => null),
++}));
++vi.mock('../services/jwt', () => ({ generateTokenPair: vi.fn(() => ({ accessToken: 'a', refreshToken: 'r', expiresIn: 900 })) }));
++vi.mock('../services/refreshDenylist', () => ({ isRefreshJtiDenylisted: vi.fn(async () => false) }));
++vi.mock('../middleware/authenticate', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => { req.user = { userId: 'u1' }; next(); },
++}));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++
++let server: Server;
++let base: string;
++let CreateOAuthAppSchema: typeof import('../routes/oauth').CreateOAuthAppSchema;
++let UpdateOAuthAppSchema: typeof import('../routes/oauth').UpdateOAuthAppSchema;
++
++beforeAll(async () => {
++  const mod = await import('../routes/oauth');
++  const { oauthRouter } = mod;
++  CreateOAuthAppSchema = mod.CreateOAuthAppSchema;
++  UpdateOAuthAppSchema = mod.UpdateOAuthAppSchema;
++  const app = express();
++  app.use('/api/oauth', express.json(), oauthRouter);
++  server = app.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => server.once('listening', () => r()));
++  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
++});
++afterAll(async () => { await new Promise<void>((r) => server.close(() => r())); });
++beforeEach(() => { updateApp.mockClear(); });
++
++async function patch(body: unknown): Promise<{ status: number }> {
++  const r = await fetch(`${base}/api/oauth/apps/${VALID_ID}`, {
++    method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
++  });
++  return { status: r.status };
++}
++
++describe('KS-805 Q5 - PATCH /api/oauth/apps/:id refuses an empty redirectUris array', () => {
++  it('RED KS-805 R1: PATCH with redirectUris [] answers 400 and never reaches updateApp', async () => {
++    expect((await patch({ redirectUris: [] })).status).toBe(400);
++    expect(updateApp).not.toHaveBeenCalled();
++  });
++
++  it('RED KS-805 R2: UpdateOAuthAppSchema rejects an empty redirectUris array', () => {
++    expect(UpdateOAuthAppSchema.safeParse({ redirectUris: [] }).success).toBe(false);
++  });
++
++  it('CONTROL KS-805 C1: PATCH with one valid redirect URI answers 200 and hands it to updateApp', async () => {
++    expect((await patch({ redirectUris: ['https://app.example.com/cb'] })).status).toBe(200);
++    expect(updateApp).toHaveBeenCalledTimes(1);
++    const [, updates] = updateApp.mock.calls[0] as unknown as [string, Record<string, unknown>];
++    expect(updates).toHaveProperty('redirectUris', ['https://app.example.com/cb']);
++  });
++
++  it('CONTROL KS-805 C2: PATCH that omits redirectUris altogether stays legal', async () => {
++    expect((await patch({ name: 'renamed' })).status).toBe(200);
++    expect(updateApp).toHaveBeenCalledTimes(1);
++  });
++
++  it('CONTROL KS-805 C3: the create schema already refuses an empty redirectUris array (the asymmetry anchor)', () => {
++    expect(CreateOAuthAppSchema.safeParse({ name: 'app', redirectUris: [] }).success).toBe(false);
++  });
++
++  it('CONTROL KS-805 C4: authorize DENY for an app with zero registered redirect URIs is refused 400, never a redirect to "undefined"', async () => {
++    const res = await fetch(`${base}/api/oauth/authorize`, {
++      method: 'POST', headers: { 'Content-Type': 'application/json' }, redirect: 'manual',
++      body: JSON.stringify({ client_id: ZERO_URI_CLIENT, action: 'deny' }),
++    });
++    expect(res.status).toBe(400);
++    expect(res.headers.get('location') || '').not.toContain('undefined');
++  });
++
++  it('CONTROL KS-805 C5: authorize GET for an app with zero registered redirect URIs is refused 400, not a 500', async () => {
++    const res = await fetch(`${base}/api/oauth/authorize?client_id=${ZERO_URI_CLIENT}&response_type=code`, { redirect: 'manual' });
++    expect(res.status).toBe(400);
++  });
++});

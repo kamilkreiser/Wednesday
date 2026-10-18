@@ -1,0 +1,108 @@
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/index.ts b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+index 82a6f8d4b..65ed14465 100644
+--- a/Blockchain/Dev/services/tenant-provisioning/src/index.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+@@ -557,3 +557,3 @@ app.get('/api/audit-log', async (req, res) => {
+     const result = await platformQuery(
+-      `SELECT * FROM platform_audit_log ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
++      `SELECT * FROM platform_audit_log ORDER BY created_at DESC, id DESC LIMIT $1 OFFSET $2`,
+       [limit, offset],
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1544-audit-log-is-paged-in-a-total-order.test.ts b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1544-audit-log-is-paged-in-a-total-order.test.ts
+new file mode 100644
+index 000000000..dd2381526
+--- /dev/null
++++ b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1544-audit-log-is-paged-in-a-total-order.test.ts
+@@ -0,0 +1,93 @@
++/**
++ * KS-1544 - GET /api/audit-log pages `platform_audit_log` with `LIMIT $1 OFFSET $2`. Its ORDER BY named
++ * `created_at DESC` only, so rows sharing a timestamp (now() is the transaction start, one transaction can write
++ * several) had no defined order between two queries, and a gateway reading the log in sequential windows could
++ * repeat or skip them. The ORDER BY now ends in the primary key: `ORDER BY created_at DESC, id DESC`.
++ * The service entry module is imported for real, with `pg` replaced by a recorder and the JWT middleware by a
++ * pass-through, so the cells see the SQL the route really sends and the parameters it binds.
++ */
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import net from 'node:net';
++import type { AddressInfo } from 'node:net';
++
++const sent = vi.hoisted(() => ({ calls: [] as Array<{ text: string; params: unknown[] | undefined }> }));
++
++vi.mock('pg', () => {
++  class Pool {
++    async query(text: string, params?: unknown[]) {
++      sent.calls.push({ text, params });
++      if (/COUNT\(\*\)/i.test(text)) return { rows: [{ total: '3' }], rowCount: 1 };
++      if (/FROM platform_audit_log/i.test(text)) return { rows: [{ id: 'a' }, { id: 'b' }, { id: 'c' }], rowCount: 3 };
++      return { rows: [], rowCount: 0 };
++    }
++    async connect() { return { query: async () => ({ rows: [] }), release: () => undefined }; }
++    on() { return this; }
++    async end() { return undefined; }
++  }
++  return { default: { Pool }, Pool };
++});
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const real = (await importOriginal()) as Record<string, unknown>;
++  return { ...real, authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next() };
++});
++
++let base = '';
++
++async function freePort(): Promise<number> {
++  const s = net.createServer();
++  await new Promise<void>((r) => s.listen(0, '127.0.0.1', () => r()));
++  const port = (s.address() as AddressInfo).port;
++  await new Promise<void>((r) => s.close(() => r()));
++  return port;
++}
++
++beforeAll(async () => {
++  const port = await freePort();
++  process.env.PORT = String(port);
++  process.env.PLATFORM_DATABASE_URL = 'postgres://platform:pw@127.0.0.1:5432/platform';
++  process.env.DATABASE_URL = 'postgres://app:pw@127.0.0.1:5432/app';
++  await import('../index');
++  base = `http://127.0.0.1:${port}`;
++  for (let i = 0; i < 100; i += 1) {
++    try { await fetch(base + '/health'); break; } catch { await new Promise((r) => setTimeout(r, 30)); }
++  }
++});
++afterAll(() => { /* the listener dies with the worker */ });
++
++/** The SQL texts of the audit-log page query and the count query, from one request. */
++async function auditLog(query = ''): Promise<{ status: number; page?: { text: string; params: unknown[] | undefined }; count?: string; body: any }> {
++  sent.calls.length = 0;
++  const r = await fetch(`${base}/api/audit-log${query}`);
++  const body = await r.json().catch(() => ({}));
++  return {
++    status: r.status,
++    page: sent.calls.find((c) => /FROM platform_audit_log/i.test(c.text) && /LIMIT/i.test(c.text)),
++    count: sent.calls.find((c) => /COUNT\(\*\)/i.test(c.text))?.text,
++    body,
++  };
++}
++
++describe('KS-1544 - the platform audit log is paged in a total order', () => {
++  it('RED KS-1544 O1: the page query orders by created_at DESC and then by id DESC', async () => {
++    const r = await auditLog('?limit=10&offset=20');
++    expect(r.status).toBe(200);
++    expect(r.page?.text.replace(/\s+/g, ' ')).toContain('ORDER BY created_at DESC, id DESC');
++  });
++
++  it('CONTROL KS-1544 O2: the page query still pages with LIMIT $1 OFFSET $2 and binds the clamped values', async () => {
++    const r = await auditLog('?limit=500&offset=7');
++    expect(r.page?.text.replace(/\s+/g, ' ')).toContain('LIMIT $1 OFFSET $2');
++    expect(r.page?.params).toEqual([200, 7]);
++  });
++
++  it('CONTROL KS-1544 O3: the response keeps its shape, the rows and the total from the count query', async () => {
++    const r = await auditLog();
++    expect(r.body).toEqual({ success: true, entries: [{ id: 'a' }, { id: 'b' }, { id: 'c' }], total: 3 });
++    expect(r.count).toMatch(/SELECT COUNT\(\*\) as total FROM platform_audit_log/);
++  });
++
++  it('CONTROL KS-1544 O4: the page query still reads platform_audit_log newest first', async () => {
++    const r = await auditLog();
++    expect(r.page?.text).toMatch(/FROM platform_audit_log ORDER BY created_at DESC/);
++  });
++});

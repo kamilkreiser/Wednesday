@@ -1,0 +1,21 @@
+diff --git a/Blockchain/Dev/services/security/src/__tests__/row-converters.test.ts b/Blockchain/Dev/services/security/src/__tests__/row-converters.test.ts
+index 4e8cc146d..cc86b613e 100644
+--- a/Blockchain/Dev/services/security/src/__tests__/row-converters.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/row-converters.test.ts
+@@ -213,4 +213,16 @@ describe('rowToApiKey()', () => {
+       expiresAt: new Date('2027-01-01T00:00:00Z'), createdAt: new Date('2026-04-01T00:00:00Z'), connectorId: 'conn_1',
+     });
+   });
++
++  // KS-1525: the is_active boundary the KS-880 gate's mutants G1 and G10 crossed with the whole suite green.
++  it('RED KS-1525 G1: a row with NO is_active column reads INACTIVE, never active (an absent column must not un-revoke a key)', () => {
++    const { is_active: _a, ...noActive } = KEY_ROW;
++    expect(rowToApiKey(noActive).isActive).toBe(false);
++  });
++  it('CONTROL KS-1525 G1: is_active null reads inactive too', () => {
++    expect(rowToApiKey({ ...KEY_ROW, is_active: null }).isActive).toBe(false);
++  });
++  it('CONTROL KS-1525 G10: the Postgres text form is_active "t" reads active, so tightening Boolean() to === true reds', () => {
++    expect(rowToApiKey({ ...KEY_ROW, is_active: 't' }).isActive).toBe(true);
++  });
+ });
