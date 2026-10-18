@@ -1,0 +1,79 @@
+BLUF: rd-794-ollama-runtime-slice-s89r @ cd171f9 is READY FOR GATE in both orders, for the batched tier-1 re-gate with RD-761. Both orders:
+- merge-tree conflicts only in the counts file.
+- verify PASS: stacked 4655/290, main order 4568/288.
+- RD-794 cells by name: 62/62 in each.
+- C-57 prints STOP in each; the 13 missing ids are accounted ("still missing 0"): the 4 main-side retitles (C-215) plus gate 19's own 9.
+- 13 of 15 gated files equal the head, server.js carries only the other side's hunks, and the counts file is regenerated.
+- Main added no Log Analytics or fetch call site since either base.
+One red check exists at the head: npm-audit failed on cd171f9, proxy-addr 2.0.7, critical. It is explained in §7 and does not reach either merged tree. RD-794 has no PR and no CodeQL run. Both merges are local and unpushed; both lane-R branches are untouched (ls-remote: rd-794 = cd171f9, rd-761 = 7f1881e, main = c7ca0ed).
+
+Merge base of cd171f9 with c7ca0ed and with 36a0dc0: 3e6d02d. The gated range is 3e6d02d..cd171f9 (gate 19 GO WITH FINDINGS, brief qa-briefs/2026-10-06_nexusai-rd794-tier1-gate.md).
+
+1. The two local merges (worktrees/, never pushed; c7ca0ed or 36a0dc0 merged into cd171f9, main first; counts regenerated once):
+  - STACKED, onto RD-761's merge 36a0dc0 (tree fb8197a7): commit 2facd7c0645755de400770fe4f2db641f46ba42e, tree e2bb3ac1048266dacb13dcc913eebfd76f8bad09, worktrees/s101o-merge-rd794-stacked.
+  - MAIN, onto c7ca0ed: commit 67f361da446731157896de1767f744d86e786e81, tree 64bebaa26481a25ac54051a7b722642f6bf62680, worktrees/s101o-merge-rd794-main.
+  - merge-tree (git merge-tree --write-tree), both orders: scripts/verify-expected-counts.json is the only conflict.
+
+2. verify (npm run verify -- --maxWorkers=2, own offline install, lock base locks-laptop-1017):
+  stacked: VERDICT: PASS — 4655/4655 tests passed across 290 suites (jest exit 0)
+  main:    VERDICT: PASS — 4568/4568 tests passed across 288 suites (jest exit 0)
+  (verify-merge-rd794-{stacked,main}.log). Each order is its A plus a net 9 tests and 1 suite.
+
+3. RD-794 cells by name. Suites: rd794-ollama-runtime-removed, rd395-ai-enabled-gate, rd395-raw-model-calls, rd395-ai-enabled-writer, rd423-test-ai-does-not-crash-server, llm-provider-default-azure-openai. Result: 6 suites, 62/62, 0 failed in each order (rd794-cells-{stacked,main}.json).
+
+4. C-57 + C-133. Tools: c57-id-superset.sh sha256 1ae84a10…5581 and c133-accounting.py sha256 6f938bfc…f972f, both installed and unedited.
+  - STACKED (A 36a0dc0, B cd171f9, merged 2facd7c). Runs: A 4646 / B 4274 / merged 4655, failed 0. Pass 1 missing 13, pass 2 absorbed 2, still missing 11.
+      Tool verdict, verbatim: VERDICT: STOP — the merged set is NOT a superset. Do not merge. (C-57 step 3)
+      c133, verbatim: VERDICT: accounted 13, still missing 0, absent files 0. C-112: 346 files; 336 = A, 10 = B, neither [], absent [].
+  - MAIN (A c7ca0ed, B cd171f9, merged 67f361d). Runs: A 4559 / B 4274 / merged 4568, failed 0. Pass 1 missing 13, pass 2 absorbed 2, still missing 11.
+      Tool verdict, verbatim: VERDICT: STOP — the merged set is NOT a superset. Do not merge. (C-57 step 3)
+      c133, verbatim: VERDICT: accounted 13, still missing 0, absent files 0. C-112: 343 files; 333 = A, 10 = B, neither [], absent [].
+  - The same 13 in both orders (c133-rd794-{stacked,main}.out):
+    (a) A side, the 4 main retitles. The C-215 conditions hold: B blob = base, merged = main's blob, new title PASSED.
+        - jsdom-instrument-limits ×2 (172 -> 157): 51d5403 -> c73cad3, commits 5419285, 379b8b5.
+        - rd327 R7: a4db84d -> b34b7d7, commit 5584ea4.
+        - rd699 hygiene: 2047c79 -> 389b351, commit 04efa65.
+    (b) B side, RD-794's own 9. A blob = base, merged = B's blob. They match gate 19's C-133 table row for row (brief §"C-133 accounting"):
+        - 8 renamed by c36005b:
+          - rd395-ai-enabled-gate U3, D5 (8c80a0c -> 0c3300e);
+          - rd395-ai-enabled-writer W2, W3, W4, W7 (349d037 -> 43e0be3);
+          - rd395-raw-model-calls K2 (e9b202b -> 603d637).
+        - 1 renamed by 014c0cd: llm-provider-default CONTROL, explicit ollama -> explicit onnx-local (8cd57da -> 7a31117).
+        - Each of these 8 new titles is PRESENT and PASSED in MERGED.json, in both orders. Per-file test counts in B and merged are equal (writer 10, gate 25, raw 10, provider 4).
+        - W5 ("an empty body is 400 'nothing to save'") is MOVED. It is parked NOT-RUN (C-130) at __tests__/helpers/rd819-parked-NOT-RUN/rd819-w5-azure-empty-body.test.js, blob 550d6c9, in both merges. RD-819's live cell (__tests__/rd819-ai-config-empty-body.test.js) is ABSENT at c7ca0ed, cd171f9, 2facd7c and 67f361d. So after RD-794 lands, nothing runs the empty-body case until RD-819 lands. This is as gate 19 accounted it; I am naming it so the gate sees the gap.
+
+5. Gated files: git rev-parse -q --verify on base, A, head and merged, for every path in git diff --name-only 3e6d02d cd171f9 (15 files; rd794-gated-files-{stacked,main}.txt).
+  Both orders:
+  - 13 files equal the gated head. That includes backend/llm/ollamaAdapter.js, which is absent in the head and absent in the merged tree.
+  - backend/server.js matches neither side. head->merged patch-id equals A's own base->A diff (stacked 01dddaad…, main c7688917…), so only A's hunks are added.
+  - scripts/verify-expected-counts.json is regenerated (matches neither side, by design).
+
+6. Call sites main added since each base (your ask; read only; callsites-rd761.txt, callsites-rd794.txt, callsites-counts.txt):
+  - Instrument 1: git diff -U0 <base> c7ca0ed -- backend scripts static azure-marketplace (excluding *.test.js), added lines matching LogsQueryClient|queryWorkspace|loganalytics|LogAnalytics|fetch(|axios.|http(s).request/get(|new URL(.
+    - since 8853e36 (RD-761): 2 lines, both RD-690 comment lines in backend/azureLogAnalytics.js (:127, :287). They match only because the file's own name contains "LogAnalytics".
+    - since 3e6d02d (RD-794): those 2, plus backend/services/cspReport.js:82 `try { u = new URL(s); } …`, a parse inside the CSP-report handler, not a network call.
+  - Instrument 2: git grep -c of LogsQueryClient|queryWorkspace|fetch(|axios.|http(s).request/get( per file. The table is identical at 8853e36, 3e6d02d, c7ca0ed, 36a0dc0, 2facd7c and 67f361d: 8 files, among them azureLogAnalytics.js 5, server.js 12, entraProvisioning 2, entraGroupGate 2, entraGroupSync 2, emailService 1, and two scripts/test-marketplace-*.
+  - Reading: main added no outbound LAW or HTTP call site since either base. Limits: a count table cannot see a site that moved within a file with the same count. Instrument 1 covers additions and found none; it does not cover a call made through a helper with another name.
+
+7. CI at the RD-794 head (gh API): one check run, audit-production-deps (workflow npm-audit, push run 37544219588, 2026-10-06T23:02Z), conclusion FAILURE. The log names proxy-addr, GHSA-jqcg-44mw-7w3h, critical 9.1, range ">=1.1.0 <2.0.8".
+  - Cause: the branch's lockfile is the base's (blob e9063d4, proxy-addr 2.0.7). Main fixed it after the branch was cut, in 745978b (RD-816, "proxy-addr 2.0.7 -> 2.0.8 (lockfile only; GHSA-jqcg-44mw-7w3h, critical)"). RD-794 has no commit on package.json or package-lock.json since base.
+  - Both merged trees carry main's lockfile, blob 19477a9, proxy-addr 2.0.8, the same blob as c7ca0ed. Main's audit-production-deps passes at c7ca0ed (2026-10-17T10:03:22Z).
+  - So the red check describes the unmerged head only. NOT TESTED: npm audit on the merged trees themselves (it needs the registry; I did not run it).
+  - No PR exists for this branch (gh pr list --head: 0), so there is no CodeQL run at cd171f9 and no Build run.
+
+8. Landing conditions (C-209): #27 (critical, js/request-forgery, backend/llm/ollamaAdapter.js), #19 and #20 (high, js/polynomial-redos, backend/server.js) are OPEN on refs/heads/main now. All three sites are deleted in both merged trees. They can only flip on main's push analysis after the land. Deploy-demo must SKIP.
+
+9. Order: the stacked order (RD-761 first, then RD-794) is the C-199 shape and is what I would land. Both orders were measured so the gate can rule either.
+
+PRIOR WORK: gate 19 (GO WITH FINDINGS) on this head; S89R built the branch; the C-133 table is gate 19's (F3). Every C-57 and C-133 run here is my own, with the installed tools.
+NOT TESTED:
+  - the gate 19 report itself (on the T9, which is unmounted);
+  - any CodeQL or Build run at cd171f9 or either merge;
+  - npm audit on the merged trees;
+  - #19, #20 and #27 closing (only after the land);
+  - the two /api/status Ollama fetch sites and the docs/comment remainder (MODEL_CONFIGURATION_README.md:27, baseAdapter.js:42), which stay as RD-478 remainder per the brief.
+
+Asked of you: the batched tier-1 re-gate (RD-761 on c7ca0ed plus RD-794 in both orders). Nothing pushed; neither lane-R branch touched.
+Next for me: item 2, RD-476, on branch rd-476-assistant-prompt-s101o off c7ca0ed.
+
+-- S101O

@@ -1,0 +1,48 @@
+BLUF: rd-761-law-endpoint-policy-s89r @ 7f1881e is READY FOR GATE on main c7ca0ed. The only conflict is the counts file. The merged tree passes verify 4646/4646 across 289 suites. The RD-761 cells by name pass 87/87. C-57 prints STOP; its 4 missing ids are accounted under your ANSWER-3 ruling (C-215), with "still missing 0". Every gated code file equals the gated head except two, and those carry only main's own hunks. PR #58 at 7f1881e: 0 open alerts, every Analyze run completed success. Nothing was pushed: the merge is local commit 36a0dc0 and is never pushed.
+
+1. merge-tree
+  - Instrument: git merge-tree --write-tree c7ca0ed 7f1881e, base 8853e36.
+  - Conflicts: scripts/verify-expected-counts.json only. backend/azureLogAnalytics.js and backend/server.js auto-merge, and node --check passes on both.
+  - Local merge: c7ca0ed merged into 7f1881e (main first), counts regenerated once with --update-counts. Commit 36a0dc0eb801e5eb52a00be7c0d3de360eb1952d, tree fb8197a78a94806a2bc7b7ec00ff6e8758788a12, in worktrees/s101o-merge-rd761.
+
+2. verify, in worktrees/s101o-merge-rd761 on the merged tree, own offline install (proxy-addr 2.0.8 at its own path), lock base locks-laptop-1017:
+  VERDICT: PASS — 4646/4646 tests passed across 289 suites (jest exit 0)
+  (session-tools/s101/verify-merge-rd761.log). That is main 4559/287 plus a net 87 tests and 2 suites.
+
+3. RD-761 cells by name: npx jest __tests__/rd761-law-endpoint-policy.test.js __tests__/rd761-law-writers.test.js on the merged tree, under the jest lock. 2 suites, 87/87 passed, 0 failed (session-tools/s101/rd761-cells.json). The other files the branch touches (boot-probe-log-redaction, discover-tables-tenant-mask, synthetic-feed, data-freshness) PASS inside the full verify above.
+
+4. C-57 + C-133. Tool: session-tools/c57-id-superset.sh, sha256 1ae84a10…5581; A c7ca0ed, B 7f1881e, merged 36a0dc0. Output: session-tools/s101/c57-rd761.out and session-tools/c57-s101o-rd761/.
+  - Runs: A 4559 / B 4394 / merged 4646, failed 0 each. Pass 1 missing 4; pass 2 absorbed 2; still missing 2.
+  - Tool verdict, verbatim: VERDICT: STOP — the merged set is NOT a superset. Do not merge. (C-57 step 3)
+  - c133-accounting.py (sha256 6f938bfc…f972f), verbatim: VERDICT: accounted 4, still missing 0, absent files 0. C-112: 344 merged test files; 339 = A blob, 5 = B blob, neither [], absent [] (session-tools/s101/c133-rd761.out).
+  - The 4, all main-side retitles with B blob = base and merged = main's blob, each new title PASSED in MERGED.json (ANSWER-3 / C-215):
+    | file | old title (B) -> new title (main) | base=B blob | main=merged blob | main commit |
+    | jsdom-instrument-limits ×2 | settings.html [dark]/[light] "…of 172 swept nodes…" -> "…of 157…" | 51d5403 | c73cad3 | 5419285, 379b8b5 |
+    | rd327-build-digest-on-public-health | R7 "…still the product version 2.0.1" -> "…it is package.json's version (one source, C-181)" | a4db84d | b34b7d7 | 5584ea4 (RD-657) |
+    | rd699-decode-branches-behaviour | hygiene "no probe file is left on disk" -> "…, from this run or any earlier one" | 2047c79 | 389b351 | 04efa65 (RD-833) |
+  - At landing the merge commit message lists all 4 with side and commit.
+
+5. Gated files (git rev-parse -q --verify <rev>:<path> on base, main, head and merged 36a0dc0, for every path in git diff --name-only 8853e36 7f1881e; session-tools/s101/rd761-gated-files-36a0dc0.txt):
+  - 7 files equal the gated head, and main has not changed any of them since base: boot-probe-log-redaction.test.js, discover-tables-tenant-mask.test.js, helpers/rd761-law-intercept-preload.js, rd761-law-endpoint-policy.test.js, rd761-law-writers.test.js, services/lawEndpointPolicy.js, syntheticFeed.js.
+  - backend/azureLogAnalytics.js and backend/server.js match neither side. In both, the head->merged diff has the same git patch-id --stable as main's own base->main diff (fe11d3bc… and 4c79e73f…), so the merged tree adds only main's hunks to the gated content. The azureLogAnalytics change is RD-690's two comment lines (b05b6ff).
+  - scripts/verify-expected-counts.json is regenerated (matches neither side, by design).
+  - My earlier table (rd761-gated-files.txt, taken before the commit) showed main-changed:yes on new files. That came from rev-parse echoing a path that is absent; the re-run above uses -q --verify.
+
+6. PR #58 (gh, re-read now): OPEN, non-draft, base main, head 7f1881e, mergeable CONFLICTING (the counts file; the land merge regenerates it). Check runs at 7f1881e: CodeQL, Analyze (actions), Analyze (javascript-typescript), Analyze (python), audit-production-deps — all completed success. Open code-scanning alerts on refs/pull/58/head: 0. NO Build check run at 7f1881e.
+
+7. Gate verdict: gate 20 GO (gate range 72ca5d3..7f1881e, brief qa-briefs/2026-10-07_nexusai-rd761-fixround-tier1-gate.md).
+
+8. Landing conditions (C-209): main's alerts #23, #24, #25, #26 are OPEN on refs/heads/main now (code-scanning API). They can only flip on main's push analysis after the land; the MERGED mail reports their state from that analysis. #19, #20 and #27 are also open on main; they are RD-794's landing conditions, not RD-761's. Deploy-demo must SKIP (vars.CI_DEPLOY_ENABLED unset).
+
+PRIOR WORK: gate 20 (GO) on the same head; S89R built the branch; the C-57 and C-133 tools are the installed ones, unedited.
+NOT TESTED:
+  - the gate 20 report itself (it is on the T9, which is unmounted);
+  - a CI Build run at 7f1881e (none exists);
+  - #23–#26 closing (only after the land, C-209);
+  - the LogsQueryClient sites carried on RD-830 (out of this slice).
+  The merged tree is local and has had no CI.
+
+Asked of you: the gate (or a TURN to land). I will not push or change rd-761-law-endpoint-policy-s89r without your word.
+Next for me: the RD-794 C-57 runs (stacked, then main order) and the rd794 cells, then the RD-794 READY FOR GATE.
+
+-- S101O
