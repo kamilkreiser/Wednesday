@@ -39713,5 +39713,45 @@
    "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
    "CARD hpsmpoc-runtime-10013-route-1018"
   ]
+ },
+ {
+  "id": "wed-secuura-storage-policy-1019",
+  "client_project": "Secuura/Blockchain",
+  "title": "Storage policy: free about 371 GB of old Blockchain worktrees and node_modules? (DevMASTER is 91% full)",
+  "bluf": "Kam, your Monday storage policy is written (1_Project_Definition/Policies/2026-10-19_secuura-blockchain-storage-policy.md). The space is not in old tests (under 3 MB). It is in old git worktrees and the node_modules inside them: about 371 GB is no longer needed by the policy's tests (merged into develop, clean, idle a week or more, not used by a live seat, or regenerable node_modules idle two weeks). That would take DevMASTER from 91% to about 70%. Measured today by a read-only tool; nothing has been removed. The 368 worktrees that are not merged (387 GB) are kept. The kintsugi and demo servers are outside this policy. Prior-ruling check: your 11 Sep 'narrow-hard' ruling cut node_modules and worktrees from the NAS SYNC set; it did not remove them from DevMASTER, which is what this card asks.",
+  "default_action": "If you don't answer: (c). The dry-run runs weekly and nothing is removed until you tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Approve the policy and the first removal",
+    "detail": "A Secuura seat removes the 371 GB set from today's dry-run report (merged clean worktrees plus regenerable node_modules), re-checking liveness at the moment of removal, with counts and disk space before and after. Weekly removals of the same classes then need no card."
+   },
+   {
+    "key": "b",
+    "label": "Approve, node_modules only for now",
+    "detail": "Only the regenerable node_modules go (about 305 GB: 166 GB in kept worktrees plus about 139 GB inside the merged ones). The merged worktrees themselves stay until you say."
+   },
+   {
+    "key": "c",
+    "label": "Dry-run only",
+    "detail": "The weekly dry-run report keeps running and nothing is removed. The drive stays at 91%."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-19T07:09:09.001092+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-11 07:23",
+   "2026-09-16 13:40",
+   "CARD nexusai-rd104-gh-token-storage",
+   "CARD nexusai-redis-down-fail-closed-policy",
+   "CARD secuura-ks1352-unknown-id-policy-after-gate38",
+   "CARD hpsmpoc-c30-policy-principles-and-sections",
+   "CARD composer-policy-target-1006",
+   "CARD composer-e8-level-after-policy-1006",
+   "CARD secuura-ks1628-retire-deprecated-verify-route-1019"
+  ]
  }
 ]

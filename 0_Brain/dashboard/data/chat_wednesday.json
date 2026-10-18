@@ -11780,5 +11780,19 @@
   "project": "Secuura",
   "ts": "2026-10-19T06:50:10.688682+11:00",
   "text": "Got it, Kam, and sorry I'm late: I missed your KS-1628 tap at first. Retire it now. The R seat will take the old verify route out in its own gated PR. Before it removes anything, it will check the kintsugi and demo logs, read-only, for recent calls to that route. If something is still calling it, the Platform S connector for instance, it stops and comes back to you rather than breaking it. A merge isn't a deploy, so nothing changes on a server until the normal deploy round."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-19T06:59:56.803004+11:00",
+  "text": "KS-1628 update, no action needed. The R seat checked the logs read-only: nothing has called the old verify route in about 30 days on kintsugi or 38 days on demo. So it's going, as you ruled, in two PRs. The first removes the internal copy. The second removes the public path, along with the tests that drive it, and those get pointed at the new route so no check is lost. Both go through one Opus gate. Peter gets a note on his ticket, because one of his test-suite checks changes."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-19T07:09:48.514821+11:00",
+  "text": "Kam, your Monday storage policy is ready, with one card to tap. It turns out old tests take up almost nothing, under 3 megabytes. The space is in old git worktrees and the node_modules inside them. About 371 gigabytes is no longer needed: merged into develop, clean, a week or more idle, and not used by any live seat. Removing it would take DevMASTER from 91% to about 70%. Nothing has been removed. The 368 unmerged worktrees stay, and the servers aren't touched. I recommend (a), approve and do the first clean-up. If you don't answer, nothing is removed and the dry run just repeats weekly."
  }
 ]
