@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 226 — 2026-10-18 17:51 CHECKPOINT (s116, ctx 68%; band 80-90). **READ THIS FIRST. Supersedes 225's IN FLIGHT; 225's DONE + 222 items 4-6 + OWED stand.**
+- **B266 READY FOR GATE** (HPSMPOC-269): `.tools/dotnet` = SDK 10.0.401 + 10.0.402, runtimes 10.0.12 + 10.0.13; m1/m3/m4a/m4b RED on 402; backup at `.tools/b266/quarantine/dotnet-before-b266` (never removed); way back proven on scratch. Tuesday's own --list-sdks/--list-runtimes/manifest read agrees. Pane closed. Its gate = item 0 of B267's gate.
+- **B267 round 3 LAUNCHED** pane **%68** `Datasec/HPSM-POC-H5` (brief `tuesday/briefs/2026-10-18_B267_SEAT-H5_hpsmpoc-round3.md`, stamped 17:50, all defaults). STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-18_B267_STATUS.md`, last line `READY FOR GATE: b267/round3-bff-counter-locks-pkcs @ <sha40>` or STOPPED. **The final-line watcher is a scratchpad script and dies with this seat: rewrite it** (30 s loop on that file's last line; exit on `READY FOR GATE:` or `STOPPED: NEEDS TUESDAY`; run_in_background). On READY: verify at source (ls-remote head, compare dff4019...head = only PARTITION paths, 0 under api/src) -> commission a tier-1 gate kit (B268) with B266 as item 0 -> PR/CodeQL/merge -> hosted deploy seat (push-to-demo grant) -> records seat.
+- NexusAI: gate 25 (%60) on C2; gate 26 (%63) running its real C-57 run; S101O (%56) RD-778 queued on the jest lock. Batch #91/#92/#93 waits for gates 25/26. Wake = mail.
+
 ## 🟢 DELTA 225 — 2026-10-18 17:10 CHECKPOINT (s116, ctx ~60%; band 80-90). **READ THIS FIRST. Supersedes 223's IN FLIGHT (B264/B265 done) and 222's FIRST WORK 1-3 (ALL DONE). 222 items 4-6 + OWED and 224's NexusAI lines stand.**
 ### DONE (each verified at source; note lines 16:40-17:10)
 - **HPSM-POC round 2 CLOSED END TO END:** #159 merged (main dff4019) -> **B264 DEPLOYED** hosted (web build 3s6IRO2rD-OZcIwNaXvDb, API live 05:27:27Z; Tuesday's own check: new id x1, old x0, /health 200 x3; Kam told bf-fc0c71b413fd + correction bf-9ddbe2205096) -> **B265 records** (C-113/114/115; 12 Jira comments; 9 Done; HPSMPOC-281..287 filed) -> Tuesday's HP-window scan 0 hits (control 1; 29 files) -> **records PR #120 MERGED**, records main **d479cb67**, tree = head tree.
