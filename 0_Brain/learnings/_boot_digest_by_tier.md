@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-18 21:00 from 242 lesson files (1,057,354 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 197. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-18 21:29 from 243 lesson files (1,059,819 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 198. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7337,6 +7337,31 @@ sections (open the file for these): How to apply
 **Expiry:** none stated. It is tied to this account controlling the Datasec projects; re-read it if he switches accounts or says stop.
 
 **Family:** [[2026-10-06_push-to-demo-when-ready-no-card]] (the original, Friday's) · [[2026-09-29_datasec-github-commits-go-through-codeql]] · [[2026-08-07_protocol-v1.3-signed-delegation]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Routing v1.0 is IN FORCE: every launch routes by `fleet/specs/model-routing.md`, and every Opus use names its table row
+`2026-10-18_model-routing-v10-approved-route-by-the-table.md` · grant · 2026-10-18 · status: live · tier: W
+
+(no rules-shaped section — file included WHOLE)
+
+# Routing v1.0 is IN FORCE: every launch routes by `fleet/specs/model-routing.md`, and every Opus use names its table row
+
+**The operative case, so the headline matches it:** Wednesday (or Tuesday or Friday) is about to launch a seat, a gate or a drafter, or route a task. **Open `2_Project_Files/fleet/specs/model-routing.md` v1.0, run its four checks (P1-P4), take the row, and write the receipt line `model: <id from models_latest.json> -- <row id> -- <P1-P4> -- <gauge %>`.** The "Opus 5.5 for every agent" override is lifted.
+
+**His words, verbatim (card tap):** *"Decision wed-model-routing-v10-approve-1018: a — Approve all seven recommendations"* (option detail: "v1.0 replaces v0.1 and the boot line 'Opus 5.5 for every agent' is lifted; tier-2 gates go to Sonnet; Fable 5.1 gets one gate and one coordinator trial.").
+
+**What the seven mean, applied:**
+1. v1.0 replaces v0.1; the boot line in `Launch_Wednesday.command` now says route by the table (changed by copy + mv, backup `.pre-1018-routingv10`).
+2. Tier-2 gates (tests, docs, config, tooling, already-gated follow-ups) run on **Sonnet** (`claude-sonnet-5-5`); tier 1 stays Opus.
+3. Security-design and data-destroying builds stay on Opus.
+4. The Spark may take fully spelled-out edits inside auth/security files; each such PR gets a tier-1 Opus gate.
+5. A round counts when the model's output was judged (brief defects included); harness refusals, lost verdicts and outputs shown correct do not.
+6. Ornith 1.5 is the second local lane, behind the Spark.
+7. **Fable 5.1 (`claude-fable-5-1`, a level above Opus): one trial tier-1 gate and one trial coordinator task**, measured against Opus, before any rule. OWED: the next tier-1 gate after #1568 runs on Fable (Agent tool `model:` cannot name Fable, so it is a cockpit seat with `/model claude-fable-5-1`, or ask Kam if the Agent tool lacks it).
+
+**Unchanged:** the counter, the 80-90% band and the 90% stop, the signature classes, the QA gate before every merge, one client per local task.
+
+**Family:** [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis]] · [[2026-10-18_new-account-tickets-backlog-routing-definition-spark-max]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
 ## Grant: new account — work the Secuura tickets and backlog, give the Spark as many tickets as it can handle, and write the definition of which agent does what
