@@ -1,0 +1,51 @@
+BLUF: RD-857 is READY FOR QA. Branch rd-857-whole-word-skip-list-s101o @ 1da0bd4684b804ccbb36f358e246759ed9a5ef8c, one commit stacked on RD-856 (f4026fb), pushed.
+- What I built: V4 plus your ruling (b) guard. I went with the guard because it stayed small: the lookup site and its new helper only, no new data path.
+- Red-first through the server on f4026fb: 4 failed, 11 passed.
+- Stacked tree: 22/22 (RD-857's 15 plus RD-856's 7).
+- verify: PASS 4581/4581 across 289 suites.
+- No answer text changes. The "Black and white pages: 11 million pixels" label is left alone for Kam.
+- Exact diff, git diff --numstat f4026fb 1da0bd4: backend/server.js +42/-3; the new test +150; counts +3/-3.
+
+1. What changed in checkForCurrentUserQuery (server.js; full diff: session-tools/s101/rd857-server.diff, 5 hunks):
+  - commonWords is matched by WHOLE WORD, with a plural rule. isCommonWord(w) = w is an entry, or w minus a trailing "s" is, or w minus a trailing "es" is. It replaces potentialName.includes(word).
+  - 21 entries added, the words the substring test only caught by accident: printer, printed, device, scan, scanned, office, colour, color, mono, duplex, toner, everyone, everybody, someone, somebody, anybody, nobody, people, staff, employee.
+  - RD-856's pronoun-lead guard is unchanged.
+2. The guard (your ruling (b), ANSWER 04:03:26Z):
+  - A new function captureIsDepartmentOrLocation(capture, logs) collects the distinct User_Department and User_Location values from the allLogs the lookup already loaded. It is true when, for ONE value, every capture word is a word of the value, or every value word is a word of the capture (lowercase, whole words).
+  - It is called only inside `if (matchingUsers.length === 0)`, before the not-found answer. When true, it does `break userLookup`: the user branch is now the labelled statement `userLookup: if (currentUserQuery.isCurrentUserQuery) {…}`. Control falls to the normal analyzeQuery path immediately after it, the same path a non-user question takes.
+  - The email branch and the multiple-match branch are untouched.
+  - Unit check of the function (node, on Engineering/Melbourne and Customer Success/Sydney HQ): engineering, melbourne hq, sydney, customer, hq -> true; zebedee, "sydney smith", "success story" -> false.
+
+3. Cells: __tests__/rd857-user-skip-list-whole-word.test.js (new, 15). Real server: rd395 harness, RD-395 counting stand-in, LLM_PROVIDER=ollama, SEED_DEMO_DATA=true. POST /api/chat.
+                                                                f4026fb   1da0bd4
+  CONTROL seed loaded                                            pass      pass
+  James Mitchell ("me") reaches the user-activity handler        FAIL      pass   "James Mitchell's printing activity for all-time: Total jobs: 90 / Total sheets: 1095 …"
+  Mei Lin ("me", "in")                                           FAIL      pass   "Mei Lin's printing activity … Total jobs: 52 / Total sheets: 774 …"
+  Priya Patel ("at")                                             FAIL      pass   "Priya Patel's printing activity … Total jobs: 86 / Total sheets: 603 …"
+  CONTROL negation "who has not printed this week?"              pass      pass   (still the "I can't fully answer … from the print logs alone" reply)
+  CONTROL function word "what did the most active user print?"   pass      pass
+  CONTROL plurals: users / teams / departments / printers        pass ×4   pass ×4
+  "how much has engineering printed this month?"                 pass      pass   (base: rejected by substring luck, "in")
+  "what did melbourne hq print last week?"                       pass      pass   (base: rejected by substring luck, "me")
+  "what did sydney print last week?"                             FAIL      pass   (base: "I couldn't find any users matching "sydney"…"; branch: normal path)
+  CONTROL Daniel Hughes reaches the handler                      pass      pass
+  CONTROL "zebedee" -> unchanged not-found text                  pass      pass   (shares no word with any department or location)
+  - "On both trees, nothing is a user lookup" here means the answer has neither the not-found text nor the handler's "'s printing activity for".
+  - Answers per question: session-tools/s101/rd857-rows-base.json and rd857-rows-new.json.
+  - Your extra control (a real seeded user who shares a word with a department or location) is SKIPPED, as you allowed. Measured (python, seed CSV): the value words are customer, engineering, executive, finance, hq, hr, it, marketing, melbourne, operations, sales, success, sydney, and no seeded user name contains any of them. So the control has no subject in this seed.
+  - On the base, engineering and melbourne-hq pass only by the old substring luck. Only sydney is red there. They are green on the branch for the ruled reason (the guard), and they would go red if the guard were removed while whole-word matching stayed. I did not run that removal as a separate mutant.
+
+4. The 85-question measurement that chose this shape: session-tools/s101/rd857-probe/. It contains the probe script, the corpus, old/V1/V4 outputs and the patch script. The probe slices checkForCurrentUserQuery out of server.js unchanged. V4's name decisions on the patched tree equal the measured V4 on all 85 (diff empty).
+
+PRIOR WORK: RD-857 is my own filing during RD-856. commonWords, its negation and function-word entries, and the 2026-04-25 smoke-test fix are older work. The harness and the stand-in are RD-395/RD-423's. Your rulings: ANSWER-9 (03:53:18Z, V4 plus the guard) and its supersession (04:03:26Z, word-level (b)).
+NOT TESTED:
+  - any real model's answers;
+  - CI (no PR yet);
+  - a guard-removed mutant;
+  - department or location values beyond the seed's 11. On a live tenant the value set comes from that tenant's own data.
+  - Captures longer than two words never reach the guard: the patterns capture one or two words.
+It stacks on RD-856 and touches backend/server.js, so it forward-merges main (and lands after RD-856).
+
+Next: opening it as a draft PR now, as you asked. Base main, since CodeQL and the Build run on PRs to main; it will show RD-856's commit as well until #92 lands. Then holding.
+
+-- S101O

@@ -1,0 +1,69 @@
+BLUF: RD-856 is READY FOR QA. Branch rd-856-user-pattern-verb-guard-s101o @ f4026fba5598ad5355b1daf21def9b651ee7bdc9, one commit on main c7ca0ed, pushed, no PR yet.
+- "what did we spend on toner cartridges last quarter?" no longer answers "I couldn't find any users matching "we spend"". It reaches the model instead.
+- The fix is an exact first-word pronoun/determiner guard in checkForCurrentUserQuery. No answer text changes.
+- Red-first through the server: 3 of the 7 new cells fail on c7ca0ed; all 7 pass on the branch.
+- verify: PASS 4566/4566 across 288 suites.
+- One new finding filed: RD-857 (the skip list matches by substring and already rejects 7 of 16 seeded names). Not fixed here.
+
+1. Cause (read at source, c7ca0ed): checkForCurrentUserQuery (backend/server.js:7999) tries its userPatterns in order. The third (server.js:8069), /\b(?:how much|what|show me)\s+(?:has|did|does)\s+([a-zA-Z]{2,}(?:\s+[a-zA-Z]{2,})?)/i, has no following-verb guard, unlike the first two. It captures any one or two words after "what did/does/has". The validity check rejects a capture only if it CONTAINS a commonWords entry (substring) or has no word of 3+ letters. "we spend" passes both, so it became userName, and the lookup at server.js:7440 answered "couldn't find any users matching".
+
+2. The fix (the whole server.js diff, +13/-0 in the validity check):
+    @@ -8099,9 +8099,19 @@ function checkForCurrentUserQuery(query, context) {
+                     'the', 'count', 'number', 'amount', 'volume',
+                     'jobs', 'job', 'print', 'printing', 'prints', 'pages', 'sheets',
+                     'paper', 'page', 'sheet', 'department', 'team'];
+    +            // RD-856: a capture that STARTS with a pronoun or determiner is never a
+    +            // name. The third pattern above has no verb guard, so "what did we
+    +            // spend…" captured "we spend" and was answered as a missing user. This is
+    +            // an exact first-word test, not a commonWords entry: commonWords matches
+    +            // by substring, so "we" / "us" / "it" / "my" there would also reject
+    +            // owen, justin, smith, amy.
+    +            const NON_NAME_LEADS = ['we', 'our', 'ours', 'us', 'i', 'my', 'me', 'you', 'your', 'it', 'its',
+    +                'they', 'their', 'them', 'he', 'his', 'she', 'her', 'this', 'that', 'these', 'those'];
+    +            const firstWord = potentialName ? potentialName.split(/\s+/)[0] : '';
+                 const isValidName = potentialName &&
+                     potentialName.length >= 2 &&
+                     potentialName.length <= 30 &&
+    +                !NON_NAME_LEADS.includes(firstWord) &&
+                     !commonWords.some(word => potentialName.toLowerCase().includes(word)) &&
+                     // Must contain at least one likely name-like word (not just common words)
+                     potentialName.split(/\s+/).some(word => word.length >= 3 && !commonWords.includes(word.toLowerCase()));
+  Why not the skip list, the brief's other option: commonWords is matched by substring, so adding "we", "us", "it" or "my" would also reject owen, justin, smith, amy. The new list is tested by exact first word only. No real first name is any of these 22 words.
+  Every pattern still runs. A rejected capture falls through to the next pattern exactly as before; only the validity of a pronoun-led capture changes.
+
+3. Cells: __tests__/rd856-user-pattern-pronoun-lead.test.js (new, 7). Real server: rd395 harness, RD-395 counting stand-in for the model, LLM_PROVIDER=ollama, SEED_DEMO_DATA=true. POST /api/chat; the answer is read from the response.
+                                                      c7ca0ed   branch
+  CONTROL seed loaded ("Demo seed: loaded N rows")     pass      pass
+  "we spend"  what did we spend on toner cartridges…   FAIL      pass   (the measured finding)
+  "we use"    what did we use most last month?         FAIL      pass
+  "it say"    what does it say about colour printing?  FAIL      pass
+  "our team"  what did our team print last week?       pass      pass   (your ask: now driven through the server; "team" was already a commonWords entry, so it never misrouted)
+  CONTROL Daniel Hughes still looked up                pass      pass   ("Daniel Hughes's printing activity for all-time: Total jobs: 45 / Total sheets: 385 / …")
+  CONTROL "zebedee" -> unchanged not-found text        pass      pass   ("I couldn't find any users matching "zebedee". Please check the spelling or try a different user name.")
+  Answers per question on each tree: session-tools/s101/rd856-rows-base.json and rd856-rows-new.json. On the branch, all four pronoun-led questions are answered by the model, so RD-476's prompt rules will apply to them once that lands.
+
+4. Found on the way, filed as RD-857 (Bug, Medium, linked to RD-856), not fixed: the commonWords skip list is matched by SUBSTRING. Node, evaluating the real 85-entry array against the 16 seeded users, finds 7 rejected:
+   - emma thompson ("on");
+   - james mitchell ("me");
+   - margaret robinson ("on", "in");
+   - mei lin ("me", "in");
+   - priya patel ("at");
+   - rebecca wilson ("on");
+   - zara ahmed ("me").
+  Through the server, "how much has James Mitchell / Mei Lin / Priya Patel printed?" go to the model, not to the user-activity handler that Daniel Hughes gets. Same on both trees; this branch does not change it.
+  Also noted in RD-857, not investigated: the handler's own text says "Black and white pages: 11 million pixels", which labels a pixel count as pages. That is answer text, so it is left alone.
+  First draft caught: my first measurement of the skip list split "haven't" on the apostrophe and invented an entry "t". I re-measured by evaluating the real array in node; the numbers above are from that.
+
+5. QA surface: a local run of f4026fb in open mode, the assistant chat panel. Ask "what did we spend on toner cartridges last quarter?": c7ca0ed answers with the not-found text; the branch hands the question to the model. No page, style or visual change, so no screenshots. Same commit, not the demo.
+
+PRIOR WORK: RD-856 is my own filing from RD-476's eval (2026-10-18). The patterns and commonWords are older work (the 2026-04-25 smoke-test fix in the comments; the negation entries). The harness and the stand-in are RD-395/RD-423's.
+NOT TESTED:
+  - any real model's answer to these questions;
+  - CI (no PR yet);
+  - questions led by a pronoun my 22-word list lacks (e.g. "everyone", "somebody"). Those still pass through the old checks unchanged.
+It touches backend/server.js, as gate 25's members do, so it forward-merges main before landing.
+
+Asked of you: should I open it as a draft PR now for CodeQL and the Build, as with #91?
+Next for me: nothing queued. Holding with the inbox watch armed.
+
+-- S101O

@@ -1,0 +1,20 @@
+BLUF: RD-476 r2 is READY FOR QA. Branch rd-476-assistant-prompt-s101o @ f9649dcf9d30ea12af58ff60007b0c67318866fd, a fast-forward of 393929057997 by one commit carrying exactly Kam's two approved lines (card nexusai-rd476-two-wording-fixes-1018 = a). Draft PR #91 is still a draft; nothing merged.
+- Red-first: the two new wording cells fail on 393929 (26 other wording cells pass) and pass here, 35/35.
+- verify: PASS 4594/4594 across 288 suites.
+- Live re-run of Q7 and Q8 on the same dev deployment: Q8 FIXED, Q7 FIXED with one nuance (below). Cost ~$0.02, as stated before the run.
+git diff --numstat 393929057997 f9649dc: model-config.js +2/-1, the rd476 test +5, counts +2/-2.
+
+1. The change (session-tools/s101/rd476-prompts/prompt-diff-r2.txt, every changed line):
+  -- Learning: … What NexusAI does remember is narrower: when it asks …
+  +- Learning: … What NexusAI does remember, for this deployment and across sessions, is narrower: when it asks …
+  +- Suggest at most one closest match; never list the roster.   (the last bullet of "Non-existent users")
+  Prompt 9854 -> 9956 chars, sha256 70c48fc2… -> f36881dd…. The delivered-prompt cell reads f36881dd on a booted server (rd476-eval-r2.json).
+2. Live re-run (answers-new-r2-f36881dd.json; appended to rd476-live/side-by-side.md). Run 09:58:56-09:59:49Z on nexusai-dev-aoai-2afe90 / gpt-4.1. Measured 10,428 prompt and 142 output tokens, 2 model calls.
+  - Q8 no-such-user: r1 listed all 16 names. r2: "I don't see a user matching 'Zebedee Quintrell' in the roster (16 users total). Did you mean "Zara Ahmed"?" FIXED.
+  - Q7 meta-learning: r1 said "… I store that meaning for similar questions in the same session". r2: "What I do remember: if you clarify what you meant by an unclear question, I store that meaning and apply it to similar questions later." FIXED: the false "same session" claim is gone.
+  - NUANCE, reported not changed (the words are Kam-approved): r2 still opens with "I do not learn from our conversations over time. Each session is independent and I do not retain or adapt based on previous interactions." That is true of the model and the conversation, but it sits a little against the stored-meaning sentence that follows. One sample; the model is not deterministic.
+PRIOR WORK: RD-476 r1 (393929057997, READY 2026-10-18T01:19Z), the r1 live check, and Kam's two rulings (C-217 and its addendum).
+NOT TESTED: more than one live sample per question; the other 10 questions on r2 (their prompt text is unchanged by r2); CI on f9649dc (it runs on #91 now).
+Next: the gate-25 landing turn (your RELEASE 10:35:43Z): land 1 RD-761, then land 2 RD-794.
+
+-- S101O

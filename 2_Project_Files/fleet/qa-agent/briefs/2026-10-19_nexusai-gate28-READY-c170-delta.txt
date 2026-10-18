@@ -1,0 +1,72 @@
+BLUF: READY FOR QA: C-170 delta. The new head of rd-460-c170-turn-s101o / PR #96 is f15217cba52a97cfa55cea2155e14d690c2bd87e, tree a0da892ab59c38fa33d3639bfde1b58f467db939, one commit on fd8ff2a.
+- It is test-only.
+- CodeQL on refs/pull/96/head: 0 new, with the control fired. #266-#271 all read "fixed" on the PR ref.
+- Gate 26's 19 suites: 412/412. Verify: PASS 4807/298. C-57/C-133: the same 33 accounted.
+HOLDING: no land until gate 28's delta item and your GO. main = 888203c, untouched.
+
+DIFF: `git diff --numstat fd8ff2a f15217c` gives 4 paths:
+  8  0  __tests__/helpers/escape-regexp.js   (NEW helper, the file named per your item 4)
+  2  1  __tests__/marketplace-single-build-path.test.js
+  2  1  __tests__/rd471-wizard-image-element-types.test.js
+  3  2  __tests__/rd472-image-bearing-resources.test.js
+- No product byte changed, and helpers/shipped-plan-build.js is unchanged.
+- The helper is a single function: `String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')`.
+- __tests__/helpers/ is in jest's testPathIgnorePatterns, so it is not collected as a suite (298 suites before and after).
+- The counts file is not in the commit. verify --update-counts only rewrote its _updated timestamp (4807/298 unchanged), so I restored it.
+
+PER-SITE REGEX, old vs new against the same real input (session-tools/s101/c170-delta-equiv.out). Each pair has identical RegExp source, matches the literal line, and rejects every near-miss (dots -> x, one dot -> X, slash -> Z, first char dropped):
+- #266 single-build-path:210, leftover = NexusAI_plan-managed-ai_2.1.1_6fb497d.zip
+  old /already holds .*NexusAI_plan-managed-ai_2\.1\.1_6fb497d\.zip/
+  new /already holds .*NexusAI_plan-managed-ai_2\.1\.1_6fb497d\.zip/
+  (the same holds for plan-managed-ai.zip and FAILED-NexusAI_plan-managed-ai_2.2.0_abcdef0.zip)
+- #267 rd471:47, DEV
+  old /\[PASS\][^\n]*nexusaidevacrfa39\.azurecr\.io\/nexusai:2\.1\.0/
+  new the same
+- #268 rd472:31, DEV
+  old /\[FAIL\] container 'nexusai-api' \(resources\[\d+\]\.properties\.template\.resources\[0\] hidden-app\) image 'nexusaidevacrfa39\.azurecr\.io\/nexusai:2\.1\.0' is neither/
+  new the same
+- #269 / #270 rd472:40, res.type + DEV, for both resources
+  old /\[FAIL\] [^\n]*Microsoft\.App\/jobs 'job' carries container image 'nexusaidevacrfa39\.azurecr\.io\/nexusai:2\.1\.0'/
+  new the same; likewise Microsoft\.ContainerInstance\/containerGroups 'cg'
+  - One honest note: the old code escaped '/' in res.type and the new helper does not. Inside `new RegExp(...)`, '\/' and '/' are the same pattern, which is why .source is byte-equal.
+- #271 (helpers/shipped-plan-build.js:12, DEV): no change at that line. Its three flows were the three DEV.replace sites above, and the PR analysis now reports it fixed.
+- Control: the dot-only escape of the string "a+b\c.d" does NOT match its own literal; the full escape does. That is the defect class CodeQL flagged.
+- Verdict line: "all 9 site/input pairs match identically (literal true, every near-miss false, old = new)".
+
+RED / GREEN on the touched cells (the 3 suites, 26 tests; session-tools/s101/c170-delta/).
+The mutants are of scripts/marketplace-package-build.sh, restored by hash after each run (40ec7de3).
+- green1: 26/26.
+- M1 (line 73 "already holds" -> "already has"): 3 red, the three #266 cells.
+- M2 (line 255 "carries container image" -> "carries image"): 2 red, the #269/#270 cells (N9 jobs, containerGroups).
+- M3 (line 281 "is neither" -> "is not"): 4 red, the #268 cell (N8 nested) plus 3 rd471 cells whose containerFails reads the same line.
+- M4 (line 281 FAIL -> PASS): 4 red. HOWEVER, the failure diff shows it reddened through containerFails, not passesDevImage. So M4 is NOT proof for #267, and I do not count it.
+- M5 (a planted line after 174: `chk("PASS", "planted false PASS for nexusaidevacrfa39.azurecr.io/nexusai:2.1.0")`): 2 red, both rd471 "label says release, value is dev" cells. In both, the ONLY key that changed is "passesDevImage": false -> true. This is #267's proof.
+- M5c (the same planted line with the dots replaced, nexusaidevacrfa39xazurecrxio/nexusai:2x1x0): 4/4 green. The escaped dots are live; a dot-wildcard would have reddened it.
+- green2: 26/26.
+- Existing planted-FAIL inputs: the cells' own mutations (nested app, jobs, containerGroups, dev-image dropdowns, leftover zips) are unchanged and still drive every green.
+
+SUITES:
+- Gate 26's 19 suites by name: 19 passed, 412/412.
+- npm run verify -- --maxWorkers=2 --update-counts: "VERDICT: PASS — 4807/4807 tests passed across 298 suites (jest exit 0)".
+- C-57 (A=888203c, B=be0fe37, merged=f15217c): missing 33, new 0, STOP.
+- C-133 (base 1904765): "accounted 33, still missing 0, absent files 0". The id list is identical to the fd8ff2a run (diffed).
+- C-112: 356 files; 342 = A blob, 10 = B blob; "neither" = exactly the 4 delta paths, which is expected for a commit on top of both sides. None absent.
+
+CODEQL on refs/pull/96/head (f15217c):
+- run 39158266106 completed/success; check run "CodeQL": success, "No new alerts in code changed by this pull request";
+- analyses: javascript-typescript 19:22:56Z 0 results; python 19:20:50Z 0; actions 19:20:33Z 0;
+- PR-only open alerts (open on the PR ref, not on main): none;
+- #266, #267, #268, #269, #270, #271: instance on refs/pull/96/head = "fixed";
+- control refs/pull/58/head state=fixed: 4.
+- One transient read to disclose: the first check-run read, while javascript was still analysing, said "neutral: 2 configurations not found". I waited for the workflow run and read again.
+PR CI on f15217c: Gitleaks success, npm-audit success, arm-ttk (Marketplace templates) 39158268736 success, Build 39158268796 success, its verify gate "VERDICT: PASS — 4807/4807 tests passed across 298 suites (jest exit 0)" (Ubuntu, Node 24); arm-ttk "TOTAL 49/49 PASS, 0 FAIL; createUiDefinition tests run: 18" (= gate 5b's prediction).
+
+NOT TESTED:
+- The released build / MANIFEST reproduction (r4) on the new head. No build input changed (scripts/, Dockerfile, the azure-marketplace files and .dockerignore are untouched), but I did not re-run it.
+- The demo, Partner Center and any deployment.
+
+ANSWER-19 quoted (2026-10-18T17:52:09Z, spf=pass, dkim=pass header.i=@agentmail.to, dmarc=pass header.from=agentmail.to): "RULED (a): fix the 6 alerts in the TEST code, on rd-460-c170-turn-s101o on top of fd8ff2a; never dismiss [...] Then HOLD the land: the changed test bytes get a tier-2 through-code delta check as an extra item of gate 28 [...] Land C-170 only on that verdict + Tuesday's GO."
+
+Next: holding C-170. Starting ANSWER-20 (RD-774 + RD-836): the prior-work check first, then the plan-confirmation mail, then nothing built until you confirm.
+
+-- S101O
