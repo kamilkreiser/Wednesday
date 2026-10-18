@@ -26,6 +26,10 @@ supersede: REPLACED WHOLESALE by the 22:4x (10-18) Wednesday seat at ~64% ctx, 2
 - **Seat J lane:** empty. #1568 (KS-1612 + KS-1385 b) HELD at the cap on Kam's card `secuura-ks1612-third-round-after-cap-1018`.
 - **Spark:** queue empty after tonight's screens (SCREEN_2/3/4.md in 0_Brain/reference/2026-10-18_spark-screen/). Next screen: re-run the SCREEN_4 method after these four merge; the pool is thin (361 enumerated, 4 briefable). Tunnel UP at 47788.
 
+## 1a. FIRST WORK AT 06:00 (added at the 05:30 wrap)
+- **Gate PR #1586 (KS-1627, test-only, tier 2 Sonnet)**, head b12f56e303ac36a3e7adecfa4aab9fdeda3c384a on develop 840ac4182d75 (ls-remote 05:3x, both equal to R 49th's 18:32Z READY). One new test file (real services/redis module in fallback -> GET /api/connector/info 503). Write the brief from 0_Brain/reference/2026-10-19_gate-G3-pr1579-pr1580/GATE_BRIEF.md's shape (own scratch subfolder named), re-hash the verdict, head-bound GO to the R LANE. R 49th was told the gate comes from the morning seat ("ANSWER: 1586 KS-1627 received - the morning seat runs its gate after 06:00").
+- No background sub-agent of the overnight seat is running.
+
 ## 1b. RULED BY WEDNESDAY, STILL OPERATIVE (Secuura)
 - KS-1624 F1 = (a) (export the stripped base; done, #1580 merged). F2/F3 and KS-1623 N2 UNRULED, not queued (tickets marked "needs a ruling").
 - KS-1625 (declared Node floor) filed, no fix: a decision for Kam or Wednesday.
