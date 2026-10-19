@@ -1,0 +1,75 @@
+=========== [INBOUND] 2026-10-19T15:42 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1637 KS-1673 PR B (Teams) + AS1 cell 
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1637 KS-1673 PR B (Teams) + AS1 cell D at 1c26f26af047 (tier 1) - landing 36284abf92d5 on 0f472ec20093, suite at the landing 139/139
+## READY FOR GATE — #1637 (KS-1673 PR B: Teams, + AS1's cell D), tier 1 (Opus)
+
+https://github.com/Secuura/Distributed_Secuura/pull/1637
+
+```
+head            1c26f26af047752fc2a42cbacdf28fc3f1a5e892   (= ls-remote after the push)
+base (develop)  0f472ec20093995381d938aca5c5380f7caf6fef   (my fetch, after the push finished)
+PREDICTED landing tree   36284abf92d516d15acd8e1c14057727d2fb215a
+                         merge-tree --write-tree 0f472ec20093 1c26f26af047, and BUILT locally as a real
+                         merge on a temp branch (tree equal), suite run there, branch deleted
+three-dot vs develop     6 files
+```
+
+**Cause.** The same root cause as PR A, in Teams:
+- `GET /api/teams/webhook-config` returned **every** organisation's `webhookUrl`, which is a secret;
+- `POST` took the org from the **body**;
+- `DELETE` acted on **any** organisation's row;
+- `notify` posted into **every** organisation's channels.
+
+**Fix.** All four routes go through PR A's `callerOrg` / `requireCallerOrg`. Teams has no warm map, so each statement carries `organization_id = $n`.
+- Register, list and notify answer **403** to a token with no org, and make no write and no outbound call.
+- Delete with a foreign id, no org or a null-org row takes the **unknown-id path, byte-for-byte**.
+- The register 201 names the **real** owner.
+- The spec loses `organizationId` from `M365TeamsWebhookConfigRequest`: 2 lines, after the `--check` control.
+
+## Cells
+
+**Teams file, 16 cells.** The 12 RED cells fail on PR A's head; the 4 controls pass on both sides. A script checks every cell's label against both runs: `ALL as labelled`.
+- **T1 asserts on the response TEXT**: as B, no URL appears except B's own.
+- The db mock evaluates each clause only when the statement carries it, with SQL's NULL rule.
+- Three "controls" were red on the base and are now **relabelled or split**: T2 → T2 + T2b, T11 → T11 + T11b, T6 → RED.
+
+**Mutants MB1–MB7**, all `tsc` rc 0, together kill every RED cell. MB7 was added after I saw that no mutant targeted register's 403.
+
+**AS1's cell D (N4)**, in PR A's test file:
+
+| mutant | reds |
+| -- | -- |
+| **X2** | **D1 only** |
+| a mutant that never uses an owned site | D2 only |
+| unfiltered documents | A14 and D3 |
+
+All three compile. My first D2 mutant did **not** compile — TypeScript narrows a const `undefined` to `never` — and it was fixed before counting.
+
+**ks934:** notify now needs an org, so its caller and seeded rows got `org-ks934`, and its mock models `organization_id = $n` only when the SQL carries it. **49 `expect` / 9 cells, unchanged.** The only removed line is the old caller.
+
+## Suites
+
+- **At the LANDING (develop `0f472ec20093` + PR B, merged locally): 14 files, 139/139, RC 0.** Product `tsc` RC 0. That includes #1636's file, which landed after PR B was pushed.
+- At the head: 13 files, 133/133.
+- The three test files type-check separately (KS-1090), RC 0, all three in the override program.
+- `check:openapi`: both halves, RC 0.
+
+**Merge-in byte gates, twice.** Develop was merged IN, never rebased: `9207fe336797` after #1633, then `09336b240721` after C 27th's batch.
+- Each merge tree equals `merge-tree`'s prediction.
+- `develop...HEAD` is the same six files both times.
+- PR B's six blobs are unchanged by the second merge.
+- All seven of C 27th's files equal develop's.
+
+**Preflight: 13/16 ran, 3 SKIPPED (legs 3/4/8, no stack), 0 failed — not a pass.** Legs 1, 6, 7 and 16 ran and passed. **Legs 3 and 8 bear on the spec change.**
+
+My push guard (`ls-remote develop` must equal the develop I merged on) **stopped the first push before anything was sent**, when develop moved to `09336b240721`.
+
+## For the gate to look at, rather than find
+
+1. **Every existing Teams row goes dark.** The wizard writes `selectedTenantId || 'default'` (`M365SetupWizard.tsx:171`). There are **0 rows on kintsugi and 0 on demo**. KS-1678 has the wizard.
+2. **The DELETE unknown-id answer is a 200 `{success:true}` even though nothing changed.** That is pre-existing: well-formed unknown ids always got it, and malformed ones get 404 via KS-431. "Not yours" now equals it byte-for-byte. I did not change the unknown-id contract.
+3. **Notify has no in-repo caller outside m365.** A grep with a positive control finds only the admin wizard, which never calls notify. So the 403 for a no-org token breaks no internal caller. **An external caller whose token has no org would now get 403.** Connector tokens carry `organizationId` per `keyRevokePolicy`'s reading of `generateConnectorToken`. I read that from source and have not measured it.
+
+**Ticket:** KS-1673 comment, read back by id, byte-identical. `Refs`, not a close.
+
+Nothing deployed. No `az`. No box touched.
+
