@@ -1,0 +1,224 @@
+=========== [INBOUND] 2026-10-19T05:03 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: the SCREEN_12 five - #1608 KS-1506, #1
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: the SCREEN_12 five - #1608 KS-1506, #1609 KS-1539, #1610 KS-623, #1611 KS-1637, #1612 KS-1503; all gate questions ANSWERED; #1597 still blocked, by a SECOND guard
+## BLUF
+
+**The SCREEN_12 five are RAISED and READY, all on develop `ce98606212e4e0dce8212d4541ffff2484f2217b`:
+#1608 (KS-1506, t1), #1609 (KS-1539, t1), #1610 (KS-623, t1), #1611 (KS-1637, t2), #1612 (KS-1503,
+t2).** Every one `Refs`, red-first proven, the service's own runner, tsc, ESLint with a stdin
+positive control, and `PUSH_RC=0` at the standing 13/16 preflight level.
+
+**All three of your gate questions are ANSWERED, not carried** — KS-1506's both halves plus R 51st's
+`audit.ts:85` note, KS-1539's `errorClass`, and KS-623's live `NODE_ENV` on both boxes. **KS-1643 is
+filed** (Low) for gate S1's residue.
+
+⛔ **#1597 is STILL blocked, and ruling (1) is not reachable: a SECOND, deliberate guard refuses it.**
+It is not the leg-14 defect this time — the push was refused in **6 seconds, before any leg ran**.
+Detail and the one question in §4. **No ref moved, in either attempt.**
+
+## 1. THE FIVE — READY FOR GATE
+
+| PR | ticket | head | tier | files |
+|---|---|---|---|---|
+| [#1608](https://github.com/Secuura/Distributed_Secuura/pull/1608) | KS-1506 steps 1-2 | `ce638c916fc7d550479ceb4e6f612998a1c14774` | **1** | api-gateway `src/index.ts` (+1/-1) + NEW ks1506 suite (+138) |
+| [#1609](https://github.com/Secuura/Distributed_Secuura/pull/1609) | KS-1539 info-reader half | `8e68a262437a60bc4f44f770d530d3115881dde3` | **1** | api-gateway `src/services/health.ts` (+5/-1) + NEW ks1539 suite (+102) |
+| [#1610](https://github.com/Secuura/Distributed_Secuura/pull/1610) | KS-623 | `940b84a9838d9c08a760d06278d214b0b904cfad` | **1** | auth `src/middleware/authenticate.ts` (+2/-2) + NEW ks623 suite (+77) |
+| [#1611](https://github.com/Secuura/Distributed_Secuura/pull/1611) | KS-1637 Minor 1 | `70bea5c98f0aa995744a9b1a8e0594f2b0d22952` | 2 | `ks1628-…-verify-is-removed.test.ts` (+24), **test only** |
+| [#1612](https://github.com/Secuura/Distributed_Secuura/pull/1612) | KS-1503 Minor 1 | `f0b8fbbe663fd0d3e77d60e55167e799f4f2ea2e` | 2 | `ks1470-…-before-every-mount.test.ts` (+38/-1), **test only** |
+
+All five OPEN, base `develop`, bodies begin `Refs KS-…`, and a case-insensitive
+`(closes|fixes|resolves) ks-` over each body reads **0**.
+
+### Red-first, every one — and for the two test-only PRs, a mutant that SURVIVES develop
+
+| PR | tamper | result |
+|---|---|---|
+| #1608 | `index.ts` → **develop's blob**, mount line read back without the middleware | **3 failed / 2 passed of 5** — the 3 RED cells (A1 JSON, A2 CSV, A3 403-not-401). A4/A5 controls pass either way, by design |
+| #1609 | `health.ts` → **develop's blob**, `0` `logger.warn` in the catch | **3 failed / 2 passed of 5** — L1 Error, L2 SyntaxError + the no-leak assertion, L3 string / sync throw. L4/L5 controls pass either way |
+| #1610 | `authenticate.ts` → **develop's blob**, line read back as the production denylist | **2 failed / 4 passed of 6** — T1 unset `NODE_ENV`, T2 `staging`. T3/T4 (test, development still accept) are what stop T1/T2 passing on a guard that refused everything |
+| #1611 | a planted `app.post('/api/documents/:id/verify')` returning 200, at top level ahead of every proxy; marker asserted present once, blob asserted changed | **SURVIVES develop's 6 cells 6/6** · **KILLED on the branch 1 failed / 7 passed of 8**, the failure exactly G4 |
+| #1612 | the front door's `catch` **rethrows** (`middleware/auth.ts:293-297`); marker once, `return false` asserted gone, **and `tsc` rc 0 under the mutant** so it is a behavioural red, not a load failure | **SURVIVES develop's 18 cells 18/18**, cell J among them · **KILLED on the branch 2 failed / 19 passed of 21**, the failures exactly M1 and M2 |
+
+**The two SURVIVES rows are the point of the tier-2 pair:** they turn "this cell adds coverage" from
+a claim into a measurement. Develop's suites stay green against the exact mutant each new cell
+exists to catch.
+
+**Every restore proved by blob, not by reading a diff.** For the three product PRs the working tree's
+blob equals **the patch's own declared post-image** (`94d34512e`, `8cbc352a8`, `56a50f144`) and
+develop's equals **its declared pre-image** (`4817a72ac`, `48aaf4dd3`, `9430831cd`). For the two
+test-only PRs the product file is back to develop's own blob (`4817a72ac`, `6dfa84705`) with the
+mutant marker counting **0**, and the suite equals a **fresh application** of the canonical patch,
+byte-identical to the copy the mutant ran against.
+
+### Suites, tsc, ESLint — each measured at the tree it names
+
+| PR | service suite | baseline at `ce98606212e4`, measured by me | tsc | ESLint |
+|---|---|---|---|---|
+| #1608 | **1122 / 1122 in 115 files** | api-gateway **1117 / 114** | rc 0 (`--noEmit` **and** the real emit) | 0 errors; `index.ts`'s 2 warnings proved pre-existing at develop |
+| #1609 | **1122 / 1122 in 115 files** | same | rc 0 | **0 messages** |
+| #1610 | **1084 / 1084 in 97 files** | auth **1078 / 96** | rc 0 | 0 errors; `authenticate.ts:100:11` warning proved pre-existing |
+| #1611 | **1119 / 1119 in 114 files** | api-gateway **1117 / 114** | rc 0 | **0 messages** |
+| #1612 | **1120 / 1120 in 114 files** | same | rc 0 | **0 messages** |
+
+Every delta is the figure I **predicted before the run**: +5/+1 file, +5/+1 file, +6/+1 file, +2 in
+an existing file, +3 in an existing file. **api-gateway reads 1117/114 at both `9512cc70d8c4` and
+`ce98606212e4`** — measured at each, not assumed across the move, though #1606 touched only 3
+`scripts/` files. auth's 1078/96 **includes** `auth.integration.test.ts`, which `BACKLOG.md` records
+as intermittently red; it was green on both runs here, and I say so rather than quote a clean number.
+
+Every ESLint pre-existing claim is **proved**, by running the same ESLint over **develop's blob**
+through `--stdin`: same lines, same rules, same counts. Positive control each time: a stdin file with
+a bad expression reports **1 error, rc 1**.
+
+### Preflight, stated honestly
+
+All five: `PUSH_RC=0` with **`PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`** —
+legs **3, 4, 8** skipped, local stack not up (no Docker on this box, as ruled). **Not a pass.** Each
+PR body carries that sentence in those words.
+
+## 2. YOUR GATE QUESTIONS — ANSWERED
+
+**KS-1506, both halves.** `authenticateToken` **is** imported (`index.ts:27`). `true` means
+**REQUIRED** and is the parameter's **default** (`middleware/auth.ts:361`
+`authenticateToken(required: boolean = true)`). **No caller loses access it should keep:** the router
+**already** refused without `req.user` — KS-1410's control C1 asserts exactly that — so this is
+defence in depth; what moves is **where** the 401 is produced. The e2e callers are a different path
+(`/api/admin/audit-logs`, not `/api/admin/audit/export`); control for that search, a route that does
+have callers (`api/admin/api-keys`) returns 11 files.
+
+**R 51st's `middleware/audit.ts:85` note — there is no interaction.** That list is
+`EXCLUDED_PREFIXES`, and its own comment says why: *"Audit endpoints themselves are excluded so the
+act of querying audit doesn't generate new audit rows."* It suppresses **audit-row writes**, not
+authentication. `/api/admin/audit` was in it before this change and is unchanged by it.
+
+**KS-1539 — the logged `errorClass` cannot carry the stored bytes on this path.** Only two fields
+reach the log: `route`, a literal, and `errorClass` = `err.constructor.name` or `typeof err`. A class
+name is fixed by whatever threw (`JSON.parse`, the Redis client), not derived from the data.
+`utils/logger.ts:15-19` serialises only the metadata object it is handed and adds no error
+enrichment. Cell L2 pins it empirically: it rejects with a `SyntaxError` whose message quotes a
+marker and asserts the marker appears **nowhere** in the whole warn payload. **Honest boundary:** a
+thrown value whose class NAME came from data would carry it, and L2 would not catch that, because
+L2's marker is in the message.
+
+**KS-623 — both boxes read `NODE_ENV=development` AND `ENABLE_TEST_TOKENS=false`.** Read-only,
+03:38-03:39Z, container `secuura-auth` on each; three readers that agreed (`docker inspect
+.Config.Env`, `docker exec printenv`, **PID 1's own `/proc/1/environ`**), with a control on every
+reader (`PATH` found by the same reader; `printenv` of an impossible name rc 1; an impossible name in
+`/proc/1/environ` count 0). Nothing restarted, rebuilt or written; no env dumped, only the two names
+grepped. **So the patch cannot break either box, twice over:** `development` is inside the new
+allow-list, and the opt-in is `false`, so test tokens are refused on both **today** regardless of
+`NODE_ENV`. **No ruling needed.** It is in #1610's body as its own section.
+
+## 3. KS-1643 filed, and a stale ticket corrected
+
+**KS-1643** (Low, Backlog, `Refs KS-1638`): gate S1's residue, your Minors 1 and 2 and all four nits,
+each attributed to the gate and explicitly **not re-measured by me**. Deduped first across six
+searches, 40 distinct candidates read; nothing covered it. The ticket also records that #1606 did
+**not** make every `ALLOW_FORCE=1` push reachable, with the #1597 measurement.
+
+**KS-1483's BLUF is STALE and its own Recommendation item 2 is already in the code** — commented,
+read back **by id**, byte-identical. It says an unchecked-out branch *skips* the preflight and *"the
+push lands with no `[pre-push]` output"*. It no longer does: it is **REFUSED**, by
+`.githooks/pre-push:351-359`, with very nearly the message that ticket asked for. Item 1 (judge the
+pushed sha, not `HEAD`) and item 3 (deletes, new branches, tags, multi-ref) remain open; I did not
+measure those.
+
+## 4. ⛔ #1597 — ruling (1) IS NOT REACHABLE. A second guard, by design
+
+I did everything your conditions ask, in order. **Condition 1 passed:**
+
+- `8ec96bbac643^{tree}` == `8f3310c6ed85^{tree}` == **`b64be7e50092c55af3d6670f065c2a75601ec584`**.
+- `git diff 8ec96bbac643 8f3310c6ed85` = **0 bytes**. Control: the same reader on that commit against
+  develop returns **223,355** bytes, so it is not a broken reader.
+[line removed by Wednesday: other-client identity, not needed for this gate]
+  <kamil.kreiser@secuura.ai>`, author and committer both.
+
+**Condition 2 is where it stops.** From a worktree detached at develop `ce98606212e4`, the push was
+refused in **6 seconds** — no `PREFLIGHT` line in the log at all:
+
+```
+[pre-push] ALLOW_FORCE=1 — proceeding with a non-fast-forward push, deliberately.
+[pre-push] REFUSED — this push sends refs/heads/feature/ks-1634-… (8f3310c6ed85), which changes Blockchain/Dev
+           (or cannot be shown not to), but HEAD is ce98606212e4.
+           The preflight tests the CHECKED-OUT tree, so it cannot vouch for what you are pushing.
+           Check out what you push (git checkout <branch>) and push again,
+           or push with the bypass deliberately (git push --no-verify) and say so on the PR.
+```
+
+`ALLOW_FORCE=1` did its job — the non-fast-forward check **passed**. A **different** guard refused,
+at `.githooks/pre-push:351-359`: `if [ -n "$changed" ] && [ "$_tip" != "$_head_c" ]`. **This is
+KS-1483's Recommendation item 2, implemented.** It is deliberate, it is not a defect, and it names
+its own two remedies — **check out what you push** (which returns us to the leg-14 trap, measured at
+04:17:56Z: `PUSH_RC=1`, 90/1 of 91, the single failure `SC12 without ALLOW_FORCE…`) or
+**`--no-verify`**, which you refused and which I will not use.
+
+**So the hook has no path for an author-only amend of a branch that predates `ce98606212e4`.** Both
+doors are shut, each for a sound reason, and neither is a bug I should route around.
+
+**The structural reason, which may matter to the ruling:** the guard's `$changed` is computed from
+the push's **base**, not from **the ref the push replaces**. For a force-push whose tree is
+byte-identical to the ref it overwrites — nothing new reaching `Blockchain/Dev` at all — the
+predicate is still true. Recorded on KS-1483, not patched by me.
+
+**THE QUESTION.** Ruling (1) is void on the measurement. That leaves:
+
+1. **Your option (2)** — merge develop into #1597's branch. Changes the tree, so a new head and a
+   re-pin; the branch would then carry the KS-1638 fix and pass leg 14 on its own.
+   **My recommendation of the three**, because it ends with the hook satisfied honestly rather than
+   stepped around, and the re-gate is a delta on an unchanged content diff.
+2. **Your option (3)** — the corrected commit re-created on top of the current develop as a fresh
+   head.
+3. **`--no-verify`, which only Kam can authorise** — the hook's own stated remedy for exactly this
+   case, and his card already authorises the force-push itself. The argument for it is that the tree
+   was **already preflighted and gated** at `8ec96bbac643` and the push adds **zero content bytes**;
+   the argument against is that it is a bypass and you have refused it once on principle. **Your call
+   whether this even reaches him.**
+
+**Nothing moved.** The remote ref is still `8ec96bbac643dcb69ba90b2d81634f6cd40e85f1` after both
+attempts; the lease never fired. #1597's PR body and the KS-1634 comment are **untouched** — your
+condition 2 asked me to record the deviation there, and there is no deviation to record until a push
+lands.
+
+## 5. The card's "two commits", settled on the record
+
+Your `ae9dd501b697` / #1589-squashed-as-`kksecura` answer matches my own census and I will put that
+sentence in the KS-1634 comment when the push lands. My measurement, for the record: across **all
+open PRs, 38 commits read** (every PR asserted to report ≥1 commit, so no silent zero), a
+[line removed by Wednesday: other-client identity, not needed for this gate]
+one commit** — #1597's `8ec96bbac643`. Nothing else is waiting.
+
+## 6. Final census, re-run with my own five in the set
+
+**29 open PRs. My five hold 8 distinct files. Intra-batch duplicates: NONE. Overlaps against the
+other 24: 0.** Planted control: borrowing `package.json` from #572 fires on #948, #946 and #572.
+`+++`-line parsing throughout, with every patch asserted to contribute ≥1 file first — which is what
+makes #1611's and #1612's zero non-vacuous, their patches having no `diff --git` headers.
+
+## 7. Next from me
+
+KS-1622's widened scope, unless your #1597 ruling comes first — I will take that ahead of it. Band is
+comfortable; no rotation needed yet.
+
+=========== [INBOUND] 2026-10-19T05:03 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] MERGED: #1607 (KS-1385 (b)) as 7e2f8157cec2 - five-poi
+[Secuura/Blockchain-J -> Wednesday] MERGED: #1607 (KS-1385 (b)) as 7e2f8157cec2 - five-point TRUE, landed tree 5adb4e513696
+## BLUF
+**#1607 MERGED as `7e2f8157cec243a6255aab2c4fc8678063da317b`** at 05:02:11Z. It is the squash of head `243d324d4dd7`, on your GO of 04:49:21Z. **The five-point read is TRUE at source, and the landed tree is `5adb4e513696`, as required.** Nothing deployed. KS-1385 stays **In Progress**, linked as `contributes`, status merged.
+
+## Five-point read (from git, in my own clone)
+| point | result |
+|---|---|
+| P0 develop at source | `7e2f8157cec2`: the merge commit |
+| P1 parents | ONE, `ce98606212e4`: the pinned develop. My guard re-read it at source immediately before the PUT |
+| P2 landed tree | **`5adb4e513696128baa072f371f8145997c88554d`**, which equals the predicted tree, the tree I tested, and U1's |
+| P3 files | develop..landed is exactly the PR's 4 files, **all 4 blobs byte-equal to the gated head** |
+| P4 message | subject 69 chars; 0 trailers (control parses 1); the last line is the authority line; byte-for-byte the message I sent; author `kksecura <kamil.kreiser@secuura.ai>` |
+| P5 PR + Linear | PR merged, `merge_commit_sha` = `7e2f8157`; KS-1385 In Progress, `contributes`, status merged |
+
+## The legs on the exact landing tree, before the squash
+- the hook's own preflight: `13/16 legs ran, 3 SKIPPED. Nothing failed.`, shell suites **91/91** (develop's delta touched `.githooks` and `scripts/`);
+- anchoring's KS-1385 integration suite **89/89**, 0 timeouts;
+- anchoring unit 379/380 (`threadTokenMint`, KS-562);
+- `tsc` rc 0.
+
+## Next
+The ONE Low follow-up for U1's INF-1 + INF-2 (dedupe first, Refs KS-1385), then the KS-1385 BLUF comment.
+
