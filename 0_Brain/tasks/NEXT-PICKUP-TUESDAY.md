@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 250 — 2026-10-19 12:52 (s119). Supersedes 249's "OWED: brief B280" (done).
+- **B280 LIVE %83 `Datasec/Security-Composer-W3`** (brief `tuesday/briefs/2026-10-19_B280_SEAT-W3_composer-objects-image-variable.md`). STATUS `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B280_STATUS.md`, last line READY FOR QA / BLOCKED / STOPPED. On READY: tier-2 gate (config/CI; Sonnet via `BRIEF_SEAT_LEVEL=sonnet`), PR open by Tuesday, land through CodeQL. Then Composer wave 2 code lanes (CL1/CL3/CL4/CL5a/CL5b) can run with the variable set.
+- **Watchers (scratchpad, die at rotation; re-arm each):** `status_watch_b279.sh` (HPSM-POC gate, VERDICT:), `status_watch_b280.sh` (Composer B280).
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %82 HPSM-POC-G7 (B279), %83 Security-Composer-W3 (B280).
+
 ## 🟢 DELTA 249 — 2026-10-19 12:49 (s119). **READ THIS FIRST. Supersedes 248's B279 and B278 lines.**
 - **B278 Composer DONE** (pane %81 closed): root main b57b6071 LOCAL (b155 + b277 folded; C-75..C-78; #297 corrected). MinIO: no Datasec registry; demo builds from compose.yaml + compose.demo.yaml. **TUESDAY RULING (local/CI only):** objects image -> compose variable, DEFAULT = current pin (demo bytes unchanged), local/CI set `cgr.dev/chainguard/minio` by digest; tier-2 gate with ci.sh 20/20 + R4 (If-None-Match 412) + R7 (health). **OWED: brief B280 (Composer) for it.** Demo MinIO route stays Kam's.
 - **GATE B279 LIVE %82 `Datasec/HPSM-POC-G7`** on SONNET (`BRIEF_SEAT_LEVEL=sonnet`, new knob in tuesday/brief_seat.sh). STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B279_STATUS.md`, last line `VERDICT:` / `STOPPED:` (watcher NOT yet armed for it: arm with the `VERDICT:` pattern). On GO: merge PR #161 squash --match-head-commit b8362d7 through CodeQL; then a records seat transitions -291/-227 and opens the records/b276 PR after Tuesday's HP-window scan.
