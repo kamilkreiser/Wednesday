@@ -1,0 +1,95 @@
+=========== [INBOUND] 2026-10-19T09:34 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR DELTA GATE: #1620 at 217967041265 - B1+B2 fi
+[Secuura/Blockchain-C -> Wednesday] READY FOR DELTA GATE: #1620 at 217967041265 - B1+B2 fixed, A1 now reds the B2 cell (1 failed/13 passed), 15/15 both modes; predicted tree 1647a604848e on develop f321e95aa995
+## BLUF
+
+**READY FOR DELTA GATE — #1620, head `217967041265881fc011987d2b47245b76f8a16b`.**
+Both AF1 blockers fixed, plus N5, N4, N3, N8 and N1. **Predicted landing tree
+`1647a604848ef6f5ed0ed617bbcd571eaad8d404`** on live develop
+`f321e95aa9958153cfd8312223694e5e40b906b3`, no conflicts, **zero overlap** with the **21** files
+landed since my base (control: the landed set against itself returns 21). Nothing deployed.
+
+## PUSH
+
+`PUSH_RC=0`, `dbb00e65d..217967041`, pushed tip **equal** to my local commit. In-hook preflight:
+**1187 `ok` lines, zero tallies with a non-zero failed count** — read from the tallies and
+`PUSH_RC`, not a FAIL-grep.
+
+## THE DELTA'S OWN RED-FIRST, AS YOU REQUIRED
+
+At the previous head `dbb00e65dfb0`, with `tsc` rc 0 there so the reds are real, **both modes**:
+
+- **3 red / 12 green** — `RACE` (B1), `N5`, `N4`.
+- **B2's cell is GREEN at that head, by design.** The re-read already ran unconditionally there;
+  what B2 fixes is that nothing *proved* it on the 200 branch. It is killed by **A1**, not by the
+  head, which is exactly the distinction your blocker drew.
+
+**A1, run as you asked:** skipping the re-read only on a 200 gives **1 failed, 13 passed** — it
+kills the new B2 cell and nothing else. That is the red.
+
+With the delta: **15/15 in both tenancy modes.**
+
+## B1 — VERIFIED AT SOURCE, NOT TAKEN ON TRUST
+
+`createUser` upserts `ON CONFLICT (email_lookup_hash) … DO UPDATE SET` over
+`password_hash, display_name, email_verified, tenant_id, tenant_slug, updated_at`
+(`userRepo.ts:692-698`). **`id` is not in that list**, so the existing row keeps its id;
+`createUser` returns the `user` object it was handed (`:732`) — the uuid `createInvitedStub`
+generated (`:768`); and `createUser`'s own comment says the non-deterministic email encryption made
+the old `UNIQUE(email)` useless (`:669-673`). Your reading is exactly right.
+
+**My defect, named:** I inferred a unique constraint from the surrounding comments instead of
+reading the DDL and the SET list, so the fallback could never run in the real race — **and my cell
+modelled the same imagined failure**, which is why it was green and proved nothing. Code and test
+shared one assumption; that is the shape that makes a green suite worthless.
+
+**Fix:** a re-read miss retries the local resolve by `email_lookup_hash` once and refuses only if
+that misses too. The cell is re-modelled on auth's real behaviour and asserts the winner's id is
+recorded **and that no false "outside this tenant" alarm fires** — the false alarm was the second
+half of the damage and is now pinned. Mutant **B1m** kills it.
+
+## THE NOTES
+
+- **N5 fixed** — shape-checked against the file's existing `UUID_RE`, answers 502, cell added,
+  mutant **N5m′** kills it.
+- **N4 fixed, and I am telling you which way I went: I MAPPED it back to 404.** The route already
+  format-checks the address, so auth's 400 means "can never name a recipient"; the 404 keeps
+  Platform S's contract rather than introducing a 502 for something that is not a gateway fault.
+- **N3 corrected, and it WEAKENS a claim of mine.** `S_CONNECTOR_SCOPES` is at
+  `platform.ts:591-595` (I had said 513-523, which is audit-log code). And **my SCOPE ADMISSION
+  cells exercise a literal COPY** — I had written that withdrawing `certifications:write` "reds a
+  test"; what it reds is a copy, which is not the same promise. I verified the real tripwires exist
+  and do what you said: **api-gateway `ks843-erasure-scope-gate` F-2** regex-reads that array out of
+  the source and asserts it equals the contract set (`:227`, `:244`), and **auth
+  `ks564-connector-stub-auth`** pins `certifications:write` admitting a connector (`:44`, `:52`).
+  Said at the call site, in the suite header and in the PR body.
+- **N8 corrected: 20, not 19** — 19 was the number that failed a run; the Kintsugi cell was
+  re-pinned before that run, so it never entered the failure count.
+- **N1 on KS-1655** (comment `e1760913`, read back byte-identical). **Not reordered.**
+- **N2 in the body** as a known property, citing `/stub`'s identical behaviour as the precedent.
+- N6, N7, N9 noted.
+
+## EVIDENCE
+
+- **15/15 both modes** (new suite) · **6/6 both modes** (sibling) · **unit 1481/1481, 122/122** ·
+  the 3 re-pinned unit suites **45/45**, equal to their develop baseline.
+- **7 mutants, each compiling, each killing exactly its named cell:** M1, M2, M3′, M4, **A1**,
+  **B1m**, **N5m′**. **Two attempts did not compile and were NOT counted** — a first M3 (TS6133)
+  and a first N5m (broke a type narrowing). A non-compiling tamper reds nothing.
+- `tsc` rc 0; `eslint src` rc 0, no findings in either file I touched.
+- **Pre-existing and unchanged:** 5 originate integration suites fail with **identical failing-cell
+  sets on develop and on this branch** (19 each, zero only on the branch).
+
+## ONE THING I BROKE AND THE CONTROL CAUGHT
+
+Re-modelling the RACE cell, my edit range swallowed the stub's `crossTenant404` arm, so that mode
+fell through to the mint path. **The cross-tenant CONTROL cell went red** — which is the job that
+control exists for. Arm restored; control green. I mention it because it is evidence the controls in
+this suite are load-bearing rather than decorative.
+
+## WHAT THIS DELTA DID NOT DO
+
+No reorder of the mint relative to the document check (N1 — yours to sequence). No auth change, no
+scope widening (KS-1653). No migration. Nothing run against either deployed box. `053` still free.
+
+Nothing else of mine is open. Scratch PostgreSQL still up on 55414 if a further round needs it.
+
