@@ -480,6 +480,13 @@ def hold_code_patch():
         elif (not is_cp2) and (not is_to) and a3i_skipped and _loose_declared(decl_brief) and not (inp.get('defect_line') or {}).get('expected_plus') and not inp.get('expected_plus') and str(adds.get(product_file)) != '0':
             loose = _loose_declared(decl_brief)
             a_lines['A3c'] = f"[no PASS A3c line in checker.out — LOOSE BRIEF declared by `{loose[0]}` (`{loose[1]}`); checker.out INFO A3i verbatim: `{a3i_skipped}`]"
+        elif is_to and a3i_skipped and str(adds.get(product_file, '0')) in ('0', 'None') and golden != '-' \
+                and os.path.isfile(os.path.join(golden, 'out.md.checker', 'patch.diff')) \
+                and open(os.path.join(golden, 'out.md.checker', 'patch.diff'), 'rb').read() == open(patch_path, 'rb').read():
+            # 2026-10-20 (Wednesday, SCREEN_17): a TEST_ONLY run whose brief adds a NEW test file carries no expected '+' lines,
+            # so the checker prints INFO A3i skipped and no A3c line. Accepted ONLY when the run's whole patch is BYTE-IDENTICAL
+            # to the control run's golden patch (a stronger check than A3c's per-line comparison) and the product is untouched.
+            a_lines['A3c'] = f"[no PASS A3c line in checker.out — TEST_ONLY with no expected '+' lines: the run's patch is BYTE-IDENTICAL to the control golden `{os.path.join(golden, 'out.md.checker', 'patch.diff')}` (byte compare in hold_ready); checker.out INFO A3i verbatim: `{a3i_skipped}`]"
         else:
             die(f"checker.out has no line starting 'PASS A3c ' — A3c cannot be asserted (accepted only for a deletion-only product hunk: needs INFO A3i skipped + numstat +0 on {product_file}; got a3i_skipped={bool(a3i_skipped)}, adds={adds.get(product_file)!r})")
 
@@ -518,6 +525,10 @@ def hold_code_patch():
         _bl = open(decl_brief, errors='replace').read().splitlines()
         _bf = [m.group(1).strip() for m in (re.match(r'^File:\s*`([^`]+)`', l) for l in _bl) if m]
         _bt = [m.group(1).strip() for m in (re.match(r'^Test file:\s*`([^`]+)`', l) for l in _bl) if m]
+        # 2026-10-20 (SCREEN_17): a NEW-file brief also pins the test path with a `File:` line under `## The test`; a File:
+        # line naming the brief's own Test file is that pin and is tolerated (the code_patch2 precedent, KS-1346). Only the
+        # product File: line is then compared.
+        _bf = [f for f in _bf if not (f == test_file and _bt == [test_file])]
         if _bf != [product_file] or _bt != [test_file]: die(f"test_only: the brief's `File:` lines {_bf} / `Test file:` lines {_bt} are not exactly [{product_file}] / [{test_file}]")
         if not any(l.startswith('## Tamper') and not l.startswith('## Tampers') for l in _bl): die(f"test_only: the brief has no `## Tamper` block: {decl_brief}")
         _ta = _read(os.path.join(chk, 'tamper.out'), 'tamper.out').strip()
@@ -529,7 +540,14 @@ def hold_code_patch():
         _ap = _read(os.path.join(chk, 'apply_product.out'), 'apply_product.out').strip()
         if not _ap.startswith('A5 (test-only): no product hunk'): die(f"test_only: apply_product.out does not say no product hunk was applied: {_ap[:160]!r}")
         files_at_tip0 = inp.get('files') or {}
-        if product_file not in files_at_tip0 or test_file not in files_at_tip0: die(f"test_only: input.json['files'] lacks the product or the test ({product_file} / {test_file}) — the byte-unchanged measurement cannot be made")
+        # 2026-10-20 (SCREEN_17): a NEW test file is absent from input.json['files'] by construction. Accepted ONLY when the
+        # patch creates it (`--- /dev/null` + `+++ b/<test_file>`) AND `git show <tip>:<test_file>` fails (absent at the tip).
+        to_new_test = False
+        if product_file in files_at_tip0 and test_file not in files_at_tip0:
+            _nt_hdr = ('--- /dev/null' in patch_text) and (f'+++ b/{test_file}' in patch_text)
+            _nt_git = subprocess.run(['git', '-C', inp['source_checkout'], 'cat-file', '-e', f"{inp['tip']}:{test_file}"], capture_output=True, text=True)
+            if _nt_hdr and _nt_git.returncode != 0: to_new_test = True
+        if product_file not in files_at_tip0 or (test_file not in files_at_tip0 and not to_new_test): die(f"test_only: input.json['files'] lacks the product or the test ({product_file} / {test_file}) — the byte-unchanged measurement cannot be made")
         def _tip_text(p):
             c = files_at_tip0[p]
             if isinstance(c, dict):
@@ -541,7 +559,7 @@ def hold_code_patch():
         _pl = prod_tip.split('\n')
         if not (0 < tl <= len(_pl)) or _pl[tl - 1].strip() != (tam.get('from') or '').strip():
             die(f"test_only: the tamper's `from` is not the product's tip line {tl}: tip {(_pl[tl - 1] if 0 < tl <= len(_pl) else None)!r} vs from {tam.get('from')!r}")
-        rc_u, err_u, dg_u = _apply_to_tip(patch_path, {product_file: prod_tip, test_file: _tip_text(test_file)}, os.environ.get('CLAUDE_SCRATCHPAD') or None)
+        rc_u, err_u, dg_u = _apply_to_tip(patch_path, ({product_file: prod_tip} if to_new_test else {product_file: prod_tip, test_file: _tip_text(test_file)}), os.environ.get('CLAUDE_SCRATCHPAD') or None)
         if rc_u != 0: die(f"test_only: the run's patch does not apply strictly (git apply -p1) to the tip content in input.json['files']: {err_u[:200]}")
         to_prod_sha = hashlib.sha256(prod_tip.encode('utf-8')).hexdigest()
         if dg_u[product_file] != to_prod_sha: die(f"test_only: the product {product_file} CHANGES under the patch (sha256 {to_prod_sha[:16]} at the tip vs {dg_u[product_file][:16]} after)")
