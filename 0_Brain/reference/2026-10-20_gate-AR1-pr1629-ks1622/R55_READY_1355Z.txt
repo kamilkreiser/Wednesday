@@ -1,0 +1,72 @@
+=========== [INBOUND] 2026-10-19T13:55 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1629 KS-1622 at cb776bfc4b20 (landing
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1629 KS-1622 at cb776bfc4b20 (landing 985fd9f982a8) + MERGED #1628 + KS-1675 filed + a rotation proposal before KS-1673 PR A
+## 1. MERGED — #1628 (KS-1568 o6)
+
+| check | reading |
+| -- | -- |
+| develop / head, re-read via the API just before | `a66cd6a4d172` / `c778f29bdff9`, both = your GO |
+| merge commit | **`390cc0a317c9bc36c19f3a1684c745836af485df`** (squash, sha pinned) |
+| landed tree | **`6a8a19bc68c7329fdf8bc28bc7629718f4987484` = AQ1's required figure, EQUAL** |
+| parents | exactly 1: `a66cd6a4d172` |
+| control | the previous develop tree `ac490c9430c0` differs |
+| message | `Refs KS-1568` |
+
+- **Before the merge:** the PR body's Known residue now carries AQ1's N1–N5, numbered as in the verdict file (sha `c9c33cae1eac`, recomputed equal). Read back byte-identical, 7,777 B.
+- **After the merge:** a KS-1568 BLUF comment (`bba75109`), read back by id.
+
+**AQ1 N4, reconciled and measured.** My "security has 2 type errors" came from the narrower frame.
+- My scratch config set `types: ["node","vitest/globals"]` and found 2 errors. Without that override the same config finds **6**.
+- The extra 4 are `TS2741 keepAliveTimeoutBuffer` (ks698r1, ks952-route `:77`, ks976a, ks976b).
+- **Cause, measured:** security can see two `@types/node` copies, **26.1.0** at the root and **20.19.43** in its own `node_modules`. The property exists only in 26. The `types` override pins one copy, which hides the mismatch.
+- I **edited my KS-1090 comment `98f5f30b` in place**, with a correction block on top and the original text kept below. Read back by id: 2,471 = 2,471 B.
+
+## 2. READY FOR GATE — #1629 (KS-1622, item 1's error-status shape only), tier 2
+
+https://github.com/Secuura/Distributed_Secuura/pull/1629
+
+```
+head          cb776bfc4b20346cdec60887c74077eb2dd50bc5   (1 commit = the Spark pass, byte-for-byte change line)
+develop       390cc0a317c9bc36c19f3a1684c745836af485df
+LANDING TREE  985fd9f982a8c4bc987258cb6a99086a72958a79   (merge-tree == real --no-ff; overlap 0; 3-dot 2 files)
+```
+The PR body read back byte-identical (4,825 B); the API shows +138/-0.
+
+- **Stated in the PR, as you asked:**
+  - The checker ran at **`83ed01af70fd`**, and **every figure was re-run by me at develop**.
+  - `platform.ts` gained 76 lines since then (KS-1195 `31cfb44dc`). The hunk applies strictly; its context moved from :420 to :490.
+  - **There is no golden.** Identity holds where it can: the **change line is byte-identical** to `section_1`'s, and the **test blob equals the declared new-file blob** (`9cfe0e6a2`). The whole-file post-image of `platform.ts` differs only because its pre-image differs.
+- **Cells and mutants:** red-first on develop gave **2 failed | 3 passed** (E1, E2, assertion reds); green is 5/5. **No gap on the claim line this time.** Removing the line reds E1 and E2; firing on any window reds E3; firing on every first window reds E3 and E5. **Full api-gateway suite 1,163/1,163 in 119 files**, and 1,158 without the new file (+5). Ratchet: 154 files, 27 errors, all baseline, 0 new.
+- **Residue (measured with a throwaway probe on the same harness, deleted afterwards):**
+  - An error status with a **non-JSON** body (502 `text/html`) now logs **2 warns**, the new line and then the catch. Develop logged 1. Both warns are true, so it is noise, not harm. The "ONE warn" in the cells holds for JSON bodies only.
+  - The ticket's other two shapes, **a 200 that is not a list** and **a JSON `null`**, still log 0 on both sides. They stay open, so this PR uses `Refs`.
+- **Preflight:** `13/16 legs ran, 3 SKIPPED. Nothing failed.` **Not a pass.**
+
+## 3. KS-1673 — ruling recorded; the side finding filed
+
+- **The ruling is on KS-1673** (comment `579562f3`, read back by id): no bypass, Teams in scope, PR A then PR B, the 404 byte-identity, and the cross-org cells with no Graph call.
+- **KS-1675 filed** (Bug, Medium, searched first, control `qzxwvkplmrty` = 0):
+  https://linear.app/secuura/issue/KS-1675. Connections probably never persist or reload:
+  - `svc_m365_connections` is in 038's set (`:42`), and 039 made that set fail-closed.
+  - m365 reads it as `secuura_app` (no bypass, measured) and sets **no** tenant setting (0 hits in its source).
+  - `dbSaveConnection` swallows the error (`:189`).
+  - The policy matches on `tenant_id`, which holds the **Entra directory id**, so even a correctly set setting could not match.
+  - Static facts plus the flags already measured. Nothing more was read on any box, as you ruled.
+
+## 4. ⚠ A ROTATION PROPOSAL, before KS-1673 PR A
+
+**I propose that a fresh R 56th builds KS-1673 PR A, not me.**
+
+**Why:**
+- This session started at 11:57Z and has run for about 2 h 10 m, with a very large context: 5 merges, 7 tickets, 6 PRs, two box passes.
+- **I cannot see my own ctx%; you can see the statusline.**
+- PR A is a tier-1 tenant binding across about 10 routes, with cells that need two organisations. It is the change I least want built on a context that might compact halfway, which is the rule that ended R 54th.
+
+**What I would do instead, right now:**
+- Finish the handover. It is already live at `5_Project_History/2026-10-19_seatR-55th/HANDOVER.md` and carries the whole plan, the AP1 seam path, and every SHA.
+- Write the history entry.
+- Hold #1629 at its gate for the successor, or merge it myself if your GO comes first.
+
+**If you would rather I build PR A**, say so and I start immediately. The plan is ruled and nothing else blocks it.
+
+Queue after PR A and PR B, per your order: the AP1 N3 `code`-seam follow-up, then KS-1634 N2/N3 (test-only).
+
