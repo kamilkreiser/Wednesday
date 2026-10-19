@@ -1,0 +1,61 @@
+=========== [INBOUND] 2026-10-19T16:58 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1640 ROUND 2 at 2e9704269dab (delta f
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1640 ROUND 2 at 2e9704269dab (delta from c210733f6592) - R3d added, OWN3/OWN4 each red it; landing 873239a5c945; 148/148
+## READY FOR GATE — #1640 ROUND 2 of 2 (delta: one commit), tier 2
+
+https://github.com/Secuura/Distributed_Secuura/pull/1640
+
+```
+new head        2e9704269dabebf5d11652ce156ef1eae22105a1   (= ls-remote; pushed c210733f6..2e9704269, a FAST-FORWARD)
+round-1 head    c210733f6592bdbff88b1dae9263d80e74143361   (the delta gate's base)
+base (develop)  a4187f0f66228603df211628d6d8ae239d6147d0   (unmoved; guard checked develop AND that the remote branch was still c210733f6)
+PREDICTED landing tree   873239a5c94525a007b96173254faa2a88355dd4   (strict descendant; equals the head tree)
+delta           1 file: ks1673-teams-statements-on-a-real-engine.test.ts -- one new cell (R3d), two id constants, the header correction
+```
+
+**BA1's verdict hash reproduces:** `sed '1d;$d'` gives `34f28527c310203e`. The whole-file control gives `9d1478210dfadaf3` and differs, as it should.
+
+## N1 — the new cell, R3d
+
+B and then A each **DELETE** the null-org row (`ID_NULL`) and the `'default'` row (`ID_DEFAULT`), and **`is_active` is read from the database**. Both rows must stay active, because they are never deletable through the API (AX1 N3).
+
+Those two seeded ids are now named constants (`ID_NULL`, `ID_DEFAULT`), and `beforeEach` uses them, so the cell and the seed cannot point at different rows.
+
+**The mutant table — the same runner, both files, every mutant `tsc` rc 0:**
+
+| mutant | real-engine file | the 16-cell mock file |
+| -- | -- | -- |
+| **OWN3** delete `OR organization_id IS NULL` | 8/1 — **R3d** | 16/0 survives |
+| **OWN4** delete `OR length(organization_id) = 7` | 8/1 — **R3d** | 16/0 survives |
+| GX1 list `OR organization_id IS NULL` | 8/1 — R1 | 16/0 survives |
+| GX2 notify `OR TRUE` | 8/1 — R2 | 16/0 survives |
+| delete `OR TRUE` | 7/2 — **R3 and R3d** | 16/0 survives |
+| register stores NULL | 8/1 — R4 | T4, T6 |
+
+**The owner controls (R1c, R2c, R3c) are green under every mutant.** Each mutant reds only its intended cell(s), and `index.ts` was restored and checked against HEAD after the run.
+
+## N2 — the header now names BOTH DDL copies
+
+- `docker/init/06-m365-tables.sql`;
+- `services/api-gateway/src/startup-migrations.ts` — `:384` CREATE TABLE and `:548-562` ALTER guards, **read by me, not just taken from the verdict**.
+
+The header says these cells read the first copy, and that the two drifting apart is not checked here.
+
+**That was my error.** My plan's DDL search covered `migrations/`, `docker/` and m365's `src/` — never api-gateway. So my plan mail's "No migration alters it" was wrong too. The round-2 commit message says so. The round-1 commit message still says "the only DDL", and it stays that way, because amending it would move a head a gate was pinned to. **The PR body is corrected:** the one remaining "the only DDL" is now inside the sentence correcting it.
+
+## N3, N4 — added to the PR body's residue
+
+- **N2's drift risk** between the two DDL copies;
+- **a wrong-table parse reds the SUITE in `beforeAll`** — loud and acceptable;
+- **the notify spec text omits the event filter and the row cap.**
+
+## Suites
+
+- **at the head, which is the landing (a strict descendant):** full m365 **15 files, 148/148, RC 0**. The new file is **9/9**.
+- the test file type-checked separately: **RC 0**, and `--listFilesOnly` = 1.
+- **the 16-cell file is unchanged** against develop.
+- **preflight: 13/16 ran, legs 3/4/8 SKIPPED (no stack), 0 failed — not a pass.**
+
+**Ticket:** no new KS-1673 comment for the round. The PR comment from round 1 (`ec2c962c`) stands. Say if you want a round-2 line on the ticket.
+
+Nothing deployed. No `az`. No box touched.
+

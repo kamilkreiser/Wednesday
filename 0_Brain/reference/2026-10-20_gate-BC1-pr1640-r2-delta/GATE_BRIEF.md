@@ -1,0 +1,17 @@
+# Gate brief: GATE BC1 = PR #1640 ROUND 2 DELTA (KS-1673 follow-up: gate BA1's N1 cell + N2 header), Sonnet 5.5, tier 2, round 2 of 2
+
+Commissioned by Wednesday after Seat R 56th's ROUND 2 READY (16:58Z). The author's CLAIM is beside this brief: `R56_READY_R2_1658Z.txt` (read it WHOLE). Round 1 verdict: `../2026-10-20_gate-BA1-pr1640-ks1673-n1/verdict.md` (its N1 and N2 are what this round answers). **This is a DELTA gate: gate the new commit only.** Round 1's findings stand for everything the delta does not touch. Round 2 of 2 under the cap: if this is NO GO, the closed instances ship and the residue is ticketed.
+
+**Project:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files` is READ ONLY. Clone INSIDE: `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/986d1a05-c6c6-443e-9186-42c238af6685/scratchpad/gate_bc1/` via `git clone --shared` from `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/cache/src`, then fetch `refs/pull/1640/head`, LITERAL paths in every `git -C`. Every npm / vitest / tsc command runs INTO your clone; NEVER `npm exec` from your cwd. Build `packages/shared` first. **BA1 found the cache clone's node_modules are symlinks into the read-only project tree: use real copies in your clone if a stale `@secuura/shared` breaks compilation.**
+
+**Heads (Wednesday's fetch, 03:5x AEDT 2026-10-20):** #1640 head `2e9704269dabebf5d11652ce156ef1eae22105a1` (fast-forward of round-1 head `c210733f6592`; delta = 1 file, +24/-6); **develop moved to `c9ab6b36ff92a3fcd5ac3430094838fd0947c0cc`** (#1641, KS-1660, originate only) since the author's READY. Landing tree on the new develop: **`fc0a930ac613667f1f1e4cc73106777b86c1693f`** (Wednesday's merge-tree; the author's `873239a5c945` was on a4187f0f6622 and is superseded). Re-read both heads at start and before the verdict.
+
+## Questions (instrument for each; name what you did NOT run)
+1. **The delta is confined:** `git diff c210733f6592 2e9704269dab` touches only the new test file (one cell R3d, two id constants, the header). Nothing else.
+2. **R3d can fail for the right reason:** run OWN3 (delete `AND (organization_id = $2 OR organization_id IS NULL)`) and OWN4 (`OR length(organization_id) = 7`) yourself, compiling: each must red R3d; owner controls green. Confirm R3d reads `is_active` from the DATABASE (not the response) and that the seeded ids it deletes are the same constants `beforeEach` uses.
+3. **N2:** the header now names both DDL copies (`docker/init/06-m365-tables.sql` and `services/api-gateway/src/startup-migrations.ts`); check the cited lines exist at the head.
+4. **Landing:** merge-tree on live develop = `fc0a930ac613…`; the full m365 suite at the LANDING (it now includes #1641; author ran 148/148 at a4187f0f); the test file type-checked separately.
+
+**Verdict file:** `verdict.md` in this folder. First line: `VERDICT: <GO|GO WITH NOTE|NO GO> at head 2e9704269dab... (tier 2 delta, round 2 of 2; landing tree <sha> on develop <sha>; N blockers, M notes)`. Then BLUF, findings, FOUND / TESTED / HOW, NOT RUN, wall-clock. Last line: the sha256 of `sed '1d;$d' verdict.md | shasum -a 256`.
+
+**Rules:** findings only; no GitHub or Linear writes; nothing under `!CODING`; no push; no `cd`; no `rm`; no stderr to /dev/null; no Docker; every zero with a positive control. Before finishing run `git -C /Volumes/DevMASTER/WEDNESDAY status --short` and report every untracked path outside 0_Brain/, 5_Project_History/, 2_Project_Files/local-model/ and 2_Project_Files/fleet/briefs_staged/.
