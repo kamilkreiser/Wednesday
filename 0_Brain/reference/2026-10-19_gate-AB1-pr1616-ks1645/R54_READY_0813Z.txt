@@ -1,0 +1,76 @@
+=========== [INBOUND] 2026-10-19T08:13 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1616 KS-1645 item 3 at 09e67d9ccd23 -
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1616 KS-1645 item 3 at 09e67d9ccd23 - tier 1, landing tree b8d59ffc7351 byte-gated, 1153 -> 1158
+## BLUF
+
+**READY FOR GATE — PR #1616 (KS-1645 item 3), tier 1.** Head `09e67d9ccd23f8200653001c94dc3bebe6f17fac`, base develop `80868551e67934cb951d28eec44ce3bdf835944c`, **predicted landing tree `b8d59ffc73512d00439c8315410a9ecf28d0f077`**. `Refs KS-1645` — items 1, 2, 4 stay open. Nothing merged, nothing deployed.
+
+## CAUSE
+
+`services/api-gateway/src/routes/audit-export.ts` read `type` as a bare cast — `const type: AuditType = (req.query.type as AuditType) || 'all'` — and forwarded it verbatim to the security service. An unknown value, **or a repeated `type=` parameter (Express yields an array)**, therefore produced a **200** whose filename and `meta.type` named a filter that was never applied. The export was switched ON by #1608, so this is one of KS-1645's four pre-deploy repairs, not hardening.
+
+The change makes `AUDIT_TYPES` the single runtime list, derives `AuditType` from it (`(typeof AUDIT_TYPES)[number]`) so type and validator cannot drift, and refuses with 400 `BAD_REQUEST` **before** the upstream call.
+
+## THE CELLS (5 in one new file)
+
+RED (red at the untouched tip, green after):
+- **T1** an unknown `type` is 400 `BAD_REQUEST` **and the security service is never asked** (asserts `fetch` call count 0)
+- **T2** a **repeated** `type=auth&type=admin` is 400 and the service is never asked
+- **T3** an unknown `type` with `format=csv` is 400 **with no `content-disposition`** — no attachment
+
+CONTROL (green both sides — these are what stop the fix being a blanket refusal):
+- **C1** each of the five known types answers 200 **and is forwarded as given** (reads `type` back off the recorded upstream URL)
+- **C2** no `type` at all answers 200 and forwards `type=all`, with `meta.type: "all"`
+
+Red-first at the branch's parent `722e07f19cee`: **3 failed / 2 passed (5 run)** — and **5 tests executed**, so assertion reds, not a load failure reading as one. Green-after: **5 / 5**.
+
+## SUITE COUNTS AT THE LANDING PARENT
+
+develop moved **twice** under this PR while it was in its 606 s push (#1613 `31cfb44dce84`, then #1614 → `80868551e679`), so every figure names its tree:
+
+- **landing parent `80868551e679`, change absent: 1153 passed / 1153 in 117 files, rc 0**
+- **landing tree `b8d59ffc7351`: 1158 passed / 1158 in 118 files, rc 0** · `tsc --noEmit` rc 0, zero bytes out
+- **+5 cells, +1 file, 0 failed at either end, 0 NEW reds.** 1153+5=1158, 117+1=118 — reconciles exactly.
+- My earlier 1132/1137 figures name the OLD parent `722e07f19cee` and I am not carrying them as the gate's numbers; they are in the PR body labelled as that tree's.
+
+Your develop figures reproduce independently in my clone: tip `80868551e679`, **tree `9fec48e29e340d84…`**, parent `31cfb44dce84` — all three equal to yours.
+
+## FILES (2)
+
+- `Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts` (+9/-2 as committed)
+- `Blockchain/Dev/services/api-gateway/src/__tests__/ks1645-the-audit-export-refuses-an-unknown-type.test.ts` (+80/-0, new)
+
+GitHub reports the PR as 2 files, **+89/-2**, which equals 9+80 and 2+0.
+
+## PREDICTED LANDING TREE — BYTE-GATED, NOT ASSERTED
+
+`git merge-tree --write-tree origin/develop HEAD` and a **real local `git merge` of develop INTO the branch** produced the **same** tree, `b8d59ffc73512d00439c8315410a9ecf28d0f077`, with zero conflicts; that merge changes **exactly the two files above** relative to develop. The merge-in is **local only and not pushed** — the head stays at the commit that was actually gated. If you want the head itself to carry the current tip, say so and it is one ~10 min push.
+
+## PUSH GATE
+
+`PUSH_RC=0` after 606 s, remote tip equals the head. **`PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`** — **13/16, not a pass**; legs 3/4/8 are Docker-dependent and there is no Docker here. Leg 14 shell suites **91 passed / 0 failed / 0 skipped of 91**; leg 1 `OK — spec is in sync`.
+
+## TWO HONEST NOTES
+
+1. **`mergeable_state` reads `unstable`, and I cannot attribute it.** `check-runs` and the combined `status` endpoint both return nothing for my head — and the **same two reads on develop's own tip return nothing too**, so that is this token's blindness, not a signal about #1616. Per the repo's own rule the field carries no testing claim either way; the Test Evidence block does.
+2. **The integration moved KS-1645 Backlog → In Progress** when the PR linked. Expected on PR open, and the link registers as **`Refs`**, not a closing link — verified by reading the attachment back.
+
+## KS-846
+
+Raised **Low → Medium** as you ruled, with the before (p4, read at source 08:05Z) and after (p3 Medium, 08:10:07Z) both read back, plus the one-line note that the priority moved on my measurement. Kept as the single ticket, no duplicate.
+
+## MEANWHILE
+
+Starting PR-B (KS-1642, both pieces in one PR). Sequencing as briefed: p1 first, then re-read the tamper line — p1 adds 3 lines above it, so the target moves `:84` → `:87` — and re-prove p2's red against the moved line as a mutant kill (tamper → H9 red, revert → 15/15), not a tip red.
+
+## NEEDED-BY
+
+A tier-1 verdict on #1616 when you have a gate seat free. Not blocking me.
+
+PROVENANCE:
+- all suite/tsc figures | my own runs, my own clone, logs under scratchpad/svc/ | measured 2026-10-19 08:09Z
+- landing tree | git merge-tree AND a real merge, both in my clone | measured 2026-10-19 08:09Z
+- PUSH_RC + preflight line | my push log, quoted | 2026-10-19 08:07:59Z
+- PR #1616 head/base/file counts | GitHub API, body read back byte-identical (sha 57d431a3bb3d55fa) | 2026-10-19 08:1xZ
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-19 08:1xZ
+
