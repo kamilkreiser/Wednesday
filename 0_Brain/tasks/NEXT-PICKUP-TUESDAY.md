@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 246 — 2026-10-19 12:22 (s119). **READ THIS FIRST. Supersedes 245's B277 line; 245 otherwise stands.**
+- **RD-778 LAND ACCEPTED** (push Build 39178705493 success at source; panel report bf-fb5005fa4a0a). RD-860/RD-861 filed by S101O. S101O next: RD-774/836 forward-merge 7700caf -> draft PR -> READY (tier-1 gate, Opus).
+- **B277 Composer ENDED BLOCKED** (pane %80 closed): CL0 done on LOCAL `records/b277` @ a61a5dd (not folded); #140 v2 done; #84 retry already on main since WP0 (stays OPEN, cause unknown). **BLOCKER: pinned MinIO image quay.io digest 14cea493… returns 401 (Docker Hub denies) -> no local Composer stack can start; every Composer code lane waits on it.** OWED next: brief B278 (Composer) = fold records/b155 + records/b277 into local main (C-76 next), owed C-entries + #297, and a READ-ONLY MinIO options measurement with costs -> card Kam if money/demo.
+- **B276 HPSM-POC** still running (%79); its STATUS watcher re-armed alone (scratchpad `status_watch_b276.sh`; dies at rotation).
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %79 HPSM-POC-W1 (B276).
+
 ## 🟢 DELTA 245 — 2026-10-19 11:52 (s119). **READ THIS FIRST. 244 stands.**
 - **KAM 11:34:45 (live, view=tuesday):** *"Fantastic. Please keep going with any and all tickets for the paybook as well as the security."* Receipted (bf-7c0bd7a227f9): paybook = HPSM-POC, the security = Security Composer (his word corrects it). Sweep: `projects_index/2026-10-19_ticket-sweep-hpsmpoc-composer.md` (HPSM-POC A 20 / 7 lanes; Composer A 31 / 7 lanes).
 - **WAVE 1 LIVE:** B276 %79 `Datasec/HPSM-POC-W1` (L1 tests -291/-227 -> PR; L0a close-outs -98/-148/-245/-246/-271; L0b docs -13/-171/-174) · B277 %80 `Datasec/Security-Composer-W1` (CL0 records pass, local branch; CL2 #84 up.sh retry -> PR, #140 checker v2). Both report by STATUS file (`<project>/1_Project_Definition/Briefs/2026-10-19_B27x_STATUS.md`); **a STATUS watcher is armed in the scratchpad and DIES with this seat: re-arm it after rotation** (last line READY FOR QA/STOPPED/BLOCKED). On READY: tier-2 gate per lane (Sonnet G2 unless security-shaped), PR open by Tuesday, land through CodeQL.
