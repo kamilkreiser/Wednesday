@@ -1,0 +1,25 @@
+{
+  "id": "composer-demo-minio-overlay-1019",
+  "client_project": "Datasec/Security-Composer",
+  "title": "Security Composer demo: let a seat read the demo VM and check the MinIO image it relies on?",
+  "bluf": "Tap a to authorise a read-only look at the demo VM. The demo VM runs its own file /opt/hpsm/compose.demo.yaml (not in the repo), which sets the object store to quay.io/minio/minio:latest (B280 STATUS F-1, F-2; last seen running on 2026-10-16, B155 evidence). The project pin on quay.io already answers 401 (B277 STATUS line 21). If the VM is ever rebuilt or redeployed with a fresh image pull, the object store may not come up. Whether that tag still pulls is unmeasured: no seat may contact the demo host without your word. Reading the VM is yours (BACKLOG rows 27 and 247 say the same).",
+  "options": [
+    {
+      "key": "a",
+      "label": "Yes: one read-only check of the demo VM",
+      "detail": "A seat reads the overlay file and the image list on the VM, and tests an anonymous pull of the tag from this Mac. It changes nothing on the VM. Any fix (a pin or a swap) comes back as its own deploy card."
+    },
+    {
+      "key": "b",
+      "label": "Yes, and prepare the fix too (still no change until you tap)",
+      "detail": "As a, plus a drafted overlay change pinned to the image already on the VM. Nothing is applied; it comes back on a deploy card."
+    },
+    {
+      "key": "c",
+      "label": "Not now: leave the demo alone until its next planned deploy",
+      "detail": "The exposure stays unmeasured. The check then runs as part of the next deploy card."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "Hold (option c): nobody touches the demo, the exposure stays unmeasured, and a rebuild before then is not advised. Tuesday folds the check into the next deploy card."
+}

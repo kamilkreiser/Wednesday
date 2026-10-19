@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 258 — 2026-10-19 15:56 (s120, boot + first work). **READ THIS FIRST. Supersedes 257 items 1 (watchers re-armed), 5 (Composer next seat launched) and 7 (cards filed); 257 items 2, 3, 4, 6 stand.**
+- **Watchers (scratchpad `status_watch.sh <STATUS> 30`, tracked background tasks, DIE at rotation: re-arm all):** B283 `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B283_STATUS.md`, B284 `…/HPSM-POC/…/2026-10-19_B284_STATUS.md`, B285 `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B285_STATUS.md`.
+- **B284 LIVE %87 `Datasec/HPSM-POC-W5`** (Sonnet, C2): L3 Feedback, HPSMPOC-290 (utf-7 part name 500 -> 400, narrowest catch) + -226 census (drafter: N-4/N-5/N-7 already built PR #129; N-8 out of lane). Brief `tuesday/briefs/2026-10-19_B284_SEAT-W5_hpsmpoc-l3-feedback-290-226.md`. On READY: tier-2 gate (Sonnet, unless the catch reaches an auth surface), PR by Tuesday, land through CodeQL.
+- **B285 LIVE %88 `Datasec/Security-Composer-W5`** (Sonnet, C2): B281-1 timing tests (recurrence after B92's CPU-time fix; cause first) + B281-2/-3 comment lines + BACKLOG rows. Brief `tuesday/briefs/2026-10-19_B285_SEAT-W5_composer-ci-timing-tests-b281-1.md`. May STOP asking to edit `vitest.config.ts` (NOT pre-approved; Tuesday decides on its evidence).
+- **PR #97 at source 15:4x:** head 4c9b0d3, 0 open alerts, #272 fixed; Build was in_progress. Kam told (bf-179a1a87f049).
+- **CARDS FILED (Datasec, HTTP 201):** hpsmpoc-sme-deputy-1019, hpsmpoc-import-words-1019, composer-minio-image-terms-1019, composer-demo-minio-overlay-1019. Drafts + CARDS-REPORT in `tuesday/briefs/2026-10-19_cards-draft/`. On his taps: `decision_queue.sh rule`, act, `--delivered`.
+- Rotation feedback sweep 15:45: 0 new feedback (`projects_index/2026-10-19_rotation-sweep-1545.md`, next edges in its last section).
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O (PR #97 waiting Build), %78 gate28 (Opus), %86 HPSM-POC-G9 (B283), %87 HPSM-POC-W5 (B284), %88 Security-Composer-W5 (B285).
+
 ## 🔴 DELTA 257 — 2026-10-19 15:39 ROTATION HANDOVER (s119, ctx 80%; band 80-90). **READ THIS FIRST, then 256-242 (their lines stand except where superseded here).**
 ### FIRST WORK for the next seat (in order)
 1. **RE-ARM the STATUS watchers (they died with s119)** — brief_seat seats report by STATUS file, not mail (ledger 10-17 11 h idle): a background loop on the LAST LINE of `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B283_STATUS.md` (finals: `VERDICT:` / `STOPPED:` / `READY FOR QA:` / `BLOCKED:`), exited on a final line, run as a tracked background task (shape: s119's scratchpad `status_watch_b279.sh`, rebuild it; exercise the fire path on a scratch file first).

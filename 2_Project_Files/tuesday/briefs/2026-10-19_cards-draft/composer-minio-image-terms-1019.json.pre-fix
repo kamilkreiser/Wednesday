@@ -1,0 +1,25 @@
+{
+  "id": "composer-minio-image-terms-1019",
+  "client_project": "Datasec/Security-Composer",
+  "title": "Security Composer: use Chainguard free-tier MinIO for local and CI, terms unknown?",
+  "bluf": "Tap a, b or c. The MinIO image the project pins can no longer be pulled: quay.io answers 401 for it (B277 STATUS line 21), so no local Composer stack starts on this machine. The seat tested Chainguard MinIO (cgr.dev/chainguard/minio, pinned by digest) and the build passes R1 to R8 (B280 STATUS lines 19-23), but the QA gate on that change (PR #80) said NO GO only because of a flaky test on main, not the image (B281 STATUS line 1-3). The open point is yours: Chainguard labels it a free \"Starter\" image, and its published licence page has no free-image clause and no statement on how long an old digest stays pullable (B280 STATUS FOR TUESDAY 1, lines 30-33). Terms and any registry cost are unmeasured. The fallback if the digest vanishes is a saved copy on this Mac (B280 STATUS line 131) plus a one-line re-pin.",
+  "options": [
+    {
+      "key": "a",
+      "label": "Accept Chainguard free tier for local and CI only",
+      "detail": "PR #80 proceeds (after the flaky test is ruled separately). No cost. The risk is that the pinned digest disappears; recovery is the saved copy and the one-line re-pin in B280 STATUS lines 126-131. The demo is not touched."
+    },
+    {
+      "key": "b",
+      "label": "Mirror the image into a Datasec-owned registry first",
+      "detail": "Copies exact bytes into a registry Datasec owns (none exists today, B278 STATUS line 173-185). Needs you to choose and pay for a registry; price is unmeasured. Safest long term, slower."
+    },
+    {
+      "key": "c",
+      "label": "Do not use Chainguard; pick another MinIO-compatible image",
+      "detail": "B278 STATUS lines 174-177 lists SeaweedFS, Garage and RustFS, each a larger change and with compatibility unproven. Local and CI stay blocked until one is chosen and tested."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "Hold: PR #80 is not merged on terms, local and CI stay blocked on the 401, and nothing touches the demo. The Tuesday seat acts only after your tap."
+}

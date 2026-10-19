@@ -1,0 +1,25 @@
+{
+  "id": "composer-minio-image-terms-1019",
+  "client_project": "Datasec/Security-Composer",
+  "title": "Security Composer: keep Chainguard's free MinIO image for local and CI testing, terms unread?",
+  "bluf": "No action needed unless you disagree. The MinIO image the project pinned on quay.io now answers 401, so no local Composer stack could start (B277 STATUS line 21). On Tuesday's ruling, local and CI testing now use Chainguard's free MinIO image, pinned by digest: PR #80 merged at 14:43 today (GitHub API, merge 50d97508), and scripts/ci.sh line 15 on main sets it. The demo is unchanged: compose.yaml line 125 still defaults to the old pin. What is unmeasured: Chainguard's terms for free images and how long an old digest stays pullable (B280 STATUS FOR TUESDAY 1). If the digest vanishes, a saved copy on this Mac and a one-line re-pin recover it (B280 STATUS lines 126-131). It costs nothing today.",
+  "options": [
+    {
+      "key": "a",
+      "label": "Keep Chainguard free tier for local and CI only",
+      "detail": "No cost, no change. The demo keeps its own image. Risk: the digest disappears; recovery is the saved copy and the re-pin."
+    },
+    {
+      "key": "b",
+      "label": "Mirror the image into a Datasec-owned registry",
+      "detail": "Exact bytes in a registry Datasec owns (none exists today, B278 STATUS lines 173-185). You choose and pay for it; the price is unmeasured."
+    },
+    {
+      "key": "c",
+      "label": "Stop using Chainguard; pick another MinIO-compatible image",
+      "detail": "B278 STATUS lines 174-177 lists SeaweedFS, Garage and RustFS, each a bigger change, compatibility unproven. Local and CI would be blocked again until one is tested."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "Option a stays in place: local and CI keep the Chainguard digest, the demo is untouched, and Tuesday re-checks the digest still pulls at each Composer CI run."
+}
