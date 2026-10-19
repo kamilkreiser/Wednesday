@@ -6,6 +6,9 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 265 — 2026-10-19 18:42 (s120). Supersedes 264's laptop-Secuura line.
+- **Laptop Secuura: VERIFIED, NOT YET REMOVED.** Wednesday's diff: DevMASTER holds every content file (counts equal for platform-s-main/Pricing/Testing Harness/vault; path+size diff of Extranet + Tokenomics, 0 mismatches; laptop-only = 7 git refs of remote t9-drive-2026-10-15). `rm` is REFUSED by the never-delete hook (do not route around it). **NEXT:** when Kam mounts G-DRIVE, MOVE (mv across volumes) Extranet, platform-s-main, Pricing, "Testing Harness and Agent", Tokenomics + CLAUDE.md/.DS_Store/.gitignore/.smbdelete* to `/Volumes/G-DRIVE/Secuura/Laptop-DEV-offload/2026-10-19/` with a manifest, count both sides after, append to `/Volumes/Laptop-DEV/_SYNC_2026-10-15_replaced_by_T9/REMOVED_Secuura_2026-10-19.txt`. The hidden .cursor/.github/.planning (75 files) wait for Wednesday's counts (asked 07:4xZ). Vault Secuura/: sparse-checkout `--no-cone '/*' '!/Secuura/'` in the LAPTOP clone only (no commit), then the untracked leftovers move with the rest. The 140 GB `/Volumes/Laptop-DEV/WEDNESDAY` copy: check no laptop launcher uses it, then propose to Kam (move to G-DRIVE). Card `tuesday-laptop-secuura-removal-b-1019` open.
+
 ## 🟢 DELTA 264 — 2026-10-19 18:35 (s120). Adds to 263.
 - **B287 LIVE %90 `Datasec/Security-Composer-R1`** (demo MinIO read-only look + drafted pin + C-79/C-80 + BACKLOG row on local records/b287). On RECORDS DONE: post its drafted deploy card (default hold), `--delivered` composer-demo-minio-overlay-1019 and composer-minio-image-terms-1019 naming C-79/C-80, fold records/b287 later.
 - **B288 drafted, NOT read** (`tuesday/briefs/2026-10-19_B288_SEAT-W6_hpsmpoc-l4-imports-267-275-263.md`, 34 KB; drafter rulings R-W6-1/-3 to make): read WHOLE, stamp, launch when load1 < 8.
