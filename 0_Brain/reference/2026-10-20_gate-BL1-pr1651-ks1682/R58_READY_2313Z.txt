@@ -1,0 +1,96 @@
+Seat R 58th, lane Secuura/Blockchain-R. Item (iii) is READY FOR GATE. Tier 1, as ruled.
+
+## THE FIVE ARTEFACTS
+1. PULL REQUEST: **#1651** — https://github.com/Secuura/Distributed_Secuura/pull/1651
+   (a PR, not a branch; base develop)
+2. HEAD SHA, read from ORIGIN in the same action as the PR number:
+   **f2827e39d5c518fb532ee183724eb7a8057f2538**
+3. TICKET COMMENT NAMING THE PR: KS-1682 comment **`a00e1f76-9e71-4874-a002-9ad4cfe6b475`**,
+   23:12:22.026Z. Count **0 -> 1**; read back **byte-identical** (6246 == 6246); `#1651` and the
+   head sha both verified present in the stored body.
+4. TEST EVIDENCE BLOCK: in the PR body, written by me — I ran every figure in it.
+5. NOT DONE / NOT COVERED: below and in the PR body.
+
+## BUILT EXACTLY AS RULED
+Shape (1): `refreshTokenForAccount(result)` selects on `result.account.homeAccountId`. Fail closed,
+your three branches each with its own cell, plus the unreadable-cache case:
+  result.account null -> ''   |   ZERO matches -> ''   |   MORE THAN ONE match -> ''   |   cache unparseable -> ''
+**No fall-back to [0] on any path.** CONTROL on that claim: the only three `[0]` occurrences left
+in the file are two in prose and `mine[0].secret`, which indexes the FILTERED single match.
+Warnings name the branch, carry no token material, and omit the account identifier (a stable
+per-user value) — a deliberate trade of some debuggability, stated in the PR.
+Not built: (2) and (3), per your ruling. 2 files, 176 insertions / 10 deletions.
+
+## RED-PROOF, 4 ARMS, EVERY LABEL MEASURED ON BOTH SIDES
+The DEVELOP arm restores token-manager.ts from 89956fe92956 — the REAL pre-fix code, asserted
+(`refreshTokenForAccount` absent, `Object.values(refreshTokens)[0]` present), not a simulation.
+
+  DEVELOP (real pre-fix)      tsc 0   T1 FAIL  T2 pass  T3 FAIL  T4 FAIL  T5 FAIL  T6 pass
+  M1  [0] restored            tsc 0   T1 FAIL  T2 pass  T3 pass  T4 FAIL  T5 FAIL  T6 pass
+  M2  null branch falls back  tsc 0   T1 pass  T2 pass  T3 FAIL  T4 pass  T5 pass  T6 pass
+  M3  multiple matches pick   tsc 0   T1 pass  T2 pass  T3 pass  T4 pass  T5 FAIL  T6 pass
+
+M1 and M2 are your two named mutants; M3 is mine, for the >1 branch no other cell reaches.
+**M2 and M3 are each killed by exactly ONE cell**, so neither T3 nor T5 is redundant.
+No arm produced a LOADFAIL. Every swap asserted before running, every restore asserted by sha256.
+**T6 is labelled GUARD, not RED** — it passes on develop too. It pins KS-1687's behaviour, which
+this PR does not change. Measured, not assigned.
+
+## develop MOVED UNDER ME, AND THE LANDING TREE IS NOT THIS HEAD'S TREE
+#1650 landed as cd63883c62a9 while this branch's in-hook preflight was still running.
+  this head            f2827e39d5c518fb532ee183724eb7a8057f2538
+  live develop         cd63883c62a9bb0e66969df8cd3f02db2b9b2217
+  merge-base           89956fe92956 (develop's PARENT)
+  PREDICTED LANDING    785b2b7cfff7b74c6721c1955f960b77fb19759f
+  this head's own tree d45992afa78a  <- NOT the landing tree
+Two methods agree on 785b2b7cfff7: `merge-tree --write-tree` (clean, rc 0) and a local merge of
+develop into a scratch branch, which I then DELETED and never pushed. This head is unchanged.
+`develop...HEAD` is exactly my 2 files; `develop..HEAD` would show 5 by folding in #1650's three.
+No merge-in was needed or pushed — the two PRs touch disjoint files.
+
+**The landing state was VERIFIED GREEN, not assumed:** on 785b2b7cfff7, m365 suite
+**22 files / 212 tests / 0 failed** (201 at the merge-base + 5 from #1650 + 6 mine) and tsc rc 0.
+Hold **212** for the merged result; **207** is this branch on its own base (20/201 -> 21/207,
++1 file, +6 cells, 0 vanished).
+
+## PREFLIGHT, QUOTED AS IT READS
+"PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." legs 3, 4, 8 — local stack not
+up. Its own next line: "This is NOT a pass." So 13 ran, 3 skipped, 0 failed. Legs 6 and 7 also
+pre-run separately before the push: rc 0, nothing outside the triaged baseline.
+Pre-push route cited before pushing, as before: `.githooks/pre-push:61`
+`[ "$remote_sha" = "$ZERO" ] && continue` — a NEW branch skips the non-fast-forward refusal at
+:62-:72; my pushed sha IS HEAD, so the :16 refusal does not bite.
+
+## ALSO RUN
+tsc --noEmit on the fix AND on each mutant separately (all rc 0) · the test files type-checked via
+a child config with `exclude: []` (rc 0, 0 diagnostics; control: 21 test files in the program, not
+0; scratch config removed, not in the PR).
+
+## NOT DONE / NOT COVERED
+- No real sign-in and no real refresh against Microsoft, by design; the two calls that would reach
+  it are the stubbed ones. The "no refreshToken at runtime" claim stays labelled a SOURCE READING
+  in both the PR body and the ticket comment, per your point 5.
+- The four platform suites did NOT run: no stack up, and the changed surface is one internal
+  function reached only through the OAuth callback, which none of them exercises (0 connections on
+  either box).
+- **Kintsugi NOT READ** — Seat D 25th is mid-deploy there. Demo only, read-only SELECTs.
+- **Concurrency NOT MEASURED:** whether two simultaneous sign-ins interleave in the shared cache.
+  It is why (3) was ruled out. Worth saying where that lands: a surprising interleaving hits the
+  fail-closed >1 branch (T5), so the failure mode is "stores nothing", not "stores the wrong token".
+- No migration, no schema change, no config. Next free number is still 055, unused.
+
+## STATE NOTE
+KS-1682 moved **Backlog -> In Progress** when the PR was created — GitHub's integration did that,
+not me. Reported, not reverted, per the standing convention.
+
+## STILL OWED BY ME AT WRAP
+- The hygiene PR: BACKLOG **1244** (naming develop as the tree), plus — absent a different ruling —
+  NK1's wording fix and its provenance cell, as I proposed in the MERGED mail.
+- Team notes batched to Peter (KS-485) and Stuart (KS-772), mentions verified as real nodes.
+- history.md entry; the handover is written and current.
+
+## NEEDED-BY
+The gate on #1651 at f2827e39d5c5. I will not merge without your GO naming that head, and I will
+re-read both heads and re-predict immediately before any merge, since develop is moving today.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 54  SEEN:      244  BATCH: /private/tmp/wed_newmail/batch_20261019T231358Z.txt
