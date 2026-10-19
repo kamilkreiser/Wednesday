@@ -1,0 +1,10 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks963-preauth-rethrow.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks963-preauth-rethrow.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks963-preauth-rethrow.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks963-preauth-rethrow.test.ts
+@@ -304,3 +304,5 @@
+   // ...and the one call allowed above is a read, pinned to the statement itself rather than to its name.
+-  expect(body.slice(0, lookup)).toContain('SELECT * FROM auth_find_user_by_wallet');
++  // KS-1468 item 3: the pin is read through the BLANKED body at each raw match, so a comment that merely repeats the query text cannot satisfy it.
++  const pins = [...body.slice(0, lookup).matchAll(/SELECT \* FROM auth_find_user_by_wallet/g)].map((m) => m.index as number);
++  expect(pins.some((at) => blanked[at - 1] === '`')).toBe(true);
+ }

@@ -1,0 +1,17 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks963-preauth-rethrow.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks963-preauth-rethrow.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks963-preauth-rethrow.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks963-preauth-rethrow.test.ts
+@@ -415,6 +415,13 @@
+     expect(code).not.toMatch(/\bawait\b|\bquery\s*\(|\bfetch\s*\(|\brequire\s*\(|\bimport\s*\(|\bprocess\.|\bfs\b|\bdb\b/);
+     expect(code).not.toMatch(/\w\s*=[^=]/); // no assignment other than the signature's own: a pure expression
+   });
++  // KS-1500 m2: PURE_BEFORE_LOOKUP matches the NAME canonicalWalletAddress, so a local impure function of that name in wallet.ts would
++  // shadow the pure export and stay green. Pin where the name comes from, and that wallet.ts binds it nowhere itself.
++  it('RED KS-1500 m2 - wallet.ts uses the canonicalWalletAddress it IMPORTS from ../utils/walletEmail and declares no binding of that name', async () => {
++    const src = await readRoute('wallet.ts');
++    expect(src).toMatch(/import\s*\{[^}]*\bcanonicalWalletAddress\b[^}]*\}\s*from\s*'\.\.\/utils\/walletEmail'/);
++    expect(blankCommentsAndStrings(src)).not.toMatch(/\b(?:function|const|let|var|class)\s+canonicalWalletAddress\b/);
++  });
+   it('KS-1131 F-C a fire-and-forget write (void query) before the wallet lookup is NOT allowed', () => {
+     const src = walletFn("  void query('INSERT INTO users (id) VALUES (1)');");
+     expect(() => assertWalletNothingWrittenBeforeLookup(src)).toThrow();

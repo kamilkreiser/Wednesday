@@ -1,0 +1,156 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+index 046a17226..15b37033f 100644
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -1492,2 +1492,7 @@
+     const userId = req.user!.userId;
++    // KS-1262: the platform-wide record is stored under the same namespace; this per-user writer must never address it.
++    if (userId === 'platform-settings') {
++      res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'This identity cannot write per-user notification settings' } });
++      return;
++    }
+     const body = req.body || {};
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1262-notification-put-cannot-write-platform-settings.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1262-notification-put-cannot-write-platform-settings.test.ts
+new file mode 100644
+index 000000000..1010b8d67
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1262-notification-put-cannot-write-platform-settings.test.ts
+@@ -0,0 +1,138 @@
++/**
++ * KS-1262 - PUT /api/settings/notifications must not write the platform-wide `platform-settings` record.
++ *
++ * Both PUT /api/admin/settings (requireAdmin) and PUT /api/settings/notifications (any authenticated caller) store through
++ * setNotificationSettings(key, data), under the same `notif:<key>` namespace. The per-user route used the caller's own userId as the
++ * key, so a caller whose userId was exactly `platform-settings` replaced the platform-wide record without the admin door.
++ * After this change that one id is refused with 403 FORBIDDEN and nothing is written; every other id behaves as before.
++ *
++ * These tests dispatch through the real admin router with the real authentication middleware and a recording Redis stand-in.
++ */
++
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++import type { Request, Response, Router, RequestHandler } from 'express';
++import { configureAuth, authenticateToken, parseTestToken } from '../middleware/auth';
++import { createAdminRoutes, type AdminRouteDeps } from '../routes/admin';
++
++function buildTestToken(payload: Record<string, unknown>): string {
++  return `test_token_${Buffer.from(JSON.stringify(payload)).toString('base64')}`;
++}
++
++type CapturedRes = Response & { _status: number; _json: unknown };
++
++function makeRes(onFinish: () => void): CapturedRes {
++  const res: any = {
++    _status: 200,
++    _json: null,
++    status(code: number) { res._status = code; return res; },
++    json(body: unknown) { res._json = body; onFinish(); return res; },
++    setHeader() { return res; },
++    send(body: unknown) { res._json = body; onFinish(); return res; },
++  };
++  return res;
++}
++
++function dispatch(router: Router, opts: { method: string; url: string; headers?: Record<string, string>; body?: unknown }): Promise<CapturedRes> {
++  return new Promise((resolve, reject) => {
++    const res = makeRes(() => resolve(res));
++    const req = {
++      method: opts.method,
++      url: opts.url,
++      headers: opts.headers || {},
++      body: opts.body,
++      query: {},
++      get(name: string) { return (this as any).headers[name?.toLowerCase()]; },
++    } as unknown as Request;
++    router(req, res as any, (err: unknown) => (err ? reject(err) : resolve(res)));
++  });
++}
++
++const SEED = { general: { platformName: 'Seeded Platform' }, integrations: [{ config: { allowedDocumentTypes: ['DOCUMENT'] } }] };
++
++function makeRecordingRedis() {
++  const notif = new Map<string, unknown>([['platform-settings', SEED]]);
++  const writes: string[] = [];
++  return {
++    writes,
++    notif,
++    service: {
++      getNotificationSettings: async (key: string) => (notif.has(key) ? notif.get(key) : null),
++      setNotificationSettings: async (key: string, value: unknown) => { writes.push(key); notif.set(key, value); },
++    },
++  };
++}
++
++function buildRouter(redisService: object): Router {
++  const passThroughBodyParser: RequestHandler = (_req, _res, next) => next();
++  return createAdminRoutes({
++    authenticateToken,
++    parseTestToken,
++    mockBodyParser: passThroughBodyParser,
++    query: async () => ({ rows: [], rowCount: 0 }),
++    isDbAvailable: () => false,
++    redisService,
++    services: {},
++    log: () => undefined,
++  } as unknown as AdminRouteDeps);
++}
++
++describe('KS-1262 - the per-user notification PUT cannot reach the platform-settings record', () => {
++  let redis: ReturnType<typeof makeRecordingRedis>;
++  let router: Router;
++
++  beforeEach(() => {
++    vi.stubEnv('NODE_ENV', 'test');
++    configureAuth({ enableTestTokens: true, defaultTenantId: 'default' });
++    redis = makeRecordingRedis();
++    router = buildRouter(redis.service);
++  });
++
++  afterEach(() => {
++    vi.unstubAllEnvs();
++  });
++
++  const put = (sub: string, role: string) => dispatch(router, {
++    method: 'PUT',
++    url: '/api/settings/notifications',
++    headers: { authorization: `Bearer ${buildTestToken({ sub, role, email: `${sub}@test.io` })}` },
++    body: { integrations: [{ config: { allowedDocumentTypes: 'planted' } }] },
++  });
++
++  it('RED KS-1262 R1: a role-user caller whose userId is platform-settings is refused 403 FORBIDDEN and nothing is written', async () => {
++    const res = await put('platform-settings', 'user');
++    expect(res._status).toBe(403);
++    expect((res._json as any).error.code).toBe('FORBIDDEN');
++    expect(redis.writes).toEqual([]);
++  });
++
++  it('RED KS-1262 R2: the refusal is by id, not by role: an admin-role caller with that userId is refused too', async () => {
++    const res = await put('platform-settings', 'admin');
++    expect(res._status).toBe(403);
++    expect(redis.writes).toEqual([]);
++  });
++
++  it('RED KS-1262 R3: the platform-wide record is untouched after the refused PUT', async () => {
++    await put('platform-settings', 'user');
++    expect(redis.notif.get('platform-settings')).toEqual(SEED);
++  });
++
++  it('CONTROL KS-1262 C1: another userId still writes its own key and leaves the platform record alone', async () => {
++    const res = await put('someone-else', 'user');
++    expect(res._status).toBe(200);
++    expect(redis.writes).toEqual(['someone-else']);
++    expect(redis.notif.get('platform-settings')).toEqual(SEED);
++  });
++
++  it('CONTROL KS-1262 C2: only the exact id is refused: look-alike ids still write their own key', async () => {
++    const a = await put('platform-settings-2', 'user');
++    const b = await put('Platform-Settings', 'user');
++    expect([a._status, b._status]).toEqual([200, 200]);
++    expect(redis.writes).toEqual(['platform-settings-2', 'Platform-Settings']);
++  });
++
++  it('CONTROL KS-1262 C3: the anonymous PUT is still 401 and writes nothing', async () => {
++    const res = await dispatch(router, { method: 'PUT', url: '/api/settings/notifications', body: { x: 1 } });
++    expect(res._status).toBe(401);
++    expect(redis.writes).toEqual([]);
++  });
++});
