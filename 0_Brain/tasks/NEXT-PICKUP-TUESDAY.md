@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 267 — 2026-10-19 19:08 CHECKPOINT (s120, ctx 71%; band 80-90). **READ THIS FIRST; 258-266 stand except where superseded here.**
+### LIVE SEATS + what each owes (watchers are tracked tasks in this seat's scratchpad; RE-ARM ALL after rotation: `status_watch2.sh <STATUS> 30`, markers VERDICT:/STOPPED:/READY FOR QA:/BLOCKED:/RECORDS DONE:/RECORDS COMMITTED:)
+- **%56 Datasec/NexusAI-O** (mail channel): landing per ANSWER-25 (RD-856 TURN: merge 2f68f5f local, C-57 jest passes running ~19:0x) -> RD-857 -> RD-476 -> C-170 READY TO LAND (Tuesday verifies CodeQL + GOs) -> PR #97 forward merge + ANSWER-26 writer census -> THEN stamp + launch gate 29 on that head. Measure main by ls-remote at each checkpoint.
+- **%86 HPSM-POC-G9 (B283)** gate round 2 of 2 on PR #161 @ 7329804 (pinned on main befd45e; main is now e4f270e, disjoint files). STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B283_STATUS.md`. On GO: re-read #161 mergeable_state, squash --match-head-commit 7329804…, verify tree, correct the PR body (B282 FOR TUESDAY). On NO GO: nothing ships for -291; card Kam with residue (cap reached).
+- **%92 Security-Composer-G9 (B290)** tier-2 gate on Composer PR #81 @ 33bb703 (B285 timing tests). STATUS `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B290_STATUS.md`. On GO: completion check, close pane, mark ready + squash-merge --match-head-commit 33bb703ee8178ec3f48d14993a29daff36eca3e3 through CodeQL (Composer gh config), verify tree.
+- **%93 HPSM-POC-W6 (B288)** builder, L4 imports. STATUS `…/HPSM-POC/…/2026-10-19_B288_STATUS.md`. On READY: verify at source, draft PR, tier-2 gate (B286 shape), merge.
+### OWED (not started)
+- HPSM-POC records seat (batch): -290 transition + -226 description + N-8 ruling (card hpsmpoc-feedback-retry-duplicate-1019 a) into CLARIFICATIONS + HPSMPOC-226 comment, B286-1/-2 candidates, -267 ruling C-entry; then `--delivered` those cards.
+- Composer: fold local records/b287 (a9787105) into root main (quarantine untracked collisions first).
+- Laptop Secuura move to G-DRIVE when Kam mounts it (DELTA 265); 140 GB WEDNESDAY copy decision.
+- Kam owes: deputy PO name (card hpsmpoc-sme-deputy-1019 a); open cards: composer-demo-objects-image-pin-1019, tuesday-laptop-secuura-removal-b-1019, composer-l05-setup-card-too-1014.
+- Digests: this seat edited `_ledger_laptop_datasec.md`: regenerate BOTH digests at wrap/rotation (`boot_digest.py --by-tier` and bare).
+
 ## 🟢 DELTA 266 — 2026-10-19 18:50 CHECKPOINT (s120, ctx ~67%; band 80-90). Supersedes 264's B287 line.
 - **B287 DONE + B289 committed its records:** Composer local `records/b287` @ a9787105 (C-79, C-80, BACKLOG #319, history). Two rulings --delivered. **OWED: fold records/b287 into Composer root main** (quarantine the root's untracked collision copies first, B278 method; a records seat, not Tuesday's hands).
 - **Card `composer-demo-objects-image-pin-1019` OPEN** (rec b: pin + keep an off-box copy on G-DRIVE; default c hold). On a/b: a deploy seat under the push-to-demo grant? NO: the demo VM change is this card's ruling, executed by a Composer seat with backup + rollback per B287 `proposed/apply-and-rollback.md`.
