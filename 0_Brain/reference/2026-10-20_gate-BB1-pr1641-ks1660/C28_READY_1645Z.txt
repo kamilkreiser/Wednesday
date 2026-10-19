@@ -1,0 +1,76 @@
+=========== [INBOUND] 2026-10-19T16:45 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1641 KS-1660 at 260115f9b481 (tier 2,
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1641 KS-1660 at 260115f9b481 (tier 2, product) - landing aa6f52d2ac54 on a4187f0f6622, 4 instruments agree
+## BLUF
+
+**#1641 (KS-1660) is READY FOR GATE, tier 2 (product code changes).** Head `260115f9b4819576a923bce27971cc746872ce51`, one commit on develop `a4187f0f66228603df211628d6d8ae239d6147d0`, landing tree **`aa6f52d2ac5464461695b5ce8c48f13585f991e9`**. 3 files, **+154/-1**, equal to the Spark's own `numstat`. `Refs KS-1660`. Nothing deployed, no environment read or driven.
+
+https://github.com/Secuura/Distributed_Secuura/pull/1641
+
+## Item 0, at the live head
+
+- `patch.diff` == `cat(section_1..3)` == the READY file's embedded block, all `cmp` rc 0. Control: wrong-order concatenation differs.
+- Declared pre-images are the real blobs at develop: `certifications.ts` `66791e844`, `ks1293` `1907f387c`; the new test file absent, with a does-exist control.
+- Strict `git apply --check` per section and whole: rc 0, empty output. Control: a corrupted-context section 1 is refused, rc 1.
+- Post-image blobs after apply equal the diff's own index lines on all three files: `15f3b2bdc`, `c3197faa1`, `ef90c4826`.
+- Census: of 23 open PRs, **0** touch any of the three files; dynamic positive control (`secuura-api.yaml` from open #1640) fires.
+
+## Red-first / green-after
+
+At the checker's exact scope (both declared test files, 20 cells): tests only -> rc 1, **5 red / 20**, every red carrying a failure message; product section -> rc 0, **20/20**, same cell names. My predicate checks both directions — every declared red matched AND no red unmatched by a declared one — with an invented expected-red left unmatched as the control.
+
+**Suite by cell name:** baseline at develop **1,526/1,526** (128 files, rc 0) -> patched **1,536/1,536** (129 files, rc 0). +10 cells, 0 vanished, **0 new reds**.
+
+**The ks1293 manifest line is load-bearing:** with the new test and without that line, ks1293's MANIFEST-DRIFT cell reds, 1 of 10.
+
+## Mutants — all compile-safe, none survived, none a false kill
+
+Unmutated control rc 0, 10 cells, 0 failed. `mutate.py` asserts each line's exact text before planting and flags a kill whose failure text carries a `TS####`.
+
+| mutant | line | breaks | killed by |
+| -- | -- | -- | -- |
+| M1 | 646 | the fix undone; variable still declared and used, so it compiles | R1, R2, R3 |
+| M2 | 650 | log guard widened to `!== null` | C3 |
+| M3 | 651 | log loses `tenantId` | R3 |
+| M4 | 651 | log carries the dropped VALUE | R3 |
+| M5 | 666 | caller `data` not spread at all | C1, C2 |
+| M6 | 666 | re-plants only a NON-STRING value | **R2 alone** |
+
+M6 is the honesty cell: R2 is not a restatement of R1. M2 and M5 show the three controls are not decoration. All six distinct cell ids pinned.
+
+## Landing prediction — four readings, not three
+
+`merge-tree --write-tree`, an index-apply of the branch diff in a bare index, a real `merge --no-ff` in a scratch worktree, and the branch commit's own tree all give `aa6f52d2ac5464461695b5ce8c48f13585f991e9`; merge-base == develop, so it is one commit on the current tip. **Control:** the same patch on a different base gives `0297600af90ea48050eb5e0e301be527aba96344`. Void if develop moves; I will re-take it before any merge.
+
+## Push and preflight
+
+Pushed at 16:31:24Z, landed 16:42:03Z — **10 m 39 s**, the push's own rc 0, and the ref verified by `ls-remote` equal to my local tip rather than assumed from the wrapper's exit code. Verbatim in the PR body, ending:
+
+```text
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+```
+
+**Not a pass.** Legs 3, 4 and 8 need a running stack; no Docker on this Studio. `shell suites: 91 passed, 0 failed, 0 skipped (of 91)`.
+
+**The preflight corroborated the KS-1090 claim independently:** its `typecheck-tests` lines name **auth, api-gateway and vc-issuer only** — no originate. That is the gate's own output saying what I measured.
+
+## Readbacks
+
+- PR body: stored 8,894 == sent, EQUAL.
+- Ticket comment `35d12d0c-1afb-426e-bd44-9b34b403208d`, stored 4,472 == sent, read-back EQUAL.
+- `bodycheck.py` PASS on the PR body (3 hex tokens, all resolving) and on the comment (5, all resolving), fake-token control failing to resolve both times, 0 close-keyword hits with its controls firing 2/2.
+- Attachment: `linkKind=contributes`, `status=open`.
+
+## Two facts for your record
+
+1. **KS-1660 moved Backlog -> In Progress on its own**, by the GitHub integration when #1641 opened, 4 s after creation. I did not change its state or priority (still p4).
+2. **The ~85 s attachment lag is an upper bound, not a constant** — this one appeared in **5 s**, measured from `created_at` rather than from wall clock.
+
+`mergeable_state` reads `unstable` for the same reason #1638 did: Actions runs queued forever on a retired CI. Neither a failure nor a pass.
+
+## Next
+
+Item 3 (KS-1500 + KS-1468, one test-only PR, two commits) — its item 0 is already done and both tamper lines are re-taken byte-identical at develop. Then item 4 (KS-1676, four passes). I will not merge #1641 without your head-pinned GO.
+
+=========== [INBOUND] 2026-10-19T16:40 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] STATUS: no new ticket - KS-1090 already covers the ori
