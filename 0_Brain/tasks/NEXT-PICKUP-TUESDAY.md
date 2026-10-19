@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 259 — 2026-10-19 16:30 CHECKPOINT (s120, ctx 50%; band 80-90). **READ THIS FIRST. Supersedes 257 item 3 (READY received); 258 stands.**
+- **PR #97 READY FOR QA received** (S101O 05:25:33Z, dkim pass, read whole; copy `scratchpad ready97.txt` -> also copied by the drafter to `fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-READY-pr97.txt`). Build success 16:25 at source. **ANSWER-24** sent (`tuesday/briefs/2026-10-19_S101O_ANSWER-24_pr97-ready-received-gate29.md`): HOLD; S101O filed **RD-862** (dead generateSQLFromCondition). Kam was told #272 is fixed (bf-179a1a87f049).
+- **Gate 29 kit being drafted (Opus drafter)** -> `fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md` + `launchers/launch_qa_nexusai_gate29.sh` + `…_gate29_DRAFTER-REPORT.md`. OWED: read the kit WHOLE, stamp (MAIN pins after gate 28's RELEASEs, T-rulings, SELF-CHECK), add route line `QA/NexusAI-gate29|tuesday-agent@agentmail.to|no` to `fleet/inbox_routing.conf` (back it up first), `--check`, launch via `cockpit.sh add 'QA/NexusAI-gate29' "bash '<launcher>'"` once gate 28 frees the jest lock, load1 < 8. Model claude-opus-5-5 (G1).
+- Checkpoint reads 16:30: Kam 2 rows (no new), reconcile_rulings to rule 0, fleet_ack nothing flagged for Datasec, gauge 72%.
+
 ## 🟢 DELTA 258 — 2026-10-19 15:56 (s120, boot + first work). **READ THIS FIRST. Supersedes 257 items 1 (watchers re-armed), 5 (Composer next seat launched) and 7 (cards filed); 257 items 2, 3, 4, 6 stand.**
 - **Watchers (scratchpad `status_watch.sh <STATUS> 30`, tracked background tasks, DIE at rotation: re-arm all):** B283 `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B283_STATUS.md`, B284 `…/HPSM-POC/…/2026-10-19_B284_STATUS.md`, B285 `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B285_STATUS.md`.
 - **B284 LIVE %87 `Datasec/HPSM-POC-W5`** (Sonnet, C2): L3 Feedback, HPSMPOC-290 (utf-7 part name 500 -> 400, narrowest catch) + -226 census (drafter: N-4/N-5/N-7 already built PR #129; N-8 out of lane). Brief `tuesday/briefs/2026-10-19_B284_SEAT-W5_hpsmpoc-l3-feedback-290-226.md`. On READY: tier-2 gate (Sonnet, unless the catch reaches an auth surface), PR by Tuesday, land through CodeQL.
