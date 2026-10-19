@@ -1,0 +1,78 @@
+=========== [INBOUND] 2026-10-19T14:54 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE (tier 1 batch): #1630 KS-1653, #1631 KS
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE (tier 1 batch): #1630 KS-1653, #1631 KS-1639, #1632 KS-1661 - three heads, batch landing tree 198e44b77a54 on develop 88b8ceb9f304
+## BLUF
+
+**READY FOR GATE, tier 1, three PRs.** All three say `Refs` (your ANSWER superseded the brief's `Closes`), none is deployed, every ticket stays In Progress. Each ticket carries one BLUF comment, read back by id. **Commit 2 on #1631 is mine (cell F4). Commit 1 on every branch is the Spark's patch byte-for-byte.** Landing trees are on live develop `88b8ceb9f3041672d9575b40c09869d45ab1c111`, taken by three instruments that agree. The strongest evidence: **the suites on the real stacked merge are green with no new red** (table below).
+
+| PR | ticket | head | commits | landing tree ALONE on live develop |
+| -- | -- | -- | -- | -- |
+| #1630 | KS-1653 | `19bb05069f03c8b6e9c35a2e0960cb3030dcf289` | 1 (Spark) | `8de20974a299711bf0694d2c6dabec13e4b0e080` |
+| #1631 | KS-1639 | `40ab71dd0fec` (commit 1 `8d1dde1a5444`) | 2 (Spark, then my F4) | `0653cef428255b17cfae73f2f77f4800e8000a3a` |
+| #1632 | KS-1661 | `77e5c5472534b6e4c817890640c4a0f6da291705` | 1 (Spark) | `fc1cd1546a9642cb90be4f15442284f1dd2c549d` |
+
+**Stacked in merge order 1653, 1639, 1661: tree `198e44b77a5426409f5e1b98a51299c88a32805c`.** All four of my PRs (with #1634): `ca60e237ea1016d3f1814490b05dcae539ddf6c7`, identical in both orders and equal to a real `git merge --no-ff` of all four in a scratch worktree. Live develop's own tree is `985fd9f982a8c4bc987258cb6a99086a72958a79`. Order does not matter: the PRs are file-disjoint.
+
+## Recommendation
+
+1. Gate #1630, #1631, #1632 as one batch. **Merge only on your head-pinned GO**; re-take the trees at the real head first (develop has moved four times since I booted).
+2. **List commit 2's cell as mine when you tell the gate.** F4 (below) is the only seat-written cell in this batch.
+3. Merge order 1653, 1639, 1661 is as good as any. After #1630 merges I do the comments-only `documents.ts` follow-up you approved.
+
+## Detail
+
+### The suites, at the landing parent and at the landing tree (taken at load average 7 on 28 cores)
+
+| service | live develop `88b8ceb9f304` alone | all four stacked (tree `ca60e237ea10`) | what changed |
+| -- | -- | -- | -- |
+| auth | 1,089/1,089, 98 files | **1,095/1,095, 99 files** | +6 cells (#1630) |
+| security | 354/354, 32 files | **361/361, 33 files** | +7 cells (#1631) |
+| originate | 1,510/1,510, 126 files | **1,523/1,523, 128 files** | +13 cells (#1632 5, #1634 8) |
+
+Every run: rc 0, 0 skipped, **0 cells vanished, 0 new reds**, compared by cell name and not by total. Security rose by 7 between my base and live develop because #1628 landed 7 cells (347 to 354), which is why I re-took the baseline.
+
+### Red-first on develop, matching each checker's A4 exactly (assertion reds, not load failures)
+
+- **#1630:** 2 failed, 4 passed (S1, S2). **#1631:** the Spark's 6 read 3 failed, 3 passed (F1-F3); with F4, 4 failed, 3 passed. **#1632:** 3 failed, 2 passed (H1-H3).
+
+### Patch identity and pre-images at live develop
+
+- All three `patch.diff` equal the cat of their sections and the READY diff block; strict `git apply --check` was clean per section at my base `46e4343a5312`; a corrupted-context control is refused.
+- Product blobs at **live** develop equal the declared pre-images and are unchanged since my base: `users.ts` `c360ce040`, `converters.ts` `edacb6a7d`. Post-image blobs equal the declared ones: `users.ts` `10fab906c`, test `0a1f5e5a1`; `converters.ts` `2faf51a40`, test `529a3f262`.
+- **#1632's diff has no `index` lines**, so there is nothing to compare. Its checker also did not compare the applied result (the patch is not byte-identical to the drafter's golden: context lines differ). **I did:** both apply to the identical tree `8d8c2228afd7`, equal to the branch tip's own tree at my base. Live-head pre-image blobs: `verification.ts` `d5c349c6f`, `verificationV2.ts` `5b6620fb3`, both unchanged since base.
+
+### Commit 2 on #1631 (mine): cell F4, and the mutant it kills
+
+A regex that dropped the **start** anchor, or the **end** anchor, passed all six Spark cells, so `'tx'`, `'trueish'`, `'tomorrow'` or `'not'` would read an API key ACTIVE. That is the fail-open direction the ticket exists to close. **F4 is red on develop's `converters.ts`, green on the patch, and kills both (M6, M7).** Ten mutants planted by line number in all; M8 (`Boolean(x)` to `x === true` on the non-string branch) survives by design, since it differs only for numbers and objects that node-postgres never delivers for a `BOOLEAN` column. The PR body quotes the ticket's own deny-list snippet beside the raised allow-list, and the KS-1639 comment carries the design question (9 of 25 inputs differ, all in the fail-open direction for the snippet). **The "accept text at all?" question stays open and is not settled by this PR.**
+
+### Mutants on the other two (no cells added)
+
+- **#1630:** 8 planted, 8 killed. M2, "stop admitting `certifications:write`", reds **exactly C1**, the admission-half red that gate AJ1 N3 said did not exist.
+- **#1632:** six aimed at the change, all killed, the inverted ones by the genuine-reply controls C1 and C2. Four mutants on **neighbouring** guards survived the file. I ran them and 4 more against the **whole** originate suite: **seven guards in these two functions are pinned by no test** (stored `simulated` and stored tx-hash shape on both paths, the incoming tx-hash shape on both, v1's `verified`). Six others are pinned elsewhere. **Filed as KS-1676 (Medium, Backlog), not fixed here.**
+
+### Open-PR census (re-run 01:52 AEDT)
+
+26 open PRs, 126 files, each PR's file count equal to GitHub's `changed_files`. **No open PR other than my own touches any of the 9 files.** The three develop commits since my base (#1627, #1628, KS-1622) overlap my files in 0. **A disclosure on its control:** my script hard-codes #1627 as the control PR, and #1627 has merged, so it printed "CONTROL FAILED". The instrument is not blind: it found #1633 on `m365-integration/src/index.ts`, which I confirmed separately through `gh` (#1633 is open and lists that file).
+
+### Preflight, from each push's own output
+
+`PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` on all four pushes. Legs 3, 4 and 8 (spec-auth, path resolvability, served-spec) skipped because the local stack is not up; there is no Docker on this machine. **That is not a pass**, and every PR body says so. Legs 6 and 7 (advisories) ran clean. Shell suites 91/91 (542 s on #1630). The excerpt in each body is extracted by script and checked line-for-line verbatim.
+
+### Timeouts and load, as you asked
+
+On unpatched develop at load 23 three cells read `Test timed out in 5000ms` (security `ks578-ks643-revoke-authorization`, 5,122 ms; auth `ks949-platform-admin-seed-identity` x2, 5,006 and 5,001 ms). **Each file alone is green** (11/11 and 31/31). **At load 7 the live-develop baseline above is fully green**, which is direct support for the load explanation. KS-1155 owns the class and now carries the data point.
+
+### Two things I did that you should know
+
+- **I moved `origin/develop` in my clone while the #1634 push's preflight was running.** I fetched live develop into a private ref expecting that would leave `origin/develop` alone. It did not: git updated it too (46e4343 to 88b8ceb). The legs that read a base (6, 7) had finished minutes earlier, the hook output for that push mentions no stale base, and it passed 13/16 with the same legs skipped. I cannot prove the hook never re-read the ref. Nothing was pushed to GitHub from it.
+- **The branches are cut from `46e4343a5312`, not the live head.** They merge cleanly onto it (merge-tree, no conflict). I did not merge develop in, because it would change each tip and void a gate already running on one. Say if you want it.
+
+### Other filings and owed work
+
+- **KS-1676** filed (above). **KS-1155** comment (the three timeouts). **KS-1639** carries the design question. No new ticket for it, per your Q1.
+- **Owed after #1630 merges:** the comments-only `documents.ts:1963-1982` correction, `Refs KS-1653`, as one PR.
+- Hygiene: the PR bodies pass a gate before they go up (no close-family word near a ticket key, every hex token of 9+ chars must resolve to a real object, with a fake-token control). Command for the handover: `python3 -I bodycheck.py <file>` from my scratchpad, which I will copy into the handover.
+
+## Next
+
+#1634 (KS-1658, tier 2) has its own READY mail. Then the second batch, re-taken at the live head, starting with KS-1262 (tier 1). The clone is `deploy-clones/seatC25-7e2f8157cec2`; my private refs `refs/seatc27/rehearsal-batch` (`414a613f5be7`) and `refs/seatc27/rehearsal-all4` (`801fe2dfc986`) hold the rehearsal merges, and nothing of this is deployed or pushed beyond the four branches.
+
