@@ -1,0 +1,123 @@
+=========== [INBOUND] 2026-10-19T21:46 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1649 (KS-1116) at c2a409ed8d0b, tier 
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1649 (KS-1116) at c2a409ed8d0b, tier 1 - Kam's (a) built; legacy row's tenant NOT determinable so (a) reaches 0 existing rows; BH1 cells; KS-1684/1685/1686 filed
+=====================================================================================
+BLUF
+=====================================================================================
+READY FOR GATE, tier 1: **PR #1649 (KS-1116)**, https://github.com/Secuura/Distributed_Secuura/pull/1649
+  head    c2a409ed8d0baa29a9a6bedb92dd3f8a4b9bf323  (2 commits, both Kam Kreiser <kamil.kreiser@secuura.ai>)
+            c367a8b88422  test-only: gate BH1 NOTE 1's three missing regressions
+            c2a409ed8d0b  product: Kam's ruling (a) on owner-less rows
+  base    develop c66b834ed4511e77ec4059abe1f46a4bc4e72de6 (= #1648's merge; unmoved at ls-remote)
+  landing tree  eadbaa1bbc608898fe034307357ddcf5e12aadce = head^{tree}.
+                CONTROL: onto develop + 1 file (an unreferenced commit) -> e3cfdc00c384, different.
+  2 files (ownership.ts, the KS-1116 test file), +209 / -25; 0 removed lines contain `expect(`.
+
+COMBINED, as you allowed: one PR. Two separate PRs would both edit the same test file and the second would
+need a merge-in round; one PR costs one tier-1 gate instead of two. Branch name `test/ks-1116-bh1-...` was
+pushed before your 21:21:38Z ruling arrived; the second commit went on it as a fast-forward rather than
+leaving a stale remote branch behind (nothing deleted).
+
+**THE OPEN POINT YOU ASKED ME TO MEASURE FIRST — the legacy row's tenant is NOT determinable. Kam's (a)
+therefore reaches 0 existing rows today** (demo 0 of 1; kintsugi has none). Measured read-only on demo
+(SELECTs only, structure and counts, no field values printed beyond empty/non-empty):
+  - The row: created 2026-08-02 02:17:49Z, keys @context, holder, id, type, verifiableCredential. holder
+    is EMPTY; one embedded credential whose issuer is EMPTY and whose credentialSubject has NO keys. No
+    tenant anywhere in the JSON, and nothing to join `svc_dids` (which does carry tenant_id) on.
+  - `audit_logs` (408,022 rows; written by the gateway, not vc-issuer: 0 audit references in
+    vc-issuer src, control: originate's db.ts/index.ts hit). 170 `presentations.create` rows overall;
+    NONE of them has a resource_id (0), so the audit never records which presentation was created.
+    0 audit rows match the row's id, exact or bare uuid. Within +/-10 s of the row: 60
+    presentations.create rows, 1 successful, all 60 with resource_id NULL; across all time, 2 successful
+    creates vs 1 stored row, so the two do not correspond. The rest of that window is a create/update/
+    delete burst across stake, status, team, tenant, tier, wallet... -- a fuzz-sweep signature, which
+    matches the row's empty content.
+  - So the only link is time proximity, which is not a join I can name. Per your rule the row stays
+    unreadable and is refused even to the would-be tenant's admins (cells N1-N6, kept, retitled).
+  -> Your line: "Wednesday tells Kam if his option ends up reaching no row." It reaches none of the
+     existing rows. It does govern any owner-less row that DOES carry a tenant: one whose creator's token
+     had a tenant but no usable userId.
+
+THE PREDICATE, as built (`ownership.ts`):
+  ownerlessRowReadable(req, rowTenantId) = role is EXACTLY 'ORG_ADMIN' or 'SYSTEM_ADMIN' (a non-empty
+  string, case-sensitive) AND rowTenantId !== null AND the token's tenantId (non-empty string) === it.
+  mayRead passes the row's created_by_tenant_id. Two choices of mine for you to rule on if you disagree:
+  (1) CASE-SENSITIVE roles: auth signs canonical names (mapDbRole maps `org_admin` -> ORG_ADMIN), and the
+      repo is inconsistent (scopes.ts folds case; ks692's platform list has `super_admin`). Strict = fail
+      closed; cell A2/A5/A9 "org_admin" pins it (MA5 reds it).
+  (2) SUPER_ADMIN is NOT admitted: Kam named two roles.
+  The "no usable userId -> refuse" guard that was inert under option C is now LIVE: an ORG_ADMIN token of
+  the right tenant with no userId is refused (MA7 reds A2/A5/A7/A9).
+
+=====================================================================================
+CELLS (the KS-1116 file: 118 = 73 from #1648 + 11 BH1 + 34 ruling (a))
+=====================================================================================
+- A1/A4/A8: ORG_ADMIN and SYSTEM_ADMIN of the row's tenant read an owner-less row WITH that tenant -> 200
+  (presentation memory path; presentation DB path; credential DB path).
+- A2/A5/A9 (x8 each): refused, byte-identical to an unknown id (status + serialised body) -- an ORG_ADMIN
+  of ANOTHER tenant; an OWNER of the row's tenant; a SYSTEM_ADMIN with no tenant claim; tenant as [T1];
+  role as ['ORG_ADMIN']; role 'org_admin'; an ORG_ADMIN of the right tenant with NO userId; no principal.
+  A2 embeds a positive control (ORG_ADMIN of T1 reads the same row, 200) before its refusal.
+- A3: admins with no tenant claim vs a row whose tenant is ALSO unknown -> 404 (null never matches null).
+- A6: the query-throws memory fallback decides the same way (T1 admin 200 after the SELECT threw; T2 404).
+- A7: DB unavailable, credential via store(): T1 admins 200; every near miss 404, byte-identical.
+- N1-N6: assertions unchanged (tenant unknown -> refused to OWNER, ORG_ADMIN and SYSTEM_ADMIN of T1);
+  titles now say "tenant unknown, ruling (a)" instead of "interim option C".
+- BH1 cells: X1/X2 (owner smuggled in the POST body), Q1 (revoke's Map-miss, foreign caller refused;
+  the creator's own 404 there is KS-1684 and NOT asserted), W1/W2 x4 (right ids, wrong type).
+
+=====================================================================================
+RED-PROOF (each mutant `tsc --noEmit` rc 0 ON ITS OWN; restore from snapshot, sha-equal after every arm)
+=====================================================================================
+Ruling (a), 12 arms (`tools/redproof_ruling_a_c30.py` -> redproof-ruling-a-run2.log fbc8f46bfbe19de7):
+  FIX 118/118 ·
+  BASE (the previous commit = option C) -> A1 A2 A4 A6 A7 A8 red (A2 on its embedded control,
+    "expected 404 to be 200"), A3/A5/A9 and every old cell green ·
+  MA1 OWNER admitted -> A2 A5 A7 A9 · MA2 no tenant equality -> A2 A5 A6 A7 A9 ·
+  MA3 unknown matches unknown -> A3 · MA4 claims coerced -> A2 A5 A7 A9 ·
+  MA5 role case-insensitive -> A2 A5 A7 A9 · MA6 row tenant never passed -> A1 A2 A4 A6 A7 A8 ·
+  MA7 no-userId guard dropped -> A2 A5 A7 A9 ·
+  BH1 re-keyed: BM1 -> X1 X2 · BM2 -> Q1 · BM4b -> W1 W2.
+  My own instrument slip, fixed before these figures: the first run declared A2 must-GREEN on BASE and
+  MA6 and read FAIL; A2's embedded control is SUPPOSED to red where no admin can read. Want-sets
+  corrected as data, re-run, and A2's failing line confirmed to be that control.
+BH1 cells on the commit before (a) (`tools/redproof_bh1_c30.py` -> redproof-bh1-run2.log b272388d5509217f):
+  BM1 -> X1 X2; BM2 -> Q1; BM4 -> P3 W1 W2; BM4b (tenant-only) -> W1 W2. NONE of the 73 original cells
+  red on BM1, BM2 or BM4b -- exactly NOTE 1's gap. Disclosed: my BM4 is broader than the gate's (it also
+  coerces userId, so it reds my old P3, which the gate says its BM4 did not); BM4b is the narrower shape.
+
+OTHER EVIDENCE: vc-issuer 18 files / 278 tests rc 0 (evidence-ruling-a/suite.log 7c4839320c7a7c2a);
+build, lint, leg-16 ratchet rc 0 (18 test files, 0 errors). Pushes: c367a8b8 rc 0 (evidence-bh1/push.log
+ca0010edca06b9f5), c2a409ed fast-forward rc 0, 21:34:02Z-21:44:58Z (evidence-ruling-a/push.log
+b3ca057748ab202d). Both preflights VERBATIM: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing
+failed. legs 3 4 8 — local stack not up ... This is NOT a pass." Hook route for the second push: the
+remote branch was exactly the new commit's parent, so the non-fast-forward refusal (:71/:76) cannot fire;
+HEAD was pushed (:351 cannot fire); preflight ran (:396).
+NOT RUN: Schemathesis, Akto, Playwright, k6 (stack down; Docker is Seat R's). No live HTTP probe.
+
+=====================================================================================
+NOTES 2 / 3 / 6 (your order: after NOTE 1 and this change) -- FILED, each board-searched first
+=====================================================================================
+  KS-1684 Low    NOTE 2: after a revoke, the creator can be refused on the memory fallback (fails closed).
+                 https://linear.app/secuura/issue/KS-1684
+  KS-1685 Medium NOTE 3: every API key without a connector id is ONE principal (connector:api-key) per
+                 tenant. Re-read: auth jwt.ts:289, security index.ts:445-448; precedent: originate's
+                 isFallbackConnectorId (connectorOrganisationErasure.ts:114) refuses that principal for
+                 erase-connector, vc-issuer does not special-case it (0 refs). KS-869 (merged) is NOT the
+                 owner: it persisted connector ids, it does not change a key minted without one.
+                 https://linear.app/secuura/issue/KS-1685
+  KS-1686 Low    NOTE 6: prism GET /api/credentials/:id (prism index.ts:690 -> dbGetCredential :231,
+                 svc_prism_credentials) unbound; gateway sends only ^/api/did to prism (proxy.ts:920,
+                 control: 6 vcIssuer mounts); prism host port commented out in compose.
+                 https://linear.app/secuura/issue/KS-1686
+  All: Bug, Backlog, project "Security Review -- Platform K", related -> KS-1116, board account; read back
+  (priority, label, project, relation, content strings present, a never-written control absent).
+  Searches with controls (never-written token -> 0; `generateAccessToken` -> 2). PRIORITIES ARE MY PICKS:
+  adjust freely.
+NOTE 4: carried in the one KS-1116 comment I post after #1649's verdict (covering #1648's merge, #1649,
+KS-1683-1686, ruling (a) and the deploy order: 054 before the new vc-issuer, migrations image rebuilt and
+the four columns verified directly). If you want it posted NOW instead, say so.
+
+NEXT: hold for the gate. Merge only on a GO naming c2a409ed8d0b, same recipe as #1648.
+Nothing deployed; no az; the only box contact this leg was read-only SELECTs on demo.
+SELF-CHECK: re-read end to end before sending; every figure above comes from a call in this session.
+
