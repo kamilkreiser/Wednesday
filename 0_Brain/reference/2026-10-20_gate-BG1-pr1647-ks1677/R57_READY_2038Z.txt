@@ -1,0 +1,82 @@
+=========== [INBOUND] 2026-10-19T20:38 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1647 (KS-1677) at f9f425582bb2, tier 
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1647 (KS-1677) at f9f425582bb2, tier 1 - landing 7aa017b89166 on develop 937c7d10b7f8; cookie measured live; /complete removed (311->310 paths); migration 053 in 4 live copies + 053; 13/13 compile-safe mutants killed; preflight 13/16 (3 skipped)
+## BLUF
+
+**READY FOR GATE: PR #1647, KS-1677, tier 1 (auth surface).** https://github.com/Secuura/Distributed_Secuura/pull/1647
+
+- **Head `f9f425582bb20f8b01799f8d6b8daf3ab77cfdda`**, one parent = **develop `937c7d10b7f83d2fa7e5e662ce46a9e8877186e3`** (live, by `ls-remote`, at 20:37Z).
+- **Predicted landing tree `7aa017b89166288f9883ca30b2d6805ad0d5b06c`.** It equals the head's own tree, because develop is its only parent; `git merge-tree --write-tree` against live develop gives the same.
+- 17 files, +968 / −234.
+- **Three-dot file list (develop...head), exactly 17:**
+  - **Schema:** `M deployment/azure/migrate/init.sql`, `M docker/init/04-sprint2-service-tables.sql`, `M docker/init/06-m365-tables.sql`, `A migrations/053_m365_oauth_states.sql`, `M services/api-gateway/src/startup-migrations.ts`
+  - **Spec:** `M docs/openapi/secuura-api.yaml`
+  - **m365 product:** `M src/index.ts`, `M src/auth/token-manager.ts`, `M src/security/tokenCrypto.ts`, `M src/m365-integration.openapi.ts`, `A src/oauthState.ts`
+  - **m365 tests:** `M __tests__/ks1641-…`, `M __tests__/ks1671-…drops-a-non-string-code`, `M __tests__/ks1671-…reads-only-string-query-values`, `A __tests__/ks1677-the-oauth-callback-binds-…`, `A __tests__/ks1677-oauth-state-statements-on-a-real-engine`, `A __tests__/ks1677-the-oauth-state-holds-without-a-database`
+  - All paths are under `Blockchain/Dev/`, and the m365 ones under `services/m365-integration/`.
+
+## Your conditions, item by item
+
+- **Q1 cookie, measured LIVE first:** done before P1-P4 (STATUS 20:02:02Z).
+  - The stack: slot 4, `secuura_r57probe`, built from develop `5ac66264b9ee` plus a never-pushed probe.
+  - **Request path:** a same-origin `fetch` of init through nginx -> api-gateway (`proxy.ts:949`, authenticated) -> m365, giving 201. Then a cross-site top-level GET: `127.0.0.1:7199` -> 302 -> `localhost:7182/api/m365/callback` -> nginx -> the gateway's no-auth branch (`proxy.ts:937`) -> m365 `/api/callback`.
+  - **The cookie as received at m365** (its own log): `m365_probe_s=…; m365_probe_ns=…`. **Both** arrived. The browser had stored them with `Path=/api/m365/callback; HttpOnly; SameSite=Lax`, Secure and not.
+  - **Control:** cookies cleared, same request; m365 logged `<NONE>`.
+- **Q2 PKCE S256:** done. The verifier is stored encrypted with the existing `encryptToken`, via `TokenColumn` += `code_verifier`; `tokenAad` is unchanged, so the existing tokens' AAD is untouched.
+- **Q3 retire `/complete`:** done. **Removed operation: `POST /api/m365/connections/complete`** (plus its `M365CompleteConnectionRequest` schema).
+  - Named in the PR body, and in a BLUF line on KS-1677 (comment `5f1b2f05`).
+  - **Spec `--check` control PASSED on the unedited source BEFORE the edit**, and passes after the regeneration. Delta: 3 hunks, **311 -> 310 paths**.
+  - I also corrected the callback's spec description, which claimed the exchange happened "via /api/connections/complete"; the code never did that.
+- **Q4 DB table, CREATE in every copy, by enumeration:** **migration `053_m365_oauth_states.sql`** (number 053; the highest present was 052).
+  - The census enumerates every file that creates `svc_m365_connections` (`docker/init`, `migrations`, `deployment/azure/migrate`, the gateway file) and finds **five**. **Four now also create the new table, plus 053.** `migrations/002_verification-tiers.sql` is history: it is not edited, and a fresh database reaches the table through 053.
+  - The census is also **a test** (P1 in the real-engine suite), with the control that the enumeration finds `002`. All five copies build **the same columns** (P2).
+  - **It needs its own census line in the deploy round:** the migrations image bakes the `.sql`, so rebuild `migrations` and check the table on the schema itself.
+- **Q5 10 minutes. Q6 one PR. Q7 tier 1.** All done.
+- **Order:** KS-1679 READY -> KS-1682 filed -> cookie first -> build -> this READY.
+
+## Where I went BEYOND the ruled plan: please rule on each
+
+1. **The binding is part of the CONSUME KEY** (`DELETE … WHERE state_hash = $1 AND binding_hash = $2 RETURNING`), not checked after the consume. My plan said "consume atomically before the exchange". Doing that as written would let anyone holding the state BURN a real user's sign-in, which is KS-819's exact bug class on Platform K's own OAuth server. Now a miss spends nothing; R15 and real-engine S2 pin it.
+2. **A third suite for the no-database branch.** Every other harness runs with the DB up, so the store's memory branch would never execute. Its own mutant X12 ("never deletes") **SURVIVED at first**: a replay after completion is also stopped by the not-pending check, and in-process the "race" was serialised. M-R4 now fires two callbacks while the exchange takes 50 ms, as a real Microsoft call does, and kills it.
+3. **R16:** init refuses a token naming no user. The state records its initiator, so the user must be named. The first mutant of it did not compile (`TS2322`); X8b is the compile-safe form, killed by R16.
+4. **No `tenant_id` and no RLS on the new table**, as for `svc_m365_connections` (039's carve-out). The callback has no tenant context; the organisation is checked in code (G1).
+
+## Evidence (all mine, each instrument shown able to fail)
+
+- **Red-first, every label MEASURED on both sides.** Develop's product files were swapped in, the swap asserted, the files restored byte-identically.
+  - Route suite: 23 cells (16 RED, 2 GUARD, 4 CONTROL, K0). Develop fails exactly the 16 REDs.
+  - No-DB suite: 5 cells (4 RED, 1 CONTROL). Develop fails the 4 REDs.
+  - Real-engine suite: 18. It cannot load on develop, which has no `oauthState`, so it is NOT counted as red.
+  - **My first draft mislabelled three cells. The develop run showed it, and they were corrected before any count:** R15 had been called a control; G1 and G2 had asserted the refusal's wording.
+- **Existing cells, kept, none weakened.**
+  - **KS-1671 K3/K4/K5** used a connection id as the "real state". With that, K3/K4 would have gone **VACUOUS** against their own mutant. They now use a minted state plus its cookie, and **X9 shows K3/K4 still kill `stringParam`'s removal**.
+  - **C2's** expected message moves from `connection_not_found` to `invalid_state`, still exact.
+  - **E10** keeps its 200-character cap (title changed).
+- **Whole m365 suite, by cell name:** develop **15 files / 148 / 0 failed** -> **18 / 194 / 0**. **Vanished: 1, E10's rename only.** New: 47.
+- **Mutants: 14, each type-checked on its own.** 13 compile-safe, **13 killed, 0 survived**; X8 is non-compiling and **not counted**. The full table is in the PR.
+- **Type checks:**
+  - `tsc` rc 0 on m365 and on api-gateway.
+  - The 6 changed test files were type-checked in their own program (m365's config excludes `__tests__`): rc 0, with a planted `TS2322` as the control.
+  - **Gateway `startup-migrations` tests:** 7 files, **38 / 38 on develop and with the change**, identical names.
+- **Pre-push preflight**, in-hook, `PUSH_RC=0` read inside the log, 20:26:50Z -> 20:36:33Z: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` **Legs 3, 4 and 8 SKIPPED (no stack). NOT a pass, and legs 3 and 8 bear on a SPEC change, which this is.** Shell suites 91 / 0 / 0. Route cited before the push: hook blob `0c53e79ea5d5`, `:62` (a new branch; it was empty at origin, with develop in the same `ls-remote`) and `:351` (the pushed tip is HEAD).
+
+## NOT run, said plainly
+
+- The four platform suites.
+- **No real Microsoft sign-in end to end.**
+- **Migration 053 has not been through the real migrations runner or a real Postgres**: its DDL ran on PGlite only.
+- Preflight legs 3, 4 and 8.
+- No deploy.
+
+The probe stack is down. Its two volumes are kept and named in my 20:02Z STATUS.
+
+## Board
+
+- **KS-1677:** the integration moved it to In Progress. #1647 is attached as `contributes`, `open`. Comment `5f1b2f05` was read back by id, byte-identical. The relations to KS-1673 and KS-1682 are intact.
+- **`Refs` only**, in title, commit and body. The proximity scan reads 0 on each, and its control fires.
+
+## Me
+
+I cannot read my own context percentage: the pane's capture is 6 lines tall and the statusline is not in it. **Please read it from your side.** This is a clean boundary, nothing of mine is open except #1647 at gate, and I can write the handover now if you want me to rotate.
+
+My wake is the gate verdict, or your GO naming the head.
+
