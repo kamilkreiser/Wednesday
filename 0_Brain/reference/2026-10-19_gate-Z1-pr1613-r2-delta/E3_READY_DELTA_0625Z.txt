@@ -1,0 +1,56 @@
+[Secuura/Blockchain-E -> Wednesday] READY FOR DELTA GATE: #1613 round 2 at c336de831221 - landing tree 9a3a5619e806 measured 1153/1153; delta red-first 2/19
+## BLUF
+
+**READY FOR DELTA GATE: #1613 round 2, head `c336de8312211a188f22a41b63e68df8046bb293`, tree `eea3130945a9eb7ca001836c9d88fb90282bd3d6`.** One commit on the X1-gated head `009749ed2565`. **Pushed tip == tested tip** (`ls-remote` = local = PR head). develop **unmoved** at `722e07f19cee`, so my predicted landing tree stands: **`9a3a5619e806511f2861ced32ae1aacc2a3cb8c7`, measured green ON that tree.** Nothing merged, nothing deployed.
+
+https://github.com/Secuura/Distributed_Secuura/pull/1613
+
+## What the delta gate needs
+
+**The delta (`009749ed2565..c336de831221`), 2 files, +60 / −8:**
+- `routes/platform.ts` **+12** — `CONNECTOR_RATE_LIMIT_WINDOW_SECONDS = 3600` with its doc comment, and one mint line `rateLimitWindow: CONNECTOR_RATE_LIMIT_WINDOW_SECONDS,`.
+- the test file **+48 / −8** — cells WINDOW and ROTATE-WINDOW; a `mintedBody()` helper; **CONTROL-1 and CONTROL-2 moved onto a shared `carriesCeiling` (rate OR window)**; header note.
+
+**Flagging, so the gate is not surprised:** the control widening is beyond "two lines + cells". It is there because once the ceiling has two fields, CONTROL-1's old `'rateLimit' in body` stops covering the window. And CONTROL-2 now sends **one PATCH per arm** — with a single rate-only body, the new window arm was exercised by nothing. Dropping that arm from the predicate **reds CONTROL-2 (1 / 20)**. If you would rather the controls stay untouched, say so and I split them out.
+
+**The PR's whole three-dot diff vs develop:** exactly 2 files, **+398, −0**.
+
+**Suites:**
+
+| tree | files | tests |
+|---|---|---|
+| **predicted landing `9a3a5619e806`** (scratch `commit-tree`, no ref, never pushed) | **117** | **1153 passed, 0 failed** |
+| PR head | 117 | 1153 passed |
+| this file, at both | — | 21 / 21 |
+
+**Instrument control for the prediction:** `git merge-tree --write-tree` on the round-1 head reproduces **X1's own landing tree `db51b5bb4c80`** exactly.
+
+**Red-first for the delta:** the new test file against the round-1 head's own `platform.ts` → **2 failed / 19 passed**, exactly WINDOW and ROTATE-WINDOW. **W1 (window → 60): 2 red. W2 (window line removed): 2 red.** Restored 21. `tsc` rc 0; `eslint` on both files rc 0, empty output.
+
+**Push preflight, quoted:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` — legs 3, 4, 8 skipped, no local stack. Leg 16: `api-gateway … 27 errors: 27 in the baseline, 0 new`. **git's own push rc 0**, read from the command, not from the task notification: `009749ed2..c336de831`, a fast-forward.
+
+## The PR body is updated (8782 == 8782 bytes, read back)
+
+It now carries:
+- X1's three notes;
+- **the correction of my round-1 claim, in its own ⚠ block** — 13 of the 17 red-first failures were `not a function`, only 4 failed on the value; I had called it "a true red-first" and it was not;
+- **both rotate-refusal entry points**: gateway GUARDRAIL 1 at `routes/platform.ts:625` for `register-connector`, and X1's security `index.ts:1347` for a direct `POST /api/keys`;
+- "How to verify after deploy" — one request, `X-RateLimit-Limit: 3000`, with a pre-#1613 key reading `1000` as the control;
+- follow-ups KS-1646, KS-1648, KS-1649.
+
+`Refs KS-1195` only. **Re-checked after the body edit:** the Linear link is still `linkKind: contributes`, and KS-1195 is still In Progress, so a merge will not auto-close it.
+
+## Standing by
+
+For the delta-gate verdict, then your head-pinned merge GO. After the merge, and not before, I owe:
+- the "How to verify after deploy" check posted onto **KS-1195**, as you ruled;
+- the one batched team note each for Peter (KS-485) and Stuart (KS-772);
+- my wrap.
+
+PROVENANCE:
+- head, tree, remote equality, develop unmoved | `rev-parse` + `ls-remote` in my clone, after the push | 2026-10-19
+- PR head, 2 files, +398/−0, body byte equality, linkKind | GitHub PR + files API, Linear attachments | 2026-10-19
+- landing tree, its control and the suite on it | `merge-tree --write-tree`, `commit-tree`, vitest | 2026-10-19
+- preflight verdict and git rc | the hook's own log + `echo $?` after `git push` in the same shell | 2026-10-19
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-19 17:3x AEDT
