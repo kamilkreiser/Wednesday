@@ -1,0 +1,38 @@
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE (tier 1): #1635 KS-1262 - head c2cfd51f
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE (tier 1): #1635 KS-1262 - head c2cfd51f3fb3, landing tree 22b9299dd24a on develop 09336b240721
+## BLUF
+
+**READY FOR GATE, tier 1, one PR: #1635 (KS-1262), the per-user notification PUT refuses the reserved `userId` `platform-settings`.** `Refs`, not deployed, ticket In Progress, one BLUF comment on it read back by id. **One commit, the Spark's patch byte-for-byte: no cell of mine was added** (all nine planted mutants were killed by the Spark's six).
+
+| | |
+| -- | -- |
+| PR | #1635, https://github.com/Secuura/Distributed_Secuura/pull/1635 |
+| head | `c2cfd51f3fb301642fbf1cd46ef2dfb644295b5d` |
+| parent (where I cut it) | `88b8ceb9f3041672d9575b40c09869d45ab1c111` |
+| landing tree ALONE on live develop `09336b240721d8961d409dbd3c0de077d03ca959` | `22b9299dd24aa8ff8b1dd1c48a3acd6d9cfd1446` |
+
+**Three instruments agree on that tree:** an index-apply of the branch's diff over the live head, `git merge-tree --write-tree`, and a real `git merge --no-ff` in a scratch worktree. 13 files landed since the branch was cut; **0 overlap** with this PR's two files and 0 under `services/api-gateway`. Develop's own tree is `29f134c4d9e5` (the batch you just had merged), so this PR is the only thing between it and `22b9299dd24a`.
+
+## What the gate should weigh (the PR body says all of it)
+
+- **It is the narrower of the ticket's two fix shapes:** refuse the reserved id at that writer. **The key namespace is still shared.** The other shape (a separate key space) is not taken, because it changes where every user's existing record is read from.
+- **Not changed:** the per-user **GET** (`admin.ts:1478`) still reads the platform-wide record for a principal with that id. Only two `setNotificationSettings` writers exist in api-gateway (`admin.ts:1146` and `:1499`), so after this the per-user route cannot address the reserved key.
+- **The cells use test tokens**, as the gate that found the bug did. A real JWT carrying that `userId` is not exercised.
+- **Still unmeasured, and it decides severity:** whether kintsugi or demo accept test tokens, and whether any real principal can carry that `userId`. I read and drove no environment. The ticket stays open until that is answered and the change is deployed and live-checked.
+
+## Evidence
+
+- **Red-first** on develop: 3 failed, 3 passed (R1, R2, R3), matching the checker's A4; green-after 6/6; both post-image blobs equal the declared ones (`admin.ts` `15b37033f`, test `1010b8d67`); pre-image `admin.ts` `046a17226` equals develop's.
+- **Mutants: nine planted by line number, nine killed**: guard removed (R1-R3); over-broad case-insensitive and prefix forms (C2); a **role-conditional** guard that lets an admin-role caller through (R2); refuse-everyone (C1, C2); a typo in the id; wrong status; wrong code; and **no `return` after the refusal, so it falls through and writes** (R1-R3).
+- **Suites**, api-gateway: develop-equivalent tree **1,163/1,163 (119 files)**, with #1635 merged **1,169/1,169 (120 files)**. rc 0, 0 skipped, 0 vanished, 0 new reds, by cell name.
+- **Test type-check ratchet** (`check.cjs services/api-gateway`): 0 new, the new test is inside it; eslint clean with planted-violation controls; `tsc` rc 0. The 16 `admin.ts` ESLint warnings are pre-existing (same 16 on develop, measured through the JSON formatter after a first attempt of mine returned a vacuous 0).
+- **Preflight:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4, 8 skipped (no local stack; no Docker here). **Not a pass**, and the PR body says so; the excerpt in it is script-extracted and verified verbatim.
+- **Census** (25 open PRs, 122 files, 02:19 AEDT, each count equal to `changed_files`): no open PR touches either file. The control is dynamic (it picked a file from open PR #1383 and had to find that PR).
+
+## A slip of mine, corrected
+
+In my MERGED mail I wrote that Linear showed no attachment for #1635 "after about seven minutes". **That was wrong.** I had read it about 25 seconds and then 1.5 minutes after the PR opened. The attachment was created at 15:22:04Z, 85 seconds after the PR (15:20:39Z), which is normal. It reads `linkKind=contributes` and the integration moved KS-1262 Backlog to In Progress at 15:22:00Z. There was no anomaly.
+
+## Next
+The comments-only `documents.ts` follow-up, the KS-1676 widening with my own re-measurement, then KS-1660 and KS-1500 + KS-1468.
+
