@@ -1,0 +1,45 @@
+VERDICT: NO GO at head 24ab138d6231... (tier 2, round 1 of 2; landing tree 3fba9ec794b6102f9ef5a6e69015c6865a985663 on develop a0da739b6954d42333640ea190d877f031803c7f; 1 blockers, 6 notes)
+
+# GATE AJ1: PR #1624 (KS-1662 tenant-predicate cells + comment corrections), Sonnet, tier 2, round 1 of 2
+
+Gated 2026-10-19. Own clone at `scratchpad/aj1/repo` (APFS copy of the ai1 clone, fetched, detached at the PR head); scratch PostgreSQL 15 on 127.0.0.1:55431, TCP only (`unix_socket_directories=''`). No writes under `!CODING`, no GitHub or Linear writes, no push, no Docker, no `rm`. Logs in `scratchpad/aj1/logs/`.
+
+## Heads (ls-remote at start and again before this verdict)
+- #1624 head `24ab138d6231551a17872794d33470556fbe4dde`: unchanged. develop `a0da739b6954d42333640ea190d877f031803c7f`: unchanged.
+- `merge-tree --write-tree` on LIVE develop: rc 0, tree **3fba9ec794b6102f9ef5a6e69015c6865a985663** = the prediction. develop IS the merge-base (one commit, fast-forward), so the landing tree equals the PR-head tree (checked out: `HEAD^{tree}` = the same sha).
+- Three-dot list: exactly 3 files (`documents.ts`, `ks1402-invited-stub-holder.integration.test.ts`, new `ks1662-tenant-predicate-without-rls.integration.test.ts`), +352/-17.
+
+## BLOCKERS
+**B1. The two predicates gate AH1 named (R2-N1: X1 and X6) are STILL not pinned by any cell. ks1662 stays 4/4 green with either dropped.** The PR's P1 and P2 are two DIFFERENT predicates.
+- At the PR head the four `AND (tenant_id IS NULL OR tenant_id = ${tenantId}::uuid)` lines are `documents.ts:1609` (inside `resolveByHash`, called at :1680 non-2xx fallback and :1733 retry), `:1715` (the id re-read "THE TENANT PROOF"), `:1928` (route email-path local read), `:2030` (route id path). The brief's "email ~:1733, id ~:1712" are AH1's X1 (the retry, :1733 is its call site) and X6 (the re-read).
+- Mutant each, replacing the predicate line with `AND true`, tsc rc 0, each run in both tenancy modes:
+
+| Mutant | line | ks1662 (owner) | ks1402-invited-stub-holder (secuura_app) |
+|---|---|---|---|
+| P1 email local read | :1928 | **1 failed (EMAIL PATH), 3 passed**, both modes | 16/16 |
+| P2 id path | :2030 | **1 failed (ID PATH), 3 passed**, both modes | 16/16 |
+| X1 `resolveByHash` (retry + fallback) | :1609 | **4/4 GREEN, both modes** | 16/16 |
+| X6 id re-read | :1715 | **4/4 GREEN, both modes** | 16/16 |
+
+- Positive control that X1 and X6 are killable once RLS is out of the loop: ks1402 with its app URL switched to the owner, unmutated = 15/16 (SETUP only). Same run with X1 = 3 failed (SETUP, TENANT PROOF, TENANT PROOF on the 200 branch); with X6 = the same 3. So the mint-path predicates are watched only by a suite that cannot see them, and ks1662 does not reach them: its auth stub always answers 404, so it never drives the 201-with-foreign-id path (X6) nor the retry path (X1).
+- Consequence: the sentence at `documents.ts:1913-1914` ("KS-1662 adds a cell that proves it independently") is true for :1928 only, and the PR body/READY mail's "both predicates could have been deleted and every suite would have stayed green" is still true of :1609 and :1715 after this PR. AH1 R2-N1 is half closed.
+
+## NOTES
+- **N1. Q1 comment-only claim holds.** `documents.ts` three-dot diff: 48 `+/-` lines (excluding headers), all 48 match `^[+-]\s*//`; 0 non-comment lines (control: a planted `+  const x = 1;` is caught by the same filter). Independent proof: TypeScript `transpileModule` with `removeComments` of develop's and head's `documents.ts` are byte-identical (sha 12 `c1744061d948` both); with comments kept they differ (`ce3e33b9bebf` vs `08b537f9ba73`), so the instrument discriminates.
+- **N2. Q2 RLS comment is TRUE as measured, with two small gaps.** On the migrated scratch DB: `users` relrowsecurity=t, relforcerowsecurity=t; `tenant_isolation` cmd=ALL, roles={public}; `users_auth_lookup` cmd=SELECT, roles={secuura_auth_lookup}, qual `true`; `secuura_app` rolsuper=f rolbypassrls=f. As `secuura_app` (current_user checked): 0 users with no GUC; GUC=tenant A shows 1 row, 0 of tenant B; owner control sees 2 rows, 1 of tenant B. `documents` is also FORCE RLS; the "0 as app / 17 as owner" counts are DB-state-dependent and were not reproduced (mechanism confirmed, counts not). Gaps: (a) the `tenant_isolation` qual has a second OR branch, `app.tenant_scope_bypass = 'platform_admin'`, which the comment does not mention; originate sets it only under explicit platform scope (`db.ts:191`); I did not check whether any principal on this route can reach platform scope. (b) The Azure half is cited to `services.bicep:51-55`, which describes the MIGRATION_* plumbing conditionally ("even after ... switches"), and `services.bicep:253-255` says the plumbing is "inert today ... until the Stage-2 cutover". The evidence that originate is `secuura_app` on Azure is `deploy.sh:679-702` (+ `RLS_ROLE_CUTOVER.md`: dev and demo cutover DONE 2026-05-22), and `deploy.sh:700-703` falls back to the ADMIN url when the KV secret is missing. So "in both deployed shapes" is true for the cut-over environments, not unconditionally, and the citation points at the wrong lines. `docker-compose.yml:581` is exact (originate service, `secuura_app` default).
+- **N3. Q2 ks564 correction is TRUE; the replacement tripwire claim is incomplete.** Baseline: auth ks564 4/4, api-gateway ks843 10/10. U1 (`hasUsersStubScope` returns false, users.ts:257): ks564 **4/4 green**, ks843 **10/10 green** (F-2 does NOT red). G1 (`certifications:write` removed from `platform.ts` `S_CONNECTOR_SCOPES`): ks564 4/4, ks843 **F-2 red, 1 failed / 9 passed**. So F-2 guards only the mint side; nothing I ran reds when the AUTH side withdraws the admission. The comments' "That is the ONLY tripwire" (documents.ts:1957, test header :73) is true of the mint half, and reads as covering the dependency. The brief's expectation "F-2 red under removal from hasUsersStubScope" is not what happens. I did not re-run auth's full unit suite (1076/1076 is the author's and AH1's figure).
+- **N4. (c), (d) hold; (e) is partial.** (c) `void raced;` at `documents.ts:1681` (tsc rc 0): ks1402 1 failed / 15 passed in both modes, only the NON-2xx FALLBACK cell; the cell enters the path (the stub inserts the row then answers 500; the cell asserts `stubCalls` length 1, a 201 and the winner id). (d) Planted a phantom-id row for another tenant in the stub (a same-hash second row is impossible: unique index `users_email_lookup_hash_uniq`): RACE reds in both modes at the new `phantomRows` assertion (test line 498 with the plant). Test-strength remark: `expect(await usersWithEmail(email)).toHaveLength(1)` can only catch zero rows, never two, because of that unique index. (e) the `:768` to `:771` citation was fixed in `documents.ts:1725` only; `ks1402-invited-stub-holder.integration.test.ts:284` still says `userRepo.ts:768` (real: `id: uuidv4()` at userRepo.ts:771, read).
+- **N5. SETUP self-check can fail.** Tampered scratch copy (product `DATABASE_URL` = `TEST_APP_DATABASE_URL`, i.e. `secuura_app`): SETUP reds at `expect(row.bypass || row.su).toBe(true)` (Received false) in both modes, while the other three cells stay green (RLS is doing the work), which is exactly why SETUP is needed. Unmutated, ks1662 is 4/4 in both modes.
+- **N6. Landing and instruments.** Landing tree: originate unit **125 suites / 1504/1504**, rc 0 (the claim). ks1662 **4/4** MT=false and MT=true; ks1402-invited-stub-holder **16/16** both; sibling `ks1402-transfer-custody-connector-actor` **6/6** both. Test-file type-check: `tsc --noEmit` with a scratch tsconfig including `src/**/*` (tests too, 0 errors, rc 0); control: a planted `const __ctl: number = "x"` in ks1662 gave rc 2 (TS2322, TS6133). The author's overlap control is degenerate (develop has not moved since the base): the merge-tree on live develop is the real check.
+
+## NOT RUN
+- Auth's full unit suite and auth's integration suite; only ks564 (and api-gateway ks843) were run, under U1 and G1.
+- Any deployed environment: Azure resource values (what `database-url` actually holds) are not readable from the repo; N2(b) rests on `deploy.sh` and `RLS_ROLE_CUTOVER.md`.
+- The PR body and Linear (no gh in scope; none per brief): KS-1663 and "NOT-run section" statements unread.
+- ESLint on the touched files; the full originate integration suite and its 5 pre-existing failing suites.
+- Whether anything in anchoring leans on the "RLS inert" belief (the author's explicitly unmeasured question).
+- Process note: my first `npm exec vitest` calls ran from the Wednesday cwd and executed Wednesday's own tests (read-only runs, 300 failures there are not this PR's); I re-ran with `--root` on the scratch clone and used only those results. I did not check Wednesday's tree for side effects from that stray run.
+
+## Harness deviations (same as AH1)
+`docker/init-platform/01-platform-schema.sql` loaded into `secuura` (1 expected "already exists" error); `secuura_app` granted S/I/U/D on public tables; migration runner: applied=54 failed=0, including 050-052.
+sha256: a3258582771f3ccfb51cf941b840435b362aa69a60351e39383b8ae75b88d756

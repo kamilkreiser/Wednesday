@@ -1,0 +1,60 @@
+=========== [INBOUND] 2026-10-19T09:50 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1623 KS-1633 at b7de86464 - landing t
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1623 KS-1633 at b7de86464 - landing tree ffb064f00e54 on develop f321e95aa; shape 1 as ruled, F4-3 pins the two-save sequence
+## READY FOR GATE — #1623, KS-1633, tier 1
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1623 · head **`b7de864640032c3b118c5aaa9e4e45b777ef67af`** · base `develop` · 6 files, +457 / −43.
+
+**Predicted landing tree: `ffb064f00e546835ce11c455ff9609d1e67128fe`** on live develop **`f321e95aa9958153cfd8312223694e5e40b906b3`** (`git merge-tree --write-tree`, in my own clone). Develop moved once during the build (`52f8777b6` → `f321e95aa`, #1634's v2 chain-first change) and is merged **in**, not rebased; overlap with my files measured **empty with a non-zero control** — my first overlap check returned 0 for both the comparison *and* its control, which is how I found my local `origin/develop` was stale and the merge had merged nothing.
+
+**Shape 1, exactly as you ruled.** Nothing merged. Nothing deployed. No live box read or driven.
+
+## Cause
+
+The route anchored before it wrote its `documents` row, and the anchoring service persists its `anchor_store` row **before** it answers 202 (`anchoring/src/index.ts:507` precedes `:543`). So any failure of the certification write left an anchor naming no document — an orphan anchor, permanently, from a legitimate authenticated flow, and orphan anchors are the rows whose anchored identity another registration can claim (the KS-1612 round-2 Major). The row is now written first, and the one refusal between the two steps compensates it away before the 503, so **every response stays byte-identical**.
+
+## The two things you asked the gate to test
+
+**1. The `withTenant` delete.** `documents` is FORCE RLS under `tenant_isolation`, whose USING clause reads the **transaction-local** GUC `app.current_tenant_id` (`set_config(…, true)`). Measured as `secuura_app` on a migrated scratch database: **outside** that transaction the DELETE answers **`DELETE 0` and raises nothing, with the row still present**; **inside** it, **`DELETE 1`**. So a compensating delete written the obvious way removes nothing and still looks like success — **my first version did exactly that, and the cell caught it, not my reading.** `deleteCertification` therefore runs through `withTenant` (which sets both GUCs, KS-458) and **returns the row count**, and the route treats **anything but 1 as a failed compensation**: a discarded count would hide the very residue the log line exists to report. En route I also mis-keyed my own control to `app.tenant_id`; it "passed" by deleting nothing, and the row count exposed it.
+
+Worth the gate's attention specifically: `verifiable_credentials.document_id` is ON DELETE **NO ACTION** while every other child of a fresh certification cascades, so a certification that has grown a credential **throws** here rather than cascading. That is why the caller handles a throw instead of swallowing it, and why the DELETE-FAILS arm is not hypothetical.
+
+**2. The crash window.** The accepted path writes the row twice, and the provisional row carries the state a FAILED anchor carries. If the process dies between the two writes the row is left saying `failed` (off-chain-only) — conservative and honest. Your reason for preferring this over a statusless `pending-onchain` provisional is in the PR body as a **known, accepted residual**: a crashed request under shape 2 would show *pending* with nothing ever updating it, which is the defect Kam's (b) closed. The cost accepted is a sub-second window in which a request whose anchor is about to succeed reads as off-chain-only. **It is reasoned from the code, not reproduced** — I have not killed a process mid-request, and I say so in the PR.
+
+## KS-1124 F4's control, under its own heading in the PR body as you required
+
+Old: `const bc = mockSaveCertification.mock.calls[0][0].blockchain;`
+New: assert **two** saves; the **first** carrying the failed state with a null anchor id; and `bc` taken from the **last** call — the state the row is actually saved with. Your condition 1 is met: the sequence is pinned, so a regression to a single write cannot pass.
+
+Kam's card id, option and date are quoted **as you read them in the store**, and the PR says plainly that **I have not read the store myself** and that the repository states the same rule in its own comment. **F4-2's `saves: 1` is untouched** (condition 2) and was never at risk — it drives `/recertify`, a different route. The second write is conditional on the state having changed, so the failed path still performs exactly one save; the save count is pinned in five other files (205 cells) and **all 205 pass untouched**, which I checked by grepping the test tree for the premise before touching anything.
+
+## Cells
+
+`ks1633-certify-writes-its-row-before-it-anchors.integration.test.ts` — 6 cells, real Postgres, the real certifications router, as `secuura_app` (asserted), both tenancy modes. The anchoring stub **persists before answering 202**, mirroring the real service, and SETUP asserts that — without it the file would measure nothing.
+
+**Red-first: 3 of 6 fail against develop's product files**, restored byte-identically afterwards — ORDER (the stub sees no row), ORPHAN (the anchor survives with no document), DELETE-FAILS (no such seam). The three that pass on both sides pin what must not change, and the production-503 cell carries a **positive control first** so neither its documents-row zero nor its provenance zero is vacuous.
+
+**Note N2 is closed here.** The ordering pin plus a control; against a reorder mutant **that compiles (tsc 0)** the pin reds and 22 other cells pass, while **the 13 KS-1557 cells all survive it 13/13** — your gate's observation reproduced and the protecting cell identified. N4's harness assumptions are in the new suite's header; N5's comment half is corrected in ks1228; **N6 is closed** by this change, since the row now precedes the anchor.
+
+## Counts
+
+| suite | MT=false | MT=true |
+| --- | --- | --- |
+| ks1633-certify-writes (new) | **6/6** | **6/6** |
+| ks1557-lineage-certify | **13/13** | — |
+| ks1538-legacy-certify (integration) | — | **10/10** |
+| **services/originate FULL unit suite** | **125 suites / 1506 tests / 0 failed** | |
+
+`tsc --noEmit -p services/originate` clean. **Flagged for the gate:** that tsconfig **excludes `src/__tests__`**, so `tsc -p` does not type-check test files — jest's transform is the only check, and two of my throwaway probes failed to load on TS6133 before I noticed. `Tests: 0 total` is a load failure, not a pass.
+
+## Push preflight, its own words
+
+**`PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`** · `legs 3 4 8 — local stack not up` · shell suites **91 passed, 0 failed, 0 skipped (of 91)** · `PUSH_RC=0`. Gate armed and read back before the push; pushed from the checked-out branch; no `--no-verify`, no `--force` (your condition 4).
+
+**The four platform suites were NOT run** — no Docker on this machine — and both pre-merge boxes are deliberately unticked with that reason in the PR. **Concurrency is not covered:** the cells are sequential.
+
+## Needed-by
+
+The gate's verdict. Still owed from me at wrap: the batched team notify on #1619 (Stuart KS-772, Peter KS-485) and a KS-1633 ticket comment once this is at review.
+
+Seat G 11th
+

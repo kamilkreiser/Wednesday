@@ -1,0 +1,83 @@
+=========== [INBOUND] 2026-10-19T10:32 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1624 KS-1662 at 24ab138d6231 - tier 2
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1624 KS-1662 at 24ab138d6231 - tier 2, documents.ts comments only (0 non-comment lines); the planted drop reds ks1662 and leaves the app-role suite 16/16; predicted tree 3fba9ec794b6
+## BLUF
+
+**READY FOR GATE — PR #1624, head `24ab138d6231551a17872794d33470556fbe4dde`, tier 2** (test +
+comment only; `documents.ts` is **comments only, 0 non-comment changed lines**). 3 files, +352/-17.
+Predicted landing tree **`3fba9ec794b6102f9ef5a6e69015c6865a985663`** on live develop
+`a0da739b6954d42333640ea190d877f031803c7f`, no conflicts. **KS-1663** filed as you asked. Nothing
+deployed.
+
+## PUSH
+
+`PUSH_RC=0`, new branch, pushed tip **equal** to my local commit. `core.hooksPath` read back as
+`.githooks` in the push log **before** the push, per the fresh-clone rule, and I pushed from the
+checked-out branch. Preflight: **1187 `ok` lines, zero tallies with a non-zero failed count**.
+
+## THE PAIR OF RUNS THAT IS THE POINT
+
+| planted drop (compiling) | `ks1662` (owner, RLS out of the loop) | `ks1402-invited-stub-holder` (`secuura_app`) |
+|---|---|---|
+| email-path predicate removed | **EMAIL PATH cell REDS** | **16/16 still GREEN** |
+| id-path predicate removed | **ID PATH cell REDS** | — |
+
+The right-hand column is your note 1, demonstrated. Before this PR, both predicates could have been
+deleted and every suite would have stayed green.
+
+## ITEM (1), THE ANSWER YOU ASKED FOR BEFORE ANY CELL
+
+**RLS is the enforcement; the predicates are the belt-and-braces. The wrong comments were the ones
+calling RLS inert** — `documents.ts:1907` and `:1999` — both corrected in place with the
+measurement and its controls, and the predicates kept. The deciding instrument was the policy's
+**`roles`** column: `tenant_isolation` is `roles={public}`, while `users_auth_lookup` (qual `true`)
+is `roles={secuura_auth_lookup}` — a dedicated role, not `public`, so it never ORs into originate's
+result. originate is `secuura_app` in both deployed shapes (`docker-compose.yml:581`; Azure keeps
+the owner on `MIGRATION_*` only, `services.bicep:51-55`).
+
+## (b) TO (e)
+
+- **(b)** the ks564 tripwire claim corrected at `documents.ts:1945` and the suite header `:73`,
+  recording why it got in: it was "verified" by grepping ks564 for the string and finding it. **A
+  string's presence in a test is not evidence the test guards it.** Your measurement is quoted
+  (scope removed from `hasUsersStubScope` at auth `users.ts:257` → ks564 4/4, auth unit 1076/1076;
+  api-gateway `ks843` F-2 reds 1/9 and is the only tripwire).
+- **(c)** the non-2xx fallback cell at `:1681`. The stub writes the row and **then** fails, because
+  the row must appear only after the first local read returned nothing — otherwise the cell never
+  enters the path, which is the vacuous shape I shipped once already and will not repeat. `void
+  raced` compiles and kills it (1 failed / 15 passed).
+- **(d)** `RACE` also asserts exactly one user row and **no row carrying auth's phantom id**.
+- **(e)** `userRepo.ts:768` → `:771`, verified by reading `766-774`.
+
+## EVIDENCE
+
+- `ks1662` **4/4 both tenancy modes** · `ks1402-invited-stub-holder` **16/16 both modes** · sibling
+  **6/6 both modes** · originate unit **1504/1504 across 125 suites** · `eslint src` rc 0, no
+  findings in any file I touched · **0 skips**.
+- Mutants **P1**, **P2**, **`void raced`** — each compiles, each kills exactly its named cell.
+- **The comment-only proof:** every `+`/`-` line of the `documents.ts` diff classified
+  mechanically, **0 non-comment lines**. That is also why the pre-existing integration failures
+  cannot be attributed to this PR.
+
+## THREE THINGS I AM FLAGGING AGAINST MYSELF
+
+1. **The overlap control in this PR is degenerate and the body says so.** Nothing has landed on
+   develop since my base, so the landed set is empty and intersecting it with itself also returns
+   0 — the overlap figure is true and **trivial**, not evidence. Re-measure if develop moves.
+2. **`tsc --noEmit -p tsconfig.json` does NOT type-check test files** (`tsconfig.json` excludes
+   `src/__tests__` and both test globs). Every "tsc rc=0" in my evidence today covered `src` only.
+   ts-jest is the type-check for tests, and it caught a TS6133 in the new suite that `tsc` passed.
+   Named in the PR's NOT-run section so no reader over-reads those lines.
+3. **A zsh word-split produced four readings I discarded.** `set -- $pair` does not split in zsh, so
+   my runner got an empty test pattern and jest ran the whole 250-test integration suite, reporting
+   19-31 failures that were the known pre-existing set. Caught from the 250 totals; every figure
+   above is from re-runs with explicit arguments.
+
+## KS-1663
+
+Low, Backlog, searched by symbol first (nearest: KS-1612 on the guard's *keying*, KS-1644 — neither
+covers it). Carries the measured policy table, **both** sites, the explicitly **unmeasured** question
+(does anything else in anchoring lean on the belief), and the method line. Not edited.
+
+Nothing else of mine is open. Scratch PostgreSQL still up on 55414 for a fix round. Team notes
+(KS-772 Stuart, KS-485 Peter) and the history entry at my wrap.
+
