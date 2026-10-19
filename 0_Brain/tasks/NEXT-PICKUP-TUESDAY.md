@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 271 — 2026-10-19 20:27 ROTATION HANDOVER (s120, ctx ~78-80%; band 80-90). **READ THIS FIRST, then 270-258 (their lines stand except where superseded).**
+### FIRST WORK for the next seat (in order)
+1. **RE-ARM the STATUS watchers** (they die with s120): rebuild a watcher like s120's scratchpad `status_watch2.sh` (loop on the LAST line; finals `VERDICT:` `STOPPED:` `READY FOR QA:` `BLOCKED:` `RECORDS DONE:` `RECORDS COMMITTED:` `DONE:`; run as a tracked background task; prove fire + quiet on a scratch file first) for: B290 `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B290_STATUS.md` (pane %92) and B291 `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B291_STATUS.md` (pane %94).
+2. **B292 (Kam ruled b): read `tuesday/briefs/2026-10-19_B292_SEAT-D1_composer-demo-pin-and-offbox-copy.md` WHOLE (36 KB) + DRAFTER-REPORT, rule its calls (drafter reads b as allowing a tar on the VM and a blob in an EXISTING container, left as residue; confirm or narrow), stamp, launch on Opus (C6).** Demo-affecting: phase 2 only after a verified copy.
+3. **On B290 GO:** merge Composer PR #81 (squash --match-head-commit 33bb703ee8178ec3f48d14993a29daff36eca3e3, Composer gh config), verify tree. **On B291 GO:** merge HPSM-POC PR #163 (--match-head-commit e3050549f20178afa13c822827504cbde2e8bc1d; base behind 1, disjoint), verify file blobs vs head; the 3307 log line goes to Kam as a wording card if the gate flags it.
+4. **NexusAI %56:** landing per ANSWER-25 (PR #92 checks running at 20:2x; main still 7700caf). Then RD-857, RD-476, C-170 READY TO LAND (verify + GO), PR #97 forward merge + ANSWER-26 census -> gate 29 kit (`fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md`, 19 slots, NOT read) stamp + launch.
+5. **HPSM-POC records seat** (DELTA 268 list + PR #163's four tickets after its merge) and **Composer records fold** (records/b287 a9787105; BACKLOG numbering collision 319-324 noted by the B292 drafter: renumber at fold).
+6. **When Kam mounts G-DRIVE:** move the verified laptop Secuura folders (DELTA 265), then `--delivered tuesday-laptop-secuura-removal-b-1019`.
+### Kam owes: deputy PO name (card hpsmpoc-sme-deputy-1019 a). Open card: composer-l05-setup-card-too-1014.
+### FLOOR at rotation: %0 tuesday, %1 fleet-monitor, %56 Datasec/NexusAI-O, %92 Datasec/Security-Composer-G9 (B290), %94 Datasec/HPSM-POC-G11 (B291). No agent QUESTION unanswered. Kam: 11 rows today, all receipted and recorded.
+
 ## 🟢 DELTA 270 — 2026-10-19 20:22 (s120, ctx ~77%). **KAM RULED 2 CARDS 20:18-20:19 (view=tuesday), receipted bf-3ea729efd587, reconciled, parked in clarifications_register.md:**
 - composer-demo-objects-image-pin-1019 **b** (pin + an off-box copy). **B292 brief being drafted** (Sonnet drafter) -> `tuesday/briefs/2026-10-19_B292_SEAT-D1_composer-demo-pin-and-offbox-copy.md` + DRAFTER-REPORT: phase 1 measure the copy route (no new resource/SSH/cost, else STOP for a Kam card), phase 2 the one-line pin (backup, no restart). Model Opus (C6). Read WHOLE, stamp, launch. Records C-81 on records/b292 branched FROM records/b287. `--delivered` when C-81 lands.
 - tuesday-laptop-secuura-removal-b-1019 **a**: counts already match; move to G-DRIVE when mounted (not mounted at 20:2x). `--delivered` after the move record.
