@@ -182,3 +182,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-19 16:42 | Kamils-Mac-Studio | send_brief.sh advisory: push/force-push/merge-route body without a pre-push: citation warns (w=3 promotion 2026-10-19) | CLOSED |  2026-10-19 16:45 built + live-proven, commit 5e6ece914 |
 | 2026-10-19 18:53 | Kamils-Mac-Studio | cockpit.sh say: refuse a pane id (%N) loudly instead of exiting 1 silently (pickup 4.1) | CLOSED |  2026-10-19 18:53 done: rc 8 guard, fire+quiet arms, commit 8666279c7 |
 | 2026-10-20 00:45 | Kamils-Mac-Studio | send_brief.sh: refuse a GO while a gate stray sits in Wednesday's tree (ledger w=3 gate-stray promotion) | CLOSED |  2026-10-20 00:47 built + armed 6a444a4e: fleet/gate_stray_check.sh, arms 9/9, send_brief dry-run fire/override/quiet/pass |
+| 2026-10-20 02:06 | Kamils-Mac-Studio | pretooluse_no_cd.sh: close the git --git-dir/--work-tree/GIT_DIR bypass of the write-verb clause (gate AU1 N1) | OPEN | |
