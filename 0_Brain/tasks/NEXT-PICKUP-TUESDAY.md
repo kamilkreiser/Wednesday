@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 280 — 2026-10-20 08:35 (s122, ctx ~61%). **READ THIS FIRST. Supersedes 279's AUTOSTART and "On Kam's tap" lines.**
+- **KAM RULED `datasec-80pct-band-build-lanes-1020` = c** (08:20:44): the 80% band does not apply to Datasec; lanes run as normal up to 90% (his note: a fresh account comes when this one is used). Receipt bf-1bd211251401; card ruled.
+- **LIVE SEATS (all Sonnet, all report by STATUS file; watchers = `tuesday/tools/status_watch.sh <STATUS> 30` as tracked tasks: RE-ARM after rotation):**
+  - **%103 B300** HPSM-POC lane 1 (HPSMPOC-298/-299/-300), STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-20_B300_STATUS.md`. On READY FOR QA: verify at source (ls-remote branch, compare vs b3a7c27, only Yours paths), open PR, tier-2 gate (Sonnet G2).
+  - **%104 B303** MPS lane-e (MPSCALC-227/-206/-207), STATUS `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-20_B303_STATUS.md`. On READY: verify, PR, **tier-1 gate (Opus; -206 is tier 1)**.
+  - **%105 B302** NexusAI lane 7 (RD-782..789 test-code CodeQL), STATUS `…/NexusAI/1_Project_Definition/Briefs/2026-10-20_B302_STATUS.md`. **Tuesday opens the PR after its "PUSHED PART 1" line** (Q2), then CodeQL reads on the PR.
+  - **%56 S101O** NexusAI PR #97 (mail channel): new-head mail -> gate 29 kit stamp (`fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md`, NOT yet read).
+- **HELD:** **B301** Composer (`tuesday/briefs/2026-10-20_B301_SEAT-W10_composer-ci-timing-test-truth-326-327.md`, read whole, rulings in) launches only after B300's last line (R-W10-6: long N=4 CPU hog). Next waves: sweep lanes 5, 6, 8-17 as load allows (drafters, Sonnet; every brief read whole before launch).
+
 ## 🟢 DELTA 279 — 2026-10-20 06:19 (s122, boot; ctx ~40%). **READ THIS FIRST. Supersedes 278's FIRST WORK item 1 (the autostart) and item 3's status_watch line; 278's state and item 2 (C-170 GO) stand.**
 - **AUTOSTART NOT RUN, by rule:** gauge 7d **80%** (renews ~Fri 23 Oct 08:1x) = routing v1.0 **P3** band: cloud launches only to raise/gate/merge done work; Datasec has no local tier (P4). **Card `datasec-80pct-band-build-lanes-1020` OPEN** (live HTTP 201; rec **b** = lane 1 only; **default a** = hold all build lanes until the renewal, Tuesday writes the briefs, finished work moves; c = band does not apply to Datasec). Panel ask bf-97ef78cbc69b.
 - **On Kam's tap:** b or c -> launch **B300** (`2_Project_Files/tuesday/briefs/2026-10-20_B300_SEAT-W7_hpsmpoc-import-failure-path-298-299-300.md`, written by Tuesday directly, no slots, committed c7d7d18e4; re-read pins at launch: main b3a7c27, 0 b300 refs, panes) with its launch line; receipt `model: claude-sonnet-5-5 -- C2 -- P3 ruled <b|c> on the card -- gauge <n>%`. c -> also the sweep's other lanes in waves of ~4 with load checks. a/no tap -> write the next briefs (lane 4 Composer #326/#327 + records close-out next), launch all on the renewal.
