@@ -1,0 +1,87 @@
+=========== [INBOUND] 2026-10-19T21:26 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR DELTA GATE (round 2): #1647 (KS-1677) at bd0
+[Secuura/Blockchain-R -> Wednesday] READY FOR DELTA GATE (round 2): #1647 (KS-1677) at bd07a37757e4 - landing 346c5104f2a7 on develop c66b834ed451; B1 redirect to admin host (measured on all 4 deployments; VMs not split; Entra card for Kam); B2 cells R19+E1; N1/N2/N4/N5/N6 done; 18/18 compile-safe mutants killed
+## BLUF
+
+**READY FOR DELTA GATE (round 2 of 2): PR #1647, KS-1677, tier 1.** https://github.com/Secuura/Distributed_Secuura/pull/1647
+
+- **Head `bd07a37757e4c22e2bf5d0ff6b76bfa116106d80`**, a fast-forward over BG1's head `f9f425582bb2`.
+- **develop moved** to **`c66b834ed4511e77ec4059abe1f46a4bc4e72de6`** (#1648, KS-1116, vc-issuer). It shares `deployment/azure/migrate/init.sql` with this PR. `git merge-tree --write-tree` against it is clean (rc 0).
+- **Predicted landing tree on `c66b834ed451`: `346c5104f2a756f1fdd7e97aefaeea91d9eaa4d1`.** I did not merge develop in, so the delta stays mine alone.
+- **Migration numbering:** my 053 now lands after develop's new 054. That is safe: `run-migrations.sh:118` applies by FILENAME membership in `_secuura_migrations`, not by a highest number. No renumbering.
+
+**The delta for the gate** (`f9f425582bb2..bd07a37757e4`, 10 files, +150 / −26):
+  - `M deployment/azure/env.dev.json`
+  - `M deployment/azure/services.bicep`
+  - `M packages/shared/src/crypto/encryptedField.ts`
+  - `M services/m365-integration/SETUP.md`
+  - `M __tests__/ks1673-m365-resources-are-bound-to-the-callers-organisation.test.ts`
+  - `A __tests__/ks1677-exchange-auth-code-hands-the-verifier-to-msal.test.ts`
+  - `M __tests__/ks1677-the-oauth-callback-binds-its-state-to-the-browser-that-started-the-sign-in.test.ts`
+  - `A __tests__/ks1677-the-sign-in-returns-to-the-host-that-set-its-cookie.test.ts`
+  - `M security/tokenCrypto.ts`
+  - `M systemTest/schemathesis/config/schemathesis-baseline.json`
+
+All four of my beyond-plan items were judged sound by BG1 (your 21:01Z mail).
+
+## Each ruling, with what closes it
+
+**B1 (ruled (a)).** The redirect URI is now the admin host's `/api/m365/callback`, in `services.bicep` and `env.dev.json`. It uses the same host expression as `FRONTEND_URL`, and keeps the same `empty(apiPublicUrl)` condition, because `deploy.sh:745` still passes it.
+
+Measured **read-only BEFORE the change, on every deployment that could run m365.** Secret variables were reported by NAME only; no values were read and nothing on either box was written. Kintsugi was reached through `KINTSUGI-REBUILD-RUNBOOK.md:144`, demo through CLAUDE.md.
+
+| deployment | wizard host | Microsoft returns to | `ENTRA_REDIRECT_URI` | split? |
+| -- | -- | -- | -- | -- |
+| bicep | `<prefix>-admin.<env>` (`:1627`) | `<prefix>-api.<env>` (`:1620`) | `${apiPublicUrl}/api/m365/callback` | **yes: fixed** |
+| env.dev.json | admin | API (`:107`) | API host | **yes: fixed** |
+| kintsugi | `kintsugi.secuura.net`, one Caddy host -> nginx :6882 | same | `http://localhost:6882/api/m365/callback` (compose default) | no |
+| demo | `demo-pk.secuura.net`, the same shape | same | the same default; **no** `ENTRA_CLIENT_*` | no |
+
+- **The VMs are not split, so the fix does not need to cover them.**
+- **But kintsugi has Entra credentials and redirects to `localhost:6882`.** Sign-in there is broken with or without this PR. That is **KS-1381**'s open item, not B1.
+- **Kam's card is needed:** register the admin-host redirect URI on the Entra app (for Container Apps), and the box's own public host (for a VM). It is named as a deploy precondition in the PR body and on KS-1677 (comment `5fbe28fa`).
+- **H1/H2** pin B1 from the config, with line comments stripped first. **H-M1** (redirect back on the API host) is killed by H1.
+
+**B2.**
+- **R19:** two sign-ins get different verifiers AND challenges. Kills **BG-M7**.
+- **E1:** a unit cell on the REAL `exchangeAuthCode`, with only MSAL's `acquireTokenByCode` stubbed; it asserts `codeVerifier` is in the request MSAL receives. Kills **BG-M11b**. **E2** is its control (no verifier, no key).
+
+**Notes.**
+- **N1 -> R17:** with the DB up, a state whose INSERT failed is refused although memory holds it. Kills **BG-M4**.
+- **N2 -> R18:** the cookie is neither the state nor the verifier. Kills **BG-M3**. I wrote my own cell; BG1-X4 was not copied.
+- **N4 -> A6 RELABELLED, not retired.** It still guards against an unbound `/complete` being re-added; R10 owns the removal.
+- **N5 -> the figure is now 312 -> 311 paths, 347 -> 346 operations**, by a YAML parse with the repo's `yaml` package. My round-1 grep counted only `/api/` keys and missed `/webhooks/stripe`.
+- **N6:**
+  - `SETUP.md` step 4 rewritten.
+  - Two dead baseline keys removed (177 -> 175, still valid JSON).
+  - The `encryptedField.ts` inventory given a dated addendum (23 pairs / 13 tables).
+  - `tokenAad` now labels the verifier `svc_m365_oauth_states.code_verifier.<id>`; the tokens' labels are unchanged.
+  - Left on purpose: `known-issues-and-baseline.md:697` and the KS-693 reviewer comment (historical records), and `ks1478_pre_merge_wfc_faults.json` (a report fixture).
+- **N3, N7, N8, N9, N10** are copied **verbatim** from the verdict file into the PR's Known residue: whole note blocks, each asserted present. The file was re-hashed by me: `1634ffa2082e`; the whole-file hash `0ed88eaa310b` differs, as the control.
+
+## Evidence (all mine; each label MEASURED on both sides)
+
+- **New cells this round, against develop `937c7d10b7f8`** (the base explicitly; the branch's HEAD is no longer develop):
+  - route suite 26 + exchange suite 2: develop fails exactly the **20 REDs**, and the change fails none;
+  - the host cells (H1/H2): both fail on develop's bicep and env.dev.json;
+  - every swap was asserted and restored byte-identically.
+- **Whole m365 suite, by cell name:** develop **15 files / 148 / 0 failed** -> **20 / 201 / 0**. **Vanished: 2, both renames: E10 and A6.** New: 55.
+- **Mutants: 19, each type-checked on its own.** **18 compile-safe, 18 killed, 0 survived.** X8 does not compile (`TS2322`) and is not counted.
+  - Round 1's 13 are all still killed.
+  - BG-M3 -> R18, BG-M4 -> R17, BG-M7 -> R19, BG-M11b -> E1, H-M1 -> H1.
+- **Type checks:** `tsc` rc 0 on m365. The 10 relevant test files type-check in their own program (rc 0); the planted-error control was shown on the same construction in round 1.
+- **Pre-push**, in-hook, `PUSH_RC=0` read inside the log, 21:15:05Z -> 21:24:58Z: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` **Legs 3, 4 and 8 SKIPPED; NOT a pass, and 3 and 8 bear on a spec change.** Shell suites 91 / 0 / 0.
+- **Route cited:** hook blob `0c53e79ea5d5`, `:62-63`. The remote branch `f9f425582bb2` is an ancestor of HEAD, so this is a fast-forward, and the pushed tip is HEAD (`:351`).
+
+## NOT run
+
+- **The bicep was not compiled:** there is no Bicep CLI on this machine, and no `az`.
+- **`test_baseline_kamil_traceability.py` was not run.** The project venv is 3.14.5 and the suite requires 3.14.8 (KS-571); pytest exits 4 before collecting, and the shared checkout was untouched (17 status entries before and after). By reading, its five assertions are universal over the baseline's entries, so a removal cannot red them.
+- Preflight legs 3, 4 and 8.
+- No real Microsoft sign-in.
+- Migration 053 has not been through the real runner.
+- No deploy.
+
+## Me
+
+ctx was 65% at your 20:40Z read; it is higher now. I wrote the handover as I went, and its LATEST STATE will be current before I idle. **My wake is the delta gate's verdict, or your GO naming `bd07a37757e4`.**
+
