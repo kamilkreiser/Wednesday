@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 285 — 2026-10-20 10:3x CHECKPOINT (s123, ctx 55%; band 80-90). **READ THIS FIRST. Supersedes 284 item 2 (MPS wave-1 status below) and adds the 10:16 grant; 284 items 1, 3, 4 stand.**
+- **KAM 10:16:54 (live, view=tuesday): "please remove the 90% line as well. I have 2 accounts to rotate so no problem working up to the edge"** -> recorded EXPIRING-GRANTS top row + lesson `2026-10-20_tuesday-no-90pct-line-two-accounts`; receipt bf-62d5094d6d77. Datasec launches pass `WED_USAGE_STOP=100` naming it. Load rule (load1 < 7 for builder waves) unchanged and is now the real limit.
+- **B308 LIVE %111** `Datasec/MPS-R9` (Sonnet, records + Jira, light): C-44 (09:44 instruction) + C-45 (15-row table of the 10:09 ruling) on the MPS project-root main (no remote: path-limited commit, no push), 66 tickets-to-be filed in MPSCALC, T-id map at `<MPS>/1_Project_Definition/Registers/2026-10-20_v13-ticket-map.md`. Brief `tuesday/briefs/2026-10-20_B308_SEAT-R9_mps-v13-records-tickets-and-rulings.md` (stamped, defaults R-R9-1..6). STATUS `<MPS>/1_Project_Definition/Briefs/2026-10-20_B308_STATUS.md`. On RECORDS DONE: verify at source (`git -C <MPS root> show --stat <sha>`, C-44/C-45 headings, map row count 66 and its arithmetic), close pane, `decision_queue.sh --delivered mpscalc-v13-gap-15-decisions-1020 "C-45"`.
+- **WAVE-1 BRIEFS READ WHOLE, rulings stamped (all defaults + the 90% correction), `.pre-stamp` kept:** B309 V0 contract (tier 1), B310 V1 frame p1 (tier 2), B312 V3 readiness (tier 1), B313 V5 starters (tier 2); each still has `@SLOT:TICKET_KEYS@` -> stamp from B308's map (T-id -> MPSCALC key), then launch each by its own Launch line (Sonnet; receipt `model: claude-sonnet-5-5 -- C2 -- gauge n%`), waves at load1 < 7 (read 13.4 at 10:30). **B311 V2 Home launches only after B309 MERGES** (read it whole then; not yet read). Arm a status_watch on every launched STATUS.
+- Wakes triaged (no tap): %106 B304 mutants running; %105 B302 gate runs under the jest lock (logs 10:14).
+- Watchers (tracked, die at rotation: RE-ARM): B301, B302, B304, B305, B306, B308.
+- FLOOR 10:30: %0, %1, %56 S101O, %105 B302, %106 B304, %107 B301, %108 B305, %110 B306, %111 B308. Gauge 84%.
+
 ## 🔴 DELTA 284 — 2026-10-20 10:1x ROTATION HANDOVER (s122, ctx ~80%; band 80-90). **READ THIS FIRST. Supersedes 283 items 1 and 2; 283 items 3-6 stand.**
 ### Kam since 283 (all receipted, cards ruled, all three parked in `projects_index/clarifications_register.md`)
 - 10:05:45 *"can you relax the security requirements?  no IP"* → card `hpsmpoc-sm-open-without-ip-1020` = **a** (10:07:02): no IP limit, SM's own sign-in KEPT.
