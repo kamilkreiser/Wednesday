@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 276 — 2026-10-20 05:15 (s121). **READ THIS FIRST. Supersedes 275's Composer line.**
+- **Composer PR #81 MERGED** (gate B297 GO WITH FINDINGS, round 2 of 2): Composer code main **d8d2a2c7** (parent 50d97508), tree = gated head 44e947ca's. Panel told (bf-d52c13162ca8). B297-2 Minor (Node 22.19/22.12 comment labels) -> a BACKLOG row in the next Composer records fold. %100 closed.
+- **NexusAI:** gate 28 RELEASE complete (RD-856, RD-857, RD-476 merged; main **29c5ee8f**, mail 17:22Z verified). C-170 (PR #96) forward merge afb6bff verified 4880/302 + gate 26 suites 412/412; C-57/C-133 running -> READY TO LAND mail -> **Tuesday verifies CodeQL at the new head and GOs**. Then PR #97 forward merge + ANSWER-26 census -> gate 29 kit stamp + launch.
+- **OWED (unchanged from 274):** one Composer records fold (records/b295, records/b296, untracked B280/B281/B285/B289/B290/B297 records; BACKLOG rows for B297-2); G-DRIVE copy of the demo image. Floor: %0, %1, %56 only.
+
 ## 🟢 DELTA 275 — 2026-10-20 02:32 CHECKPOINT (s121, ctx ~70%; band 80-90). **READ THIS FIRST. Supersedes 274's LIVE line; its DONE and OWED stand.** Today's note is `0_Brain/daily_tuesday/2026-10-20.md` (created 00:26).
 - **NexusAI:** RD-857 MERGED main **79af19c0** (mail 13:24Z verified). **RD-476 pushed 29c5ee8 (PR #91)**, %56 waiting on PR #91 Build+CodeQL, then lands; then C-170 READY TO LAND (Tuesday verifies CodeQL + GOs), PR #97 forward merge + ANSWER-26 census -> gate 29 (DELTA 271 item 4).
 - **Composer PR #81:** B296 round-2 builder READY FOR QA @ **44e947ca** (verified: 3 allowed paths, refs/pull/81/head = it). **GATE B297 LIVE %100** (Sonnet, round 2 of 2, THE LAST). STATUS `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-20_B297_STATUS.md` (watcher armed). Main question: hogged full ci:node step 16 vs 16, WORSE iff Fisher p <= 0.10. On GO / GO WITH FINDINGS: completion check, close pane, `gh pr ready 81` + squash `--match-head-commit 44e947cad6367415042063c18cb636dc74cd939f` (Composer gh config), verify tree. On NO GO: nothing ships; card Kam with the gate's bound table (x1.4 / x1.6 / neither) — no round 3 without his word.
