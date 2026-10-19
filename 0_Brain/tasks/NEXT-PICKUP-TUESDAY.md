@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 255 — 2026-10-19 15:15 (s119, ctx 77%). Supersedes 249/248's B279 lines.
+- **GATE B279 DONE (pane %82 closed): HPSMPOC-291 NO GO (round 1 of 2), HPSMPOC-227 GO WITH FINDINGS.** Report `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B279_STATUS.md` (findings :183-215). **OWED: brief B282 = fix round on `b276/l1-tests-291-227` for -291 only:** B279-1 (Major: rewrite the comment at PkcsInPackageTests.cs:178-184 to the measured SDK facts per the gate's fix-shape; same correction to the commit message going forward and the PR #161 body via Tuesday), B279-2 (rows 10.0.9999.0, 10.0.10000.0, two-part), B279-3 (Major/Minor guard + rows 10.1.0.0, 11.0.26.1), B279-8 wording. Then a round-2 tier-2 gate (Sonnet, `BRIEF_SEAT_LEVEL=sonnet`, B279's shape) on -291's delta; on GO: Tuesday merges PR #161 (squash, --match-head-commit) through CodeQL. -227's B279-4/-6 Minor + -5/-7 Notes go to a records seat as ticket comments/candidates (not this round). Records also owes: HPSMPOC-291 Done-when clause 1 + B271-6 correction; records/b276 PR after Tuesday's HP-window scan.
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O (fixing #272 on PR #97), %78 QA/NexusAI-gate28.
+
 ## 🟢 DELTA 254 — 2026-10-19 14:51 (s119, ctx ~77%).
 - **PR #97 (RD-774/836) BLOCKED by CodeQL alert #272** (js/log-injection, rule severity ERROR, backend/server.js:20945) — Kam forwarded the bot comment (FYI, DKIM pass). **ANSWER-23** (`tuesday/briefs/2026-10-19_S101O_ANSWER-23_pr97-alert272-fix-before-ready.md`) told S101O: fix in code via logSafe, red-first, CodeQL 0 open on the new head, THEN READY. On READY: verify #272 fixed on refs/pull/97/head at source, then the tier-1 gate kit (Opus). PR #96 is clean at f15217c (0 open). Tell Kam the outcome on the panel once #272 reads fixed.
 ### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %82 HPSM-POC-G7 (B279).
