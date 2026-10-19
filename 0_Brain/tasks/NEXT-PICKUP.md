@@ -3,44 +3,36 @@ date: 2026-10-20
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
-supersede: REPLACED WHOLESALE by the morning Wednesday seat (booted 06:0x 2026-10-20) at ~75% context, 08:31 AEDT. Replace wholesale again; never stack. Previous: NEXT-PICKUP.md.pre-1020-0831 + git.
+supersede: REPLACED WHOLESALE by the 09:0x Wednesday seat at its 50% checkpoint (~09:30 AEDT). Replace wholesale again; never stack. Previous: NEXT-PICKUP.md.pre-1020-0930 + git.
 ---
 
-# NEXT PICKUP (Tue 20 Oct, written 08:31 AEDT)
+# NEXT PICKUP (Tue 20 Oct, written ~09:30 AEDT)
 
 ## 0. FIRST ACTIONS FOR THE NEXT WEDNESDAY SEAT
 1. Boot reads as the launcher says. Then kam_rulings_today.sh, reconcile_rulings.py, `bash 2_Project_Files/tools/newmail.sh` (to a file), `tools/fleet_ack.sh list`, `tools/decision_queue.sh list open`, fleet/usage_gate.sh --check, `local-model/spark/tunnel.sh check`, `tmux list-panes -t fleet:0 -F '#{pane_id} #{@cockpit_name}'`.
-2. Verify every merge by fetching into the cache clone at the LITERAL path `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/cache/src` (a `$VAR` path makes the no-cd hook refuse the whole call). `refs/pull/N/head` can LAG the branch: fetch the BRANCH ref. Re-hash verdicts with `sed '1d;$d' verdict.md | shasum -a 256` and name the method.
-3. `cockpit.sh say` takes the cockpit NAME; `pane_close.sh` takes the `%ID`.
-4. **ZOOM BEFORE ANY RAW KEYPRESS** (`tmux resize-pane -Z -t %N`, read ~12 lines, unzoom). **But zooming a WAITING pane reflows it and re-fires its idle wake: to check a waiting seat, read `tmux capture-pane -p -t %N -S -60` UNZOOMED.** `/model claude-opus-5-5` only at a zoomed idle prompt, then Enter on the dialog.
-5. Receipt guard: a note line quoting a send or tap must be its OWN call after it. A mail citing a card id needs the card to EXIST first. Subjects never carry hold/stop/checkpoint words (send_brief refuses).
-6. In force: Kam 10-18 new-account grant, routing v1.0, the October deploy grant EXTENDED "until further notice", the TESTED merge grant. Gauge 64% at 08:2x.
+2. **🔴 OUTBOUND MAIL IS BROKEN (since ~22:2xZ 10-19 = ~09:2x AEDT):** every send from wednesday-agent@ returns HTTP 403 {"message":"Forbidden"}; reads (GET) are 200; the same key sends from coagent@ (400 validation on an empty probe = authorised). Last good send 22:17:48Z. Sent log: 218 sends on 2026-10-19 UTC. Cause UNMEASURED (daily cap is a guess). Kam told on the panel (bf-d7e5f45f37d8) with default "retry at checkpoints and after 00:00Z (11:00 AEDT); no sending as another inbox". **Probe without sending:** POST messages/send with `{"to":[]}` -> 403 = still blocked, 400 = recovered. **On recovery, send IN ORDER:** (a) `fleet/briefs_staged/2026-10-20_answer_seatD25_plan_confirmed_UNSENT.md` to Secuura/Blockchain-D, `--kind answer`, subject "ANSWER: plan confirmation (Seat D 25th) confirmed - model now Opus 5.5", then `fleet_ack.sh answered "Seat D 25th kintsugi"`; (b) `..._answer_seatR58_plan_confirmed_UNSENT.md` to Secuura/Blockchain-R, subject "ANSWER: plan confirmation (Seat R 58th) confirmed - build cache left alone"; tap each by cockpit NAME with --mail. Rename the files without _UNSENT after.
+3. Verify every merge by fetching into `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/cache/src` (literal path). `cockpit.sh say` takes the cockpit NAME; `pane_close.sh` takes the `%ID`. **Zoom before any raw keypress**; read a waiting seat unzoomed with `capture-pane -S -60`.
+4. send_brief needs `WED_AGENT=wednesday` in this seat's shell. Subjects never carry hold/stop/checkpoint words.
+5. In force: Kam 10-18 new-account grant, routing v1.0, the October deploy grant EXTENDED "until further notice", the TESTED merge grant. Gauge 66% at 09:29.
 
-## 1. LIVE FLOOR (08:31) — develop = c66b834ed4511e77ec4059abe1f46a4bc4e72de6 (#1648)
-**Merged by this seat today, each verified by Wednesday's own fetch:** #1645 KS-1668 docs 5ac66264b9ee · #1646 KS-1679 937c7d10b7f8 (gate BF1) · #1648 KS-1116 c66b834ed451 (gate BH1). None deployed. **Kintsugi runs a4187f0f6622; demo runs d75bfe2deb80 with the KS-1032 vouch secret ARMED** (D 23rd).
-- **R 57th (%14, Opus 5.5, ctx was 65% at 07:4x, higher now):** #1647 KS-1677 round 2 head `bd07a37757e4` at **delta gate BI1 (Opus, tier 1, round 2 of 2 = the CAP)**, brief `0_Brain/reference/2026-10-20_gate-BI1-pr1647-r2-delta/GATE_BRIEF.md`, verdict lands in the same folder. Round 1 (BG1) was NO GO: B1 cookie set on the admin host while Microsoft returned to the API host on the Container Apps topology; B2 two PKCE survivors. Round 2: redirect URI moved to the admin host (`env.dev.json:107` = `https://secuura02-demo-admin.kindtree-935b2ded.southeastasia.azurecontainerapps.io/api/m365/callback`); kintsugi/demo are single-host (not split). **On GO:** GO naming the head + landing `346c5104f2a7` on c66b834ed451 (re-check develop), verify the merge, R wraps, score + pane_close. **On NO GO (cap reached):** ship the closed instances, ticket the residue, no round 3 without Kam. **After the merge: card Kam for the Entra redirect-URI registration, quoting the literal URI above (his hands; m365 is live nowhere today).** KS-1381 (kintsugi's ENTRA redirect = localhost:6882) is its own open item. KS-1682 (m365 refresh token from a process-wide MSAL cache, High) is the next m365 PR.
-- **C 30th (%15, Opus 5.5):** KS-1116 follow-ups in vc-issuer: (1) Kam ruled card `secuura-ks1116-null-owner-who-reads-1020` = a (tenant administrators, 08:19): follow-up PR changing `ownerlessRowReadable` to ORG_ADMIN/SYSTEM_ADMIN + tenant claim + the ROW's own tenant; legacy NULL-owner rows carry no tenant stamp, so C measures whether the tenant is determinable, else fail closed and Wednesday tells Kam if his option reaches no row; tier 1. (2) NOTE 1 test-only cells for BH1's three survivors, tier 2. (3) Tickets after board searches for BH1 NOTES 2, 3, 6. KS-1683 (High) holds the list/by-hash bound, waiting on a Platform S answer.
-- **D 24th (%16, Opus 5):** posts ONE comment to Stuart on KS-695 ("has uat-ps reached aeae5ca?") and measures key_66e82ef0's last use on demo read-only (control key_61774985); then wraps. **On its report: come back to Kam with the key's last-use date (card ruled a = measure first, then come back); revoke nothing without his word.**
-- **Demo deploy of a4187f0f6622: NOT GO** until Stuart notes uat-ps on KS-695. **Stuart's a8615d46 (KS-695): fix KS-1557 before or with that round** (develop's #1619 lineage check refuses a routine S certify on a /version-created parent). OWED: a KS-1557 fix lane before the demo round. D 23rd's handover `5_Project_History/2026-10-20_seatD-23rd/HANDOVER.md` (project tree) runs the demo deploy cold.
+## 1. LIVE FLOOR (09:30) — develop = 89956fe92956a810f6821fdee09915f087feea7b (#1649)
+Merged today (morning seats), each verified by Wednesday's own fetch: #1645, #1646, #1648, #1647, #1649. None deployed. Kintsugi runs a4187f0f6622; demo runs d75bfe2deb80 (KS-1032 vouch secret armed). C 30th WRAPPED, scored 0.95, pane closed.
+- **D 25th (%17, now Opus 5.5 by Wednesday's switch):** KINTSUGI deploy round of 89956fe92956 (brief `fleet/briefs_staged/2026-10-20_seatD25_kintsugi_round.md`): Phase 0 under a NEW stamp (pre-20261020 taken), build all, migrations 053+054 before m365/vc-issuer, swaps api-gateway last, pgbouncer/nginx-gateway/demo-service held, KS-535 by hash, sweep, ONE DEPLOYED mail. m365 swap only if ENTRA unconfigured and tables empty (else QUESTION). Box writes for KS-1116/KS-1679 checks = QUESTION. Peter/Stuart notices DRAFTED to Wednesday, posted only on Wednesday's word (check whether D 22nd's 10-19 drafts were posted). DEMO NOT in this round (Stuart's uat-ps note on KS-695 absent; KS-1557 fix owed). Its plan confirmation 22:23Z is FLAGGED and UNANSWERED (mail broken); it proceeds on its fallback.
+- **C 31st (%18, Opus 5, switch owed at a zoomed idle):** KS-1557 PLAN-first QUESTION (Stuart's 16e8498d: a /version-created parent is refused for the creating connector's certify), tier 1; meanwhile BJ1 NOTE 2 cells (test-only, tier 2, vc-issuer test file). Plan confirmation not yet received.
+- **R 58th (%19, Opus 5, switch owed at a zoomed idle; it was busy at 09:28):** (i) DONE (probe objects removed, 910 MB in Docker, 0 MB df); (ii) BI1 NB1+NB2+NB4 test-only PR in progress; (iii) KS-1682 plan QUESTION to follow. Answer staged UNSENT.
+- **Spark SCREEN_19 drafter** (background sub-agent, Sonnet) running: report lands in `0_Brain/reference/2026-10-18_spark-screen/SCREEN_19.md`; read every PASS at source, then hold_ready, then give the READYs to a raise seat (C or R, file-disjoint).
 
-## 1b. UPDATE 08:5x — supersedes section 1 where they differ
-- **develop = 4abff9b1a4765982ea504784c9df69a8ddd52210** (#1647 KS-1677 merged, tree 346c5104f2a7 = delta gate BI1, verified by Wednesday's fetch). Merged by this seat today: #1645, #1646, #1648, #1647 (4). None deployed.
-- **R 57th WRAPPED** (scored 0.92, pane %14 closed). Handover `5_Project_History/2026-10-20_seatR-57th/HANDOVER.md` (project tree). **R lane EMPTY.** Next R seat: (1) the test-only follow-up for BI1's NB1 + NB2 + NB4 (on KS-1677 comment 81993547); (2) KS-1682 (High, m365 refresh token from a process-wide MSAL cache); (3) **remove R 57th's regenerable probe leftovers** (Kam's 2026-09-29 rule): Docker volumes `secuura_r57probe_postgres_data`, `secuura_r57probe_redis_data` and images `secuura_r57probe-{m365-integration,api-gateway,nginx-gateway}`, report MB freed; the unpushed branch `quarantine/2026-10-20-seatR57-ks1677-cookie-probe-NEVER-PUSH` in its scratch clone stays quarantined. Docker Desktop is left running.
-- **D 24th WRAPPED** (0.95): KS-695 question posted (comment 3aa9b60c); key_66e82ef0 last used 2026-07-30, 81 days idle.
-- **C 30th (%15):** #1649 (Kam's (a) + BH1 NOTE 1 cells, head c2a409ed8d0b) at **gate BJ1** (Opus, tier 1), brief/verdict in `0_Brain/reference/2026-10-20_gate-BJ1-pr1649-ks1116-a/`. Kam told (a) reaches 0 existing rows (the legacy row's tenant is not determinable). KS-1684/1685/1686 filed (BH1 NOTES 2/3/6).
-- **09:0x — gate BJ1 GO WITH NOTE on #1649** (verdict sha `86d54842f7e9`, whole-file control `efcfc2f447b0`); GO sent to C 30th naming head `c2a409ed8d0b` and the CORRECTED landing tree **`3ea28cd71fa5` on develop `4abff9b1a476`** (Wednesday's own merge-tree; the author's `eadbaa1bbc60` was on the old develop). **FIRST WORK FOR THE NEXT SEAT: C 30th's MERGED mail -> verify by fetch (tree must be 3ea28cd71fa5), then its WRAP -> verify handover + history on disk, score, pane_close %15.** Residue on KS-1116: note 2's two cells (role widening, tenant prefix match) = one test-only follow-up; note 3: auth signs a userId into every token, so ruling (a) governs legacy rows only (Kam already told the one legacy row is unreachable).
-- **Open Kam cards:** `secuura-demo-smoke-key-revoke-after-measure-1020` (rec a revoke, default b keep) and `secuura-ks1677-entra-redirect-uri-registration-1020` (rec/default a wait until M365 goes live).
-
-## 2. KAM'S CARDS
-- All three Secuura cards of this morning are RULED (a, a, a at 08:19-08:20) and delivered or in flight to C 30th / D 24th. None open.
-- Datasec `composer-l05-setup-card-too-1014` is Tuesday's.
+## 2. KAM'S CARDS (open, both with defaults)
+- `secuura-demo-smoke-key-revoke-after-measure-1020` (rec a revoke; default b keep).
+- `secuura-ks1677-entra-redirect-uri-registration-1020` (rec/default a: wait until M365 goes live).
+- Undelivered ruled: `secuura-m365-admin-setup-for-customer-org-1020` = b (05:35), lives in KS-1678's future work; deliver when the wizard ticket is worked.
 
 ## 3. OWED BY WEDNESDAY (in order)
-1. BI1 verdict -> GO or cap handling (above). Then the Entra card for Kam.
-2. C 30th's READYs -> gates (tier 1 for the predicate PR, tier 2 for the test-only one) -> GOs -> verify merges.
-3. D 24th's report -> Kam (the key's last use) -> score + pane_close.
-4. A KS-1557 fix lane (Stuart: before or with the demo round) and the next kintsugi round (#1640-#1648 + Peter's #1642: product = #1641, #1646, #1648 vc-issuer + migration 054, #1647 if it merges with migration 053; the 053/054 apply by filename; KS-1116's NOTE 4: 054 must run before the new vc-issuer starts).
-5. KS-1682 (m365 refresh token) after #1647.
+1. Mail recovery (section 0.2), then the two staged answers.
+2. D 25th's DEPLOYED mail -> verify on the box's evidence -> card nothing unless a STOP; then the demo round only after Stuart's uat-ps note AND a merged KS-1557 fix.
+3. C 31st's KS-1557 plan -> rule (tier-1 gate after build); BJ1 NOTE 2 READY -> tier-2 gate (Sonnet).
+4. R 58th's NB PR READY -> tier-2 gate; KS-1682 plan -> rule.
+5. SCREEN_19 -> source reads -> hold -> raise.
 6. Fable 5.1 coordinator trial (routing decision 7) still OWED.
-7. At the wrap: regenerate BOTH boot digests only if a lesson FILE was edited (today only the ledger); the 05:30 ledger archive.
-8. KS-1665 (deploy.sh admin fallback) deserves more than Low before any production deploy; KS-982 archive is Kam's call. Not carded.
+7. KS-907's launcher preflight counts the reader's own session (D 25th measured: 16802 -> 2698 -> 2696 = %17): a project-launcher defect, in D 25th's handover notes; not Wednesday's to edit.
+8. At the wrap: regenerate BOTH boot digests only if a lesson FILE was edited; the 05:30 ledger archive.
