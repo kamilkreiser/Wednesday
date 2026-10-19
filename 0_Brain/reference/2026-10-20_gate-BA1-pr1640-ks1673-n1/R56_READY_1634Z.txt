@@ -1,0 +1,55 @@
+=========== [INBOUND] 2026-10-19T16:34 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1640 KS-1673 AX1 N1 real-engine cells
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1640 KS-1673 AX1 N1 real-engine cells + N2 notify contract at c210733f6592 (tier 2) - landing 86281b3d808e on a4187f0f6
+## READY FOR GATE — #1640 (KS-1673 follow-up: AX1 N1 real-engine cells + N2 notify contract), tier 2
+
+https://github.com/Secuura/Distributed_Secuura/pull/1640
+
+```
+head            c210733f6592bdbff88b1dae9263d80e74143361   (= ls-remote after the push)
+base (develop)  a4187f0f66228603df211628d6d8ae239d6147d0   (ls-remote guard passed just before the push)
+PREDICTED landing tree   86281b3d808e57c23d280bc66fcf0efb5bfaf07d   (strict descendant; equals the head tree)
+files           3: the new test file, m365-integration.openapi.ts, the regenerated YAML (notify only)
+```
+
+**Cause (AX1 N1).** The Teams regex mock filters on `organization_id = $n` and ignores the rest of the `WHERE`, so a **widened** predicate passed all 16 cells (GX1, GX2).
+
+**Cells — 8 on PGlite, the four Teams statements.**
+- **P0:** the DDL is parsed at test time from `06-m365-tables.sql` and executed. It asserts `last_attempted_at` and the index are present, and that PGlite's `information_schema` holds the columns the routes use, so an empty parse cannot pass.
+- **R1–R4:** list (response **text**), notify (outbound), delete (a **DB** check) and register (a **DB** check).
+- **R1c–R3c:** the owner controls.
+- Each cell reseeds the table.
+
+**Mutants — all `tsc` rc 0. The same mutant run against both files:**
+
+| mutant | this file | the 16-cell mock file |
+| -- | -- | -- |
+| **GX1** list `OR organization_id IS NULL` | **R1** | 16/0 **survives** |
+| **GX2** notify `OR TRUE` | **R2** | 16/0 **survives** |
+| delete `OR TRUE` | **R3** | 16/0 **survives** — a 3rd blind spot of the mock |
+| register stores NULL | **R4** | T4, T6 |
+
+**The 16-cell file is unchanged:** 19 `expect` / 16 cells, no diff.
+
+**Loud failure, shown as you asked.** The PGlite import is at module top level and is **not wrapped**. With the package directory renamed away and then restored in a `finally`:
+- vitest **exit 1**, `Failed Suites 1`, `Error: Cannot find package '@electric-sql/pglite'`;
+- restored, it resolves again and the file is 8/8;
+- I re-ran it after the shim change below.
+- **Read the exit code, not vitest's `Tests  no tests` line.**
+
+**N2.** The notify **description** now says what the route does, and so does the **summary** ("…to all configured webhooks"). The summary was not in AX1's note; it is the same false statement. The `--check` control ran before the edit. The delta is notify's summary and description only, **4+/3−**. `check:openapi` passes both halves.
+
+**Deviations from the confirmed plan — both in the PR body:**
+1. **uuid-ossp became a test-only shim.** The contrib import ran under vitest but failed the separate test type-check with **TS2307**: m365's CommonJS `moduleResolution` cannot type `exports` subpaths. So `uuid_generate_v4()` is now `CREATE FUNCTION … AS 'SELECT gen_random_uuid()'`. The **DDL text runs unchanged**, and no cell depends on a generated id. The type-check is now RC 0, and the mutant table is the same before and after. The alternative, if you prefer the real extension, is an ambient `.d.ts` for that subpath.
+2. **The summary line**, as above.
+
+**Suites.**
+- **Full m365: 15 files, 147/147, RC 0.** Product `tsc` RC 0.
+- The test file type-checked separately (KS-1090): RC 0, `--listFilesOnly` = 1.
+- **Preflight: 13/16 ran, legs 3/4/8 SKIPPED (no stack), 0 failed — not a pass.** Leg 8 (served-spec consistency) bears on the spec line.
+
+**NOT run:** the four platform suites, for the same reason.
+
+**Ticket:** KS-1673 comment `ec2c962c-b5ef-451b-9d4c-7ab9b268fc49`, read back by id, byte-identical. `Refs`.
+
+Nothing deployed. No `az`. No box touched.
+
