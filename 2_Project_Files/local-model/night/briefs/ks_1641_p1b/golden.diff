@@ -1,0 +1,90 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/index.ts b/Blockchain/Dev/services/m365-integration/src/index.ts
+index 1d9ea9df2..d119bdef4 100644
+--- a/Blockchain/Dev/services/m365-integration/src/index.ts
++++ b/Blockchain/Dev/services/m365-integration/src/index.ts
+@@ -464,3 +464,3 @@
+     log('error', 'OAuth callback error', { error: oauthError, description: error_description });
+-    return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=error&message=${encodeURIComponent(String(error_description || oauthError))}`);
++    return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=error&message=${encodeURIComponent(String(error_description || oauthError).slice(0, 200))}`);
+   }
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1641-the-oauth-callback-caps-the-reflected-error-description.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1641-the-oauth-callback-caps-the-reflected-error-description.test.ts
+new file mode 100644
+index 000000000..729134390
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1641-the-oauth-callback-caps-the-reflected-error-description.test.ts
+@@ -0,0 +1,75 @@
++/**
++ * KS-1641 (finding 2 only) - GET /api/callback is the unauthenticated OAuth redirect target, and on a provider error it
++ * put the provider's `error_description` into the admin redirect URL with NO length cap (services/auth caps the same
++ * field at 200 characters). After the fix the reflected text is at most 200 characters; a short description and the
++ * `error` code fallback are reflected exactly as before. The redirect PATH is not touched by this file.
++ * Harness: the ks934 pattern - the real app from ../index, `../db` and express's `listen` mocked (index.ts listens at
++ * import), driven over an HTTP listener on 127.0.0.1 with redirects NOT followed.
++ */
++import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
++import http from 'http';
++
++process.env.NODE_ENV = 'test';
++process.env.FRONTEND_URL = 'http://frontend.test';
++
++const rows: any[] = [];
++
++vi.mock('../db', () => ({
++  initDb: async () => undefined,
++  isDbAvailable: () => true,
++  query: async () => ({ rows }),
++}));
++
++vi.mock('express', async (importOriginal) => {
++  const actual: any = (await importOriginal<any>()).default ?? (await importOriginal<any>());
++  const factory: any = (...args: any[]) => {
++    const app = actual(...args);
++    app.listen = () => ({ close: (cb?: () => void) => cb?.(), address: () => ({ port: 0 }), on() { return this; } });
++    return app;
++  };
++  Object.assign(factory, actual);
++  return { ...actual, default: factory };
++});
++
++let server: http.Server;
++let base = '';
++beforeAll(async () => {
++  const app = (await import('../index')).default as any;
++  server = http.createServer(app);
++  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
++  base = `http://127.0.0.1:${(server.address() as any).port}`;
++}, 20_000);
++afterAll(async () => {
++  if (server) await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++
++/** GET /api/callback with a provider error; returns the redirect target's `m365` and decoded `message`. */
++async function callback(query: string): Promise<{ status: number; m365: string | null; message: string | null }> {
++  const res = await fetch(`${base}/api/callback?${query}`, { redirect: 'manual' });
++  const loc = new URL(res.headers.get('location') || 'http://none.invalid/');
++  return { status: res.status, m365: loc.searchParams.get('m365'), message: loc.searchParams.get('message') };
++}
++
++describe('KS-1641 - the OAuth callback does not reflect unbounded provider text into the redirect', () => {
++  it('RED KS-1641 E1: a 5000-character error_description reaches the redirect as at most 200 characters', async () => {
++    const r = await callback(`error=access_denied&error_description=${encodeURIComponent('A'.repeat(5000))}`);
++    expect([r.status, r.m365]).toEqual([302, 'error']);
++    expect((r.message ?? '').length).toBeLessThanOrEqual(200);
++  });
++
++  it('RED KS-1641 E2: the 200 characters kept are the FIRST 200 of the description', async () => {
++    const text = 'B'.repeat(200) + 'TAIL-MARKER-' + 'C'.repeat(300);
++    const r = await callback(`error=access_denied&error_description=${encodeURIComponent(text)}`);
++    expect(r.message).toBe('B'.repeat(200));
++  });
++
++  it('CONTROL KS-1641 E3: a short error_description is reflected exactly as the provider sent it', async () => {
++    const r = await callback(`error=access_denied&error_description=${encodeURIComponent('The user cancelled the request')}`);
++    expect([r.status, r.m365, r.message]).toEqual([302, 'error', 'The user cancelled the request']);
++  });
++
++  it('CONTROL KS-1641 E4: with no error_description the error code is the message', async () => {
++    const r = await callback('error=access_denied');
++    expect([r.status, r.m365, r.message]).toEqual([302, 'error', 'access_denied']);
++  });
++});

@@ -1,0 +1,79 @@
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+index 07ac412a4..06f801093 100644
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -311,3 +311,3 @@
+ function rotateChainWaitMs(): number {
+-  const raw = Number.parseInt(process.env.ROTATE_CHAIN_WAIT_MS ?? '', 10);
++  const raw = /^\s*\d+\s*$/.test(process.env.ROTATE_CHAIN_WAIT_MS ?? '') ? Number(process.env.ROTATE_CHAIN_WAIT_MS) : Number.NaN;
+   return Number.isFinite(raw) && raw > 0 ? raw : 10_000;
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1568-rotate-chain-wait-ms-ignores-a-unit-suffixed-value.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1568-rotate-chain-wait-ms-ignores-a-unit-suffixed-value.test.ts
+new file mode 100644
+index 000000000..bce336541
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1568-rotate-chain-wait-ms-ignores-a-unit-suffixed-value.test.ts
+@@ -0,0 +1,64 @@
++/**
++ * KS-1568 (the folded-in o6 only) - a unit-suffixed ROTATE_CHAIN_WAIT_MS must not shorten the rotate chain's bounded wait.
++ *
++ * `withConnectorChain` makes the next rotate of one connector wait for the previous one, bounded by
++ * ROTATE_CHAIN_WAIT_MS (default 10 s). The value was read with `Number.parseInt`, which stops at the first non-digit:
++ * `10s` read as 10 ms and `1500ms` as 1500 ms, so a unit suffix silently shrank the bound (to "effectively no chain",
++ * which brings back the pool pressure the chain exists to prevent). A value that is not a plain number of milliseconds
++ * is now ignored and the 10 s default applies. No database: the chain is pure in-process code, driven on fake timers.
++ */
++import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
++
++process.env.SECURITY_DISABLE_BOOT = '1';
++delete process.env.DATABASE_URL;
++
++let withConnectorChain: <T>(key: string, fn: () => Promise<T>) => Promise<T>;
++
++beforeAll(async () => {
++  const mod = await import('../index');
++  withConnectorChain = mod.withConnectorChain;
++});
++
++afterEach(() => {
++  delete process.env.ROTATE_CHAIN_WAIT_MS;
++  vi.useRealTimers();
++});
++
++/** Hang a predecessor on `key`, queue a second caller behind it, and report when the second one is let through. */
++async function probe(key: string, env: string | undefined, checkpointsMs: number[]): Promise<boolean[]> {
++  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
++  if (env !== undefined) process.env.ROTATE_CHAIN_WAIT_MS = env;
++  void withConnectorChain(key, () => new Promise<never>(() => { /* never settles */ }));
++  let proceeded = false;
++  void withConnectorChain(key, async () => { proceeded = true; });
++  const seen: boolean[] = [];
++  let at = 0;
++  for (const cp of checkpointsMs) {
++    await vi.advanceTimersByTimeAsync(cp - at);
++    at = cp;
++    seen.push(proceeded);
++  }
++  return seen;
++}
++
++describe('KS-1568 o6 - ROTATE_CHAIN_WAIT_MS must be a plain number of milliseconds', () => {
++  it('RED KS-1568 W1: "10s" does not shorten the wait to 10 ms - the second caller is still held at 5 s', async () => {
++    expect(await probe('t:w1', '10s', [5_000])).toEqual([false]);
++  });
++
++  it('RED KS-1568 W2: "1500ms" does not shorten the wait to 1500 ms - the second caller is still held at 5 s', async () => {
++    expect(await probe('t:w2', '1500ms', [5_000])).toEqual([false]);
++  });
++
++  it('CONTROL KS-1568 W3: with the variable unset the wait is the 10 s default (held at 5 s, let through by 10 s)', async () => {
++    expect(await probe('t:w3', undefined, [5_000, 10_001])).toEqual([false, true]);
++  });
++
++  it('CONTROL KS-1568 W4: a plain number is honoured (250 holds at 100 ms and lets through by 250 ms)', async () => {
++    expect(await probe('t:w4', '250', [100, 251])).toEqual([false, true]);
++  });
++
++  it('CONTROL KS-1568 W5: a bad value falls back to the 10 s default (held at 5 s, let through by 10 s)', async () => {
++    expect(await probe('t:w5', 'abc', [5_000, 10_001])).toEqual([false, true]);
++  });
++});
