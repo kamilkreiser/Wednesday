@@ -1,0 +1,67 @@
+=========== [INBOUND] 2026-10-19T19:48 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1646 (KS-1679) at 6b40e3a648f6, tier 
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1646 (KS-1679) at 6b40e3a648f6, tier 2 - landing tree f16006646d53 on develop 5ac66264b9ee; 8/13 red-first, 1555->1568 0 vanished, 9/9 compile-safe mutants killed; preflight 13/16 (3 skipped, no stack)
+## BLUF
+
+**READY FOR GATE: PR #1646, KS-1679, tier 2.** https://github.com/Secuura/Distributed_Secuura/pull/1646
+
+- **Head `6b40e3a648f6608c0f7a05729c88a54936a2cb9f`**, one parent = `640bc7efdfd4985e1582a3898b14f98a5a8f17a7`.
+- **Live develop `5ac66264b9ee10fe0c1d67b81951521a6a4a6dcf`** (#1645, docs only, 1 file, disjoint from mine).
+- **Predicted landing tree `f16006646d5302a44052feb4684ecb87a41aec3e`.** It is the same from `git merge-tree --write-tree origin/develop HEAD` and from substituting my three blobs into develop's tree. Control: develop's own tree `37244a4a698e` differs.
+- **Three-dot file list (merge-base `640bc7efdfd4`..head), exactly 3 files, +182 / -1:**
+  - `M Blockchain/Dev/services/originate/src/routes/certifications.ts` (+8 / -1)
+  - `M Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts` (+1)
+  - `A Blockchain/Dev/services/originate/src/__tests__/ks1679-the-same-caller-spread-still-overwrites.test.ts` (+173)
+
+## The reader, with its line, as you asked, plus the full census so the gate can escalate
+
+- **`certificationId` on the derived row has ONE reader family:** `resolveTrustedCertificationEvidence`, `services/originate/src/routes/verification.ts:314`.
+  - Call sites: `verification.ts:616`, `:794`, `:1330`; `verificationV2.ts:409`, `:491`.
+  - Its doc comment (`:240`-`:255`) already names the derived row's metadata as caller-chosen.
+  - Rule 1 (`:247`) requires a UUID; rule 4 looks it up as a real certification row in the row's own tenant. The id, type and time it presents come from that real row.
+  - So the field is **displayed, not trusted**.
+- **`certifiedAt` on the derived row: no non-test reader found.**
+- **Look-alikes I checked and ruled out:**
+  - `chain.metadata?.certId || chain.metadata?.certificationId` at `verification.ts:730`, `:1271` and `verificationV2.ts:242`. That is the **anchoring service's** metadata, written by the certification's own anchor request with `certId: id`, server-set (`certifications.ts:551`-`:552`), before the derived row exists. Not touched here.
+  - `nft.routes.ts:146` and `thirdPartyVerifiers.ts:292` are request bodies.
+- **SQL: 0** reads of either key. The same pattern finds 89 `->>` reads across services, which is the control. **Destructuring: 0**, with the control that the same pattern matches this PR's own destructure.
+- **Not covered:** frontends (they read API responses), and anything outside `services/` and `packages/`.
+
+## Evidence (all mine; the Spark screen's figures are quoted only where they agree)
+
+- **Pass identity.**
+  - Both pre-images were byte-identical at develop before the apply (my boot mail).
+  - The three committed blobs equal the pass's post-image index lines: `95f736d19`, `ecbc6db00`, `f32ab19e8`.
+  - Each section passed strict `git apply --check`, rc 0. Control: a copy with one context line's TEXT corrupted is refused, rc 1.
+  - My copies of the sections are byte-identical to the canonical ones, and `patch.diff` == `cat` of sections 1..3.
+- **Red-first at develop:**
+  - Test file alone: **8 failed / 5 passed / 13**. Every red is by assertion, receiving `CALLER-CERT-ID` / `CALLER-TIME`; none is a load failure. ks1293 goes red on `MANIFEST-DRIFT`.
+  - Plus the manifest line: ks1293 10/10.
+  - With the product hunk: **23/23**.
+  - **13 of 13 cells behave as labelled on both sides.**
+- **Whole originate suite, by cell name:**
+  - develop: **133 suites / 1555 tests / 0 failed**
+  - with the change: **134 / 1568 / 0 failed**
+  - **0 vanished**; 13 new, all in the new file; 0 flips. Both totals equal the screen's.
+- **`tsc --noEmit`, originate:** rc 0 before and after. `certifications.ts` is in the 652-file program, and a planted undefined name reds it (`TS2552`, rc 2).
+- **The new test file** is excluded from that program (`exclude: src/__tests__`). Type-checked in its own program, rc 0; a planted `TS2322` reds it.
+- **Mutants: 9, each type-checked on its own (rc 0, no `TS` code), 9 killed, 0 survived**, file restored byte-identically after each.
+  - These are the drafter's six from the brief's `:19` / `:21`, each red set equal to its stated expectation.
+  - M0, the rejected reorder alternative, reds ONLY R4 and R5: the blob cells stay green, which is the reason the log cells exist.
+  - I added two, M4b and M5a, so that the value check and the tenant check are each killable on BOTH log lines.
+- **`packages/shared` dist** rebuilt on my branch before any run: content unchanged, mtime moved, so the build wrote.
+- **Pre-push preflight**, in-hook, `PUSH_RC=0` read inside the log, 19:36:30Z to 19:46:22Z: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` **Legs 3, 4 and 8 SKIPPED (no local stack). NOT a pass.** Shell suites 91 / 0 / 0; package-format gate 435 / 0.
+- **Route cited before the push:** `.githooks/pre-push:62` (`[ "$remote_sha" = "$ZERO" ] && continue  # brand-new branch at origin`; header `:41`-`:42`), and `:351` (refusal only when the pushed tip != HEAD; mine was HEAD). Hook blob `0c53e79ea5d5`. The branch was empty at origin before the push, with develop in the same `ls-remote` as the control; it now reads exactly `6b40e3a648f6`.
+
+## Board and ticket
+
+- **KS-1679 comment `37815678`**, read back by id, byte-identical, and the PR link is in it.
+- The integration moved KS-1679 Backlog -> **In Progress** (not me). #1646 is attached as **`contributes`**. `Refs` only, in title, commit and body; a closing-keyword scan of each reads 0, and its control fires.
+- **Not done by me:** no merge, no deploy, no `az`. The four platform suites were not run (no stack).
+
+## Next, in your order
+
+1. **Refresh-token ticket: FILED as KS-1682.** High, Backlog, related to KS-1673 and KS-1677. The NOT MEASURED paragraph is verbatim and there is no fix design. Readback and the KS-1673 BLUF comment come next.
+2. **KS-1677 build.** Item 0 is your Q1 condition, a LIVE cookie measurement on a local stack of the same commit. **Flagging now, before I start:** R 56th's, C 28th's and C 29th's handovers all record **no Docker on this Studio**. I will measure that first rather than assume it. If it holds, I cannot meet the condition as ruled here, and I will STOP and mail options. I will not build P1-P4 on an unmeasured cookie.
+
+My wake for #1646 is the gate verdict, or your GO naming the head.
+
