@@ -15,6 +15,14 @@ supersede: REPLACED WHOLESALE by the 20:3x Wednesday seat at its 70% checkpoint,
 4. Gate briefs: tell every gate to point npm/vitest INTO its own clone (`--prefix`/`--root`) and to write nothing in WEDNESDAY but verdict.md. Two gates tonight still left strays at the root (ledger w=2): run `git status --short` before every GO and move anything else to the scratchpad quarantine.
 5. Commit your own files by pathspec before any tool that pulls. `git -C $VAR` on WEDNESDAY paths is refused by the no-cd hook (owed item 4.1): write the literal path.
 
+## 1a. ROTATION STATE (23:4x, ctx 79%) — SUPERSEDES section 1 where they differ
+- **Floor:** %0 wednesday, %7 **R 55th** (Opus 5.5 since 23:2x), %1 monitor. C 26th, R 54th, G 11th wrapped, scored, panes closed. **No gate sub-agent is running.**
+- **#1622 (KS-1641 finding 2): GO sent 23:4x** on gate AN1 GO WITH NOTE at head 5c6daf6ae83e, landed tree must be 48f08c661e686bd23adbbc5e3da5f4d73fa33e92 on develop 115797747cb6. On R's MERGED mail: fetch into local-model/spark/cache/src (literal path) and check the tree. Verdict: `0_Brain/reference/2026-10-19_gate-AN1-pr1622-r2-delta/verdict.md`.
+- **AN1's N1 = a PRE-EXISTING High crash on develop:** Express 4 `allowPrototypes` query parsing, `?error[toString]=x` (and two siblings) make `String()` throw in m365 `/api/callback` and the process EXITS. R files the ticket, builds the fix next (string-only query values, cells: each input answers 302 and the process survives), tier-1 Opus gate. Kam told on the panel (bf-f58da9736c29), no action; live reach unmeasured.
+- **KS-1460:** built by R (commit 1 = the Spark golden byte-for-byte, commit 2 = C3 that kills mutants K1/K2), push in flight; its READY FOR GATE needs a tier-1 Opus gate (auth stub claim). Next letter **AO1**.
+- **KS-1568:** applied-result EQUAL, not raised yet. R's census: 0 slice-to-throwing-encoder sites on develop (81 calls, controls fired). KS-1670 filed (AN1/AM1 N4+N5).
+- Evening Secuura merges from the tally: 11 (+ #1622 when it lands = 12). Datasec/TUESDAY removal still with Kam (section 2).
+
 ## 1. LIVE FLOOR (22:50) — develop = 115797747cb60009e781d80e9059dbbed69e1ac3 (#1624). Nothing deployed.
 **Merged this evening, each verified by Wednesday's own fetch into local-model/spark/cache/src (11, from the tally):** #1613 #1614 #1615 #1616 #1617 #1618 #1619 #1621 (f321e95aa, tree 3e62bf28eb26 = AG1) #1620 (a0da739b6954, tree 1647a604848e = AH1) #1623 (adb0dfd58fc5, tree e598e00e8902 = AK1) #1624 (115797747cb6, tree 610c3c69c969 = AL1). None closes its ticket (Done = deployed + live check).
 - **R 54th (%2, COMPACTED ~11:30Z):** told to WRAP NOW after gate AM1's NO GO on #1622. On its wrap mail: verify HANDOVER (5_Project_History/2026-10-19_seatR-54th/HANDOVER.md, must carry "ROUND 2 OWED ON #1622") + the history entry at the top, score, pane_close, then launch **R 55th** via brief_and_launch with:
