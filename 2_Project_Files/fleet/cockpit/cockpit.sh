@@ -306,6 +306,13 @@ case "${1:-}" in
     # a pointer from the coordinator, never the principal's word.
     case "$3" in "[Wednesday tap]"*) ;; *) set -- "$1" "$2" "[Wednesday tap] $3" ;; esac
     [ $# -eq 3 ] || die "usage: cockpit.sh say <pane-name> <text> [--mail <subject-substring>]"
+    # PANE ID REFUSAL (2026-10-19, pickup 4.1, bitten twice in one day): `say %3 ...` used to exit 1
+    # with NO message, so a seat believed a tap was delivered. say takes the cockpit NAME.
+    case "$2" in %[0-9]*)
+      _nm="$(tmux display -p -t "$2" '#{@cockpit_name}' 2>&1)"
+      echo "cockpit: REFUSED - say takes the cockpit pane NAME, not a pane id ('$2'). That pane's name reads: '${_nm}'. Re-run: cockpit.sh say '${_nm}' ..." >&2
+      exit 8 ;;
+    esac
     SAY_MAX_PTR="${SAY_MAX_PTR:-200}"
     if [ -z "$MAIL_SUBJ" ] && [ "${#3}" -gt "$SAY_MAX_PTR" ]; then
       echo "cockpit: REFUSED — tap is ${#3} chars (> $SAY_MAX_PTR): a tap is a pointer, content goes by mail. Send it through send_brief.sh, then: say <pane> '<pointer>' --mail '<subject substring>'" >&2
