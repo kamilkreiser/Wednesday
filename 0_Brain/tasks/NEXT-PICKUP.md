@@ -6,7 +6,7 @@ status: live
 supersede: REPLACED WHOLESALE by the 09:0x Wednesday seat at its 50% checkpoint (~09:30 AEDT). Replace wholesale again; never stack. Previous: NEXT-PICKUP.md.pre-1020-0930 + git.
 ---
 
-# NEXT PICKUP (Tue 20 Oct, written ~09:30 AEDT, sections 0-3 refreshed 10:16)
+# NEXT PICKUP (Tue 20 Oct, written ~09:30 AEDT, sections 0-3 refreshed 10:16 and 10:38)
 
 ## 0. FIRST ACTIONS FOR THE NEXT WEDNESDAY SEAT
 1. Boot reads as the launcher says. Then kam_rulings_today.sh, reconcile_rulings.py, `bash 2_Project_Files/tools/newmail.sh` (to a file), `tools/fleet_ack.sh list`, `tools/decision_queue.sh list open`, fleet/usage_gate.sh --check, `local-model/spark/tunnel.sh check`, `tmux list-panes -t fleet:0 -F '#{pane_id} #{@cockpit_name}'`.
@@ -15,18 +15,18 @@ supersede: REPLACED WHOLESALE by the 09:0x Wednesday seat at its 50% checkpoint 
 4. send_brief needs `WED_AGENT=wednesday` in this seat's shell. Subjects never carry hold/stop/checkpoint words.
 5. In force: Kam 10-18 new-account grant, routing v1.0, the October deploy grant EXTENDED "until further notice", the TESTED merge grant. Gauge 66% at 09:29.
 
-## 1. LIVE FLOOR (10:15) — develop = cd63883c62a9bb0e66969df8cd3f02db2b9b2217 (#1650)
-Merged today, each verified by Wednesday's own fetch: #1645, #1646, #1648, #1647, #1649, #1650 (6). None deployed. Kintsugi runs a4187f0f6622; demo d75bfe2deb80. ALL FOUR SEATS still on the launcher's claude-opus-5 except D (5.5): switch C, R, G at a ZOOMED idle and mail it.
-- **D 25th (%17, Opus 5.5):** kintsugi round of 89956fe92956 (NOT #1650): Phase 0 done (stamp pre-20261020k2), source rsynced, full build detached since 22:52:38Z (~2 h). Ruled 22:5x: all defaults; m365 DORMANT (ENTRA values = repo placeholders); quiet-window rule for anchoring/nft; ONE pre-swap heads-up on KS-772 (Wednesday's word given); full notices for BOTH rounds drafted in DEPLOYED, posted only on Wednesday's word (D 22nd's 10-19 notices were never posted); + a KS-1660 sweep row. Demo NOT GO (Stuart 22:39Z: uat-ps not at aeae5ca; wants KS-1557 in the demo-pk build).
-- **C 31st (%18):** KS-1557 (a') `create:connector` + migration 055 backfill BUILT, pushing -> READY then a TIER 1 Opus gate; BJ1 NOTE 2 cells (a4d5aa81f3ba) pushing -> tier 2; then a third test-only PR fixing the stale #1619 cell that #1646 made red on develop (Refs KS-1679, tier 2). 055 is C's; not in the fresh-DB bootstraps (ruled). KS-1688 (High, /version access gap) FILED -> card to Kam.
-- **R 58th (%19):** #1650 merged; #1651 KS-1682 at GATE BL1 (Opus, tier 1, brief 0_Brain/reference/2026-10-20_gate-BL1-pr1651-ks1682/, landing 785b2b7cfff7 on cd63883c62a9). Next: hygiene PR (BACKLOG.md:1244 + NK1 wording), then wrap. KS-1687 (rotation never persisted) filed.
-- **G 12th (%20):** raising the four held Spark passes: KS-1407 as ONE PR (tier 1; change-password revokes the caller's own session, stated), KS-1157 (tier 1), KS-1659 (Refs unless the audit says otherwise). Overlap census 0.
-- **SCREEN_20 drafter** running (Sonnet): report 0_Brain/reference/2026-10-18_spark-screen/SCREEN_20.md; read every PASS at source, hold (hold_ready now accepts code_patch2 A3x: fixed + armed 2026-10-20, tests/hold_ready_a3x_arms.sh), raise via a new or existing file-disjoint seat.
+## 1. LIVE FLOOR (10:38) — develop = 11af03696c9bd966580e52605cb2a361d9c3d29b (#1652)
+Merged today, each verified by Wednesday's own fetch: #1645, #1646, #1648, #1647, #1649, #1650, #1651 (e712972bccf1), #1652 (11af03696c9b) = 8. None deployed. Kintsugi runs a4187f0f6622; demo d75bfe2deb80. Seats C, R, G still on launcher claude-opus-5 (switch at a ZOOMED idle, mail it); D on 5.5.
+- **GATES RUNNING (Agent, background), verdicts land in 0_Brain/reference/<folder>/verdict.md:** BN1 #1654 KS-1557 (C 31st, head db9bca740df0, tier 1 Opus; includes the KS-1688 interaction question); BO1 #1655 KS-1407 (G 12th, head 8e5308a87e14, tier 1 Opus); BP1 #1653 hygiene (R 58th, head b30e401ff208, tier 2 Sonnet). On each verdict: re-hash `sed '1d;$d'`, re-read heads, merge-tree on LIVE develop yourself (develop moves often today), GO naming head + landing, notes copied FROM THE FILE.
+- **DEMO-UPGRADE IMPACT analysis** (Agent, Opus, background): Stuart asked (via Kam 10:34) whether moving demo-pk to latest K affects existing users/accounts; report -> 0_Brain/reference/2026-10-20_demo-upgrade-impact/REPORT.md. OWED TO KAM: a short WhatsApp reply built from that report's BLUF, "within the hour" promised at 10:35.
+- **D 25th (%17, Opus 5.5):** kintsugi round of 89956fe92956, build healthy at +38 min (23:30Z), KS-772 heads-up POSTED. Then migrations 053/054, swaps, sweep, DEPLOYED mail with BOTH rounds' notices drafted -> Wednesday's word to post. wake_ack'd while waiting.
+- **C 31st (%18):** #1652 merged; #1654 at BN1; next item (iii) stale #1619 cell PR (Refs KS-1679, tier 2).
+- **R 58th (%19):** #1650 + #1651 merged; #1653 at BP1; next KS-1682 N1 exact-match cells PR (tier 2); KS-1687 + KS-1689 filed; then wrap.
+- **G 12th (%20):** #1655 at BO1; next KS-1157 (tier 1), KS-1659 (tier 2, audit: no trusting reader), then ADDENDUM items KS-758 (tier 1, erasure-log identifier question) and KS-1558 (tier 2).
+- **Spark:** screens 19+20 done; all held passes are in G's queue; SCREEN_20 says the remaining pool needs a deeper read or new tickets.
 
 ## 2. KAM'S CARDS (open, both with defaults)
-- `secuura-demo-smoke-key-revoke-after-measure-1020` (rec a revoke; default b keep).
-- `secuura-ks1677-entra-redirect-uri-registration-1020` (rec/default a: wait until M365 goes live).
-- `secuura-ks1688-ask-stuart-platform-s-version-1020` (rec a Kam asks Stuart; default c leave KS-1688 open). Added 10:1x, HTTP 201.
+- RULED 10:33 by Kam: Entra card = a (wait; delivered), smoke-key card = a (REVOKE key_66e82ef0 on demo: OWED as a small demo job AFTER D 25th's kintsugi round; undelivered until done, then tell Kam). KS-1688 card = a with a WhatsApp draft; Kam "sent"; Stuart "working through it, will update the ticket" (10:37): no KS-1688 build before his answer.
 - Undelivered ruled: `secuura-m365-admin-setup-for-customer-org-1020` = b (05:35), lives in KS-1678's future work; deliver when the wizard ticket is worked.
 
 ## 3. OWED BY WEDNESDAY (in order)
