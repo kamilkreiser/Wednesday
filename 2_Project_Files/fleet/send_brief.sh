@@ -184,6 +184,17 @@ BODY_G="$(printf '%s' "$BODY" | sed -E 's/^#{1,6}[[:space:]]*(PROVENANCE:|SELF-C
 # prints to stderr and always exits 0; this call never changes the exit code or blocks the send.
 bash "$SELF_DIR/prepush_cite_check.sh" "$BODY_FILE" || true
 
+# ── GATE-STRAY REFUSAL ON A GO (ledger w=3 promotion, 2026-10-20) ───────────
+# Three gate sub-agents in one night wrote into the coordinator's tree from their cwd (AJ1
+# node_modules/.vite, AL1 `r2`, AQ1 node_modules/.vite). A GO is the moment a gate's output is
+# trusted, so a GO is refused while an untracked file sits outside the allowed homes. REFUSING,
+# not advisory: fleet/gate_stray_check.sh, arms fleet/tests/gate_stray_check_arms.sh (9/9).
+# Override with a stated reason: GATE_STRAY_OK='<why>'.
+case "$SUBJECT" in
+  [Gg][Oo]:*)
+    bash "$SELF_DIR/gate_stray_check.sh" || { echo "send_brief: REFUSED — a GO is not sent while the tree holds a stray (see gate_stray_check above). Nothing sent." >&2; exit 1; } ;;
+esac
+
 # EMPTY-BODY GATE (2026-09-07, ledger: a subject-only ANSWER reached seat s143).
 # `send_brief.sh` reported "sent" and `cockpit.sh say --mail` verified the mail at
 # the destination — BY SUBJECT. Both passed on a mail with NO BODY. The agent proved
