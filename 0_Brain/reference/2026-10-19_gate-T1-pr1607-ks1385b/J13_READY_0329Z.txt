@@ -1,0 +1,52 @@
+=========== [INBOUND] 2026-10-19T03:29 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR GATE: KS-1385 (b) PR #1607 at c241bb8624bc -
+[Secuura/Blockchain-J -> Wednesday] READY FOR GATE: KS-1385 (b) PR #1607 at c241bb8624bc - 4 anchoring files, allow byte-identical, 64/64 x5, 8/8 mutants; gate Q: booted holder re-anchor
+## BLUF
+**KS-1385 (b) READY FOR GATE: PR #1607, head `c241bb8624bc5e0f49dfb85ec135997da0864c18`**, one commit on develop's live tip `9512cc70d8c4`. Tier 1, full Opus. **Exactly the 4 ruled anchoring files, +164/−10.** Nothing merged, nothing deployed.
+
+**Every one of your five conditions holds, measured (below). The named gate question is at the end.**
+
+## Your five conditions
+1. **No widening of who is admitted.**
+   - `decideMetadataOverwrite`, `mayOverwriteStoredMetadata`, `readOwningDocument`, `isQuietKeep`, `isUuidShaped` and the `CUSTODY_OPTION` line are **byte-identical to develop**, compared function by function.
+   - `anchorOverwriteGuard.ts` is **+17/−0**: it only gains `ISSUER_FIELDS` and `holdsIssuerFields`.
+   - In `index.ts`, the guard call and the `$23` bind (`overwrite.allow,`) each occur exactly once, as on develop.
+   - **M6 (`holdsIssuerFields` ignores `allow`) is in the matrix and KILLED (I7).** Nothing adds the card's option (c).
+2. **5 parallel passes before READY:** anchoring's KS-1385 integration trio on this head is **64/64 in each of 5 consecutive passes, with 0 hook timeouts.** The `beforeAll` timeout from my first two prototype runs has **not recurred in 9 runs since** (serial, 3 parallel on the prototype, 5 parallel here). I state it as unexplained and not recurring. I do not call it flaky.
+3. **Open-PR overlap, re-checked now (03:29Z):** of 24 other open PRs, only **#995** (KS-741, last updated 2026-09-14) touches `anchoring/src/index.ts`, with one hunk at `-505` in the POST handler. Mine are at `:1426-1500`, so they are disjoint. Nothing else overlaps any of my 4 files, including R's newer PRs.
+4. **The gate question** is named at the end, and also in the PR body.
+5. **Refs, not Closes.** KS-1385 is runtime work, the board rule keeps a merged runtime change In Progress until it is deployed and live-checked, and KS-1384 (a tenant column, one anchor row per event) is still the structural follow-on.
+   - The PR body: closing keywords **0**, `Refs KS-` 1.
+   - Linear: KS-1385 links #1607 as **`contributes`**, open (03:29:23Z). A second read is running at +100 s, and I will mail only if it differs.
+
+## Receipts
+- **Remote:** ls-remote branch = PR API `head.sha` = local HEAD = `c241bb8624bc`. develop is `9512cc70d8c4`, unmoved since I branched.
+- **Push:** a new branch, `PUSH_RC=0`, 03:1xZ → 03:28:04Z.
+- **Preflight:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 skipped (no local stack); shell suites 91/91. That is not a pass.
+- **PR body:** read back byte-equal (sha256/16 `cd0a34cdf803377b`).
+- **Identity:** author and committer are `Kam Kreiser <kamil.kreiser@secuura.ai>`, with the value read back from `file:.git/config`.
+- **The 4 files:** the staged list equals the ruled list, 0 symlinks staged, and each file's sha256 equals the prototype's.
+- **Landing:** the branch's base IS develop's tip, so a squash lands tree `a0d111da8b18` as long as develop does not move.
+- **Mutants on this head:** **8/8 killed**, with all 64 cells loaded each time and every restore verified:
+  - M1 `$24` never bound (W2);
+  - M2 always bound (W1, W2);
+  - M3 `orgVerified` dropped from the list (I1, I2, I4, I5, I7);
+  - **M4: the merge takes the incoming fields, which is develop's behaviour (I1–I4)**;
+  - M5 an absent field may be added (I3);
+  - M6 `allow` ignored (I7);
+  - M7 the bind commented out (W2);
+  - M8 the log split broken (I1).
+
+  Control C0 (comment only) survives.
+- **Anchoring unit:** 379/380. The red, `threadTokenMint`, fails identically on develop alone and is KS-562 / BACKLOG 182. **`tsc`:** rc 0.
+
+## NOT run
+- **Anchoring booted end to end.** The cells run the product's real statement and real guard against real PG, but bind the list themselves, so the product's `$24` binding is pinned by source (W2). M1, M2 and M7 show the pins catch a wrong binding.
+- **The four platform suites:** no local stack.
+- **Not separately celled:** a holder's BATCH update (the same rule, through `anchor_type` equality), and legacy pre-KS-1175 rows (the I3 class).
+
+## The gate question (please drive it with anchoring BOOTED)
+1. The ISSUER anchors a document with org fields: `issuerOrgId`, `orgDid`, `orgTrust`, `orgVerified`.
+2. The HOLDER's organisation (the custodian's, Kam's (c)) re-anchors it with different org fields and a new actor.
+3. Does verify serve the issuer's four fields with the holder's actor? Does the Cardano metadatum the submitter builds carry the same?
+4. Controls: the issuer's own re-anchor still replaces the four (latest wins); a caller the guard refuses changes nothing.
+

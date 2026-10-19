@@ -1,0 +1,80 @@
+=========== [QUESTION] 2026-10-19T03:11 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] QUESTION: KS-1385 (b) design - hold the 4 issuer field
+[Secuura/Blockchain-J -> Wednesday] QUESTION: KS-1385 (b) design - hold the 4 issuer fields in the one upsert for admitted non-issuers; measured 64/64, 8/8 mutants
+## BLUF
+**KS-1385 (b) design, measured on an uncommitted prototype at develop `04a4a339`, scratch PG 15 only.** Nothing is committed or pushed.
+
+**The freeze lives in the ONE statement that can change an anchored identity**, the main `anchor_store` upsert, and in the service rather than a trigger:
+- When the guard admits an update for anyone OTHER than the issuer's organisation (today, the custodian's organisation under Kam's (c)), the four issuer fields `issuerOrgId`, `orgDid`, `orgTrust`, `orgVerified` are taken from the stored row in that same statement. Absent stays absent. The rest of the holder's payload applies.
+- The issuer's own events are unchanged: latest event wins.
+
+**Measured on the prototype:**
+- 4 files, +164/−10; anchoring's KS-1385 integration suite **64/64 in three parallel runs** (develop 56 + 8 new cells);
+- **8/8 mutants killed**, with a comment-only control surviving;
+- anchoring unit 379/380 (the red is `threadTokenMint`, the same as develop alone, KS-562); `tsc` rc 0.
+
+**One reading needs your ruling** (below); the design turns on it.
+
+## Your five questions
+**1. Every write path, by symbol.**
+- **The four fields exist only inside `anchor_store.metadata_payload.secuura`**, built flat by `buildFlatAnchorMetadataPayload` (`anchorSchema.ts:262-316`).
+- **Writers of `metadata_payload`**, every service, `scripts/`, `docker/`, `migrations/` and `deployment/`, tests excluded: **exactly one statement changes it after the first anchor**, anchoring `index.ts:1372` `INSERT … ON CONFLICT (document_id, network) DO UPDATE`, through its `CASE` at `:1426`.
+- **Every other writer is not a post-anchor write of the payload:**
+  - `anchorStatusUpdate.ts:114`: its `SET` list (`:79-101`) is status, tx hash, simulated, block, slot, confirmations, `confirmed_at`, error and `updated_at`; `metadata_payload` appears only in its `WHERE` (`:109`);
+  - `index.ts:1759`: `retry_count` only;
+  - originate `anchors.ts:109`: 6 columns, without `metadata_payload`;
+  - migrations `003`, `docker/init/06` and the Azure `init.sql`: one-time `INSERT … SELECT` consolidations;
+  - the demo seed: initial `batchInsert` only.
+- **A name-grep for the four symbols finds only builders and readers:** `anchorSchema` 11, `anchoring.openapi` 7, originate `verification` 4 / `documents` 3 / `verificationV2` 2 / `certifications` 1, `anchorReadback` 3, `cardanoMetadatum` 1.
+  - The positive control: `anchorSchema.ts` is found.
+  - **A control that failed, which is a finding:** I first chose `anchorOverwriteGuard.ts` as the "known" file, and it reads **0**. The guard treats the payload as an opaque blob, so write paths can only be enumerated through `metadata_payload`'s writers, not through the field names.
+- **The chain sees the stored row, not the request.** The submitter's `getAnchor` (`index.ts:1736-1746`) reads `dbGetAnchorById(row).metadataPayload`, and `cardano/transaction.ts:114` encodes that. So the hold applied at the upsert is also what is anchored on chain.
+- `GET /api/anchors/:id`'s identity view (`:902`) reads the row too. The POST's 202 echoes no identity.
+
+**2. Where, and why not a trigger.**
+- **Service plus the same statement.** The decision is TypeScript: `holdsIssuerFields(overwrite)` is `allow && reason !== 'caller-is-issuer-organisation'` (`anchorOverwriteGuard.ts`, with `ISSUER_FIELDS` as the single list). It is bound as `$24`, with the list as `$25`.
+- **The merge is SQL inside the existing `CASE`:** `jsonb_set(EXCLUDED, '{secuura}', (EXCLUDED.secuura − $25) || (the $25 keys of the STORED row's secuura))`. It reads the stored row in the same statement, so there is no read-modify-write race.
+- **A trigger cannot do this.** A `BEFORE UPDATE` on `anchor_store` cannot see the caller, so it could only freeze the four fields against EVERYONE, including the issuer. That contradicts Kam's 10-13 card "latest event's identity wins" for the issuer's own events. **So there is no trigger, no migration and no deploy census, and nothing orders against 050/051**, which are on `documents`; this is `anchor_store`.
+
+**3. The holder update, before and after; what a "refused" change returns.**
+- **Before:** an admitted holder event replaced the WHOLE payload, so the holder could rewrite all four issuer fields (that is the card).
+- **After:** the holder's actor fields and the rest apply; the four keep exactly their stored values (I1); a holder event that omits them does not erase them (I2); one first anchored without them cannot add them (I3); a stored `orgVerified: false` stays false (I4).
+- **Control:** the ISSUER's own later event still replaces them (I5).
+- **There is no refusal.** `POST /api/anchors` still answers **202** with today's body, which carries no identity. The four simply keep their values, and the server logs ONE new info line, `KS-1385 (b): applied the update and kept the first-anchored issuer fields`. The existing "kept the stored anchor metadata" warning still fires only for a real keep: a refused caller (I6) or a hash or type mismatch.
+- **Why not a 4xx:** the card says "lets the holder change only the rest", which is a partial apply. S also sends an identity block on every event, so a 4xx would break S's holder flows. **This is the reading I need you to rule.**
+
+**4. Existing cells.**
+- **None assert the four fields after a holder update.** The holder cells send only actor fields and assert `actorDid`.
+- **What changes:**
+  - **the two harnesses** that extract the statement from `index.ts` byte for byte: they bound 23 values, and with `$24`/`$25` every cell errored (**measured: 28 × `bind message supplies 23 parameters … requires 25`**). The main file's `params()` now binds `holdsIssuerFields(decision)` and `ISSUER_FIELDS`; `…stored-identity-matches-the-anchored-transaction…` binds `false` (it plays the issuer);
+  - **W4**, which pins the exact kept-log condition line: updated to the new line (it now also excludes a held update).
+- **New: I1–I7, and W2** (the product binds `holdsIssuerFields(overwrite)` as `$24` and `ISSUER_FIELDS` as `$25`, matched after stripping comment lines; mutant M7 proves it sees through a comment).
+
+**5. Partition.**
+- **The 4 files, all in `services/anchoring`:**
+  - `src/index.ts` (`dbPersistAnchor`: the `CASE`, the `RETURNING` flag, the binds, the log split; +38/−4);
+  - `src/anchorOverwriteGuard.ts` (+17);
+  - `src/__tests__/ks1385-anchor-store-keeps-the-latest-events-metadata.integration.test.ts`;
+  - `src/__tests__/ks1385-stored-identity-matches-the-anchored-transaction.integration.test.ts`.
+- **None of R 51st's files.** Open-PR check: of 25 open PRs, only **#995** (KS-741, last updated 2026-09-14) touches `anchoring/src/index.ts`, with one hunk at `-505` in the POST handler. Mine is at `:1426-1500`, so they are disjoint.
+
+## Measurements
+| item | result |
+|---|---|
+| anchoring KS-1385 integration (3 files, `secuura_app`, PG 15 built from develop's tree) | prototype **64/64 ×3 parallel**; develop 56/56 ×2 |
+| mutants (product source; every restore verified by sha256; all 64 cells loaded each time) | **8/8 killed**: M1 `$24` never bound (W2) · M2 always bound (W1, W2) · M3 `orgVerified` dropped from the list (I1, I2, I4, I5, I7) · **M4 merge takes the INCOMING fields, which is develop's behaviour (I1–I4)** · M5 absent may be added (I3) · M6 `allow` ignored (I7) · M7 bind commented out (W2) · M8 log split broken (I1). **C0** comment-only: survived |
+| anchoring unit / `tsc` | 379/380 (`threadTokenMint`, the same on develop, KS-562) / rc 0 |
+
+## Limits, stated
+- **Anchoring is not booted.** The cells assemble the bind list themselves, so the PRODUCT's `$24` binding is pinned only by source (W2), exactly as `$23` has been by W1 since round 2; M1, M2 and M7 show the pins catch it. **I suggest the gate drives it end to end with anchoring booted:** the issuer anchors with org fields, the holder's organisation re-anchors, and verify serves the issuer's four fields with the holder's actor.
+- **⚠ A `beforeAll` hook timeout** (10 s, the `guard-reads-under-force-rls` file) appeared in 2 of my first 4 prototype runs, both under parallel cold start, and in 0 of the 4 after (serial plus three parallel). Develop: 0 of 2. **Not explained.** In the build I will run 5 parallel passes before READY, and root-cause it if it recurs; I will not call it flaky without proof.
+- Not separately celled: batch rows (the same rule, through `anchor_type` equality), and legacy pre-KS-1175 rows (the I3 class: the holder cannot add the fields). KS-1603's unconditional columns are untouched.
+
+## Question
+**Do you rule this design, and in particular its reading?** The reading is: the four fields are held only against an ADMITTED NON-issuer (the issuer keeps latest-wins); a holder's change is a partial apply, not a refusal (202, one info line); and absent stays absent. If yes: GO to build exactly these 4 files on KS-1385's Linear branch, with one tier-1 Opus gate after.
+
+## Meanwhile
+BLOCKED on the build. The prototype is `j13/k5proto` (uncommitted) plus `j13/k5/` (logs, mutants, tools). Scratch PG: only 55496 is still up; 55491–55495 are stopped, as asked.
+
+## Needed by
+No deadline. If my band arrives first, this mail plus the handover carry it.
+
