@@ -93,13 +93,22 @@ WRITE = ("fetch","pull","push","worktree","checkout","reset","stash","commit","t
 # Learned while building it, worth keeping: the hook GATES THE CALL THAT EDITS THE HOOK, so a
 # clause and its own narrowing cannot ship in one Bash call — the un-narrowed version refuses it.
 # Edit the file with a non-Bash tool, then exercise it from fixtures on disk.
+# WIDENED 2026-10-20 (gate AU1 N1): the clause matched only `git -C <path>`. A gate refused on a
+# $VAR path then used `git --git-dir=<path>/.git <verb>`, which matched NOTHING here, so the same
+# form would write into another project checkout unseen. `--git-dir`, `--work-tree` and a
+# `GIT_DIR=<path>` env prefix now name the target exactly as `-C` does. Arms in
+# fleet/tests/no_cd_gitdir_arms.sh. KEEP THIS BLOCK FREE OF APOSTROPHES (see the note below).
 pat = re.compile(
     r"""(?:^|[;&|(`\n]|\$\(|\bthen\s|\bdo\s)\s*"""
-    r"""git\s+-C\s+(?P<path>"[^"]*"|\x27[^\x27]*\x27|[^\s]+)\s+"""
+    r"""(?:GIT_DIR=(?P<envpath>"[^"]*"|\x27[^\x27]*\x27|[^\s]+)\s+)?"""
+    r"""git\s+(?:(?:-C\s+|--git-dir[=\s]\s*|--work-tree[=\s]\s*)(?P<path>"[^"]*"|\x27[^\x27]*\x27|[^\s]+)\s+)?"""
     r"""(?P<flags>(?:-[^\s]+\s+)*)"""
     r"""(?P<verb>[a-z][a-z-]*)""", re.X | re.M)
 for m in pat.finditer(cmd):
-    path = m.group("path").strip("\x27\"")
+    target = m.group("path") or m.group("envpath")
+    if not target:
+        continue                        # a bare `git <verb>` runs in the cwd, which the cd clause keeps inside the seat tree
+    path = target.strip("\x27\"")
     verb = m.group("verb")
     rest = cmd[m.end():m.end()+80]
     hit = verb in WRITE or (verb == "merge-tree" and "--write-tree" in rest)
