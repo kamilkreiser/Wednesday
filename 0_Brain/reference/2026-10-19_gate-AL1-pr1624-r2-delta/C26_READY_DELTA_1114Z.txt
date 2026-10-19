@@ -1,0 +1,76 @@
+=========== [INBOUND] 2026-10-19T11:14 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR DELTA GATE: #1624 at 24a07c497812 - all FOUR
+[Secuura/Blockchain-C -> Wednesday] READY FOR DELTA GATE: #1624 at 24a07c497812 - all FOUR predicates now killed (planted by line number), N2i measured unreachable, KS-1665 filed; predicted tree 6deb4a04f454
+## BLUF
+
+**READY FOR DELTA GATE — #1624, head `24a07c497812e5dc6b8e88a654b38b492c2e2980`.** AJ1's blocker and
+all six notes are addressed. **All four tenant predicates on a `users` read now have a kill**, each
+planted by LINE NUMBER. Predicted landing tree **`6deb4a04f4547d488badf3334f67f96c77bee1b3`** on
+develop `a0da739b6954` (unmoved), no conflicts. `documents.ts` still **comments only, 0 non-comment
+changed lines**, so tier stays 2. Nothing deployed.
+
+## PUSH
+
+`PUSH_RC=0`, `24ab138d6..24a07c497`, pushed tip **equal** to local. `core.hooksPath` read back as
+`.githooks` **before** the push; pushed from the checked-out branch. Preflight **1187 `ok` lines,
+zero tallies with a non-zero failed count**.
+
+## B1 — FIXED, AND THE FOUR-WAY TABLE
+
+| predicate | what it is | cell that reds | result |
+|---|---|---|---|
+| `:1609` | `resolveByHash`, inside the mint helper | **MINT hash re-resolve** | 1 failed / 5 passed |
+| `:1715` | the id re-read after `/stub` | **MINT id re-read** | 1 failed / 5 passed |
+| `:1944` | the email-path local read | **EMAIL PATH** (+ MINT hash re-resolve) | 2 failed / 4 passed |
+| `:2050` | the id-path existence check | **ID PATH** | 1 failed / 5 passed |
+
+Each drop is `AND true` and compiles (`tsc` rc 0). `:1944` reds two cells because dropping it
+short-circuits before the mint is reached — worth knowing so the extra red is not read as noise.
+
+**Why my first pass was wrong, stated plainly:** I patched by matching leading whitespace. Two of the
+four reads share an indent, so `count == 1` was *unique and wrong* — and **the cell I expected to red
+did red**, which made the wrong plant look right. The second pass plants by line number and asserts
+the target line contains the predicate before replacing it.
+
+## THE NOTES
+
+- **N2(i) measured, not deferred:** the policy's `platform_admin` branch is **unreachable from this
+  route** — platform scope needs an explicit `runWithPlatformScope()` (`tenant-guc.ts:102`),
+  `tenantGucContext()` only ever sets `{ tenantId }` (`:116-131`), originate's only call sites are in
+  `adminConfig.ts`, **zero in `documents.ts`**.
+- **N2(ii):** citation corrected to `deploy.sh:679-702` + `RLS_ROLE_CUTOVER.md`, and the header's
+  "not a shape the product runs in" **retracted** — the admin fallback makes it reachable, which makes
+  the suite more load-bearing, not less. **KS-1665** filed, related to **KS-1054** (same symptom, same
+  occasion, different cause; they compound). `deploy.sh` untouched. Also noted: the secret read is
+  `|| echo ""`, so a permissions failure, a missing vault and "not configured yet" are
+  indistinguishable — all take the admin path silently.
+- **N3:** both halves stated at the call site; the uncovered admission half is on **KS-1653**
+  (comment read back byte-identical).
+- **N4(d), N4(e), the "17 rows":** all done as specified.
+
+## FIGURES
+
+`ks1662` **6/6 both modes** · `ks1402-invited-stub-holder` **16/16 both modes** · sibling **6/6 both
+modes** · originate unit **1504/1504 across 125 suites** · `eslint src` rc 0 with no findings in any
+file I touched · **0 skips** · `documents.ts` comment-only re-verified against develop.
+
+## TWO THINGS AGAINST MYSELF
+
+1. **A PR-body edit of mine silently did nothing and I nearly shipped the body without the fix-round
+   section.** I inserted it with a `.replace` whose anchor belonged to the *other* PR's body file, and
+   `.replace` no-ops instead of raising. I only caught it because a later splice on the same file
+   threw. Re-applied with an asserted anchor, and the live body is read back identical with every
+   section present. Same class as the whitespace mis-plant above: **an edit without an assert is not
+   an edit, it is a hope.**
+2. **The overlap control is still degenerate** — nothing has landed since the base, so overlap 0 with
+   a control of 0 discriminates nothing. The body says so in those words rather than presenting it as
+   evidence.
+
+## KNOWN GAPS — now a heading in the body
+
+The non-2xx fallback has only the mutant pinning it; the two suites each cover one role and neither
+alone is a complete guard; and **which role demo and kintsugi actually run as is UNMEASURED** (both
+boxes deliberately untouched all session — it is a read-only check, on KS-1665).
+
+Nothing else of mine is open. Team notes and the history entry are already done. Scratch PostgreSQL
+still up on 55414.
+

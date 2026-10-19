@@ -1,0 +1,73 @@
+=========== [INBOUND] 2026-10-19T10:50 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR DELTA GATE: #1623 round 2 at ea9d6e697 - lan
+[Secuura/Blockchain-G -> Wednesday] READY FOR DELTA GATE: #1623 round 2 at ea9d6e697 - landing tree e598e00e8902 on develop a0da739b6954; B1 closed 503/503/503, PUSH_RC=0
+## READY FOR DELTA GATE — #1623 round 2 of 2, KS-1633
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1623 · head **`ea9d6e697951ef5c78628055429f345486955bcd`** · base `develop` · 8 files, +707 / −96.
+
+**Predicted landing tree `e598e00e890284ae6b85a9fe0379eac3c28a72ca`** on live develop **`a0da739b6954d42333640ea190d877f031803c7f`** — the base you named, and it has not moved since. Re-predicted just now in my own clone; the figure is unchanged from my STATUS because develop is unchanged.
+
+**The push landed:** `b7de86464..ea9d6e697  ks1633-cells-g11 -> ks1633-cells-g11`, **`PUSH_RC=0`**. It was never refused and never dropped — it was in leg 14 for 11 minutes, as the two earlier pushes from this clone were. The remote ref equals my local tip and the PR head; the body is updated and read back byte-identical with a control.
+
+**Nothing merged. Nothing deployed. No live box read or driven.**
+
+## B1, the blocker, closed
+
+| case | develop | round 1 | round 2 |
+| --- | --- | --- | --- |
+| a NUL byte in `data` | **503** | 400 | **503** |
+| the connector principal (KS-1659's shape) | **503** | 400 | **503** |
+| the save throws | **503** | 500 | **503** |
+
+The reservation is **non-deciding**: a failure is logged with ids only and the request continues, so the anchor call and the authoritative save answer exactly what they answer without any of it.
+
+## Your sharing condition
+
+The `INSERT INTO documents` moved into **one** private `insertCertificationRow` that both `saveCertification` and `reserveCertificationRow` call. The file holds **exactly one** such statement, as develop does. **Behaviour-neutral and proven:** the five save-count files plus `ks543` **210/210**, `certificationRepo` **16/16**, unchanged. So the second limb of your condition (a column-drift cell) is not needed — there is no second statement to drift.
+
+**(a-prime) also made your F4-3 condition easier:** because the reservation is a different function, `saveCertification` is called **exactly once** again, as on develop, so **F4-3's call count returns to develop's value** and Kam's ruling is untouched in letter and number. The sequence is pinned on the reservation — first, once, with the pre-anchor state.
+
+## Proof per cell
+
+| cell | proof |
+| --- | --- |
+| ORDER, ORPHAN, DELETE-FAILS, N3 | red against **develop** |
+| N1 (exactly one ISSUE event) | red against **round 1** — two events |
+| **B1** | **mutant M-B1** (unwrap the reservation): tsc **0**, reds **exactly** this cell. **Vacuous against develop and against round 1** — round 1 never called the reservation — and the PR says so |
+| **N5** | **mutant M-N5** (drop the authoritative save): tsc **0**, reds **three** cells (N5, N1, ORPHAN), not one |
+| N4 (pool selection) | 4 cells, 2 controls. **Cannot load** against develop — `deleteCertification` does not exist there — a **load failure**, reported not counted |
+
+**ORPHAN narrowed** as ruled: no orphan when the reservation **succeeds** and a later step fails.
+
+## The other notes
+
+- **N4** was a real bug and is fixed: `withTenant` takes an **optional** pool (omitted, behaviour unchanged) and the route passes the request's. **No second tenant database was stood up** — no Docker, one scratch instance — so the cross-database case is pinned **only** by the unit cell, and the PR body says that in those words.
+- **N2 / N6** corrected: "removes the window" → **narrows** it, naming the anchor-then-fail path; "sub-second" → **up to the 10 s anchoring timeout** (`AbortSignal.timeout(10000)`). Both of round 1's wordings were wrong and are retracted in the body.
+- **N9** the suite header **supplies** the `tenants` row in `beforeAll`.
+- **N7** filed as **KS-1664** (Medium, searched first, linked to KS-1633).
+
+## One more defect round 2 found, and the gate should know a smaller run would have missed it
+
+I briefly made the authoritative save **conditional** on the anchor state having changed. That left an anchoring-**failed** request never reaching `saveCertification` at all, and so writing **zero** ISSUE events where develop writes one. **The full suite caught it** — six suites that mock `certificationRepo` and assert the repo was reached. It is unconditional now; the row half is an idempotent upsert.
+
+## Counts
+
+| suite | MT=false | MT=true |
+| --- | --- | --- |
+| `ks1633-certify-writes` | **10/10** | **10/10** |
+| `ks1557-lineage-certify` | **13/13** | — |
+| **`services/originate` FULL unit suite** | **126 suites / 1510 tests / 0 failed** | |
+
+`tsc --noEmit -p services/originate` clean. **Flagged again for the gate:** that tsconfig excludes `src/__tests__`, so it does not type-check test files; jest's transform is the only check, and `Tests: 0 total` is a load failure.
+
+## Push preflight, its own words
+
+**`PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`** · `legs 3 4 8 — local stack not up` · shell suites **91 passed, 0 failed, 0 skipped (of 91)** · **`PUSH_RC=0`**. I checked all **89** tallies in the log for a non-zero failed count with an awk that I verified fires on a planted non-zero and stays silent on a planted zero — none. Gate armed, pushed from the checked-out branch, no `--no-verify`, no `--force`.
+
+**NOT run:** the four platform suites (no Docker). **Not covered:** concurrency, and the cross-tenant-database delete.
+
+## Needed-by
+
+The delta gate's verdict. **This is round 2 of 2** — if it returns findings I will report them and ticket the residue rather than attempt a third round.
+
+Seat G 11th
+
