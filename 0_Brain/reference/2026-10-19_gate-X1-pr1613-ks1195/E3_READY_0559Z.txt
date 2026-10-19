@@ -1,0 +1,56 @@
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE: #1613 KS-1195 at 009749ed2565 - 1151/1151, red-first 17/2 with both controls green, preflight 13/16 (3 skipped, nothing failed)
+## BLUF
+
+**READY FOR GATE (tier 1): PR #1613, head `009749ed25651065445e3a3ee76eab83b6e38aec`, tree `2a094dd9eb39fc78781c61381f7bb6d96df0753e`, base `develop`.** KS-1195's build delivers Kam's ruled ceiling. **Pushed tip == tested tip**, confirmed by `ls-remote` after the push. Nothing deployed, no key rotated.
+
+**Everything in my queue is now done except taking this gate's verdict:** both rulings delivered (§4 of my 05:5xZ status), six replies posted and verified, and the build raised.
+
+https://github.com/Secuura/Distributed_Secuura/pull/1613
+
+## The gate's own numbers
+
+**Diff:** exactly **2 files, +346, −0**, confirmed against the PR files API — `routes/platform.ts` +64, the new `__tests__/ks1195-...test.ts` +282. 2 commits (mine + the develop merge-in).
+
+**Suites, both sides measured, nothing subtracted:**
+
+| | files | tests |
+|---|---|---|
+| develop `846ae2788` alone (control) | 116 | 1132 passed, 0 failed |
+| PR head | 117 | **1151 passed, 0 failed** |
+
+**Red-first, and it is a true one rather than a tamper stand-in.** At develop's own `platform.ts` with my test file present: **17 failed / 2 passed**. The two that passed are **CONTROL-1 and CONTROL-2** — precisely the cells that assert an absence which holds in both states, i.e. the cells that should not move. Message `expected undefined to be 3000`.
+
+**Four tampers, each reverted after measuring:** A drop the mint field → 4 red · B `parseInt` → 3 red · C warn on the unset path → 3 red · D default back to 1000 → 12 red · restored → 19 green.
+
+**Push preflight — I am quoting the hook's own verdict, not calling it a pass.** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` The hook adds, in terms: *"This is NOT a pass. Do not quote it as one — say which legs ran."* Ran OK: **1, 2, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16**. Skipped: **3, 4, 8** — local stack not up, no Docker on this Studio.
+
+**Leg 16 covers the new test file:** `api-gateway (tsconfig.test.json): tsc examined 152 files, 117 of them under __tests__; 27 errors: 27 in the baseline, 0 new; 0 stale baseline entries.` → **0 new type errors.**
+
+`tsc` rc 0. `npm run lint` rc 0, and the **delta** is measured: `eslint src/routes/platform.ts` gives **0 warnings with AND without** the change. The single warning my test file first introduced (`no-useless-assignment`) I fixed rather than left.
+
+## Three things the gate should know, stated rather than buried
+
+1. **`mergeable_state: unstable`, `mergeable: true`, stable across two reads — and I cannot tell you why.** All three check endpoints 403 for this PAT: `check-runs`, `status` and `check-suites` each return `Resource not accessible by personal access token`. So I am not able to say what makes it unstable, and I am not guessing. Per the repo's own rule this carries **no** testing claim in either direction — the Test Evidence block carries it.
+2. **The Linear link is `linkKind: contributes`** (I used `Refs`, never `Closes`), so a merge will not auto-close KS-1195 — correct, because the ticket also tracks the throttling evidence that needs a live stack.
+3. **An honest gap is written into the PR body and onto the ticket:** there is **no end-to-end proof** that a key minted at 3,000 is then throttled at 3,000. That is the security service enforcing a value it is handed, and it needs a running stack. I told Stuart that his next `@k-live` run against a build carrying #1613 is the evidence, and that if the 429 still arrives at ~1,000 he should say so and I will treat it as unfinished rather than closed.
+
+## Also now closed out
+
+**KS-1195 carries a PR-raised comment**, `38d16d92-8b5c-4c6a-8bdc-050631d540fd`, verified by id (issue match, 2052 == 2052 bytes, mention node present, Peter control absent). It states plainly that existing Kintsugi and demo keys stay at 1,000 until rotated and that rotating a live client key is Kam's.
+
+**The stale September branch is untouched** — still `a067d4e3e8`, re-read by `ls-remote` after my push. I used a different name rather than force over it.
+
+**Still open from my 05:5xZ status, and it is yours to route:** a fresh clone has **no pre-push gate** (`core.hooksPath` unset), and `deploy-clones/seatC25-7e2f8157cec2` has that gap right now. My own first push ran ungated and was saved only by an unrelated remote rejection. One `git config core.hooksPath .githooks` fixes it, per `CONTRIBUTING.md:389`.
+
+## Standing by
+
+I take the verdict and do a fix round if there is one. I will not merge without your head-pinned GO.
+
+PROVENANCE:
+- head, tree, pushed==tested | `rev-parse` + `ls-remote` in my clone after the push | 2026-10-19
+- 2 files / +346 / −0, `mergeable_state`, `linkKind` | GitHub PR + files API, Linear attachments | 2026-10-19
+- both suite tallies, red-first 17/2, four tampers, tsc, lint-with-and-without | my own runs, each rc read unpiped | 2026-10-19
+- the preflight verdict line and leg list | the push log the hook wrote, byte-copied | 2026-10-19
+- the three 403s | `curl -w '%{http_code}'` on each endpoint | 2026-10-19
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-19 17:0x AEDT
