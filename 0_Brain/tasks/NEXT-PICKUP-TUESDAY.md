@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 282 — 2026-10-20 09:2x CHECKPOINT (s122, ctx 70%; band 80-90). **READ THIS FIRST. Adds to 281.**
+- **🔴 KAM PRIORITY (live 09:15:20, view=tuesday):** *"as a priority, can you please provide me access that I can forward to Paul for Security Manager on Azure. Ideally, remove any logon requirement"*. Receipt bf-1e017744f235. Measured 09:2x (HPSM-POC az, read-only): tenant ec01829b, subscribedSkus EMPTY (no P1; control /organization reads), NSG `hpsm-poc-sm-rg` no inbound rules, VM `vm-hpsm-sm` (D4as_v5) DEALLOCATED, PIP 52.187.238.167, SM UI port 7637. Card **hpsmpoc-sm-access-for-paul-1020** OPEN (rec a = allow-list Paul's IP on 7637, his own SM login exists, password stays in HPSM-POC .env `HPSM_SM_USER_PAUL_PASSWORD`; b = buy P1 + App Proxy, the 10-06 approved route never built; c = no logon, NOT recommended). Default: start the server, prepare a, open nothing until Paul's IP is on the board. Panel bf-9043ca077465. **Execution is a seat's (Azure write via HPSM-POC's own az identity), never Tuesday's hands:** on a tap write a short B-brief (VM start, one NSG allow rule source=<IP>/32 dport 7637, verify from SM's login page by HTTP status only, report).
+- **MPS PR datasecau/MPS-Commercial-Calculator#84** (B303 done, verified, pane closed). Gate **B305** brief drafted (`tuesday/briefs/2026-10-20_B305_SEAT-G5_mps-gate-pr84-tier1.md`, NOT yet read; drafter says launch WITHOUT BRIEF_SEAT_LEVEL so brief_seat pins Opus: check brief_seat.sh). Tier 1, Opus.
+- **B301 LAUNCHED %107** (Composer), watcher armed.
+- Floor 09:2x: %0, %1, %56 S101O, %105 B302, %106 B304 gate, %107 B301.
+
 ## 🟢 DELTA 281 — 2026-10-20 09:07 CHECKPOINT (s122, ctx 66%; band 80-90). **READ THIS FIRST. Supersedes 280's %103 line.**
 - **B300 DONE:** READY @ 8c029bb verified at source + STATUS read whole; **PR datasecau/HPSM-POC#164** opened; pane %103 closed. Rulings: 3308/3309 not approval-class; owed word approval already in C-120 (no card).
 - **GATE B304 LIVE %106** (Sonnet G2, round 1 of 2) on #164 @ 8c029bb. STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-20_B304_STATUS.md`. On GO / GO WITH FINDINGS: completion check, close pane, land #164 with `gh pr merge 164 --squash --match-head-commit 8c029bbc6df8f2a2808e592969a8c00e0b21064e` (HPSM-POC gh config) after checks green, verify main tree; then a records seat (C-entry + tickets -298/-299/-300 + B304 findings). On NO GO: one fix round (cap).
