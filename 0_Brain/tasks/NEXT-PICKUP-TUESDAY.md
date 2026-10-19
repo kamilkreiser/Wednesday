@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 254 — 2026-10-19 14:51 (s119, ctx ~77%).
+- **PR #97 (RD-774/836) BLOCKED by CodeQL alert #272** (js/log-injection, rule severity ERROR, backend/server.js:20945) — Kam forwarded the bot comment (FYI, DKIM pass). **ANSWER-23** (`tuesday/briefs/2026-10-19_S101O_ANSWER-23_pr97-alert272-fix-before-ready.md`) told S101O: fix in code via logSafe, red-first, CodeQL 0 open on the new head, THEN READY. On READY: verify #272 fixed on refs/pull/97/head at source, then the tier-1 gate kit (Opus). PR #96 is clean at f15217c (0 open). Tell Kam the outcome on the panel once #272 reads fixed.
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %82 HPSM-POC-G7 (B279).
+
 ## 🟢 DELTA 253 — 2026-10-19 14:43 (s119). Supersedes 252's B281 line.
 - **COMPOSER PR #80 MERGED by Tuesday** -> Composer main **50d97508** (tree e1824ee = gated head fddb799's). Gate B281 strict NO GO was ONE pre-existing finding: **B281-1 (Major)** ci.sh node-step wall-clock timing assertions (`packages/engine/test/s47-crf2-linear-detector.test.ts:223`, `packages/content/src/b20-codeql-redos.test.ts:8,98`) fail under load ON MAIN TOO (2/5); ruled out of #80's scope by Tuesday. **OWED to the next Composer seat:** BACKLOG rows for B281-1 (fix-shape in B281 STATUS: serial pool or CPU-time minimum of samples, regression under a CPU hog), B281-2/-3 (ci.sh:13-14 and compose.yaml:122-123 comment wording), B280's proposed rows (Chainguard digest may vanish; old dev volumes need chown). Then Composer wave-2 code lanes on main 50d97508 (CL1/CL3/CL4/CL5a/CL5b; run ci.sh with the node step's timing tests in mind: ci.sh may read 19/20 under load until B281-1 is fixed).
 ### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %82 HPSM-POC-G7 (B279).
