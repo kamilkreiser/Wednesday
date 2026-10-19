@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 262 — 2026-10-19 17:50 (s120). Supersedes 260's B286 line.
+- **PR #162 MERGED (HPSMPOC-290):** gate B286 GO WITH FINDINGS; HPSM-POC main = **e4f270ea41bd** (tree ca71a46 = gated head 6dbe394's tree). Pane %89 closed. **OWED records seat (batch with PR #161's outcome):** -290 transition + Done evidence, -226 description refresh (census in B284 STATUS), ticket candidates B286-1 (Minor: endpoint-level guard test) + B286-2 (Note), import endpoint same utf-7 defect (B284 FOR TUESDAY 2) -> lane L4 ticket.
+- **B283 (PR #161) was pinned on main befd45e;** main is now e4f270e (disjoint files). At its verdict: re-read #161 mergeable_state; if behind-required, the merge is still a squash with --match-head-commit 7329804 (no forward merge needed unless GitHub refuses).
+
 ## 🟢 DELTA 261 — 2026-10-19 17:01 (s120). Adds to 260 step 4.
 - **Gate 29 kit DRAFTED, NOT YET READ by Tuesday:** `fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md` (19 slots: MAIN_SHA x2, MAIN_TREE, MAIN_LANDED, REPORT_DATE x2, RULING_T0..T10, SELF_CHECK x2; T6 = whether the uncovered risk-store writers count against RD-836 — decided by ANSWER-26's outcome) + `launchers/launch_qa_nexusai_gate29.sh` + `…_gate29_DRAFTER-REPORT.md`. Route line to add (back up inbox_routing.conf first): `QA/NexusAI-gate29|tuesday-agent@agentmail.to|no`.
 - **ANSWER-26** (`tuesday/briefs/2026-10-19_S101O_ANSWER-26_rd836-other-writers-before-gate29.md`, sent 06:00:24Z, tap delivered): before mailing PR #97's new head, S101O censuses every risk-condition-store writer, gates the RD-836-scoped ones red-first (settings risk-definitions, validate-condition saveToDatabase, the GET sync), tickets the rest, names #221. Gate 29 is stamped on THAT head; if the head changed beyond the forward merge, ask the drafter (or re-read) for kit rows on the new writers before launch.
