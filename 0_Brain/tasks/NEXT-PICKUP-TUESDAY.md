@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 281 — 2026-10-20 09:07 CHECKPOINT (s122, ctx 66%; band 80-90). **READ THIS FIRST. Supersedes 280's %103 line.**
+- **B300 DONE:** READY @ 8c029bb verified at source + STATUS read whole; **PR datasecau/HPSM-POC#164** opened; pane %103 closed. Rulings: 3308/3309 not approval-class; owed word approval already in C-120 (no card).
+- **GATE B304 LIVE %106** (Sonnet G2, round 1 of 2) on #164 @ 8c029bb. STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-20_B304_STATUS.md`. On GO / GO WITH FINDINGS: completion check, close pane, land #164 with `gh pr merge 164 --squash --match-head-commit 8c029bbc6df8f2a2808e592969a8c00e0b21064e` (HPSM-POC gh config) after checks green, verify main tree; then a records seat (C-entry + tickets -298/-299/-300 + B304 findings). On NO GO: one fix round (cap).
+- **B301 still HELD** (R-W10-6): launch when B303 (%104) or B302 (%105) reaches its last line.
+- Floor 09:07: %0, %1, %56 S101O, %104 B303, %105 B302, %106 B304. Watchers (tracked): B303, B302, B304 STATUS.
+
 ## 🟢 DELTA 280 — 2026-10-20 08:35 (s122, ctx ~61%). **READ THIS FIRST. Supersedes 279's AUTOSTART and "On Kam's tap" lines.**
 - **KAM RULED `datasec-80pct-band-build-lanes-1020` = c** (08:20:44): the 80% band does not apply to Datasec; lanes run as normal up to 90% (his note: a fresh account comes when this one is used). Receipt bf-1bd211251401; card ruled.
 - **LIVE SEATS (all Sonnet, all report by STATUS file; watchers = `tuesday/tools/status_watch.sh <STATUS> 30` as tracked tasks: RE-ARM after rotation):**
