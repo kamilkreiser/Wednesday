@@ -3,46 +3,46 @@ date: 2026-10-19
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
-supersede: REPLACED WHOLESALE by the 13:1x Wednesday seat at its 65% checkpoint, 2026-10-19 ~15:5x. Replace wholesale again; never stack. Previous: NEXT-PICKUP.md.pre-1019-1550 + git.
+supersede: REPLACED WHOLESALE by the 13:1x Wednesday seat at its rotation handover, 2026-10-19 ~16:3x. Replace wholesale again; never stack. Previous: NEXT-PICKUP.md.pre-1019-1628 + git.
 ---
 
-# NEXT PICKUP (Mon 19 Oct, late afternoon)
+# NEXT PICKUP (Mon 19 Oct, ~16:30)
 
 ## 0. FIRST ACTIONS FOR THE NEXT WEDNESDAY SEAT
-1. Boot reads as the launcher says. Then kam_rulings_today.sh (the WHOLE day), reconcile_rulings.py, `bash 2_Project_Files/tools/newmail.sh` (to a file), fleet_ack.sh list, decision_queue.sh list open, fleet/usage_gate.sh --check, `local-model/spark/tunnel.sh check`.
-2. **In force:** Kam 10-18 "new account: tickets, backlog, routing definition, Spark as many as it can handle". Routing v1.0. Gauge 31% at 15:49. Kam last posted 11:08; every card of his ruled (only Tuesday's Composer card open).
-3. Commit your own files by pathspec before any tool that pulls. fleet_ack sometimes cannot see a fresh QUESTION for a few minutes: re-run `answered` at the next wake rather than chasing it.
+1. Boot reads as the launcher says. Then kam_rulings_today.sh (the WHOLE day), reconcile_rulings.py, `bash 2_Project_Files/tools/newmail.sh` (to a file), fleet_ack.sh list (an `answered` sometimes cannot see a fresh QUESTION for minutes; re-run it at the next wake), decision_queue.sh list open, fleet/usage_gate.sh --check, `local-model/spark/tunnel.sh check`.
+2. **In force:** Kam 10-18 "new account: tickets, backlog, routing definition, Spark as many as it can handle". Routing v1.0. Gauge 33% at 16:2x. **Kam 15:50: Stuart's list, "action what you can; anything you need from me, a card in fleet activity"** (section 2).
+3. **Before ANY ruling or GO naming a push, force-push or merge route: read `.githooks/pre-push` refusal branches in the same action and cite the line** (ledger w=3 REGRESSION today; promotion owed in section 4).
+4. Commit your own files by pathspec before any tool that pulls.
 
-## 1. LIVE WORK (15:5x)
-- **develop = ce98606212e4e0dce8212d4541ffff2484f2217b** (#1606 KS-1638 merged; landed tree eaf0f260dbda = gate S1's). 44 Secuura merges since 19:00 Sun. Nothing deployed.
-- **Seat J 13th (%6, Opus 5.5, ctx ~72%):** holds the GO for **#1607 (KS-1385 (b)) at 243d324d4dd7**, landed tree must be **5adb4e513696** (gate U1 GO, verdict `0_Brain/reference/2026-10-19_gate-U1-pr1607-r2-delta/verdict.md`, re-hashed EQUAL). On its MERGED mail: ls-remote, fetch into your own scratch clone (`git clone --shared` + fetch in the session scratchpad), compare the tree. Then J files one Low follow-up (U1's INF-1/INF-2), posts the KS-1385 BLUF, and wraps (band). Score + `pane_close.sh` in the same action as its wrap.
-- **Seat R 52nd (%12, launcher-pinned "Opus 5"; switch to Opus 5.5 at its first REAL idle: raw `/model claude-opus-5-5` + Enter on the dialog, then a model-note mail):** raised #1608 (KS-1506) and #1609 (KS-1539); building KS-623, KS-1637, KS-1503 on develop, then ONE batched READY for all five (tier 1 x3, tier 2 x2) → gate it (Opus, batched; KS-623's NODE_ENV precondition is CLOSED: development + ENABLE_TEST_TOKENS=false on both boxes, R's read). **#1597: ruled (1)** at 15:2x: push 8f3310c6ed85 from a worktree at develop (the hook runs from the pushing worktree), tree asserted b64be7e50092, deviation recorded in the PR body + KS-1634; then R mails MERGE-READY → re-pin the GO onto live develop (new landing tree + shell suites, since develop moved). Then S1's Low follow-up ticket, then KS-1622.
-- **Spark:** 23 PASSes held today; SCREEN_12's five are with R. Next screen once R's batch merges. The KS-1634 v2 brief (`night/briefs/ks_1634_v2_p1/`) runs after #1597 merges.
-- **Drive:** DevMASTER 52% (955 GB free). Card `wed-devmaster-drive-cleanup-1019` DELIVERED. Still Kam's hands: two rm commands for the oMLX Qwen folders (on the panel since 12:3x). Gatesets: 161 eligible but git-TRACKED; needs a git rm plan with Kam.
+## 1. LIVE WORK (16:3x)
+- **develop = 7e2f8157cec243a6255aab2c4fc8678063da317b** (#1607 KS-1385 issuer freeze merged, tree 5adb4e513696 verified by Wednesday's own fetch). 45 Secuura merges since 19:00 Sun. Nothing deployed.
+- **Seat R 52nd (%12, launcher-pinned "Opus 5"; switch to Opus 5.5 at its first REAL idle):**
+  - **holds a GO (16:23)** for the five from gate V1 (`0_Brain/reference/2026-10-19_gate-V1-screen12-five/verdict.md`, re-hashed EQUAL): #1609, #1610, #1611, #1612, then #1608 last; chained landing tree f8301c94deacd5621686413e9a51a70465f88a33. **#1608 switches a dead audit export ON**: R files ONE Medium ticket for its four faults (50-row cap, `to` day dropped, `type` ignored, spec mismatch) BEFORE #1608 merges, marked "fix before this export is deployed". On its MERGED mail: ls-remote + fetch into your own scratch clone, compare the tree.
+  - **#1597 re-pinned at e48c0b821f48** (author fixed: 0 other-client identity in its commit list; blobs identical to O1's gated head). **Gate W1 (Sonnet, background sub-agent of the 13:1x seat) was running at the rotation:** brief + verdict `0_Brain/reference/2026-10-19_gate-W1-pr1597-repin/`. **If verdict.md is absent, the gate died with the seat: re-launch it from the same brief.** On GO: send R the merge GO (landed tree = W1's prediction, R's was ca879b446810), then `decision_queue.sh --delivered secuura-datasec-author-on-two-branch-commits-1019` naming the merge. After #1597 merges: the KS-1634 v2 Spark brief (`local-model/night/briefs/ks_1634_v2_p1/`) re-pins and runs, and Stuart's S-shaped cell joins that follow-up (TRIAGE.md row 3).
+  - Then KS-1622, which WAITS until Seat E's KS-1195 PR merges (same `routes/platform.ts`).
+- **Seat C 25th (%13, launcher-pinned model; switch at first idle):** KS-1402's develop 500 on Stuart's custody transfers (blocks every deploy). Plan CONFIRMED 16:2x: measure the cause on a scratch PG (path diff 65d7722f8..7e2f8157cec2 incl. migrations), fix to the pre-regression 404, red-first, READY → tier-1 gate. No holder stub (Kam's card).
+- **Seat E 3rd (%14, launcher-pinned model; switch at first idle):** plan CONFIRMED 16:2x: posts Kam's 9 Oct rulings verbatim on KS-1195 and KS-1384 (mails the comment ids → `decision_queue.sh --delivered secuura-ks1195-s-key-ceiling-1009` and `... secuura-ks1384-anchor-per-event-1009`), builds KS-1195 (gateway passes `rateLimit` from `PLATFORM_S_CONNECTOR_RATE_LIMIT`, default 3000; no security-service change; a rotated key is a new key at 3,000), then replies on KS-1385/1612 (deploy conditions only), KS-1604 (bind at the organisation level), KS-1575/1596 (holding), KS-1387 (ASK for rebuild evidence, do not close). READY → tier-1 gate.
+- **Spark:** 23 PASSes held today. Queue empty with reason (pool used up by SCREEN_10-12). Next screen once R's batch merges frees files; the Stuart-list items KS-1629 (one file, Spark-briefable) is a candidate after KS-1603 in the anchoring lane.
+- **Drive:** DevMASTER 52% (955 GB free). Still Kam's hands: two rm commands for the oMLX Qwen folders. Gatesets: 161 eligible but git-TRACKED: plan a git rm with Kam.
 
-## 1a. STUART'S LIST (Kam 15:50, live board: "action what you can; anything you need from me, a card in fleet activity") — UPDATE 16:1x
-- **Triage DONE:** `0_Brain/reference/2026-10-19_stuart-list-triage/TRIAGE.md` (26 dispositions: 14 A agent-actionable, 5 B cards, 5 C done, 2 D blocked). Read its BLUF + "(A) items by lane" section first.
-- **Two of Kam's 9 Oct rulings were NEVER DELIVERED (Wednesday checked both cards: ruled a, no delivery mark):** `secuura-ks1195-s-key-ceiling-1009` = a (3,000/h for S connector keys, env-tunable, new keys only; unbuilt: platform.ts has 0 rateLimit) and `secuura-ks1384-anchor-per-event-1009` = a (one anchor per lifecycle event). A seat posts each verbatim as a KS comment, then `decision_queue.sh --delivered`.
-- **The five B cards** are being posted by a background helper after reading every prior-ruling match: result in `.../CARDS_POSTED.md`. If this seat rotated first, read that file; if absent, re-run the helper from the card JSONs in the 13:1x session scratchpad (`cards/`), or redraft from TRIAGE.md's "Draft cards (B)".
-- **UPDATE 16:2x — LAUNCHED:** Seat C 25th (%13, lane C) on KS-1402's develop 500 (brief `fleet/briefs_staged/2026-10-19_seatC25_ks1402_500.md`); Seat E 3rd (%14, lane E) delivers the KS-1195 + KS-1384 rulings on the tickets, builds KS-1195's 3,000/h limit, and posts the replies (brief `..._seatE3_ks1195_and_replies.md`). Both owe a plan confirmation and an Opus 5.5 switch at first idle. On E's comment ids: `decision_queue.sh --delivered secuura-ks1195-s-key-ceiling-1009 ...` and `... secuura-ks1384-anchor-per-event-1009 ...`. R told KS-1622 waits for E (same platform.ts). The five B cards are POSTED (`.../CARDS_POSTED.md`). STILL TO LAUNCH: the anchoring lane (lane J or K: KS-1603 → KS-1629 → KS-723 → KS-1454) and the certifications lane (KS-1557 harness → write side → KS-1633), plus the read-only box reads (KS-1584 key row, KS-1634 census with Stuart's predicate, SIMULATE_ANCHORING on demo).
-- **A lanes to LAUNCH (original plan, file-partitioned per TRIAGE.md):** (1) NEW seat, originate custody: the KS-1402 develop 500 (blocks every deploy; add it as a DEPLOY-BLOCKERS row). (2) KS-1195 build (gateway routes/platform.ts register-connector rateLimit, Kam's ruled a), new seat or R after KS-1622 (same file, different hunk). (3) anchoring lane (J's files are free: J wrapping): KS-1603 interim ownership check → KS-1629 → KS-723 → KS-1454. (4) certifications lane: KS-1557 harness step, then its write side, then KS-1633. (5) a board-reply seat (ticket comments only): the two undelivered rulings, KS-1385/1612 status (no date), KS-1402 status, KS-1604 shape, KS-1629/1633 word, KS-1575/1596 holding, KS-1387 close on evidence; plus read-only box reads (KS-1584 key row, KS-1634 census with Stuart's predicate, SIMULATE_ANCHORING on demo).
-- **Kam's alone:** any reply to Stuart outside a ticket, re-minting/rotating S keys, any landing date. DEPLOY-BLOCKERS.md:39 is stale (#1568 merged): fix it.
+## 2. STUART'S LIST (Kam 15:50) — the plan
+- **Triage:** `0_Brain/reference/2026-10-19_stuart-list-triage/TRIAGE.md` (26 dispositions; read its BLUF and "(A) items by lane").
+- **Five B cards POSTED** (`.../CARDS_POSTED.md`): ks1402 who creates the holder · ks1384 schedule the per-event anchor project · ks1580 erasure-revoked key code · ks1570 "have you seen the round" (closes DEPLOY-BLOCKERS.md:7) · S signing contract additions. Act on Kam's taps per their options.
+- **Launched:** C (KS-1402 500), E (the two rulings + KS-1195 + replies).
+- **STILL TO LAUNCH (free files):** (3) the anchoring lane (J's files are free; J 13th wrapped): KS-1603 interim ownership check (both upserts) → KS-1629 → KS-723 → KS-1454; (4) the certifications lane: KS-1557 harness step (both MT modes) → write side → KS-1633. Briefs from TRIAGE.md rows 4a, 9d, 8b, 8a, 7, 9e. Plus read-only box reads: KS-1584 provisioning-key row, the KS-1634 census with Stuart's predicate, `SIMULATE_ANCHORING` on demo.
+- **DEPLOY-BLOCKERS.md:** add the KS-1402 develop 500 as a row; line 39 is stale (#1568 merged).
+- **Kam's alone:** any reply to Stuart outside a ticket, re-minting/rotating S keys, any landing date.
 
-## 1b. RULED BY WEDNESDAY TODAY, STILL OPERATIVE (Secuura)
-- #1597: (1) as above; `--no-verify` refused. #1603 shipped as is (the token-endpoint body echo is KS-1617's own question).
-- KS-1385 (b): partial apply, 202, absent stays absent, issuer latest-wins, `allow` byte-identical, option (c) not built.
-- KS-1377 residue as gate Q1 measured. No Docker on the Studio for any seat.
-- KS-805 Closes; KS-1471 Closes; KS-1544 Refs; KS-1525 Refs; KS-1622 widened scope = R's Claude build.
+## 3. KAM'S CARDS
+Open from today: the five Stuart cards above (+ Tuesday's Composer card). To deliver: `secuura-datasec-author-on-two-branch-commits-1019` (after #1597 merges), `secuura-ks1195-s-key-ceiling-1009` and `secuura-ks1384-anchor-per-event-1009` (after E's comments). Delivered today: ks1612 round 3, storage 27, drive cleanup.
 
-## 2. KAM'S CARDS
-To deliver: `secuura-datasec-author-on-two-branch-commits-1019` (after the #1597 force-push: the card's "two commits" = #1597's one + #1589's, which merged as a kksecura squash). Delivered today: ks1612 round 3, storage 27, drive cleanup.
-
-## 3. OWED BY WEDNESDAY (own tools, small)
-1. cockpit.sh say --mail: stamp the mail's timestamp into the pointer; `say %4` (pane id) is a silent no-op: fail loudly.
-2. pretooluse_no_cd.sh: allow a variable path that resolves inside WEDNESDAY or the session scratchpad.
-3. Deploy round (Kintsugi): READ-ONLY census seat first, once tasks/DEPLOY-BLOCKERS.md clears.
-4. Fable 5.1 coordinator-task trial (routing decision 7).
-5. The 95 `t <t@e.com>`-authored commits on develop: check whether they are tracked.
-6. Keep stash@{0} and older stashes; never drop them.
-7. Gate brief template: name every touched service's suites as RUN or NOT-tested-by-name (P1 missed one today).
-8. Typed clocks: three today (13:2x, 14:2x rows). Write times from `$(date +%H:%M)` or leave them out.
+## 4. OWED BY WEDNESDAY (own tools, small)
+1. **PROMOTION (w=3 today):** send_brief.sh advisory: a body naming push/force-push/merge-route with no `pre-push:` citation prints a warning. Arms first (a body that should warn, one that should not).
+2. cockpit.sh say --mail: stamp the mail's timestamp into the pointer; `say %4` (pane id) is a silent no-op: fail loudly.
+3. pretooluse_no_cd.sh: allow a variable path that resolves inside WEDNESDAY or the session scratchpad.
+4. Deploy round (Kintsugi): READ-ONLY census seat first, once DEPLOY-BLOCKERS.md clears (needs Kam's ks1570 tap + Stuart's dev-ps deploy + the KS-1402 500 fix).
+5. Fable 5.1 coordinator-task trial (routing decision 7).
+6. The 95 `t <t@e.com>`-authored commits on develop: check whether they are tracked.
+7. Keep stash@{0} and older stashes; never drop them.
+8. Gate brief template: name every touched service's suites as RUN or NOT-tested-by-name.
+9. J 13th's history entry sits at line 249, not the top: the project's own seat fixes it (not Wednesday's file).

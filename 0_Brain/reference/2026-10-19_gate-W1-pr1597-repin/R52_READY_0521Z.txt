@@ -1,0 +1,113 @@
+=========== [INBOUND] 2026-10-19T05:21 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR DELTA GATE: #1597 re-pinned at e48c0b821f48 
+[line removed by Wednesday: other-client identity]
+## BLUF
+
+**#1597's force-push LANDED under your re-ruling (2). Head `e48c0b821f48ae90c179855f8b77cec90c45013e`,
+[line removed by Wednesday: other-client identity]
+[line removed by Wednesday: other-client identity]
+ways — the diff is **byte-identical, 15,254 B on both sides**. **Predicted landing tree onto live
+develop `7e2f8157cec2`: `ca879b4468106225960a7921b87218ec1f5b7b9e`.**
+
+**And the push is a live positive control for KS-1638: `91 passed, 0 failed` on leg 14, where the same
+leg read `90 passed, 1 failed` ninety minutes earlier on the pre-fix tree.** That is the first real
+`ALLOW_FORCE=1` push the fix has carried.
+
+Your four conditions, each with its reading, below. **Queue change received:** KS-1622 behind Seat E
+3rd's KS-1195 — noted, and I have not touched `routes/platform.ts`.
+
+## CONDITION 1 — the merge is on the AMENDED commit, not the remote tip
+
+`git checkout <branch>` at `8f3310c6ed85` (the local branch already pointed there), then
+`git merge --no-ff origin/develop` at `7e2f8157cec243a6255aab2c4fc8678063da317b`. **Merge-in, never
+rebase.** Identity read back as `file:.git/config kamil.kreiser@secuura.ai` before the merge commit
+was made. **No conflicts** — your condition 4 never fired.
+
+**The commit list, which is the thing the card is about:**
+
+```
+e48c0b821f48  Kam Kreiser <kamil.kreiser@secuura.ai>  Merge develop 7e2f8157cec2 into the KS-1634 branch …
+8f3310c6ed85  Kam Kreiser <kamil.kreiser@secuura.ai>  KS-1634: label a simulated anchor on the chain-first …
+```
+
+[line removed by Wednesday: other-client identity]
+[line removed by Wednesday: other-client identity]
+comfortable reading — **and it independently confirms your note about the card's second commit**: it
+is on #1589's branch, which merged as a squash authored by `kksecura`.
+
+## CONDITION 2 — content unchanged, four readings, each with a control
+
+| assertion | reading |
+|---|---|
+| files changed against live develop | exactly **3** — `services/originate/src/routes/verification.ts` and the two `ks1634` suites — and the list is **identical** to `git diff --name-only 78cb3c3939e3 8ec96bbac643` |
+| the diff itself | `git diff 7e2f8157cec2 e48c0b821f48` over those files is **BYTE-IDENTICAL** to `git diff 78cb3c3939e3 8ec96bbac643` over them — **15,254 B on both sides**. No hunk differs, so there is nothing to explain |
+| the blobs, stronger than the diff | all **3 identical** old head → new head: `7aeab10db`, `f6f45b5e7`, `d5c349c6f`. **Control:** a file develop moved (`docs/openapi/secuura-api.yaml`) reads `409274d0a` → `24bf043f7`, so the comparison is live, not vacuous |
+| conflict risk, measured before the merge | develop's **43-file** delta since `78cb3c3939e3` overlaps this PR's 3 files **zero** times, with a planted control reading **1** |
+
+## CONDITION 3 — the push, and the post-push reads
+
+```
+  HEAD == branch == e48c0b821f48ae90c179855f8b77cec90c45013e, so the hook preflights exactly what is pushed.
+  this tree carries KS-1638's fix: preflight.sh blob 1f70122e7942 (develop's 1f70122e7942)
+[05:08:02Z] FORCE-WITH-LEASE … : 8ec96bbac643 -> e48c0b821f48
+[05:17:52Z] PUSH_RC=0 secs=590
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+[pre-push] ALLOW_FORCE=1 — proceeding with a non-fast-forward push, deliberately.
+hook controls stripped for the suite run: ALLOW_FORCE (KS-1638)
+shell suites: 91 passed, 0 failed, 0 skipped (of 91)
+remote now: e48c0b821f48ae90c179855f8b77cec90c45013e
+want:       e48c0b821f48ae90c179855f8b77cec90c45013e
+```
+
+Legs **3, 4, 8** skipped, local stack not up. **Not a pass** — the standing 13/16 level. `--no-verify`
+was never used.
+
+**`ls-remote refs/pull/1597/head` = `e48c0b821f48ae90c179855f8b77cec90c45013e`**, equal to the pushed
+commit. PR OPEN, base develop, `MERGEABLE` / `UNSTABLE`.
+
+**The two middle lines are what I would put in front of Kam for KS-1638.** `hook controls stripped for
+the suite run: ALLOW_FORCE (KS-1638)` is the merged code firing on a real push, and `91/0` is leg 14
+green where **the same leg read 90/1 at 04:17:56Z on the pre-fix tree** — the same figure gate S1
+measured as its red control. One pair of numbers, before and after, on the same branch.
+
+**Suite on the merged tree, because a merge-in can red a suite no gate has run** (and the 2026-10-19
+anchoring case is the precedent): `services/originate`, **jest**, **1481 passed / 1481 in 122
+suites**, 0 failed — against **1469 / 120** measured by me at develop `7e2f8157cec2` in the same
+clone. Exactly this PR's **+12 cells in +2 files**.
+
+## PREDICTED LANDING TREE, for your delta gate
+
+**`ca879b4468106225960a7921b87218ec1f5b7b9e`** — `git merge-tree --write-tree 7e2f8157cec2
+e48c0b821f48`, rc 0. Since the branch now contains develop, the merge-base **is** develop's tip, so
+the base delta is **0 files** and the overlap question is answered by construction; the planted
+control still reads 1. `parent..landed` will be the same 3 files as `files_1597.txt`.
+
+## CONDITION 5 and the paperwork
+
+- **KS-1483** — the structural note is on it: the guard's `$changed` comes from the push's **base**,
+  not from **the ref the push replaces**, so a force-push with a byte-identical tree is refused on the
+  same footing as one that rewrites the service. Recorded, **not patched**. The same comment states
+  that the ticket's own BLUF is stale and its Recommendation item 2 is already in the code.
+- **KS-1634** — the full re-pin record, the card reconciliation in your words, the deviation (the head
+  is now a commit plus a merge of develop, while the diff is untouched), and the before/after leg-14
+  pair. Read back by id, byte-identical.
+- **#1597's PR body** — appended, never overwritten: I asserted the original 6,508 bytes are still a
+  **prefix** of the new body before sending it, and the read-back equals what I sent exactly (GitHub
+  adds one trailing newline; `readback == sent + b"\n"`, first differing byte **None**). Zero
+  resolution keywords in the added text.
+- **KS-1643** — filed earlier, Low, for gate S1's residue.
+
+## WHERE I AM
+
+- **Waiting on:** gate V1's verdict on the five (#1608-#1612) — branches unchanged, as instructed —
+  and your delta gate on #1597.
+- **Not started:** KS-1622, now behind Seat E 3rd's KS-1195 on `routes/platform.ts`. I had staged and
+  read-only-verified its held Spark diff (r2 is the PASS round; **p1's `round.json` reads `FAIL` /
+  golden `DIFFERS`**, so r2 is the one to use — worth carrying, since the directory listing alone does
+  not say which round passed). **No branch, no touch of that file.** Its widened scope needs more than
+  the Spark patch: the patch covers only the `!r.ok` subset, so **two of the ticket's four shapes — a
+  first window that is not a list, and a JSON `null` body — still log nothing**, because
+  `platform.ts:423`'s throw is guarded by `collected.length > 0` and a first window with no list is
+  simply taken as an empty one.
+- Band is comfortable. Next from me is the handover and the team notes while the gates run, unless you
+  have something ahead of them.
+
