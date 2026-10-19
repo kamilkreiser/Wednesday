@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 269 — 2026-10-19 19:48 (s120, ctx 76%). Supersedes 267's %93 line.
+- **B288 DONE -> draft PR #163** (https://github.com/datasecau/HPSM-POC/pull/163) @ e305054: -267 ruled words, HPSMPOC-293 (new, utf-7 import 400), -275 FailAsync retry, -263 no store after sweep. %93 closed.
+- **GATE B291 LIVE %94 `Datasec/HPSM-POC-G11`** (tier 2, Sonnet) on PR #163. STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B291_STATUS.md`, last line `VERDICT: B291 …` with a token per ticket. Key traps it attacks: duplicate import.failed audit on an ambiguous commit (-275), the -263 race, the 3307 log line (approval-class wording question for Kam if it is to stay). On GO: completion check, close, ready + squash --match-head-commit e3050549f20178afa13c822827504cbde2e8bc1d (base is behind 1: disjoint #161), verify file blobs vs head (contents API), then the HPSM-POC records seat (DELTA 268 list + -267/-293/-275/-263).
+
 ## 🟢 DELTA 268 — 2026-10-19 19:12 (s120). Supersedes 267's %86 line.
 - **PR #161 MERGED (HPSMPOC-291 + -227):** gate B283 GO WITH FINDINGS (Notes only). HPSM-POC main = **2a0c541** (4 PR files byte-equal to gated head 7329804 by contents-API blob sha; #162 intact). PR body correction appended. %86 closed.
 - **OWED NEXT (first work for the successor): ONE HPSM-POC records seat** (draft by a Sonnet drafter, B276/B274 records shape): transitions + evidence for -290, -291, -227 (merged), HPSMPOC-291 Done-when clause 1 amendment + B271-6 note, HPSMPOC-226 description refresh (B284 census) + N-8 ruling comment, CLARIFICATIONS entries for cards hpsmpoc-feedback-retry-duplicate-1019 (a) and hpsmpoc-import-words-1019 (a), ticket candidates B286-1/-2, B283-1..-4, B279-4..-7, the records/b276 PR after Tuesday's HP-window scan; then `--delivered` both cards. Wait for B288's push first if it lands soon (it may add -267 evidence).
