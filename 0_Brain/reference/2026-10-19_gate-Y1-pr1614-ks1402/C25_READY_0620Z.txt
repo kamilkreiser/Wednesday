@@ -1,0 +1,79 @@
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1614 KS-1402 at ddd54b836394 - tier 1, connector principal cast into a UUID column, 6/6 both modes
+## BLUF
+**READY FOR GATE: PR #1614, tier 1** (client-facing route plus a schema change), `Refs KS-1402`.
+- Head `ddd54b8363946511acae231aa1889acaadf5912e`, tree `31133804bddc`.
+- Landing parent: develop `722e07f19cee`, re-read by `ls-remote` just now and unmoved. `refs/pull/1614/head` equals my local HEAD.
+- 4 files, +395/−3.
+- Not merged, not deployed. The single KS-1402 comment is posted and verified.
+
+PR: https://github.com/Secuura/Distributed_Secuura/pull/1614
+
+## Cause (measured)
+`POST /api/documents/{id}/transfer-custody` bound `${user.id}::uuid` into `custody_events.transferred_by_id`, which is `UUID NOT NULL` (023). A connector principal is the literal `connector:<id>` (auth `generateConnectorToken`).
+- **Result:** 22P02 inside the custody transaction, so the outer catch answers `500 INTERNAL_ERROR "Failed to transfer custody"`, byte-identical to Stuart's body. The rollback leaves the owner unmoved.
+- **Not a regression:** a holder K does not know is still the typed 404, raised before the INSERT.
+- **Kintsugi `65d7722f8` has the same chain.** Measured DYNAMICALLY: this PR's cell, run against that commit's own code, 500s on 22P02.
+
+## Files
+- `Blockchain/Dev/services/originate/src/routes/documents.ts` (+8/−1): `const transferredByUuid = toActorUuid(user.id, transferObo.resolvedUserId)`, and the bind.
+- `Blockchain/Dev/migrations/052_custody_events_connector_actor.sql` (new): `DROP NOT NULL`, mirroring 043.
+- `Blockchain/Dev/services/originate/src/__tests__/ks1402-transfer-custody-connector-actor.integration.test.ts` (new, 6 cells).
+- `BACKLOG.md`: entry :363 extended to name `/transfer-custody`.
+
+## Cells (both tenancy modes, real router/repo/rbac/db, as `secuura_app`)
+
+| cell | develop `722e07f19cee` | head |
+|---|---|---|
+| SETUP: the product is a constrained role | pass | pass |
+| CONTROL: an interactive caller, holder by email → 201 | pass | pass |
+| KINTSUGI: a connector, unknown holder → 404 RECIPIENT_NOT_FOUND | pass | pass |
+| 🔴 S as it calls today → 201, actor NULL, a provenance row names the connector | **500 / 22P02** | pass |
+| 🔴 bare connector → 201, actor NULL, NO provenance row (the pinned gap) | **500 / 22P02** | pass |
+| 🔴 onBehalfOf a same-org K user → 201, that user as actor and on provenance | **500 / 22P02** | pass |
+
+## Controls (each in both modes; each restore verified by blob hash or a column read)
+- **revert (b) alone** → S-shape and bare red on **23502**; same-org green.
+- **revert (a) alone** (`documents.ts` = develop's bytes) → all three back on **22P02**.
+- **M3, `toActorUuid(user.id, null)`** → ONLY same-org red, on `by: null`. This was run after the push, on the pushed head, and restored to the committed blob `ddceb43f63d0`.
+- **provenance tamper** (no encryption key registered) → S-shape and same-org red on the missing row.
+- **Invalid and discarded:** my first (a)-revert, which failed to LOAD (an unused `const`; every cell red with an empty message). It was redone and is not counted.
+
+## Suite counts at the landing parent vs the head
+- originate unit (`npx jest`): **122 suites / 1481 tests**, at BOTH the parent and the head.
+- `ks1263-multi-write-rolls-back.integration`: **11/11** in each mode at the head. Its "before" run was at develop `846ae2788b3b`, the harness proof, and NOT at `722e07f19cee`: #1597 landed in between, and it touches 3 files, 0 of them in the custody path (controlled against an unfiltered diffstat). The unit base above WAS at `722e07f19cee`.
+- `tsc --noEmit`: rc 0. ESLint: 0 problems, with a positive control.
+- **Push preflight on this head:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`
+  - Legs 3, 4 and 8 were skipped: local stack not up.
+  - Shell suites 91/91 (654 s); leg 15 code guards OK; leg 16 test type-check ratchet OK.
+  - **Not a pass.**
+  - Pushed as a new branch with `PUSH_RC=0`; the remote ref equals HEAD.
+  - **Correction to my 06:06Z STATUS:** the push started at **06:03:52Z**, not "06:2xZ".
+- **NOT RUN:** Schemathesis, Akto, Playwright, k6 (no local stack; the PR's ack boxes are left unticked), and a live S↔K pair.
+
+## Linear
+- #1614 is attached to KS-1402 as `linkKind=contributes`, `status=open`. The body carries no resolving keyword; I removed even the quoted "not Closes" phrasing.
+- KS-1402 is still In Progress.
+- **The 18 Oct `updatedAt` you asked about:** it is Stuart adding a relation to **PS-1299** at 22:41:07Z (rate limits: run `@k-live` first in a gate run), one of six relation edits he made since 15 Oct. No comment and no state change.
+
+## KS-1402 comment
+- Comment id `9a02dfb5-7f7e-4299-98ba-640ea63125bd`, verified BY ID: body byte-equal at 1861 chars.
+- `@stuart.jamieson` is a real `suggestion_userMentions` node; the control, Peter's id, reads 0.
+- BLUF form, what the 500 was, and that a fix is at review, with no date.
+- The holder appears only as "that question is with Kam".
+- It offers Stuart the branch head if he wants to measure before the merge, and notes that 052 needs a `migrations` image rebuild.
+
+## Deploy (also in the PR under a Deploy heading)
+- 052 is baked into the `migrations` image. Rebuild it, and check `is_nullable = YES` directly.
+- api-gateway Stage 1 applies the file before Stage 2's legacy inline `CREATE … NOT NULL` (`startup-migrations.ts:600-629`), which is then a no-op.
+- Per-tenant databases never get file migrations: **KS-1055** (dormant). Nothing filed new.
+
+## Left standing in my area (for the gate or a round 2)
+- Scratch PG 15 on **127.0.0.1:55415** (inside the guarded 55410-55419 band).
+- The Kintsugi worktree `deploy-clones/seatC25-kintsugi-65d7722f8`.
+- My clone `deploy-clones/seatC25-7e2f8157cec2`, clean on the branch.
+- Run logs in my scratchpad.
+
+Waiting for the gate verdict. No merge without your head-pinned GO.
+
+SELF-CHECK: re-read end to end. Every count is from a run log of this session; the M3 restore was checked against the committed blob.
+Seat C 25th | 2026-10-19

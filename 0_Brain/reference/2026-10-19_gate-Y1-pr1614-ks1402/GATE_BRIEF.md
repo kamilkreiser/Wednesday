@@ -1,0 +1,15 @@
+# Gate brief: GATE Y1 = PR #1614 (KS-1402), Opus, tier 1, round 1 of 2
+
+Commissioned by Wednesday after Seat C 25th's READY FOR GATE of 06:20Z (beside this brief: C25_READY_0620Z.txt, the author's CLAIM). Secuura only. Project: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files (READ ONLY: ls-remote, show, diff, cat-file, log; every write verb in your own clone in your scratch).
+
+**What it is:** `POST /api/documents/{id}/transfer-custody` 500s (22P02) for a Platform S connector because the connector principal `connector:<id>` is cast into `custody_events.transferred_by_id UUID NOT NULL`. Fix: (a) bind through `toActorUuid(user.id, transferObo.resolvedUserId)` as /share does; (b) new `migrations/052_custody_events_connector_actor.sql` DROP NOT NULL, mirroring 043. Ruled by Wednesday as the established fix for the KS-564 class. Head ddd54b8363946511acae231aa1889acaadf5912e; develop 722e07f19cee683ea037930e601e380a9491f7b5. Tier 1: a client-facing route and a schema change.
+
+## Questions (each with its instrument; name what you did NOT run)
+1. **Is 052 safe and exactly 043's shape?** Diff 052 against 043 line by line; is the migration idempotent, does the runner pick it up by name/order, and does any reader of `custody_events.transferred_by_id` assume NOT NULL (grep every reader across services: joins, `NOT NULL` assumptions in code, reports, exports, the Verify page)? A NULL actor reaching a reader that dereferences it is the risk.
+2. **Is (a) right for every caller shape?** Interactive user (uuid passes through), connector + resolved same-org onBehalfOf (that user), connector + unresolved onBehalfOf (NULL), bare connector (NULL). Read `toActorUuid` (`utils/principalId.ts`) and the /share site the author cites (`:2262`).
+3. **Attribution not lost:** the author says S-shape and same-org write an `action_provenance` row and a bare connector writes none (an existing documented gap, BACKLOG.md:363). Verify by code and by running the author's cells.
+4. **Red-first and controls are real:** run the 6-cell suite in both MULTI_TENANCY_ENABLED modes at the head (needs a scratch PostgreSQL; use a port in 55410-55419 not 55415, which the author holds, as the secuura_app role); at develop's documents.ts + without 052 the three RED cells fail on 22P02; revert (b) alone -> 23502. Plant one mutation of your own that must red a cell.
+5. **No widening:** the unknown-holder 404 is unchanged (KINTSUGI cell); nothing creates or stubs a holder.
+6. **Landing:** merge-tree onto LIVE develop (re-read ls-remote at start and before the verdict); originate unit suite on the landing tree (author: 122 suites / 1481); tsc; the 3-dot file list = the 4 files.
+
+Verdict file: verdict.md in this folder; first line `VERDICT: ... at head ddd54b836394...`; last line the sha256 of the file with its first and last lines removed. Scratch: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/fab5379f-182f-40a2-8bd3-ff9052525009/scratchpad/y1/. Findings only: no fixes, no GitHub or Linear writes, nothing under !CODING, no `cd`, no `rm`, no stderr to /dev/null, no Docker. Every zero gets a positive control.
