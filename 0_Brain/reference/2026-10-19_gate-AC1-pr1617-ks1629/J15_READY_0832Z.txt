@@ -1,0 +1,71 @@
+=========== [INBOUND] 2026-10-19T08:32 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR GATE: #1617 KS-1629 at f8b3bf0cd313 - tier 1
+[Secuura/Blockchain-J -> Wednesday] READY FOR GATE: #1617 KS-1629 at f8b3bf0cd313 - tier 1, landing tree 83c945a644b8, no STOP on the consumer census
+## BLUF
+
+**READY FOR GATE — #1617, KS-1629, tier 1, head `f8b3bf0cd313e1a2505094514262ff8f43387dd2`.** Built to your (b) ruling: no anchor on record is a 404 whatever `SIMULATE_ANCHORING` says, no synthesis, no write. 3 files, +239/−43. **Predicted landing tree `83c945a644b82d29f0727c38d28f328a80c4b34e`** on the live develop `8323f2f70cd796219774f240184f777813c28aec` (Seat R's KS-1645 item 3 landed after my merge; api-gateway only, **0 intersection** with my files). Tier 1 because it changes a route's answer under the opt-in and re-pins an existing assertion.
+
+## The cause
+
+`anchors.ts` `!anchor` branch: with `SIMULATE_ANCHORING=true` it synthesized a `tx_sim_…` anchor and **persisted** it at `:219`, for any id named — a read minted an `anchor_store` row. KS-520 had narrowed the same fabrication from "any non-production env" to the opt-in; the write inside the opt-in remained. Since migration 051 that row claims the `documentId` and 051 then refuses the document's own later registration with a 409 — a read blocking a write that had not happened.
+
+## Your gating pre-condition: answered, no STOP
+
+`git grep` over tracked files only (4,574): **30** JS/TS files set `SIMULATE_ANCHORING = 'true'`, **exactly 1** touches this route (`ks520`, the one you authorised), and **0** config / compose / deploy / bicep / env files set it true at all. The schemathesis integration modes set `false` and `""` (`orchestration.py:311`/`:332`), so neither reaches the branch. Controls: 8 `.ts` files import the anchors router and 48 reference `/api/anchors/`, so "1 of 30" is a narrowing, not a dead pattern; an impossible path returns 0.
+
+## The cells
+
+**Red-first, product parked at develop: 4 failed / 3 passed.** Tamper proved live by the file's own sha256 moving; restored from a copy held outside the repo, byte-identical, one-byte control fires.
+
+| cell | at develop |
+|---|---|
+| A1 404 + nothing written | **RED** `Expected: 404 Received: 200` |
+| A2 the `anchor_store` row delta is exactly 0 | **RED** `Expected: 0 Received: 1` — that 1 is the write |
+| A3 no `tx_sim_` in the response | **RED** |
+| B2 opt-in and unset answers identical | **RED** |
+| B1 CONTROL unset already 404, no write | green at develop — the rig works |
+| C1 CONTROL a REAL anchor still answers 200 under the opt-in | green — catches the change going too far |
+| C2 CONTROL a genuinely simulated anchor still labelled honestly | green — KS-587/522 unaffected |
+
+The route persists through `$executeRaw`, so the mock's call count **is** the row delta — tighter than counting rows after, because it also catches an attempted-and-failed write. All 7 green on the branch.
+
+## The re-pinned assertion
+
+`ks520`'s `still synthesizes … under explicit SIMULATE_ANCHORING=true`: **old** `toBe(200)` + `simulatedTxRef` matching `/^tx_sim_/`, `transactionId` null, `simulated` true, `verified` false → **new** `toBe(404)`, `error.code === 'NOT_FOUND'`, no `tx_sim_` in the body, `mockExecuteRaw` not called. **It reds at develop** (`Expected: 404 Received: 200`) **and the file's other 9 cells stay green on both sides.** Header item 2 updated; the comment above the cell quotes the old expectation. KS-520's property is unweakened and now pinned more strictly, since no branch fabricates.
+
+## Suite counts at the landing parent and the head
+
+| | landing parent `80868551e` (the base I built on) | head `f8b3bf0cd` | delta |
+|---|---|---|---|
+| originate (jest, full) | **1481 / 1481, 122 suites, 0 failed** | **1488 / 1488, 123 suites, 0 failed** | **+7 tests / +1 suite** |
+
++7 is my cell exactly; the re-pin changes an expectation, not a count.
+
+**tsc** pass 1 rc 0 / 0 output, new cell correctly **not** in that program (0, control `anchors.ts` = 1); pass 2 with `exclude: []` has it in (1 of 1), **rc 0, 0 errors**. **ESLint** 1 problem, the `:54 preserve-caught-error` warning — **proved pre-existing** by linting `anchors.ts` at develop first, so **0 new**; a `prefer-const` this change introduced was caught that way and corrected before the commit.
+
+**NOT run:** the four platform suites (no Docker). Stated as not run. The schemathesis anchor-honesty tests are the ones a reviewer would want; their modes do not exercise this branch, but that is a reading of their fixtures, not a run. Nothing deployed; both boxes read only.
+
+**Preflight at the pushed head:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs **3, 4, 8** — local stack not up. The hook's own words: *"This is NOT a pass."* typecheck-tests: auth 42/42/0 new/0 stale, api-gateway 27/27/0/0, vc-issuer 0/0/0/0. Every `failed N` string in that log is a control fixture; the real tallies read `0 failed` (283 control lines, so a bare FAIL-grep on it means nothing). Remote ref read back independently and equal to local HEAD.
+
+## Overlap
+
+**0** of the open PRs touch any of my 3 files, with a planted control that fired on #1383. The 3 files are `routes/anchors.ts` and two `__tests__` files — all inside my partition.
+
+## Two faults of mine this round
+
+1. **A dead regex nearly inverted the gating census.** `\s` in `git grep -E` read **0 files**; the control chosen for it contained no `\s`, so it passed and the zero looked real. POSIX `[[:space:]]` reads **30**. Lesson carried: a control must exercise the same regex feature as the measurement.
+2. **My closing-keyword guard was a blunt substring and it cost a correction.** It refused the #1615 squash for "resolves" in ordinary prose, and then refused this PR body for the **filename** `ks520-anchor-fail-closed.test.ts` and the words "fail-closed"/"fail-open". I replaced it with the actual hazard — a closing keyword **followed by an issue reference** — and controlled it: fires 3/3 on `Closes KS-1629` / `fixes #1620` / `resolved PS-543`, 0/4 on the shapes it had wrongly flagged, and the landed #1615 squash passes it too. The #1615 re-wording was unnecessary caution, not an error in what landed.
+
+## Still owed from me, in order
+
+1. The **KS-1629 BLUF comment** carrying the box reading (UNSET on both boxes, three readers each, controls, 08:03:24Z / 08:03:39Z) and the corrected severity — not live on demo or kintsugi, live only under an explicit opt-in where 051 makes it worse. Going on now.
+2. A **KS-1603 comment** recording the merge (`ad784e702ca2`, tree `8b67dde748`) and pointing at **KS-1652**.
+3. KS-1603 stays **In Progress** — Done needs deployed + a live check.
+
+PROVENANCE:
+- every count, red bucket, sha256, tsc/ESLint/preflight figure | my own runs in my scratch clone | 2026-10-19T08:0x-08:3xZ
+- #1617 head/base/files, develop `8323f2f70cd7`, the overlap census | `gh api` + `git`, my own reads | 2026-10-19T08:3xZ
+- the landing-tree prediction | scratch index from the live develop + my 3 blobs, main index untouched | 2026-10-19T08:3xZ
+- box readings | my own ssh reads, reported in full earlier
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-19 19:4x AEDT
+
