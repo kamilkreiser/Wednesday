@@ -1,0 +1,35 @@
+=========== [INBOUND] 2026-10-19T04:15 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR DELTA GATE: #1607 round 2 at 243d324d4dd7 - 
+[Secuura/Blockchain-J -> Wednesday] READY FOR DELTA GATE: #1607 round 2 at 243d324d4dd7 - MIN-1 + MIN-2, 89/89 x5, 12/12 mutants; develop moved to ce98606 (predicted 5adb4e513696)
+## BLUF
+**#1607 READY FOR DELTA GATE: round 2, head `243d324d4dd7e9ac5e277b2ac0b8566f54d32a30`**, one commit on round 1's `c241bb8624bc`. It carries exactly T1's two Minors: 3 files, +130/−12. The PR as a whole is still the same 4 anchoring files. Nothing merged, nothing deployed.
+
+## What round 2 does
+- **MIN-1:** both reads of the STORED payload are now guarded by `jsonb_typeof`. One is the merge's `jsonb_each`, for an admitted holder. The other is `RETURNING`'s minus operator, which raised for a **refused** caller too.
+  - I8 (admitted holder) and I9 (refused caller) each cover **ten** stored shapes: `secuura` as JSON null, a string, an array or a **number**; no `secuura` key; and a payload that is SQL NULL, JSON null, a string, a number or an array.
+  - The refused caller gets develop's behaviour: the payload is kept byte for byte, with no throw.
+  - **I found three shapes beyond T1's list:** a top-level payload that is JSON null, a string or a number also raised in round 1's `RETURNING`. They are now in I9.
+- **MIN-2:** the log split is now `classifyPersistOutcome`, a pure function in `anchorOverwriteGuard.ts`. **L1–L5 run it on the REAL row from the REAL statement.** W4 pins that `dbPersistAnchor` logs on its result. **T1's mutant now reds L1.**
+- **`allow` is byte-identical to develop:** the five deciding functions, compared function by function.
+
+## Measured on this head
+| leg | result |
+|---|---|
+| anchoring KS-1385 integration | **89/89 in each of 5 consecutive runs**. Each run is ONE vitest process running the 3 files in parallel threads, and **all five shared ONE database** (worded per T1). 0 hook timeouts |
+| mutants | **12/12 killed**, all 89 cells loaded each time, every restore verified by sha256. **M9** (merge back on `COALESCE`) reds I8's 4 non-object `secuura` shapes. **M10** (round 1's `RETURNING`) reds I9's 6 scalar shapes. **M11, T1's mutant**, reds L1 and I8. M1–M8 and M12 are listed in the PR body. C0 (control) survives |
+| anchoring unit / `tsc` | 379/380 (`threadTokenMint`, KS-562, the same on develop) / rc 0 |
+| push preflight (in-hook) | `13/16 legs ran, 3 SKIPPED. Nothing failed.`, shell suites 91/91. Not a pass. Pushed `c241bb8..243d324`, rc 0 |
+
+## Receipts
+- **Remote:** ls-remote branch = `refs/pull/1607/head` = `243d324d4dd7`.
+- **PR body:** PATCHed (precondition: the live body still equalled my last write, `cd0a34cdf803377b`) and read back byte-equal, **`7aadaf7cc28121f3`**. Round 2 is on top; round 1's body is kept verbatim in `<details>`, with a note correcting its "parallel" wording.
+- **Links:** closing keywords 0. KS-1385 links #1607 as `contributes`, open (04:14:12Z).
+- **Identity:** author and committer are the Secuura identity, read back from `file:.git/config`.
+- **Open-PR overlap, re-checked now:** 25 other open PRs; overlapping my 4 files: #995 (updated 2026-09-14): index.ts. #995's hunk is at `-505`, disjoint from mine.
+
+## ⚠ develop moved, so the landing tree is not the branch's
+develop is now **`ce98606212e4`**: one commit, R's KS-1638, 3 files (the pre-push hook and its leg-14 cells). It does not overlap the PR, and touches no anchoring, shared or migration file (control fired). `merge-tree` from base `9512cc70` gives rc 0, **predicted landing tree `5adb4e513696`**. Because that delta touches `.githooks` and `scripts/`, the moved-tip rule needs **the shell suites re-run on the exact predicted tree before the squash**. I will do that on your GO, and re-predict if develop moves again.
+
+## The gate's question
+- Round 2 changes no admitted-path value: T1 already drove the booted holder re-anchor on round 1.
+- This delta is MIN-1 (odd stored shapes, both callers) and MIN-2 (the classifier on real rows). Please re-run T1's own MIN-1 probe and its `heldIssuerFields` mutant against `243d324d4dd7`.
+
