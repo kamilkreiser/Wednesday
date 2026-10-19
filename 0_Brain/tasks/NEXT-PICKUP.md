@@ -23,6 +23,12 @@ supersede: REPLACED WHOLESALE by the 08:4x Wednesday seat at its 50% checkpoint,
 - **Seat J 13th** (%6): builds nothing. It waits on Kam's card `secuura-ks1612-round3-nogo-1019` (rec a: a narrow round 4; default b: hold). Design-only prep is allowed. On (a): Wednesday rules J's design, then a full Opus gate.
 - **Spark:** SCREEN_10 drafter running (Agent tool, Sonnet; up to 4 briefs at rung 2+, excludes every live-lane file; report 0_Brain/reference/2026-10-18_spark-screen/SCREEN_10.md). On completion: read every PASS's product hunk at source, hold_ready (ROWID never starts with KS-), queue to R.
 
+## 1c. KAM RULED 11:07-11:08 (four taps) — status of each
+- `secuura-datasec-author-on-two-branch-commits-1019` = **b**: GO sent to R (force-push #1597, author only, tree asserted, a datasec search on the commit list = 0). On R's mail: ls-remote #1597's new head; it rides in the batched READY at its NEW head. Then `decision_queue.sh --delivered`.
+- `secuura-ks1612-round3-nogo-1019` = **a** (narrow round 4, the LAST): J 13th told to mail its DESIGN first (the deciding question: does dropping 051's pk arm reopen any of MAJ-A's four minters). Wednesday rules the design, then J builds, then ONE full Opus gate. KS-1633 stays separate.
+- `wed-secuura-storage-27-held-worktrees-1019` = **a**: **Seat D 21st launched (%9, 11:12)**, brief fleet/briefs_staged/2026-10-19_seatD21_storage_27_held.md. Rung 5/6 = its plan confirmation (not yet received at 11:1x). Switch it to Opus 5.5 at its first idle. On wrap: df, counts, score, close the pane by %ID.
+- `wed-devmaster-drive-cleanup-1019` = **b**: (i) Wednesday's tree + the Ollama store go to a background Opus sub-agent (gatesets older than 14 d removed; Qwen3.8-Flash + Qwen3.5-122B oMLX and the unreferenced Ollama models MOVED to G-DRIVE `/Volumes/G-DRIVE/WED/models-archive/2026-10-19_*`, Ornith 1.5 kept); report `0_Brain/reference/2026-10-19_dev-drive-survey/CLEANUP_B.md`. Read it, re-check df, `ollama list`, and tell Kam the freed GB. (ii) **OWED, not started:** Testing Agent MAIN's 285 GiB of Secuura QA scratch (`!CODING/Testing Agent MAIN/projects/secuura/reports/*/{wt*,work*,clone*,scratch*,tmp*}`, survey row 1) is THAT project's files. Wednesday may not remove them. There is no cockpit lane: launch a Claude session in that project folder with a brief citing the card, using the same discipline as D (liveness, counts, df).
+
 ## 1b. RULED BY WEDNESDAY TODAY, STILL OPERATIVE (Secuura)
 - KS-1628 L1/L6: **(iii)** = ticket now (KS-1634), #1589 proceeds, hardening as a follow-up. N1 measured that no in-repo caller moves, so (iii) stands; the ordering consequence is that KS-1634 goes first in the tier-1 batch.
 - KS-1634 rated High, not Urgent (census 0/0; kintsugi is a dev box; the fix is in flight).
@@ -30,7 +36,7 @@ supersede: REPLACED WHOLESALE by the 08:4x Wednesday seat at its 50% checkpoint,
 - KS-1624 F1 = (a) (done, #1580). F2/F3 and KS-1623 N2 UNRULED, not queued. KS-1625 (Node floor) filed, no fix.
 
 ## 2. KAM'S CARDS OPEN
-Secuura: `secuura-ks1612-round3-nogo-1019` (rec a, default b hold). WED: `wed-devmaster-drive-cleanup-1019` (rec a: ~296 GB of QA scratch; models stay; default c: nothing). Datasec's `composer-l05-setup-card-too-1014` is Tuesday's.
+All four of this morning's Secuura/WED cards are RULED (section 1c). Datasec's `composer-l05-setup-card-too-1014` is Tuesday's.
 
 ## 3. OWED BY WEDNESDAY (own tools, small)
 1. ~~wed_claim autostash~~ DONE 08:55.
