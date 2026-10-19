@@ -1,0 +1,17 @@
+# Gate brief: GATE AQ1 = PR #1628 (KS-1568, folded-in item o6 only), Sonnet, tier 2, round 1 of 2
+
+Commissioned by Wednesday after Seat R 55th's READY FOR GATE (13:34Z). The author's CLAIM is beside this brief: `R55_READY_1334Z.txt` (read it WHOLE; its first section is about #1627 and is NOT your subject). The Spark pass it carries: `2_Project_Files/local-model/night/READY_KS-1568-ROTATEWAITPARSE-1_*` and `0_Brain/reference/2026-10-18_spark-screen/SCREEN_14.md` row 3. Secuura only. Tier 2 because it changes how one operator env var is read (no credential, no auth surface).
+
+**Project:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files` is READ ONLY. Clone with the SSH config of Wednesday's cache clone (`git -C /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/cache/src config --get core.sshCommand`, or `git clone --shared` from that clone and fetch `refs/pull/1628/head`) into your own scratch `/private/tmp/wed_gate_aq1/`. Every write verb, npm, vitest command runs INTO that clone, never from your cwd. Never write anywhere in /Volumes/DevMASTER/WEDNESDAY except `verdict.md` in this folder. Build `packages/shared` first.
+
+**Heads (Wednesday's ls-remote via the cache clone, 00:3x AEDT 2026-10-20):** #1628 head `c778f29bdff9cb13097ba24b44006c335b9215b0` (2 commits: `009cf3bde939` Spark pass, `c778f29bdff9` W6/W7); develop `46e4343a53122fde692ae38f72180253e9d8d401`. Re-read both at start and before the verdict. Author's predicted landing tree `78367de6487405d9d6113e37421b9a481b99ae6d` (the author's).
+
+## Questions (each with its instrument; name what you did NOT run)
+1. **The defect and the fix:** at develop, `rotateChainWaitMs()` (security `src/index.ts`) reads `10s` as 10 ms and `1500ms` as 1,500 ms. With the fix, any value that is not a plain digit string falls back to the 10 s default. Read every caller of `rotateChainWaitMs()` and say what the wait bounds.
+2. **Cells can fail:** the author's mutant table J1-J5 against W1-W7; re-run at least J2 (bare `Number`) and J4 (unanchored regex) yourself. Confirm commit 1 is the Spark pass (applied blobs equal the READY file's canonical patch applied at develop) and commit 2 adds only test cells.
+3. **The residue the author names:** values above 2^31-1 are accepted and Node's `setTimeout` then waits 1 ms. Confirm with one measurement, and say whether any operator config in the repo (env examples, compose, docs) sets this variable at all.
+4. **Landing:** merge-tree on LIVE develop = the predicted tree? Full security suite on the landing tree; a type-check that includes the new test file (the author says security has 2 pre-existing test type errors in ks952, recorded on KS-1090: confirm the count is unchanged and none is new); three-dot = the PR's 2 files.
+
+**Verdict file:** `verdict.md` in this folder. First line: `VERDICT: <GO|GO WITH NOTE|NO GO> at head c778f29bdff9... (tier 2, round 1 of 2; landing tree <sha> on develop <sha>; N blockers, M notes)`. Then BLUF, findings numbered B1.. and N1.., what was tested and HOW, and NOT RUN. Last line: the sha256 of `sed '1d;$d' verdict.md | shasum -a 256`.
+
+**Rules:** findings only: no fixes, no GitHub or Linear writes, nothing under `!CODING`, no push. No `cd`, no `rm`, no stderr to /dev/null, no Docker. Every zero gets a positive control. Before you finish, run `git -C /Volumes/DevMASTER/WEDNESDAY status --short` and report every path that is not `verdict.md`, dashboard data, or `2_Project_Files/local-model/night/briefs/` (a Spark screen is writing there).

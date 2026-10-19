@@ -1,0 +1,69 @@
+=========== [INBOUND] 2026-10-19T13:34 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1628 KS-1568 at c778f29bdff9 (tier 2)
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1628 KS-1568 at c778f29bdff9 (tier 2) - AND develop moved to 46e4343a5312: #1627 landing is now ac490c9430c0, not a46ecb67e007
+## ⚠ FIRST: develop moved, and #1627's landing figure at AP1 is VOID
+
+Develop is now **`46e4343a53122fde692ae38f72180253e9d8d401`** (ls-remote, then fetch). It moved with **5 commits from
+KS-1668**, a docs branch fast-forwarded in by author "t": 26 files, **all `.md`**, no code. I checked for any
+non-`.md` file and found none.
+
+- **#1627 (KS-1671) re-predicted on `46e4343a5312`: `ac490c9430c0038c9dd85c1d64945fa61548c234`**, byte-gated against a real
+  `--no-ff` merge. Overlap with what develop gained is 0; the three-dot diff is 2 files. **The `a46ecb67e007` I gave in the
+  READY (on `4a065fb75350`) will not land.** If AP1's verdict names it, the GO needs the new figure.
+- One KS-1668 line in the repo `CLAUDE.md` bears on today. **KS-485:** tickets already on a person's name are never moved to
+  the board account; only new or unassigned ones are. KS-1672 was new, so assigning it to the board account fits.
+
+## READY FOR GATE — #1628 (KS-1568, folded-in item o6 only), tier 2
+
+https://github.com/Secuura/Distributed_Secuura/pull/1628
+
+```
+head          c778f29bdff9cb13097ba24b44006c335b9215b0   (2 commits)
+develop       46e4343a53122fde692ae38f72180253e9d8d401
+LANDING TREE  78367de6487405d9d6113e37421b9a481b99ae6d   (merge-tree == real --no-ff merge; overlap 0; 3-dot 2 files)
+```
+The tree I predicted on `4a065fb75350` (`3f8718cff6c6`) is void. The PR body read back byte-identical (5,353 B); the API shows +77/-1.
+
+**CAUSE.** `rotateChainWaitMs()` read the variable with `parseInt`, so `10s` became 10 ms and `1500ms` became 1,500 ms. The
+chain's bounded wait effectively disappeared.
+
+**FIX.** A value that is not a plain run of digits falls back to the 10 s default. **The reading is *refused*, not
+*parsed*.** The ticket allows either; the body says this is a product call it does not make.
+
+**COMMITS**
+1. `009cf3bde939`, the Spark pass. Patch bytes differ from the golden in context lines only. **The applied blobs
+   (`06f8010930b1`, `bce336541c1f`) equal BOTH the run's and the golden's applied results.** Both `.opts` files name the
+   canonical sections, not the `.decl`/`.tdz` siblings.
+2. `c778f29bdff9`, **W6 (`1e3`) and W7 (`250.5`), added by me.** The five Spark cells all pass with the regex replaced
+   by a bare `Number()`.
+
+**MUTANTS (7 cells):**
+
+| mutant | red |
+| -- | -- |
+| J1 `parseInt` | W1 W2 W6 W7 |
+| J2 a bare `Number` | **W6 W7 only** (was 0/5) |
+| J3 `parseFloat` | W1 W2 W6 W7 |
+| J4 unanchored `/\d+/` | W6 W7 |
+| J5 a 5 s default | 6 red; W4 (the plain-number control) stays green |
+
+**COUNTS**
+- Red-first on develop: 4 failed | 3 passed. Green: 7/7.
+- **Full security suite: 354/354 in 32 files**, rc 0, measured on the branch tree. The landing differs from it only by
+  `.md` files and m365/auth.
+- **Type-check including the test file:** my file adds 0 errors. Security has **2 pre-existing** test type errors, both
+  in ks952; they are recorded on KS-1090 (`98f5f30b`).
+- Preflight: `13/16 legs ran, 3 SKIPPED. Nothing failed.` **Not a pass.** Shell suites 91/91.
+
+**NOT FIXED, measured, in the body:** values above 2^31−1 are accepted, and Node's `setTimeout` waits **1 ms** for them.
+That is the same "no chain" failure through a different value. It predates this PR. It is a one-token bound if you
+want it later.
+
+**NOT RUN:** the platform suites, other services' suites, a live rotate under load, any deployed environment.
+
+## Next
+
+**KS-1622**, after one decision of yours. Its checker ran at an **older tip** (`83ed01af70fd`); `platform.ts` has changed
+since (KS-1195 `31cfb44dc`, +76). The hunk still applies cleanly, at :490 instead of :420, and there is **no golden**.
+I plan to build it on a fresh branch off `46e4343a5312` and re-run every figure there, without carrying any checker number.
+If you want KS-1622 re-run through the checker at the current tip first, say so; otherwise I start in ~5 minutes.
+
