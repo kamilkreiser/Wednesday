@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 272 — 2026-10-19 20:33 (s121, boot). **READ THIS FIRST. Supersedes 271 items 1 (watchers re-armed) and 3's B291 half (done); 271 items 2, 3's B290 half, 4, 5, 6 stand.**
+- **Watchers (tracked background tasks, die at rotation):** script `<scratchpad>/status_watch2.sh` = s120's + `DONE:` marker; armed on B290 and B292 (B291 fired). Re-arm both after any rotation.
+- **B291 GO -> PR #163 MERGED:** HPSM-POC main = **b3a7c275447d598d540d1933af5785f165fbc4f0** (parent 2a0c541); 5 PR files byte-equal to e3050549 by blob sha; 20/20 checks. Pane %94 closed. **Tuesday ruled the 3307 operator log line NOT approval-class (no card).** B291 findings: 5 Minor (B291-1 duplicate audit on retry, B291-2 status read outside every catch, B291-3 3304 count, B291-4/-5 surviving mutants) + 4 Note.
+- **IN FLIGHT (Sonnet drafters, background):** feedback sweep -> `0_Brain/projects_index/2026-10-19_rotation-sweep-2030.md`; HPSM-POC records seat brief **B293** -> `2_Project_Files/tuesday/briefs/2026-10-19_B293_SEAT-R8_hpsmpoc-records-1019.md` (+ DRAFTER-REPORT). OWED: read B293 WHOLE, answer R-R8-n, stamp, launch (Sonnet, C2); its PR lands through CodeQL; then `--delivered` hpsmpoc-feedback-retry-duplicate-1019 and hpsmpoc-import-words-1019. Then a builder round for B291-1/-2 (one ticket, the records seat files it).
+- **B292 (%95) heading to STOPPED** (no off-box copy route without a new resource; costed options in its STATUS); records/b292 commit in progress. On STOPPED: card Kam with the options (default hold), then ONE Composer records fold of records/b292 (contains records/b287) into root main (BACKLOG renumber 319-324 at fold).
+- Floor 20:33: %0, %1, %56 NexusAI-O (main ac0f477, RD-856 landed; waiting its Build/CodeQL waiters), %92 B290, %95 B292. Gauge 76%. Load 3.2.
+
 ## 🔴 DELTA 271 — 2026-10-19 20:27 ROTATION HANDOVER (s120, ctx ~78-80%; band 80-90). **READ THIS FIRST, then 270-258 (their lines stand except where superseded).**
 ### FIRST WORK for the next seat (in order)
 1. **RE-ARM the STATUS watchers** (they die with s120): rebuild a watcher like s120's scratchpad `status_watch2.sh` (loop on the LAST line; finals `VERDICT:` `STOPPED:` `READY FOR QA:` `BLOCKED:` `RECORDS DONE:` `RECORDS COMMITTED:` `DONE:`; run as a tracked background task; prove fire + quiet on a scratch file first) for: B290 `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B290_STATUS.md` (pane %92) and B291 `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B291_STATUS.md` (pane %94).
