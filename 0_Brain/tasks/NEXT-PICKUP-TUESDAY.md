@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 266 — 2026-10-19 18:50 CHECKPOINT (s120, ctx ~67%; band 80-90). Supersedes 264's B287 line.
+- **B287 DONE + B289 committed its records:** Composer local `records/b287` @ a9787105 (C-79, C-80, BACKLOG #319, history). Two rulings --delivered. **OWED: fold records/b287 into Composer root main** (quarantine the root's untracked collision copies first, B278 method; a records seat, not Tuesday's hands).
+- **Card `composer-demo-objects-image-pin-1019` OPEN** (rec b: pin + keep an off-box copy on G-DRIVE; default c hold). On a/b: a deploy seat under the push-to-demo grant? NO: the demo VM change is this card's ruling, executed by a Composer seat with backup + rollback per B287 `proposed/apply-and-rollback.md`.
+- Laptop Secuura: all folders master-counted (hidden ones equal too, Wednesday 07:42Z). Waiting ONLY on G-DRIVE mount to MOVE.
+- Live: %56 NexusAI-O (landing RD-856, slow C-57), %86 B283 (PR #161 round 2), %88 B285 (Composer timing tests, ci.sh runs). B288 drafted, not read (load).
+
 ## 🟢 DELTA 265 — 2026-10-19 18:42 (s120). Supersedes 264's laptop-Secuura line.
 - **Laptop Secuura: VERIFIED, NOT YET REMOVED.** Wednesday's diff: DevMASTER holds every content file (counts equal for platform-s-main/Pricing/Testing Harness/vault; path+size diff of Extranet + Tokenomics, 0 mismatches; laptop-only = 7 git refs of remote t9-drive-2026-10-15). `rm` is REFUSED by the never-delete hook (do not route around it). **NEXT:** when Kam mounts G-DRIVE, MOVE (mv across volumes) Extranet, platform-s-main, Pricing, "Testing Harness and Agent", Tokenomics + CLAUDE.md/.DS_Store/.gitignore/.smbdelete* to `/Volumes/G-DRIVE/Secuura/Laptop-DEV-offload/2026-10-19/` with a manifest, count both sides after, append to `/Volumes/Laptop-DEV/_SYNC_2026-10-15_replaced_by_T9/REMOVED_Secuura_2026-10-19.txt`. The hidden .cursor/.github/.planning (75 files) wait for Wednesday's counts (asked 07:4xZ). Vault Secuura/: sparse-checkout `--no-cone '/*' '!/Secuura/'` in the LAPTOP clone only (no commit), then the untracked leftovers move with the rest. The 140 GB `/Volumes/Laptop-DEV/WEDNESDAY` copy: check no laptop launcher uses it, then propose to Kam (move to G-DRIVE). Card `tuesday-laptop-secuura-removal-b-1019` open.
 
