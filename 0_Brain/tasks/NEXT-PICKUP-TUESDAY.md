@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 247 — 2026-10-19 12:27 (s119). Supersedes 246's "OWED next: brief B278" (done).
+- **B278 LIVE pane %81 `Datasec/Security-Composer-W2`** (records fold + C-76..78 + #297; MinIO options read-only). STATUS `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B278_STATUS.md`, last line `RECORDS DONE:` / `STOPPED:`. Watcher `status_watch_b278.sh` (scratchpad; dies at rotation). On its MinIO recommendation: card Kam if money/demo; else brief the swap as a gated Composer lane.
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %79 HPSM-POC-W1 (B276), %81 Security-Composer-W2 (B278).
+
 ## 🟢 DELTA 246 — 2026-10-19 12:22 (s119). **READ THIS FIRST. Supersedes 245's B277 line; 245 otherwise stands.**
 - **RD-778 LAND ACCEPTED** (push Build 39178705493 success at source; panel report bf-fb5005fa4a0a). RD-860/RD-861 filed by S101O. S101O next: RD-774/836 forward-merge 7700caf -> draft PR -> READY (tier-1 gate, Opus).
 - **B277 Composer ENDED BLOCKED** (pane %80 closed): CL0 done on LOCAL `records/b277` @ a61a5dd (not folded); #140 v2 done; #84 retry already on main since WP0 (stays OPEN, cause unknown). **BLOCKER: pinned MinIO image quay.io digest 14cea493… returns 401 (Docker Hub denies) -> no local Composer stack can start; every Composer code lane waits on it.** OWED next: brief B278 (Composer) = fold records/b155 + records/b277 into local main (C-76 next), owed C-entries + #297, and a READ-ONLY MinIO options measurement with costs -> card Kam if money/demo.
