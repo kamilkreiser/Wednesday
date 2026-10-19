@@ -1,0 +1,52 @@
+=========== [INBOUND] 2026-10-19T14:55 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE (tier 2): #1634 KS-1658 - head 91529864
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE (tier 2): #1634 KS-1658 - head 91529864158c, landing tree f20edc3ab56f on develop 88b8ceb9f304
+## BLUF
+
+**READY FOR GATE, tier 2, one PR: #1634 (KS-1658).** `Refs`, not deployed, ticket stays In Progress, one BLUF comment on it read back by id. **Commit 1 (`fefd9962962d`) is the Spark's patch byte-for-byte. Commit 2 is mine: two added cells, D1 and D2.** It gates separately from the tier-1 batch (its own mail): the files are disjoint.
+
+| | |
+| -- | -- |
+| PR | #1634, https://github.com/Secuura/Distributed_Secuura/pull/1634 |
+| head | `91529864158ccc28af95ee982b2f0965b3c317a3` |
+| landing tree ALONE on live develop `88b8ceb9f3041672d9575b40c09869d45ab1c111` | `f20edc3ab56f15a9d79773db4b4c13005eb9779a` (index-apply and `git merge-tree --write-tree` agree) |
+| all four of my PRs stacked on live develop | `ca60e237ea1016d3f1814490b05dcae539ddf6c7`, both orders, equal to a real `git merge --no-ff` |
+
+## Recommendation
+
+1. Gate #1634. **Merge only on your head-pinned GO**, re-taking the tree at the real head first.
+2. **Tell the gate D1 and D2 are mine** and which mutant each kills (below). Drop commit 2 if you want strict provenance: commit 1 stands alone and is green by itself (originate 1,516/1,516 with the Spark's 6 cells).
+
+## Detail
+
+### What it changes
+`driverRecords` in `originate/src/utils/idNamespaceCollision.ts`: on a node it cannot read, it now skips that node on its own and still visits its `cause` (`visit(o.cause, depth + 1)`) inside its own `try`/`catch`, so an unreadable cause is skipped too and the walk never throws. +2/-1. **Only `cause` is recovered**, as the ticket names; an unreadable outer Prisma wrapper's `meta.driverAdapterError.cause` would still not be (stated in the PR).
+
+### Commit 2 (mine), and the mutant each cell kills
+- **Mutant P3, a recovery that does not advance `depth`, passed all six Spark cells.** It bypasses the `MAX_DEPTH` bound (4) on the new path.
+- **D2 (a control: green on develop) kills P3.** Behind five unreadable wrappers the refusal is past the bound and is NOT found.
+- **D1 (red on develop) finds a 050 refusal behind four unreadable wrappers.** R1 to R3 each use one wrapper, so recovery through several was never exercised. D1 also reds with P1, P5 and P6.
+- No existing unit cell pins the bound for these helpers at all: the two files that test them have 0 hits for depth, nest, chain, cycle, circular or bound, with a control of 12 and 9 hits for the helper's name in the same files.
+- `MAX_DEPTH` is not exported, so both cells hard-code the count; raising the bound reds D2 on purpose.
+
+### Evidence
+- **Red-first on develop** (matches the checker's A4): the Spark's 6 cells read 3 failed, 3 passed (R1-R3). With D1 and D2: 4 failed, 4 passed. D2 passing on develop is why it is labelled a control.
+- **Mutants: six planted by line number, all killed** (P1 drop the recovery, P2 remove the inner try/catch, P3 depth, P4 no `return`, P5 visit the node not its cause, P6 depth past the cap).
+- **Suites** (load 7): originate on live develop alone **1,510/1,510, 126 files**. This branch on its base **1,518/1,518, 127 files**. All four stacked on live develop **1,523/1,523, 128 files**. rc 0, 0 skipped, 0 vanished, 0 new reds, by cell name.
+- **Type-check:** originate runs jest through `ts-jest` with no diagnostics override, so each test file is type-checked as it compiles. Control: a planted `const n: number = 'x'` in a scratch test failed with TS2322 and `Tests: 0 total`. `tsc --noEmit` rc 0, eslint rc 0 with a planted-`var` control returning rc 1.
+
+### Patch identity and pre-image
+Patch equals the cat of its two sections and the READY block; strict apply clean per section at my base `46e4343a5312`; the checker's patch is byte-identical to the drafter's golden (its own `cmp`, rc 0). Pre-image blob at **live** develop `d7d3670bb` equals the declared one and is unchanged since base. Post-image blobs equal the declared ones: `idNamespaceCollision.ts` `2d989b1e2`, test `de80ef606`. Between the checker's tip `bc3e2e2460ff` and my base, `services/originate` is unchanged (0 files, with a non-zero control on `auth`).
+
+### Open-PR census (re-run 01:52 AEDT)
+26 open PRs, 126 files, each count equal to GitHub's `changed_files`. **No other open PR touches this PR's 2 files**, and the three develop commits since my base overlap them in 0. (The census script's hard-coded control PR #1627 has merged, so it printed "CONTROL FAILED"; it is not blind: it found #1633 on the m365 file, confirmed separately through `gh`.)
+
+### Preflight
+`PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4, 8 skipped (local stack not up; no Docker on this machine). **Not a pass**, and the PR body says so. The excerpt in the body is script-extracted and verified verbatim. **Disclosure:** this was the push during which I moved `origin/develop` in my clone (fetching live develop into a private ref also updated the tracking ref). The base-reading legs (6, 7) had finished minutes earlier and the hook output mentions no stale base. Details in the tier-1 mail.
+
+### Known residue (in the PR body too)
+- The empty-looking `catch { /* the cause cannot be read either */ }` is deliberate and commented: the function's header says nothing in it throws on an unexpected shape, and its sibling at `:78` does the same.
+- Nothing here was reproduced against a live error; the cells build the shapes by hand. The ticket rates it Low: node-postgres and Prisma do not produce an unreadable-node shape.
+
+## Next
+The second batch, re-taken at the live head: KS-1262 first (tier 1, `api-gateway/src/routes/admin.ts`), then KS-1660, then KS-1500 + KS-1468 as one test-only PR. The clone is on a rehearsal commit now; I will return it to a clean branch before the next apply.
+
