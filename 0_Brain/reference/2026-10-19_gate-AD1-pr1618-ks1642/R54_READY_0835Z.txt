@@ -1,0 +1,73 @@
+=========== [INBOUND] 2026-10-19T08:35 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1618 KS-1642 at 4521a6f629b0 - tier 2
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1618 KS-1642 at 4521a6f629b0 - tier 2, landing tree 46d3e6b7a9a0 (my earlier 5271af0a figure is VOID), 1481 -> 1488
+## BLUF
+
+**READY FOR GATE — PR #1618 (KS-1642, both pieces in one PR), tier 2.** Head `4521a6f629b0c669ffbbe47798ebdcfb830d231b`, base develop `8323f2f70cd796219774f240184f777813c28aec`, **predicted landing tree `46d3e6b7a9a089370db16fd9bad31720ade3e632`**. `Refs KS-1642`. Nothing merged, nothing deployed. `PUSH_RC=0` after 618 s.
+
+## CAUSE
+
+`services/originate/src/utils/idNamespaceCollision.ts`, two defects the ticket names:
+
+1. **The helpers could throw.** They walked the error object field by field, so a node that cannot be READ — a throwing getter, or a `Proxy` whose `ownKeys` throws — made a mapping helper throw instead of answering "not a collision". A 409-mapping helper throwing propagates out of the handler. Fixed by reading every field the function uses **once, up front, inside a `try`**: an unreadable node yields no record and is skipped. The file's untrue "never throws" comment is replaced with one that states what the guard does.
+2. **The `r.constraint === null` arm of `isMigrationRefusal` had no cell**, so a mutant deleting it survived the whole suite.
+
+## THE CELLS
+
+**Piece 1 (new file, 5 cells)** — red at the untouched tip, green after: `G1` a throwing getter on the outer `code`; `G3` a throwing getter on a cause's `originalMessage`; `G4` a `Proxy` whose `ownKeys` throws. Two controls green both sides. Red-first **3 failed / 2 passed (5 run)**, 5 executed; green-after **5 / 5**.
+
+**Piece 2 (test-only, 2 cells added to the existing `ks1612` suite)** — a mutant kill, not a tip red:
+
+| product | `ks1612` | what moved |
+| -- | -- | -- |
+| real (`d7d3670bb4eb`) | **15 / 15** | — |
+| tamper, `r.constraint === null &&` deleted (`aa55d3f1f98a`) | **1 failed / 14 passed / 15** | **only `RED KS-1642 H9`** |
+| restored (`d7d3670bb4eb`, byte-identical) | **15 / 15** | — |
+
+The tamper **moved the blob** (not inert), **15 executed** under it (assertion red, not a load failure), and the control `H9c` stayed **green** (it discriminates the guard rather than breaking the file).
+
+**The tamper line was measured, not inherited.** Held pass says `:84`; piece 1 inserts 3 lines above, so `:87`. I grepped the exact line in develop's blob (**84**, the control) and in the patched file (**87**), and line 84 after the patch is blank. Your sequencing instruction was correct.
+
+## SUITE COUNTS AT THE LANDING PARENT
+
+- **landing parent `8323f2f70cd7` (live tip): 1481 passed / 1481 in 122 suites, rc 0.** Measured **twice** — at `80868551e679` when I branched, and again at the live tip after develop moved; identical both times, so it is a measurement at the tip and not a carried-forward number.
+- **branch: 1488 passed / 1488 in 123 suites, rc 0** · `tsc --noEmit` rc 0, zero bytes out.
+- **+7 cells, +1 suite, 0 failed either end, 0 NEW reds.** The 7 reconcile exactly: 5 (piece 1's new file) + 2 (`H9`, `H9c` into `ks1612`).
+
+## FILES (3)
+
+`src/utils/idNamespaceCollision.ts` (+3/-0) · new `src/__tests__/ks1642-…-unreadable-error-shape.test.ts` (+53/-0) · existing `src/__tests__/ks1612-409-mapping-survives-the-prisma-error-shape.test.ts` (+14/-0). **+70/-0**, no deletions; GitHub agrees (3 files, +70/-0). All three numstats equal the checkers' declared figures — no diff-representation discrepancy on this PR.
+
+## PREDICTED LANDING TREE — AND A FIGURE OF MINE THAT WENT VOID
+
+The branch's parent `80868551e679` is **2 commits behind** the tip: #1615 (anchoring) and then **#1616 — my own merge**. So the `5271af0a4cb7` landing tree I quoted in my earlier STATUS **is void**, and I am not carrying it. Re-predicted: **`46d3e6b7a9a0…`**, agreed by `git merge-tree --write-tree` against the live tip **and** by a real local merge of develop into the branch, which changes exactly the PR's three files with zero conflicts.
+
+**Why the suite figures survive the move, checked rather than assumed:** develop's two new commits touch **0** files under `services/originate` — positive control, the same grep returns **2** under `api-gateway` and **4** under `anchoring`, so it discriminates — and the baseline re-measured at the live tip is unchanged.
+
+## PREFLIGHT
+
+**`PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`** The hook prints its own warning beneath it — *"This is NOT a pass. Do not quote it as one — say which legs ran."* Legs 3, 4, 8 are Docker-dependent and this machine has none. Leg 14 shell suites **91 passed / 0 failed / 0 skipped of 91**.
+
+## ONE NOT-RUN THAT MATTERS ON THIS SERVICE
+
+**The DB-backed integration suite did not run.** `jest.config.js:8` ignores `\.integration\.test\.ts$`, so originate's default run is unit-only by design and the integration config needs a database this box lacks. It matters here because **#1614 added `ks1402-…-connector-actor.integration.test.ts` to this very service**, so that file is in neither of my figures. It is present on develop (checked), so its absence is the config exclusion, not a missing file.
+
+## KS-1642 COMMENT
+
+Posted, read back byte-identical, ticket left open.
+
+## MEANWHILE
+
+Starting PR-C (KS-1634 v2 site + Stuart's hand-written in-process S-shaped cell). Its READY states **golden not located, no identity claim**, so for that one I will report the three-way `index` control only and say the golden check was unavailable, rather than implying a byte match I cannot make.
+
+## NEEDED-BY
+
+A tier-2 verdict on #1618 when a gate seat is free. Not blocking.
+
+PROVENANCE:
+- all suite/tsc figures, the mutant-kill table, the line-number controls | my own runs in my own clone, logs under scratchpad/svc/ | measured 2026-10-19 08:2x-08:3xZ
+- landing tree | merge-tree AND a real merge, both in my clone | 2026-10-19 08:3xZ
+- PUSH_RC + preflight lines | my push log, quoted | 2026-10-19 08:32:26Z
+- PR #1618 head/base/counts | GitHub API, body read back byte-equal (sha 6d0411d2125896d4) | 2026-10-19 08:3xZ
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-19 08:3xZ
+
