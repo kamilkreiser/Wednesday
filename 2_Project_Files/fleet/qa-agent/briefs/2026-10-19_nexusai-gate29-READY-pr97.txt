@@ -1,0 +1,93 @@
+FROM CoAgent <coagent@agentmail.to> TS 2026-10-19T05:25:33.000Z ID <010001a1529f4b9b-86ce8abe-025d-466d-8ef3-8261ec21bffd-000000@email.amazonses.com>
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass', 'spf_domain': 'mail.agentmail.to', 'dmarc_domain': 'agentmail.to'}
+READY FOR QA: RD-774 + RD-836, draft PR #97, head 4c9b0d36993f1e78c8f23cd9e1216200550324b8 (tree 26f5dd7e632649c2ef33a97a5a73de1cf908975f). Tier 1.
+Per ANSWER-20/21 (Kam's ruling (b), C-211; P1 (ii), P2 ticket) and ANSWER-23 (#272 fixed in code before READY). DRAFT: no merge before the tier-1 gate and your GO.
+
+BRANCH
+- 63bef65: the build (main 888203c base).
+- 360cd82: forward merge of main 7700caf (main first). The only conflict was counts.
+- 4c9b0d3: the #272 fix (ANSWER-23).
+- Files vs main 7700caf: backend/services/riskSqlTemplates.js (new), backend/server.js, backend/simpleDb.js, backend/validators.js, __tests__/rd774-risk-sql-templates.test.js (new, 23), __tests__/helpers/rd774-sql-spy-preload.js (new), __tests__/security-fixes.test.js (F-10 rewritten, 13 -> 14), and counts.
+- No static/js file changed (see CORRECTIONS).
+- verify: PASS 4700/4700 across 293 suites (main 4676/292).
+
+ALERTS (ANSWER-23 item 4/5)
+- Before, at head 360cd82: 1 open on refs/pull/97/head, #272 js/log-injection (rule severity error, security medium), server.js:20945.
+- What it was: NOT a new defect. It is main's #220 (server.js:21292 at 7700caf), the "Unrecognized condition pattern" log line that writes the condition text raw. RD-774 moved it into the thin generateSQLQueryForCondition, so CodeQL renumbered it. The text comes from a stored risk condition, which a client writes.
+- Fix: it goes through backend/logSafe.js (RD-801), as you asked. No new escape was written. logSafe fits this call unchanged: one string value, one log line.
+- My first attempt (CR/LF -> space) was never pushed. logSafe's own header records that CodeQL's barrier is an EMPTY-string replacement only, so it would not have cleared #272.
+- After, at head 4c9b0d3:
+  - CodeQL run 39200009814: Analyze python, javascript-typescript and actions all succeeded. The check reads "No new alerts in code changed by this pull request".
+  - 0 open on refs/pull/97/head.
+  - #272's instance on refs/pull/97/head = FIXED.
+  - Control refs/pull/58/head state=fixed: 4 (fires).
+- #70 (js/sql-injection, simpleDb.js:859) is a baseline alert, and it has no instance on the PR ref, so its "fixed" can only be read on main's push analysis after a land. I am not claiming it fixed yet. The executeRiskQuery sink it names no longer exists; executeRiskTemplate looks its SQL up by id. #220 is the same: expected fixed on main at the land, to be read then.
+
+RED-FIRST FOR #272 (ANSWER-23 item 3)
+- The cell (part B) plants a stored condition whose text carries CR/LF, a forged-line marker and an ESC[2K erase-line sequence. POST refuses a CR/LF in the text, so a stored record is the reachable source. The cell then executes the condition.
+- Green: the log line fires with the text on ONE line, no line starts with the marker, and no raw ESC is in the output.
+- Red with logSafe removed from that one call: forgedLineStarts true, rawEscape true, logged false.
+- server.js was restored and checked byte-equal (shasum -c OK), then green again: 77/77 across both RD-774 files.
+- Runs: session-tools/s101/rd774-runs/272-{green,red,green2}.out.
+
+PRIOR WORK (what existed and why; full census in my plan mail, QUESTION "plan confirmation RD-774/836")
+- executeRiskQuery took free-form SQL behind the a241d25 F-10 grammar (2026-04-27). Its header said "upstream is responsible for the role check", and upstream had none.
+- Three request paths planted SQL: POST test-custom-query (ran it), POST /api/risk-conditions (stored it), and PUT /:id (spread the whole body into the record, including id, created_by and sql_query).
+- Three executors ran the stored sql_query: the scheduler, /:level?execute=true, and /:id/execute.
+- The templates already existed in generateSQLQueryForCondition. They are moved, not rewritten: same branches, order, parsing and bounds.
+
+WHAT CHANGED (behaviour)
+- Every executor derives {templateId, params} from condition_text at run time. The stored sql_query column is never read for execution. It stays on disk untouched, and new records store ''.
+- SQL text in a request is refused on POST /api/risk-conditions (sqlQuery and sql_query), PUT /:id and POST /api/test-custom-query: 400 {error, code: SQL_TEXT_NOT_ACCEPTED}. Nothing is stored, logged or run.
+- test-custom-query runs nothing (P1 (ii)), and its raw-SQL log line is gone.
+- RD-836: POST/PUT/DELETE /api/risk-conditions and POST /sync take the setup-mode-aware admin gate (requireAdminFor, the C-203 (b) precedent). The C-01 open window is unchanged (cell in part B).
+- PUT writes only condition_text, risk_level, is_active and email_recipients. Anything else is 400 FIELD_NOT_ACCEPTED, and the record is unchanged.
+
+ITEM-5 CHARACTERISATION (main 888203c vs the bound template, demo seed of 1445 rows; session-tools/s101/rd774-char/main-888203c.txt)
+- T1 colour ratio: main SQLITE_MISMATCH; bound 0 rows.
+- T2 colour jobs/day: main SQLITE_MISMATCH; bound 12.
+- T3 daily pages >: main SQLITE_MISMATCH; bound 13.
+- T4 daily pages <: main SQLITE_MISMATCH; bound 1.
+- T5/T6 average multiple/percentage: main "no such column: a.created_at" (invalid SQL). Fixed on the branch and equal to a hand-written reference (spread-date DB, since the seed stamps one created_at).
+- T7 cost: main SQLITE_MISMATCH; bound 21. costPerPageBW is now bound, not interpolated.
+- T8 content coverage: main SQLITE_MISMATCH; bound 50.
+- T9 anomaly window: main "misuse of window function AVG()". Fixed on the branch (the window avg moved into a subquery) and equal to a reference.
+- T10 high volume: main SQLITE_MISMATCH; bound 11.
+- T11/T12 page count above/below: main SQLITE_MISMATCH; bound 21/50. The operator is fixed per template id.
+- T0 default: 100 rows on both. On the branch it uses the CALLER's limit (main hard-coded LIMIT 100).
+- So 10 of 12 parameterised templates failed on main's SQLite path, because every caller dropped .params.
+
+UI PATHS THAT NOW RETURN DIFFERENT ROWS (SQLite fallback only; with USE_AZURE_LOG_ANALYTICS set, as on the demo, execution is KQL and unchanged)
+- index.js:8745 "execute rule" (POST /:id/execute): main gave an error for 10 of 12 shapes; the branch gives template rows.
+- The /:level?execute=true lists and the RiskAlertScheduler cron (executeRiskConditionRows): the same change.
+- The default shape now honours the caller's limit (50 for the scheduler and level lists, the requested limit for /execute) instead of 100.
+- A condition saved with a hand-written sql_query before RD-774 now runs its TEMPLATE, not that SQL (cell: legacy ids 1, 2 and 7 with a planted UNION).
+- settings.js:1369 PUT and :1387 DELETE: a signed-in VIEWER on a configured deployment now gets 403 with the EXISTING "Admin access required" text. Admins and the open first-run window are unchanged.
+
+NEW WORDS
+- No new human sentence anywhere.
+- New machine codes only: SQL_TEXT_NOT_ACCEPTED and FIELD_NOT_ACCEPTED (also used as `error`).
+- "Admin access required" is reused verbatim.
+- The log line text is unchanged for ordinary input (logSafe returns normal text byte-identical).
+- testing.html's SQL box now gets the 400 code with no sentence. Whether it gets words or goes is RD-858 (Kam's decision).
+
+CORRECTIONS TO MY PLAN MAIL
+- settings.js does NOT POST /api/risk-conditions with sqlQuery. Its only writers are PUT (:1369, fields already inside the allow-list) and DELETE (:1387). So no static/js change was needed, and none was made.
+- generateSQLFromCondition (the near-duplicate at server.js:~6391) is dead code (no caller on the execution path), so it was left alone rather than wired to the templates. A cleanup ticket can be filed if you want one.
+
+NOT TESTED
+- No browser render. The surfaces for the gate:
+  - Settings > Risk rules (save, toggle, delete as admin and as viewer);
+  - index.js execute-rule;
+  - testing.html (unlinked) SQL box -> 400.
+- The Log Analytics/KQL execution path (the demo's shape) was not exercised. It is unchanged by this diff; P2 client-KQL is RD-859.
+- The RiskAlertScheduler was not run on its cron timer. Its executor function (executeRiskConditionRows -> runRiskConditionOnDatabase) is the same one the route cells drive.
+- No demo deploy. A local run of this commit is the drivable surface: open mode serves everything, and a configured run needs sign-in set up, as in the part A harness.
+
+TICKETS: RD-858 (testing.html SQL box, Kam's decision) and RD-859 (client-sent KQL) are filed and linked. RD-774 and RD-836 are In Progress.
+
+HELD: C-170 (PR #96, f15217c) waits for gate 28 + your GO. Nothing lands on main.
+Asking you to commission the tier-1 gate on PR #97 @ 4c9b0d3.
+
+-- S101O
+
