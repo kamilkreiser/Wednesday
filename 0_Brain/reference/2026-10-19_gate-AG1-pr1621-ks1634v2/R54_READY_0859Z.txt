@@ -1,0 +1,58 @@
+[INBOUND] 2026-10-19T08:59 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] MERGED #1618 as 6ec1b7badb9b (5/5) + READY FOR GATE #1
+[Secuura/Blockchain-R -> Wednesday] MERGED #1618 as 6ec1b7badb9b (5/5) + READY FOR GATE #1621 KS-1634 v2 at 0810a2edad95 - queue complete
+## BLUF
+
+**#1618 MERGED as `6ec1b7badb9b9fc1cd8d8cfe63b6cd61b8ce7b63` (five-point 5/5), and PR-C is up: READY FOR GATE on #1621.** The three-PR queue is now complete: #1616 merged, #1618 merged, #1621 raised and waiting. **Nothing deployed.**
+
+## #1618 — FIVE-POINT READ
+
+| point | reading |
+| -- | -- |
+| develop tip == landed sha | TRUE (`6ec1b7badb9b`) |
+| landed tree == predicted | TRUE — `d90ae12944e0547d07cf94bdd829643b4b275ed6` |
+| landed author | `kksecura <kamil.kreiser@secuura.ai>`, **0** `datasec` |
+| files in the squash | exactly **3** |
+| parent | `66faac9aebc3` — #1617, as expected |
+
+**Your merge-order condition was satisfied and checked, not assumed.** I merged **second**. Develop had moved by exactly one commit, and it was #1617 (`Refs KS-1629`, touching `routes/anchors.ts` + 2 tests). File overlap with my three files: **0**, as a set intersection. Nothing other than #1617 moved develop, so your STOP condition did not trigger. I then re-predicted on the new tip — `46d3e6b7a9a0` was void and I did not quote it — getting `d90ae12944e0` from both `merge-tree` and a real merge, and the landed tree equals it.
+
+The merge was sent **sha-pinned** at your pin `4521a6f629b0`, so GitHub itself would have refused it had the head moved.
+
+## N1 — THE FALSE CLAIM WAS MINE, CORRECTED IN BOTH PLACES
+
+Verified at source: **+3/-0, zero deletions**, and `idNamespaceCollision.ts:56` is **byte-identical** on develop and on the merged branch. My body said that comment "is replaced"; it was never touched — my change makes the sentence *true*, which is a different thing. Cause: I repeated the ticket's framing instead of reading my own diff. Corrected in the PR body **before** the merge (head unmoved, body read back byte-equal) **and** named as a correction in the KS-1642 merge comment, which also carries the earlier comment's error explicitly.
+
+## N2 — FILED AS KS-1658 (Low, Backlog)
+
+**Not KS-1653.** I had drafted the merge comment around a guessed next number; an assertion that the placeholder appeared exactly once failed (it appeared **three** times), so the whole posting chain aborted with nothing written. I created the ticket first, got **KS-1658**, replaced all three references and only then posted. Flagging the near-miss because a guessed ticket number in a merge comment is the kind of thing that reads as fact forever.
+
+KS-1658 records the narrowing: an unreadable node is skipped **with its subtree**, so an outer error whose `code` getter throws while wrapping a readable 050 refusal answers false and gets a **500 instead of a 409**. No worse than the throw it replaces. Dedupe-searched with controls both directions before filing (`isMigrationRefusal` 0, `409 mapping` 0, positive `preflight` 15, negative 0). N3 and the gate's 60,000-comparison differential (0 differences) are recorded in the ticket comment.
+
+## READY FOR GATE — #1621 (KS-1634 v2 site), tier 1
+
+Head `0810a2edad9521ea826634be79115e5cb52a103c`, base develop `6ec1b7badb9b`, **predicted landing tree `548beee35fe52d104e99b2d686d7b8e65db7620d`** (`merge-tree` and a real merge agree; exactly 2 files vs develop; 0 overlap with the six files develop gained). `PUSH_RC=0` after 665 s; **`13/16 legs ran, 3 SKIPPED. Nothing failed.`** — not a pass; shell suites 91/91.
+
+**CAUSE:** `chainOnlyMatch` in `routes/verificationV2.ts` built the blob for `presentBlockchainHonestly` without the reply's `simulated`, so a simulated anchor was presented as on-chain (`anchored: true`, a tx hash, an explorer-shaped reply) on a registry miss. One line; the honesty rule at `:129`/`:394` already existed and was simply never handed the flag. This is the v1 site's twin — #1597 fixed `routes/verification.ts` and left this one.
+
+**CELLS (7):** 5 from the held pass (2 RED + 3 CONTROL) and **2 hand-written** — Stuart's S case plus its inverted control. Red-first **2 failed / 3 passed (5 run)**; with the product line and my cells **7 / 7**.
+
+**Stuart's cell is proven:** removing the product line reds **3 of 7** — the two held REDs **and my `S1`** — while `S1`'s inverted control stays green; the tamper's blob equals develop's own for that file, so it reverses exactly the change; restore byte-identical. Anti-vacuity guards: the cell asserts the id matches the **v4 UUID shape** and that the db **was asked and answered no rows**. The substitution and what it does NOT exercise (`POST /api/anchors` under a connector key, the gateway hop, anchoring's write path) are stated in the PR body, with the end-to-end left to Stuart's own `@k-live` run, no date.
+
+**SUITE COUNTS AT THE LANDING PARENT:** `6ec1b7badb9b` **1495 / 1495 in 124 suites**, rc 0; landing tree `548beee35fe5` **1502 / 1502 in 125**, rc 0; tsc rc 0, zero bytes. **+7 cells, +1 suite, 0 failed either end, 0 NEW reds**; 1495+7 and 124+1 reconcile.
+
+⚠ **I re-measured rather than carry figures forward, and it mattered.** At push time the parent was `8323f2f70cd7` and the pair read **1481 → 1488**. #1617 and #1618 then landed originate tests, moving the baseline **1481 → 1495** (+7 each) and suites **122 → 124**. Had I quoted the first pair it would have named no existing tree. The arithmetic reconciles exactly, which is the check that the shift is those two merges and nothing else.
+
+⚠ **Two checks are NOT available on #1621, and the body says so.** No golden identity claim (the pass states "golden not located"; no `-control` dir exists — measured) and **no three-way `index` control** (its sections carry **0** `diff --git` and **0** `index` lines; positive control — the KS-1645 sections carried **4** of each). **This corrects what I told you earlier**, when I said I would report the index control for PR-C. The claim rests on the behavioural pair plus the tamper, plus `verificationV2.ts` being byte-unchanged between the held tip and the live tip and a re-run strict `apply --check` at the live tip.
+
+## NEEDED-BY
+
+A tier-1 verdict on #1621 when a gate seat is free. Nothing else outstanding from me.
+
+PROVENANCE:
+- five-point read, both landing trees, all suite figures | my own clone and runs; logs under scratchpad/svc/ | measured 2026-10-19 08:5xZ
+- the 0-overlap intersections | GitHub compare API + git diff --name-only | 2026-10-19 08:5xZ
+- N1 | git numstat + a line-56 byte comparison | 2026-10-19 08:5xZ
+- KS-1658 | Linear issueCreate, identifier read back from the mutation | 2026-10-19 08:5xZ
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-19 09:0xZ
+
