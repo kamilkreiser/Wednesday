@@ -6,7 +6,7 @@ status: live
 supersede: REPLACED WHOLESALE by the 18:2x Wednesday seat (booted after the 17:31 MACHINE REBOOT), 2026-10-19 18:5x. Replace wholesale again; never stack. Previous: NEXT-PICKUP.md.pre-1019-1856 + git.
 ---
 
-# NEXT PICKUP (Mon 19 Oct, ~18:56)
+# NEXT PICKUP (Mon 19 Oct, ~19:30; 70% checkpoint refresh)
 
 ## 0. FIRST ACTIONS FOR THE NEXT WEDNESDAY SEAT
 1. Boot reads as the launcher says. Then kam_rulings_today.sh (whole day), reconcile_rulings.py, `bash 2_Project_Files/tools/newmail.sh` (to a file), fleet_ack.sh list, decision_queue.sh list open, fleet/usage_gate.sh --check, `local-model/spark/tunnel.sh check`, `tmux list-panes -t fleet:0 -F '#{pane_id} #{@cockpit_name}'`.
@@ -20,17 +20,18 @@ supersede: REPLACED WHOLESALE by the 18:2x Wednesday seat (booted after the 17:3
 - Card `wed-devmaster-datasec-leftovers-1019` (rec a: move /Volumes/DevMASTER/TUESDAY to G-DRIVE too; default: nothing beyond !CODING/Datasec moves) — open.
 - Tuesday clears Secuura off the laptop (mirror ruling 18:21:50). Wednesday supplied the master counts + a path diff (DevMASTER holds every content file; 7 laptop-only git ref files of a temp remote t9-drive-2026-10-15) + hidden folders (.cursor 18, .github 3, .planning 54, all equal). Laptop-DEV/WEDNESDAY (140 GB): Wednesday does not need it; Kam's call after Tuesday checks no laptop seat launches from it.
 
-## 2. LIVE FLOOR (18:56) — develop = 722e07f19cee683ea037930e601e380a9491f7b5. Nothing deployed.
-- **E 20th (%5, Secuura/Blockchain-E):** merge #1613 (KS-1195) at c336de831221 on Wednesday's GO (X1 GO r1 + Z1 GO r2, landing tree 9a3a5619e806), then deliver Kam's five rulings as ticket comments (KS-1575, KS-1596, KS-1570 + DEPLOY-BLOCKERS row 7 PR, KS-1580, KS-1384, KS-1402) + KS-1195 merged-not-deployed comment. Plan confirmation owed. On MERGED: verify landed tree, then `decision_queue.sh --delivered` each of the five cards naming the comment ids.
-- **C 26th (%6):** merge #1614 (KS-1402 500 fix) at ddd54b836394 AFTER #1613 lands (Y1 GO tier 1 r1; disjoint file sets; STOP on overlap), then DESIGN the KS-1402 stub holder (Kam a) — design mail before code; tier-1 gate on the build. Plan confirmation owed.
-- **R 54th (%2):** CONFIRMED; three PRs from the held Spark READYs (KS-1645 item 3, KS-1642 p1+p2, KS-1634 v2 + in-process S cell). Each -> READY FOR GATE (tier 1 KS-1645/KS-1634, tier 2 KS-1642).
-- **J 15th (%3):** CONFIRMED; #1615 (KS-1603, head 4db96203546b) re-verify in a fresh clone -> READY FOR GATE (tier 1); then KS-1629 (box reading SIMULATE_ANCHORING approved, then the fix).
-- **G 11th (%4):** CONFIRMED; KS-1557 write side (existence read accepted as a shape; the gate measures the SQL match), one PR tier 1; then two tickets (registerInPlatformRegistry silent catch; certifications.ts:417 assertNoCycle cycle arm) after cells; then KS-1633.
-- Gates Y1/Z1 verdicts: `0_Brain/reference/2026-10-19_gate-{Y1-pr1614-ks1402,Z1-pr1613-r2-delta}/verdict.md`. Next gates as READYs land (tier-1 Opus, tier-2 Sonnet per routing v1.0).
-- Spark: tunnel re-opened 18:3x (pid 21270). Held READYs all assigned to R 54th. Spent v1 KS-1634 READYs moved to `night/_spent_2026-10-19/`. **Spark is IDLE: next action = SCREEN_14 (brief drafter) for new candidates.**
+## 2. LIVE FLOOR (19:3x) — develop = ad784e702ca205230e39d329abefa8a85fb5946c (#1615). Nothing deployed.
+- **MERGED tonight, each verified by Wednesday's own fetch into local-model/spark/cache/src:** #1613 KS-1195 (31cfb44dce84, tree 9a3a5619e806 = Z1), #1614 KS-1402 500 fix (80868551e679, tree 9fec48e29e34), #1615 KS-1603 (ad784e702ca2, tree 8b67dde748 = AA1). None closes its ticket (Done = deployed + live check).
+- **R 54th (%2):** #1616 KS-1645 item 3 has GO WITH NOTE from AB1 (landing 34aebee73a39 on ad784e702ca2): R corrects the PR body for N1 (security never reads `type`: item 3 NARROWED not closed), merges, comments KS-1645. Then PR-B (KS-1642 p1+p2), PR-C (KS-1634 v2 + in-process S cell), then ADDENDUM: three held Spark READYs, one PR each: KS-1641 OAUTHCAP-2 (tier 1), KS-1460 STUBCLAIMCONFIRM-1 (tier 1), KS-1568 ROTATEWAITPARSE-1 (tier 2). On each MERGED: verify the tree in the cache clone.
+- **J 15th (%3):** #1615 merged; KS-1652 filed (tenantless arm WAS ruled 05:55:40Z; Wednesday's GO sentence withdrawn). KS-1629 built to ruling (b) (always 404 without a row; ks520 re-pinned, disclosed), commit f8b3bf0cd313: READY FOR GATE owed -> tier-1 Opus gate.
+- **G 11th (%4):** KS-1557 write side built; SHAPE CHANGED to getDocument + identity guard (accepted as a shape; the gate gets three questions: guard exactness incl. migration 050, access-before-cycle ordering, the six re-pinned cells). READY owed -> tier-1 Opus gate. Then two tickets + KS-1633.
+- **C 26th (%6):** KS-1402 stub-holder build APPROVED as a shape (auth /api/users/stub, tenant re-read through originate's bound predicate, admission via certifications:write + a cell pinning it, KINTSUGI parity cell re-pinned + renamed). READY owed -> tier-1 Opus gate.
+- **E lane:** E 20th wrapped, scored 1.0, pane closed. No E seat live.
+- Gate letters used today up to AB1; next is AC1.
+- Spark: SCREEN_14 done (3 held). Next screen when the held READYs are raised or the pool changes; KS-846 (packages/shared build trap, now Medium) is a Spark-able candidate if one file.
 
 ## 3. KAM'S CARDS
-Ruled 18:22-18:23 (recorded 18:28): signing additions a, ks1570 a (+grant extension), ks1580 a, ks1384 b, ks1402 a — **NOT YET DELIVERED** (E 20th's job). Open: wed-devmaster-datasec-leftovers-1019 + Tuesday's Datasec cards.
+All five 18:22-18:23 rulings DELIVERED (comment ids in the cards; ks1570 card now carries ruling_note "keep the grant alive until further notice"). DEPLOY-BLOCKERS.md (WEDNESDAY's own file, 0_Brain/tasks/) row ks1533-admin-bounded moved to ## Closed 19:13. Open for Kam: wed-devmaster-datasec-leftovers-1019 (rec a), wed-delegation-grant-mail-lost-its-signature-1019 (rec a re-send; default b vault record) + Tuesday's Datasec cards.
 
 ## 4. OWED BY WEDNESDAY (own tools, small)
 1. pretooluse_no_cd.sh: a `git -C $VAR` write on WEDNESDAY itself is refused (bit twice today); allow variables resolving inside WEDNESDAY.
