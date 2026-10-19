@@ -1,0 +1,67 @@
+# B293 DRAFTER REPORT (HPSM-POC records seat R8: 2026-10-19 merges, rulings, corrections)
+
+**Brief:** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-19_B293_SEAT-R8_hpsmpoc-records-1019.md` (211 lines, 75,518 bytes, sha256 `b64a993b00e529d541254e6c05702e02069e47401cb460a80d624ee6103b163d`). Shape: B274's records brief (read whole) with B265's (read whole); slot convention is the current `@SLOT:NAME@` one (B288/B291), not B274's `@R_K@` form.
+- Written: these two files only, with the Write tool. **One disclosure:** I then corrected four spots in the brief with the Edit tool on the same file (a wrong line cite `B279:224` → `:223`, a vague "14 paths", the C-SCAN pattern, the origin-label count) and added the 14-tokens-on-9-lines note. No other file was touched.
+- Nothing launched, mailed, published; no Artifact, Docs, chat, card or upload tool; no git or gh write; no Jira write; no HTTP to any hosted site. Read-only actions: `gh api` GETs under HPSM-POC's own `GH_CONFIG_DIR` (`kamilDatasec`, active); Jira GETs (issue, transitions, JQL) through a throwaway reader in the session scratchpad (the three `JIRA_*` names read in-process from the project's `.env`, nothing printed); read-only `git config --get` / `remote -v` / `log -1` at the project root; `ls`, `wc`, `shasum`, `sed`, `grep` on sources. Not opened: `HP Reporting and Docs/`, `HP Docs/`, the SOW, `Source_Documents/`, `inbound_with_secrets`, any `.tools/` content (only `ls` of directory names: `.tools/b274/`, `.tools/b198/`, `.tools/` for `b29*`/`wt-*` names), shared fleet folders, anything Secuura. NEXT-PICKUP-TUESDAY.md lines 14-93 (DELTAs 271-259) and Tuesday's daily note and clarifications register were read as the commission said.
+- No clock is typed in the brief; times in it are quoted from GitHub or STATUS fields.
+
+## Verified at source (provenance in the brief; the main ones here)
+1. **Merges (gh GET):** #162 `e4f270ea41bd0f15886ba8a9dc2667eae1305903` merged 2026-10-19T06:47:45Z, head `6dbe394f8a0b81dfbc5d2c781ab876db57e31198`, 2 files +217 −3; #161 `2a0c5412760346bca6482f2c61d44bf84a814f3e` 08:10:03Z, head `7329804e7b31d5fd8a84de9056ed81731d2ba859`, 3 commits, 4 files +130 −28; #163 `b3a7c275447d598d540d1933af5785f165fbc4f0` merged **09:29:57Z = 20:29:57 AEDT** (your 20:29 holds), head `e3050549f20178afa13c822827504cbde2e8bc1d`, 4 commits, 5 files +775 −14. Code main = `b3a7c27…` (0 open PRs, both repos).
+2. **Trees (git/commits API):** #162 main tree `ca71a465…` = head's (B286's prediction). **#161 main tree `aa9070d4…` ≠ head tree `0fd2f320…`; #163 main tree `39a140ab…` ≠ head tree `5aaef7d5…`:** both equal the gates' merge-tree predictions (`B283:11`, `B291:336`). B274's "its tree is the gated head's" would be false for two of three; the brief says so (Correction 1) and the seat is told never to write it.
+3. **CI after merge:** `e4f270e` and `2a0c541`: Push on main + push `ci` `success`, 18 success + 1 skipped. **`b3a7c27`: Push on main 39230515590 `success`; push `ci` 39230516778 was `in_progress` at my read (14 success, 3 in progress, 1 skipped).** The brief carries a wait-30-minutes-then-STOP rule for it. Open code-scanning alerts on main 0 (control: fixed → 1).
+4. **Jira (GET):** HPSMPOC-290, -291, -227, -267, -293, -275, -263, -226 all Backlog; comment ids as listed in the brief; HPSMPOC-269 Done with comment 39664; transitions 11/21/31/41 on all; assignee `616503d4bfa2c1006b1971d1` on -229/-290/-291/-226, none on -227 and -293; highest key HPSMPOC-293 → first create HPSMPOC-294. Controls: `qjzxkwvp` 0, `ce40ce07` 42, `created >= 2026-10-19` 1, `key >= HPSMPOC-293` 1. All duplicate-search counts in the T-rows are my GETs (counts, keys and status in the table). Origin labels `b279-gate`/`b283-gate`/`b286-gate`/`b291-gate` and `b293-2026-10-19` hit 0.
+5. **Gate lines:** every `:n` cited into B276/B279/B282/B283/B284/B286/B288/B291 STATUS was read in this session (verdicts, findings, drafted Jira lines, FOR TUESDAY items, last lines). B291's drafted lines are at `:355-358`; the "(not merged)" phrase occurs only in B286's and B291's, and the brief's one substitution rule handles it.
+6. **Code cites at `b3a7c27`** (raw contents API, line-checked): `ImportEndpoints.cs` :50-52, :79-82, :130-133, :133, :134/:145 (try), :151-152, :157, :260-261, :271-283, :285-306 (audit :304), :277-278, :456-457 (3307); `ImportPendingSweep.cs` :156-174 (:169, :173); `Hpsmpoc290Tests.cs` :90, :96, :125-136 (:134); `FeedbackEndpoints.cs:96`; `PkcsInPackageTests.cs` :75, :139-141, :185-187, :213, :231-232, :308-310, :323; the six `web/e2e` cites (live-api :30-32, content-050 :101, narrative-attention :28, report-demo-refused :32, narrative-stale :30, override :109 and :123). `ImportEndpoints.cs` blob equal at `b3a7c27` and `e3050549` (`60c77d0f…`).
+7. **Rulings:** register rows `:33`, `:34`, `:35` read; the store holds the three cards with options and `ruled_ts` (18:20:43 / 18:20:54 / 18:20:57, Tuesday's write times; the taps are the register's 18:19:40 / 18:20:06 / 18:20:14). The six daily-note sentences each occur exactly once (grep -c -F = 1 each). `ImportPendingSweep.cs:97` holds text 1 (the register says `:98`).
+8. **Records base:** main `47a9896e…` (1,745 lines, 118 headings, highest C-118 at :1591, history top = B274); `records/b293` absent (404); the project root checkout is stale (HEAD `76bb8ba`, B48), `core.sshCommand` still names another machine's path.
+9. **Catch-up files:** the 14 project copies, their line counts and sha256 (pasted from `shasum`), the 7 briefs `cmp`-equal to Tuesday's; records main holds Briefs up to B274, `records/b276` holds B276's two.
+
+## Where the commission and the facts differ (read first)
+1. **`records/b276` is neither landed nor a PR** (e59a5408…, ahead 3 of records main, 5 paths incl. `history.md`; PRs end at #121). The daily note and DELTA 268 list it as owed after Tuesday's HP-window scan; nothing in the note says that scan ran. It and B293 both edit the top of `history.md` → R-R8-1.
+2. **Post-merge trees** of #161 and #163 are not the gated heads' trees (above).
+3. **HPSMPOC-267's Done-when itself requires a C-entry**, so its Done depends on this seat's push → R-R8-5.
+4. **HPSMPOC-275's Done-when read literally** ("a failure on every attempt … leaves no pending run holding rows") is not met for a database that fails every attempt (B288 `:54`, B291 `:267` (ii): ends pending by design). The gates and Tuesday's completion check call it met → R-R8-4.
+5. **HPSMPOC-269 comment 39664 (B274's) asserts "m1 RED on SDK 10.0.401 too"**, which B279 and B283 measured false on a really pinned 401. The DELTAs ask for the "B271-6 note"; the false claim lives in that Jira comment (and in HPSMPOC-291's description and comment 39677), not in C-117 (grep: C-117 carries only the findings→keys line). Hence MC-9 and the dated note in C-122 → R-R8-8.
+6. **-227 has no Done-when paragraph** (only a Recommendation with "consider … a CI job"); B276 kept it open on R-W1-3 "no transition until merged" → R-R8-3.
+7. **B286 STATUS has a stray unreplaced line `OWN-LEAK-SCAN-PLACEHOLDER` at `:249`** (its r9 says "see Own-leak scan at the end"; the section was never written). The last line `:251` is the proper `VERDICT:`. Copied byte-equal; flagged in the brief.
+8. **B291-7 and the 3307 line:** Tuesday's ruling is a daily-note sentence, recorded as the coordinator's, in C-121 (not a Kam entry), as you asked.
+9. **Product source carries a person's name:** `ImportPendingSweep.cs:96` doc comment reads "User-facing words: Kam's card (B244 NEW WORDS)". Not this brief's scope; the seat is told to quote `:97` only.
+10. **Description edits are new:** B274's fences forbade any field edit; DELTA 268/262 owe two. The brief grants exactly `description` on -291 and -226, with a save/read-back/mutant procedure.
+
+## UNMEASURED (not measured by me) and the closing instrument
+- **Push `ci` run 39230516778 on `b3a7c27`:** in progress at my read. Closing: the seat's Step 0 re-read and the 30-minute rule.
+- **"Not deployed":** inferred from the absence of any deploy brief/STATUS after B273 in both Briefs folders and C-118 as the newest deploy record; the hosted site was not read. The brief words it "as far as the Briefs show".
+- **HPSMPOC-291's and -226's ADF paragraph boundaries:** I read the descriptions as text (paragraphs separated by newlines); the seat reads the ADF and asserts node equality before and after.
+- **The e2e specs' live behaviour** (T03/T04): only the cited lines were read at `b3a7c27`; the findings are the gates' (B279), local-only.
+- **Duplicate searches for T01-T07:** counts are mine; the titles of the hits were read, not their bodies (the seat classifies EXISTING/RELATED). `FeedbackEndpoints` (6 hits) and `showcase-partner` (20) are the broad ones.
+- **Whether records `core.sshCommand` is still the only SSH trap:** B276 FOUND 9 says the per-command `GIT_SSH_COMMAND` works; I did not run any ssh.
+- **A new HPSM-POC ruling after my read:** the store was read once; the seat re-reads the three cards and Tuesday re-reads at stamp.
+
+## SLOTS for Tuesday (14 tokens on 9 lines; the REFUSE `grep -c` prints 9 unstamped, must print 0 stamped; control: your `.pre-stamp` copy)
+| Token | What | Recommended default |
+|---|---|---|
+| `STAMP_TIME` | your stamp clock | I typed none |
+| `B_NUMBER_CONFIRM` | B293 free in both Briefs folders | drafter: 0 and 0 (control B291: 3 and 3) |
+| `MODEL_LINE` | model/routing line | your routing row for a records seat (B274 ran Opus 5.5; B276 Opus via brief_seat default) |
+| `CODE_MAIN_PIN` | code main at stamp | `b3a7c275447d598d540d1933af5785f165fbc4f0` |
+| `RECORDS_BASE_PIN` | the records commit the branch is cut from | if R-R8-1 (a): records main after `records/b276` lands; else `47a9896e500967d316c7330054155166a8d91e94` |
+| `NEXT_C` | next free C-number | C-119 (records main has 118 headings) |
+| `R_R8_1` … `R_R8_8` | the eight rulings below | (a) on all eight |
+
+## Rulings I need from Tuesday (R-R8-n, with my recommendation)
+- **R-R8-1: `records/b276` order.** (a) you scan and land `records/b276` first; the pin is the post-merge main; B293's history sits above B276's. (b) cut from today's records main, resolve the `history.md` overlap at the second PR. (c) cut from `records/b276`'s head (18 catch-up files; its paths join the HPWIN set). **Recommend (a):** its HP-window scan is owed anyway, one PR per concern, and the seat then needs no B276 copies.
+- **R-R8-2: description edits** on exactly HPSMPOC-291 (replace only the `Done when:` paragraph) and HPSMPOC-226 (insert one status paragraph at the top, the old text untouched). (a) allowed with save/read-back/mutant control; (b) comments only. **Recommend (a):** DELTA 268 and 262 owe exactly these two; the original clause 1 is preserved in the MC-2 comment, and the old -226 text is never copied (it names a person).
+- **R-R8-3: HPSMPOC-227.** (a) Done, the CI half moves to T03; (b) comment only, -227 stays open and T03 is not filed. **Recommend (a):** no Done-when paragraph, specs decided and fixed, R-W1-3 deferred the transition to the merge.
+- **R-R8-4: HPSMPOC-275.** (a) Done with the comment saying a database failing on every attempt still ends pending (sweep is the backstop); (b) comment only. **Recommend (a):** both gates and your completion check call the Done-when met; the residual is stated, and T05/T06 hold the rest.
+- **R-R8-5: HPSMPOC-267 timing.** (a) transition after the push reads back, the comment naming C-120 as on the branch; (b) comment now, you transition after the PR lands. **Recommend (a):** B274's precedent (transitions before the PR landed). Choose (b) only if you want Jira never ahead of records main.
+- **R-R8-6: C-entry layout.** (a) four entries (C-119 N-8, C-120 import words + the lift of C-113 R-3/R-5, C-121 coordinator rulings incl. 3307, C-122 the three merges as one); (b) six (merges as three). **Recommend (a):** three same-day merges with no deploy between; (b) is closer to C-114/C-117's one-per-PR but adds two near-identical entries.
+- **R-R8-7: tickets.** (a) seven rows as grouped by logical fix path (T01 B286-1/-2; T02 B283-1..-4; T03 B279-4..-7; T04 override:109; T05 B291-1/-2; T06 B291-3; T07 B291-4/-5/-6), T08 (B284's optional N-9 pin) not filed; (b) split or add as you name. **Recommend (a).** T04 goes beyond the DELTA list (it is B276 FOUND 5 + B279 candidate 1, base-controlled by two seats); strike it if you want only the listed candidates.
+- **R-R8-8: the HPSMPOC-269 correction comment (MC-9).** (a) yes; (b) no, the correction lives in C-122 and HPSMPOC-291 only. **Recommend (a):** comment 39664 states a claim two gates measured false.
+
+**Expected last line at the defaults:** `RECORDS DONE: B293 @ <sha40> · 4 C-entries, 7 tickets, 9 comments, 7 Done` (moves are in the brief).
+
+## Doubts
+1. `before-imports-on-hosted` on T05/T06 (an existing label on their parents -263/-275; imports are OFF on hosted). It asserts no new gate; strike it if you prefer only `test`-style labels.
+2. The amended -291 Done-when and the -226 status paragraph are my drafted wording (sources cited in the brief; each fact asserted by program). Replace at stamp if you prefer.
+3. Daily-note quoting is limited to six anchored sentences; two are your completion checks, one is the 3307 ruling.
+4. The brief is long (211 lines, ~75 KB) because B274's text for the standing rules is carried; the new content is Parts 1b, 2 rows and 3.
