@@ -22,6 +22,8 @@ F="$1"; I="${2:-30}"
 
 records_check() {
   local line="$1" dir top ref sha main ahead
+  # No records ref named: nothing to check (2026-10-20 09:30 false "no git repo" line on B302's STOP).
+  printf '%s\n' "$line" | grep -qE 'records/b[0-9]+' || return 0
   dir=$(dirname "$F")
   top=$(git -C "$dir" rev-parse --show-toplevel 2>&1) || { echo "RECORDS CHECK: no git repo holds $F ($top)"; return; }
   for ref in $(printf '%s\n' "$line" | grep -oE 'records/b[0-9]+[A-Za-z0-9_-]*' | sort -u); do
