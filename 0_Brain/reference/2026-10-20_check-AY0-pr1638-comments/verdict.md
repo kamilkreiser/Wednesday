@@ -8,3 +8,4 @@ VERDICT: GO at head 2b3b0953752545526db53db6468ece5fcf4e2f15 (tier 2 through-cod
 - Landing: `git merge-tree --write-tree 17ab917aa6f4 pr/1638` = d9b7bf7e503c (Wednesday's cache clone).
 ## NOT RUN
 No suite (comments only, no executable line changed); no transpile-identity proof beyond the line filter.
+Hash note (added 03:1x): the 3f19d1a9a91c3abe quoted in the C 28th brief is sed-1d-$d over the file BEFORE this note, which stripped the NOT RUN line; this file had no hash trailer. Whole-file sha256/16 then: 7d62d181127b9d07.
