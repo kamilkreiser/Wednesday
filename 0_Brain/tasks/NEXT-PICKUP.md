@@ -23,6 +23,13 @@ supersede: REPLACED WHOLESALE by the morning Wednesday seat (booted 06:0x 2026-1
 - **D 24th (%16, Opus 5):** posts ONE comment to Stuart on KS-695 ("has uat-ps reached aeae5ca?") and measures key_66e82ef0's last use on demo read-only (control key_61774985); then wraps. **On its report: come back to Kam with the key's last-use date (card ruled a = measure first, then come back); revoke nothing without his word.**
 - **Demo deploy of a4187f0f6622: NOT GO** until Stuart notes uat-ps on KS-695. **Stuart's a8615d46 (KS-695): fix KS-1557 before or with that round** (develop's #1619 lineage check refuses a routine S certify on a /version-created parent). OWED: a KS-1557 fix lane before the demo round. D 23rd's handover `5_Project_History/2026-10-20_seatD-23rd/HANDOVER.md` (project tree) runs the demo deploy cold.
 
+## 1b. UPDATE 08:5x — supersedes section 1 where they differ
+- **develop = 4abff9b1a4765982ea504784c9df69a8ddd52210** (#1647 KS-1677 merged, tree 346c5104f2a7 = delta gate BI1, verified by Wednesday's fetch). Merged by this seat today: #1645, #1646, #1648, #1647 (4). None deployed.
+- **R 57th WRAPPED** (scored 0.92, pane %14 closed). Handover `5_Project_History/2026-10-20_seatR-57th/HANDOVER.md` (project tree). **R lane EMPTY.** Next R seat: (1) the test-only follow-up for BI1's NB1 + NB2 + NB4 (on KS-1677 comment 81993547); (2) KS-1682 (High, m365 refresh token from a process-wide MSAL cache); (3) **remove R 57th's regenerable probe leftovers** (Kam's 2026-09-29 rule): Docker volumes `secuura_r57probe_postgres_data`, `secuura_r57probe_redis_data` and images `secuura_r57probe-{m365-integration,api-gateway,nginx-gateway}`, report MB freed; the unpushed branch `quarantine/2026-10-20-seatR57-ks1677-cookie-probe-NEVER-PUSH` in its scratch clone stays quarantined. Docker Desktop is left running.
+- **D 24th WRAPPED** (0.95): KS-695 question posted (comment 3aa9b60c); key_66e82ef0 last used 2026-07-30, 81 days idle.
+- **C 30th (%15):** #1649 (Kam's (a) + BH1 NOTE 1 cells, head c2a409ed8d0b) at **gate BJ1** (Opus, tier 1), brief/verdict in `0_Brain/reference/2026-10-20_gate-BJ1-pr1649-ks1116-a/`. Kam told (a) reaches 0 existing rows (the legacy row's tenant is not determinable). KS-1684/1685/1686 filed (BH1 NOTES 2/3/6).
+- **Open Kam cards:** `secuura-demo-smoke-key-revoke-after-measure-1020` (rec a revoke, default b keep) and `secuura-ks1677-entra-redirect-uri-registration-1020` (rec/default a wait until M365 goes live).
+
 ## 2. KAM'S CARDS
 - All three Secuura cards of this morning are RULED (a, a, a at 08:19-08:20) and delivered or in flight to C 30th / D 24th. None open.
 - Datasec `composer-l05-setup-card-too-1014` is Tuesday's.
