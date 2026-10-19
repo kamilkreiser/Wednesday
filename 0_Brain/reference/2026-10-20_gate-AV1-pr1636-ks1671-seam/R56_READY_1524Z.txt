@@ -1,0 +1,47 @@
+=========== [INBOUND] 2026-10-19T15:24 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1636 KS-1671 code-seam cells at cc07f
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1636 KS-1671 code-seam cells at cc07f145a (tier 2, test-only) - landing 4139960887f6 on 9207fe336797, suite at the landing 120/120
+## READY FOR GATE — #1636 (KS-1671 follow-up, gate AP1 note N3), tier 2, TEST-ONLY
+
+https://github.com/Secuura/Distributed_Secuura/pull/1636
+
+```
+head            cc07f145ad242a48f211d74ed61526e6d448b83c   (= ls-remote, after the push)
+base (develop)  9207fe336797b136f3f12fb6da169fba7fd900b7   (my own fetch, after the push finished)
+cut from        88b8ceb9f304 -- develop has since taken #1634 and #1633
+PREDICTED landing tree   4139960887f6aac5ceaf90dde79d0cfdd7cc3e51
+                         merge-tree --write-tree 9207fe336797 cc07f145a; also BUILT locally as a real
+                         merge on a temp branch (tree equal), the suite run there, then the branch deleted
+```
+
+**Cause.** #1627 sent every query value `/api/callback` reads through `stringParam()`. Its cells drove non-string `error`, `error_description` and `state`. **No cell drove `code`**, so removing `stringParam` from that one read left every cell green. That is AP1 N3.
+
+**Cells — 6, in one new file, 135 lines, nothing else changed.** All 6 are green on develop by design.
+- **K1/K2** — an object or array `code` with an unknown state gives `missing_code_or_state`.
+- **K3/K4** — the same values with a **real pending** state, seeded through AP1's seam, give the same answer **and 0 calls** to a recording `exchangeAuthCode`.
+- **K5 (control)** — a plain `code` with a real state reaches the exchange **exactly once**, with that code.
+- Each cell that reaches the lookup has its own pending row.
+
+**Mutants — both `tsc` rc 0.**
+
+| mutant | pass/fail | reds |
+| -- | -- | -- |
+| **MC1, the bug put back:** `const code = req.query.code;` | 2/4 | **K1 K2 K3 K4**; K5 stays green |
+| MC2: `code` never read | 5/1 | **K5** only |
+
+What MC1 did, measured on the running route:
+- the **array** code with a real state **reached the exchange** — the recording stub's own error text is in the log;
+- the **object** code threw `Cannot convert object to primitive value` inside the handler.
+
+**Suites:**
+- **at the LANDING** (develop `9207fe336797` + this file, merged locally): **13 files, 120/120, RC 0**. This matters because #1633 changed this service's `index.ts` after the branch was cut.
+- at the head: 12 files, 87/87.
+- test file type-checked separately (KS-1090): RC 0, with the `--listFilesOnly` control.
+
+**Preflight: 13/16 ran, 3 SKIPPED (legs 3/4/8, no stack), 0 failed — not a pass.** Legs 6 and 7 ran and passed. Note that `origin/develop` moved under this preflight mid-run, through my opportunistic-fetch mistake, already reported. The audits passed regardless.
+
+**NOT run:** the four platform suites. There is no stack here, and no product code changed.
+
+**Ticket:** KS-1671 comment, read back by id, byte-identical. `Refs`, not a close.
+
+**Next:** PR B. I am on its branch now: merge develop in → cell D → X2 → full suite → push → READY.
+
