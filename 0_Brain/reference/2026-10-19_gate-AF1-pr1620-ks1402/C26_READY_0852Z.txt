@@ -1,0 +1,80 @@
+[INBOUND] 2026-10-19T08:52 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1620 KS-1402 invited stub at dbb00e65
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1620 KS-1402 invited stub at dbb00e65dfb0 - tier 1, predicted tree 30f298e098bd on develop 66faac9aebc3, 0 overlap of 9 landed files, 1481/1481 + 12/12 both modes
+## BLUF
+
+**READY FOR GATE — PR #1620, head `dbb00e65dfb04abf6886237a76aaf3b2860ac3cb`, tier 1.**
+KS-1402's invited-stub build. 6 files, +706/-36. **No auth change, no new scope, no migration.**
+Predicted landing tree **`30f298e098bd19d7e179f99ead09a3e337a8e65c`** on live develop
+`66faac9aebc3aaa6e2ee453b004295345ff88cb8`, no conflicts. Nothing deployed.
+
+## PUSH
+
+`PUSH_RC=0`, new branch, pushed tip **equal** to my local commit (both
+`dbb00e65dfb04abf6886237a76aaf3b2860ac3cb`). In-hook preflight: **1187 `ok` lines, and zero tallies
+carrying a non-zero failed count** — I read the tallies and `PUSH_RC`, not a FAIL-grep, because the
+suites legitimately print `ok … REFUSED` lines that a FAIL-grep over-matches.
+
+## LANDING
+
+- Merge-base with live develop is still `80868551e679` (my base, the #1614 merge).
+- **Zero overlap** between my 6 files and the **9** that landed since that base — with a positive
+  control: the landed set intersected with itself reads 9, so the comparator discriminates.
+- `merge-tree --write-tree`: **no conflict lines**, tree `30f298e098bd19d7e179f99ead09a3e337a8e65c`.
+- ⚠ **develop is moving fast today** — `ad784e702ca2` -> `8323f2f70cd7` -> `66faac9aebc3` across the
+  span of your last two mails. The prediction is pinned to `66faac9aebc3`; if it moves again before
+  you gate, re-predict rather than trusting that figure. I have said the same in the PR body.
+
+## WHAT THE GATE SHOULD PRESS ON
+
+The four things your ruling named, and where each is pinned:
+
+1. **The tenant re-read.** `mintInvitedStubHolder` re-reads auth's returned id through the
+   handler's own bound tenant predicate and refuses a foreign-tenant answer with the no-disclosure
+   404 plus an operator-facing `logger.error`. Cell: `TENANT PROOF`. Mutant M1 (delete the re-read)
+   kills it.
+2. **The PII row.** One field, the email the caller already sent. I did **not** write a cell
+   asserting the row's columns, deliberately — the upstream in that file is my own stub, so such a
+   cell would read back what my stub wrote. The row's contents are in the PR from a **code reading**
+   of `auth/repositories/userRepo.ts:753-793`, labelled as a reading, not as a test.
+3. **The race retry.** Cell `RACE`: the stub inserts the winner's row and *then* fails, which is the
+   only state the fallback read exists for. Mutant M3' (`> 0` -> `> 1`) kills it.
+   **My first version of this cell was vacuous** — it inserted the row *before* the transfer, so the
+   first local read resolved it and the mint path was never entered; it would have passed on develop.
+   Caught and rewritten before it was ever run as evidence.
+4. **The 502/503 arms.** Cells `TIMEOUT` (5007 ms, so the route's own 5 s abort is what fired, not a
+   coincidence) and `BAD GATEWAY`. Mutant M4 (swap the statuses) kills `TIMEOUT`. Both answer before
+   the custody transaction, so no event row and no owner flip can half-happen.
+
+Plus your added condition: **`SCOPE ADMISSION`** pins S's minted set reaching `/stub`, and a
+**CONTROL** pins that withdrawing `certifications:write` is refused by the gate rather than silently
+transferred. The test's auth stub applies auth's REAL admission rule, transcribed with its source
+lines, so the dependency is exercised and not merely asserted as string membership.
+
+## EVIDENCE
+
+- originate unit: **122/122 suites, 1481/1481, rc 0** (develop baseline: the same 1481).
+- New integration suite **12/12 in BOTH tenancy modes**; sibling **6/6 in BOTH modes**.
+- The 3 re-pinned suites: **45/45, equal to their develop baseline of 45/45** — the count is the
+  evidence that nothing was deleted, skipped or weakened. Zero skips in any file I touched (the one
+  `it.skip` string match is a pre-existing comment in ks739's header saying nothing was made one).
+- Red-first **9 red / 3 green**, both modes, with `tsc` rc 0 on the reverted base. `documents.ts`
+  reverted and restored **byte-identically** (sha256 equal both ways).
+- **4 mutants, each compiling, each killing exactly its named cell, 11 others passing.** A first M3
+  did **not** compile (TS6133) and was **not** counted.
+- `tsc --noEmit` rc 0; `eslint src` rc 0 with zero findings on either file I touched.
+- **Pre-existing, named in the PR:** 5 originate integration suites fail (ks1119, ks695, ks1508,
+  ks1538, ks1557) — **identical failing-cell sets on develop and on this branch**, 19 each, zero
+  only on the branch.
+
+## DONE BESIDES THE PR
+
+- **KS-1402 merge note** posted earlier (`0dabafb1`), and now the **K-vs-Kintsugi divergence** as a
+  measured fact (`164dd87a`), with a case-by-case table: only the unknown-recipient branch diverges
+  (Kintsugi 404, K 201); known holder, cross-tenant, unknown id and malformed email are all
+  unchanged. Both read back by id and **byte-identical**, each with an altered-copy control.
+- **KS-1402 is still In Progress**, and PR #1620 is linked `contributes`, not `closes` — the ticket
+  did not move.
+- **KS-1653 / KS-1654 / KS-1655** filed Low, Backlog, each related to KS-1402.
+
+Nothing deployed; neither deployed box was driven at any point. Nothing else of mine is open.
+
