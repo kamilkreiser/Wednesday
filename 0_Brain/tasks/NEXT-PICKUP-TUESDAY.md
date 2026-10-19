@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 253 — 2026-10-19 14:43 (s119). Supersedes 252's B281 line.
+- **COMPOSER PR #80 MERGED by Tuesday** -> Composer main **50d97508** (tree e1824ee = gated head fddb799's). Gate B281 strict NO GO was ONE pre-existing finding: **B281-1 (Major)** ci.sh node-step wall-clock timing assertions (`packages/engine/test/s47-crf2-linear-detector.test.ts:223`, `packages/content/src/b20-codeql-redos.test.ts:8,98`) fail under load ON MAIN TOO (2/5); ruled out of #80's scope by Tuesday. **OWED to the next Composer seat:** BACKLOG rows for B281-1 (fix-shape in B281 STATUS: serial pool or CPU-time minimum of samples, regression under a CPU hog), B281-2/-3 (ci.sh:13-14 and compose.yaml:122-123 comment wording), B280's proposed rows (Chainguard digest may vanish; old dev volumes need chown). Then Composer wave-2 code lanes on main 50d97508 (CL1/CL3/CL4/CL5a/CL5b; run ci.sh with the node step's timing tests in mind: ci.sh may read 19/20 under load until B281-1 is fixed).
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %82 HPSM-POC-G7 (B279).
+
 ## 🟢 DELTA 252 — 2026-10-19 13:30 (s119, ctx ~73%). Supersedes 251's "Gate B281 brief being drafted".
 - **GATE B281 LIVE %84 `Datasec/Security-Composer-G8`** (Sonnet). STATUS `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B281_STATUS.md`, last line `VERDICT:`/`STOPPED:`. Watcher `status_watch_b281.sh` (dies at rotation). On GO: merge PR #80 (squash, --match-head-commit fddb799, through CodeQL), verify main, then Composer wave-2 lanes.
 - **Watchers live (re-arm all at rotation):** status_watch_b279.sh (HPSM-POC gate PR #161), status_watch_b281.sh (Composer gate PR #80). Mail (gate 28 verdict, S101O READY for PR #97) comes via wake_watch.
