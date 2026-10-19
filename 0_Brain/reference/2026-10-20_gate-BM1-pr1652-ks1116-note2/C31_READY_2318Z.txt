@@ -1,0 +1,68 @@
+=========== [INBOUND] 2026-10-19T23:18 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1652 (KS-1116 BJ1 NOTE 2) at a4d5aa81
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1652 (KS-1116 BJ1 NOTE 2) at a4d5aa81f3bae82cd9d23cbdc11692052eb5a8dd, tier 2 test-only - 291/291 vc-issuer, JM8+JM11 both KILLED; develop moved to cd63883c62a9
+## READY FOR GATE — item (ii), gate BJ1 NOTE 2, tier 2, test-only
+
+The five artefacts, each named by identifier:
+
+1. **PR [#1652](https://github.com/Secuura/Distributed_Secuura/pull/1652)**.
+2. **Head SHA, read from origin in this same action:** `a4d5aa81f3bae82cd9d23cbdc11692052eb5a8dd`.
+   `refs/heads/test/ks-1116-bj1-note2-surviving-mutant-cells` and `refs/pull/1652/head` both read that
+   value, so the PR ref is not lagging the branch.
+3. **Ticket comment:** KS-1116 comment `e1be72ea` (23:17:56Z), naming the PR and its head. Read back by
+   id, **byte-identical** to what I sent, 9 factual tokens asserted present, and the comparator proved
+   able to fail. KS-1116 went 2 → 3 comments.
+4. **Test Evidence block:** in the PR body, written by me — I ran everything in it.
+5. **What was NOT done / NOT covered:** also in the PR body, and repeated below.
+
+## What it is
+Four shapes into the existing `NOT_THE_ROWS_TENANT_ADMIN` refusal table, so each is pinned on all three
+paths that table already feeds (A2 memory, A5 DB, A9 credentials) and inside A7's DB-unavailable loop:
+a `TENANT_ADMIN` and a `SUPER_ADMIN` of the row's own tenant → 404; an `ORG_ADMIN` and a
+`SYSTEM_ADMIN` whose tenant claim is a strict PREFIX of the row's tenant → 404. Plus **cell A0**, a
+fixture-integrity guard, so renaming `T1` cannot leave the prefix rows green for the wrong reason.
+**One file, +23/-0, test-only — no line of `ownership.ts` or any other source file.**
+
+## Ran
+- Whole vc-issuer suite `npx vitest run`: **18 files, 291 tests, 291 passed, rc 0.** The KS-1116 file
+  alone **131 passed** — 118 + 12 + A0, the count I predicted before running it.
+- `tsc --noEmit` rc 0 · `eslint src` rc 0.
+- **Red-proof**, each mutant applied to `ownership.ts` alone: **JM8** `tsc` rc 0 → **7 red, KILLED**;
+  **JM11** `tsc` rc 0 → **7 red, KILLED**. The 7 is the 6 declared (2 rows × A2/A5/A9) plus **A7, which
+  loops the same table** — named so the extra is not a surprise rather than left for you to find.
+  `ownership.ts` asserted byte-identical after **every** arm (sha256/16 `895064d39beb4ff7` before and
+  after). Pristine arm: 131 passed / 0 failed. A non-compiling mutant would have been reported
+  inadmissible, not counted; both compiled. 0 passed AND 0 failed is treated as a LOADFAIL, and neither
+  arm was one.
+- **Push preflight: 13 of 16 legs ran, 3 SKIPPED (legs 3, 4, 8 — local stack not up), nothing failed.
+  It prints that this is NOT a pass, and I am not quoting it as one.**
+
+## NOT run / NOT covered
+- The four platform suites (Schemathesis · Akto · Playwright · Performance/k6): **not run.** No endpoint,
+  schema or runtime behaviour changes, so none of them has anything new to exercise.
+- No service other than vc-issuer built or tested.
+- The three skipped legs need the local stack, which I did not start (Docker is Seat R 58th's).
+- No migration, no environment variable, no configuration change.
+
+## ⚠ TWO THINGS FOR THE GATE'S RECIPE
+1. **develop MOVED while this was pushing: it is now `cd63883c62a9bb0e66969df8cd3f02db2b9b2217`**, one commit ahead of the base I
+   built on (`89956fe92956`) — `cd63883c6` "Refs KS-1677: pin the PKCE verifier's secrecy…" (#1650,
+   the R lane). **Zero overlap with my one file** (it touches two m365 test files and
+   `packages/shared/src/crypto/encryptedField.ts`), so the landing tree should differ from develop in
+   exactly my file — but it must be re-derived, not carried from my figure.
+2. **It touches `packages/shared`**, and vc-issuer consumes that package as built `dist`. So the
+   landing needs `npm run build --workspace=packages/shared` before the suite — the same condition gate
+   BJ1 recorded as its NOTE 1 for #1647. My run was at `89956fe92956` with shared built there.
+
+## Holds
+No merge (no GO). Nothing deployed, no `az`, no box write. No `--no-verify`, no force, no `--admin`.
+Pre-push route cited: `.githooks/pre-push:61` (a brand-new branch is exempt from the non-fast-forward
+refusal) and `:352` (refusal only when the pushed tip differs from HEAD; I pushed the branch I had
+checked out). The first push failed rc 141 at the SSH idle cutoff and `ls-remote` proved nothing landed;
+fixed with a repo-scoped `ServerAliveInterval`, and this push read rc 0 with `ls-remote` confirming
+the ref.
+
+## NEXT
+Committing item (i) on its own branch from develop now (it is stashed, so the two PRs are independent),
+pushing with the keepalive, then its PR and READY. Item (iii), the stale #1619 cell you ruled as a third
+test-only PR, follows after that.
+

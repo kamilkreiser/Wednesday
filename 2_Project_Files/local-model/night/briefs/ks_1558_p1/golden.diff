@@ -1,0 +1,62 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh b/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
+index 92d7f9bd4..b54512f88 100755
+--- a/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
+@@ -117,2 +117,30 @@
+ 
++# --- KS-1558 m4: every LAUNCHER_EXCEPTIONS entry cites a ticket (KS-nnn or PS-nnn) ----------
++# The rule was "a reason AND a ticket per entry"; the reason check only asked for non-empty text.
++# Entries are read from the array in the real file; the gate itself is run on COPIES whose two
++# systemTest/akto entries have their ticket tokens removed or replaced, so no tracked file is touched.
++_entries="$(sed -n '/^LAUNCHER_EXCEPTIONS=(/,/^)/p' "$SAFETY" | grep '|')"
++expect "CONTROL KS-1558 the exception array was read (5 entries)" "5" "$(printf '%s\n' "$_entries" | grep -c '|')"
++expect "RED KS-1558 R1: every LAUNCHER_EXCEPTIONS entry names a KS-nnn or PS-nnn ticket" "0" \
++  "$(printf '%s\n' "$_entries" | grep -vcE 'KS-[0-9]|PS-[0-9]')"
++mkdir -p "$FIX/gate/Dev/scripts"
++cp "$SAFETY" "$FIX/gate/Dev/scripts/check-stack-safety.sh"
++bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_pristine.out" 2>&1
++sed -e 's/KS-666: Akto/Akto/' -e 's/KS-687: Akto/Akto/' "$SAFETY" > "$FIX/gate/Dev/scripts/check-stack-safety.sh"
++bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_stripped.out" 2>&1
++expect "CONTROL KS-1558 the gate copy with every ticket intact says nothing about a missing ticket" "no" \
++  "$(saw 'cite no ticket' "$(cat "$FIX/gate_pristine.out")")"
++expect "RED KS-1558 R2: the gate names a ticketless exception when Akto's two tickets are removed" "yes yes" \
++  "$(saw 'cite no ticket' "$(cat "$FIX/gate_stripped.out")") $(saw 'systemTest/akto/scripts/start.sh' "$(grep 'cite no ticket' "$FIX/gate_stripped.out")")"
++sed -e 's/KS-666: Akto/PS-12: Akto/' -e 's/KS-687: Akto/PS-9: Akto/' "$SAFETY" > "$FIX/gate/Dev/scripts/check-stack-safety.sh"
++bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_ps.out" 2>&1
++expect "CONTROL KS-1558 a PS-nnn ticket counts as a ticket as well as a KS-nnn one" "no" \
++  "$(saw 'cite no ticket' "$(cat "$FIX/gate_ps.out")")"
++sed -e 's/KS-666: Akto/KS-: Akto/' -e 's/KS-687: Akto/PS-9: Akto/' "$SAFETY" > "$FIX/gate/Dev/scripts/check-stack-safety.sh"
++bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_bare.out" 2>&1
++expect "RED KS-1558 R3: a bare KS- with no number is not a ticket" "yes" \
++  "$(saw 'systemTest/akto/scripts/start.sh' "$(grep 'cite no ticket' "$FIX/gate_bare.out")")"
++expect "CONTROL KS-1558 the gate still names only the stripped entries (KS-1550 and KS-200 entries keep theirs)" "no no" \
++  "$(saw 'start-environment.sh' "$(grep 'cite no ticket' "$FIX/gate_stripped.out")") $(saw 'observability.sh' "$(grep 'cite no ticket' "$FIX/gate_stripped.out")")"
++
+ echo ""
+diff --git a/Blockchain/Dev/scripts/check-stack-safety.sh b/Blockchain/Dev/scripts/check-stack-safety.sh
+index 50bf70388..0ccf0db22 100755
+--- a/Blockchain/Dev/scripts/check-stack-safety.sh
++++ b/Blockchain/Dev/scripts/check-stack-safety.sh
+@@ -166,4 +166,4 @@
+   "observability/scripts/observability.sh|KS-200: a standalone stack with its own compose file, started only from observability/. It is not the platform stack."
+-  "systemTest/akto/scripts/start.sh|Akto's own side-stack. systemTest/slot-target.sh namespaces its project, ports and volumes per slot instead."
+-  "systemTest/akto/scripts/assert-compose-project.sh|Akto's own side-stack: a read-only assertion over its compose project name."
++  "systemTest/akto/scripts/start.sh|KS-666: Akto's own side-stack. systemTest/slot-target.sh namespaces its project, ports and volumes per slot instead."
++  "systemTest/akto/scripts/assert-compose-project.sh|KS-687: Akto's own side-stack: a read-only assertion over its compose project name."
+ )
+@@ -190,2 +190,15 @@
+ _cands="$(_launcher_candidates)"
++# KS-1558 m4: every exception names a TICKET, not only a reason. The ruling was "a reason AND a ticket per entry";
++# the reason check below only asks for non-empty text, so two entries went in without one. A KS-nnn or PS-nnn token
++# anywhere in the reason satisfies this. It sits outside the census branch on purpose: the census can match nothing.
++_ticketless=""
++for _e in "${LAUNCHER_EXCEPTIONS[@]}"; do
++  case "${_e#*|}" in *KS-[0-9]*|*PS-[0-9]*) ;; *) _ticketless="$_ticketless ${_e%%|*}" ;; esac
++done
++if [[ -n "$_ticketless" ]]; then
++  fail "LAUNCHER_EXCEPTIONS entr(ies) cite no ticket (KS-1558):$_ticketless" \
++    "Write path|KS-nnn: reason. An exception with no ticket has no owner to retire it."
++else
++  ok
++fi
+ if [[ -z "$_cands" ]]; then
