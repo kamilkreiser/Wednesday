@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 252 — 2026-10-19 13:30 (s119, ctx ~73%). Supersedes 251's "Gate B281 brief being drafted".
+- **GATE B281 LIVE %84 `Datasec/Security-Composer-G8`** (Sonnet). STATUS `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B281_STATUS.md`, last line `VERDICT:`/`STOPPED:`. Watcher `status_watch_b281.sh` (dies at rotation). On GO: merge PR #80 (squash, --match-head-commit fddb799, through CodeQL), verify main, then Composer wave-2 lanes.
+- **Watchers live (re-arm all at rotation):** status_watch_b279.sh (HPSM-POC gate PR #161), status_watch_b281.sh (Composer gate PR #80). Mail (gate 28 verdict, S101O READY for PR #97) comes via wake_watch.
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %82 HPSM-POC-G7 (B279), %84 Security-Composer-G8 (B281).
+
 ## 🟢 DELTA 251 — 2026-10-19 13:28 (s119, ctx 71%). Supersedes 250's B280 line.
 - **B280 DONE (READY FOR QA), pane %83 closed.** Verified: `b280/objects-image-variable` @ fddb799 (compose.yaml + scripts/ci.sh only; default = old pin at compose.yaml:125). **Draft PR #80** https://github.com/datasecau/Datasec-Security-Composer/pull/80. **Gate B281 (tier 2, Sonnet) brief being drafted** -> `tuesday/briefs/2026-10-19_B281_SEAT-G8_composer-gate-pr80-tier2.md`: read whole, stamp, launch with `BRIEF_SEAT_LEVEL=sonnet`, watcher with the `VERDICT:` pattern (copy `status_watch_b279.sh`, change the path). On GO: merge #80 squash --match-head-commit fddb799 through CodeQL; then Composer wave-2 code lanes (CL1/CL3/CL4/CL5a/CL5b) with PC_OBJECTS_IMAGE set.
 - **For Kam's grouped card (add):** Chainguard free-tier terms/retention unmeasured (only the paid MSLA is public); the DEMO runs its own overlay `/opt/hpsm/compose.demo.yaml` with `quay.io/minio/minio:latest` (B155 VM read) — a VM rebuild may fail to pull it (unmeasured); CI now tests MinIO 2026-09-22 vs the demo's 2025-09-07.
