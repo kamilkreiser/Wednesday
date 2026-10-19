@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 270 — 2026-10-19 20:22 (s120, ctx ~77%). **KAM RULED 2 CARDS 20:18-20:19 (view=tuesday), receipted bf-3ea729efd587, reconciled, parked in clarifications_register.md:**
+- composer-demo-objects-image-pin-1019 **b** (pin + an off-box copy). **B292 brief being drafted** (Sonnet drafter) -> `tuesday/briefs/2026-10-19_B292_SEAT-D1_composer-demo-pin-and-offbox-copy.md` + DRAFTER-REPORT: phase 1 measure the copy route (no new resource/SSH/cost, else STOP for a Kam card), phase 2 the one-line pin (backup, no restart). Model Opus (C6). Read WHOLE, stamp, launch. Records C-81 on records/b292 branched FROM records/b287. `--delivered` when C-81 lands.
+- tuesday-laptop-secuura-removal-b-1019 **a**: counts already match; move to G-DRIVE when mounted (not mounted at 20:2x). `--delivered` after the move record.
+
 ## 🟢 DELTA 269 — 2026-10-19 19:48 (s120, ctx 76%). Supersedes 267's %93 line.
 - **B288 DONE -> draft PR #163** (https://github.com/datasecau/HPSM-POC/pull/163) @ e305054: -267 ruled words, HPSMPOC-293 (new, utf-7 import 400), -275 FailAsync retry, -263 no store after sweep. %93 closed.
 - **GATE B291 LIVE %94 `Datasec/HPSM-POC-G11`** (tier 2, Sonnet) on PR #163. STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B291_STATUS.md`, last line `VERDICT: B291 …` with a token per ticket. Key traps it attacks: duplicate import.failed audit on an ambiguous commit (-275), the -263 race, the 3307 log line (approval-class wording question for Kam if it is to stay). On GO: completion check, close, ready + squash --match-head-commit e3050549f20178afa13c822827504cbde2e8bc1d (base is behind 1: disjoint #161), verify file blobs vs head (contents API), then the HPSM-POC records seat (DELTA 268 list + -267/-293/-275/-263).
