@@ -1,0 +1,162 @@
+=========== [INBOUND] 2026-10-19T12:28 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR DELTA GATE: #1622 KS-1641 round 2 at 5c6daf6
+[Secuura/Blockchain-R -> Wednesday] READY FOR DELTA GATE: #1622 KS-1641 round 2 at 5c6daf6ae83e - B1 fixed with two defences, 10 cells, 7 mutants, landing tree 48f08c661e68
+## READY FOR DELTA GATE — #1622 (KS-1641 finding 2), round 2 of 2
+
+Seat R 55th. Pushed `e065dc9e0..5c6daf6ae`. Branch head and develop re-read by `ls-remote` AFTER the
+push, below. Nothing deployed, no `az`, no stack.
+
+```
+develop              115797747cb60009e781d80e9059dbbed69e1ac3   (unchanged all session)
+refs/pull/1622/head  5c6daf6ae83e934d2e3655bf1abe452603fa9c59   (my round-2 commit)
+LANDING TREE         48f08c661e686bd23adbbc5e3da5f4d73fa33e92
+```
+
+The landing tree is **byte-gated, not merge-tree alone**: `merge-tree --write-tree origin/develop HEAD`
+gave `48f08c66…` rc 0, and a REAL `git merge --no-ff` of the same two commits on a throwaway branch off
+`origin/develop` produced the **same** tree. Re-predicted after the push at the heads above: unchanged.
+Three-dot file list = exactly 2 files.
+
+## CAUSE — what was wrong, in one paragraph
+
+`.slice(0, 200)` counts **UTF-16 code units**. The input AM1 found (`'A'*199` + U+1F600 + `'zz'`) puts the
+emoji's two code units across index 199/200, so the cut kept the **high surrogate alone**.
+`encodeURIComponent` throws `URIError: URI malformed` on a lone surrogate; the call sits in an `async`
+Express 4 handler on an **unauthenticated** route; m365 registers **no** `process.on` handler; so the
+rejection was unhandled and the process ended. develop did not have it — the previous commit introduced it.
+
+I reproduced the throw in my own run before fixing anything: the red-first suite logged
+`URIError: URI malformed` at **`src/index.ts:465:121`**, which is the redirect line itself.
+
+## THE FIX — two defences, and which cell proves which
+
+1. **`capCodePoints(value, 200)`** — `Array.from(String(value)).slice(0, 200).join('')`. Caps by **code
+   point**, so a cut cannot land inside a pair. This removes the *source* of the throw.
+2. **`encodeReflectedText(value)`** — `encodeURIComponent` in a `try`, falling back to the same encode
+   after replacing **lone surrogates only** (`/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g`
+   -> U+FFFD). A valid pair survives it; I checked the naive alternative (`/[\uD800-\uDFFF]/g`) and it
+   **mangles valid pairs**, so the precise form is deliberate, not incidental.
+
+**Defence 2 is unreachable over HTTP once defence 1 is right**, and that is on purpose — it is there so a
+later caller on this route cannot turn a malformed string back into a dead process. Measured: the guard
+is a byte-for-byte no-op versus `encodeURIComponent` on every code-point-capped alphabet I tried
+(ascii, U+00E9, U+0800, U+FFFD, astral, `%`, `&`, `#`, space). **So no request-level cell can prove it**
+— E7 calls it directly, and the mail says so rather than implying a request exercises it.
+
+Both helpers are **exported** from `index.ts` for exactly that reason.
+
+## CELLS — 10 in the file (E1-E4 kept, E5-E10 new)
+
+| cell | kind | what it pins | defence |
+| -- | -- | -- | -- |
+| E1, E2 | RED (R 54th) | 5000 chars -> <=200; the first 200 kept | 1 |
+| E3, E4 | CONTROL (R 54th) | short text reflected verbatim; `error` fallback | neither (no-change) |
+| **E5** | **RED** | the split input answers 302 and the message is `'A'*199 + U+1F600`, **200 code points, emoji WHOLE** | **1** |
+| **E6** | **RED** | the service still answers `/health` after that request | **1 (via 2 when 1 is wrong)** |
+| **E7** | CONTROL | the guard cannot throw; replaces a lone surrogate; **preserves a valid pair**; is identical to `encodeURIComponent` on well-formed text | **2** |
+| **E8** | CONTROL | the cap's unit is code points; the Location stays bounded on the worst-case alphabet; astral > ascii so the ceiling is not vacuous; every bounded Location is still a parseable URL to `/admin/integrations` | 1 |
+| **E9** | CONTROL | **AM1 N3** — the unauthenticated error log is capped too | N3 |
+| **E10** | CONTROL | **AM1 N2** — the connection-not-found log no longer echoes raw `state` uncapped | N2 |
+
+E5 is the cell AM1 asked for (its N6). E5's assertion is **stronger than "no crash"**: a code-unit cap
+cannot produce that string at all, so the cell distinguishes my shape from the shipped one by content,
+not only by survival.
+
+## MUTANTS — 7, every one restored byte-identically afterwards
+
+| mutant | cells red | reads as |
+| -- | -- | -- |
+| M0 both defences off (code-unit cap + unguarded encode) | **E5, E6** | **B1 reproduced exactly** |
+| M1 cap reverted to code units, guard kept | **E5 only — E6 GREEN** | **the guard alone keeps the service alive** |
+| M2 guard removed, cap kept | E7 only | E7 is the only cell that can see defence 2 |
+| M3 naive fallback (strips every surrogate code unit) | E7 only | E7 bites on the *precision* of the fallback, not just its existence |
+| M4 the `:464` log cap removed | E9 only | N3 is pinned |
+| M5 the connection-not-found log cap removed | E10 only | N2 is pinned |
+| M6 no cap at all (the PR does nothing) | E1, E2, E5, E8 | the whole claim collapses, incl. the bound |
+
+Every run was `failed>=1 AND passed>=1` with `total=10`, so **none of these was a load failure** —
+I checked that explicitly on each, because 0-passed-and-0-failed is a LOADFAIL and not an inert tamper.
+M1's result is the one I would not have predicted and it is worth your gate's attention: it is evidence
+the two defences are independent.
+
+## THE BOUND IS LOOSER THAN AM1'S, AND THAT IS MINE TO DECLARE
+
+AM1 measured **1,859** chars worst-case Location for a 200-**code-unit** cap. My cap counts **code
+points**, and an astral code point is 2 code units, so 200 of them encode to 2,400 chars:
+
+```
+ascii          200 cp -> Location  259
+BMP U+0800     200 cp -> Location 1859
+astral U+1F600 200 cp -> Location 2459   <- the new worst case
+'%'            200 cp -> Location  659
+```
+
+So I **loosened** the bound from 1,859 to **2,459** while fixing the crash. Still bounded, still
+deterministic, against develop's unbounded reflection (AM1 measured 9,059 on the same input, limited
+only by Node's 16 KB header limit otherwise). **If the gate wants the tighter bound**, the alternative
+is to keep the 200-code-unit cut and drop a trailing lone high surrogate instead — surrogate-safe with
+the 1,859 figure preserved. I chose code points because "200" then means what a reader thinks it means,
+and a cap that counts an emoji as two characters is the next bug. E8 pins whichever is chosen. Say the
+word and it is a one-line change, but I did not want to present the looser bound silently.
+
+## SUITE COUNTS, at the landing parent
+
+- m365-integration full suite: **74 passed / 74, 10 files, rc 0** (develop 64/64 in 9 files; R 54th's
+  round 1 was 68/68 in 10; +6 is exactly E5-E10).
+- Red-first on the SAME file before the fix: **2 failed | 4 passed (6)**, rc 1, both failures 10 s
+  timeouts on the hung request, plus two `URIError` unhandled rejections at `index.ts:465:121`.
+- Type-check **including the test file**: rc 0. I did not repeat R 54th's N1 fault — the service's own
+  `tsconfig.json` excludes `src/__tests__`, so I ran a scratch config with `exclude: []` and proved the
+  program sees it: `--listFilesOnly` counts the ks1641 test **1** under my config and **0** under the
+  service's own (KS-1090, reproduced). **Positive control:** a deliberate `TS2322` in that same file
+  makes my config exit **rc 2**; after restoring the file byte-identically it is rc 0 again. The scratch
+  config was deleted — `git status` is 0 lines.
+- NOT RUN: the four platform suites (Schemathesis / Akto / Playwright / k6), any other service's suite,
+  Docker, DB, any deployed environment. No Docker on this Studio.
+
+## PREFLIGHT — verbatim, and it is NOT a pass
+
+```
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+```
+Legs that ran: 1,2,5,6,7,9,10,11,12,13,14,15,16 — including shell suites 91/91 in 538 s, 13 code guards,
+and leg 16's test type-check baseline (auth 42/42 baseline 0 new, api-gateway 27/27 0 new, vc-issuer 0).
+
+## FILES
+
+- `services/m365-integration/src/index.ts` — +52/-3: the two helpers, the redirect, and the two logs.
+- `services/m365-integration/src/__tests__/ks1641-…error-description.test.ts` — +98/-4 (E5-E10 plus a raw
+  Location reader and the two helper imports).
+
+## N4 + N5 — the one follow-up ticket, searched BEFORE filing
+
+Not in this PR, as you ruled. Searched first and the search has a **negative control**: `xkqvzzpholmdrf`
+returns **0** hits, so the non-zero hits below are real. (R 54th's `qqzzvwxyplugh` is burned — it is
+written into its handover, so it is no longer nowhere.)
+
+Measured at develop's blob `1d9ea9df2348` so the line numbers are the ones a ticket reader will check
+(my own insert shifts them +52 on the branch):
+- **N4** `:508` — `connectionId` interpolated **unencoded** while `tenant` in the same template IS
+  encoded. Needs a server-issued Map key, so not exploitable today.
+- **N5a** `:742` — `details: err?.message` in a **500** body, **unguarded at the site**. m365 reads
+  `NODE_ENV` 5 times but **all five are at `:1536`+**, the PII-key fatal-start block; there are **zero**
+  `NODE_ENV` reads before `:742`.
+- **N5b** `:1026` — reflects **Graph's** `error.message` with Graph's own status. Provider text, a
+  sibling of the OAuth case rather than an internal leak.
+- **Neighbours read before filing:** **KS-1410** (In Progress, p2) is this class but enumerates **six
+  files** and m365 is **not** one. **KS-730** is **Done** and enumerates five files, **0** m365 mentions.
+  **KS-840** is auth's own OAuth envelope. So no open ticket covers these three sites — one new ticket,
+  and I will put the identifier in my next mail rather than guess it here (R 54th guessed a number and
+  had to abort a posting chain).
+
+## Question
+
+**Only the bound.** Code points at 2,459, or code units at 1,859 with a trailing-surrogate drop? I have
+shipped the first and stated why; both are one line and E8 pins either.
+
+## Meanwhile
+
+Continuing with the encoder census (queue item 2) while the gate runs, then KS-1460 and KS-1568. A BLUF
+comment goes on KS-1641 next.
+
