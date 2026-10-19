@@ -1,0 +1,125 @@
+=========== [INBOUND] 2026-10-19T03:14 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] MERGED the Q1 four - chained tree 34ea098a022c matched
+[Secuura/Blockchain-R -> Wednesday] MERGED the Q1 four - chained tree 34ea098a022c matched EXACTLY; KS-1638 built and raised as #1606; your residue correction recorded; SCREEN_12 is ORDERED behind #1606
+## BLUF
+
+**All four Q1 PRs merged, each five-point 5/5, and develop's tree after #1605 is
+`34ea098a022ca58aaff234a13c0603b21402fa14` — gate Q1's chained prediction, matched EXACTLY.**
+develop = `9512cc70d8c4ad8a1214b17a39d7c48456feb531`. **Session total: fifteen merged.**
+
+**KS-1638 is built, both halves, and raised as [#1606](https://github.com/Secuura/Distributed_Secuura/pull/1606)** — so the force-push blocker now
+has a PR at gate rather than a ticket.
+
+**Everything left in my lane is ordered behind #1606's verdict**, by your own instruction, so this
+is a clean rotation boundary. Detail at the end.
+
+| PR | ticket | gated head | merged as | 5-pt |
+|---|---|---|---|---|
+| #1602 | KS-1377 | `70dc59643b5a…` | `af788a4c8be68f9f1f452a4c211b6a150573cd5a` | 5/5 |
+| #1603 | KS-1617 A.3 | `f51d7cab124b…` | `9b90f8ac77532141624a2c5892a0b47074e01427` | 5/5 |
+| #1604 | KS-1617 A.2 | `0cc487412999…` | `618d720ec3704251951ba19a4c7f1d85ebfc414d` | 5/5 |
+| #1605 | KS-1507 | `934ce30c3c11…` | `9512cc70d8c4ad8a1214b17a39d7c48456feb531` | 5/5 ← chained tree ✓ |
+
+Each re-predicted onto the live develop at its own merge moment (it had moved to `04a4a33938f0`
+for Seat J's #1568 before I started), overlap 0 every time with a planted control reading 1.
+
+**The guard refused #1605 on its first attempt** and nothing merged — my squash message contained
+"fails closed" (a resolution-family word) and a line wrap had put `anything:` at the start of a
+line. Fixed and re-run. Worth one line because it is the guard doing its job rather than me
+noticing.
+
+## YOUR RESIDUE CORRECTION IS RECORDED, as a correction, not a quiet replacement
+
+You were right on all three points and I have put them on KS-1377 **beside** my earlier comment
+rather than editing it, because the earlier reading is already in that thread and a reader needs to
+know which one survived measurement:
+
+- the `:425` overwrite fires on **REVOKE ONLY** — mint and rotate insert fresh ids, and revoke
+  reads the row fresh at `:518`, so the loss is only the uses between that read and the save. My
+  reading overstated both scope and size.
+- it also moves **`last_used_at` BACKWARDS**, which neither of us had named — and that is the
+  sharper half, since the new statement's `GREATEST` exists precisely to stop that on validate.
+- **`:1494` serves the same number as before.** My "this widens the divergence" claim is **wrong
+  and withdrawn**, and the withdrawal is in #1602's landed commit message so the permanent record
+  does not carry it.
+
+The gate's PostgreSQL 18.3 measurement — every NULL arm correct, 20 × 25 giving **500/500** against
+develop's **31/500** — is in the commit message and on the ticket, attributed to the gate.
+
+**Also done per your mail:** KS-1617 carries the pre-existing token-endpoint body echo
+(`google.ts:39-40` + five siblings) as its own open question, and the note that **#1604 has no cell
+pinning the no-echo** — your reading of my A2-3 is right, it drives a cancel with no description at
+all, so its absence is trivially true. KS-1641 carries your two extra sites, `:464` (the log line
+is uncapped too) and `:515` (reflects the internal exchange error message), which takes that
+finding from one reflection site to three.
+
+## KS-1638 — #1606, both halves, and a fixture defect my own change exposed
+
+**Half 1:** ks998 SC12's "without" push is now `env -u ALLOW_FORCE git push …`.
+**Half 2:** leg 14 strips the hook's own controls, **derived** from the hook rather than
+hard-coded — every ALL-CAPS name it reads with an external default (`${NAME:-…}`), which is exactly
+the set that must not reach the suites. A name the hook merely *assigns* is left alone; `ZERO` is
+the live example and the `:-` form is what discriminates. Derivation measured: `ALLOW_FORCE` only.
+It carries a positive control in the shape this leg already uses for the slot list, and **withholds
+the run** on failure.
+
+**Census you asked for:** of **72** shell suites, **8** push; of those exactly **one** drives a
+non-fast-forward push (ks998, two `--force`), one of which sets the flag itself. **So exactly one
+cell was ever affected.** Control: `pre_push_hook_base.test.sh` has 18 pushes, 0 `--force`, and is
+correctly absent.
+
+**Red proof:** develop's ks998 with the flag exported **79/80**, failing cell exactly `SC12 without
+ALLOW_FORCE…`; fixed with the flag exported **80/80**; fixed with the flag **unset** **80/80** — the
+control that stops half 1 being a quiet weakening. Half 2's three stripping-dependent cells read
+**58 passed / 3 failed** against develop's preflight and **61/0** with it. Whole set:
+**91 suites passed, 0 failed, 0 skipped**.
+
+**A defect of my own, caught before the push:** the leg-14 fixture builds a tree with a stub
+`slot-target.sh` but **no `.githooks/pre-push`** — a repo that cannot exist. My derivation refused
+there and **reddened two existing cells** (54 passed / 2 failed). The fixture now writes a hook
+stub beside the slot stub, with a `nocontrol` variant mirroring the existing `noexport` one, plus
+an inverted-want control. I would rather you knew my change broke something than discover it at the
+gate.
+
+**And a live positive control: this PR's own push proved the change in production.** The in-hook
+leg 14 printed `hook controls stripped for the suite run: ALLOW_FORCE (KS-1638)` beside
+`de-slotted 39 variable(s)`.
+
+## WHY I AM AT A BOUNDARY, AND WHAT I AM NOT DOING
+
+**I received both SCREEN_12 mails — the four, and the KS-623 addendum — and I am NOT starting
+them.** Your NEXT says "after KS-1638 and the #1597 force-push (do not reorder)". KS-1638 is now at
+gate as #1606, #1597 waits on #1606 merging, and KS-1622 sits behind that too. So **every remaining
+item in my lane is ordered behind a verdict that is not mine to produce.** Starting SCREEN_12 now
+would be exactly the reordering you forbade.
+
+What I have done instead, which costs nothing and does not reorder: the handover carries the five
+SCREEN_12 items, their tiers, their files, your three gate questions verbatim, and the note that
+**KS-623's question needs a LIVE read** — every deployed box's `NODE_ENV` for auth, measured, which
+needs the boxes and is required before merge rather than before raise.
+
+## STATE AT WRAP
+
+- develop `9512cc70d8c4ad8a1214b17a39d7c48456feb531`, tree `34ea098a022c…`.
+- **Open:** #1606 (KS-1638, at gate, round 1 of 2) · #1597 (KS-1634, held, body already
+  `Refs KS-1634`, amended commit `8f3310c6ed85` / tree `b64be7e50092` still in the clone).
+- **Filed this session:** KS-1639, KS-1640, KS-1641. **Comments:** eight across seven tickets.
+  **Team notes:** two per person, the second consolidating the session total to fifteen; all
+  mentions verified as `suggestion_userMentions` nodes with a zero control on a third user.
+- Nothing deployed, no migrations, no config change, `2_Project_Files` read-only all session
+  (KS-907 — J and D live).
+- Handover: `5_Project_History/2026-10-19_seatR-51st/HANDOVER.md`, with durable tools and evidence
+  beside it.
+
+PROVENANCE:
+- the four merged SHAs, parents, trees, file lists, blob equality, trailers | merge_r51.py verify, five-point, per merge | run 2026-10-19 03:0x-03:1xZ
+- chained tree 34ea098a022c equals gate Q1's prediction | git rev-parse origin/develop^{tree} after #1605 | read 2026-10-19 03:1xZ
+- KS-1638's red proof, census, and the 91/0/0 shell set | ks998 and preflight_deps standalone, run-shell-suites.sh under the preflight's own de-slotting, run by me; logs in r51/svc | run 2026-10-19 02:4x-02:5xZ
+- the live hook-strip line | my own push's in-hook leg 14, r51/logs/push_1638.log | run 2026-10-19 03:0xZ
+- the shared clone untouched across the ks998 runs (HEAD, 864 refs, 2 mods) | snapshotted before and after | 2026-10-19 02:4xZ
+- the three ticket comments and two team notes | Linear commentCreate then fetched BY ID, mentions read from bodyData with a zero control | 2026-10-19 03:1xZ
+- the SCREEN_12 four and the KS-623 addendum | your mails 03:05:12Z and 03:12:19Z, read whole | read 2026-10-19 03:1xZ
+
+SELF-CHECK: re-read end to end. The PostgreSQL 18.3 figures are the gate's, not mine, and are
+attributed as such everywhere I used them. Everything else is a read or a run I made this session |
+2026-10-19 03:2xZ
+
