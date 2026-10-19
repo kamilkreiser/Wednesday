@@ -1,0 +1,21 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1612-409-mapping-survives-the-prisma-error-shape.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1612-409-mapping-survives-the-prisma-error-shape.test.ts
+index 4c358b74a..ecc88180f 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1612-409-mapping-survives-the-prisma-error-shape.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1612-409-mapping-survives-the-prisma-error-shape.test.ts
+@@ -115,2 +115,16 @@
+   });
++
++  // KS-1642 (gate P1 mutant H9): the `r.constraint === null` guard in isMigrationRefusal. A node-postgres 23505 that names
++  // ANOTHER constraint must not be taken for a migration's refusal just because its message equals that migration's RAISE text.
++  it('RED KS-1642 H9: a 23505 that names ANOTHER constraint is not a migration refusal, even with a migration\'s exact message', () => {
++    for (const constraint of [ID_NAMESPACE_CONSTRAINT, LIVE_ANCHOR_ID_CONSTRAINT] as const) {
++      const other = { code: '23505', constraint: 'documents_external_id_key', message: MIGRATION_MESSAGES[constraint] };
++      expect([isIdNamespaceCollision(other), isLiveAnchorIdClaim(other)]).toEqual([false, false]);
++    }
++  });
++
++  it('CONTROL KS-1642 H9c: the same exact message with NO constraint field (the Prisma shape) is still that migration\'s refusal', () => {
++    const noConstraint = { code: '23505', message: MIGRATION_MESSAGES[ID_NAMESPACE_CONSTRAINT] };
++    expect([isIdNamespaceCollision(noConstraint), isLiveAnchorIdClaim(noConstraint)]).toEqual([true, false]);
++  });
+ });
