@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 263 — 2026-10-19 18:25 (s120). **KAM RULED 5 CARDS 18:19-18:20 (view=tuesday). RULED BY KAM, NOT YET IN AN ARTEFACT** — each parked verbatim in `projects_index/clarifications_register.md`; `decision_queue.sh --delivered` each only when its artefact holds it:
+- hpsmpoc-feedback-retry-duplicate-1019 **a** (accept risk) -> HPSM-POC records seat: CLARIFICATIONS + HPSMPOC-226 comment.
+- hpsmpoc-import-words-1019 **a** -> B288 builds -267 (brief being drafted: `tuesday/briefs/2026-10-19_B288_SEAT-W6_hpsmpoc-l4-imports-267-275-263.md`) + CLARIFICATIONS.
+- hpsmpoc-sme-deputy-1019 **a** -> WAITING Kam's name (asked bf-6dbdc1e54a2b); then records seat writes it + closes HPSMPOC-6.
+- composer-demo-minio-overlay-1019 **b** -> B287 (brief being drafted: `tuesday/briefs/2026-10-19_B287_SEAT-R1_composer-demo-minio-read-and-fix-draft.md`): read-only demo look + drafted pinned fix, NOT applied, then a deploy card.
+- composer-minio-image-terms-1019 **a** -> B287 writes the Composer CLARIFICATIONS entry.
+- OWED: read B287 and B288 drafts WHOLE, stamp, launch (load permitting; Sonnet, C2).
+
 ## 🟢 DELTA 262 — 2026-10-19 17:50 (s120). Supersedes 260's B286 line.
 - **PR #162 MERGED (HPSMPOC-290):** gate B286 GO WITH FINDINGS; HPSM-POC main = **e4f270ea41bd** (tree ca71a46 = gated head 6dbe394's tree). Pane %89 closed. **OWED records seat (batch with PR #161's outcome):** -290 transition + Done evidence, -226 description refresh (census in B284 STATUS), ticket candidates B286-1 (Minor: endpoint-level guard test) + B286-2 (Note), import endpoint same utf-7 defect (B284 FOR TUESDAY 2) -> lane L4 ticket.
 - **B283 (PR #161) was pinned on main befd45e;** main is now e4f270e (disjoint files). At its verdict: re-read #161 mergeable_state; if behind-required, the merge is still a squash with --match-head-commit 7329804 (no forward merge needed unless GitHub refuses).
