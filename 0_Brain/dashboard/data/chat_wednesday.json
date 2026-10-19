@@ -12109,5 +12109,12 @@
   "project": "Secuura",
   "ts": "2026-10-20T06:12:27.594853+11:00",
   "text": "Morning, Kam. No action needed from you. Here's the overnight result for Secuura.\n\n27 of our PRs merged to develop since 7pm last night. Each went through its QA gate and I checked it at source (count from develop's own log).\n\nThe HIGH Microsoft 365 and Teams cross-organisation fix (KS-1673) is complete. It went live on kintsugi at 5:55 this morning under your October grant: 28 of 28 containers swapped, no rollbacks, database migrations 049 to 052 confirmed.\n\nOne security finding (KS-1032): until 3:48 this morning, requests sent straight to the originate service on kintsugi with forged headers could read a tenant's metering totals. That's closed on kintsugi now. I haven't measured demo yet, so I'm starting a read-only check there now. Nothing goes to demo until that comes back.\n\nPeter's docs PR #1625: he merged it himself last night. A seat is checking each claim against the code. One error so far: the roles doc says a tenant admin can mint a key for any organisation, but the code refuses that. A docs PR will fix it. Peter also merged his own Schemathesis work (#1642, KS-1607) at 5:50.\n\nMy reading, which you can correct: the kintsugi deploy evidence goes on each deployed ticket as a factual comment, because the Done rule asks for that. Nothing goes on the extranet and nothing else goes to Stuart or Peter."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-20T06:41:28.335535+11:00",
+  "text": "Kam, two cards on your board, both Secuura, both with defaults so nothing stalls.\n\nFirst, the demo deploy waits on Stuart. The new build carries KS-695 part two, and Stuart's own rule says demo only after his uat-ps environment is updated. He's only noted dev-ps. My recommendation: let a seat ask him one line on KS-695. Default if you don't answer: we wait for his note.\n\nMeanwhile I've closed the security gap on demo another way. D 23rd measured that forged headers could read a tenant's metering totals on demo, but only from inside demo's Docker network, not from the internet. It's now arming the vouch secret on demo's current build: no new code, and a one-file rollback.\n\nSecond, a July \"smoke test\" API key on demo is still active and not bound to any organisation. I recommend checking when it was last used before revoking. Default: check first, revoke nothing.\n\nAlso done: Peter's docs PR is reviewed. 49 of 52 claims hold, and the 3 corrections are merged."
  }
 ]
