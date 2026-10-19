@@ -1,0 +1,95 @@
+=========== [INBOUND] 2026-10-19T23:34 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1653 (hygiene: NK1 wording + V4 prove
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1653 (hygiene: NK1 wording + V4 provenance cell + BACKLOG closed) at b30e401ff208, tier 2
+Seat R 58th, lane Secuura/Blockchain-R. The HYGIENE PR is READY FOR GATE. Tier 2, Refs KS-1677.
+Both items you ordered are in it, as separate commits. The N1 PR is pushing behind it.
+
+## THE FIVE ARTEFACTS
+1. PULL REQUEST: **#1653** — https://github.com/Secuura/Distributed_Secuura/pull/1653
+2. HEAD SHA, read from ORIGIN in the same action as writing this: **b30e401ff208940f6e44b44696dd4ab1ff141a98**
+   (live develop in the same read: 11af03696c9bd966580e52605cb2a361d9c3d29b)
+3. TICKET COMMENT NAMING THE PR: KS-1677 comment **`95004c28-7e83-4e38-93b6-01e6af513e24`**,
+   23:34:02.518Z. Count 6 -> 7, exactly one added; read back byte-identical (4338 == 4338);
+   `#1653` and the head sha both verified present.
+4. TEST EVIDENCE BLOCK: in the PR body, written by me.
+5. NOT DONE / NOT COVERED: below and in the body.
+
+## ITEM 1 — NK1 closed, wording AND a cell
+Softening the words alone would have left the gap, so both: V2 relabelled **SHAPE** with the limit
+noted IN ITS OWN BODY (32 Math.random bytes satisfy every line in it), header/describe/cell-map
+corrected and NK1 recorded; and **V4** pins provenance — crypto.randomBytes stubbed to a
+length-honouring fill, the challenge must commit to the stubbed bytes. The stub honours the
+requested length so the keyring's IV stays correctly sized and the verifier is still really
+encrypted at rest. V4 asserts the CHALLENGE, not V1's secrecy, because under the stub all three of
+init's tokens are equal; its control is that 32 identical bytes cannot come from a CSPRNG draw; and
+with the stub REMOVED it asserts the verifier is NOT that value, so it pins the draw, not a constant.
+
+Red-proof, every mutant tsc rc 0, every restore asserted by sha256, no LOADFAIL:
+  BASELINE  V0 pass  V1 pass  V2 pass  V3 pass  V4 pass
+  BK-X1     V0 pass  V1 pass  V2 pass  V3 pass  V4 FAIL
+  BI-M1     V0 pass  V1 FAIL  V2 FAIL  V3 pass  V4 pass
+  BI-M5     V0 pass  V1 pass  V2 FAIL  V3 FAIL  V4 FAIL
+**BK-X1 killed by V4 ALONE** — V1/V2/V3 pass it, reproducing BK1's finding independently. No
+earlier kill displaced.
+
+## ITEM 2 — the backlog entry is CLOSED, not merely re-numbered
+You asked me to correct it with the measurement. It turned out to be genuinely RESOLVED, so I closed
+it out and said why:
+- **Fixed by `2672fedeb` — "KS-888: widen the KS 764 call-site guard to the revoke shape 1327
+  introduced" (#1337)**, exactly the decision the entry had deferred to KS-888's owner.
+- Measured at develop cd63883c62a9: packages/shared **52 files / 994 tests / 0 failed** vs the
+  entry's own `1 failed | 944 passed (945)`.
+- 🔴 **I did not trust the aggregate.** It can hide a cell DELETED rather than fixed, so I ran the
+  named cell on its own: **passes, 426 ms**; it moved `:292` -> `:279`; the sibling
+  "guard on the guard" cell is still present and passing. So the guard was WIDENED. Only then `[x]`.
+- Original record kept verbatim; the entry now carries the tree warning (1244 on develop,
+  1236 in the shared checkout at 5d1be7b06279, files not byte-identical).
+- Counts measured ON DEVELOP, not the shared checkout: open 34 -> 33, closed 16 -> 17.
+
+## LANDING TREE — develop moved TWICE while this branch existed
+  this head      b30e401ff208940f6e44b44696dd4ab1ff141a98
+  live develop   11af03696c9bd966580e52605cb2a361d9c3d29b  (#1651)
+  merge-base     cd63883c62a9bb0e66969df8cd3f02db2b9b2217
+  PREDICTED      7df2199daafd8bd06562da2c914e5d4c8a3de5ca
+merge-tree clean (rc 0), and a local merge on a scratch branch produced exactly that figure — two
+methods agreeing. Scratch branch deleted, never pushed; this head unchanged.
+`develop...HEAD` is exactly my 2 files; `develop..HEAD` would show 4 by folding in #1651's.
+**Landing state verified green, not assumed: 22 files / 213 tests / 0 failed** on 7df2199daafd.
+On this branch's own base: 21 files / 206 -> 21 / 207.
+
+## PREFLIGHT, AS IT READS
+"PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." legs 3/4/8, no local stack.
+Not a pass; 13 ran, 3 skipped, 0 failed. **The FIRST push (BACKLOG.md alone) skipped the preflight
+entirely** — the hook fires only for changes under Blockchain/Dev, and that commit is a repo-root
+file. Worth having on the record as the hook behaving correctly, not as a legs-missing push.
+
+## NOT DONE / NOT COVERED
+- The four platform suites did NOT run: no stack, and this PR changes **no runtime surface at all**
+  (one test file, one markdown file).
+- No migration, no schema change, no config.
+- N4 is NOT in this PR: routing the three warnings through the service's log() is a product line,
+  which by your instruction does not belong in a test-only PR. Still residue, your call on a ticket.
+
+## N1 PR — pushing now
+Branch `feature/ks-1682-n1-selector-near-miss-cells`, off develop e712972bccf1. Seven cells, and
+ALL FIVE near-miss mutants are killed by assertion:
+  G3 uid-only -> killed by W1 alone        G4 case -> W2 alone        G5 trimmed -> W3 alone
+  G6 substring -> W3 AND W4                G7 id-less entry -> W5 alone
+Each cell seeds exactly ONE near-miss entry, deliberately: under a mutant that is a SINGLE match so
+it reaches the selector's false branch; two entries would hit the fail-closed `> 1` branch and MASK
+the mutant. W0 controls that the exact match still yields its token (so these are not just
+"everything fails closed") and W6 pins that every fixture secret is distinct and non-empty, so no
+`toBe('')` can be satisfied by the fixture itself. The harness reads the seeded entry back through
+msal's own serialiser, so a '' is the SELECTOR refusing it and not an empty cache.
+Every mutant tsc rc 0, every restore asserted, no LOADFAIL. m365 suite 22/212 -> 23/219, 0 failed,
+0 vanished. Mutant list from BL1's verdict and adversarial file, read for the LIST only and cited;
+cells written independently. READY follows its push.
+
+🔴 **One flaw in my own driver, disclosed:** its per-arm summary prints "KILLED BY: NOTHING — mutant
+SURVIVES" on the BASELINE arm, which has no mutant applied. The line is wrong, not the measurement;
+every mutant arm's kill list is correct. I am not re-running the proof for a reporting string, but
+it is in the record so nobody reads that line as a survival.
+
+## NEEDED-BY
+Gates on #1653 (b30e401ff208940f6e44b44696dd4ab1ff141a98) and on the N1 PR once it exists. No merge without your GO naming the head.
+
+NEW-ROWS: 3  ROWS-IN-DIGEST: 57  SEEN:      254  BATCH: /private/tmp/wed_newmail/batch_20261019T233542Z.txt

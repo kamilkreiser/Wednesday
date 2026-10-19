@@ -1,0 +1,48 @@
+=========== [INBOUND] 2026-10-19T23:34 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1655 (KS-1407, both routes) at 8e5308
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1655 (KS-1407, both routes) at 8e5308a87e14, tier 1 - 13/13 mutants killed, preflight 13/16 ran 3 skipped 0 failed, no client calls either route
+Seat G 12th, lane Secuura/Blockchain-G. Item 1 is READY FOR GATE. **Tier 1.**
+
+## THE FIVE ARTEFACTS
+1. **PULL REQUEST: #1655** — https://github.com/Secuura/Distributed_Secuura/pull/1655 (not a branch).
+2. **HEAD SHA, read from origin in the same action as this sentence:**
+   **`8e5308a87e14d4a4796e5f838de30dae0838a5bf`** (`git ls-remote origin refs/heads/feature/ks-1407-password-change-and-reset-revoke-the-sessions-g12-1`). Base `develop`; 4 files, **+361/-1** (3+4+185+169 = 361, the one deletion being the replaced import line).
+3. **TICKET COMMENT:** one BLUF comment on KS-1407, `4c1088b3-5f9a-484e-b4e0-10b88c661496`, 23:34:01Z, 4572 bytes. Read back and asserted to still carry the PR number, the head SHA, the mutant tally, the preflight verdict and the client-search zero. PR #1655 is attached to the ticket.
+4. **TEST EVIDENCE:** in the PR body, written by me, who ran it. Summarised below.
+5. **WHAT IS NOT COVERED:** its own section below, and in the PR body.
+
+**ONE PR for both routes, as you accepted.** Two commits, one per Spark pass, bytes unmodified; identity `file:.git/config kamil.kreiser@secuura.ai`; branch commits trailer-free.
+
+**Not a batch:** KS-1157 is not built yet, so this READY stands alone. If KS-1157 is ready before you gate this, say the word and I will fold it into one tier-1 auth batch.
+
+## THE ONE THING THE GATE MUST AGREE TO
+**Change-password revokes the CALLER'S OWN session.** `revokeAllUserSessions` is account-wide and nothing spares `req.sessionId`, so after a successful change the caller's access token stops validating and the client must sign in again. The sparing alternative needs two functions the existing session mock does not provide; it was neither built nor ruled, and I did not switch to it. If the gate thinks that is wrong, it is a product decision for Kam, not a patch edit.
+
+Second-order, stated in the PR body: a Redis fault **after** the password was written answers an error although the password changed. Reset survives it (token unburned, retry works); change-password leaves the user retrying with the new password as the current one.
+
+## EVIDENCE
+- **develop moved to `cd63883c62a9` mid-round.** The advance touches **none** of my six files (control fires on the m365 path), so no re-run. Landing tree on live develop predicted **`cdc0bcffc9c4d47f6cfa0d09d94fa70d1754443d`**, `merge-tree` rc 0, clean, exactly the 4 files.
+- Pre-image blobs equal each patch's declared `index` line (`10fab906c`, `fa7b3386a`). Four sections, `git apply -p1` **strict**; a **context-line** corruption control is refused, so the check can fail. Touched set == the union of both READYs' A3 sets. numstat equals both READYs exactly. Hunk headers name `/me/change-password` and `/reset-password`, so the near-identical-site class is refuted by reading the enclosing handler.
+- **Red-first reproduced by me: 6 failed / 14 run** (3 of 7 per file, the three RED cells; all 8 CONTROLs green; 0 load-failure signatures). **Green after: 14/14, 0 skipped.** `tsc` rc 0.
+- **Suite, both ends measured on real trees:** baseline **99 files / 1096 tests / 0 failed** on a clean checkout of the base commit; after **101 files / 1110 tests / 0 failed**. +14, **0 vanished**. The 1096 equals the pass's own baseline.
+- **13 arms, 13 KILLED, 0 SURVIVED → no cell added**, as your brief prescribes for that case. Every red set equalled the pass's prediction. Your two extra arms (revoke a DIFFERENT account) are killed on both doors, so the cells pin WHICH account is revoked.
+- **Client search, with controls: no in-repo client calls either route.** Detail in the PR body and in my earlier STATUS. The notable half is the second one: nothing in-repo exercises this behaviour, so the 401 breaks no screen AND no screen proves it works.
+- **Preflight, quoted as printed:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` — legs 3, 4, 8 need a local stack. I am quoting the gate's own "This is NOT a pass" line with it. Leg 14 shell suites **91/91, 0 failed, 0 skipped**; leg 15 `13 code guards passed`, `23 / 23 services`; **leg 16 type-checks auth's test files: 152 examined, 42 errors, 42 baselined, 0 new** — so the two new test files add zero type errors by the gate's own reading.
+- **No `[format-gate]` line was printed by this push** — zero real occurrences in a 2466-line log; the apparent hits are leg 14's own suite names. A missing gate is not a passing gate, so I say it rather than quote it.
+- Push: **rc 0 from the tool's own `.rc`**, elapsed **582s**, ref at origin equal to my tip. At 9m42s it ran well past the ~6 min idle cutoff — F-02 was printed, so the keepalive went on the command line with `GIT_SSH_COMMAND` unset. Without it this is the rc-141 class.
+
+## NOT COVERED
+- **The four platform suites did not run.** No local stack, and no Docker on this Studio for me. This PR **does** touch a runtime surface, so unlike a test-only PR that is a real gap, not a formality.
+- **No real Redis driven.** The cells pin that the call is made, once, for the right account, at the right point in the sequence — not that Redis drops the sessions.
+- **N-1382-2 untouched** (the e2e case posts to `/api/auth/change-password`, a route that does not exist). Hence `Refs`, never a closing word.
+- No migration, schema, config or dependency change. Nothing to apply around a deploy.
+- Nothing deployed.
+
+## TWO THINGS AGAINST MYSELF
+- *Log without the count* cannot run as a removal here: `noUnusedLocals` makes the unused variable **TS6133**, so the arm would measure the compiler. It runs as a **wrong count**, which reaches R3.
+- My first *revoke-before-the-check* arm **inserted** instead of **moved**, declaring `sessionsRevoked` twice (**TS2451**), and read INADMISSIBLE. That was my arm's defect, not the code's. Re-run as a move: KILLED, red set `C1 C2 C3 R2`, exactly as predicted. `users.ts` also holds a pre-existing `const sessionsRevoked` at `:838` (the ks796 admin handler) — a file-wide count guard of mine fired on it and was corrected rather than loosened.
+
+## BOARD
+KS-1407 moved **Backlog -> In Progress** when the PR linked — GitHub's integration did it, not me. Reported, not reverted.
+
+## NEXT
+KS-1157 now (its reader audit is already done and clean — no strict schema, no key enumeration, storage is one JSON string not a hash), then KS-1659 (**tier 2 confirmed, `Refs`**), then KS-758 and KS-1558 from your ADDENDUM.

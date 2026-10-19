@@ -1,0 +1,89 @@
+=========== [INBOUND] 2026-10-19T23:35 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1654 (KS-1557) at db9bca740df08cd9610
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1654 (KS-1557) at db9bca740df08cd961044e3515a5cf4f2f760354, tier 1 - 19/19 both modes, 1568/1568 originate unit, develop arm reds exactly V1 V2 V4 V5 V6, migration 055 cell 13/13 wants
+## READY FOR GATE — item (i), KS-1557, tier 1 (Opus)
+
+The five artefacts, each named by identifier:
+
+1. **PR [#1654](https://github.com/Secuura/Distributed_Secuura/pull/1654)**.
+2. **Head SHA, read from origin in this same action:** `db9bca740df08cd961044e3515a5cf4f2f760354`.
+   The branch `fix/ks-1557-create-connector-provenance-on-the-minted-document` and
+   `refs/pull/1654/head` both read that value. **develop now: `11af03696c9bd966580e52605cb2a361d9c3d29b`** (my #1652 merge).
+3. **Ticket comment:** KS-1557 comment `78f1c489` (23:34:03Z), naming the PR and its head. Read back by
+   id, **byte-identical**; 11 factual tokens asserted present after whitespace normalisation, with a
+   control token that is correctly absent. KS-1557 went 11 → 12 comments.
+4. **Test Evidence block:** in the PR body, written by me — I ran every line of it.
+5. **What was NOT done / NOT covered:** in the PR body, and repeated below.
+
+## What it is
+A new provenance action value, **`create:connector`** — the key that created this document — written
+unconditionally for a `role === 'connector'` caller at **both** writers (POST /api/documents, and
+POST /api/documents/:id/version **on the document it mints**), each AFTER its save; the predicate
+`wasCreatedByConnector` widened to `action IN ('create', 'create:connector')`; and **migration 055**
+backfilling the rows that already exist. 5 files, +269/-3, one commit.
+
+**NOT the literal `create`:** `getCreationProvenance` selects `action='create'` (`provenance.ts:260`)
+and is echoed on a read as `createdOnBehalfOf` (`documents.ts:1155`); with no `onBehalfOf` on the row
+it sets **`pseudonymised: true`** (`:269`) — **falsely signalling an erasure.** Cell V5 holds that line.
+**NOT a lineage-root walk:** `/version` has no source-access check, so a lineage can legitimately span
+organisations — filed as **KS-1688** (High), and this fix must land before any gate is added there.
+
+## Ran
+- **`ks1557-lineage-certify` suite: 19/19, rc 0, in BOTH `MULTI_TENANCY_ENABLED=false` and `=true`**,
+  as `secuura_app` (non-superuser, RLS in force) against my own PG 15 at migration 054. The 13
+  pre-existing cells are unchanged and green — **ITEM5c among them**, so this cannot be read as closing
+  Kam's ruling (b).
+- **Full originate UNIT suite: 134/134 files, 1,568/1,568 tests, rc 0.** Run whole, per your instruction
+  about enumerated mocks. It caught exactly one thing: the ks1228 count cell, below.
+- `tsc --noEmit` rc 0 · `eslint src` rc 0.
+- **Red-proof, develop arm:** both source files restored to `89956fe92956`, tests left as they are →
+  **5 failed / 14 passed**, red on exactly **V1, V2, V4, V5, V6** (the five declared). **V3 — the refusal
+  controls — and all 13 pre-existing cells stayed GREEN**, so the new cells discriminate the fix and not
+  the harness. Both files asserted byte-identical after restore (`127f6298acdb1f5c`, `397ee90d5cb4db11`).
+- **Migration 055 on real Postgres 15: 13 assertions, each printed beside its own want, all met** —
+  forward; the **ambiguous** child skipped **with a NOTICE naming its external id**; a parent versioned
+  **twice by the same** connector still resolving (the case you said you would welcome — now measured,
+  not reasoned); an already-backfilled child untouched; a **certify-derived** child left alone; **0**
+  literal `create` rows ever written; one tenant touched, carried from the document row; **idempotent**
+  (second run inserts 0); and the **reverse** removing exactly its 2 marked rows while a pre-existing
+  `create:connector` row survived. The cell **aborts if its fixture fails to build**, because a failed
+  fixture turns every "want 0" below it into a vacuous pass — which it did on my first run.
+- **Push: rc 0**, `ls-remote` confirms the ref (not an rc-only reading). Preflight **13 of 16 legs ran,
+  3 SKIPPED (3, 4, 8 — local stack not up), nothing failed. NOT a pass**, and not quoted as one.
+
+## The one existing cell changed — a strengthening, not a weakening
+`ks1228 › /:id/version › control` asserted a row **COUNT** that your ruled change deliberately makes two.
+It now asserts **both** rows precisely: `version:watermark` on the SOURCE with its `onBehalfOf`, and
+`create:connector` on the **minted** document with `obo: null`, plus that the new row's documentId is
+**not** the source id and matches the minted-id shape. That suite is **31/31**, and its five refusal arms
+(bad hash, unknown document, type guard, lineage cycle, save throws) were **not touched and all pass** —
+the independent evidence that the new write sits after the save and KS-1228 stays clear.
+
+## NOT run / NOT covered
+- The four platform suites (Schemathesis · Akto · Playwright · Performance/k6): **not run.** No endpoint,
+  request schema or response shape changes; the only observable change is which callers get 201 instead of
+  403 on an existing route, which the integration cells cover directly.
+- **Not deployed.** 055 must run before the new originate image serves traffic, and the `migrations`
+  image **bakes** the `.sql` — rebuild `migrations` alongside originate and verify the rows directly,
+  because the runner prints a success summary even when it ran a stale image.
+- **kintsugi UNMEASURED** (another seat's box this session).
+- **Whether Platform S ever versions a document it did not originate** cannot be answered from this
+  project (`Secuura/platform-s` is 404 to this PAT). It does not affect this fix; it is on KS-1688.
+- The 16 certify-derived documents on demo are **not touched and not decided**.
+
+## Migration number, re-verified at the CURRENT develop
+**055 is still free and still only mine.** At develop `11af03696c9bd966580e52605cb2a361d9c3d29b` the migrations end at **054**, there is **no
+055**, and across **all open PRs only #1654 adds one**. Control: the same matcher finds exactly **1** file
+beginning `054`, so it is not silently matching nothing. Not in the fresh-database bootstraps, as you
+confirmed — a pure data backfill is dead SQL on an empty database, stated as a deliberate deviation in
+the PR body.
+
+## Holds
+No merge (no GO). Nothing deployed, no `az`, no box write; kintsugi untouched. No `--no-verify`, no
+force, no `--admin`. Pre-push route cited: `.githooks/pre-push:61` (a brand-new branch is exempt from
+the non-fast-forward refusal) and `:352` (refusal only when the pushed tip differs from HEAD — I pushed
+the branch I had checked out). The probe suite is **quarantined into the seat record and not committed**,
+per your ruling.
+
+## NEXT
+Item **(iii)**, the stale #1619 cell — `Refs KS-1679`, tier 2, test-only. Board search already done with
+its controls; the KS-1679 comment is drafted. Starting it now.
