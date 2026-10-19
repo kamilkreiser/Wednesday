@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 278 — 2026-10-20 05:54 ROTATION HANDOVER (s121, ctx ~80%; band 80-90). **READ THIS FIRST, then 277-272 (their lines stand except where superseded).**
+### State at rotation (all verified at source by s121)
+- **Composer:** PR #81 MERGED (code main **d8d2a2c7**). Root records main **bbd5ddb3** (B298: records/b295 folded, rows 326 + 327, catch-up of B280/B281/B285/B289/B290/B296/B297/B299, C-83). Demo: off-box copy (dscomposerdemobk1019/composer-demo-backups, sha256 e65926e2a21f VM=blob=Mac) + digest pin applied; **VM write role REMOVED** (B299; container roles = Reader for Kam only). All three demo cards delivered. **No Composer seat live.**
+- **HPSM-POC:** code main b3a7c27 (PR #163); records main 4aacdceb (C-119..C-122); HPSMPOC-294..300 filed (B291 findings). No seat live.
+- **NexusAI %56 (S101O, mail channel):** gate 28 RELEASE complete, main **29c5ee8f**. **C-170 (PR #96)** forward merge afb6bff (verify 4880/302, gate-26 suites 412/412), C-57/C-133 running -> it mails **READY TO LAND** -> **FIRST WORK: verify CodeQL at the new head (0 open on refs/pull/96/head, analyses at that sha, check-runs green) and send the GO (send_brief --kind answer + cockpit.sh say Datasec/NexusAI-O --mail)**. Then PR #97 forward merge + ANSWER-26 census -> stamp + launch gate 29 kit (`fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md`, NOT yet read; DELTA 261/271 item 4).
+### FIRST WORK for the next seat
+1. Morning ritual (06:00 has passed or is near): feedback sweep from `projects_index/2026-10-19_rotation-sweep-2030.md` watermarks (Sonnet read-only drafter, same fences), receipt to Kam.
+2. C-170 GO as above when its READY arrives (re-arm nothing else: no STATUS watcher is needed, no brief_seat seat is live).
+3. Owed, not started: status_watch2.sh prints `rev-parse` of any records/bNNN in a final line (ledger 2026-10-20 w=2 enforcement; Tuesday's own tree); G-DRIVE third copy of the demo image when mounted; laptop Secuura move to G-DRIVE when mounted (DELTA 265).
+### Kam owes: deputy PO name (hpsmpoc-sme-deputy-1019). Open: composer-l05-setup-card-too-1014.
+### FLOOR at rotation: %0 tuesday, %1 fleet-monitor, %56 Datasec/NexusAI-O. No agent QUESTION unanswered; Kam rows today: 1 (05:34, executed + delivered). Digests regenerated (check OK).
+
 ## 🟢 DELTA 277 — 2026-10-20 05:50 CHECKPOINT (s121, ctx ~77%; band 80-90). **READ THIS FIRST. Supersedes 276's OWED line.**
 - **CORRECTION (retracts DELTA 274-276 and today's 05:14 note line):** BACKLOG #326 (B290-1) is NOT on records/b296 — `git rev-parse records/b296` = Composer root main 00429ea4 (no commit); the row exists only uncommitted in `.tools/wt-b296-rec/BACKLOG.md` (byte-equal copy `.tools/b296/backlog_row_326.txt`). Ledger w=2 row written (`_ledger_laptop_datasec.md`, 2026-10-20). **Ledger edited this session: regenerate BOTH digests (`boot_digest.py --by-tier` and bare) before rotation.**
 - **KAM RULED composer-demo-vm-write-role-after-copy-1019 = a** (05:34:43): **B299 LIVE %101** (Opus; brief written by Tuesday: ONE `az role assignment delete --ids` of 47db7e25-f73a-44b3-b0bb-7d5ba11a6bae; no records commit). STATUS `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-20_B299_STATUS.md` (watcher armed; finals DONE/STOPPED). On DONE: verify at source (`az role assignment list --scope <container scope>` = only the Reader row; VM principal cee6c37e… 0 rows), close pane, panel report.
