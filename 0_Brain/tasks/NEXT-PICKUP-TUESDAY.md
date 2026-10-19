@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 264 — 2026-10-19 18:35 (s120). Adds to 263.
+- **B287 LIVE %90 `Datasec/Security-Composer-R1`** (demo MinIO read-only look + drafted pin + C-79/C-80 + BACKLOG row on local records/b287). On RECORDS DONE: post its drafted deploy card (default hold), `--delivered` composer-demo-minio-overlay-1019 and composer-minio-image-terms-1019 naming C-79/C-80, fold records/b287 later.
+- **B288 drafted, NOT read** (`tuesday/briefs/2026-10-19_B288_SEAT-W6_hpsmpoc-l4-imports-267-275-263.md`, 34 KB; drafter rulings R-W6-1/-3 to make): read WHOLE, stamp, launch when load1 < 8.
+- **Kam 18:21:50: no Secuura on the laptop drive.** Measured: 610 MB (!CODING/Secuura 5 folders + vault Secuura 158 files, 79 git-tracked); WEDNESDAY copy 140 GB; df 51%. Mail to Wednesday for DevMASTER per-folder counts + whether the 140 GB copy is needed. Card `tuesday-laptop-secuura-removal-b-1019` (default: nothing removed until her counts match). NEVER delete before counts; vault Secuura via sparse-checkout in the laptop clone only, no commit.
+
 ## 🟢 DELTA 263 — 2026-10-19 18:25 (s120). **KAM RULED 5 CARDS 18:19-18:20 (view=tuesday). RULED BY KAM, NOT YET IN AN ARTEFACT** — each parked verbatim in `projects_index/clarifications_register.md`; `decision_queue.sh --delivered` each only when its artefact holds it:
 - hpsmpoc-feedback-retry-duplicate-1019 **a** (accept risk) -> HPSM-POC records seat: CLARIFICATIONS + HPSMPOC-226 comment.
 - hpsmpoc-import-words-1019 **a** -> B288 builds -267 (brief being drafted: `tuesday/briefs/2026-10-19_B288_SEAT-W6_hpsmpoc-l4-imports-267-275-263.md`) + CLARIFICATIONS.
