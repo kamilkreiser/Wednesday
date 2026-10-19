@@ -41520,5 +41520,40 @@
    "CARD secuura-demo-smoke-provisioning-key-unbounded-1020",
    "CARD secuura-ks1116-null-owner-who-reads-1020"
   ]
+ },
+ {
+  "id": "secuura-ks1677-entra-redirect-uri-registration-1020",
+  "client_project": "Secuura/Blockchain",
+  "title": "Microsoft 365 sign-in moved its return address to the admin site (KS-1677). Register it in Entra now, or when M365 goes live?",
+  "bluf": "Only your hands can do this: the Entra app registration is yours. The merged KS-1677 fix (#1647) makes Microsoft send the user back to the ADMIN site's callback, so the sign-in cookie arrives. For the Azure Container Apps environment that address is https://secuura02-demo-admin.kindtree-935b2ded.southeastasia.azurecontainerapps.io/api/m365/callback (env.dev.json:107). If the admin portal is ever served from a custom domain (e.g. admin.secuura.io via configure-domain.sh), that domain's /api/m365/callback must be registered instead. Microsoft 365 is not live on any box today (demo has no Entra settings; kintsugi's redirect points at localhost, KS-1381), so nothing is broken by waiting.",
+  "default_action": "If you don't answer: (a). Nothing changes in Entra; the precondition stays on KS-1677 for whoever enables M365.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Wait until Microsoft 365 goes live",
+    "detail": "Recorded as a deploy precondition on KS-1677 (comment 81993547). Whoever turns M365 on registers the admin-site callback for that environment first."
+   },
+   {
+    "key": "b",
+    "label": "Register the Container Apps address now",
+    "detail": "In the Entra app registration that environment uses, add this redirect URI: https://secuura02-demo-admin.kindtree-935b2ded.southeastasia.azurecontainerapps.io/api/m365/callback"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-20T08:49:36.750249+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-07 07:38",
+   "CARD attio-entra-consent-m365",
+   "CARD attio-entra-consent-decision",
+   "CARD hpsmpoc-entra-app",
+   "CARD secuura-m365-admin-setup-for-customer-org-1020",
+   "CARD datasec-80pct-band-build-lanes-1020",
+   "CARD secuura-demo-deploy-ks695-uatps-precondition-1020",
+   "CARD secuura-demo-smoke-provisioning-key-unbounded-1020",
+   "CARD secuura-ks1116-null-owner-who-reads-1020"
+  ]
  }
 ]
