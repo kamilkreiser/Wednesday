@@ -18,8 +18,14 @@ SELF_DIR="$(cd "$(dirname "$0")" && pwd)"; TREE="$(cd "$SELF_DIR/../.." && pwd)"
 [ -d "$DIR" ] || { echo "brief_seat: no such project dir: $DIR" >&2; exit 2; }
 [ -f "$BRIEF" ] || { echo "brief_seat: no such brief: $BRIEF" >&2; exit 2; }
 case "$DIR" in */!CODING/Datasec/*) ;; *) echo "brief_seat: REFUSED — $DIR is not a Datasec project (Tuesday's scope is Datasec only)" >&2; exit 2 ;; esac
-MODEL="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["levels"]["opus"]["model_id"])' "$TREE/0_Brain/dashboard/data/models_latest.json")" \
-  || { echo "brief_seat: could not read the opus model id from models_latest.json" >&2; exit 2; }
+# LEVEL (2026-10-19, s119): routing v1.0 (Kam-approved 2026-10-18) puts tier-2 gates on Sonnet, and a /model switch
+# after launch leaves the seat's FIRST turn on Opus. BRIEF_SEAT_LEVEL=sonnet|opus (default opus) picks the level;
+# the id is still read from models_latest.json, never typed. Any other value REFUSES.
+LEVEL="${BRIEF_SEAT_LEVEL:-opus}"
+case "$LEVEL" in opus|sonnet) ;; *) echo "brief_seat: REFUSED — BRIEF_SEAT_LEVEL '$LEVEL' is not opus or sonnet" >&2; exit 2 ;; esac
+MODEL="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["levels"][sys.argv[2]]["model_id"])' "$TREE/0_Brain/dashboard/data/models_latest.json" "$LEVEL")" \
+  || { echo "brief_seat: could not read the $LEVEL model id from models_latest.json" >&2; exit 2; }
+[ "${BRIEF_SEAT_PRINT_MODEL:-0}" = 1 ] && { echo "brief_seat: model=$MODEL (level $LEVEL; print-only, nothing launched)"; exit 0; }
 cd "$DIR" || exit 2
 unset GH_TOKEN GITHUB_TOKEN GH_ENTERPRISE_TOKEN AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID
 export AZURE_CONFIG_DIR="$DIR/4_Credentials/.azure"
