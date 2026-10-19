@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 284 — 2026-10-20 10:1x ROTATION HANDOVER (s122, ctx ~80%; band 80-90). **READ THIS FIRST. Supersedes 283 items 1 and 2; 283 items 3-6 stand.**
+### Kam since 283 (all receipted, cards ruled, all three parked in `projects_index/clarifications_register.md`)
+- 10:05:45 *"can you relax the security requirements?  no IP"* → card `hpsmpoc-sm-open-without-ip-1020` = **a** (10:07:02): no IP limit, SM's own sign-in KEPT.
+- 10:09:20 card `mpscalc-v13-gap-15-decisions-1020` = **a**: all 15 build-plan recommendations accepted (D-01..D-15, MPS `1_Project_Definition/2026-10-20_v13.4.1_BUILD_PLAN.md` §3).
+### FIRST WORK for the next seat (in order)
+1. **B306 LIVE %110** `Datasec/HPSM-POC-D4` (Opus): opening SM to the internet, sign-in kept. Brief `tuesday/briefs/2026-10-20_B306_SEAT-D4_hpsmpoc-sm-open-internet-keep-signin.md` (the allow-list version beside it is SUPERSEDED, never launched). STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-20_B306_STATUS.md`. On DONE: verify at source (read `az network nsg show` under HPSM-POC `.azure`: exactly the one new rule, source Internet, 7637 only; `curl -sk -o /dev/null -w '%{http_code}' https://52.187.238.167:7637/`), close the pane, then panel Kam its WHAT KAM FORWARDS block (address `https://52.187.238.167:7637/`, username `hpsm-sm\paul.waite`, password stays his via the grep command already given, the certificate warning, up until 20:00 daily). Kam asked for this as a PRIORITY.
+2. **MPS v13 wave 1 (Kam ruled a; launch NOW, in waves of ~4 at load1 < 7):** gap analysis + build plan by B307 (done, pane closed; both docs shared to Kam bf-09b5c7f64e0d). Build plan §4 "What can start immediately" and line 233 "wave 1: V0, V1, V2 and V3 run together ... V5's starters" — read §2 lanes V0-V5 and §4 WHOLE, commission lane brief drafters (Sonnet), read each brief whole, launch (Sonnet C2; Opus for tier-1). **Every lane brief carries `RULED BY KAM, NOT YET IN AN ARTEFACT`: the 10:09:20 ruling verbatim**, and the first lane (or a records seat) writes the C-entries. Partition: MPS gate **B305 %108** is live on PR #84 (`.tools/b305*`); keep lanes off PR #84's 7 files until it lands.
+3. Gates and builders as DELTA 283 items 3-4 (B304 %106, B305 %108, B301 %107, B302 %105 under the jest lock, S101O %56).
+4. **Re-arm every watcher** (they die with s122): `bash 2_Project_Files/tuesday/tools/status_watch.sh <STATUS> 30` run_in_background for B301, B302, B304, B305, B306.
+### FLOOR 10:1x: %0, %1, %56 S101O, %105 B302, %106 B304, %107 B301, %108 B305, %110 B306. Gauge 83%. Load ~10 with 6 seats.
+
 ## 🔴 DELTA 283 — 2026-10-20 09:50 PRE-ROTATION HANDOVER (s122, ctx ~78%; band 80-90). **READ THIS FIRST, then 282-279.**
 ### Kam today (all receipted): 05:34 VM role (done) · 08:20 card band c (done) · 09:15 SM access for Paul (priority) · 09:38 card c "No logon at all" · 09:44 MPS v13.4.1 feedback + 6 files ("gap analysis ... spin up as many agents as you can") · 09:45 "send me the login details to Security Manager" (answered bf-fc5fa6987215: address, username `hpsm-sm\paul.waite`, password by a grep command in his own Terminal, NOT on the board).
 ### FIRST WORK for the next seat
