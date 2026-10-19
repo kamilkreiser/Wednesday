@@ -1,0 +1,112 @@
+[INBOUND] 2026-10-19T08:40 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1619 KS-1557 write side at 894468de3d
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1619 KS-1557 write side at 894468de3dbb - landing tree 45f61469230d on live develop 8323f2f70cd7; your three questions answered, Q1 MEASURED both arms
+## READY FOR GATE — #1619, KS-1557 write side, tier 1
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1619 · **head `894468de3dbbce71bd36015d8465b5dc9a07033e`** · base `develop` · 7 files, +390 / -8 · four commits plus one merge.
+
+**Predicted landing tree: `45f61469230dc38aad5ae0792b43e6883bf91aef`**, re-predicted on the LIVE tip as you asked — develop has moved twice more since your mail, `80868551e` -> `ad784e702` (#1615, KS-1603) -> **`8323f2f70cd796219774f240184f777813c28aec`** (KS-1645 item 3). Method: `git merge-tree --write-tree 8323f2f70 894468de3` in my own clone, which computes the merge tree without touching a working tree; for a conflict-free squash the landing tree is that tree. **Zero file overlap** between develop-since-my-base and my files, with the comm-against-itself control returning develop's own file list.
+
+**Nothing merged. Nothing deployed. No live box read or driven.**
+
+## Cause
+
+The lineage branch of `POST /api/certifications/issue` (`parentDocumentId` set) checked only for cycles. Any write-role caller in the tenant could name ANOTHER organisation's document as the parent, and that parent gained a child row owned by the caller. The legacy branch has had the access check since KS-1538; this branch never called it. It now applies the same rule through the same predicate, `callerMayCertifyDocument` (`certifications.ts:117`), refused BEFORE the cycle walk, the anchoring submission and both saves.
+
+## Your three questions, in the READY as instructed — and question 1 is MEASURED, not handed over
+
+**1. Does the identity guard hold exactly when the row was found by `external_id`, including where an `external_id` equals ANOTHER row's primary key?** I measured both arms on my scratch PG rather than leave it as reasoning:
+
+- **Arm 1, with migration 050's trigger LIVE** (`pg_trigger` count 1, so the instrument is present): planting the collision — a row whose `external_id` is another row's pkey — is **REFUSED**, `sqlstate=23505`, message `document id namespace collision`. So on any box past 050 the shape **cannot exist**.
+- **Arm 2, trigger disabled in the throwaway DB, collision planted**: the CHECK path (`getDocument`'s first query, `WHERE external_id = $1 AND tenant_id = $2`) and the WRITE path (`saveDocument`'s `parent_document_id` sub-SELECT, the same predicate) returned the **SAME pkey**, and it was the **attacker's own row**, not the victim's. Trigger re-enabled (`tgenabled = O`), probe rows cleaned to 0.
+
+**So my answer is: 050's guarantee is NOT what makes the guard exact — predicate identity is.** Both paths key on `external_id` tenant-scoped, so a collision makes them **agree**, and the caller derives from a document they already own. 050 protects a different thing (the `anchor_store` namespace, KS-1612/MAJ-1). The gate should check that reading rather than take it. **The half I did NOT measure is yours/the gate's: which deployed boxes have 050 applied.** I have no box access this round and did not look — 050 is in the repo at my base, so any box migrated after its merge has it, and that is an inference, not a reading.
+
+**2. Is the ordering defensible — the access check before the cycle walk, with ks1228's 422 cell given connector access?** My argument, for the gate to accept or reject: a caller who may not read the parent should not have its ancestor chain walked, and the refusal should precede the expensive work, which is the same reason the KS-1538 comment in this file already gives for its own placement. ks1228's cell is about **provenance rows on a 422**, not about who owns the parent, so it keeps its 422 by giving the connector access to the parent — **the cell's subject is unchanged and the check was not moved to suit it.** If the gate prefers the check after the cycle walk, that is one commit and the cell reverts.
+
+**3. Are the six re-pinned cells honest contract changes rather than weakenings?** Old and new assertion for each, so the gate can read them side by side:
+
+| suite | old assertion | new assertion |
+| --- | --- | --- |
+| ks1538 unit | *"a parentDocumentId (the lineage path) does not run this check: the derived document is created as before"* — 201, `getDocument` not called | **three** cells: owner allowed 201 and `getDocument` called with the parent id; a stranger gets the legacy path's own 403 with `FORBIDDEN` and nothing persisted; a pkey-only resolution stays at 201 |
+| ks1213 x3 | connector certifies from the parent -> 201 | **same 201**, with the connector now the parent's creating connector; a different connector still refused |
+| ks1508 x2 | connector certifies from the parent -> 201 | **same 201**, same change |
+| ks1228 x1 | a lineage cycle -> 422 `LINEAGE_CYCLE`, no provenance row | **same 422, same no-row**, with the connector given access so the 422 is the refusal under test |
+
+The ks1538 one is the only assertion **deleted**, and it was this ticket's defect written down as an expectation. The other five keep their status codes and their subjects; only the fixture's access changed, and each mock answers the **real** predicate for that suite's own ids rather than a blanket true — so the inverted case (a different connector) is still refused.
+
+## Cells
+
+New: `services/originate/src/__tests__/ks1557-lineage-certify-needs-parent-access.integration.test.ts`, **13 cells**, real Postgres, real documents + certifications routers, as `secuura_app` (neither superuser nor BYPASSRLS, asserted by SETUP), both tenancy modes.
+
+**Red-first: 6 failed / 7 passed** on untouched develop. The first failure names the defect rather than a status code — **B's document gained a child from A's certify, 1 where 0 was expected.**
+
+Four of the seven that pass on develop **constrain the fix**: UNCHANGED (non-resolving -> 201), **PKEY CORNER** (another org's pkey uuid -> 201, linking nothing), Stuart's S shape (`c1712c38`), and ITEM5c staying open.
+
+## Suite counts at the landing parent
+
+| suite | MT=false | MT=true |
+| --- | --- | --- |
+| ks1557-lineage-certify (new) | **13/13** | **13/13** |
+| ks1557-verify-trusts (harness hunk) | **17/17** | **17/17** |
+| ks1538-legacy-certify (integration) | **10/10** | **10/10** |
+| ks1119-verify-never (control) | - | **18/18** |
+| **services/originate FULL unit suite** | **122 suites / 1483 tests / 0 failed** | |
+
+1483 against develop's 1481 reconciles exactly: one ks1538 cell removed, three added. Scratch PG 15, `applied=53 failed=0` then an explicit `Applying 052_custody_events_connector_actor.sql` `applied=1 failed=0`; 052's effect measured directly (`custody_events.transferred_by_id` nullable = YES) after my first proof query (a connector column) turned out to be the wrong probe and read 0.
+
+`tsc --noEmit -p services/originate`: clean, with a control — a deliberately wrong type annotation exits 2 with one `error TS`.
+
+## Mutants, each checked to COMPILE first
+
+| mutant | tsc | reds |
+| --- | --- | --- |
+| drop the identity guard (a bare `getDocument`) | 0 | **exactly 1** - PKEY CORNER |
+| refuse on a non-resolving parent | 0 | **exactly 2** - UNCHANGED, PKEY CORNER |
+| no predicate at all (develop) | 0 | **exactly 6** - the RED cells |
+
+Reported, not counted: an earlier attempt at the second deleted the guard line, left `parentHit` unused, so **tsc exited 2 and all 13 cells failed with 0 passed** - a load failure, not a behavioural mutant. Green file restored **byte-identically** after every mutant.
+
+## Step 1's matrix, reproduced in MY environment before I trusted G 10th's verdict
+
+| suite | MT | result | registry FK warnings |
+| --- | --- | --- | --- |
+| ks1557 before the hunk | false | 17/17 | 0 |
+| ks1557 before the hunk | true | 16 passed, 1 FAILED at :241 | **26** |
+| ks1119 control | false / true | 18/18 both | 0 |
+| ks1557 after the hunk | false / true | **17/17 both** | **0** |
+
+G 10th's figures exactly, the 26 included. The warning count carries a zero control and a non-zero control, because my first grep pattern read 0 against a log holding 26.
+
+## Files
+
+`services/originate/src/routes/certifications.ts` · `src/__tests__/ks1557-lineage-certify-needs-parent-access.integration.test.ts` (new) · `ks1557-verify-trusts-certification-evidence.integration.test.ts` · `ks1538-legacy-certify-needs-document-access.test.ts` · `ks1213-a-derived-writer-relabel-is-refused.test.ts` · `ks1508-versionedbyid-is-server-set.test.ts` · `ks1228-a-refused-request-writes-no-provenance-row.test.ts`. **No migration added or changed. `documentRepo.ts` and `documents.ts` were READ and not edited.**
+
+## Residuals, in the PR body and on the ticket
+
+- **ITEM5c is NOT closed**, by Kam's ruling (b) (`c033e6fb`); a cell asserts it stays open.
+- **403-vs-201 now tells a write-role caller whether an `external_id` exists in their own tenant** - a new, small signal, named in the code comment, and the direct consequence of leaving the non-resolving case unchanged.
+- **A row whose `external_id` is NULL, addressed by its pkey, is refused** rather than making a parentless row. `documents.external_id` is nullable (measured on the migrated schema, not just read from `migrations/001_initial-schema.sql:31`); no writer in this service produces such a row.
+- **Concurrency is not covered** - the cells are sequential; nothing asserts two simultaneous certifies naming the same parent.
+
+## Push preflight — its own words, not mine
+
+**`PREFLIGHT INCOMPLETE - 13/16 legs ran, 3 SKIPPED. Nothing failed.`** · `legs 3 4 8 - local stack not up` · and the hook's own line: `This is NOT a pass. Do not quote it as one - say which legs ran.` Shell suites **91 passed, 0 failed, 0 skipped (of 91)**. Every tally in the log reads `failed=0`, checked with an awk that fires on a planted non-zero. `PUSH_RC=0`. Gate armed before the push, read back `.githooks` from `file:.git/config` after reading EMPTY at rc=1 before.
+
+**The four platform suites were NOT run** (Schemathesis · Akto · Playwright · Performance/k6): they need the local compose stack and **there is no Docker on this machine.** Both pre-merge acknowledgment boxes are deliberately UNTICKED and the PR says why.
+
+## Filed
+
+**KS-1656** (Low, Backlog) - `assertNoCycle` is asked about the certification uuid, not the derived row's `external_id`, so the cycle arm cannot fire for the row the certify route creates; the three `documents.ts` sites pass the minted external id, which is the control. Description read back by id: 30 distinctive phrases present, 0 missing, inverted control 0.
+
+**KS-1647 already existed** for the `registerInPlatformRegistry` double swallow - filed 06:03:16Z carrying G 10th's own measurement (the 26 warnings, the there-and-back control, the provisioning-gap reading, and KS-1528 as the broader cause). **So that queue item was already done and I filed no duplicate and added no comment** - the ticket is more complete than what I would have written.
+
+## KS-1557 ticket comment
+
+Posted, read back **by id**, byte-identical, with a control that an altered copy reads False.
+
+## Next
+
+KS-1633 on its own branch off develop, as the brief orders - option 1, the `documents` row before the anchor POST. I will mail you before the first line if the reorder moves a response a client sees.
+
+Seat G 11th
+
