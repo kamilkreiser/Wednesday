@@ -1,0 +1,124 @@
+Seat R 58th, lane Secuura/Blockchain-R. Item (ii) is READY FOR GATE. Tier 2, as briefed.
+
+## THE FIVE ARTEFACTS
+1. PULL REQUEST: **#1650** — https://github.com/Secuura/Distributed_Secuura/pull/1650
+   (a PR, not a branch; base `develop`, state OPEN, mergeable MEREABLE/UNSTABLE)
+2. HEAD SHA, read from ORIGIN in the same action as writing this sentence:
+   **902b1ee093f921bc4395b40dedb45a9ab6667eb4**
+   `git ls-remote origin refs/heads/feature/ks-1677-bi1-verifier-secrecy-and-bicep-polarity-cells`
+   returned it, `gh pr view 1650 --json headRefOid` agrees, and local HEAD equals it.
+3. TICKET COMMENT NAMING THE PR: KS-1677 comment **`517941b4-2d24-4340-a3d7-28174f08b552`**,
+   22:51:15.131Z. Comment count **4 -> 5, exactly one added**; read back **byte-identical**
+   (4551 sent, 4551 stored); `#1650` and the head sha both verified present in the stored body.
+4. TEST EVIDENCE BLOCK: in the PR body, written by me — I ran every figure in it.
+5. WHAT WAS NOT DONE / NOT COVERED: below, and in the PR body.
+
+## WHAT IT IS
+Gate BI1's NB1 + NB2 + NB4, test-only. 3 files, 274 insertions / 1 deletion. The only non-test
+line in the PR is a comment.
+- NB1: new file, V0 control + V1 secrecy (kills BI-M1) + V2 provenance (kills BI-M5 and BI-M1)
+  + V3 randomness (kills BI-M5). The cells read the verifier from the svc_m365_oauth_states row
+  through the service's OWN decryptToken under a real keyring, because it is never on the wire.
+- NB2: H3 PARSES the ENTRA_REDIRECT_URI ternary and EVALUATES it for both deployment cases, with
+  an inverted-want control that runs the same parser over the BI-M4 mutation and asserts the
+  opposite conclusion. H1 and H2 are byte-identical to develop (889 and 653 bytes, extracted from
+  89956fe92956 and compared), so BI-M6 stays killed by the assertions that killed it.
+- NB4: encryptedField.ts:61 tokenCrypto.ts:24 -> :28. One comment line.
+
+## RED-PROOF, 6 ARMS
+A Python driver asserts the swap took before running and asserts the restore by sha256 after every
+arm. R 57th's zsh-scalar trap is not repeated. NO arm produced a LOADFAIL (0 passed AND 0 failed),
+so no mutant counted as nothing.
+
+  develop, no mutation          --      my cells red: NONE    21 files, 206 passed, 0 failed, 0 skipped
+  BI-M1  codeVerifier = state   tsc 0   V1, V2                204 passed, 2 failed
+  BI-M5  = sha256Hex(connId)    tsc 0   V2, V3                204 passed, 2 failed
+  R58-M7 = 'a'.repeat(43) MINE  tsc 0   V3 (+ pre-existing R19) 204 passed, 2 failed
+  BI-M4  !empty(apiPublicUrl)   n/a     H3                    205 passed, 1 failed
+  BI-M6  both on the API host   n/a     H1 AND H3  <- CONTROL, stays red
+Suite 20 files/201 tests -> 21/206: +1 file, +5 cells, 0 vanished (201 + 5 = 206).
+R58-M7 is mine, not the gate's: a FIXED verifier with the right shape, so V1 and V2 pass it and
+only V3 sees it. It shows V3 is not merely a BI-M5 detector, and confirms the pre-existing R19
+still kills a fixed verifier, so round 1's B2 condition stands.
+
+## PRE-PUSH ROUTE, CITED BEFORE THE PUSH
+`.githooks/pre-push:61`  `[ "$remote_sha" = "$ZERO" ] && continue   # brand-new branch at origin`
+A new branch skips the non-fast-forward refusal at :62-:72 entirely. My pushed sha IS HEAD, so the
+:16 refusal ("a pushed sha that is not HEAD and changes Blockchain/Dev is REFUSED") does not bite.
+Hooks were armed in my fresh clone before the first push: `core.hooksPath` read back `.githooks`,
+`.githooks/pre-push` executable.
+
+## PREFLIGHT — QUOTED AS IT READS, NOT AS A PASS
+**"PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed."**
+  legs 3, 4, 8 SKIPPED — local stack not up.
+The verdict's own next line is "This is NOT a pass. Do not quote it as one — say which legs ran."
+So: 13 ran, 3 skipped, 0 failed. Legs 6 and 7 (the audit gates) I also pre-ran before the push:
+both rc 0, no advisories outside the baseline, 44 standalone locks.
+
+## ALSO RUN, BY ME
+- tsc --noEmit -p services/m365-integration -> rc 0.
+- The TEST FILES type-checked explicitly. The service's tsconfig EXCLUDES src/__tests__, so tsc
+  had never examined a test file here and vitest's esbuild only strips types. A child config with
+  `exclude: []` -> rc 0, 0 diagnostics, with a control that the override took (21 test files
+  listed, not 0). The scratch config was removed and is not in the PR.
+- packages/shared: build rc 0, suite 52 files / 994 tests / 0 failed.
+
+## NOT DONE / NOT COVERED
+- The four platform suites (Schemathesis, Akto, Playwright, k6) did NOT run. They need a running
+  local stack and I brought none up. This PR changes no runtime surface, so there is no behaviour
+  for them to exercise. Stated, not skipped.
+- The bicep template was NEVER COMPILED (no Bicep CLI, as BI1 also recorded). H3 reads source.
+- Nothing reached Microsoft or Graph: no cell completes an OAuth callback.
+- No other service's unit suite was run; no file outside m365-integration and that one comment.
+- BI1 NB3 (custom admin domain) is NOT addressed — a deploy precondition and a wording question
+  on KS-1677, not a test gap.
+
+## TWO THINGS FOR YOUR CALL
+1. **m365-integration is NOT gated by preflight leg 16's test-type ratchet.** Leg 16's own output
+   on this push names its corpus: auth (42 baseline errors), api-gateway (27), vc-issuer (0) —
+   m365 is absent. Its test files are exactly the KS-1000 class the ratchet exists for. I measured
+   **0** type errors for m365, so a baseline would be EMPTY, like vc-issuer's — cheaper than
+   KS-1554's security case, which has 2 errors to fix first. Board-searched over all 1675 issues,
+   archived included, exact substring, with a control (`m365-integration` 34 hits, so the corpus is
+   live): test-types-ratchet 3, typecheck-tests 6, tsconfig.test.json 9, KS-1487 10,
+   baseline-auth.txt 0, "shrinking baseline" 0. **Not a new class** — per-service tracked at
+   KS-1000 (auth), KS-1554 (security), KS-1090 (api-gateway + originate), KS-1122 (vc-issuer),
+   with KS-1551(a) on a missing baseline passing silently. **Under Kam's test-pass rule this is the
+   same workload as KS-1554, so I FILED NOTHING** and recorded it in the PR's Known residue and on
+   KS-1677. Your call whether it becomes a KS-1554 comment.
+2. **BACKLOG.md:1236 says packages/shared has a RED suite on develop. At 89956fe92956 it is GREEN**
+   (52 files / 994 tests / 0 failed). That entry looks stale. Not edited — flagged for its owner.
+
+## ITEM (iii): YOUR RULING RECEIVED, AND ONE THING IT CHANGES
+Your 22:45:36Z ANSWER is in hand: shape (1), fail closed on null / zero-match / multiple-match,
+never fall back to [0]; not (2), not (3); rotation is its own ticket; tier 1; proceed after this
+READY. Nothing of (iii) is written.
+
+**KS-1687 FILED** for your point 4 (rotation) — Backlog, Medium, label Bug, related -> KS-1682,
+read back and verified. But the board search changed its framing, so the ticket says this rather
+than "unowned":
+  - `toTokenResult` 0 hits, `refreshAccessToken` 0, `acquireTokenByRefreshToken` 0,
+    `token-manager.ts` 1 (KS-1682 only). Controls fired: `refresh token` 17, `exchangeAuthCode`
+    exactly 2 (KS-1682 + KS-1677).
+  - **`token rotation` and "rotate the refresh token" each hit KS-632 (DONE)**, which already
+    recorded the SAME SYMPTOM — and attributed it to `dbSaveConnection`'s ON CONFLICT clause
+    omitting refresh_token. **That fix LANDED**: at 89956fe92956 the clause does include
+    `refresh_token = EXCLUDED.refresh_token` (index.ts:180-182). **The symptom survives anyway**,
+    one layer up, because `toTokenResult` reads a field the msal result never carries, so
+    index.ts:844's guard can never fire and there is nothing for the now-correct upsert to store.
+  - I strengthened the evidence: `RefreshTokenClient.mjs:47-49` routes through the SAME
+    `responseHandler.handleServerTokenResponse` as `AuthorizationCodeClient.mjs:59` (control: both
+    call it), and nothing in RefreshTokenClient attaches refreshToken to the result. So the absent
+    field is a property of the SHARED result construction, not of one call.
+  - Labelled in the ticket as a SOURCE READING, not an observation of a live response, per your 5.
+So KS-632 being Done was masking a still-live defect. KS-1687 is not a duplicate of it: different
+cause, different file, different fix, and KS-632 cannot carry it.
+
+## MEANWHILE
+Starting (iii) now, per your sequencing: shape (1) with the three fail-closed branches and six
+cells, red-proofed with compile-safe mutants ([0] restored; the null branch falling back).
+
+## NEEDED-BY
+The gate on #1650 at 902b1ee093f9. I will not merge without your GO naming that head.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 54  SEEN:      238  BATCH: /private/tmp/wed_newmail/batch_20261019T225342Z.txt

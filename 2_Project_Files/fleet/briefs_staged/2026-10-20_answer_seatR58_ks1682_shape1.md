@@ -1,0 +1,11 @@
+## BLUF
+RULED: build shape (1), select the refresh token by `result.account.homeAccountId`, with FAIL-CLOSED branches. NOT (2), NOT (3). The rotation defect (your 3(b)) is its OWN ticket, not in this PR. Tier 1 Opus gate. Proceed after (ii)'s READY.
+
+## Ruling detail (inside Wednesday's v1.3 scope: a fail-closed restriction and sequencing)
+1. **Fail closed, three branches, each a cell:** `result.account` null -> store '' ; ZERO cache entries matching the homeAccountId -> store '' ; MORE THAN ONE matching entry -> store '' (do not pick one). Never fall back to `[0]` anywhere. Log a warning that names the branch and no token material.
+2. **Why (1) over (2):** same outcome at the point of selection, smallest blast radius, and the only shape you measured end to end. (2)'s cost (initMsal shape, every getMsalClient caller, lost AT cache) buys nothing the fail-closed branches do not already buy. Why not (3): its correctness rests on a concurrency interleaving nobody has measured; not as primary, not as defence in depth in this PR.
+3. **Cells:** your four (two-org through the REAL exchangeAuthCode with only acquireTokenByCode stubbed; single-org control; null account; the refresh path keeps a stored token, pinning 3(a)) plus the two new fail-closed cells (zero match, multiple match). Red on develop where the defect lives; controls that can fail. Red-proof with compile-safe mutants (`[0]` restored; the null branch falling back) as BI1 did.
+4. **3(b) rotation never persisted:** board search by symbol (`toTokenResult`, `refreshAccessToken`) and path with a control; if unowned, ONE ticket, Bug, Medium (reliability: a rotated RT is dropped and the stored one ages out), related -> KS-1682, facts + your ResponseHandler.mjs reading (nested msal-common 15.17.0) + the :843 comment that claims otherwise; no design, no build.
+5. **The source reading of "no refreshToken at runtime"** stays labelled as a source reading (your §7) in the PR body and the ticket comment: not an observation of a live response.
+6. Dormancy figures (demo 0 rows, kintsugi UNMEASURED) go in the PR body; D 25th is deploying kintsugi now, so do not read it.
+7. Pre-push citation before the push, as before. Stop at READY FOR GATE.

@@ -1,0 +1,136 @@
+diff --git a/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts b/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
+index e216d8717..919de2f78 100644
+--- a/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
++++ b/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
+@@ -248,7 +248,7 @@
+       ${'SHA-256'},
+       ${toDbStatus(cert.status)},
+       ${issuerUserId}::uuid,
+-      ${cert.holder.id}::uuid,
++      ${toActorUuid(cert.holder.id)}::uuid,
+       ${cert.holder.did || null},
+       ${JSON.stringify({})}::jsonb,
+       ${certMeta}::jsonb,
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1659-a-connector-certifying-with-no-holder.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1659-a-connector-certifying-with-no-holder.test.ts
+new file mode 100644
+index 000000000..ac0ce942e
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1659-a-connector-certifying-with-no-holder.test.ts
+@@ -0,0 +1,117 @@
++/**
++ * KS-1659 - a connector certifying with no holderId must not throw 22P02 at the holder's `::uuid` cast.
++ *
++ * KS-564 folded the ISSUER principal (`connector:platform-s:<ref>`, not a UUID) with toActorUuid before binding it to a `::uuid`
++ * column, and left the HOLDER raw in the same INSERT. A certification with no holderId defaults the holder to the caller's own
++ * principal, so a connector caller bound the principal string to documents.owner_user_id and Postgres refused it (22P02), which the route
++ * reports as the client's unstorable payload. After this change the holder is folded the same way: NULL in the UUID column, while the raw
++ * principal stays in certification_metadata.holderId, exactly as the issuer's does.
++ *
++ * The database stand-in is FAITHFUL on the one property that matters: it refuses a non-UUID value bound to a `::uuid` placeholder with
++ * Postgres's own message, and it records every binding before it refuses.
++ */
++
++const mockExecuteRaw = jest.fn();
++
++jest.mock('../db', () => ({
++  prisma: {
++    $queryRaw: jest.fn(),
++    $executeRaw: mockExecuteRaw,
++  },
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++import { saveCertification, reserveCertificationRow, Certification } from '../repositories/certificationRepo';
++
++const TENANT = 'a0000000-0000-4000-8000-000000000001';
++const CERT_ID = 'c0000000-0000-4000-8000-0000000000c1';
++const HUMAN_ISSUER = 'a0000000-0000-4000-8000-000000000010';
++const HUMAN_HOLDER = 'b0000000-0000-4000-8000-000000000020';
++const CONNECTOR = 'connector:platform-s:38d85754-17ee-4c28-8ca7-467a58f98cc3';
++const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
++
++// The documents INSERT binds (id, tenant, title, type, hash, algorithm, status, ISSUER, HOLDER, did, '{}', certMeta, ...).
++const ISSUER_AT = 7;
++const HOLDER_AT = 8;
++const CERT_META_AT = 11;
++
++type Bound = { sql: string; values: unknown[] };
++let calls: Bound[] = [];
++
++beforeEach(() => {
++  calls = [];
++  mockExecuteRaw.mockReset();
++  mockExecuteRaw.mockImplementation(async (strings: TemplateStringsArray, ...values: unknown[]) => {
++    calls.push({ sql: strings.join('?'), values });
++    values.forEach((v, i) => {
++      if (strings[i + 1].startsWith('::uuid') && v !== null && !UUID_RE.test(String(v))) {
++        throw new Error(`Raw query failed. Code: 22P02. Message: invalid input syntax for type uuid: "${String(v)}"`);
++      }
++    });
++    return 1;
++  });
++});
++
++function cert(issuerId: string, holderId: string): Certification {
++  return {
++    id: CERT_ID,
++    type: 'verification_certificate',
++    status: 'issued',
++    issuer: { id: issuerId, name: 'Issuer' },
++    holder: { id: holderId, name: 'Holder' },
++    data: { title: 'A certificate' },
++    issuedAt: '2026-10-20T00:00:00.000Z',
++    contentHash: 'a'.repeat(64),
++  } as unknown as Certification;
++}
++
++const documentsInsert = (): Bound => calls.find((c) => c.sql.includes('INSERT INTO documents')) as Bound;
++
++describe('KS-1659 the certification write folds the HOLDER principal as it folds the issuer', () => {
++  it('RED KS-1659 R1: saveCertification resolves for a connector caller who named no holder (issuer and holder are the same connector principal)', async () => {
++    const c = cert(CONNECTOR, CONNECTOR);
++    await expect(saveCertification(c, TENANT)).resolves.toBe(c);
++  });
++
++  it('RED KS-1659 R2: the connector holder is bound to owner_user_id as NULL, not as the principal string', async () => {
++    await saveCertification(cert(CONNECTOR, CONNECTOR), TENANT).catch(() => undefined);
++    expect(documentsInsert().values[HOLDER_AT]).toBeNull();
++  });
++
++  it('RED KS-1659 R3: reserveCertificationRow, which shares the INSERT, resolves for a connector holder as well', async () => {
++    await expect(reserveCertificationRow(cert(CONNECTOR, CONNECTOR), TENANT)).resolves.toBeUndefined();
++  });
++
++  it('CONTROL KS-1659 C1: a human holder UUID is still bound unchanged and the write resolves', async () => {
++    const c = cert(HUMAN_ISSUER, HUMAN_HOLDER);
++    await expect(saveCertification(c, TENANT)).resolves.toBe(c);
++    expect(documentsInsert().values[HOLDER_AT]).toBe(HUMAN_HOLDER);
++    expect(documentsInsert().values[ISSUER_AT]).toBe(HUMAN_ISSUER);
++  });
++
++  it('CONTROL KS-1659 C2: the connector ISSUER is still folded to NULL (KS-564) and a human holder beside it is untouched', async () => {
++    const c = cert(CONNECTOR, HUMAN_HOLDER);
++    await expect(saveCertification(c, TENANT)).resolves.toBe(c);
++    expect(documentsInsert().values[ISSUER_AT]).toBeNull();
++    expect(documentsInsert().values[HOLDER_AT]).toBe(HUMAN_HOLDER);
++  });
++
++  it('CONTROL KS-1659 C3: the raw connector principal still reaches certification_metadata as issuerId and holderId, so attribution survives the fold', async () => {
++    await saveCertification(cert(CONNECTOR, CONNECTOR), TENANT).catch(() => undefined);
++    const meta = JSON.parse(String(documentsInsert().values[CERT_META_AT]));
++    expect(meta.issuerId).toBe(CONNECTOR);
++    expect(meta.holderId).toBe(CONNECTOR);
++  });
++
++  it('CONTROL KS-1659 C4: the stand-in refuses a non-UUID bound to a uuid cast, so the cells above can fail for the real reason', async () => {
++    await expect(
++      (mockExecuteRaw as unknown as (s: TemplateStringsArray, ...v: unknown[]) => Promise<number>)(
++        Object.assign(['SELECT ', '::uuid'], { raw: ['SELECT ', '::uuid'] }) as unknown as TemplateStringsArray,
++        'not-a-uuid',
++      ),
++    ).rejects.toThrow(/22P02/);
++  });
++});

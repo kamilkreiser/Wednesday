@@ -21,6 +21,21 @@ updated: 2026-09-23
 > his queue to reconcile.** Until it is, this warning is the only thing standing between the
 > list and the next agent that follows the skill literally.
 
+## Last session — 2026-10-20 (Seat C 30th, pane `Secuura/Blockchain-C` `%15`, REVIEW lane, 19:56:53Z 10-19 to ~22:1xZ; wrapped on Wednesday's GO-then-wrap)
+
+**KS-1116 built and merged in two PRs.**
+- #1648 `c66b834ed451`: both `GET /:id` reads are bound to the creating principal, on the RECORD (vc-issuer's memory fallback would bypass a SQL filter), with migration 054.
+- #1649 `89956fe92956`: Kam's ruling (a) on owner-less rows (ORG_ADMIN/SYSTEM_ADMIN of the row's own tenant), plus gate BH1's three missing cells.
+- Each landed exactly its gate's tree. Nothing deployed.
+- (a) reaches **0 existing rows**: no legacy row's tenant is determinable (measured on demo).
+
+**Open / next:** the two test-only cells of gate BJ1 NOTE 2 (TENANT_ADMIN/SUPER_ADMIN, and a prefix tenant → 404). KS-1683 (list + by-hash, High) waits on Platform S. KS-1684, KS-1685, KS-1686. D lane: deploy 054 BEFORE the new vc-issuer.
+**Blockers:** none of mine. KS-1683's question is Kam's to raise with Stuart.
+**Notes for Wednesday:**
+- The project PAT sees ONE repo, so "does Platform S call X" is unanswerable from Platform K.
+- `OWNER` is Platform K's default end-user role.
+- Handover: `5_Project_History/2026-10-20_seatC-30th/HANDOVER.md`.
+
 ## Last session — 2026-10-20 (Seat C 29th, pane `Secuura/Blockchain-C` `%12`, REVIEW lane, 18:38:04Z 10-19 to ~19:4xZ; wrapped on Wednesday's approval)
 
 **Peter's docs refresh (#1625 / KS-1668) reviewed against the code: 52 claims enumerated, 49 stand, 3 corrected, ZERO code defects.** Kam relayed Peter's *"review and adjust/accept and update docs as required"*. **The merge Peter asked for was already done — by Peter** (`merged_by: PeterObeden`, 2026-10-19T13:24:02Z, a fast-forward to `46e4343a5312`), established from the API rather than assumed. The three corrections were all in `docs/security/ROLES-AND-AUTHORIZATION-INVENTORY.md` and shipped as **#1645**, squashed to develop **`5ac66264b9ee`**, landed tree **`37244a4a698e`** — the gate's figure. (1) §7 said tenant `ADMIN` *"can mint a key naming any organisation in its tenant"*; KS-1570 closed that at 2026-10-19T08:06Z against a **merged** bound, **3 h 19 min before Peter's branch was cut**, and the mint is refused 403 — and **#1625 recorded KS-1570 correctly in `DEV-PROCESS.md`, so one PR carried both states of one decision.** (2) §2.3 described presentation/credential ownership binding as implemented; KS-1116 is Backlog and says *"Nothing has been built"* — both reads resolve by id alone. (3) A personal pronoun, against KS-1668's own *"No names in the entries"*. **Nothing deployed, no `az`, no box read, no product code.**

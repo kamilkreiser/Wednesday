@@ -1,8 +1,8 @@
-# Ornith candidates — derived 2026-10-19 18:27 from 361 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-20 09:13 from 370 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 29
+## T1 services (vitest, one file) — 32
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-1168 (P3) userRepo.ts: ILIKE search on encrypted PII columns can never match — :1017 and : — `services/auth/src/repositories/userRepo.ts`
 - KS-1190 (P3) api-gateway meetsVerificationLevel fails open on an unknown REQUIRED level: an o — `services/api-gateway/src/services/enforcement.ts`
@@ -17,12 +17,13 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1528 (P3) platform_document_registry.tenant_id has three declarations that disagree (init  — `services/api-gateway/src/startup-migrations.ts`
 - KS-1534 (P3) KS-1232 gate follow-ups: share the allow-list predicate between the info reader  — `services/api-gateway/src/services/health.ts`
 - KS-1548 (P3) KS-1512 follow-up: post-deadline discard, pin the no-window guard, body-stall co — `services/api-gateway/src/routes/platform.ts`
-- KS-1568 (P3) KS-1556 follow-up (#1529 round-2 gate m1): four rotate-chain guards have no beha — `services/security/src/index.ts`
 - KS-1569 (P3) API-key revoke route writes the revoke into shared memory before its database sa — `services/security/src/index.ts`
 - KS-1581 (P3) GET /api/keys has no tenant-level mode: organisation-less keys cannot be listed, — `services/security/src/index.ts`
 - KS-1588 (P3) ks1009 wallet-status cells pin the response BODY only: a leak through a response — `services/auth/src/auth.openapi.ts`
 - KS-1600 (P3) KS-1594 follow-up (pull request 1547 round-2 gate): the non-string and null orga — `services/security/src/index.ts`
 - KS-1604 (P3) Security: nothing binds the forwarded `identity` block to the authenticated call — `services/anchoring/src/anchorSchema.ts`
+- KS-1670 (P3) m365-integration: three more reflection sites from gate AM1 - an unencoded conne — `services/m365-integration/src/index.ts`
+- KS-1675 (P3) m365: connections probably never persist or reload - svc_m365_connections is fai — `services/m365-integration/src/index.ts`
 - KS-579 (P3) Per-person platform-admin identities — the shared seeded admin cannot carry attr — `services/api-gateway/src/routes/platform.ts`
 - KS-581 (P3) register-connector: volume alerting, rate limit, and correlation of refused re-k — `services/api-gateway/src/routes/platform.ts`
 - KS-627 (P3) Implement real wallet signature verification (CIP-8/COSE + address binding) — ne — `services/wallet-connector/src/types/index.ts`
@@ -31,6 +32,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1145 (P4) ks949 suite coverage (KS-950 / KS-962, #973): ID3's capture half has no size ass — `services/api-gateway/src/startup-migrations.ts`
 - KS-1459 (P4) KS-1236 follow-ups: the approve level check and write are not atomic, and the lo — `packages/shared/src/verification/policy-engine.ts`
 - KS-1649 (P4) developer-portal.html:564 says every API key defaults to 1,000 req/hour; Platfor — `services/security/src/index.ts`
+- KS-1663 (P4) anchoring readOwningDocument: a correct tenant bound resting on a false reason — — `services/anchoring/src/anchorOverwriteGuard.ts`
+- KS-1684 (P4) vc-issuer: after a revoke, the credential's creator can be refused GET /api/cred — `services/vc-issuer/src/repositories/credentialRepo.ts`
 - KS-1463 (P0) packages/shared: one test imports services/demo-service and needs cors, so the s — `services/demo-service/src/app.ts`
 
 ## T2 tooling (systemTest/*, one file) — 3
@@ -54,25 +57,27 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1444 (P4) start-secuura.sh --rebuild leaves ~30 untagged images per slot per rebuild (and  — `Start_Up/start-secuura.sh`
 - KS-1625 (P4) Declared Node floor (engines.node >=18.0.0 in 5 packages) contradicts what the r — `scripts/preflight/lockfile-cleanroom.sh`
 
-## T3 jest services (originate, governance) — 6
+## T3 jest services (originate, governance) — 8
 - KS-1590 (P3) verify-file's cross-tenant registry lookup compares the sha256:-prefixed hash ag — `services/originate/src/routes/verification.ts`
 - KS-1593 (P3) KS-759 follow-up: nothing pins that originate's connectorContext reads stay type — `services/originate/src/middleware/auth.ts`
 - KS-1597 (P3) KS-1119 follow-ups (pull request 1542, Opus gate): the hash-match flag is not th — `services/originate/src/routes/verification.ts`
-- KS-1633 (P3) POST /api/certifications/issue anchors BEFORE it writes its documents row, so an — `services/originate/src/routes/certifications.ts`
-- KS-1629 (P4) originate GET /api/anchors/:documentId WRITES: a read request mints a tx_sim_ an — `services/originate/src/routes/anchors.ts`
+- KS-1664 (P3) POST /api/certifications/{id}/recertify anchors BEFORE it writes its documents r — `services/originate/src/routes/certifications.ts`
+- KS-1666 (P3) KS-1633 follow-ups (PR #1623, gate AK1's nine notes): the row left behind when t — `services/originate/src/routes/certifications.ts`
+- KS-1681 (P3) Five tracked files cite DEPLOY-BLOCKERS.md as a repo document, including two pro — `services/originate/src/routes/metering.ts`
 - KS-1651 (P4) ownership_transferred carries the raw principal where the custody row carries th — `services/originate/src/routes/documents.ts`
+- KS-1657 (P4) originate GET /api/anchors/:documentId answers 404 when its database read FAILS: — `services/originate/src/routes/anchors.ts`
 
 ## T4 docs (doc_patch) — 0
 
-## T5 multi-file / later — 50
+## T5 multi-file / later — 54
 - KS-1051 (P2) develop is RED on the services/originate jest suite and NOTHING catches it — the — `scripts/preflight/preflight.sh`, `.githooks/pre-push`
 - KS-1055 (P2) Per-tenant databases never receive the file migrations — CORE_MIGRATIONS FORCEs  — `services/api-gateway/src/startup-migrations.ts`, `services/tenant-provisioning/src/index.ts`
-- KS-1262 (P2) Security: PUT /api/settings/notifications writes the same key namespace as platf — `services/api-gateway/src/services/redis.ts`, `services/api-gateway/src/routes/admin.ts`
 - KS-1384 (P2) One anchor row per (document_id, network): a repeat POST /api/anchors resets the — `services/anchoring/src/index.ts`, `services/originate/src/routes/documents.ts`
 - KS-1390 (P2) The e2e-v2 harness is platform-k's only browser, portal and accessibility covera — `systemTest/playwright/playwright.config.ts`, `.githooks/pre-push`
 - KS-1535 (P2) POLICY (Kam's call): role ADMIN is a KEY_ADMIN_ROLE that the KS-764 organisation — `services/security/src/provisioningPolicy.ts`, `packages/shared/src/security/keyRevokePolicy.ts`, `services/api-gateway/src/routes/platform.ts`
 - KS-1574 (P2) GET /api/keys has no organisation arm: an ORG_ADMIN or ISSUER_ADMIN lists anothe — `services/security/src/index.ts`, `packages/shared/src/security/keyRevokePolicy.ts`
 - KS-1640 (P2) Chain-first verify blobs hard-code `anchored: true` and drop anchoring's status/ — `services/originate/src/routes/verification.ts`, `services/originate/src/routes/verificationV2.ts`
+- KS-1683 (P2) vc-issuer: GET /api/credentials (list) and GET /api/credentials/by-hash/:hash re — `services/api-gateway/src/middleware/auth.ts`, `services/vc-issuer/src/ownership.ts`
 - KS-485 (P2) Security review — plan, methodology & handover (Platform K) — `services/api-gateway/src/routes/notifications.ts`, `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/index.ts`
 - KS-491 (P2) Review F — Edge, WAF, DDoS & anti-automation — `services/api-gateway/src/middleware/rateLimitEnforce.ts`, `services/auth/src/routes/auth.ts`
 - KS-576 (P2) Bulk re-key: one admin-authorised rotate across a named set of externalRefs — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`, `packages/shared/src/db/tenant-guc.ts`
@@ -98,8 +103,10 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1591 (P3) Security (nit, pre-existing): isPlatformRole's toUpperCase admits a dotless-i, a — `packages/shared/src/security/keyRevokePolicy.ts`, `services/security/src/index.ts`
 - KS-1599 (P3) Two ungated tenant reads that KS-1032's fail-closed ruling does not cover: meter — `services/originate/src/routes/metering.ts`, `packages/shared/src/db/tenant-context.ts`, `services/originate/src/index.ts`
 - KS-1601 (P3) KS-1598 follow-up (pull request 1548 gate i6): the admin-scope route's `upper(ro — `services/security/src/index.ts`, `packages/shared/src/security/keyRevokePolicy.ts`
-- KS-1639 (P3) rowToApiKey reads the Postgres text forms 'f' and 'false' as ACTIVE — the mapper — `services/security/src/converters.ts`, `services/security/src/index.ts`
 - KS-1647 (P3) registerInPlatformRegistry's failure is swallowed twice (.catch(() => {}) over a — `services/originate/src/routes/documents.ts`, `services/originate/src/routes/verification.ts`, `services/tenant-provisioning/src/index.ts`
+- KS-1652 (P3) KS-1603 residue: the interim anchor-ownership check does not apply to a tenantle — `services/auth/src/services/jwt.ts`, `services/anchoring/src/anchorOverwriteGuard.ts`
+- KS-1659 (P3) KS-564's fold covers the certification ISSUER and not its HOLDER: a connector ce — `services/originate/src/routes/certifications.ts`, `services/originate/src/repositories/certificationRepo.ts`
+- KS-1685 (P3) Every API key without a connector id is the same principal (connector:api-key) w — `services/auth/src/services/jwt.ts`, `services/security/src/index.ts`, `services/vc-issuer/src/ownership.ts`
 - KS-526 (P3) KMS: move platform wallet mnemonic to Key Vault (KS-326 follow-up) — `services/anchoring/src/index.ts`, `services/anchoring/src/cardano/wallet.ts`, `packages/shared/src/vault/key-vault.ts`
 - KS-580 (P3) Append-only recovery audit held outside the estate being recovered — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`
 - KS-625 (P3) /presentations/verify reports a presentation verified without checking the holde — `services/vc-issuer/src/routes/presentations.ts`, `services/vc-issuer/src/routes/credentials.ts`
@@ -113,6 +120,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1635 (P4) Remove the dead meetsVerificationLevel dep from VerificationRouteDeps and its 16 — `services/api-gateway/src/routes/verification.ts`, `services/api-gateway/src/index.ts`
 - KS-1644 (P4) KS-1385 (b) follow-up: a non-object INCOMING secuura still raises, and dbPersist — `services/anchoring/src/index.ts`, `services/anchoring/src/anchorOverwriteGuard.ts`
 - KS-1648 (P4) api-gateway falls back to a 60 s window where security defaults to 3,600: a NULL — `services/api-gateway/src/middleware/auth.ts`, `services/api-gateway/src/middleware/rateLimitEnforce.ts`, `services/security/src/index.ts`
+- KS-1654 (P4) Two routes answer the same cross-tenant recipient miss with different codes: REC — `services/originate/src/routes/documents.ts`, `services/originate/src/routes/certifications.ts`
+- KS-1686 (P4) prism GET /api/credentials/:id returns any stored prism credential by id with no — `services/prism/src/index.ts`, `services/api-gateway/src/routes/proxy.ts`
 - KS-1083 (P0) GATEWAY_VOUCH_SECRET: nothing provisions it and no deploy order or rotation is w — `services/api-gateway/src/routes/verification.ts`, `packages/shared/src/db/tenant-context.ts`, `scripts/bootstrap-env.sh`
 - KS-1389 (P0) Sourcing systemTest/slot-target.sh with no slot named silently exports slot 1's  — `systemTest/fixtures/slot-required.ts`, `scripts/stack_env.sh`, `.githooks/pre-push`
 
@@ -143,12 +152,9 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 7
+## HELD (READY_* or done.md PASS) — 4
 - KS-1219 OAuth /authorize answers 500 server_error for an array-valued scope (repeated qu
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1622 Gate E1 follow-ups: KS-1545 logs nothing for an upstream error status; KS-1613 s
-- KS-1642 idNamespaceCollision helper (#1568): two guards no cell pins, a silent catch, an
-- KS-1645 The now-live audit export is quietly wrong: at most one upstream page, the to da
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 
@@ -157,7 +163,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1088 — decision-class: 'filing only; decide whether the runner should enforce isolation' — a ruling, not a patch (updated 2026-10-05)
 - KS-1112 — two files: option 1 reds ks1029's A1 cell (2026-09-15 18:45) (updated 2026-09-13)
 - KS-1113 — an e2e spec under tests/e2e — no Playwright checker yet (updated 2026-10-05)
-- KS-1132 — services/auth — security surface (Kam 16:40: auth LAST) (updated 2026-09-13)
+- KS-1132 — services/auth — security surface (Kam 16:40: auth LAST) (updated 2026-10-19)
 - KS-1148 — its own words: 'Fixing either is a .github/workflows/ edit — Kam-class; nothing here is changed by the seat that filed this' (updated 2026-10-09)
 - KS-1162 — three .github/workflows/ files (Kam-class) AND decision-class ('Fix direction: Either 1 … or …') (updated 2026-10-06)
 - KS-1184 — decision-class: the ticket's own words are 'A design call beside KS-1087 item 2, not a fix round on #1008' with two shapes offered (updated 2026-09-16)
@@ -168,7 +174,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-28)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
 
-## EXCLUDED by predicate — 238
+## EXCLUDED by predicate — 241
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-101 — on Peter/Stuart
 - KS-1010 — names no product file (after basename/docs/route resolution)
@@ -196,7 +202,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1106 — names no product file (after basename/docs/route resolution)
 - KS-1107 — auth-shaped title (LAST, Kam 16:40)
 - KS-1115 — names no product file (after basename/docs/route resolution)
-- KS-1116 — names no product file (after basename/docs/route resolution)
 - KS-1138 — names no product file (after basename/docs/route resolution)
 - KS-1141 — names no product file (after basename/docs/route resolution)
 - KS-1146 — auth-shaped title (LAST, Kam 16:40)
@@ -274,10 +279,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1446 — on Peter/Stuart
 - KS-1454 — names no product file (after basename/docs/route resolution)
 - KS-1458 — auth-shaped title (LAST, Kam 16:40)
-- KS-1460 — auth-shaped title (LAST, Kam 16:40)
 - KS-1465 — names no product file (after basename/docs/route resolution)
 - KS-1467 — auth-shaped title (LAST, Kam 16:40)
-- KS-1468 — names no product file (after basename/docs/route resolution)
 - KS-1472 — auth-shaped title (LAST, Kam 16:40)
 - KS-1473 — auth-shaped title (LAST, Kam 16:40)
 - KS-1474 — names no product file (after basename/docs/route resolution)
@@ -291,7 +294,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1495 — names no product file (after basename/docs/route resolution)
 - KS-1498 — auth-shaped title (LAST, Kam 16:40)
 - KS-1499 — names no product file (after basename/docs/route resolution)
-- KS-1500 — names no product file (after basename/docs/route resolution)
 - KS-1501 — auth-shaped title (LAST, Kam 16:40)
 - KS-1516 — names no product file (after basename/docs/route resolution)
 - KS-1523 — names no product file (after basename/docs/route resolution)
@@ -315,16 +317,24 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1596 — names no product file (after basename/docs/route resolution)
 - KS-1602 — names no product file (after basename/docs/route resolution)
 - KS-1606 — auth-shaped title (LAST, Kam 16:40)
-- KS-1607 — names no product file (after basename/docs/route resolution)
 - KS-1608 — auth-shaped title (LAST, Kam 16:40)
 - KS-1609 — on Peter/Stuart
 - KS-1611 — names no product file (after basename/docs/route resolution)
 - KS-1631 — names no product file (after basename/docs/route resolution)
 - KS-1632 — names no product file (after basename/docs/route resolution)
 - KS-1636 — names no product file (after basename/docs/route resolution)
-- KS-1641 — auth-shaped title (LAST, Kam 16:40)
 - KS-1643 — names no product file (after basename/docs/route resolution)
 - KS-1650 — names no product file (after basename/docs/route resolution)
+- KS-1655 — names no product file (after basename/docs/route resolution)
+- KS-1656 — names no product file (after basename/docs/route resolution)
+- KS-1665 — auth-shaped title (LAST, Kam 16:40)
+- KS-1667 — names no product file (after basename/docs/route resolution)
+- KS-1669 — names no product file (after basename/docs/route resolution)
+- KS-1672 — auth-shaped title (LAST, Kam 16:40)
+- KS-1674 — on Peter/Stuart
+- KS-1678 — names no product file (after basename/docs/route resolution)
+- KS-1680 — on Peter/Stuart
+- KS-1682 — auth-shaped title (LAST, Kam 16:40)
 - KS-188 — on Peter/Stuart
 - KS-239 — on Peter/Stuart
 - KS-263 — names no product file (after basename/docs/route resolution)
@@ -400,7 +410,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-956 — names no product file (after basename/docs/route resolution)
 - KS-959 — names no product file (after basename/docs/route resolution)
 - KS-964 — has a PR attached
-- KS-982 — on Peter/Stuart
 - KS-984 — on Peter/Stuart
 - KS-985 — on Peter/Stuart
 - KS-986 — names no product file (after basename/docs/route resolution)

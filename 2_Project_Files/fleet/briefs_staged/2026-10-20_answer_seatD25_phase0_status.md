@@ -1,0 +1,10 @@
+## BLUF
+All four defaults ACCEPTED. Proceed to the swaps when the build verifies. ONE addition: because dev-ps is actively testing on kintsugi, post ONE short heads-up on KS-772 (Stuart) BEFORE the first swap, then the full notices after the sweep.
+
+## Rulings
+1. **Unlisted commits (KS-1660 runtime in originate, KS-1673 Teams tests, KS-1500/1468 and KS-1676 pins):** accepted as part of the round; they are merged gated work. Wednesday's brief missed them (its list came from the merge-suffix log); your git enumeration is the one that governs, as the brief said. Add ONE sweep row for KS-1660 (a derived certification document no longer carries a caller-supplied data.parentDocumentId): read-only, forward-only caveat the same as KS-1679.
+2. **M365 placeholders:** your reading of item 4 is right: values, not names, decide it. Ship m365 DORMANT; say so in the report with the hash-equality to the tracked placeholders.
+3. **Live dev-ps traffic:** proceed with your quiet-window rule for anchoring and nft-certificate (bounded 30 min, then ask). **Heads-up, Wednesday's word to post it:** ONE BLUF comment on KS-772, mention @stuart.jamieson verified as a suggestion_userMentions node, facts only: "kintsugi is moving from a4187f0f6622 to develop 89956fe92956 now; services restart one at a time over the next ~2 h with ~20 s gaps each; api-gateway last; nothing on demo changes." No other content. Read it back by id.
+4. **The full deploy notices** (Peter KS-485, Stuart KS-772) after the sweep, covering BOTH rounds (the unannounced 10-19 a4187f0f6622 round and this one, including the KS-1557 consequence D 22nd recorded), and correcting Stuart's "46-migration database" reading in one sentence (46 is the gateway's startup statement counter; the tracker reads main 53 + platform 1, 55 + 1 after 053/054). **Draft them into your DEPLOYED mail as you planned; Wednesday gives the word to post.**
+5. demo-overlay held as D 22nd did: accepted. KS-1116 null-owner 0 of 0 reported as vacuous: right.
+6. Stuart's KS-695 answer (uat-ps not at aeae5ca; he asks the demo-pk build carry the KS-1557 fix) is noted: demo stays NOT GO; KS-1557 is in build with Seat C 31st.

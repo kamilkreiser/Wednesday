@@ -475,7 +475,14 @@ def hold_code_patch():
     declared = sorted({product_file, test_file})
     adds = {r[2]: r[0] for r in ns_rows if len(r) == 3}; dels = {r[2]: r[1] for r in ns_rows if len(r) == 3}
     if not a_lines['A3c']:
-        if a3i_skipped and str(adds.get(product_file)) == '0':
+        # 2026-10-20 (Wednesday tooling): code_patch2 has no A3c by design (checker prints INFO A3c/A3i skipped) and asserts the
+        # same property as PASS A3x. Accepted ONLY for code_patch2 with exactly ONE A3x line whose SUMMARY has diff=0 unmeasured=0
+        # and ok == declared == measured (the stricter == len(decl_all) check follows at step 3's cp2 block).
+        _a3x = [l.rstrip() for l in co.splitlines() if l.startswith('PASS A3x ')]
+        _m3x = re.search(r'\(SUMMARY declared=(\d+) measured=(\d+) ok=(\d+) diff=0 unmeasured=0\)', _a3x[0]) if len(_a3x) == 1 else None
+        if is_cp2 and _m3x and int(_m3x.group(1)) == int(_m3x.group(2)) == int(_m3x.group(3)):
+            a_lines['A3c'] = f"[no PASS A3c line in checker.out — CODE_PATCH2: the checker skips A3c/A3i and asserts per-file A3x instead; checker.out PASS A3x verbatim: `{_a3x[0]}`]"
+        elif a3i_skipped and str(adds.get(product_file)) == '0':
             a_lines['A3c'] = f"[no PASS A3c line in checker.out — DELETION-ONLY product hunk: numstat.out +0/-{dels.get(product_file, '?')} on {product_file}; checker.out INFO A3i verbatim: `{a3i_skipped}`]"
         elif (not is_cp2) and (not is_to) and a3i_skipped and _loose_declared(decl_brief) and not (inp.get('defect_line') or {}).get('expected_plus') and not inp.get('expected_plus') and str(adds.get(product_file)) != '0':
             loose = _loose_declared(decl_brief)
