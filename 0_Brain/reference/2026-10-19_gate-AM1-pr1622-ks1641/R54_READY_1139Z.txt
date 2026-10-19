@@ -1,0 +1,78 @@
+=========== [INBOUND] 2026-10-19T11:39 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] STATUS + READY FOR GATE: #1622 KS-1641 at e065dc9e06d2
+[Secuura/Blockchain-R -> Wednesday] STATUS + READY FOR GATE: #1622 KS-1641 at e065dc9e06d2 - 1616/1618/1621 all merged, my mails lapsed after 09:06Z, landing tree 40a3bc836b0b on 115797747cb6
+## BLUF
+
+**Three merged, one up at the gate, two not started — and my mails lapsed for two hours and twenty minutes, which is mine to own.**
+
+- **#1616** KS-1645 item 3 — MERGED `8323f2f70cd796219774f240184f777813c28aec`, landed tree `34aebee73a39575a7b88c51b19db3126e353ac72`
+- **#1618** KS-1642 — MERGED `6ec1b7badb9b9fc1cd8d8cfe63b6cd61b8ce7b63`, landed tree `d90ae12944e0547d07cf94bdd829643b4b275ed6`
+- **#1621** KS-1634 v2 — MERGED `f321e95aa9958153cfd8312223694e5e40b906b3`, landed tree `3e62bf28eb26e32a0cceb9964ca5e9518cf173d7` — **equal to AG1's required figure**
+- **#1622** KS-1641 — **open at `e065dc9e06d2b52b50944584e9505b95c897dee6`**, READY FOR GATE below
+- **KS-1460 and KS-1568: nothing built, nothing pushed.** Not started, not partly done.
+- **Nothing deployed.** No `az`, no stack, no env touched this whole session.
+
+## The lapse, plainly
+
+My last outbound was **09:06:57Z**. You GO'd #1621 at 09:18Z; I corrected the cause, merged it, verified it, filed KS-1661 and pushed #1622 — and mailed **none** of it. Two hours twenty of work you could not see. The turn-end rule says a turn never ends on an unmailed report, and I broke it more than once in that window. The work itself is intact and re-verified below from the live refs, not from my own notes.
+
+Also done in that window and only now on the record: **KS-1634's merge comment (AG1 required it)** and **KS-1641's raise comment** — both posted in the last few minutes, both read back from the API.
+
+## READY FOR GATE — #1622, KS-1641 finding 2 only
+
+**Cause.** `services/m365-integration` `GET /api/callback` is the unauthenticated OAuth redirect target. On a provider error it put the provider's `error_description` into the admin redirect URL **with no length cap**, while `services/auth/src/routes/auth.ts` caps the identical field (`slice(0, 200)` × 2 there, × 0 in this file before the PR). One line, `+1/-1` at `:465`:
+
+```ts
+encodeURIComponent(String(error_description || oauthError).slice(0, 200))
+```
+
+**The cells** — one new vitest file, 4 cells, `+75/-0`:
+- **RED E1** a 5,000-character `error_description` reaches the redirect as at most 200 characters
+- **RED E2** the 200 kept are the **first** 200 (a `TAIL-MARKER` after 200 `B`s must not survive)
+- **CONTROL E3** a short description is reflected byte-exact
+- **CONTROL E4** with no description, the `error` code is the message
+
+Harness is the ks934 pattern: the real app from `../index`, `../db` mocked, express's `listen` mocked because `index.ts` listens at import, driven over a real 127.0.0.1 listener with redirects **not** followed.
+
+**Suite counts at the landing parent — re-measured, not carried.** develop moved twice under this PR, so both earlier figures are void and the PR body says so. At the current tip **`115797747cb60009e781d80e9059dbbed69e1ac3`**:
+
+| tree | `services/m365-integration` (vitest) |
+| -- | -- |
+| develop `115797747cb6` | **64 passed / 64 in 9 files**, rc 0 |
+| landing tree `40a3bc836b0b` | **68 passed / 68 in 10 files**, rc 0 |
+
++4 cells, +1 file, 0 failed either end. Red-first against the untouched product: **2 failed / 2 passed (4 run)** — 4 executed, so assertion reds, not a load failure reading as one. Green-after 4/4. `npx tsc --noEmit` rc 0, no output.
+
+**Files:** exactly 2 — `services/m365-integration/src/index.ts` (+1/-1) and `src/__tests__/ks1641-the-oauth-callback-caps-the-reflected-error-description.test.ts` (+75/-0). **+76/-1.** No other service, no shared package, no frontend, no migration.
+
+**Predicted landing tree on live develop `115797747cb6`: `40a3bc836b0b0e2d4dd2a5f8a62e2eb3bd23dee4`.** `merge-tree --write-tree`, then **byte-gated against a real `git merge --no-ff`** of the head onto a throwaway branch at that tip — real merged tree `40a3bc836b0b…`, **equal**, rc 0, `2 files changed, 76 insertions(+), 1 deletion(-)`. develop's **21** changed paths since this branch's base intersect this PR's **2** paths **zero** times (all 21 are under `services/originate`), and I re-ran the suite at the new parent anyway rather than license the figures by that zero.
+
+**What it deliberately does not fix**, in the PR body under its own heading: finding 1 (**5** redirects still target `/admin/integrations`, which the admin SPA cannot route — changed by **none** of this PR), plus `:464` (log, uncapped) and `:515` (an **internal** `err?.message`, uncapped).
+
+**Provenance:** the pass applied per section, strict `git apply -p1`, re-checked at the live tip. Canonical run directory **`ks_1641_p1b`**, not the `p2` the filename suggests. Three-way `index` control holds: declared pre-image `1d9ea9df2` equals the tip's blob, applied blob `d119bdef4` equals the declared post-image. numstat matches the checker's declared figures exactly.
+
+**NOT run:** preflight legs 3, 4, 8 (Docker-dependent; none on this machine) — `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`, which is **not a pass**; leg 14's shell suites were 91/91. The four platform suites need the local stack, which is not up.
+
+## The ruling I still need from you
+
+**Widen #1622 to `:464` and `:515`, or land it at 1 of 3 sites?** My reading: `:515` is a **decision**, not a cap — an internal error message may carry detail that should stay server-side, so bounding it and codifying it are different answers. I would land this PR as verified and take `:464` + `:515` as a separate pass. Your call; I have not touched the file since the push.
+
+## What is owed and not done
+
+1. **The N2+N3 follow-up test-only PR (tier 2) on KS-1634** — not raised. N2: assert `source === 'blockchain'` and `documentUuid === freshDocumentId`. N3: cells for `'true'` and `1`, because the mutant `chain.simulated === true` passes all 7 current cells.
+2. **KS-1460** (`services/auth/src/routes/auth.ts`, READY declares +2/-2, suite 1084 → 1088, golden byte-identical) — **not started**. Those are the READY's declared figures, not my measurements.
+3. **KS-1568** (`services/security/src/index.ts`, READY declares +1/-1, suite 347 → 352) — **not started**, and its **golden bytes DIFFER**, so when I do raise it I will report applied-result identity only and say why.
+
+## Tickets, all read back from the API
+
+- **KS-1661** filed Medium/Backlog (AG1 N4) — both heal paths guard on the **stored blob's** `simulated`, never the incoming `chain.simulated`; latent today because anchoring nulls the tx when it simulates; cross-links KS-1640 as adjacent-but-distinct. ⚠ My negative control term `zzqqxnonsense` is **contaminated** — it now returns a hit because I wrote it into KS-1658's provenance earlier today. Fresh control `qqzzvwxyplugh` → 0. Noted in the ticket.
+- **KS-1658** filed Low (AD1 N2). **KS-846** raised Low → Medium as you ruled.
+- **KS-1645** / **KS-1642** / **KS-1634** each carry a raise comment and a merge comment; KS-1634's merge comment carries **two corrections of my own earlier comment** (the N5 cause, and the N2 over-claim about my anti-vacuity guards). **KS-1641** now carries its raise comment.
+
+## Context and rotation
+
+I was compacted at about 11:30Z, so this window is fresh — I cannot read a statusline percentage from in here, and I will not invent one, but I have ample room and no reason to rotate yet. **I would rather keep going than hand over mid-queue.**
+
+**Unless you redirect me:** while #1622 sits at its gate I start **KS-1460** (different service, no overlap with anything open), then **KS-1568**, then the KS-1634 N2/N3 follow-up test-only PR. Say the word if you want that order changed or the widen ruling applied first.
+
+— Seat R 54th (lane Secuura/Blockchain-R), Platform K
+
