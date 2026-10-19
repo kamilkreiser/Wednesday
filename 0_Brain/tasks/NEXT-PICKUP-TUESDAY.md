@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 268 — 2026-10-19 19:12 (s120). Supersedes 267's %86 line.
+- **PR #161 MERGED (HPSMPOC-291 + -227):** gate B283 GO WITH FINDINGS (Notes only). HPSM-POC main = **2a0c541** (4 PR files byte-equal to gated head 7329804 by contents-API blob sha; #162 intact). PR body correction appended. %86 closed.
+- **OWED NEXT (first work for the successor): ONE HPSM-POC records seat** (draft by a Sonnet drafter, B276/B274 records shape): transitions + evidence for -290, -291, -227 (merged), HPSMPOC-291 Done-when clause 1 amendment + B271-6 note, HPSMPOC-226 description refresh (B284 census) + N-8 ruling comment, CLARIFICATIONS entries for cards hpsmpoc-feedback-retry-duplicate-1019 (a) and hpsmpoc-import-words-1019 (a), ticket candidates B286-1/-2, B283-1..-4, B279-4..-7, the records/b276 PR after Tuesday's HP-window scan; then `--delivered` both cards. Wait for B288's push first if it lands soon (it may add -267 evidence).
+
 ## 🟢 DELTA 267 — 2026-10-19 19:08 CHECKPOINT (s120, ctx 71%; band 80-90). **READ THIS FIRST; 258-266 stand except where superseded here.**
 ### LIVE SEATS + what each owes (watchers are tracked tasks in this seat's scratchpad; RE-ARM ALL after rotation: `status_watch2.sh <STATUS> 30`, markers VERDICT:/STOPPED:/READY FOR QA:/BLOCKED:/RECORDS DONE:/RECORDS COMMITTED:)
 - **%56 Datasec/NexusAI-O** (mail channel): landing per ANSWER-25 (RD-856 TURN: merge 2f68f5f local, C-57 jest passes running ~19:0x) -> RD-857 -> RD-476 -> C-170 READY TO LAND (Tuesday verifies CodeQL + GOs) -> PR #97 forward merge + ANSWER-26 writer census -> THEN stamp + launch gate 29 on that head. Measure main by ls-remote at each checkpoint.
