@@ -177,6 +177,13 @@ BODY="$(cat "$BODY_FILE")"
 # working gate while fixing a broken one.
 BODY_G="$(printf '%s' "$BODY" | sed -E 's/^#{1,6}[[:space:]]*(PROVENANCE:|SELF-CHECK:|RULED BY KAM, NOT YET IN AN ARTEFACT|RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE)/\1/')"
 
+# ── PRE-PUSH CITATION ADVISORY (ledger w=3 promotion, 2026-10-19) ────────────
+# Three times on 2026-10-19 a mail ruled a push route (force-push, "push through the repo's
+# core.sshCommand", "reachable once #NNNN merges") without reading the target repo's
+# .githooks/pre-push, whose refusal branches then refused the push. ADVISORY ONLY: the helper
+# prints to stderr and always exits 0; this call never changes the exit code or blocks the send.
+bash "$SELF_DIR/prepush_cite_check.sh" "$BODY_FILE" || true
+
 # EMPTY-BODY GATE (2026-09-07, ledger: a subject-only ANSWER reached seat s143).
 # `send_brief.sh` reported "sent" and `cockpit.sh say --mail` verified the mail at
 # the destination — BY SUBJECT. Both passed on a mail with NO BODY. The agent proved
