@@ -1,0 +1,72 @@
+=========== [INBOUND] 2026-10-19T23:52 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1656 (KS-1679 stale cell) at 2e672d35
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1656 (KS-1679 stale cell) at 2e672d35fedfa751c5607f9a777b6ff5399a9877, tier 2 test-only - 17/17 both modes, red at 937c7d10b^ as the ONLY failure; a staged-revert trap worth a standing line
+## READY FOR GATE — item (iii), the stale #1619 cell, tier 2, test-only
+
+The five artefacts:
+
+1. **PR [#1656](https://github.com/Secuura/Distributed_Secuura/pull/1656)**.
+2. **Head SHA, read from origin in this same action:** `2e672d35fedfa751c5607f9a777b6ff5399a9877`. Branch and `refs/pull/1656/head` agree.
+   **develop now: `6229a92f2480f0784c31a8d6b652298a7ac10551`** — it moved again while this pushed (#1653, KS-1677, the R lane: BACKLOG.md
+   and one m365 test). **No overlap** with this PR or with #1654.
+3. **Ticket comment:** KS-1679 comment `21cb0636` (23:52:05Z), naming the PR and its head. Read back by
+   id, **byte-identical**; 7 factual tokens present, with a control token correctly absent. KS-1679 went
+   2 → 3 comments. **Stuart was not told anything.**
+4. **Test Evidence block:** in the PR body, written by me.
+5. **What was NOT done / NOT covered:** in the PR body, and below.
+
+## What it is
+One cell, rewritten. It has been **RED on develop since #1646 merged** — *"RED - a caller who overrides
+data.certificationId loses the evidence instead of choosing it (fail closed)"*, 1 failed / 16 passed. The
+product is right and **stricter** than the cell assumed: #1646 strips the caller's `certificationId`, so
+the derived row carries the SERVER's id and the genuine act is presented, where the cell expected nothing
+to verify at all.
+
+**The fail-closed intent is kept, in the title and in the assertions — the caller cannot CHOOSE the
+evidence — and the assertions are now STRONGER than the ones they replace:** the minted id is not the
+caller's string; v1 presents `isCertified: true` with the **server's** `certificationId`; v2 presents
+**exactly one** certification with that id; and the caller's string appears **nowhere** in either verify
+response. The old version asserted only two absences; this one pins **which id is presented**, which is
+the property a regression would actually break.
+
+## Ran
+- The edited suite at develop: **17/17, rc 0, in BOTH tenancy modes** (it was 1 failed / 16 passed).
+- **Red-proof:** `routes/certifications.ts` restored from **`937c7d10b^`**. That isolates exactly
+  #1646's change, and I verified the premise rather than assuming it — `git log 937c7d10b..develop --
+  <path>` returns **nothing**, so the file is unchanged since. On that arm this cell is the **ONLY** red:
+  **1 failed / 16 passed**, at `expect(one.isCertified).toBe(true)`. Snapshot asserted byte-identical
+  after the arm (`6abd05c5ea2f25f1`).
+- Neighbour check: the sibling `ks1557-lineage-certify` suite on this branch is **13/13**.
+- `eslint src` **rc 0** (26 pre-existing warnings, 0 errors).
+- **Push: rc 0**, `ls-remote` confirms the ref. Preflight **13 of 16 legs ran, 3 SKIPPED (3, 4, 8 —
+  local stack not up), nothing failed. NOT a pass**, not quoted as one.
+
+## ⚠ TWO THINGS I WANT ON THE RECORD, because both pass silently
+1. **`git checkout <sha> -- <path>` STAGES the old blob.** After the red arm, the working tree held
+   develop's `certifications.ts` again but the **index still held the pre-#1646 one** (`MM` in status).
+   Committing then would have shipped a **silent revert of someone else's merged fix inside a test-only
+   PR.** I reset the path and verified the index blob equals `HEAD`'s (`95f736d19b7f` both sides)
+   before committing. Worth a standing line.
+2. **`tsc` rc 0 says nothing about this file.** originate's `tsconfig.json` excludes `src/__tests__`,
+   `src/**/*.test.ts` and `src/**/*.integration.test.ts`, so `tsc -p` **cannot** fail on a type error
+   in any cell there — jest's transform is the only check (G 11th's finding, tracked on **KS-1090**). I
+   ran `tsc` and it returned 0; I am telling you that figure is not coverage.
+
+## NOT run / NOT covered
+- The four platform suites: not run. Nothing runtime changes.
+- The full originate unit suite was not re-run for this change (one integration file, no module any unit
+  suite mocks). It was run whole earlier today on another branch: 134/134 files, 1,568/1,568 tests.
+- Nothing deployed; nothing here is deployable.
+- No migration, no configuration.
+
+## Board search, with its controls
+The cell's file path and title, plus controls: **`KS-1679` returns exactly 1 hit** and `certifiedAt`
+returns 9, led by it — so the instrument discriminates rather than returning everything. **No open issue
+names a stale or red cell in that suite.** Nearest neighbour **KS-1566** (a MISSING cell on the same read
+side, not this stale one).
+
+## STATE OF MY THREE ITEMS
+- **(ii) #1652 MERGED** as `11af03696c9b`, tree `fa59a00217b6`, verified at source.
+- **(i) #1654 at gate BN1** (Opus, tier 1), head `db9bca740df0`. Not pushed to since.
+- **(iii) #1656 READY** (this mail).
+Remaining: team notes at wrap (Peter → KS-485, Stuart → KS-772), history.md entry, wrap mail.
+

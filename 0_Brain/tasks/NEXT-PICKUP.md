@@ -6,7 +6,7 @@ status: live
 supersede: REPLACED WHOLESALE by the 09:0x Wednesday seat at its 50% checkpoint (~09:30 AEDT). Replace wholesale again; never stack. Previous: NEXT-PICKUP.md.pre-1020-0930 + git.
 ---
 
-# NEXT PICKUP (Tue 20 Oct, written ~09:30 AEDT, sections 0-3 refreshed 10:16 and 10:38)
+# NEXT PICKUP (Tue 20 Oct, written ~09:30 AEDT, sections 0-3 refreshed 10:16 and 10:38 and 10:56)
 
 ## 0. FIRST ACTIONS FOR THE NEXT WEDNESDAY SEAT
 1. Boot reads as the launcher says. Then kam_rulings_today.sh, reconcile_rulings.py, `bash 2_Project_Files/tools/newmail.sh` (to a file), `tools/fleet_ack.sh list`, `tools/decision_queue.sh list open`, fleet/usage_gate.sh --check, `local-model/spark/tunnel.sh check`, `tmux list-panes -t fleet:0 -F '#{pane_id} #{@cockpit_name}'`.
@@ -15,26 +15,27 @@ supersede: REPLACED WHOLESALE by the 09:0x Wednesday seat at its 50% checkpoint 
 4. send_brief needs `WED_AGENT=wednesday` in this seat's shell. Subjects never carry hold/stop/checkpoint words.
 5. In force: Kam 10-18 new-account grant, routing v1.0, the October deploy grant EXTENDED "until further notice", the TESTED merge grant. Gauge 66% at 09:29.
 
-## 1. LIVE FLOOR (10:38) — develop = 11af03696c9bd966580e52605cb2a361d9c3d29b (#1652)
-Merged today, each verified by Wednesday's own fetch: #1645, #1646, #1648, #1647, #1649, #1650, #1651 (e712972bccf1), #1652 (11af03696c9b) = 8. None deployed. Kintsugi runs a4187f0f6622; demo d75bfe2deb80. Seats C, R, G still on launcher claude-opus-5 (switch at a ZOOMED idle, mail it); D on 5.5.
-- **GATES RUNNING (Agent, background), verdicts land in 0_Brain/reference/<folder>/verdict.md:** BN1 #1654 KS-1557 (C 31st, head db9bca740df0, tier 1 Opus; includes the KS-1688 interaction question); BO1 #1655 KS-1407 (G 12th, head 8e5308a87e14, tier 1 Opus); BP1 #1653 hygiene (R 58th, head b30e401ff208, tier 2 Sonnet). On each verdict: re-hash `sed '1d;$d'`, re-read heads, merge-tree on LIVE develop yourself (develop moves often today), GO naming head + landing, notes copied FROM THE FILE.
-- **DEMO-UPGRADE IMPACT analysis** (Agent, Opus, background): Stuart asked (via Kam 10:34) whether moving demo-pk to latest K affects existing users/accounts; report -> 0_Brain/reference/2026-10-20_demo-upgrade-impact/REPORT.md. OWED TO KAM: a short WhatsApp reply built from that report's BLUF, "within the hour" promised at 10:35.
-- **D 25th (%17, Opus 5.5):** kintsugi round of 89956fe92956, build healthy at +38 min (23:30Z), KS-772 heads-up POSTED. Then migrations 053/054, swaps, sweep, DEPLOYED mail with BOTH rounds' notices drafted -> Wednesday's word to post. wake_ack'd while waiting.
-- **C 31st (%18):** #1652 merged; #1654 at BN1; next item (iii) stale #1619 cell PR (Refs KS-1679, tier 2).
-- **R 58th (%19):** #1650 + #1651 merged; #1653 at BP1; next KS-1682 N1 exact-match cells PR (tier 2); KS-1687 + KS-1689 filed; then wrap.
-- **G 12th (%20):** #1655 at BO1; next KS-1157 (tier 1), KS-1659 (tier 2, audit: no trusting reader), then ADDENDUM items KS-758 (tier 1, erasure-log identifier question) and KS-1558 (tier 2).
-- **Spark:** screens 19+20 done; all held passes are in G's queue; SCREEN_20 says the remaining pool needs a deeper read or new tickets.
+## 1. LIVE FLOOR (10:56) — develop = 6229a92f2480f0784c31a8d6b652298a7ac10551 (#1653)
+Merged today, each verified by Wednesday's own fetch: #1645 #1646 #1648 #1647 #1649 #1650 #1651 #1652 #1653 = 9. None deployed. Kintsugi runs a4187f0f6622 (round of 89956fe92956 in progress); demo d75bfe2deb80.
+- **GATES RUNNING (Agent sub-agents of the 09:0x seat: they DIE with that seat's rotation; if a verdict.md is missing in its folder after rotation, RE-COMMISSION the gate from the same GATE_BRIEF.md):** BN1 #1654 KS-1557 (C 31st, head db9bca740df0, tier 1 Opus) in 0_Brain/reference/2026-10-20_gate-BN1-pr1654-ks1557/; BQ1 #1656 KS-1679 stale cell (C 31st, head 2e672d35fedf, tier 2 Sonnet) in .../2026-10-20_gate-BQ1-pr1656-ks1679-stale-cell/. On each verdict: re-hash `sed '1d;$d'`, re-read heads, merge-tree on LIVE develop yourself in the cache clone (fetch `refs/pull/N/head:refs/wed/prN` first), GO naming head + landing, notes FROM THE FILE.
+- **#1655 KS-1407 (G 12th): gate BO1 NO GO** (B1: reset with Redis down burns the token and revokes nothing). Round 2 of 2 under the cap commissioned to G (fail closed before the write; N3 cells; N1 OAuth refresh-grant ticket High + N2 race ticket Medium). A second NO GO ships nothing and goes to Kam. Verdict: 0_Brain/reference/2026-10-20_gate-BO1-pr1655-ks1407/verdict.md.
+- **D 25th (%17, Opus 5.5):** kintsugi round of 89956fe92956: build was healthy at +38 min; then migrations 053/054, swaps, sweep, DEPLOYED mail with both rounds' notices drafted -> Wednesday's word to post (Peter KS-485, Stuart KS-772). KS-772 heads-up already posted.
+- **C 31st (%18):** #1652 merged; #1654 at BN1; #1656 at BQ1; told to keep its handover current and wait for both verdicts.
+- **R 58th (%19):** #1650/#1651/#1653 merged; KS-1682 N1 exact-match cells PR in flight (tier 2 Sonnet gate when READY); KS-1687, KS-1689 filed; then wrap.
+- **G 12th (%20):** #1655 round 2; then KS-1157 (tier 1; sequence after #1655 if both touch session.ts), KS-1659 (tier 2), KS-758 (tier 1, erasure-log identifier question), KS-1558 (tier 2).
+- **Spark:** screens 19-20 done; all held passes in G's queue; pool needs a deeper read or new tickets.
+- **Demo-upgrade impact report** for Stuart's question: 0_Brain/reference/2026-10-20_demo-upgrade-impact/REPORT.md; WhatsApp draft given to Kam (10:4x); offer pending of posting the full list on KS-695 (only on his word).
 
 ## 2. KAM'S CARDS (open, both with defaults)
 - RULED 10:33 by Kam: Entra card = a (wait; delivered), smoke-key card = a (REVOKE key_66e82ef0 on demo: OWED as a small demo job AFTER D 25th's kintsugi round; undelivered until done, then tell Kam). KS-1688 card = a with a WhatsApp draft; Kam "sent"; Stuart "working through it, will update the ticket" (10:37): no KS-1688 build before his answer.
 - Undelivered ruled: `secuura-m365-admin-setup-for-customer-org-1020` = b (05:35), lives in KS-1678's future work; deliver when the wizard ticket is worked.
 
 ## 3. OWED BY WEDNESDAY (in order)
-1. Gate BL1 verdict -> GO (copy notes FROM the file; re-hash) or round 2.
-2. C 31st's READYs -> gates (KS-1557 tier 1 Opus; the two test-only PRs tier 2 Sonnet).
-3. G 12th's READYs -> gates (KS-1407 + KS-1157 tier 1; KS-1659 by its audit).
-4. D 25th's DEPLOYED mail -> verify -> word to post the two notices (Peter KS-485, Stuart KS-772) -> report the deploy to Kam on the panel.
-5. SCREEN_20 -> source reads -> hold -> raise.
-6. Fable 5.1 coordinator trial (routing decision 7) still OWED.
-7. KS-907 self-count (launcher preflight counts its own session): project-launcher defect, in seats' handovers; not Wednesday's to edit.
-8. At the wrap: regenerate BOTH digests only if a lesson FILE was edited; the 05:30 ledger archive.
+1. BN1 and BQ1 verdicts -> GOs (or round 2); after #1654 MERGES: brief the KS-1688 fix (tier 1 Opus): gate /version on the (a') create:connector provenance; post Kam's ruling on KS-1688 (card secuura-ks1688-org-merge-edge-which-side-1020 = a: S adds a 'transfer issuer' call; K builds the receiving end); Stuart's answer (KS-1688 comment 23:36:46Z) is the spec input; mark the card --delivered when the comment is posted.
+2. G 12th's #1655 round-2 READY -> delta gate (Opus, tier 1, round 2 of 2).
+3. R 58th's N1 cells READY -> tier-2 gate; then R wraps (verify handover + history, score, pane_close).
+4. D 25th's DEPLOYED mail -> verify -> word to post the two notices -> report the deploy to Kam on the panel.
+5. Demo smoke-key revoke (card secuura-demo-smoke-key-revoke-after-measure-1020 = a, undelivered): a small demo job after D 25th's round (key_66e82ef0), then tell Kam and mark delivered.
+6. Model switches to claude-opus-5-5 still owed for C, R, G at a ZOOMED idle (they keep missing idles; low value now for R/C near wrap).
+7. Fable 5.1 coordinator trial (routing decision 7) still OWED.
+8. At the wrap: regenerate BOTH digests only if a lesson FILE was edited (none today: ledger only); the 05:30 ledger archive.
