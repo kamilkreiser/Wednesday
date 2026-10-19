@@ -1,0 +1,82 @@
+=========== [INBOUND] 2026-10-19T13:18 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1627 KS-1671 at ddb8a5395268 - real p
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1627 KS-1671 at ddb8a5395268 - real process exit 1 -> 302+alive, 7 cells, 5 mutants, landing tree a46ecb67e007 on 4a065fb75350
+## READY FOR GATE — #1627 (KS-1671, High), tier 1
+
+https://github.com/Secuura/Distributed_Secuura/pull/1627
+
+```
+head          ddb8a53952683759f7d41b43fa5ca31b235d2e4a   (1 commit, cut from bc3e2e2460ff)
+develop       4a065fb7535080190c407237f948d0af3538f2dd   (#1626, auth only)
+LANDING TREE  a46ecb67e007f446728106b7a56678a952f8c108   (merge-tree == real --no-ff merge)
+```
+- Overlap between what develop gained (auth ×2) and this PR (m365 ×2) is **0** (control: 2). Both m365 blobs land
+  unchanged, and #1626's `auth.ts` in the landing equals develop's (`fa7b3386a945`). The tree I predicted on
+  `bc3e2e2460ff` (`12de512ae0bf`) is **void**. Three-dot diff is 2 files; the API reports +124/-1.
+- PR body read back byte-identical (6,956 bytes).
+
+## CAUSE
+
+Express 4.22.3 parses queries with `allowPrototypes: true` (`express/lib/utils.js:290`), so `?error[toString]=x`
+is an object whose own `toString` is a string, and `String()` on it throws `TypeError` inside the async
+`/api/callback`. m365 has no `process.on` handler, so the process exits. The gateway mounts the route with no
+`authenticateToken` (`proxy.ts:936-939`). That last point is a static reading; it was not measured through the gateway.
+
+## FIX (+23/-1 product)
+
+`stringParam(value)`: `typeof value === 'string' ? value : undefined`. The four reads at the top of
+`/api/callback` (`code`, `state`, `error`, `error_description`) go through it. Anything that is not a string is
+treated as absent. No process-wide net (KS-1427), as you ruled.
+
+## REAL PROCESS — measured by me, the same instrument on both halves
+
+`tsx src/index.ts`, a fresh process and a fresh port per input, the process group killed after each one, and every port confirmed free afterwards:
+
+| input | develop | this PR |
+| -- | -- | -- |
+| `error[toString]=x` | socket dropped, `/health` refused, **exit 1** | 302 `missing_code_or_state`, `/health` 200 |
+| `error=a&error_description[toString]=x` | socket dropped, `/health` refused, **exit 1** | 302 `a`, `/health` 200 |
+| `code=x&state[toString]=y` | socket dropped, `/health` refused, **exit 1** | 302 `missing_code_or_state`, `/health` 200 |
+| plain-string control | 302, alive | 302, alive |
+
+(The first version of the instrument leaked a grandchild process; I described that in the 13:0xZ mail. Both halves in this table come from the corrected instrument.)
+
+## CELLS (7) AND MUTANTS (5)
+
+Q1-Q3: the three inputs answer a bounded 302, then `/health` is 200. Q4: an **array** `error` is treated as absent
+(develop reflected `"a,b"`). Q5: a `[valueOf]` object is treated as absent (develop reflected
+`"[object Object]"`). C1: plain strings unchanged. C2: a plain code and state still reach the connection lookup.
+
+Red-first on develop: **5 failed | 2 passed (7)**. Q1-Q3 timed out, with 3 in-suite `TypeError`s. Q4 and Q5 are
+assertion reds. C1 and C2 stayed green. Green: 7/7.
+
+| mutant | red |
+| -- | -- |
+| `stringParam` unfiltered | Q1 Q2 Q3 Q4 Q5 |
+| `error` read raw | Q1 Q4 |
+| `error_description` read raw | Q2 Q5 |
+| `state` read raw | Q3 |
+| **`code` read raw** | **none, 7/7 green** |
+
+## KNOWN RESIDUE (in the PR body)
+
+**The `code` read has no cell.** An object `code` is only observable when `state` names a real pending
+connection. The in-memory connection map has no test seam, and I did not export a mutable Map just to pin this.
+Unfiltered, `String(code)` is inside the handler's `try`, so it does **not** crash; it would flip that pending
+connection to `status: 'error'` and reflect the `TypeError` text. The filter stays, because your ruling covers
+every value the route reads.
+
+## COUNTS
+
+- Full m365 suite **81/81 in 11 files, rc 0** (develop 74/74 in 10, plus 7). Measured on the branch tree; the
+  landing tree differs from it only in auth's two files, which m365 does not import.
+- Type-check *including* the test file: rc 0. `--listFilesOnly` counts it 1. A planted error gives rc 2.
+- Preflight: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` **Not a pass.** Shell 91/91.
+
+## NOT RUN
+
+The request through api-gateway or the deployed image; the four platform suites; other services' suites.
+
+## Next
+
+KS-1568 (tier 2), built on a fresh branch off `4a065fb75350`. #1627 stays frozen until the gate.
+
