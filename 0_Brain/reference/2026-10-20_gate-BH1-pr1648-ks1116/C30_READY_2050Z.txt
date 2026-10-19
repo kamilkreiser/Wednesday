@@ -1,0 +1,177 @@
+=========== [INBOUND] 2026-10-19T20:50 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1648 (KS-1116) at 970f488cbfd1, tier 
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1648 (KS-1116) at 970f488cbfd1, tier 1 - landing tree 08ee2b297ef3; 12/12 mutants tsc-clean and red; preflight 13/16 (3 skipped, stack down); KS-1683 filed
+MODEL: Opus 5.5 since your 20:16:20Z switch (argv still reads the launch flag `--model claude-opus-5`;
+a runtime switch does not rewrite it, so I cite your mail for the switch, not ps).
+
+=====================================================================================
+BLUF
+=====================================================================================
+READY FOR GATE, tier 1: **PR #1648 (KS-1116)**, https://github.com/Secuura/Distributed_Secuura/pull/1648
+  head    970f488cbfd1efb000b0c0dacbb36af461245368   (one commit, author Kam Kreiser <kamil.kreiser@secuura.ai>)
+  base    develop 937c7d10b7f83d2fa7e5e662ce46a9e8877186e3 (= head's parent; ls-remote just now: unmoved)
+  landing tree  08ee2b297ef38c4016d64988116dcc5933fbcf8b
+                = `git merge-tree --write-tree <develop> <head>` = head^{tree}.
+                CONTROL that can fail: the same merge onto develop + one extra file (an unreferenced
+                commit, 7c1627b9) gives 87be9db91755 -- different, so the figure discriminates.
+                (My first control, merging onto develop^, was degenerate: develop^ is an ancestor, so it
+                must return head's tree. Discarded, not quoted.)
+  10 files, +875 / -31.
+
+What it does: GET /api/presentations/:id and GET /api/credentials/:id answer only the principal that
+created the row; any other caller gets the unknown-id response, byte-identical. NULL-owner rows: your
+interim option C (nobody), named in the PR against card `secuura-ks1116-null-owner-who-reads-1020`.
+**The PR says in a boxed line that it does NOT close the credential exposure**, and points at KS-1683.
+
+KS-1683 FILED (your ruling 1): https://linear.app/secuura/issue/KS-1683 -- Bug, High, Backlog, project
+"Security Review -- Platform K", related -> KS-1116, the open question verbatim. Read back: priority,
+label, project, relation, and five content strings present; a never-written control string absent.
+Dedupe first: `credentials/by-hash` -> 0, `by-hash` -> 13 (all anchoring's own verify-by-hash),
+`GET /api/credentials` -> 5 (none about this read); control token -> 0. Nobody was messaged.
+
+THE PARKED list/by-hash COMMIT (your ruling 2): **there is none, and I did not build one.** I had not
+started it when your (b) landed at 20:21:53Z, and a patch parked for an unknown wait against a moving
+develop would rot. KS-1683's "When it is answered" section carries the design instead (owner condition
+in list's SQL AND on every record so pagination and `total` stay right; by-hash returns the first
+READABLE match, not the first match). If you want it built, it is KS-1683's PR, not a held patch.
+
+=====================================================================================
+FILES (name-status, develop..head)
+=====================================================================================
+M Blockchain/Dev/deployment/azure/migrate/init.sql                 (+2 columns per table, + 2-line comment)
+M Blockchain/Dev/docker/init/03-service-tables.sql                 (same block, byte-identical edit)
+A Blockchain/Dev/migrations/054_ks1116_vc_store_creating_principal.sql
+A Blockchain/Dev/services/vc-issuer/src/ownership.ts              (ownerOf, mayRead, ownerlessRowReadable, ownerFromRow)
+M Blockchain/Dev/services/vc-issuer/src/routes/presentations.ts
+M Blockchain/Dev/services/vc-issuer/src/routes/credentials.ts
+M Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+A .../vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts
+M .../vc-issuer/src/__tests__/ks1020-presentation-lookup-exact-or-404.test.ts
+M .../vc-issuer/src/__tests__/ks1295-store-db-unavailable-warn.test.ts
+Partition held: nothing in services/m365-integration/** or services/originate/**.
+
+=====================================================================================
+YOUR RULINGS, ONE BY ONE
+=====================================================================================
+1. Route layer, on the RECORD, owner carried for the memory fallback -- DONE. Both lookups return
+   {body, owner} from whichever path found the row; a memory row with no recorded owner is OWNERLESS.
+   Rows loaded at boot carry their owner (both loaders now SELECT the two columns).
+   `credentialRepo.getById` is UNCHANGED BYTE FOR BYTE (asserted at edit time: 649-byte body equal
+   before and after); the route uses a new `getRecordById`. Cells V1 (getById resolves another
+   principal's credential with no principal at all) and V2 (tokenless POST /verify still verifies
+   true) pin it.
+2. list + by-hash: (b), not in this PR -- see above.
+3. Absent tenantId fails closed -- DONE, as "same principal = same userId AND same tenant". A
+   tenant-less caller never matches a tenant-stamped row (cells P1/D1/M1/C1/E1, Alice's userId with no
+   tenant claim -> 404). Both absent is the same principal: a tenant-less creator reads her own
+   tenant-less row (P2, which also shows the same userId WITH a tenant is refused that row). A claim
+   that is not a non-empty string is not a usable principal (P3: owner "42", caller 42 -> 404).
+4. Migration 054 -- TAKEN; R's 053 untouched. Census at head with a control: `git grep -l
+   created_by_tenant_id` over migrations/ docker/init/ deployment/azure/migrate/ -> exactly 054 +
+   03-service-tables.sql + init.sql. CONTROL, same command for `holder_id TEXT` -> 001 + the same two
+   bootstraps, so the census sees all three copies. 001 is NOT edited (`git diff --quiet` on it): it is
+   an applied migration and 054 is its forward change -- the 048 precedent (9ceb61c5e touched the two
+   bootstraps + 048, never 001). The runner tracks applied files by filename only
+   (`scripts/run-migrations.sh:129`, no checksum) and routes `*platform*` names elsewhere (:153-158);
+   054's name has no "platform".
+5. ks1020 -- a principal added to every request and the DB fixture row stamped with it; 0 changed
+   lines contain `expect(` (CONTROL: the same filter over the ks1295 diff counts 2). Said in the PR.
+   ⚠ ONE MORE TEST FILE THAN YOU RULED ON: ks1295 W2 pins the INSERT's EXACT parameter vector, which
+   now has two more entries. It reads `[c.id, JSON.stringify(c), null, null]` -- still toEqual, and it
+   now also pins that a store() with no owner writes NULLs. Named in the PR. Your call if you want it
+   handled differently.
+6. revoke and the gateway's authenticateToken(false) -- untouched.
+7. Cells 1-7 + controls, cell 7 required, each mutant type-checked alone -- DONE, below.
+
+=====================================================================================
+TEST EVIDENCE (head 970f488cbfd1; Node 24.7.0)
+=====================================================================================
+- vc-issuer suite: 18 files / 233 tests, rc 0 (baseline at 5ac66264b9ee: 17 / 160).
+- New file: 73 cells.
+- RED-PROOF, DEVELOP arm (product files at origin/develop, ownership.ts absent, new test file kept),
+  tsc rc 0: 6 passed / 58 failed / 9 skipped. RED at their OWN assertion ("expected 200 to be 404";
+  the byte-identity cells on the status mismatch): P1 P2 P3 N1 N2 N4 N5 B4 D1 D4 C1 C4 E1 E4 M1 T1 T2
+  R1. Controls GREEN: P0 M0 C0 V1 V2 Q0. D0/E0 red on the fix's SELECT-shape assertion -- fix-dependent
+  controls, named as such. L0 L1 L2 N3 N6 SKIPPED (their beforeAll asserts the fix's boot SELECT), so
+  develop does NOT red-prove them; the mutants do (MU8 L0, MU12 L2, MU1/MU6 L1, MU1/MU4 N3, MU2/MU4 N6).
+- RED-PROOF, 12 mutants on top of the fix: EVERY ONE `tsc --noEmit` rc 0 on its own, every declared
+  MUST-RED cell red AND every declared control green:
+    MU1 presentation read unbound          -> B4 D1 D4 L1 M1 N1 N2 N3 P1 P2 P3
+    MU2 credential read unbound            -> C1 C4 E1 E4 L2 N4 N5 N6 R1 T1 T2
+    MU3 tenant equality removed            -> C1 D1 E1 M1 P1 P2
+    MU4 ownerless rows readable            -> N1 N2 N3 N4 N5 N6
+    MU5 claim() coerces non-strings        -> P3
+    MU6 bound on the DB path ONLY          -> B4 L1 M1 N1 N3 P1 P2 P3, with D1 N2 D4 GREEN
+        (the SQL-only shape your ruling 1 forbids: the DB cells cannot see it; cell 7 / M1 does)
+    MU7 presentation create not stamped    -> M0 P0 P2 P3
+    MU8 presentation boot load drops owner -> L0
+    MU9 second store() transfers owner     -> R1
+    MU10 credential create not stamped     -> C0
+    MU11 memory fallback loses owners      -> C0 L2 R1 T1 T2
+    MU12 credential boot load drops owner  -> L2
+  FIX arm 73/73. Product files restored from a snapshot after EVERY arm (never git checkout) and
+  sha256-asserted equal at the end: all four True.
+- build (tsc) rc 0; lint (eslint) rc 0; leg-16 test-type ratchet rc 0, 18 test files, 0 errors
+  against the empty baseline.
+- Migration 054 on PGlite 0.4.1 (real Postgres semantics, in-process, no Docker): 15/15. 054 changes a
+  pre-054 table (3->5 / 4->6 columns); idempotent; a no-op on a fresh DB built from EITHER bootstrap;
+  fresh column set == migrated column set; every statement vc-issuer now issues (extracted from the
+  source files by regex, not retyped) runs; ON CONFLICT keeps the first owner; getById's SELECT
+  unchanged. CONTROL: a non-existent column is refused.
+- PUSH: rc 0 at 511 s (keepalives on the one command). Route through `.githooks/pre-push`, read from
+  the file: the KS-856 non-fast-forward refusal (:71 sets it, :76-80 exits) cannot fire -- the branch was
+  ABSENT at origin before the push (ls-remote 0 lines; CONTROL: the same query returns develop); the
+  formatting gate exists (:311); the tip-is-not-HEAD refusal (:351) cannot fire -- I pushed the
+  checked-out HEAD; the preflight then ran (:396). Its verdict VERBATIM:
+      "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+         legs 3 4 8 — local stack not up; you can clear this by starting it.
+         This is NOT a pass. Do not quote it as one — say which legs ran."
+  Remote branch == local head after the push.
+- Instrument defects of MINE, each caught and fixed before any figure above was taken:
+  (a) `beforeEach(() => dbMock.query.mockClear())` returned the mock, which vitest runs as a TEARDOWN
+      -- it called the throwing mock after every cell and failed 8 cells whose product code had
+      answered correctly. Braces fixed it; 0 other expression-bodied hooks in the file.
+  (b) my red-proof's first run counted SKIPPED as green (9 boot-load cells on the develop arm). It now
+      names a third state; the develop figures above are from the fixed run.
+  (c) four mutants first failed tsc (TS6133, the removed call was the import's only use), so those
+      reds were not admissible. Rewritten to keep the symbol referenced; all twelve now tsc rc 0.
+  (d) the degenerate merge-tree control above.
+  (e) a vitest config here swallows console.log, so my first import probe printed nothing; re-run
+      writing to a file: 0 queries at import.
+
+NOT RUN / NOT MEASURED:
+- Schemathesis, Akto, Playwright, k6: NOT run. The local stack is not up and the brief forbids my
+  starting Docker. The PR's pre-merge boxes are unticked and say why.
+- No live HTTP probe of either route, local or on a box.
+- 054 applied to PGlite only, never to a real Postgres server.
+- Whether Platform S calls list/by-hash: unmeasured -> KS-1683.
+- `mayRead`'s "no usable userId -> false" guard is INERT under option C. A principal with no userId
+  reading an ownerless row is refused by ownerlessRowReadable() anyway, and against an owned row
+  `owner.userId === null` cannot match. It becomes live the moment Kam's answer makes ownerless rows
+  readable by some role, which is why it stays. No mutant for it, and I am saying so.
+- storePresentation's "first owner wins" line has no cell: presentations are module-private and their
+  ids are server-minted uuids, so no request can collide. Its credential twin is pinned (R1, MU9),
+  and PGlite shows the DB side keeps the first owner for both tables.
+
+DEPLOY NOTES (in the PR): 054 must apply BEFORE the new vc-issuer runs (otherwise the INSERTs fail into
+their catch = memory-only, and the boot load fails into its catch = an empty store). The migrations image
+bakes the .sql, so a deploy rebuilds `migrations` and verifies the four columns directly; look for
+"Applying 054_ks1116_vc_store_creating_principal.sql". Nothing deployed; no `az`; no box write. The
+only box contact all round was the two read-only COUNT(*)s reported at 20:12Z.
+
+EVIDENCE (sha256/16), all under 5_Project_History/2026-10-20_seatC-30th/:
+  ea827b8745fd8c52  redproof/redproof-results.json      (per-arm, per-cell, with failure lines)
+  1b1c1929a2c98c5c  redproof-run2.log
+  6d17658d70519cf5  tools/redproof_c30.py
+  da7805f05da3fd6a  migration-pglite.log
+  7d441bb4e5da0d44  tools/migration_pglite_c30.mjs
+  4de6fe646c07b992  evidence/push.log
+Clone: deploy-clones/seatC30-5ac66264b9ee (branch checked out, clean). 2_Project_Files: READ-ONLY all
+session, still 5d1be7b06279, 0 tracked modifications, no fetch, no ref write.
+
+NEXT, unless you say otherwise: hold for your gate. On a GO naming 970f488cbfd1 I merge through
+`pulls/1648/merge` with that sha (refs/pull/N/head lags the branch ref on this repo -- C 29th's
+finding). After the merge: one ticket comment on KS-1116 (PR, KS-1683, the interim reading), and the
+team notes batched at wrap. Nothing is posted on any ticket before your verdict.
+
+SELF-CHECK: re-read end to end before sending; every figure above comes from a call in this session.
+
