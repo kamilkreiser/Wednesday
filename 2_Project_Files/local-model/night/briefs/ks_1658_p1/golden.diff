@@ -1,0 +1,78 @@
+diff --git a/Blockchain/Dev/services/originate/src/utils/idNamespaceCollision.ts b/Blockchain/Dev/services/originate/src/utils/idNamespaceCollision.ts
+index d7d3670bb..2d989b1e2 100644
+--- a/Blockchain/Dev/services/originate/src/utils/idNamespaceCollision.ts
++++ b/Blockchain/Dev/services/originate/src/utils/idNamespaceCollision.ts
+@@ -68,3 +68,4 @@
+     // KS-1642: read every field this function uses once, up front. A node that cannot be read (a throwing getter, a Proxy trap) yields no record and is skipped, so nothing below can throw.
+-    try { void [o.originalCode, o.code, o.constraint, o.originalMessage, o.message, Object.keys(o)]; } catch { return; }
++    // KS-1658: an unreadable node is skipped on its own, not with its subtree: a readable refusal in its `cause` is still found.
++    try { void [o.originalCode, o.code, o.constraint, o.originalMessage, o.message, Object.keys(o)]; } catch { try { visit(o.cause, depth + 1); } catch { /* the cause cannot be read either */ } return; }
+     const sqlstate = str(o.originalCode) ?? str(o.code);
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1658-an-unreadable-wrapper-does-not-hide-a-readable-refusal-in-its-cause.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1658-an-unreadable-wrapper-does-not-hide-a-readable-refusal-in-its-cause.test.ts
+new file mode 100644
+index 000000000..de80ef606
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1658-an-unreadable-wrapper-does-not-hide-a-readable-refusal-in-its-cause.test.ts
+@@ -0,0 +1,62 @@
++/**
++ * KS-1658 (gate AD1's N2 on #1618) - the read probe in idNamespaceCollision.ts skipped an unreadable node WITH its
++ * `cause` subtree, so a readable migration refusal nested inside an unreadable wrapper was no longer recognised
++ * and the caller answered 500 where 409 is correct. After the fix an unreadable node is skipped on its own and
++ * the walk still goes into its `cause`. The control cells keep what must not change: an unreadable wrapper around
++ * a non-refusal, or around a cause that cannot itself be read, answers false and never throws.
++ */
++import {
++  isIdNamespaceCollision,
++  isLiveAnchorIdClaim,
++  ID_NAMESPACE_CONSTRAINT,
++  LIVE_ANCHOR_ID_CONSTRAINT,
++  MIGRATION_MESSAGES,
++} from '../utils/idNamespaceCollision';
++
++const boom = (): never => { throw new Error('ks1658 unreadable'); };
++const refusal = (constraint: keyof typeof MIGRATION_MESSAGES) => ({
++  code: '23505',
++  constraint,
++  message: MIGRATION_MESSAGES[constraint],
++});
++const unreadableAround = (cause: unknown) => {
++  const outer = Object.defineProperty({ message: 'wrapper' }, 'code', { get: boom, enumerable: true });
++  return Object.defineProperty(outer, 'cause', { value: cause, enumerable: false });
++};
++
++describe('KS-1658 - an unreadable wrapper does not hide a readable refusal in its cause', () => {
++  it('RED KS-1658 R1: an unreadable outer node around a real 050 refusal still reads as the 050 collision', () => {
++    const err = unreadableAround(refusal(ID_NAMESPACE_CONSTRAINT));
++    expect(isIdNamespaceCollision(err)).toBe(true);
++    expect(isLiveAnchorIdClaim(err)).toBe(false);
++  });
++
++  it('RED KS-1658 R2: an unreadable outer node around a real 051 refusal still reads as the live-anchor claim', () => {
++    const err = unreadableAround(refusal(LIVE_ANCHOR_ID_CONSTRAINT));
++    expect(isLiveAnchorIdClaim(err)).toBe(true);
++    expect(isIdNamespaceCollision(err)).toBe(false);
++  });
++
++  it('RED KS-1658 R3: a Proxy whose ownKeys throws, with a readable 050 refusal as its cause, still reads as the 050 collision', () => {
++    const err = new Proxy({ code: '23505', cause: refusal(ID_NAMESPACE_CONSTRAINT) }, { ownKeys: boom });
++    expect(isIdNamespaceCollision(err)).toBe(true);
++  });
++
++  it('CONTROL KS-1658 C1: an unreadable outer node around some OTHER unique violation answers false', () => {
++    const err = unreadableAround({ code: '23505', constraint: 'documents_pkey', message: 'duplicate key' });
++    expect(isIdNamespaceCollision(err)).toBe(false);
++    expect(isLiveAnchorIdClaim(err)).toBe(false);
++  });
++
++  it('CONTROL KS-1658 C2: an unreadable outer node whose cause cannot be read either answers false and does not throw', () => {
++    const outer = Object.defineProperty({ message: 'wrapper' }, 'code', { get: boom, enumerable: true });
++    const err = Object.defineProperty(outer, 'cause', { get: boom, enumerable: false });
++    expect(() => isIdNamespaceCollision(err)).not.toThrow();
++    expect(isIdNamespaceCollision(err)).toBe(false);
++  });
++
++  it('CONTROL KS-1658 C3: an ordinary node-postgres 050 refusal is still recognised as 050 and not as 051', () => {
++    expect(isIdNamespaceCollision(refusal(ID_NAMESPACE_CONSTRAINT))).toBe(true);
++    expect(isLiveAnchorIdClaim(refusal(ID_NAMESPACE_CONSTRAINT))).toBe(false);
++  });
++});

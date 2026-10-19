@@ -1,0 +1,62 @@
+diff --git a/Blockchain/Dev/services/security/src/converters.ts b/Blockchain/Dev/services/security/src/converters.ts
+index edacb6a7d..2faf51a40 100644
+--- a/Blockchain/Dev/services/security/src/converters.ts
++++ b/Blockchain/Dev/services/security/src/converters.ts
+@@ -170,3 +170,6 @@
+     usageCount: Number(r.usage_count),
+-    isActive: Boolean(r.is_active),
++    // KS-1639: a text value is active only when it is a text form of true; 'f' / 'false' (and anything unrecognised) read inactive.
++    isActive: typeof r.is_active === 'string'
++      ? /^(t|true)$/i.test(r.is_active.trim())
++      : Boolean(r.is_active),
+     expiresAt: r.expires_at ? new Date(r.expires_at as string) : undefined,
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1639-rowtoapikey-reads-the-text-forms-of-false-as-inactive.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1639-rowtoapikey-reads-the-text-forms-of-false-as-inactive.test.ts
+new file mode 100644
+index 000000000..529a3f262
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1639-rowtoapikey-reads-the-text-forms-of-false-as-inactive.test.ts
+@@ -0,0 +1,44 @@
++/**
++ * KS-1639 (gate O2's probe on #1601, KS-1525) - rowToApiKey read `isActive: Boolean(r.is_active)`, and Boolean() of any
++ * non-empty string is true, so the Postgres TEXT forms of false ('f', 'false') read ACTIVE: a revoked key could be
++ * un-revoked by a row that arrives as text (a ::text cast, row_to_json, a hand-built fixture). The mapper already
++ * honoured 't' (cell G10 in row-converters.test.ts); after the fix a string is active ONLY when it is a text form of
++ * true ('t' / 'true', any case, surrounding spaces ignored) and every other string reads inactive (fail closed).
++ * The control cells keep what must not change: real booleans, null and an absent column, and the 't' forms.
++ */
++import { describe, it, expect } from 'vitest';
++import { rowToApiKey } from '../converters';
++
++const ROW = {
++  id: 'key_1639', organization_id: 'org_1', tenant_id: 'a0000000-0000-4000-8000-000000000002', connector_id: 'conn_1',
++  name: 'connector-1639', key_hash: 'h', key_prefix: 'sk_t_', scopes: '["read:docs"]',
++  rate_limit: '100', rate_limit_window: '60', last_used_at: null, usage_count: '0',
++  expires_at: null, created_at: '2026-04-01T00:00:00Z',
++};
++const active = (v: unknown) => rowToApiKey({ ...ROW, is_active: v }).isActive;
++
++describe('KS-1639 - rowToApiKey reads the Postgres text forms of false as inactive', () => {
++  it('RED KS-1639 F1: the text form "f" reads INACTIVE, never active', () => {
++    expect(active('f')).toBe(false);
++  });
++
++  it('RED KS-1639 F2: "false", "F", "FALSE" and a padded " f " all read inactive', () => {
++    expect(['false', 'F', 'FALSE', ' f '].map(active)).toEqual([false, false, false, false]);
++  });
++
++  it('RED KS-1639 F3: an unrecognised text value reads inactive (fail closed), not active', () => {
++    expect(active('maybe')).toBe(false);
++  });
++
++  it('CONTROL KS-1639 T1: the text forms of true still read active', () => {
++    expect(['t', 'true', 'T', 'TRUE', ' t '].map(active)).toEqual([true, true, true, true, true]);
++  });
++
++  it('CONTROL KS-1639 B1: real booleans are unchanged', () => {
++    expect([active(true), active(false)]).toEqual([true, false]);
++  });
++
++  it('CONTROL KS-1639 N1: null, an empty string and an absent column all read inactive', () => {
++    expect([active(null), active(''), rowToApiKey(ROW).isActive]).toEqual([false, false, false]);
++  });
++});
