@@ -1,0 +1,83 @@
+=========== [INBOUND] 2026-10-19T07:59 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR GATE: #1615 KS-1603 at 4db96203546b - every 
+[Secuura/Blockchain-J -> Wednesday] READY FOR GATE: #1615 KS-1603 at 4db96203546b - every figure reproduced, body uncorrected, landing tree 1cd95487cc12
+## BLUF
+
+**READY FOR GATE — #1615, KS-1603, tier 1, head `4db96203546b76e383b40b4e3806cca8ba4171b0`. Re-verified from a fresh clone on this head. EVERY figure in the Test Evidence block reproduces, so per your answer I corrected NOTHING and the body stands as written.** Predicted landing tree **`1cd95487cc12b649e853c770f24a7c672f0519de`** against develop `722e07f19cee683ea037930e601e380a9491f7b5`, which `ls-remote` still reads as the tip and which **is HEAD's parent** — so a squash lands the branch's own tree. Two things for you: an overlap with a stale PR, and two dead instruments of my own that I caught and re-measured.
+
+## The cause
+
+`dbPersistAnchor`'s `ON CONFLICT (document_id, network) DO UPDATE SET` list gates `metadata_payload` alone (KS-1385). The other twelve columns — `status`, `transaction_hash`, `block_hash`, `block_number`, `slot`, `fee`, `confirmations`, `confirmed_at`, `error_message`, `retry_count`, `simulated`, `updated_at` — moved unconditionally for any authenticated caller from any tenant, and `content_hash` is the key public verify-by-hash resolves on. The gate is in `dbPersistAnchor`, the one site both routes persist through (`index.ts:507` flat, `:804` batch), so a route added later cannot go round it. The batch route additionally reads every id up front, which removes a partial write it has today.
+
+## The cells, re-run by me
+
+**At the head — anchoring integration: 103 passed / 103, 5 files, rc 0.**
+
+**RED-FIRST, the two product files parked at develop's copies (−290/+1, the exact inverse of the PR's +291/−1 on those files), the test files left in place: `8 failed | 6 passed (14)`, rc 1.** Identical to the body.
+
+| bucket | count | cells | message |
+|---|---|---|---|
+| behavioural reds | **3** | A1, A3, B1 | `expected 202 to be 403` ×3 |
+| absence reds | **5** | P1, P2, P3, P4, D1 | `guard.readIdOwners is not a function` ×3, `guard.mayWriteAnchorRows is not a function` ×2 |
+| controls GREEN at develop | **6** | S1, A2, A4, A5, A6, B2 | — |
+
+Both sides non-zero, so it is a real red and not a load failure. Restored from HEAD and **proved byte-identical by sha256** (`index.ts` `04eb96d3b6dc9ae8`, `anchorOverwriteGuard.ts` `882cd948d7e6cfd5`, before == after), working tree 0 dirty files, **with a one-byte control that fired** (one `\n` appended → `74ff976db9b349f2` ≠ `04eb96d3b6dc9ae8`).
+
+**`threadTokenMint` is the landing parent's failure, not mine — proved two ways.** Run alone with the product parked at develop: 1 failed / 1, `Could not serialize the data: Error`. Run alone at the head: 1 failed / 1, same. And the file imports neither changed module (grep **0**, with a live control: three files **do** import the guard, and `ks1385-guard-reads-under-force-rls` matches it twice).
+
+## Suite counts — landing parent AND head, and they reconcile
+
+| suite | develop `722e07f19cee` (the landing parent) | head `4db96203546b` | delta |
+|---|---|---|---|
+| anchoring **integration** | 3 files / **89 passed**, 0 failed | 5 files / **103 passed**, 0 failed | +2 files / **+14 cells** |
+| anchoring **unit** | 32 files / 379 passed, **1 failed** (380) | 32 files / 379 passed, **1 failed** (380) | **0** |
+
+**89 + 14 = 103**, exactly. The unit figure is identical at both, which is a stronger statement than the body's: the single red is the landing parent's. (At develop the two `ks1603-the-*` files are absent — measured 0, not assumed.)
+
+**tsc** — pass 1 as the repo configures it: rc 0, 0 output lines. The tsconfig's `exclude` really does list `src/__tests__` (read verbatim), so pass 2 with `exclude: []`: rc 0, **0 errors**, and the control names both new files in the program (**2 of 2**, pass 1 had **0**, with `anchorOverwriteGuard.ts` = 1 proving the instrument). Scratch config deleted; tree 0 dirty.
+
+**ESLint** — the four files: rc 0, **0 problems**. Control: a planted `const unusedVar: any = 1` in the same tree reported **1 problem** (`@typescript-eslint/no-unused-vars`), so ESLint was really running with real rules. *The body says that control reported 2; mine reported 1. That is a difference in MY control, not in a PR figure — I planted a different file. Nothing in the body is wrong and I changed nothing.*
+
+**Harness** — a throwaway PostgreSQL 15.14 on port 55615, built from `docker/init/*` + `scripts/run-migrations.sh`. **applied=53 failed=0 skipped=0**, and the per-file evidence: **53 `Applying` lines, 52 `[main]` + 1 `[platform]`, equal to `applied=53`**, including `[main] Applying 039_rls_fail_closed.sql...`, `050_documents_id_namespaces_disjoint.sql`, `051_documents_cannot_claim_a_live_anchor_id.sql`. Measured on it, every schema claim in the body: `documents` `relrowsecurity,relforcerowsecurity = true,true` with 039's `tenant_isolation` policy live · `anchor_store` RLS `false,false` and **0** tenant/organisation/owner columns · `documents.tenant_id` `is_nullable=NO` with the control columns `external_id`, `issuer_organization_id`, `owner_user_id` all `YES` · roles `secuura super=true bypassrls=true`, `secuura_app super=false bypassrls=false`, and the suite connects as `secuura_app` (asserted: `current_user=secuura_app super=false`).
+
+## Two controls I added that the body does not have
+
+The integration run is 857 ms, which is fast enough to be worth disproving:
+1. **Owner DSN pointed at a dead port (55699):** rc 1, **4 files failed, 99 skipped**. The suite genuinely depends on my database.
+2. **`TEST_APP_DATABASE_URL` unset:** rc 1, 2 files failed, 15 skipped — it **fails**, it does not skip, which is what `vitest.integration.config.ts` claims about itself in its own header.
+
+## Landing prediction, and the condition on it
+
+- develop `722e07f19cee683ea037930e601e380a9491f7b5` (`ls-remote`, just now), tree `887273f69e4174fbf693d15e322c761505cc9388`.
+- `HEAD^` **is** that commit, so the branch sits directly on the tip and the diff against develop is exactly the 4 files, **+711 / −1** — equal to the API's own `additions`/`deletions`.
+- **Predicted landing tree: `1cd95487cc12b649e853c770f24a7c672f0519de`** = the branch's own tree.
+- **#1613 and #1614 are both still open** (`merged=false`). If either lands first, this prediction is void and I re-predict on the live tip at the merge moment, as you instructed. **Neither overlaps my files** — 0 intersection against both.
+
+## The overlap, and one thing for your routing
+
+25 open PRs censused, **1 overlap**: **#995 (KS-741**, "strip `x-emitter-internal` at originate's own inbound"), which also modifies `anchoring/src/index.ts` (6+/3−). Control fired correctly on a path planted from #1613, so the census is live.
+
+**It does not block me, and I did not make it worse.** #995 was opened 2026-09-14, its base is `0f37b85c80b6`, and its `mergeable_state` is already **`dirty`**. On that one shared file its base blob (`9f3eba10ccd4`) differs from develop's (`2878a74393af`), and **five develop commits moved it since** — KS-1385 (b) `7e2f8157c`, KS-1612 `04a4a3393`, #1549 `8cbadd8d4`, KS-1175 `cbae988db`, KS-726 `48e65c435`. So it was stale there before my branch existed; mine is a sixth commit on the same file, not the cause. Control: the guard file saw 3 commits in the same window, so the log reads non-zero on another path too. **Not my ticket and not in my queue — flagging it rather than touching it.**
+
+## Faults of mine, both caught by a control rather than by luck
+
+1. **A dead zero.** My per-file migration check grepped `^Applying ` and read **0** — because the runner prefixes every line `[main] ` or `[platform] `. **My negative control (`Applying 999`) also read 0**, so both arms agreed and the zero looked like a finding. Re-measured with the real pattern: 53, and the 999 control still 0 **on a live instrument**. The body's claim was right; my instrument was dead.
+2. **A control that matched my own clone's name.** I counted the new test files in the tsc program with `grep -c 'ks1603'` over `--listFilesOnly` and got **1095** and **1176** — because my clone directory is named `j15-ks1603`, so every path in it matches. Re-measured on basenames: 0 in pass 1, 2 in pass 2, both named.
+
+## Residual — unchanged from the body
+
+1. An `anchor_store` row whose `document_id` names no document records no owner anywhere, Platform S's own flat rows included. That needs the tenant column: **KS-1384**, Kam's card.
+2. The probe **allows on a fault, by design** — for the duration of a database fault the route is back to develop's behaviour, with a warn naming KS-1603. The interim's worst case is exactly develop, which is the honest bound for an interim.
+3. originate's `saveAnchorToDb` is a second, unguarded upsert a guard inside anchoring cannot reach — **KS-1650** (P3, Backlog, filed).
+
+## Next from me
+
+KS-1629: the approved read-only `SIMULATE_ANCHORING` reading on demo and kintsugi first (that variable only, `NODE_ENV` control by the same command, nothing restarted or written), then the fix on its own branch off the live develop. Nothing deployed this session; demo and kintsugi will be read, never driven.
+
+PROVENANCE:
+- every suite count, red-first bucket, sha256, tsc/ESLint result, schema reading | my own fresh clone at `4db96203546b` + scratch PG 15.14 port 55615, this session | 2026-10-19T07:4x-08:0xZ
+- develop tip + tree, #1615 head/base/additions, #1613/#1614 open, the 25-PR overlap census, #995's base and state | `git ls-remote` and `gh api`, my own reads | 2026-10-19T08:0xZ
+- the five develop commits on `anchoring/src/index.ts` since #995's base | `git log 0f37b85c80b6..origin/develop -- <file>` in my clone | 2026-10-19T08:0xZ
+- the PR body's own prior figures, which I compared against | #1615's body, written by Seat J 14th | carried, now independently reproduced
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-19 19:0x AEDT
+
