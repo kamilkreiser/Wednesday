@@ -1,0 +1,57 @@
+=========== [INBOUND] 2026-10-19T17:35 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1643 KS-1500 + KS-1468 at de44e3d3ccf
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1643 KS-1500 + KS-1468 at de44e3d3ccfc (tier 2, test-only, 2 commits) - landing 54dc22e92056 on 2b205beada00
+## BLUF
+
+**#1643 is READY FOR GATE — one test-only PR, two commits, zero product bytes.** Head `de44e3d3ccfcefd58abe5295a1f8a2571e765bc4`, base develop `2b205beada00a2f0fb3144e38198e471848132b6` (unmoved since the push), landing tree **`54dc22e920569148070ee579fc173753432f6dd4`**. One file, **+10/-1**. `Refs KS-1500` + `Refs KS-1468`. Tier is yours to set; I would say tier 2 on the strength of the tamper work, though nothing executable in the product changed.
+
+https://github.com/Secuura/Distributed_Secuura/pull/1643
+
+## Commits
+
+- `737389ca6587e0fbfa5211d2a10fe89512369b9f` — `Refs KS-1500`, Minor-2
+- `de44e3d3ccfcefd58abe5295a1f8a2571e765bc4` — `Refs KS-1468`, item 3
+
+Each is its Spark's patch byte for byte. Both tickets linked `contributes`/`open`, and both moved Backlog -> In Progress by the integration, not by me.
+
+## The tamper matrix, both directions
+
+Unmutated control green both rounds (25 cells unedited, 26 edited). `mutate.py` asserted each line's exact text before planting and restored with a sha256 check; no kill carried a `TS####`.
+
+| tamper | unedited | edited |
+| -- | -- | -- |
+| T1 import dropped + local impure fn (checker's own) | SURVIVED | KILLED |
+| T2 import re-pointed, no local fn | SURVIVED | KILLED |
+| T3 import kept **and** local fn added | SURVIVED | KILLED |
+| T4 import dropped, no local fn | SURVIVED | KILLED |
+| K1 INSERT template + decoy `//` comment (checker's own) | SURVIVED | KILLED |
+| K2 decoy **block** comment containing a backtick | SURVIVED | KILLED |
+| K3 lookup replaced by a different statement | **KILLED** | KILLED |
+
+**T2 and T3 prove both halves of KS-1500's assertion are load-bearing.** **K3 is the positive control** — killed on the unedited test, which is what makes the six SURVIVED readings a gap rather than an inert suite.
+
+## Measurements
+
+- Both tamper lines re-taken **byte-identical** at `2b205beada00` with a line-33 control.
+- Patch identity for both passes: `patch.diff` == `section_1.diff` == the READY block, `cmp` rc 0, `.opts` confirming the applied file.
+- Strict `git apply --check` both sections at develop: rc 0, empty.
+- **Order independence:** either order gives `54dc22e92056…`; each alone gives a different tree (`dc51264410f3…`, `3a3e0e792908…`), so it is not vacuous. Commit 1's tree equals the KS-1500-alone tree.
+- **Suite by cell name:** auth baseline **1,095/1,095** (99 files, rc 0) -> patched **1,096/1,096** (99 files, rc 0). +1 cell, 0 vanished, 0 new reds. ks963 file 25 -> 26. **KS-1468 adds no cell** — it strengthens an existing assertion; the +1 is KS-1500's.
+- Census: 0 of 23 open PRs touch the file; dynamic positive control fires.
+- **auth IS covered by the push gate's type-check ratchet** (it has a `tsconfig.test.json`): `typecheck-tests: auth … 150 files, 99 of them under __tests__; 42 errors: 42 in the baseline, 0 new`. So my cell adds no type error — a figure I could quote here only because auth is enrolled, unlike originate.
+- Push 17:22:48Z -> 17:32:53Z, **10 m 05 s**, push's own rc 0, ref verified by `ls-remote` equal to my tip rather than inferred from the wrapper's exit.
+- Preflight verbatim in the body, ending `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` **Not a pass** — legs 3, 4, 8 need a stack; no Docker here. `shell suites: 91 passed, 0 failed, 0 skipped (of 91)`.
+
+## Readbacks
+
+PR body stored 7,527 == sent, EQUAL. Comments `3aefb3cb-cd14-4eba-b62f-f535d262be6a` (KS-1500) and `5d24fbbb-05ce-4da4-ada2-a0740a04e6dc` (KS-1468), both stored == sent, EQUAL. `bodycheck.py` PASS on the PR body and both comments, every hex token resolving, fake-token control failing.
+
+## Scope stated on both tickets
+
+KS-1500 closes **Minor-2 only**; Minor-1 (the deny-list purity pin) stays open and I say so on the ticket. KS-1468 closes **item 3 only**; items 1 and 2 stay open, and I named item 1 as the one actual coverage regression against the old cell.
+
+## Next: item 4
+
+Starting KS-1676 now. Plan, so you can stop me if it is wrong: raise the four held passes as **one** test-only PR with four commits, one per pass, each byte-for-byte; re-take all four tamper lines at the live develop; run each new file green at the tip and red under its own tamper; then **measure coverage against the ticket's 15 clause ids with compile-safe mutants** rather than take SCREEN_17's claim, and decide `Refs` vs a close keyword on that measurement. The `!chain` row is unmeasurable by a one-line mutant (TS18047) by the ticket's own account, so I expect `Refs` with the uncovered rows named.
+
+`mergeable_state` reads `unstable` on #1643 for the usual retired-CI reason. `origin/develop` in my clone is still `17ab917aa6f4`, untouched all session. Nothing deployed, no `az`, no environment read.
+
