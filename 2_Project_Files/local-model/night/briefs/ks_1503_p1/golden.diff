@@ -1,0 +1,48 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1470-a-connector-bearer-is-refused-before-every-mount.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1470-a-connector-bearer-is-refused-before-every-mount.test.ts
+index 4d227f5bd..2028e6206 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1470-a-connector-bearer-is-refused-before-every-mount.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1470-a-connector-bearer-is-refused-before-every-mount.test.ts
+@@ -43,2 +43,2 @@
+-const EXPECTED_CELLS = 17;
++const EXPECTED_CELLS = 20;
+ let CELLS_RUN = 0;
+@@ -353,2 +353,39 @@
+   });
++
++  // KS-1503 Minor 1: cell J asserts only "not the connector refusal", so it passes whether an unverifiable Bearer is forwarded,
++  // answered 401, or answered 500. If the front door's `catch` ever rethrew, every forged, expired or malformed Bearer would
++  // answer 500 on every route and J would stay green. The next two cells say what the Bearer DOES get; the third keeps the
++  // guard itself pinned. The forged and expired tokens below carry type:connector on purpose: that is the claim the guard acts on.
++  const unverifiable = {
++    forged: (): string => {
++      const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
++      return jwt.sign({ userId: 'connector:ks1503-forged', role: 'connector', type: 'connector', tenantId: TENANT }, privateKey.export({ type: 'pkcs1', format: 'pem' }) as string, { algorithm: 'RS256', expiresIn: '10m' });
++    },
++    expired: (): string =>
++      jwt.sign({ userId: 'connector:ks1503-expired', role: 'connector', type: 'connector', tenantId: TENANT, exp: Math.floor(Date.now() / 1000) - 3600 }, PRIV, { algorithm: 'RS256' }),
++  };
++
++  it('RED KS-1503 M1 - a type:connector token with a BAD signature goes on to the mount that forwards it: 200 and ONE upstream hit, not a 500', async () => {
++    CELLS_RUN += 1;
++    const bearer = 'Bearer ' + unverifiable.forged();
++    const mark = hits.length;
++    const r = await send(gateway!.url, 'GET', '/api/documents/ks1503/sig-json', { authorization: bearer });
++    await settle(60);
++    expect([r.status, isRefusal(r), hits.slice(mark).filter((h) => h.authorization === bearer).length]).toEqual([200, false, 1]);
++  });
++
++  it('RED KS-1503 M2 - an EXPIRED type:connector token (good signature) goes on the same way: 200 and ONE upstream hit, not a 500', async () => {
++    CELLS_RUN += 1;
++    const bearer = 'Bearer ' + unverifiable.expired();
++    const mark = hits.length;
++    const r = await send(gateway!.url, 'GET', '/api/documents/ks1503/sig-json', { authorization: bearer });
++    await settle(60);
++    expect([r.status, isRefusal(r), hits.slice(mark).filter((h) => h.authorization === bearer).length]).toEqual([200, false, 1]);
++  });
++
++  it('CONTROL KS-1503 M3 - a type:connector token with a GOOD signature is still refused 401 with the connector refusal and 0 upstream hits (the guard itself is unchanged)', async () => {
++    CELLS_RUN += 1;
++    const { res, forwarded } = await sendConnector(gateway!.url, 'GET', '/api/documents/ks1503/sig-json');
++    expect([res.status, isRefusal(res), forwarded.length]).toEqual([401, true, 0]);
++  });
+ });

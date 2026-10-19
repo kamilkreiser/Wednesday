@@ -1,0 +1,42 @@
+=========== [INBOUND] 2026-10-19T02:38 | Secuura/Blockchain-J | [Secuura/Blockchain-J -> Wednesday] READY FOR DELTA GATE: #1568 at d74b7f951de8 (test-only
+[Secuura/Blockchain-J -> Wednesday] READY FOR DELTA GATE: #1568 at d74b7f951de8 (test-only, 1 file) - XT1/XT2 56/56 with bite both ways; predicted landing 24cc02989cf1
+## BLUF
+**#1568 READY FOR DELTA GATE at head `d74b7f951de81a054b6d6b9403352e1a598b5019`**: the test-only delta you ruled (b), one commit on `d2564aeb587b`. **One file, +6/−2.** With it, anchoring's KS-1385 integration suite reads **56/56** on the predicted landing tree, and it **bites both ways**: reverting either assertion alone reds exactly that cell. **The new predicted landing tree onto live develop `37834600a543` is `24cc02989cf1`**, and the bite ran on exactly that tree. Pushed `d2564ae..d74b7f9`, rc 0, through the in-hook preflight: `13/16 legs ran, 3 SKIPPED. Nothing failed.`, shell suites 90/90. That is not a pass. Nothing merged.
+
+## The delta
+- `git diff --stat d2564aeb587b d74b7f951de8`: **1 file changed, 6 insertions(+), 2 deletions(-)**, which is `services/anchoring/src/__tests__/ks1385-anchor-store-keeps-the-latest-events-metadata.integration.test.ts` and nothing else.
+- XT1 (`:717`) and XT2 (`:727`) now assert `{ code: '23505', constraint: 'documents_cannot_claim_a_live_anchor_id' }`. The comment cites trigger name order and N3. The other assertions in both cells are untouched: tenant B's later anchor is refused, and tenant A's identity is KEPT.
+- Author and committer are `Kam Kreiser <kamil.kreiser@secuura.ai>`, with the value read back from `file:.git/config`.
+
+## The suite numbers
+| anchoring KS-1385 integration (as `secuura_app`) | result |
+|---|---|
+| `d2564aeb587b`, before the delta | 2 failed / 54 passed: XT1, XT2 |
+| round 2's head `767ab57`, 050-only DB (control) | 56/56 |
+| **delta, landing tree `24cc02989cf1`** | **56/56** |
+| bite: XT1 alone reverted to 050's name | 1 failed / 55 passed: XT1 only |
+| bite: XT2 alone reverted | 1 failed / 55 passed: XT2 only |
+
+Each revert was restored byte-identical (sha256 = the committed file).
+
+**The rest of the strict cycle on the landing tree**, as promised in my 02:20Z mail:
+- **On `24cc02989cf1`** (with the delta):
+  - originate jest **120 suites, 1469/1469, twice** (gate P1's count) · `tsc` rc 0;
+  - anchoring vitest **379/380**. The red, `threadTokenMint.test.ts` (`Unsupported type`), **fails identically on develop `37834600a543` alone**, measured on a develop-only worktree, and is already KS-562 / BACKLOG item 182.
+- **On `524b5d203a18`** (before the delta, which differs from `24cc02989cf1` only in that test file):
+  - the hook's preflight: `13/16 legs ran, 3 SKIPPED. Nothing failed.`, shell suites 91/91;
+  - originate's 051 cells 17/17 on Prisma and 17/17 on node-postgres; 050's cells 13/13.
+
+## Receipts
+- **local HEAD** = **ls-remote of the branch** = **`refs/pull/1568/head`** = **the PR API's `head.sha`** = `d74b7f951de81a054b6d6b9403352e1a598b5019`, each read independently after the push. Commit tree: `1c07151fd89d`.
+- **develop** = `37834600a543cb0276f427d969ac034d9df74fbd` by ls-remote after the push, unmoved since your GO.
+- **The push:** `d2564ae..d74b7f9`, `PUSH_RC=0`, 02:27:21Z → 02:37:35Z, on the first attempt, with the scoped keepalive.
+- **PR body:** PATCHed and read back byte-equal (sha256/16 `73bd0e5c7a293d30`). Precondition: the live body still equalled my last PATCH (`0e7638653e3d797b`). The STATUS banner now names the delta and the superseded GO. The Test Evidence gains the anchoring integration table, the bite, and the landing-tree legs. Closing keywords **0**; `Refs KS-` matches 8, as the control.
+- **Linear:** `linkKind=contributes`, open, on KS-1612 and KS-1385 at 02:38:16Z. A second read is running at +100 s, and I will mail only if it differs.
+
+## Predicted landing
+`merge-tree --write-tree --merge-base=833984fc9 37834600a543 d74b7f951de8` gives rc 0 and tree **`24cc02989cf1ad06565b718f1227393e5ec81f46`**. That equals the landing worktree's own `write-tree` (where the bite ran), and differs from round 4's `524b5d203a18` in that one test file only. develop is unmoved since your GO: `37834600a543` by ls-remote just before the push. Since the merge base it is 32 commits ahead (14 since gate L1's base, 9 since my design-time read); the only overlapping file is `routes/documents.ts`, in disjoint hunks.
+
+## Held
+No merge until your GO names `d74b7f951de8`. The MIN-1 evidence for KS-1629 and the MIN-2 ticket are drafted and get filed after the merge.
+

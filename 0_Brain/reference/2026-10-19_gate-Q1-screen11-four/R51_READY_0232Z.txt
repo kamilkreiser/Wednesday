@@ -1,0 +1,137 @@
+=========== [INBOUND] 2026-10-19T02:32 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE (batched): SCREEN_11 four - #1602 #1603
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE (batched): SCREEN_11 four - #1602 #1603 #1604 #1605; gate Q2 and Q3 answered, Q3 is NOT the reassuring answer; KS-1641 filed
+## BLUF
+
+**READY FOR GATE, batched: the four SCREEN_11 PRs are raised, all `Refs`, all at develop
+`37834600a543cb0276f427d969ac034d9df74fbd`.** Three tier 1, one tier 2. Every one red-first proven,
+every suite count a prediction I committed to before running it, every zero paired with a control.
+
+**Two of your four gate questions are ANSWERED in full, and one of those answers is the opposite of
+reassuring: Q3's premise is false — the new text DOES reach the browser.** Q1's NULL arms are yours
+to measure, as you ruled. A third defect surfaced out of Q2 and is filed as **KS-1641**.
+
+| PR | ticket | head | tier | link |
+|---|---|---|---|---|
+| [#1602](https://github.com/Secuura/Distributed_Secuura/pull/1602) | KS-1377 | `70dc59643b5aaa089606e51a43d2948ab5c671b2` | **1** | Refs |
+| [#1603](https://github.com/Secuura/Distributed_Secuura/pull/1603) | KS-1617 A.3 | `f51d7cab124b9dc9e15172b1fba0cd01fe41e819` | **1** | Refs |
+| [#1604](https://github.com/Secuura/Distributed_Secuura/pull/1604) | KS-1617 A.2 | `0cc48741299c9d4d8277eafd31c8b6f674ed2da1` | **1** | Refs |
+| [#1605](https://github.com/Secuura/Distributed_Secuura/pull/1605) | KS-1507 | `934ce30c3c118626647ced229a11ad55a4fabb41` | 2 | Refs |
+
+## Evidence, per PR
+
+| PR | red-first | after | tsc | ESLint |
+|---|---|---|---|---|
+| #1602 | develop's `index.ts` swapped in, blob asserted: ks1370 **1 failed / 9 passed**, the one being W3 | security **347/347** in 31 files (develop 346 + 1) | rc 0, 0 lines | 0, stdin control reads 1 |
+| #1603 | **both** adapters swapped, each blob asserted: **2 failed / 3 passed**, exactly P1+P2, 3 controls green | auth **1073/1073** in 96 files (1068 + 5) | rc 0, 0 lines | 0, stdin control reads 1 |
+| #1604 | `routes/auth.ts` swapped, blob asserted: **2 failed / 14 passed**, exactly A2-1+A2-2, control green | auth **1071/1071** in 95 files (1068 + 3) | rc 0, 0 lines | 0 at head AND 0 at develop |
+| #1605 | test-only, so a **planted mutant** (`!DATABASE_URL` → `!DATABASE_URL?.trim()`), asserted landed: **1 failed / 13 passed**, exactly the whitespace cell, empty-control green; restored and hash-verified twice | auth **1070/1070** in 95 files (1068 + 2) | rc 0, 0 lines | 0 |
+
+All four: `PUSH_RC=0`, `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`
+`git apply --check` clean at the live tip for each, with a **deliberately corrupted copy of a patch
+refused** as the control that `--check` discriminates. Each suite count was predicted from a base I
+measured at the landing parent, not from a base quoted in a PR body — and all four held exactly.
+
+**Overlap census re-run after this session's eleven merges, as you asked: 24 open PRs, every one
+scanned, 0 overlaps on the batch's 8 files, with a planted intersection from an open PR as the
+control — it fires.** I re-keyed the tool to this seat and replaced R 50th's control, which was a
+read-back of a PR that has since merged.
+
+## GATE QUESTION 3 — the premise is FALSE. Read this before gating #1603.
+
+You asked to *confirm the error message never reaches the user's browser beyond what it did before*.
+**It reaches it.** Chain, read in source:
+
+1. `routes/auth.ts:1032-1035` catches `exchangeCode`'s throw and re-raises
+   `new BadRequestError("OAuth authentication failed: " + exchangeErr.message)`.
+2. `BadRequestError` extends `AppError` (`errorHandler.ts:30-32`).
+3. `errorHandler.ts:293` writes `message: err.message` into the body; `:300` sends it with
+   `res.status(err.statusCode)`.
+
+So the adapter's message — now carrying `(HTTP 503)` — is **serialised to the caller in the 400**.
+The suite's own docstring says so ("in the log AND in the 400 the callback answers"), so it is the
+drafter's intent, not an accident. But **the batch brief describes A.3 as a change to an error
+MESSAGE, and it is in practice a change to a RESPONSE BODY.** That is the gate's call, not something
+to inherit quietly.
+
+What is disclosed is the status **the provider's** profile endpoint returned — Google's or
+Microsoft's, not ours. Low sensitivity, largely inferable by a caller driving the OAuth dance. Still
+new information in a response. **The alternative shape, if the gate prefers it: keep the status in
+the log line and leave the thrown message alone.** It is in #1603's body in full.
+
+## GATE QUESTION 2 — answered, both halves
+
+**(a) Structured? YES in BOTH modes — and dev is safe for a different reason than production.**
+Production is `combine(json())` (`utils/logger.ts:33-34`). Development is a `printf` template, which
+would NOT escape a newline — **but the meta object goes through `JSON.stringify` at
+`utils/logger.ts:16`**, so the caller-supplied value is escaped there. The unescaped parts of a dev
+line are timestamp, service, level and message, none caller-supplied here. So the field cannot forge
+a line either way. "It's JSON in production" would have been the wrong answer for the dev path.
+
+**(b) Echoed to a response? Not in auth, deliberately** — `errorHandler.ts:190` says so in terms,
+the callback throws the generic `OAuthProviderError`, and cell A2-3 asserts the raw response carries
+neither value.
+
+**But the same search found a service that DOES echo it — filed as KS-1641, Medium.**
+`services/m365-integration/src/index.ts:465` reflects **unbounded** provider `error_description`
+into a redirect URL on a no-auth callback (auth caps the same field at 200; control: that cap greps
+1 in `routes/auth.ts`, 0 there). **And the bigger half:** all five of that file's admin redirects
+target `/admin/integrations`, and the admin SPA has **no such route** — `vite base: '/admin/'` plus
+`BrowserRouter basename="/admin"` means the router sees `/integrations`, which is not declared
+(`/settings` is; integrations is a TAB inside it). Control: `settings` matches 2 route declarations,
+`integrations` 0. **So every M365 OAuth outcome, success included, lands on the catch-all.**
+
+**Why that is not a duplicate, and I checked properly:** `admin/integrations` returns **5** Linear
+hits and I read all five. KS-219, KS-241, KS-344, KS-349 — all **Done** — each repaired the **host
+or port** of this exact redirect, and KS-219's own text calls the path *"the frontend route"*. **Four
+tickets made the host right and left the route wrong.** KS-15 is unrelated (a stale Onfido row behind
+the admin API). Not an XSS today: no frontend reads a `message` param and there is no
+`dangerouslySetInnerHTML` anywhere under `frontend/`, both zeros against a control reading 117.
+
+## GATE QUESTION 1 — half measured by me, half yours
+
+**Measured (source):** the in-memory count IS still a source of truth in two sites #1602 does not
+touch. The shared upsert `apiKeyInsertStatement` (`index.ts:421-437`) sets
+`usage_count = EXCLUDED.usage_count` at `:425` from `k.usageCount` at `:436`, and it serves mint,
+revoke and the KS-1549 rotate — so a revoke after #1602 still writes a process-local count over the
+accumulated row. And `:1494` serves the count to the key list from `memApiKeys`, so #1602 **widens**
+the row-vs-API divergence. Both are on KS-1377 as named residue, with the note that dropping the
+column from that upsert is not available as a fix for the same KS-764 reason as `is_active`
+(`:479-483`).
+
+**NOT measured, by anyone:** the `GREATEST`/NULL arms. #1602's body says so plainly and labels the
+drafter's 20-client PostgreSQL 18.3 figure as **carried, re-run by nobody**. Yours to measure, as
+you ruled — no Docker started.
+
+## A FAULT OF MINE, caught by my own control
+
+I drafted KS-1641's dedupe section claiming `admin/integrations` returned **0** Linear hits — a
+number I had written before running the search. It returns **5**. I ran it, read all five, and
+rewrote the section before filing; the ticket now carries the lineage and the argument for why it is
+still new. **Nothing was filed on the wrong number.** The same pass also caught my earlier frontend
+searches reading 0 because BSD `grep` BRE has no `\|` alternation — the control reading 0 is what
+exposed it. Both are in my memory now.
+
+## STATE
+
+- develop unmoved at `37834600a543cb0276f427d969ac034d9df74fbd`; the four branches are untouched
+  since their pushes and will stay so until your verdicts.
+- #1597 still open and still waiting on KS-1638, body already `Refs KS-1634`.
+- **Next on my queue:** KS-1638, then #1597's author force-push, then KS-1622. Tell me if the gate
+  verdicts should take priority over starting KS-1638.
+- Watcher armed from 01:39:53Z, `--max-min 240`, lapses ~05:40Z. Nothing deployed all session.
+
+PROVENANCE:
+- the four heads, PR numbers, bodies and Refs lines | GitHub API create + read-back by me, substring-checked | 2026-10-19 02:2xZ
+- every red-first, suite, tsc and ESLint figure | each service's own runner in the r49 clone on each branch, logs in r51/svc | run 2026-10-19 01:4x-02:2xZ
+- PUSH_RC=0 and the 13/16 preflight line, per push | push_one.sh with the transport in full, logs in r51/logs | run 2026-10-19 01:42-02:27Z
+- overlap census 24 open PRs / 0 hits / control fires | overlap_r51.py, run by me | run 2026-10-19 01:4xZ
+- the Q3 chain auth.ts:1032-1035 -> errorHandler.ts:293/:300 | source read by me at develop 37834600a543 | read 2026-10-19 02:0xZ
+- the Q2 logger answer, both modes | services/auth/src/utils/logger.ts:16,33-34 read by me | read 2026-10-19 02:0xZ
+- KS-1641's five redirects, the route list, vite base and basename, Settings tab | source read by me, with controls | read 2026-10-19 02:3xZ
+- the five prior admin/integrations tickets and their Done states | Linear, paginated over 1,629 issues incl. archived, each of the five READ | read 2026-10-19 02:3xZ
+- Q1's two residue sites | services/security/src/index.ts:421-437, :1494, :479-483 read by me | read 2026-10-19 01:4xZ
+
+SELF-CHECK: re-read end to end. The only figure here I did not produce myself is the drafter's
+20-client concurrency measurement, labelled as carried in both this mail and #1602's body. Q3's
+answer I would want a second reading of, because it changes what #1603 is | 2026-10-19 02:4xZ
+

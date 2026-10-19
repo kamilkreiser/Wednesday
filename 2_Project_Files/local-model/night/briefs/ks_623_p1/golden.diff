@@ -1,0 +1,94 @@
+diff --git a/Blockchain/Dev/services/auth/src/middleware/authenticate.ts b/Blockchain/Dev/services/auth/src/middleware/authenticate.ts
+index 9430831cd..56a50f144 100644
+--- a/Blockchain/Dev/services/auth/src/middleware/authenticate.ts
++++ b/Blockchain/Dev/services/auth/src/middleware/authenticate.ts
+@@ -19,4 +19,4 @@ const TEST_TOKEN_PREFIX = 'test_token_';
+ function parseTestToken(token: string): JwtPayload | null {
+-  // SECURITY: Never accept test tokens in production
+-  if (process.env.NODE_ENV === 'production') {
++  // SECURITY: test tokens only in an explicit development or test environment; an unset or any other NODE_ENV fails closed (KS-623), as the gateway's parseTestToken does
++  if (!['development', 'test'].includes(process.env.NODE_ENV || '')) {
+     return null;
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks623-test-tokens-need-an-explicit-development-or-test-env.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks623-test-tokens-need-an-explicit-development-or-test-env.test.ts
+new file mode 100644
+index 000000000..8d4deeaf3
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks623-test-tokens-need-an-explicit-development-or-test-env.test.ts
+@@ -0,0 +1,77 @@
++/**
++ * KS-623 - the auth service accepted an unsigned `test_token_<base64>` (a self-asserted role and tenant) in EVERY
++ * environment except NODE_ENV === 'production' (a denylist), so an unset or unexpected NODE_ENV (staging, a typo)
++ * together with ENABLE_TEST_TOKENS=true let a stranger assert any role. The gateway's twin
++ * (api-gateway/src/middleware/auth.ts parseTestToken) is an allowlist: only 'development' and 'test'. The auth
++ * service now matches it, so the unset case fails closed on both sides. `authenticate()` is driven directly: a test
++ * token that is refused falls through to the standard JWT path, where the mocked verifier throws, and next() gets
++ * that error; a test token that is accepted sets req.user and calls next() with no error.
++ */
++import { describe, it, expect, afterEach, vi } from 'vitest';
++
++vi.mock('../services/jwt', () => ({
++  verifyAccessToken: vi.fn(() => { throw new Error('ks623 not a signed token'); }),
++  verifyConnectorToken: vi.fn(() => { throw new Error('ks623 not a connector token'); }),
++}));
++vi.mock('../services/session', () => ({
++  validateSession: vi.fn(async () => true),
++  updateSessionActivity: vi.fn(async () => undefined),
++}));
++
++import { authenticate } from '../middleware/authenticate';
++
++const SAVED = { NODE_ENV: process.env.NODE_ENV, ENABLE_TEST_TOKENS: process.env.ENABLE_TEST_TOKENS };
++afterEach(() => {
++  for (const [k, v] of Object.entries(SAVED)) {
++    if (v === undefined) delete process.env[k]; else process.env[k] = v;
++  }
++});
++
++function setEnv(nodeEnv: string | undefined, enable: string | undefined): void {
++  if (nodeEnv === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = nodeEnv;
++  if (enable === undefined) delete process.env.ENABLE_TEST_TOKENS; else process.env.ENABLE_TEST_TOKENS = enable;
++}
++
++const TEST_TOKEN = 'test_token_' + Buffer.from(JSON.stringify({ sub: 'u-ks623', role: 'SUPER_ADMIN', organizationId: 'org-ks623' })).toString('base64');
++
++/** Run authenticate() once with the test token; report what the middleware did with it. */
++async function present(): Promise<{ userId: string | undefined; role: string | undefined; error: string | undefined }> {
++  const req: any = { headers: { authorization: 'Bearer ' + TEST_TOKEN } };
++  let error: string | undefined;
++  await authenticate()(req, {} as any, (err?: unknown) => { if (err) error = err instanceof Error ? err.message : String(err); });
++  return { userId: req.user?.userId, role: req.user?.role, error };
++}
++
++const REFUSED = { userId: undefined, role: undefined, error: 'ks623 not a signed token' };
++
++describe('KS-623 - the auth service accepts a test token only in an explicit development or test environment', () => {
++  it('RED KS-623 T1: an UNSET NODE_ENV with ENABLE_TEST_TOKENS=true refuses the test token', async () => {
++    setEnv(undefined, 'true');
++    expect(await present()).toEqual(REFUSED);
++  });
++
++  it('RED KS-623 T2: NODE_ENV=staging with ENABLE_TEST_TOKENS=true refuses the test token', async () => {
++    setEnv('staging', 'true');
++    expect(await present()).toEqual(REFUSED);
++  });
++
++  it('CONTROL KS-623 T3: NODE_ENV=test with ENABLE_TEST_TOKENS=true still accepts it, as SUPER_ADMIN', async () => {
++    setEnv('test', 'true');
++    expect(await present()).toEqual({ userId: 'u-ks623', role: 'SUPER_ADMIN', error: undefined });
++  });
++
++  it('CONTROL KS-623 T4: NODE_ENV=development with ENABLE_TEST_TOKENS=true still accepts it', async () => {
++    setEnv('development', 'true');
++    expect(await present()).toEqual({ userId: 'u-ks623', role: 'SUPER_ADMIN', error: undefined });
++  });
++
++  it('CONTROL KS-623 T5: NODE_ENV=production refuses it even with ENABLE_TEST_TOKENS=true', async () => {
++    setEnv('production', 'true');
++    expect(await present()).toEqual(REFUSED);
++  });
++
++  it('CONTROL KS-623 T6: NODE_ENV=test without the ENABLE_TEST_TOKENS opt-in refuses it', async () => {
++    setEnv('test', undefined);
++    expect(await present()).toEqual(REFUSED);
++  });
++});
