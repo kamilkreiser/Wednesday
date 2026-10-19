@@ -23,6 +23,14 @@ supersede: REPLACED WHOLESALE by the overnight Wednesday seat (booted 2026-10-20
 - **R lane: EMPTY.** R 56th wrapped 17:12Z (scored 0.95, pane closed). Its handover: `5_Project_History/2026-10-20_seatR-56th/HANDOVER.md` in the project.
 - **Spark:** SCREEN_17 produced 4 PASS (all held, above). Pool: re-screen when new tickets land (new tonight: KS-1677, 1678, 1679).
 
+## 1a. AT THE 05:30 WRAP — SUPERSEDES sections 1 and 2 where they differ
+- **develop = 292fe0b1642a2c40cee18af863174f158ee7be51** (#1644). Merged after the 04:13 checkpoint, each verified by Wednesday's own fetch: #1643 KS-1500+KS-1468 513371a34be5 (=BD1), #1644 KS-1676 x4 Spark passes 292fe0b1642a (=BE1). **Secuura merges since the 10-19 evening: 30.** None deployed except what D 22nd is deploying (pin a4187f0f6622: includes KS-1673 A+B; NOT #1640, #1641, #1643, #1644 → the NEXT kintsugi round).
+- **C 28th WRAPPED** 18:25Z (scored 0.92, pane %10 closed). Handover `5_Project_History/2026-10-19_seatC-28th/HANDOVER.md` in the project. **C lane EMPTY. R lane EMPTY.**
+- **D 22nd (%11) still deploying kintsugi** (build running since 16:54:58Z; detached on the box; its waiter wakes it). On its DEPLOYED mail: section 1's checklist.
+- **Spark screen 18 (Sonnet sub-agent of THIS seat) was running at the wrap:** KS-1679 brief + one round. It dies with this seat if unfinished; if it finished, its report is `0_Brain/reference/2026-10-18_spark-screen/SCREEN_18.md` and its run under `local-model/runs/*ks_1679*`. Read it, source-read any PASS, hold it (hold_ready now handles new-file test-only AND code_patch2), raise via a C 29th seat.
+- **Next lanes worth a seat at the morning sweep:** R 57th for KS-1677 (needs Wednesday's fix-shape ruling first; see section 2 item 2); C 29th to raise KS-1679 if screen 18 passed; the NEXT kintsugi round (#1640-#1644) after D 22nd's verified.
+- Ledger 3c archive and BOTH boot digests: DONE at 05:1x (1517 == 1517; --check OK). Do not redo.
+
 ## 2. OWED BY WEDNESDAY (in order)
 1. **D 22nd's DEPLOYED mail** (above). Then: kintsugi live-checked tickets become Done-eligible (D lists them; moving them is a separate instruction to a seat). Then plan the DEMO round.
 2. **R 57th (if worth a seat):** KS-1677 (Medium: m365 OAuth callback `state` = bare connection id, any status) needs a WEDNESDAY RULING on fix shape: an unguessable single-use `state` nonce bound to the connection + expiry is the standard; PKCE additionally if the client is public. Read the callback code first (services/m365-integration/src/index.ts) and KS-1677's comments (AS1 measured the rebind). Then KS-1679 (Medium, caller spread overwrites certificationId/certifiedAt on derived cert rows: a SPARK candidate, KS-1660 shape) and the #1639 NOTE 1 / #1640 header nits on the next touch.
