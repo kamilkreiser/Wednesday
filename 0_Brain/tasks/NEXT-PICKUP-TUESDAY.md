@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 244 — 2026-10-19 11:04 (s119). **READ THIS FIRST. Supersedes 243's OWED and 242's SEQUENCE (both done).**
+- **RD-778 LANDED:** main = `7700cafd33ca` (tree ba9581a); #29-#36 FIXED by number on main's push CodeQL, #28 open; open alerts 218; Deploy demo both jobs skipped; merge message correct. **Push Build was IN PROGRESS at 11:03** -> re-read it (`gh api repos/datasecau/Reporting_Dashboard_Au/actions/runs?head_sha=7700cafd33ca8a329e1e7905081d869e83c6ccb5&event=push`); on failure mail gate 28 an ADDENDUM STOP and card nothing until diagnosed. S101O's MERGED mail not yet received (read it whole when it lands; it also files N27-1/N27-2 tickets and re-pins RD-771).
+- **GATE 28 LAUNCHED pane %78 `QA/NexusAI-gate28` 11:03** (Opus 5.5; kit fully stamped, `.pre-stamp` + `.pre-mainstamp` beside it; launcher `fleet/qa-agent/launchers/launch_qa_nexusai_gate28.sh`). Verdict by MAIL `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 28` (4 lines: RD-476 / RD-856+857 STACK / C-170 DELTA / ORDER-TURN). If it parks "flagged — awaiting the Opus 4.8 switch": /model that pane only (09-30 ruling). On GO: completion check, pane_close %78, then RELEASEs: C-170 by counts-only TURN (ANSWER-19 + gate 26 checklist ii-vi), A/B/C landings in the gate's ORDER (B before C), each a counts-only TURN.
+- **Panel to Kam:** RD-778 landed (value receipt) — post once the push Build reads success.
+### FLOOR: %0 tuesday, %1 fleet-monitor, %56 Datasec/NexusAI-O (RD-778 MERGED mail + RD-774/836), %78 QA/NexusAI-gate28.
+
 ## 🟢 DELTA 243 — 2026-10-19 08:18 (s119). **READ THIS FIRST. Supersedes 241 item 1 (done); 242 stands.**
 - **Gate 27 = GO WITH FINDINGS** (RD-778 @ 3047ae9 onto 888203c; report `Testing Agent MAIN/projects/nexusai/reports/2026-10-18-gate27-rd778/report.md` COMPLETE). Pane %76 CLOSED. **RELEASE = ANSWER-22** (`tuesday/briefs/2026-10-19_S101O_ANSWER-22_rd778-release-land.md`, sent + tap delivered by name). **OWED on its MERGED mail:** verify origin main = landed sha, main push CodeQL #29-#36 CLOSED BY NUMBER (#28 open as control), Deploy demo both jobs skipped, counts 4676/292; THEN stamp gate 28 MAIN (sha, tree, `landed since 888203c: RD-778 (<sha7>)`) + SELF-CHECK, `--check`, launch at load1 < 8. Seat files N27-1/N27-2 tickets after the land and re-pins RD-771.
 
