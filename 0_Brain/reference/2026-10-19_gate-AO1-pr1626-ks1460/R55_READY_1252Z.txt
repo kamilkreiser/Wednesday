@@ -1,0 +1,81 @@
+=========== [INBOUND] 2026-10-19T12:52 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1626 KS-1460 at cb8e3cfee86e - golden
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1626 KS-1460 at cb8e3cfee86e - golden + C3, 5 cells, 3 mutants, landing tree aa6acdbf5d52 on bc3e2e2460ff
+## READY FOR GATE — #1626 (KS-1460, 1 of the discarding callers), tier 1 (auth)
+
+https://github.com/Secuura/Distributed_Secuura/pull/1626
+
+```
+head          cb8e3cfee86e52a79ade3acef586b6c33cd02102   (2 commits)
+develop       bc3e2e2460fff5e961cd26b70da3ab0050fccbcc   (#1622's merge; moved during my push)
+LANDING TREE  aa6acdbf5d52a9c9490c63aa5feb1e3c1b11cc2e   (byte-gated: merge-tree == real --no-ff merge)
+```
+- The tree I predicted on the old base, `44785a3ef974` (develop `115797747cb6`), is **void**. I did not merge develop
+  into the branch: the overlap between what develop gained (m365 ×2) and this PR (auth ×2) is **0** (control: 2).
+  Both auth blobs land unchanged, and #1622's m365 file in the landing equals develop's (`829a72c9722b`).
+- Three-dot diff: exactly 2 files. The API reports 2 files, +146/-2.
+
+## CAUSE
+
+`POST /register`, when it claims an INVITED stub, calls `userRepo.updateUser(...)` and **discards** the result.
+`updateUser` returns `null` on a 0-row UPDATE (fail-closed RLS with a mismatched tenant produces exactly that),
+so the caller still got 201, a session, a verification token and a mail over a row still INVITED. The fix is
+`updateUserOrThrow`, which answers 503 when the update is unconfirmed.
+
+**Static, not measured live:** a normal claim does NOT become a 503. `updateUser` resolves the stub's own tenant
+when there is no request context (the QA F-1 fix), so the UPDATE matches one row.
+
+## COMMITS
+
+1. `619106f178e2`: the Spark pass, byte-for-byte. Post-image blobs **equal the declared ones** (`fa7b3386a945…`,
+   `833969b2d518…`).
+2. `cb8e3cfee86e`: **C3**, added by me (you accepted it in the ADDENDUM).
+
+## CELLS AND MUTANTS
+
+| cell | pins |
+| -- | -- |
+| R1 | an unconfirmed activating update → **503**, not 201 |
+| R2 | nothing issued over it: `[updates, sessions, tokens, mails] = [1,0,0,0]` |
+| C1 | a confirmed claim → 201, one session |
+| C2 | a fresh registration → no activating update |
+| **C3** | the confirmed write **is the activating one**: stub's own id, `status: 'ACTIVE'`, the new `passwordHash` |
+
+| mutant | red |
+| -- | -- |
+| K1 drop `status: 'ACTIVE'` | **C3 only** (all 4 Spark cells green) |
+| K2 drop `passwordHash` | **C3 only** (all 4 Spark cells green) |
+| K3 back to discarding `updateUser` | R1, R2, C3 |
+
+`auth.ts` was restored byte-identically (blob checked) after each mutant. None was a load failure.
+
+## COUNTS
+
+- Red-first, develop's `auth.ts`: **2 failed | 2 passed (4)**, assertion reds (`expected 201 to be 503`;
+  `expected [1,1,1,1] to deeply equal [1,0,0,0]`). Green: 5/5.
+- **Full auth suite: 1,089/1,089 in 98 files, rc 0**, measured on the branch tree. The landing tree differs from it
+  only in m365's two files, which auth does not import. I did **not** re-run it at the landing; say if you want it.
+- **Test type-check ratchet** (`scripts/typecheck-tests/check.cjs services/auth`): rc 0, 149 files, 42 errors, all in
+  the baseline, 0 new. Leg 16 on the push read the same.
+- **Preflight:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` (legs 3/4/8, no stack).
+  **Not a pass.** Shell suites 91/91.
+
+## SCOPE NOTES FOR THE GATE
+
+- `Refs KS-1460`, never a close keyword. The ticket's map has drifted: `users.ts` has **0** discarding callers
+  left (KS-1194 #1032 and #1458 converted all six, and #1458 merged 2026-10-12). Every `auth.ts` line the
+  ticket names moved by +2 or +10. **Six remain: `auth.ts:541, :589, :1249, :1253, :1323, :1327`.**
+  They are not uniform (a password rehash, a last-login timestamp, social-id links), so a blanket `OrThrow`
+  is not obviously right for all of them.
+- Open-PR overlap census, taken at `115797747cb6`: 24 open PRs, exhaustion proven, 0 with zero files, 0 touching
+  `routes/auth.ts` or the new test.
+
+## NOT RUN
+
+The four platform suites; any other service's suite; Docker, DB, any deployed environment; a live register
+against a real `users` table with RLS (the 0-row case is shown with a repository mock, not on Postgres).
+
+## Meanwhile
+
+Building **KS-1671** (the query-object crash, High) on a fresh branch off `bc3e2e2460ff` now, per your order.
+The ticket is filed: https://linear.app/secuura/issue/KS-1671 (High, Bug, read back, 61/61 lines).
+
