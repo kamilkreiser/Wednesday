@@ -1,0 +1,54 @@
+=========== [INBOUND] 2026-10-19T15:59 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1639 KS-1634 N2/N3 at 02168f95d66c (t
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1639 KS-1634 N2/N3 at 02168f95d66c (tier 2, test-only) - landing c5c221c572ed on 17ab917aa6f4; mutants A and B each red both N3 cells
+## READY FOR GATE — #1639 (KS-1634 N2/N3, gate AG1's notes), tier 2, TEST-ONLY
+
+https://github.com/Secuura/Distributed_Secuura/pull/1639
+
+```
+head            02168f95d66c926da807477aaf0459f1219bd698   (= ls-remote after the push)
+base (develop)  17ab917aa6f4646d92ce2d1ee9743362ad5bc548   (my ls-remote guard passed just before the push)
+PREDICTED landing tree   c5c221c572ed60c62601319f3c0f4b724d33997b   (strict descendant; equals the head tree)
+files           1: services/originate/src/__tests__/ks1634-v2-chain-only-match-carries-simulated.test.ts, +45 / -0
+```
+
+**Cause.**
+- **N2:** S1 asserted only that the db was asked and that one match came back, which a registry hit would also satisfy.
+- **N3:** the presenter's truthy rule (`verification.ts:60`, KS-1628) had no non-boolean cell at the v2 site, so `simulated: chain.simulated === true` at `verificationV2.ts:240` passed all 7 cells.
+
+**Cells.**
+- **N2:** S1 and its inverted control also assert `source === 'blockchain'` (`:247`) and `documentUuid === freshDocumentId` (`:246`).
+- **N3:** two cells, `simulated: 'true'` and `simulated: 1`, each with a **REAL tx hash**, must read not on-chain.
+- **CONTROL:** `simulated: 0` with a real hash stays on-chain.
+
+**Green on develop by design, as you asked to state:**
+- **the two N3 cells and the new `0` control**, because the rule they pin is already right. They are labelled `N3` / `CONTROL`, not `RED`.
+- **The two N2 assertions also pass on develop**, because the route already sets those fields.
+- So **all 10 cells are green on develop.** Their evidence is the mutant table.
+
+**Mutants — every one `tsc` rc 0.**
+
+| mutant | pass/fail | reds |
+| -- | -- | -- |
+| **A (AG1's):** `=== true` at `:240` | 8/2 | **both N3 cells** |
+| **B:** the presenter `Boolean()` written as `=== true` | 8/2 | **both N3 cells** |
+| `source` forced to `blockchain-indexed` | 8/2 | S1, S1 inverted |
+| `documentUuid` forced to `null` | 8/2 | S1, S1 inverted |
+| the presenter reading presence (`!== undefined`) | 7/3 | the `false` control, the `0` control, S1 inverted |
+
+Under A and B, every existing control stays green.
+
+**Suites.**
+- The file: **10/10**.
+- **Full originate suite: 128 suites, 1,526/1,526, RC 0.**
+- The test file type-checked separately (originate excludes `__tests__`): RC 0, **0 errors in the file**, `--listFilesOnly` = 1.
+
+**Preflight: 13/16 ran, 3 SKIPPED (legs 3/4/8, no stack), 0 failed — not a pass.**
+
+**NOT run:** the four platform suites. There is no stack, and no product code changed.
+
+**Overlap:** C 27th's #1632 touched `verificationV2.ts` at the heal guard (`:130`) and its own test file. Neither is touched here.
+
+**Ticket:** KS-1634 comment, read back by id, byte-identical. `Refs`.
+
+**Queue after this:** the brief's queue is now done except #1637 (at AX1) and #1639 (this). Unless you have more for me, I will start the session wrap after these two resolve. If you want something in between, send it.
+
