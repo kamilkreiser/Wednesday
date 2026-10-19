@@ -1,0 +1,122 @@
+=========== [INBOUND] 2026-10-19T14:49 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1633 KS-1673 PR A at 76725fd4a5b7 (ti
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1633 KS-1673 PR A at 76725fd4a5b7 (tier 1) - landing 3b26d9bc0340 on 88b8ceb9f304; 33 cells, 22 red on develop, M1 reds every cross-org cell
+## READY FOR GATE — #1633 (KS-1673 PR A, High), tier 1 (Opus)
+
+https://github.com/Secuura/Distributed_Secuura/pull/1633
+
+```
+head            76725fd4a5b74e0c2ff58dad90bc2382dfc36966
+base (develop)  88b8ceb9f3041672d9575b40c09869d45ab1c111   <- my own ls-remote + fetch, just now
+commits         457619b9d  product + 33 cells
+                76725fd4a  the published contract, regenerated
+PREDICTED landing tree   3b26d9bc0340ddf9cf371c0fc318936a9bef4e06
+                         (git merge-tree --write-tree origin/develop HEAD; the branch is a STRICT
+                          descendant of develop, so it equals the head tree -- both read 3b26d9bc0340)
+```
+
+**Remote branch verified at source after the push:** `ls-remote` = `76725fd4a5b7` = my HEAD. PR body read back byte-identical. The background push task reported exit 0. **That figure was the exit code of the `tail` after it**, so I did not take it. The real `PUSH RC=0` is the line recorded inside the log.
+
+## CAUSE
+
+Nothing in m365 bound a connection to its organisation. `GET /api/sites` returned every site together with its `connectionId`. That id then opened `GET /api/onedrive/files` and `POST /api/onedrive/files/:id/sync` with **the owning organisation's own Microsoft token**. `init` took the org from the body.
+
+## FIX
+
+The org comes from the token: `req.user.organizationId`, set by shared `authenticate`.
+
+**7 helpers:**
+- `callerOrg` — returns `null` for absent, non-string or whitespace values
+- `requireCallerOrg` — 403
+- `ownedBy` — both values non-empty and equal
+- `ownedConnection` — reads the DB first, unchanged
+- `ownedMemConnection` — the warm map, unchanged
+- `orgOwnsConnectionId`
+- `ownedSite`
+
+**14 routes are bound, and no route's lookup SOURCE changed.**
+- Named-resource routes give the same answer an unknown id gives.
+- List and create routes give 403 when the token carries no org.
+- No bypass for any role.
+
+## YOUR TWO GATE ASKS
+
+1. **Census over all routes, with a positive control.**
+   - My regex `^app\.(get|post|put|patch|delete)\('(path)'` finds **25 routes**: **24 under `/api`**, plus `/health`.
+   - **The ticket's 22 does not reproduce** under any reading I could build: 23 with `/api/`, 21 below the auth mount.
+   - **Negative control:** develop shows **0** routes with a guard and **20** touching an org-owned store.
+   - **This PR:** 14 guarded, **6** still unbound — 4 Teams (PR B), `GET /health` (aggregate counts, no rows), `GET /api/callback` (Microsoft's unauthenticated redirect).
+   - My first census had a **false negative on all 4 Teams routes**: Teams reads `svc_teams_webhooks` with a raw `query()`, and I had listed only the maps. Fixed. The figures above come from the fixed instrument.
+2. **"Not yours" 404 byte-identical to the "unknown id" 404 — cell B1.**
+   - `mine.text === unknown.text`.
+   - It also asserts the body holds **neither** A's `organizationId` **nor** A's `tenantName` (your added ask b).
+
+## YOUR THREE ADDED CELLS
+
+- **(a) F1:** `GET /api/sites` and `GET /api/documents` with a no-org token answer **403**, never an empty 200. F2 extends this to a whitespace-only org; F3 covers `init`.
+- **(b) B1**, as above.
+- **(c) C1:** a site whose `connectionId` is not in the map is invisible to **both** orgs, its creator's included. **C2** proves the orphan row was actually served to `loadFromDb`, as recorded by the db mock at read time — so C1 cannot pass on a row that never loaded.
+
+## CELLS — 33, and RED on develop: 22 of 33 in a SINGLE full run
+
+- The 11 that pass on both sides are same-org and fixture controls.
+- **Zero Graph calls is measured on two instruments.** The OneDrive routes use raw `fetch`, seen by a global spy. Sites/sync go through the Graph SDK, seen by a recording mock of `../sharepoint/client`.
+- Every cross-org cell asserts **both** counters are 0.
+- The same-org controls prove each counter can go non-zero: A13/A18 for the SDK counter, A20/A22 for the fetch counter.
+- **Every mutating cell has its own row** (`conn_a2`, `conn_a3`, `site_a2`). My first red proof showed A12/A17/A19/A21 **passing on develop**. Cause: develop's cross-org `DELETE` succeeds and strips A's token, so the later cells found no token and made no Graph call. That was pollution, read as a pass. An isolated A12 run was red while the full run was green, which is how I found it.
+
+## MUTANTS — 7, all `tsc` rc 0, none a load failure
+
+| mutant | pass/fail | reds |
+| -- | -- | -- |
+| **M1 drop the equality** | 17/16 | **every cross-org cell** (A1 A3 A4 A6 A7 A8 A9 A11 A12 A14 A15 A17 A19 A21 B1 I1) |
+| M2 requireCallerOrg never refuses | 30/3 | F1 F2 F3 |
+| M3 GET /api/sites unfiltered | 30/3 | A7 A8 C1 |
+| M4 ownedSite ignores ownership | 30/3 | A9 A11 C1 |
+| M5 ownedMemConnection ignores ownership | 30/3 | A6 A19 A21 |
+| M6 callerOrg no trim | 32/1 | F2 |
+| M7 GET /api/documents unfiltered | 32/1 | A14 |
+
+**M4 and M5 first ran COMPILE-BROKEN** (rc 2, `noUnusedParameters` on `req`) and *still* reddened cells. That is the trap. Both were fixed and re-run, and the table shows the compiling versions.
+
+## THE SUITE AT THE LANDING
+
+The head is develop plus exactly my two commits, a strict descendant, so the suite at the head **is** the suite at the landing.
+
+- **Full m365 service suite: 12 files, 114/114, RC 0.**
+- **Product `tsc`: RC 0.**
+- **Test file:** type-checked separately because `tsconfig.json` excludes `__tests__` (KS-1090). RC 0. Controls: `--listFilesOnly` finds it in the override program (1) and not in the default program (0).
+- **`check:openapi`:** both halves, RC 0.
+- **Pre-push preflight: 13/16 ran, 3 SKIPPED, 0 failed. The hook says that is not a pass, and I am not calling it one.**
+  - Skipped: **leg 3** spec-auth conformance, **leg 4** path resolvability, **leg 8** served-spec consistency. Each needs the stack on `:6882`, and there is no Docker on this Studio.
+  - **Legs 3 and 8 bear directly on a spec change.** If the gate can run them, it should. Leg 1 (spec drift) ran and passed.
+- **NOT run:** Schemathesis · Akto · Playwright · k6, for the same reason.
+
+## FILES — 4
+
+| file | change |
+| -- | -- |
+| `services/m365-integration/src/index.ts` | +123 / −17 |
+| `services/m365-integration/src/__tests__/ks1673-…-callers-organisation.test.ts` | new, 442 lines |
+| `services/m365-integration/src/m365-integration.openapi.ts` | `organizationId` out of the init request |
+| `docs/openapi/secuura-api.yaml` | regenerated, **4+/6−, one schema only** |
+
+**The spec DID require the field.** Control taken before I touched the source: `generate-openapi -- --check` **passed on develop**, so no other drift rides in.
+
+**Partition:** all four files are inside `services/m365-integration/**` or the generated spec. None of C 27th's six files is touched.
+
+## THINGS I WANT THE GATE TO LOOK AT, rather than find
+
+1. **Sites and documents prove ownership through the WARM map.** A connection that is in the DB but not in memory makes its sites invisible to their real owner. That is fail-closed, and it is what (c) asks for, but it is a behaviour change for an owner, so I am naming it.
+2. **`POST /api/sites` and `POST /api/documents/sync` answer 400 for a foreign connection**, because that is their existing answer for an unknown one. The "same as an unknown id" rule holds **per route**, not as a single 404 everywhere.
+3. **`documents/sync` with a foreign `siteId`** is now treated as absent, falling back to the raw `data.siteId` exactly as an unknown id already did. Another org's internal site id is never substituted. The raw fallback still passes a caller-supplied Graph site id through **under the caller's own token**. That is pre-existing and is not an org leak, but it is there.
+
+## TICKET
+
+KS-1673, comment `696d2f67-5fca-4207-b7ef-a1a77b06c234`, read back **by id**, byte-identical (2,831 chars). `Refs`, not a close keyword — PR B is still to come.
+
+**Model note:** Kam switched this pane to **Opus 5.5** at the end of the build. Both commits carry the Opus 5 trailer, which was true when they were made, and I did not amend them. Amending would move the head.
+
+Nothing deployed. No `az`. No box touched. `2_Project_Files` untouched.
+
+**Meanwhile:** while the gate runs, I will start the AP1 N3 `code`-seam follow-up — queue item 4, test-only, its own tier-2 gate. PR B waits for #1633 to merge, as queued. Say if you would rather I hold.
+
