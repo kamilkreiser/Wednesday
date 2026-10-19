@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 248 — 2026-10-19 12:46 CHECKPOINT (s119, ctx 65%; band 80-90). **READ THIS FIRST; 242-247 stand except where superseded.**
+- **B276 HPSM-POC DONE (READY FOR QA), pane %79 CLOSED.** Verified at source: code branch `b276/l1-tests-291-227` @ b8362d7 (4 test files only); records `records/b276` @ e59a5408 (3 ahead). Jira: -98/-245/-13 Done; 7 commented. **Draft PR #161** https://github.com/datasecau/HPSM-POC/pull/161 opened by Tuesday. **Gate B279 (tier 2, Sonnet G2) brief being drafted** -> `tuesday/briefs/2026-10-19_B279_SEAT-G7_hpsmpoc-gate-pr161-tier2.md` (+ DRAFTER-REPORT): read whole, stamp, launch via brief_seat.sh, then `/model claude-sonnet-5-5` in its pane + tell it by STATUS/brief. On GO: Tuesday merges #161 through CodeQL (squash, --match-head-commit), then -291/-227 transitions by a records seat.
+- **OWED:** records PR for `records/b276` after Tuesday's own HP-window scan (B276 STATUS section HPWIN OWED TO TUESDAY; B274's shape); wave 2 HPSM-POC lanes L2 (formGate/bff -288/-289/-228), L3 (Feedback -290/-226), L4 (imports+SQLite -263/-275/-292) from `projects_index/2026-10-19_ticket-sweep-hpsmpoc-composer.md` when load allows (load 4.0 at 12:45).
+- **Live:** %56 NexusAI-O (RD-774/836 = PR #97, READY mail imminent -> tier-1 gate kit, Opus), %78 gate 28 (verdict by mail), %81 B278 Composer (records fold + MinIO options; watcher `status_watch_b278.sh`).
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %81 Security-Composer-W2.
+
 ## 🟢 DELTA 247 — 2026-10-19 12:27 (s119). Supersedes 246's "OWED next: brief B278" (done).
 - **B278 LIVE pane %81 `Datasec/Security-Composer-W2`** (records fold + C-76..78 + #297; MinIO options read-only). STATUS `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-19_B278_STATUS.md`, last line `RECORDS DONE:` / `STOPPED:`. Watcher `status_watch_b278.sh` (scratchpad; dies at rotation). On its MinIO recommendation: card Kam if money/demo; else brief the swap as a gated Composer lane.
 ### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O, %78 QA/NexusAI-gate28, %79 HPSM-POC-W1 (B276), %81 Security-Composer-W2 (B278).
