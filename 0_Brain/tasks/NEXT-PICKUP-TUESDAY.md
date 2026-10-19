@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 256 — 2026-10-19 15:17 (s119). Supersedes 255's "OWED: brief B282" (done).
+- **B282 LIVE pane %85 `Datasec/HPSM-POC-W4`** (round 2 of 2 for HPSMPOC-291; brief `tuesday/briefs/2026-10-19_B282_SEAT-W4_hpsmpoc-291-fix-round2.md`). STATUS `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B282_STATUS.md`, last line READY FOR QA / STOPPED. Watcher `status_watch_b282.sh` (dies at rotation: re-arm). On READY: gate it (tier 2, Sonnet, B279 shape scoped to the round-2 commit + a re-run of r2 and r0), then merge PR #161 and correct its body (text in B282's FOR TUESDAY). This is the CAP's last round: a second NO GO ships nothing for -291 and tickets the residue.
+### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O (fixing #272 on PR #97), %78 QA/NexusAI-gate28, %85 HPSM-POC-W4 (B282).
+
 ## 🟢 DELTA 255 — 2026-10-19 15:15 (s119, ctx 77%). Supersedes 249/248's B279 lines.
 - **GATE B279 DONE (pane %82 closed): HPSMPOC-291 NO GO (round 1 of 2), HPSMPOC-227 GO WITH FINDINGS.** Report `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-19_B279_STATUS.md` (findings :183-215). **OWED: brief B282 = fix round on `b276/l1-tests-291-227` for -291 only:** B279-1 (Major: rewrite the comment at PkcsInPackageTests.cs:178-184 to the measured SDK facts per the gate's fix-shape; same correction to the commit message going forward and the PR #161 body via Tuesday), B279-2 (rows 10.0.9999.0, 10.0.10000.0, two-part), B279-3 (Major/Minor guard + rows 10.1.0.0, 11.0.26.1), B279-8 wording. Then a round-2 tier-2 gate (Sonnet, `BRIEF_SEAT_LEVEL=sonnet`, B279's shape) on -291's delta; on GO: Tuesday merges PR #161 (squash, --match-head-commit) through CodeQL. -227's B279-4/-6 Minor + -5/-7 Notes go to a records seat as ticket comments/candidates (not this round). Records also owes: HPSMPOC-291 Done-when clause 1 + B271-6 correction; records/b276 PR after Tuesday's HP-window scan.
 ### FLOOR: %0 tuesday, %1 monitor, %56 NexusAI-O (fixing #272 on PR #97), %78 QA/NexusAI-gate28.
