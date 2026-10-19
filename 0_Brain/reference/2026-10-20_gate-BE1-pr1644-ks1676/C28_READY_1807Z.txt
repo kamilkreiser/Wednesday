@@ -1,0 +1,45 @@
+=========== [INBOUND] 2026-10-19T18:07 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1644 KS-1676 at e9630de51c22 (tier 2,
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1644 KS-1676 at e9630de51c22 (tier 2, test-only, 4 commits) - all 15 clause rows killed, 19/19 mutants compile, landing b8df98cfb692
+## BLUF
+
+**#1644 (KS-1676) is READY FOR GATE, tier 2, test-only, four commits.** Head `e9630de51c2266627bef25742c1e95826a67ae75`, base develop `513371a34be58af9e740b82ea26795155c7bd0b4`, landing tree **`b8df98cfb692eaa02819b4c3fb441e761fbf508d`**. 4 new files, **+595/-0**, **zero product bytes** — both heal functions are tamper targets only. `Refs KS-1676` per your ruling, with the `!chain` row named in the PR body and in the ticket comment. **That closes my queue: items 1, 2 and 3 are merged; this is item 4.**
+
+https://github.com/Secuura/Distributed_Secuura/pull/1644
+
+## The measurement you asked for: all 15 rows, not SCREEN_17's word
+
+One compile-safe mutant per clause, planted by line after asserting that line's exact text, run against all four new files, restored with a sha256 check. **All fifteen KILLED — A1, A2, A3, A3b, A4, A4b, V4, V5, W4, B1, B2, B2b, B3, B3b, B5. None survived, none a false kill.** Each row's reddened file is in the ticket comment's table, and the mapping is clean: the settled/failed clauses red only the `settled-and-failed` file of their version, the stored/incoming guards only the `simulated-and-malformed` one.
+
+**And every one of the 19 mutants was type-checked individually** (the 15 plus the four checker tampers): `tsc --noEmit -p tsconfig.json`, clean rc 0 / 0-error baseline, byte-identical restore each time — **19 compile, 0 do not.** Nothing to withdraw, which is the point of having run it: on #1643 that same check cost me three rows.
+
+## Two-sided proof
+
+- **Green at the untouched tip:** all four files, both products byte-identical to develop, **19 cells, rc 0**. This is also my own measurement of the A4 wording question — these tests pass at the tip, so each READY's `PASS A4 … fails at the untouched tip` is the `code_patch` template string reused in `MODE=test_only`, where the red-first leg runs with the tamper applied and reverts it. A5's "passes with the product hunk" is the mirror defect. Both are in the PR body as a note on the artefact, not on the PR.
+- **Red under its own tamper, one-to-one:** CT1 -> `v1-settled-and-failed`, CT2 -> `v1-simulated-and-malformed`, CT3 -> `v2-settled-and-failed`, CT4 -> `v2-simulated-and-malformed`. No tamper reds a file other than its own.
+
+## Item 0 and the rest
+
+- Patch identity for all four: `patch.diff` == `section_1.diff` == the READY block, `cmp` rc 0, `.opts` confirming the applied file. **V1SETTLEDFAILED's canonical dir is `p2-r2`, not `p2`** — read from its own `CANONICAL PATCH =` line, not pattern-matched, after the near-miss I reported earlier.
+- All four tamper lines re-taken **byte-identical** at develop, with an adjacent-line control.
+- Strict `git apply --check` all four: rc 0, empty. Control: a corrupted copy is refused (rc 128).
+- Post-image blobs equal the declared index lines on all four files: `d35091bb1`, `b1fddc3d8`, `664a4eff6`, `1d0a4a5e0`.
+- **Originate suite by cell name:** baseline **1,536/1,536** (129 files, rc 0) -> patched **1,555/1,555** (133 files, rc 0). +19 cells, exactly 5+5+5+4, 0 vanished, 0 new reds.
+- **The four files type-checked separately** (originate is enrolled in no ratchet): rc 0, 0 errors, three controls — four files in the program, `@types/jest` in the program, a planted `TS2322` reddening then restoring byte-identically.
+- **Census:** 0 of 23 open PRs touch any of the four files, **and 0 touch either heal function**, so nothing concurrent can invalidate the clause table.
+- **Landing tree by three instruments**, with a control reproducing the branch's own tree `6e96daec6a4e…` on the old base, so only the base changed.
+- Push 17:55:15Z -> 18:05:09Z, **9 m 54 s**, push's own rc 0, ref verified by `ls-remote` equal to my tip.
+- Preflight verbatim in the body, ending `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` **Not a pass.** `shell suites: 91 passed, 0 failed, 0 skipped (of 91)`.
+- Readbacks: PR body stored 10,410 == sent, EQUAL. Comment `73e38c1d-1c37-4de8-8e2e-ef0b4cde7168`, stored 6,879 == sent, EQUAL. `bodycheck.py` PASS on both. Attachment `linkKind=contributes`, `status=open`; KS-1676 unchanged at In Progress, p3 — I did not touch its priority, per your standing ruling.
+
+## What I did NOT do, stated
+
+**v2's `!chain` null guard is not pinned.** No compile-safe one-line weakening exists (`TS18047` on `chain.simulated` once `!chain ||` is dropped), which is what your ticket's Undecided section already says. Pinning it needs a behavioural cell passing a null chain through the real router, or a product change making the guard separately observable. Not in scope here, named in both the PR body and the ticket comment as the remaining item.
+
+The ticket's own limits also still hold and are repeated in the body: unit suite only, which mocks the database, auth and `fetch`, so a guard could also be pinned by an integration suite that was not run.
+
+## What wakes me
+
+**Your GO (or NO GO) on #1644.** Nothing of mine is running. If you want anything before then, the obvious candidates are the `!chain` behavioural cell as its own small PR, or the KS-1679 Spark brief — say which and I will start it rather than idle.
+
+No deploy, no `az`, no environment read or driven all session. `origin/develop` in my clone is still `17ab917aa6f4`, untouched since boot; every fetch went into `refs/seatc28/*` with `--refmap=`.
+
