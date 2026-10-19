@@ -1,0 +1,149 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1676-v1-simulated-and-malformed-anchors-never-heal.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1676-v1-simulated-and-malformed-anchors-never-heal.test.ts
+new file mode 100644
+index 000000000..b1fddc3d8
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1676-v1-simulated-and-malformed-anchors-never-heal.test.ts
+@@ -0,0 +1,143 @@
++/**
++ * KS-1676 - the v1 stale-anchor heal (`confirmStalePendingAnchor`, verification.ts) refuses four things on the evidence alone: a stored
++ * blob flagged `simulated: true`, a stored `txHash` that is not 64 hex characters, an INCOMING chain reply that is not `verified: true`,
++ * and an INCOMING chain `txHash` that is not 64 hex characters. Nothing pinned any of the four, so dropping one would heal and
++ * persist a row it must leave alone. Every RED cell gives the row a chain reply that would attribute to it (the same tx, or its
++ * `metadata.documentId`), so only the guard under test keeps it from healing; the control cell shows the same row heals and persists.
++ * Harness: the real v1 router; the database, the auth middleware and the repository are mocked; `fetch` answers the anchoring
++ * chain lookup. Copied from ks1661-a-simulated-chain-reply-never-heals-a-stale-pending-row.test.ts.
++ */
++
++process.env.NODE_ENV = 'development';
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
++
++const mockQueryRaw = jest.fn();
++const mockUpdateDocument = jest.fn().mockResolvedValue(undefined);
++
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: mockQueryRaw },
++  getTenantManager: () => null,
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    runWithTenantId: (_t: unknown, fn: () => unknown) => fn(),
++    queryWithTenantGuc: jest.fn(),
++  }),
++);
++
++jest.mock('../repositories/documentRepo', () => ({
++  walkAncestors: jest.fn().mockResolvedValue({ lineage: [], truncated: false }),
++  walkDescendants: jest.fn().mockResolvedValue({ descendants: [], truncated: false }),
++  MAX_LINEAGE_DEPTH: 10,
++  updateDocument: mockUpdateDocument,
++}));
++
++import express from 'express';
++import type { Server } from 'http';
++import { verificationRouter } from '../routes/verification';
++
++const HASH = 'f'.repeat(64);
++const REAL_TX = '84fe214bd00257443c81e240a074763d476f9096b7e3525065bad06ec51c38c3';
++const ROW_ID = 'doc-target';
++const TENANT = '11111111-2222-4333-8444-555555555555';
++
++/** A registration whose stored chain blob is `blob`. */
++function rowWith(blob: Record<string, unknown>) {
++  return {
++    id: '22222222-2222-2222-2222-222222222222',
++    external_id: ROW_ID,
++    tenant_id: TENANT,
++    title: 'Grad cert',
++    document_type: 'DOCUMENT',
++    content_hash: HASH,
++    status: 'anchored',
++    certification_metadata: { blockchain: blob },
++    metadata: {},
++    created_at: '2026-08-01T00:00:00.000Z',
++    certified_at: null,
++    organization_name: 'Acme Ltd',
++  };
++}
++
++/** A chain reply for the row: verified and naming the row's registration by `metadata.documentId`; `over` replaces any field. */
++const chainReply = (over: Record<string, unknown> = {}) => ({
++  verified: true,
++  txHash: REAL_TX,
++  blockNumber: 4242,
++  network: 'preview',
++  metadata: { documentId: ROW_ID },
++  ...over,
++});
++
++const app = express();
++app.use(express.json());
++app.use('/api/verification', verificationRouter);
++
++const realFetch = global.fetch;
++let server: Server;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  const address = server.address();
++  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
++});
++
++afterAll(async () => {
++  global.fetch = realFetch;
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++
++beforeEach(() => {
++  mockQueryRaw.mockReset();
++  mockUpdateDocument.mockReset().mockResolvedValue(undefined);
++});
++
++/** Verify the hash over v1 with the given stored blob; returns the presented blockchain object, the fetch count and the persist calls. */
++async function verifyWith(blob: Record<string, unknown>, reply: Record<string, unknown> = chainReply()): Promise<{ blockchain: any; fetchCalls: number; persistCalls: number }> {
++  mockQueryRaw.mockResolvedValue([rowWith(blob)]);
++  const fetchMock = jest.fn().mockResolvedValue({ ok: true, json: async () => reply });
++  global.fetch = fetchMock as unknown as typeof fetch;
++  const res = await realFetch(`${baseUrl}/api/verification/verify`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({ contentHash: HASH }),
++  });
++  const body: any = await res.json();
++  return { blockchain: body.blockchain, fetchCalls: fetchMock.mock.calls.length, persistCalls: mockUpdateDocument.mock.calls.length };
++}
++
++describe('KS-1676 - the v1 heal refuses a simulated, unverified or malformed anchor on the evidence alone', () => {
++  it('RED KS-1676 G1: a stored blob flagged simulated is not healed, the chain is not read and nothing is persisted', async () => {
++    const r = await verifyWith({ txHash: REAL_TX, status: 'pending', simulated: true });
++    expect([r.fetchCalls, r.persistCalls]).toEqual([0, 0]);
++  });
++
++  it('RED KS-1676 G2: a stored txHash that is not 64 hex characters is not healed, the chain is not read and nothing is persisted', async () => {
++    const r = await verifyWith({ txHash: 'not-a-real-tx-hash', status: 'pending' });
++    expect([r.blockchain.status, r.fetchCalls, r.persistCalls]).toEqual(['pending', 0, 0]);
++  });
++
++  it('RED KS-1676 G3: a chain reply that is not verified heals nothing, though it carries the row\'s own tx', async () => {
++    const r = await verifyWith({ txHash: REAL_TX, status: 'pending' }, chainReply({ verified: false }));
++    expect([r.blockchain.status, r.fetchCalls, r.persistCalls]).toEqual(['pending', 1, 0]);
++  });
++
++  it('RED KS-1676 G4: a chain reply whose txHash is not 64 hex characters heals nothing, though it names the registration', async () => {
++    const r = await verifyWith({ txHash: REAL_TX, status: 'pending' }, chainReply({ txHash: 'not-a-real-tx-hash' }));
++    expect([r.blockchain.status, r.fetchCalls, r.persistCalls]).toEqual(['pending', 1, 0]);
++  });
++
++  it('CONTROL KS-1676 C1: the same row with a verified, real-hash chain reply DOES heal to confirmed and persist once', async () => {
++    const r = await verifyWith({ txHash: REAL_TX, status: 'pending' });
++    expect([r.blockchain.status, r.fetchCalls, r.persistCalls]).toEqual(['confirmed', 1, 1]);
++  });
++});
