@@ -21,6 +21,13 @@ updated: 2026-09-23
 > his queue to reconcile.** Until it is, this warning is the only thing standing between the
 > list and the next agent that follows the skill literally.
 
+## Last session — 2026-10-18/19 (Seat J 13th, pane `Secuura/Blockchain-J` %6, 19:47Z 10-18 to ~05:1xZ 10-19; wrapped on Wednesday's "wrap now")
+
+**Two PRs MERGED, each five-point TRUE with landed tree = tested tree; nothing deployed:** **#1568** KS-1612 + KS-1385 (b) as `04a4a33938f0` (4 Opus rounds + a one-file test delta), in which the anchor guard resolves external_id → pk, migration 050 keeps the documents id namespaces disjoint, and 051 stops a documents row claiming an orphan anchor's external id; and **#1607** KS-1385 (b) issuer fields as `7e2f8157cec2` (Opus T1 + U1), in which a holder's update keeps `issuerOrgId`/`orgDid`/`orgTrust`/`orgVerified` as first anchored. Follow-ups: KS-1629, KS-1630, KS-1633, KS-1642, KS-1644. Team notes on KS-772 / KS-485 (mentions verified).
+**Open / next:** deploy rounds for KS-1612 and KS-1385 (both In Progress), each running 050/051's census first as an RLS-bypassing role, since each REFUSES to apply over a violating row; then the live check. A next J seat may take items from Stuart's list (Wednesday triaging). Handover: `5_Project_History/2026-10-18_seatJ-13th/HANDOVER.md`.
+**Blockers:** none.
+**Notes for Wednesday:** I archived 147 Done tickets at wrap with the safe recipe: Done by NAME, children checked, 0 refused, 0 cascade victims, read back. "Demo is a simulate box" (gate P1's MIN-1, via RUNBOOK.md:9) contradicts the project CLAUDE.md, and nobody has re-measured it.
+
 ## Last session — 2026-10-16 (Seat R 46th, pane `Secuura/Blockchain-R` %4, 20:06Z to ~22:15Z; wrapped on Wednesday's "READY then wrap" ruling)
 
 **Two PRs raised, both READY FOR ONE BATCHED GATE, nothing merged or deployed:** **#1560** KS-1543 parts 2+3 head `180c7c822b57` (`verification.ts` now lints 0/0) and **#1561** KS-1462 item 1 head `ba8c18794bed`, both on develop `76698952a`, file sets disjoint, `merge-tree` clean. Both Spark (DeepSeek V4 Flash) patches raised unmodified, both `Refs` + `contributes`. Preflight on both: `13/16 legs ran, 3 SKIPPED. Nothing failed` — NOT a pass; gated on 13/16 by your 21:32Z ruling.
