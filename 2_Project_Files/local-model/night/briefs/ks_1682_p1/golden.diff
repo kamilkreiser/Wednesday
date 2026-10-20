@@ -1,0 +1,29 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1682-the-warnings-go-through-the-service-logger.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1682-the-warnings-go-through-the-service-logger.test.ts
+--- a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1682-the-warnings-go-through-the-service-logger.test.ts
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1682-the-warnings-go-through-the-service-logger.test.ts
+@@ -166,4 +166,25 @@ describe('KS-1682 N4: the fail-closed warnings reach the service logger, not con
+       spy.mockRestore();
+     }
+   });
++
++  // KS-1682 BZ1 N1: the third warning, the one for a token cache that cannot be read, is observed by no other cell. serialize() is made
++  // to return text JSON.parse refuses (and that holds a secret), so the only path to the catch is the one under test.
++  it('RED KS-1682 L6 - a token cache that cannot be read warns through the logger, stores no refresh token, and quotes none of the cache text', async () => {
++    process.env.ENTRA_CLIENT_ID = CLIENT_ID;
++    process.env.ENTRA_CLIENT_SECRET = 'not-a-real-secret';
++    process.env.ENTRA_TENANT_ID = 'common';
++    expect(initMsal()).toBe(true);
++    const client = getMsalClient()!;
++    vi.spyOn(client.getTokenCache(), 'serialize').mockReturnValue('{ "RefreshToken": RT-SECRET-IN-UNREADABLE-CACHE');
++    vi.spyOn(client as any, 'acquireTokenByCode').mockResolvedValue({
++      accessToken: 'AT',
++      account: { homeAccountId: SIGNER, environment: ENV, tenantId: 'tid', username: 'u@example.test', localAccountId: 'lai' },
++      expiresOn: new Date(Date.now() + 3600_000),
++      tenantId: 'tid',
++    } as any);
++    const { result, records } = await captureLogs(() => exchangeAuthCode('code', 'https://redirect.test/cb', ['User.Read'], 'verifier'));
++    expect(result.refreshToken).toBe('');
++    expect(warnings(records)).toEqual(['KS-1682: the token cache could not be read — storing no refresh token']);
++    expect(JSON.stringify(records)).not.toContain('RT-SECRET-IN-UNREADABLE-CACHE');
++  });
+ });

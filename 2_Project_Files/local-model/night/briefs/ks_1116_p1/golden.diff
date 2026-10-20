@@ -1,0 +1,16 @@
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts
+--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts
+@@ -131,6 +131,12 @@ const NOT_THE_ROWS_TENANT_ADMIN: Array<[string, Principal]> = [
+   ['a SUPER_ADMIN of the row\'s tenant', { ...ORG_ADMIN, role: 'SUPER_ADMIN' }],
+   ['an ORG_ADMIN whose tenant is a strict PREFIX of the row\'s tenant', { ...ORG_ADMIN, tenantId: T1_STRICT_PREFIX }],
+   ['a SYSTEM_ADMIN whose tenant is a strict PREFIX of the row\'s tenant', { ...SYSTEM_ADMIN, tenantId: T1_STRICT_PREFIX }],
++  // Gate BM1 NOTE 1 (#1652): two more predicate regressions the 291 cells could not see. A role that only BEGINS with ORG or SYSTEM is not
++  // ORG_ADMIN or SYSTEM_ADMIN (a prefix match on the role would admit it), and a tenant claim that EXTENDS the row's tenant is not the
++  // row's tenant (a compare in the other direction, `claim.startsWith(rowTenant)`, would admit it).
++  ['an ORG_VIEWER of the row\'s tenant', { ...ORG_ADMIN, role: 'ORG_VIEWER' }],
++  ['a SYSTEM_SERVICE of the row\'s tenant', { ...SYSTEM_ADMIN, role: 'SYSTEM_SERVICE' }],
++  ['an ORG_ADMIN whose tenant EXTENDS the row\'s tenant', { ...ORG_ADMIN, tenantId: `${T1}0` }],
+ ];
+ /** Admins with no tenant on the token: must not match a row whose tenant is also unknown (null === null). */
+ const ADMINS_WITHOUT_TENANT: Array<[string, Principal]> = [

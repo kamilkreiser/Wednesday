@@ -1,0 +1,35 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1682-the-account-match-is-exact.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1682-the-account-match-is-exact.test.ts
+--- a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1682-the-account-match-is-exact.test.ts
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1682-the-account-match-is-exact.test.ts
+@@ -246,7 +246,30 @@ describe('KS-1682 N1: the signing-in account is matched EXACTLY, so a near miss
+     );
+     expect(r.refreshToken).toBe(SECRET.twoEntryValid);
+   });
+-
++
++  // KS-1682 BZ1 N2: the `found > 1` warning is the branch that holds the matching entries in hand, so it is the one a careless edit could
++  // fill with token text. The expectation is the WHOLE message, and no record may carry either secret or the account id.
++  it('RED KS-1682 W12 - two entries for the account that signed in store nothing, and the warning names the count but quotes neither token nor account id', async () => {
++    const { logger } = await import('../utils/logger');
++    const records: Array<{ level?: string; message?: string }> = [];
++    const onData = (info: { level?: string; message?: string }) => { records.push(info); };
++    logger.on('data', onData);
++    try {
++      const r = await signInTwo(
++        { [`one-${ENV}-refreshtoken-${CLIENT_ID}----`]: entry(SIGNER, 'RT-DUP-ONE') },
++        { [`two-${ENV}-refreshtoken-${CLIENT_ID}----`]: entry(SIGNER, 'RT-DUP-TWO') },
++      );
++      await new Promise((resolve) => setTimeout(resolve, 25));
++      expect(r.refreshToken).toBe('');
++    } finally {
++      logger.off('data', onData);
++    }
++    expect(records.filter((x) => x.level === 'warn').map((x) => x.message)).toEqual([
++      'KS-1682: expected exactly one refresh token for the account that signed in, found 2 — storing no refresh token',
++    ]);
++    expect(JSON.stringify(records)).not.toMatch(/RT-DUP|uidB|tidB/);
++  });
++
+   it('CONTROL KS-1682 W6: every fixture secret the cells above actually seed is DISTINCT and non-empty, so no cell can pass by comparing against the wrong string', async () => {
+     // Gate BR1 note N2: this reads `SECRET`, the object the cells above seed FROM. Emptying or
+     // duplicating any value there reds this cell -- and W1-W9 would still pass, because an entry

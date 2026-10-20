@@ -1,0 +1,22 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1679-the-same-caller-spread-still-overwrites.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1679-the-same-caller-spread-still-overwrites.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1679-the-same-caller-spread-still-overwrites.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1679-the-same-caller-spread-still-overwrites.test.ts
+@@ -165,6 +165,18 @@ describe('KS-1679 the drop is logged without the value', () => {
+     expect(JSON.stringify(logged())).not.toContain(PLANTED_TIME);
+     expect(JSON.stringify(named('certifiedAt')[0][1])).toContain(TENANT);
+   });
++  // KS-1679 gate BF1 N1: every planted value so far was truthy. The gate is "was a value supplied", not "is it truthy": a falsy plant is dropped from the row
++  // either way, so only the log line can tell the two apart.
++  it('RED KS-1679 R6: a FALSY planted value (empty string, null, 0, false) is dropped AND logged for both keys, not only a truthy one', async () => {
++    for (const planted of ['', null, 0, false]) {
++      for (const key of ['certificationId', 'certifiedAt']) {
++        logger.info.mockClear(); logger.warn.mockClear();
++        const r = await issue(ISSUER, { [key]: planted });
++        expect([key, planted, r.status, r.rec.data[key] === planted]).toEqual([key, planted, 201, false]);
++        expect([key, planted, named(key).length]).toEqual([key, planted, 1]);
++      }
++    }
++  });
+   it('CONTROL KS-1679 C3: a derived row that carried neither key logs nothing about them', async () => {
+     logger.info.mockClear(); logger.warn.mockClear();
+     const r = await issue(ISSUER, {});
