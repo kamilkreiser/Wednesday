@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 356 — 2026-10-21 08:07 65% LIGHT CHECKPOINT (s132). **READ THIS FIRST; adds to 355.**
+- **LIVE:** B380 Lane 1 (`Datasec/HPSM-POC-D12`, rung 5 eb965944; ADDENDUM-1 delivered: measure the red-main timing test 10+10, do not edit it) · B382 Lane 3 (`D14`, mutant runs; holding by design, wake_ack'd). B377 and B378 DONE, panes closed.
+- **Records PR #128** (HPSM-POC-analysis, records/b378 @ ee105fb4; hpwin 0, control 1) OPEN; tracked waiter on its checks → land by `gh pr merge 128 --merge --match-head-commit ee105fb43523085c2582d9f950c3f89b5d74600a`, verify the merge's tree = the head's.
+- **Red main CI** (1 of the last 15 main runs; timing test): ticket OWED (a records seat files it; name B378 FOR TUESDAY 2 + B380 ADDENDUM-1's measurement).
+- **Queue** (scratchpad launchq): B385 → B379 → B381 → B383, then B386 once drafted and stamped.
+
 ## 🟢 DELTA 355 — 2026-10-21 08:02 (s132, ctx 64%). **READ THIS FIRST; adds to 354.**
 - **B377 DONE** (19 findings; pane closed; hosted-deploy hold lifted). Blocker + Major are hosted DATA → card `hpsmpoc-hosted-demo-data-cleanup-1021` (rec a; default: nothing changes, **re-raise at 18:00 today**). If Kam rules a/b: a HPSM-POC seat does it through the product as Admin (soft-delete / rename; Withdrawn on the three feedback rows), then re-reads `/workspace` and `/admin/feedback`.
 - **B386 Lane 6 drafter RUNNING** → `tuesday/briefs/2026-10-21_B386_*` (B377's word-free code fixes; pane D17, ports 7460-7469; hard stop 16:00). READ WHOLE, stamp, add to the launch queue. Its WORD PACK (B377-4/-12/-15/-16/-17 and the -18/-19 texts) becomes ONE Kam card with exact before/after.
