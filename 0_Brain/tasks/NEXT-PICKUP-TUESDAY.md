@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 297 — 2026-10-20 15:17 CHECKPOINT (s125, ctx 70%; band 80-90). **READ THIS FIRST; supersedes 296's LIVE/QUEUE; 296's DONE stands.**
+### DONE since 296 (verified at source)
+- **MPS: ALL FOUR v13 wave-1 PRs LANDED** — #88 (B325 GWF) squash 77e541c8; #86 (B332 round-2 GWF: B319-1/-2/-4 FIXED) squash **67bf2004 = MPS main**; merged path sets equal the PRs'. No MPS PR open. Kam told (bf-737917e38525). B325 findings B325-1..11 (Minor/Note), B332-1 Minor + Notes, B318-1..4, B324-1..5, B319-* all OWED to an MPS records seat (+ drafted Jira lines in each STATUS; + NEW WORDS lists for the hosted card).
+- **NexusAI #100** post-land: main open alerts 218 = unchanged (0 new). Build on 1bc9e9df was still in_progress at 15:0x; a waiter checks Deploy demo for 1bc9e9d (both jobs must be skipped) — if no result in the note, re-read `gh run list --workflow "Deploy demo"` under NexusAI's GH_CONFIG_DIR.
+- **Composer #83: B331 NO GO** (M: B331-1 Blocker — pc_app can move device_group.engagement_id under a stored scope). Tuesday ruled: fix IN THIS PR (round 2 of 2) inside 0022 — freeze device_group tenant_id + engagement_id (0004 M3 forbid_column_change), N4 array_ndims=1, B331-2 test row. **B333 fix-brief drafter RUNNING** (if `tuesday/briefs/2026-10-20_B333_*` is missing at the successor's boot, re-commission from the note line of 15:17). Then a round-2 tier-1 re-gate of #83 (Opus).
+- **Gate 30 QUESTION answered** (main moved by #100; rd385 scans HISTORY.md): ANSWER-1 file `tuesday/briefs/2026-10-20_gate30_ANSWER-1_merged-tree-history-scan.md` — verdict on 49ba21e stands + a merged-tree ADDENDUM (red = landing finding). Mail subject went out "[Wednesday -> …]" (send_brief.sh:642 HARDCODES the prefix — shared-tool bug, claim with Wednesday); a --mail-verified pointer tap covered it.
+- B329 got ANSWER-1 (counts unchanged 8/5/1; Paul's devices/tasks untouched).
+### LIVE at 15:17
+%129 **gate 31** (NexusAI #99; holds the jest lock qa-g31-H1c; verdict by MAIL) · %121 **gate 30** (#98; verdict + addendum by MAIL) · %126 **B329** (HPSM-POC L9-a, resuming under ANSWER-1; new-final-line watcher) · %56 S101O (idle, waits for gates; repeated 'frozen' wakes = by design, check inbox only). **No Composer and no MPS seat live.**
+### LAUNCH QUEUE
+Composer (one docker-heavy at a time): **B333** fix round (after its drafter) -> its round-2 gate; **B320** (#82 gate; ADDENDUM-2 in) ; **B323** (fill STAMP_TIME); **B330** (fill STAMP_TIME). B320 can go NOW at load1 < 7 (no Composer seat live). MPS: **B311 V2 Home** (read whole), **MPS records seat** (owed), **V1 phase 2** brief (R-V1-7 e2e specs + B325-1/-5). NexusAI: **gate 29** (#97; read the 117 KB kit WHOLE; re-pin main 1bc9e9df; #97 vs #99 counts conflict: second to land gets a delta gate).
+
 ## 🟢 DELTA 296 — 2026-10-20 14:50 CHECKPOINT (s125, ctx 65%; band 80-90). **READ THIS FIRST; supersedes 295's LIVE and LAUNCH QUEUE; 295's Kam/DONE/OWED stand.**
 ### DONE since 295 (verified at source)
 - **MPS #85 LANDED** (B318 GO WITH FINDINGS, Minors B318-1..4): squash f2584d36, merged path set = the PR's 28. MPS main = **f2584d36** (holds #87 + #85). **B311 V2 Home now unblocked** (brief stamped by s123: READ WHOLE before launch).
