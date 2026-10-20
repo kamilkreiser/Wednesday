@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 315 — 2026-10-20 23:17 (s128). **Adds to 314.**
+- **NexusAI #98 CLOSED OUT:** RD-874 (G32-1), RD-875 (uat-run.js), RD-873 comment 39818 (#116) verified at source; PR #98 body applied + read back; Deploy demo skipped on d463f881. Pane %145 closed. Score B343 1.0.
+- **B349 (NexusAI #97 forward merge + counts TURN, Sonnet) STAMPED** (main d463f881; `tuesday/briefs/2026-10-20_B349_SEAT-W19_nexusai-pr97-forward-merge-counts-turn.md`); a tracked waiter launches `Datasec/NexusAI-W19` at load1 < 7. **If this seat rotates first:** `tmux list-panes` for NexusAI-W19; if absent, launch by the brief's own launch line (line 32). Arm `status_watch.sh` on `NexusAI/1_Project_Definition/Briefs/2026-10-20_B349_STATUS.md`. **On its READY:** verify H at source, then re-pin gate 29's kit + launcher (`fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md`, the DRAFTER-REPORT §5 lists the lines) from its RE-PIN SHEET (a drafter), add the routing line `QA/NexusAI-gate29|tuesday-agent@agentmail.to|no` if absent, launch tier 1 on Opus. Apply its PR97-TEXT after reading. Tell S101O (on any relaunch) to fast-forward its local rd-774 branch.
+
 ## 🟢 DELTA 314 — 2026-10-20 23:02 (s128). **Adds to 313.**
 - **NexusAI #98 LANDED** (FF, main **d463f881**, tree = verified head). 62 of 63 alerts fixed; **#116 open (confirmed by Tuesday)** → ANSWER-1 to B343 (`tuesday/briefs/2026-10-20_B343_ANSWER-1_alert116-ticket-and-records.md`): RD-873 comment, G32-1 + uat-run.js tickets, PR98-TEXT corrected to 62. **On its DONE line:** verify the Jira ids at source (NexusAI .env, GET), READ the corrected PR98-TEXT, then `gh pr edit 98 --body-file …` (NexusAI GH_CONFIG_DIR) and read back; confirm Deploy demo skipped for d463f881. Then #97 counts TURN + gate 29.
 - **HPSM-POC #125 LANDED** (merge, analysis main 93ee2e0b).
