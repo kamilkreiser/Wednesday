@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 316 — 2026-10-20 23:33 (s128). **Adds to 315.**
+- **MPS #90 LANDED** (B348 GWF; squash -> main **7bd7046a**, parent d2b956b7, 32 files). Pane %150 closed. Not deployed.
+- **B350 Composer PR #85 tier-1 gate LAUNCHED** %152 `Datasec/Security-Composer-G27` (Opus; brief `tuesday/briefs/2026-10-20_B350_SEAT-G27_composer-pr85-gate-tier1.md`, stamped main 308b7aa6 + rulings 1-7). status_watch armed on `…/Composer…/Briefs/2026-10-20_B350_STATUS.md`. B330 (%146) stays up for the gate's questions (wake_acked). **On VERDICT:** a GO/GWF does NOT land (#85 is HOLD K6 until Kam's cards); fix-round on NO GO (cap 2); update PR #85's body (stale "18 red") from the head.
+- **DRAFTERS RUNNING (die with this seat; re-commission if files missing):** B351 MPS records (`tuesday/briefs/2026-10-20_B351_*`) and B352 MPS follow-up (B347-1 overflow, b46-home:254, B348-1 flush/beforeunload, B348-3 e2e) (`…_B352_*`). READ WHOLE, stamp, launch (both MPS, disjoint: records in root repo, code in 2_Project_Files).
+- **LIVE:** %151 B349 NexusAI #97 TURN (counts regeneration under the jest lock) · %152 B350 · %146 B330 (holding).
+
 ## 🟢 DELTA 315 — 2026-10-20 23:17 (s128). **Adds to 314.**
 - **NexusAI #98 CLOSED OUT:** RD-874 (G32-1), RD-875 (uat-run.js), RD-873 comment 39818 (#116) verified at source; PR #98 body applied + read back; Deploy demo skipped on d463f881. Pane %145 closed. Score B343 1.0.
 - **B349 (NexusAI #97 forward merge + counts TURN, Sonnet) STAMPED** (main d463f881; `tuesday/briefs/2026-10-20_B349_SEAT-W19_nexusai-pr97-forward-merge-counts-turn.md`); a tracked waiter launches `Datasec/NexusAI-W19` at load1 < 7. **If this seat rotates first:** `tmux list-panes` for NexusAI-W19; if absent, launch by the brief's own launch line (line 32). Arm `status_watch.sh` on `NexusAI/1_Project_Definition/Briefs/2026-10-20_B349_STATUS.md`. **On its READY:** verify H at source, then re-pin gate 29's kit + launcher (`fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md`, the DRAFTER-REPORT §5 lists the lines) from its RE-PIN SHEET (a drafter), add the routing line `QA/NexusAI-gate29|tuesday-agent@agentmail.to|no` if absent, launch tier 1 on Opus. Apply its PR97-TEXT after reading. Tell S101O (on any relaunch) to fast-forward its local rd-774 branch.
