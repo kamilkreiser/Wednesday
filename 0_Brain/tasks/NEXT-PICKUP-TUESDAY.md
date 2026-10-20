@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 342 — 2026-10-21 05:16 (s130). **READ THIS FIRST; supersedes 341's LIVE list (340's notes stand).**
+- **DONE:** NexusAI #97 LANDED (FF 115a775b, #70/#220/#221 fixed, demo skipped, verified at source); NexusAI records (RD-876/877/878; comments 39846-39849) → records PR #102 OPEN (**owed: land by C-190 FF of 6dcbedb9 via a NexusAI seat's land.sh; gh pr merge cannot FF**); MPS records B368 committed (36c8498f); panes %167 %169 %170 closed.
+- **B367 = NO GO on HPSMPOC-294 (round 1 of 2)**, 295 GWF. Tuesday ruled route (a) for B367-1..-4 (waiver of B364's 'exactly four rows' = Tuesday's error, ledger row). **B369 fix-round drafter RUNNING** → `tuesday/briefs/2026-10-21_B369_SEAT-D10_hpsmpoc-pr166-fix-round2.md`: read whole, stamp, launch; then a round-2 tier-2 gate (LAST: NO GO → Kam card). Merge still HELD for B366.
+- **LIVE, RE-ARM at boot:** %166 B362 Part 3 (#101 counts TURN; last line `READY FOR QA:`) · %168 B366 HPSM-POC hosted deploy (deploy step running, health 200s; `DEPLOYED:`/`ROLLED BACK:` need a tail watcher).
+- Composer #85 card still open (no ruling).
+
 ## 🟢 DELTA 341 — 2026-10-21 04:53 (s130). **READ THIS FIRST; supersedes 340's LIVE list (340's B358/R_DEP3_5/status_watch notes stand).**
 - **DONE:** MPS #92 LANDED (B365 GO/GWF, squash → main 1eccbc8b, tree = gated head's); B364 READY → HPSM-POC PR #166 opened; panes %165, %167 closed.
 - **LIVE, RE-ARM at boot:** %166 B362 NexusAI (three part lines, `NexusAI/…/2026-10-21_B362_STATUS.md`) · %168 B366 HPSM-POC hosted deploy (`HPSM-POC/…/2026-10-21_B366_STATUS.md`; `DEPLOYED:`/`ROLLED BACK:` need an ad-hoc tail watcher) · %169 B367 HPSM-POC PR #166 tier-2 gate (`HPSM-POC/…/2026-10-21_B367_STATUS.md`; on GO/GWF: land #166 ONLY after B366 ends, by squash (HPSM-POC convention, #165), --match-head-commit 4794bde3).
