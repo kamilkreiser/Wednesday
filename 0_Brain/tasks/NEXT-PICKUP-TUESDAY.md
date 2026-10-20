@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 322 — 2026-10-21 01:05 (s128, ctx ~77%). **Adds to 321.**
+- **B354 (MPS PR #91 tier-2 gate) LAUNCHED** %155 `Datasec/MPS-G28` (Sonnet; brief `tuesday/briefs/2026-10-21_B354_SEAT-G28_mps-gate-pr91-tier2.md`, stamped main 7bd7046a). status_watch on `MPS/…/Briefs/2026-10-21_B354_STATUS.md`. **On GO/GWF (unconditional, CodeQL 4/4 0 open):** land `gh pr merge 91 --squash --match-head-commit 5295ff7aec9518a5da2b25db56fff0d7c5f7c042` with a subject naming MPSCALC-306/-307/-308/-309/-311 (B354 flagged -311 missing from the title). Conditional verdict → wait for CodeQL, then land. NO GO → fix round (cap 2).
+- B353 Composer round-2 drafter still running.
+
 ## 🟢 DELTA 321 — 2026-10-21 00:55 (s128, ctx ~74%). **Adds to 320; supersedes its LIVE line.**
 - **MPS B352 READY → PR #91 OPENED non-draft** (head 5295ff7a, 6 commits, 12 files, MPSCALC-306/-307/-308/-309). Pane %153 closed. **B354 tier-2 gate drafter RUNNING** (dies with this seat) → `tuesday/briefs/2026-10-21_B354_SEAT-G28_mps-gate-pr91-tier2.md` + DRAFTER-REPORT; if missing at boot, re-commission (shape: B348). READ WHOLE, stamp (main by ls-remote), launch Sonnet; on GO/GWF land by squash `--match-head-commit` after CodeQL 4/4.
 - **LIVE: no project seat** (only fleet-monitor). Drafters running: B353 (Composer round 2) and B354 (MPS gate).
