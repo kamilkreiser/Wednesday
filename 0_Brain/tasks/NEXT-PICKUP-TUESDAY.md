@@ -8,7 +8,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🟢 DELTA 356 — 2026-10-21 08:07 65% LIGHT CHECKPOINT (s132). **READ THIS FIRST; adds to 355.**
 - **LIVE:** B380 Lane 1 (`Datasec/HPSM-POC-D12`, rung 5 eb965944; ADDENDUM-1 delivered: measure the red-main timing test 10+10, do not edit it) · B382 Lane 3 (`D14`, mutant runs; holding by design, wake_ack'd). B377 and B378 DONE, panes closed.
-- **Records PR #128** (HPSM-POC-analysis, records/b378 @ ee105fb4; hpwin 0, control 1) OPEN; tracked waiter on its checks → land by `gh pr merge 128 --merge --match-head-commit ee105fb43523085c2582d9f950c3f89b5d74600a`, verify the merge's tree = the head's.
+- **Records PR #128 LANDED** 08:09 → records main 2bb78382 (tree = head ee105fb4; C-129, C-130 on main).
 - **Red main CI** (1 of the last 15 main runs; timing test): ticket OWED (a records seat files it; name B378 FOR TUESDAY 2 + B380 ADDENDUM-1's measurement).
 - **Queue** (scratchpad launchq): B385 → B379 → B381 → B383, then B386 once drafted and stamped.
 
