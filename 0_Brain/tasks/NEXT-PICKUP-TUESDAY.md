@@ -6,7 +6,7 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
-## 🟢 DELTA 291 — 2026-10-20 13:1x CHECKPOINT (s124, ctx 55%; band 80-90). **READ THIS FIRST. Supersedes 290 wholly and 289's FIRST WORK 1-4.**
+## 🟢 DELTA 291 — 2026-10-20 12:5x CHECKPOINT (s124, ctx 55%; band 80-90). **READ THIS FIRST. Supersedes 290 wholly and 289's FIRST WORK 1-4.**
 ### DONE since 290 (verified at source)
 - **B309** verified (b451239b, 9 ahead/0 behind main acfcf5de, 28 paths = Yours + Proposal.cs ANSWER-1 + EntraAuthTests row); pane %112 closed; **PR datasecau/MPS-Commercial-Calculator#85** opened.
 - **B313** verified (925caf8b, 4/0, 18 web paths, all Yours); pane %117 closed; **PR #86** opened.
@@ -14,13 +14,14 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **S101O ANSWER-29** (tuesday/briefs/2026-10-20_S101O_ANSWER-29_rd863-plan-corpus-c.md): RD-863 plan confirmed; the 173-question gate-28 differential is the GATE's job at the RD-863 gate (seat neither copies nor reads it). Delivered 01:51:14Z.
 - Composer card `composer-sro-vic-gap-10-decisions-1020` still OPEN: **its default FIRED 12:5x** (L0 records, L3-a, L6-a only); Kam told bf-795df6fd5e54.
 ### IN FLIGHT (background subagents of s124 — they DIE with this seat; if a file below is missing at the successor's boot, re-commission it)
-- B318 drafter DONE: `tuesday/briefs/2026-10-20_B318_SEAT-G14_mps-gate-pr85-tier1.md` + `_B318_DRAFTER-REPORT.md` (51 KB, NOT yet read; report Q4: rule NO Jira write — the B305 template says none). Next: read whole, stamp, launch Opus (no BRIEF_SEAT_LEVEL).
+- **B318 LAUNCHED 13:02 %119 `Datasec/MPS-G14`** (MPS #85 tier 1 Opus; brief read whole + stamped, Q4 ruled Jira READ ONLY; STATUS watcher armed). On VERDICT: completion check, close pane (heavy-slot holders + pgrep first), land #85 `--squash --match-head-commit b451239b6fde51eda8dbb2703aab52a9fdb5c5b7` after checks green; then the web lanes rebase and B311 V2 Home launches.
+- **B319 (MPS #86, Sonnet, BRIEF_SEAT_LEVEL=sonnet) and B320 (Composer #82, Sonnet) READ WHOLE + STAMPED, HELD for load1 < 7** — launch lines are inside each brief (add WED_USAGE_STOP=100). B320's hog rows wait for no other heavy seat mid-build (R-W10-6).
 - B319 drafter (MPS #86 tier 2 Sonnet), B320 drafter (Composer #82 tier 2 Sonnet), B321-323 drafter (Composer default lanes L0/L3-a/L6-a), gate 29 AMEND drafter (kit re-pinned 4c9b0d3 -> 278afc25, backup `.pre-repin-278afc2`, report `fleet/qa-agent/briefs/2026-10-20_nexusai-gate29_AMEND-REPORT.md`), gate 30 LAUNCHER sub-agent (`fleet/qa-agent/launchers/launch_qa_nexusai_gate30.sh` + `2026-10-20_gate30_LAUNCHER-REPORT.md`), rotation feedback sweep (`projects_index/2026-10-20_rotation-sweep-1300.md`).
 - **B317 (gate 30, NexusAI PR #98 tier 2)**: kit READ WHOLE by s124; defaults T0-T5 accepted (T1 (a): no full verify; PR Build is the Node-24 run). Owed at stamp: main sha+tree (ls-remote), REPORT_DATE 2026-10-20, SELF-CHECK x2, routing line `QA/NexusAI-gate30|tuesday-agent@agentmail.to|no` in inbox_routing.conf, then launch via the new launcher (cockpit.sh add 'QA/NexusAI-gate30' …), Sonnet.
 - Watchers (tracked, die at rotation): B310 and B312 STATUS (both STATUS files did not exist yet at 12:5x).
 ### OWED
 RD-863 gate brief must carry "run the gate-28 173-question differential against the base" (ANSWER-29). HPSM-POC records step after B316: HPSMPOC-298/-299/-300 -> Done (R-R10-1), C-124 deploy entry, FOUND-3 ticket candidate (old process 5 fail lines during switch), HPSMPOC-268 reading. MPS records seat for B305-1..4 + B309 FOR TUESDAY items (C-entry for ANSWER-1, purchase-pair diff test for V4) + NEW WORDS (11 + 22 + 81) to the next MPS hosted card. ATTIO digest retarget (Wednesday's 10-19 21:02Z mail). inbox_routing has no MPS route.
-### FLOOR 13:1x: %0, %1, %56 S101O (RD-863 build), %116 B312, %118 B310. Gauge 89% (no line for Datasec). Load ~3-4.
+### FLOOR 12:5x: %0, %1, %56 S101O (RD-863 build), %116 B312, %118 B310. Gauge 89% (no line for Datasec). Load ~3-4.
 
 ## 🔴 DELTA 290 — 2026-10-20 12:4x LAST LINES BEFORE ROTATION (s123). **READ THIS FIRST, then 289 (stands except where updated here).** Three events landed at the band; none was acted on by s123:
 1. **B309 READY FOR QA 12:47:46** (MPS V0 contract): `b309/v0-quote-contract @ b451239b6fde51eda8dbb2703aab52a9fdb5c5b7` · tier 1 · 7 tickets (T-V0-3, -1, -2, -8, -4, -5, -6) · 6 comments · NEW WORDS 22. **Next:** verify at source (gh api branch = sha, compare vs main acfcf5de: only Yours + the one Proposal.cs 4-line allowance of ANSWER-1), read STATUS decision sections, open PR, **tier-1 gate (Opus)**; after it merges, the web lanes rebase and **B311 V2 Home launches** (read its brief whole first; stamped). Close %112 after the source read (check `.tools/heavy-slot-*` holders + `pgrep -f b309`).
