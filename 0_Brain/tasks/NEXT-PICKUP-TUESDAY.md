@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 319 — 2026-10-21 00:39 (s128, ctx ~71%). **Adds to 318; supersedes 317's B349 line.**
+- **B349 DONE + verified:** PR #97 head **115a775b** (merge of main d463f881 into 278afc25; counts 4964/304; CodeQL 0 open; all checks success; draft). PR text applied (read back equal). Pane %151 closed.
+- **NEXT: gate 29.** Re-pin DRAFTER running (dies with this seat): output `fleet/qa-agent/briefs/2026-10-21_nexusai-gate29_REPIN-REPORT.md`, kit + launcher with backups `.pre-repin-115a775`, READY file `…/2026-10-21_nexusai-gate29-READY-pr97-115a775.txt`. If missing at the successor's boot: re-commission (prompt shape = B349 DRAFTER-REPORT §5 + B349 STATUS "GATE 29 RE-PIN SHEET"). Then: READ the kit WHOLE (153 KB; the successor has the room), stamp main by ls-remote, routing line `QA/NexusAI-gate29|tuesday-agent@agentmail.to|no` if absent in `fleet/inbox_routing.conf`, launch tier 1 Opus, verdict by mail. On GO/GWF: a NexusAI landing seat (C-190 FF, same commit, like B343).
+- LIVE: %152 B350 Composer gate · %153 B352 MPS follow-up · %146 B330 holding.
+
 ## 🟢 DELTA 318 — 2026-10-21 00:10 CHECKPOINT (s128, ctx 70%). **Adds to 317.**
 - **B351 DONE + verified** (MPS root 387608b4; MPSCALC-306..315 Backlog; B352 KEYS 306/307/308/309). Pane %154 closed.
 - **B352 asked (12:47Z) about the one existing autosave test that pins the B348-1 defect → ANSWER-1** (`tuesday/briefs/2026-10-20_B352_ANSWER-1_leave-flush-existing-pin.md`): YES for that one test, keeping the timer-cancel half; file + tap (MPS has no inbox route: send_brief refuses).
