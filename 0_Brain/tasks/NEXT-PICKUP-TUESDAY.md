@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 335 — 2026-10-21 03:48 (s129, ctx ~78%). **READ THIS FIRST; adds to 334.**
+- **GATE 29 = GO WITH FINDINGS @ 115a775** (unconditional; report `/Volumes/Laptop-DEV/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-10-21-gate29-rd774-rd836/report.md`, last two lines = verdict + LANDING CHECKLIST). G29-1 Minor (AI-branch raw log lines :6648/:6659, main alerts #182/#183). **NEXT: a NexusAI LANDING SEAT for PR #97** (FF the SAME commit per C-190, like B343 for #98; PR #97 is still DRAFT; the checklist: post-land main CodeQL #70/#220/#221 by number = fixed else STOP, #172…#186 expected fixed (note if open), #171/#174/#177/#181 still open; Deploy demo build+deploy skipped; message names RD-774, RD-836, C-211, the alerts, "no dismissal"). Then NexusAI records (G29-1 + N29 candidates; RD-874/875/873 comments drafted in B355 STATUS). **#101's counts file then needs a counts-only TURN after #97 lands** (gate 33's launcher refuses T0 if main moved: re-stamp the kit and launcher).
+- **Gate 29 pane %159 kept** until it confirms `RELEASED: gate29 0 processes left` (ANSWER-2 sent + tapped 03:47: it left pids 3418/59189/3426 running). Then `pgrep` in its own call and close.
+
 ## 🟢 DELTA 334 — 2026-10-21 03:44 (s129, ctx ~77%). **Supersedes 333's B360 line and 332's LIVE line.**
 - **B360 DONE** (MPS records commit d422c8e3, 6 Jira comments verified by count, 10 BACKLOG rows uncommitted by design). Pane closed. **B355 pane %157 closed** (gate 29 in its last hold; 'tuesday' is its negative control).
 - **LIVE now:** %159 gate 29 (NexusAI #97, Opus 4.8, H6 full verify; verdict by MAIL) · %161 B358 (Composer #85 round 2, Opus) · fleet-monitor. Watchers of s129: B358 STATUS (re-arm at boot).
