@@ -6,7 +6,7 @@ status: live
 supersede: REPLACED WHOLESALE by the 09:0x Wednesday seat at its 50% checkpoint (~09:30 AEDT). Replace wholesale again; never stack. Previous: NEXT-PICKUP.md.pre-1020-0930 + git.
 ---
 
-# NEXT PICKUP (Tue 20 Oct, written ~09:30 AEDT, sections 0-3 refreshed 10:16 and 10:38 and 10:56)
+# NEXT PICKUP (Tue 20 Oct, written ~09:30 AEDT, sections 0-3 refreshed 10:16 and 10:38 and 10:56 and 11:01)
 
 ## 0. FIRST ACTIONS FOR THE NEXT WEDNESDAY SEAT
 1. Boot reads as the launcher says. Then kam_rulings_today.sh, reconcile_rulings.py, `bash 2_Project_Files/tools/newmail.sh` (to a file), `tools/fleet_ack.sh list`, `tools/decision_queue.sh list open`, fleet/usage_gate.sh --check, `local-model/spark/tunnel.sh check`, `tmux list-panes -t fleet:0 -F '#{pane_id} #{@cockpit_name}'`.
@@ -17,8 +17,9 @@ supersede: REPLACED WHOLESALE by the 09:0x Wednesday seat at its 50% checkpoint 
 
 ## 1. LIVE FLOOR (10:56) — develop = 6229a92f2480f0784c31a8d6b652298a7ac10551 (#1653)
 Merged today, each verified by Wednesday's own fetch: #1645 #1646 #1648 #1647 #1649 #1650 #1651 #1652 #1653 = 9. None deployed. Kintsugi runs a4187f0f6622 (round of 89956fe92956 in progress); demo d75bfe2deb80.
-- **GATES RUNNING (Agent sub-agents of the 09:0x seat: they DIE with that seat's rotation; if a verdict.md is missing in its folder after rotation, RE-COMMISSION the gate from the same GATE_BRIEF.md):** BN1 #1654 KS-1557 (C 31st, head db9bca740df0, tier 1 Opus) in 0_Brain/reference/2026-10-20_gate-BN1-pr1654-ks1557/; BQ1 #1656 KS-1679 stale cell (C 31st, head 2e672d35fedf, tier 2 Sonnet) in .../2026-10-20_gate-BQ1-pr1656-ks1679-stale-cell/. On each verdict: re-hash `sed '1d;$d'`, re-read heads, merge-tree on LIVE develop yourself in the cache clone (fetch `refs/pull/N/head:refs/wed/prN` first), GO naming head + landing, notes FROM THE FILE.
-- **#1655 KS-1407 (G 12th): gate BO1 NO GO** (B1: reset with Redis down burns the token and revokes nothing). Round 2 of 2 under the cap commissioned to G (fail closed before the write; N3 cells; N1 OAuth refresh-grant ticket High + N2 race ticket Medium). A second NO GO ships nothing and goes to Kam. Verdict: 0_Brain/reference/2026-10-20_gate-BO1-pr1655-ks1407/verdict.md.
+- **#1654 KS-1557 (C 31st): gate BN1 NO GO** (11:00; code sound, migration 055 can credit a child to the wrong connector). Round 2 of 2 under the cap sent to C: attribute from each child's own metadata.versionedById (connector-only, agree with any parent row, skip+report), N2 bypass-or-refuse, N3 committed proof on real PG, N4 no rows for humans, N5 ticket, N1 measurement as a KS-1688 comment. Verdict 0_Brain/reference/2026-10-20_gate-BN1-pr1654-ks1557/verdict.md. On READY: a DELTA gate (Opus, tier 1, round 2 of 2); a second NO GO goes to Kam. KS-1688's fix still waits for #1654 to MERGE.
+- **GATE STILL RUNNING (an Agent sub-agent of the 09:0x seat: it DIES with that seat's rotation; if verdict.md is missing after rotation, RE-COMMISSION from the same GATE_BRIEF.md):** BQ1 #1656 KS-1679 stale cell (C 31st, head 2e672d35fedf, tier 2 Sonnet) in 0_Brain/reference/2026-10-20_gate-BQ1-pr1656-ks1679-stale-cell/. On the verdict: re-hash, re-read heads, own merge-tree on LIVE develop (fetch refs/pull/1656/head:refs/wed/pr1656), GO naming head + landing, notes FROM THE FILE.
+- **#1655 KS-1407 (G 12th): gate BO1 NO GO** (shape for round 2 RULED 10:57: route-local isRedisAvailable guard + post-write re-assert, honest distinct errors, no session.ts change; other silent-zero callers = one High ticket) (B1: reset with Redis down burns the token and revokes nothing). Round 2 of 2 under the cap commissioned to G (fail closed before the write; N3 cells; N1 OAuth refresh-grant ticket High + N2 race ticket Medium). A second NO GO ships nothing and goes to Kam. Verdict: 0_Brain/reference/2026-10-20_gate-BO1-pr1655-ks1407/verdict.md.
 - **D 25th (%17, Opus 5.5):** kintsugi round of 89956fe92956: build was healthy at +38 min; then migrations 053/054, swaps, sweep, DEPLOYED mail with both rounds' notices drafted -> Wednesday's word to post (Peter KS-485, Stuart KS-772). KS-772 heads-up already posted.
 - **C 31st (%18):** #1652 merged; #1654 at BN1; #1656 at BQ1; told to keep its handover current and wait for both verdicts.
 - **R 58th (%19):** #1650/#1651/#1653 merged; KS-1682 N1 exact-match cells PR in flight (tier 2 Sonnet gate when READY); KS-1687, KS-1689 filed; then wrap.
@@ -31,7 +32,7 @@ Merged today, each verified by Wednesday's own fetch: #1645 #1646 #1648 #1647 #1
 - Undelivered ruled: `secuura-m365-admin-setup-for-customer-org-1020` = b (05:35), lives in KS-1678's future work; deliver when the wizard ticket is worked.
 
 ## 3. OWED BY WEDNESDAY (in order)
-1. BN1 and BQ1 verdicts -> GOs (or round 2); after #1654 MERGES: brief the KS-1688 fix (tier 1 Opus): gate /version on the (a') create:connector provenance; post Kam's ruling on KS-1688 (card secuura-ks1688-org-merge-edge-which-side-1020 = a: S adds a 'transfer issuer' call; K builds the receiving end); Stuart's answer (KS-1688 comment 23:36:46Z) is the spec input; mark the card --delivered when the comment is posted.
+1. BQ1 verdict -> GO; #1654 round-2 READY -> delta gate; after #1654 MERGES: brief the KS-1688 fix (tier 1 Opus): gate /version on the (a') create:connector provenance; post Kam's ruling on KS-1688 (card secuura-ks1688-org-merge-edge-which-side-1020 = a: S adds a 'transfer issuer' call; K builds the receiving end); Stuart's answer (KS-1688 comment 23:36:46Z) is the spec input; mark the card --delivered when the comment is posted.
 2. G 12th's #1655 round-2 READY -> delta gate (Opus, tier 1, round 2 of 2).
 3. R 58th's N1 cells READY -> tier-2 gate; then R wraps (verify handover + history, score, pane_close).
 4. D 25th's DEPLOYED mail -> verify -> word to post the two notices -> report the deploy to Kam on the panel.
