@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 289 — 2026-10-20 12:4x ROTATION HANDOVER (s123, ctx ~79%; band 80-90). **READ THIS FIRST. Supersedes 288's FIRST WORK 3 and 5; 288's items 1, 2, 4 and OWED stand.**
+### Changed since 288 (verified at source)
+- **MPS lanes LIVE:** B309 %112 V0 contract, **B312 %116 V3 readiness**, **B313 %117 V5 editors** (all Sonnet). **B310 V1 frame HELD** for load1 < 7 AND load5 < 8 (s123's waiter dies at rotation: re-check `uptime`, then launch by the Launch line inside its brief). B311 after B309 merges.
+- **B301 Composer #326/#327:** code branch verified (e6288983, 2 test files); **records commit was MISSING** (records/b301 = main) — caught before acceptance, ADDENDUM-1, now **records/b301 @ f18c6fff** (1 commit, Part D paths). **Draft PR datasecau/Datasec-Security-Composer#82** opened. Pane closed. **OWED: tier-2 gate brief for #82** (round 1 of 2; drafter + read whole + launch Sonnet G2); on GO: `gh pr ready 82` + squash `--match-head-commit e62889831069135abc25e61b08f2f59f8196e4fd` (Composer gh config), then fold records/b301 into Composer root main (B298 method).
+- **NexusAI PR #97:** S101O pushed **278afc25** (CodeQL #273 fixed: 0 open alerts on the PR ref; verify 4910/4910). Its `build` check was still in_progress at 01:42Z (started 00:54:38Z). Wait for its new-head mail; then **re-pin gate 29's kit** (`fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md` pinned 4c9b0d3) to 278afc25 and launch.
+- **B316 HPSM-POC hosted deploy:** deploy step rc 0 at 00:58:31Z; health logger running; its STATUS file was being rewritten (absent at its path at 12:01). **On DEPLOYED:** verify at source, close %115, panel Kam, then records step: HPSMPOC-298/-299/-300 -> Done + C-124 for the deploy.
+### FIRST WORK for the next seat (in order)
+1. Re-arm watchers (`tuesday/tools/status_watch.sh <STATUS> 30`, run_in_background): B309, B312, B313 (MPS `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-20_B3NN_STATUS.md`) and B316 (HPSM-POC `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-20_B316_STATUS.md`).
+2. B316's result (above). 3. B317 NexusAI gate on PR #98 (DELTA 288 item 2). 4. Gate for Composer PR #82. 5. B310 on load. 6. Composer card `composer-sro-vic-gap-10-decisions-1020` (open): on Kam's tap, a records seat (C-entries + BACKLOG rows from the SRO_VIC plan) then lanes; default if no tap = L0 records, L3-a, L6-a only.
+### FLOOR 12:4x: %0, %1, %56 S101O, %112 B309, %115 B316, %116 B312, %117 B313. Gauge ~86%. Mechanism gap (own tree, small): status_watch.sh checks only records refs named in the FINAL line; B301 named records/b301 in its body.
+
 ## 🔴 DELTA 288 — 2026-10-20 11:4x PRE-ROTATION HANDOVER (s123, ctx 75%; band 80-90). **READ THIS FIRST, then 287-285 (their lines stand except where superseded here).**
 ### DONE since 287 (all verified at source)
 - **B315 HPSM-POC records LANDED:** records PR datasecau/HPSM-POC-analysis#124 merged -> records main **9af1d55** (C-123 at CLARIFICATIONS:1854; 2 tickets for B304 findings; 3 comments on HPSMPOC-298/-299/-300; 0 Done). HP-window scan by Tuesday: 0 hits on 8 branch files + 9 posted texts, control fired. Pane closed.
