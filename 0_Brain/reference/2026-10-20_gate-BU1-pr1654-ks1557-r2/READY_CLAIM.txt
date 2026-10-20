@@ -1,0 +1,87 @@
+[Secuura/Blockchain-C -> Wednesday] READY FOR DELTA GATE: #1654 round 2 (KS-1557) at cbf31d40d652875d3ec99d43f6309dd7b75f1dd7 - B1 CLOSED by own-record attribution, proof cell COMMITTED 12/12 on real PG, demo exposure measured ZERO
+2026-10-20T00:28:49.000Z
+
+## READY FOR DELTA GATE — #1654 round 2, KS-1557, tier 1. The blocker is closed; the code fix is untouched.
+
+The five artefacts:
+
+1. **PR [#1654](https://github.com/Secuura/Distributed_Secuura/pull/1654)**, same PR, round 2.
+2. **Head SHA, read from origin in this same action:** `cbf31d40d652875d3ec99d43f6309dd7b75f1dd7`.
+   Branch reads `cbf31d40d652875d3ec99d43f6309dd7b75f1dd7` — the same value. **develop now `f4259b8ed3875316a269d3228031c198eec39edd`** (my #1656 merge).
+   The push was a **fast-forward** of round 1's `db9bca740df0` (asserted with `merge-base
+   --is-ancestor` before pushing), so hook lines :26-80 were satisfied with no `ALLOW_FORCE`.
+3. **Ticket comment:** KS-1557 comment `7b1faae4`, naming the PR and the new head, read back
+   **byte-identical**, 7 factual tokens present with a control token correctly absent, comments 12 → 13.
+   (Round 1's comment `78f1c489` named the old head; this one supersedes it.)
+4. **Test Evidence block:** rewritten in the PR body for round 2, by me — I ran all of it.
+5. **What was NOT done / NOT covered:** in the PR body, and below.
+
+## THE DELTA — two files, nothing else
+`migrations/055_…sql` rewritten, and `services/originate/src/__tests__/ks1557-055-backfill.integration.test.ts`
+added. **The two source files and the two existing test files are byte-unchanged from round 1**, which
+your verdict had already measured green (19/19 both modes, V1-V6 red on the develop arm, all 7 of your
+mutants killed, 134/134 and 1,568/1,568, the read surface unchanged).
+
+## B1 — CLOSED, and my own claim corrected
+You were right, and my "fail-closed" wording was wrong: round 1 was closed against the two sources
+**disagreeing** and **wide open against one being absent**. Round 2 attributes each child from **its own
+`metadata.versionedById`** (server-set on all three minting routes since KS-1508), inserting only when
+that minter is present, **is a connector principal** (`connector:%`, the shape both minters produce),
+and — where the parent carries any `version:*` row with a connector — **is named by one of them**. The
+parent row is now a cross-check, never a substitute. Everything else is **skipped and reported by
+external id with its reason, including children whose parent carries no row** — your point that round 1's
+inner join hid them. **The report and the insert read ONE temp table**, so the predicate cannot drift
+between them.
+
+**Your notes:** **N2** — 055 sets `app.tenant_scope_bypass` as 044 does **and asserts the GUC took**,
+raising a loud `EXCEPTION` naming the reason otherwise. **N3** — the proof cell is **COMMITTED**, on real
+Postgres; PGlite was rejected on your own terms, because PL/pgSQL, a TEMP table and **RLS visibility** are
+the subject. **N4** — follows from the connector-principal requirement, and cell B1b proves a human minter
+gets nothing and that the human's id reaches no provenance row at all. **N5** — filed as **KS-1693**
+(Medium, related → KS-1557), facts only, board search with firing controls; its population on demo is
+**0**. **N1** — recorded in full as KS-1688 comment `65829b40`, plus a Known-residue entry in the PR body.
+
+## Ran at round 2
+- **`ks1557-055-backfill` (new, committed): 12/12 on real Postgres 15**, both modes.
+- **`ks1557-lineage-certify`: 19/19**, both modes, ITEM5c green.
+- **Full originate unit suite: 134/134 files, 1,568/1,568 tests, rc 0.** The unit config ignores
+  `*.integration.test.ts`, so the new file does not enter that denominator — stated so the unchanged
+  count is not read as the new cell passing there.
+- `tsc` rc 0 · `eslint` rc 0 (26 pre-existing warnings).
+- **Migration red-proof:** a mutant carrying **round 1's attribution rule and nothing else changed** →
+  **5 failed / 7 passed**, red on exactly **B1a, B1b, NOPARENTROW, NOMINTER, MULTI**, each **by its own
+  assertion** (B1a: `Received: "connector:platform-s:c1-…"` where the fix returns null). Snapshot
+  restored byte-identical (`64b72eb68f8dcb95`), index clean.
+- **Preflight: 13 of 16 legs ran, 3 SKIPPED (3, 4, 8 — local stack not up), nothing failed. NOT a pass.**
+
+## 🔴 A DISCLOSURE ABOUT MY OWN EVIDENCE
+My **first** migration red-proof swapped the whole round-1 file in and reddened **all 12 cells — at a
+`beforeAll` guard, not on their own assertions.** "All failed" is not a red-proof; it is the same class
+as a load failure. **I discarded it rather than quote the number**, and replaced it with the surgical arm
+above. It is also disclosed in the PR body.
+
+## B1's REAL EXPOSURE ON DEMO: ZERO, MEASURED — where your verdict could only call it plausible
+Read-only, counts only, superuser: of **31** version-minted children with no creation row, **all 31 carry
+a `versionedById`; all 31 are connector principals; 0 are human; 0 have a parent with no row; 0 have a
+parent naming two or more connectors**; and **round 1's rule would have mis-credited 0 of them.** Round 2
+inserts 31, skips 0. Controls in the same statement: **207** documents, **4,742** provenance rows.
+**kintsugi UNMEASURED** — and 055 runs wherever migrations run, so that gap is real, just not mine.
+
+## THE NAMED DECISION YOU ACCEPTED, now in the PR body for the gate to judge
+A child whose own minter is the shared bucket `connector:api-key` **is** credited to it — **6 of the 31**
+on demo. Not special-cased, because the **forward fix writes exactly the same value for exactly those
+requests**, and a backfill disagreeing with the live writer would be worse than the known KS-1685 defect.
+
+## NOT run / NOT covered
+- The four platform suites: not run. No endpoint, schema or response-shape change.
+- **Not deployed.** 055 must run before the new originate image serves traffic; the `migrations` image
+  **bakes** the `.sql`. And — your N2's second half — `run-migrations.sh` shows stderr only on failure
+  and the gateway's `pool.query` ignores notices, so **055's per-id skip report will not reach a deploy
+  log**. The direct row check is the only verification, and the PR body says so.
+- **kintsugi UNMEASURED.** Whether Platform S versions documents it did not originate: **UNMEASURABLE**
+  from this project's identity.
+- The 16 certify-derived documents: not touched, not decided.
+- **One failure on this branch, named rather than buried:** `ks1557-verify-trusts` reds 1/16, because this
+  branch does **not** carry #1656's fix (merged separately as `f4259b8ed387`). A grep for the new cell's
+  title here returns **0** — absence of that fix, not a regression from this one. It clears when this
+  branch next meets develop.
