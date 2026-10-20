@@ -1,0 +1,86 @@
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1661 (KS-1558 m4) at 7ecb3257ec69, tier 2 - a survivor earned a cell (R4); the gate's own leg 14 read 23/23 and leg 15 read 106 invariants; both cited tickets are Done
+2026-10-20T01:15:22.000Z
+
+Seat G 12th, lane Secuura/Blockchain-G. Item 6 is READY FOR GATE. **Tier 2** — a developer-facing
+gate script and its tests, no runtime surface.
+
+## THE FIVE ARTEFACTS
+1. **PR #1661** — https://github.com/Secuura/Distributed_Secuura/pull/1661
+2. **HEAD, read from origin in the same action as this sentence:**
+   **`7ecb3257ec69221057b98c4df20d33133451c229`** — 2 files, **+56/-2**.
+3. **TICKET COMMENT:** `3e0b7b38-d1e2-4ab2-a84d-ed8d9f359c96` on KS-1558, 01:14:47Z, 5325 bytes,
+   read back and asserted to carry the head SHA, the 106-invariant line, the R1 caveat, the corrected
+   `+13`, and the sed-delimiter admission.
+4. **TEST EVIDENCE:** in the PR body, written by me.
+5. **NOT COVERED:** its own section, below and in the body.
+
+## THE PREREQUISITE YOU SET — answered, with a caveat you should see
+*"Check those two tickets exist and are the right owners (read them live)."* Read live from Linear:
+- **KS-666** (p2, **Done**) — *Prevent destructive rebuilds of the shared VM stack from destroying
+  another developer's in-progress work*. That is the ticket `check-stack-safety.sh` exists to serve.
+- **KS-687** (p1, **Done**) — *Akto slot targeting: ... **and the stack-safety gate structurally
+  cannot see it** (KS-666 F1+F2)*. Precisely an Akto exception to this gate.
+
+Right owners, both. ⚠ **But both are CLOSED, and the guard cannot distinguish a permanent justified
+exception from one that should have been deleted when its work landed.** It proves an exception is
+**attributable**, not that it is still **needed**. That limit is in the PR body and the ticket
+comment; it is not a blocker and I am not proposing to widen the check.
+
+## A SURVIVOR — and it earned a cell, which is why this took an extra round
+**My arm M1 passed all 21 of the pass's cells.** Widening the predicate from `"${_e#*|}"` (the reason
+half) to `"$_e"` (the whole entry) passes everything, because **no exception PATH carries a
+ticket-shaped token today**. The rule "cite a ticket" could therefore be satisfied by a path merely
+NAMED after one. Latent, not live — which is exactly why it would have sat there.
+
+Two cells in a separate commit (`7ecb3257e`, **+13 lines**): a fixture control, and **R4** asserting
+that a ticket in the PATH does not excuse a reason citing none. **Under M1 the suite reds exactly
+`RED KS-1558 R4`** (22 passed / 1 failed); unmutated **23/23**.
+
+**6 arms, all killed:** pre-fix state → R1 R2 R3 · M1 → R4 (by my cell) · M2 bare `KS-` → R3 ·
+M3 `PS-` dropped → the PS control · M4 the loop removed → R2 R3 · plus the unmutated positive
+control at 23/23. Each anchor count-asserted unique, each parse-checked with `bash -n` (an arm that
+does not parse is INADMISSIBLE, not a result), each restored by content with a sha256 assert.
+
+## THE THING I MOST WANT THE GATE TO READ
+**M4 deletes the guard entirely and R1 STAYS GREEN.** R1 reads the exceptions array out of the file
+with `sed`/`grep`, so it pins the file's **content** (the entries carry tickets); only R2, R3 and R4
+drive the gate and pin its **behaviour**. Anyone citing R1 as proof the guard exists would be wrong.
+That is the KS-1558 family itself — a cell that cannot fail for the reason you think — showing up
+inside the fix for it.
+
+## EVIDENCE
+- Red-first **18 passed / 3 failed** at the untouched tip, equal to the pass's recorded
+  `fail_lines=3 pass_lines=18`; **21/0** with the product hunk; **23/0** with my cells.
+- **The gate read my work back, which beats my own runs:** preflight **leg 14 ran this very suite —
+  `ks1355_slot_blind_launchers: 23 passed, 0 failed`** — and **leg 15 ran the changed gate:
+  `OK — 106 shared-stack safety invariants hold (KS-666)`**, against **105** in all three of my
+  earlier pushes today. The increment is the preflight's own count.
+- **Tree-identity of the two patch copies, verified rather than accepted:** the run's `patch.diff`
+  and the control's differ at **byte 1** (headers only), yet applying each gives byte-identical blobs
+  (`0ccf0db226b8`, `b54512f88c01`), and both differ from baseline so the comparison is not vacuous.
+- `bash -n` rc 0 on both scripts. `check-stack-safety.sh` on the real tree rc 0. Index modes stayed
+  `100755` on both files through every apply.
+- Preflight: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` legs 3 4 8 need a
+  stack. **No `[format-gate]` line printed** — 0 real occurrences in 2475 lines. Push **rc 0**, 636s.
+- Landing on live develop **`0cd3ab851558cc40d8bbfa0858a43498a5d1bc98`**, merge-tree rc 0, 2 files.
+
+## NOT COVERED
+Four platform suites did not run — **and here that is a formality, not a gap:** this changes no
+runtime surface. **No launcher was run against a shared stack** — the cells drive the gate over
+COPIES of itself with entries rewritten, so nothing tracked is touched and no stack starts; what is
+pinned is the gate's judgement, not a real rebuild. The cited tickets' continued necessity is not
+checked. **m1, m2, m3 and m5 of KS-1558 are untouched**, hence `Refs`. No migration or config.
+Nothing deployed, and nothing here is deployable.
+
+## TWO AGAINST MYSELF
+- My first fixture used **`|` as the sed delimiter** on data whose field separator is `|`, so it
+  parsed as `s|PAT|REPL|FLAGS` and **silently rewrote nothing**. **Its own control failed and said
+  so.** Without it, a green R4 over a fixture that never took — the very class this ticket closes.
+- My first PR body claimed **`+59/-2`** and "+16 mine". The measured figures are **`+56/-2`** and
+  **+13**, from `git show --numstat` per commit. Corrected before the ticket comment went out, and
+  reconciled against GitHub's own count.
+
+## NEXT
+**KS-758 on default (b)** — `reason` a bare category in the house style, the identifier left only in
+the existing `logger.info` at `gdprService.ts:1486-1488`; **no merge without your GO** while Kam's
+card is open. Then the **BT1 N1 test-only PR** (X1/X2/X3). #1659 untouched and awaiting BX1.
