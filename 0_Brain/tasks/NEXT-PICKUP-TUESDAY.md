@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 355 — 2026-10-21 08:02 (s132, ctx 64%). **READ THIS FIRST; adds to 354.**
+- **B377 DONE** (19 findings; pane closed; hosted-deploy hold lifted). Blocker + Major are hosted DATA → card `hpsmpoc-hosted-demo-data-cleanup-1021` (rec a; default: nothing changes, **re-raise at 18:00 today**). If Kam rules a/b: a HPSM-POC seat does it through the product as Admin (soft-delete / rename; Withdrawn on the three feedback rows), then re-reads `/workspace` and `/admin/feedback`.
+- **B386 Lane 6 drafter RUNNING** → `tuesday/briefs/2026-10-21_B386_*` (B377's word-free code fixes; pane D17, ports 7460-7469; hard stop 16:00). READ WHOLE, stamp, add to the launch queue. Its WORD PACK (B377-4/-12/-15/-16/-17 and the -18/-19 texts) becomes ONE Kam card with exact before/after.
+
 ## 🟢 DELTA 354 — 2026-10-21 07:53 (s132). **READ THIS FIRST; adds to 353.**
 - **B382 LAUNCHED** (%? `Datasec/HPSM-POC-D14`, rung 5: transcript b06afa43 names B382). **B380 Lane 1 READ WHOLE + STAMPED** (Q1-Q11 answered in its stamp: family extended to Caller.cs + FirstVisitWarmup.cs; undici exact-pinned 7.x; Friday's rolled-back write design confirmed; PORT entry allowed; hard stop 15:00; tier 1) and put at the queue HEAD. Queue now: B380 → B385 → B379 → B381 → B383. status_watch armed (tracked) on B377, B378, B380, B382, B385, B379, B381, B383 STATUS paths (re-arm all at boot). Confirm rung 5 for each new pane as it appears.
 
