@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 346 — 2026-10-21 06:01 50% CHECKPOINT (s131; morning session). **READ THIS FIRST; supersedes 345's LIVE line and 344's B369/B370 lines.**
+- **DONE this seat:** B370 records verified at source (Jira -301/-302 Done, 39852-39854) + hpwin 0 (control 1) → records PR #127 LANDED by merge commit (records main 6a368d9e, tree = branch's). B369 READY verified (PR #166 head 777f29c3, 2 test files, Jira 39855). Sweep 0535 clean. Morning receipt to Kam (bf-49623c32edf2).
+- **LIVE, watchers armed (tracked tasks; RE-ARM at boot):** %166 **B362 Part 3** (NexusAI #101 counts TURN; last line `READY FOR QA:` → verify, re-stamp gate 33 (B359 kit + launcher, DELTA 330 fixes) to H3, launch) · %173 **B371** HPSM-POC PR #166 round-2 tier-2 gate (LAST under the cap) → `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B371_STATUS.md`: **GO/GWF → land #166 by `gh pr merge --squash --match-head-commit 777f29c3` (HPSM-POC convention, #165), then HPSM-POC records for #166 (39845's stale counts Note); NO GO → Kam card with the gate's ≤4-line draft, no round 3.**
+- **DRAFTERS RUNNING (die with this seat; re-commission if files missing):** B372 HPSMPOC-305 → `tuesday/briefs/2026-10-21_B372_*` (pane HPSM-POC-D11, ports 7380-7389) · B373 MPS 289/292 → `_B373_*` (pane MPS-W23) · B374 NexusAI RD-780 → `_B374_*` (pane NexusAI-R12; must not touch #101's files/counts). Each: READ WHOLE, answer the report's questions, stamp by program, launch at load1 < 7 via a tracked waiter.
+- **HELD:** RD-877/-878 until #101 lands · RD-814 (deploy workflow perms) · Composer lanes · Vision. **OWED:** NexusAI records PR #102 (C-190 FF via a NexusAI seat) · status_watch.sh lacks `DEPLOYED:`/`ROLLED BACK:` (fix at a quiet boundary) · Composer card `composer-pr85-round2-nogo-one-line-1021` open.
+
 ## 🟢 DELTA 345 — 2026-10-21 05:31 BOOT CHECKPOINT (s131, ctx 41% after the brain load). **READ THIS FIRST, then 344 (stands except where updated).**
 - **LIVE unchanged:** %166 B362 Part 3 · %171 B369 · %172 B370 (all working, panes read 05:30). Watchers re-armed as tracked tasks (B369/B370 status_watch; B362 by a `READY FOR QA:`/STOP tail loop — status_watch fires at once on B362's Part 2 `RECORDS DONE:` line, so do NOT use it for B362).
 - **Sweep drafter RUNNING** (Sonnet, read-only; dies with this seat): `0_Brain/projects_index/2026-10-21_rotation-sweep-0535.md`. If missing at a successor's boot, re-commission from the 0115 file's shape.
