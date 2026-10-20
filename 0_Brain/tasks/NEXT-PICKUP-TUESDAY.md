@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 361 — 2026-10-21 09:06 (s132, ctx 75%). **READ THIS FIRST; adds to 360.**
+- **B381 DONE → HPSM-POC PR #169 OPEN** (head bcff3e46; formGate.ts product + mock + tests; -289 mirrored by DISTINCT names per M1). Pane closed. **B389 tier-1 Opus gate drafter RUNNING** → `tuesday/briefs/2026-10-21_B389_*` (pane G18, ports 7480-7489): READ WHOLE, stamp (head bcff3e46, main by ls-remote), launch at load1<7; GO/GWF → `gh pr merge 169 --squash --match-head-commit bcff3e46992738aba35f2832d195b12c436f18cb`, then hosted deploy (push-to-demo grant) with #168 and Lane 1/6 when they land, before 23:59.
+- **Merge ORDER on HPSM-POC main (all squash, re-read mergeable before each):** whichever gate passes first; each later PR re-reads `mergeable` (disjoint files, no forward-merge expected).
+
 ## 🟢 DELTA 360 — 2026-10-21 09:05 (s132, ctx ~75%). **READ THIS FIRST; adds to 359.**
 - **B379 DONE** (MPS PR #93 head now **acff5820**, tests+docs only, verified; pane closed). **B388 round-2 tier-1 gate drafter RUNNING** → `tuesday/briefs/2026-10-21_B388_*` (pane `MPS-G32`, Opus): READ WHOLE, stamp (head acff5820, main 1eccbc8b), launch at load1<7. **LAST under the cap:** NO GO → a Kam card from the gate's ≤4-line draft; GO/GWF → `gh pr merge 93 --squash --match-head-commit acff5820bc3704ac66ebddc67e5e10e9332bab93`, then MPS records (MPS hosted is card-per-deploy: no deploy).
 
