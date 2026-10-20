@@ -7,6 +7,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ---
 
 ## 🟢 DELTA 364 — 2026-10-21 10:28 70% CHECKPOINT (s133). **READ THIS FIRST; supersedes 363 and its UPDATE lines (they stay below as history).**
+- **UPDATE 10:33:** B396 STAMPED + LAUNCHED (%197 G22, delta gate on #175 head 89bdb18e). B397 STAMPED (10:32:30; statement-split normaliser accepted) and launching via a tracked waiter (pane `Datasec/HPSM-POC-D19`; if absent at boot, launch with its brief's line). Watchers on B393, B394, B396, B397 + the #169 CI waiter.
 - **LANDED this seat (all verified at source, tree = gated head's):** HPSM-POC **#168** (main 54fbceac -> d76200d8) · **#172** vite 8.3.4 lockfile (-> **3aeeacc5**, lock blob baf8bebc = gated head's) · NexusAI **#104** by C-190 FF (main **c139e4a8**, Deploy demo push run SKIPPED) · MPS **#93** (main **f5b6f5a7**, not deployed).
 - **HPSM-POC open PRs and their next step:**
   - **#169** (B381 form guard; B389 GWF) — branch updated with main by Tuesday (head **475870f5**, delta = main's 4 files only). A tracked waiter (scratchpad `waitci.sh`, dies with the seat) reads its CI; on all-green -> `gh pr merge 169 --squash --match-head-commit 475870f5…` (the gate's verdict stands: disjoint delta). If CI shows ONLY the known reds (SQL Server `AutomationRouteTests` EF migrations-lock, `RequestTimingLogTests` flake: both red on main) decide on required contexts: `api on SQL Server` is not required (B391 read the protection list); land if every REQUIRED context is green.
