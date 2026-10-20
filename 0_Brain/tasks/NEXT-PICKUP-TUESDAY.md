@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 292 — 2026-10-20 13:08 CHECKPOINT (s124, ctx 70%; band 80-90). **READ THIS FIRST, then 291 (stands except where updated here).**
+- **LIVE:** %119 B318 gate MPS #85 (Opus, verified rung 6), %120 B319 gate MPS #86 (Sonnet, launched 13:04), %118 B310, %116 B312, %56 S101O (RD-863). Watchers (die at rotation, RE-ARM): B310, B312, B318, B319 STATUS.
+- **READY TO LAUNCH at load1 < 7, in this order** (each brief READ WHOLE + stamped by s124, .pre-stamp kept, slots 0):
+  1. **Gate 30 (B317, NexusAI #98, Sonnet):** `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add 'QA/NexusAI-gate30' "bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_nexusai_gate30.sh'"` (with WED_USAGE_STOP=100; `--check` rc 0 at 13:06; routing line added). Re-run `--check` first (main pin 39653db4).
+  2. **B321 Composer L0 records (Sonnet)** — RULED: B321 folds records/b301 itself (new Step 0b, B298 method); launch line inside the brief.
+  3. **B322 Composer L3-1 (Sonnet, migration 0022)** — launch line inside; tier-1 gate after its READY.
+  4. **B320 gate Composer #82 (Sonnet)** — its hog rows only when no MPS build is mid-flight (R-W10-6).
+  5. **B323 Composer L6-a PDF TOC — NOT YET READ by s124** (`tuesday/briefs/2026-10-20_B323_SEAT-W13_composer-sro-vic-L6a-pdf-toc.md`, slots DEFAULT_FIRED_AT = "2026-10-20 12:56 AEDT (Tuesday s124; panel bf-795df6fd5e54)", STAMP_TIME); drafter report `_B321-323_DRAFTER-REPORT.md` Q10: launch ~15 min after B322 so image builds do not overlap.
+- **Gate 29 amend drafter (PR #97 re-pin to 278afc25) still running** (subagent dies at rotation: if `fleet/qa-agent/briefs/2026-10-20_nexusai-gate29_AMEND-REPORT.md` is missing at the successor's boot, re-commission). Gate 29 also needs its routing line `QA/NexusAI-gate29|tuesday-agent@agentmail.to|no` (absent) at launch.
+- Sweep lanes 12, 13, 16 (Composer) stay UNLAUNCHED while B322/B323 run (shared migration number, DEPLOY.md, renderers).
+
 ## 🟢 DELTA 291 — 2026-10-20 12:5x CHECKPOINT (s124, ctx 55%; band 80-90). **READ THIS FIRST. Supersedes 290 wholly and 289's FIRST WORK 1-4.**
 ### DONE since 290 (verified at source)
 - **B309** verified (b451239b, 9 ahead/0 behind main acfcf5de, 28 paths = Yours + Proposal.cs ANSWER-1 + EntraAuthTests row); pane %112 closed; **PR datasecau/MPS-Commercial-Calculator#85** opened.
