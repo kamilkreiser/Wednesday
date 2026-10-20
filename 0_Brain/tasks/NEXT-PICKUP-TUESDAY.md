@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 287 — 2026-10-20 11:2x CHECKPOINT (s123, ctx 70%; band 80-90). **READ THIS FIRST. Supersedes 286's IN FLIGHT line; 286 otherwise stands.**
+- **B315 LIVE %114** `Datasec/HPSM-POC-R10` (Sonnet records: C-123 3308/3309 ruling + #164 merge facts, 3 Jira comments, tickets T1 (B304-1+4) and T2 (B304-3), records/b315 pushed for Tuesday). On RECORDS DONE: Tuesday runs the **HP-window scan** (`tuesday/tools/hpwin.py --control`, HPWIN_SRC per B293's note in DELTA 273) over every path on records/b315 from the pushed branch, then opens the records PR and lands it on green. R-R10-1 = no Done yet: **after B316 is DEPLOYED and verified, a later records step moves HPSMPOC-298/-299/-300 to Done.**
+- **B316 LIVE %115** `Datasec/HPSM-POC-F8` (Opus hosted deploy of main c149a303 over befd45e; waits for ci 39346182958; 5A/5B boots before the switch; way back = befd45e packages, run 39121815810, expire 2026-10-25). On DEPLOYED: verify at source (live-check lines, build id, health), panel Kam the receipt (push-to-demo grant: report after). On ROLLED BACK/STOPPED: card Kam.
+- **PR #98 (NexusAI)** opened by Tuesday as DRAFT for B302 part 1 (8bb6c339) so CodeQL scans it.
+- Watchers: B301, B302, B309, B314, B315, B316 + load waiter (<7 -> launch B310, B312, B313 by their own Launch lines).
+- FLOOR 11:2x: %0, %1, %56, %105, %107, %112, %113, %114, %115. Gauge 86%.
+
 ## 🟢 DELTA 286 — 2026-10-20 11:1x CHECKPOINT (s123, ctx 65%; band 80-90). **READ THIS FIRST. Supersedes 285's B306/B308/B305/B304 lines; 285's grant + B309-B313 lines stand except where updated.**
 - **DONE + VERIFIED AT SOURCE:** B306 SM open to internet (sign-in kept; NSG rule + Windows FW rule 7637; Kam forwarded to Paul 10:40). B308 MPS records (root main faf2695, C-44/C-45, 56/8/2 tickets, map `Registers/2026-10-20_v13-ticket-map.md`; card delivered). **MPS PR #84 MERGED** (main acfcf5de; gate B305 GO/GOWF/GOWF; Minors B305-1..4 OWED to a records seat; 11 NEW WORDS owed to the next MPS hosted-deploy card). **HPSM-POC PR #164 MERGED** (main c149a303; gate B304; Minors B304-1 (new at head), -3, -4).
 - **LIVE:** **%112 B309** MPS V0 contract (Sonnet; ANSWER-1 file pointer: YES to 4 NotShown lines in Proposal.cs). **%113 B314** Composer SRO_VIC gap analysis (Opus, read-only; Kam 11:01:47 instruction; inputs `tuesday/inbound/2026-10-20_composer-paul-feedback/`). %56 S101O PR #97 (ANSWER-28: CodeQL #273 fix in code), %105 B302, %107 B301. Watchers: B301, B302, B309, B314 + load waiter (<7).
