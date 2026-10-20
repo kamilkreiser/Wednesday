@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 338 — 2026-10-21 04:05 50% CHECKPOINT (s130). **READ THIS FIRST; supersedes 337's LIVE line.**
+- **LIVE (tmux 04:05), RE-ARM status_watch on each STATUS at boot (Datasec root `/Volumes/Laptop-DEV/!CODING/Datasec/`):**
+  - %161 **B358** Composer #85 round-2 gate (Opus) → `Datasec Security Composer/1_Project_Definition/Briefs/2026-10-21_B358_STATUS.md` (per 336: GO/GWF → apply PR85-TEXT and HOLD; NO GO → Kam card).
+  - %163 **B361** MPS 304/305 test-only → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B361_STATUS.md` (READY → verify, PR non-draft, tier-2 Sonnet gate).
+  - %164 **B363** HPSM-POC records for #165 → `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B363_STATUS.md` (last line `RECORDS COMMITTED:` on `records/b363`; then Tuesday runs hpwin.py over the branch, opens the records PR, lands through CodeQL; R-R14-1 (b), C-127).
+  - %165 **B364** HPSM-POC 294/295 test-only → `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B364_STATUS.md` (READY → verify, PR non-draft, tier-2 gate).
+- **DRAFTER RUNNING:** B362 NexusAI #97 landing + records + #101 TURN (see 337); if missing at boot, re-commission.
+- OWED after B363: hosted HPSM-POC deploy decision for main 6818896b (no runbook file; B316 brief + STATUS is the pattern; needs its own C6 Opus brief under the push-to-demo grant).
+- Kam silent since 18:57 (10-20). No card filed.
+
 ## 🟢 DELTA 337 — 2026-10-21 03:56 BOOT CHECKPOINT (s130, ctx 39% after the brain load). **READ THIS FIRST, then 336 (stands except where updated).**
 - **LIVE:** %161 **B358** Composer #85 round-2 gate (Opus; status_watch re-armed) · %163 **B361** MPS MPSCALC-304/-305 test-only build (Sonnet C2; launched 03:56, stamped main f78c6408; status_watch armed on `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B361_STATUS.md`). On B361 READY: verify at source (ls-remote, compare main...H, only the 2-3 test files), open PR NON-draft, then a tier-2 Sonnet gate (G2).
 - **DRAFTERS RUNNING (Agent tool, Sonnet; die with this seat — if a file is missing at the successor's boot, re-commission):** B362 → `tuesday/briefs/2026-10-21_B362_SEAT-W22_nexusai-pr97-landing-records-pr101-turn.md` + `_B362_DRAFTER-REPORT.md` (Part 1 land #97 by C-190 + gate 29 checklist; Part 2 NexusAI records; Part 3 #101 counts-only TURN). B363 → `tuesday/briefs/2026-10-21_B363_SEAT-R14_hpsmpoc-records-pr165.md` + `_B363_DRAFTER-REPORT.md` (records + HOSTED DEPLOY FACTS for the push-to-demo decision). READ WHOLE, stamp, launch at load1 < 7.
