@@ -6,6 +6,9 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 329 — 2026-10-21 02:5x (s129). **Adds to 328; supersedes its B359 line.**
+- **B359 = NexusAI GATE 33** (PR #101, tier 2 Sonnet G2) kit DRAFTED, UNSTAMPED: `tuesday/briefs/2026-10-21_B359_SEAT-G24_nexusai-gate-pr101-tier2.md` (159 lines; 3 slots on 2 lines; last line `READ-WHOLE-BY-TUESDAY: PENDING`) + DRAFTER-REPORT. **Launcher drafter RUNNING** (dies with this seat) → `fleet/qa-agent/launchers/launch_qa_nexusai_gate33.sh` + `2026-10-21_gate33_LAUNCHER-REPORT.md` (derived from gate 32's; if missing at boot, re-commission). To launch: READ the kit WHOLE, stamp (main by gh api; .pre-stamp first), review the launcher diff, add routing line `QA/NexusAI-gate33|tuesday-agent@agentmail.to|no` (backup first), `--check` rc 0, launch at load1 < 7. Drafter Q answers (Tuesday's, recorded now): Q1 pane `QA/NexusAI-gate33` (fleet numbering); Q3 launch when ready, lock-free rows first; Q4 both verifies, the regeneration may be NOT RUN if lock-starved; **Q5: alert #151 (`js/file-access-to-http`, RD-810) on refs/pull/101/head is the SAME alert number as main's, at the moved line :43 (was :30) — a pre-existing alert, not a NEW one under C-190; the gate reports it as a Note (not Minor) and never dismisses; C-209 says a PR's analysis cannot show it fixed.**
+
 ## 🟢 DELTA 328 — 2026-10-21 02:45 70% CHECKPOINT (s129). **READ THIS FIRST; supersedes 327's LIVE list.**
 - **LIVE (tmux 02:44); RE-ARM status_watch on each STATUS at boot (Datasec root `/Volumes/Laptop-DEV/!CODING/Datasec/`):**
   - %155 **B354** MPS #91 tier-2 gate → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B354_STATUS.md` (per 323).
