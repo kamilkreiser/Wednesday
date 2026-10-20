@@ -41934,7 +41934,7 @@
   "id": "secuura-ks758-erasure-log-subject-ref-1020",
   "client_project": "Secuura/Blockchain",
   "title": "KS-758: should the erasure log keep the erased person's reference?",
-  "bluf": "When Platform S erases someone K cannot match to a user, KS-758 writes an audit row in the erasure log. Seat G found every other erasure row records only the reason category (18 of 18) and identifies the person through a user column, which is empty on this path. Should this row carry the person's external reference (a personal identifier) so it can later prove that person was erased? The reference is already in the ordinary app logs; the row would keep it for good. Nothing is built yet; Seat G builds the default now and changes one line if you pick otherwise. (Override of the prior-ruling gate: it matched only the date word '1020'; the ruled Secuura erasure cards KS-695, KS-843 and KS-1187 decide scope and response shape, none decides what the audit row records.)",
+  "bluf": "When Platform S erases someone K cannot match to a user, KS-758 writes an audit row in the erasure log. Seat G found every other erasure row records only the reason category (18 of 18) and identifies the person through a user column, which is empty on this path. Should this row carry the person's external reference (a personal identifier) so it can later prove that person was erased? The reference is already in the ordinary app logs; the row would keep it for good. Nothing is built yet; Seat G builds the default now and changes one line if you pick otherwise. (Override of the prior-ruling gate: it matched only the date word '1020'; the ruled Secuura erasure cards KS-695, KS-843 and KS-1187 decide scope and response shape, none decides what the audit row records.) NEW 13:3x (Seat G 13th, read from source, not driven on a real database): the erasure log is shown on an administrator screen, GET /api/gdpr/deletion-log (system or organisation administrators), and with no user filter it returns the latest 100 rows of a table that has no tenant column, so an organisation administrator in any tenant could read every tenant's rows. If that holds, option (a) would put a Platform S person's reference in front of administrators of other tenants; it does not change what (b) or (c) cost. That read gap is being ticketed separately and is not part of this decision.",
   "default_action": "If you don't answer: Seat G ships (b), category only, and the reference stays only in the rotating app logs. Changing to (c) or (a) later is a one-line change before merge.",
   "options": [
    {
@@ -41980,7 +41980,20 @@
    "CARD mpscalc-v13-gap-15-decisions-1020",
    "CARD secuura-ks1688-ask-stuart-platform-s-version-1020",
    "CARD secuura-ks1688-org-merge-edge-which-side-1020"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-10-20T13:28:10.881053+11:00",
+    "reason": "Seat G 13th found, while building (b), that the erasure log is returned by an administrator route with no tenant filter (source-read); it is evidence for the choice and Kam should have it before ruling. Recommendation (c) unchanged.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "When Platform S erases someone K cannot match to a user, KS-758 writes an audit row in the erasure log. Seat G found every other erasure row records only the reason category (18 of 18) and identifies the person through a user column, which is empty on this path. Should this row carry the person's external reference (a personal identifier) so it can later prove that person was erased? The reference is already in the ordinary app logs; the row would keep it for good. Nothing is built yet; Seat G builds the default now and changes one line if you pick otherwise. (Override of the prior-ruling gate: it matched only the date word '1020'; the ruled Secuura erasure cards KS-695, KS-843 and KS-1187 decide scope and response shape, none decides what the audit row records.)"
+    }
+   }
+  ],
+  "amended_ts": "2026-10-20T13:28:10.881077+11:00"
  },
  {
   "id": "secuura-ks1557-055-second-nogo-round3-1020",
@@ -42113,5 +42126,77 @@
    "CARD secuura-ks1688-ask-stuart-platform-s-version-1020",
    "CARD secuura-ks1688-org-merge-edge-which-side-1020"
   ]
+ },
+ {
+  "id": "secuura-ks1695-ownerless-records-who-reads-1020",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1695: records with no named owner. Who in the tenant should be able to open them?",
+  "bluf": "Two gaps, both found by testing, neither new. (1) Any signed-in user in a tenant, in ANY organisation in that tenant, can open any certification there by its id, including certifications the documents page already hides from them. (2) Documents that have no recorded owner can be opened by anyone in the tenant, any organisation. NEW since this card was filed (Stuart, KS-1695 comment, reported from Platform S's code, not measured by us): EVERY Platform S document is in this class, so any same-tenant user who holds an S document's id can read its file name, hash and the uploader's identity block; S sends the creating person's details on every create, so a creation record naming S's connector exists for them in the normal case, which means keeping S working does NOT require leaving the records open; and S never reads certifications by id, so fix (1) costs S nothing. His stated preference is to restrict reads to administrators plus the creating connector, after PR 1654 lands (that PR gives S's new versions their creation record). We fix (1) now with the rule the certification list already uses (issuer, holder, platform administrator). (2) needs your word. Not yet counted: how many such records sit on demo and kintsugi, and how many have no creation record. Plan: 0_Brain/reference/2026-10-20_plan-KS1695-read-gaps/PLAN.md",
+  "default_action": "If you don't answer: (c). The certification fix ships, because it applies a rule we already use and S never calls that route. Owner-less records stay as they are until PR 1654 lands and the counts are taken, because tightening them earlier would strand S's new versions.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Tenant administrators and Platform S's connectors",
+    "detail": "A normal user in another organisation can no longer open these records, and neither can an issuer-admin. An organisation administrator anywhere in that tenant still can. Platform S keeps working. From now on we also record which connector created each record, so new ones can later be limited to their creator."
+   },
+   {
+    "key": "b",
+    "label": "Platform S's connectors and platform administrators only",
+    "detail": "Only the connector that created a record, plus platform administrators, can open these records. No person in the tenant can, administrators included, unless they are a platform administrator. This is Stuart's stated preference. Platform S keeps working for records it created in the normal case; records with no creation record (older bare ones, and S records created with no person attached) become unreadable to S too, and S's new versions need PR 1654 first."
+   },
+   {
+    "key": "c",
+    "label": "Leave them as they are for now",
+    "detail": "Every signed-in user in the tenant, in every organisation, can still open these records. Only the certification fix ships."
+   },
+   {
+    "key": "d",
+    "label": "Nobody except platform administrators",
+    "detail": "Nobody except platform administrators. Tightest. Platform S can no longer read its own documents through this route, including the ones it created, so this is the one option that does cut S off."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-20T13:07:31.025331+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-13 16:55",
+   "CARD secuura-ks1187-erasure-door-reads-back",
+   "CARD where-should-project-decision-records-live",
+   "CARD secuura-m365-admin-setup-for-customer-org-1020",
+   "CARD datasec-80pct-band-build-lanes-1020",
+   "CARD secuura-demo-deploy-ks695-uatps-precondition-1020",
+   "CARD secuura-demo-smoke-provisioning-key-unbounded-1020",
+   "CARD secuura-ks1116-null-owner-who-reads-1020",
+   "CARD secuura-demo-smoke-key-revoke-after-measure-1020",
+   "CARD secuura-ks1677-entra-redirect-uri-registration-1020",
+   "CARD hpsmpoc-sm-access-for-paul-1020",
+   "CARD hpsmpoc-sm-open-without-ip-1020",
+   "CARD mpscalc-v13-gap-15-decisions-1020",
+   "CARD secuura-ks1688-ask-stuart-platform-s-version-1020",
+   "CARD secuura-ks1688-org-merge-edge-which-side-1020"
+  ],
+  "amendments": [
+   {
+    "ts": "2026-10-20T13:11:56.417405+11:00",
+    "reason": "Stuart commented on KS-1695 at 02:10Z (13:10 AEDT) after the card was filed: Platform S's own documents are all owner-less, S sends the creating person's details on every connector create so a creation record exists in the normal case, and S never reads certifications by id. That changes what options (b) and (d) cost and which one fits; reported by Stuart from S's code, not measured by us.",
+    "changed": [
+     "bluf",
+     "recommended",
+     "default_action",
+     "option:b",
+     "option:d"
+    ],
+    "before": {
+     "bluf": "Two gaps, both found by testing, neither new. (1) Any signed-in user in a tenant, in ANY organisation in that tenant, can open any certification there by its id, including certifications the documents page already hides from them. (2) Documents that Platform S's connector creates without naming a person have no recorded owner, so anyone in the tenant, any organisation, can open those too. We fix (1) now by applying the rule the certification list already uses (issuer, holder, platform administrator); the issuing connector keeps access. (2) needs your word: nothing records which connector created those documents, so 'only the creator' cannot be built for them and someone has to stand in for the missing owner. Your 20 Oct answer for presentations and credentials ('tenant administrators') is the nearest precedent, but here it would also let an administrator of a DIFFERENT organisation in the same tenant open them, which was not true there. How many such records exist on demo and kintsugi has not yet been counted. Plan: 0_Brain/reference/2026-10-20_plan-KS1695-read-gaps/PLAN.md.",
+     "recommended": "a",
+     "default_action": "If you don't answer: (c). The certification fix ships, because it applies a rule we already use. Owner-less records stay as they are, because tightening them without your word could cut off Platform S.",
+     "option:b": "No person in the tenant can open these records, administrators included, unless they are a platform administrator. Platform S keeps working. Another organisation's connector in the same tenant could still open them.",
+     "option:d": "Tightest. Platform S loses access to the documents it created and can no longer manage them."
+    }
+   }
+  ],
+  "amended_ts": "2026-10-20T13:11:56.417434+11:00"
  }
 ]
