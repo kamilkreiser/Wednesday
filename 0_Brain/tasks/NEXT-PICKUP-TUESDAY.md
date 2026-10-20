@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 348 — 2026-10-21 06:4x (s131, ctx 66% light checkpoint). **READ THIS FIRST; supersedes 347's LIVE line (347's B362 rulings and gate-33 FIRST WORK stand).**
+- **DONE since 347:** B372 → **HPSM-POC PR #167** opened (test-only, HPSMPOC-305; verified at source) · B374 → **NexusAI PR #103** opened (RD-780, 2 regex lines; verified; per C-209 the PR scan cannot show #244/#245 fixed — read their closure on main AFTER landing; on the PR: no new alert in the file) · B373 → **MPS PR #93** opened (MPSCALC-289, CopyRef only + tests + one docs line; verified). Panes %174 %175 %176 closed.
+- **LIVE (watchers armed):** %173 **B371** (#166 round 2 of 2, LAST: GO/GWF → land squash --match-head-commit 777f29c3; NO GO → Kam card) · %177 **B375** (#167 tier-2 gate round 1; GO/GWF → land squash --match-head-commit 91cbbcb1; then HPSM-POC records for #166 + #167 together).
+- **WAITING:** CodeQL waiter on PR #103 (tracked task; dies with this seat: if lost, re-read check-runs at 138b78eb + open alerts on refs/pull/103/head for the file). **B376 tier-1 Opus gate drafter** for MPS PR #93 → `tuesday/briefs/2026-10-21_B376_*` (READ WHOLE, stamp, launch at load1 < 7; pane Datasec/MPS-G31; BRIEF_SEAT_LEVEL=opus).
+- **OWED:** a tier-2 through-code gate for PR #103 (light: equivalence + CodeQL no-new + counts untouched), then land by C-190 FF via a NexusAI seat (fold with #102's FF) · gate 33 (DELTA 347 FIRST WORK) · MPSCALC-292 decision · status_watch markers.
+
 ## 🟢 DELTA 347 — 2026-10-21 06:3x (s131, ctx ~61%). **READ THIS FIRST; supersedes 346's LIVE/DRAFTERS lines and every earlier B362/gate-33 line.**
 - **B362 ENDED `STOPPED: NEEDS TUESDAY`** (Parts 1-2 done and verified; Part 3 pushed **H3 = `48a17df83847c87d47625611eb3775be259b5362`** on PR #101's branch, counts 4971/305, local verify PASS; pane closed, no process). **TUESDAY'S RULINGS (s131, 06:1x-06:3x; carry them into gate 33's kit as RULED BY TUESDAY):**
   1. **CodeQL #151 = NOT NEW → acceptable for #101's landing.** MEASURED: alerts API, #151 `js/file-access-to-http`, medium, OPEN ON MAIN since 2026-09-28 at `tests/uat-run.js:30`; RD-875's refactor moved it to `:43` on the PR ref; C-209 bars only NEW high/error alerts; RD-810 tracks it.
