@@ -9,12 +9,12 @@ Template: gate 30's kit `2026-10-20_B317_SEAT-G13_nexusai-gate-pr98-tier2.md` (r
 **THE RE-PIN STEP: the MAIN pin is what Tuesday STAMPS at launch, never a prediction.** At drafting main = `39653db4b56adb6d4e526c90531cd4cdf23022e0` (`git ls-remote origin`, 14:01:26 AEDT, rc 0, first attempt); `refs/heads/rd-863-group-nouns-s101o` = `refs/pull/99/head` = `172d321f…` (same call). The launcher derives M0's tree and what landed since `39653db4` from the stamped sha, and refuses unless origin main equals it exactly, `39653db4` is in its ancestry (is-ancestor, never `--first-parent`) and `172d321` is NOT on it. **If main moved (T0):** the likeliest movers are **PR #97** (S101O, RD-774/RD-836, head now `278afc2`, gated by gate 29) and **PR #98** (gate 30, live). **#97 touches `backend/server.js` AND `scripts/verify-expected-counts.json`** (MEASURED, `gh api pulls/97/files`); a legacy stdout-only `merge-tree 39653db4 278afc2 172d321` shows `server.js` merging WITHOUT a conflict marker and the counts file CONFLICTING (MEASURED, `.git/objects` 268 files before = after). So a land of #97 first means #99 needs a counts-only forward merge = a NEW head = a NEW kit (the launcher refuses). #98 shares no path with #99 (MEASURED, 0 of 3).
 
 MODEL (tier 2; routing v1.0 row G2, Sonnet column; read the id from `0_Brain/dashboard/data/models_latest.json` `levels.sonnet.model_id` and require it equal to this line; **that file is outside the drafter's read fence: the value is RELAYED from gate 30's stamped self-check note "claude-sonnet-5-5, read 13:0x"; the launcher re-reads the file**): claude-sonnet-5-5
-MAIN-STAMP: sha @SLOT:MAIN_SHA@ | launched @SLOT:LAUNCH_TIME@
+MAIN-STAMP: sha 39653db4b56adb6d4e526c90531cd4cdf23022e0 | launched 2026-10-20 14:22 AEDT
 
 <!-- PIN-HEADS:BEGIN -->
 | id | repo | branch | head | base | commits | status |
 |---|---|---|---|---|---|---|
-| MAIN | nexusai | main | @SLOT:MAIN_SHA@ | - | - | IN |
+| MAIN | nexusai | main | 39653db4b56adb6d4e526c90531cd4cdf23022e0 | - | - | IN |
 | RD863 | nexusai | rd-863-group-nouns-s101o | 172d321f375774ff834151f4a0ca3b79f24fd05b | 39653db4b56adb6d4e526c90531cd4cdf23022e0 | 1 | IN |
 <!-- PIN-HEADS:END -->
 

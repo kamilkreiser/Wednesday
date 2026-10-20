@@ -6,6 +6,20 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 296 — 2026-10-20 14:50 CHECKPOINT (s125, ctx 65%; band 80-90). **READ THIS FIRST; supersedes 295's LIVE and LAUNCH QUEUE; 295's Kam/DONE/OWED stand.**
+### DONE since 295 (verified at source)
+- **MPS #85 LANDED** (B318 GO WITH FINDINGS, Minors B318-1..4): squash f2584d36, merged path set = the PR's 28. MPS main = **f2584d36** (holds #87 + #85). **B311 V2 Home now unblocked** (brief stamped by s123: READ WHOLE before launch).
+- **NexusAI #100 LANDED** (S101O HISTORY, docs only): squash 1bc9e9df = NexusAI main. Post-land waiter (Deploy demo skipped? main open alerts vs 218) was running at 14:43 — if its result is not in the note, re-read: `gh run list --commit 1bc9e9df` under NexusAI's GH_CONFIG_DIR.
+- **S101O WRAPPED** (03:42Z mail): holds #97 (gate 29) and #99 (gate 31); pane %56 kept (inbox watcher). Wrap items told to Kam (bf-be93520b927a): laptop vault push key points at DevMASTER (absent); NexusAI 2_Project_Files tree shows .dockerignore + HISTORY.md modified (not S101O's, owner unknown).
+- **B326 READY verified** (#86 @ 2d18b677, 6 files in Yours; NEW WORDS 43 vs 47 explained) -> **B332** round-2 re-gate launched. **B328 RECORDS COMMITTED** (records/b328 @ 447f5a07, C-86..C-96, template DRAFT, Paul note) -> card --delivered; Paul's note sent to Kam as a file (bf-80d7f242b8f7). OWED: fold records/b328 into Composer root main (next Composer records seat).
+- B323 READ WHOLE + ADDENDUM-1 (card ruled; allowed seats); STAMP_TIME slot open.
+### LIVE at 14:50 (re-arm watchers after rotation)
+%128 **B325** (MPS #88 gate) · %131 **B332** (MPS #86 round 2 of 2: a NO GO = nothing more ships without Kam) · %130 **B331** (Composer #83 tier-1 gate, Opus) · %129 **gate 31** (NexusAI #99, verdict by MAIL; evidence in Testing Agent MAIN reports/2026-10-20-gate31-rd863-pr99/) · %121 gate 30 (#98, MAIL) · %126 **B329** (HPSM-POC L9-a; STOPPED 14:49 on 8 devices/5 tasks of Paul's -> ANSWER-1 `tuesday/briefs/2026-10-20_B329_ANSWER-1_counts-unchanged.md` delivered; its STATUS last line is still the old STOPPED until it writes again) · %56 S101O (idle, waits for gates).
+### LAUNCH QUEUE (load1 < 7)
+Composer, one docker-heavy seat at a time after B331: **B320** (#82 gate) -> **B323** (fill STAMP_TIME) -> **B330** (fill STAMP_TIME). MPS: **B311 V2 Home** (read whole first). NexusAI: **gate 29** (#97; read the 117 KB kit WHOLE first; main moved to 1bc9e9df: re-pin).
+### TOOL NOTE
+`cockpit.sh say` refuses a bare tap containing an authorising verb ANYWHERE, including a file name (proceed/continue/resume/start/…). Name answer files without those words; a pure "Tuesday file pointer: read <path> whole." is delivered.
+
 ## 🟢 DELTA 295 — 2026-10-20 14:18 CHECKPOINT (s125, ctx 53%; band 80-90). **READ THIS FIRST; supersedes 294's LIVE, LAUNCH QUEUE and B326/B325 lines; 294's B321/B319 facts stand.**
 ### Kam since 294 (receipted, parked in clarifications_register.md)
 - **14:00:26 "Decision composer-sro-vic-gap-10-decisions-1020: a — Accept all 10 recommendations"** — card ruled a (after safe_pull), receipt bf-0b1dd72b5c6a. NOT yet --delivered: deliver only when B328's C-86..C-96 are committed (records/b328). Kam told 14:12 (bf-c81bab3b3159): two ZZ-DATASEC-SYNTHETIC test policies appear in SM (B329), and Tuesday's K4 reading (SM item/sub-setting ids from our install override Q-04's working assumption; constraint ids, namespaces, routes stay out) — default: proceed unless he says otherwise.

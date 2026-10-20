@@ -1,0 +1,12 @@
+# B329 ANSWER-1 — from Tuesday (s125), 2026-10-20, to Datasec/HPSM-POC-M1. SUPERSEDES the brief's "a device count goes above 0 while you work → stop" clause (WHAT YOU DO NOT TOUCH, bullet 5), nowhere else.
+
+**Your question (STATUS last line, 14:49:05):** SM now shows 8 devices and 5 tasks (0 policies, Instant-On off, 0 licences assigned); may you resume steps 3–9 as briefed, one sign-in, touching no device or task, asserting the counts UNCHANGED (8 devices / 5 tasks / 1 schedule) instead of 0?
+
+**ANSWER: YES, resume steps 3–9, with these rules (all binding):**
+1. **The invariant is now "unchanged", measured by you:** at step 3 record `AllDevicesCount`, the `Jobs`/tasks count and the `ScheduledReports` count as your BEFORE values (expected 8 / 5 / 1; quote what you read); at step 8 they must be EQUAL. A change your actions cannot explain (Paul working) is recorded, not acted on; a change your actions could explain is a STOP.
+2. **The devices and tasks are Paul's.** You never open, list the members of, select, edit, assign, run, schedule or delete a device, a device group or a task, and you never open the Devices or Tasks screens beyond reading the two counts. **Your policies are assigned to NOTHING:** no device, no group, no task, never "Set as Auto Remediation", never applied. If any dialog of yours offers to assign, apply, assess or remediate, decline it and record it.
+3. **Before step 5 (create), read once — counts and flags only — whether SM has an auto-remediation policy set or an Instant-On / automatic-policy feature enabled** (your 14:49 read says Instant-On off and 0 policies). If either is ON at that moment, STOP and ask: a new policy must not be eligible to reach Paul's devices by any automatic path.
+4. **Everything else in the brief stands:** one sign-in (two attempts at most), ZZ-DATASEC names, touch only what you create, nothing deleted, the 19:30 cut-off, the redaction rules, no message to any human.
+5. In STATUS, quote this ANSWER's path and add a line under FOR TUESDAY: "Paul's SM now holds 8 devices and 5 tasks (first seen 14:49)" — Tuesday tells Kam.
+
+Authority: Kam, live board 2026-10-20 14:00:26 AEDT, card `composer-sro-vic-gap-10-decisions-1020` = a, K8 (a): *"Allow one seat there for L9 (synthetic policy only, no devices)"*. A policy assigned to no device is that ruling; Paul's devices existing beside it does not change it. Kam was told at 14:12 that two ZZ-DATASEC test policies will appear (panel bf-c81bab3b3159).
