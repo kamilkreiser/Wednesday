@@ -1,0 +1,95 @@
+=========== [INBOUND] 2026-10-19T23:58 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1658 (KS-1682 N1 near-miss cells + BP
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1658 (KS-1682 N1 near-miss cells + BP1 NB3 cite fix) at 2d1417f44c24, tier 2 - all five mutants killed
+Seat R 58th, lane Secuura/Blockchain-R. #1658 is READY FOR GATE. Tier 2, Refs KS-1682.
+It closes BL1's N1 and BP1's NB3. This is my last build item; wrap follows the verdict.
+
+## THE FIVE ARTEFACTS
+1. PULL REQUEST: **#1658** — https://github.com/Secuura/Distributed_Secuura/pull/1658
+2. HEAD SHA, read from ORIGIN in the same action as writing this: **2d1417f44c24224d2da4efb22f2ff847b6b4c4d5**
+   (live develop in the same read: **6229a92f2480f0784c31a8d6b652298a7ac10551**)
+3. TICKET COMMENT NAMING THE PR: KS-1682 comment **`3ec6a26d-a343-4cef-9872-ee6ad05a5ea5`**,
+   23:58:08.851Z. Count 2 -> 3, exactly one added; read back byte-identical (4335 == 4335);
+   `#1658` and the head sha both verified present.
+4. TEST EVIDENCE BLOCK: in the PR body, written by me.
+5. NOT DONE / NOT COVERED: below and in the body.
+
+## N1 — all five near-miss mutants killed BY ASSERTION
+The product code was already correct; my #1651 cells could not prove it, because every fixture
+either matched exactly or differed obviously. Seven cells now:
+  G3 uid-part-only        killed by W1 ALONE
+  G4 case-insensitive     killed by W2 ALONE
+  G5 trimmed              killed by W3 ALONE
+  G6 includes-substring   killed by W3 AND W4
+  G7 id-less entry        killed by W5 ALONE
+Four of five by exactly one cell, so W1/W2/W3/W5 each earn their place. W0 passes under every
+mutant — correct, and what makes it a control rather than a red. W6 pins that every fixture secret
+is distinct and non-empty, so no `toBe('')` is satisfiable by the fixture itself.
+
+TWO CHOICES THAT MAKE THE CELLS ABLE TO FAIL, stated because they are the whole point:
+- **Exactly ONE cache entry per cell.** Under a mutant it is a SINGLE match, so the selector reaches
+  `mine.length !== 1`'s false branch and returns it. **Two entries would hit the fail-closed `> 1`
+  branch and MASK the mutant** — the cell would pass for the wrong reason on BOTH sides.
+- **The harness reads the seeded entry back through msal's own serialiser** and asserts it is there,
+  so a '' is the SELECTOR refusing it and not an empty cache.
+Every mutant tsc rc 0 on its own; every swap asserted before running, every restore asserted by
+sha256; no LOADFAIL. Mutant LIST from your BL1 verdict and its adversarial file, read for the list
+only and cited; cells written independently.
+
+🔴 **Flaw in my own driver, disclosed:** its per-arm summary prints "KILLED BY: NOTHING — mutant
+SURVIVES" on the BASELINE arm, which has NO mutant applied. The line is wrong, the measurement is
+not; every mutant arm's kill list is correct. Not re-running a proof to fix a reporting string, but
+it is in the PR body and here so nobody reads it as a survival.
+
+## NB3 — verified myself, then fixed
+`git show <sha>:<path>` at each commit: **263** before the fix (0d156d12c), **270** at the fix
+(2672fedeb), **279** on develop. **:292 matches no state.** I found its source: the entry's OWN
+original `Where:` line, which I had kept verbatim further down — so I quoted the entry's prose as a
+measurement, paired it with the one end I HAD measured, and wrote it as a move. The entry now
+carries all three measured positions and names the mistake.
+CONTROL on the fix: the assertive form "It has moved from" is now **0** hits; the remaining :292
+occurrences are three inside the correction block (quoting the wrong figure, as they should) and one
+in the preserved original record. I attributed EVERY hit rather than reading the raw count as a
+failure — a grep for a figure inside the text that discusses it counts its own discussion.
+
+## BASE AND LANDING TREE — quoted with the develop it was computed against
+  this head                      2d1417f44c24224d2da4efb22f2ff847b6b4c4d5
+  develop it was computed against 6229a92f2480f0784c31a8d6b652298a7ac10551
+  merge-base                     6229a92f2480f0784c31a8d6b652298a7ac10551  <- develop ITSELF, because I merged it IN
+  LANDING TREE                   8de5df50f81387b643debcd497ced8bc36feba28
+merge-tree clean (rc 0) returns that figure, and because develop is the merge-base it EQUALS this
+head's own tree — two readings agreeing. `develop...HEAD` is exactly my 2 files.
+**develop was merged IN, never rebased**, to bring #1653's backlog entry into reach, since it landed
+after this branch was cut.
+
+## SUITE
+**23 files / 220 tests / 0 failed** at this head (develop's 213 after #1653, + 7 cells, 0 vanished).
+tsc rc 0, and rc 0 on EACH mutant separately. Test files type-checked via the `exclude: []` child
+config: rc 0, 0 diagnostics, with the control that they are in the program. audit:gate rc 0.
+
+## PREFLIGHT, AS IT READS
+"PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." legs 3/4/8, no local stack.
+13 ran, 3 skipped, 0 failed. Both pushes to this branch ran it; the second was a fast-forward.
+
+## NOT DONE / NOT COVERED
+- The four platform suites did NOT run: no stack, and **no runtime surface changes here at all**
+  (one test file, one markdown file).
+- No real sign-in or refresh against Microsoft; no cell performs a network request.
+- **BL1's N4 is NOT in this PR** — routing the three warnings through the service's log() is a
+  PRODUCT line, which by your instruction does not belong in a test-only PR. Still residue; your
+  call whether it becomes a ticket.
+- **BP1's NB1 is NOT closed** — V4 pins the `randomBytes` CALL, not "a CSPRNG", and your X6
+  (`randomFillSync`) reds it. A false alarm in the safe direction, so residue. Making it
+  source-agnostic while still killing BK-X1 is a design question, not a wording fix, and I did not
+  smuggle a design into a test-only PR.
+- **BP1's NB2** (an over-long header line) left as residue.
+
+## AFTER THE VERDICT — my wrap list, nothing started
+team notes batched to Peter (KS-485) and Stuart (KS-772) with mentions verified as real
+`suggestion_userMentions` nodes · history.md entry · handover finalised (written and current
+throughout) · wrap mail.
+
+## NEEDED-BY
+The gate on #1658 at 2d1417f44c24224d2da4efb22f2ff847b6b4c4d5. No merge without your GO naming that head, and I will re-read both heads
+and re-predict immediately before any merge — develop has moved four times this session.
+
+NEW-ROWS: 2  ROWS-IN-DIGEST: 54  SEEN:      262  BATCH: /private/tmp/wed_newmail/batch_20261020T000105Z.txt
