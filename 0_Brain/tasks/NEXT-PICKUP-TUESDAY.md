@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 327 — 2026-10-21 02:31 CHECKPOINT (s129, ctx 65%). **READ THIS FIRST; supersedes 325's LIVE list.**
+- **LIVE (tmux 02:30); RE-ARM status_watch on each at boot; Datasec root `/Volumes/Laptop-DEV/!CODING/Datasec/`:**
+  - %155 **B354** MPS #91 tier-2 gate → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B354_STATUS.md` (per 323 on verdict).
+  - %157 **B355** NexusAI RD-874/875 builder (holds the jest lock for its final verify since 02:16) → `NexusAI/1_Project_Definition/Briefs/2026-10-21_B355_STATUS.md` (per 325 on READY).
+  - %159 **GATE 29** NexusAI #97 tier 1, Opus 4.8 since 01:50 (queued FIFO behind B355 on the jest lock); verdict by MAIL (per 325/326).
+  - %160 **B357** HPSM-POC PR #165 tier-2 gate (Sonnet G2, round 1 of 2; tier-1 escalation if the skip can hide a needed audit) → `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B357_STATUS.md`. On GO/GWF unconditional: land #165 by the HPSM-POC landing rule (READ it first; #164 landed as a merge commit by the B300/B304 convention, check), then the records step (Jira 301/302 stay Backlog until a hosted deploy; B357's drafted Jira lines). NO GO: fix round on the same tickets.
+- **DONE since 325:** B356 READY verified at source → **PR #165 OPENED non-draft** (https://github.com/datasecau/HPSM-POC/pull/165), pane closed. B353 READY (Composer #85 round 2 @ `e969ad38`) verified at source → pane closed. **B358 drafter RUNNING** (dies with this seat) → `tuesday/briefs/2026-10-21_B358_SEAT-G29_composer-pr85-gate-tier1-round2.md` + `_B358_PR85-TEXT.md` + `_B358_DRAFTER-REPORT.md`; if missing at boot, re-commission (shape: B350 brief + B353 STATUS). Then: apply PR85-TEXT (`gh pr edit 85 --body-file`, read back), READ the gate WHOLE, stamp, launch Opus at load1 < 7. **Round 2 is the LAST: a NO GO → Kam card.** #85 never lands before K6 + his cards.
+- Queue after these: MPS lanes (sweep 0115 LANE CANDIDATES: MPSCALC-304/305/289/292) once B354 closes; Composer #363/#57/#152 after #85's gate; MPS records after #91 lands; Composer records (fold records/b344; B341-2; B350 BACKLOG row). Load is the limit (5 seats ≈ load 8).
+
 ## 🟢 DELTA 326 — 2026-10-21 01:50 (s129). **Adds to 325.**
 - **Gate 29 now runs on OPUS 4.8** (session only; flagged at r7 S4 01:47:45; switched by Tuesday per Kam's 09-30 ruling b; ANSWER-1 + tap delivered; resumed). Its MODEL column must show the switch. Draft G29-1 (Minor, AI-branch raw log lines :6648/:6659) and SC-1 are the gate's.
 - **Tool defect found (shared tooling, claim with Wednesday before fixing):** `tools/newmail.sh` fetches BODIES from `wednesday-agent@` (hardcoded) even on the Tuesday seat, so Tuesday's batch file shows `None` bodies; the index is right. Until fixed, read bodies from `tuesday-agent@` by the API.
