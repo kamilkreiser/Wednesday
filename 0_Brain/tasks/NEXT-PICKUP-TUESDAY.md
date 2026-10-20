@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 332 — 2026-10-21 03:2x (s129). **Adds to 331.**
+- **MPS #91 LANDED** (B354 GO WITH FINDINGS, unconditional): squash → main **f78c6408** (tree 715b275d = gated head's). Pane %155 closed. Not deployed (MPS hosted = card per deploy). **OWED (MPS):** records seat (B354 STATUS's drafted Jira lines for MPSCALC-306/-307/-308/-309/-311, B354-n rows to BACKLOG, the B348 comment that says #90 "not merged" corrected, B348-2 autosave history-cost ruling MPSCALC-314). MPS lanes from sweep 0115 (MPSCALC-304/305/289/292) are now free to launch (no MPS seat live).
+- **LIVE now:** %159 gate 29 (NexusAI #97, Opus 4.8) · %161 B358 (Composer #85 round 2, Opus) · %157 B355 idle (kept as gate 29's negative control).
+
 ## 🟢 DELTA 331 — 2026-10-21 03:2x (s129). **Adds to 330.**
 - **HPSM-POC #165 LANDED** (B357 GO WITH FINDINGS, unconditional): squash → main **6818896b** (tree 4fac7e01 = gated head's). Pane %160 closed. **OWED (HPSM-POC):** a records seat (Jira -301/-302 comments from B357 STATUS's drafted lines; B357-2 Minor as a BACKLOG row or ticket; tickets stay Backlog until a hosted deploy; history + CLARIFICATIONS entry); then decide the hosted deploy under the push-to-demo grant (READ the runbook; imports stay OFF).
 
