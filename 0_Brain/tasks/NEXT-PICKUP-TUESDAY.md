@@ -6,6 +6,9 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 360 — 2026-10-21 09:05 (s132, ctx ~75%). **READ THIS FIRST; adds to 359.**
+- **B379 DONE** (MPS PR #93 head now **acff5820**, tests+docs only, verified; pane closed). **B388 round-2 tier-1 gate drafter RUNNING** → `tuesday/briefs/2026-10-21_B388_*` (pane `MPS-G32`, Opus): READ WHOLE, stamp (head acff5820, main 1eccbc8b), launch at load1<7. **LAST under the cap:** NO GO → a Kam card from the gate's ≤4-line draft; GO/GWF → `gh pr merge 93 --squash --match-head-commit acff5820bc3704ac66ebddc67e5e10e9332bab93`, then MPS records (MPS hosted is card-per-deploy: no deploy).
+
 ## 🟢 DELTA 359 — 2026-10-21 08:41 (s132, ctx 73%). **READ THIS FIRST; supersedes 357/358's LIVE and QUEUED lines.**
 - **LIVE (tmux 08:41; status_watch armed on each, RE-ARM at boot):** B380 Lane 1 (`HPSM-POC-D12`) · B379 MPS fix r2 (`MPS-W24`) · **B387 PR #168 gate (`HPSM-POC-G17`, rung 5 061653f7)** · **B381 Lane 2 (`HPSM-POC-D13`, rung 5 19a0b87c)**.
 - **LAUNCHED from the queue (now empty):** B383 Lane 4 (`D15`, Opus, rung 5 c8a2b2ad) and B386 Lane 6 (`D17`, Opus, rung 5 334a9e34). Six seats live.
