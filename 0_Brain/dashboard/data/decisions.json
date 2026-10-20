@@ -41519,7 +41519,9 @@
    "CARD secuura-demo-deploy-ks695-uatps-precondition-1020",
    "CARD secuura-demo-smoke-provisioning-key-unbounded-1020",
    "CARD secuura-ks1116-null-owner-who-reads-1020"
-  ]
+  ],
+  "delivered_artefact": "Seat D 25th DONE mail 2026-10-20T01:07:44Z: key_66e82ef0 is_active true->false via DELETE /api/security/keys/:id (demo@secuura.io, ISSUER_ADMIN); activeApiKeys 42->41 in memory and DB; last_used unchanged; control uat-ps key active; secret-probe UNMEASURABLE (hash only)",
+  "delivered_ts": "2026-10-20T12:09:47.096399+11:00"
  },
  {
   "id": "secuura-ks1677-entra-redirect-uri-registration-1020",
@@ -42034,6 +42036,70 @@
    "CARD secuura-ks1557-certify-hash-semantics-1013",
    "CARD secuura-ks1557-readside-hides-own-hash-certificates-1013",
    "CARD secuura-ks1612-round3-nogo-1019",
+   "CARD secuura-m365-admin-setup-for-customer-org-1020",
+   "CARD datasec-80pct-band-build-lanes-1020",
+   "CARD secuura-demo-deploy-ks695-uatps-precondition-1020",
+   "CARD secuura-demo-smoke-provisioning-key-unbounded-1020",
+   "CARD secuura-ks1116-null-owner-who-reads-1020",
+   "CARD secuura-demo-smoke-key-revoke-after-measure-1020",
+   "CARD secuura-ks1677-entra-redirect-uri-registration-1020",
+   "CARD hpsmpoc-sm-access-for-paul-1020",
+   "CARD hpsmpoc-sm-open-without-ip-1020",
+   "CARD mpscalc-v13-gap-15-decisions-1020",
+   "CARD secuura-ks1688-ask-stuart-platform-s-version-1020",
+   "CARD secuura-ks1688-org-merge-edge-which-side-1020"
+  ]
+ },
+ {
+  "id": "secuura-ks1689-m365-failed-signin-status-1020",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1689: a Microsoft 365 sign-in that silently failed still shows 'connected'. How should it show?",
+  "bluf": "When the Microsoft 365 sign-in can't get a long-lived token, K still marks the connection 'connected'. It works for about an hour, then quietly stops. Seat R 59th measured the code (one status write, unconditional) and offers four ways to show the truth. No connections exist on either box today, so no data changes either way; this decides what users see. (Override of the prior-ruling gate: its matches shared generic words (m365, status, failed); your two M365 rulings today, Entra registration and customer-org setup, and the ruled status/failed cards for other tickets do not decide this.)",
+  "default_action": "If you don't answer: Seat R builds (d), the derived flag, since it changes nothing stored and later becomes the rule for (b) if you want (b).",
+  "options": [
+   {
+    "key": "d",
+    "label": "Show 'needs re-authorising' on the status read",
+    "detail": "a derived flag beside the stored status, computed the way 'token expired' already is; nothing stored changes, no migration, no screen breaks"
+   },
+   {
+    "key": "b",
+    "label": "A new stored status 'needs_reauth'",
+    "detail": "the honest end state, but every reader of status (the admin screens too) must learn the new value"
+   },
+   {
+    "key": "a",
+    "label": "Refuse the sign-in outright",
+    "detail": "most visible, but throws away an hour of working access and leaves a half-built record"
+   },
+   {
+    "key": "c",
+    "label": "Keep 'connected' and add a flag",
+    "detail": "smallest change, but 'connected' then means two things, which is the bug restated"
+   }
+  ],
+  "recommended": "d",
+  "ts": "2026-10-20T12:09:39.985678+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-08 11:50",
+   "CARD attio-entra-consent-m365",
+   "CARD secuura-ks1102-public-status-what-may-show",
+   "CARD secuura-ks692-status-revoke-interim-posture",
+   "CARD secuura-ks1194-failed-save-answers-200",
+   "CARD hpsmpoc-dev-signin",
+   "CARD secuura-pr1245-round3-failed-at-cap",
+   "CARD secuura-ks888-failed-key-save-design",
+   "CARD secuura-ks888-revoke-validate-on-failed-save",
+   "CARD secuura-ks1124-f4-failed-anchor-shows-pending",
+   "CARD hpsmpoc-signin-hardening-third-round",
+   "CARD mpscalc-hosting-and-signin",
+   "CARD secuura-uuid-revokes-never-wrote-status-history-1006",
+   "CARD hpsmpoc-paul-signin-emails-forward-1008",
+   "CARD secuura-ks1114-deleted-status-found-by-title-1018",
    "CARD secuura-m365-admin-setup-for-customer-org-1020",
    "CARD datasec-80pct-band-build-lanes-1020",
    "CARD secuura-demo-deploy-ks695-uatps-precondition-1020",
