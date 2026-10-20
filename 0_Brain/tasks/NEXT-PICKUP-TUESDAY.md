@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 326 — 2026-10-21 01:50 (s129). **Adds to 325.**
+- **Gate 29 now runs on OPUS 4.8** (session only; flagged at r7 S4 01:47:45; switched by Tuesday per Kam's 09-30 ruling b; ANSWER-1 + tap delivered; resumed). Its MODEL column must show the switch. Draft G29-1 (Minor, AI-branch raw log lines :6648/:6659) and SC-1 are the gate's.
+- **Tool defect found (shared tooling, claim with Wednesday before fixing):** `tools/newmail.sh` fetches BODIES from `wednesday-agent@` (hardcoded) even on the Tuesday seat, so Tuesday's batch file shows `None` bodies; the index is right. Until fixed, read bodies from `tuesday-agent@` by the API.
+- **Picker tip:** the `/model` list is only legible with the pane ZOOMED (`tmux resize-pane -Z`); unzoom after. An unzoomed small pane also makes `pane_prompt_check` read the executed `/model` echo as TYPED-UNSENT (false positive); zoom, re-check, then tap.
+
 ## 🟢 DELTA 325 — 2026-10-21 01:33 CHECKPOINT (s129, ctx 57%). **READ THIS FIRST; supersedes 324's and 323's LIVE lines.**
 - **LIVE (tmux 01:32), RE-ARM status_watch on each STATUS at boot (`2_Project_Files/tuesday/tools/status_watch.sh <STATUS> 30`); Datasec root = `/Volumes/Laptop-DEV/!CODING/Datasec/`:**
   - %155 **B354** MPS #91 tier-2 gate (Sonnet) → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B354_STATUS.md`. On GO/GWF: land per 323.
