@@ -1,0 +1,136 @@
+[Secuura/Blockchain-G -> Wednesday] READY FOR DELTA GATE: #1655 (KS-1407 r2) at 893506989ae7 - B1 closed, A3 reds 4/9 so step 4 is earned, 3 tickets filed; AND READY FOR GATE: #1657 (KS-1157) at a7de040ab040, no sequencing needed
+2026-10-20T00:22:37.000Z
+
+Seat G 12th, lane Secuura/Blockchain-G. **One tier-1 auth batch, as you allowed — but TWO different
+gate actions, so take them separately if you prefer.** Both PRs are ready now.
+
+# A. #1655 (KS-1407) — READY FOR DELTA GATE, round 2 of 2, TIER 1
+
+1. **PR #1655** — https://github.com/Secuura/Distributed_Secuura/pull/1655
+2. **HEAD, read from origin in the same action as this sentence:**
+   **`893506989ae7c656e69408d4a6489b052b728e33`** — 8 files, **+775/-3** over develop.
+3. **TICKET COMMENT:** `e40b5a54-03f4-4e44-9668-b02b1432a3ad` on KS-1407, 00:20:55Z, 5644 bytes,
+   read back and asserted to carry the head SHA, the A3 figure, the suite counts and the three
+   ticket keys.
+4. **TEST EVIDENCE:** in the PR body, round-2 section, written by me.
+5. **NOT COVERED:** its own section, below and in the body.
+
+## B1 is closed, and the shape is the one you accepted
+`revokeAllUserSessions` returns **0 with no throw** when the store is unreachable
+(`session.ts:317-318`), while `createSession` at `:156` throws in the same condition. Both routes now
+confirm the revocation is possible **before** the write and **re-assert after** it. Route-local,
+using the already-exported `isRedisAvailable` and the existing `ServiceUnavailableError`, so
+**`session.ts` is untouched** and the two other callers' contract is unchanged.
+
+**The two refusals say different things, per your ruling 1:** reset leaves the single-use token
+UNBURNED so a retry finishes the job; change-password says the password **WAS** changed, because
+telling that caller it failed would send them back to a dead password. Cell **B1-C3** is an
+inverted-want control on exactly that wording, and arm **A4** proves it fires.
+
+## The number that justifies step 4
+**Arm A3 — removing ONLY the post-write re-assert — reds 4 of the 9 new cells** (R2 R3 R5 C3). That
+is the measurement for my own addition rather than an argument for it. Had it reddened nothing I
+would have dropped it and said so.
+
+## Evidence
+- **9 new cells**, two new files, mine and separate from the pass's bytes. Both files carry a
+  healthy-store positive control.
+- **5 red-proof arms**, each anchor count-asserted unique, each type-checked, each restored by
+  content with a sha256 equality assert: **A1′** the exact pre-fix product (guards AND imports
+  reverted) **7 of 9 red** · **A2** 7 of 9 · **A3** 4 of 9 · **A4** the wording control fires ·
+  **A5** a NEGATIVE arm, `.catch(() => 0)` reds **nothing** — a gap I state rather than hide: these
+  cells pin the silent zero, not a throwing revoke.
+  A1 as first written was **INADMISSIBLE** (TS6133 — the guards gone but the imports left), so it
+  would have measured the compiler; A1′ reverts the imports too.
+- **Whole auth suite: 103 files / 1119 tests / 0 failed, 0 skipped**, against a measured baseline of
+  99 / 1096 on a clean checkout of the base. +23 cells, **0 vanished**. `tsc` rc 0.
+- **Four cell files declare a healthy store, one line each, NO assertion changed** (identical
+  `expect(` and cell counts before/after). **Two of them predate this PR** — `ks1005` and `ks1052`,
+  6 cells — and I found them by running the WHOLE suite, not by reading the route. That is the trap
+  C 26th recorded, and it caught me the way it was written to.
+- Preflight, as printed: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`
+  (legs 3 4 8, no local stack). Leg 14 **91/91**; leg 15 `13 code guards`, `23 / 23 services`;
+  **leg 16 auth test-file type-check: 154 examined, 42 errors, 42 baselined, 0 new.** **No
+  `[format-gate]` line printed** — 0 real occurrences in 2459 lines.
+- Push **rc 0**, 623s, a **fast-forward** `8e5308a87..893506989`; `origin` proved an ancestor first,
+  so the non-fast-forward refusal was satisfied, not bypassed.
+- Landing on live develop: **`2346900a5105fe24f8b3777a73123dd6df80a2a5`**, merge-tree rc 0, 8 files.
+  Develop moved 6 commits during the round; its advance is 9 files, **0 overlap** with mine
+  (negative control 9).
+
+## The three tickets, all read back by id
+- **KS-1690** Bug/High — N1, scoped to the **origin-session** half. **KS-1150 R-2 already covers the
+  rotation/denylist half of that same branch and is still open** (its 09-14 comment records R-1
+  landing and "R-2 / R-3 stay OPEN"). Overlapping but distinct; the ticket says neither closes as a
+  duplicate of the other. **That scoping is my call — tell me if you want it filed wider.**
+- **KS-1691** Bug/Medium — N2, the in-flight resurrection, with the gate's deterministic repro.
+- **KS-1692** Bug/High — your ruling 2, the other two silent-zero callers, with my enumeration as a
+  table. Named in #1655's Known residue.
+Each board-searched by symbol and path with controls both ways (a fresh never-published token → 0;
+`revokeAllUserSessions` → hits).
+
+## N4 / N5
+N4's observed responses are in the PR body: 200 with **no re-login hint**, next call 401
+`Session has been invalidated`, refresh 401, and the post-write failure's 503 wording. N5 is one line
+in Known residue, marked reasoned-not-run.
+
+## Not covered (unchanged)
+Four platform suites did not run (no stack, no Docker for this seat — and this DOES touch a runtime
+surface, so it is a real gap). No real Redis, as in the gate's own probes. N-1382-2 untouched, hence
+`Refs`. No migration, schema or config. Nothing deployed.
+
+---
+
+# B. #1657 (KS-1157) — READY FOR GATE, first round, TIER 1
+
+1. **PR #1657** — https://github.com/Secuura/Distributed_Secuura/pull/1657
+2. **HEAD, read from origin in the same action:** **`a7de040ab040f460c83f5784ae132a2667ed80c6`** —
+   4 files, **+250/-2**.
+3. **TICKET COMMENT:** `8bed4975-d1b9-4ff1-b933-6afb0d9281c9` on KS-1157, 00:21:38Z, 5838 bytes,
+   read back.
+4. **TEST EVIDENCE:** in the PR body, written by me.
+5. **NOT COVERED:** below.
+
+## Your sequencing question is ANSWERED by measurement, not assertion
+**KS-1157 does NOT need to follow #1655.** `git merge-tree --write-tree` between the two real branch
+heads is **rc 0 with a single line of output**; the file sets are **disjoint (intersection 0**,
+negative control 8); and **`services/session.ts` is not in #1655's set at all** — which is exactly
+why the route-local shape was worth choosing. Gate them in either order.
+
+## Evidence
+- Red-first **4 failed / 7 run** (R1-R4), all three controls green, 0 load-failure signatures; green
+  after **7/7, 0 skipped**; `tsc` rc 0.
+- Suite: baseline **99 / 1096** on a clean checkout of this branch's base, after **100 / 1103**.
+  +7, **0 vanished**.
+- **8 arms, 8 killed, 0 survivors → no cell added.** Two of the pass's arms are INADMISSIBLE here
+  (TS6133) rather than survivors, re-formed compile-safe.
+- ⚠ **Both `createSession(..., 'oauth')` call sites are byte-identical lines** (`:969`, `:1078`), so
+  a one-line anchor would hit the wrong grant while the other's cell reddened anyway. Both oauth arms
+  use two-line anchors.
+- **The reader audit you set:** a session is ONE JSON string under `sess:<id>` via `setex`, **not a
+  hash**, so no key-enumeration surface; all three readers do partial casts, including
+  `packages/shared/src/security/session-validation.ts:105` outside `services/auth`; **no
+  `SessionSchema` exists** (control: `.strict()` in 11 files) and nothing enumerates a session's keys
+  (control: `Object.keys` in 138 files). The shared validator **fails OPEN** on a parse error by its
+  own docstring — the asymmetry that made the audit worth running.
+- Preflight as printed: 13/16 ran, 3 skipped, nothing failed; leg 16 **151 examined, 0 new**. Push
+  rc 0, 590s.
+
+## Not covered
+Four platform suites (same reason, same real gap). No real Redis. **No existing session re-marked** —
+the accepted forward-only window. **The selective denylist is not proven possible**, only that the
+field it would select on is now written. No migration, schema or config. Nothing deployed.
+
+## A correction I want on the record
+My first KS-1157 mutant run reported **6 survivors**. That was my parser: nested describes, a label
+regex anchored with `re.match`, every label dropped, and a verdict computed from labels alone reading
+SURVIVED on arms whose own tally said 1-2 failed. Fixed, proved against a real captured red line, and
+**the verdict now cross-checks against the failed count — labels and tally disagreeing is a PARSER
+FAILURE, never a survivor.** Without the cross-check I would have reported six survivors as a
+finding.
+
+---
+
+**NEXT:** KS-1659 (tier 2 confirmed by the reader audit, `Refs` — the audit write-up is in my record
+folder), then KS-758 (where I will mail you ONE question on the `external_ref` in the erasure
+`reason` if the census shows it is a policy call), then KS-1558.
