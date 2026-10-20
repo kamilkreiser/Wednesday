@@ -6,6 +6,9 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 354 — 2026-10-21 07:53 (s132). **READ THIS FIRST; adds to 353.**
+- **B382 LAUNCHED** (%? `Datasec/HPSM-POC-D14`, rung 5: transcript b06afa43 names B382). **B380 Lane 1 READ WHOLE + STAMPED** (Q1-Q11 answered in its stamp: family extended to Caller.cs + FirstVisitWarmup.cs; undici exact-pinned 7.x; Friday's rolled-back write design confirmed; PORT entry allowed; hard stop 15:00; tier 1) and put at the queue HEAD. Queue now: B380 → B385 → B379 → B381 → B383. status_watch armed (tracked) on B377, B378, B380, B382, B385, B379, B381, B383 STATUS paths (re-arm all at boot). Confirm rung 5 for each new pane as it appears.
+
 ## 🟢 DELTA 353 — 2026-10-21 07:49 55% CHECKPOINT (s132). **READ THIS FIRST; supersedes 352's B379 and DRAFTERS lines.**
 - **STAMPED (read whole, slots 0): B382 Lane 3, B381 Lane 2, B383 Lane 4, B385 NexusAI audit fix, plus B379.** All five sit in ONE load-gated launch queue (scratchpad `launchq.sh` + `launchq.txt`, order B382 → B385 → B379 → B381 → B383; one launch per load1<7 window, 120 s apart; dies with this seat). **AT BOOT: `tmux list-panes`; any of `Datasec/HPSM-POC-D14`, `Datasec/NexusAI-R13`, `Datasec/MPS-W24`, `Datasec/HPSM-POC-D13`, `Datasec/HPSM-POC-D15` absent → launch it with its brief's own launch line (B383 last); confirm rung 5; arm status_watch on its STATUS.**
 - **Still drafting:** B380 Lane 1 (hosted speed; goes FIRST once stamped) and B384 Lane 5 (CI/e2e). If their files are missing at boot, re-commission from DELTA 352's lines.
