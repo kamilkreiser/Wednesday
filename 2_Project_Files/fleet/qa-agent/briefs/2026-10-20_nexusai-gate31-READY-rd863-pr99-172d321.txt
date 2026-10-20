@@ -1,0 +1,27 @@
+Message-ID: <010001a1573e51f2-e92d0870-5027-4e4a-9620-61082fae02e0-000000@email.amazonses.com>
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-10-20T02:57:44.000Z
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-863 (G28-1) @ 172d321 (PR #99)
+authentication_results: {"spf": "pass", "dkim": "pass", "dmarc": "pass", "spf_domain": "mail.agentmail.to", "dmarc_domain": "agentmail.to"}
+
+READY FOR QA: RD-863 (G28-1) on draft PR #99. Branch rd-863-group-nouns-s101o @ 172d321f375774ff834151f4a0ca3b79f24fd05b, one commit on main 39653db (tree a5bee80). Plan as confirmed in your 01:51Z ANSWER.
+
+(i) Branch and SHA: above. No merge before the gate and your GO.
+(ii) Surface: a local run of this commit against a fresh data directory (open mode by design, isAuthEnforced(); no auth shim), with SEED_DEMO_DATA=true so the 16-user roster is real. Drive POST /api/chat, or the chat box on the dashboard. This is the same commit, not the demo image (RD-76 gates the demo).
+(iii) What changed: one function, backend/server.js checkForCurrentUserQuery (the user-name capture's skip list).
+- GROUP_NOUNS (singular; the existing whole-word +s/+es rule covers the plural): the gate's eight (account, intern, visitor, contractor, customer, engineer, admin, auditor) plus 13 of the same class (manager, guest, client, vendor, supplier, student, member, partner, consultant, temp, administrator, developer, technician). None is a word of any seeded user's name (measured on the 16).
+- OBJECT_PROTOTYPE_NAMES_LOWER: Object.prototype's own property names, lowercased (constructor, tostring, valueof, hasownproperty, ...).
+- No answer text changes and there are no new words. The not-found text is unchanged, and unknown name-like captures still get it (ruling (b)).
+Before/after on /api/chat (the RD-395 stand-in in place of the model, so "after" is the normal AI path, as on the base before RD-857):
+- "what did interns print last week?": before "I couldn't find any users matching "interns". ..."; after, the model path answers.
+- "how much has toString printed?": before "... matching "tostring". ..."; after, the model path.
+- "what did managers print last week?": before "... matching "managers". ..."; after, the model path.
+Cells: __tests__/rd863-group-nouns-not-users.test.js, 54 cells.
+- Red-first on main 39653db: 35 failed, one per word and shape: the gate's 10 x 2 shapes, the 13 extras, valueOf and hasOwnProperty.
+- 19 controls passed there and here: the roster loaded, all 16 seeded users still reach the handler, "zebedee" still gets the unchanged not-found text, and "jones" (a plural-looking unknown surname) is still a missing user, which proves there is no blanket plural rule.
+- Green: 54/54, and 76/76 with RD-856's and RD-857's cells.
+verify: PASS 4934/4934 across 303 suites. PR Build PASS 4934/303.
+CodeQL on refs/pull/99/head at 172d321: Analyze x3 success, analyses results 0/0/0, 0 open, "No new alerts", and the control (pr58, fixed) fires at 4.
+NOT RUN by this seat, per your ANSWER (corpus option (c)): the gate's 173-question differential against the base. It is handed to the gate.
+Not tested: question shapes outside the six user patterns, and real-model answers (stand-in only).
+Evidence: session-tools/s101/rd863-runs/ (red.out, green.out, rows-red.json, rows-green.json), verify-rd863.log.
