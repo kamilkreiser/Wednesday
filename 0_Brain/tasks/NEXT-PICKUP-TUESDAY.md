@@ -6,6 +6,9 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 358 — 2026-10-21 08:16 (s132). **READ THIS FIRST; adds to 357.**
+- **B382 READY verified → HPSM-POC PR #168 OPEN** (head 0f46875c; test file + comment/README only). Pane closed. **B387 tier-2 gate drafter RUNNING** → `tuesday/briefs/2026-10-21_B387_*` (pane G17, ports 7470-7479): READ WHOLE, stamp, launch at load1<7; GO/GWF → land #168 by `gh pr merge 168 --squash --match-head-commit 0f46875c0e704884db2c8be6f64c8adbd8f8333d` (re-read mergeable first). Test-only for the product: no hosted deploy needed for #168.
+
 ## 🟢 DELTA 357 — 2026-10-21 08:11 70% CHECKPOINT (s132). **READ THIS FIRST; supersedes 356's LIVE and Queue lines.**
 - **LIVE (tmux 08:11; status_watch armed on each STATUS, RE-ARM at boot):** B380 Lane 1 (`HPSM-POC-D12`) · B382 Lane 3 (`HPSM-POC-D14`) · **B385 NexusAI audit fix (`NexusAI-R13`, rung 5 783c1cb4)** · **B379 MPS #93 fix round 2 (`MPS-W24`, rung 5 9cd727a7)**.
 - **QUEUED (scratchpad launchq; dies with this seat): B381 (`D13`) → B383 (`D15`, Opus) → B386 (`D17`, Opus).** At boot: launch any whose pane is absent, one per load1<7 window, each with its brief's own launch line; confirm rung 5.
