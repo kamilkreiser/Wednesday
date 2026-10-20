@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 359 — 2026-10-21 08:41 (s132, ctx 73%). **READ THIS FIRST; supersedes 357/358's LIVE and QUEUED lines.**
+- **LIVE (tmux 08:41; status_watch armed on each, RE-ARM at boot):** B380 Lane 1 (`HPSM-POC-D12`) · B379 MPS fix r2 (`MPS-W24`) · **B387 PR #168 gate (`HPSM-POC-G17`, rung 5 061653f7)** · **B381 Lane 2 (`HPSM-POC-D13`, rung 5 19a0b87c)**.
+- **QUEUED:** B383 (`D15`, Opus) → B386 (`D17`, Opus). Load ~12 at 08:41.
+- **B385 DONE → NexusAI PR #104 OPEN** (RD-879; lockfile-only follow-redirects 1.16.1; head c139e4a8, base main 115a775b; verified: exactly the one lock entry). Tracked waiter on its checks (scratchpad `wait_pr104.sh`; dies with this seat: re-read check-runs at c139e4a8 + open alerts on refs/pull/104/head). **Next:** confirm `audit-production-deps` SUCCESS on the PR ref; a LIGHT tier-2 gate (equivalence: one lock entry, CodeQL no new alert, verify counts untouched); then land by **C-190 same-commit FF via a NexusAI seat's land.sh** (never squash); then #103 forward-merges main (and #101's gate 33 re-stamps to its new head).
+
 ## 🟢 DELTA 358 — 2026-10-21 08:16 (s132). **READ THIS FIRST; adds to 357.**
 - **B382 READY verified → HPSM-POC PR #168 OPEN** (head 0f46875c; test file + comment/README only). Pane closed. **B387 tier-2 gate STAMPED (read whole) and at the queue HEAD** (pane G17; status_watch armed); GO/GWF → land #168 by `gh pr merge 168 --squash --match-head-commit 0f46875c0e704884db2c8be6f64c8adbd8f8333d` (re-read mergeable first). Test-only for the product: no hosted deploy needed for #168.
 
