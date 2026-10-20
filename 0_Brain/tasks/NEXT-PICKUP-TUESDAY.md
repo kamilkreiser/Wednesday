@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 339 — 2026-10-21 04:26 (s130, ctx 60%). **READ THIS FIRST; supersedes 338's LIVE list.**
+- **DONE this seat:** B361 READY verified → MPS PR #92 opened (non-draft); B363 records verified → hpwin 0 hits (control 1) → records PR #126 LANDED by merge commit (records main e2a0d721, tree = branch head's); panes %163, %164 closed.
+- **LIVE, RE-ARM status_watch at boot:** %161 B358 Composer #85 gate (`Datasec Security Composer/…/2026-10-21_B358_STATUS.md`) · %165 B364 HPSM-POC 294/295 build (`HPSM-POC/…/2026-10-21_B364_STATUS.md`) · %166 B362 NexusAI #97 land → records → #101 TURN (`NexusAI/…/2026-10-21_B362_STATUS.md`, three part lines) · %167 B365 MPS #92 tier-2 gate (`Datasec MPS Commercial Calculator/…/2026-10-21_B365_STATUS.md`; GO/GWF unconditional → land #92 by squash --match-head-commit 3f1ebd13 per MPS convention, then a records step).
+- **DRAFTER RUNNING:** B366 HPSM-POC hosted deploy of 6818896b (Opus C6, push-to-demo grant) → `tuesday/briefs/2026-10-21_B366_*`; READ WHOLE, check the COST note, stamp, launch.
+
 ## 🟢 DELTA 338 — 2026-10-21 04:05 50% CHECKPOINT (s130). **READ THIS FIRST; supersedes 337's LIVE line.**
 - **LIVE (tmux 04:05), RE-ARM status_watch on each STATUS at boot (Datasec root `/Volumes/Laptop-DEV/!CODING/Datasec/`):**
   - %161 **B358** Composer #85 round-2 gate (Opus) → `Datasec Security Composer/1_Project_Definition/Briefs/2026-10-21_B358_STATUS.md` (per 336: GO/GWF → apply PR85-TEXT and HOLD; NO GO → Kam card).
