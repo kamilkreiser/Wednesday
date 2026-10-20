@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 308 — 2026-10-20 21:47 CHECKPOINT (s127, ctx ~73%). **READ THIS FIRST; supersedes 307's LIVE/QUEUE.**
+- **MPS #89 (B311 V2 Home) READY FOR QA verified; PR #89 opened and MARKED READY by Tuesday** (head 0d7250e2, 13 files incl. the disclosed V0Home pin flip). Gate **B347** (Sonnet G2, leak-centred) stamped; a tracked background waiter (task of s127) launches `Datasec/MPS-G25` at load1 < 7 then watches `…/MPS…/Briefs/2026-10-20_B347_STATUS.md`. **If this seat rotates before it fires: check `tmux list-panes` for MPS-G25; if absent, launch it by the brief's own launch line (brief is stamped) and arm status_watch.** On VERDICT: land by MPS convention (squash --match-head-commit 0d7250e2) only on GO / GWF; a leak finding re-gates on Opus.
+- **LIVE (watchers armed):** %145 B343 NexusAI #98 landing (C-68 hold ~68/69 done) · %146 B330 Composer L1 (ANSWER-1/2/3 given; changed-line watcher) · %147 B345 MPS V1 phase 2 · **%148 B346 HPSM-POC** (WU window + records/b346; Opus).
+- **OWED after landings:** B343 DONE → `gh pr edit 98` with its PR98-TEXT, records for G32-1 + uat-run.js, then #97 TURN + gate 29. b46-home.spec.ts:254 (stale 4-tab assertion) → a small follow-up after #89 and B345 land. MPS records seat: B311 FOR TUESDAY (stub group filter, API.md/openapi/types "400" text, V4 GP ticket, MPSCALC-245 wording, MPSCALC-28 Duplicate). Composer records seat: fold b344 + B341 items.
+- **Digests:** ledger edited twice this seat → regenerate BOTH at rotation.
+
 ## 🟢 DELTA 307 — 2026-10-20 21:33 CHECKPOINT (s127, ctx 65%). **READ THIS FIRST; supersedes 306's LIVE/QUEUE.**
 - **DONE since 306:** B344 Composer records COMMITTED (records/b344 f4e57d8a, 1 ahead of root main 348e5087 which now holds the b339 fold; OWED: fold b344 by the next Composer records seat + B341 records). B337 HPSM-POC DONE (Tuesday az read: schedule Disabled, VM running; Paul = SM Administrator); Kam told with Paul's line (bf-4caf0f78f4ec); card **hpsmpoc-sm-vm-budget-24x7-1020** filed.
 - **LIVE (STATUS watchers armed; RE-ARM after rotation):** %143 B311 MPS V2 Home · %145 B343 NexusAI #98 landing (pushed merge head d463f881 to the PR branch; C-68 hold under the jest lock) · %146 B330 Composer L1 (answered ANSWER-1/2/3 in tuesday/briefs/2026-10-20_B330_ANSWER-*; a changed-final-line watcher is armed: its last STOPPED line was answered) · %147 B345 MPS V1 phase 2.
