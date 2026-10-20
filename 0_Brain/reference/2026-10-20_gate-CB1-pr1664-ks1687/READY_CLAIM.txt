@@ -1,0 +1,36 @@
+=========== [INBOUND] 2026-10-20T02:13 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1664 (KS-1687, shape B) at 64a1c1e26f
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1664 (KS-1687, shape B) at 64a1c1e26f0c, TIER 1 - forceCache + account-keyed fallback; K3/K5 prove the selector at the larger cache; 14 arms killed
+## READY FOR GATE: #1664 (KS-1687, shape B) at head 64a1c1e26f0c7f8b2711b4f377143cc069a4a9fd — TIER 1
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1664 | base `develop` | 2 files, +340/-5 | `Refs KS-1687` (stays In Progress; it was already In Progress when I read it, someone moved it after my 00:26Z read, and my first comment wrongly said I had, which I corrected in place).
+**Head read from origin in the same action as this mail** and equal to my local HEAD: `64a1c1e26f0c7f8b2711b4f377143cc069a4a9fd`.
+**Ticket comment:** KS-1687 comment `8c8e4297-00cb-4631-9b8b-842743fdcefe`, read back by id, 3531 bytes sent and read back, all anchors present.
+**Commit trailer:** Sonnet 5.5, per your model switch.
+
+## What it is
+Shape B as you ruled it, built to your three conditions. Two changes in `token-manager.ts`: (1) `toTokenResult` reads the token from msal's cache for this account only, via KS-1682's selector, fail-closed; (2) `acquireTokenByRefreshToken` is called with `forceCache: true`. Product diff is +37/-5 including comments that say what was measured and why. No migration, no config, no route, no spec.
+
+## Your three conditions, mapped to evidence
+1. **Several accounts via the forceCache path, each refresh returns ITS OWN token; two entries sharing an id fail closed.** K3 refreshes A, B, A in one process from an empty cache; each returns its own and the cache holds exactly two accounts. K4: a stale entry plus the rotated one for one account fail closed to `''` and warn `found 2`. K5: a cache holding **nine** near-miss ids plus another account returns exactly its own token.
+2. **Red-proof includes removing forceCache and loosening the selector at the larger size.** 14 arms, 14 killed by assertion, 0 inadmissible. Remove `forceCache` -> K1 K2 K3 K5 (+K4). `forceCache: false` -> the same. All EIGHT near-miss selector mutants (uid-only, case, trim, includes, no-id, startsWith, endsWith, empty-id) -> **K5**, each also reddening its own KS-1682 cell. First-entry-wins (KS-1682's original bug) -> K3 K4 K5. Remove the fallback -> K0 K1 K3-K8. Each `tsc` rc 0 on its own; each restore sha256-matched with the anchor present exactly once.
+3. **PR body states, with instruments:** the cache is in-memory and process-lifetime (`git grep` for cachePlugin/persistence/beforeCacheAccess/afterCacheAccess over non-test source: **0 hits**, control: the client construction is found, 1 hit); no new read path (the only reader of msal's cache is the one `getTokenCache().serialize()` line, **1 line** on both trees; `refreshTokenForAccount` goes from 1 caller to 2); the E1-E5 table; and what I could not measure. **A caveat on one instrument:** `git grep -nw toTokenResult` returns 2 lines at develop and 4 at my head, because two added lines are comments I wrote that name the function. The call-site count is 1; the body names the lines.
+
+## The cells use a fake transport, and why
+A partial `vi.mock('@azure/msal-node')` injects an in-process `networkClient` and static authority metadata into the constructor. The service's own `initMsal()` still builds the client, so everything from the HTTP boundary inward is real msal. A method stub could never see `forceCache`, because it replaces the code that decides whether the rotated token is cached. No cell contacts Microsoft. The experiment script and its output are pasted into the PR's first comment.
+
+## Test evidence
+- m365 suite measured at both ends on the same clone: develop `7e3b9362e08b` **24 files / 231 cells / 231 passed / 0 failed** -> this head **25 files / 240 cells / 240 passed / 0 failed**. Multiset diff: **0 vanished, 9 new**. (A dict keyed on file+title reads 219 for develop; three titles repeat in an untouched file.)
+- `tsc --noEmit` rc 0 via a child config with `exclude: []`.
+- **Preflight: 13/16 legs ran, 3 SKIPPED (3, 4, 8, local stack not up), nothing failed. NOT a pass**, quoted in full in the PR's second comment. 7 of 7 FAIL-shaped hits are `ok`-prefixed control cells.
+
+## NOT claimed, NOT measured
+- **Real Microsoft's refresh response.** The fake returns what it is told to. This shows msal behaves as observed GIVEN a response carrying `refresh_token` and `id_token`. `openid` is in the refresh request (`RefreshTokenClient.mjs:165`), which is the reason to expect an id token, not an observation of one. E5 shows the fail-closed outcome if it is absent.
+- **A replica whose cache holds an OLDER token than the database. FOR YOUR RULING, not a gate blocker.** Now that rotation persists, replica 2 can write RT-2 to the database while replica 1's cache still holds RT-1. If replica 1 then refreshes and Microsoft sends no new refresh token, the fallback returns RT-1 and the route writes it over RT-2. It needs multiple replicas AND a non-rotating response, both unmeasured, and an older token is typically still valid. I built no guard; the obvious one is a before/after snapshot of the cache entries so only a token msal wrote during this call is returned, but that is a design change to the ruled shape and it has its own concurrency edge (an entry written by a concurrent refresh for another account), so I stopped at flagging it.
+- Route-level persistence (`index.ts:840-849`) is unchanged and not exercised end to end. The four platform suites were not run. KS-632 is not touched or cited as this fix.
+
+## Landing, with the develop it was computed against
+**Landing tree `77613767396979e18840f10289c649067c143604` on develop `7e3b9362e08b1b5b2c418f43e05c9bd0616f896e`**, from head `64a1c1e26f0c`, computed 02:11Z. The branch's parent IS that develop, so the landing tree equals the head's own tree and the suite reading was taken at the landing tree. Re-predicted immediately before any merge.
+
+## Queue state
+#1663: acknowledged, GO withdrawn, not merged. I build round 2 next. BZ1 N1-N3 follow-up is built and committed in a worktree (`8409e0291`, 4 cells, 9 arms killed, suite 231 -> 235), unpushed until #1663 round 2 is away.
+

@@ -1,0 +1,82 @@
+=========== [INBOUND] 2026-10-20T02:16 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1665 at a404df30d, tier 2 test-only -
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1665 at a404df30d, tier 2 test-only - four cells for BT1 N1 and BX1 N3; landing 91a915deca65 on develop 7e3b9362e08b
+READY FOR GATE: #1665, tier 2 (test-only). Four cells for gate BT1's N1 and gate
+BX1's N3. Head a404df30d1cdc82a236321930353e634213ffce4.
+
+REFS, READ FROM ORIGIN IN ONE ACTION AT 02:14:39Z
+  refs/heads/develop     7e3b9362e08b1b5b2c418f43e05c9bd0616f896e
+  refs/pull/1665/head    a404df30d1cdc82a236321930353e634213ffce4
+PREDICTED SQUASH LANDING TREE 91a915deca6598f8456d544ce9c9a3950b1bae39, computed
+against develop 7e3b9362e08b at that same read. rc 0, a single line of output,
+exactly 3 files. Re-predicted at READY and identical to the 02:03:00Z figure, so
+develop has not moved since. It is stale the moment it does.
+
+DIFF: 3 files, +384/-0, three-dot against develop. NO PRODUCT FILE TOUCHED.
+  services/auth/.../ks1157-the-marker-at-the-route-and-across-a-rotation.test.ts  +333 (new, 6 cells)
+  services/originate/.../ks1659-a-connector-certifying-with-no-holder.test.ts     +25  (1 cell, 7 -> 8)
+  BACKLOG.md                                                                      +26
+
+TICKET COMMENTS NAMING THE PR (both read back byte-identical, both carry the head sha)
+  KS-1157  b0eacb00-3a54-4eef-aa9f-78d7a2f56c1f  02:15:31Z
+  KS-1659  d7462a3e-5748-444c-9e6c-f1632c17c736  02:15:33Z
+
+TEST EVIDENCE - WHAT I RAN
+- 7-arm red-proof, every arm tsc --noEmit rc 0 BEFORE running, cell red by
+  assertion, product restored by sha256 equality. M-X1 reds X1+X1b only; M-X2
+  reds X2 only; M-X3 reds X3 only; G1 reds N3 only. No collateral in any arm.
+  Two positive controls (6/6 auth, 8/8 originate). Comparator self-tested three
+  ways: it can say NO on a survivor, on collateral, and on a parser failure.
+- Both gates' claims RE-MEASURED, not carried: each auth mutant passes all 7
+  pre-existing KS-1157 cells (7 passed / 0 failed per arm); G1 passes 7 of the 8
+  originate cells. The four cells are additive.
+- originate whole suite both ends: 135 suites, 1575 -> 1576 tests, 0 failed,
+  rc 0. +1, 0 vanished.
+- auth whole suite both ends: baseline with my file withheld 104 files / 1126
+  passed / 0 failed / rc 0; with it 105 files / 1132 tests, reaching 1132 passed
+  / 0 failed / rc 0.
+- In-hook preflight, quoted and NOT a pass: "PREFLIGHT INCOMPLETE - 13/16 legs
+  ran, 3 SKIPPED. Nothing failed. legs 3 4 8 - local stack not up." Push rc 0
+  from the tool's own .rc, elapsed 586s, "* [new branch]", ref confirmed at
+  origin by an independent ls-remote. 586s is past the ~6 min cutoff, so the
+  keepalive carried it - F-02 was printed at my boot.
+
+WHAT IS NOT COVERED
+- The four platform suites did not run: they need the stack on :6882, this seat
+  is held off Docker, and the PR changes no runtime surface.
+- X1 drives the PASSWORD login site only. auth.ts has FOUR createSession sites
+  (register, platform-admin, password, social); a mutant marking the social site
+  passes every cell in the file. In the file header too.
+- X2 drives rotateSessionRefreshToken directly, not through the refresh route.
+- N3 pins the binding, not a route; reserveCertificationRow is not re-driven on
+  that shape.
+- Nothing here says the denylist exists or reads the marker (Kam's 09-14
+  marker-only ruling).
+
+TWO THINGS I WANT THE GATE TO SEE BEFORE IT READS THE SUITE OUTPUT
+1. THE AUTH SUITE IS NON-DETERMINISTIC UNDER LOAD and red may appear in files
+   this PR does not touch. Three consecutive runs of the SAME tree: 2 failed,
+   then 10 failed, then 0 failed. 8 of the 10 at 5002-5766 ms, vitest's 5000 ms
+   default which services/auth does not override, across six repo-walking /
+   import-graph guards (ks949, ks1186, ks1188, ks999, s130-f6, ks488). ks949
+   ALONE passes 31/31 rc 0. I am NOT calling it pre-existing: the withheld
+   baseline was 0 failed, so added load makes it trip more often. My six cells
+   failed 0 times in all three runs. In the PR's Known residue and in a BACKLOG
+   entry with every figure. Same class as KS 1155 and the kyc db.retry entry.
+2. A CORRECTION I MADE TO MY OWN PR BODY BEFORE RAISING IT. I had written that
+   the repo type-checks none of this PR. This push's own leg 16 disproved it:
+   "typecheck-tests: auth (tsconfig.test.json): tsc examined 156 files, 105 of
+   them under __tests__; 42 errors: 42 in the baseline, 0 new". So 0 new for the
+   auth cells is the GATE's figure, not mine, and the 42 are a recorded
+   shrinking baseline, not an unknown. The body now says that.
+   THE REAL FINDING UNDERNEATH IT: services/originate has NO tsconfig.test.json
+   and is NOT in leg 16's corpus (auth, api-gateway, vc-issuer each have one).
+   So the N3 cell, and every other originate test file, is type-checked by
+   NOTHING at the gate. My hand run with a child exclude:[] config found 0
+   errors across 157 test files, but it will not repeat on anyone else's push.
+   That looks like a ticket to me - say the word and I will file it with the
+   measurement, or leave it for KS 1000 / KS 1487's owner.
+
+NEXT: KS-758 option (b) per your ANSWER, and I ask you for the card's state again
+immediately before I finalise that diff. No merge without a GO.
+No deploy, no box, no az, no Docker. 2_Project_Files read-only and untouched.
+

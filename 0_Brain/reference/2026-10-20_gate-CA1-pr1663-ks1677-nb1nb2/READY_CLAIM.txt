@@ -1,0 +1,29 @@
+=========== [INBOUND] 2026-10-20T01:49 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1663 (KS-1677 BP1 NB1/NB2) at 72e9e87
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1663 (KS-1677 BP1 NB1/NB2) at 72e9e8719cec, tier 2 - V4 pins a CSPRNG not one API; X6 now green, Math.random still red; KS-1687 ruling B acknowledged
+## READY FOR GATE: #1663 (KS-1677, gate BP1 NB1/NB2) at head 72e9e8719cece2e16ee0bc8c111c2f4b3288b3aa
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1663 | base `develop` | 1 file, +66/-12 | test-only, no product code | `Refs KS-1677` (stays In Progress). **Tier 2.**
+**Head read from origin in the same action as this mail** and equal to my local HEAD: `72e9e8719cece2e16ee0bc8c111c2f4b3288b3aa`.
+**Ticket comment:** KS-1677 comment `403473a9-7e69-4dba-a71c-05957749ff4b`, read back by id, 2628 bytes sent and read back, identical, all 7 anchors present.
+
+## What it does
+**NB1 closed, not documented.** R 58th judged it a design question. It needed a wider stub set, not a decision: `V4` now stubs every synchronous CSPRNG entry point (`randomBytes`, `randomFillSync`, `crypto.getRandomValues`, `crypto.webcrypto.getRandomValues`) to the same fill and asserts the verifier commits to those bytes. **NB2:** the 166-character header line is split; the longest header line is now 113.
+
+**Red-proof, 5 arms; two must PASS.** `Math.random` -> V4 red. **`randomFillSync` (your X6) -> V4 green.** **`webcrypto.getRandomValues` -> V4 green.** Draw-then-ignore -> V4 red. Remove one entry from `CSPRNG_SINKS` -> V4 red (the control that the stub-set assertion bites). Each arm `tsc` rc 0 on its own; restore by sha256 and a unique anchor; 5 of 5 as wanted.
+
+**The bound is in the cell, not hidden:** agnostic across the APIs listed, not every conceivable one. `crypto.randomFill` is excluded on purpose (callback-async; `randomUrlToken` is synchronous). A refactor to a CSPRNG outside the list would still red `V4`. It pins provenance, not distribution.
+
+## Test evidence
+- **Suite measured at the LANDING TREE** (a synthetic local commit carrying the predicted tree, parent develop, never pushed): **24 files / 231 cells / 231 passed / 0 failed**, equal to develop `7e3b9362e08b`'s own reading. The branch's own head predates #1662 and reads 23 files / 224 cells, so the landing-tree figure is the one I quote.
+- **A multiset diff** of `(file, title)` against develop shows exactly **1 vanished and 1 new**: `V4`'s old and new titles.
+- **An instrument slip I caught on this PR:** a dict keyed on `(file, title)` read **219**, not 231, for the same run. Three titles repeat in `ks1677-oauth-state-statements-on-a-real-engine.test.ts` (an `it.each` with a truncated label), a file this PR does not touch, hiding 12 cells. The count is the sum of `assertionResults`; the "vanished" claim rests on the multiset. My earlier "0 vanished" claims on #1660 and #1662 were dict-based, and they hold because the files they changed have unique titles; I checked rather than assumed.
+- **My first draft failed `tsc`** (TS2339 from an `as never` cast on `spyOn`), caught by the child-config check before commit. The service's own tsconfig excludes `src/__tests__`, so no normal build would have shown it.
+- **Preflight: 13/16 ran, 3 SKIPPED (legs 3, 4, 8, local stack not up), nothing failed. NOT a pass.** Quoted in full in the PR's first comment. All 7 FAIL-shaped hits in the 2,464-line log are `ok`-prefixed control cells (7 of 7).
+- **NOT covered:** no real sign-in against Microsoft; the four platform suites not run (one test file, no HTTP surface).
+
+## Landing, with the develop it was computed against
+**Landing tree `0055f6af66cb9a82b7b3a2901f228addeb0edb5e` on develop `7e3b9362e08b1b5b2c418f43e05c9bd0616f896e`**, from head `72e9e8719cec`, computed 01:48:50Z. develop moved since this branch's base `3cc46ae41fed`: #1661 (scripts) and #1662 (my own; touches `ks1682-*` and `token-manager.ts`, nothing in this PR's file). **Zero overlap.** I will not self-derive a landing if develop moves after your GO.
+
+## KS-1687 ruling B: acknowledged, starting the build now
+I read your three conditions and will build to them: (1) several-account cells populated through the forceCache path, each refresh returning its own account's token, plus the same-id fail-closed cell; (2) red-proof arms for removing `forceCache` (E2 -> `''`) and for the near-miss selector mutants at the larger cache size; (3) the PR body states the cache is in-memory and process-lifetime, how I measured that `refreshTokenForAccount` is the only reader, the E1-E5 table, and what I could not measure. I will paste the experiment script into the PR as a collapsed block, since the scratchpad is not durable. Tier-1 Opus gate noted. The BZ1 N1-N3 follow-up is built while that PR waits at its gate.
+

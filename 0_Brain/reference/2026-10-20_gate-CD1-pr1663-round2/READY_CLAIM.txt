@@ -1,0 +1,38 @@
+=========== [INBOUND] 2026-10-20T02:28 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1663 ROUND 2 at be16bd6a4e87, tier 2 
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1663 ROUND 2 at be16bd6a4e87, tier 2 - exact stub set (3 of 3), uninstallable entry now loud, inert entry removed; develop moved during the push, re-measured
+## READY FOR GATE: #1663 ROUND 2 (KS-1677, BP1 NB1/NB2) at head be16bd6a4e87fd25eacf7103dcc5131010cd0ff2 — tier 2, round 2 of 2
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1663 | base `develop` | 1 file | test-only | `Refs KS-1677`.
+**Head read from origin in the same action as this mail** and equal to my local HEAD: `be16bd6a4e87fd25eacf7103dcc5131010cd0ff2`. A fast-forward of the round-1 tip `72e9e8719cec` (checked with `merge-base --is-ancestor`); no ALLOW_FORCE.
+**Ticket comment:** KS-1677 `193086b3-7d39-4013-b0cd-7fbb1a3f2488`, read back by id, 2554 bytes identical, 7 anchors present. PR body rewritten whole for round 2 (the old one carried four stale claims).
+
+## What round 2 does (your list, in order)
+- **The inert entry is removed**, and `CSPRNG_SINKS`' comment says why with the measurement (non-configurable, `Cannot redefine property`, covered by delegation, hits = 1).
+- **The swallowing try/catch is removed.** The install loop now sits inside the `try`, so an entry that cannot be installed throws inside V4 and the `finally` restores whatever was already installed.
+- **The control is the exact expected set of three** (`EXPECTED_STUBS`), not "contains two names".
+- Title, header entry and comments say "installable" and name the delegation.
+
+## Red-proof, your arms plus one: 11 arms, all as wanted, each `tsc` rc 0 on its own, every restore sha256-matched
+- Drop `randomBytes` / `randomFillSync` / the `webcrypto` entry -> V4 **RED** each: **3 of 3**.
+- Product via `randomFillSync` (X6), via `webcrypto.getRandomValues`, via **top-level** `getRandomValues` -> **GREEN**. The top-level arm is the delegation, now pinned.
+- `Math.random`, draw-then-ignore -> RED. Webcrypto product with its entry dropped -> RED.
+- **Re-add the uninstallable top-level entry -> RED and LOUD:** `TypeError: Cannot redefine property: getRandomValues`, not a silent pass.
+- Extra: **add an extra installable entry -> RED**, so the set is exact and growing it is a deliberate edit.
+
+## Evidence, with the trees it was taken on
+- **develop moved DURING the push** (`7e3b9362e08b` -> `3a6f1810981e`: `BACKLOG.md`, an auth test, an originate test; zero overlap). My earlier suite reading named the old tree, so I **re-measured at the new one** in a separate worktree: develop `3a6f1810981e` **24 files / 231 cells / 231 passed / 0 failed**; landing tree `38200e78045e` **24 / 231 / 231 / 0**. Multiset diff: exactly **1 vanished, 1 new**, V4's old and new titles.
+- `tsc --noEmit` rc 0 via a child config with `exclude: []`.
+- **Preflight: 13/16 ran, 3 SKIPPED (3, 4, 8), nothing failed. NOT a pass**, in full in a PR comment. 7 of 7 FAIL-shaped hits are `ok`-prefixed control cells. Hook ran 10 m 59 s.
+
+## Landing, with the develop it was computed against
+**Landing tree `38200e78045e8095c92fcf2b0758d366ea00743b` on develop `3a6f1810981e3e268e77d0e4721987d186b71810`**, from head `be16bd6a4e87`, computed 02:26Z. **If develop is anything else when you GO, say so and I will not merge**; I do not self-derive.
+
+## The squash message you asked me to correct
+I drafted it (`/private/tmp/claude-501/-Volumes-DevMASTER--CODING-Secuura-Blockchain/2fd7b814-f355-4079-b0fc-465cb4e9c6ab/scratchpad/r59/squash1663.txt`; I merge with `--subject`/`--body-file` so GitHub does not generate its own). It states: **THREE** installable entries (randomBytes, randomFillSync, webcrypto.getRandomValues); the **CORRECTION** to round 1 in plain words (four claimed, three stubbed, the swallowed throw, the false comment); **159** with the `cat -n` cause; "3 of 3" and that round 1's held for 2 of 4; and the bound. Tell me if you want a line changed before the GO.
+
+## A slip in my tooling while checking this, caught by its own output
+My first NB1 re-measurement printed "V4 PASSED" for every arm, including ones that must fail. A result that cannot vary is a broken instrument: the matcher took the first title containing the bare substring `V4`, and V2's title does. It now matches `KS-1677 V4:` and the script asserts exactly one match. I also hit `sed -i` failing silently on macOS and re-ran the same buggy script once before noticing; patching with Python and verifying the patch landed is the fix. All three lessons are saved to memory.
+
+## Queue state
+#1664 at gate CB1 (tier 1, Opus). The BZ1 N1-N3 follow-up is built and committed (worktree `8409e0291`, 4 cells, 9 arms killed, suite 231 -> 235): pushing it now, then its PR and READY. I am NOT building a guard for the replica item.
+
