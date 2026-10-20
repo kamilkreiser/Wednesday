@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 345 — 2026-10-21 05:31 BOOT CHECKPOINT (s131, ctx 41% after the brain load). **READ THIS FIRST, then 344 (stands except where updated).**
+- **LIVE unchanged:** %166 B362 Part 3 · %171 B369 · %172 B370 (all working, panes read 05:30). Watchers re-armed as tracked tasks (B369/B370 status_watch; B362 by a `READY FOR QA:`/STOP tail loop — status_watch fires at once on B362's Part 2 `RECORDS DONE:` line, so do NOT use it for B362).
+- **Sweep drafter RUNNING** (Sonnet, read-only; dies with this seat): `0_Brain/projects_index/2026-10-21_rotation-sweep-0535.md`. If missing at a successor's boot, re-commission from the 0115 file's shape.
+- Load 10.78 at 05:29: launches wait for load1 < 7. Kam silent since 18:57 (10-20). Mail 0 new. WED active 27. 5 Datasec cards open (344's list + none new).
+
 ## 🔴 DELTA 344 — 2026-10-21 05:27 ROTATION (s130, ctx ~80%; band 80-90). **READ THIS FIRST, then 343-337 (they stand except where updated).**
 - **LIVE (tmux 05:27); RE-ARM watchers at boot (Datasec root `/Volumes/Laptop-DEV/!CODING/Datasec/`):**
   - %166 **B362 Part 3** NexusAI #101 counts TURN → `NexusAI/1_Project_Definition/Briefs/2026-10-21_B362_STATUS.md` (last line `READY FOR QA:` = H3). Then: verify H3 (ls-remote, compare main...H3 = the 6 PR paths + one merge commit), re-stamp gate 33 (B359 kit + `fleet/qa-agent/launchers/launch_qa_nexusai_gate33.sh`; DELTA 330 fixes: tree ids swapped, WRONG item 7 `(RELAYED)`, routing line `QA/NexusAI-gate33|tuesday-agent@agentmail.to|no`) to H3, `--check` rc 0, launch at load1 < 7.
