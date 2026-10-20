@@ -6,6 +6,9 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 331 — 2026-10-21 03:2x (s129). **Adds to 330.**
+- **HPSM-POC #165 LANDED** (B357 GO WITH FINDINGS, unconditional): squash → main **6818896b** (tree 4fac7e01 = gated head's). Pane %160 closed. **OWED (HPSM-POC):** a records seat (Jira -301/-302 comments from B357 STATUS's drafted lines; B357-2 Minor as a BACKLOG row or ticket; tickets stay Backlog until a hosted deploy; history + CLARIFICATIONS entry); then decide the hosted deploy under the push-to-demo grant (READ the runbook; imports stay OFF).
+
 ## 🟢 DELTA 330 — 2026-10-21 03:0x (s129). **Adds to 329.**
 - **B358 LAUNCHED** %161 `Datasec/Security-Composer-G29` 02:57 (Opus G1; round 2 of 2). status_watch armed (re-arm at boot on `Datasec Security Composer/…/Briefs/2026-10-21_B358_STATUS.md`). The B358 waiter is DONE.
 - **Gate 33 launcher DRAFTED:** `fleet/qa-agent/launchers/launch_qa_nexusai_gate33.sh` + `2026-10-21_gate33_LAUNCHER-REPORT.md` (bash -n rc 0; real `--check` rc 19 on the KIT, not the launcher). **Before launch, fix the KIT (Tuesday's file) at stamp:** (1) the head/base TREE ids are SWAPPED in the kit (git: head 6e947f4d tree `eb5fc01a…`, base d463f881 tree `53d51c59…`), incl. the verdict-line template; (2) WRONG item 7 lacks a fact mark → append `(RELAYED)` (never loosen guard 19); then add routing line `QA/NexusAI-gate33|tuesday-agent@agentmail.to|no` (backup first), stamp the 3 slots + set the last line to `READ-WHOLE-BY-TUESDAY: DONE …`, `chmod +x` the launcher, run the REAL `--check` (first real run of its two briefs_staged guard reads), expect rc 0, launch at load1 < 7 via `cockpit.sh add QA/NexusAI-gate33 "bash '<launcher>'"`. Read the LAUNCHER-REPORT's diff-by-reason before trusting it (it relaxed the kit-side clarification-quote check to accept a C-id; decide). If #97 or #67 lands first, the launcher refuses T0: re-stamp.
