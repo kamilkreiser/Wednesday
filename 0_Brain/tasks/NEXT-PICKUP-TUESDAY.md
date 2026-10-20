@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 337 — 2026-10-21 03:56 BOOT CHECKPOINT (s130, ctx 39% after the brain load). **READ THIS FIRST, then 336 (stands except where updated).**
+- **LIVE:** %161 **B358** Composer #85 round-2 gate (Opus; status_watch re-armed) · %163 **B361** MPS MPSCALC-304/-305 test-only build (Sonnet C2; launched 03:56, stamped main f78c6408; status_watch armed on `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B361_STATUS.md`). On B361 READY: verify at source (ls-remote, compare main...H, only the 2-3 test files), open PR NON-draft, then a tier-2 Sonnet gate (G2).
+- **DRAFTERS RUNNING (Agent tool, Sonnet; die with this seat — if a file is missing at the successor's boot, re-commission):** B362 → `tuesday/briefs/2026-10-21_B362_SEAT-W22_nexusai-pr97-landing-records-pr101-turn.md` + `_B362_DRAFTER-REPORT.md` (Part 1 land #97 by C-190 + gate 29 checklist; Part 2 NexusAI records; Part 3 #101 counts-only TURN). B363 → `tuesday/briefs/2026-10-21_B363_SEAT-R14_hpsmpoc-records-pr165.md` + `_B363_DRAFTER-REPORT.md` (records + HOSTED DEPLOY FACTS for the push-to-demo decision). READ WHOLE, stamp, launch at load1 < 7.
+- **After #97 lands + #101 TURN:** gate 33 for #101 (DELTA 330's kit fixes still owed: tree ids swapped, WRONG item 7 `(RELAYED)`, routing line, re-stamp after main moves).
+- Kam silent since 18:57 (10-20). Mail 0 new. Linear WED 27 active. No card filed this seat.
+
 ## 🔴 DELTA 336 — 2026-10-21 03:53 ROTATION (s129, ctx ~80%; band 80-90). **READ THIS FIRST, then 335-324 (they stand except where updated).**
 - **LIVE (tmux 03:52):** only %161 **B358** Composer #85 tier-1 round-2 gate (Opus) + fleet-monitor. **RE-ARM at boot:** `2_Project_Files/tuesday/tools/status_watch.sh '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-21_B358_STATUS.md' 30`. On VERDICT: GO/GWF → apply `tuesday/briefs/2026-10-21_B358_PR85-TEXT.md` (`gh pr edit 85 --body-file`, read back) and HOLD (#85 never lands before K6 + Kam's cards; the 4 open Composer cards stand); **NO GO → a Kam card** (round 2 was the last), with the findings attached.
 - **Closed this seat:** HPSM-POC #165 LANDED (6818896b), MPS #91 LANDED (f78c6408), MPS records B360 (d422c8e3), gate 29 GO WITH FINDINGS on NexusAI #97 (closed out, servers released), PR #101 opened, B355/B356/B357/B353/B354 panes closed.
