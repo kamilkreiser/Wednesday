@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 302 — 2026-10-20 20:23 ROTATION HANDOVER (s126, ctx 77%; band 80-90). **READ THIS FIRST, then 301 and 300 (stand except where updated).**
+### Since 301 (verified at source; today's note 19:56-20:2x)
+- **COMPOSER #83 LANDED** (B335 round-2 GO, no finding): squash -> main **eaff2b74**, tree 610ec59b = B333's prediction. Kam told (bf-43dfce5aa7bc) — **and corrected (bf-9557817b177e): the demo deploy is NOT under the grant.** Kam's ruled K1-K10 card says "nothing is deployed without your card"; card **composer-demo-deploy-eaff2b7-words-1020** filed (a = approve the 2 user-visible API sentences + deploy once the open L05 card is decided). B342 brief (tuesday/briefs/2026-10-20_B342_*) is drafted, NOT stamped: launch only after Kam rules this card AND composer-l05-setup-card-too-1014. Its drafter's Q3 (throwaway restore DB on demo Postgres) still to rule at stamp.
+- **Records done & verified:** B338 NexusAI (RD-872 Bug/Low, RD-873 Task/High, RD-786 comment 39763, C-218); B339 Composer (records/b328 folded into root main adf5692d; records/b339 e76c7b0d 1 ahead = OWED fold by the next Composer records seat; #363-#365, #326/#327 MERGED); B340 MPS (commit bd140bba; 18 tickets MPSCALC-288..305 Backlog; 31 comments; words register 170 items). All three panes closed.
+- **VM 20:05:** vm-hpsm-sm "VM running" (Tuesday's az read) — Kam told.
+### LIVE (re-arm status_watch after boot)
+%136 **B337** HPSM-POC (Paul -> SM Administrator; HPSM-POC Briefs/2026-10-20_B337_STATUS.md; at DONE: Kam gets the one line for Paul + the measured A$ delta) · %138 **gate 32** NexusAI #98 round 2 (verdict by MAIL; ANSWER-1 gave H1 5400 s) · %142 **B341** Composer PR #84 tier-1 gate (Composer Briefs/2026-10-20_B341_STATUS.md; round 1; on GO: land #84 by squash, then "Contents" joins Kam's words card).
+### OWED / QUEUE
+fleet_ack for the gate-32 question (refused 19:56: re-run) · Composer records seat (fold records/b339; #83 landing rows) · after gate 32 GO: #98 landing (forward-merge main C-184, new CodeQL, C-68 cells, same commit) · #97 counts TURN + gate 29 · B311 MPS V2 Home (READ WHOLE) · B330 Composer L1 · MPS V1 phase 2 · HPSM-POC records (B316 items, B329 shape + FOR TUESDAY).
+
 ## 🟢 DELTA 301 — 2026-10-20 19:57 CHECKPOINT (s126, ctx 71%; band 80-90). **READ THIS FIRST, then 300 (stands except where updated).**
 - **LIVE now:** %136 B337 (HPSM-POC: Paul -> SM Administrator, Step 2) · %137 B335 (Composer #83 round-2 gate, cap) · %138 gate 32 (NexusAI #98 round 2, cap; ANSWER-1 gave H1 a 5400 s deadline; verdict by MAIL) · %139 B340 (MPS records) · %140 B338 (NexusAI records) · %141 B339 (Composer records fold b328 + #363-#365). B323 DONE -> **draft PR #84** (head 0f64aee7, 11 files, opened by Tuesday 19:5x); pane closed.
 - **DRAFTER RUNNING:** B341 = tier-1 gate brief for Composer PR #84 (Opus G1; real-render page numbers + PNG look). Output tuesday/briefs/2026-10-20_B341_*: READ WHOLE, stamp MAIN_SHA (Composer main by gh api; 318df176 at 19:5x) + STAMP_TIME, launch when B335's docker-heavy runs allow.
