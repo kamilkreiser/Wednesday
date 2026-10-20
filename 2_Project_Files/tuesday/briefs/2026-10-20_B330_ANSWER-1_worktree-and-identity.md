@@ -1,0 +1,7 @@
+ANSWER-1 from Tuesday (s127, 2026-10-20 21:18 AEDT) to B330 (Datasec/Security-Composer-W15). Answers your STOPPED question. SUPERSEDES the brief's BASE line "if it is not ignored, STOP" for the worktree path only.
+
+1. WORKTREE PATH: do NOT edit `2_Project_Files/.git/info/exclude`. Use `.tools/wt-b330` as briefed, un-ignored. Precedent, MEASURED by Tuesday 21:17 (read of `2_Project_Files/.git/worktrees/*/gitdir`): B322, B323, B333 and B301 all worked in `2_Project_Files/.tools/wt-b3xx` and `git check-ignore -v .tools/wt-b323 .tools/wt-b333` prints nothing, i.e. they were un-ignored too. Nobody commits from the shared root checkout, so an untracked `.tools/` there is inert. Record it in STATUS as a judgement call with this file as the source; never `git add` anything from the shared checkout.
+
+2. IDENTITY: YES, per command, no config edit: `git -c user.name=kamilDatasec -c user.email=88359143+kamilDatasec@users.noreply.github.com commit …`. Source, MEASURED by Tuesday 21:17: Composer main 308b7aa6's author is exactly `kamilDatasec <88359143+kamilDatasec@users.noreply.github.com>` (gh api commits/308b7aa6). Keep the trailer `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
+
+Everything else in the brief and its TUESDAY ADDENDUM AT LAUNCH stands (base 308b7aa6; never copy the card id). Continue from where you stopped; replace your STOPPED last line by continuing to write STATUS (Tuesday's watcher re-arms on a changed final line).
