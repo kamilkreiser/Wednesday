@@ -8,7 +8,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🟢 DELTA 359 — 2026-10-21 08:41 (s132, ctx 73%). **READ THIS FIRST; supersedes 357/358's LIVE and QUEUED lines.**
 - **LIVE (tmux 08:41; status_watch armed on each, RE-ARM at boot):** B380 Lane 1 (`HPSM-POC-D12`) · B379 MPS fix r2 (`MPS-W24`) · **B387 PR #168 gate (`HPSM-POC-G17`, rung 5 061653f7)** · **B381 Lane 2 (`HPSM-POC-D13`, rung 5 19a0b87c)**.
-- **QUEUED:** B383 (`D15`, Opus) → B386 (`D17`, Opus). Load ~12 at 08:41.
+- **LAUNCHED from the queue (now empty):** B383 Lane 4 (`D15`, Opus, rung 5 c8a2b2ad) and B386 Lane 6 (`D17`, Opus, rung 5 334a9e34). Six seats live.
 - **B385 DONE → NexusAI PR #104 OPEN** (RD-879; lockfile-only follow-redirects 1.16.1; head c139e4a8, base main 115a775b; verified: exactly the one lock entry). Tracked waiter on its checks (scratchpad `wait_pr104.sh`; dies with this seat: re-read check-runs at c139e4a8 + open alerts on refs/pull/104/head). **Next:** confirm `audit-production-deps` SUCCESS on the PR ref; a LIGHT tier-2 gate (equivalence: one lock entry, CodeQL no new alert, verify counts untouched); then land by **C-190 same-commit FF via a NexusAI seat's land.sh** (never squash); then #103 forward-merges main (and #101's gate 33 re-stamps to its new head).
 
 ## 🟢 DELTA 358 — 2026-10-21 08:16 (s132). **READ THIS FIRST; adds to 357.**
