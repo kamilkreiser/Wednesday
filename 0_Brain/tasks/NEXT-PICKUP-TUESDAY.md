@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 328 — 2026-10-21 02:45 70% CHECKPOINT (s129). **READ THIS FIRST; supersedes 327's LIVE list.**
+- **LIVE (tmux 02:44); RE-ARM status_watch on each STATUS at boot (Datasec root `/Volumes/Laptop-DEV/!CODING/Datasec/`):**
+  - %155 **B354** MPS #91 tier-2 gate → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B354_STATUS.md` (per 323).
+  - %157 **B355 DONE** (READY verified; PR #101 opened) — pane KEPT as gate 29's live NexusAI negative control; close it (after a `pgrep -fl b355` in its own call) once gate 29 has its verdict. wake_ack it if it pings.
+  - %159 **GATE 29** NexusAI #97, Opus 4.8; verdict by MAIL; jest lock FIFO (B355's verify released at ~02:42).
+  - %160 **B357** HPSM-POC #165 tier-2 gate → `HPSM-POC/…/Briefs/2026-10-21_B357_STATUS.md` (per 327).
+  - **B358 waiter** (tracked task of s129; DIES with this seat): launches `Datasec/Security-Composer-G29` from `tuesday/briefs/2026-10-21_B358_SEAT-G29_composer-pr85-gate-tier1-round2.md` (STAMPED) at load1 < 7. **If no `Datasec/Security-Composer-G29` pane exists at the successor's boot: launch it by the brief's own launch line (line 17) at load1 < 7** (re-read main = 308b7aa6 and #85 head = e969ad38 first; a move = re-stamp). Then status_watch `Datasec Security Composer/…/Briefs/2026-10-21_B358_STATUS.md`. Round 2 of 2: NO GO → Kam card. Apply `tuesday/briefs/2026-10-21_B358_PR85-TEXT.md` to PR #85 AFTER the verdict (`gh pr edit 85 --body-file`, read back).
+- **NEW PR #101** (NexusAI RD-874 + RD-875, head 6e947f4d, non-draft, https://github.com/datasecau/Reporting_Dashboard_Au/pull/101). **B359 tier-2 gate DRAFTER running** (dies with this seat) → `tuesday/briefs/2026-10-21_B359_SEAT-G24_nexusai-gate-pr101-tier2.md` + DRAFTER-REPORT; if missing at boot, re-commission (shape B336 brief + B355 STATUS). READ WHOLE, stamp, launch Sonnet at load1 < 7. Counts file shared with #97/#67: whichever lands second needs a counts-only TURN. Land by NexusAI's rule (C-190: same commit, never squash) — READ C-190 first.
+- Load is the limit (~8-10 with 4-5 seats). Ledger edited (w=1) → regenerate BOTH digests at rotation.
+
 ## 🟢 DELTA 327 — 2026-10-21 02:31 CHECKPOINT (s129, ctx 65%). **READ THIS FIRST; supersedes 325's LIVE list.**
 - **LIVE (tmux 02:30); RE-ARM status_watch on each at boot; Datasec root `/Volumes/Laptop-DEV/!CODING/Datasec/`:**
   - %155 **B354** MPS #91 tier-2 gate → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B354_STATUS.md` (per 323 on verdict).
