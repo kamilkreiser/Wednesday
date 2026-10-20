@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 323 — 2026-10-21 01:08 ROTATION (s128, ctx ~80%; band 80-90). **READ THIS FIRST, then 322-320 (stand except where updated).**
+- **LIVE (tmux 01:07), each with a status_watch of s128 — RE-ARM at boot with `2_Project_Files/tuesday/tools/status_watch.sh <STATUS> 30`:**
+  - %155 **B354** MPS PR #91 tier-2 gate (Sonnet) → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B354_STATUS.md`. On GO/GWF unconditional: `gh pr merge 91 --squash --match-head-commit 5295ff7aec9518a5da2b25db56fff0d7c5f7c042`, subject naming MPSCALC-306/-307/-308/-309/-311; verify main tree; close pane after a SEPARATE process check.
+  - %156 **B353** Composer PR #85 round-2 fix (Opus) → `Datasec Security Composer/1_Project_Definition/Briefs/2026-10-21_B353_STATUS.md`. On READY: verify (ls-remote; compare 308b7aa6...H; files within the brief's Yours), rewrite PR #85's stale body, then a tier-1 Opus round-2 gate (drafter from B350's brief + B353 STATUS). **Round 2 is the LAST: a NO GO → Kam card.** #85 never lands before K6 + Kam's words/deploy cards.
+- **Gate 29 (NexusAI #97 @ 115a775b): kit + launcher re-pinned and pushed** (`fleet/qa-agent/briefs/2026-10-21_nexusai-gate29_REPIN-REPORT.md`). Launch needs: kit READ WHOLE + 17 slot names stamped (see REPIN-REPORT) + routing line + **a live NexusAI builder pane (guard 38R; never loosen)**. If no NexusAI build is queued, a small NexusAI records seat (RD-874/RD-875 follow-ups? or the C-entry for #98) would satisfy it; else card Kam.
+- **OWED:** Composer records seat after #85 round 2 (fold records/b344; B341-2; B350 pre-existing strict-scanner gap BACKLOG row; field-types reproduction in HPSM-POC BACKLOG row); MPS records for B354 after #91 lands; B348-2 autosave history-cost ruling (MPSCALC-314). Re-read vm-hpsm-sm Mon 26 Oct (read-only) after the first WU window.
+- **Digests regenerated at this rotation (ledger w=2 row).** Today's note: `daily_tuesday/2026-10-21.md` (retro at 01:0x).
+- Nothing from Kam since 18:57 (20 Oct). No card open from this seat beyond 311's list.
+
 ## 🟢 DELTA 322 — 2026-10-21 01:05 (s128, ctx ~77%). **Adds to 321.**
 - **B354 (MPS PR #91 tier-2 gate) LAUNCHED** %155 `Datasec/MPS-G28` (Sonnet; brief `tuesday/briefs/2026-10-21_B354_SEAT-G28_mps-gate-pr91-tier2.md`, stamped main 7bd7046a). status_watch on `MPS/…/Briefs/2026-10-21_B354_STATUS.md`. **On GO/GWF (unconditional, CodeQL 4/4 0 open):** land `gh pr merge 91 --squash --match-head-commit 5295ff7aec9518a5da2b25db56fff0d7c5f7c042` with a subject naming MPSCALC-306/-307/-308/-309/-311 (B354 flagged -311 missing from the title). Conditional verdict → wait for CodeQL, then land. NO GO → fix round (cap 2).
 - B353 Composer round-2 drafter still running.
