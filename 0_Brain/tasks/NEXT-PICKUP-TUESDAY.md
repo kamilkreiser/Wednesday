@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 305 — 2026-10-20 21:08 CHECKPOINT (s127, ctx 52%). **READ THIS FIRST; supersedes 304's LIVE and DRAFTERS lines.**
+- **LIVE (STATUS watchers armed, tracked tasks of s127; RE-ARM after rotation):** %136 B337 HPSM-POC (holding by design on its evidence pull; wake_ack'd) · %142 B341 Composer #84 gate · %143 B311 MPS V2 Home · **%144 B344 Composer records** (launched 21:07; Step 0 copy present) · **%145 B343 NexusAI #98 LANDING** (launched 21:08, Sonnet, WED_USAGE_STOP=100; brief stamped main aa811cf2; on DONE: verify ls-remote main = its H, Deploy demo skipped, 63 alerts fixed by number, then APPLY its PR98-TEXT with gh pr edit 98 and have a records step file G32-1 + uat-run.js; then #97 counts TURN + gate 29).
+- **Feedback sweep DONE** (projects_index/2026-10-20_rotation-sweep-2100.md): 0 items, nothing for Kam.
+- **DRAFTER STILL RUNNING:** B345 MPS V1 phase 2 (tuesday/briefs/2026-10-20_B345_*): READ WHOLE, stamp, launch when load1 < 7.
+- **QUEUE:** B330 Composer L1 (after B341 frees docker) · HPSM-POC records (B316 items, B329 shape, B337 FOR TUESDAY 1-4: WU restart window, budget A$250 vs 24x7 ~A$449/mo, keep Analyst group, b337-probe cleanup = Kam card candidates) after B337's final line.
+
 ## 🟢 DELTA 304 — 2026-10-20 21:01 BOOT CHECKPOINT (s127, ctx 45%). **READ THIS FIRST, then 303 (stands except where updated).**
 - **LIVE (STATUS watchers armed as tracked tasks of s127; RE-ARM after rotation with tuesday/tools/status_watch.sh <STATUS> 30):** %136 B337 HPSM-POC (STATUS body written 20:50, FOR TUESDAY 1-4 inside it; final line not yet) · %142 B341 Composer #84 gate (no STATUS yet) · **%143 B311 MPS V2 Home LAUNCHED 21:00** (Sonnet; MPS main 67bf2004 by ls-remote; prerequisites measured by gh api contents; STATUS `…/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-20_B311_STATUS.md`).
 - **DRAFTERS RUNNING (Agent tool, Sonnet; they die with this seat — if a file is missing at the successor's boot, re-commission):** B343 #98 landing (tuesday/briefs/2026-10-20_B343_*; NexusAI main aa811cf, #98 head e80920c at 20:57) · rotation feedback sweep -> 0_Brain/projects_index/2026-10-20_rotation-sweep-2100.md · B344 Composer records (fold records/b339 + #83 landing rows + B335 note) · B345 MPS V1 phase 2 (R-V1-7, B325-1/-5; partitioned against B311). Each output: READ WHOLE, stamp, launch (load1 < 7).
