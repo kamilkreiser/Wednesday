@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 353 — 2026-10-21 07:49 55% CHECKPOINT (s132). **READ THIS FIRST; supersedes 352's B379 and DRAFTERS lines.**
+- **STAMPED (read whole, slots 0): B382 Lane 3, B381 Lane 2, B383 Lane 4, B385 NexusAI audit fix, plus B379.** All five sit in ONE load-gated launch queue (scratchpad `launchq.sh` + `launchq.txt`, order B382 → B385 → B379 → B381 → B383; one launch per load1<7 window, 120 s apart; dies with this seat). **AT BOOT: `tmux list-panes`; any of `Datasec/HPSM-POC-D14`, `Datasec/NexusAI-R13`, `Datasec/MPS-W24`, `Datasec/HPSM-POC-D13`, `Datasec/HPSM-POC-D15` absent → launch it with its brief's own launch line (B383 last); confirm rung 5; arm status_watch on its STATUS.**
+- **Still drafting:** B380 Lane 1 (hosted speed; goes FIRST once stamped) and B384 Lane 5 (CI/e2e). If their files are missing at boot, re-commission from DELTA 352's lines.
+- Targets stamped: Lane 3 READY by 14:00, Lane 2 by 15:00 (deploy freeze Wed 21 Oct 23:59).
+
 ## 🟢 DELTA 352 — 2026-10-21 07:44 BOOT CHECKPOINT (s132, ctx 41% after the brain load). **READ THIS FIRST, then 351 (stands except where updated).**
 - **CORRECTION to 351:** "Q10 deploy freeze Wed 22 Oct" is a weekday/date mismatch. **Wednesday = 21 Oct** (`date -j`). The freeze for a Thursday review is **Wed 21 Oct 23:59 AEDT** (Thu 22 Oct 23:59 for Friday), as the readiness file says.
 - **LIVE:** %179 B377 (watcher armed) · %180 B378 (rung 5 confirmed, transcript ea6bfab3; watcher armed on its STATUS, not yet written). **B379 was NOT launched by s131's waiter** (died with the seat): pins re-read unmoved (a3cfda72 / 1eccbc8b), relaunch handed to a TRACKED waiter at load1 < 7 (scratchpad `waiter_b379.sh`; dies with this seat — if no `Datasec/MPS-W24` pane at the next boot, launch with the brief's own line).
