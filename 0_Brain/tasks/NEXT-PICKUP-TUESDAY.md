@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 306 — 2026-10-20 21:15 CHECKPOINT (s127, ctx 61%). **READ THIS FIRST; supersedes 305's LIVE/QUEUE.**
+- **COMPOSER #84 LANDED** (B341 NO GO for B341-1 only = card id with the sample client's abbreviation in two branch commit messages; discharged by Tuesday's clean squash message): main **308b7aa6**, tree c994be3f = the gate's predicted merged tree; landed message term grep 0. NOT deployed. Card **composer-contents-word-pr84-1020** filed (the word "Contents"). Ledger row written (w=2, minted id carried a sample-client abbreviation) → **regenerate BOTH digests at the next rotation/wrap**. OWED to the next Composer records seat: B341-2 BACKLOG row; C-29 / #103 / #159 (summary now page 3, template /3), #315 applies to the contents page.
+- **LIVE (STATUS watchers armed; RE-ARM after rotation):** %136 B337 HPSM-POC · %143 B311 MPS V2 Home · %144 B344 Composer records · %145 B343 NexusAI #98 landing · **%146 B330 Composer L1** (base moved to 308b7aa6 by ADDENDUM AT LAUNCH; built NOT cut, K6; PR as draft "HOLD K6") · **%147 B345 MPS V1 phase 2** (beside B311; b46-home lines split mine/B311's).
+- **On B343 DONE:** verify main = H, Deploy demo skipped, then `gh pr edit 98` with its PR98-TEXT, then the records seat files G32-1 + uat-run.js; then #97 counts TURN + gate 29.
+- **QUEUE:** HPSM-POC records (B316 items, B329 shape, B337 FOR TUESDAY 1-4 → Kam cards for the WU window + budget) after B337's final line. Nothing else queued.
+
 ## 🟢 DELTA 305 — 2026-10-20 21:08 CHECKPOINT (s127, ctx 52%). **READ THIS FIRST; supersedes 304's LIVE and DRAFTERS lines.**
 - **LIVE (STATUS watchers armed, tracked tasks of s127; RE-ARM after rotation):** %136 B337 HPSM-POC (holding by design on its evidence pull; wake_ack'd) · %142 B341 Composer #84 gate · %143 B311 MPS V2 Home · **%144 B344 Composer records** (launched 21:07; Step 0 copy present) · **%145 B343 NexusAI #98 LANDING** (launched 21:08, Sonnet, WED_USAGE_STOP=100; brief stamped main aa811cf2; on DONE: verify ls-remote main = its H, Deploy demo skipped, 63 alerts fixed by number, then APPLY its PR98-TEXT with gh pr edit 98 and have a records step file G32-1 + uat-run.js; then #97 counts TURN + gate 29).
 - **Feedback sweep DONE** (projects_index/2026-10-20_rotation-sweep-2100.md): 0 items, nothing for Kam.
