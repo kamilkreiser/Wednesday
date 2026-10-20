@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 310 — 2026-10-20 22:23 (s127, ctx ~76%). **READ THIS FIRST; adds to 309.**
+- **MPS #90 OPENED (B345 V1 phase 2 READY verified: head 5f0bd02e, 32 files, 0 overlap with #89), NON-draft: CodeQL "PR #90 | dynamic" started.** Pane %147 closed. **Gate B348 drafter RUNNING** → tuesday/briefs/2026-10-20_B348_* : READ WHOLE, stamp (MAIN_SHA by ls-remote, STAMP_TIME by datetime.now in the script), launch as Datasec/MPS-G26 at load1 < 7 with WED_USAGE_STOP=100, arm status_watch on `…/MPS…/Briefs/2026-10-20_B348_STATUS.md`. If the drafter's files are missing at the successor's boot, re-commission it (template = the B347 brief).
+- **LIVE:** %145 B343 · %146 B330 · %149 B347 (#89 gate; MPS-G25).
+
 ## 🟢 DELTA 309 — 2026-10-20 22:19 CHECKPOINT (s127, ctx 74%). **READ THIS FIRST; supersedes 308's LIVE.**
 - **B346 HPSM-POC DONE** (WU window set; records/b346 pushed, head 49d71cb7, 2 ahead of analysis main; HPSMPOC-303/-304 filed; 3 Done). **OWED: open the HPSM-POC records PR for records/b346 after deciding its FOR TUESDAY 1** (the K8 card id with the sample-client abbreviation survives in 4 byte copies on the branch; lean keep: private analysis repo, unedited records; or commission a redaction pass). Re-read the VM Mon 26 Oct after the first window (read-only).
 - **LIVE (tmux list 22:19; watchers armed):** %145 B343 NexusAI #98 landing (full verify under the jest lock) · %146 B330 Composer L1 · %147 B345 MPS V1 phase 2 · **%149 B347 MPS #89 gate** (launched by the load waiter; its watcher is the waiter task). B347 asked about CodeQL: **MPS default setup does not start CodeQL on a draft-opened PR, nor on ready_for_review, nor on reopen (Tuesday measured)**; ANSWER-1 (tuesday/briefs/2026-10-20_B347_ANSWER-1_codeql-pending.md): verdict with "(conditional: CodeQL pending)"; **before landing #89 a seat must push ONE no-tree-change commit to b311/v2-home, then CodeQL is read on that head.** Open future MPS PRs NON-draft.
