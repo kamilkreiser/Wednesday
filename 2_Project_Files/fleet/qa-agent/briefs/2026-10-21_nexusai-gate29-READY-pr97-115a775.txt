@@ -1,0 +1,29 @@
+SOURCE: /Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/1_Project_Definition/Briefs/2026-10-20_B349_STATUS.md
+COPIED: the section "## GATE 29 RE-PIN SHEET" (source lines 78-103), verbatim, by the gate-29 re-pin drafter on 2026-10-21; source sha256 41acd0953739cede282eabcdbea1672070459f023baf8b4881d76005460451ff
+
+## GATE 29 RE-PIN SHEET
+1. **H** = `115a775b6d5808629f493ef7a3f602d8c5853a22` (ls-remote after the push); tree `3cf0b847c581fddcf33ec0e3b0533584be06d3f4`; parents `278afc25dda22ed8511d33e3e1cd12b0afde3487` and `d463f8817fba925dee7e78c5216df3d5ea8ad073`; main's tree `53d51c59698401237b1b1573fa942bf9f650b51d` (re-read, equal to the pin).
+2. Range `d463f881..H`: `rev-list --count` **8**; `rev-list --left-right --count d463f881...H` **`0 8`**; `merge-base --is-ancestor d463f881 H` rc **0** (the gate's mode 0 is true again against the new main).
+3. The 8 PR paths, `diff --numstat d463f881 H` and blob at H:
+
+| path | +/- | blob at H | vs `278afc25` |
+|---|---|---|---|
+| `__tests__/helpers/rd774-sql-spy-preload.js` | 23/0 | `78c21dfa0dacddaef8d6b0855cc9404d57121380` | unchanged |
+| `__tests__/rd774-risk-sql-templates.test.js` | 564/0 | `0cfd42ee6fd1b8ae32c659f430cbcf9372e56321` | unchanged |
+| `__tests__/security-fixes.test.js` | 77/77 | `e47f3545b0cd0a69eb9dedabf840fe31f18e79ef` | unchanged |
+| `backend/server.js` | 95/434 | `b01481701d954eee4f07959ad115846876d7d5de` | NEW (was `5fdf2912…`; +15/-3 from main) |
+| `backend/services/riskSqlTemplates.js` | 300/0 | `1ba37db02b31558a646cf58fb2af5982d2c4ba54` | unchanged |
+| `backend/simpleDb.js` | 17/72 | `5891c809eafeb32b01d9f4f80746383b8f4ac200` | unchanged |
+| `backend/validators.js` | 3/2 | `7657ce843bc17632889a70a32a4516f7c395cd39` | unchanged |
+| `scripts/verify-expected-counts.json` | 3/3 | `c050e78328616b96862512739e8cffc6b4a6e603` | NEW (was `57659c6c…`) |
+
+4. Counts: main `4934/303` (blob `a28458adef1e24416865a425201dc4bc840f9f30`); previous head `4910/303` (blob `57659c6cfc51d7ddffeb3e8ed31f1b7db4ef901c`); **H `4964/304`** (blob `c050e78328616b96862512739e8cffc6b4a6e603`); delta over main **+30 tests / +1 suite**; over the previous head +54 / +1.
+5. CodeQL at H: analyses js/ts 1988381038, python 1988367739, actions 1988365161, each 0 results; open alerts on the PR ref 0; control (`refs/pull/58/head`, fixed) 4; `CodeQL` check run success ("No new alerts in code changed by this pull request"); `build` (Node 24) success; 8 of 8 check runs success; #272 and #273 `fixed` on the PR ref; `mergeable` MERGEABLE, `mergeStateStatus` CLEAN, draft true.
+6. Conflict set measured (Step 3): `changed in both` = `backend/server.js` (clean) + counts file (one marker hunk). Hit in Step 4: the counts file only. C-112 numbers: 364 paths, 3 equal branch only, 30 equal main only, 331 equal both, neither 0, absent 0 (runner and C-133 accounting not needed). Named-cell table above (40/40 green, 625 tests); verify at H `PASS 4964/4964 across 304`.
+7. `git diff --stat 278afc25 H -- backend`: `backend/server.js | 18 +++++++++++++++---`, **1 file changed, 15 insertions(+), 3 deletions(-)** (as expected).
+8. Census rows (READY mail, 11 rows), at H. Main's hunks: +3 lines at `:7984` and net +9 in `checkForCurrentUserQuery` at `:8100`, so any `server.js` line above `:7984` is unchanged and any line below `:8100` moves **+12** (the lines in between move +3; none of the census lines sit there).
+   - Row 1 `POST /api/risk-conditions`: moved, `:21040` -> **`:21052`** (+12); behaviour unchanged. Row 2 `PUT /api/risk-conditions/:id`: `:21317` -> **`:21329`**. Row 3 `DELETE /api/risk-conditions/:id`: `:21351` -> **`:21363`**. Row 4 `POST /api/risk-conditions/sync`: `:21107` -> **`:21119`**. Row 5 `POST /api/settings/risk-definitions`: `:20753` -> **`:20765`**. All five still `requireRiskConditionAdmin`; **`requireRiskConditionAdmin` itself `:21019` -> `:21031`**.
+   - Row 6 `POST /api/validate-condition`: **unchanged at `:6945`** (above main's hunks); its add call `:7053` also unchanged; still `requireAdminFor` when `saveToDatabase`.
+   - Row 7 GET `/api/risk-conditions` auto-sync: route lines +12 (the sync call was `:21126`/`:21135`; I did not re-grep these two, they sit below `:8100` so the shift is arithmetic, UNMEASURED beyond `:21119`); behaviour unchanged. Row 8 kql_query cache: `:4923/:4935` unchanged (above `:7984`); GET `/:level` and `/:id/execute` below it, `/:id/execute` measured `:21227` -> **`:21239`**; behaviour unchanged. Row 9 boot `ensureLowTonerRiskCondition`: **unchanged at `:5058`** (measured). Row 10 `POST /api/admin/erasure-request`: `:18958` -> **`:18970`** (measured, +12); gate unchanged. Row 11 `simpleDb.js`: unchanged (blob `5891c809…` equals `278afc25`'s).
+   - Additional anchors at H, requested: `app.post('/api/risk-conditions'` `:21052`; `app.put('/api/risk-conditions/:id'` `:21329`; `app.delete('/api/risk-conditions/:id'` `:21363`; `app.post('/api/risk-conditions/sync'` `:21119`; `app.post('/api/settings/risk-definitions'` `:20765`; `app.post('/api/validate-condition'` `:6945`; `requireRiskConditionAdmin` definition `:21031`.
+   - Product behaviour of all 11 rows: unchanged by this merge; main's change is to `checkForCurrentUserQuery` (RD-863) and the three lines before it, which no census row touches. `logSafe` count in `server.js` 26 at both `278afc25` and H.
