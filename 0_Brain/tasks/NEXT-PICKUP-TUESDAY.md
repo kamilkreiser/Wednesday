@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 318 — 2026-10-21 00:10 CHECKPOINT (s128, ctx 70%). **Adds to 317.**
+- **B351 DONE + verified** (MPS root 387608b4; MPSCALC-306..315 Backlog; B352 KEYS 306/307/308/309). Pane %154 closed.
+- **B352 asked (12:47Z) about the one existing autosave test that pins the B348-1 defect → ANSWER-1** (`tuesday/briefs/2026-10-20_B352_ANSWER-1_leave-flush-existing-pin.md`): YES for that one test, keeping the timer-cancel half; file + tap (MPS has no inbox route: send_brief refuses).
+- **Ledger edited (w=2 pane-close row) → regenerate BOTH digests at rotation.** Today's note is now `daily_tuesday/2026-10-21.md`.
+- LIVE unchanged: %151 B349 (C-68 hold under the jest lock), %152 B350, %153 B352, %146 B330 holding.
+
 ## 🟢 DELTA 317 — 2026-10-20 23:43 CHECKPOINT (s128, ctx 68%). **READ THIS FIRST; supersedes 316's DRAFTERS and LIVE.**
 - **LIVE (tmux 23:42), each with a status_watch of s128 — RE-ARM after rotation:** %151 **B349** NexusAI #97 TURN (`NexusAI/…/Briefs/2026-10-20_B349_STATUS.md`) · %152 **B350** Composer #85 tier-1 gate (Opus; `Composer/…/Briefs/2026-10-20_B350_STATUS.md`) · %153 **B352** MPS follow-up fix (`MPS/…/Briefs/2026-10-20_B352_STATUS.md`) · %154 **B351** MPS records (`MPS/…/Briefs/2026-10-20_B351_STATUS.md`; its first STATUS line becomes `B352 KEYS: …`) · %146 **B330** holding for B350's questions (wake_acked).
 - **On B349 READY:** verify H (ls-remote; compare d463f881...H = 0 behind), then a drafter re-pins gate 29's kit + launcher from B349's RE-PIN SHEET (`fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md`, B349 DRAFTER-REPORT §5), routing line `QA/NexusAI-gate29|tuesday-agent@agentmail.to|no`, launch tier 1 Opus. Apply B349's PR97-TEXT.
