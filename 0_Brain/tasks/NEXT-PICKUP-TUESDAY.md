@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 357 — 2026-10-21 08:11 70% CHECKPOINT (s132). **READ THIS FIRST; supersedes 356's LIVE and Queue lines.**
+- **LIVE (tmux 08:11; status_watch armed on each STATUS, RE-ARM at boot):** B380 Lane 1 (`HPSM-POC-D12`) · B382 Lane 3 (`HPSM-POC-D14`) · **B385 NexusAI audit fix (`NexusAI-R13`, rung 5 783c1cb4)** · **B379 MPS #93 fix round 2 (`MPS-W24`, rung 5 9cd727a7)**.
+- **QUEUED (scratchpad launchq; dies with this seat): B381 (`D13`) → B383 (`D15`, Opus) → B386 (`D17`, Opus).** At boot: launch any whose pane is absent, one per load1<7 window, each with its brief's own launch line; confirm rung 5.
+- **B386 Lane 6** stamped (137 lines; Q1-Q7 recommended). **OWED: its WORD PACK** (brief section "WORD PACK FOR TUESDAY": B377-4/-12/-13/-15/-16/-17 + the -18/-19 texts, exact strings + file:line) → ONE Kam card, action first, before/after per item, default "no word changes for Thursday".
+- **On READY lines:** verify at source, open the PR, commission the gate at the stamped tier (B380, B381, B386 tier 1; B382 tier 2; B385 tier 2; B379 → round-2 tier-1 gate, the LAST under the cap: NO GO → Kam card). Then land by each project's convention (HPSM-POC squash --match-head-commit; NexusAI C-190 FF via a NexusAI seat; MPS squash), deploy READY HPSM-POC work to hosted under the push-to-demo grant before **Wed 21 Oct 23:59**, and re-walk hosted (B377 shape) after.
+- **18:00 today:** re-raise card `hpsmpoc-hosted-demo-data-cleanup-1021` if unruled.
+
 ## 🟢 DELTA 356 — 2026-10-21 08:07 65% LIGHT CHECKPOINT (s132). **READ THIS FIRST; adds to 355.**
 - **LIVE:** B380 Lane 1 (`Datasec/HPSM-POC-D12`, rung 5 eb965944; ADDENDUM-1 delivered: measure the red-main timing test 10+10, do not edit it) · B382 Lane 3 (`D14`, mutant runs; holding by design, wake_ack'd). B377 and B378 DONE, panes closed.
 - **Records PR #128 LANDED** 08:09 → records main 2bb78382 (tree = head ee105fb4; C-129, C-130 on main).
