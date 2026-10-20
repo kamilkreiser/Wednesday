@@ -1,0 +1,61 @@
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1662 (NOT 1661 - renumbered) at 047c7845761d, tier 2 - logger swap + both BW1 notes; W11 pins the conjunct at the return value; KS-1694 filed
+2026-10-20T01:31:33.000Z
+
+## READY FOR GATE — #1662 (KS-1682 item 2 + BOTH gate BW1 notes) at head 047c7845761db1774ed5b3a13f45cff241e14df6
+
+⚠ **CORRECTION: the PR number is #1662, not #1661.** My earlier mails and your ANSWER say "#1661"; another seat took that number while my preflight was running. Everything else in those mails stands.
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1662 | base `develop` | **3 files, +241/-12** | `Refs KS-1682` (stays In Progress).
+**Head read from origin in the same action as this mail** (`gh pr view 1662 --json headRefOid`), equals my local HEAD: `047c7845761db1774ed5b3a13f45cff241e14df6`. **Tier 2 unless you read the logger swap as touching auth logic** — it changes the SINK of three warnings and nothing about selection or the fail-closed branches; I flagged at plan time that I would stop if it drifted, and it did not.
+**Ticket comment:** KS-1682 comment `2a2f8699-2922-464e-bb60-aab3f78cedae`, read back by id, **4608 bytes sent, 4608 read back, identical**, all 6 anchors present.
+
+## THE THREE THINGS IT CARRIES
+
+**1. The swap (BL1 N4).** Three `console.warn` -> `logger.warn`. The `[MSAL]` prefix dropped (the logger stamps `service`). The two `[MSAL]` `console.log` lines left alone, as you confirmed. The `:252` catch still drops the parse error.
+
+**2. The measurement your brief listed as unmeasured — and it came back the DANGEROUS way.**
+```
+vi.spyOn(console,'warn') sees a direct console.warn   -> YES   (positive control)
+vi.spyOn(console,'warn') sees logger.warn             -> NO
+patched process.stdout.write sees logger.warn         -> NO
+patched process.stderr.write sees logger.warn         -> NO
+   ...same, for a logger CONSTRUCTED AFTER the patch  -> NO    (not a captured stream ref)
+logger.on('data') receives it                         -> YES   { message, level, service, timestamp }
+```
+**A console-based check on these three lines would record zero observations and pass forever.** So the BL1 log-hygiene probe's shape does NOT survive the swap, and I did not find that out by assuming it. The six cells hook `logger.on('data')`; **L5 pins the routing with a live console spy INSIDE the cell**, asserting the spy caught its own control line first, so "console saw nothing" cannot be vacuous. The whole table is in `token-manager.ts`'s doc comment so the next person does not re-derive it.
+
+**3. NOTE 1 — you were right, and the correction is where it will be acted on.** My "unobservable at the return value" claim held only for a SINGLE-entry cache. **W11** is the two-entry cell and it reds when the conjunct is dropped; **one arm now reds BOTH W11 (return value) and L3 (which warning fires)**, so the clause is pinned from two directions. I replaced the wording in the FILE HEADER, because that is live documentation, and left #1660's body and my earlier Linear comment as written — I am not rewriting the record, only the thing future readers act on. The general line, in the header: *a constraint adopted for one family of cells is not a property of the function.*
+
+**NOTE 2 — W6 tightened.** `!== ''` let `undefined`-via-cast and whitespace-only through (`'   ' !== ''`). Now asserts type AND non-blankness. W11's valid fixture is registered in `SECRET` so W6 still guards every secret a cell seeds; the `''` W11 also seeds is a literal in view, because registering it would contradict W6's claim. **I caught one of my own slips here:** I first registered `twoEntryValid` while W11 still seeded `SECRET.exact` — a registered secret no cell used, which is the exact sloppiness W6 exists to catch. Fixed before commit.
+
+## TEST EVIDENCE
+
+- **Suite, BOTH ENDS MEASURED on the same clone:** develop `108091b2e1c1` = **23 files / 224 cells / 224 passed / 0 failed** (checked out detached and run, NOT subtracted from an earlier reading); this head = **24 files / 231 cells / 231 passed / 0 failed**. Delta 7 = the logger file's 6 + W11. Account-match file 11 -> 12. **0 vanished.**
+  ⚠ **A slip I corrected rather than shipped:** the PR body first said develop was **225**, which I wrote from memory. It is **224**. I fixed the number AND then went and measured it, rather than leaving a derived figure described as measured. Your own rule, caught on myself twice today.
+- **`tsc --noEmit` rc 0, 0 errors**, child `tsconfig` with `exclude: []`; control: child lists 23 `src/__tests__` files, parent **0**. Not committed.
+- **Red-proof: 14 ADMISSIBLE arms across two rounds, 14 killed by assertion, 0 survivors.** Each on a snapshot with an exact-count anchor, each **`tsc` rc 0 on its own**, restore asserted by **sha256 + unique anchor present exactly 1x** (every restore MATCH), `0 passed AND 0 failed` treated as LOADFAIL — none occurred.
+  revert w1 to console -> L1 | revert w3 to console -> L2,L3,L4,**L5** | **drop `e.secret !== ''` -> W11 AND L3** | text drift -> L1 | leak the account id -> L2,L3,**L4** | leak the cache contents -> L2,L3,**L4** | level warn->info -> L1 | warn on success -> **L0** | `defaultMeta` service-key drift -> L1 | whitespace secret -> **W6** | `undefined` secret via cast -> **W6** | `''` secret -> W6 (the form the OLD control did catch, as a regression check) | duplicate secret -> W6
+  **ONE ARM WAS INADMISSIBLE AND COUNTS FOR NOTHING:** `defaultMeta: {}` removed `serviceName`'s only use, TS6133. I replaced it with the key-drift mutant rather than quietly dropping the coverage.
+
+**NOT RUN / NOT COVERED:**
+- No real sign-in against Microsoft. Every msal fact is a source reading plus a local round trip through msal's own serialiser.
+- **The four platform suites were NOT run** — three warning calls change their sink and the rest is test files; no route, no spec entry, no HTTP behaviour, so none of them can observe it.
+- **`e &&` stays unpinnable** — your gate reproduced why independently (msal-node 3.8.10 `Deserializer.ts:159`).
+- **PREFLIGHT: 13/16 ran, 3 SKIPPED (legs 3, 4, 8 — local stack not up), nothing failed. NOT A PASS.** Quoted in full in the PR's first comment, with the reason I did not start the stack (another seat on the shared Docker VM) stated as a reason, not an excuse. Every `FAIL`-shaped hit attributed: `^FAIL:` 0, `preflight gate FAILED` 0, and **zero** non-zero `N failed` lines not prefixed `ok`/`PASS:`.
+- Deploy state untouched and unclaimed. No `az`, no box writes, no Entra calls.
+
+## KS-1694 FILED — and the gate's framing UNDERSTATED it
+Your note 2 said pglite "is not declared in m365-integration's package". Measured: **no workspace member declares it at all** — not the service, not the root, not any member. It reaches `node_modules` only as a transitive dep of **another service's** Prisma (`services/originate` -> `prisma@7.8.0` -> `@prisma/dev@0.24.3` -> `@electric-sql/pglite@0.4.1`, hoisted). So two m365 suites load by accident of originate's dependency tree.
+**Latent, not present** — my clean `npm ci` resolves it and the suite is green, which is why I did not file it as a break. **Corroboration that it is not hypothetical: KS-664 records a lockfile regeneration already moving this exact subtree** ("downgraded ... `@prisma/get-platform` 7.8.0->7.2.0" and dropped packages). Board-searched first over **1682 issues, archived included, pagination exhausted**: `pglite` 1 hit (KS-664, in passing; no `m365`, no undeclared-dep mention — not a duplicate), `electric-sql` 0, `undeclared dependency` 0, `transitive dependency` 0. **Positive controls same corpus and moment:** `m365-integration` 35, `package.json` 80, `hoisted` 25. **KS-1694**, Backlog, Medium, Bug.
+
+## KS-1689 EVIDENCE CORRECTION POSTED
+Comment `25fc017b-5431-4107-be97-6e20fa5c4d46`, read back by id, 2380 bytes identical. Facts only: `setInterval` 0, `cron` 0, but **`setTimeout` 21 and `schedule` 5**, every one attributed — 16 test-harness `setTimeout`s, and the 5 non-test hits all `src/db.ts`'s connection-retry backoff (`:84`, `:111`, `:113`, `:133`, `:162`). **The conclusion "no scheduled token refresh" stands; the ticket's "0 hits" does not.** Nothing built.
+
+## LANDING, WITH THE DEVELOP IT WAS COMPUTED AGAINST
+**Landing tree `ae0fe17254427d390bfb181954ef00113308a817` on develop `3cc46ae41fed0ba8f9b3423f7737344a4916c948`**, from head `047c7845761d`, computed 01:29Z, 0 conflict lines.
+**develop moved FOUR times during this work:** `f4259b8ed387` -> `86df4f5a52cc` (#1655) -> `610570e5a757` (#1657) -> `108091b2e1c1` (**my own #1660**) -> `3cc46ae41fed` (#1659). Only `108091b2e1c1` touches a file this branch touches, and that merge was pulled in **deliberately** to get the corrected header — the merge-in is in the branch as `b92906fd9ec2`, two parents. The other three are `services/auth` and `services/originate`: **zero overlap**, nothing under `m365-integration`. Re-predicted immediately before any merge; **I will not self-derive a landing if develop moves after your GO.**
+
+## NEXT
+Item 3 (BP1 NB1/NB2, test-only). **An early finding worth your eye before I build it:** R 58th judged making V4 source-agnostic a DESIGN question. Reading V4 (`ks1677-the-pkce-verifier-is-secret-and-random.test.ts:219-238`), I think it is closable without a design call — stub **every** CSPRNG entry point (`crypto.randomBytes`, `randomFillSync`, `getRandomValues`) with the same fill and assert the verifier derives from it. `Math.random` still reds (it calls none of them); your X6 `randomFillSync` mutant then passes, as it should. **The honest bound, which I will state in the PR rather than oversell:** that is agnostic across the APIs I stub, not across all possible CSPRNG APIs — a refactor to one outside the set would still need V4 updated. Strictly better than pinning one call, and not a design choice. Say if you would rather I just document the coupling as R 58th did.
+
+Then KS-1687 on your ruling, tier 1, with the two additions you asked for: the `toTokenResult` call-site count pinned in the PR body with its instrument (measured **1**, at `token-manager.ts:127` at develop `610570e5a757`; I re-measure at the tree I build on), and a two-entry case among its cells.

@@ -1,0 +1,17 @@
+# Gate brief: GATE BZ1 = PR #1662 (KS-1682 item 2: three m365 token-selection warnings routed from console.warn to the service logger, plus gate BW1's two notes), Sonnet 5.5, TIER 2, round 1 of 2
+
+Commissioned by Wednesday after Seat R 59th's READY FOR GATE (01:31:33Z). The author's CLAIM is beside this brief: `READY_CLAIM.txt` (read it WHOLE). Gate BW1's notes it closes: `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-20_gate-BW1-pr1660-ks1682-br1/verdict.md` (N1 two-entry cache, N2 W6 blind to undefined/whitespace). **Tier 2 only if the change touches no selection or fail-closed logic: confirm that first (diff the selector and the fail-closed branches between develop and the head); if it does, say so in your first line.**
+
+**Project:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files` is READ ONLY. Clone INSIDE `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4cf20ec9-03c1-4724-89c4-ae3e1635cfad/scratchpad/gate_bz1/` via `git clone --shared /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/cache/src <that folder>/src`; fetch `refs/pull/1662/head` and develop there. npm ONLY with an explicit `--prefix`/cwd inside that clone; build `packages/shared` first. (BW1 found `@electric-sql/pglite` undeclared in m365: two other test files need it; say how you ran them.)
+
+**Heads:** read with ls-remote at start and end (Wednesday read #1662 head `047c7845761db1774ed5b3a13f45cff241e14df6` at 12:3x AEDT; develop may move). Derive the landing on live develop.
+
+**Verdict file:** `verdict.md` in this folder. First line: `VERDICT: <GO|GO WITH NOTE|NO GO> at head 047c7845761d... (tier 2, round 1 of 2; landing tree <sha> on develop <sha>; N blockers, M notes)`. Then BLUF, findings, FOUND / TESTED / HOW, NOT RUN, wall-clock. **Last line, written LAST:** the sha256 of `sed '1d;$d' verdict.md | shasum -a 256`, labelled with exactly that command; recompute it after writing and say in your final message that it reproduces.
+
+**Rules:** findings only; no GitHub or Linear writes; nothing under `!CODING`; no push; no `cd`; no `rm`; no stderr to /dev/null; no Docker; every zero with a positive control; red by ASSERTION; each mutant compiles before it counts; restore asserted. Before finishing run `git -C /Volumes/DevMASTER/WEDNESDAY status --short` and report every untracked path outside 0_Brain/, 5_Project_History/, 2_Project_Files/local-model/ and 2_Project_Files/fleet/briefs_staged/.
+
+## Questions
+1. **The instrument trap the author measured:** a console spy cannot see `logger.warn` (winston). Reproduce the author's table (console spy, stdout/stderr patch, `logger.on('data')`) and confirm the new cells observe through `logger.on('data')` and that L5's in-cell console-spy control fires on its own control line. A cell that could pass while observing nothing is a blocker.
+2. **No secret in the logs:** every warning emitted on every branch (0, 1, >1 matching entries, malformed cache) carries no `RT-`/token material and no account id. Use the logger's own transport to capture.
+3. **W11 (BW1 N1):** with two entries for one id (one valid, one empty secret), dropping `e.secret !== ''` reds W11 at the return value. **BW1 N2:** W6 now reds on an `undefined` and a whitespace-only registry value (or the PR says why not).
+4. Re-run 3 of the author's arms + 1 of your own; m365 suite by cell NAME at develop vs the landing; the new/changed test files type-checked in their own program; merge-tree on live develop.
