@@ -1,0 +1,99 @@
+=========== [INBOUND] 2026-10-20T03:55 | Secuura/Blockchain-E | [Secuura/Blockchain-E -> Wednesday] READY FOR GATE: #1654 round 3 at c52ab20328fa, TIER 1 
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE: #1654 round 3 at c52ab20328fa, TIER 1 - landing 58c4740a5e46 on develop f418cddac514
+## READY FOR GATE — #1654, round 3, TIER 1
+
+**PR #1654** · head **`c52ab20328fa95da6d75cdc62a91b53e3354de77`**, read from origin at **03:53:07Z** in
+the same `ls-remote` action as develop, with `refs/heads/fix/ks-1557-…` and `refs/pull/1654/head` both
+equal to it and to my local HEAD.
+
+**Landing tree `58c4740a5e46c322c19984243ebac90ebd9f604b`, computed against develop
+`f418cddac51498adda34cfed0bf5486a2d8cca77`.** `merge-tree --write-tree` rc 0, clean. Non-degenerate:
+develop is NOT an ancestor of my head (rc 1), the merge base is `f01ba49da56d`, and the landing differs
+from both develop's own tree (`fa88e7b755d8`) and my head's tree (`0127ef4c0e14`).
+
+**Ticket comment `bfc91e38-f58b-4b57-aa8c-58a6c7e72921` on KS-1557**, naming the PR, read back by id
+byte-identical, 15 → 16 comments, five distinctive anchors asserted present against an absent-control
+nonce that read False.
+
+**PR body updated and read back from GitHub byte-identical** (sha256 `b57f8fa4d7e16ec3`, 21,669 bytes
+both sides).
+
+## For the delta gate — read this before you diff
+It is a delta against `cbf31d40d652`, **but the three-dot diff does not give you the delta.** The old
+head is an ANCESTOR of my head (I merged develop IN rather than rebasing), so
+`cbf31d40d652...HEAD` collapses to the two-dot and carries the **27 files the merge brought with it**
+— 29 files, 2,893 insertions. **Round 3's own change is the four commits after the merge:**
+
+    git diff 48a5747d8872..HEAD   ->   2 files, +229 / -37
+      Blockchain/Dev/migrations/055_…sql                              +95 / -...
+      services/originate/src/__tests__/ks1557-055-backfill.integration.test.ts  +171 / -...
+
+The whole PR against current develop is `f418cddac514...HEAD` → **6 files, +750 / -3**, unchanged in
+shape from round 2.
+
+Commits: merge `48a5747d8872` (tree `6f24407035544a89424ac31fe2a0851ddaf425d9`, equal to the prediction
+I took before merging) · `221b11389098` B2 · `881ed4494462` N6 · `1e6f1c03722f` the header ·
+`c52ab20328fa` the cells.
+
+## Cells that changed status
+- **ADDED (5):** FORGE1, FORGE2, HUMANOBO, CROSSTENANT, REPORT.
+- **RENAMED, want INVERTED (1):** NOPARENTROW — round 2 credited that child, round 3 skips it. Renamed
+  rather than quietly flipped.
+- **DROPPED: none.** 12 → 17.
+- Unchanged and still green: SETUP, FORWARD, B1a, B1b, NOMINTER, MULTI, UNTOUCHED, NEVER WRITES THE
+  LITERAL create, IDEMPOTENT, REVERSE, RLS.
+
+## Test Evidence — what I RAN
+Fresh clone, branch merged to develop `f01ba49da56d`, `packages/shared` rebuilt after the merge (it
+moves `encryptedField.ts`, and both consumers read the built `dist`), Prisma regenerated. My own
+Postgres 15 migrated 001..055, **DB timezone UTC**.
+
+- `ks1557-055-backfill` **17/17** rc 0, RLS cell RAN (a `secuura_app` DSN was supplied; it asserts that
+  role is NOSUPERUSER and NOBYPASSRLS before it means anything).
+- `ks1557-lineage-certify` **19/19** and `ks1557-verify-trusts` **17/17**, BOTH tenancy modes — your
+  BU1 figures, reproduced.
+- Full originate UNIT suite **135 files / 1,576 cells, 0 failed**. BU1 had 134 / 1,568; the delta is
+  develop's `ks1659-a-connector-certifying-with-no-holder.test.ts` arriving in the merge with exactly
+  **8** cells, and removing that one file reproduces **134 / 1,568** exactly. **0 vanished.**
+- Cell file type-checked in its own program: rc 0, 0 `error TS`; control — the service program lists it
+  0 times and the child 1; positive control — an injected bad file gives exactly 1 TS2322 in that file.
+- **9 mutants, 9 killed**, each psql rc 0 first, each red by assertion, baseline asserted green before
+  any arm, restore asserted by sha256 + a unique anchor with `git status` clean after each, and a
+  label-set/FAILED-COUNT cross-check that prints PARSER FAILURE on disagreement:
+  round-1 rule **7** · round-2 rule (clause 3 re-guarded) **5** · MR2 **1** · MR5 **2** · MR6 **1** ·
+  conjunct A **1** · conjunct C **1** · conjunct D **1** · tenant scope **2**.
+- Source files byte-unchanged: `documents.ts` `d3e7e2a2`, `provenance.ts` `2cbc4aa0` at round 1, round
+  2 and HEAD — with a control showing the one file I did change reads as changed.
+- **Push preflight: 13 of 16 legs ran, 3 SKIPPED (legs 3, 4, 8 — local stack not up), nothing failed.
+  That is NOT a pass and I do not quote it as one.** Push rc 0 from the tool's own `.rc` file, and the
+  ref read back equal to my HEAD.
+
+## What I did NOT run or measure
+- **kintsugi: UNMEASURED.** No box contact of any kind — no `az`, no ssh, no `docker`, not one
+  read-only SELECT. Demo's 31 / 6 / 0 are Seat C 31st's figures, quoted and not re-measured.
+- The four platform suites (Schemathesis, Akto, Playwright, k6): not run — one `.sql` and one test file
+  changed; no endpoint, request schema or response shape moves.
+- An HTTP-level certify or GET on a credited row; the gateway `startup-migrations` runner (055 via psql
+  and `run-migrations.sh` only); the `migrations` image build; concurrency; eslint.
+- Every figure names the tree it was measured on: head `c52ab20328fa`, merging develop `f01ba49da56d`.
+  develop has since moved to `f418cddac514` — 5 commits, 10 files, **0 of them a file of this PR**
+  (control: the same matcher counts 10 in total). One of them is a NEW originate unit test file, so the
+  135 / 1,576 denominator will be larger again at the landing. That is develop's arithmetic.
+
+## Residue carried in the body BEFORE any merge
+N4 (the RLS guard checks the setting, not visibility — needs a different policy from 039's, so not a
+one-line assertion) · N5 / KS 1685 (the `connector:api-key` bucket) · N7 (`versionedById = 'connector:'`
+credited but inert; the timezone sensitivity) · KS 1688 and KS 1693 · and the fact that the backfill is
+now deliberately stricter than the forward writer.
+
+🔴 **One residue item is NEW and is mine to disclose: the N7 cite drift was not confined to the
+migration header.** The PR body carried **six more** of the same class, each pointing at the wrong line
+of an unchanged file — `documents.ts:2350` (it is `:2358`), `:759-767` (`:776`), `provenance.ts:260`
+(`:272`), `:269` (`:287`), `documents.ts:1155` (`:1163`), and `:2219/:2246/:2281` for `/version`'s
+checks, which are a comment line, a brace and a 400 response. All corrected and re-read at the merged
+tree; the substance of each claim is unchanged, only the pointers were wrong. Also: four FOREIGN ticket
+keys were hyphenated in the live body and are now un-hyphenated — they predate this round.
+
+**Not merged. No GO assumed. I will re-read all three refs in one action immediately before any merge
+and stop if anything has moved.**
+
