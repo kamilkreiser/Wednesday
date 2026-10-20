@@ -1,0 +1,17 @@
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1660-a-caller-s-data-parentdocumentid-overwrites.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1660-a-caller-s-data-parentdocumentid-overwrites.test.ts
+@@ -140,6 +140,14 @@
+     expect(JSON.stringify(logged())).not.toContain(FOREIGN_ID);
+     expect(JSON.stringify(logged()[0][1])).toContain(TENANT);
+   });
++  // KS-1660 falsy plants: every planted value above is truthy. The gate is "was a value supplied", not "is it truthy": a falsy plant is replaced by the route's
++  // own value either way, so only the log line can tell `!== undefined` from a truthiness test. One it.each row per value, so each is reported on its own.
++  it.each([[''], [null], [0], [false]])('RED KS-1660 R4: a FALSY planted parentDocumentId %p is replaced by the route\'s own AND the drop is logged once', async (planted) => {
++    logger.info.mockClear(); logger.warn.mockClear();
++    const r = await issue(ISSUER, { parentDocumentId: planted });
++    expect(['parentDocumentId', planted, r.status, r.rec.data.parentDocumentId]).toEqual(['parentDocumentId', planted, 201, SOURCE_ID]);
++    expect(['parentDocumentId', planted, logged().length]).toEqual(['parentDocumentId', planted, 1]);
++  });
+   it('CONTROL KS-1660 C3: a derived row that did not carry the key logs nothing about it', async () => {
+     logger.info.mockClear(); logger.warn.mockClear();
+     const r = await issue(ISSUER, {});

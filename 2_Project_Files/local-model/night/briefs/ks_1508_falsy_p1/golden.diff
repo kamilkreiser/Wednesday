@@ -1,0 +1,20 @@
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1508-versionedbyid-is-server-set.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1508-versionedbyid-is-server-set.test.ts
+@@ -230,6 +230,17 @@
+     expect(JSON.stringify(calls)).not.toContain(OTHER_ORG_CONNECTOR);
+     expect(JSON.stringify(calls[0][1])).toContain(TENANT);
+   });
++  // KS-1508 falsy plants: every planted value in this file is truthy. The gate is "was a value supplied", not "is it truthy": a falsy plant is dropped from
++  // the row either way, so only the log line can tell `!== undefined` from a truthiness test. One it.each row per value, so each is reported on its own.
++  it.each([[''], [null], [0], [false]])('RED KS-1508 F1 - a FALSY planted versionedById %p is dropped from the derived row AND logged once', async (planted) => {
++    const { logger } = jest.requireMock('../utils/logger') as { logger: { info: jest.Mock; warn: jest.Mock } };
++    seedSource();
++    logger.info.mockClear(); logger.warn.mockClear();
++    const r = await send(ISSUER, '/api/certifications/issue', { type: 'DOCUMENT', parentDocumentId: SOURCE_ID, data: { title: 'c', versionedById: planted } });
++    const calls = [...logger.info.mock.calls, ...logger.warn.mock.calls].filter((c) => /versionedById/.test(String(c[0])));
++    expect(['versionedById', planted, r.status, Object.prototype.hasOwnProperty.call(r.rec.data, 'versionedById')]).toEqual(['versionedById', planted, 201, false]);
++    expect(['versionedById', planted, calls.length]).toEqual(['versionedById', planted, 1]);
++  });
+   it('control - a certification derived row that did not carry the key logs nothing about it', async () => {
+     const { logger } = jest.requireMock('../utils/logger') as { logger: { info: jest.Mock; warn: jest.Mock } };
+     seedSource();

@@ -4,7 +4,9 @@
 
 | id | blocks | condition (Kam's words, verbatim) | source | scope reading (Wednesday's, correctable) | status |
 |---|---|---|---|---|---|
-| *(no open rows: ks1533-admin-bounded CLOSED 2026-10-19, moved below `## Closed`; the dated deploy-round checklist paragraphs below still bind every deploy brief)* | | | | | |
+| *(no open rows: ks1533-admin-bounded CLOSED 2026-10-19, moved below `**2026-10-20 DEPLOY PRECONDITION FOR MIGRATION 055 (KS-1557, PR 1654; gate CN1 N1, UNMEASURED on kintsugi; not a Kam condition):** before 055 runs on ANY box, a deploy seat takes the gate's one read-only count query (verdict.md N1 in 0_Brain/reference/2026-10-20_gate-CN1-pr1654-round3/) on demo and on kintsugi and reports the numbers; the migration credits a child to a connector when that connector left a version row on the same parent, so a pre-KS-1508 child with a planted id can still be credited. Report the credited and skipped counts after the run (the migration prints them). Source: gate CN1, read by Wednesday via the verdict file's hash-checked copy.
+
+## Closed`; the dated deploy-round checklist paragraphs below still bind every deploy brief)* | | | | | |
 
 
 **2026-10-13 ~11:55 PLAN FOR KS-1570 (Kam ruled shape b = per-ADMIN explicit organisation scope, 11:47:35):** V 6th plan confirmed (mail "KS-1570 plan confirmed, build order and one round for A and B"). The row closes only when ALL of: PR A (migration 049 + policy + three call sites), PR B (platform-only scope route + audit row) and the Admin Dashboard KS-1564 change are merged AND Kam has seen them; they ship in ONE round. The migration is the first since 048: the deploy seat must rebuild the migrations image and verify the schema directly (look for an explicit Applying 049 line). The Platform S retry question is NOT a blocker any more (answered by Stuart on KS-695 comment 7221c520; PS-1201 in review).

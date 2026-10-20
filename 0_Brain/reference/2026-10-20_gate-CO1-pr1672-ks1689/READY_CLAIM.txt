@@ -1,0 +1,95 @@
+=========== [INBOUND] 2026-10-20T04:10 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] READY FOR GATE: #1672 (KS-1689 option d) at e9e88339ee
+[Secuura/Blockchain-D -> Wednesday] READY FOR GATE: #1672 (KS-1689 option d) at e9e88339eece, 2 product lines, MD survives by design
+## BLUF
+**PR #1672 (KS-1689, Kam's ruled option (d)) is READY FOR GATE. Head `e9e88339eecefab2df395c1cc803be4616fb422d`, read from origin by `ls-remote` in the same action as this mail. 2 files, +150/-0 — and this one is NOT test-only: 2 product lines plus one new test file. All three of the Spark's mutants reproduce exactly; MY OWN mutant SURVIVES all 9 cells, and that survivor is the finding. Not merged, not deployed. Tier: yours.**
+
+https://github.com/Secuura/Distributed_Secuura/pull/1672
+
+**Three PRs now: #1670 MERGED, #1671 MERGED, #1672 here at READY.**
+
+## Landing, re-predicted — develop moved WHILE the PR was being opened
+  merge-base                               `f418cddac51498adda34cfed0bf5486a2d8cca77`
+  live develop (ls-remote + fetch, same action) `88933d5c7ebbb0af6ba1a1d4504998d581ba66c0`
+  **RE-PREDICTED LANDING TREE**            **`367043585a774ffab4de0d0fcec8af5a0dcb5d38`** on `88933d5c7ebb`
+  superseded figure                        `817fb64578a7b0dcaab85f60d0ef597b80b075d9` (computed on `f418cddac514`)
+
+The mover is **Seat C's PR 1667 / KS 1695** — `originate/routes/certifications.ts` plus its test, and
+**nothing of mine**: probes for `m365-integration/src/index.ts` and my new test file both return **0**
+in that range, against a control naming a path that IS in it. 1 ahead / 1 behind, `merge-tree` prints
+a tree and **no conflict section**, and the three-dot against live develop is still exactly my 2 files.
+`FETCH_HEAD` equals the `ls-remote` value, so the objects I computed against are the ones I meant.
+**Develop has moved five times in the hour this work took** — re-read it in the same action as any merge.
+
+## Test Evidence
+**touched (exactly 2):** `m365-integration/src/index.ts` **+2/-0** (the field and its comment) and the
+new `src/__tests__/ks1689-the-connection-status-says-when-the-user-must-sign-in-again.test.ts` **+148**.
+**NOT touched, asserted:** `src/auth/token-manager.ts` (your partition line) and everything else —
+`git status --porcelain src/auth/` returned **0** lines before the commit.
+
+- **RED-FIRST done properly for a CODE patch, not a test-only one.** I split the patch by path and
+  applied **only the new test file**, asserting the product was still byte-identical (`needsReauth`
+  occurrences **0**): **7 failed / 2 passed of 9.** The two greens are exactly the two controls — C0
+  (the seam warmed rows through the real `loadFromDb`) and C1 (`status` and `tokenExpired` keep their
+  meaning). Then the product hunk: **9/9**. Applying both halves and reading 9/9 would have proved
+  nothing about red-first.
+- **Suite 252 → 261**, **25 → 26 files**, 0 failed, **0 VANISHED**, 9 new; arithmetic closes; labels
+  unique in both runs.
+- **Type-check.** The **shipped** build program `tsc --noEmit` **rc 0, 0 errors** — that matters here
+  because the product line is in it. The test file needed a purpose-built child program: control by
+  `--listFilesOnly` shows the service's own program contains it **0** times, the child **1**; child
+  **rc 0, 0 errors**, 36 `src/` files, 26 tests.
+- **Mutants, 4 run**, each `tsc`-checked against my own unmutated baseline first, anchor uniqueness
+  asserted, each restored from a snapshot with the restore asserted by sha256:
+  **MA (drop the status clause) 4/4 · MB (drop the token clause) 2/2 · MC (invert) 7/7 — all MATCH.**
+
+## MY OWN MUTANT SURVIVES, AND IT IS THE DELIVERABLE — your blind-spot prediction holds exactly
+`MD`: `connection.refreshToken === undefined` in place of `!connection.refreshToken`. **SURVIVED, 9/9
+green.** I predicted that from source before running it, and here is the chain:
+
+  row `refresh_token` NULL      -> `undefined`  (`tokenCrypto.ts:73`)                 pinned by R2
+  stored token undecryptable    -> `undefined`  (`tokenCrypto.ts` catch, `:98`)        pinned by R3
+  **fail-closed exchange**      -> **`''`**     (`token-manager.ts:97` `|| ''`, assigned `index.ts:654`)  **pinned by NOTHING**
+
+The 9 cells drive rows through `loadFromDb`, so they reach only the two shapes that become
+`undefined`. `'' === undefined` is **false** — so that rewrite keeps every cell green while silently
+failing to flag **the one shape the ticket was filed about**. The shipped `!connection.refreshToken`
+handles all three correctly; what is missing is a cell for the third, and reaching it needs the OAuth
+callback path, a different harness from this file's DB seam. It is in the PR body as its own warning
+block, and in the Known residue.
+
+## Your scoping rule held, and one part of it is VERIFIED rather than asserted
+Derived, not stored; no write path, no migration, no UI; the POST init response and the health count do
+not get the flag. **The "no OpenAPI change" half is confirmed by the gate itself:** leg 1 (OpenAPI spec
+drift, generated spec vs Zod source) returned **"OK — spec is in sync"**, because the response schema is
+`.passthrough()`. I did not have to take that on trust. Spec follow-up stays KS 1700's.
+
+## NOT run / NOT covered
+1. **The gate was INCOMPLETE again, identically:** `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED.
+   Nothing failed.` — legs 3, 4, 8, local stack. **0 FAIL anywhere.** Push's own `.rc` = 0.
+2. **A new measurement on the leg-16 gap, and it is worse than I reported for #1671.** With my new test
+   file present, leg 16 *still* names only **auth, api-gateway and vc-issuer**:
+   `typecheck-tests: m365` appears **0** times against a control of **1** for vc-issuer. So the gap is
+   **two** services — `originate` AND `m365-integration` — and neither ships a `tsconfig.test.json`.
+   That is the live KS 1090, now measured on two services from my own pushes.
+3. **`m365-integration` has NO `lint` script.** `npm run lint` exits **1** with npm's
+   *"Did you mean `npm link`?"* — that is neither a lint failure nor a pass, and I will not report it
+   as either. `package.json` defines only `dev/build/start/test/test:watch/test:coverage`; control:
+   vc-issuer and originate both define one. I ran what their script runs: **`npx eslint src` rc 0,
+   36 files, 0 errors, 0 warnings**, both of my files 0/0 individually.
+4. The four platform suites were not run — one derived response field, one in-process vitest file, no
+   spec change, no container, no service boundary.
+5. **No deploy, no `az`, no Docker, no live service.** The flag has **not** been observed on a running
+   box, which is also why KS-1689 is not Done.
+6. Overlap census, all 26 open PRs, 126 file rows, no truncation, positive control passes: nothing
+   touches `index.ts`, my test file, or `token-manager.ts`; PRs 575 and 649 touch the service but only
+   `package.json` (both dependabot).
+
+## Meanwhile
+Standing by for #1672's gate. **I will not merge it without your GO naming the head sha**, and I will
+re-read develop in the same action as the merge — it has moved five times today. Nothing else is
+running. Seat record `5_Project_History/2026-10-20_seatD-26th/` carries 19 findings and the evidence
+for all three PRs.
+
+## Needed-by
+#1672's verdict. One open question still unanswered from earlier, now lower priority since I recorded
+it on the tickets myself: whether the KS 1508 / KS 1660 falsy-value cells should be briefed to the Spark.
