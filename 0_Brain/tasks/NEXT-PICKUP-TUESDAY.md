@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 295 — 2026-10-20 14:18 CHECKPOINT (s125, ctx 53%; band 80-90). **READ THIS FIRST; supersedes 294's LIVE, LAUNCH QUEUE and B326/B325 lines; 294's B321/B319 facts stand.**
+### Kam since 294 (receipted, parked in clarifications_register.md)
+- **14:00:26 "Decision composer-sro-vic-gap-10-decisions-1020: a — Accept all 10 recommendations"** — card ruled a (after safe_pull), receipt bf-0b1dd72b5c6a. NOT yet --delivered: deliver only when B328's C-86..C-96 are committed (records/b328). Kam told 14:12 (bf-c81bab3b3159): two ZZ-DATASEC-SYNTHETIC test policies appear in SM (B329), and Tuesday's K4 reading (SM item/sub-setting ids from our install override Q-04's working assumption; constraint ids, namespaces, routes stay out) — default: proceed unless he says otherwise.
+### DONE since 294 (verified at source)
+- **#87 LANDED** (B324 GO WITH FINDINGS, Minors B324-1..5): squash 1b32bbe6, tree = gated 61d81f4's; MPS main = 1b32bbe6. Pane %124 closed. OWED: VBCSCompiler pid 22232 `dotnet build-server shutdown` once B318 and B326 are idle (B324's ask).
+- **B322 READY verified** (Composer L3-1, 314f40d9, 17 paths in Yours) -> draft **PR #83** opened; %123 closed.
+- **S101O READY RD-863** verified (PR #99 @ 172d321, 1 ahead of 39653db4, 8/8 checks) -> gate 31 kit B327 drafted, READ WHOLE, stamped DONE, routing line added (inbox_routing.conf, .pre-g31 kept), launcher chmod +x, `--check` rc 32 = ONLY the 3 slots (MAIN_SHA x2, LAUNCH_TIME). All guards pass.
+- Briefs READ WHOLE + stamped by s125: **B326** (launched), **B328** (launched), **B329** (launched), **B325** (main re-pinned 1b32bbe6; R-V1-7: the e2e clause of -238/-240 is carried by V1 phase 2 = ruled gap), **B331** (Composer #83 tier-1 gate; slot STAMP_TIME open), **B330** (Composer L1 catalogue, K6: built not cut, PR draft "HOLD K6"; slot open). **B320 ADDENDUM-2** appended (r7 ancestry; B328/B323/B331 allowed live).
+### LIVE at 14:18 (watchers are tracked tasks of s125 — RE-ARM after rotation: `tuesday/tools/status_watch.sh <STATUS> 30`)
+%119 B318 (MPS #85 gate, Opus; repeated wake_watch 'frozen' = mutant runs in background shells, NOT a stall: read heavy-slot holder + heavy-runs.txt mtime, no tap) · %125 **B326** (MPS #86 fix round 2 of 2, Sonnet, ports 7500-7509) · %127 **B328** (Composer records: fold records/b321, C-86..C-96, L0-3 template DRAFT, 30 BACKLOG State cells, Paul's 5 questions note FOR KAM) · %126 **B329** (HPSM-POC L9-a on vm-hpsm-sm, Opus; VM auto-stops 20:00) · %121 gate 30 (NexusAI #98, verdict by MAIL; holds the jest lock as qa-g30-H1b with cwd inside gate 27's evidence/inst — check at its completion) · %56 S101O (waits for gate 31). STATUS files: MPS Briefs/2026-10-20_B318/B326_STATUS.md; Composer Briefs/2026-10-20_B328_STATUS.md; HPSM-POC Briefs/2026-10-20_B329_STATUS.md.
+### LAUNCH QUEUE (load1 < 7; it was 7.9 at 14:18)
+1. **B325** MPS #88 gate (launch line in its TUESDAY STAMP, WED_USAGE_STOP=100 on cockpit.sh). 2. **Gate 31** (fill MAIN_SHA x2 by ls-remote + LAUNCH_TIME, `--check` rc 0, then `cockpit.sh add 'QA/NexusAI-gate31' "bash '<launcher>'"` with WED_USAGE_STOP=100). 3. **Composer, ONE docker-heavy seat at a time:** B331 (#83 gate) -> B320 (#82 gate) -> B323 (NOT READ; give it the B328/B331 allowed-seat addendum) -> B330. Fill each STAMP_TIME slot at launch (.pre-stamp exists). 4. **Gate 29** (#97, read its 117 KB kit WHOLE first). #97 and #99 conflict on the counts file: whichever gets GO first lands first; the other gets a counts-only delta gate.
+### OWED
+MPS records seat (B324 findings + drafted Jira lines + 6(b) ruling; B305/B309 items; NEW WORDS lists; B319 findings). HPSM-POC records (B316 items per 291 OWED; B329 shape file). Composer: L3-b after #83 lands (K5); L9-b after L7. Usage gauge 94% (Kam lifted the line; two accounts).
+
 ## 🔴 DELTA 294 — 2026-10-20 13:33 ROTATION HANDOVER (s124, ctx 79%; band 80-90). **READ THIS FIRST, then 293 (stands except where updated here).**
 ### Changed since 293 (verified at source)
 - **B321 DONE** (Composer records): fold merge 0d2d8b5d on root main (parents bbd5ddb3 + f18c6fff); records/b321 @ dca7a220 (52 paths, additions only, BACKLOG #328-#362, C-84/C-85). Pane closed. OWED: a later records seat folds records/b321.
