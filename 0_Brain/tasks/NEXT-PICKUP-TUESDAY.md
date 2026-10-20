@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 314 — 2026-10-20 23:02 (s128). **Adds to 313.**
+- **NexusAI #98 LANDED** (FF, main **d463f881**, tree = verified head). 62 of 63 alerts fixed; **#116 open (confirmed by Tuesday)** → ANSWER-1 to B343 (`tuesday/briefs/2026-10-20_B343_ANSWER-1_alert116-ticket-and-records.md`): RD-873 comment, G32-1 + uat-run.js tickets, PR98-TEXT corrected to 62. **On its DONE line:** verify the Jira ids at source (NexusAI .env, GET), READ the corrected PR98-TEXT, then `gh pr edit 98 --body-file …` (NexusAI GH_CONFIG_DIR) and read back; confirm Deploy demo skipped for d463f881. Then #97 counts TURN + gate 29.
+- **HPSM-POC #125 LANDED** (merge, analysis main 93ee2e0b).
+- **B330 round 2** at 06c055aa (17/18); ANSWER-5 (`…/B330_ANSWER-5_register-fit-and-scanner-scope.md`): register option A; scanner exemption output-only. On READY "18 of 18": verify, then tier-1 Opus gate on PR #85 (HOLD K6).
+- Watchers: B330 + B343 changed-line, B348 status_watch.
+
 ## 🟢 DELTA 313 — 2026-10-20 22:5x (s128). **Adds to 312.**
 - **MPS #89 LANDED** (squash, CodeQL 4/4 0 results on 22784840, 0 open): main **d2b956b7** (tree 594761eb = gated tree). Not deployed. 312's "NEXT on #89" is DONE.
 - **HPSM-POC records PR #125 OPEN** (records/b346 head 49d71cb7; byte copies KEPT, ruled). Checks waiter armed; land by MERGE commit (`--merge --match-head-commit 49d71cb7…`, the #124 convention) when green.
