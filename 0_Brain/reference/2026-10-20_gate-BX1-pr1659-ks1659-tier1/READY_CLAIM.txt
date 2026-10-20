@@ -1,0 +1,90 @@
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1659 (KS-1659) at 97eaffe0d300, tier 2 CONFIRMED - sameUuid fails closed on null so no reader trusts the owner; 5/5 mutants killed, idempotence driven; Refs not Closes
+2026-10-20T00:53:05.000Z
+
+Seat G 12th, lane Secuura/Blockchain-G. Item 3 is READY FOR GATE. **Tier 2 — and that is measured,
+not defaulted.**
+
+## THE FIVE ARTEFACTS
+1. **PR #1659** — https://github.com/Secuura/Distributed_Secuura/pull/1659
+2. **HEAD, read from origin in the same action as this sentence:**
+   **`97eaffe0d3003390f244ea0d0319b988a6cf6464`** — 2 files, **+118/-1**.
+3. **TICKET COMMENT:** `810220fb-df6e-4e19-8607-351822748c66` on KS-1659, 00:52:29Z, 6406 bytes, read
+   back and asserted to carry the head SHA, the `sameUuid` finding, the idempotence result, the
+   landing tree and the suite figures.
+4. **TEST EVIDENCE:** in the PR body, written by me.
+5. **NOT COVERED:** its own section, below and in the body.
+
+## THE TIER ANSWER YOU ASKED FOR, AND IT FAILS CLOSED
+Your brief: *"say whether any reader TRUSTS a non-null `owner_user_id`... If one does, the tier rises
+and you mail Wednesday before raising."* **None does, so I raised it at tier 2.**
+
+The decisive reader is the **anchor-overwrite guard** — the security control on this column.
+`sameUuid` (`anchorOverwriteGuard.ts:164-170`) opens
+`if (typeof a !== 'string' || typeof b !== 'string') return false`, so **`sameUuid(null, x)` is
+false**, the custody branch at `:212` is not taken, and the function falls through to
+`{ allow: false }`. **A NULL owner DENIES; it cannot admit.** The shipped custody option is (c), on
+the organisation column, so the user branch is not even live.
+
+The other NULL-sensitive site, `verification.ts:334`, equates NULL with NULL via `?? ''` — and that
+is **documented twice** (`:253`, `:330-332`) as expecting exactly that "for a connector principal",
+inside a function contracted to fail closed, behind four other conjuncts (same tenant, parent-hash
+equality, the certId8 binding). **And `documentRepo.ts:501` already logs "inserting document with
+null owner_user_id"** — NULL is a state this schema was built to carry, not one the patch invents.
+116 reads over 48 files censused; control, `tenant_id` reads in 209 files. Write-up:
+`5_Project_History/2026-10-20_seatG-12th/evidence/AUDIT-ks1659-owner-user-id-readers.md`.
+
+## EVIDENCE
+- Pre-image blob equals the patch's declared `index` line (`e216d8717`); both sections
+  `git apply -p1` strict; touched set and numstat equal the READY's `A3` exactly.
+- **Red-first 3 failed / 7 run** at the untouched tip, all four controls green, 0 load-failure
+  signatures. Green after **7/7, 0 skipped**.
+- **Suite, both ends on real trees:** 134 suites / **1568** tests / 0 failed → 135 / **1575** / 0
+  failed. +7, **0 vanished**, and both ends equal the pass's declared figures exactly.
+- **5 behavioural mutants, 5 killed, 0 survivors → no cell added**, including one of mine (the
+  holder's DID folded instead of its id).
+- **One negative arm, which is NOT a gap:** the fold applied twice reds nothing, because
+  `toActorUuid` is **idempotent** — and I DROVE that rather than inferring it from "nothing red":
+  six cases (a real UUID, a connector principal, `null`, `undefined`, `''`, `'not-a-uuid'`), all
+  satisfying `toActorUuid(toActorUuid(x)) === toActorUuid(x)`. A double fold has no behaviour to
+  pin, and a cell for it would pin SOURCE TEXT, which passes when the line is commented out. So I
+  recorded it instead of adding a cell — flagging that, because your brief says a survivor earns a
+  cell and I am claiming this one does not.
+- `ks564-certification-issuer-uuid.test.ts` still **8/8**, as your brief predicted.
+- **A finding worth your eye:** `certifications.ts:343` DOES UUID-check `holderId`, but only inside
+  `if (req.body.holderId)`. The defaulting path at `:335` never enters it, so a connector supplying
+  no holder is never format-checked. That is why the repository layer is the right place, and it
+  also means the route-level guard that exists was never protecting this case.
+- Preflight as printed: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`
+  ⚠ **Leg 16 does NOT cover this service** — its corpus is auth, api-gateway and vc-issuer, so
+  **nothing at the gate type-checked the new cell file**; ts-jest in my runs is the only check, and
+  `tsc -p services/originate` excludes test files. **No `[format-gate]` line printed** (0 real
+  occurrences in 2466 lines). Push **rc 0**, 639s.
+- **Landing re-taken on the live develop:** **`2ba4f69bfbd4ca83b85c0c2e0b7ede0c7e1cdedf`**,
+  merge-tree rc 0, single line, 2 files. develop advanced from my base to `610570e5a757` by **my own
+  two merges**; from the merge base that advance is 12 files, all `services/auth`, **0 overlap** with
+  my 2 (negative control 12).
+
+## CLOSING WORD: `Refs`, and here is the "why" you asked for
+The audit clears the readers; it does **not** show the fold is the whole fix.
+1. **`certifications.ts:827` still maps any error naming `owner_user_id` to a client-payload 400** —
+   unreachable for this cause, latent for others, and mis-attribution is the class the ticket's own
+   title names.
+2. **Option 2 is untouched by design:** whether a connector certifying with no holder should default
+   to being **its own holder** (`certifications.ts:335`) is a design question the fold sidesteps. The
+   row now reads "owner NULL, metadata holderId = the connector" — coherent, but still a key holding
+   a document.
+
+## NOT COVERED
+Four platform suites (no stack, no Docker for this seat; this is a runtime write path, so a real
+gap). **No real Postgres** — the stand-in is faithful only on refusing a non-UUID at a `::uuid`
+placeholder with Postgres's own 22P02 text, which cell C4 pins. Originate's integration suites are
+ignored by `jest.config.js:8` and five fail on develop independently. **No connector driven end to
+end.** No migration — `owner_user_id` is already nullable per migration 043's own comment. Nothing
+deployed.
+
+## NEXT
+**KS-1558** now (its prerequisite is already done: KS-666 and KS-687 both exist and are the right
+owners — KS-666 *is* the stack-safety ticket and KS-687 is *"Akto slot targeting ... and the
+stack-safety gate structurally cannot see it"*. **Both are Done**, which I will state: the new guard
+proves an exception is ATTRIBUTABLE, not that it is still NEEDED). Then **KS-758 on default (b)**,
+then the **BT1 N1 test-only PR** (X1/X2/X3).
