@@ -1,0 +1,81 @@
+=========== [INBOUND] 2026-10-20T03:12 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1669 (KS-1692 PR 1) at 4728c1d61, TIE
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1669 (KS-1692 PR 1) at 4728c1d61, TIER 1 - A5 reds THREE cells; landing 9c7962e77f2a on develop f01ba49da56d
+READY FOR GATE: #1669 (KS-1692 PR 1), TIER 1 - session revocation on a credential
+path. Head 4728c1d613038a8082625f79e564837953bd7453.
+
+REFS, ONE ACTION, 03:10:29Z
+  develop  f01ba49da56d3d55204caa02ab3348f94d63b9c0
+  branch   4728c1d613038a8082625f79e564837953bd7453
+  PREDICTED LANDING TREE 9c7962e77f2ae5616fbfc962822bb8138bc31372, computed
+  against THAT develop. rc 0, single line, exactly 4 files.
+
+DIFF: 4 files, +141/-3.
+  routes/auth.ts                                              +24/-1  product
+  routes/users.ts                                             +29/-2  product
+  ks1407-reset-password-refuses-when-the-store-cannot-revoke   +38    2 cells
+  ks1407-change-password-refuses-when-the-store-cannot-revoke  +50    3 cells
+
+TICKET COMMENT: KS-1692, 48102df7-4fb6-43e0-b04a-2ee662269a77, 03:11:26Z, read
+back byte-identical, carries #1669 and the head sha.
+
+YOUR CONDITION, ANSWERED FIRST: A5 REDS THREE CELLS, NOT ZERO.
+You wrote "A5 must red T1 and T2; if it still reds nothing, say so and do not
+ship the cells." The author's own `.catch(() => 0)` arm - 0 of 23 before - reds
+T1, T2 AND T3.
+
+RED-PROOF: 6 ARMS OVER 14 CELLS (my 5 + the 9 pre-existing, so collateral FAILS)
+  A0  no mutation                                -> none (14/14)
+  A5  .catch(() => 0) on both routes             -> T1 T2 T3
+  A6  the catch removed (throw propagates, 500)  -> T1 T2 T3
+  A7  a swallow that continues to 200            -> T1 T2 T3
+  A8  the clause restored in BOTH 503s           -> T3 alone
+  A9' the post-write re-assert removed           -> B1-R2 B1-R3, NOT my cells
+Every arm tsc --noEmit rc 0 BEFORE running; both route files restored by sha256
+equality after each; comparator self-tested four ways. No collateral anywhere.
+
+AS YOU RULED: the "sign in again" clause is cut from BOTH of that route's 503s;
+the two line cites are untouched and the body says why; the authenticate()
+finding (pre-check is depth, post-write is the reachable half) is in the code and
+the body.
+
+SUITE: baseline all four files at develop, 105 files / 1132 passed / 0 failed /
+rc 0. With the change 105 / 1137, reaching 1137 passed / 0 failed / rc 0. +5, 0
+vanished. One run of three showed ks949 failing at 5004 ms (the BACKLOG'd 5000 ms
+class); my cells failed 0 times in all three.
+LEG 16 read this PR's own test content, which beats my own run: auth
+"42 errors: 42 in the baseline, 0 new; 0 stale baseline entries". So +88 test
+lines add no type errors, measured by the gate.
+In-hook preflight quoted and NOT a pass: 13/16 legs ran, 3 SKIPPED (legs 3 4 8,
+no local stack). Push rc 0 from the tool's own .rc, 628s, ref confirmed by an
+independent ls-remote.
+
+NOT COVERED
+- The throw is injected at the MOCK. The cells pin the route's HANDLING of a
+  rejection; nothing here establishes which real ioredis conditions reject
+  rather than resolve. BS1's 500/400 observation is carried, not reproduced.
+- The four platform suites did not run (no stack, seat held off Docker). No HTTP
+  contract change: the same 503 code on a path that previously 500'd.
+- session.ts is untouched - that is PR 2.
+- The admin status-change route is untouched here and still reports success over
+  live sessions; PR 2 is where that changes, with the wording you ruled.
+
+TWO THINGS I CORRECTED IN MY OWN WORK, both in the body
+1. An arm from MY OWN plan was false and I replaced it rather than run it. A9
+   was "make the revoke resolve 0, T1/T2 must NOT red" - but a resolving revoke
+   with a healthy store answers 200 while T1 expects 503, so T1 WOULD red. Its
+   intent is already carried by cells T1C and T4. A9' is the independence arm
+   instead.
+2. My apply script's own verification tripped on its own prose twice (searching
+   for the bare "Sign in again..." and ".catch(() => 0)" strings, which matched
+   the comments I had just written above them) - G 12th's trap 3. Fixed by
+   counting the CODE form plus a non-vacuity check, and the script now validates
+   the in-memory text and writes ONLY if every check passes.
+
+NEXT: KS-758 round 2, option (c), as you confirmed - the keyed lookupHash, the
+warn on a missing key, the correlator disclosure in my words, H1-H3 and the two
+CE1 gaps. I have already read the key config and mailed it: originate is wired
+in compose:601 and bicep:395, but neither guarantees a VALUE and registration is
+conditional, so (c) can degrade silently to (b) - which is in the body as you
+asked. Kam's card tap: 14:01:14 AEDT, `c`.
+No deploy, no box, no az, no Docker.
+

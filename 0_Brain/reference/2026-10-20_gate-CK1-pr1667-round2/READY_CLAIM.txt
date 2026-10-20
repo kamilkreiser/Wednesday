@@ -1,0 +1,50 @@
+=========== [INBOUND] 2026-10-20T03:32 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1667 ROUND 2 at c502c6434cf2, tier 1 
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1667 ROUND 2 at c502c6434cf2, tier 1 - N2 and N3 closed, 9 of 9 mutants incl M8 M9, 37 cells; landing ffc4db54b24c on develop 21e2ffd20795; preflight 13 of 16 again
+## READY FOR GATE — ROUND 2, PR #1667 at `c502c6434cf299d09b47b7b0ca354338f5892410`, tier 1
+
+`https://github.com/Secuura/Distributed_Secuura/pull/1667` · base `develop`. **Head and develop read from origin in ONE action at 03:31:08Z**: head `c502c6434cf299d09b47b7b0ca354338f5892410`, develop `21e2ffd20795cabb3758677380ffb4f90da51ab5`.
+
+**Push is real, not inferred:** the push tool's own `.rc` = **0**, and `ls-remote` shows the ref at `c502c6434cf2` equal to my local HEAD. Fast-forward `d7c2e296c..c502c6434`, 03:18:26Z → 03:29:25Z (11 minutes; it survives because the keepalive is supplied explicitly on `-c core.sshCommand` — my launch printed F-02).
+
+**Landing: `ffc4db54b24c8efaee75e7758d58d04a817fe48b` computed against develop `21e2ffd20795cabb3758677380ffb4f90da51ab5`.** Two independent derivations agree (`merge-tree --write-tree`, and the three-dot diff applied onto develop's tree in a temp index). **Re-derive it at GO rather than trusting it:** develop moved **five times** during this build — `7e3b9362e08b` → `3a6f1810981e` → `f01ba49da56d` → `c3ea4dc79af7` → `21e2ffd20795` — and I had already had to discard one landing figure (`8d61d5a15956`) between writing the PR body and sending this mail. **A cumulative diff across all five shas shows no develop move reaches either of my two files.**
+
+### Both code notes closed
+
+**N2 — the regression, with the arm that proves it was real.** Predicate named at source: **`isPlatformRole`**, `packages/shared/src/security/keyRevokePolicy.ts:140`, exported `index.ts:229`, body `PLATFORM_ROLES.has(String(role||'').toUpperCase())`, `PLATFORM_ROLES = new Set(['SYSTEM_ADMIN','SUPER_ADMIN'])` at `:60`. Not an ad hoc list.
+
+| arm | route tree | result |
+|---|---|---|
+| develop, no check at all | `6abd05c5ea2f25f1` | **21 failed / 15 passed** — all four admin spellings 200 |
+| round 1, hand-written set | `b0ea5cc5f1f90195` | **2 failed / 34 passed** — exactly `C10[SUPER_ADMIN]` + `C11` |
+| round 2 | this head | **37 / 37** |
+
+Both consequences are in the PR body: for `SUPER_ADMIN` the by-id read is now **more permissive than the list route** (recorded, not resolved), and **`platform_admin` -> 404** is pinned by **R18**, named as a known accepted difference citing your (a) ruling.
+
+**N3 — your gate's own two mutants die.** `R16`/`R16b` (no share lookup for a refused reader, both sibling reads) and `R17` (exact issuer compare: upper-cased, prefix, suffix, whitespace all refused, with `R17-control` proving the exact id is 200). **M8** reds `R16`; **M9** reds `R17`.
+
+### Test Evidence
+- **Whole originate suite 136 files / 1,613 tests / 0 failed**; baseline **135 / 1,575 / 0** -> **+37 exactly, 0 vanished**. `PASS …ks1695-…test.ts (6.096 s)` inside that run. Alone **37/37**.
+- **Red-proof** against develop's blob: **21 failed / 15 passed / 37**, every R cell red by assertion, every C control green, no LOADFAIL.
+- **9 mutants, 9 killed**, each type-clean first, each by assertion, restore sha-asserted, parser OK on all nine.
+- `tsc` 0 diagnostics naming either file; `eslint` rc 0 with nothing naming either file.
+- **Four cells exist only because a mutant survived everything else** — `R13`, `R14` (mine, round 1) and `R16`, `R17` (yours).
+
+### What is NOT covered — read these as the round-2 gate's starting points
+1. **The preflight did NOT fully run on EITHER push.** Round 2's own output, verbatim: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / legs 3 4 8 — local stack not up; you can clear this by starting it. / This is NOT a pass. Do not quote it as one — say which legs ran.`
+2. **The four platform suites were NOT run** — no Docker on this host; both PR-template boxes left unticked deliberately.
+3. **Nothing through a real gateway or real Postgres.** Every cell is the real router over mocked repositories. `C5`'s tenant behaviour is the mock honouring `WHERE id = $1 AND tenant_id = $2`.
+4. **No live token was decoded.** Every role claim is a fixture; I have not shown any real principal carries `platform_admin`.
+5. A plain `OWNER` reader, `MULTI_TENANCY_ENABLED=true`, a share-recipient reader, an `onBehalfOf` connector certification: unexercised here and in BX1. `services/auth` not re-run (develop's own test-only commits, merged unchanged).
+
+### Decisions I made that you may want to overturn
+- **I did NOT file the vocabulary ticket — KS 1536 already is it**, and its own table carries the exact line this landed on (`keyRevokePolicy.ts PLATFORM_ROLES "<-- no platform_admin"`). I commented there instead, read back byte-identical, adding what is new: the gap now has a user-visible consequence on a **read** surface, plus an independent re-measurement (6 gateway sites; 0 in originate; 0 in `packages/shared`; control `super_admin` = 20 files). Your instruction said one ticket — say the word and I will split it out.
+- **Adopting `isPlatformRole` adopts KS 1591** (`toUpperCase` admits a dotless-i, a long-s and an **array** role as `SUPER_ADMIN`); round 1's literal set would not have. **I did not pin those three as admitted**, because a green cell asserting a spoofable spelling is accepted would turn a KS 1591 fix into a test failure and the natural "fix" is to revert it. In Known residue. **If you want it pinned, name the direction.**
+
+### Three instrument faults, each of which produced a convincing wrong answer
+1. **`tsc --noEmit` is BLIND to test files here** — `services/originate/tsconfig.json` excludes `src/__tests__`. My rc 0 said nothing about a test file that at that moment had a **syntax error**; jest printed `Tests: 0 total`, a **LOADFAIL, not a pass and not a red**. Every type-check quoted above is under a child tsconfig with `exclude: []` whose listed files were verified to contain my test file (230 listed, 1 mine). Root cause of the syntax error was my own `str.rstrip("  });\n")`, which strips any character in that set and ate a block's closing braces.
+2. **My develop arm was initially INVALID.** `git checkout -- <path>` restored from **my branch HEAD**, not develop, so the "develop" arm silently re-ran the round-1 arm and returned identical numbers. The sha readback caught it; I re-extracted with `git show f01ba49da56d:<path>` and asserted `6abd05c5ea2f25f1` before re-running. The 21/15 figure is from that run.
+3. **The runner's label parser under-reported once** (M5: 7 labels vs 8 failures) and printed `PARSER FAILURE` — it could not match `R17-control`. The table is from the re-run after widening the regex; all nine report `parser=OK`.
+- Also, for the record: a background suite run was reported "failed" by the harness while the suite was green. The block's exit code was the **last** command's — a `grep -c` printing `0`, which exits 1. The suite printed `rc=0`.
+
+**No merge without your GO naming the head sha.** Nothing deployed, no box, no `az`, no Docker all session. `2_Project_Files` read-only throughout (KS-907) — `5d1be7b06279`, 0 tracked modifications, no fetch, no ref write. KS 1697 and KS 1699 filed facts-only; KS 1536 and KS 1695 commented. Clone `deploy-clones/seatC32-7e3b9362e08b`; the temp child tsconfig was deleted before committing, and `git status` is clean.
+

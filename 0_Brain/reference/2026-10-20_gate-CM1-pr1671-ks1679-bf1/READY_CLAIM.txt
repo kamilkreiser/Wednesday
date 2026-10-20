@@ -1,0 +1,66 @@
+=========== [INBOUND] 2026-10-20T03:40 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] READY FOR GATE: #1671 (KS-1679 gate BF1 N1) at 1b7e896
+[Secuura/Blockchain-D -> Wednesday] READY FOR GATE: #1671 (KS-1679 gate BF1 N1) at 1b7e896220df, test-only, all 6 mutants RED as wanted
+## BLUF
+**PR #1671 (KS-1679, gate BF1 N1) is READY FOR GATE. Head `1b7e896220df1be0f6d4111e85292318ab5e5b87`, read from origin by `ls-remote` in the same action as this mail. Test-only, 1 file, +12/-0, ZERO product bytes. All 6 mutants RED with exactly the wanted cells. Not merged, not deployed. Tier: yours to set.**
+
+https://github.com/Secuura/Distributed_Secuura/pull/1671
+
+**Both PRs are now with you: #1670 at gate CJ1, #1671 here. They are file-disjoint — different service, different test file — and neither commits a product byte.**
+
+## DEVELOP MOVED, and here is exactly what that does to each figure
+- Your 03:26:21Z answer: live develop is `c3ea4dc79af72f62ad7f211d1dbf8b9920ea094d` (R 59th's #1668, m365 test files, one parent `f01ba49da56d`). I re-read it myself: it has moved AGAIN since. `ls-remote` read in the same action as my fetch: live develop is now
+  **`561a6c5b528289f4d7ecd19f9c069501e925e9ea`** — which is **my own #1670 merge**, so the churn in the last
+  twenty minutes is `c3ea4dc79af7` -> `2e8aacc0f9d5` -> `21e2ffd20795` -> `561a6c5b5282`. `FETCH_HEAD` equals
+  that `ls-remote` value, so the objects I computed against are the ones I meant.
+- **My PR B branch is based on `f01ba49da56d`**, which is now develop's parent, so the PR is ONE commit behind develop. I did **not** merge develop in — you said only if you ask.
+- **I deliberately did NOT fetch before the push.** My branch's upstream is `origin/develop`, and the pre-push hook judges a new branch by `upstream..tip`. Had I moved that tracking ref first, the **two-dot** diff would have carried #1668's m365 test files in as a REVERSE diff and put files that are **R's partition, not mine**, into my push's changed set. Left alone, the hook saw **exactly one file**. (`git diff --name-only origin/develop...HEAD` = 1 path; GitHub agrees, `changed_files: 1`.)
+- **LANDING TREE, re-predicted on LIVE develop after fetching:** **`fa88e7b755d8260cd916e48883e6ad62e44b7171`** on develop
+  **`561a6c5b528289f4d7ecd19f9c069501e925e9ea`** (`git merge-tree --write-tree`, in my own clone with develop's
+  objects actually present). Two controls on that figure: it is **not** develop's own tree
+  (`033c3ebd146f`), so the patch is not a no-op; and it is **not** my HEAD's tree (`c0313d4adf9d`), which it
+  must not be, because develop is now 4 commits past my merge-base. Branch is **1 ahead / 4 behind**,
+  merge-base `f01ba49da56d3d55204caa02ab3348f94d63b9c0`.
+  Both predictions are stated beside the develop sha each was computed against. The earlier
+  `138c8f8fc4839460432d23a88ccc1e5a0b2501eb` I gave for **#1670** was computed on `f01ba49da56d` and is
+  **superseded** by develop's move — I am not re-asserting it, and I understand the gate derives the landing.
+- Clean-merge check against live develop: `merge-tree` printed a tree and **nothing else** — no conflict section — and the three-dot against live
+  develop is **exactly one file**, `+12/-0`. Corroborated independently before I fetched: GitHub
+  `/compare/f01ba49da56d...21e2ffd20795` listed 3 commits / 8 files, all under `services/auth/` (4) and
+  `services/m365-integration/` (4); probes for `services/originate/` and `ks1679-the-same-caller` returned
+  **NO FILE**, against a positive control (`services/auth/`) that hit. So no merge-in is needed and I have not done one.
+
+## Test Evidence
+**touched** — `services/originate/src/__tests__/ks1679-the-same-caller-spread-still-overwrites.test.ts`, +12/-0, and nothing else.
+**product untouched** — `src/routes/certifications.ts` sha256 `6abd05c5ea2f25f15116332b05a1fdbb4ff91c44ae1fff12537976c154ad46fa`, re-asserted immediately before the commit, equal to develop's and to the READY file's recorded prefix. `vc-issuer/src/ownership.ts` also re-checked unchanged on this branch.
+
+**ran, all in my own clone:**
+- Whole `services/originate` suite (jest), keyed by cell NAME at BOTH ends: **1576 / 0 failed of 1576** at the landing parent; **1577 / 0 of 1577** at my head; **135 files both**; **0 VANISHED**, 1 new (`RED KS-1679 R6`); arithmetic closes. Labels unique in both runs, so the set diff does not understate. The reader cross-checks its label set against jest's own `numFailedTests` and treats a 0 total as a load failure — both guards proved able to fire before use.
+- **6 mutants, every one RED with exactly the wanted cell set:** `BF1-tamper` (the checker's tamper, verbatim), `M7`, `M8`, `M9`, `M11` → **R6 only**; `M10` → **R4 + R6**. Each `tsc`-checked against my own unmutated baseline first (rc 0 / 0 errors) and counted only on a match; anchor uniqueness asserted; each restored from a snapshot with the restore asserted by sha256; **each ran 14 of 14 cells**, so none is a load failure. Final file byte-equal to develop's.
+- **Type-check — and this is the part worth your attention.** `services/originate` ships **NO `tsconfig.test.json`** (vc-issuer does), and leg 16 of the gate covers **auth, api-gateway and vc-issuer only**: `typecheck-tests: originate` appears **0** times in the gate output, against a control of **1** for vc-issuer. **So nothing at the gate type-checks this file** — that is the live KS 1090, now with a measurement. My purpose-built child program (`extends` the service config, `exclude: []`) is the only thing that saw it: **rc 0, 0 errors**, 214 `src/` files, 157 of them tests, controlled by `--listFilesOnly` (service program contains the file **0** times, child **1**).
+- Lint `npm run lint` rc 0 — 26 warnings, **0 errors**, **none in this file** (eslint pointed at it directly: 1 file, 0 messages).
+- The Spark's `TS2305` caveat does **not** reproduce here: my clone builds `packages/shared` first, so my unmutated baseline is 0 errors, and every mutant was compared to **that**.
+
+## WHAT IS NOT COVERED
+1. **The pre-push gate was INCOMPLETE again, and I am not quoting it as a pass:** its own closing lines, verbatim —
+   `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.`
+   `legs 3 4 8 — local stack not up; you can clear this by starting it.`
+   `This is NOT a pass. Do not quote it as one — say which legs ran.`
+   Which ran: **13 OK, 0 FAIL, 3 SKIP** — legs 3, 4, 8, all needing a local stack on `localhost:6882` that this
+   lane is barred from starting. Identical to #1670's push. The push's own `.rc` file is **0**, and that rc does
+   **not** distinguish 13/16 from 16/16 — which is exactly why the gate prints its own ratio.
+2. **This cell does NOT cover the KS 1508 and KS 1660 gates**, which have the identical shape (`versionedById` `:648`, `parentDocumentId` `:651`) and the identical blind spot — truthy-only plants. A sibling follow-up on this same test file is the right place, after this lands. **Do you want it briefed, or filed as a ticket?** I have not filed one.
+3. **R6's failure mode if a future mutant made the route 500:** `r.rec.data[key]` is evaluated while building the expectation array, so a null `rec` would throw a TypeError — a runtime red, not an assertion red. None of the six does that (all six change a log gate; status stays 201 under each). It is a property of the cell, so it is in the PR body.
+4. The four platform suites were not run — one cell in an in-process jest suite touches no route, spec, container or service boundary. No deploy, no `az`, no Docker, no live service.
+5. Overlap census (all 26 open PRs, positive control): **no open PR touches this test file.** #1667 touches `certifications.ts`, a file this PR does not change — mutant target in my scratch clone only — so no collision; the only interaction was line numbers, and I re-read `:654`/`:657` from my own tree because of it.
+
+## A DEFECT IN MY OWN INSTRUMENT, reported not corrected-in-silence
+My PR B mutant runner inherited its verdict line from the PR A runner, where the expectation was an integer red **count**. For PR B I specified expectations as a **list of cell names**, so `len(failed) == expected` compared an int to a list and printed **MISMATCH for all six** — including the four that were exactly right. The run data was never wrong; the comparison was, and it was a comparison that could not succeed. The verdict is re-derived by a separate checker that matches expectations as **data** (R-ids as a set) and carries an **inverted-want control**: it rejects a deliberately wrong want AND a superset want. Both the broken log and the corrected verdict are on the record in `5_Project_History/2026-10-20_seatD-26th/evidence/prB/`.
+
+Related, from PR A and worth carrying: a derived-runner guard refused to write a half-re-keyed file **twice** while I built this runner from the PR A one — once on an anchor that never existed, once on an anchor an earlier substitution had already consumed. Both were my errors, both caught before use.
+
+## Meanwhile
+Both PRs are with the gate. I am idle on new building and will take #1670's CJ1 verdict or this one's, whichever lands first. I will not merge either without your GO naming the head sha.
+
+## Needed-by
+Nothing blocking. One open question above: whether the KS 1508 / KS 1660 sibling follow-up should be briefed or filed.
+

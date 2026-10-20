@@ -1,0 +1,44 @@
+=========== [INBOUND] 2026-10-20T02:53 | Secuura/Blockchain-C | [Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1667 (KS-1695 gap 1) at d7c2e296c909,
+[Secuura/Blockchain-C -> Wednesday] READY FOR GATE: #1667 (KS-1695 gap 1) at d7c2e296c909, tier 1 - all three by-id certification reads bound; 23 cells 7 of 7 mutants; landing 9497977aaa7a on develop f01ba49da56d; preflight 13 of 16 legs
+## READY FOR GATE — PR #1667 (KS-1695 gap 1), head `d7c2e296c9099ec9a0efd8db4d2f51210381ffc4`, tier 1
+
+`https://github.com/Secuura/Distributed_Secuura/pull/1667` · base `develop` · **head and develop both read from origin in ONE action at 02:52:08Z**: head `d7c2e296c9099ec9a0efd8db4d2f51210381ffc4`, develop `f01ba49da56d3d55204caa02ab3348f94d63b9c0`.
+
+**Predicted landing tree `9497977aaa7a159922089b2e6b1abd2cd8927850`, computed against develop `f01ba49da56d3d55204caa02ab3348f94d63b9c0`** — the figure travels with that sha and is stale the moment develop moves. **Two independent derivations agree:** `git merge-tree --write-tree`, and applying the three-dot diff onto develop's tree in a temporary index. develop's own tree is `38200e78045e`, so the landing differs from it.
+
+**Ticket comment naming the PR:** posted on KS-1695, comment `a3811a16-6138-4149-a034-c08862d415b6` at 02:51:38Z, **read back BY ITS OWN ID and byte-identical** (3,958 bytes), every factual token present, control token absent, comment count 1 -> 2. *(The first readback used `comments(last:1)` and returned the OLDEST comment — Stuart's — with none of my tokens. That is the documented Linear trap, caught by the control rather than reported as a failed post.)*
+
+**Scope:** 2 files, **+398/-3** on a three-dot against the current develop. `routes/certifications.ts` plus ONE new test file. No migration, no config, no env var, no dependency, no spec change. `Refs KS-1695`, never `Closes` — gap 2 is unbuilt.
+
+### Test Evidence (what I RAN)
+- **Whole `services/originate` suite on the merged head: 136 files / 1,599 tests / 0 failed.** Baseline at `7e3b9362e08b`: **135 / 1,575 / 0**; develop's own `3a6f1810981e` adds 1 originate cell, so 1,576 + 23 = 1,599 — **+23 exactly, 0 vanished.** My file genuinely ran inside that run: `PASS src/__tests__/ks1695-…test.ts (8.868 s)`. My file alone: **23/23**.
+- **Red-proof** against develop's `certifications.ts` (sha `6abd05c5ea2f25f1`): **14 failed / 9 passed / 23 total**, every R cell red **by assertion**, every C control green, not a LOADFAIL. Fix restored and sha256-asserted (`b0ea5cc5f1f90195`).
+- **7 mutants, 7 killed** — each `tsc --noEmit` rc 0 FIRST, each killing a named cell by assertion, restore sha-asserted, label set cross-checked against the failed count (parser OK ×7). M1→C2, M2→R13, M3→R6, M4→R14, M5→C1, M6→C3, M7→R4.
+- `tsc --noEmit` rc 0, **0 diagnostics**. `eslint src` rc 0; 66 warning lines, **none naming either of my files**.
+
+### What was NOT covered — read these as the gate's starting points
+1. **The pre-push preflight did NOT fully run.** Verbatim: `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed. / legs 3 4 8 — local stack not up; you can clear this by starting it. / This is NOT a pass. Do not quote it as one — say which legs ran.` **13 of 16.** It is in the PR body verbatim, not summarised as green.
+2. **The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) were NOT run** — no Docker on this host. The two PR-template acknowledgment boxes are left **unticked** deliberately.
+3. **Nothing ran through a real gateway or real Postgres.** Every cell is the real router over mocked repositories, so what is pinned is the handler's decisions. `C5`'s tenant behaviour is the mock honouring `WHERE id = $1 AND tenant_id = $2`, not a database.
+4. **Platform S with a non-issuer key: REPORTED, NOT MEASURED** — Stuart's statement from S's code at `61bdbd3`, not our measurement; our token cannot read S's repo. I messaged nobody about it, as instructed.
+5. A plain end-user (`OWNER`) reader, `MULTI_TENANCY_ENABLED=true`, a share-recipient reader, an `onBehalfOf` connector certification, nft-certificate's tokenless fetch: all unexercised here and in BX1. The `connector:api-key` single-principal caveat (KS 1685) stands.
+6. **`services/auth` not re-run** — the merge carries develop's own test-only commit unchanged.
+
+### A CI signature that no longer matches what the repo docs describe — your call to route
+My PR's head shows **6 workflow runs with `conclusion: failure`**, and `mergeStateStatus: UNSTABLE`. **It is not my PR.** Control: the identical set fails on **develop's own heads** `f01ba49da56d` and `3a6f1810981e` — commits that merged on GOs. And every job reports **`steps=0`**: they completed without executing a single step, i.e. they never ran.
+
+That matters because the repo copy of `CLAUDE.md` documents the outage detector as `conclusion: startup_failure` with an **empty `name`** and `path: BuildFailed`. Today's shape is `conclusion: failure` with a **real name and a real workflow path** and zero steps. **Anyone applying the documented detector would read these as genuine test failures.** I did not edit any doc — out of my partition, and it looks like KS-1097-class work.
+
+### Two items for your word
+- **The branch commit carries a `Co-Authored-By` trailer.** No GO has forbidden one and 34 of the last 40 develop commits carry it, so I left it and disclosed it in Known residue. Say strip and I will, before any merge.
+- **develop moved twice during the build** (`7e3b9362e08b` -> `3a6f1810981e` -> `f01ba49da56d`). I merged develop IN at `3a6f1810981e`, never rebased, so develop is an ancestor of the head and the push was a fast-forward. **Neither move reaches either file in this PR** — `git diff --name-only` over both paths is empty for both ranges. If develop moves again before your GO I will re-predict rather than quote the figure above.
+
+### Corrections I made on my own claims, so none of them reach you as fact
+- **Two mutant anchors matched twice**: the admin-arm line and the `role` declaration are byte-identical inside `callerMayCertifyDocument` (KS 1538). The runner refused them as non-unique instead of mutating the wrong helper; I re-anchored on my own function's signature. Neither counted as killed until it was.
+- **My M5 expectation was wrong, not the cell.** On a holder-less connector certification `issuer.id` and `holder.id` are the same value, so `C4` cannot discriminate the issuer arm — `C1` does.
+- **Two mutants survived all 21 planned cells** (M2's empty principal, M4's `ORG_ADMIN`), so each earned a cell: `R13` and `R14`. The pass is 23 cells, not the planned 21.
+- **Two line numbers in my plan mail were off by one**: the lineage 404 is `:1425` and the evidence-bundle 404 `:1506` (I had written `:1424`/`:1505` from a sed window; grep is the instrument). Nothing depended on them.
+- **One PR-body token read False on readback** — `'7 mutants, 7 killed'` — because the live text is `**Mutants: 7 built, 7 killed**` and my token omitted the bold markers. Comparator artefact; the claim is present. The body is otherwise **byte-identical** to what I built (10,693 bytes), control token absent.
+
+**No merge without your GO naming the head sha.** Nothing deployed, no box, no `az`, no Docker all session. `2_Project_Files` read-only throughout (KS-907) — `5d1be7b06279`, 17 untracked files none of them mine, 0 tracked modifications, no fetch and no ref write. KS-1697 filed facts-only. Clone `deploy-clones/seatC32-7e3b9362e08b` left in place.
+

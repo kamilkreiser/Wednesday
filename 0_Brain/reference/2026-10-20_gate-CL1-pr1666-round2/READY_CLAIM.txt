@@ -1,0 +1,70 @@
+=========== [INBOUND] 2026-10-20T03:36 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1666 ROUND 2 (KS-758 option c) at d8e
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1666 ROUND 2 (KS-758 option c) at d8e8e65b816a, TIER 1 - landing 7763738a7edb; I wiped and restored the PR body, disclosed
+READY FOR GATE: #1666 ROUND 2 (KS-758 option (c)), TIER 1. Head
+d8e8e65b816a6fe7a469d2955e33ce0c040d15f5, a FAST-FORWARD over round 1's
+b5d65c8e0651.
+
+FIRST, SOMETHING I BROKE AND FIXED, because the gate will read the body and
+should know its history: I WIPED THE PULL REQUEST BODY AND RESTORED IT.
+My body-edit script asserted on a retyped anchor, the assertion failed at hit 0,
+so the script never wrote its output file - and the `cat >>` that followed
+created that file containing ONLY the round-2 appendix. `gh pr edit` then
+replaced the entire body with those 4,702 bytes, discarding the original 10,853.
+I had the original in my scratch copy, rebuilt it with the corrections applied by
+anchors LOCATED in the text rather than retyped, and the live body is now 19,101
+bytes and reads back byte-identical to what I sent. Verified present: the Test
+Evidence block, the BY MAPPING census, the (c) sections and the landing. No
+content was lost. The cause is the same retyping fault that bit me twice earlier
+today; the lesson that is new is the SEQUENCING - a failed validator followed by
+an unconditional append is a silent truncation, and `set -e` would not have
+helped because the two were separate commands.
+
+CARD RULING, quoted: Kam tapped `secuura-ks758-erasure-log-subject-ref-1020` =
+`c` at 14:01:14 AEDT 2026-10-20.
+
+REFS, ONE ACTION, 03:32:38Z
+  develop            21e2ffd20795cabb3758677380ffb4f90da51ab5
+  refs/pull/1666/head d8e8e65b816a6fe7a469d2955e33ce0c040d15f5
+  PREDICTED LANDING TREE 7763738a7edba2958278a9ca4bf97e344d206a09 against THAT
+  develop. Round 1's figures 147454c626e4 and 7169421a85cb are STALE - develop
+  has moved three times since - and I am not carrying them.
+DIFF, both rounds: 2 files, +355/-0 three-dot.
+
+TICKET COMMENT: KS-758, 2e21d354-26f5-4c95-ab0e-0d986dd2c88b, 03:35:51Z, read
+back byte-identical, carries the head sha.
+
+EVERYTHING YOU ADDED IS IN
+- the warn on a missing key carries NO reference, and the body says (c) silently
+  degrades to (b) in a deployment whose secret was never populated;
+- the key-config read is in the body: compose:601 and bicep:395 wire it, neither
+  guarantees a VALUE, initFromEnv registers only `if (hmacKey)`, and I state
+  plainly that I did NOT establish whether the live vault holds one;
+- the correlator disclosure is in the body IN MY WORDS: with the key the row
+  proves a named person was erased; without it, two rows with the same hash are
+  the same subject, so (c) removes the identifier and keeps a correlator -
+  better than (a), worse than (b), against KS 1696's cross-tenant read.
+
+CELLS: H1 H2 H3 plus CE1's G-a and G-c. All three CE1 test gaps closed.
+RED-PROOF: 7 arms over 11 cells (round 2's five + round 1's six, collateral
+judged, none appeared). No mutation -> 51/51. The hash removed -> H1 H2 H3.
+OPTION (a) WRITTEN BACK -> H1 H3 F2 FC1. The try/catch removed -> H2. The warn
+removed -> H2. The cause labels swapped -> G-c. records_affected hard-coded
+-> G-a. Each arm tsc rc 0 BEFORE running; product restored by sha256 equality.
+
+SUITE: 135 suites, 1582 -> 1587 tests, 0 failed, rc 0. +5, 0 vanished. Hand
+type-check 157 test files in the program vs 0 for the base config, 0 errors.
+Push rc 0 from the tool's own .rc, 623s, fast-forward so the hook's
+non-fast-forward refusal does not apply; preflight INCOMPLETE 13/16, 3 SKIPPED,
+nothing failed.
+
+NOT COVERED: not driven against a real Postgres (the cells assert the SQL and its
+bound values through the repo's $executeRaw stand-in); the four platform suites
+did not run; both log lines still carry externalRef, deliberately, per your CE1
+N1; concurrent requests could write two rows, untested; originate is outside leg
+16 so nothing at the gate type-checks the test file.
+
+NEXT: PR 2 of KS-1692 with the CI1 N1/N2/N3 wording pass, now that #1669 has
+merged (21e2ffd20795 - and I mailed you separately that its landed tree is NOT
+the GO's figure, because R's commit landed six seconds after my ref read).
+No deploy, no box, no az, no Docker.
+

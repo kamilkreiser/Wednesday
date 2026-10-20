@@ -1,0 +1,98 @@
+=========== [INBOUND] 2026-10-20T02:50 | Secuura/Blockchain-G | [Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1666 (KS-758 F9) at b5d65c8e0651, TIE
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: #1666 (KS-758 F9) at b5d65c8e0651, TIER 1 - landing 7169421a85cb on develop f01ba49da56d; bus read answers condition 2
+READY FOR GATE: #1666 (KS-758 F9), TIER 1 - data protection, a new write to the
+Art. 17 accountability table. Head b5d65c8e0651a780fd594f4859d1f6282256d051.
+
+CARD STATE, quoted with its read time as you required:
+`secuura-ks758-erasure-log-subject-ref-1020` read by you at 2026-10-20 13:3x
+AEDT: status open, choice=None, no tap from Kam (his newest live row 10:52:08).
+So OPTION (b) is built, which is the card's own default on his silence.
+
+REFS, READ FROM ORIGIN, AND THE EARLIER FIGURE IS STALE - SAYING SO EXPLICITLY
+  02:48:36Z  develop  f01ba49da56d3d55204caa02ab3348f94d63b9c0
+             (R 59th's #1663 round 2 landed while my branch was pushing)
+  PREDICTED LANDING TREE 7169421a85cb1b275c63d19531cf0217bc3549a8, computed
+  against THAT develop. rc 0, single line, exactly 2 files.
+  My pre-push figure 147454c626e4 was computed against develop 3a6f1810981e and
+  is STALE. I am not carrying it forward.
+
+DIFF: 2 files, +197/-0, three-dot.
+  services/originate/src/services/gdprService.ts                    +52  product
+  services/originate/src/__tests__/ks695-erasure-by-external-ref.ts +145 6 cells
+
+TICKET COMMENT NAMING THE PR: KS-758, 3b36e966-0fa4-4cac-87df-a47d5fe85f2c,
+02:49:44Z, read back byte-identical, carries the head sha and #1666.
+
+TEST EVIDENCE - RAN
+- 7-arm red-proof, every arm tsc --noEmit rc 0 BEFORE running, cell red by
+  assertion, product restored by sha256 equality, comparator self-tested four
+  ways. A0 nothing reds (46/46); INSERT removed -> F1 F2 F3 F4 FC1; OPTION (a)
+  in reason -> F2 + FC1; user_id/dsr_id named -> F1 F2 F3; fail-soft removed ->
+  F4; a row on the never-seen branch -> F5; off-vocabulary data_type -> F1.
+- Whole originate suite both ends: 135 suites, 1576 -> 1582 tests, 0 failed,
+  rc 0. +6, 0 vanished.
+- tsc on the product rc 0, 0 errors.
+- Test file type-checked BY HAND: 157 test files in the program vs 0 for the base
+  config, 0 errors total and 0 in my file.
+- In-hook preflight, quoted and NOT a pass: "PREFLIGHT INCOMPLETE - 13/16 legs
+  ran, 3 SKIPPED. Nothing failed. legs 3 4 8 - local stack not up." Push rc 0
+  from the tool's own .rc, elapsed 634s, ref confirmed by an independent
+  ls-remote.
+
+NOT COVERED
+- NOT driven against a real Postgres: the cells assert the SQL and its bound
+  values through the repo's existing $executeRaw stand-in. Nothing proves the row
+  inserts against the live CHECK; the mitigation is that data_type and
+  deletion_method are values the resolved path already writes, which M6 pins.
+- The four platform suites did not run (no stack, this seat is off Docker; the
+  change adds no HTTP surface).
+- KS-758's F6 half is untouched. KS-1696's read is not fixed here, by your
+  instruction.
+- F1 and F2 read bound values POSITIONALLY, so a future legitimate column-list
+  change reds three cells, not one. In the body.
+
+LEG 16 CONFIRMED MY OWN KS-1090 FINDING ON THIS VERY PUSH, which is better
+evidence than my hand run: it printed typecheck-tests for auth, api-gateway and
+vc-issuer and NO originate line. So the gate type-checked none of this PR's test
+file. The hand run is the only coverage and will not repeat for anyone else.
+
+----------------------------------------------------------------
+CONDITION 2 OF YOUR PR 2 RULING, ANSWERED NOW - AND IT QUALIFIES MY OWN CLAIM.
+You told me to read the bus before the PR says the erasure is "delayed and
+visible". I read it. packages/shared/src/events/index.ts:
+  RETRY EXISTS:        maxAttempts = 3 at :181, the handler retried in a while
+                       loop at :184-192.
+  DEAD-LETTER EXISTS:  on failure, xadd to `${STREAM_PREFIX}dead-letter` at
+                       :200-211 carrying original_stream, original_id, the raw
+                       event and "Failed after 3 attempts", then xack at :212.
+  So the subscriber's comment is TRUE IN MECHANISM.
+
+TWO CAVEATS THAT CHANGE WHAT PR 2 MAY CLAIM:
+1. THE RETRY HAS NO BACKOFF. There is no delay of any kind between the three
+   attempts - measured: 0 setTimeout/sleep/delay/backoff calls inside :184-192;
+   the 1000 ms pause at :234 is in the OUTER catch, not between attempts. So
+   under (i) a store outage burns all three attempts in microseconds and
+   dead-letters immediately. "Delayed and visible" is WRONG ON DELAYED: the
+   erasure does not wait for Redis to recover, it goes to the dead-letter
+   stream. Still better than silently-incomplete - it is visible and
+   replayable - but the mechanism is human/replay attention, NOT eventual
+   success. I will word PR 2's body that way and not the way I first put it to
+   you.
+2. A PENDING MESSAGE IS NEVER RECLAIMED. Zero hits for xautoclaim, xclaim and
+   xpending in that file (control: xreadgroup = 1 hit, a nonsense token = 0),
+   and the read uses '>' at :157, which reads only NEW messages. So if the
+   dead-letter xadd or the xack itself fails, the message is left PENDING and
+   this consumer never re-reads it. UNMEASURED whether that path is reachable in
+   practice - if Redis is down enough to fail the xadd, xreadgroup would
+   probably have thrown first - so I am recording it as a possible gap, not an
+   asserted one, and not filing it without your word.
+Neither caveat changes the (i) ruling as far as I can see: the subscriber still
+needs no code change, and dead-lettering a failed erasure is still better than
+recording it handled with live sessions. But condition 2 asked whether the bus
+behaves as the comment says, and the honest answer is "yes, with no backoff and
+no reclaim".
+
+NEXT: PR 1 of KS-1692 on your order (after this READY), then PR 2 with the
+discriminated return and the admin-route 503 wording you ruled.
+No deploy, no box, no az, no Docker.
+

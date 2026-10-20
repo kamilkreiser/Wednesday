@@ -1,0 +1,39 @@
+=========== [INBOUND] 2026-10-20T02:52 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1664 ROUND 2 at efd79bc87b36, TIER 1 
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1664 ROUND 2 at efd79bc87b36, TIER 1 - snapshot guard; the gate's N1 reproduced red-first on my own head; removing the guard reds K4 K7 K9-K13; 19 of 20 arms killed, 1 equivalent mutant
+## READY FOR GATE: #1664 ROUND 2 (KS-1687, snapshot guard) at head efd79bc87b36f7d570c29785ce8b0ceb06f8c10e — TIER 1, round 2 of 2
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1664 | base `develop` | 2 files | `Refs KS-1687` (In Progress).
+**Head read from origin in the same action as this mail** and equal to my local HEAD: `efd79bc87b36f7d570c29785ce8b0ceb06f8c10e`. A fast-forward of the round-1 tip `64a1c1e26f0c`; the head is a merge commit (my round-2 commit plus develop `f01ba49da56d`, merged in, never rebased).
+**Ticket comment:** KS-1687 `3a63431c-31a0-4345-960c-3f782c818371`, read back by id, 3347 bytes identical, 7 anchors. PR body rewritten whole for round 2.
+
+## Your four asks, in your order
+1. **Snapshot guard, before-read inside the same fail-closed catch.** `snapshotRefreshTokens()` reads msal's cache before the call, in its own catch (warns with the existing text, drops the error, returns null); `refreshTokenForAccount(result, before)` then considers only entries that are new or have a different secret. A null snapshot means no selection at all. The sign-in path is unchanged. **Why not gate option 1 (a per-call isolated cache or client):** it needs a new client, and so authority discovery, on every refresh, and changes a client lifecycle the exchange and OBO paths share; I could not measure that cost without real Microsoft. It is in the PR and in the code comment.
+2. **Cells from the gate's near-miss set and a stale-token cell, each red-proved by removing the guard.** K9 (prefix, rotating), K10 (prefix, no rotation), K11 (trailing space), K12 (empty id), K13 (the replica case). Each asserts its premise first (msal really returned the other account) and uses real msal through the fake transport, so no Account entities are hand-crafted. **Removing the guard reds K4, K7, K9, K10, K11, K12, K13.**
+3. **K4, K7, K8 expectations, explained.** K4: a stale same-id entry is now IGNORED and the rotated token returned (round 1 failed closed with "found 2"). K7: a non-rotating refresh now returns `''`, since the database already holds the token that was sent. K8 (no id token) is unchanged. New: **K4b** keeps the two-entries-fail-closed pin by emulating a concurrent same-id write; **K14/K14b** pin a failing before-read.
+4. **N3 comment corrected**, in the code: msal's OBO path reads the same shared cache but filters on `userAssertionHash`, which a refresh-flow entry never carries. I verified the three cited lines in the installed source before writing them. **Known residue is in the PR body** as you listed it.
+
+## Red-first, on my own code
+I wrote K9-K13 BEFORE the fix and ran them on round 1's own head. **All five failed**, each past an assertion proving its premise, with `expected 'RT-X-2' not to be 'RT-X-2'`. So the gate's finding reproduces on my head, not only on its scratch file: round 1 would have put account X's refresh token on account P's connection.
+
+## Red-proof: 20 arms, each tsc rc 0 on its own, every restore sha256-matched
+**19 killed as expected, ONE survived, and I am reporting it:** "changed = the secret appears in no earlier entry, ignoring the key" reds nothing. My expectation was wrong, not the guard. It differs from the guard only if msal rewrote a token under a different key with the same secret, which it does not: an equivalent mutant. I wrote K4 as its kill without checking.
+Other arms: snapshot taken AFTER the call -> 7 cells red; before-read outside the catch (your prototype's bug) -> K14, K14b; an unreadable snapshot still selects -> K14, K14b; "new key only" -> K0, K3; remove forceCache -> 10 cells; remove the fallback -> 10 cells; first-entry-wins, drop-the-id-match, count>=1 -> red; and the selector mutants.
+
+**One consequence to know, stated in the PR:** with the guard, five selector mutants (case-insensitive, includes, accept-no-id, startsWith, endsWith) are no longer killed by ANY KS-1687 cell. The guard restricts candidates to this call's own writes, and nothing on the refresh path can build a collision of those shapes. They stay killed by assertion by the KS-1682 cells that share the selector (W2, W4, W5, W7, W8). The ones that CAN occur here (uid-only, trimmed, empty-id, and the reverse-direction startsWith) are killed by K9/K11/K12.
+
+## Evidence
+- Suite measured AT THE LANDING TREE (this head contains develop, so it IS the landing tree): develop `f01ba49da56d` (its tree `38200e78045e` checked) **24 files / 231 cells / 231 passed** -> this head **25 files / 248 cells / 248 passed / 0 failed**. Multiset: **0 vanished, 17 new**, all in the KS-1687 file.
+- `tsc --noEmit` rc 0 via a child config with `exclude: []`.
+- **Preflight: 13/16 ran, 3 SKIPPED (3, 4, 8), nothing failed. NOT a pass.** In full in a PR comment; 7 of 7 FAIL-shaped hits are `ok`-prefixed control cells. Hook ran 10 m 45 s.
+- Instruments at this head: msal's cache is read by serialisation at **2 code lines** (`:317`, `:335`; a third match, `:138`, is a comment); `toTokenResult` has **1 call site** (`:177`); 0 persistence-plugin hits, control 1.
+
+## Landing, with the develop it was computed against
+**Landing tree `53062901f1fb4ca6f3ad50a48f313f697b62d786` on develop `f01ba49da56d3d55204caa02ab3348f94d63b9c0`**, from head `efd79bc87b36`, computed 02:51Z. If develop is anything else when you GO, say so and I will not merge.
+
+## Not claimed
+Real Microsoft's refresh response; N1's reachability (inference: Entra ids are fixed-length GUID pairs); a concurrent rotation of a prefix-colliding account inside the call window; the sign-in path hole (GC7), pre-existing; an OBO cell (N3 is a source reading); route-level persistence; the four platform suites.
+
+## Two things I will do unless you say otherwise
+- **GC7 deserves a ticket** (`exchangeAuthCode` returns another account's token on a prefix collision, present on develop, reachability inference-only). I board-search first and file one Low/Medium Bug with facts only, then tell you the id.
+- **The BZ1 N1-N3 follow-up** is committed in the worktree (`8409e0291`, 4 cells, 9 arms killed) and stays last, as ordered. It needs develop merged in first (develop moved: `f01ba49da56d` touches only the pkce file, no overlap).
+

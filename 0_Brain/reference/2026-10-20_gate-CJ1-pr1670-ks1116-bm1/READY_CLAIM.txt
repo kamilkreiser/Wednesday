@@ -1,0 +1,50 @@
+=========== [INBOUND] 2026-10-20T03:23 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] READY FOR GATE: #1670 (KS-1116 gate BM1 NOTE 1) at 67f
+[Secuura/Blockchain-D -> Wednesday] READY FOR GATE: #1670 (KS-1116 gate BM1 NOTE 1) at 67f83d4d1ad2, test-only, 8 of 8 mutants match
+## BLUF
+**PR #1670 (KS-1116, gate BM1 NOTE 1) is READY FOR GATE. Head `67f83d4d1ad2388d8cb10d521d09afe047ffcdbc`, read from origin by `ls-remote` in the same action as this mail. Test-only, 1 file, +6/-0, ZERO product bytes. All 8 briefed mutants matched their expected red counts EXACTLY. Not merged, not deployed. Tier: yours to set.**
+
+https://github.com/Secuura/Distributed_Secuura/pull/1670
+
+- base `develop` @ `f01ba49da56d3d55204caa02ab3348f94d63b9c0` — re-read by `ls-remote` at READY time: **develop has NOT moved** since I cloned.
+- `ls-remote` of the PR ref returns `67f83d4d1ad2388d8cb10d521d09afe047ffcdbc`, equal to my local HEAD and to the API's `head.sha`. The push's own `.rc` file is **0**.
+- **PREDICTED LANDING TREE `138c8f8fc4839460432d23a88ccc1e5a0b2501eb`, computed against develop `f01ba49da56d3d55204caa02ab3348f94d63b9c0`** — one commit whose only parent IS live develop, so a squash lands exactly my HEAD's tree. Independently confirmed by `git merge-tree --write-tree` returning the same tree, and controlled: it is NOT equal to develop's own tree `38200e78045e`.
+- Ticket comment posted on KS-1116 (BLUF, names the PR and the head sha) and **read back byte-identical**: comment `4c5b1fec-dbc4-4f00-85ac-49dd76f722fd`.
+- PR body **read back from the API byte-identical** (9237 chars both ways); `Closes` appears **0** times, `Refs KS-1116` present.
+
+## Test Evidence as it stands in the body
+
+**touched** — `services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts`, and nothing else: `git diff --name-only origin/develop...HEAD` returns exactly 1 path. GitHub agrees: `changed_files: 1, +6/-0`.
+**product untouched** — `src/ownership.ts` sha256 `895064d39beb4ff7f8955508b61e4e25796cebda01845f11dd964714f3d92270`, re-asserted immediately before the commit and equal to develop's (and to the READY file's recorded prefix).
+
+**ran:**
+- Whole `services/vc-issuer` suite, keyed by cell NAME at BOTH ends: **291 passed / 0 failed of 291** at the landing parent; **300 / 0 of 300** at my head; 18 files both; **0 VANISHED**, 9 new, arithmetic closes (291 - 0 + 9 = 300). Labels unique in both runs, so the set diff is sound. The reader cross-checks its label set against the reporter's own failed count and reports PARSER FAILURE on disagreement, and treats a 0 total as a load failure; both guards were proved able to fire on synthetic reports BEFORE use.
+- The 9 new cells are the 3 rows x the 3 tables (A2 / A5 / A9). A7 gains no cell — it loops the whole table inside one existing cell, which is why the mutant counts below are `n+1` rather than `n`.
+- **12 mutants**, each `tsc`-checked FIRST against my own unmutated baseline and counted only on a match, anchor uniqueness asserted (`== 1`) before each edit, restored from a SNAPSHOT (never `git checkout --`, which would have reverted the patch under test) with the restore asserted by sha256. A red counts BY ASSERTION.
+  BM4 (checker's tamper, verbatim) 7/7 · BM4a 4/4 · BM4b 4/4 · BM4c 7/7 · **BM1 4/4** · **BM1b 4/4** · JM11 7/7 · JM8 7/7 — **8 of 8 MATCH.**
+  Conjunct flips of the multi-clause `:93`: role test widened **19 red**, `rowTenantId !== null` removed **2 red** (the A3 `null === null` cells), tenant equality to `true` **20 red**.
+- Lint `npm run lint` rc 0, with a control: eslint invoked directly on the test file reports 1 file, 0 messages, so the lint path does reach `src/__tests__`.
+
+## WHAT IS NOT COVERED — the three I want on the record
+
+1. **The pre-push gate was INCOMPLETE, and I am not quoting it as a pass.** Its own closing lines:
+   `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` / `legs 3 4 8 — local stack not up` / `This is NOT a pass. Do not quote it as one — say which legs ran.`
+   Which ran: **13 OK, 0 FAIL, 3 SKIP** — legs 3 (spec-auth conformance), 4 (path resolvability), 8 (served-spec consistency), all three needing a local stack on `localhost:6882`. I did not start one because this lane is barred from Docker and live services; that is a seat constraint, not an omission, and it is in the PR body as its own warning block. None of the three has a surface on three rows in an in-process table. **Leg 16 — the leg that would see a type error in my file — ran OK.**
+2. **The EXTENDS row is proved by my hand mutants and by nothing else**, as your brief required. The checker's single tamper leaves it GREEN. BM1 and BM1b each red exactly 4 cells: the EXTENDS row on A2, A5 and A9, plus A7. Their red cell NAMES are recorded in `5_Project_History/2026-10-20_seatD-26th/evidence/prA/`.
+3. **The four platform suites were not run** (Schemathesis, Akto, Playwright, Performance/k6) — no route, spec, container or service boundary is touched.
+Nothing deployed, no `az`, no Docker, no box contact, no live service.
+
+## TWO FINDINGS WORTH MORE THAN THIS PR
+
+1. **I hand-rolled a child tsconfig the repo already ships.** `services/vc-issuer/tsconfig.test.json` is TRACKED and does exactly the job, and the gate's **leg 16 runs it**. I only learned that from the gate's own output AFTER the push. Both agree exactly — rc 0, 0 errors, 32 files, 18 of them tests, my file in program — so it is a corroboration rather than a wasted step, and I have said so in the body rather than quietly dropping mine.
+   **The half that matters for PR B: `services/originate/tsconfig.test.json` does NOT exist, and leg 16 covers auth, api-gateway and vc-issuer ONLY** — `typecheck-tests: originate` appears **0** times in the gate output, against a control of 1 for vc-issuer. So originate's test files are type-checked by NOTHING at the gate (which is the live KS 1090), and for PR B my child config is not redundant — it is the only program that will have seen the file. I will say that in PR B's body too.
+2. **My first conjunct-flip mutant was INADMISSIBLE** and I am reporting it rather than dropping it: removing the role clause outright left `TENANT_ADMIN_ROLES` unused, so `tsc` gave **TS6133, rc 2** against a 0-error baseline — it would have measured the compiler, not the cells. Rewritten to keep the Set in the expression (19 red), and both forms are on the record. This is the identical trap SCREEN_21's Findings record for the Spark's own first BM4 draft.
+
+## Spark vs me, kept separate
+The Spark's figures (red-first 7/140, green-after 140/140, suite 291 -> 300, `tsc` rc 0) are its **checker's** instrument; it also reports `A2` strict-apply clean and the golden TREE-IDENTICAL. Mine above were taken independently in my own clone and agree. I did not re-run the checker. `mergeable_state` currently reads `unstable`; it carries no testing claim (KS 660) and I am not offering it as one.
+
+## Meanwhile
+CONTINUING with PR B (KS-1679) immediately: second branch from live develop in the same clone, strict apply, originate baseline + after by cell name, child tsconfig with the listed-file control (needed, per finding 1), `npm run lint`, then the 6 mutants, then its own READY mail. **I will not merge #1670 without your GO naming the head sha.**
+
+## Needed-by
+#1670's GO whenever the gate has it. No action needed before PR B's READY.
+

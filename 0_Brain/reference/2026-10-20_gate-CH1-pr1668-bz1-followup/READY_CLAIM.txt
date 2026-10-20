@@ -1,0 +1,37 @@
+=========== [INBOUND] 2026-10-20T03:09 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1668 (KS-1682 BZ1 N1-N3) at b275a072e
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1668 (KS-1682 BZ1 N1-N3) at b275a072e0fe, tier 2 test-only; KS-1689 overlap check done (none); KS-1698 and KS-1700 filed
+## READY FOR GATE: #1668 (KS-1682, BZ1 N1-N3) at head b275a072e0fe77811c6832508f7e8299405fcef4 — tier 2, test-only
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1668 | base `develop` | 2 files, +90/-3 | no product code | `Refs KS-1682` (In Progress).
+**Head read from origin in the same action as this mail** and equal to my local worktree HEAD. A brand-new branch; the head is a merge commit (my commit plus develop `f01ba49da56d`, never rebased).
+**Ticket comment:** KS-1682 `7c163ac5-771d-4212-b0e0-f81bb8cbcd68`, read back by id, 2265 bytes identical, 7 anchors.
+
+## What it does (your three notes, re-measured at the merged tree before building; all held)
+- **N1** the catch warning was pinned by nothing -> **L6** (serialize throws) and **L7** (unparseable cache), each asserting the exact catch warning and that the error is DROPPED.
+- **N2** the no-leak check ran on one branch of four -> **L8** (found >1) and **L9** (no account); with L4 and L6/L7, all four branches, over the WHOLE emitted record so a leak through log METADATA is caught.
+- **N3** W6's comment said "= 9", assertion is 10: my slip.
+
+## A measurement that changed how L7 is written
+On Node 24.7 a JSON `SyntaxError` quotes only the **first ten characters** of its input. A check for the whole secret would pass even if the error were logged. L7's marker sits inside those ten characters and L7 carries a control that this runtime really quotes it.
+
+## Evidence, with the tree it was taken on
+Suite at the landing tree (head contains develop, so landing == head's tree `355fafd1bf8c`): develop `f01ba49da56d` **24 files / 231 cells** -> head **24 files / 235 cells / 235 passed / 0 failed**; multiset **0 vanished, 4 new**. tsc rc 0 via a child config. **Red-proof 9 arms, all killed by assertion**, each tsc rc 0 on its own, sha256 restores: catch -> console.warn / leaks the message / leaks it via METADATA / rethrows / silent -> L6 L7; found>1 leaks matches or the account id -> L8; no-account leaks the access token -> L9, **via metadata -> L9 ONLY** (the arm showing the whole-record check does something a message check cannot). **Preflight 13/16 ran, 3 SKIPPED, nothing failed. NOT a pass**; 7 of 7 FAIL-shaped hits are `ok`-prefixed control cells; hook 12 m 08 s.
+
+**Landing tree `355fafd1bf8c768df540c583f436b4f00b8e66a6` on develop `f01ba49da56d3d55204caa02ab3348f94d63b9c0`**, from head `b275a072e0fe`, computed 03:07Z. If develop is anything else when you GO, say so and I will not merge.
+
+## KS-1689 (Kam ruled d): the overlap check you asked for, and what I found
+I have NOT started building; I read the code only.
+- **Overlap with #1664 round 2: none.** #1664 touches `auth/token-manager.ts` and its own test file. The status read is `GET /api/connections/:id` at `index.ts:776-797`; it already derives `tokenExpired` at `:794`, which is where the flag goes.
+- **There is exactly ONE status read.** `:761` is the POST init response (a brand-new pending connection) and `:482` is the health count; neither needs the flag.
+- **Rule I intend:** `needsReauth = status === 'connected' && !refreshToken`. A disconnected connection clears its token (`:810-812`) but its status is not `connected`, so it cannot misfire. A connection whose stored token cannot be decrypted also reads `needsReauth`, which is the honest answer: `decryptToken` fails closed to `undefined`.
+- **Tier 2** by my measurement: a pure derived read; it does not touch sign-in, refresh or selection.
+- **I will not document the field in OpenAPI in that PR.** The `M365Connection` response schema is `.passthrough()` and already omits `tokenExpired`, `tenantName`, `connectedAt`, `lastSyncAt`; documenting is a spec change with its own regeneration steps. Tell me if you want it in.
+- **UI is not mine.** Kam said "show it on the status read"; this is the API field. Whether the admin UI renders it is another surface.
+
+## Two tickets I filed (both board-searched over the whole corpus with controls)
+- **KS-1698 (Medium)**: the sign-in path (`exchangeAuthCode`) has the same msal prefix-lookup hole #1664 closes on the refresh path. **I reproduced it myself on the sign-in path** (P signs in, a strict prefix of X's id, and receives X's token while its own sits unused in the cache); reachability is inference. Not fixed in #1664 per your ruling; sequencing note on the ticket: a fail-closed sign-in writes `status = 'connected'` with no token, which is KS-1689's territory, now ruled.
+- **KS-1700 (Low)**: the OpenAPI `M365Connection` status enum lists `expired` and `revoked` (assigned nowhere) and omits `error` and `disconnected` (assigned at `:679`, `:862`, `:810`). **A slip of mine on the way:** my first grep read the wrong schema (line 89 is the INIT response and matches the code); I caught it by re-verifying against the right one before asserting anything.
+
+## Queue state
+#1664 round 2 at gate CG1 (tier 1). #1668 is this PR. Next: KS-1689 build, after CG1 clears, as you ordered.
+
