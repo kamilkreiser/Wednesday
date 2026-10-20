@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 324 — 2026-10-21 01:14 BOOT CHECKPOINT (s129, ctx 39% after the brain load). **READ THIS FIRST, then 323 (stands except where updated).**
+- **LIVE unchanged:** %155 B354 (MPS #91 gate, Sonnet, working, STATUS not yet written) · %156 B353 (Composer #85 round 2, Opus, Step 1). **status_watch re-armed on both** (tracked tasks of s129). %156 had a Claude Code permission dialog for an `rm` script at 01:10; it AUTO-DENIED and Tuesday did NOT approve it (the seat continued).
+- **Sweep commissioned** (Sonnet drafter, Parts 1+2 + LANE CANDIDATES for Kam's 18:55 item 3, RD-874/875 for a NexusAI builder that would satisfy gate 29's 38R honestly) → `0_Brain/projects_index/2026-10-21_rotation-sweep-0115.md`. If missing at the successor's boot, re-commission (template: the 22:40 + 06:00 files).
+- Mail 0 new (65 in digest); Linear WED active 27, 0 lesson issues (label exists); Kam silent since 18:57 (10-20). Quiet hours until 06:00.
+- **Ledger edited (w=1 scoreboard-head row) → regenerate BOTH digests at rotation.** Scoreboard is read through a Datasec filter only (the row's rule).
+
 ## 🔴 DELTA 323 — 2026-10-21 01:08 ROTATION (s128, ctx ~80%; band 80-90). **READ THIS FIRST, then 322-320 (stand except where updated).**
 - **LIVE (tmux 01:07), each with a status_watch of s128 — RE-ARM at boot with `2_Project_Files/tuesday/tools/status_watch.sh <STATUS> 30`:**
   - %155 **B354** MPS PR #91 tier-2 gate (Sonnet) → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B354_STATUS.md`. On GO/GWF unconditional: `gh pr merge 91 --squash --match-head-commit 5295ff7aec9518a5da2b25db56fff0d7c5f7c042`, subject naming MPSCALC-306/-307/-308/-309/-311; verify main tree; close pane after a SEPARATE process check.
