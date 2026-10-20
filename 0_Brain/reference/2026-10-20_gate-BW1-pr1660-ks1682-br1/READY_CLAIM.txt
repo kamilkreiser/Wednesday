@@ -1,0 +1,54 @@
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE: #1660 (KS-1682 BR1 residue) at 1400219cf2b8, tier 2 - W6 now reds under two tampers, X1/X2/X5 one cell each, and a FOURTH unpinned conjunct found
+2026-10-20T00:56:34.000Z
+
+## READY FOR GATE — #1660 (KS-1682, gate BR1 residue) at head 1400219cf2b88cc60f08719bfa0295c8066c9b8c
+
+**PR:** https://github.com/Secuura/Distributed_Secuura/pull/1660 | base `develop` | **1 file, +124/-20, test-only, no product code, no migration, no config** | `Refs KS-1682` (stays In Progress).
+**Head read from origin in the same action as this mail** (`gh pr view 1660 --json headRefOid`) and it equals my local HEAD: `1400219cf2b88cc60f08719bfa0295c8066c9b8c`. Tier 2 expected.
+**Ticket comment:** KS-1682 comment `673397ca-cad2-4dbb-bc4c-9520aff2b0e5`, read back by id, **3987 bytes sent, 3987 read back, identical**, and 5 anchors (PR number, head sha, landing tree, develop sha, 13/16) each present. Not a paginated delta.
+
+## WHAT IT DOES — both BR1 notes, plus one note BR1 did not raise
+
+**N2, W6 could not fail — fixed and PROVED able to fail two ways.** Every fixture secret is now declared once in a `SECRET` registry; every cell seeds from it; W6 asserts over `Object.values(SECRET)`, which is the data the cells use.
+- **T1 empty one registered secret (`padded: ''`) -> W6 RED, and W1-W10 ALL STAY GREEN.** This is the arm that earns the control: **W3 seeds that very secret** and stays green, because an entry whose secret is `''` is dropped by the selector's own `e.secret !== ''` clause and W3 asserts `''` either way. Nothing but W6 can see the tamper.
+- **T2 duplicate one (`suffix: 'RT-PREFIX'`) -> W6 RED.**
+
+**N1, three surviving near-miss mutants — one new cell each, each killing EXACTLY its own mutant.**
+- **W7** `home_account_id: 'uidB.tidB.extra'` kills **X1 startsWith** (reds W7 only).
+- **W8** `home_account_id: 'x.uidB.tidB'` kills **X2 endsWith** (reds W8 only).
+- **W9** `home_account_id: ''`, key PRESENT, kills **X5 empty-string id** (reds W9 only).
+Why they walked through all seven cells before: W4's fixture `xuidB.tidBx` is neither a prefix nor a suffix, and W5's entry is id-LESS, not empty-string-id (`undefined === ''` is false).
+
+**NOT IN THE COMMISSION — the conjunct flips found a FOURTH unpinned clause, and two that cannot be pinned here.** You asked for each conjunct of `e && e.home_account_id === homeAccountId && typeof e.secret === 'string' && e.secret !== ''` flipped separately. That turned up more than a procedure:
+- **`typeof e.secret === 'string'` was pinned by NOTHING. W10 now kills it.** Every other cell misses on the id, so the later clauses are never evaluated. **Reachable, measured through the real cache:** msal's serialiser preserves a numeric secret verbatim (`"secret":12345` reads back), and the dropped clause returns `mine[0].secret as string` = a NUMBER through a signature promising a string, which is what gets written to the connection.
+- **`e &&` is UNREACHABLE and no cell can pin it.** msal's own `Deserializer` throws `TypeError: Cannot read properties of null (reading 'home_account_id')` (msal-node `Deserializer.ts:159`) before a null entry can reach the cache. **Measured by probe, not assumed** — I wrote the null entry and read the throw.
+- **`e.secret !== ''` is UNOBSERVABLE at the return value.** Dropping it selects the empty-secret entry instead of filtering it out, and the function returns `''` EITHER WAY. It is observable only in WHICH warning fires -- `found 0` vs no warning at all. **That is item 2's territory:** once the warnings go through the logger they become inspectable, and I intend to pin this clause in the item-2 PR. Flagging it now so you can rule otherwise.
+All three are written into the FILE HEADER, with msal's error text, so the next reader does not re-derive them.
+
+## TEST EVIDENCE — what I ran, and what I did not
+
+- **m365-integration full suite, before and after**, `npx vitest run` JSON reporter: **23 files / 220 cells / 220 passed / 0 failed** at `f4259b8ed387` -> **23 files / 224 cells / 224 passed / 0 failed** at this head. The file goes **7 -> 11 cells**. **0 vanished except W6's old title**, which this commit replaces -- I am naming that rather than claiming a bare "0 vanished".
+- **`tsc --noEmit` rc 0, 0 errors**, through a child `tsconfig` with `exclude: []`. **Control that the override took: the child lists 23 `src/__tests__` files, the parent lists 0.** The child config is a local tool and is NOT committed (m365 is outside leg 16's ratchet -- your open item, not mine).
+- **Red-proof 14 arms:** each on a snapshot with an exact-count anchor, each **`tsc --noEmit` rc 0 on its own**, restore asserted by **sha256 AND the unique anchor present exactly once** (all 14 restores MATCH), and `0 passed AND 0 failed` treated as a LOAD FAILURE -- none occurred. **12 arms red by assertion. 0 inadmissible. 0 unexplained survivors**; the 2 non-reds are C1 and C4 above, each with a measured reason.
+  G3->W1(+W7) | G4->W2 | G5->W3 | G6->W3,W4,W7,W8 | G7->W5 | **X1->W7** | **X2->W8** | **X5->W9** | C2(drop id match)->W1-W5,W7-W9 +2 non-W | **C3->W10** | C1-> none (unreachable) | C4-> none (warning-only) | **T1->W6** | **T2->W6**
+- **Harness unchanged from #1651's:** real `@azure/msal-node` client via the service's own `initMsal()`, real cache via `getTokenCache().deserialize()`, only `acquireTokenByCode` stubbed. **No cell performs a network request.** Exactly ONE cache entry per cell, so a mutant is a single match and cannot be masked by the fail-closed `> 1` branch.
+
+**NOT RUN / NOT COVERED:**
+- **No real sign-in or refresh against Microsoft.** Every msal fact is a source reading plus a local round trip through msal's own serialiser. I drove nothing against Microsoft, per the HOLDS.
+- **The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) were NOT run.** One unit-test file, one service, no HTTP surface, no route, no spec entry -- none of them can observe it.
+- **PREFLIGHT: 13/16 legs ran, 3 SKIPPED, nothing failed. THIS IS NOT A PASS** and I am not quoting it as one. Legs **3, 4, 8** skipped, each `SKIP - local stack not up on http://localhost:6882`. The 13 that ran are named individually in the PR's first comment, including leg 14 (**91 shell suites passed / 0 failed / 0 skipped of 91**, 547 s) and leg 16 (auth 42 / api-gateway 27 / vc-issuer 0 errors, **all baselined, 0 new, 0 stale**).
+  **Why I did not clear the skips:** Seat D 25th is mid-deploy with 30 of 33 images building on the same Docker VM, and all three legs need the whole compose stack up. Contending for memory with that build is not a trade I would make without your word. A reason, not an excuse.
+- **Every `FAIL`-pattern hit in the 2,472-line preflight log is ATTRIBUTED** rather than waved past: `grep -E '^FAIL|FAILED|✗'` returns **7**, and all seven are **titles of PASSING control cells** about failure handling, each prefixed `ok`. Discriminating forms are 0: `^FAIL:` 0, `preflight gate FAILED` 0. Same for every non-zero `N failed` tally (1, 2, 6, `048`) -- each sits in an `ok` or `PASS:` control line. The gate's "Nothing failed" holds at every reading I can take.
+- Deploy state untouched and unclaimed. No `az`, no box writes, no Entra calls.
+
+## LANDING, QUOTED WITH THE DEVELOP IT WAS COMPUTED AGAINST
+**Landing tree `ceea2e18a5b7ca5d868558f9ac427f504476facc` on develop `610570e5a75790d8ebf4264c4aec3ec8bebc0609`, from head `1400219cf2b8`, computed 00:54Z, 0 conflict lines.**
+**develop moved TWICE in the 12 minutes this branch existed:** `f4259b8ed387` (my clone base) -> `86df4f5a52cc` (#1655 KS-1407) -> `610570e5a757` (#1657 KS-1157). **Both are `services/auth` ONLY** -- 8 files then 4 files, **zero overlap** with my one file and **nothing under `m365-integration`** -- so develop moved but it does NOT reach my cells, and the suite figures stand. My earlier 00:42Z figure (`e5b11a9672e1` on `86df4f5a52cc`) is **superseded**; treat any figure of mine older than the last merge as stale. I re-predict again immediately before any merge and will not self-derive a landing if develop moves after your GO.
+
+## PUSH TRANSPORT
+`push rc=0`, read from the push's own exit status with output **redirected, never piped**. Brand-new branch, so `pre-push:61` skips the non-fast-forward check; pushed sha == checked-out HEAD, which `pre-push:16` requires. The hook ran **10 m 15 s** (00:42:35Z -> 00:52:50Z) -- past the ~6-minute idle cutoff -- so the explicit `-c core.sshCommand=...ServerAliveInterval=30` earned its place, given the launcher's F-02 meant no keepalive was in the repo config. `GIT_SSH_COMMAND` unset throughout.
+
+## NEXT, WHILE #1660 IS AT THE GATE
+Item 2 (the logger swap, its own PR, scope as you confirmed). I have read `utils/logger.ts` whole: winston, `export const logger = createLogger('m365-integration')` at **:25**, a single **Console transport**, level `LOG_LEVEL` or debug outside production. `token-manager.ts` imports no logger; `security/tokenCrypto.ts:20` and `oauthState.ts:26` already do. **The unmeasured item in your brief is the first thing I will measure:** winston's Console transport writes through its own stream, NOT through `console.warn`, so I expect `vi.spyOn(console, 'warn')` to stop capturing these three lines -- which would silently hollow out the BL1 log-hygiene probe. I will prove which way it goes before I change a line, and report the measurement either way.
+
+Then item 3 (BP1 NB1/NB2), then the KS-1687 + KS-1689 plan mail with the four options, a recommendation and a DEFAULT for Kam's card, short enough to read on a phone.
