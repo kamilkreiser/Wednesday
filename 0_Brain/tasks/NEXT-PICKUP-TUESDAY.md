@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 301 — 2026-10-20 19:57 CHECKPOINT (s126, ctx 71%; band 80-90). **READ THIS FIRST, then 300 (stands except where updated).**
+- **LIVE now:** %136 B337 (HPSM-POC: Paul -> SM Administrator, Step 2) · %137 B335 (Composer #83 round-2 gate, cap) · %138 gate 32 (NexusAI #98 round 2, cap; ANSWER-1 gave H1 a 5400 s deadline; verdict by MAIL) · %139 B340 (MPS records) · %140 B338 (NexusAI records) · %141 B339 (Composer records fold b328 + #363-#365). B323 DONE -> **draft PR #84** (head 0f64aee7, 11 files, opened by Tuesday 19:5x); pane closed.
+- **DRAFTER RUNNING:** B341 = tier-1 gate brief for Composer PR #84 (Opus G1; real-render page numbers + PNG look). Output tuesday/briefs/2026-10-20_B341_*: READ WHOLE, stamp MAIN_SHA (Composer main by gh api; 318df176 at 19:5x) + STAMP_TIME, launch when B335's docker-heavy runs allow.
+- **OWED:** fleet_ack for the gate-32 question (REFUSED 19:56 = no subject match yet; re-run `fleet_ack.sh answered "full-verify deadline" "Tuesday ANSWER-1 file"`); "Contents" -> Kam's Composer words card after B341's verdict; the 20:05 VM power-state read is a background task of s126 (if lost: re-read per DELTA 300).
+- Ledger +2 rows this seat (relog guess w=2 with Kam's words; parallel note w=11). Digests to regenerate at rotation (`boot_digest.py --by-tier` and bare).
+
 ## 🟢 DELTA 300 — 2026-10-20 19:53 CHECKPOINT (s126, ctx:66%; band 80-90). **READ THIS FIRST; supersedes 299's LIVE / OWED / usage lines; 299's gate-31 and #99 facts stand.**
 ### Since 299 (verified at source; detail in today's note 16:10-19:53)
 - **ACCOUNT:** Kam /login'd Tuesday 18:50 (Tuesday's own CLAUDE_CONFIG_DIR; 7d 0-1%). Agents use the SHARED keychain login "Claude Code-credentials": it changed 19:41 AEDT (mdat 08:41:24Z) when Kam /login'd agent panes. Tuesday wrongly told Kam "no relog needed" (ledger w=2, Kam: "please dont guess. always check"). B323/B335/B337 hit the old limit 19:12 and were resumed 19:42 by pointer (tuesday/briefs/2026-10-20_LIMIT-STOP-NOTE_account-switched-1941.md); verified generating 19:43. **Gate 32 (%138) still runs on the OLD login (Kam could not reach it): if it parks at the limit dialog, relaunch it (a fresh launch reads the new shared login).**
