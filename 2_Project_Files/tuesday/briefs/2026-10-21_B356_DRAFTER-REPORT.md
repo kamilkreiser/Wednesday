@@ -1,0 +1,23 @@
+# B356 drafter report (read-only drafter, claude-sonnet-5-5, 2026-10-21 01:30 AEDT)
+
+Brief: `2026-10-21_B356_SEAT-D8_hpsmpoc-301-302-import-sweep.md` (104 lines, 2 stamp slots, `@[A-Z_]+@` count 2, MEASURED). Shape copied from B300 (the last HPSM-POC build brief ending READY FOR QA, same code family) and conventions from B346 and B354 (stamp slots, launch line, refuse check).
+
+## What I measured (instrument)
+- Code main `c149a3037463d38bf7cec38c16a182c746b3b1b3` (`git --no-optional-locks ls-remote origin refs/heads/main`, 01:28); `b356*` refs 0 (control `b300*` = 1); open PRs in the code repo 0 (`gh pr list`, 01:27; control: not run for merged, brief says to).
+- Both tickets via Jira GET (`python3 -I`, key read in-process): Backlog, Medium, 0 comments, 0 links, updated 2026-10-20 11:30. Full descriptions and Done-whens read.
+- Code at `c149a30` via `gh api contents`: `ImportEndpoints.cs` (499 lines: guard `:320`, `FailOnceAsync` `:304`, status read `:133-148`, `DatabaseRefusedReason` `:276`, `FailIfStillPendingAsync` `:338`), `ImportPendingSweep.cs` (219 lines: `FailOneAsync` `:156`, `LandedSinceAsync` `:188`), and the tests `ImportSweepCountTests`, `ImportFailurePathResidualTests`, `ImportSweptUploadTests` (harness: `CountingHoldStore`, `SweepCountFactory`, `ImportResidualFactory`, `LostCommitAck`).
+- Gate `B304_STATUS.md` r2, r3, r7 (mutant table g1..g7, s1..s4), r8 (variant table), findings B304-1..-8; records `CLARIFICATIONS.md` C-120, C-121, C-123 (records main `93ee2e0b`, highest C-126).
+- Mail key absent (`grep -c` 0, control `JIRA_API_TOKEN` 1); `gh auth` = kamilDatasec; ports `7860-7899` free, no brief names `786x`-`789x` (control `730x` found in 3 briefs); load1 4.75; panes: tuesday, MPS gate, Composer only; helpers `.tools/b198/lock.sh`, `.tools/b300/{jira,post,read}.py`, `.tools/dotnet/dotnet`, gitleaks all exist.
+- Model row: routing v1.0 C2 (Sonnet 5.5 first, pilot). Pane `Datasec/HPSM-POC-D8`, `BRIEF_SEAT_LEVEL=sonnet`, ports `7870-7879`.
+
+## Not measured
+No `dotnet` run (every RED/GREEN is the gate's). The weekly gauge (P2/P3). How `SweepCommands` forges a given exception class; whether `FailAsync` is visible to the test assembly; whether the NULL-reason control row (3b) and the s3 order row are buildable. All are named UNMEASURED in the brief and have a stop-and-say fallback.
+
+## Open questions, each with a recommended answer
+1. **Widen the guard to any non-null reason (first failure wins)?** It also changes variants (i) and (iii), which are identical at base: the run then keeps the sweep's reason (approved text, C-120) and one audit, where today the upload's reason overwrites it. No word is added. Recommended: YES, as the gate and the ticket say; the brief makes the seat state the changed stored reason in STATUS. The alternative (patch only the status-read site) leaves the double audit in (i)/(iii).
+2. **Model: Sonnet (row C2) or Opus?** -301 edits one condition on the append-only audit path but adds no audit, reason or word. Recommended: Sonnet, then a tier-2 gate (as B300/B304 did for the same files); escalate to a G1 gate only if the gate finds the skip can hide a needed audit.
+3. **Include the stale header comment of `ImportSweptUploadTests.cs` (B304-8)?** Comment-only, named in -302's Where. Recommended: YES, in commit 2, with a by-program check that the diff is comment lines only.
+4. **B304-6 ("at least" wording on the 3304 operator line)?** A wording change to an operator log line; C-121/C-123 treat such lines as not approval-class, but the ticket calls it the coordinator's decision. Recommended: NOT in this brief (it would change a `LoggerMessage`); Tuesday rules separately, and the brief bans any log-text change.
+5. **s3 (order of the second look) has no known killing instrument.** The brief proposes holding the sweep inside the second look and asserting the run already reads `failed`. Recommended: keep it as the seat's task with an honest fallback (NOT KILLED stated, last Done-when clause not claimed) rather than rule it out now.
+6. **Launch authority wording at stamp.** The brief cites Kam's 2026-10-19 11:34:45 and 2026-10-20 18:55:31 words, RELAYED from B300 and B346 (not re-read from the board by me). Recommended: Tuesday confirms them in the Stamp line, or names a ruled card, before launch; the refuse check stops a seat if no authority is named.
+7. **Optional rows for variants (i) and (iii).** The brief requires the R8 (ii) probe and one different-reason row reachable with the existing harness; the other variant is NOT TESTED if it needs a product seam. Recommended: accept that scope.
