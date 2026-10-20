@@ -3,7 +3,7 @@ date: 2026-10-20
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
-supersede: REPLACED WHOLESALE by the 12:5x Wednesday seat (Sonnet 5.5) at its ~50% checkpoint (13:3x AEDT, ctx 46%); UPDATED 13:5x at the 50% checkpoint. Replace wholesale again; never stack. Previous versions: git history + NEXT-PICKUP.md.pre-1020-1338.
+supersede: REPLACED WHOLESALE by the 12:5x Wednesday seat (Sonnet 5.5) at its rotation (14:5x AEDT, ctx 79%). Replace wholesale again; never stack. Previous versions: git history + NEXT-PICKUP.md.pre-1020-1338.
 ---
 
 # NEXT PICKUP (Tue 20 Oct, written 13:3x AEDT by the 12:5x seat)
@@ -14,13 +14,13 @@ supersede: REPLACED WHOLESALE by the 12:5x Wednesday seat (Sonnet 5.5) at its ~5
 3. send_brief / brief_and_launch need `WED_AGENT=wednesday`. Subjects never carry hold/stop/checkpoint. Send, tap (`cockpit.sh say "<cockpit NAME>" "<pointer>" --mail "<subject substring>"`) and note are THREE separate calls; a note must not say posted/sent in the same command as the send (receipt guard). brief_and_launch demands: provenance `fact | source | read YYYY-MM-DD`, a ticket-state line for every ticket in the QUEUE, a `RULED BY KAM, NOT YET IN AN ARTEFACT` heading, and a SELF-CHECK line copied from the gate's own print.
 4. In force: Kam 10-18 new-account grant, routing v1.0, the October deploy grant "until further notice", TESTED merge grant, merge-and-archive grant. Kam 13:0x terminal: "spark connected. please use it as well".
 
-## 1. LIVE FLOOR (14:5x, ctx 78%) - develop = 561a6c5b528289f4d7ecd19f9c069501e925e9ea (#1670); Secuura merges today 23; usage gauge 83% (80-90 band: cloud launches only if it matters and nothing local can do it; hard stop 90%; Kam told twice; ~1 point per 19 minutes today)
-Merged and verified by fetch (in order): #1645 #1646 #1648 #1647 #1649 #1650 #1651 #1652 #1653 #1658 #1656 #1655 #1657 #1660 #1659 #1661 #1662 #1665 #1663(r2) #1668 #1664 #1669 #1670. Kintsugi 89956fe92956; demo d75bfe2deb80. Develop moves several times an hour: a landing figure in a GO is EXPECTED, not guaranteed (G 13th's #1669 landed 6 s after its ref read on a moved base; content was byte-identical): GO on the head sha, the seat mails the real parent/tree, Wednesday verifies CONTENT.
+## 1. LIVE FLOOR (14:5x, ctx 78%) - develop = f418cddac51498adda34cfed0bf5486a2d8cca77 (#1671); Secuura merges today 24; usage gauge 83% (80-90 band: cloud launches only if it matters and nothing local can do it; hard stop 90%; Kam told twice; ~1 point per 19 minutes today)
+Merged and verified by fetch (in order): #1645 #1646 #1648 #1647 #1649 #1650 #1651 #1652 #1653 #1658 #1656 #1655 #1657 #1660 #1659 #1661 #1662 #1665 #1663(r2) #1668 #1664 #1669 #1670 #1671. Kintsugi 89956fe92956; demo d75bfe2deb80. Develop moves several times an hour: a landing figure in a GO is EXPECTED, not guaranteed (G 13th's #1669 landed 6 s after its ref read on a moved base; content was byte-identical): GO on the head sha, the seat mails the real parent/tree, Wednesday verifies CONTENT.
 GATES: none running (CA1-CM1 all returned and verified; the Agent-tool gates die with a Wednesday rotation, so none was in flight at the rotation).
 SEATS (list with `tmux list-panes -t fleet:0 -F '#{pane_id} #{@cockpit_name}'`; R 59th's pane %21 is CLOSED):
 - **G 13th (%22, wrapped, standing by):** #1666 (KS-758 option c, head d8e8e65b816a) gate CL1 round 2 = GO WITH NOTE (0 blockers, 8 notes). RULED: G pushes ONE comment-and-body-only commit (N1 disclosure rewrite: the hash is not tenant-scoped, equal hashes correlate, same key as the email lookup hashes; N2 five wrong body sentences + the stale gdprService.ts comment ~1516-1525; residue N3-N8); then check the delta is comments only (python non-comment-line multiset on both blobs) and GO the NEW head, no further gate. HANDOVER written (202 lines). After #1666 merges: score G 13th, `pane_close.sh %22`. KS-1692 PR 2 (ruled shape (i), four call sites, N1/N2/N3 wording pass) is UNBUILT: needs a tier-1 Opus seat (G 14th) from G's HANDOVER; DEFERRED for the gauge; launch when it matters/gauge allows. KS-1696 filed.
 - **C 32nd (%23, ctx ~51%):** #1667 (KS-1695 gap 1, head c502c6434cf2) gate CK1 round 2 = GO WITH NOTE (0 blockers, 5 notes). RULED: C pushes ONE comment/body-only commit (R18's wrong 'gateway-only' premise: platform_admin is mintable for a hand-inserted platform_admins row, not seeded; docstring 'the rule the LIST route applies' untrue for SUPER_ADMIN, cite :954; the claim table sums 36; residue X4 holder compare, N5), then the same delta check and GO. platform_admin stays 404 by ruling (a). KS 1591 measured reachable through the router, unreachable by inference (no in-repo minter). KS-1699 and KS-1697 filed. Gap 2 (owner-less documents) waits for Kam's card.
-- **D 26th (%24, Opus 5):** #1670 merged. #1671 (KS-1679, head 1b7e896220df, landing fa88e7b755d8 expected) GO sent (gate CM1): verify its MERGED by fetch. PR C = KS-1689 raise (held Spark pass READY_KS-1689-NEEDSREAUTH-1_..., patch read at source, tier 2, Sonnet gate) per my addendum.
+- **D 26th (%24, Opus 5):** #1670 merged. #1670 and #1671 MERGED and verified by my fetch (#1671 f418cddac514, tree fa88e7b755d8 = the GO figure). PR C = KS-1689 raise (held Spark pass READY_KS-1689-NEEDSREAUTH-1_..., patch read at source, tier 2, Sonnet gate) per my addendum.
 - **E (%25, Opus 5):** KS-1557 round 3 on #1654 (migration 055): plan confirmed; built at c52ab20328fa 17/17 cells 9/9 mutants, push running; READY mail due -> OPUS delta gate (tier 1, LAST round; a third NO GO goes to Kam).
 - Spark screen 22 DONE: ks_1689_p1 PASS (held). KS-1672 (key naming and column set unspecified) and KS-1690 (needs a shape ruling) are decisions, not briefs; no screen 23 until the gauge allows.
 
@@ -29,7 +29,7 @@ OPEN: `secuura-ks1695-ownerless-records-who-reads-1020` (amended after Stuart's 
 
 ## 3. OWED BY WEDNESDAY (in order)
 1. G's and C's comment-only commits -> verify delta (comments only), GO the new heads; verify each MERGED by fetch; score G 13th / C 32nd at their wraps; close panes.
-2. D's #1671 MERGED -> verify; D's KS-1689 PR -> Sonnet gate.
+2. D's KS-1689 PR (PR C) READY -> Sonnet gate (tier 2).
 3. E's READY -> Opus delta gate vs cbf31d40d652 (give it the three-dot diff and the cells that changed status).
 4. G 14th for KS-1692 PR 2 when the gauge allows (brief from G's HANDOVER; drafter Sonnet; read whole; brief_and_launch needs the provenance form, a ticket-state line per hyphenated ticket in the QUEUE, a 'RULED BY KAM, NOT YET IN AN ARTEFACT' heading with a real check, the SELF-CHECK line copied from the gate's print).
 5. Mark delivered (decision_queue.sh --delivered ID ARTEFACT): ks758 c (G's PR), ks1689 d (D's PR), ks1557 a (E's PR), ks1688 a, m365-admin b.
