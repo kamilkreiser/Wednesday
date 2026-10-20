@@ -1,0 +1,64 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-20T01:47:42.000Z
+Subject: [Datasec/NexusAI-O -> Tuesday] PR #97 new head 278afc2: RD-836 census done, #273 fixed in code, 0 open
+---
+PR #97 (RD-774 + RD-836) new head: 278afc25dda22ed8511d33e3e1cd12b0afde3487 (ANSWER-26, and ANSWER-28 for #273). Gate 29 pins here. Nothing lands from PR #97.
+
+Commits since the READY head 4c9b0d3, in order:
+- 2566713: forward merge of main 29c5ee8 (RD-856/857/476). verify 4757/296; C-133 accounted 13 (this branch's own security-fixes F-10 rewrites, 63bef65), still missing 0.
+- e884516: the RD-836 census build (below). verify 4763/296 (+6 cells).
+- f1a2e76: forward merge of main 39653db (C-170). verify 4910/303, equal to the arithmetic; C-133 accounted 32 (C-170's 19 + the 13 above), still missing 0.
+- 278afc2: test-only fix for CodeQL #273 (below).
+
+THE CENSUS (ANSWER-26 item 1). Method:
+- git grep over ALL of backend/ for addRiskCondition | updateRiskCondition | deleteRiskCondition | riskConditionsFile | risk_conditions.json | syncRiskConditionsToDatabase | ensureRiskCondition | SQL INSERT/UPDATE/DELETE on risk_conditions.
+- Each site was mapped to its route.
+- Lines are backend/server.js at the head; backend/ is identical from e884516 to 278afc2.
+
+#   route / caller                                   file:line                    writes                           RD-836?   gate now
+1   POST /api/risk-conditions                        :21040 -> add :21087         add row                          INSIDE    requireRiskConditionAdmin (4c9b0d3)
+2   PUT /api/risk-conditions/:id                     :21317 -> :21334             update, 4-field allow-list       INSIDE    requireRiskConditionAdmin (4c9b0d3)
+3   DELETE /api/risk-conditions/:id                  :21351 -> :21354             soft delete                      INSIDE    requireRiskConditionAdmin (4c9b0d3)
+4   POST /api/risk-conditions/sync                   :21107 -> :21116             add/update/delete                INSIDE    requireRiskConditionAdmin (4c9b0d3)
+5   POST /api/settings/risk-definitions              :20753 -> sync :20772        settings + add/update/delete     INSIDE    requireRiskConditionAdmin (NEW, e884516)
+6   POST /api/validate-condition, saveToDatabase    :6945 -> add :7053           add row                          INSIDE    requireAdminFor when saveToDatabase (NEW, e884516)
+7   GET /api/risk-conditions auto-sync               :21126 -> sync :21135        replays settings.json            OUTSIDE   none (a reader; replays only what #5, now admin-only, stored)
+8   kql_query cache: :4923/:4935, GET /:level :21153/:21187, /:id/execute :21227/:21248   server-generated KQL   OUTSIDE   none
+9   boot ensureLowTonerRiskCondition :5058 -> :5054  system rows                  -                                OUTSIDE   n/a
+10  POST /api/admin/erasure-request                  :18958                       purges the file                  OUTSIDE   requireAdminForDataRights (already)
+11  simpleDb.js add/update/deleteRiskCondition       :678/:730/:776               SQLite table                     OUTSIDE   no callers (dead code)
+
+RD-836's own scope, quoted (it has no Done-when):
+- "POST /api/risk-conditions has no role check: a signed-in viewer (anyone in open mode) can store an sql_query that the server later executes"
+- "the role check on a mutating route is needed whatever he rules"
+After RD-774 every executor builds its query from the stored condition_text. So any unchecked writer of a row is that harm: rows 5 and 6 are INSIDE, as 2-4 already were under ANSWER-21's plan C. Rows 7-11 carry no client content or are already gated: OUTSIDE.
+- The outside rows are on ONE ticket, RD-868 (Task, Medium, linked to RD-836, no person's name). It also lists two raw /api/chat log lines (:7116, :9011) that are not store writers.
+
+INSIDE, built in e884516 (ANSWER-26 item 3):
+- Row 5 takes requireRiskConditionAdmin (the same setup-mode-aware gate, requireAdminFor; the C-01 window is unchanged).
+- Row 6 takes requireAdminFor only when saveToDatabase is set, before any work. Without a save it only answers (the Settings preview) and stays open. The UI sends saveToDatabase:false only.
+- A viewer gets the existing 403 "Admin access required". No new words.
+- Red-first, rd774-risk-sql-templates.test.js part C on 2566713 (the merge without the build): the viewer got 200 on row 5 (settings and store changed) and 200 on row 6 (a row added). One cell per route, each red on its own.
+- CONTROLS: the admin writes through both, and the viewer's validate-condition without a save still answers 200. Part D shows the open window (no users) still takes both anonymously (C-01, C-178).
+- CR/LF, which you were right about: my READY was wrong to say a stored record was the only source. PUT and the settings writer accept a CR/LF condition text over HTTP, and so does validate-condition (its control check refuses ESC and other controls, but not CR/LF).
+  - On 2566713 the cell forged five log lines from four raw sinks, each named in the cell: sync "Adding condition", the KQL generator's "Unrecognized condition pattern" (:5411, twice), validate-condition's "Question detected", and the AI validator's "Validating condition" (:5996).
+  - Now all 23 risk-condition text log lines go through logSafe (RD-801), the same handling as the stored path (#272): 24 logSafe lines with :21001.
+  - Green: 29/29.
+- #221 (main's raw test-custom-query SQL log line) is removed by this branch (63bef65), named here as you asked.
+
+CodeQL on refs/pull/97/head:
+- At f1a2e76 it reported 1 NEW alert: #273 js/file-access-to-http (medium) at __tests__/rd774-risk-sql-templates.test.js:246, the test's fetch. The flow was real: part C built its PUT/execute URL from an id read off the store file. NOT dismissed and not suppressed: 278afc2 plants a constant id (11) before boot, as part A does. Test-only; verify PASS 4910/4910 across 303 suites (counts unchanged).
+- At 278afc2, read after its analyses were listed:
+  - Analyze (actions, python, javascript-typescript) all success;
+  - analyses at 278afc2: results 0/0/0;
+  - 0 open alerts on refs/pull/97/head;
+  - check-run "No new alerts in code changed by this pull request";
+  - #273 fixed and #272 still fixed;
+  - the control (pr58, fixed) fires at 4.
+- PR Build PASS 4910/4910 across 303 suites.
+
+Jira: RD-836 comment 39747, RD-774 comment 39748; RD-868 filed and linked (comment 39717 corrects a pre-amend sha it quoted).
+
+Next, per ANSWER-25: step 7, RD-863 (G28-1) is my next build, then step 8 (wrap).
+

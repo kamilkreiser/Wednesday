@@ -1,12 +1,34 @@
 #!/bin/bash
 # launch_qa_nexusai_gate29.sh — cross-project QA agent, ONE gate on Datasec/NexusAI (gate 29): a TIER-1 SECURITY GATE WITH A BROWSER LEG of
 # RD-774 + RD-836 (risk-condition SQL only from fixed server templates; request SQL refused; stored sql_query never executed; admin-only
-# risk-condition writers; PUT field allow-list; #272 log line through logSafe), draft PR #97 @ 4c9b0d3 — one gated tree, one verdict, ONE report.
+# risk-condition writers; PUT field allow-list; #272 log line through logSafe), draft PR #97 @ 278afc2 (RE-PINNED 2026-10-20 from 4c9b0d3) — one gated tree,
+# one verdict, ONE report.
 # (drafted 2026-10-19 from 16:27 AEDT by a read-only drafting agent for Tuesday; the drafter ran only bash -n on this file and the --check
 # refusal path on a SCRATCH COPY whose briefs_staged greps were removed — see the DRAFTER-REPORT.)
 # A FRESH gate on the Mac mini, /Volumes/Laptop-DEV; the T9 is UNMOUNTED, so the lock base is the Laptop-DEV locks-laptop-1017.
-#   RD-774/836 rd-774-risk-sql-templates-s101o @ 4c9b0d3 (888203c -> 63bef65 build -> 360cd82 forward merge of 7700caf -> 4c9b0d3 #272 fix)
-#   M0 = the MAIN pin Tuesday STAMPS (7700caf at drafting = mode 0: the head already carries M0, nothing is merged; a moved M0 = T0 mode a/b).
+#   RD-774/836 rd-774-risk-sql-templates-s101o @ 278afc2 (888203c -> 63bef65 build -> 360cd82 forward merge of 7700caf -> 4c9b0d3 #272 fix
+#     -> 2566713 forward merge of 29c5ee8 -> e884516 RD-836 census build -> f1a2e76 forward merge of 39653db -> 278afc2 #273 test fix)
+#   M0 = the MAIN pin Tuesday STAMPS (39653db at the re-pin = mode 0: the head already carries M0, nothing is merged; a moved M0 = T0 mode a/b).
+#
+# CHANGES, RE-PIN 2026-10-20 (4c9b0d3 -> 278afc2; matches the amended kit and its AMEND-REPORT section 4; pre-edit copy: launch_qa_nexusai_gate29.sh.pre-repin-278afc2):
+#   - head 4c9b0d3 -> 278afc25dda22ed8511d33e3e1cd12b0afde3487, tree 26f5dd7e -> ee819f2126593465b352d91ae293fb3c55b9a75b (guards 40 PIN-HEADS, 18, 8).
+#   - FLOOR_MAIN 7700caf -> 39653db4b56adb6d4e526c90531cd4cdf23022e0 (tree ba9581ab -> 704c442b78a36baea66fef2349a5acbdbff114b5); 7700caf kept as M7700 (360cd82's parent).
+#     PIN-HEADS RD774 base 39653db, count 3 -> 7; the MAIN-STAMP regex reads 'landed since 39653db'; mode-0 stamp must say 'none'.
+#   - 18M: 39653db must be an ANCESTOR OF THE HEAD (new, always); 39653db, 7700caf and 888203c in M0's ancestry; trees 704c442 / ba9581a / 428f042; none of the SEVEN
+#     PR commits (278afc2 f1a2e76 e884516 2566713 4c9b0d3 360cd82 63bef65) on M0.
+#   - 7/8: the chain is now 278afc2 <- f1a2e76 (e884516 + 39653db) <- e884516 <- 2566713 (4c9b0d3 + 29c5ee8) <- 4c9b0d3 <- 360cd82 (63bef65 + 7700caf) <- 63bef65 <- 888203c,
+#     every parent list AND tree; 7 over 39653db, 21 over 888203c, 7 first-parent (were 3 / 5 / 3).
+#   - 22: the 8 gated paths over 39653db (same 8 paths); 360cd82's counts-only merge-tree now over (888203c, 63bef65, 7700caf). The conflict sets of 2566713 / f1a2e76 are
+#     NOT measured here (kit r1 measures them).
+#   - 93: counts 4880/302 (39653db, blob 2cc09485), 4910/303 (head = f1a2e76, blob 57659c6c), 4676/292 (7700caf), 4700/293 (4c9b0d3), mode-a prediction M0 + 30/+1 (was +24/+1);
+#     blob pins: server.js 05af86ce -> 5fdf2912eceb186066e8c297c5234540eeaba25c, rd774 test 3a62151e -> 0cfd42ee6fd1b8ae32c659f430cbcf9372e56321; simpleDb / validators /
+#     riskSqlTemplates / spy / security-fixes / logSafe pins UNCHANGED (re-read at 278afc25); new equal-to-main pins: authEnforcement ca764a4b, jsonStorage, settings.js,
+#     testing.js, testing.html. Anchors: the Settings route now carries requireRiskConditionAdmin (old form must be absent), the validate-condition save gate, 'logSafe(' on 24 lines.
+#   - 31: READY_774 -> 2026-10-20_nexusai-gate29-READY-pr97-278afc2.txt, sha256 da8baec1ceda051af1e8ca083e8c697eb76440ebeece4c9c2fcb6860bc55ec06 (the builder's new-head mail,
+#     saved verbatim); its content greps are the head, 'verify PASS 4910/4910 across 303 suites' and 'PR #97 new head 278afc2'. The kit does not yet NAME that sha256 (a FILL AT STAMP
+#     item), so 'kit names the READY sha' is DEFERRED to the end (READY_NAMED, like 32S) instead of refusing at 31. ANSWER-26 and ANSWER-28 must exist.
+#   - 12 / 14 / 10: 'THE LOG LINE' -> 'LOG SINKS' + 'THE NEW GATES' (the kit's r10 and T6 were renamed); the brief names the new trees / blobs in full and 2566713, e884516, f1a2e76, 29c5ee8 by short sha.
+#   - the PROMPT: the head, tree, seven-commit chain, six routes, 23 log sinks, 4910/303, M1-M16, READY file name, gate 28 complete.
 #
 # LAUNCHED ONLY VIA: cockpit.sh add 'QA/NexusAI-gate29' "bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_nexusai_gate29.sh'"
 #   (i.e. /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh). A tmux pane, NEVER nohup, never run it bare from a seat's shell.
@@ -68,12 +90,14 @@ BRIEF26="$BRIEFS/2026-10-18_nexusai-gate26-c170-be0fe37-merged.md"
 BRIEF27="$BRIEFS/2026-10-18_nexusai-gate27-rd778-xss.md"
 TEMPLATE="$TUE/2_Project_Files/fleet/qa-agent/BRIEF_TEMPLATE.md"
 ADD25="$TBRIEFS/2026-10-18_gate25_ADDENDUM-1_ref-order.md"
-READY_774="$BRIEFS/2026-10-19_nexusai-gate29-READY-pr97.txt";   READY_774_SHA='ee6d589c74cdcc8a2dc87503c58c6d7808f94a75096eb31ff5ca035954e8acae'
+READY_774="$BRIEFS/2026-10-20_nexusai-gate29-READY-pr97-278afc2.txt";   READY_774_SHA='da8baec1ceda051af1e8ca083e8c697eb76440ebeece4c9c2fcb6860bc55ec06'
 ANS1="$TBRIEFS/2026-10-18_S101O_ANSWER-1_plan-confirmation.md"
 ANS20="$TBRIEFS/2026-10-19_S101O_ANSWER-20_next-rd774-rd836.md"
 ANS21="$TBRIEFS/2026-10-19_S101O_ANSWER-21_rd774-plan-confirmed.md"
 ANS23="$TBRIEFS/2026-10-19_S101O_ANSWER-23_pr97-alert272-fix-before-ready.md"
 ANS24="$TBRIEFS/2026-10-19_S101O_ANSWER-24_pr97-ready-received-gate29.md"
+ANS26="$TBRIEFS/2026-10-19_S101O_ANSWER-26_rd836-other-writers-before-gate29.md"
+ANS28="$TBRIEFS/2026-10-20_S101O_ANSWER-28_pr97-codeql-273.md"
 CHARTER="$TUE/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md"
 MODELS_JSON="$TUE/0_Brain/dashboard/data/models_latest.json"
 BELT_ANS="$STAGED/2026-10-05_qa_b14_belt_ANSWER.md"
@@ -112,24 +136,36 @@ CHROME_APP='/Applications/Google Chrome.app'
 PW_CACHE="${HOME}/Library/Caches/ms-playwright"
 
 # ---- the pins (cross-checked against the brief's PIN-HEADS, guard 40; each MEASURED 2026-10-19 16:28-16:33 AEDT)
-FLOOR_MAIN='7700cafd33ca8a329e1e7905081d869e83c6ccb5'; FLOOR_TREE='ba9581ab6d779e867edc066895f8481e5580691a'   # main at drafting (RD-778 landed)
+FLOOR_MAIN='39653db4b56adb6d4e526c90531cd4cdf23022e0'; FLOOR_TREE='704c442b78a36baea66fef2349a5acbdbff114b5'   # main at the RE-PIN 2026-10-20 (C-170 landed; the head's base, mode 0)
+M7700='7700cafd33ca8a329e1e7905081d869e83c6ccb5'; T7700='ba9581ab6d779e867edc066895f8481e5580691a'            # the OLD floor (main at drafting, RD-778 landed): 360cd82's second parent
 L888='888203c8c50e13938ca557e8aa0f1faf2101ff31'; T888='428f042b34fb1729d8fd45a112a1220af0fdae6a'            # the branch's base (RD-794 forward-merged)
 B774='rd-774-risk-sql-templates-s101o'
-H774='4c9b0d36993f1e78c8f23cd9e1216200550324b8'; T774='26f5dd7e632649c2ef33a97a5a73de1cf908975f'            # the head (#272 fix)
+H774='278afc25dda22ed8511d33e3e1cd12b0afde3487'; T774='ee819f2126593465b352d91ae293fb3c55b9a75b'            # the head (test-only fix for CodeQL #273)
+MF1A='f1a2e762215baf2ebf79b588747eaeff6c6af342'; TF1A='5c80bbcf1abc678a08fc6b51bd067d51111c59ee'            # forward merge of main 39653db (parents e884516 then 39653db)
+E884='e884516b719c1d6f37b377bd553cbcd1b9dd97c7'; TE884='3571969baa7bc2fdbec8364a26750fc1ebd4618f'           # the RD-836 census build (gates on settings POST + validate-condition save; 23 logSafe lines)
+M256='25667136c22d308823f9e71e1295bc5e886decf6'; T256='f5322b49a61c5269a0b4f9fbd194b72c27a68bfe'            # forward merge of main 29c5ee8 (parents 4c9b0d3 then 29c5ee8)
+M29='29c5ee8f5fe42ec37b08c86ea5db20e8018182ab'                                                               # main commit merged by 2566713 (second parent)
+H4C9='4c9b0d36993f1e78c8f23cd9e1216200550324b8'; T4C9='26f5dd7e632649c2ef33a97a5a73de1cf908975f'            # the PREVIOUS gated head (#272 fix)
 M360='360cd82444d7496dcacb7db7055b4afcec42869d'; T360='a02a8755169852fbadc28f89134ad290188f2299'            # forward merge of 7700caf (branch first)
 B63='63bef65c53fc155989c5bd9504a09787293a9214';  T63='2b20a25ea25fecc869321444c6f91758bc348d30'             # the build on 888203c
 
 COUNTS_FILE='scripts/verify-expected-counts.json'
-CB_FLOOR='c136311879eaa6ad48e0b3aa10fcef0ce765fe98'; CB_HEAD='ff5f5d7ed77a57343f73875269412617b1592e37'; CB_360='7436f51c1d0c8f3b39da13db1e84c41be99a0d93'
+CB_FLOOR='2cc094855c1215299ac15373262241dd71c64bff'   # 39653db, 4880/302
+CB_7700='c136311879eaa6ad48e0b3aa10fcef0ce765fe98'    # 7700caf, 4676/292
+CB_4C9='ff5f5d7ed77a57343f73875269412617b1592e37'     # 4c9b0d3, 4700/293
+CB_HEAD='57659c6cfc51d7ddffeb3e8ed31f1b7db4ef901c'    # 278afc2 (= f1a2e76), 4910/303
+CB_360='7436f51c1d0c8f3b39da13db1e84c41be99a0d93'     # 360cd82
 PKG='package.json'; PKG_BLOB='384805d9e286718bb34ffd05be01c62c00806cf5'
 LOCK='package-lock.json'; LOCK_BLOB='19477a9329f17e529c208d91d172b95b47fc1bb5'
 DEPLOY_WF='.github/workflows/deploy-demo.yml'; DEPLOY_BLOB='953b2a2f84e8710bea857ec87c6f00faa50fa56b'
-SERVER='backend/server.js';                    SERVER_BLOB='05af86ceabfd0b012cdab6d75a1c4c3570212552'
+SERVER='backend/server.js';                    SERVER_BLOB='5fdf2912eceb186066e8c297c5234540eeaba25c'
 SIMPLEDB='backend/simpleDb.js';                SIMPLEDB_BLOB='5891c809eafeb32b01d9f4f80746383b8f4ac200'
 VALIDATORS='backend/validators.js';            VALIDATORS_BLOB='7657ce843bc17632889a70a32a4516f7c395cd39'
 TEMPLATES='backend/services/riskSqlTemplates.js'; TEMPLATES_BLOB='1ba37db02b31558a646cf58fb2af5982d2c4ba54'
 LOGSAFE='backend/logSafe.js';                  LOGSAFE_BLOB='edfb81f8df49dbde5ddaa7e15b06bb158871344d'
-T774FILE='__tests__/rd774-risk-sql-templates.test.js'; T774FILE_BLOB='3a62151eab3e6261a27e8e84fa47bf23ffb99d95'
+T774FILE='__tests__/rd774-risk-sql-templates.test.js'; T774FILE_BLOB='0cfd42ee6fd1b8ae32c659f430cbcf9372e56321'
+AUTHENF='backend/services/authEnforcement.js'; AUTHENF_BLOB='ca764a4b2c1f0349cf5891d71559d693c1104ec7'          # = main's (the gate's own machinery)
+EQMAIN_PINS='backend/jsonStorage.js 2abb5cf487d75f2ce1730a028ade1b39cde31fd2 static/js/settings.js adaa34004dea127beb216da1eb21813ccb0ab217 static/js/testing.js 2b8af34fa7bdc7c4f6f47d83aefce1fe22c8c04a static/testing.html 376bfee891372ea14692c9a1c4efaff2f30be350'   # equal at the head AND at main 39653db
 SPY='__tests__/helpers/rd774-sql-spy-preload.js'; SPY_BLOB='78c21dfa0dacddaef8d6b0855cc9404d57121380'
 SECFIX='__tests__/security-fixes.test.js';     SECFIX_BLOB='e47f3545b0cd0a69eb9dedabf840fe31f18e79ef'
 GATED_774='__tests__/helpers/rd774-sql-spy-preload.js __tests__/rd774-risk-sql-templates.test.js __tests__/security-fixes.test.js backend/server.js backend/services/riskSqlTemplates.js backend/simpleDb.js backend/validators.js scripts/verify-expected-counts.json'
@@ -186,20 +222,20 @@ PROMPT=''
 read -r -d '' PROMPT <<'PROMPT_EOF' || true
 ultrathink
 
-You are the fleet QA/testing agent running ONE gate on Datasec/NexusAI, gate 29: a TIER-1 SECURITY GATE WITH A BROWSER LEG, ONE verdict and ONE report. It is a FRESH gate on Kam's Mac mini, working volume /Volumes/Laptop-DEV; the T9 drive is UNMOUNTED, so the project's jest lock lives on this drive's locks-laptop-1017 base. The item: RD-774 + RD-836, rd-774-risk-sql-templates-s101o at 4c9b0d36993f1e78c8f23cd9e1216200550324b8 (tree 26f5dd7e632649c2ef33a97a5a73de1cf908975f), draft PR #97 by NexusAI-O (S101O): three own commits on the first-parent line over 888203c8c50e13938ca557e8aa0f1faf2101ff31 (and 3 over main 7700caf) — 63bef65c53fc155989c5bd9504a09787293a9214 (the build), 360cd82444d7496dcacb7db7055b4afcec42869d (the forward merge of main 7700cafd33ca8a329e1e7905081d869e83c6ccb5) and 4c9b0d3 (the #272 log fix). It moves risk-condition SQL into FIXED server templates chosen and parameterised from the condition text (Kam's ruling C-211, option (b)), refuses SQL text in any request with 400 SQL_TEXT_NOT_ACCEPTED, never executes the stored sql_query column again, puts the setup-mode-aware admin gate on POST, PUT and DELETE of /api/risk-conditions and on POST /api/risk-conditions/sync (RD-836), limits PUT to four fields (400 FIELD_NOT_ACCEPTED), and routes the unrecognised-condition log line through the repo's logSafe helper (CodeQL #272). M0 is the main Tuesday STAMPED (the launcher verified origin main equals it; sha, tree and the T0 mode are at the end of this prompt): in mode 0 (M0 = 7700caf) the gated tree IS the head, because the head already carries M0; if main moved, T0 rules the mode. Never trust the builder's trees, logs, cells, spy, characterisation file or census as the proof. FINDINGS-ONLY: you NEVER merge anything the fleet can see, NEVER push, NEVER open, comment on, approve, un-draft or merge a pull request, never comment on Jira, never dismiss an alert, and NEVER swap, copy over or edit the installed lock tool, the C-57 runner or the C-133 tool; no fixes, no deploys, no az, no docker, no model call of any kind, no production, no HTTP to any production or demo host, nothing to Partner Center, the demo or any human, no host npm registry. One client only: Datasec/NexusAI.
+You are the fleet QA/testing agent running ONE gate on Datasec/NexusAI, gate 29: a TIER-1 SECURITY GATE WITH A BROWSER LEG, ONE verdict and ONE report. It is a FRESH gate on Kam's Mac mini, working volume /Volumes/Laptop-DEV; the T9 drive is UNMOUNTED, so the project's jest lock lives on this drive's locks-laptop-1017 base. The item: RD-774 + RD-836, rd-774-risk-sql-templates-s101o at 278afc25dda22ed8511d33e3e1cd12b0afde3487 (tree ee819f2126593465b352d91ae293fb3c55b9a75b), draft PR #97 by NexusAI-O (S101O), RE-PINNED 2026-10-20 from 4c9b0d3: seven own commits on the first-parent line over 888203c8c50e13938ca557e8aa0f1faf2101ff31 (21 in 888203c..head; 7 over main 39653db4b56adb6d4e526c90531cd4cdf23022e0) — 63bef65c53fc155989c5bd9504a09787293a9214 (the build), 360cd82444d7496dcacb7db7055b4afcec42869d (the forward merge of main 7700cafd33ca8a329e1e7905081d869e83c6ccb5), 4c9b0d3 (the #272 log fix; the previous head), 2566713 (the forward merge of main 29c5ee8), e884516 (the RD-836 census build: the admin gate on POST /api/settings/risk-definitions and on POST /api/validate-condition when it saves; 23 risk-condition log lines through logSafe), f1a2e76 (the forward merge of main 39653db, C-170) and 278afc2 (a test-only fix for CodeQL #273). It moves risk-condition SQL into FIXED server templates chosen and parameterised from the condition text (Kam's ruling C-211, option (b)), refuses SQL text in any request with 400 SQL_TEXT_NOT_ACCEPTED, never executes the stored sql_query column again, puts the setup-mode-aware admin gate on POST, PUT and DELETE of /api/risk-conditions, on POST /api/risk-conditions/sync and (since e884516) on POST /api/settings/risk-definitions and on POST /api/validate-condition when it saves (RD-836: six routes), limits PUT to four fields (400 FIELD_NOT_ACCEPTED), and routes the risk-condition log lines (23, including the one CodeQL #272 named) through the repo's logSafe helper. M0 is the main Tuesday STAMPED (the launcher verified origin main equals it; sha, tree and the T0 mode are at the end of this prompt): in mode 0 (M0 = 39653db) the gated tree IS the head, because the head already carries M0; if main moved, T0 rules the mode. Never trust the builder's trees, logs, cells, spy, characterisation file or census as the proof. FINDINGS-ONLY: you NEVER merge anything the fleet can see, NEVER push, NEVER open, comment on, approve, un-draft or merge a pull request, never comment on Jira, never dismiss an alert, and NEVER swap, copy over or edit the installed lock tool, the C-57 runner or the C-133 tool; no fixes, no deploys, no az, no docker, no model call of any kind, no production, no HTTP to any production or demo host, nothing to Partner Center, the demo or any human, no host npm registry. One client only: Datasec/NexusAI.
 
 READ YOUR COMMISSION FIRST, whole: /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md
-It opens with the item, the READY copy, Tuesday's rulings, THE RE-PIN STEP, the stamp lines, PIN-HEADS, the TIER argument, the legitimate shapes of the two checkers (the admin gate and the SQL refusal), the drafter's WRONG OR UNVERIFIED list (each item MEASURED or READ-ONLY-INFERRED), then TUESDAY'S RULINGS (T0 to T10 as Tuesday stamped them, the commission's nine properties, the carried rulings) and THE MODEL RULE: apply them, do not re-rule them. Then the charter it names; the READY copy in briefs/ (2026-10-19_nexusai-gate29-READY-pr97.txt), read WHOLE; Tuesday's ANSWER-20, -21, -23 and -24 to S101O; the clarifications the brief quotes, at source (C-211, C-01, C-02, C-203 and the rest); gate 25's ADDENDUM-1 (the ref order); gates 22 to 27's section 3a (the H-rules, carried by reference; gate 27's browser rule); gate 27's report on THIS drive (COMPLETE; its browser instruments and its safeguards park are your precedent). Every builder statement is a CLAIM — RELAYED, never evidence. The brief's section 2a rows (r0 to r14, r7S, r12b, b1 to b3), section 2b (how the browser leg runs) and section 3b (the sweep) are required measurement.
+It opens with the item, the READY copy, Tuesday's rulings, THE RE-PIN STEP, the stamp lines, PIN-HEADS, the TIER argument, the legitimate shapes of the two checkers (the admin gate and the SQL refusal), the drafter's WRONG OR UNVERIFIED list (each item MEASURED or READ-ONLY-INFERRED), then TUESDAY'S RULINGS (T0 to T10 as Tuesday stamped them, the commission's nine properties, the carried rulings) and THE MODEL RULE: apply them, do not re-rule them. Then the charter it names; the READY copy in briefs/ (2026-10-20_nexusai-gate29-READY-pr97-278afc2.txt, the builder's new-head mail), read WHOLE; Tuesday's ANSWER-20, -21, -23, -24, -26 and -28 to S101O; the clarifications the brief quotes, at source (C-211, C-01, C-02, C-203 and the rest); gate 25's ADDENDUM-1 (the ref order); gates 22 to 27's section 3a (the H-rules, carried by reference; gate 27's browser rule); gate 27's report on THIS drive (COMPLETE; its browser instruments and its safeguards park are your precedent). Every builder statement is a CLAIM — RELAYED, never evidence. The brief's section 2a rows (r0 to r14, r7S, r12b, b1 to b3), section 2b (how the browser leg runs) and section 3b (the sweep) are required measurement.
 
 THE MODEL RULE (Kam, live board 2026-09-30 09:07, card (b)): QA gates may switch to Opus 4.8 when flagged by the running model's safeguards, PER SESSION. You start on the model named at the end of this prompt (Opus 5.5). You run the FULL rows. If one of your responses is stopped by the safeguards: that step is NOT RUN (never re-worded to slip past); write ONE line to evidence/classifier-stops.txt; let any running step finish and let the hold exit so you never sit holding a lock (H-28); mail tuesday-agent@agentmail.to with the subject exactly "[QA/Datasec-NexusAI -> Tuesday] STATUS: flagged — requesting the Opus 4.8 switch"; then end your turn with the line "PARKED: flagged — awaiting the Opus 4.8 switch" and wait. Tuesday switches THIS pane's model to Opus 4.8 and taps you by mail. You never answer the model dialog yourself, and nobody ever chooses "Switch automatically". After the switch, resume at the stopped row. The report states which rows ran on which model, with the switch time, and quotes classifier-stops.txt whole. It is likely to bite while composing the SQL-shaped plants (T3): use exactly the inert, marker-only shapes T3 names; never compose a statement that writes, drops or deletes.
 
-THE PROPERTIES (brief section 2a). (1) NO REQUEST PATH PLANTS OR RUNS SQL: r2 THE SQL-PATH CENSUS by grep of the WHOLE backend (not the builder's list: the drafter found writers the READY does not name — the Settings page's risk-definitions sync, validate-condition's save, the GET auto-sync — and the run-now entry to the scheduler's executor); r3 every request writer attacked with SQL-bearing bodies (spellings, case variants, nested, urlencoded, prototype keys); r4 stored legacy rows with a marker SELECT, a UNION over sqlite_master, UNION ALL, PRAGMA, ATTACH to a path you own, chained and comment forms, executed by EVERY executor (the level lists, red-flag, the per-rule execute with limits 1, 50, 10000 and none, and the scheduler per T7), read from YOUR OWN SQL spy (it also wraps sqlite3 Statement methods and records bound params; prove it with a planted call), with the BASE (M0) arms as the firing control. Note: the builder's "planted UNION" is a marker SELECT, not a UNION. (2) THE TEMPLATE DERIVATION r5: a differential of the head's template builder against main's generator over your OWN corpus of at least 200 condition texts (boundaries, caps, non-ASCII digits, the 500-character check on the sanitised text, injection characters), every DIFF matched to a documented READY change or reported; template ids never client-controlled, ARITY by hand count, prototype ids refused, params and limits clamped before sqlite, type confusion through PUT and risk-definitions. (3) RD-836's ADMIN-GATE MATRIX r7: states S1 open first run (C-01), S2 the RD-437 state (C-203 (b): intended to pass), S3 configured, S4 sign-in unproven; roles anonymous, viewer, admin; the four gated routes plus unchanged reader columns; BASE and BRANCH; the store's sha256 before and after every cell; and r7S the sibling writers as T6 rules. (4) THE PUT ALLOW-LIST r8 incl. id, created_by, kql_query, sql_query, prototype keys and hostile values of the allowed keys. (5) #272 r10: the logSafe line driven from the REALISTIC HTTP sources (PUT and risk-definitions carry no text validation) plus the red-proof M9; CodeQL r11 re-read at source: analyses at the head, 0 open on refs/pull/97/head, #272's instance fixed, the 360cd82 results-1 analysis as the firing control, #70, #220 and #221 OPEN on main and expected fixed only after the land — NOT claimed (C-209). (6) THE CHARACTERISATION T0 to T12 r6, re-derived against YOUR hand-written references written before you read the builder's, on the substrates T2 rules: the demo seed stamps ONE created_at, so T5, T6, T9 and T10 cannot fail on it — use the spread-date copy; at least T5, T9 and two others. (7) THE FULL VERIFY r12 under the jest lock: 4700/4700 across 293 suites in mode 0; names as SETS: LOST is exactly the 13 F-10 grammar names RD-774 itself rewrote (a branch-side rewrite, NOT a C-215 rename), each mapped to its replacement; mode (a) adds r12b, C-57 through a byte-identical COPY of the installed runner with C57_ROOT pointing at your own shim. (8) THE BROWSER LEG b1 to b3, Chrome headless via Playwright 1.62.1 from your tree's own node_modules (ruling u): Settings > Risk rules add, toggle, edit, delete as admin and viewer; the dashboard execute-rule and level panels; testing.html's SQL box giving 400 — on a local run of THIS commit, captioned "local run of <sha>, <open|configured> mode — NOT the demo". (9) PRIOR WORK r14: the builder's census (a241d25's F-10 grammar; three planting paths; three executors) checked, every READY claim VERIFIED, FALSE or UNVERIFIED. Red-proof mutants r9 for every key guard (M1 to M12), each landed, restored byte-equal to the head blob, a mutant no cell kills named.
+THE PROPERTIES (brief section 2a). (1) NO REQUEST PATH PLANTS OR RUNS SQL: r2 THE SQL-PATH CENSUS by grep of the WHOLE backend (not the builder's list: the drafter found writers the READY does not name — the Settings page's risk-definitions sync, validate-condition's save, the GET auto-sync — and the run-now entry to the scheduler's executor; the builder's own 11-row census is a CLAIM: rows 5 and 6 IN scope and gated, rows 7 to 11 out per RD-868); r3 every request writer attacked with SQL-bearing bodies (spellings, case variants, nested, urlencoded, prototype keys); r4 stored legacy rows with a marker SELECT, a UNION over sqlite_master, UNION ALL, PRAGMA, ATTACH to a path you own, chained and comment forms, executed by EVERY executor (the level lists, red-flag, the per-rule execute with limits 1, 50, 10000 and none, and the scheduler per T7), read from YOUR OWN SQL spy (it also wraps sqlite3 Statement methods and records bound params; prove it with a planted call), with the BASE (M0) arms as the firing control. Note: the builder's "planted UNION" is a marker SELECT, not a UNION. (2) THE TEMPLATE DERIVATION r5: a differential of the head's template builder against main's generator over your OWN corpus of at least 200 condition texts (boundaries, caps, non-ASCII digits, the 500-character check on the sanitised text, injection characters), every DIFF matched to a documented READY change or reported; template ids never client-controlled, ARITY by hand count, prototype ids refused, params and limits clamped before sqlite, type confusion through PUT and risk-definitions. (3) RD-836's ADMIN-GATE MATRIX r7: states S1 open first run (C-01), S2 the RD-437 state (C-203 (b): intended to pass), S3 configured, S4 sign-in unproven; roles anonymous, viewer, admin; the six gated routes (POST, PUT, DELETE and sync of /api/risk-conditions; POST /api/settings/risk-definitions; POST /api/validate-condition with a save, open without one) plus unchanged reader columns; BASE, BRANCH and the pre-gate tree 2566713 as a second positive control; the store's sha256 before and after every cell; and r7S the new gates as T6 rules. (4) THE PUT ALLOW-LIST r8 incl. id, created_by, kql_query, sql_query, prototype keys and hostile values of the allowed keys. (5) THE LOG SINKS r10 (#272 and e884516's 23 risk-condition log lines, 24 logSafe call lines): CR/LF forging driven from the REALISTIC HTTP sources (PUT, the Settings writer and validate-condition) plus the red-proof M9; CodeQL r11 re-read at source: analyses at 278afc2, 0 open on refs/pull/97/head, the instances of #272 and #273 fixed, the 360cd82 and f1a2e76 results-1 analyses as the firing controls, #70, #220 and #221 OPEN on main and expected fixed only after the land, ten more main log-injection alerts on lines the head no longer has (#172 and nine others) read as NOTEs — NOT claimed (C-209). (6) THE CHARACTERISATION T0 to T12 r6, re-derived against YOUR hand-written references written before you read the builder's, on the substrates T2 rules: the demo seed stamps ONE created_at, so T5, T6, T9 and T10 cannot fail on it — use the spread-date copy; at least T5, T9 and two others. (7) THE FULL VERIFY r12 under the jest lock: 4910/4910 across 303 suites in mode 0; names as SETS: LOST is exactly the 13 F-10 grammar names RD-774 itself rewrote (a branch-side rewrite, NOT a C-215 rename), each mapped to its replacement; mode (a) adds r12b, C-57 through a byte-identical COPY of the installed runner with C57_ROOT pointing at your own shim. (8) THE BROWSER LEG b1 to b3, Chrome headless via Playwright 1.62.1 from your tree's own node_modules (ruling u): Settings > Risk rules add, toggle, edit, delete as admin and viewer; the dashboard execute-rule and level panels; testing.html's SQL box giving 400 — on a local run of THIS commit, captioned "local run of <sha>, <open|configured> mode — NOT the demo". (9) PRIOR WORK r14: the builder's census (a241d25's F-10 grammar; three planting paths; three executors) checked, every READY claim VERIFIED, FALSE or UNVERIFIED. Red-proof mutants r9 for every key guard (M1 to M16, M12 and the new M13 to M16 included), each landed, restored byte-equal to the head blob, a mutant no cell kills named.
 
-MAIN MUST NOT MOVE (ruling b): the launcher verified origin main equals the stamped MAIN pin exactly, that 888203c and 7700caf are in its ancestry, that its tree equals the stamped tree, and that the head is not on it; take M0 by git ls-remote at YOUR start and say so. If main moves mid-gate (gate 28's RELEASEs are the likeliest movers), the gated tree is stale: name what landed, finish nothing that would read as a verdict on the new main, and mail a QUESTION (C-68). GitHub SSH intermittently denies auth (C-192): retry every ls-remote up to 5 times about 10 s apart; a FAILED ls-remote is UNKNOWN, never a value. Re-hash the lock tool, the C-57 runner and the C-133 tool at start, mid and end.
+MAIN MUST NOT MOVE (ruling b): the launcher verified origin main equals the stamped MAIN pin exactly, that 888203c, 7700caf and 39653db are in its ancestry, that 39653db is an ancestor of the head, that its tree equals the stamped tree, and that the head is not on it; take M0 by git ls-remote at YOUR start and say so. If main moves mid-gate (S101O's next landings, RD-863 first, are the likeliest movers; gate 28's RELEASEs and C-170 have already landed), the gated tree is stale: name what landed, finish nothing that would read as a verdict on the new main, and mail a QUESTION (C-68). GitHub SSH intermittently denies auth (C-192): retry every ls-remote up to 5 times about 10 s apart; a FAILED ls-remote is UNKNOWN, never a value. Re-hash the lock tool, the C-57 runner and the C-133 tool at start, mid and end.
 
 C-190 + its ADDENDUM — BOTH thresholds block: every merge to main goes through a pull request that adds no new high-or-higher CodeQL alert in changed code (test code included), AND any new alert whose RULE severity is error blocks whatever its security severity. Alerts are fixed in code, never dismissed. C-209: a PR's CodeQL run cannot show a pre-existing main alert as fixed. CodeQL is NOT RUN by this gate on any tree — say so. C-185 (ruling h): read its known set at source; any other failure is by NAME; no re-run is a clearance.
 
-THE LOCK (C-63). The installed tool is session-tools/nexusai-lock.sh in the NexusAI project on this drive, sha256 3c33f5ae58e1be20282467a90b27a23a2de998eedd0e56c03f3c06360031a792. While the T9 is unmounted the base is NEXUSAI_LOCK_BASE=/Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/session-tools/locks-laptop-1017, which the launcher has EXPORTED into your environment: keep it on every jest step and every server boot, quote the c57 runner's resolved LOCK_BASE= and ROOT= line (mode a), and never touch this drive's stale session-tools/locks (a 2026-09-22 holder lives there). If the T9 mounts mid-gate, finish the running hold, file nothing more, and mail a QUESTION. EVERY jest run, every booted server and every browser arm goes in the jest lock, each hold tagged qa-g29- (no tag of yours contains the word "merge": C-141 ADDENDUM 7), ONE hold at a time. Gate 28 had to release this lock before you launched; if a qa-g28- ticket reappears, wait behind it FIFO and never touch it. MERGES GO FIRST and RULING (i)'s BY-HAND GATE YIELD IS RETIRED: if a ticket is queued ahead of you, wait behind it (FIFO) — the builder S101O files jest holds on the same base. AT A WAIT DEADLINE: --replace on your own still-waiting ticket BEFORE its deadline fires (C-141: a SAME-PLACE handover), confirmed from the queue listing (the old ticket to released/ as ticket-left-*, your place unchanged); a duplicate-tag refusal takes a -r<N> suffix. Read queue-jest at start, around every hold and at end; any qa-g29- entry that is not your current hold is a STOP. Read your inbox before filing every new hold. THE LOAD RULE: file a hold, start any full jest, any server boot or any browser arm only below a 1-minute load of 8 (8 cores; Tuesday's ANSWER-1 to S101O); record uptime beside each.
+THE LOCK (C-63). The installed tool is session-tools/nexusai-lock.sh in the NexusAI project on this drive, sha256 3c33f5ae58e1be20282467a90b27a23a2de998eedd0e56c03f3c06360031a792. While the T9 is unmounted the base is NEXUSAI_LOCK_BASE=/Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/session-tools/locks-laptop-1017, which the launcher has EXPORTED into your environment: keep it on every jest step and every server boot, quote the c57 runner's resolved LOCK_BASE= and ROOT= line (mode a), and never touch this drive's stale session-tools/locks (a 2026-09-22 holder lives there). If the T9 mounts mid-gate, finish the running hold, file nothing more, and mail a QUESTION. EVERY jest run, every booted server and every browser arm goes in the jest lock, each hold tagged qa-g29- (no tag of yours contains the word "merge": C-141 ADDENDUM 7), ONE hold at a time. Gate 28 is complete and released this lock; if a qa-g28- ticket reappears, wait behind it FIFO and never touch it. S101O's own s101o- holds are FIFO ahead of you. MERGES GO FIRST and RULING (i)'s BY-HAND GATE YIELD IS RETIRED: if a ticket is queued ahead of you, wait behind it (FIFO) — the builder S101O files jest holds on the same base. AT A WAIT DEADLINE: --replace on your own still-waiting ticket BEFORE its deadline fires (C-141: a SAME-PLACE handover), confirmed from the queue listing (the old ticket to released/ as ticket-left-*, your place unchanged); a duplicate-tag refusal takes a -r<N> suffix. Read queue-jest at start, around every hold and at end; any qa-g29- entry that is not your current hold is a STOP. Read your inbox before filing every new hold. THE LOAD RULE: file a hold, start any full jest, any server boot or any browser arm only below a 1-minute load of 8 (8 cores; Tuesday's ANSWER-1 to S101O); record uptime beside each.
 
 NODE_MODULES WITHOUT THE HOST REGISTRY (ruling m, H-31): offline npm ci --offline --ignore-scripts --no-audit --no-fund with --cache pointing at an APFS clone of the local npm cache on the same volume; M0 and the gated tree share lock 19477a9, so ONE proven install is APFS-cloned into the others; EVERY npm invocation carries npm_config_update_notifier=false (prove the cache copy's _update-notifier-last-checked marker absent or unchanged); an ENOTCACHED is NOT RUN, named, with a QUESTION — never go online from the host, never npm install, never npx playwright install (Playwright downloads no browser; Chrome is the local install). sqlite3's binding from the cached prebuild (an APFS clone of ~/.npm/_prebuilds), inside the strict belt, IS PART OF H-31, with its three conditions (the tarball's and the unpacked node_sqlite3.node's sha256; CI builds its own Linux binding; every row that boots a server names "sqlite3 binding: cached prebuild, offline"). proxy-addr must resolve 2.0.8 and playwright 1.62.1 from each tree's own path (RD-827, C-205).
 
@@ -273,8 +309,8 @@ for ID in MAIN RD774; do
   [ "$(pfld "$PIN" "$ID" 2)" = "nexusai" ] || { echo "REFUSING: PIN-HEADS row $ID repo must be nexusai" >&2; exit 40; }
 done
 printf '%s' "$(prow "$PIN" RD774)" | grep -q '@' && { echo "REFUSING: PIN-HEADS row RD774 still carries a placeholder" >&2; exit 40; }
-[ "$(pfld "$PIN" RD774 3)" = "$B774" ] && [ "$(pfld "$PIN" RD774 4)" = "$H774" ] && [ "$(pfld "$PIN" RD774 5)" = "$FLOOR_MAIN" ] && [ "$(pfld "$PIN" RD774 6)" = "3" ] \
-  || { echo "REFUSING: PIN-HEADS RD774 is not $B774 @ 4c9b0d3, base 7700caf (main at drafting), 3 commits — re-pin kit AND launcher" >&2; exit 40; }
+[ "$(pfld "$PIN" RD774 3)" = "$B774" ] && [ "$(pfld "$PIN" RD774 4)" = "$H774" ] && [ "$(pfld "$PIN" RD774 5)" = "$FLOOR_MAIN" ] && [ "$(pfld "$PIN" RD774 6)" = "7" ] \
+  || { echo "REFUSING: PIN-HEADS RD774 is not $B774 @ 278afc2, base 39653db (main at the 2026-10-20 re-pin), 7 commits — re-pin kit AND launcher" >&2; exit 40; }
 [ "$(pfld "$PIN" MAIN 3)" = "main" ] || { echo "REFUSING: PIN-HEADS MAIN row is not branch main" >&2; exit 40; }
 PIN_MAIN="$(pfld "$PIN" MAIN 4)"
 STAMP_LINE="$(grep -E '^MAIN-STAMP: ' "$BRIEF")"
@@ -283,10 +319,10 @@ MAIN_STAMPED=1; S_LANDED=''
 if printf '%s' "$STAMP_LINE$PIN_MAIN" | grep -qF "$PH_SLOT"; then
   MAIN_STAMPED=0; STAMP_OK=0
 else
-  S_SHA="$(printf '%s' "$STAMP_LINE" | sed -nE 's/^MAIN-STAMP: sha `?([0-9a-f]{40})`? \| tree `?([0-9a-f]{40})`? \| landed since 7700caf: (.+)$/\1/p')"
-  S_TREE="$(printf '%s' "$STAMP_LINE" | sed -nE 's/^MAIN-STAMP: sha `?([0-9a-f]{40})`? \| tree `?([0-9a-f]{40})`? \| landed since 7700caf: (.+)$/\2/p')"
-  S_LANDED="$(printf '%s' "$STAMP_LINE" | sed -nE 's/^MAIN-STAMP: sha `?([0-9a-f]{40})`? \| tree `?([0-9a-f]{40})`? \| landed since 7700caf: (.+)$/\3/p')"
-  is40 "$S_SHA" && is40 "$S_TREE" && [ -n "$S_LANDED" ] || { echo "REFUSING: the MAIN-STAMP line is not 'MAIN-STAMP: sha <40-hex> | tree <40-hex> | landed since 7700caf: <text>'" >&2; exit 40; }
+  S_SHA="$(printf '%s' "$STAMP_LINE" | sed -nE 's/^MAIN-STAMP: sha `?([0-9a-f]{40})`? \| tree `?([0-9a-f]{40})`? \| landed since 39653db: (.+)$/\1/p')"
+  S_TREE="$(printf '%s' "$STAMP_LINE" | sed -nE 's/^MAIN-STAMP: sha `?([0-9a-f]{40})`? \| tree `?([0-9a-f]{40})`? \| landed since 39653db: (.+)$/\2/p')"
+  S_LANDED="$(printf '%s' "$STAMP_LINE" | sed -nE 's/^MAIN-STAMP: sha `?([0-9a-f]{40})`? \| tree `?([0-9a-f]{40})`? \| landed since 39653db: (.+)$/\3/p')"
+  is40 "$S_SHA" && is40 "$S_TREE" && [ -n "$S_LANDED" ] || { echo "REFUSING: the MAIN-STAMP line is not 'MAIN-STAMP: sha <40-hex> | tree <40-hex> | landed since 39653db: <text>'" >&2; exit 40; }
   [ "$PIN_MAIN" = "$S_SHA" ] || { echo "REFUSING: PIN-HEADS MAIN ($PIN_MAIN) and the MAIN-STAMP sha ($S_SHA) disagree — stamp the same sha in both" >&2; exit 40; }
 fi
 
@@ -306,55 +342,60 @@ if [ "$MAIN_STAMPED" = "1" ]; then
 else
   MAIN_SHA="$M_ORIGIN"; PROVISIONAL="$PROVISIONAL MAIN(unstamped: guards ran against origin main ${M_ORIGIN:0:12})"
 fi
-[ "$(ref_now "refs/heads/$B774")" = "$H774" ] || { echo "REFUSING: origin $B774 is '$(ref_now "refs/heads/$B774")', not 4c9b0d3 — the head MOVED; re-pin kit AND launcher (a new head is a new kit amendment)" >&2; exit 18; }
-[ "$(ref_now refs/pull/97/head)" = "$H774" ] || echo "NOTE: refs/pull/97/head is '$(ref_now refs/pull/97/head)', not 4c9b0d3 — PR #97 moved; the gate reads it" >&2
+[ "$(ref_now "refs/heads/$B774")" = "$H774" ] || { echo "REFUSING: origin $B774 is '$(ref_now "refs/heads/$B774")', not 278afc2 — the head MOVED; re-pin kit AND launcher (a new head is a new kit amendment)" >&2; exit 18; }
+[ "$(ref_now refs/pull/97/head)" = "$H774" ] || echo "NOTE: refs/pull/97/head is '$(ref_now refs/pull/97/head)', not 278afc2 — PR #97 moved; the gate reads it" >&2
 PIN_TS="$(date '+%Y-%m-%d %H:%M:%S %Z')"
 
 # 6 — every sha the guards use is a commit in the local object store (this launcher never fetches).
-for S in "$MAIN_SHA" "$FLOOR_MAIN" "$L888" "$H774" "$M360" "$B63"; do
+for S in "$MAIN_SHA" "$FLOOR_MAIN" "$M7700" "$L888" "$H774" "$MF1A" "$E884" "$M256" "$M29" "$H4C9" "$M360" "$B63"; do
   T="$(g cat-file -t "$S" 2>&1)"
   [ "$T" = "commit" ] || { echo "REFUSING: ${S:0:12} is not a commit in $REPO (got '$T') — this launcher never fetches; the seat's next fetch brings it, then re-check" >&2; exit 6; }
 done
 
 # 18M — M0 by ANCESTRY (never --first-parent) + trees; M0's tree = the stamp; the head NOT on M0; the mode.
-[ "$(tree_of "$FLOOR_MAIN")" = "$FLOOR_TREE" ] && [ "$(tree_of "$L888")" = "$T888" ] \
-  || { echo "REFUSING: 7700caf / 888203c are not trees ba9581a / 428f042 (the measured mains)" >&2; exit 18; }
-for S in "$L888" "$FLOOR_MAIN"; do
-  g merge-base --is-ancestor "$S" "$MAIN_SHA" 2>/dev/null || { echo "REFUSING: ${S:0:7} is not in M0 ${MAIN_SHA:0:7}'s ANCESTRY — M0 is not a descendant of the measured main 7700caf" >&2; exit 18; }
+[ "$(tree_of "$FLOOR_MAIN")" = "$FLOOR_TREE" ] && [ "$(tree_of "$M7700")" = "$T7700" ] && [ "$(tree_of "$L888")" = "$T888" ] \
+  || { echo "REFUSING: 39653db / 7700caf / 888203c are not trees 704c442 / ba9581a / 428f042 (the measured mains)" >&2; exit 18; }
+for S in "$L888" "$M7700" "$FLOOR_MAIN"; do
+  g merge-base --is-ancestor "$S" "$MAIN_SHA" 2>/dev/null || { echo "REFUSING: ${S:0:7} is not in M0 ${MAIN_SHA:0:7}'s ANCESTRY — M0 is not a descendant of the measured main 39653db" >&2; exit 18; }
 done
+# mode-0 premise (the re-pin): the re-pinned base 39653db is an ANCESTOR of the head (the head carries it; nothing is merged).
+g merge-base --is-ancestor "$FLOOR_MAIN" "$H774" 2>/dev/null || { echo "REFUSING: 39653db is NOT an ancestor of the head 278afc2 — the mode-0 premise (the head already carries the base) is gone; re-brief" >&2; exit 18; }
 M0_TREE="$(tree_of "$MAIN_SHA")"
 if [ "$MAIN_STAMPED" = "1" ]; then
   [ "$M0_TREE" = "$S_TREE" ] || { echo "REFUSING: M0 ${MAIN_SHA:0:7}'s tree is '${M0_TREE:0:12}', not the stamped tree '${S_TREE:0:12}'" >&2; exit 18; }
 fi
-for S in "$H774" "$M360" "$B63"; do
+for S in "$H774" "$MF1A" "$E884" "$M256" "$H4C9" "$M360" "$B63"; do
   if g merge-base --is-ancestor "$S" "$MAIN_SHA" 2>/dev/null; then echo "REFUSING: PR #97 commit ${S:0:7} is ALREADY on M0 ${MAIN_SHA:0:7} — it landed before its gate; re-brief" >&2; exit 18; fi
 done
 LANDED_N="$(g rev-list --count "${FLOOR_MAIN}..${MAIN_SHA}" 2>/dev/null)"
 if [ "$MAIN_SHA" = "$FLOOR_MAIN" ]; then
   MODE='0'
-  if [ "$MAIN_STAMPED" = "1" ] && [ "$(printf '%s' "$S_LANDED" | tr '[:upper:]' '[:lower:]')" != "none" ]; then echo "REFUSING: M0 is 7700caf but the MAIN-STAMP names something landed ('$S_LANDED') — stamp 'none'" >&2; exit 18; fi
+  if [ "$MAIN_STAMPED" = "1" ] && [ "$(printf '%s' "$S_LANDED" | tr '[:upper:]' '[:lower:]')" != "none" ]; then echo "REFUSING: M0 is 39653db but the MAIN-STAMP names something landed ('$S_LANDED') — stamp 'none'" >&2; exit 18; fi
 else
   MODE='a-or-b'
-  echo "NOTE: M0 ${MAIN_SHA:0:7} is $LANDED_N commit(s) past 7700caf — what landed: $(g log --format='%h %s' "${FLOOR_MAIN}..${MAIN_SHA}" 2>/dev/null | head -5 | cut -c1-90 | tr '\n' ';') — T0 mode (a) or (b) applies" >&2
-  if [ "$MAIN_STAMPED" = "1" ] && [ "$(printf '%s' "$S_LANDED" | tr '[:upper:]' '[:lower:]')" = "none" ]; then echo "REFUSING: M0 is not 7700caf but the MAIN-STAMP says 'landed since 7700caf: none' — name what landed" >&2; exit 18; fi
+  echo "NOTE: M0 ${MAIN_SHA:0:7} is $LANDED_N commit(s) past 39653db — what landed: $(g log --format='%h %s' "${FLOOR_MAIN}..${MAIN_SHA}" 2>/dev/null | head -5 | cut -c1-90 | tr '\n' ';') — T0 mode (a) or (b) applies" >&2
+  if [ "$MAIN_STAMPED" = "1" ] && [ "$(printf '%s' "$S_LANDED" | tr '[:upper:]' '[:lower:]')" = "none" ]; then echo "REFUSING: M0 is not 39653db but the MAIN-STAMP says 'landed since 39653db: none' — name what landed" >&2; exit 18; fi
   MB_M0="$(g merge-base "$MAIN_SHA" "$H774" 2>/dev/null)"
   GD0="$(g rev-parse --absolute-git-dir 2>/dev/null)"; OB0="$(find "$GD0/objects" -type f 2>/dev/null | wc -l | tr -d ' ')"
   MC0="$(mt_conflicts "$MB_M0" "$MAIN_SHA" "$H774")"
   OA0="$(find "$GD0/objects" -type f 2>/dev/null | wc -l | tr -d ' ')"
-  [ -z "$MC0" ] || [ "$MC0" = "$COUNTS_FILE" ] || { echo "REFUSING: the legacy merge-tree of 4c9b0d3 onto M0 shows conflict markers in '$MC0', not the counts file only — a non-counts conflict is a STOP; re-brief" >&2; exit 18; }
+  [ -z "$MC0" ] || [ "$MC0" = "$COUNTS_FILE" ] || { echo "REFUSING: the legacy merge-tree of 278afc2 onto M0 shows conflict markers in '$MC0', not the counts file only — a non-counts conflict is a STOP; re-brief" >&2; exit 18; }
   [ "$OB0" = "$OA0" ] || echo "NOTE: NexusAI .git/objects went $OB0 -> $OA0 around the legacy merge-tree read — the trivial-merge mode writes none; a live seat may have" >&2
 fi
 FP_HIT="$(g log --first-parent --format='%H' "$MAIN_SHA" 2>/dev/null | grep -cxF "$FLOOR_MAIN")"
 [ "$FP_HIT" != "0" ] || echo "NOTE: a --first-parent walk from M0 does not reach 7700caf — the ancestry check above decides (gate 27's topology note)" >&2
 
-# 7 / 8 — the head's chain: 888203c -> 63bef65 -> 360cd82 (63bef65 + 7700caf) -> 4c9b0d3, every tree; merge-base with 7700caf = 7700caf.
-[ "$(parents_of "$H774")" = "$M360" ] && [ "$(parents_of "$M360")" = "$B63 $FLOOR_MAIN" ] && [ "$(parents_of "$B63")" = "$L888" ] \
-  || { echo "REFUSING: the head chain is not 4c9b0d3 <- 360cd82 (63bef65 + 7700caf) <- 63bef65 <- 888203c" >&2; exit 7; }
-[ "$(tree_of "$H774")" = "$T774" ] && [ "$(tree_of "$M360")" = "$T360" ] && [ "$(tree_of "$B63")" = "$T63" ] \
-  || { echo "REFUSING: the head chain's trees are not 26f5dd7 / a02a875 / 2b20a25" >&2; exit 8; }
-[ "$(g merge-base "$H774" "$FLOOR_MAIN" 2>/dev/null)" = "$FLOOR_MAIN" ] && [ "$(g rev-list --count "${FLOOR_MAIN}..${H774}" 2>/dev/null)" = "3" ] \
-  && [ "$(g rev-list --count "${L888}..${H774}" 2>/dev/null)" = "5" ] && [ "$(g rev-list --count --first-parent "${L888}..${H774}" 2>/dev/null)" = "3" ] \
-  || { echo "REFUSING: 4c9b0d3 does not carry 7700caf, or is not 3 commits over 7700caf (5 over 888203c, 3 first-parent)" >&2; exit 8; }
+# 7 / 8 — the head's chain: 888203c -> 63bef65 -> 360cd82 (63bef65 + 7700caf) -> 4c9b0d3 -> 2566713 (4c9b0d3 + 29c5ee8) -> e884516 -> f1a2e76 (e884516 + 39653db) -> 278afc2,
+#         every parent list and tree; merge-base with 39653db = 39653db; 7 commits over it, 21 over 888203c, 7 first-parent.
+[ "$(parents_of "$H774")" = "$MF1A" ] && [ "$(parents_of "$MF1A")" = "$E884 $FLOOR_MAIN" ] && [ "$(parents_of "$E884")" = "$M256" ] \
+  && [ "$(parents_of "$M256")" = "$H4C9 $M29" ] && [ "$(parents_of "$H4C9")" = "$M360" ] && [ "$(parents_of "$M360")" = "$B63 $M7700" ] && [ "$(parents_of "$B63")" = "$L888" ] \
+  || { echo "REFUSING: the head chain is not 278afc2 <- f1a2e76 (e884516 + 39653db) <- e884516 <- 2566713 (4c9b0d3 + 29c5ee8) <- 4c9b0d3 <- 360cd82 (63bef65 + 7700caf) <- 63bef65 <- 888203c" >&2; exit 7; }
+[ "$(tree_of "$H774")" = "$T774" ] && [ "$(tree_of "$MF1A")" = "$TF1A" ] && [ "$(tree_of "$E884")" = "$TE884" ] && [ "$(tree_of "$M256")" = "$T256" ] \
+  && [ "$(tree_of "$H4C9")" = "$T4C9" ] && [ "$(tree_of "$M360")" = "$T360" ] && [ "$(tree_of "$B63")" = "$T63" ] \
+  || { echo "REFUSING: the head chain's trees are not ee819f2 / 5c80bbc / 3571969 / f5322b4 / 26f5dd7 / a02a875 / 2b20a25" >&2; exit 8; }
+[ "$(g merge-base "$H774" "$FLOOR_MAIN" 2>/dev/null)" = "$FLOOR_MAIN" ] && [ "$(g rev-list --count "${FLOOR_MAIN}..${H774}" 2>/dev/null)" = "7" ] \
+  && [ "$(g rev-list --count "${L888}..${H774}" 2>/dev/null)" = "21" ] && [ "$(g rev-list --count --first-parent "${L888}..${H774}" 2>/dev/null)" = "7" ] \
+  || { echo "REFUSING: 278afc2 does not carry 39653db, or is not 7 commits over 39653db (21 over 888203c, 7 first-parent)" >&2; exit 8; }
 
 # 90 — the INSTALLED lock tool PINNED; it honours NEXUSAI_LOCK_BASE; the Laptop-DEV base is present with queue-jest; no qa-g29 ticket.
 INST_NOW="$(fsha "$LOCKTOOL")"
@@ -387,22 +428,25 @@ grep -qF 'if [ -n "${C57_ROOT:-}" ]; then ROOT="$C57_ROOT"' "$C57TOOL" && grep -
   && grep -qF 'rm -rf "$wt"' "$C57TOOL" && grep -qF 'worktree remove --force "$wt"' "$C57TOOL" \
   || { echo "REFUSING: the C-57 runner's C57_ROOT / LOCK_BASE / rm / worktree lines are not as T1 describes" >&2; exit 91; }
 
-# 22 — the gated file set over 7700caf; no static/ or templates/ path; 360cd82's forward merge is counts-only (legacy merge-tree).
-[ "$(paths_of "$FLOOR_MAIN" "$H774")" = "$(sorted "$GATED_774")" ] || { echo "REFUSING: the gated files (7700caf..4c9b0d3) are not the briefed 8 (WRONG 4)" >&2; exit 22; }
+# 22 — the gated file set over 39653db (the same 8 paths as 7700caf..4c9b0d3 was); no static/ or templates/ path; 360cd82's forward merge is counts-only (legacy merge-tree).
+#      (the conflict sets of the later forward merges 2566713 and f1a2e76 are UNMEASURED by this launcher: the kit's r1 measures them in the gate's store.)
+[ "$(paths_of "$FLOOR_MAIN" "$H774")" = "$(sorted "$GATED_774")" ] || { echo "REFUSING: the gated files (39653db..278afc2) are not the briefed 8 (WRONG 4)" >&2; exit 22; }
 [ "$(g diff --name-only "$FLOOR_MAIN" "$H774" -- static templates 2>/dev/null | grep -c .)" = "0" ] || { echo "REFUSING: PR #97 now changes a static/ or templates/ path — the browser leg's premise (WRONG 13) moved" >&2; exit 22; }
 GD="$(g rev-parse --absolute-git-dir 2>/dev/null)"
 OBJ_BEFORE="$(find "$GD/objects" -type f 2>/dev/null | wc -l | tr -d ' ')"
-MC360="$(mt_conflicts "$L888" "$B63" "$FLOOR_MAIN")"
+MC360="$(mt_conflicts "$L888" "$B63" "$M7700")"
 [ "$MC360" = "$COUNTS_FILE" ] || { echo "REFUSING: the legacy merge-tree of 63bef65 and 7700caf shows conflict markers in '${MC360:-nothing}', not the counts file ONLY (WRONG 3)" >&2; exit 22; }
 OBJ_AFTER="$(find "$GD/objects" -type f 2>/dev/null | wc -l | tr -d ' ')"
 [ "$OBJ_BEFORE" = "$OBJ_AFTER" ] || echo "NOTE: NexusAI .git/objects went $OBJ_BEFORE -> $OBJ_AFTER around the legacy merge-tree reads — the trivial-merge mode writes none; a live seat may have" >&2
 
 # 93 — the premises at source: counts + predictions, blobs, the RD-774/836 anchors, the sibling-writer premise, the plant and seed premises.
-[ "$(counts_at "$FLOOR_MAIN")" = "4676 292" ] && [ "$(blob "$FLOOR_MAIN" "$COUNTS_FILE")" = "$CB_FLOOR" ] && [ "$(counts_at "$H774")" = "4700 293" ] && [ "$(blob "$H774" "$COUNTS_FILE")" = "$CB_HEAD" ] && [ "$(blob "$M360" "$COUNTS_FILE")" = "$CB_360" ] \
-  || { echo "REFUSING: counts are not 4676/292 c136311 (7700caf), 4700/293 ff5f5d7 (head), 7436f51 (360cd82) (WRONG 5)" >&2; exit 93; }
+[ "$(counts_at "$FLOOR_MAIN")" = "4880 302" ] && [ "$(blob "$FLOOR_MAIN" "$COUNTS_FILE")" = "$CB_FLOOR" ] && [ "$(counts_at "$H774")" = "4910 303" ] && [ "$(blob "$H774" "$COUNTS_FILE")" = "$CB_HEAD" ] \
+  && [ "$(blob "$MF1A" "$COUNTS_FILE")" = "$CB_HEAD" ] && [ "$(counts_at "$M7700")" = "4676 292" ] && [ "$(blob "$M7700" "$COUNTS_FILE")" = "$CB_7700" ] \
+  && [ "$(counts_at "$H4C9")" = "4700 293" ] && [ "$(blob "$H4C9" "$COUNTS_FILE")" = "$CB_4C9" ] && [ "$(blob "$M360" "$COUNTS_FILE")" = "$CB_360" ] \
+  || { echo "REFUSING: counts are not 4880/302 2cc0948 (39653db), 4910/303 57659c6 (head = f1a2e76), 4676/292 c136311 (7700caf), 4700/293 ff5f5d7 (4c9b0d3), 7436f51 (360cd82) (WRONG 5)" >&2; exit 93; }
 M0C="$(counts_at "$MAIN_SHA")"; M0T="${M0C% *}"; M0S="${M0C#* }"
 printf '%s' "$M0C" | grep -Eq '^[0-9]+ [0-9]+$' || { echo "REFUSING: M0's counts file is unreadable" >&2; exit 93; }
-if [ "$MODE" = "0" ]; then PRED="mode 0: the head's own 4700/293"; else PRED="mode a: M0 $M0T/$M0S + 24/1 = $((M0T+24))/$((M0S+1))"; fi
+if [ "$MODE" = "0" ]; then PRED="mode 0: the head's own 4910/303"; else PRED="mode a: M0 $M0T/$M0S + 30/1 = $((M0T+30))/$((M0S+1))"; fi
 for S in "$MAIN_SHA" "$H774"; do
   [ "$(blob "$S" "$LOCK")" = "$LOCK_BLOB" ] && [ "$(blob "$S" "$PKG")" = "$PKG_BLOB" ] && [ "$(blob "$S" "$DEPLOY_WF")" = "$DEPLOY_BLOB" ] \
     || { echo "REFUSING: ${S:0:7} does not carry lockfile 19477a9 / package.json 384805d / deploy-demo.yml 953b2a2 (ruling m, r13)" >&2; exit 93; }
@@ -412,13 +456,20 @@ done
   || { echo "REFUSING: lock 19477a9 does not resolve proxy-addr 2.0.8, playwright 1.62.1, playwright-core 1.62.1 (ruling m, ruling u)" >&2; exit 93; }
 for pair in "$SERVER $SERVER_BLOB" "$SIMPLEDB $SIMPLEDB_BLOB" "$VALIDATORS $VALIDATORS_BLOB" "$TEMPLATES $TEMPLATES_BLOB" "$LOGSAFE $LOGSAFE_BLOB" "$T774FILE $T774FILE_BLOB" "$SPY $SPY_BLOB" "$SECFIX $SECFIX_BLOB"; do
   set -- $pair
-  [ "$(blob "$H774" "$1")" = "$2" ] || { echo "REFUSING: $1 at 4c9b0d3 is not blob ${2:0:12} (WRONG 4's H-21 restore pins)" >&2; exit 93; }
+  [ "$(blob "$H774" "$1")" = "$2" ] || { echo "REFUSING: $1 at 278afc2 is not blob ${2:0:12} (WRONG 4's H-21 restore pins)" >&2; exit 93; }
 done
-[ "$(blob "$FLOOR_MAIN" "$LOGSAFE")" = "$LOGSAFE_BLOB" ] || { echo "REFUSING: backend/logSafe.js at 7700caf is not edfb81f — the head's logSafe is no longer main's (r10)" >&2; exit 93; }
+[ "$(blob "$FLOOR_MAIN" "$LOGSAFE")" = "$LOGSAFE_BLOB" ] || { echo "REFUSING: backend/logSafe.js at 39653db is not edfb81f — the head's logSafe is no longer main's (r10)" >&2; exit 93; }
+# the files the new commits did NOT change and the gate leans on: equal to main's 39653db blob AND the pin at the head (authEnforcement = the admin gate's machinery).
+[ "$(blob "$H774" "$AUTHENF")" = "$AUTHENF_BLOB" ] && [ "$(blob "$FLOOR_MAIN" "$AUTHENF")" = "$AUTHENF_BLOB" ] || { echo "REFUSING: $AUTHENF is not blob ca764a4 at both 278afc2 and 39653db — the admin gate's machinery moved (WRONG 4)" >&2; exit 93; }
+set -- $EQMAIN_PINS
+while [ "$#" -ge 2 ]; do
+  [ "$(blob "$H774" "$1")" = "$2" ] && [ "$(blob "$FLOOR_MAIN" "$1")" = "$2" ] || { echo "REFUSING: $1 is not blob ${2:0:12} at both 278afc2 and 39653db (WRONG 4's unchanged-and-equal-to-main list)" >&2; exit 93; }
+  shift 2
+done
 # '~' delimits path ~ anchor ~ expected line count (an anchor may itself contain '|', e.g. the '||' in templateSql).
 while IFS='~' read -r F Q N; do
   [ -n "$F" ] || continue
-  [ "$(cntF "$H774" "$F" "$Q")" = "$N" ] || { echo "REFUSING: '$Q' is not $N time(s) in $F at 4c9b0d3 — an anchor the kit rests on moved; re-brief" >&2; exit 93; }
+  [ "$(cntF "$H774" "$F" "$Q")" = "$N" ] || { echo "REFUSING: '$Q' is not $N time(s) in $F at 278afc2 — an anchor the kit rests on moved; re-brief" >&2; exit 93; }
 done <<'EOF_ANCHORS'
 backend/server.js~const SQL_TEXT_FIELDS = ['sqlQuery', 'sql_query'];~1
 backend/server.js~const RISK_CONDITION_PUT_FIELDS = ['condition_text', 'risk_level', 'is_active', 'email_recipients'];~1
@@ -426,8 +477,11 @@ backend/server.js~app.post('/api/risk-conditions', requireRiskConditionAdmin, re
 backend/server.js~app.post('/api/risk-conditions/sync', requireRiskConditionAdmin, async (req, res) => {~1
 backend/server.js~app.put('/api/risk-conditions/:id', requireRiskConditionAdmin, refuseSqlText, async (req, res) => {~1
 backend/server.js~app.delete('/api/risk-conditions/:id', requireRiskConditionAdmin, async (req, res) => {~1
-backend/server.js~app.post('/api/settings/risk-definitions', async (req, res) => {~1
+backend/server.js~app.post('/api/settings/risk-definitions', requireRiskConditionAdmin, async (req, res) => {~1
+backend/server.js~app.post('/api/settings/risk-definitions', async (req, res) => {~0
 backend/server.js~app.post('/api/validate-condition', validateInput, async (req, res) => {~1
+backend/server.js~if (saveToDatabase && !(await requireAdminFor(req, res))) return;~1
+backend/server.js~logSafe(~24
 backend/server.js~app.post('/api/notifications/run-now', async (req, res) => {~1
 backend/server.js~logger.info(`⚠️ Unrecognized condition pattern: "${logSafe(conditionText)}", using default query`);~1
 backend/server.js~return database.executeRiskTemplate(templateId, params, limit);~1
@@ -440,7 +494,7 @@ EOF_ANCHORS
 # the head's server never calls the old executor (simpleDb's own comment names it, so simpleDb is checked for the DEFINITION above, not the word).
 [ "$(cntF "$H774" "$SERVER" 'executeRiskQuery(')" = "0" ] \
   || { echo "REFUSING: executeRiskQuery( still appears in the head's server — the census premise (WRONG 7) moved" >&2; exit 93; }
-[ "$(cntF "$FLOOR_MAIN" "$SERVER" 'executeRiskQuery(condition.sql_query')" -ge 3 ] || { echo "REFUSING: 7700caf no longer executes condition.sql_query (r4's BASE control premise)" >&2; exit 93; }
+[ "$(cntF "$FLOOR_MAIN" "$SERVER" 'executeRiskQuery(condition.sql_query')" -ge 3 ] || { echo "REFUSING: 39653db no longer executes condition.sql_query (r4's BASE control premise)" >&2; exit 93; }
 [ "$(cntF "$H774" "$T774FILE" 'UNION')" = "0" ] || echo "NOTE: the rd774 test now mentions UNION — re-read WRONG 6 (the planted SQL was a marker SELECT at drafting)" >&2
 grep -qF '"lo":"2026-10-18 20:19:32","hi":"2026-10-18 20:19:32"' "$S101/rd774-char/main-888203c.txt" 2>/dev/null || echo "NOTE: the builder's characterisation file no longer records the single seed created_at — re-read WRONG 10 (T2's premise)" >&2
 
@@ -494,7 +548,7 @@ LOAD1="$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}')"
 awk -v l="${LOAD1:-99}" 'BEGIN{exit !(l < 8)}' || echo "NOTE: 1-minute load is ${LOAD1:-unknown} (not below 8) — the gate waits in the queue, never in a hold (ruling p)" >&2
 
 # 31 — the READY copy (sha256 PINNED), builder evidence, gate 27's / 25's / 26's instruments (THIS drive), standing references.
-for f in "$READY_774" "$CLAR" "$BRIEF22" "$BRIEF23" "$BRIEF24" "$BRIEF25" "$BRIEF26" "$BRIEF27" "$TEMPLATE" "$B27_REPORT" "$CHARTER" "$ANS20" "$ANS21" "$ANS23" "$ANS24" \
+for f in "$READY_774" "$CLAR" "$BRIEF22" "$BRIEF23" "$BRIEF24" "$BRIEF25" "$BRIEF26" "$BRIEF27" "$TEMPLATE" "$B27_REPORT" "$CHARTER" "$ANS20" "$ANS21" "$ANS23" "$ANS24" "$ANS26" "$ANS28" \
          "$S101/rd774-char/main-888203c.txt" "$S101/rd774-char/characterise.js" "$S101/rd774-runs/272-green.out" "$S101/rd774-runs/272-red.out" "$S101/rd774-runs/272-green2.out" "$S101/mail-31-ready-rd774.txt" \
          "$B27_INST/qa-file27.sh" "$B27_INST/qa-file27r.sh" "$B27_INST/qa-floorlib27.sh" "$B27_INST/qa-holdlib27.sh" "$B27_INST/qa-h1-scan27.py" "$B27_INST/qa-h1-selftest27.sh" \
          "$B27_INST/qa-mail27.py" "$B27_INST/qa-mailread27.py" "$B27_INST/qa-browser27.js" "$B27_INST/qa-b1cmp27.js" "$B27_INST/qa-b2cmp27.js" "$B27_INST/qa-ledger25.js" \
@@ -502,9 +556,10 @@ for f in "$READY_774" "$CLAR" "$BRIEF22" "$BRIEF23" "$BRIEF24" "$BRIEF25" "$BRIE
          "$B25_INST/qa-applymut.py" "$B25_INST/qa-lockcheck.py" "$B26_INST/qa-c57shim26.sh"; do
   [ -s "$f" ] || { echo "REFUSING: evidence, brief or tool absent: $f" >&2; exit 31; }
 done
-[ "$(fsha "$READY_774")" = "$READY_774_SHA" ] || { echo "REFUSING: the READY copy $READY_774 is not the drafter's saved body (sha256 ee6d589c…) — re-read it from the inbox" >&2; exit 31; }
-grep -qF "$READY_774_SHA" "$BRIEF" || { echo "REFUSING: the brief does not name the READY sha256 $READY_774_SHA" >&2; exit 31; }
-grep -qF "$H774" "$READY_774" && grep -qF 'verify: PASS 4700/4700 across 293 suites' "$READY_774" && grep -qF 'READY FOR QA: RD-774 + RD-836, draft PR #97' "$READY_774" \
+[ "$(fsha "$READY_774")" = "$READY_774_SHA" ] || { echo "REFUSING: the READY copy $READY_774 is not the saved new-head mail body (sha256 da8baec1…) — re-read it from the inbox" >&2; exit 31; }
+# DEFERRED (like 32S): the kit must NAME the new READY sha256 — Tuesday stamps it in at FILL AT STAMP; until then the launch is refused LAST (READY_NAMED), so the guards below still run.
+READY_NAMED=1; grep -qF "$READY_774_SHA" "$BRIEF" || { READY_NAMED=0; STAMP_OK=0; PROVISIONAL="$PROVISIONAL READY_SHA(the kit does not yet name da8baec1…)"; }
+grep -qF "$H774" "$READY_774" && grep -qF 'verify PASS 4910/4910 across 303 suites' "$READY_774" && grep -qF 'PR #97 new head 278afc2' "$READY_774" \
   || { echo "REFUSING: the READY copy no longer names its head / verify line / subject" >&2; exit 31; }
 grep -qF 'STATUS: COMPLETE' "$B27_REPORT" || { echo "REFUSING: gate 27's report does not read as delivered (the instrument source must be a DELIVERED gate)" >&2; exit 31; }
 for B in "$BRIEF22" "$BRIEF23" "$BRIEF24" "$BRIEF25" "$BRIEF26" "$BRIEF27"; do grep -qF '## 3a. INSTRUMENT RULES' "$B" || { echo "REFUSING: $B has no section 3a — the H-rules carried by reference are missing" >&2; exit 31; }; done
@@ -521,7 +576,7 @@ else
   [ "$(grep -oF "$(dirname "$REPORT")" "$BRIEF" | grep -c .)" -ge 2 ] || { echo "REFUSING: T9 and §11 do not name the SAME report directory (stamp one date in both)" >&2; exit 10; }
   [ ! -e "$REPORT" ] || { echo "REFUSING: $REPORT already exists — a stale report would read as this gate's" >&2; exit 17; }
 fi
-for P in "2026-10-19_nexusai-gate29-READY-pr97.txt" "2026-10-19_S101O_ANSWER-2" "2026-10-13_nexusai-gate-batch22.md" "2026-10-16_nexusai-gate-batch23.md" "2026-10-17_nexusai-gate24-rd848.md" \
+for P in "2026-10-20_nexusai-gate29-READY-pr97-278afc2.txt" "2026-10-19_S101O_ANSWER-2" "2026-10-13_nexusai-gate-batch22.md" "2026-10-16_nexusai-gate-batch23.md" "2026-10-17_nexusai-gate24-rd848.md" \
          "2026-10-18_nexusai-gate25-rd761-rd794-merged.md" "2026-10-18_nexusai-gate26-c170-be0fe37-merged.md" "2026-10-18_nexusai-gate27-rd778-xss.md" "2026-10-05_qa_b14_belt_ANSWER.md" \
          "2026-10-06_nexusai_g18_ruling_b_deliver_now.md" "2026-10-04_qa_batch13_browser_driver_answer.md" "qa-file27.sh" "qa-file27r.sh" "qa-applymut.py" "qa-browser27.js" \
          "QA_AGENT_CHARTER.md" "locks-laptop-1017" "ADDENDUM-1" "rd774-char" "rd774-runs" "models_latest.json"; do
@@ -538,7 +593,7 @@ export CLAUDE_CONFIG_DIR="$TUE/4_Credentials/.claude"
 # 12 / 13 / 14 / 15 / 20 — tier, directive, brief path, pins, verdict route, key path, question route.
 for T in 'TIER 1' 'MAIN-STAMP' 'NO GO' 'NO HOST NPM REGISTRY' 'FULL VERIFIES UNBELTED' 'EXTENSION' 'npm_config_update_notifier=false' 'BOTH thresholds block' 'RULING (b)' \
          '--replace' 'qa-g29-' 'RETIRED' 'H-34' 'H-35' 'C-63' 'C-209' 'C-211' 'THE SQL-PATH CENSUS' 'PLANTING THROUGH EVERY REQUEST PATH' 'STORED LEGACY SQL' 'THE TEMPLATE DERIVATION' \
-         'THE CHARACTERISATION T0-T12' "RD-836's ADMIN-GATE MATRIX" 'THE SIBLING WRITERS' 'THE PUT ALLOW-LIST' 'THE RED-PROOF ROW' 'THE LOG LINE' 'THE CODEQL ROW' 'THE SUITE ROW' \
+         'THE CHARACTERISATION T0-T12' "RD-836's ADMIN-GATE MATRIX" 'THE SIBLING WRITERS' 'THE PUT ALLOW-LIST' 'THE RED-PROOF ROW' 'LOG SINKS' 'THE CODEQL ROW' 'THE SUITE ROW' 'THE NEW GATES' \
          'THE BROWSER LEG' 'YOUR OWN SQL SPY' 'spread-date' 'VOID' 'can fail' 'positive control' 'negative control' 'G29-<n>' 'NOT TESTED' 'PRIOR WORK' 'No HTTP to any production or demo host' \
          'never `--first-parent`' 'LEGITIMATE SHAPES'; do
   grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief does not declare '$T'" >&2; exit 12; }
@@ -555,10 +610,18 @@ for S in "$H774" "$T774" "$M360" "$B63" "$FLOOR_MAIN" "$L888" "$LOCK_SHA_INST"; 
   grep -qF -- "$S" "$BRIEF" || { echo "REFUSING: brief must name $S in full" >&2; exit 14; }
   case "$PROMPT" in *"$S"*) ;; *) echo "REFUSING: prompt must name $S" >&2; exit 14 ;; esac
 done
-for S in "$FLOOR_TREE" "$T360" "$T63" "$CB_FLOOR" "$CB_HEAD" "$CB_360" "$C57_SHA" "$C133_SHA" "$PKG_BLOB" "$LOCK_BLOB" "$DEPLOY_BLOB" "$PREBUILD_SHA" \
+for S in "$FLOOR_TREE" "$T7700" "$T360" "$T63" "$T4C9" "$T256" "$TE884" "$TF1A" "$H4C9" "$CB_FLOOR" "$CB_7700" "$CB_4C9" "$CB_HEAD" "$CB_360" "$C57_SHA" "$C133_SHA" "$PKG_BLOB" "$LOCK_BLOB" "$DEPLOY_BLOB" "$PREBUILD_SHA" \
          "$SERVER_BLOB" "$SIMPLEDB_BLOB" "$VALIDATORS_BLOB" "$TEMPLATES_BLOB" "$LOGSAFE_BLOB" "$T774FILE_BLOB" "$SPY_BLOB" "$SECFIX_BLOB"; do
   grep -qF -- "$S" "$BRIEF" || { echo "REFUSING: brief must name $S in full" >&2; exit 14; }
 done
+# the kit names these four chain commits by their 7-character short sha only (the amend report's chain table carries the full ones): require the short form.
+for S in "${M256:0:7}" "${E884:0:7}" "${MF1A:0:7}" "${M29:0:7}"; do
+  grep -qF -- "$S" "$BRIEF" || { echo "REFUSING: brief must name ${S} (the 278afc2 chain commit)" >&2; exit 14; }
+done
+# the kit names the AUTHENF blob as 'ca764a4b…' (short): require that, plus the EQMAIN pins in full.
+grep -qF 'ca764a4b' "$BRIEF" || { echo "REFUSING: brief must name authEnforcement.js blob ca764a4b…" >&2; exit 14; }
+set -- $EQMAIN_PINS
+while [ "$#" -ge 2 ]; do grep -qF -- "$2" "$BRIEF" || { echo "REFUSING: brief must name $2 in full ($1 equal-to-main pin)" >&2; exit 14; }; shift 2; done
 if printf '%s\n' "$PROMPT" | LC_ALL=C grep -q '@[A-Z_0-9:-]*@'; then echo "REFUSING: the prompt carries a placeholder" >&2; exit 14; fi
 case "$PROMPT" in *"MAIL YOUR VERDICT"*"tuesday-agent@agentmail.to"*) ;; *) echo "REFUSING: prompt must say MAIL YOUR VERDICT to tuesday-agent@agentmail.to" >&2; exit 15 ;; esac
 grep -qF "$SUBJECT" "$BRIEF" || { echo "REFUSING: brief must carry the subject exactly: $SUBJECT" >&2; exit 15; }
@@ -609,7 +672,7 @@ for H in '^## TIER' '^## 2a-T. LEGITIMATE SHAPES' '^## WRONG OR UNVERIFIED' "^##
 done
 WSTART="$(grep -n '^## WRONG OR UNVERIFIED' "$BRIEF" | cut -d: -f1)"; WEND="$(grep -n "^## TUESDAY'S RULINGS" "$BRIEF" | cut -d: -f1)"
 [ "$WSTART" -lt "$WEND" ] || { echo "REFUSING: the WRONG OR UNVERIFIED section is not above TUESDAY'S RULINGS" >&2; exit 19; }
-WUNMARKED="$(sed -n "${WSTART},${WEND}p" "$BRIEF" | grep -E '^[0-9]+\. ' | grep -vE 'MEASURED|READ-ONLY-INFERRED|own actions' | cut -c1-60)"
+WUNMARKED="$(sed -n "${WSTART},${WEND}p" "$BRIEF" | grep -E '^[0-9]+\. ' | grep -vE 'MEASURED|READ-ONLY-INFERRED|own actions|drafter.s actions' | cut -c1-60)"
 [ -z "$WUNMARKED" ] || { echo "REFUSING: WRONG items not marked MEASURED / READ-ONLY-INFERRED: $WUNMARKED" >&2; exit 19; }
 for L in L-B1 L-B2 L-B3 L-B4 L-B5 L-B6 L-B7 L-B8 L-B9 L-Y1; do grep -qF "$L" "$BRIEF" || { echo "REFUSING: brief lacks declared limit $L (C-112)" >&2; exit 19; }; done
 for R in r0 r1 r2 r3 r4 r5 r6 r7 r7S r8 r9 r10 r11 r12 r12b r13 r14 b1 b2 b3; do grep -qF "| $R |" "$BRIEF" || { echo "REFUSING: brief lacks row $R" >&2; exit 19; }; done
@@ -745,13 +808,14 @@ if [ "$NSLOT" != "0" ] || ! grep -q '^SELF-CHECK: re-read end-to-end for contrad
 ROUTE_OK=1
 grep -q "^${ROUTE_NAME}|tuesday-agent@agentmail.to|" "$ROUTING" || ROUTE_OK=0
 GUARDS='9 40 18T 18 6 18M 7 8 90 91 22 93 96 70 70N 31 10 17 11 12 13 14 15 20 41 82 19 24 53 71 76 77 78 79 38R 86'
-SUMMARY="ls-remote attempts this run: $LSR_ATTEMPTS (C-192); origin main ${M_ORIGIN:0:7} (M0 ${MAIN_SHA:0:7} tree ${M0_TREE:0:7}; ancestry carries 888203c and 7700caf; PR #97 not on M0; MODE $MODE); RD-774/836 ${H774:0:7} (tree ${T774:0:7}; 360cd82 counts-only forward merge); predicted verify $PRED; lock tool ${INST_NOW:0:12}…; c57 ${C57_NOW:0:12}…; c133 ${C133_NOW:0:12}…; READY copy sha256 matches; Chrome ${CHV:-?}; model $MODEL"
+SUMMARY="ls-remote attempts this run: $LSR_ATTEMPTS (C-192); origin main ${M_ORIGIN:0:7} (M0 ${MAIN_SHA:0:7} tree ${M0_TREE:0:7}; ancestry carries 888203c, 7700caf and 39653db; PR #97 not on M0; 39653db an ancestor of the head; MODE $MODE); RD-774/836 ${H774:0:7} (tree ${T774:0:7}; 7-commit chain 4c9b0d3 -> 2566713 -> e884516 -> f1a2e76 -> 278afc2; 360cd82 counts-only forward merge); predicted verify $PRED; lock tool ${INST_NOW:0:12}…; c57 ${C57_NOW:0:12}…; c133 ${C133_NOW:0:12}…; READY copy sha256 matches; Chrome ${CHV:-?}; model $MODEL"
 if [ "$STAMP_OK" = "0" ] || [ "$ROUTE_OK" = "0" ] || [ "$LOCK_OK" = "0" ]; then
   echo "guards pass ($GUARDS); stamp, gate-28 lock release and/or route NOT complete." >&2
   echo "  $SUMMARY" >&2
   [ -z "$PROVISIONAL" ] || echo "  PROVISIONAL (unstamped slots, --check ran against):$PROVISIONAL" >&2
   echo "  NEG seats (38R, derived live; coordinator pane '$COORD_NAME'):$NEG_DESC" >&2
   [ "$STAMP_OK" = "1" ] || echo "REFUSING (32S): $NSLOT at-sign SLOT placeholder(s) remain in the brief (MAIN pin x2 + tree + landed, REPORT_DATE x2, RULED: T0-T10, the SELF-CHECK line and the Self-check note), or the SELF-CHECK line is not in the fleet's form — the coordinator re-reads end-to-end and stamps them before launch" >&2
+  [ "${READY_NAMED:-1}" = "1" ] || echo "REFUSING (32S/READY): the kit does not yet name the new-head READY copy's sha256 $READY_774_SHA (FILL AT STAMP: the coordinator stamps it into the kit; the saved copy is $READY_774)" >&2
   [ "$LOCK_OK" = "1" ] || echo "REFUSING (33L): $LOCK_WHY — ANSWER-24: gate 29 launches when gate 28 frees the jest lock" >&2
   if [ "$ROUTE_OK" = "0" ]; then
     echo "REFUSING (40): no '${ROUTE_NAME}|tuesday-agent@agentmail.to|no' line in $ROUTING — answers to the gate would have no route; Tuesday adds it at stamp (this launcher never writes it)" >&2; exit 40
@@ -777,7 +841,7 @@ $NOTTESTED_LINE
 
 THE MODEL OF THIS SESSION (the --model, models_latest.json levels.opus.model_id): $MODEL.
 WRITE YOUR ONE REPORT TO: $REPORT
-VERIFIED BY THE LAUNCHER AT $PIN_TS (git ls-remote origin, read-only, $LSR_ATTEMPTS attempt(s) under C-192): refs/heads/main = $M_ORIGIN = the stamped MAIN pin (tree $M0_TREE; its ancestry carries 888203c and 7700caf; PR #97's commits are not on it; what landed since 7700caf per the stamp: $S_LANDED; MODE $MODE — mode 0 means the gated tree is the head itself, otherwise T0's stamped mode (a) or (b) applies); refs/heads/$B774 = $H774 (tree $T774). Predicted verify: $PRED (arithmetic only; your verify decides). The legacy stdout-only merge-tree of 63bef65 and 7700caf shows conflict markers in the counts file ONLY. The T9 is unmounted. Gate 28 holds nothing on the jest lock. The installed lock tool $LOCKTOOL sha256 $INST_NOW equals the pin and NEXUSAI_LOCK_BASE=$LOCK_BASE_LAPTOP is exported in your environment. The C-57 runner sha256 $C57_NOW and the C-133 tool sha256 $C133_NOW equal their pins. The READY copy's sha256 equals the drafter's. These are the start-of-gate pins; take your own three readings anyway.
+VERIFIED BY THE LAUNCHER AT $PIN_TS (git ls-remote origin, read-only, $LSR_ATTEMPTS attempt(s) under C-192): refs/heads/main = $M_ORIGIN = the stamped MAIN pin (tree $M0_TREE; its ancestry carries 888203c, 7700caf and 39653db; PR #97's commits are not on it; what landed since 39653db per the stamp: $S_LANDED; MODE $MODE — mode 0 means the gated tree is the head itself, otherwise T0's stamped mode (a) or (b) applies); refs/heads/$B774 = $H774 (tree $T774). Predicted verify: $PRED (arithmetic only; your verify decides). The legacy stdout-only merge-tree of 63bef65 and 7700caf shows conflict markers in the counts file ONLY. The T9 is unmounted. Gate 28 holds nothing on the jest lock. The installed lock tool $LOCKTOOL sha256 $INST_NOW equals the pin and NEXUSAI_LOCK_BASE=$LOCK_BASE_LAPTOP is exported in your environment. The C-57 runner sha256 $C57_NOW and the C-133 tool sha256 $C133_NOW equal their pins. The READY copy's sha256 equals the drafter's. These are the start-of-gate pins; take your own three readings anyway.
 NEGATIVE-CONTROL SEATS, derived live by the launcher from the cockpit panes at $PIN_TS (the coordinator's pane is named '$COORD_NAME' on this machine):$NEG_DESC Re-read them at the start of every hold."
 
 # rd579-rd639 S-1 belt: the gate session inherits NO SESSION_SECRET. The line prints the NAME and a state only, never a value.
