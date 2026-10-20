@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 334 — 2026-10-21 03:44 (s129, ctx ~77%). **Supersedes 333's B360 line and 332's LIVE line.**
+- **B360 DONE** (MPS records commit d422c8e3, 6 Jira comments verified by count, 10 BACKLOG rows uncommitted by design). Pane closed. **B355 pane %157 closed** (gate 29 in its last hold; 'tuesday' is its negative control).
+- **LIVE now:** %159 gate 29 (NexusAI #97, Opus 4.8, H6 full verify; verdict by MAIL) · %161 B358 (Composer #85 round 2, Opus) · fleet-monitor. Watchers of s129: B358 STATUS (re-arm at boot).
+- **NEXT (in order):** gate 29 verdict → landing seat (FF same commit, C-190) or fix round · B358 verdict → per 330 · B361 MPS build (read + stamp + launch) · gate 33 (fix kit per 330, launch) · HPSM-POC records (per 331).
+
 ## 🟢 DELTA 333 — 2026-10-21 03:30 (s129, ctx 76%). **Adds to 332.**
 - **B360 MPS records** brief STAMPED (`tuesday/briefs/2026-10-21_B360_SEAT-R12_mps-records-b354.md`; R-R13-4 overruled: the sixth line goes on MPSCALC-245). A tracked waiter of s129 launches `Datasec/MPS-R12` at load1 < 7 (dies with this seat): **if no `Datasec/MPS-R12` pane exists at boot, launch by the brief's line 14** (re-read main = f78c6408 first). Watch `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B360_STATUS.md` (last line `RECORDS COMMITTED:`; read the records commit at source with `git -C <root> log -1`).
 - **B361 MPS build MPSCALC-304 + -305** DRAFTED, NOT READ (`tuesday/briefs/2026-10-21_B361_SEAT-W21_mps-304-305-import-tests.md`, 128 lines; drafter report `_B360-B361_DRAFTER-REPORT.md`): READ WHOLE, stamp (tier 2 with a STOP if `src/` must change; Sonnet C2), launch at load1 < 7 as `Datasec/MPS-W21`. Disjoint from B360 (code repo vs root records).
