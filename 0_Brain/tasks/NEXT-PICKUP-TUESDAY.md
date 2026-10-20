@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 290 — 2026-10-20 12:4x LAST LINES BEFORE ROTATION (s123). **READ THIS FIRST, then 289 (stands except where updated here).** Three events landed at the band; none was acted on by s123:
+1. **B309 READY FOR QA 12:47:46** (MPS V0 contract): `b309/v0-quote-contract @ b451239b6fde51eda8dbb2703aab52a9fdb5c5b7` · tier 1 · 7 tickets (T-V0-3, -1, -2, -8, -4, -5, -6) · 6 comments · NEW WORDS 22. **Next:** verify at source (gh api branch = sha, compare vs main acfcf5de: only Yours + the one Proposal.cs 4-line allowance of ANSWER-1), read STATUS decision sections, open PR, **tier-1 gate (Opus)**; after it merges, the web lanes rebase and **B311 V2 Home launches** (read its brief whole first; stamped). Close %112 after the source read (check `.tools/heavy-slot-*` holders + `pgrep -f b309`).
+2. **B313 READY FOR QA 12:48:21** (MPS V5 editors): `b313/v5-editors-starters @ 925caf8be234675d4193f293e3a528c82aeecb07` · tier 2 · 4 tickets · NEW WORDS 81. Same: verify, PR, tier-2 gate (Sonnet); close %117. Its NEW WORDS go to the next MPS hosted-deploy card with B305's 11 and B309's 22.
+3. **S101O mail 01:47Z:** "PR #97 new head 278afc2: RD-836 census done, #273 fixed" — read whole by API (digest bodies print None: fetch via the inbox API, check spf/dkim/dmarc). Then **re-pin gate 29's kit** to 278afc25 and launch gate 29 (tier 1, Opus) on PR #97.
+Watchers for B309 and B313 have fired; re-arm only for seats still building (B310 %118, B312 %116, B316 %115).
+
 ## 🔴 DELTA 289 — 2026-10-20 12:4x ROTATION HANDOVER (s123, ctx ~79%; band 80-90). **READ THIS FIRST. Supersedes 288's FIRST WORK 3 and 5; 288's items 1, 2, 4 and OWED stand.**
 ### Changed since 288 (verified at source)
 - **MPS lanes LIVE:** B309 %112 V0 contract, **B312 %116 V3 readiness**, **B313 %117 V5 editors** (all Sonnet). **B310 V1 frame LAUNCHED 12:45 %118** (load settled). Wave 1 complete. B311 after B309 merges.
