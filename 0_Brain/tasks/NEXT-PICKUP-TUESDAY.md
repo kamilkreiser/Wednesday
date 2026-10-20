@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 298 — 2026-10-20 15:31 ROTATION HANDOVER (s125, ctx 77%; band 80-90). **READ THIS FIRST, then 297 and 296 (their DONE lines stand).**
+### Changed since 297 (verified at source)
+- **Gate 30 (NexusAI #98) = NO GO** (RD-786 21 of 26 claimed as 26; G30-1 rd407 U2 assertion weaker); merged-tree addendum GREEN (152/152). Pane closed. **B334 fix round 2 of 2 LAUNCHED %134** (G30-1 fix; RD-786 re-scoped 21 of 26; it DRAFTS the PR title/body into `NexusAI/1_Project_Definition/Briefs/2026-10-20_B334_PR98-TEXT.md` and the follow-up ticket text into its STATUS — **Tuesday applies the PR text (`gh pr edit 98`) and files the follow-up via a records step**). Then a round-2 tier-2 re-gate of #98.
+- **Composer #83: B333 fix round 2 of 2 LAUNCHED %133** (freeze device_group tenant/engagement in 0022; array_ndims; B331-2 test row). Then a round-2 tier-1 re-gate (Opus).
+- **B320 (Composer #82 gate) LIVE %132.**
+- **🔴 NEXUSAI LANDING RULE (C-190 item 2): "land the SAME commit. Never squash, never rebase (C-68)."** NexusAI lands by a FAST-FORWARD of the gated head (a seat's `land2.sh` route after the PR's CodeQL), never `gh pr merge --squash`. Tuesday squash-merged docs-only #100 at 14:42 against it (ledger row w=1; main NOT rewritten). MPS squash merges are MPS's own convention: **before ANY merge, read that project's landing rule in the same action.** OWED: a NexusAI C-entry noting the #100 squash (next NexusAI records step).
+- **send_brief.sh:642 hardcodes "[Wednesday -> …]"** for every seat (shared tooling; claim with Wednesday). Gates expecting "[Tuesday -> …] ANSWER" need a `--mail`-verified pointer tap.
+- Two Kam-facing notes posted: Paul's five questions (file) bf-80d7f242b8f7; vault push key bf-be93520b927a; MPS wave 1 merged bf-737917e38525; ZZ-DATASEC policies + K4 reading bf-c81bab3b3159. No Kam reply since 14:00.
+### LIVE at 15:31 (RE-ARM watchers: `tuesday/tools/status_watch.sh <STATUS> 30`)
+%129 **gate 31** (NexusAI #99, holds the jest lock; verdict by MAIL; report dir Testing Agent MAIN/projects/nexusai/reports/2026-10-20-gate31-rd863-pr99/) · %134 **B334** (NexusAI/1_Project_Definition/Briefs/2026-10-20_B334_STATUS.md) · %133 **B333** (Composer Briefs/2026-10-20_B333_STATUS.md) · %132 **B320** (Composer Briefs/2026-10-20_B320_STATUS.md) · %126 **B329** (HPSM-POC Briefs/2026-10-20_B329_STATUS.md — its last line is the OLD 14:49 STOPPED until it writes again: watch for a CHANGED final line, not any final line) · %56 S101O (idle by design; repeated 'frozen' wakes: check inbox only).
+### LAUNCH QUEUE
+Composer (one docker-heavy at a time, after B320/B333): **B323** (fill STAMP_TIME) -> **B330** (fill STAMP_TIME). MPS: **B311 V2 Home** (read whole), an **MPS records seat**, the **V1 phase 2** brief. NexusAI: **gate 29** (#97: read the 117 KB kit WHOLE; re-pin main 1bc9e9df; #97 vs #99 counts conflict). HPSM-POC records step after B329.
+- **OWED (#100 post-land):** NexusAI Build run 39365783738 on 1bc9e9df was still in_progress at 15:3x; no Deploy demo run for 1bc9e9d yet (the last three on main 39653db4/29c5ee8f/79af19c0 all `skipped`). When Build completes, confirm a Deploy demo run for 1bc9e9d with build+deploy `skipped`; main open alerts read 218 = unchanged.
+### Digests regenerated at this rotation (ledger edited twice this seat).
+
 ## 🟢 DELTA 297 — 2026-10-20 15:17 CHECKPOINT (s125, ctx 70%; band 80-90). **READ THIS FIRST; supersedes 296's LIVE/QUEUE; 296's DONE stands.**
 ### DONE since 296 (verified at source)
 - **MPS: ALL FOUR v13 wave-1 PRs LANDED** — #88 (B325 GWF) squash 77e541c8; #86 (B332 round-2 GWF: B319-1/-2/-4 FIXED) squash **67bf2004 = MPS main**; merged path sets equal the PRs'. No MPS PR open. Kam told (bf-737917e38525). B325 findings B325-1..11 (Minor/Note), B332-1 Minor + Notes, B318-1..4, B324-1..5, B319-* all OWED to an MPS records seat (+ drafted Jira lines in each STATUS; + NEW WORDS lists for the hosted card).
