@@ -85,3 +85,5 @@
 | 2026-10-18 23:08:20 | ks_1482_p1 | PASS (PASS (7/7)) | 279 | 45.513 | 27499+1017 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-18_ks_1482_p1 | ks_1482_p1 |
 | 2026-10-18 23:12:40 | ks_1482_p2 | PASS (PASS (7/7)) | 259 | 36.616 | 26524+622 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-18_ks_1482_p2 | ks_1482_p2 |
 | 2026-10-18 23:14:57 | ks_1497_p1 | PASS (PASS (9/9)) | 63 | 42.046 | 12274+1673 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-18_ks_1497_p1 | ks_1497_p1 |
+| 2026-10-20 15:32:13 | ks_1508_falsy_p1 | PASS (PASS (7/7)) | 138 | 46.477 | 40836+529 | BYTE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-20_ks_1508_falsy_p1 | ks_1508_falsy_p1 |
+| 2026-10-20 15:34:17 | ks_1660_falsy_p1 | PASS (PASS (7/7)) | 123 | 42.142 | 38467+420 | BYTE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-20_ks_1660_falsy_p1 | ks_1660_falsy_p1 |
