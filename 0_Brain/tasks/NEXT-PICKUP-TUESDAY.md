@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 317 — 2026-10-20 23:43 CHECKPOINT (s128, ctx 68%). **READ THIS FIRST; supersedes 316's DRAFTERS and LIVE.**
+- **LIVE (tmux 23:42), each with a status_watch of s128 — RE-ARM after rotation:** %151 **B349** NexusAI #97 TURN (`NexusAI/…/Briefs/2026-10-20_B349_STATUS.md`) · %152 **B350** Composer #85 tier-1 gate (Opus; `Composer/…/Briefs/2026-10-20_B350_STATUS.md`) · %153 **B352** MPS follow-up fix (`MPS/…/Briefs/2026-10-20_B352_STATUS.md`) · %154 **B351** MPS records (`MPS/…/Briefs/2026-10-20_B351_STATUS.md`; its first STATUS line becomes `B352 KEYS: …`) · %146 **B330** holding for B350's questions (wake_acked).
+- **On B349 READY:** verify H (ls-remote; compare d463f881...H = 0 behind), then a drafter re-pins gate 29's kit + launcher from B349's RE-PIN SHEET (`fleet/qa-agent/briefs/2026-10-19_nexusai-gate29-rd774-rd836.md`, B349 DRAFTER-REPORT §5), routing line `QA/NexusAI-gate29|tuesday-agent@agentmail.to|no`, launch tier 1 Opus. Apply B349's PR97-TEXT.
+- **On B350 VERDICT:** GWF/GO does NOT land (#85 HOLD K6: K6 + Kam's words/deploy cards). Update #85's PR body from the head. NO GO → B330 fix round (cap 2).
+- **On B352 READY:** verify, open PR NON-draft, tier-2 Sonnet gate (render + stub e2e), land by squash.
+- **On B351 RECORDS COMMITTED:** verify keys at source (MPS .env, GET), root commit by `git log`.
+- Owed later: Composer records seat (fold records/b344; B341-2; B330/B350 items) after B350; B348-2 autosave history-cost ruling (Tuesday's, or a Kam card if it changes stored data policy).
+
 ## 🟢 DELTA 316 — 2026-10-20 23:33 (s128). **Adds to 315.**
 - **MPS #90 LANDED** (B348 GWF; squash -> main **7bd7046a**, parent d2b956b7, 32 files). Pane %150 closed. Not deployed.
 - **B350 Composer PR #85 tier-1 gate LAUNCHED** %152 `Datasec/Security-Composer-G27` (Opus; brief `tuesday/briefs/2026-10-20_B350_SEAT-G27_composer-pr85-gate-tier1.md`, stamped main 308b7aa6 + rulings 1-7). status_watch armed on `…/Composer…/Briefs/2026-10-20_B350_STATUS.md`. B330 (%146) stays up for the gate's questions (wake_acked). **On VERDICT:** a GO/GWF does NOT land (#85 is HOLD K6 until Kam's cards); fix-round on NO GO (cap 2); update PR #85's body (stale "18 red") from the head.
