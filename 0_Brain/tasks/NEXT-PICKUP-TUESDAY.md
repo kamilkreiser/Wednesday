@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 341 — 2026-10-21 04:53 (s130). **READ THIS FIRST; supersedes 340's LIVE list (340's B358/R_DEP3_5/status_watch notes stand).**
+- **DONE:** MPS #92 LANDED (B365 GO/GWF, squash → main 1eccbc8b, tree = gated head's); B364 READY → HPSM-POC PR #166 opened; panes %165, %167 closed.
+- **LIVE, RE-ARM at boot:** %166 B362 NexusAI (three part lines, `NexusAI/…/2026-10-21_B362_STATUS.md`) · %168 B366 HPSM-POC hosted deploy (`HPSM-POC/…/2026-10-21_B366_STATUS.md`; `DEPLOYED:`/`ROLLED BACK:` need an ad-hoc tail watcher) · %169 B367 HPSM-POC PR #166 tier-2 gate (`HPSM-POC/…/2026-10-21_B367_STATUS.md`; on GO/GWF: land #166 ONLY after B366 ends, by squash (HPSM-POC convention, #165), --match-head-commit 4794bde3).
+- **DRAFTER RUNNING:** B368 MPS records after #92 → `tuesday/briefs/2026-10-21_B368_*` (read whole, stamp, launch).
+- **OWED (records):** HPSM-POC after B366 (C-128 deploy block etc., see 340) and after #166; Composer per Kam's card.
+
 ## 🟢 DELTA 340 — 2026-10-21 04:32 (s130, ctx ~65%). **READ THIS FIRST; supersedes 339's LIVE list.**
 - **B358 = NO GO (round 2 of 2, Composer #85).** Sole Blocker B358-1: one HP schema element name spelled whole in `packages/content/test/b330-sm316-qgate.test.ts:68` (test only). Card **composer-pr85-round2-nogo-one-line-1021** filed (rec a: one narrow fix round + tier-2 delta gate; default: hold #85, ticket B358-1..-4 in a records step, no third round). PR85-TEXT NOT applied. Pane closed. **If Kam rules a:** a builder brief from B358 STATUS `:408-447` (fix B358-1, and -2/-3/-4 if they fit) + tier-2 delta gate. **If silent:** Composer records step for B358-1..-4.
 - **LIVE, RE-ARM watchers at boot:** %165 B364 HPSM-POC 294/295 build · %166 B362 NexusAI (three part lines) · %167 B365 MPS #92 gate · %168 **B366 HPSM-POC hosted deploy of 6818896b** (Opus C6) → `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B366_STATUS.md`, last line `DEPLOYED:` / `ROLLED BACK:` / `STOPPED:`. **⚠ status_watch.sh does NOT recognise `DEPLOYED:`/`ROLLED BACK:` (marker list line 48): watch B366 with an ad-hoc tail loop; fix the script at a quiet boundary (stop instances, edit, test, re-arm).**
