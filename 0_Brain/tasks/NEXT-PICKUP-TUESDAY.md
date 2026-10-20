@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 299 — 2026-10-20 16:03 ROTATION (s125, ctx 79%; band 80-90). **READ THIS FIRST, then 298 (stands except where updated).**
+### Changed since 298 (verified at source)
+- **Gate 31 (NexusAI #99, RD-863) = GO WITH FINDINGS** (15/0/3/11 differential; G31-1..3 Minor/missing cells). Pane closed. **ANSWER-30 = GO to S101O** (`tuesday/briefs/2026-10-20_S101O_ANSWER-30_rd863-go-land-pr99.md`, mail verified 04:49:37Z, tap delivered): forward-merge main 1bc9e9df, no counts TURN, suites as landing control, CodeQL on the new head, FAST-FORWARD the same commit (C-190), #99 before #97, tickets drafted in its MERGED mail. **Wait for S101O's MERGED mail; verify ls-remote main = its head, Deploy demo skipped, main alerts 218 -> 218.**
+- **Gate 31 ANSWER-1** sent (mode moved confirmed) before its verdict.
+- **B333 READY verified** (Composer #83 @ **8e062d94**, 3 commits on 314f40d, 6 files in Yours, 0022 sha256 8195ecb7, 10 new tests, 0 new words); pane %133 closed. **OWED: round-2 tier-1 re-gate brief of #83 @ 8e062d9 (Opus G1; THE CAP: a NO GO stops #83 for Kam).** Commission its drafter from the B331 brief (structure) + B333 STATUS.
+- **B320** (%132, Composer #82 gate) holding by design on its D=40000/60000 runs; wake acked (wake_ack.sh). No STATUS file yet.
+- **WEEKLY USAGE 99%** (seat statusline 7d:99% at 16:0x). Kam told (bf-7d600f8502f0 + correction bf-831eb6f6f551): at 100% every seat stops until he switches to his second account; resume them after. **The successor launches NOTHING new until the gauge resets or Kam switches** (in-flight seats finish).
+- Ledger +1 row (count of live seats composed from memory, w=5 of the count family). Digests regenerated at this rotation.
+### LIVE at 16:03
+%134 **B334** (NexusAI #98 fix round 2 of 2; holds the jest lock as b334-holdB; STATUS NexusAI/1_Project_Definition/Briefs/2026-10-20_B334_STATUS.md; then apply its PR98-TEXT with `gh pr edit 98` and commission the round-2 tier-2 re-gate) · %132 **B320** (Composer Briefs/2026-10-20_B320_STATUS.md) · %126 **B329** (HPSM-POC; watch for a CHANGED final line; tell Kam at its DONE: Paul's SM holds 8 devices / 5 tasks) · %56 **S101O** (landing #99 per ANSWER-30).
+### RE-ARM after boot
+status_watch on B334 and B320 STATUS; a changed-final-line watcher on B329; mail wake for S101O MERGED.
+
 ## 🔴 DELTA 298 — 2026-10-20 15:31 ROTATION HANDOVER (s125, ctx 77%; band 80-90). **READ THIS FIRST, then 297 and 296 (their DONE lines stand).**
 ### Changed since 297 (verified at source)
 - **Gate 30 (NexusAI #98) = NO GO** (RD-786 21 of 26 claimed as 26; G30-1 rd407 U2 assertion weaker); merged-tree addendum GREEN (152/152). Pane closed. **B334 fix round 2 of 2 LAUNCHED %134** (G30-1 fix; RD-786 re-scoped 21 of 26; it DRAFTS the PR title/body into `NexusAI/1_Project_Definition/Briefs/2026-10-20_B334_PR98-TEXT.md` and the follow-up ticket text into its STATUS — **Tuesday applies the PR text (`gh pr edit 98`) and files the follow-up via a records step**). Then a round-2 tier-2 re-gate of #98.
