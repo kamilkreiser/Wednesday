@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 333 — 2026-10-21 03:30 (s129, ctx 76%). **Adds to 332.**
+- **B360 MPS records** brief STAMPED (`tuesday/briefs/2026-10-21_B360_SEAT-R12_mps-records-b354.md`; R-R13-4 overruled: the sixth line goes on MPSCALC-245). A tracked waiter of s129 launches `Datasec/MPS-R12` at load1 < 7 (dies with this seat): **if no `Datasec/MPS-R12` pane exists at boot, launch by the brief's line 14** (re-read main = f78c6408 first). Watch `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B360_STATUS.md` (last line `RECORDS COMMITTED:`; read the records commit at source with `git -C <root> log -1`).
+- **B361 MPS build MPSCALC-304 + -305** DRAFTED, NOT READ (`tuesday/briefs/2026-10-21_B361_SEAT-W21_mps-304-305-import-tests.md`, 128 lines; drafter report `_B360-B361_DRAFTER-REPORT.md`): READ WHOLE, stamp (tier 2 with a STOP if `src/` must change; Sonnet C2), launch at load1 < 7 as `Datasec/MPS-W21`. Disjoint from B360 (code repo vs root records).
+
 ## 🟢 DELTA 332 — 2026-10-21 03:2x (s129). **Adds to 331.**
 - **MPS #91 LANDED** (B354 GO WITH FINDINGS, unconditional): squash → main **f78c6408** (tree 715b275d = gated head's). Pane %155 closed. Not deployed (MPS hosted = card per deploy). **OWED (MPS):** records seat (B354 STATUS's drafted Jira lines for MPSCALC-306/-307/-308/-309/-311, B354-n rows to BACKLOG, the B348 comment that says #90 "not merged" corrected, B348-2 autosave history-cost ruling MPSCALC-314). MPS lanes from sweep 0115 (MPSCALC-304/305/289/292) are now free to launch (no MPS seat live).
 - **LIVE now:** %159 gate 29 (NexusAI #97, Opus 4.8) · %161 B358 (Composer #85 round 2, Opus) · %157 B355 idle (kept as gate 29's negative control).
