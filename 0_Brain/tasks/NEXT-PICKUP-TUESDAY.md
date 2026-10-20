@@ -12,7 +12,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
   - %163 **B361** MPS 304/305 test-only → `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-21_B361_STATUS.md` (READY → verify, PR non-draft, tier-2 Sonnet gate).
   - %164 **B363** HPSM-POC records for #165 → `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B363_STATUS.md` (last line `RECORDS COMMITTED:` on `records/b363`; then Tuesday runs hpwin.py over the branch, opens the records PR, lands through CodeQL; R-R14-1 (b), C-127).
   - %165 **B364** HPSM-POC 294/295 test-only → `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B364_STATUS.md` (READY → verify, PR non-draft, tier-2 gate).
-- **DRAFTER RUNNING:** B362 NexusAI #97 landing + records + #101 TURN (see 337); if missing at boot, re-commission.
+  - %166 **B362** NexusAI: land #97 (FF, draft, no gh writes) → records → #101 counts TURN → `NexusAI/1_Project_Definition/Briefs/2026-10-21_B362_STATUS.md` (three part lines: `DONE: … PART 1 LANDED`, `RECORDS DONE: … PART 2`, `READY FOR QA: … PART 3`). After Part 2: open the records/b362 PR (docs only, through CodeQL). After Part 3: re-stamp gate 33 (B359 kit + launcher, DELTA 330 fixes) to H3, then launch.
 - OWED after B363: hosted HPSM-POC deploy decision for main 6818896b (no runbook file; B316 brief + STATUS is the pattern; needs its own C6 Opus brief under the push-to-demo grant).
 - Kam silent since 18:57 (10-20). No card filed.
 
