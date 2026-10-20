@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 343 — 2026-10-21 05:22 (s130, ctx 77%). **READ THIS FIRST; supersedes 342's LIVE/B369 lines (342's DONE/owed stand).**
+- **HPSM-POC HOSTED DEPLOYED** (B366, 05:20): 6818896 @ 3cBXgbJ5OOq2IZ-rmpNUZ, live since 17:58:03Z; Tuesday re-read both health endpoints 200; Kam told on the board (bf-047884bec7e9). R_DEP3_5 hold LIFTED. **B370 records drafter RUNNING** (dies with this seat) → `tuesday/briefs/2026-10-21_B370_SEAT-R15_hpsmpoc-records-deploy-6818896.md`: C-128, 'deployed' comments + HPSMPOC-301/-302 → Done (R-R10-1), -268 reading, FOUND-3 vs -303. If missing at boot, re-commission (shape: B363 brief + B366 STATUS 'Records and Jira'). READ WHOLE, stamp (records main pin by gh api; NEXT_C = highest on main+refs +1, expect C-128), launch.
+- **LIVE, RE-ARM at boot:** %166 **B362 Part 3** (NexusAI #101 counts TURN; last line `READY FOR QA:` → verify, then re-stamp gate 33's kit + launcher (DELTA 330 fixes) to H3 and launch) · %171 **B369** HPSM-POC #166 fix round 2 → `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B369_STATUS.md` (READY → verify, round-2 tier-2 gate, B367's kit shape; NO GO → Kam card; GO/GWF → land #166 by squash --match-head-commit, HPSM-POC convention).
+- **OWED:** NexusAI records PR #102 (FF via a NexusAI seat's land.sh, C-190) · HPSM-POC records after #166 (incl. correcting comment 39844 if B369 did not) · Composer card `composer-pr85-round2-nogo-one-line-1021` (open).
+- Kam silent since 18:57 (10-20). Ledger edited (w=1) → regenerate BOTH digests at rotation.
+
 ## 🟢 DELTA 342 — 2026-10-21 05:16 (s130). **READ THIS FIRST; supersedes 341's LIVE list (340's notes stand).**
 - **DONE:** NexusAI #97 LANDED (FF 115a775b, #70/#220/#221 fixed, demo skipped, verified at source); NexusAI records (RD-876/877/878; comments 39846-39849) → records PR #102 OPEN (**owed: land by C-190 FF of 6dcbedb9 via a NexusAI seat's land.sh; gh pr merge cannot FF**); MPS records B368 committed (36c8498f); panes %167 %169 %170 closed.
 - **B367 = NO GO on HPSMPOC-294 (round 1 of 2)**, 295 GWF. Tuesday ruled route (a) for B367-1..-4 (waiver of B364's 'exactly four rows' = Tuesday's error, ledger row). **B369 fix-round drafter RUNNING** → `tuesday/briefs/2026-10-21_B369_SEAT-D10_hpsmpoc-pr166-fix-round2.md`: read whole, stamp, launch; then a round-2 tier-2 gate (LAST: NO GO → Kam card). Merge still HELD for B366.
