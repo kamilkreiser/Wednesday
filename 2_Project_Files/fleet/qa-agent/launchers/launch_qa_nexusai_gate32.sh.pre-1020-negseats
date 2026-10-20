@@ -1,0 +1,737 @@
+#!/bin/bash
+# launch_qa_nexusai_gate32.sh — cross-project QA agent, ONE gate on Datasec/NexusAI (gate 32): a TIER-2 GATE THROUGH CODE, ROUND 2 OF 2, the RE-GATE of
+# B302 lane 7 — RD-782 .. RD-789 (CodeQL alerts in TEST code), draft PR #98, branch b302/test-code-codeql @ e80920c (B334's fix round for gate 30's finding
+# G30-1; ONE commit, ONE test file, +5/-0, on the gated 49ba21e) — one gated head, one delta, one verdict, ONE report. A NO GO here STOPS PR #98 and goes to KAM.
+# (derived 2026-10-20 by Tuesday's kit-drafting sub-agent (B336) from launch_qa_nexusai_gate30.sh (pins, the 34-path scope, the lock-tool pin, the
+#  live negative-control derivation) and launch_qa_nexusai_gate31.sh (the TWO-slot stamp form); the drafter ran ONLY `bash -n` and an unstamped
+#  `--check` — see the B336 DRAFTER-REPORT. Tuesday re-runs `--check` after stamping, then chmod +x.)
+# A FRESH gate on the Mac mini, /Volumes/Laptop-DEV; the T9 is UNMOUNTED, so the lock base is the Laptop-DEV locks-laptop-1017.
+#   PR98  b302/test-code-codeql @ e80920c (9 commits over 39653db; the gated round-1 head is 49ba21e, 8 commits; the delta is e80920c alone)
+#   M0 = the MAIN pin Tuesday STAMPS (aa811cf at drafting = mode 'moved': main moved under the PR twice, 39653db -> 1bc9e9d -> aa811cf; zero overlap with the
+#   34 PR paths). The gated tree IS the head; the MERGED tree onto M0 is a separate reading (the brief's r5).
+#
+# LAUNCHED ONLY VIA: cockpit.sh add 'QA/NexusAI-gate32' "bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_nexusai_gate32.sh'"
+#   (i.e. /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh). A tmux pane, NEVER nohup, never run it bare from a seat's shell.
+#
+# AUTHORITY: Tuesday's gate-32 commission (B336, 2026-10-20), the kit's TIER 2 argument (routing v1.0 row G2: a follow-up whose mechanism a prior gate
+# already measured), the B334 fix round's rulings as the kit relays them.
+# THE MODEL RULE: Kam, live board 2026-09-30 09:07, card nexusai-gate11-opus55-safeguard-model-switch, option (b), PER SESSION.
+# The MODEL is the kit's MODEL line (tier 2, routing v1.0 row G2, Sonnet), which must equal models_latest.json levels.sonnet.model_id.
+# FINDINGS-ONLY: never merges (outside its own store), never pushes, never opens/comments/approves/un-drafts/updates a PR, never dismisses an
+# alert, never swaps or edits the lock tool; no fix, no deploy, no az, no docker, no model call, no demo, no human.
+#
+# PATTERN: launch_qa_nexusai_gate31.sh (prompt EMBEDDED, --check mode, PIN-table parser, the TWO-slot stamp form, C-192 lsr retry, lock-tool pin 90,
+# the LIVE negative-control seat derivation 38R, guard 86, stamp + route refusals LAST) over gate 30's content. CHANGES, each deliberate:
+#   - STAMP: only TWO slots exist in the kit — MAIN_SHA (MAIN-STAMP line + PIN-HEADS MAIN row) and LAUNCH_TIME (MAIN-STAMP line). The MAIN-STAMP form is
+#     'MAIN-STAMP: sha <40-hex> | launched <YYYY-MM-DD HH:MM AEDT>'; M0's tree and "landed since 39653db" are DERIVED here, never stamped. The kit's
+#     LAST line must read 'READ-WHOLE-BY-TUESDAY: DONE …' (refused while PENDING). (gate 30 had 12 slots and a SELF-CHECK line.)
+#   - 40: PIN-HEADS rows are MAIN + PR98 (branch b302/test-code-codeql, head e80920c, base 39653db, 9 commits) + GATED (the round-1 head 49ba21e, base
+#     39653db, 8 commits). (gate 30: MAIN + B302.)
+#   - 18: refuses when the branch OR refs/pull/98/head is not e80920c. A moved head is a new kit amendment and a new CodeQL run, never a blind sed.
+#   - 18M: 39653db is-ancestor of M0 (never --first-parent); M0's tree DERIVED; NONE of the 9 PR commits is on M0 (the PR is not landed); mode 0 iff
+#     M0 = 39653db, else 'moved': what landed since is DERIVED, and the launcher REFUSES (T0: STOP) when it touches ANY of the 34 PR paths or when the
+#     legacy stdout-only merge-tree of the head onto M0 shows a conflict marker. A moved M0 that touches none is the EXPECTED case here (NOTEd, not refused).
+#   - 7/8: the chain base 39653db <- cb8755a <- … <- 49ba21e <- e80920c: parents and EVERY tree (NINE rows), linear: 9 commits, 9 first-parent,
+#     merge-base = base. (gate 30: eight rows.)
+#   - 22D (NEW): the DELTA 49ba21e..e80920c is exactly ONE commit, ONE path (the rd407 test), numstat '5 0', TWO hunks, the rd407 blobs gated 4302ca5 ->
+#     head 774cd8f, diff-tree path count 1.
+#   - 22: the 34 paths: 33 M + 1 A (A = __tests__/helpers/html-dom.js), every path test code, 0 in the guarded set, the sorted path list's sha256
+#     PINNED (97161ee…, equal to gate 30's: the SET did not move), the four files of the five open RD-786 sites byte-UNCHANGED base..head.
+#   - 93: lockfile, package.json and deploy-demo.yml are the SAME blobs at M0 and the head and equal their pins; the HEAD's counts file is the pinned blob
+#     and reads 4880/302; M0's counts file is READ, not pinned (it is 4934/303 at aa811cf and moves with main); deploy-demo gates BOTH jobs on
+#     vars.CI_DEPLOY_ENABLED at M0. (gate 30 also pinned the counts blob at M0.)
+#   - 33L: gate 30's deferral on a gate-29 hold is DROPPED (FIFO queues behind any holder); a qa-g32-* holder or queued ticket REFUSES at once.
+#   - 31: the builder's B334 STATUS must end with the READY line for e80920c (its sha256 is NOTEd, not pinned: it is a CLAIM); the PR text file's sha256 is
+#     NOTEd; gate 30's report must read STATUS: COMPLETE and carry G30-1; gate 30's evidence/H1a and evidence/H1b (the names comparison) must exist; gate 30's
+#     instruments the kit copies BY NAME (7 files) and its mutant texts (C1/S8b, 4 files) are PINNED by sha256 (a COMPLETE gate's files never move);
+#     gate 27's and gate 25's instruments present.
+#   - 12/19/53/71: the kit-declaration lists are REWRITTEN for this kit's own words (rows r0-r9, T0-T5, limits L-R1..L-R6 + L-Y1, tags qa-g32-, G32-<n>/N32-<n>,
+#     verdict lines 'B336/PR98-R2: …' and 'LANDING CHECKLIST: PR #98 …', the one NOT TESTED line).
+#   - DROPPED: the smoke/browser/DOM legs and their guards (carried from gate 30 by blob identity), the RD-786 chain of gate 30's per-commit adjudications.
+#   - The PROMPT is rewritten for gate 32 from the KIT (round 2 of 2, the red-proof, the merged tree, the PR text, the cap).
+#
+# Identity: exports NexusAI's OWN az/gh dirs (az is NOT used; gh READ-ONLY); CLAUDE_CONFIG_DIR pinned to Tuesday's store.
+# --check is READ-ONLY in NexusAI: git read verbs with --no-optional-locks (cat-file, log, merge-base, diff, diff-tree, rev-parse, ls-remote, rev-list, show) and
+# the legacy stdout-only merge-tree (no object written, only when main moved); shasum / bash -n / grep over files; python over `git show` output; ls, ps,
+# tmux list-panes, test -e. Writes nothing.
+# ABSOLUTE PATHS ON PURPOSE. Contains a legitimate `cd` (into the QA project, at exec).
+# Usage: launch_qa_nexusai_gate32.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..99 a guard refused
+set -u
+CHECK=0
+for a in "$@"; do
+  case "$a" in
+    --check) CHECK=1 ;;
+    *) echo "unknown argument: $a" >&2; exit 2 ;;
+  esac
+done
+
+PH_SLOT='@SL''OT'
+
+QA_DIR='/Volumes/Laptop-DEV/!CODING/Testing Agent MAIN'
+TUE='/Volumes/Laptop-DEV/TUESDAY'
+BRIEFS="$TUE/2_Project_Files/fleet/qa-agent/briefs"
+STAGED="$TUE/2_Project_Files/fleet/briefs_staged"
+TBRIEFS="$TUE/2_Project_Files/tuesday/briefs"
+BRIEF="$TBRIEFS/2026-10-20_B336_SEAT-G23_nexusai-gate32-pr98-round2.md"
+BRIEF27="$BRIEFS/2026-10-18_nexusai-gate27-rd778-xss.md"
+BRIEF29="$BRIEFS/2026-10-19_nexusai-gate29-rd774-rd836.md"
+BRIEF30="$TBRIEFS/2026-10-20_B317_SEAT-G13_nexusai-gate-pr98-tier2.md"
+TEMPLATE="$TUE/2_Project_Files/fleet/qa-agent/BRIEF_TEMPLATE.md"
+ADD25="$TBRIEFS/2026-10-18_gate25_ADDENDUM-1_ref-order.md"
+ANS1="$TBRIEFS/2026-10-18_S101O_ANSWER-1_plan-confirmation.md"
+CHARTER="$TUE/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md"
+MODELS_JSON="$TUE/0_Brain/dashboard/data/models_latest.json"
+SQLITE_RULING="$STAGED/2026-10-05_qa_b14_sqlite3_ANSWER.md"
+NOTIFIER_ANS="$STAGED/2026-10-05_qa_gate16_notifier_ANSWER.md"
+ROUTING="$TUE/2_Project_Files/fleet/inbox_routing.conf"
+NX='/Volumes/Laptop-DEV/!CODING/Datasec/NexusAI'
+REPO="$NX/2_Project_Files"
+ST="$NX/session-tools"
+STATUS_B334="$NX/1_Project_Definition/Briefs/2026-10-20_B334_STATUS.md"
+PR98TEXT="$NX/1_Project_Definition/Briefs/2026-10-20_B334_PR98-TEXT.md"
+LOCKTOOL="$ST/nexusai-lock.sh"
+LOCK_SHA_INST='3c33f5ae58e1be20282467a90b27a23a2de998eedd0e56c03f3c06360031a792'   # RD-821 round 3, INSTALLED — PINNED
+T9_VOL='/Volumes/KK_T9_External_HDD'
+LOCK_BASE_LAPTOP="$ST/locks-laptop-1017"
+LOCKQ_J="$LOCK_BASE_LAPTOP/queue-jest"
+CLAR="$NX/1_Project_Definition/CLARIFICATIONS.md"
+RPTS="$QA_DIR/projects/nexusai/reports"
+B25_INST="$RPTS/2026-10-18-gate25-rd761-rd794-merged/evidence/inst"
+B27_DIR="$RPTS/2026-10-18-gate27-rd778"
+B27_REPORT="$B27_DIR/report.md"
+B27_INST="$B27_DIR/evidence/inst"
+G30_DIR="$RPTS/2026-10-20-gate30-b302-pr98"
+G30_REPORT="$G30_DIR/report.md"
+G30_INST="$G30_DIR/evidence/inst"
+G30_MUT="$G30_DIR/evidence/mut"
+# gate 30's instruments the kit copies BY NAME (gate 30 is COMPLETE: these files never move) — "<file> <sha256>"
+G30_TOOLS='qa-assertcount-preload.js 6282f6737ec41aa0e815f33122ae7aba0a93236b039c1899b0da3a5983cf9ba4
+qa-assertcmp30.py 34857d12c94f52aef2396cf7e7ad6c44d1c1f21b15907b8072df2655efb6594b
+qa-r3cnt-30.js 8b38d337523f8dc403c6ac7cae4d92b17a8e4623a837ae7e242aab7611145919
+qa-jsum.js d57401170c63ca4cd19fb423c279539264af625551f0c6f890854a50dced031d
+qa-mutlib30.sh 2eb5420b7f6cc5772a382f146a5446dddfa0dd83afbd05ce4895bc3f78ba1bfd
+qa-jestwrap.sh 2383e1bead32e06d566dcdc17c3fdbb0060bc4c14ddf8669d540af5a14fc7324
+qa-verify30.sh 84a4c42244ef6e079c6850ad5b0cd47cbdca7c79230480f0395ba260c69cbf4b'
+# gate 30's round-1 mutant texts (C1 = the product refuses a torn file; S8b = quick_questions.json renamed) — "<file> <sha256>"; B334 quotes the same four
+G30_MUTS='C1.old c8725b20418e57461c5ebb1cb13107e818d31fed0bc231d8cd093e381d1b9927
+C1.new d04e7acc2f87ace4693c44e48f0ca27ddc30000726f1e529def123a95d882ac7
+S8b.old 3037539425eb1ab83feb0dc66230ef73ba10014c47cff022389083ef8ea4ce7a
+S8b.new 17b9b66878c72131962c5c546010df3a6433be7f651cc712a1e195681008e9de'
+ID_ROOT="${QA_IDENTITY_ROOT_OVERRIDE:-$NX/4_Credentials}"
+ROUTE_NAME='QA/NexusAI-gate32'
+EXPECT_REPORT="$RPTS/2026-10-20-gate32-b336-pr98-r2/report.md"
+NPM_CACHE="${HOME}/.npm/_cacache"
+PREBUILD="${HOME}/.npm/_prebuilds/0068db-sqlite3-v5.1.7-napi-v6-darwin-arm64.tar.gz"
+PREBUILD_SHA='84a34404b12ff212adbca70eff76c2e4dd83b91245eed0b4569438f928567afc'
+
+# ---- the pins (cross-checked against the kit's PIN-HEADS, guard 40; each MEASURED 2026-10-20 18:56-18:57 AEDT by read verbs)
+BASE='39653db4b56adb6d4e526c90531cd4cdf23022e0'; BASE_TREE='704c442b78a36baea66fef2349a5acbdbff114b5'   # the PR's base (main when the PR was cut)
+BR='b302/test-code-codeql'
+GATED_SHA='49ba21e101f3ce6dd75ae5dbeb1e37aae566d9a6'; GATED_TREE='8a1150466dcdfe77ade6211e3e08325e6df0f223'   # the round-1 gated head (gate 30)
+HEAD_SHA='e80920c20c43ebe3576aaaec0fbb51c393e2ba00'; HEAD_TREE='17775ae298b2d264f64c455cd1f59ef9d0f82775'   # the head under gate 32 (B334's one commit)
+PR_REF='refs/pull/98/head'
+# the chain, oldest first: <full sha> <tree> (each commit's parent is the previous row; row 1's parent is BASE)
+CHAIN='cb8755a25b2e62e5d664f9f9a10de1a11a3cd4bf e21bea8a18c8a792b1379ce352e53c47bd507554
+342afeddbe3c8a8c69f56a7fa8c01d37ca892a0c 2708703f02dd7b1d839528152ff0dce964d562ae
+b6cb5ec3dd72837a8913d7fd49e1e3b3fe422a2d 9d55a439f762091fc67fc1592b2709f7953dfc4b
+56e1b614613aa5252ce78347edb83a0a162cb526 ce59bdaa12131dd883274d0cd5389b4774888e21
+198ef3413fa589981c16db1ae18f45db9812e23b cac62316c91479d382e83b0b2702ab0b22dfb272
+8bb6c339ea86b4534ee083f4246335ddef57919d 6e6c35186d6318fd46e47e993bc236d4cdcef5bc
+017cf69588d5ffe60a9d7960991e4b7366b4359b a6bd909e5162ad3be78adca2e6d647e8dad4fbec
+49ba21e101f3ce6dd75ae5dbeb1e37aae566d9a6 8a1150466dcdfe77ade6211e3e08325e6df0f223
+e80920c20c43ebe3576aaaec0fbb51c393e2ba00 17775ae298b2d264f64c455cd1f59ef9d0f82775'
+PATHS_SHA='97161ee5c2ae3bb5dc4fc6c646d571b3b9150b340fb1f411990437e652aa03b5'   # sha256 of the sorted, space-joined 34-path list (git diff --name-only BASE HEAD); = gate 30's pin
+RD407_PATH='__tests__/rd407-concurrent-settings-writers.test.js'; RD407_BLOB_GATED='4302ca51e884f39ecf0ba065fb28562e025477fa'; RD407_BLOB_HEAD='774cd8fcaf965c65e47c78905060390473fe3bf8'
+NEW_HELPER='__tests__/helpers/html-dom.js'; HELPER_BLOB='a151c746f59a53a98dc32de701231e093d8710fd'
+COUNTS_FILE='scripts/verify-expected-counts.json'; COUNTS_BLOB_HEAD='2cc094855c1215299ac15373262241dd71c64bff'
+PKG='package.json'; PKG_BLOB='384805d9e286718bb34ffd05be01c62c00806cf5'
+LOCK='package-lock.json'; LOCK_BLOB='19477a9329f17e529c208d91d172b95b47fc1bb5'
+DEPLOY_WF='.github/workflows/deploy-demo.yml'; DEPLOY_BLOB='953b2a2f84e8710bea857ec87c6f00faa50fa56b'
+GUARDED_RE='^(backend/|static/|templates/|package\.json$|package-lock\.json$|\.github/|bicep/|Dockerfile$|scripts/verify-expected-counts\.json$)'
+TESTCODE_RE='^(__tests__/|tests/|scripts/test-[^/]*\.js$)'
+# the files of the five open RD-786 sites (#95-#99): byte-UNCHANGED base..head
+RD786_OPEN='__tests__/erasure-reaches-every-read-location.test.js __tests__/erasure-verdict-is-derived-from-failures.test.js __tests__/initialize-files-uses-shared-recovery-list.test.js __tests__/helpers/rd407-setting-writer.js'
+NEG_SEATS=''   # 38R: DERIVED at launch from the live cockpit panes — never stamped by hand
+
+SUBJECT='[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 32'
+QUESTION_SUBJ='[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>'
+STATUS_SUBJ='[QA/Datasec-NexusAI -> Tuesday] STATUS: flagged — requesting the Opus 4.8 switch'
+PARK_LINE='PARKED: flagged — awaiting the Opus 4.8 switch'
+ANSWER_PREFIX='[Tuesday -> QA/NexusAI-gate32] ANSWER'
+SAFE_PRINTER='if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET (length ${#SESSION_SECRET})"; else echo "SESSION_SECRET UNSET"; fi'
+
+g() { git --no-optional-locks -C "$REPO" "$@"; }
+counts_blob() { g cat-file -p "$1" 2>/dev/null | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["tests"], d["suites"])' 2>/dev/null; }
+counts_at() { counts_blob "$(g rev-parse --verify -q "${1}:${COUNTS_FILE}" 2>/dev/null)"; }
+blob() { g rev-parse --verify -q "${1}:${2}" 2>/dev/null; }
+cntF() { g show "${1}:${2}" 2>/dev/null | grep -cF -- "$3"; }
+fsha() { shasum -a 256 "$1" 2>/dev/null | cut -d' ' -f1; }
+tree_of() { g rev-parse --verify -q "${1}^{tree}" 2>/dev/null; }
+parents_of() { g log -1 --format='%P' "$1" 2>/dev/null; }
+paths_of() { g diff --name-only "$1" "$2" 2>/dev/null | sort | tr '\n' ' ' | sed 's/ $//'; }
+# the LEGACY stdout-only merge-tree (trivial-merge mode; writes NO object; never --write-tree in the NexusAI repo): prints the paths whose section
+# carries conflict markers, space-separated.
+mt_conflicts() { g merge-tree "$1" "$2" "$3" 2>/dev/null | python3 -c '
+import sys,re
+heads=("changed in both","added in remote","added in local","removed in remote","removed in local","merged","added in both","removed in both")
+cur=None; out={}
+for ln in sys.stdin.read().split("\n"):
+    if ln.strip() in heads and not ln.startswith((" ","+","-","@")):
+        cur={"p":set(),"c":False}; out[id(cur)]=cur; continue
+    if cur is None: continue
+    m=re.match(r"^  (base|our|their|result|both)\s+\d+\s+[0-9a-f]+\s+(.*)$",ln)
+    if m: cur["p"].add(m.group(2))
+    if ln.startswith(("+<<<<<<<","+>>>>>>>")): cur["c"]=True
+print(" ".join(sorted(p for s in out.values() if s["c"] for p in s["p"])))' 2>/dev/null; }
+# C-192: ls-remote retried up to 5 x ~10 s on a publickey denial; sets LSR_OUT on success (no subshell, so LSR_ATTEMPTS counts), returns 1 (UNKNOWN) otherwise.
+LSR_ATTEMPTS=0
+LSR_OUT=''
+lsr() { local out rc i
+  LSR_OUT=''
+  for i in 1 2 3 4 5; do
+    LSR_ATTEMPTS=$((LSR_ATTEMPTS + 1))
+    out="$(g ls-remote origin "$@" 2>&1)"; rc=$?
+    if [ "$rc" = "0" ]; then LSR_OUT="$out"; return 0; fi
+    printf '%s\n' "$out" | grep -qi 'publickey' || { printf '%s\n' "$out" >&2; return 1; }
+    [ "$i" = "5" ] || sleep 10
+  done
+  printf '%s\n' "$out" >&2; return 1; }
+
+# ---------------------------------------------------------------- THE PROMPT (embedded; guarded below like a prompt file)
+PROMPT=''
+read -r -d '' PROMPT <<'PROMPT_EOF' || true
+ultrathink
+
+You are the fleet QA/testing agent running ONE gate on Datasec/NexusAI, gate 32: a TIER-2 GATE THROUGH CODE, ROUND 2 OF 2 (the last round under the cap), ONE verdict, ONE report. A NO GO from you STOPS PR #98 and the decision GOES TO KAM; there is no round 3. It is a FRESH gate on Kam's Mac mini, working volume /Volumes/Laptop-DEV; the T9 drive is UNMOUNTED, so the project's jest lock lives on this drive's locks-laptop-1017 base. The item: B302 lane 7, RD-782 to RD-789 (CodeQL alerts in TEST code), branch b302/test-code-codeql at e80920c20c43ebe3576aaaec0fbb51c393e2ba00 (tree 17775ae298b2d264f64c455cd1f59ef9d0f82775), draft PR #98: nine commits over main 39653db4b56adb6d4e526c90531cd4cdf23022e0 (tree 704c442b78a36baea66fef2349a5acbdbff114b5). Round 1 was gate 30 (verdict NO GO at 49ba21e101f3ce6dd75ae5dbeb1e37aae566d9a6, tree 8a1150466dcdfe77ade6211e3e08325e6df0f223, on ONE Major, G30-1: the re-rooted plants in the rd407 concurrent-settings-writers suite no longer proved the torn file sits where the product reads). The fix round was B334 (builder SEAT-W17): ONE commit e80920c on 49ba21e, ONE file (the rd407 suite), 5 added lines inside two cells, no other path. M0 is the main Tuesday STAMPED (the launcher verified origin main equals it; sha, tree and the mode are at the end of this prompt): main MOVED under the PR (the 34 PR paths do not overlap what landed), so the head cannot fast-forward onto M0; the gated tree IS the head, and the MERGED tree onto M0 is a separate reading (r5). Never trust the builder's logs, probes, scan or counts as the proof; every line of the builder's STATUS is a CLAIM, RELAYED, never evidence. FINDINGS-ONLY: you NEVER merge anything the fleet can see (a merge commit in YOUR OWN store for r5 is never pushed), NEVER push, NEVER open, comment on, approve, un-draft or merge a pull request, never comment on Jira, never dismiss an alert, and NEVER swap, copy over or edit the installed lock tool; no fixes, no deploys, no az, no docker, no model call of any kind, no production, no HTTP to any production or demo host, nothing to Partner Center, the demo or any human, no host npm registry. One client only: Datasec/NexusAI.
+
+READ YOUR COMMISSION FIRST, whole: /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-20_B336_SEAT-G23_nexusai-gate32-pr98-round2.md
+It opens with the cap, the item, the builder's STATUS (read WHOLE) and Tuesday's PR text, THE RE-PIN STEP and the LANDING ROUTE (the head is NOT fast-forwardable onto M0), the stamp line, PIN-HEADS, the TIER argument (the case AGAINST: a repair of a weakened test can itself be vacuous, and a re-gate that reads the diff but does not run the round-1 mutant would pass a fix that does not fix), the LEGITIMATE SHAPES of the new assertion, the drafter's WRONG OR UNVERIFIED list (each item MEASURED, READ-ONLY-INFERRED or RELAYED), then TUESDAY'S RULINGS (T0 to T5) and THE MODEL RULE: apply them, do not re-rule them. Then gate 30's report (round 1, read WHOLE), the charter it names, BRIEF_TEMPLATE section 2a, 5 and 6a, and the section 3a of gate 29's and gate 30's kits (the H-rules, carried by reference, except what is about docker, server boots of your own, browsers, SQL spies or the C-57 runner). The brief's section 2b rows (r0 to r9), section 3b (the sibling sweep) and section 9 (the floor) are required measurement. The verdict is PROVISIONAL if r1 (THE RED-PROOF), r3 (the full verify) or r5 (THE MERGED TREE) did not run.
+
+THE MODEL RULE (Kam, live board 2026-09-30 09:07, card (b)): QA gates may switch to Opus 4.8 when flagged by the running model's safeguards, PER SESSION. You start on the model named at the end of this prompt (Sonnet 5.5). This is a Sonnet seat and none of the rows composes exploit payloads (the plants are inert JSON fragments and renamed file names). If one of your responses is stopped by the safeguards anyway: that step is NOT RUN (never re-worded to slip past); write ONE line to evidence/classifier-stops.txt (the AEDT time, the row, what you were composing, the model, NOT RUN); let any running step finish and let the hold exit so you never sit holding a lock (H-28); mail tuesday-agent@agentmail.to with the subject exactly "[QA/Datasec-NexusAI -> Tuesday] STATUS: flagged — requesting the Opus 4.8 switch"; then end your turn with the line "PARKED: flagged — awaiting the Opus 4.8 switch" and wait. Tuesday switches THIS pane's model to Opus 4.8 and taps you by mail. You never answer the model dialog yourself, and nobody ever chooses "Switch automatically". After the switch, resume at the stopped row. The report states which rows ran on which model, with the switch time, and quotes classifier-stops.txt whole.
+
+THE PROPERTIES (brief section 2b and the commission). (1) DELTA AND SCOPE (r0): exactly one commit, one file, +5/-0, the rd407 suite, the chain of nine commits intact, the 34-path set unchanged, with a planted-path control. (2) G30-1 FIXED, BY THE RED-PROOF (r1, the heart of the gate): the round-1 compound mutant C2 (C1 = the product refuses a torn file, plus S8b = quick_questions.json renamed) is 37/37 GREEN at 49ba21e and RED at e80920c by the new assertion; the siblings U (user_assignments.json renamed plus a refusal) and L (ai_misunderstanding_log.json renamed); C1 alone red at both trees; and m-g1, the new assertion deleted, turns C2 and U green again; each mutant LANDED and restored by a trap to the pinned blob. (3) RD-786 IS 21 OF 26 (r2): #85-#94 and #100-#110 by number, #95 #96 #97 #98 #99 open and byte-unchanged, none dismissed, no text claiming more. (4) THE FULL VERIFY AT THE HEAD (r3): 4880 tests in 302 suites under the jest lock, the rd407 names multiset LOST 0 ADDED 0, per-test assertion counts exactly two +1 by jest's own counter. (5) CODEQL (r4, gh READ): every analysis for e80920c listed and COMPLETED, 0 open on refs/pull/98/head, PR #96's fixed list as the firing control, the check runs incl. build. (6) THE MERGED TREE (r5): YOUR OWN merge commit of M0 into the head, the paths and blobs as predicted, the suites that read the changed files (the population stated) run once in a hold against the head's full-verify control; a red is a LANDING finding classified in section 2 of the brief. (7) THE PR TEXT (r6): every number and named item in Tuesday's title and body checked against the compare, the diff and your own measurements. (8) ROUND 1 NOT RE-LITIGATED (r7): G30-2 to G30-7 and the N30 notes are CARRIED, listed once, by the identity proof of r0. (9) LANDING hygiene (r8) and the builder's STATUS claims VERIFIED, FALSE or UNVERIFIED (r9, C-49). The sibling sweep (section 3b, C-102) asks whether the repair closed the CLASS or only the two named cells. Findings only, never fixes.
+
+MAIN MUST NOT MOVE: the launcher verified origin main equals the stamped MAIN pin exactly, that 39653db is in its ancestry, that the head and its chain are not on it, and that what landed since 39653db touches none of the 34 PR paths; take M0 by git ls-remote at YOUR start and say so. If main moves mid-gate (PR #97 from S101O is the likeliest mover), name what landed (git log with explicit revs), finish nothing that would read as a verdict on the new main, and mail a QUESTION (C-68). GitHub SSH intermittently denies auth (C-192): retry every ls-remote up to 5 times about 10 s apart; a FAILED ls-remote is UNKNOWN, never a value. Re-hash the lock tool at start, mid and end.
+
+C-190 + its ADDENDUM: BOTH thresholds block: every merge to main goes through a pull request that adds no new high-or-higher CodeQL alert in changed code (test code included), AND any new alert whose RULE severity is error blocks whatever its security severity. Alerts are fixed in code, never dismissed. The land is the SAME commit: never squash, never rebase. C-209: a PR's CodeQL run cannot show a pre-existing main alert as fixed. C-68: a gate verdict is valid only at the head it ran on; after the forward merge that the land requires (the head cannot fast-forward onto M0) the affected cells are re-run on the NEW head, each named individually: your r5 names them. CodeQL is NOT RUN by this gate on any tree: say so.
+
+THE LOCK (C-63). The installed tool is session-tools/nexusai-lock.sh in the NexusAI project on this drive, sha256 3c33f5ae58e1be20282467a90b27a23a2de998eedd0e56c03f3c06360031a792. While the T9 is unmounted the base is NEXUSAI_LOCK_BASE=/Volumes/Laptop-DEV/!CODING/Datasec/NexusAI/session-tools/locks-laptop-1017, which the launcher has EXPORTED into your environment: keep it on every jest step and never touch this drive's stale session-tools/locks (a 2026-09-22 holder lives there). THE JEST LOCK IS NOT YOURS and it is SHARED with S101O, any landing hold and the builders: you QUEUE behind them FIFO through the INSTALLED tool (never copied, never edited), never touch a holder, its owner file, its process or its worktree, and never use --replace on a ticket that is not your own. If the T9 mounts mid-gate, finish the running hold, file nothing more, and mail a QUESTION. EVERY jest run goes in the jest lock, each hold tagged qa-g32- (no tag of yours contains the word "merge": C-141 ADDENDUM 7; name the merged-tree hold qa-g32-H3), ONE hold at a time. MERGES GO FIRST: if a ticket is queued ahead of you, wait behind it (FIFO). AT A WAIT DEADLINE: --replace on your own still-waiting ticket BEFORE its deadline fires (a SAME-PLACE handover), confirmed from the queue listing; a duplicate-tag refusal takes a -r<N> suffix. Read queue-jest at start, around every hold and at end; any qa-g32- entry that is not your current hold is a STOP. THE LOAD RULE: file a hold, start any jest run only below a 1-minute load of 8 (8 cores; Tuesday's ANSWER-1 to S101O); record uptime beside each; over 8, poll every 20 s and log each wait.
+
+NODE_MODULES WITHOUT THE HOST REGISTRY (ruling m, H-31): offline npm ci --offline --ignore-scripts --no-audit --no-fund with --cache pointing at an APFS clone of the local npm cache on the same volume; the head, 49ba21e and M0 share lock 19477a9, so ONE proven install is APFS-cloned into the others (never copy node_modules from any checkout or worktree); EVERY npm invocation carries npm_config_update_notifier=false; an ENOTCACHED is NOT RUN, named, with a QUESTION: never go online from the host, never npm install. sqlite3's binding from the cached prebuild (an APFS clone of ~/.npm/_prebuilds), with its conditions, is PART OF H-31.
+
+FLOOR DISCIPLINE (brief section 9): do ALL lock-free work first (r0, r2, r4, r6, r7, r8, r9, the r5 build and path proofs, the section 3b table, the offline npm ci, the self-tests); then file your holds one at a time through your COPY of gate 27's qa-file27.sh (or gate 30's re-point of it) re-pointed to qa-g32 tags and the jest kind only (its diff against its source quoted): H2 (the rd407 red-proof matrix and numbers, r1 and r3b), H1 (the ONE full verify at the head tree, r3a) and H3 (the merged-tree suites, r5), each at most about 40 minutes planned, each part file bash -n checked first. The full 4934-test verify of the merged tree is NOT RUN under T1 as stamped unless Tuesday ruled (b); if ruled and lock-starved about 2 h after filing, it is NAMED NOT RUN under ruling (o) EXTENDED, never "skipped". QUEUE, NEVER TAKE OVER. DEADLINE AND HEARTBEAT: every step has a per-step DEADLINE (H-20), every child is killed in a finally by pid from your own ancestry (C-174, never by pattern), a HEARTBEAT line at least every 2 minutes during a hold, and a step with no heartbeat for 5 minutes is aborted and reported. Count foreign processes the C-125 way anchored on YOUR OWN claude pid, with the negative-control seats the launcher derived (listed at the end of this prompt) classifying foreign in the same run; a hold with no live negative control aborts. A zero is reportable only beside a control that fired in the same window.
+
+THE INSTRUMENT RULES H-1 TO H-36 (brief section 3a; gate 29's and gate 30's section 3a read WHOLE). H-1: the ONLY SESSION_SECRET printer is the one the brief quotes (SESSION_SECRET UNSET on every host run). H-3: a LANDING CONTROL for every plant, revert and mutant. H-4: the HEARTBEAT is a separate child of the hold wrapper. H-6: every path with a space quoted; jest runs under your copy of the network belt. H-7/H-8/H-21: every mutant by a quoted tool with a negative control, an edit whose anchor is absent FAILS LOUDLY, every file you mutate restored by a trap on EXIT (also INT and TERM) installed BEFORE the first mutation and hash-compared to its pin. H-11/H-18: /bin/bash explicitly, quote "${sha}:${path}" and never type cd. H-14: every driver ends END ok or END VOID with a reason. H-17: assert each arm STARTED (jest's first suite); censuses by pgrep. H-20: deadlines on every jest run (with --forceExit). H-24: jest array options after the paths. H-27: THE MODEL RULE. H-28: ONE focused hold at a time, you stay in the FOREGROUND, a hold that must outlive one tool call runs as a TRACKED child of your session (never nohup). H-29: other gates' and the builder's evidence is method only (gate 30's instruments are copied BY NAME and hashed, re-pointed, never written; the builder's session-tools files are hashed at start and end, never run in place). H-31: offline host node_modules. H-33: never rm, quarantine; every child reaped by pid. H-34: the Laptop-DEV lock base. H-35: NO docker object and NO az command, and NO call to any real model. A revert, plant or mutant counts only if it LANDED (the exact text present, the original absent) and parses; a planted control that does not fire makes its row VOID (never a pass).
+
+TREES AND WRITES. Build every tree INSIDE YOUR OWN PROJECT (fresh dirs under projects/nexusai/qa-trees/gate32.* in /Volumes/Laptop-DEV/!CODING/Testing Agent MAIN): ONE --mirror clone of the NexusAI repo on THIS drive as your store with gc.auto 0, your refs g32/* in it made BEFORE origin is removed (gate 25 ADDENDUM-1: g32/m0, g32/head, g32/gated, g32/base), every work tree a clone of that store, status-checked before use, EXCLUSIVE to one purpose (GATED, HEAD (also the clean full-verify tree), MUT, MERGED). NEVER work in the NexusAI root checkout or any worktrees folder (LIVE: the builders' and S101O's). In the NexusAI repo use ONLY read verbs (show, diff, log with an explicit rev, ls-tree, cat-file, grep, ls-remote, rev-parse, merge-base, rev-list, count-objects, for-each-ref, and the legacy stdout merge-tree); NEVER fetch, pull, push, checkout, worktree, commit, stash, gc, merge, merge-tree --write-tree or hash-object -w there. Copy instruments BY NAME from gate 30's COMPLETE evidence/inst (qa-assertcount-preload.js, qa-assertcmp30.py, qa-r3cnt-30.js, qa-jsum.js, qa-mutlib30.sh, qa-jestwrap.sh, qa-verify30.sh) and its evidence/mut texts (C1.old, C1.new, S8b.old, S8b.new), from gate 27's COMPLETE evidence/inst (the filer, floor, hold, netbelt and mail instruments and qa-names23.py) and gate 25's qa-applymut.py and qa-lockcheck.py; re-point every copy to gate 32 including the lock base line (quote each diff); never write into another gate's dirs. Count the NexusAI .git/objects files and their newest mtime at start and end and account for any delta (S101O may be live). No Microsoft, Log Analytics or login host, no mail host except api.agentmail.to, no demo, no Partner Center, no workflow dispatch, no repo variable written. tests/uat-run.js is NEVER executed (its default target is the demo) and the tests/e2e files are NEVER run. No mail to any human. Never rm: quarantine.
+
+RE-PIN at start, mid and end: main, b302/test-code-codeql and refs/pull/98/head by git ls-remote, plus the lock tool's sha256: three timestamped readings with the branch name and attempt count beside each sha. A head that disagrees with the brief is a FINDING and a reason to stop, never a typo to fix. Call main at your start M0 and say so.
+
+QUESTIONS: your routing name is QA/NexusAI-gate32. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>" and PROCEED ON THE SAFEST READING without waiting (the one exception is a safeguards stop, which PARKS you under THE MODEL RULE); Tuesday's answer arrives in tuesday-agent@agentmail.to with a subject beginning "[Tuesday -> QA/NexusAI-gate32] ANSWER". Approval-class items (anything Azure, any real model call, the demo, Partner Center, money, a human, the live lock tool beyond queueing) are NOT RUN and named, never done on a safe reading. Record every question, reading and answer in the report.
+
+Write your ONE report to the path the launcher names at the end of this prompt (the brief's section 11). Write its VERDICT and FINDINGS table early and keep it current; line 3 is STATUS: IN PROGRESS or COMPLETE with the date. Findings are G32-<n>, notes N32-<n>, each naming its instrument and evidence class.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 32
+Lead the body with the TWO lines in the form the brief's section 11 gives — the B336/PR98-R2 verdict line and the LANDING CHECKLIST line — then one line naming M0 and END main, the C-102 sibling sweep, which rows ran on which model, which holds ran and which are NAMED NOT RUN, and "CodeQL NOT RUN by this gate on any tree". The report's last two lines are those same two lines, verbatim as mailed. Never wednesday-agent@. You have no inbox that wakes you, so a verdict you do not mail is lost.
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/Laptop-DEV/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key, a token, a session value or any secret in a mail or the report.
+
+Run long commands in the FOREGROUND. Never end a turn waiting on a background notice: the only turn you end while waiting is the PARKED line of THE MODEL RULE.
+
+Rule 2 stands: what you did NOT test is first-class output: a NOT TESTED section carrying the builder's stated limits, every declared limit L-R1 to L-R6 and L-Y1 discharged with a measurement or left standing and named (C-112), Prior work checked (C-49), every finding naming its instrument, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY. Severity is yours; priority is Tuesday's. The tester never fixes. C-190 with its ADDENDUM, C-209, C-185, C-192, C-205, C-141 with ADDENDUM 7, C-63, C-40, C-68, C-76, C-102, C-112 and C-174 are the clarifications this gate leans on; C-49, C-89, C-115, C-125, C-130 and C-131 are carried. That section must carry, verbatim, the NOT TESTED line the launcher appends at the end of this prompt (it is the brief's section 11 line).
+PROMPT_EOF
+
+# ---------------------------------------------------------------- GUARDS
+[ -d "$QA_DIR" ]  || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
+[ -s "$BRIEF" ]   || { echo "brief missing or empty: $BRIEF" >&2; exit 3; }
+[ -n "$PROMPT" ]  || { echo "embedded prompt is empty" >&2; exit 4; }
+[ -d "$REPO/.git" ] || [ -f "$REPO/.git" ] || { echo "repo under test missing: $REPO" >&2; exit 5; }
+
+STAMP_OK=1          # cleared below by any unstamped slot or a PENDING read-whole line; the refusal itself is LAST (32S)
+PROVISIONAL=''      # what --check ran against provisionally while a slot was unstamped
+
+# 9 / MODEL — the kit's MODEL line must equal models_latest.json levels.sonnet.model_id (tier 2, Sonnet); never typed from memory.
+MODEL_LINE="$(grep -E '^MODEL \(tier 2;' "$BRIEF" | head -1)"
+[ -n "$MODEL_LINE" ] || { echo "REFUSING: the brief has no 'MODEL (tier 2; …' line" >&2; exit 9; }
+SONNET_ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["levels"]["sonnet"]["model_id"])' "$MODELS_JSON" 2>/dev/null)"
+[ -n "$SONNET_ID" ] || { echo "REFUSING: $MODELS_JSON levels.sonnet.model_id is unreadable" >&2; exit 9; }
+MODEL="$(printf '%s' "$MODEL_LINE" | sed -E 's/.*: *`?([a-z0-9.-]+)`? *$/\1/')"
+[ "$MODEL" = "$SONNET_ID" ] || { echo "REFUSING: the kit's MODEL '$MODEL' is not models_latest.json levels.sonnet.model_id '$SONNET_ID' — re-stamp the MODEL line from the file" >&2; exit 9; }
+
+# 40 — parse PIN-HEADS (the ONLY source of heads) and cross-check against this launcher's pins; the MAIN row and the MAIN-STAMP line agree.
+parse_block() { python3 - "$BRIEF" "$1" <<'PY'
+import sys, re
+s = open(sys.argv[1], encoding='utf-8').read(); name = sys.argv[2]
+m = re.search(r'<!-- %s:BEGIN -->(.*?)<!-- %s:END -->' % (name, name), s, re.S)
+if not m:
+    print('NO-BLOCK'); sys.exit(0)
+for line in m.group(1).splitlines():
+    line = line.strip()
+    if not line.startswith('|') or line.startswith('| id ') or set(line) <= set('|-: '):
+        continue
+    print('\t'.join(c.strip().strip('`') for c in line.strip('|').split('|')))
+PY
+}
+PIN="$(parse_block PIN-HEADS)"
+[ "$PIN" != "NO-BLOCK" ] && [ -n "$PIN" ] || { echo "REFUSING: the brief has no PIN-HEADS block — the heads have nowhere to come from" >&2; exit 40; }
+prow() { printf '%s\n' "$1" | awk -F'\t' -v id="$2" '$1==id'; }
+pfld() { prow "$1" "$2" | awk -F'\t' -v n="$3" '{print $n}'; }
+is40()  { printf '%s' "$1" | grep -Eq '^[0-9a-f]{40}$'; }
+[ "$(printf '%s\n' "$PIN" | wc -l | tr -d ' ')" = "3" ] || { echo "REFUSING: PIN-HEADS must carry exactly three rows (MAIN PR98 GATED)" >&2; exit 40; }
+for ID in MAIN PR98 GATED; do
+  R="$(prow "$PIN" "$ID")"
+  [ "$(printf '%s\n' "$R" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ] || { echo "REFUSING: PIN-HEADS must carry exactly one row '$ID'" >&2; exit 40; }
+  [ "$(printf '%s\n' "$R" | awk -F'\t' '{print NF}')" = "7" ] || { echo "REFUSING: PIN-HEADS row $ID does not have 7 cells: $R" >&2; exit 40; }
+  [ "$(pfld "$PIN" "$ID" 7)" = "IN" ] || { echo "REFUSING: PIN-HEADS row $ID status is not IN" >&2; exit 40; }
+  [ "$(pfld "$PIN" "$ID" 2)" = "nexusai" ] || { echo "REFUSING: PIN-HEADS row $ID repo must be nexusai" >&2; exit 40; }
+done
+printf '%s' "$(prow "$PIN" PR98)$(prow "$PIN" GATED)" | grep -q '@' && { echo "REFUSING: PIN-HEADS rows PR98/GATED carry a placeholder" >&2; exit 40; }
+[ "$(pfld "$PIN" PR98 3)" = "$BR" ] && [ "$(pfld "$PIN" PR98 4)" = "$HEAD_SHA" ] && [ "$(pfld "$PIN" PR98 5)" = "$BASE" ] && [ "$(pfld "$PIN" PR98 6)" = "9" ] \
+  || { echo "REFUSING: PIN-HEADS PR98 is not $BR @ e80920c, base 39653db, 9 commits — re-pin kit AND launcher" >&2; exit 40; }
+[ "$(pfld "$PIN" GATED 4)" = "$GATED_SHA" ] && [ "$(pfld "$PIN" GATED 5)" = "$BASE" ] && [ "$(pfld "$PIN" GATED 6)" = "8" ] \
+  || { echo "REFUSING: PIN-HEADS GATED is not 49ba21e, base 39653db, 8 commits" >&2; exit 40; }
+[ "$(pfld "$PIN" MAIN 3)" = "main" ] || { echo "REFUSING: PIN-HEADS MAIN row is not branch main" >&2; exit 40; }
+PIN_MAIN="$(pfld "$PIN" MAIN 4)"
+STAMP_LINE="$(grep -E '^MAIN-STAMP: ' "$BRIEF")"
+[ "$(printf '%s\n' "$STAMP_LINE" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ] || { echo "REFUSING: the brief must carry exactly one 'MAIN-STAMP: ' line" >&2; exit 40; }
+MAIN_STAMPED=1; S_SHA=''; S_LAUNCH=''
+if printf '%s' "$STAMP_LINE$PIN_MAIN" | grep -qF "$PH_SLOT"; then
+  MAIN_STAMPED=0; STAMP_OK=0
+else
+  STAMP_RE='s/^MAIN-STAMP: sha `?([0-9a-f]{40})`? \| launched (20[0-9]{2}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} AEDT)$/'
+  S_SHA="$(printf '%s' "$STAMP_LINE" | sed -nE "${STAMP_RE}\\1/p")"
+  S_LAUNCH="$(printf '%s' "$STAMP_LINE" | sed -nE "${STAMP_RE}\\2/p")"
+  is40 "$S_SHA" && [ -n "$S_LAUNCH" ] || { echo "REFUSING: the MAIN-STAMP line is not 'MAIN-STAMP: sha <40-hex> | launched <YYYY-MM-DD HH:MM AEDT>'" >&2; exit 40; }
+  [ "$PIN_MAIN" = "$S_SHA" ] || { echo "REFUSING: PIN-HEADS MAIN ($PIN_MAIN) and the MAIN-STAMP sha ($S_SHA) disagree — stamp the same sha in both" >&2; exit 40; }
+fi
+
+# 18T — the T9 MOUNTED refuses: two lock bases would split the FIFO (ruling q); Tuesday decides the base first.
+[ ! -d "$T9_VOL" ] || { echo "REFUSING: $T9_VOL is MOUNTED — the brief's lock base (locks-laptop-1017) assumes it is not; Tuesday decides the base, then re-brief" >&2; exit 18; }
+
+# 18 — RE-PIN NOW by ls-remote (C-192 retries): main = the stamped MAIN pin EXACTLY; the branch AND the PR ref = the head pin.
+lsr refs/heads/main "refs/heads/$BR" "$PR_REF" \
+  || { echo "REFUSING: git ls-remote origin failed after $LSR_ATTEMPTS attempt(s) — UNKNOWN, not a value (C-192); relaunch later" >&2; exit 18; }
+LSR_ALL="$LSR_OUT"
+ref_now() { printf '%s\n' "$LSR_ALL" | awk -v r="$1" '$2==r{print $1}'; }
+M_ORIGIN="$(ref_now refs/heads/main)"
+is40 "$M_ORIGIN" || { echo "REFUSING: origin main is unreadable in the ls-remote output — UNKNOWN (C-192)" >&2; exit 18; }
+if [ "$MAIN_STAMPED" = "1" ]; then
+  [ "$M_ORIGIN" = "$S_SHA" ] || { echo "REFUSING: origin main is '${M_ORIGIN:0:12}', not the stamped MAIN pin '${S_SHA:0:12}' — main MOVED since stamp; re-stamp the MAIN pin (never sed a sha blindly)" >&2; exit 18; }
+  MAIN_SHA="$S_SHA"
+else
+  MAIN_SHA="$M_ORIGIN"; PROVISIONAL="$PROVISIONAL MAIN(unstamped: guards ran against origin main ${M_ORIGIN:0:12})"
+fi
+[ "$(ref_now "refs/heads/$BR")" = "$HEAD_SHA" ] || { echo "REFUSING: origin $BR is '$(ref_now "refs/heads/$BR")', not e80920c — the head MOVED; re-pin kit AND launcher (a new head is a new kit amendment and a new CodeQL run)" >&2; exit 18; }
+[ "$(ref_now "$PR_REF")" = "$HEAD_SHA" ] || { echo "REFUSING: $PR_REF is '$(ref_now "$PR_REF")', not e80920c — PR #98 moved (or the ref is unreadable); re-pin kit AND launcher" >&2; exit 18; }
+PIN_TS="$(date '+%Y-%m-%d %H:%M:%S %Z')"
+
+# 6 — every sha the guards use is a commit in the local object store (this launcher never fetches).
+CHAIN_SHAS="$(printf '%s\n' "$CHAIN" | awk '{print $1}')"
+for S in "$MAIN_SHA" "$BASE" $CHAIN_SHAS; do
+  T="$(g cat-file -t "$S" 2>&1)"
+  [ "$T" = "commit" ] || { echo "REFUSING: ${S:0:12} is not a commit in $REPO (got '$T') — this launcher never fetches; the seat's next fetch brings it, then re-check" >&2; exit 6; }
+done
+
+# 18M — M0 by ANCESTRY (never --first-parent); M0's tree DERIVED; NONE of the nine PR commits on M0; the mode; a moved M0 touching a PR path REFUSES.
+[ "$(tree_of "$BASE")" = "$BASE_TREE" ] || { echo "REFUSING: 39653db is not tree 704c442 (the measured main)" >&2; exit 18; }
+g merge-base --is-ancestor "$BASE" "$MAIN_SHA" 2>/dev/null || { echo "REFUSING: 39653db is not in M0 ${MAIN_SHA:0:7}'s ANCESTRY — M0 is not a descendant of the PR's base 39653db" >&2; exit 18; }
+M0_TREE="$(tree_of "$MAIN_SHA")"
+for S in $CHAIN_SHAS; do
+  if g merge-base --is-ancestor "$S" "$MAIN_SHA" 2>/dev/null; then echo "REFUSING: PR #98 commit ${S:0:7} is ALREADY on M0 ${MAIN_SHA:0:7} — it landed before its gate; re-brief" >&2; exit 18; fi
+done
+LANDED_N="$(g rev-list --count "${BASE}..${MAIN_SHA}" 2>/dev/null)"
+LANDED='none'
+FFABLE='yes'
+if [ "$MAIN_SHA" = "$BASE" ]; then
+  MODE='0'
+else
+  MODE='moved'
+  FFABLE='NO (the head is not a descendant of M0: the land needs main merged forward, a NEW head)'
+  LANDED="$(g log --format='%h %s' "${BASE}..${MAIN_SHA}" 2>/dev/null | head -5 | cut -c1-90 | tr '\n' ';')"
+  echo "NOTE: M0 ${MAIN_SHA:0:7} is $LANDED_N commit(s) past 39653db — what landed: $LANDED — T0 applies (mode moved: the gated tree is the head; the merged tree is r5)" >&2
+  OVERLAP="$(comm -12 <(g diff --name-only "$BASE" "$MAIN_SHA" 2>/dev/null | sort) <(g diff --name-only "$BASE" "$HEAD_SHA" 2>/dev/null | sort) | tr '\n' ' ' | sed 's/ $//')"
+  [ -z "$OVERLAP" ] || { echo "REFUSING: what landed since 39653db touches PR #98 path(s) '$OVERLAP' — T0: STOP and mail a QUESTION; re-brief" >&2; exit 18; }
+  MB_M0="$(g merge-base "$MAIN_SHA" "$HEAD_SHA" 2>/dev/null)"
+  GD0="$(g rev-parse --absolute-git-dir 2>/dev/null)"; OB0="$(find "$GD0/objects" -type f 2>/dev/null | wc -l | tr -d ' ')"
+  MC0="$(mt_conflicts "$MB_M0" "$MAIN_SHA" "$HEAD_SHA")"
+  OA0="$(find "$GD0/objects" -type f 2>/dev/null | wc -l | tr -d ' ')"
+  [ -z "$MC0" ] || { echo "REFUSING: the legacy merge-tree of e80920c onto M0 shows conflict markers in '$MC0' — T0: STOP; re-brief" >&2; exit 18; }
+  [ "$OB0" = "$OA0" ] || echo "NOTE: NexusAI .git/objects went $OB0 -> $OA0 around the legacy merge-tree read — the trivial-merge mode writes none; a live seat may have" >&2
+fi
+M0_COUNTS="$(counts_at "$MAIN_SHA")"
+case "$M0_COUNTS" in [0-9]*" "[0-9]*) ;; *) echo "REFUSING: M0 ${MAIN_SHA:0:7}'s counts file is unreadable ('$M0_COUNTS')" >&2; exit 93 ;; esac
+
+# 7 / 8 — the head's chain: 39653db <- nine commits, oldest first, each parent = the previous row, EVERY tree; linear; the gated head is row 8.
+PREV="$BASE"
+while read -r CSHA CTREE; do
+  [ -n "$CSHA" ] || continue
+  [ "$(parents_of "$CSHA")" = "$PREV" ] || { echo "REFUSING: the parent of ${CSHA:0:7} is '$(parents_of "$CSHA")', not ${PREV:0:7} — the chain is not the briefed 9 linear commits" >&2; exit 7; }
+  [ "$(tree_of "$CSHA")" = "$CTREE" ] || { echo "REFUSING: ${CSHA:0:7}'s tree is not ${CTREE:0:7}" >&2; exit 8; }
+  PREV="$CSHA"
+done <<EOF_CHAIN
+$CHAIN
+EOF_CHAIN
+[ "$PREV" = "$HEAD_SHA" ] && [ "$(tree_of "$HEAD_SHA")" = "$HEAD_TREE" ] \
+  || { echo "REFUSING: the chain does not end at e80920c tree 17775ae" >&2; exit 8; }
+[ "$(tree_of "$GATED_SHA")" = "$GATED_TREE" ] && [ "$(parents_of "$HEAD_SHA")" = "$GATED_SHA" ] \
+  || { echo "REFUSING: the gated head 49ba21e (tree 8a11504) is not the parent of e80920c" >&2; exit 8; }
+[ "$(g merge-base "$HEAD_SHA" "$BASE" 2>/dev/null)" = "$BASE" ] && [ "$(g rev-list --count "${BASE}..${HEAD_SHA}" 2>/dev/null)" = "9" ] \
+  && [ "$(g rev-list --count --first-parent "${BASE}..${HEAD_SHA}" 2>/dev/null)" = "9" ] \
+  || { echo "REFUSING: e80920c is not 9 linear commits over 39653db (merge-base, count, first-parent count)" >&2; exit 8; }
+
+# 22D — the DELTA 49ba21e..e80920c: one commit, one path (the rd407 suite), numstat '5 0', two hunks, the two blobs; nothing else changed.
+[ "$(g rev-list --count "${GATED_SHA}..${HEAD_SHA}" 2>/dev/null)" = "1" ] \
+  && [ "$(g diff --name-only "$GATED_SHA" "$HEAD_SHA" 2>/dev/null)" = "$RD407_PATH" ] \
+  && [ "$(g diff-tree -r --name-only "$GATED_SHA" "$HEAD_SHA" 2>/dev/null | grep -c .)" = "1" ] \
+  && [ "$(g diff --numstat "$GATED_SHA" "$HEAD_SHA" 2>/dev/null | tr '\t' ' ')" = "5 0 $RD407_PATH" ] \
+  && [ "$(g diff "$GATED_SHA" "$HEAD_SHA" -- "$RD407_PATH" 2>/dev/null | grep -c '^@@')" = "2" ] \
+  || { echo "REFUSING: 49ba21e..e80920c is not exactly ONE commit, ONE path ($RD407_PATH), +5/-0, two hunks (22D)" >&2; exit 22; }
+[ "$(blob "$GATED_SHA" "$RD407_PATH")" = "$RD407_BLOB_GATED" ] && [ "$(blob "$HEAD_SHA" "$RD407_PATH")" = "$RD407_BLOB_HEAD" ] \
+  || { echo "REFUSING: the rd407 blob is not 4302ca5 at 49ba21e / 774cd8f at e80920c (22D)" >&2; exit 22; }
+
+# 90 — the INSTALLED lock tool PINNED; it honours NEXUSAI_LOCK_BASE; the Laptop-DEV base is present with queue-jest; no qa-g32 ticket or holder.
+INST_NOW="$(fsha "$LOCKTOOL")"
+[ "$INST_NOW" = "$LOCK_SHA_INST" ] || { echo "REFUSING: the INSTALLED lock tool's sha256 is '${INST_NOW:-absent}', not 3c33f5ae… — find out who changed it; re-brief" >&2; exit 90; }
+grep -qF 'BASE="${NEXUSAI_LOCK_BASE:-' "$LOCKTOOL" || { echo "REFUSING: the installed tool no longer honours NEXUSAI_LOCK_BASE — ruling q's premise" >&2; exit 90; }
+bash -n "$LOCKTOOL" 2>/dev/null || { echo "REFUSING: $LOCKTOOL does not parse (bash -n)" >&2; exit 90; }
+grep -qF -- '--replace' "$LOCKTOOL" && grep -qF 'jest|docker) ;;' "$LOCKTOOL" || { echo "REFUSING: $LOCKTOOL lacks --replace or the jest kind" >&2; exit 90; }
+[ -d "$LOCK_BASE_LAPTOP" ] && [ -d "$LOCKQ_J" ] || { echo "REFUSING: the Laptop-DEV lock base $LOCK_BASE_LAPTOP (queue-jest) is not present (ruling q)" >&2; exit 90; }
+BQ="$(grep -l '^tag=qa-g32' "$LOCKQ_J"/* 2>/dev/null | wc -l | tr -d ' ')"
+[ "${BQ:-0}" = "0" ] || { echo "REFUSING: $BQ qa-g32* ticket(s) already in $LOCKQ_J — a live or stale gate-32 ticket; read before launch" >&2; exit 90; }
+HOLDER="$(sed -n 's/^tag=//p' "$LOCK_BASE_LAPTOP/nexusai-jest.lock/owner" 2>/dev/null | head -1)"
+case "$HOLDER" in
+  qa-g32*) echo "REFUSING: the Laptop-DEV jest lock is HELD by '$HOLDER' — a gate-32 holder already exists" >&2; exit 90 ;;
+  '') ;;
+  *) echo "NOTE: the Laptop-DEV jest lock is held now by '$HOLDER' (FIFO; the gate queues behind it, never touches it)" >&2 ;;
+esac
+GQ="$(grep -lE '^tag=' "$LOCKQ_J"/* 2>/dev/null | wc -l | tr -d ' ')"
+[ "${GQ:-0}" = "0" ] || echo "NOTE: $GQ ticket(s) queued in $LOCKQ_J — FIFO; gate 32 waits behind them, never touches them" >&2
+LB_WAS="${NEXUSAI_LOCK_BASE:-}"
+[ -z "$LB_WAS" ] || [ "$LB_WAS" = "$LOCK_BASE_LAPTOP" ] || echo "NOTE: NEXUSAI_LOCK_BASE was '$LB_WAS' in the launcher's environment — REPLACED by the Laptop-DEV base before exec (ruling q)" >&2
+
+# 22 — the 34 paths: 33 M + 1 A (the new helper); all test code; none in the guarded set; the list PINNED; the five open RD-786 sites' files unchanged.
+NS="$(g diff --name-status "$BASE" "$HEAD_SHA" 2>/dev/null)"
+[ "$(printf '%s\n' "$NS" | grep -c .)" = "34" ] && [ "$(printf '%s\n' "$NS" | grep -c '^M')" = "33" ] && [ "$(printf '%s\n' "$NS" | grep '^A' | cut -f2)" = "$NEW_HELPER" ] \
+  || { echo "REFUSING: base..head is not 34 paths = 33 M + 1 A ($NEW_HELPER)" >&2; exit 22; }
+PL="$(g diff --name-only "$BASE" "$HEAD_SHA" 2>/dev/null | sort)"
+[ "$(printf '%s' "$(printf '%s\n' "$PL" | tr '\n' ' ' | sed 's/ $//')" | shasum -a 256 | cut -d' ' -f1)" = "$PATHS_SHA" ] || { echo "REFUSING: the sorted 34-path list's sha256 is not ${PATHS_SHA:0:12}… — the PR's file set moved" >&2; exit 22; }
+[ "$(printf '%s\n' "$PL" | grep -vcE "$TESTCODE_RE")" = "0" ] || { echo "REFUSING: a path in base..head is NOT test code or test tooling: $(printf '%s\n' "$PL" | grep -vE "$TESTCODE_RE" | head -3 | tr '\n' ' ')" >&2; exit 22; }
+[ "$(printf '%s\n' "$PL" | grep -cE "$GUARDED_RE")" = "0" ] || { echo "REFUSING: base..head touches a guarded path (backend/ static/ templates/ package*.json .github/ bicep/ Dockerfile or the counts file)" >&2; exit 22; }
+[ -z "$(g diff --name-only "$BASE" "$HEAD_SHA" -- $RD786_OPEN 2>/dev/null)" ] || { echo "REFUSING: a file of the five open RD-786 sites (#95-#99) changed base..head — the kit's NOT FIXED premise moved" >&2; exit 22; }
+[ "$(blob "$HEAD_SHA" "$NEW_HELPER")" = "$HELPER_BLOB" ] && [ "$(blob "$GATED_SHA" "$NEW_HELPER")" = "$HELPER_BLOB" ] || { echo "REFUSING: $NEW_HELPER is not blob ${HELPER_BLOB:0:12} at e80920c and 49ba21e" >&2; exit 22; }
+
+# 93 — the premises at source: lockfile, package.json and workflow the SAME blobs at M0 and the head and equal the pins; the HEAD's counts 4880/302; deploy gate.
+for S in "$MAIN_SHA" "$HEAD_SHA"; do
+  [ "$(blob "$S" "$LOCK")" = "$LOCK_BLOB" ] && [ "$(blob "$S" "$PKG")" = "$PKG_BLOB" ] && [ "$(blob "$S" "$DEPLOY_WF")" = "$DEPLOY_BLOB" ] \
+    || { echo "REFUSING: ${S:0:7} does not carry lockfile 19477a9 / package.json 384805d / deploy-demo.yml 953b2a2 (ruling m, r0, r8)" >&2; exit 93; }
+done
+[ "$(blob "$HEAD_SHA" "$COUNTS_FILE")" = "$COUNTS_BLOB_HEAD" ] && [ "$(counts_at "$HEAD_SHA")" = "4880 302" ] || { echo "REFUSING: the head's counts file is not blob 2cc0948 = 4880/302 (the PR adds no test cell)" >&2; exit 93; }
+[ "$(cntF "$MAIN_SHA" "$DEPLOY_WF" "vars.CI_DEPLOY_ENABLED == 'true'")" = "2" ] || { echo "REFUSING: deploy-demo.yml at M0 no longer gates BOTH jobs on vars.CI_DEPLOY_ENABLED == 'true' (r8)" >&2; exit 93; }
+
+# 70 — the carried rulings and Tuesday's answers (REFUSALs where a ruling is missing).
+[ -s "$SQLITE_RULING" ] && grep -qF 'The offline unpack of sqlite3' "$SQLITE_RULING" || { echo "REFUSING: Tuesday's sqlite3 prebuild ruling (ruling m) is not at $SQLITE_RULING" >&2; exit 70; }
+[ -s "$NOTIFIER_ANS" ] && grep -qF 'Every later npm invocation in this gate carries npm_config_update_notifier=false' "$NOTIFIER_ANS" \
+  || { echo "REFUSING: Tuesday's notifier answer (ruling m) is not at $NOTIFIER_ANS as quoted" >&2; exit 70; }
+grep -qF 'NOT RUN under ruling (o) EXTENDED' "$BRIEF" || { echo "REFUSING: ruling (o)'s EXTENDED words are not carried in this brief" >&2; exit 70; }
+[ -s "$ANS1" ] && grep -qF 'load1 below 8 before every heavy run' "$ANS1" && grep -qF 'lock base locks-laptop-1017' "$ANS1" || { echo "REFUSING: Tuesday's ANSWER-1 (load 8, lock base) is not at $ANS1 as quoted" >&2; exit 70; }
+[ -s "$ADD25" ] && grep -qF 'BEFORE you run `git remote remove origin`' "$ADD25" || { echo "REFUSING: gate 25's ADDENDUM-1 (the ref order) is not at $ADD25" >&2; exit 70; }
+
+# 70N — machine-local premises, NOTEd (the gate records what it finds).
+[ -d "$NPM_CACHE/index-v5" ] || echo "NOTE: no local npm cache at $NPM_CACHE — H-31's offline install has no source; the gate will mail a QUESTION" >&2
+PB_NOW="$(fsha "$PREBUILD")"
+[ "$PB_NOW" = "$PREBUILD_SHA" ] || echo "NOTE: the cached sqlite3 prebuild is '${PB_NOW:-absent}', not 84a34404…7afc — ruling (m)'s condition 1 records what the gate finds" >&2
+NODEV="$(node -v 2>/dev/null)"
+[ "$NODEV" = "v26.8.1" ] || echo "NOTE: host node is '${NODEV:-absent}', not v26.8.1 as briefed (T4) — the gate records it" >&2
+GLV="$(gitleaks version 2>/dev/null)"
+[ "$GLV" = "8.30.1" ] || echo "NOTE: gitleaks is '${GLV:-absent}', not 8.30.1 — r8 records it" >&2
+LOAD1="$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}')"
+awk -v l="${LOAD1:-99}" 'BEGIN{exit !(l < 8)}' || echo "NOTE: 1-minute load is ${LOAD1:-unknown} (not below 8) — the gate waits in the queue, never in a hold (ruling p)" >&2
+
+# 31 — the builder's STATUS (a CLAIM; ends with the READY line for the head), the PR text, gate 30's report/instruments/mutant texts (PINNED), gate 27's / 25's
+#      instruments, standing references.
+for f in "$STATUS_B334" "$PR98TEXT" "$CLAR" "$BRIEF27" "$BRIEF29" "$BRIEF30" "$TEMPLATE" "$B27_REPORT" "$G30_REPORT" "$CHARTER" \
+         "$B27_INST/qa-file27.sh" "$B27_INST/qa-file27r.sh" "$B27_INST/qa-floorlib27.sh" "$B27_INST/qa-holdlib27.sh" "$B27_INST/qa-h1-scan27.py" "$B27_INST/qa-h1-selftest27.sh" \
+         "$B27_INST/qa-mail27.py" "$B27_INST/qa-mailread27.py" "$B27_INST/qa-revert27.py" "$B27_INST/qa-to.sh" "$B27_INST/qa-floorcount.py" \
+         "$B27_INST/qa-netbelt.sb" "$B27_INST/qa-netbelt-nodns.sb" "$B27_INST/qa-names23.py" "$B27_INST/qa-ledger25.js" \
+         "$B25_INST/qa-applymut.py" "$B25_INST/qa-lockcheck.py"; do
+  [ -s "$f" ] || { echo "REFUSING: evidence, brief or tool absent: $f" >&2; exit 31; }
+done
+tail -n 1 "$STATUS_B334" | grep -qF "READY FOR QA: B334 pr98 fix round 2 $BR @ $HEAD_SHA" || { echo "REFUSING: the builder's B334 STATUS no longer ends with the READY line for e80920c" >&2; exit 31; }
+[ "$(fsha "$STATUS_B334")" = "b8c5d306004dc76484a96d557978dbaf1bc87c9cebe735211032a21a63ab7006" ] || echo "NOTE: the builder's B334 STATUS sha256 is not the drafter's b8c5d306… (the file is a CLAIM and changed since drafting; the gate reads it WHOLE)" >&2
+[ "$(fsha "$PR98TEXT")" = "782f562ae7a8daf978cef50c774fe514643d197aef3d8497f2b01cdac4b7359d" ] || echo "NOTE: the PR98-TEXT sha256 is not the drafter's 782f562a… (the gate's r6 compares the LIVE PR body, not this file alone)" >&2
+grep -qF 'STATUS: COMPLETE' "$B27_REPORT" || { echo "REFUSING: gate 27's report does not read as delivered (the instrument source must be a DELIVERED gate)" >&2; exit 31; }
+grep -qF 'STATUS: COMPLETE' "$G30_REPORT" && grep -qF 'G30-1' "$G30_REPORT" || { echo "REFUSING: gate 30's report does not read as delivered or does not carry G30-1 (round 1 must be COMPLETE)" >&2; exit 31; }
+[ -d "$G30_DIR/evidence/H1a" ] && [ -d "$G30_DIR/evidence/H1b" ] || { echo "REFUSING: gate 30's evidence/H1a or evidence/H1b (the names comparison source, r3a) is absent" >&2; exit 31; }
+while read -r F H; do
+  [ -n "$F" ] || continue
+  [ "$(fsha "$G30_INST/$F")" = "$H" ] || { echo "REFUSING: gate 30's instrument $F is not sha256 ${H:0:12}… — a COMPLETE gate's file moved" >&2; exit 31; }
+done <<EOF_G30T
+$G30_TOOLS
+EOF_G30T
+while read -r F H; do
+  [ -n "$F" ] || continue
+  [ "$(fsha "$G30_MUT/$F")" = "$H" ] || { echo "REFUSING: gate 30's mutant text $F is not sha256 ${H:0:12}… — the round-1 compound's source moved" >&2; exit 31; }
+done <<EOF_G30M
+$G30_MUTS
+EOF_G30M
+grep -qF '## 3a. INSTRUMENT RULES' "$BRIEF29" && grep -qF '## 3a. INSTRUMENT RULES' "$BRIEF30" || { echo "REFUSING: gate 29's / 30's brief has no section 3a — the H-rules carried by reference are missing" >&2; exit 31; }
+
+# 10 / 17 — the report path from the brief's §11; no stale report; the brief names its sources.
+REPORT="$(grep -oE 'Report: `[^`]*/report\.md`' "$BRIEF" | head -1 | sed -E 's/^Report: `//; s/`$//')"
+[ "$REPORT" = "$EXPECT_REPORT" ] || { echo "REFUSING: the brief's §11 report path '$REPORT' is not $EXPECT_REPORT" >&2; exit 10; }
+[ "$(grep -oF "$(dirname "$REPORT")" "$BRIEF" | grep -c .)" -ge 2 ] || { echo "REFUSING: T4 and §11 do not name the SAME report directory" >&2; exit 10; }
+[ ! -e "$REPORT" ] || { echo "REFUSING: $REPORT already exists — a stale report would read as this gate's" >&2; exit 17; }
+for P in "2026-10-19_nexusai-gate29-rd774-rd836.md" "2026-10-20_B317_SEAT-G13_nexusai-gate-pr98-tier2.md" "2026-10-20_B334_STATUS.md" "2026-10-20_B334_PR98-TEXT.md" \
+         "2026-10-20-gate30-b302-pr98" "ADDENDUM-1" "qa-file27.sh" "qa-applymut.py" "qa-revert27.py" "qa-floorlib27.sh" "qa-floorcount.py" "qa-netbelt.sb" \
+         "qa-assertcount-preload.js" "qa-assertcmp30.py" "qa-r3cnt-30.js" "qa-jsum.js" "qa-mutlib30.sh" "qa-jestwrap.sh" "qa-verify30.sh" "qa-names23.py" \
+         "QA_AGENT_CHARTER.md" "locks-laptop-1017" "models_latest.json"; do
+  grep -qF -- "$P" "$BRIEF" || { echo "REFUSING: brief must name $P" >&2; exit 10; }
+done
+
+# 11 — identity: NexusAI's OWN dirs.
+[ -d "$ID_ROOT/.azure" ] && [ -d "$ID_ROOT/.gh-config" ] || { echo "REFUSING: NexusAI identity dirs missing under $ID_ROOT (.azure / .gh-config) — would inherit the caller's" >&2; exit 11; }
+export AZURE_CONFIG_DIR="$ID_ROOT/.azure"
+export GH_CONFIG_DIR="$ID_ROOT/.gh-config"
+export CLAUDE_CONFIG_DIR="$TUE/4_Credentials/.claude"
+[ -d "$CLAUDE_CONFIG_DIR" ] || { echo "REFUSING: Tuesday's claude store $CLAUDE_CONFIG_DIR is absent" >&2; exit 11; }
+
+# 12 / 13 / 14 / 15 / 20 — tier, directive, brief path, pins, verdict route, key path, question route.
+for T in 'TIER 2' 'MAIN-STAMP' 'NO GO' 'NO HOST NPM REGISTRY' 'npm_config_update_notifier=false' 'BOTH thresholds block' '--replace' 'qa-g32-' 'H-34' 'H-35' 'C-63' 'C-209' 'C-68' \
+         'ROUND 2 OF 2' 'GOES TO KAM' 'THE RED-PROOF' 'G30-1' 'C2' 'm-g1' 'THE MERGED TREE' 'LANDING ROUTE' 'never squash' 'SIBLING' 'CARRIED' 'THE PR TEXT' \
+         'VOID' 'can fail' 'positive control' 'G32-<n>' 'N32-<n>' 'NOT TESTED' 'PRIOR WORK' 'No HTTP to any production or demo host' 'never `--first-parent`' \
+         'LEGITIMATE SHAPES' 'NOT RUN under ruling (o) EXTENDED'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief does not declare '$T'" >&2; exit 12; }
+done
+for T in 'TIER-2 GATE THROUGH CODE' 'ROUND 2 OF 2' 'GOES TO KAM' 'THE PROPERTIES' 'THE RED-PROOF' 'G30-1' 'm-g1' 'THE MERGED TREE' 'THE PR TEXT' 'sibling sweep' 'CARRIED' \
+         'C1' 'S8b' 'r0' 'r1' 'r2' 'r3' 'r4' 'r5' 'r6' 'r7' 'r8' 'r9' 'C-209' 'C-190' 'C-68' 'T0' 'T1' 'NAMED NOT RUN' 'NOT RUN' '--replace' \
+         'qa-g32-' 'locks-laptop-1017' 'jest lock' "Never trust the builder's logs" 'no HTTP to any production or demo host' 'One client only' 'NO docker object and NO az' 'no model call' \
+         'MERGES GO FIRST' 'QUEUE, NEVER TAKE OVER' 'Sonnet' 'PROVISIONAL' 'CodeQL is NOT RUN by this gate' 'FINDINGS-ONLY' 'never squash' 'SAME commit'; do
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt does not declare '$T'" >&2; exit 12 ;; esac
+done
+[ "$(printf '%s\n' "$PROMPT" | head -1)" = "ultrathink" ] || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 13; }
+case "$PROMPT" in *"$BRIEF"*) ;; *) echo "REFUSING: prompt must name the brief path" >&2; exit 14 ;; esac
+for S in "$HEAD_SHA" "$HEAD_TREE" "$GATED_SHA" "$GATED_TREE" "$BASE" "$BASE_TREE" "$LOCK_SHA_INST"; do
+  grep -qF -- "$S" "$BRIEF" || { echo "REFUSING: brief must name $S in full" >&2; exit 14; }
+  case "$PROMPT" in *"$S"*) ;; *) echo "REFUSING: prompt must name $S" >&2; exit 14 ;; esac
+done
+for S in $CHAIN_SHAS; do
+  grep -qF -- "${S:0:7}" "$BRIEF" || { echo "REFUSING: brief must name commit ${S:0:7}" >&2; exit 14; }
+done
+if printf '%s\n' "$PROMPT" | LC_ALL=C grep -q '@[A-Z_0-9:-]*@'; then echo "REFUSING: the prompt carries a placeholder" >&2; exit 14; fi
+case "$PROMPT" in *"MAIL YOUR VERDICT"*"tuesday-agent@agentmail.to"*) ;; *) echo "REFUSING: prompt must say MAIL YOUR VERDICT to tuesday-agent@agentmail.to" >&2; exit 15 ;; esac
+grep -qF "$SUBJECT" "$BRIEF" || { echo "REFUSING: brief must carry the subject exactly: $SUBJECT" >&2; exit 15; }
+case "$PROMPT" in *"$SUBJECT"*) ;; *) echo "REFUSING: prompt must carry the subject exactly: $SUBJECT" >&2; exit 15 ;; esac
+case "$PROMPT" in *"/Volumes/Laptop-DEV/TUESDAY/4_Credentials/.env"*) ;; *) echo "REFUSING: prompt must name the AgentMail key by ABSOLUTE path" >&2; exit 20 ;; esac
+[ -s "$TUE/4_Credentials/.env" ] || { echo "REFUSING: the AgentMail key file $TUE/4_Credentials/.env is absent" >&2; exit 20; }
+for T in "$QUESTION_SUBJ" "$ANSWER_PREFIX" "$ROUTE_NAME"; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the question route: $T" >&2; exit 20; }
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt lacks the question route: $T" >&2; exit 20 ;; esac
+done
+if printf '%s\n' "$PROMPT" | grep -qi 'wednesday-agent@' && ! printf '%s\n' "$PROMPT" | grep -q 'Never wednesday-agent@'; then
+  echo "REFUSING: the prompt routes to wednesday-agent@ — Datasec's coordinator is Tuesday" >&2; exit 15; fi
+if printf '%s\n' "$PROMPT" | grep -qF 'KK_T9_External_HDD'; then echo "REFUSING: the prompt names a T9 path — every path of this gate is on /Volumes/Laptop-DEV" >&2; exit 15; fi
+[ "$(grep -oE 'qa-g32-[A-Za-z0-9_<>-]*merge[A-Za-z0-9_-]*' "$BRIEF" | grep -c .)" = "0" ] || { echo "REFUSING: the brief suggests a qa-g32- tag containing 'merge' (C-141 ADDENDUM 7)" >&2; exit 15; }
+[ "$(printf '%s\n' "$PROMPT" | grep -oE 'qa-g32-[A-Za-z0-9_<>-]*merge' | grep -c .)" = "0" ] || { echo "REFUSING: the prompt suggests a qa-g32- tag containing 'merge'" >&2; exit 15; }
+
+# 41 — RULING (i)'s by-hand yield is RETIRED: the kit and the prompt must not instruct it.
+for T in 'stop YOUR OWN unstarted waiter' 'stop your OWN unstarted waiter' 'then re-queue with --after that merge' 'self-apply ONE yield per gate TAG'; do
+  if grep -qF -- "$T" "$BRIEF" || printf '%s\n' "$PROMPT" | grep -qF -- "$T"; then echo "REFUSING: '$T' instructs the RETIRED by-hand yield" >&2; exit 41; fi
+done
+
+# 82 — THE MODEL RULE is carried in the brief and the prompt, per session, never "Switch automatically".
+for T in "$STATUS_SUBJ" "$PARK_LINE" 'classifier-stops.txt' 'Opus 4.8' 'which rows ran on which model'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks THE MODEL RULE fragment '$T'" >&2; exit 82; }
+done
+for T in "$STATUS_SUBJ" "$PARK_LINE" 'classifier-stops.txt' 'Switch automatically' 'Opus 4.8' 'PER SESSION' 'which rows ran on which model'; do
+  case "$(printf '%s' "$PROMPT" | tr '[:upper:]' '[:lower:]')" in *"$(printf '%s' "$T" | tr '[:upper:]' '[:lower:]')"*) ;; *) echo "REFUSING: prompt lacks THE MODEL RULE fragment '$T'" >&2; exit 82 ;; esac
+done
+grep -qF '## MODEL RULE' "$BRIEF" && grep -qF 'H-28 (AMENDED)' "$BRIEF" && grep -qF '**H-34**' "$BRIEF" && grep -qF '**H-35**' "$BRIEF" \
+  || { echo "REFUSING: brief lacks the MODEL RULE section or H-28 (amended)/H-34/H-35" >&2; exit 82; }
+
+# 19 — the words the prompt must carry (% is a space); the brief's sections; limits; rows; T-slot form; clarification quotes.
+WORDS="C-190 C-209 C-185 C-192 C-205 C-141 C-63 C-40 C-68 C-76 C-102 C-112 C-174 C-49 C-89 C-115 C-125 C-130 C-131 ADDENDUM%7
+r2 r3 r4 r5 r6 r7 r8 r9 M0 39653db 49ba21e e80920c PR%#98 PR%#97 PR%#96 19477a9 RD-782 RD-786 RD-789 SEAT-W17 B334 S101O KAM
+L-R1 L-R6 L-Y1 H-1 H-3 H-4 H-6 H-14 H-17 H-20 H-21 H-24 H-27 H-28 H-29 H-31 H-33 H-34 H-35 --forceExit trap%on%EXIT DEADLINE LANDING%CONTROL
+_prebuilds --mirror EXCLUSIVE STOP VOID MERGES%GO%FIRST QUEUE,%NEVER%TAKE%OVER SAME-PLACE%handover HEARTBEAT 2%minutes 5%minutes finally SESSION_SECRET%UNSET NOT%TESTED
+MEASURED%AT%RUNTIME READ%ONLY PROBED RELAYED CodeQL%is%NOT%RUN UNKNOWN about%40%minutes TRACKED%child Prior%work FOREGROUND NEVER%push NEVER%merge Partner%Center npm%install
+--offline ENOTCACHED qa-file27.sh -r<N> instrument never%fixes never%dismissed PROVISIONAL qa-g32 G32-<n> N32-<n> 1-minute%load%of%8 g32/ qa-applymut.py
+qa-assertcount-preload.js qa-names23.py qa-jestwrap.sh qa-mutlib30.sh C1.old S8b.old forward%merge fast-forward"
+for w in $WORDS; do
+  w="${w//%/ }"
+  case "$PROMPT" in *"$w"*) ;; *) echo "REFUSING: prompt must carry '$w'" >&2; exit 19 ;; esac
+done
+for H in '^## TIER' '^## 2a-T. LEGITIMATE SHAPES' '^## WRONG OR UNVERIFIED' "^## TUESDAY'S RULINGS" '^## MODEL RULE' '^## Charter' '^## PRIOR ROUND' \
+         '^## 1. Target' '^### How to build your trees' '^## 2. Tier and severity' '^## 2b. ROWS' '^## 3. THE QUESTIONS' '^## 3a. INSTRUMENT RULES' \
+         '^## 3b. THE NEGATIVE-ASSERTION SWEEP' '^## 7. THE GATED TREE' '^## 8. CI, ALERTS, DEPLOY' '^## 9. Floor discipline' '^## 10. HELD' '^## 11. Output' '^## PROVENANCE' '^## FILL AT STAMP'; do
+  grep -q "$H" "$BRIEF" || { echo "REFUSING: brief lacks section '$H'" >&2; exit 19; }
+done
+WSTART="$(grep -n '^## WRONG OR UNVERIFIED' "$BRIEF" | cut -d: -f1)"; WEND="$(grep -n "^## TUESDAY'S RULINGS" "$BRIEF" | cut -d: -f1)"
+[ -n "$WSTART" ] && [ -n "$WEND" ] && [ "$WSTART" -lt "$WEND" ] || { echo "REFUSING: the WRONG OR UNVERIFIED section is not above TUESDAY'S RULINGS" >&2; exit 19; }
+WUNMARKED="$(sed -n "${WSTART},${WEND}p" "$BRIEF" | grep -E '^[0-9]+\. ' | grep -vE 'MEASURED|READ-ONLY-INFERRED|RELAYED|own actions' | cut -c1-60)"
+[ -z "$WUNMARKED" ] || { echo "REFUSING: WRONG items not marked MEASURED / READ-ONLY-INFERRED / RELAYED: $WUNMARKED" >&2; exit 19; }
+for L in L-R1 L-R2 L-R3 L-R4 L-R5 L-R6 L-Y1; do grep -qF "$L" "$BRIEF" || { echo "REFUSING: brief lacks declared limit $L (C-112)" >&2; exit 19; }; done
+for R in r0 r1 r2 r3 r4 r5 r6 r7 r8 r9; do grep -qF "| $R |" "$BRIEF" || { echo "REFUSING: brief lacks row $R" >&2; exit 19; }; done
+for n in 0 1 2 3 4 5; do
+  grep -qE "^- \*\*\(T${n}\) [^*]*:\*\* RULED: " "$BRIEF" || { echo "REFUSING: brief lacks the ruling (T$n) as '**(T$n) …:** RULED: …'" >&2; exit 19; }
+done
+while IFS= read -r Q; do
+  [ -n "$Q" ] || continue
+  grep -qF -- "$Q" "$CLAR" || { echo "REFUSING: CLARIFICATIONS no longer carries '$Q' — the brief's quotes are stale; re-brief" >&2; exit 19; }
+  grep -qF -- "$Q" "$BRIEF" || { echo "REFUSING: brief does not quote '$Q'" >&2; exit 19; }
+done <<'CLAR_EOF'
+The jest and docker lock (`session-tools/nexusai-lock.sh`) is first-in-first-out, and it takes over an ownerless lock after 30 s.
+a FAILED ls-remote is UNKNOWN, never a value.
+A check must be able to fail on the thing it claims to be about.
+An explanation of why a fix works is a CLAIM: it gets a red proof, or it is marked UNVERIFIED in the artefact that carries it.
+A declared limit is where the evidence stops — not a place it is cleared.
+NEVER KILL BY PATTERN.
+Every merge to NexusAI main goes through a PULL REQUEST, and a PR must add NO NEW high-or-higher CodeQL alert in the code it changes. Test code is included.
+`alerts_threshold = errors`, so ANY new alert whose RULE severity is `error` blocks, whatever its security severity.
+A PR's CodeQL run CANNOT show a PRE-EXISTING main alert as fixed
+A gate verdict is valid only at the head it ran on. If product code a cell reads or drives changes before that branch merges, the merge condition is not "verify passes" — it is RE-RUNNING THE AFFECTED CELLS on the new head, each named individually in the MERGED mail.
+Gate (`qa-*`) tickets are never moved; the holder is never touched.
+CLAR_EOF
+
+# 24 — the prompt must DESCRIBE the server entry point, never carry its literal path (RD-591 c.37901).
+if printf '%s\n' "$PROMPT" | grep -qi 'backend/server\.js'; then
+  echo "REFUSING: the prompt contains the server entry point's literal path (RD-591 c.37901). Describe it; do not name it." >&2; exit 24; fi
+
+# 53 / 71 — standing rules in the brief; the NOT TESTED line read from the brief (ONE line); appended to the prompt at exec.
+for w in 'DEADLINE' 'HEARTBEAT' 'qa-g32-' 'VOID' 'EXCLUSIVE' 'POSITIVE CONTROL FIRST' 'QUEUE, NEVER TAKE OVER' \
+         '--replace' 'never push' 'C-174' '--forceExit' 'trap … EXIT' 'MERGES GO FIRST' 'never idles holding a lock' \
+         'ONE focused hold at a time' 'FOREGROUND' 'Never two live holds' 'Every finding names its instrument' \
+         'NOT TESTED' 'The tester never fixes' 'ONE CLIENT ONLY' 'no CodeQL alert dismissed' 'below a 1-minute load of **8**'; do
+  grep -qiF -- "$w" "$BRIEF" || { echo "REFUSING: brief lacks the standing rule '$w'" >&2; exit 53; }
+done
+NOTTESTED_LINE="$(grep -E '^  Not tested by this gate: ' "$BRIEF" | sed 's/^  //')"
+[ "$(printf '%s\n' "$NOTTESTED_LINE" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ] || { echo "REFUSING: the brief must carry exactly ONE '  Not tested by this gate: …' line (§11)" >&2; exit 71; }
+for w in 'the CodeQL closure of the 63 alerts' 'the full jest suite on Node 24' 'the full 4934-test verify of the merged tree' 'the forward-merge head' \
+         'the Playwright e2e specs and the UAT script' 'the eight Jira comments' 'headed Chrome and every browser' 'Windows' 'the demo and any deployed revision' 'npm audit' 'the host npm registry'; do
+  case "$NOTTESTED_LINE" in *"$w"*) ;; *) echo "REFUSING: the brief's NOT TESTED line lacks '$w'" >&2; exit 71 ;; esac
+done
+grep -qF 'and its LAST two lines, verbatim as mailed' "$BRIEF" || { echo "REFUSING: brief must fix the report's last lines as the two verdict lines" >&2; exit 71; }
+for V in '`B336/PR98-R2: <GO|GO WITH FINDINGS|NO GO> @ ' '`LANDING CHECKLIST: PR #98 '; do
+  grep -qF -- "$V" "$BRIEF" || { echo "REFUSING: the brief's §11 lacks the verdict line '$V'" >&2; exit 71; }
+done
+
+# 76 / 77 / 79 — H-1's printer and forbidden idioms; H-4; H-7/H-8/H-21.
+grep -qF "$SAFE_PRINTER" "$BRIEF" || { echo "REFUSING: brief must carry the safe SESSION_SECRET printer verbatim (H-1)" >&2; exit 76; }
+for w in '${SESSION_SECRET-…}' '${SESSION_SECRET:-…}' 'echo $SESSION_SECRET' 'printenv'; do
+  grep -qF "$w" "$BRIEF" || { echo "REFUSING: brief must name the forbidden idiom $w (H-1)" >&2; exit 76; }
+done
+for w in 'H-4' 'heartbeat' 'within 90 s' 'max gap'; do grep -qiF "$w" "$BRIEF" || { echo "REFUSING: brief lacks the heartbeat fragment '$w' (H-4)" >&2; exit 77; }; done
+for w in 'H-7/H-8/H-21' 'FAILS LOUDLY' 'trap'; do grep -qF "$w" "$BRIEF" || { echo "REFUSING: brief lacks the mutant-landing fragment '$w' (H-7/H-8)" >&2; exit 79; }; done
+
+# 38R — the negative-control seats are DERIVED now from the live cockpit panes: the claude descendant of each pane pid.
+# ps, not pgrep: macOS pgrep hides the caller's own ancestors, so Tuesday's own claude would vanish when --check runs from her shell.
+command -v tmux >/dev/null 2>&1 || { echo "REFUSING: tmux not found — cannot derive the negative-control seats" >&2; exit 38; }
+PANES="$(tmux list-panes -a -F '#{pane_pid} #{@cockpit_name}' 2>/dev/null)"
+[ -n "$PANES" ] || { echo "REFUSING: tmux list-panes returned nothing — cannot derive the negative-control seats" >&2; exit 38; }
+PSTAB="$(ps -axo pid=,ppid=,comm= 2>/dev/null)"
+[ -n "$PSTAB" ] || { echo "REFUSING: ps returned nothing" >&2; exit 38; }
+claude_under() {   # prints the claude pids among the descendants (depth <= 5) of pane pid $1
+  printf '%s\n' "$PSTAB" | awk -v root="$1" '
+    { pid[NR]=$1; pp[NR]=$2; c=$3; sub(/^.*\//,"",c); cm[NR]=c }
+    END { lvl[root]=0; for (d=1; d<=5; d++) for (i=1;i<=NR;i++) if ((pp[i] in lvl) && !(pid[i] in lvl) && lvl[pp[i]]==d-1) lvl[pid[i]]=d;
+          for (i=1;i<=NR;i++) if ((pid[i] in lvl) && pid[i]!=root && cm[i]=="claude") print pid[i] }'; }
+pane_pid_of() { printf '%s\n' "$PANES" | awk -v n="$1" '{p=$1; $1=""; sub(/^ /,""); if ($0==n) print p}'; }
+NEG_SEATS=''; NEG_DESC=''; NEG_BUILDERS=0
+COORD_NAME=''
+for NAME in tuesday wednesday; do
+  if [ -n "$(pane_pid_of "$NAME" | sed '/^$/d')" ]; then
+    [ -z "$COORD_NAME" ] || { echo "REFUSING: panes named BOTH 'tuesday' and 'wednesday' are live — the coordinator's negative control is ambiguous" >&2; exit 38; }
+    COORD_NAME="$NAME"
+  fi
+done
+[ -n "$COORD_NAME" ] || { echo "REFUSING: no tmux pane named 'tuesday' or 'wednesday' — the coordinator's negative control is required" >&2; exit 38; }
+[ "$COORD_NAME" = "tuesday" ] || echo "NOTE: the coordinator's pane is named '$COORD_NAME' on this machine — used as the coordinator's negative control" >&2
+for NAME in Datasec/NexusAI-O Datasec/NexusAI-W17 Datasec/NexusAI-L7 Datasec/NexusAI-M Datasec/NexusAI-N Datasec/NexusAI-P Datasec/NexusAI-R "$COORD_NAME"; do
+  PP="$(pane_pid_of "$NAME")"
+  NP="$(printf '%s\n' "$PP" | sed '/^$/d' | wc -l | tr -d ' ')"
+  if [ "$NP" = "0" ]; then
+    [ "$NAME" = "$COORD_NAME" ] || echo "NOTE: no tmux pane named '$NAME' — not a negative control this launch" >&2; continue
+  fi
+  [ "$NP" = "1" ] || { echo "REFUSING: more than one tmux pane named '$NAME': '$PP' — cannot derive its negative-control seat" >&2; exit 38; }
+  CP="$(claude_under "$PP")"
+  [ "$(printf '%s\n' "$CP" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ] || { echo "REFUSING: pane '$NAME' (pid $PP) has '${CP:-no}' claude descendant(s), not exactly one — a seat is missing or ambiguous" >&2; exit 38; }
+  NEG_SEATS="$NEG_SEATS $CP"; NEG_DESC="$NEG_DESC \`$CP\` ($NAME);"
+  [ "$NAME" = "$COORD_NAME" ] || NEG_BUILDERS=$((NEG_BUILDERS + 1))
+done
+[ "$NEG_BUILDERS" -ge 1 ] || { echo "REFUSING: no live builder seat among Datasec/NexusAI-O/W17/L7/M/N/P/R — at least ONE negative control is required" >&2; exit 38; }
+# fleet-monitor and every live 'QA/*' pane other than this gate's own (gate 31 included while it runs): a negative control when exactly one claude runs under it.
+EXTRA="$(printf '%s\n' "$PANES" | awk '{p=$1; $1=""; sub(/^ /,""); print $0}' | grep -E '^(QA/|fleet-monitor$)' | grep -vxF "$ROUTE_NAME" | sort -u)"
+while IFS= read -r PEER; do
+  [ -n "$PEER" ] || continue
+  GP="$(pane_pid_of "$PEER")"; GC=''
+  [ -n "$GP" ] && [ "$(printf '%s\n' "$GP" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ] && GC="$(claude_under "$GP")"
+  if [ -n "$GC" ] && [ "$(printf '%s\n' "$GC" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ]; then
+    NEG_SEATS="$NEG_SEATS $GC"; NEG_DESC="$NEG_DESC \`$GC\` ($PEER);"
+    echo "NOTE: $PEER has a live claude — added as a negative control (FIFO, never touched)" >&2
+  else
+    echo "NOTE: $PEER has no single live claude — not a negative control" >&2
+  fi
+done <<EOF_PEERS
+$EXTRA
+EOF_PEERS
+NEG_SEATS="${NEG_SEATS# }"
+NCOUNT="$(printf '%s\n' $NEG_SEATS | sed '/^$/d' | wc -l | tr -d ' ')"
+[ "$(printf '%s\n' $NEG_SEATS | sort -u | wc -l | tr -d ' ')" = "$NCOUNT" ] || { echo "REFUSING: the derived seat pids are not distinct: $NEG_SEATS" >&2; exit 38; }
+
+# 86 — no live gate-32 session already exists.
+for P in $(pane_pid_of "$ROUTE_NAME"); do
+  if [ -n "$(claude_under "$P")" ]; then echo "REFUSING: a pane named $ROUTE_NAME (pid $P) already runs a claude — gate 32 is live; do not start a second session" >&2; exit 86; fi
+  [ "$CHECK" = "1" ] || echo "NOTE: a pane named $ROUTE_NAME (pid $P) exists with no claude under it — the cockpit's own add decides" >&2
+done
+
+# 32S / 40 — LAST: the coordinator's stamp (0 at-sign SLOT placeholders anywhere in the kit: MAIN_SHA x2 + LAUNCH_TIME; the LAST line reads
+# 'READ-WHOLE-BY-TUESDAY: DONE …', never PENDING) and the answer route (Tuesday adds it, never this launcher).
+NSLOT="$(grep -oF "$PH_SLOT" "$BRIEF" | grep -c .)"
+LASTLINE="$(sed '/^[[:space:]]*$/d' "$BRIEF" | tail -n 1)"
+if [ "$NSLOT" != "0" ] || ! printf '%s' "$LASTLINE" | grep -qE '^READ-WHOLE-BY-TUESDAY: DONE .+'; then STAMP_OK=0; fi
+ROUTE_OK=1
+grep -q "^${ROUTE_NAME}|tuesday-agent@agentmail.to|" "$ROUTING" || ROUTE_OK=0
+GUARDS='9 40 18T 18 6 18M 7 8 22D 90 22 93 70 70N 31 10 17 11 12 13 14 15 20 41 82 19 24 53 71 76 77 79 38R 86'
+SUMMARY="ls-remote attempts this run: $LSR_ATTEMPTS (C-192); origin main ${M_ORIGIN:0:7} (M0 ${MAIN_SHA:0:7} tree ${M0_TREE:0:7}; counts at M0 $M0_COUNTS; ancestry carries 39653db; the 9 PR commits not on M0; MODE $MODE; fast-forwardable: $FFABLE; landed since 39653db: $LANDED); PR98 ${HEAD_SHA:0:7} (tree ${HEAD_TREE:0:7}; branch and $PR_REF agree; delta over ${GATED_SHA:0:7} = 1 commit, 1 path (rd407 suite), +5/-0, 2 hunks; 34 paths = 33 M + 1 A, all test code, 0 guarded; head counts 4880 302; lockfile/package/workflow blobs = M0's); gate-30 instruments x7 and mutant texts x4 pinned; lock tool ${INST_NOW:0:12}…; model $MODEL"
+if [ "$STAMP_OK" = "0" ] || [ "$ROUTE_OK" = "0" ]; then
+  echo "guards pass ($GUARDS); stamp and/or route NOT complete." >&2
+  echo "  $SUMMARY" >&2
+  [ -z "$PROVISIONAL" ] || echo "  PROVISIONAL (unstamped slots, --check ran against):$PROVISIONAL" >&2
+  echo "  NEG seats (38R, derived live; coordinator pane '$COORD_NAME'):$NEG_DESC" >&2
+  [ "$ROUTE_OK" = "1" ] || echo "REFUSING (40): no '${ROUTE_NAME}|tuesday-agent@agentmail.to|no' line in $ROUTING — answers to the gate would have no route; Tuesday adds it at stamp (this launcher never writes it)" >&2
+  [ "$STAMP_OK" = "1" ] || echo "REFUSING (32S): $NSLOT at-sign SLOT placeholder(s) remain in the brief (MAIN_SHA x2 + LAUNCH_TIME), or its last line is not 'READ-WHOLE-BY-TUESDAY: DONE …' (it reads: '${LASTLINE:0:60}') — the coordinator reads the kit whole and stamps before launch" >&2
+  [ "$STAMP_OK" = "1" ] || exit 32
+  exit 40
+fi
+
+if [ "$CHECK" = "1" ]; then
+  echo "all guards pass:"
+  echo "  origin at $PIN_TS ($LSR_ATTEMPTS ls-remote attempt(s), C-192): main = the stamped pin ${MAIN_SHA:0:12} exactly; the branch and $PR_REF at e80920c; T9 unmounted (18T)"
+  echo "  $SUMMARY"
+  echo "  stamped launch time: $S_LAUNCH"
+  echo "  NEG seats (38R, derived live; coordinator pane '$COORD_NAME'):$NEG_DESC"
+  echo "  report: $REPORT"
+  echo "  SUBJECT: $SUBJECT"
+  echo "  NEXUSAI_LOCK_BASE=$LOCK_BASE_LAPTOP  AZURE_CONFIG_DIR=$AZURE_CONFIG_DIR  GH_CONFIG_DIR=$GH_CONFIG_DIR  CLAUDE_CONFIG_DIR=$CLAUDE_CONFIG_DIR"
+  echo "  --check started no claude; nothing written."
+  exit 0
+fi
+
+PROMPT="$PROMPT
+$NOTTESTED_LINE
+
+THE MODEL OF THIS SESSION (the --model, models_latest.json levels.sonnet.model_id): $MODEL.
+WRITE YOUR ONE REPORT TO: $REPORT
+VERIFIED BY THE LAUNCHER AT $PIN_TS (git ls-remote origin, read-only, $LSR_ATTEMPTS attempt(s) under C-192; Tuesday's stamped launch time $S_LAUNCH): refs/heads/main = $M_ORIGIN = the stamped MAIN pin M0 (tree $M0_TREE; counts file at M0 reads $M0_COUNTS; its ancestry carries 39653db; PR #98's nine commits are not on it; what landed since 39653db: $LANDED; MODE $MODE; the head fast-forwardable onto M0: $FFABLE — mode 0 means the gated tree is the head itself and main did not move, otherwise T0's ruling applies and the merged tree is r5's reading); refs/heads/$BR = $PR_REF = $HEAD_SHA (tree $HEAD_TREE). The head is 9 linear commits over 39653db; the delta over the gated $GATED_SHA (tree $GATED_TREE) is ONE commit and ONE path, the rd407 concurrent-settings-writers suite, +5/-0 in two hunks; its 34 paths are 33 modified and 1 added, all test code, none a backend, static, package, workflow or counts-file path; the lockfile, package.json and deploy-demo workflow are the same blobs at M0 and the head; the head's counts file reads 4880/302; the files of the five open RD-786 sites are byte-unchanged. Gate 30's seven instruments and four round-1 mutant texts match their pins. The T9 is unmounted. The installed lock tool $LOCKTOOL sha256 $INST_NOW equals the pin and NEXUSAI_LOCK_BASE=$LOCK_BASE_LAPTOP is exported in your environment. These are the start-of-gate pins; take your own three readings anyway.
+NEGATIVE-CONTROL SEATS, derived live by the launcher from the cockpit panes at $PIN_TS (the coordinator's pane is named '$COORD_NAME' on this machine):$NEG_DESC Re-read them at the start of every hold."
+
+# rd579-rd639 S-1 belt: the gate session inherits NO SESSION_SECRET. The line prints the NAME and a state only, never a value.
+if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET in the launcher's environment (length ${#SESSION_SECRET}) — unsetting before exec"; else echo "SESSION_SECRET UNSET"; fi
+unset SESSION_SECRET
+# ruling q / H-34: the gate's lock calls use the Laptop-DEV base while the T9 is unmounted.
+export NEXUSAI_LOCK_BASE="$LOCK_BASE_LAPTOP"
+# ruling (m): the gate's own npm calls inherit the notifier switch (the gate still passes it explicitly on every call).
+export npm_config_update_notifier=false
+
+cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
+exec claude --dangerously-skip-permissions --model "$MODEL" "$PROMPT"
