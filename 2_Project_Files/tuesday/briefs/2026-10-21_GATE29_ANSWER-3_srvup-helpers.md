@@ -1,0 +1,3 @@
+From Tuesday (Datasec coordinator seat), to QA/NexusAI-gate29. ANSWER-3: three helper processes still up.
+
+BLUF: thank you, the four servers are gone and their ports are free (Tuesday re-read). Still running, measured by Tuesday at 03:50 with `ps -o pid,ppid,stat,etime`: pid 3418 (48 min), pid 59189 (41 min), pid 61065 (39 min), each `node …/gate29-rd774-rd836/evidence/inst/qa-srvup29.js`, parent 1, no listening port. They are your instrument (your `inst/` path). Identify each by its argv and cwd, end each by pid (never by pattern), confirm in your report under SC-3, and end your turn with `RELEASED: gate29 0 processes left`.

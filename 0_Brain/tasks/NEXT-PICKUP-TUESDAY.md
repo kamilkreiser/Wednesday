@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 336 — 2026-10-21 03:53 ROTATION (s129, ctx ~80%; band 80-90). **READ THIS FIRST, then 335-324 (they stand except where updated).**
+- **LIVE (tmux 03:52):** only %161 **B358** Composer #85 tier-1 round-2 gate (Opus) + fleet-monitor. **RE-ARM at boot:** `2_Project_Files/tuesday/tools/status_watch.sh '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec Security Composer/1_Project_Definition/Briefs/2026-10-21_B358_STATUS.md' 30`. On VERDICT: GO/GWF → apply `tuesday/briefs/2026-10-21_B358_PR85-TEXT.md` (`gh pr edit 85 --body-file`, read back) and HOLD (#85 never lands before K6 + Kam's cards; the 4 open Composer cards stand); **NO GO → a Kam card** (round 2 was the last), with the findings attached.
+- **Closed this seat:** HPSM-POC #165 LANDED (6818896b), MPS #91 LANDED (f78c6408), MPS records B360 (d422c8e3), gate 29 GO WITH FINDINGS on NexusAI #97 (closed out, servers released), PR #101 opened, B355/B356/B357/B353/B354 panes closed.
+- **FIRST WORK for the successor, in order (all within Kam's 18:55 item 3 and the merge-once-tested grant; load1 < 7 waves):**
+  1. **NexusAI #97 LANDING SEAT** (per DELTA 335: FF same commit, C-190; the gate-29 report's LANDING CHECKLIST).
+  2. **B361 MPS build** (DELTA 333: read whole, stamp, launch).
+  3. **HPSM-POC records** (DELTA 331) and **NexusAI records** (G29-1 + N29 candidates; B355's three drafted Jira comments).
+  4. **Gate 33 for #101** (DELTA 330 kit fixes; after #97 lands, #101 needs a counts-only TURN first, then re-stamp kit + launcher).
+- Digests regenerated at this rotation (ledger w=1 row this seat). Kam silent since 18:57 (10-20). No card filed this seat.
+
 ## 🟢 DELTA 335 — 2026-10-21 03:48 (s129, ctx ~78%). **READ THIS FIRST; adds to 334.**
 - **GATE 29 = GO WITH FINDINGS @ 115a775** (unconditional; report `/Volumes/Laptop-DEV/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-10-21-gate29-rd774-rd836/report.md`, last two lines = verdict + LANDING CHECKLIST). G29-1 Minor (AI-branch raw log lines :6648/:6659, main alerts #182/#183). **NEXT: a NexusAI LANDING SEAT for PR #97** (FF the SAME commit per C-190, like B343 for #98; PR #97 is still DRAFT; the checklist: post-land main CodeQL #70/#220/#221 by number = fixed else STOP, #172…#186 expected fixed (note if open), #171/#174/#177/#181 still open; Deploy demo build+deploy skipped; message names RD-774, RD-836, C-211, the alerts, "no dismissal"). Then NexusAI records (G29-1 + N29 candidates; RD-874/875/873 comments drafted in B355 STATUS). **#101's counts file then needs a counts-only TURN after #97 lands** (gate 33's launcher refuses T0 if main moved: re-stamp the kit and launcher).
 - **Gate 29 pane %159 kept** until it confirms `RELEASED: gate29 0 processes left` (ANSWER-2 sent + tapped 03:47: it left pids 3418/59189/3426 running). Then `pgrep` in its own call and close.
