@@ -1,0 +1,35 @@
+VERDICT: GO for #1675 at head cc30ca242fb6... and #1676 at head ab6140aa5618... (tier 2, round 1 of 2; landing trees 5f8086a291094173aee9852c4019a03a744b76db, 23959963897eed2b6d3311ec249189cc6667b208 on develop 280fdbcd19867d77a5fd88dbe42a0595d1e166de; 0 blockers, 2 notes)
+
+## BLUF
+Both PRs are pure one-file test insertions (+11 and +8, zero deletions, zero product bytes). Added lines equal the Spark golden hunks line for line. With product untouched all four new cells per PR pass, the whole originate suite goes 136/1625 -> 136/1629 with 0 vanished, 4 new by name, 0 reds. The claimed mutants (certifications.ts:701 and :704 to a truthiness test) each compile and turn exactly the four new cells red by name and nothing else. Landing trees match the claims; the batch merges cleanly in either order. Ls-remote at start and end: develop 280fdbcd1986, heads unchanged.
+
+## Findings
+Blockers: none.
+Notes:
+1. Mutant reach (expected, admitted in the claims): the cells pin the `!== undefined` gate, not every rewrite. My own mutants: `!= null` is caught by exactly ONE cell (the null cell); `typeof x === 'string'` is caught by THREE cells (null, 0, false; the '' cell passes it). A rewrite that treats '' and null/undefined alike but still logs 0/false would be partly caught as well. Every shape I tried was caught by at least one named cell; none escaped.
+2. Claim figure not reproduced: the claim says root npm ci installed 1834 packages; my `npm ci --ignore-scripts` at the same develop lock printed "added 1938 packages". Probably a counting difference (the claim may have counted differently), no effect on any result, but the number as stated is not what I measured. Lint (26 problems / 0 errors) and the 812-file own-program type-check count were not re-measured by me (see NOT RUN).
+Not a defect: the first commit of each branch (58fd661fc67e, 00a0ccab716a) carries "Co-Authored-By: Claude Opus 5"; the merge commit (cc30ca242fb6, ab6140aa5618) carries Sonnet 5.5. Both trailers are in branch history, so a squash body built from the commit messages would carry both; compose the body deliberately.
+
+## FOUND / TESTED / HOW
+Q1 Scope. FOUND: `git diff --numstat 280fdbcd1986 pr1675` = `11 0 Blockchain/Dev/services/originate/src/__tests__/ks1508-versionedbyid-is-server-set.test.ts`; pr1676 = `8 0 .../ks1660-a-caller-s-data-parentdocumentid-overwrites.test.ts`. Only test paths, no product path touched. Added lines (+/- lines of the diff, headers dropped) diffed against the +/- lines of `.../spark_secuura_2026-10-20_ks_1508_falsy_p1/out.md.checker/patch.diff` and `..._ks_1660_falsy_p1/...`: IDENTICAL for both (11 and 8 lines). The 1-file diff against develop equals the 2-commit branch (spark commit + merge of develop 280fdbcd1986, no rebase).
+Q2 Red-first and green. Clone of the cache, develop 280fdbcd1986 fetched from GitHub (read), PR refs fetched; root `npm ci --ignore-scripts` rc 0; packages/shared built rc 0. Product untouched: all four new cells per PR pass (listed as 'passed' by name in the jest JSON). Mutants applied by exact-anchor replace (anchor count 1 each), `tsc -p services/originate --noEmit` rc 0 BEFORE running, whole suite run, restore asserted by sha256 590288484b463dea748ce01238f4872aeec463fd6375366a022d340b81bf09bc (identical before and after each of the 6 mutants; clone `git status` clean after):
+ - #1675 claim mutant `if (droppedVersionedById) {` -> 1629 tests, exactly 4 failed, all four "RED KS-1508 F1 - a FALSY planted versionedById <'' | null | 0 | false> ...", 1 failed suite, nothing else.
+ - #1675 own mutant A `!= null` -> 1 failed: the null cell only. Own mutant B `typeof x === 'string'` -> 3 failed: null, 0, false cells.
+ - #1676 claim mutant `if (droppedParentDocumentId) {` -> exactly 4 failed, the four "RED KS-1660 R4: a FALSY planted parentDocumentId ..." cells (''/null/0/false), nothing else.
+ - #1676 own mutant A `!= null` -> 1 failed (null cell). Own mutant B `typeof ... === 'string'` -> 3 failed (null, 0, false).
+ Red is by assertion (jest assertion failures by test name), not by crash: every mutant compiled and the 1625 other tests stayed green.
+ Type-check of the test files in their own program (child tsconfig extends the service one, exclude [], include src/**/*; deleted after): rc 0 at both heads, both ks15/ks16 test files listed.
+Q3 Suite. FOUND: baseline develop 280fdbcd1986: 136 suites / 1625 passed / 0 failed. #1675 head: 136 / 1629 / 0. #1676 head: 136 / 1629 / 0. Comparator by full test name (file + fullName + status): 0 vanished, exactly 4 new (the four named cells), 0 not-passed, 0 status changes among existing. Controls: removing one new cell from the head set makes the comparator report 3 new (detected); removing one existing cell reports 1 vanished (detected).
+Q4 Together. `git merge-tree --write-tree pr1675 pr1676` and the reverse order both rc 0, the same combined tree a9f2400c81626b10fdba448285b2a0d4dc58859b; its diff against develop is exactly the two test files (+11, +8). Per-PR landing trees on develop: `merge-tree develop pr1675` = 5f8086a291094173aee9852c4019a03a744b76db (== head tree); `develop pr1676` = 23959963897eed2b6d3311ec249189cc6667b208 (== head tree). Both equal the claims. I did not run the combined tree's suite (disjoint files; the two per-PR suites are the evidence).
+Q5 Claim accuracy (three numbers per claim, each against the tree): (a) head shas and develop sha: ls-remote at 18:42 and again after the runs: cc30ca242fb6..., ab6140aa5618..., 280fdbcd1986 all as claimed. (b) trees 5f8086a2.../23959963... and diffstat +11/-0, +8/-0 and "two-line comment plus one it.each" (2+9 lines, 2+6 lines): as claimed. (c) 136/1625 -> 1629, mutant line numbers 701 and 704 and the "46/50 / 10/14" failing counts imply 4 reds each: line numbers match the tree (701 `droppedVersionedById`, 704 `droppedParentDocumentId`); the 4-red result reproduces; the per-file counts (50/50, 14/14, 46/50, 10/14) were not individually re-counted by me but are consistent with my whole-suite figures. Exception: "1834 packages" vs my 1938 (Note 2). Pre-existing product comments also name KS-1679 (certificationId, certifiedAt) as sibling keys with the same gate at :707/:710; not covered by these PRs, mention only.
+Q5b Co-Authored-By: present as described (see Notes).
+
+## NOT RUN
+Lint and lint baseline; the claim's 812-file program count; the preflight legs; the four platform suites; any other service's suite; anything against a live service; Docker (forbidden); a combined-tree suite run; sibling keys certificationId/certifiedAt (KS-1679) mutants. Mutants beyond three shapes per key. No GitHub or Linear write, no push.
+
+## Wall-clock
+Started 18:42:30 AEDT, finished 18:49 (about 7 minutes; npm ci 19s, each full suite about 17s).
+Wednesday tree check at 18:48: `git status --short` untracked paths are only under 0_Brain/reference/ (gate CP1 and this CQ1 folder) and 2_Project_Files/local-model/night/; nothing outside the allowed areas, and the only file I wrote is this verdict.md.
+
+sha256 of `sed '1d;$d' verdict.md | shasum -a 256`:
+730604c7219547aee66b42f2dfcf4cfd006777d9bcbce93d5a70e5e2ab4b15e4

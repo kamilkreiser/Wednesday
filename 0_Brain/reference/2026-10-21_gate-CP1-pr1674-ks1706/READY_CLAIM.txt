@@ -1,0 +1,89 @@
+READY FOR GATE - Seat G 14th. TIER 1 (security dependency change). PR #1674 - clears the develop-wide advisory freeze. NOT merged, NOT deployed. I stop here for your GO naming the head sha.
+
+== 1. WHAT AND WHERE (head and develop read from origin in THIS action) ==
+PR: https://github.com/Secuura/Distributed_Secuura/pull/1674  (open, not draft, author kksecura, base develop)
+Head, ls-remote of the branch just now: 827878479f87abc10cb31fd418c45da3eeff5ed3  == GitHub's PR head == my commit (three reads equal).
+Develop, ls-remote just now: 5671d5115921cae656c6c598741d9e9a87cbeeeb == the base I cut from (unmoved since 04:13Z); the branch is ONE commit on it, one parent.
+Predicted landing tree 650837653068d267eba9eaabe62c5b04d3abc86a, computed against develop 5671d5115921cae656c6c598741d9e9a87cbeeeb. Re-predict immediately before any merge.
+Branch chore/advisory-freeze-lock-refresh-2026-10-21. 34 files, +2258/-2360: 31 package-lock.json and 3 package.json lines ("vite": "7.3.6" -> "7.3.7" in services/analytics, services/auth, services/shared). Nothing else tracked. No baseline edit, no --no-verify, no force.
+mergeable_state reads unstable. It is the retired Actions, not a result: every workflow run on the head is failure with steps=0, and develop's own tip shows the same pattern (control). I am NOT reading clean or unstable as "tested"; the Test Evidence block carries the claim.
+
+== 2. TICKET ==
+KS-1706 (Urgent, In Progress, assigned to the board account, project Dependency and Version Currency). The title names the develop-wide advisory freeze and the 10-id count; all ten GHSA ids are in the DESCRIPTION (checked), not the title, because ten ids do not fit in 255 characters. Exactly one ticket matches the title. PR says Refs KS-1706 (scanned: no closing keyword, only that hyphenated key). BLUF comment on KS-1706, id e3007022-75df-4408-8ae9-33d6c0943c75, read back by id, byte-identical.
+
+== 3. TEST EVIDENCE ==
+TOUCHED: the 31 locks and 3 manifest lines above.
+RAN:
+ - audit:gate rc 0 and audit:locks rc 0 on this tree. Both were rc 1 with the same ten ids on unmodified develop (set equality printed, four reads).
+ - Parse controls, all 31 locks against HEAD: 0 unexplained changes (every changed/added/removed package is inside the dependency closure of a package meant to move); 0 optional-platform edges newly unsatisfied; lockfileVersion and name unchanged; non-package entries that changed differ only in dependencies.vite (a planted extra change is detected); integrity 39 of 39 changed name@version equal the registry, compare can fail.
+ - The wasm32-wasi removal in frontend/admin, verifier, website is upstream's: registry rolldown@1.1.5 lists it (the control, it must) and 1.2.14 does not; both list 15 bindings.
+ - Host builds from each frontend's OWN lock (as its Dockerfile does), npm 11.19.0, darwin, load 2.05: frontend/admin vite 8.3.4 rc 0, 20 dist files; frontend/verifier vite 8.3.4 rc 0, 13; frontend/website vite 8.3.4 rc 0, 5. A chunk-size warning printed; no baseline build to compare.
+ - Container dry-runs, own clone, read-only: 31 of 31 pass, with ONE qualification (section 5).
+ - In-hook preflight at push, quoted exactly: "PREFLIGHT INCOMPLETE - 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 skipped (local stack not up); the same three skipped on the earlier refused attempt. It says "This is NOT a pass", and I am not calling it one. Legs that ran and printed OK: 2 (all locks clean-room-installable), 6, 7, 16. Push rc 0 from the tool's own .rc.
+NOT RUN (the gate should know):
+ - any backend service build or unit suite. About 20 service locks move vite (via vitest) within 8.3.x and take rolldown with it; none of those suites ran.
+ - frontend/issuer, frontend/demo-overlay, frontend/outlook-addin builds (only admin, verifier, website were asked for).
+ - any image build (outside the ruling), so linux/musl `npm ci` is covered only by the dry-runs.
+ - the four platform suites (no route, schema or config changed). Nothing deployed.
+MIGRATIONS + CONFIG: none.
+
+== 4. WHAT THE VERSIONS DO ==
+npm takes the highest in-range version, so several land ABOVE the minimum fixes: vite 8.3.4 (minimum 8.1.6 / 8.3.3), MCP SDK 1.32.1 (1.32.0), hono 4.13.13 (4.13.11), follow-redirects 1.16.1. frontend/admin, verifier and website cross TWO vite minors (8.1.4 -> 8.3.4): rolldown 1.1.5 -> 1.2.14, lightningcss 1.32 -> 1.33 with 11 bindings, postcss, nanoid, picomatch. Weigh that.
+
+== 5. THE akto QUALIFICATION, stated exactly ==
+systemTest/akto locks file:../../observability. Mounting only systemTest/akto fails EUSAGE, and the PRISTINE develop lock fails identically (rc 1), so it is the mount shape and not this change: npm derives the link's lock key from the project's depth below the filesystem root, and /app is one level deep. `-v "<clone>/systemTest":/app:ro -w /app/akto` (two levels, like the repo) passes, rc 0. That mount is slightly wider than "the lock directory" - the parent systemTest, still inside my clone, still read-only - and I am disclosing it. The linked observability package is NOT mounted, so its own dependencies are not exercised. I first mis-stated the sibling's path (systemTest/observability; it is the repo-root observability/) and why the second mount passed; corrected.
+
+== 6. DOCKER, every command verbatim (37 total) ==
+<clone> = /Volumes/DevMASTER/!CODING/Secuura/Blockchain/deploy-clones/seatG14-5671d5115921   (the only edit I made to these lines is that substitution)
+Shape of the real runs, once per changed lock dir; Blockchain/Dev is the root lock's mount:
+docker run --rm -v "<clone>/Blockchain/Dev/services/analytics":/app:ro -w /app node:24-alpine ls package-lock.json
+docker run --rm -v "<clone>/Blockchain/Dev/services/analytics":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/frontend/admin":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/frontend/demo-overlay":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/frontend/issuer":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/frontend/outlook-addin":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/frontend/verifier":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/frontend/website":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/analytics":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/anchoring":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/api-gateway":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/auth":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/billing":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/demo-service":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/guardian":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/kyc":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/m365-integration":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/mcp-server":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/nft-certificate":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/prism":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/queue":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/referral":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/security":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/shared":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/staking":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/tenant-provisioning":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/timestamping":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/tokenisation":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/transfer":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/vc-issuer":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/Blockchain/Dev/services/wallet-connector":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/systemTest/akto":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/systemTest/akto":/app:ro -w /app node:24-alpine sh -c 'ls -la /app | head -12; node -v; npm -v'
+docker run --rm -v "<clone>/systemTest/akto":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run --loglevel=verbose
+docker run --rm -v "<clone>/systemTest/akto":/app:ro -w /app node:24-alpine npm ci --ignore-scripts --dry-run
+docker run --rm -v "<clone>/systemTest":/app:ro -w /app/akto node:24-alpine npm ci --ignore-scripts --dry-run
+
+Which of those are controls and not checks of the change: the first `ls package-lock.json` line is the MOUNT CONTROL; the second services/analytics line (run with that manifest temporarily put back to 7.3.6, restored byte-identical) is the NEGATIVE CONTROL and failed rc 1 as intended; the `ls -la /app | head -12; node -v; npm -v` and `--loglevel=verbose` lines are akto DIAGNOSTICS; the later `systemTest/akto` line with the pristine lock is the akto BASE CONTROL (rc 1); the `-v "<clone>/systemTest":/app:ro -w /app/akto` line is the akto run that passed. No compose, no build, no push, no prune, no other image, no mount outside my clone.
+
+== 7. OPEN, DEFERRED, FAULTS ==
+OPEN (noticed, not categorised, not mine to fix here):
+ - Leg 6 prints an advisory CLEANUP note that 15 baseline rows (undici x13, ip-address, @hono/node-server) are no longer reported. I did not touch the baseline. Needs a ticket or a fold into an existing one; your call.
+ - The root lock has 29 optional-dependency edges with no lock entry, before AND after (the darwin-only optional-binary class). Unchanged, not touched.
+DEFERRED to the next step (waiting on this PR): the two test-only PRs. Branches feature/ks-1508-falsy-drop-log-cells (commit 58fd661fc67e) and feature/ks-1660-falsy-drop-log-cells (commit 00a0ccab716a) are committed locally on develop 5671d5115921 and NOT at origin. After this merges: merge develop in (never rebase), re-run apply/file/mutant/suite, push, READY each. Their bodies are drafted.
+FAULTS OF MINE this stretch: (1) a vacuous first npm trial (zsh does not word-split a scalar command), caught before use; (2) a name-keyed inventory that invented root-lock "blockers", fixed; (3) a matcher control that failed on the wrong input file and a watcher launched anyway, re-verified; (4) the akto mis-statement in section 5; (5) a one-off Docker probe before your narrowing (accepted); (6) two full ~8 min gates run before I ran the two audit legs myself (seconds) - the second was bound to fail.
+Evidence (28 files, secret-scanned): 5_Project_History/2026-10-21_seatG-14th/evidence/
+
+== 8. WHAT I NEED ==
+Commission the tier-1 gate and send your GO naming the head sha {H}. I then merge on that GO (the author merges once TESTED), re-read develop, merge it into both test branches and re-push. I am idle until then; I spend nothing while waiting. I cannot read the weekly figure; your last read was 87 percent against my 89.
+

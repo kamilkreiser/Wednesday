@@ -1,0 +1,35 @@
+READY FOR GATE - Seat G 14th. TIER 2 (test-only). PR #1675 (KS-1508). NOT merged, NOT deployed. I stop here for your GO naming the head sha.
+
+== 1. WHAT AND WHERE (head and develop read from origin in THIS action) ==
+PR: https://github.com/Secuura/Distributed_Secuura/pull/1675  (open, not draft, author kksecura, base develop)
+Head, ls-remote just now: cc30ca242fb6eedb3328a37d5beb3050f9234cbe  == GitHub's PR head == the merged head I measured (three reads equal).
+Develop, ls-remote just now: 280fdbcd19867d77a5fd88dbe42a0595d1e166de  == the PR's base; unmoved since my 280fdbcd1986 merge (PR 1674).
+Predicted landing tree 5f8086a291094173aee9852c4019a03a744b76db, computed against develop 280fdbcd19867d77a5fd88dbe42a0595d1e166de: predicted with git merge-tree BEFORE merging develop in and equal to the real merged tree; a squash of a branch whose only difference from develop is one file lands that tree. Re-predict before any merge.
+2 commits on the branch: my Spark-pass commit 58fd661fc67e (parent = the old base 5671d5115921) and a merge commit with develop 280fdbcd1986 (never a rebase). Against develop: 1 file changed, +11/-0, zero product bytes.
+mergeable_state reads unstable = the retired Actions (failure=5, skipped=1 on the head, the same pattern as 1674); not a result, and I am not reading it as "tested".
+
+== 2. TICKET ==
+KS-1508 BLUF comment id 46cd4381-9a5c-4a6d-83dc-d9d1a7668169, read back identical. PR says Refs KS-1508 (scanned: no closing keyword, only that hyphenated key). The ticket stays open.
+
+== 3. TEST EVIDENCE ==
+TOUCHED: services/originate/src/__tests__/ks1508-versionedbyid-is-server-set.test.ts only. Pure insertion: a two-line comment and one it.each over '', null, 0, false.
+RAN, all at this merged head on develop 280fdbcd1986:
+ - the file, product untampered: 50/50 passed.
+ - whole services/originate suite: 136 suites, 1629/1629, 0 failed; baseline at develop 280fdbcd1986: 136 / 1625 / 0; +4 exactly; 0 vanished, 4 new, compared by cell NAME, with a control that a planted missing cell is detected.
+ - mutant certifications.ts:701 -> if (droppedVersionedById) { : anchor count 1, service tsc rc 0 first, then 46/50: exactly the four new cells fail, by name. Restore asserted by sha256 (590288484b463dea, unchanged by the refresh).
+ - type-check in its OWN program (the service tsc -p excludes src/__tests__): child tsconfig exclude [], 812 files listed, my file present, rc 0.
+ - lint rc 0, 26 problems / 0 errors. Baseline lint NOT re-measured at 280fdbcd1986 (it was 26/0 at 5671d5115921; the refresh changed no source file).
+ - root npm ci against the MERGED root lock rc 0 (1834 packages) - the clone these ran in.
+ - preflight at push, quoted exactly: "PREFLIGHT INCOMPLETE - 13/16 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4, 8 skipped (local stack not up). It says NOT a pass; I am not calling it one. Legs 2, 6, 7, 16 printed OK; 6 and 7 are the ones that refused this work before the refresh merged. Push rc 0 from the tool's own .rc.
+NOT RUN: the four platform suites (no route, schema or config changed); any other service's unit suite; anything against a live service; the lint baseline at 280fdbcd1986; the overlap census was NOT repeated (the 22-of-22 figure predates 1674's merge and is stated as such in the PR body).
+MIGRATIONS + CONFIG: none. Docker: none for this PR.
+
+== 4. RESIDUE AND OPEN ==
+ - The first commit carries a "Co-Authored-By: Claude Opus 5" trailer (made before the pane switch); the merge commit carries Sonnet 5.5. The squash body is composed at merge; say if you want a trailer-free body.
+ - The cells pin one rewrite shape per key (!== undefined to a truthiness test), not every rewrite.
+ - Sibling: KS-1660, PR #1676, the same shape for the other key; you plan ONE Sonnet tier-2 gate for both.
+
+== 5. WHAT I NEED ==
+The tier-2 gate and your GO naming the head sha cc30ca242fb6eedb3328a37d5beb3050f9234cbe. I then re-read develop and the head, merge on that GO (squash, --match-head-commit, explicit subject with no (#n)), and mail the merge sha and tree. I am idle until then and wait with a job whose exit wakes me.
+Weekly figure: I cannot read it; your last read was 87 percent against my stop of 89.
+
