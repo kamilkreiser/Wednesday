@@ -186,3 +186,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-20 03:21 | Kamils-Mac-Studio | hold_ready.py: accept test_only new-file passes whose patch is byte-identical (cmp) to the control golden in place of A3c | CLOSED |  2026-10-20 03:24 done: three narrow acceptances, arms run, commit 519ee223b |
 | 2026-10-20 12:44 | Kamils-Mac-Studio | STANDING_LINES: F-02 in an adopted/scratch clone has no repo core.sshCommand fallback (G 13th catch) | CLOSED |  2026-10-20 12:44 added after the push-transport line |
 | 2026-10-21 11:06 | Kamils-Mac-mini | decision_queue prior-ruling gate client scope: leg 2 lists only ruled cards of the new card's own client (plus Fleet/WED); ledger_laptop_datasec 2026-10-21 w=3 | OPEN | |
+| 2026-10-21 21:29 | Kamils-Mac-mini | Tuesday: add QA/NexusAI-gate33 routing line to fleet/inbox_routing.conf after :238 (B420, Datasec gate 33 verdict route; one line, append-only) | OPEN | |
