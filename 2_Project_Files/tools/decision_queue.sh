@@ -225,7 +225,19 @@ def prior_rulings(d):
             # is the same flaw it exists to fix. Cell 4 (founders/hub, carded 4x) proved it.
             # Ceiling is now proportional and generous: exclude only a genuinely ubiquitous token.
             RARE = max(5, len(store) // 10)
+            # CLIENT SCOPE (2026-10-21, Tuesday ledger w=3 of the cross-client store family): another
+            # CLIENT's ruling is never a prior ruling for this client's card, and listing it printed that
+            # client's card titles into this client's seat. Skip a ruled card only when BOTH cards name a
+            # client and the clients differ; Fleet/WED/workspace scopes still count for every client.
+            # Arms: tests/decision_queue_client_scope_arms.sh (C1 and C4 red before this clause).
+            CLIENTS = {"datasec", "secuura"}
+            def _client(cp):
+                return str(cp or "").split("/")[0].strip().lower()
+            new_client = _client(d.get("client_project"))
             for x in ruled:
+                x_client = _client(x.get("client_project"))
+                if new_client in CLIENTS and x_client in CLIENTS and x_client != new_client:
+                    continue
                 x_toks = {t for t in re.split(r"[^a-z0-9]+", str(x.get("id", "")).lower())
                           if len(t) >= 4 and t not in STOPWORDS}
                 shared_rare = {t for t in (new_toks & x_toks) if freq.get(t, 99) <= RARE}
