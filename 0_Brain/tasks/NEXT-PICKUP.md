@@ -29,6 +29,12 @@ supersede: REPLACED WHOLESALE by the Sonnet 5.5 Wednesday seat that booted at 15
 - **Freeze CLEARED:** audit:gate and audit:locks rc 0 on develop (G's measurement; gate CP1 re-measured on the head). Pushes work again.
 - **Gauge:** 7d 87%, renews about 3d 18h from 18:4x (about Sun 25 Oct). Hard stop 90; Kam's 18:55 (10-20) order 'move to you and the spark' is LIFTED ONLY for raise/gate/merge steps (Kam 15:12 and 15:20 today). **No build seat, no deploy seat, no drafters** until the allowance renews or Kam says. Ornith: no reporting (Kam 10-20 19:39).
 
+## 0b. MORNING SEAT 22 OCT (Opus 5.5: the launcher fix is VERIFIED by this boot's statusline)
+- Gauge 7d 90% (hard stop; renews ~Sun 25 Oct midday). Wednesday + Spark only. Board KS 688 open (10-12 baseline 509): growing.
+- NEW CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022 (rec a: re-date braces, sprintf-js, both react-router to 2026-11-30; default: nothing re-dated, re-raise 29 Oct). Measured: deepmerge-ts is NOW fixable (@prisma/config 7.10.1 -> deepmerge-ts 8.0.2); postcss-selector-parser fixed in 7.1.6. Item 1 below is answered by this card.
+- NEW HELD SPARK PASS: KS-1709 issue-route refusal log (night/READY_KS-1709-KS-1709-REFUSALLOG1709-1_...2026-10-22.diff.md; brief ks_1709_p1). Raise with KS-1622 in ONE Sonnet raise seat after the renewal. NEXT Spark brief: KS-1709 p2 = the recertify site certifications.ts:1383 (same shape; extend the ks1709 test file in place).
+- develop moved to bcc51903d893 (#1677, Peter's own systemTest PR, not ours).
+
 ## 2. HELD / OWED, IN ORDER
 1. **KS-1707 (High, Backlog) BEFORE 2026-10-31:** six accepted audit-baseline rows lapse (react-router x2 KS-528, deepmerge-ts KS-664, sprintf-js + postcss-selector-parser KS-1425, braces KS-1403); all six are still reported by leg 6, so on that date they turn the gates RED and refuse every push. Fix the dependency or renew (a HIGH row's renewal is Kam's or Wednesday's; the 10-05 grant covers re-dating on his ruled date only). The 15 stale CLEANUP rows are in the same ticket. Told Kam on the panel 17:16. **File a card with default 'fix forward' about 10-26 if no seat has started it**; do not let it reach 10-30 unowned.
 2. **Held Spark pass KS-1622** (READY_KS-1622-LATERWINDOW1622-1 in local-model/night/; brief ks_1622_p1; PASS byte-identical, red 3/6 at tip, suite 1169 -> 1175; departs from the ticket's literal wording on purpose, see the brief's Scope). Needs a raise seat (Sonnet, test + one line in api-gateway platform.ts); batch it with any other held test-only pass. A PASS is never a merge.
