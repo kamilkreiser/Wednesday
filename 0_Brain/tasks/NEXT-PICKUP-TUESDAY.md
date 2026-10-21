@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 405 — 2026-10-22 09:37 (s139). **READ THIS FIRST; supersedes 404's drafter line and 403's LIVE line 2 (B439 is DONE).**
+- **LIVE (RE-ARM at boot: status_watch on each STATUS, run_in_background):**
+  1. %243 `Datasec/HPSM-POC-F2` **B440 telemetry fix round 3, OPUS (C3)**, stamped 09:35:31 (rulings R-1 YES: no log template sent, B436-4; R-2 YES; R-3 C3), hard stop 13:30, target READY 12:30 -> `…/Briefs/2026-10-22_B440_STATUS.md`, last line `READY FOR QA: B440 …` / `STOPPED:`. On READY: verify at source, then the ROUND-3 tier-1 Opus gate (clone `tuesday/briefs/2026-10-22_B436_SEAT-G33_…`, re-pin, add B436 findings + B440's retired-row list as regression rows). A NO GO = STOP for good (no round 4): card Kam.
+  2. %238 `Datasec/HPSM-POC-L2` **B438**: STOPPED 09:32 with a question; RULED (a) in `tuesday/briefs/2026-10-22_B438_ADDENDUM-1.md` (ship the md shift; residual Note B438-N1). Watcher re-armed `--changed`. Its measure run was DETACHED (ppid 1): `pgrep -fl b438` in its own call before pane_close.
+- **PR #131** (datasecau/HPSM-POC-analysis, records/b439 @ 9546d955; HP-mail scan 0/28, control 1): checks waiter armed; land by MERGE COMMIT after CodeQL + checks (the #130 precedent), head-pinned; then read main.
+- **Kam told** (bf-1b0fcd6f5b01): the telemetry card left out the open log-text Major; B440 includes it; his word can narrow it. If he narrows: ADDENDUM to B440 voiding item 2b.
+
 ## 🟢 DELTA 404 — 2026-10-22 09:29 (s139, booted 09:2x, ctx ~45%). **READ THIS FIRST; adds to 403 (403's LIVE lines 1-2 stand).**
 - **KAM RULED TELEMETRY = a** ("One more fix round, simplest form", live 09:27:03; ruled in store 09:27:46; receipt bf-85fd1b1a97c1). This supersedes 401/402's "HOLD, do nothing". Round 3 is beyond the cap ON HIS WORD; no round 4 without him.
 - **B440 drafter RUNNING** (Agent tool, Sonnet; dies with this seat: if the files are missing, re-commission from this line) -> `2_Project_Files/tuesday/briefs/2026-10-22_B440_SEAT-F2_hpsmpoc-telemetry-224-fixround3.md` + `_B440_DRAFTER-REPORT.md`. Then: READ WHOLE, stamp (heads by ls-remote; partition vs B438 `web/src/components/shell/**`), launch pane `Datasec/HPSM-POC-F2` on OPUS (C6, `BRIEF_SEAT_LEVEL=opus`) at load1 < 7, rung 5, status_watch on `…/Briefs/2026-10-22_B440_STATUS.md`. On READY: verify at source, then a ROUND-3 tier-1 Opus gate (clone B436's kit, re-pin, add B436 findings as regression rows).
