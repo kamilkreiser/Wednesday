@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 389 — 2026-10-21 23:26 (s137). **READ THIS FIRST; supersedes 388's LIVE and B425 lines.**
+- **LIVE:** %224 `Datasec/NexusAI-L37` **B425** lands NexusAI #101 (same-commit FF via its COPY of land.sh with the exact-row #151 allowance) + RD-874/RD-875 comment + transition 31 -> `NexusAI/1_Project_Definition/Briefs/2026-10-21_B425_STATUS.md`, last line `LANDED: …` or `STOPPED: …` (**status_watch does NOT know LANDED:** re-arm a custom waiter). On LANDED: verify main = 7c11c78f by ls-remote (same sha), Deploy demo skipped, #151 open on main, RD-874/875 comments + Testing by GET; pgrep then pane_close.
+- **Composer #85: B424 GO WITH FINDINGS @ 85105729** (Minor B424-1 ruled Minor by Tuesday). #85 waits for K6 + the open Composer cards; NOT landed. **Owed: a Composer records seat** (C-entry for the round-3 ruling + B424 verdict, BACKLOG rows for B358-2 and B424-1, history, catch-up of B423/B424 briefs/STATUS). Panes %221/%223 closed.
+- OWED otherwise: DELTA 388's list.
+
 ## 🟢 DELTA 388 — 2026-10-21 23:19 65% CHECKPOINT (s137). **READ THIS FIRST; supersedes 387's LIVE lines.**
 - **B420 gate 33 DONE: GO WITH FINDINGS @ 7c11c78** (0 Blocker/Major/Minor; N33-1..9 + Polish N33-7; completion check accepted by Tuesday; pane %222 closed). **Owed: land #101** by C-190 item 2 (SAME commit fast-forward by a NexusAI seat's land.sh, never squash). **B425 landing brief DRAFTER running** -> `tuesday/briefs/2026-10-21_B425_SEAT-L37_nexusai-land-pr101.md` + DRAFTER-REPORT. Successor/next: read whole, rule its questions, stamp, launch pane `Datasec/NexusAI-L37` (Sonnet) at load1 < 7, watch its `LANDED:`/`STOPPED:` line, then verify main = 7c11c78f by ls-remote and the RD-874/875 ticket writes by GET. Re-read main = b8715182 before stamping (#67 is the only other open PR).
 - **LIVE:** %223 `Datasec/Security-Composer-G30` **B424** tier-2 gate on Composer #85 delta (VERDICT: line; status_watch armed). %221 `Datasec/Security-Composer-W13` **B423** held idle on purpose (B424 may ask the builder); release after B424's verdict (pgrep first, then pane_close). NO GO on B424 -> a card to Kam (no 4th round); GO -> #85 still waits for K6 + the open Composer cards.
