@@ -7,6 +7,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ---
 
 ## 🟢 DELTA 376 — 2026-10-21 15:08 (s135). **Adds to 375.**
+- **UPDATE 15:1x: #171 LANDED** (squash pinned to 4615e41a, main now **a542f863**, tree = head tree; not deployed). The #171 waiter is done; HPSM-POC main for B410's ADDENDUM-1 is whatever main is after B407 + B409 land.
 - **LIVE also:** %211 `Datasec/NexusAI-G35` **B412** (stamped 15:07:02; light tier-2 gate #103 940dac40 + #102 b52b46fb, full verify both) -> `NexusAI/1_Project_Definition/Briefs/2026-10-21_B412_STATUS.md` (watcher armed; dies with this seat). On GO/GWF: land **#103 first, then #102** by C-190 same-commit FF through a NexusAI landing seat (B394's shape), #102 forward-merged after #103 lands (disjoint; no gate re-run: #103's file is read by no suite).
 - **B411 (gate 33 re-pin for #101) is DRAFTED, NOT READ, NOT STAMPED** (`tuesday/briefs/2026-10-21_B411_SEAT-G34_nexusai-gate33-pr101-repin.md`, 173 lines, + `_B411-B412_DRAFTER-REPORT.md`): its launcher must be COPIED to `fleet/qa-agent/launchers/launch_qa_nexusai_gate33_repin.sh` with the report's change list (guard 40 pin, chain, counts, lock, guard 10 report path). Do it AFTER #103/#102 land and #101 is forward-merged again (re-pin the kit to that head). Drafter Qs: launcher copy route (rec), report in NexusAI Briefs (rec), PR #101 body sentence applied before launch (B362 STATUS:177), Dependabot '2 vulnerabilities' line on main after 1.16.1 -> a ticket decision.
 
