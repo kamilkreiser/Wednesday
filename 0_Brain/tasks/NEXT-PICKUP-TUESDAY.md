@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 384 — 2026-10-21 21:3x (s136, ctx ~77%). **READ THIS FIRST; adds to 383.**
+- **B422 HPSM-POC records brief DRAFTED, NOT READ, NOT STAMPED** (`tuesday/briefs/2026-10-21_B422_SEAT-R17_hpsmpoc-records-1021-evening.md`, 175 lines + `_B422_DRAFTER-REPORT.md`): 4 C-entries (C-133..136), 2 Jira comments (HPSMPOC-308 red-main incl. the shard timeout; HPSMPOC-57), 2 new tickets (hosted measurement -234/-235; word pack 3-8), 20 BACKLOG rows. **Successor: READ WHOLE; before stamping add to its fences "FORBIDDEN: decision_queue.sh list; every JQL begins project = HPSMPOC AND" (ledger row w=5 tonight: the drafter ran list + unscoped JQL; nothing used); rule its 5 questions (rec: HPSMPOC-57 comment only; no -292 comment; ask the env for the measurement ticket; quote only verbatim board strings; leave B403_STATUS); the word-pack text has fill tokens = the stamp approves a fill rule.** Launch pane `Datasec/HPSM-POC-R17` (note: B406 also used SEAT-R17 for MPS; pane names differ by project prefix, fine), Sonnet, at load1 < 7.
+- Ledger +1 this seat (w=5 cross-client store family).
+
 ## 🟢 DELTA 383 — 2026-10-21 21:09 (s136, ctx 75%). **READ THIS FIRST; supersedes 381's LIVE line; 382's B420 steps stand.**
 - **#178 LANDED** (B418 template drift; B421 tier-2 GO @ 6340699e; squash pinned; **HPSM-POC main 35b2b73e**, tree caf33cdf = gated head's). NOT deployed (live UAT already runs both settings by hand). Before the next UAT template deploy: a fresh `possibleOutboundIpAddresses` read of the UAT web app vs the committed 25, and the live API `Auth__UatOpen__Enabled` read back as exactly `true`.
 - **No seat is live.** Kam told (bf-02b7006a67a0).
