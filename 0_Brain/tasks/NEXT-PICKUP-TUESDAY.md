@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 404 — 2026-10-22 09:29 (s139, booted 09:2x, ctx ~45%). **READ THIS FIRST; adds to 403 (403's LIVE lines 1-2 stand).**
+- **KAM RULED TELEMETRY = a** ("One more fix round, simplest form", live 09:27:03; ruled in store 09:27:46; receipt bf-85fd1b1a97c1). This supersedes 401/402's "HOLD, do nothing". Round 3 is beyond the cap ON HIS WORD; no round 4 without him.
+- **B440 drafter RUNNING** (Agent tool, Sonnet; dies with this seat: if the files are missing, re-commission from this line) -> `2_Project_Files/tuesday/briefs/2026-10-22_B440_SEAT-F2_hpsmpoc-telemetry-224-fixround3.md` + `_B440_DRAFTER-REPORT.md`. Then: READ WHOLE, stamp (heads by ls-remote; partition vs B438 `web/src/components/shell/**`), launch pane `Datasec/HPSM-POC-F2` on OPUS (C6, `BRIEF_SEAT_LEVEL=opus`) at load1 < 7, rung 5, status_watch on `…/Briefs/2026-10-22_B440_STATUS.md`. On READY: verify at source, then a ROUND-3 tier-1 Opus gate (clone B436's kit, re-pin, add B436 findings as regression rows).
+- **B439 ADDENDUM-1** written + tapped (C-140 records the 09:27 ruling; approved HPSMPOC-224 comment not edited/doubled). Expect `ADDENDUM-1 read` in B439 STATUS.
+- **%238 B438 holds by design while its `measure-all.sh` runs DETACHED (ppid 1): pane_close cannot see it — `pgrep -fl b438` in its own call before closing %238.**
+- Done s139: pane_close.sh caffeinate refinement (95526d2b5, OWED 6 closed); rotation sweep 0930 (0/0/0).
+
 ## 🔴 DELTA 403 — 2026-10-22 09:2x ROTATION (s138, ctx 81%; band 80-90). **READ THIS FIRST; supersedes 402's "no seat live" line (402's done/waiting/owed lists stand, minus items 1-2 below which are now LIVE).**
 - **LIVE (RE-ARM at boot: `bash 2_Project_Files/tuesday/tools/status_watch.sh '<STATUS>' 60` as run_in_background, one per seat):**
   1. %238 `Datasec/HPSM-POC-L2` **B438** UAT header compact to md (B435-1 fix; Sonnet; stamped 09:16:56, target READY 12:00, hard stop 13:00) -> `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-10-22_B438_STATUS.md`, last line `READY FOR QA: B438 …` / `STOPPED:`. On READY: verify at source (ls-remote `b438/uat-header-compact-to-md`, compare vs main 01dd9e4b: only `web/src/components/shell/**` + at most one `web/e2e/*.spec.ts`), then a tier-2 Sonnet gate (clone `tuesday/briefs/2026-10-22_B435_SEAT-G32_hpsmpoc-b434-badge-gate-tier2.md`, re-pin; widths 320-1280 for four levels; non-UAT pixel-identical), PR (project gh config), land by head-pinned squash after all checks + 0 alerts, then a UAT redeploy (clone `…_B437_SEAT-D25_…`, re-pin to the new main; same Auth__UatOpen__Enabled true check).
