@@ -1,0 +1,180 @@
+# READY — KS-1622-LATERWINDOW1622-1 (Spark (DeepSeek V4 Flash), briefed, code_patch, vitest) — PASS 7/7 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-21_ks_1622_p1/out.md.checker/patch.diff`** (from `ls` at 16:11 2026-10-21; it is `cat` of the section files in order: `cmp` rc 0: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-21_ks_1622_p1/out.md.checker/section_1.diff`, `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-21_ks_1622_p1/out.md.checker/section_2.diff`). Checker A2 (verbatim from checker.out): `PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-21_ks_1622_p1/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-21_ks_1622_p1-control/out.md.checker/patch.diff` rc 0, Wednesday).
+
+**Held 16:11 2026-10-21 by Wednesday after a source read (hold_ready.py, code_patch path — every clause below is COPIED from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-21_ks_1622_p1/out.md.checker`, not typed; the artefact each came from is named in brackets).** Tip `5671d5115921cae656c6c598741d9e9a87cbeeeb`.
+- Touched-file set [checker.out A3, verbatim]: `PASS A3 touched-file set == { Blockchain/Dev/services/api-gateway/src/routes/platform.ts , Blockchain/Dev/services/api-gateway/src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts }`
+- Declared set [input.json product_file + suggested_test_file]: `Blockchain/Dev/services/api-gateway/src/routes/platform.ts` (product) and `Blockchain/Dev/services/api-gateway/src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts` (test) — equal to numstat.out's set (2 files).
+- numstat [out.md.checker/numstat.out, verbatim]:
+```
+2	0	Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+139	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts
+```
+- Product hunk `+` count [checker.out A3c, verbatim]: `PASS A3c every '+' line the brief adds is in the product hunk (2 line(s)), and no tip line is re-added as a '+' (A3d)` — product section `+` lines 2 ordered-equal (whitespace-stripped) to the brief's `expected_plus` (ASCII); `-` lines 0.
+- Byte-exactness [checker.out A3i, verbatim]: `A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/api-gateway/src/routes/platform.ts byte-exact incl. leading whitespace (apply mode strict): OK 2 line(s) byte-exact incl. leading whitespace (of 2; 2 line(s) added by the apply)` [a3i_indent.out: `OK 2 line(s) byte-exact incl. leading whitespace (of 2; 2 line(s) added by the apply)`]
+- Hunk audit [out.md.checker/hunk_audit.out, first line verbatim]: `sections=2 miscounted_sections=0`
+- Sections [out.md.checker/sections.json + section_<k>.opts + apply_check_strict_<k>.out]:
+- section 1 `section_1.diff` → `Blockchain/Dev/services/api-gateway/src/routes/platform.ts` (hunks=1, miscount=0; applied file per `section_1.opts`: `section_1.diff`, git-apply options: `(none — strict)`; `apply_check_strict_1.out`: EMPTY (strict apply --check clean))
+- section 2 `section_2.diff` → `Blockchain/Dev/services/api-gateway/src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts` (hunks=1, miscount=0; applied file per `section_2.opts`: `section_2.diff`, git-apply options: `(none — strict)`; `apply_check_strict_2.out`: EMPTY (strict apply --check clean))
+- RED-FIRST [checker.out A4, verbatim]: `PASS A4 RED-FIRST: src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts fails at the untouched tip (3 failed / 6 run; controls green; assertion reds)` [red_first.json: failed=3 of total=6; red cell(s): ['KS-1622 follow-up - the audit-log route logs a later paging window that answers an error status RED KS-1622b R1 a second window that answers 500 with a list: 200 and ONE warn naming the route with status 500 and windowsRead 1', 'KS-1622 follow-up - the audit-log route logs a later paging window that answers an error status RED KS-1622b R2 a second window that answers 503 with a list: ONE warn with status 503 and windowsRead 1', 'KS-1622 follow-up - the audit-log route logs a later paging window that answers an error status RED KS-1622b R3 the warn for a later window carries the status only, never the upstream body text']]
+- GREEN-AFTER [checker.out A5, verbatim]: `PASS A5 GREEN-AFTER: src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts passes with the product hunk (6 passed / 6 run)` [green_after.json: failed=0 of total=6, success=True]
+- Whole suite [out.md.checker/suite_delta.out, verbatim]: `baseline: total=1169 failed=0 | after: total=1175 failed=0` · `NEW reds: []` [baseline_suite.json total=1169 failed=0; after_suite.json total=1175 failed=0]
+- A6 [verbatim]: `PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip` · A7 [verbatim]: `PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)`
+- SUMMARY [checker.out, verbatim]: `SUMMARY files=2 +141/-0 test=src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts red_first=yes apply_mode=strict`
+
+**PR NOTES for the raise seat:** CODE_PATCH — PRODUCT BYTES CHANGE: `Blockchain/Dev/services/api-gateway/src/routes/platform.ts` (+2/-0 per numstat.out) and the test file `Blockchain/Dev/services/api-gateway/src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts` (+139/-0); two files. Apply PER SECTION with the checker's apply mode — section 1 `section_1.diff`: `git apply -p1` (strict); section 2 `section_2.diff`: `git apply -p1` (strict) — at the tip `5671d5115921cae656c6c598741d9e9a87cbeeeb` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product code changes) — the gate decides. Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-21_ks_1622_p1/input.json`. Brief (located from the run dir's own name under night/briefs/): `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1622_p1/KS-1622.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-21_ks_1622_p1/checker.out`.
+
+```diff
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/platform.ts b/Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/platform.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+@@ -493,2 +493,4 @@
+           if (collected.length > 0 && !Array.isArray(data?.entries)) throw new Error('tenant-provisioning audit-log window was not a list');
++          // KS-1622: a LATER window that answers an error status but still carries a list is appended; log it once (a window that is not a list throws above and the catch logs it).
++          if (!r.ok && collected.length > 0) logger.warn('GET /api/platform/audit-log upstream answered an error status', { status: r.status, windowsRead });
+           const rowsInWindow = Array.isArray(data?.entries) ? data.entries : [];
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1622b-platform-audit-log-logs-a-later-window-error-status.test.ts
+@@ -0,0 +1,139 @@
++/**
++ * KS-1622 follow-up - the audit-log route logs it when a LATER paging window answers an error status.
++ *
++ * GET /api/platform/audit-log reads the tenant-provisioning half in sequential windows. #1629 logs ONE warn when the FIRST window
++ * answers an error status. A SECOND or later window that answers an error status but whose body still carries an `entries` list
++ * is appended with no log line at all. It now logs the same ONE warn naming the route, the status and windowsRead (1 for the
++ * second window). A later window that is NOT a list still ends in the existing catch (ONE warn, never two). Whether such a window
++ * should also DISCARD the platform half is a separate product decision: no cell here pins the rows.
++ *
++ * Same harness as ks1622: the REAL createPlatformRoutes on 127.0.0.1 against a stub upstream and an in-memory audit_logs query.
++ */
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import express, { type RequestHandler } from 'express';
++import http from 'http';
++import type { AddressInfo } from 'net';
++import { createPlatformRoutes } from '../routes/platform';
++import { logger } from '../utils/logger';
++
++const T0 = Date.UTC(2026, 0, 1);
++/** The stub upstream's behaviour for the current cell. */
++let mode: 'ok' | 'first-500' | 'second-503' | 'second-500-list' | 'second-503-list' = 'ok';
++const PLATFORM = Array.from({ length: 3 }, (_, i) => ({ id: `P-${i}`, action: 'tenant_created', created_at: new Date(T0 - (10 + i) * 1000).toISOString() }));
++const APP_IDS = ['A-0', 'A-1'];
++let calls = 0;
++
++let upstream: http.Server;
++let gateway: http.Server;
++let base = '';
++const warnSpy = vi.spyOn(logger, 'warn').mockImplementation((() => logger) as never);
++
++beforeAll(async () => {
++  upstream = http.createServer((req, res) => {
++    calls += 1;
++    const url = new URL(req.url ?? '/', 'http://x');
++    const limit = Number(url.searchParams.get('limit')) || 50;
++    const offset = Number(url.searchParams.get('offset')) || 0;
++    const oneRow = PLATFORM.slice(offset, offset + 1);
++    if (mode === 'first-500' && calls === 1) {
++      res.writeHead(500, { 'Content-Type': 'application/json' }).end(JSON.stringify({ success: false, error: 'upstream broke' }));
++      return;
++    }
++    if (mode === 'second-503' && calls === 2) {
++      res.writeHead(503, { 'Content-Type': 'application/json' }).end(JSON.stringify({ success: false }));
++      return;
++    }
++    if ((mode === 'second-500-list' || mode === 'second-503-list') && calls === 2) {
++      res.writeHead(mode === 'second-500-list' ? 500 : 503, { 'Content-Type': 'application/json' })
++        .end(JSON.stringify({ success: false, error: 'upstream broke later', entries: oneRow, total: PLATFORM.length }));
++      return;
++    }
++    // every mode except ok and first-500 serves ONE row per window, so the first window is short of the total and the route asks again
++    const rowsOut = mode === 'ok' || mode === 'first-500' ? PLATFORM.slice(offset, offset + limit) : oneRow;
++    res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ success: true, entries: rowsOut, total: PLATFORM.length }));
++  });
++  await new Promise<void>((r) => upstream.listen(0, '127.0.0.1', () => r()));
++  const superAdmin = (() => ((req, _res, next) => {
++    (req as unknown as { user: object }).user = { userId: 'u-ks1622b', email: 'a@b.c', role: 'super_admin', verificationLevel: 'none' };
++    next();
++  }) as RequestHandler) as (required?: boolean) => RequestHandler;
++  const app = express();
++  app.use(createPlatformRoutes({
++    authenticateToken: superAdmin,
++    tenantProvisioningUrl: 'http://127.0.0.1:' + (upstream.address() as AddressInfo).port,
++    setTenantKey: () => {},
++    getTenantKey: () => undefined,
++    removeTenantKey: () => {},
++    query: async (sql: string) => {
++      if (sql.includes('COUNT(*)')) return { rows: [{ total: APP_IDS.length }] };
++      return { rows: APP_IDS.map((id, i) => ({ id, user_id: null, action: 'doc_verified', resource_type: null, resource_id: null, details: null, ip_address: null, success: true, created_at: new Date(T0 - i * 1000) })) };
++    },
++  }));
++  gateway = http.createServer(app);
++  await new Promise<void>((r) => gateway.listen(0, '127.0.0.1', () => r()));
++  base = 'http://127.0.0.1:' + (gateway.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  upstream.closeAllConnections();
++  await new Promise<void>((r) => gateway.close(() => r()));
++  await new Promise<void>((r) => upstream.close(() => r()));
++  warnSpy.mockRestore();
++});
++
++beforeEach(() => {
++  mode = 'ok';
++  calls = 0;
++  warnSpy.mockClear();
++});
++
++async function auditLog(): Promise<number> {
++  const r = await fetch(`${base}/api/platform/audit-log?limit=50&offset=0`);
++  await r.json();
++  return r.status;
++}
++
++/** Every warn call, as [context, meta]. */
++function warnings(): Array<[unknown, unknown]> {
++  return (warnSpy.mock.calls as unknown as unknown[][]).map((c) => [c[0], c[1]] as [unknown, unknown]);
++}
++
++describe('KS-1622 follow-up - the audit-log route logs a later paging window that answers an error status', () => {
++  it('RED KS-1622b R1 a second window that answers 500 with a list: 200 and ONE warn naming the route with status 500 and windowsRead 1', async () => {
++    mode = 'second-500-list';
++    expect(await auditLog()).toBe(200);
++    expect(warnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { status: 500, windowsRead: 1 }]]);
++  });
++
++  it('RED KS-1622b R2 a second window that answers 503 with a list: ONE warn with status 503 and windowsRead 1', async () => {
++    mode = 'second-503-list';
++    expect(await auditLog()).toBe(200);
++    expect(warnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { status: 503, windowsRead: 1 }]]);
++  });
++
++  it('RED KS-1622b R3 the warn for a later window carries the status only, never the upstream body text', async () => {
++    mode = 'second-500-list';
++    await auditLog();
++    expect(warnings()).toHaveLength(1);
++    expect(JSON.stringify(warnSpy.mock.calls)).not.toContain('upstream broke later');
++  });
++
++  it('CONTROL KS-1622b C1 a first window that answers 500: still ONE warn with status 500 and windowsRead 0', async () => {
++    mode = 'first-500';
++    expect(await auditLog()).toBe(200);
++    expect(warnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { status: 500, windowsRead: 0 }]]);
++  });
++
++  it('CONTROL KS-1622b C2 a second window that answers 503 and is not a list: still ONE warn, the existing catch with windowsRead 1', async () => {
++    mode = 'second-503';
++    expect(await auditLog()).toBe(200);
++    expect(warnings()).toEqual([[expect.stringContaining('/api/platform/audit-log'), { error: 'tenant-provisioning audit-log window was not a list', windowsRead: 1 }]]);
++  });
++
++  it('CONTROL KS-1622b C3 a healthy upstream read in three windows: 200 and no warn', async () => {
++    mode = 'ok';
++    const r = await fetch(`${base}/api/platform/audit-log?limit=50&offset=0`);
++    expect(r.status).toBe(200);
++    expect(warnings()).toEqual([]);
++  });
++});
+```
