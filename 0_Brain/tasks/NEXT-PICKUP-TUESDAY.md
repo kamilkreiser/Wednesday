@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 375 — 2026-10-21 15:05 66% CHECKPOINT (s135). **READ THIS FIRST; supersedes 374's DRAFTERS line.**
+- **LIVE (RE-ARM status_watch on each at boot):** %208 `HPSM-POC-D21` **B407** words (READY 16:30 target) · %209 `HPSM-POC-D22` **B409** UAT no-sign-in, option a, Opus C3 (READY 18:30 target, hard stop 20:00; then a **TIER-1 Opus gate** to draft from B386/B393's gate shape) · %210 `HPSM-POC-DEP7` **B410** UAT stand-up, Opus C6, PHASE A now (RG `hpsm-poc-uat-rg`, budget -> 500); **PHASE B needs `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B410_ADDENDUM-1.md` naming the landed main sha after B407 + B409 merge** (polls every 5 min; STOPs at 22:00 if absent). STATUS files `…/Briefs/2026-10-21_B40{7,9}_STATUS.md`, `…_B410_STATUS.md`.
+- **#171:** scratchpad waiter `wait171.sh` (dies with this seat): if lost, re-read check-runs at #171's new head; land `--squash --match-head-commit <head>` when the 5 required are green; blobs check.
+- **B408 HELD** (demo plan/telemetry; re-aimed at UAT; Kam told bf-d629e274904b). Telemetry needs a code lane (HPSMPOC-224: OpenTelemetry distro, no bodies/PII) — not drafted; B410 measures the platform route.
+- **OPEN CARD** `hpsmpoc-uat-start-page-words-1021` (default at 20:00 = a: the B409 DEFAULTS APPLIED words + Feedback off + BillOverUsage). If b: B410 ADDENDUM switches SQL to AutoPause; if c: B409 addendum with his words.
+- **Drafter running:** B411/B412 NexusAI gates (gate 33 re-pin #101 5cc06298; light tier-2 #103 940dac40 + #102 b52b46fb).
+- **After landings:** ADDENDUM-1 for B410 · then the email to Kam (kamil.kreiser@datasec.com.au): UAT link, each level + what it can do (start-page words), the cover note (sample customer + internal feedback present; -94/-47/-48 wait on HP content with dates; DRAFT pages listed) · feedback proof item (UAT has Feedback OFF: the proof item goes to the DEMO, or ask) · exec-summary before/after card · user guide (screenshots from UAT) · records seat (Kam's C-entries from the register, B404 findings, word-pack tickets 3-8, HPSMPOC-234/-235 measurement ticket).
+
 ## 🟢 DELTA 374 — 2026-10-21 14:53 (s135, ctx ~61%). **READ THIS FIRST; updates 373.**
 - **Kam ruled `hpsmpoc-uat-no-signin-which-level-1021` = a at 14:49:54** (start page, visitor picks Partner/Consultant/Admin/Demo; Admin destructive buttons off on UAT; sample data only).
 - **LIVE:** %208 `Datasec/HPSM-POC-D21` **B407** word lane (stamped 14:50:03, READY target 16:30, hard stop 17:30) -> `HPSM-POC/…/Briefs/2026-10-21_B407_STATUS.md` (watcher armed). Then: open the PR, tier-2 gate, land (squash, pinned), deploy to UAT + demo.
