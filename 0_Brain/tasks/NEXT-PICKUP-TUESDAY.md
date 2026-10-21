@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 379 — 2026-10-21 16:29 50% CHECKPOINT (s136, booted 16:16). **READ THIS FIRST; supersedes 378's %209 line (378's OWED list stands).**
+- **B409 DONE:** READY 16:17 verified at source (549e8383, 5 ahead 0 behind main db179494, 23 files all in PARTITION). **PR #177 OPEN** (head 549e8383). Pane closed.
+- **LIVE (RE-ARM `tuesday/tools/status_watch.sh <STATUS> 30` on each at boot):**
+  - %214 `Datasec/HPSM-POC-G27` **B415 tier-1 Opus gate on #177** (kit `tuesday/briefs/2026-10-21_B415_SEAT-G27_hpsmpoc-pr177-gate-tier1.md`, read whole + stamped 16:28:43, launched 16:28; Step 0 copy landed 16:29) -> `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B415_STATUS.md`, target 20:00, hard stop 20:30. On GO/GWF: re-read required contexts + CodeQL (4 Analyze legs, 0 alerts) -> `gh pr merge 177 --squash --match-head-commit 549e8383…` -> blobs check -> **write `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B410_ADDENDUM-1.md`** naming the ONE 40-hex main sha, "B409 and B407 are merged" (B410 polls till 22:00). NO GO -> fix round (round 1 of 2).
+  - %210 `HPSM-POC-DEP7` B410 polling (wake acked twice; holding by design). %213 `NexusAI-L36` B414 (#103 merged per sweep; main 940dac40; #102 next).
+- **After the verdict, card Kam:** (1) FOR TUESDAY 8 = a demo-audience Entra token accepted by the UAT API (same apiAppClientId; tenant UNMEASURED, B410's) with the gate's measured facts; (2) the demo's compiled template gains Key Vault refs to `uat-open-key` (does a demo redeploy break?) — gate measures in r5.
+- **OPEN CARD** `hpsmpoc-uat-level-display-names-1021` (the four '(review copy)' labels; rec a; default a at 19:30).
+- Sweep 1620 done: 0 feedback, 0 client responses, MPSCALC-316 seat-filed; nothing briefable. Mail 0 new; Kam newest 15:41:19; reconcile to rule 0.
+
 ## 🔴 DELTA 378 — 2026-10-21 16:15 ROTATION (s135, ctx ~80%; band 80-90). **READ THIS FIRST; it supersedes 371-377's LIVE lines (their OWED lines stand where not done below).**
 - **LIVE (RE-ARM `tuesday/tools/status_watch.sh <STATUS> 30` on EACH at boot; watchers die with this seat):**
   - %209 `Datasec/HPSM-POC-D22` **B409** UAT no-sign-in, option a (Opus C3; READY target 18:30, hard stop 20:00; told by `tuesday/briefs/2026-10-21_B409_ADDENDUM-1.md` to forward-MERGE main db179494 before READY) -> `HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B409_STATUS.md`. On READY: verify at source (ls-remote, compare vs main, files in its PARTITION only) -> open the PR -> **draft a TIER-1 Opus gate** (shape: B393/B386 gate kits; must re-prove D2 lock table, D4 assertion, D6 refusals, demo inert, start-page words exactly as Kam approved 15:12) -> land squash pinned.
