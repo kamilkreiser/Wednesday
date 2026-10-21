@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 407 — 2026-10-22 10:16 (s139). **READ THIS FIRST; adds to 406.**
+- **OWED TO KAM BY ~12:30: the user guide v0.2 DRAFT by mail** (his 10:12/10:13 question; Tuesday's answer bf-3ca17b5f598d promised it). Two changes only: every screenshot re-taken from the review copy at 01dd9e4b (badge now "<Level> (review copy)"), the badge sentence (~line 133) updated, and his approved line added to 5.5 ("Guided remediation and HP recommendations are shown as a proposal for HP to vet; the approved wording and content wait on HP."). **B442 drafter RUNNING** (Agent, Sonnet; re-commission if `tuesday/briefs/2026-10-22_B442_*` is missing) -> READ WHOLE, stamp, launch `Datasec/HPSM-POC-U2`; on READY: look at the pages, then mail Kam from tuesday-agent@ (two mails if > ~5.5 MB each, as B427), read back, panel pointer.
+- B441 gate (%244) is in its width sweep; it had NOT written its STATUS file by 10:13 (Step 0 says it should): a protocol finding to raise at its verdict, not a fault in the subject.
+- B440: B440 ADDENDUM-1 (retire two branch-born rows: yes, with conditions) delivered + read 09:45. fleet_ack answered for its QUESTION returned rc 3: re-run `fleet_ack.sh answered "B440 retire two branch-born rows" ...`.
+
 ## 🟢 DELTA 406 — 2026-10-22 09:39 50% CHECKPOINT (s139). **READ THIS FIRST; supersedes 405's B438 and PR #131 lines (405's B440 line stands).**
 - **PR #131 LANDED** (records B439): main of datasecau/HPSM-POC-analysis = 707ceb3a (merge commit, tree = head's). Records for 22 Oct are done.
 - **B438 READY FOR QA @ c1a245f8, verified at source** (branch on origin; mutants 5/5 red; web 2056/2056; diff 2 files). **B441 tier-2 gate DRAFTER RUNNING** (Agent, Sonnet; dies with this seat: re-commission if `tuesday/briefs/2026-10-22_B441_*` is missing) -> READ WHOLE, stamp, launch `Datasec/HPSM-POC-G34` on Sonnet at load1 < 7 (B440 has load priority), ports 8110-8119. On GO/GWF: PR (project gh config), all checks + 0 alerts, land by head-pinned SQUASH (HPSM-POC convention, CLARIFICATIONS.md:138), then a UAT redeploy (clone `tuesday/briefs/2026-10-22_B437_SEAT-D25_…`, re-pin to the new main; Auth__UatOpen__Enabled exactly true before and after) under the 10-16 push-to-demo grant. %238 held open for the gate's questions.
