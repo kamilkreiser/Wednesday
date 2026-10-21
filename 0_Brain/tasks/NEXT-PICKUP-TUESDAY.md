@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 390 — 2026-10-22 00:32 (s137). **READ THIS FIRST; supersedes 389's LIVE line. No seat is live.**
+- **NexusAI #101 LANDED** (B425, verified at source 00:3x): **NexusAI main = 7c11c78f** (same commit FF from b8715182), Deploy demo skipped, push runs green, #151 open on main at :43 (RD-810 untouched), RD-874/RD-875 Testing with comments 39883/39884. Pane %224 closed.
+- **OWED next, in order:** (1) **Composer records seat** for round 3 (C-entry: Kam's 14:46 fix-round ruling + B423 + B424 GWF; BACKLOG rows B358-2 and B424-1; history; catch-up copies of the B423/B424 briefs + STATUS) — #85 itself stays unlanded (K6 + open cards). (2) NexusAI records? check NexusAI's own rule for a HISTORY entry after a landing (B414 precedent) — ask by the next NexusAI brief, never edit. (3) DELTA 383 list: feedback proof; exec-summary words card (HPSMPOC-187); branded user guide emailed; telemetry HPSMPOC-224; NexusAI main clone's 33 modified files. (4) `pane_close.sh` refusal on live seat-tag processes (ledger w=4, shared tooling: claim first). Card open: `hpsmpoc-uat-budget-alert-1021` (default 09:00 today).
+- Ledger +1 this seat (w=4 guard-in-same-command). **Digests must be regenerated at the rotation/wrap** (both forms).
+
 ## 🟢 DELTA 389 — 2026-10-21 23:26 (s137). **READ THIS FIRST; supersedes 388's LIVE and B425 lines.**
 - **LIVE:** %224 `Datasec/NexusAI-L37` **B425** lands NexusAI #101 (same-commit FF via its COPY of land.sh with the exact-row #151 allowance) + RD-874/RD-875 comment + transition 31 -> `NexusAI/1_Project_Definition/Briefs/2026-10-21_B425_STATUS.md`, last line `LANDED: …` or `STOPPED: …` (**status_watch does NOT know LANDED:** re-arm a custom waiter). On LANDED: verify main = 7c11c78f by ls-remote (same sha), Deploy demo skipped, #151 open on main, RD-874/875 comments + Testing by GET; pgrep then pane_close.
 - **Composer #85: B424 GO WITH FINDINGS @ 85105729** (Minor B424-1 ruled Minor by Tuesday). #85 waits for K6 + the open Composer cards; NOT landed. **Owed: a Composer records seat** (C-entry for the round-3 ruling + B424 verdict, BACKLOG rows for B358-2 and B424-1, history, catch-up of B423/B424 briefs/STATUS). Panes %221/%223 closed.
