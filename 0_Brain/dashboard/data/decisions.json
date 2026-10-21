@@ -43453,5 +43453,55 @@
    "CARD hpsmpoc-uat-no-signin-which-level-1021",
    "CARD hpsmpoc-uat-start-page-words-1021"
   ]
+ },
+ {
+  "id": "secuura-advisory-freeze-lock-refresh-1021",
+  "client_project": "Secuura/Blockchain",
+  "title": "Every push to the Secuura repo is blocked by 10 new security advisories. Who clears it?",
+  "bluf": "No push can land until this clears, yours, Peter's, Stuart's or an agent's. Ten newly published advisories on four packages (follow-redirects, vite and launch-editor, the Model Context Protocol SDK, hono) make the pre-push check fail on develop itself. Three of the ten are high severity on follow-redirects and the MCP SDK, which sit in services that ship (kyc, api-gateway), so the standing rule that lets me accept moderate advisories does not cover them, and baselining high ones is yours. The fix exists for all ten. Most is a lock-file refresh in the range already allowed, plus three exact version pins on vite (analytics, auth, shared) that need a small manifest bump. The same shape was done before under KS-1425, KS-1437 and KS-1452. The raise seat I started for the two test PRs (KS-1508 and KS-1660) is ready, booted and on Sonnet, and found this; it will not work around the check. You ruled fix-forward on the same kind of freeze twice before (6 and 7 October, both option a: one seat refreshes the locks, one gated PR). What is new this time is the budget: the weekly gauge is at 86 percent and the hard stop is 90.",
+  "default_action": "If you don't answer: (a), because you ruled it twice. The raise seat's scope is extended to the refresh, it stops and mails at 89 percent, and nothing is baselined at high severity.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Let the raise seat do the refresh now, under a Sonnet seat and a gate",
+    "detail": "Same as your 6 and 7 October rulings. The booted Sonnet raise seat refreshes the locks and bumps the three vite pins in one change from develop; it stops and mails me at 89 percent. I gate it and merge it, then its two test PRs go up. May use the last of the weekly allowance (cost unmeasured)."
+   },
+   {
+    "key": "b",
+    "label": "Wait for the allowance to renew, about Sunday",
+    "detail": "Nothing is pushed by anyone until then. The two test PRs and every other change wait."
+   },
+   {
+    "key": "c",
+    "label": "Baseline the ten advisories with reasons, yourself",
+    "detail": "Your call only, because three are high on shipped services. Fastest, but it accepts known exposures."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-21T15:48:50.299947+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-21 20:06",
+   "2026-09-07 09:28",
+   "2026-09-08 09:57",
+   "2026-09-08 14:05",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-ks329-refresh-token-size",
+   "CARD secuura-ks1024-advisory-baseline",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD secuura-kintsugi-refresh-notice-release",
+   "CARD secuura-oauth-refresh-launder-forward-only-window",
+   "CARD secuura-oauth-refresh-window-iat-cutoff-or-marker",
+   "CARD secuura-audit-root-lock-0930-remeasured",
+   "CARD secuura-allowance-89-before-the-0930-freeze",
+   "CARD secuura-five-new-advisories-freeze-every-push-1006",
+   "CARD secuura-advisory-freeze-3-ghsa-1007"
+  ]
  }
 ]
