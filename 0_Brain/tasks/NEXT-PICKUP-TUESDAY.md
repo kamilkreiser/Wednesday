@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 369 — 2026-10-21 14:14 (s134). **READ THIS FIRST; supersedes 368's B403 and NEXT WORK lines.**
+- **B403 DONE + LANDED:** records PR #129 merged (records main **1212e9e5**; C-131 = B400 deploy, C-132 = B402 deploy); Jira: 39865 edited, 9 comments, HPSMPOC-289/-288/-232 **Done**, HPSMPOC-308 filed (red-main SQL Server shard); -148/-234/-235 held with reasons on the tickets. hpwin: 0/15590 (control 1); NOTE hpwin.py's default HPWIN_SRC path is stale — the mail lives at `4_Credentials/inbound_with_secrets/2026-10-16_kam-fw-terry-hp-answers.txt`, pass it by env.
+- **No live seats.** Hosted HPSM-POC = ec0a62a1 @ J4BEdU3NsTbseZT_47jB0 (current for Thursday).
+- **NEXT (in order):** (1) 18:00: if `hpsmpoc-b377-word-pack-thursday-1021` is unruled its default fires: one HPSMPOC ticket for the 8 wording findings (a small records seat, or fold into the next one); re-raise `hpsmpoc-hosted-demo-data-cleanup-1021`. (2) PR #171 tier-2 Sonnet gate (test-only, HPSMPOC-292). (3) B384 lane 5 (low). (4) NexusAI: #103 forward-merge main c139e4a8 + gate 33 re-stamp for #101. (5) MPS records (#93, B388-1). (6) A ticket for the hosted measurements HPSMPOC-234/-235 need (a burst-after-idle WITH Server-Timing on a signed-in page; /home first-GET range) so they can close.
+- On Kam's taps: word pack b/c -> word lane, tier-2 gate, land, deploy (B402's shape + both ADDENDUM-1 rules) before 23:59; Entra a -> a seat adds login_hint optional claim + the site base URL as sign-out redirect (read back, re-check sign-out).
+
 ## 🟢 DELTA 368 — 2026-10-21 13:27 70% CHECKPOINT (s134). **READ THIS FIRST; supersedes 367 and 366's LIVE lines (their OWED lines stand where not done below).**
 - **HOSTED HPSM-POC = main ec0a62a1 @ J4BEdU3NsTbseZT_47jB0** (B402 DEPLOYED 13:09 AEDT; verified by Tuesday: new id, health 200, deep link 307 to /?next=). It carries every HPSM-POC landing of today: #166-#169, #172, #175, #173, #170. **The Thursday HP-review site is current.** Way back: `.tools/b402/rollback402.zsh` (-> f06d2a69) until 2026-10-28.
 - **No live seats.** Merge hold LIFTED. Open PR: #171 (test-only, HPSMPOC-292 characterization; tier-2 Sonnet gate OWED).
