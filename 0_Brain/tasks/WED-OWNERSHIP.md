@@ -189,4 +189,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-21 21:29 | Kamils-Mac-mini | Tuesday: add QA/NexusAI-gate33 routing line to fleet/inbox_routing.conf after :238 (B420, Datasec gate 33 verdict route; one line, append-only) | CLOSED |  2026-10-21 21:32 done: one line inserted after :238, committed |
 | 2026-10-22 01:49 | Kamils-Mac-mini | pane_close.sh: refuse while the pane's claude has live non-MCP descendants (Tuesday ledger w=4, 2026-10-22) | CLOSED |  2026-10-22 01:51 done: commit 40e516a48 |
 | 2026-10-22 01:54 | Kamils-Mac-Studio | Launch_Wednesday.command: pin the seat model to Opus 5.5 (Kam 2026-10-21 19:18:53: you using Opus); Tuesday's launcher untouched | CLOSED |  2026-10-22 01:57 done: --model opus alias on the claude line, backup .pre-1022-opus; syntax checked only, the next boot is the real test |
-| 2026-10-22 09:25 | Kamils-Mac-mini | pane_close.sh live-work guard: a bare caffeinate is not live work (its children still are) | OPEN | |
+| 2026-10-22 09:25 | Kamils-Mac-mini | pane_close.sh live-work guard: a bare caffeinate is not live work (its children still are) | CLOSED |  2026-10-22 09:26 done 95526d2b5 |
