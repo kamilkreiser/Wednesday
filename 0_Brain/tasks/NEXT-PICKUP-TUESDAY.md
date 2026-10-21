@@ -8,7 +8,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🟢 DELTA 408 — 2026-10-22 10:23 (s139). **READ THIS FIRST; supersedes 406's B438/B441 line and 407's B442-drafter line.**
 - **LIVE:** %243 `Datasec/HPSM-POC-F2` B440 (telemetry round 3, Opus) · %245 `Datasec/HPSM-POC-U2` **B442 guide refresh v0.2** (Sonnet; stamped 10:19:10; hard stop 13:00, target READY 12:15; STATUS `…/Briefs/2026-10-22_B442_STATUS.md`, last line `READY: B442 <docx> <pdf> <email pdf> · …` / `STOPPED:`). Watchers armed on both. On B442 READY: read STATUS + LOOK at the pages, then mail Kam from tuesday-agent@ (DOCX one mail, e-mail PDF another, each under ~5.5 MB), read back, panel pointer. **Owed to Kam by ~12:30.**
-- **B441 GO WITH FINDINGS** on B438 @ c1a245f8 (Minor B441-1 accepted as a Note). **PR #180** open (datasecau/HPSM-POC); checks waiter armed. Land by head-pinned SQUASH after all checks + 0 alerts (pre-merge read in the same action: OPEN, MERGEABLE, CLEAN, alerts on refs/pull/180/merge and repo-wide); squash message written by Tuesday (no "PARTIAL, STOPPED").
+- **PR #180 LANDED 10:37** (B438, gate B441 GWF): HPSM-POC main = **a93b926a** (squash, tree = gated head's). Not yet on the review copy.
 - **UAT redeploy of the merged main: HOLD until B442's captures are done** (B442 STOPs if the site is redeployed under its walk). Then a deploy seat (clone `tuesday/briefs/2026-10-22_B437_SEAT-D25_…`, re-pin; Auth__UatOpen__Enabled exactly true before/after) under the 10-16 push-to-demo grant; report to Kam after.
 - Kam: his and Paul's UAT feedback comes LATER TODAY (10:17:31). Each item -> an HPSM-POC seat; then the guide updates again if screens change.
 - Panes %238 and %244 closed.
