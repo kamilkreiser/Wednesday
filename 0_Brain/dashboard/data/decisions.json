@@ -43237,5 +43237,42 @@
    "CARD composer-decisions-pack-1012",
    "CARD hpsmpoc-decisions-pack-1012"
   ]
+ },
+ {
+  "id": "hpsmpoc-entra-signout-hint-1021",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC: change the demo's Microsoft sign-in registration so sign-out skips the account picker?",
+  "bluf": "Tap one option. Today's deploy shipped the reviewer-walk fix that lets sign-out skip Microsoft's account picker, but it does nothing on the demo yet: the site's Entra app registration does not send the 'login_hint' claim and does not list the site's own address for sign-out (read-only check by the deploy agent at 13:2x; it changed nothing). Fixing it is two settings on that registration, which is outside my deploy permission. Everything else from today is live; without this, sign-out still works and simply shows the account picker. Nothing goes to HP from any agent.",
+  "default_action": "If there is no tap, Tuesday leaves the registration unchanged (option c) and records the finding on the HPSM-POC backlog after the records step.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Let an agent change the two settings",
+    "detail": "A seat adds the optional ID-token claim 'login_hint' and registers the demo site's own address as a sign-out redirect on the demo's app registration (identity kamil@datasec-rd.com), records the before/after, then checks sign-out on the demo. Reversible by removing the two entries."
+   },
+   {
+    "key": "b",
+    "label": "You change them yourself",
+    "detail": "Entra admin center > App registrations > the demo app (client id in the web app's AUTH_ENTRA_CLIENT_ID setting) > Token configuration: add optional claim login_hint (ID token); Authentication: add https://app-hpsmpoc-web-demo-en46o7.azurewebsites.net/ as a redirect / front-channel logout. Tuesday then re-checks sign-out."
+   },
+   {
+    "key": "c",
+    "label": "Leave it for after the review",
+    "detail": "Thursday's demo signs out with the account picker. The fix stays in the code, inactive, and goes on the backlog."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-21T13:27:11.865231+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-09-08 11:41",
+   "2026-09-17 08:04",
+   "CARD attio-entra-consent-m365",
+   "CARD attio-entra-consent-decision",
+   "CARD hpsmpoc-entra-app"
+  ]
  }
 ]
