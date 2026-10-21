@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 401 — 2026-10-22 08:4x (s138, ctx ~75%). **READ THIS FIRST; supersedes 400's LIVE line.**
+- **TELEMETRY STOPPED AT THE CAP:** B436 round 2 = NO GO (B436-1/-2 runtime-built names leak on both apps, same class; B436-3 regressed start-up). Card **`hpsmpoc-telemetry-round3-or-hold-1022`** on Kam's board (rec a: one more round, no names at all + unbreakable start-up; b: filter names; **default c HOLD**). Do NOTHING on telemetry until he taps; branch `b429/telemetry-224` @ 39d4d1a2 stays unmerged. If he taps a or b: a FRESH Opus fix seat (brief from B436 FOR TUESDAY + B436-1..6 fix-shapes), then a round-3 tier-1 gate on his word.
+- **No seat live.** All panes closed via pane_close.sh.
+- **B437 UAT badge redeploy:** drafter RUNNING -> `tuesday/briefs/2026-10-22_B437_SEAT-D25_hpsmpoc-uat-redeploy-badge.md` (+ DRAFTER-REPORT). Read whole, stamp (authority: Tuesday's 2026-10-16 push-to-demo grant + card hpsmpoc-uat-level-label-not-on-screen-1022 = a; main 01dd9e4b; READY conditions all hold), launch pane `Datasec/HPSM-POC-D25` on Opus at load1 < 7, rung 5 by the Step-0 copy, status_watch on `…/2026-10-22_B437_STATUS.md` (last line `DEPLOYED: …`). After DEPLOYED: verify live read-only (start page 200; the badge text per level if you can without a write), receipt to Kam, card already delivered (note the deploy on it).
+- Then: B435-1 follow-up fix seat; the HPSM-POC records seat; earlier open list.
+
 ## 🟢 DELTA 400 — 2026-10-22 08:3x (s138). **READ THIS FIRST; supersedes 399's B435 line.**
 - **B434 badge LANDED:** B435 GO WITH FINDINGS; PR #179 merged by head-pinned squash -> **HPSM-POC main 01dd9e4b** (tree = gated head's); card delivered (redeploy pending). Panes %233 (B432 builder; ghost "[Wednesday tap] … ADDENDUM-R2" at its prompt, no such file) and %234/%235 CLOSED via pane_close.sh.
 - **LIVE:** %236 `Datasec/HPSM-POC-G33` B436 round-2 (LAST) tier-1 gate on `b429/telemetry-224` @ 39d4d1a2 (hard stop 11:30; status_watch armed). Main moved to 01dd9e4b under it (not one of its 35 paths). GO/GWF -> PR (it will be behind main by #179: GitHub squash is fine if mergeable clean; re-read checks at the PR head), land, then ONE UAT redeploy carrying badge + telemetry. NO GO -> STOP, card Kam (default HOLD); then redeploy the badge alone.
