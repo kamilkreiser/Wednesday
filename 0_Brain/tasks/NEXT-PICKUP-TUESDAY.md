@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 410 — 2026-10-22 10:54 65% CHECKPOINT (s139). **READ THIS FIRST; supersedes 409's B443-drafter line.**
+- **LIVE (RE-ARM at boot):** (1) %246 `Datasec/HPSM-POC-D26` **B443 UAT redeploy to main a93b926a**, Opus C6, stamped 10:52:46, hard stop 12:30 -> `…/Briefs/2026-10-22_B443_STATUS.md`, last line `DEPLOYED: UAT @ a93b926 …` / `STOPPED:` / `ROLLED BACK:` (status_watch does NOT know ROLLED BACK: arm a custom waiter too). After DEPLOYED: verify live read-only (start page 200, four levels, badge text), then a panel report to Kam (push-to-demo grant: report after). (2) %243 B440 telemetry round 3 (READY ~12:30; then the round-3 tier-1 gate, clone of B436's kit).
+- **Done since 409:** guide v0.2 mailed + read back; panes %238 %244 %245 closed; PR #180 landed (main a93b926a).
+- **Kam later today:** his + Paul's UAT feedback list -> HPSM-POC seats.
+
 ## 🟢 DELTA 409 — 2026-10-22 10:51 (s139). **READ THIS FIRST; supersedes 408's B442 and redeploy-HOLD lines.**
 - **User guide v0.2 DELIVERED** to Kam 10:49 (two mails, read back sent, attachments byte-equal; panel bf-0ba8c760c388). Kam owes nothing; his + Paul's UAT feedback comes LATER TODAY -> HPSM-POC seats, then a guide update if screens change. Pane %245 closed.
 - **UAT redeploy of main a93b926a: UNBLOCKED.** B443 deploy-brief DRAFTER RUNNING (Agent, Sonnet; re-commission if `tuesday/briefs/2026-10-22_B443_*` missing; clone of B437) -> READ WHOLE, stamp, launch `Datasec/HPSM-POC-D26` on Opus (C6) at load1 < 7; status_watch + a ROLLED BACK: waiter. After DEPLOYED: verify live read-only (start page 200, four levels, badge text), report to Kam (push-to-demo grant: report after).
