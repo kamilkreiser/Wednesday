@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-10-21 23:30 from 378 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-22 08:01 from 378 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -73,7 +73,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## T4 docs (doc_patch) — 0
 
-## T5 multi-file / later — 56
+## T5 multi-file / later — 55
 - KS-1051 (P2) develop is RED on the services/originate jest suite and NOTHING catches it — the — `scripts/preflight/preflight.sh`, `.githooks/pre-push`
 - KS-1055 (P2) Per-tenant databases never receive the file migrations — CORE_MIGRATIONS FORCEs  — `services/api-gateway/src/startup-migrations.ts`, `services/tenant-provisioning/src/index.ts`
 - KS-1384 (P2) One anchor row per (document_id, network): a repeat POST /api/anchors resets the — `services/anchoring/src/index.ts`, `services/originate/src/routes/documents.ts`
@@ -83,7 +83,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1640 (P2) Chain-first verify blobs hard-code `anchored: true` and drop anchoring's status/ — `services/originate/src/routes/verification.ts`, `services/originate/src/routes/verificationV2.ts`
 - KS-1683 (P2) vc-issuer: GET /api/credentials (list) and GET /api/credentials/by-hash/:hash re — `services/api-gateway/src/middleware/auth.ts`, `services/vc-issuer/src/ownership.ts`
 - KS-1699 (P2) Security: three certification write routes have NO per-record access check - POS — `services/originate/src/routes/certifications.ts`, `services/api-gateway/src/routes/verification.ts`
-- KS-1709 (P2) originate: the certification-issue route swallows a non-ok response from the anc — `services/originate/src/routes/certifications.ts`, `services/originate/src/utils/anchorIdentity.ts`
 - KS-485 (P2) Security review — plan, methodology & handover (Platform K) — `services/api-gateway/src/routes/notifications.ts`, `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/index.ts`
 - KS-491 (P2) Review F — Edge, WAF, DDoS & anti-automation — `services/api-gateway/src/middleware/rateLimitEnforce.ts`, `services/auth/src/routes/auth.ts`
 - KS-576 (P2) Bulk re-key: one admin-authorised rotate across a named set of externalRefs — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`, `packages/shared/src/db/tenant-guc.ts`
@@ -158,9 +157,10 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 4
+## HELD (READY_* or done.md PASS) — 5
 - KS-1219 OAuth /authorize answers 500 server_error for an array-valued scope (repeated qu
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
+- KS-1709 originate: the certification-issue route swallows a non-ok response from the anc
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 
