@@ -45,9 +45,10 @@
 #       Every call logged to logs/pane_close.log.
 set -u
 TYPED_OK=0; ARGS=()
-for a in "$@"; do case "$a" in --typed-ok) TYPED_OK=1 ;; *) ARGS+=("$a") ;; esac; done
+LIVE_OK=0
+for a in "$@"; do case "$a" in --typed-ok) TYPED_OK=1 ;; --live-ok) LIVE_OK=1 ;; *) ARGS+=("$a") ;; esac; done
 set -- "${ARGS[@]+"${ARGS[@]}"}"   # bash 3.2 + set -u: a bare "${ARGS[@]}" on an empty array is an error
-PANE="${1:?usage: pane_close.sh <pane> [port ...] [--typed-ok]}"; shift || true
+PANE="${1:?usage: pane_close.sh <pane> [port ...] [--typed-ok] [--live-ok]}"; shift || true
 # (0) 2026-10-18 16:4x (Tuesday s116): `pane_close.sh --help` reached `tmux display -t --help`, tmux's
 #     loose target matching resolved it to a LIVE QA gate's pane (%60), and only the listener check
 #     stopped the close. The pane argument must be an exact %N id or an exact @cockpit_name, never
@@ -85,6 +86,38 @@ if [ "$TARGET_NAME" = "wednesday" ]; then
 fi
 
 # TYPED-UNSENT GATE — run the detector on the RESOLVED pane id and read its one verdict line.
+# LIVE-WORK guard (2026-10-22, Tuesday s138; Tuesday ledger w=4 "a guard read in the SAME command as the destructive step"):
+# four times a seat's pane was closed with its own work still running (B161 CI run holding a heavy slot 10-17; B351
+# post-check 10-21; B425 10-22 safe by luck). The rule "pgrep first, in its own call" kept failing at a task's END, so the
+# check now lives HERE. Walk every process under the pane's root pid: under the pane's claude, ANYTHING alive except an
+# MCP server subtree (argv contains "mcp") is live work; outside claude, anything but a plain shell is live work.
+# REFUSED rc 9 listing them; --live-ok closes anyway (logged). HONEST LIMIT: a process detached to pid 1 (nohup/setsid)
+# has left the tree and is not seen here; the listener check below still covers ports.
+LIVE="$(ps -A -o pid=,ppid=,command= 2>/dev/null | awk -v root="$PPID_PANE" '
+  { pid=$1; pp=$2; $1=""; $2=""; c=substr($0,3); C[pid]=c; K[pp]=K[pp] " " pid }
+  function base(t) { sub(/.*\//, "", t); return t }
+  function walk(p, inc, inm,   n, a, i, w, isc, ism, iss) {
+    split(C[p], w, " "); isc = (base(w[1]) == "claude" || base(w[2]) == "claude")
+    ism = inm || (inc && C[p] ~ /mcp/)
+    iss = (base(w[1]) ~ /^-?(zsh|bash|sh|login)$/) && !isc
+    if (p != root && !isc && !ism && (inc || !iss)) print p "  " substr(C[p], 1, 140)
+    n = split(K[p], a, " "); for (i = 1; i <= n; i++) walk(a[i], inc || isc, ism)
+  }
+  END { if (root != "") walk(root, 0, 0) }')"
+if [ -z "$PPID_PANE" ]; then
+  echo "pane_close: REFUSED — pane '$PANE' gave no pane_pid, so the live-work check cannot run; nothing was closed" >&2
+  echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc9: no pane_pid for $PANE" >> "$PCLOG"; exit 9
+fi
+if [ -n "$LIVE" ]; then
+  if [ "$LIVE_OK" != 1 ]; then
+    echo "pane_close: REFUSED — live work is still running in $PANE ($TARGET_ID name=${TARGET_NAME:--}); it would die with the pane:" >&2
+    printf '%s\n' "$LIVE" | sed 's/^/pane_close:   /' >&2
+    echo "pane_close:   wait for it, or have the seat stop it; re-run with --live-ok only if killing it is intended" >&2
+    echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc9: $(printf '%s\n' "$LIVE" | wc -l | tr -d ' ') live process(es) under $PANE ($TARGET_ID)" >> "$PCLOG"; exit 9
+  fi
+  echo "pane_close: --live-ok OVERRIDE USED — closing $PANE ($TARGET_ID) with live work:" >&2; printf '%s\n' "$LIVE" | sed 's/^/pane_close:   /' >&2
+  echo "$(date '+%Y-%m-%d %H:%M:%S') OVERRIDE --live-ok: closing $PANE ($TARGET_ID) with $(printf '%s\n' "$LIVE" | wc -l | tr -d ' ') live process(es)" >> "$PCLOG"
+fi
 det_fail() { # $1 reason → REFUSED rc 8 (fail closed)
   echo "pane_close: REFUSED — the typed-line detector could not give a verdict for $PANE (${TARGET_ID:--}): $1. Nothing was closed. Check the pane by eye (tmux capture-pane -p -t ${TARGET_ID:-<id>}) before doing anything else." >&2
   echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc8: detector failed for $PANE: $1" >> "$PCLOG"; exit 8
