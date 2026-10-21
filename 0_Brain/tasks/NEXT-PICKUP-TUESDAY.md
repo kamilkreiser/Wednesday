@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 377 — 2026-10-21 15:18 70% CHECKPOINT (s135). **READ THIS FIRST; adds to 376/375.**
+- **B407 DONE -> PR #176 OPEN** (head 69ac8aa8, 21 web files, verified at source; pane closed). **B413 tier-2 gate kit DRAFTER RUNNING** -> `tuesday/briefs/2026-10-21_B413_SEAT-G26_hpsmpoc-pr176-gate-tier2.md` + REPORT: READ WHOLE, stamp, launch (pane G26, Sonnet, ports 7960-7969); main moved to a542f863 (#171), so update-branch #176 after the verdict if needed, CI, squash pinned.
+- **Kam approved the UAT start-page words + both settings (15:12:13, card a)**: no addendum needed for B409/B410.
+- LIVE now: %209 B409 · %210 B410 · %211 B412. #171 landed (a542f863).
+
 ## 🟢 DELTA 376 — 2026-10-21 15:08 (s135). **Adds to 375.**
 - **UPDATE 15:1x: #171 LANDED** (squash pinned to 4615e41a, main now **a542f863**, tree = head tree; not deployed). The #171 waiter is done; HPSM-POC main for B410's ADDENDUM-1 is whatever main is after B407 + B409 land.
 - **LIVE also:** %211 `Datasec/NexusAI-G35` **B412** (stamped 15:07:02; light tier-2 gate #103 940dac40 + #102 b52b46fb, full verify both) -> `NexusAI/1_Project_Definition/Briefs/2026-10-21_B412_STATUS.md` (watcher armed; dies with this seat). On GO/GWF: land **#103 first, then #102** by C-190 same-commit FF through a NexusAI landing seat (B394's shape), #102 forward-merged after #103 lands (disjoint; no gate re-run: #103's file is read by no suite).
