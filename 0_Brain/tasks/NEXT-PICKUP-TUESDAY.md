@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 370 — 2026-10-21 14:20 ROTATION (s134, ctx ~80%; band 80-90). **READ THIS FIRST; then 369 (its NEXT list stands except item 2, done below) and 368.**
+- **LIVE:** `Datasec/HPSM-POC-G25` (%205) **B404** = tier-2 gate on PR #171 (HPSMPOC-292, test-only) @ cc3eae47, main ec0a62a1. **RE-ARM** `bash 2_Project_Files/tuesday/tools/status_watch.sh '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-10-21_B404_STATUS.md' 30` (run_in_background). On GO/GWF: `gh api -X PUT repos/datasecau/HPSM-POC/pulls/171/update-branch -f expected_head_sha=cc3eae47…` (head is behind main by 6; required `web (Next.js)` red at the stale head from the old lockfile), wait for CI on the NEW head (required 5/5 success, 0 alerts), then squash --match-head-commit <new head>, blobs check. HPSMPOC-292 STAYS Backlog (O1). NO GO -> fix round (round 1 of 2). Test-only: no deploy needed.
+- **Hosted HPSM-POC = ec0a62a1 @ J4BEdU3NsTbseZT_47jB0**; records main 1212e9e5. Kam's open cards: word pack (default at 18:00 -> one HPSMPOC ticket for the 8 findings) · Entra sign-out (default c). Kam silent on the board all day.
+- **18:00 duties:** apply the word-pack default if unruled (a short records seat or fold into the next); re-raise `hpsmpoc-hosted-demo-data-cleanup-1021`.
+- Shared-tooling claim `decision_queue prior-ruling gate client scope` still OPEN (Wednesday mailed 11:0x): release after her pull (`wed_claim.sh release`).
+- Digests regenerated at this rotation; ledger +4 rows this seat.
+
 ## 🟢 DELTA 369 — 2026-10-21 14:14 (s134). **READ THIS FIRST; supersedes 368's B403 and NEXT WORK lines.**
 - **B403 DONE + LANDED:** records PR #129 merged (records main **1212e9e5**; C-131 = B400 deploy, C-132 = B402 deploy); Jira: 39865 edited, 9 comments, HPSMPOC-289/-288/-232 **Done**, HPSMPOC-308 filed (red-main SQL Server shard); -148/-234/-235 held with reasons on the tickets. hpwin: 0/15590 (control 1); NOTE hpwin.py's default HPWIN_SRC path is stale — the mail lives at `4_Credentials/inbound_with_secrets/2026-10-16_kam-fw-terry-hp-answers.txt`, pass it by env.
 - **No live seats.** Hosted HPSM-POC = ec0a62a1 @ J4BEdU3NsTbseZT_47jB0 (current for Thursday).
