@@ -1,0 +1,36 @@
+# B408 DRAFTER REPORT (Sonnet drafter) for brief `2026-10-21_B408_SEAT-DEP6_hpsmpoc-plan-p0v3-telemetry.md`
+
+Drafted 2026-10-21 14:4x-15:0x AEDT (`date` 14:50:10; load 3.42 / 5.08 / 4.34). Marks: MEASURED = I ran it and saw the output; RELAYED = read from a file at path:line; UNMEASURED = nobody ran it. Fences kept: two files written (Write/Edit); no `az`, no HTTP to Azure or the hosted site, no mail, chat, Artifact or Jira write; Jira GET only (HPSMPOC-224, -235, -237 and one JQL search, `python3 -I`, `.env` parsed in-process, nothing printed); `gh api` GET only under the project's `GH_CONFIG_DIR`; git read verbs only. No `.pre-stamp` copy created.
+
+## 1. What I read
+B402 brief (184 lines, two Reads), B402 ADDENDUM-1, B402 STATUS (grep + tail + lines 530-544), B400 STATUS `:408-432`, B400 brief `:121` (the burst method), `.tools/b402/{id.zsh,burst402.zsh,healthlog402.zsh}` (head), project `JIRA.md`, records `CLARIFICATIONS.md` (raw via `gh api`, 2,126 lines at records main `1212e9e5`: lines 412, 485-497, 1116), Bicep at `ec0a62a1`: `infra/modules/appservice.bicep`, `monitoring.bicep`, `env/demo.bicepparam`, `main.bicep` (greps).
+
+## 2. What I measured (instrument)
+- **Hosted state expectation (RELAYED):** `B402_STATUS.md:544` last line `DEPLOYED: ec0a62a @ J4BEdU3NsTbseZT_47jB0`; deployments web `d59d9d9f-...`, API `70e5bd31-...` (`:390`); main = `ec0a62a1...` by `gh api branches/main`; open PRs: #171 only (`gh api pulls?state=open`).
+- **Identity:** sub `a6b8fe11-d1b5-4293-8727-b34aba08a705`, tenant `ec01829b-...`, user `kamil@datasec-rd.com` (RELAYED `.tools/b402/id.zsh`); RG `hpsm-poc-demo-rg`; web `app-hpsmpoc-web-demo-en46o7`, API `app-hpsmpoc-api-demo-en46o7`; region `australiaeast` (`main.bicep:12`).
+- **Plan:** Bicep name `asp-hpsmpoc-demo` (INFERENCE from `asp-${prefix}`, prefix `hpsmpoc-demo`); declared SKU **B1** (`demo.bicepparam`, HPSMPOC-237 text "shared B1 Linux plan, capacity 1"); live SKU UNMEASURED. P0v3 is the Bicep-allowed SKU and C-38's "P0v3 only for the event weeks with a separate go" (records `:412`); Kam's tap is that go.
+- **Telemetry code check (MEASURED, `git grep -i` at `ec0a62a1`, `.md` excluded):** pattern `ApplicationInsights|AzureMonitor|OpenTelemetry|applicationinsights|@azure/monitor`: hits only in `infra/` (appservice.bicep x3, sql.bicep x1, test_security_baseline.py x2) and `web/package-lock.json` x4 (`@opentelemetry/api` transitive). **0 in `api/src`, `web/src`, csproj, web/package.json.** Control: `Microsoft.Extensions.Logging` hits in `api/src/HpsmPoc.Api` > 0 (fires). `APPLICATIONINSIGHTS_CONNECTION_STRING` is set on both apps and `..._AUTHENTICATION_STRING` on the API in Bicep (`appservice.bicep:93-94,185`); App Insights has `DisableLocalAuth: true`.
+- **HPSMPOC-224 (Backlog, Jira GET):** its recommendation is the Azure Monitor OpenTelemetry distro in the API and the web, with personal data scrubbed. That is code. On 2026-10-06 the App Insights tables held 0 rows. POC-2 in records (`:1116`) calls it "one new Azure resource ... you see the deploy card first"; the Bicep and the ticket say the resource already exists (provisioned): the brief makes the seat read it and forbids any new resource.
+- **HPSMPOC-237 (Backlog, Jira GET):** no SKU named, no price, no comment; "no spend recommended until the Server-Timing measurement" (that ticket pre-dates Kam's tap). The card's "about 4 s" and "A$74" are not in the ticket: I could not find the 4 s source (closest: B366 first customers read 4,189 ms, `B400_STATUS.md:425`); the brief makes the seat find it or say UNMEASURED.
+- **Budget:** only `budget-hpsm-poc-sm` (A$250/month, different RG `hpsm-poc-sm-rg`, records `:494`). Demo RG budget UNMEASURED.
+- **First-page-after-idle method the project already uses:** `burst402.zsh` / B400's burst-after-idle (public curl timings, >= 300 s idle) and the `signin256.cjs` kit visit (first signed-in `GET /api/v1/customers`; B402 1,047 ms, B400 1,918 ms).
+
+## 3. Decisions made in the draft
+1. **Telemetry is expected to stop** (needs code). The seat proves it (grep at the deployed sha, live `deps.json`, 0-row baseline) and stops on part 2 with ONE question; part 1 is independent and proceeds. I did NOT let the seat use the codeless App Service agent or filesystem application logging: different mechanisms from HPSMPOC-224's design, restart the app, and Kam's "no bodies, no personal data" cannot be proved for them. A branch for "SDK present" (step 7) is kept in case a later main has it.
+2. **Final-line shape:** when plan lands and telemetry stops, a `PLAN CHANGED AND VERIFIED: ...` line sits above the `STOPPED:` last line, so Kam does not read STOPPED as "nothing happened".
+3. **Price guard:** STOP before the change if P0v3 in AUD is > 15 % over Kam's "about A$74" (> A$85). Retail Prices API with `currencyCode=AUD`; monthly = hourly x 730. If AUD is not returned, the comparison is UNMEASURED and the ruled SKU still proceeds.
+4. **Capacity fence:** `az appservice plan update --sku P0V3` with no other flag; if refused for scale-unit/webspace reasons the seat STOPS (the only other route is a new plan = new paid resource).
+5. **Order:** all reads and the BEFORE timings first, then the plan change, then telemetry. The telemetry code check is early so a stop is known before money is spent, but part 1 is not blocked by it.
+6. **Risks I added:** (i) scale-down from Premium v3 to Basic is UNMEASURED and may be refused: the way back may not work (stated; a refused rollback = STOPPED at once); (ii) the web's outbound IP list can change with the SKU and the API trusts it (`ForwardedHeaders__KnownProxies`, C-59): record, report, do not fix; (iii) IaC drift: `demo.bicepparam` says B1, so an infra redeploy would scale back; (iv) a plan move may restart both apps (API start warm-up line B402 required is checked again, same windows 420 s / 900 s).
+7. Two kit visits (before/after) each include the sample-customer PDF GET and the kit's own sign-out POST; the brief says so rather than hiding it. Tuesday may cut the BEFORE visit and use B402's numbers instead.
+
+## 4. Questions for Tuesday, with recommended answers
+1. **Stamp:** keep the price guard at > A$85/month? Recommended yes.
+2. **If telemetry stops, is the plan-only outcome acceptable as the seat's end state?** Recommended yes (default in the stamp slot): part 1 stands, then Tuesday commissions the HPSMPOC-224 code PR (API + web, gated) as a separate seat.
+3. **Keep the BEFORE signed-in visit?** Recommended yes (like-for-like after-idle numbers); cut only if you want to avoid a second PDF GET.
+4. **Is "first-page-after-idle" in the final line the public web `/` time (what I wrote) or the signed-in first customers read?** Recommended: signed-in read is closer to what a reviewer feels; if you prefer it, change the BLUF's `<ms>` definition at the stamp.
+
+## 5. UNMEASURED at drafting
+Everything live on Azure and the hosted site; the decision board text (relayed by the commission only); the plan's real name/SKU/site count; P0v3 availability in the plan's scale unit; real A$ price; demo budgets; restart behaviour of a plan move; outbound IP change; whether any other hosted seat is running.
+
+Stamp slots left unfilled: `@STAMP_TIME@`, `@LAUNCH_AUTH@` (count 2 lines by the brief's own grep). Last line `READ-WHOLE-BY-TUESDAY: PENDING`.
