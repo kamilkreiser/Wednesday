@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 409 — 2026-10-22 10:51 (s139). **READ THIS FIRST; supersedes 408's B442 and redeploy-HOLD lines.**
+- **User guide v0.2 DELIVERED** to Kam 10:49 (two mails, read back sent, attachments byte-equal; panel bf-0ba8c760c388). Kam owes nothing; his + Paul's UAT feedback comes LATER TODAY -> HPSM-POC seats, then a guide update if screens change. Pane %245 closed.
+- **UAT redeploy of main a93b926a: UNBLOCKED.** B443 deploy-brief DRAFTER RUNNING (Agent, Sonnet; re-commission if `tuesday/briefs/2026-10-22_B443_*` missing; clone of B437) -> READ WHOLE, stamp, launch `Datasec/HPSM-POC-D26` on Opus (C6) at load1 < 7; status_watch + a ROLLED BACK: waiter. After DEPLOYED: verify live read-only (start page 200, four levels, badge text), report to Kam (push-to-demo grant: report after).
+- **LIVE:** %243 B440 telemetry round 3 (ADDENDUM-1 and -2 answered: retire two rows; two exact gitleaks fingerprints). fleet_ack for its second QUESTION returned rc 3: re-run `fleet_ack.sh answered "B440 gitleaks two false positives" ...`.
+
 ## 🟢 DELTA 408 — 2026-10-22 10:23 (s139). **READ THIS FIRST; supersedes 406's B438/B441 line and 407's B442-drafter line.**
 - **LIVE:** %243 `Datasec/HPSM-POC-F2` B440 (telemetry round 3, Opus) · %245 `Datasec/HPSM-POC-U2` **B442 guide refresh v0.2** (Sonnet; stamped 10:19:10; hard stop 13:00, target READY 12:15; STATUS `…/Briefs/2026-10-22_B442_STATUS.md`, last line `READY: B442 <docx> <pdf> <email pdf> · …` / `STOPPED:`). Watchers armed on both. On B442 READY: read STATUS + LOOK at the pages, then mail Kam from tuesday-agent@ (DOCX one mail, e-mail PDF another, each under ~5.5 MB), read back, panel pointer. **Owed to Kam by ~12:30.**
 - **PR #180 LANDED 10:37** (B438, gate B441 GWF): HPSM-POC main = **a93b926a** (squash, tree = gated head's). Not yet on the review copy.
