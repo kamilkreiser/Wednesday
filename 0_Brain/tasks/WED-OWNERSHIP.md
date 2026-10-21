@@ -188,3 +188,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-21 11:06 | Kamils-Mac-mini | decision_queue prior-ruling gate client scope: leg 2 lists only ruled cards of the new card's own client (plus Fleet/WED); ledger_laptop_datasec 2026-10-21 w=3 | OPEN | |
 | 2026-10-21 21:29 | Kamils-Mac-mini | Tuesday: add QA/NexusAI-gate33 routing line to fleet/inbox_routing.conf after :238 (B420, Datasec gate 33 verdict route; one line, append-only) | CLOSED |  2026-10-21 21:32 done: one line inserted after :238, committed |
 | 2026-10-22 01:49 | Kamils-Mac-mini | pane_close.sh: refuse while the pane's claude has live non-MCP descendants (Tuesday ledger w=4, 2026-10-22) | CLOSED |  2026-10-22 01:51 done: commit 40e516a48 |
+| 2026-10-22 01:54 | Kamils-Mac-Studio | Launch_Wednesday.command: pin the seat model to Opus 5.5 (Kam 2026-10-21 19:18:53: you using Opus); Tuesday's launcher untouched | OPEN | |
