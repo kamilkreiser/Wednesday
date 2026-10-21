@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 406 — 2026-10-22 09:39 50% CHECKPOINT (s139). **READ THIS FIRST; supersedes 405's B438 and PR #131 lines (405's B440 line stands).**
+- **PR #131 LANDED** (records B439): main of datasecau/HPSM-POC-analysis = 707ceb3a (merge commit, tree = head's). Records for 22 Oct are done.
+- **B438 READY FOR QA @ c1a245f8, verified at source** (branch on origin; mutants 5/5 red; web 2056/2056; diff 2 files). **B441 tier-2 gate DRAFTER RUNNING** (Agent, Sonnet; dies with this seat: re-commission if `tuesday/briefs/2026-10-22_B441_*` is missing) -> READ WHOLE, stamp, launch `Datasec/HPSM-POC-G34` on Sonnet at load1 < 7 (B440 has load priority), ports 8110-8119. On GO/GWF: PR (project gh config), all checks + 0 alerts, land by head-pinned SQUASH (HPSM-POC convention, CLARIFICATIONS.md:138), then a UAT redeploy (clone `tuesday/briefs/2026-10-22_B437_SEAT-D25_…`, re-pin to the new main; Auth__UatOpen__Enabled exactly true before and after) under the 10-16 push-to-demo grant. %238 held open for the gate's questions.
+
 ## 🟢 DELTA 405 — 2026-10-22 09:37 (s139). **READ THIS FIRST; supersedes 404's drafter line and 403's LIVE line 2 (B439 is DONE).**
 - **LIVE (RE-ARM at boot: status_watch on each STATUS, run_in_background):**
   1. %243 `Datasec/HPSM-POC-F2` **B440 telemetry fix round 3, OPUS (C3)**, stamped 09:35:31 (rulings R-1 YES: no log template sent, B436-4; R-2 YES; R-3 C3), hard stop 13:30, target READY 12:30 -> `…/Briefs/2026-10-22_B440_STATUS.md`, last line `READY FOR QA: B440 …` / `STOPPED:`. On READY: verify at source, then the ROUND-3 tier-1 Opus gate (clone `tuesday/briefs/2026-10-22_B436_SEAT-G33_…`, re-pin, add B436 findings + B440's retired-row list as regression rows). A NO GO = STOP for good (no round 4): card Kam.
