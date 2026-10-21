@@ -93,6 +93,8 @@ fi
 # MCP server subtree (argv contains "mcp") is live work; outside claude, anything but a plain shell is live work.
 # REFUSED rc 9 listing them; --live-ok closes anyway (logged). HONEST LIMIT: a process detached to pid 1 (nohup/setsid)
 # has left the tree and is not seen here; the listener check below still covers ports.
+# CAFFEINATE (2026-10-22, Tuesday s139; B435 gate pane refused on a bare `caffeinate -i -t 300`): caffeinate itself is a
+# sleep inhibitor, not work, so it is not listed; anything it WRAPS (`caffeinate -i <cmd>`) is its child and still is.
 LIVE="$(ps -A -o pid=,ppid=,command= 2>/dev/null | awk -v root="$PPID_PANE" '
   { pid=$1; pp=$2; $1=""; $2=""; c=substr($0,3); C[pid]=c; K[pp]=K[pp] " " pid }
   function base(t) { sub(/.*\//, "", t); return t }
@@ -100,7 +102,8 @@ LIVE="$(ps -A -o pid=,ppid=,command= 2>/dev/null | awk -v root="$PPID_PANE" '
     split(C[p], w, " "); isc = (base(w[1]) == "claude" || base(w[2]) == "claude")
     ism = inm || (inc && C[p] ~ /mcp/)
     iss = (base(w[1]) ~ /^-?(zsh|bash|sh|login)$/) && !isc
-    if (p != root && !isc && !ism && (inc || !iss)) print p "  " substr(C[p], 1, 140)
+    isk = (base(w[1]) == "caffeinate")
+    if (p != root && !isc && !ism && !isk && (inc || !iss)) print p "  " substr(C[p], 1, 140)
     n = split(K[p], a, " "); for (i = 1; i <= n; i++) walk(a[i], inc || isc, ism)
   }
   END { if (root != "") walk(root, 0, 0) }')"
