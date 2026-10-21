@@ -17,8 +17,13 @@
 # that main does not. "EQUALS MAIN" or "NOT FOUND" means the claim has nothing
 # behind it: read the seat's worktree before accepting or closing anything.
 # Read verbs only (rev-parse, rev-list): this may run against another project's repo.
-F="$1"; I="${2:-30}"
-[ -n "$F" ] || { echo "usage: status_watch.sh <STATUS file> [interval]" >&2; exit 2; }
+# MARKERS + --changed (2026-10-22, s138): three seats in one night (B425 LANDED:, B427 READY:, B428 FOLDED:) and the
+# gate kits (LANDING CHECKLIST:, PARKED:) needed hand-built waiters because this list lacked their final lines. And a
+# watcher re-armed on a RESUMED seat fired at once on the STOPPED line still in place: with --changed as the 3rd
+# argument it remembers the last line at start and fires only on a DIFFERENT final line.
+F="$1"; I="${2:-30}"; CHANGED=0; [ "${3:-}" = "--changed" ] && CHANGED=1
+[ -n "$F" ] || { echo "usage: status_watch.sh <STATUS file> [interval] [--changed]" >&2; exit 2; }
+START=""; [ "$CHANGED" = 1 ] && [ -f "$F" ] && START=$(tail -n 1 "$F")
 
 records_check() {
   local line="$1" dir top ref sha main ahead
@@ -45,7 +50,8 @@ while :; do
   if [ -f "$F" ]; then
     L=$(tail -n 1 "$F")
     case "$L" in
-      VERDICT:*|STOPPED:*|"READY FOR QA:"*|BLOCKED:*|"RECORDS DONE:"*|"RECORDS COMMITTED:"*|DONE:*)
+      VERDICT:*|STOPPED:*|"READY FOR QA:"*|READY:*|BLOCKED:*|"RECORDS DONE:"*|"RECORDS COMMITTED:"*|DONE:*|LANDED:*|FOLDED:*|"LANDING CHECKLIST:"*|PARKED:*|DEPLOYED:*)
+        [ "$CHANGED" = 1 ] && [ "$L" = "$START" ] && { sleep "$I"; continue; }
         echo "FINAL $(date '+%H:%M:%S') :: $F :: $L"
         records_check "$L"
         exit 0;;
