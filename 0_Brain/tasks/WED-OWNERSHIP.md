@@ -111,7 +111,7 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-25 09:33 | Kamils-MacBook-Pro | Launch_Friday.command: arm live_chat_poll.sh --seat friday at every launch (Kam 2026-09-25 09:29: live-board posts did not wake Friday; the poller had never run on the laptop) — Friday (laptop) | OPEN | |
 | 2026-09-25 09:33 | Kamils-Mac-mini | wake_wednesday.sh: LOG-ONLY/ERROR branches alarm on the seat's live board (Tuesday lost 09-24 to a silent LOG-ONLY) | OPEN | |
 | 2026-09-25 09:36 | Kamils-MacBook-Pro | tap_friday.sh: truncate to 180 (190 + 16-char [Wednesday tap] label = 206 > 200, cockpit refuses) — Tuesday's finding 2026-09-25 09:35 — Friday (laptop) | CLOSED |  2026-09-25 09:37 done |
-| 2026-09-25 09:41 | Kamils-Mac-Studio | live_chat_poll.sh armed per seat in Launch_Wednesday.command + doctor liveness check + per-seat tap prefix (Kam 09:34 via Friday) | OPEN | |
+| 2026-09-25 09:41 | Kamils-Mac-Studio | live_chat_poll.sh armed per seat in Launch_Wednesday.command + doctor liveness check + per-seat tap prefix (Kam 09:34 via Friday) | CLOSED |  2026-10-22 01:57 done: --model opus alias on the claude line, backup .pre-1022-opus; syntax checked only, the next boot is the real test |
 | 2026-09-25 12:26 | Kamils-Mac-Studio | local-model build_input.sh: started_ok=<reason> pin for In Progress tickets with only merged PRs (KS-1140 GF-1) | CLOSED |  2026-09-25 12:29 done |
 | 2026-09-25 13:24 | Kamils-Mac-Studio | dashboard-cloud: Import key accept attr (iPad cannot select .p8) + live deploy | CLOSED |  2026-09-25 13:31 done |
 | 2026-09-25 14:02 | Kamils-Mac-Studio | dashboard-cloud chat.html heading -> Cockpit, no agent name (Kam 14:01) | CLOSED |  2026-09-25 14:07 done |
@@ -188,4 +188,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-21 11:06 | Kamils-Mac-mini | decision_queue prior-ruling gate client scope: leg 2 lists only ruled cards of the new card's own client (plus Fleet/WED); ledger_laptop_datasec 2026-10-21 w=3 | OPEN | |
 | 2026-10-21 21:29 | Kamils-Mac-mini | Tuesday: add QA/NexusAI-gate33 routing line to fleet/inbox_routing.conf after :238 (B420, Datasec gate 33 verdict route; one line, append-only) | CLOSED |  2026-10-21 21:32 done: one line inserted after :238, committed |
 | 2026-10-22 01:49 | Kamils-Mac-mini | pane_close.sh: refuse while the pane's claude has live non-MCP descendants (Tuesday ledger w=4, 2026-10-22) | CLOSED |  2026-10-22 01:51 done: commit 40e516a48 |
-| 2026-10-22 01:54 | Kamils-Mac-Studio | Launch_Wednesday.command: pin the seat model to Opus 5.5 (Kam 2026-10-21 19:18:53: you using Opus); Tuesday's launcher untouched | OPEN | |
+| 2026-10-22 01:54 | Kamils-Mac-Studio | Launch_Wednesday.command: pin the seat model to Opus 5.5 (Kam 2026-10-21 19:18:53: you using Opus); Tuesday's launcher untouched | CLOSED |  2026-10-22 01:57 done: --model opus alias on the claude line, backup .pre-1022-opus; syntax checked only, the next boot is the real test |
