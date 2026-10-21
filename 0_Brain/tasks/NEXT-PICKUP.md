@@ -33,6 +33,8 @@ supersede: REPLACED WHOLESALE by the Sonnet 5.5 Wednesday seat that booted at 15
 - Gauge 7d 90% (hard stop; renews ~Sun 25 Oct midday). Wednesday + Spark only. Board KS 688 open (10-12 baseline 509): growing.
 - NEW CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022 (rec a: re-date braces, sprintf-js, both react-router to 2026-11-30; default: nothing re-dated, re-raise 29 Oct). Measured: deepmerge-ts is NOW fixable (@prisma/config 7.10.1 -> deepmerge-ts 8.0.2); postcss-selector-parser fixed in 7.1.6. Item 1 below is answered by this card.
 - NEW HELD SPARK PASS: KS-1709 issue-route refusal log (night/READY_KS-1709-KS-1709-REFUSALLOG1709-1_...2026-10-22.diff.md; brief ks_1709_p1). Raise with KS-1622 in ONE Sonnet raise seat after the renewal. NEXT Spark brief: KS-1709 p2 = the recertify site certifications.ts:1383 (same shape; extend the ks1709 test file in place).
+- KAM RULED 07:13: ks1707 = a (re-date braces, sprintf-js, both react-router rows to 2026-11-30 under the 10-05 board-tap grant; fix deepmerge-ts via prisma 7.10.1 and postcss-selector-parser forward; remove the 15 stale rows; one seat after the renewal, QA gate, NOT delivered yet: deliver on the merged PR). ks1557 = a (POST Drafts 1 and 4 verbatim from 5_Project_History/2026-10-21_seatD-28th/evidence/drafts.md on KS-1557 and KS-485, prove byte-equal, read the mention nodes back; NOT delivered yet). ASKED Kam 07:1x whether to launch one Sonnet seat past the 90% stop just to post; default = post right after Sunday's renewal.
+- TOOL GAP: reconcile_rulings.py skips live taps on hashed card ids (card-<sha256(id)[:20]>); rule those by hand until fixed.
 - develop moved to bcc51903d893 (#1677, Peter's own systemTest PR, not ours).
 
 ## 2. HELD / OWED, IN ORDER
