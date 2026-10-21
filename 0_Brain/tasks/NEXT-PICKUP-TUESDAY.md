@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 400 — 2026-10-22 08:3x (s138). **READ THIS FIRST; supersedes 399's B435 line.**
+- **B434 badge LANDED:** B435 GO WITH FINDINGS; PR #179 merged by head-pinned squash -> **HPSM-POC main 01dd9e4b** (tree = gated head's); card delivered (redeploy pending). Panes %233 (B432 builder; ghost "[Wednesday tap] … ADDENDUM-R2" at its prompt, no such file) and %234/%235 CLOSED via pane_close.sh.
+- **LIVE:** %236 `Datasec/HPSM-POC-G33` B436 round-2 (LAST) tier-1 gate on `b429/telemetry-224` @ 39d4d1a2 (hard stop 11:30; status_watch armed). Main moved to 01dd9e4b under it (not one of its 35 paths). GO/GWF -> PR (it will be behind main by #179: GitHub squash is fine if mergeable clean; re-read checks at the PR head), land, then ONE UAT redeploy carrying badge + telemetry. NO GO -> STOP, card Kam (default HOLD); then redeploy the badge alone.
+- **OWED:** (1) the UAT redeploy brief (deploy seat, Opus row C6, under Tuesday's 2026-10-16 push-to-demo grant: runbook backup/rollback, `scripts/deploy-from-ci.sh`, live check of the badge on all four levels at 390 + 1280; telemetry Phase B checks if included). (2) B435-1 follow-up: keep the compact UAT header styling up to md (768 px) + an e2e row at 667x375 and 360x800 (small Sonnet fix seat + tier-2 gate). (3) the earlier open list (B430 card, feedback-proof channel, NexusAI 33 files, HPSM-POC records seat).
+
 ## 🟢 DELTA 399 — 2026-10-22 07:46 70% CHECKPOINT (s138). **READ THIS FIRST; supersedes 398's LIVE lines.**
 - **LIVE (RE-ARM at boot: status_watch on each STATUS, run_in_background):**
   - %236 `Datasec/HPSM-POC-G33` **B436 ROUND-2 (LAST) tier-1 Opus gate** on `b429/telemetry-224` @ 39d4d1a2 (stamped 07:45:01, hard stop 11:30) -> `HPSM-POC/1_Project_Definition/Briefs/2026-10-22_B436_STATUS.md`, last line `VERDICT: B436 …`. **GO/GWF:** Tuesday's completion check, open the PR (project gh config), wait CodeQL + checks green, land per HPSM-POC's rule, then a Phase B deploy brief (UAT only; D5 controls per B429 ADDENDUM-Q1; cost read at 24 h). **NO GO = STOP:** card Kam (Client/Project, what failed, options: ship closed instances / drop / his word for a round 3; default HOLD).
