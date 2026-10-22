@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE by the Opus 5.5 Wednesday morning seat of 23 Oct a
 
 # NEXT PICKUP (Fri 23 Oct, written 2026-10-23 08:05 AEDT; ctx 67%, weekly 7d 96%)
 
+## 000. DELTA SINCE 08:05 (70% checkpoint, 08:23)
+- **G 15th WRAPPED + ROTATED** (scored 0.93). **Seat G 16th = pane %32**, switched to Sonnet 5.5 by Wednesday; plan ACCEPTED. NOTE: `@cockpit_name` is EMPTY on %32 after the self-rotation (cockpit defect, owed): `cockpit.sh say 'Secuura/Blockchain-G'` still delivered.
+- **Gate DA2: GO WITH NOTE on #1680 and #1681** (verdict `0_Brain/reference/2026-10-23_gate-DA2-pr1680-1681/verdict.md`, trailer equal). **Merge GO sent to G 16th**: #1680 first, then #1681 after re-predicting its tree on the new develop. NEXT: verify each merge at source (tree == landing tree), then PR C READY -> its tier-2 gate.
+- PR C stays under ruling (B); vacuity bound **> 3** (SUPERSEDES the > 5 of the 20:28Z answer).
+- Kam: no taps since 16:42 on 22 Oct (kam_rulings_today 0 rows; reconcile to rule 0). Five Secuura cards open. Fresh-login ask stands.
+
 ## 00. LIVE STATE AT 08:05
 - **Floor: %0 wednesday, %1 fleet-monitor, %30 Seat D 30th (Secuura/Blockchain-D, Opus 5.5, DEMO deploy), %31 Seat G 15th (Secuura/Blockchain-G, Sonnet 5.5, raise + KS-1707).** Both switched by Wednesday with `/model` at their plan prompts (the Secuura launcher pins `claude-opus-5`; fixing it is the project's file: a brief item, never edited from here).
 - **D 30th:** demo build of develop `bcc51903d893` running detached on the box, 16 batches, ~6/16 at 20:51Z, projected end ~22:00Z (09:00 AEDT). Rollback set `pre-20261023d1` (33, idfp 4b52bd0652edd836). Its wake: `evidence/tools/autobeat_d30.sh` mails Wednesday a heartbeat every 20 min ('STATUS build (auto heartbeat)') and wakes the seat on done / fail / stall. **Pre-swap rule (Wednesday's mail 07:12): if its statusline reads >= 98% at the first swap, NO swap, STATUS "built, not swapped", wait.** Once swaps start it finishes them. Part D (post K1c to Stuart) ONLY on Wednesday's mail after Kam's tap.
