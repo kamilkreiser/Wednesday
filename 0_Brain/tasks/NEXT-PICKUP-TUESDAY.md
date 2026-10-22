@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 417 — 2026-10-22 12:07 50% CHECKPOINT (s140, booted 12:0x). **READ THIS FIRST; supersedes 416's FIRST WORK and B448 OWED (a)/(b) lines; 416's LIVE 1-3 stand.**
+- **LIVE (RE-ARM at boot, status_watch run_in_background):** %248 B447 gate (HPSM-POC) · %247 B444 (MPS W1a) · **%249 B445** `Datasec/MPS-W1b` (Sonnet C2, stamped 12:03, launched 12:06, hard stop 15:30) -> `MPS …/Briefs/2026-10-22_B445_STATUS.md` · %243 B440 builder idle (close after B447's verdict, pgrep first).
+- **QUEUED (one waiter at a time, `tuesday/tools/launch_when_cool.sh <name> "<cmd>"` as run_in_background; launch line is in each brief):** B446 `Datasec/MPS-W1c` (stamped 12:03; waiter armed ~12:07) -> then **B449** `Datasec/MPS-WP1` word-pack seat (brief `tuesday/briefs/2026-10-22_B449_SEAT-WP1_*`, STAMPED 12:1x, NOT launched; Sonnet C8, no gate; target 13:45, hard stop 14:30) -> then B450 (fix seat for main-red FeedbackTicketTests; drafter RUNNING -> `tuesday/briefs/2026-10-22_B450_*`; read whole + stamp when it lands; re-commission from 416 OWED (a) if missing).
+- **After B449 READY FOR REVIEW:** read the pack whole + spot-check rows, mail DOCX/PDF to kamil.kreiser@datasec.com.au (read back), card the words (a approve / b edits / c hold; default c: nothing deployed). After B450 lands (gate tier per its brief, merge, CI green with a package) AND the words are ruled: re-pin B448 to the new main, stamp, launch (Opus C6), `--delivered` card `mps-hosted-deploy-main-f5b6f5a-1022`, report to Kam.
+- Done s140: fleet_ack x4 (B444 questions); `launch_when_cool.sh` built + 2 arms + committed (d41aa5465); B448 word candidates kept at `tuesday/briefs/2026-10-22_B448_evidence/`.
+
 ## 🔴 DELTA 416 — 2026-10-22 12:00 ROTATION (s139, ctx 79-80%; band 80-90). **READ THIS FIRST; supersedes 415's B448 line; 412-415's other lines stand.**
 - **LIVE (RE-ARM at boot: status_watch on each STATUS, run_in_background):**
   1. %248 `Datasec/HPSM-POC-G35` **B447 round-3 tier-1 telemetry gate** (Opus; hard stop 15:30, target 14:30) -> `HPSM-POC/1_Project_Definition/Briefs/2026-10-22_B447_STATUS.md`, `VERDICT: B447 …`. GO/GWF -> completion check vs option a, PR, all checks + CodeQL, head-pinned squash, then Phase B (UAT only). NO GO -> STOP for good, card Kam.
