@@ -45002,5 +45002,39 @@
    "CARD secuura-ks1032-fail-closed-when-vouch-secret-unset-1013",
    "CARD secuura-ks1557-tell-stuart-and-peter-about-the-swallowed-anchor-1021"
   ]
+ },
+ {
+  "id": "secuura-ks1709-keep-unanchored-certification-1023",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura / Blockchain: when anchoring refuses a certification, should we still keep it?",
+  "bluf": "A product decision, no rush. (Not covered by your earlier cards: those were about mail wake-ups and an admin-role spelling.) Today, if the anchoring service refuses, the certification is saved anyway and reported as a success, with nothing logged (KS-1709, found by Stuart). PR 1680 fixes the silent half: it now logs the refusal. It does not change whether the certification is kept, because that changes what customers see. This only happens where the system is not in production mode, which is both of our boxes today (DEPLOY-BLOCKERS, D 28th's reading of certifications.ts).",
+  "default_action": "If you don't tap: nothing changes beyond PR 1680's log line, and I raise it again in Monday's morning receipt.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Refuse it",
+    "detail": "no anchor, no certification:The route returns an error and stores nothing when anchoring refuses. A build seat changes both routes (issue and recertify) with tests; Stuart is told on KS-1709."
+   },
+   {
+    "key": "b",
+    "label": "Keep it, but mark it unanchored",
+    "detail": "The certification is stored with an explicit 'not anchored' status and the response says so. A build seat changes both routes; Stuart is told."
+   },
+   {
+    "key": "c",
+    "label": "Leave it as it is (logged only)",
+    "detail": "The log line from PR 1680 is the whole fix for now."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-23T07:48:16.504182+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD secuura-platform-admin-spelling-certification-reads-1020"
+  ]
  }
 ]
