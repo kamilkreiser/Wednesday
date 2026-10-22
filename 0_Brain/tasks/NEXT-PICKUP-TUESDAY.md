@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 419 — 2026-10-22 13:16 72% CHECKPOINT (s140). **READ THIS FIRST; supersedes 418's items 4 and 5 (418's 1-3, the B449 line and OWED stand).**
+- **B445 READY (4th) @ 6d0726e1** verified at source (ADDENDUM-4 closed the supplies regression: new `DealSupplies.tsx` + e2e +46; 25 paths; words held 33 (+9 format messages)). Builder pane %249 CLOSED. **B452** tier-1 Opus gate kit STAMPED (re-pinned to 6d0726e1; stamp line supersedes the draft's aee0edd0 facts; C3 now VERIFIES ADDENDUM-4) -> launch waiter armed (`Datasec/MPS-G2`); status_watch to arm on `…/2026-10-22_B452_STATUS.md` once launched.
+- **B453** tier-2 Sonnet gate on B450 LAUNCHED 13:15 (`Datasec/MPS-G3`), status_watch armed. %252 B450 builder idle (wake acked).
+- On every GO for an MPS branch: PR (project gh config), checks + CodeQL + 0 alerts, head-pinned squash (MPS convention, read CLARIFICATIONS' landing rule in the same action). B444 and B445 hold NEW WORDS (10 and 33+9): no merge of either until Kam rules their words — card them together when both gates are back (one card, two sections). B450 holds none: it may land on GO.
+
 ## 🟢 DELTA 418 — 2026-10-22 13:08 70% CHECKPOINT (s140). **READ THIS FIRST; supersedes 417's LIVE/QUEUED lines.**
 - **LIVE (status_watch run_in_background on each STATUS; NOTE status_watch does NOT know `READY FOR REVIEW:` — read word-pack style seats by hand):**
   1. %248 B447 HPSM-POC telemetry round-3 tier-1 gate (hard stop 15:30). GO/GWF -> completion check, PR, checks + CodeQL, head-pinned squash, Phase B (UAT). NO GO = STOP for good, card Kam. %243 B440 builder idle (close after B447's verdict, pgrep first, own call).
