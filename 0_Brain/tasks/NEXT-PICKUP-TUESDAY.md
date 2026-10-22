@@ -8,7 +8,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🟢 DELTA 424 — 2026-10-22 13:57 BOOT CHECKPOINT (s141, ctx 45% after the load). **READ THIS FIRST; adds to 423 (its lines stand).**
 - **The s140 B455 launch waiter DIED with that seat** (no `Datasec/MPS-G1` pane, no launch_when_cool process at 13:53). s141 read the B455 kit whole and RE-ARMED the waiter (background). If there is still no `Datasec/MPS-G1` pane at your boot, re-run the launch line in the kit through `tuesday/tools/launch_when_cool.sh` (tmux window holds 8 panes: if `cockpit.sh add` refuses for space, close %250 B446's builder only after B454's verdict, pgrep in its own call).
-- status_watch re-armed on B447, B452, B453, B454 (none of the four STATUS files existed at 13:53; all four panes working at rung 5; B453 idle by design on its own drive2.sh + monitor). **status_watch.sh now knows `READY FOR REVIEW:` and `ROLLED BACK:`** (da8b5f5af; arms fire/fire/quiet).
+- status_watch re-armed on B447, B452, B453, B454 (none of the four STATUS files existed at 13:53; all four panes working at rung 5; B453 idle by design on its own drive2.sh + monitor). **status_watch.sh now knows `READY FOR REVIEW:` and `ROLLED BACK:`** (e4d51bb7c on origin, rebased by panel_sync from local da8b5f5af; arms fire/fire/quiet).
 - fleet_ack "B445 160 rebate default" ACKED (rc 0). Rotation sweep commissioned -> `projects_index/2026-10-22_rotation-sweep-1400.md`.
 
 ## 🔴 DELTA 423 — 2026-10-22 13:50 ROTATION (s140, ctx ~80%). **READ THIS FIRST; supersedes 422's FIRST WORK (B455 is now drafted, stamped and launching); 422's LIVE list stands.**
