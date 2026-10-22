@@ -121,6 +121,43 @@ if [ -n "$LIVE" ]; then
   echo "pane_close: --live-ok OVERRIDE USED — closing $PANE ($TARGET_ID) with live work:" >&2; printf '%s\n' "$LIVE" | sed 's/^/pane_close:   /' >&2
   echo "$(date '+%Y-%m-%d %H:%M:%S') OVERRIDE --live-ok: closing $PANE ($TARGET_ID) with $(printf '%s\n' "$LIVE" | wc -l | tr -d ' ') live process(es)" >> "$PCLOG"
 fi
+# DETACHED SEAT WORK (2026-10-22 18:5x, Tuesday s143; Tuesday ledger w=5 "pgrep AND pane_close IN ONE COMMAND AGAIN"):
+# the live-work walk above cannot see a process that left the pane's tree (nohup/setsid/&-disown to pid 1), and the
+# hand-run `pgrep -fl b<NNN>` that was meant to cover it kept being chained into the close itself. So: derive the seat
+# tag from the pane root's argv (brief_seat.sh is launched with the brief path, which carries `_B<NNN>_`), then refuse
+# (rc 10) while any process whose argv names the tag in lowercase (`.tools/b471/`, `wt-b471-head`, `b471/<branch>`) is
+# alive OUTSIDE every pane's process tree (detached work; in-tree work is the walk above; other panes' trees belong to
+# other seats). Excluded: claude processes and this script's own ancestry (a caller's command line may name the tag).
+# Uppercase `B<NNN>` (brief and STATUS file names in the coordinator's own watchers) is never matched. No tag found
+# (a pane not launched by brief_seat.sh): the check is SKIPPED and says so. --live-ok overrides, logged.
+TAG="$(ps -o command= -p "$PPID_PANE" 2>/dev/null | /usr/bin/grep -o -E '_B[0-9]+_' | head -1 | tr -d '_' | tr 'B' 'b')"
+if [ -z "$TAG" ]; then
+  echo "pane_close: detached-work check SKIPPED — no _B<NNN>_ seat tag in the argv of $PANE's root pid $PPID_PANE"
+else
+  SELFCHAIN=" "; sp=$$; while [ -n "$sp" ] && [ "$sp" != 0 ] && [ "$sp" != 1 ]; do SELFCHAIN="$SELFCHAIN$sp "; sp="$(ps -o ppid= -p "$sp" 2>/dev/null | tr -d ' ')"; done
+  PANEPIDS=" $(tmux list-panes -a -F '#{pane_pid}' 2>/dev/null | tr '\n' ' ')"
+  DETACHED="$(ps -A -o pid=,ppid=,command= 2>/dev/null | awk -v tag="$TAG" -v self="$SELFCHAIN" -v panes="$PANEPIDS" '
+    { pid=$1; pp=$2; $1=""; $2=""; c=substr($0,3); C[pid]=c; P[pid]=pp }
+    function base(t) { sub(/.*\//, "", t); return t }
+    function inpane(p,   h) { h=0; while (p != "" && p != 0 && p != 1 && h < 40) { if (index(panes, " " p " ")) return 1; p=P[p]; h++ } return 0 }
+    END { re = "(^|[^a-z0-9])" tag "([^0-9]|$)"
+      for (pid in C) { c=C[pid]; if (c !~ re) continue; if (index(self, " " pid " ")) continue
+        split(c, w, " "); if (base(w[1]) == "claude" || base(w[2]) == "claude") continue
+        if (inpane(pid)) continue
+        print pid "  " substr(c, 1, 140) } }')"
+  if [ -n "$DETACHED" ]; then
+    if [ "$LIVE_OK" != 1 ]; then
+      echo "pane_close: REFUSED — detached work of seat $TAG is still running OUTSIDE the pane (its supervisor dies with $PANE $TARGET_ID):" >&2
+      printf '%s\n' "$DETACHED" | sed 's/^/pane_close:   /' >&2
+      echo "pane_close:   wait for it, or have the seat stop it; re-run with --live-ok only if orphaning it is intended" >&2
+      echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc10: $(printf '%s\n' "$DETACHED" | wc -l | tr -d ' ') detached $TAG process(es) for $PANE ($TARGET_ID)" >> "$PCLOG"; exit 10
+    fi
+    echo "pane_close: --live-ok OVERRIDE USED — detached $TAG work left running:" >&2; printf '%s\n' "$DETACHED" | sed 's/^/pane_close:   /' >&2
+    echo "$(date '+%Y-%m-%d %H:%M:%S') OVERRIDE --live-ok: $(printf '%s\n' "$DETACHED" | wc -l | tr -d ' ') detached $TAG process(es) for $PANE ($TARGET_ID)" >> "$PCLOG"
+  else
+    echo "pane_close: detached-work check: no process names $TAG outside the panes"
+  fi
+fi
 det_fail() { # $1 reason → REFUSED rc 8 (fail closed)
   echo "pane_close: REFUSED — the typed-line detector could not give a verdict for $PANE (${TARGET_ID:--}): $1. Nothing was closed. Check the pane by eye (tmux capture-pane -p -t ${TARGET_ID:-<id>}) before doing anything else." >&2
   echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc8: detector failed for $PANE: $1" >> "$PCLOG"; exit 8
@@ -195,12 +232,19 @@ done
 [ "$BLOCK" = 1 ] && { echo "$(date '+%Y-%m-%d %H:%M:%S') REFUSED rc5: a listener would die with $PANE" >> "$PCLOG"; exit 5; }
 
 for p in "$@"; do echo "before: port $p $(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "http://127.0.0.1:$p/")"; done
-BEFORE=$(lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null | wc -l | tr -d ' ')
+# LISTENER LIST, not just a count (2026-10-22 18:5x, Tuesday s143; ledger w=5: a close read "14 -> 13" and which listener
+# went was UNMEASURED — another seat's ephemeral test host churning looks identical to a surface this close killed).
+listeners() { lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null | awk 'NR>1 { print $2 " " $1 " " $9 }' | sort -u; }
+LBEFORE="$(listeners)"; BEFORE=$(lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null | wc -l | tr -d ' ')
 tmux kill-pane -t "$PANE" || { echo "pane_close: kill-pane failed" >&2; exit 2; }
 sleep 2
-AFTER=$(lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null | wc -l | tr -d ' ')
+LAFTER="$(listeners)"; AFTER=$(lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null | wc -l | tr -d ' ')
 echo "closed $PANE; listeners $BEFORE -> $AFTER"
-echo "$(date '+%Y-%m-%d %H:%M:%S') CLOSED $PANE ($TARGET_ID name=${TARGET_NAME:--}); listeners $BEFORE -> $AFTER" >> "$PCLOG"
-[ "$BEFORE" != "$AFTER" ] && echo "pane_close: WARNING — the listener count MOVED across this close ($BEFORE -> $AFTER) despite no refusal. Identify what died before treating this close as clean." >&2
+LGONE="$(comm -23 <(printf '%s\n' "$LBEFORE") <(printf '%s\n' "$LAFTER") | awk 'NF')"
+LNEW="$(comm -13 <(printf '%s\n' "$LBEFORE") <(printf '%s\n' "$LAFTER") | awk 'NF')"
+[ -n "$LGONE" ] && printf '%s\n' "$LGONE" | sed 's/^/pane_close: listener GONE (pid command addr): /'
+[ -n "$LNEW" ] && printf '%s\n' "$LNEW" | sed 's/^/pane_close: listener NEW  (pid command addr): /'
+echo "$(date '+%Y-%m-%d %H:%M:%S') CLOSED $PANE ($TARGET_ID name=${TARGET_NAME:--}); listeners $BEFORE -> $AFTER; gone=[$(printf '%s' "$LGONE" | tr '\n' ';')] new=[$(printf '%s' "$LNEW" | tr '\n' ';')]" >> "$PCLOG"
+[ -n "$LGONE" ] && echo "pane_close: WARNING — listener(s) disappeared across this close despite no refusal (listed above). Identify each before treating this close as clean: another seat's short-lived test host ending is not this close's doing; a surface this pane owned is." >&2
 for p in "$@"; do echo "after:  port $p $(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "http://127.0.0.1:$p/")"; done
 exit 0
