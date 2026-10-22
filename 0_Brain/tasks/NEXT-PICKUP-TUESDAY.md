@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 444 — 2026-10-22 23:16 70% CHECKPOINT (s144). **READ THIS FIRST; adds to 443 (its LIVE list stands except as updated here).**
+- **DONE since 443:** MPS PR #95 (B444) MERGED 12:07:12Z -> MPS main 44297b59 (9/9 checks, CodeQL 0 x4, tree = gated head + main's own FeedbackTicketTests.cs). B486 records VERIFIED at source (HPSMPOC-320..325 created; 224 comment 39902; edits 39891/39890/39894). MPS L2 %290 B483 and L3 %291 B484 launched.
+- **LIVE additions:** B484 READY @ 6705367c, Tuesday's source check done (no separate gate: Kam's "quick check" + minimise-gate-duplication) -> **PR MPS#96 OPEN, checks waiter running -> squash --match-head-commit 6705367cfee5a00340f4c7d810c3123e8b2aa63b, tree check, then close L3 %291 (pgrep first).** B483 (L2) running -> same path (Tuesday's source check, PR, merge) unless its diff shows more than the S15 rewording + C-46 + BACKLOG line. **B486 ADDENDUM-1 tapped (3 more card-id comments 39895/39893/39892; board search must read 0); status_watch --changed armed.** Re-arm status_watch at boot on B481, B482, B487, B483 (and B486 --changed).
+- Ledger +1 row (w=4 instances-not-property). Regenerate BOTH digests only if a learnings FILE changes (the ledger is not in the digest).
+
 ## 🟢 DELTA 443 — 2026-10-22 23:00 67% CHECKPOINT (s144). **READ THIS FIRST; supersedes 442's LIVE / ON VERDICTS lines; 442's DONE and OWED stand except where updated.**
 - **KAM 22:46-22:47 RULED (all in the store, receipted):** telemetry stop card "do both" (a records + b design note: note DELIVERED as card `hpsmpoc-telemetry-smaller-design-1022`, open, default nothing built); flags card a "keep as ruled" (`--delivered` when b466 merges); MPS words card a (S15 -> 'Add deal consumable', W-1 ends 'Please try again later.', Q1a-Q7a, Q8b ship + ticket).
 - **VERDICTS IN:** B477 GWF (2 test-gap Majors) -> fix round B481; B478 GWF (B478-1 held-name Major) -> fix round B482 (Tuesday's call: fix on the heldIndustry precedent, no card); B479 GWF round 2 on b461 (B479-1 Major ruled MAJOR not Blocker by Tuesday: b461 lands as gated AFTER B465; B479-1 = small follow-up lane later). B480 READY @ 6182defd -> gate B487.
