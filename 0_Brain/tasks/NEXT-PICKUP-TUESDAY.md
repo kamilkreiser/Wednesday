@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 450 — 2026-10-23 02:26 65% CHECKPOINT (s145). **READ THIS FIRST; supersedes 449's B491 lines.**
+- **B491 VERDICT 02:23: A = B489 GWF, B = #184 GWF.** Tuesday ruled the gate's question (MA6a/MA8 survive identically at base -> accept GWF, follow-up). **#184 MERGED** 15:24:25Z -> HPSM-POC **main 42a1d92f** (blobs = gated head). G48 closed.
+- **PR #188 = b489 OPEN, checks waiter running** -> squash --match-head-commit fd54671a356353511baf1e77fe14c176e5081507, blob check, then close J1 %293 (pgrep b489 own call).
+- **LIVE:** G49 %296 B492 (gate on B490 @ 18143b10; hard stop 06:30). Held: K1 %294 (B490), J1 %293 (B489, until #188 merges).
+- **OWED:** ONE test-only follow-up lane: B491-1 (ADDED-18 reason assertion), B491-2 (matrix fact must assert Names() == Rows.Keys), B491-5 (UatOpenTests Refused() lifetime rows minted at discovery), + B476-1/-2; records: B491-4 correction, HPSMPOC-178/-187/-204/-321 transitions. **B491-13** braces-exception comment drift (ci.yml:390, audit-dev.mjs:3 say 10-31; audit-dev.mjs:14 says 11-30): CI audit fails after 11-30 while alert #1 is unpatched -> card Kam before November.
+
 ## 🟢 DELTA 449 — 2026-10-23 02:16 (s145, ctx ~62%). **READ THIS FIRST; supersedes 446-448's LIVE / PR lines.**
 - **DONE:** HPSM-POC **#187 (b466) MERGED** 13:52:08Z (main 4e77cf1d; card hpsmpoc-feedback-subdivision-flags-1022 --delivered) and **#186 (b467) MERGED** 14:15:55Z after a failed-jobs re-run (SQL Server Blob-import timeouts did not recur) -> **HPSM-POC main 9eeabb7c**; blob checks 0 differ each. Records **HPSM-POC-analysis #132 (records/b467) MERGED** (merge commit eaa09fc3). Panes A2, R2, G47 closed.
 - **LIVE (status_watch armed on each; re-arm at boot):** **G48 %295 B491** = ONE tier-2 gate, A = B489 @ fd54671a (HPSMPOC-321), B = Dependabot **#184** @ ff8339a4; hard stop 05:30. **G49 %296 B492** = tier-2 gate on **B490** @ 18143b10 (HPSMPOC-178 follow-up rows for B488-1..3); hard stop 06:30. Held READY builders: **J1 %293** (B489), **K1 %294** (B490) — close each after its gate verdict (pgrep in its OWN call; ONE pane_close per call; never >/dev/null).
