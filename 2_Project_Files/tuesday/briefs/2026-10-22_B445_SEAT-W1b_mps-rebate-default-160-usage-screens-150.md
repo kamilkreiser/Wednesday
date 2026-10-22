@@ -8,10 +8,10 @@ From Tuesday (the Datasec coordinator seat), Datasec / MPS Commercial Calculator
 
 ## Stamp
 Tuesday fills each four-underscore slot below at launch; the drafter fills none. A seat refuses if any slot below is still unfilled (see REFUSE AT ONCE).
-- Main at launch: ____
-- Stamp time (AEDT, from `date`), launch authority (a ruled card or Tuesday's own word, as written) and the answers to the drafter's open points: ____
-- Pane free by tmux; sibling wave-1 panes live; brief read whole by line count: ____
-- Gate tier and model line as ruled at the stamp (receipt: row, P1-P4 result, gauge): ____
+- Main at launch: `f5b6f5a710258a4a36ffbcab92787a2434962500` (Tuesday's `ls-remote origin refs/heads/main` at 12:03:10 AEDT; no `b44*` branch on origin then).
+- Stamp time 2026-10-22 12:03:37 AEDT (python datetime.now in the stamp script). Launch authority: Tuesday's own word under Kam's 2026-10-16 grant (merge-once-tested on every Datasec project), on Kam's 11:01 live-board question answered bf-ee27b2ceff5e (Tuesday committed to build the open items that need nobody else). Drafter's open points: K-02 + C-17 CONFIRMED as the MPS words rule (K9 is not MPS's); words held in a `WORDS-PENDING B445` block and NOT merged until the product owner rules the pack: CONFIRMED; every B445 open point R-* = its written default. R-W1b-2 default stands: STOP on 160 with one question if a server default is needed, and continue to 150-UI meanwhile. ADDED AT THE STAMP (partition changes since drafting): NOT YOURS as well, B444 owns them by its ADDENDUM-1..4: `web/src/api/client.ts`, `src/MpsCalc.Api/Quotes/Proposal.cs`, `tests/MpsCalc.Api.Tests/QuoteApiTests.Home.cs`, `tests/MpsCalc.Api.Tests/QuoteApiTests.HomeB49.cs`, `tests/MpsCalc.Api.Tests/EntraAuthTests.cs`. Also NOT yours: a fix seat B450 (pane `Datasec/MPS-F1`, may launch after you) owns `tests/MpsCalc.Api.Tests/FeedbackTicketTests.cs` and `src/MpsCalc.Api/Feedback/FeedbackTickets.cs`; a word-pack seat B449 (pane `Datasec/MPS-WP1`) writes documents only. PRE-EXISTING RED ON MAIN (not yours, not a STOP): `FeedbackTicketTests.A_timeout_then_a_search_that_finds_the_label_records_that_key_and_never_creates_a_duplicate` failed on main's push CI (run 39514401396, 1 of 1828; known timing test, BACKLOG [B100-1]/[B340-B318-C1]/[B406-MAIN-RED], RELAYED from Tuesday's drafter). If it is red in your whole-CI run, record it as pre-existing with the run's evidence and do not touch it; ANY other red is a STOP. Never re-run any GitHub CI job.
+- Pane free by tmux (12:03: no `Datasec/MPS-W1b`/`W1c` pane); live then: %247 `Datasec/MPS-W1a` (B444), %248 `Datasec/HPSM-POC-G35`, %243 `Datasec/HPSM-POC-F2` (other project). Brief read whole by Tuesday (s140): 145 lines.
+- Gate tier 1 RULED (Opus gate). Model receipt: `model: claude-sonnet-5-5 -- C2 (pilot) -- P1 no / P2 54% / P4 Claude-only (Datasec: no local tier) -- gauge 7d 54%`; launched with `WED_USAGE_STOP=100` under EXPIRING-GRANTS row 'TUESDAY: NO 90% USAGE STOP'.
 
 **Gate tier: 1 (routing row G1), PROPOSED by the drafter; Tuesday rules it at the stamp.** Why: MPSCALC-160 touches the calculation register (the default value of X-11) and carries `tier-1`; MPSCALC-150 is `tier-1` and `calc-register` (its engine half already passed a tier-1 gate); the UI half adds no calculation but shows server figures. The stamp paragraph is the ruling; if it is silent, tier 1 stands for the whole branch.
 
@@ -142,4 +142,4 @@ SELF-CHECK: drafted 2026-10-22 from the census read whole, the project's `CLAUDE
 
 READ-WHOLE-BY-TUESDAY marker: the very last line of this file below is the stamp slot.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 2026-10-22 12:03:37 AEDT (s140)

@@ -1,0 +1,314 @@
+#83	src/MpsCalc.Import/PriceBookImporter.cs	Care packs (MPSCALC-140): every SKU in a '{SynnexBook.BidPricingSheet}' Core-block row whose Group names a care pack, and every SKU in a model sheet's '{SynnexBook.CareSectionMarker}' block (a trailin
+#84	docs/IMPORTER.md	| Colour panels outside the map (MPSCALC-147) | each row of any mapped model sheet's `Optional Color Panel Accessories` section, as an option of every mapped device on that sheet (unless the map alrea
+#84	docs/IMPORTER.md	It refuses (`RESULT: REFUSED`, exit 1) when a left-out record does not lie in its sheet's recorded section, when a
+#84	docs/IMPORTER.md	section SKU is neither imported as a panel nor held by the map, or when a sheet's left-out records do not number its section
+#84	docs/IMPORTER.md	SKUs × its mapped devices, less the (device, SKU) pairs the map already holds (a per-device panel record is missing or extra).
+#84	docs/IMPORTER.md	A sheet's mapped devices are read from the cells the store recorded for them (their governed options' rows, their supply rows
+#84	docs/IMPORTER.md	and their panel records), so a device with none of these on its sheet cannot be seen. A store written before this rule
+#84	docs/IMPORTER.md	records no section, so a store with panel rows and no section is refused: re-import it. `prove` checks the store against its
+#84	docs/IMPORTER.md	own recorded section only: it does not re-read the book, so it cannot see a section the importer bounded wrongly, or a SKU
+#84	docs/IMPORTER.md	removed from both the section and the store. Its counts read singular at one ("1 option record", "1 colour-panel SKU").
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	Parity proof: {ParityProof.Count(Scenarios, 
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	Not compared: {ParityProof.Count(OptionsOutsideWorkbook, 
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	Not compared, '{p.ModelSheet}': {ParityProof.Count(p.ExcludedSkus, 
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	colour-panel SKUs
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	)}, {p.InMap} already in the catalogue map.
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	1 panel heading block repeats a sheet the store already records one for.
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	{repeats} panel heading blocks repeat a sheet the store already records one for.
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	1 option record carries the colour-panel basis but does not lie in a recorded panel heading block (a store written before round 2 of MPSCALC-147 has none: re-import the books).
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	{unplaced} option records carry the colour-panel basis but do not lie in a recorded panel heading block (a store written before round 2 of MPSCALC-147 has none: re-import the books).
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	'{b.ModelSheet}': 1 SKU of its panel heading block (rows {b.FirstRow}-{b.LastRow}) is neither imported as a colour panel nor held by the catalogue map.
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	'{b.ModelSheet}': {lost} SKUs of its panel heading block (rows {b.FirstRow}-{b.LastRow}) are neither imported as colour panels nor held by the catalogue map.
+#84	src/MpsCalc.Import/Parity/ParityProof.cs	'{b.ModelSheet}': {Count(mine.Count, 
+#84	src/MpsCalc.Import/PriceBookImporter.cs	PANEL SECTION ENDED AT AN UNRECOGNISED CELL
+#84	src/MpsCalc.Import/PriceBookImporter.cs	'{group.Key}': a cell that is neither a part number nor one of the book's own headings ends the colour-panel section; it and the rows below it are not panels.
+#87	docs/RECONCILIATION.md	# Reconciliation (T-V3-1, lane V3)
+#87	docs/RECONCILIATION.md	`MpsCalc.Engine.Reconciliation.QuoteReconciler` recomputes the nine v13.4.1 measures from a quote's input and compares them with
+#87	docs/RECONCILIATION.md	what the calculator reported. It is **not wired into any endpoint, calculator or screen** (R-V3-1): it is a pure function a later
+#87	docs/RECONCILIATION.md	lane can call (a readiness panel, a pre-issue check, a test).
+#87	docs/RECONCILIATION.md	## What "independent" means
+#87	docs/RECONCILIATION.md	The module calls nothing in `QuoteCalculator` or `PurchaseCalculator` and shares no helper with them (a test scans the module's
+#87	docs/RECONCILIATION.md	source for that). Every figure is rebuilt from:
+#87	docs/RECONCILIATION.md	* the quote **input** (quantities, pages, flags, the line's declared pricing method, the term, the finance rate, the target GP,
+#87	docs/RECONCILIATION.md	the service costs, the supplies model), and
+#87	docs/RECONCILIATION.md	* the **facts the result records** for a line that come from a reference lookup the module cannot see: the tier-priced device and
+#87	docs/RECONCILIATION.md	option costs, the cost per page with the service reserve, the extended software prices, a purchase line's unit cost and applied
+#87	docs/RECONCILIATION.md	percent, a catalogue sell price.
+#87	docs/RECONCILIATION.md	A calculator bug that is consistent with itself (a line dropped from every total; a margin on price applied as a markup) is
+#87	docs/RECONCILIATION.md	invisible to the calculator's own parts-sum checks. It is visible here, because the module sums the lines itself and applies the
+#87	docs/RECONCILIATION.md	line's declared method itself.
+#87	docs/RECONCILIATION.md	`QuoteReconciler.ReconciliationTolerance = 0.01m`, **inclusive**: `|recomputed - reported| <= 0.01` passes (ruling D-13 a, "cents,
+#87	docs/RECONCILIATION.md	matching C-30"; v13's own are 0.015 and 0.02).
+#87	docs/RECONCILIATION.md	## The nine measures by quote mode
+#87	docs/RECONCILIATION.md	| Measure | Rental | Purchase |
+#87	docs/RECONCILIATION.md	| Upfront sell | not applicable (no upfront charge) | Σ section totals, each rounded to cents (X-21) |
+#87	docs/RECONCILIATION.md	| Upfront cost | not applicable | Σ unit cost × quantity, non-optional lines (X-07, X-10, X-19) |
+#87	docs/RECONCILIATION.md	| Upfront gross profit | not applicable | Σ (unit sell − unit cost) × quantity (X-05), before the partner rebate |
+#87	docs/RECONCILIATION.md	| Monthly revenue | Σ quantity × (base + pages × click + software), R-18 | the usage clicks over the monthly pages (X-16, X-26); only with a supplies model |
+#87	docs/RECONCILIATION.md	| Monthly cost | R-17 | the monthly pages × cost per page (X-14, X-16); only with a supplies model |
+#87	docs/RECONCILIATION.md	| Monthly gross profit | R-19 | revenue − cost; only with a supplies model |
+#87	docs/RECONCILIATION.md	| Annual gross profit | monthly GP × 12 | monthly GP × 12; only with a supplies model |
+#87	docs/RECONCILIATION.md	| Contract gross profit | contract value − monthly cost × term | upfront GP + monthly GP × term |
+#87	docs/RECONCILIATION.md	| Contract value | R-22 (annual step escalation) | upfront sell + monthly revenue × term |
+#87	docs/RECONCILIATION.md	A measure that does not apply is `NotApplicable` with a reason. It is never reported as a pass of zero. A quote the calculator did
+#87	docs/RECONCILIATION.md	not price has nothing to reconcile: all nine are `NotApplicable`.
+#87	docs/RECONCILIATION.md	Where the result carries no figure for a measure (annual gross profit; rental contract gross profit; the purchase monthly figures),
+#87	docs/RECONCILIATION.md	the **reported** side is the one the result's own totals imply (for example its monthly GP × 12, or its contract click revenue
+#87	docs/RECONCILIATION.md	÷ term). The rule text of each variance says which.
+#87	docs/RECONCILIATION.md	## What is not recomputed
+#87	docs/RECONCILIATION.md	* The partner rebate (X-11, X-12) is a payout, not a margin component: it is in none of the nine.
+#87	docs/RECONCILIATION.md	* The replacement shortfall of whole supply units (X-17, X-27) is an exposure at the end of the contract: it is in none of the nine.
+#87	docs/RECONCILIATION.md	* Fixed usage rates **without** a supplies model: the calculator prices no usage revenue or cost for them, so there is nothing to
+#87	docs/RECONCILIATION.md	* The rental result does not record a device's paper format (A3 or A4), which picks the service-cost column of the input. The
+#87	docs/RECONCILIATION.md	rental overload therefore also takes the `ReferenceData` and reads that one lookup from it.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	Add at least one device.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	Enter the customer name.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	The customer name is entered.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	QUOTE REFERENCE
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	Enter the quote reference.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	The quote reference is entered.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	V-29, T-V3-2: identity
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	CONTRACT TERM
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	The contract term is {allowed}.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	Choose a contract term of {allowed}.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	FR-DISC-003, V-29
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	, terms.Take(terms.Count - 1))} or {terms[^1]} months
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	HAS DEVICES
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	The quote has at least one device line.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	MPS-6, C-23, MPSCALC-171
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	The quote has no credit lines.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	This quote has 1 credit line. A reviewer checks it before the quote is issued.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	This quote has {count.ToString(CultureInfo.InvariantCulture)} credit lines. A reviewer checks them before the quote is issued.
+#87	src/MpsCalc.Engine/Readiness/ReadinessEvaluator.cs	CREDIT LINES
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-04/X-06 (markup on cost) or the margin-on-price convention (X-15), X-09, X-10, X-19, X-21: Σ section totals, each rounded to cents, optional lines out, credits negative
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-07, X-10, X-19: Σ unit cost × quantity over the non-optional lines
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-05, X-10, X-19: Σ (unit sell − unit cost) × quantity over the non-optional lines that have both; before the partner rebate (X-11, X-12)
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-13…X-16, X-25, X-26: monthly mono pages × applied mono click + monthly colour pages × applied colour click (reported = the contract click revenue ÷ term)
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-13, X-14, X-16, X-25, X-26: monthly pages × cost per page (reported = the contract supplies cost ÷ term); before the replacement shortfall (X-17, X-27)
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-16, X-26: monthly revenue − monthly cost (reported = the contract margin ÷ term)
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-16, X-26 × 12 months: the result carries no annual figure, so the reported side is its contract margin ÷ term × 12
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-05 and X-16/X-26: upfront gross profit + monthly gross profit × term
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	X-21 and X-16/X-26: upfront sell + monthly revenue × term
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	This purchase quote has no supplies model (X-16 per section, X-26 for the deal), so the calculator prices no usage revenue or cost: there is no monthly figure to reconcile.
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	The calculator did not price this quote, so there is no result to reconcile.
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	The term is not positive, so the quote cannot be priced from its input.
+#87	src/MpsCalc.Engine/Reconciliation/PurchaseRecomputation.cs	Line {line.LineNumber} is in the input but the result has no line {line.LineNumber}.
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	R-18 with R-10…R-16 (workbook AA): quantity × (applied base + mono pages × applied mono click + colour pages × applied colour click + software sell per device)
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	R-17 with R-06, R-09 (workbook Z): quantity × (finance + fixed service + other recurring + mono pages × mono cost per page + colour pages × colour cost per page + software cost per device)
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	R-19 (workbook AB): monthly revenue − monthly cost
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	R-19 × 12 months: the result carries no annual figure, so the reported side is its monthly gross profit × 12
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	R-22 − R-17 × term: the reported side is its contract value − its monthly cost × term
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	R-22 (workbook X): annual step escalation, year 1 at base
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	A rental quote has no upfront charge: the hardware is financed into the monthly charge (R-09).
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	The calculator did not price this quote, so there is no result to reconcile.
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	The term is not positive or the target gross margin is not below 100%, so the quote cannot be priced from its input (R-09, R-10).
+#87	src/MpsCalc.Engine/Reconciliation/RentalRecomputation.cs	Fleet line {line.LineNumber} is in the input but the result has no line {line.LineNumber}.
+#87	web/src/screens/quote/ReadinessPanel.tsx	Go to ${item.target}
+#87	web/src/screens/quote/ReadinessPanel.tsx	Readiness checks
+#87	web/src/screens/quote/ReadinessPanel.tsx	Hide checks
+#87	web/src/screens/quote/ReadinessPanel.tsx	Show checks
+#85	docs/API.md	| `GET /api/v1/quotes/{quoteId}/versions/{n}/diff?against={m}` — what changed in version n against version m | Seller, Approver | B309 T-V0-5; V-81 |
+#85	docs/API.md	- **An unchanged save is not a change (B309 T-V0-3, MPSCALC-209).** `PATCH …/draft` with a draft equal to the stored one answers 200 with the current quote: the same `revision` and `updatedAt`, no `dr
+#85	docs/API.md	### The Home list: staff-only columns and the Ready to Export group (B309 T-V0-8)
+#85	docs/API.md	**Shape first, values later.** Lane V0 writes the contract; lane V2 (which owns `QuoteFigures.cs`) fills the values.
+#85	docs/API.md	- **Four staff-only columns on a list row** (`GET /api/v1/quotes`): `oneOffGp`, `annualRecurringGp`, `tcv`, `totalGp` (exact decimal
+#85	docs/API.md	strings, like every figure). A caller holding `internal-metrics` receives them; for anyone else the endpoint removes them from
+#85	docs/API.md	every row (`Mapping.Restrict`), whatever the filling code produced. A quote with no calculation has none. Until lane V2 fills them
+#85	docs/API.md	no row carries them. They are the only cost-side figures a list row may hold; every other member stays customer-safe (B46).
+#85	docs/API.md	- **`group=readyToExport`** is a value of the list's `group` query parameter: *approved and not yet exported* (ruling C-23 MPS-3 (a)).
+#85	docs/API.md	Until lane V2 adds it to `QuoteFigures.ListFilter.Parameters["group"]` the server answers it `400 INVALID_FILTER` like any value not
+#85	docs/API.md	listed; the row's own `group` member keeps its four values (`drafts`, `submitted`, `rejected`, `approved`).
+#85	docs/API.md	- **"Exported" means (the contract's definition):** the quote's current version has at least one `proposal-generated` event with
+#85	docs/API.md	`isDraft` false, that is, a proposal was generated from its approved snapshot. No export flag exists; that event is the nearest
+#85	docs/API.md	record (`QuoteEvents.ProposalGenerated`, written by `GET …/proposal`). So *ready to export* = current version Approved and no such event.
+#85	docs/API.md	- **No CSV endpoint.** The Home CSV is built in the browser from the list rows it already holds (MPSCALC-245); the contract gains no route for it.
+#85	docs/API.md	### Approve re-checks the submitted calculation (B309 T-V0-4, MPSCALC-234)
+#85	docs/API.md	`POST …/approve` reads the submitted snapshot's calculation again, after the ownership, status and self-approval checks. If it is
+#85	docs/API.md	`Blocked` or holds a `Blocking` issue the answer is **409 `BLOCKING_ISSUES`**, the code `POST …/submit` uses for the same condition,
+#85	docs/API.md	no approved snapshot is written, no event is recorded, and the version stays Submitted (the approver rejects it with a reason). Through
+#85	docs/API.md	the API this cannot happen to a version submitted by this server, because submit refuses it first; the check guards a snapshot stored
+#85	docs/API.md	by other means, and `callerCan.approve` is false for it. An approvable version approves exactly as before.
+#85	docs/API.md	### Audit of customer, reference, term and opportunity edits; "issued" and "accepted" (B309 T-V0-6, MPSCALC-236)
+#85	docs/API.md	- **Old and new, without a reason.** A `PATCH …/draft` that changes `customer`, `quoteRef`, the term (`assumptions.termMonths`) or an
+#85	docs/API.md	opportunity field (`accountManager`, `deliverySite`, `opportunityNotes`, `opportunityDeviceCount`) adds one audit entry per field to
+#85	docs/API.md	the version's audit (the `priceAudit` list): `{ sequence, at, by, persona, field, oldValue, newValue, reason }`, an empty text counting
+#85	docs/API.md	as no value. Unlike a purchase price they need **no reason** (the save still answers 200 without one); the save's `reason`, when
+#85	docs/API.md	sent, is kept on the entries. A save that changes none of them, including an unchanged re-save (T-V0-3), records nothing. Creating
+#85	docs/API.md	a quote records no such entry. Like the price audit, the list is returned to internal-metrics callers only and is frozen into
+#85	docs/API.md	the snapshots (which restrict it the same way).
+#85	docs/API.md	- **"Issued" is the `proposal-generated` event with `isDraft` false.** A proposal printed from an approved snapshot already
+#85	docs/API.md	records that event (`GET …/proposal`, B35 item 5); a second kind for the same act would record it twice, so there is no `issued` event kind. The
+#85	docs/API.md	*status* "Issued" ruled by D-12 a is a different thing and is a later change.
+#85	docs/API.md	- **`accepted`** is now a kind in the contract's event list. **Nothing records it in this change**: the acceptance record (a reference
+#85	docs/API.md	and a date on the Won outcome) is the held follow-up, which will write it. No quote has an `accepted` event yet.
+#85	docs/API.md	### Version diff (B309 T-V0-5, MPSCALC-235)
+#85	docs/API.md	`GET /api/v1/quotes/{quoteId}/versions/{n}/diff?against={m}` (Seller or Approver) answers what changed in version **n** compared with
+#85	docs/API.md	version **m** of one quote: *old* is version m, *new* is version n. A version is read from its approved snapshot, else (while
+#85	docs/API.md	Submitted) its submitted snapshot, else its draft and, if its latest calculation is for its current revision, that calculation;
+#85	docs/API.md	`versionSource` and `againstSource` say which (`approved`, `submitted`, `draft`).
+#85	docs/API.md	- `changes`: each draft field that differs, `{ path, oldValue, newValue }`, in path order. A list line is keyed by its own number or id
+#85	docs/API.md	(`fleet[2].quantity`, `sections[office].markupPercent`, `hardware[1:OPT-TRAY].quantityPerDevice`), so an added line does not shift
+#85	docs/API.md	the others; a missing side means the field was not there. A number written at another scale (3 and 3.00) is not a change.
+#85	docs/API.md	- `figures`: each headline figure that moved, `{ name, oldValue, newValue }`: every decimal of the portfolio (`portfolio.monthlyCharge`,
+#85	docs/API.md	`portfolio.contractValueExTax`, …) and of the purchase result (`purchase.…`) present on either side. Empty when a version has no calculation to read.
+#85	docs/API.md	- **Internal-metrics.** A caller without it receives the same redacted drafts and restricted calculations the quote and snapshot reads
+#85	docs/API.md	give them, so no cost, GP, margin, capital or target GP appears in `changes` or `figures`. A caller with it also gets those.
+#85	docs/API.md	- **404 `NOT_FOUND`** for an unknown quote or an unknown version; **400 `BAD_REQUEST`** when `against` is missing, repeated, not a
+#85	docs/API.md	version number (1 or more), equal to `n`, or when any other query parameter is sent. Administrator-only callers get 403 `FORBIDDEN`.
+#85	docs/API.md	- A read: it stores nothing, records no event and changes no revision.
+#85	docs/API.md	### The opportunity fields (B309 T-V0-1, MPSCALC-232)
+#85	docs/API.md	The draft (create, `PATCH …/draft`, every read and snapshot) carries four optional fields, left out on every quote stored before B309:
+#85	docs/API.md	`accountManager` and `deliverySite` (text, at most 200 characters, no control character), `opportunityNotes` (text, at most 2000
+#85	docs/API.md	characters; line breaks and tabs allowed, no other control character) and `opportunityDeviceCount` (whole number, 0 to 100000;
+#85	docs/API.md	below 0 or above the limit is 400 `INPUT_OUT_OF_RANGE`; a text over its length, or with a control character, is 400 `BAD_REQUEST`).
+#85	docs/API.md	They are seller-entered text, visible to every quote role exactly like `customer` (no internal-metrics gate), copied by duplicate,
+#85	docs/API.md	and **never printed on the customer proposal** (each is NotShown in the allow-list; what the proposal shows is lane V8's to decide).
+#85	docs/API.md	`opportunityDeviceCount` is the number the seller states for the opportunity; it is not the derived `deviceCount` of the quote list.
+#85	docs/API.md	**Its own reference (B309 T-V0-2, MPSCALC-233).** A copy never shares its source's `quoteRef`. The body is optional: `quoteRef` in it (at most 100 characters, no control character, else 400 `BAD_REQUE
+#85	docs/API.md	`POST /api/v1/quotes/{quoteId}/duplicate` (optional body `{ "quoteRef": "…" }`; Seller) creates a **new quote**: new id, version 1, `Draft`, revision 1,
+#85	docs/API.md	| `draft-updated` | `PATCH …/draft` succeeded **and changed the draft** (B309: a save of an unchanged draft records nothing) | `revision` (the new one), `reason` when the save sent one |
+#85	docs/API.md	| `accepted` | **nothing records it yet** (B309 T-V0-6: the kind is in the contract; the acceptance record on a Won outcome, a later change, will write it) | none yet |
+#85	src/MpsCalc.Api/Quotes/Mapping.cs	every figure vanished
+#85	src/MpsCalc.Api/Quotes/Mapping.cs	{path}[{(seen[key] > 1 ? $
+#85	src/MpsCalc.Api/Quotes/Mapping.cs	 : key)}]
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	Send against=<a version number, 1 or more> and nothing else in the query.
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	The version in the path must be a version number, 1 or more.
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	A version is not compared with itself: against must name a different version.
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	Quote {quoteId} has no version {(version is null ? number : against)}.
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	The submitted calculation has {n} blocking issue(s), so it cannot be approved (FR-REV-008). Reject it so the seller can resolve them and submit again.
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	accountManager and deliverySite are at most 200 characters each.
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	opportunityNotes is at most {MaxOpportunityNotes} characters.
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	opportunityNotes contains a control character (line breaks and tabs are allowed).
+#85	src/MpsCalc.Api/Quotes/QuoteEndpoints.cs	opportunityDeviceCount is below 0; enter 0 or more.
+#88	web/src/screens/QuoteScreen.tsx	Finance rate (p.a.)
+#88	web/src/screens/QuoteScreen.tsx	Annual escalation
+#88	web/src/screens/QuoteScreen.tsx	Target GP
+#88	web/src/screens/QuoteScreen.tsx	muted small snapshot-meta
+#88	web/src/screens/QuoteScreen.tsx	 · comment: "${snapshot.comment}"
+#88	web/src/screens/quote/FoldControls.tsx	Go to section
+#88	web/src/screens/quote/SourceBanner.tsx	current until a newer version replaces it
+#88	web/src/screens/quote/SourceBanner.tsx	valid from ${formatDay(s.validFrom)} to ${formatDay(s.validTo)}
+#88	web/src/screens/quote/SourceBanner.tsx	valid to ${formatDay(s.validTo)}
+#88	web/src/screens/quote/SourceBanner.tsx	validity not stated
+#88	web/src/screens/quote/SourceBanner.tsx	Price books
+#88	web/src/screens/quote/SummaryRail.tsx	Monthly charge ex GST
+#88	web/src/screens/quote/SummaryRail.tsx	Monthly charge inc GST
+#88	web/src/screens/quote/SummaryRail.tsx	Contract value ex GST
+#88	web/src/screens/quote/SummaryRail.tsx	Contract value inc GST
+#88	web/src/screens/quote/SummaryRail.tsx	Mono pages / month
+#88	web/src/screens/quote/SummaryRail.tsx	Colour pages / month
+#88	web/src/screens/quote/SummaryRail.tsx	Configured capital
+#88	web/src/screens/quote/SummaryRail.tsx	Monthly cost
+#88	web/src/screens/quote/SummaryRail.tsx	Monthly GP
+#88	web/src/screens/quote/SummaryRail.tsx	Portfolio GP %
+#88	web/src/screens/quote/SummaryRail.tsx	Purchase total ex GST
+#88	web/src/screens/quote/SummaryRail.tsx	Purchase total inc GST
+#88	web/src/screens/quote/SummaryRail.tsx	Total cost
+#88	web/src/screens/quote/SummaryRail.tsx	Total margin
+#88	web/src/screens/quote/SummaryRail.tsx	Deal profit
+#88	web/src/screens/quote/quoteSections.ts	MPS calculations
+#88	web/src/screens/quote/quoteSections.ts	BOM and document options
+#88	web/src/screens/quote/quoteSections.ts	Software is chosen on each device line, under Hardware.
+#88	web/src/screens/quote/quoteSections.ts	Software items are BOM lines, under Hardware.
+#88	web/src/screens/quote/quoteSections.ts	Not calculated yet
+#88	web/src/screens/quote/quoteSections.ts	Purchase total ex GST ${formatMoney(calc.purchase.purchaseTotalExTax)}
+#88	web/src/screens/quote/quoteSections.ts	Monthly charge ex GST ${formatMoney(calc.portfolio.monthlyCharge)}
+#88	web/src/screens/quote/quoteSections.ts	Calculation ${calc.status}
+#88	web/src/screens/quote/quoteSections.ts	With the BOM lines
+#86	web/src/screens/FleetGrid.tsx	Search the options
+#86	web/src/screens/FleetGrid.tsx	SKU or description
+#86	web/src/screens/FleetGrid.tsx	 inputMode=
+#86	web/src/screens/FleetGrid.tsx	 placeholder=
+#86	web/src/screens/bom/ConsolidatedBom.tsx	BOM view
+#86	web/src/screens/bom/ConsolidatedBom.tsx	By section
+#86	web/src/screens/bom/ConsolidatedBom.tsx	All lines
+#86	web/src/screens/bom/ConsolidatedBom.tsx	Consolidated BOM
+#86	web/src/screens/bom/ConsolidatedBom.tsx	Every line of every section, read-only. Use Edit section to change a section.
+#86	web/src/screens/bom/ConsolidatedBom.tsx	Edit section
+#86	web/src/screens/bom/ConsolidatedBom.tsx	No lines in this section yet.
+#86	web/src/screens/bom/ConsolidatedBom.tsx	All devices, options and software
+#86	web/src/screens/bom/ConsolidatedBom.tsx	Every device, option and software line of this calculation, read-only.
+#86	web/src/screens/bom/ConsolidatedBom.tsx	Section ${String(s.number)}${s.label === '' ? '' : 
+#86	web/src/screens/bom/ConsolidatedBom.tsx	 : (onLine.get(h.fleetLineNumber) ?? 
+#86	web/src/screens/bom/ConsolidatedBom.tsx	 : (onLine.get(s.fleetLineNumber) ?? 
+#86	web/src/screens/bom/PurchaseBomEditor.tsx	Section ${n}
+#86	web/src/screens/bom/QuantityAudit.tsx	Quantity audit
+#86	web/src/screens/bom/QuantityAudit.tsx	A check only: it changes no quantity and no price. Devices, options, software and care packs should be 1 per device; others are marked.
+#86	web/src/screens/bom/QuantityAudit.tsx	Not 1 per device
+#86	web/src/screens/bom/QuantityAudit.tsx	Device quantity is not a whole number
+#86	web/src/screens/bom/QuantityAudit.tsx	No devices in this section
+#86	web/src/screens/bom/QuantityAudit.tsx	Class not known
+#86	web/src/screens/bom/QuantityAudit.tsx	Nothing to check: this section has no lines.
+#86	web/src/screens/bom/QuantityAudit.tsx	Rental quantities
+#86	web/src/screens/bom/QuantityAudit.tsx	No device chosen
+#86	web/src/screens/bom/QuantityAudit.tsx	Not set
+#86	web/src/screens/bom/QuantityAudit.tsx	Section ${String(i + 1)}${s.label === '' ? '' : 
+#86	web/src/screens/bom/QuantityAudit.tsx	} · ${devicesText(s.devices)}
+#86	web/src/screens/bom/SoftwareSection.tsx	Software licences
+#86	web/src/screens/bom/SoftwareSection.tsx	Search software
+#86	web/src/screens/bom/SoftwareSection.tsx	Name or SKU
+#86	web/src/screens/bom/SoftwareSection.tsx	Add to the quote
+#86	web/src/screens/bom/SoftwareSection.tsx	Prices appear after Calculate.
+#86	web/src/screens/bom/SoftwareSection.tsx	No list price on file.
+#86	web/src/screens/bom/SoftwareSection.tsx	No licences match.
+#86	web/src/screens/bom/SoftwareSection.tsx	Software on this quote
+#86	web/src/screens/bom/SoftwareSection.tsx	Showing licences for the quote term (${String(term)} months).${hidden > 0 ? 
+#86	web/src/screens/bom/SoftwareSection.tsx	} not shown.` : 
+#86	web/src/screens/bom/SoftwareSection.tsx	List price for the whole ${String(term)}-month term: ${formatMoney(price)}
+#86	web/src/screens/bom/SoftwareSection.tsx	Added ${sku}, quantity ${quantity}, to Section ${String(section)}.
+#86	web/src/screens/bom/SoftwareSection.tsx	Select ${r.sku}
+#86	web/src/screens/bom/SoftwareSection.tsx	 aria-label=
+#86	web/src/screens/bom/SoftwareSection.tsx	Software quantity
+#86	web/src/screens/bom/SoftwareSection.tsx	 inputMode=
+#86	web/src/screens/bom/SoftwareSection.tsx	Add software to section
+#86	web/src/screens/bom/SoftwareSection.tsx	Section ${String(i + 1)}${s.label === '' ? '' : 
+#86	web/src/screens/bom/lineInfo.ts	Not in the inventory
+#86	web/src/screens/bom/quantityAuditModel.ts	, perDevice: quantity / devices } : { kind: 
+#89	web/src/screens/Dashboard.tsx	Ready to Export
+#89	web/src/screens/Dashboard.tsx	ready to export
+#89	web/src/screens/Dashboard.tsx	 as const } : {}), group: 
+#89	web/src/screens/Dashboard.tsx	 as const } : {}), group: 
+#89	web/src/screens/QuoteList.columns.tsx	One-off GP (AUD ex GST)
+#89	web/src/screens/QuoteList.columns.tsx	Annual recurring GP (AUD ex GST)
+#89	web/src/screens/QuoteList.columns.tsx	, heading: 
+#89	web/src/screens/QuoteList.columns.tsx	Total GP (AUD ex GST)
+#89	web/src/screens/quoteListCsv.ts	Quote ref
+#89	web/src/screens/quoteListCsv.ts	Term (months)
+#89	web/src/screens/quoteListCsv.ts	Monthly value (AUD ex GST)
+#89	web/src/screens/quoteListCsv.ts	Value (AUD ex GST)
+#89	web/src/screens/quoteListCsv.ts	Last updated
+#89	web/src/screens/quoteListCsv.ts	mps-quotes-${now.toISOString().slice(0, 10)}.csv
+#90	web/src/api/stub/stubApi.ts	Not implemented
+#90	web/src/api/stub/stubApi.ts	The stub does not clone purchase quotes. (stub)
+#90	web/src/api/stub/stubApi.ts	Not implemented
+#90	web/src/app/draftModel.ts	Devices in the opportunity must be a whole number from 0 to ${OPPORTUNITY_DEVICES_MAX}
+#90	web/src/screens/QuoteScreen.tsx	 && quote.permissions.includes(
+#90	web/src/screens/QuoteScreen.tsx	 && persona.roles.includes(
+#90	web/src/screens/QuoteScreen.tsx	s panel, mounted here): the calculation
+#90	web/src/screens/quote/OpportunityPanel.tsx	Not set
+#90	web/src/screens/quote/OpportunityPanel.tsx	Calculate to compare with the calculation’s devices.
+#90	web/src/screens/quote/OpportunityPanel.tsx	The opportunity says ${typed} ${typed === 1 ? 'device' : 'devices'}; the calculation has ${server}.
+#90	web/src/screens/quote/OpportunityPanel.tsx	field${notes ? ' wide' : ''}
+#90	web/src/screens/quote/OpportunityPanel.tsx	field-text${notes ? ' notes' : ''}
+#90	web/src/screens/quote/OpportunityPanel.tsx	Opportunity details
+#90	web/src/screens/quote/OpportunityPanel.tsx	Account manager
+#90	web/src/screens/quote/OpportunityPanel.tsx	Delivery site
+#90	web/src/screens/quote/OpportunityPanel.tsx	Devices in the opportunity
+#90	web/src/screens/quote/OpportunityPanel.tsx	Opportunity notes
+#90	web/src/screens/quote/Toolbar.tsx	Quote actions
+#90	web/src/screens/quote/Toolbar.tsx	Save the draft first: Clone quote and New version use the saved quote.
+#90	web/src/screens/quote/Toolbar.tsx	Wait for the save or calculation to finish.
+#90	web/src/screens/quote/Toolbar.tsx	New version (toolbar)
+#90	web/src/screens/quote/Toolbar.tsx	save-stamp muted small
+#90	web/src/screens/quote/opportunity.ts	 } : { kind: 
+#90	web/src/screens/quote/saveStamp.ts	Unsaved changes
+#90	web/src/screens/quote/saveStamp.ts	Autosave paused: a price change needs a reason
+#90	web/src/screens/quote/saveStamp.ts	Autosave stopped: your changes are not saved
+#90	web/src/screens/quote/saveStamp.ts	, { hour: 
+#90	web/src/screens/quote/saveStamp.ts	, minute: 
+#90	web/src/screens/quote/saveStamp.ts	Saved ${clockTime(savedAt)}
+#91	web/src/screens/quoteListCsv.ts	, { timeZone: 
+#91	web/src/screens/quoteListCsv.ts	, year: 
+#91	web/src/screens/quoteListCsv.ts	, month: 
+#91	web/src/screens/quoteListCsv.ts	, day: 
+#93	docs/API.md	**Its own reference (B309 T-V0-2, MPSCALC-233).** A copy never shares its source's `quoteRef`. The body is optional: `quoteRef` in it (at most 100 characters, no control character, else 400 `BAD_REQUE
