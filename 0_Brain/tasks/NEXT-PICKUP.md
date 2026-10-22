@@ -37,6 +37,8 @@ supersede: REPLACED WHOLESALE by the Opus 5.5 Wednesday morning seat of 22 Oct a
 8. Fable 5.1 trial gate still OWED (routing v1.0 item 7).
 9. Clones left in deploy-clones (G 14th's seatG14, C 32nd's, D 26th/E): Kam's drive-hygiene rule: ask later.
 
+10. **Kintsugi SSH drift, two halves (D 29th's finding, 22 Oct):** (a) CHEAP, no Kam decision: a boot preflight leg in the Secuura launcher (`nc -z -w 5 20.198.226.148 22`; on failure print the current AllowSSHFromDev prefix and the seat's own public IP as an F-xx line). The launcher is the project's file: put it in the next Secuura seat's brief as an item, never edit it from here. (b) EXPENSIVE, Kam's (money): a stable route (Azure Bastion, a jump host, or `az vm run-command`). Card it ONLY after measuring the price from Azure's own pricing page in the same action; the cost is unmeasured today.
+
 ## 3. BOARD
 KS open 688 at 06:0x (Backlog 352, Todo 26, In Progress 267, In Review 40, Blocked 3; split by state/priority because two states exceed a 250 page). 10-12 baseline 509; 239 created vs 74 closed since 10-12 (closed includes 70 archived; includeArchived read). The 31 Oct target is off track; told Kam.
 
