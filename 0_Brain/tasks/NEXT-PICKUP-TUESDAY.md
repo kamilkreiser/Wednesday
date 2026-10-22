@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 414 — 2026-10-22 11:30 (s139). **READ THIS FIRST; supersedes 413's drafter line (413's B440 line stands).**
+- **LIVE (RE-ARM at boot):** (1) %248 `Datasec/HPSM-POC-G35` **B447 ROUND-3 tier-1 gate** on b429/telemetry-224 @ 473bfaca (Opus G1; stamped 11:29:16; hard stop 15:30, target 14:30) -> `HPSM-POC/1_Project_Definition/Briefs/2026-10-22_B447_STATUS.md`, last line `VERDICT: B447 …` / `STOPPED:`. **GO/GWF:** completion check against option a's words; PR (project gh config), all checks + CodeQL + 0 alerts; head-pinned SQUASH; then Phase B (UAT only) per B429 ADDENDUM-1 via a deploy seat; FOR TUESDAY: the test_security_baseline.py exit-code defect -> an HPSM-POC fix ticket/seat. **NO GO: STOP for good, card Kam (Client/Project, what failed, branch unmerged).** (2) %247 `Datasec/MPS-W1a` B444 (hard stop 15:30). (3) %243 B440 builder idle, held for the gate's questions; close after the verdict (pgrep in its own call).
+- FIRST WORK unchanged from 412: stamp + launch B445 and B446 (read whole first).
+
 ## 🟢 DELTA 413 — 2026-10-22 11:26 (s139). **READ THIS FIRST; supersedes 412's LIVE line 1 (412's other lines stand).**
 - **B440 READY FOR QA 11:23 @ 473bfaca, verified at source** (40 files all in partition; 1 behind main = #180, no overlap). Pane %243 held open idle for the gate's questions.
 - **B447 ROUND-3 tier-1 gate kit DRAFTER RUNNING** (Agent, Sonnet; re-commission if `tuesday/briefs/2026-10-22_B447_*` missing; clone of B436's kit) -> READ WHOLE, stamp, launch `Datasec/HPSM-POC-G35` on OPUS (G1) at load1 < 7; ports 8130-8139; hard stop 15:30. GO/GWF -> Tuesday's completion check vs option a's words, PR, all checks + CodeQL + 0 alerts, head-pinned squash, then Phase B per B429 ADDENDUM-1 (UAT only; a deploy seat). **NO GO = the end: card Kam (Client/Project, what failed, branch stays unmerged).**
