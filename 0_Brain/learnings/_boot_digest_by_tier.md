@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-22 13:51 from 244 lesson files (1,062,939 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 199. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-22 15:41 from 245 lesson files (1,065,566 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 200. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7410,4 +7410,19 @@ This follows his 08:20:44 card `datasec-80pct-band-build-lanes-1020` = c (the 80
 3. **Expiry is an EVENT:** stands while he has accounts to rotate to. If the gauge nears ~99% with no switch, say so on the board (his premise is that he rotates). Ends on his word. Not renewed by inference.
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the stop this lifts for Tuesday) · [[2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Tuesday routes Datasec work Sonnet-first (no Spark, no Ornith on this seat); weekly usage is a GUIDE, never a stop; when unsure, card and keep working
+`2026-10-22_tuesday-sonnet-default-usage-is-a-guide.md` · grant · 2026-10-22 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Tuesday is about to choose a model for a Datasec seat, gate or drafter, or is about to hold work because of the weekly gauge or an unclear rule. **Route by `2_Project_Files/fleet/specs/model-routing.md` v1.0 with the local tiers collapsed into Sonnet; never let the gauge or a rule stop progress; when unsure, post a fleet-activity card with a default and keep going.**
+
+**How to apply:**
+1. **Sonnet first:** one-to-three-file spelled-out fixes, test-only pins, raising PRs, merges on a GO, non-decision multi-file builds, drafters (Agent `model: sonnet`), tier-2 gates.
+2. **Opus first:** auth/credential/security/money DESIGN builds, data-destroying paths, deploys with box rights, tier-1 gates, coordination itself. Two measured Sonnet failures on one item -> Opus.
+3. **Usage:** past 70% lean harder on Sonnet; nothing waits on the gauge when a deploy, progress or an outcome needs it (the 2026-10-20 no-90% grant already covers launches).
+4. **Unchanged:** the signature classes pause for Kam; the QA gate before every merge; CodeQL; client isolation.
+5. Every launch receipt names the row: `model: <id> -- <row> -- <P1-P4> -- <gauge %>`.
+
+**Family:** [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-10-20_tuesday-no-90pct-line-two-accounts]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 

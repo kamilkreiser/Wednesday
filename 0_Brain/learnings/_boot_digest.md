@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-22 13:51 from 244 lesson files (1,062,729 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-22 15:41 from 245 lesson files (1,065,356 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 20 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7482,4 +7482,19 @@ This follows his 08:20:44 card `datasec-80pct-band-build-lanes-1020` = c (the 80
 3. **Expiry is an EVENT:** stands while he has accounts to rotate to. If the gauge nears ~99% with no switch, say so on the board (his premise is that he rotates). Ends on his word. Not renewed by inference.
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the stop this lifts for Tuesday) · [[2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Tuesday routes Datasec work Sonnet-first (no Spark, no Ornith on this seat); weekly usage is a GUIDE, never a stop; when unsure, card and keep working
+`2026-10-22_tuesday-sonnet-default-usage-is-a-guide.md` · grant · 2026-10-22 · status: live
+
+**The operative case, so the headline matches it:** Tuesday is about to choose a model for a Datasec seat, gate or drafter, or is about to hold work because of the weekly gauge or an unclear rule. **Route by `2_Project_Files/fleet/specs/model-routing.md` v1.0 with the local tiers collapsed into Sonnet; never let the gauge or a rule stop progress; when unsure, post a fleet-activity card with a default and keep going.**
+
+**How to apply:**
+1. **Sonnet first:** one-to-three-file spelled-out fixes, test-only pins, raising PRs, merges on a GO, non-decision multi-file builds, drafters (Agent `model: sonnet`), tier-2 gates.
+2. **Opus first:** auth/credential/security/money DESIGN builds, data-destroying paths, deploys with box rights, tier-1 gates, coordination itself. Two measured Sonnet failures on one item -> Opus.
+3. **Usage:** past 70% lean harder on Sonnet; nothing waits on the gauge when a deploy, progress or an outcome needs it (the 2026-10-20 no-90% grant already covers launches).
+4. **Unchanged:** the signature classes pause for Kam; the QA gate before every merge; CodeQL; client isolation.
+5. Every launch receipt names the row: `model: <id> -- <row> -- <P1-P4> -- <gauge %>`.
+
+**Family:** [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-10-20_tuesday-no-90pct-line-two-accounts]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
