@@ -17,14 +17,20 @@ COCKPIT="${LWC_COCKPIT:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../fleet/cock
 [ -x "$COCKPIT" ] || [ -f "$COCKPIT" ] || { echo "REFUSED: cockpit.sh not found at $COCKPIT" >&2; exit 3; }
 load1() { sysctl -n vm.loadavg | awk '{print $2}'; }
 cool() { awk -v l="$(load1)" -v m="$LOAD_MAX" 'BEGIN{exit !(l < m)}'; }
+# SPACING (ledger _ledger_laptop_datasec.md 2026-10-22, w=2 of the 10-21 two-waiters row): B463 and B464 launched 44 s
+# apart because this waiter checked load only. Now it also waits until GAP_MIN seconds after the last launch it made.
+GAP_MIN="${GAP_MIN:-120}"
+STAMP="${LWC_STAMP:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../fleet/state" && pwd)/tuesday_lwc_last_launch}"
+spaced() { [ ! -f "$STAMP" ] && return 0; [ $(( $(date +%s) - $(cat "$STAMP") )) -ge "$GAP_MIN" ]; }
 START=$(date +%s); OK=0
 while :; do
-  if cool; then OK=$((OK+1)); else OK=0; fi
+  if cool && spaced; then OK=$((OK+1)); else OK=0; fi
   [ "$OK" -ge 2 ] && break
-  [ $(( $(date +%s) - START )) -ge "$MAX_WAIT" ] && { echo "GAVE UP: load1 $(load1) still >= $LOAD_MAX after ${MAX_WAIT}s; nothing launched ($NAME)"; exit 4; }
+  [ $(( $(date +%s) - START )) -ge "$MAX_WAIT" ] && { echo "GAVE UP after ${MAX_WAIT}s: load1 $(load1) (max $LOAD_MAX), spaced=$(spaced && echo yes || echo "no, last launch < ${GAP_MIN}s ago"); nothing launched ($NAME)"; exit 4; }
   sleep 20
 done
 echo "LAUNCHING $NAME at $(date '+%H:%M:%S') load1 $(load1) (waited $(( $(date +%s) - START ))s)"
+date +%s > "$STAMP"
 bash "$COCKPIT" add "$NAME" "$CMD"; RC=$?
 echo "cockpit.sh add rc=$RC at $(date '+%H:%M:%S'); load1 $(load1)"
 exit $RC
