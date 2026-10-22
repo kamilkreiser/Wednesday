@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 452 — 2026-10-23 03:24 (s145, ctx 74%). **READ THIS FIRST; supersedes 449-451's LIVE / ON VERDICTS lines.**
+- **MERGED this seat (HPSM-POC, each head-pinned squash, blobs = gated head):** #187 b466 (4e77cf1d), #186 b467 (9eeabb7c), #184 dependabot vitest (42a1d92f), **#188 b489 HPSMPOC-321 (main 4daa4054)**; analysis records #132 (eaa09fc3). Card hpsmpoc-feedback-subdivision-flags-1022 delivered.
+- **LIVE (status_watch armed on each STATUS; re-arm at boot):**
+  - **G50 %298 B494** = round-2 delta gate (2 of 2, THE CAP) on **B490** @ 6708ac6b (HPSMPOC-178 rows for B488-1..3 + B492-1). Hard stop 06:30. **GO/GWF ->** PR for b490 (base main; link HPSMPOC-178; name B488-1/-2/-3, B492-1), checks + CodeQL + 0 alerts, `gh pr merge --squash --match-head-commit 6708ac6b34a0cbca5fe8b26e4824f62872c65c39`, blob check (2 test files), close K1 %294 and G50 (pgrep each in its OWN call; one pane_close per call; never >/dev/null). **NO GO = the cap -> card Kam** (default: nothing merges; the 12 round-1 + 4 round-2 cases wait).
+  - **J2 %297 B493** = test-only builder (B491-1/-2/-3, B491-5, B476-1/-2; JwtBearerRolePathTests.cs + Auth/UatOpenTests.cs; ports 8410-8419; hard stop 07:00). **On READY:** verify at source (gh ref, compare vs 4daa4054, paths, additions/strengthenings), then commission a tier-2 gate (Sonnet) cloned from `tuesday/briefs/2026-10-23_B492_SEAT-G49_hpsmpoc-b490-gate-tier2.md`.
+  - **K1 %294** held (B490 builder) until B494's verdict.
+- **Records OWED (one records seat, morning):** HPSMPOC-178 (Backlog, should move on #187), -187/-204 (#186), -321 (#188 -> PROOF/Done per ticket rule), B488/B491/B492 findings, B491-4 correction, the B493 bundle ticket; B491-13 braces-exception comment drift (card Kam before 2026-10-31).
+- With Kam unchanged: DELTA 446's three cards.
+
 ## 🟢 DELTA 451 — 2026-10-23 02:57 70% CHECKPOINT (s145). **READ THIS FIRST; supersedes 450's LIVE/B492 lines.**
 - **B492 VERDICT 02:54: B490 GWF (round 1)**; one Major B492-1 (one-sided half-trim of the stored name: W4s/W4e/Wm4s/Wm4e survive). **Round 2 commissioned to K1 %294 via `tuesday/briefs/2026-10-23_B490_ADDENDUM-1.md`** (4 cases, one added commit, plain push, NO rebase/force). status_watch --changed on B490_STATUS.md. **On its READY:** a SHORT round-2 tier-2 gate (Sonnet): only W4s, W4e, Wm4s, Wm4e + the class + the mock file + whole suites on the merged tree (clone B492's kit, scope narrowed). GO/GWF -> PR (link HPSMPOC-178, name B488-1..3 + B492-1), squash --match-head-commit <new head>, blob check. NO GO at round 2 = card Kam.
 - **PR #188 (b489) checks waiter running** -> on green: squash --match-head-commit fd54671a356353511baf1e77fe14c176e5081507, blob check, close J1 %293 (pgrep own call), THEN stamp + launch **B493** (`tuesday/briefs/2026-10-23_B493_SEAT-J2_hpsmpoc-test-teeth-jwt-uatopen.md`, READ WHOLE by s145; stamp asserts main contains #188: `Func<string?>` count 1 + pulls/188 merged; ports 8410-8419; Sonnet).
