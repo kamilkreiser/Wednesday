@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 451 — 2026-10-23 02:57 70% CHECKPOINT (s145). **READ THIS FIRST; supersedes 450's LIVE/B492 lines.**
+- **B492 VERDICT 02:54: B490 GWF (round 1)**; one Major B492-1 (one-sided half-trim of the stored name: W4s/W4e/Wm4s/Wm4e survive). **Round 2 commissioned to K1 %294 via `tuesday/briefs/2026-10-23_B490_ADDENDUM-1.md`** (4 cases, one added commit, plain push, NO rebase/force). status_watch --changed on B490_STATUS.md. **On its READY:** a SHORT round-2 tier-2 gate (Sonnet): only W4s, W4e, Wm4s, Wm4e + the class + the mock file + whole suites on the merged tree (clone B492's kit, scope narrowed). GO/GWF -> PR (link HPSMPOC-178, name B488-1..3 + B492-1), squash --match-head-commit <new head>, blob check. NO GO at round 2 = card Kam.
+- **PR #188 (b489) checks waiter running** -> on green: squash --match-head-commit fd54671a356353511baf1e77fe14c176e5081507, blob check, close J1 %293 (pgrep own call), THEN stamp + launch **B493** (`tuesday/briefs/2026-10-23_B493_SEAT-J2_hpsmpoc-test-teeth-jwt-uatopen.md`, READ WHOLE by s145; stamp asserts main contains #188: `Func<string?>` count 1 + pulls/188 merged; ports 8410-8419; Sonnet).
+- Gates G48, G49 closed. Live: K1 %294, J1 %293.
+
 ## 🟢 DELTA 450 — 2026-10-23 02:26 65% CHECKPOINT (s145). **READ THIS FIRST; supersedes 449's B491 lines.**
 - **B491 VERDICT 02:23: A = B489 GWF, B = #184 GWF.** Tuesday ruled the gate's question (MA6a/MA8 survive identically at base -> accept GWF, follow-up). **#184 MERGED** 15:24:25Z -> HPSM-POC **main 42a1d92f** (blobs = gated head). G48 closed.
 - **PR #188 = b489 OPEN, checks waiter running** -> squash --match-head-commit fd54671a356353511baf1e77fe14c176e5081507, blob check, then close J1 %293 (pgrep b489 own call).
