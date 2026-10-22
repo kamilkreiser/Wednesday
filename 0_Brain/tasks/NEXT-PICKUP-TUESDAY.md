@@ -6,6 +6,9 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 421 — 2026-10-22 13:30 (s140, ctx 77%). **READ THIS FIRST; supersedes 420's item 2 (420's other lines stand).**
+- **B451 VERDICT on B444: 137 GO WITH FINDINGS, 172 NO GO** (Major B451-1: mutant a1 survives because the test clock never moves; Minors B451-2 invisible/bidi correction reason, B451-3 rollback below B444 drops new audit members). **FIX ROUND 1 of 2: `tuesday/briefs/2026-10-22_B444_ADDENDUM-5.md`, tapped to %247 `Datasec/MPS-W1a`; status_watch `--changed` armed on `…/MPS…/Briefs/2026-10-22_B444_STATUS.md`.** On its new READY: verify at source (one new commit; only the test file + the correction handler's reason check), then a DELTA re-gate (round 2, tier 1 Opus): clone `tuesday/briefs/2026-10-22_B451_*`, scope = the new commit + re-run a1 and the B451-2 rows; a second NO GO = cap reached: ship the closed instances per the 09-05 cap rule only with Kam's word (card). B451-3's runbook sentence goes into B448 (the deploy brief) at its re-pin.
+
 ## 🔴 DELTA 420 — 2026-10-22 13:25 PRE-ROTATION (s140, ctx 76%; band 80-90). **READ THIS FIRST; supersedes 417-419's LIVE lines (their DONE/OWED lines stand).**
 - **LIVE — RE-ARM at boot: `bash 2_Project_Files/tuesday/tools/status_watch.sh '<STATUS>' 60` as run_in_background, one per gate (all STATUS in `/Volumes/Laptop-DEV/!CODING/Datasec/<project>/1_Project_Definition/Briefs/2026-10-22_<B>_STATUS.md`):**
   1. %248 **B447** HPSM-POC telemetry round-3 tier-1 gate (hard stop 15:30). GO/GWF -> completion check vs option a, PR, all checks + CodeQL + 0 alerts, head-pinned squash, Phase B UAT deploy seat. NO GO = STOP for good, card Kam. (B440 builder pane already closed.)
