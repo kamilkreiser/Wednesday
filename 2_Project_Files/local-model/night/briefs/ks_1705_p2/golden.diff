@@ -1,0 +1,60 @@
+diff --git a/Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts b/Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts
+index 7dd6c299a..abb432990 100644
+--- a/Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts
++++ b/Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts
+@@ -457,6 +457,7 @@
+   security: [{ bearerAuth: [] }],
+   request: {
+     body: {
++      required: true,
+       content: {
+         'application/json': { schema: TimestampVerifyRequestSchema },
+       },
+diff --git a/Blockchain/Dev/services/timestamping/src/__tests__/ks1705-timestamps-verify-body-is-required.test.ts b/Blockchain/Dev/services/timestamping/src/__tests__/ks1705-timestamps-verify-body-is-required.test.ts
+new file mode 100644
+index 000000000..519e6089f
+--- /dev/null
++++ b/Blockchain/Dev/services/timestamping/src/__tests__/ks1705-timestamps-verify-body-is-required.test.ts
+@@ -0,0 +1,42 @@
++// KS-1705 (the KS-1364 class): the published contract for POST /api/timestamps/verify did not mark the request body
++// required, although the body's schema has a non-empty `required` list (TimestampVerifyRequest: hash, proof,
++// timestampType) and the handler (index.ts, verifyTimestampSchema.parse, an absent body arrives as {}) answers 400
++// "Validation failed". A spec-driven caller such as Schemathesis may therefore send no body and read that 400 as a
++// defect. Its two siblings, POST /api/timestamps and POST /api/timestamps/batch, already publish a required body.
++// This file renders the document the generator publishes, from the shared registry the timestamping module
++// populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../timestamping.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'timestamping (ks1705 pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++describe('KS-1705: POST /api/timestamps/verify publishes a REQUIRED request body', () => {
++  it('RED KS-1705 TV1: POST /api/timestamps/verify marks its request body required', () => {
++    expect(operation('/api/timestamps/verify', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1705 TVC1: the body keeps its request schema and the operation keeps bearerAuth', () => {
++    const op = operation('/api/timestamps/verify', 'post');
++    expect(op?.requestBody?.content?.['application/json']?.schema?.$ref).toBe('#/components/schemas/TimestampVerifyRequest');
++    expect(op?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-1705 TVC2: the request component still requires hash, proof and timestampType', () => {
++    const required = doc.components?.schemas?.TimestampVerifyRequest?.required ?? [];
++    expect([...required].sort()).toEqual(['hash', 'proof', 'timestampType']);
++  });
++
++  it('control KS-1705 TVC3: the two siblings keep their required bodies and the GET reads stay bodiless', () => {
++    expect(operation('/api/timestamps', 'post')?.requestBody?.required).toBe(true);
++    expect(operation('/api/timestamps/batch', 'post')?.requestBody?.required).toBe(true);
++    expect(operation('/api/timestamps/{id}', 'get')?.requestBody).toBeUndefined();
++    expect(operation('/api/timestamps/hash/{hash}', 'get')?.requestBody).toBeUndefined();
++  });
++});

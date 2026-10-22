@@ -1,0 +1,83 @@
+diff --git a/Blockchain/Dev/services/security/src/security.openapi.ts b/Blockchain/Dev/services/security/src/security.openapi.ts
+index 0821366d5..7ef025aa9 100644
+--- a/Blockchain/Dev/services/security/src/security.openapi.ts
++++ b/Blockchain/Dev/services/security/src/security.openapi.ts
+@@ -793,7 +793,7 @@
+     'only a hash. Caller must persist the plaintext immediately.',
+   security: [{ bearerAuth: [] }],
+   request: {
+-    body: { content: { 'application/json': { schema: ApiKeyCreateRequestSchema } } },
++    body: { content: { 'application/json': { schema: ApiKeyCreateRequestSchema } }, required: true },
+   },
+   responses: {
+     201: {
+@@ -892,7 +892,7 @@
+   security: [{ bearerAuth: [] }],
+   request: {
+     params: z.object({ userId: z.string().uuid() }),
+-    body: { content: { 'application/json': { schema: AdminScopePutRequestSchema } } },
++    body: { content: { 'application/json': { schema: AdminScopePutRequestSchema } }, required: true },
+   },
+   responses: {
+     200: { description: 'Scope replaced', content: { 'application/json': { schema: AdminScopeResponseSchema } } },
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1705-security-keys-post-and-admin-scopes-put-bodies-are-required.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1705-security-keys-post-and-admin-scopes-put-bodies-are-required.test.ts
+new file mode 100644
+index 000000000..1bb6c0fcd
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1705-security-keys-post-and-admin-scopes-put-bodies-are-required.test.ts
+@@ -0,0 +1,55 @@
++// KS-1705 (the KS-1364 class): the published contract for POST /api/security/keys and PUT
++// /api/security/keys/admin-scopes/{userId} did not mark the request body required, although each body's schema has a
++// non-empty `required` list (ApiKeyCreateRequest: name; AdminScopePutRequest: tenantId, organizationIds) and each
++// handler parses the body with a schema that refuses an absent one (an absent body arrives as {}): index.ts
++// createApiKeySchema.parse and adminScopePutSchema.parse, both answered with a 400. A spec-driven caller such as
++// Schemathesis may therefore send no body and read that 400 as a defect. This file renders the document the generator
++// publishes, from the shared registry the security module populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../security.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'security (ks1705 pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++const KEYS = '/api/security/keys';
++const SCOPES = '/api/security/keys/admin-scopes/{userId}';
++
++describe('KS-1705: POST /api/security/keys and PUT /api/security/keys/admin-scopes/{userId} publish a REQUIRED request body', () => {
++  it('RED KS-1705 SK1: POST /api/security/keys marks its request body required', () => {
++    expect(operation(KEYS, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1705 SK2: PUT /api/security/keys/admin-scopes/{userId} marks its request body required', () => {
++    expect(operation(SCOPES, 'put')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1705 SKC1: both bodies keep their request schemas and both operations keep bearerAuth', () => {
++    expect(operation(KEYS, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref).toBe(
++      '#/components/schemas/ApiKeyCreateRequest',
++    );
++    expect(operation(SCOPES, 'put')?.requestBody?.content?.['application/json']?.schema?.$ref).toBe(
++      '#/components/schemas/AdminScopePutRequest',
++    );
++    expect(operation(KEYS, 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    expect(operation(SCOPES, 'put')?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-1705 SKC2: the two request components still carry their required lists and POST /keys still publishes its fields', () => {
++    const create = doc.components?.schemas?.ApiKeyCreateRequest;
++    const scope = doc.components?.schemas?.AdminScopePutRequest;
++    expect(create?.required ?? []).toEqual(['name']);
++    expect(Object.keys(create?.properties ?? {})).toEqual(expect.arrayContaining(['name', 'organizationId', 'scopes']));
++    expect([...(scope?.required ?? [])].sort()).toEqual(['organizationIds', 'tenantId']);
++  });
++
++  it('control KS-1705 SKC3: the bodiless siblings stay bodiless (GET admin-scopes, DELETE keys/{id})', () => {
++    expect(operation(SCOPES, 'get')?.requestBody).toBeUndefined();
++    expect(operation(`${KEYS}/{id}`, 'delete')?.requestBody).toBeUndefined();
++  });
++});
