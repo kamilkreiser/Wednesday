@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-22 16:17 from 246 lesson files (1,069,251 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-22 16:53 from 246 lesson files (1,071,240 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7489,6 +7489,8 @@ This follows his 08:20:44 card `datasec-80pct-band-build-lanes-1020` = c (the 80
 
 **The operative case, so the headline matches it:** Tuesday is about to choose a model for a Datasec seat, gate or drafter, or is about to hold work because of the weekly gauge or an unclear rule. **Route by `2_Project_Files/fleet/specs/model-routing.md` v1.0 with the local tiers collapsed into Sonnet; never let the gauge or a rule stop progress; when unsure, post a fleet-activity card with a default and keep going.**
 
+sections (open the file for these): EXTENSION 2026-10-22 16:52:09 — Kam, live board (view=tuesday), DIRECT to Tuesday (not relayed), verbatim
+
 **How to apply:**
 1. **Sonnet first:** one-to-three-file spelled-out fixes, test-only pins, raising PRs, merges on a GO, non-decision multi-file builds, drafters (Agent `model: sonnet`), tier-2 gates.
 2. **Opus first:** auth/credential/security/money DESIGN builds, data-destroying paths, deploys with box rights, tier-1 gates, coordination itself. Two measured Sonnet failures on one item -> Opus.
@@ -7497,6 +7499,9 @@ This follows his 08:20:44 card `datasec-80pct-band-build-lanes-1020` = c (the 80
 5. Every launch receipt names the row: `model: <id> -- <row> -- <P1-P4> -- <gauge %>`.
 
 **Family:** [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-10-20_tuesday-no-90pct-line-two-accounts]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+## EXTENSION 2026-10-22 16:52:09 — Kam, live board (view=tuesday), DIRECT to Tuesday (not relayed), verbatim
+> *"No, at the moment you don't have a spark or Ornith. you will soon have more (I have already ordered a 256gb Mac Studio) so more will be added soon. For now, please 1) put into practice the differentiated delegation to Opus or Sonnet agents. Also, take the following in to practice - New instructions going forward - always use your learnings of Opus, Sonnet, spark and onrith task allocation. Regardless of % of context. 2)use weekly usage % as a guide but don't let it stop productivity. this should make sure that once we are over 70% we allocate more heavily to sonnet and spark but deployment, progress and outcomes are more important than rules. 3)If unsure, do not just stop, post a fleet activity question but the worst outcome is when nothing happens because of a rule I made kills productivity. Lets check in together and work through things to constantly improve 4)you manage the tasks and workload on a daily stage, you are more knowledgeable than I on what works best so if you ever disagree with me just say so"*
 
 
 ## Weekly usage is a GUIDE, never a stop: route every task by what we have learned (Opus, Sonnet, Spark, Ornith), lean on Sonnet and the Spark past 70%, and when unsure ASK on fleet activity and keep going — nothing happening is the worst outcome
