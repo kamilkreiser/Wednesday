@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 432 — 2026-10-22 16:50 50% CHECKPOINT (s142, booted 16:1x, ctx 38% after the load). **READ THIS FIRST; supersedes 431's B463 and First-work lines; 429's LIVE list stands.**
+- **LIVE gates (status_watch armed on each STATUS; re-arm at boot):** B463 `Datasec/HPSM-POC-G36` %266 (tier-2 Sonnet on B459 @ 26460869, launched 16:45:08, Step-0 copy present). B464 `Datasec/HPSM-POC-G37` %267 (tier-2 Sonnet on B460 @ b9fd28ed, kit `tuesday/briefs/2026-10-22_B464_SEAT-G37_*` stamped 16:28:09, launched 16:45:52). Also watched: B457 MPS-G2, B458 F3, B461 H2, B462 H3. Builder panes held for gate questions: %262 L3 (B459), %263 H1 (B460).
+- **On B463 GO/GWF:** PR (HPSM-POC gh config) -> checks + CodeQL + 0 alerts -> squash head-pinned (CLARIFICATIONS:138) -> UAT redeploy seat (clone `tuesday/briefs/2026-10-22_B443_*`, re-pin) -> report live to Kam (he approved the look 16:10:42 "please deploy"). On B464 GO/GWF: same PR path; batch the redeploy with B459 if both land.
+- **KAM 16:41:45 RULED `hpsmpoc-class-c-wording-six-tickets-1022` = a** (pack `projects_index/2026-10-22_hpsmpoc-class-c-word-pack.md`: 148 b · 177 a · 178 a · 187 a · 204 b · 310: 3b 4a 5a 6a 7a 8a). Ruled in the store; receipt bf-7f6e9f01d61f. **DRAFTER RUNNING (dies with the seat; re-commission if missing):** three builder briefs `tuesday/briefs/2026-10-22_B465_SEAT-W1_*` (web 148+310), `_B466_SEAT-A1_*` (api 177+178, tier-1 gate), `_B467_SEAT-R1_*` (Reporting 187+204 + all eleven rulings into CLARIFICATIONS) + `_B465-467_DRAFTER-REPORT.md` with a partition-intersection program. READ WHOLE, stamp, launch one at a time through launch_when_cool. `--delivered` the card once B467's CLARIFICATIONS entry is on main.
+- Kam 16:50:01 asked whether Wednesday's routing guidelines arrived: answered yes (bf-5f0392322349).
+- Feedback sweep 1620 done: 0 new, the UAT feedback from Kam and the reviewer NOT yet arrived (`projects_index/2026-10-22_rotation-sweep-1620.md`; next sweep opens at its watermarks).
+- `tuesday/tools/launch_when_cool.sh` now also waits 120 s after its own last launch (commit 45dae3fa8).
+- Records seat owed (HPSM-POC): close merged 294, 295, 305, 307, 303, 155. Checkpoint reads 16:50: Kam 16/16, reconcile to-rule 0, mail NEW 0, Datasec flags all answered.
+
 ## 🔴 DELTA 431 — 2026-10-22 16:06 ROTATION (s141, ctx ~79%; band 80-90). **READ THIS FIRST; supersedes 430's B463 line; 429's LIVE list stands.**
 - **B463** (tier-2 Sonnet gate on B459 @ 26460869) READ WHOLE + STAMPED (slots 0, control 5, @-tokens 0); launched through launch_when_cool as `Datasec/HPSM-POC-G36` (if no such pane at your boot, re-run the kit's launch line through the waiter). Re-arm status_watch on `…/HPSM-POC/1_Project_Definition/Briefs/2026-10-22_B463_STATUS.md`.
 - **RE-ARM at boot (status_watch, run_in_background), all in `/Volumes/Laptop-DEV/!CODING/Datasec/<project>/1_Project_Definition/Briefs/2026-10-22_<B>_STATUS.md`:** MPS: B457. HPSM-POC: B458, B461, B462, B463. (B459 and B460 are READY; panes `HPSM-POC-L3` and `HPSM-POC-H1` held for gate questions.)
