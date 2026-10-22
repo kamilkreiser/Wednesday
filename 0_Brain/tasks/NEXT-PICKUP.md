@@ -1,47 +1,37 @@
 ---
-date: 2026-10-22
+date: 2026-10-23
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
-supersede: REPLACED WHOLESALE by the Opus 5.5 Wednesday morning seat of 22 Oct at its 66% checkpoint (2026-10-22 15:51 AEDT). Replace wholesale again; never stack. Previous version: NEXT-PICKUP.md.pre-1022-1552 and git history.
+supersede: REPLACED WHOLESALE by the Opus 5.5 Wednesday morning seat of 23 Oct at its 67% checkpoint (2026-10-23 08:05 AEDT). Replace wholesale again; never stack. Previous version: NEXT-PICKUP.md.pre-1023-0806 and git history.
 ---
 
-# NEXT PICKUP (Thu 22 Oct, written 2026-10-22 15:51 AEDT; ctx 66%, weekly 7d 91%)
+# NEXT PICKUP (Fri 23 Oct, written 2026-10-23 08:05 AEDT; ctx 67%, weekly 7d 96%)
 
-## 00. STATE AT 22:1x (refreshed after D 29th's wrap)
-- **Floor: wednesday %0 + fleet-monitor %1 only.** D 29th wrapped 11:09Z, scored 0.92, pane %29 closed (listeners 30 -> 30). HANDOVER `!CODING/Secuura/Blockchain/5_Project_History/2026-10-22_seatD-29th/HANDOVER.md` (30,178 B), its §10 is tomorrow's list.
-- **KINTSUGI runs develop bcc51903d893** (deployed ~20:34 AEDT 22 Oct; verified from outside by Wednesday). Rollback set pre-20261022d1. NSG AllowSSHFromDev now 157.211.44.146/32 (rollback 157.211.46.215/32). **DEMO still runs 32964477fe88.**
-- **OPEN, KAM'S: card `secuura-kintsugi-deploy-notice-1022`** (rec a: post K1b to Stuart on KS-772; nothing to Peter). K1b = `.../2026-10-22_seatD-29th/evidence/draft_K1b.txt`, 1,114 B, sha16 60cfbc6beaab9c8b, PRE-CHECKED by Wednesday (character subsequence of K1; only the 'If the ruling goes that way' sentence removed). On his tap a: the next Secuura seat posts it verbatim (pre-send hash gate, absent-id control, mention node). Default: nothing posted; raise it in the morning receipt.
-- **TOMORROW, Wednesday's plan (the daily workload is mine):** (1) DEMO deploy of bcc51903d893 by a fresh Opus deploy seat after kintsugi's overnight soak: D 28th's method on demo's 2 vCPU / 3.9 GB, batch <=2 with the load gate, DEMO's swap_one orientation with the blank-mnemonic arm reordered, KS-535 demo hashes; that seat also posts K1b if Kam has tapped. (2) KS-1707 seat (ruled a). (3) One Sonnet raise seat for the three held Spark passes. (4) The Secuura launcher's box-reachability preflight leg as a brief item.
-- Cards delivered today: ks1557 (both), deploy-tip-kintsugi-and-post, kintsugi-ssh-rule. ks1707 ruled a, NOT yet delivered (needs its seat).
+## 00. LIVE STATE AT 08:05
+- **Floor: %0 wednesday, %1 fleet-monitor, %30 Seat D 30th (Secuura/Blockchain-D, Opus 5.5, DEMO deploy), %31 Seat G 15th (Secuura/Blockchain-G, Sonnet 5.5, raise + KS-1707).** Both switched by Wednesday with `/model` at their plan prompts (the Secuura launcher pins `claude-opus-5`; fixing it is the project's file: a brief item, never edited from here).
+- **D 30th:** demo build of develop `bcc51903d893` running detached on the box, 16 batches, ~6/16 at 20:51Z, projected end ~22:00Z (09:00 AEDT). Rollback set `pre-20261023d1` (33, idfp 4b52bd0652edd836). Its wake: `evidence/tools/autobeat_d30.sh` mails Wednesday a heartbeat every 20 min ('STATUS build (auto heartbeat)') and wakes the seat on done / fail / stall. **Pre-swap rule (Wednesday's mail 07:12): if its statusline reads >= 98% at the first swap, NO swap, STATUS "built, not swapped", wait.** Once swaps start it finishes them. Part D (post K1c to Stuart) ONLY on Wednesday's mail after Kam's tap.
+- **G 15th:** PR #1679 (freeze, PR D) MERGED at 4caeec5fee78 (tree e128f13c9d55, verified at source by Wednesday). PR #1680 (KS-1709, head ebf294c37a84, landing f8981fe78807) and PR #1681 (KS-1622, head b5cc01ddcb2a, landing bf5482565b07) READY; **gate DA2 (Sonnet, Agent tool, background) running on both**: `0_Brain/reference/2026-10-23_gate-DA2-pr1680-1681/verdict.md` when done. PR C (KS-1707) building under ruling (B): three re-dates (react-router x2, braces), 16 stale removals (15 + sprintf-js, withdrawn upstream 19:21Z), contract edits, vacuity bound > 3, tier 2; NO prisma move.
+- **Spark:** KS-1705 p1 HELD (`night/READY_KS-1705-KS-1705-REQBODY1705-1_...`, security.openapi.ts, needs a tier-1 gate and an openapi.yaml regen at raise). ks_1705_p2 CONTROL-FAIL by harness: asn1js/pkijs not installed in the Spark cache checkout (npm ci owed there). Screen 23 report: `0_Brain/reference/2026-10-18_spark-screen/SCREEN_23.md` (Q2-Q4 need rulings: KS-1683, KS-1703, the audit op).
 
-## 0. FIRST ACTIONS FOR THE NEXT WEDNESDAY SEAT
-1. Boot reads as the launcher says (by-tier digest ~623 KB: read in ~700-line chunks; the Read tool caps each call). This seat booted on **Opus 5.5** (statusline), so the launcher's `--model opus` fix is verified.
-2. Then `tools/kam_rulings_today.sh`, `reconcile_rulings.py` (report, then --apply), `tools/newmail.sh`, `tools/fleet_ack.sh list`, `tools/decision_queue.sh list open`, `fleet/usage_gate.sh --check`, `local-model/spark/tunnel.sh check`, `tmux list-panes -a -F '#{pane_id} #{@cockpit_name}'`.
-3. Literal paths for `git -C`; send / tap / note are three separate calls; subjects never carry hold/stop/checkpoint; a send_brief body needs a `SELF-CHECK:` line stamped with `date`; zsh traps (no bare '=====', no PIPESTATUS).
-4. **reconcile_rulings.py skips a live tap on a HASHED card id** (`card-<sha256(id)[:20]>`, long ids): rule those by hand (`decision_queue.sh rule <id> <key>`). Tool fix OWED.
-5. safe_pull refuses on the regenerated boot digests: stash them by pathspec, pull, pop; on a conflict take HEAD's copy (generated files; the stash is kept).
+## 0. NEXT ACTIONS, IN ORDER
+1. **DA2 verdict lands** -> recompute the trailer (`sed '1,2d;$d' verdict.md | shasum -a 256`), ls-remote both heads + develop, completion check, then GO each merge by head sha to G 15th (one at a time, develop re-read after each). Verify each merge at source (tree == landing tree).
+2. **PR C READY** -> its own tier-2 gate (Sonnet) -> GO -> verify. Then mark card `secuura-ks1707-redate-four-unfixable-audit-rows-1022` DELIVERED on the merged PR (`decision_queue.sh rule/--delivered`).
+3. **D 30th DEPLOYED or "built, not swapped"** -> outside sweep (/, /verify/, /admin/, /health/deep, /api/zzz 404), then score + `pane_close.sh` in ONE action after its wrap.
+4. **Kam's taps to act on:** `secuura-kintsugi-deploy-notice-1022` (a = D 30th posts K1c, 1,114 B ec613ad4d1ac897b, verified by Wednesday) · `secuura-ks485-answer-peter-vouch-secret-1023` (a = D 30th posts its 2,730 B draft) · `secuura-ks1707-fifth-row-postcss-no-fix-1023` (a = re-date postcss AND deepmerge-ts, mail G 15th before its PR C push) · `secuura-ks1709-keep-unanchored-certification-1023` (product decision). Every tap: rule it, act, mark delivered.
+5. **Fresh login asked of Kam 07:12** (gauge 93 -> 95 in an hour). If the gauge nears 99% with no switch, say so on the panel.
+6. Fleet flags: `fleet_ack.sh answered` lags the collector; re-run for any open G 15th QUESTION before the wrap.
 
 ## 1. IN FORCE (read the files, not this list)
-- **Kam 2026-10-22 15:34:23: usage is a GUIDE, never a stop; route by the learnings; when unsure post a fleet-activity card and keep going; Wednesday owns the daily workload** -> `learnings/2026-10-22_usage-is-a-guide-outcomes-over-rules-route-by-learnings.md`. `fleet/USAGE_STOP.wednesday` = 100 (both branches proven). Past 70%: lean on Sonnet and the Spark.
-- Routing v1.0 (`fleet/specs/model-routing.md`, every receipt names the row); October deploy grant until further notice (kintsugi first, then demo; KS-535); TESTED merge grant; merge-and-archive grant.
-- Tuesday was briefed on allocation (Kam 15:35:07), verified in her inbox 04:40:06Z. Otherwise no mail to Tuesday unless Kam asks.
+- Usage is a GUIDE (Kam 2026-10-22 15:34); `fleet/USAGE_STOP.wednesday` = 100. Routing v1.0. October deploy grant until further notice (kintsugi first, then demo; KS-535). TESTED merge grant; merge-and-archive grant. The freeze pattern (lock refresh in range, nothing baselined) is Kam's three-time ruling: reported as a receipt.
 
-## 2. HELD / OWED, IN ORDER
-1. **KS-1707 audit rows (Kam ruled a, 07:13:32):** re-date braces, sprintf-js and both react-router rows in `Blockchain/Dev/scripts/audit/audit-baseline.json` to 2026-11-30 under the 10-05 board-tap grant; fix deepmerge-ts forward (@prisma/config 7.10.1 depends on deepmerge-ts 8.0.2, measured at the registry 06:0x) and postcss-selector-parser (fixed in 7.1.6); remove the 15 stale rows. ONE Sonnet seat (row C1/C2), then a QA gate. **Before 2026-10-31.** Card `secuura-ks1707-redate-four-unfixable-audit-rows-1022` NOT yet delivered: deliver on the merged PR.
-2. **Held Spark passes, ONE Sonnet raise seat (row C1):** `night/READY_KS-1622-LATERWINDOW1622-1_...`, `night/READY_KS-1709-KS-1709-REFUSALLOG1709-1_..._2026-10-22.diff.md` (issue route), `night/READY_KS-1709-KS-1709-RECERTLOG1709-2_..._2026-10-22.diff.md` (recertify route). The two KS-1709 passes both insert one manifest line after the ks1679 line in `ks1293-originate-suite-is-hermetic.test.ts`: the raise seat orders them alphabetically. KS-1709's kept-row half is a product decision (card it when raising).
-3. **C 33rd (KS-1695 gap 2, option b ruled twice):** a build seat (Opus, row C3: access design). Brief material in the 2026-10-20 seatC-32nd records + the 04:12Z ANSWER set; plus the comment-only hunk correcting the merged R18 comment (platform_admin is NOT gateway-only).
-4. **KS-1692 PR 2** (from `5_Project_History/2026-10-20_seatG-13th/HANDOVER.md`) and **KS-1688 org-merge** (card a): build seats.
-5. **Stuart's KS-1557/KS-772 box asks** are now "welcome but no longer load-bearing" (his 23:30Z words); DRAFT 1 carries the answers if Kam rules a or b.
-6. **Demo** after kintsugi is verified: a deploy seat, D 28th's batching method (demo is 2 vCPU / 3.9 GB).
-7. STANDING_LINES additions OWED (claim first): searchIssues nonsense-term control; landing figure expected unless base moved; send_brief 'sent:' is not delivery; comments-only needs a known-unequal pair; a waiter must be a background JOB whose exit re-invokes the seat.
-8. Fable 5.1 trial gate still OWED (routing v1.0 item 7).
-9. Clones left in deploy-clones (G 14th's seatG14, C 32nd's, D 26th/E): Kam's drive-hygiene rule: ask later.
-
-10. **Kintsugi SSH drift, two halves (D 29th's finding, 22 Oct):** (a) CHEAP, no Kam decision: a boot preflight leg in the Secuura launcher (`nc -z -w 5 20.198.226.148 22`; on failure print the current AllowSSHFromDev prefix and the seat's own public IP as an F-xx line). The launcher is the project's file: put it in the next Secuura seat's brief as an item, never edit it from here. (b) EXPENSIVE, Kam's (money): a stable route (Azure Bastion, a jump host, or `az vm run-command`). Card it ONLY after measuring the price from Azure's own pricing page in the same action; the cost is unmeasured today.
+## 2. OWED
+1. **Follow-up ticket: the prisma-family move** (deepmerge-ts fix + valibot clear) needs `scripts/prisma-generate.cjs` to derive the client path from where @prisma/client resolved, plus a hoisted-layout cell (G 15th's evidence/prC/ E2 lock and its 3-line fix). Not in PR C.
+2. **KS-1705 p1 raise** (tier-1 gate) and **ks_1705_p2** after an npm ci in the Spark cache.
+3. STANDING_LINES additions (claim first): "a lock refresh is proven by parsing the locks, never by npm's rc"; the earlier owed lines from 22 Oct (searchIssues control; send_brief 'sent:' is not delivery; a waiter is a background job whose exit wakes the seat).
+4. Secuura launcher: model pin `claude-opus-5` -> the newest Opus, and the box-reachability preflight leg: brief items for a Secuura seat (project file).
+5. From yesterday, still owed: C 33rd (KS-1695 gap 2, Opus C3), KS-1692 PR 2, KS-1688 org-merge; Fable 5.1 trial gate.
+6. Datasec/ATTIO digest mails keep arriving at wednesday-agent@ (third day): subject only; Tuesday's routing.
 
 ## 3. BOARD
-KS open 688 at 06:0x (Backlog 352, Todo 26, In Progress 267, In Review 40, Blocked 3; split by state/priority because two states exceed a 250 page). 10-12 baseline 509; 239 created vs 74 closed since 10-12 (closed includes 70 archived; includeArchived read). The 31 Oct target is off track; told Kam.
-
-## 4. KAM'S CARDS
-OPEN: `secuura-ks1557-draft1-overtaken-by-stuart-1022` (rec b). Ruled today: ks1707 = a, ks1557 (original) = a, deploy-tip-kintsugi-and-post = a. Datasec cards are Tuesday's.
+KS open 689 at 06:07 (Backlog 354, Todo 26, In Progress 266, In Review 40, Blocked 3); completed since 06:00 22 Oct: 2. The 31 Oct target is off track.
