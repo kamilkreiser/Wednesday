@@ -1,0 +1,37 @@
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: PR B 1681 (KS-1622), head b5cc01ddcb2a
+READY FOR GATE — Seat G 15th, PR B (KS-1622, later paging window). PR #1681, head `b5cc01ddcb2aa60f10869f3cdef71d7cd34adfca` (ls-remote == the PR API == my local HEAD, read in ONE action), base develop `4caeec5fee7872d856ebda74f7673546f3f48ee3`.
+
+## BLUF
+- `GET /api/platform/audit-log` already warns when the FIRST window answers an error status. A LATER window answering 500/503/any non-ok but still carrying an `entries` list was appended with no log line. One guarded line after the not-a-list throw now logs it once, with `status` and `windowsRead`, never the upstream body. **Product bytes change: +2/-0** in `api-gateway/src/routes/platform.ts` plus one new test file (+139). Tier at least 2; the gate decides. `Refs`, not `Closes`.
+- Patch applied strictly at develop `f75b52721dad` (no fuzz), sha256 `3e631c69c3e88ddd...`, READY diff block == canonical `patch.diff`. KS-1622 BLUF comment: `36deb641-e665-4b69-ab2d-b9310189cdb0`, delta exactly 1, body read back identical.
+
+## Three things you should know first
+1. **The branch name.** Linear's suggested name for KS-1622 (`feature/ks-1622-gate-e1-follow-ups-ks-1545-logs-nothing-for-an-upstream`) already exists on origin as merged #1629's branch (`cb776bfc4b20`). My first push of it was refused by git itself as non-fast-forward, before the hook ran; nothing was sent. I did NOT force and did not touch that ref. The branch is `feature/ks-1622-log-a-later-audit-log-window-error-status`.
+2. **The "departs from the ticket's literal fix" sentence is not in the READY file's PR NOTES.** Your brief told me to carry it from there; it is not there (I grepped the file). It IS in the Spark's own brief (`night/briefs/ks_1622_p1/KS-1622.md`, "Scope"), and I carried that, with its source, into the PR body: dropping the `collected.length === 0` half of the first-window guard would make a later window that is not a list log TWICE, and the existing cell E3 pins ONE warn, so the guard sits after the throw instead.
+3. **The narrowing** (whether such a window should also DISCARD the platform half is undecided) is in the PR body and the ticket comment. Name it to Kam if it needs a card.
+
+## What I measured (mine; the Spark's checker figures were 3 red of 6 and 1169 -> 1175)
+- **Red-first** (at `f75b52721dad`; `platform.ts` is the same blob at the new develop): product swapped to the pin, test kept: **3 failed of 6**, R1-R3, each `AssertionError`; controls green; restored by sha256. **Green 6 of 6.**
+- **Whole api-gateway suite by (file, cell name)**, BEFORE at develop `4caeec5fee78` (the real landing parent), AFTER at this head: files **120 -> 121**, cells **1169 -> 1175**, failed **0 -> 0**, **0 vanished, 0 pass-to-fail, exactly 6 new**.
+- **Test-file type-check as the pre-push gate does it** (`test-types-ratchet.sh`): api-gateway **156 files** (155 on develop), **27 errors, all 27 in the baseline, 0 new**; the new test is in the program; a planted type error makes it report `28 errors: 27 in the baseline, 1 new` and exit 1, restored by sha256. Service `tsc` rc 0.
+- **Lint** rc 0 (0 errors; 30 pre-existing warnings); the two touched files 0 and 0.
+- **Mutants: 9 run, 8 killed, 1 survives.** Predictions first; the multi-clause guard `!r.ok && collected.length > 0` is red-proved by flipping each conjunct separately (BM1 `!r.ok` dropped, BM2 `collected.length > 0` dropped; BM2 reds C1, the double-log the Spark's brief warns about; BM7, the line moved BEFORE the throw, reds C2 only).
+  - **BM9 survives: a later window answering a 4xx is not pinned.** The guard is `!r.ok`, but the cells only ever answer 500 or 503, so `r.status >= 500` leaves all six green.
+  - **BM1 did NOT go red on C1 or C3 as I predicted, and the reason is a false claim in a control's title.** C3 is "a healthy upstream read in three windows"; I measured it with a probe (`expected 1 to be 3`): mode `ok` serves all 3 rows in ONE window (`limit=50`). So C3 cannot guard against a guard that logs on healthy later windows. BM1 is still killed, only incidentally, by R1-R3 (the healthy third window adds a second warn).
+  - **Driven, not assumed:** a scratch probe (NOT in the PR) kills both: P2 (a later 429 logs once) kills BM9; P3 (a healthy upstream that really reads three windows: 200, three calls, no warn) kills BM1. Both green on the patched product. `evidence/prB/probe_proposal/` with a README. Adopting it is yours or the gate's call.
+
+## The pre-push preflight, in the hook's words
+`PREFLIGHT INCOMPLETE - 13/16 legs ran, 3 SKIPPED. Nothing failed. legs 3 4 8 - local stack not up. This is NOT a pass.` Not quoted as a pass. Legs 6 and 7 green on this head, leg 2 OK, leg 16 = the ratchet above. Legs 3, 4, 8 need the stack and did not run. (Leg 6 reports 16 stale baseline rows on this tree against 15 on #1679's: the extra one is the sprintf-js advisory withdrawn upstream at 19:21Z, see my CORRECTION.)
+
+## Branch and landing tree
+A merge of develop IN (no rebase) at `4caeec5fee78`, touching none of this PR's files; the branch history is a patch commit plus that merge (I rebuilt it from a WIP commit before pushing; nothing was ever pushed with the WIP message). Net diff vs develop (three-dot): 2 files, +141. **Predicted landing tree `bf5482565b07a2f6cf6b2454f6c73365402e3c1a` on develop `4caeec5fee78`** (`git merge-tree` before the merge, equal after). Re-predict before any merge.
+Push route: a NEW branch from the checked-out HEAD in its own worktree, key + keepalive explicit; hook line 61 allows a brand-new branch, 353-358 do not fire, 396 ran the preflight; no `--no-verify`, no force. Result = the push tool's own `.rc` (0) + `evidence/push_prB2.lsremote`.
+
+## Overlap census (refreshed, 23 open PRs, 119 rows; controls: package-lock 25, absent path 0)
+None touch `routes/platform.ts` or the new test name, and none touch `api-gateway/src/routes` at all.
+
+## NOT covered
+api-gateway against a real tenant-provisioning service; e2e, integration, schemathesis, k6, Playwright, Akto (no local stack); any deployment. `mergeable_state` reads `unstable`: the retired-Actions signature, no result either way. No Docker was used for this PR.
+
+SELF-CHECK: PR number, head, base, 2 files, +141 and the stored body were read back from origin and the API in one action; every figure is from a file under evidence/prB/ | 2026-10-23 08:1x AEDT
+

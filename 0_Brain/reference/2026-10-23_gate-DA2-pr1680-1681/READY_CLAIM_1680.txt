@@ -1,0 +1,43 @@
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: PR A 1680 (KS-1709), head ebf294c37a84
+READY FOR GATE — Seat G 15th, PR A (KS-1709, both routes, ONE PR). PR #1680, head `ebf294c37a8419b054dc8ac5a8818834ad07a9bf` (ls-remote == the PR API == my local HEAD, read in ONE action), base develop `4caeec5fee7872d856ebda74f7673546f3f48ee3` (the merge of #1679).
+
+## BLUF
+- When the anchoring service refuses an anchor, the certification issue route and the recertify route log nothing. Each now writes ONE warn naming the certificate, the status and the first 200 characters of the body, the way `anchors.ts:302-308` does. **Product bytes change: +10/-0** in `originate/src/routes/certifications.ts` (two `else` branches), two new test files, two manifest lines. Tier at least 2; the gate decides. `Refs`, not `Closes`.
+- Both Spark patches applied strictly (p1 then p2) and verified byte-for-byte: the product diff's added lines equal p1's plus p2's product hunks (10 of 10, 0 removed); each new test file equals its patch's added content. The one hand-placed thing is p2's manifest line (both patches add a line after the same `ks1679` line, so p2's manifest hunk cannot apply on p1's): inserted at a unique anchor, **alphabetical** as you required, and the array is still plain-string sorted (18 entries).
+- KS-1709 BLUF comment posted: `24d3a735-4ddf-43f0-ad6d-9b83e5a2cc46`, delta exactly 1, body read back identical.
+
+## FOR YOU TO CARD (named, not decided)
+**Should a certification whose anchor was refused be KEPT at all?** This PR closes only the no-log half; the response and the stored row are unchanged. Written in the PR body and in the ticket comment as a narrowing. The three other call sites are not in this PR (`anchors.ts:292` already logs a non-ok answer; `documents.ts` 939, 1364, 1458 throw on one).
+
+## What I measured (mine, not the Spark's; the Spark's figures were 3 red of 15 per patch and 1633 -> 1638)
+- **Red-first:** product swapped back to the pin, tests kept: **6 failed of 20 run** (R1-R3 and V1-V3), each by `expect(...)` assertion, not a load failure; controls and hermetic cells green; restored, asserted by sha256. **Green: 20 of 20.**
+- **Whole originate suite by (file, cell name), pin vs head:** files **136 -> 138**, cells **1633 -> 1643**, failed **0 -> 0**, **0 vanished, 0 pass-to-fail, exactly 10 new** (5 + 5). Both ends on the same install. Tool selftested.
+- **Type-check in the tests' own program** (originate excludes `src/__tests__`): child config with `exclude: []`. Controls: the standard program lists 652 files and 0 of the new tests; the child lists 535 including both, the hermetic test and `certifications.ts`; rc 0, 0 errors; a planted type error in the new test exits 2 naming the file and line. (My first child config pulled two stub `@types` packages and failed for that reason; `types` is now pinned.)
+- **Lint:** package exit 0, 0 errors (26 pre-existing warnings); the three touched files by name 0 and 0.
+- **Mutants: 18 run, 13 killed, 5 SURVIVE the Spark's 10 cells.** Predictions were written first; 14 of 16 matched in the first run.
+  - I7 and V7 (the body-read fallback `''` changed to `'x'`) survived AGAINST my prediction: that fallback only fires when `upstream.text()` rejects, and an empty body does not reject, so no cell drives a body-read failure. I9 and V9 (the `.catch` dropped entirely) survive for the same reason, measured separately against the Spark's cells.
+  - V3b (the new `certId` dropped from the recertify log line) survived as predicted: V1 only asserts it differs from the ORIGINAL id; the issue route's R1 pins it to the response id.
+  - **Survivor not claimed as a gap until I drove the input:** a scratch probe makes the anchoring stub cut the connection mid-body so `text()` rejects, and pins the new certificate's id. Its 3 cells are green on the patched product and kill all five. Probe + README: `evidence/prA/probe_proposal/`. **Not in the PR** (the patches are applied as drafted); adopting them is yours or the gate's call.
+
+## Two reviewer observations on the product lines (neither changed)
+1. The recertify fetch carries no `AbortSignal` (the issue route's has `AbortSignal.timeout(10000)`), so `await upstream.text()` on a non-ok answer is unbounded beyond undici's default. `anchors.ts:302-308` reads a non-ok body the same way.
+2. Up to 200 characters of the anchoring service's error body reach the log (`Invalid DID` in the measured incident). Same bound and shape as `anchors.ts`.
+
+## The pre-push preflight, in the hook's words
+`PREFLIGHT INCOMPLETE - 13/16 legs ran, 3 SKIPPED. Nothing failed. legs 3 4 8 - local stack not up. This is NOT a pass.` Not quoted as a pass. Legs 3, 4, 8 did not run (they need the local stack). Legs 6 and 7 are green on this head, leg 2 is OK, leg 16 reports 0 new test type errors.
+
+## Branch and landing tree
+A merge of develop IN (no rebase) at `4caeec5fee78`; it touches none of this PR's files (A_PRE..HEAD = PR D's 37 files, 0 under `originate/src`). Net diff vs develop (three-dot): 4 files, +348. **Predicted landing tree `f8981fe78807dfbcc7ae5e02bf08de299c8cc4d5` on develop `4caeec5fee78`** (computed with `git merge-tree` BEFORE the merge; equal after it). Re-predict before any merge.
+Push route: a NEW branch from the checked-out HEAD, key + keepalive explicit, GIT_SSH_COMMAND unset; hook line 61 allows a brand-new branch, lines 353-358 do not fire (tip == HEAD), line 396 ran the preflight; no `--no-verify`, no force. Result = the push tool's own `.rc` (0) + `evidence/push_prA.lsremote`.
+
+## Overlap census (refreshed now, after #1679 merged)
+23 open PRs, 119 file rows, keyed on exact path. Positive control `package-lock.json` 25 rows; negative control 0. **None of the 23 touch `certifications.ts`, the hermetic manifest or the new test names**, and none touch `originate/src/routes` or `api-gateway/src/routes` at all.
+
+## PR check state
+`mergeable_state` reads `unstable`: the retired-Actions signature (workflow runs failing in seconds with 0 steps on empty runners; measured on #1679). Carries no result either way.
+
+## NOT covered
+`test:integration` (DB-backed); schemathesis, k6, Playwright, Akto (no local stack); any deployment or live anchoring call; the originate routes beyond the unit suite. No Docker was used for this PR.
+
+SELF-CHECK: PR number, head, base, 4 files, +348 and the stored body were read back from origin and the API in one action; every figure above is from a file under evidence/prA/ | 2026-10-23 07:5x AEDT
+
