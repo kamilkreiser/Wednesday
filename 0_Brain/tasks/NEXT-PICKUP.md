@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE by the Opus 5.5 Wednesday morning seat of 23 Oct a
 
 # NEXT PICKUP (Fri 23 Oct, written 2026-10-23 08:05 AEDT; ctx 67%, weekly 7d 96%)
 
+## 0000. DELTA AT 10:30 (77%) — READ THIS FIRST
+- **Demo DEPLOYED** to bcc51903d893 (D 30th, verified from outside by Wednesday; 0.95, pane closed). **Four merges today**: #1679, #1680, #1681, #1682 (all verified at source). G 16th 0.95, closed. KS-1707 four-rows card DELIVERED (#1682).
+- **Kam's 10:05 taps:** ks1709 = b (keep, mark unanchored: a LATER build seat, tier-1 gate, not started) · ks485 Peter = a (POSTED by G 17th, comment a269b418, DELIVERED) · fifth-row = a (read as BOTH rows postcss + deepmerge-ts; G 17th raising the re-date PR, tier 2, gate owed on its READY) · kintsugi notice = b (the ORIGINAL drafts; Wednesday asked him at 10:07 to confirm the CORRECTED combined note + G 17th's timeout paragraph `5_Project_History/2026-10-23_seatG-17th/evidence/draft_KS772_timeout_para.txt` 1,092 B f5f3cdd3f105363f).
+- **🔴 OWED AT 11:08 (a background wake is armed):** if Kam has not answered, mail G 17th "POST STUART" naming ONLY `.../2026-10-23_seatD-30th/evidence/draft_KS772_combined.txt` (2,339 B, 290a3dd57f4a27a9); the paragraph waits. If he says yes to both, G 17th re-hashes the note + paragraph as one file (one @stuart mention), Wednesday checks it, then POST STUART names that file.
+- **Live:** %33 Seat G 17th (Sonnet 5.5). Floor otherwise %0 + %1.
+
 ## 000. DELTA SINCE 08:05 (70% checkpoint, 08:23)
 - **G 15th WRAPPED + ROTATED** (scored 0.93). **Seat G 16th = pane %32**, switched to Sonnet 5.5 by Wednesday; plan ACCEPTED. NOTE: `@cockpit_name` is EMPTY on %32 after the self-rotation (cockpit defect, owed): `cockpit.sh say 'Secuura/Blockchain-G'` still delivered.
 - **Gate DA2: GO WITH NOTE on #1680 and #1681** (verdict `0_Brain/reference/2026-10-23_gate-DA2-pr1680-1681/verdict.md`, trailer equal). **Merge GO sent to G 16th**: #1680 first, then #1681 after re-predicting its tree on the new develop. NEXT: verify each merge at source (tree == landing tree), then PR C READY -> its tier-2 gate.
