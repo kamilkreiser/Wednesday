@@ -44358,5 +44358,55 @@
    "CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022",
    "CARD secuura-deploy-tip-kintsugi-and-post-1022"
   ]
+ },
+ {
+  "id": "secuura-kintsugi-ssh-rule-stale-ip-1022",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura / Blockchain: kintsugi's SSH rule no longer matches the Studio's IP. May the deploy seat swap it to the new IP?",
+  "bluf": "Tap a, b or c. The kintsugi deploy you approved at 15:34 (card secuura-deploy-tip-kintsugi-and-post-1022) stopped before touching anything; that card covered the deploy, not this network rule. SSH to kintsugi times out from the Studio's current public IP 157.211.44.146, while the box itself is healthy (https /health/deep 200, all services up) and the Studio's outbound SSH works (github.com:22 open). The kintsugi SSH allow rule (AllowSSHFromDev) is a single-IP rule, and the record says changing it is yours only. It last moved on 18 Sep; the address has changed again. The seat is confirming the rule's current IP now with one read-only az call (tenant checked first). Nothing has been deployed or changed on either box.",
+  "default_action": "If you do not tap: nothing on Azure changes and the deploy waits. The seat still posts the two comments, wraps, and I raise this again tomorrow morning.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Let the seat swap the rule to 157.211.44.146/32, then deploy",
+    "detail": "One az write in the Secuura tenant (Founders Hub), replacing the old single IP with the new one, nothing wider. Reversible in one command; the seat reads the rule back, then carries on with the kintsugi deploy."
+   },
+   {
+    "key": "b",
+    "label": "You change it yourself",
+    "detail": "Azure portal, kintsugi's network security group, rule AllowSSHFromDev, source IP 157.211.44.146/32. Tell me when it is done and the seat continues."
+   },
+   {
+    "key": "c",
+    "label": "Leave it; skip the kintsugi deploy for now",
+    "detail": "Nothing changes. The seat posts the two comments and wraps; the deploy waits for another day."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-22T16:00:54.586053+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-11 16:55",
+   "2026-09-12 08:50",
+   "2026-09-14 21:56",
+   "2026-09-18 10:27",
+   "CARD secuura-kintsugi-whole-estate-rebuild",
+   "CARD secuura-kintsugi-build-cache-prune",
+   "CARD secuura-kintsugi-refresh-notice-release",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD secuura-ks1370-revoke-undone-by-stale-process",
+   "CARD secuura-kintsugi-deploy-for-31oct-1005",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-kintsugi-issuer-account-how",
+   "CARD secuura-done-rule-unit-pinned-deployed-no-live-check",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-ks1707-redate-four-unfixable-audit-rows-1022",
+   "CARD secuura-deploy-tip-kintsugi-and-post-1022",
+   "CARD secuura-ks1557-draft1-overtaken-by-stuart-1022"
+  ]
  }
 ]
