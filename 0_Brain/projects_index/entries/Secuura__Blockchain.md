@@ -21,6 +21,22 @@ updated: 2026-09-23
 > his queue to reconcile.** Until it is, this warning is the only thing standing between the
 > list and the next agent that follows the skill literally.
 
+## Last session — 2026-10-23 (Seat G 16th, pane `Secuura/Blockchain-G` `%32`, RAISE + small BUILD lane, 21:13Z 10-22 to ~22:1xZ; wrapped on Wednesday's WRAP)
+
+**The G 15th queue is complete.** #1680 (KS-1709) -> develop `90d7b364acbb`, #1681 (KS-1622) -> `865a4013b447`, #1682 (KS-1707, the audit baseline) -> `2bd32cbd6ed6`; each tree = the predicted one, verified from origin. **develop `2bd32cbd6ed60cb1ebf7929b9460910aea19a3b4`. Nothing deployed.**
+- Each merge: gate notes into the body's Known residue first (read back), develop and head re-read in the same run as the head-pinned squash, abort-before-PUT proven able to fire. #1681's tree re-predicted after #1680 landed.
+- #1682: proofs re-run at the merged-in head (both audit legs, contract 59/59, controls, 37-test guard proof). The 16th removal (sprintf-js) rests on Wednesday's (B) ruling + GitHub's withdrawal, not on Kam's tap; stated in the PR body.
+- Hygiene on the WRAP: three `seatG15-*` trees removed (6.55 GiB freed by `df`); the other 27 `deploy-clones/` entries untouched.
+
+**Open / next:**
+- [ ] **Two baseline rows lapse 2026-10-31** (deepmerge-ts GHSA-ggr8-5vv4-36mx, postcss-selector-parser GHSA-rj75-hqrm-r3gf). Kam's card `secuura-ks1707-fifth-row-postcss-no-fix-1023` read `[open]` at 22:00:12Z. If he taps (a): a one-file round, recipe in the HANDOVER section 2; needs a fresh clone (mine is gone).
+- [ ] Peter/Stuart refresh notes DRAFTED, POSTED BY NOBODY: `5_Project_History/2026-10-23_seatG-16th/mail/draft_team_notes_UNPOSTED.md`. Your ruling.
+- [ ] To card: stale `Blockchain/Dev/BACKLOG.md` lines 35/37; KS-1709's recertify fetch has no `AbortSignal` (gate DA2 NOTE 1); KS-1709's keep-or-refuse question (card `secuura-ks1709-keep-unanchored-certification-1023`); the prisma / `npm run generate` follow-up.
+
+**Blockers:** none for the queue; the date-bound item waits on Kam's card.
+
+**Notes for Wednesday:** skill step 2b (archive Done tickets) skipped: not in your WRAP, shared board, archive cascades. Extranet read, never marked seen. Handover: `5_Project_History/2026-10-23_seatG-16th/HANDOVER.md`.
+
 ## Last session — 2026-10-20 (Seat C 30th, pane `Secuura/Blockchain-C` `%15`, REVIEW lane, 19:56:53Z 10-19 to ~22:1xZ; wrapped on Wednesday's GO-then-wrap)
 
 **KS-1116 built and merged in two PRs.**
