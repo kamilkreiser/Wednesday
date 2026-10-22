@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 411 — 2026-10-22 11:10 (s139). **READ THIS FIRST; adds to 410 (its LIVE lines stand).**
+- **NEW WORK, Kam 11:01 (MPS Calculator):** he asked if the 16 Oct walkthrough items are done + deployed. Answered NO (bf-ee27b2ceff5e) from `0_Brain/projects_index/2026-10-22_mps-feedback-session-census.md` (53 tickets: 31 done+deployed, 8 half, 8 not started, 6 ruled; hosted e6f92a5f is 11 behind main f5b6f5a7). Tuesday COMMITTED to: build the open items that need nobody else (gate + merge each), and carded the hosted deploy.
+- **Card `mps-hosted-deploy-main-f5b6f5a-1022`** on Kam's board (rec a, default HOLD). If he taps a: a deploy seat cloned from `MPS …/Briefs/2026-10-18_B268_*` (runbook + rollback), new user-visible words to him first (K9).
+- **Lane-plan + wave-1 brief DRAFTER RUNNING** (Agent, Sonnet; re-commission if missing) -> `0_Brain/projects_index/2026-10-22_mps-open-items-lane-plan.md` + `tuesday/briefs/2026-10-22_B44{4,5,6}_SEAT-W1{a,b,c}_mps-*.md` + `_B444-446_DRAFTER-REPORT.md`. READ WHOLE, stamp, launch at load1 < 7 one by one (B440 + B443 are live: watch the load), panes `Datasec/MPS-W1a/b/c`.
+
 ## 🟢 DELTA 410 — 2026-10-22 10:54 65% CHECKPOINT (s139). **READ THIS FIRST; supersedes 409's B443-drafter line.**
 - **LIVE (RE-ARM at boot):** (1) %246 `Datasec/HPSM-POC-D26` **B443 UAT redeploy to main a93b926a**, Opus C6, stamped 10:52:46, hard stop 12:30 -> `…/Briefs/2026-10-22_B443_STATUS.md`, last line `DEPLOYED: UAT @ a93b926 …` / `STOPPED:` / `ROLLED BACK:` (status_watch does NOT know ROLLED BACK: arm a custom waiter too). After DEPLOYED: verify live read-only (start page 200, four levels, badge text), then a panel report to Kam (push-to-demo grant: report after). (2) %243 B440 telemetry round 3 (READY ~12:30; then the round-3 tier-1 gate, clone of B436's kit).
 - **Done since 409:** guide v0.2 mailed + read back; panes %238 %244 %245 closed; PR #180 landed (main a93b926a).
