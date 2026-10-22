@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 439 — 2026-10-22 20:0x 70% CHECKPOINT (s143). **READ THIS FIRST; supersedes 438's LIVE and QUEUE lines (438's WINDOW, ON VERDICTS and OWED lines stand).**
+- **LIVE panes (re-arm status_watch on each STATUS at boot):** A1 %270 B466 (api 177/178; ADDENDUM-2 19:5x: subdivision flags refused AS RULED, the RealText row becomes a refusal row; watch `--changed`), G39 %273 B469, G40 %276 B471 (telemetry LAST round), G41 %278 B474 (gate on B465), H5 %279 B475 (fix round 1 on b461). R1 %272 B467 is READY (held for its gate's questions; close it when a pane is needed, pgrep b467 in its own call first).
+- **B467 READY 19:51 @ d6eba5f6 + records/b467 @ 7d723d13** (verified by GET). Its tier-1 gate **B477 (G43, Opus) is STAMPED**.
+- **QUEUE (background, dies with this seat):** script A (pid 37801) = R20 B473 then G42 B476; script B waits on 37801, then G43 B477. **At boot: for each of `Datasec/HPSM-POC-R20`, `-G42`, `-G43` with no pane, run its kit's Launch line through `tuesday/tools/launch_when_cool.sh` ONE AT A TIME (main-vertical first).**
+- **With Kam:** card `hpsmpoc-feedback-subdivision-flags-1022` (default a = as ruled); card `mps-words-55-and-8-questions-b444-b445-b446-1022` (default nothing lands); receipt bf-6a802d5f8231 told him the 187 validator call.
+- Checkpoint reads 20:00: Kam 20/20 (newest 16:54), mail NEW-ROWS 0 of 63.
+
 ## 🟢 DELTA 438 — 2026-10-22 19:5x 65% CHECKPOINT (s143). **READ THIS FIRST; supersedes 437's LIVE/queue lines; 437's DONE lines stand.**
 - **LIVE panes (re-arm status_watch on each STATUS at boot):** A1 %270 B466 (api 177/178; mutants under its own seatlock after ADDENDUM-1), R1 %272 B467 (187 resuming under ADDENDUM-1 = validator accepts ONLY computed group sizes; watch with `--changed`, its old STOPPED line stays until replaced), G39 %273 B469 (tier-1 gate on b462), G40 %276 B471 (telemetry round-4 LAST gate; NO GO = card Kam, telemetry ends), G41 %278 B474 (tier-2 gate on B465 @ c65a5ab6).
 - **QUEUE (background, one sequential script, dies with this seat):** H5 = B475 (fix round 1 of 2 on b461 @ 52bd6e7c incl. the :155 "Home" line) waiter, then R20 = B473 (records), then G42 = B476 (tier-1 Opus gate on B472 @ e353322e). **If any of `Datasec/HPSM-POC-H5`, `-R20`, `-G42` has no pane at your boot: run each kit's Launch line through `tuesday/tools/launch_when_cool.sh` ONE AT A TIME, `tmux select-layout -t fleet:0 main-vertical` before each.** All three kits are STAMPED (tuesday/briefs/2026-10-22_B47{3,5,6}_*).
