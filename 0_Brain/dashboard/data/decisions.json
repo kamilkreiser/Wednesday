@@ -44188,5 +44188,57 @@
    "CARD hpsmpoc-telemetry-round3-or-hold-1022",
    "CARD mps-hosted-deploy-main-f5b6f5a-1022"
   ]
+ },
+ {
+  "id": "hpsmpoc-telemetry-round3-nogo-stop-1022",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC: telemetry stopped at round 3 (NO GO). Leave it stopped?",
+  "bluf": "No action needed unless you want telemetry restarted. The round-3 gate (B447) returned NO GO, so by your rule telemetry (HPSMPOC-224) stops here: nothing was merged, deployed or sent, and the branch b429/telemetry-224 stays unmerged. Round 3 fixed what you asked: exception records are closed on both apps, and no connection string can stop either app. Still open, 7 findings of Major or worse (copied from the gate's findings list): Blockers B447-1 (the API's request row carries a runtime-built exception type name), B447-2 (a span event's name leaves as a log message), B447-3 (a log category built at run time leaves verbatim), B447-9 (for 13 malformed connection strings the Azure exporter writes the string to its own diagnostics log); Majors B447-4 (the web keeps some span names by shape), B447-5 (the README states the opposite of B447-1/-2), B447-10 (one start-up guard mutant survives every test). No product code builds such names today, but any library that does would leak them. Disclosure: one early test run by the gate was not network-fenced and may have sent scrubbed test telemetry under a made-up key to a Microsoft Application Insights host (no credential, no customer or personal data); every later run was fenced.",
+  "default_action": "Telemetry stays stopped and nothing is deployed. Tuesday has the HPSM-POC records seat write the gate's findings onto HPSMPOC-224 (facts only) and keeps the branch unmerged.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Leave telemetry stopped",
+    "detail": "Leave telemetry stopped; record the findings on HPSMPOC-224 and keep the branch unmerged for reference"
+   },
+   {
+    "key": "b",
+    "label": "A new, narrower lane later",
+    "detail": "Start a NEW, narrower telemetry lane later (request counts and health only, no error or span names at all), on your word"
+   },
+   {
+    "key": "c",
+    "label": "Allow a round 4",
+    "detail": "Allow a round 4 on the same branch to close the 7 findings"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-22T14:55:38.651625+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsm-41-telemetry-cr",
+   "CARD nexusai-rd361-blocker-vs-nogo-cap",
+   "CARD nexusai-rd361-round3-blocker-survives",
+   "CARD nexusai-rd369-round3-or-ship-at-the-cap",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD hpsm-composer-round3-approver-guard",
+   "CARD nexusai-rd436-round3-authorise",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD nexusai-round4-nogo-selfheal-round5",
+   "CARD rd518-round3",
+   "CARD nexusai-listing-telemetry-pingtest-fix",
+   "CARD vision-vsp74-cap-reached-ship-or-round3",
+   "CARD nexusai-rd686-round2-cap-ship-words-or-round3",
+   "CARD hpsmpoc-qa-gate-at-90pct-stop",
+   "CARD nexusai-rd838-rd640-round3-1013",
+   "CARD composer-pr85-round2-nogo-one-line-1021",
+   "CARD hpsmpoc-demo-telemetry-review-week-1021",
+   "CARD hpsmpoc-uat-level-label-not-on-screen-1022",
+   "CARD hpsmpoc-review-mail-recommendations-line-1022",
+   "CARD hpsmpoc-telemetry-round3-or-hold-1022",
+   "CARD mps-hosted-deploy-main-f5b6f5a-1022"
+  ]
  }
 ]
