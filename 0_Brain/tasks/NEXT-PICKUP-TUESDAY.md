@@ -6,6 +6,10 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 413 — 2026-10-22 11:26 (s139). **READ THIS FIRST; supersedes 412's LIVE line 1 (412's other lines stand).**
+- **B440 READY FOR QA 11:23 @ 473bfaca, verified at source** (40 files all in partition; 1 behind main = #180, no overlap). Pane %243 held open idle for the gate's questions.
+- **B447 ROUND-3 tier-1 gate kit DRAFTER RUNNING** (Agent, Sonnet; re-commission if `tuesday/briefs/2026-10-22_B447_*` missing; clone of B436's kit) -> READ WHOLE, stamp, launch `Datasec/HPSM-POC-G35` on OPUS (G1) at load1 < 7; ports 8130-8139; hard stop 15:30. GO/GWF -> Tuesday's completion check vs option a's words, PR, all checks + CodeQL + 0 alerts, head-pinned squash, then Phase B per B429 ADDENDUM-1 (UAT only; a deploy seat). **NO GO = the end: card Kam (Client/Project, what failed, branch stays unmerged).**
+
 ## 🟢 DELTA 412 — 2026-10-22 11:22 70% CHECKPOINT (s139). **READ THIS FIRST; supersedes 405-411's LIVE lines (their DONE lines stand).**
 - **LIVE (RE-ARM at boot: status_watch on each STATUS, run_in_background):**
   1. %243 `Datasec/HPSM-POC-F2` **B440 telemetry round 3** (Opus C3; ADDENDUM-1 + -2 answered) -> `HPSM-POC/1_Project_Definition/Briefs/2026-10-22_B440_STATUS.md`, `READY FOR QA: B440 …` (target 12:30, hard stop 13:30). On READY: verify at source, then the ROUND-3 tier-1 Opus gate (clone `tuesday/briefs/2026-10-22_B436_SEAT-G33_…`, re-pin; regression rows = B436 findings + B440's retired-row list + the two gitleaks fingerprints). NO GO = STOP for good, card Kam.
