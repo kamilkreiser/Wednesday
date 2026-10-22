@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-10-22 08:01 from 378 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-23 04:17 from 380 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -41,7 +41,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1560 (P3) KS-1137 F-4 census missed a fourth suite (tenant_isolation), and the KS-1347 pro — `systemTest/playwright/global-setup.ts`
 - KS-1393 (P4) Repo hygiene: 31 spec files under Blockchain/Dev/tests that no Playwright config — `systemTest/playwright/playwright.config.ts`
 - KS-1610 (P0) Akto suppressions and exclusions: one cites the wrong ticket (KS-442 → KS-510),  — `systemTest/akto/src/core/endpointFalsePositives.ts`
-- KS-1703 (P0) Security: six GET-by-id routes serve any authenticated caller's object — transfe — `systemTest/fixtures/provision-actors.ts`
+- KS-1703 (P0) Security: seven GET-by-id routes serve any authenticated caller's object — trans — `systemTest/fixtures/provision-actors.ts`
 
 ## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 14
 - KS-1376 (P2) Security: certifications ends RLS FORCE with no tenant_isolation policy on every — `scripts/run-migrations.sh`
@@ -165,7 +165,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 
 ## SET ASIDE with a recorded reason — 14 (re-read only if the ticket's updatedAt moved)
-- KS-1076 — likely already fixed at M55 (docblock present since ec61abf8e/0882f7661) — measure with eslint in a tool-mode clone; item 2 is a Claude seat's (updated 2026-10-05)
+- KS-1076 — likely already fixed at M55 (docblock present since ec61abf8e/0882f7661) — measure with eslint in a tool-mode clone; item 2 is a Claude seat's (updated 2026-10-22)
 - KS-1088 — decision-class: 'filing only; decide whether the runner should enforce isolation' — a ruling, not a patch (updated 2026-10-05)
 - KS-1112 — two files: option 1 reds ks1029's A1 cell (2026-09-15 18:45) (updated 2026-09-13)
 - KS-1113 — an e2e spec under tests/e2e — no Playwright checker yet (updated 2026-10-05)
@@ -174,13 +174,13 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1162 — three .github/workflows/ files (Kam-class) AND decision-class ('Fix direction: Either 1 … or …') (updated 2026-10-06)
 - KS-1184 — decision-class: the ticket's own words are 'A design call beside KS-1087 item 2, not a fix round on #1008' with two shapes offered (updated 2026-09-16)
 - KS-1191 — decision-class: 'Not built; Backlog. This is a design decision for the audit trail's owner, not a one-line fix' — two choices, and the edge behaviour is NOT TESTED (updated 2026-10-12)
-- KS-590 — verification.ts, security-adjacent (updated 2026-10-13)
-- KS-709 — its own 'Done means' requires reproduction from a real run, not a unit test — beyond the local model (updated 2026-10-15)
+- KS-590 — verification.ts, security-adjacent (updated 2026-10-22)
+- KS-709 — its own 'Done means' requires reproduction from a real run, not a unit test — beyond the local model (updated 2026-10-22)
 - KS-757 — blocked by the ticket's own measurement (updated 2026-09-08)
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-28)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
 
-## EXCLUDED by predicate — 243
+## EXCLUDED by predicate — 245
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-101 — on Peter/Stuart
 - KS-1010 — names no product file (after basename/docs/route resolution)
@@ -344,6 +344,9 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1702 — names no product file (after basename/docs/route resolution)
 - KS-1705 — names no product file (after basename/docs/route resolution)
 - KS-1707 — names no product file (after basename/docs/route resolution)
+- KS-1710 — on Peter/Stuart
+- KS-1711 — on Peter/Stuart
+- KS-1712 — names no product file (after basename/docs/route resolution)
 - KS-188 — on Peter/Stuart
 - KS-239 — on Peter/Stuart
 - KS-263 — names no product file (after basename/docs/route resolution)
@@ -366,7 +369,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-604 — names no product file (after basename/docs/route resolution)
 - KS-605 — names no product file (after basename/docs/route resolution)
 - KS-607 — names no product file (after basename/docs/route resolution)
-- KS-608 — on Peter/Stuart
 - KS-61 — on Peter/Stuart
 - KS-619 — auth-shaped title (LAST, Kam 16:40)
 - KS-621 — has a PR attached
