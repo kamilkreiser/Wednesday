@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-22 20:11 from 246 lesson files (1,071,240 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-22 20:32 from 246 lesson files (1,073,278 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -3682,7 +3682,7 @@ another box. **Before sending it: name the thing that will PROMPT the seat when 
 A turn that ends stops polling. **If nothing produces an event in that session, "wait cheaply" means
 "stop existing until someone taps you."**
 
-sections (open the file for these): The case · How to apply
+sections (open the file for these): The case · How to apply · EXTENSION 2026-10-22 (w=2 of "acked an idle wake without reading progress") — a LIVE waiter is not a WORKING waiter; before acking, read a figure that MOVES
 
 ## How to apply
 
@@ -3709,6 +3709,15 @@ to keep checking is not a trigger) · [[2026-08-09_an-enforcement-you-must-arm-i
 silence from an agent is a question, never an answer) · [[2026-08-03_context-discipline-close-before-full]]
 (the window advice that was right and incomplete) ·
 [[2026-08-14_i-read-representations-they-read-sources]] ("the next signal from me" read as a wake).
+
+## EXTENSION 2026-10-22 (w=2 of "acked an idle wake without reading progress") — a LIVE waiter is not a WORKING waiter; before acking, read a figure that MOVES
+**The case.** D 29th's build waiter was written with an unquoted heredoc, so every path it polled expanded to the filesystem root and its done-test could never be true. The build finished at 07:53:16Z (18:53 AEDT); the seat learned it at 09:2xZ, 1 h 31 m later, when the waiter hit its own bound. Wednesday acked the seat's idle wake three times on "1 shell still running" in the pane footer, the last one at about 19:0x AEDT, after the build had finished. The 21 Oct row was the same shape: acked on "a hook process is running".
+**Diagnosis (why the 21 Oct rule did not fire):** that rule said "read the ARTEFACT the seat waits for (origin ref, PR, file)". For a remote build the artefact is on a box Wednesday has no access to, so Wednesday fell back to the nearest thing it COULD read, process liveness, and treated it as the artefact. A liveness signal is a representation of progress, not progress. The rule named artefacts Wednesday can always read; it said nothing about the case where it cannot.
+**The rule, extended:**
+1. **Before acking an idle wake on a seat that waits on remote work, read a figure that MOVES** — the waiter's own last heartbeat line (ask the seat for its heartbeat path at launch), a progress counter, free disk, load. Process liveness ("N shells running", a hook process) is never enough.
+2. **When Wednesday cannot read any moving figure, do not ack: tap the seat** with a pointer asking for its heartbeat's last line. That costs one turn; an hour of a finished build costs more.
+3. **Every waiter a brief asks for must print a figure that changes,** and the brief says where that heartbeat lands, so the coordinator can read it.
+**Mechanism candidate (w=3 promotes it):** `wake_ack.sh` refuses on a seat whose last mail named a background wait unless a `--progress '<figure> <value>'` argument is given and differs from the previous ack's.
 
 
 ## Where there is analysis, the record carries THREE fields — what was found, what was TESTED, and HOW
