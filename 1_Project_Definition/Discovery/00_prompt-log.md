@@ -2706,3 +2706,8 @@ INCLUDED until he says otherwise.
 > Decision secuura-ks1114-deleted-status-found-by-title-1018: a — Ship as built, hide 'deleted' in a follow-up | Decision wed-model-routing-v10-approve-1018: a — Approve all seven recommendations
 
 *Note:* Both ruled + applied: routing v1.0 in force (spec swapped, boot line changed, lesson), KS-1114 follow-up queued for the Spark.
+
+## 2026-10-23 14:35 — Kam (live-board, verbatim)
+> Please put any items that require my attenti on the fleet activity 2) please amend the morning ritual, create a morning fleet activity item with a summary and plan for the day (same format as all others) and flag items awaiting my action (these should be already listed on the board so I do not need descriptions but rather something like - awaiting on 11 items for xxx project, 2 for xx project, etc) 4)Never wait on me, if you or the agents are idle, work through the tickets.  Now, spin up as many agents as possible to work through them.  5)naturally if there is a blocker, dont push past it but flag it and remind me / escalate it so it does not slow things down.  6)if there is an unanswered item for more than 48 hours, escalate by emailing me 7)priorities for projects - HPSM-POC then Calculator, then composer so allocate agents based on that priority [14:31:59: ignore point 7]
+
+*Note:* receipted on the panel; two cards; G 19th launched; lesson 2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email
