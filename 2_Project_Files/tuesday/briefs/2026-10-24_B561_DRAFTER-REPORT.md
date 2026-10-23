@@ -1,0 +1,32 @@
+# B561 drafter report (SEAT-M7, MPS lane L1, Sonnet builder, row C2, tier 1 gate after)
+
+Drafted 2026-10-24 about 06:45-07:10 AEDT, read-only. Brief: `2026-10-24_B561_SEAT-M7_mps-proposal-combined-usage-rate.md` (123 lines), copy `...md.pre-stamp` (cmp equal). Model line `claude-sonnet-5-5` (`models_latest.json` levels.sonnet.model_id, checked_at_local 2026-10-24 03:18:55; row C2 read in `fleet/specs/model-routing.md`).
+
+## Facts measured (all read-only)
+- MEASURED: main = `a5b4bbb5d377f29dd63bf0c64d54b44c122a6055` (`gh api git/ref/heads/main`, 06:46). Open PRs = #102 only (head `275349907500a0045908cccb96d45e39be333bf2`). `pulls/102/files --paginate` = 21 paths (list in the brief's PARTITION), none is `Proposal.cs`, `Dtos.cs`, `web/src/proposal/**`, `docs/**` or the Showcase test; `QuoteEndpoints.cs` is in it. Branches `b5*`: b517, b518, b519, b520, b522, b527, b53, b54, b58. `b44*` control = 3.
+- MEASURED (tarball of exactly `a5b4bbb5`, in the drafter's scratch, not the stale local clone): PR #101's mechanism in `Proposal.cs` (`HasEstimatedColourPages` at :518-519; the per-class `foreach` at :543; the colour guard at :549, which is count 1 for the exact text); `ProposalUsageRateDto.DeviceClass` is `required` (record name count 1, member line appears 5 times in `Dtos.cs`); `openapi.json` `ProposalUsageRate` required list count 1; web: `ONE_PAGER_CAPS.rates` 6, `moreRates`, the table head `Device class` in `OnePager.tsx` (count 1) and `ProposalDocument.tsx` (head count 1; `classLabel(r.deviceClass)` count 2: full table and summary row); `docs/API.md:573` still says "one colour row per `deviceClass`" (count 1; B535 F-1). `docs/ENGINE.md:150` says colour estimate >= 0, which is why "some class has colour pages" = "the deal has colour pages".
+- MEASURED: PR #101 = squash `c4aa4cc7`, 4 files (Proposal.cs +16 -3 and three test files), gate B535 `GO WITH FINDINGS`; its F-5 says the predicate lifts to the deal unedited (44 oracle deals agree with the engine's `monthlyColourPages`); F-1/F-2/F-3/F-4/N-1/B535-1 are carried into the brief.
+- MEASURED (Jira GET, credentials by name in-process): MPSCALC-228 Backlog, 0 comments, `needs-ruling` label (ruled by C-49 rule 1); MPSCALC-219 Backlog 0 comments; MPSCALC-195 Backlog 1 comment (B165-4 target text, B165-6 headers). Greps of three -219 phrases ("Supplies are not exposed", "care packs ... manual items", "a stored number keeps") read 0 in API.md/ENGINE.md (positive control `X-25` reads 2): part of -219 looks already fixed; `docs/API.md:87` partly updated for -195's negatives; `docs/API.md:567` still "A what-if only"; `docs/ENGINE.md:84,162` still `1e-18`. The brief makes the seat verdict every clause (STILL STALE / ALREADY FIXED / FALSE PREMISE).
+- MEASURED: `web/scripts/sync-contract.mjs` takes a git REF and writes `SOURCE.txt`, `openapi.snapshot.json`, `schema.ts`; so the brief orders the openapi commit before the regenerate commit.
+- MEASURED: ports `lsof` 8960-9099 empty (rc 1). Highest block named in any 2026-10-24 brief is 8960-8969. B560 brief does not exist yet (`ls | grep -c B560` = 0). No `heavy-slot-*` directory exists; no `b561` tree or ref; panes: tuesday, HPSM-POC-G71, fleet-monitor. load1 9.04 (06:46), 7.69 (06:48).
+- MEASURED: brief slot count = 8 lines (7 slots + last line), non-ASCII 0; no person name beyond the scan-word list and the `kamilDatasec` account name.
+
+## Judgement calls for Tuesday at the stamp (the brief defers these to "STAMP READING")
+1. **Port block 8980-8989.** Free now, avoids everything named; B560 is not written, so re-check it against B560 when that brief exists.
+2. **Contract shape (reading 1):** `deviceClass` becomes nullable and leaves `required`; deal rows carry null. Alternatives (print the first class; a new scope field) are rejected in the brief. Strike it if you want a different shape; it widens the generated TS type to `| null`.
+3. **Cell word (reading 3):** default build `All device classes` in ONE shared constant, marked UNAPPROVED; Option B is an empty cell (zero new words). Pick the build default. The summary-table label drops its class parenthesis (also a word change, listed).
+4. **Renames (reading 5):** existing names stay byte-equal; only a name that now says something false (`..._per_device_class`) may be renamed as a listed lost 1 / added 1 pair. Accept or forbid renames.
+5. **Existing rows re-expected:** the brief allows expectation changes (printed line by line) for rows that pin the per-class repeat in three .NET test files plus web rows; those three .NET files are outside the lanes file's L1 path list, so this widens Yours by three existing test files (none in #102). Confirm you accept that.
+6. **Docs words:** developer-doc sentences are WORDS-DRAFT-B (ticket -219 asks for them at the words gate); user-facing words are WORDS-DRAFT-A. Say if you want B routed to the owner or only recorded.
+7. **-195 clauses that are decisions** (rate-limit parenthesis; target text pending a ruling): the brief tells the seat NOT to choose and to put them in FOR TUESDAY.
+8. **Time:** target READY 4 h, hard stop 6 h after launch (suggestion; M size, two heavy suites plus a .NET suite and a mutant battery).
+9. **Gate tier 1** after, as the lanes file says; a tier-1 gate should check the printed rates equal the calculation's applied clicks and the F-3 retroactive re-projection.
+
+## UNMEASURED
+Nothing was built, run or mutated. Not measured: the true red list of existing rows; whether `Contract.cs` and the generated-client checks accept a nullable `deviceClass`; other web uses of the type; which -219/-195 clauses are already fixed (the three greps are a floor); the deal parity figure (RELAYED only); the printed look of the one-pager; whether #102 gains commits before launch; load1 at launch; whether a PR-less branch push shows any check-run (RELAYED from earlier builders: it does not).
+
+## Files written (and nothing else)
+- `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B561_SEAT-M7_mps-proposal-combined-usage-rate.md`
+- `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B561_SEAT-M7_mps-proposal-combined-usage-rate.md.pre-stamp`
+- `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B561_DRAFTER-REPORT.md`
+(Scratch tarball only under the session scratchpad. No Artifact/Docs/mail/chat tool, no `decision_queue.sh`, no `cd`, no git write verb, no HTTP to a hosted site, Jira GET only.)
