@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 481 — 2026-10-23 14:3x 70% CHECKPOINT (s150, ctx 70%). **Corrects 480's QUEUES line; 480's other lines stand.**
+- **chain3 FINISHED 14:32:30.** Launched G56 B523 (%327, 14:07:48), G57 B524 (%328, 14:25:09) and G58 B525 (14:32:30); rung 5 read for all three (their transcripts name their briefs). queue5 (G59 B533 #99, then R24 B532) is now live; queue6 (G60 B534 #100) waits on queue5's pid 96626.
+- **NEW PR:** MPS **#101** (B522 M16, af210955, 1 commit, 4 files). Its tier-2 kit **B535 (G61, Sonnet)** is being drafted (`tuesday/briefs/2026-10-23_B535_*`). Read it whole, stamp it, and add it as queue7 behind queue6. M16 %326 is held for a fix round.
+- Watchers are armed on B514(--changed) B515 B516 B518 B523 B524 B525 B532 B533 B534 (B519, B520 and B522 have fired). Kam: no new rows since 14:21:44.
+
 ## 🟢 DELTA 480 — 2026-10-23 14:31 70% CHECKPOINT (s150, ctx 68%). **READ THIS FIRST; supersedes 479's LIVE, CHAIN and DRAFTERS lines; 479's DONE and Kam lines stand.**
 - **LIVE (7 Datasec panes; status_watch armed by s150 on every STATUS; RE-ARM at boot):** %320 H3 B514 (on **ADDENDUM-1**: acceptance sentence + a Slack=1200 pin row, one more commit on #199; its watcher is `--changed`) · %321 H4 B515 · %322 H5 B516 · %323 M2 B518 · %324 M3 B519 (held; PR **#99**) · %325 M4 B520 (held; PR **#100**) · %326 M16 B522 (+ADDENDUM-1/-2).
 - **QUEUES (ONE chain, each waits on the previous one's bash PID by `kill -0`):** s149 `chain3` (pid 90329: G56 B523 #196, G57 B524 MPS #98, G58 B525 #197+#198+#199) -> `tuesday/queues/2026-10-23_s150_queue5.sh` (pid 96626: G59 B533 MPS #99, tier-1 Opus; then R24 B532 Composer records) -> `..._queue6.sh` (G60 B534 MPS #100, tier-1 Opus). All kits are STAMPED. Load1 has stayed above 7 since ~13:30, so G56 has not launched yet. If this seat rotated: list the panes, and re-run whichever queue scripts have not finished (each one skips seats that already have a pane).
