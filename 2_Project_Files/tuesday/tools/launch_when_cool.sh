@@ -30,7 +30,26 @@ while :; do
   sleep 20
 done
 echo "LAUNCHING $NAME at $(date '+%H:%M:%S') load1 $(load1) (waited $(( $(date +%s) - START ))s)"
-date +%s > "$STAMP"
-bash "$COCKPIT" add "$NAME" "$CMD"; RC=$?
-echo "cockpit.sh add rc=$RC at $(date '+%H:%M:%S'); load1 $(load1)"
+# PANE SPACE (pickup DELTA 475/476, 2026-10-23 s149): `cockpit.sh add` splits the ACTIVE pane, and tmux refuses with
+# "no space for a new pane" when that pane is small (12:5x: M4, M16 and G56 failed rc=1 and this waiter just exited).
+# Now: on that refusal, make the coordinator pane active, re-apply the cockpit layout, wait, and retry (RETRIES, default
+# 3). Any other failure is not retried. The spacing stamp is written only after a launch that succeeded.
+# The add's output goes to one overwritten file beside the stamp (never deleted), then is printed.
+RETRIES="${RETRIES:-3}"; SELF_PANE="${LWC_SELF_PANE:-%0}"; OUT="${STAMP}.last_add_output"; TRY=0
+while :; do
+  TRY=$((TRY+1))
+  bash "$COCKPIT" add "$NAME" "$CMD" > "$OUT" 2>&1; RC=$?
+  cat "$OUT"
+  echo "cockpit.sh add rc=$RC at $(date '+%H:%M:%S'); load1 $(load1) (try $TRY of $((RETRIES+1)))"
+  [ "$RC" -eq 0 ] && { date +%s > "$STAMP"; break; }
+  if /usr/bin/grep -q -i 'no space for a new pane' "$OUT" && [ "$TRY" -le "$RETRIES" ]; then
+    echo "PANE SPACE refusal for $NAME: selecting $SELF_PANE and re-applying the layout, retry in ${LWC_RETRY_SLEEP:-30} s"
+    tmux select-pane -t "$SELF_PANE" 2>&1
+    bash "$COCKPIT" layout 2>&1 | tail -n 3
+    sleep "${LWC_RETRY_SLEEP:-30}"
+    continue
+  fi
+  echo "REFUSED: $NAME NOT launched (rc $RC after $TRY tries). Read the output above; nothing was started."
+  break
+done
 exit $RC
