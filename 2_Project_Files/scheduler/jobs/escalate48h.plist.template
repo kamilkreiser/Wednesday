@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- 2026-10-23 (Kam 11:13: "if there is an unanswered item for more than 48 hours, escalate by emailing me"). TUESDAY seat ONLY: install_all_jobs.sh skips it elsewhere and doctor.sh fails the Tuesday seat if it is not loaded. ESCALATE_SEND=1 is what makes it send; escalate_48h.sh de-dupes per card via fleet/state/escalated_48h.json, so an hourly run mails each card once. Logs in ~/Library/Logs (PORTABILITY 22: launchd cannot open paths on the drive). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.@SEAT@.escalate48h</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-c</string>
+    <string>ESCALATE_SEND=1 exec /bin/bash "@PROJECT_DIR@/2_Project_Files/tuesday/tools/escalate_48h.sh"</string>
+  </array>
+  <key>StartInterval</key><integer>3600</integer>
+  <key>EnvironmentVariables</key>
+  <dict><key>WED_AGENT</key><string>@SEAT@</string></dict>
+  <key>StandardOutPath</key><string>@HOME@/Library/Logs/@SEAT@_escalate48h.out</string>
+  <key>StandardErrorPath</key><string>@HOME@/Library/Logs/@SEAT@_escalate48h.err</string>
+</dict>
+</plist>

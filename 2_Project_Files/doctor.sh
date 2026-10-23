@@ -1188,6 +1188,18 @@ else
        "bash 2_Project_Files/scheduler/install_all_jobs.sh (from this seat's own tree, WED_AGENT unset) — a missing job is a mechanism that silently never fires"
 fi
 
+# --- 48h escalation job (2026-10-23, Kam 11:13) ---------------------------------
+# Tuesday's hourly mailer for Datasec cards unanswered > 48 h. A HARD FAIL on the Tuesday seat if
+# it is not loaded: the generic sweep above only WARNS, and an instruction Kam gave in words
+# ("escalate by emailing me") that has no running mechanism is the silent-never-fires shape.
+if [ "$_DOC_AGENT" = "tuesday" ]; then
+  if launchctl print "gui/$(id -u)/com.tuesday.escalate48h" >/dev/null 2>&1; then
+    ok "escalate48h job loaded (com.tuesday.escalate48h)"
+  else
+    fail "com.tuesday.escalate48h NOT LOADED" "Kam's 48h email escalation is not running - bash 2_Project_Files/scheduler/install_all_jobs.sh (Tuesday tree, WED_AGENT unset)"
+  fi
+fi
+
 # ── PYTHON TOOLS REFERENCE ONLY NAMES THEY BIND (2026-09-20, Tuesday) ─────────
 # Patching reconcile_rulings.py I added os.environ to a module whose imports read
 # "import json, re, subprocess, sys", and verified it with ast.parse — which
