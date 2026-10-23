@@ -1,0 +1,28 @@
+From Tuesday's gate-kit drafter (Sonnet 5.5, routing row C8), Datasec / MPS Commercial Calculator. Drafted 2026-10-23 15:12-15:40 AEDT. Read-only: nothing fetched, built, run, stamped or launched.
+
+# B538 drafter report: SEAT-G63, gate of PR #102 (b518, tier 1, Opus)
+
+**Kit:** `2026-10-23_B538_SEAT-G63_mps-b518-input-hardening-gate-tier1.md` (115 lines) and a byte-identical `.pre-stamp` (`cmp` OK, sha256 `f2676a1ac14d4e09fd57f606dbce7828db8518a5aeabf36417f5500059d7a520`). B538 was free (the folder listing showed B537 as the last).
+
+**Stamp sentence:** the unstamped copy reads **8 lines** with the four-underscore pattern: seven slot lines (STAMP, LAUNCH WINDOW, Stamped by, Launch authority, Hard stop, Head/main/PR #102 check-runs and pane list at launch, Model receipt line and load1) plus the last line `READ-WHOLE-BY-TUESDAY: ____`. All 8 end in four underscores (grep control: a scratch file with four underscores reads 1). Open slots: **8**. Q-1 (scratch rows in the gate's own worktrees) is asked in the Stamp preface and answered INSIDE the "Stamped by" slot (`Q-1: YES` / `Q-1: NO`; no answer reads NO).
+
+**Port block:** 8790-8799 (B533 8750, B534 8760, B535 8770, B536 8780; no brief names an 879x token; `lsof` on 8790-8799 empty, rc 1; no bind control run by the drafter: UNMEASURED, the gate runs one). Pane name `Datasec/MPS-G63` (no such pane; G59/G60 live, G61 queued). Heavy slots at 15:14: slot-1 B533, slot-2 B534, slot-3 free. load1 9.89.
+
+**Facts measured that shape the kit (all `gh api -X GET` / `ls-remote`, 15:14-15:25):**
+- PR #102 base is main `4c593517`, but the head is built on `e027ebd0` (ahead 6, behind 1). `refs/pull/102/merge` = `a97213e6`, parents `4c593517` and the head. So CI runs on a different tree from the one the builder tested; the kit puts the whole CI line in a `wt-merge` worktree at that merge ref.
+- 14 paths, +1753 -41 (sums match the file list). Removed lines: 35 in `src`, 6 in `LineMarkupTests.cs` (the one EXISTING test the builder edited, its D7). Kit asks for all 41 accounted and a strength-of-assertion judgment of the J1 edit.
+- Check-runs on the head: CodeQL neutral, Analyze (actions) and (python) success; dotnet, web, python, Analyze (csharp), Analyze (javascript-typescript) in progress; package not yet listed. 0 open alerts on the PR ref; analyses so far python and actions only. The repo has NO alert of any state (main open 0, fixed 0), so the usual "read one alert by number" control has no row; the kit says so and names the substitute control.
+- Rules on main: deletion, non_fast_forward, code_scanning (CodeQL), required_status_checks EMPTY.
+
+## Where the B533 template did not fit (5 lines)
+1. **Base moved under the PR.** B533's single-base shape assumed main = the base. Here main moved (PR #98) while the head stayed on `e027ebd0`; the kit adds `wt-merge` (CI's tree), a four-way worktree set, and a REFUSE rule for a moved main that names callers, not only paths.
+2. **The base-refused/head-allowed grading is one GRADING table, not a clause in C6.** Per the B533 ANSWER-1 ruling the kit grades every differential by capability from the start (G-1: reachable-at-base by an allowed request = Note, else Blocker, unproven at the verdict = Blocker, proven/unproven counts reported), and applies the same rule to base-500/head-2xx. Every check cites a table row (G-1..G-9), so no two sections can grade one shape two ways. G-2 (head stricter) and G-5 (restricted caller reads more) are new rows B533 had no use for.
+3. **Six tickets, three projects, 252 new names, 41 removed lines, 31 builder mutants** do not fit B533's 27-name/31-line shape: the kit asks for at least 24 own mutants (one per decision), a per-ticket revert instrument (new rows name head-only symbols and will not compile in a base-plus-tests tree), the M518-C1 survivor judged by a forced run plus a census of routes that can reach it, and a 3-4 h hard-stop suggestion.
+4. **The attack surface is a hostile-body corpus replayed at two trees (base and head), not a policy file.** C5/C6 are a corpus of 3,000+ cases with base/head TSVs, a status/body/leak scan, 0-five-hundreds expectation, stored-document read-back (G-7), and a restricted-caller differential on the blocked calculation shape (lead L4: the line-level `INVALID MARGIN` issue names the hidden pricing method). Also new: C7 words-by-program (the gate does not approve words; a missing literal is a Major per string).
+5. **Semantic overlap is a real dependency, not only file overlap:** `ActiveSources.Load` calls `SourceDocumentChecks.EngineRead` and `IsDocumentFault`, files PR #100 edits; the kit makes the pair build (or a named NOT TESTED) part of C10. #99 and #101 are read-only. Also the kit has 7 stamp slots (B533 had 8, its eighth being the pane/Q-1 slot).
+
+## Drafter leads (reading only, UNMEASURED; they are in the kit as L1-L9)
+`BodyRefused` parses .NET exception text and echoes caller-sent member names despite its comment; `Read<T>` catches only `JsonException` and serves eight routes; the enum factory overrides only Read/Write (dictionary keys, `[JsonConverter]` members, other option instances, query/route enum binding untouched while the brief says "whole API"); `NoCountedDevice` judged at four sites only; the new early return can drop later Blocking issues; the edit of `LineMarkupTests.cs` changes one existing row (J1); sibling `$`-anchored regexes.
+
+## Not done / UNMEASURED
+No Jira read (tickets' Done-when are the gate's to read); no bind control on 8790-8799; the project's `4_Credentials/.env` not opened; the combination build with #100 is NOT done (the gate does it); the web's display of the new sentences.
