@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-23 13:26 from 247 lesson files (1,077,585 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 202. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-23 14:22 from 248 lesson files (1,080,914 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 203. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7466,6 +7466,21 @@ sections (open the file for these): EXTENSION 2026-10-22 16:52:09 — Kam, live 
 **Mechanism (a grant is not a mechanism):** `fleet/usage_gate.sh` still REFUSES at 90% (rc 3). Until it is changed to advisory (shared tooling, claim first), launches pass `WED_USAGE_STOP=100` naming THIS file. The 2026-10-20 Tuesday no-90% grant already covers her seat.
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (its hard stop retired) · [[2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark]] · [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-09-16_if-something-blocks-move-on-to-the-next]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## HPSM-POC: build only what THIS phase needs. Next-phase work is gathered, not built, because what we show HP done for free is work HP cannot fund later
+`2026-10-23_hpsmpoc-build-only-this-phase-next-phase-funds-it.md` · preference · 2026-10-23 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Tuesday is about to brief, accept, gate or show HP any HPSM-POC work that integrates with an HP tool, or that goes past what the current phase needs. That covers the Security Manager API, Fleet Threat Assessment, the firmware tools, SIEM forwarding, or anything from the HP chase list. **Ask first whether the current phase needs it.** If it is next-phase work, we collect the inputs from HP and keep the design notes, but we do not build it, and we never show it to HP as done.
+
+**How to apply:**
+1. **Every HPSM-POC brief carries the standing line:** *"This phase builds no integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM). Next-phase items are stored and architected only (notes, designs, inputs from HP), never built, and never shown to HP as done. If a ticket needs one, STOP and ask Tuesday."*
+2. **Before stamping or accepting HPSM-POC work, check its scope against the phase.** A lane or PR that reaches past the current phase is narrowed to its current-phase half, or parked with the reason written on the ticket.
+3. **Gathering inputs is still wanted.** The HP asks go on, and the answers are filed so that the next phase starts ready.
+4. **Anything shown to HP (demo, UAT, showcase, documents) is checked for next-phase capability before it goes out.** If it shows next-phase capability, it is a card for Kam, with the default of holding it back.
+5. **Record it in the project:** a C-entry by the next HPSM-POC records seat (parked in `0_Brain/projects_index/clarifications_register.md`).
+
+**Family:** [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope of the ruling) · [[2026-08-03_role-beyond-code-three-priorities]] · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("in scope" is a claim to check) · [[2026-10-23_tuesday-never-wait-on-kam-cards-morning-card-48h-email-priorities]].
 
 
 ## Tuesday never waits on Kam: everything awaiting him is a fleet-activity card, the morning brings a summary-and-plan card, 48 hours unanswered means an email, and agents work the tickets in the order HPSM-POC, then the Calculator, then Composer
