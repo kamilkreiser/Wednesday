@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 478 — 2026-10-23 13:28 ROTATION (s149, ctx 79%). **READ THIS FIRST with 477 (its LIVE, PRs, merge and OWED lines stand).**
+- **FIRST ACTION AT BOOT:** the s149 queues, waiters and status watchers DIED with the s149 pane. Run ONE tracked background task: `bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/queues/2026-10-23_s149_chain3.sh` (launches M16 B522, G56 B523, G57 B524, G58 B525 in order; skips any seat whose pane exists; makes %0 active before each). Then RE-ARM `status_watch.sh '<STATUS>' 60` for every live or queued seat: HPSM-POC B514 B515 B516 B523 B525; MPS B518 B519 B520 B522 B524. Rung-5 each new launch by its transcript (`find ~/.claude/projects -name '*.jsonl' -mmin -5`, grep the brief name).
+- **B525 (G58, batched gate on #197 + #198) STAMPED 13:25** (hard stop 19:00; #197 checks 20/20 done 0 failing, #198 12/18 done 0 failing). All four gate kits are stamped: B523 (#196), B524 (MPS #98), B525 (#197, #198).
+- Live at rotation (6 Datasec panes): H3 %320, H4 %321, H5 %322, M2 %323, M3 %324, M4 %325. Kam: no new rows since 11:32.
+
 ## 🔴 DELTA 477 — 2026-10-23 13:20 PRE-ROTATION (s149, ctx 76%). **READ THIS FIRST with 476 (its chain and cause lines stand).**
 - **LIVE (status_watch armed on each STATUS; RE-ARM ALL at boot):** %320 H3 B514 · %321 H4 B515 · %322 H5 B516 · %323 M2 B518 · %324 M3 B519 · **%325 M4 B520** (launched 12:58:41, rung 5 read). STATUS = `<project>/1_Project_Definition/Briefs/2026-10-23_B5NN_STATUS.md` (HPSM-POC: B514-B516, B523, B525; MPS: B518-B520, B522, B524).
 - **CHAIN (serial, running):** queue2 pid 9718 -> M16 B522 next -> G56 B523 (PR #196) -> G57 B524 (MPS #98). Each step re-selects %0 first. At boot: `tmux list-panes` for M16/G56/G57, rung-5 each by transcript, arm `status_watch.sh` (B522, B523, B524 watchers may have died with this seat).
