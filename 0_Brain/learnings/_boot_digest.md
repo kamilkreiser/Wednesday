@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-23 11:10 from 246 lesson files (1,073,278 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-23 11:49 from 247 lesson files (1,077,375 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7538,4 +7538,25 @@ sections (open the file for these): EXTENSION 2026-10-22 16:52:09 — Kam, live 
 **Mechanism (a grant is not a mechanism):** `fleet/usage_gate.sh` still REFUSES at 90% (rc 3). Until it is changed to advisory (shared tooling, claim first), launches pass `WED_USAGE_STOP=100` naming THIS file. The 2026-10-20 Tuesday no-90% grant already covers her seat.
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (its hard stop retired) · [[2026-10-14_80-to-90pct-limited-cloud-wednesday-and-spark]] · [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-09-16_if-something-blocks-move-on-to-the-next]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Tuesday never waits on Kam: everything awaiting him is a fleet-activity card, the morning brings a summary-and-plan card, 48 hours unanswered means an email, and agents work the tickets in the order HPSM-POC, then the Calculator, then Composer
+`2026-10-23_tuesday-never-wait-on-kam-cards-morning-card-48h-email-priorities.md` · grant · 2026-10-23 · status: live
+
+**The operative case, so the headline matches it:** Tuesday is about to (a) mention that something is waiting on Kam, (b) open the morning, (c) leave a seat or the machine idle, or (d) let a card sit unanswered. Do the following:
+- (a) It is a card on fleet activity, posted in the same action as the mention.
+- (b) The morning starts with a summary-and-plan card.
+- (c) Agents work the tickets, in project priority order.
+- (d) After 48 hours, email Kam.
+
+**How to apply:**
+1. **Composer Jira:** a Composer agent creates the project under its own identity, with Kam's permission. The earlier hold on key `PCOMP` (C-71) is lifted by this message. If the token refuses, Tuesday posts a card with literal steps for Kam.
+2. **Anything awaiting Kam is a card, never a sentence.** A report that says "N items wait on you" names N cards that exist on the board. Each candidate is verified at source before it is carded; a stale "waiting" row is closed rather than carded.
+3. **Morning card, every morning:** the same shape as every other card (BLUF, options, recommended, default). It holds the summary, the day's plan, and counts of what awaits him per project ("awaiting 11 for Composer, 2 for HPSM-POC"), with no descriptions, because those already live on the board.
+4. **Never idle:** when a seat or the machine has room, the next action is a ticket lane. Launch as many agents as the code partition and the machine allow (load1 < 7, waves of launches), allocated in the order **HPSM-POC → MPS Calculator → Security Composer**.
+5. **Blockers:** never pushed past. They are flagged as a card, re-raised, and escalated so they do not slow anything.
+6. **48 hours unanswered → email Kam** at kamil.kreiser@datasec.com.au. The subject names the card, and the body carries its BLUF and default. This is a mechanism, not a habit.
+7. Unchanged: the v1.3 signature classes, the QA gate before every merge, CodeQL, client isolation, and the routing table (Sonnet first on this seat).
+
+**Family:** [[2026-09-24_decisions-go-on-the-fleet-activity-panel]] · [[2026-10-12_secuura-done-when-tested-works-deployed-and-never-idle]] (Wednesday's twin) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-11_a-number-left-for-kam-in-a-handover-reaches-no-surface-he-reads]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
