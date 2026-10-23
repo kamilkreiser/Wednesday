@@ -78,15 +78,15 @@ SELF-CHECK: drafted 2026-10-24 from the B558 brief and drafter report (the templ
 
 ## Stamp
 Tuesday fills each four-underscore slot at launch; the drafter fills none. The unstamped copy reads 9 lines with the pattern (the eight slot lines and the last line).
-- STAMP: ____ (Tuesday: `STAMPED <time> AEDT 2026-10-24 by <seat>`; the main sha below must be main at the stamp)
-- TICKET-KEY: ____ (Tuesday: the HPSMPOC key the records seat B563 created for this finding; the branch name's number comes from it; if no key exists, do not launch)
-- LAUNCH WINDOW: ____ (Tuesday: the launch window, load1 and the live seats beside you)
-- Stamped by (the Tuesday seat that READ this brief whole): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and target READY (AEDT, 24 Oct; drafter's suggestion: target READY 2 hours after launch, hard stop 4 hours): ____
-- Head and main at launch (Tuesday `ls-remote`; main must still be `08af828bd0eff92c82169e240fb4d6d9f5dc2fe7` or say what moved): ____
-- Model receipt line and `uptime` load1 at launch (expected `model: claude-sonnet-5-5 -- L6 pin (Sonnet; build-seat rule C2) -- P1-P4 none`): ____
+- STAMP: STAMPED 08:35 AEDT 2026-10-24 by Tuesday s156 (Tuesday: `STAMPED <time> AEDT 2026-10-24 by <seat>`; the main sha below must be main at the stamp)
+- TICKET-KEY: HPSMPOC-333 (created by B563, read back by Tuesday's Jira GET: Backlog, labels b549-gate + b563-2026-10-24); branch b564/hpsmpoc-333-snapshot-name (Tuesday: the HPSMPOC key the records seat B563 created for this finding; the branch name's number comes from it; if no key exists, do not launch)
+- LAUNCH WINDOW: now, ONE launch_when_cool at load1 < 7 (load1 8.16 at 08:35); live seats: tuesday Datasec/MPS-G73 Datasec/MPS-M8 Datasec/MPS-G72 fleet-monitor  (Tuesday: the launch window, load1 and the live seats beside you)
+- Stamped by (the Tuesday seat that READ this brief whole): Tuesday s156, read whole (93 lines). Gate after = tier 2 (Sonnet) CONFIRMED. Ports 9120-9129 are yours alone (B565 moved to 9130-9139, B566 to 9140-9149 at their stamps); lsof 9120-9129 empty at the stamp.
+- Launch authority (who, under which grant): Tuesday GO under the product owner's 2026-10-16 grant (HPSM-POC unfrozen, keep working on it; merge once tested) and his 2026-10-23 never-idle instruction (HPSM-POC first); WED_USAGE_STOP=100 under the 2026-10-20 Datasec no-90% grant
+- Hard stop and target READY (AEDT, 24 Oct; drafter's suggestion: target READY 2 hours after launch, hard stop 4 hours): target READY 2 hours after launch, hard stop 4 hours after launch
+- Head and main at launch (Tuesday `ls-remote`; main must still be `08af828bd0eff92c82169e240fb4d6d9f5dc2fe7` or say what moved): main 08af828bd0eff92c82169e240fb4d6d9f5dc2fe7 (gh api 08:35)
+- Model receipt line and `uptime` load1 at launch (expected `model: claude-sonnet-5-5 -- L6 pin (Sonnet; build-seat rule C2) -- P1-P4 none`): model: claude-sonnet-5-5 -- L6 pin (Sonnet; build-seat rule C2) -- P1-P4 none -- gauge 23%; load1 8.16 at 08:35
 Pane `Datasec/HPSM-POC-H9` (re-check that no pane has the name; pick the next free one if taken). Model row **L6, Sonnet column; build seat (C2)**. Gate after this round: **tier 2 (Sonnet)** (drafter's call, Tuesday confirms at the stamp): the product change is one client-side trim call in a name box; no auth, session, permission, deploy or destroying surface is touched, and the API still validates; tier 1 only if the diff leaves "Yours". Ports 9120-9129. **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B564_SEAT-H9_hpsmpoc-snapshot-customer-name-drop.md`. **Step 0:** copy it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/`, `cmp`, both sha256s in STATUS, the stamp-slot count. Preflight: write "none (brief_seat launch)".
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/HPSM-POC-H9 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B564_SEAT-H9_hpsmpoc-snapshot-customer-name-drop.md'"`
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 08:35 by Tuesday s156
