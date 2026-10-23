@@ -5948,5 +5948,12 @@
   "project": "Datasec",
   "ts": "2026-10-23T10:45:52.337071+11:00",
   "text": "Datasec / HPSM-POC: the security alert on PR #193 is fixed and merged. No action needed.\n\nThe new live-API test runner wrote its record of used test data to a fixed file name in the shared temporary folder, which code scanning flagged as high. That record now lives in a per-user folder, created readable only by its owner, and the runner refuses files that are unsafe. The first test gate found the fix itself correct but asked for stronger tests; the second and final round closed all six of its findings, and all 20 checks passed. Merged at 10:44.\n\nStill running: the telemetry gate, your single round, with a verdict expected by 14:00."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-23T11:02:45.819926+11:00",
+  "text": "Datasec / HPSM-POC: telemetry has stopped, as you ruled. No action needed unless you want to reopen it.\n\nThe smaller design got its one security gate this morning and the verdict was NO GO. The good news first: it held every privacy test. None of 169 planted values left the app, the record holds no free text, and all 20 checks passed. It failed on four Blockers: its own tests do not prove what leaves (a test copy that sends a caller-supplied id still passes them all), one late-written web status reaches the record, the connection strings identifiers show up in a diagnostics trace, and one README sentence is wrong. Your rule was that a NO GO stops it, so I have closed PR #195 without merging. The branch is kept and nothing is switched on anywhere.\n\nMy honest view: the fixes are small and the gate named each one, but it is the same weakness that ended the old design, so stopping is reasonable. If you would like one fix round anyway, say so and I will start it."
  }
 ]
