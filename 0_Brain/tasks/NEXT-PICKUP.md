@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE by the Opus 5.5 successor seat of 23 Oct (booted 1
 
 # NEXT PICKUP (Fri 23 Oct, written 12:55 AEDT; Wednesday ctx 50%, weekly 7d 99%, renews Sun 25 Oct ~13:00 AEDT)
 
+## 00. DELTA AT 13:58 — READ THIS FIRST
+- **Kam's 10:53 instruction is DONE for everything that could be done today:** SEVEN merges, each gated and verified at origin: #1253, #923, #927, #920, #809 (DA4 round 2), #995, #989 (DA5 Opus tier 1). develop = `a9ce2cff1594`. #1250 CLOSED unmerged (proven superseded by #1389). Archived: KS-1297, KS-1027, KS-1302, KS-1303. Filed: KS-1713/1714/1715 (DA3 notes), KS-1716 (format gate drops `akto` on large pushes, High), KS-1717 (anchoring has no inbound strip for x-emitter-internal, High), KS-1718 (test password derivable, Medium).
+- **Floor: %0 + %1 only.** G 17th (0.95) and G 18th (0.97) wrapped and closed. Handover: `!CODING/Secuura/Blockchain/5_Project_History/2026-10-23_seatG-18th/HANDOVER.md`.
+- **HELD on the allowance (99%, renews Sun 25 Oct ~13:00 AEDT; a fresh login asked of Kam):** (a) the KINTSUGI DEPLOY of develop `a9ce2cff1594`+ (October grant, kintsugi first) — Wednesday's decision: not started at 99% because a cut-off mid-swap leaves a half-swapped box; KS-741 reaches Done only after it; (b) #1383 renumber (Opus security build).
+- **Owed rulings:** four Done tickets un-archived (KS-1708, KS-1042 and KS-608 under KS-492: archive when a seat is live; KS-724 sits under Peter's KS-485: leave). The Secuura wrap skill's step 2c names a dead T9 path for Wednesday's projects_index: a brief item for the next Secuura seat.
+
 ## 0. LIVE STATE
 - **Floor:** %0 wednesday, %1 fleet-monitor, **%34 Seat G 18th** (Secuura/Blockchain-G), booted 01:52Z by `cockpit.sh rotate` on the launcher's Opus 5. **OWED: switch it with `/model claude-sonnet-5-5` at its plan prompt and answer its plan confirmation** (the SUCCESSOR mail says Wednesday does this). Do NOT type /model while it is mid-turn.
 - **Kam's 10:53 instruction** ("merge and archive everything that is ready or close to being merged") is the work. Census (G 17th, `!CODING/Secuura/Blockchain/5_Project_History/2026-10-23_seatG-17th/evidence/census_open_prs.md`): 22 open, A0 B3 C6 D13 E0.

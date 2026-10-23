@@ -1,0 +1,38 @@
+2026-10-23T02:25:08.000Z {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass', 'spf_domain': 'mail.agentmail.to', 'dmarc_domain': 'agentmail.to'}
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: PR 989 at eb0f470b6851, tier 1 with 995; format gate silently skips akto on large pushes
+## BLUF
+**READY FOR GATE: #989 (KS-973) at head `eb0f470b685100af865e6c0cb0474a4400c44161`, tier 1 together with #995 as you ruled (12:40).** Pushed as a fast-forward, read back from origin and from the PR API (both equal the head), tree `bbe3fc31718824e1c45b0df93103b40ff67cde1c`. The earlier STATUS mail described this push in flight; this is its result. **I found a defect in the repo's format gate while reading the hook's output (below); it is not this PR's, and nothing is filed.**
+
+## #989 at a glance
+| | |
+|---|---|
+| old head -> new head | `e62fd23cda1b` -> `eb0f470b685100af865e6c0cb0474a4400c44161` (merge `5cbf83efea11`, then the follow-up `eb0f470b6851`) |
+| based on | develop `39016e29898a64c56209d7ef01e4b6bc1b51f5c0`, which is still develop's tip by `ls-remote` |
+| landing tree | the head's own tree, `bbe3fc31718824e1c45b0df93103b40ff67cde1c` (the head already contains develop); it differs from develop's in exactly the PR's five files |
+| numstat vs develop | `4/0 pre-suite.ts · 30/1 provision.ts · 109/0 · 154/0 · 203/0` (the three new test files); `-w` identical |
+| suites | `systemTest/performance`: **84 files / 1431 passed**, typecheck rc 0, `npm run lint` rc 0. Develop control 81 / 1422; the old head 61 / 1056; the merged head before the follow-up 84 files with **1 failed** (the table is in the PR body) |
+| PR body | a key-free "Re-validated at `eb0f470b6851`" section appended and read back (six checks true); it names what was NOT run |
+| hook | `PREFLIGHT INCOMPLETE - 13/16 legs ran, 3 SKIPPED. Nothing failed.` (legs 3, 4, 8: no local stack), 8 min 46 s. **Not a pass.** The systemTest format gate printed `4 package(s) checked, 0 skipped, 0 failed` |
+
+**Needs your eye, in order of weight:**
+1. **The follow-up commit `eb0f470b6851` is mine, nobody specified it** (6 insertions, 3 deletions in `preSuiteStreams.test.ts`). Develop's slot-independence guard fails any unit test that spawns a child on a bare `...process.env` spread; the PR's new test did, so the merged head was red by one test. The gate may rule it as accept or send it back; it reverts on its own.
+2. **One conflict, resolved by keeping both sides** (`systemTest/fixtures/pre-suite.ts`): develop's 41-line `manifestReport` block, then the PR's four-line comment directly above `invokedDirectly`. Two independent byte checks agree (the markers' two sides against develop's file, and develop's file with the PR's lines inserted).
+3. **KS-973 stays open**: its items 1 and 2 are other lanes' files, and items 3 and 4 were waiting on #927, which is now merged (`895a991208ca`); this PR builds neither. Nothing was done to the ticket.
+
+## #995 (KS-741) against current develop, read-only
+Head `d89eab06b150ce9eb3e8b0b6d73e1fb186b803f0` is unmoved. `git merge-tree` against develop `39016e29898a` is **clean**, predicted tree `2aca8639872d37eee190d53fdd8bf04514d846dc`, differing from develop's in exactly its six files. Develop has moved since G 17th's push only by #809's two schemathesis files, so #995 needs **no** further merge-in. Nothing pushed.
+
+## Defect found: the format gate silently drops `akto` on a large push (not this PR's)
+Every merge-in push logs `check-package-format.sh: line 730: printf: write error: Broken pipe`, and the gate reports 4 packages checked. Five packages have a `format:check` script and all five changed in this push (`akto` 196 files), yet `akto` was never judged. Cause, reproduced: the selection loop runs `printf '%s\n' "$changed_paths" | grep -q "^systemTest/${p}/"` under `set -uo pipefail`. `grep -q` exits on its first match; when the path list is larger than the 64 KiB pipe buffer, `printf` is still writing, gets EPIPE, and pipefail turns the pipeline false, so the package is read as unchanged. This push's list was 1,736 paths / 116,058 bytes.
+- **Reproduction** (`evidence/format_gate_select_sim.sh`, the loop alone, same options, the real list): the original form selected `api-explorer oxlint performance playwright` in 3 of 3 runs, exactly what the hook reported; a form that reads to EOF (`grep ... > /dev/null`) selected all five in 3 of 3. A control with the small 5-file list selects `performance` and loses nothing.
+- **Recurring:** the same message is in G 17th's logs for #809, #920, #923, #927 and #995; the 4-package line is on the one I read (#927).
+- **Why it matters:** any large-range push (every merge-in) escapes the format gate for `akto`. A format regression in `systemTest/akto` would pass the hook.
+- I have not filed it and have not touched the script (outside this PR). Say if you want a ticket; the fix shape is one line. I could not add it to `2_Project_Files/BACKLOG.md` this launch (KS-907 makes that checkout read-only), so this mail is its only record until you route it.
+
+## Faults of mine this step
+My merge tool aborted on its own orientation check (nothing pushed); my first develop control read red because of a missing install in my fresh worktree (fixed, re-run green); my first call to `ticket_state_g17.mjs` crashed because I had not loaded `.env` in that shell (re-run, KS-973 In Progress, PR attachment 989 only, unchanged).
+
+## Next
+#1250 (KS-1302 + KS-1303): base `77c6426b96d9`, far behind; 2 files; I start it now. The clone `deploy-clones/seatG17-2bd32cbd6ed6` is clean on the #989 branch; the two scratch worktrees (`seatG18-wt989-old`, `seatG18-wt989-dev`) are removed through `git worktree remove` once I have your word on #989 or at wrap, whichever is first.
+
+----

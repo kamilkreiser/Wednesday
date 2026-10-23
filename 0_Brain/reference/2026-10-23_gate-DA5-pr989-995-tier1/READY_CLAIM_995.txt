@@ -1,0 +1,24 @@
+[Secuura/Blockchain-G -> Wednesday] STATUS: PR 995 pushed (head d89eab06b150); one import-block hunk kept both sides; one follow-up commit fixes a hermetic-manifest red; originate 1643 -> 1650
+## BLUF
+**PR 995 (KS-741) is PUSHED** (fast-forward `b8155636e..d89eab06b`, remote head read back = `d89eab06b150ce9eb3e8b0b6d73e1fb186b803f0`; hook `13/16 legs ran, 3 SKIPPED. Nothing failed.`, not a pass). It took ONE conflict hunk and ONE follow-up commit that I chose to make. Landing tree on develop `95a2dff1d784`: `bedee76f13ce2573bfbaff3f2c9bf9a0af319e98`. The four merges start now.
+
+## The one conflict hunk, what I chose and why
+`Blockchain/Dev/services/originate/src/index.ts`, the import block (the other four files merged automatically). Both sides changed it independently:
+- the PR adds `createEmitterMarkerStrip` to the multi-line `./utils/gatewayProvenance` import;
+- develop kept that import (collapsed to one line) and ADDED a separate line, `import { resolveRequestTenantId } from './utils/requestTenant';`.
+**I kept BOTH:** the PR's multi-line import with the new name, plus develop's new import line. They are two independent changes, so the union is the only resolution that keeps both intents. **Proved by direct test, not by eye:** with the import statement and the PR's four-line `app.use(createEmitterMarkerStrip())` block removed, the merged file is BYTE-IDENTICAL to develop's (26,058 bytes), and the import's name set is exactly develop's plus `createEmitterMarkerStrip`.
+**One honest finding:** my byte gate printed NOT OK on this file, correctly, because the PR's change reads `+9/-1` against develop and was `+5/-0` against its own base: at the PR's base that import was already multi-line, develop later collapsed it to one line, and a third name makes it multi-line again. I first "confirmed" the layout with prettier; that check ran without a config and its control did not discriminate, so I WITHDREW it. `originate` has no formatter config and no format script (only `eslint src`); I keep the PR's own layout and claim nothing about a formatter (the file's longest one-line import is 96 chars, a one-line version would be 118).
+
+## The follow-up commit `d89eab06b150` (my choice; revertible on its own; tell me if you want it out)
+After the merge, originate was RED: **1 failed test of 1,650**. It was `ks1293-originate-suite-is-hermetic` > MANIFEST-DRIFT, naming the PR's new test `ks741-emitter-marker-strip.test.ts`. That guard landed on develop AFTER the PR was written: any unit test that mentions `ANCHORING_SERVICE_URL` must be listed in its `SUBJECTS` manifest AND pin an import-scope base on a closed loopback port. A bare manifest line would have traded one red test for another (the second check, CONFIGPINNED). So two edits: (1) in the PR's test, `process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';` at import scope (the value the other subjects use; `beforeAll` still overrides it with the recorder); (2) the file appended to `SUBJECTS` (string order puts it last). +3 and +1 lines. **Falsified:** with my pin line removed the guard goes red naming the file; restored, sha256 identical.
+Authority, stated plainly: nobody specified this edit. I made it on the same reasoning you gave for 809's fix (inside the work commissioned, our own PR, reversible, a defect develop's move created), and as a SEPARATE commit so it can be dropped.
+
+## Suites, develop `95a2dff1d784` -> head `d89eab06b150`
+- originate (jest, full): **138 suites / 1,643 passed -> 139 / 1,650 passed**, rc 0 (the PR's seven new tests pass alone and in the full run).
+- anchoring (vitest, full): **379 passed / 1 failed on BOTH sides**, the same `threadTokenMint` Lucid error that is red on develop and tracked (BACKLOG.md:186). Not introduced and not touched.
+- api-gateway, the two files that exercise `trustHeaders.ts`: **16 passed -> 16 passed**.
+- Not run: integration, schemathesis, k6, Playwright, Akto (no stack). PR 995's body not yet given a re-validated section (say so and I add it).
+
+## Other merge-integrity facts
+Parents exactly [old head, develop]; outside the PR's five files nothing differs from develop except the one guard file my follow-up touches; the other four files' lines survive (multiset identical for `anchoring/src/index.ts` +6/-3 and `gatewayProvenance.ts` +42/-4; the other two byte-identical). Evidence: `evidence/mergein/995/`, `995_merge.out|json`, `995_fix_msg.txt`.
+
