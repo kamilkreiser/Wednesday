@@ -112,13 +112,13 @@ Per ticket, in the order of the title: **(1) PRIOR-WORK and CENSUS** (does it st
 
 ## Stamp
 Tuesday fills each four-underscore slot at launch; the drafter fills none. The unstamped copy reads 8 lines with the four-underscore pattern (7 slot lines and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Stamped by (the Tuesday seat that READ this brief whole): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and target READY (AEDT, 23 Oct; drafter's suggestion: target READY 4 hours after launch, hard stop 7 hours; wrap by then with PROGRESS and RESUME): ____
-- Main at launch (Tuesday `ls-remote origin refs/heads/main`, with the time; expected `e027ebd09640cad95d5b18716c6e6fb8e870835e`): ____
-- Model receipt line and `uptime` load1 at launch (drafter's line: `model: claude-sonnet-5-5 -- C2 build -- P1-P4 none -- gauge 89% (Tuesday no-90% grant)`): ____
+- STAMP: STAMPED 12:05 AEDT 2026-10-23 by Tuesday s149
+- LAUNCH WINDOW: launched by the coordinator queue (launch_when_cool) when load1 < 7 and 120 s after the previous launch
+- Stamped by (the Tuesday seat that READ this brief whole): Tuesday s149 (whole, 138 lines, with the B517-B520 drafter report). The REGISTER ROW deviation for MPSCALC-196 is accepted: write the row text in STATUS; Tuesday has it inserted after B517 lands
+- Launch authority (who, under which grant): the product owner's 2026-10-16 grant (merge once tested on every Datasec project), his 2026-10-23 11:13 live-board instruction (never wait; as many agents as possible; Calculator after HPSM-POC) and his 11:26:24 ruling quoted above for MPSCALC-230; Tuesday GO
+- Hard stop and target READY (AEDT, 23 Oct; drafter's suggestion: target READY 4 hours after launch, hard stop 7 hours; wrap by then with PROGRESS and RESUME): target READY 4 hours after launch; hard stop 7 hours after launch
+- Main at launch (Tuesday `ls-remote origin refs/heads/main`, with the time; expected `e027ebd09640cad95d5b18716c6e6fb8e870835e`): e027ebd09640cad95d5b18716c6e6fb8e870835e (gh api branches/main 12:05; 0 open PRs)
+- Model receipt line and `uptime` load1 at launch (drafter's line: `model: claude-sonnet-5-5 -- C2 build -- P1-P4 none -- gauge 89% (Tuesday no-90% grant)`): model: claude-sonnet-5-5 -- C2 -- P1-P4 none -- gauge 92% (Tuesday no-90% grant) · load1 read by the queue (< 7) · heavy-slot-2 held by B517 at stamp time, slot 1 the stale B483: expect to queue for slot 3
 Pane `Datasec/MPS-M2` (drafter MEASURED 11:49 `tmux list-panes -a -F '#{pane_id} #{@cockpit_name}'`: `%0 tuesday`, `%1 fleet-monitor`, `%312 Datasec/Security-Composer-J3`, `%313 Datasec/HPSM-POC-F3`, `%314 Datasec/HPSM-POC-R22`; no `Datasec/MPS-*` pane live; Tuesday re-checks before launch). Model row **C2 build (multi-file, red-first); tier-1 surfaces, so a G1 Opus gate follows**. Ports 8630-8639. Launched through ONE queue at load1 below 7.
 **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B518_SEAT-M2_mps-api-input-hardening.md`. **Step 0:** copy it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/`, `cmp`, both sha256s in STATUS, the stamp-slot count (the REFUSE check); then the other REFUSE checks. Preflight: write "none (brief_seat launch)".
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/MPS-M2 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B518_SEAT-M2_mps-api-input-hardening.md'"` (keep the quotes; the path has a space and a `!`). **No az.**
@@ -135,4 +135,4 @@ No build, test, install or probe was run by the drafter. Not measured: that each
 
 SELF-CHECK: drafted 2026-10-23 from the lane screen (whole), Jira GETs of MPSCALC-210, -215, -216, -196, -217, -230 (and -228, -229, -261 for the partition), the two decision cards read with `decision_queue.sh show`, the main tarball at `e027ebd0` (`PurchaseValidation.cs:18-30,75,216-227`, `ApiJson.cs:15-26`, `QuoteEndpoints.cs:78-92,230-238,520-530,1269,1436-1443`, `PurchaseCalculator.cs:340-352,672-725`, `ActiveSources.cs:60-90`, `InventoryEndpoints.cs:154-160`), the B484, B509 and B510 briefs (whole). No person name and no Jira key in code is asked for; the decision-card id appears only in the ruling quotation.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 12:05 Tuesday s149 (138 lines)

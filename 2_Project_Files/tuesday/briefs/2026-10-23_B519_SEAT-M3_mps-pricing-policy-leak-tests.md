@@ -97,13 +97,13 @@ Per ticket, in the order of the title: **(1) PRIOR-WORK and CENSUS** (does it st
 
 ## Stamp
 Tuesday fills each four-underscore slot at launch; the drafter fills none. The unstamped copy reads 8 lines with the four-underscore pattern (7 slot lines and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Stamped by (the Tuesday seat that READ this brief whole): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and target READY (AEDT, 23 Oct; drafter's suggestion: target READY 3 hours after launch, hard stop 5 hours; wrap by then with PROGRESS and RESUME): ____
-- Main at launch (Tuesday `ls-remote origin refs/heads/main`, with the time; expected `e027ebd09640cad95d5b18716c6e6fb8e870835e`): ____
-- Model receipt line and `uptime` load1 at launch (drafter's line: `model: claude-opus-5-5 -- C3 build -- P1-P4 none -- gauge 89% (Tuesday no-90% grant)`): ____
+- STAMP: STAMPED 12:06 AEDT 2026-10-23 by Tuesday s149
+- LAUNCH WINDOW: launched by the coordinator queue (launch_when_cool) when load1 < 7 and 120 s after the previous launch
+- Stamped by (the Tuesday seat that READ this brief whole): Tuesday s149 (whole, 123 lines, with the B517-B520 drafter report); MPSCALC-310 dropped as stated (re-laned after B518)
+- Launch authority (who, under which grant): the product owner's 2026-10-16 grant (merge once tested on every Datasec project) and his 2026-10-23 11:13 live-board instruction (never wait; as many agents as possible; Calculator after HPSM-POC); Tuesday GO
+- Hard stop and target READY (AEDT, 23 Oct; drafter's suggestion: target READY 3 hours after launch, hard stop 5 hours; wrap by then with PROGRESS and RESUME): target READY 3 hours after launch; hard stop 5 hours after launch
+- Main at launch (Tuesday `ls-remote origin refs/heads/main`, with the time; expected `e027ebd09640cad95d5b18716c6e6fb8e870835e`): e027ebd09640cad95d5b18716c6e6fb8e870835e (gh api branches/main 12:05; 0 open PRs)
+- Model receipt line and `uptime` load1 at launch (drafter's line: `model: claude-opus-5-5 -- C3 build -- P1-P4 none -- gauge 89% (Tuesday no-90% grant)`): model: claude-opus-5-5 -- C3 (price authorisation) -- P1-P4 none -- gauge 92% (Tuesday no-90% grant) · load1 read by the queue (< 7) · heavy-slot-1 stale B483, slot-2 B517 at stamp time: expect to queue
 Pane `Datasec/MPS-M3` (drafter MEASURED 11:49 `tmux list-panes -a -F '#{pane_id} #{@cockpit_name}'`: `%0 tuesday`, `%1 fleet-monitor`, `%312 Datasec/Security-Composer-J3`, `%313 Datasec/HPSM-POC-F3`, `%314 Datasec/HPSM-POC-R22`; no `Datasec/MPS-*` pane live; Tuesday re-checks before launch). Model row **C3 build (price-authorisation and leak surface; the first fix is on PricingPolicy.cs)**. Ports 8640-8649. Launched through ONE queue at load1 below 7.
 **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B519_SEAT-M3_mps-pricing-policy-leak-tests.md`. **Step 0:** copy it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/`, `cmp`, both sha256s in STATUS, the stamp-slot count (the REFUSE check); then the other REFUSE checks. Preflight: write "none (brief_seat launch)".
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/MPS-M3 "BRIEF_SEAT_LEVEL=opus bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B519_SEAT-M3_mps-pricing-policy-leak-tests.md'"` (keep the quotes; the path has a space and a `!`). **No az.**
@@ -120,4 +120,4 @@ No build, test, install or probe was run by the drafter. Not measured: that the 
 
 SELF-CHECK: drafted 2026-10-23 from the lane screen (whole), Jira GETs of MPSCALC-197, -211, -104, -310 (descriptions and comments), the main tarball at `e027ebd0` (`PricingPolicy.cs:40-175`, `Mapping.cs:190-245`, `QuoteApiTests.Showcase.cs:225-250`, `SuppliesIssueTextApiTests.cs:100-135`, `QuoteEndpoints.cs:741`, `QuoteFigures.cs:82`), the decision card for rental credits read with `decision_queue.sh show`, the B484, B509 and B510 briefs (whole). No person name appears in this brief.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 12:06 Tuesday s149 (123 lines)

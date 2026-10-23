@@ -115,14 +115,14 @@ Three commits, in this order, each its own files and tickets. Every new row is s
 
 ## Stamp
 Tuesday fills each four-underscore slot at launch; the drafter fills none. The unstamped copy reads 9 lines with the pattern (the slot lines and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Stamped by (the Tuesday seat that READ this brief whole): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and target READY (AEDT, 23 Oct; drafter's suggestion: target READY 2 hours after launch, hard stop 4 hours; wrap by then with PROGRESS and RESUME): ____
-- Main at launch (Tuesday `ls-remote`): ____
-- Scope slot YOURS-EXTENSION (default: yes, the two NEW files in HpsmPoc.Api.Tests and COPY of HostStartRetry; or LINK, with `api/tests/HpsmPoc.Api.Tests/HpsmPoc.Api.Tests.csproj` added to Yours and no copy; or no, which makes the ApiFactory wiring a STOP): ____
-- Model receipt line and `uptime` load1 at launch: ____
+- STAMP: STAMPED 12:04 AEDT 2026-10-23 by Tuesday s149
+- LAUNCH WINDOW: launched by the coordinator queue (launch_when_cool) when load1 < 7 and 120 s after the previous launch
+- Stamped by (the Tuesday seat that READ this brief whole): Tuesday s149 (whole, 141 lines, with the B512-B516 drafter report)
+- Launch authority (who, under which grant): the product owner's 2026-10-16 grant (HPSM-POC not frozen; merge once tested) and his 2026-10-23 11:13 live-board instruction (never wait; as many agents as possible; HPSM-POC first); Tuesday GO
+- Hard stop and target READY (AEDT, 23 Oct; drafter's suggestion: target READY 2 hours after launch, hard stop 4 hours; wrap by then with PROGRESS and RESUME): target READY 2 hours after launch; hard stop 4 hours after launch
+- Main at launch (Tuesday `ls-remote`): 4db192b025732a35e6070a7d235ba93f26b8e23a (gh api branches/main 12:03; re-read it, REFUSE 2 covers a move)
+- Scope slot YOURS-EXTENSION (default: yes, the two NEW files in HpsmPoc.Api.Tests and COPY of HostStartRetry; or LINK, with `api/tests/HpsmPoc.Api.Tests/HpsmPoc.Api.Tests.csproj` added to Yours and no copy; or no, which makes the ApiFactory wiring a STOP): yes (the default): the two NEW files in HpsmPoc.Api.Tests and a COPY of HostStartRetry; no csproj edit
+- Model receipt line and `uptime` load1 at launch: model: claude-sonnet-5-5 -- C2 -- P1-P4 none -- gauge 92% (Tuesday no-90% grant) · load1 read by the queue (< 7)
 Pane `Datasec/HPSM-POC-H4` (drafter MEASURED: no such pane; the live panes were %0 tuesday, %1 fleet-monitor, %312 Composer-J3, %313 HPSM-POC-F3, %314 HPSM-POC-R22; Tuesday re-checks and picks the next free name if taken). Model row **C2 (Sonnet, `claude-sonnet-5-5`)**. Gate after this round: **tier 2 (Sonnet), commissioned later by Tuesday**; tier 1 only if your diff leaves "Yours" (then you have stopped). Ports 8600-8609. Launched through ONE queue at load1 < 7.
 **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B515_SEAT-H4_hpsmpoc-host-start-retry-feedback-pins.md`. **Step 0:** copy it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/`, `cmp`, both sha256s in STATUS, the stamp-slot count (the REFUSE check). **Step 0b: the unstamped-slot refusal** as in REFUSE AT ONCE (count of lines holding four underscores in your copy not 0, or the `STAMP:` or `LAUNCH WINDOW:` line still holds them: write the count and the lines' numbers, end `STOPPED: NEEDS TUESDAY unstamped brief`, do nothing else). Then the other REFUSE checks. Preflight: write "none (brief_seat launch)".
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/HPSM-POC-H4 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B515_SEAT-H4_hpsmpoc-host-start-retry-feedback-pins.md'"`
@@ -138,4 +138,4 @@ No `dotnet` build or test and no mutant was run. Not measured: which `WebApplica
 
 SELF-CHECK: drafted 2026-10-23 11:29-11:42 AEDT from the lane screen (whole), the B510 brief (whole; the template), HPSMPOC-313, -317, -319 (Jira GET whole), `gh api -X GET contents?ref=4db192b0` of `Hpsmpoc290Tests.cs`, `HostStartRetry.cs`, `FeedbackApiFactory.cs`, `ApiFactory.cs`, `FeedbackFiles.cs`, both csproj files (whole or the relevant ranges), `HostStartRetryTests.cs` (lines 176-215), `ci.yml` (shard step), `commits?path=` and `compare` for the controls, `pulls`/`ls-remote`-class reads of main, `tmux list-panes`, `lsof` (8570-8619 empty). The brief follows the B510 shape (fact marks, REFUSE AT ONCE with controls, requirements as statements, red-first rows, named mutants, property checks, CodeQL standing line, locks by path, SQL Server and Api-suite rules, intersection program, partition from both sides, Stamp slots, launch line, STATUS sections, final-line forms). No person name and no decision-card id appears in this brief; the lane screen (`0_Brain/projects_index/2026-10-23_datasec-lanes.md`) is the source of the lane, the paths and the model row.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 12:04 Tuesday s149 (141 lines)

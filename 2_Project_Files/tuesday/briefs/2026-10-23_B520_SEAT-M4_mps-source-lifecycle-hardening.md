@@ -103,13 +103,13 @@ Per ticket, in the order of the title: **(1) PRIOR-WORK and CENSUS** (does it st
 
 ## Stamp
 Tuesday fills each four-underscore slot at launch; the drafter fills none. The unstamped copy reads 8 lines with the four-underscore pattern (7 slot lines and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Stamped by (the Tuesday seat that READ this brief whole): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and target READY (AEDT, 23 Oct; drafter's suggestion: target READY 4 hours after launch, hard stop 7 hours; wrap by then with PROGRESS and RESUME): ____
-- Main at launch (Tuesday `ls-remote origin refs/heads/main`, with the time; expected `e027ebd09640cad95d5b18716c6e6fb8e870835e`): ____
-- Model receipt line and `uptime` load1 at launch (drafter's line: `model: claude-sonnet-5-5 -- C2 build -- P1-P4 none -- gauge 89% (Tuesday no-90% grant)`): ____
+- STAMP: STAMPED 12:06 AEDT 2026-10-23 by Tuesday s149
+- LAUNCH WINDOW: launched by the coordinator queue (launch_when_cool) when load1 < 7 and 120 s after the previous launch
+- Stamped by (the Tuesday seat that READ this brief whole): Tuesday s149 (whole, 129 lines, with the B517-B520 drafter report); -92 and -99 dropped and -189 narrowed as stated; the B157-12 id rule goes to the product owner as a card, you pin today's behaviour only
+- Launch authority (who, under which grant): the product owner's 2026-10-16 grant (merge once tested on every Datasec project) and his 2026-10-23 11:13 live-board instruction (never wait; as many agents as possible; Calculator after HPSM-POC); Tuesday GO
+- Hard stop and target READY (AEDT, 23 Oct; drafter's suggestion: target READY 4 hours after launch, hard stop 7 hours; wrap by then with PROGRESS and RESUME): target READY 4 hours after launch; hard stop 7 hours after launch
+- Main at launch (Tuesday `ls-remote origin refs/heads/main`, with the time; expected `e027ebd09640cad95d5b18716c6e6fb8e870835e`): e027ebd09640cad95d5b18716c6e6fb8e870835e (gh api branches/main 12:05; 0 open PRs)
+- Model receipt line and `uptime` load1 at launch (drafter's line: `model: claude-sonnet-5-5 -- C2 build -- P1-P4 none -- gauge 89% (Tuesday no-90% grant)`): model: claude-sonnet-5-5 -- C2 -- P1-P4 none -- gauge 92% (Tuesday no-90% grant) · load1 read by the queue (< 7) · heavy-slot-1 stale B483, slot-2 B517 at stamp time: expect to queue
 Pane `Datasec/MPS-M4` (drafter MEASURED 11:49 `tmux list-panes -a -F '#{pane_id} #{@cockpit_name}'`: `%0 tuesday`, `%1 fleet-monitor`, `%312 Datasec/Security-Composer-J3`, `%313 Datasec/HPSM-POC-F3`, `%314 Datasec/HPSM-POC-R22`; no `Datasec/MPS-*` pane live; Tuesday re-checks before launch). Model row **C2 build (multi-file, red-first); source governance feeds pricing, so a G1 Opus gate follows**. Ports 8650-8659. Launched through ONE queue at load1 below 7.
 **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B520_SEAT-M4_mps-source-lifecycle-hardening.md`. **Step 0:** copy it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/`, `cmp`, both sha256s in STATUS, the stamp-slot count (the REFUSE check); then the other REFUSE checks. Preflight: write "none (brief_seat launch)".
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/MPS-M4 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B520_SEAT-M4_mps-source-lifecycle-hardening.md'"` (keep the quotes; the path has a space and a `!`). **No az.**
@@ -126,4 +126,4 @@ No build, test, install or probe was run by the drafter. Not measured: that each
 
 SELF-CHECK: drafted 2026-10-23 from the lane screen (whole), Jira GETs of MPSCALC-189, -190, -191, -192, -193, -99, -92 (descriptions and comments), the main tarball at `e027ebd0` (`SourceDocumentChecks.cs:36-190`, `SourceLifecycle.cs:105-135,325-346,435-535,545-600,690-715,846-858`, `ReferenceDocumentValidator.cs:20-135`, `QuoteFigures.cs:36`, `PriceBookImporter.cs:247-252`), the B484, B509 and B510 briefs (whole). No person name appears in this brief.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 12:06 Tuesday s149 (129 lines)
