@@ -1,0 +1,41 @@
+2026-10-23T01:15:04.000Z {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass', 'spf_domain': 'mail.agentmail.to', 'dmarc_domain': 'agentmail.to'}
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: five PRs 923 927 1253 809 920 brought up to develop 95a2dff1d784, all pushed and read back; file sets disjoint
+## BLUF
+**READY FOR GATE: five PRs, each brought up to develop `95a2dff1d784974061c547a291833006c361b703` by a MERGE (never a rebase, never a force), each pushed as a fast-forward and read back from origin.** Develop re-read just now by `ls-remote`: unmoved. None touches a runtime or production path: four are test or gate-config files, and 920 is e2e tooling plus npm scripts, docs and `.gitignore`. Tier is yours. Their file sets are **pairwise disjoint**, so merge order cannot change any landing tree.
+Nothing merged. Nothing archived. No PR body edited (see the end).
+
+| PR | KS | NEW head (full) | landing tree on develop `95a2dff1d784` | files vs develop |
+|---|---|---|---|---|
+| 923 | KS-736 | `64fea11d09c2f85793319ba6fc26a0bf163414b7` | `b0dce3d9281f672855e0bf049ce8ade374f8df55` | 1 (+140/-13) |
+| 927 | KS-1027 | `bc72a2ee543e88b37ec18d33a3c9adc94c448faf` | `0e042f7e8f27d567a7bc180e6f89fa781635ad63` | 2 (+68/-8) |
+| 1253 | KS-1297 | `8f71eaf1b8c324c52c9b7cb89ed140a1a0a4e9f4` | `d9ff9184f2099f84506394500c8c0d3c2df918de` | 1 (+258/-3) |
+| 809 | KS-693 | `736442fa9158df06fa2c81f27f7bc919084d3e2c` | `0a79f5c60fbeb4ff536e25db9720496854d77421` | 2 (+46/-0) |
+| 920 | KS-734 | `f62c0767f039e7fb7688b498c39b9cb5ab3282c1` | `50691f173c961ccade7b5c1248aef166869f0434` | 7 (+264/-2) |
+Each landing tree was derived fresh for the FINAL head with `git merge-tree --write-tree` against current develop (rc 0 for all five) and equals that head's own tree. GitHub shows each PR open, head == mine, base develop, `mergeable: true` (`unstable` is the retired-Actions signature, no checks exist). Heads by file: 923 `api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts`; 927 `systemTest/__tests__/{pre_suite,quarantine_call_sites}.test.sh`; 1253 `Blockchain/Dev/scripts/__tests__/pre_push_hook_base_fixture_guard.test.sh`; 809 `systemTest/schemathesis/{config/check_predicates.py,schemathesis.toml}`; 920 `.gitignore`, `DEV-PROCESS.md`, root `package.json`, `tests/e2e/{BASELINE.md,check-e2e-ready.mjs,global-setup.ts,package.json}`.
+
+## Suites, develop `95a2dff1d784` -> merged head (the touched suites only, not whole workspaces)
+- **923:** `vitest run` on the file: **5 passed -> 5 passed**, rc 0. The PR hardens an existing test; the count is unchanged.
+- **927:** `pre_suite` **28 -> 28 passed**, `quarantine_call_sites` **17 -> 17 passed**, 0 failed. The counts do not move because the PR hardens the suites' own cleanup and error paths (stub kill hoisted; a failed snapshot or restore now keeps the stash). It adds no counted assertion, and a passing run does not exercise the failed-restore path. **Unchanged counts here are not evidence the new branches work.**
+- **1253:** **6 passed -> 12 passed**, 0 failed. The PR adds six cases.
+- **809:** unit suite **NOT RUN** (see below). 
+- **920:** Playwright suite **NOT RUN** (no stack, no browser). Its new `check-e2e-ready.mjs`, run on the merged head, REFUSES with rc 1 and names the two real gaps on this machine (`otplib` not installed; the Chromium binary missing). That shows the refusal path works; the "ready" path is not demonstrated.
+
+## What changed in each merge besides develop's own commits: nothing, shown by byte gates and not by file lists
+For every PR: parents exactly [old head, develop]; the merged tree equals `merge-tree`'s prediction; the only paths that differ from develop are the PR's own files; and **where develop ALSO rewrote a PR file since its base (927 both files, 1253, 809 both, 920's `.gitignore`, `DEV-PROCESS.md`, `package.json`), the PR's change survives as the identical multiset of added and removed lines.** The PR's patch-id is unchanged for 923, 1253, 920 and changes for 927 and 809 only because the context moved. No conflicts in any of the five.
+
+## 809: three honest items
+1. **A fix commit is on top of the merge-in, on your ruling:** exactly the five edits (dead `POST /api/m365/connections/complete` dropped from the frozenset, the toml and both "eight" comments; the PR's `not_a_server_error` folded into develop's single `POST /api/teams/webhook-config` block). I read the whole diff.
+2. **That commit went through the hook with no check at all.** Its range is systemTest-only, so the Blockchain/Dev preflight did not fire, and `systemTest/schemathesis` has no `package.json`, so the KS-989 formatting gate had nothing to judge (push log: 4 lines). The merge-in commit under it did run the full preflight.
+3. **STATIC (ran):** ast and tomllib parse; `requireM365` on all seven surviving routes; seven operations present in the spec with a declared 503; after the fold, tomllib shows exactly one webhook-config entry carrying both settings, 49 toml entries and 21 frozenset entries with no duplicates. **NOT RUN:** the unit suite (the project's KS-571 guard needs Python 3.14.8, this machine has 3.14.5, I did not install anything) and the live 503 claim (no stack). **Stale and left alone:** the PR's comment still cites `index.ts:229 if (!isConfigured())`; today the gate is the per-route `requireM365` middleware around line 262.
+
+## Hook verdicts, their own words
+Four merge-in pushes (923, 927, 1253, 920) and the 809 merge-in each ended `PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4, 8 (no local stack). **Not a pass.** Each took 8 to 10 minutes. No `--no-verify`, no force; every push a fast-forward whose remote head was an ancestor of mine.
+
+## Tickets (for the archive question, nothing archived)
+KS-736 (In Review), KS-1027 (In Review; KS-992 already Done), KS-1297 (In Progress), KS-693 (In Review; KS-788 archived), KS-734 (In Review; KS-473 and KS-1040 Done). **KS-693 and KS-734 still owe a live run** (809's live 503 claim; 920's Playwright suite), so I would not archive those two on merge alone.
+
+## Left for you
+- **PR bodies are NOT edited.** Their Test Evidence blocks still describe the OLD heads. Say so and I append a "re-validated at <head>" section from the facts above to each.
+- **The conflict rows 995, 989, 1250:** I am at a clean boundary with everything pushed and mailed. I have not started them. Tell me whether to go on (995 is a single import-block hunk in `originate/src/index.ts`) or hand them to a successor seat; my handover is current as of this mail.
+
+----
