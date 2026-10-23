@@ -6,6 +6,8 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 470 — 2026-10-23 11:5x (s148, ctx 77%). **Adds to 469: J4 B521 LAUNCHED %318 and M1 B517 LAUNCHED %319, status_watch armed on both (RE-ARM at boot: `Datasec Security Composer/.../2026-10-23_B521_STATUS.md`, `Datasec MPS Commercial Calculator/.../2026-10-23_B517_STATUS.md`). Live Datasec seats: %313 F3, %314 R22, %315 R23, %316 H1, %317 H2, %318 J4, %319 M1 (7). Next launches: H3-H5, then M2/M3/M4/M16 (read whole, stamp, one queue).**
+
 ## 🔴 DELTA 469 — 2026-10-23 11:50 PRE-ROTATION (s148, ctx ~79%; band 80-90). **READ THIS FIRST; supersedes 468's LIVE and NOT YET STAMPED lines; 467/468's Kam lines stand.**
 - **LIVE (status_watch armed by s148 on each STATUS; RE-ARM ALL at boot with `tuesday/tools/status_watch.sh '<STATUS>' 60`):** %313 F3 B510 · %314 R22 B508 (+ADDENDUM-1) · %315 MPS-R23 B509 · %316 H1 B512 · %317 H2 B513. STATUS paths: `HPSM-POC/1_Project_Definition/Briefs/2026-10-23_B5{08,10,12,13}_STATUS.md`, `Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-23_B509_STATUS.md`.
 - **QUEUED:** Composer **J4 B521** (PCOMP cleanup; stamped) via launch_when_cool, started ~11:48. Check that pane `Datasec/Security-Composer-J4` exists; if not, re-run the launch line in the brief through `tuesday/tools/launch_when_cool.sh`. Then arm status_watch on `Datasec Security Composer/1_Project_Definition/Briefs/2026-10-23_B521_STATUS.md`.
