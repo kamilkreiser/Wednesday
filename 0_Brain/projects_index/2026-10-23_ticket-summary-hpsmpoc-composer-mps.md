@@ -11,7 +11,7 @@ status: snapshot — 2026-10-23 ~11:15 AEDT
 - **HPSM-POC (Jira HPSMPOC):** 325 tickets · **122 open** (3 In Progress, 119 Backlog) · 203 Done. 27 of the open ones wait on you or HP.
 - **MPS Calculator (Jira MPSCALC):** 316 tickets · **302 open, all Backlog** (0 In Progress) · 14 Done. 23 are labelled needs-ruling.
 - **Security Composer:** has **no Jira board** (key PCOMP was never created; you ruled "keep parked", C-71). Its board is `BACKLOG.md`: 358 rows · **~77 open** · **11 waiting on you** · 11 partly done · 259 closed/fixed/ruled.
-- **Caveat:** Jira status lags the work. MPS was deployed today with every ticket still in Backlog; three HPSM-POC "In Progress" tickets haven't been touched for 1–3 weeks. Read the counts as the board's view, not as measured progress.
+- **Caveat:** Jira status lags the work. MPS was deployed today while its board shows 0 In Progress (302 Backlog, 14 Done); three HPSM-POC "In Progress" tickets haven't been touched for 1–3 weeks. Read the counts as the board's view, not as measured progress.
 
 ## Recommendation
 No action needed. If you want one thing: the **6 High-priority MPS tickets** (care packs and purchase usage, listed below) are the clearest next build lane, and **HPSMPOC-237** is a money decision that's been waiting.

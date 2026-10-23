@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 466 — 2026-10-23 11:11 BOOT CHECKPOINT (s148, ctx 50% after the load). **READ THIS FIRST; adds to 465 (its LIVE/OWED lines stand, as updated here).**
+- **Kam 11:04 asked for an active + backlog ticket summary (HPSM-POC, Security Composer, MPS): DONE.** File `0_Brain/projects_index/2026-10-23_ticket-summary-hpsmpoc-composer-mps.md` attached to bf-23867037440f; a correction followed (bf-77897ec04d2a: the MPS "every ticket in Backlog" claim was false; 14 are Done). Ledger row written. Paged Jira: HPSMPOC 325 (122 open), MPSCALC 316 (302 Backlog). Finding: `fleet/board_count.sh jira` cannot count boards over 100 rows because it does not page (shared tooling: claim with Wednesday before fixing).
+- **OWED item (4) DONE:** the three B500 fleet_ack flags were cleared (FLAGGED 0).
+- **In flight (Agent tool, Sonnet; their files are the artefacts, so if a notification dies with this seat, check the files exist and read them whole):** (a) the rotation feedback sweep, writing `0_Brain/projects_index/2026-10-23_rotation-sweep-1115.md`; (b) the drafter for B508 (HPSM-POC records R22), B509 (MPS records R23) and B510 (B479-1 runner env plus the B491-13 stale braces-date comments, builder F3), writing `tuesday/briefs/2026-10-23_B508..B510_*` plus `..._B508-B510_DRAFTER-REPORT.md`; (c) the pickup OWED census over DELTA 343-465, writing `0_Brain/tasks/2026-10-23_pickup-owed-census.md`. That census is the input to the wholesale rewrite (OWED item 5).
+- **B491-13 is not a card:** the ruled lastDay is 2026-11-30 (C-44, C-99) and only two comments still say 10-31. It is agent work, inside B510.
+- Linear: 0 open lesson issues (the label resolves and is on 0 issues in any state). DevMASTER not mounted. Gauge 88% (Tuesday no-90% grant).
+
 ## 🔴 DELTA 465 — 2026-10-23 11:03 ROTATION (s147). **READ THIS FIRST; supersedes 463/464's LIVE lines; 464's DONE and the OWED list below stand.**
 - **NO DATASEC SEAT IS LIVE.** Panes: tuesday, fleet-monitor. Nothing to re-arm.
 - **Telemetry ENDED as ruled** (B505 NO GO round 1 of 1, 11:01; Kam's 07:23 option a: "a NO GO stops it"): PR #195 closed unmerged, branch b501 kept @ f12cb266, card `hpsmpoc-telemetry-smaller-design-1022` --delivered, Kam told bf-e7cf5a5ad7e5 (offer: a fix round only on his word). **Do NOT card it again.**
