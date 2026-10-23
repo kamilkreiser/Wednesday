@@ -34,7 +34,9 @@ records_check() {
   for ref in $(printf '%s\n' "$line" | grep -oE 'records/b[0-9]+[A-Za-z0-9_-]*' | sort -u); do
     sha=$(git -C "$top" rev-parse --verify -q "$ref^{commit}" 2>/dev/null \
        || git -C "$top" rev-parse --verify -q "refs/remotes/origin/$ref^{commit}" 2>/dev/null)
-    main=$(git -C "$top" rev-parse --verify -q "main^{commit}" 2>/dev/null)
+    # 2026-10-23 s149: compare to origin/main when the clone has it; the LOCAL main of a project clone is often stale
+    # (B508: local main 76bb8ba printed "156 commits ahead" for a branch 1 commit on origin/main eaa09fc3).
+    main=$(git -C "$top" rev-parse --verify -q "refs/remotes/origin/main^{commit}" 2>/dev/null || git -C "$top" rev-parse --verify -q "main^{commit}" 2>/dev/null)
     if [ -z "$sha" ]; then
       echo "RECORDS CHECK: $ref NOT FOUND in $top"
     elif [ "$sha" = "$main" ]; then
