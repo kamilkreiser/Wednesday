@@ -6,6 +6,9 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## ⏰ DATED FOLLOW-UPS (keep at the top across every rewrite; act ON the date, then move the line to DONE with the receipt)
+- **MONDAY 2026-10-26, close of business (`date -j`: Monday): Security Composer, Paul's answers to the five policy-template questions.** Kam, email to tuesday-agent@ 2026-10-23 03:39:46Z (14:39 AEDT; spf, dkim and dmarc pass), verbatim: *"Asked. If I do not forward responses to you by COB Monday, please follow me up."* ACTION: at ~16:30 AEDT Monday, search tuesday-agent@ for a forward from Kam with Paul's answers since 2026-10-23 03:39Z. If none, follow him up: a short board message, and a Datasec email to kamil.kreiser@datasec.com.au naming the five questions by number. If the answers arrived, fold them into a Composer records brief (C-entries), not a follow-up.
+
 ## 🟢 DELTA 481 — 2026-10-23 14:3x 70% CHECKPOINT (s150, ctx 70%). **Corrects 480's QUEUES line; 480's other lines stand.**
 - **chain3 FINISHED 14:32:30.** Launched G56 B523 (%327, 14:07:48), G57 B524 (%328, 14:25:09) and G58 B525 (14:32:30); rung 5 read for all three (their transcripts name their briefs). queue5 (G59 B533 #99, then R24 B532) is now live; queue6 (G60 B534 #100) waits on queue5's pid 96626.
 - **NEW PR:** MPS **#101** (B522 M16, af210955, 1 commit, 4 files). Its tier-2 kit **B535 (G61, Sonnet)** is being drafted (`tuesday/briefs/2026-10-23_B535_*`). Read it whole, stamp it, and add it as queue7 behind queue6. M16 %326 is held for a fix round.
