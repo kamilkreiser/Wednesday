@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE by the Opus 5.5 successor seat of 23 Oct (booted 1
 
 # NEXT PICKUP (Fri 23 Oct, written 12:55 AEDT; Wednesday ctx 50%, weekly 7d 99%, renews Sun 25 Oct ~13:00 AEDT)
 
+## 000. END OF DAY 15:0x — READ THIS FIRST (Kam: "once the other agent finishes, please wrap up for the day")
+- Floor clear: %0 + %1 only. G 19th wrapped after a read-only SWEEP (384 Backlog+Todo; 365 ours-or-unassigned). **Tomorrow's first work = its three file-disjoint picks**, in `!CODING/Secuura/Blockchain/5_Project_History/2026-10-23_seatG-19th/HANDOVER.md` (KS-1391 issuer test script, XS, Spark-able; KS-1289 .dockerignore __tests__, check no Dockerfile needs them first; the third there). Brief a Sonnet seat (switch with /model at its plan prompt; the launcher pins Opus 5).
+- **New boot steps 10a/10b run tomorrow morning:** the morning fleet-activity card (summary, plan, per-project counts) and `stale_card_escalate.sh --send`. First live run of both: watch them.
+- Open cards: secuura-kintsugi-deploy-held-at-99pct-1023 (default: deploy kintsugi then demo on headroom). The account Kam switched to at 14:50 also read 7d:98% (renews ~1d 14h): check the gauge at boot.
+- Ledger (this seat): 2 rows. Lesson added: 2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email.
+
 ## 00. DELTA AT 13:58 — READ THIS FIRST
 - **Kam's 10:53 instruction is DONE for everything that could be done today:** SEVEN merges, each gated and verified at origin: #1253, #923, #927, #920, #809 (DA4 round 2), #995, #989 (DA5 Opus tier 1). develop = `a9ce2cff1594`. #1250 CLOSED unmerged (proven superseded by #1389). Archived: KS-1297, KS-1027, KS-1302, KS-1303. Filed: KS-1713/1714/1715 (DA3 notes), KS-1716 (format gate drops `akto` on large pushes, High), KS-1717 (anchoring has no inbound strip for x-emitter-internal, High), KS-1718 (test password derivable, Medium).
 - **Floor: %0 + %1 only.** G 17th (0.95) and G 18th (0.97) wrapped and closed. Handover: `!CODING/Secuura/Blockchain/5_Project_History/2026-10-23_seatG-18th/HANDOVER.md`.
