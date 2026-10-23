@@ -1,8 +1,9 @@
-# Ornith candidates — derived 2026-10-23 04:17 from 380 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-23 14:03 from 384 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 33
+## T1 services (vitest, one file) — 34
+- KS-1717 (P2) anchoring has no inbound strip for `x-emitter-internal`: a direct compose-networ — `services/anchoring/src/index.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-1168 (P3) userRepo.ts: ILIKE search on encrypted PII columns can never match — :1017 and : — `services/auth/src/repositories/userRepo.ts`
 - KS-1190 (P3) api-gateway meetsVerificationLevel fails open on an unknown REQUIRED level: an o — `services/api-gateway/src/services/enforcement.ts`
@@ -73,7 +74,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## T4 docs (doc_patch) — 0
 
-## T5 multi-file / later — 55
+## T5 multi-file / later — 56
 - KS-1051 (P2) develop is RED on the services/originate jest suite and NOTHING catches it — the — `scripts/preflight/preflight.sh`, `.githooks/pre-push`
 - KS-1055 (P2) Per-tenant databases never receive the file migrations — CORE_MIGRATIONS FORCEs  — `services/api-gateway/src/startup-migrations.ts`, `services/tenant-provisioning/src/index.ts`
 - KS-1384 (P2) One anchor row per (document_id, network): a repeat POST /api/anchors resets the — `services/anchoring/src/index.ts`, `services/originate/src/routes/documents.ts`
@@ -83,6 +84,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1640 (P2) Chain-first verify blobs hard-code `anchored: true` and drop anchoring's status/ — `services/originate/src/routes/verification.ts`, `services/originate/src/routes/verificationV2.ts`
 - KS-1683 (P2) vc-issuer: GET /api/credentials (list) and GET /api/credentials/by-hash/:hash re — `services/api-gateway/src/middleware/auth.ts`, `services/vc-issuer/src/ownership.ts`
 - KS-1699 (P2) Security: three certification write routes have NO per-record access check - POS — `services/originate/src/routes/certifications.ts`, `services/api-gateway/src/routes/verification.ts`
+- KS-1716 (P2) systemTest format gate drops packages on large pushes: `grep -q` + `pipefail` tu — `systemTest/scripts/check-package-format.sh`, `.githooks/pre-push`
 - KS-485 (P2) Security review — plan, methodology & handover (Platform K) — `services/api-gateway/src/routes/notifications.ts`, `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/index.ts`
 - KS-491 (P2) Review F — Edge, WAF, DDoS & anti-automation — `services/api-gateway/src/middleware/rateLimitEnforce.ts`, `services/auth/src/routes/auth.ts`
 - KS-576 (P2) Bulk re-key: one admin-authorised rotate across a named set of externalRefs — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`, `packages/shared/src/db/tenant-guc.ts`
@@ -160,7 +162,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 ## HELD (READY_* or done.md PASS) — 5
 - KS-1219 OAuth /authorize answers 500 server_error for an array-valued scope (repeated qu
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1709 originate: the certification-issue route swallows a non-ok response from the anc
+- KS-1705 Spec: three more operations reject a "valid" empty body (KS-1364 class) — POST /
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 
@@ -180,7 +182,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-28)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
 
-## EXCLUDED by predicate — 245
+## EXCLUDED by predicate — 247
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-101 — on Peter/Stuart
 - KS-1010 — names no product file (after basename/docs/route resolution)
@@ -342,11 +344,13 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1698 — auth-shaped title (LAST, Kam 16:40)
 - KS-1700 — names no product file (after basename/docs/route resolution)
 - KS-1702 — names no product file (after basename/docs/route resolution)
-- KS-1705 — names no product file (after basename/docs/route resolution)
-- KS-1707 — names no product file (after basename/docs/route resolution)
 - KS-1710 — on Peter/Stuart
 - KS-1711 — on Peter/Stuart
 - KS-1712 — names no product file (after basename/docs/route resolution)
+- KS-1713 — auth-shaped title (LAST, Kam 16:40)
+- KS-1714 — names no product file (after basename/docs/route resolution)
+- KS-1715 — names no product file (after basename/docs/route resolution)
+- KS-1718 — auth-shaped title (LAST, Kam 16:40)
 - KS-188 — on Peter/Stuart
 - KS-239 — on Peter/Stuart
 - KS-263 — names no product file (after basename/docs/route resolution)
