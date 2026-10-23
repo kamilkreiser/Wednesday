@@ -41,14 +41,14 @@ Read WHOLE, in this order: (1) both builder briefs above; (2) the builder STATUS
 
 ## Stamp
 Tuesday fills each slot at launch; the drafter fills none. The unstamped copy reads 9 lines with the pattern (eight slot lines and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Stamped by (the Tuesday seat that READ this brief whole): ____
-- Launch authority (who, under which grant): ____
-- Hard stop (AEDT, 23 Oct): ____ (if CI on either head is still running then, write what stands and end STOPPED: NEEDS TUESDAY; the PR whose CI is complete keeps its verdict)
-- Heads, main and each PR's check-runs at launch (Tuesday): ____
-- Round rule for this gate: ____ (default: round 1 of 2 for EACH PR; a NO GO sends a fix round to that PR's builder; then round 2, the cap)
-- Model receipt line and `uptime` load1 at launch: ____
+- STAMP: Tuesday s151, stamped 14:51 AEDT 2026-10-23
+- LAUNCH WINDOW: from 14:51, through Tuesday's ONE queue (s151 queue8, after queue7's G61), at load1 < 7 (launch_when_cool)
+- Stamped by (the Tuesday seat that READ this brief whole): Tuesday s151, read WHOLE (92 lines) with the B536 drafter report; accepted as drafted. TIER CALL: tier 2 stands (both PRs are Api-test-tree only; your Escalation STOPs on any api/src byte, which would make it tier 1)
+- Launch authority (who, under which grant): Tuesday under the merge-once-tested grant for every Datasec project (Kam, 2026-10-16) and the QA gate before every merge (Kam 2026-09-01; tiered 2026-09-05); Sonnet by routing row G2 (model-routing v1.0, Kam 2026-10-18)
+- Hard stop (AEDT, 23 Oct): HARD STOP 3 h after your launch, target verdict 2 h after it (read your launch time from date at Step 0) (if CI on either head is still running then, write what stands and end STOPPED: NEEDS TUESDAY; the PR whose CI is complete keeps its verdict)
+- Heads, main and each PR's check-runs at launch (Tuesday): Tuesday at 14:50: main = 4db192b025732a35e6070a7d235ba93f26b8e23a; PR #200 open, head da1e875a26c7a22e042fb848206cf8d165cc8dd4, check-runs 20 listed, 20 completed, failing 0; PR #201 open, head 28ba1a601a68a2523ab73b2426924e75d7c99a48, check-runs 19 listed, 17 completed, failing 0. Re-read at your start and at your verdict
+- Round rule for this gate: round 1 of 2 for EACH PR, as the default states (default: round 1 of 2 for EACH PR; a NO GO sends a fix round to that PR's builder; then round 2, the cap)
+- Model receipt line and `uptime` load1 at launch: model: claude-sonnet-5-5 -- G2 -- P1-P4 none -- gauge 98% (Tuesday no-90% grant; usage is a guide, Kam 2026-10-22); load1 read by launch_when_cool at launch
 
 **Model: Sonnet** (`claude-sonnet-5-5`, read by the launcher from `levels.sonnet.model_id` in `/Volumes/Laptop-DEV/TUESDAY/0_Brain/dashboard/data/models_latest.json`, never typed; **the launch MUST carry `BRIEF_SEAT_LEVEL=sonnet`**), routing row **tier-2 gate (G2)** (`/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/specs/model-routing.md`). STATUS model line: `model claude-sonnet-5-5 -- tier-2 gate`. **Escalation (binding), per PR: STOP that PR (`STOPPED: NEEDS TUESDAY`, hand it to tier 1; the other PR's gate continues) if** #200's delta holds a path beyond its two, any `api/src` byte, a change to `FeedbackDispatcher.cs`, `FeedbackApiFactory.cs`, `HostStartRetry.cs` or any csproj, a `StubServer.cs` change that is not additive beyond the one named removed line; #201's delta holds a path beyond its five (or a commit touching a path other than its ticket's), any `api/src` byte (in particular `FeedbackFiles.cs`), any csproj, `.github/**`, `FeedbackApiFactory.cs`, `LogCapture.cs`; for either PR a change to `web/**`, a new dependency, any request that leaves loopback (other than GitHub GETs and the NuGet registry as `dotnet restore` itself reaches it), any secret, anything that would need an integration with an HP tool (see the PHASE SCOPE standing line), or a security-shaped finding you cannot classify by this brief's severity list (your own `-mut` mutants and plants are scratch tamper, not a delta). **A retry that masks a real failure is not a stop: it is a Blocker on #201 (NO GO).** **B-number:** B536. Ports 8780-8789. Pane `Datasec/HPSM-POC-G62`.
 **Step 0:** copy this file unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/`, `cmp`, sha256 of both, the slot count with its control, then REFUSE (Step 0b above). Preflight: "none (brief_seat launch)".
@@ -89,4 +89,4 @@ Standing: the round-1 kits' Standing paragraph (B506, B523, B525 and their paren
 ## STANDING LINES
 - **PHASE SCOPE (product owner, live board 2026-10-23 14:21, added by Tuesday before stamping):** this phase builds NO integration with HP tools (Security Manager API, Fleet Threat Assessment, firmware tools, SIEM). Next-phase items are stored and architected only, never built and never shown to HP as done. If anything in this round would need one, STOP and ask Tuesday.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 14:51 Tuesday s151 (92 lines, whole)
