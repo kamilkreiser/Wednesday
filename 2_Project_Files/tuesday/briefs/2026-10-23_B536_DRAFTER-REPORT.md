@@ -1,0 +1,47 @@
+# B536 drafter report (G62 batch gate kit, HPSM-POC PRs #200 and #201), 2026-10-23 14:37-14:55 AEDT
+
+Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-23_B536_SEAT-G62_hpsmpoc-b515-b516-batch-gate-tier2.md` (92 lines), byte-identical `.pre-stamp` beside it (`cmp` ok, same sha256). Wrote only those two files and this report.
+
+## Number
+B536 was free. B535 is NOT free: it exists (`2026-10-23_B535_SEAT-G61_mps-b522-deal-usage-colour-row-gate-tier2.md` and its `.pre-stamp`, an MPS gate, ports 8770-8779), so the B535 drafter had already written when I looked; B536 is the next free number and no `B536` file existed before mine.
+
+## Open slots
+- Four-underscore lines: **9** = 8 Stamp slot lines (kit lines 44-51) + the last line `READ-WHOLE-BY-TUESDAY: ____` (line 92), measured with `/usr/bin/grep -c -E '_''_''_''_'` on the kit. The Stamp section states "The unstamped copy reads 9 lines".
+- `@[A-Z_]+@` count 0; non-ASCII lines 0 (control: a planted `U+2026` counted 1); no person's name; no decision-card id (the two "decision-card" hits are the standing rule text "no decision-card id").
+- Slots Tuesday must fill: the 8 Stamp lines and `READ-WHOLE-BY-TUESDAY`. Everything else is final.
+
+## What I read
+Whole: the B525 `.pre-stamp` (the shape kit), its stamped twin (diff = stamp slots + the READ FIRST line), `B525_ADDENDUM-1` and `B525_DRAFTER-REPORT`; the B516 builder brief (`.pre-stamp`) and `B516_STATUS` (147 lines); the B515 `STATUS` (176 lines). Parts: B526 `.pre-stamp` (STANDING LINES and PARTITION), B514 brief and ADDENDUM-1 (Yours list, SQL Server rule), B523 kit (tier-2 conventions only through the B525 reference; I did not re-read it whole, the B525 kit restates its HOLD/lock/load rules). Through GitHub GET: `pulls/200`, `pulls/201` (metadata, commits with trailer check, files, full patches of `StubServer.cs`, `Hpsmpoc214Tests.cs`, `ApiFactory.cs`, and the Feedback `HostStartRetryTests.cs` and `Hpsmpoc290Tests.cs`), `contents` of the Api `HostStartRetry.cs` and `FeedbackApiFactory.cs` at the #201 head, `ci.yml` at main (shard filters, the "tests ran on SQL Server" step, the retry-count step, the artifact upload), merge-commit parents, check-runs of both heads, alerts, analyses, `alerts/12`, main's required contexts, `compare`. Local: `ls-remote`, `lsof`, `tmux list-panes`, `uptime`, `ls`, `grep` over the briefs folder.
+
+## Facts measured (14:37-14:50 AEDT)
+- main `4db192b0`; `refs/pull/200/head` = branch b516 = `da1e875a26c7a22e042fb848206cf8d165cc8dd4`; `refs/pull/201/head` = branch b515 = `28ba1a601a68a2523ab73b2426924e75d7c99a48`. Open PRs: #196-#201. #199 (b514) still at `082f2cba` (the ADDENDUM-1 fix commit not yet pushed).
+- #200: 2 files, +47 -1, 1 commit with the Sonnet trailer, mergeable true / blocked, merge ref `2b88f0f3` (parents main + head), ahead 1 behind 0; check-runs 18 listed, 8 completed, 10 in progress (both SQL Server shards, `api`, `Analyze (csharp)`, the five e2e legs, `web unit tests`); alerts 0; analyses 3 of 4 so far.
+- #201: 5 files, +475 -7, 3 commits, each ticket-named with the trailer, mergeable true / blocked, merge ref `0b74d072`, ahead 3 behind 0; check-runs 13 listed, 4 completed; alerts 0; analyses 3 of 4.
+- Both seats ran SQLite only; both PRs' SQL Server shards were in progress at 14:38.
+- Panes at 14:3x: tuesday, fleet-monitor, HPSM-POC-G56, -G58, -H3, -H4, -H5, MPS-G57, -M2, -M3, -M4, -M16; no G62. `.tools/b536` and `.tools/wt-b536-*` absent (control `b198` listed). Live G58 trees `.tools/wt-b525-{base,p197,p198,p199,both,mut}` exist: G58 runs dotnet for #199, so the Api-suite rule matters for this gate.
+- Ports: next free block **8780-8789** (B535 holds 8770-8779); `lsof` empty (rc 1); no 2026-10-23 brief names an `878x` block. The gate binds nothing.
+- load1 8.79 / 8.84 / 9.86 at 14:37.
+- Model: `BRIEF_SEAT_LEVEL=sonnet`, row G2 (tier-2 gate); the model id is read by the launcher from `models_latest.json`, not typed in the kit. I did not open `models_latest.json` or `model-routing.md` myself.
+
+## Where the template did not fit (and what I did)
+- B525 was web-only; this gate is dotnet. Added: `.tools/dotnet` use, a dotnet env block (scratch `DOTNET_CLI_HOME`, no MSBuild server/node reuse), the `apiq.sh` Api-suite rule (with the one-token `b502` -> `b536` copy and a canned-line proof), `HPSM_TEST_HOST_RETRIES` pointed at scratch, the warning-count comparison, `.trx` name diffs with the `UatOpenAssertionTests` token mask, and the 13 Azurite skips.
+- SQL Server rule rewritten as binding for BOTH PRs (B525's "neither PR adds an Api row" sentence replaced, as ADDENDUM-1 did for #199): each verdict waits for both shards to complete, and the gate quotes the new and changed rows from the `sqlserver-results.trx` artifact (`api-sqlserver-test-results-<part>`, which ci.yml uploads `if: always()`) and the step lines, or says NOT READABLE and caps the verdict at GO WITH FINDINGS.
+- Rig-weakening test for #200 made concrete as a kill-set comparison: for every row that shares the stub rig, mutate the one `FeedbackDispatcher.cs` line the row protects and require head kill-set to contain base kill-set (otherwise Major, per the task); plus a classification of every `Hold` assignment site (a row that sets Hold after its request arrived would go vacuous with the fix).
+- M4 (#200) to be judged by a forced run (M4 plus a scratch delay between `Enqueue` and the bind, with a row shaped like the third-delivery row that moves Hold on `Requests.Count == 2`), not by argument. My own reading: the builder's wording "two adjacent statements" is true, but the window is real (the request is visible at `Enqueue`), so M4 is probably NOT equivalent in the semantic sense, only un-killable by a seam; the kit makes the gate decide and sets the severity rule (a window the head still has = Blocker; a survivor the head is immune to = Note).
+- #201 mask question made the first lead and the first Blocker: planted permanent failures P1-P6 with own counters, including a product-startup break run over the whole classes at main versus head (red sets equal, planted sentence visible), the `Assert.Throws` host-start-failure tests found by program, and the post-failure `_started` false behaviour (builder note N-5).
+- Speed bound stated up front in the kit (paired, alternating, 3 pairs; head median at most 1.10 x main's on wall time and on summed test duration; noise measured first with main against main; inconclusive falls back to per-class medians) plus a per-call microbenchmark. The load was 8.8 to 15 on this machine all day, so the kit makes a noisy pair a repeat, not an average.
+- #201 start-path census re-derived with a note that macOS `git grep` does not honour `\b` (the builder's Correction 1), and the nested-retry question closed by reading: `FeedbackApiFactory` derives from `WebApplicationFactory<Program>`, not `ApiFactory`, so there is no double retry (kit tells the gate to confirm by `git grep`).
+- The inherited non-ASCII (three U+2026 in the Api `HostStartRetry.cs` copy) is a Note by default, with the gate to count how many files in `api/tests` already hold non-ASCII.
+- Coupling with #199 (`RequestTimingLogTests` runs on `LogCapturingApiFactory`, an `ApiFactory` subclass) made lead xiii: run that class 10 times in `-both` only if #199's final head is published, else NOT TESTED.
+- Round and PHASE SCOPE standing line copied verbatim from the B526 STANDING LINES.
+
+## Leads I added from reading the patches (to measure, not findings)
+- #200: `HeldOn.Enqueue(hold)` runs AFTER the `FirstRequest` signal, so a test reading `HeldOn.Count == 1` is ordered by the row's `Until`, not by the stub; `AfterRecorded` exceptions would fault the handler before the signal (a 500, no signal); M4 as above.
+- #200: the old race made "set Hold after the request arrived, for that request" work by luck; any row shaped that way goes vacuous under the fix. None is claimed; the gate classifies every assignment site.
+- #201: `ApiFactory.StartServer` builds `GetType().Name` and, on SQL Server only, `new SqlConnectionStringBuilder(ConnectionString).InitialCatalog` before the retry runs; a null or malformed `ConnectionString` at that point would break every SQL Server host start. Only the SQL Server legs can show it (the SQLite path never reaches the parser). Covered by the shard-evidence requirement; the gate is told to read the code path.
+- #201: base members are not virtual, so the retry is installed by hiding (`new`) members; a call through a `WebApplicationFactory<Program>`-typed variable bypasses it (absence of the retry, not a mask).
+- #201: after a final failure `_started` stays false, so each later `CreateClient()` on that factory tries again (2 more starts); bounded per call.
+- The three U+2026 lines and the B469-5 / B469-3 items as above.
+
+## UNMEASURED (by me)
+No dotnet, build, test, worktree, mutant or timing was run. Not measured: that any new row is green or red anywhere (builder claims only); the row names as the `.trx` prints them; the census of start paths and `Hold` sites (taken from the builders' STATUS files); whether any Api test expects a host start to throw (the kit tells the gate to find them); the SQL Server behaviour of any row; CI logs or artifacts of either PR (not yet produced); the cost of the Api suite; whether the artifact `archive_download_url` is readable under the project's token; the final head of #199.
