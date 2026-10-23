@@ -709,6 +709,18 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    briefs still go through send_brief.sh with provenance; sweep the board
    BEFORE briefing (2026-08-11 ledger). Check for client-human responses
    (e.g. Stuart on Secuura) as part of the sweep.
+10a. MORNING FLEET-ACTIVITY CARD (Kam, live board 2026-10-23 14:31:46 — learnings/
+   2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email.md): in the MORNING
+   session, after the sweep, post ONE fleet-activity card (decision_queue.sh add, the
+   same format as every card) carrying the summary of where things stand, the plan for
+   the day, and a COUNT of items awaiting Kam per project (e.g. awaiting 3 items for
+   Secuura/Blockchain, 1 for WED) — counts only, the items are already cards. Anything
+   that needs Kam goes on fleet activity as its own card, never only in chat.
+10b. STALE ITEMS: run 2_Project_Files/tools/stale_card_escalate.sh --send at every boot
+   (Kam 14:31: unanswered for more than 48 hours -> escalate by emailing him). It mails
+   one digest to Kam for this seat's open cards over 48 h, at most once a day per card.
+   Never wait on Kam: while a card waits, the agents work the tickets; a blocker is
+   flagged and re-raised, never pushed past.
 11. In text, confirm: brain loaded (learnings count), tasks carried over, project
    index freshness, DevMASTER state, Linear + mail status — then report what the
    sweep found + which agents were started, and propose today's remaining

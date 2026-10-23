@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-23 14:22 from 248 lesson files (1,080,704 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-23 14:53 from 249 lesson files (1,084,225 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7553,6 +7553,24 @@ sections (open the file for these): EXTENSION 2026-10-22 16:52:09 — Kam, live 
 5. **Record it in the project:** a C-entry by the next HPSM-POC records seat (parked in `0_Brain/projects_index/clarifications_register.md`).
 
 **Family:** [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope of the ruling) · [[2026-08-03_role-beyond-code-three-priorities]] · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("in scope" is a claim to check) · [[2026-10-23_tuesday-never-wait-on-kam-cards-morning-card-48h-email-priorities]].
+
+
+## Anything that needs Kam is a fleet-activity card; every morning opens with ONE summary card that COUNTS what waits on him; never wait on him; a blocker is flagged, never pushed past; 48 hours unanswered = an email to him
+`2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email.md` · preference · 2026-10-23 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is about to tell Kam something he must act on or decide (a login, a deploy hold, a ruling), or it is the morning session, or a card of his has sat unanswered. **The ask is a CARD on the live board's fleet activity, never only a chat line. The morning starts with one card. Silence for 48 hours is an email.**
+
+sections (open the file for these): How to apply
+
+## How to apply
+1. **Kam's attention = a card.** `decision_queue.sh add` with options, a recommendation and a default, the moment the item exists. A chat line may point at the card; it never replaces it. (Same rule as Friday's 2026-09-24 fleet-activity lesson and the 2026-10-12 needs-go-on-his-board grant; this seat put a login ask and a deploy hold in chat only earlier today: ledger row.)
+2. **Morning card (boot prompt step 10a):** one card in the standard format: where things stand, today's plan, and COUNTS of items awaiting him per project ("awaiting 3 for Secuura/Blockchain, 1 for WED"). No descriptions: the items are already cards.
+3. **Never wait on him.** While a card waits, agents work the tickets (as many as the code partition and the allowance allow). An idle floor with an open backlog is the failure.
+4. **Blockers:** flag, remind, escalate. Never push past one to keep moving.
+5. **48 hours unanswered:** `2_Project_Files/tools/stale_card_escalate.sh --send` at every boot (step 10b). One digest mail to kreiser.org@me.com from wednesday-agent@, per card at most once a day; Datasec and Friday cards are their seats' to escalate. Arms run 2026-10-23: quiet now (0), fire with the clock +3 days (1), reminder suppressed 5 h after a send and re-fires after 25 h, dry-send writes no state, the open 14 Oct Datasec card excluded.
+6. **Point 7 is withdrawn by him** (project priorities HPSM-POC/Calculator/Composer are Datasec's and not this seat's anyway).
+
+**Family:** [[2026-09-24_decisions-go-on-the-fleet-activity-panel]] · [[2026-10-12_secuura-done-when-tested-works-deployed-and-never-idle]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] · [[2026-08-07_a-promise-is-not-a-mechanism]] (the 48 h rule is a script, not a note).
 
 
 ## Tuesday never waits on Kam: everything awaiting him is a fleet-activity card, the morning brings a summary-and-plan card, 48 hours unanswered means an email, and agents work the tickets in the order HPSM-POC, then the Calculator, then Composer
