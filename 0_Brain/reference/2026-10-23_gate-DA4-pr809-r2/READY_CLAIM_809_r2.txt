@@ -1,0 +1,21 @@
+[Secuura/Blockchain-G -> Wednesday] READY FOR GATE: PR 809 round 2 of 2, head 7892929e7eb2, tier 2, landing tree 650b240b2ab8 on develop 25f42d80b0fc; lockstep 21/21/[]/[]
+## BLUF
+**READY FOR GATE (round 2 of 2): PR #809 (KS-693), head `7892929e7eb2c45a46ac38f2d7cdcc571b276167`, tier 2.** Pushed 01:48:44Z (fast-forward `736442fa9..7892929e7`, remote head read back). Tree `61a5128e1d989fcddf4a47fdf4e14ca2250fd6bc`; **predicted landing tree on current develop `25f42d80b0fc7f99528ae7fc54ac66f50f85d5df`: `650b240b2ab8459b705c435fd44468bc316fce5c`** (`merge-tree`; it differs from develop's own tree in exactly the PR's two files). The gate was right and the miss was mine: I read develop's toml only to find who added the webhook-config block and never read its KS-1170 header; my STATIC list had parse, duplicates and spec membership but not the lockstep helpers.
+
+## What round 2 changed (commit `7892929e7eb2`, parent = my previous fix commit; 2 files, +13/-11)
+1. The seven live `checks.not_a_server_error.enabled = false` lines became develop's established 503 shape, **copied from its neighbouring entries** (all 14 existing ones read the identical line): `checks.not_a_server_error.expected-statuses = ["2xx", "3xx", "4xx", "503"]`. The single `POST /api/teams/webhook-config` block keeps develop's `positive_data_acceptance` line and gains the same one.
+2. The stale `index.ts:229` reference in BOTH comments now names the per-route `requireM365` middleware (m365-integration `index.ts`, about line 261).
+The replacement is anchored to column 0 and asserted to hit exactly 7: the toml contains the dead-key text 9 times, because develop's own header QUOTES it twice in comments; those two are untouched (verified: 2 remain).
+
+## Evidence, in the form you specified (the project's helpers `operations_tolerating` and `operations_still_using_enabled_false`, imported by path, NO pytest)
+- **Control, develop `25f42d80b0fc`: frozenset 14 / toml tolerates 503 on 14 / orphaned [] / enabled=false [].**
+- **BEFORE round 2 (PR head `736442fa9158`): 21 / 14 / orphaned = the seven / enabled=false = the same seven.** That reproduces your gate's blocker with my instrument, so the instrument agrees with yours.
+- **AFTER (this head): 21 / 21 / orphaned [] / unguarded [] / enabled=false [], and every frozenset operation's tolerance is exactly `{503}`** (the lockstep tests' stricter condition, which I added). Output in `evidence/mergein/809_r2_check.out`.
+- Both files parse (ast, tomllib); 49 `include-name` entries, no duplicates; exactly ONE `POST /api/teams/webhook-config` block, carrying `positive_data_acceptance` and the 503 tolerance.
+- **NOT run:** the pytest suite (the project's conftest refuses Python < 3.14.8; this machine has 3.14.5; nothing installed or bypassed), the live 503 claim (no stack), and an actual Schemathesis run.
+- **This push ran NO hook check** (systemTest-only range; `systemTest/schemathesis` has no `package.json`, so the format gate had nothing to judge; the push log is four lines).
+
+## PR body
+A "Round 2" section is appended to #809's body and read back (body 5,574 -> 7,961 chars; head, base, state, title unchanged). It states that it SUPERSEDES the earlier "Re-validated" section, whose webhook-config description (the dead key) is now wrong, and that the miss was the author's.
+Commit message names only KS-693; the section carries no ticket key.
+
