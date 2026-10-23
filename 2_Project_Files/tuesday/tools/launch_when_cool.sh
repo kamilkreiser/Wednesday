@@ -22,6 +22,13 @@ cool() { awk -v l="$(load1)" -v m="$LOAD_MAX" 'BEGIN{exit !(l < m)}'; }
 GAP_MIN="${GAP_MIN:-120}"
 STAMP="${LWC_STAMP:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../fleet/state" && pwd)/tuesday_lwc_last_launch}"
 spaced() { [ ! -f "$STAMP" ] && return 0; [ $(( $(date +%s) - $(cat "$STAMP") )) -ge "$GAP_MIN" ]; }
+# ONE WAITER (ledger _ledger_laptop_datasec.md 2026-10-23, w=3 of the two-waiters row): a second waiter started beside a
+# live one fires in the same load dip. The holder file records the live waiter's pid; a start while that pid is alive
+# REFUSES rc 5. The file is overwritten, never deleted ("free" on exit). LWC_LOCK: test override only.
+LOCK="${LWC_LOCK:-${STAMP}.waiter}"
+if [ -f "$LOCK" ]; then HP="$(cat "$LOCK")"; case "$HP" in ''|free) ;; *) if [ "$HP" != "$$" ] && kill -0 "$HP" 2>/dev/null; then
+  echo "REFUSED: another launch_when_cool waiter (pid $HP) is alive; append this launch to the live queue instead ($NAME not launched)"; exit 5; fi;; esac; fi
+echo "$$" > "$LOCK"; trap 'echo free > "$LOCK"' EXIT
 START=$(date +%s); OK=0
 while :; do
   if cool && spaced; then OK=$((OK+1)); else OK=0; fi
