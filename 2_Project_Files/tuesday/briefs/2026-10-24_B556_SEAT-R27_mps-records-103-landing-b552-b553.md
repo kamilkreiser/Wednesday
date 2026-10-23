@@ -78,16 +78,16 @@ Root `/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/` ("
 
 ## Stamp
 Tuesday fills each slot at launch; the drafter fills none. The unstamped copy reads 11 lines with the four-underscore pattern (ten slot lines and the last line).
-- STAMP:  ____
-- LAUNCH WINDOW:  ____
-- Stamped by (the Tuesday seat that READ this brief whole):  ____
-- Launch authority (who, under which grant):  ____
-- Hard stop and target done (AEDT; drafter's suggestion: target 90 minutes after launch, hard stop 2.5 hours):  ____
-- Heads at launch (root HEAD, code main, highest MPSCALC key, PR #102 state and head, Tuesday's reads):  ____
-- Slots FACT-TICKETS / LAND-COMMENTS / WORDS-REG (defaults: yes / no / nothing):  ____
-- RULING-102 (the product owner's ruling on PR #102 after gate B552, in ASCII, no name, no card id; or the literal `NOT RULED`):  ____
-- Slot C55-102 (`NONE`, or the decision-card block for the C-55 entry: board time, `ruled_ts`, question, option text verbatim):  ____
-- Model receipt line and `uptime` load1 at launch:  ____
+- STAMP: 2026-10-24 08:57 AEDT by Tuesday s156
+- LAUNCH WINDOW: now, ONE launch_when_cool at load1 < 7
+- Stamped by (the Tuesday seat that READ this brief whole): Tuesday s156 (read whole at 08:57; s155 had read it at 03:5x and held it for the ruling). STATE CORRECTIONS AT STAMP (binding): (1) seat M2R (%348) was CLOSED at 06:44 by Tuesday; it is not live. (2) The product owner ruled a THIRD ROUND on #102 at 08:52 (slots below): a FRESH Opus builder seat Datasec/MPS-M9 (brief B568) will add commits on branch b518/mps-api-input-hardening; it, its .tools/b568 tree and ports 9160-9169 are NOT yours. (3) Live panes at the stamp: tuesday Datasec/HPSM-POC-H9 Datasec/MPS-G73 Datasec/MPS-G72 fleet-monitor ; open MPS PRs #102, #104, #105, #106 (only #102 and #103 are yours to record, as the parts say). (4) B552-1's ticket is still made (it is the record); its Landed closing sentence (i) carries the RULING-102 text. (5) Record ALSO the second 08:52 ruling (slot C55-102, block 2) as C-56 in the same shape.
+- Launch authority (who, under which grant): Tuesday under v1.3 (records, ticket creation and triage) and the product owner's 2026-10-16 grant; the B552 tickets on his 2026-10-24 decision card; WED_USAGE_STOP=100 under the 2026-10-20 Datasec no-90% grant
+- Hard stop and target done (AEDT; drafter's suggestion: target 90 minutes after launch, hard stop 2.5 hours): target 90 minutes after launch, hard stop 2.5 hours after launch
+- Heads at launch (root HEAD, code main, highest MPSCALC key, PR #102 state and head, Tuesday's reads): root main HEAD db62e76cfeb64794d0a571693e2c2a706df8f998; code main a5b4bbb5d377f29dd63bf0c64d54b44c122a6055; highest MPSCALC key MPSCALC-320 (Jira GET 08:57); PR #102 open, merged false, head 275349907500a0045908cccb96d45e39be333bf2 (gh api 08:57)
+- Slots FACT-TICKETS / LAND-COMMENTS / WORDS-REG (defaults: yes / no / nothing): yes / no / nothing
+- RULING-102 (the product owner's ruling on PR #102 after gate B552, in ASCII, no name, no card id; or the literal `NOT RULED`): The product owner ruled on 2026-10-24 at 08:52: allow one small third round on PR #102 for this leak only (the named fix with a regression row, then one more gate); the request-body sentence was approved as written the same minute.
+- Slot C55-102 (`NONE`, or the decision-card block for the C-55 entry: board time, `ruled_ts`, question, option text verbatim): BLOCK 1 (C-55): board time 2026-10-24 08:52 AEDT (live board tap); ruled_ts 2026-10-24T08:53:23+11:00; question: "MPS Calculator: PR #102 failed its final gate on one leak. Allow a small third round, or merge and ticket it?"; option a: "Allow one small third round on this leak only" -- detail: "The fix seat (still open) makes the named fix with a regression row, then one more gate. The sentence card still decides the words. Recommended." (the fix seat had been closed at 06:44; the round goes to a fresh seat, B568). BLOCK 2 (C-56): board time 2026-10-24 08:52 AEDT; ruled_ts 2026-10-24T08:53:26+11:00; question: "MPS Calculator: approve one new API error sentence (request body not a JSON object)"; option a: "Approve the sentence as written"; the sentence: "The request body must be a JSON object that holds only fields the contract has." Delivered: none (PR #102 not merged).
+- Model receipt line and `uptime` load1 at launch: model: claude-sonnet-5-5 -- records seat -- P1-P4 none -- gauge 23%; load1 5.20 at 08:57
 Pane `Datasec/MPS-R27`; model row records (Sonnet `claude-sonnet-5-5`); no gate. One queue at load1 below 7.
 **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B556_SEAT-R27_mps-records-103-landing-b552-b553.md`. **Step 0:** copy it unchanged into `1_Project_Definition/Briefs/`, `cmp`, both sha256s in STATUS, the stamp-slot count (the REFUSE check). Then the other REFUSE checks. Preflight: write "none (brief_seat launch)".
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/MPS-R27 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B556_SEAT-R27_mps-records-103-landing-b552-b553.md'"` (keep the quotes; the path has a space and a `!`). **No az.**
@@ -103,4 +103,4 @@ Everything in Jira (the highest key, the Acceptance and comments of MPSCALC-198,
 
 SELF-CHECK: drafted 2026-10-24 03:29-03:55 AEDT from the B551 brief (whole) and its STATUS (lines 1-449, 453-503, 768-809: pins, tickets as posted, comment, FOR TUESDAY, Corrections), the B553 STATUS (whole), the B552 STATUS (lines 1-185 and 263-297: verdict, questions, findings, FACTs, round-cap statement), the B546 STATUS (first lines and findings), the B527 brief's ticket lines, the B553 ADDENDUM-1/-2 and B543 ADDENDUM-2 (heads), root `CLARIFICATIONS.md` (`:924`, `:1005-1060`, `:1085-1099`), root `BACKLOG.md` (`:2505-2580`), `gh api -X GET` of pulls 102/103, commits `a5b4bbb5` (message, check-runs), `git/ref/heads/main`, `git ls-remote`, `lsof` over 8480-8959, `tmux list-panes`, `ls` of `.tools`, read verbs on the root repo. No Jira call, no store query, no write outside the three drafter files. No person name, customer name or decision-card id is minted in this brief. Tuesday re-reads before launch.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 08:57 by Tuesday s156
