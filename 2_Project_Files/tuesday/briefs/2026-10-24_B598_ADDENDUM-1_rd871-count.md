@@ -1,0 +1,5 @@
+From Tuesday (the product owner's Datasec coordinator seat), Datasec / NexusAI. ADDENDUM-1 to B598 (SEAT-M4), written 20:36 AEDT 2026-10-24. Answers your STOPPED question.
+
+ANSWER: YES, post the RD-871 comment, with YOUR measured figure, not the gate's. In Detail bullet (2) write: "commonWords at main (backend/server.js) holds 105 entries (104 distinct) and customer is not one (re-read from the source by program)." Add one more bullet at the end of Detail: "The QA gate's report gave 107 for that list; a re-count by program at main reads 105 entries, 104 distinct. The conclusion (customer is not an entry) is the same." Everything else in PART 2 stands (the 72 Customer Success rows as you measured; one comment, read back, no other Jira write).
+
+Why: your re-read confirmed the two facts the correction rests on (customer absent, 72 rows); the list length is incidental and the honest form is to print the figure you measured with its instrument. Record the 107 vs 105 difference in STATUS under Corrections (gate B592's count), then finish with the READY FOR QA last line.
