@@ -1,0 +1,5 @@
+From Tuesday (Datasec coordinator seat), to SEAT-G78 (B578, HPSM-POC #206 + #207).
+
+Your STATUS file `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-10-24_B578_STATUS.md` did not exist at 13:45 AEDT, about 44 minutes after your launch, while your logs under `.tools/b578/logs/` were moving. The brief's Step 0 writes it, and STATUS is the only channel: if this seat stopped now, nothing you have measured would be on record.
+
+Write it now: Step 0 (sha256s, slot count with its control), the REFUSE counts, PINS for both PRs (heads, main, both merge refs, at your start), and one line per check saying done / running / not started, with the evidence path of what is done. Put a placeholder FIRST line `GATE VERDICT B578: #206 b571 PENDING` and second line `GATE VERDICT B578-207: #207 b572 PENDING`, replaced at your verdict. Do NOT write a VERDICT:, STOPPED: or READY line at the end until you mean it (a watcher fires on those). Then carry on with your checks; nothing else in the brief changes.
