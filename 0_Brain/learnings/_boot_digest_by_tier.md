@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-24 15:02 from 249 lesson files (1,084,435 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 204. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-24 15:21 from 250 lesson files (1,087,254 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 205. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7520,4 +7520,21 @@ sections (open the file for these): How to apply
 7. Unchanged: the v1.3 signature classes, the QA gate before every merge, CodeQL, client isolation, and the routing table (Sonnet first on this seat).
 
 **Family:** [[2026-09-24_decisions-go-on-the-fleet-activity-panel]] · [[2026-10-12_secuura-done-when-tested-works-deployed-and-never-idle]] (Wednesday's twin) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] · [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-11_a-number-left-for-kam-in-a-handover-reaches-no-surface-he-reads]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Every boot, not only the morning one: find the actionable tickets and start working them
+`2026-10-24_every-boot-works-the-actionable-tickets-unprompted.md` · preference · 2026-10-24 · status: live · tier: W
+
+**The grant.** At EVERY boot of the Tuesday seat (a fresh start, a rotation successor, a respawn), the seat checks the Datasec boards for tickets an agent can complete now and, if there are any, starts working them: drafting the briefs, reading and stamping them, launching the seats. **It does not wait for Kam to ask.** Before 24 Oct this ran only in the morning session (the 2026-08-12 grant) and otherwise waited on his word; on 24 Oct he had to say "launch the batches when ready" and then "launch wave 2 when ready" for work the seat had already found.
+
+**The grant.** At EVERY boot of the Tuesday seat (a fresh start, a rotation successor, a respawn), the seat checks the Datasec boards for tickets an agent can complete now and, if there are any, starts working them: drafting the briefs, reading and stamping them, launching the seats. **It does not wait for Kam to ask.** Before 24 Oct this ran only in the morning session (the 2026-08-12 grant) and otherwise waited on his word; on 24 Oct he had to say "launch the batches when ready" and then "launch wave 2 when ready" for work the seat had already found.
+
+**What "actionable" means (the 24 Oct sweep's test, which he accepted by launching it):** an agent can finish it with no new user-facing word, no ruling from him and no production touch. Word-blocked and ruling-blocked tickets go on fleet activity as cards (never only in chat); they do not stop the rest.
+
+**How, at boot (after the brain load and the pickup's OWED items, which still come first):**
+1. Run (or commission) the read-only completable-tickets sweep over the active Datasec boards (MPS, HPSM-POC, Security Composer, NexusAI; SKIP myPKI, CypherKey, Lead_Bot as before), unless a sweep file of the same day is less than ~4 hours old and nothing has landed since: then reuse it.
+2. Partition what it finds into lanes that share no path, rulings into records first (a lane that cites a ruling waits for the records seat that writes it).
+3. Draft, read whole, stamp, and launch in waves (one waiter at a time, load1 below 7, the pane cap in mind), each with its watcher.
+
+**Unchanged boundaries.** The v1.3 signature classes still pause for him: production, money, external communication to a human, anything irreversible. Deploys follow each project's own rule (HPSM-POC and the Composer demo under the 2026-10-16 push grant; MPS hosted still card-per-deploy; Composer K1-K10 "nothing is deployed without your card"). New customer-facing words go to him as a word pack first. Gates before every merge.
 
