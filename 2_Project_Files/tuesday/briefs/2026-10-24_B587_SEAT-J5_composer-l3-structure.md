@@ -142,14 +142,14 @@ Mutants: M587-3A the CHECK that at least one value is set removed; M587-3B a val
 
 ## Stamp
 Tuesday fills each four-underscore slot at launch; the drafter fills none. The unstamped copy reads 9 lines with the pattern (the slot lines and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Stamped by (the Tuesday seat that READ this brief whole): ____
-- Launch authority (who, under which grant): ____
-- Tickets struck at the stamp, if any (T1 PCOMP-43, T2 PCOMP-41, T3 PCOMP-40; write NONE, or the ticket and the one-line reason; numbers close up): ____
-- Hard stop and target READY (AEDT, 24 Oct; drafter's suggestion: target READY 5 hours after launch, hard stop 7 hours; per-ticket pushes are the checkpoints; wrap by then with PROGRESS and RESUME): ____
-- Main at launch (Tuesday `ls-remote` of the CODE repo, with the time; expected `308b7aa60cd8d2a8576b29e0422538cbaf140f24`): ____
-- Model receipt line and `uptime` load1 at launch (drafter's line: `model: claude-sonnet-5-5 -- C2 build -- P1-P4 none -- gauge 95% (Tuesday no-90% grant)`): ____
+- STAMP: STAMPED 15:41 24 Oct by Tuesday s159 (rotation successor of s158); launch through launch_when_cool at load1 below 7
+- LAUNCH WINDOW: from the stamp until 18:30 AEDT 24 Oct; if not launched by then, the successor re-reads main and re-stamps
+- Stamped by (the Tuesday seat that READ this brief whole): Tuesday s159, read whole 15:41 (170 lines) with the drafter report
+- Launch authority (who, under which grant): Kam, Tuesday terminal 24 Oct (daily note line stamped 15:18) verbatim 'keep going, launch wave 2 when ready', and his standing order (daily note line stamped 15:21) (every boot works the actionable tickets); build only, no deploy (the Composer K-card rule stands: nothing is deployed without his card); the 2026-10-16 merge-once-tested grant covers the later merge after the gate
+- Tickets struck at the stamp, if any (T1 PCOMP-43, T2 PCOMP-41, T3 PCOMP-40; write NONE, or the ticket and the one-line reason; numbers close up): NONE. Readings at the stamp: (1) a new API refusal sentence or contract field description is listed under NEW WORDS and held, as B322 did; nothing ships or deploys in this lane, so the words card comes before any deploy, not before the build; a sentence a user would SEE on a screen or document still stops that ticket as written. (2) T1 is storage only: two nullable numbers, no rule linking them, a clone starts null; that is a FOR TUESDAY question for the product owner, not a ruling here. (3) T3: search for who ruled '(c)' first, exactly as the brief says; a ruling not scoped to MVP A defers T3 alone
+- Hard stop and target READY (AEDT, 24 Oct; drafter's suggestion: target READY 5 hours after launch, hard stop 7 hours; per-ticket pushes are the checkpoints; wrap by then with PROGRESS and RESUME): target READY 21:00 AEDT 24 Oct, hard stop 23:00 AEDT 24 Oct (per-ticket pushes are the checkpoints; at the hard stop wrap with PROGRESS and RESUME)
+- Main at launch (Tuesday `ls-remote` of the CODE repo, with the time; expected `308b7aa60cd8d2a8576b29e0422538cbaf140f24`): 308b7aa60cd8d2a8576b29e0422538cbaf140f24 by Tuesday ls-remote at 15:41 (equals the expected sha)
+- Model receipt line and `uptime` load1 at launch (drafter's line: `model: claude-sonnet-5-5 -- C2 build -- P1-P4 none -- gauge 95% (Tuesday no-90% grant)`): model: claude-sonnet-5-5 -- C2 build -- P1-P4 none -- gauge 37% (usage_tuesday.json 04:40:58Z); load1 7.86 at the stamp, so the launch waits in launch_when_cool for load1 below 7
 Pane `Datasec/Security-Composer-J5` (drafter MEASURED 15:23: no Composer pane live; Tuesday re-checks free before launch). Model row **C2 build**; gate after: **tier 1**. Ports 9400-9409 (MEASURED free 15:23, `lsof`; the blocks 9360-9399 are named in the 23 and 24 Oct briefs). Launched through ONE queue at load1 below 7.
 **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B587_SEAT-J5_composer-l3-structure.md`.
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/Security-Composer-J5 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/Datasec Security Composer' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B587_SEAT-J5_composer-l3-structure.md'"` (keep the quotes; the path has a space and a `!`). **No az.**
@@ -166,4 +166,4 @@ No build, test, container, image, db stack or probe was run. Not measured: that 
 
 SELF-CHECK: drafted 2026-10-24 from the sweep (its Composer section and the partition summary, whole), PCOMP-40 to PCOMP-44 (Jira GET: summary, description, labels, comments), the plan lane L3 and the gap rows D07, D10, D17, D29, D37, C-86 to C-100 of `CLARIFICATIONS.md`, B531 (structure: REFUSE, partition from both sides, STATUS and last-line format) and B322 (method), `git show 308b7aa6:` of `document.ts` (150-215, 660-740), `snapshot.ts` (1-30, 100-200), `routes/inputs.ts` (815-850), `stored-outputs.ts`, `render.ts` (100-135, 265-300), `model.ts`, `exports.ts`, `migrate.ts`, `0001`, `0012`, `0022` migrations and its recipe, `authz.ts` lines, `gh api` pulls and pull files for #85 and #86, `ls-remote`, `lsof` (9360-9459), `tmux list-panes`. No person's name, client or sample-client name and no decision-card slug is meant to appear in any text the seat writes.
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 15:41 Tuesday s159, 170 lines, stamped as above
