@@ -1,0 +1,35 @@
+STARTABLE: YES
+# DRAFTER-REPORT B652 | topic hpsmpoc-350-audit-dev-older-rows | seat Datasec/HPSM-POC-H22 | ports 9310-9319 | drafted Sun 25 Oct 2026 10:24-10:40 AEDT
+BLUF: Kit written at `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-25_B652_SEAT-H22_hpsmpoc-350-audit-dev-older-rows.md` (124 lines, 8 slot lines, last line `READ-WHOLE-BY-TUESDAY: ____`). Lane: HPSMPOC-350, one file `web/src/audit-dev.test.ts`, new branch `b652/hpsmpoc-audit-dev-older-rows` off main `754bf1e7f6eed2f140468dd283551eca1299d46e`. Part A: the nine older text rows (real-file row :137 + the 8-row it.each :152-168) are derived from AUDIT_STEPS and read the parsed workflow. Part B: B644-1 fixed (comment placed after all lines of the entry's first key) plus one regression row. Sonnet, row C2 line 92; gate tier 2 (G2 line 109), round 1 of 2 on this class.
+Seat name: H20 is taken (B639 SEAT-H20 kit file, non-.pre-). H21 and H22 are free in the kits and the pane list (panes: tuesday, NexusAI-M9, Security-Composer-G109, MPS-G107, Security-Composer-J13, fleet-monitor). I used H22 as asked and left H21 for the kit drafted beside this one; B651/B653 are not yet in the briefs folder, so a clash with a parallel drafter cannot be excluded.
+
+## Facts re-measured (instrument, control)
+- origin main = 754bf1e7 (ls-remote; control: refs/heads/b629/* prints ceac740). No b652/* or b651/* ref. Open PRs: 0 (gh -X GET pulls?state=open, length 0; control: pulls/213 closed+merged, merge commit 754bf1e7). 754bf1e7 is NOT in the shared clone (cat-file fails; control: ceac740 and 5999cf69 are commits): the kit tells the seat to fetch it under the lock.
+- Test file at 754bf1e7: blob 65b997c9fa5ef7e29620953b0df5c7a4cb280dc8, 318 lines (gh contents; 12 fact strings each count 1, NOSUCH control 0; readFileSync( on 3 lines). ci.yml blob 87d7590eefb22888cb721d74d4d65b3ecbcaf636; audit steps at lines 389-390 and 394-395, comment 391-393.
+- Ticket HPSMPOC-350: Backlog, 0 comments; Done-when quoted in the kit. Part (3) of the ticket (GB1-GB4) is excluded as a candidate decision for the product owner.
+- B644 STATUS (173 lines, read whole): census numbers RELAYED into the kit (10 survivors 0 old red; dev-dupkey 4; N5/dev-removed 9; eq-comment-in/quote/trailing 9; Z1 and key-order 9; X2 plant).
+- Ports: lsof 9310-9319 printed nothing (no positive control run by me; the kit has the seat run one). Word-boundary scan of non-.pre- SEAT kits of 10-24/10-25: hits only YESTERDAY's B581 (a finished gate that claimed 9310-9319) and one list mention in B585 line 48; no 10-25 kit names the block.
+- Model: routing rows C2 line 92, G2 line 109, G-cap line 111 (grep -n); models_latest.json line 23 = claude-sonnet-5-5 (grep -n control: lines 11, 17, 29 give the other levels).
+- Landing: rules/branches/main = deletion, non_fast_forward, code_scanning (CodeQL errors/high_or_higher), required_status_checks empty list strict false. Squash convention is RELAYED from B644 Check 8d.
+- Load1 5.14 at 10:24 (uptime). gh auth reads the project's Datasec account.
+
+## D-decisions
+- D1: derive the nine rows from the PARSED workflow (not regenerated text), because the sweep's Done-when says they go red only where the 19 table rows do, which means the three equivalents (comment-in, quote, trailing) must be green. Text derived from the table would keep them red.
+- D2: the kit states properties first (P-A1 legitimate edits cost 0, P-A2 equivalents cost 0, P-A3 kills survive and the 10 survivors turning red is the improvement, P-B1 every table shape renders valid YAML), then leaves the derivation mechanics to the builder's DESIGN.
+- D3: all 40 base titles byte-equal (lost 0); exactly ONE row added (the B644-1 regression row, taking a scratch table via a new `entries` argument to the renderer so AUDIT_STEPS is untouched). The checker stays held byte-equal (so the regression row cannot use `refusal`; the kit says so).
+- D4: no commit cap (first build, not a fix round); new branch created by plain push; Tuesday opens the PR.
+- D5: three hazards written in as READING, not run: (1) temporal dead zone: the first describe builds its it.each array at collection while AUDIT_STEPS/put/refusal/realWorkflow are declared later; (2) the literal pins `--omit=dev` and the dev step shape move from text to the table (a weakened level becomes a one-line data edit beside the ci.yml edit, not a red row); (3) stepOf finds by run, so run-edits must select first.
+- D6: hypotheses labelled UNMEASURED: 25 red (16 + 9 derived) under each disk mutant and drift plant, 3 E rows and the regression row green, equivalents 0 in the whole file.
+- D7: ci.yml lines 391-393 stay with the H-CIFILE lane, which waits for this one (PARTITION names it from both sides).
+
+## Q-questions for Tuesday
+- Q-1: keep every base title byte-equal even where the real-file row's title ("production step is still plain npm audit --omit=dev") is then true only because the table says so? Default: yes (a comment carries the truth, as the round-2 ruling did).
+- Q-2: Hazard 2 trade (level and shape pins now live only in the table): accept, or have the seat keep ONE literal anchor for `--omit=dev`? Default: accept, listed in the seat's FOR TUESDAY for the product owner.
+- Q-3: the seat names after H22: if the neighbouring kit also chose H22, one of the two must be renamed at the stamp. Default: rename the later one.
+- Q-4: the squash convention line (CLARIFICATIONS.md:138 per the gate) is not what I read at that line in the project-root copy; confirm in the records repo before the landing. Default: use the B644 text as written.
+
+## UNMEASURED
+No npm, vitest, lint, typecheck, worktree, mutant or timing run. The kit's own list covers: derived rows kill every old mutant (argued from toStrictEqual on whole entries); 25-red hypothesis; TDZ behaviour under both pools; the regression row's exact error text; stringify for empty or null first keys; the 19th check-run on main (18 of 19 success, not examined); whether CI runs on a pushed branch without a PR.
+
+## Outside-the-fences disclosure
+Wrote only the kit and this report. Read: DRAFTER_RULES, the B639 template, the sweep, B644 STATUS, model-routing.md (grep -n/sed), models_latest.json, the kit folder listing, HPSM-POC JIRA.md head and CLARIFICATIONS.md lines 134-140 (project root, a read of a records file), the stamp section of the B650 .pre-stamp (shape only). One Jira GET of HPSMPOC-350 plus one text-search GET (project = HPSMPOC AND ( ... )) through a scratchpad script reading the project .env in-process (nothing printed); scratchpad files: jget.py, audit-dev.main.ts, ctl.txt. gh -X GET under the project's GH_CONFIG_DIR (branches/main, pulls, contents, rules/branches/main, code-scanning/alerts, check-runs, auth status). Git read verbs only (ls-remote, cat-file, config read) with --no-optional-locks. No card read, no decision_queue, no briefs_staged, scoreboard or ledger, no WEDNESDAY/FRIDAY tree. One slip: my first slot-count grep surfaced a login name in the kit (the gh account); I replaced it with "the project's Datasec account" before finishing (final scan for names: 0).
