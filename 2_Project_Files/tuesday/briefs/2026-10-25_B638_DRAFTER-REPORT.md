@@ -1,0 +1,42 @@
+# B638 DRAFTER REPORT - SEAT-G103, HPSM-POC QA gate on PR #214 (builder B628), tier 2, round 1 of 2
+
+Drafted Sun 25 Oct 2026 07:02 to 07:08 AEDT (clock from `date`), read-only, model claude-sonnet-5-5. Brief: `2026-10-25_B638_SEAT-G103_hpsmpoc-214-gate-tier2.md` (95 lines, unstamped; 8 lines match the four-underscore pattern = 7 slot lines at 68-74 + the last line 95; `@[A-Z_]+@` count 0; 0 non-ASCII bytes; no person's name). Wrote two files only. Shape from the B636 kit (tonight's #213 tier-2 gate).
+
+## SHAs and times read
+- `git --no-optional-locks ls-remote origin`, 07:02:08: main `09641a91e57bb9abf116ddf29fc2d4872c4fdfb3`; `b628/hpsmpoc-ci-shard-rebalance` = `refs/pull/214/head` = `b64be166e5634437528887e0c521fbe42fd5a276`; `refs/pull/214/merge` = `a2ce37f91c141b22954795b0faee4fc30fe54438`; `refs/pull/213/head` = `refs/heads/b629/...` = `a90a8bd1547a897d713aa8c10c8d23aaa30a0d79`; `refs/pull/213/merge` = `5468abfa31c7af04c62e3bd91b0aeb025795d763`.
+- `pulls/214` 07:02:21: open, not draft, 1 commit, 1 file, +5 -3, mergeable true, state blocked. Commit parent = main; `compare` ahead 1 behind 0; commit tree = GitHub merge commit tree = `3b2ea4d27d660404b9a86c3a8f81e6a43f403881` (07:03). Unsigned; trailer present; no `HPSMPOC-n` in the message.
+- CI 07:02: 13 check-runs; 2 success (gitleaks, dependency review), 1 queued (CodeQL umbrella), 10 in progress incl. both SQL Server shards (ids 120973269002 / 120973269020) and the four Analyze runs. 3 of 4 code-scanning analyses listed at 07:03 (js-ts, python, actions; 0 results, no error). Dismissed alerts 0; main analyses listing returns 100 rows.
+- Rules 07:02: strict false, required list empty, code_scanning errors / high_or_higher. Open PRs: #213, #214.
+- Main baseline 07:03 (log GETs, nonsense control 0): run 40118421099 shard 1 Passed 987, 224 (floor 100), wall 11.8 min; shard 2 Api 1004 + Feedback 390, 272 (floor 110), wall 14.6 min; TRX artifacts 12569848407 / 12570890007 unexpired (2027-01-22).
+- Ports: `lsof -nP -iTCP:9880-9889 -sTCP:LISTEN` empty, rc 1 (07:02 and 07:04); word-boundary scan of `2026-10-2[45]_*` briefs for 988x: rc 1. No pane named `Datasec/HPSM-POC-G103`; no `.tools/b638*`; no B638 file in `Briefs/`. Load 7.83 at 07:04.
+
+## What I read, with lines
+- B636 kit `2026-10-25_B636_SEAT-G101_hpsmpoc-213-gate-tier2.md` lines 1-132 (shape; stamp section 102-111; escalation line 113; locks 122; standing lines 125-127).
+- B628 brief `2026-10-25_B628_SEAT-H18_hpsmpoc-ci-314.md` lines 1-149 (tier line 13, edit 49-56, Done-when split 58-67, P1-P7 78-86, HOLDS 105-109, partition 111-118).
+- B628 STATUS `.../Briefs/2026-10-25_B628_STATUS.md` lines 1-193 (BLUF 19-23, namespace table 39-58, programs 90-127, FOR TUESDAY 155-163, NOT TESTED 145-153).
+- `fleet/specs/model-routing.md` line 109 (G2), 111 (G-cap); `models_latest.json` lines 22-23 (`claude-sonnet-5-5`); `CLARIFICATIONS.md` lines 136-140 (`:138` quoted), 192 lines; project `CLAUDE.md` grep (no landing line).
+- Head `ci.yml` (scratch copy via `git show`): lines 150-172, 240-262, 270-352 and a grep of job keys; head `audit-dev.test.ts` of #213: grep for `ci.yml`, `readFileSync`, `parse(`, `web-build` (lines 5, 138, 162, 176-200, 229-233, 259-289).
+
+## BLUF
+Ready to stamp. One seat `Datasec/HPSM-POC-G103`, ports 9880-9889, tier 2 Sonnet (G2 line 109) with a tier-1 STOP on any security-shaped finding (new `permissions`/`uses`/`${{ }}`/secret use, any touch of `web-build`, deploy-package, `secrets` or `dependency-review`, or a hunk outside the comment block and two filter lines). The PR's own CI run is the decisive evidence and is already running (started about 07:02, expect shards done by roughly 07:25); the gate reads it, derives conservation from the TRX artifacts by its own program, and cross-checks the filters with a stub-dotnet argv run plus a grammar model. No dotnet or SQL Server in the gate.
+
+## Decisions (D)
+- **D1 Grade the TRX sum 1991, not the builder's 1979.** 1979 is a `--list-tests` discovery figure that under-lists 12 `Assessment` theory cases (975 listed vs 987 in the TRX); the PR run will show 987+163=1150, 1004-163=841, Feedback 390. The kit grades those and calls 1979 a Note.
+- **D2 Mask the minted token.** Eight `Auth.UatOpenAssertionTests...is_401` rows embed a run-time token in their name (builder, RELAYED), so a main-vs-PR full-name comparison would show 8 false diffs. The kit compares by `(className, methodName)` counts and by full name after masking only that method's token, and prints the masked count.
+- **D3 One npm install, one "pair" worktree = the merge.** #213 head with `ci.yml` replaced by #214's exact blob is byte-equivalent to the merge of the two (proved by `merge-tree` result-tree blob equality), so one `npm ci`, one test file run (expected 40 tests, 0 red), plus controls (c0 on main's blob, c1 planted audit-step rename). The #214 head tree is python/ruby only.
+- **D4 13 planted controls, not 10.** The builder's 10 plus three filter-specific (`&` to `|`, `Hostin.` typo in one filter, Hosting clause dropped from the first filter), with the equivalent-comment edit caught by the line diff. Plus hunk-position check (four hunks at base 160, after 161, 250, 253) with a planted line-168 change.
+- **D5 Filters proved three ways.** Real `run:` block executed under a stub `dotnet` (one argument each, bare-`&` control); grammar model over main's real TRX names (complements, moved set 163, three controls); PR run counts as the proof. Honest label: the model is not the test platform.
+- **D6 Wall times reported, not graded.** One run is one sample; the ESTIMATE (632/646 s) and the ticket's post-merge clauses (10 pushes, 3 greens) are not the gate's.
+- **D7 Pending CI caps the verdict.** Per the B636 rule: at most GO WITH FINDINGS with `(conditional: CI pending: names)` until 4 of 4 analyses and every check-run is complete.
+- **D8 A red shard is classified, never re-run.** Red = Blocker/NO GO; the gate names the failing tests and says Hosting-caused / known flaky set (HPSMPOC-308 read by GET) / neither; re-run is a GitHub POST and Tuesday's.
+- **D9 No gate-own dotnet run.** The brief states a local shard run is impossible (needs the CI SQL Server container); if the PR run lacks evidence the verdict is NOT GATED/NO GO, not a local substitute.
+- **D10 Mask the person's name.** Head `ci.yml:164` (pre-existing context comment line, not in the diff) names a person; the kit tells the gate not to quote it. The builder masked it in STATUS the same way.
+
+## Questions for Tuesday (Q), one each, with recommended answer
+- **Q-1 If a shard goes red on a test OUTSIDE `Hosting` that sits in the HPSMPOC-308 flaky set, who re-runs?** Recommended: Tuesday re-runs once (a POST, outside the gate); the gate's verdict stays NO GO at that head with the classification, and a second gate pass reads the re-run's artifacts. A red inside `Hosting` is the move's fault: return the branch.
+- **Q-2 Launch now or wait for CI?** Recommended: launch at the next cool slot (load1 7.83 at 07:04 means a wait anyway); the gate does light work (Checks 1, 3, 6) first and reads the finished PR run, so no waiting is needed on your side.
+- **Q-3 Hard stop.** Recommended: target verdict 2 h, HARD STOP 3.5 h after Step 0, never later than 11:30 AEDT (the kit says so; CI finishes well inside it).
+- **Q-4 The pre-existing person's name in `ci.yml:164`.** Recommended: not this PR's finding; note it as a records follow-up candidate (a comment cleanup is its own tiny lane), do not block #214.
+
+## UNMEASURED by the drafter
+Everything the gate will run: actionlint on the head, Psych structural diff and its 13 controls, the stub-dotnet argv capture, the grammar model, the TRX downloads and conservation tables, the PR run's counts / floors / wall times (the shards were in progress at the last read), whether the 163 `Hosting` tests behave the same beside `Assessment` in one dll run, how many databases `Hosting` makes (builder estimate 30 to 40 against a margin of 162 on the second shard), #213's head test against #214's `ci.yml` (expected 40 tests, 0 red), `merge-tree` of the two heads, the fourth CodeQL analysis (csharp), the 679-line count of the head file, and the sha256 of the head `ci.yml` (the builder's `f9df0b57...` is RELAYED). I ran no Jira read. The scratch copy of head `ci.yml` is at `/private/tmp/claude-501/-Volumes-Laptop-DEV-TUESDAY/3cb79054-3da4-4fd9-b231-28b825adafdc/scratchpad/ci214.yml` (scratch only, not a deliverable).
