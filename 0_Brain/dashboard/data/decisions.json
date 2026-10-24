@@ -47907,5 +47907,300 @@
    "CARD hpsmpoc-review-week-larger-plan-1021",
    "CARD datasec-morning-plan-1024"
   ]
+ },
+ {
+  "id": "nexusai-banner-guard-stylesheet-stub-1025",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: may the open-site banner test answer the Font Awesome stylesheet with an empty stand-in on the setup and status pages?",
+  "bluf": "Your word is needed on one test change, not on the product. The open-site banner test (RD-844) waits for each page to finish loading. The setup and status pages load one stylesheet from a public CDN (cdnjs, Font Awesome 6.0.0), so a slow CDN once failed the main Build (3 cells red; the same commit passed on rerun). The only fix that works is to answer that one CDN request locally with an empty stylesheet, which means the test then measures those two pages without their icon glyphs, not exactly as a person loads them. Today main (ef45606a) still waits for the full page load at open-access-banner-guard.js line 294 (20 s limit), and both pages still link cdnjs (setup.html line 8, status.html line 9). A first attempt that only waited for an earlier page event was written, found inert on the real pages by the QA gate, and reverted before PR #110 merged today (PR body: 'RD-844 is NOT fixed by this PR'). The banner's own CSS and JS contain no icon-font reference (a text search, not a rendered-page measurement). Risk is low and test-only: no product file and no page changes. Recommendation: yes, with the builder required to record one comparison of the banner measurements on those two pages with and without the real stylesheet.",
+  "default_action": "Treated as (c): the ticket stays open and no builder starts it; a red banner test on a Build is rerun and checked by page. Tuesday asks again when the failure recurs. All other NexusAI work keeps moving.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes: answer the cdnjs stylesheet with an empty stand-in in the test",
+    "detail": "A Sonnet builder edits only the guard file and its test cells. It must first show the unmodified guard failing on a never-answering cdnjs request, then passing; show only cdnjs is rewritten (1 request on setup and status, 0 on the other ten pages); keep the 60 measurements and the counts file unchanged; and record one with-versus-without-stylesheet comparison of the banner box, contrast and ink on both pages. Cost: the test no longer sees the icon glyphs on those two pages."
+   },
+   {
+    "key": "b",
+    "label": "No: keep measuring the real page; wait for the product to stop using the CDN",
+    "detail": "The proper cure for both product and test is to vendor the CDN assets into the image (RD-721, currently in Testing; at main the two pages still link cdnjs, so it has not removed the dependency). Until it lands, a red banner test on a push Build is read page by page before anyone calls the product broken."
+   },
+   {
+    "key": "c",
+    "label": "Do nothing",
+    "detail": "RD-844 stays open. The ticket measured one failure in the last 40 Build runs, so the cost is an occasional rerun."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-25T07:32:50.540803+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "CARD hpsm-composer-round3-approver-guard",
+   "CARD hpsm-composer-round4-commit-guard-and-forged-release",
+   "CARD quickquote-guard-words-1016",
+   "CARD quickquote-guard-publish-includes-pr7-deps-1016",
+   "CARD hpsmpoc-uat-banner-sentence-untrue-1021"
+  ]
+ },
+ {
+  "id": "nexusai-demo-workflow-pin-landing-1025",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: may the demo-deploy workflow be edited to pin its Azure login step, and does it need a landing window?",
+  "bluf": "Your word is needed before anyone edits the demo-deploy workflow. RD-815 pins the Azure login step (azure/login@v2, lines 71 and 108 of .github/workflows/deploy-demo.yml) to a fixed commit, which closes two open medium CodeQL alerts (#4 and #5). The worry is that this workflow runs on every push to main, so landing the edit could redeploy the demo. Read at source: main moved today to ef45606a (PR #110), and the push run on it, Deploy demo (run 40129472971), concluded skipped. The last 8 Deploy demo runs on main all show skipped. The switch that enables it (variable CI_DEPLOY_ENABLED, tested at line 53 and line 91) is not set: the repository lists no Actions variables, and the build and deploy jobs both start with that test. The deploy job also names a GitHub environment called demo with a required reviewer, but the repository lists only one environment, dev; no demo environment exists to hold that approval. So today the edit deploys nothing. Recommendation: allow it to land without a window, on three conditions: the edit changes only the two uses lines, it does not touch either if test or the switch, and the switch stays unset until a demo environment with a reviewer exists. The workflow change gets its own review before merge.",
+  "default_action": "Treated as (c): no one edits the workflow, RD-815 stays in To Do and the two alerts stay open. Other NexusAI work keeps moving.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, land it any time under those three conditions",
+    "detail": "A Sonnet builder pins both azure/login lines to a full commit SHA (the v2 tag kept as a comment), changes nothing else, and the change gets a tier-1 review. CodeQL is read after the merge by alert number (#4 and #5 must read fixed; never dismissed)."
+   },
+   {
+    "key": "b",
+    "label": "Yes, but only in a window you name",
+    "detail": "Same edit, held until the window you give. The only risk it guards against (a real deploy) cannot occur while the switch is unset."
+   },
+   {
+    "key": "c",
+    "label": "Hold it",
+    "detail": "The two medium alerts stay open and no one edits the demo-deploy workflow."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-25T07:32:53.828811+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-17 20:05",
+   "2026-09-04 07:05",
+   "2026-09-05 21:26",
+   "2026-09-14 14:45",
+   "CARD hpsm-composer-synthetic-demo-content-for-monday",
+   "CARD hpsm-composer-demo-release-unreachable-c12",
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD composer-hp-sow-name-on-demo",
+   "CARD composer-demo-internal-text-plan",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD hpsmpoc-k14-demo-scenarios-1003",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD composer-expert-66-demo-deploy-1007",
+   "CARD hpsmpoc-attribution-demo-tuesday-1011",
+   "CARD composer-4e00d57-words-look-demo-deploy-1011",
+   "CARD hpsmpoc-page-frame-names-for-demo-1011",
+   "CARD hpsmpoc-demo-names-beyond-the-frame-1011",
+   "CARD composer-new-words-look-demo-deploy-1012",
+   "CARD hpsmpoc-demo-name-check-residue-1012",
+   "CARD composer-b134-new-look-demo-1012",
+   "CARD composer-b144-words-demo-1013",
+   "CARD nexusai-rd846-build-broken-demo-deploy-1013",
+   "CARD composer-demo-minio-overlay-1019",
+   "CARD composer-demo-objects-image-pin-1019",
+   "CARD composer-demo-image-offbox-route-1019",
+   "CARD composer-demo-vm-write-role-after-copy-1019",
+   "CARD composer-demo-deploy-eaff2b7-words-1020",
+   "CARD hpsmpoc-demo-telemetry-review-week-1021",
+   "CARD hpsmpoc-hosted-demo-data-cleanup-1021",
+   "CARD hpsmpoc-uat-api-accepts-demo-audience-token-1021"
+  ]
+ },
+ {
+  "id": "nexusai-risk-template-row-ceiling-1025",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: what is the most rows a risk condition may return when it runs (today 10,000)?",
+  "bluf": "Your word is needed on a number. Since PR #97, a risk condition with no filter (the default template) no longer stops at 100 rows: the caller's limit applies, clamped to between 1 and 10,000. The QA gate measured 1,445 rows (the whole seeded table) returned at limit 10,000, against 100 before. Read at main ef45606a: backend/simpleDb.js line 802 holds the clamp (Math.min(Math.max(parseInt(limit, 10) || 100, 1), 10000)); backend/server.js line 21133 defaults the request limit to 100; backend/services/riskSqlTemplates.js line 21 says the default template has no built-in limit, 'as it does for every other template'. That clamp sits in the shared run function, so every template already has the same 10,000 ceiling; lowering it for the default row alone would make that row the odd one out. The separate question of who may call the run endpoint (it is not covered by the admin check added for RD-836) is not decided here. Recommendation: record 10,000 as intended and close RD-876, leaving the who-may-run question to RD-836.",
+  "default_action": "Treated as (a) only in the sense that nothing changes: the clamp stays at 10,000 and RD-876 stays open as an unanswered owner question. No builder starts it. Other NexusAI work keeps moving.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep 10,000 as the ceiling for every template, as built",
+    "detail": "RD-876 is closed with a note that the ceiling is intended. No code change."
+   },
+   {
+    "key": "b",
+    "label": "Lower the ceiling to 1,000 for all templates",
+    "detail": "A builder changes the one clamp and adds a cell that limit 10,000 returns at most 1,000 rows on the default row (red first). Anyone relying on larger exports through this path is cut off at 1,000; whether anyone does is not measured."
+   },
+   {
+    "key": "c",
+    "label": "Restore the old hard 100 for the default template only",
+    "detail": "A builder gives the default template its own 100-row ceiling and a red-first cell. Matches the pre-PR-97 behaviour, but makes the default row differ from all other templates."
+   },
+   {
+    "key": "d",
+    "label": "Name another number, or require the admin role above the default limit",
+    "detail": "Reply with the number or the rule; a builder applies it with a red-first cell."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-25T07:32:57.176865+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-template-102-words-1005",
+   "CARD mpscalc-proposal-template-text-assets-1010"
+  ]
+ },
+ {
+  "id": "mps-approval-queue-blocking-quote-1025",
+  "client_project": "Datasec/MPS",
+  "title": "MPS: should the approvals-waiting list still show a submitted quote whose calculation has a blocking issue, so the approver can reject it? Yes or no.",
+  "bluf": "Your word is needed: yes or no (MPSCALC-288). Today a submitted quote whose stored calculation holds a blocking issue cannot be approved (409 BLOCKING_ISSUES, with the words 'Reject it so the seller can resolve them and submit again'), but it can still be rejected. Because the 'can approve' flag is false for it, the quote also drops out of the approvals-waiting list (the canApprove=true filter) and out of the approver's 'awaiting my approval' group, so the approver cannot find the one action the error asks for. Read at main 93e1cab5: QuoteEndpoints.cs line 1225 ends the Approve rule with SubmittedBlocked(...) is null; QuoteFigures.cs line 286 filters the list by CallerCan.Approve and line 206 builds the awaiting group from it. How often this happens: the code comment at QuoteEndpoints.cs lines 1193 to 1195 says that through the API a submitted calculation never holds a blocking issue (submit refuses it first), so only a snapshot stored by other means reaches it; the ticket rates it Minor. That reject still answers 200 for such a quote is the ticket's measurement (both hosts), which I did not re-run. If yes, the list must be driven by a separate 'can reject' rule, which adds a new member to the quote contract and new words that come back to you on a follow-up card. Recommendation: no, leave the list as it is, because the case cannot arise through the API; document the limit later if you want it.",
+  "default_action": "Treated as (b): the list stays as it is and MPSCALC-288 stays in Backlog with no builder started. The rest of the MPS work keeps moving.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes: keep listing such a quote for the approver",
+    "detail": "A builder gives reject its own rule (callerCan.reject or equivalent) and points the list and the awaiting group at it. New contract member and new words; the exact text comes to you on a follow-up card before anything ships."
+   },
+   {
+    "key": "b",
+    "label": "No: leave the list as it is",
+    "detail": "No code change. A later card can add one sentence to the CallerCan description saying that the approve flag also covers the blocking-issue rule; no words are proposed here."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-25T07:33:01.032490+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:23",
+   "2026-08-28 10:02",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:32",
+   "2026-09-11 16:55",
+   "CARD nexusai-dark-palette-approval",
+   "CARD nexusai-palette-approval",
+   "CARD hpsmpoc-ai-templates-approval",
+   "CARD hpsmpoc-deck-s91-idc-quote",
+   "CARD mpscalc-new-quote-form-1010",
+   "CARD mpscalc-quote-list-deals-closed-title-1017"
+  ]
+ },
+ {
+  "id": "mps-markups-source-field-1025",
+  "client_project": "Datasec/MPS",
+  "title": "MPS: add a quote field that names the price-book versions the line markups were worked out on?",
+  "bluf": "Your word is needed on whether to add one field to the quote API (MPSCALC-169). A quote's lineMarkups are a trial run on the price-book set that is Active now, while the quote's sourceVersions show the set of the stored calculation, so nothing tells a client which set the markups came from; only the overlay version is carried (lineMarkupsOverlayVersion, marked internal). docs/API.md already says in words that the trial run uses the source set that is Active now (read at main 93e1cab5, around lines 205 to 208). The ticket gives no field name or contract words. The builder's backlog entry only suggests 'a field like lineMarkupsSourceVersions beside lineMarkupsOverlayVersion', set where the trial run reads the current set, and it needs a change to the quote contract and the endpoint file; the ticket says it waits for an earlier contract merge. I have not invented wording: if you say yes, a builder proposes the exact field name and the openapi and API.md sentences on a follow-up card, and nothing ships until you approve that text. Priority is Low in the review register. Recommendation: yes to the idea, with words still to come.",
+  "default_action": "Treated as (c): MPSCALC-169 stays in Backlog and no builder starts it. The rest of the MPS work keeps moving.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes in principle: a builder proposes the field name and the contract words on a follow-up card",
+    "detail": "No contract change is made until you approve the exact text on that card. The builder also proves the field is set from the same source set the trial run reads, with a test."
+   },
+   {
+    "key": "b",
+    "label": "No: keep the current words and close the ticket",
+    "detail": "The existing sentence in docs/API.md (the trial run uses the source set that is Active now) stays the whole answer; clients that need to know the set compare sourceVersions themselves."
+   },
+   {
+    "key": "c",
+    "label": "Not now",
+    "detail": "The ticket stays in Backlog."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-25T07:33:05.451985+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-paper-factor-source",
+   "CARD hpsm-phase1-missing-source-workbook",
+   "CARD composer-paul-110-questions-source",
+   "CARD hpsmpoc-revenue-source-1011",
+   "CARD mpscalc-e877-supply-cost-source-1017",
+   "CARD mpscalc-source-version-id-twins-1023",
+   "CARD mpscalc-source-swap-invalid-words-1023"
+  ]
+ },
+ {
+  "id": "mps-unchanged-save-api-sentence-1025",
+  "client_project": "Datasec/MPS",
+  "title": "MPS: approve this narrower sentence for the API description of an unchanged save (docs/api/openapi.json line 218)?",
+  "bluf": "Your word is needed on one sentence of API text. The OpenAPI description of the draft-save call still says a draft saved back unchanged is not a change, with no exception. That is false for one caller: a seller who is not also allowed to see internal metrics, reading a purchase quote that has manual items and sending the draft straight back, gets 403 MANUAL_ITEM_FORBIDDEN (MPSCALC-290). The other half of the fix is already in main: docs/API.md line 263 carries the exception. Read at main 93e1cab5, docs/api/openapi.json line 218 (the description of PATCH updateDraft) contains this sentence, verbatim: 'B309 T-V0-3 (MPSCALC-209): a draft saved back unchanged is not a change: the answer is 200 with the current quote, the same revision and updatedAt, no new event and no audit entry, and the latest calculation stays valid for that revision.' Proposed replacement for that sentence only (the rest of line 218, including 'A stale revision is still 409 whatever the body holds.', is untouched; the wording of the exception is taken from docs/API.md line 263): 'B309 T-V0-3 (MPSCALC-209): a draft saved back exactly as the API returned it is not a change: the answer is 200 with the current quote, the same revision and updatedAt, no new event and no audit entry, and the latest calculation stays valid for that revision. The one exception: a caller without both Seller and internal-metrics who reads a purchase quote's draft with a manualItems member (an empty array counts) and sends it back whole is refused 403 MANUAL_ITEM_FORBIDDEN before any comparison; that caller leaves manualItems out of the PATCH.' MANUAL_ITEM_FORBIDDEN already appears 5 times in that file. Recommendation: approve exactly this text.",
+  "default_action": "Treated as (c): line 218 is not edited, MPSCALC-290 stays in Backlog, and no builder starts it. The rest of the MPS work keeps moving.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Approve this exact sentence",
+    "detail": "A Sonnet builder replaces only that sentence on line 218 (no other line, no code), regenerates anything derived from the file if the build requires it, and the change goes through the normal gate. It ships with the next MPS deploy, which is still its own card."
+   },
+   {
+    "key": "b",
+    "label": "Change the words",
+    "detail": "Reply with your wording; the builder uses it verbatim. One option is to drop the internal prefix 'B309 T-V0-3 (MPSCALC-209):' from the sentence, which is already in the shipped text."
+   },
+   {
+    "key": "c",
+    "label": "Leave line 218 as it is",
+    "detail": "The API description keeps a statement that is untrue for that one caller, while docs/API.md tells the truth."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-25T07:33:09.299755+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-13 16:55",
+   "CARD hpsmpoc-uat-banner-sentence-untrue-1021",
+   "CARD hpsmpoc-400-shows-api-sentence-1023",
+   "CARD mpscalc-restricted-save-hidden-rates-entry-1023"
+  ]
+ },
+ {
+  "id": "mps-vanished-store-wording-1025",
+  "client_project": "Datasec/MPS",
+  "title": "MPS: is the wording used when the price-book store file disappears after a failed first open acceptable as written?",
+  "bluf": "Your word is needed on one operator-facing sentence (MPSCALC-332). If the price-book store file cannot be opened at first use and is then deleted, the API keeps retrying it, answers 503 until it can read the file, and recovers if the file comes back; but it never says the 'no store' line, so a missing file is reported under the 'cannot be opened' sentence. Read at main 93e1cab5, src/MpsCalc.Api/Sources/ActiveSources.cs: line 244, the cannot-open wording: 'The reference store at {Path} cannot be opened (its file permissions, or another process holds it); calculations answer 503 until it can be read.' Line 238, the no-store wording: 'No reference store at {Path}; calculations answer 503 until the price books are imported (mpscalc-import).' The open-fault log is written once, by the first reading (line 201 to 204); retries run with reportCannotOpen: false (line 233). The cannot-open sentence names permissions and another process, not a missing file. That a vanished file lands in that branch is my reading of the catch at line 198 (IOException), not a run. Both are log lines an operator reads, not screen text. Recommendation: yes, accept as written (the behaviour recovers when the file returns, which the no-store outcome does not), and add the one pinning row either way. A second, separate question about the colour-pages minimum (MPSCALC-330) is queued behind this and is not asked here.",
+  "default_action": "Treated as (a) only for the code: nothing changes, MPSCALC-332 stays in Backlog as an unanswered words question and no builder starts it. The rest of the MPS work keeps moving.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept the wording as written",
+    "detail": "A builder adds the one row the ticket asks for (an absent store at first use gives the existing no-store line once and is not served after the file is written; red if the first-use File.Exists check is disabled) and pins the vanished-file answer as it is. No new word."
+   },
+   {
+    "key": "b",
+    "label": "Say the existing no-store line once when a retry finds the file absent",
+    "detail": "The retry keeps going, but the first retry that finds the file missing logs line 238's sentence once; no new word, one small code change plus the same row."
+   },
+   {
+    "key": "c",
+    "label": "Change the words",
+    "detail": "Reply with the wording; a builder applies it and pins it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-25T07:33:13.084975+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-17 08:47",
+   "CARD nexusai-customer-test-store-wizard-clickthrough",
+   "CARD hpsmpoc-182-wording",
+   "CARD hpsmpoc-four-wording-fixes-monday",
+   "CARD composer-guided-wording-draft-1003",
+   "CARD composer-wording-asd-fixes-1006",
+   "CARD nexusai-rd476-two-wording-fixes-1018",
+   "CARD hpsmpoc-class-c-wording-six-tickets-1022",
+   "CARD hpsmpoc-pre-engagement-pack-wording-1023"
+  ]
  }
 ]
