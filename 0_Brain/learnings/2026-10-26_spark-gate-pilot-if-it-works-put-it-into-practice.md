@@ -22,3 +22,13 @@ tier: W
 **Mechanism:** `2_Project_Files/local-model/gate/` (spark_gate.sh, spark_review.py, REVIEW_CHECKLIST.md), built by a Sonnet tooling drafter on 2026-10-26 with arms, and calibrated on PR #1687.
 
 **Family:** [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]] · [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-14_do-not-guess-a-comparison-a-citation-you-did-not-open-is-a-guess]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot, measure, review; rule 5: every grant recorded).
+
+## CALIBRATION 1, 2026-10-26 ~09:4x — PR #1687 rounds 1 and 2 against the two Sonnet verdicts (tooling drafter; Wednesday re-ran the runner's arms: 3/3 PASS once the deploy key was set)
+- **Deterministic half: WORKS.** spark_gate.sh's facts matched the Sonnet gates exactly (r1 9F/7P -> 16P, unit +16; r2 14F/7P -> 21P, unit +21; ruff; mypy aborts the same way), in ~85 s, with no model.
+- **Spark review half: NOT READY for tier 2.** r1 found the two biggest findings (the unbounded cancel; the cause stated as fact) but called NO GO, missed the structural reds, caught 1 of 8 overstated sentences, and raised 3 false positives. r2 found 0 of 3 overstated sentences and raised 5 empty or wrong findings out of 10. Single runs, not repeats.
+- **IN PRACTICE from now (what works, per Kam's "if this works, put it into practice"):**
+  1. **Every gate runs `local-model/gate/spark_gate.sh` FIRST** (the mechanical half: head asserted, red/green on base vs head, suite before/after, lint, facts.json). The Claude gate is handed facts.json and told NOT to re-run what it already proves. It spends its tokens on judgement only: risk, scope, claim-checking, planted violations the runner does not do.
+  2. **Tier 3 (hygiene):** the runner alone plus Wednesday's completion check. No Claude gate.
+  3. **Tier 2:** Claude gate (Sonnet) on facts.json + a Spark review as a SHADOW. Each shadow run adds a calibration row here.
+  4. **Tier 1:** Opus gate as routing v1.0 says; Spark not measured there.
+- **Next improvements to the Spark review** (from the drafter, to build before calibration 2): a planted-violation step in the runner; include the cited upstream handlers, not only the cited line; a recommendation field; a one-sentence-at-a-time pass over client comments; findings capped to evidence-verified ones.
