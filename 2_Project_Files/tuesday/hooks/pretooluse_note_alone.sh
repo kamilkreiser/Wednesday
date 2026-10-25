@@ -41,6 +41,8 @@ try:
 except Exception as e:
     warn(f"input parse error: {e}")
 cmd = (inp.get("tool_input") or {}).get("command", "") or ""
+if os.environ.get("WED_AGENT") != "tuesday":
+    sys.exit(0)  # 2026-10-25: this hook is wired through the SHARED settings template; it acts on the Tuesday seat only
 
 # drop heredoc bodies: a brief or note text may quote note_entry.sh without running it
 out, end = [], None
@@ -53,6 +55,14 @@ for ln in cmd.split("\n"):
     if m: end = m.group(1)
 if not re.search(r"note_entry\.sh\b", "\n".join(out)):
     sys.exit(0)
+# 2026-10-25 19:5x (s174, ledger w=18): a direct note_entry.sh write is refused outright on this seat; the wrapper
+# tuesday/tools/note_alone.sh checks the message at EXECUTION time, which closes this hook's note-issued-LAST hole.
+if not re.search(r"note_entry\.sh\s+--where\b", "\n".join(out)):
+    log("REFUSED: direct note_entry.sh (use note_alone.sh)")
+    print("REFUSED by pretooluse_note_alone.sh: on the Tuesday seat a note is written ONLY through\n"
+          "  bash 2_Project_Files/tuesday/tools/note_alone.sh [--h3] --stdin <<'EOF' ... EOF\n"
+          "which refuses when its message holds any other tool call (ledger w=18, 2026-10-25).", file=sys.stderr)
+    sys.exit(2)
 
 tp, tuid = inp.get("transcript_path") or "", inp.get("tool_use_id") or ""
 if not tp or not os.path.isfile(tp):
