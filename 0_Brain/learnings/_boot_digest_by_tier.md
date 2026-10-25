@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-26 07:42 from 250 lesson files (1,087,254 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 205. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-26 08:57 from 250 lesson files (1,088,238 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 205. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -5385,7 +5385,7 @@ sections (open the file for these): What the grant covers — Wednesday's readin
 **His words, verbatim (2026-09-13 09:1x AEST):**
 > *"this is a new standing rule for all projects - please spin up as many agents as possible to complete the task as long as multiple agents do not create a problem with development through multiple agents working on the same code base.  Also as an FYI - the kreiser.org credits will most likely run out soon and will reset in 3 hours"*
 
-sections (open the file for these): What it widens, and what it does not · How to apply · EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"*
+sections (open the file for these): What it widens, and what it does not · How to apply · EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"* · EXTENSION 2026-10-26 ~08:5x — Kam, Wednesday's terminal (on the laptop), verbatim: *"use the maximum number of agents and always try to have the spark running thorugh tickets"*
 
 ## How to apply
 1. **Every morning sweep and every checkpoint asks: how many DISJOINT lanes exist right now?** — and
@@ -5407,6 +5407,11 @@ recorded) · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the queue
 ## EXTENSION 2026-09-13 14:0x — Kam, terminal, verbatim: *"rotate then keep pushing through the tickets.  use as many agents as necessary.  I would like to get through at least 50% by tuesday"*
 - **A TARGET with a date:** at least 50% of the Secuura tickets closed by **Tuesday 2026-09-15** (a weekday and a date — derived: `date -j -f %Y-%m-%d 2026-09-15 +%A` = Tuesday). Baseline: **KS active (unstarted+started types) = 121** at 08:4x on 2026-09-13 (`board_count.sh`, real count) → **≤ 60 active by Tuesday**. Re-count at every morning sweep and report the delta against this line.
 - "As many agents as necessary" restates the standing rule above with the target as the reason. "Rotate" = his word for the coordinator's rotation with the floor clear (no agent live), which the fleet-loss card's default did not forbid.
+
+## EXTENSION 2026-10-26 ~08:5x — Kam, Wednesday's terminal (on the laptop), verbatim: *"use the maximum number of agents and always try to have the spark running thorugh tickets"*
+- **Restates this rule, and adds the Spark as a standing half:** the Spark is never idle while a briefable ticket exists. In practice that means a brief batch is always being drafted or run, one round at a time (the box takes one request), and every PASS diff is read by Wednesday before it is held.
+- **The machine is now the limit, not the allowance** (gauge 6%): the laptop has 32 GB and launches wait for load1 < 7 (the Tuesday wave rule, applied here). At the instruction the floor was G 20th (KS-1719, Sonnet), D 31st (deploy, Opus), R (raise, Sonnet), K (KS-1683, Opus) plus a Sonnet Spark drafter; load1 11.7 right after the R+K boots, so the next launch waited.
+- Each new seat is announced by mail to every live seat on the shared inbox in the same action as its launch (ledger 2026-10-26).
 
 
 ## Rotation never blocks the work — delegate FIRST, then rotate with the agents running; and keep spinning up as many agents as the code allows
