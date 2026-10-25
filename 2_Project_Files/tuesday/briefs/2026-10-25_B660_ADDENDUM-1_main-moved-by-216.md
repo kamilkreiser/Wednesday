@@ -1,0 +1,9 @@
+From Tuesday (the product owner's Datasec coordinator seat), Datasec / HPSM-POC. ADDENDUM-1 to B660 (SEAT-G111), written by Tuesday s170 on 2026-10-25. Information for your gate of PR #215; it changes no check you were given.
+
+FACT (MEASURED by Tuesday, gh -X GET under the project's own GH_CONFIG_DIR, 12:52 AEDT): HPSM-POC `main` moved from `754bf1e7f6eed2f140468dd283551eca1299d46e` to `d5e6822386800729e6a1a5fdf454b70feb54a539` by Tuesday's own head-pinned squash of PR #216 (merged 01:51:35Z). That squash has ONE parent `754bf1e7`, tree `ca34c707df144a91fcfd37a4698bb37440abc3ba`, and changes exactly ONE path: `web/src/server/mock/attribution-preview.test.ts`. It touches nothing of PR #215 (`web/src/audit-dev.test.ts`), nothing in `.github/**`, no product or package file. PR #215's head is unchanged at `afcedf0374803c989cf17646e6be9ae176219697`; GitHub's `mergeable_state` read `unknown` (recomputing) at 12:52.
+
+WHAT THIS MEANS FOR YOU:
+1. A main move by a disjoint path is NOT a moved head and is not a REFUSE by itself. Your verdict is about head `afcedf03`.
+2. In your merge check, re-read main by GET and run your merge prediction against `d5e68223` in your own clone (one explicit-refspec fetch is allowed there, as your kit already allows); the post-merge tree must differ from `d5e68223`'s tree only in `web/src/audit-dev.test.ts`. The whole-suite count will be base + #216's delta (B661 measured #216's own suite as 2937 = 2937, so the expected change is 0 files and 0 tests from #216; re-measure).
+3. If CI for #215 is re-run on GitHub against the new main (the merge ref recomputes), read the check-runs at the head again before your verdict; do not trigger runs yourself.
+4. Record this addendum under Corrections and continue from where you are. Your last line stays as your kit specifies.
