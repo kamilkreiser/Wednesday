@@ -1,0 +1,38 @@
+STARTABLE: YES (after your stamp: 7 slots + last line; the slot grep reads 8 now, expect 0 after)
+
+# B673 DRAFTER-REPORT (kit for SEAT-H24, HPSM-POC PR #217 round 2 of 2)
+Drafted 2026-10-25 14:37-14:50 AEDT. Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-25_B673_SEAT-H24_hpsmpoc-217-reader-round2.md` (140 lines, 0 non-ASCII bytes, `grep -c` four-underscore pattern = 8, at-sign-slot pattern = 0).
+
+## BLUF
+Round 2 of 2 on the class "a reader test for a CI job plus a comment-only workflow edit" (B669 line 1: NO GO round 1 of 2). One path (`infra/tests/test_ci_workflow.py`), `ci.yml` byte-equal to head blob `135260d6`, fast-forward push onto `5fa26289`, Sonnet (C2, line 92), gate after tier 2 (G2, line 109), G-cap line 111, ports 9690-9699, pane `Datasec/HPSM-POC-H24`. Scope as ruled: (a) aggregator step, (b) proof step, (c) test step (g44) IN; B669-3 and B669-5 IN; B669-4 OUT with a reason; Notes not ours.
+Launch line is in the kit's Stamp section, with `BRIEF_SEAT_LEVEL=sonnet` inside the quotes.
+
+## Facts re-measured (instrument, control)
+- PR head / main / open PRs (`git ls-remote`, `gh api -X GET pulls?state=open`, 14:37:46): branch = `refs/pull/217/head` = `5fa26289...`; main `f3536156...` (unmoved); open PRs = #217 only, files = the two paths. `compare 754bf1e7...main` = the two web test files. `ls-remote 'refs/heads/b673*'` printed nothing (control: the three other refs printed). Not run by me: a positive control for the empty `b673*` read beyond those.
+- Head files: raw reads by `gh api` into my scratchpad: `ci.yml` 679 lines sha256 `0b64f997...` (= the gate's `step0_hashes`), reader 447 lines sha256 `6896fe3b...` (= the gate's). Blob ids by `contents?ref=` `.sha`: `135260d6...` and `c60b2955...` (= the gate's). Fact-check counts for the kit's REFUSE list measured with `grep -c -F` on those raw copies (all 1, reader `def test_` 26), zero control `zzz-no-such-string-7f3a` printed 0 on both files.
+- `git cat-file -t` in the shared project clone: `5fa26289` = commit; `f3536156` = "could not get object info" (as the gate kit warned). Kit tells the seat to build on the head and make no fetch of main.
+- Ports: `lsof -nP -iTCP:9690-9699 -sTCP:LISTEN` printed nothing, rc 1 (no bind control run by me). Word-boundary scan over 121 non-`.pre-` SEAT kits of 10-24/10-25 for `969[0-9]`: six hits, all range prose (B607 9540-9699, B608 9600-9699, B609 9610-9699, B612 9620-9699, B667 9620-9699, B619 says its hits are range prose); I read the matched text of each. Control: `968[0-9]` hits B618, B619, B620.
+- Names: scan for `HPSM-POC-H24|SEAT-H24|B673` over the same kits: 0 (control: `SEAT-H23` hits the B664 kit and report). Project `Briefs/` for `B673|H24`: none (rc 1). `.tools/b673`, `.tools/wt-b673-fix`: do not exist (`ls -d` errors; control: `ls -d .tools/b669` lists). Panes (`tmux list-panes`, 14:3x): tuesday, MPS-M24, Security-Composer-J14, MPS-M23, MPS-G116, NexusAI-G115, fleet-monitor.
+- Routing lines by `sed -n 92p;108,111p`: C2 92, G1 108, G2 109, G3 110, G-cap 111. Model id `claude-sonnet-5-5` at `models_latest.json` line 23.
+- Read whole: DRAFTER_RULES, B669 STATUS (447 lines, in two reads), B664 kit, B672 template, B669 kit lines 1-69 (not its Stamp text, lines 70-98 beyond the stamp excerpt), the head reader (1-30 and 168-447) and `ci.yml` 165-365.
+
+## D-decisions (all in the kit; override at the stamp)
+- D1 closed shapes instead of substring lists: aggregator step (one step, no `if`/`continue-on-error`, script = echo + check, then only `exit 0` lines tolerated), proof step (Python block as whole text with the `named` literal, URI and floor-case line as placeholders; shell tail closed), test step (every script line from a closed list, kills g44), plus an extension: `PART: ${{ matrix.part }}` once and no `include`/`exclude` in the matrix (a constant `PART` or an `exclude` runs fewer tests while every present assertion stays green; I judged a fresh gate would find these).
+- D2 four new tests, 26 -> 30, infra suite 254 -> 258.
+- D3 synthetic OUTSIDE names with predictions (Imports move green, FollowUp move stays red via the by-name placement test).
+- D4 docstring names the soft pins and the closed shapes.
+- D5 one commit; D6 plants rebuilt from the gate's TEXT and `c3_plant_table.tsv` (published data), nothing run from gate/builder folders.
+- B669-4 OUT: reasoned in the kit (trailing-comment stripping on shell text is unsafe and could hide a real defect, the exact class at issue; all cases are loud red).
+
+## Q-questions for Tuesday (each with a default)
+- Q-1. The gate's own fix-shape contradicts itself: "keep g43 green (harmless)" yet "pin the step's script as a whole so a trailing exit is a visible red". Your ruling says g43 and g52 stay green; I followed it by tolerating exactly a trailing `exit 0` (D1). Default: as written. The risk: a fresh gate EQUIV such as a trailing `echo` line would turn red; I did not tolerate it because "after the check nothing can change the exit status" holds for `echo` too. If you want the tolerance wider (trailing `echo`/`true`/`:`), say so at the stamp.
+- Q-2. g45b (`if: failure()` on the aggregator step) turns RED under my "no condition on the step" rule. Not on the stay-green list because the gate called it unmeasured and a cancelled shard makes `failure()` false (a real leak by GitHub's documented semantics, which neither I nor the gate ran). Default: accept the red and report the change. The round-2 gate's kit should list g45b as "red accepted".
+- Q-3. The embedded proof-step copy will put tokens the gate's hygiene scan flags (`os.environ`, a `http` namespace URI) into added lines. Kit handles the URI by a placeholder and asks for line-by-line judgement of the rest. The round-2 gate kit should say the hygiene scan reads executable lines and judges the embedded copy by reading; default: yes, put that in the gate kit.
+- Q-4. Times: kit suggests READY 2 h, hard stop 3.5 h (B664's). Rebuilding ~100 plants from text is the long part. Default: as suggested.
+- Q-5. Gate kit pins for you to write later: head (new), parent `5fa26289`, base `754bf1e7`, main `f3536156`, 1 path, names added 4 (30 total, suite 258), the full plant list incl. h01-h36 from the gate's TSV, g45b red accepted, g26i green.
+
+## UNMEASURED
+I ran no test, plant, mutant or bash probe; nothing compiled. Unmeasured: that the D1 shapes stay green on every EQUIV plant (the seat's Step 4/5 proves it); the exact edit of g44 and g45a/g53 beyond the gate's one-line wording (the kit tells the seat to build the natural edit and print the diff); whether the proof Python copy compares equal without a stray difference; whether the shell stubs for the bash proofs behave as the gate's did; how long the 106-plant matrix takes; runner Python version; `failure()` semantics. I did not run any lock script or tool; the two lock scripts named (`.tools/b198/lock.sh`, `.tools/b267/waitload.sh`) are copied from the paths B664 and the gate named, not re-read by me.
+
+## Outside-the-fences disclosure
+Wrote only the kit and this report. Scratch files in the session scratchpad (`.../scratchpad/b673/ci.yml`, `reader.py`: raw copies of the head's files). Read-only `gh api -X GET` under the project `GH_CONFIG_DIR` (pulls, contents, compare, matching-refs, files), `git ls-remote` and `cat-file` in the shared project clone, `lsof`, `tmux list-panes`, `ls` of the project's `Briefs/` and `Briefs/2026-10-25_B669_evidence/` (headed the TSV, no script opened), `.tools` existence checks by `ls -d` (`.tools/b669` listed as a control only; I did not open it). No Jira call, no decision queue, no mail, no Artifact/Docs tool, no read of forbidden trees, no `cd`.
