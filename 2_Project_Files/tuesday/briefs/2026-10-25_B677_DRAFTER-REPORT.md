@@ -1,0 +1,38 @@
+STARTABLE: YES (after your stamp; the kit has 8 unfilled slots, by design)
+
+# B677 drafter report (SEAT-G120, HPSM-POC PR #217 gate, round 2 of 2, tier 2)
+
+Drafted Sun 25 Oct 2026 15:47-15:56 AEDT (clock from `date`). Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-25_B677_SEAT-G120_hpsmpoc-217-gate-round2-tier2.md` (100 lines). I changed nothing else; no test, plant, clone, fetch or worktree was run.
+
+## BLUF
+The kit is the B669 shape with three changes that carry the weight: (1) the PROPERTY of B673 is the thing under test, not the six named plants; (2) the builder's 51/52 green->red rows are audited and classified L (true leak) / E (equivalent, red by design) / R (routine edit turned red), each by a bash run with stubs; (3) the grading rule for over-reds is decided in the kit (see D1) so the gate does not have to guess and cannot make a wrong class call that costs the round-cap card.
+
+## Facts re-measured (instrument; control)
+- PR #217: open, `mergeable_state` clean, head `ef63b3bf...` = `refs/heads/b664/...` = `refs/pull/217/head` (`gh api pulls/217`, `ls-remote`, 15:47 and 15:48), 4 commits, files `ci.yml` +2 -2 and reader +456 -0 (`pulls/217/files`; 277+180-1 = 456 checks out). Main `f3536156` unmoved; `compare 754bf1e7...main` ahead 2 behind 0.
+- Blobs (`contents?ref=`): `ci.yml` 135260d6... (equal to round-1 head, as the fix claims); reader `aef9509c...`. Raw head reader = 626 lines (447+180-1); the five new test names and line numbers in the kit were read from that file (547, 571, 585, 597, 611).
+- Checks at 15:47: 20 rows all `success` (CodeQL umbrella + 4 Analyze success), 4 analyses at `ef63b3b`, open alerts 0 (no positive control for the zero; the kit demands the gate's).
+- Builder's TSV (`grep -c -F`): `green->RED` = **51** rows, `red->GREEN` = 1 (g26i); the builder says 52. The kit tells the gate to recount (contradiction wins). Plant matrix rows = 193 (matches claim). Round-1 `c3_plant_table.tsv` = 106 rows plus header (matches "106-plant").
+- Panes at 15:47: tuesday, Security-Composer-G118, MPS-M24, fleet-monitor. `B677`/`G120` unused (ls of `tuesday/briefs` and the project `Briefs/`, rc empty).
+- Ports 9720-9729: `lsof` printed nothing, rc 1 (no positive control run). Word-boundary scan `972[0-9]` of non-`.pre-` SEAT kits of 10-24/25 hit **B621** (range 9700-9729), **B622** (HPSM-POC gate, took 9720-9729 as its block; finished), **B648** (Composer round-3 gate, took 9720-9729; finished), **B650** (range scan) and **B657** (names B648's block only). None belongs to a live pane (live: G118 and M24, neither hit). Control: the same scan with `969[0-9]` hit B607 B608 B609 B612 B619 B667 B673. Tuesday: if you prefer a block with no history, 9730-9739 was not scanned by me.
+- Model row: G2 line 109, G-cap line 111 (`sed -n 106,112p model-routing.md`). Runner python: UNMEASURED; machine has python3 3.14.7 and /usr/bin/python3 3.9.6 (the kit asks for a 3.9.6 run).
+- Kit self-checks: slot grep 8 (control = the 8 lines listed), at-sign grep 0, non-ASCII bytes 0, person-name grep 0. Kit holds no decision-card id.
+
+## D-decisions (mine; override at the stamp)
+- **D1 grading of over-reds.** The fix builder admits its closed shapes are red on exit-status-equivalent edits (proof text reworded, trailing echo, duplicated check line, `|| true`, `set +e`; its NOTES) and the stamp accepted that trade; round 1's B669-4 (loud format pins) was ruled OUT as Minor. So the kit grades: class E reds = Note (once, listed); class R reds = Major SAME (M2) only if the routine edit is one the docstring does not name AND either the message does not tell the editor what to change or an automatic updater makes it (a `uses:` version bump); otherwise Minor. Leaks (M1) are Major SAME. Reason: a gate that calls every closed-shape over-red a Major would hand the product owner a round-cap card for a trade he already accepted twice. Plausible R candidates I read in the code and put in the gate's battery: extra env key on the test step (exactly two keys pinned), a `--results-directory "$RUNNER_TEMP/x"` argument (quoted args exclude `$`), a new step using `$PART` (job-level env makes it natural), an extra step naming `TestResults`/`trx` (e.g. a test reporter), upload `path:`/action change, `start SQL Server` rename, a third matrix key. Which of these is M2 vs Minor depends on the docstring text I did not read in full (only `PROOF_SCRIPT` region and the tests); the gate reads it.
+- **D2** Round count: written as "NO GO 1 of 2 already spent; this is round 2 of 2", from B669 line 1; the kit has a "ROUND CAP REACHED: the product owner decides" verdict form that asks the builder for nothing.
+- **D3** Plant matrix is rebuilt against the HEAD's `ci.yml` (the plants' region 165-365 is byte-equal to main's; the gate proves it with `cmp`), with the round-1 reader (blob `c60b2955`) as the old column; the gate gets a third worktree `wt-b677-r1` for the 254 and the old-reader column.
+- **D4** The fetch is two explicit refspecs (main and the PR branch) in the gate's own clone, because the shared clone may not hold `ef63b3bf`.
+- **D5** Bash stub proofs required for L-class; skipped-step leaks (g27 g45a g45b) are marked reasoned-from-semantics and UNMEASURED on GitHub, as the builder did.
+- **D6** The fifth test (not in B673's default of four) is accepted as a fact, not a finding; counts: reader 31, infra 259, delta vs base 22.
+- **D7** Time suggestion: target 1 h 45, hard stop 3 h (bigger than round 1: audit of 51 rows + fresh battery + 41-statement sweep).
+
+## Q-questions for Tuesday
+- **Q1** Port block: keep 9720-9729 (no live claim; two finished kits B622/B648 used it)? Default: keep. Alternative 9730-9739 (unscanned by me).
+- **Q2** Should the gate treat a Dependabot-style `uses:` bump turning the fifth test red as M2 (Major SAME) as written? Default: yes, it is the one automatic edit the lane exists to allow. The builder's text suggests the test only does `assertIn("uses: actions/upload-artifact@")`, so I expect green; the gate measures.
+- **Q3** The kit lets the gate close an unproven leak only by a bash run or workflow semantics, never by argument. Default: keep (it is the only defence against an over-generous Sonnet gate in the last round).
+
+## UNMEASURED
+Runner python version; whether any of the fresh-battery edits is actually red/green (I ran none); the class docstring's full appended text (grading R vs Minor hinges on it); GitHub semantics of a step-level `if` (skipped step = pass, `failure()` with a failed ancestor job); bash 5 vs 3.2; the 51 vs 52 discrepancy cause; whether the shared clone holds `ef63b3bf`; positive control for 0 open alerts; port scan of kits written after 15:50.
+
+## Outside-the-fences disclosure
+Read-only only. Files opened: DRAFTER_RULES, B669 kit/STATUS/evidence TSV head, B673 kit/STATUS/evidence TSV, `model-routing.md` lines 106-112. One raw GET of the head reader via `gh api -X GET ... -H 'Accept: application/vnd.github.raw'` saved to the drafter scratchpad `/private/tmp/claude-501/-Volumes-Laptop-DEV-TUESDAY/d936a994-5eb0-4430-b557-4420e8a5c35f/scratchpad/r/reader.py` (a scratch copy; nothing run). `gh` only with `-X GET` under the project's `GH_CONFIG_DIR`. `git --no-optional-locks ls-remote` once on the shared repo. No decision-queue, Jira, mail, Artifact, az, ssh, docker, or hosted-host call. My first Bash call had a `cd` and was refused by the hook (no effect). One advisory from the grep-case hook on a case-sensitive pattern (positive result obtained, no false zero relied on). I did not open `.tools/**` of any seat, nor any HP-NDA folder.

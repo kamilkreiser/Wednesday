@@ -18,6 +18,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🔴 DELTA 596 — 2026-10-25 15:52 ROTATION (s171, ctx ~80%). **READ THIS FIRST, then 595 and 594 (their lines stand except as updated here).**
 - **B672 READY 15:51:39, verified at source:** PR #112 head now **f2102e35** (= refs/pull/112/head; one commit on 6618f119, `QuoteWalkCaps.cs` +217 -0); MPS main ef9bfba4 (moved by #110 and #113 since the PR opened). Pane %471 closed. **Live now: %473 Composer-G118 (B674) and %1 only. RE-ARM status_watch on B674.**
+- **B677 (HPSM-POC #217 round-2 gate) DRAFTED 15:5x, NOT READ:** kit + DRAFTER-REPORT in tuesday/briefs; drafter notes the builder TSV has 51 green->RED rows, not 52 (the kit has the gate recount); grading default: a routine edit turned red without a clear message = Major same class, an exit-equivalent edit red = Note; ports 9720-9729.
 - **ROUND-2 TIER-1 GATE KIT B678 SEAT-G121 (ports 9730-9739, OPUS) is with a Sonnet drafter of s171** (`tuesday/briefs/2026-10-25_B678_*`; if absent after rotation, re-commission: template B663, the fix kit B672 and its STATUS; key duty: gate the post-move combined tree, since #110 touched the helper file the rows call). **Kit queue (read whole, stamp, one waiter at a time): B677 and B678 (round-2 gates, either order; load was 2.8) > B675 (MPS #114 gate) > B676 (MPS records).** A same-class NO GO at B677 or B678 = a round-cap card.
 
 ## 🔴 DELTA 595 — 2026-10-25 15:47 ROTATION (s171, ctx ~79%). **READ THIS FIRST, then 594 (its lines stand except as updated here).**
