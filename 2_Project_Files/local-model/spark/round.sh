@@ -114,7 +114,10 @@ if [ "$LRC" -ne 0 ]; then
   echo "$LINT_OUT" | sed 's/^/round: /'
   finish 2 "REFUSED — brief gate: $(echo "$LINT_OUT" | grep -c '^REFUSED') reason(s), first: $(echo "$LINT_OUT" | grep -m1 '^REFUSED' | cut -c9-220)"
 fi
-eval "$LINT_OUT"
+# 2026-10-26: stderr is merged into LINT_OUT, so a WARNING line (backticks/apostrophes) must never reach eval:
+# eval only the KEY=value assignment lines (B_*); echo every other line as a lint note.
+echo "$LINT_OUT" | grep -v '^B_' | grep -v '^$' | sed 's/^/round: lint: /'
+eval "$(echo "$LINT_OUT" | grep '^B_')"
 say "brief $B_BRIEF · tier $B_TIER · runner $B_RUNNER · pins: ${B_PINS:-none}"
 
 # ------------------------------------------------------------------ 2. endpoint
