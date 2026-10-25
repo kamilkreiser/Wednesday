@@ -48909,5 +48909,41 @@
    "CARD datasec-morning-plan-1026",
    "CARD hpsmpoc-control-chars-six-field-words-1026"
   ]
+ },
+ {
+  "id": "secuura-ks1717-new-emitter-secret-1026",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura / Blockchain: add a new secret shared only by originate and anchoring, to close KS-1717?",
+  "bluf": "Your choice needed on a security change. Today, anyone holding a connector login who can reach the anchoring service directly can switch off their own audit (provenance) record. Anchoring can't tell them apart from originate, because originate forwards the caller's own login. The fix is a new secret shared only by those two services, so the marker counts only when the secret is present. That is a new kind of internal secret, and both boxes need it set before the fix is deployed. If the fix lands without the secret, every originate action writes its audit record twice until the secret is set. That costs extra rows, but nothing is lost.",
+  "default_action": "If you don't answer, Seat J builds option (a) up to the security gate and nothing merges. No secret is created on any box until you tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "New secret, fail closed (recommended)",
+    "detail": "Seat J builds it with a test that fails before and passes after, then a security gate. It merges only once the secret is set on kintsugi and demo in the same deploy round. Each box is reported after it is set."
+   },
+   {
+    "key": "b",
+    "label": "Same, but signed per request",
+    "detail": "Stronger against a replayed header, but more code to review. Only worth it if you see a network-snooping risk on the internal hop."
+   },
+   {
+    "key": "c",
+    "label": "Not now",
+    "detail": "KS-1717 stays open. The comment's overstatement is corrected on its own."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-26T09:38:50.421708+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-10-26T09:42:26.306244+11:00",
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1032-fail-closed-when-vouch-secret-unset-1013",
+   "CARD secuura-ks485-answer-peter-vouch-secret-1023",
+   "CARD wed-morning-plan-1026"
+  ],
+  "delivered_artefact": "ANSWER to Seat J '[Wednesday -> Secuura/Blockchain-J] ANSWER: Kam ruled b' (verified at secuura-blockchain@ by the tap gate)",
+  "delivered_ts": "2026-10-26T09:42:59.521438+11:00"
  }
 ]
