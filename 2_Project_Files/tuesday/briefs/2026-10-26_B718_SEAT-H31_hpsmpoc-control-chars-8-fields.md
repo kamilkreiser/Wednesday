@@ -112,15 +112,24 @@ SELF-CHECK: drafted 2026-10-26 from 08:49 AEDT by Tuesday's read-only kit drafte
 
 ## Stamp
 Tuesday fills each four-underscore slot at launch by label with `stamp_brief.py`; the drafter fills none. The unstamped copy reads 9 lines with the pattern (the eight slot lines and the last line). Guidance for the slots (this paragraph holds no run of four underscores): STAMP reads `STAMPED <time> AEDT 2026-10-26 by <seat>`, brief read whole with its drafter report, naming the D-decisions and Q-questions as accepted or changed; LAUNCH WINDOW names the window, load1 and the live seats beside you; Launch authority names the grants (2026-10-16 HPSM-POC grant, 2026-09-13 as-many-agents rule, 2026-10-24 every-boot-works-tickets, the Datasec CodeQL policy, the 2026-10-22 Sonnet-first grant, the usage grant, the product owner's 2026-10-26 ruling); hard stop and target READY are Tuesday's times (drafter's suggestion: target READY 2 hours 30 minutes after launch, hard stop 4 hours 30 minutes: one baseline Api run of about 5 minutes, rows-first run, 16 mutant builds, 3 class repeats, one final full run); Head and main at launch must still be `b069274cfc201bc451ab2c22dc6adc2a6e231bef` with no `b718/*` ref, or say what moved; WORDING reads exactly `NOTE-ONLY` or `FULL` (with six rows `field | sentence` appended under a heading `RULED WORDS` after this section's last line but before the final line, each sentence ruled by the product owner); the model receipt line expected is `model: claude-sonnet-5-5 -- Sonnet first: a multi-file build on product code, tier-1 Opus gate after (model-routing.md row C2 line 92, gate row G1 line 108)`; the gate after this lane is tier 1, round 1 of 2.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Stamped by (the Tuesday seat that READ this brief whole, with its drafter report): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and target READY (AEDT, 26 Oct): ____
-- Head and main at launch (Tuesday `ls-remote`): ____
-- Model receipt line and `uptime` load1 at launch: ____
-- WORDING (`NOTE-ONLY` or `FULL`): ____
+- STAMP: STAMPED 09:00 AEDT 2026-10-26 by Tuesday s177, brief read whole with its drafter report; Q-1 answered by the product owner (template approved, WORDING FULL, six RULED WORDS rows appended by Tuesday); Q-2 YES (the 8 distinct API fields F1-F8); Q-3 NO allowance for a held PUT title (record the case); Q-4 round 1 of 2, NO GO 0 of 2 on class 'control-character refusal added to eight Api free-text fields'; D-1 to D-5 accepted
+- LAUNCH WINDOW: from the stamp until 14:00 AEDT 2026-10-26; ONE launch_when_cool task at load1 below 7 (10.16 at the stamp read); live beside you in this repository: Datasec/HPSM-POC-G136 (B716, the gate of PR #221, infra only) and possibly Datasec/HPSM-POC-G137 (B719, the gate of PR #222, which runs dotnet; dn.sh waits for it)
+- Stamped by (the Tuesday seat that READ this brief whole, with its drafter report): Tuesday s177, kit (now 134 lines with the RULED WORDS section) and its DRAFTER-REPORT read whole
+- Launch authority (who, under which grant): Tuesday, under the product owner's 2026-10-26 08:45 ruling ('Yes: extend the same check to all 8 fields') and 08:58:52 ruling ('Approve the template'), the 2026-10-16 HPSM-POC grant, the 2026-09-13 as-many-agents rule, the 2026-10-24 every-boot standing order, the Datasec CodeQL policy, the 2026-10-22 Sonnet-first grant and the 2026-10-20 usage grant; no deploy
+- Hard stop and target READY (AEDT, 26 Oct): target READY 2 hours 30 minutes after your Step-0 date, HARD STOP 4 hours 30 minutes after it; write both absolute at Step 0
+- Head and main at launch (Tuesday `ls-remote`): read just before this stamp by ls-remote (sha8 ref): b069274c refs/heads/main; (no b718 ref printed)
+- Model receipt line and `uptime` load1 at launch: model: claude-sonnet-5-5 -- Sonnet first: a multi-file build on product code, tier-1 Opus gate after (model-routing.md row C2 line 92, gate row G1 line 108) -- 7d about 4%; load1 10.16 at the stamp read
+- WORDING (`NOTE-ONLY` or `FULL`): FULL
 Pane `Datasec/HPSM-POC-H31` (drafter MEASURED: no such pane at 08:5x; Tuesday re-checks and picks the next free name if taken). **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-26_B718_SEAT-H31_hpsmpoc-control-chars-8-fields.md`. **Step 0:** copy it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/`, `cmp`, both sha256s in STATUS, the stamp-slot count (the REFUSE check).
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/HPSM-POC-H31 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-26_B718_SEAT-H31_hpsmpoc-control-chars-8-fields.md'"`
 
-READ-WHOLE-BY-TUESDAY: ____
+## RULED WORDS
+The product owner's 2026-10-26 08:58:52 live-board ruling on card `hpsmpoc-control-chars-six-field-words-1026`, option a, verbatim: "Approve the template" (the card's option text: "the same sentence, with each field's own noun"). Each row is that template with the field's own noun; use each sentence byte for byte.
+- F1 evidence `type` | `The type holds a hidden control or text-direction character (often from copying and pasting); type it again as plain text.`
+- F2 evidence `description` | `The description holds a hidden control or text-direction character (often from copying and pasting); type it again as plain text.`
+- F4 disposition `amendedNarrative` | `The narrative holds a hidden control or text-direction character (often from copying and pasting); type it again as plain text.`
+- F6 narrative review `text` | `The text holds a hidden control or text-direction character (often from copying and pasting); type it again as plain text.`
+- F7 action item `title` | `The title holds a hidden control or text-direction character (often from copying and pasting); type it again as plain text.`
+- F8 action item `ownerRole` | `The owner role holds a hidden control or text-direction character (often from copying and pasting); type it again as plain text.`
+
+READ-WHOLE-BY-TUESDAY: DONE 09:00 AEDT by Tuesday s177 (kit and report read whole)
