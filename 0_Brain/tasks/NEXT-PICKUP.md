@@ -14,10 +14,14 @@ supersede: REPLACED WHOLESALE by the Mon 26 Oct laptop seat at its 53% checkpoin
 - Ornith is NOT available here (Studio-only, paused since 10-12). The Spark works: http://127.0.0.1:47788.
 - Open question for Kam at a natural moment: does the Studio still run its launchd jobs? A 05:30 shift-change mail came from somewhere else today; with this laptop's jobs now installed, duplicates are possible from tomorrow.
 
-## 1. LIVE FLOOR (panes in tmux `fleet`)
-- %2 `Secuura/Blockchain-G` = Seat G 20th, SONNET 5.5. KS-1719 (Peter's ask; Kam: "prioritise this from Peter"). PR #1687 head 02399bd018aa READY FOR GATE. Filed KS-1720 (mypy aborts on develop) + KS-1721 (symlinked-venv test fails on Linux). Waiting for the gate verdict. Peter's ticket comment is DRAFTED at Secuura/Blockchain 5_Project_History/2026-10-26_seatG-20th/ks1719_peter_comment_DRAFT.md — post ONLY after the gate has read every sentence and Wednesday clears it.
-- %3 `Secuura/Blockchain-D` = Seat D 31st, OPUS 5.5. Deploying develop 1ae6f17d19a8 to kintsugi then demo (card secuura-kintsugi-deploy-held-at-99pct-1023's default fired; card withdrawn). GO sent 21:40Z: disk floor 12,000 MB; demo-service held + ticket; host keys TOFU UNVERIFIED (recorded in its handover). Expect STATUS mails per box.
-- QA GATE (Agent-tool subagent, Sonnet, tier 2 round 1) on PR #1687 -> verdict at 0_Brain/reference/2026-10-26_gate-pr1687-ks1719/verdict.md. Its main question: does the helper's new cancel of QUEUED proposals stay bounded to test residue?
+## 1. LIVE FLOOR (refreshed at the 65% checkpoint, ~09:27 AEDT; panes in tmux `fleet`)
+- DONE: KS-1719 (Peter's ask). PR #1687 merged as 7ce64f5d6739 (Wednesday read origin), two tier-2 gate rounds, Peter's comment 5f02798a posted, ticket left In Progress on him. G 20th scored 0.96, pane closed. Kam has a paste-ready reply for Peter on the panel.
+- %3 `Secuura/Blockchain-D` = D 31st, Opus 5.5: kintsugi build k1 (heartbeat at Secuura/Blockchain 5_Project_History/2026-10-26_seatD-31st/evidence/heartbeat.kintsugi.k1.txt), then demo ONLY after kintsugi is verified (Kam 08:58, relayed). Ack an idle wake only after reading a MOVING heartbeat figure.
+- %4 `Secuura/Blockchain-R` = R, Sonnet 5.5: five raise PRs from held Spark READYs (KS-1391, KS-1289, then KS-1548, KS-1524, KS-1649). KS-1649 changes the PUBLISHED developer portal: 3,000 is CONNECTOR_RATE_LIMIT_DEFAULT (range 1-10,000); the gate must weigh the wording.
+- %5 `Secuura/Blockchain-K` = K, Opus 5.5: KS-1683 (vc-issuer list/by-hash bound to the creator), comment-only exception granted for 3 comments. Tier-1 Opus gate when READY.
+- %6 `Secuura/Blockchain-J` = J, Opus 5.5 (switch at its plan prompt): KS-1717 anchoring x-emitter-internal guard. DESIGN FIRST: its plan proposes options; if a new secret/identity changes the trust model, card Kam.
+- Drafters (Agent tool, Sonnet): (1) Spark rung-3/4 batch + round.sh/brief_lint eval-warning fix (it is editing spark/round.sh NOW: do not commit that file mid-edit; safe_pull refuses until it lands); (2) the SPARK GATE pilot (local-model/gate/, calibrated on PR #1687 r1/r2 vs the Sonnet verdicts). Kam's conditional grant: learnings/2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice.md.
+- Spark today: 5 tasks, 5/5 round-1 PASS, all read and held. Rung 1/2 pool dry at the tip (~40 screened).
 
 ## 2. OWED, in order
 1. Gate verdict -> Wednesday's completion check -> GO merge to G 20th (TESTED grant) or a fix round (round 2 of 2). Then clear Peter's comment text and have G post it. KS-1719 stays assigned to Peter.
