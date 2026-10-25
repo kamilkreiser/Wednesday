@@ -1,0 +1,29 @@
+--- a/Blockchain/Dev/services/timestamping/src/index.ts
++++ b/Blockchain/Dev/services/timestamping/src/index.ts
+@@ -466,7 +466,7 @@
+       // KS-523: the TSA module already knows whether the token is qualified
+       // (its internal mock fallback reports eidasQualified:false + a
+       // "(mock)"-suffixed tsaName) — carry the signal instead of dropping it.
+-      eidasQualified = tsaResult.token ? tsaResult.eidasQualified === true : false;
++      eidasQualified = tsaResult.token && tsaResult.mock !== true ? tsaResult.eidasQualified === true : false;
+       if (tsaResult.mock === true || !tsaResult.token) verified = false;
+       tsaName = tsaResult.token ? tsaResult.tsaName : undefined;
+       proof = tsaResult.token || generateMockRFC3161Token(data.hash, now);
+--- a/Blockchain/Dev/services/timestamping/src/__tests__/ks753-mock-tsa-fallback-is-not-verified.test.ts
++++ b/Blockchain/Dev/services/timestamping/src/__tests__/ks753-mock-tsa-fallback-is-not-verified.test.ts
+@@ -87,7 +87,14 @@
+     const { single, inserts } = await driveApp();
+     expect([single.body.data.verified, inserts[0]]).toEqual([false, { verified: false, verifiedAtIsDate: false }]);
+   });
+-
++
++  // KS-1515: the flag decides eidasQualified too. A mock reply that CLAIMS eidasQualified:true must be reported (and stored) as not qualified, so requireEidas can refuse it.
++  it('🔴 KS-1515 a mock marked eidasQualified:true is reported eidasQualified:false, as well as verified:false', async () => {
++    mockTsa({ token: 'bW9jaw==', tsaName: 'Ordinary TSA', eidasQualified: true, mock: true });
++    const { single } = await driveApp();
++    expect([single.status, single.body.data.verified, single.body.data.eidasQualified]).toEqual([201, false, false]);
++  });
++
+   it('🔴 no token at all from the TSA module: index.ts generates its OWN mock proof, which is not verified either', async () => {
+     mockTsa({ tsaName: undefined, eidasQualified: false });
+     const { single, inserts } = await driveApp();

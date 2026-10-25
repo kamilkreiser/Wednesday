@@ -1,0 +1,10 @@
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts
+@@ -251,6 +251,6 @@
+     deepPlatformLayout();
+     firstBodyDelayMs = BUDGET_MS * 1.1;
+     const { r, ms } = await timedPage(250, 25);
+-    const wrong = [summary(r) !== appOnly(250, 25) ? `got ${summary(r)}\n   want ${appOnly(250, 25)}` : '', ms >= BUDGET_MS * 1.1 + 900 ? `took ${ms} ms` : ''].filter(Boolean);
++    const wrong = [summary(r) !== appOnly(250, 25) ? `got ${summary(r)}\n   want ${appOnly(250, 25)}` : '', ms >= BUDGET_MS * 1.1 + 900 ? `took ${ms} ms` : '', calls.length !== 1 ? `${calls.length} requests, want 1` : ''].filter(Boolean);
+     expect(wrong, wrong.join('\n')).toEqual([]);
+   }, 20000);

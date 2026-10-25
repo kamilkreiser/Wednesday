@@ -1,0 +1,49 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html b/Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html
+--- a/Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html
++++ b/Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html
+@@ -561,7 +561,7 @@
+     <p>Rate limits are enforced per API key / OAuth app. Regular users (JWT) are subject to global limits only.</p>
+     <table>
+       <tr><th>Scope</th><th>Default Limit</th><th>Headers</th></tr>
+-      <tr><td>Per API key / OAuth app</td><td>1,000 req/hour</td><td><code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code></td></tr>
++      <tr><td>Per API key / OAuth app</td><td>1,000 req/hour by default; Platform S connector keys are minted at 3,000 req/hour</td><td><code>X-RateLimit-Limit</code> (the actual ceiling for the key, on every response), <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code></td></tr>
+       <tr><td>Login endpoint</td><td>15 req/min</td><td>—</td></tr>
+       <tr><td>Registration</td><td>5 req/min</td><td>—</td></tr>
+       <tr><td>Verification (public)</td><td>No limit</td><td>Exempt from rate limiting</td></tr>
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts
+@@ -0,0 +1,32 @@
++/**
++ * KS-1649 - the developer portal's rate-limit table states the Platform S connector key ceiling.
++ *
++ * services/api-gateway/src/docs/developer-portal.html listed ONE default rate limit for every API key, "1,000 req/hour". That stays true
++ * for a key minted without an explicit rateLimit (the security service's schema default), but keys that
++ * POST /api/platform/organizations/register-connector mints for Platform S are minted at 3,000 req/hour (KS-1195). The row must say both,
++ * and must say that X-RateLimit-Limit reports the actual ceiling on every response.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const html = readFileSync(join(__dirname, '..', 'docs', 'developer-portal.html'), 'utf8');
++const row = html.split('\n').find((l) => l.includes('<td>Per API key / OAuth app</td>')) ?? '';
++
++describe('KS-1649 - developer-portal.html rate-limit row', () => {
++  it('RED KS-1649 R1 the row says Platform S connector keys are minted at 3,000 req/hour', () => {
++    expect(row).toContain('Platform S connector keys are minted at 3,000 req/hour');
++  });
++
++  it('RED KS-1649 R2 the row says X-RateLimit-Limit is the actual ceiling for the key', () => {
++    expect(row).toContain('(the actual ceiling for the key, on every response)');
++  });
++
++  it('CONTROL KS-1649 C1 the per-key default is still stated as 1,000 req/hour', () => {
++    expect(row).toContain('1,000 req/hour');
++  });
++
++  it('CONTROL KS-1649 C2 the row still lists all three rate-limit headers', () => {
++    expect(['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'].filter((h) => !row.includes(h))).toEqual([]);
++  });
++});

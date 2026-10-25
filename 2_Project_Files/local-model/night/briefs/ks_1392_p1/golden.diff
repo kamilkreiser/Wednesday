@@ -1,0 +1,68 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -203,17 +203,17 @@
+           echo "$HOME/.aiken/bin" >> $GITHUB_PATH
+ 
+       - name: Build contracts
+-        run: |
+-          cd contracts/secuura
++        working-directory: Blockchain/Dev/contracts/secuura
++        run: |
+           aiken build
+ 
+       - name: Run contract tests
+-        run: |
+-          cd contracts/secuura
++        working-directory: Blockchain/Dev/contracts/secuura
++        run: |
+           aiken check
+ 
+       - name: Upload contract artifacts
+         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1 (AUDIT D-7 SHA-pin)
+         with:
+           name: contract-artifacts
+-          path: contracts/secuura/plutus.json
++          path: Blockchain/Dev/contracts/secuura/plutus.json
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1392-ci-contracts-job-runs-in-the-contracts-directory.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1392-ci-contracts-job-runs-in-the-contracts-directory.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1392-ci-contracts-job-runs-in-the-contracts-directory.test.ts
+@@ -0,0 +1,37 @@
++/**
++ * KS-1392 - the ci.yml `contracts` job runs the Aiken steps inside Blockchain/Dev/contracts/secuura.
++ *
++ * .github/workflows/ci.yml built and tested the Aiken contracts with `cd contracts/secuura`, relative to the repo root. There is no `contracts/`
++ * at the repo root: the project is Blockchain/Dev/contracts/secuura, and the job set no working-directory, so the first `cd` failed and the
++ * artifact path matched nothing. deploy-demo.yml does the same steps correctly with `working-directory: Blockchain/Dev/contracts/secuura`.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++// packages/shared/src/__tests__ -> six levels up is the repository root
++const root = join(__dirname, '..', '..', '..', '..', '..', '..');
++const ci = readFileSync(join(root, '.github', 'workflows', 'ci.yml'), 'utf8').split('\n');
++const start = ci.findIndex((l) => l === '  contracts:');
++const rest = ci.slice(start + 1);
++const end = rest.findIndex((l) => /^  \S/.test(l));
++const job = (end === -1 ? rest : rest.slice(0, end)).join('\n');
++const WD = 'working-directory: Blockchain/Dev/contracts/secuura';
++
++describe('KS-1392 - ci.yml contracts job', () => {
++  it('RED KS-1392 R1 no step cds into a contracts/secuura that does not exist at the repo root', () => {
++    expect(job).not.toContain('cd contracts/secuura');
++  });
++
++  it('RED KS-1392 R2 the build and the check step each run in the contracts directory', () => {
++    expect(job.split(WD).length - 1).toBe(2);
++  });
++
++  it('RED KS-1392 R3 the artifact path is the real plutus.json', () => {
++    expect(job).toContain('path: Blockchain/Dev/contracts/secuura/plutus.json');
++  });
++
++  it('CONTROL KS-1392 C1 the contracts job was found and still builds and checks', () => {
++    expect([start >= 0, job.includes('aiken build'), job.includes('aiken check')]).toEqual([true, true, true]);
++  });
++});
