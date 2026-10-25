@@ -48945,5 +48945,81 @@
   ],
   "delivered_artefact": "ANSWER to Seat J '[Wednesday -> Secuura/Blockchain-J] ANSWER: Kam ruled b' (verified at secuura-blockchain@ by the tap gate)",
   "delivered_ts": "2026-10-26T09:42:59.521438+11:00"
+ },
+ {
+  "id": "secuura-ks1723-zod-msal-high-baseline-1026",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura / Blockchain: every push is blocked by two high advisories with no fix in range. Accept them for now with a deadline, or keep everything blocked?",
+  "bluf": "Your call, because both are rated high and your rule is that nothing high gets accepted. The lockfile refresh (KS-1723) clears 10 of the 13 new advisories, and body-parser clears with a one-line pin bump. Two can't be cleared without a major upgrade. 1) msal-node: measured as not reachable. Our one call uses an older version outside the affected range, in the shape the advisory recommends. 2) zod: our code never calls the named function, but the same flaw (a huge array of bad items exhausting memory) exists in the zod 3 we use, and no version fixes it. A 1 MB request takes about 340 ms and 165 MB, and a 10 MB request about 4.5 seconds and 1.4 GB. The real fix is capping array sizes and request body limits, not upgrading zod. Until this is decided, nothing can be pushed: 5 finished PRs, KS-1683 and KS-1717 are waiting. Precedent: on 4 October (freeze 5, card secuura-freeze5-high-no-fix-1004 = b) you accepted two high advisories that had no fix, braces and node-forge, each with a reason, a ticket and an expiry.",
+  "default_action": "If you don't answer, nothing is accepted and every push stays blocked. The seats keep their work committed locally, and I raise this again at 48 hours.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept both for 14 days, with two tickets (recommended)",
+    "detail": "Both are recorded as accepted, with reasons, a ticket and an expiry date of 9 Nov. Ticket 1: cap the request arrays (about 230 unbounded) and lower the 10 MB body limits. Ticket 2: plan the zod 4 and msal moves. All pushes resume today."
+   },
+   {
+    "key": "b",
+    "label": "Accept msal-node only; fix zod's exposure first",
+    "detail": "A seat caps arrays and body limits before anything is pushed. That's safer, but every push waits about a day."
+   },
+   {
+    "key": "c",
+    "label": "Accept neither for now",
+    "detail": "Everything stays blocked until a zod 4 migration lands, likely days."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-26T09:49:30.068637+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "2026-08-21 20:10",
+   "2026-08-24 10:11",
+   "2026-08-27 19:42",
+   "2026-08-27 19:43",
+   "2026-08-27 19:44",
+   "2026-08-28 09:33",
+   "2026-09-03 12:13",
+   "2026-09-04 08:30",
+   "2026-09-05 13:55",
+   "2026-09-05 20:17",
+   "2026-09-06 10:52",
+   "2026-09-07 09:10",
+   "2026-09-08 07:10",
+   "2026-09-08 14:57",
+   "2026-09-08 15:47",
+   "2026-09-09 08:29",
+   "2026-09-09 10:29",
+   "2026-09-09 15:51",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 17:10",
+   "2026-09-10 18:01",
+   "2026-09-11 08:06",
+   "2026-09-11 16:55",
+   "2026-09-15 18:19",
+   "2026-09-15 19:44",
+   "2026-09-16 13:32",
+   "2026-09-16 13:43",
+   "2026-09-16 13:43",
+   "2026-09-16 15:06",
+   "2026-09-16 19:41",
+   "2026-09-17 07:36",
+   "2026-09-17 07:54",
+   "2026-09-17 15:09",
+   "2026-09-18 09:15",
+   "2026-09-21 14:49",
+   "CARD secuura-ks1024-advisory-baseline",
+   "CARD secuura-advisories-high-and-prod-reaching",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD secuura-audit-row-ip-address-high-override",
+   "CARD secuura-freeze5-high-no-fix-1004",
+   "CARD wed-morning-plan-1026",
+   "CARD secuura-ks1717-new-emitter-secret-1026"
+  ]
  }
 ]

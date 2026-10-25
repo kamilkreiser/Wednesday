@@ -13096,5 +13096,12 @@
   "project": "Secuura",
   "ts": "2026-10-26T09:45:29.425581+11:00",
   "text": "On moving testing to the Spark: I measured it on PR 1687, where two Claude gates already knew the answers. It half works.\n\nWhat works: the mechanical half, meaning re-running the tests on the old and new code, comparing counts and lint. It's now a script with no model at all. It matched the Claude gates exactly, in about 85 seconds.\n\nWhat doesn't work yet: the Spark's review. It found the biggest risk on the first round, but on the second round it missed every overstated sentence, and it raised several wrong findings. So it can't yet replace the Claude reviewer on test-only changes.\n\nIn practice from now:\n1. Every gate runs the script first. The Claude gate gets its results and doesn't re-run the tests. That's where most of the gate usage went.\n2. Tidy-up changes go through the script alone.\n3. The Spark's review runs alongside the Claude gate on test-only changes and gets scored each time. I'll move a gate type over once its numbers hold up.\n4. Security gates stay on Opus."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-26T09:49:39.423654+11:00",
+  "text": "One card needs you on fleet activity. Everything Secuura is blocked until you answer it.\n\nTwo high-severity advisories have no fix in range:\n1. msal-node: measured as not reachable from our code.\n2. zod: the same memory flaw exists in the zod version we use, and no upgrade removes it. The real fix is capping request arrays and body limits.\n\nI recommend option a. Accept both for 14 days, each with a reason and a ticket, the same way you handled braces and node-forge on 4 October. Then all pushes resume today.\n\nIf you don't answer, nothing is accepted and every push stays blocked."
  }
 ]
