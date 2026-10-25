@@ -22,6 +22,12 @@
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PORT="${SPARK_TUNNEL_PORT:-47788}"
 HOST="${SPARK_SSH_HOST:-Spark}"
+# Laptop fallback (2026-10-26): NVIDIA Sync names the box "ZGX-Nano-G1n" on the laptop, "Spark" on the Studio.
+# If the default alias does not resolve to a configured host, use the laptop's alias when it exists.
+if [ -z "${SPARK_SSH_HOST:-}" ] && [ "$(ssh -G Spark 2>/dev/null | awk '/^hostname /{print $2}')" = "spark" ] \
+   && [ "$(ssh -G ZGX-Nano-G1n 2>/dev/null | awk '/^hostname /{print $2}')" != "zgx-nano-g1n" ]; then
+  HOST="ZGX-Nano-G1n"
+fi
 REMOTE="${SPARK_REMOTE:-127.0.0.1:8888}"
 URL="${SPARK_URL:-http://127.0.0.1:$PORT}"
 LOG_DIR="$SELF_DIR/state"
