@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-10-23 14:03 from 384 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-24 14:35 from 382 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -182,7 +182,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-28)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
 
-## EXCLUDED by predicate — 247
+## EXCLUDED by predicate — 245
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-101 — on Peter/Stuart
 - KS-1010 — names no product file (after basename/docs/route resolution)
@@ -279,7 +279,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1433 — has a PR attached
 - KS-1438 — names no product file (after basename/docs/route resolution)
 - KS-1441 — names no product file (after basename/docs/route resolution)
-- KS-1442 — on Peter/Stuart
 - KS-1443 — names no product file (after basename/docs/route resolution)
 - KS-1446 — on Peter/Stuart
 - KS-1454 — names no product file (after basename/docs/route resolution)
@@ -337,20 +336,19 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1669 — names no product file (after basename/docs/route resolution)
 - KS-1672 — auth-shaped title (LAST, Kam 16:40)
 - KS-1678 — names no product file (after basename/docs/route resolution)
-- KS-1680 — on Peter/Stuart
 - KS-1690 — auth-shaped title (LAST, Kam 16:40)
 - KS-1691 — auth-shaped title (LAST, Kam 16:40)
 - KS-1696 — names no product file (after basename/docs/route resolution)
 - KS-1698 — auth-shaped title (LAST, Kam 16:40)
 - KS-1700 — names no product file (after basename/docs/route resolution)
 - KS-1702 — names no product file (after basename/docs/route resolution)
-- KS-1710 — on Peter/Stuart
 - KS-1711 — on Peter/Stuart
 - KS-1712 — names no product file (after basename/docs/route resolution)
 - KS-1713 — auth-shaped title (LAST, Kam 16:40)
 - KS-1714 — names no product file (after basename/docs/route resolution)
 - KS-1715 — names no product file (after basename/docs/route resolution)
 - KS-1718 — auth-shaped title (LAST, Kam 16:40)
+- KS-1719 — on Peter/Stuart
 - KS-188 — on Peter/Stuart
 - KS-239 — on Peter/Stuart
 - KS-263 — names no product file (after basename/docs/route resolution)
