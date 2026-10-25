@@ -1,0 +1,108 @@
+diff --git a/systemTest/scripts/check-package-format.sh b/systemTest/scripts/check-package-format.sh
+index 66757918b..05535bf3e 100644
+--- a/systemTest/scripts/check-package-format.sh
++++ b/systemTest/scripts/check-package-format.sh
+@@ -728,5 +728,5 @@ else
+     changed_paths="$(cat)"
+     for p in "${packages[@]+"${packages[@]}"}"; do
+-        if printf '%s\n' "$changed_paths" | grep -q "^systemTest/${p}/"; then
++        if printf '%s\n' "$changed_paths" | grep "^systemTest/${p}/" > /dev/null; then
+             selected="${selected}${p}
+ "
+diff --git a/systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh b/systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh
+new file mode 100644
+index 000000000..68adff58f
+--- /dev/null
++++ b/systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh
+@@ -0,0 +1,91 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for systemTest/scripts/check-package-format.sh - KS-1716: the package
++# selection must not drop a changed package when the pushed path list is large.
++# =============================================================================
++# The gate picks each package with `printf '%s\n' "$changed_paths" | grep -q ...`
++# under `set -uo pipefail`. grep -q exits at its FIRST match; when the list is
++# bigger than the pipe buffer (64 KiB) printf is still writing, gets EPIPE, and
++# pipefail turns the pipeline into "no match". The package is then neither
++# checked nor skipped, and the gate still prints "0 skipped". The fix reads the
++# list to EOF (grep without -q, output to /dev/null).
++#
++# Same fixture method as ks998_format_gate_stdin_isolated.test.sh: a copy of the
++# gate inside a temp tree, fixture packages whose format:check is plain shell.
++#
++# Usage: bash systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++GATE_SRC="${PACKAGE_FORMAT_GATE_SH:-$HERE/../scripts/check-package-format.sh}"
++PASS=0; FAIL=0
++
++[[ -f "$GATE_SRC" ]] || { echo "FATAL: gate script not found at $GATE_SRC" >&2; exit 2; }
++
++FIX="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1716.XXXXXX")"
++trap 'rm -rf "$FIX"' EXIT INT TERM
++
++check() {
++    local desc="$1" want="$2" got="$3"
++    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
++    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
++}
++
++GATE="$FIX/systemTest/scripts/check-package-format.sh"
++mkdir -p "$FIX/systemTest/scripts"
++cp "$GATE_SRC" "$GATE"
++
++# mk_pkg <name> <format:check shell command> - deps always present
++mk_pkg() {
++    local name="$1" cmd="$2"
++    local dir="$FIX/systemTest/$name"
++    mkdir -p "$dir/node_modules/.bin"
++    cat > "$dir/package.json" <<JSON
++{ "name": "fixture-$name", "version": "0.0.0", "scripts": { "format:check": "$cmd" } }
++JSON
++    printf '#!/bin/sh\nexit 0\n' > "$dir/node_modules/.bin/prettier"
++    chmod +x "$dir/node_modules/.bin/prettier"
++}
++
++# `aaa` sorts first, so it matches on the first line of the list; `zzz` carries
++# the bulk of the list (2500 paths, well over 64 KiB). `red` fails its check.
++mk_pkg aaa "exit 0"
++mk_pkg zzz "exit 0"
++mk_pkg abc "echo '[warn] src/a.ts'; exit 1"
++
++# big_list <first line>: that line, then 2500 paths under systemTest/zzz/
++big_list() {
++    printf '%s\n' "$1"
++    awk 'BEGIN { for (i = 1; i <= 2500; i++) printf "systemTest/zzz/src/generated/file_%05d_padding_padding_padding.ts\n", i }'
++}
++
++# --- CELL 0 (CONTROL): the fixture list really is over the pipe buffer ----------
++check "CONTROL the large list is over 64 KiB" "1" \
++    "$([ "$(big_list 'systemTest/aaa/src/a.ts' | wc -c | tr -d ' ')" -gt 65536 ] && echo 1 || echo 0)"
++
++# --- CELL 1 (RED at the tip): aaa matches first, yet both packages are checked --
++out="$(big_list 'systemTest/aaa/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "CONTROL large list, aaa first -> exit 0" "0" "$rc"
++check "large list, aaa first -> both packages checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '2 package(s) checked, 0 skipped, 0 failed')"
++
++# --- CELL 2 (RED at the tip): a red package matched first still fails the gate --
++out="$(big_list 'systemTest/abc/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "large list, red package first -> the gate fails (exit 1)" "1" "$rc"
++
++# --- CELL 3 (CONTROL, tip AND after): a small list selects the same packages ----
++out="$(printf '%s\n' 'systemTest/aaa/src/a.ts' 'systemTest/zzz/src/b.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "CONTROL small list -> exit 0" "0" "$rc"
++check "CONTROL small list -> both packages checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '2 package(s) checked, 0 skipped, 0 failed')"
++
++# --- CELL 4 (RED at the tip): a large list naming only zzz still checks zzz ------
++out="$(big_list 'systemTest/zzz/src/first.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "large list, zzz only -> one package checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '1 package(s) checked, 0 skipped, 0 failed')"
++
++echo ""
++echo "ks1716_format_gate_selects_every_changed_package_on_a_large_push: ${PASS} passed, ${FAIL} failed"
++(( FAIL == 0 ))
