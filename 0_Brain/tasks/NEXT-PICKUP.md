@@ -23,6 +23,9 @@ supersede: REPLACED WHOLESALE by the Mon 26 Oct laptop seat at its 53% checkpoin
 - Drafters (Agent tool, Sonnet): (1) Spark rung-3/4 batch + round.sh/brief_lint eval-warning fix (it is editing spark/round.sh NOW: do not commit that file mid-edit; safe_pull refuses until it lands); (2) the SPARK GATE pilot (local-model/gate/, calibrated on PR #1687 r1/r2 vs the Sonnet verdicts). Kam's conditional grant: learnings/2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice.md.
 - Spark today: 5 tasks, 5/5 round-1 PASS, all read and held. Rung 1/2 pool dry at the tip (~40 screened).
 
+- 🔴 ADVISORY FREEZE (KS-1723): every Blockchain/Dev push is refused at pre-push legs 6/7. Seat R's in-range refresh clears 10/13; body-parser override bump approved by Wednesday (Kam's 1021 vite-pin shape). zod (needs zod 4) and @azure/msal-node (identity caps at ^6) are KAM's: card OWED once R mails "reachability for zod and msal-node" (default: nothing baselined, pushes wait). R's five PRs, K (KS-1683, built red-first, 13/13 mutants), J (KS-1717 HMAC per Kam's b, card delivered) all wait on it.
+- SPARK GATE in practice (learnings/2026-10-26_spark-gate-pilot-..., CALIBRATION 1): every gate runs local-model/gate/spark_gate.sh FIRST (needs GIT_SSH_COMMAND = the Secuura repo's core.sshCommand) and hands facts.json to the Claude gate; tier 3 = runner only; tier 2 = Sonnet + Spark shadow; tier 1 Opus.
+
 ## 2. OWED, in order
 1. Gate verdict -> Wednesday's completion check -> GO merge to G 20th (TESTED grant) or a fix round (round 2 of 2). Then clear Peter's comment text and have G post it. KS-1719 stays assigned to Peter.
 2. D 31st STATUS mails: verify each box at source; KS-741 to Done after demo is live (Done = tested + works + deployed).
