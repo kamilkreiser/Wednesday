@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-26 08:57 from 250 lesson files (1,088,028 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-26 09:26 from 251 lesson files (1,091,210 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7614,4 +7614,21 @@ sections (open the file for these): How to apply
 3. Draft, read whole, stamp, and launch in waves (one waiter at a time, load1 below 7, the pane cap in mind), each with its watcher.
 
 **Unchanged boundaries.** The v1.3 signature classes still pause for him: production, money, external communication to a human, anything irreversible. Deploys follow each project's own rule (HPSM-POC and the Composer demo under the 2026-10-16 push grant; MPS hosted still card-per-deploy; Composer K1-K10 "nothing is deployed without your card"). New customer-facing words go to him as a word pack first. Gates before every merge.
+
+
+## Grant (conditional): move QA validation, review and test to the Spark wherever the measurement shows it works — tooling and instructions first, tier by tier, never on a guess
+`2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice.md` · grant · 2026-10-26 · status: live
+
+**The operative case, so the headline matches it:** Wednesday is about to commission a QA gate. **Ask whether a measured Spark gate covers that tier yet.** If it does, run the Spark gate (the deterministic runner plus the Spark review) and keep the Claude gate only where the calibration says the Spark misses things. If it does not, the Claude gate runs as today and the Spark gate runs beside it as a SHADOW, adding a calibration row.
+
+**How to apply:**
+1. **Measure before moving.** The first calibration is PR #1687 (KS-1719) at both rounds, against the two Sonnet verdicts in `0_Brain/reference/2026-10-26_gate-pr1687-ks1719/`. Score recall of the known findings, false positives checked at source, verdict match, and whether the facts match.
+2. **Promote one tier at a time, on evidence:** tier 3 (hygiene) and tier 2 (tests, docs, config, already-gated follow-ups) first. Tier 1 (security surfaces, data destruction, deploys, client handovers) keeps the Opus gate until the Spark has a record on that tier: Kam-approved routing v1.0 says tier 1 = Opus, and this grant moves it only "if this works".
+3. **Shadow first:** until a tier is promoted, every Claude gate on that tier gets a Spark shadow run, so the record grows from real work.
+4. **Report the numbers to Kam** when a tier is promoted, as a receipt with the calibration table, not as a request.
+5. Unchanged: the QA gate before every merge; Wednesday's completion check; the signature classes.
+
+**Mechanism:** `2_Project_Files/local-model/gate/` (spark_gate.sh, spark_review.py, REVIEW_CHECKLIST.md), built by a Sonnet tooling drafter on 2026-10-26 with arms, and calibrated on PR #1687.
+
+**Family:** [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]] · [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-14_do-not-guess-a-comparison-a-citation-you-did-not-open-is-a-guess]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot, measure, review; rule 5: every grant recorded).
 
