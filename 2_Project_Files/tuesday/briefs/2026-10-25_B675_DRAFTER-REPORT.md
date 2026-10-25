@@ -1,0 +1,41 @@
+STARTABLE: YES (after Tuesday's stamp; load1 was 4.65 at 15:32; the MPS heavy slot 1 is held by B672 at 15:32, so the gate waits for a free slot, it does not need slot 1)
+
+# B675 drafter report (kit: `2026-10-25_B675_SEAT-G119_mps-114-gate-tier2.md`, 98 lines)
+
+Drafted 15:32-15:38 AEDT by `date`, read-only. Shape cloned from the B668 kit (C# MPS gate) with the web instrument and check forms from the B643 kit; content from the B670 builder kit and STATUS (both read whole), DRAFTER_RULES (whole). The raw head files (`stubApi.test.ts` 13 rows, the marker line) were NOT read by the drafter: they are described from the builder STATUS and marked RELAYED.
+
+## BLUF
+Tier 2 (row G2, `model-routing.md:109`; G-cap `:111`), Sonnet, `BRIEF_SEAT_LEVEL=sonnet` in the launch line, round 1 of 2 (0 of 2 on its class), B675 / SEAT-G119 / pane `Datasec/MPS-G119`, ports 9710-9719 (see Q1: the block is on paper another seat's). Eight checks: C1 delta and provenance, C2 the 12 survivors REBUILT by the gate plus its own X1-X12 and seed 675101, C3 stability and clock independence, C4 the marker (three dists, base vs head script), C5 the web CI line ON THE COMBINED TREE, C6 check-runs and CodeQL, C7 merge/main-moved/overlap, C8 secrets, provenance, Jira GET, builder process admission.
+
+## Facts re-measured with instruments (15:32-15:38)
+- `ls-remote`: main `ef9bfba49181e5cfa06019ca4252a38f96e770b6` (MOVED from the PR base `dd0ce36d`: `compare` ahead 2 behind 0, the two squashes #110 and #113, 6 paths, ALL C# (`src/MpsCalc.Import/...` and 5 files under `tests/MpsCalc.Api.Tests/`), 0 `web/**`); branch = `refs/pull/114/head` = `1cc6a49b`; `refs/pull/114/merge` = `0c381126`, parents `dd0ce36d` + `1cc6a49b`, tree `a81309b7` = the head's tree: STALE (built on the old main; `pulls/114` mergeable null, state `unknown`). Controls: `refs/heads/b6*` listed 9 branches; `commits/<sha>` GET printed parents and tree for three shas.
+- Recursive trees (`git/trees`, GET) at `dd0ce36d` and at `ef9bfba4`: the four web paths have EQUAL blobs (`stubApi.ts` `6ec508fe`, `purchaseQuotes.ts` `7537bc60`, `stubApi.test.ts` `e6481a21`, `check-bundle.mjs` `a65bac52`), so the main move cannot change a byte the rows or the marker read. Control: the query returned 4 rows at each commit.
+- `pulls/114`: open, not draft, 2 commits, 2 files, +163 -0; commits `a2260e5e` (13 rows) and `1cc6a49b` (marker); both messages end with the one attribution line; scan for ticket key / `B###` / `C-n` / `n%` read none by eye in the printed messages (the kit asks the gate to re-run it with controls). PR title and body hold NO ticket key (differs from #113). Squash settings: `COMMIT_OR_PR_TITLE` + `COMMIT_MESSAGES`: for a two-commit PR the subject is the PR title (RELAYED documentation).
+- Check-runs at the head: 9 of 9 `completed` `success` (incl. `web`, `dotnet`, `python`, `package`, `CodeQL`, 4 `Analyze`); CodeQL analyses 4 of 4, `results_count` 0, empty `error`; open alerts on the PR ref 0 (no positive control for 0; the analyses listing for main returned rows); main open alerts 0. These ran on the STALE merge commit (old main + head), which is why the kit gates the combined tree locally.
+- Open PRs: #114 and #112 (`6618f119`, 4 paths, 0 shared with this PR; control: `docs/API.md` printed). #110 and #113 are closed (landed).
+- `ci.yml` at main (123 lines): `web` job `:45-66`, Node 24, steps `npm ci`, `npm run lint`, `npm test`, `VITE_MPSCALC_AUTH=entra npm run build && node scripts/check-bundle.mjs dist`; rule set: CodeQL `errors` + `high_or_higher`, required-checks list empty.
+- Panes `tuesday`, `HPSM-POC-H24`, `MPS-M24`, `fleet-monitor`: no `MPS-G119`. `.tools`: no `b675`, no `wt-b675-*` (`ls -d` matched nothing). `tuesday/briefs`: no B675 or G119 file before this one (the last is B674). Heavy-slot-1 holder `B672 15:32:05 ci`.
+- Ports: `lsof -nP -iTCP:9710-9719 -sTCP:LISTEN` empty, rc 1 (no bind control run). Word-boundary scan of the 123 non-`.pre-` SEAT kits of 24-25 Oct for `971[0-9]`: 3 hits: B620 (an `lsof 9700-9719` status line), B621 (NexusAI gate G96: block 9710-9719, fixture ports 9711 and 9712; finished, no pane live), B622 (a sentence saying it avoids B621's block). Control: the pattern fires on `x 9710-9719 y` (the scan program printed the B621 line).
+- Model: `claude-sonnet-5-5` at `models_latest.json:23`; routing rows G2 `:109` and G-cap `:111` by `grep -n`; usage gauge 84% at 04:31Z.
+
+## D-decisions
+- D1. Gate the post-move combined tree in the gate's OWN clone (C5, C7), as B668 did, and treat the stale merge ref and the check-runs on it as a stated fact (Note), not a failure.
+- D2. Main-moved REFUSE is narrowed to `web/**`, `ci.yml`, `package.sh`, `Directory.Build.props`/`global.json`; the two landed squashes and #112's C# paths are NOT refuse reasons.
+- D3. The gate rebuilds the 12 survivors from the builder kit's prose table AND adds X1-X12 aimed at what each row TITLE names (cap boundary 49/51, append-vs-prepend memory, 404 vs any-4xx vs any ApiError, stale `<` and `>=`, status/code string, the create's first `remember`), plus 3 seeded edits (seed 675101, distinct from earlier seeds).
+- D4. Two cw-weak controls (row 1 under L5 and row 9 under K3), because the builder showed only one.
+- D5. Web instrument forbids the project-root vitest run (the builder's admission) and requires `Test Files 1 passed (1)` and 47 tests on every single-file run.
+- D6. The builder's process admission (vitest from the project root executed another seat's test files and rewrote a gitignored cache) is graded Note (G-8) unless a tracked file or another seat's tree changed; the gate confirms by `git status` and `git check-ignore`.
+- D7. Row 10's wording ("and its list row" in the brief; the builder asserts term on the quote and read-back only, correctly, since the list row has no term) is graded only if the TEST NAME over-claims (Minor).
+- D8. Hard stop is shorter than a C# gate: target verdict 75 min, hard stop 2.5 h (no .NET builds).
+
+## Q-questions for Tuesday
+- Q1. Port block: 9710-9719 is on paper B621's (NexusAI gate G96, finished, no live pane). The web gate binds nothing. Default: keep 9710-9719 as a reserve (the kit's REFUSE already checks for a listener and for later kits). Alternative: re-assign to a block no kit names.
+- Q2. Should the stamp let the gate use `Q-1: YES` (scratch rows, weak copies and mutants of `stubApi.ts`, `purchaseQuotes.ts`, `check-bundle.mjs` in `wt-b675-mut` only)? Default YES; C2, C3 and C4 are NOT TESTED without it.
+- Q3. PR #112's builder (MPS-M24) may push or land while the gate runs: the kit treats it as not a refuse (no shared path). Default as written.
+- Q4. GitHub has not recomputed the merge ref after main moved (state `unknown`). Do you want to wait for the recompute before launch (so the gate can compare its combined tree with GitHub's)? Default: launch now; the gate compares if GitHub recomputes mid-gate.
+
+## UNMEASURED
+The new test block and the marker line at the head (read only through the builder STATUS); every mutant result and count (47, 1328, 136 files, 57/57, rcs) is the builder's; the node version CI uses vs this machine's (v26.8.1 relayed); whether a Node 24 binary exists locally; the full count of main's CodeQL analyses (the drafter used `per_page=3`); whether the lock `.tools/.git-lock` is held right now (not read); the exact text each of B620/B621/B622's hit means beyond the lines printed; the pane list at launch; the Jira ticket (not read; the project has no read helper the builder could find).
+
+## Outside-the-fences disclosure
+None. Reads: DRAFTER_RULES, the briefs folder (kits B668, B670, B643, and a `ls`), the project STATUS B670 and B643 (head lines), CLARIFICATIONS line 809 and CLAUDE.md lines 50-52, `ci.yml` via `gh api -X GET contents` (copied to the session scratchpad), `models_latest.json`, `usage_tuesday.json`, `brief_seat.sh` (lines 20-26, to confirm the Opus default), `.tools` listings and heavy-slot holders (`cat holder`, a read), `tmux list-panes`, `lsof`, `uptime`. `gh` only `-X GET` (GET is the default for these calls) under the MPS `GH_CONFIG_DIR`. No `decision_queue.sh`, no `briefs_staged/`, no `scoreboard.md`, no ledger, no WEDNESDAY/FRIDAY tree, no Jira, no fetch/clone/worktree, no HTTP to any hosted host. Two files written: the kit and this report.
