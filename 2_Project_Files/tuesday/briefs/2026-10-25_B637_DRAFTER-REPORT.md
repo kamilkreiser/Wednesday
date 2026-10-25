@@ -1,0 +1,57 @@
+# B637 DRAFTER REPORT (read-only gate-kit drafter, Sonnet; Datasec / NexusAI; PR #110 round 2 of 2, tier 2 Sonnet)
+
+Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-25_B637_SEAT-G102_nexusai-110-gate-round2-tier2.md` (UNSTAMPED, 84 lines). Checks run on the kit at 06:56:16 AEDT: four-underscore lines 8 (S1 to S7 at lines 60-66 and the last line 84; control: a scratch line with four underscores reads 1); `@[A-Z_]+@` count 0; non-ASCII lines 0. Written: two files, nothing else. No build, test, push, post, mail, launch, clone, fetch, worktree, npm, jest, browser or CodeQL by me. gh GET only, git `ls-remote` only in the shared clone, no Jira.
+
+## Decisions (D1..D8) with my recommendation
+
+- **D1. Tier 2 (Sonnet, routing row G2, `fleet/specs/model-routing.md:109`) with the binding tier-1 escalation (G1 `:108`).** Why: the net PR is one pure deletion plus two test files whose blobs are byte-identical to what round 1 measured; the new commit only reverts a test helper to main's own bytes. G-cap is row `:111`. Alternative (Opus) would buy nothing the checks do not already prove.
+- **D2. One clone, not two.** Round 1 needed `b621-mut` for plants, spies and a base-side comparison; round 2 repeats none of that. The kit uses one plain `--no-hardlinks` clone `worktrees/b637-merge` at the merge ref, scratch only in `session-tools/b637/`. Recommended: yes (less load; load1 was 9.21 at 06:52).
+- **D3. Narrow scope: the delta and the merge only.** The kit carries B621-3/4/5/6/7 as UNCHANGED on the evidence that the three paths' blobs are equal at `3b54819e` and `2f9c3e1b` (I read them through the contents API: `backend/server.js` 4d12ac0d, erasure test a588fdab, rd407 test 78a627ca, all equal) and re-runs none of the mutant matrices, stall matrix or `/tmp` runs. An optional `b637-gate-extra` re-run is allowed only after every check and never at the cost of Checks 3 and 4. Recommended: yes. B621-1 and B621-2 are judged RESOLVED only if Check 1 proves the guard equals main's.
+- **D4. Fetch refspecs use `pr110` and `pr110merge`, NOT `refs/remotes/origin/b617`.** B621's Correction 1 (and B625's Design) records that destination collides with the tracking ref `origin/b617/...` ("unable to update local ref"); B621's clone script then ran 6 fetches. Both commits `895417a3` and `3b54819e` are reachable from `refs/pull/110/head`, so the branch ref is not needed. Written into the kit in bold.
+- **D5. Full `npm run verify` at the new merge result: NOT by default (stamp slot S6 lets Tuesday say yes).** Reasons: the guard is main's own bytes again; the other two paths are byte-equal to what B621's verify ran (`PASS 5005/5005 across 305 suites` at `277a8df7`); the PR's CI `build` ran the verify gate on this head and completed success (8 of 8 check-runs, my read 06:52); the lock is shared FIFO with B635 and a verify is about 27 minutes. Cost of the gap: the specific merge result `412e33b9` (guard = main's, rest = round 1's) has no local full run; the CI Build log (Check 4) is the substitute and the kit makes the gate read which merge sha CI checked out. The small selection (erasure 11, rd407 37, rd490 66 with 0 `Timeout 20000ms` lines) runs at the merge result.
+- **D6. Landing statement and title/body.** The kit quotes C-190 `:2067` and C-189 `:2054` and C-68 `:665` (I read the three lines; the line numbers are right) and has the gate say whether the title and body still claim RD-844 at its verdict. They DO still claim it at 06:52 (title names RD-844 and "banner guard waits for DOM ready"; body has an RD-844 bullet, "Four files, 3 commits", "stall reproduced red before and green after"). Tuesday edits them before landing; a still-claiming body is a Note, never a Blocker for the gate. Recommended: yes, and edit them before launching the gate or before landing, whichever is later; the gate reads whatever is there.
+- **D7. Round-2 cap handling.** A same-class NO GO ends in `STOPPED: NEEDS TUESDAY <one question for the product owner: ship RD-862 and RD-873 alone, or rule on a third round>`, so the card opens; no round 3 is commissioned by the kit. A new-class NO GO is also Tuesday's to route. Recommended: yes (row G-cap `:111`).
+- **D8. Hard stop 2.5 h after Step 0, target 1.5 h (slot S5 is Tuesday's).** Shorter than round 1 (2.5 h / 4 h) because there is no matrix and no verify; the unknowns are the load wait (9.21 now) and the queue behind B635.
+
+## Questions for Tuesday (recommended answers)
+
+- **Q-1. Two other NexusAI panes are live (`Datasec/NexusAI-G100` = B635, tier-1 gate on #111; `Datasec/NexusAI-M6` = the finished B625 builder).** Do you want the kit to refuse while they are live? Recommended answer: NO. The kit says "not a refuse; say which and continue; the lock FIFO covers the rest" (round 1's rule allowed it unless a builder holds the lock; M6 holds no ticket per its STATUS, queue-jest was empty at 06:52). Consider closing the M6 pane first so the pane list is clean.
+- **Q-2. Edit the PR title and body now or after the gate?** Recommended: now, before launch (cheaper: the gate then checks a body that matches the net delta, and the Note disappears); if you wait, the gate returns a Note and you edit before landing anyway.
+- **Q-3. Full verify at the merge result (S6)?** Recommended: NO, per D5. Say YES only if #111 or #67 lands first (main moves, counts or workflow files change) or if the Build run's checked-out merge sha differs from `412e33b9`.
+- **Q-4. Land order with PR #111 (B635 is gating it) and PR #67?** Recommended: land #110 first, then #111 re-reads its merge ref; whichever lands first moves main and so `refs/pull/110/merge`. The kit tells the gate to re-pin and re-open Checks 3 and 4 if that happens before its verdict, and a landing after the verdict is Tuesday's head-pinned merge (GitHub recomputes the merge commit at click time, by design). #111 touches only `.github/workflows` (three files), no overlap with #110's three paths; #67 touches the counts file (moves 5005/305).
+- **Q-5. Build duration.** The B625 builder says `build` took 60.6 min on this head against 36.6 min on the previous head. Recommended: no action; the gate reads the Build log (conclusion, time, merge sha, `VERDICT:`) and reports; the cause is unmeasured.
+
+## MEASURED-BY-DRAFTER (06:52-06:56 AEDT, `date`, all read-only)
+
+- `ls-remote origin` 06:52:15 and 06:53:43 (identical): `refs/heads/b617/nexusai-hygiene-862-873-844` = `refs/pull/110/head` = `2f9c3e1ba6dc63d5549e8bdd7e9fe5be80ed1fcb`; `refs/heads/main` = `19b7106b9f2930507185e0a231408cc11a986ecb`; `refs/pull/110/merge` = `412e33b910ca6dc7db594cb4bf965aa40a1dc547`. `refs/heads/b637*` none; control `b588*` prints `701166204395...`.
+- `pulls/110`: open, not draft, mergeable true, `mergeable_state` clean, 4 commits, 3 changed files, +11 -116; head = REV; merge commit `412e33b9` (parents `19b7106b`, `2f9c3e1b`; tree `1a43b228ae6a55b564abb8a7b5fa3329f8878569`). `compare 19b7106b...2f9c3e1b`: diverged, ahead 4, behind 2, merge base `bda30039ad9706c5f0c51e5d9b28befa2b543a7b`. `pulls/110/files`: erasure test 7/6, rd407 test 4/1, `backend/server.js` 0/109, guard absent.
+- Open PRs: #111 (head `e961af6b`, 3 files), #110, #67 (head `94b288cc`).
+- Commit `2f9c3e1b`: one parent `3b54819e`, one file `tests/e2e/open-access-banner-guard.js` 2/7, unsigned, message names `895417a30eb3...`, one Co-Authored-By trailer. REST patch of `895417a3` (7 added, 2 deleted) vs the revert's (2 added, 7 deleted): after swapping signs the changed-line multisets are equal (True). That is a line-level pre-read only.
+- Blobs: guard at `main` and at `2f9c3e1b` both `0d74337f0b7a04158fd3c85547f6e1a117be14bb`; counts file at main `7fa8c90fd93ec97e0b641b0885b0cb851e455d34`; `commits/19b7106b` files `package-lock.json`, `package.json`.
+- Check-runs on the head: 8 of 8 completed success (CodeQL "No new alerts in code changed by this pull request", build, scan, audit-production-deps x2, Analyze x3). Analyses on `refs/pull/110/head` at `2f9c3e1b`: js-ts 2019849418, python 2019846315, actions 2019846286, 0 results each (three older at `3b54819e`). Open alerts on `refs/pull/110/head` 0 and `refs/pull/110/merge` 0.
+- PR title/body still claim RD-844 (quoted in the kit).
+- `lsof -nP -iTCP:9870-9879 -sTCP:LISTEN` empty. Word-boundary scan `(^|[^0-9a-f])987[0-9]([^0-9a-f]|$)` over 184 non-`.pre-` briefs named `2026-10-2[45]_*`: 0 hits; control `ports 9870-9879` True, `x98700y` False. (A plain `grep -l 987[0-9]` printed matches because of hex/other digits; the word-boundary program is the instrument, as in round 1.)
+- Panes: tuesday, HPSM-POC-G101, NexusAI-G100, MPS-M20, MPS-M19, HPSM-POC-H18, Security-Composer-G99, J11, J10, NexusAI-M6, fleet-monitor. No `NexusAI-G102`. `worktrees/` holds b621-merge, b621-mut, b625-fix, b632-fix, b635-merge; `session-tools/` holds b617, b621, b625, b632, b635; no b637. `queue-jest/` `total 0`. Lock script sha256 = the pin `3c33f5ae...3a792`. `uptime` 06:52: load 9.21 8.12 7.78.
+- Model: `levels.sonnet.model_id` = `claude-sonnet-5-5` in `models_latest.json` (checked_at 2026-10-25 06:17:33 +1100).
+- Clarifications lines read: `:665` C-68 "A gate verdict is valid only at the head it ran on."; `:2054` C-189 pilot bullet (merge with a MERGE COMMIT, never squash or rebase); `:2067` C-190 item 2 "Merge path ... land the SAME commit. Never squash, never rebase"; C-190 header `:2062` and its addendum bullet `:2076` read in context (second threshold `alerts_threshold = errors`).
+
+## Corrections to the brief's own premises
+
+- The commission says C-190 at `:2067` and `:2054`: those are bullets inside C-190 (`:2067`) and C-189 (`:2054`, whose direct-push step C-190 supersedes), not two C-190 lines; the kit says so.
+- The commission says "Tuesday will edit the PR title/body": at 06:52 they have not been edited; the kit treats both states.
+- The commission says "mergeable_state clean": yes at 06:52.
+
+## UNMEASURED (nobody ran it; the gate must)
+
+The byte-level inverse and the guard blob by git object; the merge-tree prediction and its equality with `1a43b228` (I read that tree id from GitHub only); whether #108's nodemailer/smtp-server bump interacts with anything the changed files or the rd490 test load; the three jest files at the merge result (11 / 37 / 66, 0 `Timeout 20000ms` lines); whether the Build run checked out `412e33b9` and its `VERDICT:` line (the log was not read); the CodeQL alerts #95-#99, #116, #234 by number on the PR ref; B621's Notes as unchanged beyond blob equality; node 24 locally; whether main, #111 or #67 move before launch; load at launch.
+
+## What I read (with line numbers)
+
+- `tuesday/briefs/2026-10-25_B621_SEAT-G96_nexusai-110-gate-tier2.md` lines 1-91 (whole; first read cut at 71, rest read at 72-91).
+- `Briefs/2026-10-25_B621_STATUS.md` 1-257 (whole).
+- `Briefs/2026-10-25_B625_STATUS.md` 1-126 (whole).
+- `tuesday/briefs/2026-10-25_B625_SEAT-M6_nexusai-110-round2-revert-844.md` 1-110 (whole).
+- `CLARIFICATIONS.md` `:665`, `:2050-2054`, `:2062-2080`.
+- `fleet/specs/model-routing.md` rows `:91`, `:93`, `:94`, `:108`, `:109`, `:111` (by grep, cut at 700 chars; G2 and G-cap content as quoted above).
+- `0_Brain/dashboard/data/models_latest.json` 1-45.
+- `tuesday/briefs/2026-10-25_B635_SEAT-G100_nexusai-111-gate-tier1.md` lines 2, 6, 7, 14, 25-37 by grep (sibling live seat: ports 9850-9859, clone `worktrees/b635-merge`); `2026-10-25_B635_DRAFTER-REPORT.md` line 1-3.

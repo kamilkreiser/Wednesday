@@ -13,8 +13,31 @@ changes its line, and the stamped text holds 0 lines with four underscores. Prin
 WHY (ledger 2026-10-19 position-keyed stamp, 2026-10-18 counter that counted attempts): a stamp keyed
 on line numbers misaligned slots, and a counter that counted matches reported 9 stamped while 7 were
 empty. This one matches labels and counts effects.
+
+TYPED CLOCKS (ledger _ledger_laptop_datasec.md 2026-10-24, w=4: "08:2x", "08:5x" typed into stamp prose
+while the clock read 08:14 / 09:01). Also refuses, before anything is written, a slot VALUE that holds
+  (a) a placeholder clock such as 08:2x / 9:1X: an estimate is never a reading, so it is never stamped;
+  (b) an exact literal clock right after one of Tuesday's OWN reading phrases ("read whole", "read whole
+      at/by", "printed nothing ... at", "empty at", "free at", "absent at", "MEASURED <word> at"): that
+      time is this script's to write, so the value must say @NOW@ there.
+Exact clocks QUOTED from someone else's artefact (a drafter's MEASURED-BY-DRAFTER 08:56:24, a ruling's
+08:52, a deadline "HARD STOP 11:30") are not refused: they are copies, and their source is named beside them.
+STAMP_ALLOW_CLOCK="<reason>" passes a refused value and prints the reason (for a phrase this rule
+misreads; say which in the note).
 """
-import datetime, json, re, sys
+import datetime, json, os, re, sys
+
+CLOCK_X = re.compile(r"\b[0-2]?[0-9]:[0-5][xX]\b")
+OWN_READ = re.compile(
+    r"(read whole(?: at| by)?|printed nothing(?: \(rc \d+\))? at|(?:empty|free|absent|clean) at|"
+    r"MEASURED \w+ at)\s+[0-2]?[0-9]:[0-5][0-9](?::[0-5][0-9])?\b", re.I)
+
+def clock_refusal(key, raw):
+    hits = [m.group(0) for m in CLOCK_X.finditer(raw)] + [m.group(0) for m in OWN_READ.finditer(raw)]
+    if not hits:
+        return None
+    return (f"REFUSED: label {key!r} holds a typed clock {hits!r}; an estimate (HH:Mx) is never stamped "
+            f"and Tuesday's own reading time is written as @NOW@ (ledger 2026-10-24 w=4); nothing written")
 
 brief, slots_path = sys.argv[1], sys.argv[2]
 text = open(brief, encoding="utf-8").read()
@@ -23,6 +46,13 @@ now = datetime.datetime.now().strftime("%H:%M")
 U = "_" * 4
 lines = text.split("\n")
 done = {}
+allow = os.environ.get("STAMP_ALLOW_CLOCK", "").strip()
+for key, val in slots.items():
+    why = clock_refusal(key, val)
+    if why and not allow:
+        sys.exit(why)
+    if why:
+        print(f"STAMP_ALLOW_CLOCK used for {key!r}: {allow}")
 for key, val in slots.items():
     val = val.replace("@NOW@", now)
     if key == "READ-WHOLE":

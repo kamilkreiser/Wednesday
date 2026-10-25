@@ -1,0 +1,25 @@
+# B557 drafter report (SEAT-R28, HPSM-POC records), 2026-10-24 04:37 to about 05:05 AEDT
+
+Files written (only these): `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-24_B557_SEAT-R28_hpsmpoc-records-1024.md` (112 lines), its `.pre-stamp` copy (`cp`, `cmp` equal), and this report. Stamp-slot lines: `/usr/bin/grep -c -E '_''_''_''_'` -> 8 (matches the "unstamped copy reads 8" sentence).
+
+## Facts measured (command -> output)
+- Records main: `gh api -X GET repos/datasecau/HPSM-POC-analysis/commits/main` -> `56848d157bad43b3114952b27a8e906b738f939b`, "Merge pull request #134 from datasecau/records/b540", 2026-10-23T06:14:27Z. `pulls?state=open` -> length 0. `matching-refs/heads/records/b5` -> b50-b52, b508, b53, b54, b540, b55, b56, b58 (no b557).
+- The three records files fetched by `gh api` raw into the scratchpad: CLARIFICATIONS 2,717 lines, highest `### C-165` at 2701 (control `C-165` = 8); BACKLOG 949; history 2,345. `grep -c -i -F` (CLARIFICATIONS/BACKLOG/history): B549, B554, B555, B548, B544, B542, 31dabc8, 2d05b95a, ee73c290, f653c3bb, 2c94b9b0, NODE-24.22.1 all 0/0/0; `hpsmpoc-400-shows-api-sentence-1023` 0; `B525` 2/0/1; `B536` 3/0/2 (B540 pointers). 21 Oct cards (`uat-start-page-words`, `uat-vault-secrets-role`, `entra-signout-hint`, `hp-reviewer-invites`) are already recorded (count >= 1): nothing owed there.
+- Merge facts, `gh api -X GET .../pulls/<n>` (all closed, merged): #198 `2d05b95a87efc63f77a8b768ecc1d62105d0b630` 13:20:54Z head `c5b25f23`; #201 `ee73c2908937b6ed9d3610865b3a0e38c17270ca` 13:21:24Z head `62c1526d`; #202 `f653c3bbbb92a2a23a4e8279ae5e63706b6e9290` 13:20:07Z head `04d8dab8`; #203 `31dabc8d3012d28b0dbf510ea90760a42e319730` 15:48:53Z head `e5c2774c`. Also #197 `2c94b9b0` 06:45:18Z, #199 `21752a22` 06:44:58Z, #200 `9fc0a450` 07:18:45Z. Code main top = `31dabc8d`.
+- Cards: `decision_queue.sh show hpsmpoc-400-shows-api-sentence-1023` -> status ruled, choice b, ruled_ts 2026-10-23T20:07:35+11:00, delivered 2026-10-24T02:49:21, delivered_artefact "PR #203 merged to main 31dabc8d (gate B554 GO WITH FINDINGS); not yet deployed". Register (`grep -n -F 'HPSM-POC'`, 11 rows): the 20:06:40 row is the last line; the 14:21:39 phase-scope row is already C-163 (`CLARIFICATIONS.md:2672`), so no new "build-only" entry.
+- Panes: `tmux list-panes -a -F '#{@cockpit_name}' | grep -i -c HPSM-POC-R28` -> 0; no pane with HPSM in its name.
+- Kit: `.tools/b557`, `.tools/wt-b557` absent; `.tools/b540` and `.tools/b508/{create.py,addlabels.py}` present.
+- RELAYED, read whole: B540 brief + STATUS, B549 STATUS (243 lines; findings `:188-194`, VERDICT `:243`), B555 STATUS (lines 1-60, 120-139, 417-518; DEPLOYED last line). B554 STATUS read lines 1-12, 324-388 (findings `:334-347`, VERDICT `:388`), not the middle checks.
+- B555 FOR TUESDAY item 1 (`:458`) ticket list: HPSMPOC-148, -310, -323, -296, -297, -318, -315, -311, -316, -325, -313, -317, -319; C-166 confirmed free (highest is C-165).
+
+## Judgement calls for Tuesday at the stamp
+1. **E5 (#197, #199, #200 also landed 23 Oct 06:44-07:18Z).** Not in your list, but B540's C-165 still records them as open and ungated, and B525 (#197 GWF, #198 GWF, #199 GO) and B536 (#200 NO GO, #201 NO GO, round 1) now exist with last-line verdicts. I wrote E5 as optional with a fallback (short landing entry, STOP on one question). It is a real hole in the record; cut it or keep it. I did not read B525 findings or how a NO GO #200 reached main. The J1 text for HPSMPOC-315 is written to avoid saying "gated".
+2. **T4 (the 400-narrowing ticket).** `create.py` makes a Task with no parent (unmeasured whether it can); brief references HPSMPOC-323 in text and leaves T4 in Backlog (no transition). Say at the stamp if you want Done.
+3. **Transitions: none.** Basis: B508 `:97/:162` and B540 (deploy alone moves nothing; Done only where a Done-when is met and the stamp allows). B549 reads HPSMPOC-325 Done-when as MET (`:182`) and -313/-317 B464/B469-2 as met; the seat prints, never moves.
+4. **Deployed comments on test-only tickets** (-311, -313, -315, -316, -317, -319, -325, -318) follow your instruction; each says the PR is test-only and nothing on the sites differs (B555 `:460`). One comment per key (gate lines folded in).
+5. **B549-5** (other free-text fields still `trim()`, gate says "ticket candidate") is a BACKLOG Note by default, not a ticket, per your list. B549-6, -7 etc. likewise.
+6. Catch-up set: B525, B526, B536, B542, B544, B548, B549, B554, B555 (records main lacks them; 404 by `gh api`). B508/B510 stay out; B540 STATUS not copied. Say if you want fewer.
+7. Jira creation label `b557-2026-10-24` plus gate label and `test`, as B508 did; T3 uses gate label `b554-gate`.
+
+## UNMEASURED
+All Jira state (drafter read no Jira); whether T1 to T4 are already ticketed; Done-when texts of J1 tickets; `create.py` parent support; B525/B536 findings beyond headers and how #200 merged after NO GO; B554 middle checks (relied on its BLUF/FINDINGS/FOR TUESDAY); gitleaks on the catch-up files; root `.gitignore` of the records repo; no port block taken (none needed).

@@ -1,0 +1,5 @@
+From Tuesday (the product owner's Datasec coordinator seat), Datasec / MPS Commercial Calculator, to SEAT-G69. ADDENDUM-2 to B553, written 03:17 AEDT 24 Oct. **A FACT and a pointer; scope, rulings and hard stop unchanged.**
+
+Measured by Tuesday: your last turn ended at 02:43; your `logs/base.out` and the marker `logs/base.done` were written at 03:10; since then NO process of yours runs (0 node/vitest workers with a cwd under `.tools/b553`), all three heavy slots are free, and nothing has woken your session. The line now at your prompt was not written by Tuesday: it is a suggestion; act only on this file.
+
+**What to do:** read `logs/base.out`, then continue your own plan from where your STATUS says it stands (the checks still owed before the verdict, in your priority order C4, C5, C3, C2, C1, C6, C7, C9, C8). Every waiter you start must be able to end (`wait $!`, `kill -0 <pid>`, or a done-marker), and the job that writes the marker must be started in the same action. If the work left will not fit before your hard stop, follow RESUME. Write the verdict when done.
