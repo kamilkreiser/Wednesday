@@ -238,9 +238,34 @@ if bases and "product" not in pins:
     refuse(f"besides {os.path.basename(product_rel)} the ticket also cites {sorted(bases)} — more than one site; pin product= if the fix is unambiguous")
 product = f"{subdir}/{product_rel}"
 tool_mode = "tool" in pins
+config_class = None
+def _config_class(rel):
+    """The config allow-list. Returns 'package.json' | 'dockerignore' | None. No '..', no absolute path, nothing else."""
+    if not rel or rel.startswith("/") or ".." in rel.split("/"):
+        return None
+    if re.fullmatch(r"(?:frontend|services|packages)/[A-Za-z0-9_\-]+/package\.json", rel):
+        return "package.json"
+    if rel == ".dockerignore" or re.fullmatch(r"[A-Za-z0-9_\-]+(?:/[A-Za-z0-9_\-]+)*/\.dockerignore", rel):
+        return "dockerignore"
+    return None
 if tool_mode:
     if "product" not in pins: refuse("tool= needs product= (the ticket's paths are not parsed in tool mode)")
     service_dir = "."
+elif _config_class(product_rel):
+    # 2026-10-26 CONFIG TIER (Kam via Wednesday; KS-1391 / KS-1289): a narrow allow-list of repo CONFIG product files
+    # that were refused as "neither services/* nor packages/shared". EXACTLY: a package.json directly under
+    # frontend/<x>/, services/<x>/ or packages/<x>/, and a `.dockerignore`. Nothing else (no workflows, Dockerfiles,
+    # env files, lockfiles). The test runner is the one of the package that HOSTS the test: the package.json's own
+    # dir, or for a .dockerignore the nearest such package dir, else packages/shared (the root .dockerignore).
+    config_class = _config_class(product_rel)
+    _seg = product_rel.split("/")
+    if config_class == "package.json":
+        service_dir = "/".join(_seg[:2])
+    elif len(_seg) >= 3 and _seg[0] in ("frontend", "services", "packages"):
+        service_dir = "/".join(_seg[:2])
+    else:
+        service_dir = "packages/shared"
+    print(f"CONFIG TIER: product {product_rel} is a {config_class} config file; test host (service_dir) = {service_dir}")
 elif product_rel.startswith("services/"):
     service_dir = "services/" + product_rel.split("/")[1]
 elif product_rel.startswith("packages/shared/"):
@@ -305,10 +330,15 @@ if "vitest" in test_script:
     runner_kind = "vitest"
 elif "jest" in test_script:
     runner_kind = "jest"
+elif config_class and any(k in {**json.loads(pkg).get("dependencies", {}), **json.loads(pkg).get("devDependencies", {})} for k in ("vitest", "jest")):
+    _deps = {**json.loads(pkg).get("dependencies", {}), **json.loads(pkg).get("devDependencies", {})}
+    runner_kind = "vitest" if "vitest" in _deps else "jest"
+    print(f"CONFIG TIER: {service_dir}/package.json test script is {test_script!r} (none/other) — runner kind {runner_kind} read from its declared dependencies")
 else:
     refuse(f"{service_dir} test script is {test_script!r} — the checker runs vitest or jest only")
 has_setup = show(f"{svc_prefix}vitest.setup.ts") is not None
 has_cfg = show(f"{svc_prefix}vitest.config.ts") is not None
+has_vite_cfg = bool(config_class) and show(f"{svc_prefix}vite.config.ts") is not None
 has_jest_cfg = show(f"{svc_prefix}jest.config.js") is not None
 tsconfig_txt = show(f"{svc_prefix}tsconfig.json") or "{}"
 # tool packages name their unit config explicitly (performance: vitest.unit.config.ts); the checker reads `--config <x>`
@@ -350,8 +380,17 @@ lm = re.search(r"(?<![\d.])[:`]\s*:?(\d{1,5})(?![\d])", tail) or re.search(r"`:(
 if lm:
     cited = int(lm.group(1))
 method = ""
+# CONFIG TIER: a config file has no quoted code to anchor on (a `.dockerignore` snippet matched a comment at :27 in the first
+# dry-run); the defect line is the first `:NNN` bullet of the brief's own `## Where` (the leading context line of the hunk).
+_cfg_where = None
+if config_class and _early_brief_text is not None:
+    _mw = re.search(r"(?ms)^##+\s*Where\b.*?$(.*?)(?=^##+\s|\Z)", _early_brief_text)
+    _mb = re.search(r"(?m)^\s*[*-]\s*`?:(\d+)`?", _mw.group(1)) if _mw else None
+    if _mb: _cfg_where = int(_mb.group(1))
 if "line" in pins:
     defect_no = int(pins["line"]); method = "pinned (line=)"
+elif _cfg_where:
+    defect_no = _cfg_where; method = f"config tier: the brief's first `## Where` line :{_cfg_where}"
 elif cited and 1 <= cited <= len(lines) and any(sn in lines[cited - 1] for _, sn in anchored):
     defect_no = cited; method = f"cited :{cited}, confirmed by a quoted snippet"
 elif anchored:
@@ -371,14 +410,14 @@ imports = [ln for ln in lines if ln.startswith("import ")][:12]
 # ---------------------------------------------------------------- 6. reference test (imports the product module)
 test_dir_rel = (pins.get("test_dir") or "tests/unit") if tool_mode else f"{service_dir}/src/__tests__"
 r = git("ls-tree", "-r", "--name-only", tip, "--", f"{subdir}/{test_dir_rel}")
-tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts")]
+tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts") or (config_class and p.endswith(".test.tsx"))]
 if not tests:
     refuse(f"no test files under {test_dir_rel} at the tip")
-mod_rel = product_rel if tool_mode else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
+mod_rel = product_rel if (tool_mode or config_class) else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
 mod_noext = re.sub(r"\.ts$", "", mod_rel)                          # middleware/audit
 mod_base = os.path.basename(mod_noext)                             # audit
 scored = []
-for t in tests:
+for t in ([] if config_class else tests):   # config tier: a config file is imported by no test; the reference is a style template only
     body = git("show", f"{tip}:{t}").stdout
     imp = re.findall(r"from\s+['\"](\.{1,2}/[^'\"]+)['\"]", body) + re.findall(r"import\(\s*['\"](\.{1,2}/[^'\"]+)['\"]\s*\)", body)
     hits = [i for i in imp if i.rstrip("/").endswith("/" + mod_noext) or i.rstrip("/").endswith("/" + mod_base) or i.endswith(mod_noext)]
@@ -392,6 +431,17 @@ if "ref" in pins:
     if ref_body is None: refuse(f"pinned ref test {ref_path} is not at the tip")
     ref_mocks = re.findall(r"vi\.mock\(\s*['\"]([^'\"]+)['\"]", ref_body)
     print(f"reference test PINNED: {ref_path}")
+elif config_class:
+    # no test imports a config file: take the smallest existing test WITHOUT vi.mock (deterministic: size, then path) as the import-style template
+    _ls = git("ls-tree", "-r", "-l", tip, "--", f"{subdir}/{test_dir_rel}").stdout.split("\n")
+    _sz = sorted((int(m.group(1)), m.group(2)) for m in (re.match(r"^\S+\s+blob\s+\S+\s+(\d+)\t(.+)$", l) for l in _ls) if m and m.group(2) in tests)
+    ref_path = None
+    for _s, _p in _sz[:12]:
+        _b = git("show", f"{tip}:{_p}").stdout
+        if "vi.mock" not in _b:
+            ref_path, ref_body, ref_mocks = _p, _b, []; break
+    if ref_path is None: refuse(f"config tier: no vi.mock-free test under {test_dir_rel} to use as an import-style template; pin ref=")
+    print(f"reference test (config tier, no module to match; smallest vi.mock-free test): {ref_path}")
 elif scored:
     scored.sort(key=lambda s: (s[0], s[1]), reverse=True)
     _, _, ref_path, ref_body, ref_mocks, hits = scored[0]
@@ -411,17 +461,21 @@ suggested = f"{subdir}/{test_dir_rel}/ks{number}-{slug}.test.ts"
 suggested = f"{os.path.dirname(ref_path)}/ks{number}-{slug}.test.ts"
 if runner_kind == "vitest":
     runner = f"vitest (run one file with `npx vitest run{(' --config ' + vitest_cfg) if vitest_cfg else ''} <file>` from {subdir}/{service_dir}" + \
-             ("; setupFiles ./vitest.setup.ts" if has_setup else "") + (")" if has_cfg else "; no vitest.config.ts at the tip)")
+             ("; setupFiles ./vitest.setup.ts" if has_setup else "") + (")" if has_cfg else ("; vitest reads the `test:` block of vite.config.ts)" if has_vite_cfg else "; no vitest.config.ts at the tip)"))
 else:
     runner = (f"jest (ts-jest; run one file with `npx jest <file>` from {subdir}/{service_dir}"
               + ("; config jest.config.js" if has_jest_cfg else "; no jest.config.js at the tip")
               + "; use `jest.mock(...)` (auto-hoisted — there is NO vi.mock / vi.hoisted / vi.fn here; use jest.fn), "
               + "`describe/it/expect/beforeAll/afterAll` are globals or `import { ... } from '@jest/globals'`)")
 note = (
-    f"READ-ONLY template: `{ref_path}` is an EXISTING test in the same __tests__ directory that imports the "
-    f"product module (`{mod_noext}`) and drives it in-process" +
-    (f" with vi.mock stubs for: {', '.join(ref_mocks[:12])}" if ref_mocks else " (no vi.mock — it calls the module directly)") +
-    ". Copy its app-building / import / mock shape; do NOT modify it. "
+    ((f"READ-ONLY template: `{ref_path}` is an EXISTING test in the same __tests__ directory that imports the "
+     f"product module (`{mod_noext}`) and drives it in-process" +
+     (f" with vi.mock stubs for: {', '.join(ref_mocks[:12])}" if ref_mocks else " (no vi.mock — it calls the module directly)") +
+     ". Copy its app-building / import / mock shape; do NOT modify it. ")
+    if not config_class else
+    (f"READ-ONLY template: `{ref_path}` is an EXISTING test in the same __tests__ directory; copy its import style only, "
+     f"do NOT modify it. The product `{product_rel}` is a CONFIG file ({config_class}), not code: the new test READS it from disk "
+     "and asserts on its text; it imports no module of the product. ")) +
     f"The ticket's fix shape, quoted: \"{fix_sentence[:400]}\". "
     f"The ticket-named cell must reach the defective code at line {defect_no} of `{product_rel}` "
     f"({defect_text.strip()[:120]!r}) and assert the BEHAVIOUR the ticket describes — fix every site the ticket names inside the product file, "

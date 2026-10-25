@@ -1,41 +1,30 @@
 ---
-date: 2026-10-23
+date: 2026-10-26
 type: pickup
-scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
+scope: SECUURA + all general/generic work. Datasec is TUESDAY's (Mac mini).
 status: live
-supersede: REPLACED WHOLESALE by the Opus 5.5 successor seat of 23 Oct (booted 11:12) at its 50% checkpoint (12:55 AEDT). Replace wholesale again; never stack. Previous version: NEXT-PICKUP.md.pre-1023-1255 and git history.
+supersede: REPLACED WHOLESALE by the Mon 26 Oct laptop seat at its 53% checkpoint. Previous: NEXT-PICKUP.md.pre-1026-0855. Replace wholesale; never stack.
 ---
 
-# NEXT PICKUP (Fri 23 Oct, written 12:55 AEDT; Wednesday ctx 50%, weekly 7d 99%, renews Sun 25 Oct ~13:00 AEDT)
+# NEXT PICKUP (Mon 26 Oct, written at the 53% checkpoint; gauge 7d ~5%)
 
-## 000. END OF DAY 15:0x — READ THIS FIRST (Kam: "once the other agent finishes, please wrap up for the day")
-- Floor clear: %0 + %1 only. G 19th wrapped after a read-only SWEEP (384 Backlog+Todo; 365 ours-or-unassigned). **Tomorrow's first work = its three file-disjoint picks**, in `!CODING/Secuura/Blockchain/5_Project_History/2026-10-23_seatG-19th/HANDOVER.md` (KS-1391 issuer test script, XS, Spark-able; KS-1289 .dockerignore __tests__, check no Dockerfile needs them first; the third there). Brief a Sonnet seat (switch with /model at its plan prompt; the launcher pins Opus 5).
-- **New boot steps 10a/10b run tomorrow morning:** the morning fleet-activity card (summary, plan, per-project counts) and `stale_card_escalate.sh --send`. First live run of both: watch them.
-- Open cards: secuura-kintsugi-deploy-held-at-99pct-1023 (default: deploy kintsugi then demo on headroom). The account Kam switched to at 14:50 also read 7d:98% (renews ~1d 14h): check the gauge at boot.
-- Ledger (this seat): 2 rows. Lesson added: 2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email.
+## 0. MACHINE: Wednesday runs on the LAPTOP (Kamils-MBP, 32 GB) until Kam's new machine arrives
+- Fixed today (see today's note, 07:54 block): dashboard-cloud venv (python@3.12 installed), live_chat_poll, 7 launchd jobs from this drive, rsync, usage publisher, Spark tunnel alias fallback (`ZGX-Nano-G1n`), python@3.14 -> 3.14.9.
+- ⚠ `brew upgrade python@3.14` DROPPED `/opt/homebrew/bin/python3`; Wednesday re-created it by hand (`ln -s ../opt/python@3.14/libexec/bin/python3`, same for pip3). If `python3 --version` says 3.9, that link is gone again.
+- Ornith is NOT available here (Studio-only, paused since 10-12). The Spark works: http://127.0.0.1:47788.
+- Open question for Kam at a natural moment: does the Studio still run its launchd jobs? A 05:30 shift-change mail came from somewhere else today; with this laptop's jobs now installed, duplicates are possible from tomorrow.
 
-## 00. DELTA AT 13:58 — READ THIS FIRST
-- **Kam's 10:53 instruction is DONE for everything that could be done today:** SEVEN merges, each gated and verified at origin: #1253, #923, #927, #920, #809 (DA4 round 2), #995, #989 (DA5 Opus tier 1). develop = `a9ce2cff1594`. #1250 CLOSED unmerged (proven superseded by #1389). Archived: KS-1297, KS-1027, KS-1302, KS-1303. Filed: KS-1713/1714/1715 (DA3 notes), KS-1716 (format gate drops `akto` on large pushes, High), KS-1717 (anchoring has no inbound strip for x-emitter-internal, High), KS-1718 (test password derivable, Medium).
-- **Floor: %0 + %1 only.** G 17th (0.95) and G 18th (0.97) wrapped and closed. Handover: `!CODING/Secuura/Blockchain/5_Project_History/2026-10-23_seatG-18th/HANDOVER.md`.
-- **HELD on the allowance (99%, renews Sun 25 Oct ~13:00 AEDT; a fresh login asked of Kam):** (a) the KINTSUGI DEPLOY of develop `a9ce2cff1594`+ (October grant, kintsugi first) — Wednesday's decision: not started at 99% because a cut-off mid-swap leaves a half-swapped box; KS-741 reaches Done only after it; (b) #1383 renumber (Opus security build).
-- **Owed rulings:** four Done tickets un-archived (KS-1708, KS-1042 and KS-608 under KS-492: archive when a seat is live; KS-724 sits under Peter's KS-485: leave). The Secuura wrap skill's step 2c names a dead T9 path for Wednesday's projects_index: a brief item for the next Secuura seat.
+## 1. LIVE FLOOR (panes in tmux `fleet`)
+- %2 `Secuura/Blockchain-G` = Seat G 20th, SONNET 5.5. KS-1719 (Peter's ask; Kam: "prioritise this from Peter"). PR #1687 head 02399bd018aa READY FOR GATE. Filed KS-1720 (mypy aborts on develop) + KS-1721 (symlinked-venv test fails on Linux). Waiting for the gate verdict. Peter's ticket comment is DRAFTED at Secuura/Blockchain 5_Project_History/2026-10-26_seatG-20th/ks1719_peter_comment_DRAFT.md — post ONLY after the gate has read every sentence and Wednesday clears it.
+- %3 `Secuura/Blockchain-D` = Seat D 31st, OPUS 5.5. Deploying develop 1ae6f17d19a8 to kintsugi then demo (card secuura-kintsugi-deploy-held-at-99pct-1023's default fired; card withdrawn). GO sent 21:40Z: disk floor 12,000 MB; demo-service held + ticket; host keys TOFU UNVERIFIED (recorded in its handover). Expect STATUS mails per box.
+- QA GATE (Agent-tool subagent, Sonnet, tier 2 round 1) on PR #1687 -> verdict at 0_Brain/reference/2026-10-26_gate-pr1687-ks1719/verdict.md. Its main question: does the helper's new cancel of QUEUED proposals stay bounded to test residue?
 
-## 0. LIVE STATE
-- **Floor:** %0 wednesday, %1 fleet-monitor, **%34 Seat G 18th** (Secuura/Blockchain-G), booted 01:52Z by `cockpit.sh rotate` on the launcher's Opus 5. **OWED: switch it with `/model claude-sonnet-5-5` at its plan prompt and answer its plan confirmation** (the SUCCESSOR mail says Wednesday does this). Do NOT type /model while it is mid-turn.
-- **Kam's 10:53 instruction** ("merge and archive everything that is ready or close to being merged") is the work. Census (G 17th, `!CODING/Secuura/Blockchain/5_Project_History/2026-10-23_seatG-17th/evidence/census_open_prs.md`): 22 open, A0 B3 C6 D13 E0.
-- **MERGED today and verified at origin:** #1253 -> 1b350328b1db, #923 -> fec95b757eec, #927 -> 895a991208ca, #920 -> 25f42d80b0fc (develop now 25f42d80b0fc). Gate DA3 `0_Brain/reference/2026-10-23_gate-DA3-five-prs/verdict.md`.
-- **#809:** gate DA4 (round 2 of 2) = GO WITH NOTE at head 7892929e7eb2 (`0_Brain/reference/2026-10-23_gate-DA4-pr809-r2/verdict.md`). **GO mailed to G 18th** (after the two archives). Verify its MERGED at origin.
-- **G 18th's queue (SUCCESSOR mail 12:5x + GO mail):** (1) archive KS-1297 and KS-1027 (ruled; NOT executed by G 17th: Wednesday read both In Progress, archivedAt null at 12:5x); (2) merge #809; (3) #989 then #1250 up to develop (merge, never rebase/force); (4) then Wednesday commissions ONE tier-1 OPUS gate on #995 (pushed d89eab06b150, trust-boundary header strip) + #989 (password redaction).
-- **Stay open:** KS-736 (part b undone; KS-1713), KS-734 (live e2e run owed; KS-1715), KS-693 (live 503 run owed). Follow-ups filed: KS-1713/1714/1715.
-- **Not ours / not this round:** #1383 (migration 049 collides with develop's 049: an Opus security build, renumber to 056+); D rows (dependabot, Peter #1360, Stuart #1129); #887 workflow PR (Kam's). PR #1589 is a second PR on KS-734, unread by anyone.
-- Stuart card `secuura-kintsugi-deploy-notice-1022` DELIVERED (KS-772 comment 88649db6, read back by id). KS-1707 comment 85fbbf53 posted and read back.
+## 2. OWED, in order
+1. Gate verdict -> Wednesday's completion check -> GO merge to G 20th (TESTED grant) or a fix round (round 2 of 2). Then clear Peter's comment text and have G post it. KS-1719 stays assigned to Peter.
+2. D 31st STATUS mails: verify each box at source; KS-741 to Done after demo is live (Done = tested + works + deployed).
+3. Spark: KS-1391 PASS held -> night/READY_KS-1391-...-PASS-7of7_2026-10-26.diff.md. KS-1289 round running/ran (check spark/state + runs/spark_secuura_2026-10-26_ks_1289_p1). A Sonnet RAISE seat (row C1) raises the held READYs as PRs; needs a pane name not in use (G and D are live).
+4. Brief item for the next Secuura seat: the Secuura launcher's step 8 names coagent@, which the project key cannot read (NotFound parses as "0 messages").
+5. Ledger rows past ~3 days (10-21..10-23) to archive at the wrap (rule 3c, conservation asserted).
 
-## 1. OWED
-1. G 18th: /model + plan answer; then score each step at source (ls-remote, Linear read-back).
-2. The tier-1 Opus gate on #995 + #989 when 989 is READY (routing v1.0: tier 1 = Opus).
-3. Usage: 99%; Kam asked twice for a fresh login (07:12 and 11:1x panel). Usage is a GUIDE (2026-10-22); at 100% every seat stops until Sun 25 Oct ~13:00. Push and mail after each step.
-4. From the morning pickup, still owed: prisma-family follow-up ticket; KS-1705 p1 raise (tier-1 gate) and p2 after npm ci in the Spark cache; STANDING_LINES additions; Secuura launcher model pin (`claude-opus-5` -> newest Opus) as a brief item; C 33rd (KS-1695 gap 2), KS-1692 PR 2, KS-1688; Fable 5.1 trial gate; cockpit `@cockpit_name` empty after self-rotation.
-5. Ledger 23 Oct: new row (my 11:54 809 fold instruction, the dead key). Lesson family [[2026-09-10_i-endorse-things-i-have-not-read]].
-
-## 2. IN FORCE (read the files, not this list)
-Usage is a GUIDE (2026-10-22). Routing v1.0. October deploy grant (to 31 Oct). TESTED merge grant; merge-and-archive grant (2026-10-10). Ticket Done = tested + works + deployed (2026-10-12).
+## 3. IN FORCE (read the files, not this list)
+Usage is a GUIDE (2026-10-22). Routing v1.0 (Opus/Sonnet/Spark per table). October deploy grant (extended until further notice). TESTED merge grant; merge-and-archive (2026-10-10). Done = tested + works + deployed (2026-10-12). Kam ruled wed-morning-plan-1026 = a (carry on).
