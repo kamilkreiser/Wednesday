@@ -1,0 +1,39 @@
+
+##### Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts
+
+ RUN  v4.1.12 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/260eb491-03f6-4ca4-9176-8fe7e584e897/scratchpad/wt/Blockchain/Dev/services/api-gateway
+
+stdout | src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts > KS-1512 - the platform half of the audit-log merge is read past the upstream clamp of 200 > RED KS-1512 F: a window that FAILS part-way discards the platform half, as a failed first window always has: app rows only, total of the app source
+2026-10-26 16:28:58.865 [api-gateway] [33mwarn[39m: GET /api/platform/audit-log dropped the platform half {"error":"tenant-provisioning audit-log window was not a list","windowsRead":1}
+
+stdout | src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts > KS-1512 - the platform half of the audit-log merge is read past the upstream clamp of 200 > RED KS-1512 F: a window that FAILS part-way discards the platform half, as a failed first window always has: app rows only, total of the app source
+2026-10-26 16:28:58.874 [api-gateway] [33mwarn[39m: GET /api/platform/audit-log dropped the platform half {"error":"fetch failed","windowsRead":1}
+
+stdout | src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts > KS-1512 - the platform half of the audit-log merge is read past the upstream clamp of 200 > RED KS-1512 H: a slow-yet-answering upstream (each window at 60% of the budget) degrades to the audit_logs rows within the budget, and never hangs
+2026-10-26 16:29:00.884 [api-gateway] [33mwarn[39m: GET /api/platform/audit-log dropped the platform half {"error":"Upstream timed out after 798ms: http://127.0.0.1:64403/api/audit-log?limit=75&offset=200","windowsRead":1}
+
+stdout | src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts > KS-1512 - the platform half of the audit-log merge is read past the upstream clamp of 200 > RED KS-1512 L: the budget is spent ACROSS windows - four windows at 30% each degrade, and the fourth is cut short by what is left
+2026-10-26 16:29:04.498 [api-gateway] [33mwarn[39m: GET /api/platform/audit-log dropped the platform half {"error":"Upstream timed out after 190ms: http://127.0.0.1:64403/api/audit-log?limit=75&offset=600","windowsRead":3}
+
+stdout | src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts > KS-1512 - the platform half of the audit-log merge is read past the upstream clamp of 200 > RED KS-1512 M: a window whose BODY arrives after the budget is spent ends the paging (the per-call timer stops at the headers, so only the budget sees it)
+2026-10-26 16:29:06.704 [api-gateway] [33mwarn[39m: GET /api/platform/audit-log dropped the platform half {"error":"Upstream timed out after 2000ms: http://127.0.0.1:64403/api/audit-log","windowsRead":1}
+
+stdout | src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts > KS-1512 - the platform half of the audit-log merge is read past the upstream clamp of 200 > control KS-1512 K2: a single-window page slower than the per-call timeout degrades exactly as the old route did (one request, the same figure)
+2026-10-26 16:29:10.213 [api-gateway] [33mwarn[39m: GET /api/platform/audit-log dropped the platform half {"error":"Upstream timed out after 2000ms: http://127.0.0.1:64403/api/audit-log?limit=50&offset=0","windowsRead":0}
+
+stdout | src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts > KS-1512 - the platform half of the audit-log merge is read past the upstream clamp of 200 > control KS-1512: a first window that fails serves the app rows only and asks for nothing more
+2026-10-26 16:29:10.229 [api-gateway] [33mwarn[39m: GET /api/platform/audit-log upstream answered an error status {"status":500,"windowsRead":0}
+
+ ✓ src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts (18 tests) 11468ms
+     ✓ RED KS-1512 H: a slow-yet-answering upstream (each window at 60% of the budget) degrades to the audit_logs rows within the budget, and never hangs  2005ms
+     ✓ control KS-1512 I: just inside the budget (each of two windows at 40%) the page completes and is the right one  1609ms
+     ✓ RED KS-1512 L: the budget is spent ACROSS windows - four windows at 30% each degrade, and the fourth is cut short by what is left  2005ms
+     ✓ RED KS-1512 M: a window whose BODY arrives after the budget is spent ends the paging (the per-call timer stops at the headers, so only the budget sees it)  2206ms
+     ✓ control KS-1512 K1: the budget does not touch a single-window page - one request, answered at 75% of the budget, is served in full  1506ms
+     ✓ control KS-1512 K2: a single-window page slower than the per-call timeout degrades exactly as the old route did (one request, the same figure)  2004ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  16:28:58
+   Duration  12.00s (transform 77ms, setup 128ms, import 295ms, tests 11.47s, environment 0ms)
+

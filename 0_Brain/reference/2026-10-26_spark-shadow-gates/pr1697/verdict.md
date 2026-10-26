@@ -1,0 +1,16 @@
+# Spark SHADOW gate, PR #1697 (KS-1527)
+- Head: 6e45c854a46fe8cb406d8798cc0406fe5fc87bb0 (== refs/pull/1697/head at run: tip). Base: merge-base with develop c2505d5c6. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 2, +82/-1; product files: 0.
+  - targeted on head: ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh rc=0 passed=None failed=0; preflight_test_types_ratchet_leg.test.sh rc=0 passed=None failed=0
+  - targeted on base product + head tests: ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh rc=0 passed=None failed=0; preflight_test_types_ratchet_leg.test.sh rc=0 passed=None failed=0
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: NO GO. Valid JSON first attempt: True. Wall 77.7 s, prompt 12406 tok, completion 2288 tok.
+- Findings (7), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Major: The new test suite's mutant X4 does not actually test the stub's argv logging because the mutant sed expression does not match the real leg's invocation, so the X4 cell can pass even if the stub chang  [evidence quote found in input: True]
+  - Major: The new test suite's R1text mutant does not actually change the rc-1 wording in the leg, because the sed pattern does not match the real leg's text, so the R1text cell can pass even if the rc-1 wordin  [evidence quote found in input: True]
+  - Minor: The new test suite's control cell 0 only checks that the mutant files differ from the real leg, not that the mutations actually change the behavior the cells are meant to catch, so the controls are we  [evidence quote found in input: False]
+  - Minor: The new test suite's X4 cell does not actually verify that the stub logs the full argv; it only checks that the default-run stub cell fails, which could fail for other reasons (e.g., the mutant leg is  [evidence quote found in input: False]
+  - Minor: The new test suite's R1text cell does not actually verify that the rc-1 wording cell catches a rewording; it only checks that the rc-1 wording cell fails, which could fail for other reasons.  [evidence quote found in input: False]
+  - Note: The new test suite runs the leg with DEPS_PRESENT_ROOT set to a non-existent directory, but the leg's skip logic (per the ticket) may exit 0 with a SKIP line, which could cause the stub cells to be sk  [evidence quote found in input: False]
+  - Note: The new test suite's use of `grep -c` in `count_fail` returns 0 when no matches, but with `set -uo pipefail` and no `set -e`, a grep that finds no matches returns exit code 1, which could cause the co  [evidence quote found in input: True]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

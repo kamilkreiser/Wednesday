@@ -1,0 +1,229 @@
+===== TICKET =====
+KS-1289 — Blockchain/Dev/.dockerignore excludes `tests`, which does not match `__tests__` - test sources ship into runtime images and one shared test change rebuilt 23 of 29 [In Progress]
+
+## BLUF
+
+`Blockchain/Dev/.dockerignore:13` is the single line `tests`. **That pattern does not match** `__tests__`, so every `__tests__` directory sits inside the build context. Two consequences: **test sources ship inside runtime images**, and **a change to a shared test file invalidates the cache for services that have no runtime change of their own.**
+
+## Measured - the build cost
+
+**2026-09-23 kintsugi deploy (Seat B 23rd).** Two files under `packages/shared/src/__tests__/` were the **only changed input for 23 of the 29 rebuilt images** - roughly **1 h 50 min of a 2 h 10 min build**, for images whose runtime code did not change. Excluding `__tests__` would cut a comparable rebuild to about **6** images.
+
+**At develop** `6ab9d5021` **(Seat B 24th, 2026-09-25):** **471 tracked files** live under `__tests__/` paths beneath `Blockchain/Dev`, and none are excluded by the `tests` line.
+
+## A path correction worth keeping
+
+**There is no repo-root** `.dockerignore`**.** The only two tracked at `6ab9d5021` are `Blockchain/Dev/.dockerignore` and `Blockchain/Dev/services/vc-issuer/.dockerignore`. Because `docker-compose.yml` builds every service with `context: .` = `Blockchain/Dev`, the first **is** the effective one. Earlier notes calling it "the root .dockerignore" mean the build-context root, not the repo root.
+
+## Ask
+
+Add a pattern that matches `__tests__` (and confirm nothing in the build needs those files). **Verify by rebuilding after a shared-test-only change and showing that the set of images which rebuild shrinks** - the measurement above is the before.
+
+## Searched before filing
+
+`searchIssues`, `includeArchived: true`, pages literal-matched: **".dockerignore"** (8 hits - all PS infra or unrelated: PS-193, PS-400, PS-180, PS-346, PS-182, KS-485, KS-36, KS-601) and **"tests** runtime images rebuild" (40 hits, none this finding). Nearest in spirit is **KS-918** (vite is a production dependency of `services/auth`; esbuild and fsevents ship into the runtime image) - same family of symptom, different mechanism. **Filed new.**
+
+---
+
+*Carried from Seat B 23rd's kintsugi deploy (2026-09-23), where it was ruled a FINDING. Filed by Seat B 24th, 2026-09-25, on Wednesday's ruling.*
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/.dockerignore b/Blockchain/Dev/.dockerignore
+index 4d65a8ca1..d4ecd8256 100644
+--- a/Blockchain/Dev/.dockerignore
++++ b/Blockchain/Dev/.dockerignore
+@@ -11,6 +11,7 @@ node_modules
+ docs
+ !docs/openapi
+ tests
++**/__tests__
+ contracts/secuura/build
+ frontend/*/node_modules
+ frontend/*/dist
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts
+new file mode 100644
+index 000000000..4ca06f027
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts
+@@ -0,0 +1,34 @@
++/**
++ * KS-1289 - Blockchain/Dev/.dockerignore keeps every nested __tests__ directory out of the build context.
++ *
++ * A .dockerignore pattern is matched from the build-context root, not at any depth (unlike .gitignore). The line `tests`
++ * therefore matches only a top-level tests/ directory, and every services/<name>/src/__tests__/ directory stayed in the
++ * context: test sources shipped into runtime images, and a change to one shared test file invalidated the cache of services
++ * whose runtime code had not changed. `**` + `/__tests__` is the pattern that matches at any depth.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { dirname, resolve } from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++const here = dirname(fileURLToPath(import.meta.url));
++// packages/shared/src/__tests__ -> four levels up is Blockchain/Dev, the build-context root
++const lines = readFileSync(resolve(here, '../../../../.dockerignore'), 'utf8').split('\n');
++
++describe('KS-1289 - Blockchain/Dev/.dockerignore excludes nested __tests__ directories', () => {
++  it('RED KS-1289 R1 a line excludes __tests__ at any depth', () => {
++    expect(lines).toContain('**/__tests__');
++  });
++
++  it('CONTROL KS-1289 C1 the original top-level tests line is still there', () => {
++    expect(lines).toContain('tests');
++  });
++
++  it('CONTROL KS-1289 C2 the whatsapp-bot re-include is still there, so its build keeps its sources', () => {
++    expect(lines).toContain('!connectors/whatsapp-bot');
++  });
++
++  it('CONTROL KS-1289 C3 the docs/openapi re-include is still there', () => {
++    expect(lines).toContain('!docs/openapi');
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/.dockerignore
+1: # SMB AppleDouble + tempfile artefacts (block docker build on SMB-mounted volumes)
+2: **/._*
+3: **/.smbdelete*
+4: **/.DS_Store
+5: node_modules
+6: .git
+7: .github
+8: .cursor
+9: .vscode
+10: *.md
+11: docs
+12: !docs/openapi
+13: tests
+14: **/__tests__
+15: contracts/secuura/build
+16: frontend/*/node_modules
+17: frontend/*/dist
+18: services/*/node_modules
+19: services/*/dist
+20: packages/*/node_modules
+21: packages/*/dist
+22: deployment
+23: deployments
+24: docker
+25: connectors
+26: # KS-800 F-15: whatsapp-bot now builds from the Dev root so @secuura/shared
+27: # resolves (it mounts the control-byte guard). The rest of connectors/ stays
+28: # out of the context. Last match wins in .dockerignore, so the negation is
+29: # re-narrowed below rather than left to pull in node_modules/dist.
+30: !connectors/whatsapp-bot
+31: connectors/whatsapp-bot/node_modules
+32: connectors/whatsapp-bot/dist
+33: sdk
+34: *.log
+35: *.env
+36: *.env.*
+37: .env.local.example
+38: coverage
+39: .nyc_output
+
+### FILE AT HEAD: Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts
+1: /**
+2:  * KS-1289 - Blockchain/Dev/.dockerignore keeps every nested __tests__ directory out of the build context.
+3:  *
+4:  * A .dockerignore pattern is matched from the build-context root, not at any depth (unlike .gitignore). The line `tests`
+5:  * therefore matches only a top-level tests/ directory, and every services/<name>/src/__tests__/ directory stayed in the
+6:  * context: test sources shipped into runtime images, and a change to one shared test file invalidated the cache of services
+7:  * whose runtime code had not changed. `**` + `/__tests__` is the pattern that matches at any depth.
+8:  */
+9: import { describe, it, expect } from 'vitest';
+10: import { readFileSync } from 'node:fs';
+11: import { dirname, resolve } from 'node:path';
+12: import { fileURLToPath } from 'node:url';
+13: 
+14: const here = dirname(fileURLToPath(import.meta.url));
+15: // packages/shared/src/__tests__ -> four levels up is Blockchain/Dev, the build-context root
+16: const lines = readFileSync(resolve(here, '../../../../.dockerignore'), 'utf8').split('\n');
+17: 
+18: describe('KS-1289 - Blockchain/Dev/.dockerignore excludes nested __tests__ directories', () => {
+19:   it('RED KS-1289 R1 a line excludes __tests__ at any depth', () => {
+20:     expect(lines).toContain('**/__tests__');
+21:   });
+22: 
+23:   it('CONTROL KS-1289 C1 the original top-level tests line is still there', () => {
+24:     expect(lines).toContain('tests');
+25:   });
+26: 
+27:   it('CONTROL KS-1289 C2 the whatsapp-bot re-include is still there, so its build keeps its sources', () => {
+28:     expect(lines).toContain('!connectors/whatsapp-bot');
+29:   });
+30: 
+31:   it('CONTROL KS-1289 C3 the docs/openapi re-include is still there', () => {
+32:     expect(lines).toContain('!docs/openapi');
+33:   });
+34: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1694,
+ "head_sha": "048b9d5fa48ba05712bcee73dbc9831655d58c8f",
+ "pr_tip_now": "048b9d5fa48ba05712bcee73dbc9831655d58c8f",
+ "head_mode": "tip",
+ "merge_base": "28dac5c12ba5c00d9fc3ad04daee5230eff71619",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/.dockerignore",
+   "added": "1",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts",
+   "added": "34",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts"
+ ],
+ "product_files": [
+  "Blockchain/Dev/.dockerignore"
+ ],
+ "diff_stat": {
+  "files": 2,
+  "added": 35,
+  "deleted": 0
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts",
+   "rc": 0,
+   "passed": 4,
+   "failed": 0,
+   "tail": "assed (1)\n      Tests  4 passed (4)\n   Start at  16:21:07\n   Duration  133ms (transform 19ms, setup 21ms, import 7ms, tests 2ms, environment 0ms)\n\nnpm warn config ignoring workspace config at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/***/scratchpad/wt/Blockchain/Dev/packages/shared/.npmrc"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts",
+   "rc": 1,
+   "passed": 3,
+   "failed": 1,
+   "tail": "9\n     18| describe('KS-1289 - Blockchain/Dev/.dockerignore excludes nested __tes\u2026\n     19|   it('RED KS-1289 R1 a line excludes __tests__ at any depth', () => {\n     20|     expect(lines).toContain('**/__tests__');\n       |                   ^\n     21|   });\n     22|\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[1/1]\u23af"
+  }
+ ],
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 14
+}

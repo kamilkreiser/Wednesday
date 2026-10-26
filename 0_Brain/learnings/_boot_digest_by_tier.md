@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-26 15:28 from 251 lesson files (1,093,230 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 206. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-26 16:33 from 251 lesson files (1,094,898 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 206. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7549,7 +7549,7 @@ sections (open the file for these): How to apply
 
 **The operative case, so the headline matches it:** Wednesday is about to commission a QA gate. **Ask whether a measured Spark gate covers that tier yet.** If it does, run the Spark gate (the deterministic runner plus the Spark review) and keep the Claude gate only where the calibration says the Spark misses things. If it does not, the Claude gate runs as today and the Spark gate runs beside it as a SHADOW, adding a calibration row.
 
-sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #1687 rounds 1 and 2 against the two Sonnet verdicts (tooling drafter; Wednesday re-ran the runner's arms: 3/3 PASS once the deploy key was set)
+sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #1687 rounds 1 and 2 against the two Sonnet verdicts (tooling drafter; Wednesday re-ran the runner's arms: 3/3 PASS once the deploy key was set) · CALIBRATION 2, 2026-10-26 ~16:3x — PR #1690 (KS-1717, TIER 1) plus nine tier-2 shadows (Sonnet shadow agent; Wednesday read its report, findings not re-checked at source by Wednesday)
 
 **How to apply:**
 1. **Measure before moving.** The first calibration is PR #1687 (KS-1719) at both rounds, against the two Sonnet verdicts in `0_Brain/reference/2026-10-26_gate-pr1687-ks1719/`. Score recall of the known findings, false positives checked at source, verdict match, and whether the facts match.

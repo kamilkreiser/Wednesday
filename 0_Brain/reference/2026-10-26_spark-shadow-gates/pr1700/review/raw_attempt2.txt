@@ -1,0 +1,24 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The PR changes the developer portal documentation before the code change (#1613) that introduces the 3,000 req/hour Platform S connector key rate limit has landed, contradicting the ticket's explicit timing instruction.",
+      "evidence": "developer-portal.html:564 `Platform S connector keys are minted at 3,000 req/hour`; ticket: \"Only after #1613 merges. Before then the page is correct, and changing it first would document a ceiling develop does not have.\"",
+      "test_or_reason": "The ticket's acceptance criteria are not met: the change is made now, not after #1613 merges. The diff applies the doc change to the current develop head, which does not yet have the 3,000 req/hour behavior."
+    },
+    {
+      "severity": "Major",
+      "claim": "The new test suite does not verify that the documentation change is gated on the actual code behavior; it only checks the HTML text, so it would pass even if the 3,000 req/hour behavior is not implemented in the codebase.",
+      "evidence": "ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts:17-23 `expect(row).toContain('Platform S connector keys are minted at 3,000 req/hour')` and `expect(row).toContain('(the actual ceiling for the key, on every response)')`",
+      "test_or_reason": "The tests only assert on the static HTML file content, not on the actual rate-limit implementation (e.g., the security service schema or the register-connector endpoint). They would pass even if the code does not mint Platform S keys at 3,000 req/hour, so they do not pin the behavior the ticket claims."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test file's docstring claims the change is correct only after #1613 lands, but the test itself does not enforce or check that #1613 has landed, so the test would pass even if the code change is not present.",
+      "evidence": "ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts:4-7 `That stays true for a key minted without an explicit rateLimit ... but keys that POST /api/platform/organizations/register-connector mints for Platform S are minted at 3,000 req/hour (KS-1195).`",
+      "test_or_reason": "The test does not reference or import any code from #1613; it only reads the HTML file. The test would pass even if the rate-limit code is not merged, so it does not enforce the ticket's timing requirement."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

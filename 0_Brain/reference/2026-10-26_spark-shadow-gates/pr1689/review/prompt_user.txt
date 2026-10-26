@@ -1,0 +1,1224 @@
+===== TICKET =====
+KS-1716 — systemTest format gate drops packages on large pushes: `grep -q` + `pipefail` turns EPIPE into "unchanged" [In Progress]
+
+**Ask:** make `systemTest/scripts/check-package-format.sh` select packages without a pipe whose reader can exit early, so a large pushed range cannot make the format gate skip a package.
+
+**What goes wrong:** the selection loop (line \~730) runs `printf '%s\n' "$changed_paths" | grep -q "^systemTest/${p}/"` under `set -uo pipefail`. `grep -q` exits at its first match; when the path list is larger than the pipe buffer (64 KiB on macOS) `printf` is still writing, gets EPIPE, and `pipefail` turns the pipeline's status into failure. The `if` reads that as "no changed file under this package", so the package is not checked, and nothing says so: the gate still prints `0 skipped, 0 failed`. The only trace is one stderr line, `check-package-format.sh: line 730: printf: write error: Broken pipe`.
+
+**Measured 2026-10-23 on the push of #989 (head** `eb0f470b685100af865e6c0cb0474a4400c44161`**):**
+
+* the pushed range's path list was **1,736 paths / 116,058 bytes**;
+* five packages have a `format:check` script and all five changed in the range (`akto` 196 files, `api-explorer` 33, `oxlint` 48, `performance` 111, `playwright` 68);
+* the hook printed `[format-gate] 4 package(s) checked, 0 skipped, 0 failed` and named api-explorer, oxlint, performance and playwright. `akto` **was never judged.**
+* **Reproduction** (the selection loop alone, same shell options, the real list; script `5_Project_History/2026-10-23_seatG-18th/evidence/format_gate_select_sim.sh` in the project history): the original form selected `api-explorer oxlint performance playwright` in **3 of 3** runs; the read-to-EOF form (`grep "^systemTest/${p}/" > /dev/null`) selected all five in **3 of 3**. **Control:** with the small list (the 5 files of the PR itself) the original form selects `performance` and loses nothing, so the loss needs a list over the buffer.
+* `akto` is the package lost because it sorts first among the five and so matches early, leaving the most unread input when `grep -q` exits.
+
+**Recurrence, counted over the nine push logs the previous seat kept on 2026-10-23:** five carry the `Broken pipe` line (#809, #920, #923, #927, #995) and **all five** report `4 package(s) checked, 0 skipped, 0 failed`. The control is in the same set: the push of #1253 has no `Broken pipe` line and reports `5 package(s) checked`. Three logs (the two #809 follow-ups and one more) ran no format gate at all. I did not measure the size of #1253's list, so I do not know why it escaped; the size of the pushed range decides, and merge-in pushes (which carry develop's whole delta) are the likely exposed shape, though not every one of them was hit.
+
+**Read and not duplicates:** KS-998 (the same gate, In Review) matches this on "format gate", on `grep -qx` (a path read as a regex, an unrelated polish item) and on `akto` (an instance-6 red in akto's tree); none of its items is an early-exiting reader. Its comment records the gate refusing only when `checked == 0 && skipped > 0`, and a package lost to this bug is counted as neither checked nor skipped, which is why the gate still reports `0 skipped` (read from that comment, not re-read in the script).
+
+**Why it matters:** a format regression in `systemTest/akto` passes the pre-push hook. A guard that skips a package silently, on exactly the pushes that bring in the most change, is worse than no guard because the "0 skipped" line reads as full coverage.
+
+**Precedent, and why this is not a duplicate:** PS-1254 (Platform S board, Done 2026-10-15; platform-s pull request 1021) fixed the same mechanism in platform-s's own `.githooks/pre-push`: `printf | grep -q` under `pipefail` skipped a test leg once the changed list passed the pipe buffer, and it was fixed with a pure-bash `case` match on the newline-joined list (no subprocess, nothing to SIGPIPE), moved into a sourced function and covered by contract tests (a list of tens of thousands of lines selects every leg whether the matching line comes first or last; no `| grep -q` pipeline may remain). That repository's fix does not reach this script. Platform K's own `.githooks/pre-push` was checked and has **0** pipes into `grep -q` and no `set -` options, so it is not exposed; this script is. KS-1605 (open) carries other follow-ups for the same script (npmrc, stale tracking refs, two surviving mutants) and none of them is this defect.
+
+**Fix shape, a PROPOSAL (not applied; the script was not changed):** replace the early-exiting reader with one that reads to EOF, e.g. `grep "^systemTest/${p}/" > /dev/null` (the form measured above), or, as PS-1254 did, a pure-bash `case` match on the list (no writer process at all). Add a cell with a path list over 64 KiB that must still select every package which changed, and have the gate fail (not skip) when a package that changed is absent from the checked list.
+
+**Related shape, counted and NOT assessed:** `printf`/`echo ... | grep -q` appears 170 times in shell scripts and hooks, 29 of them outside `__tests__`. It matters only where the input can pass 64 KiB and the script runs under `pipefail`; I did not check each one.
+
+Source: Seat G 18th, from the hook log of the #989 push (`evidence/push_pr989.log`).
+
+===== DIFF (merge-base..head) =====
+diff --git a/systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh b/systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh
+new file mode 100644
+index 000000000..68adff58f
+--- /dev/null
++++ b/systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh
+@@ -0,0 +1,91 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for systemTest/scripts/check-package-format.sh - KS-1716: the package
++# selection must not drop a changed package when the pushed path list is large.
++# =============================================================================
++# The gate picks each package with `printf '%s\n' "$changed_paths" | grep -q ...`
++# under `set -uo pipefail`. grep -q exits at its FIRST match; when the list is
++# bigger than the pipe buffer (64 KiB) printf is still writing, gets EPIPE, and
++# pipefail turns the pipeline into "no match". The package is then neither
++# checked nor skipped, and the gate still prints "0 skipped". The fix reads the
++# list to EOF (grep without -q, output to /dev/null).
++#
++# Same fixture method as ks998_format_gate_stdin_isolated.test.sh: a copy of the
++# gate inside a temp tree, fixture packages whose format:check is plain shell.
++#
++# Usage: bash systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++GATE_SRC="${PACKAGE_FORMAT_GATE_SH:-$HERE/../scripts/check-package-format.sh}"
++PASS=0; FAIL=0
++
++[[ -f "$GATE_SRC" ]] || { echo "FATAL: gate script not found at $GATE_SRC" >&2; exit 2; }
++
++FIX="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1716.XXXXXX")"
++trap 'rm -rf "$FIX"' EXIT INT TERM
++
++check() {
++    local desc="$1" want="$2" got="$3"
++    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
++    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
++}
++
++GATE="$FIX/systemTest/scripts/check-package-format.sh"
++mkdir -p "$FIX/systemTest/scripts"
++cp "$GATE_SRC" "$GATE"
++
++# mk_pkg <name> <format:check shell command> - deps always present
++mk_pkg() {
++    local name="$1" cmd="$2"
++    local dir="$FIX/systemTest/$name"
++    mkdir -p "$dir/node_modules/.bin"
++    cat > "$dir/package.json" <<JSON
++{ "name": "fixture-$name", "version": "0.0.0", "scripts": { "format:check": "$cmd" } }
++JSON
++    printf '#!/bin/sh\nexit 0\n' > "$dir/node_modules/.bin/prettier"
++    chmod +x "$dir/node_modules/.bin/prettier"
++}
++
++# `aaa` sorts first, so it matches on the first line of the list; `zzz` carries
++# the bulk of the list (2500 paths, well over 64 KiB). `red` fails its check.
++mk_pkg aaa "exit 0"
++mk_pkg zzz "exit 0"
++mk_pkg abc "echo '[warn] src/a.ts'; exit 1"
++
++# big_list <first line>: that line, then 2500 paths under systemTest/zzz/
++big_list() {
++    printf '%s\n' "$1"
++    awk 'BEGIN { for (i = 1; i <= 2500; i++) printf "systemTest/zzz/src/generated/file_%05d_padding_padding_padding.ts\n", i }'
++}
++
++# --- CELL 0 (CONTROL): the fixture list really is over the pipe buffer ----------
++check "CONTROL the large list is over 64 KiB" "1" \
++    "$([ "$(big_list 'systemTest/aaa/src/a.ts' | wc -c | tr -d ' ')" -gt 65536 ] && echo 1 || echo 0)"
++
++# --- CELL 1 (RED at the tip): aaa matches first, yet both packages are checked --
++out="$(big_list 'systemTest/aaa/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "CONTROL large list, aaa first -> exit 0" "0" "$rc"
++check "large list, aaa first -> both packages checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '2 package(s) checked, 0 skipped, 0 failed')"
++
++# --- CELL 2 (RED at the tip): a red package matched first still fails the gate --
++out="$(big_list 'systemTest/abc/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "large list, red package first -> the gate fails (exit 1)" "1" "$rc"
++
++# --- CELL 3 (CONTROL, tip AND after): a small list selects the same packages ----
++out="$(printf '%s\n' 'systemTest/aaa/src/a.ts' 'systemTest/zzz/src/b.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "CONTROL small list -> exit 0" "0" "$rc"
++check "CONTROL small list -> both packages checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '2 package(s) checked, 0 skipped, 0 failed')"
++
++# --- CELL 4 (RED at the tip): a large list naming only zzz still checks zzz ------
++out="$(big_list 'systemTest/zzz/src/first.ts' | bash "$GATE" 2>&1)"; rc=$?
++check "large list, zzz only -> one package checked" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '1 package(s) checked, 0 skipped, 0 failed')"
++
++echo ""
++echo "ks1716_format_gate_selects_every_changed_package_on_a_large_push: ${PASS} passed, ${FAIL} failed"
++(( FAIL == 0 ))
+diff --git a/systemTest/scripts/check-package-format.sh b/systemTest/scripts/check-package-format.sh
+index 66757918b..05535bf3e 100644
+--- a/systemTest/scripts/check-package-format.sh
++++ b/systemTest/scripts/check-package-format.sh
+@@ -727,7 +727,7 @@ if [ "$MODE" = "all" ]; then
+ else
+     changed_paths="$(cat)"
+     for p in "${packages[@]+"${packages[@]}"}"; do
+-        if printf '%s\n' "$changed_paths" | grep -q "^systemTest/${p}/"; then
++        if printf '%s\n' "$changed_paths" | grep "^systemTest/${p}/" > /dev/null; then
+             selected="${selected}${p}
+ "
+         fi
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS for systemTest/scripts/check-package-format.sh - KS-1716: the package
+4: # selection must not drop a changed package when the pushed path list is large.
+5: # =============================================================================
+6: # The gate picks each package with `printf '%s\n' "$changed_paths" | grep -q ...`
+7: # under `set -uo pipefail`. grep -q exits at its FIRST match; when the list is
+8: # bigger than the pipe buffer (64 KiB) printf is still writing, gets EPIPE, and
+9: # pipefail turns the pipeline into "no match". The package is then neither
+10: # checked nor skipped, and the gate still prints "0 skipped". The fix reads the
+11: # list to EOF (grep without -q, output to /dev/null).
+12: #
+13: # Same fixture method as ks998_format_gate_stdin_isolated.test.sh: a copy of the
+14: # gate inside a temp tree, fixture packages whose format:check is plain shell.
+15: #
+16: # Usage: bash systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh
+17: # =============================================================================
+18: 
+19: set -uo pipefail
+20: 
+21: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+22: GATE_SRC="${PACKAGE_FORMAT_GATE_SH:-$HERE/../scripts/check-package-format.sh}"
+23: PASS=0; FAIL=0
+24: 
+25: [[ -f "$GATE_SRC" ]] || { echo "FATAL: gate script not found at $GATE_SRC" >&2; exit 2; }
+26: 
+27: FIX="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1716.XXXXXX")"
+28: trap 'rm -rf "$FIX"' EXIT INT TERM
+29: 
+30: check() {
+31:     local desc="$1" want="$2" got="$3"
+32:     if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
+33:     else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
+34: }
+35: 
+36: GATE="$FIX/systemTest/scripts/check-package-format.sh"
+37: mkdir -p "$FIX/systemTest/scripts"
+38: cp "$GATE_SRC" "$GATE"
+39: 
+40: # mk_pkg <name> <format:check shell command> - deps always present
+41: mk_pkg() {
+42:     local name="$1" cmd="$2"
+43:     local dir="$FIX/systemTest/$name"
+44:     mkdir -p "$dir/node_modules/.bin"
+45:     cat > "$dir/package.json" <<JSON
+46: { "name": "fixture-$name", "version": "0.0.0", "scripts": { "format:check": "$cmd" } }
+47: JSON
+48:     printf '#!/bin/sh\nexit 0\n' > "$dir/node_modules/.bin/prettier"
+49:     chmod +x "$dir/node_modules/.bin/prettier"
+50: }
+51: 
+52: # `aaa` sorts first, so it matches on the first line of the list; `zzz` carries
+53: # the bulk of the list (2500 paths, well over 64 KiB). `red` fails its check.
+54: mk_pkg aaa "exit 0"
+55: mk_pkg zzz "exit 0"
+56: mk_pkg abc "echo '[warn] src/a.ts'; exit 1"
+57: 
+58: # big_list <first line>: that line, then 2500 paths under systemTest/zzz/
+59: big_list() {
+60:     printf '%s\n' "$1"
+61:     awk 'BEGIN { for (i = 1; i <= 2500; i++) printf "systemTest/zzz/src/generated/file_%05d_padding_padding_padding.ts\n", i }'
+62: }
+63: 
+64: # --- CELL 0 (CONTROL): the fixture list really is over the pipe buffer ----------
+65: check "CONTROL the large list is over 64 KiB" "1" \
+66:     "$([ "$(big_list 'systemTest/aaa/src/a.ts' | wc -c | tr -d ' ')" -gt 65536 ] && echo 1 || echo 0)"
+67: 
+68: # --- CELL 1 (RED at the tip): aaa matches first, yet both packages are checked --
+69: out="$(big_list 'systemTest/aaa/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
+70: check "CONTROL large list, aaa first -> exit 0" "0" "$rc"
+71: check "large list, aaa first -> both packages checked" "1" \
+72:     "$(printf '%s\n' "$out" | grep -cF '2 package(s) checked, 0 skipped, 0 failed')"
+73: 
+74: # --- CELL 2 (RED at the tip): a red package matched first still fails the gate --
+75: out="$(big_list 'systemTest/abc/src/a.ts' | bash "$GATE" 2>&1)"; rc=$?
+76: check "large list, red package first -> the gate fails (exit 1)" "1" "$rc"
+77: 
+78: # --- CELL 3 (CONTROL, tip AND after): a small list selects the same packages ----
+79: out="$(printf '%s\n' 'systemTest/aaa/src/a.ts' 'systemTest/zzz/src/b.ts' | bash "$GATE" 2>&1)"; rc=$?
+80: check "CONTROL small list -> exit 0" "0" "$rc"
+81: check "CONTROL small list -> both packages checked" "1" \
+82:     "$(printf '%s\n' "$out" | grep -cF '2 package(s) checked, 0 skipped, 0 failed')"
+83: 
+84: # --- CELL 4 (RED at the tip): a large list naming only zzz still checks zzz ------
+85: out="$(big_list 'systemTest/zzz/src/first.ts' | bash "$GATE" 2>&1)"; rc=$?
+86: check "large list, zzz only -> one package checked" "1" \
+87:     "$(printf '%s\n' "$out" | grep -cF '1 package(s) checked, 0 skipped, 0 failed')"
+88: 
+89: echo ""
+90: echo "ks1716_format_gate_selects_every_changed_package_on_a_large_push: ${PASS} passed, ${FAIL} failed"
+91: (( FAIL == 0 ))
+
+### FILE AT HEAD: systemTest/scripts/check-package-format.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # The systemTest/* formatting gate (KS-989)
+4: # =============================================================================
+5: # THE DEFECT THIS EXISTS FOR: nothing between a developer's keyboard and
+6: # `develop` ran the per-package format gates for `systemTest/*`. So a docs-only
+7: # or test-only edit under `systemTest/` could turn `npm run format:check` red in
+8: # a package, the author who made it never saw a failure, and the next unrelated
+9: # author to touch that package inherited the red — usually days later, with no
+10: # link back to the commit that caused it.
+11: #
+12: # Three places could have caught it and none of them looked:
+13: #   * `.githooks/pre-push` scopes itself to `^Blockchain/Dev/` — DELIBERATELY,
+14: #     and its own header says so ("skips instantly for vault-only / docs-only /
+15: #     systemTest-only pushes"). The design priced a systemTest-only push as
+16: #     costless. It is not.
+17: #   * `preflight.sh` is invoked BY that hook, so it never ran for these pushes.
+18: #   * GitHub Actions is retired (Kam, 2026-08-27, KS-685), so there was no backstop.
+19: #
+20: # SIX instances in nine days, three of them found and fixed by someone other
+21: # than the author who caused them (KS-702/#754, KS-706/#755, KS-711/#758,
+22: # KS-707, instance 5 on the trunk at 400517aaf, instance 6 on the trunk at
+23: # 986c592d5). Instance 6 is the one that earned this script: it entered on
+24: # `42e778203` and rode to develop in merge `512480ef1` (#892) — a merge whose
+25: # whole PR lived under `systemTest/`, so the hook skipped it exactly as designed
+26: # and a red sat on the trunk for three hours with nothing looking at it.
+27: #
+28: # --- WHY `format:check` AND NOT `quality` (KS-990) ---------------------------
+29: # `npm run quality` CANNOT PASS in `systemTest/performance` or `systemTest/akto`
+30: # today, for pre-existing reasons unrelated to formatting (a TS2540 read-only
+31: # assignment; two unused knip exports). Wiring `quality` here would produce a
+32: # gate that can never pass — and a gate that can never pass gets bypassed, which
+33: # is the behaviour this ticket exists to stop. It would manufacture it.
+34: # `format:check` is the leg that fires in every instance above, it is green in
+35: # every package as of this commit, and it costs 0–2s per package.
+36: # When KS-990 is closed, widening this to `quality` is a one-word change here.
+37: #
+38: # --- USAGE -------------------------------------------------------------------
+39: #     printf '%s\n' "$paths" | bash systemTest/scripts/check-package-format.sh
+40: #     bash systemTest/scripts/check-package-format.sh --all
+41: #     bash systemTest/scripts/check-package-format.sh --list
+42: #
+43: # Paths on stdin are repo-relative (what `git diff --name-only` emits). Only the
+44: # packages those paths land in are checked. `--all` checks every package and is
+45: # what the caller uses when it cannot compute a reliable changed set — see the
+46: # KS-854/KS-882 note in the hook: an uncomputable base is not a clean tree.
+47: #
+48: # --- PACKAGES ARE DISCOVERED, NOT LISTED -------------------------------------
+49: # Any `systemTest/*/package.json` carrying a `format:check` script is in scope.
+50: # A hardcoded list is a second implementation that something has to keep in
+51: # agreement with reality, and nothing would — the same reasoning that makes
+52: # `run-shell-suites.sh` a glob rather than three pasted copies. Add a package
+53: # with a `format:check` script and it is gated automatically.
+54: # =============================================================================
+55: 
+56: # --- KS-998 ITEM 1: AN ABSENT node_modules IS INSTALLED, NOT SKIPPED ----------
+57: # Kam's card (secuura-ks998-formatting-gate-fails-open-on-missing-prettier, option
+58: # a): "Hard-fail only when a tracked file of the package is in the push" - and
+59: # "install it also". Before this, a package whose deps were absent was a named
+60: # SKIP, and a push could pass having checked nothing in it. Now:
+61: #
+62: #   node_modules ABSENT   -> `npm ci` runs in a STAGING DIR on the same filesystem
+63: #                            (systemTest/.format-gate-stage.<pid>.<random>, gitignored),
+64: #                            and node_modules is RENAMED into the package only if the
+65: #                            install succeeded and prettier is executable. A failed,
+66: #                            timed-out or KILLED install therefore never leaves a
+67: #                            partial node_modules in the package for the next push to
+68: #                            read as "present, no prettier". Four named outcomes:
+69: #                              INSTALLED
+70: #                              could not install  -> SKIP (--all) / REFUSED (normal)
+71: #                              install timed out after <n>s -> SKIP / REFUSED
+72: #                              install not attempted (the breaker, below) -> SKIP / REFUSED
+73: #   node_modules PRESENT, no prettier -> NEVER reinstalled over (`npm ci` wipes it):
+74: #                            REFUSED in normal mode with the command printed, a named
+75: #                            SKIP in --all mode.
+76: #
+77: # WHY normal mode REFUSES and --all SKIPS. In normal mode every selected package was
+78: # selected BECAUSE a path of it is in the push - that is Kam's condition, evaluated.
+79: # --all is what the hook uses when the changed set cannot be computed (KS-854/KS-882:
+80: # no base, or a base that contains HEAD). There the condition "a tracked file of the
+81: # package is in the push" CANNOT BE EVALUATED, so the named SKIP stays and only
+82: # KS-1063 refuses, when NOTHING was checked.
+83: #
+84: # THE WATCHDOG. A wall-clock ceiling (default 120 s, FORMAT_GATE_INSTALL_TIMEOUT to
+85: # override) kills the install. It is not redundant with `--fetch-timeout=20000`:
+86: # measured on npm 11.5.1 against a registry that ACCEPTS the connection and never
+87: # answers, that flag did NOT end the install (it ran to a 100 s cap and was TERMed).
+88: # The ceiling is the only bound for that shape; nothing is claimed for the flag. (The shape
+89: # was a listener that accepts TCP connections and sends nothing; tarball fetches and the
+90: # update check both stalled on it.) The
+91: # outcome is keyed on the EXIT CODE and on the artefact (prettier executable), never
+92: # on what npm printed. `--fetch-retries=0` is what makes a plainly-unreachable
+93: # registry fail in under two seconds: npm's own retry schedule took 70.4 s for the
+94: # same install. `--no-update-notifier` is a deliberate addition to the ruled command
+95: # line: with a cold cache against the real registry, default `npm ci` makes exactly ONE
+96: # request outside the lockfile's resolved set in each of the four packages -
+97: # `GET https://registry.npmjs.org/npm`, the update check, made even with stdout not a
+98: # TTY - and with the flag that count is 0 in all four. It also removes one place to stall.
+99: #
+100: # THE BREAKER. One install that TIMES OUT means the registry is silent, and every
+101: # further install would wait out the ceiling too (4 packages x 120 s = 8 minutes, on
+102: # top of a preflight that already takes ~8 and an SSH idle cutoff near 6). After a
+103: # timeout the remaining absent packages are NOT attempted, and say so. A fast failure
+104: # does not trip it.
+105: #
+106: # WHAT THE INSTALL RUNS. `npm ci` with no --ignore-scripts, so the lockfile-pinned
+107: # dependencies' lifecycle scripts run on the developer's push (fsevents in all four
+108: # lockfiles; esbuild in performance and playwright; tsx/esbuild in akto) - exactly what
+109: # the printed remedy `npm ci` does by hand. --ignore-scripts was not added because a
+110: # node_modules whose scripts never ran looks complete and is not. The stage holds only
+111: # package.json, the lockfile and .npmrc, so a root lifecycle script or a dependency that
+112: # resolves relative to the package directory cannot be installed there; none of the four
+113: # packages has either (a relative link to ../../observability resolves identically from
+114: # the stage, which sits at the same depth as a package).
+115: #
+116: # INTERRUPTION. SIGTERM / SIGINT / SIGHUP / SIGQUIT kill npm's whole process group and remove the
+117: # stage; any other fatal signal (USR1, ALRM, PIPE...) reaches the same cleanup through the EXIT trap.
+118: # SIGKILL (or the machine dying) cannot be trapped: what survives is one orphaned, gitignored
+119: # stage dir - never a partial node_modules in a package - and the next run sweeps a
+120: # stage whose pid is dead.
+121: #
+122: # THE PROCESS GROUP (gate review of #1532, Minor 2). npm runs as the leader of its OWN process group
+123: # (`perl -e 'setpgrp; exec @ARGV'`), and the watchdog, the traps and the timeout path signal the GROUP:
+124: # signalling npm's pid left a lifecycle script's child running with ppid 1 and its cwd inside the
+125: # deleted stage (measured with a real npm and a hanging postinstall: esbuild's install.js has a
+126: # direct-download fallback with no timeout). A child that ignores TERM is ended by the group KILL.
+127: # Without perl the gate cannot promise that, so it does not start the install: REFUSED (normal) /
+128: # SKIP (--all), saying why. The tree-mode format:check is not an install and runs ungrouped without perl.
+129: #
+130: # THE RENAME (Minor 1). node_modules is moved into the package with rename(2) (via node), not `mv`: the
+131: # look for an existing node_modules is not atomic with the move, and BSD `mv` onto a directory moves the
+132: # source INSIDE it (onto a symlink, THROUGH it). rename(2) refuses a non-empty directory (ENOTEMPTY /
+133: # EEXIST) and a symlink or file (ENOTDIR); those are `raced`: the one that arrived is kept. An EMPTY
+134: # directory that arrives in that window is replaced - the stated residual. A marker file is put in the
+135: # staged tree first. The move BACK (an install whose prettier does not run from the package) re-checks the
+136: # marker INSIDE the stage after the rename (gate review of #1540, Minor 3): there is a window of about 40 ms
+137: # (measured: the node process that renames) in which another actor can replace node_modules, so a tree
+138: # without the marker is not ours - it is put back where it was found, or LEFT in a gitignored
+139: # systemTest/.format-gate-aside.* dir and named, and never deleted.
+140: #
+141: # THE HOOK TELLS THE GATE WHEN THE BASE MAY BE STALE (KS-1422): FORMAT_GATE_BASE_MAY_BE_
+142: # STALE=1 means the changed set was computed against a ref that is not the pushed
+143: # branch's own remote counterpart (a stale origin/develop then names packages the
+144: # author never touched). A refusal then says so and what to do. It changes no decision.
+145: #
+146: # --- KS-998 ITEM 3: WHAT THE INSTALL MAY RUN, AND WHAT IT IS HANDED (gate review of #1532, Minor 3) --------
+147: # `npm ci` runs the dependency install scripts from the lockfile, on the developer's push, for a package the developer may not have
+148: # touched (a stale base, a merge). The review's fixture: a lock entry whose `resolved` pointed at a local HTTP listener was fetched,
+149: # INSTALLED, and its postinstall ran and wrote outside the repository; that script also saw NPM_TOKEN, GH_TOKEN, SSH_AUTH_SOCK and ~/.npmrc.
+150: #   * THE LOCKFILE IS CHECKED FIRST (_check_lock_sources; package-lock.json AND npm-shrinkwrap.json): every `resolved` must start with an
+151: #     allowed URL prefix (default https://registry.npmjs.org/) and carry an `integrity`; a `link` and a local entry must resolve INSIDE
+152: #     the repository; bundled entries are allowed; anything else - git+, http:, file:, an unreadable lock, an unknown format - is REFUSED
+153: #     (normal mode) / SKIPPED (--all) naming the entry, and NOTHING is fetched or run.
+154: #   * FORMAT_GATE_LOCK_ALLOW (space-separated URL prefixes, REPLACES the default) is for a registry mirror. FORMAT_GATE_INSTALL_ENV_PASS
+155: #     (space-separated variable NAMES) hands the install more variables. Both are read from the DEVELOPER'S ENVIRONMENT ONLY, never from
+156: #     a file in the repository (a repo file could carry the attacker's allow-list). THREAT MODEL: lockfile content that arrives on a
+157: #     branch or in a merge the developer did not author - not the developer's own shell, who can always `git push --no-verify`.
+158: #   * THE INSTALL RUNS UNDER AN ALLOW-LIST ENVIRONMENT (_build_install_env) with a private HOME inside the stage: PATH, TERM=dumb, TMPDIR,
+159: #     LANG/LC_*, the proxy and CA variables, and npm_config_*/NPM_CONFIG_* except names that look like credentials (auth, token, pass,
+160: #     secret, cert, key). ~/.npmrc is therefore not read: a developer whose registry or proxy lives only there opts back in with
+161: #     npm_config_userconfig=<file> (the refusal says so). The developer's default cache (~/.npm) is passed as npm_config_cache unless one
+162: #     is set, so a warm cache and an offline push still work.
+163: #   * STATED LIMIT: this reduces what an install script is HANDED; it is NOT a sandbox (a script can still read files by absolute path),
+164: #     lifecycle scripts still run (no --ignore-scripts, ruled), and a malicious package hosted on an allowed registry still runs its script.
+165: #   * Small hardenings from the same review: `_rm_stage` refuses an empty prefix and a relative path (Info 3); prettier must be a regular
+166: #     file AND executable, not a directory (Info 5).
+167: #
+168: # --- KS-998 ITEM 2 (variant A'): THE GATE JUDGES THE PUSHED COMMIT, NOT THE WORKING TREE -------
+169: # `format:check` used to run in the WORKING TREE, so a red commit whose fix was left uncommitted
+170: # passed and landed red, and a ref that was not checked out was judged by whatever was. With
+171: # FORMAT_GATE_TREE=<commit> (the hook sets it per pushed ref) the gate instead:
+172: #   * DISCOVERS the packages from that commit's tree (a package the push adds is seen; one it
+173: #     removes is not selected);
+174: #   * ARCHIVES that commit's `systemTest/<pkg>` - plus whichever prettier config / .editorconfig /
+175: #     .prettierignore exists at the repo root or in systemTest/ at that commit - into a gitignored
+176: #     `systemTest/.format-gate-tree.<pid>.<random>`. The tree dir sits UNDER systemTest/ on purpose:
+177: #     its ancestors are then the working tree's own, so the gate sees what the developer's own
+178: #     `npm run format:check` sees (measured: a parent .editorconfig flips prettier's verdict on
+179: #     identical bytes), and the archived ancestor config SHADOWS the working tree's where it exists;
+180: #   * SYMLINKS the working tree's node_modules in (after item 1's install) and runs the package's own
+181: #     `npm run format:check` UNCHANGED there.
+182: # RESIDUALS, stated: the prettier BINARY (and the installed dependency set) come from the working
+183: # tree's node_modules while config and sources come from the push, so a push that changes the prettier
+184: # pin is checked with the installed version; an ancestor config the pushed commit LACKS but the
+185: # working tree has still applies; a `prettier` key in an ancestor package.json is not archived (none
+186: # exists today: systemTest/package.json has none); a package that exists at the commit but not in
+187: # the checked-out tree cannot have its deps installed or borrowed and is REFUSED (normal) / skipped
+188: # (--all) with "check out what you push". Without FORMAT_GATE_TREE the gate behaves exactly as before.
+189: #
+190: set -uo pipefail
+191: 
+192: SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+193: REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+194: 
+195: MODE="stdin"
+196: case "${1:-}" in
+197:     --all)   MODE="all" ;;
+198:     --list)  MODE="list" ;;
+199:     "")      MODE="stdin" ;;
+200:     *) echo "usage: check-package-format.sh [--all|--list]  (default: repo-relative paths on stdin)" >&2; exit 2 ;;
+201: esac
+202: 
+203: # --- KS-998 item 1: the install ceiling, validated rather than guessed at ----------
+204: # Unset or set-but-empty is the default. Anything else must be a whole number of
+205: # seconds >= 1 (no leading zero: `08` is an octal error in bash arithmetic).
+206: INSTALL_CEILING=120
+207: if [ -n "${FORMAT_GATE_INSTALL_TIMEOUT:-}" ]; then
+208:     case "$FORMAT_GATE_INSTALL_TIMEOUT" in
+209:         *[!0-9]*|0*) _bad=1 ;;
+210:         *)           _bad=0; [ "${#FORMAT_GATE_INSTALL_TIMEOUT}" -gt 6 ] && _bad=1 ;;
+211:     esac
+212:     if [ "$_bad" -ne 0 ]; then
+213:         echo "[format-gate] FORMAT_GATE_INSTALL_TIMEOUT must be a whole number of seconds, 1 or more (got '${FORMAT_GATE_INSTALL_TIMEOUT}')." >&2
+214:         exit 2
+215:     fi
+216:     INSTALL_CEILING="$FORMAT_GATE_INSTALL_TIMEOUT"
+217: fi
+218: # KS-998 item 3 (gate review of #1532, Minor 3). Both are read from the DEVELOPER'S ENVIRONMENT ONLY - never from a file in the
+219: # repository, because a repository file could carry the attacker's allow-list. THREAT MODEL: lockfile content that arrives on a branch
+220: # or in a merge the developer did not author - not the developer's own shell (who can always `git push --no-verify`).
+221: #   FORMAT_GATE_LOCK_ALLOW        space-separated URL prefixes a lockfile entry may be fetched from; REPLACES the default
+222: #                                 https://registry.npmjs.org/ (unset or empty = the default). Needed for a registry mirror.
+223: #   FORMAT_GATE_INSTALL_ENV_PASS  space-separated variable NAMES the install is also handed (it runs under an allow-list environment).
+224: LOCK_ALLOW="${FORMAT_GATE_LOCK_ALLOW:-https://registry.npmjs.org/}"
+225: INSTALL_ENV_PASS="${FORMAT_GATE_INSTALL_ENV_PASS:-}"
+226: for _n in $INSTALL_ENV_PASS; do
+227:     case "$_n" in
+228:         [A-Za-z_]*) case "$_n" in *[!A-Za-z0-9_]*) _bad=1 ;; *) _bad=0 ;; esac ;;
+229:         *) _bad=1 ;;
+230:     esac
+231:     if [ "$_bad" -ne 0 ]; then
+232:         echo "[format-gate] FORMAT_GATE_INSTALL_ENV_PASS must be space-separated variable names (letters, digits, underscore) (got '${_n}')." >&2
+233:         exit 2
+234:     fi
+235: done
+236: # Set by the hook (see the header): the changed set came from a ref that may be stale.
+237: BASE_MAY_BE_STALE=0
+238: [ "${FORMAT_GATE_BASE_MAY_BE_STALE:-0}" = "1" ] && BASE_MAY_BE_STALE=1
+239: # KS-998 item 2: the commit to judge. Unset or set-but-empty is the working tree (the old behaviour).
+240: # Anything else must resolve to a commit: a value that does not is REFUSED, never silently ignored,
+241: # because "ignore it and judge the working tree" is exactly the defect this variable exists to remove.
+242: TREE_SHA=""
+243: if [ -n "${FORMAT_GATE_TREE:-}" ]; then
+244:     TREE_SHA="$(git -C "$REPO_ROOT" rev-parse --verify --quiet "${FORMAT_GATE_TREE}^{commit}" 2>/dev/null)" || TREE_SHA=""
+245:     if [ -z "$TREE_SHA" ]; then
+246:         echo "[format-gate] FORMAT_GATE_TREE must name a commit that exists in this repository (got '${FORMAT_GATE_TREE}')." >&2
+247:         exit 2
+248:     fi
+249: fi
+250: 
+251: # --- the toolchain, or an honest skip ----------------------------------------
+252: # npm/node missing is an ENVIRONMENT condition, not a finding. KS-991 exists
+253: # because an environment condition was presented as a gate failure and cost a
+254: # diagnosis five times in one day. Say which it is.
+255: if ! command -v npm >/dev/null 2>&1 || ! command -v node >/dev/null 2>&1; then
+256:     echo "[format-gate] SKIP (advisory) — node/npm not on PATH; cannot check systemTest formatting."
+257:     exit 0
+258: fi
+259: 
+260: # --- KS-998 item 1: the install machinery --------------------------------------
+261: now_ms()    { node -e 'process.stdout.write(String(Date.now()))'; }
+262: fmt_secs()  { printf '%d.%d' $(( $1 / 1000 )) $(( ($1 % 1000) / 100 )); }
+263: 
+264: # KS-998 item 2 (gate review, Minor 2): npm and the tree-mode check run as the LEADER OF THEIR OWN PROCESS GROUP, and a
+265: # timeout or an interrupt signals the group, not the pid. Signalling npm's pid left a lifecycle script's child running (ppid 1,
+266: # its cwd inside the deleted stage): measured with a real npm and a hanging postinstall. perl's `setpgrp; exec` is used because
+267: # bash 3.2's `set -m` would also change the terminal's foreground group of a hook that runs under git.
+268: HAVE_PERL=0
+269: command -v perl >/dev/null 2>&1 && HAVE_PERL=1
+270: # _run_grouped <cmd...>: exec <cmd> as a process-group leader (its pid is its pgid). Use inside `( cd ... && _run_grouped ... ) &`
+271: # so that $! is that leader. Without perl it runs the command ungrouped; the caller that must not (the install) refuses first.
+272: _run_grouped() {
+273:     if [ "$HAVE_PERL" -eq 1 ]; then
+274:         exec perl -e 'setpgrp(0, 0); exec @ARGV or die "format-gate: cannot exec $ARGV[0]: $!\n"' -- "$@"
+275:     fi
+276:     exec "$@"
+277: }
+278: # _kill_proc <SIG> <pid>: the pid's whole process group, then the pid itself. If the pid is not a group leader no group has
+279: # its number, so the first kill finds nothing and the second is the old behaviour.
+280: _kill_proc() {
+281:     kill -"$1" -- "-$2" 2>/dev/null
+282:     kill -"$1" "$2" 2>/dev/null
+283:     return 0
+284: }
+285: # _rename_dir <from> <to>: rename(2), atomically, via node. Prints nothing on success and the errno NAME on failure. rename(2)
+286: # onto a non-empty directory fails (ENOTEMPTY/EEXIST) and onto a symlink or file fails (ENOTDIR); BSD `mv` would have moved <from>
+287: # INSIDE the directory, or through the symlink into its target (gate review, Minor 1). An EMPTY target directory is replaced:
+288: # that is the stated residual.
+289: _rename_dir() {
+290:     node -e 'try { require("fs").renameSync(process.argv[1], process.argv[2]); } catch (e) { process.stdout.write(String(e.code || "EUNKNOWN")); process.exit(1); }' "$1" "$2"
+291: }
+292: 
+293: # Staging dirs live in systemTest/ (same filesystem as every package, so the final
+294: # move is a rename, not a copy) and are gitignored. A leading dot keeps them out of
+295: # the `systemTest/*/package.json` discovery glob above (bash's `*` skips dotfiles).
+296: STAGE_PREFIX="$REPO_ROOT/systemTest/.format-gate-stage."
+297: TREE_PREFIX="$REPO_ROOT/systemTest/.format-gate-tree."      # KS-998 item 2: the pushed commit's package, extracted
+298: ASIDE_PREFIX="$REPO_ROOT/systemTest/.format-gate-aside."    # KS-998 item 3: a stage holding a tree that is NOT ours and could not be put back; never swept, never deleted
+299: 
+300: # The ONLY place this script deletes a directory, and it deletes only what it made:
+301: # the path must be a single component under systemTest/ with exactly that prefix,
+302: # must exist, and must not be a symlink (a symlink is never followed).
+303: _rm_stage() {
+304:     local d="${1:-}" rest
+305:     # An empty prefix matches every path, and a relative path would be taken relative to the cwd: refuse both (gate review, Info 3;
+306:     # unreachable today - the prefixes are assigned once, absolute - but this function is the ONE deletion, so it does not rely on that).
+307:     [ -n "$STAGE_PREFIX" ] && [ -n "$TREE_PREFIX" ] || return 1
+308:     case "$d" in /*) ;; *) return 1 ;; esac
+309:     case "$d" in
+310:         "$STAGE_PREFIX"*) rest="${d#"$STAGE_PREFIX"}" ;;
+311:         "$TREE_PREFIX"*)  rest="${d#"$TREE_PREFIX"}" ;;
+312:         *) return 1 ;;
+313:     esac
+314:     case "$rest" in ''|*/*|*..*) return 1 ;; esac
+315:     [ -d "$d" ] && [ ! -L "$d" ] || return 1
+316:     rm -rf "$d"
+317: }
+318: 
+319: # A stage whose pid is DEAD was left by a run that was killed (SIGKILL cannot be
+320: # trapped). Swept, with the same guards. A live pid, a non-numeric pid (death cannot
+321: # be proved) and a symlink are all left alone. `ps -p` rather than `kill -0`: the
+322: # latter reports EPERM, i.e. "failed", for a live process owned by someone else.
+323: _sweep_dead_stages() {
+324:     local d rest pid
+325:     for d in "$REPO_ROOT"/systemTest/.format-gate-stage.* "$REPO_ROOT"/systemTest/.format-gate-tree.*; do
+326:         [ -L "$d" ] && continue
+327:         [ -d "$d" ] || continue
+328:         [ -e "$d/.format-gate-keep" ] && continue         # holds a tree that is not ours (gate 1540 Minor 3): never swept
+329:         case "$d" in
+330:             "$STAGE_PREFIX"*) rest="${d#"$STAGE_PREFIX"}" ;;
+331:             "$TREE_PREFIX"*)  rest="${d#"$TREE_PREFIX"}" ;;
+332:             *) continue ;;
+333:         esac
+334:         pid="${rest%%.*}"
+335:         case "$pid" in ''|*[!0-9]*) continue ;; esac
+336:         ps -p "$pid" >/dev/null 2>&1 && continue
+337:         _rm_stage "$d"
+338:     done
+339: }
+340: 
+341: # A prettier that is a regular file (or a symlink to one) AND executable. `-x` alone is true for a DIRECTORY named prettier (gate review,
+342: # Info 5; npm never produces one).
+343: _prettier_ok() { [ -f "$1/node_modules/.bin/prettier" ] && [ -x "$1/node_modules/.bin/prettier" ]; }
+344: 
+345: # _check_lock_sources <package dir> <repo root> <allowed URL prefix...>: prints NOTHING and returns 0 if every lockfile `npm ci` could
+346: # use here (package-lock.json AND npm-shrinkwrap.json, whichever exist) is installable from the allowed sources; otherwise prints the
+347: # first offending entry and why, and returns 1. Rules: an entry's `resolved` must start with an allowed prefix and it must carry an
+348: # `integrity`; a `link` (and a local, non-node_modules entry such as its target) must resolve INSIDE the repository; `inBundle` /
+349: # `bundled` entries come from their parent's tarball, which is checked; anything else - git+, http:, file:, a missing source, an
+350: # unreadable lock, an unknown format - is refused. Nothing is run and nothing is fetched.
+351: _check_lock_sources() {
+352:     local dir="$1" repo="$2"
+353:     shift 2
+354:     node -e '
+355:         const fs = require("fs"), path = require("path");
+356:         const dir = process.argv[1], repo = path.resolve(process.argv[2]), allow = process.argv.slice(3);
+357:         const bad = (what, why) => { process.stdout.write(what + ": " + why); process.exit(1); };
+358:         const inside = (p) => {
+359:             const r = path.relative(repo, path.resolve(p));
+360:             return r !== "" && r !== ".." && !r.startsWith(".." + path.sep) && !path.isAbsolute(r);
+361:         };
+362:         const okSource = (r) => typeof r === "string" && allow.some((p) => p !== "" && r.startsWith(p));
+363:         const source = (what, e) => {
+364:             if (!okSource(e.resolved)) bad(what, "resolved " + String(e.resolved) + " is not under an allowed source prefix");
+365:             if (typeof e.integrity !== "string" || e.integrity === "") bad(what, "has no integrity");
+366:         };
+367:         for (const name of ["package-lock.json", "npm-shrinkwrap.json"]) {
+368:             const f = path.join(dir, name);
+369:             if (!fs.existsSync(f)) continue;
+370:             let lock;
+371:             try { lock = JSON.parse(fs.readFileSync(f, "utf8")); } catch (err) { bad(name, "is not valid JSON"); }
+372:             if (!lock || typeof lock !== "object") bad(name, "is not a lockfile object");
+373:             if (lock.packages && typeof lock.packages === "object") {
+374:                 for (const [key, e] of Object.entries(lock.packages)) {
+375:                     if (key === "") continue;
+376:                     const what = name + " " + key;
+377:                     if (!e || typeof e !== "object") bad(what, "entry is not an object");
+378:                     if (e.link === true) {
+379:                         if (typeof e.resolved !== "string" || !inside(path.resolve(dir, e.resolved))) {
+380:                             bad(what, "link resolves outside the repository (" + String(e.resolved) + ")");
+381:                         }
+382:                         continue;
+383:                     }
+384:                     if (e.inBundle === true) continue;
+385:                     if (e.resolved === undefined) {
+386:                         const local = !/(^|\/)node_modules\//.test(key);
+387:                         if (local && inside(path.resolve(dir, key))) continue;
+388:                         bad(what, local ? "local entry resolves outside the repository" : "has no resolved source");
+389:                     }
+390:                     source(what, e);
+391:                 }
+392:             } else if (lock.dependencies && typeof lock.dependencies === "object") {
+393:                 const walk = (deps, trail) => {
+394:                     for (const [n, e] of Object.entries(deps)) {
+395:                         const what = name + " " + trail + n;
+396:                         if (!e || typeof e !== "object") bad(what, "entry is not an object");
+397:                         if (e.bundled !== true) {
+398:                             if (e.resolved === undefined) bad(what, "has no resolved source (version " + String(e.version) + ")");
+399:                             source(what, e);
+400:                         }
+401:                         if (e.dependencies && typeof e.dependencies === "object") walk(e.dependencies, trail + n + " > ");
+402:                     }
+403:                 };
+404:                 walk(lock.dependencies, "");
+405:             } else {
+406:                 bad(name, "has neither packages nor dependencies (unknown lockfile format)");
+407:             }
+408:         }
+409:     ' "$dir" "$repo" "$@"
+410: }
+411: 
+412: # _build_install_env <stage>: fills INSTENV (an array of NAME=VALUE) for `env -i`. THE INSTALL RUNS UNDER AN ALLOW-LIST ENVIRONMENT
+413: # with a private HOME inside the stage, so a dependency's install script is not handed NPM_TOKEN / GH_TOKEN / SSH_AUTH_SOCK / any
+414: # other secret from the developer's shell, and ~/.npmrc is not read. Passed: PATH, TERM=dumb, TMPDIR, LANG/LC_*, the proxy and CA
+415: # variables, and the npm_config_* variables EXCEPT any whose name looks like a credential (auth, token, pass, secret, cert, key);
+416: # anything else only if FORMAT_GATE_INSTALL_ENV_PASS names it. The developer's default npm cache (~/.npm) is passed as npm_config_cache
+417: # unless one is set, so a warm cache (and an offline push) still works. STATED LIMIT: this reduces what an install script is HANDED;
+418: # it is NOT a sandbox (a script can still read files by absolute path), lifecycle scripts still run, and a malicious package hosted on
+419: # the allowed registry still runs its script.
+420: INSTENV=()
+421: _build_install_env() {
+422:     local stage="$1" n lc
+423:     mkdir -p "$stage/.home" 2>/dev/null
+424:     INSTENV=("PATH=$PATH" "HOME=$stage/.home" "TERM=dumb")
+425:     [ -n "${TMPDIR:-}" ] && INSTENV[${#INSTENV[@]}]="TMPDIR=$TMPDIR"
+426:     for n in $(compgen -e); do
+427:         case "$n" in
+428:             PATH|HOME|TERM|TMPDIR) continue ;;
+429:             LANG|LC_*|HTTP_PROXY|HTTPS_PROXY|NO_PROXY|ALL_PROXY|http_proxy|https_proxy|no_proxy|all_proxy|SSL_CERT_FILE|SSL_CERT_DIR|NODE_EXTRA_CA_CERTS) ;;
+430:             npm_config_*|NPM_CONFIG_*)
+431:                 lc="$(printf '%s' "$n" | tr 'A-Z' 'a-z')"
+432:                 case "$lc" in *auth*|*token*|*pass*|*secret*|*cert*|*key*) continue ;; esac ;;
+433:             *) case " $INSTALL_ENV_PASS " in *" $n "*) ;; *) continue ;; esac ;;
+434:         esac
+435:         [ -n "${!n}" ] || continue             # an empty value says nothing (and would hide the cache fallback below)
+436:         INSTENV[${#INSTENV[@]}]="$n=${!n}"
+437:     done
+438:     case " ${INSTENV[*]:-} " in *" npm_config_cache="*) ;; *) [ -n "${HOME:-}" ] && [ -d "$HOME/.npm" ] && INSTENV[${#INSTENV[@]}]="npm_config_cache=$HOME/.npm" ;; esac
+439:     return 0
+440: }
+441: 
+442: _FG_NPM_PID=""; _FG_WD_PID=""; _FG_STAGE=""; _FG_CHK_PID=""; _FG_TREE=""
+443: _fg_cleanup() {
+444:     local i=0
+445:     if [ -n "$_FG_CHK_PID" ]; then
+446:         _kill_proc TERM "$_FG_CHK_PID"
+447:         while kill -0 "$_FG_CHK_PID" 2>/dev/null && [ "$i" -lt 20 ]; do sleep 0.1; i=$((i + 1)); done
+448:         _kill_proc KILL "$_FG_CHK_PID"
+449:         _FG_CHK_PID=""; i=0
+450:     fi
+451:     if [ -n "$_FG_TREE" ]; then _rm_stage "$_FG_TREE"; _FG_TREE=""; fi
+452:     if [ -n "$_FG_WD_PID" ]; then kill "$_FG_WD_PID" 2>/dev/null; _FG_WD_PID=""; fi
+453:     if [ -n "$_FG_NPM_PID" ]; then
+454:         _kill_proc TERM "$_FG_NPM_PID"
+455:         while kill -0 "$_FG_NPM_PID" 2>/dev/null && [ "$i" -lt 20 ]; do sleep 0.1; i=$((i + 1)); done
+456:         _kill_proc KILL "$_FG_NPM_PID"       # always: the leader may be gone while a child that ignores TERM is not
+457:         _FG_NPM_PID=""
+458:     fi
+459:     if [ -n "$_FG_STAGE" ]; then _rm_stage "$_FG_STAGE"; _FG_STAGE=""; fi
+460: }
+461: trap '_fg_cleanup' EXIT
+462: trap '_fg_cleanup; exit 130' INT
+463: trap '_fg_cleanup; exit 143' TERM
+464: trap '_fg_cleanup; exit 129' HUP
+465: trap '_fg_cleanup; exit 131' QUIT      # bash 3.2 does not run the EXIT trap for SIGQUIT (gate review, Minor 6)
+466: 
+467: # run_install <pkg> <dir>
+468: # Sets INST_STATE: ok | raced | noprettier | mvfail | failed | timeout
+469: #      INST_RC, INST_MS, INST_TAIL (the last lines npm printed - shown, never read).
+470: run_install() {
+471:     local p="$1" dir="$2" stage marker log f wd t0 t1 tag rn rrc keep_stage=0
+472:     INST_STATE="failed"; INST_RC=0; INST_MS=0; INST_TAIL=""; LOCK_REASON=""; ASIDE_PATH=""
+473:     # KS-998 item 3: look at the lockfile BEFORE anything is created, fetched or run.
+474:     read -r -a _allow <<< "$LOCK_ALLOW"
+475:     LOCK_REASON="$(_check_lock_sources "$dir" "$REPO_ROOT" "${_allow[@]+"${_allow[@]}"}")" || {
+476:         INST_STATE="lockbad"; INST_RC=1; return 0
+477:     }
+478:     if [ "$HAVE_PERL" -ne 1 ]; then
+479:         INST_STATE="nopgrp"; INST_RC=1; return 0       # cannot promise to end what the install starts: do not start it
+480:     fi
+481:     stage="$(mktemp -d "${STAGE_PREFIX}$$.XXXXXX" 2>/dev/null)" || {
+482:         INST_STATE="nostage"; INST_RC=1; return 0
+483:     }
+484:     _FG_STAGE="$stage"
+485:     for f in package.json package-lock.json npm-shrinkwrap.json .npmrc; do
+486:         [ -f "$dir/$f" ] && cp "$dir/$f" "$stage/$f"
+487:     done
+488:     marker="$stage/.timed-out"
+489:     log="$stage/.npm-ci.log"
+490:     t0="$(now_ms)"
+491:     # `exec` so $! is npm itself; stdin from /dev/null so a child that reads stdin cannot
+492:     # swallow the package list this script is looping over (KS-998 robustness note).
+493:     _build_install_env "$stage"
+494:     ( cd "$stage" && _run_grouped env -i "${INSTENV[@]}" npm ci --no-audit --no-fund --no-update-notifier --fetch-retries=0 --fetch-timeout=20000 ) </dev/null >"$log" 2>&1 &
+495:     _FG_NPM_PID=$!
+496:     # The watchdog polls once a second and exits on its own when npm does; its stdio is
+497:     # closed so it can never hold a caller's $(...) pipe open.
+498:     (
+499:         _i=0
+500:         while [ "$_i" -lt "$INSTALL_CEILING" ]; do
+501:             sleep 1
+502:             kill -0 "$_FG_NPM_PID" 2>/dev/null || exit 0
+503:             _i=$((_i + 1))
+504:         done
+505:         : > "$marker"
+506:         _kill_proc TERM "$_FG_NPM_PID"
+507:         sleep 2
+508:         _kill_proc KILL "$_FG_NPM_PID"
+509:     ) </dev/null >/dev/null 2>&1 &
+510:     _FG_WD_PID=$!
+511:     wait "$_FG_NPM_PID" 2>/dev/null; INST_RC=$?
+512:     kill "$_FG_WD_PID" 2>/dev/null; wait "$_FG_WD_PID" 2>/dev/null
+513:     # On the timeout path npm (the leader) may exit on the watchdog's TERM before the watchdog's own KILL, which stopping the
+514:     # watchdog above prevents: end the whole group here, so a child that ignores TERM does not outlive the stage.
+515:     [ -e "$marker" ] && _kill_proc KILL "$_FG_NPM_PID"
+516:     _FG_NPM_PID=""; _FG_WD_PID=""
+517:     t1="$(now_ms)"; INST_MS=$((t1 - t0))
+518: 
+519:     if [ "$INST_RC" -ne 0 ] && [ -e "$marker" ]; then
+520:         INST_STATE="timeout"
+521:     elif [ "$INST_RC" -ne 0 ]; then
+522:         INST_STATE="failed"
+523:     elif ! _prettier_ok "$stage"; then
+524:         INST_STATE="noprettier"
+525:     elif [ -e "$dir/node_modules" ] || [ -L "$dir/node_modules" ]; then
+526:         # Someone made node_modules while we installed: keep the one that arrived.
+527:         INST_STATE="raced"
+528:     else
+529:         # The look above is not atomic with the rename, so the rename must itself refuse a target that appeared in between:
+530:         # rename(2) does (a non-empty directory: ENOTEMPTY/EEXIST; a symlink or a file: ENOTDIR), `mv` did not (it moved the
+531:         # tree INSIDE the directory, or through the symlink into its target - gate review, Minor 1).
+532:         tag=".format-gate-moved.$$"
+533:         : > "$stage/node_modules/$tag" 2>/dev/null          # proves, after the rename, that what is there is the tree WE moved
+534:         rn="$(_rename_dir "$stage/node_modules" "$dir/node_modules")"; rrc=$?
+535:         if [ "$rrc" -ne 0 ]; then
+536:             case "$rn" in
+537:                 ENOTEMPTY|EEXIST|ENOTDIR) INST_STATE="raced" ;;
+538:                 *)                        INST_STATE="mvfail" ;;
+539:             esac
+540:         elif _prettier_ok "$dir"; then
+541:             rm -f "$dir/node_modules/$tag"
+542:             INST_STATE="ok"
+543:         elif [ ! -f "$dir/node_modules/$tag" ]; then
+544:             # Not our tree any more (another actor replaced it after the rename): it is not ours to move or delete.
+545:             INST_STATE="raced"
+546:         else
+547:             # Prettier ran from the stage and does not run from here: the install embeds its own path (an absolute symlink,
+548:             # say). Leaving this node_modules in the package would be the very state staging exists to prevent - "present,
+549:             # no prettier" - so rename it BACK into the stage, which is then removed. Not reproduced for any of the four
+550:             # lockfiles (0 files embed the stage path).
+551:             rn="$(_rename_dir "$dir/node_modules" "$stage/node_modules")"; rrc=$?
+552:             if [ "$rrc" -ne 0 ]; then
+553:                 INST_STATE="mvstuck"
+554:             elif [ -f "$stage/node_modules/$tag" ]; then
+555:                 INST_STATE="mvbroken"
+556:             else
+557:                 # The marker was checked BEFORE that rename, and the two steps are about 40 ms apart (measured by the gate review of
+558:                 # #1540, not "microseconds"): another actor replaced the package's node_modules in between, and THEIR tree is now
+559:                 # inside the stage, which is about to be deleted. Put it back where it was found; if that cannot be done (node_modules
+560:                 # exists again) LEAVE it - the stage is renamed aside, gitignored and never swept - and say where. Never delete it.
+561:                 rn="$(_rename_dir "$stage/node_modules" "$dir/node_modules")"; rrc=$?
+562:                 if [ "$rrc" -eq 0 ]; then
+563:                     INST_STATE="mvforeign"
+564:                 else
+565:                     ASIDE_PATH="${ASIDE_PREFIX}${stage##*/.format-gate-stage.}"
+566:                     # If even the rename fails the stage stays where it is, and a keep marker stops the next run's sweep from
+567:                     # taking it for the garbage of a dead run.
+568:                     mv -- "$stage" "$ASIDE_PATH" 2>/dev/null || { ASIDE_PATH="$stage"; : > "$stage/.format-gate-keep"; }
+569:                     keep_stage=1; _FG_STAGE=""
+570:                     INST_STATE="mvaside"
+571:                 fi
+572:             fi
+573:         fi
+574:     fi
+575:     if [ "$INST_STATE" != "ok" ] && [ "$INST_STATE" != "raced" ] && [ -f "$log" ]; then
+576:         INST_TAIL="$(tail -n 6 "$log" 2>/dev/null)"
+577:     fi
+578:     if [ "$keep_stage" -ne 1 ]; then _rm_stage "$stage"; fi
+579:     _FG_STAGE=""
+580:     return 0
+581: }
+582: 
+583: # first_path_under <pkg>: the first changed path that selected this package (normal mode)
+584: first_path_under() {
+585:     printf '%s\n' "$changed_paths" | awk -v pre="systemTest/$1/" 'index($0, pre) == 1 { print; exit }'
+586: }
+587: 
+588: # The prettier-config files that can sit ABOVE a package (repo root, systemTest/). Only those that EXIST at the
+589: # commit are extracted: a single missing pathspec failed the whole `git archive` (measured, rc 128), so the list
+590: # is filtered through `git ls-tree` first.
+591: ANC_CANDIDATES=""
+592: for _n in .editorconfig .prettierrc .prettierrc.json .prettierrc.yaml .prettierrc.yml .prettierrc.json5 \
+593:           .prettierrc.js .prettierrc.cjs .prettierrc.mjs .prettierrc.toml prettier.config.js prettier.config.cjs \
+594:           prettier.config.mjs prettier.config.ts .prettierignore; do
+595:     ANC_CANDIDATES="$ANC_CANDIDATES $_n systemTest/$_n"
+596: done
+597: 
+598: # run_check <pkg> <dir>: the package's own `npm run format:check`; sets `out` and `rc`.
+599: # Working-tree mode is the original foreground command. With FORMAT_GATE_TREE the pushed commit's package is
+600: # archived into a tree dir, the working tree's node_modules is symlinked in, and the same command runs THERE.
+601: # That runs as a background job + wait, so a SIGTERM/SIGINT/SIGHUP reaches the trap at once (a foreground
+602: # $(...) would defer it until the check returned) and the tree dir is removed.
+603: run_check() {
+604:     local p="$1" dir="$2" tree anc
+605:     if [ -z "$TREE_SHA" ]; then
+606:         out="$(cd "$dir" && npm run --silent format:check < /dev/null 2>&1)"
+607:         rc=$?
+608:         return 0
+609:     fi
+610:     tree="$(mktemp -d "${TREE_PREFIX}$$.XXXXXX" 2>/dev/null)" || {
+611:         out="could not create a tree dir under systemTest/ - is it writable?"; rc=125; return 0
+612:     }
+613:     _FG_TREE="$tree"
+614:     anc="$(git -C "$REPO_ROOT" ls-tree --name-only "$TREE_SHA" -- $ANC_CANDIDATES 2>/dev/null)"
+615:     # The commit's files are put on disk with `read-tree` into a PRIVATE index + `checkout-index`, NOT `git archive`: archive honours
+616:     # `export-ignore` (a pushed .gitattributes, a developer-local .git/info/attributes, core.attributesFile), which silently dropped
+617:     # files from the check - format:check said OK where working-tree mode said FAILED (gate 1540 Minor 2). checkout-index applies the
+618:     # same working-tree conversions (eol) as the developer's own checkout and ignores export-ignore. The temp index keeps the real
+619:     # index (and its lock) out of it.
+620:     # shellcheck disable=SC2086
+621:     if ! { GIT_INDEX_FILE="$tree/.idx" git -C "$REPO_ROOT" -c core.sparseCheckout=false read-tree "$TREE_SHA" &&
+622:            GIT_INDEX_FILE="$tree/.idx" git -C "$REPO_ROOT" ls-files -z -- "systemTest/$p" $anc |
+623:                GIT_INDEX_FILE="$tree/.idx" xargs -0 git -C "$REPO_ROOT" checkout-index -f -q --prefix="$tree/" -- &&
+624:            [ -d "$tree/systemTest/$p" ]; } 2>"$tree/.archive.err"; then
+625:         out="could not extract systemTest/$p at ${TREE_SHA}: $(cat "$tree/.archive.err" 2>/dev/null)"; rc=125
+626:         _rm_stage "$tree"; _FG_TREE=""
+627:         return 0
+628:     fi
+629:     ln -s "$dir/node_modules" "$tree/systemTest/$p/node_modules"
+630:     ( cd "$tree/systemTest/$p" && _run_grouped npm run --silent format:check ) </dev/null >"$tree/.check.log" 2>&1 &
+631:     _FG_CHK_PID=$!
+632:     wait "$_FG_CHK_PID" 2>/dev/null; rc=$?
+633:     _FG_CHK_PID=""
+634:     out="$(cat "$tree/.check.log" 2>/dev/null)"
+635:     _rm_stage "$tree"; _FG_TREE=""
+636:     return 0
+637: }
+638: 
+639: # emit_refusal <pkg> <what>: normal mode, Kam's condition (KS-998, 2026-09-22: "a tracked file of the
+640: # package is in the push") evaluated and met; the gate could not run on the package.
+641: emit_refusal() {
+642:     local p="$1" what="$2" sel
+643:     sel="$(first_path_under "$p")"
+644:     {
+645:         echo "[format-gate] REFUSED — systemTest/$p: ${what}, and a file of this package is in the push."
+646:         echo "[format-gate]   selected by: ${sel}"
+647:         echo "[format-gate]   This is NOT a formatting failure: the gate could not run on this package."
+648:         if [ -n "${INST_TAIL:-}" ]; then
+649:             echo "[format-gate]   npm output (last lines, shown as printed, not interpreted):"
+650:             printf '%s\n' "$INST_TAIL" | sed 's/^/[format-gate]   | /'
+651:         fi
+652:         if [ "${INST_STATE:-}" = "notintree" ]; then
+653:             echo "[format-gate]   fix: check out what you push (git checkout <the branch>), then push again"
+654:         else
+655:             echo "[format-gate]   fix: (cd systemTest/$p && npm ci)"
+656:         fi
+657:         if [ "${INST_STATE:-}" = "lockbad" ]; then
+658:             echo "[format-gate]   The gate installs only from the allowed sources (default https://registry.npmjs.org/) and runs nothing else. If the source is intended, install by hand ((cd systemTest/$p && npm ci)), or allow it for this push: FORMAT_GATE_LOCK_ALLOW=<url prefix> [...] (read from your environment only, replaces the default list), together with the npm_config_* settings for that registry (npm_config_registry, npm_config_userconfig=<file>)."
+659:         fi
+660:         if [ "${INST_STATE:-}" = "failed" ] || [ "${INST_STATE:-}" = "timeout" ]; then
+661:             echo "[format-gate]   The install runs with a private HOME and without your shell's secrets, so it does not read ~/.npmrc: if your registry or proxy is configured only there, set npm_config_userconfig=\$HOME/.npmrc (or the npm_config_* variables; for a mirror also FORMAT_GATE_LOCK_ALLOW=<url prefix>) and push again; FORMAT_GATE_INSTALL_ENV_PASS=\"NAME ...\" hands the install more variables."
+662:         fi
+663:         if [ "${INST_STATE:-}" = "nopgrp" ]; then
+664:             echo "[format-gate]   install perl (macOS ships it; elsewhere your package manager), or run the command above by hand."
+665:         fi
+666:         if [ "${INST_STATE:-}" = "timeout" ]; then
+667:             echo "[format-gate]   a slow link needs longer: FORMAT_GATE_INSTALL_TIMEOUT=<seconds> (now ${INSTALL_CEILING})"
+668:         fi
+669:         if [ "$BASE_MAY_BE_STALE" -eq 1 ]; then
+670:             echo "[format-gate]   If you did not touch systemTest/$p, your origin/develop may be stale: run git fetch origin and push again."
+671:         fi
+672:     } >&2
+673: }
+674: 
+675: # --- discover the packages ----------------------------------------------------
+676: # bash 3.2 (what macOS ships, and what the pre-push hook runs) has no
+677: # associative arrays and no mapfile. Plain arrays and a newline-delimited string
+678: # only.
+679: packages=()
+680: if [ -n "$TREE_SHA" ]; then
+681:     # KS-998 item 2: discovered from the COMMIT, not the working tree.
+682:     while IFS= read -r -d '' ent; do
+683:         name="${ent#systemTest/}"
+684:         [ -n "$name" ] || continue
+685:         git -C "$REPO_ROOT" show "${TREE_SHA}:systemTest/${name}/package.json" 2>/dev/null | node -e '
+686:             let s = "";
+687:             process.stdin.on("data", (d) => { s += d; }).on("end", () => {
+688:                 try { process.exit(((JSON.parse(s).scripts) || {})["format:check"] ? 0 : 1); } catch (e) { process.exit(1); }
+689:             });
+690:         ' >/dev/null 2>&1 || continue
+691:         packages+=("$name")
+692:     done < <(git -C "$REPO_ROOT" ls-tree -z --name-only "$TREE_SHA" systemTest/ 2>/dev/null)
+693: else
+694:     for pj in "$REPO_ROOT"/systemTest/*/package.json; do
+695:         [ -e "$pj" ] || continue          # an empty glob expands to itself
+696:         dir="$(dirname "$pj")"
+697:         node -e '
+698:             const s = (require(process.argv[1]).scripts) || {};
+699:             process.exit(s["format:check"] ? 0 : 1);
+700:         ' "$pj" >/dev/null 2>&1 || continue
+701:         packages+=("$(basename "$dir")")
+702:     done
+703: fi
+704: 
+705: # `"${arr[@]}"` on an EMPTY array under `set -u` raises "unbound variable" on
+706: # bash 3.2 — and inside a command substitution that error goes to stderr,
+707: # nothing reads it, and the assignment silently yields "". Same trap
+708: # run-shell-suites.sh carries at QA R2-2. Use the +alternate form throughout.
+709: if [ "${#packages[@]}" -eq 0 ]; then
+710:     echo "[format-gate] SKIP (advisory) — no systemTest package declares a format:check script."
+711:     exit 0
+712: fi
+713: 
+714: if [ "$MODE" = "list" ]; then
+715:     printf '%s\n' "${packages[@]+"${packages[@]}"}"
+716:     exit 0
+717: fi
+718: 
+719: # --- select the packages this run covers --------------------------------------
+720: changed_paths=""
+721: selected=""
+722: if [ "$MODE" = "all" ]; then
+723:     for p in "${packages[@]+"${packages[@]}"}"; do
+724:         selected="${selected}${p}
+725: "
+726:     done
+727: else
+728:     changed_paths="$(cat)"
+729:     for p in "${packages[@]+"${packages[@]}"}"; do
+730:         if printf '%s\n' "$changed_paths" | grep "^systemTest/${p}/" > /dev/null; then
+731:             selected="${selected}${p}
+732: "
+733:         fi
+734:     done
+735: fi
+736: 
+737: selected="$(printf '%s' "$selected" | grep -v '^$' || true)"
+738: if [ -z "$selected" ]; then
+739:     exit 0                            # nothing under a gated package — say nothing, cost nothing
+740: fi
+741: 
+742: # --- run it -------------------------------------------------------------------
+743: [ -n "$TREE_SHA" ] && echo "[format-gate] judging commit ${TREE_SHA:0:12} (the pushed content), not the working tree."
+744: failed=0
+745: skipped=0
+746: checked=0
+747: refused=0          # KS-998 item 1: could not be checked, and a file of it is in the push
+748: installed=0        # KS-998 item 1: node_modules was absent and was installed this run
+749: BREAKER_PKG=""      # KS-998 item 1: set to the first package whose install TIMED OUT
+750: 
+751: # A stage whose run was SIGKILLed is garbage; remove it before making new ones.
+752: _sweep_dead_stages
+753: 
+754: # Read the selection line by line rather than relying on word splitting: this
+755: # file is bash, but the same loop pasted into a zsh shell would not split at all
+756: # and would run zero packages while reporting a clean pass.
+757: while IFS= read -r p; do
+758:     [ -n "$p" ] || continue
+759:     dir="$REPO_ROOT/systemTest/$p"
+760: 
+761:     # Deps absent. KS-991: an environment condition, never presented as a formatting
+762:     # red. KS-1063: if EVERY selected package is skipped the run examined nothing and
+763:     # is refused below. KS-998 item 1: an ABSENT node_modules is now INSTALLED first;
+764:     # only when that cannot be done does the package fall to the SKIP (--all) or the
+765:     # REFUSAL (normal mode, where a path of the package is in the push by construction).
+766:     if ! _prettier_ok "$dir"; then
+767:         unready=""                       # set to a state name when the package cannot be checked
+768:         INST_STATE=""; INST_RC=0; INST_MS=0; INST_TAIL=""
+769:         if [ -n "$TREE_SHA" ] && [ ! -f "$dir/package.json" ]; then
+770:             unready="notintree"          # KS-998 item 2: exists at the pushed commit, not in the checked-out tree
+771:         elif [ -e "$dir/node_modules" ] || [ -L "$dir/node_modules" ]; then
+772:             unready="hollow"             # present: `npm ci` would WIPE it, so never install over it
+773:         elif [ -n "$BREAKER_PKG" ]; then
+774:             unready="notattempted"
+775:         else
+776:             echo "[format-gate] systemTest/$p has no node_modules — installing with npm ci in a staging dir (ceiling ${INSTALL_CEILING}s). This runs the dependency install scripts from the lockfile, exactly as a manual npm ci does."
+777:             run_install "$p" "$dir"
+778:             case "$INST_STATE" in
+779:                 ok)
+780:                     installed=$((installed + 1))
+781:                     echo "[format-gate] INSTALLED — systemTest/$p: npm ci succeeded in $(fmt_secs "$INST_MS")s and node_modules was moved into place."
+782:                     ;;
+783:                 raced)
+784:                     echo "[format-gate] systemTest/$p: node_modules appeared during the install; keeping the one already there, not replacing it."
+785:                     _prettier_ok "$dir" || unready="hollow"
+786:                     ;;
+787:                 timeout)
+788:                     unready="timeout"; BREAKER_PKG="$p"
+789:                     ;;
+790:                 *)
+791:                     unready="$INST_STATE"
+792:                     ;;
+793:             esac
+794:         fi
+795: 
+796:         if [ -n "$unready" ]; then
+797:             secs_txt="$(fmt_secs "$INST_MS")"
+798:             case "$unready" in
+799:                 failed)       why_ref="could not install its deps (npm ci exited ${INST_RC} after ${secs_txt}s)"
+800:                               why_skip=" and could not be installed (npm ci exited ${INST_RC} after ${secs_txt}s)" ;;
+801:                 noprettier)   why_ref="could not install its deps (npm ci exited 0 after ${secs_txt}s but node_modules/.bin/prettier is still absent or not executable)"
+802:                               why_skip=" and could not be installed (npm ci exited 0 after ${secs_txt}s but node_modules/.bin/prettier is still absent or not executable)" ;;
+803:                 nostage)      why_ref="could not install its deps (a staging directory could not be created under systemTest/ - is it writable?)"
+804:                               why_skip=" and could not be installed (a staging directory could not be created under systemTest/ - is it writable?)" ;;
+805:                 mvbroken)     why_ref="could not install its deps (the install embeds its staging path: prettier is not executable after the move, so node_modules was moved back out)"
+806:                               why_skip=" and could not be installed (the install embeds its staging path: prettier is not executable after the move, so node_modules was moved back out)" ;;
+807:                 lockbad)      why_ref="the lockfile has a source the gate will not install from: ${LOCK_REASON}"
+808:                               why_skip=" and could not be installed (the lockfile has a source the gate will not install from: ${LOCK_REASON})" ;;
+809:                 mvforeign)    why_ref="could not install its deps (the install embeds its staging path, and another actor replaced node_modules while the gate was moving ours back: their tree was put back where it was found and nothing of theirs was deleted)"
+810:                               why_skip=" and could not be installed (the install embeds its staging path, and another actor replaced node_modules while the gate was moving ours back: their tree was put back where it was found and nothing of theirs was deleted)" ;;
+811:                 mvaside)      why_ref="could not install its deps (the install embeds its staging path, and another actor replaced node_modules while the gate was moving ours back: their tree could not be put back because node_modules exists again, and was LEFT, not deleted, at ${ASIDE_PATH})"
+812:                               why_skip=" and could not be installed (the install embeds its staging path, and another actor replaced node_modules while the gate was moving ours back: their tree was LEFT, not deleted, at ${ASIDE_PATH})" ;;
+813:                 mvstuck)      why_ref="could not install its deps (the install embeds its staging path: prettier is not executable after the move, and node_modules could not be moved back out - npm ci in the package replaces it)"
+814:                               why_skip=" and could not be installed (the install embeds its staging path: prettier is not executable after the move, and node_modules could not be moved back out - npm ci in the package replaces it)" ;;
+815:                 nopgrp)       why_ref="could not install its deps (perl was not found on PATH, and the install must run in its own process group so that a timeout or an interrupt ends every process it started)"
+816:                               why_skip=" and could not be installed (perl was not found on PATH, and the install must run in its own process group so that a timeout or an interrupt ends every process it started)" ;;
+817:                 mvfail)       why_ref="could not install its deps (the staged node_modules could not be moved into place)"
+818:                               why_skip=" and could not be installed (the staged node_modules could not be moved into place)" ;;
+819:                 timeout)      why_ref="install timed out after ${INSTALL_CEILING}s"
+820:                               why_skip=": install timed out after ${INSTALL_CEILING}s" ;;
+821:                 notattempted) why_ref="install not attempted: the install of systemTest/${BREAKER_PKG} timed out after ${INSTALL_CEILING}s, so the registry is treated as unreachable for the rest of this run"
+822:                               why_skip=": install not attempted: the install of systemTest/${BREAKER_PKG} timed out after ${INSTALL_CEILING}s, so the registry is treated as unreachable for the rest of this run" ;;
+823:                 notintree)    why_ref="exists at the pushed commit but is not in the checked-out tree, so its dependencies cannot be installed or borrowed here"
+824:                               why_skip=": it exists at the pushed commit but is not in the checked-out tree, so its dependencies cannot be installed or borrowed here" ;;
+825:                 hollow)       why_ref="node_modules exists but has no prettier, so it was not reinstalled over"
+826:                               why_skip=" (node_modules exists but has no prettier; not reinstalled over it)" ;;
+827:             esac
+828:             if [ "$MODE" = "all" ]; then
+829:                 # --all has no changed set, so Kam's condition (KS-998) cannot be evaluated: named SKIP.
+830:                 echo "[format-gate] SKIP — systemTest/$p deps not installed${why_skip} — skipped; --all: there is no changed set, so \"a file of this package is in the push\" cannot be evaluated. Remedy: npm ci in systemTest/$p."
+831:                 skipped=$((skipped + 1))
+832:             else
+833:                 INST_STATE="$unready"
+834:                 emit_refusal "$p" "$why_ref"
+835:                 refused=$((refused + 1))
+836:             fi
+837:             continue
+838:         fi
+839:     fi
+840: 
+841:     # KS-998: `< /dev/null`. This loop reads its package list from the
+842:     # here-string at its `done` on stdin, and npm hands its stdin to the script:
+843:     # a format:check that reads stdin would swallow every package after it.
+844:     run_check "$p" "$dir"
+845:     checked=$((checked + 1))
+846:     if [ "$rc" -eq 0 ]; then
+847:         echo "[format-gate] systemTest/$p — format:check OK"
+848:         continue
+849:     fi
+850: 
+851:     failed=$((failed + 1))
+852:     echo "[format-gate] systemTest/$p — format:check FAILED" >&2
+853: 
+854:     warns="$(printf '%s\n' "$out" | grep '^\[warn\] ' | grep -v 'Code style issues' || true)"
+855: 
+856:     # A non-zero exit with NO warn lines is not "no problems found" — it is an
+857:     # unexplained failure, and reporting it as clean is the exact shape of a
+858:     # check that cannot fail. Print what actually came back.
+859:     if [ -z "$warns" ]; then
+860:         echo "[format-gate]   prettier exited $rc but named no files. Raw output:" >&2
+861:         printf '%s\n' "$out" | sed 's/^/[format-gate]   | /' >&2
+862:         continue
+863:     fi
+864: 
+865:     printf '%s\n' "$warns" | while IFS= read -r w; do
+866:         rel="${w#\[warn\] }"
+867:         full="systemTest/$p/$rel"
+868:         # Whose red is this? The whole point of the ticket is that the bill
+869:         # lands on the wrong person. If the file is not in this push, say so —
+870:         # the reader should not have to work that out.
+871:         # KS-998: -qxF, not -qx — before, "$full" was read as a PATTERN, so a path
+872:         # containing a regex metacharacter could match the wrong line or none at all,
+873:         # and the "(in this push)" label was not a literal statement about this push.
+874:         if [ "$MODE" != "all" ] && printf '%s\n' "$changed_paths" | grep -qxF "$full"; then
+875:             echo "[format-gate]   $full   (in this push)" >&2
+876:         elif [ "$MODE" = "all" ]; then
+877:             echo "[format-gate]   $full" >&2
+878:         else
+879:             echo "[format-gate]   $full   (NOT in this push — inherited red)" >&2
+880:         fi
+881:     done
+882: 
+883:     # KS-998 item 2 (the ticket's own note): the remedy printed here edits the WORKING TREE, and pushing without
+884:     # committing that edit is how the old gate came to pass a tree that was not what was being sent. In tree mode
+885:     # the gate judges the COMMIT, so an uncommitted fix does not help - say so.
+886:     if [ -n "$TREE_SHA" ]; then
+887:         echo "[format-gate]   fix: (cd systemTest/$p && npm run format) — then COMMIT it: this gate judges the pushed commit, not your working tree" >&2
+888:     else
+889:         echo "[format-gate]   fix: (cd systemTest/$p && npm run format)" >&2
+890:     fi
+891: # A here-string, NOT a pipe: `... | while read` puts the loop in a SUBSHELL, so
+892: # every counter below would be incremented in a child and read back as 0 here —
+893: # a gate that always reports "0 failed" no matter what prettier said.
+894: done <<< "$selected"
+895: 
+896: trailer="${checked} package(s) checked, ${skipped} skipped, ${failed} failed"
+897: [ "$refused" -gt 0 ]   && trailer="${trailer}, ${refused} refused"
+898: [ "$installed" -gt 0 ] && trailer="${trailer}, ${installed} installed"
+899: echo "[format-gate] ${trailer}"
+900: 
+901: # KS-1063 (Peter, 2026-09-29): a gate that examined NOTHING must not pass. This
+902: # used to fall through to `[ "$failed" -eq 0 ]` and exit 0 on "0 checked, N
+903: # skipped" — the same observable as a clean check, on exactly the systemTest-only
+904: # pushes where this is the only gate that applies (the hook skips the platform
+905: # preflight for them by design). It now refuses, and says in words that nothing
+906: # was checked and that this is NOT a formatting failure, with the command that
+907: # fixes it — the shape preflight leg 1 uses for DEPS MISSING. A run that checked
+908: # at least one package still passes on its own verdict; the skips stay named above.
+909: # A REFUSED package already said, in words, why the gate could not run; do not also claim
+910: # that "every selected package was skipped" when one was refused.
+911: if [ "$checked" -eq 0 ] && [ "$skipped" -gt 0 ] && [ "$refused" -eq 0 ]; then
+912:     {
+913:         echo "[format-gate] NOTHING CHECKED — every selected package was skipped, so no file's formatting was examined."
+914:         echo "[format-gate]   This is NOT a formatting failure: the gate could not run. Install the deps it names above"
+915:         echo "[format-gate]   (npm ci in each skipped systemTest/<package>), then push again."
+916:     } >&2
+917:     exit 1
+918: fi
+919: [ "$failed" -eq 0 ] && [ "$refused" -eq 0 ]
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1689,
+ "head_sha": "b3a063dd33b95bcea382aa1ab1ea4a73a743b482",
+ "pr_tip_now": "b3a063dd33b95bcea382aa1ab1ea4a73a743b482",
+ "head_mode": "tip",
+ "merge_base": "28dac5c12ba5c00d9fc3ad04daee5230eff71619",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "A",
+   "path": "systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh",
+   "added": "91",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "systemTest/scripts/check-package-format.sh",
+   "added": "1",
+   "deleted": "1"
+  }
+ ],
+ "test_files": [
+  "systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh"
+ ],
+ "product_files": [
+  "systemTest/scripts/check-package-format.sh"
+ ],
+ "diff_stat": {
+  "files": 2,
+  "added": 92,
+  "deleted": 1
+ },
+ "targeted_on_head": [
+  {
+   "file": "systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh",
+   "rc": 0,
+   "passed": null,
+   "failed": 0,
+   "tail": "oth packages checked\nok   large list, red package first -> the gate fails (exit 1)\nok   CONTROL small list -> exit 0\nok   CONTROL small list -> both packages checked\nok   large list, zzz only -> one package checked\n\nks1716_format_gate_selects_every_changed_package_on_a_large_push: 7 passed, 0 failed"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "systemTest/__tests__/ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh",
+   "rc": 1,
+   "passed": null,
+   "failed": null,
+   "tail": "first -> the gate fails (exit 1)\n       want \"1\", got \"0\"\nok   CONTROL small list -> exit 0\nok   CONTROL small list -> both packages checked\nFAIL large list, zzz only -> one package checked\n       want \"1\", got \"0\"\n\nks1716_format_gate_selects_every_changed_package_on_a_large_push: 4 passed, 3 failed"
+  }
+ ],
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 19
+}

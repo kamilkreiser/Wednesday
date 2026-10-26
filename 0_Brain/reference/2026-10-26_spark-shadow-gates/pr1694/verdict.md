@@ -1,0 +1,15 @@
+# Spark SHADOW gate, PR #1694 (KS-1289)
+- Head: 048b9d5fa48ba05712bcee73dbc9831655d58c8f (== refs/pull/1694/head at run: tip). Base: merge-base with develop 28dac5c12. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 2, +35/-0; product files: 1.
+  - targeted on head: ks1289-dockerignore-excludes-nested-tests.test.ts rc=0 passed=4 failed=0
+  - targeted on base product + head tests: ks1289-dockerignore-excludes-nested-tests.test.ts rc=1 passed=3 failed=1
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: NO GO. Valid JSON first attempt: True. Wall 39.2 s, prompt 4270 tok, completion 1249 tok.
+- Findings (6), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Major: The new `**/__tests__` pattern in .dockerignore will exclude the test file that contains the new test itself from the build context, but the test only checks the literal line exists in the file, not t  [evidence quote found in input: True]
+  - Major: The PR does not verify the ticket's acceptance criterion: 'Verify by rebuilding after a shared-test-only change and showing that the set of images which rebuild shrinks' — no build or rebuild measurem  [evidence quote found in input: False]
+  - Major: The new `**/__tests__` pattern will exclude the test file itself from the build context, but the test file is under `packages/shared/src/__tests__/` and is tracked in the repo; if the build context is  [evidence quote found in input: True]
+  - Minor: The test's path resolution to the .dockerignore file is fragile: it assumes the test file is exactly four levels below Blockchain/Dev, but the test is in packages/shared/src/__tests__/, which is only   [evidence quote found in input: True]
+  - Minor: The test does not verify that the `**/__tests__` pattern actually excludes anything from the build context; it only checks the literal string is present, so it does not pin the behavior the ticket ask  [evidence quote found in input: True]
+  - Note: The ticket's measured build cost (1h50m of 2h10m for 23 of 29 images) is not re-measured or verified by the PR; the PR only adds a pattern and a static test, so the claimed improvement is not demonstr  [evidence quote found in input: False]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

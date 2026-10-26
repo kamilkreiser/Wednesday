@@ -1,0 +1,17 @@
+# Spark SHADOW gate, PR #1689 (KS-1716)
+- Head: b3a063dd33b95bcea382aa1ab1ea4a73a743b482 (== refs/pull/1689/head at run: tip). Base: merge-base with develop 28dac5c12. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 2, +92/-1; product files: 1.
+  - targeted on head: ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh rc=0 passed=None failed=0
+  - targeted on base product + head tests: ks1716_format_gate_selects_every_changed_package_on_a_large_push.test.sh rc=1 passed=None failed=None
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: NO GO. Valid JSON first attempt: True. Wall 78.5 s, prompt 24831 tok, completion 1896 tok.
+- Findings (8), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Major: The fix does not address the root cause of the EPIPE/pipefail interaction; it only changes the reader from `grep -q` to `grep > /dev/null`, which still uses a pipe and can still produce EPIPE if the w  [evidence quote found in input: True]
+  - Major: The new test does not assert that the gate fails (non-zero exit) when a changed package is dropped; it only checks that the gate exits 0 and reports the expected package count, so a silent skip would   [evidence quote found in input: True]
+  - Major: The test's fixture packages are created with `format:check` scripts that always exit 0 (except `abc`), so the test cannot detect a package that is silently skipped; the gate would still report '0 skip  [evidence quote found in input: True]
+  - Minor: The test's `big_list` function generates 2500 paths under `systemTest/zzz/`, but the ticket's measured list was 1,736 paths / 116,058 bytes; the test's list size is not verified to be over 64 KiB in t  [evidence quote found in input: True]
+  - Minor: The test's `check` function does not verify that the gate's stderr output is empty or that no 'Broken pipe' line appears, so a regression that still produces EPIPE but happens to select all packages w  [evidence quote found in input: False]
+  - Minor: The fix changes the selection loop but does not update the script's header comment, which still describes the old `grep -q` behavior; the comment now lies about the mechanism.  [evidence quote found in input: False]
+  - Minor: The test's `mk_pkg` function creates a `prettier` binary that always exits 0, but the real `format:check` scripts in the repository may have different behavior; the test does not verify that the gate   [evidence quote found in input: True]
+  - Note: The test's `big_list` function uses `awk` to generate paths, but the ticket's reproduction used a real list; the test does not verify that the gate's behavior with the generated list matches the real-  [evidence quote found in input: False]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

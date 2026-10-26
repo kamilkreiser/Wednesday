@@ -1,0 +1,51 @@
+
+##### Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+ok   CONTROL both mutants differ from the real leg
+ok   X4 (an extra argument to the checker) fails the default-run stub cell
+ok   R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell
+ok   CONTROL the unmutated leg fails neither of those two stub cells
+
+ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: 4 passed, 0 failed
+
+##### Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+ok   the real preflight.sh yields a non-empty helper block (the extraction is live)
+ok   🔴 preflight.sh has a leg 16 block (a 16th step() header exists)
+ok   🔴 a failing leg-16 script FAILS the run and the verdict can name leg 16
+ok   🔴 leg 16 runs scripts/preflight/test-types-ratchet.sh
+ok   CONTROL a passing leg-16 script fails nothing, skips nothing and counts as RAN
+ok   🔴 a leg-16 script that SKIPS is counted as skipped (advisory), not failed and not as run
+ok   🔴 TOTAL_LEGS is 16
+ok   🔴 every step header's denominator is TOTAL_LEGS (a stale one aborts every push)
+ok   the legs run 1..16 in order and leg 16 is last
+ok   CONTROL the header parser reads headers at all (it found 16)
+ok   🔴 a planted test-file type error FAILS the leg (rc 1)
+ok   🔴 ...and the output names the error, so the pusher can see what to fix
+ok   CONTROL a clean service passes the same leg (rc 0)
+ok   CONTROL ...and the checker actually ran (its own summary line is in the output)
+ok   🔴 a service that examines NO test file fails the leg, it does not read as clean (KS-676)
+ok   🔴 ...and says so
+ok   🔴 an error in the FIRST service fails the leg, and the second is still checked (no early exit)
+ok   🔴 an error in the LAST service fails the leg too (a pass cannot be inherited from an earlier one)
+ok   🔴 a service directory that does not exist FAILS the leg, it is not skipped
+ok   🔴 with no workspace install the leg SKIPs (advisory), exits 0, names leg 1, and the checker did NOT run
+ok   CONTROL the same planted error with the install present is NOT skipped (so the skip above is the precondition, not the error)
+ok   the committed tree passes the leg with no arguments (rc 0)
+ok   🔴 ...and the default list is ALL THREE gated services, auth, the api-gateway and vc-issuer (KS-1351), each with its own checker line
+ok   🔴 ...and the checker ran exactly three times, once per gated service (a fourth would be an ungated change, one fewer a dropped gate)
+ok   ...and all three read 0 new and 0 stale against their baselines
+ok   🔴 ...and the verdict counts all three services
+ok   CONTROL the default run (no arguments) passes with all three checkers green, and the stub was LIVE: asked about exactly auth, the api-gateway, then vc-issuer
+ok   🔴 the api-gateway's checker exiting 1 FAILS the default run, named (the fixture holds no baseline file, so a gate that needs one reads green)
+ok   🔴 KS-1527 the rc-1 wording names a NEW test-file type error (the one branch of the three that a rewording could change silently)
+ok   🔴 the api-gateway's checker exiting 2 (could not run) FAILS the default run, and the output says the check could not run
+ok   🔴 ...and so does an exit the leg does not know (3), which it names as unexpected
+ok   🔴 auth failing fails the default run AND the api-gateway and vc-issuer are still checked after it (no early exit)
+ok   🔴 both failing: the run fails and the output names BOTH services
+ok   🔴 KS-1351: vc-issuer's checker exiting 1 FAILS the default run, named — the third service is a real gate, not a passenger
+ok   🔴 KS-1351: ...and vc-issuer exiting 2 (could not run) fails it too, and says so
+ok   🔴 the closing advice does not tell the pusher to fix 'the test file' (the file named can be a PRODUCT file the tests import)
+ok   🔴 the leg expands only its own five locals (a service list read from the environment would add a name: the KS-1261 class)
+ok   CONTROL the plant changed the file (so the control below is not comparing a file with itself)
+ok   CONTROL the same extraction SEES a planted environment read (so the cell above could fail)
+
+preflight_test_types_ratchet_leg: 39 passed, 0 failed

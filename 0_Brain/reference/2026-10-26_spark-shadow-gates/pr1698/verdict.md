@@ -1,0 +1,13 @@
+# Spark SHADOW gate, PR #1698 (KS-1548)
+- Head: 073289640d6367f0dff74e7a41b7999dcd2e2046 (== refs/pull/1698/head at run: tip). Base: merge-base with develop 18ffc05cd. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 1, +1/-1; product files: 0.
+  - targeted on head: ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts rc=0 passed=18 failed=0
+  - targeted on base product + head tests: ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts rc=0 passed=18 failed=0
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: NO GO. Valid JSON first attempt: True. Wall 34.2 s, prompt 9348 tok, completion 855 tok.
+- Findings (4), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Major: The PR only pins the no-window guard (m2) and does not address m1 (stalled body outside every timer) or m3 (final window answering after the deadline), both of which the ticket lists as checklist item  [evidence quote found in input: True]
+  - Major: The new assertion in cell M is red only by absence on base, not by a behavioural difference, so it does not prove the guard is pinned against a mutant that removes it.  [evidence quote found in input: True]
+  - Minor: The ticket's nit about cell G's second assertion is not addressed; the assertion remains vacuous.  [evidence quote found in input: True]
+  - Note: The PR does not add a cell for m3 (final window answering after the deadline), so the ticket's "plus a cell" for m3 is unmet.  [evidence quote found in input: True]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

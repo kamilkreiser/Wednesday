@@ -1,0 +1,60 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 9348,
+     "total_tokens": 10203,
+     "completion_tokens": 855,
+     "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "multimodal_tokens": null
+     }
+    },
+    "seconds": 34.2,
+    "schema_errors": []
+   }
+  ],
+  "prompt_tokens": 9348,
+  "completion_tokens": 855,
+  "seconds": 34.2,
+  "think": false,
+  "valid": true
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The PR only pins the no-window guard (m2) and does not address m1 (stalled body outside every timer) or m3 (final window answering after the deadline), both of which the ticket lists as checklist items to fix.",
+    "evidence": "Ticket checklist: \"m1, a stalled response BODY is outside every timer, in ANY window, and the code comment overclaims... Fix shape: bound the body read by the remaining budget... or at minimum soften the comment...\" and \"m3, a final window that answers AFTER the deadline keeps the platform half and returns late... Fix shape: one deadline check after the body is read (`if (Date.now() >= deadline) throw`), plus a cell.\" Diff: only one line changed in the test file, adding `calls.length !== 1` to cell M's `wrong` array.",
+    "test_or_reason": "The diff touches only the test file and only adds the m2 assertion; no product code change and no new cell for m1 or m3. The ticket's acceptance criteria are therefore not met for m1 and m3.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Major",
+    "claim": "The new assertion in cell M is red only by absence on base, not by a behavioural difference, so it does not prove the guard is pinned against a mutant that removes it.",
+    "evidence": "facts.json: targeted_on_base_product_code shows 18 passed, 0 failed on base with the same test file (the diff is only in the test file, so base product code is the same). The new assertion `calls.length !== 1` would fail on base only if the guard is absent; but the ticket says the mutant that removes the guard survives all 18 cells, meaning the guard is present in the current code and the assertion passes on both base and head.",
+    "test_or_reason": "The ticket's m2 says \"The gate's mutant that removes it survives all 18 cells; with it removed the stub sees a second request that is aborted at once.\" The PR adds the assertion but does not run the mutant; the assertion is a regression guard, not a proof that the guard is pinned against the mutant. The facts show the test passes on base, so the new assertion is not a red-green test for the fix.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The ticket's nit about cell G's second assertion is not addressed; the assertion remains vacuous.",
+    "evidence": "Test file line 214: `expect(calls.every((c, i) => c.offset === calls.slice(0, i).reduce((n) => n + 100, 0) || c.offset === 200 || c.offset === 100 || c.offset === 0)).toBe(true);` \u2014 the ticket says \"any plausible offset satisfies it. The first assertion (the ids equal the oracle) is the real check. Delete the second or make it real.\" The diff does not touch this line.",
+    "test_or_reason": "The ticket's checklist item \"nit, cell G's second assertion cannot fail\" is not addressed; the assertion remains as-is.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The PR does not add a cell for m3 (final window answering after the deadline), so the ticket's \"plus a cell\" for m3 is unmet.",
+    "evidence": "Ticket m3: \"Fix shape: one deadline check after the body is read (`if (Date.now() >= deadline) throw`), plus a cell.\" The diff adds no new test cell; only cell M's assertion is extended.",
+    "test_or_reason": "The diff shows only one line changed in cell M; no new test for m3 exists.",
+    "evidence_quote_found_in_input": true
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

@@ -1,0 +1,1549 @@
+diff --git a/Blockchain/Dev/.env.example b/Blockchain/Dev/.env.example
+index 3ba24a38e..c630ae97c 100644
+--- a/Blockchain/Dev/.env.example
++++ b/Blockchain/Dev/.env.example
+@@ -341,3 +341,35 @@ APP_DB_PASSWORD=
+ # So a status-code check cannot tell a set secret from a missing one — assert that
+ # the metering response's data.tenantId is Platform S's key tenant.
+ GATEWAY_VOUCH_SECRET=
++
++# -----------------------------------------------------------------------------
++# EMITTER_SIGNING_SECRET — KS-1717 (the signed originate -> anchoring hop)
++# -----------------------------------------------------------------------------
++# HMAC key originate signs its own hops to anchoring with; anchoring skips the
++# flat-anchor `anchor` provenance row for `x-emitter-internal` ONLY when that
++# signature (method, path, marker, a timestamp within 60 s, the caller's
++# Authorization header, the raw body bytes) verifies. Without it, a direct
++# compose-network caller holding a connector JWT could set the header and
++# suppress its own provenance row.
++#
++# WHAT IT DOES NOT DO: anyone holding the key can sign, and there is no nonce
++# store. A byte-identical replay under the SAME bearer verifies for just under
++# 61 s after signing when the two clocks agree, and for up to about 121 s if the
++# signer's clock runs up to 60 s fast. A replay with a different body, method,
++# path, marker, timestamp or bearer is refused.
++#
++# The NAME belongs here; the VALUE never does. Leave it blank in the template
++# and generate a per-environment one:
++#     openssl rand -hex 32
++#
++# WHERE IT MAY LIVE:
++#   - `.env`, which compose interpolates into the `environment:` blocks of
++#     originate and anchoring ONLY. The same value on both; under 32 characters
++#     counts as unset.
++#   - NOT `.env.local` (four services load it).
++#
++# UNSET FAILS CLOSED: anchoring honours no marker and warns at boot, and
++# originate's own hops each write a SECOND action_provenance row until the
++# secret is set on BOTH services. Set it on both before deploying the images
++# that check it.
++EMITTER_SIGNING_SECRET=
+diff --git a/Blockchain/Dev/deployment/azure/services.bicep b/Blockchain/Dev/deployment/azure/services.bicep
+index 3baa22de9..176eafe37 100644
+--- a/Blockchain/Dev/deployment/azure/services.bicep
++++ b/Blockchain/Dev/deployment/azure/services.bicep
+@@ -130,6 +130,14 @@ param piiEncryptionKeyVersion string = '1'
+ @secure()
+ param gatewayVouchSecret string = ''
+ 
++// KS-1717: the HMAC key originate signs its own originate -> anchoring hops with.
++// Empty is valid and FAILS CLOSED: anchoring honours no `x-emitter-internal` marker and
++// warns at boot, and originate's own hops each write a second provenance row until it is
++// set. The same value on both apps; under 32 characters counts as unset.
++@description('KS-1717: HMAC key for the signed originate -> anchoring hop (32 random bytes hex-encoded). Empty => anchoring honours no emitter marker (fail-closed) and warns at boot.')
++@secure()
++param emitterSigningSecret string = ''
++
+ @description('PII deterministic-lookup HMAC key (32 random bytes hex-encoded)')
+ @secure()
+ param piiLookupHmacKey string
+@@ -361,6 +369,18 @@ var gatewayVouchSecrets = concat(commonSecrets, [
+   }
+ ])
+ 
++// KS-1717 — the emitter signing key is declared ONLY on the two apps that use it
++// (originate signs, anchoring verifies), for the reason gatewayVouchSecrets gives above.
++// The same placeholder rule holds: neither app is wired to it when the param is unset
++// (see the conditional env wiring on each). Were it ever wired, it would still fail
++// closed: the placeholder is 28 characters and the guard treats under 32 as unset.
++var emitterSigningSecretEntry = {
++  name: 'emitter-signing-secret'
++  value: empty(emitterSigningSecret) ? 'placeholder-never-referenced' : emitterSigningSecret
++}
++var originateSecrets = concat(gatewayVouchSecrets, [emitterSigningSecretEntry])
++var anchoringSecrets = concat(commonSecrets, [emitterSigningSecretEntry])
++
+ var authSecrets = concat(commonSecrets, [
+   {
+     name: 'jwt-private-key'
+@@ -755,7 +775,7 @@ resource originateService 'Microsoft.App/containerApps@2023-05-01' = {
+           passwordSecretRef: 'acr-password'
+         }
+       ]
+-      secrets: gatewayVouchSecrets
++      secrets: originateSecrets
+       // T3-A: Dapr sidecar enables automatic mTLS for service-to-service
+       // calls between Dapr-enabled apps in the same Container Apps
+       // Environment. appId is the service-mesh identity used by
+@@ -824,6 +844,12 @@ resource originateService 'Microsoft.App/containerApps@2023-05-01' = {
+             // that list reaches every service, and this secret's whole value
+             // is its narrow reach.
+             { name: 'GATEWAY_VOUCH_SECRET', secretRef: 'gateway-vouch-secret' }
++          ], empty(emitterSigningSecret) ? [] : [
++            // KS-1717: signs originate's own hops to anchoring. Wired ONLY when
++            // the param is set; unset sends the marker unsigned and anchoring
++            // records the row (fail-closed). Not in commonEnvVars, for the
++            // reason given for the vouch above.
++            { name: 'EMITTER_SIGNING_SECRET', secretRef: 'emitter-signing-secret' }
+           ])
+         }
+       ]
+@@ -1142,7 +1168,7 @@ resource anchoringService 'Microsoft.App/containerApps@2023-05-01' = {
+           passwordSecretRef: 'acr-password'
+         }
+       ]
+-      secrets: commonSecrets
++      secrets: anchoringSecrets
+       dapr: {
+         enabled: true
+         appId: 'anchoring'
+@@ -1167,6 +1193,11 @@ resource anchoringService 'Microsoft.App/containerApps@2023-05-01' = {
+             // anchoring service falls back to its DEMO_MODE / no-op path.
+             { name: 'BLOCKFROST_API_KEY', secretRef: 'blockfrost-api-key' }
+             { name: 'PLATFORM_WALLET_MNEMONIC', secretRef: 'platform-wallet-mnemonic' }
++          ], empty(emitterSigningSecret) ? [] : [
++            // KS-1717: verifies originate's signed `x-emitter-internal` hop.
++            // Wired ONLY when the param is set; unset honours no marker and the
++            // service warns at boot (fail-closed).
++            { name: 'EMITTER_SIGNING_SECRET', secretRef: 'emitter-signing-secret' }
+           ])
+         }
+       ]
+diff --git a/Blockchain/Dev/docker-compose.yml b/Blockchain/Dev/docker-compose.yml
+index 669e8b857..4e232568f 100644
+--- a/Blockchain/Dev/docker-compose.yml
++++ b/Blockchain/Dev/docker-compose.yml
+@@ -608,6 +608,14 @@ services:
+       # inert AND logs a warning naming the consequence at boot, so an
+       # unconfigured deploy is loud rather than silently unprotected.
+       - GATEWAY_VOUCH_SECRET=${GATEWAY_VOUCH_SECRET:-}
++      # KS-1717: the HMAC key this service signs its own hops to anchoring with,
++      # so anchoring honours `x-emitter-internal` (skip the flat-anchor
++      # provenance row) only on a request originate made. Declared on this
++      # service and anchoring ONLY; not in `.env.local`. Empty default FAILS
++      # CLOSED: the marker goes unsigned, anchoring never honours it, and K's
++      # own hops each write a second action_provenance row until the secret is
++      # set on BOTH services.
++      - EMITTER_SIGNING_SECRET=${EMITTER_SIGNING_SECRET:-}
+       # KS-487 B-3 (#686 review): the demo-seed route's two gate flags, passed
+       # through so the documented `.env` opt-in actually reaches this container.
+       # originate declares no `env_file`, and compose passes through nothing a
+@@ -1313,6 +1321,10 @@ services:
+       # may keep DEMO_MODE=true (originate's seeded demo docs etc.) without
+       # affecting whether anchors actually go on-chain.
+       - DEMO_MODE=${ANCHORING_DEMO_MODE:-false}
++      # KS-1717: verifies originate's signature on its `x-emitter-internal` hop
++      # (src/emitterGuard.ts). Declared here and on originate ONLY. Empty
++      # default FAILS CLOSED: no marker is honoured, and the boot log says so.
++      - EMITTER_SIGNING_SECRET=${EMITTER_SIGNING_SECRET:-}
+     depends_on:
+       pgbouncer:
+         condition: service_healthy
+diff --git a/Blockchain/Dev/docs/ENVIRONMENT-VARIABLES.md b/Blockchain/Dev/docs/ENVIRONMENT-VARIABLES.md
+index cbd3b1d30..287205ac0 100644
+--- a/Blockchain/Dev/docs/ENVIRONMENT-VARIABLES.md
++++ b/Blockchain/Dev/docs/ENVIRONMENT-VARIABLES.md
+@@ -72,6 +72,7 @@ missing. Local dev generates the keypair via `./scripts/bootstrap-env.sh`.
+ | `DEMO_MODE` | auth, anchoring, demo-service | No | `true` | Enable demo login and mock fallbacks |
+ | `ENABLE_TEST_TOKENS` | api-gateway, auth | No | `false` | Enable test token endpoints (dev only) |
+ | `GATEWAY_VOUCH_SECRET` | **api-gateway, originate ONLY** | Not required to boot, but **unset fails CLOSED** — see below | — | KS-1041 Step 2. Proves to originate that a request came through api-gateway, so identity/tenant/role headers are honoured only on vouched requests. |
++| `EMITTER_SIGNING_SECRET` | **originate, anchoring ONLY** | Not required to boot, but **unset fails CLOSED** — see below | — | KS-1717. HMAC key originate signs its own hops to anchoring with; anchoring honours `x-emitter-internal` (skip the flat-anchor provenance row) only when the signature verifies. Same value on both; under 32 characters counts as unset. |
+ 
+ ---
+ 
+@@ -126,6 +127,39 @@ an ACTIVE line when configured. Check that line to know which state a box is in.
+ Generate per environment with `openssl rand -hex 32`. The name belongs in the
+ templates; the value never does.
+ 
++### `EMITTER_SIGNING_SECRET` — the signed originate -> anchoring hop (KS-1717)
++
++`x-emitter-internal` tells anchoring that a `POST /api/anchors` is originate's own
++hop for an operation that already wrote its action_provenance row, so anchoring
++skips its flat-anchor `anchor` row (KS-566). originate's two setters forward the
++CALLER'S OWN bearer, so the hop and a direct compose-network caller holding the
++same connector JWT are indistinguishable by credential. anchoring therefore honours
++the marker only when an HMAC-SHA256 originate made under this key verifies — over
++the method, the path, the marker, a timestamp within **±60 s**, the **caller's
++Authorization header** (hashed exactly as sent), and the **raw body bytes**
++(`packages/shared/src/security/emitterSignature.ts`, used by both sides).
++
++**What it does not do:** anyone holding the key can sign, and there is no nonce
++store. A byte-identical replay under the **same bearer** verifies for just under 61 s
++after signing when the two clocks agree, and for up to about 121 s if the signer's
++clock runs up to 60 s fast. A replay with a different body, method, path, marker,
++timestamp or bearer is refused.
++
++**Where it may live:** `.env`, which compose interpolates into the `environment:`
++blocks of **originate and anchoring only** — never `.env.local` and never
++`commonEnvVars` in `services.bicep`, for the reasons given for the vouch above. The
++same value on both services.
++
++**Unset FAILS CLOSED**, the same shape as Kam's 2026-10-13 ruling for the vouch:
++anchoring honours no marker and logs `[emitter-guard] FAIL-CLOSED …` at boot
++(`[emitter-guard] ACTIVE …` when configured), and originate's own hops each write a
++**second** action_provenance row until the secret is set on BOTH services. **Set it
++on both before deploying the images that check it.** A marker anchoring refuses
++while it IS configured is logged with its reason — a forgery, or a half-configured
++deploy.
++
++Generate per environment with `openssl rand -hex 32`.
++
+ ---
+ 
+ ## Social OAuth (.env.local)
+diff --git a/Blockchain/Dev/env.example b/Blockchain/Dev/env.example
+index 09987db07..e7918d91f 100644
+--- a/Blockchain/Dev/env.example
++++ b/Blockchain/Dev/env.example
+@@ -476,3 +476,33 @@ DEMO_SERVICE_KEY=local-dev-demo-key-change-me
+ # Generate one with:
+ #     openssl rand -hex 32
+ GATEWAY_VOUCH_SECRET=
++
++# -----------------------------------------------------------------------------
++# EMITTER_SIGNING_SECRET — KS-1717 (the signed originate -> anchoring hop)
++# -----------------------------------------------------------------------------
++# HMAC key originate signs its own hops to anchoring with. `x-emitter-internal`
++# tells anchoring to skip the flat-anchor `anchor` provenance row, because the
++# operation already wrote its own. anchoring honours it ONLY when the signature
++# (method, path, marker, a timestamp within 60 s, the caller's Authorization
++# header, and the raw body bytes) verifies under this key. Without that check,
++# a caller reaching anchoring directly on the compose network with a connector
++# JWT could set the header and suppress its own provenance row.
++#
++# WHAT IT DOES NOT DO: anyone holding the key can sign, and there is no nonce
++# store. A byte-identical replay under the SAME bearer verifies for just under
++# 61 s after signing when the two clocks agree, and for up to about 121 s if the
++# signer's clock runs up to 60 s fast. A replay with a different body, method,
++# path, marker, timestamp or bearer is refused.
++#
++# WHERE IT MAY LIVE: here, in `.env`, which compose interpolates into the
++# `environment:` blocks of originate and anchoring ONLY. NOT in `.env.local`
++# (four services load that file). The SAME value on both services, and at least
++# 32 characters — anything shorter is treated as unset.
++#
++# UNSET FAILS CLOSED. anchoring honours no marker and logs a WARNING at boot, so
++# originate's own hops each write a SECOND action_provenance row (an `anchor` row
++# beside the operation's own) until the secret is set on BOTH services. Set it on
++# both before deploying the images that check it.
++# Generate one with:
++#     openssl rand -hex 32
++EMITTER_SIGNING_SECRET=
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1717-emitter-hop-signature.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1717-emitter-hop-signature.test.ts
+new file mode 100644
+index 000000000..798459462
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1717-emitter-hop-signature.test.ts
+@@ -0,0 +1,245 @@
++/**
++ * =============================================================================
++ * KS-1717 — the ONE signing format for originate's own hop to anchoring
++ * =============================================================================
++ * These cells pin the helper both services share (`security/emitterSignature.ts`).
++ * originate's cells prove its two setters SEND what this helper signs; anchoring's
++ * cells prove the real route HONOURS only what it verifies. This file is the contract
++ * between them, so every way a signed hop can be altered after signing is a cell here,
++ * and each one is expected to be REFUSED.
++ *
++ * The canonicalisation question (Wednesday's ANSWER, 2026-10-26: "reordered JSON keys
++ * must be stated as either canonicalised or rejected") is answered as REJECTED: the
++ * signature covers the raw body bytes, so S4 and S5 are refusals by design.
++ */
++import { describe, it, expect } from 'vitest';
++import crypto from 'crypto';
++import {
++  EMITTER_MARKER_HEADER,
++  EMITTER_TIMESTAMP_HEADER,
++  EMITTER_SIGNATURE_HEADER,
++  EMITTER_SIGNATURE_WINDOW_SECONDS,
++  EMITTER_SECRET_MIN_LENGTH,
++  isUsableEmitterSecret,
++  emitterSigningString,
++  signEmitterHop,
++  verifyEmitterHop,
++} from '../index';
++
++const SECRET = 'ks1717-test-signing-secret-0123456789abcdef';
++const NOW_MS = 1_800_000_000_000;
++const URL_ = 'http://anchoring:4005/api/anchors';
++const PATH = '/api/anchors';
++const AUTH = 'Bearer connector-a.header.payload.sig';
++const BODY = JSON.stringify({ documentId: 'doc-ks1717', contentHash: 'a'.repeat(64), network: 'preview' });
++
++function signed(over: Partial<{ secret: string; marker: string; method: string; url: string; authorization: string | undefined; body: string; nowMs: number }> = {}) {
++  return signEmitterHop({ secret: SECRET, marker: 'originate-create', method: 'POST', url: URL_, authorization: AUTH, body: BODY, nowMs: NOW_MS, ...over });
++}
++
++/** The receiving side: `headers` is what arrived, so the caller's bearer defaults to AUTH as sent. */
++function verify(headers: Record<string, string | string[] | undefined>, over: Partial<{ secret: string | undefined; method: string; path: string; body: Buffer | string | undefined; nowMs: number }> = {}) {
++  return verifyEmitterHop({ secret: SECRET, method: 'POST', path: PATH, headers: { authorization: AUTH, ...headers }, body: BODY, nowMs: NOW_MS, ...over });
++}
++
++/** A signature over arbitrary fields with an arbitrary key — for the cells that forge one. */
++function macOver(secret: string, fields: { method: string; path: string; timestamp: string; marker: string; authorization: string; body: string }): string {
++  return crypto.createHmac('sha256', secret).update(emitterSigningString(fields), 'utf8').digest('hex');
++}
++
++describe('KS-1717 S1 — a genuine hop verifies', () => {
++  it('what signEmitterHop produces, verifyEmitterHop accepts, and it returns the marker', () => {
++    expect(verify(signed())).toEqual({ ok: true, marker: 'originate-create' });
++  });
++
++  it('the signer emits exactly the three headers, all under x-emitter- (the gateway edge strip covers that prefix)', () => {
++    const h = signed();
++    expect(Object.keys(h).sort()).toEqual([EMITTER_MARKER_HEADER, EMITTER_SIGNATURE_HEADER, EMITTER_TIMESTAMP_HEADER].sort());
++    for (const name of Object.keys(h)) expect(name).toMatch(/^x-emitter-/);
++    expect(h[EMITTER_TIMESTAMP_HEADER]).toBe(String(NOW_MS / 1000));
++    expect(h[EMITTER_SIGNATURE_HEADER]).toMatch(/^[0-9a-f]{64}$/);
++  });
++
++  it('the body is compared as BYTES: a Buffer of the same UTF-8 verifies, including non-ASCII', () => {
++    const body = JSON.stringify({ documentId: 'doc-ks1717', issuerName: 'Société Générale — 東京' });
++    const h = signed({ body });
++    expect(verify(h, { body: Buffer.from(body, 'utf8') }).ok).toBe(true);
++  });
++});
++
++describe('KS-1717 S2 — the signing string is pinned literally', () => {
++  it('label, method, path, timestamp, marker, sha256(authorization), sha256(body) — newline-joined, in that order', () => {
++    const s = emitterSigningString({ method: 'POST', path: PATH, timestamp: '1800000000', marker: 'originate-create', authorization: AUTH, body: BODY });
++    const authHash = crypto.createHash('sha256').update(AUTH).digest('hex');
++    const bodyHash = crypto.createHash('sha256').update(BODY).digest('hex');
++    expect(s).toBe(['secuura-emitter-v1', 'POST', '/api/anchors', '1800000000', 'originate-create', authHash, bodyHash].join('\n'));
++  });
++});
++
++describe('KS-1717 S3 — every field altered after signing is refused', () => {
++  const h = signed();
++
++  it('S3a a different body (the replay-with-another-document case)', () => {
++    const other = JSON.stringify({ documentId: 'doc-someone-elses', contentHash: 'b'.repeat(64), network: 'preview' });
++    expect(verify(h, { body: other })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S3b the SAME object with its keys reordered — REJECTED, not canonicalised', () => {
++    const reordered = JSON.stringify({ network: 'preview', contentHash: 'a'.repeat(64), documentId: 'doc-ks1717' });
++    expect(JSON.parse(reordered)).toEqual(JSON.parse(BODY)); // same value...
++    expect(verify(h, { body: reordered })).toEqual({ ok: false, reason: 'bad-signature' }); // ...different bytes
++  });
++
++  it('S3c the same object with whitespace added — REJECTED', () => {
++    expect(verify(h, { body: JSON.stringify(JSON.parse(BODY), null, 2) })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S3d another method', () => {
++    expect(verify(h, { method: 'PUT' })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S3e another path, and the same path with a query string', () => {
++    expect(verify(h, { path: '/api/anchors/batch' })).toEqual({ ok: false, reason: 'bad-signature' });
++    expect(verify(h, { path: '/api/anchors?x=1' })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S3f another marker value', () => {
++    expect(verify({ ...h, [EMITTER_MARKER_HEADER]: 'originate-lifecycle' })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S3g the timestamp header moved, even inside the window', () => {
++    expect(verify({ ...h, [EMITTER_TIMESTAMP_HEADER]: String(NOW_MS / 1000 + 1) })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S3h the same timestamp with a leading zero — the header string is signed verbatim', () => {
++    expect(verify({ ...h, [EMITTER_TIMESTAMP_HEADER]: `0${h[EMITTER_TIMESTAMP_HEADER]}` })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S3i another secret', () => {
++    expect(verify(h, { secret: `${SECRET}-rotated` })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S3j raw bytes NOT captured on the receiving side fail, rather than verifying an empty body', () => {
++    expect(verify(h, { body: undefined })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++});
++
++describe(`KS-1717 S4 — the window is ±${EMITTER_SIGNATURE_WINDOW_SECONDS} s, inclusive`, () => {
++  const h = signed();
++  const W = EMITTER_SIGNATURE_WINDOW_SECONDS * 1000;
++
++  it('accepted at exactly +60 s and -60 s', () => {
++    expect(verify(h, { nowMs: NOW_MS + W }).ok).toBe(true);
++    expect(verify(h, { nowMs: NOW_MS - W }).ok).toBe(true);
++  });
++
++  it('an EXPIRED timestamp (61 s old) is refused', () => {
++    expect(verify(h, { nowMs: NOW_MS + W + 1000 })).toEqual({ ok: false, reason: 'stale-timestamp' });
++  });
++
++  it('a timestamp 61 s in the FUTURE is refused', () => {
++    expect(verify(h, { nowMs: NOW_MS - W - 1000 })).toEqual({ ok: false, reason: 'stale-timestamp' });
++  });
++});
++
++describe('KS-1717 S5 — fail-closed: no usable secret, nothing verifies', () => {
++  it(`a secret under ${EMITTER_SECRET_MIN_LENGTH} chars is "unset", including the template placeholder`, () => {
++    expect(isUsableEmitterSecret('x'.repeat(EMITTER_SECRET_MIN_LENGTH))).toBe(true);
++    expect(isUsableEmitterSecret('x'.repeat(EMITTER_SECRET_MIN_LENGTH - 1))).toBe(false);
++    expect(isUsableEmitterSecret('placeholder-never-referenced')).toBe(false);
++    expect(isUsableEmitterSecret('')).toBe(false);
++    expect(isUsableEmitterSecret(undefined)).toBe(false);
++  });
++
++  it('a hop signed correctly WITH a short secret is still refused by a verifier holding that same secret', () => {
++    const short = 'short-but-shared';
++    const timestamp = String(NOW_MS / 1000);
++    const forged = {
++      [EMITTER_MARKER_HEADER]: 'originate-create',
++      [EMITTER_TIMESTAMP_HEADER]: timestamp,
++      [EMITTER_SIGNATURE_HEADER]: macOver(short, { method: 'POST', path: PATH, timestamp, marker: 'originate-create', authorization: AUTH, body: BODY }),
++    };
++    expect(verify(forged, { secret: short })).toEqual({ ok: false, reason: 'no-secret' });
++  });
++
++  it('an empty secret refuses even a signature MAC-ed under the empty key', () => {
++    const timestamp = String(NOW_MS / 1000);
++    const forged = {
++      [EMITTER_MARKER_HEADER]: 'originate-create',
++      [EMITTER_TIMESTAMP_HEADER]: timestamp,
++      [EMITTER_SIGNATURE_HEADER]: macOver('', { method: 'POST', path: PATH, timestamp, marker: 'originate-create', authorization: AUTH, body: BODY }),
++    };
++    expect(verify(forged, { secret: '' })).toEqual({ ok: false, reason: 'no-secret' });
++    expect(verify(forged, { secret: undefined })).toEqual({ ok: false, reason: 'no-secret' });
++  });
++
++  it('the signer with no usable secret sends the marker ALONE — never a timestamp or signature', () => {
++    expect(signed({ secret: '' })).toEqual({ [EMITTER_MARKER_HEADER]: 'originate-create' });
++    expect(signEmitterHop({ secret: undefined, marker: 'originate-lifecycle', method: 'POST', url: URL_, authorization: AUTH, body: BODY })).toEqual({ [EMITTER_MARKER_HEADER]: 'originate-lifecycle' });
++  });
++});
++
++describe('KS-1717 S6 — malformed or missing headers are refused, each with its own reason', () => {
++  const h = signed();
++
++  it('no marker, an empty marker, or a repeated (array) marker', () => {
++    const { [EMITTER_MARKER_HEADER]: _m, ...rest } = h;
++    expect(verify(rest)).toEqual({ ok: false, reason: 'no-marker' });
++    expect(verify({ ...h, [EMITTER_MARKER_HEADER]: '' })).toEqual({ ok: false, reason: 'no-marker' });
++    expect(verify({ ...h, [EMITTER_MARKER_HEADER]: ['originate-create', 'originate-create'] })).toEqual({ ok: false, reason: 'no-marker' });
++  });
++
++  it('the bare marker — the pre-KS-1717 shape — is refused', () => {
++    expect(verify({ [EMITTER_MARKER_HEADER]: 'originate-create' })).toEqual({ ok: false, reason: 'missing-timestamp' });
++  });
++
++  it.each([['1.5'], ['-1'], [' 1800000000'], [''], ['abc'], ['1'.repeat(13)]])('timestamp %j is malformed', (ts) => {
++    expect(verify({ ...h, [EMITTER_TIMESTAMP_HEADER]: ts })).toEqual({ ok: false, reason: 'malformed-timestamp' });
++  });
++
++  it('a repeated (array) timestamp is malformed', () => {
++    expect(verify({ ...h, [EMITTER_TIMESTAMP_HEADER]: [String(NOW_MS / 1000)] })).toEqual({ ok: false, reason: 'malformed-timestamp' });
++  });
++
++  it('no signature', () => {
++    const { [EMITTER_SIGNATURE_HEADER]: _s, ...rest } = h;
++    expect(verify(rest)).toEqual({ ok: false, reason: 'missing-signature' });
++  });
++
++  it('uppercase hex, short, long, non-hex or repeated signatures are malformed — none reaches the compare', () => {
++    const sig = h[EMITTER_SIGNATURE_HEADER];
++    for (const bad of [sig.toUpperCase(), sig.slice(1), `${sig}0`, `${sig.slice(1)}g`, [sig]]) {
++      expect(verify({ ...h, [EMITTER_SIGNATURE_HEADER]: bad as string })).toEqual({ ok: false, reason: 'malformed-signature' });
++    }
++  });
++});
++
++describe('KS-1717 S7 — the caller\'s bearer is bound (gate round 1, Minor 2)', () => {
++  // The round-1 gate replayed a captured hop under ANOTHER connector's token inside the window:
++  // the MAC covered the body and the timestamp but not the Authorization header. It now does.
++  const h = signed();
++  const OTHER = 'Bearer connector-b.header.payload.sig';
++
++  it('S7a the same bearer verifies', () => {
++    expect(verify(h)).toEqual({ ok: true, marker: 'originate-create' });
++  });
++
++  it('S7b a captured hop REPLAYED under another caller\'s bearer is refused', () => {
++    expect(verify({ ...h, authorization: OTHER })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S7c the bearer removed from a captured hop is refused', () => {
++    expect(verify({ ...h, authorization: undefined })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S7d the bearer is compared EXACTLY: another scheme spelling or extra whitespace is a different bearer', () => {
++    expect(verify({ ...h, authorization: AUTH.replace('Bearer', 'bearer') })).toEqual({ ok: false, reason: 'bad-signature' });
++    expect(verify({ ...h, authorization: `${AUTH} ` })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('S7e a hop sent with NO bearer signs the empty value, and verifies only with no bearer', () => {
++    const none = signed({ authorization: undefined });
++    expect(verify({ ...none, authorization: undefined }).ok).toBe(true);
++    expect(verify({ ...none, authorization: AUTH })).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++});
+diff --git a/Blockchain/Dev/packages/shared/src/index.ts b/Blockchain/Dev/packages/shared/src/index.ts
+index 64067b645..522945275 100644
+--- a/Blockchain/Dev/packages/shared/src/index.ts
++++ b/Blockchain/Dev/packages/shared/src/index.ts
+@@ -238,6 +238,21 @@ export type { RevokeDecision } from './security/keyRevokePolicy';
+ // its resolvers, so no service carries a private copy that could drift.
+ export { normaliseOrgId } from './security/orgId';
+ 
++// KS-1717: the ONE signing format for originate's own hop to anchoring. originate signs with
++// signEmitterHop, anchoring checks with verifyEmitterHop, so the two sides cannot drift apart.
++export {
++  EMITTER_MARKER_HEADER,
++  EMITTER_TIMESTAMP_HEADER,
++  EMITTER_SIGNATURE_HEADER,
++  EMITTER_SIGNATURE_WINDOW_SECONDS,
++  EMITTER_SECRET_MIN_LENGTH,
++  isUsableEmitterSecret,
++  emitterSigningString,
++  signEmitterHop,
++  verifyEmitterHop,
++} from './security/emitterSignature';
++export type { EmitterHopRefusal, EmitterHopVerdict } from './security/emitterSignature';
++
+ // KS-1584: the ONE predicate for "this scope set can provision organisations", wildcards included.
+ // The gateway imports it by deep path (as it does `hasScope`); services/security takes it from here.
+ export { isProvisioningCapable, PROVISIONING_SCOPE_NAME } from './security/scopes';
+diff --git a/Blockchain/Dev/packages/shared/src/security/emitterSignature.ts b/Blockchain/Dev/packages/shared/src/security/emitterSignature.ts
+new file mode 100644
+index 000000000..79df78d35
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/security/emitterSignature.ts
+@@ -0,0 +1,199 @@
++/**
++ * =============================================================================
++ * KS-1717 — the SIGNED originate -> anchoring hop (Kam's ruling (b), 2026-10-26)
++ * =============================================================================
++ * `x-emitter-internal` tells anchoring "this is K's own originate -> anchoring hop for
++ * an operation that ALREADY wrote its own action_provenance row", and anchoring then
++ * skips its flat-anchor `anchor` row (KS-566). Before this module anchoring honoured the
++ * marker by PRESENCE, and both of originate's setters forward the CALLER'S OWN bearer
++ * (`routes/documents.ts`, `originate-create` / `originate-lifecycle`) — so originate's
++ * hop and a direct compose-network caller holding the same connector JWT were
++ * indistinguishable, and the caller could suppress its own provenance row.
++ *
++ * This is the ONE implementation of the proof, used by BOTH sides: originate signs with
++ * `signEmitterHop`, anchoring checks with `verifyEmitterHop`. Two copies of a signing
++ * string are two chances to disagree, so neither service carries its own.
++ *
++ * WHAT IS SIGNED — the RAW BODY BYTES, never a re-serialised object. originate signs the
++ * exact string it sends; anchoring hashes the exact bytes it received (captured by
++ * `express.json`'s `verify` hook, before parsing). There is therefore no canonicalisation
++ * step to get wrong: a body re-serialised in transit — reordered keys, other whitespace —
++ * is a DIFFERENT body and is REFUSED. Refusal is the safe direction (see FAIL-CLOSED).
++ *
++ * AND THE CALLER'S BEARER (PR #1690 gate round 1, Minor 2). originate forwards the
++ * caller's own Authorization header on the hop, and anchoring attributes the provenance
++ * row to whoever that bearer names. Without it in the MAC, a hop captured from one
++ * connector replayed under ANOTHER connector's token, inside the window, verified. The
++ * header value is hashed EXACTLY as sent — no case-folding, no trimming — so any other
++ * value, including none, is a different bearer and is refused.
++ *
++ *   secuura-emitter-v1 \n <method> \n <path> \n <timestamp> \n <marker>
++ *     \n <sha256-hex(authorization, or "" when absent)> \n <sha256-hex(body)>
++ *
++ * No field can contain a newline (HTTP forbids it in a method, a request-target and a
++ * header value, and the two hashes are hex), so the join is unambiguous. The timestamp
++ * and marker enter as the header STRINGS, never as re-formatted values. The leading
++ * label separates this key's signatures from any other use of HMAC-SHA256 and versions
++ * the format.
++ *
++ * THE WINDOW — ±60 s, inclusive, on whole seconds. originate signs at send time, compose
++ * services share one host clock, and Container Apps hosts are NTP-synced, so a genuine
++ * hop arrives with a skew of milliseconds. 60 s is generous for that and short for a
++ * replay. Because both sides floor to the second, a hop stays acceptable for just under
++ * 61 s after signing when the clocks agree — and for up to about 121 s if the signer's
++ * clock runs up to 60 s fast, since a timestamp up to 60 s in the future is accepted too.
++ *
++ * RESIDUAL, stated so "signed" is not read as "complete": there is no nonce store. A
++ * byte-identical replay under the SAME bearer verifies inside that window. What it buys
++ * a caller who captured the hop is an exact retry, by the same connector, of an anchor
++ * originate already attributed, with no second `anchor` row. A replay with a DIFFERENT
++ * body, method, path, marker, timestamp or bearer is refused. Closing the same-bearer,
++ * same-body case needs a nonce store on the verify path.
++ *
++ * FAIL-CLOSED. A secret shorter than EMITTER_SECRET_MIN_LENGTH is treated as unset, and
++ * unset means nothing verifies — anchoring records the provenance row, so K's own hops
++ * write a second row (the pre-KS-566 duplication) until the secret is set on BOTH
++ * services. A duplicate row is visible and recoverable; a suppressed one is neither.
++ * Same shape as Kam's KS-1032 ruling for the sibling vouch: "Fail closed, deployed only
++ * after the secret is set". The length floor also means a mis-wired template placeholder
++ * (`placeholder-never-referenced`, 28 chars) can never become a working key.
++ *
++ * WHY THE HEADERS ARE NAMED `x-emitter-*`. api-gateway's edge strip removes every
++ * client-supplied `x-emitter-*` header on `/api/*` (`TRUST_HEADER_PATTERN`), so the
++ * timestamp and signature inherit that strip with no gateway change. It is not what
++ * makes them safe — the secret is — but it keeps them off the gateway path entirely.
++ */
++import crypto from 'crypto';
++
++export const EMITTER_MARKER_HEADER = 'x-emitter-internal';
++export const EMITTER_TIMESTAMP_HEADER = 'x-emitter-timestamp';
++export const EMITTER_SIGNATURE_HEADER = 'x-emitter-signature';
++
++/** Accepted clock skew either side of the verifier's now, in seconds (inclusive). */
++export const EMITTER_SIGNATURE_WINDOW_SECONDS = 60;
++
++/** Below this length a configured secret is treated as unset (fail-closed). */
++export const EMITTER_SECRET_MIN_LENGTH = 32;
++
++const SIGNING_LABEL = 'secuura-emitter-v1';
++const TIMESTAMP_FORM = /^[0-9]{1,12}$/;
++const SIGNATURE_FORM = /^[0-9a-f]{64}$/;
++
++/** Why a marked request was not honoured. Logged by the verifier's caller; never the values. */
++export type EmitterHopRefusal =
++  | 'no-marker'
++  | 'no-secret'
++  | 'missing-timestamp'
++  | 'malformed-timestamp'
++  | 'stale-timestamp'
++  | 'missing-signature'
++  | 'malformed-signature'
++  | 'bad-signature';
++
++export type EmitterHopVerdict = { ok: true; marker: string } | { ok: false; reason: EmitterHopRefusal };
++
++/** True when `secret` is long enough to sign with. Anything else is "unset". */
++export function isUsableEmitterSecret(secret: unknown): secret is string {
++  return typeof secret === 'string' && secret.length >= EMITTER_SECRET_MIN_LENGTH;
++}
++
++/** The exact string both sides MAC. Exported so a test can pin the format itself. */
++export function emitterSigningString(fields: {
++  method: string;
++  path: string;
++  timestamp: string;
++  marker: string;
++  authorization: string | undefined;
++  body: Buffer | string;
++}): string {
++  const authHash = crypto.createHash('sha256').update(fields.authorization ?? '', 'utf8').digest('hex');
++  const bodyHash = crypto.createHash('sha256').update(fields.body).digest('hex');
++  return [SIGNING_LABEL, fields.method, fields.path, fields.timestamp, fields.marker, authHash, bodyHash].join('\n');
++}
++
++function mac(secret: string, signingString: string): string {
++  return crypto.createHmac('sha256', secret).update(signingString, 'utf8').digest('hex');
++}
++
++/**
++ * originate's side: the headers that mark ONE outbound hop. Always carries the marker;
++ * adds the timestamp and signature only with a usable secret. An unsigned marker is still
++ * sent so a half-configured deploy (anchoring keyed, originate not) shows up in anchoring's
++ * refusal log instead of silently doubling rows. `body` must be the exact string sent,
++ * and `authorization` the exact Authorization header value sent (undefined when none is):
++ * it is required, so a setter cannot forget to bind the bearer.
++ */
++export function signEmitterHop(params: {
++  secret: string | undefined;
++  marker: string;
++  method: string;
++  url: string;
++  authorization: string | undefined;
++  body: string;
++  nowMs?: number;
++}): Record<string, string> {
++  const headers: Record<string, string> = { [EMITTER_MARKER_HEADER]: params.marker };
++  if (!isUsableEmitterSecret(params.secret)) return headers;
++  const target = new URL(params.url);
++  const timestamp = String(Math.floor((params.nowMs ?? Date.now()) / 1000));
++  headers[EMITTER_TIMESTAMP_HEADER] = timestamp;
++  headers[EMITTER_SIGNATURE_HEADER] = mac(
++    params.secret,
++    emitterSigningString({
++      method: params.method,
++      path: target.pathname + target.search,
++      timestamp,
++      marker: params.marker,
++      authorization: params.authorization,
++      body: params.body,
++    }),
++  );
++  return headers;
++}
++
++/**
++ * anchoring's side: does this request carry a marker originate signed? `path` is the
++ * request-target as received (express `req.originalUrl`); `body` is the raw bytes, or
++ * undefined when none were captured — which then hashes as empty and fails unless the
++ * signer also signed an empty body. The caller's bearer is read from `headers.authorization`
++ * (a non-string value counts as absent).
++ */
++export function verifyEmitterHop(params: {
++  secret: string | undefined;
++  method: string;
++  path: string;
++  headers: Record<string, string | string[] | undefined>;
++  body: Buffer | string | undefined;
++  nowMs?: number;
++}): EmitterHopVerdict {
++  const marker = params.headers[EMITTER_MARKER_HEADER];
++  if (typeof marker !== 'string' || marker.length === 0) return { ok: false, reason: 'no-marker' };
++  if (!isUsableEmitterSecret(params.secret)) return { ok: false, reason: 'no-secret' };
++
++  const timestamp = params.headers[EMITTER_TIMESTAMP_HEADER];
++  if (timestamp === undefined) return { ok: false, reason: 'missing-timestamp' };
++  if (typeof timestamp !== 'string' || !TIMESTAMP_FORM.test(timestamp)) {
++    return { ok: false, reason: 'malformed-timestamp' };
++  }
++  const nowSeconds = Math.floor((params.nowMs ?? Date.now()) / 1000);
++  if (Math.abs(nowSeconds - Number(timestamp)) > EMITTER_SIGNATURE_WINDOW_SECONDS) {
++    return { ok: false, reason: 'stale-timestamp' };
++  }
++
++  const signature = params.headers[EMITTER_SIGNATURE_HEADER];
++  if (signature === undefined) return { ok: false, reason: 'missing-signature' };
++  if (typeof signature !== 'string' || !SIGNATURE_FORM.test(signature)) {
++    return { ok: false, reason: 'malformed-signature' };
++  }
++
++  const authorization = typeof params.headers.authorization === 'string' ? params.headers.authorization : undefined;
++  const expected = mac(
++    params.secret,
++    emitterSigningString({ method: params.method, path: params.path, timestamp, marker, authorization, body: params.body ?? '' }),
++  );
++  // Both are 64 hex chars by now, so the buffers are equal length and timingSafeEqual cannot throw.
++  if (!crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'))) {
++    return { ok: false, reason: 'bad-signature' };
++  }
++  return { ok: true, marker };
++}
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts
+new file mode 100644
+index 000000000..bd5a8b76d
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts
+@@ -0,0 +1,264 @@
++/**
++ * =============================================================================
++ * KS-1717 — POST /api/anchors honours `x-emitter-internal` only on a hop originate SIGNED
++ * =============================================================================
++ * THE DEFECT. The marker switches off the flat-anchor `anchor` provenance row (KS-566).
++ * anchoring honoured it by PRESENCE and had no inbound strip of its own, so a caller on
++ * the compose network holding a connector JWT could set it and suppress its own row
++ * (the #995 gate's note N1). originate's two setters forward the caller's OWN bearer, so
++ * no credential separates the genuine hop from that caller — only a signature can.
++ *
++ * WHY THIS FILE BOOTS THE REAL APP. The defect is in what the ROUTE does with a header,
++ * after the whole middleware chain has run. A cell that called the guard directly would
++ * pass with the guard unmounted. Every cell here therefore drives `POST /api/anchors` on
++ * the real `index.ts` app, with a real RS256 bearer, and observes the one effect that
++ * matters: whether `recordFlatAnchorProvenance` was called.
++ *
++ * HOW THE APP IS LOADED: the KS-1603 recipe (`express.application.listen` is spied before
++ * the import; the app is served on an ephemeral port). No database is connected —
++ * `dbPersistAnchor` returns before any SQL when `isDbAvailable()` is false — so this runs
++ * in the unit lane, and the provenance recorder is the only thing mocked.
++ *
++ * ONE TOKEN PER CELL. The signature covers the caller's Authorization header (gate round 1,
++ * Minor 2), and `token()` mints a new string whenever its `iat` second changes. So each cell
++ * mints its bearer ONCE and uses that same string to sign and to send.
++ *
++ * WHICH CELLS ARE RED ON DEVELOP (presence-honouring code): R1, R3, R4, R5, R8, R9, R10.
++ * R9 (a hop replayed under ANOTHER connector's bearer) is also red on the round-1 head,
++ * where the signature did not cover the bearer. R10 (a hop MAC'd under a 31-character
++ * secret) is red if the 32-character floor is removed (gate round 1, Note 4).
++ * WHICH ARE CONTROLS (green before and after): R2 — the genuine signed hop is still
++ * skipped, which a plain strip would break, and which also proves the guard is REACHED
++ * (an unmounted guard records here); R6 and R7 — the unmarked paths are unchanged; R11 —
++ * exactly 32 characters is enough.
++ * =============================================================================
++ */
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import crypto from 'crypto';
++import http from 'http';
++import type { AddressInfo } from 'net';
++import express from 'express';
++import {
++  signEmitterHop,
++  emitterSigningString,
++  EMITTER_MARKER_HEADER,
++  EMITTER_TIMESTAMP_HEADER,
++  EMITTER_SIGNATURE_HEADER,
++} from '@secuura/shared';
++
++vi.mock('../provenance', () => ({ recordFlatAnchorProvenance: vi.fn(async () => undefined) }));
++
++const SECRET = 'ks1717-anchoring-test-secret-0123456789abcdef';
++const TENANT = 'a0000000-0000-4000-8000-000000000001';
++const ORG = '1a171700-0000-4000-8000-0000000017a1';
++const CONNECTOR = 'connector:platform-s:ks1717';
++const CONNECTOR_B = 'connector:platform-s:ks1717-other-key';
++
++const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
++const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
++const PUBLIC_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
++const b64url = (b: Buffer): string => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
++function token(claims: Record<string, unknown>): string {
++  const header = b64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
++  const now = Math.floor(Date.now() / 1000);
++  const payload = b64url(Buffer.from(JSON.stringify({ iat: now, exp: now + 600, ...claims })));
++  return `${header}.${payload}.${b64url(crypto.sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), PRIVATE_PEM))}`;
++}
++/** The caller this ticket is about: a connector key, the same JWT originate would forward. */
++const CONNECTOR_TOKEN = () => token({ userId: CONNECTOR, role: 'connector', organizationId: ORG, tenantId: TENANT });
++/** Another connector key in the SAME tenant — the replayer the round-1 gate measured. */
++const CONNECTOR_B_TOKEN = () => token({ userId: CONNECTOR_B, role: 'connector', organizationId: ORG, tenantId: TENANT });
++/** An interactive caller: writes no flat-anchor row whatever the marker says (KS-566). */
++const USER_TOKEN = () => token({ userId: '2a171700-0000-4000-8000-0000000017a2', role: 'user', organizationId: ORG, tenantId: TENANT });
++
++let seq = 0;
++function anchorBody(): string {
++  seq += 1;
++  return JSON.stringify({ documentId: `doc-${Date.now()}${seq}-ks1717s${seq}`, contentHash: 'a'.repeat(64), network: 'preview' });
++}
++
++type Booted = { server: http.Server; base: string; recorder: ReturnType<typeof vi.fn> };
++
++/** Import the real app with EMITTER_SIGNING_SECRET as given, and serve it. */
++async function boot(secret: string | undefined): Promise<Booted> {
++  vi.resetModules();
++  if (secret === undefined) delete process.env.EMITTER_SIGNING_SECRET;
++  else process.env.EMITTER_SIGNING_SECRET = secret;
++  vi.spyOn(express.application, 'listen').mockReturnValue(
++    { keepAliveTimeout: 0, headersTimeout: 0, close: () => undefined } as unknown as http.Server,
++  );
++  const app = (await import('../index')).default;
++  const { recordFlatAnchorProvenance } = await import('../provenance');
++  const server = http.createServer(app);
++  await new Promise<void>((resolve) => { server.listen(0, '127.0.0.1', resolve); });
++  return { server, base: `http://127.0.0.1:${(server.address() as AddressInfo).port}`, recorder: recordFlatAnchorProvenance as unknown as ReturnType<typeof vi.fn> };
++}
++
++async function close(b: Booted | undefined): Promise<void> {
++  if (!b) return;
++  (b.server as any).closeAllConnections?.();
++  await new Promise<void>((resolve) => b.server.close(() => resolve()));
++}
++
++/** POST the EXACT bytes given, with the headers given. */
++async function post(b: Booted, tok: string, body: string, extra: Record<string, string> = {}): Promise<number> {
++  const res = await fetch(`${b.base}/api/anchors`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}`, ...extra },
++    body,
++  });
++  await res.text();
++  return res.status;
++}
++
++/** What originate's setter sends for this body and this caller's bearer, signed with `secret`. */
++function hop(b: Booted, body: string, secret: string | undefined, tok: string, nowMs?: number): Record<string, string> {
++  return signEmitterHop({
++    secret,
++    marker: 'originate-create',
++    method: 'POST',
++    url: `${b.base}/api/anchors`,
++    authorization: `Bearer ${tok}`,
++    body,
++    nowMs,
++  });
++}
++
++/** A hop MAC'd by hand under ANY key, so a cell can present a key the signer would refuse. */
++function hopMacedWith(key: string, body: string, tok: string): Record<string, string> {
++  const timestamp = String(Math.floor(Date.now() / 1000));
++  const signature = crypto
++    .createHmac('sha256', key)
++    .update(emitterSigningString({ method: 'POST', path: '/api/anchors', timestamp, marker: 'originate-create', authorization: `Bearer ${tok}`, body }), 'utf8')
++    .digest('hex');
++  return { [EMITTER_MARKER_HEADER]: 'originate-create', [EMITTER_TIMESTAMP_HEADER]: timestamp, [EMITTER_SIGNATURE_HEADER]: signature };
++}
++
++beforeAll(() => {
++  process.env.JWT_PUBLIC_KEY = Buffer.from(PUBLIC_PEM, 'utf8').toString('base64');
++  delete process.env.JWT_JWKS_URL;
++  delete process.env.AUTH_SERVICE_URL;
++  delete process.env.PLATFORM_WALLET_MNEMONIC;
++  delete process.env.BLOCKFROST_API_KEY;
++  delete process.env.DATABASE_URL;
++  process.env.CARDANO_NETWORK = process.env.CARDANO_NETWORK || 'preview';
++});
++
++afterAll(() => {
++  delete process.env.EMITTER_SIGNING_SECRET;
++  vi.restoreAllMocks();
++});
++
++describe('KS-1717 — anchoring holds a signing secret', () => {
++  let b: Booted;
++  beforeAll(async () => { b = await boot(SECRET); }, 30000);
++  afterAll(async () => { await close(b); });
++  beforeEach(() => { b.recorder.mockClear(); });
++
++  it('R1 a connector caller that sets the BARE marker itself still gets its provenance row (the defect)', async () => {
++    const body = anchorBody();
++    expect(await post(b, CONNECTOR_TOKEN(), body, { [EMITTER_MARKER_HEADER]: 'originate-create' })).toBe(202);
++    expect(b.recorder).toHaveBeenCalledTimes(1);
++    expect(b.recorder).toHaveBeenCalledWith(expect.objectContaining({ documentId: JSON.parse(body).documentId, connectorId: CONNECTOR }));
++  });
++
++  it('R2 CONTROL + REACHED: originate\'s genuine signed hop is still skipped (a plain strip, or an unmounted guard, fails this)', async () => {
++    const tok = CONNECTOR_TOKEN();
++    const body = anchorBody();
++    expect(await post(b, tok, body, hop(b, body, SECRET, tok))).toBe(202);
++    expect(b.recorder).not.toHaveBeenCalled();
++  });
++
++  it('R3 a captured signature REPLAYED onto a different body is refused, and that body gets its row', async () => {
++    const tok = CONNECTOR_TOKEN();
++    const signedFor = anchorBody();
++    const other = anchorBody();
++    expect(await post(b, tok, other, hop(b, signedFor, SECRET, tok))).toBe(202);
++    expect(b.recorder).toHaveBeenCalledTimes(1);
++    expect(b.recorder).toHaveBeenCalledWith(expect.objectContaining({ documentId: JSON.parse(other).documentId }));
++  });
++
++  it('R4 a signature whose timestamp has EXPIRED (120 s old) is refused', async () => {
++    const tok = CONNECTOR_TOKEN();
++    const body = anchorBody();
++    expect(await post(b, tok, body, hop(b, body, SECRET, tok, Date.now() - 120_000))).toBe(202);
++    expect(b.recorder).toHaveBeenCalledTimes(1);
++  });
++
++  it('R5 a signature made with any OTHER secret is refused', async () => {
++    const tok = CONNECTOR_TOKEN();
++    const body = anchorBody();
++    expect(await post(b, tok, body, hop(b, body, `${SECRET}-not-the-one`, tok))).toBe(202);
++    expect(b.recorder).toHaveBeenCalledTimes(1);
++  });
++
++  it('R6 CONTROL: Platform-S\'s genuine flat fallback (no marker) still records its row', async () => {
++    expect(await post(b, CONNECTOR_TOKEN(), anchorBody())).toBe(202);
++    expect(b.recorder).toHaveBeenCalledTimes(1);
++  });
++
++  it('R7 CONTROL: an interactive (non-connector) caller still records none, signed or not', async () => {
++    const tok = USER_TOKEN();
++    const body = anchorBody();
++    expect(await post(b, tok, body, hop(b, body, SECRET, tok))).toBe(202);
++    expect(await post(b, tok, anchorBody())).toBe(202);
++    expect(b.recorder).not.toHaveBeenCalled();
++  });
++
++  it('R9 a hop captured from one connector and REPLAYED under ANOTHER connector\'s bearer is refused, and the replayer gets its row', async () => {
++    const tokA = CONNECTOR_TOKEN();
++    const tokB = CONNECTOR_B_TOKEN();
++    expect(tokB).not.toBe(tokA);
++    const body = anchorBody();
++    // Every header originate signed for connector A, byte for byte — only the bearer changes.
++    expect(await post(b, tokB, body, hop(b, body, SECRET, tokA))).toBe(202);
++    expect(b.recorder).toHaveBeenCalledTimes(1);
++    expect(b.recorder).toHaveBeenCalledWith(expect.objectContaining({ documentId: JSON.parse(body).documentId, connectorId: CONNECTOR_B }));
++  });
++});
++
++describe('KS-1717 — anchoring holds NO signing secret (fail-closed)', () => {
++  let b: Booted;
++  beforeAll(async () => { b = await boot(undefined); }, 30000);
++  afterAll(async () => { await close(b); });
++  beforeEach(() => { b.recorder.mockClear(); });
++
++  it('R8 an unset secret honours NOTHING: even a hop signed correctly under a real key records its row', async () => {
++    const tok = CONNECTOR_TOKEN();
++    const body = anchorBody();
++    expect(await post(b, tok, body, hop(b, body, SECRET, tok))).toBe(202);
++    expect(await post(b, tok, anchorBody(), { [EMITTER_MARKER_HEADER]: 'originate-create' })).toBe(202);
++    expect(b.recorder).toHaveBeenCalledTimes(2);
++  });
++});
++
++describe('KS-1717 — the 32-character floor, enforced by anchoring itself (gate round 1, Note 4)', () => {
++  const SHORT = 'k'.repeat(31);
++  const EXACT = 'k'.repeat(32);
++
++  it('R10 configured with a 31-character secret, anchoring refuses a hop MAC\'d correctly under that SAME secret', async () => {
++    const b = await boot(SHORT);
++    b.recorder.mockClear(); // the recorder mock is shared across boots: count only this cell's calls
++    try {
++      const tok = CONNECTOR_TOKEN();
++      const body = anchorBody();
++      expect(await post(b, tok, body, hopMacedWith(SHORT, body, tok))).toBe(202);
++      expect(b.recorder).toHaveBeenCalledTimes(1);
++    } finally {
++      await close(b);
++    }
++  }, 30000);
++
++  it('R11 CONTROL: exactly 32 characters is enough — the same hand-MAC\'d hop is honoured', async () => {
++    const b = await boot(EXACT);
++    b.recorder.mockClear();
++    try {
++      const tok = CONNECTOR_TOKEN();
++      const body = anchorBody();
++      expect(await post(b, tok, body, hopMacedWith(EXACT, body, tok))).toBe(202);
++      expect(b.recorder).not.toHaveBeenCalled();
++    } finally {
++      await close(b);
++    }
++  }, 30000);
++});
+diff --git a/Blockchain/Dev/services/anchoring/src/emitterGuard.ts b/Blockchain/Dev/services/anchoring/src/emitterGuard.ts
+new file mode 100644
+index 000000000..4f938bfc8
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/emitterGuard.ts
+@@ -0,0 +1,97 @@
++/**
++ * KS-1717 — anchoring's inbound guard for `x-emitter-internal`.
++ *
++ * The marker switches off the flat-anchor `anchor` provenance row on POST /api/anchors
++ * (KS-566). Until this guard it was honoured by PRESENCE, and anchoring had no inbound
++ * strip of its own: a caller on the compose network holding a connector JWT could set it
++ * and suppress its own row. originate's legitimate hop forwards the caller's own bearer,
++ * so no credential tells the two apart — only a signature originate makes and the caller
++ * cannot (`verifyEmitterHop`, @secuura/shared; Kam's ruling (b), 2026-10-26).
++ *
++ * FAIL-CLOSED BY CONSTRUCTION. The verdict is held in a WeakSet that only this guard
++ * writes, and the route reads it through `isVerifiedInternalEmit`. A request the guard
++ * never saw — the guard unmounted, or a router mounted ahead of it — is simply not in
++ * the set, so it records provenance. Nothing a header can say is consulted after the
++ * guard: it deletes the marker and both proof headers on EVERY request, verified or not.
++ *
++ * The raw body is captured by `express.json`'s `verify` hook (`captureRawBody`) because
++ * the signature covers the bytes as sent, not the parsed object. Without a capture the
++ * body hashes as empty and the check fails — refusal, never a false accept.
++ */
++import type { IncomingMessage } from 'http';
++import type { RequestHandler } from 'express';
++import {
++  EMITTER_MARKER_HEADER,
++  EMITTER_SIGNATURE_HEADER,
++  EMITTER_TIMESTAMP_HEADER,
++  isUsableEmitterSecret,
++  verifyEmitterHop,
++} from '@secuura/shared';
++
++type Log = (level: 'info' | 'warn' | 'error', message: string, meta?: object) => void;
++
++const rawBodies = new WeakMap<IncomingMessage, Buffer>();
++const verifiedEmits = new WeakSet<IncomingMessage>();
++
++/** `express.json({ verify })` hook: keep the exact bytes the signature covers. */
++export function captureRawBody(req: IncomingMessage, _res: unknown, buf: Buffer): void {
++  rawBodies.set(req, buf);
++}
++
++/** True only for a request whose marker this guard verified. */
++export function isVerifiedInternalEmit(req: IncomingMessage): boolean {
++  return verifiedEmits.has(req);
++}
++
++/**
++ * Mount after `express.json({ verify: captureRawBody })` and ahead of every router.
++ * A refused marker is logged only when a secret IS configured: then it is either a
++ * forgery or a half-configured deploy, and both are worth a line. Unconfigured, every
++ * marker is refused and the boot line (`describeEmitterGuardState`) already says so.
++ * The log names the reason, never the header values.
++ */
++export function createEmitterSignatureGuard(secret: string, log: Log): RequestHandler {
++  const configured = isUsableEmitterSecret(secret);
++  return (req, _res, next) => {
++    if (req.headers[EMITTER_MARKER_HEADER] !== undefined) {
++      const verdict = verifyEmitterHop({
++        secret,
++        method: req.method,
++        path: req.originalUrl,
++        headers: req.headers,
++        body: rawBodies.get(req),
++      });
++      if (verdict.ok) {
++        verifiedEmits.add(req);
++      } else if (configured) {
++        log('warn', 'KS-1717: x-emitter-internal refused; the provenance row will be recorded', {
++          reason: verdict.reason,
++          method: req.method,
++          path: req.path,
++        });
++      }
++    }
++    delete req.headers[EMITTER_MARKER_HEADER];
++    delete req.headers[EMITTER_TIMESTAMP_HEADER];
++    delete req.headers[EMITTER_SIGNATURE_HEADER];
++    next();
++  };
++}
++
++/**
++ * The boot line. States the CONSEQUENCE of the configuration, as originate's
++ * `describeState` does for the gateway vouch.
++ */
++export function describeEmitterGuardState(secret: string): { level: 'info' | 'warn'; message: string } {
++  if (isUsableEmitterSecret(secret)) {
++    return {
++      level: 'info',
++      message: '[emitter-guard] ACTIVE: x-emitter-internal is honoured only on a hop originate signed (KS-1717)',
++    };
++  }
++  return {
++    level: 'warn',
++    message:
++      '[emitter-guard] FAIL-CLOSED: EMITTER_SIGNING_SECRET is unset or shorter than 32 characters, so x-emitter-internal is never honoured and originate\'s own hops each write a second action_provenance row (an `anchor` row beside the operation\'s own) until the secret is set on this service AND on originate',
++  };
++}
+diff --git a/Blockchain/Dev/services/anchoring/src/index.ts b/Blockchain/Dev/services/anchoring/src/index.ts
+index 734792c2d..2cf77b4c5 100644
+--- a/Blockchain/Dev/services/anchoring/src/index.ts
++++ b/Blockchain/Dev/services/anchoring/src/index.ts
+@@ -50,6 +50,8 @@ import { fromCardanoMetadatum } from './cardano/cardanoMetadatum';
+ import { threadMintRequestSchema, isEncodableDeploymentIdHex, classifyThreadMintError } from './threadMintRequest';
+ import { enforceProductionConfig, authenticate as jwtAuthenticate, errorHandler, rejectNulBytes } from '@secuura/shared';
+ import { recordFlatAnchorProvenance } from './provenance';
++// KS-1717: the marker that skips the provenance row is honoured only on a hop originate signed.
++import { captureRawBody, createEmitterSignatureGuard, describeEmitterGuardState, isVerifiedInternalEmit } from './emitterGuard';
+ import { mayOverwriteStoredMetadata, holdsIssuerFields, classifyPersistOutcome, ISSUER_FIELDS, mayWriteAnchorRows, AnchorOwnershipError, isAnchorOwnershipError, type AnchorCaller } from './anchorOverwriteGuard';
+ import { buildAnchorStatusUpdate, type AnchorStatusUpdate } from './anchorStatusUpdate';
+ import { honestTxView, FABRICATED_TX_PREFIX } from './honestAnchor';
+@@ -250,9 +252,17 @@ app.use(cors({
+   origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:6100', 'http://localhost:6101'],
+   credentials: true,
+ }));
+-app.use(express.json());
++// KS-1717: `verify` keeps the raw bytes, because the emitter signature covers the body as sent.
++app.use(express.json({ verify: captureRawBody }));
+ app.use(rejectNulBytes()); // KS-471: no U+0000 may pass the boundary (raw-500 / persist class)
+ 
++// KS-1717: verify, then delete, `x-emitter-internal` and its proof headers on EVERY request,
++// ahead of every router. Unset secret => nothing is honoured (fail-closed; see emitterGuard.ts).
++const EMITTER_SIGNING_SECRET = process.env.EMITTER_SIGNING_SECRET || '';
++const emitterGuardState = describeEmitterGuardState(EMITTER_SIGNING_SECRET);
++log(emitterGuardState.level, emitterGuardState.message);
++app.use(createEmitterSignatureGuard(EMITTER_SIGNING_SECRET, log));
++
+ // Request logging
+ const requestLogger: RequestHandler = (req, res, next) => {
+   const start = Date.now();
+@@ -521,14 +531,26 @@ app.post('/api/anchors', async (req: Request, res: Response, next: NextFunction)
+     // (create / share / transfer-custody / revoke / lifecycle). Recording again
+     // here would make one user action produce two rows and roughly double the
+     // table — measured live on 2026-08-26, where a single lifecycle call
+-    // produced both a `lifecycle:rename` and an `anchor` row. The header is not
+-    // spoofable, by two strips: the gateway strips `x-emitter-*` from every
+-    // inbound client request on `/api/*`, and originate strips it at its own
+-    // inbound on every request (KS-741) — so the only value that can arrive
+-    // here is one originate itself set on its outbound hop. Platform-S's
++    // produced both a `lifecycle:rename` and an `anchor` row. Platform-S's
+     // genuine flat fallback carries no such header and still records its
+     // `anchor` row.
+-    const isInternalEmit = typeof req.headers['x-emitter-internal'] === 'string';
++    //
++    // KS-1717: WHAT IS GUARDED, and what is not. The marker is honoured only
++    // when the emitter guard (emitterGuard.ts, mounted ahead of every router)
++    // verified an HMAC originate made over this request's method, path, marker,
++    // a timestamp within 60 s, the caller's Authorization header and the raw body
++    // bytes, under EMITTER_SIGNING_SECRET.
++    // The header itself is never read here: the guard deletes it, so a value a
++    // caller sends cannot reach this line. The two strips (the gateway's edge
++    // strip on `/api/*`, originate's inbound strip, KS-741) cover requests that
++    // pass through those services ONLY — they do nothing for a caller that
++    // reaches anchoring directly on the compose network, which is why the
++    // signature exists. It does NOT make the marker unforgeable: anyone holding
++    // the secret can sign, and a byte-identical replay under the SAME bearer
++    // verifies for just under 61 s (up to ~121 s with a fast signer clock; no
++    // nonce store). With the secret unset, nothing verifies and
++    // originate's own hops write a second row (fail-closed).
++    const isInternalEmit = isVerifiedInternalEmit(req);
+     if (caller?.role === 'connector' && !isInternalEmit) {
+       recordFlatAnchorProvenance({
+         documentId: data.documentId,
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts
+index 352282f76..6034fe70a 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts
+@@ -67,6 +67,7 @@ const SUBJECTS: readonly string[] = [
+   'ks1679-the-same-caller-spread-still-overwrites.test.ts',
+   'ks1709-a-refused-certification-anchor-is-logged.test.ts',
+   'ks1709-a-refused-recertification-anchor-is-logged.test.ts',
++  'ks1717-both-setters-sign-the-anchoring-hop.test.ts',
+   'ks444-certifications-issue-body-types.test.ts',
+   'ks444-documents-create-title-guard.test.ts',
+   'ks445-certifications-issue-unstorable-payload.test.ts',
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts
+new file mode 100644
+index 000000000..e74736157
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts
+@@ -0,0 +1,258 @@
++/**
++ * =============================================================================
++ * KS-1717 — originate's two marker setters SIGN the hop, and the signature verifies
++ * =============================================================================
++ * anchoring now honours `x-emitter-internal` only when an HMAC over the request verifies
++ * (services/anchoring/src/emitterGuard.ts). That is only half a fix unless originate's
++ * real setters produce exactly what the verifier accepts — the KS-1719 lesson: a guard
++ * nothing asserts is SENT is not a guard. So these cells drive the two real setters
++ * through the real routes and hand the BYTES a recorder received to the very function
++ * anchoring calls (`verifyEmitterHop`, @secuura/shared). The signer and the verifier
++ * meeting on real wire bytes is the cross-direction proof; the shared cells pin each
++ * field in isolation.
++ *
++ *   O1  create (`originate-create`)       — signed, and verifies against the received bytes
++ *   O2  lifecycle (`originate-lifecycle`) — signed, and verifies against the received bytes
++ *   O3  no secret                         — the marker travels ALONE (anchoring then records)
++ *   O4  a secret under 32 chars           — treated as unset, same as O3
++ *   O5  the marker name originate's inbound strip deletes IS the one the signer sends
++ *
++ * O1 and O2 also prove the caller's BEARER is bound (PR #1690 gate round 1, Minor 2): the
++ * caller's own Authorization header rides the hop, the hop verifies under it, and the very
++ * same captured bytes are refused under another caller's bearer.
++ *
++ * RED ON DEVELOP: O1 and O2 (develop sends a bare marker). O3-O5 are controls.
++ *
++ * HARNESS: the ks1385-create shape — repositories, auth, rbac, logger and db mocked, the
++ * routers on a bare express app, anchoring replaced by a recorder on 127.0.0.1:0 that
++ * keeps each request's headers AND raw body.
++ */
++
++delete process.env.SIMULATE_ANCHORING;
++// KS-1293: a unit test that mentions ANCHORING_SERVICE_URL pins an import-scope loopback base
++// on a closed, non-bad port; beforeAll points it at the recorder once that is listening.
++process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
++
++const mockGetDocument = jest.fn(async (..._args: any[]): Promise<any> => undefined);
++
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: mockGetDocument,
++  listDocuments: jest.fn(),
++  saveDocument: jest.fn(async () => ({ dbId: '99999999-9999-4999-8999-999999999999', inserted: true })),
++  updateDocument: jest.fn(async () => undefined),
++  getSigningRequest: jest.fn(),
++  saveSigningRequest: jest.fn(),
++  deleteSigningRequest: jest.fn(),
++  generateContentHash: jest.fn(() => 'a'.repeat(64)),
++  seedDemoDocuments: jest.fn(async () => undefined),
++  assertNoCycle: jest.fn(async () => undefined),
++}));
++
++jest.mock('../repositories/shareRepo', () => ({ createShare: jest.fn() }));
++
++jest.mock('../repositories/lifecycleEventRepo', () => ({
++  createLifecycleEvent: jest.fn(async () => ({ id: 'evt-ks1717' })),
++  setLifecycleEventAnchor: jest.fn(async () => undefined),
++  listLifecycleEvents: jest.fn(async () => []),
++}));
++
++jest.mock('../events', () => ({
++  publishEvent: jest.fn(async () => undefined),
++  EventTypes: {
++    DOCUMENT_CREATED: 'document.created',
++    DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred',
++    DOCUMENT_VERSIONED: 'document.versioned',
++  },
++}));
++
++jest.mock('../services/threadTokenClient', () => ({
++  mintAndRegisterThreadToken: jest.fn(async () => ({})),
++}));
++
++jest.mock('../routes/verification', () => ({
++  registerInPlatformRegistry: jest.fn(async () => undefined),
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
++    next();
++  },
++}));
++
++jest.mock('../middleware/rbac', () => ({
++  isAllowedByRoleOrScope: () => true,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: jest.fn(), $executeRaw: jest.fn() },
++  getTenantManager: jest.fn(() => null),
++  withTenant: jest.fn(async (_tenantId: string, cb: (tx: any) => Promise<any>) =>
++    cb({ $queryRaw: jest.fn(async () => []), $executeRaw: jest.fn(async () => 1) })),
++}));
++
++import * as http from 'http';
++import express from 'express';
++import {
++  verifyEmitterHop,
++  EMITTER_MARKER_HEADER as SHARED_MARKER_HEADER,
++  EMITTER_TIMESTAMP_HEADER,
++  EMITTER_SIGNATURE_HEADER,
++} from '@secuura/shared';
++import { documentsRouter } from '../routes/documents';
++import { EMITTER_MARKER_HEADER as ORIGINATE_STRIPPED_HEADER } from '../utils/gatewayProvenance';
++
++const SECRET = 'ks1717-originate-test-secret-0123456789abcdef';
++/** The caller's own bearer: the mocked auth ignores it, and originate forwards it to anchoring. */
++const CALLER_BEARER = 'Bearer ks1717-caller-a.header.sig';
++const OTHER_BEARER = 'Bearer ks1717-caller-b.header.sig';
++
++type Recorded = { method: string; url: string; headers: http.IncomingHttpHeaders; raw: Buffer };
++const recorded: Recorded[] = [];
++
++let anchoringServer: http.Server;
++let appServer: http.Server;
++let baseUrl = '';
++
++beforeAll(async () => {
++  anchoringServer = http.createServer((req, res) => {
++    const chunks: Buffer[] = [];
++    req.on('data', (c) => chunks.push(c));
++    req.on('end', () => {
++      recorded.push({ method: req.method || '', url: req.url || '', headers: req.headers, raw: Buffer.concat(chunks) });
++      // No `id`: documents.ts starts its confirmation poller only when one is returned.
++      res.writeHead(202, { 'content-type': 'application/json' });
++      res.end(JSON.stringify({ data: { status: 'pending' } }));
++    });
++  });
++  await new Promise<void>((resolve) => anchoringServer.listen(0, '127.0.0.1', () => resolve()));
++  const a = anchoringServer.address();
++  process.env.ANCHORING_SERVICE_URL = `http://127.0.0.1:${typeof a === 'object' && a ? a.port : 0}`;
++
++  const app = express();
++  app.use('/api/documents', express.json(), documentsRouter);
++  await new Promise<void>((resolve) => { appServer = app.listen(0, '127.0.0.1', () => resolve()); });
++  const s = appServer.address();
++  baseUrl = `http://127.0.0.1:${typeof s === 'object' && s ? s.port : 0}`;
++});
++
++afterAll(async () => {
++  delete process.env.EMITTER_SIGNING_SECRET;
++  for (const srv of [appServer, anchoringServer]) {
++    if (!srv) continue;
++    (srv as any).closeAllConnections?.();
++    await new Promise<void>((resolve) => srv.close(() => resolve()));
++  }
++});
++
++beforeEach(() => {
++  jest.clearAllMocks();
++  recorded.length = 0;
++  delete process.env.SIMULATE_ANCHORING;
++  delete process.env.EMITTER_SIGNING_SECRET;
++});
++
++/** The anchor POST lands after the response, so wait for it — bounded, never a fixed sleep. */
++async function waitForAnchorPost(timeoutMs = 4000): Promise<Recorded | undefined> {
++  const deadline = Date.now() + timeoutMs;
++  while (Date.now() < deadline) {
++    const hit = recorded.find((r) => r.method === 'POST' && r.url === '/api/anchors');
++    if (hit) return hit;
++    await new Promise((r) => setTimeout(r, 20));
++  }
++  return undefined;
++}
++
++/** What anchoring's guard decides about this recorded request, with `secret`. */
++function anchoringVerdict(hit: Recorded, secret: string) {
++  return verifyEmitterHop({ secret, method: hit.method, path: hit.url, headers: hit.headers, body: hit.raw });
++}
++
++/** The same captured bytes, presented under another caller's bearer — the round-1 replay. */
++function replayedUnder(hit: Recorded, authorization: string): Recorded {
++  return { ...hit, headers: { ...hit.headers, authorization } };
++}
++
++async function createDocument(): Promise<Response> {
++  return fetch(`${baseUrl}/api/documents`, {
++    method: 'POST',
++    headers: { 'content-type': 'application/json', authorization: CALLER_BEARER },
++    body: JSON.stringify({ title: 'ks1717 signed hop', type: 'general', data: { note: 'x' } }),
++  });
++}
++
++async function lifecycleEvent(): Promise<Response> {
++  const doc = {
++    id: '33333333-4444-4555-8666-777777777777',
++    contentHash: 'c'.repeat(64),
++    title: 'ks1717 lifecycle target',
++    ownerId: '11111111-2222-4333-8444-555555555555',
++    status: 'active',
++    type: 'general',
++  };
++  mockGetDocument.mockResolvedValue(doc);
++  return fetch(`${baseUrl}/api/documents/${doc.id}/lifecycle-events`, {
++    method: 'POST',
++    headers: { 'content-type': 'application/json', authorization: CALLER_BEARER },
++    body: JSON.stringify({ action: 'rename', payload: { to: 'x' } }),
++  });
++}
++
++describe('KS-1717 — with EMITTER_SIGNING_SECRET set, both setters sign and anchoring\'s verifier accepts', () => {
++  it('O1 POST /api/documents: the originate-create hop verifies against the bytes anchoring received', async () => {
++    process.env.EMITTER_SIGNING_SECRET = SECRET;
++    expect((await createDocument()).status).toBe(201);
++    const hit = await waitForAnchorPost();
++    expect(hit).toBeDefined();
++    expect(hit!.headers[EMITTER_TIMESTAMP_HEADER]).toMatch(/^[0-9]+$/);
++    expect(hit!.headers[EMITTER_SIGNATURE_HEADER]).toMatch(/^[0-9a-f]{64}$/);
++    expect(hit!.headers.authorization).toBe(CALLER_BEARER);
++    expect(anchoringVerdict(hit!, SECRET)).toEqual({ ok: true, marker: 'originate-create' });
++    // ...and the same bytes under any other key are refused: the cell is not vacuous.
++    expect(anchoringVerdict(hit!, `${SECRET}-other`)).toEqual({ ok: false, reason: 'bad-signature' });
++    // ...and under another caller's bearer: the hop is bound to the bearer it carried.
++    expect(anchoringVerdict(replayedUnder(hit!, OTHER_BEARER), SECRET)).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++
++  it('O2 POST /:id/lifecycle-events: the originate-lifecycle hop verifies against the bytes anchoring received', async () => {
++    process.env.EMITTER_SIGNING_SECRET = SECRET;
++    expect((await lifecycleEvent()).status).toBeLessThan(400);
++    const hit = await waitForAnchorPost();
++    expect(hit).toBeDefined();
++    expect(hit!.headers.authorization).toBe(CALLER_BEARER);
++    expect(anchoringVerdict(hit!, SECRET)).toEqual({ ok: true, marker: 'originate-lifecycle' });
++    expect(anchoringVerdict(hit!, `${SECRET}-other`)).toEqual({ ok: false, reason: 'bad-signature' });
++    expect(anchoringVerdict(replayedUnder(hit!, OTHER_BEARER), SECRET)).toEqual({ ok: false, reason: 'bad-signature' });
++  });
++});
++
++describe('KS-1717 — with no usable secret, the marker travels alone (and anchoring records the row)', () => {
++  it('O3 unset: the create hop carries the bare marker, no timestamp, no signature', async () => {
++    expect((await createDocument()).status).toBe(201);
++    const hit = await waitForAnchorPost();
++    expect(hit).toBeDefined();
++    expect(hit!.headers[SHARED_MARKER_HEADER]).toBe('originate-create');
++    expect(hit!.headers[EMITTER_TIMESTAMP_HEADER]).toBeUndefined();
++    expect(hit!.headers[EMITTER_SIGNATURE_HEADER]).toBeUndefined();
++    expect(anchoringVerdict(hit!, SECRET)).toEqual({ ok: false, reason: 'missing-timestamp' });
++  });
++
++  it('O4 a 31-character secret is treated as unset: the lifecycle hop is unsigned', async () => {
++    process.env.EMITTER_SIGNING_SECRET = 'x'.repeat(31);
++    expect((await lifecycleEvent()).status).toBeLessThan(400);
++    const hit = await waitForAnchorPost();
++    expect(hit).toBeDefined();
++    expect(hit!.headers[SHARED_MARKER_HEADER]).toBe('originate-lifecycle');
++    expect(hit!.headers[EMITTER_SIGNATURE_HEADER]).toBeUndefined();
++  });
++});
++
++describe('KS-1717 O5 — one name for the marker', () => {
++  it('the header originate\'s inbound strip deletes (KS-741) is the header the shared signer sends', () => {
++    expect(ORIGINATE_STRIPPED_HEADER).toBe(SHARED_MARKER_HEADER);
++  });
++});
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+index d3e7e2a21..c7f081e51 100644
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -45,7 +45,7 @@ import { sanitizeString } from '@secuura/shared/security';
+ import { DEFAULT_DOCUMENT_TYPE } from '@secuura/shared/documents/default-type';
+ // KS-1402: + lookupHash. transfer-custody hashes a holder email itself now; before KS-1402 it
+ // forwarded the caller's credential to auth's /api/users/lookup, which did the hashing.
+-import { verifyMessageSignature, hasNulByte, runWithTenantId, lookupHash } from '@secuura/shared';
++import { verifyMessageSignature, hasNulByte, runWithTenantId, lookupHash, signEmitterHop } from '@secuura/shared';
+ import { mintAndRegisterThreadToken } from '../services/threadTokenClient';
+ import { pollAnchorUntilConfirmed, reconcileDocumentAnchorState } from '../services/anchorStateSync';
+ import { simulatedFieldsFromAnchor, composeHonestBlockchainBlob } from '../services/anchorHonesty';
+@@ -871,11 +871,9 @@ documentsRouter.post(
+       // every fetch below uses the same value (poll loop, anchor POST,
+       // status GET).
+       const anchoringAuth = (req.headers.authorization as string) || '';
+-      // KS-566: `x-emitter-internal` marks K's own hop so anchoring does not
+-      // write a second provenance row — POST /api/documents already wrote the
+-      // `create` row for this same user action. See emitLifecycleAnchor.
++      // The `x-emitter-internal` marker is added, SIGNED, at the anchor POST below
++      // (KS-1717): the signature covers the exact body bytes, so it is minted there.
+       const anchoringHeaders: Record<string, string> = {
+-        'x-emitter-internal': 'originate-create',
+         ...(anchoringAuth ? { Authorization: anchoringAuth } : {}),
+       };
+       // KS-199: issuerName (the organisation name) is OPTIONAL — a user without
+@@ -957,10 +955,29 @@ documentsRouter.post(
+         logger.warn('SIMULATE_ANCHORING=true — simulated anchor applied immediately', { documentId: id });
+       } else {
+         // Cardano anchor — fire-and-forget relative to the HTTP response.
++        // KS-566 / KS-1717: `originate-create` marks K's own hop so anchoring does
++        // not write a second provenance row — POST /api/documents already wrote
++        // the `create` row for this same user action. anchoring honours it only
++        // when it verifies the signature, which covers these exact body bytes
++        // (unsigned when EMITTER_SIGNING_SECRET is unset: anchoring then records
++        // the row). It also binds the caller's bearer forwarded below, so the hop
++        // cannot be replayed under another connector's token. See emitLifecycleAnchor.
++        const anchorBody = buildAnchorBody();
+         fetch(anchorUrl, {
+           method: 'POST',
+-          headers: { 'Content-Type': 'application/json', ...anchoringHeaders },
+-          body: buildAnchorBody(),
++          headers: {
++            'Content-Type': 'application/json',
++            ...anchoringHeaders,
++            ...signEmitterHop({
++              secret: process.env.EMITTER_SIGNING_SECRET,
++              marker: 'originate-create',
++              method: 'POST',
++              url: anchorUrl,
++              authorization: anchoringAuth || undefined, // exactly what `anchoringHeaders` sends
++              body: anchorBody,
++            }),
++          },
++          body: anchorBody,
+         })
+           .then(async (anchorResp) => {
+             if (!anchorResp.ok) {
+@@ -1361,7 +1378,16 @@ async function emitLifecycleAnchor(params: {
+     // authenticate() middleware; ANCHORING_SERVICE_URL is injected on Azure,
+     // the service-name URL is the Docker Compose fallback.
+     const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+-    const resp = await fetch(`${anchoringBase}/api/anchors`, {
++    const anchorUrl = `${anchoringBase}/api/anchors`;
++    // The signature below covers these exact bytes, so the body is built once.
++    const anchorBody = JSON.stringify({
++      documentId,
++      // KS-282: anchoring requires a bare 64-hex digest; strip any sha256: prefix.
++      contentHash: String(contentHash || '').replace(/^sha256:/i, '').toLowerCase(),
++      network: process.env.CARDANO_NETWORK || 'preprod',
++      ...anchorIdentityFields({ identity }),
++    });
++    const resp = await fetch(anchorUrl, {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json',
+@@ -1369,18 +1395,23 @@ async function emitLifecycleAnchor(params: {
+         // KS-566: this is K's OWN hop, not Platform-S's flat-anchor fallback.
+         // The calling verb (share / transfer-custody / revoke / lifecycle) has
+         // already written its own action_provenance row, so anchoring must not
+-        // write a second one for the same user action. Non-spoofable: the
+-        // gateway strips `x-emitter-*` from every inbound client request
+-        // (api-gateway TRUST_HEADER_PATTERN), and this call bypasses it.
+-        'x-emitter-internal': 'originate-lifecycle',
++        // write a second one for the same user action.
++        // KS-1717: the marker is not trusted by presence. The gateway's
++        // `x-emitter-*` strip covers only requests that pass through it; a
++        // caller reaching anchoring directly could set the header itself. So
++        // anchoring honours it only when this HMAC verifies — over the body and
++        // the bearer below as sent (unsigned when EMITTER_SIGNING_SECRET is
++        // unset: anchoring then records the row).
++        ...signEmitterHop({
++          secret: process.env.EMITTER_SIGNING_SECRET,
++          marker: 'originate-lifecycle',
++          method: 'POST',
++          url: anchorUrl,
++          authorization: authHeader || undefined, // exactly what the header above sends
++          body: anchorBody,
++        }),
+       },
+-      body: JSON.stringify({
+-        documentId,
+-        // KS-282: anchoring requires a bare 64-hex digest; strip any sha256: prefix.
+-        contentHash: String(contentHash || '').replace(/^sha256:/i, '').toLowerCase(),
+-        network: process.env.CARDANO_NETWORK || 'preprod',
+-        ...anchorIdentityFields({ identity }),
+-      }),
++      body: anchorBody,
+     });
+     if (!resp.ok) {
+       throw new Error(`Anchoring service returned ${resp.status}`);

@@ -1,0 +1,16 @@
+# Spark SHADOW gate, PR #1695 (KS-1513)
+- Head: 716e26290155975a4b97fda68cf597413c0e8e98 (== refs/pull/1695/head at run: tip). Base: merge-base with develop 28dac5c12. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 2, +73/-0; product files: 0.
+  - targeted on head: ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh rc=0 passed=None failed=0; preflight_test_types_ratchet_leg.test.sh rc=0 passed=None failed=0
+  - targeted on base product + head tests: ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh rc=0 passed=None failed=0; preflight_test_types_ratchet_leg.test.sh rc=0 passed=None failed=0
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: GO WITH NOTES. Valid JSON first attempt: True. Wall 42.9 s, prompt 11465 tok, completion 1219 tok.
+- Findings (7), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Note: The new test suite's CELL 5 greps for a substring that also appears in the wiring cells' output, so it does not uniquely prove the wiring cells ran under the no-install condition.  [evidence quote found in input: True]
+  - Note: The new test suite's CELL 4 greps for a stub-cell output line that is only produced when the stub cells run, but the grep pattern is not anchored to the exact line, so it could match a partial or diff  [evidence quote found in input: True]
+  - Note: The new test suite does not verify that the SKIP line is printed exactly once; it only checks that at least one line matches the pattern.  [evidence quote found in input: True]
+  - Note: The new test suite does not assert that the real-checker cells are actually skipped; it only checks that no `FAIL` lines appear and that the SKIP line is printed.  [evidence quote found in input: True]
+  - Note: The new test suite does not verify that the suite's exit code is 0 when the install is present; it only tests the no-install case.  [evidence quote found in input: True]
+  - Note: The new test suite does not verify that the SKIP line is printed to stdout; it captures both stdout and stderr, so a stderr-only SKIP would still pass.  [evidence quote found in input: True]
+  - Note: The new test suite does not verify that the suite's exit code is 0 when the install is present; it only tests the no-install case.  [evidence quote found in input: True]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

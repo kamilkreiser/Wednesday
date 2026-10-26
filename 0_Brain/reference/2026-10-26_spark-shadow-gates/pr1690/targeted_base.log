@@ -1,0 +1,231 @@
+
+##### Blockchain/Dev/packages/shared/src/__tests__/ks1717-emitter-hop-signature.test.ts
+
+ RUN  v4.1.12 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/260eb491-03f6-4ca4-9176-8fe7e584e897/scratchpad/wt/Blockchain/Dev/packages/shared
+
+ ❯ src/__tests__/ks1717-emitter-hop-signature.test.ts (0 test)
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  16:07:32
+   Duration  581ms (transform 208ms, setup 20ms, import 0ms, tests 0ms, environment 0ms)
+
+npm warn config ignoring workspace config at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/***/scratchpad/wt/Blockchain/Dev/packages/shared/.npmrc
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1717-emitter-hop-signature.test.ts [ src/__tests__/ks1717-emitter-hop-signature.test.ts ]
+TypeError: signEmitterHop is not a function
+ ❯ signed src/__tests__/ks1717-emitter-hop-signature.test.ts:37:10
+     35|
+     36| function signed(over: Partial<{ secret: string; marker: string; method…
+     37|   return signEmitterHop({ secret: SECRET, marker: 'originate-create', …
+       |          ^
+     38| }
+     39|
+ ❯ src/__tests__/ks1717-emitter-hop-signature.test.ts:80:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+##### Blockchain/Dev/services/anchoring/src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts
+
+ RUN  v4.1.12 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/260eb491-03f6-4ca4-9176-8fe7e584e897/scratchpad/wt/Blockchain/Dev/services/anchoring
+
+stdout | src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R1 a connector caller that sets the BARE marker itself still gets its provenance row (the defect)
+{"timestamp":"2026-10-26T05:07:33.947Z","level":"info","service":"anchoring","message":"Anchor created","anchorId":"anchor_058e30fe-57f7-4adf-a8f7-c969f3f0151d","documentId":"doc-17929912539291-ks1717s1"}
+
+stdout | src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R1 a connector caller that sets the BARE marker itself still gets its provenance row (the defect)
+{"timestamp":"2026-10-26T05:07:33.948Z","level":"info","service":"anchoring","message":"Request completed","method":"POST","path":"/api/anchors","statusCode":202,"duration":"4ms"}
+
+stdout | src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R6 CONTROL: Platform-S's genuine flat fallback (no marker) still records its row
+{"timestamp":"2026-10-26T05:07:33.961Z","level":"info","service":"anchoring","message":"Anchor created","anchorId":"anchor_c8eb337e-efa7-405b-8caf-b33d4783478c","documentId":"doc-17929912539597-ks1717s7"}
+
+stdout | src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R6 CONTROL: Platform-S's genuine flat fallback (no marker) still records its row
+{"timestamp":"2026-10-26T05:07:33.961Z","level":"info","service":"anchoring","message":"Request completed","method":"POST","path":"/api/anchors","statusCode":202,"duration":"0ms"}
+
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts (11 tests | 9 failed) 320ms
+     ✓ R1 a connector caller that sets the BARE marker itself still gets its provenance row (the defect) 24ms
+     × R2 CONTROL + REACHED: originate's genuine signed hop is still skipped (a plain strip, or an unmounted guard, fails this) 3ms
+     × R3 a captured signature REPLAYED onto a different body is refused, and that body gets its row 1ms
+     × R4 a signature whose timestamp has EXPIRED (120 s old) is refused 1ms
+     × R5 a signature made with any OTHER secret is refused 1ms
+     ✓ R6 CONTROL: Platform-S's genuine flat fallback (no marker) still records its row 3ms
+     × R7 CONTROL: an interactive (non-connector) caller still records none, signed or not 1ms
+     × R9 a hop captured from one connector and REPLAYED under ANOTHER connector's bearer is refused, and the replayer gets its row 2ms
+     × R8 an unset secret honours NOTHING: even a hop signed correctly under a real key records its row 1ms
+     × R10 configured with a 31-character secret, anchoring refuses a hop MAC'd correctly under that SAME secret 3ms
+     × R11 CONTROL: exactly 32 characters is enough — the same hand-MAC'd hop is honoured 3ms
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 2 passed (11)
+   Start at  16:07:33
+   Duration  725ms (transform 164ms, setup 0ms, import 295ms, tests 320ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R2 CONTROL + REACHED: originate's genuine signed hop is still skipped (a plain strip, or an unmounted guard, fails this)
+TypeError: signEmitterHop is not a function
+ ❯ hop src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:116:10
+    114| /** What originate's setter sends for this body and this caller's bear…
+    115| function hop(b: Booted, body: string, secret: string | undefined, tok:…
+    116|   return signEmitterHop({
+       |          ^
+    117|     secret,
+    118|     marker: 'originate-create',
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:168:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R3 a captured signature REPLAYED onto a different body is refused, and that body gets its row
+TypeError: signEmitterHop is not a function
+ ❯ hop src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:116:10
+    114| /** What originate's setter sends for this body and this caller's bear…
+    115| function hop(b: Booted, body: string, secret: string | undefined, tok:…
+    116|   return signEmitterHop({
+       |          ^
+    117|     secret,
+    118|     marker: 'originate-create',
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:176:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R4 a signature whose timestamp has EXPIRED (120 s old) is refused
+TypeError: signEmitterHop is not a function
+ ❯ hop src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:116:10
+    114| /** What originate's setter sends for this body and this caller's bear…
+    115| function hop(b: Booted, body: string, secret: string | undefined, tok:…
+    116|   return signEmitterHop({
+       |          ^
+    117|     secret,
+    118|     marker: 'originate-create',
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:184:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R5 a signature made with any OTHER secret is refused
+TypeError: signEmitterHop is not a function
+ ❯ hop src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:116:10
+    114| /** What originate's setter sends for this body and this caller's bear…
+    115| function hop(b: Booted, body: string, secret: string | undefined, tok:…
+    116|   return signEmitterHop({
+       |          ^
+    117|     secret,
+    118|     marker: 'originate-create',
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:191:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R7 CONTROL: an interactive (non-connector) caller still records none, signed or not
+TypeError: signEmitterHop is not a function
+ ❯ hop src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:116:10
+    114| /** What originate's setter sends for this body and this caller's bear…
+    115| function hop(b: Booted, body: string, secret: string | undefined, tok:…
+    116|   return signEmitterHop({
+       |          ^
+    117|     secret,
+    118|     marker: 'originate-create',
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:203:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds a signing secret > R9 a hop captured from one connector and REPLAYED under ANOTHER connector's bearer is refused, and the replayer gets its row
+TypeError: signEmitterHop is not a function
+ ❯ hop src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:116:10
+    114| /** What originate's setter sends for this body and this caller's bear…
+    115| function hop(b: Booted, body: string, secret: string | undefined, tok:…
+    116|   return signEmitterHop({
+       |          ^
+    117|     secret,
+    118|     marker: 'originate-create',
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:214:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — anchoring holds NO signing secret (fail-closed) > R8 an unset secret honours NOTHING: even a hop signed correctly under a real key records its row
+TypeError: signEmitterHop is not a function
+ ❯ hop src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:116:10
+    114| /** What originate's setter sends for this body and this caller's bear…
+    115| function hop(b: Booted, body: string, secret: string | undefined, tok:…
+    116|   return signEmitterHop({
+       |          ^
+    117|     secret,
+    118|     marker: 'originate-create',
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:229:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — the 32-character floor, enforced by anchoring itself (gate round 1, Note 4) > R10 configured with a 31-character secret, anchoring refuses a hop MAC'd correctly under that SAME secret
+TypeError: emitterSigningString is not a function
+ ❯ hopMacedWith src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:132:13
+    130|   const signature = crypto
+    131|     .createHmac('sha256', key)
+    132|     .update(emitterSigningString({ method: 'POST', path: '/api/anchors…
+       |             ^
+    133|     .digest('hex');
+    134|   return { [EMITTER_MARKER_HEADER]: 'originate-create', [EMITTER_TIMES…
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:245:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts > KS-1717 — the 32-character floor, enforced by anchoring itself (gate round 1, Note 4) > R11 CONTROL: exactly 32 characters is enough — the same hand-MAC'd hop is honoured
+TypeError: emitterSigningString is not a function
+ ❯ hopMacedWith src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:132:13
+    130|   const signature = crypto
+    131|     .createHmac('sha256', key)
+    132|     .update(emitterSigningString({ method: 'POST', path: '/api/anchors…
+       |             ^
+    133|     .digest('hex');
+    134|   return { [EMITTER_MARKER_HEADER]: 'originate-create', [EMITTER_TIMES…
+ ❯ src/__tests__/ks1717-the-emitter-marker-is-honoured-only-when-signed.test.ts:258:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+##### Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts
+PASS src/__tests__/ks1293-originate-suite-is-hermetic.test.ts
+  KS-1293 the originate unit suite stays off the network, and it is PINNED here
+    ✓ CONFIGPINNED: every SUBJECT sets an import-scope base on a loopback host and a non-bad port (53 ms)
+    ✓ MANIFEST-DRIFT: no file this config runs touches the key without being a SUBJECT (18 ms)
+    ✓ RS1 🔴 B-1261-1: deleting ks1228-a-refused-request-writes-no-provenance-row.test.ts's import-scope assignment is an offender NAMED BY FILE (8 ms)
+    ✓ RS2 🔴 B-1261-1: deleting ks1264-revoke-records-its-action-provenance-row.test.ts's import-scope assignment is an offender NAMED BY FILE (4 ms)
+    ✓ RS3a 🔴 B-1261-1: deleting ks1213-a-derived-writer-relabel-is-refused.test.ts's import-scope assignment is an offender NAMED BY FILE (6 ms)
+    ✓ RS1 CONTROL: the SAME file untouched is clean, so the red is the deletion (7 ms)
+    ✓ RS2 CONTROL: the SAME file untouched is clean, so the red is the deletion (5 ms)
+    ✓ RS3a CONTROL: the SAME file untouched is clean, so the red is the deletion (6 ms)
+    ✓ RS3a MECHANISM: ks1213 keeps NESTED assignments, which is why a text reader stayed green (2 ms)
+    ✓ NODNS: the configured base resolves no non-loopback host and is refused at the SOCKET, and the spy is proven able to fire (18 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        1.512 s, estimated 3 s
+Ran all test suites matching /src\/__tests__\/ks1293-originate-suite-is-hermetic.test.ts/i.
+
+##### Blockchain/Dev/services/originate/src/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts
+FAIL src/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts
+  ● Test suite failed to run
+
+    [96msrc/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts[0m:[93m101[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"@secuura/shared"' has no exported member 'verifyEmitterHop'.
+
+    [7m101[0m   verifyEmitterHop,
+    [7m   [0m [91m  ~~~~~~~~~~~~~~~~[0m
+    [96msrc/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts[0m:[93m102[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"@secuura/shared"' has no exported member 'EMITTER_MARKER_HEADER'.
+
+    [7m102[0m   EMITTER_MARKER_HEADER as SHARED_MARKER_HEADER,
+    [7m   [0m [91m  ~~~~~~~~~~~~~~~~~~~~~[0m
+    [96msrc/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts[0m:[93m103[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"@secuura/shared"' has no exported member 'EMITTER_TIMESTAMP_HEADER'.
+
+    [7m103[0m   EMITTER_TIMESTAMP_HEADER,
+    [7m   [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96msrc/__tests__/ks1717-both-setters-sign-the-anchoring-hop.test.ts[0m:[93m104[0m:[93m3[0m - [91merror[0m[90m TS2305: [0mModule '"@secuura/shared"' has no exported member 'EMITTER_SIGNATURE_HEADER'.
+
+    [7m104[0m   EMITTER_SIGNATURE_HEADER,
+    [7m   [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        2.099 s, estimated 4 s
+Ran all test suites matching /src\/__tests__\/ks1717-both-setters-sign-the-anchoring-hop.test.ts/i.

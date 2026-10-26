@@ -1,0 +1,552 @@
+===== TICKET =====
+KS-1527 — KS-1520 gate follow-ups: pin leg 16's rc-1 wording, and let the stub cells see the arguments given to the checker [In Progress]
+
+## BLUF
+
+The Sonnet-tier gate on PR #1513 (ticket KS-1520) returned **GO WITH NOTE**: 0 Major, 4 Minor (verdict sha256/16 `073d1618ed99b54a`). Two of the Minors need a change; two were accepted as written. This is the checklist for the two, both in `Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh`.
+
+## Recommendation
+
+Test first for both: each is a cell that is red against a named mutant today. Do (b) in the same pass as KS-1513's skip logic, because the two touch the same lines (see Detail).
+
+## Checklist
+
+- [ ] **(a) Pin the rc-1 wording (the gate's Minor 1).** The leg's `1) why="a NEW test-file type error, ..."` text is pinned by no cell. The gate's mutant R1text (the rc-1 `why` replaced by "something") leaves the suite at 36 passed, 0 failed. The PR pinned the rc-2 and rc-3 wording only. Cosmetic, no gating effect: it is the one branch of the three that a rewording can change silently. Add a stub cell that drives the gateway to exit 1 and asserts the rc-1 text.
+- [ ] **(b) Let the stub cells see the arguments given to the checker (the gate's Minor 4).** The stub records only which service it was asked about, so a leg that passes an extra argument cannot be seen by any stub cell. The gate's mutant X4 (`check.cjs "$svc" --update`, which would LOWER the baseline on every push) passes every stub cell; it is caught (4 red) only by the real-checker cells, which skip or fail without a workspace install (measured by the gate: without an install the X4 run reads 23 passed, 9 failed, identical to the no-install control). Fix shape: the stub appends its **whole argv** to `calls.log`, and the default-run cell compares exact lines (`services/auth`, `services/api-gateway`, nothing after them). Then an appended `--update` fails with no compiler.
+
+## Detail
+
+* **Interaction with KS-1513 (filed earlier by Seat V 4th): decide the two together.** KS-1513 observes that this suite goes red in a tree with no workspace install (9 of its cells run the real checker) and proposes, as its closing step, to run the leg's install precondition **at the top of the suite and exit 0 with a** `SKIP` **line if it fails**. Done that way, the PR #1513 stub cells would be skipped too, which is exactly the case they were added for (they assert the default list with no compiler). The safer shape is to scope the SKIP to the real-checker cells and let the stub cells run. I have left a one-line comment on KS-1513.
+* Gate Minors 2 and 3 were accepted as written and need no ticket: the five-locals cell is deliberate friction (a harmless loop counter used as `$i` would trip it, and the fix is to edit the allow-list), and two cells pin prose (`the check could not run`, `a product file`), which is brittle by design.
+* **Related:** KS-1520 (the change), KS-1513 (the no-install red), KS-1517 (the stale shared build the closing advice now mentions only by shape).
+* **Dedupe before filing:** literal, case-insensitive matches over title and description, archived included: `rc-1 wording` 0, `R1text` 0, `stub cells` 0, `calls.log` 0; `preflight_test_types_ratchet_leg` hit KS-1520 and KS-1513, both read and cited above. The same instrument returned KS-1520 for its own title phrase, so it can see ticket text.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh b/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+new file mode 100644
+index 000000000..5b39e397c
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+@@ -0,0 +1,79 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for preflight_test_types_ratchet_leg.test.sh - KS-1527: its stub cells
++# must catch a mutated leg with no compiler.
++# =============================================================================
++# The PR #1513 gate built two mutants of scripts/preflight/test-types-ratchet.sh
++# that survived every stub cell (only the real-checker cells, which need a
++# workspace install, caught the second):
++#   X4      `check.cjs "$svc"` becomes `check.cjs "$svc" --update` (which would
++#           LOWER the baseline on every push): the stub logged only the service,
++#           so an extra argument was invisible.
++#   R1text  the rc-1 `why` text replaced by "something": no cell pinned it.
++# This suite aims the other suite at each mutant (its LEG_SH variable) and at no
++# workspace install (DEPS_PRESENT_ROOT at a directory that does not exist, so the
++# real-checker cells cannot be what fails), then asks whether the NAMED stub cell
++# is among the FAIL lines. Nothing in the repository is changed.
++#
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUITE="${RATCHET_LEG_SUITE_SH:-$HERE/preflight_test_types_ratchet_leg.test.sh}"
++LEG_REAL="${RATCHET_LEG_REAL_SH:-$HERE/../preflight/test-types-ratchet.sh}"
++PASS=0; FAIL=0
++
++[[ -f "$SUITE" ]] || { echo "FATAL: suite not found at $SUITE" >&2; exit 2; }
++[[ -f "$LEG_REAL" ]] || { echo "FATAL: leg not found at $LEG_REAL" >&2; exit 2; }
++
++tmp="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1527.XXXXXX")"
++trap 'rm -rf "$tmp"' EXIT INT TERM
++
++check() {
++    local desc="$1" want="$2" got="$3"
++    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
++    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
++}
++
++# mutant <name> <sed expression> -> a mutated copy of the leg at $tmp/<name>/scripts/preflight/test-types-ratchet.sh
++mutant() {
++    mkdir -p "$tmp/$1/scripts/preflight"
++    sed "$2" "$LEG_REAL" > "$tmp/$1/scripts/preflight/test-types-ratchet.sh"
++}
++mutant real 's/^$//'
++mutant x4 's#check.cjs "$svc"#check.cjs "$svc" --update#'
++mutant r1 's#1) why="a NEW test-file type error[^"]*"#1) why="something"#'
++
++# run_with <name> -> the suite's output, with LEG_SH aimed at that leg copy and no install reachable
++run_with() {
++    LEG_SH="$tmp/$1/scripts/preflight/test-types-ratchet.sh" DEPS_PRESENT_ROOT="$tmp/no-install-here" \
++        bash "$SUITE" 2>&1 < /dev/null
++}
++# count_fail <output> <pattern> -> how many FAIL lines match the pattern
++count_fail() { printf '%s\n' "$1" | grep -c "^FAIL .*$2"; }
++
++# --- CELL 0 (CONTROL): the mutations really changed the leg ----------------------
++check "CONTROL both mutants differ from the real leg" "no no" \
++    "$(cmp -s "$tmp/x4/scripts/preflight/test-types-ratchet.sh" "$LEG_REAL" && echo yes || echo no) $(cmp -s "$tmp/r1/scripts/preflight/test-types-ratchet.sh" "$LEG_REAL" && echo yes || echo no)"
++
++out_real="$(run_with real)"
++out_x4="$(run_with x4)"
++out_r1="$(run_with r1)"
++
++# --- CELL 1 (RED at the tip): X4 turns the default-run stub cell red -------------
++check "X4 (an extra argument to the checker) fails the default-run stub cell" "1" \
++    "$(count_fail "$out_x4" 'the default run (no arguments) passes with all three checkers green')"
++
++# --- CELL 2 (RED at the tip): R1text turns the rc-1 wording cell red -------------
++check "R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell" "1" \
++    "$(count_fail "$out_r1" 'the rc-1 wording names a NEW test-file type error')"
++
++# --- CELL 3 (CONTROL, tip AND after): the unmutated leg fails neither cell -------
++check "CONTROL the unmutated leg fails neither of those two stub cells" "0 0" \
++    "$(count_fail "$out_real" 'the default run (no arguments) passes with all three checkers green') $(count_fail "$out_real" 'the rc-1 wording names a NEW test-file type error')"
++
++echo ""
++echo "ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: ${PASS} passed, ${FAIL} failed"
++(( FAIL == 0 ))
+diff --git a/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh b/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+index 107525ccb..d72555a12 100644
+--- a/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+@@ -188,7 +188,7 @@ mkstub() {  # mkstub <dir> <auth rc> <gateway rc> [vc-issuer rc, default 0]
+ 'use strict';
+ const fs = require('fs');
+ const svc = process.argv[2];
+-fs.appendFileSync('calls.log', svc + '\n');
++fs.appendFileSync('calls.log', process.argv.slice(2).join(' ') + '\n');
+ const f = 'rc/' + svc.replace(/\//g, '_');
+ const rc = fs.existsSync(f) ? parseInt(fs.readFileSync(f, 'utf8'), 10) : 0;
+ console.log('typecheck-tests: ' + svc + ' (stub, exit ' + rc + ')');
+@@ -212,6 +212,8 @@ expect "CONTROL the default run (no arguments) passes with all three checkers gr
+ stub 0 1
+ expect "🔴 the api-gateway's checker exiting 1 FAILS the default run, named (the fixture holds no baseline file, so a gate that needs one reads green)" \
+   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
++expect "🔴 KS-1527 the rc-1 wording names a NEW test-file type error (the one branch of the three that a rewording could change silently)" \
++  "yes" "$(has "$STUB_OUT" 'a NEW test-file type error')"
+ stub 0 2
+ expect "🔴 the api-gateway's checker exiting 2 (could not run) FAILS the default run, and the output says the check could not run" \
+   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/api-gateway')|$(has "$STUB_OUT" 'the check could not run')"
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS for preflight_test_types_ratchet_leg.test.sh - KS-1527: its stub cells
+4: # must catch a mutated leg with no compiler.
+5: # =============================================================================
+6: # The PR #1513 gate built two mutants of scripts/preflight/test-types-ratchet.sh
+7: # that survived every stub cell (only the real-checker cells, which need a
+8: # workspace install, caught the second):
+9: #   X4      `check.cjs "$svc"` becomes `check.cjs "$svc" --update` (which would
+10: #           LOWER the baseline on every push): the stub logged only the service,
+11: #           so an extra argument was invisible.
+12: #   R1text  the rc-1 `why` text replaced by "something": no cell pinned it.
+13: # This suite aims the other suite at each mutant (its LEG_SH variable) and at no
+14: # workspace install (DEPS_PRESENT_ROOT at a directory that does not exist, so the
+15: # real-checker cells cannot be what fails), then asks whether the NAMED stub cell
+16: # is among the FAIL lines. Nothing in the repository is changed.
+17: #
+18: # Usage: bash Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+19: # =============================================================================
+20: 
+21: set -uo pipefail
+22: 
+23: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+24: SUITE="${RATCHET_LEG_SUITE_SH:-$HERE/preflight_test_types_ratchet_leg.test.sh}"
+25: LEG_REAL="${RATCHET_LEG_REAL_SH:-$HERE/../preflight/test-types-ratchet.sh}"
+26: PASS=0; FAIL=0
+27: 
+28: [[ -f "$SUITE" ]] || { echo "FATAL: suite not found at $SUITE" >&2; exit 2; }
+29: [[ -f "$LEG_REAL" ]] || { echo "FATAL: leg not found at $LEG_REAL" >&2; exit 2; }
+30: 
+31: tmp="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1527.XXXXXX")"
+32: trap 'rm -rf "$tmp"' EXIT INT TERM
+33: 
+34: check() {
+35:     local desc="$1" want="$2" got="$3"
+36:     if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
+37:     else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
+38: }
+39: 
+40: # mutant <name> <sed expression> -> a mutated copy of the leg at $tmp/<name>/scripts/preflight/test-types-ratchet.sh
+41: mutant() {
+42:     mkdir -p "$tmp/$1/scripts/preflight"
+43:     sed "$2" "$LEG_REAL" > "$tmp/$1/scripts/preflight/test-types-ratchet.sh"
+44: }
+45: mutant real 's/^$//'
+46: mutant x4 's#check.cjs "$svc"#check.cjs "$svc" --update#'
+47: mutant r1 's#1) why="a NEW test-file type error[^"]*"#1) why="something"#'
+48: 
+49: # run_with <name> -> the suite's output, with LEG_SH aimed at that leg copy and no install reachable
+50: run_with() {
+51:     LEG_SH="$tmp/$1/scripts/preflight/test-types-ratchet.sh" DEPS_PRESENT_ROOT="$tmp/no-install-here" \
+52:         bash "$SUITE" 2>&1 < /dev/null
+53: }
+54: # count_fail <output> <pattern> -> how many FAIL lines match the pattern
+55: count_fail() { printf '%s\n' "$1" | grep -c "^FAIL .*$2"; }
+56: 
+57: # --- CELL 0 (CONTROL): the mutations really changed the leg ----------------------
+58: check "CONTROL both mutants differ from the real leg" "no no" \
+59:     "$(cmp -s "$tmp/x4/scripts/preflight/test-types-ratchet.sh" "$LEG_REAL" && echo yes || echo no) $(cmp -s "$tmp/r1/scripts/preflight/test-types-ratchet.sh" "$LEG_REAL" && echo yes || echo no)"
+60: 
+61: out_real="$(run_with real)"
+62: out_x4="$(run_with x4)"
+63: out_r1="$(run_with r1)"
+64: 
+65: # --- CELL 1 (RED at the tip): X4 turns the default-run stub cell red -------------
+66: check "X4 (an extra argument to the checker) fails the default-run stub cell" "1" \
+67:     "$(count_fail "$out_x4" 'the default run (no arguments) passes with all three checkers green')"
+68: 
+69: # --- CELL 2 (RED at the tip): R1text turns the rc-1 wording cell red -------------
+70: check "R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell" "1" \
+71:     "$(count_fail "$out_r1" 'the rc-1 wording names a NEW test-file type error')"
+72: 
+73: # --- CELL 3 (CONTROL, tip AND after): the unmutated leg fails neither cell -------
+74: check "CONTROL the unmutated leg fails neither of those two stub cells" "0 0" \
+75:     "$(count_fail "$out_real" 'the default run (no arguments) passes with all three checkers green') $(count_fail "$out_real" 'the rc-1 wording names a NEW test-file type error')"
+76: 
+77: echo ""
+78: echo "ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: ${PASS} passed, ${FAIL} failed"
+79: (( FAIL == 0 ))
+
+### FILE AT HEAD: Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS for preflight leg 16: the test-file type-check ratchet runs at push time (KS-1487)
+4: # =============================================================================
+5: # KS-1000 added `node scripts/typecheck-tests/check.cjs services/auth`, a type-check of the auth
+6: # test files against a baseline that can only shrink. Nothing in the pre-push preflight ran it, so a
+7: # push that added a test-file type error was accepted: the ratchet ran only inside the auth vitest
+8: # suite, by convention. A ratchet nothing runs at the gate is decoration. Leg 16 runs it.
+9: #
+10: # Two things are proved here, and neither is a grep of preflight.sh:
+11: #
+12: #   WIRING   the REAL step-16 block of preflight.sh is EXECUTED under the REAL helpers (step(),
+13: #            run_delegated(), _leg_concluded()) with `bash` stubbed. A leg whose script fails must be
+14: #            NAMED as a failed leg; a script that skips must be counted as skipped, not as run; a
+15: #            comment can satisfy neither. The step headers are parsed too: a 16th leg with a stale
+16: #            denominator would abort every seat's push.
+17: #   BEHAVIOUR the real script runs the REAL checker over throwaway fixture services: a planted type
+18: #            error must fail it, a clean service must pass it (the control), and a service that
+19: #            examines no test file must fail it rather than read as clean (KS-676's shape).
+20: #
+21: # The script takes its services as arguments and reads no ambient variable, so nothing a caller
+22: # exported can quietly point the gate at a clean directory (the KS-1261 class).
+23: #
+24: # Usage: bash Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+25: # =============================================================================
+26: 
+27: set -uo pipefail
+28: 
+29: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+30: DEV="$(cd "$HERE/../.." && pwd)"
+31: PREFLIGHT="${PREFLIGHT_SH:-$HERE/../preflight/preflight.sh}"
+32: LEG="${LEG_SH:-$HERE/../preflight/test-types-ratchet.sh}"
+33: PASS=0
+34: FAIL=0
+35: 
+36: expect() {
+37:   local desc="$1" want="$2" got="$3"
+38:   if [[ "$got" == "$want" ]]; then
+39:     PASS=$((PASS + 1)); printf 'ok   %s\n' "$desc"
+40:   else
+41:     FAIL=$((FAIL + 1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"
+42:   fi
+43: }
+44: has() {  # has <haystack> <needle> -> yes|no   (fixed string, no regex)
+45:   case "$1" in *"$2"*) echo yes ;; *) echo no ;; esac
+46: }
+47: 
+48: tmp="$(mktemp -d "${TMPDIR:-/tmp}/ks1487-leg.XXXXXX")"
+49: trap 'rm -rf "$tmp"' EXIT INT TERM
+50: 
+51: # -----------------------------------------------------------------------------
+52: # WIRING: the product's own lines.
+53: #   helpers.sh  from `fail=0` up to the first leg: the state and the real step() / run_delegated().
+54: #   block.sh    leg 16 itself: from its step() header to the `echo ""` that closes the last leg.
+55: # -----------------------------------------------------------------------------
+56: awk '/^fail=0$/{on=1} /^step "1\//{on=0} on' "$PREFLIGHT" > "$tmp/helpers.sh"
+57: awk '/^step "16\//{on=1} on && /^echo ""$/{exit} on' "$PREFLIGHT" > "$tmp/block.sh"
+58: expect "the real preflight.sh yields a non-empty helper block (the extraction is live)" "yes" \
+59:   "$([ -s "$tmp/helpers.sh" ] && echo yes || echo no)"
+60: expect "🔴 preflight.sh has a leg 16 block (a 16th step() header exists)" "yes" \
+61:   "$([ -s "$tmp/block.sh" ] && echo yes || echo no)"
+62: 
+63: # run_block <stub rc> <stub stdout>  ->  "<rc of the block> <failed legs> <skipped legs> <ran legs> <script seen>"
+64: run_block() {
+65:   local rc="$1" say="$2"
+66:   ( cd "$tmp" || exit 99
+67:     # shellcheck disable=SC1091
+68:     . ./helpers.sh
+69:     : > "$tmp/stub_seen"
+70:     # A function named bash shadows the command, so the block's `bash scripts/preflight/...` lands here. run_delegated
+71:     # calls it inside a command substitution, so what it saw is recorded in a FILE: a variable would die with the subshell.
+72:     bash() { printf '%s' "$*" > "$tmp/stub_seen"; [ -n "$say" ] && printf '%s\n' "$say"; return "$rc"; }
+73:     # shellcheck disable=SC1091
+74:     . ./block.sh >/dev/null 2>&1
+75:     _leg_concluded
+76:     printf '%s|%s|%s|%s' "$(printf '%s' "${FAILED_LEGS:-}" | tr -d ' ')" \
+77:       "$(printf '%s' "${SKIPPED_ADVISORY:-}" | tr -d ' ')" "$(printf '%s' "${RAN_LEGS:-}" | tr -d ' ')" "$(cat "$tmp/stub_seen")"
+78:   )
+79: }
+80: 
+81: out="$(run_block 1 'NEW type errors (not in the baseline):')"
+82: expect "🔴 a failing leg-16 script FAILS the run and the verdict can name leg 16" "16" "$(printf '%s' "$out" | cut -d'|' -f1)"
+83: expect "🔴 leg 16 runs scripts/preflight/test-types-ratchet.sh" "yes" \
+84:   "$(has "$(printf '%s' "$out" | cut -d'|' -f4)" 'scripts/preflight/test-types-ratchet.sh')"
+85: 
+86: out="$(run_block 0 '')"
+87: expect "CONTROL a passing leg-16 script fails nothing, skips nothing and counts as RAN" "||16" \
+88:   "$(printf '%s' "$out" | cut -d'|' -f1)|$(printf '%s' "$out" | cut -d'|' -f2)|$(printf '%s' "$out" | cut -d'|' -f3)"
+89: 
+90: out="$(run_block 0 'SKIP (advisory) — workspace install missing (leg 1 reports it)')"
+91: expect "🔴 a leg-16 script that SKIPS is counted as skipped (advisory), not failed and not as run" "|16|" \
+92:   "$(printf '%s' "$out" | cut -d'|' -f1)|$(printf '%s' "$out" | cut -d'|' -f2)|$(printf '%s' "$out" | cut -d'|' -f3)"
+93: 
+94: # The step headers: TOTAL_LEGS and every `N/TOTAL` agree, and the legs are 1..TOTAL in order with 16 last.
+95: total="$(awk -F= '$1 == "TOTAL_LEGS" {print $2; exit}' "$PREFLIGHT")"
+96: hdrs="$(awk '/^step "[0-9]+\/[0-9]+ /{ if (match($0, /"[0-9]+\/[0-9]+/)) print substr($0, RSTART + 1, RLENGTH - 1) }' "$PREFLIGHT")"
+97: nums="$(printf '%s\n' "$hdrs" | awk -F/ '{printf "%s ", $1}')"
+98: dens="$(printf '%s\n' "$hdrs" | awk -F/ '{print $2}' | sort -u | tr '\n' ' ')"
+99: expect "🔴 TOTAL_LEGS is 16" "16" "$total"
+100: expect "🔴 every step header's denominator is TOTAL_LEGS (a stale one aborts every push)" "16 " "$dens"
+101: expect "the legs run 1..16 in order and leg 16 is last" "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 " "$nums"
+102: expect "CONTROL the header parser reads headers at all (it found 16)" "16" "$(printf '%s\n' "$hdrs" | grep -c .)"
+103: 
+104: # -----------------------------------------------------------------------------
+105: # BEHAVIOUR: the real script, the real checker, throwaway fixture services.
+106: # -----------------------------------------------------------------------------
+107: mkfixture() {  # mkfixture <dir> <clean|error|empty>
+108:   local dir="$1" kind="$2"
+109:   mkdir -p "$dir/src/__tests__"
+110:   cat > "$dir/tsconfig.test.json" <<'JSON'
+111: { "compilerOptions": { "strict": true, "noEmit": true, "target": "ES2020", "module": "commonjs", "types": [], "skipLibCheck": true },
+112:   "include": ["src/**/*.ts"] }
+113: JSON
+114:   case "$kind" in
+115:     clean) printf 'export const n: number = 1;\n' > "$dir/src/__tests__/a.test.ts" ;;
+116:     error) printf "export const n: number = 'not a number';\n" > "$dir/src/__tests__/a.test.ts" ;;
+117:     empty) printf 'export const n: number = 1;\n' > "$dir/src/b.ts"; rmdir "$dir/src/__tests__" ;;
+118:   esac
+119: }
+120: mkfixture "$tmp/ks1487-svc-clean" clean
+121: mkfixture "$tmp/ks1487-svc-error" error
+122: mkfixture "$tmp/ks1487-svc-empty" empty
+123: 
+124: # leg <args...>  ->  sets LEG_OUT and LEG_RC. Runs from the repo's Dev root, as preflight does.
+125: leg() { LEG_OUT="$(cd "$DEV" && bash "$LEG" "$@" 2>&1)"; LEG_RC=$?; }
+126: 
+127: leg "$tmp/ks1487-svc-error"
+128: expect "🔴 a planted test-file type error FAILS the leg (rc 1)" "1" "$LEG_RC"
+129: expect "🔴 ...and the output names the error, so the pusher can see what to fix" "yes yes" \
+130:   "$(has "$LEG_OUT" 'NEW type errors') $(has "$LEG_OUT" 'TS2322')"
+131: 
+132: leg "$tmp/ks1487-svc-clean"
+133: expect "CONTROL a clean service passes the same leg (rc 0)" "0" "$LEG_RC"
+134: expect "CONTROL ...and the checker actually ran (its own summary line is in the output)" "yes" \
+135:   "$(has "$LEG_OUT" 'typecheck-tests:')"
+136: 
+137: leg "$tmp/ks1487-svc-empty"
+138: expect "🔴 a service that examines NO test file fails the leg, it does not read as clean (KS-676)" "1" "$LEG_RC"
+139: expect "🔴 ...and says so" "yes" "$(has "$LEG_OUT" 'NONE under __tests__')"
+140: 
+141: leg "$tmp/ks1487-svc-error" "$tmp/ks1487-svc-clean"
+142: rc_a="$LEG_RC"; out_a="$LEG_OUT"
+143: expect "🔴 an error in the FIRST service fails the leg, and the second is still checked (no early exit)" "1 yes yes" \
+144:   "$rc_a $(has "$out_a" 'TS2322') $(has "$out_a" 'ks1487-svc-clean')"
+145: leg "$tmp/ks1487-svc-clean" "$tmp/ks1487-svc-error"
+146: expect "🔴 an error in the LAST service fails the leg too (a pass cannot be inherited from an earlier one)" "1" "$LEG_RC"
+147: 
+148: leg "$tmp/ks1487-no-such-directory"
+149: expect "🔴 a service directory that does not exist FAILS the leg, it is not skipped" "1" "$LEG_RC"
+150: 
+151: # The install precondition. No workspace install is an ENVIRONMENT condition that leg 1 already refuses; this
+152: # leg must say so and SKIP (advisory) rather than fail on a compiler that is not there, and it must not run.
+153: LEG_OUT="$(cd "$DEV" && DEPS_PRESENT_ROOT="$tmp/no-install-here" bash "$LEG" "$tmp/ks1487-svc-error" 2>&1)"; LEG_RC=$?
+154: expect "🔴 with no workspace install the leg SKIPs (advisory), exits 0, names leg 1, and the checker did NOT run" "0 yes yes no" \
+155:   "$LEG_RC $(has "$LEG_OUT" 'SKIP (advisory)') $(has "$LEG_OUT" 'Leg 1') $(has "$LEG_OUT" 'typecheck-tests:')"
+156: LEG_OUT="$(cd "$DEV" && bash "$LEG" "$tmp/ks1487-svc-error" 2>&1)"; LEG_RC=$?
+157: expect "CONTROL the same planted error with the install present is NOT skipped (so the skip above is the precondition, not the error)" "1 no" \
+158:   "$LEG_RC $(has "$LEG_OUT" 'SKIP (advisory)')"
+159: 
+160: # The committed tree itself: no arguments, so the default service. It must pass, or every push is refused.
+161: leg
+162: expect "the committed tree passes the leg with no arguments (rc 0)" "0" "$LEG_RC"
+163: case "$LEG_OUT" in
+164:   *'SKIP (advisory)'*) printf 'note no workspace install here: the default-service run skipped, so the REAL checker lines are not asserted (the stub cells below assert the default list without an install)\n' ;;
+165:   *) expect "🔴 ...and the default list is ALL THREE gated services, auth, the api-gateway and vc-issuer (KS-1351), each with its own checker line" "yes yes yes" \
+166:        "$(has "$LEG_OUT" 'typecheck-tests: auth (') $(has "$LEG_OUT" 'typecheck-tests: api-gateway (') $(has "$LEG_OUT" 'typecheck-tests: vc-issuer (')"
+167:      expect "🔴 ...and the checker ran exactly three times, once per gated service (a fourth would be an ungated change, one fewer a dropped gate)" "3" \
+168:        "$(printf '%s\n' "$LEG_OUT" | grep -c '^typecheck-tests: ')"
+169:      expect "...and all three read 0 new and 0 stale against their baselines" "3" \
+170:        "$(printf '%s\n' "$LEG_OUT" | grep -c '0 new; 0 stale baseline entries')"
+171:      expect "🔴 ...and the verdict counts all three services" "yes" "$(has "$LEG_OUT" 'OK — 3 service(s)')" ;;
+172: esac
+173: 
+174: # -----------------------------------------------------------------------------
+175: # THE DEFAULT RUN WITHOUT AN INSTALL (KS-1520 a, b, c)
+176: # -----------------------------------------------------------------------------
+177: # The default-list cells above run the REAL checker, which needs a compiler, so without a workspace install the leg SKIPs and
+178: # they assert nothing. These run a COPY of the real leg from a fixture Dev root whose checker is a STUB: it records which
+179: # service it was asked about and exits with the code the fixture gives it. They pin the leg's OWN logic - which services the
+180: # default run gates, and that a non-zero code from ANY of them, the api-gateway by name, fails the run - and they need no
+181: # compiler. The stub is not the checker; the cells above prove the checker.
+182: mkstub() {  # mkstub <dir> <auth rc> <gateway rc> [vc-issuer rc, default 0]
+183:   local d="$1"
+184:   rm -rf "$d"; mkdir -p "$d/scripts/preflight" "$d/scripts/typecheck-tests" "$d/rc"
+185:   cp "$LEG" "$d/scripts/preflight/test-types-ratchet.sh"
+186:   printf '#!/usr/bin/env bash\nexit 0\n' > "$d/scripts/preflight/deps-present.sh"
+187:   cat > "$d/scripts/typecheck-tests/check.cjs" <<'JS'
+188: 'use strict';
+189: const fs = require('fs');
+190: const svc = process.argv[2];
+191: fs.appendFileSync('calls.log', process.argv.slice(2).join(' ') + '\n');
+192: const f = 'rc/' + svc.replace(/\//g, '_');
+193: const rc = fs.existsSync(f) ? parseInt(fs.readFileSync(f, 'utf8'), 10) : 0;
+194: console.log('typecheck-tests: ' + svc + ' (stub, exit ' + rc + ')');
+195: process.exit(rc);
+196: JS
+197:   printf '%s' "$2" > "$d/rc/services_auth"
+198:   printf '%s' "$3" > "$d/rc/services_api-gateway"
+199:   printf '%s' "${4:-0}" > "$d/rc/services_vc-issuer"
+200: }
+201: stub() {  # stub <auth rc> <gateway rc> [vc-issuer rc]  ->  STUB_RC STUB_OUT STUB_CALLS. The default run: NO arguments, no baseline file anywhere.
+202:   local d="$tmp/ks1520-root"
+203:   mkstub "$d" "$1" "$2" "${3:-0}"
+204:   STUB_OUT="$(cd "$d" && bash scripts/preflight/test-types-ratchet.sh 2>&1)"; STUB_RC=$?
+205:   STUB_CALLS="$([ -f "$d/calls.log" ] && tr '\n' ' ' < "$d/calls.log" || echo none)"
+206: }
+207: 
+208: stub 0 0
+209: expect "CONTROL the default run (no arguments) passes with all three checkers green, and the stub was LIVE: asked about exactly auth, the api-gateway, then vc-issuer" \
+210:   "0|services/auth services/api-gateway services/vc-issuer |yes" \
+211:   "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'OK — 3 service(s)')"
+212: stub 0 1
+213: expect "🔴 the api-gateway's checker exiting 1 FAILS the default run, named (the fixture holds no baseline file, so a gate that needs one reads green)" \
+214:   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
+215: expect "🔴 KS-1527 the rc-1 wording names a NEW test-file type error (the one branch of the three that a rewording could change silently)" \
+216:   "yes" "$(has "$STUB_OUT" 'a NEW test-file type error')"
+217: stub 0 2
+218: expect "🔴 the api-gateway's checker exiting 2 (could not run) FAILS the default run, and the output says the check could not run" \
+219:   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/api-gateway')|$(has "$STUB_OUT" 'the check could not run')"
+220: stub 0 3
+221: expect "🔴 ...and so does an exit the leg does not know (3), which it names as unexpected" \
+222:   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'an unexpected exit')"
+223: stub 1 0
+224: expect "🔴 auth failing fails the default run AND the api-gateway and vc-issuer are still checked after it (no early exit)" \
+225:   "1|services/auth services/api-gateway services/vc-issuer |yes" "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'FAIL — services/auth')"
+226: stub 1 1
+227: expect "🔴 both failing: the run fails and the output names BOTH services" "1|yes|yes" \
+228:   "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/auth')|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
+229: stub 0 0 1
+230: expect "🔴 KS-1351: vc-issuer's checker exiting 1 FAILS the default run, named — the third service is a real gate, not a passenger" \
+231:   "1|yes|services/auth services/api-gateway services/vc-issuer " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$STUB_CALLS"
+232: stub 0 0 2
+233: expect "🔴 KS-1351: ...and vc-issuer exiting 2 (could not run) fails it too, and says so" \
+234:   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$(has "$STUB_OUT" 'the check could not run')"
+235: stub 0 1
+236: expect "🔴 the closing advice does not tell the pusher to fix 'the test file' (the file named can be a PRODUCT file the tests import)" \
+237:   "no|yes" "$(has "$STUB_OUT" 'in the test file')|$(has "$STUB_OUT" 'a product file')"
+238: 
+239: # No ambient list. The script header says no environment variable is read; this is the cell that holds it to that. It lists the
+240: # NAME of every $var / ${var expansion outside a comment line and compares the set with the leg's own five locals, so a list read
+241: # from an exported variable (whatever its name) adds a name and fails. The plant proves the extraction can see such a read.
+242: varnames_of() {  # varnames_of <file>  ->  sorted, unique names of every expansion outside comment lines
+243:   grep -v '^[[:space:]]*#' "$1" | grep -oE '\$\{?[A-Za-z_][A-Za-z0-9_]*' | sed -e 's/^\$//' -e 's/^{//' | LC_ALL=C sort -u | tr '\n' ' '
+244: }
+245: expect "🔴 the leg expands only its own five locals (a service list read from the environment would add a name: the KS-1261 class)" \
+246:   "DEV_ROOT failed rc svc why " "$(varnames_of "$LEG")"
+247: { cat "$LEG"; printf '%s\n' 'planted_list=${TYPECHECK_SERVICES:-services/auth services/api-gateway services/vc-issuer}'; } > "$tmp/ks1520-planted.sh"
+248: expect "CONTROL the plant changed the file (so the control below is not comparing a file with itself)" "yes" \
+249:   "$(cmp -s "$LEG" "$tmp/ks1520-planted.sh" && echo no || echo yes)"
+250: expect "CONTROL the same extraction SEES a planted environment read (so the cell above could fail)" "yes" \
+251:   "$(has "$(varnames_of "$tmp/ks1520-planted.sh")" 'TYPECHECK_SERVICES')"
+252: 
+253: echo ""
+254: echo "preflight_test_types_ratchet_leg: $PASS passed, $FAIL failed"
+255: [ "$FAIL" -eq 0 ]
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1697,
+ "head_sha": "6e45c854a46fe8cb406d8798cc0406fe5fc87bb0",
+ "pr_tip_now": "6e45c854a46fe8cb406d8798cc0406fe5fc87bb0",
+ "head_mode": "tip",
+ "merge_base": "c2505d5c6fe0daf92b5f4dae37e6a0436a907c2f",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh",
+   "added": "79",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh",
+   "added": "3",
+   "deleted": "1"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh",
+  "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh"
+ ],
+ "product_files": [],
+ "diff_stat": {
+  "files": 2,
+  "added": 82,
+  "deleted": 1
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh",
+   "rc": 0,
+   "passed": null,
+   "failed": 0,
+   "tail": "the real leg\nok   X4 (an extra argument to the checker) fails the default-run stub cell\nok   R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell\nok   CONTROL the unmutated leg fails neither of those two stub cells\n\nks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: 4 passed, 0 failed"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh",
+   "rc": 0,
+   "passed": null,
+   "failed": 0,
+   "tail": "e environment would add a name: the KS-1261 class)\nok   CONTROL the plant changed the file (so the control below is not comparing a file with itself)\nok   CONTROL the same extraction SEES a planted environment read (so the cell above could fail)\n\npreflight_test_types_ratchet_leg: 39 passed, 0 failed"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh",
+   "rc": 0,
+   "passed": null,
+   "failed": 0,
+   "tail": "the real leg\nok   X4 (an extra argument to the checker) fails the default-run stub cell\nok   R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell\nok   CONTROL the unmutated leg fails neither of those two stub cells\n\nks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: 4 passed, 0 failed"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh",
+   "rc": 0,
+   "passed": null,
+   "failed": 0,
+   "tail": "e environment would add a name: the KS-1261 class)\nok   CONTROL the plant changed the file (so the control below is not comparing a file with itself)\nok   CONTROL the same extraction SEES a planted environment read (so the cell above could fail)\n\npreflight_test_types_ratchet_leg: 39 passed, 0 failed"
+  }
+ ],
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 64
+}

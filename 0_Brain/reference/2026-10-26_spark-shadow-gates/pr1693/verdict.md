@@ -1,0 +1,14 @@
+# Spark SHADOW gate, PR #1693 (KS-1391)
+- Head: 0b880d125964e3cece4bb29c431297e7b6ead446 (== refs/pull/1693/head at run: tip). Base: merge-base with develop 28dac5c12. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 2, +31/-0; product files: 1.
+  - targeted on head: ks1391-issuer-declares-a-test-script.test.ts rc=0 passed=3 failed=0
+  - targeted on base product + head tests: ks1391-issuer-declares-a-test-script.test.ts rc=1 passed=2 failed=1
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: GO WITH NOTES. Valid JSON first attempt: True. Wall 29.4 s, prompt 5715 tok, completion 827 tok.
+- Findings (5), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Note: The new test file is a meta-test that pins the package.json content rather than exercising the actual component assertions, so it does not verify the 12 assertions the ticket references actually run.  [evidence quote found in input: True]
+  - Note: The ticket's acceptance criterion about a planted failure turning the command red is not covered by any test in the PR; the new test only checks the script string, not the failure behavior of the suit  [evidence quote found in input: True]
+  - Note: The ticket's acceptance criterion about stating the intended unit-test posture for other frontends is not addressed by the PR; the PR only adds a test script to issuer, leaving the other five frontend  [evidence quote found in input: True]
+  - Note: The new test's control C1 uses arrayContaining, which does not pin the exact set of scripts, so it would pass even if an unintended script were added or removed, weakening the control's purpose.  [evidence quote found in input: True]
+  - Note: The new test file is placed in the same __tests__ directory as the existing component specs, so running vitest will execute both the meta-test and the component tests, but the PR does not verify the c  [evidence quote found in input: False]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

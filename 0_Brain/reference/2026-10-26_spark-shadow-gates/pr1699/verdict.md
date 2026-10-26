@@ -1,0 +1,13 @@
+# Spark SHADOW gate, PR #1699 (KS-1524)
+- Head: c189e242a37791005b1cff60ab4860d6df6332f4 (== refs/pull/1699/head at run: tip). Base: merge-base with develop 18ffc05cd. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 1, +8/-0; product files: 0.
+  - targeted on head: ks1510-document-lookup-logs-the-thrown-error.test.ts rc=0 passed=9 failed=0
+  - targeted on base product + head tests: ks1510-document-lookup-logs-the-thrown-error.test.ts rc=0 passed=9 failed=0
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: NO GO. Valid JSON first attempt: True. Wall 46.9 s, prompt 6017 tok, completion 1309 tok.
+- Findings (4), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Major: The new test L5 is red only by absence (the assertion on the exact logged text would fail on base because the base logs nothing), not by a behavioral difference in the production code, so it does not   [evidence quote found in input: False]
+  - Major: The new test L5 does not actually pin the 'exactly its message, not its stack' property because the test double (the logger spy) is more permissive than the real logger: the spy's mockImplementation r  [evidence quote found in input: True]
+  - Minor: The new test L5 is redundant with the existing L2 test (which already asserts the exact logged text for a thrown string) and does not add coverage for the Error branch's exact text beyond what L1 alre  [evidence quote found in input: False]
+  - Note: The test file's comment at line 96 claims that L1 asserts only that the text contains ECONNREFUSED, which is true, but the comment does not mention that L5 is the only test that pins the exact message  [evidence quote found in input: True]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

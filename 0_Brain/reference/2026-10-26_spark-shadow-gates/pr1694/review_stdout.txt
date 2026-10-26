@@ -1,0 +1,49 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 4270, "total_tokens": 5519, "completion_tokens": 1249, "prompt_tokens_details": {"cached_tokens": 1024, "multimodal_tokens": null}}, "seconds": 39.2, "schema_errors": []}], "prompt_tokens": 4270, "completion_tokens": 1249, "seconds": 39.2, "think": false, "valid": true}
+{
+ "findings": [
+  {
+   "severity": "Major",
+   "claim": "The new `**/__tests__` pattern in .dockerignore will exclude the test file that contains the new test itself from the build context, but the test only checks the literal line exists in the file, not that the pattern actually excludes anything from the build context, so the claimed behavior (test sources no longer ship in runtime images) is not verified by any test.",
+   "evidence": "Blockchain/Dev/.dockerignore:14 `**/__tests__`; Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts:20 `expect(lines).toContain('**/__tests__');`",
+   "test_or_reason": "The test only asserts the string is present in the .dockerignore file; it does not run docker build or check the build context, so it cannot prove the pattern actually excludes __tests__ directories or that the build still works without those files.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Major",
+   "claim": "The PR does not verify the ticket's acceptance criterion: 'Verify by rebuilding after a shared-test-only change and showing that the set of images which rebuild shrinks' \u2014 no build or rebuild measurement is performed or recorded in the PR.",
+   "evidence": "TICKET Ask: 'Verify by rebuilding after a shared-test-only change and showing that the set of images which rebuild shrinks - the measurement above is the before.'; facts.json not_run: ['live/integration runs', 'security scan', 'network or deployed service']",
+   "test_or_reason": "The only test added is a static file-content check; no build is run, so the acceptance criterion is not met.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Major",
+   "claim": "The new `**/__tests__` pattern will exclude the test file itself from the build context, but the test file is under `packages/shared/src/__tests__/` and is tracked in the repo; if the build context is used to run tests or if the test file is needed at build time, this could break the build or the test suite.",
+   "evidence": "Blockchain/Dev/.dockerignore:14 `**/__tests__`; Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts:1 (file path) `Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts`",
+   "test_or_reason": "The pattern matches any directory named __tests__ at any depth, including the one containing the new test; the PR does not add a negation to re-include it, and no build is run to confirm the build still succeeds.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Minor",
+   "claim": "The test's path resolution to the .dockerignore file is fragile: it assumes the test file is exactly four levels below Blockchain/Dev, but the test is in packages/shared/src/__tests__/, which is only three levels below Blockchain/Dev (packages/shared/src/__tests__ -> src -> shared -> packages -> Blockchain/Dev is four levels up, but the comment says 'four levels up' which is correct, yet the test would break if the file moves).",
+   "evidence": "Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts:15 `// packages/shared/src/__tests__ -> four levels up is Blockchain/Dev, the build-context root`; line 16 `const lines = readFileSync(resolve(here, '../../../../.dockerignore'), 'utf8').split('\\n');`",
+   "test_or_reason": "The path is hard-coded to the current location; if the test file is moved, the test will fail to find the .dockerignore, but this is a maintainability issue, not a functional defect in the current state.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Minor",
+   "claim": "The test does not verify that the `**/__tests__` pattern actually excludes anything from the build context; it only checks the literal string is present, so it does not pin the behavior the ticket asks for (test sources not shipping in runtime images).",
+   "evidence": "Blockchain/Dev/packages/shared/src/__tests__/ks1289-dockerignore-excludes-nested-tests.test.ts:20 `expect(lines).toContain('**/__tests__');`",
+   "test_or_reason": "The test is a static check; it does not run docker build or inspect the build context, so it cannot prove the exclusion works.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The ticket's measured build cost (1h50m of 2h10m for 23 of 29 images) is not re-measured or verified by the PR; the PR only adds a pattern and a static test, so the claimed improvement is not demonstrated.",
+   "evidence": "TICKET Measured: '2026-09-23 kintsugi deploy (Seat B 23rd). Two files under packages/shared/src/__tests__/ were the only changed input for 23 of the 29 rebuilt images - roughly 1 h 50 min of a 2 h 10 min build'; facts.json not_run: ['live/integration runs']",
+   "test_or_reason": "No build or timing data is added in the PR; the acceptance criterion of showing rebuild shrink is not met.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "NO GO"
+}

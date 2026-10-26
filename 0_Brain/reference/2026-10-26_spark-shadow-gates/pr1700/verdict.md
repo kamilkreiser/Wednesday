@@ -1,0 +1,12 @@
+# Spark SHADOW gate, PR #1700 (KS-1649)
+- Head: 4f951814deb376a92024e05100b30a752636c2cc (== refs/pull/1700/head at run: tip). Base: merge-base with develop 28e2d27de. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 2, +33/-1; product files: 1.
+  - targeted on head: ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts rc=0 passed=4 failed=0
+  - targeted on base product + head tests: ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts rc=1 passed=2 failed=2
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: NO GO. Valid JSON first attempt: False. Wall 60.1 s, prompt 33577 tok, completion 1829 tok.
+- Findings (3), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Major: The PR changes the developer portal documentation before the code change (#1613) that introduces the 3,000 req/hour Platform S connector key rate limit has landed, contradicting the ticket's explicit   [evidence quote found in input: True]
+  - Major: The new test suite does not verify that the documentation change is gated on the actual code behavior; it only checks the HTML text, so it would pass even if the 3,000 req/hour behavior is not impleme  [evidence quote found in input: True]
+  - Minor: The test file's docstring claims the change is correct only after #1613 lands, but the test itself does not enforce or check that #1613 has landed, so the test would pass even if the code change is no  [evidence quote found in input: False]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

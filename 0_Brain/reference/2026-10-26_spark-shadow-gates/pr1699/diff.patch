@@ -1,0 +1,19 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1510-document-lookup-logs-the-thrown-error.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1510-document-lookup-logs-the-thrown-error.test.ts
+index e1f6fdbd2..19d79dc59 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1510-document-lookup-logs-the-thrown-error.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1510-document-lookup-logs-the-thrown-error.test.ts
+@@ -93,6 +93,14 @@ describe('KS-1510 document-lookup logs the thrown error', () => {
+     expect(logged()).toEqual([[CONTEXT, { error: 'platform registry exploded' }]]);
+   });
+ 
++  // KS-1524 (b): an Error logs its message and ONLY its message. L1 asserts just that the text contains ECONNREFUSED, so logging err.stack or String(err) stays green there.
++  it('RED KS-1510 L5 - a thrown Error logs exactly its message, not its stack and not String(err)', async () => {
++    stubQueryRejecting(new Error('platform registry exploded'));
++    const r = await lookup('?hash=abc');
++    expect([r.status, r.body]).toEqual([500, CONSTANT_BODY]);
++    expect(logged()).toEqual([[CONTEXT, { error: 'platform registry exploded' }]]);
++  });
++
+   it('RED KS-1510 L3 - a thrown object logs its TYPE and FIELD NAMES, never its values', async () => {
+     stubQueryRejecting({ code: '57P01', detail: 'SECRET-DETAIL-VALUE' });
+     const r = await lookup('?documentId=d1');

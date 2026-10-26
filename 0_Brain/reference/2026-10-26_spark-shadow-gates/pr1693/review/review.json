@@ -1,0 +1,67 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 5715,
+     "total_tokens": 6542,
+     "completion_tokens": 827,
+     "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "multimodal_tokens": null
+     }
+    },
+    "seconds": 29.4,
+    "schema_errors": []
+   }
+  ],
+  "prompt_tokens": 5715,
+  "completion_tokens": 827,
+  "seconds": 29.4,
+  "think": false,
+  "valid": true
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Note",
+    "claim": "The new test file is a meta-test that pins the package.json content rather than exercising the actual component assertions, so it does not verify the 12 assertions the ticket references actually run.",
+    "evidence": "Blockchain/Dev/frontend/issuer/src/__tests__/ks1391-issuer-declares-a-test-script.test.ts:19-20 `expect(pkg.scripts.test).toBe('vitest run');`",
+    "test_or_reason": "The test only reads package.json; it does not import or run blockchain-card.test.tsx or provenance-timeline.test.tsx, so the acceptance criterion 'npm test -w frontend/issuer runs and reports 12 passing assertions' is not directly pinned.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The ticket's acceptance criterion about a planted failure turning the command red is not covered by any test in the PR; the new test only checks the script string, not the failure behavior of the suite.",
+    "evidence": "Blockchain/Dev/frontend/issuer/src/__tests__/ks1391-issuer-declares-a-test-script.test.ts:19-20 `expect(pkg.scripts.test).toBe('vitest run');`",
+    "test_or_reason": "No test in the PR introduces a planted failure or asserts that a failing spec causes a non-zero exit; the acceptance criterion is only implicitly satisfied by the script being 'vitest run'.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The ticket's acceptance criterion about stating the intended unit-test posture for other frontends is not addressed by the PR; the PR only adds a test script to issuer, leaving the other five frontends' posture undocumented.",
+    "evidence": "Blockchain/Dev/frontend/issuer/package.json:11 `\"test\": \"vitest run\"`",
+    "test_or_reason": "The diff only touches issuer/package.json and the new test file; no documentation or change addresses the other frontends' unit-test posture.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The new test's control C1 uses arrayContaining, which does not pin the exact set of scripts, so it would pass even if an unintended script were added or removed, weakening the control's purpose.",
+    "evidence": "Blockchain/Dev/frontend/issuer/src/__tests__/ks1391-issuer-declares-a-test-script.test.ts:24 `expect(Object.keys(pkg.scripts)).toEqual(expect.arrayContaining(['dev', 'build', 'preview', 'lint', 'check:bundle']));`",
+    "test_or_reason": "arrayContaining only checks presence, not absence; a regression that removes 'test' would be caught by R1, but a regression that adds an extra script would not fail C1.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The new test file is placed in the same __tests__ directory as the existing component specs, so running vitest will execute both the meta-test and the component tests, but the PR does not verify the component tests pass or that the total is 12 assertions.",
+    "evidence": "Blockchain/Dev/frontend/issuer/src/__tests__/ks1391-issuer-declares-a-test-script.test.ts:1-30 (entire file)",
+    "test_or_reason": "facts.json targeted_on_head only reports 3 tests from the new file; the component specs are not listed in the run output, so their execution and assertion count are unverified.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+ }
+}

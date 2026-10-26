@@ -1,0 +1,97 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh b/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+new file mode 100644
+index 000000000..949ac27da
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+@@ -0,0 +1,61 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for preflight_test_types_ratchet_leg.test.sh - KS-1513: in a tree with no
++# workspace install that suite must SKIP its real-checker cells, not go red.
++# =============================================================================
++# The suite runs the REAL checker (check.cjs) over fixture services in 9 cells,
++# which needs the workspace install (typescript). With no install those 9 cells
++# fail for an ENVIRONMENT reason that preflight leg 1 already refuses. The leg
++# script prints `SKIP (advisory)` and exits 0 in that tree; the suite must mirror
++# it for those cells only: the wiring cells and the stub cells (KS-1520) need no
++# install and must still run.
++#
++# This suite aims the other suite at "no install" with DEPS_PRESENT_ROOT, the
++# variable scripts/preflight/deps-present.sh honours, pointed at a directory that
++# does not exist, then reads its output. Nothing in the repository is changed.
++#
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUITE="${RATCHET_LEG_SUITE_SH:-$HERE/preflight_test_types_ratchet_leg.test.sh}"
++PASS=0; FAIL=0
++
++[[ -f "$SUITE" ]] || { echo "FATAL: suite not found at $SUITE" >&2; exit 2; }
++
++tmp="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1513.XXXXXX")"
++trap 'rm -rf "$tmp"' EXIT INT TERM
++
++check() {
++    local desc="$1" want="$2" got="$3"
++    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
++    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
++}
++
++# Run the suite with no workspace install reachable.
++out="$(DEPS_PRESENT_ROOT="$tmp/no-install-here" bash "$SUITE" 2>&1 < /dev/null)"; rc=$?
++
++# --- CELL 1 (RED at the tip): it exits 0 -----------------------------------------
++check "with no install the suite exits 0" "0" "$rc"
++
++# --- CELL 2 (RED at the tip): it says it skipped the real-checker cells ----------
++check "with no install the suite prints one SKIP line naming the missing install" "1" \
++    "$(printf '%s\n' "$out" | grep -c '^SKIP .*workspace install absent')"
++
++# --- CELL 3 (RED at the tip): no cell is reported failed -------------------------
++check "with no install no cell is reported FAIL" "0" \
++    "$(printf '%s\n' "$out" | grep -c '^FAIL ')"
++
++# --- CELL 4 (CONTROL, tip AND after): the stub cells still run -------------------
++check "CONTROL with no install the stub cells still run (the default-run stub cell reports ok)" "1" \
++    "$(printf '%s\n' "$out" | grep -c '^ok   CONTROL the default run (no arguments) passes with all three checkers green')"
++
++# --- CELL 5 (CONTROL, tip AND after): the wiring cells still run -----------------
++check "CONTROL with no install the leg-16 wiring cells still run" "1" \
++    "$(printf '%s\n' "$out" | grep -c 'a failing leg-16 script FAILS the run')"
++
++echo ""
++echo "ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install: ${PASS} passed, ${FAIL} failed"
++(( FAIL == 0 ))
+diff --git a/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh b/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+index 107525ccb..0b316e0b5 100644
+--- a/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+@@ -101,6 +101,17 @@ expect "🔴 every step header's denominator is TOTAL_LEGS (a stale one aborts e
+ expect "the legs run 1..16 in order and leg 16 is last" "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 " "$nums"
+ expect "CONTROL the header parser reads headers at all (it found 16)" "16" "$(printf '%s\n' "$hdrs" | grep -c .)"
+ 
++# KS-1513: everything from here down to the stub block runs the REAL checker, which needs the workspace install (typescript).
++# Without one those cells go red for an ENVIRONMENT reason that leg 1 already refuses, so they are skipped, as the leg itself
++# SKIPs (advisory). The wiring cells above and the stub cells below need no install and always run.
++if bash "$DEV/scripts/preflight/deps-present.sh" >/dev/null 2>&1; then
++  have_install=yes
++else
++  have_install=no
++  printf 'SKIP — workspace install absent (leg 1 refuses this tree): the real-checker cells are not run\n'
++fi
++if [ "$have_install" = yes ]; then
++
+ # -----------------------------------------------------------------------------
+ # BEHAVIOUR: the real script, the real checker, throwaway fixture services.
+ # -----------------------------------------------------------------------------
+@@ -170,6 +181,7 @@ case "$LEG_OUT" in
+        "$(printf '%s\n' "$LEG_OUT" | grep -c '0 new; 0 stale baseline entries')"
+      expect "🔴 ...and the verdict counts all three services" "yes" "$(has "$LEG_OUT" 'OK — 3 service(s)')" ;;
+ esac
++fi
+ 
+ # -----------------------------------------------------------------------------
+ # THE DEFAULT RUN WITHOUT AN INSTALL (KS-1520 a, b, c)

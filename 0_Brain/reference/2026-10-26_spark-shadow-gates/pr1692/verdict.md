@@ -1,0 +1,13 @@
+# Spark SHADOW gate, PR #1692 (KS-1560)
+- Head: 6bb63146affd0079020924a94691e1208dbd39f8 (== refs/pull/1692/head at run: tip). Base: merge-base with develop 28dac5c12. Run 2026-10-26 16:2x-16:3x AEDT.
+- Deterministic half (own harness; spark_gate.sh is pytest-only): files 2, +70/-1; product files: 0.
+  - targeted on head: ks1560_private_path_suites_link_jq.test.sh rc=0 passed=None failed=0; tenant_isolation_stderr_own_file.test.sh rc=0 passed=None failed=0
+  - targeted on base product + head tests: ks1560_private_path_suites_link_jq.test.sh rc=0 passed=None failed=0; tenant_isolation_stderr_own_file.test.sh rc=0 passed=None failed=0
+  - full suite before/after: NOT RUN (only PR #1690 got --suite).
+- Spark verdict: GO WITH NOTES. Valid JSON first attempt: True. Wall 31.1 s, prompt 8237 tok, completion 814 tok.
+- Findings (4), UNSCORED, not checked at source (for scoring at the tier-2 gate):
+  - Note: The census test's grep-based detection of `$root/bin:` is a literal string match and may miss suites that construct the private PATH differently (e.g., with a variable or different quoting), so the ce  [evidence quote found in input: True]
+  - Note: The census test's grep for `bin/jq` is a literal string match and could false-positive on a comment or unrelated text, but it is sufficient for the current suites.  [evidence quote found in input: True]
+  - Note: The census test does not verify that the `bin/jq` link is actually created in the fixture's stub dir at runtime; it only checks the source text for the literal `bin/jq`.  [evidence quote found in input: True]
+  - Note: The tenant_isolation suite's new `JQ_BIN` resolution uses `command -v jq` on the outer PATH, but the subject runs under a private PATH that includes `$root/bin` first; the link is created, but the sui  [evidence quote found in input: True]
+- Overstated-comment sentences: 0 (no draft comment supplied). Not run: PR body not supplied (no gh access used), live/integration, ticket comments.

@@ -1,0 +1,408 @@
+===== TICKET =====
+KS-1548 — KS-1512 follow-up: post-deadline discard, pin the no-window guard, body-stall comment, cell G [In Progress]
+
+## BLUF
+
+The gate on PR 1522 (KS-1512 option A, verdict sha256/16 `cf710859d4177885`, GO WITH NOTE, 0 Major) found three Minors and a nit that do not block the merge. Wednesday ruled them into ONE follow-up ticket. The common thread: the overall deadline bounds the *waiting between* windows, not a response **body** that arrives slowly, and one guard and one assertion are not pinned.
+
+## Checklist
+
+- [ ] **m1, a stalled response BODY is outside every timer, in ANY window, and the code comment overclaims.** `fetchWithTimeout` (`platform.ts:143-158`) clears its timer when `fetch()` resolves, which is at the response HEADERS; `await r.json()` (`:416`) then runs outside any timer. Measured by the gate (budget 2000 ms, a stub holding the body back after flushing headers): a stalled 8 s body in a **non-last** window gave **8014 ms**, in the **last** window **8006 ms**. Same as the old route's one request, not worse (the worst case is one stall, not 26). The comment at `:401` ("never hangs") is true for slow responses and false for a stalled body. *Fix shape:* bound the body read by the remaining budget (keep the `AbortController` live until after `r.json()`, or race the body read against a `remaining` timer), or at minimum soften the comment to "slow responses" and record the caveat. *Cell to add:* a stalled body in a NON-last window degrades within budget + margin.
+- [ ] **m2, the guard "no window starts once nothing is left" (**`platform.ts:407`**) is unpinned.** The gate's mutant that removes it survives **all 18 cells**; with it removed the stub sees a second request that is aborted at once. *Fix shape:* in cell M assert `calls.length === 1` (the stub already records calls).
+- [ ] **m3, a final window that answers AFTER the deadline keeps the platform half and returns late.** Measured: a last-window body at 1.5 times the budget returned in **3021 ms** (budget 2000 ms) with the platform rows served. Wednesday's ruling said a spent budget DISCARDS the platform half; today the discard applies only when another window would be needed. She accepted this for the merge because it is bounded by the same body-stall exposure as the old route. *Fix shape:* one deadline check after the body is read (`if (Date.now() >= deadline) throw`), plus a cell. Note it would not bound the time (see m1); it only stops a late result from being served as if on time. A ruling-interpretation question as well as a fix: the rows served are complete, never partial.
+- [ ] **nit, cell G's second assertion cannot fail** (`ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts`, the `calls.every(... || c.offset === 200 || c.offset === 100 || c.offset === 0)` line, around `:214`): any plausible offset satisfies it. The first assertion (the ids equal the oracle) is the real check. Delete the second or make it real.
+
+## Detail
+
+* **Where:** `Blockchain/Dev/services/api-gateway/src/routes/platform.ts` (the audit-log handler's platform-fetch block) and `ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts`.
+* **Evidence:** the gate's probes P1 to P5 and mutant M9, in its evidence folder under Wednesday's reference directory (`2026-10-13_gate-pr1522`). Not re-run by me.
+* **Not in scope here:** the invisible degrade (KS-1545), the tie-break (KS-1544), the live read of a deep page that KS-1512 still needs after a deploy.
+* **Related:** KS-1512, KS-1545.
+* **Dedupe before filing (Wednesday's condition):** literal, case-insensitive matches over titles AND descriptions in team KS, archived included: `UPSTREAM_TIMEOUT_MS` 0, `fetchWithTimeout` 0, `stalled body` 0, `body stall` 0, `post-deadline` 0; `routes/platform.ts` names 25 tickets, none about these findings (the nearest, KS-1545, is the invisible degrade). The same instrument returns KS-1512 for a phrase from its own title (`half of the merge is cut to 200 rows`), so it can see ticket text.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts
+index 1cbd8fc49..7919f415f 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts
+@@ -251,7 +251,7 @@ describe('KS-1512 - the platform half of the audit-log merge is read past the up
+     deepPlatformLayout();
+     firstBodyDelayMs = BUDGET_MS * 1.1;
+     const { r, ms } = await timedPage(250, 25);
+-    const wrong = [summary(r) !== appOnly(250, 25) ? `got ${summary(r)}\n   want ${appOnly(250, 25)}` : '', ms >= BUDGET_MS * 1.1 + 900 ? `took ${ms} ms` : ''].filter(Boolean);
++    const wrong = [summary(r) !== appOnly(250, 25) ? `got ${summary(r)}\n   want ${appOnly(250, 25)}` : '', ms >= BUDGET_MS * 1.1 + 900 ? `took ${ms} ms` : '', calls.length !== 1 ? `${calls.length} requests, want 1` : ''].filter(Boolean);
+     expect(wrong, wrong.join('\n')).toEqual([]);
+   }, 20000);
+ 
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts
+1: /**
+2:  * KS-1512 - GET /api/platform/audit-log merges two sources and asks each for `limit + offset` rows so it can paginate after sorting. The
+3:  * platform_audit_log half comes from tenant-provisioning GET /api/audit-log, which clamps `limit` at 200 per request, so whenever
+4:  * limit + offset exceeded 200 that half contributed only its newest 200 rows: deep pages omitted older platform entries while `total` still
+5:  * summed the true totals. The route now asks for that half in sequential windows of at most 200 until it holds `limit + offset` rows or the
+6:  * upstream runs out (the gateway's own bound of 200 + 5000 is unchanged, and no new bound is added).
+7:  *
+8:  * Drives the REAL createPlatformRoutes on 127.0.0.1 against a stub upstream that has the real clamp (Math.min(parseInt(limit) || 50, 200)),
+9:  * ORDER BY created_at DESC, OFFSET, and { success, entries, total }. The expected page is an independent oracle: every row of both sources,
+10:  * sorted by created_at, sliced at [offset, offset + limit).
+11:  *
+12:  * The whole paging shares ONE budget, the route's existing per-call timeout (PLATFORM_UPSTREAM_TIMEOUT_MS, 8000 ms by default): the old route was
+13:  * bounded by one timeout and this one is bounded by the same figure. Each window's own timeout is min(that, what is left); when the budget is spent
+14:  * the platform half is discarded exactly as a failed window does. The route reads the variable once, when its module loads, so this file sets it
+15:  * (below, before the imports run) to a budget small enough to wait for.
+16:  */
+17: import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+18: import express, { type RequestHandler } from 'express';
+19: import http from 'http';
+20: import type { AddressInfo } from 'net';
+21: import { createPlatformRoutes } from '../routes/platform';
+22: 
+23: /** The budget these cells run under: PLATFORM_UPSTREAM_TIMEOUT_MS, set before the route module loads. */
+24: const BUDGET_MS = vi.hoisted(() => {
+25:   process.env.PLATFORM_UPSTREAM_TIMEOUT_MS = '2000';
+26:   return 2000;
+27: });
+28: 
+29: const T0 = Date.UTC(2026, 0, 1);
+30: type Row = { id: string; created_at: number };
+31: /** `n` consecutive rows, newest first, one second apart: ids `${prefix}-${from}` onward, the first `slot` seconds before T0. */
+32: const rows = (prefix: string, n: number, slot = 0, from = 0): Row[] => Array.from({ length: n }, (_, i) => ({ id: `${prefix}-${from + i}`, created_at: T0 - (slot + i) * 1000 }));
+33: 
+34: /**
+35:  * The layout that makes the defect visible: the 40 newest rows are app rows, then 300 platform rows, then older app rows. Merged index 250 is then
+36:  * platform rank 210, which the upstream clamp (newest 200 only) never delivered. An even interleave would hide it: the clamped slice and the true
+37:  * order coincide up to merged index 400.
+38:  */
+39: const deepPlatformLayout = (): void => {
+40:   platformRows = rows('P', 300, 40);
+41:   appRows = [...rows('A', 40, 0), ...rows('A', 300, 340, 40)];
+42: };
+43: 
+44: let platformRows: Row[] = [];
+45: let appRows: Row[] = [];
+46: let failOnCall: number | null = null;
+47: let failMode: 'http500' | 'destroy' = 'http500';
+48: let delayMs = 0;
+49: /** Hold back the BODY of the first response by this long, after its headers: the per-call timer stops at the headers, so only the budget can see it. */
+50: let firstBodyDelayMs = 0;
+51: /** The upstream's per-request clamp: 200 is the real one (tenant-provisioning GET /api/audit-log). A cell lowers it to prove the route does not hard-code that number as 'the end of the data'. */
+52: let upstreamClamp = 200;
+53: const calls: Array<{ limit: number; offset: number }> = [];
+54: let inFlight = 0;
+55: let maxInFlight = 0;
+56: 
+57: let upstream: http.Server;
+58: let gateway: http.Server;
+59: let base = '';
+60: 
+61: beforeAll(async () => {
+62:   vi.stubEnv('PLATFORM_AUDIT_MAX_OFFSET', '5000');
+63:   upstream = http.createServer(async (req, res) => {
+64:     const url = new URL(req.url ?? '/', 'http://x');
+65:     const callNo = calls.length + 1;
+66:     inFlight += 1; maxInFlight = Math.max(maxInFlight, inFlight);
+67:     calls.push({ limit: Number(url.searchParams.get('limit')), offset: Number(url.searchParams.get('offset')) });
+68:     if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
+69:     try {
+70:       if (failOnCall === callNo) {
+71:         if (failMode === 'destroy') { req.socket.destroy(); return; }
+72:         res.writeHead(500, { 'Content-Type': 'application/json' }).end(JSON.stringify({ success: false, error: { code: 'INTERNAL_ERROR', message: 'stub failure' } }));
+73:         return;
+74:       }
+75:       // the REAL upstream clamp and query shape (services/tenant-provisioning/src/index.ts, GET /api/audit-log)
+76:       const limit = Math.min(parseInt(url.searchParams.get('limit') as string) || 50, upstreamClamp);
+77:       const offset = parseInt(url.searchParams.get('offset') as string) || 0;
+78:       const entries = platformRows.slice(offset, offset + limit).map((r) => ({ id: r.id, action: 'tenant_created', created_at: new Date(r.created_at).toISOString() }));
+79:       const payload = JSON.stringify({ success: true, entries, total: platformRows.length });
+80:       res.writeHead(200, { 'Content-Type': 'application/json' });
+81:       if (firstBodyDelayMs > 0 && callNo === 1) {
+82:         res.flushHeaders();
+83:         await new Promise((r) => setTimeout(r, firstBodyDelayMs));
+84:       }
+85:       res.end(payload);
+86:     } finally {
+87:       inFlight -= 1;
+88:     }
+89:   });
+90:   await new Promise<void>((r) => upstream.listen(0, '127.0.0.1', () => r()));
+91:   const upstreamUrl = 'http://127.0.0.1:' + (upstream.address() as AddressInfo).port;
+92: 
+93:   const superAdmin = (() => ((req, _res, next) => {
+94:     (req as unknown as { user: object }).user = { userId: 'u-ks1512', email: 'a@b.c', role: 'super_admin', verificationLevel: 'none' };
+95:     next();
+96:   }) as RequestHandler) as (required?: boolean) => RequestHandler;
+97:   const app = express();
+98:   app.use(createPlatformRoutes({
+99:     authenticateToken: superAdmin,
+100:     tenantProvisioningUrl: upstreamUrl,
+101:     setTenantKey: () => {},
+102:     getTenantKey: () => undefined,
+103:     removeTenantKey: () => {},
+104:     query: async (sql: string, params?: unknown[]) => {
+105:       if (/COUNT\(\*\)/.test(sql)) return { rows: [{ total: appRows.length }] };
+106:       const limit = Number(params?.[0]);
+107:       return {
+108:         rows: appRows.slice(0, limit).map((r) => ({
+109:           id: r.id, user_id: null, action: 'doc_verified', resource_type: null, resource_id: null, details: null, ip_address: null, success: true, created_at: new Date(r.created_at),
+110:         })),
+111:       };
+112:     },
+113:   }));
+114:   gateway = http.createServer(app);
+115:   await new Promise<void>((r) => gateway.listen(0, '127.0.0.1', () => r()));
+116:   base = 'http://127.0.0.1:' + (gateway.address() as AddressInfo).port;
+117: });
+118: 
+119: afterAll(async () => {
+120:   delete process.env.PLATFORM_UPSTREAM_TIMEOUT_MS;
+121:   await new Promise<void>((r) => gateway.close(() => r()));
+122:   await new Promise<void>((r) => upstream.close(() => r()));
+123:   vi.unstubAllEnvs();
+124: });
+125: 
+126: beforeEach(() => {
+127:   platformRows = []; appRows = []; failOnCall = null; failMode = 'http500'; delayMs = 0; firstBodyDelayMs = 0; upstreamClamp = 200; calls.length = 0; inFlight = 0; maxInFlight = 0;
+128: });
+129: 
+130: async function page(offset: number, limit: number): Promise<{ status: number; ids: string[]; total: number }> {
+131:   const r = await fetch(`${base}/api/platform/audit-log?limit=${limit}&offset=${offset}`);
+132:   const body = (await r.json()) as { entries?: Array<{ id: string }>; total?: number };
+133:   return { status: r.status, ids: (body.entries ?? []).map((e) => String(e.id)), total: body.total ?? -1 };
+134: }
+135: 
+136: /** The independent oracle: every row of both sources, newest first, sliced where the page is. */
+137: const oracle = (offset: number, limit: number): string[] =>
+138:   [...platformRows, ...appRows].sort((a, b) => b.created_at - a.created_at).slice(offset, offset + limit).map((r) => r.id);
+139: 
+140: /** What the response looks like when the platform half was discarded: the audit_logs rows only, with that source's own total. */
+141: const summary = (r: { status: number; ids: string[]; total: number }): string => `${r.status} ids=${r.ids.join(',')} total=${r.total}`;
+142: const appOnly = (offset: number, limit: number): string => summary({ status: 200, ids: appRows.slice(offset, offset + limit).map((x) => x.id), total: appRows.length });
+143: /** A timed page: how long the caller waited. */
+144: async function timedPage(offset: number, limit: number): Promise<{ r: { status: number; ids: string[]; total: number }; ms: number }> {
+145:   const t0 = Date.now();
+146:   const r = await page(offset, limit);
+147:   return { r, ms: Date.now() - t0 };
+148: }
+149: 
+150: const RAN = new Set<string>();
+151: 
+152: describe('KS-1512 - the platform half of the audit-log merge is read past the upstream clamp of 200', () => {
+153:   it('RED KS-1512 A: the ticket\'s test - 300 platform rows among 340 app rows, offset 250 limit 25, is the rank-ordered slice of BOTH sources (it starts at P-210)', async () => {
+154:     RAN.add('A');
+155:     deepPlatformLayout();
+156:     const r = await page(250, 25);
+157:     expect(r.status).toBe(200);
+158:     expect(oracle(250, 25)[0]).toBe('P-210');   // the oracle itself reaches past the clamp
+159:     expect(r.ids, `want ${oracle(250, 25).join(',')}`).toEqual(oracle(250, 25));
+160:   });
+161: 
+162:   it('RED KS-1512 B: a deep page of a platform-only log (600 rows, offset 250 limit 25) is P-250 to P-274, not an empty page', async () => {
+163:     RAN.add('B');
+164:     platformRows = rows('P', 600);
+165:     const r = await page(250, 25);
+166:     expect(r.ids).toEqual(Array.from({ length: 25 }, (_, i) => `P-${250 + i}`));
+167:   });
+168: 
+169:   it('RED KS-1512 C: the deepest page (offset clamped to 5000, limit 200) is read in 26 sequential windows of at most 200 and never past 5200 rows', async () => {
+170:     RAN.add('C');
+171:     platformRows = rows('P', 6000);
+172:     const r = await page(999999, 200);
+173:     const got: Record<string, unknown> = { windows: calls.length, maxLimit: Math.max(...calls.map((c) => c.limit)), sumLimit: calls.reduce((n, c) => n + c.limit, 0), offsets: calls.map((c) => c.offset).join(','), maxInFlight };
+174:     const want: Record<string, unknown> = { windows: 26, maxLimit: 200, sumLimit: 5200, offsets: Array.from({ length: 26 }, (_, i) => i * 200).join(','), maxInFlight: 1 };
+175:     const wrong = Object.keys(want).filter((k) => got[k] !== want[k]).map((k) => `${k}: got ${got[k]} want ${want[k]}`);
+176:     expect(wrong, wrong.join('\n')).toEqual([]);   // an empty list of mismatches, the rows as the message: a nested toEqual elides them under the JSON reporter
+177:     expect(r.ids).toEqual(Array.from({ length: 200 }, (_, i) => `P-${5000 + i}`));
+178:   });
+179: 
+180:   it('RED KS-1512 D: the first row past 200 needs a second window of exactly one row (limit + offset = 201)', async () => {
+181:     RAN.add('D');
+182:     platformRows = rows('P', 600);
+183:     await page(151, 50);
+184:     expect(calls).toEqual([{ limit: 200, offset: 0 }, { limit: 1, offset: 200 }]);
+185:   });
+186: 
+187:   it('RED KS-1512 E: paging stops when the upstream runs out (330 rows, limit + offset = 400): two windows, never a third', async () => {
+188:     RAN.add('E');
+189:     platformRows = rows('P', 330);
+190:     const r = await page(300, 100);
+191:     expect(calls).toEqual([{ limit: 200, offset: 0 }, { limit: 200, offset: 200 }]);
+192:     expect(r.ids).toEqual(Array.from({ length: 30 }, (_, i) => `P-${300 + i}`));
+193:   });
+194: 
+195:   it('RED KS-1512 F: a window that FAILS part-way discards the platform half, as a failed first window always has: app rows only, total of the app source', async () => {
+196:     RAN.add('F');
+197:     deepPlatformLayout();
+198:     failOnCall = 2;
+199:     const withHttp500 = await page(250, 25);
+200:     failMode = 'destroy'; calls.length = 0;
+201:     const withDestroy = await page(250, 25);
+202:     const describe = (r: { status: number; ids: string[]; total: number }): string => `${r.status} ids=${r.ids.join(',')} total=${r.total}`;
+203:     const want = describe({ status: 200, ids: appRows.slice(250, 275).map((r) => r.id), total: appRows.length });
+204:     const wrong = [['http500', describe(withHttp500)], ['destroy', describe(withDestroy)]].filter(([, got]) => got !== want).map(([how, got]) => `${how}: got ${got}\n   want ${want}`);
+205:     expect(wrong, wrong.join('\n')).toEqual([]);
+206:   });
+207: 
+208:   it('RED KS-1512 G: an upstream that clamps LOWER than 200 (100) still yields the right page: a short window is not taken for the end while `total` says there is more', async () => {
+209:     RAN.add('G');
+210:     deepPlatformLayout();
+211:     upstreamClamp = 100;
+212:     const r = await page(250, 25);
+213:     expect(r.ids, `calls ${JSON.stringify(calls)}`).toEqual(oracle(250, 25));
+214:     expect(calls.every((c, i) => c.offset === calls.slice(0, i).reduce((n) => n + 100, 0) || c.offset === 200 || c.offset === 100 || c.offset === 0)).toBe(true);
+215:   });
+216: 
+217:   // The overall deadline (Wednesday's ruling, 2026-10-12): the budget is the existing per-call timeout, spent across ALL windows.
+218:   it('RED KS-1512 H: a slow-yet-answering upstream (each window at 60% of the budget) degrades to the audit_logs rows within the budget, and never hangs', async () => {
+219:     RAN.add('H');
+220:     deepPlatformLayout();
+221:     delayMs = BUDGET_MS * 0.6;
+222:     const { r, ms } = await timedPage(250, 25);
+223:     const wrong = [summary(r) !== appOnly(250, 25) ? `got ${summary(r)}\n   want ${appOnly(250, 25)}` : '', ms >= BUDGET_MS + 900 ? `took ${ms} ms, budget ${BUDGET_MS} ms` : ''].filter(Boolean);
+224:     expect(wrong, wrong.join('\n')).toEqual([]);
+225:   }, 20000);
+226: 
+227:   it('control KS-1512 I: just inside the budget (each of two windows at 40%) the page completes and is the right one', async () => {
+228:     RAN.add('I');
+229:     deepPlatformLayout();
+230:     delayMs = BUDGET_MS * 0.4;
+231:     const { r } = await timedPage(250, 25);
+232:     const wrong = [summary(r) !== summary({ status: 200, ids: oracle(250, 25), total: platformRows.length + appRows.length }) ? `got ${summary(r)}` : ''].filter(Boolean);
+233:     expect(wrong, wrong.join('\n')).toEqual([]);
+234:   }, 20000);
+235: 
+236:   it('RED KS-1512 L: the budget is spent ACROSS windows - four windows at 30% each degrade, and the fourth is cut short by what is left', async () => {
+237:     RAN.add('L');
+238:     platformRows = rows('P', 800); appRows = [];
+239:     delayMs = BUDGET_MS * 0.3;
+240:     const { r, ms } = await timedPage(650, 25);
+241:     const wrong = [
+242:       summary(r) !== appOnly(650, 25) ? `got ${summary(r)}\n   want ${appOnly(650, 25)}` : '',
+243:       ms >= BUDGET_MS + 900 ? `took ${ms} ms, budget ${BUDGET_MS} ms` : '',
+244:       calls.length < 2 ? `only ${calls.length} window(s) were asked for: the paging must get going before the budget ends it` : '',
+245:     ].filter(Boolean);
+246:     expect(wrong, wrong.join('\n')).toEqual([]);
+247:   }, 20000);
+248: 
+249:   it('RED KS-1512 M: a window whose BODY arrives after the budget is spent ends the paging (the per-call timer stops at the headers, so only the budget sees it)', async () => {
+250:     RAN.add('M');
+251:     deepPlatformLayout();
+252:     firstBodyDelayMs = BUDGET_MS * 1.1;
+253:     const { r, ms } = await timedPage(250, 25);
+254:     const wrong = [summary(r) !== appOnly(250, 25) ? `got ${summary(r)}\n   want ${appOnly(250, 25)}` : '', ms >= BUDGET_MS * 1.1 + 900 ? `took ${ms} ms` : '', calls.length !== 1 ? `${calls.length} requests, want 1` : ''].filter(Boolean);
+255:     expect(wrong, wrong.join('\n')).toEqual([]);
+256:   }, 20000);
+257: 
+258:   it('control KS-1512 K1: the budget does not touch a single-window page - one request, answered at 75% of the budget, is served in full', async () => {
+259:     RAN.add('K1');
+260:     deepPlatformLayout();
+261:     delayMs = BUDGET_MS * 0.75;
+262:     const { r } = await timedPage(0, 50);
+263:     const wrong = [calls.length !== 1 ? `${calls.length} requests` : '', summary(r) !== summary({ status: 200, ids: oracle(0, 50), total: platformRows.length + appRows.length }) ? `got ${summary(r)}` : ''].filter(Boolean);
+264:     expect(wrong, wrong.join('\n')).toEqual([]);
+265:   }, 20000);
+266: 
+267:   it('control KS-1512 K2: a single-window page slower than the per-call timeout degrades exactly as the old route did (one request, the same figure)', async () => {
+268:     RAN.add('K2');
+269:     deepPlatformLayout();
+270:     delayMs = BUDGET_MS * 1.3;
+271:     const { r, ms } = await timedPage(0, 50);
+272:     const wrong = [calls.length !== 1 ? `${calls.length} requests` : '', summary(r) !== appOnly(0, 50) ? `got ${summary(r)}\n   want ${appOnly(0, 50)}` : '', ms >= BUDGET_MS + 900 ? `took ${ms} ms` : ''].filter(Boolean);
+273:     expect(wrong, wrong.join('\n')).toEqual([]);
+274:   }, 20000);
+275: 
+276:   it('control KS-1512: a page that fits in one window is ONE upstream request, the same as before (limit 50 offset 0 asks for limit=50 offset=0)', async () => {
+277:     RAN.add('control one window');
+278:     deepPlatformLayout();
+279:     const r = await page(0, 50);
+280:     expect(calls).toEqual([{ limit: 50, offset: 0 }]);
+281:     expect(r.ids).toEqual(oracle(0, 50));
+282:   });
+283: 
+284:   it('control KS-1512: limit + offset of exactly 200 is still ONE request for 200 rows', async () => {
+285:     RAN.add('control exactly 200');
+286:     platformRows = rows('P', 600);
+287:     await page(150, 50);
+288:     expect(calls).toEqual([{ limit: 200, offset: 0 }]);
+289:   });
+290: 
+291:   it('control KS-1512: `total` is still the sum of both sources\' true totals on a deep page', async () => {
+292:     RAN.add('control total');
+293:     deepPlatformLayout();
+294:     expect((await page(250, 25)).total).toBe(platformRows.length + appRows.length);
+295:   });
+296: 
+297:   it('control KS-1512: a first window that fails serves the app rows only and asks for nothing more', async () => {
+298:     RAN.add('control first window fails');
+299:     deepPlatformLayout();
+300:     failOnCall = 1;
+301:     const r = await page(250, 25);
+302:     expect([r.status, r.ids, calls.length]).toEqual([200, appRows.slice(250, 275).map((x) => x.id), 1]);
+303:   });
+304: 
+305:   it('COMPLETENESS: every graded cell above actually ran', () => {
+306:     expect([...RAN].sort()).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K1', 'K2', 'L', 'M', 'control exactly 200', 'control first window fails', 'control one window', 'control total'].sort());
+307:   });
+308: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1698,
+ "head_sha": "073289640d6367f0dff74e7a41b7999dcd2e2046",
+ "pr_tip_now": "073289640d6367f0dff74e7a41b7999dcd2e2046",
+ "head_mode": "tip",
+ "merge_base": "18ffc05cda550815392a98e0ac992b4d9ad3b805",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts",
+   "added": "1",
+   "deleted": "1"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts"
+ ],
+ "product_files": [],
+ "diff_stat": {
+  "files": 1,
+  "added": 1,
+  "deleted": 1
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts",
+   "rc": 0,
+   "passed": 18,
+   "failed": 0,
+   "tail": " single-window page slower than the per-call timeout degrades exactly as the old route did (one request, the same figure)  2004ms\n\n Test Files  1 passed (1)\n      Tests  18 passed (18)\n   Start at  16:28:40\n   Duration  12.51s (transform 83ms, setup 83ms, import 824ms, tests 11.47s, environment 0ms)"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts",
+   "rc": 0,
+   "passed": 18,
+   "failed": 0,
+   "tail": "single-window page slower than the per-call timeout degrades exactly as the old route did (one request, the same figure)  2004ms\n\n Test Files  1 passed (1)\n      Tests  18 passed (18)\n   Start at  16:28:58\n   Duration  12.00s (transform 77ms, setup 128ms, import 295ms, tests 11.47s, environment 0ms)"
+  }
+ ],
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 41
+}

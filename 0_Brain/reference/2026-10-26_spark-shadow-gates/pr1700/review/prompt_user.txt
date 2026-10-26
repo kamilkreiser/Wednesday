@@ -1,0 +1,771 @@
+===== TICKET =====
+KS-1649 — developer-portal.html:564 says every API key defaults to 1,000 req/hour; Platform S connector keys mint at 3,000 once #1613 lands [In Progress]
+
+**BLUF: the developer portal states one default rate limit for every API key — "1,000 req/hour" — and once #1613 (KS-1195) lands that is no longer true for Platform S connector keys, which mint at 3,000/hour. A one-line doc change, to make AFTER #1613 merges, not before.**
+
+## Where
+
+`Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html:564`, at develop `722e07f19cee`:
+
+```
+<tr><td>Per API key / OAuth app</td><td>1,000 req/hour</td><td><code>X-RateLimit-Limit</code>, …</td></tr>
+```
+
+## Why it is not simply wrong
+
+1,000/hour **stays true** for every key minted without an explicit `rateLimit` — the security service's own schema default (`services/security/src/index.ts:666`, `.default(1000)`). What changes is one class of key: those `POST /api/platform/organizations/register-connector` mints for Platform S, which take Kam's ruled 3,000/hour (KS-1195, card `secuura-ks1195-s-key-ceiling-1009` = a), tunable by `PLATFORM_S_CONNECTOR_RATE_LIMIT`.
+
+So the fix is a qualification, not a new number:
+
+* the per-key default stays **1,000 req/hour**;
+* add that **Platform S connector keys are minted at 3,000 req/hour**; and
+* point at `X-RateLimit-Limit`, which already reports the actual ceiling on every response — the page lists the header but does not say it is the authoritative value.
+
+## Timing
+
+Only after #1613 merges. Before then the page is correct, and changing it first would document a ceiling develop does not have. If it lands before a deploy, the text should not imply Kintsugi or demo already run it.
+
+## Same file, different defect
+
+KS-1473 is also on `developer-portal.html` (it documents a `verify-batch` route that does not exist). Whoever picks either can do both in one pass.
+
+Raised by gate X1 on PR #1613 (note c), filed 2026-10-19 by Seat E 3rd. Related: KS-1195, KS-1473.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts
+new file mode 100644
+index 000000000..4d3adaaa8
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts
+@@ -0,0 +1,32 @@
++/**
++ * KS-1649 - the developer portal's rate-limit table states the Platform S connector key ceiling.
++ *
++ * services/api-gateway/src/docs/developer-portal.html listed ONE default rate limit for every API key, "1,000 req/hour". That stays true
++ * for a key minted without an explicit rateLimit (the security service's schema default), but keys that
++ * POST /api/platform/organizations/register-connector mints for Platform S are minted at 3,000 req/hour (KS-1195). The row must say both,
++ * and must say that X-RateLimit-Limit reports the actual ceiling on every response.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const html = readFileSync(join(__dirname, '..', 'docs', 'developer-portal.html'), 'utf8');
++const row = html.split('\n').find((l) => l.includes('<td>Per API key / OAuth app</td>')) ?? '';
++
++describe('KS-1649 - developer-portal.html rate-limit row', () => {
++  it('RED KS-1649 R1 the row says Platform S connector keys are minted at 3,000 req/hour', () => {
++    expect(row).toContain('Platform S connector keys are minted at 3,000 req/hour');
++  });
++
++  it('RED KS-1649 R2 the row says X-RateLimit-Limit is the actual ceiling for the key', () => {
++    expect(row).toContain('(the actual ceiling for the key, on every response)');
++  });
++
++  it('CONTROL KS-1649 C1 the per-key default is still stated as 1,000 req/hour', () => {
++    expect(row).toContain('1,000 req/hour');
++  });
++
++  it('CONTROL KS-1649 C2 the row still lists all three rate-limit headers', () => {
++    expect(['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'].filter((h) => !row.includes(h))).toEqual([]);
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html b/Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html
+index de3ecd3b7..f70f9a7b2 100644
+--- a/Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html
++++ b/Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html
+@@ -561,7 +561,7 @@ npm install @secuura/sdk
+     <p>Rate limits are enforced per API key / OAuth app. Regular users (JWT) are subject to global limits only.</p>
+     <table>
+       <tr><th>Scope</th><th>Default Limit</th><th>Headers</th></tr>
+-      <tr><td>Per API key / OAuth app</td><td>1,000 req/hour</td><td><code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code></td></tr>
++      <tr><td>Per API key / OAuth app</td><td>1,000 req/hour by default; Platform S connector keys are minted at 3,000 req/hour</td><td><code>X-RateLimit-Limit</code> (the actual ceiling for the key, on every response), <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code></td></tr>
+       <tr><td>Login endpoint</td><td>15 req/min</td><td>—</td></tr>
+       <tr><td>Registration</td><td>5 req/min</td><td>—</td></tr>
+       <tr><td>Verification (public)</td><td>No limit</td><td>Exempt from rate limiting</td></tr>
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts
+1: /**
+2:  * KS-1649 - the developer portal's rate-limit table states the Platform S connector key ceiling.
+3:  *
+4:  * services/api-gateway/src/docs/developer-portal.html listed ONE default rate limit for every API key, "1,000 req/hour". That stays true
+5:  * for a key minted without an explicit rateLimit (the security service's schema default), but keys that
+6:  * POST /api/platform/organizations/register-connector mints for Platform S are minted at 3,000 req/hour (KS-1195). The row must say both,
+7:  * and must say that X-RateLimit-Limit reports the actual ceiling on every response.
+8:  */
+9: import { describe, it, expect } from 'vitest';
+10: import { readFileSync } from 'node:fs';
+11: import { join } from 'node:path';
+12: 
+13: const html = readFileSync(join(__dirname, '..', 'docs', 'developer-portal.html'), 'utf8');
+14: const row = html.split('\n').find((l) => l.includes('<td>Per API key / OAuth app</td>')) ?? '';
+15: 
+16: describe('KS-1649 - developer-portal.html rate-limit row', () => {
+17:   it('RED KS-1649 R1 the row says Platform S connector keys are minted at 3,000 req/hour', () => {
+18:     expect(row).toContain('Platform S connector keys are minted at 3,000 req/hour');
+19:   });
+20: 
+21:   it('RED KS-1649 R2 the row says X-RateLimit-Limit is the actual ceiling for the key', () => {
+22:     expect(row).toContain('(the actual ceiling for the key, on every response)');
+23:   });
+24: 
+25:   it('CONTROL KS-1649 C1 the per-key default is still stated as 1,000 req/hour', () => {
+26:     expect(row).toContain('1,000 req/hour');
+27:   });
+28: 
+29:   it('CONTROL KS-1649 C2 the row still lists all three rate-limit headers', () => {
+30:     expect(['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'].filter((h) => !row.includes(h))).toEqual([]);
+31:   });
+32: });
+
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html
+1: <!DOCTYPE html>
+2: <html lang="en">
+3: <head>
+4:   <meta charset="UTF-8">
+5:   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+6:   <title>Secuura Developer Portal</title>
+7:   <style>
+8:     * { margin: 0; padding: 0; box-sizing: border-box; }
+9:     :root {
+10:       --navy: #0F1B33;
+11:       --teal: #0CF7C4;
+12:       --dark-bg: #f8f9fa;
+13:       --card-bg: #ffffff;
+14:       --text: #1a1a2e;
+15:       --text-muted: #6b7280;
+16:       --border: #e5e7eb;
+17:       --code-bg: #1e1e2e;
+18:       --code-text: #cdd6f4;
+19:     }
+20:     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text); line-height: 1.6; background: var(--dark-bg); }
+21:     a { color: var(--navy); text-decoration: none; }
+22:     a:hover { color: var(--teal); }
+23:     code { background: #f1f3f5; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: 'SF Mono', 'Fira Code', monospace; }
+24: 
+25:     /* Header */
+26:     .header { background: var(--navy); color: white; padding: 60px 0; text-align: center; }
+27:     .header h1 { font-size: 2.5rem; margin-bottom: 12px; }
+28:     .header h1 span { color: var(--teal); }
+29:     .header p { font-size: 1.1rem; opacity: 0.8; max-width: 600px; margin: 0 auto; }
+30: 
+31:     /* Nav */
+32:     .nav { display: flex; justify-content: center; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+33:     .nav a { background: rgba(12,247,196,0.15); color: var(--teal); padding: 10px 24px; border-radius: 8px; font-weight: 500; border: 1px solid rgba(12,247,196,0.3); transition: all 0.2s; }
+34:     .nav a:hover { background: var(--teal); color: var(--navy); }
+35: 
+36:     /* Container */
+37:     .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+38: 
+39:     /* Section */
+40:     .section { background: var(--card-bg); border-radius: 12px; padding: 32px; margin-bottom: 24px; border: 1px solid var(--border); }
+41:     .section h2 { font-size: 1.5rem; margin-bottom: 16px; color: var(--navy); border-bottom: 2px solid var(--teal); padding-bottom: 8px; display: inline-block; }
+42:     .section h3 { font-size: 1.15rem; margin: 20px 0 8px; color: var(--navy); }
+43:     .section p { margin-bottom: 12px; color: var(--text-muted); }
+44:     .section ul, .section ol { margin: 8px 0 16px 24px; color: var(--text-muted); }
+45:     .section li { margin-bottom: 6px; }
+46: 
+47:     /* Code blocks */
+48:     pre { background: var(--code-bg); color: var(--code-text); padding: 20px; border-radius: 8px; overflow-x: auto; margin: 12px 0; font-size: 0.88rem; line-height: 1.5; }
+49:     pre .comment { color: #6c7086; }
+50:     pre .string { color: #a6e3a1; }
+51:     pre .keyword { color: #cba6f7; }
+52:     pre .number { color: #fab387; }
+53: 
+54:     /* Endpoint table */
+55:     table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+56:     th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+57:     th { background: var(--dark-bg); font-weight: 600; color: var(--navy); }
+58:     .method { font-weight: 700; font-family: monospace; font-size: 0.85rem; padding: 3px 8px; border-radius: 4px; }
+59:     .method-get { background: #dbeafe; color: #1d4ed8; }
+60:     .method-post { background: #d1fae5; color: #059669; }
+61:     .method-patch { background: #fef3c7; color: #d97706; }
+62:     .method-delete { background: #fee2e2; color: #dc2626; }
+63: 
+64:     /* Badge */
+65:     .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+66:     .badge-public { background: #d1fae5; color: #059669; }
+67:     .badge-auth { background: #fef3c7; color: #d97706; }
+68:     .badge-admin { background: #fee2e2; color: #dc2626; }
+69: 
+70:     /* Steps */
+71:     .steps { counter-reset: step; }
+72:     .step { counter-increment: step; position: relative; padding-left: 48px; margin-bottom: 24px; }
+73:     .step::before { content: counter(step); position: absolute; left: 0; top: 0; width: 32px; height: 32px; background: var(--navy); color: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+74: 
+75:     /* Footer */
+76:     .footer { text-align: center; padding: 40px 24px; color: var(--text-muted); font-size: 0.9rem; }
+77:     .footer a { color: var(--teal); }
+78: 
+79:     @media (max-width: 640px) {
+80:       .header h1 { font-size: 1.8rem; }
+81:       .container { padding: 20px 16px; }
+82:       .section { padding: 20px; }
+83:       pre { font-size: 0.8rem; padding: 14px; }
+84:     }
+85:   </style>
+86: </head>
+87: <body>
+88: 
+89: <div class="header">
+90:   <h1>Secuura <span>Developer Portal</span></h1>
+91:   <p>Integrate blockchain-anchored document verification into your applications. Certify, verify, and manage documents via a simple REST API.</p>
+92:   <div class="nav">
+93:     <a href="#quickstart">Quick Start</a>
+94:     <a href="#authentication">Authentication</a>
+95:     <a href="#endpoints">API Reference</a>
+96:     <a href="#oauth">OAuth 2.0</a>
+97:     <a href="#webhooks">Webhooks</a>
+98:     <a href="#sdks">SDKs</a>
+99:     <a href="/api/docs" target="_blank">Swagger UI</a>
+100:   </div>
+101: </div>
+102: 
+103: <div class="container">
+104: 
+105:   <!-- Overview -->
+106:   <div class="section">
+107:     <h2>How Secuura Works</h2>
+108:     <p>Secuura is a multi-tenant document certification platform anchored on the Cardano blockchain. The core workflow is:</p>
+109:     <div class="steps">
+110:       <div class="step">
+111:         <strong>Create a document record</strong>
+112:         <p>Upload metadata and a SHA-256 hash of the document. The original file never leaves your system.</p>
+113:       </div>
+114:       <div class="step">
+115:         <strong>Certify the document</strong>
+116:         <p>Issue a verifiable certification tied to your organisation. The certification is anchored on Cardano.</p>
+117:       </div>
+118:       <div class="step">
+119:         <strong>Anyone can verify</strong>
+120:         <p>Send the file hash to the public verification endpoint. If it matches a certified document, the API returns the issuer, date, and blockchain proof. If even one byte has changed, verification fails.</p>
+121:       </div>
+122:     </div>
+123:     <p><strong>Security model:</strong> The SHA-256 hash of the entire file IS the proof. A tampered file produces a different hash and will not verify. Documents are never stored on Secuura's servers.</p>
+124:   </div>
+125: 
+126:   <!-- Quick Start -->
+127:   <div class="section" id="quickstart">
+128:     <h2>Quick Start</h2>
+129: 
+130:     <h3>1. Get an API Key</h3>
+131:     <p>API keys are created by your organisation's administrator in the Secuura Admin Portal under <strong>API Keys</strong>. Each key is scoped to your tenant — all requests are automatically routed to your organisation's data.</p>
+132: 
+133:     <h3>2. Create a Document</h3>
+134:     <p>Hash your file locally, then register it with Secuura:</p>
+135:     <pre><span class="comment"># Hash the file locally</span>
+136: FILE_HASH=$(shasum -a 256 document.pdf | awk '{print "sha256:"$1}')
+137: 
+138: <span class="comment"># Create the document record</span>
+139: curl -X POST https://api.secuura.io/api/documents \
+140:   -H <span class="string">"x-api-key: sk_your_api_key"</span> \
+141:   -H <span class="string">"Content-Type: application/json"</span> \
+142:   -d <span class="string">'{
+143:     "title": "BSc Mathematics — Alice Smith",
+144:     "documentType": "certificate",
+145:     "contentHash": "'$FILE_HASH'"
+146:   }'</span></pre>
+147: 
+148:     <h3>3. Certify It</h3>
+149:     <pre>curl -X POST https://api.secuura.io/api/certifications/issue \
+150:   -H <span class="string">"x-api-key: sk_your_api_key"</span> \
+151:   -H <span class="string">"Content-Type: application/json"</span> \
+152:   -d <span class="string">'{
+153:     "type": "certificate",
+154:     "data": {
+155:       "title": "BSc Mathematics — Alice Smith",
+156:       "issuedBy": "Oxford University"
+157:     }
+158:   }'</span></pre>
+159:     <p><strong>Fields:</strong></p>
+160:     <ul>
+161:       <li><code>type</code> — Certification type: <code>certificate</code>, <code>educational_degree</code>, <code>professional_certification</code>, etc.</li>
+162:       <li><code>data.issuedBy</code> — Your organisation name. This is shown to anyone who verifies the document.</li>
+163:       <li><code>holderId</code> — (Optional) UUID of the person this is for. If omitted, defaults to you (the issuer). Returns <code>400</code> if the UUID doesn't match a real user.</li>
+164:       <li><code>documentId</code> — (Optional) Link to a document created via <code>POST /api/documents</code>.</li>
+165:     </ul>
+166: 
+167:     <h3>4. Verify (Public — No Auth Required)</h3>
+168:     <pre><span class="comment"># Anyone can verify by hash — no authentication needed</span>
+169: curl -X POST https://api.secuura.io/api/verification/verify \
+170:   -H <span class="string">"Content-Type: application/json"</span> \
+171:   -d <span class="string">'{"contentHash": "sha256:abc123..."}'</span>
+172: 
+173: <span class="comment"># Or upload the actual file for server-side hashing</span>
+174: curl -X POST https://api.secuura.io/api/verification/verify-file \
+175:   --data-binary @document.pdf</pre>
+176: 
+177:     <h3>How Verification Works — Chain First</h3>
+178:     <p>Secuura uses a <strong>chain-first</strong> verification model. The blockchain is the single source of truth, so any connector — in any environment, owned by any organisation — can verify any certificate issued by any other connector. The verify response is reconstructed directly from on-chain CIP-674 metadata; no shared database is required.</p>
+179:     <p>Each anchor transaction carries a self-describing payload (schema v2.0):</p>
+180:     <ul>
+181:       <li><code>hash</code>, <code>algorithm</code>, <code>documentId</code>, <code>certId</code>, <code>timestamp</code></li>
+182:       <li><code>environment</code> — which Secuura environment posted the cert (<code>dev</code>, <code>demo</code>, <code>production</code>)</li>
+183:       <li><code>issuerOrgId</code>, <code>issuerName</code> — who certified it</li>
+184:       <li><code>network</code> — <code>preprod</code> or <code>mainnet</code></li>
+185:       <li><code>version</code> — on-chain schema version</li>
+186:     </ul>
+187:     <p>A verifier only needs the file (or its SHA-256). Legacy v1.0 certs still verify via the platform registry fallback.</p>
+188: 
+189:     <h3>Response</h3>
+190:     <pre>{
+191:   <span class="string">"verified"</span>: <span class="keyword">true</span>,
+192:   <span class="string">"source"</span>: <span class="string">"blockchain"</span>,
+193:   <span class="string">"documentId"</span>: <span class="string">"doc-1776386328065-a6ecff39"</span>,
+194:   <span class="string">"status"</span>: <span class="string">"anchored"</span>,
+195:   <span class="string">"contentHash"</span>: <span class="string">"e47f0914fb9e10c114316cd7741a53f63454b7e49b0e836153b37e8bb4ced545"</span>,
+196:   <span class="string">"certifiedAt"</span>: <span class="string">"2026-04-17T00:56:47.231Z"</span>,
+197:   <span class="string">"issuer"</span>: <span class="string">"Oxford University"</span>,
+198:   <span class="string">"blockchain"</span>: {
+199:     <span class="string">"anchored"</span>: <span class="keyword">true</span>,
+200:     <span class="string">"network"</span>: <span class="string">"preprod"</span>,
+201:     <span class="string">"txHash"</span>: <span class="string">"c5ee534ed3d2b5b737129c061cec5016d7914f32b0f0cda1cf7f58f0917c5155"</span>,
+202:     <span class="string">"blockHeight"</span>: <span class="string">"4615780"</span>,
+203:     <span class="string">"cardanoScanUrl"</span>: <span class="string">"https://preprod.cardanoscan.io/transaction/..."</span>,
+204:     <span class="string">"confirmedAt"</span>: <span class="string">"2026-04-17T00:56:47.231Z"</span>
+205:   },
+206:   <span class="string">"onChainMetadata"</span>: {
+207:     <span class="string">"version"</span>: <span class="string">"2.0"</span>,
+208:     <span class="string">"environment"</span>: <span class="string">"dev"</span>,
+209:     <span class="string">"issuerOrgId"</span>: <span class="string">"00000000-0000-4000-8000-000000000001"</span>,
+210:     <span class="string">"issuerName"</span>: <span class="string">"issuer@secuura.com"</span>,
+211:     <span class="string">"documentId"</span>: <span class="string">"doc-1776386328065-a6ecff39"</span>,
+212:     <span class="string">"certId"</span>: <span class="string">"doc-1776386328065-a6ecff39"</span>,
+213:     <span class="string">"contentHash"</span>: <span class="string">"e47f0914..."</span>,
+214:     <span class="string">"timestamp"</span>: <span class="string">"2026-04-17T00:55:56.533Z"</span>
+215:   },
+216:   <span class="string">"checks"</span>: {
+217:     <span class="string">"documentExists"</span>: <span class="keyword">true</span>,
+218:     <span class="string">"hashValid"</span>: <span class="keyword">true</span>,
+219:     <span class="string">"isCertified"</span>: <span class="keyword">true</span>,
+220:     <span class="string">"isRevoked"</span>: <span class="keyword">false</span>,
+221:     <span class="string">"integrityVerified"</span>: <span class="keyword">true</span>
+222:   }
+223: }</pre>
+224:     <p><code>source</code> values:</p>
+225:     <ul>
+226:       <li><code>"blockchain"</code> — reconstructed from an on-chain Blockfrost metadata scan (cross-environment hit)</li>
+227:       <li><code>"blockchain-indexed"</code> — same chain data, served from the anchoring service's local index (fast path)</li>
+228:       <li>omitted — served from the platform registry fallback for pre-v2 certs</li>
+229:     </ul>
+230:   </div>
+231: 
+232:   <!-- Authentication -->
+233:   <div class="section" id="authentication">
+234:     <h2>Authentication</h2>
+235:     <p>Secuura supports two authentication methods:</p>
+236: 
+237:     <h3>API Key (Recommended for Integrations)</h3>
+238:     <p>Pass your API key in the <code>x-api-key</code> header. API keys are scoped to your organisation's tenant — you don't need to manage tenant IDs.</p>
+239:     <pre>curl -H <span class="string">"x-api-key: sk_your_api_key"</span> \
+240:      https://api.secuura.io/api/documents</pre>
+241: 
+242:     <h3>JWT Bearer Token (For User Applications)</h3>
+243:     <p>Login to receive a JWT token, then pass it in the <code>Authorization</code> header. The token includes your tenant context automatically.</p>
+244:     <pre><span class="comment"># Login</span>
+245: curl -X POST https://api.secuura.io/api/auth/login \
+246:   -H <span class="string">"Content-Type: application/json"</span> \
+247:   -d <span class="string">'{"email": "user@example.com", "password": "..."}'</span>
+248: 
+249: <span class="comment"># Use the token</span>
+250: curl -H <span class="string">"Authorization: Bearer eyJhbG..."</span> \
+251:      https://api.secuura.io/api/documents</pre>
+252: 
+253:     <h3>Public Endpoints (No Auth)</h3>
+254:     <p>Verification endpoints are public — anyone can verify a document without authenticating:</p>
+255:     <ul>
+256:       <li><code>POST /api/verification/verify</code> — Verify by hash</li>
+257:       <li><code>POST /api/verification/verify-file</code> — Verify by file upload</li>
+258:       <li><code>GET /health</code> — Health check</li>
+259:     </ul>
+260: 
+261:     <h3>Rate Limits</h3>
+262:     <p>Default: 100 requests per minute per API key. Contact us to increase limits for production use.</p>
+263:   </div>
+264: 
+265:   <!-- Core Endpoints -->
+266:   <div class="section" id="endpoints">
+267:     <h2>Core API Endpoints</h2>
+268:     <p>Full interactive API reference available at <a href="/api/docs" target="_blank">Swagger UI</a>.</p>
+269: 
+270:     <h3>Documents</h3>
+271:     <table>
+272:       <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+273:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/documents</code></td><td>Create a new document record</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+274:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/documents</code></td><td>List your documents (paginated)</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+275:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/documents/:id</code></td><td>Get document details</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+276:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/documents/:id/revoke</code></td><td>Revoke a document</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+277:     </table>
+278: 
+279:     <h3>Certifications</h3>
+280:     <table>
+281:       <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+282:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/certifications/issue</code></td><td>Issue a certification for a document</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+283:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/certifications</code></td><td>List certifications</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+284:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/certifications/:id</code></td><td>Get certification details</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+285:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/certifications/:id/revoke</code></td><td>Revoke a certification</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+286:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/certifications/:id/share</code></td><td>Share certification with a third party</td><td><span class="badge badge-auth">API Key / JWT</span></td></tr>
+287:     </table>
+288: 
+289:     <h3>Verification (Public)</h3>
+290:     <table>
+291:       <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+292:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/verification/verify</code></td><td>Verify by content hash or document ID</td><td><span class="badge badge-public">Public</span></td></tr>
+293:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/verification/verify-file</code></td><td>Upload file for server-side hash verification</td><td><span class="badge badge-public">Public</span></td></tr>
+294:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/verification/verify-batch</code></td><td>Verify multiple hashes in one request</td><td><span class="badge badge-public">Public</span></td></tr>
+295:     </table>
+296: 
+297:     <h3>Authentication</h3>
+298:     <table>
+299:       <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+300:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/auth/login</code></td><td>Login with email and password</td><td><span class="badge badge-public">Public</span></td></tr>
+301:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/auth/register</code></td><td>Register a new account</td><td><span class="badge badge-public">Public</span></td></tr>
+302:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/auth/refresh</code></td><td>Refresh an expired access token</td><td><span class="badge badge-auth">Refresh Token</span></td></tr>
+303:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/users/me</code></td><td>Get current user profile</td><td><span class="badge badge-auth">JWT</span></td></tr>
+304:     </table>
+305: 
+306:     <h3>Organisation Management (ORG_ADMIN)</h3>
+307:     <table>
+308:       <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+309:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/admin/document-types</code></td><td>List document type configurations</td><td><span class="badge badge-admin">ORG_ADMIN+</span></td></tr>
+310:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/admin/rights-holders</code></td><td>List rights holders (people docs are about)</td><td><span class="badge badge-admin">ORG_ADMIN+</span></td></tr>
+311:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/admin/rights-holders</code></td><td>Create a rights holder</td><td><span class="badge badge-admin">ORG_ADMIN+</span></td></tr>
+312:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/admin/users</code></td><td>List users in your organisation</td><td><span class="badge badge-admin">ORG_ADMIN+</span></td></tr>
+313:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/admin/dashboard</code></td><td>Platform stats (document count, user count, services)</td><td><span class="badge badge-admin">ORG_ADMIN+</span></td></tr>
+314:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/integrations</code></td><td>Integration status (M365, SharePoint, etc.)</td><td><span class="badge badge-auth">JWT</span></td></tr>
+315:     </table>
+316: 
+317:     <h3>Platform Management (super_admin only)</h3>
+318:     <table>
+319:       <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th></tr>
+320:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/platform/tenants</code></td><td>List all tenants</td><td><span class="badge badge-admin">super_admin</span></td></tr>
+321:       <tr><td><span class="method method-post">POST</span></td><td><code>/api/platform/tenants</code></td><td>Create a new tenant. <code>contacts</code> must be an <strong>array</strong> of objects.</td><td><span class="badge badge-admin">super_admin</span></td></tr>
+322:       <tr><td><span class="method method-get">GET</span></td><td><code>/api/platform/templates/document-types</code></td><td>List document type templates</td><td><span class="badge badge-admin">super_admin</span></td></tr>
+323:     </table>
+324:   </div>
+325: 
+326:   <!-- Multi-Tenancy -->
+327:   <div class="section">
+328:     <h2>Multi-Tenancy</h2>
+329:     <p>Secuura is a multi-tenant platform. Each organisation gets an isolated database — your data never mixes with other clients.</p>
+330:     <ul>
+331:       <li><strong>API Key users:</strong> Tenant is resolved automatically from the key. No action needed.</li>
+332:       <li><strong>JWT users:</strong> Tenant is embedded in the token at login (resolved from your email domain).</li>
+333:       <li><strong>Verification:</strong> Public endpoints search across all tenants — a certified document can be verified by anyone, regardless of which organisation issued it.</li>
+334:     </ul>
+335:   </div>
+336: 
+337:   <!-- SDKs & Integrations -->
+338:   <div class="section">
+339:     <h2>SDKs &amp; Integrations</h2>
+340:     <p>Secuura provides native integrations for:</p>
+341:     <ul>
+342:       <li><strong>JavaScript/TypeScript SDK</strong> — <code>npm install @secuura/sdk</code></li>
+343:       <li><strong>Python SDK</strong> — <code>pip install secuura</code></li>
+344:       <li><strong>Microsoft 365</strong> — Outlook add-in, SharePoint, OneDrive, Teams</li>
+345:       <li><strong>Gmail</strong> — Google Workspace Add-on for attachment verification</li>
+346:       <li><strong>LibreOffice</strong> — Desktop extension for document verify &amp; certify</li>
+347:       <li><strong>Nextcloud</strong> — File browser app with auto-hashing and sidebar verification</li>
+348:       <li><strong>WhatsApp Bot</strong> — Send documents to a WhatsApp number for instant verification</li>
+349:       <li><strong>Secuura Verify App</strong> — Cross-platform app (macOS, Windows, iOS, Android) with Share Sheet and drag-and-drop</li>
+350:       <li><strong>REST API</strong> — Any language via HTTP (see Swagger UI)</li>
+351:     </ul>
+352:     <p>Download the OpenAPI specification for code generation:</p>
+353:     <pre>curl -o secuura-api.json https://api.secuura.io/api/docs/openapi.json</pre>
+354:   </div>
+355: 
+356:   <!-- Connectors -->
+357:   <div class="section" id="connectors">
+358:     <h2>Connectors</h2>
+359:     <p>All connectors hash documents locally — files never leave the user's environment. Verification uses the public API (no auth required).</p>
+360: 
+361:     <table>
+362:       <tr><th>Connector</th><th>Platform</th><th>Type</th><th>Status</th></tr>
+363:       <tr><td>Outlook Add-in</td><td>Microsoft 365</td><td>Email verification</td><td>Live</td></tr>
+364:       <tr><td>Gmail Add-on</td><td>Google Workspace</td><td>Email verification</td><td>Live</td></tr>
+365:       <tr><td>SharePoint Sync</td><td>Microsoft 365</td><td>Cloud storage</td><td>Live</td></tr>
+366:       <tr><td>OneDrive Sync</td><td>Microsoft 365</td><td>Cloud storage</td><td>Live</td></tr>
+367:       <tr><td>Teams Notifications</td><td>Microsoft Teams</td><td>Alerts</td><td>Live</td></tr>
+368:       <tr><td>LibreOffice Extension</td><td>LibreOffice</td><td>Desktop</td><td>Live</td></tr>
+369:       <tr><td>Nextcloud App</td><td>Nextcloud 28+</td><td>Cloud storage</td><td>Live</td></tr>
+370:       <tr><td>WhatsApp Bot</td><td>WhatsApp</td><td>Messaging</td><td>Live</td></tr>
+371:       <tr><td>Secuura Verify (Mac)</td><td>macOS</td><td>Computer application</td><td>Live</td></tr>
+372:       <tr><td>Secuura Verify (PC)</td><td>Windows</td><td>Computer application</td><td>Live</td></tr>
+373:     </table>
+374: 
+375:     <h3>WhatsApp Verification Bot</h3>
+376:     <p>A standalone Node.js webhook service. Users send documents to a WhatsApp Business number and receive verification results instantly.</p>
+377:     <pre><span class="comment"># Deploy the bot</span>
+378: cd connectors/whatsapp-bot
+379: npm install &amp;&amp; npm run build
+380: 
+381: <span class="comment"># Configure environment</span>
+382: cp .env.example .env
+383: <span class="comment"># Set WHATSAPP_TOKEN, VERIFY_TOKEN, PHONE_NUMBER_ID, SECUURA_API_URL</span>
+384: 
+385: <span class="comment"># Run</span>
+386: npm start
+387: <span class="comment"># Or with Docker:</span>
+388: docker build -t secuura-whatsapp-bot .
+389: docker run -p 3000:3000 --env-file .env secuura-whatsapp-bot</pre>
+390:     <p>The bot uses the SHA-256 hash provided by WhatsApp in the webhook payload — no file download needed. Stateless, no database required.</p>
+391: 
+392:     <h3>Secuura Verify (Mac)</h3>
+393:     <p>Download the DMG, drag to Applications, launch. Drag files onto the app or right-click "Open With" in Finder.</p>
+394:     <pre><span class="comment"># Or build from source:</span>
+395: cd connectors/flutter-verify-app
+396: flutter pub get &amp;&amp; flutter build macos</pre>
+397: 
+398:     <h3>Secuura Verify (PC)</h3>
+399:     <p>Run the installer wizard. Creates a desktop shortcut and Start menu entry. Drag files onto the app or right-click "Open With" in Explorer.</p>
+400:     <pre><span class="comment"># Or build from source (requires Windows):</span>
+401: cd connectors/flutter-verify-app
+402: flutter pub get &amp;&amp; flutter build windows
+403: <span class="comment"># Then compile the installer:</span>
+404: iscc installer/secuura-verify-setup.iss</pre>
+405: 
+406:     <p>No login or API key required — uses only the public verification endpoint. Files are hashed locally and never uploaded.</p>
+407:   </div>
+408: 
+409:   <!-- Errors -->
+410:   <div class="section">
+411:     <h2>Error Handling</h2>
+412:     <p>All errors return a JSON body with an <code>error</code> field:</p>
+413:     <pre>{
+414:   <span class="string">"error"</span>: <span class="string">"Document not found"</span>,
+415:   <span class="string">"code"</span>: <span class="string">"NOT_FOUND"</span>
+416: }</pre>
+417:     <table>
+418:       <tr><th>Status</th><th>Meaning</th></tr>
+419:       <tr><td><code>200</code></td><td>Success</td></tr>
+420:       <tr><td><code>201</code></td><td>Created (new resource)</td></tr>
+421:       <tr><td><code>400</code></td><td>Bad request (validation error)</td></tr>
+422:       <tr><td><code>401</code></td><td>Authentication required or invalid</td></tr>
+423:       <tr><td><code>403</code></td><td>Forbidden (insufficient permissions)</td></tr>
+424:       <tr><td><code>404</code></td><td>Resource not found</td></tr>
+425:       <tr><td><code>409</code></td><td>Conflict (duplicate resource)</td></tr>
+426:       <tr><td><code>429</code></td><td>Rate limited — wait and retry</td></tr>
+427:       <tr><td><code>500</code></td><td>Internal server error</td></tr>
+428:     </table>
+429:   </div>
+430: 
+431:   <!-- OAuth 2.0 -->
+432:   <div class="section" id="oauth">
+433:     <h2>OAuth 2.0 (For Partner Apps)</h2>
+434:     <p>Build your own Secuura integration using standard OAuth 2.0 with PKCE. Same protocol as GitHub, Google, Spotify.</p>
+435: 
+436:     <h3>1. Register Your App</h3>
+437:     <pre>curl -X POST https://api.secuura.io/api/oauth/apps \
+438:   -H <span class="string">"Authorization: Bearer YOUR_TOKEN"</span> \
+439:   -H <span class="string">"Content-Type: application/json"</span> \
+440:   -d <span class="string">'{
+441:     "name": "My Integration",
+442:     "redirectUris": ["http://localhost:3000/callback"],
+443:     "scopes": ["verify:read", "documents:read", "certifications:write"]
+444:   }'</span>
+445: <span class="comment"># Returns: client_id (save this), client_secret (for confidential apps only)</span></pre>
+446: 
+447:     <h3>2. Authorize Users (PKCE Flow)</h3>
+448:     <pre><span class="comment"># Generate code_verifier and code_challenge</span>
+449: <span class="comment"># Open browser to:</span>
+450: https://api.secuura.io/api/oauth/authorize?
+451:   client_id=sec_your_client_id&amp;
+452:   redirect_uri=http://localhost:3000/callback&amp;
+453:   response_type=code&amp;
+454:   code_challenge=BASE64URL_SHA256_OF_VERIFIER&amp;
+455:   code_challenge_method=S256&amp;
+456:   scope=verify:read+certifications:write&amp;
+457:   state=random_state</pre>
+458: 
+459:     <h3>3. Exchange Code for Tokens</h3>
+460:     <pre>curl -X POST https://api.secuura.io/api/oauth/token \
+461:   -H <span class="string">"Content-Type: application/json"</span> \
+462:   -d <span class="string">'{
+463:     "grant_type": "authorization_code",
+464:     "code": "AUTH_CODE_FROM_CALLBACK",
+465:     "client_id": "sec_your_client_id",
+466:     "redirect_uri": "http://localhost:3000/callback",
+467:     "code_verifier": "YOUR_ORIGINAL_VERIFIER"
+468:   }'</span>
+469: <span class="comment"># Returns: access_token, refresh_token, expires_in, scope</span></pre>
+470: 
+471:     <h3>Available Scopes</h3>
+472:     <table>
+473:       <tr><th>Scope</th><th>Description</th></tr>
+474:       <tr><td><code>verify:read</code></td><td>Verify documents against the blockchain registry</td></tr>
+475:       <tr><td><code>documents:read</code></td><td>List and read documents</td></tr>
+476:       <tr><td><code>documents:write</code></td><td>Create, modify, and upload documents</td></tr>
+477:       <tr><td><code>certifications:read</code></td><td>List and view certifications</td></tr>
+478:       <tr><td><code>certifications:write</code></td><td>Issue and revoke certifications</td></tr>
+479:       <tr><td><code>users:read</code></td><td>Read user profile</td></tr>
+480:       <tr><td><code>webhooks:manage</code></td><td>Create and manage webhook subscriptions</td></tr>
+481:     </table>
+482:   </div>
+483: 
+484:   <!-- Webhooks -->
+485:   <div class="section" id="webhooks">
+486:     <h2>Webhooks</h2>
+487:     <p>Receive real-time notifications when document events occur. Secuura signs every payload with HMAC-SHA256 so you can verify authenticity.</p>
+488: 
+489:     <h3>Create a Subscription</h3>
+490:     <pre>curl -X POST https://api.secuura.io/api/webhooks \
+491:   -H <span class="string">"Authorization: Bearer YOUR_TOKEN"</span> \
+492:   -H <span class="string">"Content-Type: application/json"</span> \
+493:   -d <span class="string">'{
+494:     "url": "https://your-server.com/webhooks/secuura",
+495:     "events": ["certification.issued", "certification.revoked", "document.created"]
+496:   }'</span>
+497: <span class="comment"># Returns: webhook id + secret (save the secret for signature verification)</span></pre>
+498: 
+499:     <h3>Verify Signatures</h3>
+500:     <pre><span class="comment"># The x-secuura-signature header contains: sha256=HMAC_HEX</span>
+501: <span class="comment"># Verify with:</span>
+502: expected = HMAC-SHA256(webhook_secret, raw_request_body)
+503: received = x-secuura-signature header (strip "sha256=" prefix)
+504: assert expected == received</pre>
+505: 
+506:     <h3>Event Types</h3>
+507:     <table>
+508:       <tr><th>Event</th><th>Description</th></tr>
+509:       <tr><td><code>certification.issued</code></td><td>A new certification was issued</td></tr>
+510:       <tr><td><code>certification.revoked</code></td><td>A certification was revoked</td></tr>
+511:       <tr><td><code>certification.verified</code></td><td>A document was verified</td></tr>
+512:       <tr><td><code>document.created</code></td><td>A new document was registered</td></tr>
+513:       <tr><td><code>document.anchored</code></td><td>A document was anchored on blockchain</td></tr>
+514:       <tr><td><code>document.revoked</code></td><td>A document was revoked</td></tr>
+515:     </table>
+516:   </div>
+517: 
+518:   <!-- SDKs -->
+519:   <div class="section" id="sdks">
+520:     <h2>SDKs</h2>
+521: 
+522:     <h3>Python</h3>
+523:     <pre><span class="comment"># Install</span>
+524: pip install secuura
+525: 
+526: <span class="comment"># Verify a document</span>
+527: <span class="keyword">from</span> secuura <span class="keyword">import</span> SecuuraClient
+528: 
+529: client = SecuuraClient(api_key=<span class="string">"sk_your_key"</span>)
+530: result = client.verify_file(<span class="string">"document.pdf"</span>)
+531: print(result.verified, result.issuer)
+532: 
+533: <span class="comment"># Certify a document</span>
+534: cert = client.certify(
+535:     content_hash=<span class="string">"sha256:abc123..."</span>,
+536:     title=<span class="string">"BSc Mathematics"</span>,
+537:     issued_by=<span class="string">"Oxford University"</span>,
+538: )
+539: 
+540: <span class="comment"># OAuth for desktop apps</span>
+541: <span class="keyword">from</span> secuura.auth <span class="keyword">import</span> OAuth
+542: oauth = OAuth(client_id=<span class="string">"sec_xxx"</span>)
+543: tokens = oauth.login_interactive()  <span class="comment"># Opens browser</span></pre>
+544: 
+545:     <h3>JavaScript / TypeScript</h3>
+546:     <pre><span class="comment">// Install</span>
+547: npm install @secuura/sdk
+548: 
+549: <span class="comment">// Verify</span>
+550: <span class="keyword">import</span> { SecuuraClient } <span class="keyword">from</span> <span class="string">'@secuura/sdk'</span>;
+551: <span class="keyword">const</span> client = <span class="keyword">new</span> SecuuraClient({ apiKey: <span class="string">'sk_your_key'</span> });
+552: <span class="keyword">const</span> result = <span class="keyword">await</span> client.certifications.verify({ contentHash: <span class="string">'sha256:...'</span> });</pre>
+553: 
+554:     <h3>REST API (Any Language)</h3>
+555:     <p>Use any HTTP client. Download the <a href="/api/docs/openapi.json">OpenAPI specification</a> to generate client code for your language.</p>
+556:   </div>
+557: 
+558:   <!-- Rate Limits -->
+559:   <div class="section">
+560:     <h2>Rate Limits</h2>
+561:     <p>Rate limits are enforced per API key / OAuth app. Regular users (JWT) are subject to global limits only.</p>
+562:     <table>
+563:       <tr><th>Scope</th><th>Default Limit</th><th>Headers</th></tr>
+564:       <tr><td>Per API key / OAuth app</td><td>1,000 req/hour by default; Platform S connector keys are minted at 3,000 req/hour</td><td><code>X-RateLimit-Limit</code> (the actual ceiling for the key, on every response), <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code></td></tr>
+565:       <tr><td>Login endpoint</td><td>15 req/min</td><td>—</td></tr>
+566:       <tr><td>Registration</td><td>5 req/min</td><td>—</td></tr>
+567:       <tr><td>Verification (public)</td><td>No limit</td><td>Exempt from rate limiting</td></tr>
+568:     </table>
+569:     <p>When rate limited, the API returns <code>429 Too Many Requests</code> with a <code>Retry-After</code> header indicating seconds to wait.</p>
+570:   </div>
+571: 
+572: </div>
+573: 
+574: <div class="footer">
+575:   <p>Secuura Platform K &mdash; Blockchain-Anchored Document Verification &mdash; Proven on Cardano</p>
+576:   <p><a href="/api/docs">Swagger UI</a> &middot; <a href="https://secuura.io">secuura.io</a></p>
+577: </div>
+578: 
+579: </body>
+580: </html>
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1700,
+ "head_sha": "4f951814deb376a92024e05100b30a752636c2cc",
+ "pr_tip_now": "4f951814deb376a92024e05100b30a752636c2cc",
+ "head_mode": "tip",
+ "merge_base": "28e2d27de33734c3ad7d2909c3019a9f530d4629",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts",
+   "added": "32",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html",
+   "added": "1",
+   "deleted": "1"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts"
+ ],
+ "product_files": [
+  "Blockchain/Dev/services/api-gateway/src/docs/developer-portal.html"
+ ],
+ "diff_stat": {
+  "files": 2,
+  "added": 33,
+  "deleted": 1
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts",
+   "rc": 0,
+   "passed": 4,
+   "failed": 0,
+   "tail": "/Blockchain/Dev/services/api-gateway\n\n \u2713 src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts (4 tests) 2ms\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  16:29:38\n   Duration  166ms (transform 20ms, setup 48ms, import 13ms, tests 2ms, environment 0ms)"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1649-developer-portal-states-the-connector-key-rate-limit.test.ts",
+   "rc": 1,
+   "passed": 2,
+   "failed": 2,
+   "tail": "tes-the-connector-key-rate-limit.test.ts:22:17\n     20|\n     21|   it('RED KS-1649 R2 the row says X-RateLimit-Limit is the actual ceil\u2026\n     22|     expect(row).toContain('(the actual ceiling for the key, on every r\u2026\n       |                 ^\n     23|   });\n     24|\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[2/2]\u23af"
+  }
+ ],
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 15
+}
