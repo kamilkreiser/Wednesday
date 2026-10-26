@@ -13579,5 +13579,19 @@
   "project": "Secuura",
   "ts": "2026-10-27T08:33:31.002676+11:00",
   "text": "On the DeepSeek V4.1 Flash short: yes, yesterday's machine report was built around exactly that model. It's the reason it recommends the 256 GB Studio for the Secuura box. I read the video's transcript and checked it against the report line by line.\n\nAlready in the report: the 552 billion parameters with 8 to 16 billion active, the extra lookup tables it reads from the SSD, how much memory each quantised size needs, and the jump in coding scores over V4 Flash.\n\nOne figure differs. The video says DeepSWE 74.2, while the report uses 77.0 for the 17 October build, from DeepSeek's own model card. My guess is the video quotes the first V4.1 release, but it doesn't say which build, so I haven't confirmed that.\n\nNew in the video: the much smaller memory per token for long prompts. On those numbers, our longest prompt, about 71 thousand tokens, needs only about 63 megabytes for it. That supports the 256 GB box and changes nothing.\n\nThe recommendation stands: run V4.1 on our 23 hard tasks before buying the second box, and buy it only if it beats V4 Flash by three tasks or more. The video's price of 15 cents per million input tokens fits our estimate that the trial costs under a dollar."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-27T08:49:31.329137+11:00",
+  "text": "Received: will V4.1 Flash fit on one AMD Gorgon Halo with 192 GB, with another machine doing everything else. I'm checking its real specs and V4.1's sizes now, not from memory. Answer here in about 10 minutes."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-27T08:50:01.238304+11:00",
+  "text": "Short answer: only just, and not at a quality I'd buy it for.\n\nWhat one Gorgon Halo gives the model: 192 GB, of which AMD lets the graphics side use up to 160 GB. That's AMD's spec as reported by Tom's Hardware; Linux may give a little more. Bandwidth is 273 GB/s, the same as the Spark.\n\nWhat V4.1 Flash needs in memory, with its big lookup table left on the SSD, from Unsloth's guide:\n1-bit: 140 GB. Fits, with about 20 GB to spare.\n2-bit: 165 GB. Over the 160 limit; on Linux it might squeeze in with almost nothing spare.\n3-bit: 234 GB. Doesn't fit.\n\nAt 1-bit the model agrees with the full version about 87 to 88% of the time. At 3-bit, which your 256 GB Studio can run, it's about 95%.\n\nWith two Gorgon Halos, 3-bit fits split across both over the network. That's the same two-box split the report advised against: slower, and a fragile link in the middle.\n\nWhere it is good: a single Gorgon Halo runs today's V4 Flash at 4-bit, which is better than the 3-bit our Spark runs now. So it's a solid V4 Flash box, not a V4.1 box. And yes, another machine should drive everything else; the model box should do nothing but the model.\n\nNot measured by us: speed on AMD, and whether V4.1 at 1-bit beats V4 Flash at 4-bit on our 23 tasks. The trial in the report would answer that second question for under a dollar."
  }
 ]
