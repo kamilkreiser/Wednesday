@@ -13138,5 +13138,26 @@
   "project": "WED",
   "ts": "2026-10-26T12:25:29.332922+11:00",
   "text": "Measured on the Spark just now, from its own server log and files.\n\nThe DeepSeek V4 Flash weights take 95.4 gigabytes of memory when they load. On disk they're 99 gigabytes.\n\nOn top of the weights, the server reserves about 94.6 percent of the box's 121 gigabytes, so roughly 114. That's 95 for the weights, and most of the rest is the context cache, stored in a compact 4-bit format, which is what gives it the long context window. That 94.6 is the start script's default; I didn't check whether the running container overrides it. Free memory reads 1 to 2 gigabytes, so the Spark is effectively full.\n\nSo in practice it needs about 110 to 115 gigabytes to run the way we use it. You could run it with less by shrinking the context window, but I haven't measured how far.\n\nFor comparison, Ornith 122B in its 4-bit build is 78 gigabytes of weights. That's why it fits on the Spark only if DeepSeek is stopped first, and why the 256 gigabyte Studio could hold both. The test card on fleet activity is waiting for your choice."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-10-26T12:27:40.989971+11:00",
+  "text": "Received: no test on the Spark, so DeepSeek stays as it is. I'll test it online. One catch I'm checking now: OpenRouter, the service we used before, doesn't list Ornith at all, so I'm looking for who does serve it, with zero data retention for Secuura code."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-10-26T12:28:12.123781+11:00",
+  "text": "Received. I'll check which DeepSeek models are bigger than V4 Flash and what each needs in memory, and answer with the sizes as published, not from memory."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-10-26T12:29:29.119057+11:00",
+  "text": "Two answers. One needs your tap on fleet activity.\n\nOrnith 122B online: I can't test it there yet, because nobody hosts it. OpenRouter doesn't carry it, Hugging Face lists no provider for it, and its makers only publish instructions for running it yourself. It came out five days ago, so hosts may add it soon. Also, the OpenRouter key isn't on this drive any more. The card offers three choices: wait for a host, which I recommend; rent one cloud GPU for a few hours, where I'd bring you the price first; or wait for the Studio.\n\nMore capable DeepSeek on 256 gigabytes: no, not at a sensible quality. Sizes as published on Hugging Face:\nV4 Flash, what the Spark runs, is 304 billion parameters.\nV4.1 Flash, released on 17 October, is 763 billion.\nV4 Pro is 1.6 trillion.\nAt 4-bit, V4.1 Flash needs about 380 gigabytes for the weights alone, and V4 Pro about 800. Only a 2-bit squeeze of V4.1 Flash would fit in 256, at a quality cost I haven't measured. That's my arithmetic from the published sizes, not a test.\n\nSo on a 256 gigabyte Studio, the strongest DeepSeek fit is still V4 Flash, with room left beside it for Ornith 122B."
  }
 ]
