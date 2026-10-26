@@ -2746,3 +2746,8 @@ INCLUDED until he says otherwise.
 > Thank you that PDF is very useful. I had to get rid of the 96 GB studio as the funds will help towards the 256 studio based on the review at the moment. The most likely options are 256 studio running a number of various models with the Mac mini M3 running data projects offloading to the 256 studio for any local Al work Wednesday work or you and secure to work will either be done by the current laptop or a new laptop with either 64 or 128 GB and with a potential down the line to buy another unit either at 2:56 Mac or and Nvidia founders hub PC for additional local power can you review this plan and suggest whether 64 would be a bit bit natural? Naturally more ram is better but buying 64 will speed up when I can afford to buy an additional and Nvidia or additional Mac
 
 *Note:* answered on the panel: 64 GB, measured laptop memory first (71% free, 0 swap, claude 2.9 GB, Docker VM 4.3 GB)
+
+## 2026-10-26 21:49 — Kam (live board 21:47:42 view=wednesday, verbatim)
+> Can you please provide the kintsugi admin password so Stuart can mint some tokens. This chat is encrypted so it's ok in chat
+
+*Note:* declined to paste a secret into the panel (chat store is committed to the Wednesday repo + read aloud); gave Kam a pasteable command, Stuart's own admin@secuura.com account (13 Oct) named
