@@ -50211,5 +50211,48 @@
    }
   ],
   "amended_ts": "2026-10-27T06:55:12.206341+11:00"
+ },
+ {
+  "id": "secuura-ks1358-405-before-auth-posture-1027",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1358: keep '405 + Allow before auth' (superseding your KS-406 auth-first ruling)? It now gates one ready PR",
+  "bluf": "Not urgent, but it now holds a PR. The gateway answers an unsupported method with 405 + Allow BEFORE authentication, on about 311 documented paths. Your KS-406 ruling (July) said an anonymous caller should see 401, so the method list stays hidden. KS-1358 asks you which posture stands, and it has been open since 28 Sep. Seat U 3rd's KS-1531 PR documents one more route (connector/info), which enrols it in the 405 posture. Measured by Seat U (relayed): an anonymous GET there already gets 401, so the route's existence is already visible; the only new disclosure is its method list. Both tickets were read on the board by Wednesday.",
+  "default_action": "KS-1531's PR is opened and marked do-not-merge. Nothing merges and no gateway behaviour changes until you tap. The other seats keep working.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep 405 + Allow before auth: KS-406 superseded (recommended)",
+    "detail": "Today's behaviour across ~311 paths stands, and is what the schemathesis conformance check expects. KS-1531 merges after its gate. KS-1358 is answered on the ticket, and the harness can stop suppressing those probes."
+   },
+   {
+    "key": "b",
+    "label": "Restore auth-first (KS-406)",
+    "detail": "An anonymous non-GET gets 401 everywhere. A gateway change in its own ticket and PR. KS-1531 still documents the route, but its 405 cell changes to expect 401."
+   },
+   {
+    "key": "c",
+    "label": "Leave it open for now",
+    "detail": "KS-1531's PR stays open and do-not-merge. Nothing else changes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-27T07:56:21.990116+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-17 20:23",
+   "2026-09-08 08:09",
+   "2026-09-08 14:00",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:32",
+   "2026-09-12 11:34",
+   "CARD secuura-ks686-501-posture",
+   "CARD secuura-ks692-status-revoke-interim-posture"
+  ]
  }
 ]
