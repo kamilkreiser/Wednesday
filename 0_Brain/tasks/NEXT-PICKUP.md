@@ -6,7 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
-## ⏩ CHECKPOINT (20:5x, ctx 66%) — READ THIS FIRST
+## ⏩ CHECKPOINT (21:3x, ctx 70%) — READ THIS FIRST
+- V 1st WRAPPED + scored 0.94, pane closed. develop = 8661f5d418b2. Floor: D %8 (demo deploy), S 2nd %13, T 2nd %14, U 2nd %15, monitor %1 (all three new seats on claude-opus-5).
+- READY / in flight: U #1711 (KS-1735, d21a8386de8d) READY; S KS-1731 on origin 7788af2aa591 + KS-1729 pushing -> ONE batch READY mail coming (S leaves for Wednesday: move both tickets' state; file its shape-(i)/module commonjs finding after its search); T KS-1726 pushing (then commit 2 = bicep:129 description, then KS-1736); U KS-1443 1cdde251848f queued on the lock, then KS-1438.
+- NEXT: one tier-2 batch gate (Sonnet, private TMPDIR, own clone under local-model/spark/cache/work/) over #1711 + S's two PRs + T's KS-1726 PR once READY; completion check; merge GO to whichever seat is free (none is the merge seat now).
+- Push gate rule (fleet/STANDING_LINES.md, last line): mkdir lock + `pgrep -fl '^/bin/sh [.]githooks/pre-push origin git@github[.]com:'` empty + load1 < 16. Partial-install rule added (Third symptom). Each seat must run its push waiter as its OWN background task (S's did not once; Wednesday woke it by mail + --mail tap).
+- Ledger tonight: 96 GB frame row; preview-read w=2 (S's 09:26Z ask). Kam's machine PDF sent 20:4x.
+
+## ⏩ CHECKPOINT (20:5x, ctx 66%) — superseded where it differs
 - develop = 8661f5d418b2 (#1708, #1709, #1710 merged tonight; 19 PRs today on top of 28e2d27de337, NONE deployed). V 1st wrapping on its 09:45Z GO (score it, pane_close).
 - S 2nd %13 (KS-1731 committed 7788af2aa, then KS-1729), T 2nd %14 (KS-1726 re-pushing after a partial-install refusal; commit 2 = services.bicep:129 description, ruled by Wednesday; then KS-1736), U 2nd %15 (KS-1735 d21a8386, then KS-1443, KS-1438) — all on claude-opus-5 (the Secuura launcher pins it; ruled OK). All queue on the push lock. Each READY -> batch tier-2 gate (Sonnet, private TMPDIR) -> completion check -> merge GO (V is gone: next merge seat = whichever seat is READY, or a fresh Sonnet raise/merge seat).
 - Machine PDF SENT to Kam 20:4x (HTTP 200, attachment read back). Kam may reply on it.
