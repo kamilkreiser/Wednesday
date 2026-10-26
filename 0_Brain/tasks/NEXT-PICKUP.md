@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ ROTATION STATE (15:2x, ctx 80%; written by the 12:0x seat just before its self-rotation)
+- **Floor now:** %7 `Secuura/Blockchain-R` = **Seat R 2nd** (Sonnet 5.5, launched 15:2x, brief mailed + tapped): push KS-1548/1524/1649 serially (load1 < 10, one preflight, anchored check), then ONE READY FOR GATE batch for all nine, then the KS-1728 four-line PR. R 1st, K, J and D are all WRAPPED, scored and CLOSED. %1 fleet-monitor.
+- **Six of R's nine are on origin:** #1689 KS-1716 (no preflight leg ran; its gate runs the real hook), #1692 KS-1560, #1693 KS-1391, #1694 KS-1289, #1695 KS-1513, #1697 KS-1527. When READY arrives: ONE tier-2 batch gate (Sonnet, spark_gate.sh runner first), then a completion check, then merge GOs one at a time.
+- **develop = 18ffc05cda55** (#1688 locks + #1691 KS-1683 + #1696 KS-1722 on top of 1ae6f17d19a8, which both boxes run). **#1690 (KS-1717) is FINAL at 83b9b5f52cac, gated GO WITH NOTES x2, merge HELD for the deploy round with EMITTER_SIGNING_SECRET.** NEXT DEPLOY ROUND (a fresh Opus deploy seat, C6): merge #1690 on GO, set the secret in each box's .env for originate + anchoring, deploy develop to kintsugi, smoke (both log `[emitter-guard] ACTIVE`; one create = one provenance row; 054 already present), then demo; then Done for KS-1683/KS-1722/KS-1717 once deployed.
+- **Quant test (DeepSeek GGUF on the Spark): the agent was told to finish + verify the UD-IQ2_XXS download and STOP without touching DeepSeek. It dies at this rotation.** Successor: `ssh ZGX-Nano-G1n 'docker ps'` (DeepSeek must be Up), look for the download dir on the box (`ls ~`), then re-commission steps 2-4 of `2_Project_Files/local-model/spark-ab/BRIEF_QUANT.md` (step 0 route PASSED per the agent; its `serve_gguf.sh` and an `ab.py` edit sit uncommitted in spark-ab/). Restore + proof are mandatory.
+- **Kam's open card:** `wed-deepseek-four-mac-comparisons-1026` (default b: an estimate research pass today, then measure on the Studio). If unruled, run b.
+- **caffeinate:** `ensure_caffeinate` armed `-dims -t 21600` (pid 17627) at the R 2nd launch; the `-u` one (pid 45194) lapses ~16:18. Re-arm `caffeinate -u -t 7200` if the macOS idle work returns (mediaanalysisd high, load high with low disk I/O).
+
 # NEXT PICKUP (Mon 26 Oct ~13:48 AEDT; account gauge 7d ~1%; develop = c2505d5c6fe0)
 
 ## 0. READ FIRST
