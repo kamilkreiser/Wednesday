@@ -6,7 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
-## ⏩ CHECKPOINT (20:0x, ctx ~56%; the 19:4x successor seat) — READ THIS FIRST, it supersedes the blocks below where they differ
+## ⏩ CHECKPOINT (20:5x, ctx 66%) — READ THIS FIRST
+- develop = 8661f5d418b2 (#1708, #1709, #1710 merged tonight; 19 PRs today on top of 28e2d27de337, NONE deployed). V 1st wrapping on its 09:45Z GO (score it, pane_close).
+- S 2nd %13 (KS-1731 committed 7788af2aa, then KS-1729), T 2nd %14 (KS-1726 re-pushing after a partial-install refusal; commit 2 = services.bicep:129 description, ruled by Wednesday; then KS-1736), U 2nd %15 (KS-1735 d21a8386, then KS-1443, KS-1438) — all on claude-opus-5 (the Secuura launcher pins it; ruled OK). All queue on the push lock. Each READY -> batch tier-2 gate (Sonnet, private TMPDIR) -> completion check -> merge GO (V is gone: next merge seat = whichever seat is READY, or a fresh Sonnet raise/merge seat).
+- Machine PDF SENT to Kam 20:4x (HTTP 200, attachment read back). Kam may reply on it.
+- OWED brief items for a Secuura seat (the project's launcher): --model claude-opus-5 -> newest; "CC Kam on every email" line; step 7 POST /api/seen; F-02 branch keepalive.
+- Next wave: lane 3 (KS-1324/1331, Sonnet) and lane 5 (KS-1727, Opus), lanes.md 1950. Deploy round after D 32nd wraps.
+
+## ⏩ CHECKPOINT (20:0x, ctx ~56%; the 19:4x successor seat) — superseded by the block above where they differ
 - **Floor:** %8 D 32nd (Opus, demo deploy of 28e2d27de337; notices post only on Wednesday's "POST NOTICES") · %12 V 1st (Sonnet): MERGE GO sent 20:01 for #1708 a6bb564a9bf5 then #1709 f1abd08594ec (tier-2 gate GO WITH NOTES x2, 0_Brain/reference/2026-10-26_gate-r1708-v1709/verdict.md); then KS-1551 (fixture-baseline plan approved), rebase --onto, READY -> its own tier-2 gate · %13 S 2nd (KS-1731 then KS-1729, vc-issuer) · %14 T 2nd (KS-1726 then KS-1736) · U 2nd (KS-1735, KS-1443, KS-1438) launching via a background load<7 waiter · %1 fleet-monitor. Briefs: 2_Project_Files/fleet/briefs_staged/2026-10-26_seat{S2,T2,U2}_*.md. **OWED at each new seat's plan prompt: `/model claude-sonnet-5-5` (boot statusline read "Opus 5"), model mail, then the plan GO.**
 - **Next wave (lanes.md 1950):** lane 3 shell runner KS-1324/KS-1331 (Sonnet), lane 5 KS-1727 wallet signature (Opus) once load allows. Spark-strict pool: 0.
 - **Spark:** gate tooling fixed (claim released); calibration 3 = tier 2 FAIL x2 (two false NO GOs) — recorded in the grant lesson. Spark is FREE; next Spark work: per-finding source check of the shadow-3 Majors, or a rung-3 brief from the near-misses (KS-1667 after its PR overlap clears, KS-1438 is U 2nd's).
