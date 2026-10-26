@@ -13103,5 +13103,40 @@
   "project": "Secuura",
   "ts": "2026-10-26T09:49:39.423654+11:00",
   "text": "One card needs you on fleet activity. Everything Secuura is blocked until you answer it.\n\nTwo high-severity advisories have no fix in range:\n1. msal-node: measured as not reachable from our code.\n2. zod: the same memory flaw exists in the zod version we use, and no upgrade removes it. The real fix is capping request arrays and body limits.\n\nI recommend option a. Accept both for 14 days, each with a reason and a ticket, the same way you handled braces and node-forge on 4 October. Then all pushes resume today.\n\nIf you don't answer, nothing is accepted and every push stays blocked."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-26T12:10:43.289584+11:00",
+  "text": "No action needed. I'm the fresh seat after the 11:30 rotation, brain loaded, on the new account at 1% of the week.\n\nKintsugi is deployed and verified at develop 1ae6f17d19a8: all 25 services swapped clean, the wallets and anchoring checked, the three fixes proven live. D has started the demo build, and it should finish around 2:30 this afternoon.\n\nPR 1688 is merged. R is pushing its nine branches, and the first one, PR 1689, is up. K and J are rebasing onto the new develop.\n\nOne problem on the laptop. Docker's virtual machine is stuck at about 900% CPU and won't answer, which is slowing every seat's tests. I've asked the seats whether any of them has a container running. Unless one does, I'll restart Docker Desktop at 12:25."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-10-26T12:12:40.079337+11:00",
+  "text": "Received. I'm looking up the model analysis and any Ornith 122B test in the records now, so you get what was actually measured and not my memory of it. Answer in a few minutes."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-10-26T12:18:51.824826+11:00",
+  "text": "No action needed. These are the measured results, from the routing table we wrote on 18 October and its records.\n\nLocal models, first-round pass rates on real tickets:\nThe Spark, DeepSeek V4 Flash, is the clear leader. It passed 48 of 48 on one- to three-file fixes that were fully spelled out. On looser briefs it passed 5 of 7 first time and 6 of 7 after one rebrief.\nOrnith 1.0, the 35B, passed 112 of 172 first time and 138 of 172 within two rounds.\nOrnith 1.5 matched 1.0 on the head-to-head, 17 of 20, but has only one real ticket behind it.\n\nClaude seats, scored by me against what was asked:\nSonnet raise seats average 0.96 over 8 runs. Sonnet merge seats average 0.96 over 12 runs, and no Major has reached develop. Sonnet build lanes average 0.95 over 11.\nOpus gates score 0.95 to 0.97 and have caught real Majors that Sonnet built. Opus deploys are 0.96 over 2, with no rollbacks.\nFable 5.1 has had two security gates. It was thorough and found a real test gap by running a real database. That's two data points, so no rule yet.\n\nNot measured: usage cost per hour by model, so the 8 times figure for Sonnet is still your estimate.\n\nOn Ornith 122B: no, it has never been tested. Every Ornith run on record is a 35B, either 1.0 at two quantisations or 1.5. This laptop couldn't hold a model that size anyway. When the new 256 gigabyte Studio arrives I can run the same head-to-head on it. That's my recommendation."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-10-26T12:25:07.207886+11:00",
+  "text": "Received. Measuring DeepSeek V4 Flash's actual footprint on the Spark now: the weights on disk and what the server reserves for context."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-10-26T12:25:29.332922+11:00",
+  "text": "Measured on the Spark just now, from its own server log and files.\n\nThe DeepSeek V4 Flash weights take 95.4 gigabytes of memory when they load. On disk they're 99 gigabytes.\n\nOn top of the weights, the server reserves about 94.6 percent of the box's 121 gigabytes, so roughly 114. That's 95 for the weights, and most of the rest is the context cache, stored in a compact 4-bit format, which is what gives it the long context window. That 94.6 is the start script's default; I didn't check whether the running container overrides it. Free memory reads 1 to 2 gigabytes, so the Spark is effectively full.\n\nSo in practice it needs about 110 to 115 gigabytes to run the way we use it. You could run it with less by shrinking the context window, but I haven't measured how far.\n\nFor comparison, Ornith 122B in its 4-bit build is 78 gigabytes of weights. That's why it fits on the Spark only if DeepSeek is stopped first, and why the 256 gigabyte Studio could hold both. The test card on fleet activity is waiting for your choice."
  }
 ]
