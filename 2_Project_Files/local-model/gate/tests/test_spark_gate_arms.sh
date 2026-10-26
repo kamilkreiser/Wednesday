@@ -4,6 +4,14 @@
 # Arm 3: the junit parser refuses a report with 0 tests (exit 4).
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; G="$HERE/../spark_gate.sh"
 REPO="$1"; SCR="$2"; fail=0
+# Refuse to run without its inputs (2026-10-26): with no args every arm failed on the
+# invocation, not on spark_gate.sh, and read like a broken gate.
+if [ -z "$REPO" ] || [ -z "$SCR" ] || [ ! -d "$REPO/.git" ] || [ ! -d "$SCR" ]; then
+  echo "REFUSED: usage: test_spark_gate_arms.sh <repo-clone with .git> <existing scratch-dir>" >&2; exit 64
+fi
+if [ -z "$GIT_SSH_COMMAND" ] && [ -z "$(git -C "$REPO" config --get core.sshCommand)" ]; then
+  echo "REFUSED: no GIT_SSH_COMMAND and no core.sshCommand in $REPO: the arms fetch the PR and need the deploy key" >&2; exit 64
+fi
 HEADOK=18e72727d94c81970952ea1d37b409d0b800bc76
 TESTF=systemTest/schemathesis/tests/unit/support/test_precondition_probes_proposal_cap.py
 bash "$G" "$REPO" 1687 0123456789abcdef0123456789abcdef01234567 develop "$TESTF" --work "$SCR/arm1_$$" < /dev/null; rc=$?
