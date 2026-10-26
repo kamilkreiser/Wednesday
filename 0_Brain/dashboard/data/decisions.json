@@ -49456,5 +49456,52 @@
    "CARD wed-deepseek-four-mac-comparisons-1026",
    "CARD mps-117-round-cap-nogo-1026"
   ]
+ },
+ {
+  "id": "composer-94-narrow-fix-lost-cells-1026",
+  "client_project": "Datasec/Security Composer",
+  "title": "Composer #94: the narrow fix closes its targets but misses 16 cross-line cases. Accept them as tickets, or hold #94?",
+  "bluf": "Datasec / Security Composer, PR #94 (the DEPLOY.md command-guard test scanner). This is the RESULT of the narrow round you ruled at 14:33 (b: B736-1 and B736-2 only), which neither of your earlier #94 rulings covered. It closes every case it was meant to, including the related case kept at the stamp and every earlier closed case. But on this last round it now misses 16 shapes that the previous version caught. In 15 of them the new scanner reads the shell code exactly as bash does; it misses only because bash's failure depends on something left open on an EARLIER line (a bracket, a stray double quote, an exec replaying its input, an unclosed math expansion), and this scanner reads one command at a time by design. Main's own scanner also misses 7 of the 16. None of the 16 can occur in the real DEPLOY.md: all four scanners find nothing there. The fix is held on the machine, not pushed.",
+  "default_action": "If you do not choose, I hold #94 (option b): nothing is pushed or landed, and a records seat tickets the leftovers.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept the 16 as ticketed leftovers, then a short check and land",
+    "detail": "I push the held commit; a short check confirms the closed cases and the 16 as the only leftovers; then it lands (squash, after a CodeQL scan). One ticket covers the cross-line context class."
+   },
+   {
+    "key": "b",
+    "label": "Hold #94 and keep main's scanner",
+    "detail": "Nothing lands; main keeps its current scanner (it catches 9 of these 16 but has the issues #94 set out to fix); the fix commit is kept, not pushed; a records seat tickets everything."
+   },
+   {
+    "key": "c",
+    "label": "One more round",
+    "detail": "A fifth round on this class, on your word only."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-26T18:20:41.576885+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 20:15",
+   "CARD wed-nas-narrow-hard-followon",
+   "CARD wed-delegation-grant-mail-lost-its-signature-1019",
+   "CARD hpsmpoc-free-text-control-chars-1026",
+   "CARD mps-117-null-class-strict-nogo-1026",
+   "CARD datasec-morning-plan-1026",
+   "CARD hpsmpoc-control-chars-six-field-words-1026",
+   "CARD composer-94-heredoc-scan-round-cap-1026",
+   "CARD wed-ornith-122b-test-on-spark-1026",
+   "CARD datasec-github-actions-billing-refused-1026",
+   "CARD hpsmpoc-control-chars-stored-values-1026",
+   "CARD composer-94-extra-round-nogo-1026",
+   "CARD wed-deepseek-four-mac-comparisons-1026",
+   "CARD mps-117-round-cap-nogo-1026",
+   "CARD mps-118-round-cap-nogo-1026",
+   "CARD wed-laptop-spotlight-load-1026"
+  ]
  }
 ]
