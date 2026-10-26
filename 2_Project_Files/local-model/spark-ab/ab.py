@@ -51,6 +51,10 @@ MAX_TOKENS = 16384
 MODELS = {
     "deepseek": {"served": "deepseek-v4-flash-0731", "kwargs": {"thinking": False}},
     "ornith": {"served": "Ornith-1.5-122B-NVFP4", "kwargs": {"enable_thinking": False}},
+    # BRIEF_QUANT.md (Kam 2026-10-26 ~14:59): the SAME model as smaller unsloth GGUF quants, served by llama.cpp
+    # (serve_gguf.sh). Same kwarg as deepseek: unsloth's chat template reads `thinking` (false -> "</think>" prefix).
+    "iq2xxs": {"served": "DeepSeek-V4-Flash-0731-UD-IQ2_XXS", "kwargs": {"thinking": False}},
+    "iq1m": {"served": "DeepSeek-V4-Flash-0731-UD-IQ1_M", "kwargs": {"thinking": False}},
 }
 
 
