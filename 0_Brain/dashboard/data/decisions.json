@@ -49167,5 +49167,49 @@
   ],
   "delivered_artefact": "Tuesday pickup DELTA 651 (standing: CI paused, local work continues, nothing lands that needs a new run)",
   "delivered_ts": "2026-10-26T12:36:22.952369+11:00"
+ },
+ {
+  "id": "hpsmpoc-control-chars-stored-values-1026",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Control-character check: should a value already stored with one still save?",
+  "bluf": "No action needed unless you disagree with the default. The control-character check you approved this morning (PR #223, all eight fields) passed its gate. One side effect: a title, note, wording or narrative that ALREADY holds one of these characters (typed before the merge, or written by the AI narrative, which is not screened) is refused when the web sends it back unchanged. Measured by the gate on its own test data: an action item stored that way can no longer have its status changed from the action-plan screen. Whether any such value exists on the hosted UAT or demo data is unmeasured. Recommendation: land #223 as gated, and have an agent build a small follow-up that lets an UNCHANGED stored value through and screens the AI narrative before it is stored, with its own gate. #223 cannot land yet in any case: it waits for the Pkcs pin fix (#225) and for CI, which you paused at 12:35. (Not a re-ask: this morning's rulings chose the fields and the sentences; stored values were not in them.)",
+  "default_action": "If there is no answer, Tuesday commissions the follow-up build (a) now and lands #223 once #225 has landed and CI runs again; nothing is deployed without the project's normal deploy rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Land #223, then the follow-up (recommended)",
+    "detail": "An agent builds the allowance for unchanged stored values plus screening of the AI narrative output, gated before landing. #223 lands once #225 has landed and CI runs again."
+   },
+   {
+    "key": "b",
+    "label": "Hold #223 until the follow-up is in",
+    "detail": "Both land together, so nobody can get stuck in between. Slower; same build work."
+   },
+   {
+    "key": "c",
+    "label": "Land #223 only; no allowance",
+    "detail": "A stuck user retypes the title or text. The AI narrative path stays unscreened."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-26T13:27:40.221114+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-26T13:32:17.116020+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-09 16:39",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD hpsmpoc-erasure-stored-pdfs",
+   "CARD hpsmpoc-free-text-control-chars-1026",
+   "CARD mps-117-null-class-strict-nogo-1026",
+   "CARD datasec-morning-plan-1026",
+   "CARD hpsmpoc-control-chars-six-field-words-1026",
+   "CARD composer-94-heredoc-scan-round-cap-1026",
+   "CARD wed-ornith-122b-test-on-spark-1026",
+   "CARD datasec-github-actions-billing-refused-1026"
+  ]
  }
 ]
