@@ -92,6 +92,14 @@ def write_outputs(run, raw, wall, body, info, model_key):
     choice = j["choices"][0]
     msg = choice.get("message") or {}
     content = msg.get("content") or ""
+    # GGUF arms (llama.cpp server-cuda13 b2026-10-25, --jinja): with thinking=false the unsloth template ENDS the prompt
+    # with "</think>" and the server's chat parser echoes that generation-prompt tail as the first 8 chars of
+    # message.content. Proven 2026-10-26 04:44Z: /completion on the identical rendered prompt returns tokens
+    # [11932,223,3180,1] = "OK 42" (no </think> token generated) while /v1/chat/completions returns "</think>OK 42".
+    # Strip exactly ONE leading echo, record it; any other think tag still trips the leak detector below.
+    prefix_stripped = False
+    if model_key in ("iq2xxs", "iq1m") and content.startswith("</think>"):
+        content, prefix_stripped = content[len("</think>"):], True
     reasoning = msg.get("reasoning_content") or msg.get("reasoning") or ""
     finish = choice.get("finish_reason")
     usage = j.get("usage") or {}
@@ -114,6 +122,7 @@ def write_outputs(run, raw, wall, body, info, model_key):
         "decode_tok_s_end_to_end": round(usage["completion_tokens"] / wall, 2) if usage.get("completion_tokens") and wall else None,
         "thinking_chars": len(reasoning), "think_leak_in_content": ("<think>" in content or "</think>" in content),
         "finish_reason": finish, "done": finish is not None, "done_reason": finish,
+        "template_prefix_echo_stripped": prefix_stripped,
         "unfenced_wrapped": unfenced, "unclosed_fence_closed": closed, "content_chars": len(cleaned),
         "task_file": info["task_path"],
     }
