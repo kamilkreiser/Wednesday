@@ -1,0 +1,76 @@
+# DeepSeek V4 / V4.1 Flash on 128 GB and 256 GB Macs: estimates (2026-10-26, Sonnet research drafter; card wed-deepseek-four-mac-comparisons-1026 = b)
+
+## BLUF
+
+**V4.1 Flash does exist.** It is 552B total parameters (8B active at prefill, 16B at decode), about twice V4 Flash's 284B/13B. Its smallest community builds are 1-bit/1.6-bit and its 2-bit builds are 150 to 313 GB, so **no V4.1 build runs fully resident on a 128 GB Mac**. **V4 Flash at ~2-bit does fit in 128 GB and has real measurements at about 27 to 39 tok/s generation** (M3 Max and M5 Max). A 256 GB Mac Studio can run V4.1 Flash. Measured speeds there are low and inconsistent (7 to 21 tok/s, one build per figure), and the single-machine V4.1 numbers all come from blog or README claims, not independent reproductions. I found **no measured tok/s for SSD-streamed DeepSeek on any Mac**, so config 2 and the 128 GB half of config 3 are derived or guessed. I found **no Reddit, X or HF-discussion posts**; the search tool did not surface them. Every "what others did" figure below is from READMEs and blogs, so the weight of real user reports is thinner than Kam asked for.
+
+## Facts established
+
+- **V4 Flash:** 284B total, 13B active, 1M context, with 256 routed experts plus 1 shared, top-6 routing. Source: [HF blog](https://huggingface.co/blog/deepseekv4) and [paper](https://arxiv.org/html/2606.19348v1), both seen only as search snippets (unread). KV is 3,514 B/token (stated by [modemguides](https://www.modemguides.com/blogs/ai-infrastructure/run-deepseek-v4-1-flash-locally-hardware-reality-check)). The 0731 GA checkpoint is 156.4 GB official ([Unsloth docs](https://unsloth.ai/docs/models/deepseek-v4)).
+- **V4.1 Flash exists.** [DeepSeek changelog](https://api-docs.deepseek.com/updates/):
+  - Released 2026-09-10, with an updated 1017 version on 2026-10-17, and the API name `deepseek-flash`.
+  - The changelog gives **no parameter count and no context length**.
+  - 552B total and 8B/16B active come from a NVIDIA model-card mirror and third parties (search snippets, unread), and are confirmed by [modemguides](https://www.modemguides.com/blogs/ai-infrastructure/run-deepseek-v4-1-flash-locally-hardware-reality-check) and [mindstudio](https://www.mindstudio.ai/blog/deepseek-v4-1-flash-local) (both opened).
+  - Context is up to 1M, with 384 routed experts and 6 active.
+  - KV is **890 B/token** (versus 3,514 for V4 Flash), per [modemguides](https://www.modemguides.com/blogs/ai-infrastructure/run-deepseek-v4-1-flash-locally-hardware-reality-check) and [modelfit](https://modelfit.io/blog/deepseek-v4-1-flash-mac-memory-requirements/).
+  - It also carries about 189 GiB of "Engram" tables that sit on SSD in most runtimes. The official checkpoint is 510 GB.
+- **Your quant sizes (V4 Flash 0731 GGUF)** are as you gave them. Other builds of the same model:
+  - antirez ds4 Q2 is about 81 GB ([rentamac](https://rentamac.io/run-deepseek-v4-mac/)), or about 80 GB resident ([noreff](https://github.com/noreff/lmstudio-dsv4-patch)).
+  - MLX 2-bit DQ is 96.5 GB and MLX 3-bit DQ is 129.1 GB ([modelfit](https://modelfit.io/blog/deepseek-v4-flash-0731-128gb-macbook/)).
+- **V4.1 Flash builds** (all from [modelfit](https://modelfit.io/blog/deepseek-v4-1-flash-mac-memory-requirements/) or [modemguides](https://www.modemguides.com/blogs/ai-infrastructure/run-deepseek-v4-1-flash-locally-hardware-reality-check) unless noted):
+
+| Build | Size |
+|---|---|
+| Unsloth UD-IQ1_S GGUF | 233 GB total, ~122 GB outside Engram; needs Unsloth's draft llama.cpp PR |
+| GGUF Q2_K | 264.5 GB |
+| GGUF MixedQ2 (apetersson, Engram dropped) | 169.9 GB; no runtime shown running it |
+| MLX 2-bit | 238.8 GB (September weights, mlx-community) |
+| 1017 MLX 2-bit | 313 GB |
+| ds4 Q2 | ~152 GiB resident (backbone only) |
+| ds4 Q4 | ~294 GiB resident (backbone only) |
+| REAP 2-bit | ~199 GiB |
+
+  The ds4 [README](https://github.com/antirez/ds4) lists V4.1 Flash and says "Q4 needs SSD streaming or a 512 GB Mac". It says Q2 runs with SSD streaming on one 128 GB Mac. It gives no speed figure for that.
+- **Usable memory on a 128 GB Mac:** my ~90 to 100 GB figure is an estimate and stays one. modelfit uses a budget of about 109 GiB for 128 GB and about 218 GiB for 256 GB, which is also arithmetic, not a measurement. It needs `sysctl iogpu.wired_limit_mb` raised ([modelfit](https://modelfit.io/blog/deepseek-v4-flash-0731-128gb-macbook/)). The noreff report loads ~80 GB resident on a 128 GB M5 Max.
+
+## Estimate table
+
+Tags: **M** = measured by someone (URL), **D** = derived (arithmetic shown), **G** = guess.
+
+| | 1. V4 Flash, 128 GB, all resident | 2. V4 Flash, 128 GB, SSD-streamed | 3. V4.1 Flash, 128 GB | 4. V4.1 Flash, 256 GB (M3 Ultra) |
+|---|---|---|---|---|
+| **Quant that fits** | **Fits: IQ1_M 86.9, IQ2_XXS/IQ2_M 90.9, Q2_K_XL 96.8 GB.** UD-IQ3_XXS at 104.2 GB leaves no KV headroom inside a 90 to 100 GB budget (D). ds4 Q2 (~81 GB) fits with room to spare (M, [noreff](https://github.com/noreff/lmstudio-dsv4-patch)). | Only needed above ~100 GB: IQ3_XXS 104.2 GB, MLX 3-bit 125 GB, 4-bit class 155 to 162 GB (D from sizes above). Streaming does not help the 2-bit tier, which already fits. | **Nothing fits resident.** Options: ds4 Q2 with Engram and experts streamed (ds4 README, no speeds), Unsloth 1-bit (122 GB outside Engram, so still over budget, needs the draft PR), or the 1.6-bit ~106 GiB build (needs the `ds4-dfm-rs` fork; the speed below is for a DGX Spark, not a Mac). | **Fits resident:** ds4 Q2 at 152 GiB (September weights only), REAP 2-bit at ~199 GiB, and MLX 2-bit (peak 166.7 GiB process memory in testing, though the file is 238.8 GB). The 1017 2-bit at 313 GB and the 4-bit class do not fit. |
+| **Generation tok/s** | **M: 39.35 (M5 Max, 128 GB, Q2, 2k ctx), 36.1 (16k), 34.4 (32k), 27.6 (64k)** ([ds4 PERFORMANCE.md](https://github.com/antirez/ds4/blob/main/docs/PERFORMANCE.md)). **M: 26.68 on M3 Max 128 GB, q2, 2k** and **35.5 on M3 Ultra 512 GB, q4** (ds4 README table, via [modelfit](https://modelfit.io/blog/deepseek-v4-flash-0731-128gb-macbook/)). **M: ~26** in LM Studio on M5 Max ([noreff](https://github.com/noreff/lmstudio-dsv4-patch)), and **~22 to 23** from the rentamac author's own llama-bench run on M5 Max ([rentamac](https://rentamac.io/run-deepseek-v4-mac/)). Note ds4 and llama.cpp differ by ~40%. | **No measured figure.** G: 3 to 8 tok/s for a 4-bit class quant. Basis: Flash-MoE streamed a 397B model at 4.4 tok/s on M3 Max (17.5 GB/s SSD) and 12 to 21 on M5 Max 128 GB ([gorroai](https://github.com/gorroai/flash-moe)). rentamac also lists 3 to 6 tok/s on M4 Max 128 GB, but with unnamed sources and unclear settings. | **No measured Mac figure.** G: 4 to 12 tok/s with streaming. For comparison, M: ~30 tok/s plain and 43 with speculative decoding on one DGX Spark, 1.6-bit, September weights ([modemguides](https://www.modemguides.com/blogs/ai-infrastructure/run-deepseek-v4-1-flash-locally-hardware-reality-check)). A Spark has far less memory bandwidth than a Max, but a Mac that must stream does not get that benefit. | **M: 9.46 (greedy, MLX 2-bit, M3 Ultra 256 GiB, short text)** ([modelfit](https://modelfit.io/blog/deepseek-v4-1-flash-mac-memory-requirements/), quant author's own run). **M: 7.3 to 7.9** for REAP 2-bit on M3 Ultra 60c. **M: 20 to 21** for oMLX 0.7.1.dev1 on an M3 Ultra, but quant and memory are unstated. ds4 Q2 resident: G 20 to 35. Basis: V4 on ds4 reached 35.5 against a 112 tok/s ceiling (D: 819 GB/s ÷ (13B × 4.5 bit ÷ 8 = 7.3 GB)), about 32%. At 2.5 bit × 16B active, the V4.1 ceiling is 164 tok/s (D), and 32% of that is ~52. I then discounted heavily for the immature V4.1 support, which is why the range is 20 to 35, not 52. |
+| **Prompt processing tok/s** | **M: 790 (M5 Max, 2k), 573 (16k), 557 (32k), 399 (64k)** (PERFORMANCE.md). **M: 58.5 on M3 Max q2** and **79 on M3 Ultra q4**. **M: ~190 on the LM Studio path** (M5 Max) and ~436 at 512 tokens (rentamac author's llama-bench). | G: roughly the same as resident, or slower, because prefill touches many experts and I/O-bound passes on a cold cache will dominate. No data. | None for Mac. Spark 1017 EXL3 prefill 1,700 to 2,200 is for two Sparks (M, modemguides). G for 128 GB: 100 to 300. | **No M3 Ultra V4.1 prefill number found.** G: 80 to 200. Basis: M3 Ultra measured 79 on V4 q4 (above), and V4.1 prefill uses 8B active, so it should be no worse. |
+| **KV headroom** | **D:** 3,514 B/token × 65,536 = 0.23 GB at 64k, and 3.7 GB at 1M ([modelfit](https://modelfit.io/blog/deepseek-v4-flash-0731-128gb-macbook/) agrees on 3.7 GB). At 90.9 GB of weights, 1M context is feasible (D), and the noreff user ran **M: full 1,048,576 context with ~80 GB resident on 128 GB**. **Conflict:** rentamac says "roughly 26GB" of KV at long context and modelfit says "tens of thousands of tokens". Neither shows arithmetic, so I'd treat ~3.7 GB as the formula figure and ~26 GB as unverified. | Same KV as config 1, but page cache and KV compete for the same RAM. G: plan for 128k or less. | **D:** 890 B/token × 1,048,576 = 0.93 GB at 1M (matches modelfit). KV is not the constraint. Weights are. | **D:** 890 B × 131,072 = 0.12 GB at 128k, 0.93 GB at 1M. Budget ~218 GiB (modelfit). 152 GiB leaves ~66 GiB spare. |
+| **Quality cost of the quant** | AtomicChat's own KLD table (wikitext-2, self-reported by a quant maker): BF16 PPL 4.53; IQ2_S_XL 96.8 GB PPL 5.14, KLD 0.319, top-1 match 81.5%; IQ2_XXS 78.5 GB PPL 5.79, KLD 0.454, 77.5% ([HF card](https://huggingface.co/AtomicChat/DeepSeek-V4-Flash-0731-GGUF)). Unsloth's table gives antirez IQ2XXS 86.7 GB KLD 0.408 and mixed 97.6 GB KLD 0.361, against UD-Q4_K_XL 0.010 ([Unsloth docs](https://unsloth.ai/docs/models/deepseek-v4)). **The two tables use different reference baselines** (AtomicChat shows Q4/MXFP4 at ~0.156, Unsloth at ~0.010), so the absolute KLD values do not compare across them. **No task benchmarks for any quant exist** (rentamac, modelfit). User impression only: "answers stay reasonable" (rentamac). | Q3 and 4-bit class would be better, KLD 0.25 for IQ3_XXS (AtomicChat) down to ~0.01 for Q4_K_XL (Unsloth), but only at the speed penalty above. | Quality at 1 to 2 bit is poor-to-moderate: 1-bit/1.6-bit builds match the full model's next token **69 to 88%** of the time (conflicting figures inside the same article, [modemguides](https://www.modemguides.com/blogs/ai-infrastructure/run-deepseek-v4-1-flash-locally-hardware-reality-check)). | 0xSero's 2.70 bpw 1017: **94.95% top-token agreement**; Mia's 2.9-bit: code perplexity within 1.8% of unquantized (both via modemguides, author-reported, unreproduced). |
+| **SSD-offload penalty** | n/a | Mac SSD bandwidth: **M: 17.5 GB/s sequential read (M3 Max 1 TB)** ([gorroai](https://github.com/gorroai/flash-moe)). I found no measured figure for an M3 Ultra or M5 Max drive. D: V4 Flash at ~2.5 bit active ≈ 13B × 2.5 ÷ 8 ≈ 4 GB/token, and the experts are maybe 60 to 80% of that, so 2.4 to 3.3 GB/token. A cold ceiling is 17.5 ÷ 3.3 to 2.4 = 5 to 7 tok/s. A 71% page-cache hit rate (Flash-MoE's reported figure) cuts miss traffic to 29%, which lifts the ceiling to ~18 to 25 tok/s (D). All of this is theory. rentamac says streaming starts "near 96GB" and is "far slower" than resident, with no figure. | The ds4 README says V4.1 Q2 can stream on one 128 GB Mac and "run it at a decent speed", with no number. G as above. Engram tables are read from SSD every token regardless. | Little penalty if Engram stays on SSD (modelfit says it is read on demand) and the backbone is resident. G: 0 to 15%. No measurement. |
+| **Tradeoff note** | This is the only config with solid evidence. | Not worth it at this size: the 2-bit tier fits resident at 27 to 39 tok/s. | Experimental. modemguides: "No speeds are published." | Best V4.1 option, but V4.1 runtime support is still immature. |
+
+## Sources opened (actually read)
+
+- [DeepSeek API changelog](https://api-docs.deepseek.com/updates/)
+- [Unsloth docs, DeepSeek-V4](https://unsloth.ai/docs/models/deepseek-v4)
+- [AtomicChat/DeepSeek-V4-Flash-0731-GGUF](https://huggingface.co/AtomicChat/DeepSeek-V4-Flash-0731-GGUF)
+- [antirez/ds4 README](https://github.com/antirez/ds4) and [docs/PERFORMANCE.md](https://github.com/antirez/ds4/blob/main/docs/PERFORMANCE.md)
+- [noreff/lmstudio-dsv4-patch](https://github.com/noreff/lmstudio-dsv4-patch)
+- [Tonoken3/DeepSeek-V4-Flash-MacStudio](https://github.com/Tonoken3/DeepSeek-V4-Flash-MacStudio): 22.4 tok/s with 155 GB mxfp8 on a 512 GB M3 Ultra. Not used in the table, since it doesn't fit any of the four configs.
+- [gorroai/flash-moe](https://github.com/gorroai/flash-moe)
+- [rentamac](https://rentamac.io/run-deepseek-v4-mac/)
+- [modelfit, V4 Flash 0731 on 128 GB](https://modelfit.io/blog/deepseek-v4-flash-0731-128gb-macbook/)
+- [modelfit, V4.1 Flash on Mac](https://modelfit.io/blog/deepseek-v4-1-flash-mac-memory-requirements/)
+- [modemguides, V4.1 Flash](https://www.modemguides.com/blogs/ai-infrastructure/run-deepseek-v4-1-flash-locally-hardware-reality-check)
+- [mindstudio](https://www.mindstudio.ai/blog/deepseek-v4-1-flash-local), which had little beyond KV and parameter figures.
+
+**Unread (search snippets only):** the HF blog and the arXiv V4 paper, SiliconANGLE, qz.com, DeepSeek's X post, the NVIDIA model card, artificialanalysis.ai, apxml, morphllm, willitrunai, llmcheck, pinggy, kingy.ai, besthub.dev, and the flash-moe writeups (insiderllm and others). The neoxcomputers page returned 429 and `huggingface.co/unsloth/DeepSeek-V4.1-Flash-GGUF` returned 401. I only have its existence and size second-hand (modemguides).
+
+## What could not be established
+
+- **Any measured tok/s for DeepSeek streamed from SSD on a Mac.** All SSD figures here are derived from Flash-MoE on a different model (Qwen 397B), or guessed. Memory bandwidth for the M3 Ultra (819 GB/s) is from my background knowledge. I did not open an Apple page for it.
+- **Mac SSD bandwidth on the M3 Ultra and M5 Max.** The only measured number is 17.5 GB/s on an M3 Max 1 TB. My search for M3 Ultra SSD speeds found nothing quantitative.
+- **Downstream quality of any 2-bit DeepSeek quant** (coding, agentic tasks). Only KLD, perplexity and top-1 agreement exist, and the two KLD tables disagree on baseline.
+- **The V4.1 Flash 552B / 8B / 16B figures from DeepSeek directly.** The official changelog omits them; I have them from the NVIDIA mirror and third-party blogs.
+- **Reddit r/LocalLLaMA, X and HF discussion reports.** The search tool did not surface them, so no user-thread evidence is included. That is the main gap relative to Kam's "read what other people have done".
+- **Whether the KV cache at long context is 3.7 GB or 26 GB for V4 Flash.** The two sources conflict.
+- **Which V4.1 runtimes work on a 128 GB Mac today.** The ds4 README says supported (Metal) but gives no Mac speed, and llama.cpp, Ollama and LM Studio paths are reportedly unready (modelfit, modemguides).
+- **Whether the 256 GB Mac Studio's 819 GB/s M3 Ultra bandwidth matches what ships.** Kam's order may be a different chip generation.
