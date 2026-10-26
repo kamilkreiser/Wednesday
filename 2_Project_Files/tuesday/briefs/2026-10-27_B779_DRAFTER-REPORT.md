@@ -1,0 +1,47 @@
+STARTABLE: YES (after the stamp; nothing in the kit blocks a launch)
+
+# B779 drafter report (SEAT-G162, Composer PCOMP-22 Route B check, tier-1 gate, round 1 of 2)
+
+Drafted 2026-10-27 04:03 to about 04:25 AEDT (`date`) by the read-only kit drafter (Sonnet 5.5). Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-27_B779_SEAT-G162_composer-pcomp22-route-b-check-gate-tier1.md` (78 lines). Shape cloned from the stamped B724 gate kit; verdict conventions from B766.
+
+## BLUF
+- The kit gates branch `b778/composer-route-b-dump-complete` @ `151c9a44` (one commit on main `4a2911f1`, two paths). Opus, row G1 (`model-routing.md:108` quoted with the ruling citation elided under the naming rule), cap row `:111`, model id `claude-opus-5-5` (`models_latest.json` lines 17, 37).
+- The gate is adversarial where the builder's evidence is thin. Three gaps I found by reading the new test and STATUS, each turned into a named check: (1) **the builder's "footer text inside an ordinary line" fixtures are not whole-line**: they are indented by four spaces and tab-prefixed, so `-x` was never tested against a line byte-equal to the footer text near the end of a cut script (C3 measures it on real pg_restore output; my reading is that it is ACCEPTED, graded Minor unless the new DEPLOY.md sentences claim otherwise); (2) **the second `echo $?   # 0, or stop here: the script is cut short and must not be applied` line is pinned by no row** (the order row asserts only write < check < DROP FUNCTION < apply by index), so deleting it keeps all 7 rows green: mutant M17 in C4, graded Minor; (3) the builder's "tail -n 6 is the largest window that refuses" is a property of its own fixture (footer 7th from the end), not of correctness: C3 asks for the real false-accept window.
+- Also specified: re-measure of the real footer and the ticket's claim in the gate's own digest-pinned container with a richer synthetic database and at least 20 cut points (including the data/post-data boundary the builder skipped); a 40-row check matrix from the document's own line (CRLF, trailing space/tab, extra blank lines, no final newline, footer plus half a statement, 50 MB file, NUL bytes, directory, symlink, missing, unreadable, unreplaced placeholder, a file named with U+2026, 200 runs under `pipefail` for SIGPIPE); GNU in the image, macOS bash 3.2 + BSD tail/grep + `zsh -f -i` on scratch files (what was and was not measured is a required statement; the Linux VM host is UNMEASURED); 23 defects M1-M23; the #94 scanner scratch run with its planted controls; whole `packages/db` group at head and main; unit chain; prettier on DEPLOY.md; every new DEPLOY.md sentence backed by a gate-seen line; merge/overlap/gitleaks; CodeQL-shaped review of the one `spawnSync("bash", ["-c", ...])`.
+- No PR exists, no check run, no analysis (all MEASURED 04:0x): the kit makes CodeQL NOT SCANNED the state and caps the verdict at GO WITH FOLLOW-UPS (conditional) unless a PR appears.
+
+## Facts re-measured by me (instrument, control)
+- `ls-remote` 04:05: main `4a2911f1a92c81cbd78b23e7fd955decb30cdf0b`, branch `151c9a449dce7bb3a7c11d439da89c286928c337` (instrument: `git --no-optional-locks ls-remote`; control: the same call listed `refs/pull/*`).
+- `gh api -X GET compare/4a2911f1...151c9a44`: ahead 1, behind 0, files `DEPLOY.md` (modified +10 -1, blob `6a47cac2`) and the test (added +318). Control: main's DEPLOY.md blob `f70ce89d` differs.
+- `git/trees` of the head: b616 file `ee282782...`, `support.ts` `13eb5f3e...`, `package.json` `32fea116...`, `package-lock.json` `53305eb4...` (equal to the builder's stated main blobs; I did not diff them against a separate main read, I compared to the builder's and the brief's stated shas: the gate re-proves).
+- `diff` of the raw DEPLOY.md at both shas (607 vs 616 lines): exactly two added lines (203, 204) and the line-220 sentence replaced by eight lines. `LC_ALL=C grep -n '[^ -~]'` of the head file lists the new check line (203) among lines carrying the placeholder; `grep -c` of `PostgreSQL database dump` over the head file = 1.
+- `grep -n` for the sentence: six remaining lines 298, 339, 385, 439, 499, 547 (control: the builder says main has 7).
+- Head commit message read whole by `git/commits`: title without a ticket key; one trailer.
+- `pulls?head=...` 0; `check-runs` total 0; `code-scanning/analyses?ref=` 0 rows. Open PRs #95 (head now `867f3402`), #91, #86, #85.
+- `lsof -nP -iTCP:9630-9639 -sTCP:LISTEN` rc 1 at 04:06 (no control run by me). SEAT-kit word scan of 74 non-`.pre-` kits of 26 and 27 Oct for `963[0-9]`: one hit, the B778 builder kit; control `995[0-9]` listed B721, B724, B729. Panes: `tuesday`, `Datasec/NexusAI-G161`, `fleet-monitor`; no Composer pane (builder J23 closed). Ports verdict: B778 named 963x, is finished; reuse as a reserve is safe at this moment.
+- Round count: 230 STATUS files, 27 with `GATE VERDICT` on line 1; pattern hits B331 and B335 (the 20 Oct 0021 down-recipe gates, different class); control B724 matches `GATE VERDICT`. Class count 0.
+- `.tools/b779`, `.tools/wt-b779-*`, any `B779`/`G162` in `tuesday/briefs`: none. `.tools/b626/scripts/` exists with `common.sh dbone.sh dbtest.sh heavy.sh build.sh unit.sh names.py`. `which codeql` empty; gitleaks present.
+- Landing rule: CLARIFICATIONS line 1799 read with `sed -n 1799p` (squash, head-pinned, quoted in the kit); CLAUDE.md (33 lines) read whole.
+
+## D-decisions (mine)
+- D1. Plumbing from `.tools/b626/scripts/` (the template's finished lineage), not from the builder's `.tools/b778/` (read-forbidden as an instrument). The one needed adaptation is the DEPLOY.md third mount, declared in INSTRUMENTS, same as the builder's (measured need: `COPY . .` in the Dockerfile).
+- D2. Gate model Opus per row G1 and the task's brief; BRIEF_SEAT_LEVEL=opus inside the quotes.
+- D3. Severity of the whole-line-equal false accept set to Minor (ticket text) with a Major trigger if the new DEPLOY.md text claims it is refused; the new text does not, per my reading of the diff. A prefix of a real pg_restore script accepted is Blocker class (a).
+- D4. Hard stop suggested at 240 minutes (target verdict 150): the work is one document line and one test file, but the cut sweep, matrix, mutants and two group runs share a daemon.
+- D5. Verdict ceiling when no PR exists: GO WITH FOLLOW-UPS conditional (CodeQL NOT SCANNED), following B766.
+- D6. The kit keeps `PCOMP-22` and `B778` as work identifiers (not person names, not decision-card ids); no card id appears.
+
+## Q-questions for Tuesday (each with a default)
+- Q1. Reserve ports 9630-9639 for the gate (stated by one finished builder kit, nothing listens)? Default: YES.
+- Q2. Unit step's SOW text input as a read-only `--network none` bind mount at the path `unit.sh` names, never opened? Default: YES (as for B724/B778); NO makes the SOW-dependent unit rows NOT TESTED.
+- Q3. Plumbing copy from `.tools/b626/scripts/` with the declared DEPLOY.md third mount? Default: YES.
+- Q4. Allow the host-side tool matrix (macOS `/bin/bash` 3.2, BSD `tail`/`grep`, `zsh -f -i`) on scratch files only, no docker? Default: YES (it is the only way to say what was and was not measured about other shells; the Linux VM host stays UNMEASURED either way).
+- Q5. Open the PR before launching the gate so CodeQL runs while the gate works (then the gate can reach a clean GO), or launch now and accept the conditional ceiling? Default: open the PR first (non-draft, the commit title as the PR title), then launch; if you launch first, the gate stops at GO WITH FOLLOW-UPS conditional.
+- Q6. Hard stop: accept 240 minutes after Step 0 (target verdict 150)? Default: YES; name the absolute clock at the stamp.
+
+## UNMEASURED (by me)
+No container, `pg_dump`, `pg_restore`, `psql`, vitest, mutant, `tail`/`grep` run of the check line, build or image build. Not measured: whether the digest-pinned image's `pg_restore` still writes the builder's 4-line trailer (builder's transcript RELAYED), what the check does under any shell/tool (the gate's C3), whether `os.tmpdir()` into `bash -c` raises a CodeQL alert (no CLI here; the hosted scan decides), whether the root unit run picks the new file up (builder says no), the four blobs against a fresh main read (compared to the builder's and the kit's stated values, the gate re-proves), whether the NexusAI pane's load will change, the hosted check state after a PR is opened.
+
+## Outside-the-fences disclosure
+- Wrote only the two files. For reading I wrote raw copies of DEPLOY.md at both shas and the new test file into my own scratchpad directory `/private/tmp/claude-501/-Volumes-Laptop-DEV-TUESDAY/d9c03e4f-7a0d-4e9e-9056-1df463c9a679/scratchpad/` (`deploy_head.md`, `deploy_main.md`, `test_head.ts`) via `gh api -X GET` raw output redirection; no project file touched. I also ran `mkdir -p` of that scratchpad directory. No `cd`, no git write verb, no `decision_queue.sh`, no hosted-host HTTP other than `gh api -X GET` against api.github.com under the project's `GH_CONFIG_DIR`, no az/ssh/docker. I read the project's `CLAUDE.md`, CLARIFICATIONS line 1799 and the builder STATUS/evidence text files (not `.tools/b778/`, not any mutant driver). `lsof`, `tmux list-panes`, `which`, `ls` of `.tools/` were run read-only. One unquoted shell expansion `ls -d .../wt-b779-*` raised a zsh no-match message (expected: nothing exists).
+- The model-routing line 108 contains a person's name and a decision slug in its last column; the kit quotes the row with that column elided.
