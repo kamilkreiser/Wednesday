@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 04:2x 27 Oct (ctx 70%; the 22:2x seat) — READ THIS FIRST, supersedes the blocks below where they differ
+- **Floor:** ONLY %18 D 33rd (+ %1 monitor). R 3rd, S 2nd, T 2nd, U 2nd, V 2nd all WRAPPED, scored (0.90 / 0.96 / 0.94 / 0.95 / 0.96) and panes CLOSED.
+- **develop = ec3313a80440** (28 of ours merged today incl. #1719 KS-1331 after a fix round; Peter's #1720-#1724 merge commits are in it). KS-1745 filed (KS-1331 residue). Unfiled by Wednesday's choice: #1717 three surviving mutants, T's two LOWs.
+- **Kintsugi DEPLOYED 5f689991861b** (14:32Z); Done KS-1649, KS-1289, KS-1635. **Demo: build 17/17 done 17:05Z (batch 13 issuer-frontend swap-bound 25 min on 3.9 GB), 23 swaps running from 17:19Z.** OWED next: D's DEPLOYED demo mail -> read the Peter (KS-485) / Stuart (KS-772) notice DRAFTS against both boxes' facts -> mail "POST NOTICES" (with edits if needed) -> D wraps -> score 0.9x, pane_close. Then a panel receipt to Kam (demo deployed).
+- **Next deploy round:** develop ec3313a80440 (6 more of ours: #1715, #1713, #1716, #1718, #1717, #1719 + Peter's 5) -> kintsugi then demo, a fresh Opus C6 seat; demo's issuer-frontend vite build is the slow, memory-bound step (expect ~25 min + swap use near 3 GB).
+- **Untriaged:** the 18 test/tooling-only tickets of the 5f689991861b delta (list in the 01:4x block below) — a Secuura seat reads each for residue, Done only where nothing is open (KS-1728 stays open).
+- Ledger tonight +2 [W]. Daily notes: 2026-10-26.md to 22:2x boot, 2026-10-27.md after midnight.
+
 ## ⏩ CHECKPOINT 01:4x 27 Oct (ctx 65%; the 22:2x seat) — READ THIS FIRST, supersedes every block below where they differ
 - **develop moves under us:** Peter is merging his own PRs tonight as MERGE COMMITS (#1720, #1721, #1722, #1723, #1724). Our merges tonight: #1712, #1714, #1711 (22:1x), #1715 64b275091, #1713 b0ef926f6, #1716 c85508083, #1718 bea5ed493, #1717 dd276d8bb = 27 of ours today. Every GO now uses the rule: develop may have moved by merges not in the GO only if the moved range shares no file with the PR AND merge-tree is clean, both reported.
 - **KINTSUGI DEPLOYED 14:32Z at 5f689991861b** (D 33rd: 24/24 swaps, rollback stamp pre-20261026k3, KS-535 clean, smoke a/c/d PASS, b UNMEASURABLE; demo-service stopped). Done: KS-1649, KS-1289, KS-1635 (live evidence on the tickets). KS-1731 In Progress (0 credential rows). **The 18 test/tooling/docs-only delta tickets are UNTRIAGED** (KS-1735, 1729, 1551, 1554, 1728, 1714, 1636, 1578, 1602, 1566, 1713, 1716, 1527, 1513, 1560, 1524, 1548, 1391): a seat reads each for residue before any Done (KS-1728 was ruled to stay open). Panel receipt posted 01:3x.
