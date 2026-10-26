@@ -3,37 +3,30 @@ date: 2026-10-26
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's (Mac mini).
 status: live
-supersede: REPLACED WHOLESALE by the Mon 26 Oct laptop seat at its 53% checkpoint. Previous: NEXT-PICKUP.md.pre-1026-0855. Replace wholesale; never stack.
+supersede: REPLACED WHOLESALE by the Mon 26 Oct laptop seat at ~79% before its rotation (~11:3x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1130 (and .pre-1026-0855). Replace wholesale; never stack.
 ---
 
-# NEXT PICKUP (Mon 26 Oct, written at the 53% checkpoint; gauge 7d ~5%)
+# NEXT PICKUP (Mon 26 Oct ~11:30 AEDT; new account since ~11:2x, gauge 7d ~0-1%)
 
-## 0. MACHINE: Wednesday runs on the LAPTOP (Kamils-MBP, 32 GB) until Kam's new machine arrives
-- Fixed today (see today's note, 07:54 block): dashboard-cloud venv (python@3.12 installed), live_chat_poll, 7 launchd jobs from this drive, rsync, usage publisher, Spark tunnel alias fallback (`ZGX-Nano-G1n`), python@3.14 -> 3.14.9.
-- ⚠ `brew upgrade python@3.14` DROPPED `/opt/homebrew/bin/python3`; Wednesday re-created it by hand (`ln -s ../opt/python@3.14/libexec/bin/python3`, same for pip3). If `python3 --version` says 3.9, that link is gone again.
-- Ornith is NOT available here (Studio-only, paused since 10-12). The Spark works: http://127.0.0.1:47788.
-- Open question for Kam at a natural moment: does the Studio still run its launchd jobs? A 05:30 shift-change mail came from somewhere else today; with this laptop's jobs now installed, duplicates are possible from tomorrow.
+## 0. READ FIRST
+- Machine = the LAPTOP (Kamils-MBP, 32 GB) until Kam's new Studio arrives. Fixed today: dashboard venv (python@3.12), live poller, 7 launchd jobs, rsync, usage publisher, Spark tunnel alias (ZGX-Nano-G1n), python@3.14.9 (+ a hand-made /opt/homebrew/bin/python3 link: if `python3 --version` says 3.9 it is gone again). Ornith unavailable here. Docker Desktop running.
+- Kam switched accounts (/login) and said "please continue": the 10-18 grant is re-read as reaffirmed (EXPIRING-GRANTS).
+- Load rule: launch at load1 < 7 (watch it; R/K/J/D plus gates pushed it to 11-12).
+- Every push of Blockchain/Dev code needs the per-command ssh KEEPALIVE (GitHub drops idle ssh at ~364 s; preflight is 11-15 min): fleet/STANDING_LINES.md.
 
-## 1. LIVE FLOOR (refreshed at the 65% checkpoint, ~09:27 AEDT; panes in tmux `fleet`)
-- DONE: KS-1719 (Peter's ask). PR #1687 merged as 7ce64f5d6739 (Wednesday read origin), two tier-2 gate rounds, Peter's comment 5f02798a posted, ticket left In Progress on him. G 20th scored 0.96, pane closed. Kam has a paste-ready reply for Peter on the panel.
-- %3 `Secuura/Blockchain-D` = D 31st, Opus 5.5: kintsugi build k1 (heartbeat at Secuura/Blockchain 5_Project_History/2026-10-26_seatD-31st/evidence/heartbeat.kintsugi.k1.txt), then demo ONLY after kintsugi is verified (Kam 08:58, relayed). Ack an idle wake only after reading a MOVING heartbeat figure.
-- %4 `Secuura/Blockchain-R` = R, Sonnet 5.5: five raise PRs from held Spark READYs (KS-1391, KS-1289, then KS-1548, KS-1524, KS-1649). KS-1649 changes the PUBLISHED developer portal: 3,000 is CONNECTOR_RATE_LIMIT_DEFAULT (range 1-10,000); the gate must weigh the wording.
-- %5 `Secuura/Blockchain-K` = K, Opus 5.5: KS-1683 (vc-issuer list/by-hash bound to the creator), comment-only exception granted for 3 comments. Tier-1 Opus gate when READY.
-- %6 `Secuura/Blockchain-J` = J, Opus 5.5 (switch at its plan prompt): KS-1717 anchoring x-emitter-internal guard. DESIGN FIRST: its plan proposes options; if a new secret/identity changes the trust model, card Kam.
-- Drafters (Agent tool, Sonnet): (1) Spark rung-3/4 batch + round.sh/brief_lint eval-warning fix (it is editing spark/round.sh NOW: do not commit that file mid-edit; safe_pull refuses until it lands); (2) the SPARK GATE pilot (local-model/gate/, calibrated on PR #1687 r1/r2 vs the Sonnet verdicts). Kam's conditional grant: learnings/2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice.md.
-- Spark today: 5 tasks, 5/5 round-1 PASS, all read and held. Rung 1/2 pool dry at the tip (~40 screened).
+## 1. IN FLIGHT (panes in tmux `fleet`)
+- %4 `Secuura/Blockchain-R` (Sonnet 5.5): GO sent ~11:3x to MERGE PR #1688 (KS-1723 lock refresh) at b5767aa4c527; tier-1 Opus gate GO WITH NOTES (0_Brain/reference/2026-10-26_gate-pr1688-ks1723/verdict.md). NEXT: verify the merge at origin (ls-remote develop moved; R mails the sha) -> tell K and J the freeze has cleared -> R pushes its NINE branches (KS-1391, 1289, 1548, 1524, 1649, 1716, 1560 [--recount only, approved], 1513, 1527 sequenced) and mails READY FOR GATE -> gates: tier 2 Sonnet with local-model/gate/spark_gate.sh first (+ Spark review as shadow); KS-1649 (published developer portal) and KS-1716 (a pre-push gate script) need a careful read.
+- %5 `Secuura/Blockchain-K` (Opus 5.5): KS-1683 built red-first (13/13 mutants, 840 Postgres comparisons), holding; handover + bundle written. After #1688 merges: merge develop in, push with keepalive, PR, READY -> TIER-1 Opus gate (authorization surface).
+- %6 `Secuura/Blockchain-J` (Opus 5.5): KS-1717 HMAC (Kam ruled b) committed at 708be64ccafd, holding. After #1688: push with keepalive, PR, READY -> TIER-1 Opus gate. Stated residual (tell Kam when the PR lands): same-body replay inside 60 s accepted (no nonce cache). MERGE + the new EMITTER_SIGNING_SECRET go out TOGETHER in a deploy round (Kam's card text); never merge it alone.
+- %3 `Secuura/Blockchain-D` (Opus 5.5): kintsugi build k1 at 13/15 (~00:23Z), 0 failures, floor 12,000 MB never approached; then swap one-by-one, live check, KS-535 after, STATUS -> DEMO only after kintsugi is verified (Kam 08:58 verbatim, relayed). KS-741 -> Done after the deploy. Heartbeat: Secuura/Blockchain 5_Project_History/2026-10-26_seatD-31st/evidence/heartbeat.kintsugi.k1.txt (ack an idle wake only on a MOVING figure).
 
-- 🔴 ADVISORY FREEZE (KS-1723): every Blockchain/Dev push is refused at pre-push legs 6/7. Seat R's in-range refresh clears 10/13; body-parser override bump approved by Wednesday (Kam's 1021 vite-pin shape). zod (needs zod 4) and @azure/msal-node (identity caps at ^6) are KAM's: card OWED once R mails "reachability for zod and msal-node" (default: nothing baselined, pushes wait). R's five PRs, K (KS-1683, built red-first, 13/13 mutants), J (KS-1717 HMAC per Kam's b, card delivered) all wait on it.
-- SPARK GATE in practice (learnings/2026-10-26_spark-gate-pilot-..., CALIBRATION 1): every gate runs local-model/gate/spark_gate.sh FIRST (needs GIT_SSH_COMMAND = the Secuura repo's core.sshCommand) and hands facts.json to the Claude gate; tier 3 = runner only; tier 2 = Sonnet + Spark shadow; tier 1 Opus.
-
-- 73% CHECKPOINT DELTA (~09:53): Kam ruled KS-1717 = b (HMAC per request; card delivered to J). J building: helper in packages/shared, raw-body HMAC, ±60 s, EMITTER_SIGNING_SECRET, five declaration sites; same-body replay inside 60 s = stated residual (tell Kam when the PR lands). OPEN CARD (Kam): secuura-ks1723-zod-msal-high-baseline-1026 — blocks ALL pushes; rec a (baseline both 14 days + 2 tickets); default nothing baselined. When he taps a: R commits its pre-drafted baseline rows into the refresh PR -> tier-1 gate (run local-model/gate/spark_gate.sh first) -> merge -> then R's 9 PRs, K, J push. R's raise queue = 9 held Spark patches (KS-1391, 1289, 1548, 1524, 1649, 1716, 1560 [apply strictly or stop], 1513+1527 stacked). Spark pool dry at rung 4 (why in spark/queue.md). K holding with handover written.
-
-## 2. OWED, in order
-1. Gate verdict -> Wednesday's completion check -> GO merge to G 20th (TESTED grant) or a fix round (round 2 of 2). Then clear Peter's comment text and have G post it. KS-1719 stays assigned to Peter.
-2. D 31st STATUS mails: verify each box at source; KS-741 to Done after demo is live (Done = tested + works + deployed).
-3. Spark: KS-1391 PASS held -> night/READY_KS-1391-...-PASS-7of7_2026-10-26.diff.md. KS-1289 round running/ran (check spark/state + runs/spark_secuura_2026-10-26_ks_1289_p1). A Sonnet RAISE seat (row C1) raises the held READYs as PRs; needs a pane name not in use (G and D are live).
-4. Brief item for the next Secuura seat: the Secuura launcher's step 8 names coagent@, which the project key cannot read (NotFound parses as "0 messages").
-5. Ledger rows past ~3 days (10-21..10-23) to archive at the wrap (rule 3c, conservation asserted).
+## 2. OWED
+1. The above chain. Every READY: gate, then Wednesday's completion check, then merge GO under the TESTED grant.
+2. Spark: pool dry at rung 4 (why in spark/queue.md). Next lift: extend the builder to loose TS briefs or a Postgres-backed checker, or new tickets. Spark gate pilot: CALIBRATION 1 recorded (runner in practice; Spark review shadow on tier 2); build the 5 named improvements before calibration 2.
+3. Kam-facing: tell him the KS-1717 replay residual when J's PR lands; KS-1724/1725 priorities are unset (his to rank); baseline expires Mon 2026-11-09.
+4. Ledger: rows 10-21..10-23 are past rule 3c (archive at the next wrap, conservation asserted). Today's rows: 6 (all [W]).
+5. Brief items for Secuura's own launcher (the project's file, via a brief): step 8 names coagent@ (NotFound reads as empty); step 7 orders POST /api/seen on the extranet; the arms script local-model/gate/tests/test_spark_gate_arms.sh does not refuse missing args (Wednesday's own file: fix).
+6. Possible duplicate launchd jobs if the Studio still runs its own (a 05:30 shift-change mail came from elsewhere today): ask Kam once at a natural moment.
 
 ## 3. IN FORCE (read the files, not this list)
-Usage is a GUIDE (2026-10-22). Routing v1.0 (Opus/Sonnet/Spark per table). October deploy grant (extended until further notice). TESTED merge grant; merge-and-archive (2026-10-10). Done = tested + works + deployed (2026-10-12). Kam ruled wed-morning-plan-1026 = a (carry on).
+Usage is a GUIDE (2026-10-22). Routing v1.0. October deploy grant (until further notice). TESTED merge grant; merge-and-archive (2026-10-10). Done = tested + works + deployed. Max agents + Spark always running (09-13 lesson, 10-26 extension). Spark-gate conditional grant (2026-10-26).
