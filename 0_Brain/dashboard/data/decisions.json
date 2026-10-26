@@ -49211,5 +49211,51 @@
    "CARD wed-ornith-122b-test-on-spark-1026",
    "CARD datasec-github-actions-billing-refused-1026"
   ]
+ },
+ {
+  "id": "composer-94-extra-round-nogo-1026",
+  "client_project": "Datasec/Security Composer",
+  "title": "Composer #94: the extra fix round closed its target but regressed one shape: land it, or one narrow fix?",
+  "bluf": "Your call. The extra round you granted at 09:26 did its job: every case of the array-index miss is closed (19 of 19 own shapes, 53 chains, 33 fresh blocks) and nothing was loosened. But the same change made the DEPLOY.md command scanner miss one shape the previous round caught: a real here-document nested inside ${...}, a[...] or a=(...) (finding B736-1), and two test comments overstate what bash does (B736-2). Measured by the gate: the scanner on main today misses those same shapes too, and the real DEPLOY.md contains none of them, so landing this round loses nothing compared with what is live. Nothing can land until CI runs again anyway. This morning you chose a fix round over landing with losses; the difference now is that the losses are against the previous round, not against main. Recommendation: land #94 as it stands once CI is back, and ticket B736-1 and B736-2.",
+  "default_action": "If there is no answer, Tuesday holds #94 unmerged (it cannot land while CI is paused anyway) and a Composer records seat tickets B736-1, B736-2 and the residue; nothing is built and nothing lands without your tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Land #94 when CI is back; ticket the regression (recommended)",
+    "detail": "Squash head-pinned at eddebf34 after a real CodeQL scan. B736-1 and B736-2 become tickets with the gate's cells. Better than main on every shape measured."
+   },
+   {
+    "key": "b",
+    "label": "One more narrow fix round, B736-1 and B736-2 only",
+    "detail": "A builder fixes only the nested here-document shape and the two comments, then a short gate. A fourth round on this class."
+   },
+   {
+    "key": "c",
+    "label": "Close #94 unmerged and keep everything as tickets",
+    "detail": "Main keeps today's scanner; all findings stay ticket text."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-26T14:29:40.276662+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd361-blocker-vs-nogo-cap",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD nexusai-round4-nogo-selfheal-round5",
+   "CARD composer-pr85-round2-nogo-one-line-1021",
+   "CARD hpsmpoc-telemetry-round3-nogo-stop-1022",
+   "CARD hpsmpoc-telemetry-round4-nogo-ended-1022",
+   "CARD mpscalc-pr102-cap-nogo-third-round-1024",
+   "CARD hpsmpoc-free-text-control-chars-1026",
+   "CARD mps-117-null-class-strict-nogo-1026",
+   "CARD datasec-morning-plan-1026",
+   "CARD hpsmpoc-control-chars-six-field-words-1026",
+   "CARD composer-94-heredoc-scan-round-cap-1026",
+   "CARD wed-ornith-122b-test-on-spark-1026",
+   "CARD datasec-github-actions-billing-refused-1026",
+   "CARD hpsmpoc-control-chars-stored-values-1026"
+  ]
  }
 ]
