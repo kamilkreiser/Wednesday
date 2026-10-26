@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>AI machine combinations</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<h1>
+AI machine combinations: decision paper
+</h1>
+<div class="sub">
+For Kam Kreiser · prepared by Wednesday (research analyst, Claude Opus
+5.5) · 26 October 2026, AEDT · all prices AUD incl. GST, read 2026-10-26
+unless stated · <b>quality is weighted above speed throughout</b> (your
+20:29:55 instruction)
+</div>
+<section id="executive-summary" class="box">
+<h2>Executive summary</h2>
+<p><strong>Recommendation.</strong> Your split is right in shape: one
+local box per client is the simplest way to keep Datasec and Secuura
+apart. Change three things:</p>
+<ol type="1">
+<li><strong>Make the laptop 64 GB, and take the fleet off it.</strong>
+At 32 GB the laptop is today’s measured bottleneck.</li>
+<li><strong>Don’t replace the HP with a like-for-like GB10 until a
+one-day trial has run.</strong> The strongest local coding model today,
+DeepSeek <strong>V4.1</strong> Flash, needs a 256 GB box. A 128 GB GB10
+can’t run it at a quality worth having.</li>
+<li><strong>Be clear about what the local box does for QA.</strong> It
+runs the test suites. It does not yet judge PRs.</li>
+</ol>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Role</th>
+<th>Machine</th>
+<th>AUD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Datasec local model box</td>
+<td>256 GB Mac Studio (ordered; chip/config/price of your order not in
+our records — figure shown is Apple AU’s current list price for the M5
+Ultra 36/80-core, 256 GB, 1 TB)</td>
+<td>17,449 (list)</td>
+</tr>
+<tr>
+<td>Secuura local model box, <strong>if the trial passes</strong>
+(expected)</td>
+<td>A second Mac Studio M5 Ultra, 256 GB, 1 TB, running V4.1 Flash</td>
+<td>17,449</td>
+</tr>
+<tr>
+<td>Secuura local model box, <strong>if the trial fails</strong></td>
+<td>GB10 Founders Edition 4 TB (same chip as the HP). Reproduces today’s
+Spark exactly</td>
+<td>8,879–9,399</td>
+</tr>
+<tr>
+<td>Travelling laptop</td>
+<td>MacBook Pro 14” M5 Pro, 18-core CPU, 64 GB, 1 TB</td>
+<td>5,799</td>
+</tr>
+<tr>
+<td>At-desk fleet host (seats, test suites, Docker)</td>
+<td>your existing 96 GB M3 Ultra Mac Studio [ours:
+<code>2026-10-10_mac-ram-local-coding-models/REPORT.md</code> §2]</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>Total</strong> (list-price based)</td>
+<td>Recommended / fallback</td>
+<td><strong>40,697 / 32,127–32,647</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The local model and how to run it.</strong> For Secuura,
+<strong>DeepSeek V4.1 Flash</strong> on the 256 GB Studio, served with
+ds4 or oMLX on Apple’s MLX/Metal stack, one client per box. Two ways to
+load it:</p>
+<ul>
+<li><strong>Q2, fully in memory:</strong> reported 28–30 tok/s on an M5
+Ultra.</li>
+<li><strong>Q3–Q4 with part of the model on the SSD (higher
+quality):</strong> about 10–20 tok/s [est].</li>
+</ul>
+<p>Speed is secondary, so the higher quant is the pick. V4 Flash stays
+as the fallback; it is measured at 16–18/23 on our hard set.</p>
+<p><strong>One-line answers to tonight’s questions</strong></p>
+<ul>
+<li><strong>Your split.</strong> Agree, with the three changes above.
+Suites run on CPU cores, so put them on the desktop host, not the model
+box. A GB10 serving DeepSeek has only about 10 GB left for suites and
+Docker [ours].</li>
+<li><strong>Returning the HP.</strong> Yes, return it. It is the dearest
+GB10 in Australia (A$11,599–12,413) for the same chip that the NVIDIA
+Founders Edition sells for at A$8,879–9,399. AU stock is still priced at
+the old US price (US$6,950 since 2 Oct), so if a GB10 is the answer, buy
+soon.</li>
+<li><strong>Local coding models.</strong> Shortlist for a measured trial
+on our 23-task set: V4.1 Flash, MiMo, GLM Flash, and Qwen3-Coder
+(section 7). DeepSeek V4 Flash (16/23) and Ornith 122B (12/23) are
+measured already.</li>
+<li><strong>V4.1 Flash with part of the model on the SSD.</strong> It
+works on Macs today. The table of word-lookup data V4.1 consults
+(“Engram”) costs about 1% of speed when it is read from the SSD
+[reported]. Putting experts on the SSD is what lets the Q3–Q4 quants fit
+in 256 GB. No-one has published a measured Q4 run on a 256 GB Mac; our
+estimate is 10–20 tok/s.</li>
+<li><strong>Splitting the model across a Mac, the Spark and the
+SSD.</strong> No. Only llama.cpp’s networked mode joins a Mac and a CUDA
+box into one model; its own README calls it “fragile and insecure”, and
+the one measured Mac + Spark split lost 43–47% of decode speed
+[reported]. The Spark also goes back.</li>
+<li><strong>Joining the laptop to the Studio over Thunderbolt.</strong>
+Possible (MLX or exo, Mac-to-Mac) but not worth it. No Studio + MacBook
+benchmark exists, a working laptop adds little memory, and the model
+drops whenever the laptop travels. For more than 256 GB, buy the 512 GB
+Studio.</li>
+<li><strong>The engine.</strong> Tuesday, Wednesday and Friday stay on
+Claude Code with the newest Opus for coordination. Routing stays as the
+approved table sets it. A local box adds capacity for briefed tickets
+and runs the deterministic test suites. It replaces no gate, design,
+deploy, or client-facing step (section 4).</li>
+</ul>
+<p><strong>What we measure first when the Studio lands</strong></p>
+<ol type="1">
+<li>Before the HP goes back, run <strong>V4.1 Flash on the 23-task hard
+set</strong>, either through a zero-retention hosted provider or on the
+Studio itself. It is the same harness as <code>spark-ab/</code>, and the
+hosted route costs under US$1. <strong>Buy the second Secuura box only
+if V4.1 beats V4 Flash’s 16/23 by at least 3 tasks.</strong></li>
+<li>On the Studio: Q2 in memory against Q3/Q4 with SSD offload (speed
+and score), then memory headroom next to Tuesday’s seats.</li>
+</ol>
+</section>
+<h2 class="pb">
+<ol type="1">
+<li>BLUF: do we agree with your setup?
+</h2></li>
+</ol>
+<p>Every number carries a label. <strong>[ours]</strong> means we
+measured it on our own machines (file path given).
+<strong>[reported]</strong> means a third party measured it (source in
+section 9). <strong>[vendor]</strong> means the maker reported it about
+its own product. <strong>[est]</strong> means our own arithmetic or a
+judgement; nobody has measured it.</p>
+<p><strong>Broadly yes. Here is where we agree:</strong></p>
+<ul>
+<li>A dedicated 256 GB Studio for Datasec matches the hard rule that
+keeps the clients apart. It also matches Tuesday’s ruling from 22
+October: the local tiers collapse into Sonnet until the box arrives
+(<code>learnings/2026-10-22_tuesday-sonnet-default-usage-is-a-guide.md</code>).</li>
+<li>A separate local box for Secuura is the right pattern. On 25
+September you ruled that Secuura code may go to the Spark, one client
+per task (<code>fleet/specs/model-routing.md</code> §2, P4).
+<strong>Your 20:26 message sets the Datasec use of the 256 GB Studio;
+Tuesday’s routing table</strong> (which today says “no local tier” for
+Datasec, P4) <strong>needs updating to use it.</strong></li>
+</ul>
+<p><strong>Caveat 1: “QA” is two jobs, and only one of them is ready for
+the local box.</strong></p>
+<ul>
+<li><strong>Mechanical QA works today, and it needs no model.</strong>
+That covers fetching the head, red/green on base against head, suite
+counts, lint and planted violations. <code>spark_gate.sh</code> matched
+the Claude gates’ facts exactly, in about 85 s [ours:
+<code>learnings/2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice.md</code>,
+calibration 1].</li>
+<li><strong>Review judgement fails today.</strong> The Spark’s review
+was wrong in all three calibrations:
+<ul>
+<li><strong>Calibration 1:</strong> it missed findings and raised false
+positives.</li>
+<li><strong>Calibration 2:</strong> on a tier-1 PR it produced no
+verdict at all, because of a repetition loop. It found 0 of 7
+findings.</li>
+<li><strong>Calibration 3:</strong> it gave two false NO GOs out of two,
+where Sonnet’s gate said GO WITH NOTES.</li>
+<li>That is <strong>0 promotable rounds</strong> [ours, same file]. Tier
+1 stays on Opus, tier 2 stays on Sonnet, and the Spark stays a
+shadow.</li>
+</ul></li>
+<li>So the box can do most of the heavy <strong>testing</strong>, but
+not the <strong>QA judgement</strong>. That still costs Claude tokens.
+The gain is that the gate no longer pays to re-run suites.</li>
+</ul>
+<p><strong>Caveat 2: the laptop is the measured bottleneck, not the
+Spark.</strong></p>
+<ul>
+<li>On 26 October the 32 GB MacBook Pro ran 4–6 Claude seats, test
+suites and Docker. It hit load 77–97 on 12 CPUs, with the Docker VM at
+870–920% CPU and <code>docker ps</code> hung for more than 4
+minutes.</li>
+<li>At other times the cause was node test suites (~808% CPU), Photos
+media analysis (load 51), or Spotlight indexing the new worktrees (load
+18–20).</li>
+<li>Gates and pushes had to queue behind a load waiter all day [ours:
+<code>daily/2026-10-26.md</code> 12:1x, 14:18, 14:46, 16:52].</li>
+<li>Ornith 122B cannot run on that laptop at all.</li>
+<li><strong>Fix:</strong>
+<ul>
+<li>Run the at-desk fleet (seats, suites, Docker) on your existing 96 GB
+M3 Ultra Mac Studio [ours:
+<code>2026-10-10_mac-ram-local-coding-models/REPORT.md</code> §2].</li>
+<li>Buy a 64 GB laptop with 18 CPU cores for travel.</li>
+<li>A 128 GB laptop only earns its price if you want a local model
+<em>on the road</em>. It cannot comfortably host a model and the seats
+at the same time: about 100–110 of 128 GB [est:
+<code>2026-10-26_deepseek-quant-on-spark/report.md</code>].</li>
+</ul></li>
+</ul>
+<p><strong>Caveat 3: the model box and the suites compete for
+memory.</strong></p>
+<ul>
+<li>DeepSeek V4 Flash loads 95.4 GiB on the Spark’s 121 GB [ours:
+<code>daily/2026-10-26.md</code> 12:24].</li>
+<li>Ornith 122B used 111–112 of 121 GB [ours:
+<code>2026-10-26_ornith122b-vs-deepseek-spark/report.md</code>].</li>
+<li>That leaves roughly 10–25 GB for test suites and throwaway Postgres
+containers.</li>
+<li>So “the Spark does the heavy testing” works only for light suites.
+Heavy suites belong on the desktop host.</li>
+</ul>
+<h2 id="recommendation-and-alternatives">2. Recommendation and
+alternatives</h2>
+<p><strong>Recommended (quality-first, phased):</strong></p>
+<ul>
+<li>Studio 256 for Datasec (ordered), a second Studio 256 for Secuura
+(gated on the trial), a MacBook Pro M5 Pro 64 GB, and your existing 96
+GB M3 Ultra Mac Studio as the at-desk fleet host [ours:
+<code>2026-10-10_mac-ram-local-coding-models/REPORT.md</code> §2]. The
+256 GB Studio figure is Apple AU’s current list price; your order’s
+chip, config and price are not in our records.</li>
+<li><strong>A$40,697</strong> (A$23,248 of it is already committed or is
+the laptop).</li>
+<li><strong>Fallback if V4.1 does not beat V4 Flash by 3 or more of 23
+tasks:</strong> a GB10 Founders Edition instead of the second Studio,
+<strong>A$32,127–32,647</strong>.</li>
+<li><strong>Why a second Studio over a GB10 for Secuura:</strong>
+<ul>
+<li>A GB10 tops out at V4 Flash, 128 GB class. V4.1 Flash only fits a
+GB10 at 1.6-bit. At that size the quantised model’s next word matches
+the full model’s only 69–88% of the time [reported: modemguides].</li>
+<li>V4.1 is the bigger quality step:
+<ul>
+<li>[vendor] DeepSWE 77.0 (1017 build) against V4 Flash 54.4.</li>
+<li>[reported, independent] Vals Terminal-Bench 2.1 74.5%.</li>
+</ul></li>
+<li>Secuura’s work is the security-sensitive work, and you asked for
+quality over speed.</li>
+</ul></li>
+</ul>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it is</th>
+<th>AUD</th>
+<th>Gains</th>
+<th>Loses</th>
+<th>Client isolation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R (recommended)</strong></td>
+<td>Studio 256 ×2 (one per client) + MBP M5 Pro 64 GB + existing 96 GB
+Studio as fleet host</td>
+<td><strong>40,697</strong></td>
+<td>V4.1 Flash for both clients; one stack (MLX) to maintain; 1.2 TB/s
+bandwidth</td>
+<td>No CUDA, so no EXL3 or vLLM batching; prefill slower than a GB10
+[reported]</td>
+<td>Best: one box per client</td>
+</tr>
+<tr>
+<td><strong>A (your plan)</strong></td>
+<td>Studio 256 (Datasec) + GB10 (Secuura) + laptop</td>
+<td>32,127 (Founders 4 TB A$8,879) to 32,647 (in-stock A$9,399)</td>
+<td>Reproduces today’s Spark exactly: V4 Flash EXL3 3-bit, 33 tok/s,
+16/23 [ours]; fast prefill (~1,030 tok/s [ours])</td>
+<td>Secuura stays a model generation behind (no V4.1); two stacks (CUDA
++ MLX)</td>
+<td>Best: one box per client</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>Studio 256 + <strong>Strix Halo</strong> 128 GB (Minisforum MS-S1
+Max) + laptop</td>
+<td>28,967 (sale price)</td>
+<td>Cheapest</td>
+<td>No EXL3 (CUDA-only), so V4 Flash runs as GGUF. GGUF was already 3×
+slower end-to-end on the GB10 [ours]. Strix Halo prefill is 2–9× slower
+again under load [reported: StorageReview]. Our prompts are 14–71K
+tokens, so a 71K prompt waits about 4 minutes [est]. ROCm/Vulkan are
+less mature</td>
+<td>One box per client</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td><strong>One 512 GB Studio</strong> shared by both clients +
+laptop</td>
+<td>price not published (“coming late October”); about 25,000–30,000
+[est] + 5,799</td>
+<td>Best single-box quality: V4.1 Q4 fully in memory, 20–41 tok/s on an
+M3 Ultra 512 [reported]; KLD (how far the quantised model’s predictions
+drift from the full model’s; lower is better) 0.009 for Q4 against 0.138
+for Q2 [vendor: Unsloth]</td>
+<td>One request at a time across both clients; a single point of
+failure; your 256 GB order would need changing; Datasec on a shared box
+is unruled</td>
+<td>Workable only with per-client run directories, one client per task
+and no shared caches. It needs your ruling</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td>Studio 256 + <strong>Studio M5 Max 128 GB</strong> for Secuura +
+laptop</td>
+<td>31,897</td>
+<td>Cheaper than a GB10. Runs V4 Flash 2-bit through ds4 at 27–39 tok/s
+[reported: ds4 PERFORMANCE.md, M5 Max]; IQ2_XXS scored 18/23 on our set
+[ours, on the GB10]; one stack</td>
+<td>Same model tier as A (no V4.1); prefill 400–790 tok/s [reported],
+below the GB10’s</td>
+<td>One box per client</td>
+</tr>
+<tr>
+<td><strong>E</strong></td>
+<td>Studio 256 + <strong>two GB10s joined</strong> over their QSFP ports
+(Secuura) + laptop</td>
+<td>41,006 (two Founders Editions at A$8,879)</td>
+<td>V4.1-Flash at EXL3 2.9 bpw: 73 tok/s for one request, ~2,000 tok/s
+prefill [reported: tonyd2wild]; CUDA batching</td>
+<td>2.9-bit is lower quality than a Q4 on a Studio; two boxes and a
+cluster to maintain; unmeasured by us</td>
+<td>One cluster per client</td>
+</tr>
+</tbody>
+</table>
+<p><span class="small">Laptop in every option: MacBook Pro 14” M5 Pro,
+18-core CPU / 20-core GPU, 64 GB, 1 TB, A$5,799 (Apple AU). It has the
+same 18-core CPU count as the M5 Max at A$2,100 less; the GPU doesn’t
+matter if the laptop hosts no model. Choose 2 TB if worktrees will live
+on the internal disk. The Studio 256 GB price is today’s configurator
+price for the 36/80-core chip, A$17,449. Our 10 October read showed 256
+GB on the 30/64-core chip at A$15,499; today’s read says 256 GB needs
+the 36/80 chip. Your order’s exact price is not in our files.</span></p>
+<h2 id="machine-table">3. Machine table</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Machine</th>
+<th>AU price (source, read 2026-10-26)</th>
+<th>Memory / bandwidth</th>
+<th>DeepSeek fit and speed</th>
+<th>Concurrency</th>
+<th>Stack</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mac Studio M5 Ultra 256 GB</strong> 1 TB / 2 TB</td>
+<td><strong>17,449</strong> / 18,199 (Apple AU list; your order’s
+config/price not in our records)</td>
+<td>256 GB / 1.2 TB/s</td>
+<td><strong>V4 Flash 4-bit:</strong> fits (peak 142 GB); 35 tok/s on M3
+Ultra [reported: omlx.ai]. <strong>V4.1 Q2 in memory:</strong> 28–30
+tok/s on M5 Ultra [reported: ds4 #1239]; up to 54–75 tok/s with forks
+[reported: niklaslenz]. <strong>V4.1 Q3/Q4 with SSD offload:</strong>
+10–20 [est]; oQ3e paged on an M3 Ultra 256: 10–15 [reported]</td>
+<td>Batch 4 gave 78.8 tok/s total on V4 Flash [reported]; we would run
+one per client</td>
+<td>MLX / oMLX / ds4 / llama.cpp Metal</td>
+<td><strong>Buy</strong> (ordered)</td>
+</tr>
+<tr>
+<td>Mac Studio M5 Ultra 512 GB</td>
+<td>Not published (“late October”); 25–30k [est]</td>
+<td>512 GB / 1.2 TB/s</td>
+<td>V4.1 Q4 fully in memory: 20–41 tok/s on M3 Ultra 512 [reported:
+IngeniousIdiocy, PR #3574]</td>
+<td>as above</td>
+<td>as above</td>
+<td>The quality ceiling; wait for the price</td>
+</tr>
+<tr>
+<td>Mac Studio M5 Max 128 GB</td>
+<td>8,649 (Apple AU)</td>
+<td>128 GB / 614 GB/s</td>
+<td>V4 Flash 2-bit (~81–92 GB): 27–39 tok/s [reported: ds4]. V4.1 only
+by streaming from the SSD</td>
+<td>1</td>
+<td>MLX / ds4</td>
+<td>Cheap V4 Flash box (option D)</td>
+</tr>
+<tr>
+<td>MacBook Pro 14” M5 Pro 64 GB</td>
+<td>5,799 (Apple AU)</td>
+<td>64 GB / 307 GB/s</td>
+<td>Not a model host</td>
+<td>n/a</td>
+<td>n/a</td>
+<td><strong>Buy</strong> as the laptop</td>
+</tr>
+<tr>
+<td>MacBook Pro 14” M5 Max 64 / 128 GB</td>
+<td>7,899 / 10,299 (Apple AU)</td>
+<td>614 GB/s</td>
+<td>128 GB: V4 Flash 2-bit fits (~92 GB) but not beside the seats
+[est]</td>
+<td>1</td>
+<td>MLX</td>
+<td>Only if you want a model on the road</td>
+</tr>
+<tr>
+<td><strong>NVIDIA DGX Spark Founders</strong> 4 TB</td>
+<td><strong>8,879</strong> (Landmark, stock not stated) · 9,399
+(MSY/Umart, in stock) · 9,999 (Scorptec/PLE)</td>
+<td>128 GB (121 usable) / 273 GB/s</td>
+<td><strong>V4 Flash EXL3 3-bit: 33 tok/s, 16/23 [ours]</strong>; GGUF
+19.5 tok/s [ours]. V4.1 only at 1.6-bit</td>
+<td>Our setup runs one request at a time (<code>MAX_NUM_SEQS=1</code>)
+[ours]; vLLM can batch: 32 parallel requests gave ~353 tok/s on gpt-oss
+[reported: llama.cpp]</td>
+<td>CUDA 13, vLLM, SGLang, EXL3: mature</td>
+<td>Best-value GB10</td>
+</tr>
+<tr>
+<td>ASUS Ascent GX10 1 TB / 4 TB</td>
+<td>8,999 (Scorptec) / 11,549–11,999</td>
+<td>same</td>
+<td>same chip</td>
+<td>same</td>
+<td>same</td>
+<td>Fine; 1 TB is tight next to 200 GB of weights</td>
+</tr>
+<tr>
+<td>MSI EdgeXpert 4 TB</td>
+<td>9,974–9,999 (MegaBuy / Scorptec)</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>Gigabyte AI TOP ATOM 4 TB</td>
+<td>9,999 (Scorptec / MSY, in stock)</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>Lenovo ThinkStation PGX</td>
+<td>9,402 (1 TB, MediaForm, index snippet) / 10,760 (2 TB)</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>Dearer</td>
+</tr>
+<tr>
+<td>Dell Pro Max GB10 4 TB</td>
+<td>12,546 (Dell AU)</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>Dearer</td>
+</tr>
+<tr>
+<td><strong>HP ZGX Nano G1n</strong> 4 TB (our demo)</td>
+<td>11,599 (Prology, index snippet) · 12,413 (Techbuy, backorder)</td>
+<td>same</td>
+<td>same (it <em>is</em> our Spark)</td>
+<td>same</td>
+<td>same</td>
+<td><strong>Overpriced; return it</strong></td>
+</tr>
+<tr>
+<td>Acer Veriton GN100 4 TB</td>
+<td>8,899 (Prology)</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>Out of stock</td>
+</tr>
+<tr>
+<td><strong>Strix Halo</strong> 128 GB: Minisforum MS-S1 Max</td>
+<td>5,719 (sale; usually 7,149), Minisforum AU</td>
+<td>128 GB (up to ~96–112 usable by the GPU) / 256 GB/s</td>
+<td>gpt-oss-120b: 34–54 tok/s decode, 340–459 tok/s prefill [reported:
+Hardware Corner, ComputingForGeeks]. V4 Flash GGUF unmeasured; slower
+than the GB10 [est]</td>
+<td>2–9× behind a GB10 under load [reported: StorageReview]</td>
+<td>ROCm / Vulkan: maturing; results swing 2× by backend [reported]</td>
+<td>Cheapest, weakest for our long prompts</td>
+</tr>
+<tr>
+<td>Other Strix Halo 128 GB</td>
+<td>GMKtec EVO-X2 6,471 (Amazon AU, imported) · Corsair AI WS 300 6,999
+(JW) · Framework 6,069 (out of stock) · Beelink ≈6,804 (US price
+converted) · HP Z2 Mini G1a 128 GB: <strong>no AU price</strong> · MSI:
+<strong>none found</strong></td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>same</td>
+<td>Same verdict</td>
+</tr>
+<tr>
+<td>AMD “Gorgon Halo” 192 GB (Ryzen AI Max+ PRO 495)</td>
+<td><strong>No AU stockist.</strong> Framework 192 GB US$6,799 DIY ≈
+A$10,637 (US price converted)</td>
+<td>192 GB / ~273 GB/s</td>
+<td>Unmeasured by us</td>
+<td>same</td>
+<td>ROCm / Vulkan</td>
+<td>Watch, not now</td>
+</tr>
+</tbody>
+</table>
+<p><span class="small">Currency: RBA 26 Oct 2026, 1 AUD = 0.7031 USD;
+“US price converted” = US price ÷ 0.7031 + 10% GST. The Founders Edition
+US price rose to <strong>US$6,950</strong> on 2 Oct 2026 (The Register),
+which is ≈A$10,873 converted, so AU stock is still priced at the older
+US price. NVIDIA also launched a <strong>64 GB GB10</strong> from
+US$4,999 on 23 Oct. It is too small for DeepSeek. “Index snippet” rows
+came from a search index; the page itself was not opened
+live.</span></p>
+<h2 id="the-engine-claude-code-stays-in-charge">4. The engine: Claude
+Code stays in charge</h2>
+<p>You asked that Tuesday, Wednesday and Friday stay on Claude Code with
+the best model, and that work is spread across Opus, Sonnet and the
+local models. That is exactly what the approved routing v1.0 does
+(<code>2_Project_Files/fleet/specs/model-routing.md</code>). New
+machines change <strong>capacity</strong>, not <strong>who
+decides</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Work</th>
+<th>Model today</th>
+<th>What a new local box adds</th>
+<th>What it does NOT replace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coordination (Tuesday, Wednesday, Friday)</td>
+<td>Newest Opus, row C9</td>
+<td>Nothing</td>
+<td>The coordinator seat</td>
+</tr>
+<tr>
+<td>Security and auth design; data-destroying paths; deploys</td>
+<td>Opus, rows C3 / C4 / C6</td>
+<td>Nothing</td>
+<td>All of it</td>
+</tr>
+<tr>
+<td>Tier-1 gates</td>
+<td>Opus (G1)</td>
+<td><code>spark_gate.sh</code> runs the suites first, so the gate spends
+its tokens on judgement only [ours]</td>
+<td>The gate’s verdict (0/3 calibrations)</td>
+</tr>
+<tr>
+<td>Tier-2 gates, raising PRs, merges, builds</td>
+<td>Sonnet (G2, C1, C5, C2)</td>
+<td>The same facts.json pre-run; a shadow review that keeps adding
+calibration rows</td>
+<td>The verdict, the raise and the merge</td>
+</tr>
+<tr>
+<td>Briefed tickets, rungs 1–4</td>
+<td>Spark first (L1–L4); Ornith second</td>
+<td><strong>Datasec gets a local lane for the first time</strong> (your
+20:26 message sets this; Tuesday’s routing table needs updating to use
+it). Secuura gets V4.1 if the trial passes</td>
+<td>Brief writing (the real cost) and the review of every local
+PASS</td>
+</tr>
+<tr>
+<td>Running test suites, lint, red/green</td>
+<td>Wherever the seat runs (the laptop today)</td>
+<td>Desktop CPU cores; the laptop stops choking</td>
+<td>Nothing; this is pure gain</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Measured local record that supports this split:</strong></p>
+<ul>
+<li>Spark rungs 1–3: 48/48. Rung 4: 5/7, then 6/7 [ours:
+<code>model-routing.md</code> §4].</li>
+<li>Hard set: V4 Flash 16/23, Ornith 122B 12/23 [ours].</li>
+<li>Hosted replay of 48 Spark tasks: MiMo 46/48, GLM 45/48, V4 Flash
+43/48 [ours:
+<code>2026-10-10_mac-ram-local-coding-models/REPORT.md</code>].</li>
+<li>Local models are good at spelled-out patches. They are weak at
+concurrency semantics and at fixing their own misconceptions from
+feedback [ours:
+<code>2026-09-22_spark-deepseek-v4-flash/HANDOFF.md</code>].</li>
+</ul>
+<h2 id="v4.1-flash-with-ssd-offload-what-it-means-in-practice">5. V4.1
+Flash with SSD offload: what it means in practice</h2>
+<p><strong>What it is:</strong></p>
+<ul>
+<li>DeepSeek V4.1 Flash has 552B total parameters with 8–16B active per
+token, plus about 189 GiB of “Engram” tables (a large table of
+word-sequence lookups the model consults as it goes).</li>
+<li>ds4 builds: Q2 = 152 GiB of main weights, Q4 = 294 GiB. Engram is
+read from the file on demand in every mode [reported: ds4
+MODELS.md].</li>
+<li>Llama.cpp merged V4.1 support only yesterday (PR #31086, 25 Oct).
+The Mac runtimes today are ds4 and oMLX.</li>
+</ul>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Build on a 256 GB Studio</th>
+<th>Quality cost (lower KLD is better)</th>
+<th>Speed</th>
+<th>Label</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q2 fully in memory (ds4, 152 GiB)</td>
+<td>Unsloth’s nearest equivalent, UD-Q2_K_XL: KLD 0.138, top-1 match
+91.5%. ds4’s own Q2 has <strong>no published quality
+number</strong></td>
+<td>28–30 tok/s on M5 Ultra; ~21 with experts streamed from the SSD</td>
+<td>[vendor] KLD / [reported] speed</td>
+</tr>
+<tr>
+<td>Q3 (oQ3e) with part of the model on the SSD</td>
+<td>UD-IQ3_XXS: KLD 0.063, 94.6%</td>
+<td>10–15 tok/s paged; 25–30 when cut down to fit in memory (M3 Ultra
+256)</td>
+<td>[vendor] / [reported: drowzeys]</td>
+</tr>
+<tr>
+<td>Q4 (294 GiB) with experts on the SSD</td>
+<td>UD-Q4_K_XL: KLD 0.009, 98.2%; close to full precision</td>
+<td><strong>No measured 256 GB run.</strong> 10–20 tok/s [est]. Basis:
+18.7–22 tok/s <em>measured</em> on a 128 GB M5 Max with a forked ds4
+[reported: ds4 #1151], against 20–41 fully in memory on a 512 GB
+machine</td>
+<td>[vendor] / [est]</td>
+</tr>
+<tr>
+<td><em>Comparison:</em> V4 Flash EXL3 3-bit on the Spark</td>
+<td>16/23 on our hard set; code correct on 21/23</td>
+<td>33 tok/s; ~1 min per task</td>
+<td>[ours]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading:</strong></p>
+<ul>
+<li>Offload is what lets a near-lossless Q4 fit in 256 GB.</li>
+<li>Reading Engram from the SSD costs about 1% of decode speed
+[reported: oMLX PR #3574]. Streaming experts from the SSD is the real
+cost: roughly half the speed of running fully in memory.</li>
+<li>At 10–20 tok/s, one of our tasks (25K tokens in, 1.5K out) takes
+about 1.5–3 minutes [est], against about 1 minute on the Spark. For
+overnight briefed tickets that is acceptable, and quality is the
+point.</li>
+<li><strong>V4.1 has never been run on our 23 tasks.</strong> The
+quality case rests on vendor benchmarks plus one independent one, and on
+the Unsloth KLD tables, which the quant maker reports about its own
+builds. That is why the trial comes first.</li>
+</ul>
+<h2 id="splitting-one-model-across-machines">6. Splitting one model
+across machines</h2>
+<p><strong>Two questions:</strong> (a) a Mac, the Spark and the SSD
+together, and (b) the laptop joined to the Studio over Thunderbolt.
+<strong>Short answer to both: no.</strong> Neither beats one 256 GB
+Studio running a higher quant with part of the model on its SSD. Neither
+beats a 512 GB Studio if the model must sit fully in memory. No-one has
+published V4.1 Flash split across a Mac and a Spark, or across a Studio
+and a MacBook.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Mixes Mac (Metal) and NVIDIA (CUDA) in one model?</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>llama.cpp networked mode (RPC)</td>
+<td><strong>Yes, the only proven tool</strong></td>
+<td>Splits the model’s layers between machines. The README calls it a
+“proof-of-concept… fragile and insecure” with no authentication, and
+every node must run the same build. A Mac and a Spark talk over plain
+TCP; the RDMA fast path works only between like machines [reported:
+llama.cpp RPC README]</td>
+</tr>
+<tr>
+<td>exo</td>
+<td>Demo only</td>
+<td>The Spark-does-prefill, Mac-does-decode demo used an 8B model and
+gave a 2.8× end-to-end gain. Today’s exo runs on CPU on Linux, so a
+Spark can’t act as a GPU node [reported: EXO blog; exo README]</td>
+</tr>
+<tr>
+<td>MLX distributed</td>
+<td>Apple only, in practice</td>
+<td>Ring over TCP, or RDMA over Thunderbolt 5 on macOS 26.2+ [reported:
+MLX docs via Geerling]</td>
+</tr>
+<tr>
+<td>vLLM / SGLang</td>
+<td>NVIDIA only</td>
+<td>This is how two Sparks are joined</td>
+</tr>
+</tbody>
+</table>
+<p><strong>(a) Mac + Spark + SSD.</strong></p>
+<ul>
+<li><strong>Only measured Mac + Spark split:</strong> an M2 Ultra and a
+Spark over 10GbE using llama.cpp’s networked mode. Decode fell from 11.1
+to 5.9 tok/s on a 72B model (−47%) and from 91.8 to 52.7 on a 7B (−43%)
+[reported: kjaiswal benchmarks].</li>
+<li><strong>Fit:</strong> a 256 GB Studio plus the Spark’s 128 GB would
+hold a Q3_K_M V4.1 (347 GB) with about 37 GB to spare [est]. Expect
+roughly half the Studio’s single-box speed [est]. You also depend on a
+fragile, unauthenticated service across two machines and two operating
+systems.</li>
+<li><strong>The Spark must go back,</strong> so the design would need a
+replacement GB10 just to make the split work.</li>
+<li><strong>The 256 GB Studio alone reaches Q4 quality</strong> (KLD
+0.009 [vendor]) with SSD offload at about 10–20 tok/s [est]. That is
+better quality than Q3 for one box’s cost, with no network in the loop.
+<strong>Verdict: no.</strong></li>
+<li><strong>If you ever want a GB10 path to V4.1, use two GB10s
+together, not a Mac + GB10.</strong> Two Sparks running V4.1-Flash-1017
+at EXL3 2.9 bpw over their QSFP ports report 73 tok/s for one request
+and ~2,000 tok/s prefill [reported: tonyd2wild, 2026-10-19]. About
+A$17,800 for two Founders Editions. The 2.9-bit build is lower quality
+than a Q4 on the Studio.</li>
+</ul>
+<p><strong>(b) Laptop + Studio over Thunderbolt 5.</strong></p>
+<ul>
+<li><strong>It is technically real</strong> with MLX
+(<code>mlx.launch</code> over RDMA) or exo, which needs matching macOS
+versions and every device cabled to every other.</li>
+<li><strong>Reported results are on four Studios, not a Studio and a
+laptop:</strong>
+<ul>
+<li>Four M3 Ultra Studios ran DeepSeek V3.1 at ~21 tok/s without RDMA
+and ~32 tok/s with it.</li>
+<li>Kimi K2 ran at ~30 tok/s.</li>
+<li>Stability was “prerelease”: a non-RDMA run crashed and rebooted both
+Macs [reported: Geerling Dec 2025; MacGeneration 2026-08-27].</li>
+<li><strong>No Studio + MacBook benchmark exists.</strong></li>
+</ul></li>
+<li><strong>What the laptop actually adds:</strong>
+<ul>
+<li>A 64 GB laptop running macOS, 2–4 Claude seats and test suites has
+about 0–20 GB spare [est]. Today’s 32 GB laptop was saturated by seats
+alone.</li>
+<li>A 128 GB laptop dedicated to the job might lend 80–100 GB [est].
+That makes about 340–350 GB in total, which is no better than one 256 GB
+Studio streaming from its SSD.</li>
+<li><strong>The laptop travels.</strong> Every trip takes the model
+down, or strands half of it.</li>
+</ul></li>
+<li><strong>Verdict: no.</strong> For more memory than 256 GB, buy the
+512 GB Studio (option C) once its price is published.</li>
+</ul>
+<h2 id="local-coding-models-and-how-to-deploy-them">7. Local coding
+models and how to deploy them</h2>
+<p><strong>How to read this:</strong></p>
+<ul>
+<li>Memory figures are weights only (parameters × bits ÷ 8) [est],
+unless a quant size is given.</li>
+<li>Benchmarks are mostly vendor-reported and use different harnesses,
+so <strong>they do not compare across labs</strong>.</li>
+<li>Independent sources: Artificial Analysis (AA, index and
+Terminal-Bench 4.0), and swebench.com, whose newest data is February
+2026.</li>
+<li>Fit: <strong>S256</strong> = Studio 256 GB · <strong>S512</strong> =
+Studio 512 GB · <strong>128</strong> = a GB10, Strix Halo or 128 GB Mac
+· <strong>S96</strong> = your existing 96 GB M3 Ultra Studio, about
+60–65 GB usable for a model beside the fleet [ours:
+<code>2026-10-10_mac-ram-local-coding-models/REPORT.md</code> §2].</li>
+</ul>
+<div class="small">
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model (release)</th>
+<th>Total / active</th>
+<th>4-bit / 8-bit</th>
+<th>Licence</th>
+<th>Coding scores: [vendor] / [independent]</th>
+<th>Runs on</th>
+<th>Our measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DeepSeek V4.1-Flash-1017</strong> (17 Oct)</td>
+<td>552B (+196B Engram) / 8–16B</td>
+<td>~298 GB RAM for Q4, Engram on SSD [Unsloth] / —</td>
+<td>MIT</td>
+<td>DeepSWE 77.0, TB4.0 42.3 / AA index 45, TB4.0 34%; Vals TB2.1
+74.5</td>
+<td>S256 (Q2 in memory; Q3/Q4 with offload), S512 (Q4 in memory)</td>
+<td><strong>None. Trial #1</strong></td>
+</tr>
+<tr>
+<td>DeepSeek V4-Flash-0731 (our Spark model)</td>
+<td>284B / 13B</td>
+<td>142 / 284</td>
+<td>MIT</td>
+<td>DeepSWE 54.4, TB2.1 82.7 / AA 34</td>
+<td>128 (2–3-bit), S256 (4–8-bit)</td>
+<td><strong>16/23 (3-bit), 18/23 (IQ2_XXS); 43/48 replay</strong></td>
+</tr>
+<tr>
+<td><strong>MiMo-V2.6-Flash</strong> (22 Sep)</td>
+<td>309B / 15B</td>
+<td>155 / 309</td>
+<td>MIT</td>
+<td>DeepSWE 67.9, TB2.1 87.6 / AA 38, TB4.0 23%</td>
+<td>S256</td>
+<td><strong>46/48 hosted replay</strong> (easier set). Trial #2</td>
+</tr>
+<tr>
+<td><strong>GLM-5.3-Flash</strong> (Aug)</td>
+<td>320B / 18B</td>
+<td>162–210 [Unsloth] / 320</td>
+<td>MIT</td>
+<td>TB2.1 84.3 / AA 42, TB4.0 33%</td>
+<td>S256</td>
+<td><strong>45/48 hosted replay</strong>. Trial #3</td>
+</tr>
+<tr>
+<td>Qwen3.8-Flash-Next (Aug)</td>
+<td>180B incl. tables / 6B</td>
+<td>90 / 180</td>
+<td>Qwen Community 1.0</td>
+<td>SWE-Pro 62.5, LCB 91.9 / AA 40, TB4.0 25%</td>
+<td>128, S256</td>
+<td>Did not fit beside the fleet on S96 [ours]. Trial #4 (local only: no
+zero-retention host)</td>
+</tr>
+<tr>
+<td>Qwen3.8-27B dense (Aug)</td>
+<td>27B</td>
+<td>13.5 / 27</td>
+<td>Apache-2.0</td>
+<td>SWE-Pro 61.7 / AA 34, TB4.0 6%</td>
+<td>everything, including the laptop</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Qwen3-Coder-Next (Feb)</td>
+<td>80B / 3B</td>
+<td>40 / 80</td>
+<td>Apache-2.0</td>
+<td>SWE-V 70.6 / AA 9</td>
+<td>S96, 128</td>
+<td>On disk on S96, unmeasured</td>
+</tr>
+<tr>
+<td>MiniMax M3.1-Flash (Oct)</td>
+<td>~428B / 23B</td>
+<td>214 / 428</td>
+<td>“minimax-community” (terms not read)</td>
+<td>DeepSWE 73.7 / AA 43</td>
+<td>S256 (4-bit, tight)</td>
+<td>None. Hold: licence unread, and the weights’ status conflicts
+between sources</td>
+</tr>
+<tr>
+<td>GLM-5.3 (full)</td>
+<td>753B / 40B</td>
+<td>377 / 753</td>
+<td>GLM-5.3 licence</td>
+<td>DeepSWE 66.9 / AA 45, TB4.0 42%</td>
+<td>S512 (4-bit)</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Kimi K2.6 / K3</td>
+<td>1T / 32B; 2.8T / 104B</td>
+<td>~500 GB+ / ~1.5 TB native</td>
+<td>Modified MIT; K3 needs a commercial licence above US$20M
+revenue</td>
+<td>K2.6 SWE-V 80.2 / K3 AA 44</td>
+<td><strong>Does not fit</strong> a single box below 512 GB; K3 not at
+all</td>
+<td>—</td>
+</tr>
+<tr>
+<td>DeepSeek V4-Pro</td>
+<td>1.6T / 49B</td>
+<td>~893 GB native</td>
+<td>MIT</td>
+<td>SWE-V 80.6</td>
+<td>Does not fit</td>
+<td>—</td>
+</tr>
+<tr>
+<td>gpt-oss-120b</td>
+<td>117B / 5.1B</td>
+<td>~63 GB (MXFP4)</td>
+<td>Apache-2.0</td>
+<td>SWE-V 62.4 / swebench bash-only 26.0, AA 12</td>
+<td>everything</td>
+<td>On disk on S96, unmeasured</td>
+</tr>
+<tr>
+<td>Devstral 2 / Small 2</td>
+<td>123B / 24B dense</td>
+<td>62 / 12</td>
+<td>Modified MIT / Apache-2.0</td>
+<td>SWE-V 72.2 / 68.0; swebench 53.8 / 56.4</td>
+<td>S96 / laptop</td>
+<td>Superseded; Mistral now points to Medium 3.5</td>
+</tr>
+<tr>
+<td>Ornith 1.5 122B / 35B</td>
+<td>122B (~10B active) / 35B (3B active)</td>
+<td>61 / 17.5</td>
+<td>MIT</td>
+<td>SWE-V 84.5, SWE-Pro 76.9 (122B) / <strong>none</strong></td>
+<td>128 / S96</td>
+<td><strong>122B: 12/23</strong> against V4 Flash’s 16/23; 35B: 17/20 on
+our A/B. Vendor claims look inflated (the card’s “single 80 GB GPU”
+claim is impossible at BF16)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Deployment stacks and what they mean for client
+isolation</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Stack</th>
+<th>Hardware</th>
+<th>Batching</th>
+<th>Maturity</th>
+<th>Isolation note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vLLM / SGLang</td>
+<td>GB10 (mature); Strix Halo (early ROCm)</td>
+<td>Full continuous batching</td>
+<td>Production on CUDA</td>
+<td>One server per client, or strictly one client per request with
+prefix cache off or salted</td>
+</tr>
+<tr>
+<td>EXL3 / ExLlamaV3</td>
+<td>NVIDIA only; it is our Spark’s 3-bit build</td>
+<td>Paged batching</td>
+<td>Young (v1.6.5)</td>
+<td>As above</td>
+</tr>
+<tr>
+<td>llama.cpp / GGUF</td>
+<td>All three (CUDA, ROCm/Vulkan, Metal)</td>
+<td><code>--parallel</code> slots</td>
+<td>Mature; first to support new models. V4.1 merged 25 Oct (PR
+#31086)</td>
+<td>Separate slot caches. Run one client per server process</td>
+</tr>
+<tr>
+<td>MLX / mlx-lm, oMLX, ds4</td>
+<td>Apple only</td>
+<td>oMLX: batching and an SSD KV cache</td>
+<td>oMLX young but widely used; ds4 is the V4/V4.1 specialist</td>
+<td><strong>oMLX’s SSD KV cache persists prompts on disk:</strong> use a
+per-client cache directory and wipe it between clients</td>
+</tr>
+<tr>
+<td>Ollama / LM Studio</td>
+<td>All</td>
+<td>Limited (Ollama’s MLX engine runs one request at a time)</td>
+<td>Desktop-grade</td>
+<td>Fine for trials, not for the fleet</td>
+</tr>
+<tr>
+<td><strong>Hosted, zero data retention</strong> (OpenRouter’s ZDR
+filter; Fireworks, DeepInfra and Cerebras retain nothing by default;
+Together and Groq only once switched on)</td>
+<td>None of ours</td>
+<td>Unlimited</td>
+<td>Production</td>
+<td>Client code leaves our machines. We used this once, on 10 Oct, with
+your ruling (OpenRouter, pinned to ZDR endpoints). DeepSeek’s own API
+“may train” on data, so never send work there</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worth a measured trial on our 23-task hard set</strong> (same
+<code>spark-ab/</code> harness, sampler and checker; one client per
+task), in order:</p>
+<ol type="1">
+<li><strong>V4.1-Flash-1017</strong>: the largest vendor and independent
+jump, and it fits S256.</li>
+<li><strong>MiMo-V2.6-Flash</strong>: best on our earlier hosted
+replay.</li>
+<li><strong>GLM-5.3-Flash</strong>: second-best on that replay.</li>
+<li><strong>Qwen3.8-Flash-Next</strong>: the strongest model that fits a
+128 GB box. Local only, because there is no zero-retention host.</li>
+</ol>
+<p>Steps 1–3 can run hosted under zero retention <strong>before</strong>
+the HP goes back, for under US$1, if you rule it as on 10 Oct.</p>
+<p><strong>Not worth trialling now:</strong></p>
+<ul>
+<li>Kimi K2.6/K3 and V4-Pro: they don’t fit.</li>
+<li>gpt-oss, Devstral: weak on independent boards.</li>
+<li>Ornith 1.5: already measured below V4 Flash.</li>
+<li>MiniMax M3.1: hold until its licence is read.</li>
+</ul>
+<h2 id="measured-reported-and-estimated">8. Measured, reported and
+estimated</h2>
+<p><strong>Measured by us (2026-09-22 to 2026-10-26):</strong></p>
+<ul>
+<li>V4 Flash EXL3 3-bit on the Spark: 33.2 tok/s end-to-end, 37 decode,
+~1,030 prefill, 95.4 GiB loaded, one request at a time.</li>
+<li>16/23 on the hard set. GGUF IQ2_XXS scored 18/23 and IQ1_M 16/23, at
+about 19.5 tok/s decode (3× slower end-to-end).</li>
+<li>Ornith 122B: 12/23 at 23.6 tok/s.</li>
+<li>Hosted replay: MiMo 46/48, GLM 45/48, V4 Flash 43/48.</li>
+<li>Spark review calibrations: 0 of 3 promotable. Deterministic runner:
+matched the Claude gates exactly.</li>
+<li>Laptop: load 50–97 with 4–6 seats, suites and Docker.</li>
+<li>Our 96 GB M3 Ultra Studio: about 60–65 GB usable for a model beside
+the fleet [ours:
+<code>2026-10-10_mac-ram-local-coding-models/REPORT.md</code> §2].</li>
+</ul>
+<p><strong>Reported by others:</strong> all Mac and M5 Ultra speeds, all
+GB10-against-Strix-Halo comparisons, every V4.1 speed and every
+quant-quality (KLD) figure.</p>
+<p><strong>Estimated, not measured:</strong></p>
+<ul>
+<li>V4.1 Q4 with SSD offload at 10–20 tok/s on 256 GB.</li>
+<li>The 512 GB price.</li>
+<li>V4 Flash on Strix Halo.</li>
+<li>A 128 GB laptop hosting a model beside the seats.</li>
+<li>Every split-across-machines speed.</li>
+<li>Whether V4.1 beats 16/23 on our tasks: <strong>the key
+unknown</strong>.</li>
+</ul>
+<p><strong>What to measure when the Studio arrives, in
+order:</strong></p>
+<ol type="1">
+<li><strong>V4.1 Flash on the 23-task set</strong>, hosted with zero
+retention (under US$1) or on the Studio, scored against V4 Flash’s
+16/23. This decides the second box.</li>
+<li>Q2 in memory against Q3/Q4 with offload on the Studio: score and
+time per task.</li>
+<li>Memory headroom next to Tuesday’s seats, read from the wired-memory
+limit and swap.</li>
+<li>A shadow review on the Studio’s model against Claude tier-2 gates.
+Is a bigger model enough to promote review? Today’s answer is no.</li>
+<li>MiMo and GLM on the same 23 tasks.</li>
+</ol>
+<h2 id="sources">9. Sources</h2>
+<div class="small">
+<p><strong>Our own files (measured; paths under
+<code>/Volumes/DevMASTER/WEDNESDAY/</code>):</strong></p>
+<ul>
+<li><code>0_Brain/reference/2026-10-26_ornith122b-vs-deepseek-spark/report.md</code>
+· <code>…/2026-10-26_deepseek-quant-on-spark/report.md</code> ·
+<code>…/2026-10-26_apple-silicon-inference-speedups/report.md</code> ·
+<code>…/2026-10-26_deepseek-mac-four-comparisons/report.md</code></li>
+<li><code>…/2026-09-22_spark-deepseek-v4-flash/HANDOFF.md</code> and
+<code>STUDIO_HANDOUT_2026-09-25.md</code> ·
+<code>…/2026-10-10_mac-ram-local-coding-models/REPORT.md</code> ·
+<code>…/2026-10-10_mac-hosted-replay-harder/RESULTS.md</code> ·
+<code>…/2026-10-08_omlx-flash-next/MODEL_RANKING.md</code></li>
+<li><code>2_Project_Files/fleet/specs/model-routing.md</code> (v1.0) ·
+<code>0_Brain/learnings/2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice.md</code>
+·
+<code>0_Brain/learnings/2026-10-22_tuesday-sonnet-default-usage-is-a-guide.md</code>
+· <code>0_Brain/daily/2026-10-26.md</code></li>
+</ul>
+<p><strong>Prices (all read 2026-10-26):</strong></p>
+<ul>
+<li>Apple AU configurator, Mac Studio and MacBook Pro:
+apple.com/au/shop/buy-mac/mac-studio and …/macbook-pro (M5 Ultra 256 GB
+1 TB, M5 Max 128 GB, MBP M5 Pro 64 GB, M5 Max 64/128 GB pages). Specs
+and bandwidth: apple.com/au/mac-studio/specs,
+apple.com/au/macbook-pro/specs</li>
+<li>GB10: staticice.com.au searches “DGX Spark”, “GX10-GG0013BN”,
+“GX10-GG0032BN”, “EDGEXPERT-34SAU”, “ATAGB10-9000” ·
+ple.com.au/ai-pc/mini ·
+core-electronics.com.au/nvidia-blackwell-spark.html · aiwarehouse.com.au
+(DGX Spark FE) · dell.com/en-au … dell-pro-max-fcm1253-micro ·
+mediaform.com.au (GX10; ThinkStation PGX) · clickfrenzy.com.au (Lenovo
+PGX) · prology.net/au/vgn100-ud11-new · techbuy.com.au/p/560530</li>
+<li>Strix Halo: frame.work/au (Desktop DIY, mainboard) ·
+au.minisforum.com/products/minisforum-ms-s1-max · amazon.com.au GMKtec
+EVO-X2 (B0F53XL9DP) · staticice “Corsair Workstation 300”, “Z2 Mini G1a”
+· jw.com.au ROG Flow Z13 · bee-link.com GTR9 Pro ·
+frame.work/blog/192gb-framework-desktop-open-for-pre-order</li>
+<li>Context: RBA exchange rates
+(rba.gov.au/statistics/frequency/exchange-rates.html) · The Register
+2026-10-02 (DGX Spark price, 64 GB model) ·
+blogs.nvidia.com/blog/local-ai-dgx-spark-64gb-sync · Tom’s Hardware
+2026-10-21 (Dell GB10 US prices)</li>
+</ul>
+<p><strong>Performance and comparisons (read 2026-10-26):</strong></p>
+<ul>
+<li>github.com/ggml-org/llama.cpp/blob/master/benches/dgx-spark/dgx-spark.md
+· hardware-corner.net/first-dgx-spark-llm-benchmarks · storagereview.com
+(AMD Ryzen AI Halo vs DGX Spark, Jul 2026) ·
+computingforgeeks.com/dgx-spark-vs-strix-halo-vs-mac-studio (2026-10-13)
+·
+community.frame.work/t/dgx-spark-vs-strix-halo-initial-impressions/77055
+· petronellatech.com (DGX Spark vs Strix Halo vs Gorgon Halo)</li>
+<li>omlx.ai/benchmarks (66rvj1q7, dn0dqucy, osqlhjud, fpal51r3,
+2jbv1kog, vd4ful4d) · bgr.com M5 Ultra review (2026-09-21) ·
+implicator.ai (M5 Ultra prompt processing)</li>
+<li>V4.1 Flash: github.com/antirez/ds4 (README, docs/MODELS.md,
+docs/PERFORMANCE.md, issues #1151 and #1239) ·
+dwarfstar.sh/docs/deepseek-v4-1-flash ·
+unsloth.ai/docs/models/deepseek-v4.1-flash ·
+github.com/ggml-org/llama.cpp/pull/31086 · omlx PRs #3574 and #4674 ·
+github.com/IngeniousIdiocy/ds4-v41-m3ultra · niklaslenz.com/k/mac256 ·
+huggingface.co/drowzeys (oQ3e MTP card) ·
+elitetestengineering.substack.com · modemguides.com (V4.1 hardware
+reality check) · benchleader.com · kingy.ai · ukyo.dev/blog/ds41f ·
+huggingface.co/ISTA-DASLab (GSQ card)</li>
+<li>Distributed:
+github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md ·
+github.com/kjaiswal/llama-cpp-distributed-benchmarks ·
+blog.exolabs.net/nvidia-dgx-spark · github.com/exo-explore/exo ·
+forums.developer.nvidia.com (Qwen3-235B multi-node, 2025-12-17) ·
+github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark ·
+github.com/elsung/dgx-spark-deepseek-v4-flash ·
+github.com/vcruz305/DeepSeek-V4.1-Flash-GGUF-DGX-Spark-recipe ·
+jeffgeerling.com (RDMA over Thunderbolt 5, Dec 2025) · macg.co (M5 Ultra
+cluster, 2026-08-27) · heise.de/-11085716</li>
+<li>Models: Hugging Face model cards for deepseek-ai V4.1-Flash(-1017),
+V4-Flash-0731, V4-Pro · zai-org GLM-5.3(-Flash) · XiaomiMiMo
+MiMo-V2.6-Flash · Qwen Qwen3.8-Flash-Next, Qwen3.8-27B, Qwen3-Coder-Next
+· MiniMaxAI M3.1-Flash · moonshotai Kimi-K2.6, K3 · openai gpt-oss
+(arXiv 2508.10925) · mistralai Devstral-2 · ornith-ai Ornith-1.5 ·
+artificialanalysis.ai comparison pages · swebench.com leaderboards.json
+· aider.chat leaderboards</li>
+<li>Zero-retention policies: openrouter.ai/docs (zdr; provider-logging)
+· docs.together.ai/docs/zero-data-retention · docs.fireworks.ai (data
+handling) · deepinfra.com/docs/data · console.groq.com/docs/your-data ·
+support.cerebras.net (data retention)</li>
+</ul>
+<p>Prices change daily, and AU GB10 stock is likely to reprice upward
+after NVIDIA’s 2 Oct US increase. Rows marked “index snippet” were not
+opened live. No discounts are claimed except where the stockist’s page
+showed a sale price.</p>
+</div>
+</body>
+</html>

@@ -2711,3 +2711,33 @@ INCLUDED until he says otherwise.
 > Please put any items that require my attenti on the fleet activity 2) please amend the morning ritual, create a morning fleet activity item with a summary and plan for the day (same format as all others) and flag items awaiting my action (these should be already listed on the board so I do not need descriptions but rather something like - awaiting on 11 items for xxx project, 2 for xx project, etc) 4)Never wait on me, if you or the agents are idle, work through the tickets.  Now, spin up as many agents as possible to work through them.  5)naturally if there is a blocker, dont push past it but flag it and remind me / escalate it so it does not slow things down.  6)if there is an unanswered item for more than 48 hours, escalate by emailing me 7)priorities for projects - HPSM-POC then Calculator, then composer so allocate agents based on that priority [14:31:59: ignore point 7]
 
 *Note:* receipted on the panel; two cards; G 19th launched; lesson 2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email
+
+## 2026-10-26 20:28 — Kam (live board 20:26:50 view=wednesday, verbatim)
+> All the discussion today regarding AI machines I'm getting the impression that to cover all secure work and all data work I should look at the following one 256 max studio allocated to data projects to allow for a reasonable combination of things for secure work a spark and a reasonable laptop should suffice with a spark doing most of the heavy testing and QA work. Do you agree with this or would be more reasonable to have a different combination of setup and looking at this I also had a few quick looks at Australian stockist and saw the Nvidia machine as well as AMD MSI and other AI machines. I'm not sure that the HP machine that we're currently using is the best one especially at the price. I think that's probably a little bit overpriced and as that is a demo machine I'll have to return it soon and replace it with something else. Can you have a good look at all the discussions? Thus far or the possible machine combinations put it into a PDF and email it to me. I would still like to make sure that the main engine that is Tuesday Wednesday and Friday is all run by Claude code best model with a differentiated task allocation usingopus sonnet and whatever local models we end up with.
+
+*Note:* receipted on the panel; Opus research agent commissioned for an AU-priced machine-combinations PDF, emailed on completion
+
+## 2026-10-26 20:29 — Kam (live board 20:29:03 view=wednesday, verbatim)
+> Also review all possible local llm models. For coding. MIMO kimi k etc. And different ways of deploying. K
+
+*Note:* added to the machine-combinations PDF agent by SendMessage
+
+## 2026-10-26 20:30 — Kam (live board 20:29:55 view=wednesday, verbatim)
+> V4.1 flash with part of files on ssd seems to be performing well as well. Speed is less important than quality
+
+*Note:* added to the PDF brief: quality-first weighting + V4.1 Flash SSD offload section
+
+## 2026-10-26 20:32 — Kam (live board 20:31:40 view=wednesday, verbatim)
+> Also could I split v4.1 accross my and spark and ssd?
+
+*Note:* added to the PDF brief: distributed inference section
+
+## 2026-10-26 20:34 — Kam (live board 20:33:35 view=wednesday, verbatim)
+> And also for the pdf, could I connect laptop with 64 or 128 gb ram to studio using thunderbolt and split the model
+
+*Note:* added to the PDF brief: Apple-only Thunderbolt split section
+
+## 2026-10-26 20:34 — Kam (live board 20:34:14 view=wednesday, verbatim)
+> Please have a good exec summary at the beginning with your recommendations
+
+*Note:* added to the PDF brief
