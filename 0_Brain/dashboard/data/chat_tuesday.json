@@ -6655,5 +6655,40 @@
   "project": "Datasec",
   "ts": "2026-10-26T15:51:45.258015+11:00",
   "text": "Datasec / MPS Commercial Calculator: done. #117 is merged (15:51:18, squash, pinned to the checked commit a284048e, main is now 2d8fede4). Nothing was bypassed: CodeQL had scanned that commit in all four languages with 0 alerts, and GitHub let the merge through. The only red check was the old dotnet one, which failed on the Pkcs pin that is already fixed on main. I corrected the PR description before merging. Not deployed. A records seat tickets the two missing rows.\n\nOne question. Three HPSM-POC PRs have passed their checks and wait only on CI: #224 (the HP logo), #223 (control characters) and #221 (the CI reader). Does skip CI and merge anyway cover them too? If I don't hear back, I'll hold them for CI as before."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-26T15:54:24.334891+11:00",
+  "text": "Datasec / HPSM-POC: I could not merge these three, and I need your call on one setting.\n\nI need you to choose one of these:\n\n1. Let CI run again (lift the 12:35 pause). The red check reruns on today's main, where its only failure is already fixed, and I merge #221 and #223 as soon as it is green. This is my recommendation.\n\n2. Or allow me to change HPSM-POC's main branch protection for one merge: turn off 'include administrators', merge #221 and #223, then turn it straight back on. It is a security setting, so I will not change it without your word.\n\nWhy: on HPSM-POC, main requires five checks, and the rule applies to admins too. One of them, 'api (ASP.NET Core)', is still red on #221 and #223 from before #225 fixed the Pkcs pin. GitHub refused my admin merge for exactly that reason. CodeQL has scanned both PRs with 0 alerts.\n\n#224 (the HP logo) is different: CodeQL has never scanned it because of the pause, and our rule is that nothing reaches main unscanned. That one needs CI back whichever option you choose.\n\nIf I hear nothing, all three stay held for CI."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-26T15:58:48.088417+11:00",
+  "text": "Datasec / HPSM-POC: done, option 2. 'Include administrators' was off for 12 seconds (15:57:56 to 15:58:08), and in that window #221 and #223 merged, squash-merged and pinned to their checked commits. It is back on now, with all 5 required checks in place. Main is 58a863a0. Every merged file matches the checked commit exactly. CodeQL had scanned both with 0 alerts. Not deployed.\n\n#224 (the HP logo) is still held: CodeQL has never scanned it, so it waits for CI. The follow-up to #223 (unchanged stored values plus the AI-text screen) has its full check queued. Since #223 is now on main, that work will be reapplied onto it after the check."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-26T16:25:33.547100+11:00",
+  "text": "Datasec / Security Composer: a follow-up, as you asked on Friday. Paul's answers to the five policy-template questions have not reached me. I've emailed you the five questions again, numbered, to your Datasec address. Nothing on the template is built until they arrive."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-26T16:27:11.069238+11:00",
+  "text": "Datasec / Security Composer: understood, it's with you. No more follow-ups from me; the template waits for Paul's answers."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-26T17:11:55.501459+11:00",
+  "text": "Datasec / Security Composer and HPSM-POC: one question about CI.\n\nComposer #95 (refuse a second target in guided setup) passed its final check: GO WITH FOLLOW-UPS, nothing above Minor. It can land as soon as CodeQL has scanned it. HPSM-POC #224 (the HP logo) is in the same position.\n\nNeither has ever been scanned: their jobs did not start, with GitHub's message 'recent account payments have failed or your spending limit needs to be increased'. But GitHub is running jobs again: MPS main ran all 8 checks green at 15:51.\n\nMay I re-run the checks on #95 and #224 so CodeQL scans them, and then land both? It uses Actions minutes, which is why I'm asking. If you don't answer, both stay held. (#118 is on its own card.)"
  }
 ]
