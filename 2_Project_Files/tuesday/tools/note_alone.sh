@@ -15,26 +15,37 @@
 #   note_alone.sh --h3 --stdin <<'EOF'   -> "### HH:MM — title"
 # How it finds its own message: the NEWEST assistant tool_use whose command contains "note_alone.sh" AND the body's
 # first non-empty line (up to 80 chars); it then counts every tool_use block sharing that message id.
-# FAIL-OPEN, stated: no transcript, or its own call not found after 6 reads -> it WRITES the note and prints
-# "check NOT run" on stderr (a lost note costs more than an unchecked one; the hook and the ledger still stand).
+# FAIL-CLOSED since 2026-10-26 20:1x (ledger w=24 and w=29 of the parallel-note family): no transcript, a read error,
+# or its own call not found after 12 reads (~3 s) -> REFUSED rc 3, nothing written. Both fail-open writes on record
+# (10:21 and 18:10, 26 Oct) were notes that DID share their message with another call, so the open path let through
+# exactly the case it exists to stop. A refused note is not lost: its body is in the transcript, re-issue it alone.
+# Override, for a seat with no transcript at all: NOTE_ALONE_ALLOW_UNCHECKED=1 (writes, and says so on stderr).
+# Arms: tests/note_alone_arms.sh
 set -u
 DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NOTE_ENTRY="$DIR/../../tools/note_entry.sh"
+NOTE_ENTRY="${NOTE_ALONE_NOTE_ENTRY:-$DIR/../../tools/note_entry.sh}"
 STDIN=0; for a in "$@"; do [ "$a" = "--stdin" ] && STDIN=1; done
 [ "$STDIN" = 1 ] || { echo "note_alone.sh: REFUSED: pass the body with --stdin <<'EOF' (it must be in the transcript verbatim)" >&2; exit 2; }
 BODY="$(cat)"
 [ -n "$BODY" ] || { echo "note_alone.sh: REFUSED: empty body" >&2; exit 2; }
 TPDIR="${NOTE_ALONE_TRANSCRIPT_DIR:-${CLAUDE_CONFIG_DIR:-$DIR/../../../4_Credentials/.claude}/projects/-Volumes-Laptop-DEV-TUESDAY}"
-export BODY TPDIR
+ALLOW="${NOTE_ALONE_ALLOW_UNCHECKED:-0}"
+export BODY TPDIR ALLOW
 python3 -I - <<'PY'
 import glob, json, os, sys, time
 body, d = os.environ["BODY"], os.environ["TPDIR"]
+allow = os.environ.get("ALLOW") == "1"
 first = next((l.strip() for l in body.splitlines() if l.strip()), "")[:80]
+def not_run(why):
+    if allow:
+        print(f"note_alone.sh: check NOT run ({why}); NOTE_ALONE_ALLOW_UNCHECKED=1 given, writing the note", file=sys.stderr); sys.exit(0)
+    print(f"note_alone.sh: REFUSED (rc 3), nothing written: check NOT run ({why}).\n"
+          "Re-issue the note ALONE in its own message (no other call, no text beside it).", file=sys.stderr); sys.exit(3)
 files = glob.glob(os.path.join(d, "*.jsonl"))
 if not files:
-    print(f"note_alone.sh: check NOT run (no transcript in {d}); writing the note", file=sys.stderr); sys.exit(0)
+    not_run(f"no transcript in {d}")
 tp = max(files, key=os.path.getmtime)
-for attempt in range(6):
+for attempt in range(12):
     count, mid = {}, None
     try:
         for line in open(tp, encoding="utf-8", errors="replace"):
@@ -50,11 +61,11 @@ for attempt in range(6):
                 c = (b.get("input") or {}).get("command", "") or ""
                 if "note_alone.sh" in c and first in c: mid = k
     except Exception as ex:
-        print(f"note_alone.sh: check NOT run (transcript read error: {ex}); writing the note", file=sys.stderr); sys.exit(0)
+        not_run(f"transcript read error: {ex}")
     if mid is not None: break
     time.sleep(0.25)
 if mid is None:
-    print("note_alone.sh: check NOT run (own call not found in the transcript after 6 reads); writing the note", file=sys.stderr); sys.exit(0)
+    not_run("own call not found in the transcript after 12 reads")
 n = count[mid]
 if n > 1:
     print(f"note_alone.sh: REFUSED, nothing written: this note shares its message with {n - 1} other tool call(s).\n"
@@ -65,4 +76,6 @@ sys.exit(0)
 PY
 RC=$?
 [ "$RC" = 2 ] && exit 2
+[ "$RC" = 3 ] && exit 3
+[ "$RC" = 0 ] || { echo "note_alone.sh: REFUSED, nothing written: the check exited rc $RC" >&2; exit 3; }
 printf '%s\n' "$BODY" | bash "$NOTE_ENTRY" "$@"
