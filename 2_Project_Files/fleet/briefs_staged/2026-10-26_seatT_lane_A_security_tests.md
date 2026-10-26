@@ -68,4 +68,4 @@ PROVENANCE:
 - Seat R 2nd live on KS-1548/1524/1649/1728 and Seat D 32nd live on the KS-1717 deploy round | Wednesday's drafting request and `/Volumes/DevMASTER/WEDNESDAY/0_Brain/daily/2026-10-26.md` lines 128-130 | read 2026-10-26
 - UNMEASURED: whether a migrated Postgres with both URLs is reachable from a worktree on this machine (decides KS-1578); whether the vitest in the repo accepts a hook-timeout flag on the command line; KS-1554's state and comments (not read by the drafter; out of round); the clean-develop counts of the security unit suite today; gauge ~8% is Wednesday's figure, not re-measured | the seat's own runs and Wednesday's request | read 2026-10-26
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-10-26 16:05
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-26 16:10
