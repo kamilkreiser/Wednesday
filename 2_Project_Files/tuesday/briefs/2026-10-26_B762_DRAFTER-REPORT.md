@@ -1,0 +1,45 @@
+STARTABLE: YES (with one commission correction Tuesday must confirm in slot PUSH: the Composer root repo has no remote, so "pushed plainly, Tuesday opens and lands the PR" cannot happen for the records branch; the kit folds locally like B657 and B666)
+
+# B762 drafter report (Datasec / Security Composer records seat R50, PR #94 landing and cross-line ticket)
+Drafted 2026-10-26 ~21:35 to 21:55 AEDT (clock `date` showed 21:40:09 mid-run). Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-26_B762_SEAT-R50_composer-records-94-landing-cross-line-ticket.md`.
+
+## BLUF
+- Kit is complete in the B666 shape: REFUSE 1-9, Steps 0-7, STANDING LINES, PARTITION, STATUS, 11 stamp slots plus the last line (12 lines with four underscores, MEASURED `/usr/bin/grep -c -E '_''_''_''_'` = 12; control: a printf of four underscores = 1).
+- Scope delivered as commissioned: C-103 (ruling, verbatim option words), C-104 (landing), one PCOMP create (label `plan-comp-374`, expected key PCOMP-98), BACKLOG #374 (class ticket), #375 (landing record), #376/#377/#378 (B755-1/-2/-3), history entry, JIRA.md bullet, optional #372 State append. Branch `records/b762`, worktree `.tools/wt-b762-rec`, one `--no-ff` fold on root `main`.
+- Three things differ from the commission and need Tuesday's eye: PUSH (D1), the ruling time (D2), PCOMP-97 (D3).
+
+## Facts re-measured (instrument, control)
+- PR #94 (`gh api -X GET pulls/94`): merged true; merged_at 2026-10-26T10:35:58Z = 21:35:58 AEDT; merge_commit_sha 4a2911f1a92c81cbd78b23e7fd955decb30cdf0b; head abd07d352a40830aea342b05090b0880d76ebdde; base 667830ede8f2...; changed_files 1; commits 4. `commits/4a2911f1`: one parent 8347f91b456ed8c352cebb395ceeb9511ceec537, tree 740297caf40ababd26071e2c865356769a97f512 (= the gate's predicted tree), file `packages/db/test/b616-deploy-commands.db.test.ts +703 -20`. `commits/main` = 4a2911f1. Control: `commits/8347f91b...` returns that sha. Tuesday's relayed values all match.
+- Squash message: title "Deploy guide scanner: pin the cross-line bang cases (#94)"; `/usr/bin/grep -c -i -E 'B[0-9]{3}|PCOMP'` over it = 0, control `x B736-1 y` = 1. So B755-1 and B755-2 are discharged at the merge as Tuesday's message says. The PR body is still the stale round-1 text (not re-read for staleness by me beyond its first lines; B755 STATUS line 71 is the source).
+- Check-runs on the merge commit: Analyze (javascript-typescript) success, Analyze (csharp) success; no separate "CodeQL" run listed on the merge sha (the gate saw CodeQL on the PR head). Recorded in the kit as a thing the seat re-reads.
+- Gate verdict lines (`/usr/bin/grep -i -E '^VERDICT:'`): B699 NO GO round 1 of 2 (0307e31); B707 NO GO round 2 of 2 (99585f7); B736 NO GO, "product owner's extra round" (eddebf3, CodeQL not scanned); B755 GO WITH FOLLOW-UPS (abd07d3). Kit forbids "round 3 of 2".
+- Rulings read with `decision_queue.sh show` by exact id: the 19:35 ruling is choice a, option text verbatim in the kit, card default was b; store ruled_ts 2026-10-26T19:37:17+11:00. Earlier cards: choice b at 09:27:09 (commission says 09:26) and choice b at 14:33:32 (commission 14:33).
+- Evidence counts: `setB-cfclass.txt` 283 lines = 187 `B~` (184 `ref=head CARRIER` + 3 `RULING-B`, 185 distinct shapes) + 16 `C~` + 80 `N~` control rows. A naive `grep -c CARRIER` gives 197 (it counts the 13 control rows too); I warned the seat to count `B~` lines only. `setB-kills.txt`: 187 lines starting `NEW vs HEAD`, 0 `NEW vs PREV`; control: a planted `NEW vs HEAD: x` line = 1. The 3 ruling-(b) cells: Z5037/zqz5037_1, Z5289/zqz5289_2, Z5289/zqz5289_3 (B755's "2 tokens" wording belongs to Z5289).
+- 16 ids: 4+5+3+1 = 13 clause 2, plus 3 clause 3 (Q02785, Q03187, Q02893), from B742 LOST CELLS.
+- Root repo: main 06cf6315caf5bd7260d76bbcec3ace5a9c792349 (B666 fold); C-102 highest (`/usr/bin/grep -i -c -E '^### C-'` = 102); BACKLOG highest 373 (`awk`); rows 374-379 count 0 (control 373 = 1); `.tools/b762`, `.tools/wt-b762-rec` absent, `records/b762` ref 0 (control `records/b666` 1); `git remote | wc -l` root = 0 (control: `2_Project_Files` = 1); index clean, no MERGE_HEAD/index.lock; `git diff --name-only` = the four known STATUS paths; `git status --short` 1165; load1 9.49 (9.13, 7.92) at 21:41.
+- Jira (jira666.py GET only): total 97, held 19, owner-wait 2, seed 94, plan-comp-372 = 1, plan-comp-373..379 = 0, controls zzqxvbw 0, composer 21, plan-comp-330 1. Pre-search: B755/B742/B736/B707/B721/B705/B695 0; `here-document`, `exec`, `open bracket`, `dangling`, `PR #94`, `array subscript` 0; hits: PCOMP-97 (bang, heredoc, quoteScan, b616-deploy-commands, scanner, event not found, DEPLOY.md command), PCOMP-25 (cross-line: a demo VM overlay, different), PCOMP-66, -93, -21, -95. No issue holds the 16 cells or the class. PCOMP-97: Task, Backlog, label plan-comp-372, 0 comments. Control for the text index: `event not found` returns 2 rows.
+- Ports: `lsof -nP -iTCP:9700-9799 -sTCP:LISTEN` empty (rc 1; no listener-bind control run). Kit says none needed (records seat starts no server). R50 word-boundary scan of non-`.pre-` SEAT kits of 25/26 Oct: 0 files; control R49: 2. Live panes: wednesday, MPS-M35, MPS-M34, MPS-G153, HPSM-POC-H38, fleet-monitor; no Composer pane, none named R50.
+- Model: row C8 at line 98 of model-routing.md (`/usr/bin/grep -n -i -E '^\| *C8 '` = 98), first-column "1st" Sonnet; `models_latest.json` `levels.sonnet.model_id` = claude-sonnet-5-5 (python3 -I). Launch line carries `BRIEF_SEAT_LEVEL=sonnet` inside the quotes.
+
+## D-decisions (mine)
+- D1 PUSH: the commission said "pushed plainly from the seat's own worktree; Tuesday opens and lands the PR". Root repo has no remote, so I wrote no push, no PR, fold by `merge --no-ff` as B657/B666 did, and added a `PUSH` stamp slot (default NO PUSH) plus REFUSE 3 stops if a remote has appeared.
+- D2 Ruling time: kit writes "19:35 AEDT (tap 19:35:32 as relayed; store 19:37:17)" and lists the disagreement under Corrections, following the C-101 precedent (09:54 vs 09:55). Card ids are not in the kit.
+- D3 PCOMP-97: PR #94's body says it closes PCOMP-97 (the five B648 gaps, row #372). I added an optional State append to #372 (slot ROW-STATE, default APPEND), but wrote NO Jira comment or transition on PCOMP-97 (slot COMMENT-97 default NONE), because the commission allows one create only.
+- D4 Extra BACKLOG rows: five rows (#374 ticket, #375 landing record, #376-#378 the three gate findings); #375 is my addition for parity with #373, the commission named the ticket and B755-1/-2/-3.
+- D5 Jira text rule stricter than B666: no `B[0-9]{3}` work numbers in the Jira text (case-sensitive; lowercase `b616` is the test file's own name). The Jira COPY BLOCK is written without B-numbers and evidence folders are pointed to via BACKLOG #374 instead of a path.
+- D6 The two earlier rulings of the day are context bullets in C-103 only (slot PRIOR-C default NONE).
+- D7 Done-when for the ticket is my construction from the builder's/gate's words (regression row per id red on main, no loosening, test-file-only, fresh-seed sweep, own gate); the gate gave no Done-when. Round count of a later lane written as "not ruled".
+
+## Q-questions for Tuesday (each with a default)
+- Q1 Confirm slot PUSH = NO PUSH (no remote on the root repo). Default: NO PUSH, local fold.
+- Q2 Comment on or transition PCOMP-97 after the merge? Default: NONE (comment-only/transition would need the fence widened and your stamp text).
+- Q3 Is "ruling (b)" (the comment-apostrophe family) described right in the ticket as "a family the earlier rounds had already set aside"? I did not find the ruling's own text (the B707 STATUS lines 141-142 call it Tuesday's ruling (b)). Default: keep the neutral Jira wording; the seat quotes the ruling in the BACKLOG row if it finds it.
+- Q4 Do you want the two earlier rulings of today recorded as their own C-entries? Default: no (context in C-103).
+
+## UNMEASURED
+Composer `ps` processes; whether root `main` or the 1165-line dirt moved after ~21:50; `DEPLOY.md` at 4a2911f1 (the "cannot hold them" sentence is relayed from B742/B755); the CodeQL check on the merge sha beyond the two Analyze runs; PR #95/#91/#86/#85 current state (relayed from B755 line 26); the `brief_seat: model=` line; whether PCOMP create works for the board account today (it did for PCOMP-95..97); PR #94's current body text (not re-fetched).
+
+## Disclosure (outside the fences)
+- I wrote only the two files. I created and wrote a scratch directory and a few scratch files in the session scratchpad (`m1.sh`, `jr.py`, three `decision_queue.sh show` outputs, the squash message `sq.txt`); no repo path.
+- Read-only actions beyond the plain reads: ran `python3 -I` on a scratchpad script that imports `.tools/b666/scripts/jira666.py` (GET and `jql` only; it reads the project `.env` in-process, nothing printed). No Jira write, no POST. `decision_queue.sh` was used only as `show <exact id>` for the three named cards; no `list`.
+- One command was refused by a hook (word-splitting `$G` in zsh); rerun as a script file. A `cd`-free session throughout.
