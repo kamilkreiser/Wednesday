@@ -13292,5 +13292,26 @@
   "project": "Secuura",
   "ts": "2026-10-26T16:19:11.324148+11:00",
   "text": "Will do. Five Secuura seats are running now: R, D, S, T and U. Load sits around 6, against my ceiling of 7 for starting seats. I'll keep adding seats as load allows, and tell you where the laptop tops out."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-26T16:33:58.252353+11:00",
+  "text": "No action needed. First result from the Spark on QA: it isn't ready to review security-level changes. On the KS-1717 change it got stuck repeating itself and gave no verdict. Its two distinct findings were both wrong when checked against the code. So the stricter reviews stay on Opus. On nine smaller PRs it did give verdicts, which I'll score once the Claude reviewer finishes the same nine. Two fixes before the next attempt: a guard against the repetition loop, and support for TypeScript and shell tests. The test harness it needed is now saved in the repo. The quant test now has the Spark back."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-26T16:37:40.484094+11:00",
+  "text": "Yes, but only next-token measurements so far. Nobody has published task or coding scores for the 2-bit builds. These come from this afternoon's research, with the sources it opened, and I haven't re-checked them myself.\n\nUnsloth's table: 4-bit (UD-Q4_K_XL) sits almost on top of the full model, with a divergence of 0.01. Two-bit IQ2_XXS is about 0.41, and the 97 GB mixed 2-bit about 0.36. Lower is better, so 2-bit drifts far more than 4-bit.\n\nAtomicChat's table: full-model perplexity is 4.53. The 97 GB 2-bit build is 5.14, picking the same next token 81 percent of the time. IQ2_XXS is 5.79, at 77 percent. Their 4-bit divergence is about 0.16, but their baseline differs from Unsloth's, so don't compare numbers across the two tables.\n\nIn plain terms, 4-bit is close to lossless and 2-bit is a real step down. Users only say answers stay reasonable.\n\nOur own test is the better answer. It runs the same 23 coding tasks on the Spark at 2-bit against today's 3-bit build, which scored 16 of 23. So far 2-bit has passed 4 of 4, and the rest runs now that the Spark is free. Sources are in the reference folder, under deepseek-mac-four-comparisons."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-26T17:02:25.003677+11:00",
+  "text": "The Spark runs DeepSeek V4 Flash, the 0731 release, as a 3-bit build in a format that only runs on NVIDIA GPUs. Its weights take 95 GB, so that exact copy can't move to a Mac.\n\nOn a 128 GB Mac, yes, it works, but only at 2 bits. These come from the research, not measured by us:\n- The 2-bit file is about 91 GB. antirez's own Mac build is about 81 GB. An MLX 2-bit build is about 97 GB.\n- They run through llama.cpp or antirez's ds4, both Mac-native.\n- People report 27 to 39 tokens a second on 128 GB M3 Max and M5 Max machines.\n\nThe catch is room. With macOS and a few Claude sessions running, a 128 GB Mac has an estimated 90 to 100 GB to spare. The 81 to 91 GB builds fit, with a little left for context. The 3-bit and 4-bit builds don't fit.\n\nQuality is the open question, and that's the test on the Spark right now. It runs the same 91 GB 2-bit file through the same 23 coding tasks, against the 3-bit build's 16 of 23. If 2-bit holds up there, it's a real option for the 128 GB Mac. I'll send you the score when it finishes."
  }
 ]

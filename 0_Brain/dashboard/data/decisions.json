@@ -49405,5 +49405,56 @@
    "CARD wed-deepseek-four-mac-comparisons-1026",
    "CARD mps-117-round-cap-nogo-1026"
   ]
+ },
+ {
+  "id": "wed-laptop-spotlight-load-1026",
+  "client_project": "WED",
+  "title": "Laptop load stuck at 13-20: exclude the Secuura worktree folders from Spotlight",
+  "bluf": "I need you to add two folders to Spotlight's privacy list on the laptop (steps in option a). For the last hour, load has sat at 13 to 20 with only about 3 of 12 cores busy. Spotlight is the biggest CPU user: mdworker_shared 157 percent and mds_stores 37 percent (measured 16:5x), indexing the new worktrees. The disk is not saturated (100 to 235 operations a second). Four seats' pushes were held up behind it, so at 17:1x I raised their push gate to load under 16. Removing Spotlight is my best reading of the cause, not a proven one.",
+  "default_action": "c: nothing changes on the laptop. Wednesday keeps the push gate at load under 16, keeps measuring, and re-raises this card if pushes start timing out.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Exclude the two folders from Spotlight (recommended)",
+    "detail": "System Settings, then Spotlight, then Search Privacy (on some versions: Siri and Spotlight, then Spotlight Privacy). Press + and add:\n/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees\n/Volumes/DevMASTER/!CODING/Secuura/Blockchain/deploy-clones\nNothing is deleted; Spotlight just stops indexing them. Wednesday re-measures load 10 minutes later and reports."
+   },
+   {
+    "key": "b",
+    "label": "Exclude the whole DevMASTER drive",
+    "detail": "Same screen, add /Volumes/DevMASTER. Bigger effect, but Spotlight search stops finding anything on that drive."
+   },
+   {
+    "key": "c",
+    "label": "Leave it",
+    "detail": "Seats keep pushing at the raised gate (load under 16) and run slower."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-26T17:12:25.250726+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-14 13:06",
+   "2026-09-16 15:00",
+   "CARD studio-spotlight-indexing-devmaster-load",
+   "CARD wed-laptop-dev-copy-disk-full",
+   "CARD hpsm-jira-login-on-laptop",
+   "CARD tuesday-laptop-secuura-removal-b-1019",
+   "CARD hpsmpoc-free-text-control-chars-1026",
+   "CARD mps-117-null-class-strict-nogo-1026",
+   "CARD datasec-morning-plan-1026",
+   "CARD wed-morning-plan-1026",
+   "CARD hpsmpoc-control-chars-six-field-words-1026",
+   "CARD composer-94-heredoc-scan-round-cap-1026",
+   "CARD secuura-ks1717-new-emitter-secret-1026",
+   "CARD secuura-ks1723-zod-msal-high-baseline-1026",
+   "CARD wed-ornith-122b-test-on-spark-1026",
+   "CARD datasec-github-actions-billing-refused-1026",
+   "CARD hpsmpoc-control-chars-stored-values-1026",
+   "CARD composer-94-extra-round-nogo-1026",
+   "CARD wed-deepseek-four-mac-comparisons-1026",
+   "CARD mps-117-round-cap-nogo-1026"
+  ]
  }
 ]
