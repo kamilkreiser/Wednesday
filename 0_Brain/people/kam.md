@@ -23,7 +23,7 @@ learnings/2026-08-03_role-beyond-code-three-priorities).
   mature project + best structural reference), **Datasec** (NexusAI, Vision Sales
   Portal, HP Auth Suite work), side projects (Visualiser at coagent.live/VI,
   Clara local-AI experiments, myPKI).
-- Hardware: Mac Studio M3 Ultra (possible future dedicated Wednesday machine),
+- Hardware: Mac Studio M3 Ultra 96 GB — SOLD 2026-10-26 (Kam 21:34, funds towards the ordered 256 GB Studio); the plan is a 256 GB Studio for local models, the Mac mini M3 for Datasec, a laptop (current 32 GB MBP, or a new 64 GB one) for Wednesday + Secuura, maybe a second 256 Mac or NVIDIA box later. Earlier note:
   Windows 11 PC on direct Ethernet, DevMASTER SSD (Wednesday's home since 2026-08-25 — one drive for her and the dev code; the T9 SSD was her home 07-31→08-25 and is now a sync copy).
 - Uses Claude Code extensively; launchers per project; Fable 5 + ultrathink
   pinned everywhere; Max subscription.
