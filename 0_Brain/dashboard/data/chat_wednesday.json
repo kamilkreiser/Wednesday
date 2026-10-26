@@ -13229,5 +13229,12 @@
   "project": "WED",
   "ts": "2026-10-26T15:05:36.142322+11:00",
   "text": "Received: the claims that Apple Silicon builds like MLX run 5 to 15 times faster than generic ones. I'm having it researched from published benchmarks and project docs, and I'll check which comparisons are fair, because those multipliers are usually measured against a slow baseline. Answer in about half an hour, with what it means for running DeepSeek on the coming 256 gigabyte Studio."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "WED",
+  "ts": "2026-10-26T15:07:25.778332+11:00",
+  "text": "No action needed. On the 5 to 15 times faster claim: the research found no primary source showing that against a fair comparison.\n\nLike for like on the same Mac, Apple's own framework, MLX, beats the generic llama.cpp build by about 1 to 2 times. The gain is biggest on small models and models like DeepSeek, and shrinks as models get bigger. The big multipliers you've heard come from comparing against something slow: plain PyTorch or the CPU, a cold start with nothing cached, many users at once, or Apple's new M5 chip, which processes the prompt about 4 times faster than the M4 but generates only 20 to 25 percent faster. The name you couldn't remember is most likely MLX, or the newer Ollama build that runs on it.\n\nWhat it means for us, as an estimate: on the 256 gigabyte Studio, DeepSeek V4 Flash should run at roughly 25 to 40 tokens a second. That's about the same as the Spark's 33, not a multiple of it, because memory bandwidth is the limit. There's a DeepSeek-only Mac engine called ds4 that people report at 27 to 37 on an M3 Ultra. The extra upside is a feature that lets the model write several tokens at once, maybe 1.5 to 2 times, but nobody has published that for this model yet.\n\nWhen the Studio arrives, I'd measure ds4 and MLX on our own tasks, with the 4-bit build, which fits comfortably in 256 gigabytes. The report is in the brain under today's reference folder."
  }
 ]
