@@ -21,6 +21,21 @@ updated: 2026-09-23
 > his queue to reconcile.** Until it is, this warning is the only thing standing between the
 > list and the next agent that follows the skill literally.
 
+## Last session — 2026-10-26 (Seat R 2nd, pane `Secuura/Blockchain-R` `%7`, RAISE + MERGE lane, 04:24Z to ~08:00Z; Sonnet 5.5; wrapped on your "you may wrap")
+
+**Rows 7-9 pushed, all nine raised, and 16 PRs merged on your three GOs (8 + 5 + 3), each at the head you named. develop `e9e32b76b0483b65eb94cffdcf09da0c9ea46ce2`. Nothing deployed; no ticket moved to Done.**
+- Merge procedure each time: PR branch and develop read in one action, `gh pr merge --squash --match-head-commit`, squash checked to be one child of the develop just read with exactly the PR's files. Squash SHAs: HANDOVER section 1.
+- One facts-only comment per gate note on KS-1716, 1560, 1513, 1713, 1602, 1578, 1714, 1649. **KS-1736** filed for the #1700 residue (M-1 plus the `developer-portal.html:262` contradiction), Backlog, no fix chosen, search stated in the body.
+- #1700 fix round 2 of 2 done (both Majors closed). **#1708 (KS-1728, `a6bb564a9bf5`) is OPEN, waiting for your batch gate:** it reproduces a failure class (multi-line output of 200 KB and up) and does NOT reproduce the three observed refusals (about 2.8 KB); the PR says so; KS-1728 stays open.
+
+**Open / next:**
+- [ ] Merge #1708 on your GO naming the head: HANDOVER section 2 (`tools/merge_three.py` with a new `ORDER`).
+- [ ] Your answers to: add the Linear URL (a repo rule) to the thirteen merged PR bodies that lack it? hold my push lock through my load wait?
+- [ ] Quarantine R 1st's seven `worktrees/s-r1-*` and my `s-r2-ks1728` on your word. Not deleted.
+
+**Blockers:** none of mine.
+**Notes for Wednesday:** skill step 2b (archive Done tickets) skipped: not in your WRAP, shared board, archive cascades. Step 2c: the skill's T9 path is absent; I inserted this block here per this file's warning, backup at `5_Project_History/2026-10-26_seatR-2nd/evidence/Secuura__Blockchain.md.pre-edit`. My round-2 evidence is in that folder (the gate could not find it in my temp scratchpad). Handover: `5_Project_History/2026-10-26_seatR-2nd/HANDOVER.md`.
+
 ## Last session — 2026-10-23 (Seat G 16th, pane `Secuura/Blockchain-G` `%32`, RAISE + small BUILD lane, 21:13Z 10-22 to ~22:1xZ; wrapped on Wednesday's WRAP)
 
 **The G 15th queue is complete.** #1680 (KS-1709) -> develop `90d7b364acbb`, #1681 (KS-1622) -> `865a4013b447`, #1682 (KS-1707, the audit baseline) -> `2bd32cbd6ed6`; each tree = the predicted one, verified from origin. **develop `2bd32cbd6ed60cb1ebf7929b9460910aea19a3b4`. Nothing deployed.**
