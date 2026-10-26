@@ -197,4 +197,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-26 12:26 | Kamils-MBP | spark gate arms script: refuse when required args/GIT_SSH_COMMAND missing (pickup owed 5) | CLOSED |  2026-10-26 12:27 done: guard + 3 arms exercised 12:2x |
 | 2026-10-26 12:35 | Kamils-MBP | Ornith 1.5 122B vs DeepSeek V4 Flash head-to-head on the Spark (Kam 12:32:27) | CLOSED |  2026-10-26 14:56 done: report 0_Brain/reference/2026-10-26_ornith122b-vs-deepseek-spark/report.md; DeepSeek restored + verified |
 | 2026-10-26 15:01 | Kamils-MBP | DeepSeek V4 Flash smaller-quant test on the Spark (UD-IQ2_XXS vs EXL3-3.0; Kam ~14:59) | OPEN | |
-| 2026-10-26 19:46 | Kamils-MBP | Spark gate tooling: repetition guard in spark_review.py + bash/vitest runner in spark_gate.sh, then shadow calibration 3 on #1708/#1709 (Wednesday, laptop seat 19:4x) | OPEN | |
+| 2026-10-26 19:46 | Kamils-MBP | Spark gate tooling: repetition guard in spark_review.py + bash/vitest runner in spark_gate.sh, then shadow calibration 3 on #1708/#1709 (Wednesday, laptop seat 19:4x) | CLOSED |  2026-10-26 20:03 done 20:0x: arms 9/9 + 8/8, calibration 3 recorded (tier 2 FAIL x2) |
