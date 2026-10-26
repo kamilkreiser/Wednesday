@@ -234,12 +234,22 @@ def prior_rulings(d):
             def _client(cp):
                 return str(cp or "").split("/")[0].strip().lower()
             new_client = _client(d.get("client_project"))
+            # SEAT SCOPE (2026-10-27, Wednesday pickup OWED item 7, recurred 06:0x): a WED/Fleet-scoped card names
+            # no client, so the clause above never fired and the Wednesday seat's morning card printed two
+            # Datasec card titles. For a card that names no client, the seat's OWN client stands in for it:
+            # another client's ruled card is skipped, the seat's own client and Fleet/WED rulings still count.
+            SEAT_CLIENT = {"wednesday": "secuura", "tuesday": "datasec", "friday": "datasec"}
+            scope_client = new_client if new_client in CLIENTS else SEAT_CLIENT.get(os.environ.get("DQ_SEAT", ""), "")
+            # DATE TOKENS (same incident): every card id ends in MMDD, so a same-day card shared "1027" with any
+            # card ruled that day and the token is rare by construction. A date is never a subject word.
+            DATE_TOK = re.compile(r"^(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$")
+            new_toks = {t for t in new_toks if not DATE_TOK.match(t)}
             for x in ruled:
                 x_client = _client(x.get("client_project"))
-                if new_client in CLIENTS and x_client in CLIENTS and x_client != new_client:
+                if scope_client in CLIENTS and x_client in CLIENTS and x_client != scope_client:
                     continue
                 x_toks = {t for t in re.split(r"[^a-z0-9]+", str(x.get("id", "")).lower())
-                          if len(t) >= 4 and t not in STOPWORDS}
+                          if len(t) >= 4 and t not in STOPWORDS and not DATE_TOK.match(t)}
                 shared_rare = {t for t in (new_toks & x_toks) if freq.get(t, 99) <= RARE}
                 if shared_rare:
                     hits.append((f"CARD {x.get('id')}",

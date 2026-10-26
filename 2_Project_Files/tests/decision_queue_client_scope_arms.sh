@@ -57,5 +57,20 @@ check "C4 Datasec ruling is not a prior for a Secuura card" 0 $rc "" "hpsmpoc-he
 # C5: control: same-project ruling refuses (the gate still fires at all)
 card hpsmpoc-heron-window-1021 "Datasec/HPSM-POC" | bash "$DQ" add --json > "$W/c5" 2>&1; rc=$?
 check "C5 control: same-project ruling refuses" 3 $rc "hpsmpoc-heron-window-0901" "" "$W/c5"
+# SEAT SCOPE + DATE TOKENS (2026-10-27, Wednesday pickup OWED item 7): a WED/Fleet-scoped card names no client, so
+# C1-C5's clause never fired; the seat's own client stands in. Run as the wednesday seat (own client = secuura).
+# C6: a WED card in the wednesday seat whose only rare overlap is a DATASEC ruled card -> not refused, not printed
+card wed-heron-window-1021 "WED" | WED_AGENT=wednesday bash "$DQ" add --json > "$W/c6" 2>&1; rc=$?
+check "C6 Datasec ruling is not a prior for a WED card in the wednesday seat" 0 $rc "" "hpsmpoc-heron-window" "$W/c6"
+# C7: a WED card in the wednesday seat overlapping the seat's OWN client's ruled card -> still refused
+card wed-zebrafish-quota-1021 "WED" | WED_AGENT=wednesday bash "$DQ" add --json > "$W/c7" 2>&1; rc=$?
+check "C7 own client's ruling still refuses a WED card" 3 $rc "secuura-zebrafish-quota-0901" "" "$W/c7"
+# C8: a WED card sharing ONLY a date token (MMDD) with a ruled card -> not refused (dates are not subject words)
+python3 -c 'import json,sys; s=json.load(open(sys.argv[1])); s.append({"id":"fleet-pelican-sweep-0315","client_project":"Fleet/all projects","title":"Arm: pelican","status":"ruled","ruled_choice":"a"}); json.dump(s,open(sys.argv[1],"w"))' "$DQ_FILE"
+card wed-morning-plan-0315 "WED" | WED_AGENT=wednesday bash "$DQ" add --json > "$W/c8" 2>&1; rc=$?
+check "C8 a shared date token alone does not refuse" 0 $rc "" "ALREADY RULED" "$W/c8"
+# C9: a Fleet card in the TUESDAY seat overlapping a SECUURA ruled card -> not refused, not printed (mirror of C6)
+card ops-zebrafish-quota-1022 "Fleet/all projects" | WED_AGENT=tuesday bash "$DQ" add --json > "$W/c9" 2>&1; rc=$?
+check "C9 Secuura ruling is not a prior for a Fleet card in the tuesday seat" 0 $rc "" "secuura-zebrafish" "$W/c9"
 echo "arms: $pass passed, $fail failed (tool: $DQ; scratch: $W)"
 [ $fail = 0 ]
