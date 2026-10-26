@@ -1,0 +1,166 @@
+{
+ "note": "Spark A/B task set (2026-10-26). Each task = one real Spark round's run dir; the prompt is rebuilt by hosted/replay.build_messages and proven by sha256(task+input) + prompt_bytes against that round's meta. 'expect' is written BEFORE any model ran. Classes: CAN = expected PASS; PARTIAL = the Spark has passed this shape only sometimes / after a rebrief; CANNOT = the Spark failed this exact prompt at the counter (went to Opus) or the shape it never cleared.",
+ "tasks": [
+  {
+   "id": "T01",
+   "run": "spark_secuura_2026-10-07_KS-591-platform-tenant-id-uuid",
+   "rung": 1,
+   "expect": "CAN",
+   "why": "rung 1 code_patch, Spark PASS BYTE-IDENTICAL"
+  },
+  {
+   "id": "T02",
+   "run": "spark_secuura_2026-10-07_KS-1435-transfer-reject-signature-typed",
+   "rung": 1,
+   "expect": "CAN",
+   "why": "rung 1, 34.7K prompt, Spark PASS BYTE-IDENTICAL"
+  },
+  {
+   "id": "T03",
+   "run": "spark_secuura_2026-10-09_KS-998-format-gate-npm-stdin",
+   "rung": 1,
+   "expect": "CAN",
+   "why": "rung 1 bash_patch, Spark PASS TREE-IDENTICAL (hosted/tests positive control)"
+  },
+  {
+   "id": "T04",
+   "run": "spark_secuura_2026-10-19_ks_623_p1",
+   "rung": 1,
+   "expect": "PARTIAL",
+   "why": "rung 1; Spark round 1 FAILed A2a (new test file's hunk header), r2 PASS \u2014 header arithmetic on a NEW file"
+  },
+  {
+   "id": "T05",
+   "run": "spark_secuura_2026-10-19_ks_1623_p1",
+   "rung": 1,
+   "expect": "PARTIAL",
+   "why": "rung 1; Spark round 1 FAILed A2a on the new test file, r2 PASS"
+  },
+  {
+   "id": "T06",
+   "run": "spark_secuura_2026-10-11_T2-reset-500-body",
+   "rung": 2,
+   "expect": "CAN",
+   "why": "rung 2, Spark PASS BYTE-IDENTICAL"
+  },
+  {
+   "id": "T07",
+   "run": "spark_secuura_2026-10-06_KS-1355-stack-guard-one-line-per-project",
+   "rung": 2,
+   "expect": "CAN",
+   "why": "rung 2 bash_patch, Spark PASS BYTE-IDENTICAL"
+  },
+  {
+   "id": "T08",
+   "run": "spark_secuura_2026-10-12_ks_1186_p1",
+   "rung": 2,
+   "expect": "CAN",
+   "why": "rung 2, 35.4K prompt, Spark PASS TREE-IDENTICAL"
+  },
+  {
+   "id": "T09",
+   "run": "spark_secuura_2026-10-10_KS-1346-apigw-fail500-type-and-field-names",
+   "rung": 3,
+   "expect": "CAN",
+   "why": "rung 3 code_patch2 (two product files), Spark PASS BYTE-IDENTICAL"
+  },
+  {
+   "id": "T10",
+   "run": "spark_secuura_2026-10-07_KS-1274-trivy-bare-object",
+   "rung": 3,
+   "expect": "CAN",
+   "why": "rung 3 bash_patch2, Spark PASS 10/10 BYTE-IDENTICAL"
+  },
+  {
+   "id": "T11",
+   "run": "spark_secuura_2026-10-22_ks_1709_p1",
+   "rung": 3,
+   "expect": "CAN",
+   "why": "rung 3 code_patch2, 41K prompt, Spark PASS"
+  },
+  {
+   "id": "T12",
+   "run": "spark_secuura_2026-10-05_KS-1278-revoke-atomic-r3",
+   "rung": 3,
+   "expect": "PARTIAL",
+   "why": "rung 3 code_patch2, the LARGEST prompt (71.3K tok, 157-line new test byte-exact); Spark PASS only on round 3 (r1/r2 harness FAILs)"
+  },
+  {
+   "id": "T13",
+   "run": "spark_secuura_2026-10-05_KS-723-anchors-tx",
+   "rung": 4,
+   "expect": "PARTIAL",
+   "why": "rung 4 loose (no product + lines), Spark PASS, golden DIFFERS"
+  },
+  {
+   "id": "T14",
+   "run": "spark_secuura_2026-10-05_KS-1364-analytics-exports-r4",
+   "rung": 4,
+   "expect": "PARTIAL",
+   "why": "rung 4 loose, Spark PASS, golden DIFFERS"
+  },
+  {
+   "id": "T15",
+   "run": "spark_secuura_2026-10-10_KS-1410-apigw-audit-export-502-loose",
+   "rung": 4,
+   "expect": "PARTIAL",
+   "why": "rung 4 loose, Spark PASS, golden DIFFERS"
+  },
+  {
+   "id": "T16",
+   "run": "spark_secuura_2026-10-10_KS-1345-originate-deliveries-failed-query-500",
+   "rung": 6,
+   "expect": "PARTIAL",
+   "why": "rung 6 PROSE-only (behaviour + cells, no lines; a trap second behaviour), Spark PASS with a miscounted header (recount)"
+  },
+  {
+   "id": "T17",
+   "run": "spark_secuura_2026-10-18_ks_1545_p1",
+   "rung": 4,
+   "expect": "CANNOT",
+   "why": "rung 4 loose, 3 sites: Spark FAILed A2a (hunk header arithmetic) \u2014 code right, headers wrong"
+  },
+  {
+   "id": "T18",
+   "run": "spark_secuura_2026-10-18_ks_1545_p1-r2",
+   "rung": 4,
+   "expect": "CANNOT",
+   "why": "rung 4 rebrief naming the miss: Spark FAILed A2a AGAIN; counter spent -> Opus"
+  },
+  {
+   "id": "T19",
+   "run": "spark_secuura_2026-10-08_KS-1438-html-docs-check-resolved-paths",
+   "rung": 3,
+   "expect": "CANNOT",
+   "why": "rung 3 bash_patch2, .mjs product: Spark FAILed B3x (one inserted colon in a quoted grep pattern)"
+  },
+  {
+   "id": "T20",
+   "run": "spark_secuura_2026-10-09_KS-1438-html-docs-check-resolved-paths-r2",
+   "rung": 3,
+   "expect": "CANNOT",
+   "why": "rung 3 rebrief naming the colon: Spark FAILed B3x AGAIN, same byte; counter spent -> Opus"
+  },
+  {
+   "id": "T21",
+   "run": "spark_secuura_2026-10-07_KS-1410-apigw-notifications-500",
+   "rung": 2,
+   "expect": "CAN",
+   "why": "QWEN122_AB leg 2 hard set (added 13:2x on Wednesday's input, labelled before any run): rung 2, ~3K-token answer, Spark PASS BYTE-IDENTICAL"
+  },
+  {
+   "id": "T22",
+   "run": "spark_secuura_2026-10-05_KS-593-share-null-recipient-cp2",
+   "rung": 3,
+   "expect": "PARTIAL",
+   "why": "QWEN122_AB leg 2: rung 3 code_patch2, 64.8K prompt, Spark PASS, golden DIFFERS"
+  },
+  {
+   "id": "T23",
+   "run": "spark_secuura_2026-10-05_KS-1136-aggregate-unreadable-artefacts",
+   "rung": 2,
+   "expect": "CAN",
+   "why": "QWEN122_AB leg 2: rung 2 bash_patch, 3.5K-token answer, Spark PASS, golden DIFFERS"
+  }
+ ]
+}
