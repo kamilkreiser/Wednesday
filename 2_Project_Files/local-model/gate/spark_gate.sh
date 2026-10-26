@@ -8,6 +8,12 @@
 #   <base-ref>    branch name or sha the PR targets (e.g. develop). The diff is against merge-base(head, base).
 #   <test-file>   repo-relative test files to run on BASE product code and on HEAD. A missing file REFUSES (exit 4).
 #   --runner      command prefix that runs pytest, default "python3 -m pytest" (e.g. "/path/venv/bin/python -m pytest").
+#   --node-modules DIR   (non-pytest mode) symlinked as node_modules into the vitest package dir of the head worktree.
+# SUITE KINDS (2026-10-26): all <test-file>s *.py -> the pytest path below. All non-.py (*.sh -> `/bin/bash <file>`;
+#   *.test.ts/tsx -> `npx vitest run <file>`, jest if the package has jest.config.js) -> this script does the same fetch / head
+#   assertion / missing-file refusal / diff, then HANDS OFF to shadow_facts.py (the one non-pytest harness; it was NOT forked)
+#   which runs the files on HEAD and on BASE product code and writes facts.json with per-file rc/passed/failed and totals.
+#   Mixing .py and non-.py files in one call REFUSES (exit 2).
 # Exit: 0 facts.json written · 2 usage · 3 head-sha mismatch · 4 test not found / 0 tests collected · 5 git failure.
 # Writes <out>/facts.json, diff.patch, targeted_{base,head}.log, unit_{base,head}.log, lint.log.
 set -uo pipefail
@@ -16,16 +22,19 @@ die() { echo "spark_gate: $2" >&2; exit "$1"; }
 
 [ $# -ge 5 ] || die 2 "usage: spark_gate.sh <repo-clone> <pr> <head-sha> <base-ref> <test-file>... [--runner cmd] [--work DIR] [--out DIR]"
 REPO="$1"; PR="$2"; HEAD_SHA="$3"; BASE_REF="$4"; shift 4
-TESTS=(); RUNNER="python3 -m pytest"; WORK=""; OUT=""
+TESTS=(); RUNNER="python3 -m pytest"; WORK=""; OUT=""; NODE_MODULES=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --runner) RUNNER="$2"; shift 2;;
     --work) WORK="$2"; shift 2;;
     --out) OUT="$2"; shift 2;;
+    --node-modules) NODE_MODULES="$2"; shift 2;;
     *) TESTS+=("$1"); shift;;
   esac
 done
 [ ${#TESTS[@]} -ge 1 ] || die 2 "at least one test file is required"
+NPY=0; for t in "${TESTS[@]}"; do case "$t" in *.py) ;; *) NPY=$((NPY+1));; esac; done
+[ $NPY -eq 0 ] || [ $NPY -eq ${#TESTS[@]} ] || die 2 "mixed .py and non-.py test files in one call; run the gate once per kind"
 case "$PR" in ''|*[!0-9]*) die 2 "PR number must be digits";; esac
 [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]] || die 2 "head-sha must be a full 40-char sha"
 [ -d "$REPO/.git" ] || die 2 "$REPO is not a git clone"
@@ -68,6 +77,20 @@ git -C "$REPO" diff --name-status "$MB" "$HEAD_SHA" > "$OUT/namestatus.txt"
 for t in "${TESTS[@]}"; do
   grep -q "[[:space:]]$t\$" "$OUT/namestatus.txt" || echo "spark_gate: WARNING named test file $t is not in the diff (unchanged by the PR)" >&2
 done
+# ---- 3b. kind: pytest vs everything else ------------------------------------------------------------------------------
+if [ $NPY -gt 0 ]; then
+  git -C "$REPO" worktree add -q --detach "$WORK/head" "$HEAD_SHA" || die 5 "worktree head"
+  NMARG=(); [ -z "$NODE_MODULES" ] || NMARG=(--node-modules "$NODE_MODULES")
+  python3 "$HERE/shadow_facts.py" "$WORK/head" "$REPO" "$PR" "$HEAD_SHA" "$BASE_REF" "$OUT" --tests "${TESTS[@]}" ${NMARG[@]+"${NMARG[@]}"} > "$OUT/shadow_facts.stdout" 2>&1; RC=$?
+  [ -f "$OUT/facts.json" ] || { tail -20 "$OUT/shadow_facts.stdout" >&2; die 5 "shadow_facts.py produced no facts.json (rc=$RC)"; }
+  python3 - "$OUT/facts.json" <<'PY2'
+import json, sys
+f = json.load(open(sys.argv[1]))
+print("spark_gate: head", f["head_sha"], f["head_mode"], "· merge-base", f["merge_base"], "· diff", f["diff_stat"])
+print("spark_gate: targeted on HEAD:", f["targeted_head_totals"]); print("spark_gate: targeted on BASE product code:", f["targeted_base_totals"])
+PY2
+  echo "spark_gate: non-pytest facts -> $OUT/facts.json ($(( $(date +%s) - T0 ))s)"; exit 0
+fi
 # package dir = nearest dir with pyproject.toml above the first test file
 PKG=""; d="$(dirname "${TESTS[0]}")"
 while [ "$d" != "." ] && [ "$d" != "/" ]; do

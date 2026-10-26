@@ -1,0 +1,76 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 43613,
+     "total_tokens": 44638,
+     "completion_tokens": 1025,
+     "prompt_tokens_details": {
+      "cached_tokens": 0
+     }
+    },
+    "seconds": 75.1,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 6000
+   }
+  ],
+  "prompt_tokens": 43613,
+  "completion_tokens": 1025,
+  "seconds": 75.1,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The fix replaces a pipeline with a here-string, but the ticket's own measurement shows the failure was not reproduced under load and the mechanism is unproven, so the change may not address the actual cause.",
+    "evidence": "Ticket: 'The failure was NOT reproduced under load... the mechanism is unproven.' and 'I tried to reproduce that on the real captured output: 3 runs of 3000 iterations... 0 of 9000 reported no-match. Not reproduced.'",
+    "test_or_reason": "The ticket explicitly states the cause is inferred, not measured; the fix changes the mechanism but no test proves the new form is immune to the observed failure.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The change to preflight_deps.test.sh replaces only two of four `printf | grep -q` pipelines in the verdict chain, leaving the same race-prone shape in the first two branches (lines 441-442), so the fix is incomplete for the suite that failed.",
+    "evidence": "preflight_deps.test.sh:441-442 `if   printf '%s' \"$out\" | grep -q 'step header .* disagrees with TOTAL_LEGS'; then verdict='HEADER-MISMATCH'` and `elif printf '%s' \"$out\" | grep -q 'could not measure what'; then verdict='DESLOT-REFUSED'`",
+    "test_or_reason": "The ticket reports preflight_deps.test.sh failed with 'printf: write error: Broken pipe' on lines 443 and 444; the diff only changes those two lines, leaving the identical shape on 441-442, which could still fail under the same conditions.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Major",
+    "claim": "The fix does not address the 150 occurrences of the same `printf | grep -q` shape in 29 files, so the defect class remains in the product scripts and other test suites, and the ticket's census shows the fix is not systemic.",
+    "evidence": "Ticket: 'git grep -n -E 'printf [^|]*\\| *grep -q'... 150 lines in 29 files (22 under __tests__, 7 product scripts)'",
+    "test_or_reason": "The PR only changes 3 files; the ticket's own census shows the same shape in 7 product scripts and 19 other test files, which remain vulnerable.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The here-string `<<<\"$out\"` may not be portable to all shells the suites claim to support, and the ticket does not state which shell is used in the preflight environment.",
+    "evidence": "check_shared_relink.test.sh:49 `if [ -n \"$want_out\" ] && ! grep -qF -- \"$want_out\" <<<\"$out\"; then` and ks1355_slot_blind_launchers.test.sh:68 `saw() { if grep -qF -- \"$1\" <<<\"$2\"; then echo yes; else echo no; fi; }`",
+    "test_or_reason": "Here-strings are a bash extension; if the suites are run under a POSIX sh (e.g., dash), the change would break. The ticket does not specify the shell, and the shebang is `#!/usr/bin/env bash`, but the preflight may invoke differently.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The change to preflight_deps.test.sh does not add a test that pins the new here-string form, so a regression back to the pipeline would not be caught.",
+    "evidence": "Diff for preflight_deps.test.sh: only the two `elif` lines changed; no new test case added in the diff.",
+    "test_or_reason": "The existing tests assert verdicts, not the mechanism; a future change back to `printf | grep -q` would still pass all tests, so the fix is not protected.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The ticket's 'Not measured' section explicitly states the failure was not reproduced under load)Skip, so the fix is based on an unproven hypothesis.",
+    "evidence": "Ticket: 'The failure was NOT reproduced under load: no deliberate stress was run... the mechanism is unproven.'",
+    "test_or_reason": "The fix changes the mechanism but no test or measurement proves the new form is immune to the observed failure.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

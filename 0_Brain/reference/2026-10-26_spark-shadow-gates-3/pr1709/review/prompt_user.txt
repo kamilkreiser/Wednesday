@@ -1,0 +1,2416 @@
+===== TICKET =====
+KS-1554 — services/security does not type-check src/__tests__, hiding 2 errors (ks952 files) — enrol it in the test-file type-check ratchet [In Progress]
+
+**BLUF:** `services/security`'s tsconfig excludes `src/__tests__`, and vitest does not type-check, so **nothing type-checks the security service's tests**. Over a program that includes them, develop `69878dc5` has **2 type errors** in two KS-952 test files. This is the same class as KS-1329 (packages/shared). The fix is the one KS-1351 item 3 applied to vc-issuer: enrol `services/security` in the test-file type-check ratchet (leg 16 and `check:test-types`), with a baseline.
+
+**Measured 2026-10-13**, during KS-1549's build, with a scratch tsconfig extending the service's own, with `exclude: []` and `types: ["node"]`. Positive control: a planted `TS2322` in an included scratch file is reported.
+
+- `src/__tests__/ks952-rate-limit-scope-route.test.ts:249` TS2339, "Property 'error' does not exist on type '{}'", at `expect((await res.json())?.error?.code)`;
+- `src/__tests__/ks952-rate-limit-scope.test.ts:313` TS1343, "The 'import.meta' meta-property is only allowed when '--module' is es2020/es2022/esnext…", at `dirname(fileURLToPath(import.meta.url))`. The same shape was hit in the gateway (vitest index: use `createRequire(__filename)` or `__dirname` instead).
+- Every other security test file is clean, including KS-1549's new integration test. Both files are byte-identical on develop and the KS-1549 branch, so these are develop's own errors.
+- [ ] Fix the two errors: type the JSON body, and use `__dirname` for the module's directory.
+- [ ] Enrol `services/security` in leg 16's default list and the root `check:test-types`, with a `tsconfig.test.json` and a baseline written by `--init`. If the two are fixed first, the baseline is EMPTY, as vc-issuer's is. KS-1551 (a missing baseline passes silently) applies to every enrolled service.
+- [ ] Leg 16's cells cover the new service, as KS-1351 item 3 did.
+
+**Related:** KS-1329 (the same class in packages/shared), KS-1351 item 3 (the vc-issuer enrolment that landed as `559947aa`), KS-1551.
+
+**Dedupe (2026-10-13):** title and description searched for ks952-rate-limit-scope, ks952, "services/security under", "security under the", test-type, TS1343, import.meta and enrol.
+
+* Hits: KS-968, KS-1546, KS-1551, KS-1520 (Done), KS-1523, KS-1487 (Done), KS-1396, KS-1319 (Done), KS-1329, KS-1438, KS-1381, KS-1347, KS-1337, plus unrelated PS-\* hits for "enrol".
+* None covers security's test files. KS-1329 is the sibling class.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/package.json b/Blockchain/Dev/package.json
+index 4e404b339..c0b5de1d9 100644
+--- a/Blockchain/Dev/package.json
++++ b/Blockchain/Dev/package.json
+@@ -41,7 +41,7 @@
+     "postinstall": "node scripts/fix-libsodium-symlink.js && npm run build --workspaces --if-present",
+     "check:openapi": "npm run generate-openapi -- --check && npm run check:spec-examples",
+     "check:spec-examples": "node scripts/spec-examples/check-spec-examples.mjs",
+-    "check:test-types": "node scripts/typecheck-tests/check.cjs services/auth && node scripts/typecheck-tests/check.cjs services/api-gateway && node scripts/typecheck-tests/check.cjs services/vc-issuer",
++    "check:test-types": "node scripts/typecheck-tests/check.cjs services/auth && node scripts/typecheck-tests/check.cjs services/api-gateway && node scripts/typecheck-tests/check.cjs services/vc-issuer && node scripts/typecheck-tests/check.cjs services/security && node scripts/typecheck-tests/check.cjs services/m365-integration",
+     "test:auth-integration": "cd services/auth && vitest run -c vitest.integration.config.ts",
+     "verify:spec-examples": "node scripts/spec-examples/verify-spec-examples.mjs",
+     "audit:locks": "node scripts/audit/audit-locks.mjs",
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh b/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+index 949ac27da..e3c9a4446 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+@@ -50,7 +50,7 @@ check "with no install no cell is reported FAIL" "0" \
+ 
+ # --- CELL 4 (CONTROL, tip AND after): the stub cells still run -------------------
+ check "CONTROL with no install the stub cells still run (the default-run stub cell reports ok)" "1" \
+-    "$(printf '%s\n' "$out" | grep -c '^ok   CONTROL the default run (no arguments) passes with all three checkers green')"
++    "$(printf '%s\n' "$out" | grep -c '^ok   CONTROL the default run (no arguments) passes with all five checkers green')"
+ 
+ # --- CELL 5 (CONTROL, tip AND after): the wiring cells still run -----------------
+ check "CONTROL with no install the leg-16 wiring cells still run" "1" \
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh b/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+index 5b39e397c..f46046054 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+@@ -64,7 +64,7 @@ out_r1="$(run_with r1)"
+ 
+ # --- CELL 1 (RED at the tip): X4 turns the default-run stub cell red -------------
+ check "X4 (an extra argument to the checker) fails the default-run stub cell" "1" \
+-    "$(count_fail "$out_x4" 'the default run (no arguments) passes with all three checkers green')"
++    "$(count_fail "$out_x4" 'the default run (no arguments) passes with all five checkers green')"
+ 
+ # --- CELL 2 (RED at the tip): R1text turns the rc-1 wording cell red -------------
+ check "R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell" "1" \
+@@ -72,7 +72,7 @@ check "R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell" "1"
+ 
+ # --- CELL 3 (CONTROL, tip AND after): the unmutated leg fails neither cell -------
+ check "CONTROL the unmutated leg fails neither of those two stub cells" "0 0" \
+-    "$(count_fail "$out_real" 'the default run (no arguments) passes with all three checkers green') $(count_fail "$out_real" 'the rc-1 wording names a NEW test-file type error')"
++    "$(count_fail "$out_real" 'the default run (no arguments) passes with all five checkers green') $(count_fail "$out_real" 'the rc-1 wording names a NEW test-file type error')"
+ 
+ echo ""
+ echo "ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: ${PASS} passed, ${FAIL} failed"
+diff --git a/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh b/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+index f8fae8df3..e40fb1176 100644
+--- a/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+@@ -173,13 +173,13 @@ leg
+ expect "the committed tree passes the leg with no arguments (rc 0)" "0" "$LEG_RC"
+ case "$LEG_OUT" in
+   *'SKIP (advisory)'*) printf 'note no workspace install here: the default-service run skipped, so the REAL checker lines are not asserted (the stub cells below assert the default list without an install)\n' ;;
+-  *) expect "🔴 ...and the default list is ALL THREE gated services, auth, the api-gateway and vc-issuer (KS-1351), each with its own checker line" "yes yes yes" \
+-       "$(has "$LEG_OUT" 'typecheck-tests: auth (') $(has "$LEG_OUT" 'typecheck-tests: api-gateway (') $(has "$LEG_OUT" 'typecheck-tests: vc-issuer (')"
+-     expect "🔴 ...and the checker ran exactly three times, once per gated service (a fourth would be an ungated change, one fewer a dropped gate)" "3" \
++  *) expect "🔴 ...and the default list is ALL FIVE gated services, auth, the api-gateway, vc-issuer (KS-1351), security and m365-integration (KS-1554), each with its own checker line" "yes yes yes yes yes" \
++       "$(has "$LEG_OUT" 'typecheck-tests: auth (') $(has "$LEG_OUT" 'typecheck-tests: api-gateway (') $(has "$LEG_OUT" 'typecheck-tests: vc-issuer (') $(has "$LEG_OUT" 'typecheck-tests: security (') $(has "$LEG_OUT" 'typecheck-tests: m365-integration (')"
++     expect "🔴 ...and the checker ran exactly five times, once per gated service (a sixth would be an ungated change, one fewer a dropped gate)" "5" \
+        "$(printf '%s\n' "$LEG_OUT" | grep -c '^typecheck-tests: ')"
+-     expect "...and all three read 0 new and 0 stale against their baselines" "3" \
++     expect "...and all five read 0 new and 0 stale against their baselines" "5" \
+        "$(printf '%s\n' "$LEG_OUT" | grep -c '0 new; 0 stale baseline entries')"
+-     expect "🔴 ...and the verdict counts all three services" "yes" "$(has "$LEG_OUT" 'OK — 3 service(s)')" ;;
++     expect "🔴 ...and the verdict counts all five services" "yes" "$(has "$LEG_OUT" 'OK — 5 service(s)')" ;;
+ esac
+ fi
+ 
+@@ -191,7 +191,7 @@ fi
+ # service it was asked about and exits with the code the fixture gives it. They pin the leg's OWN logic - which services the
+ # default run gates, and that a non-zero code from ANY of them, the api-gateway by name, fails the run - and they need no
+ # compiler. The stub is not the checker; the cells above prove the checker.
+-mkstub() {  # mkstub <dir> <auth rc> <gateway rc> [vc-issuer rc, default 0]
++mkstub() {  # mkstub <dir> <auth rc> <gateway rc> [vc-issuer rc, default 0] [security rc, default 0] [m365-integration rc, default 0]
+   local d="$1"
+   rm -rf "$d"; mkdir -p "$d/scripts/preflight" "$d/scripts/typecheck-tests" "$d/rc"
+   cp "$LEG" "$d/scripts/preflight/test-types-ratchet.sh"
+@@ -209,18 +209,20 @@ JS
+   printf '%s' "$2" > "$d/rc/services_auth"
+   printf '%s' "$3" > "$d/rc/services_api-gateway"
+   printf '%s' "${4:-0}" > "$d/rc/services_vc-issuer"
++  printf '%s' "${5:-0}" > "$d/rc/services_security"
++  printf '%s' "${6:-0}" > "$d/rc/services_m365-integration"
+ }
+-stub() {  # stub <auth rc> <gateway rc> [vc-issuer rc]  ->  STUB_RC STUB_OUT STUB_CALLS. The default run: NO arguments, no baseline file anywhere.
++stub() {  # stub <auth rc> <gateway rc> [vc-issuer rc] [security rc] [m365-integration rc]  ->  STUB_RC STUB_OUT STUB_CALLS. The default run: NO arguments, no baseline file anywhere.
+   local d="$tmp/ks1520-root"
+-  mkstub "$d" "$1" "$2" "${3:-0}"
++  mkstub "$d" "$1" "$2" "${3:-0}" "${4:-0}" "${5:-0}"
+   STUB_OUT="$(cd "$d" && bash scripts/preflight/test-types-ratchet.sh 2>&1)"; STUB_RC=$?
+   STUB_CALLS="$([ -f "$d/calls.log" ] && tr '\n' ' ' < "$d/calls.log" || echo none)"
+ }
+ 
+ stub 0 0
+-expect "CONTROL the default run (no arguments) passes with all three checkers green, and the stub was LIVE: asked about exactly auth, the api-gateway, then vc-issuer" \
+-  "0|services/auth services/api-gateway services/vc-issuer |yes" \
+-  "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'OK — 3 service(s)')"
++expect "CONTROL the default run (no arguments) passes with all five checkers green, and the stub was LIVE: asked about exactly auth, the api-gateway, vc-issuer, security, then m365-integration" \
++  "0|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration |yes" \
++  "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'OK — 5 service(s)')"
+ stub 0 1
+ expect "🔴 the api-gateway's checker exiting 1 FAILS the default run, named (the fixture holds no baseline file, so a gate that needs one reads green)" \
+   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
+@@ -233,17 +235,29 @@ stub 0 3
+ expect "🔴 ...and so does an exit the leg does not know (3), which it names as unexpected" \
+   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'an unexpected exit')"
+ stub 1 0
+-expect "🔴 auth failing fails the default run AND the api-gateway and vc-issuer are still checked after it (no early exit)" \
+-  "1|services/auth services/api-gateway services/vc-issuer |yes" "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'FAIL — services/auth')"
++expect "🔴 auth failing fails the default run AND the api-gateway, vc-issuer, security and m365-integration are still checked after it (no early exit)" \
++  "1|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration |yes" "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'FAIL — services/auth')"
+ stub 1 1
+ expect "🔴 both failing: the run fails and the output names BOTH services" "1|yes|yes" \
+   "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/auth')|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
+ stub 0 0 1
+ expect "🔴 KS-1351: vc-issuer's checker exiting 1 FAILS the default run, named — the third service is a real gate, not a passenger" \
+-  "1|yes|services/auth services/api-gateway services/vc-issuer " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$STUB_CALLS"
++  "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$STUB_CALLS"
+ stub 0 0 2
+ expect "🔴 KS-1351: ...and vc-issuer exiting 2 (could not run) fails it too, and says so" \
+   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$(has "$STUB_OUT" 'the check could not run')"
++stub 0 0 0 1
++expect "🔴 KS-1554: security's checker exiting 1 FAILS the default run, named — the fourth service is a real gate, not a passenger" \
++  "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/security')|$STUB_CALLS"
++stub 0 0 0 2
++expect "🔴 KS-1554: ...and security exiting 2 (could not run) fails it too, and says so" \
++  "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/security')|$(has "$STUB_OUT" 'the check could not run')"
++stub 0 0 0 0 1
++expect "🔴 KS-1554: m365-integration's checker exiting 1 FAILS the default run, named — the fifth service is a real gate, not a passenger" \
++  "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/m365-integration')|$STUB_CALLS"
++stub 0 0 0 0 2
++expect "🔴 KS-1554: ...and m365-integration exiting 2 (could not run) fails it too, and says so" \
++  "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/m365-integration')|$(has "$STUB_OUT" 'the check could not run')"
+ stub 0 1
+ expect "🔴 the closing advice does not tell the pusher to fix 'the test file' (the file named can be a PRODUCT file the tests import)" \
+   "no|yes" "$(has "$STUB_OUT" 'in the test file')|$(has "$STUB_OUT" 'a product file')"
+@@ -256,7 +270,7 @@ varnames_of() {  # varnames_of <file>  ->  sorted, unique names of every expansi
+ }
+ expect "🔴 the leg expands only its own five locals (a service list read from the environment would add a name: the KS-1261 class)" \
+   "DEV_ROOT failed rc svc why " "$(varnames_of "$LEG")"
+-{ cat "$LEG"; printf '%s\n' 'planted_list=${TYPECHECK_SERVICES:-services/auth services/api-gateway services/vc-issuer}'; } > "$tmp/ks1520-planted.sh"
++{ cat "$LEG"; printf '%s\n' 'planted_list=${TYPECHECK_SERVICES:-services/auth services/api-gateway services/vc-issuer services/security services/m365-integration}'; } > "$tmp/ks1520-planted.sh"
+ expect "CONTROL the plant changed the file (so the control below is not comparing a file with itself)" "yes" \
+   "$(cmp -s "$LEG" "$tmp/ks1520-planted.sh" && echo no || echo yes)"
+ expect "CONTROL the same extraction SEES a planted environment read (so the cell above could fail)" "yes" \
+diff --git a/Blockchain/Dev/scripts/preflight/test-types-ratchet.sh b/Blockchain/Dev/scripts/preflight/test-types-ratchet.sh
+index b945ac466..188e78f3d 100644
+--- a/Blockchain/Dev/scripts/preflight/test-types-ratchet.sh
++++ b/Blockchain/Dev/scripts/preflight/test-types-ratchet.sh
+@@ -35,7 +35,7 @@
+ #
+ # bash 3.2 compatible on purpose: macOS ships 3.2 (KS-676).
+ #
+-# Usage:  bash scripts/preflight/test-types-ratchet.sh [<service-dir> ...]      (default: services/auth services/api-gateway services/vc-issuer)
++# Usage:  bash scripts/preflight/test-types-ratchet.sh [<service-dir> ...]      (default: services/auth services/api-gateway services/vc-issuer services/security services/m365-integration)
+ # =============================================================================
+ 
+ set -uo pipefail
+@@ -44,7 +44,7 @@ DEV_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ cd "$DEV_ROOT" || { echo "FAIL — cannot enter $DEV_ROOT"; exit 1; }
+ 
+ if [ "$#" -eq 0 ]; then
+-    set -- services/auth services/api-gateway services/vc-issuer
++    set -- services/auth services/api-gateway services/vc-issuer services/security services/m365-integration
+ fi
+ 
+ # The same precondition leg 1 establishes (and the same variable it honours, so a fixture can aim it).
+diff --git a/Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt b/Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt
+new file mode 100644
+index 000000000..77de8848e
+--- /dev/null
++++ b/Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt
+@@ -0,0 +1,5 @@
++# KS-1000 ratchet: type errors already present in this service's test files, keyed by file + code + a fingerprint of the message.
++# It can only SHRINK. A new error fails `node scripts/typecheck-tests/check.cjs <service>`; an entry that no longer
++# reproduces fails it too; so does a swap (one error fixed, another of the same code added). Lower it with `--update` (which
++# refuses to admit anything new). Never edit a count up. `examined-test-files` is a floor: fewer examined test files fails.
++examined-test-files 26
+diff --git a/Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt b/Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt
+new file mode 100644
+index 000000000..2d01766bc
+--- /dev/null
++++ b/Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt
+@@ -0,0 +1,5 @@
++# KS-1000 ratchet: type errors already present in this service's test files, keyed by file + code + a fingerprint of the message.
++# It can only SHRINK. A new error fails `node scripts/typecheck-tests/check.cjs <service>`; an entry that no longer
++# reproduces fails it too; so does a swap (one error fixed, another of the same code added). Lower it with `--update` (which
++# refuses to admit anything new). Never edit a count up. `examined-test-files` is a floor: fewer examined test files fails.
++examined-test-files 40
+diff --git a/Blockchain/Dev/services/m365-integration/tsconfig.test.json b/Blockchain/Dev/services/m365-integration/tsconfig.test.json
+new file mode 100644
+index 000000000..10ef9f490
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/tsconfig.test.json
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "noEmit": true
++  },
++  "include": ["src/**/*"],
++  "exclude": ["node_modules", "dist"]
++}
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts
+index 2c30e98fe..38a0be065 100644
+--- a/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts
+@@ -246,7 +246,7 @@ describe('KS-952 round 2 — F5: four guard clauses the 149-cell suite could not
+       body: JSON.stringify({ key: 'orphan' }),
+     });
+     expect(res.status).toBe(403);
+-    expect((await res.json())?.error?.code).toBe('FORBIDDEN');
++    expect(((await res.json()) as { error?: { code?: string } })?.error?.code).toBe('FORBIDDEN');
+   });
+ 
+   it('C1 CONTROL: the same claimless operator naming a scope EXPLICITLY still succeeds', async () => {
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts
+index a4b482989..b98d52a03 100644
+--- a/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts
+@@ -308,10 +308,8 @@ describe('KS-970 item 6 — the published contract states the refusals the runti
+     // A zod `.refine()` never reaches the generated schema, so a constraint that
+     // is only in code is not in the contract. Same class as round 1's F1.
+     const { readFile } = await import('node:fs/promises');
+-    const { fileURLToPath } = await import('node:url');
+-    const { dirname, resolve } = await import('node:path');
+-    const here = dirname(fileURLToPath(import.meta.url));
+-    const yaml = await readFile(resolve(here, '../../../../docs/openapi/secuura-api.yaml'), 'utf8');
++    const { resolve } = await import('node:path');
++    const yaml = await readFile(resolve(__dirname, '../../../../docs/openapi/secuura-api.yaml'), 'utf8');
+     const start = yaml.indexOf('    RateLimitResetRequest:');
+     expect(start).toBeGreaterThan(-1);
+     const block = yaml.slice(start, yaml.indexOf('\n    SecuritySuccess:', start));
+diff --git a/Blockchain/Dev/services/security/tsconfig.test.json b/Blockchain/Dev/services/security/tsconfig.test.json
+new file mode 100644
+index 000000000..10ef9f490
+--- /dev/null
++++ b/Blockchain/Dev/services/security/tsconfig.test.json
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "noEmit": true
++  },
++  "include": ["src/**/*"],
++  "exclude": ["node_modules", "dist"]
++}
+diff --git a/CLAUDE.md b/CLAUDE.md
+index d155fefea..1f0a61427 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -395,12 +395,12 @@ The **test-file type-check ratchet** (KS-1000 / KS-1487, leg 16) runs at push ti
+ `tsconfig.json` excludes `src/__tests__`, so `tsc` over the service had never examined a test file, and
+ `scripts/typecheck-tests/check.cjs` checks them against a baseline that can only shrink. A push that adds a
+ test-file type error is refused; `npm run check:test-types` runs it alone, and `--update` only ever LOWERS the
+-baseline (it refuses to admit a new error). Leg 16 gates `services/auth`, `services/api-gateway` and `services/vc-issuer` (the script's default list; vc-issuer
++baseline (it refuses to admit a new error). Leg 16 gates `services/auth`, `services/api-gateway`, `services/vc-issuer`, `services/security` and `services/m365-integration` (the script's default list; vc-issuer
+ added by KS-1351 item 3 with an EMPTY baseline, so any type error in its tests is new), and
+-`npm run check:test-types` runs the same three (KS-1090, KS-1351), each against its own baseline. A baseline entry is keyed by file + code +
++`npm run check:test-types` runs the same five (KS-1090, KS-1351, KS-1554), each against its own baseline. A baseline entry is keyed by file + code +
+ a fingerprint of the message, so fixing one error and adding another of the same code is a swap and fails (KS-1489); an old
+ count-only baseline is converted with `--rekey`, which can lower it and refuses to admit more. The baseline also records
+-`examined-test-files <N>` as a floor: fewer examined test files fails, so **a PR that deletes an auth, api-gateway or vc-issuer test file
++`examined-test-files <N>` as a floor: fewer examined test files fails, so **a PR that deletes an auth, api-gateway, vc-issuer, security or m365-integration test file
+ must run `node scripts/typecheck-tests/check.cjs <service> --update`** and commit the lowered floor; a `@ts-nocheck` in a test fails too.
+ **What it does NOT catch:** `// @ts-ignore` and `// @ts-expect-error` are not policed (on a new error in a file the baseline does not list they
+ pass; on a baselined error they make the entry stale, which fails), and the floor only protects down to its last recorded value. The
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/package.json
+1: {
+2:   "name": "secuura",
+3:   "version": "0.1.0",
+4:   "description": "Secuura - Document Authenticity Platform on Cardano Blockchain",
+5:   "private": true,
+6:   "workspaces": [
+7:     "packages/*",
+8:     "services/*",
+9:     "frontend/*"
+10:   ],
+11:   "scripts": {
+12:     "dev": "docker-compose up -d && concurrently \"npm run dev:services\" \"npm run dev:frontend\"",
+13:     "dev:services": "concurrently \"npm run dev -w services/api-gateway\" \"npm run dev -w services/originate\" \"npm run dev -w services/auth\" \"npm run dev -w services/wallet-connector\"",
+14:     "dev:frontend": "npm run dev -w frontend/issuer",
+15:     "dev:infra": "docker-compose up -d postgres redis cardano-devnet",
+16:     "build": "npm run build --workspaces",
+17:     "test": "npm run test --workspaces",
+18:     "lint": "npm run lint --workspaces --if-present",
+19:     "docker:build": "docker-compose build",
+20:     "docker:up": "docker-compose up -d",
+21:     "docker:down": "docker-compose down",
+22:     "docker:logs": "docker-compose logs -f",
+23:     "docker:clean": "docker-compose down -v --rmi local",
+24:     "docker:ps": "docker-compose ps --format 'table {{.Name}}\t{{.Status}}'",
+25:     "prod:build": "docker compose -f docker-compose.yml -f docker-compose.production.yml build",
+26:     "prod:up": "docker compose -f docker-compose.yml -f docker-compose.production.yml up -d",
+27:     "prod:down": "docker compose -f docker-compose.yml -f docker-compose.production.yml down",
+28:     "prod:logs": "docker compose -f docker-compose.yml -f docker-compose.production.yml logs -f",
+29:     "prod:ps": "docker compose -f docker-compose.yml -f docker-compose.production.yml ps --format 'table {{.Name}}\t{{.Status}}'",
+30:     "prod:backup": "docker compose -f docker-compose.yml -f docker-compose.production.yml exec db-backup /backup.sh",
+31:     "prod:restore": "docker compose -f docker-compose.yml -f docker-compose.production.yml exec db-backup /restore.sh",
+32:     "migrate": "node-pg-migrate up --migrations-dir migrations --migration-file-language sql",
+33:     "migrate:down": "node-pg-migrate down --migrations-dir migrations --migration-file-language sql",
+34:     "migrate:create": "node-pg-migrate create --migrations-dir migrations --migration-file-language sql",
+35:     "db:migrate": "npm run migrate -w services/originate",
+36:     "db:seed": "npm run seed -w services/originate",
+37:     "smoke-test": "./scripts/smoke-test.sh",
+38:     "smoke-test:quick": "./scripts/smoke-test.sh --quick",
+39:     "load-test": "k6 run tests/load/k6-load-test.js",
+40:     "load-test:azure": "k6 run -e BASE_URL=https://secuura02-demo-api.kindtree-935b2ded.southeastasia.azurecontainerapps.io tests/load/k6-load-test.js",
+41:     "postinstall": "node scripts/fix-libsodium-symlink.js && npm run build --workspaces --if-present",
+42:     "check:openapi": "npm run generate-openapi -- --check && npm run check:spec-examples",
+43:     "check:spec-examples": "node scripts/spec-examples/check-spec-examples.mjs",
+44:     "check:test-types": "node scripts/typecheck-tests/check.cjs services/auth && node scripts/typecheck-tests/check.cjs services/api-gateway && node scripts/typecheck-tests/check.cjs services/vc-issuer && node scripts/typecheck-tests/check.cjs services/security && node scripts/typecheck-tests/check.cjs services/m365-integration",
+45:     "test:auth-integration": "cd services/auth && vitest run -c vitest.integration.config.ts",
+46:     "verify:spec-examples": "node scripts/spec-examples/verify-spec-examples.mjs",
+47:     "audit:locks": "node scripts/audit/audit-locks.mjs",
+48:     "audit:contract": "node --test scripts/audit/baseline-contract.test.mjs scripts/audit/lock-discovery.test.mjs scripts/audit/gate-exit-codes.test.mjs",
+49:     "audit:gate": "node scripts/audit/audit-gate.mjs",
+50:     "generate-openapi": "npm run build --workspace=packages/shared && tsx scripts/generate-openapi.ts",
+51:     "check:connectors": "node tests/connectors/check-coverage.mjs",
+52:     "test:connectors": "jest --config tests/connectors/jest.config.cjs",
+53:     "test:migrations": "bash ./migrations/__tests__/ks667-044-scenarios.sh",
+54:     "test:contract": "python3 ../../systemTest/schemathesis/scripts/run.py pr",
+55:     "verify:slot-isolation": "bash scripts/verify-slot-credential-isolation.sh",
+56:     "test:shell": "bash scripts/run-shell-suites.sh",
+57:     "e2e:install": "npm --prefix tests/e2e ci && npm --prefix tests/e2e run playwright:install",
+58:     "e2e:check": "npm --prefix tests/e2e run check:ready",
+59:     "e2e": "npm --prefix tests/e2e run test --"
+60:   },
+61:   "devDependencies": {
+62:     "@axe-core/playwright": "^4.11.3",
+63:     "@playwright/test": "^1.61.1",
+64:     "@types/nodemailer": "^8.0.1",
+65:     "concurrently": "^8.2.2",
+66:     "eslint": "^10.7.0",
+67:     "@eslint/js": "^10.0.1",
+68:     "globals": "^17.7.0",
+69:     "typescript-eslint": "^8.64.0",
+70:     "node-pg-migrate": "^8.0.4",
+71:     "prettier": "^3.2.4",
+72:     "typescript": "^5.3.3",
+73:     "tsx": "^4.23.1",
+74:     "yaml": "^2.9.0"
+75:   },
+76:   "engines": {
+77:     "node": ">=18.0.0",
+78:     "npm": ">=9.0.0"
+79:   },
+80:   "// overrides": "Audit 2.4 phase 2: pin known-vulnerable transitive deps to safe versions. path-to-regexp ReDoS GHSA-9wv6-86v2-598j \u2014 express 4.x uses 0.1.x so we pin to the patched ^0.1.13. node-forge basicConstraints bypass GHSA-2qmh-3rxg-87j8 \u2014 pin to 1.3.1+ (current 1.4.0). vite path-traversal in dev-server is dev-only (vite never runs in prod after build) and forcing v7 would break frontends still on v5 \u2014 left unpinned, documented as dev-only risk. undici GHSA (decompression/request-smuggling, fixed in 6.24+) reaches the prod tree only via the issuer-frontend's Cardano-SDK chain (@meshsdk/core \u2192 @utxorpc/sdk \u2192 @connectrpc/connect-node@1.4.0, which pins undici ^5.28.3). undici is a Node HTTP library: it is tree-shaken out of the Vite browser bundle and used by NO backend service, so it is never shipped to or executed in any deployed runtime \u2014 accepted-risk (KS-185). A scoped override dedupes to the hoisted undici@5 (no effect); a global pin to 6.x collaterally downgrades dev-only jsdom (7\u21926) and bumps testcontainers (5\u21926), risking the dev test tooling. Real fix lands when @utxorpc/sdk / @meshsdk adopt @connectrpc/connect-node@2.x (which drops the undici dependency) \u2014 tracked in KS-185.",
+81:   "// overrides KS-493": "postcss ^8.5.24 (GHSA-6g55-p6wh-862q / GHSA-r28c-9q8g-f849, path-traversal) \u2014 the residual 8.4.31 was nested under next's build tooling and its declared range pinned it below the fix; postcss 8.x is API-stable so a global pin is safe and build-time-only. valibot (GHSA-5qjj) is NOT overridden \u2014 @prisma/dev bundles valibot 1.2.0 (override is inert) and it is reached only via that dev-server tooling, so it is accepted as a dev-only baseline entry instead.",
+82:   "overrides": {
+83:     "fast-uri": "^3.1.7",
+84:     "node-forge": "^1.4.0",
+85:     "path-to-regexp": "0.1.13",
+86:     "express": {
+87:       "path-to-regexp": "0.1.13"
+88:     },
+89:     "@cardano-sdk/crypto": "^0.4.5",
+90:     "postcss": "^8.5.24",
+91:     "mysql2": "3.23.1",
+92:     "morgan": "^1.12.1",
+93:     "ip-address": "^10.5.1",
+94:     "undici": "^7.29.1",
+95:     "jsdom": {
+96:       "undici": "^7.29.1"
+97:     },
+98:     "@prisma/dev": {
+99:       "@hono/node-server": "^1.19.15"
+100:     }
+101:   },
+102:   "repository": {
+103:     "type": "git",
+104:     "url": "https://github.com/kksecura/Blockchain_SSV.git"
+105:   },
+106:   "keywords": [
+107:     "blockchain",
+108:     "cardano",
+109:     "document-authenticity",
+110:     "verifiable-credentials",
+111:     "did",
+112:     "self-sovereign-data"
+113:   ],
+114:   "author": "Secuura",
+115:   "license": "UNLICENSED",
+116:   "dependencies": {
+117:     "@asteasolutions/zod-to-openapi": "^7.3.4",
+118:     "@lucid-evolution/lucid": "^0.4.30",
+119:     "nodemailer": "^10.0.12",
+120:     "zod": "^3.22.4"
+121:   }
+122: }
+
+### FILE AT HEAD: Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS for preflight_test_types_ratchet_leg.test.sh - KS-1513: in a tree with no
+4: # workspace install that suite must SKIP its real-checker cells, not go red.
+5: # =============================================================================
+6: # The suite runs the REAL checker (check.cjs) over fixture services in 9 cells,
+7: # which needs the workspace install (typescript). With no install those 9 cells
+8: # fail for an ENVIRONMENT reason that preflight leg 1 already refuses. The leg
+9: # script prints `SKIP (advisory)` and exits 0 in that tree; the suite must mirror
+10: # it for those cells only: the wiring cells and the stub cells (KS-1520) need no
+11: # install and must still run.
+12: #
+13: # This suite aims the other suite at "no install" with DEPS_PRESENT_ROOT, the
+14: # variable scripts/preflight/deps-present.sh honours, pointed at a directory that
+15: # does not exist, then reads its output. Nothing in the repository is changed.
+16: #
+17: # Usage: bash Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+18: # =============================================================================
+19: 
+20: set -uo pipefail
+21: 
+22: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+23: SUITE="${RATCHET_LEG_SUITE_SH:-$HERE/preflight_test_types_ratchet_leg.test.sh}"
+24: PASS=0; FAIL=0
+25: 
+26: [[ -f "$SUITE" ]] || { echo "FATAL: suite not found at $SUITE" >&2; exit 2; }
+27: 
+28: tmp="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1513.XXXXXX")"
+29: trap 'rm -rf "$tmp"' EXIT INT TERM
+30: 
+31: check() {
+32:     local desc="$1" want="$2" got="$3"
+33:     if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
+34:     else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
+35: }
+36: 
+37: # Run the suite with no workspace install reachable.
+38: out="$(DEPS_PRESENT_ROOT="$tmp/no-install-here" bash "$SUITE" 2>&1 < /dev/null)"; rc=$?
+39: 
+40: # --- CELL 1 (RED at the tip): it exits 0 -----------------------------------------
+41: check "with no install the suite exits 0" "0" "$rc"
+42: 
+43: # --- CELL 2 (RED at the tip): it says it skipped the real-checker cells ----------
+44: check "with no install the suite prints one SKIP line naming the missing install" "1" \
+45:     "$(printf '%s\n' "$out" | grep -c '^SKIP .*workspace install absent')"
+46: 
+47: # --- CELL 3 (RED at the tip): no cell is reported failed -------------------------
+48: check "with no install no cell is reported FAIL" "0" \
+49:     "$(printf '%s\n' "$out" | grep -c '^FAIL ')"
+50: 
+51: # --- CELL 4 (CONTROL, tip AND after): the stub cells still run -------------------
+52: check "CONTROL with no install the stub cells still run (the default-run stub cell reports ok)" "1" \
+53:     "$(printf '%s\n' "$out" | grep -c '^ok   CONTROL the default run (no arguments) passes with all five checkers green')"
+54: 
+55: # --- CELL 5 (CONTROL, tip AND after): the wiring cells still run -----------------
+56: check "CONTROL with no install the leg-16 wiring cells still run" "1" \
+57:     "$(printf '%s\n' "$out" | grep -c 'a failing leg-16 script FAILS the run')"
+58: 
+59: echo ""
+60: echo "ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install: ${PASS} passed, ${FAIL} failed"
+61: (( FAIL == 0 ))
+
+### FILE AT HEAD: Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS for preflight_test_types_ratchet_leg.test.sh - KS-1527: its stub cells
+4: # must catch a mutated leg with no compiler.
+5: # =============================================================================
+6: # The PR #1513 gate built two mutants of scripts/preflight/test-types-ratchet.sh
+7: # that survived every stub cell (only the real-checker cells, which need a
+8: # workspace install, caught the second):
+9: #   X4      `check.cjs "$svc"` becomes `check.cjs "$svc" --update` (which would
+10: #           LOWER the baseline on every push): the stub logged only the service,
+11: #           so an extra argument was invisible.
+12: #   R1text  the rc-1 `why` text replaced by "something": no cell pinned it.
+13: # This suite aims the other suite at each mutant (its LEG_SH variable) and at no
+14: # workspace install (DEPS_PRESENT_ROOT at a directory that does not exist, so the
+15: # real-checker cells cannot be what fails), then asks whether the NAMED stub cell
+16: # is among the FAIL lines. Nothing in the repository is changed.
+17: #
+18: # Usage: bash Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+19: # =============================================================================
+20: 
+21: set -uo pipefail
+22: 
+23: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+24: SUITE="${RATCHET_LEG_SUITE_SH:-$HERE/preflight_test_types_ratchet_leg.test.sh}"
+25: LEG_REAL="${RATCHET_LEG_REAL_SH:-$HERE/../preflight/test-types-ratchet.sh}"
+26: PASS=0; FAIL=0
+27: 
+28: [[ -f "$SUITE" ]] || { echo "FATAL: suite not found at $SUITE" >&2; exit 2; }
+29: [[ -f "$LEG_REAL" ]] || { echo "FATAL: leg not found at $LEG_REAL" >&2; exit 2; }
+30: 
+31: tmp="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1527.XXXXXX")"
+32: trap 'rm -rf "$tmp"' EXIT INT TERM
+33: 
+34: check() {
+35:     local desc="$1" want="$2" got="$3"
+36:     if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
+37:     else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
+38: }
+39: 
+40: # mutant <name> <sed expression> -> a mutated copy of the leg at $tmp/<name>/scripts/preflight/test-types-ratchet.sh
+41: mutant() {
+42:     mkdir -p "$tmp/$1/scripts/preflight"
+43:     sed "$2" "$LEG_REAL" > "$tmp/$1/scripts/preflight/test-types-ratchet.sh"
+44: }
+45: mutant real 's/^$//'
+46: mutant x4 's#check.cjs "$svc"#check.cjs "$svc" --update#'
+47: mutant r1 's#1) why="a NEW test-file type error[^"]*"#1) why="something"#'
+48: 
+49: # run_with <name> -> the suite's output, with LEG_SH aimed at that leg copy and no install reachable
+50: run_with() {
+51:     LEG_SH="$tmp/$1/scripts/preflight/test-types-ratchet.sh" DEPS_PRESENT_ROOT="$tmp/no-install-here" \
+52:         bash "$SUITE" 2>&1 < /dev/null
+53: }
+54: # count_fail <output> <pattern> -> how many FAIL lines match the pattern
+55: count_fail() { printf '%s\n' "$1" | grep -c "^FAIL .*$2"; }
+56: 
+57: # --- CELL 0 (CONTROL): the mutations really changed the leg ----------------------
+58: check "CONTROL both mutants differ from the real leg" "no no" \
+59:     "$(cmp -s "$tmp/x4/scripts/preflight/test-types-ratchet.sh" "$LEG_REAL" && echo yes || echo no) $(cmp -s "$tmp/r1/scripts/preflight/test-types-ratchet.sh" "$LEG_REAL" && echo yes || echo no)"
+60: 
+61: out_real="$(run_with real)"
+62: out_x4="$(run_with x4)"
+63: out_r1="$(run_with r1)"
+64: 
+65: # --- CELL 1 (RED at the tip): X4 turns the default-run stub cell red -------------
+66: check "X4 (an extra argument to the checker) fails the default-run stub cell" "1" \
+67:     "$(count_fail "$out_x4" 'the default run (no arguments) passes with all five checkers green')"
+68: 
+69: # --- CELL 2 (RED at the tip): R1text turns the rc-1 wording cell red -------------
+70: check "R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell" "1" \
+71:     "$(count_fail "$out_r1" 'the rc-1 wording names a NEW test-file type error')"
+72: 
+73: # --- CELL 3 (CONTROL, tip AND after): the unmutated leg fails neither cell -------
+74: check "CONTROL the unmutated leg fails neither of those two stub cells" "0 0" \
+75:     "$(count_fail "$out_real" 'the default run (no arguments) passes with all five checkers green') $(count_fail "$out_real" 'the rc-1 wording names a NEW test-file type error')"
+76: 
+77: echo ""
+78: echo "ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: ${PASS} passed, ${FAIL} failed"
+79: (( FAIL == 0 ))
+
+### FILE AT HEAD: Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS for preflight leg 16: the test-file type-check ratchet runs at push time (KS-1487)
+4: # =============================================================================
+5: # KS-1000 added `node scripts/typecheck-tests/check.cjs services/auth`, a type-check of the auth
+6: # test files against a baseline that can only shrink. Nothing in the pre-push preflight ran it, so a
+7: # push that added a test-file type error was accepted: the ratchet ran only inside the auth vitest
+8: # suite, by convention. A ratchet nothing runs at the gate is decoration. Leg 16 runs it.
+9: #
+10: # Two things are proved here, and neither is a grep of preflight.sh:
+11: #
+12: #   WIRING   the REAL step-16 block of preflight.sh is EXECUTED under the REAL helpers (step(),
+13: #            run_delegated(), _leg_concluded()) with `bash` stubbed. A leg whose script fails must be
+14: #            NAMED as a failed leg; a script that skips must be counted as skipped, not as run; a
+15: #            comment can satisfy neither. The step headers are parsed too: a 16th leg with a stale
+16: #            denominator would abort every seat's push.
+17: #   BEHAVIOUR the real script runs the REAL checker over throwaway fixture services: a planted type
+18: #            error must fail it, a clean service must pass it (the control), and a service that
+19: #            examines no test file must fail it rather than read as clean (KS-676's shape).
+20: #
+21: # The script takes its services as arguments and reads no ambient variable, so nothing a caller
+22: # exported can quietly point the gate at a clean directory (the KS-1261 class).
+23: #
+24: # Usage: bash Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+25: # =============================================================================
+26: 
+27: set -uo pipefail
+28: 
+29: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+30: DEV="$(cd "$HERE/../.." && pwd)"
+31: PREFLIGHT="${PREFLIGHT_SH:-$HERE/../preflight/preflight.sh}"
+32: LEG="${LEG_SH:-$HERE/../preflight/test-types-ratchet.sh}"
+33: PASS=0
+34: FAIL=0
+35: 
+36: expect() {
+37:   local desc="$1" want="$2" got="$3"
+38:   if [[ "$got" == "$want" ]]; then
+39:     PASS=$((PASS + 1)); printf 'ok   %s\n' "$desc"
+40:   else
+41:     FAIL=$((FAIL + 1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"
+42:   fi
+43: }
+44: has() {  # has <haystack> <needle> -> yes|no   (fixed string, no regex)
+45:   case "$1" in *"$2"*) echo yes ;; *) echo no ;; esac
+46: }
+47: 
+48: tmp="$(mktemp -d "${TMPDIR:-/tmp}/ks1487-leg.XXXXXX")"
+49: trap 'rm -rf "$tmp"' EXIT INT TERM
+50: 
+51: # -----------------------------------------------------------------------------
+52: # WIRING: the product's own lines.
+53: #   helpers.sh  from `fail=0` up to the first leg: the state and the real step() / run_delegated().
+54: #   block.sh    leg 16 itself: from its step() header to the `echo ""` that closes the last leg.
+55: # -----------------------------------------------------------------------------
+56: awk '/^fail=0$/{on=1} /^step "1\//{on=0} on' "$PREFLIGHT" > "$tmp/helpers.sh"
+57: awk '/^step "16\//{on=1} on && /^echo ""$/{exit} on' "$PREFLIGHT" > "$tmp/block.sh"
+58: expect "the real preflight.sh yields a non-empty helper block (the extraction is live)" "yes" \
+59:   "$([ -s "$tmp/helpers.sh" ] && echo yes || echo no)"
+60: expect "🔴 preflight.sh has a leg 16 block (a 16th step() header exists)" "yes" \
+61:   "$([ -s "$tmp/block.sh" ] && echo yes || echo no)"
+62: 
+63: # run_block <stub rc> <stub stdout>  ->  "<rc of the block> <failed legs> <skipped legs> <ran legs> <script seen>"
+64: run_block() {
+65:   local rc="$1" say="$2"
+66:   ( cd "$tmp" || exit 99
+67:     # shellcheck disable=SC1091
+68:     . ./helpers.sh
+69:     : > "$tmp/stub_seen"
+70:     # A function named bash shadows the command, so the block's `bash scripts/preflight/...` lands here. run_delegated
+71:     # calls it inside a command substitution, so what it saw is recorded in a FILE: a variable would die with the subshell.
+72:     bash() { printf '%s' "$*" > "$tmp/stub_seen"; [ -n "$say" ] && printf '%s\n' "$say"; return "$rc"; }
+73:     # shellcheck disable=SC1091
+74:     . ./block.sh >/dev/null 2>&1
+75:     _leg_concluded
+76:     printf '%s|%s|%s|%s' "$(printf '%s' "${FAILED_LEGS:-}" | tr -d ' ')" \
+77:       "$(printf '%s' "${SKIPPED_ADVISORY:-}" | tr -d ' ')" "$(printf '%s' "${RAN_LEGS:-}" | tr -d ' ')" "$(cat "$tmp/stub_seen")"
+78:   )
+79: }
+80: 
+81: out="$(run_block 1 'NEW type errors (not in the baseline):')"
+82: expect "🔴 a failing leg-16 script FAILS the run and the verdict can name leg 16" "16" "$(printf '%s' "$out" | cut -d'|' -f1)"
+83: expect "🔴 leg 16 runs scripts/preflight/test-types-ratchet.sh" "yes" \
+84:   "$(has "$(printf '%s' "$out" | cut -d'|' -f4)" 'scripts/preflight/test-types-ratchet.sh')"
+85: 
+86: out="$(run_block 0 '')"
+87: expect "CONTROL a passing leg-16 script fails nothing, skips nothing and counts as RAN" "||16" \
+88:   "$(printf '%s' "$out" | cut -d'|' -f1)|$(printf '%s' "$out" | cut -d'|' -f2)|$(printf '%s' "$out" | cut -d'|' -f3)"
+89: 
+90: out="$(run_block 0 'SKIP (advisory) — workspace install missing (leg 1 reports it)')"
+91: expect "🔴 a leg-16 script that SKIPS is counted as skipped (advisory), not failed and not as run" "|16|" \
+92:   "$(printf '%s' "$out" | cut -d'|' -f1)|$(printf '%s' "$out" | cut -d'|' -f2)|$(printf '%s' "$out" | cut -d'|' -f3)"
+93: 
+94: # The step headers: TOTAL_LEGS and every `N/TOTAL` agree, and the legs are 1..TOTAL in order with 16 last.
+95: total="$(awk -F= '$1 == "TOTAL_LEGS" {print $2; exit}' "$PREFLIGHT")"
+96: hdrs="$(awk '/^step "[0-9]+\/[0-9]+ /{ if (match($0, /"[0-9]+\/[0-9]+/)) print substr($0, RSTART + 1, RLENGTH - 1) }' "$PREFLIGHT")"
+97: nums="$(printf '%s\n' "$hdrs" | awk -F/ '{printf "%s ", $1}')"
+98: dens="$(printf '%s\n' "$hdrs" | awk -F/ '{print $2}' | sort -u | tr '\n' ' ')"
+99: expect "🔴 TOTAL_LEGS is 16" "16" "$total"
+100: expect "🔴 every step header's denominator is TOTAL_LEGS (a stale one aborts every push)" "16 " "$dens"
+101: expect "the legs run 1..16 in order and leg 16 is last" "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 " "$nums"
+102: expect "CONTROL the header parser reads headers at all (it found 16)" "16" "$(printf '%s\n' "$hdrs" | grep -c .)"
+103: 
+104: # KS-1513: everything from here down to the stub block runs the REAL checker, which needs the workspace install (typescript).
+105: # Without one those cells go red for an ENVIRONMENT reason that leg 1 already refuses, so they are skipped, as the leg itself
+106: # SKIPs (advisory). The wiring cells above and the stub cells below need no install and always run.
+107: if bash "$DEV/scripts/preflight/deps-present.sh" >/dev/null 2>&1; then
+108:   have_install=yes
+109: else
+110:   have_install=no
+111:   printf 'SKIP — workspace install absent (leg 1 refuses this tree): the real-checker cells are not run\n'
+112: fi
+113: if [ "$have_install" = yes ]; then
+114: 
+115: # -----------------------------------------------------------------------------
+116: # BEHAVIOUR: the real script, the real checker, throwaway fixture services.
+117: # -----------------------------------------------------------------------------
+118: mkfixture() {  # mkfixture <dir> <clean|error|empty>
+119:   local dir="$1" kind="$2"
+120:   mkdir -p "$dir/src/__tests__"
+121:   cat > "$dir/tsconfig.test.json" <<'JSON'
+122: { "compilerOptions": { "strict": true, "noEmit": true, "target": "ES2020", "module": "commonjs", "types": [], "skipLibCheck": true },
+123:   "include": ["src/**/*.ts"] }
+124: JSON
+125:   case "$kind" in
+126:     clean) printf 'export const n: number = 1;\n' > "$dir/src/__tests__/a.test.ts" ;;
+127:     error) printf "export const n: number = 'not a number';\n" > "$dir/src/__tests__/a.test.ts" ;;
+128:     empty) printf 'export const n: number = 1;\n' > "$dir/src/b.ts"; rmdir "$dir/src/__tests__" ;;
+129:   esac
+130: }
+131: mkfixture "$tmp/ks1487-svc-clean" clean
+132: mkfixture "$tmp/ks1487-svc-error" error
+133: mkfixture "$tmp/ks1487-svc-empty" empty
+134: 
+135: # leg <args...>  ->  sets LEG_OUT and LEG_RC. Runs from the repo's Dev root, as preflight does.
+136: leg() { LEG_OUT="$(cd "$DEV" && bash "$LEG" "$@" 2>&1)"; LEG_RC=$?; }
+137: 
+138: leg "$tmp/ks1487-svc-error"
+139: expect "🔴 a planted test-file type error FAILS the leg (rc 1)" "1" "$LEG_RC"
+140: expect "🔴 ...and the output names the error, so the pusher can see what to fix" "yes yes" \
+141:   "$(has "$LEG_OUT" 'NEW type errors') $(has "$LEG_OUT" 'TS2322')"
+142: 
+143: leg "$tmp/ks1487-svc-clean"
+144: expect "CONTROL a clean service passes the same leg (rc 0)" "0" "$LEG_RC"
+145: expect "CONTROL ...and the checker actually ran (its own summary line is in the output)" "yes" \
+146:   "$(has "$LEG_OUT" 'typecheck-tests:')"
+147: 
+148: leg "$tmp/ks1487-svc-empty"
+149: expect "🔴 a service that examines NO test file fails the leg, it does not read as clean (KS-676)" "1" "$LEG_RC"
+150: expect "🔴 ...and says so" "yes" "$(has "$LEG_OUT" 'NONE under __tests__')"
+151: 
+152: leg "$tmp/ks1487-svc-error" "$tmp/ks1487-svc-clean"
+153: rc_a="$LEG_RC"; out_a="$LEG_OUT"
+154: expect "🔴 an error in the FIRST service fails the leg, and the second is still checked (no early exit)" "1 yes yes" \
+155:   "$rc_a $(has "$out_a" 'TS2322') $(has "$out_a" 'ks1487-svc-clean')"
+156: leg "$tmp/ks1487-svc-clean" "$tmp/ks1487-svc-error"
+157: expect "🔴 an error in the LAST service fails the leg too (a pass cannot be inherited from an earlier one)" "1" "$LEG_RC"
+158: 
+159: leg "$tmp/ks1487-no-such-directory"
+160: expect "🔴 a service directory that does not exist FAILS the leg, it is not skipped" "1" "$LEG_RC"
+161: 
+162: # The install precondition. No workspace install is an ENVIRONMENT condition that leg 1 already refuses; this
+163: # leg must say so and SKIP (advisory) rather than fail on a compiler that is not there, and it must not run.
+164: LEG_OUT="$(cd "$DEV" && DEPS_PRESENT_ROOT="$tmp/no-install-here" bash "$LEG" "$tmp/ks1487-svc-error" 2>&1)"; LEG_RC=$?
+165: expect "🔴 with no workspace install the leg SKIPs (advisory), exits 0, names leg 1, and the checker did NOT run" "0 yes yes no" \
+166:   "$LEG_RC $(has "$LEG_OUT" 'SKIP (advisory)') $(has "$LEG_OUT" 'Leg 1') $(has "$LEG_OUT" 'typecheck-tests:')"
+167: LEG_OUT="$(cd "$DEV" && bash "$LEG" "$tmp/ks1487-svc-error" 2>&1)"; LEG_RC=$?
+168: expect "CONTROL the same planted error with the install present is NOT skipped (so the skip above is the precondition, not the error)" "1 no" \
+169:   "$LEG_RC $(has "$LEG_OUT" 'SKIP (advisory)')"
+170: 
+171: # The committed tree itself: no arguments, so the default service. It must pass, or every push is refused.
+172: leg
+173: expect "the committed tree passes the leg with no arguments (rc 0)" "0" "$LEG_RC"
+174: case "$LEG_OUT" in
+175:   *'SKIP (advisory)'*) printf 'note no workspace install here: the default-service run skipped, so the REAL checker lines are not asserted (the stub cells below assert the default list without an install)\n' ;;
+176:   *) expect "🔴 ...and the default list is ALL FIVE gated services, auth, the api-gateway, vc-issuer (KS-1351), security and m365-integration (KS-1554), each with its own checker line" "yes yes yes yes yes" \
+177:        "$(has "$LEG_OUT" 'typecheck-tests: auth (') $(has "$LEG_OUT" 'typecheck-tests: api-gateway (') $(has "$LEG_OUT" 'typecheck-tests: vc-issuer (') $(has "$LEG_OUT" 'typecheck-tests: security (') $(has "$LEG_OUT" 'typecheck-tests: m365-integration (')"
+178:      expect "🔴 ...and the checker ran exactly five times, once per gated service (a sixth would be an ungated change, one fewer a dropped gate)" "5" \
+179:        "$(printf '%s\n' "$LEG_OUT" | grep -c '^typecheck-tests: ')"
+180:      expect "...and all five read 0 new and 0 stale against their baselines" "5" \
+181:        "$(printf '%s\n' "$LEG_OUT" | grep -c '0 new; 0 stale baseline entries')"
+182:      expect "🔴 ...and the verdict counts all five services" "yes" "$(has "$LEG_OUT" 'OK — 5 service(s)')" ;;
+183: esac
+184: fi
+185: 
+186: # -----------------------------------------------------------------------------
+187: # THE DEFAULT RUN WITHOUT AN INSTALL (KS-1520 a, b, c)
+188: # -----------------------------------------------------------------------------
+189: # The default-list cells above run the REAL checker, which needs a compiler, so without a workspace install the leg SKIPs and
+190: # they assert nothing. These run a COPY of the real leg from a fixture Dev root whose checker is a STUB: it records which
+191: # service it was asked about and exits with the code the fixture gives it. They pin the leg's OWN logic - which services the
+192: # default run gates, and that a non-zero code from ANY of them, the api-gateway by name, fails the run - and they need no
+193: # compiler. The stub is not the checker; the cells above prove the checker.
+194: mkstub() {  # mkstub <dir> <auth rc> <gateway rc> [vc-issuer rc, default 0] [security rc, default 0] [m365-integration rc, default 0]
+195:   local d="$1"
+196:   rm -rf "$d"; mkdir -p "$d/scripts/preflight" "$d/scripts/typecheck-tests" "$d/rc"
+197:   cp "$LEG" "$d/scripts/preflight/test-types-ratchet.sh"
+198:   printf '#!/usr/bin/env bash\nexit 0\n' > "$d/scripts/preflight/deps-present.sh"
+199:   cat > "$d/scripts/typecheck-tests/check.cjs" <<'JS'
+200: 'use strict';
+201: const fs = require('fs');
+202: const svc = process.argv[2];
+203: fs.appendFileSync('calls.log', process.argv.slice(2).join(' ') + '\n');
+204: const f = 'rc/' + svc.replace(/\//g, '_');
+205: const rc = fs.existsSync(f) ? parseInt(fs.readFileSync(f, 'utf8'), 10) : 0;
+206: console.log('typecheck-tests: ' + svc + ' (stub, exit ' + rc + ')');
+207: process.exit(rc);
+208: JS
+209:   printf '%s' "$2" > "$d/rc/services_auth"
+210:   printf '%s' "$3" > "$d/rc/services_api-gateway"
+211:   printf '%s' "${4:-0}" > "$d/rc/services_vc-issuer"
+212:   printf '%s' "${5:-0}" > "$d/rc/services_security"
+213:   printf '%s' "${6:-0}" > "$d/rc/services_m365-integration"
+214: }
+215: stub() {  # stub <auth rc> <gateway rc> [vc-issuer rc] [security rc] [m365-integration rc]  ->  STUB_RC STUB_OUT STUB_CALLS. The default run: NO arguments, no baseline file anywhere.
+216:   local d="$tmp/ks1520-root"
+217:   mkstub "$d" "$1" "$2" "${3:-0}" "${4:-0}" "${5:-0}"
+218:   STUB_OUT="$(cd "$d" && bash scripts/preflight/test-types-ratchet.sh 2>&1)"; STUB_RC=$?
+219:   STUB_CALLS="$([ -f "$d/calls.log" ] && tr '\n' ' ' < "$d/calls.log" || echo none)"
+220: }
+221: 
+222: stub 0 0
+223: expect "CONTROL the default run (no arguments) passes with all five checkers green, and the stub was LIVE: asked about exactly auth, the api-gateway, vc-issuer, security, then m365-integration" \
+224:   "0|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration |yes" \
+225:   "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'OK — 5 service(s)')"
+226: stub 0 1
+227: expect "🔴 the api-gateway's checker exiting 1 FAILS the default run, named (the fixture holds no baseline file, so a gate that needs one reads green)" \
+228:   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
+229: expect "🔴 KS-1527 the rc-1 wording names a NEW test-file type error (the one branch of the three that a rewording could change silently)" \
+230:   "yes" "$(has "$STUB_OUT" 'a NEW test-file type error')"
+231: stub 0 2
+232: expect "🔴 the api-gateway's checker exiting 2 (could not run) FAILS the default run, and the output says the check could not run" \
+233:   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/api-gateway')|$(has "$STUB_OUT" 'the check could not run')"
+234: stub 0 3
+235: expect "🔴 ...and so does an exit the leg does not know (3), which it names as unexpected" \
+236:   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'an unexpected exit')"
+237: stub 1 0
+238: expect "🔴 auth failing fails the default run AND the api-gateway, vc-issuer, security and m365-integration are still checked after it (no early exit)" \
+239:   "1|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration |yes" "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'FAIL — services/auth')"
+240: stub 1 1
+241: expect "🔴 both failing: the run fails and the output names BOTH services" "1|yes|yes" \
+242:   "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/auth')|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
+243: stub 0 0 1
+244: expect "🔴 KS-1351: vc-issuer's checker exiting 1 FAILS the default run, named — the third service is a real gate, not a passenger" \
+245:   "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$STUB_CALLS"
+246: stub 0 0 2
+247: expect "🔴 KS-1351: ...and vc-issuer exiting 2 (could not run) fails it too, and says so" \
+248:   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$(has "$STUB_OUT" 'the check could not run')"
+249: stub 0 0 0 1
+250: expect "🔴 KS-1554: security's checker exiting 1 FAILS the default run, named — the fourth service is a real gate, not a passenger" \
+251:   "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/security')|$STUB_CALLS"
+252: stub 0 0 0 2
+253: expect "🔴 KS-1554: ...and security exiting 2 (could not run) fails it too, and says so" \
+254:   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/security')|$(has "$STUB_OUT" 'the check could not run')"
+255: stub 0 0 0 0 1
+256: expect "🔴 KS-1554: m365-integration's checker exiting 1 FAILS the default run, named — the fifth service is a real gate, not a passenger" \
+257:   "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/m365-integration')|$STUB_CALLS"
+258: stub 0 0 0 0 2
+259: expect "🔴 KS-1554: ...and m365-integration exiting 2 (could not run) fails it too, and says so" \
+260:   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/m365-integration')|$(has "$STUB_OUT" 'the check could not run')"
+261: stub 0 1
+262: expect "🔴 the closing advice does not tell the pusher to fix 'the test file' (the file named can be a PRODUCT file the tests import)" \
+263:   "no|yes" "$(has "$STUB_OUT" 'in the test file')|$(has "$STUB_OUT" 'a product file')"
+264: 
+265: # No ambient list. The script header says no environment variable is read; this is the cell that holds it to that. It lists the
+266: # NAME of every $var / ${var expansion outside a comment line and compares the set with the leg's own five locals, so a list read
+267: # from an exported variable (whatever its name) adds a name and fails. The plant proves the extraction can see such a read.
+268: varnames_of() {  # varnames_of <file>  ->  sorted, unique names of every expansion outside comment lines
+269:   grep -v '^[[:space:]]*#' "$1" | grep -oE '\$\{?[A-Za-z_][A-Za-z0-9_]*' | sed -e 's/^\$//' -e 's/^{//' | LC_ALL=C sort -u | tr '\n' ' '
+270: }
+271: expect "🔴 the leg expands only its own five locals (a service list read from the environment would add a name: the KS-1261 class)" \
+272:   "DEV_ROOT failed rc svc why " "$(varnames_of "$LEG")"
+273: { cat "$LEG"; printf '%s\n' 'planted_list=${TYPECHECK_SERVICES:-services/auth services/api-gateway services/vc-issuer services/security services/m365-integration}'; } > "$tmp/ks1520-planted.sh"
+274: expect "CONTROL the plant changed the file (so the control below is not comparing a file with itself)" "yes" \
+275:   "$(cmp -s "$LEG" "$tmp/ks1520-planted.sh" && echo no || echo yes)"
+276: expect "CONTROL the same extraction SEES a planted environment read (so the cell above could fail)" "yes" \
+277:   "$(has "$(varnames_of "$tmp/ks1520-planted.sh")" 'TYPECHECK_SERVICES')"
+278: 
+279: echo ""
+280: echo "preflight_test_types_ratchet_leg: $PASS passed, $FAIL failed"
+281: [ "$FAIL" -eq 0 ]
+
+### FILE AT HEAD: Blockchain/Dev/scripts/preflight/test-types-ratchet.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # CHECK: the gated services' TEST files still type-check against their baseline (KS-1487 / KS-1000)
+4: # =============================================================================
+5: # Why this exists.
+6: #
+7: # A gated service's tsconfig.json excludes src/__tests__ (services/auth's does, and so does
+8: # services/api-gateway's), so `tsc -p tsconfig.json` ("npm run build") has never examined a test file:
+9: # a "tsc: 0 errors" line over a test-only change is a green that could not fail. KS-1000 added
+10: # scripts/typecheck-tests/check.cjs, which runs the same compiler over the service's
+11: # tsconfig.test.json and compares the result to a recorded baseline that can only shrink: a new error
+12: # fails, and so does a baseline entry that no longer reproduces.
+13: #
+14: # Until this leg, nothing at the gate ran it. The auth and api-gateway vitest suites do (each has a cell
+15: # that shells out to the checker), so it was enforced by convention - "run the suite as the final
+16: # check" - and not at push time. A push that added a test-file type error went through and was found
+17: # later. A ratchet nothing runs at the gate is decoration; this is the run.
+18: #
+19: # What it does: runs `node scripts/typecheck-tests/check.cjs <service>` for each service given (default
+20: # services/auth and services/api-gateway, about 2.6 to 3.2 s each, measured) and fails if ANY of them
+21: # exits non-zero. It does not stop at the first failure, so one push shows every service that is red.
+22: # The checker's exit codes are 0 pass, 1 a new error or a stale baseline entry, 2 it could not run or
+23: # examined nothing (KS-676's shape: a clean report over an empty file set). All three non-zero outcomes
+24: # fail this leg: a ratchet that did not run is not a pass.
+25: #
+26: # One precondition is NOT a failure of this leg: no workspace install. The checker resolves `tsc` from the
+27: # install, and without one it can only say "run npm ci". That is an environment condition, and leg 1 already
+28: # refuses it (deps-present.sh), so this leg prints SKIP (advisory) and exits 0 rather than add a second red
+29: # for the same cause. preflight.sh runs this leg through run_delegated(), so the verdict counts that as a
+30: # SKIPPED leg, not a run one. The skip lets nothing through: leg 1 has already refused the push.
+31: #
+32: # To gate another service, give it a tsconfig.test.json and a baseline (`check.cjs <svc> --init`), then
+33: # add it to the default below. Services come in as ARGUMENTS and no environment variable is read, so
+34: # nothing a caller exported can quietly point the gate at a clean directory (the KS-1261 class).
+35: #
+36: # bash 3.2 compatible on purpose: macOS ships 3.2 (KS-676).
+37: #
+38: # Usage:  bash scripts/preflight/test-types-ratchet.sh [<service-dir> ...]      (default: services/auth services/api-gateway services/vc-issuer services/security services/m365-integration)
+39: # =============================================================================
+40: 
+41: set -uo pipefail
+42: 
+43: DEV_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+44: cd "$DEV_ROOT" || { echo "FAIL — cannot enter $DEV_ROOT"; exit 1; }
+45: 
+46: if [ "$#" -eq 0 ]; then
+47:     set -- services/auth services/api-gateway services/vc-issuer services/security services/m365-integration
+48: fi
+49: 
+50: # The same precondition leg 1 establishes (and the same variable it honours, so a fixture can aim it).
+51: if ! bash scripts/preflight/deps-present.sh >/dev/null 2>&1; then
+52:     echo "SKIP (advisory) — the workspace install is absent or incomplete, so the compiler this check needs is not there."
+53:     echo "  Leg 1 reports the install problem and refuses the push. Run 'npm ci' in Blockchain/Dev, then push again."
+54:     exit 0
+55: fi
+56: 
+57: failed=0
+58: for svc in "$@"; do
+59:     node scripts/typecheck-tests/check.cjs "$svc"
+60:     rc=$?
+61:     if [ "$rc" -ne 0 ]; then
+62:         failed=$((failed + 1))
+63:         case "$rc" in
+64:             1) why="a NEW test-file type error, a swap, a baseline entry that no longer reproduces, a tsc diagnostic with no file, a @ts-nocheck, or a fallen examined-test-files floor" ;;
+65:             2) why="the check could not run, examined no test file (a clean result would say nothing), or the baseline cannot be trusted (count-only, unparseable, no floor line, a duplicate line)" ;;
+66:             *) why="an unexpected exit" ;;
+67:         esac
+68:         echo "FAIL — $svc: the test-file type-check ratchet exited $rc: $why."
+69:     fi
+70: done
+71: 
+72: if [ "$failed" -ne 0 ]; then
+73:     echo ""
+74:     echo "  The lines above name the cause. For a type error, fix it in the file named: that can be a product file the"
+75:     echo "  tests import, not only a test file. The baseline admits only the errors already recorded; 'check.cjs <service>"
+76:     echo "  --update' LOWERS it (it refuses to admit anything new), so it cannot be used to silence a new error."
+77:     echo "  (KS-1000: scripts/typecheck-tests/check.cjs)"
+78:     exit 1
+79: fi
+80: echo "OK — $# service(s) type-check against their baseline."
+81: exit 0
+
+### FILE AT HEAD: Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt
+1: # KS-1000 ratchet: type errors already present in this service's test files, keyed by file + code + a fingerprint of the message.
+2: # It can only SHRINK. A new error fails `node scripts/typecheck-tests/check.cjs <service>`; an entry that no longer
+3: # reproduces fails it too; so does a swap (one error fixed, another of the same code added). Lower it with `--update` (which
+4: # refuses to admit anything new). Never edit a count up. `examined-test-files` is a floor: fewer examined test files fails.
+5: examined-test-files 26
+
+### FILE AT HEAD: Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt
+1: # KS-1000 ratchet: type errors already present in this service's test files, keyed by file + code + a fingerprint of the message.
+2: # It can only SHRINK. A new error fails `node scripts/typecheck-tests/check.cjs <service>`; an entry that no longer
+3: # reproduces fails it too; so does a swap (one error fixed, another of the same code added). Lower it with `--update` (which
+4: # refuses to admit anything new). Never edit a count up. `examined-test-files` is a floor: fewer examined test files fails.
+5: examined-test-files 40
+
+### FILE AT HEAD: Blockchain/Dev/services/m365-integration/tsconfig.test.json
+1: {
+2:   "extends": "./tsconfig.json",
+3:   "compilerOptions": {
+4:     "noEmit": true
+5:   },
+6:   "include": ["src/**/*"],
+7:   "exclude": ["node_modules", "dist"]
+8: }
+
+### FILE AT HEAD: Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts
+1: /**
+2:  * =============================================================================
+3:  * KS-952 — THE HANDLER MUST STILL DERIVE THE BUCKET (driven at the wire)
+4:  * =============================================================================
+5:  * The sibling file pins `principalScope`/`scopedRateLimitKey` as functions. That
+6:  * is not enough on its own, and the #882 gate proved why on this very service:
+7:  * neutering an extracted decision reds a cell, but tampering the CALL SITE left
+8:  * the whole suite green while restoring the original defect exactly.
+9:  *
+10:  * So this file asserts the OBSERVABLE consequence against the real app: a caller
+11:  * in tenant A naming tenant B's key must not touch tenant B's bucket. That is
+12:  * how the #882 tier-1 gate drove the finding — `remaining 99` after the wait,
+13:  * at both SHAs — and it is the shape a regression would have to survive.
+14:  *
+15:  * The harness is the one `ks698r1-route-heals-poisoned-key.test.ts` established:
+16:  * a locally-minted RS256 token and a real listener bound to 127.0.0.1 (KS-860:
+17:  * the host argument is passed, never a callback in its place).
+18:  * =============================================================================
+19:  */
+20: 
+21: import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+22: import crypto from 'node:crypto';
+23: import type { Server } from 'node:http';
+24: import type { AddressInfo } from 'node:net';
+25: 
+26: const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+27: const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+28: const PUBLIC_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+29: 
+30: const b64url = (b: Buffer): string =>
+31:   b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+32: 
+33: /** A token for an arbitrary principal — the whole point is that two differ. */
+34: function token(claims: Record<string, unknown>): string {
+35:   const header = b64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
+36:   const now = Math.floor(Date.now() / 1000);
+37:   const payload = b64url(Buffer.from(JSON.stringify({
+38:     sub: 'ks952', iat: now, exp: now + 300, role: 'ISSUER_ADMIN', ...claims,
+39:   })));
+40:   const sig = b64url(crypto.sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), PRIVATE_PEM));
+41:   return `${header}.${payload}.${sig}`;
+42: }
+43: 
+44: const TENANT_A = 'a0000000-0000-4000-8000-00000000000a';
+45: const TENANT_B = 'b0000000-0000-4000-8000-00000000000b';
+46: const VICTIM = { tenantId: TENANT_B, userId: 'victim-1' };
+47: const ATTACKER = { tenantId: TENANT_A, userId: 'attacker-1' };
+48: 
+49: let server: Server;
+50: let base: string;
+51: let rateLimits: Map<string, { count: number; resetAt: number }>;
+52: 
+53: async function check(as: Record<string, unknown>, body: Record<string, unknown>) {
+54:   const res = await fetch(`${base}/api/rate-limit/check`, {
+55:     method: 'POST',
+56:     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token(as)}` },
+57:     body: JSON.stringify(body),
+58:   });
+59:   const text = await res.text();
+60:   let json: any = null;
+61:   try { json = JSON.parse(text); } catch { /* a 500 may not be JSON */ }
+62:   return { status: res.status, json, text };
+63: }
+64: 
+65: beforeAll(async () => {
+66:   // Importing ../index BOOTS the service on its fixed PORT unless this is set,
+67:   // so without it this file races every other file that imports index and dies
+68:   // EADDRINUSE on 4004 in the full suite while passing alone. We want the app
+69:   // object, not its listener — we bind our own on port 0 below.
+70:   process.env.SECURITY_DISABLE_BOOT = '1';
+71:   process.env.JWT_PUBLIC_KEY = Buffer.from(PUBLIC_PEM, 'utf8').toString('base64');
+72:   delete process.env.JWT_JWKS_URL;
+73:   delete process.env.AUTH_SERVICE_URL;
+74:   const mod = await import('../index');
+75:   rateLimits = mod.rateLimits as typeof rateLimits;
+76:   const app = mod.default;
+77:   await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
+78:   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+79: });
+80: 
+81: afterAll(async () => {
+82:   if (server) await new Promise<void>((r) => server.close(() => r()));
+83: });
+84: 
+85: beforeEach(() => { rateLimits.clear(); });
+86: 
+87: describe('KS-952 at the wire — one tenant cannot consume another tenant bucket', () => {
+88:   it('CONTROL first: the route still rate-limits a caller against ITSELF', () => {
+89:     // If this failed, every cell below would pass on a route that had simply
+90:     // stopped counting — which is a worse defect than the one being fixed.
+91:     return (async () => {
+92:       const first = await check(VICTIM, { key: 'login', limit: 2, windowMs: 60_000 });
+93:       expect(first.status).toBe(200);
+94:       expect(first.json?.data?.allowed).toBe(true);
+95:       expect(first.json?.data?.remaining).toBe(1);
+96: 
+97:       const second = await check(VICTIM, { key: 'login', limit: 2, windowMs: 60_000 });
+98:       expect(second.json?.data?.remaining).toBe(0);
+99:     })();
+100:   });
+101: 
+102:   it('the attacker requests do NOT appear in the victim budget', async () => {
+103:     await check(VICTIM, { key: 'login', limit: 5, windowMs: 60_000 }); // victim: 1 used
+104: 
+105:     // Same key, a different tenant. Under the defect these landed in the
+106:     // victim's bucket and consumed its budget.
+107:     for (let i = 0; i < 4; i++) {
+108:       await check(ATTACKER, { key: 'login', limit: 100, windowMs: 60_000 });
+109:     }
+110: 
+111:     const victimNext = await check(VICTIM, { key: 'login', limit: 5, windowMs: 60_000 });
+112:     // 2 of 5 used by the victim itself; 3 remaining. If the attacker's four had
+113:     // landed here it would be 0 and `allowed` would be false.
+114:     expect(victimNext.json?.data?.remaining).toBe(3);
+115:     expect(victimNext.json?.data?.allowed).toBe(true);
+116:   });
+117: 
+118:   it('the attacker cannot shrink the victim WINDOW — the 60x lever', async () => {
+119:     // F3 as the gate drove it: a 1s window on the owner's key turns 100/minute
+120:     // into 100/second.
+121:     //
+122:     // THE ORDER MATTERS AND THE FIRST VERSION OF THIS CELL HAD IT WRONG. KS-698
+123:     // measured that `windowMs` is ignored once an entry exists — it is read only
+124:     // at creation. So a cell where the VICTIM creates the bucket first cannot
+125:     // fail: the attacker's window is discarded either way, and the cell passed
+126:     // with the fix reverted. The attacker has to CREATE the entry for the lever
+127:     // to exist at all, so that is the order driven here.
+128:     await check(ATTACKER, { key: 'burst', limit: 100, windowMs: 1_000 });
+129: 
+130:     const victim = await check(VICTIM, { key: 'burst', limit: 100, windowMs: 60_000 });
+131:     const windowLeft = Date.parse(victim.json.data.resetAt) - Date.now();
+132:     // Its own 60s window, not the attacker's 1s one.
+133:     expect(windowLeft).toBeGreaterThan(30_000);
+134:   });
+135: 
+136:   it('two principals naming one key hold two SEPARATE entries in the store', async () => {
+137:     await check(VICTIM, { key: 'same', limit: 10, windowMs: 60_000 });
+138:     await check(ATTACKER, { key: 'same', limit: 10, windowMs: 60_000 });
+139:     expect(rateLimits.size).toBe(2);
+140:     // And neither stored key is the bare body value, which is what the defect
+141:     // used and what a revert would restore.
+142:     expect([...rateLimits.keys()]).not.toContain('same');
+143:   });
+144: 
+145:   it('/reset at the wire: a platform operator clears the bucket it NAMES, and only that one', async () => {
+146:     // /reset had no wire-level cell at all, so a revert of its scope handling
+147:     // would have left every cell green while the route silently became a no-op
+148:     // (it would delete a raw key that /check no longer writes).
+149:     await check(VICTIM, { key: 'login', limit: 5, windowMs: 60_000 });
+150:     await check(ATTACKER, { key: 'login', limit: 5, windowMs: 60_000 });
+151:     expect(rateLimits.size).toBe(2);
+152: 
+153:     const res = await fetch(`${base}/api/rate-limit/reset`, {
+154:       method: 'POST',
+155:       headers: {
+156:         'Content-Type': 'application/json',
+157:         Authorization: `Bearer ${token({ role: 'SYSTEM_ADMIN', tenantId: TENANT_A, userId: 'operator-1' })}`,
+158:       },
+159:       body: JSON.stringify({ key: 'login', tenantId: TENANT_B, userId: 'victim-1' }),
+160:     });
+161:     expect(res.status).toBe(200);
+162:     // The named bucket is gone and the other one is untouched — a reset that
+163:     // cleared everything would be a worse bug than the one being fixed.
+164:     expect(rateLimits.size).toBe(1);
+165:     const survivor = [...rateLimits.keys()][0];
+166:     // KS-952 round 2, F2/F3: the scope parts are base64url now, not
+167:     // percent-encoded. Re-derived here independently rather than by calling the
+168:     // module under test, so this still pins the encoding rather than agreeing
+169:     // with whatever it happens to do.
+170:     expect(survivor).toContain(Buffer.from(TENANT_A, 'utf8').toString('base64url'));
+171:     // and the OLD encoding must be gone — a revert to encodeURIComponent would
+172:     // restore the `-` sentinel collision this round exists to close.
+173:     expect(survivor).not.toContain(TENANT_A);
+174:   });
+175: 
+176:   it('a token with neither a tenant nor a user claim is REFUSED, not given a shared bucket', async () => {
+177:     const res = await check({ tenantId: undefined, userId: undefined, sub: undefined }, {
+178:       key: 'anon', limit: 10, windowMs: 60_000,
+179:     });
+180:     expect(res.status).toBe(403);
+181:     expect(res.json?.error?.code).toBe('FORBIDDEN');
+182:   });
+183: 
+184:   it('control: the same request WITH a tenant claim succeeds, so the 403 is about the claim', async () => {
+185:     const res = await check({ tenantId: TENANT_A, userId: undefined, sub: undefined }, {
+186:       key: 'anon', limit: 10, windowMs: 60_000,
+187:     });
+188:     expect(res.status).toBe(200);
+189:   });
+190: });
+191: 
+192: /**
+193:  * ===========================================================================
+194:  * KS-952 ROUND 2 — the gate's findings, driven at the wire
+195:  * ===========================================================================
+196:  * Every cell below was RED-PROOFED individually against the 149-cell baseline:
+197:  * the clause it names was tampered on its own, the whole suite still passed,
+198:  * and only then was the cell written. Four controls (the empty-string claim,
+199:  * the 403 error code, the refusal AND, and the `|k:` join) DID red under the
+200:  * same method, so the instrument discriminates rather than agreeing with
+201:  * everything.
+202:  */
+203: describe('KS-952 round 2 — F2: a malformed scope value is REFUSED, not a 500', () => {
+204:   it('an unpaired surrogate in tenantId answers 400, not the URIError 500 this PR introduced', async () => {
+205:     // F2 is a REGRESSION of this PR: neither route encoded a scope before it, so
+206:     // `encodeURIComponent` — which THROWS `URIError: URI malformed` on a lone
+207:     // surrogate — put an uncaught 500 on a path that used to answer 200.
+208:     const res = await fetch(`${base}/api/rate-limit/reset`, {
+209:       method: 'POST',
+210:       headers: {
+211:         'Content-Type': 'application/json',
+212:         Authorization: `Bearer ${token({ role: 'SYSTEM_ADMIN', tenantId: TENANT_A, userId: 'operator-1' })}`,
+213:       },
+214:       body: JSON.stringify({ key: 'k', tenantId: '\ud800' }),
+215:     });
+216:     expect(res.status).toBe(400);
+217:     expect(res.status).not.toBe(500);
+218:   });
+219: 
+220:   it('CONTROL: the identical request with an ordinary tenantId answers 200', async () => {
+221:     // Without this the cell above cannot tell a guarded surrogate from a route
+222:     // that simply refuses everything.
+223:     const res = await fetch(`${base}/api/rate-limit/reset`, {
+224:       method: 'POST',
+225:       headers: {
+226:         'Content-Type': 'application/json',
+227:         Authorization: `Bearer ${token({ role: 'SYSTEM_ADMIN', tenantId: TENANT_A, userId: 'operator-1' })}`,
+228:       },
+229:       body: JSON.stringify({ key: 'k', tenantId: TENANT_B }),
+230:     });
+231:     expect(res.status).toBe(200);
+232:   });
+233: });
+234: 
+235: describe('KS-952 round 2 — F5: four guard clauses the 149-cell suite could not see', () => {
+236:   it('C1 — /reset refuses a platform caller with nothing to scope by, rather than clearing a shared bucket', async () => {
+237:     // MEASURED unguarded: `if (scope === null)` on /reset was tampered to
+238:     // `if (false)` and all 149 cells still passed. /check had this cell; /reset
+239:     // did not, and it is the same fail-open.
+240:     const res = await fetch(`${base}/api/rate-limit/reset`, {
+241:       method: 'POST',
+242:       headers: {
+243:         'Content-Type': 'application/json',
+244:         Authorization: `Bearer ${token({ role: 'SYSTEM_ADMIN', tenantId: undefined, userId: undefined, sub: undefined })}`,
+245:       },
+246:       body: JSON.stringify({ key: 'orphan' }),
+247:     });
+248:     expect(res.status).toBe(403);
+249:     expect(((await res.json()) as { error?: { code?: string } })?.error?.code).toBe('FORBIDDEN');
+250:   });
+251: 
+252:   it('C1 CONTROL: the same claimless operator naming a scope EXPLICITLY still succeeds', async () => {
+253:     const res = await fetch(`${base}/api/rate-limit/reset`, {
+254:       method: 'POST',
+255:       headers: {
+256:         'Content-Type': 'application/json',
+257:         Authorization: `Bearer ${token({ role: 'SYSTEM_ADMIN', tenantId: undefined, userId: undefined, sub: undefined })}`,
+258:       },
+259:       body: JSON.stringify({ key: 'orphan', tenantId: TENANT_B }),
+260:     });
+261:     expect(res.status).toBe(200);
+262:   });
+263: 
+264:   it('C2 — /check SWEEPS before it grows the store; the call site, not the function', async () => {
+265:     // MEASURED unguarded: deleting `sweepExpired(rateLimits, now)` from the
+266:     // handler left all 149 green. `sweepExpired` itself is unit-tested; nothing
+267:     // asserted the route ever calls it, which is the KS-882 lesson exactly —
+268:     // neutering an extracted decision reds a cell, tampering the CALL SITE did not.
+269:     const expired = Date.now() - 1;
+270:     for (let i = 0; i < 10_001; i++) rateLimits.set(`stale-${i}`, { count: 1, resetAt: expired });
+271:     expect(rateLimits.size).toBe(10_001);
+272: 
+273:     const res = await check(VICTIM, { key: 'fresh', limit: 5, windowMs: 60_000 });
+274:     expect(res.status).toBe(200);
+275: 
+276:     // Only the new live entry survives. Without the call it would be 10_002.
+277:     expect(rateLimits.size).toBe(1);
+278:   });
+279: 
+280:   it('C2 CONTROL: LIVE entries are never swept, so the sweep is not just a clear()', async () => {
+281:     const live = Date.now() + 600_000;
+282:     for (let i = 0; i < 10_001; i++) rateLimits.set(`live-${i}`, { count: 1, resetAt: live });
+283:     await check(VICTIM, { key: 'fresh', limit: 5, windowMs: 60_000 });
+284:     // A sweep that dropped live buckets would itself be the rate-limit bypass
+285:     // this module exists to prevent.
+286:     expect(rateLimits.size).toBe(10_002);
+287:   });
+288: 
+289:   it('C4 — a NON-STRING tenant claim is refused, not coerced into a bucket name', async () => {
+290:     // MEASURED unguarded: replacing `typeof value !== 'string'` with a
+291:     // `String(value)` coercion left all 149 green. A token whose tenantId is the
+292:     // number 123 would then share a namespace with the tenant literally named
+293:     // "123" — a cross-principal collision reached through the claim rather than
+294:     // the body.
+295:     const res = await check({ tenantId: 123 as unknown as string, userId: undefined, sub: undefined }, {
+296:       key: 'coerce', limit: 10, windowMs: 60_000,
+297:     });
+298:     expect(res.status).toBe(403);
+299:   });
+300: 
+301:   it('C4 CONTROL: the same value as a STRING is accepted, so the 403 is about the type', async () => {
+302:     const res = await check({ tenantId: '123', userId: undefined, sub: undefined }, {
+303:       key: 'coerce', limit: 10, windowMs: 60_000,
+304:     });
+305:     expect(res.status).toBe(200);
+306:   });
+307: });
+
+### FILE AT HEAD: Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts
+1: /**
+2:  * =============================================================================
+3:  * KS-952 — THE RATE-LIMIT BUCKET IS DERIVED FROM THE PRINCIPAL
+4:  * =============================================================================
+5:  * `POST /api/rate-limit/check` took its bucket `key` from the request body with
+6:  * no binding to the caller, so any authenticated principal in any tenant could
+7:  * name ANOTHER tenant's bucket and set its window. The #882 tier-1 gate drove
+8:  * both directions at the wire, at two SHAs: a 1s window turns an owner's
+9:  * 100/minute into 100/second (60x), a 24h window turns an intended 60s lockout
+10:  * into 1440x.
+11:  *
+12:  * THE TWO ROUTES DELIBERATELY DO NOT GET THE SAME RULE, and that asymmetry is
+13:  * the QA agent's uncommissioned find on the KS-698 gate, not this seat's:
+14:  *   /check  — no role gate, so the bucket is DERIVED and the body cannot choose it.
+15:  *   /reset  — platform-gated, and clearing another tenant's bucket is plausibly
+16:  *             what it is FOR, so a platform role names the scope explicitly.
+17:  * A blanket "bind the key to the principal" across both closes /check correctly
+18:  * and BREAKS /reset. These cells hold both halves so that trap stays closed.
+19:  *
+20:  * The service has no supertest dependency, so these call the exported seam
+21:  * directly — the same arrangement `rateLimitBounds` uses.
+22:  * =============================================================================
+23:  */
+24: 
+25: import { describe, it, expect, beforeAll } from 'vitest';
+26: import {
+27:   RATE_LIMIT_KEY_MAX,
+28:   hasLoneSurrogate,
+29:   principalScope,
+30:   explicitScope,
+31:   scopedRateLimitKey,
+32:   sweepExpired,
+33: } from '../rateLimitScope';
+34: import { resetRateLimitSchema } from '../requestSchemas';
+35: 
+36: // index.ts calls app.listen() at module load, so it is imported the way the
+37: // KS-698 cells import it — the boot guard first, then dynamically. A static
+38: // import here would start a listener in the test process.
+39: let checkRateLimitSchema: { safeParse: (v: unknown) => { success: boolean } };
+40: beforeAll(async () => {
+41:   process.env.SECURITY_DISABLE_BOOT = '1';
+42:   const mod: any = await import('../index');
+43:   ({ checkRateLimitSchema } = mod);
+44: });
+45: 
+46: const TENANT_A = 'a0000000-0000-4000-8000-00000000000a';
+47: const TENANT_B = 'b0000000-0000-4000-8000-00000000000b';
+48: const USER_1 = 'user-1';
+49: const USER_2 = 'user-2';
+50: 
+51: const bucket = (user: Record<string, unknown>, key: string) =>
+52:   scopedRateLimitKey(principalScope(user)!, key);
+53: 
+54: describe('KS-952 F3/F4 — naming another principal key cannot reach their bucket', () => {
+55:   it('the SAME key in two tenants is two different buckets', () => {
+56:     const victim = bucket({ tenantId: TENANT_B, userId: USER_1 }, 'login:victim');
+57:     const attacker = bucket({ tenantId: TENANT_A, userId: USER_1 }, 'login:victim');
+58:     expect(attacker).not.toEqual(victim);
+59:   });
+60: 
+61:   it('control: the same principal and the same key IS the same bucket', () => {
+62:     // Without this, the cell above would pass on a function that returned a
+63:     // random value every call — which would also break rate limiting entirely.
+64:     const once = bucket({ tenantId: TENANT_A, userId: USER_1 }, 'login:x');
+65:     const twice = bucket({ tenantId: TENANT_A, userId: USER_1 }, 'login:x');
+66:     expect(once).toEqual(twice);
+67:   });
+68: 
+69:   it('two users INSIDE one tenant are also separated', () => {
+70:     // Scoping on tenant alone would close the reported cross-tenant finding and
+71:     // leave one tenant member able to throttle another under a chosen key.
+72:     expect(bucket({ tenantId: TENANT_A, userId: USER_1 }, 'k'))
+73:       .not.toEqual(bucket({ tenantId: TENANT_A, userId: USER_2 }, 'k'));
+74:   });
+75: 
+76:   it('the body cannot smuggle a scope: a key containing the separators stays in the caller own namespace', () => {
+77:     const attacker = { tenantId: TENANT_A, userId: USER_1 };
+78:     const forged = bucket(attacker, `x|k:t:${TENANT_B}|u:${USER_2}|k:login`);
+79:     const victim = bucket({ tenantId: TENANT_B, userId: USER_2 }, 'login');
+80:     expect(forged).not.toEqual(victim);
+81:     expect(forged.startsWith(principalScope(attacker)!)).toBe(true);
+82:   });
+83: 
+84:   it('REGRESSION: the unencoded scope was not injective, and this is the pair that collided', () => {
+85:     // Found by testing the claim in the first version of this module comment,
+86:     // which asserted a caller could not forge another namespace. It could:
+87:     //   victim   t:1 u:'2|k:evil' key 'foo'        -> t:1|u:2|k:evil|k:foo
+88:     //   attacker t:1 u:'2'        key 'evil|k:foo' -> t:1|u:2|k:evil|k:foo
+89:     // Identical stored keys, two different principals. The scope parts are
+90:     // ENCODED now (base64url of the UTF-8 bytes, whose alphabet [A-Za-z0-9-_]
+91:     // cannot contain either delimiter), so the delimiters are unambiguous. This
+92:     // cell reds if that encoding is ever removed as cosmetic.
+93:     //
+94:     // KS-970 item 5: this said "percent-encoded" until round 2 replaced
+95:     // `encodeURIComponent` with base64url and left the sentence behind. Corrected
+96:     // rather than deleted — the cell was always right; only its prose went stale.
+97:     const victim = bucket({ tenantId: '1', userId: '2|k:evil' }, 'foo');
+98:     const attacker = bucket({ tenantId: '1', userId: '2' }, 'evil|k:foo');
+99:     expect(attacker).not.toEqual(victim);
+100:   });
+101: });
+102: 
+103: describe('KS-952 — a token with nothing to scope by is REFUSED, not given a shared bucket', () => {
+104:   it('no tenant and no user yields null', () => {
+105:     expect(principalScope({})).toBeNull();
+106:     expect(principalScope(undefined)).toBeNull();
+107:     expect(principalScope({ tenantId: '   ', userId: '' })).toBeNull();
+108:   });
+109: 
+110:   it('control: either claim alone is enough, and `sub` substitutes for `userId`', () => {
+111:     // The null above must mean "nothing to scope by", not "this function always
+112:     // returns null" — three positives against the one negative.
+113:     expect(principalScope({ tenantId: TENANT_A })).not.toBeNull();
+114:     expect(principalScope({ userId: USER_1 })).not.toBeNull();
+115:     expect(principalScope({ sub: USER_1 })).toEqual(principalScope({ userId: USER_1 }));
+116:   });
+117: });
+118: 
+119: describe('KS-952 — /reset keeps the cross-tenant reach that /check must not have', () => {
+120:   const platformCaller = { tenantId: TENANT_A, userId: 'operator-1' };
+121: 
+122:   it('naming no scope targets the caller own bucket', () => {
+123:     expect(explicitScope({}, platformCaller)).toEqual(principalScope(platformCaller));
+124:   });
+125: 
+126:   it('naming another tenant targets THAT tenant, not the caller', () => {
+127:     const named = explicitScope({ tenantId: TENANT_B, userId: USER_2 }, platformCaller);
+128:     expect(named).not.toEqual(principalScope(platformCaller));
+129:     expect(named).toEqual(principalScope({ tenantId: TENANT_B, userId: USER_2 }));
+130:   });
+131: 
+132:   it('ROUND TRIP: a reset naming a scope clears the exact bucket /check stored for it', () => {
+133:     // The point of the whole asymmetry. If /reset could not name the scope, it
+134:     // would delete a key nothing had written and answer 200 — a capability
+135:     // silently reduced to a no-op, which is the failure the blanket rule causes.
+136:     const store = new Map<string, { resetAt: number }>();
+137:     const victimKey = bucket({ tenantId: TENANT_B, userId: USER_2 }, 'login');
+138:     store.set(victimKey, { resetAt: Date.now() + 60_000 });
+139: 
+140:     const scope = explicitScope({ tenantId: TENANT_B, userId: USER_2 }, platformCaller)!;
+141:     store.delete(scopedRateLimitKey(scope, 'login'));
+142:     expect(store.has(victimKey)).toBe(false);
+143:   });
+144: 
+145:   it('control: a reset naming the WRONG scope leaves the bucket alone', () => {
+146:     // Otherwise the round trip above would pass against a delete that cleared
+147:     // everything, which would be a far worse bug than the one being fixed.
+148:     const store = new Map<string, { resetAt: number }>();
+149:     const victimKey = bucket({ tenantId: TENANT_B, userId: USER_2 }, 'login');
+150:     store.set(victimKey, { resetAt: Date.now() + 60_000 });
+151: 
+152:     const scope = explicitScope({ tenantId: TENANT_A, userId: USER_1 }, platformCaller)!;
+153:     store.delete(scopedRateLimitKey(scope, 'login'));
+154:     expect(store.has(victimKey)).toBe(true);
+155:   });
+156: });
+157: 
+158: describe('KS-952 F10 — the key is bounded and the map is swept', () => {
+159:   const validCheck = { key: 'k', limit: 10, windowMs: 60_000 };
+160: 
+161:   it('both schemas refuse a key longer than the bound', () => {
+162:     const tooLong = 'x'.repeat(RATE_LIMIT_KEY_MAX + 1);
+163:     expect(checkRateLimitSchema.safeParse({ ...validCheck, key: tooLong }).success).toBe(false);
+164:     expect(resetRateLimitSchema.safeParse({ key: tooLong }).success).toBe(false);
+165:   });
+166: 
+167:   it('control: a key AT the bound is still accepted', () => {
+168:     // A bound that refuses everything would pass the cell above and break the
+169:     // endpoint. The 100,000-character key the gate stored is what this rejects.
+170:     const atMax = 'x'.repeat(RATE_LIMIT_KEY_MAX);
+171:     expect(checkRateLimitSchema.safeParse({ ...validCheck, key: atMax }).success).toBe(true);
+172:     expect(resetRateLimitSchema.safeParse({ key: atMax }).success).toBe(true);
+173:   });
+174: 
+175:   it('sweeps expired entries only once ABOVE the threshold, and never a live one', () => {
+176:     const now = Date.now();
+177:     const store = new Map<string, { resetAt: number }>();
+178:     for (let i = 0; i < 10; i++) store.set(`expired-${i}`, { resetAt: now - 1 });
+179:     store.set('live', { resetAt: now + 60_000 });
+180: 
+181:     // Below the soft max: untouched. A sweep on every write would be O(n) per
+182:     // request, which is its own availability problem.
+183:     expect(sweepExpired(store, now, 100)).toBe(0);
+184:     expect(store.size).toBe(11);
+185: 
+186:     // Above it: the expired go, the live one stays. A sweep that dropped a live
+187:     // bucket would itself be the rate-limit bypass this ticket is about.
+188:     expect(sweepExpired(store, now, 5)).toBe(10);
+189:     expect(store.size).toBe(1);
+190:     expect(store.has('live')).toBe(true);
+191:   });
+192: 
+193:   it('also drops an entry whose resetAt is unusable, rather than keeping it forever', () => {
+194:     const now = Date.now();
+195:     const store = new Map<string, { resetAt: number }>();
+196:     for (let i = 0; i < 6; i++) store.set(`e-${i}`, { resetAt: now - 1 });
+197:     store.set('poisoned', { resetAt: Number.NaN });
+198:     expect(sweepExpired(store, now, 3)).toBe(7);
+199:     expect(store.size).toBe(0);
+200:   });
+201: });
+202: 
+203: /**
+204:  * ===========================================================================
+205:  * KS-952 ROUND 2 — F2, F3 and the fourth unguarded clause
+206:  * ===========================================================================
+207:  */
+208: describe('KS-952 round 2 F3 — the `-` placeholder was itself a legal claim value', () => {
+209:   it('REGRESSION: "no tenant" and a tenant literally named "-" are DIFFERENT buckets', () => {
+210:     // The pair that collided. `buildScope` wrote `tenantId ?? '-'` and
+211:     // percent-encoding leaves `-` unchanged, so both produced `t:-|u:x` — the
+212:     // cross-principal collision this module exists to prevent, reintroduced by
+213:     // the placeholder rather than by the separator.
+214:     const absent = principalScope({ userId: 'x' });
+215:     const named = explicitScope({ tenantId: '-', userId: 'x' }, { tenantId: 'ignored', userId: 'ignored' });
+216:     expect(absent).not.toBeNull();
+217:     expect(named).not.toBeNull();
+218:     expect(absent).not.toBe(named);
+219:   });
+220: 
+221:   it('and ENCODING the sentinel does not fix it — which is why the sentinel had to go', () => {
+222:     // Measured: base64url('-') is the constant 'LQ', so swapping the encoder
+223:     // while keeping `?? '-'` leaves both sides equal. Pinned so a future
+224:     // "tidy-up" that reintroduces a placeholder reds here.
+225:     const placeholder = Buffer.from('-', 'utf8').toString('base64url');
+226:     expect(principalScope({ userId: 'x' })).not.toContain(`t:${placeholder}|`);
+227:     expect(principalScope({ userId: 'x' })).toBe('t:|u:eA');
+228:   });
+229: 
+230:   it('control: two genuinely identical principals still share one bucket', () => {
+231:     expect(principalScope({ tenantId: TENANT_A, userId: 'u1' }))
+232:       .toBe(principalScope({ tenantId: TENANT_A, userId: 'u1' }));
+233:   });
+234: });
+235: 
+236: describe('KS-970 item 1 — a present-but-BLANK scope field is refused, not treated as omitted', () => {
+237:   it('the schema refuses a whitespace-only tenantId, which `min(1)` cannot catch', () => {
+238:     // `"   "` has length 3, so min(1) passes it. It then trims to '' inside
+239:     // `claim`, which used to make the field look UNNAMED -- so the operator who
+240:     // asked to clear tenant X's bucket cleared their own and got 200 "Rate limit
+241:     // reset". A wrong action reported as success.
+242:     expect(resetRateLimitSchema.safeParse({ key: 'k', tenantId: '   ' }).success).toBe(false);
+243:     expect(resetRateLimitSchema.safeParse({ key: 'k', userId: '\t\n' }).success).toBe(false);
+244:   });
+245: 
+246:   it('CONTROL: an ordinary tenantId still passes, so the refusal is about blankness', () => {
+247:     expect(resetRateLimitSchema.safeParse({ key: 'k', tenantId: TENANT_A }).success).toBe(true);
+248:   });
+249: 
+250:   it('and a blank field never silently retargets the caller own bucket', () => {
+251:     // Second line, for any caller that reaches `explicitScope` without the schema.
+252:     const caller = { tenantId: TENANT_A, userId: USER_1 };
+253:     expect(explicitScope({ tenantId: '   ' }, caller)).toBeNull();
+254:     // CONTROL: omitting it entirely IS the documented way to target your own.
+255:     expect(explicitScope({}, caller)).toBe(principalScope(caller));
+256:   });
+257: });
+258: 
+259: describe('KS-970 item 2 — a present-but-unusable CLAIM is refused, not downgraded to the tenant-wide bucket', () => {
+260:   it('a NON-STRING userId claim is refused rather than folding to the tenant bucket', () => {
+261:     // The asymmetry this closes: a non-string tenantId ended in a 403 only
+262:     // because nothing was left to scope by, while a non-string userId was
+263:     // ACCEPTED and put every malformed-claim user in one tenant-wide bucket --
+264:     // contradicting this module's own rule that tenant alone lets one member
+265:     // throttle another.
+266:     expect(principalScope({ tenantId: TENANT_A, userId: 123 as unknown as string })).toBeNull();
+267:   });
+268: 
+269:   it('a BLANK userId claim is refused for the same reason', () => {
+270:     expect(principalScope({ tenantId: TENANT_A, userId: '   ' })).toBeNull();
+271:   });
+272: 
+273:   it('CONTROL: an ABSENT userId is NOT a refusal — it falls through to `sub`, then to tenant-only', () => {
+274:     // Absent and malformed must not be the same thing. Without this control the
+275:     // cells above would pass on a function that refused everything.
+276:     expect(principalScope({ tenantId: TENANT_A })).not.toBeNull();
+277:     expect(principalScope({ tenantId: TENANT_A, sub: USER_1 }))
+278:       .toBe(principalScope({ tenantId: TENANT_A, userId: USER_1 }));
+279:   });
+280: 
+281:   it('and `sub` does NOT rescue a MALFORMED userId — only an absent one', () => {
+282:     // Falling through here would hide exactly the case this item is about.
+283:     expect(principalScope({ tenantId: TENANT_A, userId: 123 as unknown as string, sub: USER_1 })).toBeNull();
+284:   });
+285: });
+286: 
+287: describe('KS-970 item 4 — the runtime bound counts CODE POINTS, matching the published maxLength', () => {
+288:   const astral = '\u{1F600}'; // one code point, TWO UTF-16 code units
+289: 
+290:   it('256 astral characters are accepted: 256 code points, though 512 code units', () => {
+291:     // `z.string().max(256)` counts code units, so this was refused at runtime
+292:     // while the published `maxLength: 256` (code points) said it was valid.
+293:     const v = astral.repeat(RATE_LIMIT_KEY_MAX);
+294:     expect([...v].length).toBe(RATE_LIMIT_KEY_MAX);
+295:     expect(v.length).toBe(RATE_LIMIT_KEY_MAX * 2); // the unit that used to decide
+296:     expect(resetRateLimitSchema.safeParse({ key: 'k', tenantId: v }).success).toBe(true);
+297:   });
+298: 
+299:   it('CONTROL: 257 code points are still refused, so the bound is a bound', () => {
+300:     const v = astral.repeat(RATE_LIMIT_KEY_MAX + 1);
+301:     expect(resetRateLimitSchema.safeParse({ key: 'k', tenantId: v }).success).toBe(false);
+302:     expect(resetRateLimitSchema.safeParse({ key: 'a'.repeat(RATE_LIMIT_KEY_MAX + 1) }).success).toBe(false);
+303:   });
+304: });
+305: 
+306: describe('KS-970 item 6 — the published contract states the refusals the runtime enforces', () => {
+307:   it('the generated spec documents the blank and unpaired-surrogate refusals on both scope fields', async () => {
+308:     // A zod `.refine()` never reaches the generated schema, so a constraint that
+309:     // is only in code is not in the contract. Same class as round 1's F1.
+310:     const { readFile } = await import('node:fs/promises');
+311:     const { resolve } = await import('node:path');
+312:     const yaml = await readFile(resolve(__dirname, '../../../../docs/openapi/secuura-api.yaml'), 'utf8');
+313:     const start = yaml.indexOf('    RateLimitResetRequest:');
+314:     expect(start).toBeGreaterThan(-1);
+315:     const block = yaml.slice(start, yaml.indexOf('\n    SecuritySuccess:', start));
+316:     for (const needed of ['blank', 'unpaired surrogate', 'code points']) {
+317:       expect(block).toContain(needed);
+318:     }
+319:     // CONTROL: a phrase that must NOT be there, so this is not matching the whole file.
+320:     expect(block).not.toContain('StakeRequest');
+321:   });
+322: });
+323: 
+324: describe('KS-970 item 3 — /reset reaches the encoder through UNREFINED claims, exactly as /check does', () => {
+325:   it('a body that names NO scope falls back to the caller claims, so the schema never sees them', () => {
+326:     // The claim this pins replaces a FALSE one: the round-2 comment implied
+327:     // /check was the only unrefined path. `explicitScope` falls back to
+328:     // `principalScope(caller)` whenever the body names no scope, so /reset is
+329:     // unrefined too. `resetRateLimitSchema` guards BODY fields; it never sees a claim.
+330:     const caller = { tenantId: TENANT_A, userId: USER_1 };
+331:     expect(explicitScope({}, caller)).toBe(principalScope(caller));
+332:   });
+333: 
+334:   it('the residual, stated rather than implied away: two DIFFERENT unpaired surrogates share one namespace', () => {
+335:     // Every unpaired surrogate encodes to the same UTF-8 replacement bytes, so
+336:     // the encoder cannot separate them. Near-unreachable (claims are minted from
+337:     // Postgres, which cannot store one) but not refused -- and a comment that
+338:     // implied otherwise is what this ticket is correcting.
+339:     const a = explicitScope({}, { tenantId: '\ud800', userId: USER_1 });
+340:     const b = explicitScope({}, { tenantId: '\ud801', userId: USER_1 });
+341:     expect(a).toBe(b);
+342:   });
+343: 
+344:   it('CONTROL: two ORDINARY different tenants do NOT share a namespace', () => {
+345:     // Without this the cell above would pass on an encoder that collapsed
+346:     // everything -- which would be a far worse defect than the one it documents.
+347:     expect(explicitScope({}, { tenantId: TENANT_A, userId: USER_1 }))
+348:       .not.toBe(explicitScope({}, { tenantId: TENANT_B, userId: USER_1 }));
+349:   });
+350: });
+351: 
+352: describe('KS-952 round 2 F2 — the encoder is TOTAL, and malformed input is refused at the boundary', () => {
+353:   it('the claims path has no schema in front of it, so the encoder must not throw', () => {
+354:     // /check builds its scope from JWT CLAIMS. `resetRateLimitSchema` does not
+355:     // stand in front of those, so the encoder itself has to be total or the
+356:     // route 500s on a token nobody validated.
+357:     expect(() => principalScope({ tenantId: '\ud800', userId: 'u' })).not.toThrow();
+358:     expect(principalScope({ tenantId: '\ud800', userId: 'u' })).not.toBeNull();
+359:   });
+360: 
+361:   it('the boundary REFUSES an unpaired surrogate, so no two of them collide on one bucket', () => {
+362:     // Every lone surrogate encodes to the same UTF-8 replacement bytes, so a
+363:     // total encoder alone would trade the 500 for a fresh collision class in the
+364:     // exact property this module establishes. Refused before it gets there.
+365:     expect(resetRateLimitSchema.safeParse({ key: 'k', tenantId: '\ud800' }).success).toBe(false);
+366:     expect(resetRateLimitSchema.safeParse({ key: 'k', userId: '\udfff' }).success).toBe(false);
+367:   });
+368: 
+369:   it('control: an ordinary value passes the same schema', () => {
+370:     expect(resetRateLimitSchema.safeParse({ key: 'k', tenantId: TENANT_A }).success).toBe(true);
+371:   });
+372: 
+373:   it('hasLoneSurrogate distinguishes an unpaired half from a well-formed pair', () => {
+374:     expect(hasLoneSurrogate('\ud800')).toBe(true);        // high, unpaired
+375:     expect(hasLoneSurrogate('\udc00')).toBe(true);        // low, unpaired
+376:     expect(hasLoneSurrogate('a\ud800b')).toBe(true);      // unpaired, mid-string
+377:     expect(hasLoneSurrogate('\ud83d\ude00')).toBe(false); // 😀 — a valid pair
+378:     expect(hasLoneSurrogate('ordinary')).toBe(false);
+379:     expect(hasLoneSurrogate('')).toBe(false);
+380:   });
+381: });
+382: 
+383: describe('KS-952 round 2 F5 — a partially-named reset target must not widen to the caller', () => {
+384:   it('C4/C5 MEASURED unguarded: naming a tenant alone does NOT pick up the caller userId', () => {
+385:     // Tampering `explicitScope` to fall back to the caller claims left all 149
+386:     // cells green. The module header states this rule ("naming a tenant without
+387:     // a user targets that tenant unnamed-user bucket rather than silently
+388:     // widening to the caller own") and nothing pinned it.
+389:     const asA = explicitScope({ tenantId: TENANT_B }, { tenantId: TENANT_A, userId: 'caller-a' });
+390:     const asB = explicitScope({ tenantId: TENANT_B }, { tenantId: TENANT_A, userId: 'caller-b' });
+391:     // Two different operators naming the same target must clear the SAME bucket.
+392:     expect(asA).toBe(asB);
+393:     expect(asA).not.toContain(Buffer.from('caller-a', 'utf8').toString('base64url'));
+394:   });
+395: 
+396:   it('control: naming NO scope at all still targets the caller own bucket', () => {
+397:     expect(explicitScope({}, { tenantId: TENANT_A, userId: 'caller-a' }))
+398:       .toBe(principalScope({ tenantId: TENANT_A, userId: 'caller-a' }));
+399:   });
+400: });
+
+### FILE AT HEAD: Blockchain/Dev/services/security/tsconfig.test.json
+1: {
+2:   "extends": "./tsconfig.json",
+3:   "compilerOptions": {
+4:     "noEmit": true
+5:   },
+6:   "include": ["src/**/*"],
+7:   "exclude": ["node_modules", "dist"]
+8: }
+
+### FILE AT HEAD: CLAUDE.md
+1: # Blockchain (Distributed Secuura)
+2: **Client:** Secuura
+3: **Stack:** Node.js microservices / Docker Compose / PostgreSQL / Redis / Cardano (Aiken) / React frontends
+4: **GitHub:** git@github.com:Secuura/Distributed_Secuura.git
+5: **Live:** No public domain yet — `secuura.com` is **not owned** (parked for sale; do not link to it).
+6: 
+7: > **⚠ Demo env moved to a single VM on 2026-07-08 (cost pivot, KS-414).** The Container Apps
+8: > deployment below (`secuura02-demo-*` at `kindtree-935b2ded.…azurecontainerapps.io`) is **DELETED** —
+9: > those URLs are DEAD. (Actually deleted **2026-07-31**: the 07-08 teardown silently failed — env
+10: > delete refused with 24 apps still inside, never retried — and the apps billed ~$12.4/day for 23
+11: > days. Delete apps BEFORE the env; verify with `az resource list`, not the teardown's exit code.) The live demo is now the **compose stack on one VM** at
+12: > **`https://demo-pk.secuura.net`** (the pre-existing `demo-pk` CNAME repointed to the VM;
+13: > Azure fallback `https://secuura02-demo.southeastasia.cloudapp.azure.com` also served).
+14: > One host, paths: Issuer `/`, Verifier `/verify/`, Admin `/admin/`, API (Platform S) `/api/`;
+15: > Caddy auto-TLS → nginx gateway. VM `secuura02-demo-vm` (B2pls_v2 ARM), SSH key
+16: > `3_Access_Keys/vm_secuura02_demo`, stack at `/home/secuura/secuura/Dev`.
+17: > **Full detail + redeploy runbook + why: `Blockchain/Dev/deployment/DEPLOYMENT-ARCHITECTURE.md`.**
+18: > **⚠ Migrations are BAKED into an image — rsyncing a `.sql` does nothing on its own (2026-08-07).**
+19: > The `migrations` compose service builds from `services/originate/Dockerfile`, so `migrations/*.sql`
+20: > ships inside that image. Rebuild `migrations` alongside the service images, then **verify the schema
+21: > changed directly** — the runner prints `applied=N failed=0` even when it never saw the new file.
+22: > Caught on the KS-564 deploy: 043 silently didn't apply while the runner reported success. A correct
+23: > run prints an explicit `Applying 043_….sql`. (Inverse trap: the OpenAPI spec is bind-mounted, not
+24: > baked — there a rebuild is the thing that does nothing.)
+25: > The Container Apps sections that follow are retained as the **production-scale template**, not the
+26: > current live env — treat every `secuura02-demo-*` Container App URL / `deploy.sh -e demo` reference
+27: > below as the future-scale path, not today's demo.
+28: 
+29: **PRIMARY / LIVE (Container Apps — DECOMMISSIONED 2026-07-08, kept as the production-scale template):** single `demo` env (no dev) on Azure Container Apps at suffix `kindtree-935b2ded.southeastasia.azurecontainerapps.io` — issuer `secuura02-demo-issuer`, admin `secuura02-demo-admin`, verifier `secuura02-demo-verifier`, API `secuura02-demo-api`, Outlook add-in `secuura02-demo-outlook`. Deploy ID `secuura02`, region southeastasia (Singapore), `SIMULATE_ANCHORING=true`. Tenant `efc17e5f-7637-4118-b92c-c5236d591cad` (`philipcuffyahooco.onmicrosoft.com`), sub `a0ee7d32-2e4a-47a0-9a49-9c001817a545`. **OLD env (`secuura01`, old Secuura tenant, uksouth) — DECOMMISSIONED + DEAD (2026-06-25); gone — never deploy or reference.** Stale pointers to its dead URLs were repointed to secuura02 (KS-333). Full resource/URL detail archived in `5_Project_History/AZURE-MIGRATION-2026-06-17.md`.
+30: 
+31: ## Overview
+32: Document authenticity platform anchored on the Cardano blockchain. A microservices monorepo with 15+ backend services (API gateway, auth, originate, anchoring, timestamping, KYC, analytics, M365 integration, etc.) and three React frontends (Issuer Portal, Verifier Portal, Admin Dashboard).
+33: 
+34: ## Architecture
+35: ```
+36: Blockchain/Dev/
+37: ├── services/          # 15+ Node.js microservices (auth, originate, anchoring, etc.)
+38: ├── frontend/          # React apps: issuer/, verifier/, admin/
+39: ├── contracts/         # Aiken smart contracts (Cardano)
+40: ├── packages/          # Shared: validation (Zod), pagination, Redis cache, DB
+41: ├── migrations/        # Prisma/PostgreSQL migrations
+42: ├── deployment/azure/  # Azure deploy scripts
+43: ├── systemTest/        # E2E + integration tests — has its own auto-loaded systemTest/CLAUDE.md (test standards)
+44: └── docker-compose.yml # Dev orchestration (Compose v2)
+45: ```
+46: 
+47: ## Local Development
+48: ```bash
+49: # All services via nginx gateway
+50: docker compose -f docker-compose.local.yml up -d
+51: 
+52: # Or just the platform
+53: cd Blockchain/Dev
+54: docker compose up -d
+55: ```
+56: 
+57: **Local URLs (via gateway on 6882):**
+58: - Issuer Portal: http://localhost:6882/
+59: - Verifier Portal: http://localhost:6882/verify/
+60: - Admin Dashboard: http://localhost:6882/admin/
+61: - API Gateway: http://localhost:6882/api/
+62: - Marketing Website: http://localhost:6881
+63: - Tokenomics Website: http://localhost:8881
+64: 
+65: **Infrastructure ports:**
+66: - Postgres: 5432 | Redis: 6379 | Cardano devnet: 6092 | Yaci Store API: 6092
+67: 
+68: ## Environments
+69: 
+70: ### 1. Local
+71: ```bash
+72: docker compose -f docker-compose.local.yml up -d
+73: # OR for platform only:
+74: cd Blockchain/Dev && docker compose up -d
+75: ```
+76: URLs: gateway=http://localhost:6882, website=http://localhost:6881, tokenomics=http://localhost:8881
+77: 
+78: ### 2. Azure Demo — PRIMARY / LIVE (new Founders Hub tenant, single demo env)
+79: ```bash
+80: cd Blockchain/Dev/deployment/azure
+81: ./deploy.sh -e demo setup     # Create infra (first time)
+82: ./deploy.sh -e demo build     # Build + push images (date-pinned)
+83: ./deploy.sh -e demo services  # Deploy services to demo
+84: ./deploy.sh -e demo status    # Check status
+85: ./deploy.sh verify            # Post-deploy health checks
+86: ```
+87: | Resource | Value |
+88: |---|---|
+89: | Deployment ID | secuura02 |
+90: | Resource Group | secuura-demo-rg |
+91: | Key Vault | secuura02-demo-kv |
+92: | ACR | secuura02demoacr.azurecr.io |
+93: | PostgreSQL | secuura02-demo-pg (v15) |
+94: | Storage | secuura02demostor |
+95: | Container Apps env | secuura02-demo-env |
+96: | Redis | in-env container (Cache-for-Redis classic retired by Azure) |
+97: | Anchoring | **Real Cardano `preview` testnet** on today's VM demo (`SIMULATE_ANCHORING` unset; Blockfrost + platform wallet configured — verified live 2026-07-30). The `SIMULATE_ANCHORING=true` in the Container Apps block above is historical. **Local must NOT share demo's `PLATFORM_WALLET_MNEMONIC`** — it did until 2026-07-30 and the two raced for the same UTxOs (`All inputs are spent`, 295 local + 2 demo failures; KS-535). Local now runs mock mode (blank mnemonic), which is honestly labelled since KS-520/522. See `env.example`. |
+98: | Region | southeastasia (Singapore) |
+99: 
+100: **Live URLs (suffix `kindtree-935b2ded.southeastasia.azurecontainerapps.io`):**
+101: - Issuer  `https://secuura02-demo-issuer.kindtree-935b2ded.southeastasia.azurecontainerapps.io`
+102: - Admin   `https://secuura02-demo-admin.kindtree-935b2ded.southeastasia.azurecontainerapps.io`
+103: - Verifier `https://secuura02-demo-verifier.kindtree-935b2ded.southeastasia.azurecontainerapps.io`
+104: - API     `https://secuura02-demo-api.kindtree-935b2ded.southeastasia.azurecontainerapps.io`
+105: - Outlook add-in `https://secuura02-demo-outlook.kindtree-935b2ded.southeastasia.azurecontainerapps.io`
+106: 
+107: **Demo login:** demo@secuura.io / demo123 (seeded via ENABLE_DEMO_SEED)
+108: 
+109: Deployment ID: `secuura02` | Region: `southeastasia` (Singapore)
+110: Tenant: `philipcuffyahooco.onmicrosoft.com` (`efc17e5f-7637-4118-b92c-c5236d591cad`) | Subscription: `a0ee7d32-2e4a-47a0-9a49-9c001817a545`
+111: Deploy tooling on branch `feature/azure-new-tenant-migration`.
+112: 
+113: **Login before deploying:**
+114: ```bash
+115: az login --tenant efc17e5f-7637-4118-b92c-c5236d591cad   # philipcuffyahooco.onmicrosoft.com
+116: az account set --subscription a0ee7d32-2e4a-47a0-9a49-9c001817a545
+117: ```
+118: 
+119: ### 3. OLD Azure (dev + demo) — DECOMMISSIONED + DEAD (2026-06-25)
+120: The previous environment (deploy ID `secuura01`, old Secuura tenant `anupambaidyasecuura.onmicrosoft.com` / `4012a4e8-26db-400b-b933-75f9931ed6e2`, sub `27ef4264-2527-4980-985f-2e79829bdd4c`, region uksouth) was migrated to the new Founders Hub tenant on 2026-06 and **decommissioned/deleted on 2026-06-25 — it is gone; never deploy or reference it.** Stale code/config pointers to its dead URL suffixes (`blackmoss-2a7eea0b` demo / `gentlebush-21213dc4` dev / `yellowground-ae96b9b1`) were repointed to secuura02 in KS-333. Full old resource names are archived in `5_Project_History/AZURE-MIGRATION-2026-06-17.md`.
+121: 
+122: ### Post-Deploy Verification
+123: ```bash
+124: ./deploy.sh verify   # Checks REDIS_URL on all services, portal health, API health, login
+125: ```
+126: 
+127: ## Environment Setup
+128: ```bash
+129: # One-shot: copies .env / .env.local from examples and generates PII keys
+130: ./Blockchain/Dev/scripts/bootstrap-env.sh
+131: 
+132: # Edit .env.local with OAuth/IdP credentials (gitignored)
+133: ```
+134: 
+135: The bootstrap script is idempotent — re-run anytime. It only fills blanks and
+136: will not overwrite values you've already set.
+137: 
+138: ## AI Behaviour Rules
+139: 
+140: **Package Manager**
+141: - Always use `pip3`, never `pip` — applies to all install commands, scripts, and documentation
+142: 
+143: **Python Version**
+144: - All Python code changes must target **Python 3.14+** — no exceptions
+145: - Use Python 3.14+ syntax exclusively: `X | None` (not `Optional[X]`), `dict[K, V]` (not `Dict[K, V]`), `list[T]` (not `List[T]`), `tuple[A, B]` (not `Tuple[A, B]`)
+146: - Do not add compatibility shims, `from __future__ import annotations`, or `typing_extensions` imports to work around 3.14 syntax
+147: - **Check `python3 --version` before running or validating any Python code in the sandbox.** If it reports below 3.14 (e.g. 3.10), do not run/validate Python in-sandbox — tell the user to run quality gates locally in their 3.14 venv. If it reports 3.14+, in-sandbox runs are fine (subject to network access for dependency installs).
+148: 
+149: **Runtime versions — LTS only (Peter, 2026-10-06)**
+150: - Run, build and test on the **Long-Term-Support** release of every runtime, base image and OS — never a "Current"/non-LTS line. Node: an even-numbered LTS line (24 today; never an odd-numbered Current release); Java: the latest LTS JDK; Ubuntu: an LTS release; Docker base images: pin an LTS tag (e.g. `node:24-alpine`). For any other runtime, use the release its own support policy calls long-term or stable.
+151: - **Python has no LTS programme.** The rule there is the newest patch release of the supported minor (Python 3.14 → floor 3.14.8, enforced by `systemTest/schemathesis/scripts/python_pin.py`) — that is the documented exception, not a second rule.
+152: - **Check the LTS status at bump time from the vendor's release schedule — never from memory.** A tool that forces a non-LTS runtime is a time-boxed bridge with a ticket, not a decision (precedent: KS-422, Android AGP vs JDK).
+153: - This is an environment rule: it changes no test, no assertion and no expected result. Results are quoted as measured on the LTS versions; if a result was NOT measured on an LTS version, say so in the Test Evidence block.
+154: 
+155: **Secrets — report the problem, never solve it**
+156: - **Never open, read, quote or edit a secrets file in a session** — `.env`, `.env.local`,
+157:   rendered `Docker.appsettings.*` configs, Key Vault / Secrets Manager output, or any
+158:   restored local-secrets file. Reading one costs the team a full rotation of everything
+159:   in it (this happened on platform-s PS-309, 2026-07-17).
+160: - **When an issue involves secrets, report it and stop.** Name the file and the symptom,
+161:   say which *key* to check and what shape its value should have, and let a person make
+162:   the change. Naming a key is fine; seeing its value is not — no patch, no worked
+163:   example, no "just set it to…".
+164: - A diagnosis that dead-ends at that boundary is the correct outcome. Say so explicitly
+165:   and hand the step over rather than looking.
+166: 
+167: **External repositories — never create a GitHub cross-reference (KS-1270 / KS-1271, 2026-09-18)**
+168: - In anything GitHub renders as a commit message, PR title/body/review, issue or comment, refer
+169:   to another organisation's issue or PR in **plain words only** (`upstream schemathesis issue
+170:   4807`) — never a full `github.com/<owner>/<repo>/...` URL and never `owner/repo#N`. GitHub
+171:   turns either into a public, undeletable cross-reference on the other repository naming this
+172:   private one (it happened on PR #1047). `Secuura/…` links and links inside tracked files are fine.
+173: - Applies to every repository and every commit/PR Claude writes, not only systemTest. The full
+174:   rule, the incident and the pre-push grep live in `systemTest/CLAUDE.md` → *No links to other
+175:   organisations' issues or PRs in git metadata (MUST)* — one canonical text; do not duplicate it.
+176: 
+177: **Scope discipline**
+178: - Fix only what is explicitly requested — never infer extra tasks from hedging phrases like "may need", "could check", or "might want"
+179: - When asked to "comply" with a standard: run the quality command, fix only what it flags, stop
+180: - Do not fetch external URLs, changelogs, GitHub releases, or package registries unless the current message explicitly instructs it
+181: 
+182: ## Document naming — systemTest folder
+183: 
+184: All Markdown documentation (`.md` files) created anywhere in the `systemTest/` folder and its
+185: subfolders must follow **kebab-case naming convention**:
+186: 
+187: **Format:** `example-document-name.md`
+188: - All lowercase letters
+189: - Words separated by hyphens (`-`)
+190: - No spaces, underscores, or camelCase
+191: - No uppercase letters
+192: 
+193: **Examples (correct):** `getting-started.md`, `how-to-test-secuura.md`, `openapi-explorer.md`,
+194: `test-data-management.md`, `error-handling-guide.md`
+195: 
+196: **Examples (incorrect — do NOT use):** `GettingStarted.md` (PascalCase), `getting_started.md`
+197: (snake_case), `Getting Started.md` (spaces), `gettingStarted.md` (camelCase)
+198: 
+199: `README.md` and `CLAUDE.md` are the two exceptions, by universal convention — and renaming
+200: `CLAUDE.md` would stop the tooling finding it.
+201: 
+202: **This is the single source for the rule (KS-682).** It previously existed twice and the two
+203: copies contradicted each other: this file said kebab-case while `systemTest/CLAUDE.md` said
+204: snake_case and listed `getting-started.md` as ❌. Fourteen files across six packages had been
+205: named to the snake_case copy. Keep the rule here only; a second copy is how they diverged.
+206: 
+207: ## Key Rules
+208: - .env and .env.local are gitignored — never commit
+209: - **Docker stack slots are a LOCAL-HOST mechanism only (MUST, 2026-09-14).** `SECUURA_STACK_SLOT`
+210:   / `STACK_SLOT` (KS-666) select an isolated stack — ports offset by `100*(N-1)`, own compose
+211:   project, volumes, network and `secuura-sN-*` container names — **for a build on the developer's
+212:   local host and nothing else.** The slot number MUST NOT be applied to, or assumed by, any other
+213:   related build: the VM demo (`demo-pk.secuura.net`, `/home/secuura/secuura/Dev`), the Azure
+214:   Container Apps template, CI/pre-merge runs, or a teammate's machine. Those build and run
+215:   unslotted — historic ports, historic names — and a slot number in their commands, env files,
+216:   compose overrides or docs is a defect. Pass the slot on the command line of the local build
+217:   (`SECUURA_STACK_SLOT=N ./Start_Up/start-secuura.sh …`, `STACK_SLOT=N npm test`); never bake it
+218:   into anything that leaves the host.
+219: - **Every slot value is CALCULATED from slot 1 (MUST, 2026-09-14).** Slot 1 holds the historic
+220:   bases (gateway 6882, Postgres 6432, Redis 6379, tokenomics 8881, website 6881, prefix `secuura`,
+221:   Compose's default project); slot N is derived from them — port `base + 100*(N-1)`, prefix
+222:   `secuura-sN`, project `secuura_slotN` — in exactly one place, `Blockchain/Dev/scripts/stack_env.sh`
+223:   (`systemTest/slot-target.sh` for the harnesses). Nothing else types a per-slot number: no
+224:   `6982`/`7182`/`secuura-s2-…` literal in code, compose overrides, env files, tests or docs. Tests
+225:   that assert a slot's ports or names compute the expectation from the slot-1 base too
+226:   (`Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh` is the shape), so a wrong
+227:   literal cannot pass against an equally wrong literal.
+228: - Use `docker compose` (v2), NOT `docker-compose` (v1) — local dev is on Docker Desktop
+229: - Cardano smart contracts are in Aiken (not Solidity)
+230: - **Live tenant is the new Founders Hub tenant** `efc17e5f-7637-4118-b92c-c5236d591cad` (`philipcuffyahooco.onmicrosoft.com`), sub `a0ee7d32-...`. The OLD Secuura tenant `4012a4e8-26db-400b-b933-75f9931ed6e2` was **decommissioned + is dead (2026-06-25)**. Both differ from Datasec (kreiser.org Default Directory).
+231: 
+232: ## Backend validation standards (services + packages)
+233: - **Trim user-facing string fields (KS-202).** Every Zod schema for a free-text
+234:   user input — name, title, description, reason, label, code, email, org/domain,
+235:   phone — must call `.trim()`, and `.trim()` must come **before** `.min()`,
+236:   `.max()`, `.email()`, or any content check so the constraint applies to the
+237:   trimmed value (`z.string().trim().min(1)` rejects `'   '`; `.min(1).trim()`
+238:   does not). Compose from the shared bases (`@secuura/shared` `emailSchema`/
+239:   `nonEmptyStringSchema`; `services/shared` `SafeStringSchema`/`EmailSchema`) so
+240:   the fix propagates. **Do NOT trim** passwords, tokens, hashes, API keys,
+241:   Base64 payloads, or free-form `metadata` values — trimming corrupts those.
+242: - **Keep base string schemas chainable.** Express content checks on a base
+243:   string schema with `.regex()` (returns `ZodString`, still `.min()/.max()`-able),
+244:   not `.refine()` (returns `ZodEffects`, which has no `.min()/.max()` and throws
+245:   "min is not a function" at module load if a derived schema chains them).
+246: 
+247: ## Branching — Git Flow (adopted 2026-05-25, KS-137)
+248: `main` = stability/production (always releasable; only `release/*` + `hotfix/*` merge here).
+249: `develop` = integration; `feature/*` branch from and merge into `develop`; `release/*` and
+250: `hotfix/*` fold back into both. Use Linear's suggested `gitBranchName` for ticketed work.
+251: Nothing reaches `main`/`release/*` without the pre-merge gate green (KS-105).
+252: Full model: **`Blockchain/Dev/CONTRIBUTING.md` → Branching Model**.
+253: 
+254: **Pull-request rules (always):**
+255: - **Every PR summary/description MUST include the Linear ticket URL** (e.g.
+256:   `https://linear.app/secuura/issue/KS-390`). When opening or updating a PR, put the
+257:   ticket link in the summary so the PR ↔ ticket link is one click away.
+258: - **Before merging a PR, the pre-merge suites MUST be run and pass, and the author
+259:   acknowledges it in the PR description.** The pre-merge tiers are the Schemathesis
+260:   sweep (`pre-merge-platform-suites.yml` → `run.py pre-merge`) and the Akto scan
+261:   (`npm run test:pre-merge`); the workflow is `workflow_dispatch`-disabled, so trigger
+262:   it manually (or run the two suites locally) and confirm green — the fast PR gate
+263:   alone is not sufficient. **The PR template (`.github/pull_request_template.md`)
+264:   seeds two author-acknowledgment checkboxes (Schemathesis, Akto) + a Linear line**,
+265:   and **`.github/workflows/pr-premerge-ack.yml`** enforces them with three checks —
+266:   **`Pre-merge acknowledged — Schemathesis`**, **`Pre-merge acknowledged — Akto`**,
+267:   **`Linear ticket present`** (drafts exempt). **Built OFF by default:** while the repo
+268:   Variable `ENFORCE_PREMERGE_ACK` is unset, a missing box/ticket only **warns** and the
+269:   check still **passes green** (so nothing shows red before it's turned on). To enforce:
+270:   (1) set `ENFORCE_PREMERGE_ACK=true` (`gh variable set ENFORCE_PREMERGE_ACK --body true`)
+271:   so a missing box/ticket fails the check, then (2) add the check names to the develop AND
+272:   main `require-pr-gates` rulesets and turn on required reviews = 1 (any writer). *[NOT APPLIED (2026-09-11, KS-1095): the pending ruling is raise-to-1 (Kam's card `secuura-required-approvals-zero-after-the-untick`; Kam applies it himself; not yet applied) - do not turn it on while fleet PRs carry 0 GitHub reviews: it would block every fleet merge.]* The former
+273:   Environment-based sign-off jobs were removed in favour of this checkbox approach.
+274: 
+275: 
+276: ### Merge flow (Kam-adopted 2026-08-25) — supersedes "nothing merges"
+277: 
+278: Kam adopted Stuart's proposal with Peter's amendments on **2026-08-25**:
+279: *"Happy with that   Work this into our current flow and follow it going forward."*
+280: It is the standing flow, permanently — GitHub Actions is **retired** for this repo
+281: (Kam, 2026-08-27: *"billing will not be fixed. Please find and use a workaround
+282: (this new process) going forward."*), so there is no CI state to revert to.
+283: 
+284: - Branch → **test your own work** → commit → push → PR.
+285: - The PR description carries a **Test Evidence** block: **touched / ran / NOT run /
+286:   migrations+config**. Honest "NOT run" lines are the point of it.
+287: - Peter runs periodic formal test passes; demo (UAT) is updated after his nod.
+288: - **We approve our own work; the author merges once it is TESTED** (Kam, 2026-09-11, on Stuart's forwarded proposal):
+289:   16:56:00 *"For the time being, I / you will approve our own elements"* ·
+290:   16:56:44 *"based on this.  FIx and merge all tickets after they are tested"* ·
+291:   16:58:04 *"yes, still run all our own tests to make sure we only commit things that are working and tested."*
+292:   **TESTED** = a QA gate verdict (GO or GO WITH FINDINGS) at the PR's current head + a Test Evidence block + our own suites.
+293:   **Wednesday's GO, naming the head SHA, is the approval.** Peter runs periodic formal test passes; demo (UAT) is updated only after his nod.
+294: - Then pull `develop` and **manual deploy by the PR issuer** where one applies — demo (UAT) only after Peter's nod.
+295: - **The ticket and the review must not sit with the same person.**
+296: - **Untested, or no GO → no merge.** Never push straight to `develop`.
+297: 
+298: *Amended 2026-09-11 (KS-1092, s182, as ruled by Wednesday: ANSWER to s182, 09:26:14Z) to match the project-root copy. The
+299: third, fourth and last bullets above replace the 2026-08-25 wording that made Peter the per-PR reviewer and his approval the
+300: signal to merge.*
+301: 
+302: ⚠ **`mergeable_state: clean` is NOT "tested".** With no checks running it means only
+303: that no required check is failing or pending — not that one ran. The **Test Evidence
+304: block carries the testing claim**; `mergeable_state` carries none of it. (See *Required checks and
+305: `mergeStateStatus` — RETIRED* below, and KS-660.)
+306: 
+307: **The gate is a TESTED PR (see *Merge flow* / step 6) + Wednesday's GO naming the head SHA, with the Test Evidence block filled from LOCAL runs** — the four
+308: platform suites (Schemathesis · Akto · Playwright · Performance/k6) plus the touched
+309: services' unit suites, run by the author as the **final check before handover**
+310: (Kam, 2026-08-27: *"we run with the tests and add to the pr and then Peter checks our
+311: results with his red pen … always run as a final check"*). Every retired CI job maps
+312: to a local command in `Blockchain/Dev/docs/DEV-PROCESS.md` §Manual CI-gate equivalents.
+313: Never dispatch `pre-merge-platform-suites.yml` (KS-441).
+314: 
+315: ⚠ **Branch protection enforces NOTHING right now — measured 2026-08-27.** All 20
+316: conflict-free open PRs read `mergeable_state: clean`, **including 18 with zero
+317: approvals**; `blocked` appears **zero** times across 24 open PRs, while the same field
+318: returns `dirty` (2) and `unstable` (2) — so the instrument discriminates. The
+319: branch-protection API 403s the `kksecura` PAT, so this is indirect; org-admin should
+320: confirm. **Consequence: "no approval → no merge" is a rule we keep, not one GitHub
+321: enforces** — nothing technical stopped #731 being self-merged unapproved.
+322: *[Superseded 2026-09-11 (s181, as ruled by Wednesday): that rule sentence is replaced by Kam's 16:56 ruling — the
+323: merge rule is now "untested, or no GO → no merge" (Merge flow, above). The 2026-08-27 measurement in this paragraph
+324: stands as written.]* And with
+325: Actions retired, "Require status checks to pass before merging" must **never** be
+326: enabled: it would be permanently unsatisfiable and block every merge.
+327: 
+328: Written up properly under **KS-685** (Stuart owns that write-up).
+329: 
+330: ## Linear project tracking — keep the relevant project updated for related tickets (ALL Secuura-PK / KS projects)
+331: Every piece of KS work belongs to a Linear **project** (team **Secuura-PK**, key **KS**), and
+332: each project typically has an umbrella/tracker issue. **Rule — always keep the ticket's project
+333: updated:** whenever you create or work a ticket, or a related finding / bug / CVE / out-of-date
+334: dependency / decision surfaces, (1) add the item to that project's tracker/register — append a
+335: comment if you shouldn't rewrite an existing register — (2) keep the umbrella issue's
+336: status/sequencing current, and (3) cross-reference. File new work as a child of, or linked to,
+337: the correct project; **don't leave KS work loose in the backlog unlinked from its project.**
+338: This keeps each project the single source of truth for its area. Applies to **every** Secuura-PK
+339: project — e.g. Schemathesis API Contract Testing, Akto OWASP Security Scanning, Security/Privacy
+340: & Compliance, ID Integration, and the Security Review project below.
+341: 
+342: **Reassignment scope — KS-485 (2026-09-06 10:24):** "once something is assigned to someone
+343: it belongs to them. the ruling was only to new or unassigned items." Platform K tickets already on a
+344: person's name are never moved to the board account; only new or unassigned ones are.
+345: 
+346: **Instance — Security Review — Platform K** (project id `ec29c312-1fc0-4370-9580-f2469e52b5be`):
+347: the standing home + single source of truth for all platform-k security work. Umbrella plan
+348: **KS-485** (grounded against `develop`; re-ground when the branch materially moves). Work-streams:
+349: **KS-486** A — authN/authZ/tenancy/IDOR · **KS-487** B — input validation/injection/upload/XSS/
+350: SSRF/crypto · **KS-488** C — S↔K channel/payments/integrations · **KS-489** D — blockchain/
+351: anchoring/smart-contract integrity · **KS-490** E — deployment/containers/CI-CD supply chain ·
+352: **KS-491** F — edge/WAF/DDoS/anti-automation · **KS-492** G — systemTest security regression
+353: coverage (**Peter-owned**) · **KS-493** H — dependency currency & known-vuln upgrades. **Kamil
+354: owns A–F + H; Peter owns all systemTest security work (G).** New platform-k vuln / CVE / dep-drift
+355: → add the finding (`file:line` + severity) to the matching work-stream register (append a comment
+356: if you shouldn't rewrite it) and keep KS-485's register + remediation sequencing current; new
+357: work-streams become child issues of KS-485; security regressions land in systemTest under KS-492.
+358: 
+359: ## Pre-push preflight (KS-380) — run before pushing a feature branch
+360: Before pushing platform (services/frontends/spec/deps) changes, run
+361: `bash Blockchain/Dev/scripts/preflight/preflight.sh` and clear anything it flags. It
+362: runs the cheap cross-cutting sweeps the per-package gates miss — the mistakes
+363: recent builds leaked to review: **OpenAPI spec drift** (`check:openapi`),
+364: **lockfile clean-room** (`npm ci --dry-run` per standalone lock — KS-374/376/#399),
+365: **spec-auth conformance** (every bearer-authed operation must 401/403 when
+366: called unauthenticated — the KS-375 class; needs the local stack up on :6882),
+367: **path resolvability** (every published op must route — AUTHED probe, fails
+368: on the gateway's "Route … not found" 404; the KS-473 class the unauth sweep
+369: can't see. Known-unroutable exceptions go in the script's `KNOWN_UNROUTABLE`
+370: with a ticket ref, and come out when the ticket resolves), and the
+371: **npm-audit gate** (KS-470 — ambient `npm audit` output is OFF in .npmrc; a
+372: new or lapsed advisory outside the triaged
+373: `scripts/audit/audit-baseline.json` fails, `npm run audit:gate` to run it
+374: alone; baseline entries need a reason + ticket, temporary ones an `expires`;
+375: **KS-1024 (2026-09-09)** "Bump the pins instead of accepting them - removes the vulnerable
+376: code rather than recording a decision to live with it" — so where a fixed version exists, bump
+377: the pin rather than baselining the advisory; **KS-1077 (2026-09-10)** chose
+378: `one-list-triage-two` over `populate-ci-list` — one GHSA-keyed `audit-baseline.json` is the
+379: single triage list, not a second populated CI allow-list),
+380: and the **standalone-lock audit** (KS-531 — the npm-audit gate resolves the
+381: HOISTED workspace tree, which dedupes away versions a service's own lock still
+382: pins and ships in its image, so `npm run audit:locks` reads the lockfiles
+383: directly and matches their pins against the registry's advisory data, sharing
+384: the same baseline. The corpus is DERIVED, not typed: every tracked
+385: `package-lock.json` (`git ls-files '*package-lock.json'` — 45 at develop
+386: e02e15811), minus the `Blockchain/Dev` workspace root that `audit:gate`
+387: covers, minus whatever is enumerated in `OUT_OF_SCOPE_LOCKS` — 43 scanned
+388: today. The old figure of 35 was the count a four-directory walk under
+389: `Blockchain/Dev` could see; it could not reach `systemTest/` or
+390: `connectors/` at any depth, and the gate now prints the number with the
+391: command that reproduces it rather than a constant that goes stale. Note: `npm audit` run *inside* a workspace member does NOT
+392: read that member's lock — it audits the hoisted tree, which is why this reads
+393: the lockfiles itself; see the header of `scripts/audit/audit-locks.mjs`).
+394: The **test-file type-check ratchet** (KS-1000 / KS-1487, leg 16) runs at push time too: a service's
+395: `tsconfig.json` excludes `src/__tests__`, so `tsc` over the service had never examined a test file, and
+396: `scripts/typecheck-tests/check.cjs` checks them against a baseline that can only shrink. A push that adds a
+397: test-file type error is refused; `npm run check:test-types` runs it alone, and `--update` only ever LOWERS the
+398: baseline (it refuses to admit a new error). Leg 16 gates `services/auth`, `services/api-gateway`, `services/vc-issuer`, `services/security` and `services/m365-integration` (the script's default list; vc-issuer
+399: added by KS-1351 item 3 with an EMPTY baseline, so any type error in its tests is new), and
+400: `npm run check:test-types` runs the same five (KS-1090, KS-1351, KS-1554), each against its own baseline. A baseline entry is keyed by file + code +
+401: a fingerprint of the message, so fixing one error and adding another of the same code is a swap and fails (KS-1489); an old
+402: count-only baseline is converted with `--rekey`, which can lower it and refuses to admit more. The baseline also records
+403: `examined-test-files <N>` as a floor: fewer examined test files fails, so **a PR that deletes an auth, api-gateway, vc-issuer, security or m365-integration test file
+404: must run `node scripts/typecheck-tests/check.cjs <service> --update`** and commit the lowered floor; a `@ts-nocheck` in a test fails too.
+405: **What it does NOT catch:** `// @ts-ignore` and `// @ts-expect-error` are not policed (on a new error in a file the baseline does not list they
+406: pass; on a baselined error they make the entry stale, which fails), and the floor only protects down to its last recorded value. The
+407: fingerprint is of the message with the checkout's absolute path removed (tsc names it in TS1192/TS2307/TS2305), so a baseline made in one
+408: clone reads in every other. The full list is in the header of `check.cjs`.
+409: **A stale `@secuura/shared` build is exit 2, not a false red (KS-1517).** The checker reports a stale
+410: workspace build **from tsc's own diagnostics**: it exits 2 only on a diagnostic whose **code** is `TS2307`
+411: (tsc could not resolve the module) or `TS7016` (it found no declaration for it) **and** whose message
+412: **begins** with that phrase, naming an installed `@secuura/*` package whose mapped declaration target is
+413: genuinely absent from disk. (Both the code and the anchor are needed: the round 2 gate showed a `TS2322`
+414: quoting "Cannot find module '@secuura/...'" inside a string-literal type passing a text-only match.) Then it says "the build is
+415: stale or incomplete, so this check CANNOT RUN", names the target and `npm run build -w @secuura/shared`,
+416: and cites the diagnostic that corroborated it — instead of listing that error as a NEW error in your test
+417: file, which `--update` refuses to admit, so the red could not be silenced and the person debugged a type
+418: error that was not theirs (the #1504 gate hit exactly this).
+419: **Where tsc is happy, it cannot exit 2** — measured across 50 such shapes by the round 2 gate — **and the
+420: note cannot crash it**: the scan that feeds the note reads only regular files under a size cap, and the
+421: whole note is wrapped so that any throw costs the note and nothing else. Round 1 of this change tried to
+422: decide it BEFORE tsc ran, by resolving `typesVersions` the way TypeScript does; two gates found six shapes
+423: where that differs (first-match versus longest-prefix keys, a version range other than `*`, a redirected
+424: `types` field, extensionless and wildcard targets, a mixed array) and each exited 2 on a build tsc accepts.
+425: Emulating a resolver was the wrong shape of answer. **Where tsc is NOT happy the resolver still matters**,
+426: and it is not TypeScript's (it takes the first matching key, and reads only the `*` version range). So in
+427: contrived shapes it can name the wrong file, or call a permanently-absent target "stale, rebuild it" — and
+428: had such a `TS2307`/`TS7016` been **baselined**, that would refuse a push develop accepts. Both committed
+429: baselines hold **zero** such entries (measured 2026-10-13). One judged stale cannot get in — the exit 2
+430: runs before `--init` or `--update` writes, and `--update` admits nothing new — but `--init` can still
+431: admit one whose target is on disk at the time. The residue is ticketed.
+432: Two cases are deliberately NOT failures: a gap in the `exports` (runtime `.js`) target alone, which
+433: type-checks cleanly and prints a note; and a subpath the package declares **no** declaration target for,
+434: which is an import of something that does not exist and so is the author's own error, left to tsc.
+435: `npm ci` does not rebuild the package here (`Blockchain/Dev/.npmrc` sets `ignore-scripts=true`).
+436: It's additive to `npm test`/systemTest, not a replacement.
+437: **Running the preflight from a `git worktree`? `npm ci` in it once first (KS-691).**
+438: `node_modules` is gitignored and the root lock places ~218 deps in *nested* trees,
+439: so a fresh worktree has none. Nothing-installed is reported honestly (KS-469); the
+440: *partial* state — root present, nested absent — used to be announced as "spec
+441: drifted" and is now caught by `scripts/preflight/deps-present.sh`. The standalone
+442: `scripts/preflight` and `scripts/audit` members install themselves on first run.
+443: Spec-only changes still have a live surface: the **api-gateway image bundles
+444: `docs/openapi/secuura-api.yaml`** (served at `/api/docs` + the raw
+445: `.yaml`/`.json` routes, and driving the gateway's spec-auth gate + 405 map).
+446: **How to pick that change up differs by target — and the local case is NOT a
+447: rebuild (corrected 2026-08-19, Kamil's KS-256 review §9):**
+448: - **Deployed targets** (Container Apps / the VM's built images) — the spec is
+449:   baked in, so **rebuild api-gateway**.
+450: - **Local compose** — the spec is **bind-mounted**, not baked
+451:   (the `secuura-api.yaml:/app/docs/openapi/secuura-api.yaml:ro` line in
+452:   `docker-compose.yml`), and since KS-656 the gateway reads it into memory
+453:   **once at boot** (`openApiSpecRaw = readFileSync(specPath, …)` in
+454:   `api-gateway/src/index.ts`) so every spec surface has one source. So **`docker restart secuura-api-gateway`** is what
+455:   picks up a regenerated spec. A rebuild also works, but only incidentally —
+456:   it recreates the container, which re-boots it — so citing "the image bundles
+457:   the spec" as the *reason* locally is wrong and sends people on a 10-minute
+458:   rebuild for a 2-second restart.
+459: - **Verify by checksum, because the failure mode is silent.** There *is* a
+460:   dev-only `fs.watch` hot-reload, and whether it fires **depends on how the spec
+461:   was written** — an in-place rewrite (what `npm run generate-openapi` does) is
+462:   picked up; a replacement (`mv`, `rsync`, an image rebuild) is not.
+463:   **`api-gateway/src/index.ts` is the authority on that split — read the comment
+464:   above `fsWatch(specPath, …)` rather than trusting a restatement here** (measured
+465:   by Peter 2026-08-31; KS-659 tracks making the reload unconditional). Restarting is
+466:   still the reliable move, because it works for both write shapes. Worse, after a
+467:   `git checkout` the single-file bind mount keeps pointing at the **dead inode**
+468:   the old file had: the container path becomes unreadable while
+469:   `/api/docs/openapi.yaml` keeps answering **200 with the previous branch's
+470:   spec**. Kamil hit exactly this — 1,152,555 bytes served against the branch's
+471:   1,232,278. So compare `md5sum` of the served bytes against the host file
+472:   rather than trusting a 200. **If the checksums differ the mount is dead, and a
+473:   restart will NOT clear it** — a bind resolves at container *create*, so the fix
+474:   is `docker compose -f docker-compose.local.yml up -d --force-recreate --no-deps
+475:   api-gateway`. (Measured again 2026-09-02: after checking out a branch whose
+476:   spec differs, `md5sum` inside the container answered *"No such file or
+477:   directory"*; one `--force-recreate` and host and container agreed, healthy in
+478:   ~6 s.)
+479: 
+480: The swagger mount lives in `api-gateway/src/index.ts` (a dead root-level
+481: `swagger.ts` duplicate was deleted 2026-07-17 — #553/#554).
+482: ### Required checks and `mergeStateStatus` — RETIRED
+483: 
+484: > ⚠ **Historical from 2026-08-27.** GitHub Actions is retired for this repository
+485: > (Kam's decision). **None of the checks below runs any more, and branch protection
+486: > requires nothing.** Kept on record because each maps to a local runner in
+487: > `Blockchain/Dev/docs/DEV-PROCESS.md` under *Manual CI-gate equivalents* — that
+488: > table, together with a Test Evidence block filled from local runs and the TESTED
+489: > rule under *Merge flow* above (TESTED as defined there, then Wednesday's GO naming
+490: > the head SHA), is what gates a PR now.
+491: 
+492: The retired wording: *"Never merge a PR while its required checks are red or still
+493: running"* — the #403 miss — and *"the four PR suites (Schemathesis, Playwright,
+494: Security Gates, Lockfiles) gate merges once branch protection requires them
+495: (KS-380); watch a PR's state with `gh pr view <n> --json mergeStateStatus`
+496: (CLEAN = green)"*.
+497: 
+498: **`CLEAN` never meant green, and now it cannot.** With no run executing, a PR reads
+499: `CLEAN` because branch protection has no required check to hold it on — so the less a
+500: PR was verified, the cleaner it looks. Measured under the same branch protection:
+501: #718 (pushed before the stop) `UNSTABLE`; #720 (pushed during it) **`CLEAN` with zero
+502: checks ever run**.
+503: 
+504: **The detector still works and is worth keeping.** Runs from the outage return
+505: `conclusion: startup_failure` with an empty `name` and `path: BuildFailed` — GitHub
+506: never resolved the workflow files. That signature is the stop, not a pass:
+507: 
+508: ```
+509: gh api "repos/Secuura/Distributed_Secuura/actions/runs?head_sha=<sha>"
+510: ```
+511: 
+512: The `kksecura` PAT still cannot read individual check runs, so `mergeable_state` plus
+513: that runs list remain the only readable signals — and neither is evidence that
+514: anything was tested.
+515: 
+516: ## Date/time standards — UTC everywhere (KS-201)
+517: Every timestamp is a legally-significant artefact (on-chain anchoring, audit,
+518: eIDAS/UETA), so date/time handling must be unambiguous and region-independent.
+519: - **Containers run `TZ=UTC`.** Set on every backend service in
+520:   `Blockchain/Dev/docker-compose.yml` and in the Azure bicep `commonEnvVars`
+521:   (`deployment/azure/services.bicep`). Add it for any new service.
+522: - **Don't rely on local-time Date methods or local-time date-fns.** Use
+523:   `getUTCFullYear()/getUTCMonth()/getUTCDate()` (not `getFullYear()/getMonth()`),
+524:   and UTC-explicit boundaries (`services/analytics/src/utils/utcDate.ts`:
+525:   `startOfUtcDay`/`endOfUtcDay`/`startOfUtcMonth`/`endOfUtcMonth`) rather than
+526:   date-fns `startOfDay`/`endOfMonth`, which operate in the process TZ.
+527: - **Persisted/on-chain date strings must be deterministic.** Never build an
+528:   NFT/VC/anchor date with `toLocaleDateString`/`toLocaleString` (locale + TZ
+529:   dependent, and on-chain data is immutable) — format from UTC getters with
+530:   fixed month names. UI-only display formatting may still use `toLocale*`.
+531: - API responses keep `.toISOString()`; Postgres/Prisma already store `Date` as UTC.
+532: 
+533: ## Git / Deploy Key
+534: ```bash
+535: # SSH key at 3_Access_Keys/github_deploy_rw
+536: # Already wired in git config: core.sshCommand
+537: git pull   # uses deploy key automatically
+538: git push   # uses deploy key automatically
+539: ```
+540: 
+541: ## Session Start Checklist
+542: - [ ] Read this file
+543: - [ ] Check docker is running: `docker compose ps`
+544: - [ ] Verify .env and .env.local exist in Blockchain/Dev/
+545: 
+546: ## Session End Checklist
+547: - [ ] Commit and push to Secuura/Distributed_Secuura
+548: - [ ] Update 5_Project_History/history.md
+549: - [ ] Verify .env files not staged
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1709,
+ "head_sha": "f1abd08594ecdc76fee9731be32459fc3f8ecd5f",
+ "pr_tip_now": "f1abd08594ecdc76fee9731be32459fc3f8ecd5f",
+ "head_mode": "tip",
+ "merge_base": "1f2ec373bdade7298b5c29c4d144d0bddf92861f",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/package.json",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh",
+   "added": "2",
+   "deleted": "2"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh",
+   "added": "29",
+   "deleted": "15"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/scripts/preflight/test-types-ratchet.sh",
+   "added": "2",
+   "deleted": "2"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/m365-integration/tsconfig.test.json",
+   "added": "8",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts",
+   "added": "2",
+   "deleted": "4"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/security/tsconfig.test.json",
+   "added": "8",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "CLAUDE.md",
+   "added": "3",
+   "deleted": "3"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh",
+  "Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh",
+  "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh"
+ ],
+ "product_files": [
+  "Blockchain/Dev/package.json",
+  "Blockchain/Dev/scripts/preflight/test-types-ratchet.sh",
+  "Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt",
+  "Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt",
+  "Blockchain/Dev/services/m365-integration/tsconfig.test.json",
+  "Blockchain/Dev/services/security/tsconfig.test.json",
+  "CLAUDE.md"
+ ],
+ "diff_stat": {
+  "files": 12,
+  "added": 67,
+  "deleted": 29
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 5,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "ing install\nok   with no install no cell is reported FAIL\nok   CONTROL with no install the stub cells still run (the default-run stub cell reports ok)\nok   CONTROL with no install the leg-16 wiring cells still run\n\nks1513_ratchet_leg_suite_skips_real_checker_cells_without_install: 5 passed, 0 failed"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 4,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "the real leg\nok   X4 (an extra argument to the checker) fails the default-run stub cell\nok   R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell\nok   CONTROL the unmutated leg fails neither of those two stub cells\n\nks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: 4 passed, 0 failed"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 27,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "e environment would add a name: the KS-1261 class)\nok   CONTROL the plant changed the file (so the control below is not comparing a file with itself)\nok   CONTROL the same extraction SEES a planted environment read (so the cell above could fail)\n\npreflight_test_types_ratchet_leg: 27 passed, 0 failed"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh",
+   "rc": 1,
+   "ok": false,
+   "passed": 2,
+   "failed": 3,
+   "count_unparsed": false,
+   "tail": "ed FAIL\n       want \"0\", got \"7\"\nFAIL CONTROL with no install the stub cells still run (the default-run stub cell reports ok)\n       want \"1\", got \"0\"\nok   CONTROL with no install the leg-16 wiring cells still run\n\nks1513_ratchet_leg_suite_skips_real_checker_cells_without_install: 2 passed, 3 failed"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh",
+   "rc": 1,
+   "ok": false,
+   "passed": 3,
+   "failed": 1,
+   "count_unparsed": false,
+   "tail": "a argument to the checker) fails the default-run stub cell\nok   R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell\nFAIL CONTROL the unmutated leg fails neither of those two stub cells\n       want \"0 0\", got \"1 0\"\n\nks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: 3 passed, 1 failed"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh",
+   "rc": 1,
+   "ok": false,
+   "passed": 20,
+   "failed": 7,
+   "count_unparsed": false,
+   "tail": "e environment would add a name: the KS-1261 class)\nok   CONTROL the plant changed the file (so the control below is not comparing a file with itself)\nok   CONTROL the same extraction SEES a planted environment read (so the cell above could fail)\n\npreflight_test_types_ratchet_leg: 20 passed, 7 failed"
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 3,
+  "files_ok": 3,
+  "files_failed": 0,
+  "passed": 36,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 3,
+  "files_ok": 0,
+  "files_failed": 3,
+  "passed": 25,
+  "failed": 11,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 36
+}

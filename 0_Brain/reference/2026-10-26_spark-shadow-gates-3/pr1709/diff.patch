@@ -1,0 +1,270 @@
+diff --git a/Blockchain/Dev/package.json b/Blockchain/Dev/package.json
+index 4e404b339..c0b5de1d9 100644
+--- a/Blockchain/Dev/package.json
++++ b/Blockchain/Dev/package.json
+@@ -41,7 +41,7 @@
+     "postinstall": "node scripts/fix-libsodium-symlink.js && npm run build --workspaces --if-present",
+     "check:openapi": "npm run generate-openapi -- --check && npm run check:spec-examples",
+     "check:spec-examples": "node scripts/spec-examples/check-spec-examples.mjs",
+-    "check:test-types": "node scripts/typecheck-tests/check.cjs services/auth && node scripts/typecheck-tests/check.cjs services/api-gateway && node scripts/typecheck-tests/check.cjs services/vc-issuer",
++    "check:test-types": "node scripts/typecheck-tests/check.cjs services/auth && node scripts/typecheck-tests/check.cjs services/api-gateway && node scripts/typecheck-tests/check.cjs services/vc-issuer && node scripts/typecheck-tests/check.cjs services/security && node scripts/typecheck-tests/check.cjs services/m365-integration",
+     "test:auth-integration": "cd services/auth && vitest run -c vitest.integration.config.ts",
+     "verify:spec-examples": "node scripts/spec-examples/verify-spec-examples.mjs",
+     "audit:locks": "node scripts/audit/audit-locks.mjs",
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh b/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+index 949ac27da..e3c9a4446 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+@@ -50,7 +50,7 @@ check "with no install no cell is reported FAIL" "0" \
+ 
+ # --- CELL 4 (CONTROL, tip AND after): the stub cells still run -------------------
+ check "CONTROL with no install the stub cells still run (the default-run stub cell reports ok)" "1" \
+-    "$(printf '%s\n' "$out" | grep -c '^ok   CONTROL the default run (no arguments) passes with all three checkers green')"
++    "$(printf '%s\n' "$out" | grep -c '^ok   CONTROL the default run (no arguments) passes with all five checkers green')"
+ 
+ # --- CELL 5 (CONTROL, tip AND after): the wiring cells still run -----------------
+ check "CONTROL with no install the leg-16 wiring cells still run" "1" \
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh b/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+index 5b39e397c..f46046054 100644
+--- a/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+@@ -64,7 +64,7 @@ out_r1="$(run_with r1)"
+ 
+ # --- CELL 1 (RED at the tip): X4 turns the default-run stub cell red -------------
+ check "X4 (an extra argument to the checker) fails the default-run stub cell" "1" \
+-    "$(count_fail "$out_x4" 'the default run (no arguments) passes with all three checkers green')"
++    "$(count_fail "$out_x4" 'the default run (no arguments) passes with all five checkers green')"
+ 
+ # --- CELL 2 (RED at the tip): R1text turns the rc-1 wording cell red -------------
+ check "R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell" "1" \
+@@ -72,7 +72,7 @@ check "R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell" "1"
+ 
+ # --- CELL 3 (CONTROL, tip AND after): the unmutated leg fails neither cell -------
+ check "CONTROL the unmutated leg fails neither of those two stub cells" "0 0" \
+-    "$(count_fail "$out_real" 'the default run (no arguments) passes with all three checkers green') $(count_fail "$out_real" 'the rc-1 wording names a NEW test-file type error')"
++    "$(count_fail "$out_real" 'the default run (no arguments) passes with all five checkers green') $(count_fail "$out_real" 'the rc-1 wording names a NEW test-file type error')"
+ 
+ echo ""
+ echo "ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: ${PASS} passed, ${FAIL} failed"
+diff --git a/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh b/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+index f8fae8df3..e40fb1176 100644
+--- a/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+@@ -173,13 +173,13 @@ leg
+ expect "the committed tree passes the leg with no arguments (rc 0)" "0" "$LEG_RC"
+ case "$LEG_OUT" in
+   *'SKIP (advisory)'*) printf 'note no workspace install here: the default-service run skipped, so the REAL checker lines are not asserted (the stub cells below assert the default list without an install)\n' ;;
+-  *) expect "🔴 ...and the default list is ALL THREE gated services, auth, the api-gateway and vc-issuer (KS-1351), each with its own checker line" "yes yes yes" \
+-       "$(has "$LEG_OUT" 'typecheck-tests: auth (') $(has "$LEG_OUT" 'typecheck-tests: api-gateway (') $(has "$LEG_OUT" 'typecheck-tests: vc-issuer (')"
+-     expect "🔴 ...and the checker ran exactly three times, once per gated service (a fourth would be an ungated change, one fewer a dropped gate)" "3" \
++  *) expect "🔴 ...and the default list is ALL FIVE gated services, auth, the api-gateway, vc-issuer (KS-1351), security and m365-integration (KS-1554), each with its own checker line" "yes yes yes yes yes" \
++       "$(has "$LEG_OUT" 'typecheck-tests: auth (') $(has "$LEG_OUT" 'typecheck-tests: api-gateway (') $(has "$LEG_OUT" 'typecheck-tests: vc-issuer (') $(has "$LEG_OUT" 'typecheck-tests: security (') $(has "$LEG_OUT" 'typecheck-tests: m365-integration (')"
++     expect "🔴 ...and the checker ran exactly five times, once per gated service (a sixth would be an ungated change, one fewer a dropped gate)" "5" \
+        "$(printf '%s\n' "$LEG_OUT" | grep -c '^typecheck-tests: ')"
+-     expect "...and all three read 0 new and 0 stale against their baselines" "3" \
++     expect "...and all five read 0 new and 0 stale against their baselines" "5" \
+        "$(printf '%s\n' "$LEG_OUT" | grep -c '0 new; 0 stale baseline entries')"
+-     expect "🔴 ...and the verdict counts all three services" "yes" "$(has "$LEG_OUT" 'OK — 3 service(s)')" ;;
++     expect "🔴 ...and the verdict counts all five services" "yes" "$(has "$LEG_OUT" 'OK — 5 service(s)')" ;;
+ esac
+ fi
+ 
+@@ -191,7 +191,7 @@ fi
+ # service it was asked about and exits with the code the fixture gives it. They pin the leg's OWN logic - which services the
+ # default run gates, and that a non-zero code from ANY of them, the api-gateway by name, fails the run - and they need no
+ # compiler. The stub is not the checker; the cells above prove the checker.
+-mkstub() {  # mkstub <dir> <auth rc> <gateway rc> [vc-issuer rc, default 0]
++mkstub() {  # mkstub <dir> <auth rc> <gateway rc> [vc-issuer rc, default 0] [security rc, default 0] [m365-integration rc, default 0]
+   local d="$1"
+   rm -rf "$d"; mkdir -p "$d/scripts/preflight" "$d/scripts/typecheck-tests" "$d/rc"
+   cp "$LEG" "$d/scripts/preflight/test-types-ratchet.sh"
+@@ -209,18 +209,20 @@ JS
+   printf '%s' "$2" > "$d/rc/services_auth"
+   printf '%s' "$3" > "$d/rc/services_api-gateway"
+   printf '%s' "${4:-0}" > "$d/rc/services_vc-issuer"
++  printf '%s' "${5:-0}" > "$d/rc/services_security"
++  printf '%s' "${6:-0}" > "$d/rc/services_m365-integration"
+ }
+-stub() {  # stub <auth rc> <gateway rc> [vc-issuer rc]  ->  STUB_RC STUB_OUT STUB_CALLS. The default run: NO arguments, no baseline file anywhere.
++stub() {  # stub <auth rc> <gateway rc> [vc-issuer rc] [security rc] [m365-integration rc]  ->  STUB_RC STUB_OUT STUB_CALLS. The default run: NO arguments, no baseline file anywhere.
+   local d="$tmp/ks1520-root"
+-  mkstub "$d" "$1" "$2" "${3:-0}"
++  mkstub "$d" "$1" "$2" "${3:-0}" "${4:-0}" "${5:-0}"
+   STUB_OUT="$(cd "$d" && bash scripts/preflight/test-types-ratchet.sh 2>&1)"; STUB_RC=$?
+   STUB_CALLS="$([ -f "$d/calls.log" ] && tr '\n' ' ' < "$d/calls.log" || echo none)"
+ }
+ 
+ stub 0 0
+-expect "CONTROL the default run (no arguments) passes with all three checkers green, and the stub was LIVE: asked about exactly auth, the api-gateway, then vc-issuer" \
+-  "0|services/auth services/api-gateway services/vc-issuer |yes" \
+-  "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'OK — 3 service(s)')"
++expect "CONTROL the default run (no arguments) passes with all five checkers green, and the stub was LIVE: asked about exactly auth, the api-gateway, vc-issuer, security, then m365-integration" \
++  "0|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration |yes" \
++  "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'OK — 5 service(s)')"
+ stub 0 1
+ expect "🔴 the api-gateway's checker exiting 1 FAILS the default run, named (the fixture holds no baseline file, so a gate that needs one reads green)" \
+   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
+@@ -233,17 +235,29 @@ stub 0 3
+ expect "🔴 ...and so does an exit the leg does not know (3), which it names as unexpected" \
+   "1|yes" "$STUB_RC|$(has "$STUB_OUT" 'an unexpected exit')"
+ stub 1 0
+-expect "🔴 auth failing fails the default run AND the api-gateway and vc-issuer are still checked after it (no early exit)" \
+-  "1|services/auth services/api-gateway services/vc-issuer |yes" "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'FAIL — services/auth')"
++expect "🔴 auth failing fails the default run AND the api-gateway, vc-issuer, security and m365-integration are still checked after it (no early exit)" \
++  "1|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration |yes" "$STUB_RC|$STUB_CALLS|$(has "$STUB_OUT" 'FAIL — services/auth')"
+ stub 1 1
+ expect "🔴 both failing: the run fails and the output names BOTH services" "1|yes|yes" \
+   "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/auth')|$(has "$STUB_OUT" 'FAIL — services/api-gateway')"
+ stub 0 0 1
+ expect "🔴 KS-1351: vc-issuer's checker exiting 1 FAILS the default run, named — the third service is a real gate, not a passenger" \
+-  "1|yes|services/auth services/api-gateway services/vc-issuer " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$STUB_CALLS"
++  "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$STUB_CALLS"
+ stub 0 0 2
+ expect "🔴 KS-1351: ...and vc-issuer exiting 2 (could not run) fails it too, and says so" \
+   "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/vc-issuer')|$(has "$STUB_OUT" 'the check could not run')"
++stub 0 0 0 1
++expect "🔴 KS-1554: security's checker exiting 1 FAILS the default run, named — the fourth service is a real gate, not a passenger" \
++  "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/security')|$STUB_CALLS"
++stub 0 0 0 2
++expect "🔴 KS-1554: ...and security exiting 2 (could not run) fails it too, and says so" \
++  "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/security')|$(has "$STUB_OUT" 'the check could not run')"
++stub 0 0 0 0 1
++expect "🔴 KS-1554: m365-integration's checker exiting 1 FAILS the default run, named — the fifth service is a real gate, not a passenger" \
++  "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration " "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/m365-integration')|$STUB_CALLS"
++stub 0 0 0 0 2
++expect "🔴 KS-1554: ...and m365-integration exiting 2 (could not run) fails it too, and says so" \
++  "1|yes|yes" "$STUB_RC|$(has "$STUB_OUT" 'FAIL — services/m365-integration')|$(has "$STUB_OUT" 'the check could not run')"
+ stub 0 1
+ expect "🔴 the closing advice does not tell the pusher to fix 'the test file' (the file named can be a PRODUCT file the tests import)" \
+   "no|yes" "$(has "$STUB_OUT" 'in the test file')|$(has "$STUB_OUT" 'a product file')"
+@@ -256,7 +270,7 @@ varnames_of() {  # varnames_of <file>  ->  sorted, unique names of every expansi
+ }
+ expect "🔴 the leg expands only its own five locals (a service list read from the environment would add a name: the KS-1261 class)" \
+   "DEV_ROOT failed rc svc why " "$(varnames_of "$LEG")"
+-{ cat "$LEG"; printf '%s\n' 'planted_list=${TYPECHECK_SERVICES:-services/auth services/api-gateway services/vc-issuer}'; } > "$tmp/ks1520-planted.sh"
++{ cat "$LEG"; printf '%s\n' 'planted_list=${TYPECHECK_SERVICES:-services/auth services/api-gateway services/vc-issuer services/security services/m365-integration}'; } > "$tmp/ks1520-planted.sh"
+ expect "CONTROL the plant changed the file (so the control below is not comparing a file with itself)" "yes" \
+   "$(cmp -s "$LEG" "$tmp/ks1520-planted.sh" && echo no || echo yes)"
+ expect "CONTROL the same extraction SEES a planted environment read (so the cell above could fail)" "yes" \
+diff --git a/Blockchain/Dev/scripts/preflight/test-types-ratchet.sh b/Blockchain/Dev/scripts/preflight/test-types-ratchet.sh
+index b945ac466..188e78f3d 100644
+--- a/Blockchain/Dev/scripts/preflight/test-types-ratchet.sh
++++ b/Blockchain/Dev/scripts/preflight/test-types-ratchet.sh
+@@ -35,7 +35,7 @@
+ #
+ # bash 3.2 compatible on purpose: macOS ships 3.2 (KS-676).
+ #
+-# Usage:  bash scripts/preflight/test-types-ratchet.sh [<service-dir> ...]      (default: services/auth services/api-gateway services/vc-issuer)
++# Usage:  bash scripts/preflight/test-types-ratchet.sh [<service-dir> ...]      (default: services/auth services/api-gateway services/vc-issuer services/security services/m365-integration)
+ # =============================================================================
+ 
+ set -uo pipefail
+@@ -44,7 +44,7 @@ DEV_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ cd "$DEV_ROOT" || { echo "FAIL — cannot enter $DEV_ROOT"; exit 1; }
+ 
+ if [ "$#" -eq 0 ]; then
+-    set -- services/auth services/api-gateway services/vc-issuer
++    set -- services/auth services/api-gateway services/vc-issuer services/security services/m365-integration
+ fi
+ 
+ # The same precondition leg 1 establishes (and the same variable it honours, so a fixture can aim it).
+diff --git a/Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt b/Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt
+new file mode 100644
+index 000000000..77de8848e
+--- /dev/null
++++ b/Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt
+@@ -0,0 +1,5 @@
++# KS-1000 ratchet: type errors already present in this service's test files, keyed by file + code + a fingerprint of the message.
++# It can only SHRINK. A new error fails `node scripts/typecheck-tests/check.cjs <service>`; an entry that no longer
++# reproduces fails it too; so does a swap (one error fixed, another of the same code added). Lower it with `--update` (which
++# refuses to admit anything new). Never edit a count up. `examined-test-files` is a floor: fewer examined test files fails.
++examined-test-files 26
+diff --git a/Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt b/Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt
+new file mode 100644
+index 000000000..2d01766bc
+--- /dev/null
++++ b/Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt
+@@ -0,0 +1,5 @@
++# KS-1000 ratchet: type errors already present in this service's test files, keyed by file + code + a fingerprint of the message.
++# It can only SHRINK. A new error fails `node scripts/typecheck-tests/check.cjs <service>`; an entry that no longer
++# reproduces fails it too; so does a swap (one error fixed, another of the same code added). Lower it with `--update` (which
++# refuses to admit anything new). Never edit a count up. `examined-test-files` is a floor: fewer examined test files fails.
++examined-test-files 40
+diff --git a/Blockchain/Dev/services/m365-integration/tsconfig.test.json b/Blockchain/Dev/services/m365-integration/tsconfig.test.json
+new file mode 100644
+index 000000000..10ef9f490
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/tsconfig.test.json
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "noEmit": true
++  },
++  "include": ["src/**/*"],
++  "exclude": ["node_modules", "dist"]
++}
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts
+index 2c30e98fe..38a0be065 100644
+--- a/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts
+@@ -246,7 +246,7 @@ describe('KS-952 round 2 — F5: four guard clauses the 149-cell suite could not
+       body: JSON.stringify({ key: 'orphan' }),
+     });
+     expect(res.status).toBe(403);
+-    expect((await res.json())?.error?.code).toBe('FORBIDDEN');
++    expect(((await res.json()) as { error?: { code?: string } })?.error?.code).toBe('FORBIDDEN');
+   });
+ 
+   it('C1 CONTROL: the same claimless operator naming a scope EXPLICITLY still succeeds', async () => {
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts
+index a4b482989..b98d52a03 100644
+--- a/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts
+@@ -308,10 +308,8 @@ describe('KS-970 item 6 — the published contract states the refusals the runti
+     // A zod `.refine()` never reaches the generated schema, so a constraint that
+     // is only in code is not in the contract. Same class as round 1's F1.
+     const { readFile } = await import('node:fs/promises');
+-    const { fileURLToPath } = await import('node:url');
+-    const { dirname, resolve } = await import('node:path');
+-    const here = dirname(fileURLToPath(import.meta.url));
+-    const yaml = await readFile(resolve(here, '../../../../docs/openapi/secuura-api.yaml'), 'utf8');
++    const { resolve } = await import('node:path');
++    const yaml = await readFile(resolve(__dirname, '../../../../docs/openapi/secuura-api.yaml'), 'utf8');
+     const start = yaml.indexOf('    RateLimitResetRequest:');
+     expect(start).toBeGreaterThan(-1);
+     const block = yaml.slice(start, yaml.indexOf('\n    SecuritySuccess:', start));
+diff --git a/Blockchain/Dev/services/security/tsconfig.test.json b/Blockchain/Dev/services/security/tsconfig.test.json
+new file mode 100644
+index 000000000..10ef9f490
+--- /dev/null
++++ b/Blockchain/Dev/services/security/tsconfig.test.json
+@@ -0,0 +1,8 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "noEmit": true
++  },
++  "include": ["src/**/*"],
++  "exclude": ["node_modules", "dist"]
++}
+diff --git a/CLAUDE.md b/CLAUDE.md
+index d155fefea..1f0a61427 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -395,12 +395,12 @@ The **test-file type-check ratchet** (KS-1000 / KS-1487, leg 16) runs at push ti
+ `tsconfig.json` excludes `src/__tests__`, so `tsc` over the service had never examined a test file, and
+ `scripts/typecheck-tests/check.cjs` checks them against a baseline that can only shrink. A push that adds a
+ test-file type error is refused; `npm run check:test-types` runs it alone, and `--update` only ever LOWERS the
+-baseline (it refuses to admit a new error). Leg 16 gates `services/auth`, `services/api-gateway` and `services/vc-issuer` (the script's default list; vc-issuer
++baseline (it refuses to admit a new error). Leg 16 gates `services/auth`, `services/api-gateway`, `services/vc-issuer`, `services/security` and `services/m365-integration` (the script's default list; vc-issuer
+ added by KS-1351 item 3 with an EMPTY baseline, so any type error in its tests is new), and
+-`npm run check:test-types` runs the same three (KS-1090, KS-1351), each against its own baseline. A baseline entry is keyed by file + code +
++`npm run check:test-types` runs the same five (KS-1090, KS-1351, KS-1554), each against its own baseline. A baseline entry is keyed by file + code +
+ a fingerprint of the message, so fixing one error and adding another of the same code is a swap and fails (KS-1489); an old
+ count-only baseline is converted with `--rekey`, which can lower it and refuses to admit more. The baseline also records
+-`examined-test-files <N>` as a floor: fewer examined test files fails, so **a PR that deletes an auth, api-gateway or vc-issuer test file
++`examined-test-files <N>` as a floor: fewer examined test files fails, so **a PR that deletes an auth, api-gateway, vc-issuer, security or m365-integration test file
+ must run `node scripts/typecheck-tests/check.cjs <service> --update`** and commit the lowered floor; a `@ts-nocheck` in a test fails too.
+ **What it does NOT catch:** `// @ts-ignore` and `// @ts-expect-error` are not policed (on a new error in a file the baseline does not list they
+ pass; on a baselined error they make the entry stale, which fails), and the floor only protects down to its last recorded value. The

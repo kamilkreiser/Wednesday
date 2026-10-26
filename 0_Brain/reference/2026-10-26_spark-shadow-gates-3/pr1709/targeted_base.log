@@ -1,0 +1,60 @@
+
+##### Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh
+FAIL with no install the suite exits 0
+       want "0", got "1"
+ok   with no install the suite prints one SKIP line naming the missing install
+FAIL with no install no cell is reported FAIL
+       want "0", got "7"
+FAIL CONTROL with no install the stub cells still run (the default-run stub cell reports ok)
+       want "1", got "0"
+ok   CONTROL with no install the leg-16 wiring cells still run
+
+ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install: 2 passed, 3 failed
+
+##### Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh
+ok   CONTROL both mutants differ from the real leg
+ok   X4 (an extra argument to the checker) fails the default-run stub cell
+ok   R1text (the rc-1 wording replaced) fails the rc-1 wording stub cell
+FAIL CONTROL the unmutated leg fails neither of those two stub cells
+       want "0 0", got "1 0"
+
+ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg: 3 passed, 1 failed
+
+##### Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh
+ok   the real preflight.sh yields a non-empty helper block (the extraction is live)
+ok   🔴 preflight.sh has a leg 16 block (a 16th step() header exists)
+ok   🔴 a failing leg-16 script FAILS the run and the verdict can name leg 16
+ok   🔴 leg 16 runs scripts/preflight/test-types-ratchet.sh
+ok   CONTROL a passing leg-16 script fails nothing, skips nothing and counts as RAN
+ok   🔴 a leg-16 script that SKIPS is counted as skipped (advisory), not failed and not as run
+ok   🔴 TOTAL_LEGS is 16
+ok   🔴 every step header's denominator is TOTAL_LEGS (a stale one aborts every push)
+ok   the legs run 1..16 in order and leg 16 is last
+ok   CONTROL the header parser reads headers at all (it found 16)
+SKIP — workspace install absent (leg 1 refuses this tree): the real-checker cells are not run
+FAIL CONTROL the default run (no arguments) passes with all five checkers green, and the stub was LIVE: asked about exactly auth, the api-gateway, vc-issuer, security, then m365-integration
+       want "0|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration |yes", got "0|services/auth services/api-gateway services/vc-issuer |no"
+ok   🔴 the api-gateway's checker exiting 1 FAILS the default run, named (the fixture holds no baseline file, so a gate that needs one reads green)
+ok   🔴 KS-1527 the rc-1 wording names a NEW test-file type error (the one branch of the three that a rewording could change silently)
+ok   🔴 the api-gateway's checker exiting 2 (could not run) FAILS the default run, and the output says the check could not run
+ok   🔴 ...and so does an exit the leg does not know (3), which it names as unexpected
+FAIL 🔴 auth failing fails the default run AND the api-gateway, vc-issuer, security and m365-integration are still checked after it (no early exit)
+       want "1|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration |yes", got "1|services/auth services/api-gateway services/vc-issuer |yes"
+ok   🔴 both failing: the run fails and the output names BOTH services
+FAIL 🔴 KS-1351: vc-issuer's checker exiting 1 FAILS the default run, named — the third service is a real gate, not a passenger
+       want "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration ", got "1|yes|services/auth services/api-gateway services/vc-issuer "
+ok   🔴 KS-1351: ...and vc-issuer exiting 2 (could not run) fails it too, and says so
+FAIL 🔴 KS-1554: security's checker exiting 1 FAILS the default run, named — the fourth service is a real gate, not a passenger
+       want "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration ", got "0|no|services/auth services/api-gateway services/vc-issuer "
+FAIL 🔴 KS-1554: ...and security exiting 2 (could not run) fails it too, and says so
+       want "1|yes|yes", got "0|no|no"
+FAIL 🔴 KS-1554: m365-integration's checker exiting 1 FAILS the default run, named — the fifth service is a real gate, not a passenger
+       want "1|yes|services/auth services/api-gateway services/vc-issuer services/security services/m365-integration ", got "0|no|services/auth services/api-gateway services/vc-issuer "
+FAIL 🔴 KS-1554: ...and m365-integration exiting 2 (could not run) fails it too, and says so
+       want "1|yes|yes", got "0|no|no"
+ok   🔴 the closing advice does not tell the pusher to fix 'the test file' (the file named can be a PRODUCT file the tests import)
+ok   🔴 the leg expands only its own five locals (a service list read from the environment would add a name: the KS-1261 class)
+ok   CONTROL the plant changed the file (so the control below is not comparing a file with itself)
+ok   CONTROL the same extraction SEES a planted environment read (so the cell above could fail)
+
+preflight_test_types_ratchet_leg: 20 passed, 7 failed

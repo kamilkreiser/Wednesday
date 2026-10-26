@@ -34,10 +34,13 @@ C. TESTS
 D. TICKET ACCEPTANCE
    10. List each acceptance line in the ticket as MET / NOT MET / MET OFFLINE ONLY, with the file:line that shows it.
 
-E. DRAFT COMMENT (skip if none was provided)
+E. DRAFT COMMENT AND PR DESCRIPTION (skip each that was not provided)
    11. Go sentence by sentence. A sentence is OVERSTATED if it states as fact something that is unmeasured, says "fixes"/"proves"
       beyond what was run, claims a cause the facts do not establish, or contradicts another sentence of the same comment (for
       example a cause stated as fact next to a "not measured" paragraph). List each overstated sentence verbatim with why.
+      If a PR DESCRIPTION is provided (not "(not provided)"), apply exactly the same test to ITS sentences and list the overstated
+      ones in the same array, prefixing the "sentence" with "[PR body] ". A PR description that says "fixes"/"proves"/"all" without a
+      run in facts.json that shows it is overstated. If it is "(not provided)", say nothing about it.
    12. Is anything material MISSING from the comment that the reader needs (e.g. a behaviour change in what the code can now delete)?
 
 F. HYGIENE
@@ -59,4 +62,4 @@ ANSWER FORMAT — reply with ONE JSON object and nothing else (no prose, no code
   "comment_sentences_overstated": [{"sentence": "verbatim from the draft", "why": "..."}],
   "verdict": "GO|GO WITH NOTES|NO GO"
 }
-Use [] for comment_sentences_overstated when there is no draft comment. Evidence quotes must be copied exactly from the material given.
+Use [] for comment_sentences_overstated when there is no draft comment and no PR description. Evidence quotes must be copied exactly from the material given.

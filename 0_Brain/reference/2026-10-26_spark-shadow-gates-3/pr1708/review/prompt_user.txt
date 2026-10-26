@@ -1,0 +1,2273 @@
+===== TICKET =====
+KS-1728 — Shell suites grade with `printf ... | grep -q` under pipefail: two unrelated suites failed a loaded preflight with "printf: write error: Broken pipe" (150 such lines in 29 files) [In Progress]
+
+## BLUF
+
+Two unrelated shell suites each failed once inside preflight leg 14 of a pre-push, on the same tell, `printf: write error: Broken pipe`, while the machine was heavily loaded. Both grade a result with `printf '%s' "$out" | grep -qF ...` under `set -uo pipefail`. Both passed every time on a quiet machine (15 of 15 runs). **The failure was NOT reproduced under load, so the mechanism below is the explanation that fits, not a proven one.** The same line shape appears at 150 places in 29 files.
+
+## What was seen
+
+Two pushes ran their pre-push hook at the same time on one macOS laptop (12 CPUs). A Docker Desktop VM was at about 920% CPU and the load average read 98 / 100 / 98 at 00:45Z and my later readings of the 1-minute figure were 74 (00:52Z), 58 (01:12Z), 39 (01:13Z) and 6.65 (01:18Z), after Docker Desktop was restarted. Leg 14 took 947 s and 1007 s; the same leg took 553 s on an unloaded run earlier. Each push was a branch off develop `28dac5c12ba5` carrying a two-file change that touches neither suite. Both pushes were refused, `PREFLIGHT FAILED on leg(s) 14 - (13/16 legs ran)`, every other leg passing.
+
+`check_shared_relink.test.sh` (push started 00:47:52Z, `shell suites: 90 passed, 1 failed, 1 skipped (of 92)`):
+
+```
+.../scripts/__tests__/check_shared_relink.test.sh: line 49: printf: write error: Broken pipe
+  FAIL: F-6 inv: distroless nodejs is DENIED (exit correct, WRONG rule fired — wanted /a JavaScript runtime/)
+        ::error::./services/thing/Dockerfile — re-link invariant (KS-921): final stage writes node_modules nowhere — but its base image is `gcr.io/distroless/nodejs22-debian12`, a JavaScript runtime, ...
+  111 passed, 1 failed, 0 skipped
+```
+
+The captured output printed under the FAIL line contains the wanted text, so the rule fired and the grade was wrong. Line 49 is `if [ -n "$want_out" ] && ! printf '%s' "$out" | grep -qF -- "$want_out"; then`.
+
+`ks1355_slot_blind_launchers.test.sh` (push started 00:49:30Z, `shell suites: 89 passed, 1 failed, 1 skipped (of 91)`):
+
+```
+.../scripts/__tests__/ks1355_slot_blind_launchers.test.sh: line 68: printf: write error: Broken pipe
+FAIL CONTROL no slot named: the banner shows the historic 6882 and 6881
+       want "yes yes"
+        got "no yes"
+ks1355_slot_blind_launchers: 22 passed, 1 failed
+```
+
+Line 68 is the helper `saw() { if printf '%s' "$2" | grep -qF -- "$1"; then echo yes; else echo no; fi; }`.
+
+## Measured on a quiet machine
+
+* `check_shared_relink.test.sh`, 10 consecutive runs, hermetic env (`env -i HOME PATH`), load about 4.5, tree `6bb63146affd` (develop `28dac5c12ba5` plus one two-file branch): **10 of 10 passed, 112 passed / 0 failed, 0 "Broken pipe".**
+* `ks1355_slot_blind_launchers.test.sh`, 5 consecutive runs, same env, load 3.5 to 4.9, tree `b5767aa4c527` (tree identical to develop `28dac5c12ba5`): **5 of 5 passed, 23 passed / 0 failed, 0 "Broken pipe".**
+
+## Not measured
+
+The failure was not reproduced under load: no deliberate stress was run (it would have disturbed live pushes), so there is no measured failure rate under load. Only two failures were seen, one per suite, in one window. The mechanism is inferred from the shape: `grep -q` exits at its first match, a `printf` still writing to that pipe gets EPIPE, and `pipefail` turns the pipeline's status into failure, so a MATCH is graded as no match. It is a race between two processes, which fits "only when the machine is slow".
+
+## The census, and its frame
+
+`git grep -n -E 'printf [^|]*\| *grep -q'` at commit `28dac5c12ba5c00d9fc3ad04daee5230eff71619`, pathspecs `Blockchain/Dev/scripts` and `systemTest`, excluding `node_modules`: **150 lines in 29 files** (22 under `__tests__`, 7 product scripts); 26 of the 29 files mention `pipefail`. `check_shared_relink.test.sh` holds 13 of the lines, `ks1355_slot_blind_launchers.test.sh` 1. Not counted: 12 `echo ... | grep -q` lines (the sibling shape); other pipe-to-early-exit-reader shapes (`| head`, `| grep -m1`); any directory outside the two pathspecs. The count says nothing about which of the 150 can actually be hit: it is the number of lines with the shape.
+
+## Siblings
+
+* KS-1716 (In Progress): the same defect class in one script, `systemTest/scripts/check-package-format.sh`, where the large-input case silently dropped a package. Not these suites.
+* KS-1149 (Backlog, archived): a different cause of a similar-looking push failure (`rc 141` after the gate PASSED; GitHub closes the idle ssh session). Not this one: here the hook itself refuses with `PREFLIGHT FAILED on leg(s) 14`.
+
+## Searched before filing (board, title and description, archived included)
+
+`check_shared_relink` (KS-956, KS-948, KS-937: the guard itself, not this flake); `ks1355_slot_blind_launchers` (KS-1558: gate follow-ups); `write error: Broken pipe` and `Broken pipe` (KS-1716 only); `grep -q` (KS-1716, KS-1624, KS-1134, KS-998, KS-912, KS-469); `pipefail` (8 hits, none about these suites); `EPIPE` (KS-1716, KS-1598); `SIGPIPE` (KS-1716, KS-1583, KS-1149). The terms `Broken pipe`, `EPIPE` and `SIGPIPE` all find KS-1716, so the search can see this class. No open ticket names either suite as flaking.
+
+## Update 2026-10-26 02:20Z: a third suite, at moderate load, and a measurement that weakens the first explanation
+
+**Third occurrence.** A third push was refused at leg 14 with the same tell. Push of the KS-1513 branch, started 01:53:06Z, ended `rc 1` after 1081 s: `shell suites: 90 passed, 1 failed, 1 skipped (of 92)`, FAILED `preflight_deps.test.sh`, which printed
+
+```
+.../scripts/__tests__/preflight_deps.test.sh: line 443: printf: write error: Broken pipe
+.../scripts/__tests__/preflight_deps.test.sh: line 444: printf: write error: Broken pipe
+FAIL KS-1638: that refusal SHORT-CIRCUITS — a red suite present, still not run
+       want "HOOKCTL-REFUSED/1", got "OTHER/1"
+preflight_deps: 60 passed, 1 failed
+```
+
+Lines 443 and 444 are consecutive `elif printf '%s' "$out" | grep -q '...'` verdict tests; in this cell the text for 443 (`could not derive the pre-push hook's own control`) sits at byte 1871 and the text for 444 (`de-slotted`) at byte 1821 of `$out`, so both match early and both pipelines failed, which sent the cell to the `OTHER` verdict. **This one was NOT in the 60 to 98 load window:** leg 14 took 662 s (against 553 s unloaded), and my readings of the 1-minute load average over the push were between 4.0 and 13.
+
+**Quiet-box runs of this suite:** 6 of 6 passed on that exact tree (`716e26290155`, 61 passed / 0 failed, 0 "Broken pipe"), load about 6.
+
+**What the measurement does to the explanation.** Using the suite's own `PREFLIGHT_FIXTURE_OUT` capture on the failing cell, `$out` is **2848 bytes**, 62 lines. That is far below the macOS pipe buffer (`st_blksize` 16384), so a single `write()` of it cannot meet a closed reader. The "large output, early match" form of the race is therefore NOT what happened here; for it to occur, bash 3.2's `printf` would have to deliver the string to `grep` in several small writes. I tried to reproduce that on the real captured output: 3 runs of 3000 iterations of `set -uo pipefail; printf '%s' "$out" | grep -q "could not derive the pre-push hook's own control"`, load about 8 to 10, **0 of 9000 reported no-match.** Not reproduced.
+
+**Tally of pushes of mine that reached leg 14 since 00:43Z:** 6; refused by this tell: 3 (the KS-1391 and KS-1560 first attempts, and the KS-1513 push above); passed: 3 (the KS-1560 and KS-1391 second attempts, and KS-1289). A seventh push, KS-1716, ran no preflight leg. The refused ones were three different suites. So the suites are sometimes fragile on this machine under contention from several simultaneous preflights; the mechanism is unproven.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh b/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
+index a2961a4e9..fed88e50a 100755
+--- a/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
+@@ -46,7 +46,7 @@ expect() {
+     if [ "$got" != "$want" ]; then
+         FAIL=$((FAIL+1)); echo "  FAIL: $name (expected exit $want, got $got)"; echo "$out" | sed 's/^/        /'; return
+     fi
+-    if [ -n "$want_out" ] && ! printf '%s' "$out" | grep -qF -- "$want_out"; then
++    if [ -n "$want_out" ] && ! grep -qF -- "$want_out" <<<"$out"; then
+         FAIL=$((FAIL+1)); echo "  FAIL: $name (exit correct, WRONG rule fired — wanted /$want_out/)"; echo "$out" | sed 's/^/        /'; return
+     fi
+     PASS=$((PASS+1))
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh b/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
+index d906eb066..6bbabea08 100755
+--- a/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
+@@ -65,7 +65,7 @@ urls() {
+       bash "$DEV/scripts/start-local.sh" urls 2>&1
+   fi
+ }
+-saw() { if printf '%s' "$2" | grep -qF -- "$1"; then echo yes; else echo no; fi; }
++saw() { if grep -qF -- "$1" <<<"$2"; then echo yes; else echo no; fi; }
+ 
+ # --- CONTROL: the fixture really runs the product --------------------------------
+ out_none="$(urls "")"
+diff --git a/Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh b/Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+index 98c14661c..c0c0b72b4 100644
+--- a/Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+@@ -440,8 +440,8 @@ preflight_fixture_run() {            # $1 = deps rc, $2 = fixture-suite rc, $3 =
+   local verdict
+   if   printf '%s' "$out" | grep -q 'step header .* disagrees with TOTAL_LEGS'; then verdict='HEADER-MISMATCH'
+   elif printf '%s' "$out" | grep -q 'could not measure what'; then verdict='DESLOT-REFUSED'
+-  elif printf '%s' "$out" | grep -q "could not derive the pre-push hook's own control"; then verdict='HOOKCTL-REFUSED'
+-  elif printf '%s' "$out" | grep -q 'de-slotted .* variable'; then
++  elif grep -q "could not derive the pre-push hook's own control" <<<"$out"; then verdict='HOOKCTL-REFUSED'
++  elif grep -q 'de-slotted .* variable' <<<"$out"; then
+     # KS-1046: the honest pass shape. The fixture's gateway is closed by
+     # construction, so legs 3/4/8 always SKIP here and `PREFLIGHT PASSED —
+     # N/N legs ran.` is unreachable in this fixture; the verdict a green
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
+1: #!/usr/bin/env bash
+2: # Unit tests for check-shared-relink.sh (KS-921, and the KS-490 sibling assertion).
+3: #
+4: # The guard carries TWO assertions, so this suite's first duty is to prove them
+5: # SEPARATELY. A multi-clause guard proved with one fixture that trips both
+6: # clauses has measured the pair and learned nothing about the parts — so the two
+7: # headline cases each red ONE clause and assert the other is GREEN in the same
+8: # run:
+9: #
+10: #   · A alone — the real tree at d602a1536 (#851's pre-fix head): the re-link
+11: #     assertion reds on exactly nft-certificate, referral and staking, and the
+12: #     dev-tree assertion emits ZERO warnings there.
+13: #   · B alone — governance at develop with its one `npm prune --omit=dev` line
+14: #     removed: the dev-tree assertion reds on exactly that file, and the re-link
+15: #     assertion stays green.
+16: #
+17: # Both historical fixtures are materialised with `git show` into a throwaway
+18: # directory. Never `git checkout`: a control that mutates its subject is not a
+19: # control, and this checkout carries other branches' work.
+20: #
+21: # Every synthetic case pins itself to ITS message, not merely to an exit code,
+22: # so a broken rule cannot hide behind a working one.
+23: 
+24: set -uo pipefail
+25: 
+26: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+27: GATE="$(cd "$HERE/.." && pwd)/check-shared-relink.sh"
+28: DEV_DIR="$(cd "$HERE/../.." && pwd)"
+29: REPO_ROOT="$(cd "$DEV_DIR/../.." && pwd)"
+30: 
+31: PASS=0; FAIL=0; SKIP=0
+32: TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+33: 
+34: # expect <name> <expected_exit> <dockerfile-body> [expected_substring] [env-assignment]
+35: # The 4th argument pins the case to its own rule.
+36: expect() {
+37:     local name="$1" want="$2" body="$3" want_out="${4:-}" envset="${5:-}" d out got
+38:     d=$(mktemp -d "$TMP/case.XXXXXX")
+39:     mkdir -p "$d/services/thing"
+40:     printf '%s\n' "$body" > "$d/services/thing/Dockerfile"
+41:     if [ -n "$envset" ]; then
+42:         out=$(env "$envset" bash "$GATE" "$d" 2>&1); got=$?
+43:     else
+44:         out=$(bash "$GATE" "$d" 2>&1); got=$?
+45:     fi
+46:     if [ "$got" != "$want" ]; then
+47:         FAIL=$((FAIL+1)); echo "  FAIL: $name (expected exit $want, got $got)"; echo "$out" | sed 's/^/        /'; return
+48:     fi
+49:     if [ -n "$want_out" ] && ! grep -qF -- "$want_out" <<<"$out"; then
+50:         FAIL=$((FAIL+1)); echo "  FAIL: $name (exit correct, WRONG rule fired — wanted /$want_out/)"; echo "$out" | sed 's/^/        /'; return
+51:     fi
+52:     PASS=$((PASS+1))
+53: }
+54: 
+55: ok() { PASS=$((PASS+1)); }
+56: bad() { FAIL=$((FAIL+1)); echo "  FAIL: $1"; }
+57: 
+58: echo "check_shared_relink:"
+59: 
+60: # --- the shapes this repo actually has, both green ----------------------------
+61: 
+62: expect "re-install shape passes" 0 'FROM node:24-alpine AS shared-builder
+63: WORKDIR /shared
+64: RUN npm ci --ignore-scripts
+65: FROM node:24-alpine AS builder
+66: COPY --from=shared-builder /shared /shared
+67: RUN npm ci --ignore-scripts
+68: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+69: RUN npm run build
+70: FROM node:24-alpine
+71: RUN npm ci --ignore-scripts --omit=dev
+72: COPY --from=shared-builder /shared /shared
+73: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+74: USER secuura' "OK — 1 Dockerfile"
+75: 
+76: expect "copy-node_modules shape passes" 0 'FROM node:24-alpine AS shared-builder
+77: RUN npm ci --ignore-scripts
+78: FROM node:24-alpine AS builder
+79: COPY --from=shared-builder /shared /shared
+80: RUN npm ci --ignore-scripts
+81: RUN npm run build
+82: RUN npm prune --omit=dev
+83: FROM node:24-alpine
+84: COPY --from=builder /app/node_modules ./node_modules
+85: COPY --from=shared-builder /shared /shared
+86: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+87: USER secuura' "OK — 1 Dockerfile"
+88: 
+89: # originate's shape: a sub-path restore AFTER the install. Reading that COPY as a
+90: # whole-tree write made the guard report a dev-tree failure that is not real.
+91: expect "sub-path restore into node_modules/ is not a whole-tree write" 0 'FROM node:24-alpine AS shared-builder
+92: RUN npm ci --ignore-scripts
+93: FROM node:24-alpine AS builder
+94: COPY --from=shared-builder /shared /shared
+95: RUN npm ci --ignore-scripts
+96: FROM node:24-alpine
+97: COPY --from=builder /app/node_modules ./node_modules
+98: RUN npm ci --ignore-scripts --omit=dev
+99: COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+100: COPY --from=shared-builder /shared /shared
+101: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+102: USER secuura' "OK — 1 Dockerfile"
+103: 
+104: # --- assertion A, four ways ---------------------------------------------------
+105: 
+106: expect "A: no re-link in the final stage fails" 1 'FROM node:24-alpine AS shared-builder
+107: RUN npm ci --ignore-scripts
+108: FROM node:24-alpine AS builder
+109: COPY --from=shared-builder /shared /shared
+110: RUN npm ci --ignore-scripts
+111: RUN npm prune --omit=dev
+112: FROM node:24-alpine
+113: COPY --from=builder /app/node_modules ./node_modules
+114: COPY --from=shared-builder /shared /shared
+115: USER secuura' "final stage has NO"
+116: 
+117: # THE CASE THAT SEPARATES THIS GUARD FROM `grep -c "ln -s /shared" = 2`: two
+118: # links, both in the builder stage, none in the runtime stage. A count of 2 is
+119: # satisfied; the image still crashes on start.
+120: expect "A: two links BOTH in the builder stage still fails (count-fooling)" 1 'FROM node:24-alpine AS shared-builder
+121: RUN npm ci --ignore-scripts
+122: FROM node:24-alpine AS builder
+123: COPY --from=shared-builder /shared /shared
+124: RUN npm ci --ignore-scripts
+125: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+126: RUN rm -rf node_modules/@secuura && mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+127: RUN npm prune --omit=dev
+128: FROM node:24-alpine
+129: COPY --from=builder /app/node_modules ./node_modules
+130: COPY --from=shared-builder /shared /shared
+131: USER secuura' "final stage has NO"
+132: 
+133: expect "A: re-link BEFORE the last node_modules write fails" 1 'FROM node:24-alpine AS shared-builder
+134: RUN npm ci --ignore-scripts
+135: FROM node:24-alpine AS builder
+136: COPY --from=shared-builder /shared /shared
+137: RUN npm ci --ignore-scripts
+138: FROM node:24-alpine
+139: COPY --from=shared-builder /shared /shared
+140: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+141: RUN npm ci --ignore-scripts --omit=dev
+142: USER secuura' "runs BEFORE the last instruction"
+143: 
+144: expect "A: re-link after a NON-ROOT USER fails" 1 'FROM node:24-alpine AS shared-builder
+145: RUN npm ci --ignore-scripts
+146: FROM node:24-alpine AS builder
+147: COPY --from=shared-builder /shared /shared
+148: RUN npm ci --ignore-scripts
+149: FROM node:24-alpine
+150: RUN npm ci --ignore-scripts --omit=dev
+151: COPY --from=shared-builder /shared /shared
+152: USER secuura
+153: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared' "runs after a non-root"
+154: 
+155: # A commented-out re-link is not a re-link. Dockerfile comments are whole-line,
+156: # which is exactly why the parser strips them rather than matching substrings.
+157: expect "A: a COMMENTED-OUT re-link does not satisfy the rule" 1 'FROM node:24-alpine AS shared-builder
+158: RUN npm ci --ignore-scripts
+159: FROM node:24-alpine AS builder
+160: COPY --from=shared-builder /shared /shared
+161: RUN npm ci --ignore-scripts
+162: FROM node:24-alpine
+163: RUN npm ci --ignore-scripts --omit=dev
+164: COPY --from=shared-builder /shared /shared
+165: # RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+166: USER secuura' "final stage has NO"
+167: 
+168: # KS-921 F-2. The gate rejected this shape with a message asserting the link
+169: # "is attempted without the privileges to create it" — which is false about this
+170: # file: USER root is in force at the re-link. The oracle is the EFFECTIVE user at
+171: # that point, not the first USER in the stage.
+172: expect "A: root -> re-link -> drop privileges is LEGITIMATE and passes" 0 'FROM node:24-alpine AS shared-builder
+173: RUN npm ci --ignore-scripts
+174: FROM node:24-alpine AS builder
+175: COPY --from=shared-builder /shared /shared
+176: RUN npm ci --ignore-scripts
+177: FROM node:24-alpine
+178: USER root
+179: RUN npm ci --ignore-scripts --omit=dev
+180: COPY --from=shared-builder /shared /shared
+181: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+182: USER secuura' "OK — 1 Dockerfile"
+183: 
+184: # KS-921 F-4. `-sf` is the idiomatic idempotent form and an absolute destination
+185: # is natural under WORKDIR /app. Both create the IDENTICAL symlink; requiring one
+186: # literal spelling was a false BLOCK on the clause that blocks today.
+187: expect "A: \`ln -sf\` is the same symlink and passes" 0 'FROM node:24-alpine AS shared-builder
+188: RUN npm ci --ignore-scripts
+189: FROM node:24-alpine AS builder
+190: COPY --from=shared-builder /shared /shared
+191: RUN npm ci --ignore-scripts
+192: FROM node:24-alpine
+193: RUN npm ci --ignore-scripts --omit=dev
+194: COPY --from=shared-builder /shared /shared
+195: RUN mkdir -p node_modules/@secuura && ln -sf /shared node_modules/@secuura/shared
+196: USER secuura' "OK — 1 Dockerfile"
+197: 
+198: expect "A: an ABSOLUTE re-link destination is the same symlink and passes" 0 'FROM node:24-alpine AS shared-builder
+199: RUN npm ci --ignore-scripts
+200: FROM node:24-alpine AS builder
+201: COPY --from=shared-builder /shared /shared
+202: RUN npm ci --ignore-scripts
+203: FROM node:24-alpine
+204: WORKDIR /app
+205: RUN npm ci --ignore-scripts --omit=dev
+206: COPY --from=shared-builder /shared /shared
+207: RUN mkdir -p /app/node_modules/@secuura && ln -s /shared /app/node_modules/@secuura/shared
+208: USER secuura' "OK — 1 Dockerfile"
+209: 
+210: # and the negative half of F-4: a link to somewhere ELSE is still not the re-link
+211: expect "A: a link to a DIFFERENT target does not satisfy the rule" 1 'FROM node:24-alpine AS shared-builder
+212: RUN npm ci --ignore-scripts
+213: FROM node:24-alpine AS builder
+214: COPY --from=shared-builder /shared /shared
+215: RUN npm ci --ignore-scripts
+216: FROM node:24-alpine
+217: RUN npm ci --ignore-scripts --omit=dev
+218: COPY --from=shared-builder /shared /shared
+219: RUN ln -s /shared node_modules/@secuura/other
+220: USER secuura' "final stage has NO"
+221: 
+222: # KS-937 F-C. F-4 accepts any destination ENDING at node_modules/@secuura/shared, but the prefix
+223: # group required a LEADING slash, so a relative prefix was a false BLOCK whose message ("final stage
+224: # has NO re-link") is false about the file: the link is there and identical.
+225: expect "F-C: a ./node_modules re-link destination is the same symlink and passes" 0 'FROM node:24-alpine AS shared-builder
+226: RUN npm ci --ignore-scripts
+227: FROM node:24-alpine AS builder
+228: COPY --from=shared-builder /shared /shared
+229: RUN npm ci --ignore-scripts
+230: FROM node:24-alpine
+231: RUN npm ci --ignore-scripts --omit=dev
+232: COPY --from=shared-builder /shared /shared
+233: RUN mkdir -p node_modules/@secuura && ln -s /shared ./node_modules/@secuura/shared
+234: USER secuura' "1 Dockerfile"
+235: 
+236: expect "F-C: an app/node_modules re-link destination under WORKDIR / is the same symlink and passes" 0 'FROM node:24-alpine AS shared-builder
+237: RUN npm ci --ignore-scripts
+238: FROM node:24-alpine AS builder
+239: COPY --from=shared-builder /shared /shared
+240: RUN npm ci --ignore-scripts
+241: FROM node:24-alpine
+242: WORKDIR /
+243: RUN npm ci --prefix app --ignore-scripts --omit=dev
+244: COPY --from=shared-builder /shared /shared
+245: RUN mkdir -p app/node_modules/@secuura && ln -s /shared app/node_modules/@secuura/shared
+246: USER secuura' "1 Dockerfile"
+247: 
+248: # KS-937 F-E. USER root:root and USER 0:0 are root, so the link IS created with privileges; the
+249: # value was compared whole, so both read as a non-root user and false-blocked the F-2 shape.
+250: expect "F-E: USER root:root -> re-link -> drop privileges passes" 0 'FROM node:24-alpine AS shared-builder
+251: RUN npm ci --ignore-scripts
+252: FROM node:24-alpine AS builder
+253: COPY --from=shared-builder /shared /shared
+254: RUN npm ci --ignore-scripts
+255: FROM node:24-alpine
+256: USER root:root
+257: RUN npm ci --ignore-scripts --omit=dev
+258: COPY --from=shared-builder /shared /shared
+259: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+260: USER secuura' "1 Dockerfile"
+261: 
+262: expect "F-E: USER 0:0 -> re-link -> drop privileges passes" 0 'FROM node:24-alpine AS shared-builder
+263: RUN npm ci --ignore-scripts
+264: FROM node:24-alpine AS builder
+265: COPY --from=shared-builder /shared /shared
+266: RUN npm ci --ignore-scripts
+267: FROM node:24-alpine
+268: USER 0:0
+269: RUN npm ci --ignore-scripts --omit=dev
+270: COPY --from=shared-builder /shared /shared
+271: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+272: USER secuura' "1 Dockerfile"
+273: 
+274: # The control for F-E: only the USER part decides. A non-root user with the root GROUP is still a
+275: # non-root user, so a re-link after it still fails, on the privilege rule.
+276: expect "F-E control: USER secuura:root is not root, and a re-link after it still fails" 1 'FROM node:24-alpine AS shared-builder
+277: RUN npm ci --ignore-scripts
+278: FROM node:24-alpine AS builder
+279: COPY --from=shared-builder /shared /shared
+280: RUN npm ci --ignore-scripts
+281: FROM node:24-alpine
+282: RUN npm ci --ignore-scripts --omit=dev
+283: COPY --from=shared-builder /shared /shared
+284: USER secuura:root
+285: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared' "runs after a non-root"
+286: 
+287: # KS-937 F-E deviation pin (Seat F 7th, ruled by Wednesday). Dropping the :group part must not turn an EMPTY
+288: # user part into root: USER :root was read as a non-root user at the base, nothing has measured that it runs
+289: # as root, so a re-link after it still fails on the privilege rule. A regression pin, green at the base: it
+290: # reds only on a guard that strips the group from an empty user.
+291: expect "F-E pin: USER :root has an empty user part, is not read as root, and a re-link after it still fails" 1 'FROM node:24-alpine AS shared-builder
+292: RUN npm ci --ignore-scripts
+293: FROM node:24-alpine AS builder
+294: COPY --from=shared-builder /shared /shared
+295: RUN npm ci --ignore-scripts
+296: FROM node:24-alpine
+297: RUN npm ci --ignore-scripts --omit=dev
+298: COPY --from=shared-builder /shared /shared
+299: USER :root
+300: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared' "runs after a non-root"
+301: 
+302: # KS-921 F-5. Docker resolves stage names case-insensitively; keying the prune on
+303: # the literal made `AS Builder` + `--from=builder` a false B warning today, and a
+304: # false BLOCK the moment STRICT becomes the default.
+305: # The MIRROR of the cell below. The pinned cell had `AS Builder` + `--from=builder`
+306: # -- a mixed-case DECLARATION with a lowercase REFERENCE -- which passed because
+307: # pruned_by_name is KEYED on tolower(stage_name). The reverse direction was never
+308: # pinned and it failed: the lookup used the RAW reference. One cell per direction,
+309: # because a case rule proved in one direction is a rule half proved.
+310: expect "B: a mixed-case REFERENCE to a lowercase stage resolves (the mirror)" 0 'FROM node:24-alpine AS shared-builder
+311: RUN npm ci --ignore-scripts
+312: FROM node:24-alpine AS builder
+313: COPY --from=shared-builder /shared /shared
+314: RUN npm ci --ignore-scripts
+315: RUN npm prune --omit=dev
+316: FROM node:24-alpine
+317: COPY --from=Builder /app/node_modules ./node_modules
+318: COPY --from=shared-builder /shared /shared
+319: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+320: USER secuura' "" "SHARED_RELINK_STRICT=1"
+321: 
+322: expect "B: a stage name differing only in CASE still resolves" 0 'FROM node:24-alpine AS shared-builder
+323: RUN npm ci --ignore-scripts
+324: FROM node:24-alpine AS Builder
+325: COPY --from=shared-builder /shared /shared
+326: RUN npm ci --ignore-scripts
+327: RUN npm prune --omit=dev
+328: FROM node:24-alpine
+329: COPY --from=builder /app/node_modules ./node_modules
+330: COPY --from=shared-builder /shared /shared
+331: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+332: USER secuura' "1 of 1 clean" "SHARED_RELINK_STRICT=1"
+333: 
+334: # --- assertion B, both ways, and both modes -----------------------------------
+335: 
+336: B_UNPRUNED='FROM node:24-alpine AS shared-builder
+337: RUN npm ci --ignore-scripts
+338: FROM node:24-alpine AS builder
+339: COPY --from=shared-builder /shared /shared
+340: RUN npm ci --ignore-scripts
+341: FROM node:24-alpine
+342: COPY --from=builder /app/node_modules ./node_modules
+343: COPY --from=shared-builder /shared /shared
+344: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+345: USER secuura'
+346: 
+347: expect "B: unpruned copy WARNS and does not block by default" 0 "$B_UNPRUNED" "::warning::"
+348: expect "B: unpruned copy BLOCKS under SHARED_RELINK_STRICT=1" 1 "$B_UNPRUNED" "::error::" "SHARED_RELINK_STRICT=1"
+349: 
+350: expect "B: final install without --omit=dev warns" 0 'FROM node:24-alpine AS shared-builder
+351: RUN npm ci --ignore-scripts
+352: FROM node:24-alpine AS builder
+353: COPY --from=shared-builder /shared /shared
+354: RUN npm ci --ignore-scripts
+355: FROM node:24-alpine
+356: RUN npm ci --ignore-scripts
+357: COPY --from=shared-builder /shared /shared
+358: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+359: USER secuura' "installs WITHOUT --omit=dev"
+360: 
+361: # --- KS-921 F-1: a file must not be able to leave the CLASS silently ----------
+362: # The gate found this and it is why the PR did not merge: Dockerfile instruction
+363: # keywords are case-INSENSITIVE, so `Copy --from=shared-builder` is an ordinary
+364: # authoring slip. A case-sensitive selector dropped that file out of the corpus
+365: # rather than failing it, and the guard printed `OK — 1 Dockerfile(s) … 1 of 1
+366: # clean` at rc 0 over a corpus of two whose second file was broken in BOTH
+367: # clauses — under SHARED_RELINK_STRICT=1 as well. This guard committing KS-921's
+368: # own defect, with the guard installed and green.
+369: GOOD_FILE='FROM node:24-alpine AS shared-builder
+370: RUN npm ci --ignore-scripts
+371: FROM node:24-alpine AS builder
+372: COPY --from=shared-builder /shared /shared
+373: RUN npm ci --ignore-scripts
+374: FROM node:24-alpine
+375: RUN npm ci --ignore-scripts --omit=dev
+376: COPY --from=shared-builder /shared /shared
+377: RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
+378: USER secuura'
+379: 
+380: d=$(mktemp -d "$TMP/f1case.XXXXXX"); mkdir -p "$d/services/good" "$d/services/bad"
+381: printf '%s\n' "$GOOD_FILE" > "$d/services/good/Dockerfile"
+382: # identical, except the keyword case and the missing re-link
+383: printf '%s\n' "$GOOD_FILE" | sed 's/^COPY --from=shared-builder/Copy --from=shared-builder/; /ln -s \/shared/d' > "$d/services/bad/Dockerfile"
+384: out=$(SHARED_RELINK_STRICT=1 bash "$GATE" "$d" 2>&1); got=$?
+385: # Pinned to the file being JUDGED, not merely mentioned. Asserting only "exit 1
+386: # and the name appears somewhere" does NOT discriminate: with the -i removed the
+387: # cross-check below also exits 1 and also names the file, so the cell passed
+388: # against the very tamper it exists to catch. Measured, not reasoned — the tamper
+389: # was run and the suite stayed at 26/0 until this line was tightened.
+390: if [ "$got" = "1" ] && printf '%s' "$out" | grep -qF "services/bad/Dockerfile — re-link invariant"; then ok
+391: else bad "a lowercase-keyword file must stay IN the class and be JUDGED by clause A, not merely reported as divergent (got exit $got)"; echo "$out" | sed 's/^/        /'; fi
+392: 
+393: # the corpus count itself must not shrink: two files consume shared-builder here
+394: if printf '%s' "$out" | grep -qE '1 Dockerfile\(s\) consume'; then
+395:     bad "the derived class size still reads 1 over a corpus of 2 — the count shrinks in step with the miss, which is what made this invisible"
+396: else ok; fi
+397: 
+398: # THE CROSS-CHECK: a file that mentions the stage but does not match the precise
+399: # selector must fail LOUDLY rather than leave the corpus. This is the protection
+400: # that notices the NEXT selector miss, not this one.
+401: d=$(mktemp -d "$TMP/f1xcheck.XXXXXX"); mkdir -p "$d/services/good" "$d/services/odd"
+402: printf '%s\n' "$GOOD_FILE" > "$d/services/good/Dockerfile"
+403: printf 'FROM node:24-alpine\n# this file mentions shared-builder but never copies from it\nUSER secuura\n' > "$d/services/odd/Dockerfile"
+404: out=$(bash "$GATE" "$d" 2>&1); got=$?
+405: if [ "$got" = "1" ] && printf '%s' "$out" | grep -qF "disagree about the corpus" && printf '%s' "$out" | grep -qF "services/odd/Dockerfile"; then ok
+406: else bad "the cross-check must fail loudly and name the divergent file (got exit $got)"; echo "$out" | sed 's/^/        /'; fi
+407: 
+408: # --- a vacuous green is a failure ---------------------------------------------
+409: # The gate must refuse a corpus it cannot see rather than report clean on zero
+410: # files — the failure mode this repo has paid for more than once.
+411: d=$(mktemp -d "$TMP/empty.XXXXXX"); mkdir -p "$d/services/thing"
+412: printf 'FROM node:24-alpine\nUSER secuura\n' > "$d/services/thing/Dockerfile"
+413: out=$(bash "$GATE" "$d" 2>&1); got=$?
+414: if [ "$got" = "1" ] && printf '%s' "$out" | grep -qF "the class is empty"; then ok
+415: else bad "empty class must be refused, not reported clean (got exit $got)"; fi
+416: 
+417: # A tree with NO Dockerfiles at all must refuse too — and must not BLOCK doing it.
+418: # `grep -l P $(find ...)` with an empty find result has no file operands and reads
+419: # STDIN; the pre-push hook's stdin is git's ref list, so that path would hang the
+420: # push rather than fail it. `< /dev/null` here would hide exactly that, so the
+421: # case runs with a live stdin that never closes and asserts the guard returns
+422: # anyway.
+423: # Asserted on TIME, not just on the exit code: with the blocking form the guard
+424: # still exits 1 eventually — once its stdin closes — so an exit-code-only case
+425: # passes against the bug and measures nothing. The budget is what discriminates.
+426: # (No `timeout(1)`: macOS does not ship one, and a check wrapped in a command
+427: # that does not exist is a check that cannot fail.)
+428: d=$(mktemp -d "$TMP/nodockerfiles.XXXXXX")
+429: : > "$TMP/nodf.out"; rm -f "$TMP/nodf.rc"
+430: ( bash "$GATE" "$d" > "$TMP/nodf.out" 2>&1; echo "$?" > "$TMP/nodf.rc" ) < <(sleep 20) &
+431: gpid=$!
+432: waited=0
+433: while [ "$waited" -lt 5 ] && kill -0 "$gpid" 2>/dev/null; do sleep 1; waited=$((waited+1)); done
+434: if kill -0 "$gpid" 2>/dev/null; then
+435:     kill "$gpid" 2>/dev/null; wait "$gpid" 2>/dev/null
+436:     bad "a tree with no Dockerfiles: the guard was still running after ${waited}s — it is reading STDIN, which the pre-push hook feeds git's ref list"
+437: else
+438:     wait "$gpid" 2>/dev/null
+439:     got=$(cat "$TMP/nodf.rc" 2>/dev/null || echo missing)
+440:     if [ "$got" = "1" ] && grep -qF "no Dockerfile at all" "$TMP/nodf.out"; then ok
+441:     else bad "a tree with no Dockerfiles must refuse (got exit $got)"; fi
+442: fi
+443: 
+444: # --- GREEN BASELINE: the repo as it stands ------------------------------------
+445: # Without this, a red below could be the harness rather than the fixture.
+446: out=$(bash "$GATE" "$DEV_DIR" 2>&1); got=$?
+447: if [ "$got" = "0" ] && printf '%s' "$out" | grep -qF "OK — "; then ok
+448: else bad "the guard is not green on this working tree (exit $got) — fix that before trusting any red below"; echo "$out" | sed 's/^/        /'; fi
+449: 
+450: # --- THE TWO INDEPENDENT RED-PROOFS -------------------------------------------
+451: 
+452: materialise() {  # <commit> <destdir>
+453:     local commit="$1" dest="$2" p rel
+454:     for p in $(git -C "$REPO_ROOT" ls-tree -r --name-only "$commit" | grep -E '^Blockchain/Dev/.*/Dockerfile$'); do
+455:         rel="${p#Blockchain/Dev/}"
+456:         mkdir -p "$dest/$(dirname "$rel")"
+457:         git -C "$REPO_ROOT" show "$commit:$p" > "$dest/$rel"
+458:     done
+459: }
+460: 
+461: if ! git -C "$REPO_ROOT" cat-file -e 'd602a1536^{commit}' 2>/dev/null; then
+462:     SKIP=$((SKIP+1))
+463:     echo "  SKIP: historical red-proofs — commit d602a1536 not present (shallow clone?). The synthetic cases above still cover both clauses."
+464: else
+465:     # --- A alone: #851's pre-fix head. A reds on three named files; B is silent.
+466:     FA="$TMP/fixtureA"; mkdir -p "$FA"; materialise d602a1536 "$FA"
+467:     out=$(bash "$GATE" "$FA" 2>&1); got=$?
+468:     a_errs=$(printf '%s\n' "$out" | grep -c 're-link invariant' || true)
+469:     b_warns=$(printf '%s\n' "$out" | grep -c 'dev-tree invariant' || true)
+470:     named=0
+471:     for svc in nft-certificate referral staking; do
+472:         printf '%s\n' "$out" | grep -q "services/$svc/Dockerfile — re-link invariant" && named=$((named+1))
+473:     done
+474:     if [ "$got" = "1" ] && [ "$a_errs" = "3" ] && [ "$named" = "3" ] && [ "$b_warns" = "0" ]; then ok
+475:     else bad "red-proof A at d602a1536: wanted exit 1, 3 re-link errors naming nft-certificate/referral/staking, and 0 dev-tree findings; got exit $got, $a_errs errors, $named named, $b_warns dev-tree"; fi
+476: 
+477:     # governance is the discriminator: same corpus, same run, the other answer.
+478:     if printf '%s\n' "$out" | grep -q 'services/governance/Dockerfile — re-link invariant'; then
+479:         bad "red-proof A: governance must be GREEN at d602a1536 — a fixture that reds everything proves nothing"
+480:     else ok; fi
+481: 
+482:     # --- B alone: develop's governance minus its one prune line. B reds; A green.
+483:     FB="$TMP/fixtureB"; mkdir -p "$FB"; materialise HEAD "$FB"
+484:     G="$FB/services/governance/Dockerfile"
+485:     if [ ! -f "$G" ]; then
+486:         bad "red-proof B: governance/Dockerfile missing from the materialised tree"
+487:     else
+488:         before=$(grep -c . "$G")
+489:         grep -v -x 'RUN npm prune --omit=dev' "$G" > "$G.new" && mv "$G.new" "$G"
+490:         after=$(grep -c . "$G")
+491:         if [ "$((before - after))" != "1" ]; then
+492:             bad "red-proof B: the mutation removed $((before - after)) lines, expected exactly 1 — the fixture is not what it claims"
+493:         else
+494:             out=$(SHARED_RELINK_STRICT=1 bash "$GATE" "$FB" 2>&1); got=$?
+495:             b_errs=$(printf '%s\n' "$out" | grep -c 'dev-tree invariant' || true)
+496:             a_errs=$(printf '%s\n' "$out" | grep -c 're-link invariant' || true)
+497:             if [ "$got" = "1" ] && [ "$b_errs" = "1" ] && [ "$a_errs" = "0" ] \
+498:                && printf '%s\n' "$out" | grep -q 'services/governance/Dockerfile — dev-tree invariant'; then ok
+499:             else bad "red-proof B: wanted exit 1, exactly 1 dev-tree error on governance, and 0 re-link errors; got exit $got, $b_errs dev-tree, $a_errs re-link"; fi
+500: 
+501:             # and the same fixture must NOT block in the default report-only mode
+502:             out=$(bash "$GATE" "$FB" 2>&1); got=$?
+503:             if [ "$got" = "0" ] && printf '%s\n' "$out" | grep -q '::warning::'; then ok
+504:             else bad "red-proof B: report-only mode must warn and exit 0 (got exit $got)"; fi
+505:         fi
+506:     fi
+507: fi
+508: 
+509: # --- KS-930 F-3: two SPELLINGS of the final node_modules write that produced a
+510: # FALSE CLEAN on the #851 clobber shape.
+511: #
+512: # Each case below is the canonical clobber file with ONLY the spelling of the last
+513: # write changed. The canonical spelling has always blocked; before the F-3 fix all
+514: # three of these returned rc 0, "1 of 1 clean" — a whole-tree write landing on top of
+515: # @secuura/shared, reported as correct.
+516: #
+517: # Every case pins the CLAUSE and not merely the exit code. Stated precisely, because
+518: # the first version of this comment overstated it: for THESE four fixtures the substring
+519: # is not what discriminates — each carries a second, parseable write, so the pre-fix
+520: # guard exits 0 and the exit code alone already separates the versions. Strip their
+521: # substring argument and they still red.
+522: #
+523: # The substring earns its keep on the SINGLE-write shape, where the pre-fix guard also
+524: # exits 1 — but via the "writes node_modules nowhere (unexpected shape)" fallback, a
+525: # block for the wrong reason. That shape has its own cell at the end of this file and it
+526: # is the only one here whose substring argument can be red-proved. The fallback is also
+527: # the only thing that stood between the parser gap and the false clean, so it must not
+528: # be mistaken for the rule working.
+529: expect "F-3: a JSON-form COPY clobber is caught — flag inside the array" 1 'FROM node:24-alpine AS shared-builder
+530: RUN npm ci --ignore-scripts
+531: FROM node:24-alpine AS builder
+532: RUN npm ci --ignore-scripts
+533: FROM node:24-alpine
+534: RUN npm ci --ignore-scripts --omit=dev
+535: COPY --from=shared-builder /shared /shared
+536: RUN ln -s /shared node_modules/@secuura/shared
+537: COPY ["--from=builder", "/app/node_modules", "./node_modules"]
+538: USER secuura' "runs BEFORE the last instruction"
+539: 
+540: expect "F-3: a JSON-form COPY clobber is caught — flag outside the array" 1 'FROM node:24-alpine AS shared-builder
+541: RUN npm ci --ignore-scripts
+542: FROM node:24-alpine AS builder
+543: RUN npm ci --ignore-scripts
+544: FROM node:24-alpine
+545: RUN npm ci --ignore-scripts --omit=dev
+546: COPY --from=shared-builder /shared /shared
+547: RUN ln -s /shared node_modules/@secuura/shared
+548: COPY --from=builder ["/app/node_modules", "./node_modules"]
+549: USER secuura' "runs BEFORE the last instruction"
+550: 
+551: expect "F-3: an \`npm i\` clobber is caught — the shorthand writes the same tree" 1 'FROM node:24-alpine AS shared-builder
+552: RUN npm ci --ignore-scripts
+553: FROM node:24-alpine
+554: RUN npm ci --ignore-scripts --omit=dev
+555: COPY --from=shared-builder /shared /shared
+556: RUN ln -s /shared node_modules/@secuura/shared
+557: RUN npm i --omit=dev
+558: USER secuura' "runs BEFORE the last instruction"
+559: 
+560: # The guard against the F-3 widening itself. `npm init` begins with the same two
+561: # characters as the `npm i` shorthand and installs nothing; if the alternation ever
+562: # loses its trailing separator this cell reds, and without it the widening would be
+563: # free to swallow any `npm i*` verb.
+564: expect "F-3: \`npm init\` is NOT an install — the shorthand must not swallow it" 0 'FROM node:24-alpine AS shared-builder
+565: RUN npm ci --ignore-scripts
+566: FROM node:24-alpine
+567: RUN npm ci --ignore-scripts --omit=dev
+568: COPY --from=shared-builder /shared /shared
+569: RUN ln -s /shared node_modules/@secuura/shared
+570: RUN npm init -y
+571: USER secuura' "OK — 1 Dockerfile"
+572: 
+573: 
+574: 
+575: # --- KS-930 F-6 (ruled: option A). A final stage with no node tree at all cannot
+576: # violate the re-link invariant, and before the exemption the guard offered such a
+577: # stage NO route to green: adding the re-link honestly returned the same error, and
+578: # the only passing shape was to install a node tree into a static-serving image.
+579: #
+580: # The exemption is granted on POSITIVE readings only. Measured before it was built:
+581: # a stage that writes no node_modules and a stage whose write this parser cannot read
+582: # produce byte-identical output, so anything keyed on the ABSENCE of a parsed write
+583: # would have exempted a node-bearing image shipping without the re-link. Each cell
+584: # below pins ONE of the four conditions, and the four fail through different clauses
+585: # so a cell that stops discriminating shows up as a wrong message rather than a pass.
+586: expect "F-6: an nginx final stage with no node tree is EXEMPT — and the guard SAYS so" 0 'FROM node:24-alpine AS shared-builder
+587: RUN npm ci --ignore-scripts
+588: FROM node:24-alpine AS builder
+589: COPY --from=shared-builder /shared /shared
+590: RUN npm ci --ignore-scripts && npm run build
+591: FROM nginx:1.27-alpine
+592: COPY --from=builder /app/dist /usr/share/nginx/html
+593: USER nginx' "EXEMPT"
+594: 
+595: expect "F-6: a node-ish word in the stage denies the exemption — an unreadable write is not a missing one" 1 'FROM node:24-alpine AS shared-builder
+596: RUN npm ci --ignore-scripts
+597: FROM node:24-alpine AS builder
+598: COPY --from=shared-builder /shared /shared
+599: RUN npm ci --ignore-scripts && npm run build
+600: FROM nginx:1.27-alpine
+601: COPY --from=builder /app/dist /usr/share/nginx/html
+602: RUN apk add --no-cache nodejs npm
+603: USER nginx' "will not certify it as node-free"
+604: 
+605: expect "F-6: a JS-runtime base denies the exemption — a bundled tree would ship unlinked" 1 'FROM node:24-alpine AS shared-builder
+606: RUN npm ci --ignore-scripts
+607: FROM node:24-alpine AS builder
+608: COPY --from=shared-builder /shared /shared
+609: RUN npm ci --ignore-scripts
+610: FROM node:24-alpine
+611: COPY --from=builder /app/dist /app/dist
+612: USER secuura' "its base image is"
+613: 
+614: expect "F-6: a final stage built FROM an earlier stage denies the exemption — what it inherits is unreadable here" 1 'FROM node:24-alpine AS shared-builder
+615: RUN npm ci --ignore-scripts
+616: FROM alpine:3.20 AS base
+617: COPY --from=shared-builder /shared /shared
+618: FROM base
+619: COPY --chown=1000:1000 ./dist /srv/dist
+620: USER 1000' "built FROM the earlier stage"
+621: 
+622: # Pins the COVERAGE clause on its own. The heredoc body carries no node-ish word, so
+623: # the keyword clause cannot be what refuses it -- only "there are lines here I did not
+624: # classify" can. Without this cell the two clauses are indistinguishable on every
+625: # fixture that trips both, which is the mechanism KS-926 is a campaign about.
+626: expect "F-6: an unclassified line denies the exemption even with no node-ish word in it" 1 'FROM node:24-alpine AS shared-builder
+627: RUN npm ci --ignore-scripts
+628: FROM nginx:1.27-alpine
+629: COPY --from=shared-builder /shared /shared
+630: RUN <<EOT
+631: apk add --no-cache curl
+632: EOT
+633: USER nginx' "are not Dockerfile instructions this guard classifies"
+634: 
+635: 
+636: # --- KS-937 F-A / KS-930 F-3, the THIRD axis. Docker instruction keywords are
+637: # case-INSENSITIVE and every clause in the parser matched them case-sensitively, so
+638: # the #851 outage shape spelled with a lowercase `copy` returned rc 0, "1 of 1 clean".
+639: # KS-921 F-1 fixed the SHELL selectors that choose the corpus; it never reached the
+640: # awk parser they feed, which is how an axis survived a fix that was about it.
+641: #
+642: # Three cells, one per keyword that decides a verdict, because a single `copy` cell
+643: # would pass against a fix that upper-cased only COPY.
+644: expect "F-A: a lowercase \`copy\` clobber is caught — keywords are case-insensitive" 1 'FROM node:24-alpine AS shared-builder
+645: RUN npm ci --ignore-scripts
+646: FROM node:24-alpine AS builder
+647: RUN npm ci --ignore-scripts
+648: FROM node:24-alpine
+649: RUN npm ci --ignore-scripts --omit=dev
+650: COPY --from=shared-builder /shared /shared
+651: RUN ln -s /shared node_modules/@secuura/shared
+652: copy --from=builder /app/node_modules ./node_modules
+653: USER secuura' "runs BEFORE the last instruction"
+654: 
+655: expect "F-A: a lowercase \`run\` re-link still counts as the re-link" 1 'FROM node:24-alpine AS shared-builder
+656: RUN npm ci --ignore-scripts
+657: FROM node:24-alpine
+658: RUN npm ci --ignore-scripts --omit=dev
+659: COPY --from=shared-builder /shared /shared
+660: run ln -s /shared node_modules/@secuura/shared
+661: copy --from=builder /app/node_modules ./node_modules
+662: USER secuura' "runs BEFORE the last instruction"
+663: 
+664: expect "F-A: a lowercase \`user\` still ends the privileged window" 1 'FROM node:24-alpine AS shared-builder
+665: RUN npm ci --ignore-scripts
+666: FROM node:24-alpine
+667: RUN npm ci --ignore-scripts --omit=dev
+668: COPY --from=shared-builder /shared /shared
+669: user secuura
+670: RUN ln -s /shared node_modules/@secuura/shared' "runs after a non-root"
+671: 
+672: # The guard against the case widening itself: only the leading KEYWORD is upper-cased.
+673: # PATHS are case-sensitive and must survive untouched.
+674: #
+675: # CORRECTED. This comment used to add "or the parser would start matching
+676: # --from=Builder to a stage named builder and mis-attribute prunes", which states
+677: # the rule BACKWARDS: Docker resolves stage names case-INSENSITIVELY, so matching
+678: # --from=Builder to a stage named builder is the CORRECT attribution, not a
+679: # mis-attribution. Verified against real BuildKit rather than reasoned about --
+680: # a --from=Builder reference to a `builder` stage BUILDS, while --from=Buildr
+681: # fails with "repository name must be lowercase", which is what makes the
+682: # positive result mean something: it proves `Builder` resolved AS A STAGE
+683: # instead of falling through to an image pull.
+684: #
+685: # A comment that inverts its own rule is worse than no comment -- the next author
+686: # believes it. Left uncorrected it would have argued against the one-line fix in
+687: # the guard (lower-casing the pruned_by_name lookup) that this round makes.
+688: expect "F-A: only the keyword is upper-cased — a mixed-case PATH is left alone" 1 'FROM node:24-alpine AS shared-builder
+689: RUN npm ci --ignore-scripts
+690: FROM node:24-alpine AS builder
+691: RUN npm ci --ignore-scripts
+692: FROM node:24-alpine
+693: RUN npm ci --ignore-scripts --omit=dev
+694: COPY --from=shared-builder /shared /shared
+695: RUN ln -s /shared node_modules/@Secuura/shared
+696: USER secuura' "final stage has NO"
+697: 
+698: 
+699: # =============================================================================
+700: # ROUND 1 of the #876 re-gate. The F-6 exemption is INVERTED: it is now granted
+701: # only on a POSITIVE identification of a base image that ships no JS runtime,
+702: # and refused on anything it cannot read.
+703: #
+704: # One cell per spelling in the sweep that escaped the old prefix-anchored regex.
+705: # Each asserts the CONDITION-4 message, not merely the exit code, so a cell
+706: # cannot pass because some other arm happened to deny the file.
+707: # =============================================================================
+708: 
+709: nonjs_case() {  # nonjs_case <name> <expected_rc> <final FROM> [substring]
+710:     expect "$1" "$2" "FROM node:24-alpine AS shared-builder
+711: RUN npm ci --ignore-scripts
+712: $3
+713: COPY --from=shared-builder /shared /shared
+714: CMD [\"/bin/sh\"]" "${4:-}"
+715: }
+716: 
+717: # --- the five that were EXEMPT at a0ad0a084 and must now be DENIED ------------
+718: nonjs_case "F-6 inv: \${REGISTRY_PREFIX}node is DENIED (18 of 25 real files use this spelling)" 1 \
+719:   'FROM ${REGISTRY_PREFIX}node:24-alpine' "a JavaScript runtime"
+720: nonjs_case "F-6 inv: a --platform flag no longer hides the base image" 1 \
+721:   'FROM --platform=$BUILDPLATFORM node:24-alpine' "a JavaScript runtime"
+722: nonjs_case "F-6 inv: a digest-pinned node is DENIED" 1 \
+723:   'FROM node@sha256:0000000000000000000000000000000000000000000000000000000000000000' "a JavaScript runtime"
+724: nonjs_case "F-6 inv: distroless nodejs is DENIED" 1 \
+725:   'FROM gcr.io/distroless/nodejs22-debian12' "a JavaScript runtime"
+726: nonjs_case "F-6 inv: a variable that IS the reference is unreadable, so DENIED" 1 \
+727:   'FROM $NODE_IMAGE' "is not one this guard can positively identify"
+728: 
+729: # --- the controls: an incomplete allow-list must fail CLOSED, not block the ---
+730: # --- shapes the exemption exists for -----------------------------------------
+731: nonjs_case "F-6 inv: a plain node base is still DENIED (the pre-existing control)" 1 \
+732:   'FROM node:24-alpine' "a JavaScript runtime"
+733: nonjs_case "F-6 inv: nginx is still EXEMPT — the case the exemption exists for" 0 \
+734:   'FROM nginx:1.27-alpine' "the re-link invariant does not apply"
+735: nonjs_case "F-6 inv: nginx behind a REGISTRY prefix is EXEMPT — not a false block" 0 \
+736:   'FROM ${REGISTRY_PREFIX}nginx:1.27-alpine' "the re-link invariant does not apply"
+737: nonjs_case "F-6 inv: busybox is EXEMPT" 0 \
+738:   'FROM busybox:1.36' "the re-link invariant does not apply"
+739: 
+740: # An image nobody has classified yet is DENIED, not waved through. This is the
+741: # whole point of inverting: the list will always be incomplete, and the question
+742: # is only which way incompleteness fails.
+743: nonjs_case "F-6 inv: an UNKNOWN non-JS image fails CLOSED (the direction that matters)" 1 \
+744:   'FROM ghcr.io/acme/some-static-server:1' "is not one this guard can positively identify"
+745: 
+746: # =============================================================================
+747: # KS-930 ROUND 2 — the gate finding-1 attack table, one cell per row.
+748: #
+749: # Round 1 shipped an exemption arm whose comment said it was granted "on
+750: # POSITIVE readings, never on the absence of a parse match", and whose only
+751: # runtime signal was four PACKAGE-MANAGER tokens: node_modules, npm, yarn,
+752: # pnpm. None of those four is a substring of "nodejs", and none is the bare
+753: # word "node". So `RUN apk add --no-cache nodejs` and `CMD ["node", "..."]`
+754: # both read as "this stage mentions no node tooling", and 6 of 8 attack shapes
+755: # were certified EXEMPT at rc 0. Every one of the six was a REGRESSION against
+756: # this branch base: 306d0db92 blocked every no-nmwrite final stage outright.
+757: #
+758: # Each cell pins the ARM MESSAGE, not just the exit code. That is deliberate:
+759: # the round headline was that the right exit can arrive from the wrong rule, and
+760: # an exit-code-only cell cannot see the difference.
+761: # =============================================================================
+762: row_case() {  # row_case <name> <expected_rc> <final stage lines> <arm substring>
+763:     expect "$1" "$2" "FROM node:24-alpine AS shared-builder
+764: WORKDIR /shared
+765: RUN npm ci --ignore-scripts
+766: FROM node:24-alpine AS builder
+767: WORKDIR /app
+768: RUN npm ci && npm run build
+769: $3
+770: COPY --from=shared-builder /shared /shared" "$4"
+771: }
+772: 
+773: NODEISH_MSG="names a JavaScript runtime or its tooling"
+774: 
+775: # --- the six that round 1 certified clean, and the two controls that held ----
+776: row_case "R2 row 1a: apk add nodejs is DENIED (round 1 said EXEMPT)" 1 \
+777:   'FROM alpine:3.20
+778: RUN apk add --no-cache nodejs
+779: CMD ["/bin/sh"]' "$NODEISH_MSG"
+780: 
+781: row_case "R2 row 1b CONTROL: apk add nodejs npm was already denied" 1 \
+782:   'FROM alpine:3.20
+783: RUN apk add --no-cache nodejs npm
+784: CMD ["/bin/sh"]' "$NODEISH_MSG"
+785: 
+786: row_case "R2 row 1c: busybox + a copied node binary is DENIED" 1 \
+787:   'FROM busybox:1.36
+788: COPY --from=builder /usr/local/bin/node /usr/local/bin/node
+789: COPY --from=builder /app /app
+790: CMD ["/usr/local/bin/node"]' "$NODEISH_MSG"
+791: 
+792: row_case "R2 row 1e: an ENV-indirected package name is DENIED" 1 \
+793:   'FROM alpine:3.20
+794: ENV RUNTIME_PKG=nodejs
+795: RUN apk add --no-cache $RUNTIME_PKG
+796: CMD ["/bin/sh"]' "$NODEISH_MSG"
+797: 
+798: row_case "R2 row 1g: a line-continuation apk add nodejs is DENIED" 1 \
+799:   'FROM alpine:3.20
+800: RUN apk add --no-cache \
+801:     nodejs
+802: CMD ["/bin/sh"]' "$NODEISH_MSG"
+803: 
+804: row_case "R2 row 1h: alpine + a copied node binary is DENIED" 1 \
+805:   'FROM alpine:3.20
+806: COPY --from=builder /usr/local/bin/node /usr/local/bin/node
+807: COPY --from=builder /app /app
+808: CMD ["/usr/local/bin/node"]' "$NODEISH_MSG"
+809: 
+810: row_case "R2 row 1i: nginx + a copied node binary is DENIED" 1 \
+811:   'FROM nginx:1.27-alpine
+812: COPY --from=builder /usr/local/bin/node /usr/local/bin/node
+813: COPY --from=builder /app /app
+814: CMD ["/usr/local/bin/node"]' "$NODEISH_MSG"
+815: 
+816: # The other two runtimes the fix-shape named, so the alternation is not three
+817: # dead branches beside one live one.
+818: row_case "R2: a bun runtime in the final stage is DENIED" 1 \
+819:   'FROM alpine:3.20
+820: COPY --from=builder /app /app
+821: CMD ["bun", "run", "/app/index.js"]' "$NODEISH_MSG"
+822: 
+823: row_case "R2: a deno runtime in the final stage is DENIED" 1 \
+824:   'FROM alpine:3.20
+825: COPY --from=builder /app /app
+826: CMD ["deno", "run", "/app/index.js"]' "$NODEISH_MSG"
+827: 
+828: # --- the boundary: the match is on WORDS, not substrings --------------------
+829: # Without boundaries this widening would be a false-block machine: every one of
+830: # these is an ordinary line in a static-serving image.
+831: row_case "R2 boundary: nodemon-free words containing node are NOT a match" 0 \
+832:   'FROM nginx:1.27-alpine
+833: RUN mkdir -p /srv/nodes /srv/anode /srv/nodex
+834: CMD ["/bin/sh"]' "the re-link invariant does not apply"
+835: 
+836: row_case "R2 boundary: an nginx image is still EXEMPT after the widening" 0 \
+837:   'FROM nginx:1.27-alpine
+838: COPY --from=builder /app/dist /usr/share/nginx/html
+839: CMD ["/bin/sh"]' "the re-link invariant does not apply"
+840: 
+841: # --- ROUND 3: the regression, and the bound stated out loud -----------------
+842: # The round-2 gate found that the boundary class [^A-Za-z0-9_.-] treats `-`, `.`
+843: # and `_` as word characters, so a runtime name carrying a version or variant
+844: # suffix was invisible. Every row in this block was rc 1 at this branch base
+845: # 306d0db92 and rc 0 A_EXEMPT at round-2 head 3047bcb1d -- a REGRESSION against
+846: # base, not a known gap. All rows measured at all three SHAs before the fix was
+847: # written; the base column is what makes them regressions rather than gaps.
+848: #
+849: # A boundary character is only isolated by a PAIR, so the two spellings that
+850: # differ from an already-denied one by a single character carry their partners.
+851: 
+852: row_case "R3 F1: a copied binary named node-22 is DENIED" 1 \
+853:   'FROM alpine:3.20
+854: COPY --from=builder /usr/local/bin/node-22 /usr/local/bin/node-22
+855: COPY --from=builder /app /app
+856: CMD ["/usr/local/bin/node-22", "/app/dist/index.js"]' "$NODEISH_MSG"
+857: 
+858: row_case "R3 F1 PAIR: the same shape spelled node -- isolates the hyphen" 1 \
+859:   'FROM alpine:3.20
+860: COPY --from=builder /usr/local/bin/node /usr/local/bin/node
+861: COPY --from=builder /app /app
+862: CMD ["/usr/local/bin/node", "/app/dist/index.js"]' "$NODEISH_MSG"
+863: 
+864: row_case "R3 F1: a copied binary named node22 is DENIED" 1 \
+865:   'FROM alpine:3.20
+866: COPY --from=builder /usr/local/bin/node22 /usr/local/bin/node22
+867: COPY --from=builder /app /app
+868: CMD ["/usr/local/bin/node22", "/app/dist/index.js"]' "$NODEISH_MSG"
+869: 
+870: row_case "R3 F1: a copied binary named node.22 is DENIED" 1 \
+871:   'FROM alpine:3.20
+872: COPY --from=builder /usr/local/bin/node.22 /usr/local/bin/node.22
+873: COPY --from=builder /app /app
+874: CMD ["/usr/local/bin/node.22", "/app/dist/index.js"]' "$NODEISH_MSG"
+875: 
+876: row_case "R3 F1: a copied binary named node_22 is DENIED" 1 \
+877:   'FROM alpine:3.20
+878: COPY --from=builder /usr/local/bin/node_22 /usr/local/bin/node_22
+879: COPY --from=builder /app /app
+880: CMD ["/usr/local/bin/node_22", "/app/dist/index.js"]' "$NODEISH_MSG"
+881: 
+882: row_case "R3 F1: a copied binary named nodejs-22 is DENIED" 1 \
+883:   'FROM alpine:3.20
+884: COPY --from=builder /usr/local/bin/nodejs-22 /usr/local/bin/nodejs-22
+885: COPY --from=builder /app /app
+886: CMD ["/usr/local/bin/nodejs-22", "/app/dist/index.js"]' "$NODEISH_MSG"
+887: 
+888: row_case "R3 F1: a copied binary named node-lts is DENIED" 1 \
+889:   'FROM alpine:3.20
+890: COPY --from=builder /usr/local/bin/node-lts /usr/local/bin/node-lts
+891: COPY --from=builder /app /app
+892: CMD ["/usr/local/bin/node-lts", "/app/dist/index.js"]' "$NODEISH_MSG"
+893: 
+894: # The round-2 gate found four more of the same class (its F2). npx is the one
+895: # that is not a suffix problem at all: it named the tooling and sat in neither
+896: # token list. It is added to the tooling clause, not to the word-arm.
+897: row_case "R3 F2: npx in the final CMD is DENIED" 1 \
+898:   'FROM alpine:3.20
+899: COPY --from=builder /app /app
+900: CMD ["npx","tsx","/app/src/index.ts"]' "$NODEISH_MSG"
+901: 
+902: row_case "R3 F2: apk add nodejs-current is DENIED" 1 \
+903:   'FROM alpine:3.20
+904: RUN apk add --no-cache nodejs-current
+905: CMD ["/bin/sh"]' "$NODEISH_MSG"
+906: 
+907: row_case "R3 F2 PAIR: apk add nodejs=20.15.1-r0 -- isolates the hyphen" 1 \
+908:   'FROM alpine:3.20
+909: RUN apk add --no-cache nodejs=20.15.1-r0
+910: CMD ["/bin/sh"]' "$NODEISH_MSG"
+911: 
+912: row_case "R3 F2: a nodejs.org tarball install is DENIED" 1 \
+913:   'FROM alpine:3.20
+914: RUN wget -qO- https://nodejs.org/dist/v22.5.1/node-v22.5.1-linux-x64.tar.xz | tar -xJ -C /usr/local
+915: CMD ["/bin/sh"]' "$NODEISH_MSG"
+916: 
+917: row_case "R3 F2: apt-get install nodejs-legacy is DENIED" 1 \
+918:   'FROM alpine:3.20
+919: RUN apt-get install -y nodejs-legacy
+920: CMD ["/bin/sh"]' "$NODEISH_MSG"
+921: 
+922: # --- the PRICE of the widening, pinned rather than discovered later ---------
+923: # Allowing a suffix necessarily catches hyphenated words that begin with a
+924: # runtime name. Two of them are worth naming, and they land on opposite sides
+925: # of "is this correct?":
+926: #   node-red      IS a JavaScript runtime environment -- denying it is RIGHT.
+927: #   node-exporter is a Go binary -- denying it is a FALSE BLOCK, and we take it.
+928: # The direction is deliberate: this arm fails toward blocking, which a human
+929: # sees, over exempting, which nobody sees. The false-block class as a whole is
+930: # the round-2 gate finding F3 and is NOT addressed in this round -- Kam ruled it
+931: # regression-only. These two cells exist so that choice is a measurement rather
+932: # than a silence, and so the day someone narrows the class, both move together.
+933: row_case "R3 BOUND: node-red is DENIED (correct -- it IS a JS runtime)" 1 \
+934:   'FROM nginx:1.27-alpine
+935: RUN mkdir -p /srv/node-red
+936: CMD ["/bin/sh"]' "$NODEISH_MSG"
+937: 
+938: row_case "R3 BOUND: node-exporter is DENIED -- a KNOWN FALSE BLOCK we accept (gate F3)" 1 \
+939:   'FROM nginx:1.27-alpine
+940: COPY --from=builder /usr/local/bin/node-exporter /usr/local/bin/node-exporter
+941: CMD ["/bin/sh"]' "$NODEISH_MSG"
+942: 
+943: # --- F-QA-2: the message has to carry its own remedy ------------------------
+944: # The argument for accepting the node-exporter false block is that this arm
+945: # "fails toward blocking, which a human sees". That argument is only true if
+946: # what the human sees tells them what matched and what to do. As round 3 first
+947: # shipped it, the message listed tokens none of which appear in the offending
+948: # file, did not mention npx (which the same round added to the rule), said
+949: # nothing about the version-suffix rule, and offered no way out -- so the real
+950: # options were rename the binary, edit the regex, or --no-verify, which skips
+951: # all thirteen preflight legs rather than this one.
+952: #
+953: # Two cells, not one, so each can fail on its own: quoting the match and naming
+954: # the rule are separate promises.
+955: row_case "F-QA-2: the message QUOTES the line that matched" 1 \
+956:   'FROM nginx:1.27-alpine
+957: COPY --from=builder /usr/local/bin/node-exporter /usr/local/bin/node-exporter
+958: CMD ["/bin/sh"]' "/usr/local/bin/node-exporter /usr/local/bin/node-exporter"
+959: 
+960: row_case "F-QA-2: the message names npx, which round 3 added to the rule" 1 \
+961:   'FROM nginx:1.27-alpine
+962: COPY --from=builder /usr/local/bin/node-exporter /usr/local/bin/node-exporter
+963: CMD ["/bin/sh"]' "npm/npx/yarn/pnpm"
+964: 
+965: row_case "F-QA-2: the message states the SUFFIX rule, not just the bare names" 1 \
+966:   'FROM nginx:1.27-alpine
+967: COPY --from=builder /usr/local/bin/node-exporter /usr/local/bin/node-exporter
+968: CMD ["/bin/sh"]' "version or variant suffix"
+969: 
+970: row_case "F-QA-2: the message offers a REMEDY and warns off --no-verify" 1 \
+971:   'FROM nginx:1.27-alpine
+972: COPY --from=builder /usr/local/bin/node-exporter /usr/local/bin/node-exporter
+973: CMD ["/bin/sh"]' "skips all 13 preflight legs"
+974: 
+975: # --- clause ORDER, and what this cell does and does not prove ---------------
+976: # `node_modules` matches the widened word-arm as well as the tooling clause,
+977: # because `node` is now allowed a `_` suffix. It cannot change any outcome: the
+978: # tooling clause is tested FIRST and the word-arm is its `else if`, and both set
+979: # the same flag to the same value. So this cell pins the OUTCOME only -- it
+980: # cannot tell which clause fired, and it is not claimed to. Its worth is that
+981: # the day someone reorders or narrows those two clauses, this moves.
+982: row_case "R3 ORDER: a node_modules path is DENIED (outcome pinned, not the clause)" 1 \
+983:   'FROM nginx:1.27-alpine
+984: RUN mkdir -p /srv/node_modules
+985: CMD ["/bin/sh"]' "$NODEISH_MSG"
+986: 
+987: # --- the base image keeps its OWN arm after the widening --------------------
+988: # A node base must still be denied by base_is_js_runtime and say so, not be
+989: # swept up by nodeish: one input judged by two clauses means neither can be
+990: # red-proofed alone. It gets that for free -- a FROM line returns out of the
+991: # classifier before the nodeish statement -- and an explicit `!= "FROM"` guard
+992: # written here was REMOVED after a tamper left the suite 70/70 with it
+993: # defeated, i.e. it could not change an outcome. These cells pin the outcome
+994: # rather than the mechanism, so they hold either way.
+995: row_case "R2: a node BASE is still judged by the base arm, not by nodeish" 1 \
+996:   'FROM node:24-alpine
+997: CMD ["/bin/sh"]' "a JavaScript runtime, so a node tree"
+998: 
+999: row_case "R2: a prefixed node BASE is still judged by the base arm" 1 \
+1000:   'FROM ${REGISTRY_PREFIX}node:24-alpine
+1001: CMD ["/bin/sh"]' "a JavaScript runtime, so a node tree"
+1002: 
+1003: # The gate mechanism-sweep found base_is_js_runtime second arm -- the bare
+1004: # /nodejs/ substring test -- reddened by NOTHING (its T13): removing it left the
+1005: # exit code identical and only the RULE changed, and every existing cell pinned
+1006: # the exit. This one pins the rule, so it can tell.
+1007: row_case "R2: an image whose NAME merely contains nodejs is DENIED BY THE RUNTIME ARM (gate T13)" 1 \
+1008:   'FROM ghcr.io/acme/custom-nodejs:1
+1009: CMD ["/bin/sh"]' "a JavaScript runtime, so a node tree"
+1010: 
+1011: # --- THE ROW THAT IS STILL OPEN, pinned as open rather than left silent -----
+1012: # Row 1d. A whole app tree copied out of a build stage, into a stage that names
+1013: # NO JavaScript runtime anywhere. This is still A_EXEMPT and this cell says so
+1014: # out loud, so the day it changes, something fails and a human reads why.
+1015: #
+1016: # The gate fix-shape for it -- "an allow-listed base should not be exempt when
+1017: # the stage copies a whole directory from another stage" -- was BUILT and then
+1018: # WITHDRAWN, because measurement says it cannot be expressed without denying
+1019: # this repo of its own idiom. Every class file, and every exemption fixture in
+1020: # this suite, contains `COPY --from=shared-builder /shared /shared`; and
+1021: # shared-builder is `WORKDIR /shared` + `npm ci`, so /shared IS that stage
+1022: # workdir and does hold a node tree. A structural rule (source is a top-level
+1023: # directory) and a WORKDIR-aware rule (source is the source stage workdir) BOTH
+1024: # match it. With the structural version in place the suite went 41/12, and the
+1025: # reds included "nginx is still EXEMPT", the case the arm exists for.
+1026: #
+1027: # What bounds the residue -- and this sentence was WRONG as round 2 shipped it,
+1028: # which is why it is now written against measurements rather than against
+1029: # intent. It then read "every variant that names something able to RUN the
+1030: # copied tree is now denied". The round-2 gate falsified it in one line: the
+1031: # same shape with the binary spelled `node-22` named the runtime in plain text
+1032: # on its own CMD line and was EXEMPT at rc 0. Round 3 closes that spelling and
+1033: # nine more like it, each pinned above and each measured at three SHAs.
+1034: # So, as measured: a final stage is denied when it NAMES something able to run
+1035: # the copied tree -- a copied node/bun/deno binary, CMD or ENTRYPOINT on one,
+1036: # those names carrying a version or variant suffix, or npm/npx/yarn/pnpm.
+1037: # What is left is the stage that cannot NAME what it would execute: an image
+1038: # reaching node through a file this guard cannot read, e.g. CMD ["/app/start.sh"].
+1039: # That is a weaker and different claim than the one that was wrong, and it is
+1040: # the hole KS-956 describes. Tracked as KS-956.
+1041: row_case "R2 row 1d: KNOWN OPEN — a whole app tree with no named runtime is still EXEMPT (KS-956)" 0 \
+1042:   'FROM scratch
+1043: COPY --from=builder /app /app' "the re-link invariant does not apply"
+1044: 
+1045: # --- gate finding 2: assertion B must not carry the pre-inversion regex -----
+1046: # B kept a deny-list regex verbatim, about fifteen lines below the arm round 1
+1047: # rewrote, and it disagreed with A on the single most common spelling in this
+1048: # repo. One run asserted BOTH "a node tree this guard cannot see would ship
+1049: # unlinked" AND "obtains no node_modules at all", about the same stage.
+1050: b_arm_case() {  # b_arm_case <name> <final FROM> <expected B substring>
+1051:     local d out
+1052:     d=$(mktemp -d "$TMP/barm.XXXXXX"); mkdir -p "$d/services/thing"
+1053:     printf '%s\n' "FROM node:24-alpine AS shared-builder
+1054: WORKDIR /shared
+1055: RUN npm ci --ignore-scripts
+1056: $2
+1057: COPY --from=shared-builder /shared /shared
+1058: CMD [\"/bin/sh\"]" > "$d/services/thing/Dockerfile"
+1059:     out=$(bash "$GATE" "$d" 2>&1)
+1060:     if printf '%s' "$out" | grep -qF -- "$3"; then ok; else bad "$1 (wanted B arm /$3/)"; fi
+1061: }
+1062: 
+1063: b_arm_case "R2 F2: a node base must NOT be B_EXEMPT" \
+1064:   'FROM ${REGISTRY_PREFIX}node:24-alpine' "cannot determine how the final stage obtains node_modules"
+1065: 
+1066: b_arm_case "R2 F2: a digest-pinned node must NOT be B_EXEMPT" \
+1067:   'FROM node@sha256:0000000000000000000000000000000000000000000000000000000000000000' "cannot determine how the final stage obtains node_modules"
+1068: 
+1069: b_arm_case "R2 F2 CONTROL: nginx IS still B_EXEMPT — the fix must not deny everything" \
+1070:   'FROM nginx:1.27-alpine' "there is no tree to prune"
+1071: 
+1072: # --- Finding 2: the exemption count must reach the summary --------------------
+1073: exempt_summary_case() {
+1074:     local d out
+1075:     d=$(mktemp -d "$TMP/exsum.XXXXXX"); mkdir -p "$d/services/thing"
+1076:     printf '%s\n' 'FROM node:24-alpine AS shared-builder
+1077: RUN npm ci --ignore-scripts
+1078: FROM nginx:1.27-alpine
+1079: COPY --from=shared-builder /shared /shared
+1080: CMD ["/bin/sh"]' > "$d/services/thing/Dockerfile"
+1081:     out=$(bash "$GATE" "$d" 2>&1)
+1082:     # The commit that added the exemption promised "a count in the summary".
+1083:     if printf '%s' "$out" | grep -qF "1 EXEMPT"; then ok; else bad "exemption count reaches the summary"; fi
+1084:     # And the OK line must stop claiming ALL files re-link when one does not.
+1085:     if printf '%s' "$out" | grep -qF "all re-link"; then
+1086:         bad "OK line still says 'all re-link' with an exempt file present"
+1087:     else ok; fi
+1088: }
+1089: exempt_summary_case
+1090: 
+1091: # --- The cell that gives the substring argument an actual red-proof.
+1092: #
+1093: # The four F-3 cells above pin their message, and the comment there says the message
+1094: # is load-bearing. For THOSE fixtures it is not: they carry a second, parseable write,
+1095: # so the pre-fix guard exits 0 and the exit code alone already separates the versions.
+1096: # Strip their substring argument and they still red. The claim was true of the CLASS
+1097: # and not of the cells asserting it -- exactly the gap this suite exists to close.
+1098: #
+1099: # This fixture has ONE write and it is the unparseable one. Across the fix the exit
+1100: # code does NOT change -- it is 1 on both sides -- and only the MESSAGE moves:
+1101: #   before   "final stage writes node_modules nowhere"      (the fallback, wrong about the file)
+1102: #   after    "the re-link runs BEFORE the last instruction" (the rule, right about the file)
+1103: # So this is the one cell in the set that an exit-code-only assertion could not write,
+1104: # and removing its substring argument makes it pass against the unfixed guard.
+1105: expect "F-3: the substring is load-bearing — same exit code, different clause, single-write fixture" 1 'FROM node:24-alpine AS shared-builder
+1106: RUN npm ci --ignore-scripts
+1107: FROM node:24-alpine AS builder
+1108: RUN npm ci --ignore-scripts
+1109: FROM node:24-alpine
+1110: COPY --from=shared-builder /shared /shared
+1111: RUN ln -s /shared node_modules/@secuura/shared
+1112: COPY ["--from=builder", "/app/node_modules", "./node_modules"]
+1113: USER secuura' "runs BEFORE the last instruction"
+1114: 
+1115: 
+1116: # --- KS-945. The install test used to ENUMERATE verbs, which fails OPEN: a verb
+1117: # nobody listed reads as "writes nothing". Measured on the enumerating version, each
+1118: # of the first five returned rc 0 "1 of 1 clean" on the #851 clobber shape.
+1119: #
+1120: # Inverted, it fails CLOSED — a package manager in COMMAND POSITION counts as a write
+1121: # unless its verb is on a read-only allowlist. One cell per rule, because a single
+1122: # `npm add` cell would pass against a fix that special-cased only `add`.
+1123: expect "KS-945: \`npm add\` is an install" 1 'FROM node:24-alpine AS shared-builder
+1124: RUN npm ci --ignore-scripts
+1125: FROM node:24-alpine
+1126: RUN npm ci --ignore-scripts --omit=dev
+1127: COPY --from=shared-builder /shared /shared
+1128: RUN ln -s /shared node_modules/@secuura/shared
+1129: RUN npm add lodash
+1130: USER secuura' "runs BEFORE the last instruction"
+1131: 
+1132: expect "KS-945: \`npm it\` is an install" 1 'FROM node:24-alpine AS shared-builder
+1133: RUN npm ci --ignore-scripts
+1134: FROM node:24-alpine
+1135: RUN npm ci --ignore-scripts --omit=dev
+1136: COPY --from=shared-builder /shared /shared
+1137: RUN ln -s /shared node_modules/@secuura/shared
+1138: RUN npm it
+1139: USER secuura' "runs BEFORE the last instruction"
+1140: 
+1141: expect "KS-945: bare \`yarn\` is an install — its DEFAULT verb is install" 1 'FROM node:24-alpine AS shared-builder
+1142: RUN npm ci --ignore-scripts
+1143: FROM node:24-alpine
+1144: RUN npm ci --ignore-scripts --omit=dev
+1145: COPY --from=shared-builder /shared /shared
+1146: RUN ln -s /shared node_modules/@secuura/shared
+1147: RUN yarn
+1148: USER secuura' "runs BEFORE the last instruction"
+1149: 
+1150: expect "KS-945: \`pnpm add\` is an install" 1 'FROM node:24-alpine AS shared-builder
+1151: RUN npm ci --ignore-scripts
+1152: FROM node:24-alpine
+1153: RUN npm ci --ignore-scripts --omit=dev
+1154: COPY --from=shared-builder /shared /shared
+1155: RUN ln -s /shared node_modules/@secuura/shared
+1156: RUN pnpm add lodash
+1157: USER secuura' "runs BEFORE the last instruction"
+1158: 
+1159: # Before the inversion this passed only BY ACCIDENT: the npm rule had no left word
+1160: # boundary, so `npm[ \t]+i` matched inside `pnpm i`. Right answer, wrong reason.
+1161: expect "KS-945: \`pnpm i\` is an install — matched as pnpm, not as npm inside pnpm" 1 'FROM node:24-alpine AS shared-builder
+1162: RUN npm ci --ignore-scripts
+1163: FROM node:24-alpine
+1164: RUN npm ci --ignore-scripts --omit=dev
+1165: COPY --from=shared-builder /shared /shared
+1166: RUN ln -s /shared node_modules/@secuura/shared
+1167: RUN pnpm i
+1168: USER secuura' "runs BEFORE the last instruction"
+1169: 
+1170: # The manager need not lead the RUN line; segments after && are commands too.
+1171: expect "KS-945: a manager after && is still in command position" 1 'FROM node:24-alpine AS shared-builder
+1172: RUN npm ci --ignore-scripts
+1173: FROM node:24-alpine
+1174: RUN npm ci --ignore-scripts --omit=dev
+1175: COPY --from=shared-builder /shared /shared
+1176: RUN ln -s /shared node_modules/@secuura/shared
+1177: RUN echo building && npm add lodash
+1178: USER secuura' "runs BEFORE the last instruction"
+1179: 
+1180: # ...but a manager NAME that is an ARGUMENT is not an invocation. `apk add nodejs npm`
+1181: # installs the npm BINARY and writes no node_modules. An earlier version of this
+1182: # inversion counted that trailing token as a write; it was caught by an F-6 cell that
+1183: # began failing on the wrong CLAUSE while still exiting 1, which the exit code alone
+1184: # would have hidden.
+1185: expect "KS-945: a manager name as an ARGUMENT is not an invocation" 0 'FROM node:24-alpine AS shared-builder
+1186: RUN npm ci --ignore-scripts
+1187: FROM node:24-alpine
+1188: RUN npm ci --ignore-scripts --omit=dev
+1189: COPY --from=shared-builder /shared /shared
+1190: RUN ln -s /shared node_modules/@secuura/shared
+1191: RUN apk add --no-cache nodejs npm
+1192: USER secuura' "OK — 1 Dockerfile"
+1193: 
+1194: # The over-match guard the old `npm i` shorthand needed, kept because the inversion
+1195: # must not resurrect it: `mynpm` is not a package manager.
+1196: expect "KS-945: \`mynpm i\` is not a package manager" 0 'FROM node:24-alpine AS shared-builder
+1197: RUN npm ci --ignore-scripts
+1198: FROM node:24-alpine
+1199: RUN npm ci --ignore-scripts --omit=dev
+1200: COPY --from=shared-builder /shared /shared
+1201: RUN ln -s /shared node_modules/@secuura/shared
+1202: RUN mynpm i
+1203: USER secuura' "OK — 1 Dockerfile"
+1204: 
+1205: # The allowlist must actually let read-only verbs through, or the inversion is just a
+1206: # blanket block wearing a list.
+1207: expect "KS-945: a read-only verb is not a write" 0 'FROM node:24-alpine AS shared-builder
+1208: RUN npm ci --ignore-scripts
+1209: FROM node:24-alpine
+1210: RUN npm ci --ignore-scripts --omit=dev
+1211: COPY --from=shared-builder /shared /shared
+1212: RUN ln -s /shared node_modules/@secuura/shared
+1213: RUN npm ls --depth=0
+1214: USER secuura' "OK — 1 Dockerfile"
+1215: 
+1216: # `npm init <spec>` is documented as the same thing as `npx create-<spec>` — it
+1217: # downloads and runs a package — while `npm init -y` writes only package.json. The
+1218: # next token decides, which avoids both a false block on the common form and a false
+1219: # clean on the installing one. Its sibling `npm init -y` cell is above.
+1220: expect "KS-945: \`npm init <package-spec>\` installs, unlike \`npm init -y\`" 1 'FROM node:24-alpine AS shared-builder
+1221: RUN npm ci --ignore-scripts
+1222: FROM node:24-alpine
+1223: RUN npm ci --ignore-scripts --omit=dev
+1224: COPY --from=shared-builder /shared /shared
+1225: RUN ln -s /shared node_modules/@secuura/shared
+1226: RUN npm init create-vite
+1227: USER secuura' "runs BEFORE the last instruction"
+1228: 
+1229: # --- The #879 review (Peter, 2026-09-08), finding 1. Treating `npm run` as a write is
+1230: # this inversion's widest decision (50 invocations across the class), and NO cell
+1231: # pinned it: with `run` added to the read-only allowlist the suite stayed at 51 passed,
+1232: # 0 failed. This is the cell that reds under that tamper, on the shape the guard exists
+1233: # for: a script that might install, landing after the re-link.
+1234: expect "KS-945: \`npm run build\` after the re-link is a write — \`run\` is not read-only" 1 'FROM node:24-alpine AS shared-builder
+1235: RUN npm ci --ignore-scripts
+1236: FROM node:24-alpine
+1237: RUN npm ci --ignore-scripts --omit=dev
+1238: COPY --from=shared-builder /shared /shared
+1239: RUN ln -s /shared node_modules/@secuura/shared
+1240: RUN npm run build
+1241: USER secuura' "runs BEFORE the last instruction"
+1242: 
+1243: # --- The #879 review, finding 2. A version or help probe is a flag in verb position
+1244: # and writes nothing, but the default-verb rule read EVERY leading flag as the default
+1245: # verb: `npm --version` was rc 0 on the enumerating base and rc 1 after the inversion,
+1246: # a false block this PR itself introduced. Three cells cover the four spellings the
+1247: # allowance names (the help pair shares one), so a fix that allows only one spelling
+1248: # leaves at least one of them red.
+1249: expect "KS-945: \`npm --version\` is a probe, not an install" 0 'FROM node:24-alpine AS shared-builder
+1250: RUN npm ci --ignore-scripts
+1251: FROM node:24-alpine
+1252: RUN npm ci --ignore-scripts --omit=dev
+1253: COPY --from=shared-builder /shared /shared
+1254: RUN ln -s /shared node_modules/@secuura/shared
+1255: RUN npm --version
+1256: USER secuura' "OK — 1 Dockerfile"
+1257: 
+1258: expect "KS-945: \`node -v && npm -v\` is a probe — the short flag, after &&" 0 'FROM node:24-alpine AS shared-builder
+1259: RUN npm ci --ignore-scripts
+1260: FROM node:24-alpine
+1261: RUN npm ci --ignore-scripts --omit=dev
+1262: COPY --from=shared-builder /shared /shared
+1263: RUN ln -s /shared node_modules/@secuura/shared
+1264: RUN node -v && npm -v
+1265: USER secuura' "OK — 1 Dockerfile"
+1266: 
+1267: expect "KS-945: \`npm --help && pnpm -h\` is a probe" 0 'FROM node:24-alpine AS shared-builder
+1268: RUN npm ci --ignore-scripts
+1269: FROM node:24-alpine
+1270: RUN npm ci --ignore-scripts --omit=dev
+1271: COPY --from=shared-builder /shared /shared
+1272: RUN ln -s /shared node_modules/@secuura/shared
+1273: RUN npm --help && pnpm -h
+1274: USER secuura' "OK — 1 Dockerfile"
+1275: 
+1276: # ...and the guard against the allowance widening itself. It is an EXACT match, so any
+1277: # OTHER leading flag still runs the manager's default verb, which for yarn is install.
+1278: # Without this cell, loosening the allowance to every flag would pass the suite.
+1279: expect "KS-945: \`yarn --frozen-lockfile\` still blocks — only the probe flags are allowed" 1 'FROM node:24-alpine AS shared-builder
+1280: RUN npm ci --ignore-scripts
+1281: FROM node:24-alpine
+1282: RUN npm ci --ignore-scripts --omit=dev
+1283: COPY --from=shared-builder /shared /shared
+1284: RUN ln -s /shared node_modules/@secuura/shared
+1285: RUN yarn --frozen-lockfile
+1286: USER secuura' "runs BEFORE the last instruction"
+1287: 
+1288: # --- The suite must not EXECUTE its own case names.
+1289: #
+1290: # Learned the hard way on KS-945: a case name is interpolated into a double-quoted
+1291: # shell word at the call site, so a backtick in it is COMMAND SUBSTITUTION. Seven
+1292: # names written as `npm add`, `pnpm add`, `npm init <package-spec>` and so on ran
+1293: # those commands for real during a suite run -- npm init rewrote
+1294: # Blockchain/Dev/package.json and the managers rewrote package-lock.json. Both were
+1295: # restored from HEAD and verified byte-identical, and nothing was committed.
+1296: #
+1297: # The damage was invisible in the pass/fail column: the cells still passed. It
+1298: # surfaced only because a RED-PROOF run printed yarn and pnpm output inside its
+1299: # FAIL lines. So this check exists to make the hazard fail loudly instead of
+1300: # silently mutating the working tree.
+1301: unescaped=$(grep -n '^expect "' "${BASH_SOURCE[0]}" | grep '`' | grep -v '\\`' || true)
+1302: if [ -n "$unescaped" ]; then
+1303:     bad "case names must escape backticks — an unescaped one is command substitution and RUNS: $unescaped"
+1304: else ok; fi
+1305: 
+1306: echo "  $PASS passed, $FAIL failed, $SKIP skipped"
+1307: [ "$FAIL" -eq 0 ] || exit 1
+1308: exit 0
+
+### FILE AT HEAD: Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS KS-1355 spot 2b: start-local.sh must derive its slot, and the
+4: # check-stack-safety.sh rule must cover every PLATFORM launcher, not two of them.
+5: # =============================================================================
+6: # start-local.sh brings the platform stack up and did NOT source stack_env.sh, so from a
+7: # slot-N worktree it drove slot 1's project, stamped `unknown` ownership markers on anything
+8: # it created (the KS-1011 mechanism), and printed slot 1's URLs whatever the slot. Nothing
+9: # made it comply: check-stack-safety.sh enforced the source for start-secuura.sh and
+10: # stop-secuura.sh ONLY (its `for f in "$START" "$STOP"` loop). It also called the Compose v1
+11: # binary (`docker-compose`) in 10 places, against the project rule that local dev is v2.
+12: #
+13: # Method: start-local.sh runs for real inside a fixture tree with its siblings stubbed on
+14: # PATH, as ks1355_dev_reload_slot_container.test.sh does — the `urls` subcommand touches no
+15: # docker and no network. The rule itself is asserted against the real check-stack-safety.sh.
+16: # The "a NEW unlisted launcher reds" bite needs a TRACKED file, so it is proved in this
+17: # ticket's tamper table (git add -N) rather than faked here.
+18: #
+19: # Usage: bash Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
+20: # =============================================================================
+21: 
+22: set -uo pipefail
+23: 
+24: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+25: SCRIPTS="$(cd "$HERE/.." && pwd)"
+26: DEVDIR="$(cd "$SCRIPTS/.." && pwd)"
+27: SAFETY="$SCRIPTS/check-stack-safety.sh"
+28: LOCAL="$SCRIPTS/start-local.sh"
+29: PASS=0; FAIL=0
+30: 
+31: expect() {
+32:   local desc="$1" want="$2" got="$3"
+33:   if [[ "$got" == "$want" ]]; then PASS=$((PASS + 1)); printf 'ok   %s\n' "$desc"
+34:   else FAIL=$((FAIL + 1)); printf 'FAIL %s\n       want "%s"\n        got "%s"\n' "$desc" "$want" "$got"; fi
+35: }
+36: 
+37: FIX="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks1355-launch.XXXXXX")"
+38: trap 'rm -rf "$FIX"' EXIT INT TERM
+39: 
+40: DEV="$FIX/repo/Blockchain/Dev"
+41: mkdir -p "$DEV/scripts" "$FIX/bin"
+42: cp "$LOCAL" "$SCRIPTS/stack_env.sh" "$DEV/scripts/"
+43: # Siblings start-local.sh calls before doing anything: both exit 0 (their own suites cover them).
+44: for sib in check-slot-credentials.sh check-app-db-password-default.sh bootstrap-env.sh; do
+45:   printf '#!/usr/bin/env bash\nexit 0\n' > "$DEV/scripts/$sib"; chmod +x "$DEV/scripts/$sib"
+46: done
+47: printf 'POSTGRES_USER=secuura\n' > "$DEV/.env"
+48: # docker/docker-compose stubs: log the invocation so a v1 call is visible if one survives.
+49: for b in docker docker-compose; do
+50:   printf '#!/usr/bin/env bash\necho "%s $*" >> "$KS1355_LOG"\nexit 0\n' "$b" > "$FIX/bin/$b"
+51:   chmod +x "$FIX/bin/$b"
+52: done
+53: 
+54: # urls <slot or ""> - runs the real start-local.sh `urls` in the fixture; prints its stdout.
+55: urls() {
+56:   local slot="$1"
+57:   : > "$FIX/log"
+58:   if [[ -n "$slot" ]]; then
+59:     env -u STACK_SLOT -u STACK_PREFIX -u COMPOSE_PROJECT_NAME -u GATEWAY_PORT -u WEBSITE_PORT \
+60:       LC_ALL=C PATH="$FIX/bin:$PATH" KS1355_LOG="$FIX/log" SECUURA_STACK_SLOT="$slot" \
+61:       bash "$DEV/scripts/start-local.sh" urls 2>&1
+62:   else
+63:     env -u STACK_SLOT -u STACK_PREFIX -u COMPOSE_PROJECT_NAME -u GATEWAY_PORT -u WEBSITE_PORT \
+64:       -u SECUURA_STACK_SLOT LC_ALL=C PATH="$FIX/bin:$PATH" KS1355_LOG="$FIX/log" \
+65:       bash "$DEV/scripts/start-local.sh" urls 2>&1
+66:   fi
+67: }
+68: saw() { if grep -qF -- "$1" <<<"$2"; then echo yes; else echo no; fi; }
+69: 
+70: # --- CONTROL: the fixture really runs the product --------------------------------
+71: out_none="$(urls "")"
+72: expect "CONTROL the fixture runs the real start-local.sh and it prints its URL banner" "yes" \
+73:   "$(saw 'SERVICE URLs' "$out_none")"
+74: 
+75: # --- CONTROL (tip AND after): slot 1 / unslotted keeps the historic ports ---------
+76: expect "CONTROL no slot named: the banner shows the historic 6882 and 6881" "yes yes" \
+77:   "$(saw 'localhost:6882/' "$out_none") $(saw 'localhost:6881' "$out_none")"
+78: 
+79: # --- RED at the tip: a named slot must move the banner ----------------------------
+80: out2="$(urls 2)"
+81: expect "🔴 slot 2: the banner names slot 2's gateway 6982" "yes" "$(saw 'localhost:6982/' "$out2")"
+82: expect "🔴 slot 2: the banner no longer names slot 1's gateway 6882" "no" "$(saw 'localhost:6882/' "$out2")"
+83: expect "🔴 slot 2: the banner names slot 2's website 6981, not 6881" "yes no" \
+84:   "$(saw 'localhost:6981' "$out2") $(saw 'localhost:6881' "$out2")"
+85: out3="$(urls 3)"
+86: expect "🔴 slot 3: the banner names slot 3's gateway 7082" "yes" "$(saw 'localhost:7082/' "$out3")"
+87: 
+88: # --- RED at the tip: Compose v1 is gone ------------------------------------------
+89: # The project rule is Compose v2 for local dev. A v1 `docker-compose` call also resolves a
+90: # DIFFERENT project name, so it can miss the very containers stack_env.sh just namespaced.
+91: expect "🔴 start-local.sh makes zero Compose v1 (docker-compose) calls" "0" \
+92:   "$(sed -e 's/[[:space:]]*#.*$//' "$LOCAL" | grep -cE '(^|[^-[:alnum:]_])docker-compose([[:space:]]|$)')"
+93: expect "🔴 start-local.sh still makes Compose v2 calls (the v1 ones were ported, not deleted)" "yes" \
+94:   "$( [ "$(sed -e 's/[[:space:]]*#.*$//' "$LOCAL" | grep -cE '(^|[^-[:alnum:]_])docker compose[[:space:]]')" -ge 5 ] && echo yes || echo no )"
+95: 
+96: # --- RED at the tip: start-local.sh sources the single source of truth ------------
+97: expect "🔴 start-local.sh SOURCES stack_env.sh" "yes" \
+98:   "$(grep -qE '^[[:space:]]*(source|\.)[[:space:]]+.*stack_env\.sh' "$LOCAL" && echo yes || echo no)"
+99: 
+100: # --- RED at the tip: the safety rule covers every platform launcher ---------------
+101: # It enforced the source for start-secuura.sh and stop-secuura.sh only, so start-local.sh
+102: # could stay non-compliant indefinitely with the gate green.
+103: expect "🔴 check-stack-safety.sh names start-local.sh as a platform launcher" "yes" \
+104:   "$(grep -qF 'start-local.sh' "$SAFETY" && echo yes || echo no)"
+105: expect "🔴 check-stack-safety.sh declares a launcher EXCEPTION list with a reason per entry" "yes" \
+106:   "$(grep -qE 'LAUNCHER_EXCEPTIONS' "$SAFETY" && echo yes || echo no)"
+107: expect "🔴 the exception list cites KS-1550 for start-/stop-environment.sh" "yes" \
+108:   "$(grep -qF 'KS-1550' "$SAFETY" && echo yes || echo no)"
+109: expect "🔴 the guard states its SCOPE and that KS-1381 widens it" "yes" \
+110:   "$(grep -qF 'KS-1381' "$SAFETY" && echo yes || echo no)"
+111: 
+112: # --- CONTROL (tip AND after): the real gate is green on the real tree -------------
+113: # Runs the actual check-stack-safety.sh, not a copy. The "plant a literal, see it red"
+114: # bite is in this ticket's tamper table.
+115: ( cd "$DEVDIR" && bash "$SAFETY" >"$FIX/safety.out" 2>&1 )
+116: expect "CONTROL the real check-stack-safety.sh is green on this tree" "0" "$?"
+117: 
+118: # --- KS-1558 m4: every LAUNCHER_EXCEPTIONS entry cites a ticket (KS-nnn or PS-nnn) ----------
+119: # The rule was "a reason AND a ticket per entry"; the reason check only asked for non-empty text.
+120: # Entries are read from the array in the real file; the gate itself is run on COPIES whose two
+121: # systemTest/akto entries have their ticket tokens removed or replaced, so no tracked file is touched.
+122: _entries="$(sed -n '/^LAUNCHER_EXCEPTIONS=(/,/^)/p' "$SAFETY" | grep '|')"
+123: expect "CONTROL KS-1558 the exception array was read (5 entries)" "5" "$(printf '%s\n' "$_entries" | grep -c '|')"
+124: expect "RED KS-1558 R1: every LAUNCHER_EXCEPTIONS entry names a KS-nnn or PS-nnn ticket" "0" \
+125:   "$(printf '%s\n' "$_entries" | grep -vcE 'KS-[0-9]|PS-[0-9]')"
+126: mkdir -p "$FIX/gate/Dev/scripts"
+127: cp "$SAFETY" "$FIX/gate/Dev/scripts/check-stack-safety.sh"
+128: bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_pristine.out" 2>&1
+129: sed -e 's/KS-666: Akto/Akto/' -e 's/KS-687: Akto/Akto/' "$SAFETY" > "$FIX/gate/Dev/scripts/check-stack-safety.sh"
+130: bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_stripped.out" 2>&1
+131: expect "CONTROL KS-1558 the gate copy with every ticket intact says nothing about a missing ticket" "no" \
+132:   "$(saw 'cite no ticket' "$(cat "$FIX/gate_pristine.out")")"
+133: expect "RED KS-1558 R2: the gate names a ticketless exception when Akto's two tickets are removed" "yes yes" \
+134:   "$(saw 'cite no ticket' "$(cat "$FIX/gate_stripped.out")") $(saw 'systemTest/akto/scripts/start.sh' "$(grep 'cite no ticket' "$FIX/gate_stripped.out")")"
+135: sed -e 's/KS-666: Akto/PS-12: Akto/' -e 's/KS-687: Akto/PS-9: Akto/' "$SAFETY" > "$FIX/gate/Dev/scripts/check-stack-safety.sh"
+136: bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_ps.out" 2>&1
+137: expect "CONTROL KS-1558 a PS-nnn ticket counts as a ticket as well as a KS-nnn one" "no" \
+138:   "$(saw 'cite no ticket' "$(cat "$FIX/gate_ps.out")")"
+139: sed -e 's/KS-666: Akto/KS-: Akto/' -e 's/KS-687: Akto/PS-9: Akto/' "$SAFETY" > "$FIX/gate/Dev/scripts/check-stack-safety.sh"
+140: bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_bare.out" 2>&1
+141: expect "RED KS-1558 R3: a bare KS- with no number is not a ticket" "yes" \
+142:   "$(saw 'systemTest/akto/scripts/start.sh' "$(grep 'cite no ticket' "$FIX/gate_bare.out")")"
+143: expect "CONTROL KS-1558 the gate still names only the stripped entries (KS-1550 and KS-200 entries keep theirs)" "no no" \
+144:   "$(saw 'start-environment.sh' "$(grep 'cite no ticket' "$FIX/gate_stripped.out")") $(saw 'observability.sh' "$(grep 'cite no ticket' "$FIX/gate_stripped.out")")"
+145: 
+146: # --- G 12th: the ticket must be in the REASON, not merely somewhere in the entry -------------
+147: # A mutant that widens the predicate from "${_e#*|}" (the reason) to "$_e" (the whole entry)
+148: # passes all 21 cells above, because no exception PATH carries a ticket-shaped token today. The
+149: # gap is latent rather than live, and these two cells close it so it stays that way: a path that
+150: # happens to be named after a ticket must not excuse a reason that cites none.
+151: sed -e 's#systemTest/akto/scripts/start.sh|KS-666: Akto#systemTest/akto/scripts/KS-666-start.sh|Akto#' "$SAFETY" \
+152:   > "$FIX/gate/Dev/scripts/check-stack-safety.sh"
+153: bash "$FIX/gate/Dev/scripts/check-stack-safety.sh" >"$FIX/gate_pathtoken.out" 2>&1
+154: expect "CONTROL KS-1558 the path-token fixture really took (the entry was rewritten)" "yes" \
+155:   "$(saw 'KS-666-start.sh' "$(cat "$FIX/gate/Dev/scripts/check-stack-safety.sh")")"
+156: expect "RED KS-1558 R4: a ticket in the PATH does not satisfy the rule - the reason must cite one" "yes" \
+157:   "$(saw 'KS-666-start.sh' "$(grep 'cite no ticket' "$FIX/gate_pathtoken.out")")"
+158: 
+159: echo ""
+160: echo "ks1355_slot_blind_launchers: ${PASS} passed, ${FAIL} failed"
+161: (( FAIL == 0 ))
+
+### FILE AT HEAD: Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS for the preflight's dependency preconditions (KS-691)
+4: # =============================================================================
+5: # Two legs of the pre-push preflight depended on dependencies that nothing
+6: # declared, so they failed in any tree without the ROOT workspace install — a
+7: # fresh `git worktree`, a fresh clone — and reported the failure as something
+8: # else entirely:
+9: #
+10: #   leg 1  needs packages/shared's NESTED @types/node ^20. Without it tsc
+11: #          resolves the hoisted 26 (which dropped crypto.JsonWebKey), fails in
+12: #          jwks.ts, and the catch-all announced "FAIL — spec drifted".
+13: #   leg 6  imports `semver` in audit-locks.mjs, which NO package.json declared.
+14: #          It resolved only as a hoisted transitive, so elsewhere the leg died
+15: #          with ERR_MODULE_NOT_FOUND and preflight called that a lock advisory.
+16: #
+17: # The cases below pin the structural properties that keep both shut. The
+18: # import-declaration case is the general one: it fails for ANY future undeclared
+19: # import in scripts/audit, not just semver.
+20: #
+21: # Usage: bash Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+22: # =============================================================================
+23: 
+24: set -uo pipefail
+25: 
+26: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+27: DEV_ROOT="${PREFLIGHT_DEPS_TEST_ROOT:-$(cd "$HERE/../.." && pwd)}"
+28: PASS=0
+29: FAIL=0
+30: 
+31: expect() {
+32:   local desc="$1" want="$2" got="$3"
+33:   if [[ "$got" == "$want" ]]; then
+34:     PASS=$((PASS + 1)); printf 'ok   %s\n' "$desc"
+35:   else
+36:     FAIL=$((FAIL + 1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"
+37:   fi
+38: }
+39: 
+40: # --- leg 6: every non-builtin import of the audit scripts must be DECLARED -----
+41: # The general guard. `semver` was the instance; an undeclared import added
+42: # tomorrow breaks the leg the same way, in the same invisible manner.
+43: undeclared=""
+44: for mjs in "$DEV_ROOT"/scripts/audit/*.mjs; do
+45:   while IFS= read -r spec; do
+46:     case "$spec" in
+47:       node:*|.*|/*) continue ;;                       # builtins and relative paths
+48:     esac
+49:     # Bare specifier: strip any subpath, keeping the scope for @scoped names.
+50:     case "$spec" in
+51:       @*) pkg="$(printf '%s' "$spec" | cut -d/ -f1,2)" ;;
+52:       *)  pkg="$(printf '%s' "$spec" | cut -d/ -f1)" ;;
+53:     esac
+54:     if ! grep -q "\"$pkg\"" "$DEV_ROOT/scripts/audit/package.json" 2>/dev/null; then
+55:       undeclared="${undeclared}${pkg} (in $(basename "$mjs")) "
+56:     fi
+57:   done < <(grep -oE "from '[^']+'" "$mjs" | sed "s/from '//; s/'$//")
+58: done
+59: expect "every bare import in scripts/audit/*.mjs is declared in its package.json" "" "$undeclared"
+60: 
+61: # --- leg 6: the member must be standalone, never folded into the workspaces ---
+62: # Adding it to the root workspaces list would move its deps into the root lock,
+63: # which is the thing KS-376 says not to touch.
+64: in_workspaces=$(node -e '
+65:   const w = require("'"$DEV_ROOT"'/package.json").workspaces || [];
+66:   process.stdout.write(w.some(p => String(p).startsWith("scripts")) ? "yes" : "no");
+67: ' 2>/dev/null)
+68: expect "scripts/* is NOT in the root workspaces list" "no" "$in_workspaces"
+69: 
+70: # --- leg 1: the precondition script exists and its own self-test passes -------
+71: bash "$DEV_ROOT/scripts/preflight/deps-present.sh" --self-test >/dev/null 2>&1
+72: expect "deps-present.sh self-test passes" "0" "$?"
+73: 
+74: # --- leg 1: the PARTIAL install is detected -----------------------------------
+75: # Root present, packages/shared's nested tree absent. This is the state that
+76: # produced TS2694 and was misreported as spec drift; if it ever passes, the fix
+77: # is gone. Built from scratch rather than reusing the self-test's fixture so the
+78: # two cannot rot together.
+79: tmp="$(mktemp -d "${TMPDIR:-/tmp}/ks691-partial.XXXXXX")"
+80: trap 'rm -rf "$tmp"' EXIT INT TERM
+81: mkdir -p "$tmp/node_modules/.bin" "$tmp/packages/shared"
+82: : > "$tmp/node_modules/.bin/tsx"
+83: DEPS_PRESENT_ROOT="$tmp" bash "$DEV_ROOT/scripts/preflight/deps-present.sh" >/dev/null 2>&1
+84: expect "a partial install (root present, nested absent) is refused" "1" "$?"
+85: 
+86: # ...and a complete one is accepted, so the check above is not vacuous.
+87: mkdir -p "$tmp/packages/shared/node_modules/@types/node"
+88: DEPS_PRESENT_ROOT="$tmp" bash "$DEV_ROOT/scripts/preflight/deps-present.sh" >/dev/null 2>&1
+89: expect "a complete install is accepted" "0" "$?"
+90: 
+91: # --- leg 1: preflight must gate the drift check on the precondition -----------
+92: # Ordering is the property: if deps-present.sh is invoked AFTER check:openapi,
+93: # the misleading "spec drifted" is printed before anyone sees the real reason.
+94: guard_line=$(grep -n 'deps-present.sh' "$DEV_ROOT/scripts/preflight/preflight.sh" | head -1 | cut -d: -f1)
+95: drift_line=$(grep -n 'check:openapi' "$DEV_ROOT/scripts/preflight/preflight.sh" | head -1 | cut -d: -f1)
+96: if [[ -n "$guard_line" && -n "$drift_line" && "$guard_line" -lt "$drift_line" ]]; then
+97:   ordered="yes"
+98: else
+99:   ordered="no (guard=${guard_line:-absent} drift=${drift_line:-absent})"
+100: fi
+101: expect "preflight runs deps-present.sh BEFORE the drift check" "yes" "$ordered"
+102: 
+103: # --- KS-691: the pre-push hook must target THIS slot, not always slot 1 -------
+104: # preflight.sh defaults GATEWAY to localhost:6882. The hook used to invoke it with
+105: # no slot context, so from a slot-2 worktree legs 3/4/7 either silently SKIPped
+106: # (slot 1 down — a green push that probed nothing) or probed SLOT 1 and reported
+107: # success for a stack that was not under test. Sourcing slot-target.sh first
+108: # exports this slot's GATEWAY_URL, which preflight honours.
+109: HOOK="$DEV_ROOT/../../.githooks/pre-push"
+110: if [[ -f "$HOOK" ]]; then
+111:   src_line=$(grep -n 'slot-target.sh' "$HOOK" | head -1 | cut -d: -f1)
+112:   pf_line=$(grep -n 'preflight/preflight.sh' "$HOOK" | tail -1 | cut -d: -f1)
+113:   if [[ -n "$src_line" && -n "$pf_line" && "$src_line" -lt "$pf_line" ]]; then
+114:     ordered=yes
+115:   else
+116:     ordered="no (slot-target=${src_line:-absent} preflight=${pf_line:-absent})"
+117:   fi
+118: else
+119:   ordered="no (hook not found at $HOOK)"
+120: fi
+121: expect "pre-push hook sources slot-target.sh BEFORE running preflight" "yes" "$ordered"
+122: 
+123: # --- KS-691 (B): the HOOK must make preflight probe THIS slot ----------------
+124: # Earlier these cases sourced slot-target.sh directly and asserted GATEWAY_URL.
+125: # That was green against develop TOO, because slot-target.sh always exported it —
+126: # it is the HOOK that changed. A case that passes with and without the fix proves
+127: # nothing about the fix, so it now runs the hook's own invocation block against a
+128: # STUB preflight that reports the gateway it was handed. On develop that block
+129: # never sources slot-target.sh, so it reports 6882 for every slot and these fail.
+130: HOOK_FILE="${HOOK_UNDER_TEST:-$(cd "$DEV_ROOT/../.." && pwd)/.githooks/pre-push}"
+131: REPO_TOP="$(cd "$DEV_ROOT/../.." && pwd)"
+132: 
+133: hook_gateway_for_slot() {
+134:   local slot="$1"
+135:   local tmp; tmp="$(mktemp -d "${TMPDIR:-/tmp}/ks691-hook.XXXXXX")"
+136:   mkdir -p "$tmp/Blockchain/Dev/scripts/preflight" "$tmp/systemTest"
+137:   cp "$REPO_TOP/systemTest/slot-target.sh"            "$tmp/systemTest/"           2>/dev/null
+138:   cp "$REPO_TOP/Blockchain/Dev/scripts/stack_env.sh"  "$tmp/Blockchain/Dev/scripts/" 2>/dev/null
+139:   # The stub stands in for preflight.sh and prints the gateway it would probe —
+140:   # i.e. preflight.sh:51's own expression, evaluated in the hook's environment.
+141:   printf '#!/usr/bin/env bash\nprintf "%%s" "${GATEWAY_URL:-http://localhost:6882}"\n' \
+142:     > "$tmp/Blockchain/Dev/scripts/preflight/preflight.sh"
+143:   ( cd "$tmp" && git init -q . && git add -A >/dev/null 2>&1 &&
+144:     git -c user.email=t@t -c user.name=t commit -qm fixture >/dev/null 2>&1 ) || { rm -rf "$tmp"; echo "FIXTURE-FAILED"; return; }
+145:   # Take the hook's preflight invocation verbatim — the lines under test.
+146:   sed -n '/^( *bash -c/,/^}/p;/^( *cd Blockchain\/Dev/,/^}/p' "$HOOK_FILE" > "$tmp/invoke.sh"
+147:   [[ -s "$tmp/invoke.sh" ]] || { rm -rf "$tmp"; echo "NO-INVOCATION-BLOCK"; return; }
+148:   local out
+149:   out="$( cd "$tmp" && env -i HOME="$HOME" PATH="$PATH" SECUURA_STACK_SLOT="$slot" bash invoke.sh 2>/dev/null )"
+150:   rm -rf "$tmp"
+151:   printf '%s' "$out"
+152: }
+153: 
+154: expect "hook makes preflight probe slot 1's gateway" "http://localhost:6882" "$(hook_gateway_for_slot 1)"
+155: expect "hook makes preflight probe slot 2's gateway" "http://localhost:6982" "$(hook_gateway_for_slot 2)"
+156: expect "hook makes preflight probe slot 3's gateway" "http://localhost:7082" "$(hook_gateway_for_slot 3)"
+157: expect "hook makes preflight probe slot 4's gateway" "http://localhost:7182" "$(hook_gateway_for_slot 4)"
+158: 
+159: # --- KS-691 (D): the gateway /health JSON must not hardcode a port -----------
+160: # nginx-demo.conf is bind-mounted read-only into EVERY slot, so a literal port in
+161: # that JSON is wrong on three slots out of four. Asserted statically so it does
+162: # not need four running stacks to catch a regression.
+163: HEALTH_BLOCK="$(awk '/location = \/health \{/,/^    \}/' "$DEV_ROOT/docker/nginx-gateway/nginx-demo.conf")"
+164: expect "nginx /health block exists (guards against a vacuous pass)" "yes" \
+165:   "$([ -n "$HEALTH_BLOCK" ] && echo yes || echo no)"
+166: expect "nginx /health JSON hardcodes no port" "0" \
+167:   "$(printf '%s' "$HEALTH_BLOCK" | grep -c '"port"')"
+168: 
+169: # --- KS-691 (E): /health must not advertise a route the gateway does not serve
+170: # The KS-641 merge exposed this class: `/demo-api/` was deleted from the config
+171: # but stayed in the JSON, and PORT-REGISTRY.md carried a note flagging the JSON
+172: # as stale rather than anyone fixing it. A health endpoint that lists a route
+173: # returning 404 is worse than one that lists nothing — it is used to discover
+174: # what the gateway serves. Every route key must have a real `location` block.
+175: NGINX_CONF="$DEV_ROOT/docker/nginx-gateway/nginx-demo.conf"
+176: advertised=$(printf '%s' "$HEALTH_BLOCK" \
+177:   | grep -o '"/[a-z-]*/\?":"' | sed 's/^"//;s/":"$//' | sort -u)
+178: expect "/health advertises at least one route (guards a vacuous pass)" "yes" \
+179:   "$([ -n "$advertised" ] && echo yes || echo no)"
+180: missing=""
+181: for route in $advertised; do
+182:   # `/` is the catch-all and is spelled `location /` with no trailing token.
+183:   if [ "$route" = "/" ]; then
+184:     grep -qE '^[[:space:]]*location[[:space:]]+/[[:space:]]*\{' "$NGINX_CONF" || missing="$missing $route"
+185:   else
+186:     grep -qE "^[[:space:]]*location[[:space:]]+(=[[:space:]]*)?${route}" "$NGINX_CONF" || missing="$missing $route"
+187:   fi
+188: done
+189: expect "every route in /health has a location block (KS-641 /demo-api/ class)" "" "$missing"
+190: 
+191: # --- KS-691 (F): PORT-REGISTRY.md must agree with port-allocations.json -------
+192: # The registry listed akto-mongo-express on host 8081 while the allocation (and
+193: # the compose default it mirrors) had moved to 9490 for KS-666. Three other
+194: # places in the same document recorded the move; this row did not, so the file
+195: # contradicted itself and the wrong number was the one next to the binding.
+196: ALLOC="$DEV_ROOT/scripts/port-allocations.json"
+197: REGISTRY="$DEV_ROOT/../../Projects Documents/PORT-REGISTRY.md"
+198: if [ -f "$REGISTRY" ] && [ -f "$ALLOC" ]; then
+199:   # KS-971: was a hardcoded list of three Akto names, so a NEWLY allocated port was covered by
+200:   # nothing — which is how K6_WEB_DASHBOARD_PORT (5665) came to be bound and slot-offset by the
+201:   # performance runner while appearing in neither this gate nor the registry. Now derived from
+202:   # the allocation itself, so every present and future platform-k port is checked without anyone
+203:   # remembering to extend a list. (It also immediately found CARDANO_SUBMIT_PORT 6094 absent.)
+204:   #
+205:   # bash 3.2 on macOS: no mapfile/readarray, hence the while-read pipeline.
+206:   alloc_vars=$(sed -n '/"platform-k"/,/^        }/p' "$ALLOC" | grep -oE '"[A-Z0-9_]+_PORT": *[0-9]+')
+207:   expect "the allocation yielded platform-k ports to check (non-vacuity)" "yes" \
+208:     "$([ -n "$alloc_vars" ] && echo yes || echo no)"
+209:   # A here-string, NOT a pipeline: `... | while read` runs the loop in a SUBSHELL, so every
+210:   # expect() inside it increments a copy of FAIL that is discarded on exit — the suite prints the
+211:   # failure and still reports "0 failed". Caught in review of this very change.
+212:   while IFS= read -r entry; do
+213:     [ -n "$entry" ] || continue
+214:     var=$(printf '%s' "$entry" | grep -oE '^"[A-Z0-9_]+_PORT"' | tr -d '"')
+215:     base=$(printf '%s' "$entry" | grep -oE '[0-9]+$')
+216:     expect "PORT-REGISTRY.md cites $var's real base ($base)" "yes" \
+217:       "$(grep -q "$base" "$REGISTRY" && echo yes || echo "no — $base absent")"
+218:   done <<< "$alloc_vars"
+219:   # The superseded Mongo Express binding must not reappear as a HOST port.
+220:   expect "PORT-REGISTRY.md no longer binds mongo-express on host 8081" "0" \
+221:     "$(grep -c '8081:8081' "$REGISTRY")"
+222: else
+223:   expect "PORT-REGISTRY.md and port-allocations.json are both present" "yes" "no"
+224: fi
+225: 
+226: # --- KS-691: leg 6 must install scripts/audit's deps BEFORE it runs ---------
+227: # The mirror of the leg-1 ordering case. audit-locks.mjs imports semver; if the
+228: # bootstrap were ever moved after the invocation (or dropped), the leg would go
+229: # back to dying with ERR_MODULE_NOT_FOUND on a fresh tree and preflight would
+230: # again report that as a standalone-lock advisory finding.
+231: PF="$DEV_ROOT/scripts/preflight/preflight.sh"
+232: boot_line=$(grep -n 'cd scripts/audit && npm ci' "$PF" | head -1 | cut -d: -f1)
+233: run_line=$(grep -n 'node scripts/audit/audit-locks.mjs' "$PF" | head -1 | cut -d: -f1)
+234: if [[ -n "$boot_line" && -n "$run_line" && "$boot_line" -lt "$run_line" ]]; then bo=yes
+235: else bo="no (bootstrap=${boot_line:-absent} run=${run_line:-absent})"; fi
+236: expect "preflight installs scripts/audit deps BEFORE audit-locks.mjs" "yes" "$bo"
+237: 
+238: # A failed install is offline, not a lock defect, so it must SKIP (rc 2) rather
+239: # than FAIL — matching this leg's own exit-2 semantics. If that ever became a
+240: # hard fail, every offline push would be blocked by a leg that cannot run.
+241: expect "an un-installable scripts/audit is a SKIP, not a FAIL" "1" \
+242:   "$(grep -c 'locks_rc=2' "$PF")"
+243: 
+244: # --- KS-691: the new standalone member's lock must be real and in sync -------
+245: # The lock is what a clean-room `npm ci` installs (leg 2). A hand-edited or
+246: # absent lock would pass the "declared imports" case above while still failing
+247: # to install anywhere.
+248: AUD="$DEV_ROOT/scripts/audit"
+249: expect "scripts/audit has its own lockfile" "yes" "$([ -f "$AUD/package-lock.json" ] && echo yes || echo no)"
+250: expect "that lock pins semver" "1" \
+251:   "$(node -e 'const l=require(process.argv[1]);process.stdout.write(String(l.packages&&l.packages["node_modules/semver"]?1:0))' "$AUD/package-lock.json" 2>/dev/null)"
+252: expect "lock root name matches package.json (lock is in sync)" "same" \
+253:   "$(node -e '
+254:      const p=require(process.argv[1]), l=require(process.argv[2]);
+255:      const lockRoot=(l.packages&&l.packages[""])||{};
+256:      process.stdout.write(p.name===l.name && p.name===lockRoot.name && p.version===lockRoot.version ? "same" : "DIFFERENT");
+257:    ' "$AUD/package.json" "$AUD/package-lock.json" 2>/dev/null)"
+258: expect "declared semver range is satisfied by the pinned version" "yes" \
+259:   "$(node -e '
+260:      const p=require(process.argv[1]), l=require(process.argv[2]);
+261:      const want=p.dependencies.semver, got=(l.packages["node_modules/semver"]||{}).version||"";
+262:      const maj=v=>v.split(".")[0];
+263:      process.stdout.write(want.startsWith("^") && maj(want.slice(1))===maj(got) ? "yes" : "no ("+want+" vs "+got+")");
+264:    ' "$AUD/package.json" "$AUD/package-lock.json" 2>/dev/null)"
+265: 
+266: # --- KS-691 (E): the DEV-PROCESS caveat must stay put ------------------------
+267: # Without it the ~7-8 min Akto budgets read as measured on this hardware, which
+268: # they are not.
+269: expect "DEV-PROCESS records the Akto budgets as unbaselined here" "1" \
+270:   "$(grep -c 'unbaselined on this hardware' "$DEV_ROOT/docs/DEV-PROCESS.md")"
+271: 
+272: # --- KS-691: leg 1 must HONOUR deps-present's exit code, not merely call it ---
+273: # The ordering case proves deps-present.sh runs first. It does NOT prove the leg
+274: # acts on the answer: `if ! bash ...; then fail=1` could become `bash ... || true`
+275: # and every case above would stay green while a tree with no install sailed
+276: # through. Driven with a stub deps-present so no real install state is needed.
+277: # QA R2-4 (s123): PARAMETERISED. Leg 14 was only ever driven green — the fixture
+278: # gave it one passing suite and a slot stub that exports something, so the
+279: # de-slot positive control and both failure branches had no case at all and the
+280: # QA report was the only thing that had ever run them. The three knobs below let
+281: # the same fixture reach every branch; `leg1_outcome` keeps its old signature so
+282: # the two leg-1 cases are unchanged.
+283: preflight_fixture_run() {            # $1 = deps rc, $2 = fixture-suite rc, $3 = slot stub: ok|noexport, $4 = header: ok|mismatch, $5 = hook stub: ok|nocontrol
+284:   local rc="$1"
+285:   local suite_rc="${2:-0}"
+286:   local slot_mode="${3:-ok}"
+287:   local header_mode="${4:-ok}"
+288:   local hook_mode="${5:-ok}"
+289:   local tmp; tmp="$(mktemp -d "${TMPDIR:-/tmp}/ks691-leg1.XXXXXX")"
+290:   # QA FR-800-03: the fixture tree is NESTED at Blockchain/Dev inside $tmp rather
+291:   # than laid out flat at $tmp. run-shell-suites.sh derives
+292:   # REPO_ROOT="$DEV_DIR/../.." — with a flat fixture that resolves OUTSIDE $tmp
+293:   # entirely, into whatever happens to sit two levels above the temp directory,
+294:   # so its ROOTS could never match anything the fixture wrote and run mode exited
+295:   # 1 on "no shell suites found". Nesting puts REPO_ROOT back at $tmp, which is
+296:   # what lets leg 14 reach a genuine verdict here instead of being stubbed out.
+297:   local dev="$tmp/Blockchain/Dev"
+298:   mkdir -p "$dev/scripts/preflight" "$dev/scripts/audit" "$dev/scripts/__tests__"
+299:   cp "$DEV_ROOT/scripts/preflight/preflight.sh" "$dev/scripts/preflight/"
+300:   # KS-1046 / QA F-925-3: TOTAL_LEGS was a convention — nothing checked that
+301:   # the `N/TOTAL` in each step() header agreed with it, so a new leg pasted in
+302:   # with a stale denominator would count under one total and print another.
+303:   # `mismatch` rewrites leg 3's header denominator to 99 in the FIXTURE COPY
+304:   # only (the real file is never touched) so the cell below can show the run
+305:   # refuses on it. Portable sed: no -i (its argument shape differs by platform).
+306:   if [ "$header_mode" = "mismatch" ]; then
+307:     sed -E 's#^step "3/[0-9]+ #step "3/99 #' "$dev/scripts/preflight/preflight.sh" > "$dev/scripts/preflight/preflight.sh.tmp" \
+308:       && mv "$dev/scripts/preflight/preflight.sh.tmp" "$dev/scripts/preflight/preflight.sh"
+309:     grep -q '^step "3/99 ' "$dev/scripts/preflight/preflight.sh" || echo "TAMPER-DID-NOT-LAND"
+310:   fi
+311:   printf '#!/usr/bin/env bash\nexit %s\n' "$rc" > "$dev/scripts/preflight/deps-present.sh"
+312:   # Neutralise every other leg so only leg 1's decision is under test.
+313:   printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/lockfile-cleanroom.sh"
+314:   printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/no-tracked-credentials.sh"
+315:   # QA F-800-07: leg 12 asks scripts/run-shell-suites.sh whether any tracked
+316:   # shell suite is unreachable. The REAL script is copied in rather than stubbed
+317:   # `exit 0`, because a stub would make this case pass even if leg 12 stopped
+318:   # honouring the answer — the exact weakness the leg-1 cases above exist to
+319:   # catch, one leg along. In this fixture tree it self-SKIPs (not a git
+320:   # checkout), so leg 12 contributes 0 without being neutered.
+321:   cp "$DEV_ROOT/scripts/run-shell-suites.sh" "$dev/scripts/"
+322:   # PRE-EXISTING BREAK, fixed here rather than skipped (QA F-800-07 is exactly
+323:   # about this). Legs 10 and 11 (`bare-path-scripts-executable.sh`,
+324:   # `action-pins-labelled.sh`, KS-667 F-16 / KS-751) and leg 5's stored
+325:   # `expected-case-count` (KS-763) all landed on develop WITHOUT being added to
+326:   # this fixture. Each one made the leg-1 "exits 0 -> run proceeds" case fail,
+327:   # because the missing file sets fail=1 and the run exits 1 for reasons that
+328:   # have nothing to do with leg 1.
+329:   #
+330:   # Measured: develop's OWN preflight.sh in this same fixture exits 1 with three
+331:   # `No such file or directory` errors, and this suite reads 22/11 on develop
+332:   # against 35/1 here. Nobody saw it because this suite was invoked by NOTHING —
+333:   # the defect F-800-07 closes, demonstrating itself on its first wired run.
+334:   printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/bare-path-scripts-executable.sh"
+335:   printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/action-pins-labelled.sh"
+336:   # Leg 16 (KS-1487, `test-types-ratchet.sh`) is a fifth instance of the same class: a script this fixture tree does not
+337:   # contain, so the real preflight.sh reaches it and `bash` answers 127, which reds every run this suite drives. This suite
+338:   # is about legs 1 and 14; the ratchet leg has its own suite (preflight_test_types_ratchet_leg.test.sh), so it is stubbed.
+339:   printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/preflight/test-types-ratchet.sh"
+340:   # Leg 13 (KS-921, `check-shared-relink.sh`) is the fourth instance of the class
+341:   # this comment block describes, added the same way. It is stubbed rather than
+342:   # left to self-SKIP deliberately: the real guard REFUSES a corpus in which no
+343:   # Dockerfile consumes the shared-builder stage, because a guard that reports
+344:   # clean over zero files is the vacuous green this repo has paid for more than
+345:   # once. Teaching it to shrug at an empty tree to satisfy a fixture would be
+346:   # removing the assertion to make the test pass. This fixture holds no
+347:   # Dockerfiles at all, so the leg has nothing to say here.
+348:   #
+349:   # MERGE NOTE (KS-731 leg-14 branch): develop wrote this stub to "$tmp/scripts/",
+350:   # which is where the fixture lived on develop. This branch roots the fixture at
+351:   # $dev ("$tmp/Blockchain/Dev") so it mirrors the real repo layout, so the path is
+352:   # translated rather than copied — a stub at the develop path would simply not be
+353:   # found, and the leg would fail for a reason unrelated to what it tests.
+354:   printf '#!/usr/bin/env bash\nexit 0\n' > "$dev/scripts/check-shared-relink.sh"
+355:   # Leg 15 (KS-926, `run-code-guards.sh`) is the fifth instance of the same
+356:   # class: the leg calls scripts/run-code-guards.sh twice (the census, then the
+357:   # run), and a fixture with no such file sets fail=1 for a reason that has
+358:   # nothing to do with leg 1. Measured before this line: 53 passed, 2 failed —
+359:   # `leg 1 lets the run proceed` and `leg 14: suites green -> preflight passes`
+360:   # both red. Stubbed the same way as legs 10, 11 and 13: this fixture holds no
+361:   # check-*.sh guards, so the leg has nothing to census here. The real runner has
+362:   # its own suite (run_code_guards.test.sh) and is exercised by leg 15 itself.
+363:   printf '#!/usr/bin/env bash\necho "OK — 0 code guards (fixture stub)"\nexit 0\n' > "$dev/scripts/run-code-guards.sh"
+364:   # Leg 5 compares a case count against this stored expectation. The stub
+365:   # audit-gate above emits no " tests N" line, so the parsed count is empty and
+366:   # the leg's own guard handles the mismatch; the file only has to EXIST so the
+367:   # `tr` does not error. Its content is deliberately not the real 55 — this
+368:   # fixture is not asserting the audit contract.
+369:   printf '0\n' > "$dev/scripts/audit/expected-case-count"
+370:   printf 'console.log("audit-gate stub");process.exit(0);\n' > "$dev/scripts/audit/audit-gate.mjs"
+371:   printf 'console.log("audit-locks stub");process.exit(0);\n' > "$dev/scripts/audit/audit-locks.mjs"
+372:   mkdir -p "$dev/scripts/audit/node_modules/semver"
+373:   # Leg 5 (KS-763, added by #796) runs `npm run audit:contract` and CANNOT skip
+374:   # by design, so the fixture has to provide it. The stub emits a " tests N"
+375:   # line because the leg asserts the case count for EQUALITY against
+376:   # scripts/audit/expected-case-count (KS-763 QA F1 — a floor of 1 let the
+377:   # suites rot from 54 cases to 1 and still print OK). Both are 0 here: this
+378:   # fixture tests leg 1's decision, not the audit contract.
+379:   printf '{"name":"x","scripts":{"check:openapi":"true","audit:contract":"echo \\"# tests 0\\""}}\n' > "$dev/package.json"
+380:   # Leg 14 (QA FR-800-03) RUNS the shell suites. With REPO_ROOT now inside the
+381:   # fixture, the runner globs $dev/scripts/__tests__ — so give it exactly one
+382:   # trivial passing suite. That makes leg 14 reach a real verdict rather than
+383:   # being neutralised, and it keeps the runner's own positive control ("the glob
+384:   # reached 0 suites") satisfied honestly rather than by suppression.
+385:   printf '#!/usr/bin/env bash\necho "fixture stub suite"\nexit %s\n' "$suite_rc" > "$dev/scripts/__tests__/fixture_stub.test.sh"
+386:   # Leg 14 measures what systemTest/slot-target.sh exports, so it can clear those
+387:   # before running the suites (they include derivation tests that an ambient
+388:   # AKTO_PREFIX makes vacuous). Its positive control REFUSES when that
+389:   # measurement comes back empty, which is correct and which this fixture would
+390:   # otherwise trip: the fixture tree has no systemTest/. A stub that exports one
+391:   # variable is enough for leg 14 to proceed, because this fixture is asserting
+392:   # leg 1's decision and nothing about slot targeting. The REAL measurement is
+393:   # exercised on every actual push, not here.
+394:   mkdir -p "$tmp/systemTest"
+395:   # `noexport` reproduces the state leg 14's positive control exists for: the
+396:   # file is present and sources cleanly, but the before/after diff comes back
+397:   # EMPTY, so the de-slot list cannot be built. Asserted rather than assumed,
+398:   # because the alternative — running the suites in a polluted environment while
+399:   # printing a pass — is the exact failure the control was written to prevent.
+400:   if [ "$slot_mode" = "noexport" ]; then
+401:     printf '#!/usr/bin/env bash\n: # sources cleanly, exports nothing\n' > "$tmp/systemTest/slot-target.sh"
+402:   else
+403:     printf '#!/usr/bin/env bash\nexport FIXTURE_SLOT_VAR=1\n' > "$tmp/systemTest/slot-target.sh"
+404:   fi
+405:   # KS-1638: the fixture must carry a pre-push hook, because leg 14 now derives the
+406:   # hook's OWN control variables and strips them too, and refuses if it cannot find
+407:   # them. The real tree always has .githooks/pre-push; a fixture without one was
+408:   # modelling a repo that cannot exist, and it red-flagged two cells here the moment
+409:   # the derivation was added. `nocontrol` is the counterpart of `noexport` above: the
+410:   # hook is present and readable but declares no externally-defaulted variable, which
+411:   # is the state leg 14's new positive control exists for — the alternative being to
+412:   # run the suites with the hook's flags inherited while printing a pass, which is
+413:   # KS-1638 itself.
+414:   mkdir -p "$tmp/.githooks"
+415:   if [ "$hook_mode" = "nocontrol" ]; then
+416:     printf '#!/usr/bin/env bash\nZERO=0\n: # readable, but reads no ${NAME:-...} from its caller\n' > "$tmp/.githooks/pre-push"
+417:   else
+418:     printf '#!/usr/bin/env bash\nif [ "${ALLOW_FORCE:-0}" = "1" ]; then : ; fi\n' > "$tmp/.githooks/pre-push"
+419:   fi
+420:   chmod +x "$tmp/.githooks/pre-push"
+421:   local out prc
+422:   # KS-1046: the nested preflight must not inherit the OPERATOR's strict
+423:   # setting. The fixture's gateway is closed by construction (127.0.0.1:1), so
+424:   # under PREFLIGHT_STRICT_LEGS=1 the nested run takes the strict refusal
+425:   # (rc 1) for the fixture's OWN skips, and this suite reads two cells red for
+426:   # a reason that is the operator's environment, not leg 1's decision — the
+427:   # same isolation this file already does for GIT_CONFIG_GLOBAL. Measured: the
+428:   # suite alone under PREFLIGHT_STRICT_LEGS=1 read 53 passed, 2 failed
+429:   # without this pin, 55 passed, 0 failed with it.
+430:   out=$( cd "$dev" && GATEWAY_URL="http://127.0.0.1:1" PREFLIGHT_STRICT_LEGS=0 bash scripts/preflight/preflight.sh 2>&1 )
+431:   prc=$?
+432:   # KS-1638: when PREFLIGHT_FIXTURE_OUT is set, keep the captured output so a cell can
+433:   # assert on its CONTENT and not only on the classified verdict. Unset by default, so
+434:   # every existing case behaves exactly as before.
+435:   [ -n "${PREFLIGHT_FIXTURE_OUT:-}" ] && printf '%s' "$out" > "$PREFLIGHT_FIXTURE_OUT"
+436:   # VERDICT + STATUS, never rc alone. Every one of these states exits non-zero,
+437:   # so an rc-only oracle cannot tell a de-slot refusal from a red suite from any
+438:   # other leg failing — and would go green against the defect it names. Same
+439:   # lesson the run-mode empty case recorded one script along.
+440:   local verdict
+441:   if   printf '%s' "$out" | grep -q 'step header .* disagrees with TOTAL_LEGS'; then verdict='HEADER-MISMATCH'
+442:   elif printf '%s' "$out" | grep -q 'could not measure what'; then verdict='DESLOT-REFUSED'
+443:   elif grep -q "could not derive the pre-push hook's own control" <<<"$out"; then verdict='HOOKCTL-REFUSED'
+444:   elif grep -q 'de-slotted .* variable' <<<"$out"; then
+445:     # KS-1046: the honest pass shape. The fixture's gateway is closed by
+446:     # construction, so legs 3/4/8 always SKIP here and `PREFLIGHT PASSED —
+447:     # N/N legs ran.` is unreachable in this fixture; the verdict a green
+448:     # fixture yields is `PREFLIGHT INCOMPLETE — … SKIPPED. Nothing failed.`
+449:     # with rc 0. SUITES-GREEN is therefore rc 0 AND either pass line — never
+450:     # the old `PREFLIGHT PASSED.` alone, which asserted the very verdict text
+451:     # this branch exists to stop printing over skipped legs. Measured on the
+452:     # stacked tree before this line: 54 passed, 1 failed (this cell).
+453:     if [ "$prc" -eq 0 ] && printf '%s' "$out" | grep -q 'PREFLIGHT PASSED\|Nothing failed'; then verdict='SUITES-GREEN'
+454:     else verdict='SUITES-RED'; fi
+455:   else verdict='OTHER'; fi
+456:   printf '%s/%s' "$verdict" "$prc"
+457: }
+458: 
+459: leg1_outcome() {                     # $1 = exit code the stub returns -> "<rc>"
+460:   local v; v="$(preflight_fixture_run "$1" 0 ok)"
+461:   printf '%s' "${v##*/}"
+462: }
+463: expect "leg 1 FAILS the run when deps-present exits non-zero" "1" "$(leg1_outcome 1)"
+464: expect "leg 1 lets the run proceed when deps-present exits 0"  "0" "$(leg1_outcome 0)"
+465: 
+466: # --- QA R2-4: leg 14's three branches, none of which had a case --------------
+467: # The de-slot positive control and both suite outcomes were verified only by
+468: # construction in the QA report's own scratch. A branch whose only execution was
+469: # in a reviewer's scratch directory is not covered; it is described.
+470: expect "leg 14: suites green -> preflight passes" \
+471:   "SUITES-GREEN/0" "$(preflight_fixture_run 0 0 ok)"
+472: expect "leg 14: a RED suite fails the push, after de-slotting" \
+473:   "SUITES-RED/1" "$(preflight_fixture_run 0 1 ok)"
+474: expect "leg 14: an empty de-slot measurement REFUSES rather than running polluted" \
+475:   "DESLOT-REFUSED/1" "$(preflight_fixture_run 0 0 noexport)"
+476: 
+477: # --- KS-1046 / QA F-925-3: TOTAL_LEGS is a mechanism, not a convention -------
+478: # A step() header whose denominator disagrees with TOTAL_LEGS must ABORT the run
+479: # and name the header — otherwise a leg added with a stale `N/13` counts under
+480: # one total and prints another, and the ratio the verdict is built on is
+481: # unfalsifiable from its own output. Red-first: without the check in step() this
+482: # fixture reads SUITES-GREEN/0 (the mismatched header is printed and ignored).
+483: # The green control is the `leg 14: suites green` cell above — the same fixture
+484: # with every header agreeing.
+485: expect "F-925-3: a step header whose denominator disagrees with TOTAL_LEGS ABORTS the run, naming the header" \
+486:   "HEADER-MISMATCH/1" "$(preflight_fixture_run 0 0 ok mismatch)"
+487: 
+488: # CONTROL: the refusal must WITHHOLD the run, not merely report. If the de-slot
+489: # measurement fails and the suites run anyway, the leg has reported a problem and
+490: # then done the unsafe thing — which is worse than either alone, and rc would not
+491: # show it. Asserted on the absence of the de-slot line the run path always prints.
+492: expect "leg 14: the refusal SHORT-CIRCUITS — a red suite present, still not run" \
+493:   "DESLOT-REFUSED/1" "$(preflight_fixture_run 0 1 noexport)"
+494: 
+495: # --- KS-1638: leg 14 strips the HOOK'S OWN controls, not only the slot ones ---
+496: # Leg 14 runs these suites INSIDE the pre-push hook, so a variable the hook reads
+497: # from its caller is in their environment. ALLOW_FORCE was the live case: an
+498: # `ALLOW_FORCE=1 git push` reddened ks998's SC12 cell — whose subject is what
+499: # happens WITHOUT the flag — so every deliberate-force push was refused by its own
+500: # preflight and the path the hook documents was unreachable.
+501: KS1638_OUT="$(mktemp)"
+502: KS1638_VERDICT="$(PREFLIGHT_FIXTURE_OUT="$KS1638_OUT" preflight_fixture_run 0 0 ok)"
+503: expect "KS-1638: the hook-stub fixture still reaches a green leg 14" "SUITES-GREEN/0" "$KS1638_VERDICT"
+504: expect "KS-1638: leg 14 names the hook controls it strips, and ALLOW_FORCE is among them" "1" \
+505:   "$(grep -c 'hook controls stripped for the suite run: ALLOW_FORCE' "$KS1638_OUT")"
+506: # INVERTED-WANT CONTROL on the same captured output: a name the hook does NOT declare
+507: # must not appear in the strip line, or the assertion above would pass for any text.
+508: expect "KS-1638: a control the hook never declares is NOT in that line" "0" \
+509:   "$(grep -c 'hook controls stripped for the suite run: .*SOMETHING_ELSE' "$KS1638_OUT")"
+510: rm -f "$KS1638_OUT"
+511: # The positive control, in the same shape as the de-slot one above: a hook that
+512: # declares no externally-defaulted variable means the derivation has stopped
+513: # working (the hook moved, or the pattern no longer matches), and the suites would
+514: # then run with the hook's flags inherited while this leg printed a pass. Refuse.
+515: expect "KS-1638: a hook with no derivable control REFUSES rather than running leaked" \
+516:   "HOOKCTL-REFUSED/1" "$(preflight_fixture_run 0 0 ok ok nocontrol)"
+517: # ...and the refusal must WITHHOLD the run, not merely report it.
+518: expect "KS-1638: that refusal SHORT-CIRCUITS — a red suite present, still not run" \
+519:   "HOOKCTL-REFUSED/1" "$(preflight_fixture_run 0 1 ok ok nocontrol)"
+520: 
+521: # --- KS-691: the message is the deliverable, so assert its content ------------
+522: # The whole point of this leg is that a missing install does NOT read as spec
+523: # drift. A reworded message that dropped that would leave every other case green.
+524: DP_OUT="$(DEPS_PRESENT_ROOT="$(mktemp -d)" bash "$DEV_ROOT/scripts/preflight/deps-present.sh" 2>&1)"
+525: expect "deps-present says it is NOT spec drift" "1" "$(printf '%s' "$DP_OUT" | grep -c 'NOT spec drift')"
+526: expect "deps-present names the actual fix (npm ci)" "1" "$(printf '%s' "$DP_OUT" | grep -c 'npm ci')"
+527: expect "deps-present names WHERE to run it (Blockchain/Dev)" "1" \
+528:   "$(printf '%s' "$DP_OUT" | grep -c 'cd Blockchain/Dev')"
+529: 
+530: # --- KS-469 regression: BOTH of its paths must survive this change ------------
+531: # KS-469's acceptance was explicit — "real spec drift still fails check 1 as it
+532: # does today (regression-test both paths)". This change inserted a precondition
+533: # ahead of that branch, so the branch itself must still be present and still be
+534: # reached. Asserted structurally: the STALE classifier and the drift catch-all
+535: # both remain, and both sit AFTER the precondition rather than being displaced.
+536: PF="$DEV_ROOT/scripts/preflight/preflight.sh"
+537: expect "KS-469 STALE classifier still present" "1" "$(grep -c 'STALE — host workspace install is behind' "$PF")"
+538: expect "real spec drift still has its own FAIL branch" "1" "$(grep -v "^[[:space:]]*#" "$PF" | grep -c 'echo "FAIL — spec drifted')"
+539: expect "KS-376 esbuild SKIP branch still present" "1" "$(grep -c 'KS-376 esbuild lock inconsistency' "$PF")"
+540: dp=$(grep -vn '^[[:space:]]*#' "$PF" | grep 'deps-present.sh' | head -1 | cut -d: -f1)
+541: st=$(grep -vn '^[[:space:]]*#' "$PF" | grep 'echo "STALE — host workspace install' | head -1 | cut -d: -f1)
+542: dr=$(grep -vn '^[[:space:]]*#' "$PF" | grep 'echo "FAIL — spec drifted' | head -1 | cut -d: -f1)
+543: expect "precondition precedes the STALE branch" "yes" "$([ "$dp" -lt "$st" ] && echo yes || echo "no ($dp vs $st)")"
+544: expect "precondition precedes the drift catch-all" "yes" "$([ "$dp" -lt "$dr" ] && echo yes || echo "no ($dp vs $dr)")"
+545: 
+546: echo ""
+547: echo "preflight_deps: $PASS passed, $FAIL failed"
+548: [ "$FAIL" -eq 0 ]
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1708,
+ "head_sha": "a6bb564a9bf53f7d310adc4a4af672783c9ffd3e",
+ "pr_tip_now": "a6bb564a9bf53f7d310adc4a4af672783c9ffd3e",
+ "head_mode": "tip",
+ "merge_base": "fee13f25d574cdbac32601cbe0176f7b6622fa57",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh",
+   "added": "2",
+   "deleted": "2"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh",
+  "Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh",
+  "Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh"
+ ],
+ "product_files": [],
+ "diff_stat": {
+  "files": 3,
+  "added": 4,
+  "deleted": 4
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 112,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "check_shared_relink:\n  112 passed, 0 failed, 0 skipped"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 23,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": " names only the stripped entries (KS-1550 and KS-200 entries keep theirs)\nok   CONTROL KS-1558 the path-token fixture really took (the entry was rewritten)\nok   RED KS-1558 R4: a ticket in the PATH does not satisfy the rule - the reason must cite one\n\nks1355_slot_blind_launchers: 23 passed, 0 failed"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 61,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "WHERE to run it (Blockchain/Dev)\nok   KS-469 STALE classifier still present\nok   real spec drift still has its own FAIL branch\nok   KS-376 esbuild SKIP branch still present\nok   precondition precedes the STALE branch\nok   precondition precedes the drift catch-all\n\npreflight_deps: 61 passed, 0 failed"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 112,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "check_shared_relink:\n  112 passed, 0 failed, 0 skipped"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 23,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": " names only the stripped entries (KS-1550 and KS-200 entries keep theirs)\nok   CONTROL KS-1558 the path-token fixture really took (the entry was rewritten)\nok   RED KS-1558 R4: a ticket in the PATH does not satisfy the rule - the reason must cite one\n\nks1355_slot_blind_launchers: 23 passed, 0 failed"
+  },
+  {
+   "file": "Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 61,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "WHERE to run it (Blockchain/Dev)\nok   KS-469 STALE classifier still present\nok   real spec drift still has its own FAIL branch\nok   KS-376 esbuild SKIP branch still present\nok   precondition precedes the STALE branch\nok   precondition precedes the drift catch-all\n\npreflight_deps: 61 passed, 0 failed"
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 3,
+  "files_ok": 3,
+  "files_failed": 0,
+  "passed": 196,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 3,
+  "files_ok": 3,
+  "files_failed": 0,
+  "passed": 196,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 76
+}

@@ -1,0 +1,41 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh b/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
+index a2961a4e9..fed88e50a 100755
+--- a/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
+@@ -46,7 +46,7 @@ expect() {
+     if [ "$got" != "$want" ]; then
+         FAIL=$((FAIL+1)); echo "  FAIL: $name (expected exit $want, got $got)"; echo "$out" | sed 's/^/        /'; return
+     fi
+-    if [ -n "$want_out" ] && ! printf '%s' "$out" | grep -qF -- "$want_out"; then
++    if [ -n "$want_out" ] && ! grep -qF -- "$want_out" <<<"$out"; then
+         FAIL=$((FAIL+1)); echo "  FAIL: $name (exit correct, WRONG rule fired — wanted /$want_out/)"; echo "$out" | sed 's/^/        /'; return
+     fi
+     PASS=$((PASS+1))
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh b/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
+index d906eb066..6bbabea08 100755
+--- a/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1355_slot_blind_launchers.test.sh
+@@ -65,7 +65,7 @@ urls() {
+       bash "$DEV/scripts/start-local.sh" urls 2>&1
+   fi
+ }
+-saw() { if printf '%s' "$2" | grep -qF -- "$1"; then echo yes; else echo no; fi; }
++saw() { if grep -qF -- "$1" <<<"$2"; then echo yes; else echo no; fi; }
+ 
+ # --- CONTROL: the fixture really runs the product --------------------------------
+ out_none="$(urls "")"
+diff --git a/Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh b/Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+index 98c14661c..c0c0b72b4 100644
+--- a/Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+@@ -440,8 +440,8 @@ preflight_fixture_run() {            # $1 = deps rc, $2 = fixture-suite rc, $3 =
+   local verdict
+   if   printf '%s' "$out" | grep -q 'step header .* disagrees with TOTAL_LEGS'; then verdict='HEADER-MISMATCH'
+   elif printf '%s' "$out" | grep -q 'could not measure what'; then verdict='DESLOT-REFUSED'
+-  elif printf '%s' "$out" | grep -q "could not derive the pre-push hook's own control"; then verdict='HOOKCTL-REFUSED'
+-  elif printf '%s' "$out" | grep -q 'de-slotted .* variable'; then
++  elif grep -q "could not derive the pre-push hook's own control" <<<"$out"; then verdict='HOOKCTL-REFUSED'
++  elif grep -q 'de-slotted .* variable' <<<"$out"; then
+     # KS-1046: the honest pass shape. The fixture's gateway is closed by
+     # construction, so legs 3/4/8 always SKIP here and `PREFLIGHT PASSED —
+     # N/N legs ran.` is unreachable in this fixture; the verdict a green

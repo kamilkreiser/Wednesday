@@ -1,0 +1,50 @@
+```json
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The PR adds services/security and services/m365-integration to the default list of the test-file type-check ratchet leg and to check:test-types, but the baselines for both services are empty of type-error entries, so any pre-existing type error in their test files will now fail the gate; the ticket claims the two KS-952 errors are fixed)Skip",
+      "evidence": "Blockchain/Dev/scripts/typecheck-tests/baseline-security.txt:5 `examined-test-files 40` and Blockchain/Dev/scripts/typecheck-tests/baseline-m365-integration.txt:5 `examined-test-files 26`; Blockchain/Dev/scripts/preflight/test-types-ratchet.sh:47 `set -- services/auth services/api-gateway services/vc-issuer services/security services/m365-integration`",
+      "test_or_reason": "The baselines contain only the examined-test-files floor and no error entries, so the ratchet will fail on any type error in these services' test files. The ticket's own measurement (2026-10-13) found 2 errors in security's test files; the PR fixes those two, but the baseline is empty, meaning the gate now enforces zero errors. This is the intended ratchet behavior, but it is a behavior change that could block pushes if any other test file in these services has a type error not caught by the ticket's measurement."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR description (not provided) and the ticket claim the two KS-952 errors are fixed, but the fix for the TS1343 error in ks952-rate-limit-scope.test.ts uses `__dirname` which is not available in ES module context; the test file uses `import` statements, so `__dirname` is undefined at runtime, causing a ReferenceError when the test runs.",
+      "evidence": "Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope.test.ts:312 `const yaml = await readFile(resolve(__dirname, '../../../../docs/openapi/secuura-api.yaml'), 'utf8');` and line 25 `import { describe, it, expect, beforeAll } from 'vitest';`",
+      "test_or_reason": "The file uses ES module syntax (import statements), so `__dirname` is not defined. The ticket itself notes the gateway fix used `createRequire(__filename)` or `__dirname` instead, but the gateway may be CommonJS. In this ES module test file, `__dirname` will throw a ReferenceError at runtime, breaking the test. The type-check may pass (since `__dirname` is a global in Node types), but the test will fail at runtime."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR adds services/m365-integration to the ratchet and check:test-types, but the ticket KS-1554 is specifically about services/security; the m365-integration enrolment is not in the ticket's acceptance criteria and may be an unrequested scope expansion.",
+      "evidence": "Blockchain/Dev/package.json:44 `\"check:test-types\": \"node scripts/typecheck-tests/check.cjs services/auth && node scripts/typecheck-tests/check.cjs services/api-gateway && node scripts/typecheck-tests/check.cjs services/vc-issuer && node scripts/typecheck-tests/check.cjs services/security && node scripts/typecheck-tests/check.cjs services/m365-integration\"` and Blockchain/Dev/scripts/preflight/test-types-ratchet.sh:47 `set -- services/auth services/api-gateway services/vc-issuer services/security services/m365-integration`",
+      "test_or_reason": "The ticket KS-1554 only mentions services/security. Adding m365-integration is a separate change not covered by the ticket's acceptance criteria. This could be intentional (the ticket mentions 'leg 16's cells cover the new service' but only for security), but it is an unrequested change that should be justified or split out."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test preflight_test_types_ratchet_leg.test.sh asserts the default list is 'ALL FIVE gated services' but the test's stub cells only verify the leg's own logic, not that the real checker runs against the real services; the real-checker cells are skipped when no workspace install is present, so the assertion that all five services are gated is only proven by the stub, not by the real checker.",
+      "evidence": "Blockchain/Dev/scripts/__tests__/preflight_test_types_ratchet_leg.test.sh:176 `expect \"🔴 ...and the default list is ALL FIVE gated services, auth, the api-gateway, vc-issuer (KS-1351), security and m365-integration (KS-1554), each with its own checker line\" \"yes yes yes yes yes\"` and line 175 `*'SKIP (advisory)'*) printf 'note no workspace install here: the default-service run skipped, so the REAL checker lines are not asserted (the stub cells below assert the default list without an install)\\n' ;;`",
+      "test_or_reason": "The test's real-checker cells (lines 172-183) are inside the `if [ \"$have_install\" = yes ]` block (line 113), so without an install they are skipped. The stub cells (lines 222-260) verify the leg's default list by stubbing the checker, but they do not prove the real checker runs against the real services. This is a limitation of the test environment, not a defect in the PR."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The PR's change to ks952-rate-limit-scope-route.test.ts casts the JSON body to `{ error?: { code?: string } }`, but the actual response shape may differ; the cast is a type assertion that could mask a runtime shape mismatch, and the test does not verify the actual shape beyond the cast.",
+      "evidence": "Blockchain/Dev/services/security/src/__tests__/ks952-rate-limit-scope-route.test.ts:249 `expect(((await res.json()) as { error?: { code?: string } })?.error?.code).toBe('FORBIDDEN');`",
+      "test_or_reason": "The cast `as { error?: { code?: string } }` tells TypeScript to trust the shape, but if the runtime response has a different shape (e.g., `error` is a string, or `code` is a number), the test would fail at runtime but the type-check would pass. The test does not assert the full shape, only the `code` field. This is a minor test-quality issue, not a production defect."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The PR updates CLAUDE.md to say the ratchet gates 'services/security' and 'services/m365-integration', but the ticket KS-1554 only mentions security; the m365-integration addition is undocumented in the ticket and may be a scope creep that should be called out.",
+      "evidence": "CLAUDE.md:398 `Leg 16 gates `services/auth`, `services/api-gateway`, `services/vc-issuer`, `services/security` and `services/m365-integration` (the script's default list; vc-issuer`",
+      "test_or_reason": "The documentation change is consistent with the code change, but the ticket does not mention m365-integration. This is a documentation/scope issue, not a functional defect."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR's test changes to ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh and ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh update expected strings from 'three' to 'five' checkers, but these tests are not run in the facts.json targeted runs (only preflight_test_types_ratchet_leg.test.sh is run), so their correctness is not verified by the runner.",
+      "evidence": "Blockchain/Dev/scripts/__tests__/ks1513_ratchet_leg_suite_skips_real_checker_cells_without_install.test.sh:53 `check \"CONTROL with no install the stub cells still run (the default-run stub cell reports ok)\" \"1\" \\` and Blockchain/Dev/scripts/__tests__/ks1527_ratchet_leg_stub_cells_catch_a_mutated_leg.test.sh:67 `\"$(count_fail \"$out_x4\" 'the default run (no arguments) passes with all five checkers green')\"`",
+      "test_or_reason": "facts.json targeted_on_head only lists preflight_test_types_ratchet_leg.test.sh, not the other two test files. The other two tests are not run by the runner, so their updated expectations are unverified. This is a test-coverage gap, not a defect."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}
+```
