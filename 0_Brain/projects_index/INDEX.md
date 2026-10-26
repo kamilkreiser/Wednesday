@@ -27,6 +27,10 @@ file is refreshed by Wednesday reading each project's `5_Project_History/history
 > **The full-sweep mechanism is still WED-7 and still unbuilt.** The honest reading of
 > this file today: a rich archive of how the fleet got here, with a stale first page.
 
+**Refreshed 2026-10-27 06:1x (boot, laptop seat; Secuura only, Datasec is Tuesday's):** Secuura/Blockchain
+history newest = 2026-10-26 (Seats R 3rd, T 2nd, V 2nd wrapped; matches NEXT-PICKUP). develop ec3313a80440;
+kintsugi on it (D 34th, 05:49), demo building (D 34th, batch 8/17 at 06:09). No other Secuura seat live.
+
 Last full sweep: **never** (first sweep = WED-7). Partial freshness via the
 end-of-session feed: see `entries/` cards. **Refreshed 2026-08-11 06:1x** —
 05:30 shift change: only Wednesday's pane live, nothing to wrap; quiet
