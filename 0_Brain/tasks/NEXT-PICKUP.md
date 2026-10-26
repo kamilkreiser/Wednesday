@@ -6,6 +6,13 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ SHIFT-CHANGE HANDOVER 05:3x 27 Oct (the 22:2x seat, ctx ~75%) — READ THIS FIRST, supersedes every block below where they differ
+- **Floor:** %19 **Seat D 34th** (Opus C6, boots claude-opus-5) DEPLOYING develop **ec3313a80440** (our six #1715 #1713 #1716 #1718 #1717 #1719 + Peter's merge commits #1720-#1724) -> kintsugi (build k4 running, batch 9/17 at 18:14Z, fast: cache hits) then demo in-seat if its ctx < 60% (it CANNOT read its statusline: read %19 for it when its DEPLOYED kintsugi mail asks), demo-service docker-stopped last. Brief fleet/briefs_staged/2026-10-27_seatD34_deploy_round.md; heartbeat !CODING/Secuura/Blockchain/5_Project_History/2026-10-27_seatD-34th/evidence/heartbeat.kintsugi.k4.d34.txt. Notices DRAFT only: Wednesday reads both against measured facts, then mails "POST NOTICES". KS-1736 is the one ticket likely Done on live evidence. %1 monitor. **No other seat live.** D 34th is NOT wrapped at the shift change (overnight is working time; its queue is live).
+- **Both boxes run 5f689991861b** (D 33rd, verified; Done KS-1649/1289/1635; notices posted Peter e8e5c0e2 KS-485, Stuart d51768e7 KS-772). Panel receipts posted for both boxes.
+- **OWED next, in order:** (1) D 34th's milestones; (2) triage the 18 test/tooling-only tickets of the 5f689991861b delta + the six of the ec3313a80440 delta (KS-1443, 1726, 1736 after deploy, 1324, 1438, 1331) — a Secuura seat reads each for residue, Done only where nothing is open (KS-1728 stays open); (3) morning: the 10a fleet-activity card + 10b stale escalate; (4) a lane sweep for new briefable tickets (Spark + Claude seats; the Spark has had no briefable ticket since lanes.md 1950).
+- **Kam overnight:** 05:09 asked about a 128 GB Studio (DeepSeek V4 Flash + SSD; Thunderbolt to a 256) — ANSWERED on the panel (2-bit fits resident; SSD streaming unmeasured; TB split unproven for 128+256; recommend separate machines). He may follow up.
+- Ledger: +3 [W] tonight; rule 3c run (10-21..10-23 archived). Digests regenerated.
+
 ## ⏩ CHECKPOINT 04:2x 27 Oct (ctx 70%; the 22:2x seat) — READ THIS FIRST, supersedes the blocks below where they differ
 - **Floor:** ONLY %18 D 33rd (+ %1 monitor). R 3rd, S 2nd, T 2nd, U 2nd, V 2nd all WRAPPED, scored (0.90 / 0.96 / 0.94 / 0.95 / 0.96) and panes CLOSED.
 - **develop = ec3313a80440** (28 of ours merged today incl. #1719 KS-1331 after a fix round; Peter's #1720-#1724 merge commits are in it). KS-1745 filed (KS-1331 residue). Unfiled by Wednesday's choice: #1717 three surviving mutants, T's two LOWs.

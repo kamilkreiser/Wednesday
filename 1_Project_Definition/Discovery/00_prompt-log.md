@@ -2751,3 +2751,8 @@ INCLUDED until he says otherwise.
 > Can you please provide the kintsugi admin password so Stuart can mint some tokens. This chat is encrypted so it's ok in chat
 
 *Note:* declined to paste a secret into the panel (chat store is committed to the Wednesday repo + read aloud); gave Kam a pasteable command, Stuart's own admin@secuura.com account (13 Oct) named
+
+## 2026-10-27 05:10 — Kam (live board 05:09:39 view=wednesday, verbatim)
+> Another question about models - if I was to get a studio 128gb for you, while we wait for another machine, 1) can we use DeepSeek V4 Flash with some on ssd to ensure enough RAM for typical workflow 2) can we thunderbolt the 128 to a 256 just in case?
+
+*Note:* Answered on the panel from the 10-26 four-Mac report + machine PDF: V4 Flash 2-bit fits resident (SSD not needed; streaming unmeasured, est. 3-8 tok/s); TB5 split real but unproven for a 128+256 pair; recommend separate machines.
