@@ -7,6 +7,8 @@ sampler, same checker.
   ab.py --model control              re-check each task's ORIGINAL Spark out.md with today's checker (no model call):
                                      proves the checker leg reproduces the recorded verdict (PASS and FAIL) before any
                                      model verdict is trusted.
+  ab.py --model v41hosted [--only T01]   DeepSeek V4.1 Flash 1017 via OpenRouter, pinned DeepInfra/fp8/zdr (Kam 2026-10-27 10:06);
+                                     key read by name from 4_Credentials/.env; US$5 hard cap (runs/v41hosted/budget.json).
   ab.py --model deepseek|ornith [--url http://127.0.0.1:47788] [--only T01,T02] [--served-name NAME]
 
 Per task:
@@ -55,7 +57,17 @@ MODELS = {
     # (serve_gguf.sh). Same kwarg as deepseek: unsloth's chat template reads `thinking` (false -> "</think>" prefix).
     "iq2xxs": {"served": "DeepSeek-V4-Flash-0731-UD-IQ2_XXS", "kwargs": {"thinking": False}},
     "iq1m": {"served": "DeepSeek-V4-Flash-0731-UD-IQ1_M", "kwargs": {"thinking": False}},
+    # 2026-10-27 hosted arm: same prompts/sampler/checker, through OpenRouter. Secuura code => provider pinned, zdr, no fallback.
+    "v41hosted": {"served": "deepseek/deepseek-v4.1-flash-1017", "kwargs": {}, "hosted": True},
 }
+OR_URL = "https://openrouter.ai/api/v1/chat/completions"
+OR_ENV = os.path.join(os.path.dirname(os.path.dirname(LM)), "4_Credentials", ".env")
+OR_PROVIDER = {"order": ["DeepInfra"], "only": ["deepinfra"], "allow_fallbacks": False, "data_collection": "deny",
+               "zdr": True, "quantizations": ["fp8"]}
+OR_REASONING = {"enabled": False}
+OR_CAP = 5.00
+# GET /api/v1/models/<id>/endpoints 2026-10-27: DeepInfra fp8 tiers flex/base/priority; the dearest (priority) is used for worst case.
+OR_PRICE_IN, OR_PRICE_OUT = 0.147e-6, 0.441e-6
 
 
 def load_tasks(only):
@@ -81,6 +93,45 @@ def post(url, body, timeout=1800):
                                  headers={"Content-Type": "application/json"}, method="POST")
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
+
+
+def or_key():
+    for line in open(OR_ENV, encoding="utf-8"):
+        if line.startswith("OPENROUTER_API_KEY="):
+            return line.split("=", 1)[1].strip().strip('"').strip("'")
+    raise SystemExit("ab: OPENROUTER_API_KEY not in 4_Credentials/.env")
+
+
+def assert_or_routing(body):
+    p = body.get("provider") or {}
+    if p != OR_PROVIDER or body.get("model") != MODELS["v41hosted"]["served"]:
+        raise SystemExit("ab: REFUSED: hosted request lacks the absolute provider pin")
+
+
+def post_hosted(body, budget, info):
+    """Reserve worst case -> POST (same body on 429/502/503, <=3 tries) -> settle on usage.cost. Returns (raw, usd)."""
+    assert_or_routing(body)
+    worst = info["prompt_bytes"] / 2.0 * OR_PRICE_IN + body["max_tokens"] * OR_PRICE_OUT
+    key = or_key()
+    for attempt in range(3):
+        rid = budget.reserve("v41hosted", "deepinfra/fp8", worst)  # replay.Refused if spent + worst > cap
+        req = urllib.request.Request(OR_URL, data=json.dumps(body).encode("utf-8"), method="POST", headers={
+            "Content-Type": "application/json", "Authorization": "Bearer " + key, "X-Title": "Wednesday spark-ab v41hosted"})
+        try:
+            with urllib.request.urlopen(req, timeout=1800) as r:
+                raw = r.read()
+        except urllib.error.HTTPError as e:
+            budget.settle(rid, worst if e.code != 429 else 0.0, f"HTTP {e.code}", {})
+            if e.code in (429, 502, 503) and attempt < 2:
+                time.sleep(30 * (attempt + 1))
+                continue
+            raise
+        usage = (json.loads(raw).get("usage") or {})
+        usd = usage.get("cost")
+        if not isinstance(usd, (int, float)):
+            usd = (usage.get("prompt_tokens") or 0) * OR_PRICE_IN + (usage.get("completion_tokens") or 0) * OR_PRICE_OUT
+        budget.settle(rid, float(usd), "usage.cost", usage)
+        return raw, float(usd)
 
 
 def write_outputs(run, raw, wall, body, info, model_key):
@@ -114,7 +165,10 @@ def write_outputs(run, raw, wall, body, info, model_key):
         f.write(cleaned + ("\n" if not cleaned.endswith("\n") else ""))
     meta = {
         "backend": "spark-ab", "model": body["model"], "model_key": model_key, "max_tokens": body["max_tokens"],
-        "sampler": {"temperature": 0, "max_tokens": body["max_tokens"], "chat_template_kwargs": body["chat_template_kwargs"]},
+        "sampler": {"temperature": 0, "max_tokens": body["max_tokens"], "chat_template_kwargs": body.get("chat_template_kwargs"),
+                    "reasoning": body.get("reasoning"), "provider": body.get("provider")},
+        "provider_served": j.get("provider"), "cost_usd": usage.get("cost"),
+        "reasoning_tokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
         "prompt_bytes": info["prompt_bytes"], "sha256_task_plus_input": info["sha256_task_plus_input"],
         "messages_sha256": info["messages_sha256"],
         "prompt_eval_count": usage.get("prompt_tokens"), "eval_count": usage.get("completion_tokens"), "usage": usage,
@@ -165,6 +219,7 @@ def main():
     if not os.path.exists(tsv):
         with open(tsv, "w", encoding="utf-8") as f:
             f.write("when\tid\trung\texpect\tverdict\tfail_clause\tgolden\tprompt_tok\tcompletion_tok\tmodel_s\tcheck_s\tfinish\tthinking_chars\tmessages_sha256\tspark_verdict\tspark_run\n")
+    budget = None
     plan = []
     for t in tasks:
         srun = os.path.join(RUNS_SRC, t["run"])
@@ -194,27 +249,47 @@ def main():
             m = MODELS[mk]
             body = {"model": a.served_name or m["served"], "messages": msgs, "max_tokens": MAX_TOKENS, "temperature": 0,
                     "chat_template_kwargs": dict(m["kwargs"])}
+            if m.get("hosted"):
+                del body["chat_template_kwargs"]
+                body.update({"provider": dict(OR_PROVIDER), "reasoning": dict(OR_REASONING), "usage": {"include": True}})
+                if budget is None:
+                    budget = replay.Budget(os.path.join(OUT, lab, "budget.json"), OR_CAP)
             with open(os.path.join(run, "request.json"), "w", encoding="utf-8") as f:
                 json.dump(body, f, indent=1)
             body_sha = hashlib.sha256(json.dumps(msgs, ensure_ascii=False).encode("utf-8")).hexdigest()
             assert body_sha == info["messages_sha256"], "messages changed between build and send"
             t0 = time.time()
             try:
-                raw = post(a.url, body)
+                if m.get("hosted"):
+                    raw, usd = post_hosted(body, budget, info)
+                    spent = budget.total()
+                    print(f"ab: spend ${spent:.5f} of ${OR_CAP:.2f} (this call ${usd:.5f})", flush=True)
+                else:
+                    raw = post(a.url, body)
             except urllib.error.HTTPError as e:
                 print(f"ab: HTTP {e.code} on {t['id']}: {e.read()[:600]!r}", flush=True)
                 return 4
+            except replay.Refused as e:
+                print(f"ab: REFUSED {t['id']}: {e}", flush=True)
+                return 2
             except (urllib.error.URLError, OSError) as e:
                 print(f"ab: connection error on {t['id']} after {time.time() - t0:.1f}s: {e}", flush=True)
                 return 4
             wall = time.time() - t0
             try:
                 meta = write_outputs(run, raw, wall, body, info, mk)
+                if m.get("hosted"):
+                    served = str(meta.get("provider_served") or "")
+                    if "deepinfra" not in served.lower().replace(" ", ""):
+                        print(f"ab: STOP: {t['id']} served by {served!r}, not DeepInfra (response kept in {run})", flush=True)
+                        return 4
+                    if meta.get("reasoning_tokens"):
+                        print(f"ab: NOTE {t['id']}: reasoning_tokens={meta['reasoning_tokens']} with reasoning disabled", flush=True)
             except (ValueError, KeyError, IndexError) as e:
                 print(f"ab: unexpected response shape on {t['id']}: {e}", flush=True)
                 return 4
         harness = ""
-        if mk != "control" and (meta.get("thinking_chars") or meta.get("think_leak_in_content")):
+        if mk != "control" and (meta.get("thinking_chars") or meta.get("reasoning_tokens") or meta.get("think_leak_in_content")):
             harness = "thinking ON or leaked (requested off)"
         if harness:
             v, g, res, fc, cs = "HARNESS", "-", harness, "-", 0
