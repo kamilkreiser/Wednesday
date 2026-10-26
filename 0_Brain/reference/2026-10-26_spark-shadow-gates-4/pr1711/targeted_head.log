@@ -1,0 +1,25 @@
+
+##### systemTest/__tests__/generated_guard_restore.test.sh
+== CONTROL: the instrument fails the chosen destination and ONLY that one ==
+  ok   the fake cp REFUSES a copy into a /generated/ destination
+  ok   the fake cp passes every OTHER destination through to the real cp
+== CONTROL: a clean run restores generated/, removes the stash, keeps rc 0 ==
+  ok   a clean run exits 0
+  ok   a clean run puts the sentinel back in generated/
+  ok   a clean run removes the scratch directory
+== KS-1735: a FAILED restore is REPORTED on stderr ==
+  ok   the instrument actually intercepted the restore copy
+  ok   a failed restore says so (names the directory and that it may be EMPTY)
+== KS-1735: a FAILED restore KEEPS the stash — it is the only copy left ==
+  ok   the stash and its contents survive a failed restore
+  ok   the message names where the kept stash is
+== KS-1735: a failed restore moves a PASSING suite's exit status off 0 ==
+  ok   a suite that exited 0 reports non-zero when its restore failed (rc=1)
+== KS-1735: a FAILING suite keeps its OWN status, not a flattened 1 ==
+  ok   a suite that exited 3 still reports 3 after a failed restore
+== KS-1027 item 2: a failed SNAPSHOT keeps its partial stash too ==
+  ok   the instrument intercepted the snapshot copy
+  ok   a failed snapshot refuses to restore and says so (KS-992)
+  ok   the PARTIAL stash survives a failed snapshot
+  ok   a failed snapshot leaves generated/ exactly as the run left it
+generated_guard_restore.test.sh: 15 passed, 0 failed

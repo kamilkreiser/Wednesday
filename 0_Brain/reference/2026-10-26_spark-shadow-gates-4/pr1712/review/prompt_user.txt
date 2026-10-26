@@ -1,0 +1,1325 @@
+===== TICKET =====
+KS-1731 — vc-issuer GET /api/credentials pages on ORDER BY created_at DESC alone - rows sharing (or lacking) a created_at repeat or are skipped across pages (gate: 24 of 180 page walks; an id tie-breaker takes it to 0) [In Progress]
+
+## BLUF
+
+`GET /api/credentials` **pages on** `ORDER BY created_at DESC` **alone.** Rows that share a `created_at`, or have none, can be **repeated or skipped** between pages. The tier-1 gate on PR #1691 measured this, rated it **Minor** and found no leak. Only the caller's **own** rows are affected: no foreign row was ever served, and `total` stayed correct. Adding the row id as a tie-breaker took it to 0. **The sort predates PR #1691** — #1691 kept it, and did not introduce it.
+
+## Where (develop `c2505d5c6fe0`)
+
+* `services/vc-issuer/src/repositories/credentialRepo.ts:365` — `ORDER BY created_at DESC LIMIT $n OFFSET $m` in `selectList()`. Both `listReadable()` (what `GET /api/credentials` calls since #1691) and the unbound `list()` use it.
+* For contrast, the by-hash read at `:286` already orders `created_at DESC, id DESC`.
+
+## When it came in
+
+`git log -S 'ORDER BY created_at DESC LIMIT' -- services/vc-issuer/src/repositories/credentialRepo.ts` gives one commit: `e50dbde98` (2026-02-18, "Identity verification & SSI integration…"). It is already present on develop `1ae6f17d19a8` at `:227`, before #1691.
+
+## What was measured (by the gate, relayed; not re-measured by the filer)
+
+On PGlite (PostgreSQL 17.5): **24 of 180 page walks** repeated or skipped rows that shared a timestamp or had none. Adding `id` as a tie-breaker took it to **0**. All affected rows were the caller's own. The verdict is on the coordinator's side at `0_Brain/reference/2026-10-26_gate-pr1691-ks1683/verdict.md`.
+
+## Facts that bound it
+
+* `created_at` is `TIMESTAMPTZ DEFAULT NOW()`, nullable (`migrations/001_initial-schema.sql:748`, no `NOT NULL`).
+* vc-issuer's own `store()` INSERT (`credentialRepo.ts:84`) does not name `created_at`, so rows it writes get `NOW()`. **A NULL** `created_at` **can only come from another writer.** A shared timestamp is reachable for rows written in the same transaction.
+* The in-memory fallback pages a `Map` in insertion order. That order is deterministic, so this ticket is about the DB path.
+* Two other `ORDER BY created_at DESC` reads in vc-issuer are boot loads, not paged: `credentialRepo.ts:423` (`loadFromDb`) and `routes/presentations.ts:173`. They are outside this defect.
+* `vc_credentials_store` held 0 rows on demo and 0 on kintsugi on 2026-10-20 (from KS-1683's body).
+
+## Fix shape (not chosen here)
+
+`ORDER BY created_at DESC, id DESC`, matching by-hash at `:286`. `id` is the primary key, so that is a total order. Whether NULLs should sort last (`NULLS LAST`; PostgreSQL puts NULLs first under `DESC`) is a choice for whoever fixes it.
+
+## Related, NOT duplicates
+
+* **KS-1544** — `platform_audit_log` paged without a tie-break (`ORDER BY created_at DESC` only). Same class, different table and service.
+* **KS-1683** / PR #1691 — the change whose gate found this.
+
+## Searched first
+
+Exact substring over the title and description of all **701 open** Secuura-PK issues:
+
+* `ORDER BY created_at DESC LIMIT` → 2: **KS-1544** (above) and KS-1696 (GDPR deletion log — unrelated).
+* `created_at DESC, id` → KS-1544.
+* `tie-breaker` / `tiebreaker` / `tie breaker` / `unstable sort` / `stable sort` / `listReadable` → 0.
+* `credentialRepo.list` → KS-1683 only.
+
+Controls showing the instrument finds a known ticket: `Hook timed out in 10000ms` → KS-1729 and KS-1602; `GHSA-27r3-jxmh-p828` → KS-1723.
+
+## Found by
+
+The tier-1 gate on PR #1691 (round 1, Minor). Filed by Seat K on the coordinator's ruling, facts only. Not fixed in #1691.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
+index 05f345bfc..00d8ab4aa 100644
+--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
+@@ -419,7 +419,7 @@ describe('KS-1683 DB path: the owner filter is in the SQL, and on every returned
+       const hash = params[params.length - 1];
+       return Promise.resolve({ rows: newestFirst.filter((x) => (x.credential as any).credentialSubject.documentHash === hash).slice(0, 1) });
+     }
+-    if (/ORDER BY created_at DESC LIMIT \$\d+ OFFSET \$\d+$/.test(s)) {
++    if (/ORDER BY created_at DESC, id DESC LIMIT \$\d+ OFFSET \$\d+$/.test(s)) {
+       const limit = Number(params[params.length - 2]);
+       const offset = Number(params[params.length - 1]);
+       return Promise.resolve({ rows: newestFirst.slice(offset, offset + limit) });
+@@ -519,6 +519,24 @@ describe('KS-1683 DB path: the owner filter is in the SQL, and on every returned
+     expect(r.body.pagination).toEqual({ total: 2, limit: 1, offset: 1, hasMore: false });
+   });
+ 
++  /**
++   * KS-1731: the page SELECT must carry a TOTAL order. On `created_at DESC` alone, rows that share a
++   * `created_at` — or have none, since the column is nullable — can repeat or be skipped between
++   * pages: the tier-1 gate on pull request 1691 walked 180 pages on PGlite, 24 walks repeated or
++   * skipped a row, and an `id` tie-breaker took that to 0. `id` is the primary key, so
++   * `created_at DESC, id DESC` is a total order. G2 already pins that same order on the by-hash
++   * read; this is its counterpart for the list page, so the two cannot drift apart again.
++   *
++   * It asserts the SQL TEXT only. No database runs in this file, so it does not prove that real
++   * pages stop repeating — the gate's PGlite walk is that evidence, and it is not reproduced here.
++   */
++  it('Q3 the list page SELECT orders on a total order: created_at DESC, id DESC (KS-1731)', async () => {
++    await list(mods, ALICE);
++    const page = statements().find(([s]) => /OFFSET/.test(s));
++    expect(page).toBeTruthy();
++    expect(page![0]).toMatch(/ORDER BY created_at DESC, id DESC LIMIT \$\d+ OFFSET \$\d+$/);
++  });
++
+   // --- the empty-string trap ----------------------------------------------
+   it.each(TENANT_ADMINS_T1)('E1 %s lists -> tenant 1\'s owner-less rows, INCLUDING the one whose owner column is \'\'', async (_label, caller) => {
+     const r = await list(mods, caller);
+diff --git a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+index df57204c8..b353cafe8 100644
+--- a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+@@ -362,7 +362,7 @@ async function selectList(
+         created_by_tenant_id?: string | null;
+       }>(
+         `SELECT ${columns} FROM vc_credentials_store ${where}
+-         ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx++}`,
++         ORDER BY created_at DESC, id DESC LIMIT $${idx++} OFFSET $${idx++}`,
+         params,
+       );
+ 
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
+1: /**
+2:  * KS-1683 — GET /api/credentials (list) and GET /api/credentials/by-hash/:hash
+3:  * are bound to the principal that CREATED the row, by the same rule KS-1116
+4:  * applies to GET /api/credentials/:id.
+5:  *
+6:  * The rule (ownership.ts `mayRead`, unchanged by this ticket): Kam's KS-1116 ruling
+7:  * `bind-creator` — "Owner = the authenticated principal that created it" — and,
+8:  * for a row with no recorded owner, ruling (a) of card
+9:  * `secuura-ks1116-null-owner-who-reads-1020`: a tenant administrator (ORG_ADMIN /
+10:  * SYSTEM_ADMIN) of the ROW's tenant, and nobody when that tenant is unknown.
+11:  *
+12:  * The defect: KS-1116 bound the two `/:id` reads and left these two routes out,
+13:  * because Platform S might call them and its repository was not visible from
+14:  * here. Stuart answered on KS-1683 (2026-10-20T02:10:49Z): Platform S never calls
+15:  * either route. Until this change, any authenticated caller could page through
+16:  * every stored credential, and could read any credential by its document hash.
+17:  *
+18:  * What the cells pin, per the ticket and the brief:
+19:  *   - B cannot see A's credential through EITHER route; A still reads its own.
+20:  *   - `total` and `hasMore` are counted AFTER the owner filter, not before it.
+21:  *   - The in-memory fallback is bound too (DB unavailable, and DB query throws).
+22:  *   - by-hash with two matches of MIXED owners returns the CALLER's, not the
+23:  *     first match — so a caller's own credential cannot hide behind another's.
+24:  *   - The empty-string trap: `claim()` reads '' as an absent claim, so a row whose
+25:  *     owner column holds '' is judged exactly as `mayRead` judges it (cells E1-E3).
+26:  *
+27:  * THE ORACLE (cells X1, X2): the list is not checked only against hand-written
+28:  * sets. For every caller and every row, "the row is in the caller's list" must
+29:  * equal "GET /:id answers the caller 200" — and GET /:id is KS-1116's shipped,
+30:  * gated code. If the list ever applies a different rule from /:id, X goes red.
+31:  *
+32:  * THE DB MODEL: `pgModel` stands in for PostgreSQL. It applies an owner filter
+33:  * ONLY when the statement's WHERE clause actually carries one (the reader's three
+34:  * parameters, $1-$3) — otherwise it returns every row, exactly as the unbound SQL
+35:  * would. It throws on any statement it does not recognise, so it cannot pass a
+36:  * query it never saw. What a model CANNOT show is that the SQL text means what the
+37:  * model says it means; that was measured against a real PostgreSQL by hand and is
+38:  * recorded in the pull request, not here.
+39:  *
+40:  * Harness: the ks1116/ks1352 shape — the REAL router and the REAL shared
+41:  * errorHandler over a hand-rolled req/res; `../db` is a controllable stand-in.
+42:  * Every cell id is letters + digits so a tamper run can score cell by cell.
+43:  */
+44: 
+45: import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
+46: import crypto from 'crypto';
+47: 
+48: const dbMock = vi.hoisted(() => ({
+49:   isDbAvailable: vi.fn<() => boolean>(() => false),
+50:   query: vi.fn<(sql: string, params?: unknown[]) => Promise<{ rows: any[] }>>(),
+51: }));
+52: 
+53: vi.mock('../db', () => ({
+54:   isDbAvailable: () => dbMock.isDbAvailable(),
+55:   query: (sql: string, params?: unknown[]) => dbMock.query(sql, params),
+56: }));
+57: 
+58: vi.mock('../utils/logger', () => ({
+59:   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+60: }));
+61: 
+62: // ---------------------------------------------------------------------------
+63: // Principals
+64: // ---------------------------------------------------------------------------
+65: type Principal = Record<string, unknown> | undefined;
+66: const T1 = 'ks1683-tenant-1';
+67: const T2 = 'ks1683-tenant-2';
+68: const ALICE = { userId: 'ks1683-alice', tenantId: T1, role: 'OWNER', email: 'alice@ks1683.test', verificationLevel: 'BASIC' };
+69: const BOB = { userId: 'ks1683-bob', tenantId: T1, role: 'OWNER', email: 'bob@ks1683.test', verificationLevel: 'BASIC' };
+70: const ALICE_NO_TENANT = { userId: ALICE.userId, role: 'OWNER', email: ALICE.email, verificationLevel: 'BASIC' };
+71: const ORG_ADMIN = { userId: 'ks1683-org-admin', tenantId: T1, role: 'ORG_ADMIN', email: 'oa@ks1683.test', verificationLevel: 'BASIC' };
+72: const SYSTEM_ADMIN = { userId: 'ks1683-sys-admin', tenantId: T1, role: 'SYSTEM_ADMIN', email: 'sa@ks1683.test', verificationLevel: 'BASIC' };
+73: 
+74: /** Tenant administrators of T1: ruling (a) admits them to T1's OWNER-LESS rows, and to nothing owned. */
+75: const TENANT_ADMINS_T1: Array<[string, Principal]> = [
+76:   ['an ORG_ADMIN of tenant 1', ORG_ADMIN],
+77:   ['a SYSTEM_ADMIN of tenant 1', SYSTEM_ADMIN],
+78: ];
+79: 
+80: /** Callers who own nothing and administer no tenant that holds an owner-less row: each must see NOTHING. */
+81: const THIRD_PARTIES: Array<[string, Principal]> = [
+82:   ['Alice\'s userId under another tenant', { ...ALICE, tenantId: T2 }],
+83:   ['Alice\'s userId as a number, not a string', { ...ALICE, userId: 42 }],
+84:   ['Alice\'s userId as an array holding the right id', { ...ALICE, userId: [ALICE.userId] }],
+85:   ['an ORG_ADMIN of ANOTHER tenant', { ...ORG_ADMIN, tenantId: T2 }],
+86:   ['a SYSTEM_ADMIN with NO tenant claim', { userId: SYSTEM_ADMIN.userId, role: 'SYSTEM_ADMIN', email: SYSTEM_ADMIN.email, verificationLevel: 'BASIC' }],
+87:   ['a TENANT_ADMIN of tenant 1', { ...ORG_ADMIN, role: 'TENANT_ADMIN' }],
+88:   ['the role spelled org_admin (lower case)', { ...ORG_ADMIN, role: 'org_admin' }],
+89:   ['a role given as an array holding ORG_ADMIN', { ...ORG_ADMIN, role: ['ORG_ADMIN'] }],
+90:   ['an ORG_ADMIN of tenant 1 with NO userId', { tenantId: T1, role: 'ORG_ADMIN', email: ORG_ADMIN.email, verificationLevel: 'BASIC' }],
+91:   ['no principal at all', undefined],
+92: ];
+93: 
+94: /** Every caller the agreement oracle (X1, X2) is run for. */
+95: const ALL_CALLERS: Array<[string, Principal]> = [
+96:   ['Alice', ALICE],
+97:   ['Bob', BOB],
+98:   ['Alice with NO tenant claim', ALICE_NO_TENANT],
+99:   ...TENANT_ADMINS_T1,
+100:   ...THIRD_PARTIES,
+101: ];
+102: 
+103: // ---------------------------------------------------------------------------
+104: // Harness
+105: // ---------------------------------------------------------------------------
+106: type Reply = { status: number; body: any };
+107: type RouterFn = (rq: any, rs: any, nx: (e?: unknown) => void) => void;
+108: type Mods = { credentials: RouterFn; errorHandler: any; repo: any };
+109: 
+110: /** A fresh router + repo per describe, so the in-memory store starts empty. */
+111: async function freshModules(): Promise<Mods> {
+112:   vi.resetModules();
+113:   const c = await import('../routes/credentials');
+114:   const { errorHandler } = await import('../middleware/errorHandler');
+115:   const repo = await import('../repositories/credentialRepo');
+116:   return { credentials: c.credentialRoutes as unknown as RouterFn, errorHandler, repo };
+117: }
+118: 
+119: function dispatch(
+120:   mods: Mods,
+121:   user: Principal,
+122:   method: string,
+123:   url: string,
+124:   opts: { body?: unknown; query?: Record<string, string> } = {},
+125: ): Promise<Reply> {
+126:   return new Promise((resolve, reject) => {
+127:     const req: any = { method, url, baseUrl: '', originalUrl: url, headers: {}, body: opts.body, params: {}, query: opts.query ?? {}, user };
+128:     const res: any = {
+129:       statusCode: 200,
+130:       status(code: number) { this.statusCode = code; return this; },
+131:       json(payload: unknown) { resolve({ status: this.statusCode, body: payload }); return this; },
+132:     };
+133:     const next = (err?: unknown) => {
+134:       if (err) mods.errorHandler(err as Error, req, res, () => {});
+135:       else reject(new Error(`route did not match ${method} ${url}`));
+136:     };
+137:     mods.credentials(req, res, next);
+138:   });
+139: }
+140: 
+141: const list = (m: Mods, user: Principal, query: Record<string, string> = {}) => dispatch(m, user, 'GET', '/', { query });
+142: const byHash = (m: Mods, user: Principal, hash: string) => dispatch(m, user, 'GET', `/by-hash/${encodeURIComponent(hash)}`);
+143: const byId = (m: Mods, user: Principal, id: string) => dispatch(m, user, 'GET', `/${encodeURIComponent(id)}`);
+144: 
+145: /** The ids of a list reply, sorted, after asserting it is a 200 list reply. */
+146: function listedIds(r: Reply): string[] {
+147:   expect(r.status).toBe(200);
+148:   expect(Array.isArray(r.body?.credentials)).toBe(true);
+149:   return (r.body.credentials as Array<{ id: string }>).map((c) => c.id).sort();
+150: }
+151: 
+152: function expectHashNotFound(r: Reply) {
+153:   expect(r.status).toBe(404);
+154:   expect(r.body?.error?.code).toBe('NOT_FOUND');
+155:   expect(r.body?.error?.message).toBe('Credential not found for document hash');
+156:   expect(r.body?.credential).toBeUndefined();
+157: }
+158: 
+159: /** Same status AND the same serialised body — the refusal is not an existence oracle. */
+160: function expectByteIdentical(a: Reply, b: Reply) {
+161:   expect(a.status).toBe(b.status);
+162:   expect(JSON.stringify(a.body)).toBe(JSON.stringify(b.body));
+163: }
+164: 
+165: const sorted = (ids: string[]) => [...ids].sort();
+166: 
+167: // Document hashes. HS is SHARED by one of Alice's credentials and one of Bob's.
+168: const HS = 'ks1683-' + 'a5'.repeat(28);
+169: const HA = 'ks1683-' + 'a1'.repeat(28);
+170: const HB = 'ks1683-' + 'b1'.repeat(28);
+171: const HO = 'ks1683-' + '0e'.repeat(28);
+172: const HL = 'ks1683-' + 'le'.repeat(28);
+173: const UNKNOWN_HASH = 'ks1683-' + 'ff'.repeat(28);
+174: 
+175: // The issue route refuses without a real signing key (audit A-11), so a fresh
+176: // Ed25519 PKCS8 key is generated per run — exactly as ks1116 and ks1352 do.
+177: beforeAll(() => {
+178:   const { privateKey } = crypto.generateKeyPairSync('ed25519');
+179:   process.env.VC_SIGNING_KEY = privateKey.export({ type: 'pkcs8', format: 'der' }).toString('hex');
+180: });
+181: 
+182: function storedCredential(id: string, documentHash: string, type = 'PropertyDeed'): Record<string, unknown> {
+183:   return {
+184:     '@context': ['https://www.w3.org/2018/credentials/v1'],
+185:     id,
+186:     type: ['VerifiableCredential', type],
+187:     issuer: { id: 'did:prism:secuura_test_issuer' },
+188:     issuanceDate: '2026-01-01T00:00:00Z',
+189:     credentialSubject: { documentHash },
+190:   };
+191: }
+192: 
+193: // ===========================================================================
+194: // MEMORY PATH (DB unavailable): owned rows created through the real POST /
+195: // ===========================================================================
+196: describe('KS-1683 memory path: the list and by-hash answer only what the caller may read', () => {
+197:   let mods: Mods;
+198:   const id: Record<string, string> = {};
+199: 
+200:   async function issue(user: Principal, documentHash: string, documentType: string, key: string) {
+201:     const r = await dispatch(mods, user, 'POST', '/', {
+202:       body: { documentId: `doc-${key}`, documentHash, documentType, documentTitle: `KS-1683 ${key}` },
+203:     });
+204:     expect(r.status).toBe(201);
+205:     id[key] = r.body.credential.id;
+206:   }
+207: 
+208:   beforeAll(async () => {
+209:     dbMock.isDbAvailable.mockReturnValue(false);
+210:     dbMock.query.mockReset();
+211:     mods = await freshModules();
+212:     // Bob's shared-hash credential is stored FIRST, so "the first match" is his.
+213:     await issue(BOB, HS, 'PropertyDeed', 'bShared');
+214:     await issue(ALICE, HS, 'PropertyDeed', 'aShared');
+215:     await issue(ALICE, HA, 'DegreeCertificate', 'aOnly');
+216:     await issue(BOB, HB, 'DegreeCertificate', 'bOnly');
+217:     // No owner, tenant known: ruling (a) admits tenant 1's administrators.
+218:     id.ownerlessT1 = 'https://secuura.io/credentials/1683a000-0000-4000-8000-000000000001';
+219:     await mods.repo.store(storedCredential(id.ownerlessT1, HO), { userId: null, tenantId: T1 });
+220:     // No owner, tenant unknown (every pre-054 row): nobody may read it.
+221:     id.legacy = 'https://secuura.io/credentials/1683a000-0000-4000-8000-000000000002';
+222:     await mods.repo.store(storedCredential(id.legacy, HL));
+223:   });
+224: 
+225:   beforeEach(() => {
+226:     dbMock.isDbAvailable.mockReturnValue(false);
+227:   });
+228: 
+229:   it('F0 fixtures: six rows stored, and the UNBOUND first match for the shared hash is Bob\'s', async () => {
+230:     const all = await mods.repo.list({ limit: 100 });
+231:     expect(all.total).toBe(6);
+232:     // The unbound primitive is what the route used to call: it returns Bob's row to anyone.
+233:     expect((await mods.repo.getByHash(HS))?.id).toBe(id.bShared);
+234:     expect(id.aShared).not.toBe(id.bShared);
+235:   });
+236: 
+237:   // --- list ----------------------------------------------------------------
+238:   it('L0 CONTROL: Alice lists -> exactly her two credentials, total 2', async () => {
+239:     const r = await list(mods, ALICE);
+240:     expect(listedIds(r)).toEqual(sorted([id.aShared, id.aOnly]));
+241:     expect(r.body.pagination).toEqual({ total: 2, limit: 100, offset: 0, hasMore: false });
+242:   });
+243: 
+244:   it('L1 Bob lists -> exactly his two credentials, none of Alice\'s', async () => {
+245:     const r = await list(mods, BOB);
+246:     expect(listedIds(r)).toEqual(sorted([id.bShared, id.bOnly]));
+247:     expect(r.body.pagination.total).toBe(2);
+248:   });
+249: 
+250:   it.each(THIRD_PARTIES)('L2 %s lists -> nothing, total 0', async (_label, caller) => {
+251:     const r = await list(mods, caller);
+252:     expect(listedIds(r)).toEqual([]);
+253:     expect(r.body.pagination).toEqual({ total: 0, limit: 100, offset: 0, hasMore: false });
+254:   });
+255: 
+256:   it.each(TENANT_ADMINS_T1)('L3 ruling (a): %s lists -> tenant 1\'s owner-less row only (no owned row, no pre-054 row)', async (_label, caller) => {
+257:     const r = await list(mods, caller);
+258:     expect(listedIds(r)).toEqual([id.ownerlessT1]);
+259:     expect(r.body.pagination.total).toBe(1);
+260:   });
+261: 
+262:   it('L4 Alice with NO tenant claim lists -> nothing: her rows are stamped with tenant 1', async () => {
+263:     const r = await list(mods, ALICE_NO_TENANT);
+264:     expect(listedIds(r)).toEqual([]);
+265:     expect(r.body.pagination.total).toBe(0);
+266:   });
+267: 
+268:   // --- pagination after the filter -----------------------------------------
+269:   it('P1 Alice, limit 1 offset 0 -> one row, total 2, hasMore TRUE', async () => {
+270:     const r = await list(mods, ALICE, { limit: '1', offset: '0' });
+271:     expect(r.body.credentials).toHaveLength(1);
+272:     expect(r.body.pagination).toEqual({ total: 2, limit: 1, offset: 0, hasMore: true });
+273:   });
+274: 
+275:   it('P2 Alice, limit 1 offset 1 -> one row, total 2, hasMore FALSE', async () => {
+276:     const r = await list(mods, ALICE, { limit: '1', offset: '1' });
+277:     expect(r.body.credentials).toHaveLength(1);
+278:     expect(r.body.pagination).toEqual({ total: 2, limit: 1, offset: 1, hasMore: false });
+279:   });
+280: 
+281:   it('P3 Alice\'s two one-row pages are exactly her two credentials, no repeat', async () => {
+282:     const p0 = await list(mods, ALICE, { limit: '1', offset: '0' });
+283:     const p1 = await list(mods, ALICE, { limit: '1', offset: '1' });
+284:     expect(sorted([...listedIds(p0), ...listedIds(p1)])).toEqual(sorted([id.aShared, id.aOnly]));
+285:   });
+286: 
+287:   it('P4 Alice, offset 2 -> no rows, total still 2', async () => {
+288:     const r = await list(mods, ALICE, { offset: '2' });
+289:     expect(listedIds(r)).toEqual([]);
+290:     expect(r.body.pagination.total).toBe(2);
+291:   });
+292: 
+293:   it('P5 a documentType filter composes with the bound: Alice, PropertyDeed -> her one, total 1', async () => {
+294:     const r = await list(mods, ALICE, { documentType: 'PropertyDeed' });
+295:     expect(listedIds(r)).toEqual([id.aShared]);
+296:     expect(r.body.pagination.total).toBe(1);
+297:   });
+298: 
+299:   // --- by-hash -------------------------------------------------------------
+300:   it('H0 CONTROL: Alice reads her own hash -> 200 with her credential', async () => {
+301:     const r = await byHash(mods, ALICE, HA);
+302:     expect(r.status).toBe(200);
+303:     expect(r.body.credential.id).toBe(id.aOnly);
+304:   });
+305: 
+306:   it('H1 two matches, mixed owners, Bob\'s stored first: Alice -> 200 with HER credential, not the first match', async () => {
+307:     const r = await byHash(mods, ALICE, HS);
+308:     expect(r.status).toBe(200);
+309:     expect(r.body.credential.id).toBe(id.aShared);
+310:   });
+311: 
+312:   it('H2 the same hash: Bob -> 200 with his own credential', async () => {
+313:     const r = await byHash(mods, BOB, HS);
+314:     expect(r.status).toBe(200);
+315:     expect(r.body.credential.id).toBe(id.bShared);
+316:   });
+317: 
+318:   it.each(THIRD_PARTIES)('H3 %s reads the shared hash -> 404, byte-identical to an unknown hash', async (_label, caller) => {
+319:     const refused = await byHash(mods, caller, HS);
+320:     expectHashNotFound(refused);
+321:     expectByteIdentical(refused, await byHash(mods, caller, UNKNOWN_HASH));
+322:   });
+323: 
+324:   it('H4 Bob reads a hash only Alice holds -> 404', async () => {
+325:     expectHashNotFound(await byHash(mods, BOB, HA));
+326:   });
+327: 
+328:   it.each(TENANT_ADMINS_T1)('H5 ruling (a): %s reads the owner-less tenant-1 hash -> 200', async (_label, caller) => {
+329:     const r = await byHash(mods, caller, HO);
+330:     expect(r.status).toBe(200);
+331:     expect(r.body.credential.id).toBe(id.ownerlessT1);
+332:   });
+333: 
+334:   it.each([...TENANT_ADMINS_T1, ['Alice', ALICE] as [string, Principal], ['Bob', BOB] as [string, Principal]])(
+335:     'H6 tenant unknown: %s reads the pre-054 row\'s hash -> 404',
+336:     async (_label, caller) => {
+337:       expectHashNotFound(await byHash(mods, caller, HL));
+338:     },
+339:   );
+340: 
+341:   // --- the oracle ----------------------------------------------------------
+342:   it.each(ALL_CALLERS)('X1 %s: a row is in the list exactly when GET /:id answers 200 (KS-1116\'s rule)', async (_label, caller) => {
+343:     const listed = new Set(listedIds(await list(mods, caller)));
+344:     for (const rowId of Object.values(id)) {
+345:       const readable = (await byId(mods, caller, rowId)).status === 200;
+346:       expect({ rowId, listed: listed.has(rowId) }).toEqual({ rowId, listed: readable });
+347:     }
+348:   });
+349: });
+350: 
+351: // ===========================================================================
+352: // DB PATH: the owner travels with the row; the SQL carries the owner filter
+353: // ===========================================================================
+354: type ModelRow = { credential: Record<string, unknown>; created_by_user_id: string | null; created_by_tenant_id: string | null; created_at: number };
+355: 
+356: describe('KS-1683 DB path: the owner filter is in the SQL, and on every returned row', () => {
+357:   const D = (n: number) => `https://secuura.io/credentials/1683d000-0000-4000-8000-00000000000${n}`;
+358:   const HE = 'ks1683-' + 'e1'.repeat(28);
+359:   const HE2 = 'ks1683-' + 'e2'.repeat(28);
+360:   const HX = 'ks1683-' + 'e3'.repeat(28);
+361:   const row = (n: number, hash: string, u: string | null, t: string | null, type = 'PropertyDeed'): ModelRow => ({
+362:     credential: storedCredential(D(n), hash, type),
+363:     created_by_user_id: u,
+364:     created_by_tenant_id: t,
+365:     created_at: n,
+366:   });
+367:   // created_at ascends with n. On the shared hash Bob's row is NEWER, so an
+368:   // unbound newest-first lookup hands Bob's row to anyone who asks.
+369:   const ROWS: ModelRow[] = [
+370:     row(1, HS, ALICE.userId, T1),
+371:     row(2, HS, BOB.userId, T1),
+372:     row(3, HA, ALICE.userId, T1, 'DegreeCertificate'),
+373:     row(4, HB, BOB.userId, T1, 'DegreeCertificate'),
+374:     row(5, HO, null, T1),
+375:     row(6, HL, null, null),
+376:     // The empty-string trap. claim('') is "absent", so mayRead reads this row as
+377:     // OWNER-LESS with tenant 1 -> tenant 1's administrators may read it.
+378:     row(7, HE, '', T1),
+379:     // '' in both columns: owner-less with an UNKNOWN tenant -> nobody.
+380:     row(8, HE2, '', ''),
+381:     // Alice with tenant '': mayRead reads the tenant as absent, so it is Alice's
+382:     // TENANT-LESS row — readable by Alice-with-no-tenant, not by Alice-in-tenant-1.
+383:     row(9, HX, ALICE.userId, ''),
+384:   ];
+385:   const A1 = D(1), B2 = D(2), A3 = D(3), B4 = D(4), O5 = D(5), E7 = D(7), X9 = D(9);
+386: 
+387:   /** Off = a database whose SQL ignores the owner filter: what the fail-closed backstop must survive. */
+388:   let ignoreOwnerFilter = false;
+389: 
+390:   const nz = (v: string | null) => (v === '' ? null : v);
+391:   /** The owner filter, as the reader's three parameters ($1 userId, $2 tenantId, $3 owner-less-of-own-tenant) state it. */
+392:   function ownerFilter(sql: string, params: unknown[]): (r: ModelRow) => boolean {
+393:     const where = sql.split(/\bWHERE\b/)[1] ?? '';
+394:     if (ignoreOwnerFilter || !/created_by_user_id/.test(where)) return () => true;
+395:     const [u, t, a] = params;
+396:     if (typeof u !== 'string' || !(t === null || typeof t === 'string') || typeof a !== 'boolean') {
+397:       throw new Error(`pgModel: the reader parameters $1-$3 are not (string, string|null, boolean): ${JSON.stringify(params.slice(0, 3))}`);
+398:     }
+399:     return (r) => {
+400:       const ou = nz(r.created_by_user_id);
+401:       const ot = nz(r.created_by_tenant_id);
+402:       return (ou !== null && ou === u && ot === t) || (a && ou === null && ot !== null && ot === t);
+403:     };
+404:   }
+405: 
+406:   function pgModel(sql: string, params: unknown[] = []): Promise<{ rows: any[] }> {
+407:     const s = sql.replace(/\s+/g, ' ').trim();
+408:     if (/^SELECT 1 FROM vc_credentials_store LIMIT 0$/.test(s)) return Promise.resolve({ rows: [] });
+409:     if (/WHERE id = \$1/.test(s)) {
+410:       const r = ROWS.find((x) => x.credential.id === params[0]);
+411:       return Promise.resolve({ rows: r ? [r] : [] });
+412:     }
+413:     const keep = ownerFilter(s, params);
+414:     const newestFirst = [...ROWS].filter(keep).sort((x, y) => y.created_at - x.created_at);
+415:     if (/^SELECT COUNT\(\*\) AS count FROM vc_credentials_store\b/.test(s)) {
+416:       return Promise.resolve({ rows: [{ count: String(newestFirst.length) }] });
+417:     }
+418:     if (/documentHash/.test(s)) {
+419:       const hash = params[params.length - 1];
+420:       return Promise.resolve({ rows: newestFirst.filter((x) => (x.credential as any).credentialSubject.documentHash === hash).slice(0, 1) });
+421:     }
+422:     if (/ORDER BY created_at DESC, id DESC LIMIT \$\d+ OFFSET \$\d+$/.test(s)) {
+423:       const limit = Number(params[params.length - 2]);
+424:       const offset = Number(params[params.length - 1]);
+425:       return Promise.resolve({ rows: newestFirst.slice(offset, offset + limit) });
+426:     }
+427:     return Promise.reject(new Error(`pgModel: unrecognised statement: ${s}`));
+428:   }
+429: 
+430:   let mods: Mods;
+431: 
+432:   beforeAll(async () => {
+433:     dbMock.isDbAvailable.mockReturnValue(true);
+434:     mods = await freshModules(); // memory store empty: every answer below comes from the model
+435:   });
+436: 
+437:   beforeEach(() => {
+438:     ignoreOwnerFilter = false;
+439:     dbMock.isDbAvailable.mockReturnValue(true);
+440:     dbMock.query.mockReset();
+441:     dbMock.query.mockImplementation((sql: string, params?: unknown[]) => pgModel(String(sql), params ?? []));
+442:   });
+443: 
+444:   const statements = () => dbMock.query.mock.calls.map((c) => [String(c[0]).replace(/\s+/g, ' ').trim(), (c[1] ?? []) as unknown[]] as const);
+445: 
+446:   it('F1 fixtures: unbound, the model lists all nine rows and hands the shared hash to Bob', async () => {
+447:     await expect(pgModel('SELECT COUNT(*) AS count FROM vc_credentials_store', [])).resolves.toEqual({ rows: [{ count: '9' }] });
+448:     const first = await pgModel(`SELECT credential FROM vc_credentials_store WHERE credential->'credentialSubject'->>'documentHash' = $1 LIMIT 1`, [HS]);
+449:     expect(first.rows[0].credential.id).toBe(B2);
+450:     await expect(pgModel('SELECT nonsense', [])).rejects.toThrow(/unrecognised statement/);
+451:   });
+452: 
+453:   it('D0 CONTROL: Alice lists -> her two rows, total 2, from the DB', async () => {
+454:     const r = await list(mods, ALICE);
+455:     expect(listedIds(r)).toEqual(sorted([A1, A3]));
+456:     expect(r.body.pagination).toEqual({ total: 2, limit: 100, offset: 0, hasMore: false });
+457:   });
+458: 
+459:   it('D1 the COUNT and the page SELECT carry the SAME owner WHERE, with Alice as $1-$3', async () => {
+460:     await list(mods, ALICE);
+461:     const count = statements().find(([s]) => /COUNT\(\*\)/.test(s));
+462:     const page = statements().find(([s]) => /OFFSET/.test(s));
+463:     expect(count && page).toBeTruthy();
+464:     const whereOf = (s: string) => s.split(/\bWHERE\b/)[1]?.split(/\bORDER BY\b/)[0]?.trim() ?? '';
+465:     expect(count![0]).toMatch(/\bWHERE\b/);
+466:     expect(whereOf(count![0])).toMatch(/created_by_user_id/);
+467:     expect(whereOf(count![0])).toMatch(/created_by_tenant_id/);
+468:     expect(whereOf(page![0])).toBe(whereOf(count![0]));
+469:     expect(count![1].slice(0, 3)).toEqual([ALICE.userId, T1, false]);
+470:     expect(page![1].slice(0, 3)).toEqual([ALICE.userId, T1, false]);
+471:   });
+472: 
+473:   /**
+474:    * The model above applies its OWN statement of the owner filter whenever the WHERE names the owner
+475:    * columns, so it cannot tell a correct predicate from a subtly wrong one ('' not normalised, `=` where
+476:    * IS NOT DISTINCT FROM is needed). That equivalence — this exact text against mayRead, row for row —
+477:    * was measured against a real PostgreSQL (recorded on the KS-1683 pull request). S1 pins the text the
+478:    * measurement was made on: change the predicate and this goes red, and the measurement must be re-run.
+479:    */
+480:   const MEASURED_PREDICATE =
+481:     "((NULLIF(created_by_user_id, '') = $1::text AND NULLIF(created_by_tenant_id, '') IS NOT DISTINCT FROM $2::text)" +
+482:     " OR ($3::boolean AND NULLIF(created_by_user_id, '') IS NULL AND NULLIF(created_by_tenant_id, '') = $2::text))";
+483: 
+484:   it('S1 the list COUNT, the list page and the by-hash SELECT each carry exactly the measured predicate', async () => {
+485:     await list(mods, ALICE);
+486:     await byHash(mods, ALICE, HS);
+487:     const owned = statements().filter(([s]) => /COUNT\(\*\)|OFFSET|documentHash/.test(s));
+488:     expect(owned).toHaveLength(3);
+489:     for (const [s] of owned) expect(s).toContain(MEASURED_PREDICATE);
+490:   });
+491: 
+492:   it('D2 Bob lists -> his two rows, none of Alice\'s', async () => {
+493:     const r = await list(mods, BOB);
+494:     expect(listedIds(r)).toEqual(sorted([B2, B4]));
+495:     expect(r.body.pagination.total).toBe(2);
+496:   });
+497: 
+498:   it.each(THIRD_PARTIES)('D3 %s lists -> nothing, total 0', async (_label, caller) => {
+499:     const r = await list(mods, caller);
+500:     expect(listedIds(r)).toEqual([]);
+501:     expect(r.body.pagination).toEqual({ total: 0, limit: 100, offset: 0, hasMore: false });
+502:   });
+503: 
+504:   it('D4 a caller with no usable userId is answered without a query: nothing to filter for', async () => {
+505:     const r = await list(mods, { tenantId: T1, role: 'ORG_ADMIN' });
+506:     expect(listedIds(r)).toEqual([]);
+507:     expect(statements().filter(([s]) => /COUNT|OFFSET/.test(s))).toEqual([]);
+508:   });
+509: 
+510:   it('Q1 Alice, limit 1 offset 0 -> one row, total 2, hasMore TRUE', async () => {
+511:     const r = await list(mods, ALICE, { limit: '1', offset: '0' });
+512:     expect(listedIds(r)).toEqual([A3]); // newest first
+513:     expect(r.body.pagination).toEqual({ total: 2, limit: 1, offset: 0, hasMore: true });
+514:   });
+515: 
+516:   it('Q2 Alice, limit 1 offset 1 -> her other row, total 2, hasMore FALSE', async () => {
+517:     const r = await list(mods, ALICE, { limit: '1', offset: '1' });
+518:     expect(listedIds(r)).toEqual([A1]);
+519:     expect(r.body.pagination).toEqual({ total: 2, limit: 1, offset: 1, hasMore: false });
+520:   });
+521: 
+522:   /**
+523:    * KS-1731: the page SELECT must carry a TOTAL order. On `created_at DESC` alone, rows that share a
+524:    * `created_at` — or have none, since the column is nullable — can repeat or be skipped between
+525:    * pages: the tier-1 gate on pull request 1691 walked 180 pages on PGlite, 24 walks repeated or
+526:    * skipped a row, and an `id` tie-breaker took that to 0. `id` is the primary key, so
+527:    * `created_at DESC, id DESC` is a total order. G2 already pins that same order on the by-hash
+528:    * read; this is its counterpart for the list page, so the two cannot drift apart again.
+529:    *
+530:    * It asserts the SQL TEXT only. No database runs in this file, so it does not prove that real
+531:    * pages stop repeating — the gate's PGlite walk is that evidence, and it is not reproduced here.
+532:    */
+533:   it('Q3 the list page SELECT orders on a total order: created_at DESC, id DESC (KS-1731)', async () => {
+534:     await list(mods, ALICE);
+535:     const page = statements().find(([s]) => /OFFSET/.test(s));
+536:     expect(page).toBeTruthy();
+537:     expect(page![0]).toMatch(/ORDER BY created_at DESC, id DESC LIMIT \$\d+ OFFSET \$\d+$/);
+538:   });
+539: 
+540:   // --- the empty-string trap ----------------------------------------------
+541:   it.each(TENANT_ADMINS_T1)('E1 %s lists -> tenant 1\'s owner-less rows, INCLUDING the one whose owner column is \'\'', async (_label, caller) => {
+542:     const r = await list(mods, caller);
+543:     expect(listedIds(r)).toEqual(sorted([O5, E7]));
+544:     expect(r.body.pagination.total).toBe(2);
+545:   });
+546: 
+547:   it('E2 Alice with NO tenant lists -> her row stamped with tenant \'\' (absent, as mayRead reads it)', async () => {
+548:     const r = await list(mods, ALICE_NO_TENANT);
+549:     expect(listedIds(r)).toEqual([X9]);
+550:   });
+551: 
+552:   it('E3 Alice IN tenant 1 does not see the row stamped with tenant \'\'', async () => {
+553:     const r = await list(mods, ALICE);
+554:     expect(listedIds(r)).not.toContain(X9);
+555:   });
+556: 
+557:   // --- by-hash -------------------------------------------------------------
+558:   it('G1 two matches, mixed owners, Bob\'s NEWER: Alice -> 200 with HER row', async () => {
+559:     const r = await byHash(mods, ALICE, HS);
+560:     expect(r.status).toBe(200);
+561:     expect(r.body.credential.id).toBe(A1);
+562:   });
+563: 
+564:   it('G2 the by-hash SELECT carries the owner WHERE ($1-$3 = Bob), a total order, and LIMIT 1', async () => {
+565:     const r = await byHash(mods, BOB, HS);
+566:     expect(r.body.credential.id).toBe(B2);
+567:     const sel = statements().find(([s]) => /documentHash/.test(s));
+568:     expect(sel).toBeTruthy();
+569:     expect(sel![0]).toMatch(/WHERE .*created_by_user_id/);
+570:     expect(sel![0]).toMatch(/ORDER BY created_at DESC, id DESC LIMIT 1$/);
+571:     expect(sel![1]).toEqual([BOB.userId, T1, false, HS]);
+572:   });
+573: 
+574:   it.each(THIRD_PARTIES)('G3 %s reads the shared hash -> 404, byte-identical to an unknown hash', async (_label, caller) => {
+575:     const refused = await byHash(mods, caller, HS);
+576:     expectHashNotFound(refused);
+577:     expectByteIdentical(refused, await byHash(mods, caller, UNKNOWN_HASH));
+578:   });
+579: 
+580:   it.each(TENANT_ADMINS_T1)('G4 %s reads the \'\'-owner tenant-1 hash -> 200; the \'\'/\'\' hash -> 404', async (_label, caller) => {
+581:     const r = await byHash(mods, caller, HE);
+582:     expect(r.status).toBe(200);
+583:     expect(r.body.credential.id).toBe(E7);
+584:     expectHashNotFound(await byHash(mods, caller, HE2));
+585:   });
+586: 
+587:   // --- the fail-closed backstop -------------------------------------------
+588:   it('K1 a DB whose SQL ignores the filter: the list still serves Alice none of Bob\'s rows; total says what COUNT said', async () => {
+589:     ignoreOwnerFilter = true;
+590:     const r = await list(mods, ALICE);
+591:     expect(listedIds(r)).toEqual(sorted([A1, A3]));
+592:     // Documented behaviour: the backstop drops rows the SQL should not have
+593:     // returned, so `total` can over-claim. It serves fewer rows; it never leaks one.
+594:     expect(r.body.pagination.total).toBe(ROWS.length);
+595:   });
+596: 
+597:   it('K2 a DB whose SQL ignores the filter: by-hash hands Alice Bob\'s newer row -> refused 404, never served', async () => {
+598:     ignoreOwnerFilter = true;
+599:     expectHashNotFound(await byHash(mods, ALICE, HS));
+600:   });
+601: 
+602:   // --- the oracle ----------------------------------------------------------
+603:   it.each(ALL_CALLERS)('X2 %s: a DB row is in the list exactly when GET /:id answers 200 (KS-1116\'s rule)', async (_label, caller) => {
+604:     const listed = new Set(listedIds(await list(mods, caller)));
+605:     for (const r of ROWS) {
+606:       const rowId = r.credential.id as string;
+607:       const readable = (await byId(mods, caller, rowId)).status === 200;
+608:       expect({ rowId, listed: listed.has(rowId) }).toEqual({ rowId, listed: readable });
+609:     }
+610:   });
+611: });
+612: 
+613: // ===========================================================================
+614: // MEMORY FALLBACK: the DB is "available" but every query THROWS
+615: // ===========================================================================
+616: describe('KS-1683 memory fallback: the query throws and both routes are served from memory, still bound', () => {
+617:   let mods: Mods;
+618:   const A = 'https://secuura.io/credentials/1683f000-0000-4000-8000-000000000001';
+619:   const B = 'https://secuura.io/credentials/1683f000-0000-4000-8000-000000000002';
+620: 
+621:   beforeAll(async () => {
+622:     dbMock.isDbAvailable.mockReturnValue(true);
+623:     dbMock.query.mockReset();
+624:     dbMock.query.mockImplementation(() => Promise.reject(new Error('KS-1683: database query failed')));
+625:     mods = await freshModules();
+626:     // The INSERTs are refused, so both rows live in memory only: store()'s real catch.
+627:     await mods.repo.store(storedCredential(B, HS), { userId: BOB.userId, tenantId: T1 });
+628:     await mods.repo.store(storedCredential(A, HS), { userId: ALICE.userId, tenantId: T1 });
+629:   });
+630: 
+631:   beforeEach(() => {
+632:     dbMock.isDbAvailable.mockReturnValue(true);
+633:     dbMock.query.mockClear();
+634:   });
+635: 
+636:   it('T1 the list query throws: Bob is served from memory -> his row only, total 1', async () => {
+637:     const r = await list(mods, BOB);
+638:     expect(dbMock.query).toHaveBeenCalled(); // the DB path was tried, and threw
+639:     expect(listedIds(r)).toEqual([B]);
+640:     expect(r.body.pagination.total).toBe(1);
+641:   });
+642: 
+643:   it('T2 the by-hash query throws: Alice (Bob\'s stored first) is served HER row from memory', async () => {
+644:     const r = await byHash(mods, ALICE, HS);
+645:     expect(dbMock.query).toHaveBeenCalled();
+646:     expect(r.status).toBe(200);
+647:     expect(r.body.credential.id).toBe(A);
+648:   });
+649: 
+650:   it('T3 the by-hash query throws: a third party is refused 404 from memory', async () => {
+651:     expectHashNotFound(await byHash(mods, { ...ALICE, tenantId: T2 }, HS));
+652:   });
+653: });
+
+### FILE AT HEAD: Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+1: /**
+2:  * =============================================================================
+3:  * CREDENTIAL REPOSITORY
+4:  * =============================================================================
+5:  * Dual-write storage for Verifiable Credentials.
+6:  * Persists to PostgreSQL when available, with an in-memory Map as fallback.
+7:  *
+8:  * Uses a dedicated `vc_credentials_store` table to avoid foreign-key issues
+9:  * with the `verifiable_credentials` table whose `issuer_did` column references
+10:  * `did_documents`.
+11:  *
+12:  * The table is owned by the migration path — `migrations/001_initial-schema.sql`
+13:  * and `docker/init/03-service-tables.sql`. KS-1281 (#1231) removed the runtime
+14:  * `CREATE TABLE`: `ensureTable()` below performs an existence check and issues
+15:  * no DDL, because the runtime role has no CREATE on schema `public`.
+16:  * =============================================================================
+17:  */
+18: 
+19: import type { Request } from 'express';
+20: import { SecuuraCredential } from '@secuura/shared/vc';
+21: import { query, isDbAvailable } from '../db';
+22: import { logger } from '../utils/logger';
+23: import { RecordOwner, OWNERLESS, ownerFromRow, ownerOf, ownerlessRowReadable, mayRead } from '../ownership';
+24: 
+25: // ---------------------------------------------------------------------------
+26: // In-memory fallback
+27: // ---------------------------------------------------------------------------
+28: const memoryStore = new Map<string, SecuuraCredential>();
+29: // KS-1116: the creating principal of every credential in memoryStore, so the
+30: // GET /:id bound still holds when getRecordById() falls back to memory — and,
+31: // since KS-1683, the list and by-hash bounds (listReadable, getReadableByHash).
+32: const memoryOwners = new Map<string, RecordOwner>();
+33: 
+34: // ---------------------------------------------------------------------------
+35: // Table existence check (KS-1281: no runtime DDL; migration 001 owns the table)
+36: // ---------------------------------------------------------------------------
+37: let tableEnsured = false;
+38: 
+39: async function ensureTable(): Promise<void> {
+40:   if (tableEnsured) return;
+41:   try {
+42:     // KS-1281: migration 001 owns vc_credentials_store and the runtime role has no CREATE on schema public,
+43:     // so this is an existence check only - no DDL at runtime.
+44:     await query('SELECT 1 FROM vc_credentials_store LIMIT 0');
+45:     tableEnsured = true;
+46:   } catch (err: any) {
+47:     logger.warn('Could not ensure vc_credentials_store table', { error: err?.message });
+48:   }
+49: }
+50: 
+51: // ---------------------------------------------------------------------------
+52: // Public API
+53: // ---------------------------------------------------------------------------
+54: 
+55: /**
+56:  * Store a credential (dual-write: memory + DB).
+57:  *
+58:  * KS-1116: `owner` is the authenticated principal creating it (the route passes
+59:  * `ownerOf(req)`). Omitted, the row is stored OWNERLESS — which the GET /:id
+60:  * bound refuses, so a caller that forgets it fails closed, never open.
+61:  */
+62: export async function store(credential: SecuuraCredential, owner: RecordOwner = OWNERLESS): Promise<void> {
+63:   memoryStore.set(credential.id, credential);
+64:   // ON CONFLICT below never rewrites the owner columns, so neither does memory.
+65:   if (!memoryOwners.has(credential.id)) memoryOwners.set(credential.id, owner);
+66: 
+67:   if (!isDbAvailable()) {
+68:     // KS-1295: this return used to be SILENT. The caller is told the credential was
+69:     // stored, nothing reaches PostgreSQL, and on restart the credential is simply
+70:     // gone — with no line to grep, no counter and no artefact, so the event cannot
+71:     // be investigated after the fact. #1231 made the sibling table-absent path loud;
+72:     // this matches it. The id is named because it is the only handle that ties this
+73:     // line to the credential a later 404 or failed revoke will be asking about.
+74:     logger.warn('Credential stored in memory only — the database is unavailable', {
+75:       credentialId: credential.id,
+76:       reason: 'isDbAvailable() returned false',
+77:     });
+78:     return;
+79:   }
+80: 
+81:   try {
+82:     await ensureTable();
+83:     await query(
+84:       `INSERT INTO vc_credentials_store (id, credential, created_by_user_id, created_by_tenant_id)
+85:        VALUES ($1, $2, $3, $4)
+86:        ON CONFLICT (id) DO UPDATE SET credential = EXCLUDED.credential`,
+87:       [credential.id, JSON.stringify(credential), owner.userId, owner.tenantId],
+88:     );
+89:   } catch (err: any) {
+90:     logger.warn('DB write failed for credential — kept in memory', {
+91:       credentialId: credential.id,
+92:       error: err?.message,
+93:     });
+94:   }
+95: }
+96: 
+97: /**
+98:  * Retrieve a credential by its EXACT id only (KS-1121; the KS-1020 / #966 rule): a fragment resolves
+99:  * nothing. The LIKE fallback and the includes() scan are deleted.
+100:  */
+101: export async function getById(id: string): Promise<SecuuraCredential | undefined> {
+102:   // Try DB first
+103:   if (isDbAvailable()) {
+104:     try {
+105:       await ensureTable();
+106:       // Exact match
+107:       const result = await query<{ credential: SecuuraCredential }>(
+108:         'SELECT credential FROM vc_credentials_store WHERE id = $1',
+109:         [id],
+110:       );
+111:       if (result.rows.length > 0) return result.rows[0].credential;
+112:     } catch (err: any) {
+113:       logger.warn('DB read failed — falling back to memory', { error: err?.message });
+114:     }
+115:   }
+116: 
+117:   // Fall back to memory
+118:   const exact = memoryStore.get(id);
+119:   if (exact) return exact;
+120:   return undefined;
+121: }
+122: 
+123: /**
+124:  * KS-1116: the same EXACT lookup as getById, returning the row's creating
+125:  * principal with it, from whichever path found the row. Used by
+126:  * GET /api/credentials/:id, which decides on the record (ownership.ts).
+127:  *
+128:  * getById above is deliberately left as it was: the public verify path's
+129:  * revocation lookup (services/revocationResolvers.ts) calls it with no
+130:  * principal, by contract, and must not be bound.
+131:  */
+132: export interface CredentialRecord {
+133:   credential: SecuuraCredential;
+134:   owner: RecordOwner;
+135: }
+136: 
+137: export async function getRecordById(id: string): Promise<CredentialRecord | undefined> {
+138:   if (isDbAvailable()) {
+139:     try {
+140:       await ensureTable();
+141:       const result = await query<{
+142:         credential: SecuuraCredential;
+143:         created_by_user_id: string | null;
+144:         created_by_tenant_id: string | null;
+145:       }>(
+146:         'SELECT credential, created_by_user_id, created_by_tenant_id FROM vc_credentials_store WHERE id = $1',
+147:         [id],
+148:       );
+149:       if (result.rows.length > 0) {
+150:         const row = result.rows[0];
+151:         return { credential: row.credential, owner: ownerFromRow(row) };
+152:       }
+153:     } catch (err: any) {
+154:       logger.warn('DB read failed — falling back to memory', { error: err?.message });
+155:     }
+156:   }
+157: 
+158:   const exact = memoryStore.get(id);
+159:   if (exact) return { credential: exact, owner: memoryOwners.get(id) ?? OWNERLESS };
+160:   return undefined;
+161: }
+162: 
+163: /**
+164:  * Find a credential whose `credentialSubject.documentHash` matches.
+165:  *
+166:  * UNBOUND: it returns the first match, whoever created it. No route serves it —
+167:  * GET /api/credentials/by-hash/:hash calls getReadableByHash (KS-1683). It is kept
+168:  * because the repository's own cells (credentialRepo.test.ts) exercise it.
+169:  */
+170: export async function getByHash(hash: string): Promise<SecuuraCredential | undefined> {
+171:   if (isDbAvailable()) {
+172:     try {
+173:       await ensureTable();
+174:       const result = await query<{ credential: SecuuraCredential }>(
+175:         `SELECT credential FROM vc_credentials_store
+176:          WHERE credential->'credentialSubject'->>'documentHash' = $1
+177:          LIMIT 1`,
+178:         [hash],
+179:       );
+180:       if (result.rows.length > 0) return result.rows[0].credential;
+181:     } catch (err: any) {
+182:       logger.warn('DB hash lookup failed — falling back to memory', { error: err?.message });
+183:     }
+184:   }
+185: 
+186:   for (const value of memoryStore.values()) {
+187:     if (value.credentialSubject.documentHash === hash) return value;
+188:   }
+189:   return undefined;
+190: }
+191: 
+192: export interface ListOptions {
+193:   issuer?: string;
+194:   documentType?: string;
+195:   limit?: number;
+196:   offset?: number;
+197: }
+198: 
+199: /**
+200:  * List credentials with optional filters and pagination.
+201:  *
+202:  * UNBOUND: it lists every caller's credentials. No route serves it —
+203:  * GET /api/credentials calls listReadable (KS-1683). It is kept because the
+204:  * repository's own cells (credentialRepo.test.ts) exercise it.
+205:  */
+206: export async function list(options?: ListOptions): Promise<{ credentials: SecuuraCredential[]; total: number }> {
+207:   return selectList(options, null);
+208: }
+209: 
+210: // ---------------------------------------------------------------------------
+211: // KS-1683: the list and by-hash reads, bound by the KS-1116 rule
+212: // ---------------------------------------------------------------------------
+213: 
+214: /**
+215:  * The KS-1116 rule (ownership.ts `mayRead`) as a SQL condition on the owner
+216:  * columns, for the two reads that return MANY rows or pick ONE of several. There,
+217:  * deciding on each record afterwards cannot keep `total`, the page boundaries or
+218:  * "the first match" right, so the database has to apply the rule too.
+219:  *
+220:  * Always parameters $1-$3, in this order:
+221:  *   $1  the caller's userId — never null: a caller without one may read nothing,
+222:  *       and no query is run for it (readerParams)
+223:  *   $2  the caller's tenantId, or null when the token carries none
+224:  *   $3  may the caller read an OWNER-LESS row of its own tenant (ruling (a))
+225:  *
+226:  * Row for row it is mayRead:
+227:  *   - `NULLIF(col, '')` is claim(): '' reads as absent, as ownerFromRow reads it.
+228:  *   - An owned row: the same userId and the same tenant. IS NOT DISTINCT FROM, so
+229:  *     a tenant-less caller matches a tenant-less row — mayRead's
+230:  *     `owner.tenantId === claim(user?.tenantId)` with null === null.
+231:  *   - An owner-less row: ruling (a) can only ever admit a row whose tenant IS the
+232:  *     caller's tenant, so ownerlessRowReadable(req, <the caller's tenant>) decides
+233:  *     this branch for every row it could admit, and `= $2` refuses the rest.
+234:  *
+235:  * mayRead still runs on every row this returns, on both paths — a fail-closed
+236:  * backstop. If the SQL and the rule ever disagreed, the row is dropped and never
+237:  * served; `total`, counted by the SQL, would then over-claim. It never under-protects.
+238:  */
+239: const READABLE_BY_CALLER =
+240:   `((NULLIF(created_by_user_id, '') = $1::text` +
+241:   ` AND NULLIF(created_by_tenant_id, '') IS NOT DISTINCT FROM $2::text)` +
+242:   ` OR ($3::boolean AND NULLIF(created_by_user_id, '') IS NULL` +
+243:   ` AND NULLIF(created_by_tenant_id, '') = $2::text))`;
+244: 
+245: /** READABLE_BY_CALLER's $1-$3 for this caller, or null when it may read nothing at all. */
+246: function readerParams(reader: Request): [string, string | null, boolean] | null {
+247:   // ownerOf reads the caller's claims exactly as mayRead does (claim()).
+248:   const { userId, tenantId } = ownerOf(reader);
+249:   if (userId === null) return null;
+250:   return [userId, tenantId, tenantId !== null && ownerlessRowReadable(reader, tenantId)];
+251: }
+252: 
+253: /**
+254:  * GET /api/credentials: the credentials the caller may read (ownership.ts
+255:  * `mayRead`), filtered and paginated AFTER the owner bound — so `total` and the
+256:  * page are the caller's own, on the DB path and on the in-memory fallback alike.
+257:  */
+258: export async function listReadable(
+259:   reader: Request,
+260:   options?: ListOptions,
+261: ): Promise<{ credentials: SecuuraCredential[]; total: number }> {
+262:   return selectList(options, reader);
+263: }
+264: 
+265: /**
+266:  * GET /api/credentials/by-hash/:hash: the newest credential with this document
+267:  * hash that the caller may read — not the first match. Several callers can hold
+268:  * credentials over the same document, and an unbound `LIMIT 1` would let any of
+269:  * theirs stand in for (or hide) the caller's own.
+270:  */
+271: export async function getReadableByHash(reader: Request, hash: string): Promise<SecuuraCredential | undefined> {
+272:   const params = readerParams(reader);
+273:   if (params === null) return undefined;
+274: 
+275:   if (isDbAvailable()) {
+276:     try {
+277:       await ensureTable();
+278:       const result = await query<{
+279:         credential: SecuuraCredential;
+280:         created_by_user_id: string | null;
+281:         created_by_tenant_id: string | null;
+282:       }>(
+283:         `SELECT credential, created_by_user_id, created_by_tenant_id FROM vc_credentials_store
+284:          WHERE ${READABLE_BY_CALLER}
+285:            AND credential->'credentialSubject'->>'documentHash' = $4
+286:          ORDER BY created_at DESC, id DESC
+287:          LIMIT 1`,
+288:         [...params, hash],
+289:       );
+290:       if (result.rows.length > 0) {
+291:         const row = result.rows[0];
+292:         if (mayRead(reader, ownerFromRow(row))) return row.credential;
+293:         logger.warn('KS-1683: the by-hash owner filter returned a row mayRead refuses — not served');
+294:         return undefined;
+295:       }
+296:     } catch (err: any) {
+297:       logger.warn('DB hash lookup failed — falling back to memory', { error: err?.message });
+298:     }
+299:   }
+300: 
+301:   for (const [id, value] of memoryStore.entries()) {
+302:     if (value.credentialSubject.documentHash === hash && mayRead(reader, memoryOwners.get(id) ?? OWNERLESS)) {
+303:       return value;
+304:     }
+305:   }
+306:   return undefined;
+307: }
+308: 
+309: /** The list, bound by `reader` when one is given (listReadable) and unbound when null (list). */
+310: async function selectList(
+311:   options: ListOptions | undefined,
+312:   reader: Request | null,
+313: ): Promise<{ credentials: SecuuraCredential[]; total: number }> {
+314:   const limit = options?.limit ?? 100;
+315:   const offset = options?.offset ?? 0;
+316: 
+317:   let ownerParams: [string, string | null, boolean] | null = null;
+318:   if (reader) {
+319:     ownerParams = readerParams(reader);
+320:     if (ownerParams === null) return { credentials: [], total: 0 };
+321:   }
+322: 
+323:   if (isDbAvailable()) {
+324:     try {
+325:       await ensureTable();
+326: 
+327:       const conditions: string[] = [];
+328:       const params: unknown[] = [];
+329:       let idx = 1;
+330: 
+331:       // KS-1683: the owner bound is a WHERE condition, so the COUNT below and the
+332:       // page share it — `total` and `hasMore` are counted after the filter.
+333:       if (ownerParams) {
+334:         conditions.push(READABLE_BY_CALLER);
+335:         params.push(...ownerParams);
+336:         idx = 4;
+337:       }
+338: 
+339:       if (options?.issuer) {
+340:         conditions.push(`credential->'issuer'->>'id' = $${idx++}`);
+341:         params.push(options.issuer);
+342:       }
+343:       if (options?.documentType) {
+344:         conditions.push(`credential->'type' @> $${idx++}::jsonb`);
+345:         params.push(JSON.stringify([options.documentType]));
+346:       }
+347: 
+348:       const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+349: 
+350:       const countResult = await query<{ count: string }>(
+351:         `SELECT COUNT(*) AS count FROM vc_credentials_store ${where}`,
+352:         params,
+353:       );
+354:       const total = parseInt(countResult.rows[0].count, 10);
+355: 
+356:       params.push(limit);
+357:       params.push(offset);
+358:       const columns = reader ? 'credential, created_by_user_id, created_by_tenant_id' : 'credential';
+359:       const dataResult = await query<{
+360:         credential: SecuuraCredential;
+361:         created_by_user_id?: string | null;
+362:         created_by_tenant_id?: string | null;
+363:       }>(
+364:         `SELECT ${columns} FROM vc_credentials_store ${where}
+365:          ORDER BY created_at DESC, id DESC LIMIT $${idx++} OFFSET $${idx++}`,
+366:         params,
+367:       );
+368: 
+369:       let rows = dataResult.rows;
+370:       if (reader) {
+371:         // The fail-closed backstop (see READABLE_BY_CALLER).
+372:         const readable = rows.filter((r) => mayRead(reader, ownerFromRow(r)));
+373:         if (readable.length !== rows.length) {
+374:           logger.warn('KS-1683: the list owner filter returned rows mayRead refuses — not served', {
+375:             dropped: rows.length - readable.length,
+376:           });
+377:         }
+378:         rows = readable;
+379:       }
+380: 
+381:       return {
+382:         credentials: rows.map((r) => r.credential),
+383:         total,
+384:       };
+385:     } catch (err: any) {
+386:       logger.warn('DB list failed — falling back to memory', { error: err?.message });
+387:     }
+388:   }
+389: 
+390:   // Memory fallback — bound by the same rule, on the record (KS-1683)
+391:   let credentials = Array.from(memoryStore.entries())
+392:     .filter(([id]) => !reader || mayRead(reader, memoryOwners.get(id) ?? OWNERLESS))
+393:     .map(([, credential]) => credential);
+394: 
+395:   if (options?.issuer) {
+396:     credentials = credentials.filter((c) => {
+397:       const issuerId = typeof c.issuer === 'string' ? c.issuer : c.issuer.id;
+398:       return issuerId === options.issuer;
+399:     });
+400:   }
+401:   if (options?.documentType) {
+402:     credentials = credentials.filter((c) => c.type.includes(options.documentType as string));
+403:   }
+404: 
+405:   const total = credentials.length;
+406:   const paged = credentials.slice(offset, offset + limit);
+407:   return { credentials: paged, total };
+408: }
+409: 
+410: /**
+411:  * Load all credentials from DB into the in-memory store on startup.
+412:  */
+413: export async function loadFromDb(): Promise<void> {
+414:   if (!isDbAvailable()) return;
+415:   try {
+416:     await ensureTable();
+417:     const result = await query<{
+418:       id: string;
+419:       credential: SecuuraCredential;
+420:       created_by_user_id: string | null;
+421:       created_by_tenant_id: string | null;
+422:     }>(
+423:       'SELECT id, credential, created_by_user_id, created_by_tenant_id FROM vc_credentials_store ORDER BY created_at DESC',
+424:     );
+425:     for (const row of result.rows) {
+426:       memoryStore.set(row.id, row.credential);
+427:       memoryOwners.set(row.id, ownerFromRow(row));
+428:     }
+429:     logger.info('credentialRepo loaded credentials from DB', { count: result.rows.length });
+430:   } catch (err) {
+431:     logger.warn('credentialRepo.loadFromDb failed — starting with empty store', {
+432:       error: err instanceof Error ? err.message : String(err),
+433:     });
+434:   }
+435: }
+436: 
+437: /**
+438:  * Revoke a credential by updating its status.
+439:  */
+440: export async function revoke(
+441:   id: string,
+442:   reason?: string,
+443: ): Promise<SecuuraCredential | undefined> {
+444:   const credential = await getById(id);
+445:   if (!credential) return undefined;
+446: 
+447:   const revokedCredential = {
+448:     ...credential,
+449:     credentialStatus: {
+450:       ...credential.credentialStatus,
+451:       revoked: true,
+452:       revokedAt: new Date().toISOString(),
+453:       revocationReason: reason,
+454:     },
+455:   } as SecuuraCredential;
+456: 
+457:   // Update memory
+458:   memoryStore.set(credential.id, revokedCredential);
+459: 
+460:   // Update DB
+461:   if (isDbAvailable()) {
+462:     try {
+463:       await ensureTable();
+464:       await query(
+465:         `UPDATE vc_credentials_store SET credential = $1 WHERE id = $2`,
+466:         [JSON.stringify(revokedCredential), credential.id],
+467:       );
+468:     } catch (err: any) {
+469:       logger.warn('DB revoke update failed — kept in memory', { error: err?.message });
+470:     }
+471:   }
+472: 
+473:   return revokedCredential;
+474: }
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1712,
+ "head_sha": "7788af2aa59183a5f5557999a6a057de89137177",
+ "pr_tip_now": "7788af2aa59183a5f5557999a6a057de89137177",
+ "head_mode": "tip",
+ "merge_base": "444813665a09a5f27b7953009c94ee9fe57beb6b",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts",
+   "added": "19",
+   "deleted": "1"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts",
+   "added": "1",
+   "deleted": "1"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts"
+ ],
+ "product_files": [
+  "Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts"
+ ],
+ "diff_stat": {
+  "files": 2,
+  "added": 20,
+  "deleted": 2
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 113,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "T_FOUND\",\n  \"statusCode\": 404\n}\n\n \u2713 src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts (113 tests) 404ms\n\n Test Files  1 passed (1)\n      Tests  113 passed (113)\n   Start at  22:06:46\n   Duration  567ms (transform 85ms, setup 0ms, import 60ms, tests 404ms, environment 0ms)"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts",
+   "rc": 1,
+   "ok": false,
+   "passed": 99,
+   "failed": 14,
+   "count_unparsed": false,
+   "tail": ".id as string;\n    607|       const readable = (await byId(mods, caller, rowId)).status === 20\u2026\n    608|       expect({ rowId, listed: listed.has(rowId) }).toEqual({ rowId, li\u2026\n       |                                                    ^\n    609|     }\n    610|   });\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[12/14]\u23af"
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 113,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 0,
+  "files_failed": 1,
+  "passed": 99,
+  "failed": 14,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 6
+}

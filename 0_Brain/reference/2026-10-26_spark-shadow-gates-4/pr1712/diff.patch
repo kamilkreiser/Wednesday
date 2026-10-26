@@ -1,0 +1,51 @@
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
+index 05f345bfc..00d8ab4aa 100644
+--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
+@@ -419,7 +419,7 @@ describe('KS-1683 DB path: the owner filter is in the SQL, and on every returned
+       const hash = params[params.length - 1];
+       return Promise.resolve({ rows: newestFirst.filter((x) => (x.credential as any).credentialSubject.documentHash === hash).slice(0, 1) });
+     }
+-    if (/ORDER BY created_at DESC LIMIT \$\d+ OFFSET \$\d+$/.test(s)) {
++    if (/ORDER BY created_at DESC, id DESC LIMIT \$\d+ OFFSET \$\d+$/.test(s)) {
+       const limit = Number(params[params.length - 2]);
+       const offset = Number(params[params.length - 1]);
+       return Promise.resolve({ rows: newestFirst.slice(offset, offset + limit) });
+@@ -519,6 +519,24 @@ describe('KS-1683 DB path: the owner filter is in the SQL, and on every returned
+     expect(r.body.pagination).toEqual({ total: 2, limit: 1, offset: 1, hasMore: false });
+   });
+ 
++  /**
++   * KS-1731: the page SELECT must carry a TOTAL order. On `created_at DESC` alone, rows that share a
++   * `created_at` — or have none, since the column is nullable — can repeat or be skipped between
++   * pages: the tier-1 gate on pull request 1691 walked 180 pages on PGlite, 24 walks repeated or
++   * skipped a row, and an `id` tie-breaker took that to 0. `id` is the primary key, so
++   * `created_at DESC, id DESC` is a total order. G2 already pins that same order on the by-hash
++   * read; this is its counterpart for the list page, so the two cannot drift apart again.
++   *
++   * It asserts the SQL TEXT only. No database runs in this file, so it does not prove that real
++   * pages stop repeating — the gate's PGlite walk is that evidence, and it is not reproduced here.
++   */
++  it('Q3 the list page SELECT orders on a total order: created_at DESC, id DESC (KS-1731)', async () => {
++    await list(mods, ALICE);
++    const page = statements().find(([s]) => /OFFSET/.test(s));
++    expect(page).toBeTruthy();
++    expect(page![0]).toMatch(/ORDER BY created_at DESC, id DESC LIMIT \$\d+ OFFSET \$\d+$/);
++  });
++
+   // --- the empty-string trap ----------------------------------------------
+   it.each(TENANT_ADMINS_T1)('E1 %s lists -> tenant 1\'s owner-less rows, INCLUDING the one whose owner column is \'\'', async (_label, caller) => {
+     const r = await list(mods, caller);
+diff --git a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+index df57204c8..b353cafe8 100644
+--- a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+@@ -362,7 +362,7 @@ async function selectList(
+         created_by_tenant_id?: string | null;
+       }>(
+         `SELECT ${columns} FROM vc_credentials_store ${where}
+-         ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx++}`,
++         ORDER BY created_at DESC, id DESC LIMIT $${idx++} OFFSET $${idx++}`,
+         params,
+       );
+ 

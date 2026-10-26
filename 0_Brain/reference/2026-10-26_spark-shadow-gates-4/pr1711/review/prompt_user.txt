@@ -1,0 +1,620 @@
+===== TICKET =====
+KS-1735 — generated_guard.sh: a failed restore copy is unchecked and the stash is then deleted, so the only copy is lost without a word [In Progress]
+
+## BLUF
+
+`systemTest/__tests__/support/generated_guard.sh` is the shared copy of the `generated/` snapshot-and-restore guard, and its `generated_guard_restore()` has the two defects the two inline copies already had fixed. **The restore copy is unchecked, and the stash is then deleted, so a failed restore loses the only copy and says nothing.** Found while working KS-1714. **Read from source at develop** `28e2d27de337`**; not run.**
+
+## Where (develop `28e2d27de337`)
+
+* `:40` `cp -R "$GENERATED_GUARD_STASH/." "$GENERATED_GUARD_GEN/" 2>/dev/null` has no check and prints nothing on failure.
+* `:42` `rm -rf "$GENERATED_GUARD_TMP"` runs straight after. The stash is `$GENERATED_GUARD_TMP/stash`, so it goes with it.
+* Net effect if the copy at `:40` fails: `generated/` is left empty (or partial), no message, the only copy deleted, and the suite exits with its own status.
+* The snapshot-failed branch (`:28-34`) prints its message and then `rm -rf "$GENERATED_GUARD_TMP"` at `:33`, which deletes the partial stash too. That branch is a different situation (a guard that could not save does not restore), but the partial copy is thrown away.
+* One suite sources it: `systemTest/__tests__/bootstrap_login_diagnosis.test.sh` (`:46`). `systemTest/CLAUDE.md:1475` points the next suite that drives the DEGRADED path at it.
+
+## Why it matters
+
+The two inline copies, `pre_suite.test.sh` and `quarantine_call_sites.test.sh`, were hardened for exactly these two things under KS 1027 (item 1: the restore copy was unchecked; item 2: the refusal path deleted the partial stash). This file was written under KS 1167 as "the same guard for suites written after them" and carries the KS 992 snapshot check only. KS-1714 then made the inline copies exit non-zero after a failed restore; this file still has no failed-restore branch at all.
+
+## It is the third copy
+
+Both inline suites carry a note recording why the guard is duplicated rather than shared: a sourced helper makes the guard depend on a file that could itself be missing or unreadable, and "if a THIRD site ever appears, that is the trigger to revisit". This file is that third site.
+
+## Two options, not chosen here
+
+**A. Fix in place.** Check the restore copy; on failure print the message and keep the stash (`KS 1027` items 1 and 2 as the inline copies have them); exit non-zero, as KS-1714 does for the two inline copies. Smallest change; keeps three copies to keep in step.
+
+**B. Extract one shared helper** and source it from all three. Removes the drift, at the cost the inline suites' note names: the guard then depends on a sourced file.
+
+Either way the cell is the instrument from the KS-1714 PR: a fake `cp` first on `PATH` that fails only when the destination ends in `/generated/` (control: it copies to any other destination), a sentinel file in `generated/`, then read the suite's exit code and whether the stash survives. **Expected from the source, unmeasured:** exit status is the suite's own, `generated/` empty, no stash.
+
+## Search before filing (2026-10-26)
+
+Linear filter over title, description and comment bodies, all states, archived included. Terms: `generated_guard` (the path stem and the variable names), `support/generated_guard.sh`, `generated_guard_restore`. Result: **1 issue, KS-1201** (Done, archived), for `generated_guard` and `generated_guard_restore`; 0 for the full path. I read KS-1201: it is a different defect (the login-stub process leak in `bootstrap_login_diagnosis.test.sh`) and names `generated_guard_restore` only on a quoted `trap` line, so it does not cover this. Positive controls on the same instrument: `pre_suite.test.sh` 14 issues, `quarantine_call_sites` 13 issues. Zero control: a nonsense token, 0.
+
+Priority Medium is the filer's read (a test suite can silently lose a developer's local `generated/` contents); adjust as you see fit.
+
+Related: KS-1714.
+
+===== DIFF (merge-base..head) =====
+diff --git a/systemTest/__tests__/generated_guard_restore.test.sh b/systemTest/__tests__/generated_guard_restore.test.sh
+new file mode 100755
+index 000000000..6ead09dad
+--- /dev/null
++++ b/systemTest/__tests__/generated_guard_restore.test.sh
+@@ -0,0 +1,189 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for support/generated_guard.sh's RESTORE path (KS-1735)
++# =============================================================================
++# The defect: `generated_guard_restore()` copied the stash back with an
++# unchecked `cp` and then `rm -rf`'d the scratch directory regardless, so a
++# failed restore left generated/ empty or partial, deleted the ONLY copy, said
++# nothing, and did not move the suite's exit status. The two inline copies of
++# this guard (`pre_suite.test.sh`, `quarantine_call_sites.test.sh`) were
++# hardened for exactly this under KS 1027 (items 1 and 2) and KS 1714; this
++# file was written under KS 1167 as "the same guard for suites written after
++# them" and carried the KS 992 snapshot check only.
++#
++# HOW: the guard is a sourced file that installs an EXIT trap, so each cell
++# drives it in a CHILD bash process (a throwaway driver that sources the guard
++# and exits with a chosen status) and then reads three things the parent can
++# see: the child's exit status, what it wrote to stderr, and whether the stash
++# directory still holds the sentinel.
++#
++# $FIXTURES is a parameter of the guard, so every cell points it at its OWN
++# throwaway directory. No cell reads or writes the repo's real
++# systemTest/fixtures/generated.
++#
++# The instrument is a fake `cp` first on PATH that fails ONLY for a chosen
++# destination suffix and execs the real `cp` for everything else. Cell 1 is its
++# positive control: a guard that cannot be made to fail proves nothing about
++# the branch that handles failure.
++#
++# Usage: bash systemTest/__tests__/generated_guard_restore.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++GUARD="$HERE/support/generated_guard.sh"
++
++PASS=0; FAIL=0
++ok()  { PASS=$((PASS+1)); printf '  ok   %s\n' "$1"; }
++bad() { FAIL=$((FAIL+1)); printf '  FAIL %s\n     %s\n' "$1" "${2:-}"; }
++
++[ -f "$GUARD" ] || { printf 'generated_guard_restore.test.sh: cannot find %s\n' "$GUARD" >&2; exit 2; }
++
++# A private scratch root, so a parallel suite's cleanup cannot reach these and
++# this suite cannot reach anyone else's.
++WORK="$(mktemp -d "/tmp/ks1735.XXXXXX")" || exit 2
++cleanup() { rm -rf "$WORK"; }
++trap cleanup EXIT
++
++# --- the instrument ----------------------------------------------------------
++# $1 = destination suffix to refuse (e.g. "/generated/" or "/stash/")
++make_fake_cp() {
++  mkdir -p "$WORK/fakebin"
++  cat > "$WORK/fakebin/cp" <<FAKE
++#!/bin/bash
++# KS-1735 instrument: fail ONLY when the destination (last argument) ends in $1.
++for last; do :; done
++echo "cp \$*" >> "$WORK/cp-calls.log"
++case "\$last" in
++  *$1) echo "fake cp: refusing a copy into \$last" >&2; exit 1 ;;
++esac
++exec /bin/cp "\$@"
++FAKE
++  chmod +x "$WORK/fakebin/cp"
++}
++
++# Drives the guard in a child process.
++#   $1 = label (its own fixtures dir + output files)
++#   $2 = the status the driven suite itself exits with
++#   $3 = "fake" to put the instrument first on PATH, anything else for a clean run
++# Sets: DRV_RC, DRV_OUT (file), DRV_STASH (the guard's own stash path)
++drive() {
++  DRV_LABEL="$1"
++  mkdir -p "$WORK/$DRV_LABEL/fixtures/generated"
++  echo "sentinel $DRV_LABEL" > "$WORK/$DRV_LABEL/fixtures/generated/SENTINEL.txt"
++  cat > "$WORK/$DRV_LABEL/driver.sh" <<DRIVER
++#!/usr/bin/env bash
++set -uo pipefail
++FIXTURES="$WORK/$DRV_LABEL/fixtures"
++. "$GUARD"
++# Report the guard's own scratch paths so the parent can check stash survival
++# WITHOUT depending on any message the guard prints — the unfixed guard prints
++# none, and a cell that read the path out of the message could not go red.
++printf '%s\n' "\$GENERATED_GUARD_STASH" > "$WORK/$DRV_LABEL/stash-path"
++exit $2
++DRIVER
++  chmod +x "$WORK/$DRV_LABEL/driver.sh"
++  : > "$WORK/cp-calls.log"
++  DRV_OUT="$WORK/$DRV_LABEL/out.txt"
++  if [ "${3:-clean}" = fake ]; then
++    PATH="$WORK/fakebin:$PATH" /usr/bin/env bash "$WORK/$DRV_LABEL/driver.sh" > "$DRV_OUT" 2>&1
++  else
++    /usr/bin/env bash "$WORK/$DRV_LABEL/driver.sh" > "$DRV_OUT" 2>&1
++  fi
++  DRV_RC=$?
++  DRV_STASH="$(cat "$WORK/$DRV_LABEL/stash-path" 2>/dev/null)"
++  DRV_GEN="$WORK/$DRV_LABEL/fixtures/generated"
++}
++
++echo "== CONTROL: the instrument fails the chosen destination and ONLY that one =="
++make_fake_cp "/generated/"
++mkdir -p "$WORK/ctl/a" "$WORK/ctl/generated"
++echo hi > "$WORK/ctl/a/f.txt"
++if PATH="$WORK/fakebin:$PATH" cp -R "$WORK/ctl/a/." "$WORK/ctl/generated/" 2>/dev/null; then
++  bad "the fake cp REFUSES a copy into a /generated/ destination" "it succeeded — the instrument is inert and every cell below is meaningless"
++else
++  ok "the fake cp REFUSES a copy into a /generated/ destination"
++fi
++mkdir -p "$WORK/ctl/elsewhere"
++if PATH="$WORK/fakebin:$PATH" cp -R "$WORK/ctl/a/." "$WORK/ctl/elsewhere/" 2>/dev/null \
++   && [ -f "$WORK/ctl/elsewhere/f.txt" ]; then
++  ok "the fake cp passes every OTHER destination through to the real cp"
++else
++  bad "the fake cp passes every OTHER destination through to the real cp" "it refused one it should not have — the instrument is too broad"
++fi
++
++echo "== CONTROL: a clean run restores generated/, removes the stash, keeps rc 0 =="
++drive clean0 0 clean
++[ "$DRV_RC" -eq 0 ] && ok "a clean run exits 0" || bad "a clean run exits 0" "rc=$DRV_RC"
++if [ -f "$DRV_GEN/SENTINEL.txt" ]; then ok "a clean run puts the sentinel back in generated/"; else bad "a clean run puts the sentinel back in generated/" "generated/ holds: [$(ls "$DRV_GEN" 2>/dev/null | tr '\n' ' ')]"; fi
++if [ -n "$DRV_STASH" ] && [ ! -d "$DRV_STASH" ]; then ok "a clean run removes the scratch directory"; else bad "a clean run removes the scratch directory" "stash=[$DRV_STASH] still present"; fi
++
++echo "== KS-1735: a FAILED restore is REPORTED on stderr =="
++make_fake_cp "/generated/"
++drive failrep 0 fake
++if [ "$(grep -c '/generated/$' "$WORK/cp-calls.log")" -ge 1 ]; then
++  ok "the instrument actually intercepted the restore copy"
++else
++  bad "the instrument actually intercepted the restore copy" "no cp call into a /generated/ destination was logged — the cells below would pass for the wrong reason"
++fi
++if grep -q 'restoring .* FAILED' "$DRV_OUT"; then
++  ok "a failed restore says so (names the directory and that it may be EMPTY)"
++else
++  bad "a failed restore says so (names the directory and that it may be EMPTY)" "stderr was silent — this is the KS-1735 defect; output: [$(tr '\n' '|' < "$DRV_OUT")]"
++fi
++
++echo "== KS-1735: a FAILED restore KEEPS the stash — it is the only copy left =="
++if [ -n "$DRV_STASH" ] && [ -f "$DRV_STASH/SENTINEL.txt" ]; then
++  ok "the stash and its contents survive a failed restore"
++else
++  bad "the stash and its contents survive a failed restore" "stash=[$DRV_STASH] present=$(test -d "$DRV_STASH" && echo yes || echo NO) — the only copy was deleted, this is the KS-1735 defect"
++fi
++if grep -q 'KEPT at' "$DRV_OUT"; then
++  ok "the message names where the kept stash is"
++else
++  bad "the message names where the kept stash is" "no 'KEPT at' line — an operator is told nothing about where the copy went"
++fi
++
++echo "== KS-1735: a failed restore moves a PASSING suite's exit status off 0 =="
++if [ "$DRV_RC" -ne 0 ]; then
++  ok "a suite that exited 0 reports non-zero when its restore failed (rc=$DRV_RC)"
++else
++  bad "a suite that exited 0 reports non-zero when its restore failed" "rc=0 — the runner scores this suite as passed while the developer's generated/ is gone"
++fi
++
++echo "== KS-1735: a FAILING suite keeps its OWN status, not a flattened 1 =="
++make_fake_cp "/generated/"
++drive failrc 3 fake
++if [ "$DRV_RC" -eq 3 ]; then
++  ok "a suite that exited 3 still reports 3 after a failed restore"
++else
++  bad "a suite that exited 3 still reports 3 after a failed restore" "rc=$DRV_RC — the suite's own failure was overwritten"
++fi
++
++echo "== KS-1027 item 2: a failed SNAPSHOT keeps its partial stash too =="
++make_fake_cp "/stash/"
++drive snapfail 0 fake
++if [ "$(grep -c '/stash/$' "$WORK/cp-calls.log")" -ge 1 ]; then
++  ok "the instrument intercepted the snapshot copy"
++else
++  bad "the instrument intercepted the snapshot copy" "no cp call into a /stash/ destination was logged"
++fi
++if grep -q 'KS-992' "$DRV_OUT"; then
++  ok "a failed snapshot refuses to restore and says so (KS-992)"
++else
++  bad "a failed snapshot refuses to restore and says so (KS-992)" "output: [$(tr '\n' '|' < "$DRV_OUT")]"
++fi
++if [ -n "$DRV_STASH" ] && [ -d "$DRV_STASH" ]; then
++  ok "the PARTIAL stash survives a failed snapshot"
++else
++  bad "the PARTIAL stash survives a failed snapshot" "stash=[$DRV_STASH] was deleted — KS-1027 item 2"
++fi
++if [ -f "$DRV_GEN/SENTINEL.txt" ]; then
++  ok "a failed snapshot leaves generated/ exactly as the run left it"
++else
++  bad "a failed snapshot leaves generated/ exactly as the run left it" "the guard deleted it after failing to save it"
++fi
++
++printf 'generated_guard_restore.test.sh: %d passed, %d failed\n' "$PASS" "$FAIL"
++[ "$FAIL" -eq 0 ]
+diff --git a/systemTest/__tests__/support/generated_guard.sh b/systemTest/__tests__/support/generated_guard.sh
+index 5529a5d8f..5c9b46a11 100644
+--- a/systemTest/__tests__/support/generated_guard.sh
++++ b/systemTest/__tests__/support/generated_guard.sh
+@@ -11,6 +11,14 @@
+ # whether a copy is actually held; an ABSENT generated/ is fine (nothing to lose); only a cp
+ # that was attempted and FAILED flips it, and then restore refuses to delete and says so.
+ #
++# KS-1735: restore's OWN cp was still unchecked, and `rm -rf $GENERATED_GUARD_TMP` ran either
++# way — so a failed restore left generated/ empty or partial, deleted the only copy, said
++# nothing, and left the suite's exit status alone. Both failure paths now KEEP the scratch
++# directory and name it, and a failed restore exits non-zero (the suite's own status when it had
++# one). The cost, as the inline copies accepted under KS 1027: on a failure the scratch directory
++# survives the run, and the sourcing suite's temp files survive with it. That is the trade — a
++# leaked temp directory is recoverable, a deleted snapshot is not.
++#
+ # Requires: $FIXTURES (absolute path to systemTest/fixtures). Provides: $GENERATED_GUARD_TMP,
+ # a scratch directory removed on exit, for the sourcing suite's own temp files.
+ 
+@@ -26,18 +34,24 @@ if [ -d "$GENERATED_GUARD_GEN" ]; then
+ fi
+ 
+ generated_guard_restore() {
++  local rc=$?
+   if [ "$generated_guard_snapshot_ok" -ne 1 ]; then
+     printf '  !! KS-992: the snapshot of %s FAILED, so this suite will not restore it.\n' "$GENERATED_GUARD_GEN" >&2
+     printf '  !! generated/ is being left exactly as the run left it — a guard that\n' >&2
+     printf '  !! cannot restore must not delete. Check it by hand.\n' >&2
+-    rm -rf "$GENERATED_GUARD_TMP"
++    printf '  !! KS-1027: the partial snapshot is KEPT at: %s\n' "$GENERATED_GUARD_STASH" >&2
+     return
+   fi
+   # Put back exactly what was there: the snapshot if the directory existed, nothing if it did not.
+   rm -rf "$GENERATED_GUARD_GEN"
+   if [ "$generated_guard_existed" -eq 1 ]; then
+     mkdir -p "$GENERATED_GUARD_GEN"
+-    cp -R "$GENERATED_GUARD_STASH/." "$GENERATED_GUARD_GEN/" 2>/dev/null
++    if ! cp -R "$GENERATED_GUARD_STASH/." "$GENERATED_GUARD_GEN/" 2>/dev/null; then
++      printf '  !! KS-1027: restoring %s FAILED — it may now be EMPTY.\n' "$GENERATED_GUARD_GEN" >&2
++      printf '  !! the snapshot is KEPT at: %s — copy it back by hand.\n' "$GENERATED_GUARD_STASH" >&2
++      if [ "$rc" -eq 0 ]; then exit 1; fi
++      exit "$rc"
++    fi
+   fi
+   rm -rf "$GENERATED_GUARD_TMP"
+ }
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: systemTest/__tests__/generated_guard_restore.test.sh
+1: #!/usr/bin/env bash
+2: # =============================================================================
+3: # TESTS for support/generated_guard.sh's RESTORE path (KS-1735)
+4: # =============================================================================
+5: # The defect: `generated_guard_restore()` copied the stash back with an
+6: # unchecked `cp` and then `rm -rf`'d the scratch directory regardless, so a
+7: # failed restore left generated/ empty or partial, deleted the ONLY copy, said
+8: # nothing, and did not move the suite's exit status. The two inline copies of
+9: # this guard (`pre_suite.test.sh`, `quarantine_call_sites.test.sh`) were
+10: # hardened for exactly this under KS 1027 (items 1 and 2) and KS 1714; this
+11: # file was written under KS 1167 as "the same guard for suites written after
+12: # them" and carried the KS 992 snapshot check only.
+13: #
+14: # HOW: the guard is a sourced file that installs an EXIT trap, so each cell
+15: # drives it in a CHILD bash process (a throwaway driver that sources the guard
+16: # and exits with a chosen status) and then reads three things the parent can
+17: # see: the child's exit status, what it wrote to stderr, and whether the stash
+18: # directory still holds the sentinel.
+19: #
+20: # $FIXTURES is a parameter of the guard, so every cell points it at its OWN
+21: # throwaway directory. No cell reads or writes the repo's real
+22: # systemTest/fixtures/generated.
+23: #
+24: # The instrument is a fake `cp` first on PATH that fails ONLY for a chosen
+25: # destination suffix and execs the real `cp` for everything else. Cell 1 is its
+26: # positive control: a guard that cannot be made to fail proves nothing about
+27: # the branch that handles failure.
+28: #
+29: # Usage: bash systemTest/__tests__/generated_guard_restore.test.sh
+30: # =============================================================================
+31: 
+32: set -uo pipefail
+33: 
+34: HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+35: GUARD="$HERE/support/generated_guard.sh"
+36: 
+37: PASS=0; FAIL=0
+38: ok()  { PASS=$((PASS+1)); printf '  ok   %s\n' "$1"; }
+39: bad() { FAIL=$((FAIL+1)); printf '  FAIL %s\n     %s\n' "$1" "${2:-}"; }
+40: 
+41: [ -f "$GUARD" ] || { printf 'generated_guard_restore.test.sh: cannot find %s\n' "$GUARD" >&2; exit 2; }
+42: 
+43: # A private scratch root, so a parallel suite's cleanup cannot reach these and
+44: # this suite cannot reach anyone else's.
+45: WORK="$(mktemp -d "/tmp/ks1735.XXXXXX")" || exit 2
+46: cleanup() { rm -rf "$WORK"; }
+47: trap cleanup EXIT
+48: 
+49: # --- the instrument ----------------------------------------------------------
+50: # $1 = destination suffix to refuse (e.g. "/generated/" or "/stash/")
+51: make_fake_cp() {
+52:   mkdir -p "$WORK/fakebin"
+53:   cat > "$WORK/fakebin/cp" <<FAKE
+54: #!/bin/bash
+55: # KS-1735 instrument: fail ONLY when the destination (last argument) ends in $1.
+56: for last; do :; done
+57: echo "cp \$*" >> "$WORK/cp-calls.log"
+58: case "\$last" in
+59:   *$1) echo "fake cp: refusing a copy into \$last" >&2; exit 1 ;;
+60: esac
+61: exec /bin/cp "\$@"
+62: FAKE
+63:   chmod +x "$WORK/fakebin/cp"
+64: }
+65: 
+66: # Drives the guard in a child process.
+67: #   $1 = label (its own fixtures dir + output files)
+68: #   $2 = the status the driven suite itself exits with
+69: #   $3 = "fake" to put the instrument first on PATH, anything else for a clean run
+70: # Sets: DRV_RC, DRV_OUT (file), DRV_STASH (the guard's own stash path)
+71: drive() {
+72:   DRV_LABEL="$1"
+73:   mkdir -p "$WORK/$DRV_LABEL/fixtures/generated"
+74:   echo "sentinel $DRV_LABEL" > "$WORK/$DRV_LABEL/fixtures/generated/SENTINEL.txt"
+75:   cat > "$WORK/$DRV_LABEL/driver.sh" <<DRIVER
+76: #!/usr/bin/env bash
+77: set -uo pipefail
+78: FIXTURES="$WORK/$DRV_LABEL/fixtures"
+79: . "$GUARD"
+80: # Report the guard's own scratch paths so the parent can check stash survival
+81: # WITHOUT depending on any message the guard prints — the unfixed guard prints
+82: # none, and a cell that read the path out of the message could not go red.
+83: printf '%s\n' "\$GENERATED_GUARD_STASH" > "$WORK/$DRV_LABEL/stash-path"
+84: exit $2
+85: DRIVER
+86:   chmod +x "$WORK/$DRV_LABEL/driver.sh"
+87:   : > "$WORK/cp-calls.log"
+88:   DRV_OUT="$WORK/$DRV_LABEL/out.txt"
+89:   if [ "${3:-clean}" = fake ]; then
+90:     PATH="$WORK/fakebin:$PATH" /usr/bin/env bash "$WORK/$DRV_LABEL/driver.sh" > "$DRV_OUT" 2>&1
+91:   else
+92:     /usr/bin/env bash "$WORK/$DRV_LABEL/driver.sh" > "$DRV_OUT" 2>&1
+93:   fi
+94:   DRV_RC=$?
+95:   DRV_STASH="$(cat "$WORK/$DRV_LABEL/stash-path" 2>/dev/null)"
+96:   DRV_GEN="$WORK/$DRV_LABEL/fixtures/generated"
+97: }
+98: 
+99: echo "== CONTROL: the instrument fails the chosen destination and ONLY that one =="
+100: make_fake_cp "/generated/"
+101: mkdir -p "$WORK/ctl/a" "$WORK/ctl/generated"
+102: echo hi > "$WORK/ctl/a/f.txt"
+103: if PATH="$WORK/fakebin:$PATH" cp -R "$WORK/ctl/a/." "$WORK/ctl/generated/" 2>/dev/null; then
+104:   bad "the fake cp REFUSES a copy into a /generated/ destination" "it succeeded — the instrument is inert and every cell below is meaningless"
+105: else
+106:   ok "the fake cp REFUSES a copy into a /generated/ destination"
+107: fi
+108: mkdir -p "$WORK/ctl/elsewhere"
+109: if PATH="$WORK/fakebin:$PATH" cp -R "$WORK/ctl/a/." "$WORK/ctl/elsewhere/" 2>/dev/null \
+110:    && [ -f "$WORK/ctl/elsewhere/f.txt" ]; then
+111:   ok "the fake cp passes every OTHER destination through to the real cp"
+112: else
+113:   bad "the fake cp passes every OTHER destination through to the real cp" "it refused one it should not have — the instrument is too broad"
+114: fi
+115: 
+116: echo "== CONTROL: a clean run restores generated/, removes the stash, keeps rc 0 =="
+117: drive clean0 0 clean
+118: [ "$DRV_RC" -eq 0 ] && ok "a clean run exits 0" || bad "a clean run exits 0" "rc=$DRV_RC"
+119: if [ -f "$DRV_GEN/SENTINEL.txt" ]; then ok "a clean run puts the sentinel back in generated/"; else bad "a clean run puts the sentinel back in generated/" "generated/ holds: [$(ls "$DRV_GEN" 2>/dev/null | tr '\n' ' ')]"; fi
+120: if [ -n "$DRV_STASH" ] && [ ! -d "$DRV_STASH" ]; then ok "a clean run removes the scratch directory"; else bad "a clean run removes the scratch directory" "stash=[$DRV_STASH] still present"; fi
+121: 
+122: echo "== KS-1735: a FAILED restore is REPORTED on stderr =="
+123: make_fake_cp "/generated/"
+124: drive failrep 0 fake
+125: if [ "$(grep -c '/generated/$' "$WORK/cp-calls.log")" -ge 1 ]; then
+126:   ok "the instrument actually intercepted the restore copy"
+127: else
+128:   bad "the instrument actually intercepted the restore copy" "no cp call into a /generated/ destination was logged — the cells below would pass for the wrong reason"
+129: fi
+130: if grep -q 'restoring .* FAILED' "$DRV_OUT"; then
+131:   ok "a failed restore says so (names the directory and that it may be EMPTY)"
+132: else
+133:   bad "a failed restore says so (names the directory and that it may be EMPTY)" "stderr was silent — this is the KS-1735 defect; output: [$(tr '\n' '|' < "$DRV_OUT")]"
+134: fi
+135: 
+136: echo "== KS-1735: a FAILED restore KEEPS the stash — it is the only copy left =="
+137: if [ -n "$DRV_STASH" ] && [ -f "$DRV_STASH/SENTINEL.txt" ]; then
+138:   ok "the stash and its contents survive a failed restore"
+139: else
+140:   bad "the stash and its contents survive a failed restore" "stash=[$DRV_STASH] present=$(test -d "$DRV_STASH" && echo yes || echo NO) — the only copy was deleted, this is the KS-1735 defect"
+141: fi
+142: if grep -q 'KEPT at' "$DRV_OUT"; then
+143:   ok "the message names where the kept stash is"
+144: else
+145:   bad "the message names where the kept stash is" "no 'KEPT at' line — an operator is told nothing about where the copy went"
+146: fi
+147: 
+148: echo "== KS-1735: a failed restore moves a PASSING suite's exit status off 0 =="
+149: if [ "$DRV_RC" -ne 0 ]; then
+150:   ok "a suite that exited 0 reports non-zero when its restore failed (rc=$DRV_RC)"
+151: else
+152:   bad "a suite that exited 0 reports non-zero when its restore failed" "rc=0 — the runner scores this suite as passed while the developer's generated/ is gone"
+153: fi
+154: 
+155: echo "== KS-1735: a FAILING suite keeps its OWN status, not a flattened 1 =="
+156: make_fake_cp "/generated/"
+157: drive failrc 3 fake
+158: if [ "$DRV_RC" -eq 3 ]; then
+159:   ok "a suite that exited 3 still reports 3 after a failed restore"
+160: else
+161:   bad "a suite that exited 3 still reports 3 after a failed restore" "rc=$DRV_RC — the suite's own failure was overwritten"
+162: fi
+163: 
+164: echo "== KS-1027 item 2: a failed SNAPSHOT keeps its partial stash too =="
+165: make_fake_cp "/stash/"
+166: drive snapfail 0 fake
+167: if [ "$(grep -c '/stash/$' "$WORK/cp-calls.log")" -ge 1 ]; then
+168:   ok "the instrument intercepted the snapshot copy"
+169: else
+170:   bad "the instrument intercepted the snapshot copy" "no cp call into a /stash/ destination was logged"
+171: fi
+172: if grep -q 'KS-992' "$DRV_OUT"; then
+173:   ok "a failed snapshot refuses to restore and says so (KS-992)"
+174: else
+175:   bad "a failed snapshot refuses to restore and says so (KS-992)" "output: [$(tr '\n' '|' < "$DRV_OUT")]"
+176: fi
+177: if [ -n "$DRV_STASH" ] && [ -d "$DRV_STASH" ]; then
+178:   ok "the PARTIAL stash survives a failed snapshot"
+179: else
+180:   bad "the PARTIAL stash survives a failed snapshot" "stash=[$DRV_STASH] was deleted — KS-1027 item 2"
+181: fi
+182: if [ -f "$DRV_GEN/SENTINEL.txt" ]; then
+183:   ok "a failed snapshot leaves generated/ exactly as the run left it"
+184: else
+185:   bad "a failed snapshot leaves generated/ exactly as the run left it" "the guard deleted it after failing to save it"
+186: fi
+187: 
+188: printf 'generated_guard_restore.test.sh: %d passed, %d failed\n' "$PASS" "$FAIL"
+189: [ "$FAIL" -eq 0 ]
+
+### FILE AT HEAD: systemTest/__tests__/support/generated_guard.sh
+1: # generated_guard.sh — snapshot fixtures/generated/ before driving the SHIPPED pre-suite step,
+2: # and put it back exactly afterwards. Source it; it installs an EXIT trap.
+3: #
+4: # WHY (KS-969 F-2, KS-992, restated here rather than a fourth copy left to drift — KS-1167):
+5: # the step's DEGRADED path calls quarantineManifest(), an `fs.renameSync` of the LIVE manifest.
+6: # A cell that drives that path from a developer's checkout would move their actors.json aside
+7: # and still report every cell passing. `pre_suite.test.sh` and `quarantine_call_sites.test.sh`
+8: # carry this guard inline; this file is the same guard for suites written after them.
+9: #
+10: # KS-992: a guard that could not SAVE must not DELETE. `generated_guard_snapshot_ok` records
+11: # whether a copy is actually held; an ABSENT generated/ is fine (nothing to lose); only a cp
+12: # that was attempted and FAILED flips it, and then restore refuses to delete and says so.
+13: #
+14: # KS-1735: restore's OWN cp was still unchecked, and `rm -rf $GENERATED_GUARD_TMP` ran either
+15: # way — so a failed restore left generated/ empty or partial, deleted the only copy, said
+16: # nothing, and left the suite's exit status alone. Both failure paths now KEEP the scratch
+17: # directory and name it, and a failed restore exits non-zero (the suite's own status when it had
+18: # one). The cost, as the inline copies accepted under KS 1027: on a failure the scratch directory
+19: # survives the run, and the sourcing suite's temp files survive with it. That is the trade — a
+20: # leaked temp directory is recoverable, a deleted snapshot is not.
+21: #
+22: # Requires: $FIXTURES (absolute path to systemTest/fixtures). Provides: $GENERATED_GUARD_TMP,
+23: # a scratch directory removed on exit, for the sourcing suite's own temp files.
+24: 
+25: GENERATED_GUARD_GEN="$FIXTURES/generated"
+26: GENERATED_GUARD_TMP="$(mktemp -d)"
+27: GENERATED_GUARD_STASH="$GENERATED_GUARD_TMP/stash"
+28: generated_guard_snapshot_ok=1
+29: generated_guard_existed=0
+30: mkdir -p "$GENERATED_GUARD_STASH"
+31: if [ -d "$GENERATED_GUARD_GEN" ]; then
+32:   generated_guard_existed=1
+33:   cp -R "$GENERATED_GUARD_GEN/." "$GENERATED_GUARD_STASH/" 2>/dev/null || generated_guard_snapshot_ok=0
+34: fi
+35: 
+36: generated_guard_restore() {
+37:   local rc=$?
+38:   if [ "$generated_guard_snapshot_ok" -ne 1 ]; then
+39:     printf '  !! KS-992: the snapshot of %s FAILED, so this suite will not restore it.\n' "$GENERATED_GUARD_GEN" >&2
+40:     printf '  !! generated/ is being left exactly as the run left it — a guard that\n' >&2
+41:     printf '  !! cannot restore must not delete. Check it by hand.\n' >&2
+42:     printf '  !! KS-1027: the partial snapshot is KEPT at: %s\n' "$GENERATED_GUARD_STASH" >&2
+43:     return
+44:   fi
+45:   # Put back exactly what was there: the snapshot if the directory existed, nothing if it did not.
+46:   rm -rf "$GENERATED_GUARD_GEN"
+47:   if [ "$generated_guard_existed" -eq 1 ]; then
+48:     mkdir -p "$GENERATED_GUARD_GEN"
+49:     if ! cp -R "$GENERATED_GUARD_STASH/." "$GENERATED_GUARD_GEN/" 2>/dev/null; then
+50:       printf '  !! KS-1027: restoring %s FAILED — it may now be EMPTY.\n' "$GENERATED_GUARD_GEN" >&2
+51:       printf '  !! the snapshot is KEPT at: %s — copy it back by hand.\n' "$GENERATED_GUARD_STASH" >&2
+52:       if [ "$rc" -eq 0 ]; then exit 1; fi
+53:       exit "$rc"
+54:     fi
+55:   fi
+56:   rm -rf "$GENERATED_GUARD_TMP"
+57: }
+58: trap generated_guard_restore EXIT
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1711,
+ "head_sha": "d21a8386de8d7f0be71cebd4a094507c9ed60c05",
+ "pr_tip_now": "d21a8386de8d7f0be71cebd4a094507c9ed60c05",
+ "head_mode": "tip",
+ "merge_base": "444813665a09a5f27b7953009c94ee9fe57beb6b",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "A",
+   "path": "systemTest/__tests__/generated_guard_restore.test.sh",
+   "added": "189",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "systemTest/__tests__/support/generated_guard.sh",
+   "added": "16",
+   "deleted": "2"
+  }
+ ],
+ "test_files": [
+  "systemTest/__tests__/generated_guard_restore.test.sh"
+ ],
+ "product_files": [],
+ "diff_stat": {
+  "files": 2,
+  "added": 205,
+  "deleted": 2
+ },
+ "targeted_on_head": [
+  {
+   "file": "systemTest/__tests__/generated_guard_restore.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 15,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "h too ==\n  ok   the instrument intercepted the snapshot copy\n  ok   a failed snapshot refuses to restore and says so (KS-992)\n  ok   the PARTIAL stash survives a failed snapshot\n  ok   a failed snapshot leaves generated/ exactly as the run left it\ngenerated_guard_restore.test.sh: 15 passed, 0 failed"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "systemTest/__tests__/generated_guard_restore.test.sh",
+   "rc": 0,
+   "ok": true,
+   "passed": 15,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "h too ==\n  ok   the instrument intercepted the snapshot copy\n  ok   a failed snapshot refuses to restore and says so (KS-992)\n  ok   the PARTIAL stash survives a failed snapshot\n  ok   a failed snapshot leaves generated/ exactly as the run left it\ngenerated_guard_restore.test.sh: 15 passed, 0 failed"
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 15,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 15,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 4
+}

@@ -1,0 +1,123 @@
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1020-presentation-lookup-exact-or-404.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1020-presentation-lookup-exact-or-404.test.ts
+index 2e1a47abf..2f72e013a 100644
+--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1020-presentation-lookup-exact-or-404.test.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1020-presentation-lookup-exact-or-404.test.ts
+@@ -66,6 +66,27 @@ const PRINCIPAL = { userId: 'ks1020-user', tenantId: 'ks1020-tenant', role: 'OWN
+ type Mods = { router: Router; errorHandler: any };
+ 
+ /** Fresh router + errorHandler per describe, so memPresentationStore starts empty. */
++
++/**
++ * KS-1729: the budget for the FIRST `freshModules()` of this file, which is a cold import.
++ *
++ * On the first `vitest run` after an `npm ci`, resolving, reading and transforming this import
++ * graph for the first time can cost far more than vitest's 10 s default. The hook then lapses
++ * and every cell in that describe is SKIPPED while the run still reports `0 failed` — which
++ * reads as a pass to anything that does not check the skip count. The ticket measured 87.5 s of
++ * import on a cold run against ~5 s warm, and 110 cells skipped.
++ *
++ * 120 s is ~1.4x that worst cold measurement: wide enough that a cold load is not mistaken for
++ * a hang, narrow enough that a genuine hang still fails the run rather than hanging it. It
++ * applies ONLY to this file's first hook; every other hook keeps the 10 s default, so nothing
++ * else in the suite gets a looser budget.
++ *
++ * It is a budget, not a speed-up — the cold cost is still paid. Moving the import to module
++ * scope would avoid the hook entirely, but this service compiles with `module: commonjs`
++ * (`tsconfig.json`), under which a top-level `await` is TS1378 — so that shape cannot be done
++ * from inside this file.
++ */
++const KS1729_COLD_IMPORT_BUDGET_MS = 120_000;
+ async function freshModules(): Promise<Mods> {
+   vi.resetModules();
+   const { presentationRoutes } = await import('../routes/presentations');
+@@ -145,7 +166,7 @@ describe('KS-1020 — memory path (isDbAvailable() false): exact id or 404', ()
+     storedId = created.body.presentation.id;
+     expect(storedId).toMatch(new RegExp(`^${VC_BASE_URL.replace(/[.]/g, '\\.')}/presentations/[0-9a-f-]{36}$`));
+     uuid = storedId.slice(storedId.lastIndexOf('/') + 1);
+-  });
++  }, KS1729_COLD_IMPORT_BUDGET_MS);
+ 
+   it('P1 positive control: the exact stored id (URL-encoded) → 200 with that presentation', async () => {
+     const r = await getById(mods, storedId);
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts
+index 7fe972e21..060ff2302 100644
+--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts
+@@ -159,6 +159,27 @@ type RouterFn = (rq: any, rs: any, nx: (e?: unknown) => void) => void;
+ type Mods = { presentations: RouterFn; credentials: RouterFn; errorHandler: any; repo: any; loadPresentations: () => Promise<void> };
+ 
+ /** Fresh routers + repo per describe, so every in-memory store starts empty. */
++
++/**
++ * KS-1729: the budget for the FIRST `freshModules()` of this file, which is a cold import.
++ *
++ * On the first `vitest run` after an `npm ci`, resolving, reading and transforming this import
++ * graph for the first time can cost far more than vitest's 10 s default. The hook then lapses
++ * and every cell in that describe is SKIPPED while the run still reports `0 failed` — which
++ * reads as a pass to anything that does not check the skip count. The ticket measured 87.5 s of
++ * import on a cold run against ~5 s warm, and 110 cells skipped.
++ *
++ * 120 s is ~1.4x that worst cold measurement: wide enough that a cold load is not mistaken for
++ * a hang, narrow enough that a genuine hang still fails the run rather than hanging it. It
++ * applies ONLY to this file's first hook; every other hook keeps the 10 s default, so nothing
++ * else in the suite gets a looser budget.
++ *
++ * It is a budget, not a speed-up — the cold cost is still paid. Moving the import to module
++ * scope would avoid the hook entirely, but this service compiles with `module: commonjs`
++ * (`tsconfig.json`), under which a top-level `await` is TS1378 — so that shape cannot be done
++ * from inside this file.
++ */
++const KS1729_COLD_IMPORT_BUDGET_MS = 120_000;
+ async function freshModules(): Promise<Mods> {
+   vi.resetModules();
+   const p = await import('../routes/presentations');
+@@ -267,7 +288,7 @@ describe('KS-1116 presentations, memory path: GET /:id answers only the principa
+     const o = await dispatch(mods, mods.presentations, NO_PRINCIPAL, 'POST', '/', { credentials: [baseCredential()] });
+     expect(o.status).toBe(201);
+     ownerlessId = o.body.presentation.id;
+-  });
++  }, KS1729_COLD_IMPORT_BUDGET_MS);
+ 
+   it('A0 FIXTURE INTEGRITY for gate BJ1 NOTE 2: the prefix fixture is a STRICT prefix of the row tenant, and the two admin-sounding roles are not the two the ruling admits', () => {
+     // Without this, renaming T1 would leave the prefix rows passing for the wrong reason.
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
+index 05f345bfc..c2d741ce2 100644
+--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts
+@@ -108,6 +108,27 @@ type RouterFn = (rq: any, rs: any, nx: (e?: unknown) => void) => void;
+ type Mods = { credentials: RouterFn; errorHandler: any; repo: any };
+ 
+ /** A fresh router + repo per describe, so the in-memory store starts empty. */
++
++/**
++ * KS-1729: the budget for the FIRST `freshModules()` of this file, which is a cold import.
++ *
++ * On the first `vitest run` after an `npm ci`, resolving, reading and transforming this import
++ * graph for the first time can cost far more than vitest's 10 s default. The hook then lapses
++ * and every cell in that describe is SKIPPED while the run still reports `0 failed` — which
++ * reads as a pass to anything that does not check the skip count. The ticket measured 87.5 s of
++ * import on a cold run against ~5 s warm, and 110 cells skipped.
++ *
++ * 120 s is ~1.4x that worst cold measurement: wide enough that a cold load is not mistaken for
++ * a hang, narrow enough that a genuine hang still fails the run rather than hanging it. It
++ * applies ONLY to this file's first hook; every other hook keeps the 10 s default, so nothing
++ * else in the suite gets a looser budget.
++ *
++ * It is a budget, not a speed-up — the cold cost is still paid. Moving the import to module
++ * scope would avoid the hook entirely, but this service compiles with `module: commonjs`
++ * (`tsconfig.json`), under which a top-level `await` is TS1378 — so that shape cannot be done
++ * from inside this file.
++ */
++const KS1729_COLD_IMPORT_BUDGET_MS = 120_000;
+ async function freshModules(): Promise<Mods> {
+   vi.resetModules();
+   const c = await import('../routes/credentials');
+@@ -220,7 +241,7 @@ describe('KS-1683 memory path: the list and by-hash answer only what the caller
+     // No owner, tenant unknown (every pre-054 row): nobody may read it.
+     id.legacy = 'https://secuura.io/credentials/1683a000-0000-4000-8000-000000000002';
+     await mods.repo.store(storedCredential(id.legacy, HL));
+-  });
++  }, KS1729_COLD_IMPORT_BUDGET_MS);
+ 
+   beforeEach(() => {
+     dbMock.isDbAvailable.mockReturnValue(false);

@@ -1,0 +1,54 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix only widens the hook timeout and does not address the lapsed-hook effect described in the ticket, so a cold import that exceeds 120s or a lapsed hook can still cause skipped cells or cross-describe contamination.",
+      "evidence": "ks1020-presentation-lookup-exact-or-404.test.ts:169 `}, KS1729_COLD_IMPORT_BUDGET_MS);` and ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts:291 `}, KS1729_COLD_IMPORT_BUDGET_MS);` and ks1683-credential-list-and-by-hash-bound-to-the-creator.test.ts:244 `}, KS1729_COLD_IMPORT_BUDGET_MS);`",
+      "test_or_reason": "The ticket's 'A second effect under load (run E)' section states 'A beforeAll that times out is not cancelled; its promise runs on' and describes assertion failures in later describes. The PR only increases the timeout; it does not implement the ticket's third fix shape ('Make freshModules() refuse to hand out a module instance while an earlier one is still being set up')."
+    },
+    {
+      "severity": "Major",
+      "claim": "The comment claims '120 s is ~1.4x that worst cold measurement' but the measured worst cold import is 87.5s, and 120/87.5 ≈ 1.37, which is not 1.4x; the claim is arithmetically overstated.",
+      "evidence": "ks1020-presentation-lookup-exact-or-404.test.ts:79 `120 s is ~1.4x that worst cold measurement`",
+      "test_or_reason": "87.5 * 1.4 = 122.5, so 120 is not 1.4x; it is ~1.37x. The comment's precision is false."
+    },
+    {
+      "severity": "Major",
+      "claim": "The comment claims the budget 'applies ONLY to this file's first hook' but the code applies it to the first beforeAll of the first describe, not to the first hook in the file; the file has a module-level beforeAll (for signing key) that is not covered, and the budget is not limited to the first freshModules call.",
+      "evidence": "ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts:267 `beforeAll(() => {` and ks1116-presentation-and-credential-reads-bound-to-the-creator.test.ts:291 `}, KS1729_COLD_IMPORT_BUDGET_MS);`",
+      "test_or_reason": "The comment says 'applies ONLY to this file's first hook' but the budget is attached to the first describe's beforeAll, not to the module-level beforeAll at line 267. Also, the budget is not conditioned on being the first freshModules call; it applies to that specific beforeAll regardless of whether it is the first."
+    },
+    {
+      "severity": "Major",
+      "claim": "The comment claims 'every other hook keeps the 10 s default' but the code does not enforce that; the budget constant is only used on one hook, but nothing prevents a future hook from using it, and the comment's claim is not enforced by code.",
+      "evidence": "ks1020-presentation-lookup-exact-or-404.test.ts:89 `const KS1729_COLD_IMPORT_BUDGET_MS = 120_000;` and ks1020-presentation-lookup-exact-or-404.test.ts:169 `}, KS1729_COLD_IMPORT_BUDGET_MS);`",
+      "test_or_reason": "The constant is module-scoped and could be reused; the comment's assertion is a documentation claim, not a code-enforced restriction."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The comment claims 'Moving the import to module scope would avoid the hook entirely, but this service compiles with module: commonjs (tsconfig.json), under which a top-level await is TS1378' — this is an unverified claim; the tsconfig.json is not cited and the claim is not measured.",
+      "evidence": "ks1020-presentation-lookup-exact-or-404.test.ts:84-87 `Moving the import to module scope would avoid the hook entirely, but this service compiles with module: commonjs (tsconfig.json), under which a top-level await is TS1378 — so that shape cannot be done from inside this file.`",
+      "test_or_reason": "The tsconfig.json is not provided in the diff or facts; the claim is asserted without evidence."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The comment claims 'The ticket measured 87.5 s of import on a cold run against ~5 s warm, and 110 cells skipped' but the ticket's run C measured 87.47s import and 110 skipped, while run A (develop) had 54 skipped; the comment does not distinguish that the 110-skip figure is from the head with the new file, not from the base.",
+      "evidence": "ks1020-presentation-lookup-exact-or-404.test.ts:76-77 `The ticket measured 87.5 s of import on a cold run against ~5 s warm, and 110 cells skipped.`",
+      "test_or_reason": "The ticket's run A (develop) had 54 skipped, not 110; the 110 figure is from run C on head. The comment implies the measurement is for the base files, which is misleading."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The comment claims 'a genuine hang still fails the run rather than hanging it' but a 120s timeout is not a hang detection; it merely extends the time before failure, and a genuine hang would still fail after 120s, not 'fail the run rather than hanging it'.",
+      "evidence": "ks1020-presentation-lookup-exact-or-404.test.ts:80 `narrow enough that a genuine hang still fails the run rather than hanging it`",
+      "test_or_reason": "A timeout always fails the run; the comment's contrast is misleading."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR does not add any test that verifies the timeout value or the behavior under cold import; the change is untested.",
+      "evidence": "facts.json targeted_on_head shows all tests pass but no new test for the timeout; diff only adds a constant and a hook argument.",
+      "test_or_reason": "No test asserts that the budget is 120000 or that the hook uses it; the change is a configuration change with no test coverage."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}
