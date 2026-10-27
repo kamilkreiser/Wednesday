@@ -2756,3 +2756,8 @@ INCLUDED until he says otherwise.
 > Another question about models - if I was to get a studio 128gb for you, while we wait for another machine, 1) can we use DeepSeek V4 Flash with some on ssd to ensure enough RAM for typical workflow 2) can we thunderbolt the 128 to a 256 just in case?
 
 *Note:* Answered on the panel from the 10-26 four-Mac report + machine PDF: V4 Flash 2-bit fits resident (SSD not needed; streaming unmeasured, est. 3-8 tok/s); TB5 split real but unproven for a 128+256 pair; recommend separate machines.
+
+## 2026-10-28 10:29 — Kam (terminal, verbatim)
+> morning.  Can you please look at and action the following message from Peter - Hi @Kam , Can you review this PR? https://github.com/Secuura/Distributed_Secuura/pull/1756
+
+*Note:* Tier-1 review of #1756 commissioned; findings + draft review comment go to Kam before anything is posted to Peter
