@@ -1,0 +1,42 @@
+STARTABLE: YES
+
+# B843 drafter report (MPS MPSCALC-356, submit test race, seat Datasec/MPS-M48)
+
+Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-27_B843_SEAT-M48_mps-356-feedback-submit-test-race.md`. Drafted 19:20-19:40 AEDT (clock = `date`; read 19:23:29).
+
+## BLUF
+- Startable once stamped. One test file (`tests/MpsCalc.Api.Tests/FeedbackTicketTests.cs`), no product byte, 0 added names, one existing line changed (the rig line 112, only its `seams:` argument); line 116 (`pending`) is untouched.
+- Design: hold the fake Jira's first create with a `TaskCompletionSource` (`jira.BeforeCreate = n => n == 1 ? hold.Task : ...`, the same pattern the retry test uses at lines 203-231), give the test its own seams object with a 5 minute Jira timeout, release the hold after line 116. The 201 is then read while the worker is blocked, so `pending` no longer depends on worker speed.
+- Red-proof: a hold on the fake Jira can only slow the worker, so the "worker finishes first" variant must be a scratch PRODUCT edit in `wt-b843-mut` (never committed): R1a `await Task.Delay(750)` and R1b a bounded wait until the worker saved `created`, both between `FeedbackEndpoints.cs:229` (`worker.QueueNow`) and `:230` (the 201 reply). OLD test red at line 116 (`Expected "pending"` / `Actual "created"`), NEW test green; plus cw-weak (hold released early is red), a retained-assertion mutant (reply not pending is red), controls c0/c1/c2, plants T1/T2.
+- Model Sonnet `claude-sonnet-5-5` (`models_latest.json` line 38), rows L6 `model-routing.md:85` and C2 `:92`, gate G2 `:109`, G-cap `:111`, `BRIEF_SEAT_LEVEL=sonnet` inside the launch quotes. Pane `Datasec/MPS-M48`, ports 7700-7709, branch `b843/mps-356-feedback-submit-test-hold`, gate round 1 of 2 on a new PR.
+
+## Facts re-measured (instrument, time)
+- Main: `gh -X GET api .../git/ref/heads/main` 19:2x = `44137f7a498cad4792a991f2b87adc17bc82246a` (the ticket's base). Jira: MPSCALC-356 read whole through the project `.env` in process (scratchpad reader, no token printed): Backlog, created 2026-10-27T19:19, labels lane-h / mpscalc-b840 / plan-b840-b840-1 / tier-2, 0 comments, 0 links. Control: `MPSCALC-99999` answers HTTP 404. The BLUF, Where, and Recommendation-with-acceptance paragraphs are quoted verbatim in the kit.
+- Test file at main (raw): 534 lines, 29,435 bytes, git blob `ca6a51d7` (`git hash-object`). Lines confirmed by reading: Fact 108-109, `new FakeJira()` 111, rig 112, pending assertion 116, hold in retry test 203/208/211/231. `"pending"` count in the file 4 (`/usr/bin/grep -c -i -F`), `BeforeCreate` 3, `hold.SetResult();` 1, `TaskCompletionSource` 1, `class FakeJira` 1; negative control `zzz-no-such-string-7f3a` 0.
+- Product at main (raw): `FeedbackEndpoints.cs` blob `dca637f1`, `worker.QueueNow(item.FeedbackId);` line 229 (1 hit; `worker.QueueNow(feedbackId);` line 392, 1 hit, so the mutant anchor is the two-line pair 229-230), `Submit` is `async Task<IResult>` (line 117, so `await` is legal in the mutant); `FeedbackTickets.cs` `StateOf` line 164, worker saves `Pending` at line 267 and `Created` at line 293. `FakeJira.SendAsync` enqueues into `Requests` (line 44) before awaiting `BeforeCreate` (line 50), so `Assert.Single(jira.Requests)` survives a held create. `Seams(jira)` (line 76) sets a 400 ms timeout, hence the own seams object.
+- Open PRs (`pulls?state=open`): #121, #120. `pulls/<n>/files` of each = 1 path, `web/package-lock.json`. Overlap with Yours (`/usr/bin/grep -c -x -F`): 0 and 0; control: Yours piped to itself reads 1. Live branches `b820/mps-354-feedback-case-and-warning-rows` (compare `main...`: `FeedbackTriageTests.cs` only) and `b821/mps-walk-cap-rows` (`QuoteWalkCaps.cs` only): 0 shared. `heads/b843` 0 refs; no `.tools/b843`.
+- Sibling: BACKLOG rows are at lines 1557, 1991, 2395 (the task text read "155"; the rows are `[B100-1]`, `[B340-B318-C1]`, `[B406-MAIN-RED]`). Same class, different mechanism (15 s `WaitForTicket` poll with the TIMEOUT retry schedule, asserting `pending` on a saved ticket, not on a reply built at response time). The ticket does not cover it. Kept out of the lane (D10).
+- Seat name: python scan of the 307 non-`.pre-` `.md` briefs dated 26 and 27 Oct for `(?<![A-Za-z0-9])M48(?![0-9])`: 0 before this kit; control `M47` fires 14 files. Panes: `tuesday`, `Datasec/Security-Composer-J27`, `Datasec/NexusAI-G179`, `fleet-monitor`.
+- Ports: `lsof -nP -iTCP:7700-7709 -sTCP:LISTEN` empty, rc 1; scan `(?<![0-9])770[0-9](?![0-9])` over the same files: 0; controls `761x` fires 3, `760x` fires 3. All blocks 7600-7689 carry reservations (3-8 files, except 7670-7679 which is isolated between used blocks); 7690-7719 are all 0, so 7700-7709 sits in the middle of an empty run. The bind control of `lsof` was not repeated here (the kit makes the seat do it).
+- Stamp slots: `/usr/bin/grep -c -E '_''_''_''_'` on the kit prints 8 (7 slots + last line), matching the kit's own statement. Non-ASCII bytes 0.
+
+## Record-text hygiene (the B840 lesson)
+- Program (python, regexes built with bracketed fragments so the script itself carries no banned word): person names, coordinator seat names (Tuesday/Wednesday/Friday), `FOR TUESDAY`, `PHASE`, decision-card shapes (`D-` / `C-` ids). Over the texts that may reach a record (the three quoted ticket paragraphs, the suggested commit subject, the three suggested test comments, 7 texts): **0 hits**. Planted control (a string with every banned shape): 10 hits, fires. Whole kit: person 0, Wednesday/Friday 0, `FOR TUESDAY` 0, `PHASE` 0, card ids 0, non-ASCII 0; the word Tuesday appears 18 times only in coordination lines (channel, stamp, launch, REFUSE markers), as the B820 template does. Property check (f) of the kit tells the seat to scan its own commit with bracketed fragments so the kit does not carry the banned words whole.
+- The quoted ticket text itself carries none of the list (it says "the coordinator" and "records seat").
+
+## D-decisions (override at the stamp)
+- D1 Sonnet. D2 0 added names. D3 the hold shape, not "pending or created" (which would weaken line 116); STOP if the hold cannot be made green. D4 red-proof by a scratch product edit in the mutant tree only (the ticket's "hold or delay on the fake Jira" cannot make the worker finish earlier). D5 base is current main at Step 0. D6 one commit, subject suggestion in the kit. D7 name multiset unchanged. D8 pane M48. D9 one push. D10 sibling out of the lane.
+- Drafter's own: target READY 1.5 h, hard stop 3 h after Step 0 (as B820).
+
+## Q-questions for Tuesday (each with a default)
+- Q-1: M48 and 7700-7709 may collide with the B841/B842 drafters running in parallel. Default: keep; re-run the pane and kit scans at the stamp.
+- Q-2: Should the sibling timing test (`[B100-1]` and kin) get its own ticket? Default: no action here; the ticket's Related line does not name it; decide separately.
+- Q-3: Round count "round 1 of 2 on this new PR, tier 2". Default: as written.
+- Q-4: The kit lets the seat edit one existing line (rig line 112), unlike B820 (insert-only). Default: accepted, because the seams object must change; the strong line-116 assertion stays untouched.
+
+## UNMEASURED
+- Nothing was built or run. That the NEW test is green at the base and under R1a/R1b, that the rig disposal cancels a held create promptly, that 750 ms is enough on a loaded machine (R1b has no such dependence), the race rate (one failure seen), and the `lsof` bind control.
+
+## Outside-the-fences disclosure
+- Read-only reads only: Jira GET through a scratchpad reader (`.../scratchpad/w/jr.py`; loads the project `.env` in process, no token printed), `gh -X GET api` under the project `GH_CONFIG_DIR` (matching-refs, pulls, pulls/<n>/files, compare, contents raw of the Feedback test files, `FeedbackEndpoints.cs`, `FeedbackTickets.cs`), `lsof`, `tmux list-panes`, python scans of the briefs folder, local reads of `BACKLOG.md` rows and the records seat's STATUS/kit, `model-routing.md`, `models_latest.json`. Scratch raw copies live in the session scratchpad `w/`, not committed.
+- One Bash call was refused by the no-`cd` hook and re-issued without `cd`; one redirect to `/tmp/x` failed because it is a directory (the loop did not run, re-run into the scratchpad). Several greps drew the case-sensitivity advisory; counts that matter carry a control. Not touched: `decision_queue.sh`, `briefs_staged/`, the scoreboard, `_ledger.md`, any other tree, any hosted host, az, ssh, docker, any write to Jira/GitHub, mail, Artifact or Docs tools.
