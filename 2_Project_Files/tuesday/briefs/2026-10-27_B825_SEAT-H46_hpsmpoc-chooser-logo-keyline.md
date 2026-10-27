@@ -99,14 +99,14 @@ SELF-CHECK: drafted 2026-10-27 13:3x-13:4x AEDT by Tuesday's read-only kit draft
 
 ## Stamp
 Tuesday fills each four-underscore slot at launch by label; the drafter fills none. The unstamped copy reads 8 lines with the pattern (the seven slot lines and the last line).
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- Stamped by (the Tuesday seat that READ this brief whole, with its drafter report): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and READY-by (AEDT, 27 Oct): ____
-- Head and main at launch (Tuesday `ls-remote`), TARGET `<T>` = ____ ; refs/heads/b825* on origin: ____
-- Model receipt line and `uptime` load1 at launch: ____
+- STAMP: B825 stamped by Tuesday s195 at 13:42 AEDT 2026-10-27 (Tuesday merged the two-slot line 107 into one before stamping)
+- LAUNCH WINDOW: from 13:42 for 2 h; launch_when_cool at load1 below 7, queued after B826; live beside you: B826 HPSM-POC-H47 (infra/** only) if launched, and seats of other repositories
+- Stamped by (the Tuesday seat that READ this brief whole, with its drafter report): Tuesday s195 read this brief whole (1-113) with its drafter report's summary before stamping at 13:42. Accepted D-1..D-4; Q-1 chooser only (sign-in pages unchanged); Q-2 the exact supplied file; Q-3 times as below; Q-4 light only if the seat's own search confirms no dark theme. Gate after: tier 2, round 1 of 2
+- Launch authority (who, under which grant): the product owner's 2026-10-27 13:35:05 instruction (quoted in the brief) and Kam's 2026-10-16 grant (HPSM-POC not frozen; all Datasec projects on this account); no deploy by this seat
+- Hard stop and READY-by (AEDT, 27 Oct): READY-by 2 h after your Step 0; HARD STOP 3.5 h after your Step 0
+- Head and main at launch (Tuesday `ls-remote`), TARGET `<T>` and refs/heads/b825* on origin: HPSM-POC main 271f69328c8506c38243066a2853d9eee2ed9e0f by Tuesday's ls-remote at the B826 stamp; TARGET <T> = 271f69328c8506c38243066a2853d9eee2ed9e0f; refs/heads/b825* absent (re-read at your Step 0)
+- Model receipt line and `uptime` load1 at launch: model: claude-sonnet-5-5 -- C2 web asset and markup build -- P1-P4 none -- gauge 7d 71%
 Pane `Datasec/HPSM-POC-H46`. **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-27_B825_SEAT-H46_hpsmpoc-chooser-logo-keyline.md`. **Step 0:** copy it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/`, `cmp`, both sha256s in STATUS, the stamp-slot count (the REFUSE check).
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash /Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/HPSM-POC-H46 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-27_B825_SEAT-H46_hpsmpoc-chooser-logo-keyline.md'"`
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 13:42 by Tuesday s195 (lines 1-113)
