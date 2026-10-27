@@ -50924,5 +50924,123 @@
    "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
    "CARD wed-schedulers-dead-since-0907"
   ]
+ },
+ {
+  "id": "wed-morning-plan-1028",
+  "client_project": "WED",
+  "title": "Morning: where things stand and today's plan",
+  "bluf": "Overnight (Secuura/Blockchain): 6 PRs merged to develop 7512529b928d, none deployed yet. A new qs security advisory blocked every push for a few hours; we fixed it ourselves with a patch bump (#1770). Peter's #1759 had left the docs check red; our #1762 fixed it (please tell Peter). Three seats scored 0.95-0.97. Board: 8 new tickets filed (KS-1775 to KS-1782), KS-1765 + KS-1766 Done. TODAY: Seat Y 3rd (launched 06:12) finishes #1767; one gate over #1768 + #1771 + #1769, then merges; then a deploy round of develop to kintsugi then demo under your October grant. AWAITING YOU: Secuura/Blockchain 7 (Peter asks you to review #1756 and for a view on KS-1610 item 3; Stuart's KS-772 ask; PS-1075 / KS-1402; tell Peter about #1762; two cards I will post this morning: KS-1773 and KS-1657). WED 0. (Prior-ruling override: this is the daily morning card; the earlier rulings were on 26 and 27 Oct's cards.)",
+  "default_action": "If no answer: Wednesday works this plan (option a); every other card keeps its own default.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Go with this plan",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Change the plan",
+    "detail": "tell me what to change"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-28T06:14:11.436764+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-17 20:23",
+   "2026-09-05 15:01",
+   "2026-09-07 08:50",
+   "2026-09-10 17:01",
+   "2026-09-16 09:53",
+   "2026-09-16 13:40",
+   "2026-09-16 14:00",
+   "2026-09-18 09:18",
+   "2026-09-21 14:05",
+   "CARD secuura-ks670-blockfrost-plan",
+   "CARD wed-morning-plan-1026",
+   "CARD wed-morning-plan-1027"
+  ]
+ },
+ {
+  "id": "secuura-ks1773-document-lookup-public-1028",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1773: a public endpoint returns a document's tenant and title to anyone who has its hash. Intended?",
+  "bluf": "GET /api/platform/document-lookup takes no login (code comment: public, for the verifier portal) and is missing from the published API contract. Given a document's hash or id it returns the owning tenant and the document's title and status. A July security review listed it as an unauthenticated finding; no ticket says whether it is intended. Related ruling, read: on 13 Oct (KS-1114) you chose to keep the title lookup on the verify endpoint open to anyone (b). This is a different endpoint and it also reveals the TENANT, so it is not covered by that ruling. A hash needs the document itself, so whoever asks already holds the document. Facts: KS-1773 (Backlog), develop 061c3a4f62d5, seen live on both boxes 27 Oct.",
+  "default_action": "If no answer: nothing changes, and KS-1773 stays in the Backlog until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it public and publish it",
+    "detail": "add it to the published API contract as a deliberate public endpoint, in line with your KS-1114 ruling"
+   },
+   {
+    "key": "b",
+    "label": "Keep it public, return less",
+    "detail": "a seat measures what the verifier portal needs; tenant and title stop being returned if it does not need them"
+   },
+   {
+    "key": "c",
+    "label": "Require login",
+    "detail": "the verifier portal would have to sign in; the biggest change"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-28T06:16:14.417774+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-26 10:44",
+   "2026-09-09 17:03",
+   "2026-09-13 16:55",
+   "2026-09-21 10:15",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-ks1102-public-status-what-may-show",
+   "CARD secuura-ks1402-lookup-refuses-connector-tokens",
+   "CARD secuura-ks1114-title-lookup-needs-authentication-1013"
+  ]
+ },
+ {
+  "id": "secuura-ks1657-anchor-404-on-db-error-1028",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1657: when the database read fails, the anchor lookup says 'not found'. Change it to say 'error'?",
+  "bluf": "GET /api/anchors/:documentId answers 404 (no anchor) when its database read FAILS, because the lookup swallows every error. A relying party can record 'this document has no anchor' when the truth is 'our database had a fault'. Not a regression (before KS-1629 it was worse: a fabricated anchor). The fix: a fault answers 500/503 and a real absence keeps 404. It changes what clients see on a fault, so it is on your desk. Prior-ruling check: the gate matched your anchor cards KS-1385 and KS-1557 on the word 'anchor' only; neither covers this. Facts: KS-1657 (Backlog), originate anchors.ts:83-94 at develop 66faac9aebc3.",
+  "default_action": "If no answer by Thursday 29 Oct 09:00 AEDT: option a is built and gated, then held from merge until you have seen it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix it",
+    "detail": "a fault answers 500/503, absence keeps 404; built, gated, merged, deployed with the next round"
+   },
+   {
+    "key": "b",
+    "label": "Leave it",
+    "detail": "404 on a fault stays; the ticket is archived with this ruling"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-28T06:16:17.781960+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-08 15:16",
+   "2026-09-08 15:17",
+   "2026-09-10 11:25",
+   "2026-09-16 07:01",
+   "CARD secuura-ks953-shared-pins-anchor-by-marker",
+   "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD secuura-ks1171-when-is-an-anchor-absent",
+   "CARD secuura-ks1124-f4-failed-anchor-shows-pending",
+   "CARD secuura-ks1384-anchor-per-event-1009",
+   "CARD secuura-ks1385-anchor-identity-needs-ps895-ruling-1013",
+   "CARD secuura-ks1385-custodian-may-update-anchor-identity-1013",
+   "CARD secuura-ks1557-tell-stuart-and-peter-about-the-swallowed-anchor-1021"
+  ]
  }
 ]
