@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-27 18:28 from 251 lesson files (1,096,654 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 206. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-27 21:48 from 252 lesson files (1,098,301 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 207. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7561,4 +7561,17 @@ sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #168
 **Mechanism:** `2_Project_Files/local-model/gate/` (spark_gate.sh, spark_review.py, REVIEW_CHECKLIST.md), built by a Sonnet tooling drafter on 2026-10-26 with arms, and calibrated on PR #1687.
 
 **Family:** [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]] · [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-14_do-not-guess-a-comparison-a-citation-you-did-not-open-is-a-guess]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot, measure, review; rule 5: every grant recorded).
+
+
+## A change of DESIGN inside a ruling Kam already gave is Wednesday's call: decide, then report
+`2026-10-27_design-changes-inside-a-ruling-are-mine.md` · grant · 2026-10-27 · status: live · tier: W
+
+**The operative case:** Kam has ruled WHAT should happen (here: "c — fix it in the launcher"), and a seat's measurement shows the briefed HOW is wrong (a separate CLAUDE_CONFIG_DIR would have wiped seat memory and the login). **Wednesday picks the better how, says so on the panel, and proceeds.** Kam's words: *"I am happy for you to make the call."*
+
+**How to apply:**
+1. Ask: does the new design still deliver the outcome he ruled, with no new signature-class element (production, money, external comms to a human, anything irreversible, a credential handled)? If yes: decide, act, and post one panel line naming the change and the reason. No card, no wait.
+2. If the redesign changes the OUTCOME he chose, or adds a signature-class element, it is a new decision: card it with options, as before.
+3. The receipt is not optional: the grant removes the pause, not the report ([[2026-08-07_autonomy-grant-ship-decisions]]).
+
+**Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (scope and sequencing inside commissioned work) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-08-03_go-slow-earn-autonomy]] rule 5 (every grant written down).
 

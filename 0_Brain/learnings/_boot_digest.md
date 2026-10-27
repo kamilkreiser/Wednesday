@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-27 18:28 from 251 lesson files (1,096,444 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-27 21:48 from 252 lesson files (1,098,091 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7633,4 +7633,17 @@ sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #168
 **Mechanism:** `2_Project_Files/local-model/gate/` (spark_gate.sh, spark_review.py, REVIEW_CHECKLIST.md), built by a Sonnet tooling drafter on 2026-10-26 with arms, and calibrated on PR #1687.
 
 **Family:** [[2026-09-05_qa-gate-tiers-and-the-two-nogo-cap]] · [[2026-10-18_model-routing-v10-approved-route-by-the-table]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-14_do-not-guess-a-comparison-a-citation-you-did-not-open-is-a-guess]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot, measure, review; rule 5: every grant recorded).
+
+
+## A change of DESIGN inside a ruling Kam already gave is Wednesday's call: decide, then report
+`2026-10-27_design-changes-inside-a-ruling-are-mine.md` · grant · 2026-10-27 · status: live
+
+**The operative case:** Kam has ruled WHAT should happen (here: "c — fix it in the launcher"), and a seat's measurement shows the briefed HOW is wrong (a separate CLAUDE_CONFIG_DIR would have wiped seat memory and the login). **Wednesday picks the better how, says so on the panel, and proceeds.** Kam's words: *"I am happy for you to make the call."*
+
+**How to apply:**
+1. Ask: does the new design still deliver the outcome he ruled, with no new signature-class element (production, money, external comms to a human, anything irreversible, a credential handled)? If yes: decide, act, and post one panel line naming the change and the reason. No card, no wait.
+2. If the redesign changes the OUTCOME he chose, or adds a signature-class element, it is a new decision: card it with options, as before.
+3. The receipt is not optional: the grant removes the pause, not the report ([[2026-08-07_autonomy-grant-ship-decisions]]).
+
+**Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (scope and sequencing inside commissioned work) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-08-03_go-slow-earn-autonomy]] rule 5 (every grant written down).
 
