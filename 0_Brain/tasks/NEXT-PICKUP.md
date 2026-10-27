@@ -11,7 +11,7 @@ supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% 
 - **READY:** T 4th #1734 (KS-1589 A, head b6c678248c98, tier 2). Held for ONE batched tier-2 gate with the wave's next READYs (S's three, R's KS-1746, T's B and C).
 - **Committed, waiting on the lock:** R 5th KS-1746 item 5 c5b75d4adacc; S 4th KS-1754 21602841b + KS-1753 5f0476f41 (KS-1752 pushed, PR not yet opened); T 4th KS-1505 b627c7e22 + KS-1667 56ddf5d49.
 - **Standing lines added today (this seat):** Linear markdown normalisation; two-doc rule; lock acquired only by own mkdir; anchored pre-push pattern; short private TMPDIR; release deletes holder before rmdir.
-- fleet_ack: T's "#1734 READY" flag not yet cleared (collector lag): re-run.
+- fleet_ack: all flags cleared 12:5x.
 
 ## ⏩ CHECKPOINT 12:1x 27 Oct (the 11:01 seat, ctx 66%) — READ THIS FIRST, supersedes every block below where they differ
 - **Floor (wave 2, all Opus 5 = launcher pin, accepted):** %30 **Seat R 5th** (lane 6: KS-1746 item 5 built 68/0 -> 75/0, waiting on its full run-shell-suites before push; then KS-1750, KS-1738 shapes 1+2 accepted) · %31 **Seat S 4th** (lane 7: KS-1752 committed 336143384 unpushed = old item 2, escape clause for docs; KS-1754 building = old item 3, MUST append both Projects Documents HTML docs; KS-1753 = old item 1) · %32 **Seat T 4th** (lane 8: KS-1589 A committed d2e73c0b2, push in flight; then KS-1505 part 1, KS-1667; N8 deviation accepted) · %1 monitor. Briefs: fleet/briefs_staged/2026-10-27_seat{R_lane6,S_lane7,T_lane8}_*.md.
