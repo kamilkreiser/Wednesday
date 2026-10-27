@@ -50893,5 +50893,36 @@
    "CARD wed-morning-plan-1027",
    "CARD datasec-morning-plan-1027"
   ]
+ },
+ {
+  "id": "nexusai-rd897-dead-anomaly-filter-1028",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI RD-897: the anomaly filter has no caller - leave it or retire it?",
+  "bluf": "RD-897 asked for a guard on a second reader of the risk level, the anomaly filter in the dashboard script. A read-only search of NexusAI main this morning found nothing that can call it: no caller in 784 files, and the page's click dispatch does not reach it either. So a guard would protect code that never runs. Leave it (close RD-897 as unreachable), or retire the dead code in a gated pull request? (The prior-ruling check matched three unrelated cards on the words 'dead' and 'filter' only; none is about RD-897.)",
+  "default_action": "If no answer by 12:00 today: option a (record and close; no code change).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Leave it; close RD-897 as unreachable",
+    "detail": "A records seat writes the search result on RD-897 and closes it. No code changes."
+   },
+   {
+    "key": "b",
+    "label": "Retire the dead code in a gated PR",
+    "detail": "A builder deletes the unused filter and its display helper from the dashboard script; a gate proves nothing called them and the suites stay green. It is a product byte, so it goes through the usual gate and CodeQL; not deployed until you say."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-28T06:06:47.737083+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-08 09:57",
+   "2026-09-08 10:04",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter",
+   "CARD wed-schedulers-dead-since-0907"
+  ]
  }
 ]
