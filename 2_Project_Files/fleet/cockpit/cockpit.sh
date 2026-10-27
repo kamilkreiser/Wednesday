@@ -268,7 +268,10 @@ case "${1:-}" in
     fi
     if [ "$1" = resolve ]; then echo "would launch pane '$2': bash \"$LPATH\""; exit 0; fi
     "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session — run 'cockpit.sh up' first"
-    add_pane "$2" "bash \"$LPATH\""
+    # SEAT_MODEL_ENV (optional): launch a Secuura seat on this model via its launcher's
+    # SECUURA_SEAT_MODEL override (Kam ruling c, 2026-10-27; the launcher allow-lists it).
+    # Unset = byte-identical to the old command. Scoped to this one pane command.
+    add_pane "$2" "${SEAT_MODEL_ENV:+SECUURA_SEAT_MODEL=$SEAT_MODEL_ENV }bash \"$LPATH\""
     ;;
   layout)
     "$TMUX_BIN" has-session -t "$SESSION" 2>/dev/null || die "no fleet session"
@@ -535,7 +538,7 @@ PYMAIL
       exit 0
     fi
     "$TMUX_BIN" kill-pane -t "$PANE"
-    add_pane "$NAME" "bash \"$LPATH\""
+    add_pane "$NAME" "${SEAT_MODEL_ENV:+SECUURA_SEAT_MODEL=$SEAT_MODEL_ENV }bash \"$LPATH\""
     if [ -n "$WRAPPED" ]; then
       echo "$(date '+%F %T') rotate '$NAME': wrap mail at $WRAPPED UTC — clean rotation" >> "$RLOG"
       echo "rotate: '$NAME' wrapped (mail at $WRAPPED UTC) — old pane killed, fresh session launched"
