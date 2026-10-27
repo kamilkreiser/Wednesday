@@ -6,6 +6,12 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 02:4x 28 Oct (the 00:0x overnight seat, ctx 70%) — READ THIS FIRST, supersedes the 02:1x block where they differ
+- **develop = 9b698b7aa1f8** (#1762, X 2nd's one-block docs fix: Peter's #1759 had left systemTest html_docs_matrix RED, which blocks every pre-push; Wednesday reproduced it and verified the merge at origin). Tell Kam in the morning (Peter is told by Kam, not by agents).
+- **Wave 4, all pushes RESUMED 02:38** (mail "docs fix merged - pushes may resume"): W 2nd %42 KS-1765 · X 2nd %44 KS-1769 (committed 88b9af64543a; tier-1 OPUS gate on its READY) · Y 2nd %43 KS-1766 (6fb92c0a310a) + KS-1771 (local; verification.ts:1067 under option (a) vs Peter's #1756) · Z 2nd %45 KS-1772 (127b24313956) + KS-1767 (local) · AA 2nd %46 KS-1757 (228c3c49bbcd) + KS-1760 (29fef343094c). All may gh pr create/edit their OWN PRs with the project token (kksecura). Second tickets may be built locally; push order first ticket first.
+- **NEXT:** READYs -> batch tier-2 gates (X's KS-1769 tier 1, Opus) -> Wednesday completion check -> merge GOs SEQUENTIAL (all five append to the two Projects Documents docs: section numbers renumbered at MERGE time) -> scores + pane_close. A deploy round only after merges, and only KS-1757 (yaml), KS-1769, KS-1771/1772 are runtime-visible.
+- **FILING LIST (next board seat):** demo .env 644; KS-1634 Done (deployed); Z's two pre-existing ESLint warnings in originate adminConfig.ts (~2168 prefer-const `copied`, ~2208 unused `e`); KS-1764 owner question. **Cards for Kam (morning):** KS-1773 document-lookup posture; KS-1657 Spark near-miss ruling. **Durable fix owed:** a seat must learn its lane at boot (W 2nd booted letterless).
+
 ## ⏩ CHECKPOINT 02:1x 28 Oct (the 00:0x overnight seat, ctx 65%) — READ THIS FIRST, supersedes every block below where they differ
 - **Deploy round DONE:** both boxes on 061c3a4f62d5 (kintsugi 00:42, demo 01:25 AEDT); notices posted (Peter KS-485 75313835, Stuart KS-772 3cef69f4) with Wednesday's three edits; KS-1753 + KS-1484 Done. D 36th 0.97 and G 25th 0.95, both panes closed. Kam told (bf-2bc0eaf4c807, bf-be3cb92a5a76).
 - **develop = ba9e8fad7** (Peter's merges past the pin; 0 Blockchain/Dev files).
