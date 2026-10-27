@@ -7,6 +7,7 @@ supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% 
 ---
 
 ## ⏩ CHECKPOINT 13:2x 27 Oct (the 11:01 seat, ctx 77%) — READ THIS FIRST, supersedes every block below where they differ
+- 🔴 **14:5x STATE: the Spark is MID-TEST — `docker ps` shows only `dsv4-ssd-iq2xxs-36g-cold` (Up, unhealthy at 2 min); DeepSeek is STOPPED. If this seat rotated before the agent reported, the successor's FIRST act is the restore below, then re-commission. Gate b3 also in flight (no verdict file yet at 14:5x).**
 - 🔴 **SPARK AGENT IN FLIGHT (in-session, DIES at a rotation):** Kam 13:23:29 asked to measure V4 Flash on the Spark with part on SSD (a Spark vs a 128 GB Studio). Brief: 2_Project_Files/local-model/spark-ab/BRIEF_QUANT_SSD.md. Opus agent commissioned 13:2x. **If this seat rotated before its report: FIRST `ssh ZGX-Nano-G1n 'docker ps'`; if `deepseek-v4-flash-spark-deepseek-v4-flash-1` is not Up, stop any other model container (never remove), `docker start` it, wait for health, prove it answers; then re-commission from the brief file.** Report -> 0_Brain/reference/2026-10-27_deepseek-ssd-on-spark/report.md, then a short table to Kam on the panel.
 - **Gate batch 1 MERGED:** #1735 cbcbf4a5d3dd, #1734 bc958363c549, #1736 f3042778cd0e = develop (verified first-parent). All undeployed (test/comment only).
 - **Lock incidents resolved:** S's driver deadlock fixed by S; yield rule coded by S and T; R got its window.
