@@ -1,11 +1,11 @@
 ## NEW SEAT: you are Seat G 25th in pane %__ (Wednesday fills the pane id from the launcher's "pane ... added (%NN)" line; if `$TMUX_PANE` differs, trust `$TMUX_PANE`, say so in your plan confirmation; lane Secuura/Blockchain-G, BOARD HYGIENE, NO CODE, on SONNET): file or comment the day's FILING LIST facts and triage the wave-2/wave-3 tickets, each after a board search with a positive control and a fresh zero control
 
-**Routing receipt:** `model: claude-sonnet-5-5 -- C2 (Linear filing and comments against stated facts; no code, no repo write) -- P1-P4: Linear writes on the board account, a scratch clone for read verbs`. Wednesday launches this seat with `SEAT_MODEL_ENV=claude-sonnet-5-5` (STANDING_LINES 2026-10-27: never `/model` afterwards); the launcher prints `[seat-model] launching on <model>`, quote that line in your plan confirmation. **Spark: not eligible** (board work, no code).
+**Routing receipt:** `model: claude-sonnet-5-5 -- C2 (Linear filing and comments against stated facts; no code, no repo write) -- P1-P4: Linear writes on the board account, a scratch clone for read verbs -- gauge 51% (usage_wednesday.json, 13:09Z)`. Wednesday launches this seat with `SEAT_MODEL_ENV=claude-sonnet-5-5` (STANDING_LINES 2026-10-27: never `/model` afterwards); the launcher prints `[seat-model] launching on <model>`, quote that line in your plan confirmation. **Spark: not eligible** (board work, no code).
 
 **Why you exist:** Kam, 2026-10-27 15:42:59 (live board, verbatim): "please refocus on the tickets and clearing as many as possible". Wave 3 is complete: all 13 wave-3 PRs (#1743-#1755) are merged, with wave 2 (#1734-#1742) that is 22 PRs plus Peter's own #1757, develop `061c3a4f62d563e723b8cee5fe792b4c27dc3014`. Seat G 24th (its READY 05:39Z, wrap 05:46Z) already did the first five findings and an early Done-triage: it filed KS-1759, KS-1760, KS-1761, commented on KS-1329, KS-1748, KS-1621, moved KS-1750, KS-1738, KS-1667, KS-1159, KS-1754 to Done and filled 11-13 assignees. Since then the seats of wave 3 wrote a FILING LIST of follow-up facts into the daily note that no board seat has read, and the PRs for the wave-3 tickets merged. You put those facts on the board and close what is genuinely closed, so the next fleet works from an accurate board. The deploy seat (Seat D 36th) is deploying `061c3a4f62d5` in parallel and owns the RUNTIME tickets.
 
 ## BLUF
-1. **Section 1: the FILING LIST, 14 items (F1-F14) plus one comment (F15).** Every item carries its source (seat and time) and the `file:line` as written there, and the drafter's re-read of that `file:line` at develop `061c3a4f62d5`. Re-read each at YOUR tip before you write a word. The drafter marks which items the board already holds (comment on that ticket, or "covered, no write") from a pre-search that you re-run.
+1. **Section 1: the FILING LIST, 14 items (F1-F14), one comment (F15), and F16 (added by Wednesday 00:1x from Seat D 36th's live point (i)).** Every item carries its source (seat and time) and the `file:line` as written there, and the drafter's re-read of that `file:line` at develop `061c3a4f62d5`. Re-read each at YOUR tip before you write a word. The drafter marks which items the board already holds (comment on that ticket, or "covered, no write") from a pre-search that you re-run.
 2. **Section 2: Done-triage.** Move a ticket to Done ONLY if (a) it is test/doc-only (no runtime surface) AND (b) every item of the ticket is landed on develop at your tip. Runtime tickets wait for the deploy seat. A partial ticket stays open with a comment naming what is still open. The drafter's reading is a table; it is evidence to check, not a decision.
 3. **File a filing-list ticket BEFORE moving a Done candidate whose only record of that fact is inside it** (the pattern G 24th used for KS-1750): F3 before KS-1756, F8 before KS-1484 (not yours to move), F11 before KS-1637, F12 before KS-1620, F14 before KS-1529, F10 before KS-1621.
 4. **No code, no push, no PR, no merge, no deploy, no box, no Docker, no `git config`.** Your writes are Linear tickets, comments, assignee changes, state moves named in Section 2, and your handover folder.
@@ -51,6 +51,8 @@ Source = the seat's STATUS/READY/WRAP as relayed in Wednesday's daily note, so e
 
 **F15. One-line follow-up on KS-1493** (Seat X 1st wrap, 22:19 / 11:17Z). Fact: X's earlier KS-1493 comment (its only comment, 2026-10-27T07:59:05Z, PR #1751 "READY FOR GATE ... reports CONFLICTING, in the two HTML docs only") now reads stale: #1751 merged as `49cc8e367596` after the docs were rebuilt. Add ONE comment on KS-1493, facts only: merged sha, that the ticket stays open for N2, and the gate-f INFO on the v2 alias mount (F13 i). Drafter re-read: `git log --first-parent` shows `49cc8e367 Refs KS-1493 N1: pin the verification limiter above the audit middleware (#1751)`.
 
+**F16. Unauthenticated `GET /api/platform/document-lookup` answers 400, not 401** (Seat D 36th STATUS A, 2026-10-27T13:07Z, point (i), BOTH boxes, live, added by Wednesday 2026-10-28 00:1x after the drafter). Fact as written: with no credentials the route answers 400 `"hash or documentId query parameter is required"`, 107 B, sha16 `31431d4f1093ee22`; the deploy brief had expected 401. Not established (Wednesday did not open the route): whether the route is PUBLIC BY DESIGN (a document-verification lookup), whether its auth middleware runs after the query validation, and what it answers with valid parameters and no credentials. Instrument: read the route's mount and middleware chain in `services/api-gateway/src/routes/platform.ts` and its `security:` field in the published yaml at your tip. Kam ruled the neighbouring posture on 2026-10-27 08:08 (card `secuura-ks1358-405-before-auth-posture-1027` = a: keep 405 + Allow before auth; KS-1358 records it): read KS-1358 before writing. If the route is public by design per its own yaml, record "public by design, no write" in your READY. Otherwise search (`document-lookup`, `hash or documentId`) and comment on the home ticket or file ONE facts-only ticket (api-gateway unit suite), no fix shape.
+
 **Not filing-list items, so do nothing (but know them):** Seat Y 1st's 16:42 observation that the shared checkout's `refs/remotes/origin/develop` moved (Wednesday's question to ask at a wrap); Seat Z 1st's 16:56 report that `2_Project_Files/.git/config` carries the Secuura identity (Wednesday read it as correct); S 4th's earlier items are G 24th's. `KS-1757`/`KS-1758` (the #1740 findings) exist: do not duplicate. KS-658's kintsugi comment (D 35th's finding) is already on the ticket (2026-10-27T00:55Z) and KS-1751 holds kintsugi's two simulated+confirmed rows.
 
 ### 2. Done-triage (Done only with evidence at source; nothing archived)
@@ -93,7 +95,7 @@ Notes: (a) every ticket above is already assigned to the board account at the dr
 
 ## PARTITION
 **Yours:** Linear only (the KS team), `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-g-board` (read verbs), and your handover folder `5_Project_History/2026-10-27_seatG-25th/`. **No repo file.**
-**NOT yours, live beside you:** Seat D 36th (deploys `061c3a4f62d5` to both boxes; owns the runtime Done moves KS-1753 and, on Wednesday's word, KS-1484); build seats may still be on the floor; a gate seat may be live. Do not touch their tickets' state except as Section 2 states.
+**NOT yours, live beside you:** Seat D 36th (deploys `061c3a4f62d5` to both boxes; owns the runtime Done moves KS-1753 and, on Wednesday's word, KS-1484). At your launch the floor is Seat D 36th (pane %40) and the fleet monitor only (Wednesday's `tmux list-panes`, 2026-10-28 00:1x); if Wednesday launches another seat, you get a mail naming it. Do not touch their tickets' state except as Section 2 states.
 
 ## UNMEASURED (WHY, and WHICH instrument closes it)
 - **Every relayed figure** (W's 3/31, 1 in 3, 35 sites; Y's helper default; Z's equivalent mutant; AA's 12 lines; the gates' mutants): carried from Wednesday's daily note, not run by the drafter, who ran no suite. Closed by reading the cited file at your tip, and by the gate verdict files for F11, F13.
@@ -108,7 +110,12 @@ RULED BY KAM, NOT YET IN AN ARTEFACT
 - Kam 2026-09-07 13:23: one ticket when one test pass proves it; split only for separate fixes (STANDING_LINES line 86).
 - Kam 2026-09-14 08:55: truly duplicate tickets are closed and archived by the board seat with no external review (STANDING_LINES line 252): none is proposed here; no duplicate was proved.
 
+RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE
+- 2026-10-27 23:59 AEDT, PLAN GO to Seat D 36th: KS-1484 moves to Done AFTER both boxes are deployed, with the wording "delivered and gate-verified over HTTP with no database; not observed live"; KS-1753 Done after deploy; KS-1524 untouched. Seat D 36th makes those moves, not you (Section 2 note (d)).
+- 2026-10-27 STANDING_LINES: a Secuura brief queuing a test change grants the two `Projects Documents/*.html` docs; this brief queues no test change, so the two docs are read-only to you.
+
 PROVENANCE:
+- F16 (document-lookup 400) | Seat D 36th STATUS A mail `[Secuura/Blockchain-D -> Wednesday] STATUS A Seat D 36th`, 2026-10-27T13:07:27Z, read whole by Wednesday | read 2026-10-28
 - Pin `061c3a4f62d563e723b8cee5fe792b4c27dc3014` | `ls-remote origin refs/heads/develop` equal to `rev-parse FETCH_HEAD` after `git fetch origin develop` in the scratchpad copy /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/a0e8f5cf-3f62-4936-bb4f-2deaf4ae7654/scratchpad/dv | read 2026-10-27 23:4x AEDT
 - The FILING LIST entries F1-F15 (seat, time, text) | /Volumes/DevMASTER/WEDNESDAY/0_Brain/daily/2026-10-27.md lines 184, 186, 187, 191, 192, 196, 203, 204, 207, 217, 219, 222, 230 (the "FILING LIST" entries at those lines; located with a case-insensitive awk, 15 lines incl. 173 and 247 which only mention the list) | read 2026-10-27
 - The `file:line` re-reads (F1-F14) | `git show 061c3a4f6:<path>` / `git grep -n` in the same copy; F7 by the `<h2>` order | read 2026-10-27
@@ -116,7 +123,7 @@ PROVENANCE:
 - Gate g (#1755) GO, emit hash `6bfef20abaf295a6` | /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-27_gate-g-batch/verdict.md | read 2026-10-27
 - Merge list and squash shas | `git log --first-parent --format='%h %an %s' c3eb63c9d23b..061c3a4f62d5` in the same copy | read 2026-10-27
 - Board pre-search counts (KS-1531 positive control 24; zero control 0; the F-item tokens) | Linear GraphQL `issues(includeArchived:true, ...)` paginated to the end, 23:4x AEDT | read 2026-10-27
-- Linear reads below: GraphQL, `comments(first:50)` sorted client-side by `createdAt` (times in UTC); control KS-999999 = 0 nodes
+- Method of the Linear reads below: GraphQL `comments(first:50)` sorted client-side by `createdAt` (times in UTC), control KS-999999 = 0 nodes | Linear GraphQL API, drafter's reads | read 2026-10-27
 - KS-999999 not found on the board (0 nodes) | Linear ticket KS-999999 | read 2026-10-27
 - KS-1621 state (In Progress, assignee kamil.kreiser@secuura.ai, 2 comments, last comment 2026-10-27T05:50:06Z) | Linear ticket KS-1621 | read 2026-10-27
 - KS-1529 state (In Progress, assignee kamil.kreiser@secuura.ai, 1 comments, last comment 2026-10-27T06:03:44Z) | Linear ticket KS-1529 | read 2026-10-27
@@ -152,4 +159,41 @@ PROVENANCE:
 - KS-1168 state (Backlog, assignee kamil.kreiser@secuura.ai, 0 comments, last comment none) | Linear ticket KS-1168 | read 2026-10-27
 - KS-1751 state (Backlog, assignee kamil.kreiser@secuura.ai, 1 comments, last comment 2026-10-27T00:56:31Z) | Linear ticket KS-1751 | read 2026-10-27
 
-SELF-CHECK: (Wednesday stamps)
+- KS-1000 state (In Review, assignee kamil.kreiser@secuura.ai, 5 comments, last comment 2026-10-12T08:20:17.726Z) | Linear ticket KS-1000 | read 2026-10-28
+- KS-1053 state (Backlog, assignee kamil.kreiser@secuura.ai, 8 comments, last comment 2026-10-26T23:21:18.101Z) | Linear ticket KS-1053 | read 2026-10-28
+- KS-1146 state (Backlog, assignee kamil.kreiser@secuura.ai, 0 comments, last comment none) | Linear ticket KS-1146 | read 2026-10-28
+- KS-1150 state (In Progress, assignee kamil.kreiser@secuura.ai, 5 comments, last comment 2026-09-14T04:34:50.895Z) | Linear ticket KS-1150 | read 2026-10-28
+- KS-1151 state (Done, archived, assignee kamil.kreiser@secuura.ai, 4 comments, last comment 2026-09-14T04:25:59.890Z) | Linear ticket KS-1151 | read 2026-10-28
+- KS-1186 state (In Review, assignee kamil.kreiser@secuura.ai, 2 comments, last comment 2026-10-12T08:34:25.354Z) | Linear ticket KS-1186 | read 2026-10-28
+- KS-1232 state (In Progress, assignee kamil.kreiser@secuura.ai, 2 comments, last comment 2026-10-12T16:36:55.169Z) | Linear ticket KS-1232 | read 2026-10-28
+- KS-1346 state (In Progress, assignee kamil.kreiser@secuura.ai, 7 comments, last comment 2026-10-09T07:39:18.665Z) | Linear ticket KS-1346 | read 2026-10-28
+- KS-1347 state (Done, archived, assignee unassigned, 5 comments, last comment 2026-10-12T20:33:19.597Z) | Linear ticket KS-1347 | read 2026-10-28
+- KS-1355 state (In Review, assignee kamil.kreiser@secuura.ai, 4 comments, last comment 2026-10-12T20:28:47.228Z) | Linear ticket KS-1355 | read 2026-10-28
+- KS-1358 state (Done, assignee kamil.kreiser@secuura.ai, 1 comments, last comment 2026-10-26T21:15:26.610Z) | Linear ticket KS-1358 | read 2026-10-28
+- KS-1390 state (Todo, assignee kamil.kreiser@secuura.ai, 1 comments, last comment 2026-09-29T12:41:18.910Z) | Linear ticket KS-1390 | read 2026-10-28
+- KS-1505 state (In Progress, assignee kamil.kreiser@secuura.ai, 1 comments, last comment 2026-10-27T02:04:10.326Z) | Linear ticket KS-1505 | read 2026-10-28
+- KS-1510 state (In Review, assignee unassigned, 1 comments, last comment 2026-10-12T15:08:02.566Z) | Linear ticket KS-1510 | read 2026-10-28
+- KS-1519 state (Done, archived, assignee unassigned, 1 comments, last comment 2026-10-12T16:03:29.064Z) | Linear ticket KS-1519 | read 2026-10-28
+- KS-1525 state (In Progress, assignee unassigned, 2 comments, last comment 2026-10-19T01:30:57.806Z) | Linear ticket KS-1525 | read 2026-10-28
+- KS-1541 state (In Review, assignee kamil.kreiser@secuura.ai, 2 comments, last comment 2026-10-18T09:48:04.654Z) | Linear ticket KS-1541 | read 2026-10-28
+- KS-1555 state (In Progress, assignee unassigned, 0 comments, last comment none) | Linear ticket KS-1555 | read 2026-10-28
+- KS-1619 state (In Progress, assignee kamil.kreiser@secuura.ai, 5 comments, last comment 2026-10-18T13:03:19.309Z) | Linear ticket KS-1619 | read 2026-10-28
+- KS-1628 state (Done, assignee peter@obeden.com, 3 comments, last comment 2026-10-18T22:35:46.900Z) | Linear ticket KS-1628 | read 2026-10-28
+- KS-1635 state (Done, assignee unassigned, 2 comments, last comment 2026-10-26T14:38:24.489Z) | Linear ticket KS-1635 | read 2026-10-28
+- KS-1638 state (In Review, assignee unassigned, 1 comments, last comment 2026-10-19T05:40:20.659Z) | Linear ticket KS-1638 | read 2026-10-28
+- KS-1643 state (Done, assignee unassigned, 4 comments, last comment 2026-10-27T01:03:41.066Z) | Linear ticket KS-1643 | read 2026-10-28
+- KS-1692 state (In Progress, assignee kamil.kreiser@secuura.ai, 2 comments, last comment 2026-10-20T03:11:26.196Z) | Linear ticket KS-1692 | read 2026-10-28
+- KS-1729 state (Done, assignee kamil.kreiser@secuura.ai, 3 comments, last comment 2026-10-26T19:42:18.331Z) | Linear ticket KS-1729 | read 2026-10-28
+- KS-1734 state (Done, assignee kamil.kreiser@secuura.ai, 2 comments, last comment 2026-10-26T23:23:43.397Z) | Linear ticket KS-1734 | read 2026-10-28
+- KS-1757 state (Backlog, assignee kamil.kreiser@secuura.ai, 0 comments, last comment none) | Linear ticket KS-1757 | read 2026-10-28
+- KS-1758 state (Backlog, assignee kamil.kreiser@secuura.ai, 0 comments, last comment none) | Linear ticket KS-1758 | read 2026-10-28
+- KS-658 state (Backlog, assignee kamil.kreiser@secuura.ai, 3 comments, last comment 2026-10-27T00:55:17.835Z) | Linear ticket KS-658 | read 2026-10-28
+- KS-682 state (Done, archived, assignee peter@obeden.com, 20 comments, last comment 2026-09-11T11:35:11.777Z) | Linear ticket KS-682 | read 2026-10-28
+- KS-800 state (Done, archived, assignee kamil.kreiser@secuura.ai, 8 comments, last comment 2026-09-14T12:08:20.314Z) | Linear ticket KS-800 | read 2026-10-28
+- KS-907 state (Tested Not Deployed, archived, assignee kamil.kreiser@secuura.ai, 4 comments, last comment 2026-09-14T12:15:49.642Z) | Linear ticket KS-907 | read 2026-10-28
+- KS-926 state (Done, archived, assignee kamil.kreiser@secuura.ai, 11 comments, last comment 2026-09-14T02:17:12.585Z) | Linear ticket KS-926 | read 2026-10-28
+- KS-950 state (Done, archived, assignee kamil.kreiser@secuura.ai, 9 comments, last comment 2026-09-13T11:31:24.783Z) | Linear ticket KS-950 | read 2026-10-28
+- KS-968 state (In Review, assignee kamil.kreiser@secuura.ai, 11 comments, last comment 2026-10-12T09:17:36.730Z) | Linear ticket KS-968 | read 2026-10-28
+- KS-971 state (Done, archived, assignee peter@obeden.com, 4 comments, last comment 2026-09-11T11:35:31.131Z) | Linear ticket KS-971 | read 2026-10-28
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-28 00:14
