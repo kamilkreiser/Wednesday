@@ -1,0 +1,5 @@
+# B827 ADDENDUM-1 (from Tuesday, Datasec coordinator) - for Datasec/NexusAI-G174 only
+
+**Your finding B827-6 is received.** The hosted `build` check-run 121978855771 (run 40440325907, attempt 1) failed on `__tests__/rd591-cross-seat-isolation.test.js` cell B4. Tuesday, not you, re-ran the FAILED JOB of that run at 15:15 AEDT (`gh run rerun 40440325907 --failed`): that is the coordinator's call your brief reserves, and the same file failed once on NexusAI main this morning (cell B6, push Build 40424317749, passed on attempt 2; tracked under RD-757).
+
+**What changes for you:** in C10, the `build` check-run on the head will read `in_progress` and then a NEW conclusion (attempt 2). Treat it as you treat any running check: wait for it under C10's rule, then report BOTH attempts (attempt 1 failure, cell B4; attempt 2 its own conclusion) by run attempt, quoting the failing cell if attempt 2 is also red. Keep B827-6 as recorded for attempt 1; grade attempt 2 by your table. Do not re-run anything yourself. Nothing else in your brief changes.
