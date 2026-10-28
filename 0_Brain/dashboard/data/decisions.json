@@ -51150,5 +51150,91 @@
   ],
   "delivered_artefact": "KS-772 comment 1441fefb-4628-4989-86b0-871ea956495c posted 2026-10-28T02:39:46Z as kksecura (Seat W 4th), body = 0_Brain/reference/2026-10-28_ks772-stuart-rows/comment.md (sha16 bfe692cf6bfe7068), 10/10 rows cross-checked, 1 mention stuart.jamieson; WhatsApp draft given to Kam 13:37",
   "delivered_ts": "2026-10-28T13:41:24.854997+11:00"
+ },
+ {
+  "id": "secuura-deepmerge-advisory-baseline-1028",
+  "client_project": "Secuura/Blockchain",
+  "title": "A new low-severity advisory (deepmerge) is blocking every Secuura push. Accept it in the baseline until 30 Nov?",
+  "bluf": "Since about 08:35 AEDT, every Secuura push has been refused by the security gate. A third-party advisory (GHSA-gcqx-w48m-w2h4, LOW: prototype poisoning in deepmerge) was updated overnight, and there is NO fixed version to upgrade to. Ticket KS-1784. In the 4 services that pin it (originate, governance, referral, vc-issuer) it is test-only (pulled in by Jest) and stripped from their images. In the mobile app it is a PRODUCTION dependency, via Expo's config tooling, but the mobile app's lockfile is outside the gate's scope altogether (KS-769). So the freeze comes only from the test-only pins, and accepting it hides no production exposure that the gate currently sees. It still comes to you: your 9 Sep rule sends any package found in both a test lock and a shipped product to you, whatever its severity. Precedent: on 26 Oct you accepted two HIGH advisories with no fix in range (KS-1723); this one is LOW. Our KS-1773 change is waiting behind it.",
+  "default_action": "If no answer: hold (nothing baselined, pushes stay blocked); the seat files the ticket either way.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept it until 30 Nov",
+    "detail": "a seat files the ticket and lands one baseline entry (reason, ticket, expiry 30 Nov, the shared re-review date already used by 5 entries), then pushes resume"
+   },
+   {
+    "key": "b",
+    "label": "Hold",
+    "detail": "nothing baselined; every Secuura push stays blocked until a fix is published or you decide otherwise"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-28T14:05:19.714904+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-28T14:40:49.555151+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-27 19:42",
+   "2026-08-28 09:33",
+   "2026-09-08 07:08",
+   "2026-09-10 18:01",
+   "2026-09-18 09:15",
+   "CARD secuura-ks1024-advisory-baseline",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD secuura-advisory-freeze-3-ghsa-1007",
+   "CARD secuura-advisory-freeze-lock-refresh-1021",
+   "CARD secuura-ks1723-zod-msal-high-baseline-1026"
+  ],
+  "amendments": [
+   {
+    "ts": "2026-10-28T14:10:08.830914+11:00",
+    "reason": "Seat W 4th read the gate's source: the mobile lock (the only PROD pin) is OUT OF SCOPE of the gate (lock-discovery.mjs:193, KS-769), so the freeze comes only from the dev-only pins; ticket KS-1784 filed.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "Since about 08:35 AEDT, every Secuura push has been refused by the security gate. A third-party advisory (GHSA-gcqx-w48m-w2h4, LOW: prototype poisoning in deepmerge) was updated overnight, and there is NO fixed version to upgrade to. Measured by me in the lockfiles at develop 65bc28234507: in the 4 services that pin it (originate, governance, referral, vc-issuer) it is test-only (pulled in by Jest) and stripped from their images (npm ci --omit=dev / npm prune --omit=dev in each Dockerfile). In the mobile app it is a PRODUCTION dependency, via Expo's config tooling. Under your 9 Sep rule, a package that appears in both a test lock and a shipped tree stops for you, whatever its severity. That is why this is on your desk and not just done. Today's change #1773 is waiting behind it. Precedent, read: on 26 Oct you accepted two HIGH advisories with no fix in range (KS-1723, a); this one is LOW. (Prior-ruling override: the gate matched 4 earlier advisory cards (24 Sep re-triage, 7 Oct, 21 Oct, 26 Oct), each about different advisories; none covers this one.)"
+    }
+   }
+  ],
+  "amended_ts": "2026-10-28T14:10:08.830948+11:00"
+ },
+ {
+  "id": "wed-spark-drafting-cost-1028",
+  "client_project": "WED",
+  "title": "Keeping the Spark busy costs about as much quota as it saves. Which way do you want it run?",
+  "bluf": "Today the Spark went 23 of 24 tasks (one failure: the first loose brief, a patch formatting error). But every task has to be written by a Sonnet helper first, about 7 minutes and roughly 40 to 50 thousand tokens per task, which is about what a Sonnet seat spends just doing the ticket. So with Claude writing the briefs, the Spark gives us capability data but not a quota saving. The cheap way to keep it busy is review work: running its checks and second-opinion reviews on PRs Claude has already raised needs almost no drafting. (Prior-ruling override: the gate matched a 16 Oct gate-timing card and a 26 Oct Ornith test card on the word 'Spark' only; neither covers this.)",
+  "default_action": "If no answer: option a (the Spark stays busy, but mostly on low-cost review work).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Cheap work first",
+    "detail": "keep it busy mainly with checks and shadow reviews on raised PRs; write new briefs only for genuinely new kinds of task (harder ones, to find its limit)"
+   },
+   {
+    "key": "b",
+    "label": "Keep briefing as today",
+    "detail": "full batches of tickets; the quota goes on drafting but we learn more, faster"
+   },
+   {
+    "key": "c",
+    "label": "Pause it",
+    "detail": "let Sonnet do the tickets directly until a cheaper way to brief exists"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-28T14:56:38.626434+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD wed-ledger-boot-cost",
+   "CARD spark-studio-client-scope",
+   "CARD spark-recreate-serving-container",
+   "CARD secuura-gate-at-99pct-two-spark-prs-1016",
+   "CARD wed-ornith-122b-test-on-spark-1026"
+  ]
  }
 ]
