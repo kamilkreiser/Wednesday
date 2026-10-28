@@ -6,6 +6,15 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 01:5x 29 Oct (the 22:3x boot seat, ctx 70%) — READ THIS FIRST, supersedes every block below where they differ
+- **develop = cc262c1b6d18.** Tonight: #1783, #1777, #1778 and #1784 merged, each verified at origin by Wednesday (tree = head tree, single parent). NOT deployed (boxes on bd6697e079fc). A deploy round is owed under the October grant (kintsugi first, Opus C6 deploy seat, Phase 0 re-tag, KS-535) once more of the chain lands.
+- **NEXT MERGE: #1779 (91, R 6th)**, PREP GO sent 01:54 (no code change; blobs must equal gated bb7a646c8db4). Then: #1786 (92, Z 3rd; mail "prep #1786 now") -> #1782 (93, Y 4th) -> brief **X 4th** from X 3rd's HANDOVER for #1785 (94) and #1788 (95) -> #1787 (96, R) -> #1789 (97, name a live seat) -> #1791 (98, R + non-ASCII cell) -> Y's KS-1240 b PR (99, needs its own tier-1 gate when opened) -> #1790/#1792/#1794 (100-102, T) -> #1793 (103, R) -> gate 9's PRs (104+).
+- **Per-step completion check** (Wednesday's cache clone local-model/spark/cache/src, `fetch origin refs/pull/N/head:refs/wed/prN +develop:refs/wed/develop`; merge-tree is refused by the hook outside WEDNESDAY, so ancestry plus blob compare is the check): ancestry · code/test blobs = gated head · word-diff of any owed wording fix · docs 0 removed lines + the one h2 · push_queue.sh list -> head-pinned GO -> verify the squash at origin (tree + parent) -> tell the next author to prep.
+- **GATE 9 IN FLIGHT (in-session Opus, DIES at a rotation; re-commission from the 2026-10-29 01:34 note line):** tier 1 over #1796, #1798 (K), #1797, #1799 (R) -> 0_Brain/reference/2026-10-29_gate9-tier1/verdict.md.
+- **TIER-2 WAITING:** #1795 (R H1). Its Spark half is DONE (0_Brain/reference/2026-10-29_sparkhalf-1795/verdict.md: real 12/0 vs 6/6, byte-identical, Spark NO GO void). The Claude half batches with the next tier-2 READYs.
+- **Floor:** %54 R 6th (prep #1779) · %56 Y 4th (holding for 93; ctx 64%) · %57 AA 4th (BOTH MERGED: owes its wrap -> score + pane_close) · %59 Z 3rd (holding for 92) · %62 T 5th (holding for 100-102) · %64 K 13th (both PRs in gate 9). CAPACITY: room when AA closes; the next lane is 26 (staged, needs a read + KS-1783 dropped).
+- Nothing open with Kam. Usage ~85%.
+
 ## ⏩ CHECKPOINT 00:5x 29 Oct (the 22:3x boot seat, ctx 65%) — READ THIS FIRST, supersedes every block below where they differ
 - **develop = 8fbda28e6e79** (#1777 merged and verified at origin: tree 2c67b56e362f = head tree, single parent bf681065124b). NOT deployed.
 - **NEXT MERGE: #1778 (89, AA 4th)**, prep committed locally (merge head a08f6d8b63df, wording narrowed, 46f90ab8 edited), QUEUED behind R. On its PUSHED mail: completion check = gated a4c698922472 blobs except auth.openapi.ts (2 sites) + regenerated yaml + ks839 pin + ks1210 header (AA's 6 files) + docs 89 only -> read push_queue -> head-pinned GO -> verify at origin -> AA preps #1784 (90).
