@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-29 05:30 from 254 lesson files (1,106,940 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 209. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-29 07:42 from 254 lesson files (1,107,965 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 209. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7273,6 +7273,8 @@ sections (open the file for these): How to apply
 **His words, verbatim (answering the morning receipt and card `secuura-92pct-stop-ready-work-waits-1014`):**
 > *"thank you. please move to working with the spark.  going forward once we reach 80 - 90% should be the start of limited cloud model usage and a focus on you and the spark"*
 
+sections (open the file for these): EXTENSION 2026-10-29 07:29:41 — Kam, live board (view=wednesday), verbatim: *"with usage at 92%, lets work on you and the spark with minimal (but used when necessary) Claude agents"*
+
 **How to apply:**
 1. Read the gauge at every checkpoint and before every launch, in the same action as the decision.
 2. In the 80–90% band, every cloud launch receipt carries `cloud (80-90% band): <why not Spark/Wednesday>`.
@@ -7281,6 +7283,11 @@ sections (open the file for these): How to apply
 5. **Mechanism:** the 80% advisory belongs in `fleet/usage_gate.sh` beside the 90% refusal (rc 0, loud, naming this file). Shared tooling: claim first (`wed_claim.sh`).
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the hard stop above 90%, unchanged) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-10-06_past-70pct-spark-takes-80pct-of-tasks]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+## EXTENSION 2026-10-29 07:29:41 — Kam, live board (view=wednesday), verbatim: *"with usage at 92%, lets work on you and the spark with minimal (but used when necessary) Claude agents"*
+- **Restated by Kam at 92%**, eight seconds before ruling the morning card `wed-morning-plan-1029` = a ("Carry on with the plan"). Read together: the plan stands (finish the merge chain, then a deploy round kintsugi -> demo), and its SHAPE moves to Wednesday + the Spark.
+- **Wednesday's reading, receipted on the panel (bf-764c80d34b23) with a correction offer:** seats already mid-chain (R 7th, U 5th) finish their in-flight merges (repo write is a "necessary" Claude use: no local tier has it); NO new build seats; the Spark gets the next tasks, briefed by Wednesday herself (no drafter); the deploy round is ONE Opus seat (box rights = necessary). A launch receipt names which "necessary" clause applies.
+- **Expiry:** an EVENT: the allowance renewal (statusline `renews`), an account switch, or his word. Not renewed by inference.
 
 
 ## A sync is not done until every folder is counted on both sides; never delete or "clean space" on the strength of a folder existing

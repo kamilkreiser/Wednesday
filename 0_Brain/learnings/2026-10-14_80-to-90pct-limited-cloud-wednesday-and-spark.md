@@ -24,3 +24,8 @@ supersedes: the 70% thresholds in 2026-09-25_three-tier-routing-ornith-spark-clo
 5. **Mechanism:** the 80% advisory belongs in `fleet/usage_gate.sh` beside the 90% refusal (rc 0, loud, naming this file). Shared tooling: claim first (`wed_claim.sh`).
 
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the hard stop above 90%, unchanged) · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-10-06_past-70pct-spark-takes-80pct-of-tasks]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+## EXTENSION 2026-10-29 07:29:41 — Kam, live board (view=wednesday), verbatim: *"with usage at 92%, lets work on you and the spark with minimal (but used when necessary) Claude agents"*
+- **Restated by Kam at 92%**, eight seconds before ruling the morning card `wed-morning-plan-1029` = a ("Carry on with the plan"). Read together: the plan stands (finish the merge chain, then a deploy round kintsugi -> demo), and its SHAPE moves to Wednesday + the Spark.
+- **Wednesday's reading, receipted on the panel (bf-764c80d34b23) with a correction offer:** seats already mid-chain (R 7th, U 5th) finish their in-flight merges (repo write is a "necessary" Claude use: no local tier has it); NO new build seats; the Spark gets the next tasks, briefed by Wednesday herself (no drafter); the deploy round is ONE Opus seat (box rights = necessary). A launch receipt names which "necessary" clause applies.
+- **Expiry:** an EVENT: the allowance renewal (statusline `renews`), an account switch, or his word. Not renewed by inference.
