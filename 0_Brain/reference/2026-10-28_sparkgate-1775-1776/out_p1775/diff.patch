@@ -1,0 +1,148 @@
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts
+new file mode 100644
+index 000000000..86b64a9af
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts
+@@ -0,0 +1,73 @@
++// KS-1467 (packages/shared src/errors/index.ts, mounted by twelve services): AppError's constructor ended with `Object.setPrototypeOf(this, AppError.prototype)`, which resets EVERY subclass
++// instance to the base prototype, so `err instanceof <subclass>` was always false. The constructor now uses `new.target.prototype`. P1/P2/P3 pin the prototypes (three levels deep for
++// DocumentNotFoundError); C1/C2 pin what must not change: the status, the code, the details, and the handler's answer.
++import { describe, it, expect } from 'vitest';
++import type { Response } from 'express';
++import {
++  errorHandler,
++  AppError,
++  BadRequestError,
++  UnauthorizedError,
++  ForbiddenError,
++  NotFoundError,
++  ConflictError,
++  ValidationError,
++  RateLimitError,
++  InternalError,
++  ServiceUnavailableError,
++  DocumentNotFoundError,
++} from '../errors';
++
++const FACTORIES = [
++  { name: 'BadRequestError', make: () => new BadRequestError('x'), cls: BadRequestError, status: 400 },
++  { name: 'UnauthorizedError', make: () => new UnauthorizedError('x'), cls: UnauthorizedError, status: 401 },
++  { name: 'ForbiddenError', make: () => new ForbiddenError('x'), cls: ForbiddenError, status: 403 },
++  { name: 'NotFoundError', make: () => new NotFoundError('Thing'), cls: NotFoundError, status: 404 },
++  { name: 'ConflictError', make: () => new ConflictError('x'), cls: ConflictError, status: 409 },
++  { name: 'ValidationError', make: () => new ValidationError('x', { a: 1 }), cls: ValidationError, status: 422 },
++  { name: 'RateLimitError', make: () => new RateLimitError(5), cls: RateLimitError, status: 429 },
++  { name: 'InternalError', make: () => new InternalError('x'), cls: InternalError, status: 500 },
++  { name: 'ServiceUnavailableError', make: () => new ServiceUnavailableError('Billing'), cls: ServiceUnavailableError, status: 503 },
++] as const;
++
++function run(err: Error): { statusCode: number; body: { error: { code: string; message: string; details?: unknown } } } {
++  const captured = { statusCode: 0, body: undefined } as unknown as { statusCode: number; body: { error: { code: string; message: string; details?: unknown } } };
++  const res = {
++    status(code: number) {
++      captured.statusCode = code;
++      return this;
++    },
++    json(payload: unknown) {
++      captured.body = payload as typeof captured.body;
++      return this;
++    },
++  } as unknown as Response;
++  errorHandler(err, undefined, res, undefined);
++  return captured;
++}
++
++describe('KS-1467: shared AppError subclasses keep their own prototype', () => {
++  it.each(FACTORIES)('RED KS-1467 P1 $name: an instance is an instance of its own class', ({ make, cls }) => {
++    expect(make() instanceof cls).toBe(true);
++  });
++
++  it.each(FACTORIES)('RED KS-1467 P2 $name: the prototype of an instance is the class prototype', ({ make, cls }) => {
++    expect(Object.getPrototypeOf(make())).toBe(cls.prototype);
++  });
++
++  it('RED KS-1467 P3 a two-level subclass is an instance of every class in its chain', () => {
++    const e = new DocumentNotFoundError('d-1');
++    expect([e instanceof DocumentNotFoundError, e instanceof NotFoundError, e instanceof AppError]).toEqual([true, true, true]);
++  });
++
++  it.each(FACTORIES)('control KS-1467 C1 $name: an instance is still an AppError and an Error with its status', ({ make, status }) => {
++    const e = make();
++    expect([e instanceof AppError, e instanceof Error, e.statusCode]).toEqual([true, true, status]);
++  });
++
++  it('control KS-1467 C2 the handler still answers a ValidationError with its details and a 422', () => {
++    const r = run(new ValidationError('bad', { field: 'name' }));
++    expect(r.statusCode).toBe(422);
++    expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'bad', details: { field: 'name' } });
++  });
++});
+diff --git a/Blockchain/Dev/packages/shared/src/errors/index.ts b/Blockchain/Dev/packages/shared/src/errors/index.ts
+index 35aef367e..c9e11b92e 100644
+--- a/Blockchain/Dev/packages/shared/src/errors/index.ts
++++ b/Blockchain/Dev/packages/shared/src/errors/index.ts
+@@ -41,7 +41,7 @@ export class AppError extends Error {
+     this.isOperational = isOperational;
+     this.details = details;
+     
+-    Object.setPrototypeOf(this, AppError.prototype);
++    Object.setPrototypeOf(this, new.target.prototype);
+     Error.captureStackTrace(this, this.constructor);
+   }
+ }
+diff --git a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+index 09fd44750..7e87a5738 100644
+--- a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
++++ b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
+@@ -5101,5 +5101,21 @@ cd Blockchain/Dev/services/originate &amp;&amp; ../../node_modules/.bin/tsc --no
+ cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run                                                                             # 126 files / 1266 tests, rc 0
+ cd Blockchain/Dev &amp;&amp; npm run check:openapi                                                                                           # rc 0
+ cd Blockchain/Dev &amp;&amp; npm run check:test-types                                                                                        # rc 0; api-gateway 0 new</code></pre>
++<h2>84. AppError subclasses in packages/shared keep their own prototype, so <code>instanceof</code> on them is no longer always false (KS-1467)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> KS-1467, the packages/shared half (the services/auth half is a separate change): the constructor of <code>AppError</code> in <code>packages/shared/src/errors/index.ts</code> ended with <code>Object.setPrototypeOf(this, AppError.prototype)</code>, which reset every subclass instance to the base prototype. So <code>err instanceof NotFoundError</code>, and the same test on the other eight subclasses and on <code>DocumentNotFoundError</code>, was always false. The line now reads <code>Object.setPrototypeOf(this, new.target.prototype)</code>. A local model (the Spark, DeepSeek V4 Flash) wrote the patch; its checker passed 7 of 7 and the patch is byte-identical to the drafter&rsquo;s golden. It was applied here strictly and unchanged. </td></tr><tr><td>One product line changes (+1 / &minus;1). The new test is <code>packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts</code> (vitest, 29 cells). A search of non-test source in <code>services/</code> and <code>packages/</code> finds one code use of <code>instanceof</code> on one of these subclass names, in <code>services/auth/src/middleware/errorHandler.ts</code>, which defines its own classes and does not import these (plus one comment in <code>passwordLoginGate.ts</code>). No tier timing or budget in these documents moves.
++    </td></tr></table>
++<h3>84.1 Red-first, and the figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Measured at base <code>bd6697e079fc</code>, 2026-10-28 (UTC), Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions.</strong></td><td> vitest 4.1.12, TypeScript 5.9.3, npm 11.19.0, each read from the installed package. Host Node <strong>v26.8.1</strong>, which is <strong>not</strong> an LTS line, and no Node 24 run was made, so every figure below is a Node 26 measurement. </td></tr>
++<tr><td>The new file against the unfixed <code>errors/index.ts</code>: <strong>19 failed / 10 passed</strong> of 29. Every red is an <code>AssertionError</code> (P1 and P2 for nine classes each, and P3, the <code>DocumentNotFoundError</code> chain); the ten control cells C1 and C2 pass at base, as designed. With the fix: <strong>29 / 29</strong>.</td></tr>
++<tr><td>packages/shared suite by cell name: <strong>54 files / 1034 cells, 1 failed</strong> at the base; <strong>55 files / 1063 cells, 1 failed</strong> with the change. 0 cells vanished, 29 are new, 0 changed status. The one failure is the same cell on both sides: <code>wallet-signature.test.ts</code> &ldquo;accepts a valid wallet signature over the message&rdquo;. It fails on Node 26 because <code>cbor.encode</code> truncates every output to one byte there (measured: <code>encode([1,2,3])</code> returns <code>83</code>, not <code>83010203</code>); KS 1727 and KS 1739 track it.</td></tr>
++<tr><td>Type-check: <code>tsc --noEmit -p tsconfig.json</code> rc 0. A child tsconfig with <code>exclude</code> emptied compiled 1575 files, 57 of them under <code>__tests__</code>, the new test among them; it reports 24 errors in other test files (top-level await and <code>import.meta</code> under the package&rsquo;s commonjs module setting) and none in the two files of this change; a planted type error in the same program is reported (rc 2). Lint: <code>eslint</code> on the two files rc 0; <code>npm run lint</code> for the package exits 1 on a pre-existing <code>no-control-regex</code> error in <code>middleware/index.ts</code> (36 problems, none in these files; recorded in <code>BACKLOG.md</code>).</td></tr>
++</table>
++<h3>84.2 What the cells prove, and what they do not</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>The class hierarchy, not any service.</strong></td><td> The cells prove the prototype of an instance of each of the nine subclasses and of <code>DocumentNotFoundError</code> (a two-level subclass), that every instance is still an <code>AppError</code> and an <code>Error</code> with its status, and that <code>errorHandler</code> still answers a <code>ValidationError</code> with its details and a 422. The test imports the package by its source path; it runs no service. </td></tr><tr><td>Not measured: the suites of the other services that import these classes from <code>@secuura/shared</code> (only the packages/shared suite was run), the services/auth half of KS-1467, a running stack, the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a Node 24 LTS run, and any deploy. None of them is claimed as passing.
++    </td></tr></table>
++<h3>84.3 Running it</h3>
++<pre><code>cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts   # 29 cells, rc 0
++cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run                                                                                    # 55 files / 1063 cells; 1 failed on Node 26 (wallet-signature, KS 1727)
++cd Blockchain/Dev/packages/shared &amp;&amp; npx tsc --noEmit -p tsconfig.json                                                                 # rc 0</code></pre>
+ </body>
+ </html>
+diff --git a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+index a5c2927b4..2caf679dc 100644
+--- a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
++++ b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
+@@ -5193,5 +5193,25 @@ cd Blockchain/Dev &amp;&amp; npm run check:openapi</code></pre>
+ <tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>8894c7486f82</code>, 2026-10-27 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+ <tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+ </table>
++<h2>AppError subclasses in packages/shared keep their own prototype &mdash; KS-1467</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Every subclass of <code>AppError</code> in <code>packages/shared</code> (nine, plus <code>DocumentNotFoundError</code> under <code>NotFoundError</code>) used to be reset to the base prototype by the constructor, so <code>err instanceof NotFoundError</code> was always false. The constructor now uses <code>new.target.prototype</code> (one line). Status, code, details and the handler&rsquo;s answers do not change. </td></tr><tr><td>This is the shared half of KS-1467. The services/auth half (its own error classes) is a separate change. A local model wrote the patch; it is applied unchanged.
++      </td></tr></table></div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> Other services&rsquo; suites (only the packages/shared suite was run), a running stack, and a Node 24 LTS run (the host is Node 26.8.1). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
++      </td></tr></table></div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts   # 29 cells, rc 0
++cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run                                                                                    # 55 files / 1063 cells; 1 failed on Node 26 (wallet-signature, KS 1727)
++cd Blockchain/Dev/packages/shared &amp;&amp; npx tsc --noEmit -p tsconfig.json                                                                 # rc 0</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new file against the unfixed product line</td><td><strong>19 failed / 10 passed</strong> of 29, every red an AssertionError; the 10 controls pass at base</td></tr>
++<tr><td>new file, with the fix</td><td><strong>29 / 29</strong></td></tr>
++<tr><td>packages/shared, before &rarr; after</td><td><strong>54 files / 1034 cells &rarr; 55 files / 1063</strong>; 1 failed on both sides (the same <code>wallet-signature</code> cell, Node 26 only: <code>cbor.encode</code> truncates to one byte; KS 1727, KS 1739); 0 vanished, 29 new</td></tr>
++<tr><td>type-check</td><td><code>tsc -p tsconfig.json</code> rc 0; the tests-included program (1575 files) shows 0 errors in the two files of this change and 24 in other test files (module setting); planted-error control rc 2</td></tr>
++<tr><td>lint</td><td><code>eslint</code> on the two files rc 0; the package&rsquo;s <code>npm run lint</code> exits 1 on a pre-existing error elsewhere (<code>BACKLOG.md</code>)</td></tr>
++<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>bd6697e079fc</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+ </body>
+ </html>

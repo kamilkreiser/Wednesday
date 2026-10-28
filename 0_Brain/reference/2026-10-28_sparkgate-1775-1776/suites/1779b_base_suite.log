@@ -1,0 +1,494 @@
+
+ RUN  v4.1.12 /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth
+
+stdout | src/__tests__/auth.integration.test.ts
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/ks1005-change-password-reads-the-hash-it-verifies.test.ts (6 tests) 1479ms
+     ✓ RED KS-1005 cell D — the hash WRITTEN is a hash of the NEW password  322ms
+ ✓ src/__tests__/ks1407-change-password-revokes-the-sessions.test.ts (7 tests) 1605ms
+ ✓ src/__tests__/ks1407-change-password-refuses-when-the-store-cannot-revoke.test.ts (7 tests) 2035ms
+ ✓ src/__tests__/ks795-social-link-verified-email.test.ts (41 tests) 2075ms
+ ✓ src/__tests__/ks1407-reset-password-revokes-the-sessions.test.ts (7 tests) 2107ms
+ ✓ src/__tests__/ks1407-reset-password-refuses-when-the-store-cannot-revoke.test.ts (7 tests) 2292ms
+ ✓ src/__tests__/ks1052-credential-lifecycle-update-not-persisted.test.ts (12 tests) 2275ms
+stdout | src/__tests__/ks488-smtp-opt-in.test.ts > KS-488 C-5: no default points at a real mail provider > sending while enabled-but-unconfigured refuses, and says why once
+[Email] No provider configured — would send to someone@example.test: should not send
+
+stdout | src/__tests__/ks488-smtp-opt-in.test.ts > KS-488 C-5: no default points at a real mail provider > sending while enabled-but-unconfigured refuses, and says why once
+[Email] No provider configured — would send to someone@example.test: should not send either
+
+ ✓ src/__tests__/ks488-smtp-opt-in.test.ts (8 tests) 566ms
+     ✓ a password ALONE does not enable the transport  559ms
+ ✓ src/__tests__/ks938-mfa-disable-nulls-seed-and-backup-codes.test.ts (5 tests) 438ms
+ ✓ src/__tests__/ks1188-getuserbyid-failed-log-meta-keys.test.ts (5 tests) 606ms
+     ✓ RED KS-1188 F2 - a message-form infrastructure failure logs a meta whose key set is exactly error and code  602ms
+ ✓ src/__tests__/ks1188-mfa-sibling-sites-503.test.ts (4 tests) 598ms
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — CONTROL happy path — no MFA, correct password
+2026-10-28 19:01:26.893 [auth] [32minfo[39m: User logged in {"userId":"user-1","email":"d***@secuura.local"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — locked out
+2026-10-28 19:01:26.908 [auth] [33mwarn[39m: login: blocked by account lockout {"email":"d***@secuura.local","ip":"127.0.0.1"}
+2026-10-28 19:01:26.912 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:344:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+ ✓ src/__tests__/s130-f6-openapi-module-in-the-import-graph.test.ts (2 tests) 966ms
+     ✓ imports auth.openapi.ts without throwing at module scope  965ms
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — locked out
+2026-10-28 19:01:26.917 [auth] [33mwarn[39m: oauth/authorize: blocked by account lockout {"email":"dr***@secuura.local","ip":"127.0.0.1"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — locked out, PADDED email (the F-1 drift)
+2026-10-28 19:01:26.920 [auth] [33mwarn[39m: login: blocked by account lockout {"email":"D***@SECUURA.LOCAL","ip":"127.0.0.1"}
+2026-10-28 19:01:26.920 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:344:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — locked out, PADDED email (the F-1 drift)
+2026-10-28 19:01:26.922 [auth] [33mwarn[39m: oauth/authorize: blocked by account lockout {"email":"dr***@secuura.local","ip":"127.0.0.1"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — suspended
+2026-10-28 19:01:26.925 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — deactivated
+2026-10-28 19:01:26.934 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — wrong password
+2026-10-28 19:01:26.941 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — MFA enabled, code MISSING
+2026-10-28 19:01:26.948 [auth] [31merror[39m: Error occurred {"error":"MFA verification required","stack":"Error: MFA verification required\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:528:49\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — MFA enabled, code WRONG
+2026-10-28 19:01:26.957 [auth] [33mwarn[39m: auth/login: MFA verification failed {"userId":"user-1"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — MFA enabled, code WRONG
+2026-10-28 19:01:26.957 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — MFA enabled, code WRONG
+2026-10-28 19:01:26.962 [auth] [33mwarn[39m: oauth/authorize: MFA verification failed {"userId":"user-1"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — CONTROL MFA enabled, code RIGHT
+2026-10-28 19:01:26.975 [auth] [32minfo[39m: User logged in {"userId":"user-1","email":"d***@secuura.local"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — SSO-only account (no password hash)
+2026-10-28 19:01:26.984 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — unknown email
+2026-10-28 19:01:26.992 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — CONTROL MFA enabled, valid BACKUP code
+2026-10-28 19:01:27.039 [auth] [32minfo[39m: auth/login: MFA verified via backup code {"userId":"user-1"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — CONTROL MFA enabled, valid BACKUP code
+2026-10-28 19:01:27.039 [auth] [32minfo[39m: User logged in {"userId":"user-1","email":"d***@secuura.local"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — CONTROL MFA enabled, valid BACKUP code
+2026-10-28 19:01:27.091 [auth] [32minfo[39m: oauth/authorize: MFA verified via backup code {"userId":"user-1"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — no MFA, EMPTY second factor (P3-4)
+2026-10-28 19:01:27.094 [auth] [32minfo[39m: User logged in {"userId":"user-1","email":"d***@secuura.local"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — MFA enabled, EMPTY second factor (P3-4)
+2026-10-28 19:01:27.098 [auth] [31merror[39m: Error occurred {"error":"MFA verification required","stack":"Error: MFA verification required\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:528:49\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — no MFA, MALFORMED second factor stays refused (P3-4)
+2026-10-28 19:01:27.107 [auth] [31merror[39m: Error occurred {"error":"[\n  {\n    \"validation\": \"regex\",\n    \"code\": \"invalid_string\",\n    \"message\": \"Invalid\",\n    \"path\": [\n      \"mfaCode\"\n    ]\n  }\n]","stack":"ZodError: [\n  {\n    \"validation\": \"regex\",\n    \"code\": \"invalid_string\",\n    \"message\": \"Invalid\",\n    \"path\": [\n      \"mfaCode\"\n    ]\n  }\n]\n    at Object.get error [as error] (file:///Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/zod/v3/types.js:39:31)\n    at ZodObject.parse (file:///Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/zod/v3/types.js:114:22)\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:332:30\n    at Layer.handle [as handle_request] (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/layer.js:95:5)\n    at next (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/route.js:149:13)\n    at Route.dispatch (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/route.js:119:3)\n    at Layer.handle [as handle_request] (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/layer.js:95:5)\n    at /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/index.js:284:15\n    at router.process_params (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/index.js:346:12)\n    at next (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/index.js:280:10)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — pending (KS-796 F-1)
+2026-10-28 19:01:27.111 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — invited (KS-796 F-1)
+2026-10-28 19:01:27.118 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks781-login-authorize-agree.test.ts > KS-781 F-3: login and authorize must agree on the same account > agree — a status NOBODY anticipated (allow-list, not deny-list)
+2026-10-28 19:01:27.125 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+ ✓ src/__tests__/ks781-login-authorize-agree.test.ts (18 tests) 809ms
+ ✓ src/__tests__/ks1186-userrepo-fromrow-sites-are-awaited.test.ts (35 tests) 794ms
+     ✓ KS-1186 🔴 getUserByIdWithPasswordHash - an infrastructure failure inside fromRow becomes ServiceUnavailable  776ms
+ ✓ src/__tests__/issuerCert.test.ts (21 tests) 3744ms
+       ✓ throws MULTI_CERT_PEM on a chain bundle  472ms
+       ✓ accepts a matching Ed25519 keypair  377ms
+       ✓ throws KEY_MISMATCH when key belongs to a different cert  548ms
+       ✓ throws KEY_MISMATCH when algorithms differ (RSA cert + Ed25519 key)  353ms
+       ✓ rejects non-hex content hash with INVALID_CONTENT_HASH  330ms
+ ✓ src/__tests__/ks622-backup-code-at-login.test.ts (22 tests) 811ms
+     ✓ a valid backup code verifies against its stored hash and reports its index  337ms
+     ✓ redeeming a code consumes THAT code and leaves the others usable  310ms
+stdout | src/__tests__/password.test.ts > argon2 env tuning (KS-254) > clamps a below-floor ARGON2_MEMORY_KIB up to the OWASP floor (19 MiB)
+2026-10-28 19:01:27.967 [auth] [33mwarn[39m: ARGON2_MEMORY_KIB below the OWASP argon2id floor — using the floor {"requested":1024,"floor":19456}
+
+ ✓ src/__tests__/password.test.ts (21 tests) 648ms
+stdout | src/__tests__/ks781-oauth-authorize-mfa-bypass.test.ts > KS-781: /api/oauth/authorize applies the same gates as /api/auth/login > LEG 2 — a WRONG mfaCode issues no code, and counts toward lockout
+2026-10-28 19:01:28.113 [auth] [33mwarn[39m: oauth/authorize: MFA verification failed {"userId":"user-1"}
+
+stdout | src/__tests__/ks781-oauth-authorize-mfa-bypass.test.ts > KS-781: /api/oauth/authorize applies the same gates as /api/auth/login > LEG 4 — a valid BACKUP code authorizes AND is burned
+2026-10-28 19:01:28.233 [auth] [32minfo[39m: oauth/authorize: MFA verified via backup code {"userId":"user-1"}
+
+stdout | src/__tests__/ks781-oauth-authorize-mfa-bypass.test.ts > KS-781: /api/oauth/authorize applies the same gates as /api/auth/login > LEG 7 — a locked-out caller issues no code, and is refused BEFORE the lookup
+2026-10-28 19:01:28.247 [auth] [33mwarn[39m: oauth/authorize: blocked by account lockout {"email":"mf***@secuura.local","ip":"127.0.0.1"}
+
+stdout | src/__tests__/ks781-oauth-authorize-mfa-bypass.test.ts > KS-781: /api/oauth/authorize applies the same gates as /api/auth/login > LEG 8 — mfaEnabled with a NULL secret fails CLOSED, it does not fall through
+2026-10-28 19:01:28.253 [auth] [31merror[39m: oauth/authorize: MFA enabled but no secret found {"userId":"user-1"}
+
+stdout | src/__tests__/ks781-oauth-authorize-mfa-bypass.test.ts > KS-781: /api/oauth/authorize applies the same gates as /api/auth/login > F-1 — a PADDED email must not defeat the lockout (QA BLOCKER)
+2026-10-28 19:01:28.258 [auth] [33mwarn[39m: oauth/authorize: blocked by account lockout {"email":"mf***@secuura.local","ip":"127.0.0.1"}
+
+stdout | src/__tests__/ks781-oauth-authorize-mfa-bypass.test.ts > KS-781: /api/oauth/authorize applies the same gates as /api/auth/login > F-1 — a PADDED email must not defeat the lockout (QA BLOCKER)
+2026-10-28 19:01:28.259 [auth] [33mwarn[39m: oauth/authorize: blocked by account lockout {"email":"mf***@secuura.local","ip":"127.0.0.1"}
+
+stdout | src/__tests__/ks781-oauth-authorize-mfa-bypass.test.ts > KS-781: /api/oauth/authorize applies the same gates as /api/auth/login > F-1 — a PADDED email must not defeat the lockout (QA BLOCKER)
+2026-10-28 19:01:28.268 [auth] [33mwarn[39m: oauth/authorize: blocked by account lockout {"email":"mf***@secuura.local","ip":"127.0.0.1"}
+
+ ✓ src/__tests__/ks781-n1-empty-mfacode-treated-as-absent.test.ts (6 tests) 732ms
+ ✓ src/__tests__/ks728-social-link-responds.test.ts (2 tests) 1431ms
+     ✓ answers an authenticated caller instead of holding the connection open  722ms
+     ✓ registers no middleware FACTORY as a route handler, in any router (class guard)  707ms
+ ✓ src/__tests__/ks781-oauth-authorize-mfa-bypass.test.ts (14 tests) 1063ms
+ ✓ src/__tests__/backup-codes.test.ts (6 tests) 781ms
+ ✓ src/__tests__/auth.integration.test.ts (56 tests) 5268ms
+stdout | src/__tests__/ks1402-lookup-accepts-connector-token.test.ts
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/ks1402-lookup-accepts-connector-token.test.ts (4 tests) 408ms
+ ✓ src/__tests__/ks819-oauth-state-consume-order.test.ts (16 tests) 450ms
+ ✓ src/__tests__/ks999-getuserbyid-awaits-fromrow.test.ts (5 tests) 419ms
+     ✓ 🔴 KS-999 — an INFRASTRUCTURE failure inside fromRow (the getDek read) becomes ServiceUnavailable, not a raw error  414ms
+ ✓ src/__tests__/db.retry.test.ts (7 tests) 391ms
+     ✓ reports available immediately when the probe succeeds at boot  382ms
+ ✓ src/__tests__/ks804-authorize-get-post-agree-per-rule.test.ts (54 tests) 467ms
+ ✓ src/__tests__/ks722-oauth-state-verified.test.ts (10 tests) 410ms
+ ✓ src/__tests__/ks806-the-synthetic-wallet-email-is-collision-free.test.ts (12 tests) 396ms
+stdout | src/__tests__/ks737-platform-admin-mfa-bypass.test.ts > KS-737: a platform admin cannot decline the second factor > LEG 1 — omitting mfaCode must NOT return a session
+2026-10-28 19:01:29.525 [auth] [31merror[39m: Error occurred {"error":"MFA verification required","stack":"Error: MFA verification required\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:414:34\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks737-platform-admin-mfa-bypass.test.ts > KS-737: a platform admin cannot decline the second factor > LEG 2 — mfa_secret NULL while mfa_enabled is true must NOT return a session
+2026-10-28 19:01:29.533 [auth] [31merror[39m: MFA enabled but no secret found for platform admin {"adminId":"admin-1"}
+2026-10-28 19:01:29.533 [auth] [31merror[39m: Error occurred {"error":"MFA configuration error. Please contact support.","stack":"Error: MFA configuration error. Please contact support.\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:423:17\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks737-platform-admin-mfa-bypass.test.ts > KS-737: a platform admin cannot decline the second factor > LEG 2b — mfa_secret NULL and no code either must NOT return a session
+2026-10-28 19:01:29.535 [auth] [31merror[39m: Error occurred {"error":"MFA verification required","stack":"Error: MFA verification required\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:414:34\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks737-platform-admin-mfa-bypass.test.ts > KS-737: a platform admin cannot decline the second factor > CONTROL — a VALID TOTP code still logs the admin in
+2026-10-28 19:01:29.540 [auth] [32minfo[39m: Platform admin logged in {"userId":"admin-1","email":"a***@secuura.com","role":"SYSTEM_ADMIN"}
+
+stdout | src/__tests__/ks737-platform-admin-mfa-bypass.test.ts > KS-737: a platform admin cannot decline the second factor > CONTROL — an admin with MFA DISABLED still logs in without a code
+2026-10-28 19:01:29.547 [auth] [32minfo[39m: Platform admin logged in {"userId":"admin-1","email":"a***@secuura.com","role":"SYSTEM_ADMIN"}
+
+stdout | src/__tests__/ks737-platform-admin-mfa-bypass.test.ts > KS-737: a platform admin cannot decline the second factor > CONTROL — a WRONG PASSWORD is still refused
+2026-10-28 19:01:29.552 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:353:15\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks737-platform-admin-mfa-bypass.test.ts > KS-737: a platform admin cannot decline the second factor > CONTROL — a WRONG TOTP code is still refused (unchanged by this fix)
+2026-10-28 19:01:29.556 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:436:17\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+ ✓ src/__tests__/ks737-platform-admin-mfa-bypass.test.ts (7 tests) 376ms
+ ✓ src/__tests__/ks1188-users-me-503-route.test.ts (5 tests) 326ms
+stdout | src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+stdout | src/__tests__/ks1156-auth4-gate-records-983-r2-984.test.ts
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/ks720-wallet-auth-and-unlink.test.ts (10 tests) 406ms
+stdout | src/__tests__/ks622-mfa-failure-lockout.test.ts > KS-622: a failed second factor increments the (email, /24) lockout > records a lockout failure when the MFA code is wrong
+2026-10-28 19:01:29.816 [auth] [33mwarn[39m: auth/login: MFA verification failed {"userId":"user-1"}
+
+stdout | src/__tests__/ks622-mfa-failure-lockout.test.ts > KS-622: a failed second factor increments the (email, /24) lockout > records a lockout failure when the MFA code is wrong
+2026-10-28 19:01:29.822 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks622-mfa-failure-lockout.test.ts > KS-622: a failed second factor increments the (email, /24) lockout > CONTROL — a WRONG PASSWORD also records, so the counter is not MFA-only
+2026-10-28 19:01:29.829 [auth] [31merror[39m: Error occurred {"error":"Invalid email or password","stack":"Error: Invalid email or password\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:529:13\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+stdout | src/__tests__/ks622-mfa-failure-lockout.test.ts > KS-622: a failed second factor increments the (email, /24) lockout > CONTROL — a SUCCESSFUL login records no failure and clears the counter
+2026-10-28 19:01:29.833 [auth] [32minfo[39m: User logged in {"userId":"user-1","email":"v***@example.com"}
+
+stdout | src/__tests__/ks622-mfa-failure-lockout.test.ts > KS-622: a failed second factor increments the (email, /24) lockout > CONTROL — a missing MFA code is MFA_REQUIRED, not a counted failure
+2026-10-28 19:01:29.836 [auth] [31merror[39m: Error occurred {"error":"MFA verification required","stack":"Error: MFA verification required\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/routes/auth.ts:528:49\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)","path":"/api/auth/login","method":"POST"}
+
+ ✓ src/__tests__/ks622-mfa-failure-lockout.test.ts (4 tests) 396ms
+ ✓ src/__tests__/ks841-consent-form-pkce-and-client-id.test.ts (3 tests) 366ms
+ ✓ src/__tests__/ks823-refresh-grant-client-auth-and-binding.test.ts (11 tests) 324ms
+ ✓ src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts (13 tests) 309ms
+ ✓ src/__tests__/ks1156-auth4-gate-records-983-r2-984.test.ts (3 tests) 363ms
+ ✓ src/__tests__/ks1188-mfa-status-503-route.test.ts (5 tests) 282ms
+ ✓ src/__tests__/ks805-oauth-app-update-refuses-empty-redirect-uris.test.ts (7 tests) 241ms
+ ✓ src/__tests__/ks796-wallet-verify-account-gate.test.ts (10 tests) 277ms
+ ✓ src/__tests__/ks942-public-wallet-routes-stay-open.test.ts (6 tests) 262ms
+ ✓ src/__tests__/ks1157-the-marker-at-the-route-and-across-a-rotation.test.ts (6 tests) 224ms
+ ✓ src/__tests__/ks797-authorize-client-and-redirect.test.ts (10 tests) 255ms
+ ✓ src/__tests__/ks798-consent-form-client-id.test.ts (3 tests) 259ms
+ ✓ src/__tests__/ks1188-f3-a-spent-backup-code-503-says-so.test.ts (6 tests) 290ms
+stdout | src/__tests__/ks1151-auth-refresh-refuses-oauth-token.test.ts
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/ks799-consent-script-csp-and-execution.test.ts (7 tests) 392ms
+ ✓ src/__tests__/ks1151-auth-refresh-refuses-oauth-token.test.ts (5 tests) 213ms
+ ✓ src/__tests__/ks1157-a-session-minted-by-an-oauth-grant-carries-a-marker.test.ts (7 tests) 208ms
+ ✓ src/__tests__/ks949-platform-admin-seed-identity.test.ts (31 tests) 7613ms
+     ✓ is NOT seeded when DEMO_SECUURA_PASSWORD is unset — no invented value, no published default  534ms
+     ✓ the enumeration actually finds seed sites, including the one the gate planted in  5155ms
+     ✓ no executable seed site anywhere in the tree names the real address  1303ms
+     ✓ the walk finds .env.example files at all — the control comes first  329ms
+ ✓ src/__tests__/ks799-consent-form-csrf-submit.test.ts (5 tests) 230ms
+ ✓ src/__tests__/ks732-mfa-disable-proof.test.ts (13 tests) 241ms
+ ✓ src/__tests__/ks847-no-raw-control-bytes.test.ts (5 tests) 103ms
+stdout | src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/ks790-token-pre-auth-user-lookup.test.ts (6 tests) 233ms
+ ✓ src/__tests__/ks1150-code-grant-status-pin.test.ts (4 tests) 224ms
+ ✓ src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts (8 tests) 244ms
+ ✓ src/__tests__/ks835-oauth-mint-carries-granted-scope.test.ts (5 tests) 211ms
+stdout | src/__tests__/jwks.test.ts > KS-182 — JWKS endpoint > publishes the RS256 public key as a JWK with kid/use/alg when provisioned
+[Auth/JWT] signing=RS256 (kid=k-test); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+stdout | src/__tests__/jwks.test.ts > KS-182 — JWKS endpoint > the published JWK verifies a token auth actually signs (end-to-end)
+[Auth/JWT] signing=RS256 (kid=k-test); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/jwks.test.ts (2 tests) 186ms
+stdout | src/__tests__/ks480-connector-token.test.ts > KS-480 — generateConnectorToken > mints an RS256 connector JWT with the key metadata as claims
+[Auth/JWT] signing=RS256 (kid=k-test); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+stdout | src/__tests__/ks480-connector-token.test.ts > KS-480 — generateConnectorToken > is rejected by verifyAccessToken and verifyRefreshToken (never an interactive token)
+[Auth/JWT] signing=RS256 (kid=k-test); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+stdout | src/__tests__/ks480-connector-token.test.ts > KS-480 — generateConnectorToken > omits org/tenant claims when the key carries none (falls back to connector:api-key id)
+[Auth/JWT] signing=RS256 (kid=k-test); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/ks480-connector-token.test.ts (3 tests) 114ms
+stdout | src/__tests__/ks564-connector-stub-auth.test.ts > KS-564 — verifyConnectorToken > accepts a genuine connector token and returns its claims
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+stdout | src/__tests__/ks564-connector-stub-auth.test.ts > KS-564 — verifyConnectorToken > still refuses to let a connector token pass verifyAccessToken (KS-480 invariant intact)
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+stdout | src/__tests__/ks564-connector-stub-auth.test.ts > KS-564 — verifyConnectorToken > rejects an INTERACTIVE access token on the connector path
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+stdout | src/__tests__/ks564-connector-stub-auth.test.ts > KS-564 — verifyConnectorToken > rejects a token signed by a DIFFERENT key (no signature bypass)
+[Auth/JWT] signing=RS256 (kid=test-kid); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/ks467-user-admin-isolation.test.ts (38 tests) 165ms
+ ✓ src/__tests__/ks564-connector-stub-auth.test.ts (4 tests) 213ms
+stdout | src/__tests__/jwt.rs256.test.ts > KS-167/184 — auth RS256-only signing > signs RS256 with the kid header and verifies it
+[Auth/JWT] signing=RS256 (kid=k-test); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/ks703-admin-list-query-nul.test.ts (42 tests) 139ms
+stdout | src/__tests__/jwt.rs256.test.ts > KS-167/184 — auth RS256-only signing > exposes the active RS256 public key via getActiveJwk
+[Auth/JWT] signing=RS256 (kid=k-test); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+stdout | src/__tests__/jwt.rs256.test.ts > KS-167/184 — auth RS256-only signing > REJECTS a legacy HS256 token (KS-184 — HS256 dropped, no dual-accept)
+[Auth/JWT] signing=RS256 (kid=k-test); accepted=[RS256]; key source=env (crypto-agility + runtime KMS, KS-326).
+
+ ✓ src/__tests__/jwt.rs256.test.ts (3 tests) 87ms
+ ✓ src/__tests__/ks1210-oauth-app-scopes-and-ownership.test.ts (24 tests) 84ms
+ ✓ src/__tests__/ks1052-backup-code-burn-cause-a.test.ts (3 tests) 165ms
+ ✓ src/__tests__/ks1477-the-verification-store-is-memory-only-only-when-no-database-is-configured.test.ts (14 tests) 177ms
+ ✓ src/__tests__/ks1460-register-over-an-invited-stub-confirms-its-activating-write.test.ts (5 tests) 62ms
+ ✓ src/__tests__/ks1194-a-failed-verification-request-save-is-never-acknowledged.test.ts (18 tests) 122ms
+stdout | src/__tests__/ks622-retired-route-contract.test.ts > KS-622 — the retired route answers 410, but not to everything > a MALFORMED body is rejected by the parser with 400 before the 410 handler runs
+2026-10-28 19:01:32.153 [auth] [31merror[39m: Error occurred {"error":"Unexpected token '\"', \"\"AAA\"\" is not valid JSON","stack":"SyntaxError: Unexpected token '\"', \"\"AAA\"\" is not valid JSON\n    at JSON.parse (<anonymous>)\n    at createStrictSyntaxError (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/body-parser/lib/types/json.js:169:10)\n    at parse (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/body-parser/lib/types/json.js:90:15)\n    at /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/body-parser/lib/read.js:146:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:226:14)\n    at invokeCallback (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/raw-body/index.js:238:16)\n    at done (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/raw-body/index.js:227:7)\n    at IncomingMessage.onEnd (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/raw-body/index.js:287:7)\n    at IncomingMessage.emit (node:events:514:20)\n    at endReadableNT (node:internal/streams/readable:1966:12)","path":"/api/auth/mfa/verify","method":"POST"}
+
+ ✓ src/__tests__/ks622-retired-route-contract.test.ts (6 tests) 109ms
+ ✓ src/__tests__/ks806-wallet-local-is-a-reserved-email-domain.test.ts (21 tests) 97ms
+ ✓ src/__tests__/ks1194-approve-never-restores-pending-over-a-raised-level.test.ts (6 tests) 56ms
+ ✓ src/__tests__/usersAdminStatus.test.ts (9 tests) 63ms
+ ✓ src/__tests__/ks1236-approve-never-lowers-a-subjects-verification-level.test.ts (9 tests) 69ms
+ ✓ src/__tests__/ks1050-profile-update-zero-rows-is-not-success.test.ts (4 tests) 73ms
+ ✓ src/__tests__/ks1018-security-correctness-three-verification-store-reads.test.ts (6 tests) 82ms
+ ✓ src/__tests__/ks1013-admin-patch-malformed-id.test.ts (10 tests) 65ms
+ ✓ src/__tests__/session.test.ts (19 tests) 67ms
+ ✓ src/__tests__/ks1018-item3-a-configured-database-never-answers-from-memory.test.ts (4 tests) 63ms
+stdout | src/__tests__/ks468-authenticate-tenant-guc.test.ts > KS-468: authenticate() seeds the tenant-GUC scope from the verified token > unauthenticated requests never reach the handler (contract unchanged)
+2026-10-28 19:01:32.659 [auth] [31merror[39m: Error occurred {"error":"No token provided","stack":"Error: No token provided\n    at /private/tmp/claude-501/gatework/p1779/head/Blockchain/Dev/services/auth/src/middleware/authenticate.ts:135:17\n    at Layer.handle [as handle_request] (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/layer.js:95:5)\n    at next (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/route.js:149:13)\n    at Route.dispatch (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/route.js:119:3)\n    at Layer.handle [as handle_request] (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/layer.js:95:5)\n    at /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/index.js:284:15\n    at router.process_params (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/index.js:346:12)\n    at next (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/index.js:280:10)\n    at jsonParser (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/body-parser/lib/types/json.js:117:7)\n    at Layer.handle [as handle_request] (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-aa-ks1537/Blockchain/Dev/node_modules/express/lib/router/layer.js:95:5)","path":"/probe","method":"GET"}
+
+ ✓ src/__tests__/ks468-authenticate-tenant-guc.test.ts (4 tests) 50ms
+ ✓ src/__tests__/ks1347-ks732-spec-paths-survive-a-spaced-checkout.test.ts (3 tests) 55ms
+ ✓ src/__tests__/ks1193-verification-reads-codeless-pool-timeout.test.ts (4 tests) 58ms
+ ✓ src/__tests__/ks1194-part2-mfa-auto-approve-never-acknowledges-an-unpersisted-level.test.ts (5 tests) 54ms
+ ✓ src/__tests__/ks431-oauth-app-update.test.ts (13 tests) 55ms
+ ✓ src/__tests__/ks1006-mfa-disable-refuses-when-no-secret-is-stored.test.ts (5 tests) 53ms
+ ✓ src/__tests__/ks444-oauth-app-create-guard.test.ts (9 tests) 43ms
+ ✓ src/__tests__/ks1210-contract-publishes-the-closed-oauth-scope-enum.test.ts (5 tests) 19ms
+ ✓ src/__tests__/ks1193-review-read-query-error-is-not-503.test.ts (3 tests) 52ms
+ ✓ src/__tests__/ks1653-stub-admits-transfer-custody-on-its-own-scope.test.ts (6 tests) 67ms
+ ✓ src/__tests__/ks781-n6-lockout-key-normalisation.test.ts (5 tests) 7ms
+ ✓ src/__tests__/ks963-preauth-rethrow.test.ts (26 tests) 14ms
+ ✓ src/__tests__/ks727-internal-error-message-leak.test.ts (8 tests) 9ms
+ ✓ src/__tests__/dbErrors.test.ts (19 tests) 5ms
+ ✓ src/__tests__/ks839-contract-states-the-wildcard-allow-list-rule.test.ts (5 tests) 7ms
+ ✓ src/__tests__/ks1617-social-profile-fetch-failure-names-the-http-status.test.ts (5 tests) 3ms
+stdout | src/__tests__/ks796q1-status-allow-list.test.ts > KS-796 Q1 — the DB vocabulary maps somewhere safe, and never to ACTIVE by accident > an unrecognised column value fails CLOSED, not to ACTIVE
+2026-10-28 19:01:33.263 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "banned" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "banned" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "Suspended " — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "Suspended " — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "ACTIVE_BUT_NOT_REALLY" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "ACTIVE_BUT_NOT_REALLY" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "null" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "null" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+
+stdout | src/__tests__/ks796q1-status-allow-list.test.ts > KS-796 Q1 — the DB vocabulary maps somewhere safe, and never to ACTIVE by accident > an Object.prototype key name (constructor) maps to a real status, not an inherited member
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "constructor" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+
+stdout | src/__tests__/ks796q1-status-allow-list.test.ts > KS-796 Q1 — the DB vocabulary maps somewhere safe, and never to ACTIVE by accident > an Object.prototype key name (toString) maps to a real status, not an inherited member
+2026-10-28 19:01:33.264 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "toString" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+
+stdout | src/__tests__/ks796q1-status-allow-list.test.ts > KS-796 Q1 — the DB vocabulary maps somewhere safe, and never to ACTIVE by accident > an Object.prototype key name (valueOf) maps to a real status, not an inherited member
+2026-10-28 19:01:33.265 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "valueOf" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+
+stdout | src/__tests__/ks796q1-status-allow-list.test.ts > KS-796 Q1 — the DB vocabulary maps somewhere safe, and never to ACTIVE by accident > an Object.prototype key name (hasOwnProperty) maps to a real status, not an inherited member
+2026-10-28 19:01:33.265 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "hasOwnProperty" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+
+stdout | src/__tests__/ks796q1-status-allow-list.test.ts > KS-796 Q1 — the DB vocabulary maps somewhere safe, and never to ACTIVE by accident > an Object.prototype key name (__proto__) maps to a real status, not an inherited member
+2026-10-28 19:01:33.265 [auth] [33mwarn[39m: mapDbStatus: unrecognised users.status "__proto__" — failing closed to DEACTIVATED. Add it to DB_STATUS_TO_DOMAIN (and the CHECK constraint) if it is legitimate.
+
+ ✓ src/__tests__/ks796q1-status-allow-list.test.ts (25 tests) 6ms
+ ✓ src/__tests__/ks839-a-wildcard-allow-list-grants-nothing.test.ts (8 tests) 7ms
+ ✓ src/__tests__/ks811-social-callback-403-code-set-agrees.test.ts (6 tests) 4ms
+stdout | src/__tests__/ks623-test-tokens-need-an-explicit-development-or-test-env.test.ts > KS-623 - the auth service accepts a test token only in an explicit development or test environment > CONTROL KS-623 T3: NODE_ENV=test with ENABLE_TEST_TOKENS=true still accepts it, as SUPER_ADMIN
+2026-10-28 19:01:33.334 [auth] [34mdebug[39m: Parsed test token for E2E testing {"userId":"u-ks623","role":"SUPER_ADMIN"}
+
+stdout | src/__tests__/ks623-test-tokens-need-an-explicit-development-or-test-env.test.ts > KS-623 - the auth service accepts a test token only in an explicit development or test environment > CONTROL KS-623 T4: NODE_ENV=development with ENABLE_TEST_TOKENS=true still accepts it
+2026-10-28 19:01:33.336 [auth] [34mdebug[39m: Parsed test token for E2E testing {"userId":"u-ks623","role":"SUPER_ADMIN"}
+
+ ✓ src/__tests__/ks623-test-tokens-need-an-explicit-development-or-test-env.test.ts (6 tests) 6ms
+ ✓ src/__tests__/ks466-oauth-tenant-guc.test.ts (2 tests) 2ms
+ ✓ src/__tests__/platformAdminMfa.test.ts (6 tests) 4ms
+ ✓ src/__tests__/ks796-f6-mfa-schema-identity.test.ts (31 tests) 11ms
+ ✓ src/__tests__/ks855-the-oauth-available-scopes-list-is.test.ts (4 tests) 2ms
+ ✓ src/__tests__/ks960-two-schema-sources-disagree-on-whether.test.ts (6 tests) 3ms
+ ✓ src/__tests__/ks451-oauth-app-nul-scope.test.ts (4 tests) 2ms
+ ✓ src/__tests__/ks944-the-gateway-s-auth-gate-reads.test.ts (3 tests) 2ms
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts (99 tests | 1 failed) 39810ms
+     ✓ RED: a type error planted in a test file FAILS the check and names the file and the code  661ms
+     ✓ CONTROL: the same project without the plant passes, and says how many test files it examined  877ms
+     ✓ the baseline admits the error it records, and does not admit a second one of the same kind  1780ms
+     ✓ a baseline entry that no longer reproduces FAILS (it can only shrink); --update lowers it  2501ms
+     ✓ --update refuses to ADMIT a new error: the baseline file is left byte-for-byte as it was  434ms
+     ✓ a project that examines NO test file exits 2, not 0 (a clean report over an empty file set says nothing)  404ms
+     × REAL: services/auth against the committed baseline passes, and examined its test files (this is the gate) 3680ms
+     ✓ REAL: the committed baseline is fingerprinted (no count-only lines) and records a floor on the examined test files 2ms
+     ✓ RED: fixing one error and adding another of the same code in the same file is a SWAP, and FAILS (a count alone passed it)  758ms
+     ✓ RED: a count-only baseline (the old format) is REFUSED, and the message names the command that converts it 245ms
+     ✓ --rekey converts a count-only baseline without admitting anything: fingerprinted lines, a floor, and the check then passes  485ms
+     ✓ --rekey REFUSES to admit more than the count-only baseline did: the file is left byte-for-byte as it was 241ms
+     ✓ RED: a tsc diagnostic with NO FILE is never dropped: it fails the check (a stub tsc prints one beside a baselined error)  439ms
+     ✓ RED: a `@ts-nocheck` in an examined test file FAILS the check, and names the file (it hides every error in it) 242ms
+     ✓ RED: narrowing the tsconfig so test files drop out FAILS against the recorded floor; adding a test file passes, and --update raises the floor  1376ms
+     ✓ a tsc that prints NOTHING and exits non-zero is exit 2, not a pass (the check cannot tell clean from broken) 98ms
+     ✓ a tsc that cannot be RUN is exit 2 with its own message (not the "no diagnostic" one it would otherwise fall into) 56ms
+     ✓ an unparseable baseline line is exit 2 naming the line, never skipped  322ms
+     ✓ --init over an existing baseline is exit 2 and leaves the file byte-for-byte as it was  336ms
+     ✓ RED (the #1506 gate's Major): the SAME error has the SAME fingerprint under four different checkout roots, and a baseline made under one reads under the other three  3025ms
+     ✓ an unrelated edit ABOVE an error (it moves its line) does not change its identity (green on the old checker too: it pins position-free keys)  576ms
+     ✓ an existing baseline with NO floor line is exit 2: an empty file, a comment-only file, and a real baseline whose floor line was deleted  1381ms
+     ✓ a second floor line, and a duplicate entry key, are exit 2 naming the line (the last one used to win silently)  1027ms
+     ✓ a CRLF baseline (an autocrlf checkout) reads: the header comment lines do not make it exit 2  515ms
+     ✓ the writers REFUSE a path the reader could not read back (a space, a #): exit 2, nothing written  502ms
+     ✓ a `@ts-nocheck` AFTER a header comment (not on line 1) is still found: the /m flag on the matcher is load-bearing 253ms
+     ✓ --init, --rekey and --update each REFUSE while an unbaselinable item exists (a @ts-nocheck file), and leave the baseline as it was  1049ms
+     ✓ a path under the REPO root (a hoisted node_modules package) is normalised too: the same fingerprint under two different roots  764ms
+     ✓ the limits are WRITTEN in the checker and in CLAUDE.md, not only in a PR body: @ts-ignore / @ts-expect-error are not policed 0ms
+     ✓ CONTROL: a COMPLETE shared build passes, so the new precondition is not simply always-fail 257ms
+     ✓ RED (the TS7016 shape): the declaration target alone is missing -> exit 2 naming the package, the missing target and the build command 252ms
+     ✓ RED (the TS2307 shape): BOTH targets missing (the directory is gone from dist) -> the same exit 2, not a NEW error 250ms
+     ✓ an exports-only gap is DELIBERATELY NOT a failure: the .js is missing, the .d.ts is there, tsc is happy -> exit 0, and the run says so 261ms
+     ✓ the stale-build check runs BEFORE the baseline comparison: a real test-file error AND a missing target reports the BUILD, not the test file 259ms
+     ✓ a service that imports NO @secuura package is untouched by the precondition (every other cell in this file depends on that) 239ms
+     ✓ NO FALSE EXIT 2 on a COMPLETE build: a trailing-* key with an EXTENSIONLESS target (the TypeScript-docs form) 252ms
+     ✓ NO FALSE EXIT 2 on a COMPLETE build: a bare "*" key 259ms
+     ✓ NO FALSE EXIT 2 on a COMPLETE build: a literal EXTENSIONLESS target (dist/e, with e.d.ts on disk) 296ms
+     ✓ NO FALSE EXIT 2 on a COMPLETE build: a DIRECTORY target (dist/d, with d/index.d.ts on disk) 249ms
+     ✓ NO FALSE EXIT 2 on a COMPLETE build: an ARRAY whose FIRST entry is absent and second exists 257ms
+     ✓ a specifier in a line comment is not an import: no exit 2 even when that target is genuinely unbuilt 249ms
+     ✓ a specifier in a block comment is not an import: no exit 2 even when that target is genuinely unbuilt 244ms
+     ✓ a specifier in a specifier quoted inside ANOTHER string is not an import: no exit 2 even when that target is genuinely unbuilt 243ms
+     ✓ CONTROL for those three: the SAME unbuilt target DOES exit 2 when the specifier is real code 258ms
+     ✓ an `import type` specifier IS judged (the comment filter must not reject real code) 251ms
+     ✓ a sibling subpath under the SAME trailing-* key resolves to its OWN target (a head off-by-one would cross them) 260ms
+     ✓ node_modules and dist are NOT scanned for specifiers (a vendored file must not judge this service) 260ms
+     ✓ CORROBORATION one way: tsc RESOLVED it, so a target this resolver reads as missing is NOT a failure 254ms
+     ✓ CORROBORATION the other way: tsc reported TS2307 for a NON-@secuura module, so behaviour is unchanged 249ms
+     ✓ tsc complains, but the target THIS resolver names DOES exist -> the author keeps the error; it is not relabelled a stale build 294ms
+     ✓ a declared target that resolves only through an EXTENSION VARIANT is not called missing (mixed array, second entry built)  314ms
+     ✓ a sibling-PREFIX subpath does not match a trailing-* key (subx/thing is not under sub/*)  303ms
+     ✓ MJ1: a huge file under src cannot crash the checker (it once threw a Set-size RangeError: exit 1 on a healthy build) 296ms
+     ✓ MJ1: a NON-REGULAR file named *.ts (a FIFO) cannot hang the checker — it is skipped, not read 293ms
+     ✓ MJ1: a throw anywhere in the NOTE block costs the note and nothing else (a package.json that is literally null)  303ms
+     ✓ E1: a TS2322 that merely QUOTES "Cannot find module '@secuura/...'" is the author's error, never a stale build 299ms
+     ✓ an UNINSTALLED @secuura package is not fatal: tsc owns that message, and leg 1 owns the install  315ms
+     ✓ only the subpaths the service IMPORTS are judged: a declared subpath nobody imports, with a missing target, does not fail  368ms
+     ✓ RED: when the assertion fails on a red run, its message names the file and the TS code  311ms
+     ✓ RED: ...and it carries the WHOLE output, not its first few lines (the last of 12 errors is in the message)  341ms
+     ✓ RED: a wrong STATUS alone fails the assertion with the output in its message (the summary it looks for IS present)  348ms
+     ✓ RED: a missing SUMMARY alone fails the assertion with the output in its message (the status it expects IS right)  310ms
+     ✓ CONTROL: the same assertion PASSES on the green run it is meant for (so the throws above are the red, not a helper that always throws)  364ms
+     ✓ no cell in this file compares a run as one value (an array or an object holding both the status and the output) 1ms
+     ✓ RED: the baseline deleted TOGETHER WITH a test file is exit 2 naming the baseline (it read rc 0). CONTROL: with the baseline kept, the same deletion trips the floor  745ms
+     ✓ a missing baseline alone is exit 2 naming the file and the command that writes one; with it present the same project passes  818ms
+     ✓ the DEFAULT baseline path is judged too: a service with no committed baseline is exit 2 naming baseline-<service>.txt, and nothing is written there 243ms
+     ✓ --update on a missing baseline REFUSES, says --init, and creates no file (it must not turn a deletion into a fresh baseline) 264ms
+     ✓ --rekey on a missing baseline is exit 2 as well, and creates no file 288ms
+     ✓ CONTROL: --init is the one run that needs no baseline: it writes one, with its floor, and the next plain run passes  502ms
+     ✓ the LOOKAHEAD after each root is load-bearing, for EVERY character in its class: which service is checked must not change how a path OUTSIDE it is normalised  765ms
+     ✓ the `g` FLAG on each root regex is load-bearing: a message naming the SAME root twice is normalised throughout  786ms
+     ✓ the regex ESCAPING of each root is load-bearing: a checkout path containing regex metacharacters is still replaced  764ms
+     ✓ RED (a): the array the guard always caught is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an OBJECT holding both is caught, on the line it starts on, when planted in a copy of this file 1ms
+     ✓ RED (a): a REVERSED array is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an array SPLIT over several lines is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an array that opens with a nested CALL ahead of .status is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an INDEX ahead of .status (parts[0]) is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an INDEX ahead of .out is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an OBJECT with an index ahead of the second field is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an index INSIDE an index is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an array of arrays, each field in an array of its own is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): a quoted close bracket ahead of the fields is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an escaped quote, then a quoted close bracket, ahead of the fields is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ RED (a): an array that never closes (the scan runs to the end of the text) is caught, on the line it starts on, when planted in a copy of this file 0ms
+     ✓ CONTROL (a): the status and the output as separate arguments (the output is the message) is NOT flagged when planted in a copy of this file 0ms
+     ✓ CONTROL (a): each field in an array of its own is NOT flagged when planted in a copy of this file 0ms
+     ✓ CONTROL (a): an array and an object that hold neither field is NOT flagged when planted in a copy of this file 0ms
+     ✓ CONTROL (a): a closed array followed by a use of both fields (the scan must not read across the bracket) is NOT flagged when planted in a copy of this file 0ms
+     ✓ CONTROL (a): a quoted bracket inside the compared value, then a use of both fields after it is NOT flagged when planted in a copy of this file 0ms
+     ✓ CONTROL (a): a template literal holding a bracket, then a use of both fields after it is NOT flagged when planted in a copy of this file 0ms
+     ✓ CONTROL (a): a nested array that holds neither field, then a use of both fields after it is NOT flagged when planted in a copy of this file 0ms
+     ✓ CONTROL (a): an object holding a nested array and neither field is NOT flagged when planted in a copy of this file 0ms
+     ✓ RED (b): AUTH_GREEN_SUMMARY can fail -- a green run satisfies it, and a red run, a SILENT run (right status, summary gone) and a wrong-status run do not  556ms
+     ✓ RED (b): AUTH_GREEN_SUMMARY is not a substring of a worse summary -- ten new errors do not satisfy it, and the checker's own green line does 1ms
+     ✓ RED (b): the REAL cell still passes AUTH_GREEN_SUMMARY to expectRun with status 0 -- and this check fails when that call is dropped, commented out, inlined or given another status 29ms
+     ✓ RED (b) KS-1765: every ordinary expectRun call passes a numeric status and a predicate that can fail -- an emptied, a match-everything or a dropped one fails this check 233ms
+     ✓ RED (b) KS-1765: this file keeps at least ORDINARY_CALLS_FLOOR ordinary expectRun calls -- a call replaced by a bare status check, or removed, is counted 102ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts > KS-1000 - the test files of a service are type-checked against a baseline that can only shrink > REAL: services/auth against the committed baseline passes, and examined its test files (this is the gate)
+AssertionError: typecheck-tests: auth (tsconfig.test.json): tsc examined 156 files, 105 of them under __tests__; 44 errors: 42 in the baseline, 2 new; 0 stale baseline entries.
+NEW type errors (not in the baseline):
+  src/__tests__/jwks.test.ts(70,73): TS2694: Namespace '"crypto"' has no exported member 'JsonWebKey'.
+  src/__tests__/ks820-821-token-client-auth-and-apptype.test.ts(197,40): TS2345: Argument of type 'string | NonSharedBuffer' is not assignable to parameter of type 'Buffer<ArrayBufferLike>'.
+: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ expectRun src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:88:29
+     86| function expectRun(r: { status: number | null; out: string }, status: …
+     87|   const message = (label ? label + '\n' : '') + r.out;
+     88|   expect(r.status, message).toBe(status);
+       |                             ^
+     89|   if (typeof output === 'string') expect(r.out, message).toContain(out…
+     90|   else expect(r.out, message).toMatch(output);
+ ❯ src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts:223:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 104 passed (105)
+      Tests  1 failed | 1199 passed (1200)
+   Start at  19:01:22
+   Duration  40.56s (transform 4.31s, setup 5.65s, import 28.16s, tests 93.60s, environment 6ms)
+

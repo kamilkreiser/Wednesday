@@ -1,0 +1,17 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1634-a-simulated-anchor-verified-by-hash.test.ts
+@@ -44,1 +44,3 @@
++// KS-1783: the shape of a REAL tx hash (as ks1634-v2-chain-only-match-carries-simulated.test.ts:49), held apart from REAL_TX on purpose.
++const REAL_TX_SHAPE = /^[0-9a-f]{64}$/;
+ const REAL_TX = '4f1e6a8d2c7b9e3f1a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e0f2a4b6c8d0e2f';
+@@ -102,5 +104,8 @@
+   it('RED KS-1628 L6 verify-file: simulated true with a real hash is not on-chain', async () => {
+-    const body = await callSite(chainReply({ simulated: true }));
++    const reply = chainReply({ simulated: true });
++    // KS-1783: assert the hash this cell sends is real (it was implicit, from chainReply's default). The route's own reply carries txHash null here, so the check is on the reply handed in.
++    expect(reply.txHash).toMatch(REAL_TX_SHAPE);
++    const body = await callSite(reply);
+     expect(body.blockchain.simulated).toBe(true);
+     expect(body.blockchain.anchored).toBe(false);
+     expect(body.blockchain.txHash).toBeNull();

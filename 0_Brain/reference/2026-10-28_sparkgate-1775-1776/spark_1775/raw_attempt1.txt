@@ -1,0 +1,44 @@
+```json
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix changes the prototype of every AppError subclass instance, which can alter behavior in any of the twelve services that mount packages/shared, but the PR only ran the packages/shared suite and did not run the suites of the other services that import these classes.",
+      "evidence": "Blockchain/Dev/packages/shared/src/errors/index.ts:44 `Object.setPrototypeOf(this, new.target.prototype);` and Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html:5114 `Not measured: the suites of the other services that import these classes from @secuura/shared (only the packages/shared suite was run)`",
+      "test_or_reason": "The change is in a shared package mounted by twelve services; the PR's own documentation states the other services' suites were not run, so a regression in those services would not be caught."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR claims the fix makes `err instanceof <subclass>` true, but the test only verifies the prototype of instances created directly; it does not verify that the `errorHandler` in any service that uses these classes now correctly recognizes subclasses, so the claimed fix for the ValidationError `details` bug is not proven.",
+      "evidence": "Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts:50 `expect(make() instanceof cls).toBe(true);` and :68 `const r = run(new ValidationError('bad', { field: 'name' }));`",
+      "test_or_reason": "The test's C2 cell runs the shared errorHandler, but the ticket's reported bug is in services/auth's errorHandler (services/auth/src/middleware/errorHandler.ts:296), which is a separate change and not tested here; the shared handler's `details` branch is unmeasured per the ticket."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's documentation states the fix is 'byte-identical to the drafter's golden' and 'applied here strictly and unchanged', but the diff shows the change is a one-line modification to a shared constructor that affects all subclasses; the claim of byte-identical application is unverifiable from the provided material and does not establish that the fix is correct for all consumers.",
+      "evidence": "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html:5105 `A local model (the Spark, DeepSeek V4 Flash) wrote the patch; its checker passed 7 of 7 and the patch is byte-identical to the drafter's golden. It was applied here strictly and unchanged.`",
+      "test_or_reason": "The claim of byte-identical application is a process claim, not a measured result; the facts.json only shows test counts, not a comparison of the applied patch to a golden."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test file's `run` helper uses a fake `Response` object that does not faithfully model Express's `Response`, so the C2 cell's assertion that the handler 'still answers a ValidationError with its details and a 422' may not reflect real behavior.",
+      "evidence": "Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts:35-44 `const res = { status(code: number) { captured.statusCode = code; return this; }, json(payload: unknown) { captured.body = payload as typeof captured.body; return this; } } as unknown as Response;`",
+      "test_or_reason": "The fake `res` only implements `status` and `json`; real Express `Response` has many other methods and properties, and the handler may rely on them (e.g., `res.status` chaining is fine, but the handler's behavior with a real response is not tested)."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The PR's documentation claims 'Status, code, details and the handler's answers do not change', but the change to the prototype can affect `instanceof` checks in the handler, which is the very behavior the ticket says was broken; the claim that 'answers do not change' is only tested for the shared handler, not for services/auth's handler.",
+      "evidence": "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html:5197 `Status, code, details and the handler's answers do not change.` and ticket text `errorHandler never adds details to a 422`",
+      "test_or_reason": "The ticket states the bug is that `errorHandler` in services/auth never adds `details`; the PR's test only checks the shared handler, so the claim that 'answers do not change' is not proven for the service where the bug was reported."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR's documentation states the new test has 29 cells, but the test file defines 9 factories and runs P1, P2, C1 for each (27 cells) plus P3 and C2 (2 cells), totaling 29; the count is consistent, but the documentation's claim that 'P1/P2/P3 pin the prototypes' is slightly imprecise because P3 is a single cell for DocumentNotFoundError, not a per-class cell.",
+      "evidence": "Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts:50-61 `it.each(FACTORIES)('RED KS-1467 P1 ...')` and `it('RED KS-1467 P3 ...')`",
+      "test_or_reason": "The documentation says 'P1/P2/P3 pin the prototypes (three levels deep for DocumentNotFoundError)', but P3 is a single test for the chain, not a per-class test; this is a documentation nuance, not a defect."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}
+```

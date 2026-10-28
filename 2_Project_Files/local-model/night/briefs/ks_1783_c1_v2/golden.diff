@@ -1,0 +1,13 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1634-v2-chain-only-match-carries-simulated.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1634-v2-chain-only-match-carries-simulated.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1634-v2-chain-only-match-carries-simulated.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1634-v2-chain-only-match-carries-simulated.test.ts
+@@ -117,5 +117,8 @@
+   it('RED KS-1634 L6 v2: simulated true with a real hash reads NOT on-chain', async () => {
+-    const body = await callV2(chainReply({ simulated: true }));
++    const reply = chainReply({ simulated: true });
++    // KS-1783: assert the hash this cell sends is real (it was implicit, from chainReply's default). The route's own reply carries txHash null here, so the check is on the reply handed in.
++    expect(reply.txHash).toMatch(REAL_TX_SHAPE);
++    const body = await callV2(reply);
+     expect(body.count).toBe(1);
+     const m = body.matches[0];
+     expect(m.blockchain.simulated).toBe(true);

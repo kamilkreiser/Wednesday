@@ -6,8 +6,11 @@ import sys, os, importlib.util
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import mk2
 def build(T):
-    old = mk2.rd(T['test']); o, n = T['edit']; assert old.count(o) == 1, 'edit anchor not unique'
-    new = old.replace(o, n)
+    old = mk2.rd(T['test']); new = old
+    # op5 2026-10-28: T['edit'] may be ONE (old,new) tuple (unchanged) or a LIST of them (several hunks in the one test file)
+    for o, n in ([T['edit']] if isinstance(T['edit'], tuple) else T['edit']):
+        assert old.count(o) == 1, 'edit anchor not unique'
+        new = new.replace(o, n)
     prod = mk2.rd(T['product']).split('\n')
     assert prod[T['tamper_line'] - 1] == T['tamper_from'], (prod[T['tamper_line'] - 1], T['tamper_from'])
     diff = mk2.udiff(T['test'], old, new)
@@ -17,11 +20,11 @@ def build(T):
     open(d + '/golden.diff', 'w', encoding='utf-8').write(diff)
     open(d + '/spark.pins', 'w').write(f"# test_only: ONE existing test modified in place, the tamper planted in the product by the checker; line = the tamper line at the tip.\ntier=test_only\ntest_file={T['test']}\nref={T['ref']}\nline={T['tamper_line']}\n")
     k = T['ticket']
-    s = f"# {k} {T['title']}\n\n{T['intro']}\n\nFile: `{T['product']}`  (product, NOT modified: it is the tamper target only)\nTest file: `{T['test']}`  (EXISTING, modified in place: 1 hunk, the new cell added at the end of an existing describe)\n"
+    s = f"# {k} {T['title']}\n\n{T['intro']}\n\nFile: `{T['product']}`  (product, NOT modified: it is the tamper target only)\nTest file: `{T['test']}`  (EXISTING, modified in place: {T.get('nh_txt', '1 hunk, the new cell added at the end of an existing describe')})\n"
     s += f"Tip: `{mk2.TIP}` (origin/develop by `git ls-remote` on 2026-10-28; every line number and quote below was read from the cache clone at exactly this sha)\nRunner: `{T['runner']}`\nTier: `test_only` (the `## Tamper` block below)\nRung: **{T['rung']}**\n\n"
-    s += "## The mode - read this twice\n\nTEST-ONLY, MODIFY IN PLACE. Your diff contains EXACTLY ONE file: the EXISTING test file above, with the ordinary header `--- a/...` / `+++ b/...` and ONE hunk. **No hunk for the product file.** Do NOT create a new test file. The checker reddens your new cell by planting the tamper named below into a clone of the product file, then expects the test file GREEN at the untouched tip. A diff that touches the product file is refused at A3.\n\n"
+    s += "## The mode - read this twice\n\nTEST-ONLY, MODIFY IN PLACE. Your diff contains EXACTLY ONE file: the EXISTING test file above, with the ordinary header `--- a/...` / `+++ b/...` and " + T.get('nh_word', 'ONE hunk') + ". **No hunk for the product file.** Do NOT create a new test file. The checker reddens your new cell by planting the tamper named below into a clone of the product file, then expects the test file GREEN at the untouched tip. A diff that touches the product file is refused at A3.\n\n"
     s += "## What is wrong (one paragraph)\n\n" + T['what_wrong'] + "\n\n## Where\n\n" + T['where'] + "\n\n"
-    s += "## The exact change - ONE EDIT in the TEST file (one hunk)\n\nApply this hunk to the EXISTING test file. The `+` lines are byte-exact: copy them; do not paraphrase a comment, do not re-indent.\n\n```diff\n" + diff.split('+++ b/' + T['test'] + '\n', 1)[1] + "```\n\n"
+    s += "## The exact change - " + T.get('nh_head', 'ONE EDIT in the TEST file (one hunk)') + "\n\nApply this hunk to the EXISTING test file. The `+` lines are byte-exact: copy them; do not paraphrase a comment, do not re-indent.\n\n```diff\n" + diff.split('+++ b/' + T['test'] + '\n', 1)[1] + "```\n\n"
     s += f"## Tamper (test-only mode - the checker plants this in a clone of the product file to prove your cell can go red)\nline: {T['tamper_line']}\nfrom: `{T['tamper_from']}`\nto: `{T['tamper_to']}`\nstatement_ok: {T['statement_ok']}\n\n"
     s += "## Red cells\n" + ''.join(f"- {c}\n" for c in T['red']) + "\n## Cells and controls\n\n" + T['cells'] + "\n\n"
     s += "## UNMEASURED - stated rather than glossed\n\n" + T['unmeasured'] + "\n\n## Scope\n\n" + T['scope'] + "\n\n"

@@ -1,0 +1,232 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts
+new file mode 100644
+index 000000000..219f7fc23
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts
+@@ -0,0 +1,115 @@
++// Behaviour-preserving extraction in services/auth routes/issuerCerts.ts: the four gates (write, read, revoke, sign) each copied the same two lines, `const role = String(user.role ?? '')` and
++// `ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())`. They now call one exported helper, hasAdminRole. R1 to R3 pin the helper (it exists, its truth table, and the file
++// holds the role test once). C1 to C6 drive the REAL router on a loopback listener through all four gates and must read the same before and after the extraction: an admitted caller with no tenant claim
++// gets 400 TENANT_REQUIRED (past the role gate), a refused caller gets 403. The role arrives in an x-test-user header that a mocked authenticate() turns into req.user.
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import type { Server } from 'node:http';
++import express from 'express';
++
++const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++vi.mock('../middleware/authenticate', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    const raw = req.headers['x-test-user'];
++    req.user = typeof raw === 'string' ? JSON.parse(raw) : undefined;
++    next();
++  },
++}));
++vi.mock('../repositories/issuerCertRepo', () => ({
++  createIssuerCert: vi.fn(), getIssuerCertById: vi.fn(), findIssuerCertByFingerprint: vi.fn(), findActiveIssuerCertForTenant: vi.fn(),
++  listIssuerCerts: vi.fn(async () => []), revokeIssuerCert: vi.fn(), rotateIssuerCert: vi.fn(), toSummary: vi.fn(),
++}));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++
++import * as certRoutes from '../routes/issuerCerts';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const SRC = readFileSync(join(__dirname, '..', 'routes', 'issuerCerts.ts'), 'utf8');
++
++let server: Server;
++let base = '';
++
++beforeAll(async () => {
++  const app = express();
++  app.use(express.json());
++  app.use('/api/issuer-certs', certRoutes.issuerCertsRoutes);
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
++  const addr = server.address();
++  base = 'http://127.0.0.1:' + (typeof addr === 'object' && addr ? addr.port : 0);
++});
++afterAll(() => { server?.close(); });
++
++/** The helper under test, or a sentinel when it is not exported yet, so a missing helper is a red assertion and not a thrown error. */
++function helper(role: unknown): boolean | string {
++  const fn = (certRoutes as Record<string, unknown>).hasAdminRole;
++  return typeof fn === 'function' ? (fn as (r: unknown) => boolean)(role) : 'NO HELPER';
++}
++
++const ROUTES: Array<[string, string, string]> = [
++  ['write', 'POST', '/api/issuer-certs'],
++  ['read', 'GET', '/api/issuer-certs'],
++  ['revoke', 'POST', '/api/issuer-certs/abc/revoke'],
++  ['sign', 'POST', '/api/issuer-certs/sign'],
++];
++
++/** The status a caller gets from a route; the user carries no tenant claim, so a caller past the role gate is answered 400 TENANT_REQUIRED. */
++async function status(method: string, path: string, user: unknown): Promise<number> {
++  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
++  if (user !== undefined) headers['x-test-user'] = JSON.stringify(user);
++  const res = await fetch(base + path, { method, headers, body: method === 'GET' ? undefined : '{}' });
++  return res.status;
++}
++
++async function statuses(user: unknown): Promise<number[]> {
++  const out: number[] = [];
++  for (const [, method, path] of ROUTES) out.push(await status(method, path, user));
++  return out;
++}
++
++describe('KS-1536 extraction: the issuer-cert admin role test is one helper', () => {
++  it('RED KS-1536 R1 hasAdminRole is exported as a function', () => {
++    expect(typeof (certRoutes as Record<string, unknown>).hasAdminRole).toBe('function');
++  });
++
++  it('RED KS-1536 R2 hasAdminRole keeps the truth table of the copied lines', () => {
++    const rows = ['ORG_ADMIN', 'org_admin', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin', 'Super_Admin', 'Admin', 'ADMIN', 'USER', '', undefined, null, 0];
++    expect(rows.map((r) => helper(r))).toEqual([true, true, true, true, true, true, true, true, false, false, false, false, false, false, false]);
++  });
++
++  it('RED KS-1536 R3 the file holds the role test once: no gate copies the ADMIN_ROLES comparison any more', () => {
++    expect(SRC.split('ADMIN_ROLES.includes(').length - 1).toBe(2);
++    expect(SRC).not.toContain("const role = String(user.role ?? '');");
++  });
++
++  it('control KS-1536 C1 an ORG_ADMIN is admitted by all four gates (400 TENANT_REQUIRED, past the role gate)', async () => {
++    expect(await statuses({ role: 'ORG_ADMIN' })).toEqual([400, 400, 400, 400]);
++  });
++
++  it('control KS-1536 C2 a lower-case super_admin and a mixed-case Super_Admin are admitted by all four gates', async () => {
++    expect(await statuses({ role: 'super_admin' })).toEqual([400, 400, 400, 400]);
++    expect(await statuses({ role: 'Super_Admin' })).toEqual([400, 400, 400, 400]);
++  });
++
++  it('control KS-1536 C3 an ordinary USER, a mixed-case Admin and a caller with no role are refused by all four gates', async () => {
++    expect(await statuses({ role: 'USER' })).toEqual([403, 403, 403, 403]);
++    expect(await statuses({ role: 'Admin' })).toEqual([403, 403, 403, 403]);
++    expect(await statuses({})).toEqual([403, 403, 403, 403]);
++  });
++
++  it('control KS-1536 C4 a request with no user at all is refused by all four gates', async () => {
++    expect(await statuses(undefined)).toEqual([403, 403, 403, 403]);
++  });
++
++  it('control KS-1536 C5 a USER holding only the read scope passes the read gate and no other', async () => {
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:read'] })).toEqual([403, 400, 403, 403]);
++  });
++
++  it('control KS-1536 C6 a USER holding the write scope passes write and read, a revoke-scope USER passes revoke only, a sign-scope USER passes sign only', async () => {
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:write'] })).toEqual([400, 400, 403, 403]);
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:revoke'] })).toEqual([403, 403, 400, 403]);
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:sign'] })).toEqual([403, 403, 403, 400]);
++  });
++});
+diff --git a/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts b/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+index 42ccdeeb0..a009177d4 100644
+--- a/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
++++ b/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+@@ -62,11 +62,19 @@ export const issuerCertsRoutes = Router();
+  */
+ const ADMIN_ROLES = ['ORG_ADMIN', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'];
+ 
++/**
++ * The one role test the four gates below share: the role claim, read as text, is in ADMIN_ROLES either as it is or upper-cased.
++ * Behaviour-preserving extraction of the two lines that were copied into each gate.
++ */
++export function hasAdminRole(role: unknown): boolean {
++  const text = String(role ?? '');
++  return ADMIN_ROLES.includes(text) || ADMIN_ROLES.includes(text.toUpperCase());
++}
++
+ function isAuthorisedForCertWrite(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return scopes.includes('issuer-certs:write') || scopes.includes('issuer-certs:*') || scopes.includes('*');
+ }
+@@ -74,8 +82,7 @@ function isAuthorisedForCertWrite(req: AuthenticatedRequest): boolean {
+ function isAuthorisedForCertRead(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:read') ||
+@@ -88,8 +95,7 @@ function isAuthorisedForCertRead(req: AuthenticatedRequest): boolean {
+ function isAuthorisedForCertRevoke(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:revoke') ||
+@@ -105,8 +111,7 @@ function isAuthorisedForCertSign(req: AuthenticatedRequest): boolean {
+   // allow-list, plus a dedicated `issuer-certs:sign` scope for the
+   // SSD connector path (originate calls this on behalf of the caller,
+   // forwarding the Bearer token, so the caller's scopes apply).
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:sign') ||
+diff --git a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+index 09fd44750..8a67b0591 100644
+--- a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
++++ b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
+@@ -5101,5 +5101,21 @@ cd Blockchain/Dev/services/originate &amp;&amp; ../../node_modules/.bin/tsc --no
+ cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run                                                                             # 126 files / 1266 tests, rc 0
+ cd Blockchain/Dev &amp;&amp; npm run check:openapi                                                                                           # rc 0
+ cd Blockchain/Dev &amp;&amp; npm run check:test-types                                                                                        # rc 0; api-gateway 0 new</code></pre>
++<h2>84. issuerCerts.ts holds the admin-role test once, in one helper, <code>hasAdminRole</code> (KS-1536, groundwork)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> KS-1536 hangs this change only because the builder needs an open ticket: it is <strong>a behaviour-preserving extraction, groundwork for the role-vocabulary class, not a fix for KS-1536</strong>. In <code>services/auth/src/routes/issuerCerts.ts</code> the four gates (<code>isAuthorisedForCertWrite</code>, <code>isAuthorisedForCertRead</code>, <code>isAuthorisedForCertRevoke</code> and <code>isAuthorisedForCertSign</code>) each copied the same two lines, <code>const role = String(user.role ?? '')</code> and the <code>ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())</code> test. They now call one exported helper, <code>hasAdminRole(role: unknown)</code>, defined after <code>ADMIN_ROLES</code>, whose body is the same two expressions. Every spelling admitted or refused before is admitted or refused now. A local model (the Spark, DeepSeek V4 Flash, pass <code>ks_1536_p1</code>) wrote the patch; its checker passed 7 of 7 and the patch is byte-identical to the drafter&rsquo;s golden. It was applied here strictly and unchanged. </td></tr><tr><td>The product file changes +13 / &minus;8. The new test is <code>services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts</code> (vitest, 9 cells): R1 to R3 are RED at the pin (the helper is exported; it keeps the truth table of the copied lines; the file holds the role comparison once, which is a source-text check of the file), and C1 to C6 are controls on the four gates that are green before and after. No tier timing or budget in these documents moves.
++    </td></tr></table>
++<h3>84.1 Red-first, and the figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Measured at base <code>bd6697e079fc</code>, 2026-10-28 (UTC), Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions.</strong></td><td> vitest 4.1.12, TypeScript 5.9.3, npm 11.19.0, eslint 10.7.0, each read from the installed package. Host Node <strong>v26.8.1</strong>, which is <strong>not</strong> an LTS line, and no Node 24 run was made, so every figure below is a Node 26 measurement. </td></tr>
++<tr><td>The new file against the unfixed <code>issuerCerts.ts</code>: <strong>3 failed / 6 passed</strong> of 9, every red an <code>AssertionError</code> (R1 to R3); the six controls C1 to C6 pass at base, as designed. With the change: <strong>9 / 9</strong>. The product file was restored by sha256 after the red run.</td></tr>
++<tr><td>services/auth suite by cell name: <strong>105 files / 1200 cells, 1 failed</strong> at the base; <strong>106 files / 1209 cells, 1 failed</strong> with the change; 0 vanished, 9 new, 0 changed status. The one failure is the same cell on both sides: <code>ks949-platform-admin-seed-identity.test.ts</code> &ldquo;the enumeration actually finds seed sites&rdquo;, which ran 5005 ms against vitest&rsquo;s 5 s default under machine load 10 to 13 (a load timeout; KS 1155 names this cell).</td></tr>
++<tr><td>Type-check and lint: <code>tsc --noEmit -p tsconfig.json</code> rc 0. The repo&rsquo;s own test-file ratchet for services/auth examined 157 files (156 at the base), 42 errors, 42 in the baseline, 0 new. <code>eslint</code> on the two files: 0 errors and 1 warning (<code>prefer-const</code> at <code>issuerCerts.ts</code> line 738, which is line 733 at the base and lies outside this change&rsquo;s hunks).</td></tr>
++</table>
++<h3>84.2 What the cells prove, and what they do not</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>One helper and its four callers, not the role vocabulary.</strong></td><td> R1 and R2 prove the helper exists and keeps the truth table of the lines it replaced; R3 reads the file&rsquo;s source text and proves the comparison appears once. C1 to C6 prove that the four gates admit and refuse the same callers as before: an ORG_ADMIN, lower and mixed case super_admin, an ordinary USER, a mixed-case Admin, no role, no user, and the read, write, revoke and sign scopes. This PR does not change which roles are admin roles, and it does not touch the seven divergent role lists that KS-1536 is about. </td></tr><tr><td>Not measured: the other six role lists, a running stack, the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a Node 24 LTS run, and any deploy. None of them is claimed as passing.
++    </td></tr></table>
++<h3>84.3 Running it</h3>
++<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts   # 9 cells, rc 0
++cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run                                                                          # 106 files / 1209 cells; 1 load timeout (ks949 enumeration, KS 1155)
++cd Blockchain/Dev &amp;&amp; node scripts/typecheck-tests/check.cjs services/auth                                                   # rc 0, 0 new</code></pre>
+ </body>
+ </html>
+diff --git a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+index a5c2927b4..fb67131fd 100644
+--- a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
++++ b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
+@@ -5193,5 +5193,24 @@ cd Blockchain/Dev &amp;&amp; npm run check:openapi</code></pre>
+ <tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>8894c7486f82</code>, 2026-10-27 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+ <tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+ </table>
++<h2>issuerCerts.ts: the admin-role test is one helper (groundwork, not the KS-1536 fix) &mdash; KS-1536</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The four certificate gates in <code>services/auth/src/routes/issuerCerts.ts</code> (write, read, revoke, sign) each copied the same two-line admin-role test. They now call one exported helper, <code>hasAdminRole</code>, whose body is those two expressions. Behaviour does not change: every spelling admitted or refused before is admitted or refused now. </td></tr><tr><td>This is groundwork for the role-vocabulary class and <strong>not</strong> a fix for KS-1536, which is about seven divergent role lists. A local model wrote the patch; it is applied unchanged. Test cell R3 is a source-text check of the file.
++      </td></tr></table></div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The other six role lists, a running stack, and a Node 24 LTS run (the host is Node 26.8.1). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
++      </td></tr></table></div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts   # 9 cells, rc 0
++cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run                                                                          # 106 files / 1209 cells; 1 load timeout (ks949 enumeration, KS 1155)
++cd Blockchain/Dev &amp;&amp; node scripts/typecheck-tests/check.cjs services/auth                                                   # rc 0, 0 new</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new file against the unfixed product line</td><td><strong>3 failed / 6 passed</strong> of 9, all AssertionError; with the change <strong>9 / 9</strong></td></tr>
++<tr><td>services/auth, before &rarr; after</td><td><strong>105 files / 1200 cells &rarr; 106 files / 1209</strong>; 1 failed on both sides (the ks949 enumeration cell: 5005 ms against the 5 s default under load; KS 1155); 0 vanished, 9 new</td></tr>
++<tr><td>type-check</td><td><code>tsc -p tsconfig.json</code> rc 0; the repo test ratchet examined 157 files (156 at the base), 42 in the baseline, 0 new</td></tr>
++<tr><td>lint</td><td><code>eslint</code> on the two files: 0 errors, 1 warning that is also present at the base (<code>prefer-const</code>, outside this change)</td></tr>
++<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>bd6697e079fc</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+ </body>
+ </html>
