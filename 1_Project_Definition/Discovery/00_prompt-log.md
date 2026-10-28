@@ -2771,3 +2771,8 @@ INCLUDED until he says otherwise.
 > no problem at all.  keep the rule and mabe introduce a allocation check for local LLM into your wakeup procedure
 
 *Note:* Built spark_status.py; wired into doctor.sh, send_brief.sh and launcher boot step 10c; proven both directions
+
+## 2026-10-29 10:07 — Kam (live board 10:05:10 view=tuesday, 2 attachments, verbatim)
+> Good morning, please use as many seats as the machine will handle to work on the HPSM-poc.  Here is the feedback.  1)the HTML is a design that I would like to implement based on the feedback from Peter and HP.  This moves the menu to the left column.  There are also other layout and structural changes so please review the layout very carefully and create relevant tickets and implement the new design as a priority 2) there is a video and transcript from Pete for his site review.  Video will be added in terminal due to size.  do not file the video but file the other
+
+*Note:* Attachments HP_Security_Services_Playbook_Prototype_v1_2.html + Pete's click-through AI summary docx saved to 0_Brain/reference/2026-10-29_hpsm-poc-hp-feedback/; receipt posted; design-delta drafter commissioned (Sonnet, C8).
