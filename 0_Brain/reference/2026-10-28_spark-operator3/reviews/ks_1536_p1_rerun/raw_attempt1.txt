@@ -1,0 +1,30 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The PR does not implement the ticket's core recommendation — a single exported vocabulary in packages/shared with a guard test — and instead only refactors one file's four gates into a local helper, leaving the seven divergent lists untouched.",
+      "evidence": "issuerCerts.ts:63 `const ADMIN_ROLES = ['ORG_ADMIN', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'];` and issuerCerts.ts:69 `export function hasAdminRole(role: unknown): boolean {` — the helper is local to this file, not in packages/shared, and no other list is touched.",
+      "test_or_reason": "The ticket's Recommendation says 'One exported vocabulary in packages/shared' and 'a guard test that fails when any service re-declares one of them inline'. The diff only adds a helper in services/auth/src/routes/issuerCerts.ts and a test file for that file; no shared vocabulary or guard test is added."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's test R3 asserts the role test appears exactly twice in the file, but the helper itself contains one occurrence and the ADMIN_ROLES declaration contains another, so the assertion does not actually prove the gates no longer copy the comparison — it only proves the count is 2, which would also be true if one gate still copied it.",
+      "evidence": "ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts:83 `expect(SRC.split('ADMIN_ROLES.includes(').length - 1).toBe(2);` — the source at head has `ADMIN_ROLES.includes(text)` at line 71 and `ADMIN_ROLES.includes(text.toUpperCase())` at line 71, plus the declaration at line 63, so the count is 2 only because the helper has two calls; if a gate copied one call, the count would be 3, but the test does not distinguish.",
+      "test_or_reason": "The test's intent is to pin 'the file holds the role test once', but the assertion only counts occurrences of the string 'ADMIN_ROLES.includes(' which appears twice in the helper itself (line 71) and once in the declaration (line 63), so the count is 2 regardless of whether gates copy it. The test would pass even if one gate still had a copied comparison, as long as the total count stayed 2 — which is not the case here, but the test is not a faithful guard."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test R2's truth table includes 'Super_Admin' as true and 'Admin' as false, but the helper upper-cases the input, so 'Super_Admin' becomes 'SUPER_ADMIN' (in ADMIN_ROLES) and 'Admin' becomes 'ADMIN' (not in ADMIN_ROLES) — the test pins the existing behaviour but does not document why mixed-case 'Super_Admin' is admitted while 'Admin' is not, which is a subtle security-relevant distinction.",
+      "evidence": "ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts:78-79 `const rows = ['ORG_ADMIN', 'org_admin', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin', 'Super_Admin', 'Admin', 'ADMIN', 'USER', '', undefined, null, 0]; expect(rows.map((r) => helper(r))).toEqual([true, true, true, true, true, true, true, true, false, false, false, false, false, false, false]);`",
+      "test_or_reason": "The test pins the behaviour but does not explain the rationale; the helper's upper-casing means 'Super_Admin' is admitted because 'SUPER_ADMIN' is in ADMIN_ROLES, while 'Admin' is refused because 'ADMIN' is not. This is a real behavioural nuance that a reader might miss, but it is not a defect in the code."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR's test file mocks the authenticate middleware to inject req.user from a header, but the real authenticate middleware is not shown in the diff, so the test's fidelity to the real authentication path is unverified.",
+      "evidence": "ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts:12-18 `vi.mock('../middleware/authenticate', () => ({ authenticate: () => (req: any, _res: unknown, next: () => void) => { const raw = req.headers['x-test-user']; req.user = typeof raw === 'string' ? JSON.parse(raw) : undefined; next(); }, }));`",
+      "test_or_reason": "The test drives the real router but replaces authentication with a mock; the real authenticate middleware is not in the diff, so the test cannot prove the real auth path produces the same req.user shape. This is a limitation, not a defect."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

@@ -1,0 +1,69 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 12675,
+     "total_tokens": 13497,
+     "completion_tokens": 822,
+     "prompt_tokens_details": {
+      "cached_tokens": 1024
+     }
+    },
+    "seconds": 36.6,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 12675,
+  "completion_tokens": 822,
+  "seconds": 36.6,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The ticket's acceptance criterion \u2014 a 503 on timeout consistent with the connector branch \u2014 is not implemented; the batch path returns a 200 with a failed item and the audit path returns a 502, not 503.",
+    "evidence": "batch.ts:150-152 `catch (err: any) { return { ok: false, error: err.message || 'Service request failed' }; }`; audit-export.ts:215-223 `res.status(502).json({ ... message: 'Failed to reach security service' })`; ticket: 'decide the refusal shape \u2014 a 503 on timeout is consistent with how the connector branch already answers a refused exchange.'",
+    "test_or_reason": "No test asserts a 503 on timeout; the new tests only check for the presence of AbortSignal.timeout and the constant value.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The new tests are source-text assertions, not behavioural tests; they do not verify that a timeout actually aborts the fetch or that the catch returns the documented error shape, so the fix's runtime behaviour is unproven.",
+    "evidence": "test file lines 55-73: `expect(unbounded(BATCH_SRC)).toEqual([]);` and `expect(ms).toBeGreaterThan(0);` \u2014 these only read source text, never execute fetch with a timeout.",
+    "test_or_reason": "The tests would pass even if AbortSignal.timeout were ignored by the runtime or if the catch returned a different shape; no test exercises the fetch with a slow upstream.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The ticket's measured evidence (2.5 s late body \u2192 request hangs) is not reproduced by any test; the fix is only verified by static source inspection, not by a runtime reproduction.",
+    "evidence": "Ticket: 'an exchange whose body arrives 2.5 s late \u2192 the request hangs for that long.'; test file has no timing or network simulation.",
+    "test_or_reason": "No test in the PR simulates a delayed or non-answering upstream to confirm the timeout fires and the request is bounded.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The timeout constant is hard-coded at 30_000 ms with no environment override, which may be too short for legitimate slow upstreams and is not configurable per environment.",
+    "evidence": "batch.ts:124 `const UPSTREAM_BATCH_FETCH_TIMEOUT_MS = 30_000;`; audit-export.ts:75 `const UPSTREAM_AUDIT_FETCH_TIMEOUT_MS = 30_000;`",
+    "test_or_reason": "The ticket asks for an explicit timeout but does not mandate configurability; however, a fixed 30s could cause false failures in production if upstreams legitimately take longer.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The test file's comment claims 'C3 and C4 prove the extractor can return both answers' but C3 uses a synthetic string, not the actual admin.ts source, so it does not prove the extractor works on real code with a signal.",
+    "evidence": "test file lines 83-86: `const synthetic = \"const r = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(5000) });\\n\";`",
+    "test_or_reason": "The control test only validates the extractor on a hand-crafted string, not on the real admin.ts file it claims to cover.",
+    "evidence_quote_found_in_input": true
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

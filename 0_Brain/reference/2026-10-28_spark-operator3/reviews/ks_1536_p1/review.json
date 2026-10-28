@@ -1,0 +1,62 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 18051,
+     "total_tokens": 18624,
+     "completion_tokens": 573,
+     "prompt_tokens_details": {
+      "cached_tokens": 1024
+     }
+    },
+    "seconds": 32.5,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 18051,
+  "completion_tokens": 573,
+  "seconds": 32.5,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Note",
+    "claim": "The PR is a behaviour-preserving extraction of the role test into a helper; it does not address the ticket's core problem of seven divergent role lists.",
+    "evidence": "issuerCerts.ts:69 `export function hasAdminRole(role: unknown): boolean { const text = String(role ?? ''); return ADMIN_ROLES.includes(text) || ADMIN_ROLES.includes(text.toUpperCase()); }`",
+    "test_or_reason": "The ticket asks for one exported vocabulary in packages/shared and a guard test; the PR only refactors one file's local ADMIN_ROLES list.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The new test R3 pins the source text of issuerCerts.ts, which is brittle and will break on any unrelated formatting change.",
+    "evidence": "ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts:83 `expect(SRC.split('ADMIN_ROLES.includes(').length - 1).toBe(2);`",
+    "test_or_reason": "The test reads the file as a string and asserts on exact content, coupling the test to whitespace/comments.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The test's mocked authenticate() is more permissive than the real middleware, as it accepts any x-test-user header without validating a JWT or tenant claim.",
+    "evidence": "ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts:13-17 `authenticate: () => (req: any, _res: unknown, next: () => void) => { const raw = req.headers['x-test-user']; req.user = typeof raw === 'string' ? JSON.parse(raw) : undefined; next(); }`",
+    "test_or_reason": "The real authenticate() (not shown) would verify a token; the fake bypasses that, so the tests only cover the role gate logic, not the full auth path.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The PR does not add a guard test that fails when any service re-declares one of the role lists inline, as the ticket recommends.",
+    "evidence": "Ticket Recommendation: 'a guard test that fails when any service re-declares one of them inline'",
+    "test_or_reason": "The new test only checks issuerCerts.ts; it does not scan other files for inline role lists.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+ }
+}

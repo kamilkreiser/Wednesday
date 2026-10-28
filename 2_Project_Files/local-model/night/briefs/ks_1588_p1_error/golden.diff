@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts
+@@ -167,4 +167,22 @@
+     expect(res.status).not.toBe(401);
+     expect(await res.text()).toContain('exists');
+   });
++
++  // KS-1588 (gate mutant N8): no cell made the lookup throw, so the error path was never entered; an echo of the thrown message, the address or the row into the 500 body passed every cell.
++  it('RED KS-1588 E1 - a lookup that throws answers the generic 500 body, with nothing of the thrown text, the address or the seeded row in it', async () => {
++    const { query } = await import('../db');
++    vi.mocked(query).mockImplementationOnce(async () => { throw new Error('boom-ks1588-db-down'); });
++    const res = await fetch(`${base}/api/auth/wallet/status/${REGISTERED}`);
++    const text = await res.text();
++    expect(res.status).toBe(500);
++    expect(text).not.toContain('boom-ks1588-db-down');
++    expect(text).not.toContain(REGISTERED);
++    expect(text).not.toContain(SEEDED.id);
++    expect(JSON.parse(text)).toEqual({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
++  });
++
++  it('control KS-1588 E0 - after the one-shot throwing stub the lookup answers normally again', async () => {
++    const r = await status(REGISTERED);
++    expect(r.json).toEqual({ exists: true });
++  });
+ });

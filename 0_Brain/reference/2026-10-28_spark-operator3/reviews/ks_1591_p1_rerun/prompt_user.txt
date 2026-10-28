@@ -1,0 +1,658 @@
+===== TICKET =====
+KS-1591 — Security (nit, pre-existing): isPlatformRole's toUpperCase admits a dotless-i, a long-s and an ARRAY role as SUPER_ADMIN [Backlog]
+
+## BLUF
+
+`String(role).toUpperCase()` **is not an identity test.** `packages/shared/src/security/keyRevokePolicy.ts:139-140` (`isPlatformRole`) and `requireKeyAdmin`'s own `toUpperCase` admit three spellings as `SUPER_ADMIN`:
+
+* `super_admın` — **dotless i** (U+0131), which upper-cases to `I`;
+* `ſuper_admin` — **long s** (U+017F), which upper-cases to `S`;
+* a role **array** `["SUPER_ADMIN"]`, because `String(["SUPER_ADMIN"])` is `"SUPER_ADMIN"`.
+
+**Measured by the pull request 1539 gate** (verdict sha256/16 `91e8da4021c40661`, finding **n4**): `PUT /api/keys/admin-scopes/:userId` answered **200** and the mint answered **201** for all three.
+
+## Reachability is NOT established, and that is the first thing to settle
+
+This needs a token the auth service **signs** with such a role. **The gate did not test whether any issuer, user-management path or seed can store or sign one**, and nor have I. So the severity here is a nit until someone measures that; if any path can, it is a privilege escalation and should be re-rated immediately.
+
+## Recommendation
+
+Not built. Compare against an exact ASCII-folded string and **reject a non-string role** outright, in the one shared definition so every caller inherits it.
+
+## Where
+
+* `packages/shared/src/security/keyRevokePolicy.ts:139-140` — `isPlatformRole`.
+* `services/security/src/index.ts` — `requireKeyAdmin`'s `toUpperCase`.
+* Worth a sweep for other `toUpperCase()` role comparisons rather than fixing only these two.
+
+## Dedupe
+
+Linear's `searchIssues` is **fuzzy** — it returned 12 hits for a deliberately nonsensical control term, so it is not a membership test. Deduped with a literal `containsIgnoreCase` filter over title and description, controlled both ways (0 for the nonsense term, non-zero for a real one): `toUpperCase` **0 hits,** `dotless` **0,** `ASCII-folded` **0.** Related but NOT the same: KS-1536 (one role vocabulary, seven divergent lists) is about which role strings each list contains, not about the folding admitting lookalikes.
+
+Filed by Seat V 7th from the pull request 1539 gate.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts b/Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+--- a/Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
++++ b/Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+@@ -138,5 +138,8 @@
+  * @returns true for SYSTEM_ADMIN / SUPER_ADMIN, false for everything else.
+  */
+ export function isPlatformRole(role: string | undefined): boolean {
+-  return PLATFORM_ROLES.has(String(role || '').toUpperCase());
++  // KS-1591: `String(role).toUpperCase()` is not an identity test. U+0131 (dotless i) upper-cases to `I`, U+017F (long s) upper-cases to `S`, and an ARRAY role stringifies to its element, so all three
++  // read as SUPER_ADMIN. Only an ASCII fold is applied (a-z to A-Z, every other character untouched), and a role that is not a string is refused outright.
++  if (typeof role !== 'string') return false;
++  return PLATFORM_ROLES.has(role.replace(/[a-z]/g, (ch) => ch.toUpperCase()));
+ }
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1591-is-platform-role-is-an-exact-ascii-fold.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1591-is-platform-role-is-an-exact-ascii-fold.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1591-is-platform-role-is-an-exact-ascii-fold.test.ts
+@@ -0,0 +1,78 @@
++// KS-1591 (packages/shared security/keyRevokePolicy.ts isPlatformRole): the predicate decided "platform administrator" with `String(role || '').toUpperCase()`, which is not an identity test.
++// U+0131 (dotless i) upper-cases to `I` and U+017F (long s) upper-cases to `S`, so `super_admin` spelled with either read as SUPER_ADMIN; and a role ARRAY stringifies to its element, so
++// `['SUPER_ADMIN']` read as SUPER_ADMIN too. R1 to R5 pin that each of those is refused; C1 to C6 pin that every spelling the platform really uses is still admitted and that an ordinary role,
++// an empty role and an absent role are still refused; D1 and D2 go through decideTenantAccess, the caller of the predicate, so the refusal is seen where the decision is made.
++// All non-ASCII characters are written as \u escapes so this file is pure ASCII.
++import { describe, it, expect } from 'vitest';
++import { isPlatformRole, decideTenantAccess } from '../index';
++
++const DOTLESS_I = '\u0131';
++const LONG_S = '\u017f';
++
++function asRole(value: unknown): string | undefined {
++  return value as string | undefined;
++}
++
++describe('KS-1591: isPlatformRole is an exact ASCII fold and refuses a non-string role', () => {
++  it('RED KS-1591 R1 a role spelled with a dotless i is not a platform role', () => {
++    expect(isPlatformRole('super_adm' + DOTLESS_I + 'n')).toBe(false);
++  });
++
++  it('RED KS-1591 R2 a role spelled with a long s is not a platform role', () => {
++    expect(isPlatformRole(LONG_S + 'uper_admin')).toBe(false);
++  });
++
++  it('RED KS-1591 R3 a role array holding SUPER_ADMIN is not a platform role', () => {
++    expect(isPlatformRole(asRole(['SUPER_ADMIN']))).toBe(false);
++  });
++
++  it('RED KS-1591 R4 a role array holding system_admin is not a platform role', () => {
++    expect(isPlatformRole(asRole(['system_admin']))).toBe(false);
++  });
++
++  it('RED KS-1591 R5 a system admin role spelled with a long s is not a platform role', () => {
++    expect(isPlatformRole(LONG_S + 'ystem_admin')).toBe(false);
++  });
++
++  it('control KS-1591 C1 SUPER_ADMIN and SYSTEM_ADMIN are platform roles', () => {
++    expect(isPlatformRole('SUPER_ADMIN')).toBe(true);
++    expect(isPlatformRole('SYSTEM_ADMIN')).toBe(true);
++  });
++
++  it('control KS-1591 C2 super_admin and system_admin are platform roles', () => {
++    expect(isPlatformRole('super_admin')).toBe(true);
++    expect(isPlatformRole('system_admin')).toBe(true);
++  });
++
++  it('control KS-1591 C3 a mixed-case spelling is a platform role', () => {
++    expect(isPlatformRole('Super_Admin')).toBe(true);
++    expect(isPlatformRole('sYsTeM_aDmIn')).toBe(true);
++  });
++
++  it('control KS-1591 C4 ordinary roles are not platform roles', () => {
++    expect(isPlatformRole('ADMIN')).toBe(false);
++    expect(isPlatformRole('ISSUER_ADMIN')).toBe(false);
++    expect(isPlatformRole('user')).toBe(false);
++  });
++
++  it('control KS-1591 C5 an empty role and an absent role are not platform roles', () => {
++    expect(isPlatformRole('')).toBe(false);
++    expect(isPlatformRole(undefined)).toBe(false);
++    expect(isPlatformRole(asRole(null))).toBe(false);
++  });
++
++  it('control KS-1591 C6 a role with surrounding whitespace is still not a platform role', () => {
++    expect(isPlatformRole(' SUPER_ADMIN')).toBe(false);
++    expect(isPlatformRole('SUPER_ADMIN ')).toBe(false);
++  });
++
++  it('RED KS-1591 D1 decideTenantAccess does not give a dotless-i role the platform-admin pass', () => {
++    const decision = decideTenantAccess({ role: 'super_adm' + DOTLESS_I + 'n', tenantId: 'tenant-a' }, 'tenant-b');
++    expect(decision.allow).toBe(false);
++  });
++
++  it('control KS-1591 D2 decideTenantAccess still gives super_admin the platform-admin pass', () => {
++    const decision = decideTenantAccess({ role: 'super_admin', tenantId: 'tenant-a' }, 'tenant-b');
++    expect(decision).toEqual({ allow: true, reason: 'platform-admin' });
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts
+1: /**
+2:  * =============================================================================
+3:  * API-KEY REVOKE POLICY — the single implementation of the rule (KS-643/KS-764)
+4:  * =============================================================================
+5:  * MOVED HERE from `services/security/src/keyRevokePolicy.ts` (KS-764, QA
+6:  * F-764-01). The rule had ONE implementation and TWO call sites, and only one
+7:  * of them used it: `originate`'s `DELETE /api/admin/api-keys/:id` writes the
+8:  * same `svc_api_keys` row gated on role and tenant alone, so an ORG_ADMIN in
+9:  * organisation A could still revoke organisation B's key through it.
+10:  *
+11:  * Duplicating the decision into `originate` would have produced two
+12:  * implementations of one rule, neither able to witness the other drifting —
+13:  * the shape that made #795's reachable-entry check untestable. So the pure
+14:  * decision lives here, in the package both services already depend on, and
+15:  * both call sites import it.
+16:  *
+17:  * PURE BY CONSTRUCTION: no database, no request, no clock, no environment. The
+18:  * caller resolves the key row and passes it in. `lookupKeyForRevoke` stays in
+19:  * `services/security` because it needs that service's own pool and the
+20:  * platform-scope wrapper; it is the half that cannot be shared, and it is not
+21:  * the half that carries the rule.
+22:  * =============================================================================
+23:  */
+24: 
+25: /**
+26:  * KS-643 / KS-578 — who may revoke which API key.
+27:  *
+28:  * `DELETE /api/keys/:id` was gated on role alone (`requireKeyAdmin`), and
+29:  * `KEY_ADMIN_ROLES` includes the **tenant-scoped** ORG_ADMIN / ISSUER_ADMIN /
+30:  * ADMIN. Nothing compared the key's tenant to the caller's, so a tenant-scoped
+31:  * admin could revoke another customer's key — an auth denial-of-service against
+32:  * that customer (KS-643). Measured live before this module existed: an
+33:  * ISSUER_ADMIN in tenant A revoked a tenant-B key and got 200, with `is_active`
+34:  * flipping t -> f; the same call as OWNER returned 403 and with no token 401,
+35:  * so the role gate worked and only the tenancy check was missing.
+36:  *
+37:  * KS-578 is the other half. The lookup that feeds this decision ran under the
+38:  * caller's tenant GUC, so a foreign-tenant row was RLS-hidden and the handler
+39:  * 404'd on a key that exists. Those two interact, which is why they land
+40:  * together: platform-scoping the lookup WITHOUT this check would have made the
+41:  * KS-643 cross-tenant revoke fully reliable instead of only mostly reliable.
+42:  * Resolve first, then authorise — the tenant comparison needs the key's tenant,
+43:  * which cannot be known until the row is read.
+44:  *
+45:  * Kam's ruling 2026-08-26: "together — Authorise the ownership check in the
+46:  * same PR as KS-578", minimal shape — non-platform KEY_ADMIN roles act only on
+47:  * their own tenant's keys, platform-admin cross-tenant revoke preserved
+48:  * (KS-577's revoke-on-rotate depends on that half).
+49:  */
+50: 
+51: 
+52: import { normaliseOrgId } from './orgId';
+53: import { isProvisioningCapable } from './scopes';
+54: 
+55: /**
+56:  * Roles that may act across tenants. Deliberately NOT the whole of
+57:  * KEY_ADMIN_ROLES: ORG_ADMIN / ISSUER_ADMIN / ADMIN are tenant-scoped and are
+58:  * exactly the escalation KS-643 describes.
+59:  */
+60: const PLATFORM_ROLES = new Set(['SYSTEM_ADMIN', 'SUPER_ADMIN']);
+61: 
+62: /**
+63:  * Roles bounded to their OWN Organisation within a tenant (KS-764).
+64:  *
+65:  * A tenant holds many organisations, so the tenant compare below is a floor and
+66:  * not a fence: an ISSUER_ADMIN in organisation A passed it while revoking a key
+67:  * belonging to organisation B of the same tenant — an auth denial-of-service
+68:  * against a sibling, on a destructive surface.
+69:  *
+70:  * ADMIN is deliberately NOT in this set even though it is in KEY_ADMIN_ROLES.
+71:  * ORG_ADMIN and ISSUER_ADMIN name an organisation in their own titles; ADMIN is
+72:  * the tenant-wide administrator, and org-bounding it would remove access that is
+73:  * meant to exist. Narrowing it is a separate decision with a separate blast
+74:  * radius, and guessing at it here would be the same mistake in the other
+75:  * direction.
+76:  */
+77: const ORG_BOUNDED_ROLES = new Set(['ORG_ADMIN', 'ISSUER_ADMIN']);
+78: 
+79: /**
+80:  * True when the caller's role is bounded to its own Organisation (KS-764).
+81:  *
+82:  * @param role - the caller's JWT role claim, in either casing.
+83:  */
+84: export function isOrgBoundedRole(role: string | undefined): boolean {
+85:   return ORG_BOUNDED_ROLES.has(String(role || '').toUpperCase());
+86: }
+87: 
+88: /**
+89:  * KS-1570 (Kam's ruling, shape b): the tenant-level `ADMIN` role is bounded by an explicit ADMIN
+90:  * ORGANISATION SCOPE (the `admin_organisation_scopes` table), not by its token's organisation claim.
+91:  * Compared upper-cased, so lowercase `admin` is bound too: that is how this service already reads the
+92:  * role, although auth's own lists treat `admin` as a platform admin (the KS-1536 vocabulary split).
+93:  */
+94: const SCOPED_ADMIN_ROLES = new Set(['ADMIN']);
+95: 
+96: /**
+97:  * True when the caller's role is bounded by an ADMIN organisation scope (KS-1570).
+98:  *
+99:  * @param role - the caller's JWT role claim, in either casing.
+100:  */
+101: export function isScopedAdminRole(role: string | undefined): boolean {
+102:   return SCOPED_ADMIN_ROLES.has(String(role || '').toUpperCase());
+103: }
+104: 
+105: /*
+106:  * Organisation ids are normalised before comparison (KS-764) — `svc_api_keys.
+107:  * organization_id` is TEXT while `tenant_id` is UUID, so a raw `!==` on two org
+108:  * ids compares whatever casing each side happened to store, and a
+109:  * differently-cased claim would read as a different Organisation and refuse a
+110:  * legitimate revoke while nothing caught it.
+111:  *
+112:  * The normaliser is `normaliseOrgId` from `./orgId` (KS-780) — the ONE
+113:  * implementation, which `services/originate/src/services/orgId.ts` re-exports
+114:  * for its own resolvers. This file used to carry a private byte-identical copy
+115:  * (`normOrgId`) because `@secuura/shared` cannot import from a service; moving
+116:  * the function here rather than reusing the service's was the only direction
+117:  * available, and it is done. Empty and whitespace-only collapse to null so
+118:  * "absent" has ONE representation at the comparison, and the org-less arms
+119:  * below decide it explicitly.
+120:  */
+121: 
+122: export interface RevokeDecision {
+123:   allow: boolean;
+124:   status?: number;
+125:   reason?: string;
+126: }
+127: 
+128: /**
+129:  * True when the caller's role may act across tenants.
+130:  *
+131:  * KS-742: the list endpoint needs this predicate on its own — it filters a
+132:  * collection rather than authorising one resolved key, so it has no single
+133:  * `targetTenantId` to hand `decideTenantAccess`. Exported so there is exactly
+134:  * one definition of "platform role" in this service rather than a second copy
+135:  * drifting inside index.ts.
+136:  *
+137:  * @param role - the caller's JWT role claim, in either casing.
+138:  * @returns true for SYSTEM_ADMIN / SUPER_ADMIN, false for everything else.
+139:  */
+140: export function isPlatformRole(role: string | undefined): boolean {
+141:   // KS-1591: `String(role).toUpperCase()` is not an identity test. U+0131 (dotless i) upper-cases to `I`, U+017F (long s) upper-cases to `S`, and an ARRAY role stringifies to its element, so all three
+142:   // read as SUPER_ADMIN. Only an ASCII fold is applied (a-z to A-Z, every other character untouched), and a role that is not a string is refused outright.
+143:   if (typeof role !== 'string') return false;
+144:   return PLATFORM_ROLES.has(role.replace(/[a-z]/g, (ch) => ch.toUpperCase()));
+145: }
+146: 
+147: /**
+148:  * The one tenancy rule for the whole `/api/keys` family.
+149:  *
+150:  * KS-742: KS-643 fixed `DELETE /api/keys/:id` by comparing the key's tenant to
+151:  * the caller's, but wrote that comparison inline for revoke alone. `GET` and
+152:  * `POST` needed the identical rule, and a second copy of a security decision is
+153:  * how the two halves drift. `decideKeyRevoke` below is now a thin wrapper over
+154:  * this, so its behaviour is unchanged and there is a single definition.
+155:  *
+156:  * @param user - the verified principal (role / tenant) from the JWT.
+157:  * @param targetTenantId - the tenant the operation would actually touch, which
+158:  *        for a mint means the tenant AFTER resolution, not the one requested.
+159:  * @returns an allow decision naming the authorising path, or a 403 deny.
+160:  * @example decideTenantAccess({role:'ISSUER_ADMIN',tenantId:'a'}, 'b') // deny
+161:  */
+162: export function decideTenantAccess(
+163:   user: { role?: string; tenantId?: string; organizationId?: string | null; scopes?: readonly (string | null | undefined)[] } | undefined,
+164:   targetTenantId: string,
+165:   organisationScope?: {
+166:     targetOrganizationId: string | null;
+167:     /**
+168:      * KS-1570: the ADMIN caller's organisation scope, resolved by the call site. Consulted only for a
+169:      * scoped-admin role; ABSENT means the call site did not resolve it, and that is refused.
+170:      */
+171:     adminOrganisationScope?: readonly (string | null | undefined)[];
+172:   },
+173: ): RevokeDecision {
+174:   // JWTs in this repo carry both casings (`super_admin` and `SUPER_ADMIN`).
+175:   if (isPlatformRole(user?.role)) {
+176:     return { allow: true, reason: 'platform-admin' };
+177:   }
+178: 
+179:   // A caller with no tenant is refused rather than defaulted. Defaulting here
+180:   // would silently hand every tenant-less principal the default tenant's keys.
+181:   if (!user?.tenantId) {
+182:     return { allow: false, status: 403, reason: 'caller has no tenant' };
+183:   }
+184: 
+185:   if (user.tenantId !== targetTenantId) {
+186:     return { allow: false, status: 403, reason: 'cross-tenant' };
+187:   }
+188: 
+189:   // KS-764 — the organisation arm. Engaged ONLY when the caller supplies
+190:   // `organisationScope`, so the two existing callers (KS-742's list and mint)
+191:   // keep exactly today's behaviour and this change's blast radius is the revoke
+192:   // route alone.
+193:   //
+194:   // Under Kam's ruling `{ targetOrganizationId: null }` and omitting the argument
+195:   // reach the same verdict, so the options object no longer earns its place on
+196:   // the null case. It still earns it on the populated one: omitting means "do not
+197:   // apply an organisation bound at all", so a genuine cross-org mismatch is not
+198:   // even looked at. Kept an options object rather than an optional third string
+199:   // so that adding a bound to another surface later is an explicit act at the
+200:   // call site rather than a value that could arrive as undefined by accident.
+201:   if (organisationScope && isOrgBoundedRole(user.role)) {
+202:     const targetOrg = normaliseOrgId(organisationScope.targetOrganizationId);
+203:     const callerOrg = normaliseOrgId(user.organizationId);
+204: 
+205:     // KS-764's filed fix-shape said an ORG-LESS KEY must be refused. Kam ruled
+206:     // otherwise on 2026-09-03, and the reasoning is worth keeping because the
+207:     // filed shape reads more secure than it is:
+208:     //
+209:     // The hazard this arm exists to close is an org-bounded admin in
+210:     // organisation A destroying organisation B's key. That requires the key to
+211:     // BELONG to organisation B. A key with no organisation is not a sibling
+212:     // organisation's asset — it is a tenant-level key — so refusing it prevents
+213:     // no cross-org attack. What it does do is strand the key.
+214:     //
+215:     // FIGURE REPLACED 2026-09-03. This cited "477 of 1,225 rows across 197
+216:     // tenants" from the LOCAL stack. That database no longer exists — the
+217:     // slot-1 credential rotation rebuilt it to 17 seeded accounts — and it was
+218:     // a FIXTURE, never a population. Re-measured on the DEMO VM, read-only:
+219:     // `svc_api_keys` holds 39 rows, 18 of them with a NULL organization_id, so
+220:     // under the filed shape those 18 become revocable by a platform admin
+221:     // alone — a permanent operational cost buying no security.
+222:     //
+223:     // (The CALLER-side population, which is what Kam's merge precondition
+224:     // actually asked for, is on KS-764 and KS-779: 10 of 30 accounts hold an
+225:     // org-bounded role with no organisation — 10 of 10 org-bounded accounts —
+226:     // and 21 org-owned keys would 403 today.)
+227:     //
+228:     // It also contradicts
+229:     // KS-643's merged acceptance test, which asserts in as many words that a
+230:     // tenant-scoped ORG_ADMIN revoking a key in its own tenant "must not
+231:     // over-correct".
+232:     //
+233:     // So: an org-less key falls through to the tenant verdict, which has already
+234:     // passed. Tenant remains the floor and it is doing the work here.
+235:     if (!targetOrg) {
+236:       return { allow: true, reason: 'same-tenant' };
+237:     }
+238: 
+239:     // The caller side is NOT symmetric, and this is the asymmetry that matters:
+240:     // the key demonstrably belongs to an organisation, and an org-bounded caller
+241:     // that cannot name its own cannot be shown to belong to that one. Refused
+242:     // explicitly rather than defaulted — a token-shape problem, reported with
+243:     // its own reason because its fix is different from a cross-org denial.
+244:     if (!callerOrg) {
+245:       return { allow: false, status: 403, reason: 'caller has no organisation' };
+246:     }
+247:     if (callerOrg !== targetOrg) {
+248:       return { allow: false, status: 403, reason: 'cross-organisation' };
+249:     }
+250:     return { allow: true, reason: 'same-organisation' };
+251:   }
+252: 
+253:   // KS-1570 (Kam's ruling, shape b): an ADMIN acts only for the organisations in its ADMIN
+254:   // ORGANISATION SCOPE. Same engagement rule as the arm above: only when the call site supplies
+255:   // `organisationScope`, so the KS-742 list (which omits it) keeps its behaviour (KS-1574 is the list's
+256:   // own bound).
+257:   //   - An unqualified target (no organisation) is a tenant-level key: it falls through to the tenant
+258:   //     verdict, as for the org-bounded roles (Kam, 2026-09-03; the KS-779 shape for minting).
+259:   //   - An ABSENT scope means the call site did not resolve it. That is refused, never defaulted: a call
+260:   //     site that forgets the lookup fails closed instead of silently restoring an unbounded ADMIN.
+261:   //     originate's adminConfig revoke passes none today, and is unreachable by ADMIN (its requireRole).
+262:   //   - An EMPTY scope grants nothing (default deny for naming an organisation).
+263:   if (organisationScope && isScopedAdminRole(user.role)) {
+264:     const targetOrg = normaliseOrgId(organisationScope.targetOrganizationId);
+265:     if (!targetOrg) {
+266:       return { allow: true, reason: 'same-tenant' };
+267:     }
+268:     const scope = organisationScope.adminOrganisationScope;
+269:     if (scope === undefined) {
+270:       return { allow: false, status: 403, reason: 'admin organisation scope not resolved' };
+271:     }
+272:     const granted = new Set(scope.map((o) => normaliseOrgId(o ?? null)).filter((o): o is string => o !== null));
+273:     if (!granted.has(targetOrg)) {
+274:       return { allow: false, status: 403, reason: 'outside admin organisation scope' };
+275:     }
+276:     return { allow: true, reason: 'within admin organisation scope' };
+277:   }
+278: 
+279:   // KS-1584 (pull request 1535 gate M1) — the PROVISIONER arm, and the reason the two arms above
+280:   // were not enough. A tenant admin may mint a key carrying `organizations:register`; that key's
+281:   // principal is role `connector`, which is neither an org-bounded role nor a scoped admin, so it
+282:   // fell through to the tenant verdict and could mint for ANY organisation of the tenant, bound to
+283:   // that organisation's connector id. Two hops, no cross-tenant step, and the KS-695 erasure then
+284:   // trusts the row it produced.
+285:   //
+286:   // THE BOUND IS THE KEY'S OWN ORGANISATION (Kam's option b, Wednesday's R1: one organisation per
+287:   // key, no migration). The claim already travels — the gateway builds the connector principal with
+288:   // `organizationId: meta.organizationId` from the key row, and auth's `generateConnectorToken`
+289:   // signs it — so nothing is looked up and no column is added. An admin needing two organisations
+290:   // mints two keys.
+291:   //
+292:   //   - An unqualified target falls through to the tenant verdict, as in both arms above.
+293:   //   - An ORG-LESS provisioning key is PLATFORM-MINTED and stays UNBOUNDED. That is Platform S's
+294:   //     per-instance key (shared scopes.ts, the KS-480 §4 amendment) and it must keep working.
+295:   //     Legacy org-less keys an admin minted before this change also read as unbounded here; they
+296:   //     are censused at deploy and revoked only on Kam's word (Wednesday's R2), because a
+297:   //     revocation of a live integration is his signature class and who minted a key cannot be
+298:   //     recovered from the row.
+299:   //   - Wildcards count, via the one shared predicate: a `*` key can register a connector at the
+300:   //     gateway, so it is bounded here too.
+301:   if (organisationScope && user.role === 'connector' && isProvisioningCapable(user.scopes)) {
+302:     const targetOrg = normaliseOrgId(organisationScope.targetOrganizationId);
+303:     if (!targetOrg) {
+304:       return { allow: true, reason: 'same-tenant' };
+305:     }
+306:     const callerOrg = normaliseOrgId(user.organizationId);
+307:     if (!callerOrg) {
+308:       return { allow: true, reason: 'unbounded provisioning key' };
+309:     }
+310:     if (callerOrg !== targetOrg) {
+311:       return { allow: false, status: 403, reason: 'outside provisioning key organisation' };
+312:     }
+313:     return { allow: true, reason: 'within provisioning key organisation' };
+314:   }
+315: 
+316:   return { allow: true, reason: 'same-tenant' };
+317: }
+318: 
+319: /**
+320:  * Authorise a revoke of ONE resolved key.
+321:  *
+322:  * Tenant is the floor; organisation is the gate (KS-764). Platform roles bypass
+323:  * both, unchanged — KS-577's revoke-on-rotate depends on that half.
+324:  *
+325:  * @param user - the verified principal (role / tenant / organisation) from the JWT.
+326:  * @param key - the key AFTER resolution, carrying its own tenant and organisation.
+327:  * @example decideKeyRevoke({role:'ISSUER_ADMIN',tenantId:'a',organizationId:'o1'},
+328:  *                          {id:'k',tenantId:'a',organizationId:'o2'}) // deny cross-organisation
+329:  */
+330: export function decideKeyRevoke(
+331:   user: { role?: string; tenantId?: string; organizationId?: string | null } | undefined,
+332:   key: { id: string; tenantId: string; organizationId?: string | null },
+333:   opts?: { adminOrganisationScope?: readonly (string | null | undefined)[] },
+334: ): RevokeDecision {
+335:   return decideTenantAccess(user, key.tenantId, {
+336:     targetOrganizationId: key.organizationId ?? null,
+337:     // KS-1570: only passed when the call site resolved it; absent stays absent, so an ADMIN is refused.
+338:     ...(opts?.adminOrganisationScope !== undefined ? { adminOrganisationScope: opts.adminOrganisationScope } : {}),
+339:   });
+340: }
+341: 
+342: /**
+343:  * KS-1584 — may this register-connector caller act on this organisation?
+344:  *
+345:  * Extracted as a pure function rather than left inline in the gateway route for the reason the rest
+346:  * of this file exists: it is an authorisation rule on a path that ends in an irreversible erasure, and
+347:  * inline in a 200-line handler it could only ever be pinned by booting the whole app. Here it has a
+348:  * truth table.
+349:  *
+350:  * The rule: a provisioning key that carries an organisation is BOUNDED to it, so at register-connector
+351:  * it may do exactly one thing — re-register its OWN organisation. It may not create a new organisation
+352:  * (a new one is outside every bound by construction) and it may not act on another organisation, which
+353:  * is also what stops it renaming one.
+354:  *
+355:  * ONE refusal for every case, deliberately. Answering differently for "would be new" and "exists but is
+356:  * not yours" would let a bounded key probe which externalRefs exist in its tenant — the same enumeration
+357:  * the cross-tenant guardrail refuses. The only outcome a bounded key can tell apart is "my own
+358:  * organisation", which it already knows.
+359:  *
+360:  * An ORG-LESS provisioning key is platform-minted (Platform S's per-instance key) and is UNBOUNDED: it
+361:  * registers and creates as before.
+362:  *
+363:  * @param args.byConnector - true when a connector key authorised the call, not a platform admin.
+364:  * @param args.callerScopes - the key's scopes; wildcards count, via `isProvisioningCapable`.
+365:  * @param args.callerOrganizationId - the key row's own organisation, or null/absent when org-less.
+366:  * @param args.existingOrganizationId - the organisation the externalRef resolved to, or null for none.
+367:  * @example decideProvisionerRegistration({byConnector:true,callerScopes:['organizations:register'],callerOrganizationId:'a',existingOrganizationId:'a'}) // allow
+368:  * @example decideProvisionerRegistration({byConnector:true,callerScopes:['*'],callerOrganizationId:'a',existingOrganizationId:null}) // deny (would create)
+369:  */
+370: export function decideProvisionerRegistration(args: {
+371:   byConnector: boolean;
+372:   callerScopes?: readonly (string | null | undefined)[];
+373:   callerOrganizationId?: string | null;
+374:   existingOrganizationId?: string | null;
+375: }): { allow: true; reason: string } | { allow: false; status: 403; reason: string } {
+376:   const ownOrg = normaliseOrgId(args.callerOrganizationId ?? null);
+377:   const bounded = args.byConnector && isProvisioningCapable(args.callerScopes) && ownOrg !== null;
+378:   if (!bounded) {
+379:     return { allow: true, reason: 'not a bounded provisioning key' };
+380:   }
+381:   const hitOrg = normaliseOrgId(args.existingOrganizationId ?? null);
+382:   if (hitOrg === null || hitOrg !== ownOrg) {
+383:     return { allow: false, status: 403, reason: 'bounded provisioning key may only re-register its own organisation' };
+384:   }
+385:   return { allow: true, reason: 'own organisation' };
+386: }
+
+### FILE AT HEAD: Blockchain/Dev/packages/shared/src/__tests__/ks1591-is-platform-role-is-an-exact-ascii-fold.test.ts
+1: // KS-1591 (packages/shared security/keyRevokePolicy.ts isPlatformRole): the predicate decided "platform administrator" with `String(role || '').toUpperCase()`, which is not an identity test.
+2: // U+0131 (dotless i) upper-cases to `I` and U+017F (long s) upper-cases to `S`, so `super_admin` spelled with either read as SUPER_ADMIN; and a role ARRAY stringifies to its element, so
+3: // `['SUPER_ADMIN']` read as SUPER_ADMIN too. R1 to R5 pin that each of those is refused; C1 to C6 pin that every spelling the platform really uses is still admitted and that an ordinary role,
+4: // an empty role and an absent role are still refused; D1 and D2 go through decideTenantAccess, the caller of the predicate, so the refusal is seen where the decision is made.
+5: // All non-ASCII characters are written as \u escapes so this file is pure ASCII.
+6: import { describe, it, expect } from 'vitest';
+7: import { isPlatformRole, decideTenantAccess } from '../index';
+8: 
+9: const DOTLESS_I = '\u0131';
+10: const LONG_S = '\u017f';
+11: 
+12: function asRole(value: unknown): string | undefined {
+13:   return value as string | undefined;
+14: }
+15: 
+16: describe('KS-1591: isPlatformRole is an exact ASCII fold and refuses a non-string role', () => {
+17:   it('RED KS-1591 R1 a role spelled with a dotless i is not a platform role', () => {
+18:     expect(isPlatformRole('super_adm' + DOTLESS_I + 'n')).toBe(false);
+19:   });
+20: 
+21:   it('RED KS-1591 R2 a role spelled with a long s is not a platform role', () => {
+22:     expect(isPlatformRole(LONG_S + 'uper_admin')).toBe(false);
+23:   });
+24: 
+25:   it('RED KS-1591 R3 a role array holding SUPER_ADMIN is not a platform role', () => {
+26:     expect(isPlatformRole(asRole(['SUPER_ADMIN']))).toBe(false);
+27:   });
+28: 
+29:   it('RED KS-1591 R4 a role array holding system_admin is not a platform role', () => {
+30:     expect(isPlatformRole(asRole(['system_admin']))).toBe(false);
+31:   });
+32: 
+33:   it('RED KS-1591 R5 a system admin role spelled with a long s is not a platform role', () => {
+34:     expect(isPlatformRole(LONG_S + 'ystem_admin')).toBe(false);
+35:   });
+36: 
+37:   it('control KS-1591 C1 SUPER_ADMIN and SYSTEM_ADMIN are platform roles', () => {
+38:     expect(isPlatformRole('SUPER_ADMIN')).toBe(true);
+39:     expect(isPlatformRole('SYSTEM_ADMIN')).toBe(true);
+40:   });
+41: 
+42:   it('control KS-1591 C2 super_admin and system_admin are platform roles', () => {
+43:     expect(isPlatformRole('super_admin')).toBe(true);
+44:     expect(isPlatformRole('system_admin')).toBe(true);
+45:   });
+46: 
+47:   it('control KS-1591 C3 a mixed-case spelling is a platform role', () => {
+48:     expect(isPlatformRole('Super_Admin')).toBe(true);
+49:     expect(isPlatformRole('sYsTeM_aDmIn')).toBe(true);
+50:   });
+51: 
+52:   it('control KS-1591 C4 ordinary roles are not platform roles', () => {
+53:     expect(isPlatformRole('ADMIN')).toBe(false);
+54:     expect(isPlatformRole('ISSUER_ADMIN')).toBe(false);
+55:     expect(isPlatformRole('user')).toBe(false);
+56:   });
+57: 
+58:   it('control KS-1591 C5 an empty role and an absent role are not platform roles', () => {
+59:     expect(isPlatformRole('')).toBe(false);
+60:     expect(isPlatformRole(undefined)).toBe(false);
+61:     expect(isPlatformRole(asRole(null))).toBe(false);
+62:   });
+63: 
+64:   it('control KS-1591 C6 a role with surrounding whitespace is still not a platform role', () => {
+65:     expect(isPlatformRole(' SUPER_ADMIN')).toBe(false);
+66:     expect(isPlatformRole('SUPER_ADMIN ')).toBe(false);
+67:   });
+68: 
+69:   it('RED KS-1591 D1 decideTenantAccess does not give a dotless-i role the platform-admin pass', () => {
+70:     const decision = decideTenantAccess({ role: 'super_adm' + DOTLESS_I + 'n', tenantId: 'tenant-a' }, 'tenant-b');
+71:     expect(decision.allow).toBe(false);
+72:   });
+73: 
+74:   it('control KS-1591 D2 decideTenantAccess still gives super_admin the platform-admin pass', () => {
+75:     const decision = decideTenantAccess({ role: 'super_admin', tenantId: 'tenant-a' }, 'tenant-b');
+76:     expect(decision).toEqual({ allow: true, reason: 'platform-admin' });
+77:   });
+78: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "236d6aafb5463b3b1f5cfb23154b0a34d10d0b5c",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts",
+   "added": "4",
+   "deleted": "1"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/packages/shared/src/__tests__/ks1591-is-platform-role-is-an-exact-ascii-fold.test.ts",
+   "added": "78",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "4",
+   "1",
+   "Blockchain/Dev/packages/shared/src/security/keyRevokePolicy.ts"
+  ],
+  [
+   "78",
+   "0",
+   "Blockchain/Dev/packages/shared/src/__tests__/ks1591-is-platform-role-is-an-exact-ascii-fold.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 13,
+  "failed": 6
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 13,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1039 failed=1 | after: total=1052 failed=1\ndevelop's own reds (attributed, not counted): [('wallet-signature.test.ts', 'verifyMessageSignature (CIP-8/CIP-30) \u2014 KS-278 accepts a valid wallet signature over the message')]\nNEW reds: []\nreds fixed by the patch: []\ntests added: 13\n",
+ "checker_summary": [
+  "PASS A6 whole packages/shared suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for packages/shared: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +82/-1 test=src/__tests__/ks1591-is-platform-role-is-an-exact-ascii-fold.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

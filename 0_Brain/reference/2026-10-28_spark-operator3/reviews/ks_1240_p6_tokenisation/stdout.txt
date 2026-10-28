@@ -1,0 +1,37 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 8905, "total_tokens": 9719, "completion_tokens": 814, "prompt_tokens_details": {"cached_tokens": 1024}}, "seconds": 29.4, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 8905, "completion_tokens": 814, "seconds": 29.4, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The timeout is applied to both outbound fetches, but the ticket's acceptance criterion of a 503 refusal shape is not implemented; the code answers an empty map on timeout, not a 503.",
+   "evidence": "Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts:127-132 `catch (err) { logger.warn('tokeniseFields: tokenisation service unavailable', { tenantId, error: (err as Error).message }); }` and line 134 `return map;`",
+   "test_or_reason": "Ticket says 'decide the refusal shape \u2014 a 503 on timeout is consistent with how the connector branch already answers a refused exchange.' The code does not return a 503; it returns an empty map. This is a deviation from the ticket's stated intent, though the ticket says 'decide', so it may be acceptable.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test R4/R5 does not actually verify the timeout fires; it mocks AbortSignal.timeout to return an already-aborted signal, so the test only proves the fetch rejects when the signal is aborted, not that the 10-second timeout is wired to the fetch.",
+   "evidence": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts:81 `vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());` and line 83 `expect(await outcome(() => tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]))).toBe('EMPTY MAP');`",
+   "test_or_reason": "The test replaces the timeout with an immediate abort, so it does not exercise the real timeout path. It only proves the catch handles an aborted fetch, not that the timeout is actually set to 10 seconds.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test R3 only checks that the timeout value is positive and \u2264 30000 ms, but does not pin the exact value 10_000, so a regression to 1 ms or 30000 ms would still pass.",
+   "evidence": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts:74-77 `for (const ms of bounds) { expect(ms).toBeGreaterThan(0); expect(ms).toBeLessThanOrEqual(30000); }`",
+   "test_or_reason": "The test is intentionally loose, but it does not pin the intended 10-second bound, so a change to an unreasonable value would not be caught.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test C3's assertion that an empty request makes no call at all is not directly tied to the timeout change; it is a pre-existing behaviour that is not part of the fix.",
+   "evidence": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts:108-109 `expect((await detokeniseValues('t1', 'k1', [])).size).toBe(0); expect(spy).not.toHaveBeenCalled();`",
+   "test_or_reason": "This is a control test for existing behaviour, not a regression test for the timeout. It is fine but not essential to the PR.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO WITH NOTES"
+}
+
+STDERR:

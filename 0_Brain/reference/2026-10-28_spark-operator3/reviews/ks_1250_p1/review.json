@@ -1,0 +1,69 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 12456,
+     "total_tokens": 13744,
+     "completion_tokens": 1288,
+     "prompt_tokens_details": {
+      "cached_tokens": 1024
+     }
+    },
+    "seconds": 46.6,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 12456,
+  "completion_tokens": 1288,
+  "seconds": 46.6,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The smoke test script still hardcodes several service URLs to localhost, so pointing SMOKE_BASE_URL at a remote environment does not make the whole run check that environment; the new test only verifies the gateway URL, not the hardcoded service URLs.",
+    "evidence": "Blockchain/Dev/scripts/smoke-test.sh:259 `check_api \"Timestamping (create)\" \"POST\" \"http://localhost:6004/api/timestamps\"`; :263 `check_api \"M365 (init)\" \"POST\" \"http://localhost:6013/api/connections/init\"`; :267 `check_api \"VC issue\" \"POST\" \"http://localhost:6014/api/credentials\"`; :275 `DB_TYPES=$(curl -s \"http://localhost:6000/api/admin/document-types\" 2>/dev/null)`; :292 `AUTH_HEALTH=$(curl -s \"http://localhost:6003/health\" 2>/dev/null)`; :305 `check_health \"Tokenisation health\" \"http://localhost:6021/health\"`; :317 `check_health \"Tenant Provisioning health\" \"http://localhost:6022/health\"`; :327 `check_health \"MCP Server health\" \"http://localhost:6023/health\"`",
+    "test_or_reason": "The new test only asserts that URLs under the gateway base are used (test lines 74-76), but the script's non-quick mode still uses hardcoded localhost URLs for timestamping, M365, VC, DB, auth, tokenisation, tenant provisioning, and MCP. Thus the fix does not fully deliver the ticket's goal of pointing the smoke test at an environment via SMOKE_BASE_URL.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Major",
+    "claim": "The new test's stub curl is not faithful to the real curl: it exits 0 for every invocation and never simulates connection failures, so the test cannot detect regressions where the script would fail to use SMOKE_BASE_URL for some URLs or where the script's error handling changes.",
+    "evidence": "Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh:45 `for a in \"$@\"; do [ \"$a\" = \"-w\" ] && { printf '200'; exit 0; }; done`; :46 `exit 0`",
+    "test_or_reason": "The stub always returns success, so the test only checks that URLs are recorded, not that the script behaves correctly when a URL is unreachable or returns non-200. The real curl can fail, and the script's `|| { fail ...; return; }` paths are never exercised.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The new test does not verify that the script actually uses SMOKE_BASE_URL for the /health/deep call; it only checks that URLs are under the base, but the stub's /health/deep handling is separate and the test does not assert the deep URL is under the base.",
+    "evidence": "Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh:43 `case \"$a\" in */health/deep) cat \"@ROOT@/deep.json\"; exit 0 ;; esac`; :74-76 `got=\"$([ \"$(total_urls \"$WORK/set\")\" -gt 0 ] && echo some || echo none) $(urls_not_under \"$WORK/set\" \"$BASE\")\"`",
+    "test_or_reason": "The test's `urls_not_under` check counts all URLs, but the stub's /health/deep handler exits before recording the URL, so the deep URL is never in urls.txt. The test cannot confirm the deep call uses the base.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The test's `urls_not_under` function uses `grep -v -c -F` which counts lines that do not contain the base string, but the stub records URLs with a trailing newline; the count logic is correct but the test does not assert that the deep URL is recorded at all, so the 'some' check could pass even if the deep call is missing.",
+    "evidence": "Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh:60 `total_urls() { grep -c . \"$1/urls.txt\"; }`; :61 `urls_not_under() { grep -v -c -F \"$2\" \"$1/urls.txt\"; }`",
+    "test_or_reason": "The test only checks that at least one URL is recorded and none are outside the base; it does not assert that the /health/deep call is made at all, so a regression that drops the deep call would still pass.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The test file has a typo in a comment: 'STUB' should be 'STUB' (stub), and the comment says 'in the shape of smoke_test_counters_survive_errexit.test.sh' but that test is not part of this PR.",
+    "evidence": "Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh:10 `# curl is NEVER really run here (no stack, no network): a STUB curl on a private PATH records every URL it is given and`",
+    "test_or_reason": "Minor typo; does not affect functionality.",
+    "evidence_quote_found_in_input": true
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

@@ -1,0 +1,47 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix only changes services/auth's errorHandler.ts, but the ticket explicitly states the same constructor line exists in packages/shared/src/errors/index.ts, which twelve other services mount; the PR does not fix that shared copy, so the root cause remains in the shared package and the ticket's recommendation to fix both places is not met.",
+      "evidence": "Ticket: 'The same constructor line is in `packages/shared`, which twelve other services mount.' and 'Make the constructor `Object.setPrototypeOf(this, new.target.prototype)` in both places' — diff only touches `Blockchain/Dev/services/auth/src/middleware/errorHandler.ts` and `passwordLoginGate.ts`; no change to `packages/shared/src/errors/index.ts`.",
+      "test_or_reason": "The new test file only imports from '../middleware/errorHandler' (line 9), so it cannot catch the shared package's still-broken constructor; the ticket's own 'Where the constructor line is' lists both files, and only one is fixed."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR changes the 422 response shape by now including `details` for ValidationError, but the ticket explicitly says this is a visible response change that must be checked against the published 422 shape first; no such check or test against the published spec is present.",
+      "evidence": "Ticket: 'decide deliberately that 422 responses now carry `details` (a visible response change; check the published 422 shape first).' — diff adds H1 test asserting `details` in the response (test line 70), but no test or code references any published spec or openapi shape.",
+      "test_or_reason": "The new test H1 pins the new behaviour, but nothing pins that the published 422 shape allows `details`; the ticket's own caution is unaddressed."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's fix to `new.target.prototype` is not applied to the shared package, so any service mounting the shared error handler still has the broken `instanceof` and dropped `details`; the ticket's claim that the same line is in `packages/shared` is unaddressed, leaving the root cause live for twelve other services.",
+      "evidence": "Ticket: 'The same constructor line is in `packages/shared`, which twelve other services mount.' — diff only touches `services/auth` files; `packages/shared/src/errors/index.ts` is not in the diff.",
+      "test_or_reason": "The new test only covers `services/auth`'s errorHandler; no test covers the shared package, so the fix is incomplete per the ticket's own scope."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test S1 pins that a comment no longer contains 'is always false here', but the comment in passwordLoginGate.ts still says 'instanceof ServiceUnavailableError was always false here' (past tense), which is a stale claim that the fix has made it true; the test only checks the exact phrase 'is always false here' and misses the still-misleading past-tense wording.",
+      "evidence": "passwordLoginGate.ts:288: 'Object.setPrototypeOf(this, AppError.prototype), which reset every subclass instance, so `instanceof ServiceUnavailableError` was always false here.' — test line 75: `expect(source).not.toContain('is always false here');` — the source contains 'was always false here', which does not match the test's substring.",
+      "test_or_reason": "The test S1 passes because the source no longer contains the exact phrase 'is always false here', but the comment still claims the instanceof was always false, which is now false after the fix; the comment is misleading and the test is too narrow."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's header comment claims the fix 'now uses `new.target.prototype`' and that the password-strength feedback 'never reached the client', but the ticket itself says the shared package is unmeasured and the fix is only in services/auth; the test header overstates the fix's reach.",
+      "evidence": "Test file lines 1-3: 'AppError's constructor ended with `Object.setPrototypeOf(this, AppError.prototype)`... The constructor now uses `new.target.prototype`.' — but the diff only changes services/auth; the shared package is untouched.",
+      "test_or_reason": "The test header's claim of a universal fix is contradicted by the diff and the ticket's own note that the shared handler is unmeasured."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's header comment claims the password-strength feedback 'never reached the client' as a fact, but the ticket says 'Not established: whether any client depends on `details` being absent' and the shared package's behaviour is unmeasured; the claim is overstated.",
+      "evidence": "Test file line 3: 'the password-strength `feedback` that registration, password reset and password change build never reached the client.' — Ticket: 'Not established: whether any client depends on `details` being absent; whether any other `instanceof <subclass>` exists outside `services/auth`'.",
+      "test_or_reason": "The test header states as fact something the ticket itself marks as unmeasured for the shared package."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's header comment claims the fix 'now uses `new.target.prototype`' but the diff only changes services/auth; the shared package's constructor is still broken, so the claim is incomplete.",
+      "evidence": "Test file line 3: 'The constructor now uses `new.target.prototype`.' — diff only touches `services/auth/src/middleware/errorHandler.ts`; `packages/shared/src/errors/index.ts` is not changed.",
+      "test_or_reason": "The test header's claim is contradicted by the diff and the ticket's own scope."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's header comment claims the password-strength feedback 'never reached the client' as a fact, but the ticket says 'Not established: whether any client depends on `

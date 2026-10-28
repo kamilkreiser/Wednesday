@@ -1,0 +1,83 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 83261,
+     "total_tokens": 84258,
+     "completion_tokens": 997,
+     "prompt_tokens_details": {
+      "cached_tokens": 81920
+     }
+    },
+    "seconds": 33.3,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 83261,
+  "completion_tokens": 997,
+  "seconds": 33.3,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Note",
+    "claim": "The PR changes only read-side access checks; no mutation or deletion is added or widened.",
+    "evidence": "documents.ts:300 `const isAdmin = isPlatformRole(userRole);`; documents.ts:1101 `const isAdmin = isPlatformRole(userRole);`; certifications.ts:123 `if (isPlatformRole(role)) return true;`; certifications.ts:964 `const isAdmin = isPlatformRole(userRole);`",
+    "test_or_reason": "All four changed lines are boolean predicates feeding existing read/list scoping or a write-side gate that already existed; no new delete/update/cancel is introduced.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The change widens the set of roles treated as platform admin from three literal spellings to any casing of SYSTEM_ADMIN or SUPER_ADMIN, which is the intended fix but a behaviour change.",
+    "evidence": "documents.ts:300 `const isAdmin = isPlatformRole(userRole);` replaces `userRole === 'system_admin' || userRole === 'SYSTEM_ADMIN' || userRole === 'super_admin'`",
+    "test_or_reason": "isPlatformRole upper-cases the claim (per ticket, packages/shared/src/security/keyRevokePolicy.ts:140), so a token carrying 'SUPER_ADMIN' now passes where it previously failed; this is the ticket's stated defect being fixed.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The new test file pins only textual properties of the route files, not runtime behaviour; it does not exercise the predicate against a real or mocked request.",
+    "evidence": "ks1701-platform-admin-checks-use-is-platform-role.test.ts:8-9 `const DOCUMENTS = readFileSync(...); const CERTIFICATIONS = readFileSync(...);`",
+    "test_or_reason": "The tests read the source as text and assert on string counts/imports; no route handler is invoked, so the actual effect of isPlatformRole on a request is not verified.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The test's count-based assertions are brittle and could pass even if the predicate is misused elsewhere in the same file.",
+    "evidence": "ks1701-platform-admin-checks-use-is-platform-role.test.ts:30 `expect(count(DOCUMENTS, 'isAdmin = isPlatformRole(userRole);')).toBe(2);`",
+    "test_or_reason": "The test only checks the exact string 'isAdmin = isPlatformRole(userRole);' appears twice; a different variable name or a different call shape would not be caught.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The sharedModuleMock change keeps isPlatformRole real, which is a deliberate deviation from the mock's stated contract of inert jest.fn() for all functions.",
+    "evidence": "sharedModuleMock.ts:33 `base[key] = typeof value === 'function' && key !== 'isPlatformRole' ? jest.fn() : value;`",
+    "test_or_reason": "The comment explains the rationale; this is a documented exception, not an oversight.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The ticket's claim that the KS-1695 regression was 'measured' is supported only by the ticket text, not by facts.json; no reproduction run is present in the facts.",
+    "evidence": "facts.json: `test_on_base_with_test_files_only (A4 red-first): total 9 failed 5`; `test_on_head (A5 green-after): total 9 failed 0`",
+    "test_or_reason": "The facts show the new tests fail on base and pass on head, but no test exercises the actual 200-to-404 regression described in the ticket; the regression claim is not independently verified here.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The PR does not address the fifth site (adminConfig.ts:60) that includes 'platform_admin' as a super-admin role, which the ticket itself flags as a separate inconsistency.",
+    "evidence": "Ticket: 'A fifth site, different in kind, and the one that includes platform_admin'",
+    "test_or_reason": "The diff touches only documents.ts and certifications.ts; adminConfig.ts is untouched, so the internal split the ticket describes remains.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+ }
+}

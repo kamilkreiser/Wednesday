@@ -1,0 +1,42 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix only changes isPlatformRole; requireKeyAdmin's own toUpperCase comparison in services/security/src/index.ts remains unfixed, so the dotless-i / long-s / array-role admission persists on that path.",
+      "evidence": "keyRevokePolicy.ts:143-144 `if (typeof role !== 'string') return false; return PLATFORM_ROLES.has(role.replace(/[a-z]/g, (ch) => ch.toUpperCase()));` — the diff touches only this file; the ticket's 'Where' section names `services/security/src/index.ts` — `requireKeyAdmin`'s `toUpperCase` as a second site, and the diff does not modify it.",
+      "test_or_reason": "The ticket's own 'Where' list and the diff's touched_files (only keyRevokePolicy.ts and the new test) show the second site is untouched; the PR's stated goal 'in the one shared definition so every caller inherits it' is not met because requireKeyAdmin does not call isPlatformRole."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR claims to fix the security issue but does not establish reachability — the ticket itself says 'Reachability is NOT established' and the PR adds no measurement that any issuer or seed can sign a dotless-i / long-s / array role; the fix is therefore unproven as a security fix.",
+      "evidence": "Ticket: 'Reachability is NOT established, and that is the first thing to settle' and 'The gate did not test whether any issuer, user-management path or seed can store or sign one'.",
+      "test_or_reason": "facts.json shows no new integration or e2e test; the new unit tests only call isPlatformRole/decideTenantAccess directly with hand-crafted strings, not through any real token-signing path."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's claim that 'every spelling the platform really uses is still admitted' is not pinned by any test that exercises the actual JWT-signing or role-issuing code; C1-C3 only test the predicate with literal strings.",
+      "evidence": "Test file lines 37-50: `expect(isPlatformRole('SUPER_ADMIN')).toBe(true);` etc. — no test calls auth's token mint or any issuer.",
+      "test_or_reason": "The comment in the test header (lines 3-4) asserts coverage of 'every spelling the platform really uses', but the tests do not reference any real issuer or seed data."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The fix's ASCII fold via `role.replace(/[a-z]/g, ...)` is not a full ASCII fold — it only upper-cases a-z and leaves other ASCII characters (e.g. digits, punctuation) untouched, which is fine for the current role set but the comment claims 'Only an ASCII fold is applied (a-z to A-Z, every other character untouched)' — that is accurate but the term 'ASCII fold' is misleading; the real issue is that the code does not reject non-ASCII characters that could map to ASCII after a full Unicode fold (e.g. U+212A KELVIN SIGN upper-cases to K, but that is not in the role set).",
+      "evidence": "keyRevokePolicy.ts:144 `return PLATFORM_ROLES.has(role.replace(/[a-z]/g, (ch) => ch.toUpperCase()));` — only a-z are folded; U+212A (KELVIN) would not be folded, but it is not a role character anyway.",
+      "test_or_reason": "No test covers non-ASCII characters that are not dotless-i or long-s; the comment's claim of 'ASCII fold' is technically correct but the code does not reject other Unicode lookalikes (e.g. U+212A) — though those are not in the role vocabulary, so this is a note-level observation."
+    },
+    {
+      "severity": "Note",
+      "claim": "The new test file uses `asRole` to cast an array to `string | undefined`, which is a type lie; the runtime check `typeof role !== 'string'` correctly rejects it, but the test's type cast hides the fact that the function's signature only accepts `string | undefined`.",
+      "evidence": "Test file lines 12-14: `function asRole(value: unknown): string | undefined { return value as string | undefined; }` and line 26: `expect(isPlatformRole(asRole(['SUPER_ADMIN']))).toBe(false);`",
+      "test_or_reason": "The cast is a deliberate workaround to test a non-string input, but it means the test does not reflect a real call site where a non-string role could arrive; the function's type signature would normally prevent this at compile time."
+    },
+    {
+      "severity": "Note",
+      "claim": "The ticket's acceptance criteria are not explicitly listed, but the PR's change does not address the 'sweep for other toUpperCase() role comparisons' recommendation — the ticket says 'Worth a sweep for other toUpperCase() role comparisons rather than fixing only these two' and the PR only fixes one of the two named sites.",
+      "evidence": "Ticket 'Where' section: 'Worth a sweep for other toUpperCase() role comparisons rather than fixing only these two.'",
+      "test_or_reason": "The diff only touches keyRevokePolicy.ts; no sweep or additional fix is present."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

@@ -1,0 +1,37 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 7281, "total_tokens": 7949, "completion_tokens": 668, "prompt_tokens_details": {"cached_tokens": 1024}}, "seconds": 25.6, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 7281, "completion_tokens": 668, "seconds": 25.6, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The timeout constant is hard-coded at 10 seconds with no configuration override, which may be too short or too long for some deployments.",
+   "evidence": "Blockchain/Dev/services/auth/src/routes/internal.ts:24 `const SECURITY_VALIDATE_TIMEOUT_MS = 10_000;`",
+   "test_or_reason": "No test or configuration mechanism covers the value; the test only checks it is positive and <= 30000 ms.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test for R3 mocks AbortSignal.timeout to return an already-aborted signal, which does not exercise the real timeout expiry path (the actual 10-second wait is not tested).",
+   "evidence": "Blockchain/Dev/services/auth/src/__tests__/ks1240-connector-token-security-validate-fetch-is-bounded.test.ts:86 `vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());`",
+   "test_or_reason": "The test verifies the route handles an aborted signal, but not that the timeout actually fires after the configured duration.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test double for fetch is more permissive than the real fetch: it does not enforce that the signal is actually used to abort the underlying request, and it does not model the real fetch's behavior of rejecting on abort.",
+   "evidence": "Blockchain/Dev/services/auth/src/__tests__/ks1240-connector-token-security-validate-fetch-is-bounded.test.ts:49-55 `function neverAnswers(init?: { signal?: AbortSignal }): Promise<Response> { ... if (!signal) return; if (signal.aborted) reject(new Error('aborted')); else signal.addEventListener('abort', () => reject(new Error('aborted'))); }`",
+   "test_or_reason": "The fake only rejects when the signal is aborted; it does not simulate the real fetch's behavior of rejecting with a DOMException or similar when the signal aborts, but the route's catch-all still returns 502.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test suite does not include a test that verifies the timeout value is actually 10 seconds; it only checks it is positive and <= 30000 ms.",
+   "evidence": "Blockchain/Dev/services/auth/src/__tests__/ks1240-connector-token-security-validate-fetch-is-bounded.test.ts:75-83 `it('RED KS-1240 R2 the bound handed to AbortSignal.timeout is positive and at most 30000 ms', ...)`",
+   "test_or_reason": "The test allows any value between 1 and 30000 ms, so the specific 10-second bound is not pinned.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO WITH NOTES"
+}
+
+STDERR:

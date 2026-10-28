@@ -1,0 +1,36 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The PR fixes only the systemErrors.ts:196 instanceof check, but the ticket's own scan identifies 15 adminConfig.ts catch blocks and one webhooks.ts:320 site with the same pre-fail500 read pattern, and the PR does not address them, leaving the same no-response hang possible at those sites.",
+      "evidence": "Ticket item 2: 'routes/adminConfig.ts: 15 catch blocks, at :189, :226, :289, :378, :433, :521, :702, :818, :933, :1226, :1389, :1567, :1658, :1695 and :1723. 13 of them open with `if (err?.message?.includes('does not exist') || err?.code === '42P01')`' and 'routes/webhooks.ts:316-320: `const pgCode = extractPgCode(err);`'",
+      "test_or_reason": "The PR's diff only modifies systemErrors.ts and adds a test for that route; no change or test covers the adminConfig or webhooks sites, so the blast radius of the fix is narrower than the ticket's stated scope."
+    },
+    {
+      "severity": "Major",
+      "claim": "The new test file's header comment claims the fix 'pins that the list route's own check does too' survive hostile values, but the test only exercises the systemErrors route; it does not pin any of the 15 adminConfig or webhooks sites, so the claim of fixing the class of pre-helper reads is unproven.",
+      "evidence": "Test file line 3: 'this file pins that the list route's own check does too' and the test file only contains tests for GET /api/system-errors (lines 64-82).",
+      "test_or_reason": "The ticket's scope is the 17 sites; the PR's test coverage is 1 of 17, so the acceptance of the ticket's BLUF is not met."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new helper `isZodError` returns false for any value whose prototype inspection throws, which changes behavior for a Proxy with a throwing getPrototypeOf trap: previously the instanceof check would throw and the request would hang; now it returns false and falls through to fail500, which is the intended fix, but the helper's catch is too broad and could mask other errors in the instanceof check.",
+      "evidence": "systemErrors.ts:185-191: `function isZodError(err: unknown): err is z.ZodError { try { return err instanceof z.ZodError; } catch { return false; } }`",
+      "test_or_reason": "The catch swallows any error from the instanceof operation, not just the hostile-proxy case; this is acceptable for the stated purpose but is a broad catch that could hide unexpected errors."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test's C2 control asserts that a bad query returns 400 and the service is not called, but it does not verify that the ZodError arm's `details` field is present, which is part of the original behavior and could regress.",
+      "evidence": "Test file lines 77-81: `expect(reply.status).toBe(400); expect((reply.body as { error: { code: string } }).error.code).toBe('BAD_REQUEST'); expect(mockGetRecentErrors).not.toHaveBeenCalled();`",
+      "test_or_reason": "The test only checks status and code, not the `details` array that the route returns at systemErrors.ts:209, so a regression in the details field would not be caught."
+    },
+    {
+      "severity": "Note",
+      "claim": "The ticket's 'Not established' section explicitly states that none of the 15 adminConfig blocks or the webhooks site was driven by anyone, and the PR does not add tests for them, so the fix's effectiveness for those sites is unmeasured.",
+      "evidence": "Ticket: 'I ran nothing. Only the `systemErrors.ts` site was driven, by Gate B. None of the 15 adminConfig blocks or the webhooks site was driven by anyone this seat knows of.'",
+      "test_or_reason": "The PR's test only covers the systemErrors site, so the other sites remain unverified."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

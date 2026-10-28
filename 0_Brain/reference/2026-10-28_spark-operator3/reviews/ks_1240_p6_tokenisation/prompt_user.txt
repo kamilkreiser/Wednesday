@@ -1,0 +1,571 @@
+===== TICKET =====
+KS-1240 — T-2: the connector-token / key-validate fetch has no timeout — a slow upstream hangs the request [Backlog]
+
+**The sharpest of the four candidates the gate surfaced, and the only one that is request-reachable today.**
+
+The api-gateway's connector-token exchange / key-validate `fetch` carries **no timeout**. A slow or non-answering upstream turns into a gateway request with no bound on how long it hangs, while the process carries on serving everything else.
+
+## Measured on BOTH trees (head and develop) — so it is pre-existing
+
+* an exchange that **never answers** → the request hangs;
+* an exchange whose body arrives **2.5 s late** → the request hangs for that long.
+
+Graded **Major**. Request-reachable, unlike T-1.
+
+## What to do
+
+Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange.
+
+---
+
+Filed from the #1034 / KS-1215 tier-1 gate report `2026-09-18-ks1215-1034-e4624218b-tier1-r1`, at merge of `a105cd32b1ed9c6927ae6e797f8259224d8480c6`. Pre-existing unless stated; **not** introduced by #1034.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts b/Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts
+--- a/Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts
+@@ -17,2 +17,6 @@
+ const PLATFORM_DB_URL = process.env.PLATFORM_DATABASE_URL || '';
+ const TOKENISATION_URL = process.env.TOKENISATION_URL || 'http://tokenisation:4021';
++
++// KS-1240: the longest the gateway waits for the tokenisation service. Neither fetch below carried a timeout, so a service that accepted the connection and never answered held the caller for as long as
++// the socket lived. On expiry the fetch rejects and the existing catch in each function logs and answers the empty map, exactly as it already does for an unreachable service.
++const TOKENISATION_FETCH_TIMEOUT_MS = 10_000;
+@@ -111,6 +115,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ tenantId, key, fields }),
++      signal: AbortSignal.timeout(TOKENISATION_FETCH_TIMEOUT_MS),
+     });
+     const data = (await res.json()) as {
+       success: boolean;
+@@ -146,6 +151,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ tenantId, key, tokens }),
++      signal: AbortSignal.timeout(TOKENISATION_FETCH_TIMEOUT_MS),
+     });
+     const data = (await res.json()) as {
+       success: boolean;
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts
+@@ -0,0 +1,111 @@
++// KS-1240 (class: hand-built outbound fetches with no timeout), api-gateway services/tokenisation.ts: tokeniseFields and detokeniseValues each fetched the tokenisation service with no `signal`, so a
++// service that accepted the connection and never answered held the caller for as long as the socket lived. Each function already catches a failed fetch, logs a warning and answers an empty map. The
++// functions are driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there is none); nothing touches the network. R1 and R2 pin that each fetch carries an
++// AbortSignal, R3 that the two bounds are sane positive numbers, R4 and R5 that a service that never answers ends in the empty map and not a hang; C1 to C3 pin the unchanged answers.
++import { describe, it, expect, afterEach, vi } from 'vitest';
++
++const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++
++import { tokeniseFields, detokeniseValues } from '../services/tokenisation';
++
++function reply(body: unknown): Response {
++  return { ok: true, status: 200, json: async () => body, text: async () => JSON.stringify(body) } as unknown as Response;
++}
++
++type Seen = { url: string; signal: unknown };
++
++/** Answers both endpoints and records the signal each call carried. */
++function stubAnswering(seen: Seen[]): void {
++  vi.spyOn(globalThis, 'fetch').mockImplementation((async (url: unknown, init?: { signal?: unknown }) => {
++    const u = String(url);
++    seen.push({ url: u, signal: init?.signal });
++    if (u.endsWith('/api/tokenise')) return reply({ success: true, fields: [{ name: 'email', token: 'tok-1' }] });
++    if (u.endsWith('/api/detokenise')) return reply({ success: true, values: [{ token: 'tok-1', value: 'a@x.test' }] });
++    return reply({ success: false });
++  }) as never);
++}
++
++/** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
++function stubNeverAnswering(): void {
++  vi.spyOn(globalThis, 'fetch').mockImplementation(((_url: unknown, init?: { signal?: AbortSignal }) =>
++    new Promise<Response>((_resolve, reject) => {
++      const signal = init?.signal;
++      if (!signal) return;
++      if (signal.aborted) reject(new Error('aborted'));
++      else signal.addEventListener('abort', () => reject(new Error('aborted')));
++    })) as never);
++}
++
++afterEach(() => { vi.restoreAllMocks(); });
++
++/** 'EMPTY MAP' when the call resolves to an empty map, 'HUNG' when it is still pending after 300 ms, else the map's size, so a hang is a red assertion and not a stuck run. */
++async function outcome(run: () => Promise<Map<string, string>>): Promise<string> {
++  return Promise.race([
++    run().then((m) => (m.size === 0 ? 'EMPTY MAP' : 'SIZE ' + m.size), () => 'REJECTED'),
++    new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
++  ]);
++}
++
++describe('KS-1240: the gateway tokenisation client bounds its fetches', () => {
++  it('RED KS-1240 R1 the tokenise fetch carries an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
++    expect(seen).toHaveLength(1);
++    expect(seen[0].signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R2 the detokenise fetch carries an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await detokeniseValues('t1', 'k1', ['tok-1']);
++    expect(seen).toHaveLength(1);
++    expect(seen[0].signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R3 the two bounds handed to AbortSignal.timeout are positive and at most 30000 ms', async () => {
++    const timeout = vi.spyOn(AbortSignal, 'timeout');
++    stubAnswering([]);
++    await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
++    await detokeniseValues('t1', 'k1', ['tok-1']);
++    const bounds = timeout.mock.calls.map((c) => c[0] as number);
++    expect(bounds).toHaveLength(2);
++    for (const ms of bounds) {
++      expect(ms).toBeGreaterThan(0);
++      expect(ms).toBeLessThanOrEqual(30000);
++    }
++  });
++
++  it('RED KS-1240 R4 a tokenisation service that never answers a tokenise call ends in the empty map, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]))).toBe('EMPTY MAP');
++  });
++
++  it('RED KS-1240 R5 a tokenisation service that never answers a detokenise call ends in the empty map, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => detokeniseValues('t1', 'k1', ['tok-1']))).toBe('EMPTY MAP');
++  });
++
++  it('control KS-1240 C1 a healthy tokenise answer still fills the map', async () => {
++    stubAnswering([]);
++    const map = await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
++    expect(map.get('email')).toBe('tok-1');
++  });
++
++  it('control KS-1240 C2 a healthy detokenise answer still fills the map', async () => {
++    stubAnswering([]);
++    const map = await detokeniseValues('t1', 'k1', ['tok-1']);
++    expect(map.get('tok-1')).toBe('a@x.test');
++  });
++
++  it('control KS-1240 C3 an unreachable service still answers the empty map, and an empty request makes no call at all', async () => {
++    const spy = vi.spyOn(globalThis, 'fetch').mockImplementation((async () => { throw new Error('connect ECONNREFUSED'); }) as never);
++    expect((await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }])).size).toBe(0);
++    spy.mockClear();
++    expect((await detokeniseValues('t1', 'k1', [])).size).toBe(0);
++    expect(spy).not.toHaveBeenCalled();
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts
+1: /**
+2:  * =============================================================================
+3:  * TOKENISATION / PII HANDLING SERVICE — API Gateway
+4:  * =============================================================================
+5:  * Extracted from the gateway monolith.  Provides multi-tenant PII field
+6:  * tokenisation and detokenisation via the external tokenisation micro-service,
+7:  * plus helpers for inspecting and replacing token values in arbitrary objects.
+8:  * =============================================================================
+9:  */
+10: 
+11: import { logger } from '../utils/logger';
+12: 
+13: // ---------------------------------------------------------------------------
+14: // Configuration constants
+15: // ---------------------------------------------------------------------------
+16: 
+17: const PLATFORM_DB_URL = process.env.PLATFORM_DATABASE_URL || '';
+18: const TOKENISATION_URL = process.env.TOKENISATION_URL || 'http://tokenisation:4021';
+19: 
+20: // KS-1240: the longest the gateway waits for the tokenisation service. Neither fetch below carried a timeout, so a service that accepted the connection and never answered held the caller for as long as
+21: // the socket lived. On expiry the fetch rejects and the existing catch in each function logs and answers the empty map, exactly as it already does for an unreachable service.
+22: const TOKENISATION_FETCH_TIMEOUT_MS = 10_000;
+23: 
+24: /** Fallback tenant identifier when none is provided. */
+25: export const DEFAULT_TENANT_ID = process.env.DEFAULT_TENANT_ID || 'a0000000-0000-4000-8000-000000000001';
+26: 
+27: /** Set of body-field names that are considered PII and should be tokenised. */
+28: export const PII_FIELDS = new Set(
+29:   (
+30:     process.env.PII_FIELDS ||
+31:     'email,firstName,lastName,displayName,name,phone,phoneNumber,mobile,address,street,city,postcode,zipCode,dateOfBirth,dob,ssn,nationalId'
+32:   ).split(','),
+33: );
+34: 
+35: // ---------------------------------------------------------------------------
+36: // Tenant DB resolution (multi-tenancy)
+37: // ---------------------------------------------------------------------------
+38: 
+39: interface TenantDbConfig {
+40:   dbName: string;
+41:   dbHost: string;
+42:   dbPort: number;
+43: }
+44: 
+45: const tenantDbCache = new Map<string, TenantDbConfig>();
+46: 
+47: /**
+48:  * Resolve the database connection details for a given tenant.
+49:  * Returns `null` for the default tenant or when the platform DB is unavailable.
+50:  */
+51: export async function resolveTenantDb(tenantId: string): Promise<TenantDbConfig | null> {
+52:   if (!tenantId || tenantId === DEFAULT_TENANT_ID) return null;
+53: 
+54:   const cached = tenantDbCache.get(tenantId);
+55:   if (cached) return cached;
+56: 
+57:   if (!PLATFORM_DB_URL) return null;
+58: 
+59:   try {
+60:     const { Pool } = await import('pg');
+61:     const p = new Pool({ connectionString: PLATFORM_DB_URL, max: 2 });
+62:     const r = await p.query<TenantDbConfig>(
+63:       `SELECT db_name AS "dbName", db_host AS "dbHost", db_port AS "dbPort" FROM tenant_config WHERE tenant_id = $1`,
+64:       [tenantId],
+65:     );
+66:     await p.end();
+67: 
+68:     if (r.rows.length > 0) {
+69:       tenantDbCache.set(tenantId, r.rows[0]);
+70:       return r.rows[0];
+71:     }
+72:   } catch (err) {
+73:     logger.warn('resolveTenantDb failed', { tenantId, error: (err as Error).message });
+74:   }
+75: 
+76:   return null;
+77: }
+78: 
+79: // ---------------------------------------------------------------------------
+80: // Session-scoped tenant key storage
+81: // ---------------------------------------------------------------------------
+82: 
+83: const sessionTenantKeys = new Map<string, string>();
+84: 
+85: export function setTenantKey(tenantId: string, key: string): void {
+86:   sessionTenantKeys.set(tenantId, key);
+87: }
+88: 
+89: export function getTenantKey(tenantId: string): string | undefined {
+90:   return sessionTenantKeys.get(tenantId);
+91: }
+92: 
+93: export function removeTenantKey(tenantId: string): void {
+94:   sessionTenantKeys.delete(tenantId);
+95: }
+96: 
+97: // ---------------------------------------------------------------------------
+98: // Tokenisation helpers
+99: // ---------------------------------------------------------------------------
+100: 
+101: /**
+102:  * Send an array of `{ name, value }` PII fields to the tokenisation service
+103:  * and receive back a map of `name -> token`.
+104:  */
+105: export async function tokeniseFields(
+106:   tenantId: string,
+107:   key: string,
+108:   fields: Array<{ name: string; value: string }>,
+109: ): Promise<Map<string, string>> {
+110:   const map = new Map<string, string>();
+111:   if (fields.length === 0) return map;
+112: 
+113:   try {
+114:     const res = await fetch(`${TOKENISATION_URL}/api/tokenise`, {
+115:       method: 'POST',
+116:       headers: { 'Content-Type': 'application/json' },
+117:       body: JSON.stringify({ tenantId, key, fields }),
+118:       signal: AbortSignal.timeout(TOKENISATION_FETCH_TIMEOUT_MS),
+119:     });
+120:     const data = (await res.json()) as {
+121:       success: boolean;
+122:       fields?: Array<{ name: string; token: string }>;
+123:     };
+124:     if (data.success && data.fields) {
+125:       for (const f of data.fields) map.set(f.name, f.token);
+126:     }
+127:   } catch (err) {
+128:     logger.warn('tokeniseFields: tokenisation service unavailable', {
+129:       tenantId,
+130:       error: (err as Error).message,
+131:     });
+132:   }
+133: 
+134:   return map;
+135: }
+136: 
+137: /**
+138:  * Send an array of token strings to the tokenisation service and receive
+139:  * back a map of `token -> cleartext value`.
+140:  */
+141: export async function detokeniseValues(
+142:   tenantId: string,
+143:   key: string,
+144:   tokens: string[],
+145: ): Promise<Map<string, string>> {
+146:   const map = new Map<string, string>();
+147:   if (tokens.length === 0) return map;
+148: 
+149:   try {
+150:     const res = await fetch(`${TOKENISATION_URL}/api/detokenise`, {
+151:       method: 'POST',
+152:       headers: { 'Content-Type': 'application/json' },
+153:       body: JSON.stringify({ tenantId, key, tokens }),
+154:       signal: AbortSignal.timeout(TOKENISATION_FETCH_TIMEOUT_MS),
+155:     });
+156:     const data = (await res.json()) as {
+157:       success: boolean;
+158:       values?: Array<{ token: string; value: string | null }>;
+159:     };
+160:     if (data.success && data.values) {
+161:       for (const v of data.values) {
+162:         if (v.value) map.set(v.token, v.value);
+163:       }
+164:     }
+165:   } catch (err) {
+166:     logger.warn('detokeniseValues: tokenisation service unavailable', {
+167:       tenantId,
+168:       error: (err as Error).message,
+169:     });
+170:   }
+171: 
+172:   return map;
+173: }
+174: 
+175: // ---------------------------------------------------------------------------
+176: // PII field extraction & token replacement helpers
+177: // ---------------------------------------------------------------------------
+178: 
+179: /**
+180:  * Scan the top-level keys of `obj` and return any whose name is in
+181:  * `PII_FIELDS` and whose value is a non-empty string that is NOT already
+182:  * a token (i.e. does not start with `tok_`).
+183:  */
+184: export function extractPiiFields(
+185:   obj: Record<string, unknown>,
+186: ): Array<{ name: string; value: string }> {
+187:   const result: Array<{ name: string; value: string }> = [];
+188:   for (const [k, v] of Object.entries(obj)) {
+189:     if (PII_FIELDS.has(k) && typeof v === 'string' && v.length > 0 && !v.startsWith('tok_')) {
+190:       result.push({ name: k, value: v });
+191:     }
+192:   }
+193:   return result;
+194: }
+195: 
+196: /**
+197:  * Recursively collect every `tok_`-prefixed string found anywhere in `obj`.
+198:  */
+199: export function collectTokens(obj: unknown): string[] {
+200:   const tokens: string[] = [];
+201:   if (typeof obj === 'string' && obj.startsWith('tok_')) {
+202:     tokens.push(obj);
+203:   } else if (Array.isArray(obj)) {
+204:     for (const item of obj) tokens.push(...collectTokens(item));
+205:   } else if (obj && typeof obj === 'object') {
+206:     for (const v of Object.values(obj as Record<string, unknown>)) {
+207:       tokens.push(...collectTokens(v));
+208:     }
+209:   }
+210:   return tokens;
+211: }
+212: 
+213: /**
+214:  * Deep-clone `obj`, replacing every `tok_`-prefixed string value that exists
+215:  * in `map` with its cleartext equivalent.
+216:  */
+217: export function replaceTokensInObject(
+218:   obj: unknown,
+219:   map: Map<string, string>,
+220: ): unknown {
+221:   if (typeof obj === 'string' && obj.startsWith('tok_') && map.has(obj)) return map.get(obj);
+222:   if (Array.isArray(obj)) return obj.map((item) => replaceTokensInObject(item, map));
+223:   if (obj && typeof obj === 'object') {
+224:     const result: Record<string, unknown> = {};
+225:     for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+226:       result[k] = replaceTokensInObject(v, map);
+227:     }
+228:     return result;
+229:   }
+230:   return obj;
+231: }
+
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts
+1: // KS-1240 (class: hand-built outbound fetches with no timeout), api-gateway services/tokenisation.ts: tokeniseFields and detokeniseValues each fetched the tokenisation service with no `signal`, so a
+2: // service that accepted the connection and never answered held the caller for as long as the socket lived. Each function already catches a failed fetch, logs a warning and answers an empty map. The
+3: // functions are driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there is none); nothing touches the network. R1 and R2 pin that each fetch carries an
+4: // AbortSignal, R3 that the two bounds are sane positive numbers, R4 and R5 that a service that never answers ends in the empty map and not a hang; C1 to C3 pin the unchanged answers.
+5: import { describe, it, expect, afterEach, vi } from 'vitest';
+6: 
+7: const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
+8: vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent }));
+9: 
+10: import { tokeniseFields, detokeniseValues } from '../services/tokenisation';
+11: 
+12: function reply(body: unknown): Response {
+13:   return { ok: true, status: 200, json: async () => body, text: async () => JSON.stringify(body) } as unknown as Response;
+14: }
+15: 
+16: type Seen = { url: string; signal: unknown };
+17: 
+18: /** Answers both endpoints and records the signal each call carried. */
+19: function stubAnswering(seen: Seen[]): void {
+20:   vi.spyOn(globalThis, 'fetch').mockImplementation((async (url: unknown, init?: { signal?: unknown }) => {
+21:     const u = String(url);
+22:     seen.push({ url: u, signal: init?.signal });
+23:     if (u.endsWith('/api/tokenise')) return reply({ success: true, fields: [{ name: 'email', token: 'tok-1' }] });
+24:     if (u.endsWith('/api/detokenise')) return reply({ success: true, values: [{ token: 'tok-1', value: 'a@x.test' }] });
+25:     return reply({ success: false });
+26:   }) as never);
+27: }
+28: 
+29: /** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
+30: function stubNeverAnswering(): void {
+31:   vi.spyOn(globalThis, 'fetch').mockImplementation(((_url: unknown, init?: { signal?: AbortSignal }) =>
+32:     new Promise<Response>((_resolve, reject) => {
+33:       const signal = init?.signal;
+34:       if (!signal) return;
+35:       if (signal.aborted) reject(new Error('aborted'));
+36:       else signal.addEventListener('abort', () => reject(new Error('aborted')));
+37:     })) as never);
+38: }
+39: 
+40: afterEach(() => { vi.restoreAllMocks(); });
+41: 
+42: /** 'EMPTY MAP' when the call resolves to an empty map, 'HUNG' when it is still pending after 300 ms, else the map's size, so a hang is a red assertion and not a stuck run. */
+43: async function outcome(run: () => Promise<Map<string, string>>): Promise<string> {
+44:   return Promise.race([
+45:     run().then((m) => (m.size === 0 ? 'EMPTY MAP' : 'SIZE ' + m.size), () => 'REJECTED'),
+46:     new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
+47:   ]);
+48: }
+49: 
+50: describe('KS-1240: the gateway tokenisation client bounds its fetches', () => {
+51:   it('RED KS-1240 R1 the tokenise fetch carries an AbortSignal', async () => {
+52:     const seen: Seen[] = [];
+53:     stubAnswering(seen);
+54:     await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
+55:     expect(seen).toHaveLength(1);
+56:     expect(seen[0].signal).toBeInstanceOf(AbortSignal);
+57:   });
+58: 
+59:   it('RED KS-1240 R2 the detokenise fetch carries an AbortSignal', async () => {
+60:     const seen: Seen[] = [];
+61:     stubAnswering(seen);
+62:     await detokeniseValues('t1', 'k1', ['tok-1']);
+63:     expect(seen).toHaveLength(1);
+64:     expect(seen[0].signal).toBeInstanceOf(AbortSignal);
+65:   });
+66: 
+67:   it('RED KS-1240 R3 the two bounds handed to AbortSignal.timeout are positive and at most 30000 ms', async () => {
+68:     const timeout = vi.spyOn(AbortSignal, 'timeout');
+69:     stubAnswering([]);
+70:     await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
+71:     await detokeniseValues('t1', 'k1', ['tok-1']);
+72:     const bounds = timeout.mock.calls.map((c) => c[0] as number);
+73:     expect(bounds).toHaveLength(2);
+74:     for (const ms of bounds) {
+75:       expect(ms).toBeGreaterThan(0);
+76:       expect(ms).toBeLessThanOrEqual(30000);
+77:     }
+78:   });
+79: 
+80:   it('RED KS-1240 R4 a tokenisation service that never answers a tokenise call ends in the empty map, not a hang', async () => {
+81:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+82:     stubNeverAnswering();
+83:     expect(await outcome(() => tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]))).toBe('EMPTY MAP');
+84:   });
+85: 
+86:   it('RED KS-1240 R5 a tokenisation service that never answers a detokenise call ends in the empty map, not a hang', async () => {
+87:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+88:     stubNeverAnswering();
+89:     expect(await outcome(() => detokeniseValues('t1', 'k1', ['tok-1']))).toBe('EMPTY MAP');
+90:   });
+91: 
+92:   it('control KS-1240 C1 a healthy tokenise answer still fills the map', async () => {
+93:     stubAnswering([]);
+94:     const map = await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
+95:     expect(map.get('email')).toBe('tok-1');
+96:   });
+97: 
+98:   it('control KS-1240 C2 a healthy detokenise answer still fills the map', async () => {
+99:     stubAnswering([]);
+100:     const map = await detokeniseValues('t1', 'k1', ['tok-1']);
+101:     expect(map.get('tok-1')).toBe('a@x.test');
+102:   });
+103: 
+104:   it('control KS-1240 C3 an unreachable service still answers the empty map, and an empty request makes no call at all', async () => {
+105:     const spy = vi.spyOn(globalThis, 'fetch').mockImplementation((async () => { throw new Error('connect ECONNREFUSED'); }) as never);
+106:     expect((await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }])).size).toBe(0);
+107:     spy.mockClear();
+108:     expect((await detokeniseValues('t1', 'k1', [])).size).toBe(0);
+109:     expect(spy).not.toHaveBeenCalled();
+110:   });
+111: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "73513657acea8c46641f7c987568c565545eeb29",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts",
+   "added": "6",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts",
+   "added": "111",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "6",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts"
+  ],
+  [
+   "111",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 8,
+  "failed": 5
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 8,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1255 failed=0 | after: total=1263 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 8\n",
+ "checker_summary": [
+  "PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +117/-0 test=src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts red_first=yes apply_mode=fuzzy",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

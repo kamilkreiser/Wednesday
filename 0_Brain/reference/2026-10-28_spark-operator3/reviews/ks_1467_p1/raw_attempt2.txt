@@ -1,0 +1,54 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix only changes services/auth/src/middleware/errorHandler.ts, but the ticket explicitly states the same constructor line exists in packages/shared/src/errors/index.ts, which twelve other services mount; the PR does not touch that file, so the root cause remains in the shared package.",
+      "evidence": "Ticket: 'The same constructor line is in `packages/shared`, which twelve other services mount.' Diff touches only `Blockchain/Dev/services/auth/src/middleware/errorHandler.ts`, `passwordLoginGate.ts`, and the new test file.",
+      "test_or_reason": "The ticket's recommendation says 'Make the constructor `Object.setPrototypeOf(this, new.target.prototype)` in both places', but the diff only changes the auth service, leaving the shared package unfixed."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR changes the 422 response shape by now including `details` for ValidationError, a visible API change that the ticket says must be checked against the published 422 shape; no evidence in the PR or facts.json shows this check was done.",
+      "evidence": "Ticket: 'decide deliberately that 422 responses now carry `details` (a visible response change; check the published 422 shape first).' Test H1 (line 70) asserts `details` is present, but no test or documentation verifies the published API contract.",
+      "test_or_reason": "The new test H1 pins the new behavior, but nothing in the PR or facts.json confirms the published 422 shape allows `details`."
+    },
+    {
+      "severity": "Major",
+      "claim": "The ticket's claim that the password-strength `feedback` is 'silently dropped' is not measured in the PR; the ticket says 'I have not checked the other services' use' and the PR does not add a test that drives the actual routes (register, reset-password, change-password) to show the feedback now reaches the client.",
+      "evidence": "Ticket: 'What is dropped today (`new ValidationError(..., { feedback })`): `routes/auth.ts:201` (register) and `:819` (reset-password), `routes/users.ts:981` (change-password). I have not checked the other services' use.' The new test only calls `errorHandler` directly with a constructed ValidationError, not the routes.",
+      "test_or_reason": "The test H1 (line 68) constructs `new mod.ValidationError(...)` and calls `errorHandler` directly, but does not exercise the route code that builds the feedback, so the end-to-end behavior is unproven."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test S1 and S2 read the source file as a string to assert comment text, which is brittle and does not test runtime behavior; S1 only checks the absence of a phrase, not the correctness of the new comment.",
+      "evidence": "Test S1 (line 74-75): `expect(source).not.toContain('is always false here');` and S2 (line 80): `expect(source).toContain('?.statusCode === 503) throw new ServiceUnavailableError(BACKUP_CODE_UNCONFIRMED_MESSAGE);')`.",
+      "test_or_reason": "These tests pin the literal comment text, which is not a behavioral property and will break on any unrelated comment edit."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test file's `run` helper does not assert that `res.status` and `res.json` are called in the correct order or that the response is actually sent; it only captures the last call, so a handler that calls `json` before `status` would still pass.",
+      "evidence": "Test helper (lines 38-47): `status` and `json` just set `captured` fields; no assertion on call order or that both are called.",
+      "test_or_reason": "The tests only check the final captured values, not the sequence of middleware behavior."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The PR does not add a test that verifies the `details` branch is not triggered for non-ValidationError subclasses that might have a `details` property, leaving a potential regression if a future subclass adds `details`.",
+      "evidence": "The `errorHandler` checks `err instanceof ValidationError && err.details` (line 296), but the new tests only cover ValidationError and BadRequestError; no test covers a subclass with a `details` property that is not ValidationError.",
+      "test_or_reason": "The control test C4 (line 100) uses BadRequestError without details, but no test covers a subclass with details that should not be included."
+    },
+    {
+      "severity": "Note",
+      "claim": "The ticket's 'Gate notes carried from #1479' mention a missing test for the burn running exactly once, but the PR does not add such a test; this is a known gap from a related PR, not introduced here.",
+      "evidence": "Ticket: 'no cell asserts the burn runs exactly once (the gate verified it by a probe only: UPDATE count 1 in the faulted case). Add one.' The new test file does not include any test for the burn count.",
+      "test_or_reason": "The PR does not address the carried gate note, but it is not a regression from this change."
+    },
+    {
+      "severity": "Note",
+      "claim": "The lint result is 'not run' in facts.json, so the PR's hygiene (e.g., the import placement in passwordLoginGate.ts) is not verified by the runner.",
+      "evidence": "facts.json: `\"lint\": \"not run\"`.",
+      "test_or_reason": "The ticket's gate note mentions a cosmetic import placement issue, but lint was not run to confirm it is clean."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

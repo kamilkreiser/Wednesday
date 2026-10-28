@@ -1,0 +1,58 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 47365, "total_tokens": 48707, "completion_tokens": 1342, "prompt_tokens_details": {"cached_tokens": 1024}}, "seconds": 87.5, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 47365, "completion_tokens": 1342, "seconds": 87.5, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Major",
+   "claim": "The ticket's acceptance criterion \u2014 a 503 on timeout consistent with the connector branch \u2014 is not met; the code answers 502 on timeout, and the ticket's own 'What to do' says 503.",
+   "evidence": "proxy.ts:25-26 `On expiry the fetch rejects and the handler's existing catch answers 502 BAD_GATEWAY`; proxy.ts:489 `res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable' } })`; ticket 'What to do' `a 503 on timeout is consistent with how the connector branch already answers a refused exchange`",
+   "test_or_reason": "The ticket explicitly asks for 503 on timeout; the code and comments state 502 is returned. No test pins the status code on timeout.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Major",
+   "claim": "The fix does not cover the key-exchange half of the ticket; the ticket title and test file comment say the key-validate fetch is the target, but the diff only touches proxy.ts and admin.ts, not middleware/auth.ts.",
+   "evidence": "test file line 1-2 `(the key-exchange half of the same ticket is in middleware/auth.ts)`; ticket title `the connector-token / key-validate fetch has no timeout`",
+   "test_or_reason": "The ticket's title names the key-validate fetch; the PR's own test comment admits that half is in middleware/auth.ts, which is not in the diff. The acceptance criterion 'every hand-built gateway fetch' is not met for the key-exchange path.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Major",
+   "claim": "The test suite is red-first only by absence (the new test file fails on base because the constants and signals don't exist), not by behavioural failure; the tests do not prove the old behaviour was wrong, only that the new symbols are present.",
+   "evidence": "facts.json `test_on_base_with_test_files_only (A4 red-first)`: `total: 8, failed: 4`; test file lines 55-76 reference `UPSTREAM_PROXY_FETCH_TIMEOUT_MS`, `UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS`, `UPSTREAM_ADMIN_FETCH_TIMEOUT_MS` which are introduced by this PR",
+   "test_or_reason": "The four RED tests fail on base because the constants they reference are added by this PR (absence-reds), not because the old code's behaviour is wrong. The tests only pin source text, not runtime behaviour.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Major",
+   "claim": "The tests do not verify that the timeout actually aborts a hanging fetch or that the handler returns 502/503; they only check source text contains 'AbortSignal.timeout(', so a broken or mis-wired signal would still pass.",
+   "evidence": "test file line 38-40 `function isBounded(call: string): boolean { return call.includes('AbortSignal.timeout('); }`; test file line 55-56 `expect(unbounded(PROXY_SRC)).toEqual([])`",
+   "test_or_reason": "No test drives a fetch that never answers to assert the request is aborted and the response is 502/503. The tests are static source scans, not behavioural tests.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Minor",
+   "claim": "The test's control C3 is fragile: it filters admin.ts fetch calls by `call.includes('bfUrl')`, which matches the Blockfrost fetch at admin.ts:970, but the test does not assert that this is the only pre-existing bounded fetch, so a future change could break the control without a clear signal.",
+   "evidence": "test file line 87 `const calls = fetchCalls(ADMIN_SRC).filter((call) => call.includes('bfUrl'));`; admin.ts:970 `const bfResp = await fetch(bfUrl, { headers: { project_id: cfg.projectId }, signal: AbortSignal.timeout(8000) });`",
+   "test_or_reason": "The control relies on a string match that could be ambiguous; it does not pin the exact call or its timeout value.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Minor",
+   "claim": "The comment in proxy.ts claims the timeout constants are 'bounded' but the test only checks they are \u2264 120000 ms; the 30-second proxy timeout may be too short for legitimate slow upstreams, and no rationale or measurement supports the chosen values.",
+   "evidence": "proxy.ts:27-28 `const UPSTREAM_PROXY_FETCH_TIMEOUT_MS = 30_000; const UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS = 120_000;`; test file line 66-69 `expect(proxyMs).toBeLessThanOrEqual(120000)`",
+   "test_or_reason": "The timeout values are magic numbers with no justification; the test only bounds them, not validates they are appropriate for the upstreams.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test file's comment says 'C3 and C4 prove the extractor can return both answers', but C4 only tests a synthetic string, not the real source, so it does not prove the extractor handles all real-world fetch calls correctly.",
+   "evidence": "test file line 4 `C3 and C4 prove the extractor can return both answers`; test file line 92-94 `const synthetic = \"const r = await fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) });\\n\"; expect(unbounded(synthetic)).toEqual([...])`",
+   "test_or_reason": "C4 uses a hand-crafted string, not a real source file, so it does not validate the extractor against actual code patterns.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "NO GO"
+}
+
+STDERR:

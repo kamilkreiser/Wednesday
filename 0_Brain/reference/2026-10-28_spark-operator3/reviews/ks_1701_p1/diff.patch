@@ -1,0 +1,116 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -45,7 +45,7 @@
+ import { DEFAULT_DOCUMENT_TYPE } from '@secuura/shared/documents/default-type';
+ // KS-1402: + lookupHash. transfer-custody hashes a holder email itself now; before KS-1402 it
+ // forwarded the caller's credential to auth's /api/users/lookup, which did the hashing.
+-import { verifyMessageSignature, hasNulByte, runWithTenantId, lookupHash, signEmitterHop } from '@secuura/shared';
++import { verifyMessageSignature, hasNulByte, runWithTenantId, lookupHash, signEmitterHop, isPlatformRole } from '@secuura/shared';
+ import { mintAndRegisterThreadToken } from '../services/threadTokenClient';
+ import { pollAnchorUntilConfirmed, reconcileDocumentAnchorState } from '../services/anchorStateSync';
+ import { simulatedFieldsFromAnchor, composeHonestBlockchainBlob } from '../services/anchorHonesty';
+@@ -297,4 +297,4 @@
+       const user = (req as any).user;
+       const userId = user?.userId as string | undefined;
+       const userRole = user?.role as string | undefined;
+-      const isAdmin = userRole === 'system_admin' || userRole === 'SYSTEM_ADMIN' || userRole === 'super_admin';
++      const isAdmin = isPlatformRole(userRole);
+@@ -1098,7 +1098,7 @@
+       // Cross-tenant fallback: only for admins — search the platform_document_registry
+       // Pen-test F-04: read role from authenticated req.user, NOT raw headers.
+       const userRole = (req as any).user?.role as string | undefined;
+-      const isAdmin = userRole === 'system_admin' || userRole === 'SYSTEM_ADMIN' || userRole === 'super_admin';
++      const isAdmin = isPlatformRole(userRole);
+       // BUG-ISOLATION-001 fix (2026-05-02): if the admin explicitly set
+       // X-Tenant-Override (i.e., effective tenant ≠ JWT tenant), they
+       // are scoped to that override and the cross-tenant fallback MUST
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -120,7 +120,7 @@
+ async function callerMayCertifyDocument(req: Request, userId: string, document: DocumentRecord): Promise<boolean> {
+   const authUser = (req as any).user;
+   const role = authUser?.role as string | undefined;
+-  if (role === 'system_admin' || role === 'SYSTEM_ADMIN' || role === 'super_admin') return true;
++  if (isPlatformRole(role)) return true;
+   if (document.owner?.id && document.owner.id === userId) return true;
+   const email = authUser?.email;
+   const recipientEmail = (document.data as Record<string, unknown> | undefined)?.recipientEmail;
+@@ -961,4 +961,4 @@
+       const user = (req as any).user;
+       const userId = user?.userId as string | undefined;
+       const userRole = user?.role as string | undefined;
+-      const isAdmin = userRole === 'system_admin' || userRole === 'SYSTEM_ADMIN' || userRole === 'super_admin';
++      const isAdmin = isPlatformRole(userRole);
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1701-platform-admin-checks-use-is-platform-role.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1701-platform-admin-checks-use-is-platform-role.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1701-platform-admin-checks-use-is-platform-role.test.ts
+@@ -0,0 +1,54 @@
++// KS-1701 (originate routes/documents.ts and routes/certifications.ts): four places answered "is this caller a platform administrator?" with a hand-written literal that names
++// system_admin, SYSTEM_ADMIN and super_admin and omits SUPER_ADMIN, so a platform administrator whose token carries that casing was treated as an ordinary user. The repo's own predicate
++// isPlatformRole (packages/shared) upper-cases the claim and covers every spelling; the certification by-id read already uses it. These cells read the two route files as text (no app
++// boot, no database) and pin that no hand-written role literal is left in either file, that documents.ts imports the predicate, and the number of call sites in each file.
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const DOCUMENTS = readFileSync(join(__dirname, '..', 'routes', 'documents.ts'), 'utf8');
++const CERTIFICATIONS = readFileSync(join(__dirname, '..', 'routes', 'certifications.ts'), 'utf8');
++
++/** The number of non-overlapping occurrences of `needle` in `text`. */
++function count(text: string, needle: string): number {
++  return text.split(needle).length - 1;
++}
++
++describe('KS-1701: platform-admin checks in originate use isPlatformRole', () => {
++  it('RED KS-1701 R1 documents.ts keeps no hand-written system_admin comparison', () => {
++    expect(count(DOCUMENTS, "=== 'system_admin'")).toBe(0);
++  });
++
++  it('RED KS-1701 R2 certifications.ts keeps no hand-written system_admin comparison', () => {
++    expect(count(CERTIFICATIONS, "=== 'system_admin'")).toBe(0);
++  });
++
++  it('RED KS-1701 R3 documents.ts imports isPlatformRole from the shared package', () => {
++    expect(DOCUMENTS).toMatch(/import \{[^}]*\bisPlatformRole\b[^}]*\} from '@secuura\/shared';/);
++  });
++
++  it('RED KS-1701 R4 documents.ts calls isPlatformRole at the list scoping and at the by-id read', () => {
++    expect(count(DOCUMENTS, 'isAdmin = isPlatformRole(userRole);')).toBe(2);
++  });
++
++  it('RED KS-1701 R5 certifications.ts calls isPlatformRole at the list scoping and at callerMayCertifyDocument', () => {
++    expect(count(CERTIFICATIONS, 'isAdmin = isPlatformRole(userRole);')).toBe(1);
++    expect(count(CERTIFICATIONS, 'if (isPlatformRole(role)) return true;')).toBe(1);
++  });
++
++  it('control KS-1701 C1 certifications.ts still imports isPlatformRole exactly once', () => {
++    expect(count(CERTIFICATIONS, "import { isPlatformRole } from '@secuura/shared';")).toBe(1);
++  });
++
++  it('control KS-1701 C2 the certification by-id read helper still calls isPlatformRole on the authenticated role', () => {
++    expect(CERTIFICATIONS).toContain('if (isPlatformRole(authUser?.role as string | undefined)) return true;');
++  });
++
++  it('control KS-1701 C3 callerMayCertifyDocument still checks the owner', () => {
++    expect(CERTIFICATIONS).toContain('  if (document.owner?.id && document.owner.id === userId) return true;');
++  });
++
++  it('control KS-1701 C4 documents.ts still imports sanitizeString and the other shared names it had', () => {
++    expect(DOCUMENTS).toContain("import { sanitizeString } from '@secuura/shared/security';");
++    expect(DOCUMENTS).toContain('verifyMessageSignature, hasNulByte, runWithTenantId, lookupHash, signEmitterHop');
++  });
++});
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/helpers/sharedModuleMock.ts b/Blockchain/Dev/services/originate/src/__tests__/helpers/sharedModuleMock.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/helpers/sharedModuleMock.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/helpers/sharedModuleMock.ts
+@@ -28,5 +28,7 @@
+   const base: Record<string, unknown> = {};
+   for (const key of Object.keys(actual)) {
+     const value = actual[key];
+-    base[key] = typeof value === 'function' ? jest.fn() : value;
++    // KS-1701: isPlatformRole is a pure predicate over a role string. An inert jest.fn() answers undefined for every caller, which would turn every platform admin into an ordinary user in a suite
++    // that exercises an admin path through this mock, so it stays the real function (the only function export kept real).
++    base[key] = typeof value === 'function' && key !== 'isPlatformRole' ? jest.fn() : value;
+   }

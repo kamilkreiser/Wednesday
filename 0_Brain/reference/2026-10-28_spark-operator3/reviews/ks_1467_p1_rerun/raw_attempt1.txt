@@ -1,0 +1,36 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix changes the runtime prototype of every AppError subclass instance, which can alter behavior of any code that relies on `instanceof` checks or prototype identity, but the PR only fixes the auth service and leaves the identical constructor line in packages/shared untouched, so the same bug persists in twelve other services.",
+      "evidence": "Blockchain/Dev/services/auth/src/middleware/errorHandler.ts:25 `Object.setPrototypeOf(this, new.target.prototype);` and ticket: \"The same constructor line is in `packages/shared`, which twelve other services mount.\"",
+      "test_or_reason": "The diff only changes services/auth; the ticket explicitly states the shared package has the same line, and the PR does not address it, so the claimed fix is incomplete for the broader blast radius."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR changes the 422 response shape to now include `details` for ValidationError, which is a visible API change that the ticket says must be checked against the published 422 shape, but no evidence in facts.json or the diff shows that check was done.",
+      "evidence": "Ticket: \"decide deliberately that 422 responses now carry `details` (a visible response change; check the published 422 shape first).\" and test file line 70: `expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'New password is too weak', details: { feedback: ['add a number'] } });`",
+      "test_or_reason": "The new test H1 pins the new shape, but there is no test or documentation confirming the published 422 contract allows `details`; this could break clients that expect the old shape."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test S1 and S2 read the source file as a string to assert comment text, which is brittle and does not test runtime behavior; S1 only checks that a specific phrase is absent, not that the comment is accurate.",
+      "evidence": "Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts:73-76 `expect(source).not.toContain('is always false here');`",
+      "test_or_reason": "This is a test of the comment text, not the code's behavior; it will pass even if the comment is misleading in other ways."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test file does not include a test that verifies the `details` branch is reached for a ValidationError with `details` when the error is thrown from a real route, only from a direct call to the handler; the ticket claims the feedback is dropped in registration, password reset, and password change, but no test covers those routes.",
+      "evidence": "Ticket: \"What is dropped today (`new ValidationError(..., { feedback })`): `routes/auth.ts:201` (register) and `:819` (reset-password), `routes/users.ts:981` (change-password).\" and test file line 68: `run(new mod.ValidationError('New password is too weak', { feedback: ['add a number'] }))`",
+      "test_or_reason": "The test only exercises the handler directly, not the routes that build the feedback; the fix could be correct but the routes might not pass `details` as expected."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR does not address the gate note from #1479 about moving the `BACKUP_CODE_UNCONFIRMED_MESSAGE` const below the imports; the const remains in the middle of the import block.",
+      "evidence": "Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:69-72 `const BACKUP_CODE_UNCONFIRMED_MESSAGE = ...` followed by `import { STATUSES_MAY_RECEIVE_CREDENTIAL } from '../types';`",
+      "test_or_reason": "The gate note explicitly says to move it; the diff does not do so, so the note is unaddressed."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

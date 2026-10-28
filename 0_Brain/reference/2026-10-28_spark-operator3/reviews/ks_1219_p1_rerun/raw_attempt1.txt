@@ -1,0 +1,24 @@
+{
+  "findings": [
+    {
+      "severity": "Note",
+      "claim": "The fix only guards the `scope` parameter; other authorize parameters (e.g., `client_id`, `redirect_uri`, `state`, `code_challenge`) that arrive as arrays are still passed to the resolver and may cause a 500, despite the ticket's recommendation to refuse any non-string authorize parameter.",
+      "evidence": "routes/oauth.ts:396 `if (scope !== undefined && typeof scope !== 'string')` — only `scope` is checked; the resolver destructures `clientId`, `redirectUri`, `responseType`, `codeChallenge`, `codeChallengeMethod` without type guards (lines 239, 497-504, 661-671, 720-727).",
+      "test_or_reason": "The ticket's recommendation explicitly says 'any other non-string authorize parameter' should be refused; the diff only adds a guard for `scope`."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test suite does not include a case for a repeated `scope` parameter on POST (only JSON array body), even though the ticket lists it as a carrier.",
+      "evidence": "ks1219-authorize-refuses-an-array-valued-scope.test.ts:101-113 — R1 tests GET repeated query, R2/R3 test POST JSON array; no POST repeated query test.",
+      "test_or_reason": "The ticket's BLUF lists 'repeated query param on GET, the same on POST, JSON array body on POST' as carriers; the tests cover only two of the three."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test for POST approve with an array scope (R3) does not assert that the response is a 400 with `invalid_request` when the array is the only malformed input; it also sends valid credentials)Skip? Actually it does assert 400 and no code minted, but it does not verify that the error is specifically `invalid_request` in the body (it only checks status and that `createAuthorizationCode` was not called).",
+      "evidence": "ks1219-authorize-refuses-an-array-valued-scope.test.ts:109-113 — `expect(reply).toEqual({ status: 400, message: 'invalid_request' });` — actually it does check message. This finding is invalid.",
+      "test_or_reason": "Re-reading the test, it does assert the message. No finding."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+}

@@ -1,0 +1,1751 @@
+===== TICKET =====
+KS-1776 — services/auth routes/auth.ts:62: a module-scope 2 s setTimeout calls userRepo.seedDemoUsers, and a test whose userRepo mock lacks that export gets an uncaught vitest error when the run outlasts the timer (seen once, in ks781-login-authorize-agree, in a loaded run) [Backlog]
+
+## BLUF
+
+`routes/auth.ts` **arms a** `setTimeout(..., 2000)` **at module import that calls** `userRepo.seedDemoUsers(...)`**. In a test file whose** `../repositories/userRepo` **mock has no** `seedDemoUsers`**, vitest's mock throws synchronously on that property read, so the** `.catch` **at** `:63` **is never reached and the error is an uncaught exception that vitest attributes to whichever test is running.** Seen once: Seat W 2nd's first full `services/auth` run on PR 1765's head `b47c1514bb28` (209.84 s on a loaded box; about 44 s normally) ended with `Errors  1 error`, attributed to `ks781-login-authorize-agree.test.ts`. The rerun at box load 1.8 was 1200/1200 with 0 errors.
+
+Facts only. **No fix is proposed.** The same run's one failed test is the `ks949` tree-walk timeout, which is KS-1155's class and is not repeated here.
+
+Refs KS-1155, KS-1765, KS-649.
+
+All source line numbers were read at develop `c18552d94de23b4da365ce02e02be5d06793bbcb`, under `Blockchain/Dev/services/auth`. The run output is Seat W 2nd's, read from its saved file, not reproduced here.
+
+## 1 — The timer
+
+`src/routes/auth.ts:59`-`:66`:
+
+`// SEED DEMO USERS — runs once at startup via the repository`
+
+`setTimeout(() => { userRepo.seedDemoUsers(hashPassword).catch((err) => logger.error('Failed to seed demo users', { error: err }), ); }, 2000);`
+
+The `setTimeout` is at `:62` and the `seedDemoUsers` call at `:63`. It sits at module scope, so it is armed by the first import of the module. The lines have no environment or test check, and nothing is chained on `setTimeout(...)` after the `2000` (no `unref`).
+
+## 2 — The error, verbatim
+
+From `5_Project_History/2026-10-27_seatW-2nd/evidence/second-push-79/services_auth_first_run_loaded_1of1200_failed.out`, lines 429-462 and 465-469:
+
+`Error: [vitest] No "seedDemoUsers" export is defined on the "../repositories/userRepo" mock. Did you forget to return it from "vi.mock"?`
+
+The trace's own frame is ` ❯ Timeout._onTimeout src/routes/auth.ts:63:12`, under the heading `Uncaught Exception`. The closing paragraph reads: `This error originated in "src/__tests__/ks781-login-authorize-agree.test.ts" test file. ... The latest test that might've caused the error is "agree — CONTROL happy path — no MFA, correct password".` The run summary: `Test Files  1 failed | 104 passed (105)`, `Tests  1 failed | 1199 passed (1200)`, `Errors  1 error`, `Duration  209.84s`. Seat W 2nd's STATUS E (17:26Z, 2026-10-27) names the one failed test as the `ks949` tree-walk 120 s timeout, and the rerun at load 1.8 as 1200/1200 with 0 errors.
+
+## 3 — The mock that lacks the export
+
+`src/__tests__/ks781-login-authorize-agree.test.ts:139` opens `vi.mock('../repositories/userRepo', () => ({` and the file contains `seedDemoUsers` **0** times (control on the same file: `getUserByEmail`, a key the factory defines, occurs **2** times). The file imports the routes module at `:206`: `const { authRoutes } = await import('../routes/auth');`.
+
+## 4 — Scope at this tip
+
+* **49** test files under `src` mock `../repositories/userRepo` with `vi.mock`.
+* **11** of those contain the module path `routes/auth`: `ks819-oauth-state-consume-order`, `ks795-social-link-verified-email`, `ks781-login-authorize-agree`, `ks737-platform-admin-mfa-bypass`, `ks722-oauth-state-verified`, `ks622-mfa-failure-lockout`, `ks622-backup-code-at-login`, `ks1460-register-over-an-invited-stub-confirms-its-activating-write`, `ks1157-the-marker-at-the-route-and-across-a-rotation`, `ks1156-auth4-gate-records-983-r2-984` and `ks1151-auth-refresh-refuses-oauth-token`.
+* The string `seedDemoUsers` occurs in only two test files, `ks1460-register-over-an-invited-stub-confirms-its-activating-write.test.ts` (1 occurrence) and `ks949-platform-admin-seed-identity.test.ts` (4), besides `repositories/userRepo.ts` and `routes/auth.ts`.
+
+## Not established
+
+* **I ran nothing.** The error, the run summary and the load figures are Seat W 2nd's. Seen **once**, in one loaded run; the rerun was clean.
+* Which of the other 10 files that import the routes module under a `userRepo` mock would report the same error under load, and whether they define `seedDemoUsers` in their mock (only `ks1460` names it; whether its mock defines it was not read).
+* That the timer fires only when a file's run outlasts the 2000 ms after the import. That is an inference from the `2000` and the one loaded run (209.84 s against about 44 s), not a measurement.
+* Whether vitest's exit status is non-zero for an uncaught error alone. Not read from the output.
+* What, if anything, to do. Not decided.
+
+## Searched
+
+Board, KS team, title + description + comment bodies, `includeArchived: true`, paged to the end. `seedDemoUsers` → **8 hits** (KS-1132, KS-986, KS-963, KS-962, KS-960, KS-950, KS-915, KS-487); each read for `vi.mock`, `setTimeout`, `timer` and `mock`: none describes this timer or this mock (KS-963 and KS-487 mention other mocks). `auth.ts:63` → 2 hits (KS-756, KS-329), both the substring of `routes/auth.ts:635`. `export is defined on the` → 1 hit, KS-649 (archived, Done): the same vitest message shape for a different export (`authenticateAccessOrConnector` on the `../middleware/authenticate` mock), failing at module load, not a timer. `Timeout._onTimeout` → **0**. `seed demo users` → **0**. **Positive control** `KS-1531` → 40 hits. **Zero control:** a token coined for this seat and written nowhere → 0 hits.
+
+*Filed by Seat G 26th, 2026-10-27 UTC, on Wednesday's brief.*
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -59,8 +59,15 @@
+ // =============================================================================
+ // SEED DEMO USERS — runs once at startup via the repository
+ // =============================================================================
++// KS-1776: seedDemoUsers is started from a timer, outside any request. A synchronous throw from it (a repository mock that lacks the export, a repository that is not ready) never reached the
++// .catch below, so it escaped the timer as an uncaught exception that the test runner pinned on whichever test was running. Both the throw and the rejection now go to the same log line.
++const logSeedFailure = (err: unknown): void => {
++  logger.error('Failed to seed demo users', { error: err });
++};
+ setTimeout(() => {
+-  userRepo.seedDemoUsers(hashPassword).catch((err) =>
+-    logger.error('Failed to seed demo users', { error: err }),
+-  );
++  try {
++    userRepo.seedDemoUsers(hashPassword).catch(logSeedFailure);
++  } catch (err) {
++    logSeedFailure(err);
++  }
+ }, 2000);
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts
+@@ -0,0 +1,102 @@
++// KS-1776 (services/auth routes/auth.ts): importing the routes module arms a module-scope `setTimeout(..., 2000)` that calls `userRepo.seedDemoUsers(hashPassword).catch(...)`. When the
++// repository mock of a test has no `seedDemoUsers` export, vitest's mock THROWS on that property read, synchronously, inside the timer callback: the `.catch` is never reached and the
++// error escapes as an uncaught exception that vitest pins on whichever test is running (seen once, in ks781-login-authorize-agree, in a loaded run). Here the timer is driven with FAKE
++// timers so the escape is an assertion: D1 reads whether firing the timer throws, D2 reads whether the failure is logged instead. C1 and C2 pin what must not change.
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++
++const silent = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() };
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++
++const USER_REPO_BASE = {
++  getUserById: vi.fn(async () => null),
++  getUserByIdPreAuth: vi.fn(async () => null),
++  getUserByEmail: vi.fn(async () => null),
++  updateUser: vi.fn(async () => undefined),
++  getPlatformAdmin: vi.fn(async () => null),
++  updatePlatformAdminPassword: vi.fn(async () => undefined),
++  reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++  reencryptPlatformAdminMfaSecretIfLegacy: vi.fn(async () => undefined),
++};
++
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }));
++vi.mock('../repositories/userRepo', () => ({ ...USER_REPO_BASE }));
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => ({ id: 'sess-new' })),
++  getSession: vi.fn(async () => null),
++  rotateSessionRefreshToken: vi.fn(async () => undefined),
++  revokeSession: vi.fn(async () => undefined),
++  getRedisClient: vi.fn(() => null),
++  validateSession: vi.fn(async () => true),
++  updateSessionActivity: vi.fn(async () => undefined),
++}));
++vi.mock('../services/refreshDenylist', () => ({
++  isRefreshJtiDenylisted: vi.fn(async () => false),
++  denylistRefreshJti: vi.fn(async () => undefined),
++}));
++vi.mock('../services/accountLockout', () => ({
++  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => 1),
++  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
++}));
++vi.mock('../services/password', () => ({
++  verifyPassword: vi.fn(async () => false), hashPassword: vi.fn(async () => '$argon2id$stub'),
++  checkPasswordStrength: vi.fn(() => ({ ok: true })), generateResetToken: vi.fn(() => 'tok'), shouldRehashAfterVerify: vi.fn(() => false),
++}));
++vi.mock('../services/email', () => ({ sendVerificationEmail: vi.fn(async () => undefined), sendPasswordResetEmail: vi.fn(async () => undefined) }));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++
++function advance(ms: number): string {
++  try {
++    vi.advanceTimersByTime(ms);
++    return 'ok';
++  } catch (err) {
++    return 'THREW ' + (err instanceof Error ? err.message : String(err));
++  }
++}
++
++beforeAll(() => {
++  vi.useFakeTimers();
++});
++afterAll(() => {
++  vi.useRealTimers();
++});
++
++describe('KS-1776: the demo-user seed timer cannot escape as an uncaught throw', () => {
++  it('RED KS-1776 D1 firing the seed timer does not throw when the repository has no seedDemoUsers', async () => {
++    vi.resetModules();
++    silent.error.mockClear();
++    await import('../routes/auth');
++    expect(advance(2500)).toBe('ok');
++  });
++
++  it('RED KS-1776 D2 the missing seedDemoUsers is logged as Failed to seed demo users instead', async () => {
++    vi.resetModules();
++    silent.error.mockClear();
++    await import('../routes/auth');
++    advance(2500);
++    expect(silent.error.mock.calls.map((call) => call[0])).toEqual(['Failed to seed demo users']);
++  });
++
++  it('control KS-1776 C1 with seedDemoUsers present it is called once, with the password hasher, after 2000 ms and not before', async () => {
++    vi.resetModules();
++    const seed = vi.fn(async () => undefined);
++    vi.doMock('../repositories/userRepo', () => ({ ...USER_REPO_BASE, seedDemoUsers: seed }));
++    await import('../routes/auth');
++    advance(1999);
++    expect(seed).not.toHaveBeenCalled();
++    advance(1);
++    expect(seed).toHaveBeenCalledTimes(1);
++    expect(typeof (seed.mock.calls[0] as unknown[])[0]).toBe('function');
++  });
++
++  it('control KS-1776 C2 a seedDemoUsers that rejects is logged as Failed to seed demo users', async () => {
++    vi.resetModules();
++    silent.error.mockClear();
++    vi.doMock('../repositories/userRepo', () => ({ ...USER_REPO_BASE, seedDemoUsers: vi.fn(async () => { throw new Error('ks1776 rejection'); }) }));
++    await import('../routes/auth');
++    advance(2500);
++    await Promise.resolve();
++    await Promise.resolve();
++    expect(silent.error.mock.calls.map((call) => call[0])).toEqual(['Failed to seed demo users']);
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/routes/auth.ts
+1: /**
+2:  * =============================================================================
+3:  * AUTH ROUTES — Login, Register, Logout, Token Refresh, Password Reset
+4:  * =============================================================================
+5:  * All user data is persisted to PostgreSQL via the userRepo repository.
+6:  * Falls back to in-memory storage when the database is unavailable.
+7:  * =============================================================================
+8:  */
+9: 
+10: import { Router, Response, NextFunction } from 'express';
+11: import { randomUUID, createHash, randomBytes } from 'crypto';
+12: import { z } from 'zod';
+13: import { AuthenticatedRequest, User, TokenResponse, LoginRequest } from '../types';
+14: import { hashPassword, verifyPassword, checkPasswordStrength, generateResetToken, shouldRehashAfterVerify } from '../services/password';
+15: import { generateTokenPair, verifyRefreshToken, decodeToken } from '../services/jwt';
+16: import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email';
+17: import { createSession, revokeSession, revokeAllUserSessions, getSession, rotateSessionRefreshToken, isRedisAvailable } from '../services/session';
+18: import { denylistRefreshJti, isRefreshJtiDenylisted } from '../services/refreshDenylist';
+19: import { query } from '../db';
+20: // KS-796 F-1: `verifyBackupCode` left this file when login's regular-user
+21: // branch moved onto the shared gate, which consumes backup codes itself.
+22: // Worth recording rather than just deleting: the ONLY remaining consumer of
+23: // `verifyTotpCode` here is the PLATFORM-ADMIN branch, and it never called
+24: // `verifyBackupCode` at all — so a platform admin cannot log in with a backup
+25: // code while a regular user can. Pre-existing, not introduced here, and the
+26: // same shape as KS-737 (the more privileged branch is the laxer one). Recorded
+27: // on KS-796; not fixed in this round.
+28: import { verifyTotpCode } from '../services/totp';
+29: import { authenticate } from '../middleware/authenticate';
+30: import { meHandler } from './users';
+31: import {
+32:   BadRequestError,
+33:   InvalidCredentialsError,
+34:   ConflictError,
+35:   NotFoundError,
+36:   MfaRequiredError,
+37:   // F-11: AccountSuspendedError no longer thrown at /login (uniform error)
+38:   ValidationError,
+39:   // KS-795 (KS-781 door 2): the social callback may not auto-link on an
+40:   // unsound email claim — it refuses rather than falling through to create.
+41:   SocialEmailUnavailableError,
+42:   SocialSignInRefusedError,
+43:   OAuthStateInvalidError,
+44:   OAuthProviderError,
+45:   ServiceUnavailableError,
+46: } from '../middleware/errorHandler';
+47: import { logger } from '../utils/logger';
+48: import { isReservedWalletEmail, RESERVED_WALLET_EMAIL_MESSAGE } from '../utils/walletEmail';
+49: import * as userRepo from '../repositories/userRepo';
+50: import { publishEvent, EventTypes } from '../events';
+51: 
+52: const maskEmail = (email: string) => {
+53:   const [local, domain] = email.split('@');
+54:   return `${local[0]}***@${domain}`;
+55: };
+56: 
+57: export const authRoutes = Router();
+58: 
+59: // =============================================================================
+60: // SEED DEMO USERS — runs once at startup via the repository
+61: // =============================================================================
+62: // KS-1776: seedDemoUsers is started from a timer, outside any request. A synchronous throw from it (a repository mock that lacks the export, a repository that is not ready) never reached the
+63: // .catch below, so it escaped the timer as an uncaught exception that the test runner pinned on whichever test was running. Both the throw and the rejection now go to the same log line.
+64: const logSeedFailure = (err: unknown): void => {
+65:   logger.error('Failed to seed demo users', { error: err });
+66: };
+67: setTimeout(() => {
+68:   try {
+69:     userRepo.seedDemoUsers(hashPassword).catch(logSeedFailure);
+70:   } catch (err) {
+71:     logSeedFailure(err);
+72:   }
+73: }, 2000);
+74: 
+75: // =============================================================================
+76: // VALIDATION SCHEMAS
+77: // =============================================================================
+78: /**
+79:  * KS-622: the accepted shapes for login's second factor — 6 digits (TOTP) or 8
+80:  * alphanumeric (backup code; base32 is a subset, and verifyBackupCode
+81:  * upper-cases so lowercase is accepted). Exported so a test can assert it stays
+82:  * in lockstep with the published spec's pattern, which is a separate literal in
+83:  * auth.openapi.ts and would otherwise drift silently.
+84:  *
+85:  * Both branches are ASCII-only, preserving the KS-518 property that the spec's
+86:  * code-POINT count and this runtime code-UNIT check agree.
+87:  */
+88: import {
+89:   MFA_CODE_PATTERN,
+90:   mfaCodeRuntimeSchema,
+91:   enforcePasswordLoginGates,
+92:   assertAccountMayReceiveCredential,
+93: } from '../services/passwordLoginGate';
+94: // Re-exported so existing importers (and the KS-622 lockstep test, which asserts
+95: // this stays in step with the published spec's separate literal) are unaffected
+96: // by the move into the shared credential layer.
+97: export { MFA_CODE_PATTERN };
+98: 
+99: // KS-796 F-6: exported so the shared-definition claim can be ASSERTED rather
+100: // than described. Nothing else imports it; it is not part of the route contract.
+101: export const loginSchema = z.object({
+102:   email: z.string().trim().email(),
+103:   password: z.string().min(1),
+104:   // KS-283: a TOTP code is exactly 6 decimal digits. The old `.length(6)`
+105:   // counted UTF-16 code units, so a schema-valid 6-code-point string with
+106:   // astral chars (which Schemathesis generates) was >6 code units and 400'd —
+107:   // surfacing as a positive_data_acceptance failure. Both branches below are
+108:   // ASCII-only, so the spec's code-point count and this runtime check still
+109:   // agree.
+110:   // KS-622: WIDENED to accept a backup code here. `/api/auth/mfa/verify` used
+111:   // to be the only redemption path and it redeemed without any proof of factor
+112:   // one; it is now retired (410). Login is the correct home because it has
+113:   // already verified the password before it looks at this field. 6 digits =
+114:   // TOTP; 8 alphanumeric = backup code (base32 is a subset, and
+115:   // verifyBackupCode upper-cases, so lowercase is accepted).
+116:   // KS-781 P3-4: the SHARED shape, so login and /api/oauth/authorize cannot
+117:   // disagree about what a second factor may look like. Previously this was a
+118:   // bare regex while authorize accepted `""` — measured as 400 vs 302 on the
+119:   // same body. `""` normalises to absent; a malformed code is still a 400.
+120:   mfaCode: mfaCodeRuntimeSchema,
+121:   deviceId: z.string().optional(),
+122:   // Pen-test F-10 + KS-43: refresh token is set as an httpOnly cookie by
+123:   // default. Mobile / non-browser clients that can't use cookies should
+124:   // explicitly request the body field by setting `clientType: 'native'`
+125:   // or `'api'`. Browser clients leave this unset and only get the cookie
+126:   // — so an XSS that reads `response.body` cannot exfiltrate the refresh
+127:   // token. `'api'` additionally opts into single-session: each new 'api'
+128:   // login revokes prior 'api' sessions for the same user (stolen-token
+129:   // protection for headless API callers).
+130:   clientType: z.enum(['browser', 'native', 'api']).optional(),
+131: });
+132: 
+133: /**
+134:  * Pen-test F-10 helper. True when the login response should include the
+135:  * refresh token in the JSON body (in addition to the httpOnly cookie).
+136:  * Defaults to false (browser flow). Override per-request via clientType.
+137:  */
+138: function shouldEmitRefreshTokenInBody(clientType: string | undefined): boolean {
+139:   return clientType === 'native' || clientType === 'api';
+140: }
+141: 
+142: const registerSchema = z.object({
+143:   // KS-806: wallet.local is the synthetic domain of wallet accounts and is not registrable (utils/walletEmail.ts).
+144:   email: z.string().trim().email().refine((e) => !isReservedWalletEmail(e), { message: RESERVED_WALLET_EMAIL_MESSAGE }),
+145:   password: z.string().min(8),
+146:   firstName: z.string().trim().min(1).optional(),
+147:   lastName: z.string().trim().min(1).optional(),
+148:   name: z.string().trim().min(1).optional(),
+149:   organizationId: z.string().uuid().optional(),
+150:   // Pen-test F-10: opt-in body refresh token (mobile/native clients).
+151:   clientType: z.enum(['browser', 'native', 'api']).optional(),
+152: }).strip();
+153: 
+154: const forgotPasswordSchema = z.object({
+155:   email: z.string().trim().email(),
+156: });
+157: 
+158: const resetPasswordSchema = z.object({
+159:   token: z.string(),
+160:   password: z.string().min(8),
+161: });
+162: 
+163: // =============================================================================
+164: // POST /api/auth/register
+165: // =============================================================================
+166: authRoutes.post('/register', async (req: AuthenticatedRequest, res: Response, next) => {
+167:   try {
+168:     // KS-82 (2026-05-15): registration always creates OWNER-role accounts
+169:     // server-side (line ~161 below). Accepting a client-supplied `role`
+170:     // field would be a privilege-escalation vector — anyone could register
+171:     // as SYSTEM_ADMIN. The defensive `registerSchema.strip()` silently
+172:     // dropped the field, which made callers think they had asserted a
+173:     // role when in reality nothing they sent was honoured. Surface the
+174:     // rejection explicitly so callers know their request was modified.
+175:     if (req.body && typeof req.body === 'object' && 'role' in req.body) {
+176:       // KS-82: privilege-escalation defence. Client-supplied `role` is a
+177:       // validation failure of the request payload (not a malformed-syntax
+178:       // bad request), so 422 VALIDATION_ERROR per the auth service's error
+179:       // convention — matches the surrounding `checkPasswordStrength` reject.
+180:       throw new ValidationError(
+181:         'role is not a permitted field on /register — accounts are always created with the OWNER role and elevated by an admin via /api/admin/users/{id}/role',
+182:       );
+183:     }
+184: 
+185:     const data = registerSchema.parse(req.body);
+186: 
+187:     // Derive firstName/lastName from "name" field when not supplied directly
+188:     let firstName = data.firstName;
+189:     let lastName = data.lastName;
+190:     if (!firstName && !lastName && data.name) {
+191:       const parts = data.name.trim().split(/\s+/);
+192:       firstName = parts[0];
+193:       lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
+194:     }
+195: 
+196:     // KS-74: An INVITED stub may already exist for this email (created by an
+197:     // issuer via POST /api/users/stub before the recipient signed up). Claim
+198:     // it instead of erroring on "email already registered" — the whole point
+199:     // of the stub is that the recipient eventually completes the registration.
+200:     // ACTIVE / SUSPENDED / DEACTIVATED stay as a 409 conflict (existing
+201:     // behaviour) — only INVITED is claimable.
+202:     const existingForEmail = await userRepo.getUserByEmail(data.email);
+203:     const claimingInvitedStub = existingForEmail?.status === 'INVITED';
+204:     if (existingForEmail && !claimingInvitedStub) {
+205:       throw new ConflictError('Email already registered');
+206:     }
+207: 
+208:     // Password strength check
+209:     const strength = checkPasswordStrength(data.password);
+210:     if (!strength.isStrong) {
+211:       throw new ValidationError('Password is too weak', { feedback: strength.feedback });
+212:     }
+213: 
+214:     const passwordHash = await hashPassword(data.password);
+215:     const userId = claimingInvitedStub ? existingForEmail!.id : randomUUID();
+216: 
+217:     // F-04-allowed: /api/auth/register is intentionally unauthenticated (no
+218:     // req.user yet — the user does not exist) and the auth service does not
+219:     // mount extractTenantContext (which would 400 in prod on a missing
+220:     // header). The gateway IS the trust boundary here: it strips client-sent
+221:     // x-tenant-* and re-injects a value derived from the request's hostname /
+222:     // tenant-override before forwarding. Direct hits on the service that
+223:     // bypass the gateway will simply land on the no-tenant path below.
+224:     const tenantId = req.headers['x-tenant-id'] as string | undefined; // F-04-allowed
+225:     const tenantSlug = req.headers['x-tenant-slug'] as string | undefined; // F-04-allowed
+226: 
+227:     const displayName = firstName && lastName
+228:       ? `${firstName} ${lastName}`
+229:       : data.name || undefined;
+230: 
+231:     const user: User = {
+232:       id: userId,
+233:       email: data.email.toLowerCase(),
+234:       emailVerified: false,
+235:       passwordHash,
+236:       firstName,
+237:       lastName,
+238:       displayName,
+239:       phoneVerified: false,
+240:       mfaEnabled: false,
+241:       role: 'OWNER',
+242:       verificationLevel: 'BASIC',
+243:       organizationId: data.organizationId,
+244:       // KS-74: when claiming an INVITED stub the row's tenant_id was pinned
+245:       // by whichever issuer created it. Preserve it rather than overwriting
+246:       // with the request header — otherwise a register call without the
+247:       // tenant header would wipe the stub's tenant binding.
+248:       tenantId: claimingInvitedStub ? existingForEmail!.tenantId : tenantId,
+249:       tenantSlug: claimingInvitedStub ? existingForEmail!.tenantSlug : tenantSlug,
+250:       status: 'ACTIVE',
+251:       createdAt: claimingInvitedStub ? existingForEmail!.createdAt : new Date(),
+252:       updatedAt: new Date(),
+253:     };
+254: 
+255:     // createUser is idempotent via ON CONFLICT (email_lookup_hash) — for the
+256:     // claim path it'll UPDATE the existing INVITED row in place, flipping
+257:     // status to 'active' via the ON CONFLICT clause's COALESCE-and-update
+258:     // shape plus the explicit user.status='ACTIVE' value above. The
+259:     // updated_at is bumped server-side.
+260:     await userRepo.createUser(user);
+261:     if (claimingInvitedStub) {
+262:       // ON CONFLICT in createUser doesn't update status (the SET list is
+263:       // narrow on purpose). Apply it explicitly so the stub flips to ACTIVE
+264:       // and the row gains the password hash etc. on the same write.
+265:       await userRepo.updateUserOrThrow(userId, {
+266:         status: 'ACTIVE',
+267:         passwordHash,
+268:         firstName,
+269:         lastName,
+270:         displayName,
+271:         emailVerified: false,
+272:         role: 'OWNER',
+273:       }, 'Claiming the invited account');
+274:       logger.info('KS-74: invited stub claimed on register', { userId });
+275:     }
+276: 
+277:     // Generate email verification token
+278:     const verifyToken = randomBytes(32).toString('hex');
+279:     const verifyHash = createHash('sha256').update(verifyToken).digest('hex');
+280:     await userRepo.storeEmailToken(verifyHash, userId, new Date(Date.now() + 24 * 3600000));
+281: 
+282:     // Send verification email (or log in dev if SMTP not configured)
+283:     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:6882';
+284:     const verifyUrl = `${baseUrl}/verify-email?token=${verifyToken}`;
+285:     const emailSent = await sendVerificationEmail(user.email, verifyUrl);
+286:     if (!emailSent && process.env.NODE_ENV !== 'production') {
+287:       logger.info('Email verification link (SMTP not configured)', {
+288:         email: user.email,
+289:         url: verifyUrl,
+290:       });
+291:     }
+292: 
+293:     // Create session
+294:     const session = await createSession(
+295:       user,
+296:       req.ip,
+297:       req.get('user-agent'),
+298:       undefined,
+299:       data.clientType ?? 'browser',
+300:     );
+301:     const tokens = generateTokenPair(user, session.id);
+302: 
+303:     logger.info('User registered', { userId, email: maskEmail(user.email) });
+304: 
+305:     // Publish user.registered event (fire-and-forget)
+306:     publishEvent(EventTypes.USER_REGISTERED, {
+307:       userId,
+308:       email: user.email,
+309:       role: user.role,
+310:       verificationLevel: user.verificationLevel,
+311:     }).catch(err => logger.error('Failed to publish event', { error: err instanceof Error ? err.message : String(err) }));
+312: 
+313:     const response: TokenResponse = {
+314:       accessToken: tokens.accessToken,
+315:       // F-10: only include in body for native clients
+316:       ...(shouldEmitRefreshTokenInBody(data.clientType) ? { refreshToken: tokens.refreshToken } : {}),
+317:       expiresIn: tokens.expiresIn,
+318:       tokenType: 'Bearer',
+319:       user: {
+320:         id: user.id,
+321:         email: user.email,
+322:         displayName: user.displayName,
+323:         role: user.role,
+324:         verificationLevel: user.verificationLevel,
+325:       },
+326:     };
+327: 
+328:     res.status(201).json({ success: true, data: response });
+329:   } catch (error) {
+330:     next(error);
+331:   }
+332: });
+333: 
+334: // =============================================================================
+335: // POST /api/auth/login
+336: // =============================================================================
+337: authRoutes.post('/login', async (req: AuthenticatedRequest, res: Response, next) => {
+338:   try {
+339:     const data = loginSchema.parse(req.body) as LoginRequest;
+340: 
+341:     // Pen-test F-06 — application-level account lockout. Defence-in-depth
+342:     // on top of the per-IP gateway rate limit. If this (email, source-ip-
+343:     // /24) is currently locked out, throw the SAME error as a wrong
+344:     // password (F-11 — no enumeration), then return.
+345:     const { isLockedOut, recordFailure, recordSuccess } = await import('../services/accountLockout');
+346:     const { getRedisClient } = await import('../services/session');
+347:     const lockoutRedis = getRedisClient();
+348:     const sourceIp = (req.ip as string) || (req.socket?.remoteAddress as string) || '';
+349:     if (await isLockedOut(lockoutRedis, data.email, sourceIp)) {
+350:       logger.warn('login: blocked by account lockout', { email: maskEmail(data.email), ip: sourceIp });
+351:       throw new InvalidCredentialsError();
+352:     }
+353: 
+354:     // --- Super-admin login: check platform_admins table first ---
+355:     const platformAdmin = await userRepo.getPlatformAdmin(data.email);
+356:     if (platformAdmin) {
+357:       const isValid = await verifyPassword(data.password, platformAdmin.passwordHash);
+358:       if (!isValid) {
+359:         await recordFailure(lockoutRedis, data.email, sourceIp);
+360:         throw new InvalidCredentialsError();
+361:       }
+362: 
+363:       // T1-B (F-12 phase 2) — UPGRADE-ON-VERIFY for platform_admins.
+364:       // Same migration logic as the regular-user path below; the difference
+365:       // is the table lives in PLATFORM_DATABASE_URL (separate DB from the
+366:       // main `secuura` DB), so we go through the dedicated repo helper.
+367:       if (shouldRehashAfterVerify(platformAdmin.passwordHash)) {
+368:         try {
+369:           const newHash = await hashPassword(data.password);
+370:           await userRepo.updatePlatformAdminPassword(platformAdmin.id, newHash);
+371:           logger.info('UPGRADE-ON-VERIFY (platform_admin): rehashed bcrypt → argon2id', {
+372:             adminId: platformAdmin.id,
+373:           });
+374:         } catch (err: any) {
+375:           logger.warn('UPGRADE-ON-VERIFY (platform_admin) rehash failed (non-fatal)', {
+376:             adminId: platformAdmin.id,
+377:             error: err?.message,
+378:           });
+379:         }
+380:       }
+381: 
+382:       const syntheticUser: User = {
+383:         id: platformAdmin.id,
+384:         email: platformAdmin.email,
+385:         emailVerified: true,
+386:         passwordHash: platformAdmin.passwordHash,
+387:         displayName: platformAdmin.name,
+388:         phoneVerified: false,
+389:         mfaEnabled: platformAdmin.mfaEnabled,
+390:         mfaSecret: platformAdmin.mfaSecret || undefined,
+391:         role: 'SYSTEM_ADMIN' as const,
+392:         verificationLevel: 'ENHANCED',
+393:         status: 'ACTIVE',
+394:         createdAt: new Date(),
+395:         updatedAt: new Date(),
+396:         tenantId: undefined,
+397:         tenantSlug: undefined,
+398:       };
+399: 
+400:       // KS-737. This condition used to be
+401:       //   `mfaEnabled && mfaSecret && data.mfaCode`
+402:       // with `data.mfaCode` as part of the GUARD, so omitting the field skipped
+403:       // the whole block and execution fell through to createSession() +
+404:       // generateTokenPair() on the password alone — a full SYSTEM_ADMIN session.
+405:       // A second factor that can be declined by omitting an input is not a
+406:       // second factor. `mfaEnabled` was never consulted on its own.
+407:       //
+408:       // Now shaped exactly like the regular-user branch below, which already
+409:       // failed CLOSED on both states. That the MORE privileged path was the
+410:       // laxer one is the part worth remembering: this branch exists because
+411:       // platform admins are not in `users`, and it drifted from its sibling
+412:       // without anything comparing them.
+413:       //
+414:       // Pre-existing, not introduced by #745: present at cfe1f0678:344 and
+415:       // unchanged at 8a6790fb2:361.
+416:       if (syntheticUser.mfaEnabled) {
+417:         // Leg 1: no code supplied. MfaRequiredError, not a session — and not a
+418:         // counted lockout failure either, since prompting for the second factor
+419:         // is not a failed attempt (KS-622's reasoning, which the regular-user
+420:         // branch already applies).
+421:         if (!data.mfaCode) throw new MfaRequiredError();
+422: 
+423:         // Leg 2: mfa_enabled true with no secret. The regular-user branch calls
+424:         // this a configuration error and refuses; this branch used to skip it
+425:         // silently, which is the same fail-open wearing a different shape.
+426:         if (!syntheticUser.mfaSecret) {
+427:           logger.error('MFA enabled but no secret found for platform admin', {
+428:             adminId: platformAdmin.id,
+429:           });
+430:           throw new BadRequestError('MFA configuration error. Please contact support.');
+431:         }
+432: 
+433:         const isValidTotp = verifyTotpCode(syntheticUser.mfaSecret, data.mfaCode);
+434:         if (!isValidTotp) {
+435:           // KS-622 (#745 review): count a FAILED SECOND FACTOR toward the
+436:           // (email, /24) lockout. Every other recordFailure call site is
+437:           // password-stage, so before this an attacker who already held the
+438:           // password could grind the second factor unbounded by the lockout —
+439:           // exactly the "single email targeted across IPs" case
+440:           // services/accountLockout.ts exists for. The remaining bound was
+441:           // login_strict, 15 req / 15 min PER IP, which scales with IPs.
+442:           await recordFailure(lockoutRedis, data.email, sourceIp);
+443:           throw new InvalidCredentialsError();
+444:         }
+445:         // KS-171: the admin just proved control of the seed — lazily encrypt a
+446:         // legacy-plaintext platform_admins.mfa_secret at rest (no-op if already
+447:         // encrypted; non-fatal on failure).
+448:         await userRepo.reencryptPlatformAdminMfaSecretIfLegacy(platformAdmin.id);
+449:       }
+450: 
+451:       const session = await createSession(
+452:         syntheticUser,
+453:         req.ip,
+454:         req.get('user-agent'),
+455:         data.deviceId,
+456:         data.clientType ?? 'browser',
+457:       );
+458:       const tokens = generateTokenPair(
+459:         { ...syntheticUser, role: platformAdmin.role as any },
+460:         session.id,
+461:       );
+462: 
+463:       logger.info('Platform admin logged in', { userId: platformAdmin.id, email: maskEmail(platformAdmin.email), role: platformAdmin.role });
+464: 
+465:       res.cookie('refresh_token', tokens.refreshToken, {
+466:         httpOnly: true,
+467:         secure: process.env.NODE_ENV === 'production',
+468:         sameSite: 'strict',
+469:         maxAge: 7 * 24 * 60 * 60 * 1000,
+470:         path: '/api/auth',
+471:       });
+472: 
+473:       const response: TokenResponse = {
+474:         accessToken: tokens.accessToken,
+475:         // F-10: only include in body for native clients
+476:         ...(shouldEmitRefreshTokenInBody(data.clientType) ? { refreshToken: tokens.refreshToken } : {}),
+477:         expiresIn: tokens.expiresIn,
+478:         tokenType: 'Bearer',
+479:         user: {
+480:           id: syntheticUser.id,
+481:           email: syntheticUser.email,
+482:           displayName: syntheticUser.displayName,
+483:           role: platformAdmin.role as any,
+484:           verificationLevel: syntheticUser.verificationLevel,
+485:         },
+486:       };
+487: 
+488:       // F-06: clear lockout counter on successful platform-admin auth
+489:       await recordSuccess(lockoutRedis, data.email, sourceIp);
+490:       res.json({ success: true, data: response });
+491:       return;
+492:     }
+493: 
+494:     // KS-796 F-1 (QA PASS 1 on #819 — BLOCKER) — /api/auth/login is now the SAME
+495:     // door as /api/oauth/authorize, not a fourth hand-rolled copy of it.
+496:     //
+497:     // What stood here was `getUserByEmail` plus its OWN status DENY-list, its own
+498:     // `!passwordHash` check, its own `verifyPassword` and its own MFA block. The
+499:     // status copy is the finding: it named SUSPENDED and DEACTIVATED, so a
+500:     // PENDING or INVITED account minted a full token pair HERE while the shared
+501:     // allow-list refused it at every other door. Measured by the gate at
+502:     // `ba6c60e35`, `pending` and `invited` each: login=1, authorize=0,
+503:     // wallet/verify=0, wallet/authenticate=0, refresh=0.
+504:     //
+505:     // Worth keeping for the next reader: the 20-case suite this PR added asserted
+506:     // the PREDICATE and never asserted that this door CONSULTS it, which is how a
+507:     // change written to close Q1 shipped with Q1 still open. An allow-list is only
+508:     // as good as the number of call sites that consult it, and no unit test over
+509:     // the predicate can count those.
+510:     //
+511:     // The uniform refusal the removed comment demanded is exactly what the gate
+512:     // guarantees: unknown email, wrong password, SSO-only, locked-out AND a
+513:     // refused status all return `invalid_credentials` (pen-test F-11). Suspension
+514:     // is still never surfaced here; it belongs after authentication would
+515:     // otherwise have succeeded.
+516:     //
+517:     // TWO DELIBERATE BEHAVIOUR CHANGES, both restated in the PR body:
+518:     //   1. `mfaEnabled` with no `mfaSecret` now returns the uniform 401 instead
+519:     //      of a 400 "MFA configuration error" — which told an UNAUTHENTICATED
+520:     //      caller that the account exists and is misconfigured. Nothing asserts
+521:     //      the 400 (no test, no spec entry; grepped). The platform-admin branch
+522:     //      above keeps its 400: platform admins are not `users` rows and do not
+523:     //      pass through this gate.
+524:     //   2. UPGRADE-ON-VERIFY now runs after the WHOLE gate rather than between
+525:     //      the password check and MFA, so a login that fails its second factor no
+526:     //      longer rewrites the password hash.
+527:     const gate = await enforcePasswordLoginGates({
+528:       email: data.email,
+529:       password: data.password,
+530:       mfaCode: data.mfaCode,
+531:       sourceIp,
+532:       route: 'auth/login',
+533:     });
+534:     if (!gate.ok) {
+535:       if (gate.reason === 'mfa_required') throw new MfaRequiredError();
+536:       throw new InvalidCredentialsError();
+537:     }
+538:     const user = gate.user;
+539: 
+540:     // T1-B (F-12 phase 2) — UPGRADE-ON-VERIFY. Bcrypt hashes are still
+541:     // accepted by verifyPassword(), but on each successful login we
+542:     // rehash with Argon2id and persist. Over time, every active user
+543:     // migrates without any user-visible change. Failure to upgrade is
+544:     // logged but does NOT block login (the verified password still
+545:     // counts; we'll retry on the next login).
+546:     if (user.passwordHash && shouldRehashAfterVerify(user.passwordHash)) {
+547:       try {
+548:         const newHash = await hashPassword(data.password);
+549:         await userRepo.updateUser(user.id, { passwordHash: newHash });
+550:         logger.info('UPGRADE-ON-VERIFY: rehashed bcrypt -> argon2id', { userId: user.id });
+551:       } catch (err: any) {
+552:         logger.warn('UPGRADE-ON-VERIFY rehash failed (non-fatal)', { userId: user.id, error: err?.message });
+553:       }
+554:     }
+555: 
+556:     // Resolve tenant if not already set on the user
+557:     if (!user.tenantId && process.env.MULTI_TENANCY_ENABLED === 'true') {
+558:       try {
+559:         const platformUrl = process.env.PLATFORM_DATABASE_URL;
+560:         if (platformUrl) {
+561:           const pg = require('pg');
+562:           const pPool = new pg.Pool({ connectionString: platformUrl, max: 2 });
+563:           const domain = user.email.split('@')[1]?.toLowerCase();
+564:           // Match full domain or root domain (e.g., student.ox.ac.uk matches ox.ac.uk)
+565:           const domainParts = domain.split('.');
+566:           const rootDomain = domainParts.length > 2 ? domainParts.slice(-domainParts.length + 1).join('.') : domain;
+567:           // For academic/country TLDs (ac.uk, co.uk, com.au), root = last 3 parts
+568:           const isCountryTld = /\.(ac|co|com|org|net|gov)\.\w{2}$/.test(domain);
+569:           const effectiveRoot = isCountryTld && domainParts.length > 3
+570:             ? domainParts.slice(-3).join('.')
+571:             : rootDomain;
+572:           const tenantResult = await pPool.query(
+573:             `SELECT id, slug FROM tenants WHERE LOWER(domain) = $1 OR LOWER(domain) = $2 OR LOWER(domain) = $3 LIMIT 1`,
+574:             [domain, rootDomain, effectiveRoot]
+575:           );
+576:           if (tenantResult.rows.length > 0) {
+577:             user.tenantId = tenantResult.rows[0].id;
+578:             user.tenantSlug = tenantResult.rows[0].slug;
+579:             // Persist tenant association for future logins.
+580:             // KS-458 limitation: under fail-closed RLS this cross-tenant
+581:             // re-assignment (old tenant -> resolved tenant) cannot satisfy
+582:             // USING and WITH CHECK with a single GUC and becomes a no-op.
+583:             // The block only runs when MULTI_TENANCY_ENABLED=true (off in
+584:             // local/demo); if that mode is ever enabled it needs its own
+585:             // SECURITY DEFINER assign function (tracked on KS-458).
+586:             await query('UPDATE users SET tenant_id = $1, tenant_slug = $2 WHERE id = $3',
+587:               [user.tenantId, user.tenantSlug, user.id]);
+588:           }
+589:           await pPool.end();
+590:         }
+591:       } catch (err: any) {
+592:         logger.debug('Tenant resolution skipped', { error: err?.message });
+593:       }
+594:     }
+595: 
+596:     // Update last login
+597:     await userRepo.updateUser(user.id, { lastLoginAt: new Date() });
+598: 
+599:     // Create session & tokens
+600:     const session = await createSession(
+601:       user,
+602:       req.ip,
+603:       req.get('user-agent'),
+604:       data.deviceId,
+605:       data.clientType ?? 'browser',
+606:     );
+607:     const tokens = generateTokenPair(user, session.id);
+608: 
+609:     logger.info('User logged in', { userId: user.id, email: maskEmail(user.email) });
+610: 
+611:     // Publish user.login event (fire-and-forget)
+612:     publishEvent(EventTypes.USER_LOGIN, {
+613:       userId: user.id,
+614:       email: user.email,
+615:       role: user.role,
+616:       ip: req.ip,
+617:     }).catch(err => logger.error('Failed to publish event', { error: err instanceof Error ? err.message : String(err) }));
+618: 
+619:     // Set refresh token as httpOnly cookie
+620:     res.cookie('refresh_token', tokens.refreshToken, {
+621:       httpOnly: true,
+622:       secure: process.env.NODE_ENV === 'production',
+623:       sameSite: 'strict',
+624:       maxAge: 7 * 24 * 60 * 60 * 1000,
+625:       path: '/api/auth',
+626:     });
+627: 
+628:     const response: TokenResponse = {
+629:       accessToken: tokens.accessToken,
+630:       // F-10: only include in body for native clients
+631:       ...(shouldEmitRefreshTokenInBody(data.clientType) ? { refreshToken: tokens.refreshToken } : {}),
+632:       expiresIn: tokens.expiresIn,
+633:       tokenType: 'Bearer',
+634:       user: {
+635:         id: user.id,
+636:         email: user.email,
+637:         displayName: user.displayName,
+638:         role: user.role,
+639:         verificationLevel: user.verificationLevel,
+640:       },
+641:     };
+642: 
+643:     // F-06: the lockout counter is cleared by the shared gate, not here.
+644:     //
+645:     // KS-796 F-1: this line used to be a second `recordSuccess`. Once the
+646:     // regular-user branch moved onto `enforcePasswordLoginGates`, the counter was
+647:     // cleared TWICE per successful login — caught by `ks622-mfa-failure-lockout`'s
+648:     // own CONTROL ("a SUCCESSFUL login records no failure and clears the counter"),
+649:     // which read `successes = 2` where it asserts 1. Both calls key the same
+650:     // counter (`normaliseEmailForKey` lower-cases and trims, so `data.email` and
+651:     // the gate's `user.email` derive one key), so it was idempotent — but a
+652:     // control that counts is exactly the instrument that should decide this, and
+653:     // it said one clear.
+654:     //
+655:     // Ownership now matches the gate's own documented contract: "clearing the
+656:     // counter is the shared gate's job, and it must happen only once every gate
+657:     // has passed" (`passwordLoginGate.ts`). The platform-admin branch above keeps
+658:     // its own `recordSuccess` — it does not pass through the gate.
+659:     res.json({ success: true, data: response });
+660:   } catch (error) {
+661:     next(error);
+662:   }
+663: });
+664: 
+665: // =============================================================================
+666: // POST /api/auth/refresh
+667: // =============================================================================
+668: authRoutes.post('/refresh', async (req: AuthenticatedRequest, res: Response, next) => {
+669:   try {
+670:     const refreshTokenValue: string | undefined =
+671:       (req as any).cookies?.refresh_token || req.body?.refreshToken;
+672: 
+673:     if (!refreshTokenValue) throw new InvalidCredentialsError();
+674: 
+675:     const payload = verifyRefreshToken(refreshTokenValue);
+676: 
+677:     // KS-1151: an OAuth-minted refresh token — bound to a client (`client_id`,
+678:     // KS-823) and/or labelled `authMethod: 'oauth'` (KS-835) — is redeemable ONLY
+679:     // at POST /api/oauth/token, by the client it was issued to: the mirror of that
+680:     // grant's fail-closed binding refusal. Refused HERE, before the session
+681:     // lookup, so a refused token is neither rotated nor denylisted and the
+682:     // legitimate client's token stays alive at its own grant. Before this guard
+683:     // the route re-minted such a token as an UNBOUND, role-default login pair
+684:     // (the launder: a narrow OAuth grant became the user's full authority in one
+685:     // unauthenticated call). Both arms stay: a token minted before the label
+686:     // existed carries only `client_id`.
+687:     if (payload.client_id !== undefined || payload.authMethod === 'oauth') {
+688:       logger.warn('Refresh refused: OAuth-minted token presented at the interactive refresh route', {
+689:         userId: payload.userId,
+690:         clientId: payload.client_id ?? null,
+691:         authMethod: payload.authMethod ?? null,
+692:       });
+693:       throw new InvalidCredentialsError();
+694:     }
+695: 
+696:     const session = await getSession(payload.sessionId);
+697:     if (!session) throw new InvalidCredentialsError();
+698: 
+699:     // Audit A-05: detect token-reuse. If this jti was already rotated/revoked,
+700:     // an attacker is replaying. RFC 6819 §5.2.2.3 says burn the whole session
+701:     // — both the legitimate user and the attacker have to log in again, but
+702:     // the attacker no longer has a foothold.
+703:     if (payload.jti && (await isRefreshJtiDenylisted(payload.jti))) {
+704:       await revokeSession(session.id);
+705:       logger.warn('Refresh-token reuse detected — session revoked', {
+706:         userId: payload.userId,
+707:         sessionId: session.id,
+708:         jti: payload.jti,
+709:       });
+710:       res.clearCookie('refresh_token', { path: '/api/auth' });
+711:       throw new InvalidCredentialsError();
+712:     }
+713: 
+714:     // KS-458: refresh runs pre-auth (the proven refresh token is the
+715:     // credential) — use the SECURITY DEFINER carve-out lookup.
+716:     const user = await userRepo.getUserByIdPreAuth(payload.userId);
+717:     if (!user || user.status !== 'ACTIVE') throw new InvalidCredentialsError();
+718: 
+719:     const tokens = generateTokenPair(user, session.id);
+720: 
+721:     // Rotate: invalidate the old refresh token by updating the session in Redis,
+722:     // and denylist the predecessor's jti for whatever's left of its natural
+723:     // lifetime. The session-record rotation alone is not enough — nothing in the
+724:     // /refresh path compared the incoming JWT against session.refreshToken.
+725:     await rotateSessionRefreshToken(session.id, tokens.refreshToken);
+726:     if (payload.jti && payload.exp) {
+727:       const remaining = payload.exp - Math.floor(Date.now() / 1000);
+728:       await denylistRefreshJti(payload.jti, remaining);
+729:     }
+730: 
+731:     logger.info('Token refreshed', { userId: user.id });
+732: 
+733:     res.cookie('refresh_token', tokens.refreshToken, {
+734:       httpOnly: true,
+735:       secure: process.env.NODE_ENV === 'production',
+736:       sameSite: 'strict',
+737:       maxAge: 7 * 24 * 60 * 60 * 1000,
+738:       path: '/api/auth',
+739:     });
+740: 
+741:     res.json({
+742:       success: true,
+743:       data: {
+744:         accessToken: tokens.accessToken,
+745:         expiresIn: tokens.expiresIn,
+746:         tokenType: 'Bearer',
+747:       },
+748:     });
+749:   } catch (error) {
+750:     next(error);
+751:   }
+752: });
+753: 
+754: // =============================================================================
+755: // POST /api/auth/logout
+756: // =============================================================================
+757: authRoutes.post('/logout', authenticate(), async (req: AuthenticatedRequest, res: Response, next) => {
+758:   try {
+759:     if (req.sessionId) {
+760:       await revokeSession(req.sessionId);
+761:       logger.info('User logged out', { userId: req.user?.userId });
+762:     }
+763: 
+764:     // Denylist the refresh JWT too. Session revocation already breaks /refresh
+765:     // (getSession returns null), but defending in depth means a future bug that
+766:     // skips the session check still can't replay this token.
+767:     const refreshCookie = (req as any).cookies?.refresh_token;
+768:     if (refreshCookie) {
+769:       const decoded = decodeToken(refreshCookie);
+770:       if (decoded?.jti && decoded.exp) {
+771:         const remaining = decoded.exp - Math.floor(Date.now() / 1000);
+772:         await denylistRefreshJti(decoded.jti, remaining).catch((err) => {
+773:           logger.warn('Logout denylist failed (non-fatal)', { error: err?.message });
+774:         });
+775:       }
+776:     }
+777: 
+778:     res.clearCookie('refresh_token', { path: '/api/auth' });
+779:     res.json({ success: true, message: 'Logged out successfully' });
+780:   } catch (error) {
+781:     next(error);
+782:   }
+783: });
+784: 
+785: // =============================================================================
+786: // POST /api/auth/forgot-password
+787: // =============================================================================
+788: authRoutes.post('/forgot-password', async (req: AuthenticatedRequest, res: Response, next) => {
+789:   try {
+790:     const data = forgotPasswordSchema.parse(req.body);
+791: 
+792:     // Always return success to prevent email enumeration
+793:     const user = await userRepo.getUserByEmail(data.email);
+794: 
+795:     if (user) {
+796:       const { token, hash, expiresAt } = generateResetToken();
+797:       await userRepo.storeResetToken(hash, user.id, expiresAt);
+798:       logger.info('Password reset requested', { email: maskEmail(data.email) });
+799: 
+800:       const frontendUrl = process.env.FRONTEND_URL;
+801:       if (!frontendUrl && (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging')) {
+802:         logger.error('FRONTEND_URL not set — password reset links will be malformed');
+803:       }
+804:       const resetUrl = `${frontendUrl || 'http://localhost:6882'}/reset-password?token=${token}`;
+805:       const resetEmailSent = await sendPasswordResetEmail(data.email, resetUrl);
+806:       if (!resetEmailSent && process.env.NODE_ENV !== 'production') {
+807:         logger.info('Password reset link (SMTP not configured)', { resetUrl });
+808:       }
+809:     }
+810: 
+811:     res.json({
+812:       success: true,
+813:       message: 'If the email exists, a password reset link has been sent',
+814:     });
+815:   } catch (error) {
+816:     next(error);
+817:   }
+818: });
+819: 
+820: // =============================================================================
+821: // POST /api/auth/reset-password
+822: // =============================================================================
+823: authRoutes.post('/reset-password', async (req: AuthenticatedRequest, res: Response, next) => {
+824:   try {
+825:     const data = resetPasswordSchema.parse(req.body);
+826: 
+827:     const strength = checkPasswordStrength(data.password);
+828:     if (!strength.isStrong) {
+829:       throw new ValidationError('Password is too weak', { feedback: strength.feedback });
+830:     }
+831: 
+832:     const tokenHash = createHash('sha256').update(data.token).digest('hex');
+833:     const stored = await userRepo.getResetToken(tokenHash);
+834: 
+835:     if (!stored) {
+836:       throw new NotFoundError('Password reset token — invalid or already used');
+837:     }
+838: 
+839:     if (new Date() > stored.expiresAt) {
+840:       await userRepo.consumeResetToken(tokenHash);
+841:       throw new BadRequestError('Password reset token has expired — please request a new one');
+842:     }
+843: 
+844:     // KS-458: password reset runs pre-auth (the proven reset token is the
+845:     // credential) — use the SECURITY DEFINER carve-out lookup.
+846:     const user = await userRepo.getUserByIdPreAuth(stored.userId);
+847:     if (!user) {
+848:       await userRepo.consumeResetToken(tokenHash);
+849:       throw new NotFoundError('User');
+850:     }
+851: 
+852:     const newHash = await hashPassword(data.password);
+853:     // KS-1052: check BEFORE consuming. The reset token is single-use, so
+854:     // burning it after a write that did not land leaves the user with a
+855:     // password that never changed and no token to try again with.
+856:     // KS-1407 B1: revokeAllUserSessions returns 0 WITHOUT throwing when the session store is
+857:     // down (session.ts:317-318 — createSession at :156 throws in the same condition). Writing
+858:     // the password, burning the single-use token and answering 200 would leave every old
+859:     // session to come back when Redis recovered. Confirm the revocation is POSSIBLE first.
+860:     if (!isRedisAvailable()) {
+861:       throw new ServiceUnavailableError(
+862:         'Your password was NOT reset: the session store cannot be reached, so your other sessions could not be ended. Nothing was changed and your reset link has not been used — please try it again shortly.',
+863:       );
+864:     }
+865:     await userRepo.updateUserOrThrow(user.id, { passwordHash: newHash }, 'Password reset');
+866:     // KS-1407: the old password minted sessions; none of them may outlive it. Before the token is burned, so a failing revocation leaves it usable for a retry.
+867:     // KS-1692 (gate BS1 N1): the flag check above is not the only way this can
+868:     // fail. `revokeAllUserSessions` can also THROW — a rejected Redis command
+869:     // rather than an unavailable client — and a throw here skipped the
+870:     // post-write re-assert entirely and landed in `next(error)` as a 500
+871:     // INTERNAL_ERROR. The password was written, the sessions were not revoked,
+872:     // and the caller was told only "unexpected error".
+873:     //
+874:     // Mapped onto the SAME post-write 503 as the check-then-act path, so a store
+875:     // that is DOWN and a store that THROWS are indistinguishable to the caller —
+876:     // which is the point: both mean "your password changed, your other sessions
+877:     // did not end". NOT `.catch(() => 0)`: that is the author's own A5 arm, it
+878:     // reds none of the KS-1407 cells, and it would turn this into a 200 with
+879:     // nothing revoked. This catch RE-THROWS; it never swallows.
+880:     let sessionsRevoked = 0;
+881:     try {
+882:       sessionsRevoked = await revokeAllUserSessions(user.id);
+883:     } catch (err: unknown) {
+884:       logger.error('Password reset: the session revocation THREW after the password write', {
+885:         userId: user.id, error: err instanceof Error ? err.message : String(err),
+886:       });
+887:       throw new ServiceUnavailableError(
+888:         'Your password WAS reset, but your other sessions could not be ended because the session store became unreachable. Your reset link has NOT been used — please use it again shortly to end those sessions.',
+889:       );
+890:     }
+891:     logger.info('Password reset revoked the account sessions', { userId: user.id, sessionsRevoked });
+892:     // The guard above is a check-then-act: if the store dropped since, the call above returned
+893:     // its silent 0. Re-assert, and leave the single-use token UNBURNED so a retry can finish
+894:     // the job. The password really did change, and the message says so.
+895:     if (!isRedisAvailable()) {
+896:       throw new ServiceUnavailableError(
+897:         'Your password WAS reset, but your other sessions could not be ended because the session store became unreachable. Your reset link has NOT been used — please use it again shortly to end those sessions.',
+898:       );
+899:     }
+900:     await userRepo.consumeResetToken(tokenHash);
+901: 
+902:     logger.info('Password reset completed', { userId: user.id });
+903: 
+904:     res.json({
+905:       success: true,
+906:       message: 'Password has been reset successfully. You can now log in with your new password.',
+907:     });
+908:   } catch (error) {
+909:     next(error);
+910:   }
+911: });
+912: 
+913: // =============================================================================
+914: // POST /api/auth/verify-email
+915: // =============================================================================
+916: authRoutes.post('/verify-email', async (req: AuthenticatedRequest, res: Response, next) => {
+917:   try {
+918:     const { token } = req.body;
+919:     if (!token) throw new BadRequestError('Verification token required');
+920: 
+921:     const tokenHash = createHash('sha256').update(token).digest('hex');
+922:     const stored = await userRepo.getEmailToken(tokenHash);
+923: 
+924:     if (!stored) {
+925:       throw new NotFoundError('Verification token — invalid or already used');
+926:     }
+927: 
+928:     if (new Date() > stored.expiresAt) {
+929:       await userRepo.consumeEmailToken(tokenHash);
+930:       throw new BadRequestError('Verification token has expired — please request a new one');
+931:     }
+932: 
+933:     // KS-458: email verification runs pre-auth (the proven email token is
+934:     // the credential) — use the SECURITY DEFINER carve-out lookup.
+935:     const user = await userRepo.getUserByIdPreAuth(stored.userId);
+936:     if (!user) {
+937:       await userRepo.consumeEmailToken(tokenHash);
+938:       throw new NotFoundError('User');
+939:     }
+940: 
+941:     // KS-1052: check BEFORE consuming — same single-use token argument as
+942:     // the password reset above.
+943:     await userRepo.updateUserOrThrow(user.id, { emailVerified: true }, 'Email verification');
+944:     await userRepo.consumeEmailToken(tokenHash);
+945: 
+946:     logger.info('Email verified', { userId: user.id, email: maskEmail(user.email) });
+947: 
+948:     res.json({
+949:       success: true,
+950:       message: 'Email address verified successfully.',
+951:     });
+952:   } catch (error) {
+953:     next(error);
+954:   }
+955: });
+956: 
+957: // =============================================================================
+958: // SOCIAL LOGIN ROUTES
+959: // =============================================================================
+960: 
+961: import {
+962:   SocialProviderFactory,
+963:   mayAutoLinkByEmail,
+964:   type SocialProviderName,
+965: } from '../providers/social';
+966: import { storeOAuthState, consumeOAuthState } from '../services/oauthState';
+967: // generateTokenPair already imported above — used directly for social login token creation
+968: 
+969: const socialFactory = new SocialProviderFactory();
+970: 
+971: // List enabled social providers
+972: authRoutes.get('/social/providers', (_req, res: Response) => {
+973:   const enabled = socialFactory.getEnabled();
+974:   res.json({ providers: enabled });
+975: });
+976: 
+977: // Initiate OAuth flow — redirects to provider
+978: authRoutes.get('/social/:provider', async (req, res: Response, next) => {
+979:   try {
+980:     const providerName = req.params.provider as string;
+981:     if (!socialFactory.isValidProvider(providerName)) {
+982:       throw new BadRequestError(`Unknown social provider: ${providerName}`);
+983:     }
+984:     const provider = socialFactory.get(providerName as SocialProviderName);
+985:     if (!provider) {
+986:       throw new BadRequestError(`Social provider ${providerName} is not enabled in this deployment`);
+987:     }
+988:     const state = randomUUID();
+989:     // KS-722 Shape 1: persist BEFORE handing the value out. Minting a `state`
+990:     // we cannot later verify is precisely the defect this closes, so a storage
+991:     // failure must fail the initiate rather than produce an unverifiable flow.
+992:     //
+993:     // KS-819 F-5 — THIS IS AN UNAUTHENTICATED WRITE TO SHARED STATE, and it is
+994:     // left as one. Recorded here rather than "fixed", because the obvious
+995:     // repairs do not repair it: the write must precede the redirect (that is
+996:     // the whole point), and no caller is authenticated at this stage by
+997:     // construction — an unauthenticated sign-in flow is what this route IS.
+998:     //
+999:     // What bounds it, measured rather than assumed: the gateway limiter caps
+1000:     // this route at 300/min, each key is one short value under a 600-second
+1001:     // TTL, and the ceiling is therefore ~3,000 live keys per source — bounded
+1002:     // rather than unbounded growth. Reachable only where a provider is
+1003:     // configured, which no deployment does today.
+1004:     //
+1005:     // If that ever stops being true, the fix is a per-source cap on outstanding
+1006:     // states, not a shorter TTL: the TTL bounds a leak's usefulness, not the
+1007:     // write volume. Left as a residual on KS-819 with that reasoning stated,
+1008:     // rather than closed with a change that would not close it.
+1009:     await storeOAuthState(state, providerName);
+1010:     const authUrl = provider.getAuthUrl(state);
+1011:     res.json({ authUrl, state });
+1012:   } catch (error) {
+1013:     next(error);
+1014:   }
+1015: });
+1016: 
+1017: // OAuth callback — exchange code for profile, create/link user
+1018: authRoutes.get('/social/:provider/callback', async (req: AuthenticatedRequest, res: Response, next) => {
+1019:   try {
+1020:     const providerName = req.params.provider as string;
+1021:     if (!socialFactory.isValidProvider(providerName)) {
+1022:       throw new BadRequestError(`Unknown social provider: ${providerName}`);
+1023:     }
+1024:     const provider = socialFactory.get(providerName as SocialProviderName);
+1025:     if (!provider) {
+1026:       throw new BadRequestError(`Social provider ${providerName} is not enabled`);
+1027:     }
+1028: 
+1029:     // -----------------------------------------------------------------
+1030:     // KS-722 Shape 1 — VERIFY THE `state` BEFORE THE CODE EXCHANGE.
+1031:     //
+1032:     // Placed ahead of the exchange deliberately. A forged callback must not
+1033:     // cause an outbound token-exchange request to the provider: that is a side
+1034:     // effect on a third party, driven by an unauthenticated caller.
+1035:     //
+1036:     // KS-819 F-1/F-2/F-4 — BUT NOT BEFORE THE CHECKS THAT NEED NOTHING.
+1037:     //
+1038:     // KS-722 read "before the exchange" as "first", and consuming BURNS. So the
+1039:     // burn became reachable by requests that were never going to complete a
+1040:     // sign-in, and the ORDER of the refusals leaked which one had happened:
+1041:     //
+1042:     //   · a codeless callback with a REAL state answered 400 (consume passed,
+1043:     //     then the missing-code throw); with a forged one it answered 403. That
+1044:     //     single difference is a validity oracle for anyone holding a candidate
+1045:     //     `state` — and the probe destroyed the real one, so the user's own
+1046:     //     callback then failed 403. One unauthenticated request, no sign-in.
+1047:     //
+1048:     //   · a provider `?error=` (the user pressed Cancel) took the same path:
+1049:     //     "missing authorization code", with the state burned, so the retry
+1050:     //     failed too.
+1051:     //
+1052:     // Both checks below decide on the request ALONE. Running them first costs
+1053:     // the exchange-ordering nothing — the consume still precedes it — and it
+1054:     // means a request that cannot complete never touches the store.
+1055:     //
+1056:     // The cross-provider burn (F-2) is NOT fixed here. Ordering cannot fix it,
+1057:     // because a cross-provider callback carries a perfectly good code; it is
+1058:     // fixed in `oauthState.ts` by putting the provider in the KEY, so the wrong
+1059:     // provider misses rather than reading-then-comparing. Two findings, one
+1060:     // root, two different repairs.
+1061:     // -----------------------------------------------------------------
+1062:     if (req.query.error !== undefined) {
+1063:       // Logged, never echoed: attacker-controllable via the redirect.
+1064:       logger.warn('Social callback — provider returned an error', {
+1065:         provider: providerName,
+1066:         providerError: String(req.query.error).slice(0, 200),
+1067:         providerErrorDescription: req.query.error_description === undefined ? undefined : String(req.query.error_description).slice(0, 200),
+1068:       });
+1069:       throw new OAuthProviderError();
+1070:     }
+1071: 
+1072:     const code = req.query.code as string;
+1073:     if (!code) throw new BadRequestError('Missing authorization code');
+1074: 
+1075:     const state = req.query.state as string | undefined;
+1076:     if (!(await consumeOAuthState(state ?? '', providerName))) {
+1077:       throw new OAuthStateInvalidError();
+1078:     }
+1079: 
+1080:     let profile;
+1081:     try {
+1082:       profile = await provider.exchangeCode(code);
+1083:     } catch (exchangeErr: any) {
+1084:       throw new BadRequestError(
+1085:         `OAuth authentication failed: ${exchangeErr?.message || 'invalid authorization code'}`
+1086:       );
+1087:     }
+1088: 
+1089:     const socialIdField = `${providerName}Id` as keyof import('../types').User;
+1090:     let user = await userRepo.getUserBySocialId(providerName, profile.providerId);
+1091:     /** KS-795 F-5: set when the email-link branch resolved an account whose
+1092:      *  identity must be attached — but only once the gate has passed. */
+1093:     let linkIdentityAfterGate = false;
+1094: 
+1095:     // -----------------------------------------------------------------
+1096:     // KS-795 F-4 — AN EMPTY EMAIL IS NEVER A KEY.
+1097:     //
+1098:     // Placed AFTER the provider-identity lookup on purpose. If the account was
+1099:     // resolved by its social id, the profile's email is irrelevant and a
+1100:     // returning caller must not be refused — that matters the day the social-id
+1101:     // persistence defect is fixed and this lookup starts finding rows.
+1102:     //
+1103:     // Reached only when nothing was resolved by identity. Refusing TERMINALLY
+1104:     // here is what makes the collision impossible rather than unlikely: it
+1105:     // forecloses BOTH remaining paths at once — the email-link branch below
+1106:     // (which an empty address skips) and, more importantly, CREATE, where two
+1107:     // different provider ids carrying empty addresses collapse onto one row via
+1108:     // `ON CONFLICT (email_lookup_hash) DO UPDATE` and mint a token pair for a
+1109:     // user id that was never inserted.
+1110:     //
+1111:     // Cost, stated rather than discovered later: a provider that reports no
+1112:     // address cannot complete a FIRST sign-in. Today that caller does not get an
+1113:     // account either — it gets someone else's row — so this refuses cleanly
+1114:     // what already fails silently.
+1115:     // -----------------------------------------------------------------
+1116:     // S130-F1 — GUARD THE VALUE THE REPOSITORY KEYS ON, NOT THE RAW ONE.
+1117:     //
+1118:     // This guard was `!profile.email`, which is falsy for `''` and TRUE for
+1119:     // every whitespace-only address. The repository does not agree:
+1120:     // `getUserByEmail`, `getUserByEmailLookup` and `createUser` all normalise
+1121:     // with `.toLowerCase().trim()`, so `' '`, `'\t\t'` and `'  \n '` key on the
+1122:     // SAME `email_lookup_hash` as a literal empty address.
+1123:     //
+1124:     // Two distinct provider identities carrying different whitespace therefore
+1125:     // collapsed onto one row via `ON CONFLICT (email_lookup_hash) DO UPDATE` and
+1126:     // minted two token pairs — the collision F-4 exists to foreclose, reached by
+1127:     // walking AROUND the guard rather than through it. Measured before the fix:
+1128:     // `''` refused, and each of the other three created a row and minted twice.
+1129:     const profileEmail = String(profile.email ?? '').trim();
+1130: 
+1131:     if (!user && !profileEmail) {
+1132:       logger.warn('Social callback refused — provider supplied no email and no identity matched', {
+1133:         provider: providerName,
+1134:       });
+1135:       throw new SocialEmailUnavailableError();
+1136:     }
+1137: 
+1138:     // KS-806: wallet.local is the synthetic domain of wallet accounts and no provider can have verified an address in it.
+1139:     // A profile carrying one is refused (the uniform refusal) before it can link to an existing account or create one.
+1140:     if (!user && isReservedWalletEmail(profileEmail)) {
+1141:       logger.warn('Social callback refused — provider email is in the reserved wallet.local domain', { provider: providerName });
+1142:       throw new SocialSignInRefusedError();
+1143:     }
+1144: 
+1145:     // S130-F3 — WHAT THIS CONDITION ACTUALLY DOES, corrected.
+1146:     //
+1147:     // It used to claim `&& profileEmail` was "a second, independent expression
+1148:     // of the same invariant, so removing the guard alone cannot reopen the
+1149:     // create-collision." That was measured FALSE: with the guard removed and
+1150:     // this expression kept, rows=1, inserts=2, mints=2.
+1151:     //
+1152:     // The reason is structural. This condition guards the LINK branch only. The
+1153:     // CREATE branch below is a bare `if (!user)` and never consults the email at
+1154:     // all — so an empty address skips the link branch and lands in create, which
+1155:     // is exactly where the collision happens. The guard above is the ONLY thing
+1156:     // standing between an empty key and a row.
+1157:     //
+1158:     // Kept because it is still correct as a branch condition — an empty address
+1159:     // is not a lookup key — but it is NOT a second line of defence, and the
+1160:     // prose saying it was is what would have licensed deleting the guard.
+1161:     if (!user && profileEmail) {
+1162:       const existing = await userRepo.getUserByEmail(profileEmail);
+1163:       if (existing) {
+1164:         // ---------------------------------------------------------------
+1165:         // KS-795 (KS-781 door 2) — DO NOT ATTACH A SOCIAL IDENTITY TO AN
+1166:         // EXISTING ACCOUNT ON AN EMAIL MATCH ALONE.
+1167:         //
+1168:         // This branch used to link unconditionally and then mint a token
+1169:         // pair, so a profile carrying the victim's address was enough to
+1170:         // take over the victim's account. `profile.emailVerified` on its
+1171:         // own is not the fix: facebook derives it from `Boolean(email)`
+1172:         // and microsoft-personal hardcodes `true`, so the flag is
+1173:         // unconditionally satisfied for those providers. See
+1174:         // providers/social/emailVerificationTrust.ts for the derivation
+1175:         // table this decision is made from.
+1176:         //
+1177:         // The refusal is TERMINAL rather than a fall-through: leaving
+1178:         // `user` null here would reach the create branch below and insert
+1179:         // a second row on an address that already has one.
+1180:         // ---------------------------------------------------------------
+1181:         if (!mayAutoLinkByEmail(providerName as SocialProviderName, profile.emailVerified)) {
+1182:           logger.warn('Social auto-link refused — provider email claim is not sufficient proof', {
+1183:             provider: providerName,
+1184:             emailVerified: profile.emailVerified,
+1185:             userId: existing.id,
+1186:           });
+1187:           // ⚠ The remedy this error names — sign in, then use the
+1188:           // authenticated POST /api/auth/social/link — DOES NOT PERSIST TODAY.
+1189:           // `userRepo.updateUser` has no social-id fields in its fieldMap, so
+1190:           // every `{ googleId: ... }` write is silently dropped and no UPDATE
+1191:           // is issued at all. Measured, with a control: `{ status }` issues
+1192:           // `UPDATE users SET status = $1 ...`; `{ googleId }`,
+1193:           // `{ microsoftPersonalId }` and the shape this route actually builds
+1194:           // (`microsoft_personalId`) each issue ZERO. That affects `:1027` (the
+1195:           // explicit link route) as much as the branch above, and it is a
+1196:           // separate defect on a shared repository function — recorded in
+1197:           // BACKLOG.md rather than widened into this security fix. The message
+1198:           // states the INTENDED remedy; do not read it as one that works yet.
+1199:           // KS-795 F-6: one refusal shape. The code this replaced named the
+1200:           // account's existence and a remedy that writes nothing.
+1201:           throw new SocialSignInRefusedError();
+1202:         }
+1203: 
+1204:         user = existing;
+1205:         // KS-795 F-5: DEFERRED, not performed here. The identity is attached
+1206:         // only after the account gate below says this account may receive a
+1207:         // credential at all. See the F-5 note above the gate.
+1208:         linkIdentityAfterGate = true;
+1209:       }
+1210:     }
+1211: 
+1212:     if (!user) {
+1213:       const now = new Date();
+1214:       const newUser: User = {
+1215:         id: randomUUID(),
+1216:         // S130-F1: the trimmed value, so what is stored and what is hashed agree.
+1217:         email: profileEmail,
+1218:         emailVerified: profile.emailVerified,
+1219:         firstName: profile.firstName,
+1220:         lastName: profile.lastName,
+1221:         displayName: profile.displayName,
+1222:         phoneVerified: false,
+1223:         mfaEnabled: false,
+1224:         verificationLevel: 'SOCIAL',
+1225:         authMethod: 'social',
+1226:         status: 'ACTIVE',
+1227:         role: 'OWNER',
+1228:         createdAt: now,
+1229:         updatedAt: now,
+1230:       };
+1231:       (newUser as unknown as Record<string, unknown>)[socialIdField] = profile.providerId;
+1232:       // ⚠ The social id assigned above does NOT reach the database. `createUser`'s
+1233:       // INSERT names 22 columns and no social-id column is among them, while
+1234:       // SOCIAL_ID_COLUMN_MAP declares six that `getUserBySocialId` queries -- so
+1235:       // the create path drops it exactly as `updateUser` does, and NO path
+1236:       // persists one. Consequence: `getUserBySocialId` can never return a row
+1237:       // for a social user, so every returning caller re-enters the email-match
+1238:       // branch for the life of the account. Recorded in BACKLOG.md; it is the
+1239:       // reason the F-4 refusal above costs nothing that currently works.
+1240:       user = await userRepo.createUser(newUser);
+1241:     }
+1242: 
+1243:     // -----------------------------------------------------------------
+1244:     // KS-795 part (a) — THE ACCOUNT GATE, door 2.
+1245:     //
+1246:     // Part (b) stopped an UNSOUND email claim attaching a social identity to
+1247:     // someone else's account. It did not ask the other question: may THIS
+1248:     // account receive a credential at all? Above this line the route has three
+1249:     // ways to arrive at `user` — an existing social id, an email link, or a
+1250:     // freshly created row — and all three fell straight through to
+1251:     // createSession + generateTokenPair. So a SUSPENDED account with a social
+1252:     // identity already linked minted a full token pair on every callback,
+1253:     // needing no linking step and no second factor.
+1254:     //
+1255:     // DELIBERATELY BROADER THAN "THE LINK PATH". The commission named the link
+1256:     // branch; the gate is placed at the MINT instead, because the link branch
+1257:     // is only one of three ways to reach it and the other two carry the same
+1258:     // defect. A gate on one branch would have been a gate an attacker walks
+1259:     // around by already being linked.
+1260:     //
+1261:     // The MFA case is a real refusal, not an omission: this callback has no
+1262:     // channel to carry a second factor, so an MFA account cannot complete here
+1263:     // and 403 MFA_REQUIRED is the honest answer. Minting without the factor is
+1264:     // precisely the KS-781 class.
+1265:     // -----------------------------------------------------------------
+1266:     const gate = await assertAccountMayReceiveCredential(user, {
+1267:       sourceIp: req.ip || '0.0.0.0',
+1268:       route: 'GET /api/auth/social/:provider/callback',
+1269:     });
+1270:     if (!gate.ok) {
+1271:       if (gate.reason === 'mfa_required') throw new MfaRequiredError();
+1272:       // KS-795 F-6: same shape as the link refusal above -- an unauthenticated
+1273:       // caller must not be able to tell a disabled account from a healthy one.
+1274:       throw new SocialSignInRefusedError();
+1275:     }
+1276: 
+1277:     // -----------------------------------------------------------------
+1278:     // KS-795 F-5 — THE GATE NOW PRECEDES BOTH WRITES.
+1279:     //
+1280:     // Two writes used to run BEFORE the gate: the identity link, and the
+1281:     // `BASIC -> SOCIAL` verification-level upgrade. A REFUSED callback
+1282:     // therefore still mutated the account it had just refused to authenticate.
+1283:     //
+1284:     // The verification-level write was the visible half. The link write is the
+1285:     // dangerous one, and its danger is LATENT rather than current: today
+1286:     // `updateUser` has no social-id fields in its fieldMap, so the write is
+1287:     // silently dropped. The moment that persistence defect is repaired, a
+1288:     // pre-gate link write would attach an ATTACKER's provider identity to a
+1289:     // SUSPENDED victim's account -- the refusal would hold for this request and
+1290:     // hand over a permanent key. That is why this reordering lands BEFORE the
+1291:     // persistence fix, not after it.
+1292:     //
+1293:     // The lockout `recordFailure` inside the gate is deliberately NOT moved or
+1294:     // suppressed. A refused callback SHOULD count against the lockout counter:
+1295:     // the refusal is an authentication outcome, and not counting it would make
+1296:     // this door a free oracle for probing account state. Confirmed as correct
+1297:     // behaviour rather than assumed.
+1298:     // -----------------------------------------------------------------
+1299:     if (linkIdentityAfterGate) {
+1300:       await userRepo.updateUser(user.id, { [socialIdField]: profile.providerId } as Record<string, string>);
+1301:     }
+1302: 
+1303:     if (user.verificationLevel === 'NONE' || user.verificationLevel === 'BASIC') {
+1304:       await userRepo.updateUser(user.id, { verificationLevel: 'SOCIAL' });
+1305:       user.verificationLevel = 'SOCIAL';
+1306:     }
+1307: 
+1308:     const session = await createSession(
+1309:       user,
+1310:       req.ip || '0.0.0.0',
+1311:       req.headers['user-agent'] || '',
+1312:       undefined,
+1313:       'browser',
+1314:     );
+1315:     const tokens = generateTokenPair(user, session.id);
+1316: 
+1317:     logger.info('Social login success', {
+1318:       userId: user.id,
+1319:       provider: providerName,
+1320:       isNew: !user.lastLoginAt,
+1321:     });
+1322: 
+1323:     res.json({
+1324:       success: true,
+1325:       ...tokens,
+1326:     });
+1327:   } catch (error) {
+1328:     next(error);
+1329:   }
+1330: });
+1331: 
+1332: // Link social account to existing authenticated user
+1333: //
+1334: // KS-819 — NO `state` CHECK HERE, and that is a decision rather than an
+1335: // oversight. The gate that filed this named it out of scope; it is recorded at
+1336: // the call site so it is not rediscovered as a finding.
+1337: //
+1338: // The callback above needs `state` because it is a REDIRECT: the browser
+1339: // arrives carrying parameters an attacker chose, with no other proof the flow
+1340: // began here. This route is different on both counts — the caller is
+1341: // authenticated, and the `code` arrives in a POST body, so the platform CSRF
+1342: // token already supplies the provenance `state` supplies there.
+1343: //
+1344: // What it shares with the callback is the outbound exchange: a body-supplied
+1345: // `code` drives a request to the provider. That is reachable only by an
+1346: // authenticated caller, so it is rate-limited by identity rather than open to
+1347: // the internet.
+1348: //
+1349: // The live defect on this route is not the missing `state` — it is that
+1350: // `userRepo.updateUser` has no social-id fields in its fieldMap, so the write
+1351: // below issues ZERO statements and the link never persists. Tracked in
+1352: // BACKLOG.md; do not read the success response as proof the link happened.
+1353: authRoutes.post('/social/link', authenticate(), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+1354:   try {
+1355:     const { provider: providerName, code } = req.body;
+1356:     if (!providerName || !code) {
+1357:       throw new BadRequestError('provider and code are required');
+1358:     }
+1359:     if (!socialFactory.isValidProvider(providerName)) {
+1360:       throw new BadRequestError(`Unknown social provider: ${providerName}`);
+1361:     }
+1362:     const provider = socialFactory.get(providerName as SocialProviderName);
+1363:     if (!provider) {
+1364:       throw new BadRequestError(`Social provider ${providerName} is not enabled`);
+1365:     }
+1366: 
+1367:     const profile = await provider.exchangeCode(code);
+1368:     const existingUser = await userRepo.getUserBySocialId(providerName, profile.providerId);
+1369:     if (existingUser && existingUser.id !== req.user!.userId) {
+1370:       throw new ConflictError('This social account is already linked to another user');
+1371:     }
+1372: 
+1373:     const socialIdField = `${providerName}Id`;
+1374:     await userRepo.updateUser(req.user!.userId, { [socialIdField]: profile.providerId } as Record<string, string>);
+1375: 
+1376:     const user = await userRepo.getUserById(req.user!.userId);
+1377:     if (user && (user.verificationLevel === 'NONE' || user.verificationLevel === 'BASIC')) {
+1378:       await userRepo.updateUser(user.id, { verificationLevel: 'SOCIAL' });
+1379:     }
+1380: 
+1381:     logger.info('Social account linked', { userId: req.user!.userId, provider: providerName });
+1382: 
+1383:     res.json({ success: true, provider: providerName, linked: true });
+1384:   } catch (error) {
+1385:     next(error);
+1386:   }
+1387: });
+1388: 
+1389: // =============================================================================
+1390: // GET /api/auth/me — Alias of /api/users/me (F-06 audit 2026-05-15)
+1391: // =============================================================================
+1392: // The "current authenticated user" concept lives on either surface depending
+1393: // on the consumer's mental model. Issuer/admin/verifier portals and the
+1394: // e2e-v2 tier1 `auth.api.spec.ts:113` hit `/api/auth/me`; the canonical
+1395: // handler lives in routes/users.ts (`meHandler`). Re-mounting here avoids
+1396: // duplication and matches the long-standing pen-test ISSUE-5 expectation.
+1397: authRoutes.get('/me', authenticate(), meHandler);
+1398: 
+1399: // Export the userRepo for use by other route modules (users.ts, mfa.ts, etc.)
+1400: export { userRepo };
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts
+1: // KS-1776 (services/auth routes/auth.ts): importing the routes module arms a module-scope `setTimeout(..., 2000)` that calls `userRepo.seedDemoUsers(hashPassword).catch(...)`. When the
+2: // repository mock of a test has no `seedDemoUsers` export, vitest's mock THROWS on that property read, synchronously, inside the timer callback: the `.catch` is never reached and the
+3: // error escapes as an uncaught exception that vitest pins on whichever test is running (seen once, in ks781-login-authorize-agree, in a loaded run). Here the timer is driven with FAKE
+4: // timers so the escape is an assertion: D1 reads whether firing the timer throws, D2 reads whether the failure is logged instead. C1 and C2 pin what must not change.
+5: import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+6: 
+7: const silent = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() };
+8: vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
+9: vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
+10: 
+11: const USER_REPO_BASE = {
+12:   getUserById: vi.fn(async () => null),
+13:   getUserByIdPreAuth: vi.fn(async () => null),
+14:   getUserByEmail: vi.fn(async () => null),
+15:   updateUser: vi.fn(async () => undefined),
+16:   getPlatformAdmin: vi.fn(async () => null),
+17:   updatePlatformAdminPassword: vi.fn(async () => undefined),
+18:   reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
+19:   reencryptPlatformAdminMfaSecretIfLegacy: vi.fn(async () => undefined),
+20: };
+21: 
+22: vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }));
+23: vi.mock('../repositories/userRepo', () => ({ ...USER_REPO_BASE }));
+24: vi.mock('../services/session', () => ({
+25:   createSession: vi.fn(async () => ({ id: 'sess-new' })),
+26:   getSession: vi.fn(async () => null),
+27:   rotateSessionRefreshToken: vi.fn(async () => undefined),
+28:   revokeSession: vi.fn(async () => undefined),
+29:   getRedisClient: vi.fn(() => null),
+30:   validateSession: vi.fn(async () => true),
+31:   updateSessionActivity: vi.fn(async () => undefined),
+32: }));
+33: vi.mock('../services/refreshDenylist', () => ({
+34:   isRefreshJtiDenylisted: vi.fn(async () => false),
+35:   denylistRefreshJti: vi.fn(async () => undefined),
+36: }));
+37: vi.mock('../services/accountLockout', () => ({
+38:   isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => 1),
+39:   recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
+40: }));
+41: vi.mock('../services/password', () => ({
+42:   verifyPassword: vi.fn(async () => false), hashPassword: vi.fn(async () => '$argon2id$stub'),
+43:   checkPasswordStrength: vi.fn(() => ({ ok: true })), generateResetToken: vi.fn(() => 'tok'), shouldRehashAfterVerify: vi.fn(() => false),
+44: }));
+45: vi.mock('../services/email', () => ({ sendVerificationEmail: vi.fn(async () => undefined), sendPasswordResetEmail: vi.fn(async () => undefined) }));
+46: vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
+47: 
+48: function advance(ms: number): string {
+49:   try {
+50:     vi.advanceTimersByTime(ms);
+51:     return 'ok';
+52:   } catch (err) {
+53:     return 'THREW ' + (err instanceof Error ? err.message : String(err));
+54:   }
+55: }
+56: 
+57: beforeAll(() => {
+58:   vi.useFakeTimers();
+59: });
+60: afterAll(() => {
+61:   vi.useRealTimers();
+62: });
+63: 
+64: describe('KS-1776: the demo-user seed timer cannot escape as an uncaught throw', () => {
+65:   it('RED KS-1776 D1 firing the seed timer does not throw when the repository has no seedDemoUsers', async () => {
+66:     vi.resetModules();
+67:     silent.error.mockClear();
+68:     await import('../routes/auth');
+69:     expect(advance(2500)).toBe('ok');
+70:   });
+71: 
+72:   it('RED KS-1776 D2 the missing seedDemoUsers is logged as Failed to seed demo users instead', async () => {
+73:     vi.resetModules();
+74:     silent.error.mockClear();
+75:     await import('../routes/auth');
+76:     advance(2500);
+77:     expect(silent.error.mock.calls.map((call) => call[0])).toEqual(['Failed to seed demo users']);
+78:   });
+79: 
+80:   it('control KS-1776 C1 with seedDemoUsers present it is called once, with the password hasher, after 2000 ms and not before', async () => {
+81:     vi.resetModules();
+82:     const seed = vi.fn(async () => undefined);
+83:     vi.doMock('../repositories/userRepo', () => ({ ...USER_REPO_BASE, seedDemoUsers: seed }));
+84:     await import('../routes/auth');
+85:     advance(1999);
+86:     expect(seed).not.toHaveBeenCalled();
+87:     advance(1);
+88:     expect(seed).toHaveBeenCalledTimes(1);
+89:     expect(typeof (seed.mock.calls[0] as unknown[])[0]).toBe('function');
+90:   });
+91: 
+92:   it('control KS-1776 C2 a seedDemoUsers that rejects is logged as Failed to seed demo users', async () => {
+93:     vi.resetModules();
+94:     silent.error.mockClear();
+95:     vi.doMock('../repositories/userRepo', () => ({ ...USER_REPO_BASE, seedDemoUsers: vi.fn(async () => { throw new Error('ks1776 rejection'); }) }));
+96:     await import('../routes/auth');
+97:     advance(2500);
+98:     await Promise.resolve();
+99:     await Promise.resolve();
+100:     expect(silent.error.mock.calls.map((call) => call[0])).toEqual(['Failed to seed demo users']);
+101:   });
+102: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "8894c7486f82f6eb682fecb879791f53312537b1",
+ "head_sha": "d2d0ed83cdc1dee6811f2843345e6d1acc9a6b6c",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/routes/auth.ts",
+   "added": "10",
+   "deleted": "3"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts",
+   "added": "102",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "10",
+   "3",
+   "Blockchain/Dev/services/auth/src/routes/auth.ts"
+  ],
+  [
+   "102",
+   "0",
+   "Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 4,
+  "failed": 2
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 4,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1200 failed=2 | after: total=1204 failed=1\ndevelop's own reds (attributed, not counted): [('ks949-platform-admin-seed-identity.test.ts', 'the real person is gone from every EXECUTABLE seed site no executable seed site anywhere in the tree names the real address'), ('ks949-platform-admin-seed-identity.test.ts', 'the real person is gone from every EXECUTABLE seed site the enumeration actually finds seed sites, including the one the gate planted in')]\nNEW reds: []\nreds fixed by the patch: [('ks949-platform-admin-seed-identity.test.ts', 'the real person is gone from every EXECUTABLE seed site no executable seed site anywhere in the tree names the real address')]\ntests added: 4\n",
+ "checker_summary": [
+  "PASS A6 whole services/auth suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/auth: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +112/-3 test=src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

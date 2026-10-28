@@ -1,0 +1,105 @@
+diff --git a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+--- a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+@@ -441,5 +441,6 @@
+   id: string,
+   reason?: string,
+ ): Promise<SecuuraCredential | undefined> {
+-  const credential = await getById(id);
+-  if (!credential) return undefined;
++  const record = await getRecordById(id);
++  if (!record) return undefined;
++  const credential = record.credential;
+@@ -457,2 +458,3 @@
+   // Update memory
+   memoryStore.set(credential.id, revokedCredential);
++  if (!memoryOwners.has(credential.id)) memoryOwners.set(credential.id, record.owner);
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1684-revoke-keeps-the-creator-so-the-memory-fallback-still-serves-her.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1684-revoke-keeps-the-creator-so-the-memory-fallback-still-serves-her.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1684-revoke-keeps-the-creator-so-the-memory-fallback-still-serves-her.test.ts
+@@ -0,0 +1,84 @@
++// KS-1684 (vc-issuer credentialRepo.revoke): revoke() read the row with getById (the database when it is available) and put the revoked copy into the in-memory store WITHOUT an owner entry,
++// so with the database then unavailable the row reads as OWNERLESS and the credential's own creator is refused (the memory fallback fails closed for an owner-less row). The fix reads the record
++// (credential + owner) and carries the owner into the in-memory owner map. The database is mocked: a row exists only in the "database" (never stored in this process), is revoked while the
++// database is up, and is then read through getRecordById with the database down, which takes the memory path.
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++const h = vi.hoisted(() => ({
++  up: true,
++  rows: new Map<string, { credential: any; created_by_user_id: string | null; created_by_tenant_id: string | null }>(),
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: vi.fn(() => h.up),
++  query: vi.fn(async (sql: string, params: unknown[] = []) => {
++    if (/FROM vc_credentials_store WHERE id = \$1/.test(sql)) {
++      const row = h.rows.get(String(params[0]));
++      return { rows: row ? [row] : [] };
++    }
++    return { rows: [] };
++  }),
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
++}));
++
++import * as repo from '../repositories/credentialRepo';
++
++function cred(id: string) {
++  return {
++    '@context': ['https://www.w3.org/2018/credentials/v1'],
++    id,
++    type: ['VerifiableCredential', 'SecuuraCredential'],
++    issuer: { id: 'did:secuura:issuer-1', name: 'Issuer' },
++    issuanceDate: '2026-10-28T00:00:00.000Z',
++    credentialSubject: { id: 'did:secuura:holder-1', documentHash: 'sha256:ks1684' },
++    credentialStatus: { id: 'urn:status:1', type: 'StatusList2021', revoked: false },
++    proof: { type: 'Ed25519Signature2020', created: '2026-10-28', verificationMethod: 'did:secuura:issuer-1#k', proofPurpose: 'assertionMethod', proofValue: 'z' },
++  } as any;
++}
++
++beforeEach(() => {
++  h.up = true;
++  h.rows.clear();
++});
++
++describe('KS-1684: revoke() carries the creator into the memory fallback', () => {
++  it('RED KS-1684 R1 a database-only row revoked here keeps its creator when the database then goes down', async () => {
++    h.rows.set('urn:vc:ks1684-a', { credential: cred('urn:vc:ks1684-a'), created_by_user_id: 'u-alice', created_by_tenant_id: 't-1' });
++    const revoked = await repo.revoke('urn:vc:ks1684-a', 'test');
++    expect(revoked?.credentialStatus.revoked).toBe(true);
++    h.up = false;
++    const rec = await repo.getRecordById('urn:vc:ks1684-a');
++    expect(rec?.owner).toEqual({ userId: 'u-alice', tenantId: 't-1' });
++  });
++
++  it('RED KS-1684 R2 the memory copy is the revoked one and carries a creator owned by the second tenant too', async () => {
++    h.rows.set('urn:vc:ks1684-b', { credential: cred('urn:vc:ks1684-b'), created_by_user_id: 'u-bob', created_by_tenant_id: 't-2' });
++    await repo.revoke('urn:vc:ks1684-b');
++    h.up = false;
++    const rec = await repo.getRecordById('urn:vc:ks1684-b');
++    expect([rec?.credential.credentialStatus.revoked, rec?.owner.userId, rec?.owner.tenantId]).toEqual([true, 'u-bob', 't-2']);
++  });
++
++  it('control KS-1684 C1 a row stored in this process with an owner keeps that owner through revoke', async () => {
++    h.up = false;
++    await repo.store(cred('urn:vc:ks1684-c'), { userId: 'u-carol', tenantId: 't-3' });
++    await repo.revoke('urn:vc:ks1684-c');
++    const rec = await repo.getRecordById('urn:vc:ks1684-c');
++    expect([rec?.credential.credentialStatus.revoked, rec?.owner]).toEqual([true, { userId: 'u-carol', tenantId: 't-3' }]);
++  });
++
++  it('control KS-1684 C2 revoking an unknown id still answers undefined', async () => {
++    expect(await repo.revoke('urn:vc:ks1684-missing')).toBeUndefined();
++  });
++
++  it('control KS-1684 C3 a database row with no recorded creator is still owner-less after revoke', async () => {
++    h.rows.set('urn:vc:ks1684-d', { credential: cred('urn:vc:ks1684-d'), created_by_user_id: null, created_by_tenant_id: null });
++    await repo.revoke('urn:vc:ks1684-d');
++    h.up = false;
++    const rec = await repo.getRecordById('urn:vc:ks1684-d');
++    expect(rec?.owner).toEqual({ userId: null, tenantId: null });
++  });
++});

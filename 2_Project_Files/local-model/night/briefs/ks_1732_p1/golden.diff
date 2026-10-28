@@ -1,0 +1,152 @@
+diff --git a/Blockchain/Dev/services/governance/src/services/governanceService.ts b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+--- a/Blockchain/Dev/services/governance/src/services/governanceService.ts
++++ b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+@@ -253,6 +253,6 @@
+     return result.rows.map(rowToProposal);
+   } catch (err: any) {
+     logger.error('DB get all proposals failed', { error: err instanceof Error ? err.message : String(err) });
+-    return [];
++    throw err;
+   }
+ }
+diff --git a/Blockchain/Dev/services/governance/src/routes/governance.ts b/Blockchain/Dev/services/governance/src/routes/governance.ts
+--- a/Blockchain/Dev/services/governance/src/routes/governance.ts
++++ b/Blockchain/Dev/services/governance/src/routes/governance.ts
+@@ -138,7 +138,7 @@
+  * GET /api/governance/proposals
+  * Get proposals with optional filters
+  */
+-router.get('/proposals', async (req: Request, res: Response) => {
++router.get('/proposals', async (req: Request, res: Response, next: NextFunction) => {
+   // KS-1722: validate the query against one schema (the KS-444 pattern) instead
+   // of passing it through. The service applies a filter only when it is truthy,
+   // so a blank `?proposerId=` used to list every proposer's proposals, and a
+@@ -160,4 +160,5 @@
+     status: statusFilter,
+     category,
+     proposerId,
+-  });
++  }).catch(next);
++  if (!proposals) return;
+@@ -173,5 +174,6 @@
+  * GET /api/governance/proposals/active
+  * Get active proposals only
+  */
+-router.get('/proposals/active', async (_req: Request, res: Response) => {
+-  const proposals = await governanceService.getProposals({ status: 'active' });
++router.get('/proposals/active', async (_req: Request, res: Response, next: NextFunction) => {
++  const proposals = await governanceService.getProposals({ status: 'active' }).catch(next);
++  if (!proposals) return;
+diff --git a/Blockchain/Dev/services/governance/src/__tests__/ks1732-a-failed-proposals-read-is-a-500-not-an-empty-list.test.ts b/Blockchain/Dev/services/governance/src/__tests__/ks1732-a-failed-proposals-read-is-a-500-not-an-empty-list.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/governance/src/__tests__/ks1732-a-failed-proposals-read-is-a-500-not-an-empty-list.test.ts
+@@ -0,0 +1,108 @@
++/**
++ * KS-1732 - a FAILED database read of the proposals table must not answer as an empty list.
++ * Before: dbGetAllProposals caught every error and returned [], so GET /proposals and GET /proposals/active answered 200 with an empty list,
++ * and the active-proposal cap in createProposal (which reads through the same helper) failed open. After: the read rejects, the two list routes hand
++ * the error to next(), and the shared errorHandler answers 500. The harness is the one ks1722 and ks594 use: the REAL routes over a REAL socket through
++ * the REAL shared error handler, only the database mocked. Cell ids are letters plus digits.
++ */
++import express from 'express';
++
++const mockState = { failReads: false };
++
++jest.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: jest.fn(async (sql: string) => {
++    const flat = sql.replace(/\s+/g, ' ').trim();
++    if (/FROM svc_proposals/.test(flat)) {
++      if (mockState.failReads) throw new Error('connection terminated (ks1732 test)');
++      return {
++        rows: [
++          {
++            id: 'p-active-1',
++            proposal_number: 1,
++            proposer_id: 'alice',
++            status: 'active',
++            category: 'general',
++            title: 'KS-1732 proposal',
++            description: 'd',
++            voting_config: {},
++            created_at: new Date('2026-10-28T00:00:00Z'),
++          },
++        ],
++      };
++    }
++    return { rows: [] };
++  }),
++}));
++const { errorHandler } = require('@secuura/shared');
++const { governanceRoutes } = require('../routes/governance');
++const governanceService = require('../services/governanceService');
++
++const app = express();
++app.use(express.json());
++app.use((req, _res, next) => {
++  (req as any).user = { userId: 'alice', tenantId: 'tenant-1' };
++  next();
++});
++app.use('/api/governance', governanceRoutes);
++app.use(errorHandler);
++
++let baseUrl = '';
++let server: ReturnType<typeof app.listen>;
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => {
++      const addr = server.address();
++      baseUrl = `http://127.0.0.1:${typeof addr === 'object' && addr ? addr.port : 0}`;
++      resolve();
++    });
++  });
++});
++
++afterAll(async () => {
++  if (server) await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++
++beforeEach(() => {
++  mockState.failReads = false;
++});
++
++async function get(path: string): Promise<{ status: number; body: any }> {
++  const r = await fetch(`${baseUrl}/api/governance${path}`);
++  return { status: r.status, body: await r.json().catch(() => null) };
++}
++
++describe('KS-1732: a failed proposals read is a 500, not an empty list', () => {
++  it('RED KS-1732 R1 GET /proposals with a failing database answers 500, success false, no data', async () => {
++    mockState.failReads = true;
++    const r = await get('/proposals');
++    expect([r.status, r.body?.success, r.body?.data]).toEqual([500, false, undefined]);
++  });
++
++  it('RED KS-1732 R2 GET /proposals/active with a failing database answers 500, success false, no data', async () => {
++    mockState.failReads = true;
++    const r = await get('/proposals/active');
++    expect([r.status, r.body?.success, r.body?.data]).toEqual([500, false, undefined]);
++  });
++
++  it('RED KS-1732 R3 the service read itself rejects with the database error instead of resolving to an empty list', async () => {
++    mockState.failReads = true;
++    await expect(governanceService.getProposals()).rejects.toThrow('connection terminated (ks1732 test)');
++  });
++
++  it('control KS-1732 C1 a healthy GET /proposals still answers 200 with the one proposal', async () => {
++    const r = await get('/proposals');
++    expect([r.status, r.body?.success, r.body?.count, (r.body?.data ?? []).map((p: { id: string }) => p.id)]).toEqual([200, true, 1, ['p-active-1']]);
++  });
++
++  it('control KS-1732 C2 a healthy GET /proposals/active still answers 200 with the one proposal', async () => {
++    const r = await get('/proposals/active');
++    expect([r.status, r.body?.success, r.body?.count]).toEqual([200, true, 1]);
++  });
++
++  it('control KS-1732 C3 processExpiredProposals still resolves 0 (its own catch) when the read fails', async () => {
++    mockState.failReads = true;
++    await expect(governanceService.processExpiredProposals()).resolves.toBe(0);
++  });
++});

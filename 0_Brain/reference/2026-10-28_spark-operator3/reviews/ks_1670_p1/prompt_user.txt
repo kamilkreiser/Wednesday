@@ -1,0 +1,2021 @@
+===== TICKET =====
+KS-1670 — m365-integration: three more reflection sites from gate AM1 - an unencoded connectionId in the success redirect, and two uncapped error texts in JSON bodies [Backlog]
+
+**BLUF:** Gate AM1, reviewing #1622 (KS-1641 finding 2), found **three more places in** `services/m365-integration/src/index.ts` **that put text the service does not control into a response.** None is the crash #1622 fixes. One is an **unencoded** value in a redirect; two are **uncapped** error texts in JSON bodies, one of them an internal error message in a 500. All three need a valid session or a server-issued id to reach, so none is reachable by an anonymous request today.
+
+Filed as one ticket because AM1 found them in one review pass. Measured by Seat R 55th at develop `115797747cb60009e781d80e9059dbbed69e1ac3`, file blob `1d9ea9df234832ceb8d04de116be10ee3bf421d3`. **Line numbers are develop's.** #1622 inserts 52 lines above them, so on that branch each is +52.
+
+## The three sites
+
+**1.** `:508` **—** `connectionId` **goes into the success redirect unencoded (AM1 N4).**
+
+```ts
+res.redirect(`…/admin/integrations?m365=success&connectionId=${connectionId}&tenant=${encodeURIComponent(connection.tenantName || '')}`);
+```
+
+`tenant` in the same template **is** encoded and `connectionId` is not. `connectionId` is `String(state)`, and it only reaches this line after `memConnections.get(connectionId)` hits. So it has to equal an id the server issued, and **it is not exploitable today.** It is fragile: if the id format ever admits `&`, `#` or `%`, the redirect's query changes shape. Fix: `encodeURIComponent(connectionId)`, the same as its neighbour.
+
+**2.** `:742` **— an internal error message in a 500 body, with no guard at the site (AM1 N5).**
+
+```ts
+res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Token refresh failed', details: err?.message } });
+```
+
+This is the **KS-1410 class** (thrown text in a 500 body), but in a file KS-1410 does not cover. m365 reads `NODE_ENV` 5 times, **all at** `:1536` **or later** (the PII-key fatal-start block). There are **zero** `NODE_ENV` reads before `:742`, so nothing guards this site. The route is authenticated.
+
+**3.** `:1026` **— Graph's own error text, passed back uncapped (AM1 N5).**
+
+```ts
+return res.status(resp.status).json({ error: (err as any).error?.message || 'OneDrive API error' });
+```
+
+This is **provider** text, not an internal error: it is the same kind of thing as the OAuth `error_description` KS-1641 capped. It is authenticated, uncapped, and it forwards Graph's status code unchanged.
+
+## Why the third one matters beyond itself
+
+The callback's `:515` already reflects MSAL's `err.message` into a redirect: encoded, uncapped, and reachable only with a valid `state`. KS-1641 calls that **a decision, not a cap**: bound the internal message, or map it to a code and keep the detail server-side. `:742` and `:1026` are the same decision in JSON bodies, so they should be decided together with `:515`, not capped one at a time.
+
+## Neighbours read before filing
+
+The search's negative control (`xkqvzzpholmdrf`) returned **0** hits, so the search does discriminate.
+
+* **KS-1410** (In Progress): same class as site 2, but it lists **six files** by name, and m365 is not one of them.
+* **KS-730** (Done): lists five files, with **0** m365 mentions.
+* **KS-840**: about auth's own OAuth error envelope, not m365.
+* **KS-1641**: owns `:465` (the cap, #1622) and the `:515` decision. These three are AM1's notes on that PR, carved out by Wednesday's ruling so they would not widen it.
+
+## How to fix
+
+Site 1 is a one-line change and can ship on its own. Sites 2 and 3 should wait for the `:515` decision on KS-1641, so that one rule covers all three.
+
+Each fix needs a cell that sends **non-ASCII text across the boundary**. KS-1641's round 1 shipped a crash because every cell was ASCII; gate AM1's B1 is that crash.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/m365-integration/src/index.ts b/Blockchain/Dev/services/m365-integration/src/index.ts
+--- a/Blockchain/Dev/services/m365-integration/src/index.ts
++++ b/Blockchain/Dev/services/m365-integration/src/index.ts
+@@ -677,4 +677,4 @@
+-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=success&connectionId=${connectionId}&tenant=${encodeURIComponent(connection.tenantName || '')}`);
++    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName || '')}`);
+   } catch (err: any) {
+     connection.status = 'error';
+     connection.errorMessage = err?.message || 'Token exchange failed';
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+@@ -0,0 +1,55 @@
++// KS-1670 site 1 (m365-integration src/index.ts, GET /api/callback success redirect): the redirect put `connectionId` into the query string unencoded, while `tenant` in the same template was
++// encoded with encodeURIComponent. The id only reaches that line after the server's own connection lookup hits, so it is not exploitable today, but an id format that ever admitted `&`, `#` or `%`
++// would change the shape of the query. This file reads the route's source text (no app boot, no database) and pins that every `connectionId=${...}` interpolation in the file is wrapped in
++// encodeURIComponent, and that the success redirect still encodes the tenant. C1 to C3 prove the instrument finds the route and the redirects it must not disturb.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');
++const NEEDLE = 'connectionId=${';
++
++/** Every interpolation that follows `connectionId=${` in the source, as the text up to the closing `}` of the template expression. */
++function interpolations(): string[] {
++  const found: string[] = [];
++  let at = SRC.indexOf(NEEDLE);
++  while (at !== -1) {
++    const start = at + NEEDLE.length;
++    let depth = 1;
++    let i = start;
++    while (i < SRC.length && depth > 0) {
++      if (SRC[i] === '{') depth++;
++      else if (SRC[i] === '}') depth--;
++      i++;
++    }
++    found.push(SRC.slice(start, i - 1));
++    at = SRC.indexOf(NEEDLE, i);
++  }
++  return found;
++}
++
++describe('KS-1670: the m365 success redirect encodes the connection id', () => {
++  it('RED KS-1670 R1 every connectionId interpolation in a redirect query is wrapped in encodeURIComponent', () => {
++    const unwrapped = interpolations().filter((expr) => !/^encodeURIComponent\(.*\)$/.test(expr.trim()));
++    expect(unwrapped).toEqual([]);
++  });
++
++  it('RED KS-1670 R2 the success redirect carries the encoded connection id and the encoded tenant, in that order', () => {
++    expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName');
++  });
++
++  it('control KS-1670 C1 the instrument finds exactly one connectionId interpolation (the success redirect)', () => {
++    expect(interpolations()).toHaveLength(1);
++  });
++
++  it('control KS-1670 C2 the success redirect is still the one that follows the "connection completed" log line', () => {
++    const logAt = SRC.indexOf('OAuth callback: connection completed');
++    const redirectAt = SRC.indexOf('m365=success');
++    expect(logAt).toBeGreaterThan(-1);
++    expect(redirectAt).toBeGreaterThan(logAt);
++  });
++
++  it('control KS-1670 C3 the invalid_state refusal redirect is untouched', () => {
++    expect(SRC).toContain('/admin/integrations?m365=error&message=invalid_state');
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/m365-integration/src/index.ts
+1: /**
+2:  * =============================================================================
+3:  * SECUURA M365 INTEGRATION SERVICE
+4:  * =============================================================================
+5:  * Handles Microsoft 365 integration:
+6:  * - Microsoft Entra ID (Azure AD) authentication
+7:  * - SharePoint document integration
+8:  * - OneDrive file access
+9:  * - Microsoft Graph API
+10:  * Port: 4009
+11:  *
+12:  * Graceful degradation: the service starts and serves /health even when M365
+13:  * env vars are missing. SharePoint / auth operations return HTTP 503 until a
+14:  * valid Microsoft 365 license and Entra app registration are configured.
+15:  * =============================================================================
+16:  */
+17: 
+18: import express, { Request, Response, NextFunction, RequestHandler } from 'express';
+19: import cors from 'cors';
+20: import { initDb, query, isDbAvailable } from './db';
+21: import helmet from 'helmet';
+22: import { z } from 'zod';
+23: import crypto from 'crypto';
+24: import dotenv from 'dotenv';
+25: import { initMsal, isMsalReady, getMsalClient, refreshAccessToken, exchangeAuthCode, classifyMsalTokenError } from './auth/token-manager';
+26: import { initGraphClient, isGraphReady, isConfigured, listSharePointSites, listDocumentLibraries, downloadAndHashItem } from './sharepoint/client';
+27: import { validateEnv } from './utils/logger';
+28: import { teamsNotifyRequestSchema, teamsNotifyErrorMessage } from './teamsNotifyRequest';
+29: import { authenticate as jwtAuthenticate, enforceProductionConfig, errorHandler, rejectNulBytes, assertSafeOutboundUrl, safeOutboundRequest } from '@secuura/shared';
+30: import { encryptToken, decryptToken } from './security/tokenCrypto';
+31: import { OAUTH_BINDING_COOKIE_PATH, OAUTH_STATE_TTL_MS, PendingOAuthState, consumeOAuthState, oauthBindingCookieName,
+32:   pkceChallenge, randomUrlToken, readCookie, saveOAuthState, sha256Hex } from './oauthState';
+33: 
+34: dotenv.config();
+35: 
+36: // Validate environment variables at startup
+37: validateEnv();
+38: 
+39: // Production startup guard — refuse to start with dev defaults in production
+40: enforceProductionConfig('m365-integration', {
+41:   requiredEnvVars: [
+42:     'DATABASE_URL',
+43:     'MICROSOFT_GRAPH_TENANT_ID',
+44:     'MICROSOFT_GRAPH_CLIENT_ID',
+45:     'MICROSOFT_GRAPH_CLIENT_SECRET',
+46:   ],
+47:   forbiddenValues: {},
+48:   requireRealProviders: true,
+49: });
+50: 
+51: const app = express();
+52: const PORT = process.env.PORT || 4013;
+53: 
+54: // =============================================================================
+55: // KS-934 — bounds for POST /api/teams/notify
+56: // =============================================================================
+57: // The route loops over active webhooks SERIALLY inside the request handler. It
+58: // had no LIMIT on the query and no aggregate deadline, while safeOutboundRequest's
+59: // own deadline defaults to 10 s and this call site passed none — so the worst case
+60: // was rows x 10 s with the HTTP request held open throughout.
+61: //
+62: // The three numbers, with the reason for each rather than as bare constants:
+63: //
+64: //  * MAX_ROWS 50 — bounds the row set and the memory one request can cost. A LIMIT
+65: //    alone does NOT make the request acceptable (50 x 10 s is not a request anyone
+66: //    should wait on), which is why the deadline below exists too.
+67: //
+68: //  * DEADLINE_MS 10 000 — the aggregate budget for the WHOLE loop. Chosen to equal
+69: //    the guard's existing single-call default, so this route's worst case becomes
+70: //    what ONE row already cost before this change: no request becomes slower than
+71: //    it could already be, and the N x multiplier is gone.
+72: //
+73: //  * PER_ROW_TIMEOUT_MS 2 000 — so one hanging peer cannot consume the whole
+74: //    aggregate budget and starve every row behind it. At this value at least five
+75: //    rows are still attempted inside the aggregate deadline even if every one hangs.
+76: //    The effective per-call value is min(this, time remaining), so a row can never
+77: //    be given time the aggregate has already spent.
+78: //
+79: // Overridable by env because the right values depend on how many webhooks a tenant
+80: // registers; the defaults are the safe case.
+81: const TEAMS_NOTIFY_MAX_ROWS = Number(process.env.TEAMS_NOTIFY_MAX_ROWS || 50);
+82: const TEAMS_NOTIFY_DEADLINE_MS = Number(process.env.TEAMS_NOTIFY_DEADLINE_MS || 10_000);
+83: const TEAMS_NOTIFY_PER_ROW_TIMEOUT_MS = Number(process.env.TEAMS_NOTIFY_PER_ROW_TIMEOUT_MS || 2_000);
+84: 
+85: // =============================================================================
+86: // TYPE DEFINITIONS
+87: // =============================================================================
+88: 
+89: interface M365Connection {
+90:   id: string;
+91:   organizationId: string;
+92:   tenantId: string;
+93:   tenantName?: string;
+94:   status: 'pending' | 'connected' | 'error' | 'disconnected';
+95:   accessToken?: string;
+96:   refreshToken?: string;
+97:   tokenExpiresAt?: Date;
+98:   scopes: string[];
+99:   connectedAt?: Date;
+100:   lastSyncAt?: Date;
+101:   errorMessage?: string;
+102:   createdAt: Date;
+103:   updatedAt: Date;
+104: }
+105: 
+106: interface SharePointSite {
+107:   id: string;
+108:   connectionId: string;
+109:   siteId: string;
+110:   siteName: string;
+111:   siteUrl: string;
+112:   documentLibraries: DocumentLibrary[];
+113:   isActive: boolean;
+114:   lastSyncAt?: Date;
+115: }
+116: 
+117: interface DocumentLibrary {
+118:   id: string;
+119:   name: string;
+120:   webUrl: string;
+121:   itemCount: number;
+122: }
+123: 
+124: interface SyncedDocument {
+125:   id: string;
+126:   connectionId: string;
+127:   siteId: string;
+128:   libraryId: string;
+129:   driveItemId: string;
+130:   name: string;
+131:   webUrl: string;
+132:   contentHash?: string;
+133:   secuuraDocumentId?: string;
+134:   syncStatus: 'pending' | 'synced' | 'error';
+135:   lastModified: Date;
+136:   syncedAt?: Date;
+137: }
+138: 
+139: // =============================================================================
+140: // CONSTANTS
+141: // =============================================================================
+142: 
+143: // KS-144: emit the canonical error envelope (matches ErrorResponse / every other
+144: // service's non-2xx) so response_schema_conformance holds on the unconfigured-503
+145: // path (onedrive/files, teams/webhook-config, …). The setup hint moves to details.
+146: const M365_UNAVAILABLE_RESPONSE = {
+147:   success: false,
+148:   error: {
+149:     code: 'SERVICE_UNAVAILABLE',
+150:     message: 'M365 integration not configured',
+151:     details: {
+152:       setup: 'Add Microsoft 365 Business Basic license and configure ENTRA_* env vars',
+153:     },
+154:   },
+155: };
+156: 
+157: // =============================================================================
+158: // IN-MEMORY STORAGE (Replace with database in production)
+159: // =============================================================================
+160: 
+161: const memConnections = new Map<string, M365Connection>();
+162: const memSites = new Map<string, SharePointSite>();
+163: const memSyncedDocuments = new Map<string, SyncedDocument>();
+164: 
+165: // DB helpers — dual-write and DB-first reads
+166: //
+167: // KS-488 C-3: Graph tokens are encrypted at the DB boundary only (see
+168: // ./security/tokenCrypto). The in-memory M365Connection keeps the plaintext
+169: // token because it is sent to Graph as a bearer on every call.
+170: async function dbSaveConnection(c: M365Connection): Promise<void> {
+171:   memConnections.set(c.id, c);
+172:   if (!isDbAvailable()) return;
+173:   try {
+174:     await query(
+175:       `INSERT INTO svc_m365_connections (id, organization_id, tenant_id, tenant_name, status,
+176:          access_token, refresh_token, token_expires_at, scopes, connected_at, last_sync_at,
+177:          error_message, created_at, updated_at)
+178:        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+179:        ON CONFLICT (id) DO UPDATE SET
+180:          status = EXCLUDED.status, access_token = EXCLUDED.access_token,
+181:          refresh_token = EXCLUDED.refresh_token, token_expires_at = EXCLUDED.token_expires_at,
+182:          scopes = EXCLUDED.scopes,
+183:          last_sync_at = EXCLUDED.last_sync_at, error_message = EXCLUDED.error_message, updated_at = NOW()`,
+184:       [c.id, c.organizationId, c.tenantId, c.tenantName || null, c.status,
+185:        encryptToken(c.accessToken, 'access_token', c.id),
+186:        encryptToken(c.refreshToken, 'refresh_token', c.id),
+187:        c.tokenExpiresAt || null,
+188:        JSON.stringify(c.scopes || []), c.connectedAt || null, c.lastSyncAt || null,
+189:        c.errorMessage || null, c.createdAt, c.updatedAt]
+190:     );
+191:   } catch (err: any) { log('warn', 'DB save connection failed', { error: err?.message }); }
+192: }
+193: 
+194: async function dbGetConnection(id: string): Promise<M365Connection | undefined> {
+195:   if (isDbAvailable()) {
+196:     try {
+197:       const r = await query('SELECT * FROM svc_m365_connections WHERE id = $1', [id]);
+198:       if (r.rows.length > 0) {
+199:         const row = r.rows[0];
+200:         return {
+201:           id: row.id, organizationId: row.organization_id, tenantId: row.tenant_id,
+202:           tenantName: row.tenant_name, status: row.status,
+203:           accessToken: decryptToken(row.access_token, 'access_token', row.id),
+204:           refreshToken: decryptToken(row.refresh_token, 'refresh_token', row.id),
+205:           tokenExpiresAt: row.token_expires_at ? new Date(row.token_expires_at) : undefined,
+206:           scopes: row.scopes || [], connectedAt: row.connected_at ? new Date(row.connected_at) : undefined,
+207:           lastSyncAt: row.last_sync_at ? new Date(row.last_sync_at) : undefined,
+208:           errorMessage: row.error_message, createdAt: new Date(row.created_at), updatedAt: new Date(row.updated_at),
+209:         };
+210:       }
+211:     } catch { /* fall through */ }
+212:   }
+213:   return memConnections.get(id);
+214: }
+215: 
+216: async function dbSaveSite(s: SharePointSite): Promise<void> {
+217:   memSites.set(s.id, s);
+218:   if (!isDbAvailable()) return;
+219:   try {
+220:     await query(
+221:       `INSERT INTO svc_sharepoint_sites (id, connection_id, site_id, site_name, site_url, document_libraries, is_active, last_sync_at)
+222:        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+223:        ON CONFLICT (id) DO UPDATE SET is_active = EXCLUDED.is_active, last_sync_at = EXCLUDED.last_sync_at`,
+224:       [s.id, s.connectionId, s.siteId, s.siteName, s.siteUrl, JSON.stringify(s.documentLibraries || []),
+225:        s.isActive, s.lastSyncAt || null]
+226:     );
+227:   } catch (err: any) { log('warn', 'DB save site failed', { error: err?.message }); }
+228: }
+229: 
+230: async function dbSaveSyncedDoc(d: SyncedDocument): Promise<void> {
+231:   memSyncedDocuments.set(d.id, d);
+232:   if (!isDbAvailable()) return;
+233:   try {
+234:     await query(
+235:       `INSERT INTO svc_synced_documents (id, connection_id, site_id, library_id, drive_item_id, name, web_url, content_hash, secuura_document_id, sync_status, last_modified, synced_at)
+236:        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+237:        ON CONFLICT (id) DO UPDATE SET sync_status = EXCLUDED.sync_status, synced_at = EXCLUDED.synced_at, content_hash = EXCLUDED.content_hash`,
+238:       [d.id, d.connectionId, d.siteId, d.libraryId, d.driveItemId, d.name, d.webUrl || null,
+239:        d.contentHash || null, d.secuuraDocumentId || null, d.syncStatus, d.lastModified, d.syncedAt || null]
+240:     );
+241:   } catch (err: any) { log('warn', 'DB save synced doc failed', { error: err?.message }); }
+242: }
+243: 
+244: // =============================================================================
+245: // LOGGING
+246: // =============================================================================
+247: 
+248: function log(level: 'info' | 'warn' | 'error', message: string, meta?: object) {
+249:   const timestamp = new Date().toISOString();
+250:   console.log(JSON.stringify({ timestamp, level, service: 'm365-integration', message, ...meta }));
+251: }
+252: 
+253: // =============================================================================
+254: // M365 GUARD MIDDLEWARE
+255: // =============================================================================
+256: 
+257: /**
+258:  * Middleware that returns 503 when M365 is not configured.
+259:  * Attach to any route that requires Graph API / MSAL.
+260:  */
+261: function requireM365(_req: Request, res: Response, next: NextFunction): void {
+262:   if (!isConfigured()) {
+263:     res.status(503).json(M365_UNAVAILABLE_RESPONSE);
+264:     return;
+265:   }
+266:   next();
+267: }
+268: 
+269: // =============================================================================
+270: // STARTUP LOADING
+271: // =============================================================================
+272: 
+273: async function loadFromDb(): Promise<void> {
+274:   if (!isDbAvailable()) return;
+275:   try {
+276:     const connRows = await query<{
+277:       id: string; organization_id: string; tenant_id: string; tenant_name: string | null;
+278:       status: string; access_token: string | null; refresh_token: string | null;
+279:       token_expires_at: string | null; scopes: string[]; connected_at: string | null;
+280:       last_sync_at: string | null; error_message: string | null; created_at: string; updated_at: string;
+281:     }>('SELECT * FROM svc_m365_connections');
+282:     for (const r of connRows.rows) {
+283:       memConnections.set(r.id, {
+284:         id: r.id, organizationId: r.organization_id, tenantId: r.tenant_id,
+285:         tenantName: r.tenant_name || undefined, status: r.status as M365Connection['status'],
+286:         accessToken: decryptToken(r.access_token, 'access_token', r.id),
+287:         refreshToken: decryptToken(r.refresh_token, 'refresh_token', r.id),
+288:         tokenExpiresAt: r.token_expires_at ? new Date(r.token_expires_at) : undefined,
+289:         scopes: r.scopes || [], connectedAt: r.connected_at ? new Date(r.connected_at) : undefined,
+290:         lastSyncAt: r.last_sync_at ? new Date(r.last_sync_at) : undefined,
+291:         errorMessage: r.error_message || undefined,
+292:         createdAt: new Date(r.created_at), updatedAt: new Date(r.updated_at),
+293:       });
+294:     }
+295: 
+296:     const siteRows = await query<{
+297:       id: string; connection_id: string; site_id: string; site_name: string;
+298:       site_url: string; document_libraries: string; is_active: boolean; last_sync_at: string | null;
+299:     }>('SELECT * FROM svc_sharepoint_sites');
+300:     for (const r of siteRows.rows) {
+301:       memSites.set(r.id, {
+302:         id: r.id, connectionId: r.connection_id, siteId: r.site_id,
+303:         siteName: r.site_name, siteUrl: r.site_url,
+304:         documentLibraries: typeof r.document_libraries === 'string' ? JSON.parse(r.document_libraries) : (r.document_libraries || []),
+305:         isActive: r.is_active, lastSyncAt: r.last_sync_at ? new Date(r.last_sync_at) : undefined,
+306:       });
+307:     }
+308: 
+309:     const docRows = await query<{
+310:       id: string; connection_id: string; site_id: string; library_id: string;
+311:       drive_item_id: string; name: string; web_url: string | null; content_hash: string | null;
+312:       secuura_document_id: string | null; sync_status: string; last_modified: string; synced_at: string | null;
+313:     }>('SELECT * FROM svc_synced_documents');
+314:     for (const r of docRows.rows) {
+315:       memSyncedDocuments.set(r.id, {
+316:         id: r.id, connectionId: r.connection_id, siteId: r.site_id,
+317:         libraryId: r.library_id, driveItemId: r.drive_item_id, name: r.name,
+318:         webUrl: r.web_url || '', contentHash: r.content_hash || undefined,
+319:         secuuraDocumentId: r.secuura_document_id || undefined,
+320:         syncStatus: r.sync_status as SyncedDocument['syncStatus'],
+321:         lastModified: new Date(r.last_modified), syncedAt: r.synced_at ? new Date(r.synced_at) : undefined,
+322:       });
+323:     }
+324: 
+325:     log('info', 'Loaded M365 data from DB', { connections: memConnections.size, sites: memSites.size, documents: memSyncedDocuments.size });
+326:   } catch (err: any) {
+327:     log('warn', 'Failed to load M365 data from DB — starting empty', { error: err?.message });
+328:   }
+329: }
+330: 
+331: // =============================================================================
+332: // MIDDLEWARE
+333: // =============================================================================
+334: 
+335: app.use(helmet());
+336: app.use(cors({
+337:   origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:6100', 'http://localhost:6101'],
+338:   credentials: true,
+339: }));
+340: app.use(express.json());
+341: app.use(rejectNulBytes()); // KS-471: no U+0000 may pass the boundary (raw-500 / persist class)
+342: 
+343: const requestLogger: RequestHandler = (req, res, next) => {
+344:   const start = Date.now();
+345:   res.on('finish', () => {
+346:     log('info', 'Request completed', {
+347:       method: req.method,
+348:       path: req.path,
+349:       statusCode: res.statusCode,
+350:       duration: `${Date.now() - start}ms`,
+351:     });
+352:   });
+353:   next();
+354: };
+355: app.use(requestLogger);
+356: 
+357: // =============================================================================
+358: // VALIDATION SCHEMAS
+359: // =============================================================================
+360: 
+361: // KS-1673: `organizationId` is deliberately absent. The organisation comes from
+362: // the caller's signed token. A value sent in the body is stripped by Zod and
+363: // ignored, so an existing caller still gets 201 — with a connection owned by its
+364: // OWN organisation, not the one it asked for. Authority never comes from the body.
+365: const initConnectionSchema = z.object({
+366:   tenantId: z.string().optional(),
+367:   scopes: z.array(z.string()).default([
+368:     'User.Read',
+369:     'Sites.Read.All',
+370:     'Files.Read.All',
+371:   ]),
+372: });
+373: 
+374: 
+375: const addSiteSchema = z.object({
+376:   connectionId: z.string(),
+377:   siteUrl: z.string().url(),
+378: });
+379: 
+380: const syncDocumentSchema = z.object({
+381:   connectionId: z.string(),
+382:   siteId: z.string(),
+383:   libraryId: z.string().optional(),
+384:   driveItemId: z.string(),
+385: });
+386: 
+387: // =============================================================================
+388: // ORGANISATION BINDING (KS-1673)
+389: // =============================================================================
+390: //
+391: // Every m365 resource below is owned by exactly one organisation, and the
+392: // caller's organisation comes from their signed token — `req.user.organizationId`,
+393: // set by @secuura/shared's `authenticate()` mounted on /api below — never from the
+394: // request body or the query string. There is NO bypass for any role: an operator
+395: // who needs to see another organisation's connections gets its own ticket and its
+396: // own design.
+397: //
+398: // Two shapes of refusal, deliberately different:
+399: //   * a route that NAMES a resource answers the SAME 404 it gives an unknown id,
+400: //     so a caller cannot learn that the id exists (`ownedConnection`, `ownedSite`);
+401: //   * a route that LISTS or CREATES has no id to hide behind, so a token carrying
+402: //     no organisation is refused visibly with 403 rather than served an empty list
+403: //     that reads like "you own nothing" (`requireCallerOrg`).
+404: //
+405: // A row with no organisation recorded is owned by NOBODY, including whoever created
+406: // it. So is a site or document whose connection is no longer in the warm map. Both
+407: // are fail-closed on purpose: there is nothing left to prove ownership with.
+408: 
+409: function callerOrg(req: Request): string | null {
+410:   const raw = (req as unknown as { user?: { organizationId?: unknown } }).user?.organizationId;
+411:   if (typeof raw !== 'string') return null;
+412:   const org = raw.trim();
+413:   return org === '' ? null : org;
+414: }
+415: 
+416: function requireCallerOrg(req: Request, res: Response): string | null {
+417:   const org = callerOrg(req);
+418:   if (org !== null) return org;
+419:   res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Token carries no organisation' } });
+420:   return null;
+421: }
+422: 
+423: // KS-1677: the user who starts a sign-in is recorded with its state, so it must be named by the token.
+424: function callerUserId(req: Request): string | null {
+425:   const raw = (req as unknown as { user?: { userId?: unknown } }).user?.userId;
+426:   if (typeof raw !== 'string') return null;
+427:   const id = raw.trim();
+428:   return id === '' ? null : id;
+429: }
+430: 
+431: function ownedBy(connection: M365Connection | undefined, org: string | null): boolean {
+432:   if (!connection || org === null) return false;
+433:   const owner = typeof connection.organizationId === 'string' ? connection.organizationId.trim() : '';
+434:   return owner !== '' && owner === org;
+435: }
+436: 
+437: /** The connection, only if the caller's organisation owns it. Reads the DB first, as before. */
+438: async function ownedConnection(req: Request, id: unknown): Promise<M365Connection | undefined> {
+439:   if (typeof id !== 'string' || id === '') return undefined;
+440:   const connection = await dbGetConnection(id);
+441:   return ownedBy(connection, callerOrg(req)) ? connection : undefined;
+442: }
+443: 
+444: /** As `ownedConnection`, for the routes that read the warm map rather than the DB. */
+445: function ownedMemConnection(req: Request, id: unknown): M365Connection | undefined {
+446:   if (typeof id !== 'string' || id === '') return undefined;
+447:   const connection = memConnections.get(id);
+448:   return ownedBy(connection, callerOrg(req)) ? connection : undefined;
+449: }
+450: 
+451: /** Sites and synced documents are owned THROUGH their connection. */
+452: function orgOwnsConnectionId(connectionId: unknown, org: string | null): boolean {
+453:   if (typeof connectionId !== 'string' || connectionId === '') return false;
+454:   return ownedBy(memConnections.get(connectionId), org);
+455: }
+456: 
+457: function ownedSite(req: Request, id: unknown): SharePointSite | undefined {
+458:   if (typeof id !== 'string' || id === '') return undefined;
+459:   const site = memSites.get(id);
+460:   if (!site) return undefined;
+461:   return orgOwnsConnectionId(site.connectionId, callerOrg(req)) ? site : undefined;
+462: }
+463: 
+464: // =============================================================================
+465: // ROUTES
+466: // =============================================================================
+467: 
+468: // Health check — always available regardless of M365 config
+469: app.get('/health', (_req: Request, res: Response) => {
+470:   const m365Configured = isConfigured();
+471:   res.json({
+472:     status: 'healthy',
+473:     service: 'm365-integration',
+474:     version: '0.1.0',
+475:     timestamp: new Date().toISOString(),
+476:     config: {
+477:       m365Configured,
+478:       msalReady: isMsalReady(),
+479:       graphReady: isGraphReady(),
+480:     },
+481:     stats: {
+482:       activeConnections: Array.from(memConnections.values()).filter(c => c.status === 'connected').length,
+483:       totalSites: memSites.size,
+484:       syncedDocuments: memSyncedDocuments.size,
+485:     },
+486:   });
+487: });
+488: 
+489: // Health alias for proxy path (/api/m365/health → /api/health after rewrite)
+490: app.get('/api/health', (_req: Request, res: Response) => {
+491:   res.redirect('/health');
+492: });
+493: 
+494: // API info — always available
+495: app.get('/api', (_req: Request, res: Response) => {
+496:   res.json({
+497:     service: 'Secuura M365 Integration Service',
+498:     version: '0.1.0',
+499:     m365Configured: isConfigured(),
+500:     endpoints: {
+501:       connections: {
+502:         'POST /api/connections/init': 'Initialize M365 connection',
+503:         'GET /api/connections/:id': 'Get connection status',
+504:         'DELETE /api/connections/:id': 'Disconnect M365',
+505:         'POST /api/connections/:id/refresh': 'Refresh access token',
+506:       },
+507:       sites: {
+508:         'POST /api/sites': 'Add SharePoint site',
+509:         'GET /api/sites': 'List connected sites',
+510:         'GET /api/sites/:id/libraries': 'List document libraries',
+511:         'DELETE /api/sites/:id': 'Remove site',
+512:       },
+513:       documents: {
+514:         'POST /api/documents/sync': 'Sync document to Secuura',
+515:         'GET /api/documents': 'List synced documents',
+516:         'GET /api/documents/:id': 'Get synced document',
+517:       },
+518:     },
+519:     requiredScopes: [
+520:       'User.Read',
+521:       'Sites.Read.All',
+522:       'Files.Read.All',
+523:     ],
+524:   });
+525: });
+526: 
+527: // =============================================================================
+528: // REFLECTED TEXT BOUNDING — KS-1641
+529: // =============================================================================
+530: 
+531: // Both helpers are exported so the guard below can be exercised DIRECTLY. With the
+532: // code-point cap in front of it the guard's fallback is unreachable over HTTP, so a
+533: // request-level cell cannot prove it; only a direct call can.
+534: 
+535: /** Code points of provider-controlled text this service will reflect or log. */
+536: const REFLECTED_TEXT_MAX = 200;
+537: 
+538: /**
+539:  * Cap provider-controlled text by CODE POINT, never by UTF-16 code unit.
+540:  *
+541:  * `String.prototype.slice` counts code units, so a cut at a fixed index can land
+542:  * between the two halves of a surrogate pair and leave a lone surrogate behind.
+543:  * `encodeURIComponent` throws `URIError: URI malformed` on one of those — and on
+544:  * the OAuth callback below that throw happens inside an `async` Express 4 handler
+545:  * on an UNAUTHENTICATED route, in a service that registers no `process.on`
+546:  * handler, so it takes the process down rather than returning 500. Capping by
+547:  * code point cannot split a pair, so the throw has no source here.
+548:  */
+549: export function capCodePoints(value: unknown, max: number = REFLECTED_TEXT_MAX): string {
+550:   return Array.from(String(value)).slice(0, max).join('');
+551: }
+552: 
+553: /**
+554:  * `encodeURIComponent` that cannot throw — the second defence, not the first.
+555:  *
+556:  * With `capCodePoints` in front of it this fallback is unreachable through the
+557:  * HTTP surface, and that is the intent: it is here so a later caller on this
+558:  * route cannot turn a malformed string back into a dead process. The replacement
+559:  * targets LONE surrogates only, so a valid pair survives intact.
+560:  */
+561: export function encodeReflectedText(value: string): string {
+562:   try {
+563:     return encodeURIComponent(value);
+564:   } catch {
+565:     const wellFormed = value.replace(
+566:       /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g,
+567:       '\uFFFD',
+568:     );
+569:     return encodeURIComponent(wellFormed);
+570:   }
+571: }
+572: 
+573: // =============================================================================
+574: // QUERY VALUES — KS-1671
+575: // =============================================================================
+576: 
+577: /**
+578:  * A query value as this service may use it: a string, or absent.
+579:  *
+580:  * Express 4 parses query strings with `allowPrototypes: true`, so a value can arrive
+581:  * as an array or an object — and `?error[toString]=x` builds an object whose own
+582:  * `toString` is a STRING, on which `String()` throws `TypeError`. Inside an `async`
+583:  * handler that throw is an unhandled rejection, and this service registers no
+584:  * `process.on` handler, so one unauthenticated request ended the process. Anything
+585:  * that is not a string is treated as absent, so it answers exactly what a missing
+586:  * value would.
+587:  */
+588: function stringParam(value: unknown): string | undefined {
+589:   return typeof value === 'string' ? value : undefined;
+590: }
+591: 
+592: // =============================================================================
+593: // OAUTH CALLBACK — Microsoft redirects here after user consent
+594: // =============================================================================
+595: 
+596: /**
+597:  * KS-1677: why a callback is refused, for the log only. The caller sees one redirect whatever the reason.
+598:  * The binding was already checked by the consume itself: a wrong or missing cookie never reaches here
+599:  * with a record.
+600:  */
+601: function refuseOAuthCallback(pending: PendingOAuthState | null, connection: M365Connection | undefined): string | null {
+602:   if (!pending) return 'no_matching_state';
+603:   if (pending.expiresAt.getTime() <= Date.now()) return 'expired_state';
+604:   if (!connection) return 'connection_gone';
+605:   if (connection.status !== 'pending') return 'connection_not_pending';
+606:   if (connection.organizationId !== pending.organizationId) return 'organisation_mismatch';
+607:   return null;
+608: }
+609: 
+610: /**
+611:  * GET /api/callback
+612:  * OAuth2 redirect handler — exchanges auth code for tokens
+613:  * Note: No auth required — this is called by Microsoft's redirect
+614:  */
+615: app.get('/api/callback', async (req: Request, res: Response) => {
+616:   const code = stringParam(req.query.code);
+617:   const state = stringParam(req.query.state);
+618:   const oauthError = stringParam(req.query.error);
+619:   const error_description = stringParam(req.query.error_description);
+620: 
+621:   if (oauthError) {
+622:     log('error', 'OAuth callback error', {
+623:       error: capCodePoints(oauthError),
+624:       description: error_description === undefined ? undefined : capCodePoints(error_description),
+625:     });
+626:     return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=error&message=${encodeReflectedText(capCodePoints(error_description || oauthError))}`);
+627:   }
+628: 
+629:   if (!code || !state) {
+630:     return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=error&message=missing_code_or_state`);
+631:   }
+632: 
+633:   // KS-1677: `state` is an opaque single-use value bound to the browser that started the sign-in (its cookie),
+634:   // to the initiating user and organisation, and to one connection. Every refusal changes nothing, exchanges no
+635:   // code and answers with ONE redirect, so an unknown, spent, expired, unbound or no-longer-pending state cannot
+636:   // be told apart (this also closes the old known-id vs unknown-id oracle).
+637:   const stateHash = sha256Hex(String(state));
+638:   const presentedBinding = readCookie(req.headers.cookie, oauthBindingCookieName(stateHash));
+639:   const pending = presentedBinding ? await consumeOAuthState(stateHash, sha256Hex(presentedBinding)) : null;
+640:   const connection = pending ? memConnections.get(pending.connectionId) : undefined;
+641:   const refusal = refuseOAuthCallback(pending, connection);
+642:   if (refusal !== null || !pending || !connection) {
+643:     log('warn', 'OAuth callback refused', { reason: refusal, connectionId: pending?.connectionId });
+644:     return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=error&message=invalid_state`);
+645:   }
+646:   res.clearCookie(oauthBindingCookieName(stateHash), { path: OAUTH_BINDING_COOKIE_PATH });
+647:   const connectionId = connection.id;
+648: 
+649:   try {
+650:     const redirectUri = process.env.ENTRA_REDIRECT_URI || `${process.env.FRONTEND_URL || 'http://localhost:6882'}/api/m365/callback`;
+651:     const tokenResult = await exchangeAuthCode(String(code), redirectUri, connection.scopes, pending.codeVerifier);
+652: 
+653:     connection.accessToken = tokenResult.accessToken;
+654:     connection.refreshToken = tokenResult.refreshToken;
+655:     connection.tokenExpiresAt = tokenResult.expiresAt;
+656:     connection.status = 'connected';
+657:     connection.connectedAt = new Date();
+658:     connection.tenantName = tokenResult.tenantName || connection.tenantId;
+659: 
+660:     // Fetch tenant display name from Graph
+661:     if (connection.accessToken) {
+662:       try {
+663:         const orgResp = await fetch('https://graph.microsoft.com/v1.0/organization', {
+664:           headers: { Authorization: `Bearer ${connection.accessToken}` },
+665:         });
+666:         if (orgResp.ok) {
+667:           const orgData = await orgResp.json() as { value: Array<{ displayName: string }> };
+668:           connection.tenantName = orgData.value?.[0]?.displayName || connection.tenantName;
+669:         }
+670:       } catch { /* keep existing name */ }
+671:     }
+672: 
+673:     connection.updatedAt = new Date();
+674:     await dbSaveConnection(connection);
+675:     log('info', 'OAuth callback: connection completed', { connectionId, tenantName: connection.tenantName });
+676: 
+677:     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName || '')}`);
+678:   } catch (err: any) {
+679:     connection.status = 'error';
+680:     connection.errorMessage = err?.message || 'Token exchange failed';
+681:     connection.updatedAt = new Date();
+682:     await dbSaveConnection(connection);
+683:     log('error', 'OAuth callback: token exchange failed', { error: err?.message });
+684:     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=error&message=${encodeURIComponent(err?.message || 'token_exchange_failed')}`);
+685:   }
+686: });
+687: 
+688: // =============================================================================
+689: // CONNECTION ROUTES — all require M365 configuration
+690: // =============================================================================
+691: 
+692: // Pen-test H2 — every /api/* route below this point JWT-verifies the
+693: // bearer token via @secuura/shared's `authenticate()`. Without this,
+694: // downstream services trusted the gateway-injected x-user-* headers,
+695: // which an attacker reaching a service directly (intra-cluster, leaked
+696: // internal endpoint, etc.) could forge.
+697: // NOTE: /api/callback (Microsoft OAuth redirect) and /api/health and /api
+698: // info routes are declared ABOVE this line and remain unauthenticated —
+699: // the OAuth callback is invoked by Microsoft's redirect (no JWT possible).
+700: // KS-442: outlook/verify-hash is public by contract (spec `security: []`) —
+701: // the Outlook add-in verifies a document hash without a platform account.
+702: // Exempted here (path relative to /api) rather than moved above the line:
+703: // its handler is declared further down this file.
+704: app.use('/api', jwtAuthenticate({ publicOps: ['POST /outlook/verify-hash'] }));
+705: 
+706: /**
+707:  * POST /api/connections/init
+708:  * Initialize Microsoft 365 connection (start OAuth flow)
+709:  */
+710: app.post('/api/connections/init', requireM365, async (req: Request, res: Response, next: NextFunction) => {
+711:   try {
+712:     // KS-1673: before the body is even looked at — authority first.
+713:     const organizationId = requireCallerOrg(req, res);
+714:     if (organizationId === null) return;
+715:     const initiatedBy = callerUserId(req);
+716:     if (initiatedBy === null) {
+717:       res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Token carries no user' } });
+718:       return;
+719:     }
+720: 
+721:     const data = initConnectionSchema.parse(req.body);
+722: 
+723:     const connectionId = `conn_${require('crypto').randomUUID()}`;
+724:     const tenantId = data.tenantId || process.env.ENTRA_TENANT_ID || '';
+725: 
+726:     const connection: M365Connection = {
+727:       id: connectionId,
+728:       organizationId,
+729:       tenantId,
+730:       status: 'pending',
+731:       scopes: data.scopes,
+732:       createdAt: new Date(),
+733:       updatedAt: new Date(),
+734:     };
+735: 
+736:     await dbSaveConnection(connection);
+737: 
+738:     // KS-1677: an opaque single-use state, a browser-binding cookie and a PKCE verifier for this sign-in.
+739:     const state = randomUrlToken();
+740:     const binding = randomUrlToken();
+741:     const codeVerifier = randomUrlToken();
+742:     const stateHash = sha256Hex(state);
+743:     await saveOAuthState(stateHash, {
+744:       connectionId, organizationId, initiatedBy, bindingHash: sha256Hex(binding), codeVerifier,
+745:       expiresAt: new Date(Date.now() + OAUTH_STATE_TTL_MS),
+746:     });
+747:     res.cookie(oauthBindingCookieName(stateHash), binding, {
+748:       httpOnly: true, secure: true, sameSite: 'lax', path: OAUTH_BINDING_COOKIE_PATH, maxAge: OAUTH_STATE_TTL_MS,
+749:     });
+750: 
+751:     // Build authorization URL
+752:     const authUrl = buildAuthorizationUrl(connection, state, pkceChallenge(codeVerifier));
+753: 
+754:     log('info', 'Connection initialized', { connectionId, organizationId });
+755: 
+756:     res.status(201).json({
+757:       success: true,
+758:       data: {
+759:         connectionId,
+760:         authorizationUrl: authUrl,
+761:         status: connection.status,
+762:       },
+763:     });
+764:   } catch (error) {
+765:     if (error instanceof z.ZodError) {
+766:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+767:     }
+768:     next(error);
+769:   }
+770: });
+771: 
+772: /**
+773:  * GET /api/connections/:id
+774:  * Get connection status
+775:  */
+776: app.get('/api/connections/:id', async (req: Request, res: Response) => {
+777:   const connection = await ownedConnection(req, req.params.id);
+778: 
+779:   if (!connection) {
+780:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Connection not found' } });
+781:   }
+782: 
+783:   res.json({
+784:     success: true,
+785:     data: {
+786:       id: connection.id,
+787:       organizationId: connection.organizationId,
+788:       tenantId: connection.tenantId,
+789:       tenantName: connection.tenantName,
+790:       status: connection.status,
+791:       scopes: connection.scopes,
+792:       connectedAt: connection.connectedAt,
+793:       lastSyncAt: connection.lastSyncAt,
+794:       tokenExpired: connection.tokenExpiresAt ? connection.tokenExpiresAt < new Date() : true,
+795:       // KS-1689: derived, not stored. A connected connection with no usable refresh token (a fail-closed exchange stores none; a token that cannot be decrypted reads as none) can never refresh, so the user must sign in again.
+796:       needsReauth: connection.status === 'connected' && !connection.refreshToken,
+797:     },
+798:   });
+799: });
+800: 
+801: /**
+802:  * DELETE /api/connections/:id
+803:  * Disconnect M365 integration
+804:  */
+805: app.delete('/api/connections/:id', async (req: Request, res: Response) => {
+806:   const connection = await ownedConnection(req, req.params.id);
+807: 
+808:   if (!connection) {
+809:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Connection not found' } });
+810:   }
+811: 
+812:   connection.status = 'disconnected';
+813:   connection.accessToken = undefined;
+814:   connection.refreshToken = undefined;
+815:   connection.updatedAt = new Date();
+816:   await dbSaveConnection(connection);
+817: 
+818:   log('info', 'Connection disconnected', { connectionId: req.params.id });
+819: 
+820:   res.json({
+821:     success: true,
+822:     message: 'M365 connection disconnected',
+823:   });
+824: });
+825: 
+826: /**
+827:  * POST /api/connections/:id/refresh
+828:  * Refresh access token using MSAL
+829:  */
+830: app.post('/api/connections/:id/refresh', requireM365, async (req: Request, res: Response) => {
+831:   const connection = await ownedConnection(req, req.params.id);
+832: 
+833:   if (!connection) {
+834:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Connection not found' } });
+835:   }
+836: 
+837:   if (!connection.refreshToken) {
+838:     return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'No refresh token available' } });
+839:   }
+840: 
+841:   try {
+842:     const tokenResult = await refreshAccessToken(connection.refreshToken, connection.scopes);
+843: 
+844:     connection.accessToken = tokenResult.accessToken;
+845:     // Microsoft may rotate the refresh token — persist the new one
+846:     if (tokenResult.refreshToken) {
+847:       connection.refreshToken = tokenResult.refreshToken;
+848:     }
+849:     connection.tokenExpiresAt = tokenResult.expiresAt;
+850:     connection.updatedAt = new Date();
+851:     await dbSaveConnection(connection);
+852: 
+853:     log('info', 'Token refreshed', { connectionId: connection.id });
+854: 
+855:     res.json({
+856:       success: true,
+857:       data: {
+858:         tokenRefreshed: true,
+859:         expiresAt: connection.tokenExpiresAt,
+860:       },
+861:     });
+862:   } catch (err: any) {
+863:     log('error', 'Token refresh failed', { connectionId: connection.id, error: err?.message });
+864:     connection.status = 'error';
+865:     connection.errorMessage = err?.message || 'Token refresh failed';
+866:     connection.updatedAt = new Date();
+867:     await dbSaveConnection(connection);
+868: 
+869:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Token refresh failed', details: err?.message } });
+870:   }
+871: });
+872: 
+873: // =============================================================================
+874: // SITE ROUTES
+875: // =============================================================================
+876: 
+877: /**
+878:  * POST /api/sites
+879:  * Add a SharePoint site
+880:  */
+881: app.post('/api/sites', requireM365, async (req: Request, res: Response, next: NextFunction) => {
+882:   try {
+883:     const data = addSiteSchema.parse(req.body);
+884: 
+885:     const connection = await ownedConnection(req, data.connectionId);
+886:     if (!connection || connection.status !== 'connected') {
+887:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid or disconnected connection' } });
+888:     }
+889: 
+890:     if (!connection.accessToken) {
+891:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Connection has no access token — complete OAuth flow first' } });
+892:     }
+893: 
+894:     const siteId = `site_${require('crypto').randomUUID()}`;
+895: 
+896:     // Fetch real site data via Graph API
+897:     const realSites = await listSharePointSites(connection.accessToken);
+898:     const match = realSites.find(s => data.siteUrl.includes(s.webUrl) || s.webUrl.includes(data.siteUrl));
+899: 
+900:     if (!match) {
+901:       return res.status(404).json({
+902:         success: false,
+903:         error: { code: 'NOT_FOUND', message: `No accessible SharePoint site matches URL: ${data.siteUrl}`, availableSites: realSites.map(s => ({ displayName: s.displayName, webUrl: s.webUrl })) },
+904:       });
+905:     }
+906: 
+907:     const realLibs = await listDocumentLibraries(connection.accessToken, match.id);
+908:     const libraries: DocumentLibrary[] = realLibs.map(l => ({
+909:       id: l.id,
+910:       name: l.name,
+911:       webUrl: l.webUrl,
+912:       itemCount: l.itemCount,
+913:     }));
+914: 
+915:     const site: SharePointSite = {
+916:       id: siteId,
+917:       connectionId: data.connectionId,
+918:       siteId: match.id,
+919:       siteName: match.displayName,
+920:       siteUrl: data.siteUrl,
+921:       documentLibraries: libraries,
+922:       isActive: true,
+923:       lastSyncAt: new Date(),
+924:     };
+925: 
+926:     await dbSaveSite(site);
+927: 
+928:     log('info', 'SharePoint site added', { siteId, url: data.siteUrl, graphSiteId: match.id });
+929: 
+930:     res.status(201).json({
+931:       success: true,
+932:       data: site,
+933:     });
+934:   } catch (error) {
+935:     if (error instanceof z.ZodError) {
+936:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+937:     }
+938:     next(error);
+939:   }
+940: });
+941: 
+942: /**
+943:  * GET /api/sites
+944:  * List connected SharePoint sites
+945:  */
+946: app.get('/api/sites', (req: Request, res: Response) => {
+947:   // KS-1673: a list route has no id to hide behind, so a token with no
+948:   // organisation is refused rather than served an empty 200.
+949:   const org = requireCallerOrg(req, res);
+950:   if (org === null) return;
+951: 
+952:   const { connectionId } = req.query;
+953: 
+954:   let siteList = Array.from(memSites.values()).filter(s => orgOwnsConnectionId(s.connectionId, org));
+955: 
+956:   if (connectionId) {
+957:     siteList = siteList.filter(s => s.connectionId === connectionId);
+958:   }
+959: 
+960:   res.json({
+961:     success: true,
+962:     data: siteList,
+963:   });
+964: });
+965: 
+966: /**
+967:  * GET /api/sites/:id/libraries
+968:  * List document libraries for a site
+969:  */
+970: app.get('/api/sites/:id/libraries', (req: Request, res: Response) => {
+971:   const site = ownedSite(req, req.params.id);
+972: 
+973:   if (!site) {
+974:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Site not found' } });
+975:   }
+976: 
+977:   res.json({
+978:     success: true,
+979:     data: site.documentLibraries,
+980:   });
+981: });
+982: 
+983: /**
+984:  * DELETE /api/sites/:id
+985:  * Remove SharePoint site
+986:  */
+987: app.delete('/api/sites/:id', async (req: Request, res: Response) => {
+988:   const site = ownedSite(req, req.params.id);
+989: 
+990:   if (!site) {
+991:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Site not found' } });
+992:   }
+993: 
+994:   site.isActive = false;
+995:   await dbSaveSite(site);
+996: 
+997:   log('info', 'SharePoint site removed', { siteId: req.params.id });
+998: 
+999:   res.json({
+1000:     success: true,
+1001:     message: 'Site removed',
+1002:   });
+1003: });
+1004: 
+1005: // =============================================================================
+1006: // DOCUMENT ROUTES
+1007: // =============================================================================
+1008: 
+1009: /**
+1010:  * POST /api/documents/sync
+1011:  * Sync a document from SharePoint to Secuura
+1012:  */
+1013: app.post('/api/documents/sync', requireM365, async (req: Request, res: Response, next: NextFunction) => {
+1014:   try {
+1015:     const data = syncDocumentSchema.parse(req.body);
+1016: 
+1017:     const connection = await ownedConnection(req, data.connectionId);
+1018:     if (!connection || connection.status !== 'connected') {
+1019:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid or disconnected connection' } });
+1020:     }
+1021: 
+1022:     if (!connection.accessToken) {
+1023:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Connection has no access token — complete OAuth flow first' } });
+1024:     }
+1025: 
+1026:     const docId = `sync_${require('crypto').randomUUID()}`;
+1027: 
+1028:     // Look up the site to get its SharePoint site ID and libraries
+1029:     // KS-1673: an unowned siteId is treated as absent, exactly as an unknown one
+1030:     // already was, so another organisation's internal site id is never substituted.
+1031:     const site = ownedSite(req, data.siteId);
+1032:     const spSiteId = site?.siteId || data.siteId;
+1033:     const libraryId = data.libraryId || site?.documentLibraries?.[0]?.id || 'Documents';
+1034: 
+1035:     // Download and hash via Graph API
+1036:     log('info', 'Sync: downloading document', { hasToken: !!connection.accessToken, tokenLen: connection.accessToken?.length || 0, siteId: spSiteId?.substring(0, 20), libraryId: libraryId?.substring(0, 20), driveItemId: data.driveItemId?.substring(0, 20) });
+1037:     const result = await downloadAndHashItem(connection.accessToken!, spSiteId, libraryId, data.driveItemId);
+1038:     if (!result) {
+1039:       return res.status(502).json({
+1040:         success: false,
+1041:         error: { code: 'BAD_GATEWAY', message: 'The Graph API call succeeded but the document could not be retrieved. Check that the driveItemId is valid and the app has Files.Read.All permission.' },
+1042:       });
+1043:     }
+1044: 
+1045:     const syncedDoc: SyncedDocument = {
+1046:       id: docId,
+1047:       connectionId: data.connectionId,
+1048:       siteId: data.siteId,
+1049:       libraryId,
+1050:       driveItemId: data.driveItemId,
+1051:       name: result.name,
+1052:       webUrl: result.webUrl,
+1053:       contentHash: result.hash,
+1054:       syncStatus: 'synced',
+1055:       lastModified: new Date(result.lastModified),
+1056:       syncedAt: new Date(),
+1057:     };
+1058: 
+1059:     await dbSaveSyncedDoc(syncedDoc);
+1060:     log('info', 'Document synced via Graph API', { docId, hash: result.hash.substring(0, 20) });
+1061: 
+1062:     res.status(201).json({ success: true, data: syncedDoc });
+1063:   } catch (error) {
+1064:     if (error instanceof z.ZodError) {
+1065:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+1066:     }
+1067:     next(error);
+1068:   }
+1069: });
+1070: 
+1071: /**
+1072:  * GET /api/documents
+1073:  * List synced documents
+1074:  */
+1075: app.get('/api/documents', (req: Request, res: Response) => {
+1076:   // KS-1673: as GET /api/sites — refused visibly, never an empty 200.
+1077:   const org = requireCallerOrg(req, res);
+1078:   if (org === null) return;
+1079: 
+1080:   const { connectionId, siteId } = req.query;
+1081: 
+1082:   let docs = Array.from(memSyncedDocuments.values()).filter(d => orgOwnsConnectionId(d.connectionId, org));
+1083: 
+1084:   if (connectionId) {
+1085:     docs = docs.filter(d => d.connectionId === connectionId);
+1086:   }
+1087:   if (siteId) {
+1088:     docs = docs.filter(d => d.siteId === siteId);
+1089:   }
+1090: 
+1091:   res.json({
+1092:     success: true,
+1093:     data: docs,
+1094:   });
+1095: });
+1096: 
+1097: /**
+1098:  * GET /api/documents/:id
+1099:  * Get synced document details
+1100:  */
+1101: app.get('/api/documents/:id', (req: Request, res: Response) => {
+1102:   const doc = memSyncedDocuments.get(req.params.id);
+1103: 
+1104:   if (!doc || !orgOwnsConnectionId(doc.connectionId, callerOrg(req))) {
+1105:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Document not found' } });
+1106:   }
+1107: 
+1108:   res.json({
+1109:     success: true,
+1110:     data: doc,
+1111:   });
+1112: });
+1113: 
+1114: // =============================================================================
+1115: // HELPER FUNCTIONS
+1116: // =============================================================================
+1117: 
+1118: function buildAuthorizationUrl(connection: M365Connection, state: string, codeChallenge: string): string {
+1119:   const clientId = process.env.ENTRA_CLIENT_ID;
+1120:   if (!clientId) {
+1121:     throw new Error('ENTRA_CLIENT_ID is required to build authorization URL');
+1122:   }
+1123: 
+1124:   // Ensure offline_access is included so Microsoft returns a refresh token
+1125:   const scopes = new Set(connection.scopes);
+1126:   scopes.add('offline_access');
+1127: 
+1128:   const params = new URLSearchParams({
+1129:     client_id: clientId,
+1130:     response_type: 'code',
+1131:     redirect_uri: process.env.ENTRA_REDIRECT_URI || process.env.OAUTH_REDIRECT_URI || 'http://localhost:6882/api/m365/callback',
+1132:     scope: Array.from(scopes).join(' '),
+1133:     // KS-1677: an opaque single-use value, never the connection id, and the PKCE S256 challenge.
+1134:     state,
+1135:     code_challenge: codeChallenge,
+1136:     code_challenge_method: 'S256',
+1137:     response_mode: 'query',
+1138:   });
+1139: 
+1140:   const tenant = connection.tenantId || 'common';
+1141:   return `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize?${params}`;
+1142: }
+1143: 
+1144: // =============================================================================
+1145: // ONEDRIVE ROUTES
+1146: // =============================================================================
+1147: 
+1148: /**
+1149:  * GET /api/onedrive/files
+1150:  * List files in user's OneDrive root (or a subfolder via ?folderId=xxx)
+1151:  */
+1152: app.get('/api/onedrive/files', requireM365, async (req: Request, res: Response, next: NextFunction) => {
+1153:   try {
+1154:     const { connectionId, folderId } = req.query;
+1155:     if (!connectionId) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'connectionId is required' } });
+1156: 
+1157:     // KS-1673: bound BEFORE any call to graph.microsoft.com.
+1158:     const connection = ownedMemConnection(req, String(connectionId));
+1159:     if (!connection?.accessToken) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Connection not found or not authenticated' } });
+1160: 
+1161:     const path = folderId ? `/me/drive/items/${folderId}/children` : '/me/drive/root/children';
+1162:     const resp = await fetch(`https://graph.microsoft.com/v1.0${path}`, {
+1163:       headers: { Authorization: `Bearer ${connection.accessToken}` },
+1164:     });
+1165: 
+1166:     if (!resp.ok) {
+1167:       const err = await resp.json().catch(() => ({}));
+1168:       return res.status(resp.status).json({ error: (err as any).error?.message || 'OneDrive API error' });
+1169:     }
+1170: 
+1171:     const data = await resp.json() as { value: any[] };
+1172:     res.json({
+1173:       success: true,
+1174:       data: (data.value || []).map((item: any) => ({
+1175:         id: item.id,
+1176:         name: item.name,
+1177:         size: item.size || 0,
+1178:         webUrl: item.webUrl,
+1179:         lastModified: item.lastModifiedDateTime,
+1180:         isFolder: !!item.folder,
+1181:         mimeType: item.file?.mimeType,
+1182:         childCount: item.folder?.childCount,
+1183:       })),
+1184:     });
+1185:   } catch (error) { next(error); }
+1186: });
+1187: 
+1188: /**
+1189:  * POST /api/onedrive/files/:id/sync
+1190:  * Hash a OneDrive file (SVS — no storage) and create a Secuura document record
+1191:  */
+1192: app.post('/api/onedrive/files/:id/sync', requireM365, async (req: Request, res: Response, next: NextFunction) => {
+1193:   try {
+1194:     const { connectionId } = req.body;
+1195:     if (!connectionId) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'connectionId is required' } });
+1196: 
+1197:     // KS-1673: bound BEFORE any call to graph.microsoft.com.
+1198:     const connection = ownedMemConnection(req, String(connectionId));
+1199:     if (!connection?.accessToken) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Connection not found or not authenticated' } });
+1200: 
+1201:     const itemId = req.params.id;
+1202: 
+1203:     // Get item metadata
+1204:     const metaResp = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${itemId}`, {
+1205:       headers: { Authorization: `Bearer ${connection.accessToken}` },
+1206:     });
+1207:     if (!metaResp.ok) return res.status(metaResp.status).json({ error: 'Failed to fetch file metadata' });
+1208:     const meta = await metaResp.json() as any;
+1209: 
+1210:     // Stream content through SHA-256 hash (SVS — never stored)
+1211:     const contentResp = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${itemId}/content`, {
+1212:       headers: { Authorization: `Bearer ${connection.accessToken}` },
+1213:     });
+1214:     if (!contentResp.ok || !contentResp.body) return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to download file content' } });
+1215: 
+1216:     const hash = crypto.createHash('sha256');
+1217:     const reader = contentResp.body.getReader();
+1218:     let size = 0;
+1219:     while (true) {
+1220:       const { done, value } = await reader.read();
+1221:       if (done) break;
+1222:       hash.update(Buffer.from(value));
+1223:       size += value.length;
+1224:     }
+1225:     const contentHash = `sha256:${hash.digest('hex')}`;
+1226: 
+1227:     // Save synced document record
+1228:     const docId = `ondrive_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+1229:     const syncedDoc: SyncedDocument = {
+1230:       id: docId,
+1231:       connectionId: String(connectionId),
+1232:       siteId: 'onedrive',
+1233:       libraryId: 'personal',
+1234:       driveItemId: itemId,
+1235:       name: meta.name,
+1236:       webUrl: meta.webUrl,
+1237:       contentHash,
+1238:       syncStatus: 'synced',
+1239:       lastModified: meta.lastModifiedDateTime ? new Date(meta.lastModifiedDateTime) : new Date(),
+1240:       syncedAt: new Date(),
+1241:     };
+1242:     memSyncedDocuments.set(docId, syncedDoc);
+1243:     await dbSaveSyncedDoc(syncedDoc);
+1244: 
+1245:     log('info', 'OneDrive file synced', { itemId, name: meta.name, hash: contentHash });
+1246: 
+1247:     res.json({ success: true, data: { ...syncedDoc, size } });
+1248:   } catch (error) { next(error); }
+1249: });
+1250: 
+1251: // =============================================================================
+1252: // TEAMS ROUTES
+1253: // =============================================================================
+1254: 
+1255: const teamsWebhookSchema = z.object({
+1256:   channelName: z.string(),
+1257:   // KS-487 B-1: `z.string().url()` constrains neither host nor scheme, so
+1258:   // `http://169.254.169.254/latest/meta-data/` was a valid value here. The host
+1259:   // check cannot live in the schema because it needs DNS — it runs as
+1260:   // assertSafeOutboundUrl in the handler below, and again before the fetch.
+1261:   webhookUrl: z.string().url(),
+1262:   // KS-1673 PR B: `organizationId` is deliberately absent, as on connections/init. The
+1263:   // owner comes from the caller's signed token; a body value is stripped and ignored.
+1264:   events: z.array(z.string()).default(['certified', 'revoked', 'verified']),
+1265: });
+1266: 
+1267: /**
+1268:  * POST /api/teams/webhook-config
+1269:  * Register a Teams incoming webhook URL for notifications
+1270:  */
+1271: app.post('/api/teams/webhook-config', requireM365, async (req: Request, res: Response, next: NextFunction) => {
+1272:   try {
+1273:     // KS-1673 PR B: authority first, before the body is even parsed.
+1274:     const organizationId = requireCallerOrg(req, res);
+1275:     if (organizationId === null) return;
+1276: 
+1277:     const data = teamsWebhookSchema.parse(req.body);
+1278: 
+1279:     // KS-487 B-1: refuse loopback / RFC1918 / link-local (Azure IMDS) /
+1280:     // internal hostnames, and anything that RESOLVES to them. https-only.
+1281:     const urlCheck = await assertSafeOutboundUrl(data.webhookUrl);
+1282:     if (!urlCheck.ok) {
+1283:       return res.status(400).json({
+1284:         success: false,
+1285:         error: { code: 'BAD_REQUEST', message: `webhookUrl rejected: ${urlCheck.error}` },
+1286:       });
+1287:     }
+1288:     data.webhookUrl = urlCheck.url;
+1289: 
+1290:     const id = crypto.randomUUID();
+1291:     await query(
+1292:       `INSERT INTO svc_teams_webhooks (id, organization_id, channel_name, webhook_url, events, is_active)
+1293:        VALUES ($1, $2, $3, $4, $5, true)`,
+1294:       [id, organizationId, data.channelName, data.webhookUrl, JSON.stringify(data.events)],
+1295:     );
+1296: 
+1297:     log('info', 'Teams webhook registered', { id, channel: data.channelName });
+1298:     // The response names the REAL owner. It used to echo whatever organisation the caller claimed.
+1299:     res.status(201).json({ success: true, data: { id, ...data, organizationId, isActive: true } });
+1300:   } catch (error) {
+1301:     if (error instanceof z.ZodError) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+1302:     next(error);
+1303:   }
+1304: });
+1305: 
+1306: /**
+1307:  * GET /api/teams/webhook-config
+1308:  * List configured Teams webhooks
+1309:  */
+1310: app.get('/api/teams/webhook-config', requireM365, async (req: Request, res: Response, next: NextFunction) => {
+1311:   try {
+1312:     // KS-1673 PR B: each row carries a webhookUrl, which is a SECRET -- whoever holds it can post into
+1313:     // that Teams channel. Only the caller's own organisation's rows; a token with no org is refused.
+1314:     const organizationId = requireCallerOrg(req, res);
+1315:     if (organizationId === null) return;
+1316: 
+1317:     const result = await query(
+1318:       'SELECT * FROM svc_teams_webhooks WHERE is_active = true AND organization_id = $1 ORDER BY created_at DESC',
+1319:       [organizationId],
+1320:     );
+1321:     res.json({
+1322:       success: true,
+1323:       data: (result?.rows || []).map((r: any) => ({
+1324:         id: r.id,
+1325:         channelName: r.channel_name,
+1326:         webhookUrl: r.webhook_url,
+1327:         events: r.events,
+1328:         isActive: r.is_active,
+1329:         lastSentAt: r.last_sent_at,
+1330:         createdAt: r.created_at,
+1331:       })),
+1332:     });
+1333:   } catch (error) { next(error); }
+1334: });
+1335: 
+1336: /**
+1337:  * DELETE /api/teams/webhook-config/:id
+1338:  * Remove a Teams webhook
+1339:  */
+1340: app.delete('/api/teams/webhook-config/:id', async (req: Request, res: Response, next: NextFunction) => {
+1341:   try {
+1342:     // KS-1673 PR B: scoped to the caller's organisation. A foreign id, a caller with no organisation
+1343:     // (`= NULL` is never true in SQL) and a row with no organisation all take the unknown-id path.
+1344:     await query(
+1345:       'UPDATE svc_teams_webhooks SET is_active = false, updated_at = NOW() WHERE id = $1 AND organization_id = $2',
+1346:       [req.params.id, callerOrg(req)],
+1347:     );
+1348:     res.json({ success: true });
+1349:   } catch (error) {
+1350:     // KS-431: the id column is a uuid, so a non-UUID path param (e.g. "0") makes Postgres
+1351:     // throw 22P02 (invalid input syntax for type uuid) which fell through to a raw 500. A
+1352:     // malformed id cannot reference a real webhook → 404 (same pattern as oauth /apps/:id).
+1353:     const err = error as { code?: string; message?: string };
+1354:     if (err?.code === '22P02' || /invalid input syntax/i.test(err?.message || '')) {
+1355:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Teams webhook not found' } });
+1356:     }
+1357:     next(error);
+1358:   }
+1359: });
+1360: 
+1361: /**
+1362:  * POST /api/teams/notify
+1363:  * Send a notification to all active webhooks matching the event type
+1364:  */
+1365: app.post('/api/teams/notify', async (req: Request, res: Response, next: NextFunction) => {
+1366:   try {
+1367:     // KS-1673 PR B: a caller may only notify its OWN organisation's channels. Before this, any
+1368:     // authenticated caller could post a card -- with its own title, actor and details -- into
+1369:     // every organisation's Teams channels at once.
+1370:     const organizationId = requireCallerOrg(req, res);
+1371:     if (organizationId === null) return;
+1372: 
+1373:     // KS-444: validate the whole declared shape against the published contract
+1374:     // (teamsNotifyRequestSchema mirrors M365TeamsNotifyRequest in
+1375:     // m365-integration.openapi.ts). The old truthiness check only caught a
+1376:     // falsy `event`, so a wrong-typed event/documentTitle/actor/details was
+1377:     // accepted with 200 {sent:0} (negative_data_rejection).
+1378:     const parsed = teamsNotifyRequestSchema.safeParse(req.body ?? {});
+1379:     if (!parsed.success) {
+1380:       return res.status(400).json({
+1381:         success: false,
+1382:         error: { code: 'BAD_REQUEST', message: teamsNotifyErrorMessage(parsed.error) },
+1383:       });
+1384:     }
+1385:     const { event, documentTitle, documentId, actor, details } = parsed.data;
+1386: 
+1387:     // KS-934: this SELECT had no LIMIT and the loop below no aggregate bound, inside
+1388:     // the request handler. safeOutboundRequest's own deadline defaults to 10 s and
+1389:     // this call site passes none, so the worst case was rows x 10 s with the HTTP
+1390:     // request held open throughout. Two bounds are needed and neither is sufficient
+1391:     // alone: the LIMIT bounds the row set and the memory it costs but still allows
+1392:     // LIMIT x 10 s of wall-clock; the aggregate deadline bounds the wall-clock but
+1393:     // would still load an unbounded row set.
+1394:     //
+1395:     // KS-934 F-1274-1 — CORRECTING THIS COMMENT, which used to end "Paging is
+1396:     // deliberately NOT added ... The un-attempted remainder is reported instead of
+1397:     // being silently dropped". The first half still holds: cursor paging on the
+1398:     // request path is more request-path work, which is the opposite of the fix. The
+1399:     // second half was FALSE as written and was measured to be false: with a plain
+1400:     // `LIMIT` over a FIXED `created_at ASC` order, rows past the limit were neither
+1401:     // attempted NOR reported, and because the order never changed, "call again"
+1402:     // re-notified the same first MAX_ROWS for ever. The newest webhooks were starved
+1403:     // permanently and silently. Two changes, and each fixes a different half:
+1404:     //
+1405:     //   1. fetch MAX_ROWS + 1. The extra row is NEVER notified; it is read only so
+1406:     //      the answer can say `truncated`, rather than presenting a bounded run as a
+1407:     //      complete one. An exact "how many remain" would need a second COUNT(*) on
+1408:     //      the request path, which is the work this bound exists to avoid.
+1409:     //   2. order by `last_sent_at ASC NULLS FIRST, created_at ASC`. This ROTATES the
+1410:     //      window: a row just notified sorts last, so the next call reaches the rest.
+1411:     //      NULLS FIRST keeps never-notified rows at the head, so a newly registered
+1412:     //      webhook is served first rather than last.
+1413:     //
+1414:     // KS1335, the limit this used to record: ordering on `last_sent_at` starved any
+1415:     // row that never succeeded, because that column is written only after a SUCCESSFUL
+1416:     // send, so a permanently-failing webhook kept a NULL and held the head of every
+1417:     // call. The rotation key is now `last_attempted_at`, a nullable column stamped on
+1418:     // every ATTEMPT (below), so a failing row still sorts to the back and the rows
+1419:     // behind it are reached. `last_sent_at` keeps its meaning exactly - the last
+1420:     // SUCCESSFUL send - and is still what the published `lastSentAt` field returns.
+1421:     const result = await query(
+1422:       `SELECT * FROM svc_teams_webhooks WHERE is_active = true AND events::jsonb ? $1
+1423:          AND organization_id = $3
+1424:        ORDER BY last_attempted_at ASC NULLS FIRST, created_at ASC
+1425:        LIMIT $2`,
+1426:       [event, TEAMS_NOTIFY_MAX_ROWS + 1, organizationId],
+1427:     );
+1428: 
+1429:     // The +1 row is a probe, never a recipient: slice it off before the loop can see it.
+1430:     const fetched = result?.rows || [];
+1431:     const truncated = fetched.length > TEAMS_NOTIFY_MAX_ROWS;
+1432:     const webhooks = truncated ? fetched.slice(0, TEAMS_NOTIFY_MAX_ROWS) : fetched;
+1433:     const sent: string[] = [];
+1434:     const failed: string[] = [];
+1435:     const skipped: string[] = [];
+1436:     const startedAt = Date.now();
+1437: 
+1438:     // Adaptive Card payload for Teams
+1439:     const card = {
+1440:       type: 'message',
+1441:       attachments: [{
+1442:         contentType: 'application/vnd.microsoft.card.adaptive',
+1443:         content: {
+1444:           '$schema': 'http://adaptivecards.io/schemas/adaptive-card.json',
+1445:           type: 'AdaptiveCard',
+1446:           version: '1.4',
+1447:           body: [
+1448:             { type: 'TextBlock', text: `Secuura: Document ${event}`, weight: 'Bolder', size: 'Medium', color: event === 'revoked' ? 'Attention' : 'Good' },
+1449:             { type: 'FactSet', facts: [
+1450:               { title: 'Document', value: documentTitle || documentId || 'Unknown' },
+1451:               { title: 'Event', value: event },
+1452:               { title: 'By', value: actor || 'System' },
+1453:               ...(details ? [{ title: 'Details', value: String(details) }] : []),
+1454:               { title: 'Time', value: new Date().toISOString() },
+1455:             ]},
+1456:           ],
+1457:           // KS-349: the verify-result page lives on the VERIFIER portal, not admin.
+1458:           // FRONTEND_URL points at the admin host on demo (KS-344), so use a
+1459:           // dedicated VERIFIER_URL for this link; fall back to FRONTEND_URL then
+1460:           // localhost (local dev fronts /verify and /admin on the same gateway).
+1461:           actions: documentId ? [{ type: 'Action.OpenUrl', title: 'View in Secuura', url: `${process.env.VERIFIER_URL || process.env.FRONTEND_URL || 'http://localhost:6882'}/verify/result/${documentId}` }] : [],
+1462:         },
+1463:       }],
+1464:     };
+1465: 
+1466:     for (const wh of webhooks) {
+1467:       // KS-934: the aggregate deadline. Everything not attempted is reported.
+1468:       const remainingMs = TEAMS_NOTIFY_DEADLINE_MS - (Date.now() - startedAt);
+1469:       if (remainingMs <= 0) {
+1470:         skipped.push(wh.id);
+1471:         continue;
+1472:       }
+1473:       try {
+1474:         // KS1335: stamp the ATTEMPT here - after the deadline guard, before the request -
+1475:         // so ONE write covers every branch below: guard-blocked, non-ok, the catch, and a
+1476:         // success. This ticket exists because a write lived on the success branch alone
+1477:         // and the others were forgotten; a single pre-attempt stamp cannot be forgotten by
+1478:         // a branch added later. The deadline-SKIPPED row above is deliberately NOT stamped:
+1479:         // it was never attempted, and leaving it NULL keeps it at the head of the next call
+1480:         // under NULLS FIRST, which is the priority a skipped row should have.
+1481:         await query('UPDATE svc_teams_webhooks SET last_attempted_at = NOW() WHERE id = $1', [wh.id]);
+1482:         // KS-487 B-1: re-check immediately before the request, not only at
+1483:         // registration. This is the load-bearing half here for two reasons:
+1484:         // registration is gated behind requireM365 (so it is unreachable
+1485:         // wherever Entra is unconfigured) while THIS route is not, and every
+1486:         // row written before this guard existed is still in the table
+1487:         // unvalidated. Also re-resolves, so a record repointed after
+1488:         // registration is caught.
+1489:         // KS-914: validate and connect in one call, against one resolution.
+1490:         const result = await safeOutboundRequest(wh.webhook_url, {
+1491:           method: 'POST',
+1492:           headers: { 'Content-Type': 'application/json' },
+1493:           body: JSON.stringify(card),
+1494:           // KS-934: never let ONE peer consume time the aggregate deadline has
+1495:           // already spent. Without this a single hanging row rides the guard's 10 s
+1496:           // default and can overshoot the aggregate bound by most of it.
+1497:           timeoutMs: Math.min(TEAMS_NOTIFY_PER_ROW_TIMEOUT_MS, remainingMs),
+1498:         });
+1499:         if (!result.ok) {
+1500:           // KS-914 A-4/A-5: blocked and failed are distinguishable again, and
+1501:           // the distinction is in the type rather than in a comment. This loop
+1502:           // reports only ids, so the log line is the only surface an operator
+1503:           // has for WHY a row failed.
+1504:           log(
+1505:             'warn',
+1506:             result.reason === 'blocked'
+1507:               ? 'Teams webhook delivery blocked by SSRF guard'
+1508:               : 'Teams webhook delivery failed',
+1509:             { id: wh.id, reason: result.error },
+1510:           );
+1511:           failed.push(wh.id);
+1512:           continue;
+1513:         }
+1514:         const resp = result.response;
+1515:         if (resp.ok) {
+1516:           sent.push(wh.id);
+1517:           await query('UPDATE svc_teams_webhooks SET last_sent_at = NOW() WHERE id = $1', [wh.id]);
+1518:         } else {
+1519:           failed.push(wh.id);
+1520:         }
+1521:       } catch { failed.push(wh.id); }
+1522:     }
+1523: 
+1524:     log('info', 'Teams notifications sent', {
+1525:       event, sent: sent.length, failed: failed.length, skipped: skipped.length,
+1526:       elapsedMs: Date.now() - startedAt,
+1527:     });
+1528:     // KS-934: `skipped`, `deadlineExceeded` and `truncated` are additive. A caller
+1529:     // that ignores them reads exactly what it read before; one that checks them can
+1530:     // tell a complete run from a bounded one, which the old shape made impossible.
+1531:     // The two bounds are reported separately on purpose: `deadlineExceeded` means
+1532:     // rows were LOADED and not attempted in time, `truncated` means rows were never
+1533:     // loaded at all. An operator needs to know which, because the remedies differ.
+1534:     // `total` remains the number of rows this request took responsibility for, so
+1535:     // sent + failed + skipped === total still holds with truncation.
+1536:     res.json({
+1537:       success: true,
+1538:       data: {
+1539:         sent: sent.length,
+1540:         failed: failed.length,
+1541:         skipped: skipped.length,
+1542:         total: webhooks.length,
+1543:         deadlineExceeded: skipped.length > 0,
+1544:         truncated,
+1545:       },
+1546:     });
+1547:   } catch (error) { next(error); }
+1548: });
+1549: 
+1550: // =============================================================================
+1551: // OUTLOOK INTEGRATION ROUTES
+1552: // =============================================================================
+1553: 
+1554: const exchangeTokenSchema = z.object({
+1555:   ssoToken: z.string(),
+1556:   scopes: z.array(z.string()).default(['User.Read', 'Mail.Read']),
+1557: });
+1558: 
+1559: /**
+1560:  * POST /api/outlook/exchange-token
+1561:  * Exchange an Office SSO token for a Microsoft Graph access token.
+1562:  * Uses the On-Behalf-Of (OBO) flow — the SSO token from Office.js is exchanged
+1563:  * for a Graph token that can access user data.
+1564:  */
+1565: app.post('/api/outlook/exchange-token', requireM365, (async (req: Request, res: Response, next: NextFunction) => {
+1566:   try {
+1567:     const data = exchangeTokenSchema.parse(req.body);
+1568: 
+1569:     // Use MSAL's acquireTokenOnBehalfOf for SSO token exchange
+1570:     const oboRequest = {
+1571:       oboAssertion: data.ssoToken,
+1572:       scopes: data.scopes,
+1573:     };
+1574: 
+1575:     const msalApp = getMsalClient();
+1576:     if (!msalApp) {
+1577:       return res.status(503).json({ success: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'MSAL not configured' } });
+1578:     }
+1579: 
+1580:     // KS-445 (KS-440 Microsoft-identity cluster): a fuzz/garbage ssoToken (or
+1581:     // an AAD-side failure) makes acquireTokenOnBehalfOf throw, which used to
+1582:     // fall through the catch to a raw 500. Classify: bad caller assertion →
+1583:     // 401, caller-controlled scopes → 400, unconfigured/unreachable identity
+1584:     // platform → 503 (same classifier pattern as KS-421/KS-431 in billing);
+1585:     // only a genuinely unclassified failure keeps the 500 path.
+1586:     let result;
+1587:     try {
+1588:       result = await msalApp.acquireTokenOnBehalfOf(oboRequest);
+1589:     } catch (msalError) {
+1590:       const mapped = classifyMsalTokenError(msalError);
+1591:       if (mapped) {
+1592:         log('warn', 'exchange-token classified MSAL failure', {
+1593:           status: mapped.status,
+1594:           error: msalError instanceof Error ? msalError.message : String(msalError),
+1595:         });
+1596:         return res.status(mapped.status).json({
+1597:           success: false,
+1598:           error: { code: mapped.code, message: mapped.message },
+1599:         });
+1600:       }
+1601:       throw msalError;
+1602:     }
+1603:     if (!result || !result.accessToken) {
+1604:       return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Token exchange returned empty result' } });
+1605:     }
+1606: 
+1607:     const expiresIn = result.expiresOn
+1608:       ? Math.max(0, Math.floor((new Date(result.expiresOn).getTime() - Date.now()) / 1000))
+1609:       : 3600;
+1610: 
+1611:     res.json({
+1612:       success: true,
+1613:       data: {
+1614:         accessToken: result.accessToken,
+1615:         expiresIn,
+1616:       },
+1617:     });
+1618:   } catch (error) {
+1619:     if (error instanceof z.ZodError) {
+1620:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+1621:     }
+1622:     next(error);
+1623:   }
+1624: }) as RequestHandler);
+1625: 
+1626: /**
+1627:  * POST /api/outlook/verify-hash
+1628:  * Verify a document hash against Secuura records.
+1629:  * Proxies to the originate service's verification endpoint.
+1630:  */
+1631: app.post('/api/outlook/verify-hash', (async (req: Request, res: Response, next: NextFunction) => {
+1632:   try {
+1633:     const { hash } = z.object({ hash: z.string() }).parse(req.body);
+1634:     log('info', 'Outlook verify-hash request', { hash: hash.substring(0, 20) + '...' });
+1635: 
+1636:     // Forward to originate verification
+1637:     const originateUrl = process.env.ORIGINATE_SERVICE_URL || 'http://originate:4000';
+1638:     try {
+1639:       const verifyResp = await fetch(`${originateUrl}/api/verification/verify`, {
+1640:         method: 'POST',
+1641:         headers: { 'Content-Type': 'application/json' },
+1642:         body: JSON.stringify({ documentHash: hash }),
+1643:       });
+1644:       const result = await verifyResp.json();
+1645:       res.json({ success: true, data: result });
+1646:     } catch {
+1647:       res.json({
+1648:         success: true,
+1649:         data: { hash, verified: false, message: 'Verification service unavailable' },
+1650:       });
+1651:     }
+1652:   } catch (error) {
+1653:     if (error instanceof z.ZodError) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+1654:     next(error);
+1655:   }
+1656: }) as RequestHandler);
+1657: 
+1658: /**
+1659:  * GET /api/outlook/status
+1660:  * Health check for the Outlook Add-in integration.
+1661:  */
+1662: app.get('/api/outlook/status', (_req: Request, res: Response) => {
+1663:   res.json({
+1664:     success: true,
+1665:     service: 'secuura-outlook-integration',
+1666:     version: '0.1.0',
+1667:     capabilities: {
+1668:       ssoExchange: isMsalReady(),
+1669:       hashVerification: true,
+1670:       documentRegistration: true,
+1671:       sharePointAccess: isGraphReady(),
+1672:     },
+1673:     addinManifestUrl: '/api/outlook/manifest',
+1674:   });
+1675: });
+1676: 
+1677: // =============================================================================
+1678: // ERROR HANDLING
+1679: // =============================================================================
+1680: 
+1681: app.use((_req: Request, res: Response) => {
+1682:   res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Not Found' } });
+1683: });
+1684: 
+1685: // KS-111: route errors through the shared AppError-aware handler (maps
+1686: // AppError.statusCode + Zod -> 4xx; emits the canonical {success,error} shape).
+1687: app.use(errorHandler);
+1688: 
+1689: // =============================================================================
+1690: // START SERVER
+1691: // =============================================================================
+1692: 
+1693: async function startup() {
+1694:   // loadFromDb (the M365 connection/site/document cache warm) is initDb's
+1695:   // onReady boot work: it runs when the boot probe succeeds AND again when
+1696:   // the DB only comes up after a lost start race (KS-377 background retry),
+1697:   // so recovery re-warms the caches instead of silently skipping them
+1698:   // (KS-382).
+1699:   await initDb(loadFromDb);
+1700: 
+1701:   const msalEnabled = initMsal();
+1702:   const graphEnabled = initGraphClient();
+1703: 
+1704:   // Production guards
+1705:   const isProduction = process.env.NODE_ENV === 'production';
+1706:   const m365Configured = isConfigured();
+1707: 
+1708:   if (!m365Configured) {
+1709:     if (isProduction) {
+1710:       log('warn', 'PRODUCTION WARNING: M365 env vars (ENTRA_CLIENT_ID, ENTRA_CLIENT_SECRET, ENTRA_TENANT_ID) are missing. M365 features are disabled. SharePoint endpoints will return 503.');
+1711:     } else {
+1712:       log('warn', 'M365 env vars not set — M365 features disabled. Service will start but SharePoint endpoints return 503. Set ENTRA_CLIENT_ID, ENTRA_CLIENT_SECRET, and ENTRA_TENANT_ID to enable.');
+1713:     }
+1714:   } else if (m365Configured && (!msalEnabled || !graphEnabled)) {
+1715:     log('error', 'M365 env vars are present but Graph/MSAL client failed to initialize. Check ENTRA_CLIENT_ID, ENTRA_CLIENT_SECRET, and ENTRA_TENANT_ID values.');
+1716:   }
+1717: 
+1718:   return { msalEnabled, graphEnabled, m365Configured };
+1719: }
+1720: 
+1721: // Audit 2.2: cascade subscriber for GDPR user.erased events
+1722: import { startUserErasedSubscriber } from './userErasedSubscriber';
+1723: startUserErasedSubscriber((msg, ctx) => log('info', msg, ctx)).catch((err) => {
+1724:   log('warn', '[cascade] failed to start user.erased subscriber', { error: err?.message });
+1725: });
+1726: 
+1727: // KS-488 C-3: initialise the PII keyring BEFORE the server accepts traffic and
+1728: // before startup() runs loadFromDb() — Graph access/refresh tokens are encrypted
+1729: // at rest with it, so a read that beats the init would see every stored token as
+1730: // undecryptable. Mirrors the auth + originate precedent, including the prod-like
+1731: // refusal: a service that stores credentials must not run without the key.
+1732: //
+1733: // Note the demo VM runs this service with NODE_ENV=development, so the fatal
+1734: // branch is a production-only safety net and cannot take the demo down. The key
+1735: // is already wired for m365 in both deployment/azure/services.bicep
+1736: // (commonEnvVars) and docker-compose.yml, so no deploy change is required.
+1737: {
+1738:   const NODE_ENV = process.env.NODE_ENV || 'development';
+1739:   const IS_PROD_LIKE = ['production', 'staging', 'demo'].includes(NODE_ENV);
+1740:   if (process.env.PII_ENCRYPTION_KEY) {
+1741:     try {
+1742:       const { initFromEnv } = require('@secuura/shared');
+1743:       initFromEnv();
+1744:       log('info', 'PII encryption keyring initialised (M365 token encryption at rest)');
+1745:     } catch (err: any) {
+1746:       log('error', 'PII keyring init FAILED — M365 tokens will not be persisted', { error: err?.message });
+1747:     }
+1748:   } else if (IS_PROD_LIKE) {
+1749:     log('error', `FATAL: PII_ENCRYPTION_KEY is not set in ${NODE_ENV} — refusing to start (M365 Graph token encryption depends on it)`);
+1750:     process.exit(1);
+1751:   } else {
+1752:     log('warn', 'PII_ENCRYPTION_KEY not set — M365 Graph tokens will NOT be stored (connections will require re-auth)');
+1753:   }
+1754: }
+1755: 
+1756: const server = app.listen(PORT, async () => {
+1757:   const { msalEnabled, graphEnabled, m365Configured } = await startup();
+1758:   log('info', 'M365 Integration Service started', { port: PORT, msal: msalEnabled, graph: graphEnabled, m365Configured });
+1759:   console.log(`
+1760: ╔═══════════════════════════════════════════════════════════════╗
+1761: ║             SECUURA M365 INTEGRATION SERVICE                  ║
+1762: ╠═══════════════════════════════════════════════════════════════╣
+1763: ║  Port:      ${String(PORT).padEnd(47)}║
+1764: ║  M365:      ${m365Configured ? 'Configured' : 'NOT CONFIGURED (503 for SP endpoints)'}${' '.repeat(m365Configured ? 36 : 10)}║
+1765: ║  MSAL:      ${msalEnabled ? 'Ready (Entra ID)' : 'Disabled'}${' '.repeat(msalEnabled ? 30 : 39)}║
+1766: ║  Graph:     ${graphEnabled ? 'Ready (SharePoint API)' : 'Disabled'}${' '.repeat(graphEnabled ? 25 : 39)}║
+1767: ║  API Info:  http://localhost:${PORT}/api                         ║
+1768: ║  Health:    http://localhost:${PORT}/health                      ║
+1769: ╚═══════════════════════════════════════════════════════════════╝
+1770: `);
+1771: });
+1772: 
+1773: // KS-252: hold keep-alive sockets longer than any upstream proxy's idle
+1774: // window (gateway http-proxy-middleware / nginx / ACA envoy reuse pooled
+1775: // sockets; Node's 5 s default close races their reuse -> ECONNRESET and
+1776: // 19-29 s stalls under load). headersTimeout must exceed keepAliveTimeout.
+1777: server.keepAliveTimeout = 65_000;
+1778: server.headersTimeout = 66_000;
+1779: 
+1780: export default app;
+
+### FILE AT HEAD: Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+1: // KS-1670 site 1 (m365-integration src/index.ts, GET /api/callback success redirect): the redirect put `connectionId` into the query string unencoded, while `tenant` in the same template was
+2: // encoded with encodeURIComponent. The id only reaches that line after the server's own connection lookup hits, so it is not exploitable today, but an id format that ever admitted `&`, `#` or `%`
+3: // would change the shape of the query. This file reads the route's source text (no app boot, no database) and pins that every `connectionId=${...}` interpolation in the file is wrapped in
+4: // encodeURIComponent, and that the success redirect still encodes the tenant. C1 to C3 prove the instrument finds the route and the redirects it must not disturb.
+5: import { describe, it, expect } from 'vitest';
+6: import { readFileSync } from 'node:fs';
+7: import { join } from 'node:path';
+8: 
+9: const SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');
+10: const NEEDLE = 'connectionId=${';
+11: 
+12: /** Every interpolation that follows `connectionId=${` in the source, as the text up to the closing `}` of the template expression. */
+13: function interpolations(): string[] {
+14:   const found: string[] = [];
+15:   let at = SRC.indexOf(NEEDLE);
+16:   while (at !== -1) {
+17:     const start = at + NEEDLE.length;
+18:     let depth = 1;
+19:     let i = start;
+20:     while (i < SRC.length && depth > 0) {
+21:       if (SRC[i] === '{') depth++;
+22:       else if (SRC[i] === '}') depth--;
+23:       i++;
+24:     }
+25:     found.push(SRC.slice(start, i - 1));
+26:     at = SRC.indexOf(NEEDLE, i);
+27:   }
+28:   return found;
+29: }
+30: 
+31: describe('KS-1670: the m365 success redirect encodes the connection id', () => {
+32:   it('RED KS-1670 R1 every connectionId interpolation in a redirect query is wrapped in encodeURIComponent', () => {
+33:     const unwrapped = interpolations().filter((expr) => !/^encodeURIComponent\(.*\)$/.test(expr.trim()));
+34:     expect(unwrapped).toEqual([]);
+35:   });
+36: 
+37:   it('RED KS-1670 R2 the success redirect carries the encoded connection id and the encoded tenant, in that order', () => {
+38:     expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName');
+39:   });
+40: 
+41:   it('control KS-1670 C1 the instrument finds exactly one connectionId interpolation (the success redirect)', () => {
+42:     expect(interpolations()).toHaveLength(1);
+43:   });
+44: 
+45:   it('control KS-1670 C2 the success redirect is still the one that follows the "connection completed" log line', () => {
+46:     const logAt = SRC.indexOf('OAuth callback: connection completed');
+47:     const redirectAt = SRC.indexOf('m365=success');
+48:     expect(logAt).toBeGreaterThan(-1);
+49:     expect(redirectAt).toBeGreaterThan(logAt);
+50:   });
+51: 
+52:   it('control KS-1670 C3 the invalid_state refusal redirect is untouched', () => {
+53:     expect(SRC).toContain('/admin/integrations?m365=error&message=invalid_state');
+54:   });
+55: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "81a567ce9097ac129ed250c7c44c876910da022d",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/m365-integration/src/index.ts",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts",
+   "added": "55",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "1",
+   "1",
+   "Blockchain/Dev/services/m365-integration/src/index.ts"
+  ],
+  [
+   "55",
+   "0",
+   "Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 5,
+  "failed": 2
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 5,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=266 failed=0 | after: total=271 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 5\n",
+ "checker_summary": [
+  "PASS A6 whole services/m365-integration suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/m365-integration: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +56/-1 test=src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

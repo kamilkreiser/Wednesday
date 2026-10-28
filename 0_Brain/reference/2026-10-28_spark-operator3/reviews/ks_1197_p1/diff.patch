@@ -1,0 +1,125 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts b/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
+--- a/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
+@@ -54,5 +54,6 @@
+ export function meetsVerificationLevel(userLevel: string, requiredLevel: string): boolean {
+-  const userIdx = VERIFICATION_LEVEL_ORDER.indexOf((userLevel || 'none').toLowerCase());
++  // KS-1197: a level that is not a string (a number, an array, an object off a token claim) made `.toLowerCase()` throw. It now ranks as 'none', the same as any unrecognised level (KS-1176).
++  const userIdx = VERIFICATION_LEVEL_ORDER.indexOf((typeof userLevel === 'string' && userLevel ? userLevel : 'none').toLowerCase());
+   const reqIdx = VERIFICATION_LEVEL_ORDER.indexOf((requiredLevel || 'none').toLowerCase());
+   // KS-1176: a user level outside the order ranks as 'none'. A connector key carries
+   // 'api_key' (middleware/auth.ts), which indexOf read as -1, and `-1 >= 0` failed even a
+@@ -151,5 +152,5 @@
+   const requiredLevel = (docType.creatorVerificationLevel as string) || 'none';
+-  const userLevel = user.verificationLevel || 'none';
++  const userLevel = typeof user.verificationLevel === 'string' && user.verificationLevel ? user.verificationLevel : 'none';
+   if (!meetsVerificationLevel(userLevel, requiredLevel)) {
+     return {
+       ok: false, status: 403,
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1197-a-non-string-verification-level-ranks-as-none.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1197-a-non-string-verification-level-ranks-as-none.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1197-a-non-string-verification-level-ranks-as-none.test.ts
+@@ -0,0 +1,102 @@
++/**
++ * KS-1197 (api-gateway services/enforcement.ts): a verificationLevel that is not a string made POST /api/documents answer 500. `meetsVerificationLevel` read
++ * `(userLevel || 'none').toLowerCase()`, and `enforceDocumentTypeRules` read `user.verificationLevel || 'none'` and later `userLevel.toUpperCase()` in its 403 text; a
++ * truthy non-string (a number, an array, an object) passed the `||` and threw a TypeError. A level that is not a string now ranks as 'none', the lowest authenticated level,
++ * exactly as an unrecognised level already does (KS-1176): it meets a 'none' requirement and nothing above it. Every cell reads a thrown error as the string THREW, so a red is an
++ * assertion. K1-K5 are red at the tip; C1-C4 pin the known levels and the connector-key level, which must not change.
++ */
++
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++import { enforceDocumentTypeRules, meetsVerificationLevel } from '../services/enforcement';
++import type { UserPayload } from '../services/enforcement';
++
++vi.mock('../services/redis', () => ({
++  getAllDocumentTypes: vi.fn(),
++  getWorkflow: vi.fn(),
++  setWorkflowInstance: vi.fn(),
++  setPendingDocument: vi.fn(),
++}));
++
++import * as redisService from '../services/redis';
++
++type Outcome = string | [boolean, number | undefined, string | undefined];
++
++async function enforce(level: unknown, required: string): Promise<Outcome> {
++  vi.mocked(redisService.getAllDocumentTypes).mockResolvedValue([
++    { id: 'dt-1', code: 'DEGREE', isActive: true, creatorVerificationLevel: required },
++  ]);
++  const user = { userId: 'u-1', email: 'u@example.test', role: 'OWNER', verificationLevel: level } as unknown as UserPayload;
++  try {
++    const result = await enforceDocumentTypeRules({ documentType: 'DEGREE' }, user);
++    return [result.ok, (result as { status?: number }).status, (result as { code?: string }).code];
++  } catch (err) {
++    return 'THREW ' + (err instanceof Error ? err.message : String(err));
++  }
++}
++
++function meets(level: unknown, required: string): boolean | string {
++  try {
++    return meetsVerificationLevel(level as string, required);
++  } catch (err) {
++    return 'THREW ' + (err instanceof Error ? err.message : String(err));
++  }
++}
++
++const REFUSED: Outcome = [false, 403, 'INSUFFICIENT_VERIFICATION_LEVEL'];
++const ADMITTED: Outcome = [true, undefined, undefined];
++
++describe('KS-1197: a non-string verification level ranks as none', () => {
++  beforeEach(() => vi.clearAllMocks());
++
++  it.each([
++    ['number', 7],
++    ['array', ['high']],
++    ['object', {}],
++  ])('RED KS-1197 K1 a %s level meets nothing above none: a standard type refuses it with 403', async (_kind, level) => {
++    expect(await enforce(level, 'standard')).toEqual(REFUSED);
++  });
++
++  it('RED KS-1197 K2 the 403 text names the level as NONE', async () => {
++    vi.mocked(redisService.getAllDocumentTypes).mockResolvedValue([{ id: 'dt-1', code: 'DEGREE', isActive: true, creatorVerificationLevel: 'standard' }]);
++    const user = { userId: 'u-1', email: 'u@example.test', role: 'OWNER', verificationLevel: 7 } as unknown as UserPayload;
++    let message = 'THREW';
++    try {
++      message = (await enforceDocumentTypeRules({ documentType: 'DEGREE' }, user) as { error?: string }).error ?? 'no error text';
++    } catch {
++      message = 'THREW';
++    }
++    expect(message).toBe('This document type requires STANDARD verification. Your current level is NONE.');
++  });
++
++  it.each([
++    ['number', 7],
++    ['array', ['high']],
++    ['object', {}],
++  ])('RED KS-1197 K3 a %s level still meets a none requirement: a none type admits it', async (_kind, level) => {
++    expect(await enforce(level, 'none')).toEqual(ADMITTED);
++  });
++
++  it('RED KS-1197 K4 meetsVerificationLevel of a number is true against none and false against basic', () => {
++    expect([meets(7, 'none'), meets(7, 'basic')]).toEqual([true, false]);
++  });
++
++  it('RED KS-1197 K5 meetsVerificationLevel of an array or an object is true against none and false against basic', () => {
++    expect([meets(['high'], 'none'), meets(['high'], 'basic'), meets({}, 'none'), meets({}, 'basic')]).toEqual([true, false, true, false]);
++  });
++
++  it('control KS-1197 C1 a level that meets the requirement is admitted, case-insensitively', async () => {
++    expect([await enforce('standard', 'standard'), await enforce('HIGH', 'standard')]).toEqual([ADMITTED, ADMITTED]);
++  });
++
++  it('control KS-1197 C2 a known level below the requirement is still refused with 403', async () => {
++    expect(await enforce('basic', 'standard')).toEqual(REFUSED);
++  });
++
++  it('control KS-1197 C3 the connector-key level api_key still ranks as none: admitted on a none type, refused on a basic one', async () => {
++    expect([await enforce('api_key', 'none'), await enforce('api_key', 'basic')]).toEqual([ADMITTED, REFUSED]);
++  });
++
++  it('control KS-1197 C4 an absent or empty level still ranks as none', async () => {
++    expect([await enforce(undefined, 'none'), await enforce('', 'none'), await enforce('', 'basic')]).toEqual([ADMITTED, ADMITTED, REFUSED]);
++  });
++});

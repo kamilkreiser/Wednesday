@@ -1,0 +1,1948 @@
+===== TICKET =====
+KS-1219 — OAuth /authorize answers 500 server_error for an array-valued scope (repeated query param or JSON array) - should be 400 invalid_request [Backlog]
+
+## BLUF
+
+**Minor, pre-existing:** `/api/oauth/authorize` answers **500** `server_error` when `scope` arrives as an ARRAY: a repeated query parameter (`?scope=a&scope=b`) on GET or POST, or a JSON array in the POST body. The request is malformed, so it should be refused 400 `invalid_request`. Measured by the tier-1 round-2 gate on PR #1026 (finding F-10) on all 53 apps, with develop equal to the PR head; not introduced by that PR.
+
+## Recommendation
+
+Refuse a non-string `scope` (and, by the same shape, any other non-string authorize parameter) with 400 `invalid_request` before the resolver runs, rather than casting the query. Add a cell per carrier (repeated query param on GET, the same on POST, JSON array body on POST) asserting 400, plus a control that a single string scope still resolves. Not built; `Refs KS-839` as its source.
+
+## Detail
+
+* **Cause, as the gate read it and re-read at develop** `20ab16f9a`**:**
+  * `routes/oauth.ts:473-478`: GET `/authorize` destructures `scope` from `req.query as Record<string, string>`. The cast is compile-time only, so express/qs still hands over an array for a repeated parameter.
+  * The resolver passes that `scope` to `parseScopeString` (`services/oauth.ts:357-360`), which calls `scope.split(/[\s,]+/)`. An array has no `split`, so the resulting TypeError reaches the handler's catch and answers 500 `server_error`.
+  * POST `/authorize` (`routes/oauth.ts:619`) reads the same parameters from the query or body. The gate measured the POST query and JSON-array body carriers giving the same 500. Not re-measured here.
+* **Why it matters:** a malformed client request is reported as a server fault. That is noise for monitoring and fuzzing (the `not_a_server_error` class), and it is the wrong contract for an integrator.
+* **Not the same as KS-283** (Done): that was a 500 on malformed Unicode in authorize query parameters, a different input and cause.
+* **Searched before filing** (Linear, literal matches, archived included): `server_error` (47 hits, the Schemathesis `not_a_server_error` family; the only authorize one is KS-283, above); `array-valued` (2: KS-256, KS-677, unrelated); `as Record<string, string>` (0); `invalid_scope` (3: KS-839, KS-840 on authorize error delivery, KS-822); `parseScopeString` (0).
+* **Source:** gate report `2026-09-17-ks839-1026-df97c0def-tier1-r2` (F-10), relayed in Wednesday's GO for #1026 (2026-09-17 10:51Z).
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -390,6 +390,16 @@
+   // the all-unpermitted contrast. Removing the `?:` below reds exactly the two
+   // no-scope cases. Narrowing this default is a decision to be made in those
+   // cases first, not here.
++  // KS-1219: a repeated query parameter (?scope=a&scope=b) or a JSON array body reaches this resolver as an ARRAY whatever the compile-time cast at the handler says, and
++  // parseScopeString below would throw on it (an array has no split) and the handler would answer 500 server_error. A malformed request is a 400 invalid_request, the same
++  // existing message RULE 3 uses, so no published message changes.
++  if (scope !== undefined && typeof scope !== 'string') {
++    return {
++      ok: false,
++      message: 'invalid_request',
++      description: 'scope must be a single space- or comma-separated string',
++    };
++  }
+   const requestedScopes = parseScopeString(scope);
+   const grantedScopes = validateScopes(
+     requestedScopes.length > 0 ? requestedScopes : app.allowedScopes,
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts
+@@ -0,0 +1,126 @@
++// KS-1219: /api/oauth/authorize answered 500 server_error for an ARRAY-valued scope (a repeated query parameter, or a JSON array in the POST body): the compile-time
++// `as Record<string, string>` cast does nothing at run time, and parseScopeString calls `.split` on its argument. A malformed request is a 400 invalid_request. Each carrier is
++// driven through the real router on a loopback listener, with the same mocks as ks804-authorize-get-post-agree-per-rule.test.ts; a single string scope is the control.
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { Server } from 'node:http';
++import express from 'express';
++
++const state = vi.hoisted(() => ({
++  app: null as null | {
++    id: string; name: string; clientId: string; appType: string;
++    redirectUris: string[]; allowedScopes: string[];
++  },
++}));
++
++const silent = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() };
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++
++vi.mock('../services/oauth', async (importOriginal) => {
++  const real = await importOriginal<Record<string, unknown>>();
++  return {
++    ...real,
++    createAuthorizationCode: vi.fn(async () => 'MINTED_AUTHORIZATION_CODE'),
++    createApp: vi.fn(),
++    getAppByClientId: vi.fn(async () => state.app),
++    getAppById: vi.fn(),
++  };
++});
++vi.mock('../services/accountLockout', () => ({
++  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => undefined),
++  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
++}));
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => ({ id: 's' })), getRedisClient: vi.fn(() => null),
++  validateSession: vi.fn(async () => true), updateSessionActivity: vi.fn(async () => undefined),
++}));
++vi.mock('../services/password', () => ({ verifyPassword: vi.fn(async () => true), hashPassword: vi.fn(async () => 'h') }));
++vi.mock('../repositories/userRepo', () => ({
++  getUserByEmail: vi.fn(async () => ({
++    id: 'user-1', email: 'u@secuura.local', status: 'ACTIVE', mfaEnabled: false,
++    passwordHash: 'h', role: 'OWNER', verificationLevel: 'BASIC',
++  })),
++  getUserById: vi.fn(async () => null), updateUser: vi.fn(async () => undefined),
++  getPlatformAdmin: vi.fn(async () => null), reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++}));
++vi.mock('../services/jwt', () => ({ generateTokenPair: vi.fn(() => ({ accessToken: 'a', refreshToken: 'r', expiresIn: 900 })) }));
++vi.mock('../services/refreshDenylist', () => ({ isRefreshJtiDenylisted: vi.fn(async () => false) }));
++vi.mock('../middleware/authenticate', () => ({ authenticate: () => (_r: unknown, _s: unknown, n: () => void) => n() }));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++
++let server: Server;
++let base: string;
++let createAuthorizationCode: ReturnType<typeof vi.fn>;
++
++beforeAll(async () => {
++  const { oauthRouter } = await import('../routes/oauth');
++  ({ createAuthorizationCode } = (await import('../services/oauth')) as never);
++  const app = express();
++  app.use(express.json());
++  app.use('/api/oauth', oauthRouter);
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
++  const addr = server.address();
++  base = `http://127.0.0.1:${typeof addr === 'object' && addr ? addr.port : 0}`;
++});
++afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
++
++beforeEach(() => {
++  state.app = {
++    id: 'app-1', name: 'Test App', clientId: 'client-1', appType: 'confidential',
++    redirectUris: ['https://app.example.com/cb'], allowedScopes: ['openid', 'profile'],
++  };
++  vi.clearAllMocks();
++});
++
++const CB = encodeURIComponent('https://app.example.com/cb');
++const GET_BASE = `client_id=client-1&redirect_uri=${CB}&response_type=code&state=xyz`;
++
++async function get(extraQuery: string): Promise<{ status: number; message: string | undefined }> {
++  const res = await fetch(`${base}/api/oauth/authorize?${GET_BASE}${extraQuery}`, { redirect: 'manual' });
++  const text = await res.text();
++  let message: string | undefined;
++  try { message = JSON.parse(text)?.error?.message; } catch { /* html consent page */ }
++  return { status: res.status, message };
++}
++
++async function post(body: Record<string, unknown>): Promise<{ status: number; message: string | undefined }> {
++  const res = await fetch(`${base}/api/oauth/authorize`, {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    redirect: 'manual',
++    body: JSON.stringify({ client_id: 'client-1', redirect_uri: 'https://app.example.com/cb', ...body }),
++  });
++  const text = await res.text();
++  let message: string | undefined;
++  try { message = JSON.parse(text)?.error?.message; } catch { /* redirect */ }
++  return { status: res.status, message };
++}
++
++describe('KS-1219: /api/oauth/authorize refuses an array-valued scope', () => {
++  it('RED KS-1219 R1 GET with a repeated scope parameter is 400 invalid_request, not 500', async () => {
++    expect(await get('&scope=openid&scope=profile')).toEqual({ status: 400, message: 'invalid_request' });
++  });
++
++  it('RED KS-1219 R2 POST deny with a JSON array scope is 400 invalid_request, not 500', async () => {
++    expect(await post({ action: 'deny', scope: ['openid', 'profile'] })).toEqual({ status: 400, message: 'invalid_request' });
++  });
++
++  it('RED KS-1219 R3 POST approve with a JSON array scope is 400 invalid_request and mints no code', async () => {
++    const reply = await post({ email: 'u@secuura.local', password: 'correct-horse', action: 'approve', scope: ['openid'] });
++    expect(reply).toEqual({ status: 400, message: 'invalid_request' });
++    expect(createAuthorizationCode).not.toHaveBeenCalled();
++  });
++
++  it('CONTROL KS-1219 C1 GET with one string scope still serves the consent page', async () => {
++    expect((await get('&scope=openid')).status).toBe(200);
++  });
++
++  it('CONTROL KS-1219 C2 GET with no scope still serves the consent page', async () => {
++    expect((await get('')).status).toBe(200);
++  });
++
++  it('CONTROL KS-1219 C3 POST deny with one string scope still redirects with access_denied', async () => {
++    expect((await post({ action: 'deny', scope: 'openid' })).status).toBe(302);
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/routes/oauth.ts
+1: /**
+2:  * =============================================================================
+3:  * OAUTH 2.0 ROUTES
+4:  * =============================================================================
+5:  * Standard OAuth 2.0 Authorization Code Flow with PKCE.
+6:  * Compatible with any OAuth client library.
+7:  *
+8:  * Endpoints:
+9:  *   GET  /api/oauth/authorize  — Start authorization (shows consent page)
+10:  *   GET  /api/oauth/consent.js — The consent page's submit script (KS-799 round 2)
+11:  *   POST /api/oauth/token      — Exchange code for tokens
+12:  *   POST /api/oauth/revoke     — Revoke a token
+13:  *   POST /api/oauth/apps       — Register an app
+14:  *   GET  /api/oauth/apps       — List my apps
+15:  *   GET  /api/oauth/apps/:id   — App details
+16:  *   PATCH /api/oauth/apps/:id  — Update app
+17:  *   DELETE /api/oauth/apps/:id — Deactivate app
+18:  *   POST /api/oauth/apps/:id/rotate-secret — Rotate client secret
+19:  * =============================================================================
+20:  */
+21: 
+22: import { Router, Request, Response, NextFunction } from 'express';
+23: import { z } from 'zod';
+24: // KS-1210: pgSafeStringSchema is no longer imported here. Both scope arrays it
+25: // guarded are now closed z.enum(AVAILABLE_SCOPES) arrays, which cannot admit a NUL
+26: // byte either, so the guard is subsumed rather than removed. tsc TS6133 caught the
+27: // now-unused import; the enum is what replaced it.
+28: import { runWithTenantId } from '@secuura/shared';
+29: import {
+30:   createApp, getAppByClientId, getAppById, listApps, updateApp, rotateSecret,
+31:   createAuthorizationCode, exchangeCode, verifyClientSecret,
+32:   validateScopes, parseScopeString, AVAILABLE_SCOPES,
+33: } from '../services/oauth';
+34: import { generateTokenPair, verifyRefreshToken } from '../services/jwt';
+35: import { createSession } from '../services/session';
+36: import { isRefreshJtiDenylisted } from '../services/refreshDenylist';
+37: import * as userRepo from '../repositories/userRepo';
+38: import { authenticate } from '../middleware/authenticate';
+39: import { logger } from '../utils/logger';
+40: import { enforcePasswordLoginGates, mfaCodeRuntimeSchema } from '../services/passwordLoginGate';
+41: 
+42: export const oauthRouter = Router();
+43: 
+44: /**
+45:  * KS-781 F-1/F-6 — the credential fields of POST /api/oauth/authorize, typed and
+46:  * normalised the same way `/api/auth/login` types and normalises them.
+47:  *
+48:  * Authorize previously read `email`, `password` and `mfaCode` straight off
+49:  * `req.body` with no schema at all. Two consequences, both measured:
+50:  *
+51:  *   F-1 (BLOCKER) — an untrimmed email produced a lockout key nothing had ever
+52:  *   incremented while still resolving the victim's row, so the account lockout
+53:  *   was defeated by a single leading space.
+54:  *
+55:  *   F-6 — a NON-STRING `mfaCode` reached `verifyBackupCode`, which calls
+56:  *   `.toUpperCase()` on it, and 500'd on an MFA account holding backup codes.
+57:  *
+58:  * `email` mirrors loginSchema's `z.string().trim().email()`. The gate normalises
+59:  * again (lowercase + trim) because it is the shared layer doors 2 and 3 will
+60:  * call — belt and braces here is deliberate, not redundant.
+61:  *
+62:  * Deliberately covers ONLY the credential fields. The OAuth parameters keep
+63:  * their existing hand-rolled validation and their existing 400 shapes (KS-144),
+64:  * so this closes the finding without re-contracting the endpoint.
+65:  */
+66: // KS-796 F-6: exported for the identity assertion — see routes/auth.ts.
+67: export const authorizeCredentialsSchema = z.object({
+68:   email: z.string().trim().email(),
+69:   password: z.string().min(1),
+70:   // KS-781 N-1 — AN EMPTY STRING IS AN ABSENT SECOND FACTOR, NOT A MALFORMED ONE.
+71:   //
+72:   // The consent page this route ships renders `mfaCode` unconditionally and
+73:   // NOT `required`, because an account without MFA has nothing to type. An HTML
+74:   // form submits every named input; an untouched one arrives as `""`. To zod,
+75:   // `""` is PRESENT — `.optional()` does not apply, the regex runs, and it
+76:   // fails. So the first version of this schema returned `400 invalid_request`
+77:   // to every non-MFA user, on a page whose own comment said they were
+78:   // unaffected. Measured on the re-gate, and a regression introduced with the
+79:   // field itself.
+80:   //
+81:   // Normalised here rather than at the page: the same shape reaches us from any
+82:   // form-backed SPA that posts its whole state, and a fix living in a `<script>`
+83:   // would not cover them. `.min(1)` on the union arm keeps a genuinely
+84:   // malformed code (`"abc"`, `"12345"`) a 400 — the relaxation is exactly the
+85:   // empty string and nothing else.
+86:   mfaCode: mfaCodeRuntimeSchema,
+87: });
+88: 
+89: // KS-466: the platform default tenant (KS-192) — the tenant createApp pins for
+90: // a tenantless caller and the value the migration backfills rows into.
+91: const DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+92: 
+93: // KS-466: seed the fail-closed RLS tenant GUC for the authenticated /apps
+94: // management routes. The gateway's `/api/oauth` proxy also carries the pre-auth
+95: // token/authorize endpoints, so it deliberately sets no `x-tenant-id` header —
+96: // which means the auth service's global tenantGucContext has nothing to seed,
+97: // and fail-closed RLS (migration 039) returns ZERO rows on every oauth_apps
+98: // read. Seed the GUC from the VERIFIED JWT here, after authenticate(); the same
+99: // default createApp pins keeps writes and reads on the same tenant. Runs the
+100: // downstream handler inside the tenant scope via AsyncLocalStorage.
+101: function seedTenantGuc(req: Request, _res: Response, next: NextFunction): void {
+102:   const tenantId = ((req as { user?: { tenantId?: string } }).user?.tenantId) || DEFAULT_TENANT_ID;
+103:   runWithTenantId(tenantId, () => next());
+104: }
+105: 
+106: // =============================================================================
+107: // KS-797 — ONE definition of "which client is this, and may it be redirected
+108: // there", used by every branch of the authorization endpoint.
+109: // =============================================================================
+110: // The GET handler validated the client and the redirect URI. The POST handler
+111: // did neither: measured on the same file, `getAppByClientId` 0 / redirectUris 0
+112: // / invalid_client 0 in the POST block against 2 / 3 / 3 in the GET block.
+113: //
+114: // Two consequences, both measured live through the gateway:
+115: //   - with valid credentials, a code was minted for an unregistered client and
+116: //     302'd to an attacker-chosen URL (the QA pass's finding);
+117: //   - with NO credentials at all, `action=deny` 302'd to an attacker-chosen URL
+118: //     carrying `error=access_denied` — an open redirect off the platform's own
+119: //     authorization endpoint, reachable by anyone. The GET handler refused the
+120: //     same client_id with 400 invalid_client on the same input, which is what
+121: //     made it a defect rather than a configuration accident.
+122: //
+123: // Extracted rather than copied into POST, because two definitions of
+124: // "registered redirect" is the drift class this endpoint has already produced
+125: // twice (KS-737, KS-781). Callers get the rule or they get a refusal; there is
+126: // nowhere for a second opinion to live.
+127: //
+128: // ⚠ THE WILDCARD IS INHERITED, NOT INTRODUCED. `redirectUris.includes('*')`
+129: // accepts any redirect URI for that app. It is the GET path's existing rule and
+130: // is preserved deliberately so the two handlers cannot disagree; it is NOT
+131: // endorsed. Measured on this deployment: 0 of 21 registered apps carry one, so
+132: // it is latent. Recorded on KS-797 as its own concern.
+133: // =============================================================================
+134: 
+135: /**
+136:  * =============================================================================
+137:  * KS-804 — THE RESOLVER CARRIES ALL FOUR APP-DERIVED RULES, NOT ONE
+138:  * =============================================================================
+139:  * KS-797 moved the client/redirect rule in here and left three behind in the
+140:  * GET handler. POST enforced none of them. Measured by the tester: a POST for a
+141:  * PUBLIC app with no `code_challenge` returned 302 with a code minted and
+142:  * `codeChallenge` undefined — and `exchangeCode` verifies PKCE only inside
+143:  * `if (row.code_challenge)`, so that code was redeemable with **no verifier at
+144:  * all**. PKCE was not merely skipped at authorize time; it was unenforceable at
+145:  * exchange time for every code minted that way.
+146:  *
+147:  * This is the THIRD instance of GET/POST drift on this one endpoint — KS-737,
+148:  * KS-781, KS-797, now this. Fixing the rules one at a time is what invited a
+149:  * fourth, so all four live here and each handler renders the same resolution:
+150:  *
+151:  *   1. response_type            2. client_id + registered redirect_uri
+152:  *   3. PKCE for public clients  4. scope against app.allowedScopes
+153:  *
+154:  * ⚠ THE WILDCARD IS INHERITED, NOT INTRODUCED. `redirectUris.includes('*')`
+155:  * accepts any redirect URI for that app. It is the GET path's existing rule and
+156:  * is preserved deliberately so the two handlers cannot disagree; it is NOT
+157:  * endorsed. Measured: 0 of 21 registered apps carry one, so it is latent.
+158:  * Recorded on KS-797 as its own concern.
+159:  * =============================================================================
+160:  */
+161: 
+162: /**
+163:  * KS-804 Q4 — schemes a redirect target may use.
+164:  *
+165:  * The registration schema admits `javascript:` and `data:`, so a registered URI
+166:  * can be a script payload the browser executes on redirect. Census 2026-09-05:
+167:  * 0 such rows on local (of 21) or demo (of 3) — hardening, not a live exposure.
+168:  *
+169:  * Stated honestly: this is a REFUSAL SET, not a true allow-list, and the reason
+170:  * is that a true one is not constructible here. Native clients register their
+171:  * own custom schemes (`com.example.app:`), which are per-app and unbounded, so
+172:  * enumerating what is permitted would break every mobile client. What CAN be
+173:  * enumerated is the set that makes a redirect dangerous: schemes the browser
+174:  * executes or treats as an inline document. Everything else is allowed, and
+175:  * `https:` is the only web scheme among them.
+176:  *
+177:  * `http:` is refused too. It is not executable, but an authorization code
+178:  * delivered over cleartext is a code on the wire, and RFC 8252 §7.3 already
+179:  * excludes it for native apps.
+180:  */
+181: /**
+182:  * KS-822 F-6 — the ONLY two methods `exchangeCode` can verify. Kept as a Set
+183:  * beside the check so the pair cannot drift: the verifier's `=== 'S256'` else
+184:  * branch IS the plain implementation, so this set is exhaustive by definition
+185:  * and adding a member here without teaching the verifier would be the same
+186:  * silent downgrade one level up.
+187:  */
+188: const PKCE_METHODS = new Set(['S256', 'plain']);
+189: 
+190: const REFUSED_REDIRECT_SCHEMES = new Set([
+191:   'javascript:', 'data:', 'vbscript:', 'file:', 'blob:', 'about:', 'http:',
+192: ]);
+193: 
+194: type AuthorizeClientResolution =
+195:   | {
+196:       ok: true;
+197:       app: Awaited<ReturnType<typeof getAppByClientId>> & object;
+198:       redirectUri: string;
+199:       /** Scopes actually granted — validated against `app.allowedScopes`. */
+200:       grantedScopes: string[];
+201:       codeChallenge?: string;
+202:       codeChallengeMethod: string;
+203:     }
+204:   | {
+205:       ok: false;
+206:       message:
+207:         | 'invalid_request'
+208:         | 'invalid_client'
+209:         | 'invalid_redirect_uri'
+210:         | 'invalid_scope'
+211:         | 'unsupported_response_type';
+212:       description: string;
+213:     };
+214: 
+215: interface AuthorizeParams {
+216:   clientId?: string;
+217:   redirectUri?: string;
+218:   /**
+219:    * The consent FORM carries no `response_type` — it is a submission for a flow
+220:    * the GET already validated. POST therefore passes `body.response_type || 'code'`,
+221:    * so a client that puts a bogus value in the body is refused rather than
+222:    * ignored, and the rule still has exactly one definition.
+223:    *
+224:    * KS-822 F-3 — the operator is `||`, NOT `??`, and the difference is
+225:    * user-visible. `??` substitutes only for null/undefined, and an HTML form
+226:    * submits an empty field as `""`, which is PRESENT. RULE 1 then saw
+227:    * `"" !== 'code'` and refused, so a person clicking "Deny" on the consent
+228:    * form got a 400 JSON body where the parent had redirected them back to the
+229:    * client with `error=access_denied`. An empty field is an absent one here; a
+230:    * BOGUS one is still refused, which is what the third cell asserts.
+231:    */
+232:   responseType?: string;
+233:   scope?: string;
+234:   codeChallenge?: string;
+235:   codeChallengeMethod?: string;
+236: }
+237: 
+238: async function resolveAuthorizeClient(params: AuthorizeParams): Promise<AuthorizeClientResolution> {
+239:   const { clientId, redirectUri, responseType, scope, codeChallenge, codeChallengeMethod } = params;
+240: 
+241:   // RULE 1 — response_type. Ahead of the client lookup: an unsupported flow is
+242:   // wrong regardless of who is asking, and refusing first costs no DB read.
+243:   if (responseType !== 'code') {
+244:     return {
+245:       ok: false,
+246:       message: 'unsupported_response_type',
+247:       description: 'Only response_type=code is supported',
+248:     };
+249:   }
+250: 
+251:   if (!clientId) {
+252:     return { ok: false, message: 'invalid_request', description: 'client_id is required' };
+253:   }
+254: 
+255:   // KS-283: reject a malformed client_id BEFORE the DB lookup. Non-UTF-8 / NUL
+256:   // garbage makes Postgres throw 22021, which surfaced as a 500. A real
+257:   // client_id is an opaque `sec_<hex>` we mint, so anything outside a
+258:   // conservative URL-safe charset is simply not a known client.
+259:   if (!/^[A-Za-z0-9._~-]+$/.test(clientId)) {
+260:     return { ok: false, message: 'invalid_client', description: 'Unknown client_id' };
+261:   }
+262: 
+263:   const app = await getAppByClientId(clientId);
+264:   if (!app) {
+265:     return { ok: false, message: 'invalid_client', description: 'Unknown client_id' };
+266:   }
+267: 
+268:   if (redirectUri && !app.redirectUris.includes(redirectUri) && !app.redirectUris.includes('*')) {
+269:     return { ok: false, message: 'invalid_redirect_uri', description: 'redirect_uri not registered for this app' };
+270:   }
+271: 
+272:   // RULE 2c — KS-822 F-7: WHEN `redirect_uri` MAY BE OMITTED, decided here so all
+273:   // three entry points agree.
+274:   //
+275:   // The disagreement F-7 names was three-way, not two-way: GET passed an absent
+276:   // `redirect_uri` to this resolver and got the fallback; the POST DENY branch
+277:   // did the same; and only the POST APPROVE path refused it, at a pre-resolver
+278:   // required-field guard that never reached this line. So the fallback was dead
+279:   // on exactly one of the three, which is the KS-804 shape again — a rule
+280:   // enforced by a handler instead of by the resolver every handler shares.
+281:   //
+282:   // RFC 6749 3.1.2.3 makes the omission legal only when the ambiguity does not
+283:   // exist: with more than one registered URI the client MUST send one. The old
+284:   // fallback took `redirectUris[0]` no matter how many were registered, so with
+285:   // two registered it silently picked the first — a choice nobody made, and the
+286:   // same shape as F-5's empty filter. Now the omission is allowed only when the
+287:   // app registers EXACTLY one, and refused otherwise.
+288:   //
+289:   // `invalid_request` is an existing message and so is invisible to F-8's
+290:   // message-set guard — the RULES row for this rule is hand-added in the same
+291:   // commit, as with F-6.
+292:   if (!redirectUri && app.redirectUris.length !== 1) {
+293:     return {
+294:       ok: false,
+295:       message: 'invalid_request',
+296:       description: 'redirect_uri is required unless the app registers exactly one',
+297:     };
+298:   }
+299: 
+300:   const effectiveRedirect = redirectUri || app.redirectUris[0];
+301: 
+302:   // RULE 2b (KS-804 Q4) — the scheme. Applied to the EFFECTIVE target, so a
+303:   // dangerous URI is refused whether the client supplied it or it came from the
+304:   // app's own registration.
+305:   let parsed: URL;
+306:   try {
+307:     parsed = new URL(effectiveRedirect);
+308:   } catch {
+309:     return {
+310:       ok: false,
+311:       message: 'invalid_redirect_uri',
+312:       description: 'redirect_uri must be a valid absolute URL',
+313:     };
+314:   }
+315:   if (REFUSED_REDIRECT_SCHEMES.has(parsed.protocol)) {
+316:     return {
+317:       ok: false,
+318:       message: 'invalid_redirect_uri',
+319:       description: 'redirect_uri scheme is not permitted',
+320:     };
+321:   }
+322: 
+323:   // RULE 3 — PKCE for public clients. This is the one whose absence on POST was
+324:   // not merely a skipped check: a code minted with no challenge is redeemable
+325:   // with no verifier, because exchangeCode only verifies inside
+326:   // `if (row.code_challenge)`.
+327:   if (app.appType === 'public' && !codeChallenge) {
+328:     return {
+329:       ok: false,
+330:       message: 'invalid_request',
+331:       description: 'code_challenge is required for public clients (PKCE)',
+332:     };
+333:   }
+334: 
+335:   // RULE 3b — KS-822 F-6: `code_challenge_method` must be one the verifier
+336:   // understands, checked HERE rather than trusted downstream.
+337:   //
+338:   // `exchangeCode` selects the method with `row.code_challenge_method === 'S256'
+339:   // ? sha256(verifier) : verifier` — an exact string match with the PLAIN
+340:   // comparison as its else branch. So every value that is not exactly `S256`
+341:   // verifies as plain, and the two that matter are:
+342:   //   · `s256` — a client that believes it asked for S256 and got it. The
+343:   //     challenge it computed is a sha256 digest; the server compares the raw
+344:   //     verifier to it, so the code is simply unredeemable — but nothing tells
+345:   //     the client its protection was never applied, and a client that instead
+346:   //     sends the verifier as the challenge redeems with NO protection at all.
+347:   //   · anything else — silently plain.
+348:   // RFC 7636 4.3: the method must be a registered value. An unregistered one is
+349:   // an error, not a default.
+350:   //
+351:   // Refused with `invalid_request`, an EXISTING message, deliberately: it is the
+352:   // same class as RULE 3's refusal, and inventing a message for it would be a
+353:   // published-contract change this ticket has no grant for. Note the consequence,
+354:   // named because F-8's guard depends on it — a new rule reusing an existing
+355:   // message is invisible to that guard, so the RULES row for this rule is added
+356:   // by hand in the same commit and that is the only thing making it driven.
+357:   //
+358:   // NOT covered, and stated rather than implied: rows ALREADY stored carrying a
+359:   // bad method still verify as plain. That population drains with the 5-minute
+360:   // code TTL and no migration is attempted here.
+361:   if (codeChallengeMethod !== undefined && !PKCE_METHODS.has(codeChallengeMethod)) {
+362:     return {
+363:       ok: false,
+364:       message: 'invalid_request',
+365:       description: 'code_challenge_method must be S256 or plain',
+366:     };
+367:   }
+368: 
+369:   // RULE 4 — scopes, against the app's own allow-list. POST used to store the
+370:   // raw `scope` string from the body straight onto the code.
+371:   //
+372:   // KS-822 F-4 — OMITTING `scope` IS A DEFAULT, AND THE DEFAULT IS THE WHOLE
+373:   // ALLOW-LIST. Named here deliberately rather than left to be re-derived.
+374:   // RFC 6749 3.3 gives a server exactly two options when the client omits the
+375:   // parameter: use a pre-defined default, or fail the request. This is the
+376:   // first. Before KS-804 put GET and POST on this one resolver, POST stored the
+377:   // raw body string, so omitting `scope` minted NULL — which is NEITHER of the
+378:   // RFC's options. So the consolidation did not widen a correct behaviour; it
+379:   // replaced a non-conforming one with a conforming and wider one.
+380:   //
+381:   // The asymmetry that makes this worth writing down: omitting the parameter
+382:   // grants EVERYTHING the app may hold, while explicitly asking for only things
+383:   // it may not hold grants NOTHING (`validateScopes` filters rather than
+384:   // refuses — that is F-5, and it is a separate item). Asking for less than
+385:   // nothing is therefore stricter than asking for nothing at all.
+386:   //
+387:   // Bound by `ks804-authorize-get-post-agree-per-rule.test.ts`, describe
+388:   // "KS-822 F-4", four cases: the two no-scope cases plus a narrow-request
+389:   // control (an explicit `openid` must NOT be widened to the allow-list) and
+390:   // the all-unpermitted contrast. Removing the `?:` below reds exactly the two
+391:   // no-scope cases. Narrowing this default is a decision to be made in those
+392:   // cases first, not here.
+393:   // KS-1219: a repeated query parameter (?scope=a&scope=b) or a JSON array body reaches this resolver as an ARRAY whatever the compile-time cast at the handler says, and
+394:   // parseScopeString below would throw on it (an array has no split) and the handler would answer 500 server_error. A malformed request is a 400 invalid_request, the same
+395:   // existing message RULE 3 uses, so no published message changes.
+396:   if (scope !== undefined && typeof scope !== 'string') {
+397:     return {
+398:       ok: false,
+399:       message: 'invalid_request',
+400:       description: 'scope must be a single space- or comma-separated string',
+401:     };
+402:   }
+403:   const requestedScopes = parseScopeString(scope);
+404:   const grantedScopes = validateScopes(
+405:     requestedScopes.length > 0 ? requestedScopes : app.allowedScopes,
+406:     app.allowedScopes,
+407:   );
+408: 
+409:   // RULE 5 — KS-822 F-5: rule 4 FILTERS, and a filter that removes everything is
+410:   // not a decision anybody made. A request naming only scopes the app may not
+411:   // hold used to reach `ok: true` with an EMPTY grant: on GET that renders a
+412:   // consent page asking the user to approve a list of nothing, and on POST it
+413:   // mints a code carrying scope ''.
+414:   //
+415:   // RFC 6749 4.1.2.1 registers `invalid_scope` for exactly this. Partial overlap
+416:   // is left as a filter — that IS permitted, and §3.3's obligation to tell the
+417:   // client what it actually got is already met by the token response's `scope`
+418:   // field. Only the all-or-nothing case refuses.
+419:   //
+420:   // Deliberately conditioned on `requestedScopes.length > 0`, so this is about a
+421:   // request that ASKED and got nothing. An app registered with an EMPTY
+422:   // `allowedScopes` still takes RULE 4's default path unchanged and is not
+423:   // refused here — whether such an app should be able to mint at all is a
+424:   // different question and not this one.
+425:   //
+426:   // `invalid_scope` is a NEW message, and that is load-bearing twice over: it is
+427:   // the RFC's own code for this condition (answering with `invalid_request`
+428:   // would misreport a scope problem as a malformed request, the same species of
+429:   // error F-1b corrected in the published contract), and unlike F-6's reused
+430:   // message it IS visible to F-8's message-set guard — which reds until the
+431:   // RULES row exists. That red was observed before the row was written.
+432:   if (requestedScopes.length > 0 && grantedScopes.length === 0) {
+433:     return {
+434:       ok: false,
+435:       message: 'invalid_scope',
+436:       description: 'none of the requested scopes are permitted for this client',
+437:     };
+438:   }
+439: 
+440:   return {
+441:     ok: true,
+442:     app,
+443:     redirectUri: effectiveRedirect,
+444:     grantedScopes,
+445:     codeChallenge,
+446:     codeChallengeMethod: codeChallengeMethod || 'S256',
+447:   };
+448: }
+449: 
+450: /** The refusal envelope both handlers already use, so the shape does not drift either. */
+451: function authorizeRefusal(res: Response, r: Extract<AuthorizeClientResolution, { ok: false }>) {
+452:   return res.status(400).json({
+453:     success: false,
+454:     error: { code: 'BAD_REQUEST', message: r.message, description: r.description },
+455:   });
+456: }
+457: 
+458: /**
+459:  * KS-799 — deliver the post-consent redirect target in a way the consent page
+460:  * can actually act on.
+461:  *
+462:  * The gateway CSRF guard is double-submit-cookie: it requires the `X-XSRF-TOKEN`
+463:  * *header* (csrf.ts), which a top-level `<form>` POST cannot set — so the consent
+464:  * page must submit via `fetch` with the header (the XSRF-TOKEN cookie is
+465:  * httpOnly:false for exactly this). But a browser `fetch` cannot follow this 302
+466:  * to NAVIGATE the page, so an XHR caller is handed the target as JSON and
+467:  * navigates itself; every other caller keeps the native 302.
+468:  *
+469:  * This is the whole of Option 2 (KS-799 ruling, 2026-09-07): no CSRF exemption
+470:  * and no change to the CSRF middleware. It is additive and backward-compatible —
+471:  * a request without `X-Requested-With: XMLHttpRequest` behaves exactly as before,
+472:  * which is why every existing authorize test still sees a 302. Error responses on
+473:  * this path were already JSON, so the fetch client reads those unchanged.
+474:  */
+475: function respondAuthorizeRedirect(req: Request, res: Response, url: string): void {
+476:   if ((req.get('x-requested-with') || '').toLowerCase() === 'xmlhttprequest') {
+477:     res.status(200).json({ success: true, redirect: url });
+478:     return;
+479:   }
+480:   res.redirect(url);
+481: }
+482: 
+483: // =============================================================================
+484: // GET /api/oauth/authorize — Authorization endpoint
+485: // =============================================================================
+486: 
+487: oauthRouter.get('/authorize', async (req: Request, res: Response) => {
+488:   try {
+489:     const {
+490:       client_id, redirect_uri, response_type, scope, state,
+491:       code_challenge, code_challenge_method,
+492:     } = req.query as Record<string, string>;
+493: 
+494:     // KS-804: every app-derived rule lives in the resolver now — response_type,
+495:     // client/redirect, the scheme, PKCE for public clients and scopes. This
+496:     // handler renders the resolution; it does not re-decide any of it.
+497:     const resolved = await resolveAuthorizeClient({
+498:       clientId: client_id,
+499:       redirectUri: redirect_uri,
+500:       responseType: response_type,
+501:       scope,
+502:       codeChallenge: code_challenge,
+503:       codeChallengeMethod: code_challenge_method,
+504:     });
+505:     if (!resolved.ok) return authorizeRefusal(res, resolved);
+506:     const { app, grantedScopes } = resolved;
+507:     const effectiveRedirect = resolved.redirectUri;
+508: 
+509:     // Serve the consent page
+510:     const consentHtml = generateConsentPage({
+511:       app,
+512:       // KS-798: the canonical client_id from the resolved app record, not the
+513:       // caller-supplied query param — the resolver already confirmed the two match
+514:       // (getAppByClientId(client_id) returned this app), and the record is the
+515:       // source that cannot be spoofed by a crafted request.
+516:       clientId: app.clientId,
+517:       scopes: grantedScopes,
+518:       state: state || '',
+519:       redirectUri: effectiveRedirect,
+520:       codeChallenge: resolved.codeChallenge,
+521:       codeChallengeMethod: resolved.codeChallengeMethod,
+522:     });
+523: 
+524:     res.setHeader('Content-Type', 'text/html');
+525:     res.send(consentHtml);
+526: 
+527:   } catch (error: any) {
+528:     // KS-283: a malformed query param (NUL byte / non-UTF-8 sequence) can still
+529:     // reach the DB layer and surface as Postgres 22021 / 22P05 — that is a
+530:     // client error, answer 400 not 500 (mirrors the KS-144 22P02 mapping on the
+531:     // /apps/:id routes below).
+532:     if (error?.code === '22021' || error?.code === '22P05' || /invalid byte sequence|untranslatable character/i.test(error?.message || '')) {
+533:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_request', description: 'Malformed request parameters' } });
+534:     }
+535:     logger.error('OAuth authorize error', { error: error.message });
+536:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'server_error', description: 'Internal server error' } });
+537:   }
+538: });
+539: 
+540: // =============================================================================
+541: // POST /api/oauth/authorize — Process consent (login + approve)
+542: // =============================================================================
+543: 
+544: // =============================================================================
+545: // KS-799 (round 2) — the consent page's submit script, served as an EXTERNAL
+546: // same-origin resource.
+547: //
+548: // Round 1 rendered these bytes as an inline <script> inside generateConsentPage.
+549: // Peter's review of PR #881 measured what a browser actually receives on this
+550: // route: /api/oauth/* is proxied by the api-gateway; this service sets its own
+551: // Content-Security-Policy on every response (index.ts `app.use(helmet())` —
+552: // helmet's defaults are script-src 'self' and script-src-attr 'none'); and
+553: // http-proxy writes upstream headers with res.setHeader, which REPLACES the
+554: // gateway's deliberate 'unsafe-inline' (KS-245). So script-src as the browser
+555: // sees it is 'self' — the inline script was refused, no submit listener
+556: // attached, the native <form> POST went out without X-XSRF-TOKEN, and the page
+557: // landed back on the 403 CSRF_TOKEN_MISSING this ticket was filed to remove.
+558: //
+559: // Of the three vehicles Peter offered (per-request nonce · external same-origin
+560: // script · per-route CSP), only this one is admitted at EVERY layer without a
+561: // change outside this file: the production nginx gateway
+562: // (docker/nginx-gateway/nginx-production.conf) sends script-src 'self' too, and
+563: // browsers enforce the intersection of the policies they receive, so a nonce
+564: // minted here would still be refused there. 'self' admits a same-origin
+565: // <script src> everywhere; no CSP header is authored in a second place.
+566: //
+567: // The bytes below are the round-1 script, moved verbatim. They run inside the
+568: // consent page (see generateConsentPage), so the constraints that applied
+569: // inside the template literal still apply: no backticks, no dollar-brace.
+570: // Executed under test by ks799-consent-script-csp-and-execution.test.ts (jsdom
+571: // drives a real click through this script); admission by the response's own
+572: // CSP is asserted there too.
+573: // =============================================================================
+574: const CONSENT_SUBMIT_SCRIPT = `
+575:     (function () {
+576:       var form = document.getElementById('form');
+577:       var errorEl = document.getElementById('error');
+578:       if (!form) return;
+579:       var chosen = 'approve';
+580:       var btns = form.querySelectorAll('button[type="submit"]');
+581:       for (var i = 0; i < btns.length; i++) {
+582:         btns[i].addEventListener('click', function (e) { chosen = e.currentTarget.value || 'approve'; });
+583:       }
+584:       function readCookie(name) {
+585:         var parts = document.cookie ? document.cookie.split('; ') : [];
+586:         for (var j = 0; j < parts.length; j++) {
+587:           var eq = parts[j].indexOf('=');
+588:           if (eq > -1 && parts[j].slice(0, eq) === name) return decodeURIComponent(parts[j].slice(eq + 1));
+589:         }
+590:         return '';
+591:       }
+592:       function showError(msg) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
+593:       form.addEventListener('submit', function (ev) {
+594:         ev.preventDefault();
+595:         var token = readCookie('XSRF-TOKEN');
+596:         if (!token) { showError('Your session could not be verified. Please reload this page and try again.'); return; }
+597:         var body = {};
+598:         new FormData(form).forEach(function (v, k) { body[k] = v; });
+599:         body.action = chosen;
+600:         fetch(form.getAttribute('action'), {
+601:           method: 'POST',
+602:           credentials: 'same-origin',
+603:           redirect: 'manual',
+604:           headers: {
+605:             'Content-Type': 'application/json',
+606:             'Accept': 'application/json',
+607:             'X-XSRF-TOKEN': token,
+608:             'X-Requested-With': 'XMLHttpRequest'
+609:           },
+610:           body: JSON.stringify(body)
+611:         }).then(function (res) {
+612:           return res.json().then(
+613:             function (d) { return { status: res.status, data: d }; },
+614:             function () { return { status: res.status, data: {} }; }
+615:           );
+616:         }).then(function (r) {
+617:           if (r.data && r.data.redirect) { window.location.assign(r.data.redirect); return; }
+618:           var err = r.data && r.data.error;
+619:           showError((err && (err.description || err.message)) || ('Request failed (' + r.status + ').'));
+620:         }).catch(function () { showError('Network error. Please try again.'); });
+621:       });
+622:     })();
+623: `;
+624: 
+625: oauthRouter.get('/consent.js', (_req: Request, res: Response) => {
+626:   // helmet sets X-Content-Type-Options: nosniff, so the media type is
+627:   // load-bearing: a browser refuses to execute a script served as anything else.
+628:   res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+629:   res.setHeader('Cache-Control', 'no-store');
+630:   res.send(CONSENT_SUBMIT_SCRIPT);
+631: });
+632: 
+633: oauthRouter.post('/authorize', async (req: Request, res: Response) => {
+634:   try {
+635:     const {
+636:       email, password, client_id, redirect_uri, scope, state,
+637:       code_challenge, code_challenge_method, action,
+638:       // KS-804: the consent FORM does not send this, so it is normally
+639:       // undefined and defaults to 'code'. Destructured so a client that DOES
+640:       // put a value in the body is validated rather than ignored.
+641:       response_type,
+642:       // KS-781: the second factor. Same field name and same accepted shapes as
+643:       // `/api/auth/login` (6 digits = TOTP, 8 alphanumeric = backup code), so a
+644:       // client that can log in can authorize without learning a second dialect.
+645:       mfaCode,
+646:     } = req.body;
+647: 
+648:     // KS-797 — VALIDATE BEFORE REDIRECTING, INCLUDING ON DENY.
+649:     //
+650:     // This branch redirected to whatever `redirect_uri` arrived, before anything
+651:     // was checked and with no credentials required at all. Measured live: an
+652:     // unauthenticated POST with an unregistered client_id and
+653:     // `redirect_uri=https://evil.example.net/steal` returned
+654:     // `302 -> https://evil.example.net/steal?error=access_denied&state=xyz`,
+655:     // while the GET handler refused the same client_id with 400 invalid_client.
+656:     // An open redirect off the platform's own authorization endpoint, reachable
+657:     // by anyone. It carries no code, so it is a phishing primitive rather than a
+658:     // credential leak — and it needs no account, which the code-carrying half
+659:     // does.
+660:     if (action === 'deny') {
+661:       const denied = await resolveAuthorizeClient({
+662:         clientId: client_id,
+663:         redirectUri: redirect_uri,
+664:         responseType: response_type || 'code',
+665:         scope,
+666:         // A deny mints nothing, so PKCE cannot apply — the user is refusing,
+667:         // and demanding a challenge to decline would strand public clients on
+668:         // the consent page with no way out.
+669:         codeChallenge: 'n/a-deny',
+670:         codeChallengeMethod: code_challenge_method,
+671:       });
+672:       if (!denied.ok) return authorizeRefusal(res, denied);
+673: 
+674:       // KS-804 D1/D3 — BUILD THE URL, DO NOT CONCATENATE IT.
+675:       //
+676:       // This was `${redir}?error=...`. A registered URI that already carries a
+677:       // query (`https://app.test/cb?tenant=acme`) produced a second `?`, so the
+678:       // client never received `error=access_denied` at all — the deny outcome
+679:       // was silently undeliverable for exactly those apps. A fragment did the
+680:       // same, with the whole query landing inside it.
+681:       let denyUrl: URL;
+682:       try {
+683:         denyUrl = new URL(denied.redirectUri);
+684:       } catch {
+685:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_redirect_uri', description: 'redirect_uri must be a valid absolute URL' } });
+686:       }
+687:       denyUrl.searchParams.set('error', 'access_denied');
+688:       if (state) denyUrl.searchParams.set('state', state);
+689:       return respondAuthorizeRedirect(req, res, denyUrl.toString()); // KS-799
+690:     }
+691: 
+692:     // Validate required fields up-front — a missing/malformed body is an
+693:     // invalid_request (400), not a server error. Without this, undefined
+694:     // fields fell through to getUserByEmail() / new URL() and threw → 500
+695:     // (KS-144).
+696:     // KS-822 F-7: `redirect_uri` is NO LONGER required here. It was the only
+697:     // thing standing between this path and RULE 2c, and requiring it at the
+698:     // handler is what made the fallback dead on approve while GET and deny both
+699:     // had it. The resolver decides optionality now; `client_id` stays because
+700:     // without it there is no app to fall back TO, and email/password stay
+701:     // because this path authenticates.
+702:     if (!email || !password || !client_id) {
+703:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_request', description: 'email, password and client_id are required' } });
+704:     }
+705: 
+706:     // KS-797 — RESOLVE THE CLIENT BEFORE ANY CREDENTIAL LOGIC.
+707:     //
+708:     // This handler consulted neither `client_id` nor `redirect_uri` anywhere:
+709:     // measured against the GET block in the same file as the control,
+710:     // getAppByClientId 0 vs 2, redirectUris 0 vs 3, invalid_client 0 vs 3. With
+711:     // valid credentials it minted a code for an unregistered client and 302'd it
+712:     // to an attacker-chosen URL (RFC 6749 §3.1.2.3 and §4.1.1).
+713:     //
+714:     // Before the gate rather than after: an unregistered client should cost no
+715:     // password verify, and it discloses nothing the GET handler does not already
+716:     // disclose on the same input.
+717:     // KS-804: the SAME resolver, so POST now carries response_type, the scheme,
+718:     // PKCE-for-public-clients and scope validation — the three rules it had
+719:     // never enforced.
+720:     const client = await resolveAuthorizeClient({
+721:       clientId: client_id,
+722:       redirectUri: redirect_uri,
+723:       responseType: response_type || 'code',
+724:       scope,
+725:       codeChallenge: code_challenge,
+726:       codeChallengeMethod: code_challenge_method,
+727:     });
+728:     if (!client.ok) return authorizeRefusal(res, client);
+729: 
+730:     // KS-797 — and parse the target BEFORE minting, not after. The code used to
+731:     // be created and persisted at what is now the line below, and only then was
+732:     // `new URL(redirect_uri)` attempted; a malformed target therefore left an
+733:     // orphaned code behind every 400.
+734:     let redirectUrl: URL;
+735:     try {
+736:       redirectUrl = new URL(client.redirectUri);
+737:     } catch {
+738:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_redirect_uri', description: 'redirect_uri must be a valid absolute URL' } });
+739:     }
+740: 
+741:     // KS-781 — authenticate the user through the SAME gates as /api/auth/login.
+742:     //
+743:     // What used to be here was `getUserByEmail` + `verifyPassword` and nothing
+744:     // else: no second factor, no account lockout, no account-status check. That
+745:     // made this endpoint a second, password-only login — a password alone
+746:     // yielded an authorization code for an account whose front door refuses
+747:     // password-only login, which was confirmed at runtime, not inferred.
+748:     //
+749:     // The refusal is uniform (pen-test F-11): unknown email, wrong password,
+750:     // suspended, deactivated, SSO-only and locked-out all return the same 401.
+751:     // Only "this account has a second factor and you did not supply a usable
+752:     // code" is distinguishable, and it mirrors login's 403 MFA_REQUIRED.
+753:     // KS-781 F-1/F-6: type and normalise the credential fields before they reach
+754:     // any consumer. A malformed body is an invalid_request (400), in the same
+755:     // shape the hand-rolled checks above already return.
+756:     const creds = authorizeCredentialsSchema.safeParse({ email, password, mfaCode });
+757:     if (!creds.success) {
+758:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_request', description: 'email must be a valid address, password must be a non-empty string, and mfaCode (if supplied) must be 6 digits or an 8-character backup code' } });
+759:     }
+760: 
+761:     const sourceIp = (req.ip as string) || (req.socket?.remoteAddress as string) || '';
+762:     const gate = await enforcePasswordLoginGates({
+763:       email: creds.data.email,
+764:       password: creds.data.password,
+765:       mfaCode: creds.data.mfaCode,
+766:       sourceIp,
+767:       route: 'oauth/authorize',
+768:     });
+769: 
+770:     if (!gate.ok) {
+771:       if (gate.reason === 'mfa_required') {
+772:         return res.status(403).json({ success: false, error: { code: 'MFA_REQUIRED', message: 'MFA verification required', description: 'This account requires a second factor. Supply mfaCode.' } });
+773:       }
+774:       return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'invalid_credentials', description: 'Invalid email or password' } });
+775:     }
+776:     const user = gate.user;
+777: 
+778:     // Generate authorization code
+779:     const code = await createAuthorizationCode({
+780:       clientId: client_id,
+781:       userId: user.id,
+782:       // KS-797: the VALIDATED target, not the raw body field. On this path they
+783:       // are the same string (redirect_uri is required above), but the token
+784:       // exchange compares what was stored against what the client sends, so the
+785:       // stored value should be the one that passed the registration check.
+786:       redirectUri: client.redirectUri,
+787:       // KS-804: the VALIDATED scopes, not the raw body string. The body's
+788:       // `scope` was stored verbatim, so a code could carry scopes the app is
+789:       // not permitted to hold.
+790:       scope: client.grantedScopes.join(' '),
+791:       codeChallenge: client.codeChallenge,
+792:       codeChallengeMethod: client.codeChallengeMethod,
+793:     });
+794: 
+795:     // The target was resolved and parsed above, before the code was minted.
+796:     redirectUrl.searchParams.set('code', code);
+797:     if (state) redirectUrl.searchParams.set('state', state);
+798: 
+799:     respondAuthorizeRedirect(req, res, redirectUrl.toString()); // KS-799
+800: 
+801:   } catch (error: any) {
+802:     logger.error('OAuth authorize POST error', { error: error.message });
+803:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'server_error' } });
+804:   }
+805: });
+806: 
+807: // =============================================================================
+808: // POST /api/oauth/token — Token exchange
+809: // =============================================================================
+810: 
+811: /**
+812:  * KS-820 — read the client secret from either place RFC 6749 2.3.1 allows.
+813:  *
+814:  * HTTP Basic first, because the RFC says a server MUST support it and SHOULD
+815:  * prefer it. The body form is accepted too: it is what most SDKs send.
+816:  *
+817:  * The Basic credentials are only honoured when the userid half MATCHES the
+818:  * `client_id` the request is exchanging under. Without that check a caller
+819:  * could authenticate as one client and redeem another's code.
+820:  *
+821:  * Per the RFC the two halves are form-urlencoded before the base64, so they are
+822:  * decoded here; a secret containing `:` is not mangled because only the FIRST
+823:  * colon separates the pair.
+824:  */
+825: /**
+826:  * KS-823 — the client a token request is made under: `client_id` in the body
+827:  * (what public clients send, RFC 6749 §6) or the userid half of an HTTP Basic
+828:  * header (a confidential client authenticating per §2.3.1 need not repeat it in
+829:  * the body). Body wins when both are present; readClientSecret() then refuses a
+830:  * Basic userid that does not match it.
+831:  */
+832: function readClientId(req: Request): string | undefined {
+833:   const fromBody = (req.body as Record<string, unknown> | undefined)?.client_id;
+834:   if (typeof fromBody === 'string' && fromBody.length > 0) return fromBody;
+835:   const header = req.get('authorization');
+836:   if (header && /^Basic /i.test(header)) {
+837:     try {
+838:       const decoded = Buffer.from(header.slice(6).trim(), 'base64').toString('utf8');
+839:       const sep = decoded.indexOf(':');
+840:       if (sep > 0) return decodeURIComponent(decoded.slice(0, sep));
+841:     } catch {
+842:       // malformed — not an identification
+843:     }
+844:   }
+845:   return undefined;
+846: }
+847: 
+848: function readClientSecret(req: Request, clientId: string): string | undefined {
+849:   const header = req.get('authorization');
+850:   if (header && /^Basic /i.test(header)) {
+851:     try {
+852:       const decoded = Buffer.from(header.slice(6).trim(), 'base64').toString('utf8');
+853:       const sep = decoded.indexOf(':');
+854:       if (sep > 0) {
+855:         const user = decodeURIComponent(decoded.slice(0, sep));
+856:         const pass = decodeURIComponent(decoded.slice(sep + 1));
+857:         if (user === clientId && pass) return pass;
+858:       }
+859:     } catch {
+860:       // A malformed Authorization header is not a credential. Fall through to
+861:       // the body rather than 500 on it.
+862:     }
+863:   }
+864:   const fromBody = (req.body as Record<string, unknown> | undefined)?.client_secret;
+865:   return typeof fromBody === 'string' && fromBody.length > 0 ? fromBody : undefined;
+866: }
+867: 
+868: oauthRouter.post('/token', async (req: Request, res: Response) => {
+869:   try {
+870:     const { grant_type, code, redirect_uri, client_id, code_verifier, refresh_token } = req.body;
+871: 
+872:     if (grant_type === 'authorization_code') {
+873:       // Exchange authorization code for tokens
+874:       if (!code || !client_id || !redirect_uri) {
+875:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_request', description: 'code, client_id, and redirect_uri are required' } });
+876:       }
+877: 
+878:       // -----------------------------------------------------------------
+879:       // KS-820 — AUTHENTICATE THE CLIENT. This endpoint did not, at all.
+880:       //
+881:       // The destructure above named six fields and `client_secret` was not one
+882:       // of them, so a confidential app's code redeemed with no credential
+883:       // whatsoever. `getAppByClientId`'s own comment already asserted the
+884:       // opposite -- "the OAuth token/authorize endpoints resolve the app
+885:       // pre-auth (the client secret is the credential being checked)" -- which
+886:       // is how this survived: the claim was written down, so it read as done.
+887:       //
+888:       // RFC 6749 4.1.3: a confidential client MUST authenticate here. 2.3.1:
+889:       // the server MUST support HTTP Basic and MAY support the body, so both
+890:       // are accepted below.
+891:       //
+892:       // A PUBLIC app has no secret to keep, so ON THIS GRANT it authenticates
+893:       // no client: `clientAuthenticated` stays false and PKCE is the only
+894:       // thing that can carry the code.
+895:       //
+896:       // F-2a — what `exchangeCode` enforces is the FLOOR, not this rule, and
+897:       // this sentence used to call it "the invariant". See
+898:       // `services/oauth.ts` (the KS-820 block above the credential check),
+899:       // which states the floor and says in the same breath that calling it
+900:       // "the invariant" is exactly how the weaker half comes to be read as
+901:       // the whole one. THE rule is the one above: a code is redeemable only
+902:       // on the credential its client type demands — a verified secret for a
+903:       // confidential app, a verified PKCE challenge for a public one — and
+904:       // never on neither. That is enforced HERE, in the route.
+905:       //
+906:       // Worth naming: this is the FOURTH place one wrong sentence reached
+907:       // (comment → contract → test header → here), and the first three were
+908:       // corrected in #827 and #831 while this one survived inside the very
+909:       // commit that corrected them.
+910:       //
+911:       // SCOPE — this block is grant_type=authorization_code. The refresh_token
+912:       // branch below authenticates the client on the SAME terms (KS-823): it
+913:       // resolves the app (is_active pinned), requires a confidential app's
+914:       // secret, and additionally checks the refresh token's `client_id` claim
+915:       // against the presenting client. Until 2026-09-13 that branch
+916:       // authenticated no client at all; this sentence used to record that as
+917:       // an open defect so no reader would take the rule above as a universal
+918:       // and close the ticket as working-as-intended (the KS-820 failure mode:
+919:       // a claim written down reads as done).
+920:       //
+921:       // ALSO CLOSED, and named rather than left as a side effect: resolving the
+922:       // app pins `is_active = true`, so a DEACTIVATED app can no longer redeem
+923:       // a code that was minted while it was live. The old path never looked the
+924:       // app up at all.
+925:       // -----------------------------------------------------------------
+926:       const app = await getAppByClientId(client_id);
+927:       if (!app) {
+928:         // One refusal for unknown and for deactivated. `client_id` is public by
+929:         // design (it travels in the authorize URL), so this is not an oracle
+930:         // over a secret.
+931:         return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'invalid_client', description: 'Unknown or inactive client' } });
+932:       }
+933: 
+934:       let clientAuthenticated = false;
+935:       if (app.appType === 'confidential') {
+936:         const presented = readClientSecret(req, client_id);
+937:         if (!presented || !(await verifyClientSecret(client_id, presented))) {
+938:           logger.warn('OAuth token exchange refused: confidential client did not authenticate', { clientId: client_id });
+939:           return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'invalid_client', description: 'Client authentication failed' } });
+940:         }
+941:         clientAuthenticated = true;
+942:       }
+943: 
+944:       const result = await exchangeCode({
+945:         code,
+946:         clientId: client_id,
+947:         redirectUri: redirect_uri,
+948:         codeVerifier: code_verifier,
+949:         clientAuthenticated,
+950:       });
+951: 
+952:       if (!result) {
+953:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'Invalid or expired authorization code' } });
+954:       }
+955: 
+956:       // Get user and generate tokens.
+957:       //
+958:       // KS-790: this is a PRE-auth path — the caller holds an authorization
+959:       // code, not a bearer, and no tenant GUC is seeded — so the lookup goes
+960:       // through the SECURITY DEFINER carve-out (migration 039), exactly as the
+961:       // other pre-auth token flows do since KS-458. The plain, RLS-scoped
+962:       // `getUserById` answers nothing here under fail-closed RLS and the grant
+963:       // failed `invalid_grant: User not found` for EVERY code, MFA or not. The
+964:       // null guard below is unchanged: a user the carve-out cannot see is still
+965:       // refused.
+966:       const user = await userRepo.getUserByIdPreAuth(result.userId);
+967:       // KS-1150 (R-1): pin user.status === 'ACTIVE' here as the refresh grant below
+968:       // and POST /api/auth/refresh already do — a SUSPENDED user's code minted a
+969:       // pair (the window is a code minted before a suspension); ONE refusal and
+970:       // ONE description for missing and inactive, the refresh grant's.
+971:       if (!user || user.status !== 'ACTIVE') {
+972:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User inactive or not found' } });
+973:       }
+974: 
+975:       // KS-43: OAuth authorization_code grants are user-redirect-driven flows.
+976:       // The SPA / mobile app receives the code via browser redirect and
+977:       // exchanges it here. Default to 'browser' — confidential server-side
+978:       // clients can re-issue under 'api' if they want single-session.
+979:       const session = await createSession(user, req.ip, req.get('user-agent'), undefined, 'browser', 'oauth');
+980:       // KS-823: the pair is bound to the client that redeemed the code — the
+981:       // refresh grant checks the claim against the presenting client.
+982:       // KS-835: and it carries what the user GRANTED (result.scope, validated
+983:       // against the app's allow-list at /authorize), not the role default. The
+984:       // response's informational `scope` below now describes the token it
+985:       // accompanies.
+986:       const tokens = generateTokenPair(user, session.id, { clientId: client_id, scopes: parseScopeString(result.scope || '') });
+987: 
+988:       logger.info('OAuth token issued', { clientId: client_id, userId: user.id, scope: result.scope });
+989: 
+990:       return res.json({
+991:         access_token: tokens.accessToken,
+992:         refresh_token: tokens.refreshToken,
+993:         token_type: 'Bearer',
+994:         expires_in: tokens.expiresIn,
+995:         scope: result.scope || '',
+996:       });
+997: 
+998:     } else if (grant_type === 'refresh_token') {
+999:       // Refresh token grant
+1000:       if (!refresh_token) {
+1001:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_request', description: 'refresh_token is required' } });
+1002:       }
+1003: 
+1004:       // -----------------------------------------------------------------
+1005:       // KS-823 — AUTHENTICATE THE CLIENT on this grant too. Until 2026-09-13
+1006:       // the whole client-authentication block sat inside the
+1007:       // authorization_code branch: this one read no client_id, resolved no
+1008:       // app and never reached verifyClientSecret, so a CONFIDENTIAL app's
+1009:       // refresh token needed no credential, a DEACTIVATED app's refresh token
+1010:       // kept working while its codes stopped, and nothing checked that the
+1011:       // redeemer was the client the token was issued to.
+1012:       //
+1013:       // RFC 6749 §6: a confidential client MUST authenticate on the refresh
+1014:       // grant (secret by Basic or body, §2.3.1); a public client MUST send its
+1015:       // client_id. The client is resolved through the same definer lookup as
+1016:       // the code grant, which pins is_active — one refusal for unknown and for
+1017:       // deactivated, so the distinction is not an oracle. The client is
+1018:       // authenticated BEFORE the token is verified: a caller who cannot
+1019:       // identify itself learns nothing about the token it holds.
+1020:       // -----------------------------------------------------------------
+1021:       const refreshClientId = readClientId(req);
+1022:       if (!refreshClientId) {
+1023:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_request', description: 'client_id is required' } });
+1024:       }
+1025:       const refreshApp = await getAppByClientId(refreshClientId);
+1026:       if (!refreshApp) {
+1027:         return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'invalid_client', description: 'Unknown or inactive client' } });
+1028:       }
+1029:       if (refreshApp.appType === 'confidential') {
+1030:         const presented = readClientSecret(req, refreshClientId);
+1031:         if (!presented || !(await verifyClientSecret(refreshClientId, presented))) {
+1032:           logger.warn('OAuth refresh refused: confidential client did not authenticate', { clientId: refreshClientId });
+1033:           return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'invalid_client', description: 'Client authentication failed' } });
+1034:         }
+1035:       }
+1036: 
+1037:       // Verify and rotate refresh token. verifyRefreshToken THROWS
+1038:       // InvalidTokenError on a bad/expired/wrong-type token — without this
+1039:       // catch the throw lands in the route's outer handler and answers 500
+1040:       // for what is a client error (KS-255; regressed when the guard was
+1041:       // removed in #248, re-verified live 2026-06-12).
+1042:       //
+1043:       // KS-790: verifyRefreshToken comes from the file's static import now. It
+1044:       // used to be a `require('../services/jwt')` on this line — redundant with
+1045:       // the import at the top of the file, and the reason NO test had ever
+1046:       // reached this branch: under vitest a runtime require of a TypeScript
+1047:       // module answers "Cannot find module", the throw lands in the outer catch,
+1048:       // and every refresh-grant case reads 500 whatever it asserts (measured
+1049:       // 2026-09-13 while writing ks790-token-pre-auth-user-lookup.test.ts).
+1050:       let decoded;
+1051:       try {
+1052:         decoded = verifyRefreshToken(refresh_token);
+1053:       } catch {
+1054:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'Invalid refresh token' } });
+1055:       }
+1056: 
+1057:       // Audit A-05: refuse refresh tokens that have been denylisted elsewhere
+1058:       // (rotated via /api/auth/refresh, or revoked at logout). Without this
+1059:       // check, the OAuth grant_type=refresh_token path is a backdoor around
+1060:       // the rotation-replay defence.
+1061:       if (decoded.jti && (await isRefreshJtiDenylisted(decoded.jti))) {
+1062:         logger.warn('OAuth refresh token replay refused', { jti: decoded.jti, userId: decoded.userId });
+1063:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'Refresh token revoked' } });
+1064:       }
+1065: 
+1066:       // KS-823 — TOKEN BINDING. OAuth-minted refresh tokens carry the client
+1067:       // they were issued to (jwt.ts, `client_id`); a token that names another
+1068:       // client, or names none, is not this client's to redeem. "None" covers a
+1069:       // token minted before binding existed and a token minted by the
+1070:       // interactive login flow (which never passes through this grant) — both
+1071:       // refused, fail-closed: the cost is one re-authorization, the alternative
+1072:       // is a token redeemable by any party that holds it.
+1073:       if (decoded.client_id !== refreshClientId) {
+1074:         logger.warn('OAuth refresh refused: token not bound to the presenting client', { clientId: refreshClientId, bound: decoded.client_id ?? null, userId: decoded.userId });
+1075:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'Refresh token was not issued to this client' } });
+1076:       }
+1077: 
+1078:       // KS-790: the same pre-auth carve-out as the authorization_code grant
+1079:       // above — a refresh token is not a bearer and seeds no tenant context.
+1080:       const user = await userRepo.getUserByIdPreAuth(decoded.userId);
+1081:       if (!user || user.status !== 'ACTIVE') {
+1082:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_grant', description: 'User inactive or not found' } });
+1083:       }
+1084: 
+1085:       // KS-43: refresh_token grants typically come from the same client that
+1086:       // did the original authorization_code exchange (browser SPA / mobile).
+1087:       // Default to 'browser' to match the original session's policy.
+1088:       const session = await createSession(user, req.ip, req.get('user-agent'), undefined, 'browser', 'oauth');
+1089:       // KS-823: the re-issued pair stays bound to the same client.
+1090:       // KS-835: and keeps the token's OWN granted scopes — a refresh never widens
+1091:       // a grant back to the role default.
+1092:       const tokens = generateTokenPair(user, session.id, { clientId: refreshClientId, scopes: decoded.scopes ?? [] });
+1093: 
+1094:       return res.json({
+1095:         access_token: tokens.accessToken,
+1096:         refresh_token: tokens.refreshToken,
+1097:         token_type: 'Bearer',
+1098:         expires_in: tokens.expiresIn,
+1099:       });
+1100: 
+1101:     } else {
+1102:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'unsupported_grant_type', description: 'Only authorization_code and refresh_token are supported' } });
+1103:     }
+1104: 
+1105:   } catch (error: any) {
+1106:     logger.error('OAuth token error', { error: error.message });
+1107:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'server_error' } });
+1108:   }
+1109: });
+1110: 
+1111: // =============================================================================
+1112: // POST /api/oauth/revoke — Token revocation
+1113: // =============================================================================
+1114: 
+1115: oauthRouter.post('/revoke', async (_req: Request, res: Response) => {
+1116:   // OAuth 2.0 token revocation always returns 200 (even if token is invalid)
+1117:   // This prevents information leakage about token validity
+1118:   res.json({ success: true });
+1119: });
+1120: 
+1121: // =============================================================================
+1122: // APP MANAGEMENT (authenticated)
+1123: // =============================================================================
+1124: 
+1125: // KS-444: the create handler only truthy-checked name/redirectUris, so a body
+1126: // violating the published OAuthAppCreateRequest contract (the sweep sent
+1127: // `description: {}` — spec says string) was accepted and stored → 201. Validate
+1128: // against the published request schema (same shape as UpdateOAuthAppSchema below,
+1129: // with the spec's required fields required; trim user-facing strings per KS-202).
+1130: // The spec object is non-strict, so undeclared extras (logoUrl, …) stay
+1131: // permitted and are read from req.body as before.
+1132: //
+1133: // KS-821 — `appType` USED TO BE ONE OF THOSE EXTRAS, and that was the defect.
+1134: // It was read from `req.body` on the line after this schema parsed, so the
+1135: // closed set never applied to it and `POST /apps {"appType":"native"}` returned
+1136: // 201 for an app that is neither public nor confidential. It is declared here
+1137: // now, which is what makes KS-804's central rule non-negotiable at
+1138: // registration rather than the caller's choice.
+1139: //
+1140: // Case is FOLDED, not rejected: an exact-match rule elsewhere reads "Public"
+1141: // and "public" as different strings, and the one that reaches the database is
+1142: // what every later comparison sees. Normalising at the boundary means there is
+1143: // only ever one spelling to compare.
+1144: export const OAUTH_APP_TYPES = ['public', 'confidential'] as const;
+1145: 
+1146: // =============================================================================
+1147: // KS-1210: TWO GATES, TWO LISTS.
+1148: // Neither list in routes/users.ts is importable: PLATFORM_ADMIN_ROLES is a
+1149: // module-level const that is NOT exported (routes/users.ts:192, blob
+1150: // ea9f8da97a049f4de93d815ba7de0ed655ba65dd) and ADMIN_ROLES is local to that
+1151: // file's GET '/' handler (routes/users.ts:439, same blob). They are copied here
+1152: // BY NAME rather than exported from there, because routes/users.ts is another
+1153: // row's file this round. A drift cell in
+1154: // __tests__/ks1210-oauth-app-scopes-and-ownership.test.ts reads users.ts SOURCE
+1155: // and fails if either copy stops matching it, so the duplication cannot rot
+1156: // silently.
+1157: //
+1158: // Gate 1 (privileged scope): only a caller in the FOUR-role PLATFORM list may
+1159: // register or keep a privileged scope. certifications:write and webhooks:manage
+1160: // are deliberately NOT privileged in this change — a product choice, stated in
+1161: // the PR body so it can be tightened later.
+1162: // Gate 2 (ownership): the by-id routes answer 404 to a caller who is neither the
+1163: // app's creator nor in the SIX-role admin list. 404, not 403, so the existence of
+1164: // another user's app is not disclosed.
+1165: const OAUTH_PRIVILEGED_SCOPES: readonly string[] = ['admin:read', 'admin:write'];
+1166: const OAUTH_PLATFORM_ADMIN_ROLES: readonly string[] = ['SYSTEM_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'];
+1167: const OAUTH_APP_ADMIN_ROLES: readonly string[] = ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ISSUER_ADMIN', 'admin', 'super_admin', 'SUPER_ADMIN'];
+1168: 
+1169: function privilegedScopesIn(scopes?: readonly string[]): string[] {
+1170:   return (scopes || []).filter((s) => OAUTH_PRIVILEGED_SCOPES.includes(s));
+1171: }
+1172: function isOauthPlatformAdmin(role?: string): boolean {
+1173:   return !!role && OAUTH_PLATFORM_ADMIN_ROLES.includes(role);
+1174: }
+1175: function isOauthAppAdmin(role?: string): boolean {
+1176:   return !!role && OAUTH_APP_ADMIN_ROLES.includes(role);
+1177: }
+1178: // Returns the app when the caller may act on it, or null when it does not exist
+1179: // or is not theirs. Both cases are a 404 to the caller.
+1180: async function appVisibleTo(req: any, id: string) {
+1181:   const app = await getAppById(id);
+1182:   if (!app) return null;
+1183:   if (app.createdBy && app.createdBy === req.user?.userId) return app;
+1184:   if (isOauthAppAdmin(req.user?.role as string)) return app;
+1185:   return null;
+1186: }
+1187: const PRIVILEGE_REFUSED = 'that scope may only be registered by a platform administrator';
+1188: 
+1189: export const CreateOAuthAppSchema = z.object({
+1190:   name: z.string().trim().min(1).max(100),
+1191:   redirectUris: z.array(z.string().url()).min(1),
+1192:   // KS-1210: CLOSED to the published vocabulary. AVAILABLE_SCOPES is the nine
+1193:   // scopes in services/oauth.ts:57-67 (blob
+1194:   // 8995edec6a43b7623def6c9d1b002ed0a1b0dc86); anything else — '*',
+1195:   // 'subjects:erase', 'made:up' — is a 400 for EVERY caller, which alone closes
+1196:   // the sev-5 this ticket was raised for.
+1197:   // KS-451 is SUBSUMED, not dropped: a closed enum cannot admit a NUL byte
+1198:   // either, so the pgSafeStringSchema guard this replaces is strictly weaker.
+1199:   scopes: z.array(z.enum(AVAILABLE_SCOPES as unknown as [string, ...string[]])).optional(),
+1200:   description: z.string().trim().optional(),
+1201:   appType: z
+1202:     .string()
+1203:     .trim()
+1204:     .toLowerCase()
+1205:     .pipe(z.enum(OAUTH_APP_TYPES))
+1206:     .optional(),
+1207: });
+1208: 
+1209: oauthRouter.post('/apps', authenticate(), seedTenantGuc, async (req: any, res: Response) => {
+1210:   try {
+1211:     const parsed = CreateOAuthAppSchema.safeParse(req.body);
+1212:     if (!parsed.success) {
+1213:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'name and redirectUris (array) are required', details: parsed.error.errors } });
+1214:     }
+1215:     // KS-821: `appType` comes from parsed.data now — the schema's closed,
+1216:     // case-folded set — NOT from the raw body.
+1217:     const { name, description, redirectUris, scopes, appType } = parsed.data;
+1218: 
+1219:     // KS-1210 gate 1: a privileged scope may only be registered by a caller in the
+1220:     // FOUR-role PLATFORM list. Creation itself stays open to any authenticated user,
+1221:     // which is the ticket's question 2 answered deliberately rather than by omission.
+1222:     const privileged = privilegedScopesIn(scopes);
+1223:     if (privileged.length > 0 && !isOauthPlatformAdmin(req.user?.role as string)) {
+1224:       return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: PRIVILEGE_REFUSED, details: { scopes: privileged } } });
+1225:     }
+1226:     const { logoUrl, websiteUrl, privacyPolicyUrl } = req.body;
+1227: 
+1228:     const result = await createApp({
+1229:       name,
+1230:       description,
+1231:       redirectUris,
+1232:       scopes,
+1233:       appType: appType || 'public',
+1234:       organizationId: req.user?.organizationId,
+1235:       tenantId: req.user?.tenantId,
+1236:       logoUrl,
+1237:       websiteUrl,
+1238:       privacyPolicyUrl,
+1239:       createdBy: req.user?.userId,
+1240:     });
+1241: 
+1242:     res.status(201).json({
+1243:       success: true,
+1244:       app: {
+1245:         id: result.app.id,
+1246:         name: result.app.name,
+1247:         clientId: result.app.clientId,
+1248:         redirectUris: result.app.redirectUris,
+1249:         allowedScopes: result.app.allowedScopes,
+1250:         appType: result.app.appType,
+1251:       },
+1252:       clientSecret: result.clientSecret, // Only returned at creation time
+1253:       warning: result.clientSecret ? 'Store the client_secret securely — it cannot be retrieved later.' : undefined,
+1254:     });
+1255:   } catch (error: any) {
+1256:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: error.message } });
+1257:   }
+1258: });
+1259: 
+1260: oauthRouter.get('/apps', authenticate(), seedTenantGuc, async (req: any, res: Response) => {
+1261:   try {
+1262:     const apps = await listApps(req.user?.userId);
+1263:     res.json({
+1264:       success: true,
+1265:       apps: apps.map(a => ({
+1266:         id: a.id,
+1267:         name: a.name,
+1268:         description: a.description,
+1269:         clientId: a.clientId,
+1270:         redirectUris: a.redirectUris,
+1271:         allowedScopes: a.allowedScopes,
+1272:         appType: a.appType,
+1273:         logoUrl: a.logoUrl,
+1274:         websiteUrl: a.websiteUrl,
+1275:         isActive: a.isActive,
+1276:         createdAt: a.createdAt,
+1277:       })),
+1278:     });
+1279:   } catch (error: any) {
+1280:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: error.message } });
+1281:   }
+1282: });
+1283: 
+1284: oauthRouter.get('/apps/:id', authenticate(), seedTenantGuc, async (req: any, res: Response) => {
+1285:   try {
+1286:     // KS-1210 gate 2: owner-or-admin. A caller who is neither the creator nor in the
+1287:     // SIX-role admin list gets the same 404 as a missing app, so the existence of
+1288:     // someone else's app is not disclosed.
+1289:     const app = await appVisibleTo(req, req.params.id);
+1290:     if (!app) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1291:     res.json({ success: true, app });
+1292:   } catch (error: any) {
+1293:     // KS-144: a malformed id (non-UUID) makes the lookup throw (Postgres 22P02) —
+1294:     // that's a not-found, not a server error. KS-445: an id carrying a NUL byte /
+1295:     // invalid UTF-8 raises 22021/22P05 instead — the only input here is the id,
+1296:     // and an unstorable id is equally not a known app.
+1297:     if (error?.code === '22P02' || error?.code === '22021' || error?.code === '22P05' || /invalid input syntax|invalid byte sequence|untranslatable character/i.test(error?.message || '')) {
+1298:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1299:     }
+1300:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: error.message } });
+1301:   }
+1302: });
+1303: 
+1304: // KS-431: the update body was passed straight to updateApp, which builds a dynamic
+1305: // UPDATE from whatever keys/values it receives. A wrong-type value (the sweep sent
+1306: // `description: {}`) and the spec's `scopes` key (whose column is `allowed_scopes`, not
+1307: // `scopes`) both made Postgres throw → a raw 500. Validate against the published request
+1308: // schema (trim user-facing strings per KS-202) and remap `scopes` → the domain field.
+1309: export const UpdateOAuthAppSchema = z.object({
+1310:   name: z.string().trim().min(1).max(100).optional(),
+1311:   redirectUris: z.array(z.string().url()).min(1).optional(),
+1312:   // KS-1210: same closed vocabulary as the create path; KS-451's NUL guard is
+1313:   // subsumed by the enum.
+1314:   scopes: z.array(z.enum(AVAILABLE_SCOPES as unknown as [string, ...string[]])).optional(),
+1315:   description: z.string().trim().optional(),
+1316: });
+1317: 
+1318: oauthRouter.patch('/apps/:id', authenticate(), seedTenantGuc, async (req: any, res: Response) => {
+1319:   const parsed = UpdateOAuthAppSchema.safeParse(req.body);
+1320:   if (!parsed.success) {
+1321:     return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid request', details: parsed.error.errors } });
+1322:   }
+1323:   // KS-445: a malformed {id} can't match any app — answer 404 up-front instead
+1324:   // of letting Postgres throw. The 22P02 mapping below already covered plain
+1325:   // non-UUID ids, but an id carrying a NUL byte / invalid UTF-8 raises 22021
+1326:   // instead, which fell through to the raw 500. Every real app id is a UUID we
+1327:   // mint, so anything else is simply not a known app.
+1328:   if (!z.string().uuid().safeParse(req.params.id).success) {
+1329:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1330:   }
+1331:   // The spec field `scopes` is the domain's `allowedScopes` (DB column allowed_scopes);
+1332:   // updateApp camel→snake-maps its keys, so pass the domain name, never the raw `scopes`.
+1333:   const { scopes, ...rest } = parsed.data;
+1334:   const updates = scopes !== undefined ? { ...rest, allowedScopes: scopes } : rest;
+1335:   try {
+1336:     // KS-1210 gate 2 BEFORE gate 1, deliberately: a non-owner must not be able to
+1337:     // tell a 403 (the app exists, my scope was refused) from a 404 (no such app).
+1338:     if (!(await appVisibleTo(req, req.params.id))) {
+1339:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1340:     }
+1341:     // KS-1210 gate 1: the same privileged-scope rule as the create path.
+1342:     const privilegedUpdate = privilegedScopesIn(scopes);
+1343:     if (privilegedUpdate.length > 0 && !isOauthPlatformAdmin(req.user?.role as string)) {
+1344:       return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: PRIVILEGE_REFUSED, details: { scopes: privilegedUpdate } } });
+1345:     }
+1346:     const app = await updateApp(req.params.id, updates);
+1347:     if (!app) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1348:     res.json({ success: true, app });
+1349:   } catch (error: any) {
+1350:     // KS-144: a malformed id (non-UUID) makes the lookup throw (Postgres 22P02) —
+1351:     // that's a not-found, not a server error.
+1352:     if (error?.code === '22P02' || /invalid input syntax/i.test(error?.message || '')) {
+1353:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1354:     }
+1355:     // KS-445: with the id pre-validated as a UUID above, a 22021/22P05 here can
+1356:     // only come from a body value — the spec permits any string, but a NUL byte
+1357:     // / invalid UTF-8 sequence is unstorable in Postgres text. That's the
+1358:     // client's malformed input, not a server fault (mirrors the KS-283 mapping
+1359:     // on GET /authorize).
+1360:     if (error?.code === '22021' || error?.code === '22P05' || /invalid byte sequence|untranslatable character/i.test(error?.message || '')) {
+1361:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Malformed request parameters' } });
+1362:     }
+1363:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: error.message } });
+1364:   }
+1365: });
+1366: 
+1367: oauthRouter.delete('/apps/:id', authenticate(), seedTenantGuc, async (req: any, res: Response) => {
+1368:   try {
+1369:     // KS-1210 gate 2. CONSEQUENCE BEYOND THE TICKET, stated in the PR body: this
+1370:     // route previously answered 200 for an id that does not exist at all, because
+1371:     // updateApp's null return was never inspected. With the ownership lookup in
+1372:     // front of it, a non-existent app is now a 404 as well as a foreign one.
+1373:     if (!(await appVisibleTo(req, req.params.id))) {
+1374:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1375:     }
+1376:     await updateApp(req.params.id, { isActive: false });
+1377:     res.json({ success: true });
+1378:   } catch (error: any) {
+1379:     // KS-144: a malformed id (non-UUID) makes the lookup throw (Postgres 22P02) —
+1380:     // that's a not-found, not a server error. KS-445: NUL-byte / invalid-UTF-8
+1381:     // ids raise 22021/22P05 — same not-found semantics (id is the only input).
+1382:     if (error?.code === '22P02' || error?.code === '22021' || error?.code === '22P05' || /invalid input syntax|invalid byte sequence|untranslatable character/i.test(error?.message || '')) {
+1383:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1384:     }
+1385:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: error.message } });
+1386:   }
+1387: });
+1388: 
+1389: oauthRouter.post('/apps/:id/rotate-secret', authenticate(), seedTenantGuc, async (req: any, res: Response) => {
+1390:   try {
+1391:     // KS-1210 gate 2: rotating another user's client secret is the sharpest of the
+1392:     // four by-id routes — it would hand the caller working credentials.
+1393:     if (!(await appVisibleTo(req, req.params.id))) {
+1394:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1395:     }
+1396:     const newSecret = await rotateSecret(req.params.id);
+1397:     if (!newSecret) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Cannot rotate secret for public apps' } });
+1398:     res.json({
+1399:       success: true,
+1400:       clientSecret: newSecret,
+1401:       warning: 'Store the new client_secret securely — it cannot be retrieved later.',
+1402:     });
+1403:   } catch (error: any) {
+1404:     // KS-144: a malformed id (non-UUID) makes the lookup throw (Postgres 22P02) —
+1405:     // that's a not-found, not a server error. KS-445: NUL-byte / invalid-UTF-8
+1406:     // ids raise 22021/22P05 — same not-found semantics (id is the only input).
+1407:     if (error?.code === '22P02' || error?.code === '22021' || error?.code === '22P05' || /invalid input syntax|invalid byte sequence|untranslatable character/i.test(error?.message || '')) {
+1408:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'App not found' } });
+1409:     }
+1410:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: error.message } });
+1411:   }
+1412: });
+1413: 
+1414: // =============================================================================
+1415: // SCOPES INFO
+1416: // =============================================================================
+1417: 
+1418: oauthRouter.get('/scopes', (_req: Request, res: Response) => {
+1419:   res.json({
+1420:     scopes: AVAILABLE_SCOPES.map(s => {
+1421:       const [resource, action] = s.split(':');
+1422:       return { scope: s, resource, action, description: getScopeDescription(s) };
+1423:     }),
+1424:   });
+1425: });
+1426: 
+1427: function getScopeDescription(scope: string): string {
+1428:   const descriptions: Record<string, string> = {
+1429:     'verify:read': 'Verify documents against the blockchain registry',
+1430:     'documents:read': 'List and read your documents',
+1431:     'documents:write': 'Create, modify, and upload documents',
+1432:     'certifications:read': 'List and view certifications',
+1433:     'certifications:write': 'Issue and revoke certifications',
+1434:     'users:read': 'Read your user profile',
+1435:     'webhooks:manage': 'Create and manage webhook subscriptions',
+1436:     'admin:read': 'Read organisation settings and configuration',
+1437:     'admin:write': 'Modify organisation settings',
+1438:   };
+1439:   return descriptions[scope] || scope;
+1440: }
+1441: 
+1442: // =============================================================================
+1443: // CONSENT PAGE HTML
+1444: // =============================================================================
+1445: 
+1446: function generateConsentPage(params: {
+1447:   app: { name: string; logoUrl?: string; websiteUrl?: string };
+1448:   // KS-798: the consent form's hidden client_id field used to be derived from
+1449:   // params.redirectUri (a URL, rejected by the resolver's RULE 2a charset check
+1450:   // — `:` and `/` are not in `[A-Za-z0-9._~-]`), so a POST of the rendered form
+1451:   // answered 400 invalid_client and the flow could not complete. generateConsentPage
+1452:   // is now passed the real client_id explicitly; the GET handler sources it from
+1453:   // the resolved app record (canonical `sec_<hex>`), never from caller-echoed input.
+1454:   clientId: string;
+1455:   scopes: string[];
+1456:   state: string;
+1457:   redirectUri: string;
+1458:   codeChallenge?: string;
+1459:   codeChallengeMethod: string;
+1460: }): string {
+1461:   const scopeList = params.scopes.map(s =>
+1462:     `<li>${getScopeDescription(s)}</li>`
+1463:   ).join('');
+1464: 
+1465:   return `<!DOCTYPE html>
+1466: <html lang="en">
+1467: <head>
+1468:   <meta charset="UTF-8">
+1469:   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+1470:   <title>Authorize ${params.app.name} — Secuura</title>
+1471:   <style>
+1472:     * { margin: 0; padding: 0; box-sizing: border-box; }
+1473:     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+1474:            background: #0F1B33; color: white; display: flex; justify-content: center;
+1475:            align-items: center; min-height: 100vh; }
+1476:     .card { background: #1a2740; border-radius: 16px; padding: 40px; width: 420px;
+1477:             box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+1478:     .app-info { text-align: center; margin-bottom: 24px; }
+1479:     .app-info .name { font-size: 1.3rem; font-weight: 700; }
+1480:     .app-info .desc { font-size: 0.85rem; color: #888; margin-top: 4px; }
+1481:     .divider { border-top: 1px solid #334; margin: 20px 0; }
+1482:     .scopes h3 { font-size: 0.85rem; color: #aaa; margin-bottom: 8px; }
+1483:     .scopes ul { list-style: none; }
+1484:     .scopes li { padding: 8px 0; border-bottom: 1px solid #1f2f45; font-size: 0.9rem; }
+1485:     .scopes li::before { content: "\\2713"; color: #0CF7C4; margin-right: 8px; }
+1486:     .field { margin-bottom: 14px; }
+1487:     .field label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 4px; }
+1488:     .field input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334;
+1489:                    background: #0F1B33; color: white; font-size: 0.95rem; }
+1490:     .field input:focus { border-color: #0CF7C4; outline: none; }
+1491:     .buttons { display: flex; gap: 10px; margin-top: 20px; }
+1492:     .buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 1rem;
+1493:                       font-weight: 600; cursor: pointer; }
+1494:     .btn-approve { background: #0CF7C4; color: #0F1B33; }
+1495:     .btn-approve:hover { background: #0ad9a8; }
+1496:     .btn-deny { background: transparent; color: #888; border: 1px solid #334; }
+1497:     .btn-deny:hover { color: white; border-color: #666; }
+1498:     .error { color: #ff6b6b; font-size: 0.85rem; margin-bottom: 10px; display: none; }
+1499:     .powered { text-align: center; margin-top: 20px; font-size: 0.7rem; color: #444; }
+1500:   </style>
+1501: </head>
+1502: <body>
+1503:   <div class="card">
+1504:     <div class="app-info">
+1505:       <div class="name">${escapeHtml(params.app.name)}</div>
+1506:       <div class="desc">wants to access your Secuura account</div>
+1507:     </div>
+1508: 
+1509:     <div class="scopes">
+1510:       <h3>This app will be able to:</h3>
+1511:       <ul>${scopeList}</ul>
+1512:     </div>
+1513: 
+1514:     <div class="divider"></div>
+1515: 
+1516:     <div class="error" id="error"></div>
+1517: 
+1518:     <form method="POST" action="/api/oauth/authorize" id="form">
+1519:       <input type="hidden" name="client_id" value="${escapeHtml(params.clientId)}"/>
+1520:       <input type="hidden" name="redirect_uri" value="${escapeHtml(params.redirectUri)}"/>
+1521:       <input type="hidden" name="scope" value="${escapeHtml(params.scopes.join(' '))}"/>
+1522:       <input type="hidden" name="state" value="${escapeHtml(params.state)}"/>
+1523:       <input type="hidden" name="code_challenge" value="${escapeHtml(params.codeChallenge || '')}"/>
+1524:       <input type="hidden" name="code_challenge_method" value="${escapeHtml(params.codeChallengeMethod)}"/>
+1525: 
+1526:       <div class="field">
+1527:         <label>Email</label>
+1528:         <input type="email" name="email" required autofocus placeholder="you@company.com"/>
+1529:       </div>
+1530:       <div class="field">
+1531:         <label>Password</label>
+1532:         <input type="password" name="password" required placeholder="Your Secuura password"/>
+1533:       </div>
+1534:       <!--
+1535:         KS-781: the second factor. OPTIONAL, exactly as mfaCode is optional on
+1536:         /api/auth/login — accounts without MFA leave it blank and are unaffected.
+1537:         (No backticks in this comment: it lives inside a template literal, where
+1538:         a backtick ends the string. It did, and cost a build.)
+1539:         Without this field the form could not supply what the route now
+1540:         requires, so an MFA-enabled user would receive 403 MFA_REQUIRED with no
+1541:         way to answer it. Reuses the existing .field / input styling; no new
+1542:         rule and no new colour.
+1543:       -->
+1544:       <div class="field">
+1545:         <label>Authentication code (if your account has MFA enabled)</label>
+1546:         <input type="text" name="mfaCode" autocomplete="one-time-code"
+1547:                placeholder="6-digit code, or a backup code"/>
+1548:       </div>
+1549: 
+1550:       <div class="buttons">
+1551:         <button type="submit" name="action" value="approve" class="btn-approve">Authorize</button>
+1552:         <button type="submit" name="action" value="deny" class="btn-deny">Deny</button>
+1553:       </div>
+1554:     </form>
+1555: 
+1556:     <div class="powered">Powered by Secuura Platform K</div>
+1557:   </div>
+1558: 
+1559:   <!--
+1560:     KS-799: the gateway CSRF guard is double-submit-cookie and requires the
+1561:     X-XSRF-TOKEN *header*, which a top-level <form> POST cannot set — so a native
+1562:     submit is refused 403 CSRF_TOKEN_MISSING. The submit script below posts via
+1563:     fetch with the header read from the httpOnly:false XSRF-TOKEN cookie, keeping
+1564:     the CSRF choke point intact (no exemption, no CSRF-middleware change).
+1565: 
+1566:     Round 2 (Peter's review of PR #881): the script is EXTERNAL, not inline. This
+1567:     service sets its own CSP on every response (index.ts: helmet defaults,
+1568:     script-src 'self'), the api-gateway proxies /api/oauth/* and http-proxy's
+1569:     setHeader replaces the gateway's 'unsafe-inline' with ours, and the production
+1570:     nginx gateway sends script-src 'self' as well — browsers enforce the
+1571:     intersection. An inline script element is therefore refused at every layer
+1572:     and the page silently falls back to the native, headerless POST. A
+1573:     same-origin external script (src attribute) is admitted by 'self' everywhere.
+1574:     The bytes are served by GET /api/oauth/consent.js on this router
+1575:     (CONSENT_SUBMIT_SCRIPT).
+1576:   -->
+1577:   <script src="/api/oauth/consent.js"></script>
+1578: </body>
+1579: </html>`;
+1580: }
+1581: 
+1582: function escapeHtml(s: string): string {
+1583:   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+1584: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts
+1: // KS-1219: /api/oauth/authorize answered 500 server_error for an ARRAY-valued scope (a repeated query parameter, or a JSON array in the POST body): the compile-time
+2: // `as Record<string, string>` cast does nothing at run time, and parseScopeString calls `.split` on its argument. A malformed request is a 400 invalid_request. Each carrier is
+3: // driven through the real router on a loopback listener, with the same mocks as ks804-authorize-get-post-agree-per-rule.test.ts; a single string scope is the control.
+4: import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+5: import type { Server } from 'node:http';
+6: import express from 'express';
+7: 
+8: const state = vi.hoisted(() => ({
+9:   app: null as null | {
+10:     id: string; name: string; clientId: string; appType: string;
+11:     redirectUris: string[]; allowedScopes: string[];
+12:   },
+13: }));
+14: 
+15: const silent = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() };
+16: vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
+17: vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
+18: 
+19: vi.mock('../services/oauth', async (importOriginal) => {
+20:   const real = await importOriginal<Record<string, unknown>>();
+21:   return {
+22:     ...real,
+23:     createAuthorizationCode: vi.fn(async () => 'MINTED_AUTHORIZATION_CODE'),
+24:     createApp: vi.fn(),
+25:     getAppByClientId: vi.fn(async () => state.app),
+26:     getAppById: vi.fn(),
+27:   };
+28: });
+29: vi.mock('../services/accountLockout', () => ({
+30:   isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => undefined),
+31:   recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
+32: }));
+33: vi.mock('../services/session', () => ({
+34:   createSession: vi.fn(async () => ({ id: 's' })), getRedisClient: vi.fn(() => null),
+35:   validateSession: vi.fn(async () => true), updateSessionActivity: vi.fn(async () => undefined),
+36: }));
+37: vi.mock('../services/password', () => ({ verifyPassword: vi.fn(async () => true), hashPassword: vi.fn(async () => 'h') }));
+38: vi.mock('../repositories/userRepo', () => ({
+39:   getUserByEmail: vi.fn(async () => ({
+40:     id: 'user-1', email: 'u@secuura.local', status: 'ACTIVE', mfaEnabled: false,
+41:     passwordHash: 'h', role: 'OWNER', verificationLevel: 'BASIC',
+42:   })),
+43:   getUserById: vi.fn(async () => null), updateUser: vi.fn(async () => undefined),
+44:   getPlatformAdmin: vi.fn(async () => null), reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
+45: }));
+46: vi.mock('../services/jwt', () => ({ generateTokenPair: vi.fn(() => ({ accessToken: 'a', refreshToken: 'r', expiresIn: 900 })) }));
+47: vi.mock('../services/refreshDenylist', () => ({ isRefreshJtiDenylisted: vi.fn(async () => false) }));
+48: vi.mock('../middleware/authenticate', () => ({ authenticate: () => (_r: unknown, _s: unknown, n: () => void) => n() }));
+49: vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
+50: vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
+51: 
+52: let server: Server;
+53: let base: string;
+54: let createAuthorizationCode: ReturnType<typeof vi.fn>;
+55: 
+56: beforeAll(async () => {
+57:   const { oauthRouter } = await import('../routes/oauth');
+58:   ({ createAuthorizationCode } = (await import('../services/oauth')) as never);
+59:   const app = express();
+60:   app.use(express.json());
+61:   app.use('/api/oauth', oauthRouter);
+62:   await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
+63:   const addr = server.address();
+64:   base = `http://127.0.0.1:${typeof addr === 'object' && addr ? addr.port : 0}`;
+65: });
+66: afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
+67: 
+68: beforeEach(() => {
+69:   state.app = {
+70:     id: 'app-1', name: 'Test App', clientId: 'client-1', appType: 'confidential',
+71:     redirectUris: ['https://app.example.com/cb'], allowedScopes: ['openid', 'profile'],
+72:   };
+73:   vi.clearAllMocks();
+74: });
+75: 
+76: const CB = encodeURIComponent('https://app.example.com/cb');
+77: const GET_BASE = `client_id=client-1&redirect_uri=${CB}&response_type=code&state=xyz`;
+78: 
+79: async function get(extraQuery: string): Promise<{ status: number; message: string | undefined }> {
+80:   const res = await fetch(`${base}/api/oauth/authorize?${GET_BASE}${extraQuery}`, { redirect: 'manual' });
+81:   const text = await res.text();
+82:   let message: string | undefined;
+83:   try { message = JSON.parse(text)?.error?.message; } catch { /* html consent page */ }
+84:   return { status: res.status, message };
+85: }
+86: 
+87: async function post(body: Record<string, unknown>): Promise<{ status: number; message: string | undefined }> {
+88:   const res = await fetch(`${base}/api/oauth/authorize`, {
+89:     method: 'POST',
+90:     headers: { 'content-type': 'application/json' },
+91:     redirect: 'manual',
+92:     body: JSON.stringify({ client_id: 'client-1', redirect_uri: 'https://app.example.com/cb', ...body }),
+93:   });
+94:   const text = await res.text();
+95:   let message: string | undefined;
+96:   try { message = JSON.parse(text)?.error?.message; } catch { /* redirect */ }
+97:   return { status: res.status, message };
+98: }
+99: 
+100: describe('KS-1219: /api/oauth/authorize refuses an array-valued scope', () => {
+101:   it('RED KS-1219 R1 GET with a repeated scope parameter is 400 invalid_request, not 500', async () => {
+102:     expect(await get('&scope=openid&scope=profile')).toEqual({ status: 400, message: 'invalid_request' });
+103:   });
+104: 
+105:   it('RED KS-1219 R2 POST deny with a JSON array scope is 400 invalid_request, not 500', async () => {
+106:     expect(await post({ action: 'deny', scope: ['openid', 'profile'] })).toEqual({ status: 400, message: 'invalid_request' });
+107:   });
+108: 
+109:   it('RED KS-1219 R3 POST approve with a JSON array scope is 400 invalid_request and mints no code', async () => {
+110:     const reply = await post({ email: 'u@secuura.local', password: 'correct-horse', action: 'approve', scope: ['openid'] });
+111:     expect(reply).toEqual({ status: 400, message: 'invalid_request' });
+112:     expect(createAuthorizationCode).not.toHaveBeenCalled();
+113:   });
+114: 
+115:   it('CONTROL KS-1219 C1 GET with one string scope still serves the consent page', async () => {
+116:     expect((await get('&scope=openid')).status).toBe(200);
+117:   });
+118: 
+119:   it('CONTROL KS-1219 C2 GET with no scope still serves the consent page', async () => {
+120:     expect((await get('')).status).toBe(200);
+121:   });
+122: 
+123:   it('CONTROL KS-1219 C3 POST deny with one string scope still redirects with access_denied', async () => {
+124:     expect((await post({ action: 'deny', scope: 'openid' })).status).toBe(302);
+125:   });
+126: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "8894c7486f82f6eb682fecb879791f53312537b1",
+ "head_sha": "aaa4853377e2bfe2e1fad694a39b8230c09361df",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/routes/oauth.ts",
+   "added": "10",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts",
+   "added": "126",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "10",
+   "0",
+   "Blockchain/Dev/services/auth/src/routes/oauth.ts"
+  ],
+  [
+   "126",
+   "0",
+   "Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 6,
+  "failed": 3
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 6,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1200 failed=0 | after: total=1206 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 6\n",
+ "checker_summary": [
+  "PASS A6 whole services/auth suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/auth: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +136/-0 test=src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

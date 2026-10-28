@@ -1,0 +1,71 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts b/Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts
+--- a/Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts
++++ b/Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts
+@@ -216,8 +216,8 @@
+ //           key committed before that UPDATE's snapshot is always seen and rolls the whole transaction back (m-1);
+ //       (2) a key with NO connector id (NULL or blank) authenticates as the principal `connector:api-key`, which is also the literal
+ //           label, so that principal is shared by every such key and by legacy rows from before ticket KS-869. It cannot identify
+-//           one connector, and no key table can make an erasure by it safe (a guard that reads live keys cannot see a key that was
+-//           deleted or rotated away). The erasure REFUSES it (403, nothing written) before it reads any key. A key without an id
++//           one connector, and no key table can make an erasure by it safe (a guard that reads the key table cannot see a key that was
++//           DELETED; a rotated key is only deactivated or shortened and is still read). The erasure REFUSES it (403, nothing written) before it reads any key. A key without an id
+ //           could never erase (its stored id is not the label); this closes the key that stores the label itself.
+ //   - NOT closed here (M-1 path 1): the security service lets an organisation-scoped admin mint a key for ANOTHER
+ //     organisation with any connector id, and this erasure trusts the key row, so that key can erase that organisation.
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1579-two-stale-statements-about-the-erase-connector-guard-are-corrected.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1579-two-stale-statements-about-the-erase-connector-guard-are-corrected.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1579-two-stale-statements-about-the-erase-connector-guard-are-corrected.test.ts
+@@ -0,0 +1,43 @@
++// KS-1579 items 3 and 4 (originate, the erase-connector guard): two statements in the tree had gone stale after round 6 of KS-695.
++//   item 4: the header comment of services/connectorOrganisationErasure.ts said the guard cannot see a key that "was deleted or rotated away". A rotation only deactivates or shortens the old key
++//           (an UPDATE), and the guard reads inactive keys, so a rotated key IS seen; only a DELETED key escapes it.
++//   item 3: the title of a unit cell in ks695-ask3-erase-connector-refusals.test.ts said a key with a NULL or empty connector id "already got 403 from the ownership comparison". After round 6 the 403 for
++//           those keys comes from the fallback-principal refusal; the cell pins the status, not the reason, so the title is what a reader trusts.
++// These cells read the two files as text. R1 and R2 are the product-comment cells (red until the comment is corrected); T1 and T2 pin the corrected cell title; C1 to C3 pin what must not move.
++import { describe, it, expect } from '@jest/globals';
++import { readFileSync } from 'fs';
++import { join } from 'path';
++
++const ERASURE_SRC = readFileSync(join(__dirname, '..', 'services', 'connectorOrganisationErasure.ts'), 'utf8');
++const REFUSALS_SRC = readFileSync(join(__dirname, 'ks695-ask3-erase-connector-refusals.test.ts'), 'utf8');
++
++describe('KS-1579: the erase-connector guard statements say what the code does', () => {
++  it('RED KS-1579 R1 the guard header no longer says a key can be "deleted or rotated away" from the guard', () => {
++    expect(ERASURE_SRC).not.toContain('deleted or rotated away');
++  });
++
++  it('RED KS-1579 R2 the guard header says a rotated key is only deactivated or shortened and is still read', () => {
++    expect(ERASURE_SRC).toContain('a rotated key is only deactivated or shortened and is still read');
++  });
++
++  it('control KS-1579 T1 the refusals cell title no longer claims the 403 comes from the ownership comparison', () => {
++    expect(REFUSALS_SRC).not.toContain('already got 403 from the ownership comparison');
++  });
++
++  it('control KS-1579 T2 the refusals cell title names the fallback-principal refusal', () => {
++    expect(REFUSALS_SRC).toContain('(now by the fallback-principal refusal, not the ownership comparison)');
++  });
++
++  it('control KS-1579 C1 the guard header still says the erasure REFUSES a key with no connector id before it reads any key', () => {
++    expect(ERASURE_SRC).toContain('The erasure REFUSES it (403, nothing written) before it reads any key.');
++  });
++
++  it('control KS-1579 C2 the refusals cell is still there under its M-2 liveness title', () => {
++    expect(REFUSALS_SRC).toContain('CONTROL - M-2 liveness is UNCHANGED');
++  });
++
++  it('control KS-1579 C3 both files were read (the instrument is not reading an empty string)', () => {
++    expect(ERASURE_SRC.length).toBeGreaterThan(1000);
++    expect(REFUSALS_SRC.length).toBeGreaterThan(1000);
++  });
++});
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts
+@@ -279,4 +279,4 @@
+-  it('CONTROL - M-2 liveness is UNCHANGED: a key with a NULL, and one with an empty, connector id already got 403 from the ownership comparison and still does', async () => {
++  it('CONTROL - M-2 liveness is UNCHANGED: a key with a NULL, and one with an empty, connector id is still refused 403 (now by the fallback-principal refusal, not the ownership comparison)', async () => {
+     keyRows['key-null-695'] = { organization_id: ORG, connector_id: null };
+     keyRows['key-empty-695'] = { organization_id: ORG, connector_id: '' };
+     for (const keyId of ['key-null-695', 'key-empty-695']) {

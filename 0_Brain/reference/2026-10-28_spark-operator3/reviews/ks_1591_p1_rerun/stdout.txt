@@ -1,0 +1,44 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 11489, "total_tokens": 12497, "completion_tokens": 1008, "prompt_tokens_details": {"cached_tokens": 8192}}, "seconds": 34.8, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 11489, "completion_tokens": 1008, "seconds": 34.8, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Major",
+   "claim": "The fix only changes isPlatformRole in packages/shared, but the ticket explicitly names requireKeyAdmin's own toUpperCase in services/security/src/index.ts as a second admission point; that path is untouched, so the dotless-i/long-s/array spellings may still be admitted there.",
+   "evidence": "keyRevokePolicy.ts:140-144 `export function isPlatformRole(role: string | undefined): boolean { ... if (typeof role !== 'string') return false; return PLATFORM_ROLES.has(role.replace(/[a-z]/g, (ch) => ch.toUpperCase())); }`; ticket: \"services/security/src/index.ts \u2014 requireKeyAdmin's toUpperCase\"",
+   "test_or_reason": "The diff touches only keyRevokePolicy.ts and the new test file; no change to services/security/src/index.ts, and no test covers requireKeyAdmin. The ticket's own 'Where' section lists it as a second location to fix.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Major",
+   "claim": "The ticket's acceptance criterion 'reject a non-string role outright, in the one shared definition so every caller inherits it' is not met because the shared definition is not the only definition; requireKeyAdmin still has its own toUpperCase comparison that is not fixed.",
+   "evidence": "Ticket: \"Compare against an exact ASCII-folded string and reject a non-string role outright, in the one shared definition so every caller inherits it.\" and \"services/security/src/index.ts \u2014 requireKeyAdmin's toUpperCase\"",
+   "test_or_reason": "The diff only modifies isPlatformRole; requireKeyAdmin is not touched, so the 'one shared definition' goal is not achieved.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Minor",
+   "claim": "The new test file's claim that 'every spelling the platform really uses is still admitted' is not fully pinned: the test only checks SUPER_ADMIN/SYSTEM_ADMIN in a few casings, but does not test the exact set of role strings that the platform actually issues (e.g., from auth service), so the control is incomplete.",
+   "evidence": "test file lines 37-50: C1-C3 test only 'SUPER_ADMIN', 'SYSTEM_ADMIN', 'super_admin', 'system_admin', 'Super_Admin', 'sYsTeM_aDmIn'",
+   "test_or_reason": "The comment in the test header says 'every spelling the platform really uses is still admitted', but the test does not enumerate the platform's actual role vocabulary; it only tests a few variants.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The fix's ASCII fold via regex replace is functionally equivalent to toUpperCase for ASCII letters, but the comment says 'every other character untouched' \u2014 this is true for the regex, but the code does not explicitly reject non-ASCII characters that are not in the regex; they pass through unchanged and could still match if the set contained them (it doesn't, but the comment's claim of 'exact ASCII fold' is slightly overstated).",
+   "evidence": "keyRevokePolicy.ts:144 `return PLATFORM_ROLES.has(role.replace(/[a-z]/g, (ch) => ch.toUpperCase()));` and comment line 142 \"Only an ASCII fold is applied (a-z to A-Z, every other character untouched)\"",
+   "test_or_reason": "The regex only replaces a-z; any other character (including non-ASCII) is left as-is, so the fold is not a full ASCII fold (e.g., it does not fold other Unicode case pairs), but since the set only contains ASCII uppercase, it is safe. The comment's wording is slightly imprecise.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The ticket's 'Reachability is NOT established' caveat is not addressed by the PR; the fix is a hardening measure but does not prove that any issuer can actually sign a dotless-i role, so the severity remains a nit per the ticket's own framing.",
+   "evidence": "Ticket: \"Reachability is NOT established, and that is the first thing to settle ... The gate did not test whether any issuer, user-management path or seed can store or sign one, and nor have I. So the severity here is a nit until someone measures that\"",
+   "test_or_reason": "The PR does not add any test or measurement of reachability; it only changes the predicate.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "NO GO"
+}
+
+STDERR:

@@ -1,0 +1,129 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts b/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+@@ -187,3 +187,7 @@
++// KS-1240: the longest the gateway waits for auth's connector-token exchange or security's key-validate answer. Neither fetch carried a timeout, so an upstream that never answered held the
++// caller's request for as long as the socket lived. On expiry the fetch rejects and the existing catch in each function answers exactly as it already did for an unreachable upstream (null).
++const UPSTREAM_AUTH_FETCH_TIMEOUT_MS = 5_000;
++
+ /**
+  * Exchange a validated sk_ key for a short-lived connector JWT via auth.
+  * Returns null (and logs) on failure — downstream Bearer-only services will
+@@ -198,6 +202,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ apiKey: key }),
++      signal: AbortSignal.timeout(UPSTREAM_AUTH_FETCH_TIMEOUT_MS),
+     });
+     if (!resp.ok) {
+       console.error(`[gateway] connector-token exchange failed (${resp.status}) — downstream Bearer-only services will 401 this connector request`);
+@@ -228,6 +233,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ key }),
++      signal: AbortSignal.timeout(UPSTREAM_AUTH_FETCH_TIMEOUT_MS),
+     });
+     if (!resp.ok) {
+       apiKeyCache.set(key, { result: null, expiresAt: Date.now() + 30_000 });
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts
+@@ -0,0 +1,97 @@
++// KS-1240 (api-gateway middleware/auth.ts getConnectorBearer and validateApiKey): both fetches carried no timeout, so an upstream (auth's connector-token exchange, security's key-validate) that never
++// answered held the caller's request open with no bound. T1/T2 pin that each fetch is given an abort signal built from AbortSignal.timeout with a bounded value; T3/T4 drive an upstream that never
++// answers and fire that signal: the call must settle with null (the existing unreachable-upstream answer) instead of hanging. A call still pending after 300 ms is reported as the string HUNG, so a
++// hang is a red assertion, not a stuck run. C1 to C3 keep the answers for a healthy upstream exactly as they were.
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++import { getConnectorBearer, validateApiKey, apiKeyCache, connectorBearerCache } from '../middleware/auth';
++
++const fetchMock = vi.fn();
++vi.stubGlobal('fetch', fetchMock);
++
++let timeoutSpy: ReturnType<typeof vi.spyOn>;
++let controller: AbortController;
++
++beforeEach(() => {
++  fetchMock.mockReset();
++  apiKeyCache.clear();
++  connectorBearerCache.clear();
++  controller = new AbortController();
++  timeoutSpy = vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => controller.signal);
++});
++
++afterEach(() => {
++  timeoutSpy.mockRestore();
++});
++
++function neverAnswering(): void {
++  fetchMock.mockImplementation(
++    (_url: string, init?: { signal?: AbortSignal }) =>
++      new Promise((_resolve, reject) => {
++        init?.signal?.addEventListener('abort', () => reject(new Error('aborted by signal')));
++      }),
++  );
++}
++
++async function settled<T>(pending: Promise<T>): Promise<T | 'HUNG'> {
++  return Promise.race([pending, new Promise<'HUNG'>((resolve) => setTimeout(() => resolve('HUNG'), 300))]);
++}
++
++describe('KS-1240: the gateway key-exchange and key-validate fetches are bounded', () => {
++  it('RED KS-1240 T1 the connector-token exchange fetch is given a timeout signal', async () => {
++    fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { token: 't1', expiresIn: 600 } }) });
++    await getConnectorBearer('sk_ks1240_t1');
++    const init = fetchMock.mock.calls[0][1] as { signal?: unknown };
++    expect(init.signal).toBeInstanceOf(AbortSignal);
++    expect(timeoutSpy).toHaveBeenCalledTimes(1);
++    const ms = timeoutSpy.mock.calls[0][0] as number;
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(30000);
++  });
++
++  it('RED KS-1240 T2 the key-validate fetch is given a timeout signal', async () => {
++    fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { valid: false } }) });
++    await validateApiKey('sk_ks1240_t2');
++    const init = fetchMock.mock.calls[0][1] as { signal?: unknown };
++    expect(init.signal).toBeInstanceOf(AbortSignal);
++    expect(timeoutSpy).toHaveBeenCalledTimes(1);
++    const ms = timeoutSpy.mock.calls[0][0] as number;
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(30000);
++  });
++
++  it('RED KS-1240 T3 an exchange that never answers settles with null once the signal fires', async () => {
++    neverAnswering();
++    const pending = getConnectorBearer('sk_ks1240_t3');
++    controller.abort();
++    expect(await settled(pending)).toBeNull();
++  });
++
++  it('RED KS-1240 T4 a validate that never answers settles with null once the signal fires and caches nothing', async () => {
++    neverAnswering();
++    const pending = validateApiKey('sk_ks1240_t4');
++    controller.abort();
++    expect(await settled(pending)).toBeNull();
++    expect(apiKeyCache.has('sk_ks1240_t4')).toBe(false);
++  });
++
++  it('control KS-1240 C1 a healthy exchange still returns the connector token and caches it', async () => {
++    fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { token: 'jwt-c1', expiresIn: 600 } }) });
++    expect(await getConnectorBearer('sk_ks1240_c1')).toBe('jwt-c1');
++    expect(connectorBearerCache.get('sk_ks1240_c1')?.token).toBe('jwt-c1');
++  });
++
++  it('control KS-1240 C2 a healthy validate still returns the key metadata', async () => {
++    fetchMock.mockResolvedValue({
++      ok: true,
++      json: async () => ({ data: { valid: true, connectorId: 'platform-s:c2', scopes: ['documents:write'], organizationId: 'org-c2', tenantId: 'ten-c2' } }),
++    });
++    const meta = await validateApiKey('sk_ks1240_c2');
++    expect(meta?.connectorId).toBe('platform-s:c2');
++    expect(meta?.tenantId).toBe('ten-c2');
++  });
++
++  it('control KS-1240 C3 a refused exchange (HTTP 502) still returns null', async () => {
++    fetchMock.mockResolvedValue({ ok: false, status: 502, json: async () => ({}) });
++    expect(await getConnectorBearer('sk_ks1240_c3')).toBeNull();
++  });
++});

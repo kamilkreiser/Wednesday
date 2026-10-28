@@ -1,0 +1,51 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 8044, "total_tokens": 9241, "completion_tokens": 1197, "prompt_tokens_details": {"cached_tokens": 1024}}, "seconds": 42.1, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 8044, "completion_tokens": 1197, "seconds": 42.1, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Major",
+   "claim": "The fix changes the runtime prototype of every AppError subclass instance, which can alter behavior of any code that relies on `instanceof` checks or prototype identity, but the PR does not demonstrate that all twelve services mounting the shared package are unaffected.",
+   "evidence": "Blockchain/Dev/packages/shared/src/errors/index.ts:44 `Object.setPrototypeOf(this, new.target.prototype);`",
+   "test_or_reason": "The ticket itself notes 'Not established: whether any other `instanceof <subclass>` exists outside `services/auth` (the one grep covered `Blockchain/Dev/services` and found only the two above).' The change is in a shared package mounted by twelve services; the PR only tests the shared package's own error classes, not the consumers.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Major",
+   "claim": "The PR changes the 422 response shape by now including `details` in the error payload, but the ticket explicitly says this is a visible response change that must be deliberately decided and checked against the published 422 shape; the PR does not show that decision or check.",
+   "evidence": "Ticket: 'decide deliberately that 422 responses now carry `details` (a visible response change; check the published 422 shape first).' Test at Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts:71 `expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'bad', details: { field: 'name' } });`",
+   "test_or_reason": "The test pins the new behavior (details present) but no evidence in facts.json or the diff shows that the published 422 shape was checked or that clients are unaffected.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Major",
+   "claim": "The PR claims to fix the root cause of `instanceof` failures and dropped `details`, but the ticket's measured evidence is from `services/auth`, not from `packages/shared`; the PR only changes the shared package and does not verify that the auth service's `errorHandler` (which has its own `details` branch) now works with the shared change.",
+   "evidence": "Ticket: 'Measured 2026-10-12 by driving the real `errorHandler` in `services/auth`...' and 'The dead branch: `services/auth/src/middleware/errorHandler.ts:296`...' The diff only touches `Blockchain/Dev/packages/shared/src/errors/index.ts` and its test.",
+   "test_or_reason": "The new test exercises the shared `errorHandler` (imported from '../errors'), not the auth service's handler. The ticket's root cause is in the shared constructor, but the fix's effect on the auth service is unmeasured.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Minor",
+   "claim": "The test file's `run` helper passes `undefined` for `_req` and `_next` to `errorHandler`, which is fine for the current signature but does not exercise the real Express middleware chain, so the test does not prove the handler's behavior in a real request.",
+   "evidence": "Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts:45 `errorHandler(err, undefined, res, undefined);`",
+   "test_or_reason": "The test only checks the handler's direct output; it does not verify that the handler is wired correctly in any service.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test file's `FACTORIES` array includes `RateLimitError` with `new RateLimitError(5)`, but the constructor signature is `retryAfter?: number`; the test does not assert the `details` shape for `RateLimitError`, so the test does not pin the `retryAfter` behavior.",
+   "evidence": "Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts:28 `{ name: 'RateLimitError', make: () => new RateLimitError(5), cls: RateLimitError, status: 429 }`",
+   "test_or_reason": "The test only checks `instanceof` and `statusCode`; it does not check `details` for `RateLimitError`, so a regression in `retryAfter` would not be caught.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test file's `run` helper uses a fake `res` object that does not implement the full `Response` interface, so the test may not catch issues with `res.status` or `res.json` being called incorrectly in the real handler.",
+   "evidence": "Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts:35-44 `const res = { status(code: number) { ... }, json(payload: unknown) { ... } } as unknown as Response;`",
+   "test_or_reason": "The fake is minimal; it does not verify that `status` is called before `json` or that the handler returns properly.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "NO GO"
+}
+
+STDERR:

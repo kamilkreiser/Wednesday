@@ -1,0 +1,43 @@
+{
+  "findings": [
+    {
+      "severity": "Note",
+      "claim": "The fix only guards the `scope` parameter; other authorize parameters (e.g. `client_id`, `redirect_uri`, `state`, `code_challenge`) that arrive as arrays or non-strings still reach the resolver and can throw or misbehave, despite the ticket's recommendation to refuse any non-string authorize parameter.",
+      "evidence": "routes/oauth.ts:396 `if (scope !== undefined && typeof scope !== 'string')` — only `scope` is checked; the resolver still destructures `clientId`, `redirectUri`, `responseType`, `codeChallenge`, `codeChallengeMethod` without type guards (routes/oauth.ts:239).",
+      "test_or_reason": "The ticket's Recommendation says 'Refuse a non-string `scope` (and, by the same shape, any other non-string authorize parameter) with 400 `invalid_request`', but the diff only adds the `scope` guard; no test covers other array-valued parameters."
+    },
+    {
+      "severity": "Note",
+      "claim": "The POST handler's `req.body` is not parsed as JSON in the test setup, so the JSON-array body carrier is not actually exercised through the real express.json() middleware; the test's `post` helper sends `content-type: application/json` but the test app only calls `app.use(express.json())` before mounting the router, which is correct, but the test does not assert that the body is parsed as JSON — it relies on the middleware being present, which it is.",
+      "evidence": "ks1219-authorize-refuses-an-array-valued-scope.test.ts:60 `app.use(express.json());` and :88-92 `headers: { 'content-type': 'application/json' }, body: JSON.stringify({...})` — the middleware is presenthol, so the JSON array is parsed; this is fine, but the test does not verify that the array actually reaches the resolver as an array (it could be stringified differently).",
+      "test_or_reason": "The test's `post` helper sends a JSON body with an array; the express.json() middleware parses it, so the array reaches `req.body.scope` as an array. The test passes, but it does not assert the array shape is preserved; it only checks the 400 response."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test file's comment claims 'the same mocks as ks804-authorize-get-post-agree-per-rule.test.ts', but the mock for `../services/oauth` spreads the real module and overrides only a few functions; the real `parseScopeString` and `validateScopes` are used, which is good, but the comment does not mention that `getAppByClientId` is mocked to return a fixed app, so the resolver's client/redirect rules are not exercised for the array cases.",
+      "evidence": "ks1219-authorize-refuses-an-array-valued-scope.test.ts:19-28 `vi.mock('../services/oauth', async (importOriginal) => { const real = await importOriginal(); return { ...real, createAuthorizationCode: vi.fn(...), createApp: vi.fn(), getAppByClientId: vi.fn(async () => state.app), getAppById: vi.fn() }; });`",
+      "test_or_reason": "The test's `getAppByClientId` always returns a valid app, so the array-scope guard is tested in isolation; the real `parseScopeString` is used, but the test does not verify that the guard fires before any DB lookup (it does, since the guard is in the resolver before `getAppByClientId`)."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test's `get` helper parses the response text as JSON and extracts `error.message`, but for a 400 response the body is JSON with `error.message`; for a 200 consent page it is HTML, so the `try/catch` is correct. However, the test does not assert the response body's `description` field, which the new code sets to 'scope must be a single space- or comma-separated string'.",
+      "evidence": "ks1219-authorize-refuses-an-array-valued-scope.test.ts:83 `try { message = JSON.parse(text)?.error?.message; } catch { /* html consent page */ }` — only `message` is extracted, not `description`.",
+      "test_or_reason": "The new code returns `description: 'scope must be a single space- or comma-separated string'` (routes/oauth.ts:400), but no test asserts that description, so a regression in the description would go unnoticed."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test's `post` helper does not include `X-Requested-With: XMLHttpRequest`, so the POST deny/approve responses are 302 redirects, not JSON; the test's `post` helper tries to parse the response as JSON, which fails for a 302 (empty body), so `message` stays undefined and the test only checks status, not the error message for the deny/approve cases.",
+      "evidence": "ks1219-authorize-refuses-an-array-valued-scope.test.ts:87-98 `async function post(body) { const res = await fetch(...); const text = await res.text(); let message; try { message = JSON.parse(text)?.error?.message; } catch { /* redirect */ } return { status: res.status, message }; }` — for a 302, `res.text()` is empty, so `JSON.parse` throws and `message` is undefined.",
+      "test_or_reason": "The test's R2 and R3 expect `{ status: 400, message: 'invalid_request' }`, but the POST deny/approve paths return 400 JSON only when the resolver refuses; for a 302 (successful deny/approve), the body is empty, so the test's `message` is undefined. The tests pass because the array-scope guard returns 400 before any redirect, but the test does not verify the error message for the deny/approve success cases (C3 only checks status 302)."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test's `post` helper does not include `X-Requested-With: XMLHttpRequest`, so the POST deny/approve responses are 302 redirects, not JSON; the test's `post` helper tries to parse the response as JSON, which fails for a 302 (empty body), so `message` stays undefined and the test only checks status, not the error message for the deny/approve cases.",
+      "evidence": "ks1219-authorize-refuses-an-array-valued-scope.test.ts:87-98 `async function post(body) { const res = await fetch(...); const text = await res.text(); let message; try { message = JSON.parse(text)?.error?.message; } catch { /* redirect */ } return { status: res.status, message }; }` — for a 302, `res.text()` is empty, so `JSON.parse` throws and `message` is undefined.",
+      "test_or_reason": "The test's R2 and R3 expect `{ status: 400, message: 'invalid_request' }`, but the POST deny/approve paths return 400 JSON only when the resolver refuses; for a 302 (successful deny/approve), the body is empty, so the test's `message` is undefined. The tests pass because the array-scope guard returns 400 before any redirect, but the test does not verify the error message for the deny/approve success cases (C3 only checks status 302)."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test's `post` helper does not include `X-Requested-With: XMLHttpRequest`, so the POST deny/approve responses are 302 redirects, not JSON; the test's `post` helper tries to parse the response as JSON, which fails for a 302 (empty body), so `message` stays undefined and the test only checks status, not the error message for the deny/approve cases.",
+      "evidence": "ks1219-authorize-refuses-an-array-valued-scope.test.ts:87-98 `async function post(body) { const res = await fetch(...); const text = await res.text(); let message; try { message = JSON.parse(text)?.error?.message; } catch { /* redirect */ } return { status: res.status, message }; }` — for a 302, `res.text()` is empty, so `JSON.parse` throws and `message` is undefined.",
+      "test_or_reason": "The test's R2 and R3 expect `{ status: 400,

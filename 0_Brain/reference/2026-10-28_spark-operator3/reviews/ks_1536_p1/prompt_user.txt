@@ -1,0 +1,1270 @@
+===== TICKET =====
+KS-1536 — One role vocabulary, seven divergent lists: platform_admin is a super-role to the gateway and an ordinary tenant user to the key policy [Backlog]
+
+## BLUF
+
+**The same question — "is this caller a platform role?" — is answered by at least seven separate hard-coded lists that do not agree.** The one that matters most: `platform_admin` is accepted as a super-role by the api-gateway in six places, and is **absent** from the key policy's `PLATFORM_ROLES`, so `decideTenantAccess` treats it as an ordinary tenant user.
+
+Found while building KS-1533 arm 1 (the mint's organisation arm). It is **not** folded into that ticket: arm 1 is one call site, this is a repo-wide vocabulary problem. KS-1535 records the *policy* question of which roles may cross an organisation boundary; **this ticket is the engineering problem that there is no single answer to consult.**
+
+## The seven lists, read at source
+
+```
+services/api-gateway/src/routes/platform.ts:65       SUPER_ROLES           super_admin SUPER_ADMIN platform_admin SYSTEM_ADMIN
+services/api-gateway/src/middleware/auth.ts:515      SUPER_ADMIN_ROLES     super_admin SUPER_ADMIN SYSTEM_ADMIN platform_admin
+services/api-gateway/src/routes/admin.ts:577         PLATFORM_SCOPE_ROLES  SYSTEM_ADMIN system_admin super_admin SUPER_ADMIN platform_admin
+services/api-gateway/src/routes/proxy.ts:1094,1227   (two inline lists)    …include platform_admin, ORG_ADMIN, ISSUER_ADMIN
+services/api-gateway/src/routes/audit-export.ts:105  adminRoles            …includes platform_admin AND ORG_ADMIN
+packages/shared/src/security/keyRevokePolicy.ts:59   PLATFORM_ROLES        SYSTEM_ADMIN SUPER_ADMIN            <-- no platform_admin
+services/auth/src/routes/users.ts:193                PLATFORM_ADMIN_ROLES  SYSTEM_ADMIN SUPER_ADMIN admin super_admin   <-- no platform_admin, but `admin`
+services/auth/src/routes/oauth.ts:1156               OAUTH_PLATFORM_ADMIN_ROLES  the same four as users.ts, duplicated because
+                                                     "neither list in routes/users.ts is importable" (its own comment, :1138)
+```
+
+`services/auth/src/routes/oauth.ts:1138` already says the quiet part: the lists are duplicated **because they cannot be imported**.
+
+## The measured consequence
+
+Running the real predicates over the vocabulary (caller in org A, target a different organisation in the **same tenant**):
+
+| role | `isPlatformRole` | `isOrgBoundedRole` | `decideTenantAccess` verdict |
+| -- | -- | -- | -- |
+| `SYSTEM_ADMIN` / `SUPER_ADMIN` / `super_admin` | true | false | ALLOW `platform-admin` |
+| `platform_admin` / `PLATFORM_ADMIN` | **false** | **false** | **ALLOW** `same-tenant` |
+| `ADMIN` / `admin` | false | false | ALLOW `same-tenant` |
+| `ORG_ADMIN` / `ISSUER_ADMIN` / `issuer_admin` | false | true | DENY `cross-organisation` |
+
+Both predicates upper-case the claim (`keyRevokePolicy.ts:84`, `:123`), so this is not a casing bug — the role is in neither set. A `platform_admin` therefore passes the gateway's platform guards and then lands in the key policy as an unbounded tenant user.
+
+**Stored roles are lower-case** on Kintsugi (J's count, 16:44Z), which is why the upper-casing in those predicates is load-bearing and why a new list written without it would be wrong on real data.
+
+## Why it is worth a ticket rather than a shrug
+
+* A role added to one list and not the others is a **silent authorisation difference**, and nothing fails when the lists drift — there is no test that compares them.
+* KS-1283 already fixed one instance of this class ("a widened `SUPER_ROLES` would admit a tenant `ADMIN` role on six routes"). That was the symptom; this is the cause.
+* The erasure path reached through KS-1533/KS-695 is irreversible, so "which list did this route consult" is a security question, not a tidiness one.
+
+## Recommendation
+
+One exported vocabulary in `packages/shared` (it already owns `keyRevokePolicy`), each role set named for the question it answers, and **a guard test that fails when any service re-declares one of them inline** — the KS-764 call-site-guard shape, which already works in this repo. The lists cannot simply be merged: they genuinely differ today, and reconciling them is an authorisation change per route, so the first step is a census with the differences stated, not a rename.
+
+**Not in scope here:** whether `ADMIN` and `platform_admin` *should* be organisation-bounded. That is Kam's policy call on KS-1535 and his board card.
+
+## Dedupe
+
+Literal, case-insensitive over title and description, archived included. The actual results, with every hit named:
+
+| token | hits | which |
+| -- | -- | -- |
+| `SUPER_ROLES` | 3 | KS-1535 (this ticket's sibling), **KS-1283** (Done — "a widened `SUPER_ROLES` would admit a tenant `ADMIN` role on six routes"), KS-1472 (P4 — OAuth authorize-contract wording) |
+| `PLATFORM_ROLES` | 2 | KS-1535, **KS-742** (Deployed to UAT — the `/api/keys` tenant boundary) |
+| `SUPER_ADMIN_ROLES` | 2 | KS-1535, KS-619 (P3 — gateway tenant resolution falling through to `x-tenant-id`) |
+| `PLATFORM_ADMIN_ROLES` | 1 | KS-1535 only |
+| `PLATFORM_SCOPE_ROLES` | 1 | KS-1535 only |
+| `role vocabulary` | 1 | KS-1535 only |
+| `divergent role` | 0 | — |
+
+**KS-1283 is the nearest and is NOT this ticket:** it fixed ONE list on one file (and is Done); this is that the lists disagree across seven sites and nothing compares them. KS-742 and KS-619 are the tenant boundary, not the platform-role vocabulary.
+
+*Corrected after filing: the first version of this paragraph said the hits were "the KS-1283 / KS-486 family" and did not name them. KS-486 was not among the results — I carried it over from a different ticket's dedupe — and KS-1472, KS-619 and KS-742 were, unnamed. The conclusion is unchanged. Recorded rather than quietly edited, because this is the second time in one session I summarised a scan without reading what it returned.*
+
+Filed by Seat V 5th on Wednesday's ruling, 2026-10-12, found by reading the role sets while building KS-1533 arm 1.
+
+---
+
+## ⚠ CORRECTION to the "measured consequence" above
+
+The table above shows `platform_admin` as ALLOW `same-tenant` from `decideTenantAccess`, and says "for arm 1 that reads as unbounded". **That is true of the function and false of the route.** On the running mint route, `decideMint` runs first and refuses `platform_admin` 403, because `PLATFORM_ADMIN` is not in `KEY_ADMIN_ROLES`. So at the mint, this vocabulary split makes a gateway super-role **over**-restricted (it cannot mint keys), not under-restricted.
+
+**This strengthens the ticket rather than weakening it.** The same role is a platform role to the gateway, an ordinary tenant user to `decideTenantAccess`, and not an admin at all to `decideMint` — three different answers to one question across three lists on one request path. That is exactly the problem this ticket names; I had just picked the wrong one of the three as the consequence.
+
+*Corrected by Seat V 5th after a real-HTTP cell in KS-1533 PR A read 403 where I had predicted 201.*
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts b/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+--- a/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
++++ b/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+@@ -65,8 +65,16 @@
++/**
++ * The one role test the four gates below share: the role claim, read as text, is in ADMIN_ROLES either as it is or upper-cased.
++ * Behaviour-preserving extraction of the two lines that were copied into each gate.
++ */
++export function hasAdminRole(role: unknown): boolean {
++  const text = String(role ?? '');
++  return ADMIN_ROLES.includes(text) || ADMIN_ROLES.includes(text.toUpperCase());
++}
++
+ function isAuthorisedForCertWrite(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return scopes.includes('issuer-certs:write') || scopes.includes('issuer-certs:*') || scopes.includes('*');
+ }
+@@ -74,8 +82,7 @@
+ function isAuthorisedForCertRead(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:read') ||
+@@ -88,8 +95,7 @@
+ function isAuthorisedForCertRevoke(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:revoke') ||
+@@ -105,8 +111,7 @@
+   // allow-list, plus a dedicated `issuer-certs:sign` scope for the
+   // SSD connector path (originate calls this on behalf of the caller,
+   // forwarding the Bearer token, so the caller's scopes apply).
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:sign') ||
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts
+@@ -0,0 +1,115 @@
++// Behaviour-preserving extraction in services/auth routes/issuerCerts.ts: the four gates (write, read, revoke, sign) each copied the same two lines, `const role = String(user.role ?? '')` and
++// `ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())`. They now call one exported helper, hasAdminRole. R1 to R3 pin the helper (it exists, its truth table, and the file
++// holds the role test once). C1 to C6 drive the REAL router on a loopback listener through all four gates and must read the same before and after the extraction: an admitted caller with no tenant claim
++// gets 400 TENANT_REQUIRED (past the role gate), a refused caller gets 403. The role arrives in an x-test-user header that a mocked authenticate() turns into req.user.
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import type { Server } from 'node:http';
++import express from 'express';
++
++const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++vi.mock('../middleware/authenticate', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    const raw = req.headers['x-test-user'];
++    req.user = typeof raw === 'string' ? JSON.parse(raw) : undefined;
++    next();
++  },
++}));
++vi.mock('../repositories/issuerCertRepo', () => ({
++  createIssuerCert: vi.fn(), getIssuerCertById: vi.fn(), findIssuerCertByFingerprint: vi.fn(), findActiveIssuerCertForTenant: vi.fn(),
++  listIssuerCerts: vi.fn(async () => []), revokeIssuerCert: vi.fn(), rotateIssuerCert: vi.fn(), toSummary: vi.fn(),
++}));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++
++import * as certRoutes from '../routes/issuerCerts';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const SRC = readFileSync(join(__dirname, '..', 'routes', 'issuerCerts.ts'), 'utf8');
++
++let server: Server;
++let base = '';
++
++beforeAll(async () => {
++  const app = express();
++  app.use(express.json());
++  app.use('/api/issuer-certs', certRoutes.issuerCertsRoutes);
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
++  const addr = server.address();
++  base = 'http://127.0.0.1:' + (typeof addr === 'object' && addr ? addr.port : 0);
++});
++afterAll(() => { server?.close(); });
++
++/** The helper under test, or a sentinel when it is not exported yet, so a missing helper is a red assertion and not a thrown error. */
++function helper(role: unknown): boolean | string {
++  const fn = (certRoutes as Record<string, unknown>).hasAdminRole;
++  return typeof fn === 'function' ? (fn as (r: unknown) => boolean)(role) : 'NO HELPER';
++}
++
++const ROUTES: Array<[string, string, string]> = [
++  ['write', 'POST', '/api/issuer-certs'],
++  ['read', 'GET', '/api/issuer-certs'],
++  ['revoke', 'POST', '/api/issuer-certs/abc/revoke'],
++  ['sign', 'POST', '/api/issuer-certs/sign'],
++];
++
++/** The status a caller gets from a route; the user carries no tenant claim, so a caller past the role gate is answered 400 TENANT_REQUIRED. */
++async function status(method: string, path: string, user: unknown): Promise<number> {
++  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
++  if (user !== undefined) headers['x-test-user'] = JSON.stringify(user);
++  const res = await fetch(base + path, { method, headers, body: method === 'GET' ? undefined : '{}' });
++  return res.status;
++}
++
++async function statuses(user: unknown): Promise<number[]> {
++  const out: number[] = [];
++  for (const [, method, path] of ROUTES) out.push(await status(method, path, user));
++  return out;
++}
++
++describe('KS-1536 extraction: the issuer-cert admin role test is one helper', () => {
++  it('RED KS-1536 R1 hasAdminRole is exported as a function', () => {
++    expect(typeof (certRoutes as Record<string, unknown>).hasAdminRole).toBe('function');
++  });
++
++  it('RED KS-1536 R2 hasAdminRole keeps the truth table of the copied lines', () => {
++    const rows = ['ORG_ADMIN', 'org_admin', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin', 'Super_Admin', 'Admin', 'ADMIN', 'USER', '', undefined, null, 0];
++    expect(rows.map((r) => helper(r))).toEqual([true, true, true, true, true, true, true, true, false, false, false, false, false, false, false]);
++  });
++
++  it('RED KS-1536 R3 the file holds the role test once: no gate copies the ADMIN_ROLES comparison any more', () => {
++    expect(SRC.split('ADMIN_ROLES.includes(').length - 1).toBe(2);
++    expect(SRC).not.toContain("const role = String(user.role ?? '');");
++  });
++
++  it('control KS-1536 C1 an ORG_ADMIN is admitted by all four gates (400 TENANT_REQUIRED, past the role gate)', async () => {
++    expect(await statuses({ role: 'ORG_ADMIN' })).toEqual([400, 400, 400, 400]);
++  });
++
++  it('control KS-1536 C2 a lower-case super_admin and a mixed-case Super_Admin are admitted by all four gates', async () => {
++    expect(await statuses({ role: 'super_admin' })).toEqual([400, 400, 400, 400]);
++    expect(await statuses({ role: 'Super_Admin' })).toEqual([400, 400, 400, 400]);
++  });
++
++  it('control KS-1536 C3 an ordinary USER, a mixed-case Admin and a caller with no role are refused by all four gates', async () => {
++    expect(await statuses({ role: 'USER' })).toEqual([403, 403, 403, 403]);
++    expect(await statuses({ role: 'Admin' })).toEqual([403, 403, 403, 403]);
++    expect(await statuses({})).toEqual([403, 403, 403, 403]);
++  });
++
++  it('control KS-1536 C4 a request with no user at all is refused by all four gates', async () => {
++    expect(await statuses(undefined)).toEqual([403, 403, 403, 403]);
++  });
++
++  it('control KS-1536 C5 a USER holding only the read scope passes the read gate and no other', async () => {
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:read'] })).toEqual([403, 400, 403, 403]);
++  });
++
++  it('control KS-1536 C6 a USER holding the write scope passes write and read, a revoke-scope USER passes revoke only, a sign-scope USER passes sign only', async () => {
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:write'] })).toEqual([400, 400, 403, 403]);
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:revoke'] })).toEqual([403, 403, 400, 403]);
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:sign'] })).toEqual([403, 403, 403, 400]);
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+1: /**
+2:  * =============================================================================
+3:  * ISSUER CERTS ROUTES — KS-83 PR 1
+4:  * =============================================================================
+5:  * Per-org X.509 cert lifecycle: upload, list, get one. Revoke + rotate
+6:  * land in PR 2; sign-cert integration with /api/documents/{id}/version
+7:  * (KS-86) lands in PR 3.
+8:  *
+9:  * RBAC:
+10:  *   - POST   /api/issuer-certs   → ORG_ADMIN+ role  OR  `issuer-certs:write`
+11:  *   - GET    /api/issuer-certs   → ORG_ADMIN+ role  OR  `issuer-certs:read`
+12:  *   - GET    /api/issuer-certs/:id → same as list
+13:  *
+14:  * Tenant scoping: every read/write filters by `req.user.tenantId` (the JWT
+15:  * tenant claim). RLS on the table is permissive defence-in-depth.
+16:  *
+17:  * Security notes:
+18:  *   - The private-key PEM is encrypted before INSERT and never logged.
+19:  *   - List/get responses use `toSummary()` which strips the encrypted blob
+20:  *     so the ciphertext doesn't even leave the service.
+21:  *   - Audit log captures upload + access events (uploaded_by_id is the
+22:  *     authoritative actor; revoked_by_id will be in PR 2).
+23:  * =============================================================================
+24:  */
+25: 
+26: import { Router, Response } from 'express';
+27: import { z } from 'zod';
+28: import { AuthenticatedRequest } from '../types';
+29: import { authenticate } from '../middleware/authenticate';
+30: import { logger } from '../utils/logger';
+31: import {
+32:   parseCert,
+33:   verifyKeyMatchesCert,
+34:   encryptPrivateKeyPem,
+35:   signContentHashWithCert,
+36:   IssuerCertError,
+37: } from '../services/issuerCert';
+38: import {
+39:   createIssuerCert,
+40:   getIssuerCertById,
+41:   findIssuerCertByFingerprint,
+42:   findActiveIssuerCertForTenant,
+43:   listIssuerCerts,
+44:   revokeIssuerCert,
+45:   rotateIssuerCert,
+46:   toSummary,
+47:   IssuerCertSummary,
+48:   IssuerCertStatus,
+49: } from '../repositories/issuerCertRepo';
+50: import { publishEvent, EventTypes } from '../events';
+51: 
+52: export const issuerCertsRoutes = Router();
+53: 
+54: // =============================================================================
+55: // HELPERS
+56: // =============================================================================
+57: 
+58: /**
+59:  * Roles that may manage issuer certs. Mirrors the admin gate used in
+60:  * users.ts; if/when api-gateway adds scope-based gating for these
+61:  * routes the scope check below complements (not replaces) it.
+62:  */
+63: const ADMIN_ROLES = ['ORG_ADMIN', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'];
+64: 
+65: /**
+66:  * The one role test the four gates below share: the role claim, read as text, is in ADMIN_ROLES either as it is or upper-cased.
+67:  * Behaviour-preserving extraction of the two lines that were copied into each gate.
+68:  */
+69: export function hasAdminRole(role: unknown): boolean {
+70:   const text = String(role ?? '');
+71:   return ADMIN_ROLES.includes(text) || ADMIN_ROLES.includes(text.toUpperCase());
+72: }
+73: 
+74: function isAuthorisedForCertWrite(req: AuthenticatedRequest): boolean {
+75:   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+76:   if (!user) return false;
+77:   if (hasAdminRole(user.role)) return true;
+78:   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+79:   return scopes.includes('issuer-certs:write') || scopes.includes('issuer-certs:*') || scopes.includes('*');
+80: }
+81: 
+82: function isAuthorisedForCertRead(req: AuthenticatedRequest): boolean {
+83:   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+84:   if (!user) return false;
+85:   if (hasAdminRole(user.role)) return true;
+86:   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+87:   return (
+88:     scopes.includes('issuer-certs:read') ||
+89:     scopes.includes('issuer-certs:write') ||  // write implies read
+90:     scopes.includes('issuer-certs:*') ||
+91:     scopes.includes('*')
+92:   );
+93: }
+94: 
+95: function isAuthorisedForCertRevoke(req: AuthenticatedRequest): boolean {
+96:   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+97:   if (!user) return false;
+98:   if (hasAdminRole(user.role)) return true;
+99:   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+100:   return (
+101:     scopes.includes('issuer-certs:revoke') ||
+102:     scopes.includes('issuer-certs:*') ||
+103:     scopes.includes('*')
+104:   );
+105: }
+106: 
+107: function isAuthorisedForCertSign(req: AuthenticatedRequest): boolean {
+108:   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+109:   if (!user) return false;
+110:   // Signing is a sensitive op — the role gate stays the same admin
+111:   // allow-list, plus a dedicated `issuer-certs:sign` scope for the
+112:   // SSD connector path (originate calls this on behalf of the caller,
+113:   // forwarding the Bearer token, so the caller's scopes apply).
+114:   if (hasAdminRole(user.role)) return true;
+115:   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+116:   return (
+117:     scopes.includes('issuer-certs:sign') ||
+118:     scopes.includes('issuer-certs:*') ||
+119:     scopes.includes('*')
+120:   );
+121: }
+122: 
+123: function getReqTenantId(req: AuthenticatedRequest): string | null {
+124:   const user = req.user as { tenantId?: string } | undefined;
+125:   return user?.tenantId || null;
+126: }
+127: 
+128: function publicResponse(summary: IssuerCertSummary): Record<string, unknown> {
+129:   return {
+130:     id: summary.id,
+131:     name: summary.name,
+132:     organizationId: summary.organizationId,
+133:     fingerprintSha256: summary.fingerprintSha256,
+134:     subject: summary.subject,
+135:     issuer: summary.issuer,
+136:     serialNumber: summary.serialNumber,
+137:     validFrom: summary.validFrom.toISOString(),
+138:     validUntil: summary.validUntil.toISOString(),
+139:     keyAlgorithm: summary.keyAlgorithm,
+140:     keySizeBits: summary.keySizeBits,
+141:     trustLevel: summary.trustLevel,
+142:     status: summary.status,
+143:     uploadedAt: summary.uploadedAt.toISOString(),
+144:     uploadedById: summary.uploadedById,
+145:     revokedAt: summary.revokedAt ? summary.revokedAt.toISOString() : null,
+146:     revokedById: summary.revokedById,
+147:     revocationReason: summary.revocationReason,
+148:     previousCertId: summary.previousCertId,
+149:     // certPem is included so consumers can ship the public cert with
+150:     // signatures (offline verifiers need it). Never includes the
+151:     // encrypted private key — that's repo-level only.
+152:     certPem: summary.certPem,
+153:   };
+154: }
+155: 
+156: function mapCertErrorStatus(code: string): number {
+157:   switch (code) {
+158:     case 'INVALID_CERT_PEM':
+159:     case 'MULTI_CERT_PEM':
+160:     case 'KEY_PARSE_ERROR':
+161:     case 'INVALID_CONTENT_HASH':
+162:       return 400;
+163:     case 'CERT_EXPIRED':
+164:     case 'CERT_NOT_YET_VALID':
+165:     case 'KEY_MISMATCH':
+166:     case 'UNSUPPORTED_KEY_ALGORITHM':
+167:       return 422;
+168:     case 'SIGN_FAILED':
+169:     case 'DECRYPTION_FAILED':
+170:       return 500;
+171:     default:
+172:       return 500;
+173:   }
+174: }
+175: 
+176: // =============================================================================
+177: // VALIDATION
+178: // =============================================================================
+179: 
+180: const uploadSchema = z
+181:   .object({
+182:     name: z.string().trim().min(1).max(200),
+183:     certPem: z.string().min(1),
+184:     privateKeyPem: z.string().min(1),
+185:     privateKeyPassword: z.string().optional(),
+186:     organizationId: z.string().uuid().optional(),
+187:   })
+188:   .strict();
+189: 
+190: // =============================================================================
+191: // POST /api/issuer-certs — upload a cert + private key
+192: // =============================================================================
+193: issuerCertsRoutes.post('/', authenticate(), async (req: AuthenticatedRequest, res: Response) => {
+194:   try {
+195:     if (!isAuthorisedForCertWrite(req)) {
+196:       return res.status(403).json({
+197:         success: false,
+198:         error: { code: 'FORBIDDEN', message: 'Your role / scope does not permit issuer-cert upload' },
+199:       });
+200:     }
+201: 
+202:     const tenantId = getReqTenantId(req);
+203:     if (!tenantId) {
+204:       return res.status(400).json({
+205:         success: false,
+206:         error: { code: 'TENANT_REQUIRED', message: 'Authenticated user has no tenantId claim' },
+207:       });
+208:     }
+209: 
+210:     const parsed = uploadSchema.safeParse(req.body);
+211:     if (!parsed.success) {
+212:       return res.status(400).json({
+213:         success: false,
+214:         error: {
+215:           code: 'VALIDATION_ERROR',
+216:           message: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+217:           details: parsed.error.issues,
+218:         },
+219:       });
+220:     }
+221: 
+222:     const { name, certPem, privateKeyPem, privateKeyPassword, organizationId } = parsed.data;
+223: 
+224:     // 1. Parse the cert (catches malformed PEM, expired, multi-cert chain)
+225:     let parsedCert;
+226:     try {
+227:       parsedCert = parseCert(certPem);
+228:     } catch (err) {
+229:       if (err instanceof IssuerCertError) {
+230:         return res.status(mapCertErrorStatus(err.code)).json({
+231:           success: false,
+232:           error: { code: err.code, message: err.message },
+233:         });
+234:       }
+235:       throw err;
+236:     }
+237: 
+238:     // 2. Verify the private key matches the cert (sign + verify roundtrip)
+239:     try {
+240:       verifyKeyMatchesCert(parsedCert.certPem, privateKeyPem, privateKeyPassword);
+241:     } catch (err) {
+242:       if (err instanceof IssuerCertError) {
+243:         return res.status(mapCertErrorStatus(err.code)).json({
+244:           success: false,
+245:           error: { code: err.code, message: err.message },
+246:         });
+247:       }
+248:       throw err;
+249:     }
+250: 
+251:     // 3. Idempotent upload — same fingerprint within a tenant returns the
+252:     //    existing row instead of creating a duplicate.
+253:     const existing = await findIssuerCertByFingerprint(parsedCert.fingerprintSha256, tenantId);
+254:     if (existing) {
+255:       logger.info('Issuer cert upload: returning existing row (idempotent)', {
+256:         id: existing.id,
+257:         tenantId,
+258:         fingerprint: parsedCert.fingerprintSha256.slice(0, 16),
+259:       });
+260:       return res.status(200).json({
+261:         success: true,
+262:         cert: publicResponse(toSummary(existing)),
+263:         idempotent: true,
+264:       });
+265:     }
+266: 
+267:     // 4. Pre-mint the row id so we can encrypt the private key with the
+268:     //    correct AAD context in a single write. The AAD binds the
+269:     //    ciphertext to the row id — a swap between rows fails AES-GCM
+270:     //    verification rather than silently decrypting to the wrong key.
+271:     const certId = (await import('crypto')).randomUUID();
+272:     const encryptedPrivateKey = encryptPrivateKeyPem(privateKeyPem, certId);
+273: 
+274:     const created = await createIssuerCert({
+275:       id: certId,
+276:       tenantId,
+277:       organizationId: organizationId ?? null,
+278:       name,
+279:       fingerprintSha256: parsedCert.fingerprintSha256,
+280:       subject: parsedCert.subject,
+281:       issuer: parsedCert.issuer,
+282:       serialNumber: parsedCert.serialNumber,
+283:       validFrom: parsedCert.validFrom,
+284:       validUntil: parsedCert.validUntil,
+285:       keyAlgorithm: parsedCert.keyAlgorithm,
+286:       keySizeBits: parsedCert.keySizeBits,
+287:       trustLevel: parsedCert.trustLevel,
+288:       certPem: parsedCert.certPem,
+289:       encryptedPrivateKey,
+290:       uploadedById: req.user!.userId as string,
+291:     });
+292: 
+293:     logger.info('Issuer cert uploaded', {
+294:       id: created.id,
+295:       tenantId,
+296:       fingerprint: parsedCert.fingerprintSha256.slice(0, 16),
+297:       subject: parsedCert.subject,
+298:       trustLevel: parsedCert.trustLevel,
+299:       validUntil: parsedCert.validUntil.toISOString(),
+300:       uploadedById: req.user!.userId,
+301:     });
+302: 
+303:     publishEvent(EventTypes.ISSUER_CERT_UPLOADED, {
+304:       certId: created.id,
+305:       tenantId,
+306:       fingerprintSha256: parsedCert.fingerprintSha256,
+307:       subject: parsedCert.subject,
+308:       trustLevel: parsedCert.trustLevel,
+309:       validUntil: parsedCert.validUntil.toISOString(),
+310:       uploadedById: req.user!.userId as string,
+311:     }).catch(() => {});
+312: 
+313:     return res.status(201).json({
+314:       success: true,
+315:       cert: publicResponse(toSummary(created)),
+316:     });
+317:   } catch (err) {
+318:     logger.error('Issuer cert upload failed', {
+319:       error: err instanceof Error ? err.message : String(err),
+320:     });
+321:     return res.status(500).json({
+322:       success: false,
+323:       error: { code: 'INTERNAL_ERROR', message: 'Failed to upload issuer cert' },
+324:     });
+325:   }
+326: });
+327: 
+328: // =============================================================================
+329: // GET /api/issuer-certs — list certs for the caller's tenant
+330: // =============================================================================
+331: issuerCertsRoutes.get('/', authenticate(), async (req: AuthenticatedRequest, res: Response) => {
+332:   try {
+333:     if (!isAuthorisedForCertRead(req)) {
+334:       return res.status(403).json({
+335:         success: false,
+336:         error: { code: 'FORBIDDEN', message: 'Your role / scope does not permit issuer-cert read' },
+337:       });
+338:     }
+339: 
+340:     const tenantId = getReqTenantId(req);
+341:     if (!tenantId) {
+342:       return res.status(400).json({
+343:         success: false,
+344:         error: { code: 'TENANT_REQUIRED', message: 'Authenticated user has no tenantId claim' },
+345:       });
+346:     }
+347: 
+348:     const limit = Math.min(parseInt((req.query.limit as string) || '50', 10), 200);
+349:     const offset = Math.max(parseInt((req.query.offset as string) || '0', 10), 0);
+350:     const statusParam = req.query.status as string | undefined;
+351:     const validStatuses: IssuerCertStatus[] = ['active', 'revoked', 'expired'];
+352:     const status =
+353:       statusParam && validStatuses.includes(statusParam as IssuerCertStatus)
+354:         ? (statusParam as IssuerCertStatus)
+355:         : undefined;
+356: 
+357:     const { certs, total } = await listIssuerCerts({ tenantId, status, limit, offset });
+358: 
+359:     return res.status(200).json({
+360:       success: true,
+361:       certs: certs.map((c) => publicResponse(toSummary(c))),
+362:       pagination: { total, limit, offset },
+363:     });
+364:   } catch (err) {
+365:     logger.error('Issuer cert list failed', {
+366:       error: err instanceof Error ? err.message : String(err),
+367:     });
+368:     return res.status(500).json({
+369:       success: false,
+370:       error: { code: 'INTERNAL_ERROR', message: 'Failed to list issuer certs' },
+371:     });
+372:   }
+373: });
+374: 
+375: // =============================================================================
+376: // GET /api/issuer-certs/:id — get one cert
+377: // =============================================================================
+378: issuerCertsRoutes.get('/:id', authenticate(), async (req: AuthenticatedRequest, res: Response) => {
+379:   try {
+380:     if (!isAuthorisedForCertRead(req)) {
+381:       return res.status(403).json({
+382:         success: false,
+383:         error: { code: 'FORBIDDEN', message: 'Your role / scope does not permit issuer-cert read' },
+384:       });
+385:     }
+386: 
+387:     const tenantId = getReqTenantId(req);
+388:     if (!tenantId) {
+389:       return res.status(400).json({
+390:         success: false,
+391:         error: { code: 'TENANT_REQUIRED', message: 'Authenticated user has no tenantId claim' },
+392:       });
+393:     }
+394: 
+395:     const cert = await getIssuerCertById(req.params.id, tenantId);
+396:     if (!cert) {
+397:       return res.status(404).json({
+398:         success: false,
+399:         error: { code: 'NOT_FOUND', message: 'Issuer cert not found in this tenant' },
+400:       });
+401:     }
+402: 
+403:     return res.status(200).json({
+404:       success: true,
+405:       cert: publicResponse(toSummary(cert)),
+406:     });
+407:   } catch (err) {
+408:     // KS-210: a non-uuid :id (e.g. "0") makes the `id::uuid` cast in
+409:     // getIssuerCertById throw pg 22P02 (invalid_text_representation) before the
+410:     // not-found check — treat it as 404 (no such issuer cert), not a 500
+411:     // (KS-111 "500-on-bad-input" class).
+412:     if ((err as { code?: string })?.code === '22P02') {
+413:       return res.status(404).json({
+414:         success: false,
+415:         error: { code: 'NOT_FOUND', message: 'Issuer cert not found in this tenant' },
+416:       });
+417:     }
+418:     logger.error('Issuer cert get failed', {
+419:       error: err instanceof Error ? err.message : String(err),
+420:     });
+421:     return res.status(500).json({
+422:       success: false,
+423:       error: { code: 'INTERNAL_ERROR', message: 'Failed to get issuer cert' },
+424:     });
+425:   }
+426: });
+427: 
+428: // =============================================================================
+429: // POST /api/issuer-certs/:id/revoke — KS-83 PR 2
+430: // =============================================================================
+431: const revokeSchema = z.object({ reason: z.string().trim().max(500).optional() }).strict();
+432: 
+433: issuerCertsRoutes.post('/:id/revoke', authenticate(), async (req: AuthenticatedRequest, res: Response) => {
+434:   try {
+435:     if (!isAuthorisedForCertRevoke(req)) {
+436:       return res.status(403).json({
+437:         success: false,
+438:         error: { code: 'FORBIDDEN', message: 'Your role / scope does not permit issuer-cert revoke' },
+439:       });
+440:     }
+441: 
+442:     const tenantId = getReqTenantId(req);
+443:     if (!tenantId) {
+444:       return res.status(400).json({
+445:         success: false,
+446:         error: { code: 'TENANT_REQUIRED', message: 'Authenticated user has no tenantId claim' },
+447:       });
+448:     }
+449: 
+450:     const parsed = revokeSchema.safeParse(req.body || {});
+451:     if (!parsed.success) {
+452:       return res.status(400).json({
+453:         success: false,
+454:         error: {
+455:           code: 'VALIDATION_ERROR',
+456:           message: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+457:           details: parsed.error.issues,
+458:         },
+459:       });
+460:     }
+461: 
+462:     // Snapshot pre-state so we can distinguish first-revoke (200) from
+463:     // already-revoked (409) without race conditions on the UPDATE.
+464:     const existing = await getIssuerCertById(req.params.id, tenantId);
+465:     if (!existing) {
+466:       return res.status(404).json({
+467:         success: false,
+468:         error: { code: 'NOT_FOUND', message: 'Issuer cert not found in this tenant' },
+469:       });
+470:     }
+471: 
+472:     if (existing.status === 'revoked') {
+473:       return res.status(409).json({
+474:         success: false,
+475:         error: {
+476:           code: 'ALREADY_REVOKED',
+477:           message: `Cert was already revoked at ${existing.revokedAt?.toISOString()}`,
+478:         },
+479:         cert: publicResponse(toSummary(existing)),
+480:       });
+481:     }
+482: 
+483:     const updated = await revokeIssuerCert({
+484:       id: req.params.id,
+485:       tenantId,
+486:       revokedById: req.user!.userId as string,
+487:       reason: parsed.data.reason,
+488:     });
+489:     if (!updated) {
+490:       // Lost a race to a concurrent revoke / delete — surface as 404.
+491:       return res.status(404).json({
+492:         success: false,
+493:         error: { code: 'NOT_FOUND', message: 'Issuer cert vanished between read and update' },
+494:       });
+495:     }
+496: 
+497:     publishEvent(EventTypes.ISSUER_CERT_REVOKED, {
+498:       certId: updated.id,
+499:       tenantId,
+500:       fingerprintSha256: updated.fingerprintSha256,
+501:       revokedById: req.user!.userId as string,
+502:       reason: parsed.data.reason ?? null,
+503:     }).catch(() => {});
+504: 
+505:     return res.status(200).json({
+506:       success: true,
+507:       cert: publicResponse(toSummary(updated)),
+508:     });
+509:   } catch (err) {
+510:     logger.error('Issuer cert revoke failed', {
+511:       error: err instanceof Error ? err.message : String(err),
+512:     });
+513:     return res.status(500).json({
+514:       success: false,
+515:       error: { code: 'INTERNAL_ERROR', message: 'Failed to revoke issuer cert' },
+516:     });
+517:   }
+518: });
+519: 
+520: // =============================================================================
+521: // POST /api/issuer-certs/:id/rotate — KS-83 PR 2
+522: // =============================================================================
+523: // Atomic rotate: validate the new cert+key, revoke the old row, insert
+524: // the new row with previous_cert_id linked. Either both succeed or
+525: // neither does (single transaction in the repo). Historical signatures
+526: // stay valid forever — they reference the OLD cert by fingerprint, which
+527: // is preserved as a row in status=revoked.
+528: const rotateSchema = z
+529:   .object({
+530:     name: z.string().trim().min(1).max(200).optional(),
+531:     certPem: z.string().min(1),
+532:     privateKeyPem: z.string().min(1),
+533:     privateKeyPassword: z.string().optional(),
+534:     organizationId: z.string().uuid().optional(),
+535:     reason: z.string().trim().max(500).optional(),
+536:   })
+537:   .strict();
+538: 
+539: issuerCertsRoutes.post('/:id/rotate', authenticate(), async (req: AuthenticatedRequest, res: Response) => {
+540:   try {
+541:     // Rotate is essentially "revoke + upload" — gate on BOTH scopes so a
+542:     // caller that only has revoke can't sneak through an upload.
+543:     if (!isAuthorisedForCertWrite(req) || !isAuthorisedForCertRevoke(req)) {
+544:       return res.status(403).json({
+545:         success: false,
+546:         error: { code: 'FORBIDDEN', message: 'Your role / scope does not permit issuer-cert rotate (needs both write + revoke)' },
+547:       });
+548:     }
+549: 
+550:     const tenantId = getReqTenantId(req);
+551:     if (!tenantId) {
+552:       return res.status(400).json({
+553:         success: false,
+554:         error: { code: 'TENANT_REQUIRED', message: 'Authenticated user has no tenantId claim' },
+555:       });
+556:     }
+557: 
+558:     const parsed = rotateSchema.safeParse(req.body);
+559:     if (!parsed.success) {
+560:       return res.status(400).json({
+561:         success: false,
+562:         error: {
+563:           code: 'VALIDATION_ERROR',
+564:           message: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+565:           details: parsed.error.issues,
+566:         },
+567:       });
+568:     }
+569: 
+570:     const { name, certPem, privateKeyPem, privateKeyPassword, organizationId, reason } = parsed.data;
+571: 
+572:     // 1. Confirm the old cert exists and is currently active.
+573:     const oldCert = await getIssuerCertById(req.params.id, tenantId);
+574:     if (!oldCert) {
+575:       return res.status(404).json({
+576:         success: false,
+577:         error: { code: 'NOT_FOUND', message: 'Old issuer cert not found in this tenant' },
+578:       });
+579:     }
+580:     if (oldCert.status !== 'active') {
+581:       return res.status(409).json({
+582:         success: false,
+583:         error: {
+584:           code: 'NOT_ACTIVE',
+585:           message: `Cannot rotate cert in status '${oldCert.status}'. Only active certs can be rotated.`,
+586:         },
+587:       });
+588:     }
+589: 
+590:     // 2. Parse + verify the NEW cert (same logic as upload).
+591:     let parsedCert;
+592:     try {
+593:       parsedCert = parseCert(certPem);
+594:     } catch (err) {
+595:       if (err instanceof IssuerCertError) {
+596:         return res.status(mapCertErrorStatus(err.code)).json({
+597:           success: false,
+598:           error: { code: err.code, message: err.message },
+599:         });
+600:       }
+601:       throw err;
+602:     }
+603: 
+604:     // Reject same-fingerprint rotation — that's a no-op masquerading as
+605:     // a rotation and would create a self-referencing previous_cert_id
+606:     // confusion (FK technically allows it but semantically meaningless).
+607:     if (parsedCert.fingerprintSha256 === oldCert.fingerprintSha256) {
+608:       return res.status(400).json({
+609:         success: false,
+610:         error: {
+611:           code: 'SAME_FINGERPRINT',
+612:           message: 'New cert fingerprint matches the old cert — rotation requires a different cert',
+613:         },
+614:       });
+615:     }
+616: 
+617:     try {
+618:       verifyKeyMatchesCert(parsedCert.certPem, privateKeyPem, privateKeyPassword);
+619:     } catch (err) {
+620:       if (err instanceof IssuerCertError) {
+621:         return res.status(mapCertErrorStatus(err.code)).json({
+622:           success: false,
+623:           error: { code: err.code, message: err.message },
+624:         });
+625:       }
+626:       throw err;
+627:     }
+628: 
+629:     // 3. Pre-mint UUID + encrypt private key with the AAD context bound
+630:     //    to that id (same invariant as upload).
+631:     const newCertId = (await import('crypto')).randomUUID();
+632:     const encryptedPrivateKey = encryptPrivateKeyPem(privateKeyPem, newCertId);
+633: 
+634:     // 4. Atomic rotation: revoke old + insert new in one transaction.
+635:     const result = await rotateIssuerCert({
+636:       oldCertId: oldCert.id,
+637:       tenantId,
+638:       rotatedById: req.user!.userId as string,
+639:       reason: reason ?? 'rotated',
+640:       newCert: {
+641:         id: newCertId,
+642:         tenantId,
+643:         organizationId: organizationId ?? oldCert.organizationId ?? null,
+644:         name: name ?? oldCert.name,
+645:         fingerprintSha256: parsedCert.fingerprintSha256,
+646:         subject: parsedCert.subject,
+647:         issuer: parsedCert.issuer,
+648:         serialNumber: parsedCert.serialNumber,
+649:         validFrom: parsedCert.validFrom,
+650:         validUntil: parsedCert.validUntil,
+651:         keyAlgorithm: parsedCert.keyAlgorithm,
+652:         keySizeBits: parsedCert.keySizeBits,
+653:         trustLevel: parsedCert.trustLevel,
+654:         certPem: parsedCert.certPem,
+655:         encryptedPrivateKey,
+656:         uploadedById: req.user!.userId as string,
+657:       },
+658:     });
+659: 
+660:     publishEvent(EventTypes.ISSUER_CERT_ROTATED, {
+661:       oldCertId: result.oldCert.id,
+662:       newCertId: result.newCert.id,
+663:       tenantId,
+664:       newFingerprintSha256: result.newCert.fingerprintSha256,
+665:       rotatedById: req.user!.userId as string,
+666:       reason: reason ?? 'rotated',
+667:     }).catch(() => {});
+668: 
+669:     return res.status(201).json({
+670:       success: true,
+671:       newCert: publicResponse(toSummary(result.newCert)),
+672:       revokedCert: publicResponse(toSummary(result.oldCert)),
+673:     });
+674:   } catch (err) {
+675:     logger.error('Issuer cert rotate failed', {
+676:       error: err instanceof Error ? err.message : String(err),
+677:     });
+678:     return res.status(500).json({
+679:       success: false,
+680:       error: { code: 'INTERNAL_ERROR', message: 'Failed to rotate issuer cert' },
+681:     });
+682:   }
+683: });
+684: 
+685: // =============================================================================
+686: // POST /api/issuer-certs/sign — KS-83 PR 3
+687: // =============================================================================
+688: // Sign a content hash with the tenant's active issuer cert. Produces the
+689: // signature + public cert + algorithm metadata that callers can wrap into
+690: // a `.sig.json` companion file (per KS-21 Q3: out-of-band sidecar, not
+691: // embedded in the document).
+692: //
+693: // Originate's POST /api/documents/{id}/sign-cert calls this internally
+694: // (forwarding the caller's Bearer token so this route's RBAC applies).
+695: // Public-API-callable too — connectors can sign hashes directly.
+696: //
+697: // RBAC: ORG_ADMIN+ role OR `issuer-certs:sign` scope.
+698: const signSchema = z
+699:   .object({
+700:     contentHash: z.string().min(1),
+701:     // Optional: caller can target a specific cert by id (e.g. for replaying
+702:     // an old signature). When omitted, we pick the most recently uploaded
+703:     // active cert via findActiveIssuerCertForTenant.
+704:     certId: z.string().uuid().optional(),
+705:   })
+706:   .strict();
+707: 
+708: issuerCertsRoutes.post('/sign', authenticate(), async (req: AuthenticatedRequest, res: Response) => {
+709:   try {
+710:     if (!isAuthorisedForCertSign(req)) {
+711:       return res.status(403).json({
+712:         success: false,
+713:         error: { code: 'FORBIDDEN', message: 'Your role / scope does not permit issuer-cert sign' },
+714:       });
+715:     }
+716: 
+717:     const tenantId = getReqTenantId(req);
+718:     if (!tenantId) {
+719:       return res.status(400).json({
+720:         success: false,
+721:         error: { code: 'TENANT_REQUIRED', message: 'Authenticated user has no tenantId claim' },
+722:       });
+723:     }
+724: 
+725:     const parsed = signSchema.safeParse(req.body);
+726:     if (!parsed.success) {
+727:       return res.status(400).json({
+728:         success: false,
+729:         error: {
+730:           code: 'VALIDATION_ERROR',
+731:           message: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+732:           details: parsed.error.issues,
+733:         },
+734:       });
+735:     }
+736: 
+737:     // 1. Find the cert to sign with.
+738:     let cert = parsed.data.certId
+739:       ? await getIssuerCertById(parsed.data.certId, tenantId)
+740:       : await findActiveIssuerCertForTenant(tenantId);
+741: 
+742:     if (!cert) {
+743:       return res.status(404).json({
+744:         success: false,
+745:         error: {
+746:           code: 'NO_ACTIVE_CERT',
+747:           message:
+748:             parsed.data.certId
+749:               ? `Cert ${parsed.data.certId} not found in this tenant`
+750:               : 'No active issuer cert found for this tenant. Upload one via POST /api/issuer-certs first.',
+751:         },
+752:       });
+753:     }
+754: 
+755:     // 2. Refuse to sign with non-active certs. PR 2's background sweep
+756:     //    flips expired certs automatically; revoked is operator-driven.
+757:     //    Either way the route MUST refuse — historical sigs stay valid
+758:     //    forever, but new sigs only come from an active cert.
+759:     if (cert.status !== 'active') {
+760:       return res.status(409).json({
+761:         success: false,
+762:         error: {
+763:           code: 'CERT_NOT_ACTIVE',
+764:           message: `Cannot sign with cert in status '${cert.status}'. Rotate or upload a new active cert.`,
+765:         },
+766:       });
+767:     }
+768: 
+769:     // Belt-and-braces: validUntil < now should never happen on an active
+770:     // cert (the sweep flips it to expired), but in the gap between sweeps
+771:     // the row stays 'active' so this catches it.
+772:     if (cert.validUntil.getTime() < Date.now()) {
+773:       return res.status(409).json({
+774:         success: false,
+775:         error: {
+776:           code: 'CERT_EXPIRED',
+777:           message: `Cert validUntil (${cert.validUntil.toISOString()}) has passed. Awaiting next sweep tick to flip status=expired.`,
+778:         },
+779:       });
+780:     }
+781: 
+782:     // 3. Sign.
+783:     let envelope;
+784:     try {
+785:       envelope = signContentHashWithCert({
+786:         encryptedPrivateKey: cert.encryptedPrivateKey,
+787:         certId: cert.id,
+788:         keyAlgorithm: cert.keyAlgorithm,
+789:         contentHash: parsed.data.contentHash,
+790:       });
+791:     } catch (err) {
+792:       if (err instanceof IssuerCertError) {
+793:         return res.status(mapCertErrorStatus(err.code)).json({
+794:           success: false,
+795:           error: { code: err.code, message: err.message },
+796:         });
+797:       }
+798:       throw err;
+799:     }
+800: 
+801:     logger.info('Issuer cert signed content hash', {
+802:       certId: cert.id,
+803:       tenantId,
+804:       fingerprint: cert.fingerprintSha256.slice(0, 16),
+805:       contentHash: envelope.signedContentHash.slice(0, 32),
+806:       algorithm: envelope.signatureAlgorithm,
+807:       signedById: req.user!.userId,
+808:     });
+809: 
+810:     return res.status(200).json({
+811:       success: true,
+812:       signature: envelope.signature,
+813:       signatureAlgorithm: envelope.signatureAlgorithm,
+814:       signedContentHash: envelope.signedContentHash,
+815:       signedAt: envelope.signedAt,
+816:       cert: {
+817:         id: cert.id,
+818:         fingerprintSha256: cert.fingerprintSha256,
+819:         subject: cert.subject,
+820:         issuer: cert.issuer,
+821:         certPem: cert.certPem,
+822:         validFrom: cert.validFrom.toISOString(),
+823:         validUntil: cert.validUntil.toISOString(),
+824:         trustLevel: cert.trustLevel,
+825:       },
+826:     });
+827:   } catch (err) {
+828:     logger.error('Issuer cert sign failed', {
+829:       error: err instanceof Error ? err.message : String(err),
+830:     });
+831:     return res.status(500).json({
+832:       success: false,
+833:       error: { code: 'INTERNAL_ERROR', message: 'Failed to sign content hash' },
+834:     });
+835:   }
+836: });
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts
+1: // Behaviour-preserving extraction in services/auth routes/issuerCerts.ts: the four gates (write, read, revoke, sign) each copied the same two lines, `const role = String(user.role ?? '')` and
+2: // `ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())`. They now call one exported helper, hasAdminRole. R1 to R3 pin the helper (it exists, its truth table, and the file
+3: // holds the role test once). C1 to C6 drive the REAL router on a loopback listener through all four gates and must read the same before and after the extraction: an admitted caller with no tenant claim
+4: // gets 400 TENANT_REQUIRED (past the role gate), a refused caller gets 403. The role arrives in an x-test-user header that a mocked authenticate() turns into req.user.
+5: import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+6: import type { Server } from 'node:http';
+7: import express from 'express';
+8: 
+9: const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
+10: vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
+11: vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
+12: vi.mock('../middleware/authenticate', () => ({
+13:   authenticate: () => (req: any, _res: unknown, next: () => void) => {
+14:     const raw = req.headers['x-test-user'];
+15:     req.user = typeof raw === 'string' ? JSON.parse(raw) : undefined;
+16:     next();
+17:   },
+18: }));
+19: vi.mock('../repositories/issuerCertRepo', () => ({
+20:   createIssuerCert: vi.fn(), getIssuerCertById: vi.fn(), findIssuerCertByFingerprint: vi.fn(), findActiveIssuerCertForTenant: vi.fn(),
+21:   listIssuerCerts: vi.fn(async () => []), revokeIssuerCert: vi.fn(), rotateIssuerCert: vi.fn(), toSummary: vi.fn(),
+22: }));
+23: vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
+24: vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
+25: 
+26: import * as certRoutes from '../routes/issuerCerts';
+27: import { readFileSync } from 'node:fs';
+28: import { join } from 'node:path';
+29: 
+30: const SRC = readFileSync(join(__dirname, '..', 'routes', 'issuerCerts.ts'), 'utf8');
+31: 
+32: let server: Server;
+33: let base = '';
+34: 
+35: beforeAll(async () => {
+36:   const app = express();
+37:   app.use(express.json());
+38:   app.use('/api/issuer-certs', certRoutes.issuerCertsRoutes);
+39:   await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
+40:   const addr = server.address();
+41:   base = 'http://127.0.0.1:' + (typeof addr === 'object' && addr ? addr.port : 0);
+42: });
+43: afterAll(() => { server?.close(); });
+44: 
+45: /** The helper under test, or a sentinel when it is not exported yet, so a missing helper is a red assertion and not a thrown error. */
+46: function helper(role: unknown): boolean | string {
+47:   const fn = (certRoutes as Record<string, unknown>).hasAdminRole;
+48:   return typeof fn === 'function' ? (fn as (r: unknown) => boolean)(role) : 'NO HELPER';
+49: }
+50: 
+51: const ROUTES: Array<[string, string, string]> = [
+52:   ['write', 'POST', '/api/issuer-certs'],
+53:   ['read', 'GET', '/api/issuer-certs'],
+54:   ['revoke', 'POST', '/api/issuer-certs/abc/revoke'],
+55:   ['sign', 'POST', '/api/issuer-certs/sign'],
+56: ];
+57: 
+58: /** The status a caller gets from a route; the user carries no tenant claim, so a caller past the role gate is answered 400 TENANT_REQUIRED. */
+59: async function status(method: string, path: string, user: unknown): Promise<number> {
+60:   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+61:   if (user !== undefined) headers['x-test-user'] = JSON.stringify(user);
+62:   const res = await fetch(base + path, { method, headers, body: method === 'GET' ? undefined : '{}' });
+63:   return res.status;
+64: }
+65: 
+66: async function statuses(user: unknown): Promise<number[]> {
+67:   const out: number[] = [];
+68:   for (const [, method, path] of ROUTES) out.push(await status(method, path, user));
+69:   return out;
+70: }
+71: 
+72: describe('KS-1536 extraction: the issuer-cert admin role test is one helper', () => {
+73:   it('RED KS-1536 R1 hasAdminRole is exported as a function', () => {
+74:     expect(typeof (certRoutes as Record<string, unknown>).hasAdminRole).toBe('function');
+75:   });
+76: 
+77:   it('RED KS-1536 R2 hasAdminRole keeps the truth table of the copied lines', () => {
+78:     const rows = ['ORG_ADMIN', 'org_admin', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin', 'Super_Admin', 'Admin', 'ADMIN', 'USER', '', undefined, null, 0];
+79:     expect(rows.map((r) => helper(r))).toEqual([true, true, true, true, true, true, true, true, false, false, false, false, false, false, false]);
+80:   });
+81: 
+82:   it('RED KS-1536 R3 the file holds the role test once: no gate copies the ADMIN_ROLES comparison any more', () => {
+83:     expect(SRC.split('ADMIN_ROLES.includes(').length - 1).toBe(2);
+84:     expect(SRC).not.toContain("const role = String(user.role ?? '');");
+85:   });
+86: 
+87:   it('control KS-1536 C1 an ORG_ADMIN is admitted by all four gates (400 TENANT_REQUIRED, past the role gate)', async () => {
+88:     expect(await statuses({ role: 'ORG_ADMIN' })).toEqual([400, 400, 400, 400]);
+89:   });
+90: 
+91:   it('control KS-1536 C2 a lower-case super_admin and a mixed-case Super_Admin are admitted by all four gates', async () => {
+92:     expect(await statuses({ role: 'super_admin' })).toEqual([400, 400, 400, 400]);
+93:     expect(await statuses({ role: 'Super_Admin' })).toEqual([400, 400, 400, 400]);
+94:   });
+95: 
+96:   it('control KS-1536 C3 an ordinary USER, a mixed-case Admin and a caller with no role are refused by all four gates', async () => {
+97:     expect(await statuses({ role: 'USER' })).toEqual([403, 403, 403, 403]);
+98:     expect(await statuses({ role: 'Admin' })).toEqual([403, 403, 403, 403]);
+99:     expect(await statuses({})).toEqual([403, 403, 403, 403]);
+100:   });
+101: 
+102:   it('control KS-1536 C4 a request with no user at all is refused by all four gates', async () => {
+103:     expect(await statuses(undefined)).toEqual([403, 403, 403, 403]);
+104:   });
+105: 
+106:   it('control KS-1536 C5 a USER holding only the read scope passes the read gate and no other', async () => {
+107:     expect(await statuses({ role: 'USER', scopes: ['issuer-certs:read'] })).toEqual([403, 400, 403, 403]);
+108:   });
+109: 
+110:   it('control KS-1536 C6 a USER holding the write scope passes write and read, a revoke-scope USER passes revoke only, a sign-scope USER passes sign only', async () => {
+111:     expect(await statuses({ role: 'USER', scopes: ['issuer-certs:write'] })).toEqual([400, 400, 403, 403]);
+112:     expect(await statuses({ role: 'USER', scopes: ['issuer-certs:revoke'] })).toEqual([403, 403, 400, 403]);
+113:     expect(await statuses({ role: 'USER', scopes: ['issuer-certs:sign'] })).toEqual([403, 403, 403, 400]);
+114:   });
+115: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "a2787352f001abde859817ff8bc6cafe98b5fe47",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/routes/issuerCerts.ts",
+   "added": "13",
+   "deleted": "8"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts",
+   "added": "115",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "13",
+   "8",
+   "Blockchain/Dev/services/auth/src/routes/issuerCerts.ts"
+  ],
+  [
+   "115",
+   "0",
+   "Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 9,
+  "failed": 3
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 9,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1200 failed=0 | after: total=1209 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 9\n",
+ "checker_summary": [
+  "PASS A6 whole services/auth suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/auth: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +128/-8 test=src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

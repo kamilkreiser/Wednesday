@@ -1,0 +1,881 @@
+===== TICKET =====
+KS-1240 — T-2: the connector-token / key-validate fetch has no timeout — a slow upstream hangs the request [Backlog]
+
+**The sharpest of the four candidates the gate surfaced, and the only one that is request-reachable today.**
+
+The api-gateway's connector-token exchange / key-validate `fetch` carries **no timeout**. A slow or non-answering upstream turns into a gateway request with no bound on how long it hangs, while the process carries on serving everything else.
+
+## Measured on BOTH trees (head and develop) — so it is pre-existing
+
+* an exchange that **never answers** → the request hangs;
+* an exchange whose body arrives **2.5 s late** → the request hangs for that long.
+
+Graded **Major**. Request-reachable, unlike T-1.
+
+## What to do
+
+Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange.
+
+---
+
+Filed from the #1034 / KS-1215 tier-1 gate report `2026-09-18-ks1215-1034-e4624218b-tier1-r1`, at merge of `a105cd32b1ed9c6927ae6e797f8259224d8480c6`. Pre-existing unless stated; **not** introduced by #1034.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/batch.ts b/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
+@@ -122,3 +122,7 @@
++// KS-1240: the batch fan-out fetch carries a timeout signal. Without one an originate or transfer service that never answers holds the whole batch request open. On expiry the fetch rejects and the existing
++// catch in proxyRequest returns `{ ok: false, error }` for that item, as it already does for an unreachable service.
++const UPSTREAM_BATCH_FETCH_TIMEOUT_MS = 30_000;
++
+ async function proxyRequest(
+   baseUrl: string,
+   path: string,
+@@ -132,4 +136,5 @@
+     const response = await fetch(`${baseUrl}${path}`, {
++      signal: AbortSignal.timeout(UPSTREAM_BATCH_FETCH_TIMEOUT_MS),
+       method: 'POST',
+       headers,
+       body: JSON.stringify(body),
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+@@ -73,3 +73,7 @@
++// KS-1240: the audit-log fetch carries a timeout signal. Without one a security service that never answers holds the export request open. On expiry the fetch rejects and the existing catch answers the
++// constant 502 BAD_GATEWAY, as it already does for an unreachable service.
++const UPSTREAM_AUDIT_FETCH_TIMEOUT_MS = 30_000;
++
+ function escapeCSVField(value: string | undefined | null): string {
+   if (value == null) return '';
+   const str = String(value);
+@@ -172,5 +176,5 @@
+       const response = await fetch(
+         // KS-745: the security service lists at /api/audit (no /logs route — that hit /api/audit/:id with id "logs" → 404)
+         `${SECURITY_SERVICE_URL}/api/audit?${queryParams.toString()}`,
+-        { method: 'GET', headers },
++        { method: 'GET', headers, signal: AbortSignal.timeout(UPSTREAM_AUDIT_FETCH_TIMEOUT_MS) },
+       );
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts
+@@ -0,0 +1,92 @@
++// KS-1240 (api-gateway routes/batch.ts and routes/audit-export.ts): the upstream fetch in each of these two files carried no timeout, so an upstream that accepted the connection and never answered held the
++// caller's request open with no bound (the key-exchange half of the same ticket is in middleware/auth.ts, the proxy.ts and admin.ts half is another file). This file reads the two sources and pins, per fetch call, that the call carries an
++// AbortSignal.timeout signal, and that the timeout constants exist and are bounded. The extractor balances the call's own parentheses, so a signal in a NEIGHBOUR call cannot satisfy a fetch that has none.
++// C3 and C4 prove the extractor can return both answers (a bounded call that already existed at admin.ts, and a synthetic unbounded one), so the red cells are not vacuous.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const BATCH_SRC = readFileSync(join(__dirname, '..', 'routes', 'batch.ts'), 'utf8');
++const AUDIT_SRC = readFileSync(join(__dirname, '..', 'routes', 'audit-export.ts'), 'utf8');
++
++/** Every `fetch(` call in the source, each as the text from `fetch(` to its balancing `)`. */
++function fetchCalls(src: string): string[] {
++  const calls: string[] = [];
++  const re = /\bfetch\(/g;
++  let match: RegExpExecArray | null;
++  while ((match = re.exec(src)) !== null) {
++    const open = match.index + match[0].length - 1;
++    let depth = 0;
++    let end = -1;
++    for (let i = open; i < src.length; i++) {
++      const ch = src[i];
++      if (ch === '(') depth++;
++      else if (ch === ')') {
++        depth--;
++        if (depth === 0) {
++          end = i;
++          break;
++        }
++      }
++    }
++    expect(end, 'unbalanced fetch call at offset ' + match.index).toBeGreaterThan(-1);
++    calls.push(src.slice(match.index, end + 1));
++  }
++  return calls;
++}
++
++function isBounded(call: string): boolean {
++  return call.includes('AbortSignal.timeout(');
++}
++
++/** The first line of each unbounded call, so a failure names the call. */
++function unbounded(src: string): string[] {
++  return fetchCalls(src)
++    .filter((call) => !isBounded(call))
++    .map((call) => call.split('\n')[0].trim());
++}
++
++function constantMs(src: string, name: string): number {
++  const found = new RegExp('const ' + name + ' = ([0-9_]+);').exec(src);
++  return found ? Number(found[1].replace(/_/g, '')) : Number.NaN;
++}
++
++describe('KS-1240: the batch and audit-export upstream fetches are bounded', () => {
++  it('RED KS-1240 R1 every fetch call in batch.ts carries an AbortSignal.timeout', () => {
++    expect(unbounded(BATCH_SRC)).toEqual([]);
++  });
++
++  it('RED KS-1240 R2 every fetch call in audit-export.ts carries an AbortSignal.timeout', () => {
++    expect(unbounded(AUDIT_SRC)).toEqual([]);
++  });
++
++  it('RED KS-1240 R3 batch.ts declares its timeout constant, positive and at most 120000 ms', () => {
++    const ms = constantMs(BATCH_SRC, 'UPSTREAM_BATCH_FETCH_TIMEOUT_MS');
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(120000);
++  });
++
++  it('RED KS-1240 R4 audit-export.ts declares its timeout constant, positive and at most 120000 ms', () => {
++    const ms = constantMs(AUDIT_SRC, 'UPSTREAM_AUDIT_FETCH_TIMEOUT_MS');
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(120000);
++  });
++
++  it('control KS-1240 C1 batch.ts has exactly one fetch call', () => {
++    expect(fetchCalls(BATCH_SRC)).toHaveLength(1);
++  });
++
++  it('control KS-1240 C2 audit-export.ts has exactly one fetch call', () => {
++    expect(fetchCalls(AUDIT_SRC)).toHaveLength(1);
++  });
++
++  it('control KS-1240 C3 the extractor reads a call whose init object holds a signal as bounded', () => {
++    const synthetic = "const r = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(5000) });\n";
++    expect(unbounded(synthetic)).toEqual([]);
++  });
++
++  it('control KS-1240 C4 the extractor reads a synthetic call with no signal as unbounded', () => {
++    const synthetic = "const r = await fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) });\n";
++    expect(unbounded(synthetic)).toEqual(["fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) })"]);
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/routes/batch.ts
+1: /**
+2:  * =============================================================================
+3:  * BATCH OPERATIONS ROUTES
+4:  * =============================================================================
+5:  * Bulk endpoints for certifying, verifying, and delegating documents.
+6:  *
+7:  * Usage in index.ts:
+8:  *   import batchRouter from './routes/batch';
+9:  *   app.use('/api/batch', batchRouter);
+10:  * =============================================================================
+11:  */
+12: 
+13: import { Router, Request, Response } from 'express';
+14: import { logger } from '../utils/logger';
+15: 
+16: const router = Router();
+17: 
+18: /**
+19:  * KS-1410: the only place in this router that turns a caught error into a 500. The three route catch blocks below put the
+20:  * thrown error's own text in the 500 body with NO NODE_ENV guard, so it reached the client in every environment,
+21:  * production included. Same shape as originate's fail500 (KS-1334, KS-730): log the thrown text server-side with
+22:  * the route named, answer the constant body.
+23:  */
+24: function fail500(res: Response, context: string, err: unknown): void {
+25:   // KS-1346: was `String(err)`, which rendered a thrown non-Error object as "[object Object]" and lost
+26:   // its content. Kam ruled 2026-09-27 that such a throw logs its TYPE and FIELD NAMES only. A thrown
+27:   // Error still logs `.message`, and thrown text is still logged verbatim: neither is in this ticket.
+28:   // KS-1771: describing the thrown value (a message getter, a Proxy trap, a revoked Proxy) and writing the log line (a logger that fails) can themselves throw. This line did both with no try of its
+29:   // own, so such a throw escaped fail500 and the constant 500 below was never sent: these handlers are async, Express 4 does not catch their rejection, and the request got no answer at all. Describe
+30:   // the value in its own try and log in another (the shape PR 1754 gave platform.ts, KS-1524 a). The line is unchanged for every value that could be described before.
+31:   let described: string;
+32:   try {
+33:     described = err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err;
+34:   } catch {
+35:     described = 'thrown value that could not be described';
+36:   }
+37:   try {
+38:     logger.error(context, { error: described });
+39:   } catch {
+40:     // Nothing more can be said if the logger itself fails; the caller still gets the 500 below.
+41:   }
+42:   res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+43: }
+44: 
+45: // ---------------------------------------------------------------------------
+46: // Inline validators (api-gateway does not depend on zod)
+47: // ---------------------------------------------------------------------------
+48: 
+49: function validateBatchCertify(body: any): { valid: true; data: { documents: any[] } } | { valid: false; error: string } {
+50:   if (!body?.documents || !Array.isArray(body.documents)) return { valid: false, error: 'documents array required' };
+51:   if (body.documents.length < 1 || body.documents.length > 100) return { valid: false, error: 'documents must have 1-100 items' };
+52:   for (const d of body.documents) {
+53:     if (!d.documentHash || typeof d.documentHash !== 'string') return { valid: false, error: 'each document must have a documentHash string' };
+54:     if (!d.documentType || typeof d.documentType !== 'string') return { valid: false, error: 'each document must have a documentType string' };
+55:   }
+56:   return { valid: true, data: { documents: body.documents } };
+57: }
+58: 
+59: function validateBatchVerify(body: any): { valid: true; data: { hashes: string[] } } | { valid: false; error: string } {
+60:   if (!body?.hashes || !Array.isArray(body.hashes)) return { valid: false, error: 'hashes array required' };
+61:   if (body.hashes.length < 1 || body.hashes.length > 200) return { valid: false, error: 'hashes must have 1-200 items' };
+62:   if (!body.hashes.every((h: any) => typeof h === 'string')) return { valid: false, error: 'all hashes must be strings' };
+63:   return { valid: true, data: { hashes: body.hashes } };
+64: }
+65: 
+66: function validateBatchDelegate(body: any): { valid: true; data: { delegations: any[] } } | { valid: false; error: string } {
+67:   if (!body?.delegations || !Array.isArray(body.delegations)) return { valid: false, error: 'delegations array required' };
+68:   if (body.delegations.length < 1 || body.delegations.length > 50) return { valid: false, error: 'delegations must have 1-50 items' };
+69:   for (const d of body.delegations) {
+70:     if (!d.delegateId || typeof d.delegateId !== 'string') return { valid: false, error: 'each delegation must have a delegateId string' };
+71:     if (!d.delegationType || !Array.isArray(d.delegationType)) return { valid: false, error: 'each delegation must have a delegationType array' };
+72:   }
+73:   return { valid: true, data: { delegations: body.delegations } };
+74: }
+75: 
+76: // ---------------------------------------------------------------------------
+77: // Types
+78: // ---------------------------------------------------------------------------
+79: 
+80: interface BatchResultItem {
+81:   index: number;
+82:   status: 'success' | 'failed';
+83:   data?: unknown;
+84:   error?: string;
+85: }
+86: 
+87: interface BatchResponse {
+88:   success: true;
+89:   results: BatchResultItem[];
+90:   summary: {
+91:     total: number;
+92:     succeeded: number;
+93:     failed: number;
+94:   };
+95: }
+96: 
+97: // ---------------------------------------------------------------------------
+98: // Helpers
+99: // ---------------------------------------------------------------------------
+100: 
+101: function getUserId(req: Request): string | null {
+102:   return (req as any).user?.userId || null;
+103: }
+104: 
+105: function buildBatchResponse(results: BatchResultItem[]): BatchResponse {
+106:   const succeeded = results.filter((r) => r.status === 'success').length;
+107:   return {
+108:     success: true,
+109:     results,
+110:     summary: {
+111:       total: results.length,
+112:       succeeded,
+113:       failed: results.length - succeeded,
+114:     },
+115:   };
+116: }
+117: 
+118: // Service base URLs (configurable via env)
+119: const ORIGINATE_SERVICE_URL = process.env.ORIGINATE_SERVICE_URL || 'http://localhost:4002';
+120: const TRANSFER_SERVICE_URL = process.env.TRANSFER_SERVICE_URL || 'http://localhost:4004';
+121: 
+122: // KS-1240: the batch fan-out fetch carries a timeout signal. Without one an originate or transfer service that never answers holds the whole batch request open. On expiry the fetch rejects and the existing
+123: // catch in proxyRequest returns `{ ok: false, error }` for that item, as it already does for an unreachable service.
+124: const UPSTREAM_BATCH_FETCH_TIMEOUT_MS = 30_000;
+125: 
+126: async function proxyRequest(
+127:   baseUrl: string,
+128:   path: string,
+129:   body: unknown,
+130:   authHeader?: string,
+131: ): Promise<{ ok: boolean; data?: unknown; error?: string }> {
+132:   try {
+133:     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+134:     if (authHeader) headers['Authorization'] = authHeader;
+135: 
+136:     const response = await fetch(`${baseUrl}${path}`, {
+137:       signal: AbortSignal.timeout(UPSTREAM_BATCH_FETCH_TIMEOUT_MS),
+138:       method: 'POST',
+139:       headers,
+140:       body: JSON.stringify(body),
+141:     });
+142: 
+143:     const data = await response.json().catch(() => ({}));
+144: 
+145:     if (!response.ok) {
+146:       return { ok: false, error: (data as any)?.error || `HTTP ${response.status}` };
+147:     }
+148: 
+149:     return { ok: true, data };
+150:   } catch (err: any) {
+151:     return { ok: false, error: err.message || 'Service request failed' };
+152:   }
+153: }
+154: 
+155: // ---------------------------------------------------------------------------
+156: // POST /api/batch/certifications — bulk certify documents
+157: // ---------------------------------------------------------------------------
+158: 
+159: router.post('/certifications', async (req: Request, res: Response) => {
+160:   try {
+161:     const userId = getUserId(req);
+162:     if (!userId) {
+163:       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+164:       return;
+165:     }
+166: 
+167:     const parsed = validateBatchCertify(req.body);
+168:     if (!parsed.valid) {
+169:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: parsed.error } });
+170:       return;
+171:     }
+172: 
+173:     const authHeader = req.headers.authorization;
+174:     const { documents } = parsed.data;
+175: 
+176:     const settled = await Promise.allSettled(
+177:       documents.map((doc, index) =>
+178:         proxyRequest(
+179:           ORIGINATE_SERVICE_URL,
+180:           '/api/certifications',
+181:           { ...doc, userId },
+182:           authHeader,
+183:         ).then((result): BatchResultItem => {
+184:           if (result.ok) {
+185:             return { index, status: 'success', data: result.data };
+186:           }
+187:           return { index, status: 'failed', error: result.error };
+188:         }),
+189:       ),
+190:     );
+191: 
+192:     const results: BatchResultItem[] = settled.map((s, index) => {
+193:       if (s.status === 'fulfilled') return s.value;
+194:       return { index, status: 'failed' as const, error: s.reason?.message || 'Unknown error' };
+195:     });
+196: 
+197:     res.json(buildBatchResponse(results));
+198:   } catch (err: any) {
+199:     fail500(res, 'Batch certify failed (POST /api/batch/certifications)', err);
+200:   }
+201: });
+202: 
+203: // ---------------------------------------------------------------------------
+204: // POST /api/batch/verify — bulk verify document hashes
+205: // ---------------------------------------------------------------------------
+206: 
+207: router.post('/verify', async (req: Request, res: Response) => {
+208:   try {
+209:     const userId = getUserId(req);
+210:     if (!userId) {
+211:       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+212:       return;
+213:     }
+214: 
+215:     const parsed = validateBatchVerify(req.body);
+216:     if (!parsed.valid) {
+217:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: parsed.error } });
+218:       return;
+219:     }
+220: 
+221:     const authHeader = req.headers.authorization;
+222:     const { hashes } = parsed.data;
+223: 
+224:     const settled = await Promise.allSettled(
+225:       hashes.map((hash, index) =>
+226:         proxyRequest(
+227:           ORIGINATE_SERVICE_URL,
+228:           '/api/verify',
+229:           { documentHash: hash },
+230:           authHeader,
+231:         ).then((result): BatchResultItem => {
+232:           if (result.ok) {
+233:             return { index, status: 'success', data: result.data };
+234:           }
+235:           return { index, status: 'failed', error: result.error };
+236:         }),
+237:       ),
+238:     );
+239: 
+240:     const results: BatchResultItem[] = settled.map((s, index) => {
+241:       if (s.status === 'fulfilled') return s.value;
+242:       return { index, status: 'failed' as const, error: s.reason?.message || 'Unknown error' };
+243:     });
+244: 
+245:     res.json(buildBatchResponse(results));
+246:   } catch (err: any) {
+247:     fail500(res, 'Batch verify failed (POST /api/batch/verify)', err);
+248:   }
+249: });
+250: 
+251: // ---------------------------------------------------------------------------
+252: // POST /api/batch/delegations — bulk create delegations
+253: // ---------------------------------------------------------------------------
+254: 
+255: router.post('/delegations', async (req: Request, res: Response) => {
+256:   try {
+257:     const userId = getUserId(req);
+258:     if (!userId) {
+259:       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+260:       return;
+261:     }
+262: 
+263:     const parsed = validateBatchDelegate(req.body);
+264:     if (!parsed.valid) {
+265:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: parsed.error } });
+266:       return;
+267:     }
+268: 
+269:     const authHeader = req.headers.authorization;
+270:     const { delegations } = parsed.data;
+271: 
+272:     const settled = await Promise.allSettled(
+273:       delegations.map((delegation, index) =>
+274:         proxyRequest(
+275:           TRANSFER_SERVICE_URL,
+276:           '/api/delegations',
+277:           { ...delegation, delegatorId: userId },
+278:           authHeader,
+279:         ).then((result): BatchResultItem => {
+280:           if (result.ok) {
+281:             return { index, status: 'success', data: result.data };
+282:           }
+283:           return { index, status: 'failed', error: result.error };
+284:         }),
+285:       ),
+286:     );
+287: 
+288:     const results: BatchResultItem[] = settled.map((s, index) => {
+289:       if (s.status === 'fulfilled') return s.value;
+290:       return { index, status: 'failed' as const, error: s.reason?.message || 'Unknown error' };
+291:     });
+292: 
+293:     res.json(buildBatchResponse(results));
+294:   } catch (err: any) {
+295:     fail500(res, 'Batch delegate failed (POST /api/batch/delegations)', err);
+296:   }
+297: });
+298: 
+299: export default router;
+
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+1: /**
+2:  * =============================================================================
+3:  * AUDIT LOG EXPORT ROUTES
+4:  * =============================================================================
+5:  * Admin endpoints for exporting audit logs in CSV or JSON format.
+6:  *
+7:  * Usage in index.ts:
+8:  *   import auditExportRouter from './routes/audit-export';
+9:  *   app.use('/api/admin/audit', auditExportRouter);
+10:  * =============================================================================
+11:  */
+12: 
+13: import { Router, Request, Response } from 'express';
+14: import { logger } from '../utils/logger';
+15: 
+16: const router = Router();
+17: 
+18: /**
+19:  * KS-1410: the only place in this router that turns a caught error into a 500. The route's catch block below put the
+20:  * thrown error's own text in the 500 body with NO NODE_ENV guard, so it reached the client in every environment,
+21:  * production included. Same shape as originate's fail500 (KS-1334, KS-730): log the thrown text server-side with
+22:  * the route named, answer the constant body.
+23:  */
+24: function fail500(res: Response, context: string, err: unknown): void {
+25:   // KS-1346: was `String(err)`, which rendered a thrown non-Error object as "[object Object]" and lost
+26:   // its content. Kam ruled 2026-09-27 that such a throw logs its TYPE and FIELD NAMES only. A thrown
+27:   // Error still logs `.message`, and thrown text is still logged verbatim: neither is in this ticket.
+28:   // KS-1771: describing the thrown value (a message getter, a Proxy trap, a revoked Proxy) and writing the log line (a logger that fails) can themselves throw. This line did both with no try of its
+29:   // own, so such a throw escaped fail500 and the constant 500 below was never sent: this handler is async, Express 4 does not catch its rejection, and the request got no answer at all. Describe the
+30:   // value in its own try and log in another (the shape PR 1754 gave platform.ts, KS-1524 a). The line is unchanged for every value that could be described before.
+31:   let described: string;
+32:   try {
+33:     described = err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err;
+34:   } catch {
+35:     described = 'thrown value that could not be described';
+36:   }
+37:   try {
+38:     logger.error(context, { error: described });
+39:   } catch {
+40:     // Nothing more can be said if the logger itself fails; the caller still gets the 500 below.
+41:   }
+42:   res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+43: }
+44: 
+45: // ---------------------------------------------------------------------------
+46: // Types
+47: // ---------------------------------------------------------------------------
+48: 
+49: interface AuditEntry {
+50:   id: string;
+51:   timestamp: string;
+52:   type: string;
+53:   action: string;
+54:   userId: string;
+55:   email?: string;
+56:   ipAddress?: string;
+57:   userAgent?: string;
+58:   resource?: string;
+59:   resourceId?: string;
+60:   details?: string;
+61:   outcome: 'success' | 'failure';
+62: }
+63: 
+64: const AUDIT_TYPES = ['all', 'auth', 'document', 'admin', 'billing'] as const;
+65: type AuditType = (typeof AUDIT_TYPES)[number];
+66: 
+67: // ---------------------------------------------------------------------------
+68: // Helpers
+69: // ---------------------------------------------------------------------------
+70: 
+71: const SECURITY_SERVICE_URL = process.env.SECURITY_SERVICE_URL || 'http://localhost:4005';
+72: 
+73: // KS-1240: the audit-log fetch carries a timeout signal. Without one a security service that never answers holds the export request open. On expiry the fetch rejects and the existing catch answers the
+74: // constant 502 BAD_GATEWAY, as it already does for an unreachable service.
+75: const UPSTREAM_AUDIT_FETCH_TIMEOUT_MS = 30_000;
+76: 
+77: function escapeCSVField(value: string | undefined | null): string {
+78:   if (value == null) return '';
+79:   const str = String(value);
+80:   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+81:     return `"${str.replace(/"/g, '""')}"`;
+82:   }
+83:   return str;
+84: }
+85: 
+86: function formatDate(dateStr: string): string {
+87:   // Validate and normalize date input
+88:   const date = new Date(dateStr);
+89:   if (isNaN(date.getTime())) {
+90:     throw new Error(`Invalid date: ${dateStr}`);
+91:   }
+92:   return date.toISOString().split('T')[0];
+93: }
+94: 
+95: function auditEntriesToCSV(entries: AuditEntry[]): string {
+96:   const headers = [
+97:     'id', 'timestamp', 'type', 'action', 'userId', 'email',
+98:     'ipAddress', 'userAgent', 'resource', 'resourceId', 'details', 'outcome',
+99:   ];
+100: 
+101:   const headerRow = headers.join(',');
+102: 
+103:   const dataRows = entries.map((entry) =>
+104:     headers.map((h) => escapeCSVField((entry as any)[h])).join(','),
+105:   );
+106: 
+107:   return [headerRow, ...dataRows].join('\n');
+108: }
+109: 
+110: // ---------------------------------------------------------------------------
+111: // GET /api/admin/audit/export
+112: // ---------------------------------------------------------------------------
+113: 
+114: router.get('/export', async (req: Request, res: Response) => {
+115:   try {
+116:     // Auth check — admin only
+117:     const user = (req as any).user;
+118:     if (!user) {
+119:       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+120:       return;
+121:     }
+122: 
+123:     const adminRoles = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN', 'ORG_ADMIN'];
+124:     if (!adminRoles.includes(user.role)) {
+125:       res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
+126:       return;
+127:     }
+128: 
+129:     // Parse query parameters
+130:     const format = (req.query.format as string) || 'json';
+131:     const fromDate = req.query.from as string;
+132:     const toDate = req.query.to as string;
+133:     // KS-1645: `type` was a bare cast forwarded verbatim, so an unknown value got a 200 whose filename and meta.type named a filter nobody applied.
+134:     const rawType = req.query.type || 'all';
+135:     if (typeof rawType !== 'string' || !(AUDIT_TYPES as readonly string[]).includes(rawType)) {
+136:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `Type must be one of: ${AUDIT_TYPES.join(', ')}` } });
+137:       return;
+138:     }
+139:     const type = rawType as AuditType;
+140: 
+141:     if (!['csv', 'json'].includes(format)) {
+142:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Format must be "csv" or "json"' } });
+143:       return;
+144:     }
+145: 
+146:     if (!fromDate || !toDate) {
+147:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Both "from" and "to" date parameters are required' } });
+148:       return;
+149:     }
+150: 
+151:     let formattedFrom: string;
+152:     let formattedTo: string;
+153: 
+154:     try {
+155:       formattedFrom = formatDate(fromDate);
+156:       formattedTo = formatDate(toDate);
+157:     } catch {
+158:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid date format. Use YYYY-MM-DD.' } });
+159:       return;
+160:     }
+161: 
+162:     // Fetch audit logs from security service
+163:     const queryParams = new URLSearchParams({
+164:       from: formattedFrom,
+165:       to: formattedTo,
+166:       type,
+167:     });
+168: 
+169:     const authHeader = req.headers.authorization;
+170:     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+171:     if (authHeader) headers['Authorization'] = authHeader;
+172: 
+173:     let entries: AuditEntry[] = [];
+174: 
+175:     try {
+176:       const response = await fetch(
+177:         // KS-745: the security service lists at /api/audit (no /logs route — that hit /api/audit/:id with id "logs" → 404)
+178:         `${SECURITY_SERVICE_URL}/api/audit?${queryParams.toString()}`,
+179:         { method: 'GET', headers, signal: AbortSignal.timeout(UPSTREAM_AUDIT_FETCH_TIMEOUT_MS) },
+180:       );
+181: 
+182:       if (response.ok) {
+183:         const data = await response.json();
+184:         // KS-745: the list answers { success, data: { logs, total, limit, offset } } — the array is data.data.logs
+185:         entries = (data as any)?.data?.logs ?? (data as any)?.logs ?? [];
+186:       } else {
+187:         const errorData = await response.json().catch(() => ({}));
+188:         res.status(response.status).json({
+189:           success: false,
+190:           error: {
+191:             code: 'BAD_GATEWAY',
+192:             message: (errorData as any)?.error || `Security service returned ${response.status}`,
+193:           },
+194:         });
+195:         return;
+196:       }
+197:     } catch (err: any) {
+198:       // KS-1410: log the failed fetch server-side, naming the route. Before this the catch logged nothing and sent the
+199:       // thrown text to the client in the 502 body instead (see `message` below).
+200:       // WHY this expression: Kam's ruling of 2026-09-27 (card secuura-ks1346-logging-thrown-objects-leaks-secrets => a): log a thrown object's TYPE and FIELD NAMES only.
+201:       // KS-1771: describing the thrown value and writing the log line can themselves throw (a message getter, a Proxy trap, a revoked Proxy, a logger that fails). Here that throw left this catch for the
+202:       // outer one at the foot of the handler, so the request was answered by fail500's 500 under a different log context, not by the 502 below. Describe the value in its own try and log in another, so the
+203:       // constant 502 is always sent (the shape PR 1754 gave platform.ts, KS-1524 a). The line is unchanged for every value that could be described before.
+204:       let described: string;
+205:       try {
+206:         described = err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err;
+207:       } catch {
+208:         described = 'thrown value that could not be described';
+209:       }
+210:       try {
+211:         logger.error('Audit export could not reach the security service (GET /api/admin/audit/export)', { error: described });
+212:       } catch {
+213:         // Nothing more can be said if the logger itself fails; the caller still gets the 502 below.
+214:       }
+215:       res.status(502).json({
+216:         success: false,
+217:         error: {
+218:           code: 'BAD_GATEWAY',
+219:           // KS-1410: a constant message. It was `Failed to reach security service: ${err.message}`, which put the thrown
+220:           // text (a driver message, an internal host:port) in the 502 body in every environment.
+221:           message: 'Failed to reach security service',
+222:         },
+223:       });
+224:       return;
+225:     }
+226: 
+227:     // Generate filename
+228:     const filename = `audit-logs_${formattedFrom}_${formattedTo}_${type}`;
+229: 
+230:     if (format === 'csv') {
+231:       const csv = auditEntriesToCSV(entries);
+232: 
+233:       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+234:       res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`);
+235:       res.send(csv);
+236:       return;
+237:     }
+238: 
+239:     // JSON format
+240:     res.setHeader('Content-Type', 'application/json; charset=utf-8');
+241:     res.setHeader('Content-Disposition', `attachment; filename="${filename}.json"`);
+242:     res.json({
+243:       success: true,
+244:       meta: {
+245:         from: formattedFrom,
+246:         to: formattedTo,
+247:         type,
+248:         totalEntries: entries.length,
+249:         exportedAt: new Date().toISOString(),
+250:       },
+251:       data: entries,
+252:     });
+253:   } catch (err: any) {
+254:     fail500(res, 'Audit export failed (GET /api/admin/audit/export)', err);
+255:   }
+256: });
+257: 
+258: export default router;
+
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts
+1: // KS-1240 (api-gateway routes/batch.ts and routes/audit-export.ts): the upstream fetch in each of these two files carried no timeout, so an upstream that accepted the connection and never answered held the
+2: // caller's request open with no bound (the key-exchange half of the same ticket is in middleware/auth.ts, the proxy.ts and admin.ts half is another file). This file reads the two sources and pins, per fetch call, that the call carries an
+3: // AbortSignal.timeout signal, and that the timeout constants exist and are bounded. The extractor balances the call's own parentheses, so a signal in a NEIGHBOUR call cannot satisfy a fetch that has none.
+4: // C3 and C4 prove the extractor can return both answers (a bounded call that already existed at admin.ts, and a synthetic unbounded one), so the red cells are not vacuous.
+5: import { describe, it, expect } from 'vitest';
+6: import { readFileSync } from 'node:fs';
+7: import { join } from 'node:path';
+8: 
+9: const BATCH_SRC = readFileSync(join(__dirname, '..', 'routes', 'batch.ts'), 'utf8');
+10: const AUDIT_SRC = readFileSync(join(__dirname, '..', 'routes', 'audit-export.ts'), 'utf8');
+11: 
+12: /** Every `fetch(` call in the source, each as the text from `fetch(` to its balancing `)`. */
+13: function fetchCalls(src: string): string[] {
+14:   const calls: string[] = [];
+15:   const re = /\bfetch\(/g;
+16:   let match: RegExpExecArray | null;
+17:   while ((match = re.exec(src)) !== null) {
+18:     const open = match.index + match[0].length - 1;
+19:     let depth = 0;
+20:     let end = -1;
+21:     for (let i = open; i < src.length; i++) {
+22:       const ch = src[i];
+23:       if (ch === '(') depth++;
+24:       else if (ch === ')') {
+25:         depth--;
+26:         if (depth === 0) {
+27:           end = i;
+28:           break;
+29:         }
+30:       }
+31:     }
+32:     expect(end, 'unbalanced fetch call at offset ' + match.index).toBeGreaterThan(-1);
+33:     calls.push(src.slice(match.index, end + 1));
+34:   }
+35:   return calls;
+36: }
+37: 
+38: function isBounded(call: string): boolean {
+39:   return call.includes('AbortSignal.timeout(');
+40: }
+41: 
+42: /** The first line of each unbounded call, so a failure names the call. */
+43: function unbounded(src: string): string[] {
+44:   return fetchCalls(src)
+45:     .filter((call) => !isBounded(call))
+46:     .map((call) => call.split('\n')[0].trim());
+47: }
+48: 
+49: function constantMs(src: string, name: string): number {
+50:   const found = new RegExp('const ' + name + ' = ([0-9_]+);').exec(src);
+51:   return found ? Number(found[1].replace(/_/g, '')) : Number.NaN;
+52: }
+53: 
+54: describe('KS-1240: the batch and audit-export upstream fetches are bounded', () => {
+55:   it('RED KS-1240 R1 every fetch call in batch.ts carries an AbortSignal.timeout', () => {
+56:     expect(unbounded(BATCH_SRC)).toEqual([]);
+57:   });
+58: 
+59:   it('RED KS-1240 R2 every fetch call in audit-export.ts carries an AbortSignal.timeout', () => {
+60:     expect(unbounded(AUDIT_SRC)).toEqual([]);
+61:   });
+62: 
+63:   it('RED KS-1240 R3 batch.ts declares its timeout constant, positive and at most 120000 ms', () => {
+64:     const ms = constantMs(BATCH_SRC, 'UPSTREAM_BATCH_FETCH_TIMEOUT_MS');
+65:     expect(ms).toBeGreaterThan(0);
+66:     expect(ms).toBeLessThanOrEqual(120000);
+67:   });
+68: 
+69:   it('RED KS-1240 R4 audit-export.ts declares its timeout constant, positive and at most 120000 ms', () => {
+70:     const ms = constantMs(AUDIT_SRC, 'UPSTREAM_AUDIT_FETCH_TIMEOUT_MS');
+71:     expect(ms).toBeGreaterThan(0);
+72:     expect(ms).toBeLessThanOrEqual(120000);
+73:   });
+74: 
+75:   it('control KS-1240 C1 batch.ts has exactly one fetch call', () => {
+76:     expect(fetchCalls(BATCH_SRC)).toHaveLength(1);
+77:   });
+78: 
+79:   it('control KS-1240 C2 audit-export.ts has exactly one fetch call', () => {
+80:     expect(fetchCalls(AUDIT_SRC)).toHaveLength(1);
+81:   });
+82: 
+83:   it('control KS-1240 C3 the extractor reads a call whose init object holds a signal as bounded', () => {
+84:     const synthetic = "const r = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(5000) });\n";
+85:     expect(unbounded(synthetic)).toEqual([]);
+86:   });
+87: 
+88:   it('control KS-1240 C4 the extractor reads a synthetic call with no signal as unbounded', () => {
+89:     const synthetic = "const r = await fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) });\n";
+90:     expect(unbounded(synthetic)).toEqual(["fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) })"]);
+91:   });
+92: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "f95d354b1ee27aad17d2a354d2e9983e38b7255a",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/routes/batch.ts",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts",
+   "added": "5",
+   "deleted": "1"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts",
+   "added": "92",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "5",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/routes/batch.ts"
+  ],
+  [
+   "5",
+   "1",
+   "Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts"
+  ],
+  [
+   "92",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 8,
+  "failed": 4
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 8,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1255 failed=0 | after: total=1263 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 8\n",
+ "checker_summary": [
+  "PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=3 products=2 tests=1 red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

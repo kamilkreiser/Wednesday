@@ -1,0 +1,177 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts b/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
+@@ -21,3 +21,8 @@
+ // list live in utils/originateForward.ts — the one reader, shared by onProxyReq
+ // below and by the hand-built originate forwards in this file and verification.ts.
+ import { vouchHeaderFor } from '../utils/originateForward';
++
++// KS-1240: every hand-built upstream fetch in this file carries a timeout signal. Without one an upstream that accepts the connection and never answers holds the caller's request open for as long
++// as the socket lives. On expiry the fetch rejects and the handler's existing catch answers 502 BAD_GATEWAY, as it already does for an unreachable upstream. The package-generation call gets a longer bound.
++const UPSTREAM_PROXY_FETCH_TIMEOUT_MS = 30_000;
++const UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS = 120_000;
+@@ -469,6 +474,7 @@
+         });
+       }
+       const upstream = await fetch(`${authUrl}/api/users/admin/create`, {
++        signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+@@ -500,6 +506,7 @@
+         });
+       }
+       const upstream = await fetch(`${authUrl}/api/users/admin/${req.params.id}`, {
++        signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+         method: 'PATCH',
+         headers: {
+           'Content-Type': 'application/json',
+@@ -663,6 +670,7 @@
+         const originateUrl = services.originate?.url || 'http://originate:4000';
+         const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+         const upstream = await fetch(`${originateUrl}/api/signatories${qs}`, {
++          signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+           // KS-1084: forward the tenant authenticateToken verified (it writes x-tenant-id onto req.headers,
+           // middleware/auth.ts) so single-tenant originate does not scope this read to DEFAULT_TENANT_ID.
+           // KS-955 P2a: and vouch, or a provisioned originate drops that x-tenant-id as unvouched.
+@@ -691,6 +699,7 @@
+       try {
+         const originateUrl = services.originate?.url || 'http://originate:4000';
+         const upstream = await fetch(`${originateUrl}/api/third-party-verifiers`, {
++          signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+           // KS-1084: forward the tenant authenticateToken verified (it writes x-tenant-id onto req.headers,
+           // middleware/auth.ts) so single-tenant originate does not scope this read to DEFAULT_TENANT_ID.
+           // KS-955 P2a: and vouch, or a provisioned originate drops that x-tenant-id as unvouched.
+@@ -1259,6 +1268,7 @@
+     async (req: Request, res: Response) => {
+       try {
+         const r = await fetch(`${MCP_SERVER_URL}/generate-package`, {
++          signal: AbortSignal.timeout(UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS),
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify(req.body),
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -11,3 +11,6 @@
+ import crypto from 'crypto';
+ import express from 'express';
+ import { runWithPlatformScope } from '@secuura/shared';
++
++// KS-1240: the two hand-built auth-service fetches below carry a timeout signal; without one an auth service that never answers holds the admin's request open. On expiry the handler's existing catch answers 502.
++const UPSTREAM_ADMIN_FETCH_TIMEOUT_MS = 30_000;
+@@ -1373,6 +1376,7 @@
+       const authUrl = services.auth?.url || 'http://auth:4003';
+       const token = req.headers.authorization;
+       const upstream = await fetch(`${authUrl}/api/users/admin/create`, {
++        signal: AbortSignal.timeout(UPSTREAM_ADMIN_FETCH_TIMEOUT_MS),
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+@@ -1440,4 +1444,5 @@
+       const upstream = await fetch(`${authUrl}/api/users/admin/${encodeURIComponent(id)}`, {
++        signal: AbortSignal.timeout(UPSTREAM_ADMIN_FETCH_TIMEOUT_MS),
+         method: 'PATCH',
+         headers: {
+           'Content-Type': 'application/json',
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts
+@@ -0,0 +1,96 @@
++// KS-1240 (api-gateway routes/proxy.ts and routes/admin.ts): the hand-built upstream fetches in these two files carried no timeout, so an upstream that accepted the connection and never answered held the
++// caller's request open with no bound (the key-exchange half of the same ticket is in middleware/auth.ts). This file reads the two sources and pins, per fetch call, that the call carries an
++// AbortSignal.timeout signal, and that the timeout constants exist and are bounded. The extractor balances the call's own parentheses, so a signal in a NEIGHBOUR call cannot satisfy a fetch that has none.
++// C3 and C4 prove the extractor can return both answers (a bounded call that already existed at admin.ts, and a synthetic unbounded one), so the red cells are not vacuous.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const PROXY_SRC = readFileSync(join(__dirname, '..', 'routes', 'proxy.ts'), 'utf8');
++const ADMIN_SRC = readFileSync(join(__dirname, '..', 'routes', 'admin.ts'), 'utf8');
++
++/** Every `fetch(` call in the source, each as the text from `fetch(` to its balancing `)`. */
++function fetchCalls(src: string): string[] {
++  const calls: string[] = [];
++  const re = /\bfetch\(/g;
++  let match: RegExpExecArray | null;
++  while ((match = re.exec(src)) !== null) {
++    const open = match.index + match[0].length - 1;
++    let depth = 0;
++    let end = -1;
++    for (let i = open; i < src.length; i++) {
++      const ch = src[i];
++      if (ch === '(') depth++;
++      else if (ch === ')') {
++        depth--;
++        if (depth === 0) {
++          end = i;
++          break;
++        }
++      }
++    }
++    expect(end, 'unbalanced fetch call at offset ' + match.index).toBeGreaterThan(-1);
++    calls.push(src.slice(match.index, end + 1));
++  }
++  return calls;
++}
++
++function isBounded(call: string): boolean {
++  return call.includes('AbortSignal.timeout(');
++}
++
++/** The first line of each unbounded call, so a failure names the call. */
++function unbounded(src: string): string[] {
++  return fetchCalls(src)
++    .filter((call) => !isBounded(call))
++    .map((call) => call.split('\n')[0].trim());
++}
++
++function constantMs(src: string, name: string): number {
++  const found = new RegExp('const ' + name + ' = ([0-9_]+);').exec(src);
++  return found ? Number(found[1].replace(/_/g, '')) : Number.NaN;
++}
++
++describe('KS-1240: every hand-built gateway fetch in proxy.ts and admin.ts is bounded', () => {
++  it('RED KS-1240 R1 every fetch call in proxy.ts carries an AbortSignal.timeout', () => {
++    expect(unbounded(PROXY_SRC)).toEqual([]);
++  });
++
++  it('RED KS-1240 R2 every fetch call in admin.ts carries an AbortSignal.timeout', () => {
++    expect(unbounded(ADMIN_SRC)).toEqual([]);
++  });
++
++  it('RED KS-1240 R3 proxy.ts declares its two timeout constants, each positive and at most 120000 ms', () => {
++    const proxyMs = constantMs(PROXY_SRC, 'UPSTREAM_PROXY_FETCH_TIMEOUT_MS');
++    const packageMs = constantMs(PROXY_SRC, 'UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS');
++    expect(proxyMs).toBeGreaterThan(0);
++    expect(proxyMs).toBeLessThanOrEqual(120000);
++    expect(packageMs).toBeGreaterThanOrEqual(proxyMs);
++    expect(packageMs).toBeLessThanOrEqual(120000);
++  });
++
++  it('RED KS-1240 R4 admin.ts declares its timeout constant, positive and at most 120000 ms', () => {
++    const adminMs = constantMs(ADMIN_SRC, 'UPSTREAM_ADMIN_FETCH_TIMEOUT_MS');
++    expect(adminMs).toBeGreaterThan(0);
++    expect(adminMs).toBeLessThanOrEqual(120000);
++  });
++
++  it('control KS-1240 C1 proxy.ts has exactly five hand-built fetch calls', () => {
++    expect(fetchCalls(PROXY_SRC)).toHaveLength(5);
++  });
++
++  it('control KS-1240 C2 admin.ts has exactly three hand-built fetch calls', () => {
++    expect(fetchCalls(ADMIN_SRC)).toHaveLength(3);
++  });
++
++  it('control KS-1240 C3 the extractor reads the fetch that was already bounded in admin.ts as bounded', () => {
++    const calls = fetchCalls(ADMIN_SRC).filter((call) => call.includes('bfUrl'));
++    expect(calls).toHaveLength(1);
++    expect(isBounded(calls[0])).toBe(true);
++  });
++
++  it('control KS-1240 C4 the extractor reads a synthetic call with no signal as unbounded', () => {
++    const synthetic = "const r = await fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) });\n";
++    expect(unbounded(synthetic)).toEqual(["fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) })"]);
++  });
++});

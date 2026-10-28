@@ -1,0 +1,683 @@
+===== TICKET =====
+KS-1240 — T-2: the connector-token / key-validate fetch has no timeout — a slow upstream hangs the request [Backlog]
+
+**The sharpest of the four candidates the gate surfaced, and the only one that is request-reachable today.**
+
+The api-gateway's connector-token exchange / key-validate `fetch` carries **no timeout**. A slow or non-answering upstream turns into a gateway request with no bound on how long it hangs, while the process carries on serving everything else.
+
+## Measured on BOTH trees (head and develop) — so it is pre-existing
+
+* an exchange that **never answers** → the request hangs;
+* an exchange whose body arrives **2.5 s late** → the request hangs for that long.
+
+Graded **Major**. Request-reachable, unlike T-1.
+
+## What to do
+
+Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange.
+
+---
+
+Filed from the #1034 / KS-1215 tier-1 gate report `2026-09-18-ks1215-1034-e4624218b-tier1-r1`, at merge of `a105cd32b1ed9c6927ae6e797f8259224d8480c6`. Pre-existing unless stated; **not** introduced by #1034.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/github.ts b/Blockchain/Dev/services/auth/src/providers/social/github.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/github.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/github.ts
+@@ -1,1 +1,5 @@
+ import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
++
++// KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
++// long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
++const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+@@ -32,4 +36,5 @@
+         code,
+         redirect_uri: this.config.callbackUrl,
+       }),
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+@@ -43,3 +48,4 @@
+     const profileRes = await fetch('https://api.github.com/user', {
+       headers: { Authorization: `Bearer ${access_token}`, Accept: 'application/json' },
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+@@ -56,6 +62,7 @@
+     if (!email) {
+       const emailsRes = await fetch('https://api.github.com/user/emails', {
+         headers: { Authorization: `Bearer ${access_token}`, Accept: 'application/json' },
++        signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+       });
+       if (emailsRes.ok) {
+         const emails = (await emailsRes.json()) as { email: string; primary: boolean; verified: boolean }[];
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/google.ts b/Blockchain/Dev/services/auth/src/providers/social/google.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/google.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/google.ts
+@@ -1,1 +1,5 @@
+ import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
++
++// KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
++// long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
++const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+@@ -33,4 +37,5 @@
+         redirect_uri: this.config.callbackUrl,
+         grant_type: 'authorization_code',
+       }),
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+@@ -45,3 +50,4 @@
+     const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+       headers: { Authorization: `Bearer ${tokens.access_token}` },
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/linkedin.ts b/Blockchain/Dev/services/auth/src/providers/social/linkedin.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/linkedin.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/linkedin.ts
+@@ -1,1 +1,5 @@
+ import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
++
++// KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
++// long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
++const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+@@ -31,4 +35,5 @@
+         client_secret: this.config.clientSecret,
+         redirect_uri: this.config.callbackUrl,
+       }),
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+@@ -42,3 +47,4 @@
+     const profileRes = await fetch('https://api.linkedin.com/v2/userinfo', {
+       headers: { Authorization: `Bearer ${access_token}` },
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded.test.ts
+@@ -0,0 +1,128 @@
++// KS-1240 (class: hand-built outbound fetches with no timeout), services/auth social adapters github.ts, google.ts and linkedin.ts: their seven fetches (github token, user, user/emails; google token,
++// userinfo; linkedin token, userinfo) passed no `signal`, so an identity provider that accepts the connection and never answers held the OAuth callback open for as long as the socket lived. The adapters are
++// driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there is none); nothing touches the network. R1 to R3 pin that every fetch carries an AbortSignal, R4 that
++// each bound is a sane positive number, R5 to R7 that a provider that never answers ends in a rejection, not a hang. C1 and C2 pin that the full exchange and the refusal message are unchanged.
++import { describe, it, expect, afterEach, vi } from 'vitest';
++import { GitHubProvider } from '../providers/social/github';
++import { GoogleProvider } from '../providers/social/google';
++import { LinkedInProvider } from '../providers/social/linkedin';
++
++const CONFIG = { clientId: 'cid-ks1240', clientSecret: 'secret-ks1240', callbackUrl: 'https://app.test/cb', enabled: true };
++
++function reply(status: number, body: unknown): Response {
++  return {
++    ok: status >= 200 && status < 300,
++    status,
++    json: async () => body,
++    text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
++  } as unknown as Response;
++}
++
++type Seen = { url: string; signal: unknown };
++
++/** Answers by URL and records the signal each call carried. `emailless` makes github's user profile carry no email, so the emails fetch happens too. */
++function stubAnswering(seen: Seen[], emailless = false): void {
++  vi.spyOn(globalThis, 'fetch').mockImplementation((async (url: unknown, init?: { signal?: unknown }) => {
++    const u = String(url);
++    seen.push({ url: u, signal: init?.signal });
++    if (u.includes('github.com/login/oauth/access_token')) return reply(200, { access_token: 'tok' });
++    if (u.endsWith('api.github.com/user')) return reply(200, emailless ? { id: 7, login: 'octo', name: 'Octo Cat' } : { id: 7, login: 'octo', email: 'o@x.test', name: 'Octo Cat' });
++    if (u.endsWith('api.github.com/user/emails')) return reply(200, [{ email: 'o@x.test', primary: true, verified: true }]);
++    if (u.includes('googleapis.com/token')) return reply(200, { access_token: 'tok' });
++    if (u.includes('googleapis.com/oauth2/v2/userinfo')) return reply(200, { id: 'g1', email: 'g@x.test', verified_email: true });
++    if (u.includes('linkedin.com/oauth/v2/accessToken')) return reply(200, { access_token: 'tok' });
++    if (u.includes('api.linkedin.com/v2/userinfo')) return reply(200, { sub: 'l1', email: 'l@x.test', email_verified: true });
++    return reply(404, 'unexpected url ' + u);
++  }) as never);
++}
++
++/** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
++function stubNeverAnswering(): void {
++  vi.spyOn(globalThis, 'fetch').mockImplementation(((_url: unknown, init?: { signal?: AbortSignal }) =>
++    new Promise<Response>((_resolve, reject) => {
++      const signal = init?.signal;
++      if (!signal) return;
++      if (signal.aborted) reject(new Error('aborted'));
++      else signal.addEventListener('abort', () => reject(new Error('aborted')));
++    })) as never);
++}
++
++afterEach(() => { vi.restoreAllMocks(); });
++
++/** 'REJECTED' when exchangeCode rejects, 'RESOLVED' when it resolves, 'HUNG' when it is still pending after 300 ms, so a hang is a red assertion and not a stuck run. */
++async function outcome(run: () => Promise<unknown>): Promise<string> {
++  return Promise.race([
++    run().then(() => 'RESOLVED', () => 'REJECTED'),
++    new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
++  ]);
++}
++
++describe('KS-1240: the social adapters bound their outbound fetches', () => {
++  it('RED KS-1240 R1 every github fetch (token, user, emails) carries an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen, true);
++    await new GitHubProvider(CONFIG).exchangeCode('code');
++    expect(seen).toHaveLength(3);
++    for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R2 every google fetch (token, userinfo) carries an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await new GoogleProvider(CONFIG).exchangeCode('code');
++    expect(seen).toHaveLength(2);
++    for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R3 every linkedin fetch (token, userinfo) carries an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await new LinkedInProvider(CONFIG).exchangeCode('code');
++    expect(seen).toHaveLength(2);
++    for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R4 the seven bounds handed to AbortSignal.timeout are positive and at most 30000 ms', async () => {
++    const timeout = vi.spyOn(AbortSignal, 'timeout');
++    stubAnswering([], true);
++    await new GitHubProvider(CONFIG).exchangeCode('code');
++    await new GoogleProvider(CONFIG).exchangeCode('code');
++    await new LinkedInProvider(CONFIG).exchangeCode('code');
++    const bounds = timeout.mock.calls.map((c) => c[0] as number);
++    expect(bounds).toHaveLength(7);
++    for (const ms of bounds) {
++      expect(ms).toBeGreaterThan(0);
++      expect(ms).toBeLessThanOrEqual(30000);
++    }
++  });
++
++  it('RED KS-1240 R5 a github token endpoint that never answers ends in a rejection, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => new GitHubProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
++  });
++
++  it('RED KS-1240 R6 a google token endpoint that never answers ends in a rejection, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => new GoogleProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
++  });
++
++  it('RED KS-1240 R7 a linkedin token endpoint that never answers ends in a rejection, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => new LinkedInProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
++  });
++
++  it('control KS-1240 C1 the full exchange of each adapter still resolves to the same provider id', async () => {
++    stubAnswering([], true);
++    expect((await new GitHubProvider(CONFIG).exchangeCode('code')).providerId).toBe('7');
++    expect((await new GoogleProvider(CONFIG).exchangeCode('code')).providerId).toBe('g1');
++    expect((await new LinkedInProvider(CONFIG).exchangeCode('code')).providerId).toBe('l1');
++  });
++
++  it('control KS-1240 C2 a refused github token exchange still throws its own message', async () => {
++    vi.spyOn(globalThis, 'fetch').mockImplementation((async () => reply(401, 'bad_verification_code')) as never);
++    await expect(new GitHubProvider(CONFIG).exchangeCode('code')).rejects.toThrow('GitHub token exchange failed: bad_verification_code');
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/providers/social/github.ts
+1: import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
+2: 
+3: // KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
+4: // long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
+5: const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+6: 
+7: export class GitHubProvider implements SocialProvider {
+8:   readonly name = 'github' as const;
+9:   private config: SocialProviderConfig;
+10: 
+11:   constructor(config: SocialProviderConfig) {
+12:     this.config = config;
+13:   }
+14: 
+15:   getAuthUrl(state: string): string {
+16:     const scopes = this.config.scopes ?? ['user:email', 'read:user'];
+17:     const params = new URLSearchParams({
+18:       client_id: this.config.clientId,
+19:       redirect_uri: this.config.callbackUrl,
+20:       scope: scopes.join(' '),
+21:       state,
+22:     });
+23:     return `https://github.com/login/oauth/authorize?${params}`;
+24:   }
+25: 
+26:   async exchangeCode(code: string): Promise<SocialProfile> {
+27:     const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+28:       method: 'POST',
+29:       headers: {
+30:         'Content-Type': 'application/json',
+31:         Accept: 'application/json',
+32:       },
+33:       body: JSON.stringify({
+34:         client_id: this.config.clientId,
+35:         client_secret: this.config.clientSecret,
+36:         code,
+37:         redirect_uri: this.config.callbackUrl,
+38:       }),
+39:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+40:     });
+41: 
+42:     if (!tokenRes.ok) {
+43:       throw new Error(`GitHub token exchange failed: ${await tokenRes.text()}`);
+44:     }
+45: 
+46:     const { access_token } = (await tokenRes.json()) as { access_token: string };
+47: 
+48:     const profileRes = await fetch('https://api.github.com/user', {
+49:       headers: { Authorization: `Bearer ${access_token}`, Accept: 'application/json' },
+50:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+51:     });
+52: 
+53:     if (!profileRes.ok) {
+54:       throw new Error('Failed to fetch GitHub user profile');
+55:     }
+56: 
+57:     const profile = (await profileRes.json()) as Record<string, unknown>;
+58: 
+59:     let email = String(profile.email ?? '');
+60:     let emailVerified = false;
+61: 
+62:     if (!email) {
+63:       const emailsRes = await fetch('https://api.github.com/user/emails', {
+64:         headers: { Authorization: `Bearer ${access_token}`, Accept: 'application/json' },
+65:         signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+66:       });
+67:       if (emailsRes.ok) {
+68:         const emails = (await emailsRes.json()) as { email: string; primary: boolean; verified: boolean }[];
+69:         const primary = emails.find(e => e.primary && e.verified) ?? emails.find(e => e.verified);
+70:         if (primary) {
+71:           email = primary.email;
+72:           emailVerified = primary.verified;
+73:         }
+74:       }
+75:     } else {
+76:       emailVerified = true;
+77:     }
+78: 
+79:     const name = String(profile.name ?? '');
+80:     const parts = name.split(' ');
+81: 
+82:     return {
+83:       providerId: String(profile.id),
+84:       provider: 'github',
+85:       email,
+86:       emailVerified,
+87:       displayName: name || String(profile.login ?? ''),
+88:       firstName: parts[0] || undefined,
+89:       lastName: parts.slice(1).join(' ') || undefined,
+90:       avatarUrl: profile.avatar_url ? String(profile.avatar_url) : undefined,
+91:       rawProfile: profile,
+92:     };
+93:   }
+94: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/providers/social/google.ts
+1: import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
+2: 
+3: // KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
+4: // long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
+5: const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+6: 
+7: export class GoogleProvider implements SocialProvider {
+8:   readonly name = 'google' as const;
+9:   private config: SocialProviderConfig;
+10: 
+11:   constructor(config: SocialProviderConfig) {
+12:     this.config = config;
+13:   }
+14: 
+15:   getAuthUrl(state: string): string {
+16:     const scopes = this.config.scopes ?? ['openid', 'email', 'profile'];
+17:     const params = new URLSearchParams({
+18:       client_id: this.config.clientId,
+19:       redirect_uri: this.config.callbackUrl,
+20:       response_type: 'code',
+21:       scope: scopes.join(' '),
+22:       state,
+23:       access_type: 'offline',
+24:       prompt: 'consent',
+25:     });
+26:     return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+27:   }
+28: 
+29:   async exchangeCode(code: string): Promise<SocialProfile> {
+30:     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+31:       method: 'POST',
+32:       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+33:       body: new URLSearchParams({
+34:         code,
+35:         client_id: this.config.clientId,
+36:         client_secret: this.config.clientSecret,
+37:         redirect_uri: this.config.callbackUrl,
+38:         grant_type: 'authorization_code',
+39:       }),
+40:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+41:     });
+42: 
+43:     if (!tokenRes.ok) {
+44:       const err = await tokenRes.text();
+45:       throw new Error(`Google token exchange failed: ${err}`);
+46:     }
+47: 
+48:     const tokens = (await tokenRes.json()) as { access_token: string; id_token?: string };
+49: 
+50:     const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+51:       headers: { Authorization: `Bearer ${tokens.access_token}` },
+52:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+53:     });
+54: 
+55:     if (!profileRes.ok) {
+56:       throw new Error(`Failed to fetch Google user profile (HTTP ${profileRes.status})`);
+57:     }
+58: 
+59:     const profile = (await profileRes.json()) as Record<string, unknown>;
+60: 
+61:     return {
+62:       providerId: String(profile.id),
+63:       provider: 'google',
+64:       // S130-F2: `?? ''` — alone among the six adapters this was missing it.
+65:       // `String(undefined)` is the literal string "undefined", which is TRUTHY:
+66:       // an emailless google profile minted an account named "undefined" and then
+67:       // refused every later one on that same key.
+68:       email: String(profile.email ?? ''),
+69:       emailVerified: Boolean(profile.verified_email),
+70:       displayName: String(profile.name ?? ''),
+71:       firstName: String(profile.given_name ?? ''),
+72:       lastName: String(profile.family_name ?? ''),
+73:       avatarUrl: profile.picture ? String(profile.picture) : undefined,
+74:       rawProfile: profile,
+75:     };
+76:   }
+77: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/providers/social/linkedin.ts
+1: import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
+2: 
+3: // KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
+4: // long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
+5: const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+6: 
+7: export class LinkedInProvider implements SocialProvider {
+8:   readonly name = 'linkedin' as const;
+9:   private config: SocialProviderConfig;
+10: 
+11:   constructor(config: SocialProviderConfig) {
+12:     this.config = config;
+13:   }
+14: 
+15:   getAuthUrl(state: string): string {
+16:     const scopes = this.config.scopes ?? ['openid', 'profile', 'email'];
+17:     const params = new URLSearchParams({
+18:       response_type: 'code',
+19:       client_id: this.config.clientId,
+20:       redirect_uri: this.config.callbackUrl,
+21:       state,
+22:       scope: scopes.join(' '),
+23:     });
+24:     return `https://www.linkedin.com/oauth/v2/authorization?${params}`;
+25:   }
+26: 
+27:   async exchangeCode(code: string): Promise<SocialProfile> {
+28:     const tokenRes = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+29:       method: 'POST',
+30:       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+31:       body: new URLSearchParams({
+32:         grant_type: 'authorization_code',
+33:         code,
+34:         client_id: this.config.clientId,
+35:         client_secret: this.config.clientSecret,
+36:         redirect_uri: this.config.callbackUrl,
+37:       }),
+38:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+39:     });
+40: 
+41:     if (!tokenRes.ok) {
+42:       throw new Error(`LinkedIn token exchange failed: ${await tokenRes.text()}`);
+43:     }
+44: 
+45:     const { access_token } = (await tokenRes.json()) as { access_token: string };
+46: 
+47:     const profileRes = await fetch('https://api.linkedin.com/v2/userinfo', {
+48:       headers: { Authorization: `Bearer ${access_token}` },
+49:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+50:     });
+51: 
+52:     if (!profileRes.ok) {
+53:       throw new Error('Failed to fetch LinkedIn user profile');
+54:     }
+55: 
+56:     const profile = (await profileRes.json()) as Record<string, unknown>;
+57: 
+58:     return {
+59:       providerId: String(profile.sub),
+60:       provider: 'linkedin',
+61:       email: String(profile.email ?? ''),
+62:       emailVerified: Boolean(profile.email_verified),
+63:       displayName: String(profile.name ?? ''),
+64:       firstName: String(profile.given_name ?? ''),
+65:       lastName: String(profile.family_name ?? ''),
+66:       avatarUrl: profile.picture ? String(profile.picture) : undefined,
+67:       rawProfile: profile,
+68:     };
+69:   }
+70: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded.test.ts
+1: // KS-1240 (class: hand-built outbound fetches with no timeout), services/auth social adapters github.ts, google.ts and linkedin.ts: their seven fetches (github token, user, user/emails; google token,
+2: // userinfo; linkedin token, userinfo) passed no `signal`, so an identity provider that accepts the connection and never answers held the OAuth callback open for as long as the socket lived. The adapters are
+3: // driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there is none); nothing touches the network. R1 to R3 pin that every fetch carries an AbortSignal, R4 that
+4: // each bound is a sane positive number, R5 to R7 that a provider that never answers ends in a rejection, not a hang. C1 and C2 pin that the full exchange and the refusal message are unchanged.
+5: import { describe, it, expect, afterEach, vi } from 'vitest';
+6: import { GitHubProvider } from '../providers/social/github';
+7: import { GoogleProvider } from '../providers/social/google';
+8: import { LinkedInProvider } from '../providers/social/linkedin';
+9: 
+10: const CONFIG = { clientId: 'cid-ks1240', clientSecret: 'secret-ks1240', callbackUrl: 'https://app.test/cb', enabled: true };
+11: 
+12: function reply(status: number, body: unknown): Response {
+13:   return {
+14:     ok: status >= 200 && status < 300,
+15:     status,
+16:     json: async () => body,
+17:     text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
+18:   } as unknown as Response;
+19: }
+20: 
+21: type Seen = { url: string; signal: unknown };
+22: 
+23: /** Answers by URL and records the signal each call carried. `emailless` makes github's user profile carry no email, so the emails fetch happens too. */
+24: function stubAnswering(seen: Seen[], emailless = false): void {
+25:   vi.spyOn(globalThis, 'fetch').mockImplementation((async (url: unknown, init?: { signal?: unknown }) => {
+26:     const u = String(url);
+27:     seen.push({ url: u, signal: init?.signal });
+28:     if (u.includes('github.com/login/oauth/access_token')) return reply(200, { access_token: 'tok' });
+29:     if (u.endsWith('api.github.com/user')) return reply(200, emailless ? { id: 7, login: 'octo', name: 'Octo Cat' } : { id: 7, login: 'octo', email: 'o@x.test', name: 'Octo Cat' });
+30:     if (u.endsWith('api.github.com/user/emails')) return reply(200, [{ email: 'o@x.test', primary: true, verified: true }]);
+31:     if (u.includes('googleapis.com/token')) return reply(200, { access_token: 'tok' });
+32:     if (u.includes('googleapis.com/oauth2/v2/userinfo')) return reply(200, { id: 'g1', email: 'g@x.test', verified_email: true });
+33:     if (u.includes('linkedin.com/oauth/v2/accessToken')) return reply(200, { access_token: 'tok' });
+34:     if (u.includes('api.linkedin.com/v2/userinfo')) return reply(200, { sub: 'l1', email: 'l@x.test', email_verified: true });
+35:     return reply(404, 'unexpected url ' + u);
+36:   }) as never);
+37: }
+38: 
+39: /** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
+40: function stubNeverAnswering(): void {
+41:   vi.spyOn(globalThis, 'fetch').mockImplementation(((_url: unknown, init?: { signal?: AbortSignal }) =>
+42:     new Promise<Response>((_resolve, reject) => {
+43:       const signal = init?.signal;
+44:       if (!signal) return;
+45:       if (signal.aborted) reject(new Error('aborted'));
+46:       else signal.addEventListener('abort', () => reject(new Error('aborted')));
+47:     })) as never);
+48: }
+49: 
+50: afterEach(() => { vi.restoreAllMocks(); });
+51: 
+52: /** 'REJECTED' when exchangeCode rejects, 'RESOLVED' when it resolves, 'HUNG' when it is still pending after 300 ms, so a hang is a red assertion and not a stuck run. */
+53: async function outcome(run: () => Promise<unknown>): Promise<string> {
+54:   return Promise.race([
+55:     run().then(() => 'RESOLVED', () => 'REJECTED'),
+56:     new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
+57:   ]);
+58: }
+59: 
+60: describe('KS-1240: the social adapters bound their outbound fetches', () => {
+61:   it('RED KS-1240 R1 every github fetch (token, user, emails) carries an AbortSignal', async () => {
+62:     const seen: Seen[] = [];
+63:     stubAnswering(seen, true);
+64:     await new GitHubProvider(CONFIG).exchangeCode('code');
+65:     expect(seen).toHaveLength(3);
+66:     for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
+67:   });
+68: 
+69:   it('RED KS-1240 R2 every google fetch (token, userinfo) carries an AbortSignal', async () => {
+70:     const seen: Seen[] = [];
+71:     stubAnswering(seen);
+72:     await new GoogleProvider(CONFIG).exchangeCode('code');
+73:     expect(seen).toHaveLength(2);
+74:     for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
+75:   });
+76: 
+77:   it('RED KS-1240 R3 every linkedin fetch (token, userinfo) carries an AbortSignal', async () => {
+78:     const seen: Seen[] = [];
+79:     stubAnswering(seen);
+80:     await new LinkedInProvider(CONFIG).exchangeCode('code');
+81:     expect(seen).toHaveLength(2);
+82:     for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
+83:   });
+84: 
+85:   it('RED KS-1240 R4 the seven bounds handed to AbortSignal.timeout are positive and at most 30000 ms', async () => {
+86:     const timeout = vi.spyOn(AbortSignal, 'timeout');
+87:     stubAnswering([], true);
+88:     await new GitHubProvider(CONFIG).exchangeCode('code');
+89:     await new GoogleProvider(CONFIG).exchangeCode('code');
+90:     await new LinkedInProvider(CONFIG).exchangeCode('code');
+91:     const bounds = timeout.mock.calls.map((c) => c[0] as number);
+92:     expect(bounds).toHaveLength(7);
+93:     for (const ms of bounds) {
+94:       expect(ms).toBeGreaterThan(0);
+95:       expect(ms).toBeLessThanOrEqual(30000);
+96:     }
+97:   });
+98: 
+99:   it('RED KS-1240 R5 a github token endpoint that never answers ends in a rejection, not a hang', async () => {
+100:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+101:     stubNeverAnswering();
+102:     expect(await outcome(() => new GitHubProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
+103:   });
+104: 
+105:   it('RED KS-1240 R6 a google token endpoint that never answers ends in a rejection, not a hang', async () => {
+106:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+107:     stubNeverAnswering();
+108:     expect(await outcome(() => new GoogleProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
+109:   });
+110: 
+111:   it('RED KS-1240 R7 a linkedin token endpoint that never answers ends in a rejection, not a hang', async () => {
+112:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+113:     stubNeverAnswering();
+114:     expect(await outcome(() => new LinkedInProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
+115:   });
+116: 
+117:   it('control KS-1240 C1 the full exchange of each adapter still resolves to the same provider id', async () => {
+118:     stubAnswering([], true);
+119:     expect((await new GitHubProvider(CONFIG).exchangeCode('code')).providerId).toBe('7');
+120:     expect((await new GoogleProvider(CONFIG).exchangeCode('code')).providerId).toBe('g1');
+121:     expect((await new LinkedInProvider(CONFIG).exchangeCode('code')).providerId).toBe('l1');
+122:   });
+123: 
+124:   it('control KS-1240 C2 a refused github token exchange still throws its own message', async () => {
+125:     vi.spyOn(globalThis, 'fetch').mockImplementation((async () => reply(401, 'bad_verification_code')) as never);
+126:     await expect(new GitHubProvider(CONFIG).exchangeCode('code')).rejects.toThrow('GitHub token exchange failed: bad_verification_code');
+127:   });
+128: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "63e01bf996a1d1c20293ed86bdd46db5e29d1fb4",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/providers/social/github.ts",
+   "added": "7",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/providers/social/google.ts",
+   "added": "6",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/providers/social/linkedin.ts",
+   "added": "6",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded.test.ts",
+   "added": "128",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "7",
+   "0",
+   "Blockchain/Dev/services/auth/src/providers/social/github.ts"
+  ],
+  [
+   "6",
+   "0",
+   "Blockchain/Dev/services/auth/src/providers/social/google.ts"
+  ],
+  [
+   "6",
+   "0",
+   "Blockchain/Dev/services/auth/src/providers/social/linkedin.ts"
+  ],
+  [
+   "128",
+   "0",
+   "Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 9,
+  "failed": 7
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 9,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1200 failed=0 | after: total=1209 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 9\n",
+ "checker_summary": [
+  "PASS A6 whole services/auth suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/auth: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=4 products=3 tests=1 red_first=yes apply_mode=accommodated (see the A2 line)",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

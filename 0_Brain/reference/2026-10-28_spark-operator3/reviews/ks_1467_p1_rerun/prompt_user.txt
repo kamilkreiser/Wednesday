@@ -1,0 +1,1080 @@
+===== TICKET =====
+KS-1467 — AppError resets every subclass to the base prototype: `instanceof <subclass>` is always false and ValidationError `details` (password-strength feedback) never reaches the client [Backlog]
+
+## BLUF
+
+`AppError`'s constructor ends with `Object.setPrototypeOf(this, AppError.prototype)`, which resets every subclass instance to the **base** prototype. So `err instanceof ValidationError` (or any other subclass) is **always false**, and `errorHandler` never adds `details` to a 422. The password-strength `feedback` that registration, password reset and password change build is silently dropped. The same constructor line is in `packages/shared`, which twelve other services mount.
+
+## Recommendation
+
+Make the constructor `Object.setPrototypeOf(this, new.target.prototype)` in both places, with a cell per subclass, and decide deliberately that 422 responses now carry `details` (a visible response change; check the published 422 shape first). Until then, code that needs to recognise an error by type must use `statusCode`/`code`, as the tests do.
+
+## Detail
+
+* **Measured 2026-10-12** by driving the real `errorHandler` in `services/auth`: `next(new ValidationError('New password is too weak', { feedback: ['add a number'] }))` answers 422 with the body `{"success":false,"error":{"code":"VALIDATION_ERROR","message":"New password is too weak"}}`. No `details`. And `new ValidationError('x', { a: 1 }) instanceof ValidationError` is `false`.
+* **The dead branch:** `services/auth/src/middleware/errorHandler.ts:296`, `if (err instanceof ValidationError && err.details) { errorPayload.details = err.details; }`. The outer `err instanceof AppError` works (the base), the inner one cannot.
+* **What is dropped today** (`new ValidationError(..., { feedback })`): `routes/auth.ts:201` (register) and `:819` (reset-password), `routes/users.ts:981` (change-password). I have not checked the other services' use.
+* **Where the constructor line is:** `services/auth/src/middleware/errorHandler.ts:25` and `packages/shared/src/errors/index.ts:44`. Whether the shared handler has the same `details` branch is unmeasured.
+* **How it bit me:** a new `err instanceof ServiceUnavailableError` check in the KS-1188 F3 change never matched. It was caught only because the new test went red against the fix; the fix keys on `statusCode === 503`.
+* **Not established:** whether any client depends on `details` being absent; whether any other `instanceof <subclass>` exists outside `services/auth` (the one grep covered `Blockchain/Dev/services` and found only the two above).
+
+Found by Seat V 3rd while building KS-1188 F3, 2026-10-12. Related: KS-1188, KS-253 (the 503 class).
+
+## Gate notes carried from #1479 (KS-1188 F3, same file family; Sonnet-tier gate, verdict sha256/16 `306acc1aaf41a045`)
+
+1. `services/auth/src/services/passwordLoginGate.ts`: a `const` (BACKUP_CODE_UNCONFIRMED_MESSAGE) and its import sit in the middle of the import block, before `import { STATUSES_MAY_RECEIVE_CREDENTIAL }`. Cosmetic; lint passes. Move it below the imports.
+2. `ks1188-f3-a-spent-backup-code-503-says-so.test.ts`: no cell asserts the burn runs exactly once (the gate verified it by a probe only: UPDATE count 1 in the faulted case). Add one.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/auth/src/middleware/errorHandler.ts b/Blockchain/Dev/services/auth/src/middleware/errorHandler.ts
+--- a/Blockchain/Dev/services/auth/src/middleware/errorHandler.ts
++++ b/Blockchain/Dev/services/auth/src/middleware/errorHandler.ts
+@@ -22,6 +22,6 @@
+     this.statusCode = statusCode;
+     this.code = code;
+     this.isOperational = isOperational;
+-    Object.setPrototypeOf(this, AppError.prototype);
++    Object.setPrototypeOf(this, new.target.prototype);
+   }
+ }
+diff --git a/Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts b/Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts
+--- a/Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts
++++ b/Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts
+@@ -284,8 +284,8 @@
+             'Backup-code sign-in',
+           );
+         } catch (err) {
+-          // `statusCode`, not `instanceof`: AppError's constructor ends with Object.setPrototypeOf(this, AppError.prototype), which
+-          // resets every subclass instance to the base prototype, so `err instanceof ServiceUnavailableError` is always false here.
++          // `statusCode`, not `instanceof`: this reads the same for an AppError from any package. (KS-1467: AppError's constructor used to end with
++          // Object.setPrototypeOf(this, AppError.prototype), which reset every subclass instance, so `instanceof ServiceUnavailableError` was always false here.)
+           if ((err as { statusCode?: unknown } | null)?.statusCode === 503) throw new ServiceUnavailableError(BACKUP_CODE_UNCONFIRMED_MESSAGE);
+           throw err;
+         }
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts
+@@ -0,0 +1,104 @@
++// KS-1467 (services/auth middleware/errorHandler.ts): AppError's constructor ended with `Object.setPrototypeOf(this, AppError.prototype)`, which resets EVERY subclass instance to the base
++// prototype. So `err instanceof ValidationError` (or any other subclass) was always false, and the errorHandler's own `err instanceof ValidationError && err.details` branch could never run:
++// the password-strength `feedback` that registration, password reset and password change build never reached the client. The constructor now uses `new.target.prototype`.
++// P1/P2 pin the prototype of each subclass (and the two-level chain), H1 pins the handler's `details` branch, S1 pins that the stale comment in passwordLoginGate.ts is reworded, C1 to C4 and S2 pin what must not change.
++import { describe, it, expect, vi } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import type { Request, Response, NextFunction } from 'express';
++import * as mod from '../middleware/errorHandler';
++
++vi.mock('../utils/logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
++  createLogger: vi.fn(),
++  validateEnv: vi.fn(),
++}));
++
++const { errorHandler, AppError } = mod;
++
++const FACTORIES = [
++  { name: 'BadRequestError', make: () => new mod.BadRequestError('x'), cls: mod.BadRequestError, status: 400 },
++  { name: 'UnauthorizedError', make: () => new mod.UnauthorizedError('x'), cls: mod.UnauthorizedError, status: 401 },
++  { name: 'ForbiddenError', make: () => new mod.ForbiddenError('x'), cls: mod.ForbiddenError, status: 403 },
++  { name: 'NotFoundError', make: () => new mod.NotFoundError('Thing'), cls: mod.NotFoundError, status: 404 },
++  { name: 'ConflictError', make: () => new mod.ConflictError('x'), cls: mod.ConflictError, status: 409 },
++  { name: 'ValidationError', make: () => new mod.ValidationError('x', { a: 1 }), cls: mod.ValidationError, status: 422 },
++  { name: 'TooManyRequestsError', make: () => new mod.TooManyRequestsError(), cls: mod.TooManyRequestsError, status: 429 },
++  { name: 'ServiceUnavailableError', make: () => new mod.ServiceUnavailableError('x'), cls: mod.ServiceUnavailableError, status: 503 },
++  { name: 'MfaRequiredError', make: () => new mod.MfaRequiredError(), cls: mod.MfaRequiredError, status: 403 },
++] as const;
++
++interface Captured {
++  statusCode: number;
++  body: { success: boolean; error: { code: string; message: string; details?: unknown } };
++}
++
++function run(err: Error): Captured {
++  const captured = { statusCode: 0, body: undefined } as unknown as Captured;
++  const res = {
++    status(code: number) {
++      captured.statusCode = code;
++      return this;
++    },
++    json(payload: unknown) {
++      captured.body = payload as Captured['body'];
++      return this;
++    },
++  } as unknown as Response;
++  const req = { path: '/api/auth/register', method: 'POST' } as unknown as Request;
++  errorHandler(err, req, res, (() => undefined) as unknown as NextFunction);
++  return captured;
++}
++
++describe('KS-1467: auth AppError subclasses keep their own prototype', () => {
++  it.each(FACTORIES)('RED KS-1467 P1 $name: an instance is an instance of its own class', ({ make, cls }) => {
++    expect(make() instanceof cls).toBe(true);
++  });
++
++  it.each(FACTORIES)('RED KS-1467 P2 $name: the prototype of an instance is the class prototype', ({ make, cls }) => {
++    expect(Object.getPrototypeOf(make())).toBe(cls.prototype);
++  });
++
++  it('RED KS-1467 P3 a two-level subclass is an instance of both of its classes', () => {
++    const e = new mod.InvalidCredentialsError();
++    expect([e instanceof mod.InvalidCredentialsError, e instanceof mod.UnauthorizedError, e instanceof AppError]).toEqual([true, true, true]);
++  });
++
++  it('RED KS-1467 H1 the handler answers a ValidationError with its details', () => {
++    const r = run(new mod.ValidationError('New password is too weak', { feedback: ['add a number'] }));
++    expect(r.statusCode).toBe(422);
++    expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'New password is too weak', details: { feedback: ['add a number'] } });
++  });
++
++  it('RED KS-1467 S1 the comment above the 503 statusCode check no longer claims instanceof is always false', () => {
++    const source = readFileSync(join(process.cwd(), 'src', 'services', 'passwordLoginGate.ts'), 'utf8');
++    expect(source).not.toContain('is always false here');
++  });
++
++  it('control KS-1467 S2 passwordLoginGate.ts still reaches the 503 by statusCode and still throws the unconfirmed message', () => {
++    const source = readFileSync(join(process.cwd(), 'src', 'services', 'passwordLoginGate.ts'), 'utf8');
++    expect(source).toContain('?.statusCode === 503) throw new ServiceUnavailableError(BACKUP_CODE_UNCONFIRMED_MESSAGE);');
++  });
++
++  it.each(FACTORIES)('control KS-1467 C1 $name: an instance is still an AppError and an Error with its status', ({ make, status }) => {
++    const e = make();
++    expect([e instanceof AppError, e instanceof Error, e.statusCode]).toEqual([true, true, status]);
++  });
++
++  it('control KS-1467 C2 a plain AppError is still an AppError with its own prototype', () => {
++    const e = new AppError('teapot', 418, 'TEAPOT');
++    expect([e instanceof AppError, Object.getPrototypeOf(e) === AppError.prototype, e.code]).toEqual([true, true, 'TEAPOT']);
++  });
++
++  it('control KS-1467 C3 a ValidationError without details is answered without a details key', () => {
++    const r = run(new mod.ValidationError('bad'));
++    expect(r.statusCode).toBe(422);
++    expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'bad' });
++  });
++
++  it('control KS-1467 C4 a BadRequestError is answered with code and message only', () => {
++    const r = run(new mod.BadRequestError('nope'));
++    expect(r.statusCode).toBe(400);
++    expect(r.body.error).toEqual({ code: 'BAD_REQUEST', message: 'nope' });
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/middleware/errorHandler.ts
+1: /**
+2:  * Error Handler Middleware
+3:  */
+4: 
+5: import { Request, Response, NextFunction } from 'express';
+6: import { ZodError } from 'zod';
+7: import { logger } from '../utils/logger';
+8: 
+9: // Base error class
+10: export class AppError extends Error {
+11:   public readonly statusCode: number;
+12:   public readonly code: string;
+13:   public readonly isOperational: boolean;
+14: 
+15:   constructor(
+16:     message: string,
+17:     statusCode: number = 500,
+18:     code: string = 'INTERNAL_ERROR',
+19:     isOperational: boolean = true
+20:   ) {
+21:     super(message);
+22:     this.statusCode = statusCode;
+23:     this.code = code;
+24:     this.isOperational = isOperational;
+25:     Object.setPrototypeOf(this, new.target.prototype);
+26:   }
+27: }
+28: 
+29: // Common errors
+30: export class BadRequestError extends AppError {
+31:   constructor(message: string = 'Bad request') {
+32:     super(message, 400, 'BAD_REQUEST');
+33:   }
+34: }
+35: 
+36: export class UnauthorizedError extends AppError {
+37:   constructor(message: string = 'Unauthorized') {
+38:     super(message, 401, 'UNAUTHORIZED');
+39:   }
+40: }
+41: 
+42: export class ForbiddenError extends AppError {
+43:   constructor(message: string = 'Forbidden') {
+44:     super(message, 403, 'FORBIDDEN');
+45:   }
+46: }
+47: 
+48: export class NotFoundError extends AppError {
+49:   constructor(resource: string = 'Resource') {
+50:     super(`${resource} not found`, 404, 'NOT_FOUND');
+51:   }
+52: }
+53: 
+54: export class ConflictError extends AppError {
+55:   constructor(message: string = 'Resource already exists') {
+56:     super(message, 409, 'CONFLICT');
+57:   }
+58: }
+59: 
+60: export class ValidationError extends AppError {
+61:   public readonly details: unknown;
+62:   
+63:   constructor(message: string = 'Validation failed', details?: unknown) {
+64:     super(message, 422, 'VALIDATION_ERROR');
+65:     this.details = details;
+66:   }
+67: }
+68: 
+69: export class TooManyRequestsError extends AppError {
+70:   constructor(_retryAfter?: number) {
+71:     super('Too many requests', 429, 'RATE_LIMIT_EXCEEDED');
+72:   }
+73: }
+74: 
+75: // KS-253: infrastructure unavailability (DB pool starvation, connection
+76: // timeouts). Distinct from 401 — clients should retry, ops should alert.
+77: export class ServiceUnavailableError extends AppError {
+78:   constructor(message: string = 'Service temporarily unavailable, please retry') {
+79:     super(message, 503, 'SERVICE_UNAVAILABLE');
+80:   }
+81: }
+82: 
+83: // Auth-specific errors
+84: export class InvalidCredentialsError extends UnauthorizedError {
+85:   constructor() {
+86:     super('Invalid email or password');
+87:   }
+88: }
+89: 
+90: export class TokenExpiredError extends UnauthorizedError {
+91:   constructor() {
+92:     super('Token has expired');
+93:   }
+94: }
+95: 
+96: export class InvalidTokenError extends UnauthorizedError {
+97:   constructor() {
+98:     super('Invalid token');
+99:   }
+100: }
+101: 
+102: export class MfaRequiredError extends AppError {
+103:   constructor() {
+104:     super('MFA verification required', 403, 'MFA_REQUIRED');
+105:   }
+106: }
+107: 
+108: /**
+109:  * KS-795 F-6 (2026-09-05): AccountLinkRequiredError was REMOVED here, not
+110:  * merely stopped being thrown. Its message was an explicit account-existence
+111:  * oracle ("An account already exists for this email address") and its remedy
+112:  * named a route that persists nothing, so the social callback now answers
+113:  * SOCIAL_SIGN_IN_REFUSED for every account-dependent refusal. Left defined and
+114:  * unused it would read to the next author as an intention. If the social-id
+115:  * persistence fix ever wants a link-required outcome, it reintroduces one
+116:  * deliberately, with its own test.
+117:  */
+118: 
+119: 
+120: /**
+121:  * KS-795 F-6 + F-8 — THE ONE REFUSAL SHAPE for door 2.
+122:  *
+123:  * `passwordLoginGate.ts` states the platform's rule: "The refusal is uniform by
+124:  * design (pen-test F-11): locked out, suspended, deactivated, SSO-only, unknown
+125:  * email and wrong password all return the same `invalid_credentials`.
+126:  * Differentiating them leaks account existence and account state to an
+127:  * unauthenticated caller." Door 1 obeys it. Door 2 did not: it returned
+128:  * ACCOUNT_LINK_REQUIRED ("An account already exists for this email address" --
+129:  * an explicit existence oracle) for one refusal and FORBIDDEN "Account may not
+130:  * sign in" for another, so an unauthenticated caller could tell a healthy
+131:  * account from a disabled one, and either from an address with no account.
+132:  *
+133:  * Those two collapse here. MFA_REQUIRED stays distinct, because door 1
+134:  * differentiates it too -- that is a deliberate difference, not drift.
+135:  *
+136:  * The sentence is NEUTRAL on purpose (F-8). The wording it replaces named a
+137:  * remedy -- sign in, then link the provider from account settings -- that does
+138:  * NOT work: `updateUser` has no social-id fields in its fieldMap, so
+139:  * `POST /api/auth/social/link` issues zero statements. A user who followed it
+140:  * was told it worked and was refused identically on the next callback. A
+141:  * correct refusal carrying an incorrect instruction is worse than a vague one.
+142:  * Restore actionable wording in the same commit that repairs the persistence.
+143:  */
+144: export class SocialSignInRefusedError extends AppError {
+145:   constructor() {
+146:     super(
+147:       'This account cannot be signed in with this provider.',
+148:       403,
+149:       'SOCIAL_SIGN_IN_REFUSED',
+150:     );
+151:   }
+152: }
+153: 
+154: /**
+155:  * KS-722 Shape 1 — the callback could not be shown to belong to a flow this
+156:  * deployment started.
+157:  *
+158:  * ONE code for every rejection the state check can produce: absent, expired,
+159:  * already used, or minted for a different provider. Splitting them would hand a
+160:  * prober a free oracle for which condition it hit, and the caller's remedy is
+161:  * identical in all four cases — start the flow again.
+162:  *
+163:  * 403 rather than 400 to match the platform's other provenance refusal
+164:  * (`CSRF_TOKEN_MISSING`): the request is well-formed, it is just not one we
+165:  * can attribute to a flow we began.
+166:  */
+167: export class OAuthStateInvalidError extends AppError {
+168:   constructor() {
+169:     super(
+170:       'This sign-in could not be verified. Please start again from the sign-in page.',
+171:       403,
+172:       'OAUTH_STATE_INVALID',
+173:     );
+174:   }
+175: }
+176: 
+177: /**
+178:  * KS-819 F-4 — the PROVIDER refused, and said so on the redirect.
+179:  *
+180:  * An authorization server that denies the request comes back with `?error=` and
+181:  * no `code` (RFC 6749 §4.1.2.1). The route used to fall through to the missing-
+182:  * code branch, so a user who simply pressed "Cancel" was told their request was
+183:  * malformed — and, because the refusal landed after the state consume, their
+184:  * `state` was burned on the way, so the retry failed too.
+185:  *
+186:  * 400 rather than 403: this is the same status the malformed-callback path
+187:  * already answered, so the documented status set for the operation is unchanged
+188:  * — only the code and the message improve.
+189:  *
+190:  * The provider's `error` and `error_description` are deliberately NOT echoed.
+191:  * They are attacker-controllable via the redirect and land in a browser; the
+192:  * caller does not need them, and the server log keeps the detail.
+193:  */
+194: export class OAuthProviderError extends AppError {
+195:   constructor() {
+196:     super(
+197:       'The sign-in provider did not complete this request. Please try again.',
+198:       400,
+199:       'OAUTH_PROVIDER_ERROR',
+200:     );
+201:   }
+202: }
+203: 
+204: /**
+205:  * KS-795 F-4 — the provider completed the authorization but supplied no email
+206:  * address, and no account was resolved by the provider identity itself.
+207:  *
+208:  * An empty email is not a link key and not a create key. Two different
+209:  * identities from the same provider both carrying an empty address would
+210:  * otherwise resolve to the SAME account: the create path's
+211:  * `ON CONFLICT (email_lookup_hash) DO UPDATE` collapses them onto one row while
+212:  * `createUser` returns its input object either way, so the second caller is
+213:  * minted a session for a user id that was never inserted. `user_sessions` has
+214:  * no foreign key to `users`, so that orphan is written rather than refused.
+215:  *
+216:  * Reachable, not hypothetical: apple returns `email` only on the FIRST
+217:  * authorization (`providers/social/apple.ts`), and github yields `''` when there
+218:  * is neither a public nor a verified address.
+219:  *
+220:  * Deliberately neutral wording (KS-795 F-8 class): it names no remedy, because
+221:  * the obvious one — sign in and link the provider — does not persist today.
+222:  */
+223: export class SocialEmailUnavailableError extends AppError {
+224:   constructor() {
+225:     super(
+226:       'This provider did not supply an email address, so sign-in cannot be completed.',
+227:       403,
+228:       'SOCIAL_EMAIL_UNAVAILABLE',
+229:     );
+230:   }
+231: }
+232: 
+233: export class EmailNotVerifiedError extends ForbiddenError {
+234:   constructor() {
+235:     super('Email address not verified');
+236:   }
+237: }
+238: 
+239: export class AccountSuspendedError extends ForbiddenError {
+240:   constructor() {
+241:     super('Account has been suspended');
+242:   }
+243: }
+244: 
+245: export class InsufficientVerificationError extends ForbiddenError {
+246:   constructor(required: string, current: string) {
+247:     super(`Verification level ${required} required, current level is ${current}`);
+248:   }
+249: }
+250: 
+251: // Error handler middleware
+252: export function errorHandler(
+253:   err: Error,
+254:   req: Request,
+255:   res: Response,
+256:   _next: NextFunction
+257: ): void {
+258:   // Log the error
+259:   logger.error('Error occurred', {
+260:     error: err.message,
+261:     stack: err.stack,
+262:     path: req.path,
+263:     method: req.method,
+264:   });
+265: 
+266:   // Handle JSON parse errors (malformed request body)
+267:   if ((err as any).type === 'entity.parse.failed') {
+268:     res.status(400).json({
+269:       success: false,
+270:       error: { code: 'INVALID_JSON', message: 'Invalid JSON in request body' },
+271:     });
+272:     return;
+273:   }
+274: 
+275:   // Handle Zod validation errors
+276:   if (err instanceof ZodError) {
+277:     const firstError = err.errors[0];
+278:     const errorMessage = firstError 
+279:       ? `${firstError.path.join('.')}: ${firstError.message}`
+280:       : 'Validation failed';
+281:     
+282:     res.status(400).json({
+283:       success: false,
+284:       error: { code: 'VALIDATION_ERROR', message: errorMessage, details: err.errors },
+285:     });
+286:     return;
+287:   }
+288: 
+289:   // Handle AppError
+290:   if (err instanceof AppError) {
+291:     const errorPayload: Record<string, unknown> = {
+292:       code: err.code,
+293:       message: err.message,
+294:     };
+295: 
+296:     if (err instanceof ValidationError && err.details) {
+297:       errorPayload.details = err.details;
+298:     }
+299: 
+300:     res.status(err.statusCode).json({
+301:       success: false,
+302:       error: errorPayload,
+303:     });
+304:     return;
+305:   }
+306: 
+307:   // Handle unknown errors.
+308:   //
+309:   // KS-727: generic on EVERY environment, not only production — see the same
+310:   // change in packages/shared/src/errors/index.ts, which 12 other services
+311:   // mount. `err.message` and `err.stack` are logged at the top of this handler
+312:   // (with path + method), so removing them from the response loses nothing an
+313:   // operator had. Typed AppErrors return above with their own authored text.
+314:   res.status(500).json({
+315:     success: false,
+316:     error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+317:   });
+318: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts
+1: /**
+2:  * =============================================================================
+3:  * PASSWORD-LOGIN GATE (KS-781)
+4:  * =============================================================================
+5:  * The gates `/api/auth/login` applies between "a password arrived" and "a
+6:  * credential is issued": account lockout, account status, password
+7:  * verification, and the second factor.
+8:  *
+9:  * WHY THIS EXISTS
+10:  * ---------------
+11:  * `POST /api/oauth/authorize` was a SECOND, password-only login. It called
+12:  * `getUserByEmail` → `verifyPassword` → `createAuthorizationCode` and consulted
+13:  * neither `mfaEnabled`, nor account lockout, nor `user.status`. A password alone
+14:  * yielded an authorization code for an account whose front door refuses
+15:  * password-only login — confirmed at runtime, not inferred: the same account and
+16:  * password returned `403 MFA_REQUIRED` from `/api/auth/login` and `302 …?code=…`
+17:  * from `/api/oauth/authorize`.
+18:  *
+19:  * KS-737 closed "a second factor that can be declined" on the login route. This
+20:  * route declined it by not being the route that asks.
+21:  *
+22:  * WHY A HELPER RATHER THAN A THIRD COPY
+23:  * -------------------------------------
+24:  * KS-781 covers three token-issuing doors — this one, the social-callback
+25:  * account-linking branch, and `POST /api/auth/wallet/verify`. The ticket was
+26:  * deliberately kept as ONE ticket because they share a single remedy: three
+27:  * separate inline fixes would be three things that must agree and nothing
+28:  * comparing them, which is precisely the class that produced KS-737.
+29:  *
+30:  * WHAT THIS DID NOT DO, UNTIL IT HAD TO (KS-796 QA2-F6 — corrected)
+31:  * -----------------------------------------------------------------
+32:  * This header used to say it deliberately does NOT refactor `/api/auth/login` to
+33:  * call it, on the reasoning that login carries logic this gate has no business
+34:  * owning (platform-admin lookup, upgrade-on-verify rehashing, tenant resolution)
+35:  * and that a drift TEST was guard enough.
+36:  *
+37:  * **`/api/auth/login` calls it now**, and the reason the old reasoning failed is
+38:  * worth keeping: the drift test compared the two routes' verdicts but its corpus
+39:  * had no PENDING or INVITED row, so login kept its own status DENY-list and
+40:  * minted a full token pair for both while the shared allow-list refused them at
+41:  * every other door (KS-796 F-1, BLOCKER). A test guards only the rows it has.
+42:  *
+43:  * The logic that genuinely is login's own stayed in the route: the platform-admin
+44:  * branch never enters this gate, and upgrade-on-verify and tenant resolution run
+45:  * after it returns. So the concern was right about WHICH code belongs where and
+46:  * wrong that a test could substitute for a shared call site.
+47:  *
+48:  * The refusal is uniform by design (pen-test F-11): locked out, suspended,
+49:  * deactivated, SSO-only, unknown email and wrong password all return the same
+50:  * `invalid_credentials`. Differentiating them leaks account existence and
+51:  * account state to an unauthenticated caller.
+52:  * =============================================================================
+53:  */
+54: 
+55: // S130-F6 / registry.ts:245 — `z` MUST come from '@secuura/shared', not 'zod'.
+56: // `extendZodWithOpenApi` is applied to the shared package's zod prototype; a
+57: // direct 'zod' import gets an UNEXTENDED one, so every schema built here lacks
+58: // `.openapi()`. The CJS spec generator happens to unify the two resolutions and
+59: // hid it; a vitest run does not, which is why `auth.openapi.ts` could not be
+60: // imported by any test and its module-scope canary could never fire.
+61: import { z } from '@secuura/shared';
+62: import * as userRepo from '../repositories/userRepo';
+63: import { verifyTotpCode, verifyBackupCode } from './totp';
+64: import { logger } from '../utils/logger';
+65: import type { User } from '../types';
+66: import { ServiceUnavailableError } from '../middleware/errorHandler';
+67: 
+68: /** KS-1188 F3: the 503 text when a backup-code burn could not be confirmed. True whether or not the burn landed. */
+69: const BACKUP_CODE_UNCONFIRMED_MESSAGE =
+70:   'Sign-in could not be confirmed. If you signed in with a backup code, your backup code may already have been spent: ' +
+71:   'try again with another backup code or an authenticator app code.';
+72: import { STATUSES_MAY_RECEIVE_CREDENTIAL } from '../types';
+73: 
+74: const maskEmail = (email: string): string => {
+75:   const [local, domain] = String(email).split('@');
+76:   if (!domain) return '***';
+77:   return `${local.slice(0, 2)}***@${domain}`;
+78: };
+79: 
+80: /**
+81:  * KS-781 F-1: the accepted shapes for a second factor — 6 digits (TOTP) or 8
+82:  * alphanumeric (backup code; base32 is a subset, and verifyBackupCode
+83:  * upper-cases so lowercase is accepted). Both branches are ASCII-only, which
+84:  * preserves the KS-518 property that the spec's code-POINT count and this
+85:  * runtime code-UNIT check agree.
+86:  *
+87:  * MOVED HERE from routes/auth.ts (re-exported there, so its existing importers
+88:  * and the KS-622 lockstep test are unaffected). It lives in the shared
+89:  * credential layer because BOTH login routes need it and doors 2 and 3 will
+90:  * too — and because importing it route-to-route pulled the whole auth route
+91:  * module, and everything it imports, into oauth.ts's dependency graph.
+92:  */
+93: export const MFA_CODE_PATTERN = /^(?:[0-9]{6}|[A-Za-z0-9]{8})$/;
+94: 
+95: /**
+96:  * KS-781 P3-4: the accepted INBOUND SHAPES for `mfaCode` — one definition, so
+97:  * the password doors cannot disagree about what a second factor may look like.
+98:  *
+99:  * WHY THIS EXISTS AS A SYMBOL rather than two matching literals. The previous
+100:  * round gave `/api/oauth/authorize` a union accepting `""` (an HTML form
+101:  * submits an untouched input as the empty string) and left `/api/auth/login`
+102:  * on the bare regex. Measured on the re-gate: the same body was `400` at login
+103:  * and `302 + code` at authorize — 2 disagreements in a 12-row corpus. The
+104:  * route's own new comment claimed *"the same accepted shapes as
+105:  * /api/auth/login"*, which was false as written.
+106:  *
+107:  * Worse, the drift guard built in that round could not see it: its corpus
+108:  * builds every body with `...(mfaCode ? { mfaCode } : {})`, so a falsy code was
+109:  * OMITTED rather than sent, and `""` was unexpressible. A class was identified,
+110:  * a guard was built for it, and the next change landed in the guard's declared
+111:  * gap. Both were fixed together — the guard now sends `""` explicitly.
+112:  *
+113:  * `""` means ABSENT, not "any code goes": a genuinely malformed code (`"abc"`,
+114:  * `"12345"`) is still a 400 on both doors, and an account with MFA still gets
+115:  * `403 MFA_REQUIRED`. The widening is exactly the empty string.
+116:  */
+117: export const MFA_CODE_ACCEPTED = z.union([z.string().regex(MFA_CODE_PATTERN), z.literal('')]);
+118: 
+119: /**
+120:  * The runtime form of {@link MFA_CODE_ACCEPTED}: optional, with `""` normalised
+121:  * to `undefined` so every consumer downstream sees one representation of
+122:  * "no second factor supplied". Used by BOTH password doors.
+123:  *
+124:  * The published spec uses `MFA_CODE_ACCEPTED.optional()` directly (no
+125:  * transform — a transform describes runtime coercion, not the wire contract),
+126:  * so the two stay in step through the shared union rather than by copy.
+127:  */
+128: export const mfaCodeRuntimeSchema = MFA_CODE_ACCEPTED.optional().transform((v) => (v ? v : undefined));
+129: 
+130: /**
+131:  * KS-796 — THE ONE DEFINITION OF "this account may not be issued a credential
+132:  * because of its status".
+133:  *
+134:  * Called from two places for two different reasons, which is why the rule is a
+135:  * function and not a second `if`:
+136:  *
+137:  *   - `enforcePasswordLoginGates` refuses EARLY, before verifying the password,
+138:  *     so a suspended account costs an attacker no crypto work and the refusal
+139:  *     timing does not distinguish it from an unknown email;
+140:  *   - `assertAccountMayReceiveCredential` refuses at the shared gate, which is
+141:  *     the only check doors 2 and 3 have.
+142:  *
+143:  * Measured before this existed: removing the status branch from the shared
+144:  * helper reddened door 3's suite and left door 1's **completely green**, because
+145:  * door 1 carried its own copy of the same condition. Two copies of a refusal
+146:  * rule, in the file written to stop exactly that, is the KS-737 class in
+147:  * miniature. With this predicate the same tamper reddens both.
+148:  */
+149: export function accountStatusForbidsCredential(user: Pick<User, 'status'>): boolean {
+150:   // KS-796 Q1: an ALLOW-list, not a deny-list. The deny-list named SUSPENDED and
+151:   // DEACTIVATED and therefore let PENDING, INVITED — and anything the mapper did
+152:   // not recognise — mint a full token pair. Inverted, a status nobody thought
+153:   // about is refused by default, which is the only safe direction for a
+154:   // credential gate.
+155:   return !(STATUSES_MAY_RECEIVE_CREDENTIAL as readonly string[]).includes(user.status);
+156: }
+157: 
+158: /**
+159:  * KS-796 / KS-795 — THE SPLIT.
+160:  *
+161:  * The gates that apply to an ALREADY-RESOLVED account, with no password step:
+162:  * lockout, account status, and the second factor. `enforcePasswordLoginGates`
+163:  * calls it after verifying the password, so there is ONE gate rather than a
+164:  * password copy and a credential copy that must agree.
+165:  *
+166:  * WHY IT EXISTS SEPARATELY FROM THE PASSWORD GATE
+167:  * ----------------------------------------------
+168:  * KS-781 covers three token-issuing doors. Door 1 authenticates with a
+169:  * password. Door 2 authenticates with an external identity assertion. Door 3
+170:  * authenticates with a CIP-8 wallet signature. Only the credential differs —
+171:  * everything the platform then asks about the ACCOUNT is identical, and it was
+172:  * asked on exactly one of the three.
+173:  *
+174:  * IDENTIFIER NORMALISATION LIVES IN HERE, NOT IN THE CALLERS
+175:  * ---------------------------------------------------------
+176:  * KS-781 F-1: `accountLockout` keyed on `.toLowerCase()` with no trim while
+177:  * `getUserByEmail` trimmed, so a padded address resolved the victim's row
+178:  * against a lockout counter nothing had incremented — one space defeated the
+179:  * lockout, measured at 30 of 30 attempts. That was closed in two callers, which
+180:  * is a convention; doors 2 and 3 are new callers. It is normalised here so a
+181:  * caller cannot reintroduce it. (KS-781 N-6 also put a `.trim()` in the key
+182:  * derivation itself, so this is now belt AND braces, deliberately.)
+183:  *
+184:  * A WALLET ACCOUNT'S IDENTIFIER
+185:  * -----------------------------
+186:  * Wallet users carry a synthetic @wallet.local email (`routes/wallet.ts`, `getOrCreateWalletUser`): `w-<40 hex of
+187:  * sha256(address)>` for accounts created since KS-806, `<addr-prefix>...` for older ones, which keep the email they
+188:  * already store. It is stable per account, so
+189:  * it keys the lockout counter consistently; it is not a deliverable address and
+190:  * nothing here treats it as one.
+191:  */
+192: export type CredentialIssueGateResult =
+193:   | { ok: true }
+194:   /** Uniform refusal — never say WHICH reason applied. */
+195:   | { ok: false; reason: 'refused' }
+196:   /** The account has a second factor and no usable code arrived. */
+197:   | { ok: false; reason: 'mfa_required' };
+198: 
+199: export interface CredentialIssueGateInput {
+200:   /** 6 digits = TOTP, 8 alphanumeric = backup code. Absent is the MFA_REQUIRED case. */
+201:   mfaCode?: string;
+202:   sourceIp: string;
+203:   /** Names the calling route in logs so a refusal can be traced to its door. */
+204:   route: string;
+205:   /**
+206:    * Skip the lockout check. ONLY for a caller that has already performed it —
+207:    * i.e. the password path, which checks lockout BEFORE the user lookup so a
+208:    * locked-out account costs an attacker the same as an unknown one. Every
+209:    * other caller leaves this false and gets the check.
+210:    */
+211:   lockoutAlreadyChecked?: boolean;
+212: }
+213: 
+214: /**
+215:  * May this account be issued a credential right now, whatever proved the
+216:  * caller's identity? Returns ok only when every gate passes.
+217:  */
+218: export async function assertAccountMayReceiveCredential(
+219:   user: User,
+220:   input: CredentialIssueGateInput,
+221: ): Promise<CredentialIssueGateResult> {
+222:   const { mfaCode, sourceIp, route, lockoutAlreadyChecked } = input;
+223: 
+224:   // Normalised HERE — see the header. The identifier is the account's own, not
+225:   // one the caller supplied, so a caller cannot key the counter differently
+226:   // from the account it resolved.
+227:   const email = String(user.email ?? '').toLowerCase().trim();
+228: 
+229:   const { isLockedOut, recordFailure, recordSuccess } = await import('./accountLockout');
+230:   const { getRedisClient } = await import('./session');
+231:   const lockoutRedis = getRedisClient();
+232: 
+233:   if (!lockoutAlreadyChecked && (await isLockedOut(lockoutRedis, email, sourceIp))) {
+234:     logger.warn(`${route}: blocked by account lockout`, { email: maskEmail(email), ip: sourceIp });
+235:     return { ok: false, reason: 'refused' };
+236:   }
+237: 
+238:   if (accountStatusForbidsCredential(user)) {
+239:     logger.warn(`${route}: blocked by account status`, { userId: user.id, status: user.status });
+240:     await recordFailure(lockoutRedis, email, sourceIp);
+241:     return { ok: false, reason: 'refused' };
+242:   }
+243: 
+244:   if (user.mfaEnabled) {
+245:     if (!mfaCode) return { ok: false, reason: 'mfa_required' };
+246: 
+247:     if (!user.mfaSecret) {
+248:       // MFA on with no secret is a configuration fault, not a credential the
+249:       // caller can supply. Refuse rather than fall through — falling through
+250:       // issues a credential without the factor, which is the whole defect.
+251:       logger.error(`${route}: MFA enabled but no secret found`, { userId: user.id });
+252:       return { ok: false, reason: 'refused' };
+253:     }
+254: 
+255:     if (!verifyTotpCode(user.mfaSecret, mfaCode)) {
+256:       const backupResult = user.mfaBackupCodes
+257:         ? await verifyBackupCode(mfaCode, user.mfaBackupCodes)
+258:         : { valid: false, index: -1 };
+259: 
+260:       if (backupResult.valid && backupResult.index >= 0 && user.mfaBackupCodes) {
+261:         // Single-use: burn it before it can buy a second credential.
+262:         //
+263:         // KS-1052: the burn is CHECKED. It was discarded, and on a write that
+264:         // did not land the code stayed valid while this function went on to
+265:         // recordSuccess() and returned ok:true — a single-use credential
+266:         // surviving the login it just bought. updateUserOrThrow refuses instead,
+267:         // so the code cannot be spent without being spent.
+268:         //
+269:         // The 503 is not a credential oracle: it is reachable only AFTER a
+270:         // backup code has already verified, so it tells an attacker nothing
+271:         // they did not supply. An invalid code still takes the uniform
+272:         // refusal path below.
+273:         user.mfaBackupCodes.splice(backupResult.index, 1);
+274:         // KS-1188 F3: a 503 around the burn does not mean "nothing happened". The burn can have LANDED while the
+275:         // read-back inside updateUserOrThrow failed (measured by the #1013 gate: codes 2 -> 1), so "please retry" sent
+276:         // the user back with a SPENT code: 401 and a lockout increment. A fault before the burn gives 503 then 200 on
+277:         // retry, so the response alone cannot tell the two apart. Wording only (ruled option A, 2026-10-12): same 503,
+278:         // same code, text that is true in both cases. It is conditional ("if you signed in with a backup code") so it
+279:         // does not confirm the code was valid. Any other failure passes through untouched.
+280:         try {
+281:           await userRepo.updateUserOrThrow(
+282:             user.id,
+283:             { mfaBackupCodes: user.mfaBackupCodes },
+284:             'Backup-code sign-in',
+285:           );
+286:         } catch (err) {
+287:           // `statusCode`, not `instanceof`: this reads the same for an AppError from any package. (KS-1467: AppError's constructor used to end with
+288:           // Object.setPrototypeOf(this, AppError.prototype), which reset every subclass instance, so `instanceof ServiceUnavailableError` was always false here.)
+289:           if ((err as { statusCode?: unknown } | null)?.statusCode === 503) throw new ServiceUnavailableError(BACKUP_CODE_UNCONFIRMED_MESSAGE);
+290:           throw err;
+291:         }
+292:         logger.info(`${route}: MFA verified via backup code`, { userId: user.id });
+293:       } else {
+294:         logger.warn(`${route}: MFA verification failed`, { userId: user.id });
+295:         // KS-622: reached only when BOTH checks failed, so a legitimate backup
+296:         // code never increments the lockout counter.
+297:         await recordFailure(lockoutRedis, email, sourceIp);
+298:         return { ok: false, reason: 'refused' };
+299:       }
+300:     }
+301: 
+302:     // KS-158: self-heal a legacy-plaintext secret after a successful verify.
+303:     await userRepo.reencryptMfaSecretIfLegacy(user.id);
+304:   }
+305: 
+306:   await recordSuccess(lockoutRedis, email, sourceIp);
+307:   return { ok: true };
+308: }
+309: 
+310: export type PasswordLoginGateResult =
+311:   | { ok: true; user: User }
+312:   /** Uniform refusal — never say WHICH of the refusal reasons applied. */
+313:   | { ok: false; reason: 'invalid_credentials' }
+314:   /** The account has a second factor and no code (or no usable code) arrived. */
+315:   | { ok: false; reason: 'mfa_required' };
+316: 
+317: export interface PasswordLoginGateInput {
+318:   email: string;
+319:   password: string;
+320:   /** 6 digits = TOTP, 8 alphanumeric = backup code. Absent is the MFA_REQUIRED case. */
+321:   mfaCode?: string;
+322:   sourceIp: string;
+323:   /** Names the calling route in logs so a lockout can be traced to its door. */
+324:   route: string;
+325: }
+326: 
+327: /**
+328:  * Apply login's pre-credential gates. Returns the user only when every gate
+329:  * passes; the caller renders its own error shape from `reason`.
+330:  */
+331: export async function enforcePasswordLoginGates(
+332:   input: PasswordLoginGateInput,
+333: ): Promise<PasswordLoginGateResult> {
+334:   const { password, mfaCode, sourceIp, route } = input;
+335: 
+336:   // KS-781 F-1 — NORMALISE THE IDENTIFIER ONCE, HERE, AND USE ONLY THIS VALUE.
+337:   //
+338:   // This is the whole finding, and it belongs in the shared layer rather than in
+339:   // each caller. The two consumers of an email disagreed about normalisation:
+340:   //
+341:   //   accountLockout keys on `email.toLowerCase()`      — NO trim
+342:   //   userRepo.getUserByEmail  does `.toLowerCase().trim()` — trims
+343:   //
+344:   // `/api/auth/login` is safe only by accident of ordering: `loginSchema`'s
+345:   // `z.string().trim().email()` trims BEFORE either sees the value. Authorize
+346:   // read `req.body.email` raw, so `" victim@example.com"` produced a lockout key
+347:   // nothing had ever incremented while still resolving the victim's row — the
+348:   // lockout was defeated by one space. Measured by the QA pass: 30 of 30
+349:   // attempts across six whitespace variants reached a locked-out account, and
+350:   // that account was minted an authorization code.
+351:   //
+352:   // Normalising in the gate rather than only in a route schema is deliberate:
+353:   // doors 2 and 3 (KS-795 / KS-796) will call the split helper, and a fix that
+354:   // lived in one route's schema would let them reintroduce exactly this bug.
+355:   const email = input.email.toLowerCase().trim();
+356: 
+357:   // recordSuccess is NOT taken here: clearing the counter is the shared gate's
+358:   // job, and it must happen only once every gate has passed.
+359:   const { isLockedOut, recordFailure } = await import('./accountLockout');
+360:   const { getRedisClient } = await import('./session');
+361:   const lockoutRedis = getRedisClient();
+362: 
+363:   // Gate 1 — account lockout, checked BEFORE the lookup so a locked-out account
+364:   // costs an attacker the same as an unknown one.
+365:   if (await isLockedOut(lockoutRedis, email, sourceIp)) {
+366:     logger.warn(`${route}: blocked by account lockout`, { email: maskEmail(email), ip: sourceIp });
+367:     return { ok: false, reason: 'invalid_credentials' };
+368:   }
+369: 
+370:   const user = await userRepo.getUserByEmail(email);
+371:   if (!user) {
+372:     await recordFailure(lockoutRedis, email, sourceIp);
+373:     return { ok: false, reason: 'invalid_credentials' };
+374:   }
+375: 
+376:   // Gate 2 — account status, refused EARLY so a suspended account costs no
+377:   // password verify. Uniform refusal (F-11): do not differentiate SUSPENDED /
+378:   // DEACTIVATED from a wrong password at an unauthenticated door. The RULE is
+379:   // shared with the credential gate (KS-796); only the timing differs.
+380:   if (accountStatusForbidsCredential(user)) {
+381:     await recordFailure(lockoutRedis, email, sourceIp);
+382:     return { ok: false, reason: 'invalid_credentials' };
+383:   }
+384: 
+385:   // SSO-only account — same uniform error.
+386:   if (!user.passwordHash) {
+387:     await recordFailure(lockoutRedis, email, sourceIp);
+388:     return { ok: false, reason: 'invalid_credentials' };
+389:   }
+390: 
+391:   // Gate 3 — password.
+392:   const { verifyPassword } = await import('./password');
+393:   if (!(await verifyPassword(password, user.passwordHash))) {
+394:     await recordFailure(lockoutRedis, email, sourceIp);
+395:     return { ok: false, reason: 'invalid_credentials' };
+396:   }
+397: 
+398:   // Gate 4 — everything that is about the ACCOUNT rather than the password:
+399:   // the second factor, and (for a caller that has not already done it) lockout
+400:   // and status. Delegated so doors 2 and 3 apply the identical rules — a second
+401:   // copy here is exactly the drift KS-737 and KS-781 both came from.
+402:   //
+403:   // `lockoutAlreadyChecked` because this path checks lockout BEFORE the user
+404:   // lookup, so a locked-out account costs an attacker the same as an unknown
+405:   // one. Status is re-checked inside; that is idempotent and cheap.
+406:   const accountGate = await assertAccountMayReceiveCredential(user, {
+407:     mfaCode,
+408:     sourceIp,
+409:     route,
+410:     lockoutAlreadyChecked: true,
+411:   });
+412:   if (!accountGate.ok) {
+413:     return accountGate.reason === 'mfa_required'
+414:       ? { ok: false, reason: 'mfa_required' }
+415:       : { ok: false, reason: 'invalid_credentials' };
+416:   }
+417: 
+418:   return { ok: true, user };
+419: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts
+1: // KS-1467 (services/auth middleware/errorHandler.ts): AppError's constructor ended with `Object.setPrototypeOf(this, AppError.prototype)`, which resets EVERY subclass instance to the base
+2: // prototype. So `err instanceof ValidationError` (or any other subclass) was always false, and the errorHandler's own `err instanceof ValidationError && err.details` branch could never run:
+3: // the password-strength `feedback` that registration, password reset and password change build never reached the client. The constructor now uses `new.target.prototype`.
+4: // P1/P2 pin the prototype of each subclass (and the two-level chain), H1 pins the handler's `details` branch, S1 pins that the stale comment in passwordLoginGate.ts is reworded, C1 to C4 and S2 pin what must not change.
+5: import { describe, it, expect, vi } from 'vitest';
+6: import { readFileSync } from 'node:fs';
+7: import { join } from 'node:path';
+8: import type { Request, Response, NextFunction } from 'express';
+9: import * as mod from '../middleware/errorHandler';
+10: 
+11: vi.mock('../utils/logger', () => ({
+12:   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+13:   createLogger: vi.fn(),
+14:   validateEnv: vi.fn(),
+15: }));
+16: 
+17: const { errorHandler, AppError } = mod;
+18: 
+19: const FACTORIES = [
+20:   { name: 'BadRequestError', make: () => new mod.BadRequestError('x'), cls: mod.BadRequestError, status: 400 },
+21:   { name: 'UnauthorizedError', make: () => new mod.UnauthorizedError('x'), cls: mod.UnauthorizedError, status: 401 },
+22:   { name: 'ForbiddenError', make: () => new mod.ForbiddenError('x'), cls: mod.ForbiddenError, status: 403 },
+23:   { name: 'NotFoundError', make: () => new mod.NotFoundError('Thing'), cls: mod.NotFoundError, status: 404 },
+24:   { name: 'ConflictError', make: () => new mod.ConflictError('x'), cls: mod.ConflictError, status: 409 },
+25:   { name: 'ValidationError', make: () => new mod.ValidationError('x', { a: 1 }), cls: mod.ValidationError, status: 422 },
+26:   { name: 'TooManyRequestsError', make: () => new mod.TooManyRequestsError(), cls: mod.TooManyRequestsError, status: 429 },
+27:   { name: 'ServiceUnavailableError', make: () => new mod.ServiceUnavailableError('x'), cls: mod.ServiceUnavailableError, status: 503 },
+28:   { name: 'MfaRequiredError', make: () => new mod.MfaRequiredError(), cls: mod.MfaRequiredError, status: 403 },
+29: ] as const;
+30: 
+31: interface Captured {
+32:   statusCode: number;
+33:   body: { success: boolean; error: { code: string; message: string; details?: unknown } };
+34: }
+35: 
+36: function run(err: Error): Captured {
+37:   const captured = { statusCode: 0, body: undefined } as unknown as Captured;
+38:   const res = {
+39:     status(code: number) {
+40:       captured.statusCode = code;
+41:       return this;
+42:     },
+43:     json(payload: unknown) {
+44:       captured.body = payload as Captured['body'];
+45:       return this;
+46:     },
+47:   } as unknown as Response;
+48:   const req = { path: '/api/auth/register', method: 'POST' } as unknown as Request;
+49:   errorHandler(err, req, res, (() => undefined) as unknown as NextFunction);
+50:   return captured;
+51: }
+52: 
+53: describe('KS-1467: auth AppError subclasses keep their own prototype', () => {
+54:   it.each(FACTORIES)('RED KS-1467 P1 $name: an instance is an instance of its own class', ({ make, cls }) => {
+55:     expect(make() instanceof cls).toBe(true);
+56:   });
+57: 
+58:   it.each(FACTORIES)('RED KS-1467 P2 $name: the prototype of an instance is the class prototype', ({ make, cls }) => {
+59:     expect(Object.getPrototypeOf(make())).toBe(cls.prototype);
+60:   });
+61: 
+62:   it('RED KS-1467 P3 a two-level subclass is an instance of both of its classes', () => {
+63:     const e = new mod.InvalidCredentialsError();
+64:     expect([e instanceof mod.InvalidCredentialsError, e instanceof mod.UnauthorizedError, e instanceof AppError]).toEqual([true, true, true]);
+65:   });
+66: 
+67:   it('RED KS-1467 H1 the handler answers a ValidationError with its details', () => {
+68:     const r = run(new mod.ValidationError('New password is too weak', { feedback: ['add a number'] }));
+69:     expect(r.statusCode).toBe(422);
+70:     expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'New password is too weak', details: { feedback: ['add a number'] } });
+71:   });
+72: 
+73:   it('RED KS-1467 S1 the comment above the 503 statusCode check no longer claims instanceof is always false', () => {
+74:     const source = readFileSync(join(process.cwd(), 'src', 'services', 'passwordLoginGate.ts'), 'utf8');
+75:     expect(source).not.toContain('is always false here');
+76:   });
+77: 
+78:   it('control KS-1467 S2 passwordLoginGate.ts still reaches the 503 by statusCode and still throws the unconfirmed message', () => {
+79:     const source = readFileSync(join(process.cwd(), 'src', 'services', 'passwordLoginGate.ts'), 'utf8');
+80:     expect(source).toContain('?.statusCode === 503) throw new ServiceUnavailableError(BACKUP_CODE_UNCONFIRMED_MESSAGE);');
+81:   });
+82: 
+83:   it.each(FACTORIES)('control KS-1467 C1 $name: an instance is still an AppError and an Error with its status', ({ make, status }) => {
+84:     const e = make();
+85:     expect([e instanceof AppError, e instanceof Error, e.statusCode]).toEqual([true, true, status]);
+86:   });
+87: 
+88:   it('control KS-1467 C2 a plain AppError is still an AppError with its own prototype', () => {
+89:     const e = new AppError('teapot', 418, 'TEAPOT');
+90:     expect([e instanceof AppError, Object.getPrototypeOf(e) === AppError.prototype, e.code]).toEqual([true, true, 'TEAPOT']);
+91:   });
+92: 
+93:   it('control KS-1467 C3 a ValidationError without details is answered without a details key', () => {
+94:     const r = run(new mod.ValidationError('bad'));
+95:     expect(r.statusCode).toBe(422);
+96:     expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'bad' });
+97:   });
+98: 
+99:   it('control KS-1467 C4 a BadRequestError is answered with code and message only', () => {
+100:     const r = run(new mod.BadRequestError('nope'));
+101:     expect(r.statusCode).toBe(400);
+102:     expect(r.body.error).toEqual({ code: 'BAD_REQUEST', message: 'nope' });
+103:   });
+104: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "c6a9c83f87cefc06342f7a3611370c782a168602",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/middleware/errorHandler.ts",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts",
+   "added": "2",
+   "deleted": "2"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts",
+   "added": "104",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "1",
+   "1",
+   "Blockchain/Dev/services/auth/src/middleware/errorHandler.ts"
+  ],
+  [
+   "2",
+   "2",
+   "Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts"
+  ],
+  [
+   "104",
+   "0",
+   "Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 34,
+  "failed": 21
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 34,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1200 failed=0 | after: total=1234 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 34\n",
+ "checker_summary": [
+  "PASS A6 whole services/auth suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/auth: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=3 products=2 tests=1 red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

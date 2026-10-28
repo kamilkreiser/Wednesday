@@ -1,0 +1,482 @@
+===== TICKET =====
+KS-1780 — originate: 17 catches read the thrown value before fail500 (systemErrors.ts:196, 15 in adminConfig.ts, webhooks.ts:320); at the one Gate B drove, a revoked Proxy or a throwing getPrototypeOf trap gets no response, and KS-1772 guards only its five describer sites [Backlog]
+
+## BLUF
+
+**In** `services/originate`**, 17 catch blocks read the thrown value before they reach** `fail500`**: one in** `systemErrors.ts` **(**`instanceof z.ZodError`**), 15 in** `adminConfig.ts` **(**`err?.message` **and** `err?.code`**) and one in** `webhooks.ts` **(**`extractPgCode(err)`**). KS-1772 guards the five describer sites and nothing else; at the one of these sites Gate B drove, a revoked Proxy and a Proxy whose** `getPrototypeOf` **trap throws still got NO response at PR 1766's head.** The class is outside KS-1772's named sites, so it is not that PR's defect. Gate B's finding F6 (LOW) says a follow-up ticket "for pre-helper reads is the right home".
+
+Facts only. **No fix is proposed.**
+
+Refs KS-1772, KS-1346, KS-1621.
+
+All line numbers were read at develop `c18552d94de23b4da365ce02e02be5d06793bbcb`, under `Blockchain/Dev/services/originate/src`. The measurement in item 1 is Gate B's, from `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-28_gate-t1b/verdict.md` (F6, lines 160-170), and was not re-run. The list in item 2 is this seat's own scan of the source text, and is a heuristic.
+
+## 1 — The site Gate B drove
+
+`routes/systemErrors.ts:195`-`:199`, `GET /api/system-errors`:
+
+`} catch (err: any) {` then `if (err instanceof z.ZodError) {` at `:196`, then `fail500(res, 'Error list read failed (GET /api/system-errors)', err);` at `:199`.
+
+Gate B's measurement (driver site "systemErrors GET /"): at the head, **NO ANSWER** for a Proxy whose `getPrototypeOf` trap throws, for a revoked Proxy and for the combined case; Jest attributes each to `systemErrors.ts:196:12`, the `instanceof` check, not to `fail500`. The other three hostile values are answered 500 at the head (they hung at base). **Control:** the same values on `PATCH /:errorId/resolve`, whose catch goes straight to `fail500`, are answered 500.
+
+## 2 — The same shape in the source at this tip
+
+The scan: in each route file that defines its own `fail500` (adminConfig 51 calls, gdpr 16, webhooks 8, systemErrors 5), take every `catch (X ...) { ... }` block and classify the first use of `X` inside it; report the blocks whose first use is `X.prop`, `X?.prop` or `X instanceof` and that contain a later `fail500(`. Strings and comments are skipped for brace matching; it is not a parser.
+
+* `routes/adminConfig.ts`**: 15 catch blocks**, at `:189`, `:226`, `:289`, `:378`, `:433`, `:521`, `:702`, `:818`, `:933`, `:1226`, `:1389`, `:1567`, `:1658`, `:1695` and `:1723`. 13 of them open with `if (err?.message?.includes('does not exist') || err?.code === '42P01') {` (`:189` is the first: the read at `:191`, the `fail500` at `:194`); `:226` reads `err?.message?.includes('unique constraint')`; `:1567` reads `err?.message?.includes('does not exist')` with no code test.
+* `routes/webhooks.ts:316`**-**`:320`: `const pgCode = extractPgCode(err);`, ahead of the 400 branch and the 500 path. `extractPgCode` (`utils/pgErrors.ts:52`) reads `e?.code`, `e?.meta?.code` and `e?.message` (`:59`, `:70`) with no `try`. The scan classes this site as passing the value on, so it is reported by hand, not by the scan.
+* `routes/systemErrors.ts:195`: item 1.
+
+Counts by file from the same scan: adminConfig 35 blocks go straight to `fail500`, 17 read first (15 followed by `fail500`; the other two are `:2086`, a `logger.error` that reads `err?.message`, and `:2243`, the describer KS-1772 guards), 1 never uses the value (the `catch (e: any)` at `:2221`, which is another ticket's subject); gdpr 13 go straight, 0 read first, 4 pass the value to something else first; webhooks 6 straight, 2 read first (`:58` and `:550`, both log calls, neither followed by `fail500`), 1 passes it on (the one above); systemErrors 3 straight, 3 read first (one followed by `fail500`; the other two are the log calls at `:133` and `:164`).
+
+The same scan therefore also shows five reads of the thrown value inside a log call with no `fail500` after them (`adminConfig.ts:2086`, `webhooks.ts:58` and `:550`, `systemErrors.ts:133` and `:164`). They are outside this ticket's definition ("before `fail500`") and are named only so the scan's totals can be checked.
+
+Gate B's own estimate was "about 15 more originate catches ... mostly in `adminConfig.ts` (for example `:189`, `:226`, `:289`, `:378`, ..., `:1723`), plus `webhooks.ts:320`", from a heuristic list in `out/pre-helper-reads.txt`. That file is not in the gate's directory (only `verdict.md` is), so the two lists were compared by the lines the verdict names: all five appear in the scan above.
+
+## 3 — What the PR's author says
+
+`__tests__/ks1772-originate-log-line-describers-cannot-hang-a-request.test.ts:18`-`:20`: "THE ROUTES ARE CHOSEN SO THE DESCRIBER IS THE ONLY THING THAT CAN THROW. Each catch below goes straight to `fail500`; a route whose catch first reads `err.message` or `err.code` (the four GET /settings-style routes of adminConfig do) would throw THERE for a message getter or a revoked Proxy, and the cell would measure that read rather than the describer." The header says four routes; the scan above finds 15 adminConfig blocks. Not reconciled here.
+
+Gate B on the effect: "For an `?.` read, only the revoked-Proxy and getter-throw shapes bite." and "The PR title 'cannot hang a request' is true only for the describer sites". It also states that the same heuristic finds none in the three api-gateway helper files.
+
+## Not established
+
+* **I ran nothing.** Only the `systemErrors.ts` site was driven, by Gate B. None of the 15 adminConfig blocks or the webhooks site was driven by anyone this seat knows of.
+* Whether a thrown value of those shapes (a revoked Proxy, a throwing getter, a throwing `getPrototypeOf` trap) can reach any of these catches in practice. Gate B's values are its own choosing.
+* The scan is a text heuristic: it can miss a catch whose first use of the value is not a plain property read, and it does not check what the code does after the read. The 4 gdpr blocks that pass the value on first were not examined.
+* What, if anything, to do. Not decided.
+
+## Searched
+
+Board, KS team, title + description + comment bodies, `includeArchived: true`, paged to the end. `fail500` → **23 hits**; `getPrototypeOf(err)` → **3** (KS-1772, KS-1771, KS-1621); `systemErrors.ts` → **9**; `ZodError` → 3 (KS-594, KS-593, KS-497, not about this); `extractPgCode` → **1**, KS-1341 (its PATCH classification control, read); `pre-helper` → **0**; `before fail500` → **0**; `revoked Proxy` → 4 (KS-1772, KS-1771, KS-1614, KS-1524, the last two read: other sites); `message getter` → 1 (KS-1524, an api-gateway log call). The threads of KS-1772, KS-1771, KS-1346, KS-1524, KS-1510, KS-1242, KS-1427 and KS-1621 were searched for `before fail500`, `pre-helper`, `instanceof z.ZodError`, `systemErrors.ts:196` and "reads ... thrown": no match. KS-1772 and KS-1771 each say, under "Not established", that none of their sites was driven. **Positive control** `KS-1531` → 40 hits. **Zero control:** a token coined for this seat and written nowhere → 0 hits.
+
+*Filed by Seat G 26th, 2026-10-27 UTC, on Wednesday's brief.*
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/originate/src/utils/pgErrors.ts b/Blockchain/Dev/services/originate/src/utils/pgErrors.ts
+--- a/Blockchain/Dev/services/originate/src/utils/pgErrors.ts
++++ b/Blockchain/Dev/services/originate/src/utils/pgErrors.ts
+@@ -50,6 +50,16 @@
+  * if (pgCode === '23503') return res.status(404).json(...);
+  */
+ export function extractPgCode(err: unknown): string | undefined {
++  // KS-1780: the reads below touch the thrown value (`code`, `meta.code`, `message`). A revoked Proxy, or an object whose getter throws, makes one of them throw. The route catches that call
++  // this function BEFORE they reach fail500 (webhooks.ts PATCH /:id), so the throw rejected the handler's promise and the request got no answer. A value that cannot be read has no code.
++  try {
++    return readPgCode(err);
++  } catch {
++    return undefined;
++  }
++}
++
++function readPgCode(err: unknown): string | undefined {
+   const e = err as
+     | { code?: unknown; meta?: { code?: unknown }; message?: unknown }
+     | null
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts
+@@ -0,0 +1,126 @@
++// KS-1780 (originate routes/webhooks.ts PATCH /:id, utils/pgErrors.ts): the catch of PATCH /api/webhooks/:id called `extractPgCode(err)` BEFORE it reached fail500. extractPgCode reads
++// `code`, `meta.code` and `message` of the thrown value with no try of its own, so a revoked Proxy, or an object whose `code` getter throws, made the call throw inside the catch: the
++// handler's promise rejected and the request got NO answer. B1/B2 drive the real route over a loopback listener and read what the caller gets (a request with no answer in 1500 ms is
++// reported as the string NO ANSWER, so a hang is a red assertion, not a stuck run); B3/B4 pin the helper itself. C1 to C4 keep the KS-445 classification exactly as it was.
++const mockExecuteRawUnsafe = jest.fn();
++
++jest.mock('../db', () => ({
++  prisma: {
++    $queryRaw: jest.fn(),
++    $executeRaw: jest.fn(),
++    $executeRawUnsafe: mockExecuteRawUnsafe,
++  },
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { webhooksRouter } from '../routes/webhooks';
++import { extractPgCode } from '../utils/pgErrors';
++
++const WEBHOOK_ID = 'a1b2c3d4-5678-4abc-9def-0123456789ab';
++const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++
++const app = express();
++app.use('/api/webhooks', express.json(), webhooksRouter);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => {
++  (server as unknown as { closeAllConnections?: () => void })?.closeAllConnections?.();
++  server?.close();
++});
++beforeEach(() => mockExecuteRawUnsafe.mockReset());
++
++async function patchWithThrow(thrown: unknown): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
++  mockExecuteRawUnsafe.mockRejectedValueOnce(thrown);
++  try {
++    const res = await fetch(baseUrl + '/api/webhooks/' + WEBHOOK_ID, {
++      method: 'PATCH',
++      headers: { 'content-type': 'application/json' },
++      body: JSON.stringify({ isActive: true }),
++      signal: AbortSignal.timeout(1500),
++    });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER', body: null };
++  }
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++function pgCodeOrThrew(err: unknown): string | undefined {
++  try {
++    return extractPgCode(err);
++  } catch {
++    return 'THREW';
++  }
++}
++
++function throwingCodeGetter(): object {
++  return {
++    get code(): string {
++      throw new Error('ks1780 code getter');
++    },
++  };
++}
++
++describe('KS-1780: PATCH /api/webhooks/:id and extractPgCode answer a hostile thrown value', () => {
++  it('RED KS-1780 B1 a revoked Proxy thrown by the update is answered with the constant 500', async () => {
++    expect(await patchWithThrow(revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('RED KS-1780 B2 an object whose code getter throws is answered with the constant 500', async () => {
++    expect(await patchWithThrow(throwingCodeGetter())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('RED KS-1780 B3 extractPgCode of a revoked Proxy is undefined, not a throw', () => {
++    expect(pgCodeOrThrew(revokedProxy())).toBeUndefined();
++  });
++
++  it('RED KS-1780 B4 extractPgCode of an object whose meta getter throws is undefined, not a throw', () => {
++    const hostile = {
++      get meta(): { code: string } {
++        throw new Error('ks1780 meta getter');
++      },
++    };
++    expect(pgCodeOrThrew(hostile)).toBeUndefined();
++  });
++
++  it('control KS-1780 C1 a Prisma-wrapped 42804 is still answered 400 VALIDATION_ERROR', async () => {
++    const reply = await patchWithThrow(Object.assign(new Error('Raw query failed.'), { code: 'P2010', meta: { code: '42804' } }));
++    expect(reply.status).toBe(400);
++    expect((reply.body as { error: { code: string } }).error.code).toBe('VALIDATION_ERROR');
++  });
++
++  it('control KS-1780 C2 a bare pg 23514 on code is still answered 400 VALIDATION_ERROR', async () => {
++    const reply = await patchWithThrow({ code: '23514' });
++    expect(reply.status).toBe(400);
++    expect((reply.body as { error: { code: string } }).error.code).toBe('VALIDATION_ERROR');
++  });
++
++  it('control KS-1780 C3 an ordinary Error is still answered with the constant 500', async () => {
++    expect(await patchWithThrow(new Error('connection terminated unexpectedly'))).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('control KS-1780 C4 extractPgCode still reads a known code out of the message text', () => {
++    expect(extractPgCode(new Error('Raw query failed. Code: `22P02`. Message: `invalid input syntax`'))).toBe('22P02');
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/originate/src/utils/pgErrors.ts
+1: /**
+2:  * =============================================================================
+3:  * POSTGRES ERROR CLASSIFICATION (KS-445)
+4:  * =============================================================================
+5:  * Originate's raw queries run through Prisma, which wraps the underlying
+6:  * Postgres error: the SQLSTATE is NOT on `err.code` (that holds Prisma's own
+7:  * `P2010`) but on `err.meta.code`, and sometimes only inside the message text
+8:  * ("Raw query failed. Code: `42804`. ..."). The bare pg driver, by contrast,
+9:  * puts the SQLSTATE directly on `err.code`. This helper normalises all three
+10:  * shapes (same matching approach as the KS-255 fix in routes/certifications.ts)
+11:  * so route handlers can map constraint/type failures to an honest 4xx instead
+12:  * of leaking a raw 500.
+13:  * =============================================================================
+14:  */
+15: 
+16: /** SQLSTATE is exactly 5 chars, digits + uppercase letters (e.g. 22P02, 23503). */
+17: const SQLSTATE_PATTERN = /^[0-9A-Z]{5}$/;
+18: 
+19: /** Prisma's own error codes (P2010 etc.) also match the 5-char shape — exclude them. */
+20: const PRISMA_CODE_PATTERN = /^P\d{4}$/;
+21: 
+22: /**
+23:  * The SQLSTATEs the write-path handlers map to 4xx responses. Kept as an
+24:  * explicit list so the message-text fallback can't false-match arbitrary
+25:  * 5-char tokens in an error string:
+26:  *   22P02 invalid text representation (bad ::uuid cast)
+27:  *   22001 string data right truncation (value longer than VARCHAR(n))
+28:  *   22007 / 22008 invalid / out-of-range datetime
+29:  *   22021 invalid byte sequence (non-UTF-8 input)
+30:  *   22P05 untranslatable character (e.g. \u0000 inside a jsonb value)
+31:  *   23502 not-null violation
+32:  *   23503 foreign-key violation (e.g. userId not in users)
+33:  *   23505 unique violation
+34:  *   23514 check-constraint violation (value outside an allowed set)
+35:  *   42804 datatype mismatch (bound parameter of the wrong type)
+36:  */
+37: const KNOWN_PG_CODES = /\b(22P02|22001|22007|22008|22021|22P05|23502|23503|23505|23514|42804)\b/;
+38: 
+39: /**
+40:  * Extract the Postgres SQLSTATE from an error of any of the shapes originate
+41:  * sees: bare pg driver (`err.code`), Prisma-wrapped (`err.meta.code`), or
+42:  * message-embedded ("Code: `42804`").
+43:  *
+44:  * @param err - the caught error (unknown shape — bare pg, Prisma wrapper, or a
+45:  *   re-thrown Error whose message still carries the code text).
+46:  * @returns the 5-char SQLSTATE (e.g. '23503') when one is identifiable,
+47:  *   otherwise undefined (caller should fall through to its 500 path).
+48:  * @example
+49:  * const pgCode = extractPgCode(err);
+50:  * if (pgCode === '23503') return res.status(404).json(...);
+51:  */
+52: export function extractPgCode(err: unknown): string | undefined {
+53:   // KS-1780: the reads below touch the thrown value (`code`, `meta.code`, `message`). A revoked Proxy, or an object whose getter throws, makes one of them throw. The route catches that call
+54:   // this function BEFORE they reach fail500 (webhooks.ts PATCH /:id), so the throw rejected the handler's promise and the request got no answer. A value that cannot be read has no code.
+55:   try {
+56:     return readPgCode(err);
+57:   } catch {
+58:     return undefined;
+59:   }
+60: }
+61: 
+62: function readPgCode(err: unknown): string | undefined {
+63:   const e = err as
+64:     | { code?: unknown; meta?: { code?: unknown }; message?: unknown }
+65:     | null
+66:     | undefined;
+67: 
+68:   // Structured fields first: bare pg puts the SQLSTATE on `code`, Prisma on `meta.code`.
+69:   for (const candidate of [e?.code, e?.meta?.code]) {
+70:     if (
+71:       typeof candidate === 'string' &&
+72:       SQLSTATE_PATTERN.test(candidate) &&
+73:       !PRISMA_CODE_PATTERN.test(candidate)
+74:     ) {
+75:       return candidate;
+76:     }
+77:   }
+78: 
+79:   // Fallback: Prisma sometimes surfaces the pg code only inside the message text.
+80:   if (typeof e?.message === 'string') {
+81:     const match = e.message.match(KNOWN_PG_CODES);
+82:     if (match) return match[1];
+83:   }
+84: 
+85:   return undefined;
+86: }
+
+### FILE AT HEAD: Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts
+1: // KS-1780 (originate routes/webhooks.ts PATCH /:id, utils/pgErrors.ts): the catch of PATCH /api/webhooks/:id called `extractPgCode(err)` BEFORE it reached fail500. extractPgCode reads
+2: // `code`, `meta.code` and `message` of the thrown value with no try of its own, so a revoked Proxy, or an object whose `code` getter throws, made the call throw inside the catch: the
+3: // handler's promise rejected and the request got NO answer. B1/B2 drive the real route over a loopback listener and read what the caller gets (a request with no answer in 1500 ms is
+4: // reported as the string NO ANSWER, so a hang is a red assertion, not a stuck run); B3/B4 pin the helper itself. C1 to C4 keep the KS-445 classification exactly as it was.
+5: const mockExecuteRawUnsafe = jest.fn();
+6: 
+7: jest.mock('../db', () => ({
+8:   prisma: {
+9:     $queryRaw: jest.fn(),
+10:     $executeRaw: jest.fn(),
+11:     $executeRawUnsafe: mockExecuteRawUnsafe,
+12:   },
+13: }));
+14: 
+15: jest.mock('../middleware/auth', () => ({
+16:   authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+17: }));
+18: 
+19: jest.mock('../utils/logger', () => ({
+20:   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+21: }));
+22: 
+23: import express from 'express';
+24: import type { AddressInfo } from 'net';
+25: import { webhooksRouter } from '../routes/webhooks';
+26: import { extractPgCode } from '../utils/pgErrors';
+27: 
+28: const WEBHOOK_ID = 'a1b2c3d4-5678-4abc-9def-0123456789ab';
+29: const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
+30: 
+31: const app = express();
+32: app.use('/api/webhooks', express.json(), webhooksRouter);
+33: let server: ReturnType<typeof app.listen>;
+34: let baseUrl = '';
+35: 
+36: beforeAll(async () => {
+37:   await new Promise<void>((resolve) => {
+38:     server = app.listen(0, '127.0.0.1', () => resolve());
+39:   });
+40:   baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+41: });
+42: afterAll(() => {
+43:   (server as unknown as { closeAllConnections?: () => void })?.closeAllConnections?.();
+44:   server?.close();
+45: });
+46: beforeEach(() => mockExecuteRawUnsafe.mockReset());
+47: 
+48: async function patchWithThrow(thrown: unknown): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
+49:   mockExecuteRawUnsafe.mockRejectedValueOnce(thrown);
+50:   try {
+51:     const res = await fetch(baseUrl + '/api/webhooks/' + WEBHOOK_ID, {
+52:       method: 'PATCH',
+53:       headers: { 'content-type': 'application/json' },
+54:       body: JSON.stringify({ isActive: true }),
+55:       signal: AbortSignal.timeout(1500),
+56:     });
+57:     return { status: res.status, body: await res.json() };
+58:   } catch {
+59:     return { status: 'NO ANSWER', body: null };
+60:   }
+61: }
+62: 
+63: function revokedProxy(): object {
+64:   const { proxy, revoke } = Proxy.revocable({}, {});
+65:   revoke();
+66:   return proxy;
+67: }
+68: 
+69: function pgCodeOrThrew(err: unknown): string | undefined {
+70:   try {
+71:     return extractPgCode(err);
+72:   } catch {
+73:     return 'THREW';
+74:   }
+75: }
+76: 
+77: function throwingCodeGetter(): object {
+78:   return {
+79:     get code(): string {
+80:       throw new Error('ks1780 code getter');
+81:     },
+82:   };
+83: }
+84: 
+85: describe('KS-1780: PATCH /api/webhooks/:id and extractPgCode answer a hostile thrown value', () => {
+86:   it('RED KS-1780 B1 a revoked Proxy thrown by the update is answered with the constant 500', async () => {
+87:     expect(await patchWithThrow(revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
+88:   });
+89: 
+90:   it('RED KS-1780 B2 an object whose code getter throws is answered with the constant 500', async () => {
+91:     expect(await patchWithThrow(throwingCodeGetter())).toEqual({ status: 500, body: CONSTANT_BODY });
+92:   });
+93: 
+94:   it('RED KS-1780 B3 extractPgCode of a revoked Proxy is undefined, not a throw', () => {
+95:     expect(pgCodeOrThrew(revokedProxy())).toBeUndefined();
+96:   });
+97: 
+98:   it('RED KS-1780 B4 extractPgCode of an object whose meta getter throws is undefined, not a throw', () => {
+99:     const hostile = {
+100:       get meta(): { code: string } {
+101:         throw new Error('ks1780 meta getter');
+102:       },
+103:     };
+104:     expect(pgCodeOrThrew(hostile)).toBeUndefined();
+105:   });
+106: 
+107:   it('control KS-1780 C1 a Prisma-wrapped 42804 is still answered 400 VALIDATION_ERROR', async () => {
+108:     const reply = await patchWithThrow(Object.assign(new Error('Raw query failed.'), { code: 'P2010', meta: { code: '42804' } }));
+109:     expect(reply.status).toBe(400);
+110:     expect((reply.body as { error: { code: string } }).error.code).toBe('VALIDATION_ERROR');
+111:   });
+112: 
+113:   it('control KS-1780 C2 a bare pg 23514 on code is still answered 400 VALIDATION_ERROR', async () => {
+114:     const reply = await patchWithThrow({ code: '23514' });
+115:     expect(reply.status).toBe(400);
+116:     expect((reply.body as { error: { code: string } }).error.code).toBe('VALIDATION_ERROR');
+117:   });
+118: 
+119:   it('control KS-1780 C3 an ordinary Error is still answered with the constant 500', async () => {
+120:     expect(await patchWithThrow(new Error('connection terminated unexpectedly'))).toEqual({ status: 500, body: CONSTANT_BODY });
+121:   });
+122: 
+123:   it('control KS-1780 C4 extractPgCode still reads a known code out of the message text', () => {
+124:     expect(extractPgCode(new Error('Raw query failed. Code: `22P02`. Message: `invalid input syntax`'))).toBe('22P02');
+125:   });
+126: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "8894c7486f82f6eb682fecb879791f53312537b1",
+ "head_sha": "62ff1b9c26888756b97d4d5c119c844551761656",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/originate/src/utils/pgErrors.ts",
+   "added": "10",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts",
+   "added": "126",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "10",
+   "0",
+   "Blockchain/Dev/services/originate/src/utils/pgErrors.ts"
+  ],
+  [
+   "126",
+   "0",
+   "Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 8,
+  "failed": 4
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 8,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1690 failed=0 | after: total=1698 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 8\n",
+ "checker_summary": [
+  "PASS A6 whole services/originate suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/originate: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +136/-0 test=src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

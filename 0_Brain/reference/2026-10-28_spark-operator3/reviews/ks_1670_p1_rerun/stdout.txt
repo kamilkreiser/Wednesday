@@ -1,0 +1,37 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 28624, "total_tokens": 29385, "completion_tokens": 761, "prompt_tokens_details": {"cached_tokens": 24576}}, "seconds": 26.3, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 28624, "completion_tokens": 761, "seconds": 26.3, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The new test suite reads the source file text rather than exercising the route, so it pins the literal source string but does not prove the running code encodes the connectionId in the redirect.",
+   "evidence": "Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts:9 `const SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');` and :38 `expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName');`",
+   "test_or_reason": "The test only checks the source text; it does not boot the app or send a request, so it cannot catch a runtime regression (e.g., a different code path or a build step that alters the string).",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test's control C1 asserts exactly one `connectionId=${` interpolation in the file, but the file also contains `connectionId=${connectionId}` in the success redirect and `connectionId=${...}` in other places (e.g., the log line at :675), so the control may be too strict or the instrument may miss other interpolations.",
+   "evidence": "Blockchain/Dev/services/m365-integration/src/index.ts:675 `log('info', 'OAuth callback: connection completed', { connectionId, tenantName: connection.tenantName });` and :677 `res.redirect(...connectionId=${encodeURIComponent(connectionId)}...)`",
+   "test_or_reason": "The test's `interpolations()` only searches for the exact string `connectionId=${`, which appears only in the redirect; the log line uses `connectionId` as a bare variable, so the control is consistent but the test does not cover other potential unencoded uses.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The ticket's sites 2 and 3 (uncapped error texts in JSON bodies) are not addressed by this PR, and the PR description is not provided, so the PR only fixes site 1.",
+   "evidence": "Ticket: 'Sites 2 and 3 should wait for the `:515` decision on KS-1641' and the diff only changes the redirect line and adds a test file.",
+   "test_or_reason": "The diff shows only one line changed in index.ts (the redirect) and a new test file; no changes to :742 or :1026.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test file's comment claims 'C1 to C3 prove the instrument finds the route and the redirects it must not disturb,' but C1 only checks the count of interpolations, C2 checks the order of a log line and the redirect, and C3 checks a different redirect string; none of these prove the instrument is correct for all possible source changes.",
+   "evidence": "Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts:41-54",
+   "test_or_reason": "The controls are narrow and do not validate the parsing logic against a broader set of source patterns.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO WITH NOTES"
+}
+
+STDERR:

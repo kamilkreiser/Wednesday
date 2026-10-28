@@ -1,0 +1,62 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 83259,
+     "total_tokens": 83995,
+     "completion_tokens": 736,
+     "prompt_tokens_details": {
+      "cached_tokens": 0
+     }
+    },
+    "seconds": 107.9,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 83259,
+  "completion_tokens": 736,
+  "seconds": 107.9,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The PR widens the admin check to accept SUPER_ADMIN (and any casing) at four sites, but the new test suite only pins the source text, not the runtime behaviour, so the change is unverified against the actual predicate semantics.",
+    "evidence": "Blockchain/Dev/services/originate/src/__tests__/ks1701-platform-admin-checks-use-is-platform-role.test.ts:17-18 `expect(count(DOCUMENTS, \"=== 'system_admin'\")).toBe(0);` and :29-30 `expect(count(DOCUMENTS, 'isAdmin = isPlatformRole(userRole);')).toBe(2);`",
+    "test_or_reason": "The tests read the route files as text (line 8-9) and assert on string counts; they never execute isPlatformRole or the route handlers, so a regression in the predicate or a wrong import would not be caught.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Major",
+    "claim": "The PR changes the admin check to use isPlatformRole, which upper-cases the role, but the ticket itself notes that no real principal is known to carry SUPER_ADMIN or platform_admin, so the fix may have no effect on production behaviour and the claimed regression is not reproduced by this PR.",
+    "evidence": "TICKET 'NOT measured' section: 'Whether any real principal carries SUPER_ADMIN or platform_admin is unestablished.'",
+    "test_or_reason": "The PR's only evidence is the KS-1695 regression, which was fixed in a different change; this PR does not add a runtime test that exercises a SUPER_ADMIN token.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The new test file's control C2 pins a specific string in certifications.ts that is not part of the diff and could be brittle, but it does not verify the behaviour of callerMayReadCertification.",
+    "evidence": "Blockchain/Dev/services/originate/src/__tests__/ks1701-platform-admin-checks-use-is-platform-role.test.ts:42-43 `expect(CERTIFICATIONS).toContain('if (isPlatformRole(authUser?.role as string | undefined)) return true;');`",
+    "test_or_reason": "This is a text assertion, not a behavioural test; it would pass even if the predicate were broken.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The sharedModuleMock change keeps isPlatformRole as the real function, but the comment claims it is the only function export kept real; this is not verified by any test and could mask a regression in the predicate.",
+    "evidence": "Blockchain/Dev/services/originate/src/__tests__/helpers/sharedModuleMock.ts:31-33 `// KS-1701: isPlatformRole is a pure predicate over a role string. An inert jest.fn() answers undefined for every caller, which would turn every platform admin into an ordinary user in a suite that exercises an admin path through this mock, so it stays the real function (the only function export kept real).`",
+    "test_or_reason": "The change is not covered by a test that asserts the real predicate is used; it is a comment-only justification.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

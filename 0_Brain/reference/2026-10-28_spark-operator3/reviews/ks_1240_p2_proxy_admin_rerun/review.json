@@ -1,0 +1,76 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 47366,
+     "total_tokens": 48353,
+     "completion_tokens": 987,
+     "prompt_tokens_details": {
+      "cached_tokens": 45056
+     }
+    },
+    "seconds": 35.4,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 47366,
+  "completion_tokens": 987,
+  "seconds": 35.4,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The ticket's acceptance criterion \u2014 a 503 on timeout \u2014 is not met; the code answers 502 on timeout, contradicting the ticket's stated refusal shape.",
+    "evidence": "proxy.ts:489 `res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable' } });` and proxy.ts:25-26 `On expiry the fetch rejects and the handler's existing catch answers 502 BAD_GATEWAY, as it already does for an unreachable upstream.`",
+    "test_or_reason": "Ticket 'What to do' says 'a 503 on timeout is consistent with how the connector branch already answers a refused exchange'; the code and comment explicitly keep 502, so the acceptance line is unmet.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Major",
+    "claim": "The ticket's claim that the connector-token / key-validate fetch in middleware/auth.ts is the target is not addressed; the diff only touches proxy.ts and admin.ts, leaving the key-exchange half unbounded.",
+    "evidence": "Test file line 1-2 `(the key-exchange half of the same ticket is in middleware/auth.ts)` and diff shows no changes to middleware/auth.ts.",
+    "test_or_reason": "The ticket title and body specifically name the connector-token / key-validate fetch; the PR's own test comment admits that half is elsewhere and untouched, so the ticket's primary target is not fixed.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Major",
+    "claim": "The test suite is red on base only by absence (the new test file's assertions fail because the timeout symbols don't exist), not because old behaviour is wrong; this does not prove the fix is correct, only that the new symbols are new.",
+    "evidence": "facts.json `test_on_base_with_test_files_only (A4 red-first)`: `total: 8, failed: 4` and `test_on_head (A5 green-after)`: `total: 8, failed: 0`.",
+    "test_or_reason": "The four red tests on base are the new R1-R4 tests that check for `AbortSignal.timeout` and the new constants; they fail with absence (the symbols don't exist on base), not because old behaviour is wrong. This is absence-red, not behavioural red.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The test's control C3 is fragile: it filters for 'bfUrl' to find the pre-existing bounded fetch, but the filter could match a different call if the source changes, and the test does not assert the call is the Blockfrost one.",
+    "evidence": "Test file line 87 `const calls = fetchCalls(ADMIN_SRC).filter((call) => call.includes('bfUrl'));`",
+    "test_or_reason": "The filter is a string match on 'bfUrl'; if another fetch call in admin.ts ever includes that substring, the test would pick the wrong call and the control would be vacuous.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The test's constantMs regex only matches a constant declared with a semicolon and no trailing whitespace; a formatting change (e.g. no semicolon or a comment) would make the test fail even though the constant is correct.",
+    "evidence": "Test file line 50 `const found = new RegExp('const ' + name + ' = ([0-9_]+);').exec(src);`",
+    "test_or_reason": "The regex is brittle; it requires an exact `;` after the numberhol, so a code style change would break the test without a behavioural change.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The test suite does not verify that the timeout actually aborts a hanging fetch; it only checks the source text for the presence of `AbortSignal.timeout`, so a regression that ignores the signal would not be caught.",
+    "evidence": "Test file line 38-40 `function isBounded(call: string): boolean { return call.includes('AbortSignal.timeout('); }`",
+    "test_or_reason": "The test is a static source check; it does not exercise the runtime behaviour of the timeout, so it cannot prove the fetch is actually bounded in practice.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

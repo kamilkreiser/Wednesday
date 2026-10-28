@@ -1,0 +1,58 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 40149, "total_tokens": 41511, "completion_tokens": 1362, "prompt_tokens_details": {"cached_tokens": 36864}}, "seconds": 45.8, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 40149, "completion_tokens": 1362, "seconds": 45.8, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Major",
+   "claim": "The fix only addresses requireKeyAdmin in services/security; the ticket's primary cited location, isPlatformRole in packages/shared/src/security/keyRevokePolicy.ts, is not touched, so the dotless-i/long-s/array role admission remains live in every caller of that shared function (GET /api/audit, GET /api/audit/:id, POST /api/events, POST /api/rate-limit/reset, mint/revoke tenant checks).",
+   "evidence": "index.ts:1101-1104 `const claim = (req as any).user?.role; const role = typeof claim === 'string' ? claim.replace(/[a-z]/g, (ch) => ch.toUpperCase()) : '';` and index.ts:851 `if (!isPlatformRole((req as any).user?.role) && !callerTenantId)`",
+   "test_or_reason": "The diff modifies only services/security/src/index.ts; packages/shared/src/security/keyRevokePolicy.ts is not in touched_files. The ticket's 'Where' section names isPlatformRole as the first location to fix.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Major",
+   "claim": "The new test file's R3 assertion is weaker than the claimed fix: it accepts 401 as well as 403, so it does not pin that the array role is refused by requireKeyAdmin specifically; a 401 from the auth middleware would also pass, leaving the requireKeyAdmin array-admission unproven.",
+   "evidence": "ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts:70 `expect([401, 403]).toContain(await listKeysAs(withRole(['ISSUER_ADMIN'])));`",
+   "test_or_reason": "C1 (no token) expects 401, so a 401 is the auth middleware's refusal, not requireKeyAdmin's. The test comment claims 'R1 to R3 ... pin that each is refused' but R3 does not distinguish which layer refused.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Major",
+   "claim": "The ticket's acceptance criterion 'reject a non-string role outright' is only partially met: the code refuses non-strings in requireKeyAdmin, but the shared isPlatformRole (the ticket's primary cited location) still accepts an array role because it is untouched.",
+   "evidence": "index.ts:1104 `const role = typeof claim === 'string' ? claim.replace(/[a-z]/g, (ch) => ch.toUpperCase()) : '';` and ticket 'Where' section: 'packages/shared/src/security/keyRevokePolicy.ts:139-140 \u2014 isPlatformRole.'",
+   "test_or_reason": "The diff does not modify packages/shared/src/security/keyRevokePolicy.ts; the ticket's recommendation says 'in the one shared definition so every caller inherits it'.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Minor",
+   "claim": "The new test file's comment claims 'a role ARRAY stringifies to its element' and that ['ISSUER_ADMIN'] was admitted, but the test R3 only asserts a 401-or-403 response, not that the old code admitted it; the red-first evidence for R3 is not shown in facts.json as a specific failure.",
+   "evidence": "ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts:2-3 `a role ARRAY stringifies to its element, so ... ['ISSUER_ADMIN'] were admitted as key admins. R1 to R3 drive the real app over HTTP ... and pin that each is refused;`",
+   "test_or_reason": "facts.json 'test_on_base_with_test_files_only (A4 red-first)' shows total=7 failed=3 but does not name which tests failed; the comment asserts a behaviour the test does not directly demonstrate.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Minor",
+   "claim": "The fix's ASCII fold via `replace(/[a-z]/g, (ch) => ch.toUpperCase())` is not proven to be an exact ASCII fold for all inputs: it leaves non-ASCII characters untouched, but the test only covers dotless-i, long-s, and case variants; it does not test other Unicode characters that might fold differently or that the regex is truly ASCII-only.",
+   "evidence": "index.ts:1104 `claim.replace(/[a-z]/g, (ch) => ch.toUpperCase())` and test file lines 61-88 covering only \u0131, \u017f, and ASCII case variants.",
+   "test_or_reason": "The test suite does not include a control with, e.g., U+00DF (sharp s) or U+0130 (I with dot) to verify the fold is exactly ASCII.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The ticket's 'Reachability is NOT established' caveat is not addressed by the PR: no test or measurement shows whether any issuer, user-management path, or seed can store or sign a role with dotless-i/long-s/array, so the severity remains a nit as the ticket states.",
+   "evidence": "Ticket: 'Reachability is NOT established, and that is the first thing to settle ... The gate did not test whether any issuer, user-management path or seed can store or sign one, and nor have I.'",
+   "test_or_reason": "The PR adds no test or measurement for reachability; it only fixes the comparison in one service.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The ticket's recommendation to 'sweep for other toUpperCase() role comparisons' is not implemented; the PR only fixes requireKeyAdmin, leaving other potential toUpperCase role comparisons unaddressed.",
+   "evidence": "Ticket 'Where' section: 'Worth a sweep for other toUpperCase() role comparisons rather than fixing only these two.'",
+   "test_or_reason": "The diff touches only services/security/src/index.ts and the new test file; no sweep or additional fixes are present.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "NO GO"
+}
+
+STDERR:

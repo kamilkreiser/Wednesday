@@ -1,0 +1,36 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix only addresses the POST /api/documents 500 path; the ticket's second symptom, the verify endpoint hanging on an unhandled rejection at routes/verification.ts:556-557, is not touched by this diff, so the claimed fix is incomplete.",
+      "evidence": "Ticket: 'POST /api/documents/:id/verify on a verifier-gated type never answers. The async handler throws at routes/verification.ts:556-557, the rejection is unhandled, and the socket hangs.' Diff touches only enforcement.ts and a new test file; no change to routes/verification.ts.",
+      "test_or_reason": "The diff does not modify routes/verification.ts, and no test in the new file exercises the verify endpoint; the ticket's acceptance for the verify hang is unmet."
+    },
+    {
+      "severity": "Major",
+      "claim": "The fix does not coerce or validate the claim once where the principal is built (middleware/auth.ts) as the ticket recommends; it only patches the enforcement layer, leaving other callers of the level check (e.g., the verify handler) still exposed to a non-string level.",
+      "evidence": "Ticket: 'The fix shape: coerce or validate the claim once where the principal is built (middleware/auth.ts), and make the verify handler's rejection reach the error handler.' Diff changes only enforcement.ts lines 55-56 and 153; middleware/auth.ts is untouched.",
+      "test_or_reason": "The new tests only call enforceDocumentTypeRules and meetsVerificationLevel; no test covers the verify handler or the principal-building path, so the ticket's recommended fix location is not implemented."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's header comment claims 'K1-K5 are red at the tip', but facts.json shows the test suite on base with test files only has 9 failed out of 13, and the whole suite delta reports 'reds fixed by the patch: []' — the red-first claim is not supported by the measured facts.",
+      "evidence": "facts.json: 'test_on_base_with_test_files_only (A4 red-first)': { 'total': 13, 'failed': 9 }; 'whole_suite_delta': 'reds fixed by the patch: []'.",
+      "test_or_reason": "The comment's assertion that K1-K5 are red at the tip is contradicted by the measured failure count and the absence of 'reds fixed by the patch'."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's header comment states 'Every cell reads a thrown error as the string THREW, so a red is an assertion', but the tests do not assert that a non-string level previously threw; they only assert the new behaviour (ranks as none), so the red-first property is not pinned by the tests themselves.",
+      "evidence": "Test file lines 55-56, 75-76, 79-84: tests expect REFUSED/ADMITTED outcomes, not a THREW string; the THREW catch is only used to convert errors, not to assert them.",
+      "test_or_reason": "The tests would pass on the old code only if the old code also returned REFUSED/ADMITTED, which it did not (it threw), so the tests are not red-first in the sense claimed; they are green-after only."
+    },
+    {
+      "severity": "Note",
+      "claim": "The fix changes the 403 error message for a non-string level to 'NONE', but the ticket's acceptance criteria do not specify the message text; the test K2 pins a specific string that may be brittle if the message format changes.",
+      "evidence": "Test file line 68: `expect(message).toBe('This document type requires STANDARD verification. Your current level is NONE.');`",
+      "test_or_reason": "The message is an implementation detail; pinning it exactly may cause unnecessary test churn."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

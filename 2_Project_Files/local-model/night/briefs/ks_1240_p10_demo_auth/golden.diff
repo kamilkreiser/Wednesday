@@ -1,0 +1,102 @@
+diff --git a/Blockchain/Dev/services/demo-service/src/services/authClient.ts b/Blockchain/Dev/services/demo-service/src/services/authClient.ts
+--- a/Blockchain/Dev/services/demo-service/src/services/authClient.ts
++++ b/Blockchain/Dev/services/demo-service/src/services/authClient.ts
+@@ -17,2 +17,6 @@
+ const AUTH_HOST = process.env.AUTH_HOST || 'auth';
+ const AUTH_PORT = process.env.AUTH_PORT || '4003';
++
++// KS-1240: the longest the demo service waits for the auth service's login endpoint. The fetch carried no timeout, so an auth service that accepted the connection and never answered held the
++// caller for as long as the socket lived. On expiry the fetch rejects and the existing catch answers { success: false, error } exactly as it already does for an unreachable service.
++const AUTH_FETCH_TIMEOUT_MS = 10_000;
+@@ -36,4 +40,5 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ email, password }),
++      signal: AbortSignal.timeout(AUTH_FETCH_TIMEOUT_MS),
+     });
+diff --git a/Blockchain/Dev/services/demo-service/src/__tests__/ks1240-demo-auth-client-login-fetch-is-bounded.test.ts b/Blockchain/Dev/services/demo-service/src/__tests__/ks1240-demo-auth-client-login-fetch-is-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/demo-service/src/__tests__/ks1240-demo-auth-client-login-fetch-is-bounded.test.ts
+@@ -0,0 +1,81 @@
++// KS-1240 (class: hand-built outbound fetches with no timeout), demo-service services/authClient.ts: authenticatePersona fetched the auth service's login endpoint with no `signal`, so an auth service that
++// accepted the connection and never answered held the caller for as long as the socket lived. The function already catches a failed fetch and answers { success: false, error }. It is driven directly with a
++// stubbed global fetch that honours `init.signal` (and never answers when there is none); nothing touches the network. R1 pins that the fetch carries an AbortSignal, R2 that the bound is a sane positive
++// number, R3 that a service that never answers ends in { success: false } and not a hang; C1 to C3 pin the unchanged answers.
++import { describe, it, expect, afterEach, vi } from 'vitest';
++
++const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }));
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++
++import { authenticatePersona } from '../services/authClient';
++
++function okReply(): Response {
++  return {
++    ok: true,
++    status: 200,
++    headers: { get: (name: string) => (name === 'set-cookie' ? 'refresh_token=abc; Path=/api/auth; HttpOnly' : null) },
++    json: async () => ({ data: { accessToken: 'jwt-1', user: { id: 'u1' } } }),
++  } as unknown as Response;
++}
++
++afterEach(() => { vi.restoreAllMocks(); });
++
++/** The call's outcome, or 'HUNG' when it is still pending after 300 ms, so a hang is a red assertion and not a stuck run. */
++async function outcome(): Promise<unknown> {
++  return Promise.race([
++    authenticatePersona('a@x.test', 'pw').then((r) => r, () => 'REJECTED'),
++    new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
++  ]);
++}
++
++describe('KS-1240: the demo-service auth client bounds its login fetch', () => {
++  it('RED KS-1240 R1 the login fetch carries an AbortSignal', async () => {
++    const seen: unknown[] = [];
++    vi.spyOn(globalThis, 'fetch').mockImplementation((async (_url: unknown, init?: { signal?: unknown }) => { seen.push(init?.signal); return okReply(); }) as never);
++    await authenticatePersona('a@x.test', 'pw');
++    expect(seen).toHaveLength(1);
++    expect(seen[0]).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R2 the bound handed to AbortSignal.timeout is positive and at most 30000 ms', async () => {
++    const timeout = vi.spyOn(AbortSignal, 'timeout');
++    vi.spyOn(globalThis, 'fetch').mockImplementation((async () => okReply()) as never);
++    await authenticatePersona('a@x.test', 'pw');
++    const bounds = timeout.mock.calls.map((c) => c[0] as number);
++    expect(bounds).toHaveLength(1);
++    expect(bounds[0]).toBeGreaterThan(0);
++    expect(bounds[0]).toBeLessThanOrEqual(30000);
++  });
++
++  it('RED KS-1240 R3 an auth service that never answers ends in { success: false }, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    vi.spyOn(globalThis, 'fetch').mockImplementation(((_url: unknown, init?: { signal?: AbortSignal }) =>
++      new Promise<Response>((_resolve, reject) => {
++        const signal = init?.signal;
++        if (!signal) return;
++        if (signal.aborted) reject(new Error('aborted'));
++        else signal.addEventListener('abort', () => reject(new Error('aborted')));
++      })) as never);
++    const r = (await outcome()) as { success?: boolean };
++    expect(r).not.toBe('HUNG');
++    expect(r.success).toBe(false);
++  });
++
++  it('control KS-1240 C1 a healthy login still answers the token, the user and the cookie header', async () => {
++    vi.spyOn(globalThis, 'fetch').mockImplementation((async () => okReply()) as never);
++    const r = await authenticatePersona('a@x.test', 'pw');
++    expect([r.success, r.accessToken, r.setCookieHeader]).toEqual([true, 'jwt-1', 'refresh_token=abc; Path=/api/auth; HttpOnly']);
++  });
++
++  it('control KS-1240 C2 a refused login still answers { success: false, error: "Auth service returned 401" }', async () => {
++    vi.spyOn(globalThis, 'fetch').mockImplementation((async () => ({ ok: false, status: 401, headers: { get: () => null }, json: async () => ({}) })) as never);
++    const r = await authenticatePersona('a@x.test', 'pw');
++    expect([r.success, r.error]).toEqual([false, 'Auth service returned 401']);
++  });
++
++  it('control KS-1240 C3 an unreachable auth service still answers { success: false } with the error text', async () => {
++    vi.spyOn(globalThis, 'fetch').mockImplementation((async () => { throw new Error('connect ECONNREFUSED'); }) as never);
++    const r = await authenticatePersona('a@x.test', 'pw');
++    expect([r.success, r.error]).toEqual([false, 'connect ECONNREFUSED']);
++  });
++});

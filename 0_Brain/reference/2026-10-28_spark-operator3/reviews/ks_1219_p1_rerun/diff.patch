@@ -1,0 +1,151 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -390,6 +390,16 @@
+   // the all-unpermitted contrast. Removing the `?:` below reds exactly the two
+   // no-scope cases. Narrowing this default is a decision to be made in those
+   // cases first, not here.
++  // KS-1219: a repeated query parameter (?scope=a&scope=b) or a JSON array body reaches this resolver as an ARRAY whatever the compile-time cast at the handler says, and
++  // parseScopeString below would throw on it (an array has no split) and the handler would answer 500 server_error. A malformed request is a 400 invalid_request, the same
++  // existing message RULE 3 uses, so no published message changes.
++  if (scope !== undefined && typeof scope !== 'string') {
++    return {
++      ok: false,
++      message: 'invalid_request',
++      description: 'scope must be a single space- or comma-separated string',
++    };
++  }
+   const requestedScopes = parseScopeString(scope);
+   const grantedScopes = validateScopes(
+     requestedScopes.length > 0 ? requestedScopes : app.allowedScopes,
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts
+@@ -0,0 +1,126 @@
++// KS-1219: /api/oauth/authorize answered 500 server_error for an ARRAY-valued scope (a repeated query parameter, or a JSON array in the POST body): the compile-time
++// `as Record<string, string>` cast does nothing at run time, and parseScopeString calls `.split` on its argument. A malformed request is a 400 invalid_request. Each carrier is
++// driven through the real router on a loopback listener, with the same mocks as ks804-authorize-get-post-agree-per-rule.test.ts; a single string scope is the control.
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { Server } from 'node:http';
++import express from 'express';
++
++const state = vi.hoisted(() => ({
++  app: null as null | {
++    id: string; name: string; clientId: string; appType: string;
++    redirectUris: string[]; allowedScopes: string[];
++  },
++}));
++
++const silent = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() };
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++
++vi.mock('../services/oauth', async (importOriginal) => {
++  const real = await importOriginal<Record<string, unknown>>();
++  return {
++    ...real,
++    createAuthorizationCode: vi.fn(async () => 'MINTED_AUTHORIZATION_CODE'),
++    createApp: vi.fn(),
++    getAppByClientId: vi.fn(async () => state.app),
++    getAppById: vi.fn(),
++  };
++});
++vi.mock('../services/accountLockout', () => ({
++  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => undefined),
++  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
++}));
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => ({ id: 's' })), getRedisClient: vi.fn(() => null),
++  validateSession: vi.fn(async () => true), updateSessionActivity: vi.fn(async () => undefined),
++}));
++vi.mock('../services/password', () => ({ verifyPassword: vi.fn(async () => true), hashPassword: vi.fn(async () => 'h') }));
++vi.mock('../repositories/userRepo', () => ({
++  getUserByEmail: vi.fn(async () => ({
++    id: 'user-1', email: 'u@secuura.local', status: 'ACTIVE', mfaEnabled: false,
++    passwordHash: 'h', role: 'OWNER', verificationLevel: 'BASIC',
++  })),
++  getUserById: vi.fn(async () => null), updateUser: vi.fn(async () => undefined),
++  getPlatformAdmin: vi.fn(async () => null), reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++}));
++vi.mock('../services/jwt', () => ({ generateTokenPair: vi.fn(() => ({ accessToken: 'a', refreshToken: 'r', expiresIn: 900 })) }));
++vi.mock('../services/refreshDenylist', () => ({ isRefreshJtiDenylisted: vi.fn(async () => false) }));
++vi.mock('../middleware/authenticate', () => ({ authenticate: () => (_r: unknown, _s: unknown, n: () => void) => n() }));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++
++let server: Server;
++let base: string;
++let createAuthorizationCode: ReturnType<typeof vi.fn>;
++
++beforeAll(async () => {
++  const { oauthRouter } = await import('../routes/oauth');
++  ({ createAuthorizationCode } = (await import('../services/oauth')) as never);
++  const app = express();
++  app.use(express.json());
++  app.use('/api/oauth', oauthRouter);
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
++  const addr = server.address();
++  base = `http://127.0.0.1:${typeof addr === 'object' && addr ? addr.port : 0}`;
++});
++afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
++
++beforeEach(() => {
++  state.app = {
++    id: 'app-1', name: 'Test App', clientId: 'client-1', appType: 'confidential',
++    redirectUris: ['https://app.example.com/cb'], allowedScopes: ['openid', 'profile'],
++  };
++  vi.clearAllMocks();
++});
++
++const CB = encodeURIComponent('https://app.example.com/cb');
++const GET_BASE = `client_id=client-1&redirect_uri=${CB}&response_type=code&state=xyz`;
++
++async function get(extraQuery: string): Promise<{ status: number; message: string | undefined }> {
++  const res = await fetch(`${base}/api/oauth/authorize?${GET_BASE}${extraQuery}`, { redirect: 'manual' });
++  const text = await res.text();
++  let message: string | undefined;
++  try { message = JSON.parse(text)?.error?.message; } catch { /* html consent page */ }
++  return { status: res.status, message };
++}
++
++async function post(body: Record<string, unknown>): Promise<{ status: number; message: string | undefined }> {
++  const res = await fetch(`${base}/api/oauth/authorize`, {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    redirect: 'manual',
++    body: JSON.stringify({ client_id: 'client-1', redirect_uri: 'https://app.example.com/cb', ...body }),
++  });
++  const text = await res.text();
++  let message: string | undefined;
++  try { message = JSON.parse(text)?.error?.message; } catch { /* redirect */ }
++  return { status: res.status, message };
++}
++
++describe('KS-1219: /api/oauth/authorize refuses an array-valued scope', () => {
++  it('RED KS-1219 R1 GET with a repeated scope parameter is 400 invalid_request, not 500', async () => {
++    expect(await get('&scope=openid&scope=profile')).toEqual({ status: 400, message: 'invalid_request' });
++  });
++
++  it('RED KS-1219 R2 POST deny with a JSON array scope is 400 invalid_request, not 500', async () => {
++    expect(await post({ action: 'deny', scope: ['openid', 'profile'] })).toEqual({ status: 400, message: 'invalid_request' });
++  });
++
++  it('RED KS-1219 R3 POST approve with a JSON array scope is 400 invalid_request and mints no code', async () => {
++    const reply = await post({ email: 'u@secuura.local', password: 'correct-horse', action: 'approve', scope: ['openid'] });
++    expect(reply).toEqual({ status: 400, message: 'invalid_request' });
++    expect(createAuthorizationCode).not.toHaveBeenCalled();
++  });
++
++  it('CONTROL KS-1219 C1 GET with one string scope still serves the consent page', async () => {
++    expect((await get('&scope=openid')).status).toBe(200);
++  });
++
++  it('CONTROL KS-1219 C2 GET with no scope still serves the consent page', async () => {
++    expect((await get('')).status).toBe(200);
++  });
++
++  it('CONTROL KS-1219 C3 POST deny with one string scope still redirects with access_denied', async () => {
++    expect((await post({ action: 'deny', scope: 'openid' })).status).toBe(302);
++  });
++});

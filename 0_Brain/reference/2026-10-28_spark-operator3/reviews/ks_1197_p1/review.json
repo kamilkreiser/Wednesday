@@ -1,0 +1,69 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 9525,
+     "total_tokens": 10443,
+     "completion_tokens": 918,
+     "prompt_tokens_details": {
+      "cached_tokens": 1024
+     }
+    },
+    "seconds": 36.8,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 9525,
+  "completion_tokens": 918,
+  "seconds": 36.8,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The fix only addresses the POST /api/documents 500 path; the verify endpoint's unhandled rejection at routes/verification.ts:556-557 is not touched, so the ticket's second symptom (never answers) remains unfixed.",
+    "evidence": "Ticket: 'POST /api/documents/:id/verify on a verifier-gated type never answers. The async handler throws at routes/verification.ts:556-557, the rejection is unhandled, and the socket hangs.' Diff touches only enforcement.ts and a new test; no change to routes/verification.ts.",
+    "test_or_reason": "The new tests only exercise enforceDocumentTypeRules and meetsVerificationLevel; no test covers the verify route or the unhandled rejection.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The fix changes the 403 error message for a non-string level to 'NONE', but the code at enforcement.ts:157 still calls userLevel.toUpperCase() on a value that could be a non-string if the guard at line 153 is bypassed (e.g., if user.verificationLevel is a String object, not a primitive), causing a TypeError.",
+    "evidence": "enforcement.ts:153 `const userLevel = typeof user.verificationLevel === 'string' && user.verificationLevel ? user.verificationLevel : 'none';` and line 157 `error: ... Your current level is ${userLevel.toUpperCase()}.` \u2014 a `new String('basic')` object passes `typeof === 'object'` and falls to 'none', but a `String` object with a value would be truthy and not a primitive string, so the guard is insufficient.",
+    "test_or_reason": "No test covers a String object; the guard only checks primitive strings, so the TypeError could still occur for exotic non-primitive string-like values.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The ticket's recommendation to 'coerce or validate the claim once where the principal is built (middleware/auth.ts)' is not implemented; the fix is only at the enforcement layer, leaving other callers of verificationLevel (e.g., the verify route) still exposed to non-string values.",
+    "evidence": "Ticket: 'The fix shape: coerce or validate the claim once where the principal is built (middleware/auth.ts), and make the verify handler's rejection reach the error handler.' Diff does not touch middleware/auth.ts or routes/verification.ts.",
+    "test_or_reason": "The diff only modifies enforcement.ts; no change to auth.ts or verification.ts, so the root cause at the principal-building layer remains.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The new test file's header comment claims 'K1-K5 are red at the tip' but facts.json shows test_on_head failed=0, so the comment is stale or misleading.",
+    "evidence": "Test file line 6: 'K1-K5 are red at the tip; C1-C4 pin the known levels...' vs facts.json 'test_on_head (A5 green-after)': failed: 0.",
+    "test_or_reason": "The comment contradicts the measured result; it should say the tests pass at head.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The fix ranks a non-string level as 'none', which is the lowest authenticated level; this could be a security downgrade if a token with a non-string level was previously rejected (500) and now is admitted on 'none' document types.",
+    "evidence": "enforcement.ts:56 `const userIdx = VERIFICATION_LEVEL_ORDER.indexOf((typeof userLevel === 'string' && userLevel ? userLevel : 'none').toLowerCase());` \u2014 a non-string now maps to 'none', which meets a 'none' requirement.",
+    "test_or_reason": "The ticket says 'it is not client-forgeable' but the change widens access for any token with a non-string level; the PR does not discuss whether this is acceptable.",
+    "evidence_quote_found_in_input": true
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

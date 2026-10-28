@@ -1,0 +1,69 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/index.ts b/Blockchain/Dev/services/m365-integration/src/index.ts
+--- a/Blockchain/Dev/services/m365-integration/src/index.ts
++++ b/Blockchain/Dev/services/m365-integration/src/index.ts
+@@ -677,4 +677,4 @@
+-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=success&connectionId=${connectionId}&tenant=${encodeURIComponent(connection.tenantName || '')}`);
++    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:6882'}/admin/integrations?m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName || '')}`);
+   } catch (err: any) {
+     connection.status = 'error';
+     connection.errorMessage = err?.message || 'Token exchange failed';
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+@@ -0,0 +1,55 @@
++// KS-1670 site 1 (m365-integration src/index.ts, GET /api/callback success redirect): the redirect put `connectionId` into the query string unencoded, while `tenant` in the same template was
++// encoded with encodeURIComponent. The id only reaches that line after the server's own connection lookup hits, so it is not exploitable today, but an id format that ever admitted `&`, `#` or `%`
++// would change the shape of the query. This file reads the route's source text (no app boot, no database) and pins that every `connectionId=${...}` interpolation in the file is wrapped in
++// encodeURIComponent, and that the success redirect still encodes the tenant. C1 to C3 prove the instrument finds the route and the redirects it must not disturb.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');
++const NEEDLE = 'connectionId=${';
++
++/** Every interpolation that follows `connectionId=${` in the source, as the text up to the closing `}` of the template expression. */
++function interpolations(): string[] {
++  const found: string[] = [];
++  let at = SRC.indexOf(NEEDLE);
++  while (at !== -1) {
++    const start = at + NEEDLE.length;
++    let depth = 1;
++    let i = start;
++    while (i < SRC.length && depth > 0) {
++      if (SRC[i] === '{') depth++;
++      else if (SRC[i] === '}') depth--;
++      i++;
++    }
++    found.push(SRC.slice(start, i - 1));
++    at = SRC.indexOf(NEEDLE, i);
++  }
++  return found;
++}
++
++describe('KS-1670: the m365 success redirect encodes the connection id', () => {
++  it('RED KS-1670 R1 every connectionId interpolation in a redirect query is wrapped in encodeURIComponent', () => {
++    const unwrapped = interpolations().filter((expr) => !/^encodeURIComponent\(.*\)$/.test(expr.trim()));
++    expect(unwrapped).toEqual([]);
++  });
++
++  it('RED KS-1670 R2 the success redirect carries the encoded connection id and the encoded tenant, in that order', () => {
++    expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName');
++  });
++
++  it('control KS-1670 C1 the instrument finds exactly one connectionId interpolation (the success redirect)', () => {
++    expect(interpolations()).toHaveLength(1);
++  });
++
++  it('control KS-1670 C2 the success redirect is still the one that follows the "connection completed" log line', () => {
++    const logAt = SRC.indexOf('OAuth callback: connection completed');
++    const redirectAt = SRC.indexOf('m365=success');
++    expect(logAt).toBeGreaterThan(-1);
++    expect(redirectAt).toBeGreaterThan(logAt);
++  });
++
++  it('control KS-1670 C3 the invalid_state refusal redirect is untouched', () => {
++    expect(SRC).toContain('/admin/integrations?m365=error&message=invalid_state');
++  });
++});

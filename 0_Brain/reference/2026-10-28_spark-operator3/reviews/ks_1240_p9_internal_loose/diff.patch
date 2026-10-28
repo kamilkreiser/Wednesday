@@ -1,0 +1,131 @@
+--- a/Blockchain/Dev/services/auth/src/routes/internal.ts
++++ b/Blockchain/Dev/services/auth/src/routes/internal.ts
+@@ -21,6 +21,9 @@
+ const SECURITY_SERVICE_URL = process.env.SECURITY_SERVICE_URL || 'http://security:4008';
++// KS-1240: bounds the security-service key-validation fetch; on expiry the
++// request aborts and the route's existing catch answers 502.
++const SECURITY_VALIDATE_TIMEOUT_MS = 10_000;
+ 
+ export const internalRoutes = Router();
+@@ -43,6 +46,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ key: parsed.data.apiKey }),
++      signal: AbortSignal.timeout(SECURITY_VALIDATE_TIMEOUT_MS),
+     });
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1240-connector-token-security-validate-fetch-is-bounded.test.ts
+@@ -0,0 +1,113 @@
++// KS-1240 (class: hand-built outbound fetches with no timeout), services/auth routes/internal.ts, POST /internal/connector-token: the route validates the presented sk_ key with a fetch to the security
++// service and carried no `signal`, so a security service that accepted the connection and never answered held the gateway's token exchange open for as long as the socket lived. The real router runs on a
++// loopback listener; the global fetch is wrapped so calls to the listener go through and calls to the security service are stubbed (and honour `init.signal`; with no signal they never answer). R1 pins that
++// the security call carries an AbortSignal, R2 that the bound is sane, R3 that a silent security service ends in the route's existing 502 and not a hang; C1 to C4 pin the unchanged answers.
++import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
++import type { Server } from 'node:http';
++import express from 'express';
++
++const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++vi.mock('../services/jwt', () => ({ generateConnectorToken: vi.fn(() => ({ token: 'connector-jwt', expiresIn: 300 })) }));
++
++import { internalRoutes } from '../routes/internal';
++
++const realFetch = globalThis.fetch;
++const API_KEY = 'sk_' + 'a'.repeat(24);
++
++let server: Server;
++let base = '';
++
++beforeAll(async () => {
++  const app = express();
++  app.use(express.json());
++  app.use('/internal', internalRoutes);
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
++  const addr = server.address();
++  base = 'http://127.0.0.1:' + (typeof addr === 'object' && addr ? addr.port : 0);
++});
++afterAll(() => { (server as Server & { closeAllConnections?: () => void })?.closeAllConnections?.(); server?.close(); });
++afterEach(() => { vi.restoreAllMocks(); globalThis.fetch = realFetch; });
++
++function jsonReply(status: number, body: unknown): Response {
++  return { ok: status >= 200 && status < 300, status, json: async () => body, text: async () => JSON.stringify(body) } as unknown as Response;
++}
++
++/** Wraps fetch: the loopback listener is called for real, the security service is answered by `security`. */
++function stubSecurity(security: (init?: { signal?: AbortSignal }) => Promise<Response>, seen: unknown[] = []): void {
++  globalThis.fetch = ((url: unknown, init?: { signal?: AbortSignal }) => {
++    if (String(url).startsWith(base)) return realFetch(url as string, init as RequestInit);
++    seen.push(init?.signal);
++    return security(init);
++  }) as typeof fetch;
++}
++
++const VALID = { data: { valid: true, organizationId: 'org-1', tenantId: 'tenant-1', scopes: ['documents:read'], connectorId: 'conn-1' } };
++
++/** Honours the signal; with NO signal it never answers (the hang the fix removes). */
++function neverAnswers(init?: { signal?: AbortSignal }): Promise<Response> {
++  return new Promise<Response>((_resolve, reject) => {
++    const signal = init?.signal;
++    if (!signal) return;
++    if (signal.aborted) reject(new Error('aborted'));
++    else signal.addEventListener('abort', () => reject(new Error('aborted')));
++  });
++}
++
++/** The route's status, or 'HUNG' when nothing has answered after 300 ms, so a hang is a red assertion and not a stuck run. */
++async function exchange(body: unknown = { apiKey: API_KEY }): Promise<number | 'HUNG'> {
++  return Promise.race([
++    realFetch(base + '/internal/connector-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.status),
++    new Promise<'HUNG'>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
++  ]);
++}
++
++describe('KS-1240: the connector-token exchange bounds its security-service fetch', () => {
++  it('RED KS-1240 R1 the key-validation fetch carries an AbortSignal', async () => {
++    const seen: unknown[] = [];
++    stubSecurity(async () => jsonReply(200, VALID), seen);
++    expect(await exchange()).toBe(200);
++    expect(seen).toHaveLength(1);
++    expect(seen[0]).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R2 the bound handed to AbortSignal.timeout is positive and at most 30000 ms', async () => {
++    const timeout = vi.spyOn(AbortSignal, 'timeout');
++    stubSecurity(async () => jsonReply(200, VALID));
++    expect(await exchange()).toBe(200);
++    const bounds = timeout.mock.calls.map((c) => c[0] as number);
++    expect(bounds).toHaveLength(1);
++    expect(bounds[0]).toBeGreaterThan(0);
++    expect(bounds[0]).toBeLessThanOrEqual(30000);
++  });
++
++  it('RED KS-1240 R3 a security service that never answers ends in the 502, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubSecurity(neverAnswers);
++    expect(await exchange()).toBe(502);
++  });
++
++  it('control KS-1240 C1 a valid key still gets its connector token', async () => {
++    stubSecurity(async () => jsonReply(200, VALID));
++    const res = await realFetch(base + '/internal/connector-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: API_KEY }) });
++    expect(res.status).toBe(200);
++    expect(((await res.json()) as { data: { token: string } }).data.token).toBe('connector-jwt');
++  });
++
++  it('control KS-1240 C2 an invalid key is still refused with 401', async () => {
++    stubSecurity(async () => jsonReply(200, { data: { valid: false } }));
++    expect(await exchange()).toBe(401);
++  });
++
++  it('control KS-1240 C3 a non-2xx answer from security is still a 502', async () => {
++    stubSecurity(async () => jsonReply(500, {}));
++    expect(await exchange()).toBe(502);
++  });
++
++  it('control KS-1240 C4 an unreachable security service is still a 502, and a malformed key is still a 400', async () => {
++    stubSecurity(async () => { throw new Error('connect ECONNREFUSED'); });
++    expect(await exchange()).toBe(502);
++    expect(await exchange({ apiKey: 'not-a-key' })).toBe(400);
++  });
++});

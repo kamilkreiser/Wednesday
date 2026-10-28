@@ -1,0 +1,37 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 10676, "total_tokens": 11321, "completion_tokens": 645, "prompt_tokens_details": {"cached_tokens": 1024}}, "seconds": 28.8, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 10676, "completion_tokens": 645, "seconds": 28.8, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The PR adds a 10-second timeout to all seven social-provider fetches, but the ticket's acceptance criterion of a 503 on timeout is not implemented; the fetch rejects and the callback's existing catch answers, which may not be a 503.",
+   "evidence": "github.ts:39 `signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS)`; github.ts:3-4 `On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.`",
+   "test_or_reason": "Ticket says 'decide the refusal shape \u2014 a 503 on timeout is consistent with how the connector branch already answers a refused exchange.' The code does not map the abort rejection to a 503; it relies on the callback's existing catch, which is not shown to produce 503.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test R5-R7 mock AbortSignal.timeout to return an already-aborted signal, so they do not actually exercise the real 10-second timer; they only verify that an aborted signal causes rejection.",
+   "evidence": "ks1240-social-provider-fetches-are-bounded.test.ts:100 `vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());`",
+   "test_or_reason": "The tests do not wait for the real timeout; they simulate an immediate abort, so they do not prove that a slow upstream is bounded by 10 seconds in practice.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test stub for fetch is more permissive than the real fetch: it never rejects on abort unless the signal is already aborted or an abort event fires, but it does not simulate the network-level behavior of a hanging connection that would be aborted by the timeout.",
+   "evidence": "ks1240-social-provider-fetches-are-bounded.test.ts:41-47 `new Promise<Response>((_resolve, reject) => { const signal = init?.signal; if (!signal) return; if (signal.aborted) reject(new Error('aborted')); else signal.addEventListener('abort', () => reject(new Error('aborted'))); })`",
+   "test_or_reason": "The stub only rejects when the signal is aborted; it does not model a real fetch that would hang until the timeout fires, so the test does not fully replicate the production scenario.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The PR description is not provided, so no PR-body sentences are evaluated.",
+   "evidence": "PR DESCRIPTION: (not provided)",
+   "test_or_reason": "No PR description to assess.",
+   "evidence_quote_found_in_input": false
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO WITH NOTES"
+}
+
+STDERR:

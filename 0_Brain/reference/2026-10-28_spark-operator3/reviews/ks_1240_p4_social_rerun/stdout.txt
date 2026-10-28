@@ -1,0 +1,65 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 10679, "total_tokens": 11863, "completion_tokens": 1184, "prompt_tokens_details": {"cached_tokens": 8192}}, "seconds": 38.0, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 10679, "completion_tokens": 1184, "seconds": 38.0, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The ticket's acceptance criteria are not explicitly listed, so acceptance is inferred from the ticket's 'What to do' section; the diff adds a timeout to all seven fetches and the tests pin the timeout presence and rejection behavior, so the ticket's intent is met.",
+   "evidence": "Ticket: 'Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape \u2014 a 503 on timeout is consistent with how the connector branch already answers a refused exchange.'; github.ts:39 `signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS)`; test file:61-115 R1-R7.",
+   "test_or_reason": "The ticket's 'What to do' is satisfied by the code and tests; no explicit acceptance lines are present to mark MET/NOT MET.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The ticket claims the issue is 'request-reachable' and 'pre-existing', but the diff only adds timeouts to the social provider fetches, not to the connector-token / key-validate fetch mentioned in the ticket title; the ticket's scope may be broader than the diff addresses.",
+   "evidence": "Ticket: 'the connector-token exchange / key-validate `fetch` carries **no timeout**'; diff only touches Blockchain/Dev/services/auth/src/providers/social/*.ts.",
+   "test_or_reason": "The diff does not modify any connector-token or key-validate code; the ticket's title and description focus on that fetch, but the PR addresses only social providers.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test R5-R7 mock AbortSignal.timeout to return an already-aborted signal, so they do not actually test the real timeout duration or the real AbortSignal behavior; they only verify that a rejection occurs when the signal is aborted.",
+   "evidence": "test file:100 `vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());`; test file:102 `expect(await outcome(() => new GitHubProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');`",
+   "test_or_reason": "The tests do not exercise the real 10_000 ms timeout; they short-circuit it, so they do not prove the real timeout works in production.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test stub `stubNeverAnswering` never answers when there is no signal, but it also never answers when a signal is present unless the signal is aborted; this is a faithful simulation of a hanging upstream, but it does not test the real timeout firing.",
+   "evidence": "test file:41-47 `new Promise<Response>((_resolve, reject) => { const signal = init?.signal; if (!signal) return; if (signal.aborted) reject(new Error('aborted')); else signal.addEventListener('abort', () => reject(new Error('aborted'))); })`",
+   "test_or_reason": "The stub only rejects on abort; it does not simulate a real timeout, so the tests do not verify the actual timeout mechanism.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test R4 asserts the bounds are at most 30000 ms, but the code uses 10_000 ms; the test is more permissive than the implementation, so it does not pin the exact value.",
+   "evidence": "test file:95 `expect(ms).toBeLessThanOrEqual(30000);`; github.ts:5 `const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;`",
+   "test_or_reason": "The test allows up to 30 seconds, but the code uses 10 seconds; the test does not catch a regression to a longer timeout.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test C1 only checks the providerId, not the full SocialProfile shape; it does not pin that email, displayName, or other fields are unchanged.",
+   "evidence": "test file:119-121 `expect((await new GitHubProvider(CONFIG).exchangeCode('code')).providerId).toBe('7');` etc.",
+   "test_or_reason": "The test name says 'full exchange' but only asserts providerId; other fields are not verified.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test C2 only checks the GitHub refusal message; it does not test Google or LinkedIn refusal messages, so the 'refusal shape' is not fully pinned.",
+   "evidence": "test file:124-126 `it('control KS-1240 C2 a refused github token exchange still throws its own message', ...)`",
+   "test_or_reason": "Only GitHub is tested for the refusal message; Google and LinkedIn are not covered.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The lint was not run in facts.json, so there is no evidence of lint cleanliness.",
+   "evidence": "facts.json: `\"lint\": \"not run\"`",
+   "test_or_reason": "Hygiene check cannot be confirmed.",
+   "evidence_quote_found_in_input": true
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO WITH NOTES"
+}
+
+STDERR:

@@ -1,0 +1,58 @@
+{"attempts": [{"attempt": 1, "finish": "stop", "usage": {"prompt_tokens": 14153, "total_tokens": 15150, "completion_tokens": 997, "prompt_tokens_details": {"cached_tokens": 1024}}, "seconds": 42.4, "schema_errors": [], "repetition": null, "max_tokens": 8000}], "prompt_tokens": 14153, "completion_tokens": 997, "seconds": 42.4, "think": false, "valid": true, "duplicate_findings_removed": 0}
+{
+ "findings": [
+  {
+   "severity": "Note",
+   "claim": "The diff adds timeouts to all eight hand-built fetches in ipfs.service.ts, but the ticket's scope is the connector-token / key-validate fetch in the api-gateway, which is not touched by this PR.",
+   "evidence": "Ticket: \"the connector-token / key-validate fetch has no timeout\"; diff only touches Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts and its test file.",
+   "test_or_reason": "The PR addresses a different fetch than the ticket describes; the ticket's acceptance criteria are not met by this change.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The new test file's header comment claims \"seven fetches\" for providers and \"one more\" for the gateway read, but the test R5 expects exactly eight AbortSignal.timeout calls, which matches the code; the comment is consistent.",
+   "evidence": "Test file line 1: \"the Pinata, Infura and Web3.Storage providers (upload, pin, unpin: seven fetches) and the gateway read in IPFSService.fetch (one more)\"; test R5 line 110: `expect(bounds).toHaveLength(8);`",
+   "test_or_reason": "No discrepancy; the count is correct.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test R6 uses `AbortSignal.timeout` mocked to return an already-aborted signal, but the real `AbortSignal.timeout` would reject after the specified delay; the test does not verify the actual timeout duration, only that an abort leads to the failure path.",
+   "evidence": "Test file line 118: `vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());`",
+   "test_or_reason": "The test pins the failure behavior on abort, not the real timeout mechanism; acceptable for unit testing but does not prove the real timeout works.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test R5 only checks that the timeout bounds are positive and \u2264120000 ms, but does not assert the specific values (60s, 15s, 30s) that the code uses, so a regression to a different but still bounded value would pass.",
+   "evidence": "Test file lines 111-114: `for (const ms of bounds) { expect(ms).toBeGreaterThan(0); expect(ms).toBeLessThanOrEqual(120000); }`",
+   "test_or_reason": "The test is permissive; it does not pin the exact timeout constants.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The test stub `stubAnswering` returns a generic `reply({})` for any URL that does not match the known endpoints, which could mask a fetch to an unintended URL as a success; the tests do not assert the exact URLs.",
+   "evidence": "Test file line 32: `return reply({});`",
+   "test_or_reason": "The stub is more permissive than the real service; a wrong URL would still pass the signal assertions.",
+   "evidence_quote_found_in_input": true
+  },
+  {
+   "severity": "Note",
+   "claim": "The test C2 verifies the mock provider makes no fetch, but it does not verify that the mock's `read` path is used for the gateway read; the mock's `read` is not covered by the timeout tests.",
+   "evidence": "Test file lines 142-148: `const svc = new IPFSService('mock'); ... expect(spy).not.toHaveBeenCalled();`",
+   "test_or_reason": "The mock provider's read path is not exercised with a timeout; the timeout tests only cover HTTP-gateway providers.",
+   "evidence_quote_found_in_input": false
+  },
+  {
+   "severity": "Note",
+   "claim": "The ticket's acceptance criteria are not explicitly listed, but the PR does not address the connector-token / key-validate fetch; the ticket's \"What to do\" is not implemented in this diff.",
+   "evidence": "Ticket: \"Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape \u2014 a 503 on timeout\"; diff does not touch api-gateway code.",
+   "test_or_reason": "The PR is out of scope for the ticket; the ticket's acceptance is not met.",
+   "evidence_quote_found_in_input": true
+  }
+ ],
+ "comment_sentences_overstated": [],
+ "verdict": "GO WITH NOTES"
+}
+
+STDERR:

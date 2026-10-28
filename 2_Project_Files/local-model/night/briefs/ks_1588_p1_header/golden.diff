@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1009-wallet-status-reveals-only-existence.test.ts
+@@ -167,4 +167,22 @@
+     expect(res.status).not.toBe(401);
+     expect(await res.text()).toContain('exists');
+   });
++
++  // KS-1588 (gate mutant N3): every cell above reads only the response BODY, so an id sent in a response HEADER with the body untouched passed them all.
++  // Every header of a registered wallet's answer must be one of Express's defaults, and none may carry the seeded id, role or date.
++  it('RED KS-1588 H1 - a REGISTERED wallet answers with only Express default headers, none carrying the seeded id, role or timestamp', async () => {
++    const res = await fetch(`${base}/api/auth/wallet/status/${REGISTERED}`);
++    const allowed = ['connection', 'content-length', 'content-type', 'date', 'etag', 'keep-alive', 'x-powered-by'];
++    const names = [...res.headers.keys()];
++    expect(names.filter((n) => !allowed.includes(n))).toEqual([]);
++    const values = [...res.headers.values()].join('\n');
++    expect(values).not.toContain(SEEDED.id);
++    expect(values).not.toContain(SEEDED.role);
++    expect(values).not.toContain('2026-01-02');
++  });
++
++  it('control KS-1588 H0 - the same reader sees the response headers it is checking (content-type is among them)', async () => {
++    const res = await fetch(`${base}/api/auth/wallet/status/${REGISTERED}`);
++    expect([...res.headers.keys()]).toContain('content-type');
++  });
+ });

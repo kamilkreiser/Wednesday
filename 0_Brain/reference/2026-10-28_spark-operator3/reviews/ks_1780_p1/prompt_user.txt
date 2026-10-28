@@ -1,0 +1,556 @@
+===== TICKET =====
+KS-1780 — originate: 17 catches read the thrown value before fail500 (systemErrors.ts:196, 15 in adminConfig.ts, webhooks.ts:320); at the one Gate B drove, a revoked Proxy or a throwing getPrototypeOf trap gets no response, and KS-1772 guards only its five describer sites [Backlog]
+
+## BLUF
+
+**In** `services/originate`**, 17 catch blocks read the thrown value before they reach** `fail500`**: one in** `systemErrors.ts` **(**`instanceof z.ZodError`**), 15 in** `adminConfig.ts` **(**`err?.message` **and** `err?.code`**) and one in** `webhooks.ts` **(**`extractPgCode(err)`**). KS-1772 guards the five describer sites and nothing else; at the one of these sites Gate B drove, a revoked Proxy and a Proxy whose** `getPrototypeOf` **trap throws still got NO response at PR 1766's head.** The class is outside KS-1772's named sites, so it is not that PR's defect. Gate B's finding F6 (LOW) says a follow-up ticket "for pre-helper reads is the right home".
+
+Facts only. **No fix is proposed.**
+
+Refs KS-1772, KS-1346, KS-1621.
+
+All line numbers were read at develop `c18552d94de23b4da365ce02e02be5d06793bbcb`, under `Blockchain/Dev/services/originate/src`. The measurement in item 1 is Gate B's, from `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-28_gate-t1b/verdict.md` (F6, lines 160-170), and was not re-run. The list in item 2 is this seat's own scan of the source text, and is a heuristic.
+
+## 1 — The site Gate B drove
+
+`routes/systemErrors.ts:195`-`:199`, `GET /api/system-errors`:
+
+`} catch (err: any) {` then `if (err instanceof z.ZodError) {` at `:196`, then `fail500(res, 'Error list read failed (GET /api/system-errors)', err);` at `:199`.
+
+Gate B's measurement (driver site "systemErrors GET /"): at the head, **NO ANSWER** for a Proxy whose `getPrototypeOf` trap throws, for a revoked Proxy and for the combined case; Jest attributes each to `systemErrors.ts:196:12`, the `instanceof` check, not to `fail500`. The other three hostile values are answered 500 at the head (they hung at base). **Control:** the same values on `PATCH /:errorId/resolve`, whose catch goes straight to `fail500`, are answered 500.
+
+## 2 — The same shape in the source at this tip
+
+The scan: in each route file that defines its own `fail500` (adminConfig 51 calls, gdpr 16, webhooks 8, systemErrors 5), take every `catch (X ...) { ... }` block and classify the first use of `X` inside it; report the blocks whose first use is `X.prop`, `X?.prop` or `X instanceof` and that contain a later `fail500(`. Strings and comments are skipped for brace matching; it is not a parser.
+
+* `routes/adminConfig.ts`**: 15 catch blocks**, at `:189`, `:226`, `:289`, `:378`, `:433`, `:521`, `:702`, `:818`, `:933`, `:1226`, `:1389`, `:1567`, `:1658`, `:1695` and `:1723`. 13 of them open with `if (err?.message?.includes('does not exist') || err?.code === '42P01') {` (`:189` is the first: the read at `:191`, the `fail500` at `:194`); `:226` reads `err?.message?.includes('unique constraint')`; `:1567` reads `err?.message?.includes('does not exist')` with no code test.
+* `routes/webhooks.ts:316`**-**`:320`: `const pgCode = extractPgCode(err);`, ahead of the 400 branch and the 500 path. `extractPgCode` (`utils/pgErrors.ts:52`) reads `e?.code`, `e?.meta?.code` and `e?.message` (`:59`, `:70`) with no `try`. The scan classes this site as passing the value on, so it is reported by hand, not by the scan.
+* `routes/systemErrors.ts:195`: item 1.
+
+Counts by file from the same scan: adminConfig 35 blocks go straight to `fail500`, 17 read first (15 followed by `fail500`; the other two are `:2086`, a `logger.error` that reads `err?.message`, and `:2243`, the describer KS-1772 guards), 1 never uses the value (the `catch (e: any)` at `:2221`, which is another ticket's subject); gdpr 13 go straight, 0 read first, 4 pass the value to something else first; webhooks 6 straight, 2 read first (`:58` and `:550`, both log calls, neither followed by `fail500`), 1 passes it on (the one above); systemErrors 3 straight, 3 read first (one followed by `fail500`; the other two are the log calls at `:133` and `:164`).
+
+The same scan therefore also shows five reads of the thrown value inside a log call with no `fail500` after them (`adminConfig.ts:2086`, `webhooks.ts:58` and `:550`, `systemErrors.ts:133` and `:164`). They are outside this ticket's definition ("before `fail500`") and are named only so the scan's totals can be checked.
+
+Gate B's own estimate was "about 15 more originate catches ... mostly in `adminConfig.ts` (for example `:189`, `:226`, `:289`, `:378`, ..., `:1723`), plus `webhooks.ts:320`", from a heuristic list in `out/pre-helper-reads.txt`. That file is not in the gate's directory (only `verdict.md` is), so the two lists were compared by the lines the verdict names: all five appear in the scan above.
+
+## 3 — What the PR's author says
+
+`__tests__/ks1772-originate-log-line-describers-cannot-hang-a-request.test.ts:18`-`:20`: "THE ROUTES ARE CHOSEN SO THE DESCRIBER IS THE ONLY THING THAT CAN THROW. Each catch below goes straight to `fail500`; a route whose catch first reads `err.message` or `err.code` (the four GET /settings-style routes of adminConfig do) would throw THERE for a message getter or a revoked Proxy, and the cell would measure that read rather than the describer." The header says four routes; the scan above finds 15 adminConfig blocks. Not reconciled here.
+
+Gate B on the effect: "For an `?.` read, only the revoked-Proxy and getter-throw shapes bite." and "The PR title 'cannot hang a request' is true only for the describer sites". It also states that the same heuristic finds none in the three api-gateway helper files.
+
+## Not established
+
+* **I ran nothing.** Only the `systemErrors.ts` site was driven, by Gate B. None of the 15 adminConfig blocks or the webhooks site was driven by anyone this seat knows of.
+* Whether a thrown value of those shapes (a revoked Proxy, a throwing getter, a throwing `getPrototypeOf` trap) can reach any of these catches in practice. Gate B's values are its own choosing.
+* The scan is a text heuristic: it can miss a catch whose first use of the value is not a plain property read, and it does not check what the code does after the read. The 4 gdpr blocks that pass the value on first were not examined.
+* What, if anything, to do. Not decided.
+
+## Searched
+
+Board, KS team, title + description + comment bodies, `includeArchived: true`, paged to the end. `fail500` → **23 hits**; `getPrototypeOf(err)` → **3** (KS-1772, KS-1771, KS-1621); `systemErrors.ts` → **9**; `ZodError` → 3 (KS-594, KS-593, KS-497, not about this); `extractPgCode` → **1**, KS-1341 (its PATCH classification control, read); `pre-helper` → **0**; `before fail500` → **0**; `revoked Proxy` → 4 (KS-1772, KS-1771, KS-1614, KS-1524, the last two read: other sites); `message getter` → 1 (KS-1524, an api-gateway log call). The threads of KS-1772, KS-1771, KS-1346, KS-1524, KS-1510, KS-1242, KS-1427 and KS-1621 were searched for `before fail500`, `pre-helper`, `instanceof z.ZodError`, `systemErrors.ts:196` and "reads ... thrown": no match. KS-1772 and KS-1771 each say, under "Not established", that none of their sites was driven. **Positive control** `KS-1531` → 40 hits. **Zero control:** a token coined for this seat and written nowhere → 0 hits.
+
+*Filed by Seat G 26th, 2026-10-27 UTC, on Wednesday's brief.*
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/originate/src/routes/systemErrors.ts b/Blockchain/Dev/services/originate/src/routes/systemErrors.ts
+--- a/Blockchain/Dev/services/originate/src/routes/systemErrors.ts
++++ b/Blockchain/Dev/services/originate/src/routes/systemErrors.ts
+@@ -181,3 +181,15 @@
++/**
++ * KS-1780: `err instanceof z.ZodError` reads the thrown value's prototype. A revoked Proxy, or a Proxy whose getPrototypeOf trap throws, makes THAT check throw from inside the catch, before
++ * fail500 is reached, so the handler's promise rejects and the request gets no response at all (the KS-1772 shape, one step earlier). A value that cannot be inspected is not a ZodError.
++ */
++function isZodError(err: unknown): err is z.ZodError {
++  try {
++    return err instanceof z.ZodError;
++  } catch {
++    return false;
++  }
++}
++
+ /** List errors with optional filters — admin only (dev: open) */
+ systemErrorsRouter.get('/', authenticate(), requireRole('SYSTEM_ADMIN', 'ORG_ADMIN'), async (req: Request, res: Response) => {
+   try {
+@@ -194,6 +206,6 @@
+     res.json({ success: true, ...result });
+   } catch (err: any) {
+-    if (err instanceof z.ZodError) {
++    if (isZodError(err)) {
+       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid query parameters', details: err.errors } });
+     }
+     fail500(res, 'Error list read failed (GET /api/system-errors)', err);
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts
+@@ -0,0 +1,83 @@
++// KS-1780 (originate routes/systemErrors.ts, GET /api/system-errors): the catch of the list route tested `err instanceof z.ZodError` BEFORE it reached fail500. That check reads the thrown
++// value's prototype, so a revoked Proxy, or a Proxy whose getPrototypeOf trap throws, made the check itself throw inside the catch: the handler's promise rejected and the request got NO
++// answer. fail500 already survives such a value (KS-1772); this file pins that the list route's own check does too. The service call is made to reject on a real loopback listener, as the
++// KS-1346 part A cells do; a request that gets no answer within the window is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
++const mockGetRecentErrors = jest.fn();
++
++jest.mock('../services/errorTrackingService', () => ({
++  trackError: jest.fn(),
++  resolveErrorsByService: jest.fn(),
++  getErrorStats: jest.fn(),
++  getRecentErrors: mockGetRecentErrors,
++  resolveError: jest.fn(),
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { systemErrorsRouter } from '../routes/systemErrors';
++
++const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++
++const app = express();
++app.use('/api/system-errors', express.json(), systemErrorsRouter);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => server?.close());
++beforeEach(() => jest.clearAllMocks());
++
++async function listWithThrow(thrown: unknown, query = ''): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
++  mockGetRecentErrors.mockRejectedValueOnce(thrown);
++  try {
++    const res = await fetch(baseUrl + '/api/system-errors/' + query, { signal: AbortSignal.timeout(1500) });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER', body: null };
++  }
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++function throwingPrototypeTrap(): object {
++  return new Proxy({}, { getPrototypeOf() { throw new Error('ks1780 trap'); } });
++}
++
++describe('KS-1780: GET /api/system-errors answers a hostile thrown value', () => {
++  it('RED KS-1780 R1 a revoked Proxy thrown by the service is answered with the constant 500', async () => {
++    expect(await listWithThrow(revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('RED KS-1780 R2 a Proxy whose getPrototypeOf trap throws is answered with the constant 500', async () => {
++    expect(await listWithThrow(throwingPrototypeTrap())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('CONTROL KS-1780 C1 a plain Error is still answered with the constant 500', async () => {
++    expect(await listWithThrow(new Error('ks1780 ordinary'))).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('CONTROL KS-1780 C2 a bad query is still a 400 BAD_REQUEST from the ZodError arm, and the service is not called', async () => {
++    const reply = await listWithThrow(new Error('unused'), '?limit=abc');
++    expect(reply.status).toBe(400);
++    expect((reply.body as { error: { code: string } }).error.code).toBe('BAD_REQUEST');
++    expect(mockGetRecentErrors).not.toHaveBeenCalled();
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/originate/src/routes/systemErrors.ts
+1: /**
+2:  * =============================================================================
+3:  * SYSTEM ERRORS ROUTES
+4:  * =============================================================================
+5:  * Admin API for viewing and managing system errors:
+6:  * - List/filter errors
+7:  * - Error statistics
+8:  * - Resolve errors
+9:  * - Ingest errors from other services and client-side
+10:  * =============================================================================
+11:  */
+12: 
+13: import { Router, Request, Response } from 'express';
+14: import { z } from 'zod';
+15: import * as errorTracking from '../services/errorTrackingService';
+16: // KS-730: an inline 500 logs err.message server-side and answers the constant text, in every NODE_ENV.
+17: import { logger } from '../utils/logger';
+18: import { authenticate, requireRole } from '../middleware/auth';
+19: 
+20: export const systemErrorsRouter = Router();
+21: 
+22: // KS-267: strict query validation for GET /api/system-errors — reject wrong-type
+23: // / out-of-range / bad-enum with 400 instead of tolerating junk (the old handler
+24: // coerced via parseInt and treated any non-'true' resolved as false). Mirrored
+25: // in originate.openapi.ts so the generated spec matches. `severity` matches the
+26: // SystemError union; `resolved` is the string enum the client sends; limit/offset
+27: // are coerced + bounded.
+28: const SystemErrorsQuerySchema = z
+29:   .object({
+30:     service: z.string().trim().min(1).optional(),
+31:     severity: z.enum(['warning', 'error', 'critical']).optional(),
+32:     resolved: z.enum(['true', 'false']).optional(),
+33:     limit: z.coerce.number().int().positive().max(500).optional(),
+34:     offset: z.coerce.number().int().min(0).optional(),
+35:   })
+36:   // KS-423: reject unknown query params with 400 (negative_data_rejection) —
+37:   // a silently-stripped junk param would otherwise be accepted with 200.
+38:   .strict();
+39: 
+40: // KS-444: the three write routes below truthy-checked (or didn't check) their
+41: // bodies, so spec-violating shapes were accepted — ingest stored `metadata`
+42: // sent as an array, client-errors stored `source: {}`, and resolve-by-service
+43: // answered 200 to `service: {}` (verified live 2026-07-13). Validate against
+44: // the published request schemas (originate.openapi.ts) and 400 with the
+45: // KS-267-style envelope on violation. `severity` is the platform's real
+46: // severity union (errorTrackingService + the GET /api/system-errors filter,
+47: // KS-267) — the spec's stale debug/info/warn/error/fatal enum is corrected to
+48: // match in the same change.
+49: const IngestErrorBodySchema = z.object({
+50:   service: z.string().min(1),
+51:   errorType: z.string().optional(),
+52:   message: z.string().min(1),
+53:   stack: z.string().optional(),
+54:   requestPath: z.string().optional(),
+55:   requestMethod: z.string().optional(),
+56:   userId: z.string().optional(),
+57:   severity: z.enum(['warning', 'error', 'critical']).optional(),
+58:   metadata: z.record(z.string(), z.unknown()).optional(),
+59: });
+60: 
+61: const ClientErrorBodySchema = z.object({
+62:   error: z.string().optional(),
+63:   componentStack: z.string().optional(),
+64:   url: z.string().optional(),
+65:   userAgent: z.string().optional(),
+66:   source: z.string().optional(),
+67: });
+68: 
+69: const ResolveByServiceBodySchema = z.object({
+70:   service: z.string().min(1),
+71: });
+72: 
+73: /** Ingest an error (from other services or client-side error boundaries) */
+74: /**
+75:  * KS-730: the only place in this router that turns a caught error into a 500.
+76:  *
+77:  * WHAT WAS WRONG. Four inline handlers returned `err.message` verbatim unless
+78:  * `NODE_ENV === 'production'`, so every non-production environment — `development`, `demo`, `test`,
+79:  * and an UNSET NODE_ENV — answered an admin route with the raw internal text. KS-727 fixed the two
+80:  * SHARED handlers the same way; these are the per-route remainder it enumerated rather than folded in.
+81:  *
+82:  * WHY A HELPER RATHER THAN DELETING THE TERNARY IN PLACE. KS-727's fix was purely SUBTRACTIVE: the
+83:  * shared handlers already logged `err.message` and `err.stack` at entry, so removing the ternary lost
+84:  * nothing. That is NOT true here. Measured across the three originate files this ticket enumerates:
+85:  * **0 of 65 sites log the error before returning it**, so deleting the ternary alone would destroy the
+86:  * diagnostic at every one of them. The ticket asks for the log to be added in the same change, and a
+87:  * helper is the only shape in which 65 such edits stay reviewable — it is the ticket's own suggestion
+88:  * ("a small local helper rather than 67 edited ternaries").
+89:  *
+90:  * The log carries the message; the RESPONSE never does. `context` names the route, so a log line is
+91:  * attributable without the caller having to be trusted about which handler it came from.
+92:  */
+93: function fail500(res: Response, context: string, err: unknown): void {
+94:     // KS-1772: building this log line, and writing it, can themselves throw (a message getter, a Proxy trap, a revoked Proxy, a logger that fails). That throw left this helper from inside
+95:     // the handler's own catch, so the handler's promise rejected and the request got no response at all. Describe the value in its own try and log in another, so the constant 500 below is
+96:     // always sent. The line is unchanged for every value that could be described before; one that cannot be described logs the fallback in its place. Same shape as api-gateway's KS-1524 (a).
+97:     let described: string;
+98:     try {
+99:         described = err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err;
+100:     } catch {
+101:         described = 'thrown value that could not be described';
+102:     }
+103:     try {
+104:         logger.error(context, { error: described });
+105:     } catch {
+106:         // Nothing more can be said if the logger itself fails; the caller still gets the 500 below.
+107:     }
+108:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+109: }
+110: 
+111: systemErrorsRouter.post('/ingest', async (req: Request, res: Response) => {
+112:   try {
+113:     const parsed = IngestErrorBodySchema.safeParse(req.body);
+114:     if (!parsed.success) {
+115:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'service and message are required', details: parsed.error.errors } });
+116:     }
+117:     const { service, errorType, message, stack, requestPath, requestMethod, userId, severity, metadata } = parsed.data;
+118: 
+119:     await errorTracking.trackError({
+120:       service,
+121:       errorType: errorType || 'unhandled',
+122:       message,
+123:       stack,
+124:       requestPath,
+125:       requestMethod,
+126:       userId,
+127:       ipAddress: req.ip || req.socket.remoteAddress,
+128:       severity: severity || 'error',
+129:       metadata,
+130:     });
+131: 
+132:     res.status(201).json({ success: true });
+133:   } catch (err: any) {
+134:     logger.error('System error ingest failed', { error: err instanceof Error ? err.message : String(err) });
+135:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+136:   }
+137: });
+138: 
+139: /** Client-side error ingestion (from React Error Boundaries) */
+140: systemErrorsRouter.post('/client-errors', async (req: Request, res: Response) => {
+141:   try {
+142:     // KS-444: every declared field is optional, but a present field must match
+143:     // its published type (the sweep's `source: {}` was stored verbatim).
+144:     // Non-strict, so the ErrorBoundary's extra fields (type, message, …) pass.
+145:     const parsed = ClientErrorBodySchema.safeParse(req.body);
+146:     if (!parsed.success) {
+147:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid request body', details: parsed.error.errors } });
+148:     }
+149:     const { error, componentStack, url, userAgent, source } = parsed.data;
+150: 
+151:     await errorTracking.trackError({
+152:       service: source || 'frontend',
+153:       errorType: 'client_render_error',
+154:       message: error || 'Unknown client error',
+155:       stack: componentStack,
+156:       requestPath: url,
+157:       requestMethod: 'GET',
+158:       ipAddress: req.ip || req.socket.remoteAddress,
+159:       severity: 'error',
+160:       metadata: { userAgent, source },
+161:     });
+162: 
+163:     res.status(201).json({ success: true });
+164:   } catch (err: any) {
+165:     logger.error('Client error ingest failed', { error: err instanceof Error ? err.message : String(err) });
+166:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+167:   }
+168: });
+169: 
+170: 
+171: /** Get error statistics (dashboard widget data) — admin only (dev: open) */
+172: systemErrorsRouter.get('/stats', authenticate(), requireRole('SYSTEM_ADMIN', 'ORG_ADMIN'), async (_req: Request, res: Response) => {
+173:   try {
+174:     const stats = await errorTracking.getErrorStats();
+175:     res.json({ success: true, stats });
+176:   } catch (err: any) {
+177:     fail500(res, 'Error statistics read failed (GET /api/system-errors/stats)', err);
+178:   }
+179: });
+180: 
+181: /**
+182:  * KS-1780: `err instanceof z.ZodError` reads the thrown value's prototype. A revoked Proxy, or a Proxy whose getPrototypeOf trap throws, makes THAT check throw from inside the catch, before
+183:  * fail500 is reached, so the handler's promise rejects and the request gets no response at all (the KS-1772 shape, one step earlier). A value that cannot be inspected is not a ZodError.
+184:  */
+185: function isZodError(err: unknown): err is z.ZodError {
+186:   try {
+187:     return err instanceof z.ZodError;
+188:   } catch {
+189:     return false;
+190:   }
+191: }
+192: 
+193: /** List errors with optional filters — admin only (dev: open) */
+194: systemErrorsRouter.get('/', authenticate(), requireRole('SYSTEM_ADMIN', 'ORG_ADMIN'), async (req: Request, res: Response) => {
+195:   try {
+196:     const { service, severity, resolved, limit, offset } = SystemErrorsQuerySchema.parse(req.query);
+197: 
+198:     const result = await errorTracking.getRecentErrors({
+199:       service,
+200:       severity,
+201:       resolved: resolved !== undefined ? resolved === 'true' : undefined,
+202:       limit,
+203:       offset,
+204:     });
+205: 
+206:     res.json({ success: true, ...result });
+207:   } catch (err: any) {
+208:     if (isZodError(err)) {
+209:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid query parameters', details: err.errors } });
+210:     }
+211:     fail500(res, 'Error list read failed (GET /api/system-errors)', err);
+212:   }
+213: });
+214: 
+215: /** Mark an error as resolved — admin only */
+216: systemErrorsRouter.patch('/:errorId/resolve', authenticate(), requireRole('SYSTEM_ADMIN', 'ORG_ADMIN'), async (req: Request, res: Response) => {
+217:   try {
+218:     const resolved = await errorTracking.resolveError(req.params.errorId);
+219:     res.json({ success: resolved, message: resolved ? 'Error resolved' : 'Error not found' });
+220:   } catch (err: any) {
+221:     fail500(res, 'Error resolve failed (PATCH /api/system-errors/:errorId/resolve)', err);
+222:   }
+223: });
+224: 
+225: /** Bulk resolve errors by service — admin only */
+226: systemErrorsRouter.post('/resolve-by-service', authenticate(), requireRole('SYSTEM_ADMIN', 'ORG_ADMIN'), async (req: Request, res: Response) => {
+227:   try {
+228:     // KS-444: truthy check let a wrong-typed `service` (object/number) through → 200.
+229:     const parsed = ResolveByServiceBodySchema.safeParse(req.body);
+230:     if (!parsed.success) {
+231:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'service is required', details: parsed.error.errors } });
+232:     }
+233: 
+234:     const count = await errorTracking.resolveErrorsByService(parsed.data.service);
+235:     res.json({ success: true, resolved: count });
+236:   } catch (err: any) {
+237:     fail500(res, 'Bulk error resolve failed (POST /api/system-errors/resolve-by-service)', err);
+238:   }
+239: });
+
+### FILE AT HEAD: Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts
+1: // KS-1780 (originate routes/systemErrors.ts, GET /api/system-errors): the catch of the list route tested `err instanceof z.ZodError` BEFORE it reached fail500. That check reads the thrown
+2: // value's prototype, so a revoked Proxy, or a Proxy whose getPrototypeOf trap throws, made the check itself throw inside the catch: the handler's promise rejected and the request got NO
+3: // answer. fail500 already survives such a value (KS-1772); this file pins that the list route's own check does too. The service call is made to reject on a real loopback listener, as the
+4: // KS-1346 part A cells do; a request that gets no answer within the window is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
+5: const mockGetRecentErrors = jest.fn();
+6: 
+7: jest.mock('../services/errorTrackingService', () => ({
+8:   trackError: jest.fn(),
+9:   resolveErrorsByService: jest.fn(),
+10:   getErrorStats: jest.fn(),
+11:   getRecentErrors: mockGetRecentErrors,
+12:   resolveError: jest.fn(),
+13: }));
+14: 
+15: jest.mock('../middleware/auth', () => ({
+16:   authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+17:   requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+18: }));
+19: 
+20: jest.mock('../utils/logger', () => ({
+21:   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+22: }));
+23: 
+24: import express from 'express';
+25: import type { AddressInfo } from 'net';
+26: import { systemErrorsRouter } from '../routes/systemErrors';
+27: 
+28: const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
+29: 
+30: const app = express();
+31: app.use('/api/system-errors', express.json(), systemErrorsRouter);
+32: let server: ReturnType<typeof app.listen>;
+33: let baseUrl = '';
+34: 
+35: beforeAll(async () => {
+36:   await new Promise<void>((resolve) => {
+37:     server = app.listen(0, '127.0.0.1', () => resolve());
+38:   });
+39:   baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+40: });
+41: afterAll(() => server?.close());
+42: beforeEach(() => jest.clearAllMocks());
+43: 
+44: async function listWithThrow(thrown: unknown, query = ''): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
+45:   mockGetRecentErrors.mockRejectedValueOnce(thrown);
+46:   try {
+47:     const res = await fetch(baseUrl + '/api/system-errors/' + query, { signal: AbortSignal.timeout(1500) });
+48:     return { status: res.status, body: await res.json() };
+49:   } catch {
+50:     return { status: 'NO ANSWER', body: null };
+51:   }
+52: }
+53: 
+54: function revokedProxy(): object {
+55:   const { proxy, revoke } = Proxy.revocable({}, {});
+56:   revoke();
+57:   return proxy;
+58: }
+59: 
+60: function throwingPrototypeTrap(): object {
+61:   return new Proxy({}, { getPrototypeOf() { throw new Error('ks1780 trap'); } });
+62: }
+63: 
+64: describe('KS-1780: GET /api/system-errors answers a hostile thrown value', () => {
+65:   it('RED KS-1780 R1 a revoked Proxy thrown by the service is answered with the constant 500', async () => {
+66:     expect(await listWithThrow(revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
+67:   });
+68: 
+69:   it('RED KS-1780 R2 a Proxy whose getPrototypeOf trap throws is answered with the constant 500', async () => {
+70:     expect(await listWithThrow(throwingPrototypeTrap())).toEqual({ status: 500, body: CONSTANT_BODY });
+71:   });
+72: 
+73:   it('CONTROL KS-1780 C1 a plain Error is still answered with the constant 500', async () => {
+74:     expect(await listWithThrow(new Error('ks1780 ordinary'))).toEqual({ status: 500, body: CONSTANT_BODY });
+75:   });
+76: 
+77:   it('CONTROL KS-1780 C2 a bad query is still a 400 BAD_REQUEST from the ZodError arm, and the service is not called', async () => {
+78:     const reply = await listWithThrow(new Error('unused'), '?limit=abc');
+79:     expect(reply.status).toBe(400);
+80:     expect((reply.body as { error: { code: string } }).error.code).toBe('BAD_REQUEST');
+81:     expect(mockGetRecentErrors).not.toHaveBeenCalled();
+82:   });
+83: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "8894c7486f82f6eb682fecb879791f53312537b1",
+ "head_sha": "15b401776293238b070af17d01d3e3d4e7f9a067",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/originate/src/routes/systemErrors.ts",
+   "added": "13",
+   "deleted": "1"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts",
+   "added": "83",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "13",
+   "1",
+   "Blockchain/Dev/services/originate/src/routes/systemErrors.ts"
+  ],
+  [
+   "83",
+   "0",
+   "Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 4,
+  "failed": 2
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 4,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1690 failed=0 | after: total=1694 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 4\n",
+ "checker_summary": [
+  "PASS A6 whole services/originate suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/originate: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +96/-1 test=src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

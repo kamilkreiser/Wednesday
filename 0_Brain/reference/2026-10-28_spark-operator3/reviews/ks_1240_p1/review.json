@@ -1,0 +1,55 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 13169,
+     "total_tokens": 13606,
+     "completion_tokens": 437,
+     "prompt_tokens_details": {
+      "cached_tokens": 1024
+     }
+    },
+    "seconds": 24.3,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 13169,
+  "completion_tokens": 437,
+  "seconds": 24.3,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Note",
+    "claim": "The timeout constant is hardcoded at 5000 ms with no configuration hook, which may be acceptable but is a magic number.",
+    "evidence": "auth.ts:189 `const UPSTREAM_AUTH_FETCH_TIMEOUT_MS = 5_000;`",
+    "test_or_reason": "No test pins the exact value; T1/T2 only assert it is between 0 and 30000 ms.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The test suite does not verify that the timeout signal is actually passed to the real fetch call in a way that would abort a real network request; it only checks the mock receives a signal.",
+    "evidence": "test file:44 `expect(init.signal).toBeInstanceOf(AbortSignal);` and test file:19 `timeoutSpy = vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => controller.signal);`",
+    "test_or_reason": "The mock replaces AbortSignal.timeout, so the real timeout behavior is not exercised; T3/T4 manually abort the controller, not the real timeout.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The ticket's acceptance criteria are not explicitly listed, so it is unclear whether the 503 refusal shape mentioned in the ticket is required; the code returns null on timeout, not a 503.",
+    "evidence": "auth.ts:217-219 `catch (err) { console.error(...); return null; }` and auth.ts:259-260 `catch { return null; }`",
+    "test_or_reason": "The ticket says 'decide the refusal shape \u2014 a 503 on timeout is consistent...' but the code does not return 503; it returns null, which is the existing behavior.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+ }
+}

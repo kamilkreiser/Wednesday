@@ -1,0 +1,2474 @@
+===== TICKET =====
+KS-1591 — Security (nit, pre-existing): isPlatformRole's toUpperCase admits a dotless-i, a long-s and an ARRAY role as SUPER_ADMIN [Backlog]
+
+## BLUF
+
+`String(role).toUpperCase()` **is not an identity test.** `packages/shared/src/security/keyRevokePolicy.ts:139-140` (`isPlatformRole`) and `requireKeyAdmin`'s own `toUpperCase` admit three spellings as `SUPER_ADMIN`:
+
+* `super_admın` — **dotless i** (U+0131), which upper-cases to `I`;
+* `ſuper_admin` — **long s** (U+017F), which upper-cases to `S`;
+* a role **array** `["SUPER_ADMIN"]`, because `String(["SUPER_ADMIN"])` is `"SUPER_ADMIN"`.
+
+**Measured by the pull request 1539 gate** (verdict sha256/16 `91e8da4021c40661`, finding **n4**): `PUT /api/keys/admin-scopes/:userId` answered **200** and the mint answered **201** for all three.
+
+## Reachability is NOT established, and that is the first thing to settle
+
+This needs a token the auth service **signs** with such a role. **The gate did not test whether any issuer, user-management path or seed can store or sign one**, and nor have I. So the severity here is a nit until someone measures that; if any path can, it is a privilege escalation and should be re-rated immediately.
+
+## Recommendation
+
+Not built. Compare against an exact ASCII-folded string and **reject a non-string role** outright, in the one shared definition so every caller inherits it.
+
+## Where
+
+* `packages/shared/src/security/keyRevokePolicy.ts:139-140` — `isPlatformRole`.
+* `services/security/src/index.ts` — `requireKeyAdmin`'s `toUpperCase`.
+* Worth a sweep for other `toUpperCase()` role comparisons rather than fixing only these two.
+
+## Dedupe
+
+Linear's `searchIssues` is **fuzzy** — it returned 12 hits for a deliberately nonsensical control term, so it is not a membership test. Deduped with a literal `containsIgnoreCase` filter over title and description, controlled both ways (0 for the nonsense term, non-zero for a real one): `toUpperCase` **0 hits,** `dotless` **0,** `ASCII-folded` **0.** Related but NOT the same: KS-1536 (one role vocabulary, seven divergent lists) is about which role strings each list contains, not about the folding admitting lookalikes.
+
+Filed by Seat V 7th from the pull request 1539 gate.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -1098,7 +1098,10 @@
+ // (seeded DB casing) and canonical `SYSTEM_ADMIN` shapes (KS-486 precedent).
+ const KEY_ADMIN_ROLES = new Set(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'ISSUER_ADMIN', 'ADMIN']);
+ function requireKeyAdmin(req: Request, res: Response, next: NextFunction): void {
+-  const role = String((req as any).user?.role || '').toUpperCase();
++  // KS-1591: `String(role).toUpperCase()` is not an identity test. U+0131 (dotless i) upper-cases to `I` and U+017F (long s) upper-cases to `S`, so a role spelled with a dotless i read as ISSUER_ADMIN, and a role
++  // ARRAY stringifies to its element. Only an ASCII fold is applied (a-z to A-Z, every other character untouched), and a role that is not a string is refused outright.
++  const claim = (req as any).user?.role;
++  const role = typeof claim === 'string' ? claim.replace(/[a-z]/g, (ch) => ch.toUpperCase()) : '';
+   if (!KEY_ADMIN_ROLES.has(role)) {
+     res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'API key management requires an admin role' } });
+     return;
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts
+@@ -0,0 +1,89 @@
++// KS-1591 (services/security src/index.ts requireKeyAdmin, the services/security half of the ticket): the gate in front of GET /api/keys compared `String(role).toUpperCase()` to the admin role set, which is
++// not an identity test. U+0131 (dotless i) upper-cases to `I`, U+017F (long s) upper-cases to `S`, and a role ARRAY stringifies to its element, so `\u0131ssuer_admin`, `\u017fuper_admin` and ['ISSUER_ADMIN'] were
++// admitted as key admins. R1 to R3 drive the real app over HTTP (the harness of ks742-keys-tenancy-route-contract.test.ts: a real RS256 token signed with node crypto, no database) and pin that each
++// is refused; C1 to C4 pin that the spellings the platform really uses are still admitted and that an ordinary role and no token are still refused. Non-ASCII characters are written as \u escapes (pure ASCII file).
++import { describe, it, expect, beforeAll, afterAll } from 'vitest';
++import crypto from 'crypto';
++import type { Server } from 'http';
++import type { AddressInfo } from 'net';
++
++// Opt-IN boot guard: keeps `import '../index'` from binding its port and dialling postgres. Must be set before the import.
++process.env.SECURITY_DISABLE_BOOT = '1';
++
++const TENANT_A = 'a0000000-0000-4000-8000-0000000000aa';
++const ORG_A = '11111111-1111-4111-8111-111111111111';
++
++const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
++const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
++const PUBLIC_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
++
++const b64url = (b: Buffer): string => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
++
++/** Sign an RS256 JWT with node crypto, in the shape the auth service issues. */
++function token(claims: Record<string, unknown>): string {
++  const header = b64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
++  const now = Math.floor(Date.now() / 1000);
++  const payload = b64url(Buffer.from(JSON.stringify({ sub: 'test-user', iat: now, exp: now + 300, ...claims })));
++  const signature = b64url(crypto.sign('RSA-SHA256', Buffer.from(header + '.' + payload), PRIVATE_PEM));
++  return header + '.' + payload + '.' + signature;
++}
++
++const withRole = (role: unknown): string => token({ role, tenantId: TENANT_A, organizationId: ORG_A });
++
++let server: Server;
++let base = '';
++
++const HOOK_BUDGET_MS = 60_000;
++
++beforeAll(async () => {
++  process.env.JWT_PUBLIC_KEY = Buffer.from(PUBLIC_PEM, 'utf8').toString('base64');
++  delete process.env.JWT_JWKS_URL;
++  delete process.env.AUTH_SERVICE_URL;
++  const app = (await import('../index')).default;
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', resolve);
++  });
++  base = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++}, HOOK_BUDGET_MS);
++
++afterAll(async () => {
++  if (!server) return;
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++
++async function listKeysAs(bearer: string | null): Promise<number> {
++  const headers: Record<string, string> = bearer ? { Authorization: 'Bearer ' + bearer } : {};
++  const res = await fetch(base + '/api/keys?organizationId=' + ORG_A, { headers });
++  return res.status;
++}
++
++describe('KS-1591: requireKeyAdmin is an exact ASCII fold and refuses a non-string role', () => {
++  it('RED KS-1591 R1 a role spelled with a dotless i is refused', async () => {
++    expect(await listKeysAs(withRole('\u0131ssuer_admin'))).toBe(403);
++  });
++
++  it('RED KS-1591 R2 a role spelled with a long s is refused', async () => {
++    expect(await listKeysAs(withRole('\u017fuper_admin'))).toBe(403);
++  });
++
++  it('RED KS-1591 R3 a role array holding ISSUER_ADMIN is refused', async () => {
++    expect([401, 403]).toContain(await listKeysAs(withRole(['ISSUER_ADMIN'])));
++  });
++
++  it('control KS-1591 C1 no token is refused by the auth middleware', async () => {
++    expect(await listKeysAs(null)).toBe(401);
++  });
++
++  it('control KS-1591 C2 an ISSUER_ADMIN of the tenant is still admitted', async () => {
++    expect(await listKeysAs(withRole('ISSUER_ADMIN'))).toBe(200);
++  });
++
++  it('control KS-1591 C3 a lower-case and a mixed-case spelling are still admitted', async () => {
++    expect(await listKeysAs(withRole('issuer_admin'))).toBe(200);
++    expect(await listKeysAs(withRole('Issuer_Admin'))).toBe(200);
++  });
++
++  it('control KS-1591 C4 an ordinary role is still refused', async () => {
++    expect(await listKeysAs(withRole('USER'))).toBe(403);
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/security/src/index.ts
+1: /**
+2:  * =============================================================================
+3:  * SECUURA SECURITY SERVICE
+4:  * =============================================================================
+5:  * Handles:
+6:  * - Audit logging
+7:  * - Security event tracking
+8:  * - Rate limit management
+9:  * - API key validation
+10:  * Port: 4004
+11:  * =============================================================================
+12:  */
+13: 
+14: import express, { Request, Response, NextFunction, RequestHandler } from 'express';
+15: import cors from 'cors';
+16: import helmet from 'helmet';
+17: import { z } from 'zod';
+18: import crypto from 'crypto';
+19: import dotenv from 'dotenv';
+20: import { initDb, query, isDbAvailable, transaction } from './db';
+21: import { logger } from './utils/logger';
+22: import { validateKeySchema, resetRateLimitSchema } from './requestSchemas';
+23: import { bodyRefusalMessage } from './requestRefusal';
+24: // KS-480 §4 amendment: provisioning mint policy (bootless, unit-tested).
+25: import { decideMint, PROVISIONING_SCOPE, type MintRequest } from './provisioningPolicy';
+26: import { encryptField, decryptField, initFromEnv as initPiiCrypto, authenticate as jwtAuthenticate, enforceProductionConfig, errorHandler, isoDateTimeSchema, tenantGucContext, runWithTenantId, runWithPlatformScope, rejectNulBytes, normaliseOrgId, applyTenantGuc, isProvisioningCapable } from '@secuura/shared';
+27: import {
+28:   MAX_RATE_LIMIT_WINDOW_MS,
+29:   usableRateLimitEntry,
+30:   persistableResetAt,
+31: } from './rateLimitBounds';
+32: import {
+33:   RATE_LIMIT_KEY_MAX,
+34:   principalScope,
+35:   explicitScope,
+36:   scopedRateLimitKey,
+37:   sweepExpired,
+38: } from './rateLimitScope';
+39: import { decideKeyRevoke, decideTenantAccess, isPlatformRole, isScopedAdminRole, lookupKeyForRevoke } from './keyRevokePolicy';
+40: import { getAdminOrganisationScope } from './adminScope';
+41: // KS-880: the single home of the row mappers and their types (see the ROW CONVERTERS section below).
+42: import {
+43:   parseJson,
+44:   parseJsonArray,
+45:   rowToAuditLog as rowToAuditLogWith,
+46:   rowToSecurityEvent,
+47:   rowToApiKey,
+48:   type AuditLog,
+49:   type SecurityEvent,
+50:   type ApiKey,
+51: } from './converters';
+52: 
+53: // =============================================================================
+54: // PII FOR audit_logs.details (audit 1.3 phase 5)
+55: // =============================================================================
+56: // audit_logs.details often contains user-supplied input (request bodies,
+57: // query strings, error context). Encrypt the JSONB blob at rest with AAD
+58: // bound to (auditLogId). The column is widened from JSONB to TEXT in the
+59: // startup migration.
+60: 
+61: function encryptDetails(details: unknown, auditId: string): string | null {
+62:   if (details == null) return null;
+63:   const json = JSON.stringify(details);
+64:   if (json === '{}' || json === 'null') return null;
+65:   return encryptField(json, `audit_logs.details.${auditId}`);
+66: }
+67: 
+68: function decryptDetails(stored: any, auditId: string): Record<string, unknown> | null {
+69:   if (stored == null || stored === '') return null;
+70:   if (typeof stored === 'string' && /^v\d+:/.test(stored)) {
+71:     try {
+72:       const plain = decryptField(stored, `audit_logs.details.${auditId}`);
+73:       return plain ? JSON.parse(plain) : null;
+74:     } catch (err: any) {
+75:       logger.error('[piiCrypto] audit_logs.details decrypt failed', { auditId, error: err?.message });
+76:       return null;
+77:     }
+78:   }
+79:   // Legacy plaintext (still raw JSON or already-parsed object)
+80:   if (typeof stored === 'string') {
+81:     try { return JSON.parse(stored); } catch { return null; }
+82:   }
+83:   return stored as Record<string, unknown>;
+84: }
+85: 
+86: dotenv.config();
+87: 
+88: // Production startup guard — refuse to start with dev defaults in production
+89: enforceProductionConfig('security', {
+90:   requiredEnvVars: ['DATABASE_URL'],
+91:   forbiddenValues: {},
+92:   requireRealProviders: true,
+93: });
+94: 
+95: const app = express();
+96: const PORT = process.env.PORT || 4004;
+97: 
+98: // =============================================================================
+99: // TYPE DEFINITIONS
+100: // =============================================================================
+101: 
+102: interface RateLimitEntry {
+103:   count: number;
+104:   resetAt: number;
+105: }
+106: 
+107: // =============================================================================
+108: // IN-MEMORY STORAGE (with database persistence fallback)
+109: // =============================================================================
+110: 
+111: const memAuditLogs: AuditLog[] = [];
+112: const memSecurityEvents: SecurityEvent[] = [];
+113: // KS-577: exported as a test seam; see revokePriorConnectorKeys.
+114: export const memApiKeys = new Map<string, ApiKey>();
+115: // KS-698: exported as a test seam (see isRepresentableInstant).
+116: export const rateLimits = new Map<string, RateLimitEntry>(); // Ephemeral - memory only
+117: 
+118: // =============================================================================
+119: // DATABASE HELPERS
+120: // =============================================================================
+121: 
+122: /**
+123:  * KS-1570 PR B: the audit_logs INSERT for a SYSTEM-GENERATED audit row (the admin-scope write), run on the
+124:  * caller's own transaction client so a failure rolls the change back.
+125:  *
+126:  * Deliberately NOT dbSaveAuditLog's statement, which is unchanged below, for two measured reasons:
+127:  *   - it names `previous_state` and `new_state`, which no schema source defines (docker/init/01-schema.sql,
+128:  *     migrations/001; only prisma/schema.prisma has them), so on a database built from the repo it always
+129:  *     fails, and dbSaveAuditLog swallows the error (KS-1586);
+130:  *   - it writes ENCRYPTED `details` (a "v1:…" string) into a column that is `jsonb` unless the boot-time
+131:  *     widening to TEXT ran. That widening runs as `secuura_app`, which has no DDL rights by design, so on a
+132:  *     fresh database it fails and the column stays `jsonb` (also KS-1586).
+133:  * This row's details are system-generated ids only (tenant, target user, organisation ids, who granted), no
+134:  * user-supplied input and no personal data, so they are stored as plain JSON. Plain JSON is valid for a
+135:  * `jsonb` and for a widened `text` column alike, and decryptDetails already reads it back.
+136:  */
+137: function systemAuditInsertStatement(a: AuditLog): { text: string; values: unknown[] } {
+138:   return {
+139:     text: `INSERT INTO audit_logs (id, tenant_id, user_id, organization_id, action, resource_type, resource_id,
+140:          ip_address, user_agent, details, success, error_message, created_at)
+141:        VALUES ($1,$2::uuid,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+142:     values: [a.id, a.tenantId, a.userId || null, a.organizationId || null, a.action, a.resourceType,
+143:       a.resourceId || null, a.ipAddress || null, a.userAgent || null, JSON.stringify(a.details ?? {}),
+144:       a.success, a.errorMessage || null, a.createdAt],
+145:   };
+146: }
+147: 
+148: function rememberAuditLog(a: AuditLog): void {
+149:   memAuditLogs.push(a);
+150:   if (memAuditLogs.length > 10000) memAuditLogs.splice(0, memAuditLogs.length - 10000);
+151: }
+152: 
+153: async function dbSaveAuditLog(a: AuditLog): Promise<void> {
+154:   memAuditLogs.push(a);
+155:   if (memAuditLogs.length > 10000) memAuditLogs.splice(0, memAuditLogs.length - 10000);
+156:   if (!isDbAvailable()) return;
+157:   try {
+158:     // KS-28: tenant_id is the security boundary (NOT NULL after migration
+159:     // 012). Sourced from the JWT-derived AuditLog.tenantId; the POST
+160:     // handler enforces this so the in-memory cache + DB row both carry it.
+161:     // KS-458: pin the RLS GUC to the row's own tenant — the request ALS may
+162:     // differ (admin acting cross-tenant) or be absent (fire-and-forget after
+163:     // the response), and fail-closed audit_logs would reject a mismatch.
+164:     await runWithTenantId(a.tenantId, () => query(
+165:       `INSERT INTO audit_logs (id, tenant_id, user_id, organization_id, action, resource_type, resource_id,
+166:          ip_address, user_agent, details, previous_state, new_state, success, error_message, created_at)
+167:        VALUES ($1,$2::uuid,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) ON CONFLICT (id) DO NOTHING`,
+168:       [a.id, a.tenantId, a.userId || null, a.organizationId || null, a.action, a.resourceType,
+169:        a.resourceId || null, a.ipAddress || null, a.userAgent || null,
+170:        // Audit 1.3 phase 5: encrypt details JSONB at rest. AAD bound to
+171:        // the audit log id so a ciphertext can't be ported between rows.
+172:        encryptDetails(a.details, a.id),
+173:        a.previousState ? JSON.stringify(a.previousState) : null,
+174:        a.newState ? JSON.stringify(a.newState) : null, a.success, a.errorMessage || null, a.createdAt]
+175:     ));
+176:   } catch (err: any) {
+177:     logger.error('DB save audit log failed', { error: err?.message });
+178:   }
+179: }
+180: 
+181: async function dbSaveSecurityEvent(e: SecurityEvent): Promise<void> {
+182:   memSecurityEvents.push(e);
+183:   if (!isDbAvailable()) return;
+184:   try {
+185:     await query(
+186:       `INSERT INTO svc_security_events (id, event_type, severity, source, user_id, ip_address,
+187:          details, resolved, resolved_at, resolved_by, created_at)
+188:        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (id) DO NOTHING`,
+189:       [e.id, e.eventType, e.severity, e.source, e.userId || null, e.ipAddress || null,
+190:        JSON.stringify(e.details || {}), e.resolved, e.resolvedAt || null, e.resolvedBy || null, e.createdAt]
+191:     );
+192:   } catch (err: any) {
+193:     logger.error('DB save event failed', { error: err?.message });
+194:   }
+195: }
+196: 
+197: /** KS-577's cutover window, read per call so a deploy can change it without a restart. 0 = retire at once. */
+198: function rotationGraceSeconds(): number {
+199:   const graceRaw = Number.parseInt(process.env.API_KEY_ROTATION_GRACE_SECONDS ?? '0', 10);
+200:   return Number.isFinite(graceRaw) && graceRaw > 0 ? graceRaw : 0;
+201: }
+202: 
+203: /** Retire one in-memory key the way the UPDATE below retires its row: at once, or at the end of the window. */
+204: function retireInMemory(k: ApiKey, grace: number): void {
+205:   if (grace === 0) {
+206:     k.isActive = false;
+207:   } else {
+208:     const until = new Date(Date.now() + grace * 1000);
+209:     if (!k.expiresAt || k.expiresAt > until) k.expiresAt = until;
+210:   }
+211: }
+212: 
+213: /** The retire statement, shared by revokePriorConnectorKeys and the KS-1549 rotate transaction. RETURNING id
+214:  *  lets the transaction retire exactly those keys in memory. */
+215: function retirePriorStatement(connectorId: string, tenantId: string, keepKeyId: string, grace: number): { text: string; values: unknown[] } {
+216:   return grace === 0
+217:     ? {
+218:       text: `UPDATE svc_api_keys SET is_active = false
+219:              WHERE connector_id = $1 AND tenant_id = $2::uuid AND id <> $3 AND is_active = true
+220:              RETURNING id`,
+221:       values: [connectorId, tenantId, keepKeyId],
+222:     }
+223:     : {
+224:       text: `UPDATE svc_api_keys
+225:              SET expires_at = LEAST(COALESCE(expires_at, 'infinity'::timestamptz), NOW() + ($4 || ' seconds')::interval)
+226:              WHERE connector_id = $1 AND tenant_id = $2::uuid AND id <> $3 AND is_active = true
+227:              RETURNING id`,
+228:       values: [connectorId, tenantId, keepKeyId, String(grace)],
+229:     };
+230: }
+231: 
+232: /**
+233:  * KS-577. Retire the prior active keys of a connector when a new one is minted
+234:  * with `rotate: true`.
+235:  *
+236:  * Before this, `rotate: true` skipped the gateway early return and went straight
+237:  * to the mint; `dbSaveApiKey` upserts ON CONFLICT (id) and so never touches
+238:  * sibling rows, and validation keys off key_hash -> isActive -> expiresAt. After
+239:  * re-keying a lost credential, the lost credential still worked. Guardrail 1
+240:  * conceded it in a comment ("it invalidates nothing by itself") with nothing
+241:  * acting on it.
+242:  *
+243:  * THE WINDOW IS ONE VALUE, ON PURPOSE. The cutover shape is a contract question
+244:  * for Platform S, not a unilateral K-side call, and KS-577s three options differ
+245:  * only in how long the old key keeps working:
+246:  *   grace = 0  instant revoke. Cleanest containment; S in-flight writes 401
+247:  *              until S picks up the new credential. DEFAULT, because it is what
+248:  *              Kam ruled.
+249:  *   grace > 0  bounded overlap. Softer on S; leaves the credential live for
+250:  *              exactly that window, which is the thing being fixed.
+251:  * The third option (S confirms adoption, then the old key dies) needs an S-side
+252:  * acknowledgement path and a fallback for when it never arrives, so it is NOT
+253:  * implemented here and no default pretends otherwise.
+254:  *
+255:  * Returns how many prior keys were retired, or null if the attempt FAILED. The
+256:  * caller reports that rather than swallowing it: a silent failure here leaves
+257:  * BOTH credentials live, which is exactly the bug.
+258:  */
+259: // Exported as a TEST SEAM together with `memApiKeys` below. The alternative was
+260: // an HTTP-level test, and this service has no supertest dependency — adding one
+261: // to assert a four-line UPDATE is a worse trade than exporting the function that
+262: // performs it. Exporting changes no behaviour: both were already module-level.
+263: export async function revokePriorConnectorKeys(
+264:   connectorId: string,
+265:   tenantId: string,
+266:   keepKeyId: string,
+267: ): Promise<number | null> {
+268:   const grace = rotationGraceSeconds();
+269: 
+270:   // In-memory first, so a DB-less run still retires the sibling rather than
+271:   // reporting a revoke that did not happen.
+272:   let retired = 0;
+273:   for (const [, k] of memApiKeys) {
+274:     if (k.id === keepKeyId || k.connectorId !== connectorId || k.tenantId !== tenantId) continue;
+275:     if (!k.isActive) continue;
+276:     retireInMemory(k, grace);
+277:     retired += 1;
+278:   }
+279: 
+280:   if (!isDbAvailable()) return retired;
+281: 
+282:   try {
+283:     // KS-458: the GUC names the row's own tenant and svc_api_keys is
+284:     // fail-closed, so a cross-tenant rotate cannot reach another tenant's keys.
+285:     const st = retirePriorStatement(connectorId, tenantId, keepKeyId, grace);
+286:     const r = await runWithTenantId(tenantId, () => query(st.text, st.values));
+287:     return r.rowCount ?? retired;
+288:   } catch (err) {
+289:     // Loud, never silent. The new key is already minted and returned, so the
+290:     // request cannot be failed without losing it — but the operator is told the
+291:     // old credential is STILL LIVE.
+292:     log('error', 'KS-577: revoke-on-rotate FAILED — the prior credential is still valid', {
+293:       connectorId, tenantId, keepKeyId, error: err instanceof Error ? err.message : String(err),
+294:     });
+295:     return null;
+296:   }
+297: }
+298: 
+299: /**
+300:  * KS-1556. Rotates of ONE connector, in this process, run one at a time. The next caller waits for the
+301:  * previous one to finish COMPLETELY (its transaction AND its in-memory update) before it takes a pooled
+302:  * client, so the waiting costs no connection (KS-757's pool trap) and the in-memory map is updated in
+303:  * the same order the database committed. The wait is bounded: a predecessor that never settles must not
+304:  * hang the connector forever, so after ROTATE_CHAIN_WAIT_MS (read per call; default 10 s) the caller
+305:  * proceeds. The database's advisory lock still serialises it; only the memory ordering is no longer
+306:  * guaranteed, and that is logged. A predecessor that throws releases the chain in its `finally`, so it
+307:  * cannot poison it. An entry is removed when the last waiter finishes, so the map cannot grow without
+308:  * bound. Exported as a test seam, like revokePriorConnectorKeys.
+309:  */
+310: export const rotateChains = new Map<string, Promise<void>>();
+311: function rotateChainWaitMs(): number {
+312:   const raw = /^\s*\d+\s*$/.test(process.env.ROTATE_CHAIN_WAIT_MS ?? '') ? Number(process.env.ROTATE_CHAIN_WAIT_MS) : Number.NaN;
+313:   return Number.isFinite(raw) && raw > 0 ? raw : 10_000;
+314: }
+315: export async function withConnectorChain<T>(key: string, fn: () => Promise<T>): Promise<T> {
+316:   const predecessor = rotateChains.get(key);
+317:   let release!: () => void;
+318:   const mine = new Promise<void>((resolve) => { release = resolve; });
+319:   rotateChains.set(key, mine);
+320:   try {
+321:     if (predecessor) {
+322:       const waitMs = rotateChainWaitMs();
+323:       let timer: NodeJS.Timeout | undefined;
+324:       const timedOut = await Promise.race([
+325:         predecessor.then(() => false),
+326:         new Promise<boolean>((resolve) => { timer = setTimeout(() => resolve(true), waitMs); }),
+327:       ]);
+328:       if (timer) clearTimeout(timer);
+329:       if (timedOut) log('warn', 'KS-1556: a rotate waited the whole chain timeout for its predecessor and proceeds', { key, waitMs });
+330:     }
+331:     return await fn();
+332:   } finally {
+333:     release();
+334:     if (rotateChains.get(key) === mine) rotateChains.delete(key);
+335:   }
+336: }
+337: 
+338: /**
+339:  * KS-1549. A rotate's INSERT and its retire, as ONE transaction on ONE pooled client, serialised per
+340:  * connector. Returns how many prior keys were retired, or null if the retire FAILED (KS-577's contract:
+341:  * the new key still stands and the failure is reported). Throws if the key itself could not be saved,
+342:  * which the caller answers 503/500 with no key (KS-888's contract).
+343:  *
+344:  * Before this, the INSERT and the retire were two autocommit statements, each on its own pooled
+345:  * connection, with an await between them. Two interleaved rotates each retired the OTHER's new key, so
+346:  * the connector was left with ZERO active keys and both callers held dead ones: 0 active in 9 of 10
+347:  * double-submits on real Postgres (the #1521 gate). Ruled (decision D): the last rotate wins, exactly as
+348:  * two sequential rotates behave.
+349:  *
+350:  * Every step here is load-bearing:
+351:  *  - the per-connector in-process chain above, so that this process applies its in-memory changes in
+352:  *    commit order, and waits without holding a pooled client;
+353:  *  - READ COMMITTED, pinned on the transaction itself (KS-1556 m2). Under REPEATABLE READ the snapshot is
+354:  *    taken before the lock is granted, so a rotate that waited cannot see the key the previous one
+355:  *    committed, and its retire fails to serialise: more than one active key. It must be the FIRST
+356:  *    statement: once the transaction has run a query, Postgres refuses to CHANGE the level (setting
+357:  *    the level it already has is a no-op). So a late pin passes silently under a READ COMMITTED
+358:  *    default and fails every rotate under a REPEATABLE READ one;
+359:  *  - the tenant GUC on THIS client: svc_api_keys is FORCE row-level security and fail-closed, so a
+360:  *    transaction without it inserts nothing and retires nothing, silently;
+361:  *  - a TRANSACTION-scoped advisory lock on (tenant, connector): pgbouncer runs pool_mode = transaction,
+362:  *    where a session lock would leak to the next client. It serialises rotates of one connector across
+363:  *    processes;
+364:  *  - the INSERT on the SAME client as the lock. KS-757 measured the trap: an INSERT on a second pooled
+365:  *    connection, made while holding the lock, deadlocks the pool once the waiters fill it;
+366:  *  - the retire under a SAVEPOINT, so a failed retire rolls back alone and the mint stands;
+367:  *  - the in-memory changes ONLY AFTER COMMIT, and never undone (KS-1556). The design this replaces
+368:  *    (#1527) changed memory before COMMIT and undid it on failure. Restoring the captured object let a
+369:  *    concurrent validate leave the prior key refused while the database held it active (m1, the #1527
+370:  *    gate's A8). Restoring by id instead RESURRECTED a revoke whose own save had failed (KS-888 R2),
+371:  *    measured by its author on #1529. After COMMIT there is nothing to undo, and before it, memory and the
+372:  *    database agree. A crash between COMMIT and this update leaves memory stale. Validate re-reads the
+373:  *    stored row for a key in memory, and finds a key that is not in memory by its hash (KS-1370), so it
+374:  *    still answers from the database.
+375:  */
+376: export async function saveKeyAndRetirePriors(k: ApiKey, connectorId: string): Promise<number | null> {
+377:   if (!isDbAvailable()) {
+378:     // In memory nothing awaits between the two steps, so there is no window to close.
+379:     memApiKeys.set(k.id, k);
+380:     return revokePriorConnectorKeys(connectorId, k.tenantId, k.id);
+381:   }
+382:   return withConnectorChain(`${k.tenantId}:${connectorId}`, async () => {
+383:     const grace = rotationGraceSeconds();
+384:     const retiredIds = await runWithTenantId(k.tenantId, () => transaction(async (client) => {
+385:       await client.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+386:       await applyTenantGuc(client);
+387:       await client.query('SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))', [k.tenantId, connectorId]);
+388:       const ins = apiKeyInsertStatement(k);
+389:       await client.query(ins.text, ins.values);
+390: 
+391:       const ret = retirePriorStatement(connectorId, k.tenantId, k.id, grace);
+392:       await client.query('SAVEPOINT ks1549_retire');
+393:       try {
+394:         const ids = (await client.query<{ id: string }>(ret.text, ret.values)).rows.map((row) => row.id);
+395:         await client.query('RELEASE SAVEPOINT ks1549_retire');
+396:         return ids;
+397:       } catch (err) {
+398:         await client.query('ROLLBACK TO SAVEPOINT ks1549_retire');
+399:         log('error', 'KS-577: revoke-on-rotate FAILED — the prior credential is still valid', {
+400:           connectorId, tenantId: k.tenantId, keepKeyId: k.id, error: err instanceof Error ? err.message : String(err),
+401:         });
+402:         return null;
+403:       }
+404:     }));
+405: 
+406:     // COMMITTED. Only now does memory change, so nothing is ever undone, and the new key is in memory
+407:     // before the 201 leaves.
+408:     memApiKeys.set(k.id, k);
+409:     for (const id of retiredIds ?? []) {
+410:       const current = memApiKeys.get(id);
+411:       if (current) retireInMemory(current, grace);
+412:     }
+413:     return retiredIds === null ? null : retiredIds.length;
+414:   });
+415: }
+416: 
+417: /** The INSERT for one key, shared by dbSaveApiKey and the KS-1549 rotate transaction so the two can never drift. */
+418: function apiKeyInsertStatement(k: ApiKey): { text: string; values: unknown[] } {
+419:   return {
+420:     text: `INSERT INTO svc_api_keys (id, organization_id, tenant_id, name, key_hash, key_prefix, scopes,
+421:        rate_limit, rate_limit_window, last_used_at, usage_count, is_active, expires_at, created_at,
+422:        connector_id)
+423:      VALUES ($1,$2,$3::uuid,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+424:      ON CONFLICT (id) DO UPDATE SET
+425:        last_used_at = EXCLUDED.last_used_at, usage_count = EXCLUDED.usage_count,
+426:        is_active = EXCLUDED.is_active,
+427:        -- KS-869: COALESCE, not a plain assignment. connector_id is immutable
+428:        -- per key like tenant_id, so a stored value is never overwritten — but
+429:        -- a row written BEFORE this change holds NULL, and a key still live in
+430:        -- memory does know its connectorId, so the next save backfills it for
+431:        -- free. EXCLUDED-first would null a stored value out whenever an
+432:        -- in-memory key lacked one; stored-first would never backfill.
+433:        connector_id = COALESCE(EXCLUDED.connector_id, svc_api_keys.connector_id)`,
+434:     values: [k.id, k.organizationId, k.tenantId, k.name, k.keyHash, k.keyPrefix,
+435:       JSON.stringify(k.scopes || []),
+436:       k.rateLimit, k.rateLimitWindow, k.lastUsedAt || null, k.usageCount, k.isActive,
+437:       k.expiresAt || null, k.createdAt, k.connectorId ?? null],
+438:   };
+439: }
+440: 
+441: async function dbSaveApiKey(k: ApiKey, opts: { rethrow?: boolean } = {}): Promise<void> {
+442:   memApiKeys.set(k.id, k);
+443:   if (!isDbAvailable()) return;
+444:   try {
+445:     // KS-33: write tenant_id (the load-bearing scoping field) on every
+446:     // INSERT. organization_id is now NULL-able. ON CONFLICT updates
+447:     // the volatile usage fields, but tenant_id is immutable per key —
+448:     // a key minted for tenant A never moves to tenant B.
+449:     // KS-869: connector_id is written too. The column has existed since
+450:     // migration 018 and NOTHING wrote it or read it, so a key's connectorId
+451:     // lived only in memApiKeys and died with the process. That made the
+452:     // KS-843 grace log record `connectorId: null` for every Platform S key
+453:     // after a restart, collapsed every connector's userId to
+454:     // `connector:api-key`, and left revoke-on-rotate (KS-577) with no durable
+455:     // way to find a connector's prior keys.
+456:     // KS-458: pin the RLS GUC to the key's own tenant — callers include the
+457:     // pre-session validate route (no request ALS at all) and admin flows
+458:     // whose request tenant may differ from the key's; fail-closed
+459:     // svc_api_keys requires the GUC to match the row being written.
+460:     const st = apiKeyInsertStatement(k);
+461:     await runWithTenantId(k.tenantId, () => query(st.text, st.values));
+462:   } catch (err: any) {
+463:     logger.error('DB save API key failed', { error: err?.message });
+464:     // KS-888: re-throws only for a caller that opts in, and each caller that opts in catches it in its own try.
+465:     // Any other caller keeps this log-only swallow: a throw into a handler that takes no next is an unhandled
+466:     // rejection, and that ends the process.
+467:     if (opts.rethrow) throw err;
+468:   }
+469: }
+470: 
+471: // KS-1370 half (i): validate's usage write must NOT carry is_active.
+472: // The shared dbSaveApiKey upsert above sets `is_active = EXCLUDED.is_active`, and it is the ONE
+473: // statement every caller uses — mint, revoke and validate's usage bump. That is what let a stale
+474: // in-memory copy REVIVE a persisted revoke: validate resolved the key from memApiKeys (a boot-time
+475: // snapshot), saw isActive=true there, and its usage write then wrote that true back over the
+476: // revoked row. Measured on real PostgreSQL before this change: usage_count 1 -> 2 and
+477: // is_active false -> TRUE.
+478: //
+479: // Deleting `is_active = EXCLUDED.is_active` from the shared upsert is NOT the fix: the revoke route
+480: // persists its revoke THROUGH that same upsert (`apiKey.isActive = false` then
+481: // `dbSaveApiKey(apiKey, { rethrow: true })`), so removing it would stop a revoke of an existing row
+482: // persisting at all, and the KS 764 call-site guard pins exactly that shape. So the narrow change is
+483: // a usage-only statement for validate's call site, leaving revoke's persistence untouched.
+484: //
+485: // UPDATE, not an upsert: every caller reaches here with a row that already exists — validate either
+486: // hit the boot cache (loaded FROM svc_api_keys) or warmed it from the DB in this same request. A key
+487: // with no row must not be conjured by a usage bump.
+488: //
+489: // KS-458: same tenant GUC pin as dbSaveApiKey. svc_api_keys is fail-closed, and this route is
+490: // pre-session with no request ALS, so the GUC must come from the key's own tenantId.
+491: // KS-888 (card secuura-ks888-validate-usage-write-failure, option a): a failed usage write is
+492: // LOGGED, NEVER REFUSED, and the log line carries no key and no hash. The message is deliberately
+493: // byte-identical to dbSaveApiKey's so #1334's V2 cell keeps pinning one error line for this path.
+494: async function dbRecordApiKeyUsage(k: ApiKey): Promise<void> {
+495:   memApiKeys.set(k.id, k);
+496:   if (!isDbAvailable()) return;
+497:   try {
+498:     await runWithTenantId(k.tenantId, () => query(
+499:       `UPDATE svc_api_keys SET last_used_at = GREATEST(last_used_at, $2), usage_count = usage_count + 1 WHERE id = $1`,
+500:       [k.id, k.lastUsedAt || null]
+501:     ));
+502:   } catch (err: any) {
+503:     logger.error('DB save API key failed', { error: err?.message });
+504:   }
+505: }
+506: 
+507: async function dbGetApiKey(id: string): Promise<ApiKey | undefined> {
+508:   if (isDbAvailable()) {
+509:     try {
+510:       // KS-578: the lookup is platform-scoped (see keyRevokePolicy). Under
+511:       // FORCE RLS a foreign-tenant row read with the caller's tenant GUC
+512:       // returns nothing, so a key written by another service AFTER this one
+513:       // booted 404'd even though it exists. Safe only because the sole caller
+514:       // — the revoke route — puts the result through decideKeyRevoke.
+515:       // Row mapping now uses the canonical rowToApiKey rather than a second
+516:       // inline copy, which also drops a divergence: the inline version passed
+517:       // `scopes` straight through instead of parseJsonArray().
+518:       const row = await lookupKeyForRevoke(id);
+519:       if (row) return rowToApiKey(row);
+520:     } catch { /* fall through */ }
+521:   }
+522:   return memApiKeys.get(id);
+523: }
+524: 
+525: // =============================================================================
+526: // ROW CONVERTERS — map DB rows to in-memory types
+527: // =============================================================================
+528: 
+529: // KS-880: the five converters and their row-shape types live in ./converters - the ONE home, import-light so
+530: // it is unit-tested without this module's boot. This file used to carry a second copy of each (and the dead
+531: // copy in converters.ts had drifted: no tenantId, no connectorId). Re-exported under the same names so every
+532: // existing `import ... from './index'` keeps working. rowToAuditLog is the only one not re-exported as-is: the
+533: // shared version takes its decryptor as an argument, and this wrapper binds the production keyring one.
+534: export { parseJson, parseJsonArray, rowToSecurityEvent, rowToApiKey };
+535: 
+536: export function rowToAuditLog(r: Record<string, unknown>): AuditLog {
+537:   return rowToAuditLogWith(r, decryptDetails);
+538: }
+539: 
+540: // =============================================================================
+541: // DATABASE → MEMORY LOADER
+542: // =============================================================================
+543: 
+544: export async function loadFromDb(): Promise<void> {
+545:   if (!isDbAvailable()) return;
+546:   // KS-458: boot-time cache warm is deliberately cross-tenant — there is no
+547:   // request context, and the in-memory caches must hold EVERY tenant's rows
+548:   // (the API surface re-filters per caller). Under fail-closed RLS the full
+549:   // scans on audit_logs / svc_api_keys would return zero rows without the
+550:   // platform scope, silently emptying the caches.
+551:   return runWithPlatformScope(async () => {
+552:     try {
+553:       const logsResult = await query(
+554:         'SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 10000'
+555:       );
+556:       memAuditLogs.length = 0;
+557:       for (const row of logsResult.rows) memAuditLogs.push(rowToAuditLog(row));
+558:       memAuditLogs.reverse();
+559: 
+560:       const eventsResult = await query(
+561:         'SELECT * FROM svc_security_events ORDER BY created_at DESC LIMIT 10000'
+562:       );
+563:       memSecurityEvents.length = 0;
+564:       for (const row of eventsResult.rows) memSecurityEvents.push(rowToSecurityEvent(row));
+565:       memSecurityEvents.reverse();
+566: 
+567:       const keysResult = await query('SELECT * FROM svc_api_keys');
+568:       memApiKeys.clear();
+569:       for (const row of keysResult.rows) {
+570:         const key = rowToApiKey(row);
+571:         memApiKeys.set(key.id, key);
+572:       }
+573: 
+574:       logger.info('Loaded persisted data from DB', {
+575:         auditLogs: memAuditLogs.length,
+576:         securityEvents: memSecurityEvents.length,
+577:         apiKeys: memApiKeys.size,
+578:       });
+579:     } catch (err: any) {
+580:       logger.error('Failed to load persisted data from DB', { error: err?.message });
+581:     }
+582:   });
+583: }
+584: 
+585: // =============================================================================
+586: // LOGGING
+587: // =============================================================================
+588: 
+589: function log(level: 'info' | 'warn' | 'error', message: string, meta?: object) {
+590:   const timestamp = new Date().toISOString();
+591:   console.log(JSON.stringify({ timestamp, level, service: 'security', message, ...meta }));
+592: }
+593: 
+594: // =============================================================================
+595: // MIDDLEWARE
+596: // =============================================================================
+597: 
+598: app.use(helmet());
+599: app.use(cors({
+600:   origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:6100', 'http://localhost:6101'],
+601:   credentials: true,
+602: }));
+603: app.use(express.json());
+604: app.use(rejectNulBytes()); // KS-471: no U+0000 may pass the boundary (raw-500 / persist class)
+605: 
+606: const requestLogger: RequestHandler = (req, res, next) => {
+607:   const start = Date.now();
+608:   res.on('finish', () => {
+609:     log('info', 'Request completed', {
+610:       method: req.method,
+611:       path: req.path,
+612:       statusCode: res.statusCode,
+613:       duration: `${Date.now() - start}ms`,
+614:     });
+615:   });
+616:   next();
+617: };
+618: app.use(requestLogger);
+619: 
+620: // KS-458: seed the request-scoped tenant context (from the gateway-derived
+621: // x-tenant-id header) so the db chokepoint bundles the fail-closed RLS GUC
+622: // into every query's transaction. Mounted before routes/auth so it wraps the
+623: // whole request chain. The pre-session /api/keys/validate path has no tenant
+624: // yet — it uses the SECURITY DEFINER lookup instead (see that route).
+625: app.use(tenantGucContext());
+626: 
+627: // =============================================================================
+628: // VALIDATION SCHEMAS
+629: // =============================================================================
+630: 
+631: const createAuditLogSchema = z.object({
+632:   userId: z.string().optional(),
+633:   organizationId: z.string().optional(),
+634:   action: z.string().trim().min(1),
+635:   resourceType: z.string().trim().min(1),
+636:   resourceId: z.string().optional(),
+637:   ipAddress: z.string().optional(),
+638:   userAgent: z.string().optional(),
+639:   details: z.record(z.unknown()).default({}),
+640:   previousState: z.record(z.unknown()).optional(),
+641:   newState: z.record(z.unknown()).optional(),
+642:   success: z.boolean().default(true),
+643:   errorMessage: z.string().optional(),
+644: });
+645: 
+646: const createSecurityEventSchema = z.object({
+647:   eventType: z.string().min(1),
+648:   severity: z.enum(['low', 'medium', 'high', 'critical']),
+649:   source: z.string().min(1),
+650:   userId: z.string().optional(),
+651:   ipAddress: z.string().optional(),
+652:   details: z.record(z.unknown()).default({}),
+653: });
+654: 
+655: const createApiKeySchema = z.object({
+656:   // KS-33: organizationId is now optional. SYSTEM_ADMIN flows that issue
+657:   // tenant-scoped keys without picking a specific org pass null; the
+658:   // tenant_id-derivation logic below falls through to header / default.
+659:   organizationId: z.string().optional(),
+660:   // KS-33: explicit tenantId override. Callers that already know the
+661:   // tenant (e.g. originate's POST /api/admin/api-keys, with X-Tenant-
+662:   // Override resolved by the gateway) can skip the org→tenant lookup.
+663:   tenantId: z.string().uuid().optional(),
+664:   name: z.string().trim().min(1).max(100),
+665:   scopes: z.array(z.string()).default(['read']),
+666:   rateLimit: z.number().int().min(1).max(10000).default(1000),
+667:   rateLimitWindow: z.number().int().min(60).max(86400).default(3600),
+668:   expiresAt: isoDateTimeSchema.optional(), // KS-427: accept RFC 3339 offsets, normalise to UTC
+669:   connectorId: z.string().optional(),
+670:   // KS-577. Kam ruled 2026-08-07 that rotation SHOULD revoke the prior key:
+671:   // shipping the additive version would hand out N new credentials, leave N
+672:   // compromised ones live, and look like recovery. When true and a connectorId
+673:   // is supplied, the prior active keys for that connector are retired — see
+674:   // revokePriorConnectorKeys for the window semantics.
+675:   rotate: z.boolean().optional().default(false),
+676: });
+677: 
+678: // KS-698. The ECMAScript time value range is +/-8.64e15 ms; a Date outside it is
+679: // Invalid and toISOString() THROWS. windowMs had a minimum and no maximum, so a
+680: // single request could compute a resetAt beyond that range.
+681: // KS-698 — extracted to `rateLimitBounds.ts` so the PUBLISHED contract can import
+682: // the same constant the runtime enforces (the #882 gate's F2). Re-exported here
+683: // because callers and tests already import them from this module.
+684: export {
+685:   isRepresentableInstant,
+686:   MAX_RATE_LIMIT_WINDOW_MS,
+687:   usableRateLimitEntry,
+688:   persistableResetAt,
+689: } from './rateLimitBounds';
+690: 
+691: // Exported as a test seam: this service has no supertest dependency, and adding
+692: // one to assert a schema bound is the worse trade. Exporting changes no
+693: // behaviour — the schema was already module-level.
+694: export const checkRateLimitSchema = z.object({
+695:   // KS-952 F10: `min(1)` with no maximum accepted a 100,000-character key and
+696:   // stored it. This bounds one entry; `sweepExpired` bounds the map.
+697:   // KS-974 item 1: the published maxLength 256 counts CODE POINTS; zod .max() counts UTF-16
+698:   // code units, so 256 astral characters were refused on the one route anyone can reach.
+699:   // Same predicate as boundedByCodePoints on /reset (requestSchemas.ts).
+700:   key: z.string().min(1).refine((value) => [...value].length <= RATE_LIMIT_KEY_MAX, {
+701:     message: 'must not exceed ' + RATE_LIMIT_KEY_MAX + ' characters',
+702:   }),
+703:   limit: z.number().int().min(1).default(100),
+704:   // KS-698 fix 1: an UPPER bound. `min` alone let one request poison a key.
+705:   windowMs: z.number().int().min(1000).max(MAX_RATE_LIMIT_WINDOW_MS).default(60000),
+706: });
+707: 
+708: // =============================================================================
+709: // ROUTES
+710: // =============================================================================
+711: 
+712: // Health check
+713: app.get('/health', (_req: Request, res: Response) => {
+714:   res.json({
+715:     status: 'healthy',
+716:     service: 'security',
+717:     version: '0.1.0',
+718:     timestamp: new Date().toISOString(),
+719:     stats: {
+720:       auditLogs: memAuditLogs.length,
+721:       securityEvents: memSecurityEvents.length,
+722:       activeApiKeys: Array.from(memApiKeys.values()).filter(k => k.isActive).length,
+723:     },
+724:   });
+725: });
+726: 
+727: // API info
+728: app.get('/api', (_req: Request, res: Response) => {
+729:   res.json({
+730:     service: 'Secuura Security Service',
+731:     version: '0.1.0',
+732:     endpoints: {
+733:       audit: {
+734:         'POST /api/audit': 'Create audit log entry',
+735:         'GET /api/audit': 'Query audit logs',
+736:         'GET /api/audit/:id': 'Get audit log by ID',
+737:       },
+738:       events: {
+739:         'POST /api/events': 'Create security event',
+740:         'GET /api/events': 'Query security events',
+741:         'PATCH /api/events/:id/resolve': 'Resolve security event',
+742:       },
+743:       apiKeys: {
+744:         'POST /api/keys': 'Create API key',
+745:         'GET /api/keys': 'List API keys for organization',
+746:         'DELETE /api/keys/:id': 'Revoke API key',
+747:         'POST /api/keys/validate': 'Validate API key',
+748:       },
+749:       rateLimit: {
+750:         'POST /api/rate-limit/check': 'Check rate limit',
+751:         'POST /api/rate-limit/reset': 'Reset rate limit counter',
+752:       },
+753:     },
+754:   });
+755: });
+756: 
+757: // =============================================================================
+758: // AUDIT LOG ROUTES
+759: // =============================================================================
+760: 
+761: // Pen-test H2 — every /api/* route below this point JWT-verifies the
+762: // bearer token via @secuura/shared's `authenticate()`. Without this,
+763: // downstream services trusted the gateway-injected x-user-* headers,
+764: // which an attacker reaching a service directly (intra-cluster, leaked
+765: // internal endpoint, etc.) could forge.
+766: //
+767: // KS-39 #5: `/api/keys/validate` is a special case. The gateway calls
+768: // it from `validateApiKey()` to check an inbound `x-api-key` header
+769: // BEFORE there's a user session to authenticate. Forwarding the
+770: // gateway's own bearer token would require a service identity that we
+771: // don't currently mint, and per Pen-test H2 the route is on the
+772: // internal-only Container Apps FQDN so the threat model is "another
+773: // pod inside the env". We skip auth specifically on this path while
+774: // keeping H2 enforcement for every other route.
+775: app.use('/api', (req: Request, res: Response, next: NextFunction) => {
+776:   if (req.path === '/keys/validate' || req.path.startsWith('/keys/validate?')) {
+777:     return next();
+778:   }
+779:   return jwtAuthenticate()(req, res, next);
+780: });
+781: 
+782: /**
+783:  * POST /api/audit
+784:  * Create an audit log entry
+785:  */
+786: app.post('/api/audit', async (req: Request, res: Response, next: NextFunction) => {
+787:   try {
+788:     const data = createAuditLogSchema.parse(req.body);
+789: 
+790:     // KS-28: server-derives tenant_id from the verified JWT, NOT from the
+791:     // request body. Allowing the body to set tenant_id would let any
+792:     // authenticated caller forge audit entries against another tenant.
+793:     // Falls back to the originate default tenant id when no JWT context is
+794:     // present (system-actor calls e.g. cron jobs that authenticate via
+795:     // service tokens with no tenantId claim).
+796:     const jwtTenant = (req as any).user?.tenantId as string | undefined;
+797:     const tenantId = jwtTenant || 'a0000000-0000-4000-8000-000000000001';
+798: 
+799:     const auditLog: AuditLog = {
+800:       // Pen-test F-09: audit-log IDs MUST be unpredictable. Math.random()
+801:       // is xorshift128+ — an attacker who can race the audit insert can
+802:       // pre-claim an ID and break the evidentiary chain. crypto.randomUUID
+803:       // gives 122-bit entropy from a CSPRNG.
+804:       id: `audit_${require('crypto').randomUUID()}`,
+805:       tenantId,
+806:       ...data,
+807:       createdAt: new Date(),
+808:     };
+809: 
+810:     await dbSaveAuditLog(auditLog);
+811:     
+812:     log('info', 'Audit log created', { 
+813:       auditId: auditLog.id, 
+814:       action: auditLog.action, 
+815:       resourceType: auditLog.resourceType 
+816:     });
+817:     
+818:     res.status(201).json({
+819:       success: true,
+820:       data: { id: auditLog.id },
+821:     });
+822:   } catch (error) {
+823:     if (error instanceof z.ZodError) {
+824:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+825:     }
+826:     next(error);
+827:   }
+828: });
+829: 
+830: /**
+831:  * GET /api/audit
+832:  * Query audit logs
+833:  */
+834: app.get('/api/audit', (req: Request, res: Response) => {
+835:   const { userId, organizationId, action, resourceType, from, to, limit = '50', offset = '0' } = req.query;
+836: 
+837:   // KS-28: scope to the caller's JWT tenant. The in-memory cache is
+838:   // cross-tenant on disk (loaded by loadFromDb at startup) but the API
+839:   // surface must filter so a tenant A admin cannot enumerate tenant B's
+840:   // actions through this endpoint. Cross-tenant audit views for super_admin
+841:   // go through the api-gateway's /admin/audit-logs which already gates on
+842:   // role + applies its own tenant filter (KS-28 partial earlier this
+843:   // session). Security service callers are gateway-internal otherwise.
+844:   // KS-743: a caller with NO tenant claim used to fall through to
+845:   // `[...memAuditLogs]` — every tenant's rows — which is the exact defaulting
+846:   // the KS-28 comment above says this endpoint exists to prevent, and the same
+847:   // fail-open KS-742 refused for `/api/keys`. A missing claim is now a refusal,
+848:   // not a wildcard. Platform roles keep cross-tenant reach explicitly, through
+849:   // the one shared rule in keyRevokePolicy rather than a second copy here.
+850:   const callerTenantId = (req as any).user?.tenantId as string | undefined;
+851:   if (!isPlatformRole((req as any).user?.role) && !callerTenantId) {
+852:     return res.status(403).json({
+853:       success: false,
+854:       error: { code: 'FORBIDDEN', message: 'Caller has no tenant' },
+855:     });
+856:   }
+857:   let filtered = callerTenantId
+858:     ? memAuditLogs.filter(l => l.tenantId === callerTenantId)
+859:     : [...memAuditLogs];
+860: 
+861:   if (userId) filtered = filtered.filter(l => l.userId === userId);
+862:   if (organizationId) filtered = filtered.filter(l => l.organizationId === organizationId);
+863:   if (action) filtered = filtered.filter(l => l.action === action);
+864:   if (resourceType) filtered = filtered.filter(l => l.resourceType === resourceType);
+865:   if (from) filtered = filtered.filter(l => l.createdAt >= new Date(from as string));
+866:   if (to) filtered = filtered.filter(l => l.createdAt <= new Date(to as string));
+867:   
+868:   // Sort by newest first
+869:   filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+870:   
+871:   const total = filtered.length;
+872:   const results = filtered.slice(parseInt(offset as string), parseInt(offset as string) + parseInt(limit as string));
+873:   
+874:   res.json({
+875:     success: true,
+876:     data: {
+877:       logs: results,
+878:       total,
+879:       limit: parseInt(limit as string),
+880:       offset: parseInt(offset as string),
+881:     },
+882:   });
+883: });
+884: 
+885: /**
+886:  * GET /api/audit/:id
+887:  * Get audit log by ID
+888:  */
+889: app.get('/api/audit/:id', (req: Request, res: Response) => {
+890:   // KS-28: same tenant scope as the list endpoint. A foreign-tenant id
+891:   // returns 404 (not 403) so existence isn't leaked.
+892:   //
+893:   // KS-743: that promise was not kept for a caller with NO tenant claim. The
+894:   // guard below reads `callerTenantId && …`, so an absent claim skipped the
+895:   // tenant comparison entirely and ANY audit row was returned by id, from a
+896:   // cache `loadFromDb` warms cross-tenant at boot. Unlike its sibling
+897:   // `GET /api/audit`, this route is NOT shadowed at the edge — the gateway's
+898:   // local alias is exact-path `/api/security/audit` only, so this one is
+899:   // reachable through the public gateway and the fail-open was live.
+900:   // Refusing the tenant-less caller is what makes the comment above true.
+901:   const callerTenantId = (req as any).user?.tenantId as string | undefined;
+902:   if (!isPlatformRole((req as any).user?.role) && !callerTenantId) {
+903:     return res.status(403).json({
+904:       success: false,
+905:       error: { code: 'FORBIDDEN', message: 'Caller has no tenant' },
+906:     });
+907:   }
+908:   const auditLog = memAuditLogs.find(l => l.id === req.params.id);
+909: 
+910:   if (!auditLog || (callerTenantId && auditLog.tenantId !== callerTenantId)) {
+911:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Audit log not found' } });
+912:   }
+913: 
+914:   res.json({
+915:     success: true,
+916:     data: auditLog,
+917:   });
+918: });
+919: 
+920: // =============================================================================
+921: // SECURITY EVENT ROUTES
+922: // =============================================================================
+923: 
+924: /**
+925:  * POST /api/events
+926:  * Create a security event
+927:  */
+928: app.post('/api/events', requirePlatformOperator, async (req: Request, res: Response, next: NextFunction) => {
+929:   try {
+930:     const data = createSecurityEventSchema.parse(req.body);
+931:     
+932:     const event: SecurityEvent = {
+933:       // Pen-test F-09: same evidentiary-integrity rationale as audit IDs.
+934:       id: `event_${require('crypto').randomUUID()}`,
+935:       ...data,
+936:       resolved: false,
+937:       createdAt: new Date(),
+938:     };
+939:     
+940:     await dbSaveSecurityEvent(event);
+941:     
+942:     // Log high/critical events
+943:     if (event.severity === 'high' || event.severity === 'critical') {
+944:       log('warn', `Security event: ${event.eventType}`, {
+945:         eventId: event.id,
+946:         severity: event.severity,
+947:         source: event.source,
+948:       });
+949:     }
+950:     
+951:     res.status(201).json({
+952:       success: true,
+953:       data: event,
+954:     });
+955:   } catch (error) {
+956:     if (error instanceof z.ZodError) {
+957:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+958:     }
+959:     next(error);
+960:   }
+961: });
+962: 
+963: /**
+964:  * KS-743: the security-event surface is PLATFORM-ONLY, and that is a statement
+965:  * about the data model rather than a policy preference.
+966:  *
+967:  * `SecurityEvent` has no tenant field, and neither does `svc_security_events`
+968:  * (migrations/002, and `dbSaveSecurityEvent`'s INSERT names eleven columns,
+969:  * none of them a tenant or an organisation). So there is nothing to scope a
+970:  * tenant-scoped caller TO — `decideTenantAccess` has no `targetTenantId` to be
+971:  * handed here, which is exactly why the read below could return the whole
+972:  * cross-tenant corpus to an ordinary tenant admin (measured: 200, total 651).
+973:  *
+974:  * With no tenant dimension in the data, the only authorisation that is true is
+975:  * "platform operator". Giving events a real tenant column is the larger fix and
+976:  * is not this ticket; until then the honest gate is this one, and it is
+977:  * strictly narrowing — 403 is already a declared response on both operations.
+978:  *
+979:  * `requireKeyAdmin` above is deliberately NOT reused: its role set includes the
+980:  * tenant-scoped ORG_ADMIN / ISSUER_ADMIN / ADMIN, which is the very set that
+981:  * could read every tenant's events.
+982:  */
+983: /**
+984:  * The shared body of the platform-role gates. `subject` only shapes the refusal
+985:  * MESSAGE — the decision is identical.
+986:  *
+987:  * ⚠ These are FUNCTION DECLARATIONS, not `const` arrow bindings, and that is
+988:  * load-bearing: `app.post('/api/events', …)` at :688 mounts its gate ~70 lines
+989:  * ABOVE this point. A `const` is in the temporal dead zone there and the module
+990:  * would throw `ReferenceError: Cannot access 'requirePlatformOperator' before
+991:  * initialization` at import — which the first draft of this change did. Function
+992:  * declarations hoist, so route order and gate order stay independent.
+993:  */
+994: function platformRoleGate(subject: string, req: Request, res: Response, next: NextFunction): void {
+995:   if (!isPlatformRole((req as any).user?.role)) {
+996:     res.status(403).json({
+997:       success: false,
+998:       error: { code: 'FORBIDDEN', message: `${subject} require a platform role` },
+999:     });
+1000:     return;
+1001:   }
+1002:   next();
+1003: }
+1004: 
+1005: /**
+1006:  * The events gate. `'Security events require a platform role'` is asserted
+1007:  * verbatim by the KS-743 route-contract rows (QA F-8): two gates in this file
+1008:  * both answer 403 + FORBIDDEN, so the MESSAGE is the only thing that says which
+1009:  * one refused. Changing this string changes what those rows are testing.
+1010:  */
+1011: function requirePlatformOperator(req: Request, res: Response, next: NextFunction): void {
+1012:   platformRoleGate('Security events', req, res, next);
+1013: }
+1014: 
+1015: /**
+1016:  * KS-743 QA F-6. `POST /api/rate-limit/reset` is published at
+1017:  * `/api/security/rate-limit/reset`, so it is internet-reachable, and it carried
+1018:  * NO role gate: any authenticated caller could clear any rate-limit bucket by
+1019:  * key — the control standing in front of every brute-force limiter on the
+1020:  * platform. Outside the ticket's four routes, inside the "property of the route
+1021:  * TABLE" class this file's header defines.
+1022:  *
+1023:  * Platform-operator rather than a connector scope, on the same measurement as
+1024:  * `POST /api/events`: zero callers outside this service's own route table, its
+1025:  * OpenAPI module and the published spec, against controls that matched real
+1026:  * callers elsewhere (75 `rate-limit` hits in the same corpus).
+1027:  */
+1028: function requirePlatformOperatorForRateLimit(req: Request, res: Response, next: NextFunction): void {
+1029:   platformRoleGate('Rate-limit resets', req, res, next);
+1030: }
+1031: 
+1032: /**
+1033:  * GET /api/events
+1034:  * Query security events
+1035:  */
+1036: app.get('/api/events', requirePlatformOperator, (req: Request, res: Response) => {
+1037:   const { severity, resolved, from, to, limit = '50', offset = '0' } = req.query;
+1038:   
+1039:   let filtered = [...memSecurityEvents];
+1040:   
+1041:   if (severity) filtered = filtered.filter(e => e.severity === severity);
+1042:   if (resolved !== undefined) filtered = filtered.filter(e => e.resolved === (resolved === 'true'));
+1043:   if (from) filtered = filtered.filter(e => e.createdAt >= new Date(from as string));
+1044:   if (to) filtered = filtered.filter(e => e.createdAt <= new Date(to as string));
+1045:   
+1046:   filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+1047:   
+1048:   const total = filtered.length;
+1049:   const results = filtered.slice(parseInt(offset as string), parseInt(offset as string) + parseInt(limit as string));
+1050:   
+1051:   res.json({
+1052:     success: true,
+1053:     data: { events: results, total, limit: parseInt(limit as string), offset: parseInt(offset as string) },
+1054:   });
+1055: });
+1056: 
+1057: /**
+1058:  * PATCH /api/events/:id/resolve
+1059:  * Resolve a security event
+1060:  */
+1061: app.patch('/api/events/:id/resolve', requirePlatformOperator, async (req: Request, res: Response) => {
+1062:   const event = memSecurityEvents.find(e => e.id === req.params.id);
+1063: 
+1064:   if (!event) {
+1065:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Event not found' } });
+1066:   }
+1067: 
+1068:   event.resolved = true;
+1069:   event.resolvedAt = new Date();
+1070:   // KS-743: attribution comes from the verified token, not the request body.
+1071:   // `resolvedBy = req.body.resolvedBy` let the caller name anyone — on a
+1072:   // security-event trail that is the one field whose whole value is that it
+1073:   // cannot be chosen by the actor. The body is ignored; a caller that supplies
+1074:   // it is not honoured rather than rejected, so this narrows attribution
+1075:   // without adding a new failure mode to a route that already resolves.
+1076:   event.resolvedBy = String((req as any).user?.userId || (req as any).user?.sub || 'unknown');
+1077: 
+1078:   await dbSaveSecurityEvent(event);
+1079:   
+1080:   res.json({
+1081:     success: true,
+1082:     data: event,
+1083:   });
+1084: });
+1085: 
+1086: // =============================================================================
+1087: // API KEY ROUTES
+1088: // =============================================================================
+1089: 
+1090: // KS-480: key management is an admin surface. Before this gate, ANY
+1091: // authenticated JWT — any logged-in user of any role, and (once the KS-480
+1092: // connector token exchange landed) any sk_ connector — could mint keys with
+1093: // arbitrary scopes or revoke others' keys: a self-service privilege-escalation
+1094: // path (mint a wider key than your own grants). Legitimate callers are the
+1095: // admin dashboard (platform/org admins) and tenant-provisioning's metering
+1096: // mint, which forwards the provisioning admin's own bearer (meteringKey.ts).
+1097: // Role strings are uppercased before comparison — JWTs carry both `super_admin`
+1098: // (seeded DB casing) and canonical `SYSTEM_ADMIN` shapes (KS-486 precedent).
+1099: const KEY_ADMIN_ROLES = new Set(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'ISSUER_ADMIN', 'ADMIN']);
+1100: function requireKeyAdmin(req: Request, res: Response, next: NextFunction): void {
+1101:   // KS-1591: `String(role).toUpperCase()` is not an identity test. U+0131 (dotless i) upper-cases to `I` and U+017F (long s) upper-cases to `S`, so a role spelled with a dotless i read as ISSUER_ADMIN, and a role
+1102:   // ARRAY stringifies to its element. Only an ASCII fold is applied (a-z to A-Z, every other character untouched), and a role that is not a string is refused outright.
+1103:   const claim = (req as any).user?.role;
+1104:   const role = typeof claim === 'string' ? claim.replace(/[a-z]/g, (ch) => ch.toUpperCase()) : '';
+1105:   if (!KEY_ADMIN_ROLES.has(role)) {
+1106:     res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'API key management requires an admin role' } });
+1107:     return;
+1108:   }
+1109:   next();
+1110: }
+1111: 
+1112: /**
+1113:  * KS-480 §4 amendment (2026-07-30) — mint authorisation for Organisation
+1114:  * provisioning. A thin wrapper over the pure policy in ./provisioningPolicy.ts
+1115:  * (extracted so it is unit-testable without booting this service): a
+1116:  * platform-admin passes as before; a connector carrying the provisioning-only
+1117:  * `organizations:register` scope may cause a mint, but never of a wildcard or
+1118:  * of the provisioning scope itself, and only into its own tenant. Read/revoke
+1119:  * stay admin-only — provisioning is create-only.
+1120:  */
+1121: /**
+1122:  * KS-888's infrastructure/application split, as ONE definition.
+1123:  *
+1124:  * The SQLSTATE classes 08 (connection), 53 (insufficient resources) and 57 (operator intervention),
+1125:  * plus the socket errno set and the pg driver's own connection messages, mean "the database could not
+1126:  * be reached", which is retryable: the caller answers 503. Anything else is an application fault and
+1127:  * answers 500.
+1128:  *
+1129:  * Extracted by the pull request 1539 gate's m1 rather than copied a third time. The expression already
+1130:  * existed TWICE, byte-identical, at the mint and revoke save sites, and the gate's finding was that the
+1131:  * new PUT did not use it — so adding a third inline copy would have fixed the symptom while making the
+1132:  * drift worse. Now a change to the classification reaches every caller at once.
+1133:  *
+1134:  * @param err - the thrown value; a non-Error is handled, since pg can reject with a plain object.
+1135:  * @returns true when the failure is infrastructure, so the caller should answer 503.
+1136:  */
+1137: function isInfrastructureDbError(err: unknown): boolean {
+1138:   const e = err as { code?: unknown; message?: unknown } | undefined;
+1139:   return /^(08|53|57)|^(ECONNREFUSED|ECONNRESET|ETIMEDOUT|EHOSTUNREACH|ENETUNREACH|EPIPE)$/.test(String(e?.code))
+1140:     || /connection terminated|timeout exceeded when trying to connect|connection timeout|pool is draining|client has encountered a connection error/i.test(String(e?.message));
+1141: }
+1142: 
+1143: function requireKeyAdminOrProvisioner(req: Request, res: Response, next: NextFunction): void {
+1144:   const decision = decideMint((req as any).user, (req.body ?? {}) as MintRequest);
+1145:   if (decision.allow) {
+1146:     if (decision.via === 'provisioner') {
+1147:       log('info', 'API key mint authorised by a provisioning key', {
+1148:         connectorId: (req as any).user?.connectorId,
+1149:         tenantId: (req as any).user?.tenantId,
+1150:       });
+1151:     }
+1152:     next();
+1153:     return;
+1154:   }
+1155:   if (decision.offendingScopes) {
+1156:     log('warn', 'Provisioning key attempted to mint an escalating scope', {
+1157:       offending: decision.offendingScopes,
+1158:       connectorId: (req as any).user?.connectorId,
+1159:     });
+1160:   }
+1161:   res.status(decision.status).json({ success: false, error: { code: 'FORBIDDEN', message: decision.message } });
+1162: }
+1163: 
+1164: app.post('/api/keys', requireKeyAdminOrProvisioner, async (req: Request, res: Response, next: NextFunction) => {
+1165:   try {
+1166:     const data = createApiKeySchema.parse(req.body);
+1167: 
+1168:     // Generate API key
+1169:     const keyValue = `sk_${crypto.randomBytes(32).toString('hex')}`;
+1170:     const keyHash = crypto.createHash('sha256').update(keyValue).digest('hex');
+1171:     const keyPrefix = keyValue.substring(0, 12);
+1172: 
+1173:     // KS-33: tenant_id resolution. Order:
+1174:     //   1. Explicit tenantId in request body (callers that already know).
+1175:     //   2. x-tenant-id header (gateway-injected for proxied calls).
+1176:     //   3. Look up via organizations.tenant_id (fast path for OAuth-app
+1177:     //      flows that pass organizationId).
+1178:     //   4. Default-tenant fallback (non-prod / single-tenancy mode).
+1179:     const DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+1180:     let tenantId =
+1181:       ((data as any).tenantId as string | undefined) ||
+1182:       (req.headers['x-tenant-id'] as string | undefined);
+1183: 
+1184:     if (!tenantId && data.organizationId && isDbAvailable()) {
+1185:       try {
+1186:         // KS-458: admin-authorised cross-tenant resolution. The caller may be
+1187:         // a platform admin creating a key for an org in ANOTHER tenant, and
+1188:         // organizations is fail-closed — the request's own tenant GUC would
+1189:         // hide the target org's row. Platform scope covers this single lookup.
+1190:         const r = await runWithPlatformScope(() => query(
+1191:           'SELECT tenant_id::text AS tenant_id FROM organizations WHERE id = $1::uuid LIMIT 1',
+1192:           [data.organizationId],
+1193:         ));
+1194:         if (r.rows.length > 0 && r.rows[0].tenant_id) {
+1195:           tenantId = r.rows[0].tenant_id as string;
+1196:         }
+1197:       } catch {
+1198:         // organizations table missing or organizationId not a UUID — fall through
+1199:       }
+1200:     }
+1201:     if (!tenantId) {
+1202:       // KS-742: a tenant-scoped caller's OWN tenant is the right default here.
+1203:       // The platform-wide DEFAULT_TENANT_ID silently placed a tenant-B admin's
+1204:       // key in tenant A — the same cross-tenant landing this ticket is about,
+1205:       // arrived at by omission rather than by a supplied value.
+1206:       tenantId = (!isPlatformRole((req as any).user?.role) && (req as any).user?.tenantId)
+1207:         ? ((req as any).user.tenantId as string)
+1208:         : DEFAULT_TENANT_ID;
+1209:     }
+1210: 
+1211:     // KS-742: resolve first, THEN authorise — the order KS-643 established for
+1212:     // revoke. decideMint (requireKeyAdminOrProvisioner) runs before the body is
+1213:     // parsed and cannot see which tenant the key will land in; its own tenant
+1214:     // limit is on the provisioner branch only, so a KEY_ADMIN_ROLE took its
+1215:     // early return and never met a tenancy check. All THREE resolution sources
+1216:     // above — body `tenantId`, the `x-tenant-id` header, and the platform-scoped
+1217:     // organizations lookup — can name a foreign tenant, and one check placed
+1218:     // here after resolution covers all three rather than three checks that must
+1219:     // stay in step.
+1220:     //
+1221:     // KS-1533 arm 1 — the ORGANISATION arm. KS-764 gave revoke an organisation bound and deliberately
+1222:     // left the mint on tenant only ("the two existing callers keep exactly today's behaviour"). So an
+1223:     // organisation-bounded admin of A could mint a key carrying B's organizationId inside the same
+1224:     // tenant, and the KS-695 connector erasure then trusts that row. Passing the scope engages the arm
+1225:     // for ORG_ADMIN / ISSUER_ADMIN only: platform roles still bypass by design (KS-577 depends on it).
+1226:     // A null target organisation is an unqualified, tenant-level mint and is still allowed, under Kam's
+1227:     // 2026-09-03 ruling — so the unqualified mint survives, including for the org-less accounts KS-779
+1228:     // recorded as intentionally org-less. Those accounts CAN no longer name an organisation; that is the
+1229:     // accepted price, and both open questions (ADMIN's reach, the org-less mint cost) are Kam's cards.
+1230:     //
+1231:     // KS-1570 (Kam's ruling, shape b): an ADMIN is bounded by its ADMIN ORGANISATION SCOPE, read here per
+1232:     // decision and only when it can matter (an ADMIN naming an organisation). A read that fails throws to
+1233:     // the catch below and is answered 5xx; it is never an allow. Not passing it would also be refused
+1234:     // ("not resolved"): the policy fails closed.
+1235:     // KS-1584 HOP 1 (pull request 1535 gate M1). A non-platform caller minting a PROVISIONING-CAPABLE
+1236:     // key must NAME an organisation. `decideMint` takes a KEY_ADMIN early return for every admin role
+1237:     // whatever the scopes are asked for (provisioningPolicy.ts:97), so an ADMIN could mint an
+1238:     // UNQUALIFIED `organizations:register` key — and an unqualified key carries no organisation, so the
+1239:     // hop-2 arm below has nothing to bound it to and it would read as platform-minted and unbounded.
+1240:     // That is the escape, and the bound cannot close it alone: the refusal has to be here.
+1241:     //
+1242:     // Default deny, which is stricter than "may mint only unqualified keys": with no organisation there
+1243:     // is nothing to bound the key to, so there is no safe unqualified provisioning key for a tenant
+1244:     // admin to hold. A platform role still mints the org-less instance key Platform S uses.
+1245:     // Wildcards count, through the same shared predicate the gateway's register-connector uses.
+1246:     // An ORDINARY unqualified mint is untouched — this reads the REQUESTED scopes, not the mint itself.
+1247:     const requestedScopes = Array.isArray((data as any).scopes) ? ((data as any).scopes as unknown[]) : [];
+1248:     if (isProvisioningCapable(requestedScopes as (string | null | undefined)[])
+1249:       && !isPlatformRole((req as any).user?.role)
+1250:       && normaliseOrgId(data.organizationId ?? null) === null) {
+1251:       log('warn', 'API key mint refused: an unqualified provisioning-capable key has no organisation to bind', {
+1252:         callerRole: (req as any).user?.role,
+1253:         callerTenantId: (req as any).user?.tenantId,
+1254:         requestedScopes,
+1255:       });
+1256:       return res.status(403).json({
+1257:         success: false,
+1258:         error: {
+1259:           code: 'FORBIDDEN',
+1260:           message: 'A provisioning-capable key must name an organisation in your scope; only a platform role may mint one without an organisation',
+1261:         },
+1262:       });
+1263:     }
+1264: 
+1265:     const mintCaller = (req as any).user as { role?: string; tenantId?: string; userId?: string; sub?: string } | undefined;
+1266:     const adminOrganisationScope = isScopedAdminRole(mintCaller?.role) && normaliseOrgId(data.organizationId) !== null
+1267:       ? await getAdminOrganisationScope(mintCaller?.tenantId, mintCaller?.userId ?? mintCaller?.sub)
+1268:       : undefined;
+1269:     const mintDecision = decideTenantAccess((req as any).user, tenantId, {
+1270:       targetOrganizationId: data.organizationId ?? null,
+1271:       ...(adminOrganisationScope !== undefined ? { adminOrganisationScope } : {}),
+1272:     });
+1273:     if (!mintDecision.allow) {
+1274:       const reason = mintDecision.reason;
+1275:       log('warn', 'API key mint refused', {
+1276:         targetTenantId: tenantId,
+1277:         targetOrganizationId: data.organizationId ?? null,
+1278:         callerTenantId: (req as any).user?.tenantId,
+1279:         callerRole: (req as any).user?.role,
+1280:         reason,
+1281:       });
+1282:       // The message names the boundary that actually refused. A same-tenant organisation refusal that
+1283:       // said "your own tenant" would send the reader to the wrong fix — the tenants match.
+1284:       // KS-1584: the provisioning reason needs its own line for the reason this chain already gives:
+1285:       // the tenants MATCH on a provisioning-organisation refusal, so the default tenant message would
+1286:       // send the reader to the wrong fix. Caught by reading the gate cell's ledger, which recorded a
+1287:       // correct 403 carrying "may only be minted in your own tenant".
+1288:       const message = reason === 'cross-organisation'
+1289:         ? 'API keys may only be minted for your own organisation'
+1290:         : reason === 'caller has no organisation'
+1291:           ? 'Your token carries no organisation, so it cannot mint a key that names one; omit organizationId to mint a tenant-level key'
+1292:           : reason === 'outside admin organisation scope' || reason === 'admin organisation scope not resolved'
+1293:             ? 'API keys may only be minted for an organisation in your admin organisation scope; omit organizationId to mint a tenant-level key'
+1294:             : reason === 'outside provisioning key organisation'
+1295:               ? 'A provisioning key may only mint for its own organisation; omit organizationId to mint a tenant-level key'
+1296:               : 'API keys may only be minted in your own tenant';
+1297:       return res.status(mintDecision.status ?? 403).json({ success: false, error: { code: 'FORBIDDEN', message } });
+1298:     }
+1299: 
+1300:     // KS-1533 arm 1, second half — a caller-chosen connectorId. Only a platform role or a PROVISIONER
+1301:     // (role `connector` carrying organizations:register) may name one: those are exactly the two caller
+1302:     // kinds register-connector's requireOrgProvisioner admits, so Platform S registration is untouched.
+1303:     // Anyone else naming a connector id could bind a key to another organisation's connector, and with
+1304:     // `rotate: true` retire that organisation's live keys: revokePriorConnectorKeys is scoped by
+1305:     // connector id and TENANT only (Path 3 — an availability harm that needs no erasure and is
+1306:     // reachable on any build with KS-577's revoke-on-rotate). Refused here, BEFORE the key is built,
+1307:     // saved or rotated, so a refusal writes nothing and retires nothing.
+1308:     if (data.connectorId !== undefined) {
+1309:       const caller = (req as any).user as { role?: string; scopes?: string[] } | undefined;
+1310:       const isProvisioner = caller?.role === 'connector' && (caller?.scopes ?? []).includes(PROVISIONING_SCOPE);
+1311:       if (!isPlatformRole(caller?.role) && !isProvisioner) {
+1312:         log('warn', 'API key mint refused: a non-provisioner named a connectorId', {
+1313:           callerRole: caller?.role,
+1314:           connectorId: data.connectorId,
+1315:           rotate: data.rotate === true,
+1316:         });
+1317:         return res.status(403).json({
+1318:           success: false,
+1319:           error: { code: 'FORBIDDEN', message: 'Only a platform role or a provisioning connector may set connectorId' },
+1320:         });
+1321:       }
+1322:       // #1521 gate M1. A provisioner may NAME a connectorId (register-connector's path), but nothing binds
+1323:       // that id to its own connector or organisation, so with `rotate: true` it could retire ANOTHER
+1324:       // organisation's live keys and take a fresh key on that connector: Path 3, left open for exactly this
+1325:       // caller class. Rotation is platform-only, as the gateway already says ("GUARDRAIL 1" in
+1326:       // api-gateway routes/platform.ts, register-connector); this service enforces it too, because a key
+1327:       // can reach it directly.
+1328:       // KS-1584 (pull request 1535 gate M1), the second half of the hop-2 hazard. A provisioner may name
+1329:       // a connectorId — register-connector's own path needs it — but a BOUNDED one may not. Binding an
+1330:       // A1-bounded key to A2's connector id is the erasure shape this ticket exists to remove: the KS-695
+1331:       // connector erasure trusts the row's connector and organisation, and the erasure is irreversible.
+1332:       // Only a platform role and an UNBOUNDED (platform-minted, org-less) provisioner keep the capability,
+1333:       // which is exactly the Platform S registration path. Refused BEFORE the key is built or saved.
+1334:       const boundedProvisioner = caller?.role === 'connector'
+1335:         && isProvisioningCapable((caller as { scopes?: (string | null | undefined)[] } | undefined)?.scopes)
+1336:         && normaliseOrgId((caller as { organizationId?: string | null } | undefined)?.organizationId ?? null) !== null;
+1337:       if (boundedProvisioner) {
+1338:         log('warn', 'API key mint refused: a bounded provisioning connector named a connectorId', {
+1339:           callerRole: caller?.role,
+1340:           connectorId: data.connectorId,
+1341:         });
+1342:         return res.status(403).json({
+1343:           success: false,
+1344:           error: {
+1345:             code: 'FORBIDDEN',
+1346:             message: 'A provisioning key bound to an organisation may not set connectorId; that is reserved for a platform role or the platform-minted instance key',
+1347:           },
+1348:         });
+1349:       }
+1350:       if (isProvisioner && data.rotate === true) {
+1351:         log('warn', 'API key mint refused: a provisioning connector asked to rotate', {
+1352:           callerRole: caller?.role,
+1353:           connectorId: data.connectorId,
+1354:         });
+1355:         return res.status(403).json({
+1356:           success: false,
+1357:           error: { code: 'FORBIDDEN', message: 'Key rotation requires a platform role; a provisioning connector may not rotate' },
+1358:         });
+1359:       }
+1360:     }
+1361: 
+1362:     const apiKey: ApiKey = {
+1363:       // Internal record ID — not a secret, but using crypto.randomUUID keeps
+1364:       // us consistent with the no-Math.random rule across the codebase.
+1365:       id: `key_${crypto.randomUUID()}`,
+1366:       // #1521 gate m1: stored in the SAME form the organisation arm compares (normaliseOrgId: trimmed,
+1367:       // lower-case, blank = absent). A raw write let a padded or upper-case own id pass the arm and then
+1368:       // vanish from its own organisation's listing, and stored a blank id as '' instead of absent.
+1369:       organizationId: normaliseOrgId(data.organizationId),
+1370:       tenantId,
+1371:       name: data.name,
+1372:       keyHash,
+1373:       keyPrefix,
+1374:       scopes: data.scopes,
+1375:       rateLimit: data.rateLimit,
+1376:       rateLimitWindow: data.rateLimitWindow,
+1377:       usageCount: 0,
+1378:       isActive: true,
+1379:       expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
+1380:       createdAt: new Date(),
+1381:       connectorId: data.connectorId,
+1382:     };
+1383: 
+1384:     // KS-888 (Kam ruled 2026-09-28, the KS-1194 contract): a mint whose save did not persist is never
+1385:     // acknowledged, and no key material leaves the service. The in-memory copy is dropped so the
+1386:     // unsaved key is neither listed nor valid. An infrastructure fault (the auth dbErrors classes:
+1387:     // SQLSTATE 08, 53, 57, a lost socket, a pool timeout) answers a retryable 503; anything else 500.
+1388:     //
+1389:     // KS-577 + KS-1549. A rotate saves the key and retires the connector's prior keys in ONE transaction,
+1390:     // serialised per connector (saveKeyAndRetirePriors), so concurrent rotates leave exactly one active
+1391:     // key. The mint still stands if only the retire fails: priorKeysRevoked is then null and reported.
+1392:     let priorKeysRevoked: number | null = null;
+1393:     try {
+1394:       if (data.rotate && data.connectorId) {
+1395:         priorKeysRevoked = await saveKeyAndRetirePriors(apiKey, data.connectorId);
+1396:       } else {
+1397:         await dbSaveApiKey(apiKey, { rethrow: true });
+1398:       }
+1399:     } catch (saveErr: any) {
+1400:       memApiKeys.delete(apiKey.id);
+1401:       const infra = isInfrastructureDbError(saveErr);
+1402:       log('error', 'KS-888: API key mint refused, the key could not be saved', { keyId: apiKey.id, code: saveErr?.code, infra });
+1403:       return res.status(infra ? 503 : 500).json({
+1404:         success: false,
+1405:         error: { code: infra ? 'SERVICE_UNAVAILABLE' : 'INTERNAL_ERROR', message: 'The API key could not be saved, so no key was issued' },
+1406:       });
+1407:     }
+1408: 
+1409:     // KS-577's order still holds inside that transaction: MINT FIRST, THEN REVOKE. A failed revoke leaves
+1410:     // the old key live, the status quo being fixed; a failed mint after a revoke would leave the connector
+1411:     // with NO working credential. The worse failure is the outage, so the retire goes second, under a
+1412:     // savepoint, and reports itself.
+1413: 
+1414:     log('info', 'API key created', { keyId: apiKey.id, organizationId: apiKey.organizationId });
+1415:     
+1416:     res.status(201).json({
+1417:       success: true,
+1418:       data: {
+1419:         id: apiKey.id,
+1420:         key: keyValue, // Only returned once at creation
+1421:         prefix: keyPrefix,
+1422:         name: apiKey.name,
+1423:         scopes: apiKey.scopes,
+1424:         rateLimit: apiKey.rateLimit,
+1425:         createdAt: apiKey.createdAt,
+1426:         connectorId: apiKey.connectorId || null,
+1427:         // KS-577: reported, not assumed. `null` means the revoke was attempted
+1428:         // and FAILED, so the prior credential is still valid — a caller that
+1429:         // ignores this is back to the bug.
+1430:         ...(data.rotate && data.connectorId ? { priorKeysRevoked } : {}),
+1431:       },
+1432:     });
+1433:   } catch (error) {
+1434:     if (error instanceof z.ZodError) {
+1435:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+1436:     }
+1437:     next(error);
+1438:   }
+1439: });
+1440: 
+1441: /**
+1442:  * GET /api/keys
+1443:  * List API keys for organization
+1444:  */
+1445: app.get('/api/keys', requireKeyAdmin, (req: Request, res: Response) => {
+1446:   const { organizationId } = req.query;
+1447:   
+1448:   if (!organizationId) {
+1449:     return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'organizationId required' } });
+1450:   }
+1451: 
+1452:   // KS-742: requireKeyAdmin checks the ROLE only, and KEY_ADMIN_ROLES includes
+1453:   // the tenant-scoped ORG_ADMIN / ISSUER_ADMIN / ADMIN — the same gap KS-643
+1454:   // closed on revoke. `organizationId` arrives straight from the query string
+1455:   // and memApiKeys is warmed CROSS-TENANT by loadFromDb at boot, so without
+1456:   // this a tenant-A admin naming tenant-B's organisation was handed that
+1457:   // customer's key ids, names, prefixes and full scope lists. Measured live
+1458:   // before this fix: 200 + one foreign key, against a 401 no-token control and
+1459:   // a SUPER_ADMIN control returning the identical payload.
+1460:   //
+1461:   // Filtering (rather than 403) is deliberate and follows GET /api/audit two
+1462:   // hundred lines up, which solved this exact problem under KS-28: a list
+1463:   // scoped to nothing the caller may see leaks no existence. The tenant-less
+1464:   // non-platform caller is refused outright, for the reason decideTenantAccess
+1465:   // gives — defaulting would hand them the default tenant's keys.
+1466:   const caller = (req as any).user as { role?: string; tenantId?: string } | undefined;
+1467:   const callerIsPlatform = isPlatformRole(caller?.role);
+1468:   if (!callerIsPlatform && !caller?.tenantId) {
+1469:     log('warn', 'API key list refused: caller has no tenant', { callerRole: caller?.role });
+1470:     return res.status(403).json({
+1471:       success: false,
+1472:       error: { code: 'FORBIDDEN', message: 'API key management requires a tenant context' },
+1473:     });
+1474:   }
+1475: 
+1476:   // KS-1553 (a): compare in the form the mint STORES. Since #1521 the mint stores normaliseOrgId(id)
+1477:   // (trimmed, lower-cased, blank = absent), so a raw compare missed an organisation listing its own keys
+1478:   // with its id in upper case. The SAME function, from @secuura/shared, on BOTH sides: a key stored before
+1479:   // #1521 in upper-case or padded form (KS-1565) must stay listable too. A query that normalises to null
+1480:   // (whitespace-only, or a repeated parameter, which Express parses as an array) matches nothing: null
+1481:   // must not equal the stored null of every org-less, tenant-level key.
+1482:   // KS-1577 (ruled: accept as is): a key whose STORED organisation id is blank (whitespace-only, which
+1483:   // only a pre-#1521 mint or a direct write can produce) normalises to null too, so NO query lists it.
+1484:   // Before KS-1553 (a) it was listed by the exact blank query. It is still revocable by id.
+1485:   // The list still has NO organisation arm for ORG_ADMIN / ISSUER_ADMIN (KS-1574), nor for a scoped ADMIN
+1486:   // (KS-1570 bounds the mint and the revoke): a scoped ADMIN can still list other organisations' keys.
+1487:   const wantedOrg = normaliseOrgId(typeof organizationId === 'string' ? organizationId : null);
+1488:   const keys = Array.from(memApiKeys.values())
+1489:     .filter(k => wantedOrg !== null && normaliseOrgId(k.organizationId) === wantedOrg)
+1490:     .filter(k => callerIsPlatform || k.tenantId === caller!.tenantId)
+1491:     .map(k => ({
+1492:       id: k.id,
+1493:       name: k.name,
+1494:       prefix: k.keyPrefix,
+1495:       scopes: k.scopes,
+1496:       lastUsedAt: k.lastUsedAt,
+1497:       usageCount: k.usageCount,
+1498:       isActive: k.isActive,
+1499:       createdAt: k.createdAt,
+1500:       connectorId: k.connectorId || null,
+1501:     }));
+1502:   
+1503:   res.json({
+1504:     success: true,
+1505:     data: keys,
+1506:   });
+1507: });
+1508: 
+1509: /**
+1510:  * DELETE /api/keys/:id
+1511:  * Revoke an API key
+1512:  */
+1513: app.delete('/api/keys/:id', requireKeyAdmin, async (req: Request, res: Response, next: NextFunction) => {
+1514:   const apiKey = await dbGetApiKey(req.params.id);
+1515:   
+1516:   if (!apiKey) {
+1517:     return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'API key not found' } });
+1518:   }
+1519: 
+1520:   // KS-643: requireKeyAdmin checks the ROLE only, and KEY_ADMIN_ROLES includes
+1521:   // the tenant-scoped ORG_ADMIN / ISSUER_ADMIN / ADMIN — so without this a
+1522:   // tenant-scoped admin could revoke another customer's key. Resolve first,
+1523:   // then authorise: the comparison needs the key's own tenant.
+1524:   // KS-764: the key's ORGANISATION goes in too. Tenant alone let an org-bounded
+1525:   // admin in organisation A revoke organisation B's key inside the same tenant.
+1526:   // KS-1570 (Kam's ruling, shape b): an ADMIN revokes only keys of organisations in its ADMIN
+1527:   // ORGANISATION SCOPE. Read only when it can matter (an ADMIN, a key that names an organisation). A read
+1528:   // that fails is answered 5xx and revokes nothing; it is never an allow.
+1529:   const revokeCaller = (req as any).user as { role?: string; tenantId?: string; userId?: string; sub?: string } | undefined;
+1530:   let adminOrganisationScope: string[] | undefined;
+1531:   if (isScopedAdminRole(revokeCaller?.role) && normaliseOrgId(apiKey.organizationId) !== null) {
+1532:     try {
+1533:       adminOrganisationScope = await getAdminOrganisationScope(revokeCaller?.tenantId, revokeCaller?.userId ?? revokeCaller?.sub);
+1534:     } catch (err) {
+1535:       return next(err);
+1536:     }
+1537:   }
+1538:   const decision = decideKeyRevoke((req as any).user, {
+1539:     id: apiKey.id,
+1540:     tenantId: apiKey.tenantId,
+1541:     organizationId: apiKey.organizationId,
+1542:   }, adminOrganisationScope !== undefined ? { adminOrganisationScope } : undefined);
+1543:   if (!decision.allow) {
+1544:     log('warn', 'Cross-tenant API key revoke refused', {
+1545:       keyId: apiKey.id,
+1546:       keyTenantId: apiKey.tenantId,
+1547:       keyOrganizationId: apiKey.organizationId,
+1548:       callerTenantId: (req as any).user?.tenantId,
+1549:       callerOrganizationId: (req as any).user?.organizationId,
+1550:       callerRole: (req as any).user?.role,
+1551:       reason: decision.reason,
+1552:     });
+1553:     // KS-764: the message no longer asserts "another tenant" — the refusal now
+1554:     // has four causes and three of them are not that. Saying the wrong one to a
+1555:     // caller debugging a 403 costs them the time the message was meant to save.
+1556:     return res.status(decision.status ?? 403).json({
+1557:       success: false,
+1558:       error: { code: 'FORBIDDEN', message: 'Not authorised to revoke this API key' },
+1559:     });
+1560:   }
+1561: 
+1562:   apiKey.isActive = false;
+1563:   // KS-888 (card secuura-ks888-revoke-validate-on-failed-save, option a, the default from 2026-09-28 18:00):
+1564:   // a revoke whose save did not persist is not acknowledged. The in-memory revoke above is KEPT, so the key
+1565:   // stops working in this process, and the caller is told the revoke was not stored: 503 for an infrastructure
+1566:   // fault (the mint classifier: SQLSTATE 08, 53, 57, a lost socket, a pool timeout), 500 for anything else.
+1567:   // The try is required: this handler takes no next, so an uncaught throw would end the process (KS-888 r2).
+1568:   try {
+1569:     await dbSaveApiKey(apiKey, { rethrow: true });
+1570:   } catch (saveErr: any) {
+1571:     const infra = isInfrastructureDbError(saveErr);
+1572:     log('error', 'KS-888: API key revoke not stored, the key is revoked in this process only', { keyId: apiKey.id, code: saveErr?.code, infra });
+1573:     return res.status(infra ? 503 : 500).json({
+1574:       success: false,
+1575:       error: { code: infra ? 'SERVICE_UNAVAILABLE' : 'INTERNAL_ERROR', message: 'The API key revoke could not be saved, so it may not survive a restart' },
+1576:     });
+1577:   }
+1578: 
+1579:   log('info', 'API key revoked', { keyId: apiKey.id });
+1580:   
+1581:   res.json({
+1582:     success: true,
+1583:     message: 'API key revoked',
+1584:   });
+1585: });
+1586: 
+1587: /**
+1588:  * KS-1570 PR B: an ADMIN's ORGANISATION SCOPE, written and read by a PLATFORM role only.
+1589:  *
+1590:  * PR A made the mint and the revoke read `admin_organisation_scopes`; this is the only way to write it.
+1591:  * Wednesday's rulings, each enforced here:
+1592:  *   - platform roles only (platformRoleGate): an ADMIN can never widen its own scope;
+1593:  *   - validated at WRITE time, because the table has no foreign keys (the pull request 1535 gate's m3):
+1594:  *     the target is an ADMIN of that tenant, and every organisation belongs to that tenant;
+1595:  *   - PUT REPLACES the set (an empty list clears it); duplicates and case variants collapse;
+1596:  *   - the audit row is written on the SAME transaction as the change, so a failed audit insert rolls the
+1597:  *     scope change back (dbSaveAuditLog would swallow the error; see systemAuditInsertStatement);
+1598:  *   - a pure scope write: removing an organisation revokes no key (that is an ops step).
+1599:  */
+1600: function requireAdminScopeWriter(req: Request, res: Response, next: NextFunction): void {
+1601:   platformRoleGate('Admin organisation scopes', req, res, next);
+1602: }
+1603: 
+1604: const UUID_TEXT = z.string().uuid().transform((v) => v.toLowerCase());
+1605: export const adminScopeParamsSchema = z.object({ userId: UUID_TEXT });
+1606: export const adminScopePutSchema = z.object({
+1607:   tenantId: UUID_TEXT,
+1608:   organizationIds: z.array(UUID_TEXT).max(1000),
+1609: });
+1610: export const adminScopeGetQuerySchema = z.object({ tenantId: UUID_TEXT });
+1611: 
+1612: function badRequestFromZod(res: Response, error: z.ZodError): Response {
+1613:   return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+1614: }
+1615: 
+1616: app.put('/api/keys/admin-scopes/:userId', requireAdminScopeWriter, async (req: Request, res: Response, next: NextFunction) => {
+1617:   try {
+1618:     const { userId } = adminScopeParamsSchema.parse(req.params);
+1619:     const body = adminScopePutSchema.parse(req.body);
+1620:     const tenantId = body.tenantId;
+1621:     const wanted = [...new Set(body.organizationIds)].sort();
+1622:     if (!isDbAvailable()) {
+1623:       return res.status(503).json({ success: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'Admin organisation scopes need the database' } });
+1624:     }
+1625: 
+1626:     // The pull request 1539 gate's m2: the target must also be LIVE. A user with role ADMIN and
+1627:     // status 'deleted' could be granted a scope (200, row written) — harmless while the account cannot
+1628:     // log in, but the grant revives silently if it is reactivated or re-promoted. `users.status` is
+1629:     // NOT NULL DEFAULT 'active' (checked against the schema, so this adds no NULL hole).
+1630:     //
+1631:     // KS-1598 (the pull request 1539 gate's m1): the status comparison FOLDS CASE, as the role one
+1632:     // already did with upper(role). This column is stored in either case on purpose —
+1633:     // migrations/046_users_status_vocabulary.sql bounds it with `CHECK (lower(status) IN (...))` at
+1634:     // :60, under the constraint name `users_status_vocabulary`, and says at :47 "Case is folded
+1635:     // rather than forbidden: mapDbStatus already accepts either case". (:34 and :41 are the
+1636:     // NORMALISING UPDATE's `NOT IN`, not the constraint — the pull request 1548 gate's i1 corrected
+1637:     // that citation.) With a raw `status = 'active'` a live ADMIN whose row held 'ACTIVE' satisfied
+1638:     // the CHECK and failed this guard, so a platform operator got 404 for a user plainly present.
+1639:     //
+1640:     // The fold is `COLLATE "C"`, not the database's default, and that is the pull request 1548 gate's
+1641:     // m1. libc collations fold U+0130 (LATIN CAPITAL LETTER I WITH DOT ABOVE) to `i`, so a stored
+1642:     // 'ACTİVE' satisfied the CHECK *and* satisfied a default-collation `lower(status) = 'active'`,
+1643:     // while auth's `mapDbStatus` folds the same bytes with JS `toLowerCase()` and gets `acti` +
+1644:     // U+0307 + `ve`, which is outside the vocabulary — so auth read that same user as DEACTIVATED.
+1645:     // One spelling was therefore granted a scope its owner could never use. Measured on PostgreSQL
+1646:     // 15.14 under en_AU.UTF-8, and by the gate under en_US.UTF-8: `lower('ACTİVE') = 'active'` is
+1647:     // true by default and FALSE under both `COLLATE "C"` and ICU `und-x-icu`, while every ASCII
+1648:     // spelling stays true under all three. So `COLLATE "C"` is neutral for the fold this guard was
+1649:     // added for, and closed for the Unicode one.
+1650:     //
+1651:     // `upper(role) = $3` beside it carries the SAME libc-fold class — U+0131 (dotless i) upper-cases
+1652:     // to `I`, so `upper('admın') = 'ADMIN'` is true. That is PRE-EXISTING, it is not touched here,
+1653:     // and it is on its own ticket: the pull request 1548 gate's i6.
+1654:     //
+1655:     // Folding does NOT widen liveness: 'DELETED' still does not match, and neither does any other
+1656:     // status in the vocabulary in any of three spellings — the KS-1598 spectrum cells pin all 18, and
+1657:     // they read the vocabulary off the live CHECK rather than carrying a typed copy of it.
+1658:     // Purging existing rows on demotion or deletion is NOT in this change — it is on its own ticket.
+1659:     const target = await runWithTenantId(tenantId, () => query(
+1660:       "SELECT 1 FROM users WHERE id = $1::uuid AND tenant_id = $2::uuid AND upper(role) = $3 AND lower(status COLLATE \"C\") = 'active' LIMIT 1",
+1661:       [userId, tenantId, 'ADMIN'],
+1662:     ));
+1663:     if (target.rows.length === 0) {
+1664:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'No ADMIN with that id in that tenant' } });
+1665:     }
+1666: 
+1667:     if (wanted.length > 0) {
+1668:       const found = await runWithTenantId(tenantId, () => query<{ id: string }>(
+1669:         'SELECT id::text AS id FROM organizations WHERE tenant_id = $1::uuid AND id = ANY($2::uuid[])',
+1670:         [tenantId, wanted],
+1671:       ));
+1672:       const known = new Set(found.rows.map((r) => r.id));
+1673:       const unknown = wanted.filter((o) => !known.has(o));
+1674:       if (unknown.length > 0) {
+1675:         return res.status(400).json({
+1676:           success: false,
+1677:           error: {
+1678:             code: 'BAD_REQUEST',
+1679:             message: `Not organisations of tenant ${tenantId}: ${unknown.join(', ')}`,
+1680:             details: { unknownOrganizationIds: unknown },
+1681:           },
+1682:         });
+1683:       }
+1684:     }
+1685: 
+1686:     const caller = (req as any).user as { userId?: string; sub?: string; role?: string } | undefined;
+1687:     const callerId = String(caller?.userId ?? caller?.sub ?? '');
+1688:     const callerUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(callerId) ? callerId : undefined;
+1689:     const grantedBy = callerId || String(caller?.role ?? 'platform');
+1690:     const audit: AuditLog = {
+1691:       id: crypto.randomUUID(),
+1692:       tenantId,
+1693:       userId: callerUuid,
+1694:       action: 'admin_scope.set',
+1695:       resourceType: 'admin_organisation_scope',
+1696:       resourceId: userId,
+1697:       ipAddress: req.ip,
+1698:       userAgent: req.headers['user-agent'] as string | undefined,
+1699:       details: {},
+1700:       success: true,
+1701:       createdAt: new Date(),
+1702:     };
+1703: 
+1704:     const before = await runWithTenantId(tenantId, () => transaction(async (client) => {
+1705:       await applyTenantGuc(client);
+1706:       // KS-1570 PR B, the pull request 1539 gate's M1 (Major). Without this line two overlapping PUTs
+1707:       // for the same ADMIN leave the UNION of their sets, not the last write: Y's DELETE waits on X's
+1708:       // row lock, then under READ COMMITTED re-reads, finds the old row gone and CANNOT see X's
+1709:       // newly inserted row, so it inserts its own beside it. The gate measured {A2, A3} stored 3 runs
+1710:       // of 3, with the last audit row reporting before [A1] → after [A3] — a grant WIDER than any
+1711:       // request asked for, described by an audit row that misstates it. On a route whose whole purpose
+1712:       // is an exact, audited authorisation grant, that is the defect, not an edge case.
+1713:       //
+1714:       // Serialised per (tenant, user) INSIDE the transaction, so the lock is released at COMMIT or
+1715:       // ROLLBACK and cannot outlive the request. `pg_advisory_xact_lock` and not `SELECT … FOR UPDATE`
+1716:       // for two reasons: it is the variant the gate actually measured green, and FOR UPDATE needs a
+1717:       // row to lock — on a FIRST grant there is none, which is exactly when two concurrent writers
+1718:       // are most likely. KS-1549 serialises concurrent rotates per connector the same way.
+1719:       // KS-1598, carried from bd11c34e as DEFENCE IN DEPTH and NOT as a fix. Stated carefully,
+1720:       // because the commit it came from claimed the opposite and was wrong:
+1721:       //   `hashtext()` IS case-sensitive while `uuid` comparison is not, so an un-lowered key pair
+1722:       //   WOULD fail to serialise two callers who spelled the same ids in different hex case.
+1723:       //   On this route that cannot happen today: `UUID_TEXT` (see adminScopeParamsSchema /
+1724:       //   adminScopePutSchema) is `z.string().uuid().transform(toLowerCase)`, so both `tenantId` and
+1725:       //   `userId` arrive ALREADY lower-cased and the lock folds case end to end without this.
+1726:       //   The pull request 1539 r2 gate measured that end to end (its F1, one waiter seen, exact
+1727:       //   audit chain) and its mutant R4 — the lock keyed on raw ids — was killed by F1.
+1728:       // So this adds no behaviour today. It is here so the key stays case-insensitive if a future
+1729:       // caller path ever reaches this lock without passing through UUID_TEXT.
+1730:       // CONSEQUENCE worth knowing: with lower() inside the key, mutant R4 becomes EQUIVALENT BY
+1731:       // CONSTRUCTION rather than killable — SQL re-normalises the raw ids, so R4 and the original
+1732:       // compute the same key. A surviving R4 after this change is not a coverage hole.
+1733:       await client.query('SELECT pg_advisory_xact_lock(hashtext(lower($1)), hashtext(lower($2)))', [tenantId, userId]);
+1734:       const prev = await client.query<{ o: string }>(
+1735:         'SELECT organization_id::text AS o FROM admin_organisation_scopes WHERE tenant_id = $1::uuid AND user_id = $2::uuid ORDER BY 1',
+1736:         [tenantId, userId],
+1737:       );
+1738:       await client.query('DELETE FROM admin_organisation_scopes WHERE tenant_id = $1::uuid AND user_id = $2::uuid', [tenantId, userId]);
+1739:       if (wanted.length > 0) {
+1740:         await client.query(
+1741:           `INSERT INTO admin_organisation_scopes (tenant_id, user_id, organization_id, granted_by)
+1742:            SELECT $1::uuid, $2::uuid, o, $3 FROM unnest($4::uuid[]) AS o`,
+1743:           [tenantId, userId, grantedBy, wanted],
+1744:         );
+1745:       }
+1746:       const b = prev.rows.map((r) => r.o);
+1747:       audit.details = { tenantId, targetUserId: userId, before: b, after: wanted, grantedBy };
+1748:       const st = systemAuditInsertStatement(audit);
+1749:       await client.query(st.text, st.values);
+1750:       return b;
+1751:     }));
+1752:     rememberAuditLog(audit);
+1753:     log('info', 'Admin organisation scope set', { tenantId, targetUserId: userId, before, after: wanted });
+1754:     return res.json({ success: true, data: { userId, tenantId, before, organizationIds: wanted } });
+1755:   } catch (error) {
+1756:     if (error instanceof z.ZodError) return badRequestFromZod(res, error);
+1757:     // The pull request 1539 gate's m1. An infrastructure fault reached errorHandler and answered a
+1758:     // generic 500 INTERNAL_ERROR, while develop's mint path answers 503 for the same killed backend.
+1759:     // Fail-closed held either way — the transaction rolls back and nothing is written — but a 500 tells
+1760:     // a caller the request was wrong when the honest answer is "retry".
+1761:     if (isInfrastructureDbError(error)) {
+1762:       // Read off the request, not the parsed locals: those are declared inside the try and are not in
+1763:       // scope here, which tsc caught.
+1764:       log('error', 'Admin organisation scope write failed on infrastructure, nothing written', {
+1765:         tenantId: (req.body as { tenantId?: unknown } | undefined)?.tenantId,
+1766:         targetUserId: req.params?.userId,
+1767:         code: (error as { code?: unknown } | undefined)?.code,
+1768:       });
+1769:       return res.status(503).json({
+1770:         success: false,
+1771:         error: { code: 'SERVICE_UNAVAILABLE', message: 'The admin organisation scope could not be written, so nothing changed' },
+1772:       });
+1773:     }
+1774:     return next(error);
+1775:   }
+1776: });
+1777: 
+1778: app.get('/api/keys/admin-scopes/:userId', requireAdminScopeWriter, async (req: Request, res: Response, next: NextFunction) => {
+1779:   try {
+1780:     const { userId } = adminScopeParamsSchema.parse(req.params);
+1781:     const { tenantId } = adminScopeGetQuerySchema.parse(req.query);
+1782:     if (!isDbAvailable()) {
+1783:       return res.status(503).json({ success: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'Admin organisation scopes need the database' } });
+1784:     }
+1785:     const r = await runWithTenantId(tenantId, () => query<{ o: string }>(
+1786:       'SELECT organization_id::text AS o FROM admin_organisation_scopes WHERE tenant_id = $1::uuid AND user_id = $2::uuid ORDER BY 1',
+1787:       [tenantId, userId],
+1788:     ));
+1789:     return res.json({ success: true, data: { userId, tenantId, organizationIds: r.rows.map((x) => x.o) } });
+1790:   } catch (error) {
+1791:     if (error instanceof z.ZodError) return badRequestFromZod(res, error);
+1792:     return next(error);
+1793:   }
+1794: });
+1795: 
+1796: /**
+1797:  * POST /api/keys/validate
+1798:  * Validate an API key
+1799:  */
+1800: app.post('/api/keys/validate', async (req: Request, res: Response) => {
+1801:   // KS-444: schema-validate instead of truthy-check — a wrong-typed `key`
+1802:   // (object/number) previously reached crypto.createHash().update() and threw.
+1803:   const parsedBody = validateKeySchema.safeParse(req.body);
+1804:   if (!parsedBody.success) {
+1805:     return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'API key required', details: parsedBody.error.errors } });
+1806:   }
+1807:   const { key } = parsedBody.data;
+1808: 
+1809:   const keyHash = crypto.createHash('sha256').update(key).digest('hex');
+1810: 
+1811:   let apiKey = Array.from(memApiKeys.values()).find(k => k.keyHash === keyHash);
+1812: 
+1813:   // KS-39 #5: in-memory map is populated only at boot from svc_api_keys.
+1814:   // Keys minted by originate AFTER security started are invisible until
+1815:   // the next restart, so any test or runtime caller minting a key + using
+1816:   // it within the same uptime window saw "invalid api key" even though
+1817:   // the row was correctly in svc_api_keys. Fall through to a fresh DB
+1818:   // lookup on cache-miss before we declare the key invalid, and warm the
+1819:   // memory cache for next time.
+1820:   // KS-1370 half (ii): a cache HIT is a boot-time snapshot, so it cannot be trusted for the one
+1821:   // question this route exists to answer. A revoke performed in ANOTHER process is invisible here,
+1822:   // and answering `valid: true` from that snapshot is how a revoked credential kept working.
+1823:   // So on a cache hit, re-read the STORED state through the same reviewed carve-out the cache-miss
+1824:   // branch uses, and decide on the stored row rather than on memory.
+1825:   //
+1826:   // Kam's ruling, card `secuura-ks1370-validate-when-the-revoke-check-cannot-read`, option (a):
+1827:   // "Split: refuse on a failed read, memory-only mode answers from memory. A failed stored read with
+1828:   // a database configured returns 503 'Unable to verify key'. ... A revoked key is never honoured.
+1829:   // Memory-only deployments behave as today. The usage write stays log-only, as you ruled."
+1830:   // Hence the isDbAvailable() guard: with NO database configured there is no stored state to be
+1831:   // blind to — memory IS the store of record in that mode, and the revoke route writes isActive
+1832:   // false into it — so refusing there would break every memory-only deployment and #1334's control
+1833:   // C4 for no security gain. That is a deployment with no store, not an unverifiable read.
+1834:   //
+1835:   // The stale copy is REFRESHED, not merely consulted, so the cache stops lying for later requests
+1836:   // in this process. A row that has VANISHED is treated as not found and evicted: a deleted key is a
+1837:   // stronger revocation than is_active=false, and a stale copy must not honour it either.
+1838:   //
+1839:   // This handler takes NO `next` (see ks888-failed-mint-save-issues-no-key.test.ts:5-7), so a throw
+1840:   // here would be an unhandled rejection that can end the process. The read therefore has its own
+1841:   // try and every exit from it is a response, never a throw.
+1842:   if (apiKey && isDbAvailable()) {
+1843:     try {
+1844:       const storedResult = await query('SELECT * FROM security_find_api_key_by_hash($1)', [keyHash]);
+1845:       if (storedResult.rows.length === 0) {
+1846:         memApiKeys.delete(apiKey.id);
+1847:         return res.json({ success: true, data: { valid: false, reason: 'Key not found' } });
+1848:       }
+1849:       // A REVOKE IS STICKY IN BOTH DIRECTIONS, and this line is the one that keeps KS-888 intact.
+1850:       // KS-888 (card secuura-ks888-revoke-validate-on-failed-save, option a) says a revoke whose
+1851:       // SAVE failed keeps its in-memory revoke, so the key stops working in this process even though
+1852:       // the row still reads active. Refreshing blindly from the stored row would UNDO exactly that
+1853:       // and re-honour a key an operator has revoked — measured: #1334's cell R2 fails without this.
+1854:       // So the two sources are combined in the safe direction: revoked if EITHER says revoked.
+1855:       // Stored-revoked beats cached-active (that is KS-1370), and cached-revoked beats
+1856:       // stored-active (that is KS-888 R2). Neither source can revive a revocation the other holds.
+1857:       const revokedInMemory = apiKey.isActive === false;
+1858:       apiKey = rowToApiKey(storedResult.rows[0]);
+1859:       if (revokedInMemory) apiKey.isActive = false;
+1860:       memApiKeys.set(apiKey.id, apiKey);
+1861:     } catch (err: any) {
+1862:       logger.error('KS-1370: stored API key state could not be read', { error: err?.message });
+1863:       return res.status(503).json({
+1864:         success: false,
+1865:         error: { code: 'SERVICE_UNAVAILABLE', message: 'Unable to verify key' },
+1866:       });
+1867:     }
+1868:   }
+1869: 
+1870:   if (!apiKey) {
+1871:     try {
+1872:       // KS-458: this route is deliberately unauthenticated (the gateway calls
+1873:       // it BEFORE any session exists — see the KS-39 #5 auth carve-out above),
+1874:       // so there is no tenant context to set the RLS GUC from. Under the
+1875:       // fail-closed tenant_isolation policy a direct SELECT on svc_api_keys
+1876:       // would return zero rows and break every sk_* API-key auth. The
+1877:       // migration-039 SECURITY DEFINER function is the reviewed pre-session
+1878:       // carve-out: same row shape (SETOF svc_api_keys), lookup by hash only.
+1879:       const dbResult = await query('SELECT * FROM security_find_api_key_by_hash($1)', [keyHash]);
+1880:       if (dbResult.rows.length > 0) {
+1881:         apiKey = rowToApiKey(dbResult.rows[0]);
+1882:         memApiKeys.set(apiKey.id, apiKey);
+1883:       }
+1884:     } catch (err: any) {
+1885:       logger.warn('DB fallback for api-key validation failed', { error: err?.message });
+1886:     }
+1887:   }
+1888: 
+1889:   if (!apiKey) {
+1890:     return res.json({ success: true, data: { valid: false, reason: 'Key not found' } });
+1891:   }
+1892:   
+1893:   if (!apiKey.isActive) {
+1894:     return res.json({ success: true, data: { valid: false, reason: 'Key revoked' } });
+1895:   }
+1896:   
+1897:   if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
+1898:     return res.json({ success: true, data: { valid: false, reason: 'Key expired' } });
+1899:   }
+1900:   
+1901:   // Update usage
+1902:   apiKey.lastUsedAt = new Date();
+1903:   apiKey.usageCount++;
+1904:   // KS-1370 half (i): usage-only. dbSaveApiKey would carry is_active and revive a revoke.
+1905:   await dbRecordApiKeyUsage(apiKey);
+1906:   
+1907:   res.json({
+1908:     success: true,
+1909:     data: {
+1910:       valid: true,
+1911:       organizationId: apiKey.organizationId,
+1912:       // KS-33: return tenantId so the gateway's auth middleware can set
+1913:       // req.tenantId from sk_* requests without an extra DB roundtrip.
+1914:       // Pre-KS-33 this field was missing from the response and the
+1915:       // gateway fell back to '' (empty), which broke every downstream
+1916:       // tenant-scoped query for sk_*-authenticated requests.
+1917:       tenantId: apiKey.tenantId,
+1918:       scopes: apiKey.scopes,
+1919:       rateLimit: apiKey.rateLimit,
+1920:       rateLimitWindow: apiKey.rateLimitWindow,
+1921:       connectorId: apiKey.connectorId || null,
+1922:     },
+1923:   });
+1924: });
+1925: 
+1926: // =============================================================================
+1927: // RATE LIMIT ROUTES
+1928: // =============================================================================
+1929: 
+1930: /**
+1931:  * POST /api/rate-limit/check
+1932:  * Check and increment rate limit
+1933:  */
+1934: app.post('/api/rate-limit/check', (req: Request, res: Response, next: NextFunction) => {
+1935:   try {
+1936:     const data = checkRateLimitSchema.parse(req.body);
+1937: 
+1938:     // KS-952 F3/F4: the bucket is DERIVED from the verified principal; the body
+1939:     // can no longer choose it. `data.key` is now a label WITHIN the caller's own
+1940:     // namespace, so naming another tenant's key selects a bucket of the caller's
+1941:     // own rather than the owner's. That closes both directions of one lever: the
+1942:     // 1s window that turned an owner's 100/minute into 100/second (60x), and the
+1943:     // 24h window that turned an intended 60s lockout into 1440x.
+1944:     //
+1945:     // No platform exception, deliberately. Cross-tenant reach is a capability on
+1946:     // /reset; on a *check* naming someone else's bucket IS the attack, so there
+1947:     // is nobody this route should let do it.
+1948:     const scope = principalScope((req as any).user);
+1949:     if (scope === null) {
+1950:       // KS-743's rule applied here: a missing claim is a refusal, not a wildcard.
+1951:       // Defaulting to a shared namespace would put unrelated callers in one
+1952:       // bucket, which is the same fail-open this change exists to remove.
+1953:       return res.status(403).json({
+1954:         success: false,
+1955:         // KS-976 item 2: scope is null for three reasons - say whether a claim was present but unusable, or absent.
+1956:         error: { code: 'FORBIDDEN', message: [(req as any).user?.tenantId, (req as any).user?.userId, (req as any).user?.sub].some((v) => v !== undefined && v !== null) ? 'Caller scope claims are present but unusable (tenant, user or sub)' : 'Caller has no tenant' },
+1957:       });
+1958:     }
+1959:     const bucketKey = scopedRateLimitKey(scope, data.key);
+1960: 
+1961:     const now = Date.now();
+1962:     const stored = rateLimits.get(bucketKey);
+1963: 
+1964:     // KS-698 fix 3: SELF-HEAL. A key poisoned before this fix holds a resetAt
+1965:     // outside the time-value range, so `now > entry.resetAt` is false and every
+1966:     // later request reached `new Date(entry.resetAt).toISOString()` and threw —
+1967:     // 500 forever for that key, however valid the new request was. Because the
+1968:     // limiter fails OPEN on error (KS-616) that key was effectively unlimited: a
+1969:     // CORRECTED by the #882 tier-1 gate: this said "a rate-limit BYPASS", and that is
+1970:     // WRONG on two counts, both measured. KS-616 is a DIFFERENT limiter that never
+1971:     // calls this endpoint, and its fail-open was already remediated at this SHA. The
+1972:     // impact is AVAILABILITY — a caller-named key permanently answering 500.
+1973:     // treated as expired, so poisoned keys recover on their next request rather
+1974:     // than needing a flush.
+1975:     const entry = usableRateLimitEntry(stored);
+1976:     
+1977:     if (!entry || now > entry.resetAt) {
+1978:       // KS-698 fix 2: compute BEFORE the write and refuse to persist a value we
+1979:       // cannot render. The original order wrote the entry and THEN threw while
+1980:       // formatting the response, so the bad state outlived the failed request.
+1981:       // Unreachable from this route now that the schema bounds windowMs — kept
+1982:       // because it guards the WRITE rather than the INPUT, and those can drift.
+1983:       const resetAt = persistableResetAt(now, data.windowMs);
+1984:       if (resetAt === null) {
+1985:         return res.status(400).json({
+1986:           success: false,
+1987:           error: {
+1988:             code: 'BAD_REQUEST',
+1989:             message: 'windowMs produces a reset time outside the representable range',
+1990:           },
+1991:         });
+1992:       }
+1993:       // KS-952 F10: sweep expired entries before growing the map. Only expired
+1994:       // ones go — dropping a live bucket would itself be a bypass.
+1995:       sweepExpired(rateLimits, now);
+1996:       rateLimits.set(bucketKey, { count: 1, resetAt });
+1997:       
+1998:       return res.json({
+1999:         success: true,
+2000:         data: {
+2001:           allowed: true,
+2002:           remaining: data.limit - 1,
+2003:           resetAt: new Date(now + data.windowMs).toISOString(),
+2004:         },
+2005:       });
+2006:     }
+2007:     
+2008:     if (entry.count >= data.limit) {
+2009:       return res.json({
+2010:         success: true,
+2011:         data: {
+2012:           allowed: false,
+2013:           remaining: 0,
+2014:           resetAt: new Date(entry.resetAt).toISOString(),
+2015:           retryAfter: Math.ceil((entry.resetAt - now) / 1000),
+2016:         },
+2017:       });
+2018:     }
+2019:     
+2020:     entry.count++;
+2021:     
+2022:     res.json({
+2023:       success: true,
+2024:       data: {
+2025:         allowed: true,
+2026:         remaining: data.limit - entry.count,
+2027:         resetAt: new Date(entry.resetAt).toISOString(),
+2028:       },
+2029:     });
+2030:   } catch (error) {
+2031:     if (error instanceof z.ZodError) {
+2032:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: error.errors } });
+2033:     }
+2034:     next(error);
+2035:   }
+2036: });
+2037: 
+2038: /**
+2039:  * POST /api/rate-limit/reset
+2040:  * Reset rate limit for a key
+2041:  */
+2042: app.post('/api/rate-limit/reset', requirePlatformOperatorForRateLimit, (req: Request, res: Response) => {
+2043:   // KS-444: schema-validate instead of truthy-check — a wrong-typed `key`
+2044:   // (object/number) was previously accepted and answered 200 "Rate limit reset".
+2045:   const parsedBody = resetRateLimitSchema.safeParse(req.body);
+2046:   if (!parsedBody.success) {
+2047:     // KS-976 item 1: the message names the field that actually failed. It was the
+2048:     // constant 'Key required', which was wrong for every refusal that was not about
+2049:     // the key - and `tenantId`/`userId` refusals are exactly what KS-970 item 6
+2050:     // published. `details` is unchanged and remains the authoritative, parseable half.
+2051:     return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: bodyRefusalMessage(parsedBody.error), details: parsedBody.error.errors } });
+2052:   }
+2053: 
+2054:   // KS-952 (the folded-in KS-645 half): /check now stores under a
+2055:   // principal-derived namespace, so a raw key would no longer match anything and
+2056:   // this route would silently become a no-op. The platform operator therefore
+2057:   // names the SCOPE explicitly — which is also the capability the strict rule on
+2058:   // /check must NOT be copied onto: clearing another tenant's bucket is
+2059:   // plausibly what a platform-operator reset is FOR.
+2060:   //
+2061:   // Only a platform role reaches this line (requirePlatformOperatorForRateLimit
+2062:   // above), so there is deliberately NO "a tenant role may name only its own"
+2063:   // arm — no tenant role can reach the route, and code that cannot be exercised
+2064:   // is a check that cannot fail wearing a feature's clothes. If the gate is ever
+2065:   // relaxed, `explicitScope` is the one place that rule goes.
+2066:   const scope = explicitScope(parsedBody.data, (req as any).user);
+2067:   if (scope === null) {
+2068:     return res.status(403).json({
+2069:       success: false,
+2070:       error: { code: 'FORBIDDEN', message: [(req as any).user?.tenantId, (req as any).user?.userId, (req as any).user?.sub].some((v) => v !== undefined && v !== null) ? 'Caller scope claims are present but unusable (tenant, user or sub)' : 'Caller has no tenant' },
+2071:     });
+2072:   }
+2073:   rateLimits.delete(scopedRateLimitKey(scope, parsedBody.data.key));
+2074:   
+2075:   res.json({
+2076:     success: true,
+2077:     message: 'Rate limit reset',
+2078:   });
+2079: });
+2080: 
+2081: // =============================================================================
+2082: // ERROR HANDLING
+2083: // =============================================================================
+2084: 
+2085: app.use((_req: Request, res: Response) => {
+2086:   res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Not Found' } });
+2087: });
+2088: 
+2089: // KS-111: route errors through the shared AppError-aware handler (maps
+2090: // AppError.statusCode + Zod -> 4xx; emits the canonical {success,error} shape).
+2091: app.use(errorHandler);
+2092: 
+2093: // =============================================================================
+2094: // START SERVER
+2095: // =============================================================================
+2096: 
+2097: // Audit 1.3 phase 5: PII keyring for audit_logs.details encryption.
+2098: if (process.env.PII_ENCRYPTION_KEY) {
+2099:   try {
+2100:     initPiiCrypto();
+2101:     log('info', 'PII encryption keyring initialised');
+2102:   } catch (err: any) {
+2103:     log('warn', 'PII encryption init failed (audit_logs.details will store plaintext)', { error: err?.message });
+2104:   }
+2105: } else if (process.env.NODE_ENV === 'production') {
+2106:   log('error', 'FATAL: PII_ENCRYPTION_KEY missing in production — refusing to start');
+2107:   process.exit(1);
+2108: } else {
+2109:   log('warn', 'PII_ENCRYPTION_KEY not set — audit_logs.details will store plaintext');
+2110: }
+2111: 
+2112: /**
+2113:  * One-shot DB boot work: warm the in-memory caches (audit logs, security
+2114:  * events, API keys) and apply the idempotent audit_logs.details widening.
+2115:  * Passed to initDb as its onReady hook so it runs on the boot success path
+2116:  * AND again when the DB only comes up after a lost start race (KS-377
+2117:  * background retry) — recovery re-runs it instead of silently skipping it
+2118:  * (KS-382).
+2119:  */
+2120: async function runDbBootTasks(): Promise<void> {
+2121:   await loadFromDb();
+2122:   // Audit 1.3 phase 5: widen audit_logs.details from JSONB to TEXT so
+2123:   // AES-GCM ciphertext fits. Idempotent — only runs if currently jsonb.
+2124:   try {
+2125:     await query(`
+2126:       DO $$ BEGIN
+2127:         IF EXISTS (
+2128:           SELECT 1 FROM information_schema.columns
+2129:           WHERE table_name='audit_logs' AND column_name='details' AND data_type='jsonb'
+2130:         ) THEN
+2131:           ALTER TABLE audit_logs ALTER COLUMN details TYPE TEXT USING details::text;
+2132:         END IF;
+2133:       END $$
+2134:     `);
+2135:     log('info', 'audit_logs.details migration applied (or already TEXT)');
+2136:   } catch (err: any) {
+2137:     log('warn', 'audit_logs.details migration failed (non-fatal)', { error: err?.message });
+2138:   }
+2139: }
+2140: 
+2141: // KS-742: the /api/keys routes had no wire test because importing this module
+2142: // starts a listener and a DB connect, so a test could only call the pure policy
+2143: // functions — which is exactly how a route can keep a defect while its policy
+2144: // unit tests stay green. One documented guard makes the app importable. It is
+2145: // opt-IN: unset (every deployment) means boot, so production behaviour is
+2146: // byte-identical.
+2147: if (process.env.SECURITY_DISABLE_BOOT !== '1') {
+2148:   initDb(runDbBootTasks).then((connected) => {
+2149:     console.log('[Security] DB init:', connected);
+2150:   });
+2151: 
+2152:   const server = app.listen(PORT, () => {
+2153:     log('info', 'Security Service started', { port: PORT });
+2154:     console.log(`
+2155: ╔═══════════════════════════════════════════════════════════════╗
+2156: ║                SECUURA SECURITY SERVICE                       ║
+2157: ╠═══════════════════════════════════════════════════════════════╣
+2158: ║  Port:      ${PORT}                                              ║
+2159: ║  API Info:  http://localhost:${PORT}/api                          ║
+2160: ║  Health:    http://localhost:${PORT}/health                       ║
+2161: ╠═══════════════════════════════════════════════════════════════╣
+2162: ║  Features:                                                    ║
+2163: ║    • Audit Logging                                           ║
+2164: ║    • Security Event Tracking                                 ║
+2165: ║    • API Key Management                                      ║
+2166: ║    • Rate Limiting                                           ║
+2167: ╚═══════════════════════════════════════════════════════════════╝
+2168: `);
+2169:   });
+2170:   // KS-252: hold keep-alive sockets longer than any upstream proxy's idle
+2171:   // window (gateway http-proxy-middleware / nginx / ACA envoy reuse pooled
+2172:   // sockets; Node's 5 s default close races their reuse -> ECONNRESET and
+2173:   // 19-29 s stalls under load). headersTimeout must exceed keepAliveTimeout.
+2174:   server.keepAliveTimeout = 65_000;
+2175:   server.headersTimeout = 66_000;
+2176: }
+2177: 
+2178: export default app;
+
+### FILE AT HEAD: Blockchain/Dev/services/security/src/__tests__/ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts
+1: // KS-1591 (services/security src/index.ts requireKeyAdmin, the services/security half of the ticket): the gate in front of GET /api/keys compared `String(role).toUpperCase()` to the admin role set, which is
+2: // not an identity test. U+0131 (dotless i) upper-cases to `I`, U+017F (long s) upper-cases to `S`, and a role ARRAY stringifies to its element, so `\u0131ssuer_admin`, `\u017fuper_admin` and ['ISSUER_ADMIN'] were
+3: // admitted as key admins. R1 to R3 drive the real app over HTTP (the harness of ks742-keys-tenancy-route-contract.test.ts: a real RS256 token signed with node crypto, no database) and pin that each
+4: // is refused; C1 to C4 pin that the spellings the platform really uses are still admitted and that an ordinary role and no token are still refused. Non-ASCII characters are written as \u escapes (pure ASCII file).
+5: import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+6: import crypto from 'crypto';
+7: import type { Server } from 'http';
+8: import type { AddressInfo } from 'net';
+9: 
+10: // Opt-IN boot guard: keeps `import '../index'` from binding its port and dialling postgres. Must be set before the import.
+11: process.env.SECURITY_DISABLE_BOOT = '1';
+12: 
+13: const TENANT_A = 'a0000000-0000-4000-8000-0000000000aa';
+14: const ORG_A = '11111111-1111-4111-8111-111111111111';
+15: 
+16: const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+17: const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+18: const PUBLIC_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+19: 
+20: const b64url = (b: Buffer): string => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+21: 
+22: /** Sign an RS256 JWT with node crypto, in the shape the auth service issues. */
+23: function token(claims: Record<string, unknown>): string {
+24:   const header = b64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
+25:   const now = Math.floor(Date.now() / 1000);
+26:   const payload = b64url(Buffer.from(JSON.stringify({ sub: 'test-user', iat: now, exp: now + 300, ...claims })));
+27:   const signature = b64url(crypto.sign('RSA-SHA256', Buffer.from(header + '.' + payload), PRIVATE_PEM));
+28:   return header + '.' + payload + '.' + signature;
+29: }
+30: 
+31: const withRole = (role: unknown): string => token({ role, tenantId: TENANT_A, organizationId: ORG_A });
+32: 
+33: let server: Server;
+34: let base = '';
+35: 
+36: const HOOK_BUDGET_MS = 60_000;
+37: 
+38: beforeAll(async () => {
+39:   process.env.JWT_PUBLIC_KEY = Buffer.from(PUBLIC_PEM, 'utf8').toString('base64');
+40:   delete process.env.JWT_JWKS_URL;
+41:   delete process.env.AUTH_SERVICE_URL;
+42:   const app = (await import('../index')).default;
+43:   await new Promise<void>((resolve) => {
+44:     server = app.listen(0, '127.0.0.1', resolve);
+45:   });
+46:   base = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+47: }, HOOK_BUDGET_MS);
+48: 
+49: afterAll(async () => {
+50:   if (!server) return;
+51:   await new Promise<void>((resolve) => server.close(() => resolve()));
+52: });
+53: 
+54: async function listKeysAs(bearer: string | null): Promise<number> {
+55:   const headers: Record<string, string> = bearer ? { Authorization: 'Bearer ' + bearer } : {};
+56:   const res = await fetch(base + '/api/keys?organizationId=' + ORG_A, { headers });
+57:   return res.status;
+58: }
+59: 
+60: describe('KS-1591: requireKeyAdmin is an exact ASCII fold and refuses a non-string role', () => {
+61:   it('RED KS-1591 R1 a role spelled with a dotless i is refused', async () => {
+62:     expect(await listKeysAs(withRole('\u0131ssuer_admin'))).toBe(403);
+63:   });
+64: 
+65:   it('RED KS-1591 R2 a role spelled with a long s is refused', async () => {
+66:     expect(await listKeysAs(withRole('\u017fuper_admin'))).toBe(403);
+67:   });
+68: 
+69:   it('RED KS-1591 R3 a role array holding ISSUER_ADMIN is refused', async () => {
+70:     expect([401, 403]).toContain(await listKeysAs(withRole(['ISSUER_ADMIN'])));
+71:   });
+72: 
+73:   it('control KS-1591 C1 no token is refused by the auth middleware', async () => {
+74:     expect(await listKeysAs(null)).toBe(401);
+75:   });
+76: 
+77:   it('control KS-1591 C2 an ISSUER_ADMIN of the tenant is still admitted', async () => {
+78:     expect(await listKeysAs(withRole('ISSUER_ADMIN'))).toBe(200);
+79:   });
+80: 
+81:   it('control KS-1591 C3 a lower-case and a mixed-case spelling are still admitted', async () => {
+82:     expect(await listKeysAs(withRole('issuer_admin'))).toBe(200);
+83:     expect(await listKeysAs(withRole('Issuer_Admin'))).toBe(200);
+84:   });
+85: 
+86:   it('control KS-1591 C4 an ordinary role is still refused', async () => {
+87:     expect(await listKeysAs(withRole('USER'))).toBe(403);
+88:   });
+89: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "634daa0bc3424db13456543b87abcc5a0b54e2c3",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/security/src/index.ts",
+   "added": "4",
+   "deleted": "1"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/security/src/__tests__/ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts",
+   "added": "89",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "4",
+   "1",
+   "Blockchain/Dev/services/security/src/index.ts"
+  ],
+  [
+   "89",
+   "0",
+   "Blockchain/Dev/services/security/src/__tests__/ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 7,
+  "failed": 3
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 7,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=361 failed=0 | after: total=368 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 7\n",
+ "checker_summary": [
+  "PASS A6 whole services/security suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/security: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +93/-1 test=src/__tests__/ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

@@ -1,0 +1,1007 @@
+===== TICKET =====
+KS-1240 — T-2: the connector-token / key-validate fetch has no timeout — a slow upstream hangs the request [Backlog]
+
+**The sharpest of the four candidates the gate surfaced, and the only one that is request-reachable today.**
+
+The api-gateway's connector-token exchange / key-validate `fetch` carries **no timeout**. A slow or non-answering upstream turns into a gateway request with no bound on how long it hangs, while the process carries on serving everything else.
+
+## Measured on BOTH trees (head and develop) — so it is pre-existing
+
+* an exchange that **never answers** → the request hangs;
+* an exchange whose body arrives **2.5 s late** → the request hangs for that long.
+
+Graded **Major**. Request-reachable, unlike T-1.
+
+## What to do
+
+Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange.
+
+---
+
+Filed from the #1034 / KS-1215 tier-1 gate report `2026-09-18-ks1215-1034-e4624218b-tier1-r1`, at merge of `a105cd32b1ed9c6927ae6e797f8259224d8480c6`. Pre-existing unless stated; **not** introduced by #1034.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts b/Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts
+@@ -16,3 +16,7 @@
+   /** The internal `key_…` record id, for later revoke / lookup. */
+   id: string;
+ }
++
++// KS-1240 (class): the longest provisioning waits for the security service to mint the metering key. The fetch carried no timeout, so a security service that accepted the connection and never answered
++// held the tenant-creation request for as long as the socket lived. On expiry the fetch rejects, requestMeteringKey throws, and the provisioning handler fails soft as it already does for a non-2xx.
++const METERING_KEY_FETCH_TIMEOUT_MS = 10_000;
+@@ -55,6 +59,7 @@
+       scopes: ['metering:read'],
+       connectorId: 'platform-s',
+     }),
++    signal: AbortSignal.timeout(METERING_KEY_FETCH_TIMEOUT_MS),
+   });
+   // Non-2xx → throw so the provisioning handler can fail soft (tenant already active).
+   if (!res.ok) {
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/index.ts b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/index.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+@@ -37,4 +37,8 @@
+ const TOKENISATION_URL = process.env.TOKENISATION_URL || 'http://tokenisation:4021';
++
++// KS-1240 (class): the longest provisioning waits for the tokenisation service to generate a tenant key. The fetch carried no timeout, so a tokenisation service that accepted the connection and never
++// answered held the tenant-creation request for as long as the socket lived. On expiry the fetch rejects out of requestKeyGeneration to the handler's existing error path.
++const KEY_GENERATION_FETCH_TIMEOUT_MS = 10_000;
+ // KS-336: the security service owns connector API keys (svc_api_keys, in the app
+ // DB — a different DB from the platform tables this service writes). We mint the
+ // per-tenant metering key over HTTP, not via platformQuery. Default matches the
+@@ -135,6 +139,7 @@
+       ...(authHeader ? { Authorization: authHeader } : {}),
+     },
+     body: JSON.stringify({ tenantId, tenantSlug }),
++    signal: AbortSignal.timeout(KEY_GENERATION_FETCH_TIMEOUT_MS),
+   });
+   return res.json() as Promise<{
+     success: boolean;
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts
+@@ -0,0 +1,94 @@
++// KS-1240 (class: hand-built outbound fetches with no timeout), tenant-provisioning meteringKey.ts and index.ts: the metering-key mint (requestMeteringKey, exported) and the tenant key generation
++// (requestKeyGeneration, private to index.ts, which boots a server and so is read as TEXT here) fetched the security and tokenisation services with no `signal`, so a service that accepted the connection
++// and never answered held the tenant-creation request for as long as the socket lived. requestMeteringKey is driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there
++// is none). R1 pins that its fetch carries an AbortSignal, R2 that the bound is sane, R3 that a silent security service ends in a rejection and not a hang, R4 and R5 that index.ts bounds its fetch;
++// C1 to C3 pin the unchanged answers.
++import { describe, it, expect, vi, afterEach } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { fileURLToPath } from 'node:url';
++import { requestMeteringKey } from '../meteringKey.js';
++
++const SEC = 'http://security:4004';
++const INDEX_SRC = readFileSync(fileURLToPath(new URL('../index.ts', import.meta.url)), 'utf8');
++
++afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
++
++/** The key the security service mints, as a Response-like object. */
++function mintedKey(): Response {
++  return { ok: true, status: 201, json: async () => ({ success: true, data: { id: 'key_abc', key: 'sk_deadbeef', prefix: 'sk_deadbeef0' } }) } as unknown as Response;
++}
++
++/** Answers the mint and records the signal the call carried. */
++function stubAnswering(seen: unknown[]): void {
++  vi.stubGlobal('fetch', vi.fn(async (_url: unknown, init?: { signal?: unknown }) => { seen.push(init?.signal); return mintedKey(); }));
++}
++
++/** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
++function stubNeverAnswering(): void {
++  vi.stubGlobal('fetch', vi.fn((_url: unknown, init?: { signal?: AbortSignal }) =>
++    new Promise<Response>((_resolve, reject) => {
++      const signal = init?.signal;
++      if (!signal) return;
++      if (signal.aborted) reject(new Error('aborted'));
++      else signal.addEventListener('abort', () => reject(new Error('aborted')));
++    })));
++}
++
++/** 'REJECTED' when the call rejects, 'RESOLVED' when it resolves, 'HUNG' when it is still pending after 300 ms, so a hang is a red assertion and not a stuck run. */
++async function outcome(run: () => Promise<unknown>): Promise<string> {
++  return Promise.race([
++    run().then(() => 'RESOLVED', () => 'REJECTED'),
++    new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
++  ]);
++}
++
++describe('KS-1240: tenant provisioning bounds its outbound fetches', () => {
++  it('RED KS-1240 R1 the metering-key fetch carries an AbortSignal', async () => {
++    const seen: unknown[] = [];
++    stubAnswering(seen);
++    await requestMeteringKey(SEC, 'tenant-123', 'acme', 'Bearer admintoken');
++    expect(seen).toHaveLength(1);
++    expect(seen[0]).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R2 the bound handed to AbortSignal.timeout is positive and at most 30000 ms', async () => {
++    const timeout = vi.spyOn(AbortSignal, 'timeout');
++    stubAnswering([]);
++    await requestMeteringKey(SEC, 'tenant-123', 'acme');
++    const bounds = timeout.mock.calls.map((c) => c[0] as number);
++    expect(bounds).toHaveLength(1);
++    expect(bounds[0]).toBeGreaterThan(0);
++    expect(bounds[0]).toBeLessThanOrEqual(30000);
++  });
++
++  it('RED KS-1240 R3 a security service that never answers ends in a rejection, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => requestMeteringKey(SEC, 'tenant-123', 'acme'))).toBe('REJECTED');
++  });
++
++  it('RED KS-1240 R4 the generate-key fetch in index.ts carries a timeout signal', () => {
++    expect(INDEX_SRC).toContain('signal: AbortSignal.timeout(KEY_GENERATION_FETCH_TIMEOUT_MS),');
++  });
++
++  it('RED KS-1240 R5 index.ts declares the generate-key bound as a positive number of at most 30000 ms', () => {
++    const match = /const KEY_GENERATION_FETCH_TIMEOUT_MS = ([0-9_]+);/.exec(INDEX_SRC);
++    const ms = match ? Number(match[1].replace(/_/g, '')) : NaN;
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(30000);
++  });
++
++  it('control KS-1240 C1 a healthy mint still returns the key material', async () => {
++    stubAnswering([]);
++    expect(await requestMeteringKey(SEC, 'tenant-123', 'acme')).toEqual({ key: 'sk_deadbeef', prefix: 'sk_deadbeef0', id: 'key_abc' });
++  });
++
++  it('control KS-1240 C2 a non-2xx answer still throws with the status in the message', async () => {
++    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 403, json: async () => ({}) })));
++    await expect(requestMeteringKey(SEC, 't', 's')).rejects.toThrow('403');
++  });
++
++  it('control KS-1240 C3 index.ts still sends the generate-key request to the tokenisation service', () => {
++    expect(INDEX_SRC).toContain('${TOKENISATION_URL}/api/generate-key');
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts
+1: /**
+2:  * KS-336 — mint a per-tenant Platform-S metering key via the security service.
+3:  *
+4:  * Extracted from the provisioning handler so it can be unit-tested without
+5:  * booting the service. The security service owns connector keys (svc_api_keys,
+6:  * in the app DB — a different DB from the platform tables tenant-provisioning
+7:  * writes), so this is an HTTP call, not a platform-DB write.
+8:  */
+9: 
+10: /** Key material the security service returns once, at key creation. */
+11: export interface MeteringKey {
+12:   /** The plaintext `sk_…` key — shown only here; the server stores a hash. */
+13:   key: string;
+14:   /** The non-secret key prefix (first 12 chars), safe to log / display. */
+15:   prefix: string;
+16:   /** The internal `key_…` record id, for later revoke / lookup. */
+17:   id: string;
+18: }
+19: 
+20: // KS-1240 (class): the longest provisioning waits for the security service to mint the metering key. The fetch carried no timeout, so a security service that accepted the connection and never answered
+21: // held the tenant-creation request for as long as the socket lived. On expiry the fetch rejects, requestMeteringKey throws, and the provisioning handler fails soft as it already does for a non-2xx.
+22: const METERING_KEY_FETCH_TIMEOUT_MS = 10_000;
+23: 
+24: /**
+25:  * Mint a read-only, single-tenant `metering:read` connector key for Platform-S.
+26:  *
+27:  * Tenant creation is always driven by an authenticated platform-admin, so the
+28:  * caller's bearer is forwarded — the admin identity authorises (and is audited
+29:  * on) the new tenant's key. `svc_api_keys.tenant_id` is immutable, so a leaked
+30:  * key exposes only this one tenant's usage.
+31:  *
+32:  * @param securityUrl - base URL of the security service (e.g. `http://security:4008`).
+33:  * @param tenantId - the freshly-provisioned tenant id; becomes the key's immutable `tenant_id`.
+34:  * @param tenantSlug - the tenant slug, used only to label the key.
+35:  * @param authHeader - the provisioning admin's `Authorization` header, forwarded for authz + audit.
+36:  * @returns the new key material, or `null` if security returned a non-success body.
+37:  * @throws Error if the security service returns a non-2xx status (the caller fails soft).
+38:  * @example
+39:  * const k = await requestMeteringKey('http://security:4004', tenantId, 'acme', req.headers.authorization);
+40:  * // k?.key === 'sk_…'
+41:  */
+42: export async function requestMeteringKey(
+43:   securityUrl: string,
+44:   tenantId: string,
+45:   tenantSlug: string,
+46:   authHeader?: string,
+47: ): Promise<MeteringKey | null> {
+48:   // Single read-only metering scope on exactly this tenant — least privilege.
+49:   const res = await fetch(`${securityUrl}/api/keys`, {
+50:     method: 'POST',
+51:     headers: {
+52:       'Content-Type': 'application/json',
+53:       // Forward the admin bearer so security authorises + audits the mint.
+54:       ...(authHeader ? { Authorization: authHeader } : {}),
+55:     },
+56:     body: JSON.stringify({
+57:       name: `Platform S metering — ${tenantSlug}`,
+58:       tenantId,
+59:       scopes: ['metering:read'],
+60:       connectorId: 'platform-s',
+61:     }),
+62:     signal: AbortSignal.timeout(METERING_KEY_FETCH_TIMEOUT_MS),
+63:   });
+64:   // Non-2xx → throw so the provisioning handler can fail soft (tenant already active).
+65:   if (!res.ok) {
+66:     throw new Error(`security /api/keys returned ${res.status}`);
+67:   }
+68:   const body = (await res.json()) as {
+69:     success?: boolean;
+70:     data?: { id: string; key: string; prefix: string };
+71:   };
+72:   // A 2xx without a key (shouldn't happen) is treated as "no key minted", not a throw.
+73:   if (!body?.success || !body.data?.key) {
+74:     return null;
+75:   }
+76:   return { key: body.data.key, prefix: body.data.prefix, id: body.data.id };
+77: }
+
+### FILE AT HEAD: Blockchain/Dev/services/tenant-provisioning/src/index.ts
+1: import express from 'express';
+2: import { z } from 'zod';
+3: import { tenantIdParamGuard } from './tenantIdParam.js';
+4: import pg from 'pg';
+5: import { readFileSync, readdirSync } from 'node:fs';
+6: import { join } from 'node:path';
+7: import { createHash, randomBytes } from 'node:crypto';
+8: import { authenticate as jwtAuthenticate, enforceProductionConfig, errorHandler, pgSslConfig, rejectNulBytes } from '@secuura/shared';
+9: import { requestMeteringKey, type MeteringKey } from './meteringKey.js';
+10: 
+11: // Production startup guard — refuse to start with dev defaults in production
+12: enforceProductionConfig('tenant-provisioning', {
+13:   requiredEnvVars: ['DATABASE_URL', 'PLATFORM_DATABASE_URL'],
+14:   forbiddenValues: {},
+15:   requireRealProviders: true,
+16: });
+17: 
+18: const app = express();
+19: app.use(express.json({ limit: '1mb' }));
+20: app.use(rejectNulBytes()); // KS-471: no U+0000 may pass the boundary (raw-500 / persist class)
+21: 
+22: const PORT = parseInt(process.env.PORT || '4022', 10);
+23: 
+24: const PLATFORM_DB_URL = process.env.PLATFORM_DATABASE_URL;
+25: if (!PLATFORM_DB_URL) throw new Error('PLATFORM_DATABASE_URL environment variable is required');
+26: 
+27: // Derive PG connection details from PLATFORM_DATABASE_URL (preferred) or DATABASE_URL
+28: // PLATFORM_DATABASE_URL always points to the real PostgreSQL server — not PgBouncer —
+29: // which is required because tenant creation uses CREATE DATABASE (admin-level op).
+30: const _dbUrl = new URL(PLATFORM_DB_URL);
+31: const _fallbackUrl = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL) : null;
+32: const PG_USER = process.env.POSTGRES_USER || _dbUrl.username || _fallbackUrl?.username || 'secuura';
+33: const PG_PASSWORD = process.env.POSTGRES_PASSWORD || _dbUrl.password || _fallbackUrl?.password || 'secuura_dev_password';
+34: const PG_HOST = process.env.POSTGRES_HOST || _dbUrl.hostname || _fallbackUrl?.hostname || 'postgres';
+35: const PG_PORT = parseInt(process.env.POSTGRES_PORT || _dbUrl.port || _fallbackUrl?.port || '5432', 10);
+36: 
+37: const TOKENISATION_URL = process.env.TOKENISATION_URL || 'http://tokenisation:4021';
+38: 
+39: // KS-1240 (class): the longest provisioning waits for the tokenisation service to generate a tenant key. The fetch carried no timeout, so a tokenisation service that accepted the connection and never
+40: // answered held the tenant-creation request for as long as the socket lived. On expiry the fetch rejects out of requestKeyGeneration to the handler's existing error path.
+41: const KEY_GENERATION_FETCH_TIMEOUT_MS = 10_000;
+42: // KS-336: the security service owns connector API keys (svc_api_keys, in the app
+43: // DB — a different DB from the platform tables this service writes). We mint the
+44: // per-tenant metering key over HTTP, not via platformQuery. Default matches the
+45: // local-stack service name + port (security listens on 4008); Azure sets the
+46: // internal FQDN via env.
+47: const SECURITY_SERVICE_URL = process.env.SECURITY_SERVICE_URL || 'http://security:4008';
+48: 
+49: const INIT_SCRIPTS_DIR = process.env.INIT_SCRIPTS_DIR || '/app/init-scripts';
+50: 
+51: const platformPool = new pg.Pool({ connectionString: PLATFORM_DB_URL, max: 5 });
+52: 
+53: async function platformQuery<T extends pg.QueryResultRow = any>(
+54:   text: string,
+55:   params?: unknown[],
+56: ): Promise<pg.QueryResult<T>> {
+57:   return platformPool.query<T>(text, params);
+58: }
+59: 
+60: // -------------------------------------------------------------------------
+61: // Helper: create a database and run init scripts
+62: // -------------------------------------------------------------------------
+63: 
+64: const VALID_DB_NAME = /^[a-z][a-z0-9_]{0,62}$/;
+65: 
+66: async function createTenantDatabase(dbName: string): Promise<void> {
+67:   if (!VALID_DB_NAME.test(dbName)) {
+68:     throw new Error(`Invalid database name: ${dbName}`);
+69:   }
+70:   const adminPool = new pg.Pool({
+71:     user: PG_USER,
+72:     password: PG_PASSWORD,
+73:     host: PG_HOST,
+74:     port: PG_PORT,
+75:     database: 'postgres',
+76:     max: 2,
+77:     ssl: pgSslConfig(PG_HOST),
+78:   });
+79: 
+80:   try {
+81:     const exists = await adminPool.query(
+82:       `SELECT 1 FROM pg_database WHERE datname = $1`,
+83:       [dbName],
+84:     );
+85:     if (exists.rowCount === 0) {
+86:       await adminPool.query(`CREATE DATABASE "${dbName}" OWNER "${PG_USER}"`);
+87:     }
+88:   } finally {
+89:     await adminPool.end();
+90:   }
+91: 
+92:   const tenantPool = new pg.Pool({
+93:     user: PG_USER,
+94:     password: PG_PASSWORD,
+95:     host: PG_HOST,
+96:     port: PG_PORT,
+97:     database: dbName,
+98:     max: 2,
+99:   });
+100: 
+101:   try {
+102:     let scripts: string[] = [];
+103:     try {
+104:       scripts = readdirSync(INIT_SCRIPTS_DIR)
+105:         .filter((f) => f.endsWith('.sql'))
+106:         .sort();
+107:     } catch {
+108:       console.warn(`[provisioning] Init scripts dir not found: ${INIT_SCRIPTS_DIR}`);
+109:     }
+110: 
+111:     for (const script of scripts) {
+112:       const sql = readFileSync(join(INIT_SCRIPTS_DIR, script), 'utf-8');
+113:       try {
+114:         await tenantPool.query(sql);
+115:         console.log(`[provisioning] Executed ${script} on ${dbName}`);
+116:       } catch (err) {
+117:         console.warn(`[provisioning] Script ${script} on ${dbName} had errors:`, (err as Error).message);
+118:       }
+119:     }
+120:   } finally {
+121:     await tenantPool.end();
+122:   }
+123: }
+124: 
+125: // -------------------------------------------------------------------------
+126: // Helper: generate a key via the tokenisation service
+127: // -------------------------------------------------------------------------
+128: 
+129: async function requestKeyGeneration(tenantId: string, tenantSlug: string, authHeader?: string) {
+130:   // KS-175: forward the calling platform-admin's bearer token. generate-key now
+131:   // requires a platform-level role (SYSTEM_ADMIN/SUPER_ADMIN/...), and tenant
+132:   // creation is always driven by an authenticated platform-admin, so the real
+133:   // admin identity authorises — and is audited on — the new tenant's key. A
+134:   // tenant-scoped user hitting generate-key directly is rejected with 403.
+135:   const res = await fetch(`${TOKENISATION_URL}/api/generate-key`, {
+136:     method: 'POST',
+137:     headers: {
+138:       'Content-Type': 'application/json',
+139:       ...(authHeader ? { Authorization: authHeader } : {}),
+140:     },
+141:     body: JSON.stringify({ tenantId, tenantSlug }),
+142:     signal: AbortSignal.timeout(KEY_GENERATION_FETCH_TIMEOUT_MS),
+143:   });
+144:   return res.json() as Promise<{
+145:     success: boolean;
+146:     keyFile: Record<string, unknown>;
+147:     keyHash: string;
+148:   }>;
+149: }
+150: 
+151: // -------------------------------------------------------------------------
+152: // GET /health
+153: // -------------------------------------------------------------------------
+154: 
+155: app.get('/health', (_req, res) => {
+156:   res.json({ status: 'ok', service: 'tenant-provisioning', version: '1.0.0' });
+157: });
+158: 
+159: // Pen-test H2 — every /api/* route below this point JWT-verifies the
+160: // bearer token via @secuura/shared's `authenticate()`. Without this,
+161: // downstream services trusted the gateway-injected x-user-* headers,
+162: // which an attacker reaching a service directly (intra-cluster, leaked
+163: // internal endpoint, etc.) could forge.
+164: app.use('/api', jwtAuthenticate());
+165: 
+166: // -------------------------------------------------------------------------
+167: // POST /api/tenants  — create a new tenant
+168: // -------------------------------------------------------------------------
+169: 
+170: // F-DEV-TENANT-CRUFT fix (2026-04-29): refuse slugs that are obvious
+171: // test cruft or that contain literal `undefined`/`null`. Without this,
+172: // a shell script with an unset env var (`co-${ENV}`) creates tenants
+173: // named `co-undefined` etc. — Dev had 6 such cruft tenants.
+174: const TENANT_SLUG_BLOCKLIST = /(^|-)(undefined|null)(-|$)|^test(-?[0-9]+)?$|^test-bug/i;
+175: const createTenantSchema = z.object({
+176:   name: z.string().trim().min(1).max(255),
+177:   slug: z
+178:     .string()
+179:     .min(2)
+180:     .max(100)
+181:     .regex(/^[a-z0-9-]+$/)
+182:     .refine((s) => !TENANT_SLUG_BLOCKLIST.test(s), {
+183:       message:
+184:         'Tenant slug looks like test cruft (matches `test-?\\d+`, `test-bug…`, or contains `undefined`/`null`). ' +
+185:         'If this is a real tenant, pick a different slug. If a script is generating slugs from env vars, ensure they are set.',
+186:     }),
+187:   domain: z.string().trim().optional(),
+188:   industry: z.string().trim().optional(),
+189:   country: z.string().trim().optional(),
+190:   test_url: z.string().url().optional().or(z.literal('')),
+191:   live_url: z.string().url().optional().or(z.literal('')),
+192:   contacts: z.array(z.object({
+193:     name: z.string().trim(),
+194:     email: z.string().trim().email(),
+195:     phone: z.string().trim().optional(),
+196:     role: z.string().optional(),
+197:     isPrimary: z.boolean().optional(),
+198:   })).optional(),
+199: });
+200: 
+201: app.post('/api/tenants', async (req, res) => {
+202:   // KS-211: track the inserted tenant id so a provisioning failure (CREATE
+203:   // DATABASE / key-gen / a later INSERT) rolls back instead of leaving an
+204:   // orphan 'provisioning' tenant (which then blocks retries / pollutes the
+205:   // tenant list). The catch also logs the real cause — it was a silent 500.
+206:   let provisionedTenantId: string | undefined;
+207:   try {
+208:     const body = createTenantSchema.parse(req.body);
+209:     const dbName = `secuura_tenant_${body.slug.replace(/-/g, '_')}`;
+210: 
+211:     const existing = await platformQuery(
+212:       `SELECT id FROM tenants WHERE slug = $1`,
+213:       [body.slug],
+214:     );
+215:     if (existing.rowCount && existing.rowCount > 0) {
+216:       res.status(409).json({ success: false, error: { code: 'CONFLICT', message: `Tenant with slug "${body.slug}" already exists` } });
+217:       return;
+218:     }
+219: 
+220:     const tenantResult = await platformQuery<{ id: string }>(
+221:       `INSERT INTO tenants (name, slug, status, domain, industry, country, test_url, live_url)
+222:        VALUES ($1, $2, 'provisioning', $3, $4, $5, $6, $7)
+223:        RETURNING id`,
+224:       [body.name, body.slug, body.domain || null, body.industry || null, body.country || null, body.test_url || null, body.live_url || null],
+225:     );
+226:     const tenantId = tenantResult.rows[0].id;
+227:     provisionedTenantId = tenantId;
+228: 
+229:     if (body.contacts) {
+230:       for (const c of body.contacts) {
+231:         await platformQuery(
+232:           `INSERT INTO tenant_contacts (tenant_id, name, email, phone, role, is_primary)
+233:            VALUES ($1, $2, $3, $4, $5, $6)`,
+234:           [tenantId, c.name, c.email, c.phone || null, c.role || 'admin', c.isPrimary ?? false],
+235:         );
+236:       }
+237:     }
+238: 
+239:     // KS-211: per-tenant DATABASE provisioning is gated OFF by default. New
+240:     // tenants use the shared app DB (consistent with existing tenants + the
+241:     // current RLS-inert reality). Building real per-tenant-DB isolation (admin
+242:     // CREATE DATABASE + the connection budget) is KS-160's job — set
+243:     // PROVISION_PER_TENANT_DB=true once that path is ready.
+244:     //
+245:     // Point tenant_config at the shared app DB *via the runtime path* (DATABASE_URL
+246:     // → pgbouncer on Azure), so a trafficked tenant multiplexes through pgbouncer
+247:     // instead of opening a direct connection (KS-207), and the row satisfies the
+248:     // NOT NULL tenant_config schema (local init-platform; Azure's migration is
+249:     // nullable, but non-null is safe for both).
+250:     const provisionPerTenantDb = process.env.PROVISION_PER_TENANT_DB === 'true';
+251:     const appDbUrl = (() => {
+252:       try { return new URL(process.env.DATABASE_URL || ''); } catch { return null; }
+253:     })();
+254:     let cfgDbName: string = appDbUrl?.pathname.replace(/^\//, '') || 'secuura';
+255:     let cfgDbHost: string = appDbUrl?.hostname || PG_HOST;
+256:     let cfgDbPort: number = appDbUrl?.port ? parseInt(appDbUrl.port, 10) : PG_PORT;
+257:     if (provisionPerTenantDb) {
+258:       await createTenantDatabase(dbName);
+259:       cfgDbName = dbName;
+260:       cfgDbHost = PG_HOST;
+261:       cfgDbPort = PG_PORT;
+262:     }
+263: 
+264:     let keyFile: Record<string, unknown> | null = null;
+265:     let keyHash = '';
+266:     try {
+267:       const keyResult = await requestKeyGeneration(tenantId, body.slug, req.headers.authorization);
+268:       if (keyResult.success) {
+269:         keyFile = keyResult.keyFile;
+270:         keyHash = keyResult.keyHash;
+271:       }
+272:     } catch (err) {
+273:       console.warn('[provisioning] Key generation failed, will need manual generation:', (err as Error).message);
+274:     }
+275: 
+276:     await platformQuery(
+277:       `INSERT INTO tenant_config (tenant_id, db_name, db_host, db_port, vault_key_hash)
+278:        VALUES ($1, $2, $3, $4, $5)`,
+279:       [tenantId, cfgDbName, cfgDbHost, cfgDbPort, keyHash || null],
+280:     );
+281: 
+282:     await platformQuery(
+283:       `UPDATE tenants SET status = 'active' WHERE id = $1`,
+284:       [tenantId],
+285:     );
+286: 
+287:     await platformQuery(
+288:       `INSERT INTO platform_audit_log (action, target_type, target_id, details)
+289:        VALUES ('tenant_created', 'tenant', $1, $2)`,
+290:       [tenantId, JSON.stringify({ name: body.name, slug: body.slug, dbName })],
+291:     );
+292: 
+293:     // KS-336: mint the tenant's Platform-S metering key (Option A onboarding) and
+294:     // return it once, alongside the vault keyFile, so S receives it at signup
+295:     // without holding admin creds. Fail-soft — a mint failure must NOT fail
+296:     // provisioning (the tenant is already active); it can be minted later.
+297:     // Mirrors the keyFile try/catch above.
+298:     let meteringApiKey: MeteringKey | null = null;
+299:     try {
+300:       meteringApiKey = await requestMeteringKey(SECURITY_SERVICE_URL, tenantId, body.slug, req.headers.authorization);
+301:     } catch (err) {
+302:       console.warn('[provisioning] metering key mint failed, will need manual generation:', (err as Error).message);
+303:     }
+304: 
+305:     res.status(201).json({
+306:       success: true,
+307:       tenant: { id: tenantId, name: body.name, slug: body.slug, status: 'active', dbName: cfgDbName },
+308:       keyFile,
+309:       meteringApiKey,
+310:     });
+311:   } catch (err: unknown) {
+312:     if (err instanceof z.ZodError) {
+313:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: err.errors } });
+314:       return;
+315:     }
+316:     const message = err instanceof Error ? err.message : String(err);
+317:     // KS-211: surface the real cause — this was a silent 500 (the message was
+318:     // returned to the client but never logged server-side, so it was invisible
+319:     // in Log Analytics). Likely cause on Azure: tenant-provisioning connects to
+320:     // the platform DB as the least-privilege secuura_app role (from
+321:     // PLATFORM_DATABASE_URL), which cannot write the platform tables / CREATE
+322:     // DATABASE — a platform-admin write service needs an admin connection.
+323:     console.error('[provisioning] POST /api/tenants failed:', message, err instanceof Error ? err.stack : '');
+324:     // Roll back a partially-created tenant so it doesn't orphan or block retries.
+325:     if (provisionedTenantId) {
+326:       try {
+327:         await platformQuery(`DELETE FROM tenant_config WHERE tenant_id = $1`, [provisionedTenantId]);
+328:         await platformQuery(`DELETE FROM tenant_contacts WHERE tenant_id = $1`, [provisionedTenantId]);
+329:         await platformQuery(`DELETE FROM tenants WHERE id = $1`, [provisionedTenantId]);
+330:         console.error(`[provisioning] rolled back partially-created tenant ${provisionedTenantId}`);
+331:       } catch (cleanupErr) {
+332:         console.error('[provisioning] cleanup of partial tenant failed:', (cleanupErr as Error).message);
+333:       }
+334:     }
+335:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
+336:   }
+337: });
+338: 
+339: // -------------------------------------------------------------------------
+340: // GET /api/tenants  — list all tenants
+341: // -------------------------------------------------------------------------
+342: 
+343: app.get('/api/tenants', async (_req, res) => {
+344:   try {
+345:     const result = await platformQuery(
+346:       `SELECT t.*, tc.db_name, tc.db_host, tc.db_port
+347:        FROM tenants t
+348:        LEFT JOIN tenant_config tc ON tc.tenant_id = t.id
+349:        ORDER BY t.created_at DESC`,
+350:     );
+351:     res.json({ success: true, tenants: result.rows, total: result.rowCount });
+352:   } catch (err: unknown) {
+353:     // Return 400 for validation errors, 500 for everything else
+354:     if (err instanceof z.ZodError) {
+355:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: err.errors } });
+356:       return;
+357:     }
+358:     const message = err instanceof Error ? err.message : String(err);
+359:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
+360:   }
+361: });
+362: 
+363: // -------------------------------------------------------------------------
+364: // :id param guard — KS-497 (see src/tenantIdParam.ts for the rationale)
+365: // -------------------------------------------------------------------------
+366: app.param('id', tenantIdParamGuard);
+367: 
+368: // -------------------------------------------------------------------------
+369: // GET /api/tenants/:id
+370: // -------------------------------------------------------------------------
+371: 
+372: app.get('/api/tenants/:id', async (req, res) => {
+373:   try {
+374:     const tenant = await platformQuery(
+375:       `SELECT t.*, tc.db_name, tc.db_host, tc.db_port, tc.token_location_type, tc.token_location_path
+376:        FROM tenants t
+377:        LEFT JOIN tenant_config tc ON tc.tenant_id = t.id
+378:        WHERE t.id = $1`,
+379:       [req.params.id],
+380:     );
+381:     if (tenant.rowCount === 0) {
+382:       res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Tenant not found' } });
+383:       return;
+384:     }
+385: 
+386:     const contacts = await platformQuery(
+387:       `SELECT * FROM tenant_contacts WHERE tenant_id = $1`,
+388:       [req.params.id],
+389:     );
+390: 
+391:     res.json({
+392:       success: true,
+393:       tenant: tenant.rows[0],
+394:       contacts: contacts.rows,
+395:     });
+396:   } catch (err: unknown) {
+397:     const message = err instanceof Error ? err.message : String(err);
+398:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
+399:   }
+400: });
+401: 
+402: // -------------------------------------------------------------------------
+403: // PATCH /api/tenants/:id/status  — suspend / activate / archive
+404: // -------------------------------------------------------------------------
+405: 
+406: app.patch('/api/tenants/:id/status', async (req, res) => {
+407:   try {
+408:     const { status } = req.body;
+409:     if (!['active', 'suspended', 'archived'].includes(status)) {
+410:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid status' } });
+411:       return;
+412:     }
+413: 
+414:     await platformQuery(
+415:       `UPDATE tenants SET status = $1, updated_at = now() WHERE id = $2`,
+416:       [status, req.params.id],
+417:     );
+418: 
+419:     await platformQuery(
+420:       `INSERT INTO platform_audit_log (action, target_type, target_id, details)
+421:        VALUES ('tenant_status_changed', 'tenant', $1, $2)`,
+422:       [req.params.id, JSON.stringify({ status })],
+423:     );
+424: 
+425:     res.json({ success: true, status });
+426:   } catch (err: unknown) {
+427:     const message = err instanceof Error ? err.message : String(err);
+428:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
+429:   }
+430: });
+431: 
+432: // -------------------------------------------------------------------------
+433: // PATCH /api/tenants/:id  — update tenant fields
+434: // -------------------------------------------------------------------------
+435: 
+436: const updateTenantSchema = z.object({
+437:   name: z.string().trim().min(1).max(255).optional(),
+438:   domain: z.string().trim().optional(),
+439:   industry: z.string().trim().optional(),
+440:   country: z.string().trim().optional(),
+441:   test_url: z.string().url().optional().or(z.literal('')).or(z.null()),
+442:   live_url: z.string().url().optional().or(z.literal('')).or(z.null()),
+443: });
+444: 
+445: app.patch('/api/tenants/:id', async (req, res) => {
+446:   try {
+447:     const body = updateTenantSchema.parse(req.body);
+448:     const sets: string[] = [];
+449:     const vals: unknown[] = [];
+450:     let idx = 1;
+451: 
+452:     for (const [key, value] of Object.entries(body)) {
+453:       if (value !== undefined) {
+454:         sets.push(`${key} = $${idx}`);
+455:         vals.push(value === '' ? null : value);
+456:         idx++;
+457:       }
+458:     }
+459: 
+460:     if (sets.length === 0) {
+461:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'No fields to update' } });
+462:       return;
+463:     }
+464: 
+465:     sets.push(`updated_at = now()`);
+466:     vals.push(req.params.id);
+467: 
+468:     await platformQuery(
+469:       `UPDATE tenants SET ${sets.join(', ')} WHERE id = $${idx}`,
+470:       vals,
+471:     );
+472: 
+473:     await platformQuery(
+474:       `INSERT INTO platform_audit_log (action, target_type, target_id, details)
+475:        VALUES ('tenant_updated', 'tenant', $1, $2)`,
+476:       [req.params.id, JSON.stringify(body)],
+477:     );
+478: 
+479:     res.json({ success: true });
+480:   } catch (err: unknown) {
+481:     // KS-497: a body failing updateTenantSchema threw a ZodError that fell
+482:     // into the generic handler → raw 500. Map it to the declared 400, the
+483:     // same shape the list route already uses.
+484:     if (err instanceof z.ZodError) {
+485:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: err.errors } });
+486:       return;
+487:     }
+488:     const message = err instanceof Error ? err.message : String(err);
+489:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
+490:   }
+491: });
+492: 
+493: // -------------------------------------------------------------------------
+494: // DELETE /api/tenants/:id  — delete (requires confirmation)
+495: // -------------------------------------------------------------------------
+496: 
+497: app.delete('/api/tenants/:id', async (req, res) => {
+498:   try {
+499:     const { confirm } = req.body || {};
+500:     if (confirm !== true) {
+501:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Set "confirm": true in the request body to delete' } });
+502:       return;
+503:     }
+504: 
+505:     const tenant = await platformQuery<{ slug: string }>(
+506:       `SELECT slug FROM tenants WHERE id = $1`,
+507:       [req.params.id],
+508:     );
+509:     if (tenant.rowCount === 0) {
+510:       res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Tenant not found' } });
+511:       return;
+512:     }
+513: 
+514:     const dbName = `secuura_tenant_${tenant.rows[0].slug.replace(/-/g, '_')}`;
+515: 
+516:     if (!VALID_DB_NAME.test(dbName)) {
+517:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid database name derived from tenant slug' } });
+518:       return;
+519:     }
+520: 
+521:     // Delete related records — wrap each in try/catch since tables may not exist on all deployments.
+522:     // BACKLOG H13: added `platform_document_registry` — without it, tenants
+523:     // that ever had a doc registered can't be deleted (the FK from
+524:     // platform_document_registry.tenant_id blocks the DELETE FROM tenants).
+525:     for (const table of ['vault_entries', 'tenant_contacts', 'tenant_config', 'platform_document_registry']) {
+526:       try { await platformQuery(`DELETE FROM ${table} WHERE tenant_id = $1`, [req.params.id]); } catch {}
+527:     }
+528:     await platformQuery(`DELETE FROM tenants WHERE id = $1`, [req.params.id]);
+529: 
+530:     try {
+531:       const adminPool = new pg.Pool({
+532:         user: PG_USER, password: PG_PASSWORD, host: PG_HOST, port: PG_PORT, database: 'postgres', max: 2,
+533:         ssl: pgSslConfig(PG_HOST),
+534:       });
+535:       await adminPool.query(`DROP DATABASE IF EXISTS "${dbName}"`);
+536:       await adminPool.end();
+537:     } catch (err) {
+538:       console.warn('[provisioning] Failed to drop database:', (err as Error).message);
+539:     }
+540: 
+541:     await platformQuery(
+542:       `INSERT INTO platform_audit_log (action, target_type, target_id, details)
+543:        VALUES ('tenant_deleted', 'tenant', $1, $2)`,
+544:       [req.params.id, JSON.stringify({ slug: tenant.rows[0].slug, dbName })],
+545:     );
+546: 
+547:     res.json({ success: true, deleted: true });
+548:   } catch (err: unknown) {
+549:     const message = err instanceof Error ? err.message : String(err);
+550:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
+551:   }
+552: });
+553: 
+554: // -------------------------------------------------------------------------
+555: // GET /api/audit-log  — platform audit log
+556: // -------------------------------------------------------------------------
+557: 
+558: app.get('/api/audit-log', async (req, res) => {
+559:   try {
+560:     const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+561:     const offset = parseInt(req.query.offset as string) || 0;
+562:     const result = await platformQuery(
+563:       `SELECT * FROM platform_audit_log ORDER BY created_at DESC, id DESC LIMIT $1 OFFSET $2`,
+564:       [limit, offset],
+565:     );
+566:     const countResult = await platformQuery(`SELECT COUNT(*) as total FROM platform_audit_log`);
+567:     res.json({ success: true, entries: result.rows, total: parseInt(countResult.rows[0].total) });
+568:   } catch (err: unknown) {
+569:     const message = err instanceof Error ? err.message : String(err);
+570:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
+571:   }
+572: });
+573: 
+574: // -------------------------------------------------------------------------
+575: // START
+576: // -------------------------------------------------------------------------
+577: 
+578: try {
+579:   await platformPool.query('SELECT 1');
+580:   console.log('[provisioning] Platform DB connected');
+581: } catch {
+582:   console.warn('[provisioning] Platform DB not available — will retry on first request');
+583: }
+584: 
+585: // KS-111: final AppError-aware handler — thrown AppErrors (and unknowns) get the
+586: // canonical {success,error} JSON + correct status instead of Express's HTML 500.
+587: app.use(errorHandler);
+588: 
+589: const server = app.listen(PORT, () => {
+590: 
+591:   console.log(`[provisioning] Listening on port ${PORT}`);
+592: });
+593: // KS-252: hold keep-alive sockets longer than any upstream proxy's idle
+594: // window (gateway http-proxy-middleware / nginx / ACA envoy reuse pooled
+595: // sockets; Node's 5 s default close races their reuse -> ECONNRESET and
+596: // 19-29 s stalls under load). headersTimeout must exceed keepAliveTimeout.
+597: server.keepAliveTimeout = 65_000;
+598: server.headersTimeout = 66_000;
+
+### FILE AT HEAD: Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts
+1: // KS-1240 (class: hand-built outbound fetches with no timeout), tenant-provisioning meteringKey.ts and index.ts: the metering-key mint (requestMeteringKey, exported) and the tenant key generation
+2: // (requestKeyGeneration, private to index.ts, which boots a server and so is read as TEXT here) fetched the security and tokenisation services with no `signal`, so a service that accepted the connection
+3: // and never answered held the tenant-creation request for as long as the socket lived. requestMeteringKey is driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there
+4: // is none). R1 pins that its fetch carries an AbortSignal, R2 that the bound is sane, R3 that a silent security service ends in a rejection and not a hang, R4 and R5 that index.ts bounds its fetch;
+5: // C1 to C3 pin the unchanged answers.
+6: import { describe, it, expect, vi, afterEach } from 'vitest';
+7: import { readFileSync } from 'node:fs';
+8: import { fileURLToPath } from 'node:url';
+9: import { requestMeteringKey } from '../meteringKey.js';
+10: 
+11: const SEC = 'http://security:4004';
+12: const INDEX_SRC = readFileSync(fileURLToPath(new URL('../index.ts', import.meta.url)), 'utf8');
+13: 
+14: afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+15: 
+16: /** The key the security service mints, as a Response-like object. */
+17: function mintedKey(): Response {
+18:   return { ok: true, status: 201, json: async () => ({ success: true, data: { id: 'key_abc', key: 'sk_deadbeef', prefix: 'sk_deadbeef0' } }) } as unknown as Response;
+19: }
+20: 
+21: /** Answers the mint and records the signal the call carried. */
+22: function stubAnswering(seen: unknown[]): void {
+23:   vi.stubGlobal('fetch', vi.fn(async (_url: unknown, init?: { signal?: unknown }) => { seen.push(init?.signal); return mintedKey(); }));
+24: }
+25: 
+26: /** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
+27: function stubNeverAnswering(): void {
+28:   vi.stubGlobal('fetch', vi.fn((_url: unknown, init?: { signal?: AbortSignal }) =>
+29:     new Promise<Response>((_resolve, reject) => {
+30:       const signal = init?.signal;
+31:       if (!signal) return;
+32:       if (signal.aborted) reject(new Error('aborted'));
+33:       else signal.addEventListener('abort', () => reject(new Error('aborted')));
+34:     })));
+35: }
+36: 
+37: /** 'REJECTED' when the call rejects, 'RESOLVED' when it resolves, 'HUNG' when it is still pending after 300 ms, so a hang is a red assertion and not a stuck run. */
+38: async function outcome(run: () => Promise<unknown>): Promise<string> {
+39:   return Promise.race([
+40:     run().then(() => 'RESOLVED', () => 'REJECTED'),
+41:     new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
+42:   ]);
+43: }
+44: 
+45: describe('KS-1240: tenant provisioning bounds its outbound fetches', () => {
+46:   it('RED KS-1240 R1 the metering-key fetch carries an AbortSignal', async () => {
+47:     const seen: unknown[] = [];
+48:     stubAnswering(seen);
+49:     await requestMeteringKey(SEC, 'tenant-123', 'acme', 'Bearer admintoken');
+50:     expect(seen).toHaveLength(1);
+51:     expect(seen[0]).toBeInstanceOf(AbortSignal);
+52:   });
+53: 
+54:   it('RED KS-1240 R2 the bound handed to AbortSignal.timeout is positive and at most 30000 ms', async () => {
+55:     const timeout = vi.spyOn(AbortSignal, 'timeout');
+56:     stubAnswering([]);
+57:     await requestMeteringKey(SEC, 'tenant-123', 'acme');
+58:     const bounds = timeout.mock.calls.map((c) => c[0] as number);
+59:     expect(bounds).toHaveLength(1);
+60:     expect(bounds[0]).toBeGreaterThan(0);
+61:     expect(bounds[0]).toBeLessThanOrEqual(30000);
+62:   });
+63: 
+64:   it('RED KS-1240 R3 a security service that never answers ends in a rejection, not a hang', async () => {
+65:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+66:     stubNeverAnswering();
+67:     expect(await outcome(() => requestMeteringKey(SEC, 'tenant-123', 'acme'))).toBe('REJECTED');
+68:   });
+69: 
+70:   it('RED KS-1240 R4 the generate-key fetch in index.ts carries a timeout signal', () => {
+71:     expect(INDEX_SRC).toContain('signal: AbortSignal.timeout(KEY_GENERATION_FETCH_TIMEOUT_MS),');
+72:   });
+73: 
+74:   it('RED KS-1240 R5 index.ts declares the generate-key bound as a positive number of at most 30000 ms', () => {
+75:     const match = /const KEY_GENERATION_FETCH_TIMEOUT_MS = ([0-9_]+);/.exec(INDEX_SRC);
+76:     const ms = match ? Number(match[1].replace(/_/g, '')) : NaN;
+77:     expect(ms).toBeGreaterThan(0);
+78:     expect(ms).toBeLessThanOrEqual(30000);
+79:   });
+80: 
+81:   it('control KS-1240 C1 a healthy mint still returns the key material', async () => {
+82:     stubAnswering([]);
+83:     expect(await requestMeteringKey(SEC, 'tenant-123', 'acme')).toEqual({ key: 'sk_deadbeef', prefix: 'sk_deadbeef0', id: 'key_abc' });
+84:   });
+85: 
+86:   it('control KS-1240 C2 a non-2xx answer still throws with the status in the message', async () => {
+87:     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 403, json: async () => ({}) })));
+88:     await expect(requestMeteringKey(SEC, 't', 's')).rejects.toThrow('403');
+89:   });
+90: 
+91:   it('control KS-1240 C3 index.ts still sends the generate-key request to the tokenisation service', () => {
+92:     expect(INDEX_SRC).toContain('${TOKENISATION_URL}/api/generate-key');
+93:   });
+94: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "26a8386bc92ceeb16414e239de583bee28f03eb4",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/tenant-provisioning/src/index.ts",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts",
+   "added": "94",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "5",
+   "0",
+   "Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts"
+  ],
+  [
+   "5",
+   "0",
+   "Blockchain/Dev/services/tenant-provisioning/src/index.ts"
+  ],
+  [
+   "94",
+   "0",
+   "Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 8,
+  "failed": 5
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 8,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=21 failed=0 | after: total=29 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 8\n",
+ "checker_summary": [
+  "PASS A6 whole services/tenant-provisioning suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/tenant-provisioning: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=3 products=2 tests=1 red_first=yes apply_mode=accommodated (see the A2 line)",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

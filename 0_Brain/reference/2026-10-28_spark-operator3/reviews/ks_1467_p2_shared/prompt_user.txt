@@ -1,0 +1,555 @@
+===== TICKET =====
+KS-1467 — AppError resets every subclass to the base prototype: `instanceof <subclass>` is always false and ValidationError `details` (password-strength feedback) never reaches the client [Backlog]
+
+## BLUF
+
+`AppError`'s constructor ends with `Object.setPrototypeOf(this, AppError.prototype)`, which resets every subclass instance to the **base** prototype. So `err instanceof ValidationError` (or any other subclass) is **always false**, and `errorHandler` never adds `details` to a 422. The password-strength `feedback` that registration, password reset and password change build is silently dropped. The same constructor line is in `packages/shared`, which twelve other services mount.
+
+## Recommendation
+
+Make the constructor `Object.setPrototypeOf(this, new.target.prototype)` in both places, with a cell per subclass, and decide deliberately that 422 responses now carry `details` (a visible response change; check the published 422 shape first). Until then, code that needs to recognise an error by type must use `statusCode`/`code`, as the tests do.
+
+## Detail
+
+* **Measured 2026-10-12** by driving the real `errorHandler` in `services/auth`: `next(new ValidationError('New password is too weak', { feedback: ['add a number'] }))` answers 422 with the body `{"success":false,"error":{"code":"VALIDATION_ERROR","message":"New password is too weak"}}`. No `details`. And `new ValidationError('x', { a: 1 }) instanceof ValidationError` is `false`.
+* **The dead branch:** `services/auth/src/middleware/errorHandler.ts:296`, `if (err instanceof ValidationError && err.details) { errorPayload.details = err.details; }`. The outer `err instanceof AppError` works (the base), the inner one cannot.
+* **What is dropped today** (`new ValidationError(..., { feedback })`): `routes/auth.ts:201` (register) and `:819` (reset-password), `routes/users.ts:981` (change-password). I have not checked the other services' use.
+* **Where the constructor line is:** `services/auth/src/middleware/errorHandler.ts:25` and `packages/shared/src/errors/index.ts:44`. Whether the shared handler has the same `details` branch is unmeasured.
+* **How it bit me:** a new `err instanceof ServiceUnavailableError` check in the KS-1188 F3 change never matched. It was caught only because the new test went red against the fix; the fix keys on `statusCode === 503`.
+* **Not established:** whether any client depends on `details` being absent; whether any other `instanceof <subclass>` exists outside `services/auth` (the one grep covered `Blockchain/Dev/services` and found only the two above).
+
+Found by Seat V 3rd while building KS-1188 F3, 2026-10-12. Related: KS-1188, KS-253 (the 503 class).
+
+## Gate notes carried from #1479 (KS-1188 F3, same file family; Sonnet-tier gate, verdict sha256/16 `306acc1aaf41a045`)
+
+1. `services/auth/src/services/passwordLoginGate.ts`: a `const` (BACKUP_CODE_UNCONFIRMED_MESSAGE) and its import sit in the middle of the import block, before `import { STATUSES_MAY_RECEIVE_CREDENTIAL }`. Cosmetic; lint passes. Move it below the imports.
+2. `ks1188-f3-a-spent-backup-code-503-says-so.test.ts`: no cell asserts the burn runs exactly once (the gate verified it by a probe only: UPDATE count 1 in the faulted case). Add one.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/packages/shared/src/errors/index.ts b/Blockchain/Dev/packages/shared/src/errors/index.ts
+--- a/Blockchain/Dev/packages/shared/src/errors/index.ts
++++ b/Blockchain/Dev/packages/shared/src/errors/index.ts
+@@ -44,4 +44,4 @@
+-    Object.setPrototypeOf(this, AppError.prototype);
++    Object.setPrototypeOf(this, new.target.prototype);
+     Error.captureStackTrace(this, this.constructor);
+   }
+ }
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts
+@@ -0,0 +1,73 @@
++// KS-1467 (packages/shared src/errors/index.ts, mounted by twelve services): AppError's constructor ended with `Object.setPrototypeOf(this, AppError.prototype)`, which resets EVERY subclass
++// instance to the base prototype, so `err instanceof <subclass>` was always false. The constructor now uses `new.target.prototype`. P1/P2/P3 pin the prototypes (three levels deep for
++// DocumentNotFoundError); C1/C2 pin what must not change: the status, the code, the details, and the handler's answer.
++import { describe, it, expect } from 'vitest';
++import type { Response } from 'express';
++import {
++  errorHandler,
++  AppError,
++  BadRequestError,
++  UnauthorizedError,
++  ForbiddenError,
++  NotFoundError,
++  ConflictError,
++  ValidationError,
++  RateLimitError,
++  InternalError,
++  ServiceUnavailableError,
++  DocumentNotFoundError,
++} from '../errors';
++
++const FACTORIES = [
++  { name: 'BadRequestError', make: () => new BadRequestError('x'), cls: BadRequestError, status: 400 },
++  { name: 'UnauthorizedError', make: () => new UnauthorizedError('x'), cls: UnauthorizedError, status: 401 },
++  { name: 'ForbiddenError', make: () => new ForbiddenError('x'), cls: ForbiddenError, status: 403 },
++  { name: 'NotFoundError', make: () => new NotFoundError('Thing'), cls: NotFoundError, status: 404 },
++  { name: 'ConflictError', make: () => new ConflictError('x'), cls: ConflictError, status: 409 },
++  { name: 'ValidationError', make: () => new ValidationError('x', { a: 1 }), cls: ValidationError, status: 422 },
++  { name: 'RateLimitError', make: () => new RateLimitError(5), cls: RateLimitError, status: 429 },
++  { name: 'InternalError', make: () => new InternalError('x'), cls: InternalError, status: 500 },
++  { name: 'ServiceUnavailableError', make: () => new ServiceUnavailableError('Billing'), cls: ServiceUnavailableError, status: 503 },
++] as const;
++
++function run(err: Error): { statusCode: number; body: { error: { code: string; message: string; details?: unknown } } } {
++  const captured = { statusCode: 0, body: undefined } as unknown as { statusCode: number; body: { error: { code: string; message: string; details?: unknown } } };
++  const res = {
++    status(code: number) {
++      captured.statusCode = code;
++      return this;
++    },
++    json(payload: unknown) {
++      captured.body = payload as typeof captured.body;
++      return this;
++    },
++  } as unknown as Response;
++  errorHandler(err, undefined, res, undefined);
++  return captured;
++}
++
++describe('KS-1467: shared AppError subclasses keep their own prototype', () => {
++  it.each(FACTORIES)('RED KS-1467 P1 $name: an instance is an instance of its own class', ({ make, cls }) => {
++    expect(make() instanceof cls).toBe(true);
++  });
++
++  it.each(FACTORIES)('RED KS-1467 P2 $name: the prototype of an instance is the class prototype', ({ make, cls }) => {
++    expect(Object.getPrototypeOf(make())).toBe(cls.prototype);
++  });
++
++  it('RED KS-1467 P3 a two-level subclass is an instance of every class in its chain', () => {
++    const e = new DocumentNotFoundError('d-1');
++    expect([e instanceof DocumentNotFoundError, e instanceof NotFoundError, e instanceof AppError]).toEqual([true, true, true]);
++  });
++
++  it.each(FACTORIES)('control KS-1467 C1 $name: an instance is still an AppError and an Error with its status', ({ make, status }) => {
++    const e = make();
++    expect([e instanceof AppError, e instanceof Error, e.statusCode]).toEqual([true, true, status]);
++  });
++
++  it('control KS-1467 C2 the handler still answers a ValidationError with its details and a 422', () => {
++    const r = run(new ValidationError('bad', { field: 'name' }));
++    expect(r.statusCode).toBe(422);
++    expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'bad', details: { field: 'name' } });
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/packages/shared/src/errors/index.ts
+1: // =============================================================================
+2: // SECUURA ERROR HANDLING
+3: // =============================================================================
+4: // Standardized error classes and handlers
+5: // =============================================================================
+6: 
+7: import { Response } from 'express';
+8: import { ZodError } from 'zod';
+9: import { logger } from '../logger';
+10: 
+11: // Error tracking (Sentry-compatible with structured-JSON fallback)
+12: export { initErrorTracking, captureError, captureMessage } from './tracking';
+13: export type { ErrorContext } from './tracking';
+14: 
+15: // Express error-tracking middleware
+16: export { errorTrackingMiddleware } from './middleware';
+17: 
+18: // =============================================================================
+19: // ERROR CLASSES
+20: // =============================================================================
+21: 
+22: /**
+23:  * Base application error
+24:  */
+25: export class AppError extends Error {
+26:   public readonly statusCode: number;
+27:   public readonly code: string;
+28:   public readonly isOperational: boolean;
+29:   public readonly details?: unknown;
+30: 
+31:   constructor(
+32:     message: string,
+33:     statusCode: number = 500,
+34:     code: string = 'INTERNAL_ERROR',
+35:     isOperational: boolean = true,
+36:     details?: unknown
+37:   ) {
+38:     super(message);
+39:     this.statusCode = statusCode;
+40:     this.code = code;
+41:     this.isOperational = isOperational;
+42:     this.details = details;
+43:     
+44:     Object.setPrototypeOf(this, new.target.prototype);
+45:     Error.captureStackTrace(this, this.constructor);
+46:   }
+47: }
+48: 
+49: /**
+50:  * 400 Bad Request
+51:  */
+52: export class BadRequestError extends AppError {
+53:   constructor(message: string = 'Bad request', details?: unknown) {
+54:     super(message, 400, 'BAD_REQUEST', true, details);
+55:   }
+56: }
+57: 
+58: /**
+59:  * 401 Unauthorized
+60:  */
+61: export class UnauthorizedError extends AppError {
+62:   constructor(message: string = 'Unauthorized') {
+63:     super(message, 401, 'UNAUTHORIZED', true);
+64:   }
+65: }
+66: 
+67: /**
+68:  * 403 Forbidden
+69:  */
+70: export class ForbiddenError extends AppError {
+71:   constructor(message: string = 'Forbidden') {
+72:     super(message, 403, 'FORBIDDEN', true);
+73:   }
+74: }
+75: 
+76: /**
+77:  * 404 Not Found
+78:  */
+79: export class NotFoundError extends AppError {
+80:   constructor(resource: string = 'Resource') {
+81:     super(`${resource} not found`, 404, 'NOT_FOUND', true);
+82:   }
+83: }
+84: 
+85: /**
+86:  * 409 Conflict
+87:  */
+88: export class ConflictError extends AppError {
+89:   constructor(message: string = 'Resource already exists') {
+90:     super(message, 409, 'CONFLICT', true);
+91:   }
+92: }
+93: 
+94: /**
+95:  * 422 Unprocessable Entity
+96:  */
+97: export class ValidationError extends AppError {
+98:   constructor(message: string = 'Validation failed', details?: unknown) {
+99:     super(message, 422, 'VALIDATION_ERROR', true, details);
+100:   }
+101: }
+102: 
+103: /**
+104:  * 429 Too Many Requests
+105:  */
+106: export class RateLimitError extends AppError {
+107:   constructor(retryAfter?: number) {
+108:     super('Too many requests', 429, 'RATE_LIMIT_EXCEEDED', true, { retryAfter });
+109:   }
+110: }
+111: 
+112: /**
+113:  * 500 Internal Server Error
+114:  */
+115: export class InternalError extends AppError {
+116:   constructor(message: string = 'Internal server error') {
+117:     super(message, 500, 'INTERNAL_ERROR', false);
+118:   }
+119: }
+120: 
+121: /**
+122:  * 503 Service Unavailable
+123:  */
+124: export class ServiceUnavailableError extends AppError {
+125:   constructor(service: string = 'Service') {
+126:     super(`${service} is temporarily unavailable`, 503, 'SERVICE_UNAVAILABLE', true);
+127:   }
+128: }
+129: 
+130: // =============================================================================
+131: // DOMAIN-SPECIFIC ERRORS
+132: // =============================================================================
+133: 
+134: export class DocumentNotFoundError extends NotFoundError {
+135:   constructor(documentId?: string) {
+136:     super(documentId ? `Document ${documentId}` : 'Document');
+137:   }
+138: }
+139: 
+140: export class UserNotFoundError extends NotFoundError {
+141:   constructor(userId?: string) {
+142:     super(userId ? `User ${userId}` : 'User');
+143:   }
+144: }
+145: 
+146: export class OrganizationNotFoundError extends NotFoundError {
+147:   constructor(orgId?: string) {
+148:     super(orgId ? `Organization ${orgId}` : 'Organization');
+149:   }
+150: }
+151: 
+152: export class WalletNotFoundError extends NotFoundError {
+153:   constructor(address?: string) {
+154:     super(address ? `Wallet ${address}` : 'Wallet');
+155:   }
+156: }
+157: 
+158: export class SignatureVerificationError extends BadRequestError {
+159:   constructor(message: string = 'Signature verification failed') {
+160:     super(message);
+161:   }
+162: }
+163: 
+164: export class HashMismatchError extends BadRequestError {
+165:   constructor() {
+166:     super('Document hash does not match');
+167:   }
+168: }
+169: 
+170: export class InsufficientVerificationError extends ForbiddenError {
+171:   constructor(required: string, current: string) {
+172:     super(`Verification level ${required} required, current level is ${current}`);
+173:   }
+174: }
+175: 
+176: export class DocumentAlreadyCertifiedError extends ConflictError {
+177:   constructor() {
+178:     super('Document has already been certified');
+179:   }
+180: }
+181: 
+182: export class DocumentRevokedError extends BadRequestError {
+183:   constructor() {
+184:     super('Document has been revoked');
+185:   }
+186: }
+187: 
+188: export class AccessDeniedError extends ForbiddenError {
+189:   constructor(resource: string = 'resource') {
+190:     super(`Access denied to ${resource}`);
+191:   }
+192: }
+193: 
+194: export class BlockchainError extends AppError {
+195:   constructor(message: string, details?: unknown) {
+196:     super(message, 502, 'BLOCKCHAIN_ERROR', true, details);
+197:   }
+198: }
+199: 
+200: // =============================================================================
+201: // ERROR RESPONSE FORMATTER
+202: // =============================================================================
+203: 
+204: export interface ErrorResponse {
+205:   success: false;
+206:   error: {
+207:     code: string;
+208:     message: string;
+209:     details?: unknown;
+210:   };
+211:   requestId?: string;
+212: }
+213: 
+214: export function formatErrorResponse(error: AppError, requestId?: string): ErrorResponse {
+215:   return {
+216:     success: false,
+217:     error: {
+218:       code: error.code,
+219:       message: error.message,
+220:       details: error.details,
+221:     },
+222:     requestId,
+223:   };
+224: }
+225: 
+226: // =============================================================================
+227: // ERROR HANDLER MIDDLEWARE
+228: // =============================================================================
+229: 
+230: export function errorHandler(
+231:   err: Error,
+232:   _req: unknown,
+233:   res: Response,
+234:   _next: unknown
+235: ): void {
+236:   // Log the error
+237:   logger.error('Error occurred', {
+238:     error: err.message,
+239:     stack: err.stack,
+240:     ...(err instanceof AppError && { code: err.code, statusCode: err.statusCode }),
+241:   });
+242: 
+243:   // Handle Zod validation errors
+244:   if (err instanceof ZodError) {
+245:     const validationError = new ValidationError('Validation failed', err.errors);
+246:     res.status(validationError.statusCode).json(formatErrorResponse(validationError));
+247:     return;
+248:   }
+249: 
+250:   // Handle AppError
+251:   if (err instanceof AppError) {
+252:     res.status(err.statusCode).json(formatErrorResponse(err));
+253:     return;
+254:   }
+255: 
+256:   // Handle body-parser errors (malformed JSON, oversized / unsupported body).
+257:   // These arrive as a SyntaxError / typed error carrying `.type` + `.status`
+258:   // but are NOT AppError, so they'd otherwise fall through to the 500 below —
+259:   // flattening a client's bad request into a server error. A malformed body is
+260:   // a client error (KS-144 / KS-111: stop turning bad input into 500).
+261:   const bp = err as Error & { type?: string; status?: number };
+262:   if (bp.type === 'entity.parse.failed' || (err instanceof SyntaxError && 'body' in (err as object))) {
+263:     const badRequest = new BadRequestError('Malformed request body');
+264:     res.status(badRequest.statusCode).json(formatErrorResponse(badRequest));
+265:     return;
+266:   }
+267:   if (typeof bp.status === 'number' && bp.status >= 400 && bp.status < 500) {
+268:     const clientErr = new AppError(err.message || 'Bad request', bp.status, 'BAD_REQUEST', true);
+269:     res.status(clientErr.statusCode).json(formatErrorResponse(clientErr));
+270:     return;
+271:   }
+272: 
+273:   // Handle unknown errors.
+274:   //
+275:   // KS-727: the message is generic on EVERY environment, not only production.
+276:   // The old gate was `NODE_ENV === 'production' ? <generic> : err.message`, so
+277:   // anything that was not the exact string `production` — `development`,
+278:   // `demo`, `test`, or unset — returned the thrown message verbatim to the
+279:   // caller. KS-658 records that the live demo runs all 26 Node services as
+280:   // `NODE_ENV=development`, so on the demo that was the branch that always
+281:   // executed, and it leaked driver text (`invalid byte sequence for encoding
+282:   // "UTF8": 0x00`) and internal call sites (`role.split is not a function`)
+283:   // from ordinary requests.
+284:   //
+285:   // Nothing is lost: `err.message` and `err.stack` are already logged at the
+286:   // top of this handler, so the detail still reaches the operator — it just
+287:   // stops reaching the caller. Typed client errors are unaffected; they return
+288:   // above, carrying their own authored text.
+289:   const internalError = new InternalError('An unexpected error occurred');
+290:   res.status(internalError.statusCode).json(formatErrorResponse(internalError));
+291: }
+292: 
+293: // =============================================================================
+294: // ASYNC HANDLER WRAPPER
+295: // =============================================================================
+296: 
+297: type AsyncFunction = (req: unknown, res: Response, next: (err?: unknown) => void) => Promise<unknown>;
+298: 
+299: export function asyncHandler(fn: AsyncFunction) {
+300:   return (req: unknown, res: Response, next: (err?: unknown) => void) => {
+301:     Promise.resolve(fn(req, res, next)).catch(next);
+302:   };
+303: }
+
+### FILE AT HEAD: Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts
+1: // KS-1467 (packages/shared src/errors/index.ts, mounted by twelve services): AppError's constructor ended with `Object.setPrototypeOf(this, AppError.prototype)`, which resets EVERY subclass
+2: // instance to the base prototype, so `err instanceof <subclass>` was always false. The constructor now uses `new.target.prototype`. P1/P2/P3 pin the prototypes (three levels deep for
+3: // DocumentNotFoundError); C1/C2 pin what must not change: the status, the code, the details, and the handler's answer.
+4: import { describe, it, expect } from 'vitest';
+5: import type { Response } from 'express';
+6: import {
+7:   errorHandler,
+8:   AppError,
+9:   BadRequestError,
+10:   UnauthorizedError,
+11:   ForbiddenError,
+12:   NotFoundError,
+13:   ConflictError,
+14:   ValidationError,
+15:   RateLimitError,
+16:   InternalError,
+17:   ServiceUnavailableError,
+18:   DocumentNotFoundError,
+19: } from '../errors';
+20: 
+21: const FACTORIES = [
+22:   { name: 'BadRequestError', make: () => new BadRequestError('x'), cls: BadRequestError, status: 400 },
+23:   { name: 'UnauthorizedError', make: () => new UnauthorizedError('x'), cls: UnauthorizedError, status: 401 },
+24:   { name: 'ForbiddenError', make: () => new ForbiddenError('x'), cls: ForbiddenError, status: 403 },
+25:   { name: 'NotFoundError', make: () => new NotFoundError('Thing'), cls: NotFoundError, status: 404 },
+26:   { name: 'ConflictError', make: () => new ConflictError('x'), cls: ConflictError, status: 409 },
+27:   { name: 'ValidationError', make: () => new ValidationError('x', { a: 1 }), cls: ValidationError, status: 422 },
+28:   { name: 'RateLimitError', make: () => new RateLimitError(5), cls: RateLimitError, status: 429 },
+29:   { name: 'InternalError', make: () => new InternalError('x'), cls: InternalError, status: 500 },
+30:   { name: 'ServiceUnavailableError', make: () => new ServiceUnavailableError('Billing'), cls: ServiceUnavailableError, status: 503 },
+31: ] as const;
+32: 
+33: function run(err: Error): { statusCode: number; body: { error: { code: string; message: string; details?: unknown } } } {
+34:   const captured = { statusCode: 0, body: undefined } as unknown as { statusCode: number; body: { error: { code: string; message: string; details?: unknown } } };
+35:   const res = {
+36:     status(code: number) {
+37:       captured.statusCode = code;
+38:       return this;
+39:     },
+40:     json(payload: unknown) {
+41:       captured.body = payload as typeof captured.body;
+42:       return this;
+43:     },
+44:   } as unknown as Response;
+45:   errorHandler(err, undefined, res, undefined);
+46:   return captured;
+47: }
+48: 
+49: describe('KS-1467: shared AppError subclasses keep their own prototype', () => {
+50:   it.each(FACTORIES)('RED KS-1467 P1 $name: an instance is an instance of its own class', ({ make, cls }) => {
+51:     expect(make() instanceof cls).toBe(true);
+52:   });
+53: 
+54:   it.each(FACTORIES)('RED KS-1467 P2 $name: the prototype of an instance is the class prototype', ({ make, cls }) => {
+55:     expect(Object.getPrototypeOf(make())).toBe(cls.prototype);
+56:   });
+57: 
+58:   it('RED KS-1467 P3 a two-level subclass is an instance of every class in its chain', () => {
+59:     const e = new DocumentNotFoundError('d-1');
+60:     expect([e instanceof DocumentNotFoundError, e instanceof NotFoundError, e instanceof AppError]).toEqual([true, true, true]);
+61:   });
+62: 
+63:   it.each(FACTORIES)('control KS-1467 C1 $name: an instance is still an AppError and an Error with its status', ({ make, status }) => {
+64:     const e = make();
+65:     expect([e instanceof AppError, e instanceof Error, e.statusCode]).toEqual([true, true, status]);
+66:   });
+67: 
+68:   it('control KS-1467 C2 the handler still answers a ValidationError with its details and a 422', () => {
+69:     const r = run(new ValidationError('bad', { field: 'name' }));
+70:     expect(r.statusCode).toBe(422);
+71:     expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'bad', details: { field: 'name' } });
+72:   });
+73: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "8894c7486f82f6eb682fecb879791f53312537b1",
+ "head_sha": "d5a1007a6c6a4d1e8d728ee7e99f4c7bddbc9dbe",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/packages/shared/src/errors/index.ts",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts",
+   "added": "73",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "1",
+   "1",
+   "Blockchain/Dev/packages/shared/src/errors/index.ts"
+  ],
+  [
+   "73",
+   "0",
+   "Blockchain/Dev/packages/shared/src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 29,
+  "failed": 19
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 29,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1039 failed=2 | after: total=1068 failed=1\ndevelop's own reds (attributed, not counted): [('threadToken.test.ts', 'parameteriseMintPolicy (Phase 2) returns different policy IDs for different seeds (one-shot guarantee)'), ('wallet-signature.test.ts', 'verifyMessageSignature (CIP-8/CIP-30) \u2014 KS-278 accepts a valid wallet signature over the message')]\nNEW reds: []\nreds fixed by the patch: [('threadToken.test.ts', 'parameteriseMintPolicy (Phase 2) returns different policy IDs for different seeds (one-shot guarantee)')]\ntests added: 29\n",
+ "checker_summary": [
+  "PASS A6 whole packages/shared suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for packages/shared: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +74/-1 test=src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

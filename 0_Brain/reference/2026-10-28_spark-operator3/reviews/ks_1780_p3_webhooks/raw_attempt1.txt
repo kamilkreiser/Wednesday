@@ -1,0 +1,36 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix only addresses the webhooks.ts PATCH /:id site, but the ticket identifies 15 adminConfig.ts catch blocks and the systemErrors.ts:196 instanceof check that still read the thrown value before fail500 and can hang requests; the PR does not fix those, so the blast radius of the original defect remains.",
+      "evidence": "Blockchain/Dev/services/originate/src/utils/pgErrors.ts:52-60 `export function extractPgCode(err: unknown): string | undefined { try { return readPgCode(err); } catch { return undefined; } }`; ticket item 2 lists `routes/adminConfig.ts`: 15 catch blocks at `:189`, `:226`, `:289`, `:378`, `:433`, `:521`, `:702`, `:818`, `:933`, `:1226`, `:1389`, `:1567`, `:1658`, `:1695` and `:1723` and `routes/systemErrors.ts:195`.",
+      "test_or_reason": "The PR's tests only cover webhooks.ts PATCH /:id and extractPgCode; no test covers adminConfig or systemErrors, and the ticket explicitly states 'No fix is proposed' for those sites."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's comment claims the fix prevents 'the request got no answer' for the webhooks PATCH route, but the ticket's measurement (Gate B) shows the same hang at systemErrors.ts:196, which is not fixed; the claim is overstated as a general fix.",
+      "evidence": "Ticket item 1: 'at the head, NO ANSWER for a Proxy whose getPrototypeOf trap throws, for a revoked Proxy and for the combined case; Jest attributes each to systemErrors.ts:196:12, the instanceof check, not to fail500.'",
+      "test_or_reason": "The PR's tests only drive webhooks.ts PATCH /:id; no test or code change addresses systemErrors.ts:196."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's header comment says 'B1/B2 drive the real route over a loopback listener', but the route is mocked at the db layer (mockExecuteRawUnsafe), so it is not a full integration test; the claim of 'real route' is misleading.",
+      "evidence": "Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts:5 `const mockExecuteRawUnsafe = jest.fn();` and :49 `mockExecuteRawUnsafe.mockRejectedValueOnce(thrown);`",
+      "test_or_reason": "The test mocks the database call, so it does not exercise the real Prisma/Postgres path; it only verifies the route's error handling with a mocked rejection."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test helper `pgCodeOrThrew` has a typo in its name ('Threw' instead of 'Threw'), which is a hygiene issue but not a functional defect.",
+      "evidence": "Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts:69 `function pgCodeOrThrew(err: unknown): string | undefined {`",
+      "test_or_reason": "Naming typo; does not affect test behavior."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR's fix changes extractPgCode to return undefined on any throw, which could mask genuine programming errors (e.g., a bug in the helper itself) by silently falling through to a 500 instead of surfacing the error.",
+      "evidence": "Blockchain/Dev/services/originate/src/utils/pgErrors.ts:55-59 `try { return readPgCode(err); } catch { return undefined; }`",
+      "test_or_reason": "The catch-all swallows any exception from readPgCode, including unexpected ones, which may hide real defects."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

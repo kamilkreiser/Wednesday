@@ -1,0 +1,2826 @@
+===== TICKET =====
+KS-1780 — originate: 17 catches read the thrown value before fail500 (systemErrors.ts:196, 15 in adminConfig.ts, webhooks.ts:320); at the one Gate B drove, a revoked Proxy or a throwing getPrototypeOf trap gets no response, and KS-1772 guards only its five describer sites [Backlog]
+
+## BLUF
+
+**In** `services/originate`**, 17 catch blocks read the thrown value before they reach** `fail500`**: one in** `systemErrors.ts` **(**`instanceof z.ZodError`**), 15 in** `adminConfig.ts` **(**`err?.message` **and** `err?.code`**) and one in** `webhooks.ts` **(**`extractPgCode(err)`**). KS-1772 guards the five describer sites and nothing else; at the one of these sites Gate B drove, a revoked Proxy and a Proxy whose** `getPrototypeOf` **trap throws still got NO response at PR 1766's head.** The class is outside KS-1772's named sites, so it is not that PR's defect. Gate B's finding F6 (LOW) says a follow-up ticket "for pre-helper reads is the right home".
+
+Facts only. **No fix is proposed.**
+
+Refs KS-1772, KS-1346, KS-1621.
+
+All line numbers were read at develop `c18552d94de23b4da365ce02e02be5d06793bbcb`, under `Blockchain/Dev/services/originate/src`. The measurement in item 1 is Gate B's, from `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-28_gate-t1b/verdict.md` (F6, lines 160-170), and was not re-run. The list in item 2 is this seat's own scan of the source text, and is a heuristic.
+
+## 1 — The site Gate B drove
+
+`routes/systemErrors.ts:195`-`:199`, `GET /api/system-errors`:
+
+`} catch (err: any) {` then `if (err instanceof z.ZodError) {` at `:196`, then `fail500(res, 'Error list read failed (GET /api/system-errors)', err);` at `:199`.
+
+Gate B's measurement (driver site "systemErrors GET /"): at the head, **NO ANSWER** for a Proxy whose `getPrototypeOf` trap throws, for a revoked Proxy and for the combined case; Jest attributes each to `systemErrors.ts:196:12`, the `instanceof` check, not to `fail500`. The other three hostile values are answered 500 at the head (they hung at base). **Control:** the same values on `PATCH /:errorId/resolve`, whose catch goes straight to `fail500`, are answered 500.
+
+## 2 — The same shape in the source at this tip
+
+The scan: in each route file that defines its own `fail500` (adminConfig 51 calls, gdpr 16, webhooks 8, systemErrors 5), take every `catch (X ...) { ... }` block and classify the first use of `X` inside it; report the blocks whose first use is `X.prop`, `X?.prop` or `X instanceof` and that contain a later `fail500(`. Strings and comments are skipped for brace matching; it is not a parser.
+
+* `routes/adminConfig.ts`**: 15 catch blocks**, at `:189`, `:226`, `:289`, `:378`, `:433`, `:521`, `:702`, `:818`, `:933`, `:1226`, `:1389`, `:1567`, `:1658`, `:1695` and `:1723`. 13 of them open with `if (err?.message?.includes('does not exist') || err?.code === '42P01') {` (`:189` is the first: the read at `:191`, the `fail500` at `:194`); `:226` reads `err?.message?.includes('unique constraint')`; `:1567` reads `err?.message?.includes('does not exist')` with no code test.
+* `routes/webhooks.ts:316`**-**`:320`: `const pgCode = extractPgCode(err);`, ahead of the 400 branch and the 500 path. `extractPgCode` (`utils/pgErrors.ts:52`) reads `e?.code`, `e?.meta?.code` and `e?.message` (`:59`, `:70`) with no `try`. The scan classes this site as passing the value on, so it is reported by hand, not by the scan.
+* `routes/systemErrors.ts:195`: item 1.
+
+Counts by file from the same scan: adminConfig 35 blocks go straight to `fail500`, 17 read first (15 followed by `fail500`; the other two are `:2086`, a `logger.error` that reads `err?.message`, and `:2243`, the describer KS-1772 guards), 1 never uses the value (the `catch (e: any)` at `:2221`, which is another ticket's subject); gdpr 13 go straight, 0 read first, 4 pass the value to something else first; webhooks 6 straight, 2 read first (`:58` and `:550`, both log calls, neither followed by `fail500`), 1 passes it on (the one above); systemErrors 3 straight, 3 read first (one followed by `fail500`; the other two are the log calls at `:133` and `:164`).
+
+The same scan therefore also shows five reads of the thrown value inside a log call with no `fail500` after them (`adminConfig.ts:2086`, `webhooks.ts:58` and `:550`, `systemErrors.ts:133` and `:164`). They are outside this ticket's definition ("before `fail500`") and are named only so the scan's totals can be checked.
+
+Gate B's own estimate was "about 15 more originate catches ... mostly in `adminConfig.ts` (for example `:189`, `:226`, `:289`, `:378`, ..., `:1723`), plus `webhooks.ts:320`", from a heuristic list in `out/pre-helper-reads.txt`. That file is not in the gate's directory (only `verdict.md` is), so the two lists were compared by the lines the verdict names: all five appear in the scan above.
+
+## 3 — What the PR's author says
+
+`__tests__/ks1772-originate-log-line-describers-cannot-hang-a-request.test.ts:18`-`:20`: "THE ROUTES ARE CHOSEN SO THE DESCRIBER IS THE ONLY THING THAT CAN THROW. Each catch below goes straight to `fail500`; a route whose catch first reads `err.message` or `err.code` (the four GET /settings-style routes of adminConfig do) would throw THERE for a message getter or a revoked Proxy, and the cell would measure that read rather than the describer." The header says four routes; the scan above finds 15 adminConfig blocks. Not reconciled here.
+
+Gate B on the effect: "For an `?.` read, only the revoked-Proxy and getter-throw shapes bite." and "The PR title 'cannot hang a request' is true only for the describer sites". It also states that the same heuristic finds none in the three api-gateway helper files.
+
+## Not established
+
+* **I ran nothing.** Only the `systemErrors.ts` site was driven, by Gate B. None of the 15 adminConfig blocks or the webhooks site was driven by anyone this seat knows of.
+* Whether a thrown value of those shapes (a revoked Proxy, a throwing getter, a throwing `getPrototypeOf` trap) can reach any of these catches in practice. Gate B's values are its own choosing.
+* The scan is a text heuristic: it can miss a catch whose first use of the value is not a plain property read, and it does not check what the code does after the read. The 4 gdpr blocks that pass the value on first were not examined.
+* What, if anything, to do. Not decided.
+
+## Searched
+
+Board, KS team, title + description + comment bodies, `includeArchived: true`, paged to the end. `fail500` → **23 hits**; `getPrototypeOf(err)` → **3** (KS-1772, KS-1771, KS-1621); `systemErrors.ts` → **9**; `ZodError` → 3 (KS-594, KS-593, KS-497, not about this); `extractPgCode` → **1**, KS-1341 (its PATCH classification control, read); `pre-helper` → **0**; `before fail500` → **0**; `revoked Proxy` → 4 (KS-1772, KS-1771, KS-1614, KS-1524, the last two read: other sites); `message getter` → 1 (KS-1524, an api-gateway log call). The threads of KS-1772, KS-1771, KS-1346, KS-1524, KS-1510, KS-1242, KS-1427 and KS-1621 were searched for `before fail500`, `pre-helper`, `instanceof z.ZodError`, `systemErrors.ts:196` and "reads ... thrown": no match. KS-1772 and KS-1771 each say, under "Not established", that none of their sites was driven. **Positive control** `KS-1531` → 40 hits. **Zero control:** a token coined for this seat and written nowhere → 0 hits.
+
+*Filed by Seat G 26th, 2026-10-27 UTC, on Wednesday's brief.*
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -128,3 +128,24 @@
++/**
++ * KS-1780: a catch that tests `err?.message?.includes(...)` or `err?.code` BEFORE it reaches fail500 reads the thrown value itself. A revoked Proxy, or an object whose `message` getter throws,
++ * makes THAT read throw from inside the catch, so the handler's promise rejects and the request gets no response at all (the KS-1772 shape, one step earlier). These two readers answer false
++ * when the value cannot be inspected: such a value is not a "table missing" or "unique constraint" error, so it falls through to fail500 and gets the constant 500.
++ */
++function errorMessageIncludes(err: any, needle: string): boolean {
++  try {
++    return err?.message?.includes(needle) === true;
++  } catch {
++    return false;
++  }
++}
++
++function isMissingTableError(err: any): boolean {
++  try {
++    return err?.message?.includes('does not exist') === true || err?.code === '42P01';
++  } catch {
++    return false;
++  }
++}
++
+ adminConfigRouter.post('/refresh-tenants', async (_req: Request, res: Response) => {
+   try {
+     await refreshTenantConfigs();
+@@ -188,7 +209,7 @@
+     res.json({ success: true, documentTypes: rows.map(mapDocTypeRow) });
+   } catch (err: any) {
+     // Table may not exist yet — return empty list so frontend uses its defaults
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, documentTypes: [] });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/document-types)', err);
+@@ -224,7 +245,7 @@
+     `;
+     res.status(201).json({ success: true, documentType: mapDocTypeRow(rows[0]) });
+   } catch (err: any) {
+-    if (err?.message?.includes('unique constraint')) {
++    if (errorMessageIncludes(err, 'unique constraint')) {
+       return res.status(409).json({ success: false, error: { code: 'CONFLICT', message: 'Document type code already exists' } });
+     }
+     fail500(res, 'Admin config request failed (POST /api/admin/document-types)', err);
+@@ -288,7 +309,7 @@
+     res.json({ success: true, workflows: rows.map(mapWorkflowRow) });
+   } catch (err: any) {
+     // Table may not exist yet — return empty list so frontend uses its defaults
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, workflows: [] });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/workflows)', err);
+@@ -376,7 +397,7 @@
+     `;
+     res.json({ success: true, items: rows.map(mapQueueRow) });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, items: [] });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/verification-queue)', err);
+@@ -431,7 +452,7 @@
+     `;
+     res.json({ success: true, integrations: rows.map(mapIntegrationRow) });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, integrations: [] });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/integrations)', err);
+@@ -520,6 +541,6 @@
+     res.json({ success: true, settings });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, settings: {} });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/settings)', err);
+@@ -700,7 +721,7 @@
+       total: rows.length,
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, policies: [], total: 0 });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/verification-policies)', err);
+@@ -816,7 +837,7 @@
+       total: rows.length,
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, organizations: [], total: 0 });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/organizations)', err);
+@@ -931,7 +952,7 @@
+       })),
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, keys: [] });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/api-keys)', err);
+@@ -1224,7 +1245,7 @@
+       total: countResult[0]?.total ?? rows.length,
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, logs: [], events: [], total: 0 });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/audit-logs)', err);
+@@ -1387,7 +1408,7 @@
+       total: rows.length,
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, rightsHolders: [], total: 0 });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/rights-holders)', err);
+@@ -1565,7 +1586,7 @@
+       })),
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist')) {
++    if (errorMessageIncludes(err, 'does not exist')) {
+       return res.json({ success: true, documents: [] });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/rights-holders/:id/documents)', err);
+@@ -1656,7 +1677,7 @@
+       },
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, data: { users: [], total: 0 } });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/users)', err);
+@@ -1693,7 +1714,7 @@
+       })),
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, users: [] });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/identity/users)', err);
+@@ -1721,7 +1742,7 @@
+       })),
+     });
+   } catch (err: any) {
+-    if (err?.message?.includes('does not exist') || err?.code === '42P01') {
++    if (isMissingTableError(err)) {
+       return res.json({ success: true, organizations: [] });
+     }
+     fail500(res, 'Admin config request failed (GET /api/admin/identity/organizations)', err);
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
+@@ -0,0 +1,124 @@
++// KS-1780 (originate routes/adminConfig.ts): fifteen catch blocks tested `err?.message?.includes(...)` and/or `err?.code` BEFORE they reached fail500. That read touches the thrown value
++// itself, so a revoked Proxy, or an object whose `message` getter throws, made the read throw inside the catch: the handler's promise rejected and the request got NO answer. fail500
++// already survives such a value (KS-1772); this file pins that the catches' own reads do too. Four GET routes are driven over a real loopback listener by making their prisma.$queryRaw
++// reject, as the KS-1346 part C cells do; a request that gets no answer within the window is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
++// S1 pins the source: no `if (err?.message` / `if (err?.code` condition may remain in the file.
++process.env.NODE_ENV = 'development';
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
++
++const mockQueryRaw = jest.fn();
++
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: mockQueryRaw, $executeRaw: jest.fn() },
++  refreshTenantConfigs: jest.fn(),
++  withTenant: (_t: unknown, fn: () => unknown) => fn(),
++  getTenantManager: () => null,
++}));
++
++jest.mock('../middleware/auth', () => {
++  const actual = jest.requireActual('../middleware/auth');
++  return {
++    ...actual,
++    authenticate: () => (req: any, _res: unknown, next: () => void) => {
++      const principal = { id: 'u-ks1780', role: 'SYSTEM_ADMIN', tenantId: 't-ks1780' };
++      req._secuuraUser = principal; req.user = principal; req.tenantId = principal.tenantId;
++      next();
++    },
++    requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  };
++});
++
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    ...(jest.requireActual('@secuura/shared') as Record<string, unknown>),
++    runWithPlatformScope: (fn: () => unknown) => fn(),
++    queryWithTenantGuc: jest.fn(),
++  }),
++);
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++import { readFileSync } from 'fs';
++import { join } from 'path';
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { adminConfigRouter } from '../routes/adminConfig';
++
++const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++const ROUTES = [
++  { label: 'GET /settings', path: '/settings', empty: { success: true, settings: {} } },
++  { label: 'GET /document-types', path: '/document-types', empty: { success: true, documentTypes: [] } },
++  { label: 'GET /workflows', path: '/workflows', empty: { success: true, workflows: [] } },
++  { label: 'GET /organizations', path: '/organizations', empty: { success: true, organizations: [], total: 0 } },
++] as const;
++
++const app = express();
++app.use('/api/admin', express.json(), adminConfigRouter);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => {
++  (server as unknown as { closeAllConnections?: () => void })?.closeAllConnections?.();
++  server?.close();
++});
++beforeEach(() => mockQueryRaw.mockReset());
++
++async function callWithThrow(path: string, thrown: unknown): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
++  mockQueryRaw.mockRejectedValueOnce(thrown);
++  try {
++    const res = await fetch(baseUrl + '/api/admin' + path, { signal: AbortSignal.timeout(1500) });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER', body: null };
++  }
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++function throwingMessageGetter(): object {
++  return {
++    get message(): string {
++      throw new Error('ks1780 getter');
++    },
++  };
++}
++
++describe('KS-1780: adminConfig catches answer a hostile thrown value', () => {
++  it.each(ROUTES)('RED KS-1780 A1 $label: a revoked Proxy thrown by the query is answered with the constant 500', async (route) => {
++    expect(await callWithThrow(route.path, revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it.each(ROUTES)('RED KS-1780 A2 $label: an object whose message getter throws is answered with the constant 500', async (route) => {
++    expect(await callWithThrow(route.path, throwingMessageGetter())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it.each(ROUTES)('control KS-1780 C1 $label: an Error saying "does not exist" is still answered with the empty list', async (route) => {
++    expect(await callWithThrow(route.path, new Error('relation "x" does not exist'))).toEqual({ status: 200, body: route.empty });
++  });
++
++  it.each(ROUTES)('control KS-1780 C2 $label: a thrown object with code 42P01 is still answered with the empty list', async (route) => {
++    expect(await callWithThrow(route.path, { code: '42P01' })).toEqual({ status: 200, body: route.empty });
++  });
++
++  it.each(ROUTES)('control KS-1780 C3 $label: an ordinary Error is still answered with the constant 500', async (route) => {
++    expect(await callWithThrow(route.path, new Error('ks1780 ordinary'))).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('RED KS-1780 S1: no catch condition in adminConfig.ts reads err?.message or err?.code directly', () => {
++    const source = readFileSync(join(__dirname, '..', 'routes', 'adminConfig.ts'), 'utf8');
++    const direct = source.split('\n').filter((line) => /^\s*if \(err\?\.(message|code)/.test(line));
++    expect(direct).toEqual([]);
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+1: /**
+2:  * =============================================================================
+3:  * ADMIN CONFIGURATION ROUTES
+4:  * =============================================================================
+5:  * REST API for managing:
+6:  * - Pricing configuration
+7:  * - Document type definitions
+8:  * - Workflow configurations
+9:  * =============================================================================
+10:  */
+11: 
+12: import { Router, Request, Response } from 'express';
+13: import { getPricingTable, updatePricing, loadPricing } from '../services/chargeEvents';
+14: import { prisma, refreshTenantConfigs, withTenant } from '../db';
+15: import { authenticate, requireRole } from '../middleware/auth';
+16: // KS-458: this router is admin-gated (authenticate + SYSTEM_ADMIN/ORG_ADMIN
+17: // below), and several handlers deliberately read/write across tenants with no
+18: // tenant filter. Under fail-closed RLS (migration 039) those statements need
+19: // the platform-scope GUC bundled into their transaction, or they silently
+20: // see/affect zero rows.
+21: import {
+22:   runWithPlatformScope,
+23:   queryWithTenantGuc,
+24:   decideKeyRevoke,
+25:   isProvisioningCapable,
+26:   isPlatformRole,
+27:   normaliseOrgId,
+28: } from '@secuura/shared';
+29: import { logger } from '../utils/logger';
+30: import { isDemoSeedEnabled } from '../utils/demoSeedGate';
+31: 
+32: export const adminConfigRouter = Router();
+33: 
+34: // Admin routes always use the shared DB — tenant filtering via WHERE clauses, not pool switching.
+35: // The tenant selector in the admin portal is for SETUP/CONFIG, not for browsing client data.
+36: adminConfigRouter.use((req, _res, next) => {
+37:   (req as any).db = prisma; // Always shared DB
+38:   // Pen-test F-04: read tenantId from req.tenantId (set by extractTenantContext
+39:   // middleware after token verification), NOT from raw headers.
+40:   (req as any).filterTenantId = ((req as any).tenantId as string | undefined) || null;
+41:   next();
+42: });
+43: 
+44: // All routes require authentication + SYSTEM_ADMIN or ORG_ADMIN role.
+45: adminConfigRouter.use(authenticate(), requireRole('SYSTEM_ADMIN', 'ORG_ADMIN'));
+46: 
+47: /**
+48:  * Minimal email-format check for rights-holder create/update. A rights holder
+49:  * must have a valid email (product decision 2026-05-22, KS-106); this checks the
+50:  * format. Mirrors the `.isEmail()` intent used elsewhere in this service
+51:  * (certifications.ts, thirdPartyVerifiers.ts) without pulling express-validator
+52:  * into these manual handlers.
+53:  */
+54: function isValidEmail(value: unknown): boolean {
+55:   if (typeof value !== 'string') return false;
+56:   const email = value.trim();
+57:   return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+58: }
+59: 
+60: const SUPER_ADMIN_ROLES = ['super_admin', 'SUPER_ADMIN', 'SYSTEM_ADMIN', 'platform_admin'];
+61: 
+62: /**
+63:  * Resolve the tenant (== organization id) a rights-holders request operates on,
+64:  * for the `app.tenant_id` GUC the RLS policy keys off (KS-108 / KS-93).
+65:  *
+66:  * - Tenant-bound admins (ORG_ADMIN, ISSUER_ADMIN…) → their own org from the
+67:  *   verified JWT. They cannot reach another tenant.
+68:  * - super_admins → the verified X-Tenant-Override (`req.tenantId`, set by the
+69:  *   gateway + extractTenantContext) or `?organizationId=`. This is the KS-93
+70:  *   fix: super_admin scopes via the same override used elsewhere, no dual-send.
+71:  *
+72:  * Returns null when no tenant can be resolved — callers MUST treat that as "no
+73:  * access" (empty / 400), never "all tenants". RLS is the backstop: even a wrong
+74:  * value only scopes to that one tenant, it can never leak across tenants.
+75:  */
+76: function resolveTenantId(req: Request): string | null {
+77:   const u = (req as any).user;
+78:   if (u?.role && SUPER_ADMIN_ROLES.includes(u.role)) {
+79:     return ((req as any).tenantId as string | undefined)
+80:       || (req.query?.organizationId as string | undefined)
+81:       || (u?.organizationId as string | undefined)
+82:       || null;
+83:   }
+84:   return (u?.organizationId as string | undefined) || null;
+85: }
+86: 
+87: // =============================================================================
+88: // TENANT CONFIG REFRESH
+89: // =============================================================================
+90: 
+91: /** Force reload tenant configs (call after creating a new tenant) */
+92: /**
+93:  * KS-730: the only place in this router that turns a caught error into a 500.
+94:  *
+95:  * WHAT WAS WRONG. Forty-six inline handlers returned `err.message` verbatim unless
+96:  * `NODE_ENV === 'production'`, so `development`, `demo`, `test` and an UNSET NODE_ENV all answered an
+97:  * admin-configuration route with raw internal text. This is the largest of the three files KS-730
+98:  * enumerates, and the reason the ticket asked for a helper rather than 67 edited ternaries.
+99:  *
+100:  * WHY A HELPER AND NOT A DELETION. KS-727's fix was SUBTRACTIVE — its shared handlers already logged
+101:  * at entry, so removing the ternary lost nothing. Measured across the three files this ticket
+102:  * enumerates: **0 of 65 sites log the error before returning it.** Deleting the ternary alone would
+103:  * destroy the diagnostic at all 46 sites here. The log is added in the same change.
+104:  *
+105:  * Each call site passes its own context naming the route, and all 46 are DISTINCT — a mislabelled
+106:  * context is worse than none, because it sends a reader to the wrong handler. The contexts were
+107:  * GENERATED from each site's enclosing route registration rather than hand-written, since 46 typed
+108:  * strings is 46 chances to mislabel one, and a cell asserts the count and the distinctness.
+109:  */
+110: function fail500(res: Response, context: string, err: unknown): void {
+111:   // KS-1772: building this log line, and writing it, can themselves throw (a message getter, a Proxy trap, a revoked Proxy, a logger that fails). That throw left this helper from inside
+112:   // the handler's own catch, so the handler's promise rejected and the request got no response at all. Describe the value in its own try and log in another, so the constant 500 below is
+113:   // always sent. The line is unchanged for every value that could be described before; one that cannot be described logs the fallback in its place. Same shape as api-gateway's KS-1524 (a).
+114:   let described: string;
+115:   try {
+116:     described = err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err;
+117:   } catch {
+118:     described = 'thrown value that could not be described';
+119:   }
+120:   try {
+121:     logger.error(context, { error: described });
+122:   } catch {
+123:     // Nothing more can be said if the logger itself fails; the caller still gets the 500 below.
+124:   }
+125:   res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+126: }
+127: 
+128: /**
+129:  * KS-1780: a catch that tests `err?.message?.includes(...)` or `err?.code` BEFORE it reaches fail500 reads the thrown value itself. A revoked Proxy, or an object whose `message` getter throws,
+130:  * makes THAT read throw from inside the catch, so the handler's promise rejects and the request gets no response at all (the KS-1772 shape, one step earlier). These two readers answer false
+131:  * when the value cannot be inspected: such a value is not a "table missing" or "unique constraint" error, so it falls through to fail500 and gets the constant 500.
+132:  */
+133: function errorMessageIncludes(err: any, needle: string): boolean {
+134:   try {
+135:     return err?.message?.includes(needle) === true;
+136:   } catch {
+137:     return false;
+138:   }
+139: }
+140: 
+141: function isMissingTableError(err: any): boolean {
+142:   try {
+143:     return err?.message?.includes('does not exist') === true || err?.code === '42P01';
+144:   } catch {
+145:     return false;
+146:   }
+147: }
+148: 
+149: adminConfigRouter.post('/refresh-tenants', async (_req: Request, res: Response) => {
+150:   try {
+151:     await refreshTenantConfigs();
+152:     res.json({ success: true, message: 'Tenant configs refreshed' });
+153:   } catch (err: any) {
+154:     fail500(res, 'Admin config request failed (POST /api/admin/refresh-tenants)', err);
+155:   }
+156: });
+157: 
+158: // =============================================================================
+159: // PRICING
+160: // =============================================================================
+161: 
+162: /** Get current pricing table */
+163: adminConfigRouter.get('/pricing', async (_req: Request, res: Response) => {
+164:   try {
+165:     const pricing = getPricingTable();
+166:     res.json({ success: true, pricing });
+167:   } catch (err: any) {
+168:     fail500(res, 'Admin config request failed (GET /api/admin/pricing)', err);
+169:   }
+170: });
+171: 
+172: /** Update pricing for an event type */
+173: adminConfigRouter.patch('/pricing/:eventType', async (req: Request, res: Response) => {
+174:   try {
+175:     const { adaAmount, usdAmount } = req.body;
+176:     if (adaAmount === undefined || usdAmount === undefined) {
+177:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'adaAmount and usdAmount are required' } });
+178:     }
+179:     if (typeof adaAmount !== 'number' || typeof usdAmount !== 'number' || adaAmount < 0 || usdAmount < 0) {
+180:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'adaAmount and usdAmount must be non-negative numbers' } });
+181:     }
+182:     const updated = await updatePricing(req.params.eventType, adaAmount, usdAmount);
+183:     res.json({ success: updated, message: updated ? 'Pricing updated' : 'Event type not found' });
+184:   } catch (err: any) {
+185:     fail500(res, 'Admin config request failed (PATCH /api/admin/pricing/:eventType)', err);
+186:   }
+187: });
+188: 
+189: /** Refresh pricing cache from database */
+190: adminConfigRouter.post('/pricing/refresh', async (_req: Request, res: Response) => {
+191:   try {
+192:     await loadPricing();
+193:     res.json({ success: true, pricing: getPricingTable() });
+194:   } catch (err: any) {
+195:     fail500(res, 'Admin config request failed (POST /api/admin/pricing/refresh)', err);
+196:   }
+197: });
+198: 
+199: // =============================================================================
+200: // DOCUMENT TYPES
+201: // =============================================================================
+202: 
+203: /** List all document types */
+204: adminConfigRouter.get('/document-types', async (req: Request, res: Response) => {
+205:   try {
+206:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+207:       SELECT * FROM document_type_configs ORDER BY name ASC
+208:     `;
+209:     res.json({ success: true, documentTypes: rows.map(mapDocTypeRow) });
+210:   } catch (err: any) {
+211:     // Table may not exist yet — return empty list so frontend uses its defaults
+212:     if (isMissingTableError(err)) {
+213:       return res.json({ success: true, documentTypes: [] });
+214:     }
+215:     fail500(res, 'Admin config request failed (GET /api/admin/document-types)', err);
+216:   }
+217: });
+218: 
+219: /** Create a document type */
+220: adminConfigRouter.post('/document-types', async (req: Request, res: Response) => {
+221:   try {
+222:     const d = req.body;
+223:     if (!d.name || !d.code) {
+224:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'name and code are required' } });
+225:     }
+226:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+227:       INSERT INTO document_type_configs (
+228:         name, code, description, category, is_active,
+229:         creator_verification_level, owner_verification_level, viewer_verification_level, verifier_verification_level,
+230:         require_mfa, require_wallet_signature, require_kyc, allowed_auth_providers,
+231:         requires_approval, approval_workflow_id, auto_anchor, anchor_network,
+232:         metadata_schema, allowed_sources, webhook_events
+233:       ) VALUES (
+234:         ${d.name}, ${d.code}, ${d.description || null}, ${d.category || 'Other'}, ${d.isActive !== false},
+235:         ${d.creatorVerificationLevel || 'basic'}, ${d.ownerVerificationLevel || 'basic'},
+236:         ${d.viewerVerificationLevel || 'none'}, ${d.verifierVerificationLevel || 'standard'},
+237:         ${d.requireMFA || false}, ${d.requireWalletSignature || false}, ${d.requireKYC || false},
+238:         ${JSON.stringify(d.allowedAuthProviders || [])}::jsonb,
+239:         ${d.requiresApproval || false}, ${d.approvalWorkflowId || null}::uuid, ${d.autoAnchor !== false},
+240:         ${d.anchorNetwork || 'preprod'},
+241:         ${JSON.stringify(d.metadataSchema || [])}::jsonb,
+242:         ${JSON.stringify(d.allowedSources || [])}::jsonb,
+243:         ${JSON.stringify(d.webhookEvents || [])}::jsonb
+244:       ) RETURNING *
+245:     `;
+246:     res.status(201).json({ success: true, documentType: mapDocTypeRow(rows[0]) });
+247:   } catch (err: any) {
+248:     if (errorMessageIncludes(err, 'unique constraint')) {
+249:       return res.status(409).json({ success: false, error: { code: 'CONFLICT', message: 'Document type code already exists' } });
+250:     }
+251:     fail500(res, 'Admin config request failed (POST /api/admin/document-types)', err);
+252:   }
+253: });
+254: 
+255: /** Update a document type */
+256: adminConfigRouter.put('/document-types/:id', async (req: Request, res: Response) => {
+257:   try {
+258:     const d = req.body;
+259:     const result = await ((req as any).db || prisma).$executeRaw`
+260:       UPDATE document_type_configs SET
+261:         name = COALESCE(${d.name || null}, name),
+262:         description = COALESCE(${d.description || null}, description),
+263:         category = COALESCE(${d.category || null}, category),
+264:         is_active = COALESCE(${d.isActive}, is_active),
+265:         creator_verification_level = COALESCE(${d.creatorVerificationLevel || null}, creator_verification_level),
+266:         owner_verification_level = COALESCE(${d.ownerVerificationLevel || null}, owner_verification_level),
+267:         viewer_verification_level = COALESCE(${d.viewerVerificationLevel || null}, viewer_verification_level),
+268:         verifier_verification_level = COALESCE(${d.verifierVerificationLevel || null}, verifier_verification_level),
+269:         require_mfa = COALESCE(${d.requireMFA}, require_mfa),
+270:         require_wallet_signature = COALESCE(${d.requireWalletSignature}, require_wallet_signature),
+271:         require_kyc = COALESCE(${d.requireKYC}, require_kyc),
+272:         requires_approval = COALESCE(${d.requiresApproval}, requires_approval),
+273:         auto_anchor = COALESCE(${d.autoAnchor}, auto_anchor),
+274:         anchor_network = COALESCE(${d.anchorNetwork || null}, anchor_network),
+275:         metadata_schema = COALESCE(${d.metadataSchema ? JSON.stringify(d.metadataSchema) : null}::jsonb, metadata_schema),
+276:         allowed_sources = COALESCE(${d.allowedSources ? JSON.stringify(d.allowedSources) : null}::jsonb, allowed_sources),
+277:         webhook_events = COALESCE(${d.webhookEvents ? JSON.stringify(d.webhookEvents) : null}::jsonb, webhook_events),
+278:         updated_at = NOW()
+279:       WHERE id = ${req.params.id}::uuid
+280:     `;
+281:     res.json({ success: result > 0, message: result > 0 ? 'Updated' : 'Not found' });
+282:   } catch (err: any) {
+283:     fail500(res, 'Admin config request failed (PUT /api/admin/document-types/:id)', err);
+284:   }
+285: });
+286: 
+287: /** Delete a document type */
+288: adminConfigRouter.delete('/document-types/:id', async (req: Request, res: Response) => {
+289:   try {
+290:     const result = await ((req as any).db || prisma).$executeRaw`
+291:       DELETE FROM document_type_configs WHERE id = ${req.params.id}::uuid
+292:     `;
+293:     res.json({ success: result > 0, message: result > 0 ? 'Deleted' : 'Not found' });
+294:   } catch (err: any) {
+295:     fail500(res, 'Admin config request failed (DELETE /api/admin/document-types/:id)', err);
+296:   }
+297: });
+298: 
+299: // =============================================================================
+300: // WORKFLOWS
+301: // =============================================================================
+302: 
+303: /** List all workflows */
+304: adminConfigRouter.get('/workflows', async (req: Request, res: Response) => {
+305:   try {
+306:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+307:       SELECT * FROM workflow_configs ORDER BY name ASC
+308:     `;
+309:     res.json({ success: true, workflows: rows.map(mapWorkflowRow) });
+310:   } catch (err: any) {
+311:     // Table may not exist yet — return empty list so frontend uses its defaults
+312:     if (isMissingTableError(err)) {
+313:       return res.json({ success: true, workflows: [] });
+314:     }
+315:     fail500(res, 'Admin config request failed (GET /api/admin/workflows)', err);
+316:   }
+317: });
+318: 
+319: /** Create a workflow */
+320: adminConfigRouter.post('/workflows', async (req: Request, res: Response) => {
+321:   try {
+322:     const w = req.body;
+323:     if (!w.name) {
+324:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'name is required' } });
+325:     }
+326:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+327:       INSERT INTO workflow_configs (name, description, type, is_active, steps, document_types, sla_hours)
+328:       VALUES (
+329:         ${w.name}, ${w.description || null}, ${w.type || 'sequential'}, ${w.isActive !== false},
+330:         ${JSON.stringify(w.steps || [])}::jsonb, ${JSON.stringify(w.documentTypes || [])}::jsonb,
+331:         ${w.slaHours || 24}
+332:       ) RETURNING *
+333:     `;
+334:     res.status(201).json({ success: true, workflow: mapWorkflowRow(rows[0]) });
+335:   } catch (err: any) {
+336:     fail500(res, 'Admin config request failed (POST /api/admin/workflows)', err);
+337:   }
+338: });
+339: 
+340: /** Update a workflow */
+341: adminConfigRouter.put('/workflows/:id', async (req: Request, res: Response) => {
+342:   try {
+343:     const w = req.body;
+344:     const result = await ((req as any).db || prisma).$executeRaw`
+345:       UPDATE workflow_configs SET
+346:         name = COALESCE(${w.name || null}, name),
+347:         description = COALESCE(${w.description || null}, description),
+348:         type = COALESCE(${w.type || null}, type),
+349:         is_active = COALESCE(${w.isActive}, is_active),
+350:         steps = COALESCE(${w.steps ? JSON.stringify(w.steps) : null}::jsonb, steps),
+351:         document_types = COALESCE(${w.documentTypes ? JSON.stringify(w.documentTypes) : null}::jsonb, document_types),
+352:         sla_hours = COALESCE(${w.slaHours || null}, sla_hours),
+353:         updated_at = NOW()
+354:       WHERE id = ${req.params.id}::uuid
+355:     `;
+356:     res.json({ success: result > 0, message: result > 0 ? 'Updated' : 'Not found' });
+357:   } catch (err: any) {
+358:     fail500(res, 'Admin config request failed (PUT /api/admin/workflows/:id)', err);
+359:   }
+360: });
+361: 
+362: /** Delete a workflow */
+363: adminConfigRouter.delete('/workflows/:id', async (req: Request, res: Response) => {
+364:   try {
+365:     const result = await ((req as any).db || prisma).$executeRaw`
+366:       DELETE FROM workflow_configs WHERE id = ${req.params.id}::uuid
+367:     `;
+368:     res.json({ success: result > 0, message: result > 0 ? 'Deleted' : 'Not found' });
+369:   } catch (err: any) {
+370:     fail500(res, 'Admin config request failed (DELETE /api/admin/workflows/:id)', err);
+371:   }
+372: });
+373: 
+374: // =============================================================================
+375: // VERIFICATION QUEUE
+376: // =============================================================================
+377: 
+378: /** List verification queue items */
+379: adminConfigRouter.get('/verification-queue', async (req: Request, res: Response) => {
+380:   try {
+381:     const status = req.query.status as string | undefined;
+382:     const priority = req.query.priority as string | undefined;
+383: 
+384:     const filterStatus = (status && status !== 'all') ? status : null;
+385:     const filterPriority = (priority && priority !== 'all') ? priority : null;
+386: 
+387:     // KS-29: tenant-scoped — admin in tenant A cannot list items in tenant B.
+388:     // tenant_id was added in migration 015; req.tenantId is the effective
+389:     // tenant after extractTenantContext resolves any X-Tenant-Override.
+390:     const tenantId = ((req as any).tenantId as string | undefined) || 'a0000000-0000-4000-8000-000000000001';
+391:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+392:       SELECT * FROM admin_verification_queue
+393:       WHERE tenant_id = ${tenantId}::uuid
+394:         AND (${filterStatus}::text IS NULL OR status = ${filterStatus})
+395:         AND (${filterPriority}::text IS NULL OR priority = ${filterPriority})
+396:       ORDER BY created_at DESC
+397:     `;
+398:     res.json({ success: true, items: rows.map(mapQueueRow) });
+399:   } catch (err: any) {
+400:     if (isMissingTableError(err)) {
+401:       return res.json({ success: true, items: [] });
+402:     }
+403:     fail500(res, 'Admin config request failed (GET /api/admin/verification-queue)', err);
+404:   }
+405: });
+406: 
+407: /** Perform an action on a verification queue item */
+408: adminConfigRouter.post('/verification-queue/:id/action', async (req: Request, res: Response) => {
+409:   try {
+410:     const { action, notes, assignedTo } = req.body;
+411:     if (!action) {
+412:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'action is required (approve, reject, escalate, assign)' } });
+413:     }
+414: 
+415:     let newStatus: string;
+416:     switch (action) {
+417:       case 'approve': newStatus = 'approved'; break;
+418:       case 'reject': newStatus = 'rejected'; break;
+419:       case 'escalate': newStatus = 'escalated'; break;
+420:       case 'assign': newStatus = 'in_review'; break;
+421:       default:
+422:         return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `Unknown action: ${action}` } });
+423:     }
+424: 
+425:     // KS-29: tenant-scoped action — admin in tenant A cannot transition an
+426:     // item in tenant B by guessing its id.
+427:     const tenantId = ((req as any).tenantId as string | undefined) || 'a0000000-0000-4000-8000-000000000001';
+428:     const result = await ((req as any).db || prisma).$executeRaw`
+429:       UPDATE admin_verification_queue SET
+430:         status = ${newStatus},
+431:         assigned_to = COALESCE(${assignedTo || null}, assigned_to),
+432:         notes = COALESCE(${notes || null}, notes),
+433:         updated_at = NOW()
+434:       WHERE id = ${req.params.id}
+435:         AND tenant_id = ${tenantId}::uuid
+436:     `;
+437:     res.json({ success: result > 0, message: result > 0 ? `Item ${action}d` : 'Item not found' });
+438:   } catch (err: any) {
+439:     fail500(res, 'Admin config request failed (POST /api/admin/verification-queue/:id/action)', err);
+440:   }
+441: });
+442: 
+443: // =============================================================================
+444: // INTEGRATIONS
+445: // =============================================================================
+446: 
+447: /** List all integrations */
+448: adminConfigRouter.get('/integrations', async (req: Request, res: Response) => {
+449:   try {
+450:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+451:       SELECT * FROM admin_integrations ORDER BY name ASC
+452:     `;
+453:     res.json({ success: true, integrations: rows.map(mapIntegrationRow) });
+454:   } catch (err: any) {
+455:     if (isMissingTableError(err)) {
+456:       return res.json({ success: true, integrations: [] });
+457:     }
+458:     fail500(res, 'Admin config request failed (GET /api/admin/integrations)', err);
+459:   }
+460: });
+461: 
+462: /** Create an integration */
+463: adminConfigRouter.post('/integrations', async (req: Request, res: Response) => {
+464:   try {
+465:     const d = req.body;
+466:     if (!d.name || !d.integrationType || !d.provider) {
+467:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'name, integrationType, and provider are required' } });
+468:     }
+469:     // Pen-test F-09
+470:     const id = `int_${require('crypto').randomUUID()}`;
+471:     await ((req as any).db || prisma).$executeRaw`
+472:       INSERT INTO admin_integrations (id, name, integration_type, provider, status, config)
+473:       VALUES (${id}, ${d.name}, ${d.integrationType}, ${d.provider},
+474:               ${d.status || 'disconnected'}, ${JSON.stringify(d.config || {})}::jsonb)
+475:     `;
+476:     res.status(201).json({ success: true, integration: { id, ...d } });
+477:   } catch (err: any) {
+478:     fail500(res, 'Admin config request failed (POST /api/admin/integrations)', err);
+479:   }
+480: });
+481: 
+482: /** Update an integration */
+483: adminConfigRouter.put('/integrations/:id', async (req: Request, res: Response) => {
+484:   try {
+485:     const d = req.body;
+486:     const result = await ((req as any).db || prisma).$executeRaw`
+487:       UPDATE admin_integrations SET
+488:         name = COALESCE(${d.name || null}, name),
+489:         status = COALESCE(${d.status || null}, status),
+490:         config = COALESCE(${d.config ? JSON.stringify(d.config) : null}::jsonb, config),
+491:         error_message = ${d.errorMessage || null},
+492:         last_sync_at = ${d.status === 'connected' ? new Date() : null},
+493:         updated_at = NOW()
+494:       WHERE id = ${req.params.id}
+495:     `;
+496:     res.json({ success: result > 0, message: result > 0 ? 'Updated' : 'Not found' });
+497:   } catch (err: any) {
+498:     fail500(res, 'Admin config request failed (PUT /api/admin/integrations/:id)', err);
+499:   }
+500: });
+501: 
+502: /** Delete an integration */
+503: adminConfigRouter.delete('/integrations/:id', async (req: Request, res: Response) => {
+504:   try {
+505:     const result = await ((req as any).db || prisma).$executeRaw`
+506:       DELETE FROM admin_integrations WHERE id = ${req.params.id}
+507:     `;
+508:     res.json({ success: result > 0, message: result > 0 ? 'Deleted' : 'Not found' });
+509:   } catch (err: any) {
+510:     fail500(res, 'Admin config request failed (DELETE /api/admin/integrations/:id)', err);
+511:   }
+512: });
+513: 
+514: // =============================================================================
+515: // PLATFORM SETTINGS
+516: // =============================================================================
+517: 
+518: /** Get all settings (optionally filtered by category) */
+519: adminConfigRouter.get('/settings', async (req: Request, res: Response) => {
+520:   try {
+521:     const category = req.query.category as string | undefined;
+522:     let rows: any[];
+523:     if (category) {
+524:       rows = await ((req as any).db || prisma).$queryRaw`
+525:         SELECT * FROM admin_settings WHERE category = ${category} ORDER BY key ASC
+526:       `;
+527:     } else {
+528:       rows = await ((req as any).db || prisma).$queryRaw`
+529:         SELECT * FROM admin_settings ORDER BY category ASC, key ASC
+530:       `;
+531:     }
+532: 
+533:     // Convert to a nested object grouped by category
+534:     const settings: Record<string, Record<string, unknown>> = {};
+535:     for (const row of rows) {
+536:       if (!settings[row.category]) settings[row.category] = {};
+537:       const shortKey = row.key.includes('.') ? row.key.split('.').slice(1).join('.') : row.key;
+538:       settings[row.category][shortKey] = row.value;
+539:     }
+540: 
+541:     res.json({ success: true, settings });
+542:   } catch (err: any) {
+543:     if (isMissingTableError(err)) {
+544:       return res.json({ success: true, settings: {} });
+545:     }
+546:     fail500(res, 'Admin config request failed (GET /api/admin/settings)', err);
+547:   }
+548: });
+549: 
+550: /** Update one or more settings */
+551: adminConfigRouter.put('/settings', async (req: Request, res: Response) => {
+552:   try {
+553:     const updates: Record<string, unknown> = req.body;
+554:     let updatedCount = 0;
+555: 
+556:     for (const [key, value] of Object.entries(updates)) {
+557:       const result = await ((req as any).db || prisma).$executeRaw`
+558:         UPDATE admin_settings SET value = ${JSON.stringify(value)}::jsonb, updated_at = NOW()
+559:         WHERE key = ${key}
+560:       `;
+561:       if (result > 0) updatedCount++;
+562:       else {
+563:         // Insert if not exists
+564:         const category = key.split('.')[0] || 'general';
+565:         await ((req as any).db || prisma).$executeRaw`
+566:           INSERT INTO admin_settings (key, value, category) VALUES (${key}, ${JSON.stringify(value)}::jsonb, ${category})
+567:           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
+568:         `;
+569:         updatedCount++;
+570:       }
+571:     }
+572: 
+573:     res.json({ success: true, updatedCount });
+574:   } catch (err: any) {
+575:     fail500(res, 'Admin config request failed (PUT /api/admin/settings)', err);
+576:   }
+577: });
+578: 
+579: // =============================================================================
+580: // DASHBOARD
+581: // =============================================================================
+582: 
+583: /** Aggregate platform stats (used by audit log page header) */
+584: adminConfigRouter.get('/dashboard', async (req: Request, res: Response) => {
+585:   try {
+586:     const db = (req as any).db || prisma;
+587: 
+588:     // H25 (2026-04-28): honour X-Tenant-Override on the count queries.
+589:     // Without this, a super_admin viewing tenant X via the override sees
+590:     // platform-wide totals (1597 / 1400 etc.) regardless of which tenant
+591:     // is selected — the H12 banner says "Cross-tenant mode" but the data
+592:     // behind it is unscoped. Per-tenant routing at the connection level
+593:     // exists (TenantPoolManager) but in dev all tenants share the same
+594:     // Postgres database, so connection-level routing alone doesn't filter.
+595:     //
+596:     // Logic: if the original request supplied X-Tenant-Override (super-
+597:     // admin viewing a specific tenant), tag every count query with
+598:     // `WHERE tenant_id = $1` (joining via owner_user_id → users for
+599:     // documents). With no override, return platform-wide aggregate
+600:     // (the existing default — which is what H15's "PLATFORM TOTALS"
+601:     // label tells the operator they're seeing).
+602:     const overrideHeader = req.headers['x-tenant-override'] as string | undefined;
+603:     const overrideUuid =
+604:       overrideHeader && /^[0-9a-fA-F-]{36}$/.test(overrideHeader) ? overrideHeader : null;
+605: 
+606:     // BACKLOG H3: totalVerifications used to count ALL audit_logs rows (wrong
+607:     // — that's a count of every recorded mutation, not just verifies).
+608:     // Filter to just verification-related audit entries. Prefer the audit_logs
+609:     // path if rows exist; fall back to anchor_store as a coarse approximation.
+610:     // KS-458 (admin cross-tenant): platform-wide totals / override-tenant
+611:     // counts have no request-tenant filter (or filter a DIFFERENT tenant than
+612:     // the caller's), so they run under the platform scope.
+613:     const [docCount, userCount, verifyCount] = await runWithPlatformScope(() => Promise.all([
+614:       overrideUuid
+615:         ? db.$queryRaw`
+616:             SELECT COUNT(d.id)::int AS count
+617:             FROM documents d
+618:             LEFT JOIN users u ON d.owner_user_id = u.id
+619:             WHERE u.tenant_id = ${overrideUuid}::uuid
+620:           `.catch(() => [{ count: 0 }])
+621:         : db.$queryRaw`SELECT COUNT(*)::int AS count FROM documents`.catch(() => [{ count: 0 }]),
+622:       overrideUuid
+623:         ? db.$queryRaw`SELECT COUNT(*)::int AS count FROM users WHERE tenant_id = ${overrideUuid}::uuid`
+624:             .catch(() => [{ count: 0 }])
+625:         : db.$queryRaw`SELECT COUNT(*)::int AS count FROM users`.catch(() => [{ count: 0 }]),
+626:       overrideUuid
+627:         ? db.$queryRaw`
+628:             SELECT COUNT(a.id)::int AS count FROM audit_logs a
+629:             LEFT JOIN users u ON a.user_id = u.id
+630:             WHERE (a.action LIKE 'verification.%' OR a.resource_type = 'verification')
+631:               AND u.tenant_id = ${overrideUuid}::uuid
+632:           `.catch(() => [{ count: 0 }])
+633:         : db.$queryRaw`
+634:             SELECT COUNT(*)::int AS count FROM audit_logs
+635:             WHERE action LIKE 'verification.%' OR resource_type = 'verification'
+636:           `.catch(() => [{ count: 0 }]),
+637:     ])) as any[];
+638: 
+639:     const totalDocs = docCount[0]?.count ?? 0;
+640:     const totalUsers = userCount[0]?.count ?? 0;
+641:     const totalVerifications = verifyCount[0]?.count ?? 0;
+642: 
+643:     // Count blockchain anchors
+644:     let totalAnchors = 0;
+645:     try {
+646:       // anchor_store doesn't have tenant_id directly — go via document_id → documents → users.
+647:       // Skip the join when no override (platform-wide aggregate).
+648:       // KS-458 (admin cross-tenant): the documents/users join has no
+649:       // request-tenant filter — platform scope, same as the counts above.
+650:       const anchorCount = (await runWithPlatformScope(() => overrideUuid
+651:         ? db.$queryRaw`
+652:             SELECT COUNT(a.id)::int AS count
+653:             FROM anchor_store a
+654:             JOIN documents d ON a.document_id = d.external_id
+655:             LEFT JOIN users u ON d.owner_user_id = u.id
+656:             WHERE u.tenant_id = ${overrideUuid}::uuid
+657:           `
+658:         : db.$queryRaw`SELECT COUNT(*)::int AS count FROM anchor_store`)) as any[];
+659:       totalAnchors = anchorCount[0]?.count ?? 0;
+660:     } catch { /* table may not exist */ }
+661: 
+662:     // BACKLOG H3: previously hard-counted only auth + anchoring (+1 for self
+663:     // = 3). The platform actually runs 30+ services. Health enumeration
+664:     // doesn't belong in originate — the API gateway already has the
+665:     // authoritative `/system/status` endpoint that probes every service.
+666:     // Omitting the field tells the frontend to query /system/status itself
+667:     // (it already has that fallback path).
+668: 
+669:     // Recent activity from audit log — KS-28 tenant-scoped. The dashboard
+670:     // is rendered per the request's effective tenant; super_admin override
+671:     // flips that via X-Tenant-Override.
+672:     let recentActivity: any[] = [];
+673:     try {
+674:       const dashboardTenantId = ((req as any).tenantId as string | undefined) || 'a0000000-0000-4000-8000-000000000001';
+675:       recentActivity = await ((req as any).db || prisma).$queryRaw`
+676:         SELECT id, action, resource_type, user_id, created_at, success, details
+677:         FROM audit_logs
+678:         WHERE tenant_id = ${dashboardTenantId}::uuid
+679:         ORDER BY created_at DESC LIMIT 10
+680:       `;
+681:     } catch { /* table may not exist */ }
+682: 
+683:     res.json({
+684:       success: true,
+685:       stats: {
+686:         totalDocuments: totalDocs,
+687:         totalUsers: totalUsers,
+688:         totalVerifications,
+689:         totalAnchors,
+690:         // servicesOnline intentionally omitted — caller should hit
+691:         // /system/status for the authoritative number.
+692:       },
+693:       recentActivity: recentActivity.map((r: any) => ({
+694:         id: r.id,
+695:         action: r.action,
+696:         resourceType: r.resource_type,
+697:         userId: r.user_id,
+698:         createdAt: r.created_at?.toISOString?.() || r.created_at,
+699:         success: r.success,
+700:         details: r.details,
+701:       })),
+702:     });
+703:   } catch (err: any) {
+704:     fail500(res, 'Admin config request failed (GET /api/admin/dashboard)', err);
+705:   }
+706: });
+707: 
+708: // =============================================================================
+709: // VERIFICATION POLICIES
+710: // =============================================================================
+711: 
+712: /** List verification policies */
+713: adminConfigRouter.get('/verification-policies', async (req: Request, res: Response) => {
+714:   try {
+715:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+716:       SELECT * FROM verification_policies ORDER BY created_at DESC
+717:     `;
+718:     res.json({
+719:       success: true,
+720:       policies: rows.map(mapPolicyRow),
+721:       total: rows.length,
+722:     });
+723:   } catch (err: any) {
+724:     if (isMissingTableError(err)) {
+725:       return res.json({ success: true, policies: [], total: 0 });
+726:     }
+727:     fail500(res, 'Admin config request failed (GET /api/admin/verification-policies)', err);
+728:   }
+729: });
+730: 
+731: /** Create a verification policy */
+732: adminConfigRouter.post('/verification-policies', async (req: Request, res: Response) => {
+733:   try {
+734:     const d = req.body;
+735:     if (!d.name) {
+736:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'name is required' } });
+737:     }
+738:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+739:       INSERT INTO verification_policies (
+740:         name, description, scope, is_active,
+741:         min_user_verification_level, min_org_verification_level,
+742:         required_auth_providers, require_mfa, require_wallet_signature,
+743:         region_restrictions, enforcement_mode
+744:       ) VALUES (
+745:         ${d.name}, ${d.description || null}, ${d.scope || 'deployment'},
+746:         ${d.isActive !== false},
+747:         ${d.minUserVerificationLevel || 'BASIC'}, ${d.minOrgVerificationLevel || 'BASIC'},
+748:         ${JSON.stringify(d.requiredAuthProviders || [])}::jsonb,
+749:         ${d.requireMFA || false}, ${d.requireWalletSignature || false},
+750:         ${JSON.stringify(d.regionRestrictions || [])}::jsonb,
+751:         ${d.enforcementMode || 'warn'}
+752:       ) RETURNING *
+753:     `;
+754:     res.status(201).json({ success: true, policy: mapPolicyRow(rows[0]) });
+755:   } catch (err: any) {
+756:     fail500(res, 'Admin config request failed (POST /api/admin/verification-policies)', err);
+757:   }
+758: });
+759: 
+760: /** Update a verification policy */
+761: adminConfigRouter.put('/verification-policies/:id', async (req: Request, res: Response) => {
+762:   try {
+763:     const d = req.body;
+764:     const result = await ((req as any).db || prisma).$executeRaw`
+765:       UPDATE verification_policies SET
+766:         name = COALESCE(${d.name || null}, name),
+767:         description = COALESCE(${d.description || null}, description),
+768:         scope = COALESCE(${d.scope || null}, scope),
+769:         is_active = COALESCE(${d.isActive}, is_active),
+770:         min_user_verification_level = COALESCE(${d.minUserVerificationLevel || null}, min_user_verification_level),
+771:         enforcement_mode = COALESCE(${d.enforcementMode || null}, enforcement_mode),
+772:         updated_at = NOW()
+773:       WHERE id = ${req.params.id}::uuid
+774:     `;
+775:     res.json({ success: result > 0, message: result > 0 ? 'Updated' : 'Not found' });
+776:   } catch (err: any) {
+777:     fail500(res, 'Admin config request failed (PUT /api/admin/verification-policies/:id)', err);
+778:   }
+779: });
+780: 
+781: /** Delete a verification policy */
+782: adminConfigRouter.delete('/verification-policies/:id', async (req: Request, res: Response) => {
+783:   try {
+784:     const result = await ((req as any).db || prisma).$executeRaw`
+785:       DELETE FROM verification_policies WHERE id = ${req.params.id}::uuid
+786:     `;
+787:     res.json({ success: result > 0, message: result > 0 ? 'Deleted' : 'Not found' });
+788:   } catch (err: any) {
+789:     fail500(res, 'Admin config request failed (DELETE /api/admin/verification-policies/:id)', err);
+790:   }
+791: });
+792: 
+793: /** Verification policy audit trail */
+794: adminConfigRouter.get('/verification-policies/audit', async (req: Request, res: Response) => {
+795:   try {
+796:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+797:       SELECT * FROM policy_audit_log ORDER BY created_at DESC LIMIT 100
+798:     `;
+799:     res.json({ success: true, entries: rows });
+800:   } catch {
+801:     res.json({ success: true, entries: [] });
+802:   }
+803: });
+804: 
+805: /** Regional verification policies */
+806: adminConfigRouter.get('/verification-policies/regional', async (req: Request, res: Response) => {
+807:   try {
+808:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+809:       SELECT * FROM verification_policies
+810:       WHERE region_restrictions IS NOT NULL AND region_restrictions != '[]'::jsonb
+811:       ORDER BY name ASC
+812:     `;
+813:     res.json({ success: true, regions: rows.map(mapPolicyRow) });
+814:   } catch {
+815:     res.json({ success: true, regions: [] });
+816:   }
+817: });
+818: 
+819: // =============================================================================
+820: // ORGANIZATIONS
+821: // =============================================================================
+822: 
+823: /** List organizations */
+824: adminConfigRouter.get('/organizations', async (req: Request, res: Response) => {
+825:   try {
+826:     // KS-458 (admin cross-tenant): org listing join has no tenant filter.
+827:     const rows: any[] = await runWithPlatformScope(() => ((req as any).db || prisma).$queryRaw`
+828:       SELECT o.*, COUNT(om.user_id)::int AS user_count
+829:       FROM organizations o
+830:       LEFT JOIN organization_members om ON om.organization_id = o.id
+831:       GROUP BY o.id
+832:       ORDER BY o.name ASC
+833:     `);
+834:     res.json({
+835:       success: true,
+836:       organizations: rows.map(mapOrgRow),
+837:       total: rows.length,
+838:     });
+839:   } catch (err: any) {
+840:     if (isMissingTableError(err)) {
+841:       return res.json({ success: true, organizations: [], total: 0 });
+842:     }
+843:     fail500(res, 'Admin config request failed (GET /api/admin/organizations)', err);
+844:   }
+845: });
+846: 
+847: /** Create an organization */
+848: adminConfigRouter.post('/organizations', async (req: Request, res: Response) => {
+849:   try {
+850:     const d = req.body;
+851:     if (!d.name) {
+852:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'name is required' } });
+853:     }
+854:     const slug = d.slug || d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+855:     // KS-458 (admin cross-tenant): organizations is a fail-closed flip table
+856:     // and a new org is not the caller's tenant — platform scope for the write.
+857:     const rows: any[] = await runWithPlatformScope(() => ((req as any).db || prisma).$queryRaw`
+858:       INSERT INTO organizations (name, slug, type, status, domain, settings)
+859:       VALUES (${d.name}, ${slug}, ${d.type || 'issuer'}, ${d.status || 'active'},
+860:               ${d.domain || null}, ${JSON.stringify(d.settings || {})}::jsonb)
+861:       RETURNING *
+862:     `);
+863:     res.status(201).json({ success: true, organization: mapOrgRow(rows[0]) });
+864:   } catch (err: any) {
+865:     fail500(res, 'Admin config request failed (POST /api/admin/organizations)', err);
+866:   }
+867: });
+868: 
+869: /** Update an organization */
+870: adminConfigRouter.put('/organizations/:id', async (req: Request, res: Response) => {
+871:   try {
+872:     const d = req.body;
+873:     // KS-458 (admin cross-tenant): targets an arbitrary org by id, no
+874:     // caller-tenant filter — platform scope so the UPDATE matches under RLS.
+875:     const result = await runWithPlatformScope(() => ((req as any).db || prisma).$executeRaw`
+876:       UPDATE organizations SET
+877:         name = COALESCE(${d.name || null}, name),
+878:         type = COALESCE(${d.type || null}, type),
+879:         status = COALESCE(${d.status || null}, status),
+880:         domain = COALESCE(${d.domain || null}, domain),
+881:         updated_at = NOW()
+882:       WHERE id = ${req.params.id}::uuid
+883:     `);
+884:     res.json({ success: result > 0, message: result > 0 ? 'Updated' : 'Not found' });
+885:   } catch (err: any) {
+886:     fail500(res, 'Admin config request failed (PUT /api/admin/organizations/:id)', err);
+887:   }
+888: });
+889: 
+890: /** Delete an organization (cascade: members, rights holders, documents, users) */
+891: adminConfigRouter.delete('/organizations/:id', async (req: Request, res: Response) => {
+892:   try {
+893:     const db = (req as any).db || prisma;
+894:     const orgId = req.params.id;
+895: 
+896:     // Cascade delete dependent records in correct order
+897:     // KS-108: scope this org's rights_holders delete to its tenant under RLS.
+898:     await withTenant(orgId, (tx) => tx.$executeRaw`DELETE FROM rights_holders WHERE organization_id = ${orgId}::uuid`);
+899:     // KS-458 (admin cross-tenant): the cascade targets an arbitrary org's
+900:     // documents/members/org rows, not the caller's tenant — platform scope.
+901:     const result = await runWithPlatformScope(async () => {
+902:       await db.$executeRaw`DELETE FROM documents WHERE issuer_organization_id = ${orgId}::uuid`;
+903:       await db.$executeRaw`DELETE FROM organization_members WHERE organization_id = ${orgId}::uuid`;
+904:       return db.$executeRaw`
+905:         DELETE FROM organizations WHERE id = ${orgId}::uuid
+906:       `;
+907:     });
+908:     res.json({ success: result > 0, message: result > 0 ? 'Deleted (cascade)' : 'Not found' });
+909:   } catch (err: any) {
+910:     fail500(res, 'Admin config request failed (DELETE /api/admin/organizations/:id)', err);
+911:   }
+912: });
+913: 
+914: // =============================================================================
+915: // API KEYS
+916: // =============================================================================
+917: 
+918: /** List API keys (tenant-scoped, reads svc_api_keys — the table the
+919:  *  gateway's /api/keys/validate also reads, so keys returned here are
+920:  *  the same set that actually validates through the gateway).
+921:  *
+922:  *  KS-33: cut over from `api_keys` to `svc_api_keys` so the originate
+923:  *  admin path and the security-service validation path see the same
+924:  *  rows. KS-24's tenant-scoping guarantees still hold — `svc_api_keys`
+925:  *  has tenant_id NOT NULL + RLS post-migration 018, and every WHERE
+926:  *  filters on req.tenantId here too as defence-in-depth. */
+927: adminConfigRouter.get('/api-keys', async (req: Request, res: Response) => {
+928:   try {
+929:     const tenantId = ((req as any).tenantId as string | undefined) || 'a0000000-0000-4000-8000-000000000001';
+930:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+931:       SELECT id, key_prefix, name, scopes, rate_limit, is_active,
+932:              expires_at, last_used_at, created_at
+933:       FROM svc_api_keys
+934:       WHERE tenant_id = ${tenantId}::uuid
+935:       ORDER BY created_at DESC
+936:     `;
+937:     res.json({
+938:       success: true,
+939:       keys: rows.map((r: any) => ({
+940:         id: r.id,
+941:         keyPrefix: r.key_prefix,
+942:         name: r.name,
+943:         // svc_api_keys.scopes is text[]; expose as `permissions` to
+944:         // keep the admin UI's response shape unchanged across the
+945:         // KS-33 cutover.
+946:         permissions: Array.isArray(r.scopes) ? r.scopes : [],
+947:         rateLimit: r.rate_limit,
+948:         isActive: r.is_active,
+949:         expiresAt: r.expires_at?.toISOString?.() || r.expires_at,
+950:         lastUsedAt: r.last_used_at?.toISOString?.() || r.last_used_at,
+951:         createdAt: r.created_at?.toISOString?.() || r.created_at,
+952:       })),
+953:     });
+954:   } catch (err: any) {
+955:     if (isMissingTableError(err)) {
+956:       return res.json({ success: true, keys: [] });
+957:     }
+958:     fail500(res, 'Admin config request failed (GET /api/admin/api-keys)', err);
+959:   }
+960: });
+961: 
+962: /** Create an API key. KS-33: writes to svc_api_keys so the resulting
+963:  *  sk_* validates through the gateway (security service's
+964:  *  /api/keys/validate reads svc_api_keys, not api_keys). */
+965: adminConfigRouter.post('/api-keys', async (req: Request, res: Response) => {
+966:   try {
+967:     const d = req.body;
+968:     // KS-1206: the security service bounds this field to an integer from 1 to 10000; refuse anything else before the INSERT.
+969:     if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {
+970:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'rateLimit must be an integer from 1 to 10000' } });
+971:     }
+972:     if (!d.name) {
+973:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'name is required' } });
+974:     }
+975:     // KS-1594: this handler INSERTs into svc_api_keys with a raw $queryRaw below, so NEITHER
+976:     // `decideMint` NOR `decideTenantAccess` runs on it. That made it a SECOND hop 1: an ORG_ADMIN
+977:     // could mint a provisioning-capable key here carrying no, a whitespace, or a FOREIGN
+978:     // organisation, and hop 2 then minted into that organisation with its connector (pull request
+979:     // 1541 Opus gate, finding M1, measured 201 three of three). KS-1584 shut the security route's
+980:     // hop 1; it does not reach this one.
+981:     //
+982:     // All three decisions below go through the SAME shared predicates the security route uses, so
+983:     // each rule has one definition rather than a second copy that can drift apart from it.
+984:     // (ks1594CommentOnlyMarker: named here in a comment ONLY, so the KS-1594 cell's
+985:     // comment-stripper has a control — a predicate named in a comment must not satisfy its
+986:     // source assertion.)
+987:     const requestedScopes = Array.isArray(d.permissions) && d.permissions.length > 0
+988:       ? d.permissions as string[]
+989:       : ['read'];
+990:     const callerIsPlatform = isPlatformRole((req as any).user?.role as string | undefined);
+991:     // (m2, pull request 1547 gate) A non-string `organizationId` must be refused BEFORE
+992:     // normalisation. `normaliseOrgId` returns null for ANY non-string, so an array, object, number
+993:     // or boolean was read as "absent" — and for a platform caller that silently turned a malformed
+994:     // request into an ORG-LESS, and therefore UNBOUNDED, provisioning key. Refuse the shape.
+995:     if (d.organizationId !== undefined && d.organizationId !== null && typeof d.organizationId !== 'string') {
+996:       return res.status(400).json({
+997:         success: false,
+998:         error: { code: 'BAD_REQUEST', message: 'organizationId must be a string' },
+999:       });
+1000:     }
+1001:     // (b) Normalise BEFORE comparing or storing, so '' and '   ' are absent rather than a distinct
+1002:     // organisation, and the comparison in (c) folds case and surrounding whitespace.
+1003:     const requestedOrg = normaliseOrgId(d.organizationId as string | null | undefined);
+1004:     const callerOrg = normaliseOrgId((req as any).user?.organizationId as string | null | undefined);
+1005:     // (a) A non-platform caller may NOT mint an UNQUALIFIED provisioning-capable key — one whose
+1006:     // body names no organisation — because an org-less provisioning key is the unbounded,
+1007:     // platform-minted shape (`keyRevokePolicy.ts` treats a null organisation as unbounded), and
+1008:     // there would be nothing to bound it to.
+1009:     //
+1010:     // It MAY mint one that names an organisation, which (c) then bounds to its own. That is Kam's
+1011:     // ruling on card `secuura-provisioning-scope-escapes-the-org-bound`, 2026-10-13 12:55:49 AEDT,
+1012:     // option b: "Allow it, but bound the provisioning key to the minting admin's own scope". The
+1013:     // rejected option a was "only platform roles may mint a key with the provisioning scope", and
+1014:     // the first version of this guard implemented that rejected option (pull request 1547 gate, m1).
+1015:     //
+1016:     // The test is on `requestedOrg` — the BODY value — with NO fall-back to the caller's claim, so
+1017:     // this door matches the sibling door exactly: `services/security/src/index.ts` refuses when
+1018:     // `normaliseOrgId(data.organizationId) === null`, and its comment states the same default-deny
+1019:     // reasoning. Testing the post-fall-back value instead would make THIS door more permissive than
+1020:     // that one, on the single key class whose unboundedness is the whole concern.
+1021:     if (isProvisioningCapable(requestedScopes) && !callerIsPlatform && requestedOrg === null) {
+1022:       return res.status(403).json({
+1023:         success: false,
+1024:         error: {
+1025:           code: 'FORBIDDEN',
+1026:           message: 'A provisioning-capable key must name an organisation in your scope; only a platform role may mint one without an organisation',
+1027:         },
+1028:       });
+1029:     }
+1030:     // (c) A non-platform caller is bound to its own organisation — the rule the security route
+1031:     // already applies to an ORG_ADMIN by token claim (the KS-1533 arm). A blank or whitespace
+1032:     // value is not a foreign organisation: it normalises to absent and falls through to the
+1033:     // caller's own claim below, which leaves the key BOUNDED rather than unbounded.
+1034:     if (!callerIsPlatform && requestedOrg !== null && requestedOrg !== callerOrg) {
+1035:       return res.status(403).json({
+1036:         success: false,
+1037:         error: { code: 'FORBIDDEN', message: 'organizationId must be your own organisation' },
+1038:       });
+1039:     }
+1040:     // Audit A-12: API key value MUST be cryptographic — 32 bytes from
+1041:     // crypto.randomBytes (256 bits of entropy, hex-encoded).
+1042:     const cryptoMod = require('crypto') as typeof import('crypto');
+1043:     const keyValue = `sk_${cryptoMod.randomBytes(32).toString('hex')}`;
+1044:     const keyPrefix = keyValue.substring(0, 12);
+1045:     // KS-24 + KS-33: tenant from req.tenantId (extractTenantContext-set);
+1046:     // organization_id is optional in svc_api_keys post-018 — SYSTEM_ADMIN
+1047:     // issuing a per-tenant key without picking a specific org is fine.
+1048:     // The internal record id is `key_<uuid>` to match the format the
+1049:     // security service uses for its own POST /api/keys (see
+1050:     // services/security/src/index.ts:703).
+1051:     const tenantId = ((req as any).tenantId as string | undefined) || 'a0000000-0000-4000-8000-000000000001';
+1052:     const recordId = `key_${cryptoMod.randomUUID()}`;
+1053:     // KS-1594: both decided and normalised above; the body no longer wins unchecked.
+1054:     const orgId = requestedOrg ?? callerOrg;
+1055:     const scopes = requestedScopes;
+1056:     // KS-33 follow-up: svc_api_keys.scopes is JSONB on every deploy
+1057:     // (docker/init/04 declares it; CORE_MIGRATIONS post-PR #14 declares
+1058:     // it; the security service's dbSaveApiKey at services/security/src/
+1059:     // index.ts:194 writes it via JSON.stringify). PR #10's `::text[]`
+1060:     // cast worked against a non-existent canonical TEXT[] shape and
+1061:     // failed at runtime against the real JSONB column. Cast as JSONB
+1062:     // here so the originate admin endpoint matches the rest of the
+1063:     // pipeline.
+1064:     const rows: any[] = await ((req as any).db || prisma).$queryRaw`
+1065:       INSERT INTO svc_api_keys (
+1066:         id, organization_id, tenant_id, name, key_hash, key_prefix,
+1067:         scopes, rate_limit, rate_limit_window, usage_count,
+1068:         is_active, expires_at
+1069:       )
+1070:       VALUES (
+1071:         ${recordId},
+1072:         ${orgId},
+1073:         ${tenantId}::uuid,
+1074:         ${d.name},
+1075:         encode(digest(${keyValue}, 'sha256'), 'hex'),
+1076:         ${keyPrefix},
+1077:         ${JSON.stringify(scopes)}::jsonb,
+1078:         ${d.rateLimit || 1000},
+1079:         3600,
+1080:         0,
+1081:         TRUE,
+1082:         ${d.expiresAt ? new Date(d.expiresAt) : null}
+1083:       ) RETURNING id, key_prefix, name, scopes, rate_limit, is_active, expires_at, created_at
+1084:     `;
+1085:     res.status(201).json({
+1086:       success: true,
+1087:       key: keyValue,
+1088:       apiKey: {
+1089:         id: rows[0].id,
+1090:         keyPrefix: rows[0].key_prefix,
+1091:         name: rows[0].name,
+1092:         permissions: Array.isArray(rows[0].scopes) ? rows[0].scopes : [],
+1093:         rateLimit: rows[0].rate_limit,
+1094:         isActive: rows[0].is_active,
+1095:         expiresAt: rows[0].expires_at,
+1096:         createdAt: rows[0].created_at,
+1097:       },
+1098:     });
+1099:   } catch (err: any) {
+1100:     fail500(res, 'Admin config request failed (POST /api/admin/api-keys)', err);
+1101:   }
+1102: });
+1103: 
+1104: /** Revoke an API key. KS-33: writes to svc_api_keys (same table the
+1105:  *  gateway validates against, so a revoked key actually stops working
+1106:  *  on the next gateway request once the security service's per-key
+1107:  *  cache expires — 30 s for invalid, 60 s for valid per
+1108:  *  services/api-gateway/src/middleware/auth.ts apiKeyCache). */
+1109: adminConfigRouter.delete('/api-keys/:id', async (req: Request, res: Response) => {
+1110:   try {
+1111:     // KS-25/33: tenant-scoped — a super_admin revokes a key in another tenant by
+1112:     // passing X-Tenant-Override (the gateway resolves it into req.tenantId), the
+1113:     // same mechanism the mint endpoint uses; otherwise revocation is scoped to the
+1114:     // caller's own tenant (default-tenant fallback in single-tenancy).
+1115:     const tenantId = ((req as any).tenantId as string | undefined) || 'a0000000-0000-4000-8000-000000000001';
+1116: 
+1117:     // KS-764 (QA F-764-01): this route is the SECOND surface that revokes a key,
+1118:     // and until now it authorised on ROLE + TENANT only. `adminConfigRouter`
+1119:     // admits ORG_ADMIN (see the requireRole at the top of this file), so an
+1120:     // ORG_ADMIN in organisation A could revoke organisation B's key inside the
+1121:     // same tenant — the exact defect KS-764 closed on
+1122:     // services/security's DELETE /api/keys/:id, still open here.
+1123:     //
+1124:     // It now routes through the SAME `decideKeyRevoke` as that route, imported
+1125:     // from @secuura/shared. Not a second copy of the rule: two implementations
+1126:     // of one policy cannot witness each other drifting.
+1127:     //
+1128:     // RESOLVE FIRST, THEN AUTHORISE — the comparison needs the key's own
+1129:     // organisation, so the row is read before the decision. The read stays
+1130:     // TENANT-SCOPED exactly as the UPDATE below always was: the defect is
+1131:     // same-tenant cross-ORGANISATION, so no platform-scope widening is needed
+1132:     // or wanted here (services/security wraps its lookup only because it must
+1133:     // resolve rows in OTHER tenants).
+1134:     const keyRows: any[] = await ((req as any).db || prisma).$queryRaw`
+1135:       SELECT id, tenant_id, organization_id
+1136:         FROM svc_api_keys
+1137:        WHERE id = ${req.params.id}
+1138:          AND tenant_id = ${tenantId}::uuid
+1139:     `;
+1140:     if (keyRows.length === 0) {
+1141:       return res.json({ success: false, message: 'Not found' });
+1142:     }
+1143:     // BLAST RADIUS — a comparison this route did NOT make before (Peter's #799
+1144:     // review, finding 3). `decideKeyRevoke` delegates to `decideTenantAccess`,
+1145:     // which evaluates `user.tenantId !== targetTenantId` and refuses a caller
+1146:     // with NO tenant outright (`403 caller has no tenant`). This route
+1147:     // previously made no tenant comparison at all.
+1148:     //
+1149:     // It works today only because the auth service signs `tenantId` into
+1150:     // interactive JWTs — and it does so CONDITIONALLY
+1151:     // (`services/auth/src/services/jwt.ts:263`), so a tenant-less user receives
+1152:     // a token without the claim and is refused here. Any other token minter, or
+1153:     // a token predating that field, is refused for the same reason.
+1154:     //
+1155:     // That refusal is the intended fail-closed direction and is NOT being
+1156:     // softened: defaulting a missing tenant would let the caller's absence
+1157:     // choose the answer. It is recorded here because the organisation arm's
+1158:     // blast radius was documented and this one was not, and an undeclared
+1159:     // dependency is the half that surprises someone later. Both `JwtPayload`
+1160:     // types now DECLARE `tenantId` so the requirement is visible to the
+1161:     // compiler rather than resting on what auth happens to sign.
+1162:     const decision = decideKeyRevoke((req as any).user, {
+1163:       id: String(keyRows[0].id),
+1164:       // The SELECT above matched `tenant_id = ${tenantId}`, so the row's tenant IS
+1165:       // this value — passing it is exact, not a widening of the row's own field.
+1166:       tenantId,
+1167:       organizationId: keyRows[0].organization_id == null ? undefined : String(keyRows[0].organization_id),
+1168:     });
+1169:     if (!decision.allow) {
+1170:       logger.warn('API key revoke refused', {
+1171:         keyId: String(keyRows[0].id),
+1172:         keyTenantId: keyRows[0].tenant_id,
+1173:         keyOrganizationId: keyRows[0].organization_id,
+1174:         callerTenantId: (req as any).user?.tenantId,
+1175:         callerOrganizationId: (req as any).user?.organizationId,
+1176:         callerRole: (req as any).user?.role,
+1177:         reason: decision.reason,
+1178:       });
+1179:       return res.status(403).json({
+1180:         success: false,
+1181:         error: { code: 'FORBIDDEN', message: 'Not authorised to revoke this key' },
+1182:       });
+1183:     }
+1184: 
+1185:     // KS-337: svc_api_keys has no `updated_at` column (the mint INSERT never
+1186:     // declares one), so the previous `SET …, updated_at = NOW()` 500'd on every
+1187:     // revoke — keys could never be revoked. is_active = false is all revocation
+1188:     // needs; it propagates within 30–60 s as the gateway's per-key validate cache
+1189:     // expires (see api-gateway middleware/auth.ts apiKeyCache).
+1190:     const result = await ((req as any).db || prisma).$executeRaw`
+1191:       UPDATE svc_api_keys SET is_active = false
+1192:        WHERE id = ${req.params.id}
+1193:          AND tenant_id = ${tenantId}::uuid
+1194:     `;
+1195:     res.json({ success: result > 0, message: result > 0 ? 'Key revoked' : 'Not found' });
+1196:   } catch (err: any) {
+1197:     fail500(res, 'Admin config request failed (DELETE /api/admin/api-keys/:id)', err);
+1198:   }
+1199: });
+1200: 
+1201: // =============================================================================
+1202: // AUDIT LOGS
+1203: // =============================================================================
+1204: 
+1205: /** List audit logs */
+1206: adminConfigRouter.get('/audit-logs', async (req: Request, res: Response) => {
+1207:   try {
+1208:     const limit = Math.min(parseInt(req.query.limit as string) || 200, 1000);
+1209:     const offset = parseInt(req.query.offset as string) || 0;
+1210:     // KS-593 (KS-565 section 2): `|| 0` only catches NaN, so a negative offset reached Postgres as OFFSET -1 (a 500).
+1211:     if (offset < 0) {
+1212:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'offset must be an integer from 0' } });
+1213:     }
+1214:     const action = req.query.action as string | undefined;
+1215:     // KS-28: tenant-scoped — admin in tenant A can only see actions in
+1216:     // their own tenant. Cross-tenant audit visibility (super_admin
+1217:     // platform-wide audit dashboard) goes through routes/platform.ts and
+1218:     // is gated separately on the SUPER_ADMIN role.
+1219:     const tenantId = ((req as any).tenantId as string | undefined) || 'a0000000-0000-4000-8000-000000000001';
+1220: 
+1221:     let rows: any[];
+1222:     if (action) {
+1223:       rows = await ((req as any).db || prisma).$queryRaw`
+1224:         SELECT * FROM audit_logs
+1225:          WHERE tenant_id = ${tenantId}::uuid AND action = ${action}
+1226:         ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}
+1227:       `;
+1228:     } else {
+1229:       rows = await ((req as any).db || prisma).$queryRaw`
+1230:         SELECT * FROM audit_logs
+1231:          WHERE tenant_id = ${tenantId}::uuid
+1232:         ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}
+1233:       `;
+1234:     }
+1235: 
+1236:     const countResult: any[] = await ((req as any).db || prisma).$queryRaw`
+1237:       SELECT COUNT(*)::int AS total FROM audit_logs
+1238:        WHERE tenant_id = ${tenantId}::uuid
+1239:     `;
+1240: 
+1241:     res.json({
+1242:       success: true,
+1243:       logs: rows.map(mapAuditRow),
+1244:       events: rows.map(mapAuditRow),
+1245:       total: countResult[0]?.total ?? rows.length,
+1246:     });
+1247:   } catch (err: any) {
+1248:     if (isMissingTableError(err)) {
+1249:       return res.json({ success: true, logs: [], events: [], total: 0 });
+1250:     }
+1251:     fail500(res, 'Admin config request failed (GET /api/admin/audit-logs)', err);
+1252:   }
+1253: });
+1254: 
+1255: // =============================================================================
+1256: // REPORTS
+1257: // =============================================================================
+1258: 
+1259: /** List reports */
+1260: adminConfigRouter.get('/reports', async (_req: Request, res: Response) => {
+1261:   try {
+1262:     // Aggregate summary reports from existing data
+1263:     // KS-458 (admin cross-tenant): platform-wide aggregates, no tenant filter.
+1264:     const [docStats, userStats] = await runWithPlatformScope(() => Promise.all([
+1265:       prisma.$queryRaw`
+1266:         SELECT status, COUNT(*)::int AS count FROM documents GROUP BY status
+1267:       `.catch(() => []),
+1268:       prisma.$queryRaw`
+1269:         SELECT role, COUNT(*)::int AS count FROM users GROUP BY role
+1270:       `.catch(() => []),
+1271:     ])) as any[];
+1272: 
+1273:     res.json({
+1274:       success: true,
+1275:       reports: [
+1276:         {
+1277:           id: 'doc-summary',
+1278:           name: 'Document Summary',
+1279:           type: 'summary',
+1280:           data: docStats,
+1281:           generatedAt: new Date().toISOString(),
+1282:         },
+1283:         {
+1284:           id: 'user-summary',
+1285:           name: 'User Summary',
+1286:           type: 'summary',
+1287:           data: userStats,
+1288:           generatedAt: new Date().toISOString(),
+1289:         },
+1290:       ],
+1291:     });
+1292:   } catch (err: any) {
+1293:     fail500(res, 'Admin config request failed (GET /api/admin/reports)', err);
+1294:   }
+1295: });
+1296: 
+1297: // =============================================================================
+1298: // PRIVACY
+1299: // =============================================================================
+1300: 
+1301: /** Get privacy settings (consent + retention policies) */
+1302: adminConfigRouter.get('/privacy', async (_req: Request, res: Response) => {
+1303:   try {
+1304:     const [consentRows, retentionRows] = await Promise.all([
+1305:       prisma.$queryRaw`SELECT * FROM consent_records ORDER BY given_at DESC LIMIT 100`.catch(() => []),
+1306:       prisma.$queryRaw`SELECT * FROM data_retention_policies ORDER BY data_type ASC`.catch(() => []),
+1307:     ]) as any[];
+1308: 
+1309:     res.json({
+1310:       success: true,
+1311:       consents: (consentRows as any[]).map((r: any) => ({
+1312:         id: r.id,
+1313:         userId: r.user_id,
+1314:         purpose: r.purpose,
+1315:         source: r.source,
+1316:         givenAt: r.given_at?.toISOString?.() || r.given_at,
+1317:         expiresAt: r.expires_at?.toISOString?.() || r.expires_at,
+1318:         withdrawnAt: r.withdrawn_at?.toISOString?.() || r.withdrawn_at,
+1319:       })),
+1320:       retentionPolicies: (retentionRows as any[]).map((r: any) => ({
+1321:         id: r.id,
+1322:         dataType: r.data_type,
+1323:         retentionDays: r.retention_period_days,
+1324:         legalBasis: r.legal_basis,
+1325:         deletionMethod: r.deletion_method,
+1326:         autoDelete: r.auto_delete,
+1327:         isActive: r.is_active,
+1328:       })),
+1329:     });
+1330:   } catch (err: any) {
+1331:     fail500(res, 'Admin config request failed (GET /api/admin/privacy)', err);
+1332:   }
+1333: });
+1334: 
+1335: /** Update privacy/retention settings */
+1336: adminConfigRouter.put('/privacy', async (req: Request, res: Response) => {
+1337:   try {
+1338:     const d = req.body;
+1339:     let updatedCount = 0;
+1340: 
+1341:     if (d.retentionPolicies && Array.isArray(d.retentionPolicies)) {
+1342:       for (const policy of d.retentionPolicies) {
+1343:         if (policy.id) {
+1344:           const result = await ((req as any).db || prisma).$executeRaw`
+1345:             UPDATE data_retention_policies SET
+1346:               retention_period_days = COALESCE(${policy.retentionDays || null}, retention_period_days),
+1347:               auto_delete = COALESCE(${policy.autoDelete}, auto_delete),
+1348:               deletion_method = COALESCE(${policy.deletionMethod || null}, deletion_method),
+1349:               is_active = COALESCE(${policy.isActive}, is_active),
+1350:               updated_at = NOW()
+1351:             WHERE id = ${policy.id}::uuid
+1352:           `;
+1353:           updatedCount += result;
+1354:         }
+1355:       }
+1356:     }
+1357: 
+1358:     res.json({ success: true, updatedCount });
+1359:   } catch (err: any) {
+1360:     fail500(res, 'Admin config request failed (PUT /api/admin/privacy)', err);
+1361:   }
+1362: });
+1363: 
+1364: // =============================================================================
+1365: // RIGHTS HOLDERS
+1366: // =============================================================================
+1367: 
+1368: /** List rights holders (search, filter, paginate) — filtered by organization */
+1369: adminConfigRouter.get('/rights-holders', async (req: Request, res: Response) => {
+1370:   try {
+1371:     const search = req.query.search as string | undefined;
+1372:     const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+1373:     const offset = parseInt(req.query.offset as string) || 0;
+1374: 
+1375:     // KS-108: scope by the resolved tenant; RLS (via withTenant) is the hard
+1376:     // guarantee against cross-tenant leakage on this shared table. No tenant
+1377:     // resolved → no access. KS-93: super_admin scopes via the verified
+1378:     // X-Tenant-Override or ?organizationId= (resolveTenantId), no dual-send.
+1379:     const tenantId = resolveTenantId(req);
+1380:     // KS-593 (KS-565 section 2): `|| 0` only catches NaN, so a negative offset reached Postgres as OFFSET -1 (a 500).
+1381:     if (offset < 0) {
+1382:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'offset must be an integer from 0' } });
+1383:     }
+1384:     if (!tenantId) {
+1385:       return res.json({ success: true, rightsHolders: [], total: 0 });
+1386:     }
+1387: 
+1388:     const rows: any[] = await withTenant(tenantId, async (tx) => {
+1389:       if (search) {
+1390:         const q = `%${search}%`;
+1391:         return tx.$queryRaw`
+1392:           SELECT * FROM rights_holders
+1393:           WHERE organization_id = ${tenantId}::uuid
+1394:             AND (first_name ILIKE ${q} OR last_name ILIKE ${q} OR email ILIKE ${q} OR display_name ILIKE ${q} OR external_id ILIKE ${q})
+1395:             AND status = 'active'
+1396:           ORDER BY display_name ASC, last_name ASC LIMIT ${limit} OFFSET ${offset}
+1397:         `;
+1398:       }
+1399:       return tx.$queryRaw`
+1400:         SELECT * FROM rights_holders WHERE organization_id = ${tenantId}::uuid AND status = 'active'
+1401:         ORDER BY display_name ASC, last_name ASC LIMIT ${limit} OFFSET ${offset}
+1402:       `;
+1403:     });
+1404: 
+1405:     res.json({
+1406:       success: true,
+1407:       rightsHolders: rows.map(mapRightsHolderRow),
+1408:       total: rows.length,
+1409:     });
+1410:   } catch (err: any) {
+1411:     if (isMissingTableError(err)) {
+1412:       return res.json({ success: true, rightsHolders: [], total: 0 });
+1413:     }
+1414:     fail500(res, 'Admin config request failed (GET /api/admin/rights-holders)', err);
+1415:   }
+1416: });
+1417: 
+1418: /** Get a single rights holder by ID */
+1419: adminConfigRouter.get('/rights-holders/:id', async (req: Request, res: Response) => {
+1420:   try {
+1421:     const tenantId = resolveTenantId(req);
+1422:     if (!tenantId) {
+1423:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Rights holder not found' } });
+1424:     }
+1425:     // KS-108: scope the lookup to the caller's tenant via an explicit
+1426:     // organization_id filter (PRIMARY — enforces regardless of DB role) plus the
+1427:     // withTenant GUC so RLS is defense-in-depth. Closes the prior cross-tenant
+1428:     // read (this query previously had no org filter). NOTE: RLS alone does not
+1429:     // bind the Azure admin connection (secuuraadmin) — see KS-108; the explicit
+1430:     // filter is what guarantees isolation until services run as a least-priv role.
+1431:     const rows: any[] = await withTenant(tenantId, (tx) => tx.$queryRaw`
+1432:       SELECT * FROM rights_holders WHERE id = ${req.params.id}::uuid AND organization_id = ${tenantId}::uuid AND status = 'active'
+1433:     `);
+1434:     if (rows.length === 0) {
+1435:       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Rights holder not found' } });
+1436:     }
+1437:     res.json({ success: true, rightsHolder: mapRightsHolderRow(rows[0]) });
+1438:   } catch (err: any) {
+1439:     fail500(res, 'Admin config request failed (GET /api/admin/rights-holders/:id)', err);
+1440:   }
+1441: });
+1442: 
+1443: /** Create a rights holder */
+1444: adminConfigRouter.post('/rights-holders', async (req: Request, res: Response) => {
+1445:   try {
+1446:     const d = req.body;
+1447:     // KS-106 (product decision 2026-05-22): a rights holder must have a valid
+1448:     // email. Name is optional — display_name falls back to the email below.
+1449:     if (!d.email) {
+1450:       return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'email is required' } });
+1451:     }
+1452:     if (!isValidEmail(d.email)) {
+1453:       return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'email must be a valid email address' } });
+1454:     }
+1455:     // KS-108: a rights holder belongs to one tenant. Resolve it (super_admin via
+1456:     // override/query/body.organizationId; tenant-bound admin via their own org).
+1457:     // tenant_id is set to the same value the RLS WITH CHECK enforces.
+1458:     const tenantId = resolveTenantId(req) || (d.organizationId as string | undefined) || null;
+1459:     if (!tenantId) {
+1460:       return res.status(400).json({ success: false, error: { code: 'TENANT_SCOPE_REQUIRED', message: 'organizationId (or X-Tenant-Override) is required to create a rights holder' } });
+1461:     }
+1462:     const displayName = d.displayName || [d.firstName, d.lastName].filter(Boolean).join(' ') || d.email;
+1463:     const wantInvite = d.sendInvite !== false;
+1464:     const inviteToken = require('crypto').randomBytes(32).toString('hex');
+1465: 
+1466:     const created = await withTenant(tenantId, async (tx) => {
+1467:       const rows: any[] = await tx.$queryRaw`
+1468:         INSERT INTO rights_holders (email, first_name, last_name, display_name, external_id, organization_id, tenant_id, metadata)
+1469:         VALUES (${d.email}, ${d.firstName || null}, ${d.lastName || null}, ${displayName},
+1470:                 ${d.externalId || null}, ${tenantId}::uuid, ${tenantId}::uuid, ${JSON.stringify(d.metadata || {})}::jsonb)
+1471:         RETURNING *
+1472:       `;
+1473:       const mapped = mapRightsHolderRow(rows[0]);
+1474:       if (wantInvite) {
+1475:         await tx.$executeRaw`
+1476:           UPDATE rights_holders SET invite_sent = true, invite_sent_at = NOW(), invite_token = ${inviteToken}, updated_at = NOW()
+1477:           WHERE id = ${rows[0].id}::uuid
+1478:         `;
+1479:         mapped.inviteSent = true;
+1480:       }
+1481:       return mapped;
+1482:     });
+1483: 
+1484:     // Fire-and-forget the invitation email outside the transaction (best-effort).
+1485:     if (wantInvite) {
+1486:       try {
+1487:         const baseUrl = process.env.FRONTEND_URL || 'http://localhost:6882';
+1488:         const inviteUrl = `${baseUrl}/register?invite=${inviteToken}`;
+1489:         const { sendRightsHolderInvite } = require('../services/email');
+1490:         // Pen-test F-04: read identity/org from authenticated req.user and
+1491:         // tenant from req.tenantSlug (populated by extractTenantContext from
+1492:         // the verified JWT-derived header), NOT from raw spoofable headers.
+1493:         const authUser = (req as any).user;
+1494:         const orgName = (authUser?.organizationName as string | undefined)
+1495:           || ((req as any).tenantSlug as string | undefined)
+1496:           || 'Secuura Platform K';
+1497:         sendRightsHolderInvite({
+1498:           recipientEmail: d.email,
+1499:           recipientName: displayName,
+1500:           organizationName: orgName,
+1501:           inviteUrl,
+1502:           inviterName: (authUser?.email as string | undefined) || undefined,
+1503:         }).catch(() => {}); // fire-and-forget
+1504:         (created as any).inviteUrl = inviteUrl;
+1505:       } catch { /* invite email is best-effort */ }
+1506:     }
+1507: 
+1508:     res.status(201).json({ success: true, rightsHolder: created });
+1509:   } catch (err: any) {
+1510:     fail500(res, 'Admin config request failed (POST /api/admin/rights-holders)', err);
+1511:   }
+1512: });
+1513: 
+1514: /** Update a rights holder */
+1515: adminConfigRouter.put('/rights-holders/:id', async (req: Request, res: Response) => {
+1516:   try {
+1517:     const d = req.body;
+1518:     // Validate email format on update too — same rule as create. (F-LOCAL-RH-EMAIL-VALIDATION-01)
+1519:     if (d.email && !isValidEmail(d.email)) {
+1520:       return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'email must be a valid email address' } });
+1521:     }
+1522:     const tenantId = resolveTenantId(req);
+1523:     if (!tenantId) {
+1524:       return res.json({ success: false, message: 'Not found' });
+1525:     }
+1526:     // KS-108: RLS scopes the update to the caller's tenant — a cross-tenant id
+1527:     // simply matches no row.
+1528:     const result = await withTenant(tenantId, (tx) => tx.$executeRaw`
+1529:       UPDATE rights_holders SET
+1530:         email = COALESCE(${d.email || null}, email),
+1531:         first_name = COALESCE(${d.firstName || null}, first_name),
+1532:         last_name = COALESCE(${d.lastName || null}, last_name),
+1533:         display_name = COALESCE(${d.displayName || null}, display_name),
+1534:         external_id = COALESCE(${d.externalId || null}, external_id),
+1535:         metadata = COALESCE(${d.metadata ? JSON.stringify(d.metadata) : null}::jsonb, metadata),
+1536:         updated_at = NOW()
+1537:       WHERE id = ${req.params.id}::uuid AND organization_id = ${tenantId}::uuid
+1538:     `);
+1539:     res.json({ success: result > 0, message: result > 0 ? 'Updated' : 'Not found' });
+1540:   } catch (err: any) {
+1541:     fail500(res, 'Admin config request failed (PUT /api/admin/rights-holders/:id)', err);
+1542:   }
+1543: });
+1544: 
+1545: /** Delete (deactivate) a rights holder */
+1546: adminConfigRouter.delete('/rights-holders/:id', async (req: Request, res: Response) => {
+1547:   try {
+1548:     const tenantId = resolveTenantId(req);
+1549:     if (!tenantId) {
+1550:       return res.json({ success: false, message: 'Not found' });
+1551:     }
+1552:     // KS-108: RLS scopes the (soft) delete to the caller's tenant.
+1553:     const result = await withTenant(tenantId, (tx) => tx.$executeRaw`
+1554:       UPDATE rights_holders SET status = 'inactive', updated_at = NOW() WHERE id = ${req.params.id}::uuid AND organization_id = ${tenantId}::uuid
+1555:     `);
+1556:     res.json({ success: result > 0, message: result > 0 ? 'Deactivated' : 'Not found' });
+1557:   } catch (err: any) {
+1558:     fail500(res, 'Admin config request failed (DELETE /api/admin/rights-holders/:id)', err);
+1559:   }
+1560: });
+1561: 
+1562: /** List documents for a specific rights holder */
+1563: adminConfigRouter.get('/rights-holders/:id/documents', async (req: Request, res: Response) => {
+1564:   try {
+1565:     const db = (req as any).db || prisma;
+1566:     const rows: any[] = await db.$queryRaw`
+1567:       SELECT d.id, d.external_id, d.title, d.document_type, d.content_hash, d.status,
+1568:              d.certification_scope, d.created_at, d.certified_at,
+1569:              d.certification_metadata, d.metadata
+1570:       FROM documents d
+1571:       WHERE d.rights_holder_id = ${req.params.id}::uuid
+1572:       ORDER BY d.created_at DESC
+1573:     `;
+1574:     res.json({
+1575:       success: true,
+1576:       documents: rows.map((r: any) => ({
+1577:         id: r.external_id || r.id,
+1578:         title: r.title,
+1579:         documentType: r.document_type,
+1580:         status: r.status,
+1581:         certificationScope: r.certification_scope,
+1582:         contentHash: r.content_hash,
+1583:         issuer: (r.certification_metadata || {}).issuerName || (r.metadata || {}).issuedBy,
+1584:         createdAt: r.created_at?.toISOString?.() || r.created_at,
+1585:         certifiedAt: r.certified_at?.toISOString?.() || r.certified_at,
+1586:       })),
+1587:     });
+1588:   } catch (err: any) {
+1589:     if (errorMessageIncludes(err, 'does not exist')) {
+1590:       return res.json({ success: true, documents: [] });
+1591:     }
+1592:     fail500(res, 'Admin config request failed (GET /api/admin/rights-holders/:id/documents)', err);
+1593:   }
+1594: });
+1595: 
+1596: /** Send invite to a rights holder */
+1597: adminConfigRouter.post('/rights-holders/:id/invite', async (req: Request, res: Response) => {
+1598:   try {
+1599:     const tenantId = resolveTenantId(req);
+1600:     if (!tenantId) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Rights holder not found' } });
+1601: 
+1602:     // KS-108: look up + flag the invite within the caller's tenant (RLS).
+1603:     const rh: any = await withTenant(tenantId, async (tx) => {
+1604:       const rows: any[] = await tx.$queryRaw`SELECT * FROM rights_holders WHERE id = ${req.params.id}::uuid AND organization_id = ${tenantId}::uuid`;
+1605:       return rows[0] || null;
+1606:     });
+1607:     if (!rh) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Rights holder not found' } });
+1608:     if (!rh.email) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Rights holder has no email address' } });
+1609: 
+1610:     const inviteToken = require('crypto').randomBytes(32).toString('hex');
+1611:     await withTenant(tenantId, (tx) => tx.$executeRaw`
+1612:       UPDATE rights_holders SET invite_sent = true, invite_sent_at = NOW(), invite_token = ${inviteToken}, updated_at = NOW()
+1613:       WHERE id = ${req.params.id}::uuid AND organization_id = ${tenantId}::uuid
+1614:     `);
+1615: 
+1616:     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:6882';
+1617:     const inviteUrl = `${baseUrl}/register?invite=${inviteToken}`;
+1618: 
+1619:     // Send invitation email
+1620:     const { sendRightsHolderInvite } = require('../services/email');
+1621:     // Pen-test F-04: read identity/org from authenticated req.user and
+1622:     // tenant from req.tenantSlug (populated by extractTenantContext from
+1623:     // the verified JWT-derived header), NOT from raw spoofable headers.
+1624:     const authUser = (req as any).user;
+1625:     const orgName = (authUser?.organizationName as string | undefined)
+1626:       || ((req as any).tenantSlug as string | undefined)
+1627:       || 'Secuura Platform K';
+1628:     const inviterName = (authUser?.email as string | undefined) || undefined;
+1629:     const rhName = rh.display_name || [rh.first_name, rh.last_name].filter(Boolean).join(' ') || rh.email;
+1630: 
+1631:     const emailSent = await sendRightsHolderInvite({
+1632:       recipientEmail: rh.email,
+1633:       recipientName: rhName,
+1634:       organizationName: orgName,
+1635:       inviteUrl,
+1636:       inviterName,
+1637:     });
+1638: 
+1639:     res.json({
+1640:       success: true,
+1641:       message: emailSent ? `Invitation email sent to ${rh.email}` : `Invite created for ${rh.email} (email delivery pending — check SMTP config)`,
+1642:       inviteUrl,
+1643:       emailSent,
+1644:     });
+1645:   } catch (err: any) {
+1646:     fail500(res, 'Admin config request failed (POST /api/admin/rights-holders/:id/invite)', err);
+1647:   }
+1648: });
+1649: 
+1650: // =============================================================================
+1651: // IDENTITY MANAGEMENT
+1652: // =============================================================================
+1653: 
+1654: /** List all users (alias for admin portal Users page) */
+1655: adminConfigRouter.get('/users', async (req: Request, res: Response) => {
+1656:   try {
+1657:     const db = (req as any).db || prisma;
+1658:     const role = req.query.role as string | undefined;
+1659:     // KS-458 (admin cross-tenant): users list has no tenant filter.
+1660:     let rows: any[];
+1661:     if (role) {
+1662:       rows = await runWithPlatformScope(() => db.$queryRaw`SELECT id, email, first_name, last_name, role, status, verification_level, created_at, last_login_at FROM users WHERE role = ${role} ORDER BY created_at DESC LIMIT 200`);
+1663:     } else {
+1664:       rows = await runWithPlatformScope(() => db.$queryRaw`SELECT id, email, first_name, last_name, role, status, verification_level, created_at, last_login_at FROM users ORDER BY created_at DESC LIMIT 200`);
+1665:     }
+1666:     res.json({
+1667:       success: true,
+1668:       data: {
+1669:         users: rows.map((r: any) => ({
+1670:           id: r.id, email: r.email, firstName: r.first_name, lastName: r.last_name,
+1671:           displayName: [r.first_name, r.last_name].filter(Boolean).join(' ') || r.email,
+1672:           role: r.role, status: r.status, verificationLevel: r.verification_level,
+1673:           createdAt: r.created_at?.toISOString?.() || r.created_at,
+1674:           lastLoginAt: r.last_login_at?.toISOString?.() || r.last_login_at,
+1675:         })),
+1676:         total: rows.length, limit: 200, offset: 0,
+1677:       },
+1678:     });
+1679:   } catch (err: any) {
+1680:     if (isMissingTableError(err)) {
+1681:       return res.json({ success: true, data: { users: [], total: 0 } });
+1682:     }
+1683:     fail500(res, 'Admin config request failed (GET /api/admin/users)', err);
+1684:   }
+1685: });
+1686: 
+1687: /** List users with verification info */
+1688: adminConfigRouter.get('/identity/users', async (req: Request, res: Response) => {
+1689:   try {
+1690:     // KS-458 (admin cross-tenant): users/organizations join, no tenant filter.
+1691:     const rows: any[] = await runWithPlatformScope(() => ((req as any).db || prisma).$queryRaw`
+1692:       SELECT u.id, u.email, u.first_name, u.last_name, u.role,
+1693:              u.verification_level, u.mfa_enabled, u.external_provider,
+1694:              u.status, o.name AS org_name, o.id AS org_id
+1695:       FROM users u
+1696:       LEFT JOIN organization_members om ON om.user_id = u.id
+1697:       LEFT JOIN organizations o ON o.id = om.organization_id
+1698:       ORDER BY u.email ASC
+1699:       LIMIT 200
+1700:     `);
+1701:     res.json({
+1702:       success: true,
+1703:       users: rows.map((r: any) => ({
+1704:         userId: r.id,
+1705:         email: r.email,
+1706:         name: [r.first_name, r.last_name].filter(Boolean).join(' ') || r.email,
+1707:         verificationLevel: r.verification_level || 'BASIC',
+1708:         authMethod: r.external_provider || 'email',
+1709:         mfaEnabled: r.mfa_enabled ?? false,
+1710:         walletConnected: false,
+1711:         orgId: r.org_id,
+1712:         orgName: r.org_name,
+1713:         status: r.status,
+1714:       })),
+1715:     });
+1716:   } catch (err: any) {
+1717:     if (isMissingTableError(err)) {
+1718:       return res.json({ success: true, users: [] });
+1719:     }
+1720:     fail500(res, 'Admin config request failed (GET /api/admin/identity/users)', err);
+1721:   }
+1722: });
+1723: 
+1724: /** List organizations for identity management */
+1725: adminConfigRouter.get('/identity/organizations', async (req: Request, res: Response) => {
+1726:   try {
+1727:     // KS-458 (admin cross-tenant): org listing, no tenant filter.
+1728:     const rows: any[] = await runWithPlatformScope(() => ((req as any).db || prisma).$queryRaw`
+1729:       SELECT id, name, type, status, domain, verification_level
+1730:       FROM organizations ORDER BY name ASC
+1731:     `);
+1732:     res.json({
+1733:       success: true,
+1734:       organizations: rows.map((r: any) => ({
+1735:         orgId: r.id,
+1736:         orgName: r.name,
+1737:         trustLevel: r.verification_level || 'STANDARD',
+1738:         verificationMode: r.type || 'issuer',
+1739:         domain: r.domain,
+1740:         domainVerified: !!r.domain,
+1741:         status: r.status || 'active',
+1742:       })),
+1743:     });
+1744:   } catch (err: any) {
+1745:     if (isMissingTableError(err)) {
+1746:       return res.json({ success: true, organizations: [] });
+1747:     }
+1748:     fail500(res, 'Admin config request failed (GET /api/admin/identity/organizations)', err);
+1749:   }
+1750: });
+1751: 
+1752: /** Update user verification level */
+1753: adminConfigRouter.patch('/identity/users/:id/level', async (req: Request, res: Response) => {
+1754:   try {
+1755:     const { verificationLevel } = req.body;
+1756:     const valid = ['NONE', 'BASIC', 'SOCIAL', 'STANDARD', 'ENHANCED', 'HIGH', 'GOVERNMENT'];
+1757:     if (!verificationLevel || !valid.includes(verificationLevel)) {
+1758:       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `verificationLevel must be one of: ${valid.join(', ')}` } });
+1759:     }
+1760:     // KS-458 (admin cross-tenant): targets an arbitrary user by id, no
+1761:     // caller-tenant filter — platform scope so the UPDATE matches under RLS.
+1762:     const result = await runWithPlatformScope(() => ((req as any).db || prisma).$executeRaw`
+1763:       UPDATE users SET verification_level = ${verificationLevel}, updated_at = NOW()
+1764:       WHERE id = ${req.params.id}::uuid
+1765:     `);
+1766:     res.json({ success: result > 0, userId: req.params.id, verificationLevel });
+1767:   } catch (err: any) {
+1768:     fail500(res, 'Admin config request failed (PATCH /api/admin/identity/users/:id/level)', err);
+1769:   }
+1770: });
+1771: 
+1772: /** List identity providers */
+1773: adminConfigRouter.get('/identity/providers', async (_req: Request, res: Response) => {
+1774:   const providers = [
+1775:     { name: 'entra', label: 'Microsoft Entra ID', tier: 'ENHANCED', configured: !!process.env.ENTRA_CLIENT_ID, status: process.env.ENTRA_CLIENT_ID ? 'active' : 'unconfigured' },
+1776:     { name: 'auth0', label: 'Auth0', tier: 'ENHANCED', configured: !!process.env.AUTH0_DOMAIN, status: process.env.AUTH0_DOMAIN ? 'active' : 'unconfigured' },
+1777:     { name: 'okta', label: 'Okta', tier: 'ENHANCED', configured: !!process.env.OKTA_DOMAIN, status: process.env.OKTA_DOMAIN ? 'active' : 'unconfigured' },
+1778:     { name: 'google', label: 'Google', tier: 'SOCIAL', configured: !!process.env.GOOGLE_CLIENT_ID, status: process.env.GOOGLE_CLIENT_ID ? 'active' : 'unconfigured' },
+1779:     { name: 'linkedin', label: 'LinkedIn', tier: 'SOCIAL', configured: !!process.env.LINKEDIN_CLIENT_ID, status: process.env.LINKEDIN_CLIENT_ID ? 'active' : 'unconfigured' },
+1780:     { name: 'github', label: 'GitHub', tier: 'SOCIAL', configured: !!process.env.GITHUB_CLIENT_ID, status: process.env.GITHUB_CLIENT_ID ? 'active' : 'unconfigured' },
+1781:     { name: 'email', label: 'Email + Password', tier: 'BASIC', configured: true, status: 'active' },
+1782:     { name: 'wallet', label: 'Cardano Wallet', tier: 'STANDARD', configured: true, status: 'active' },
+1783:   ];
+1784:   res.json({ success: true, providers });
+1785: });
+1786: 
+1787: // =============================================================================
+1788: // ROW MAPPERS
+1789: // =============================================================================
+1790: 
+1791: function mapDocTypeRow(r: any): Record<string, unknown> {
+1792:   return {
+1793:     id: r.id,
+1794:     name: r.name,
+1795:     code: r.code || r.id,
+1796:     description: r.description,
+1797:     category: r.category,
+1798:     isActive: r.is_active ?? true,
+1799:     creatorVerificationLevel: r.creator_verification_level || 'basic',
+1800:     ownerVerificationLevel: r.owner_verification_level || 'basic',
+1801:     viewerVerificationLevel: r.viewer_verification_level || 'none',
+1802:     verifierVerificationLevel: r.verifier_verification_level || 'standard',
+1803:     requireMFA: r.require_mfa ?? false,
+1804:     requireWalletSignature: r.require_wallet_signature ?? false,
+1805:     requireKYC: r.require_kyc ?? false,
+1806:     allowedAuthProviders: r.allowed_auth_providers || [],
+1807:     requiresApproval: r.requires_approval ?? false,
+1808:     approvalWorkflowId: r.approval_workflow_id || null,
+1809:     autoAnchor: r.auto_anchor ?? true,
+1810:     anchorNetwork: r.anchor_network || 'preprod',
+1811:     metadataSchema: r.metadata_schema || [],
+1812:     allowedSources: r.allowed_sources || [],
+1813:     webhookEvents: r.webhook_events || [],
+1814:     documentCount: r.document_count ?? 0,
+1815:     createdAt: r.created_at?.toISOString?.() || r.created_at,
+1816:     updatedAt: r.updated_at?.toISOString?.() || r.updated_at,
+1817:   };
+1818: }
+1819: 
+1820: function mapWorkflowRow(r: any): Record<string, unknown> {
+1821:   return {
+1822:     id: r.id,
+1823:     name: r.name,
+1824:     description: r.description,
+1825:     type: r.type,
+1826:     isActive: r.is_active,
+1827:     steps: r.steps || [],
+1828:     documentTypes: r.document_types || [],
+1829:     slaHours: r.sla_hours,
+1830:     usageCount: r.usage_count,
+1831:     createdAt: r.created_at?.toISOString?.() || r.created_at,
+1832:     updatedAt: r.updated_at?.toISOString?.() || r.updated_at,
+1833:   };
+1834: }
+1835: 
+1836: function mapQueueRow(r: any): Record<string, unknown> {
+1837:   return {
+1838:     id: r.id,
+1839:     documentId: r.document_id,
+1840:     documentTitle: r.document_title,
+1841:     submitterName: r.submitter_name,
+1842:     submitterEmail: r.submitter_email,
+1843:     organizationId: r.organization_id,
+1844:     organizationName: r.organization_name,
+1845:     documentType: r.document_type,
+1846:     status: r.status,
+1847:     priority: r.priority,
+1848:     assignedTo: r.assigned_to,
+1849:     slaDeadline: r.sla_deadline?.toISOString?.() || r.sla_deadline,
+1850:     workflowId: r.workflow_id,
+1851:     notes: r.notes,
+1852:     createdAt: r.created_at?.toISOString?.() || r.created_at,
+1853:     updatedAt: r.updated_at?.toISOString?.() || r.updated_at,
+1854:   };
+1855: }
+1856: 
+1857: function mapIntegrationRow(r: any): Record<string, unknown> {
+1858:   return {
+1859:     id: r.id,
+1860:     name: r.name,
+1861:     integrationType: r.integration_type,
+1862:     provider: r.provider,
+1863:     status: r.status,
+1864:     config: r.config || {},
+1865:     lastSyncAt: r.last_sync_at?.toISOString?.() || r.last_sync_at,
+1866:     errorMessage: r.error_message,
+1867:     createdAt: r.created_at?.toISOString?.() || r.created_at,
+1868:     updatedAt: r.updated_at?.toISOString?.() || r.updated_at,
+1869:   };
+1870: }
+1871: 
+1872: function mapPolicyRow(r: any): Record<string, unknown> {
+1873:   return {
+1874:     id: r.id,
+1875:     name: r.name,
+1876:     description: r.description,
+1877:     scope: r.scope,
+1878:     isActive: r.is_active,
+1879:     minUserVerificationLevel: r.min_user_verification_level,
+1880:     minOrgVerificationLevel: r.min_org_verification_level,
+1881:     requiredAuthProviders: r.required_auth_providers || [],
+1882:     requireMFA: r.require_mfa,
+1883:     requireWalletSignature: r.require_wallet_signature,
+1884:     regionRestrictions: r.region_restrictions || [],
+1885:     enforcementMode: r.enforcement_mode,
+1886:     createdAt: r.created_at?.toISOString?.() || r.created_at,
+1887:     updatedAt: r.updated_at?.toISOString?.() || r.updated_at,
+1888:   };
+1889: }
+1890: 
+1891: function mapOrgRow(r: any): Record<string, unknown> {
+1892:   return {
+1893:     id: r.id,
+1894:     name: r.name,
+1895:     type: r.type,
+1896:     status: r.status,
+1897:     domain: r.domain,
+1898:     userCount: r.user_count ?? 0,
+1899:     documentCount: 0,
+1900:     verificationLevel: r.verification_level,
+1901:     createdAt: r.created_at?.toISOString?.() || r.created_at,
+1902:     updatedAt: r.updated_at?.toISOString?.() || r.updated_at,
+1903:   };
+1904: }
+1905: 
+1906: function mapRightsHolderRow(r: any): Record<string, unknown> {
+1907:   return {
+1908:     id: r.id,
+1909:     email: r.email,
+1910:     firstName: r.first_name,
+1911:     lastName: r.last_name,
+1912:     displayName: r.display_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || r.email,
+1913:     externalId: r.external_id,
+1914:     organizationId: r.organization_id,
+1915:     userId: r.user_id,
+1916:     status: r.status,
+1917:     inviteSent: r.invite_sent,
+1918:     inviteSentAt: r.invite_sent_at?.toISOString?.() || r.invite_sent_at,
+1919:     metadata: r.metadata,
+1920:     createdAt: r.created_at?.toISOString?.() || r.created_at,
+1921:     updatedAt: r.updated_at?.toISOString?.() || r.updated_at,
+1922:   };
+1923: }
+1924: 
+1925: function mapAuditRow(r: any): Record<string, unknown> {
+1926:   return {
+1927:     id: r.id,
+1928:     action: r.action,
+1929:     type: r.action,
+1930:     resourceType: r.resource_type,
+1931:     resourceId: r.resource_id,
+1932:     actor: r.user_id,
+1933:     userId: r.user_id,
+1934:     organizationId: r.organization_id,
+1935:     success: r.success ?? true,
+1936:     ipAddress: r.ip_address,
+1937:     userAgent: r.user_agent,
+1938:     details: r.details,
+1939:     createdAt: r.created_at?.toISOString?.() || r.created_at,
+1940:   };
+1941: }
+1942: 
+1943: // =============================================================================
+1944: // CERTIFICATION METADATA BACKFILL
+1945: // =============================================================================
+1946: 
+1947: /** Backfill certification_metadata on documents missing issuer info */
+1948: adminConfigRouter.post('/backfill-certification-metadata', async (req: Request, res: Response) => {
+1949:   try {
+1950:     const db = (req as any).db || prisma;
+1951:     const { issuerName, certifiedAt } = req.body;
+1952:     if (!issuerName) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'issuerName is required' } });
+1953: 
+1954:     const meta = JSON.stringify({
+1955:       issuerName,
+1956:       certifiedAt: certifiedAt || new Date().toISOString(),
+1957:     });
+1958: 
+1959:     // KS-458 (admin cross-tenant): backfill sweeps documents platform-wide.
+1960:     const result = await runWithPlatformScope(() => db.$executeRaw`
+1961:       UPDATE documents SET
+1962:         certification_metadata = COALESCE(certification_metadata, '{}'::jsonb) || ${meta}::jsonb,
+1963:         updated_at = NOW()
+1964:       WHERE status IN ('certified', 'signed', 'anchored')
+1965:         AND (certification_metadata IS NULL
+1966:              OR certification_metadata->>'issuerName' IS NULL
+1967:              OR certification_metadata->>'issuerName' = '')
+1968:     `);
+1969: 
+1970:     res.json({ success: true, updatedCount: result });
+1971:   } catch (err: any) {
+1972:     fail500(res, 'Admin config request failed (POST /api/admin/backfill-certification-metadata)', err);
+1973:   }
+1974: });
+1975: 
+1976: /**
+1977:  * Seed demo/test users for all tenants — idempotent, and gated (KS-487 B-3).
+1978:  *
+1979:  * WHAT THIS WAS. Any authenticated `ORG_ADMIN` could POST here, with no
+1980:  * environment gate of any kind, and the upsert read:
+1981:  *
+1982:  *     ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash,
+1983:  *                                       ..., role = EXCLUDED.role
+1984:  *
+1985:  * So it was not "create these accounts if missing" — it was an unconditional
+1986:  * **password and role reset**, keyed on email, for 14 named accounts, running
+1987:  * under `runWithPlatformScope` and therefore across every tenant. The hash it
+1988:  * wrote is the bcrypt of `admin123`, published in this file.
+1989:  *
+1990:  * That is a cross-tenant account-takeover primitive: an ORG_ADMIN of tenant A
+1991:  * resets an account in tenant B to a password printed in this repository, then
+1992:  * signs in as it. Four of the fourteen are seeded `ORG_ADMIN`. One of the
+1993:  * addresses used to belong to a real person rather than a fictional demo
+1994:  * persona; KS-913 replaced it with `org.admin@example.com` / `Demo Org Admin`,
+1995:  * so every address in the list is now fictional and `example.com` is the
+1996:  * IANA-reserved domain for exactly this. The gate below is still what stops
+1997:  * the primitive; removing the address removed the personal data, not the hole.
+1998:  *
+1999:  * TWO INDEPENDENT FIXES, because either alone leaves a hole:
+2000:  *
+2001:  *  1. **The gate** (below). `auth` already solved this class in pen-test F-05
+2002:  *     (`services/auth/src/repositories/userRepo.ts:966-985`): seeding requires
+2003:  *     `ALLOW_DEFAULT_SEED_PASSWORDS=true`, and non-dev additionally requires
+2004:  *     `ENABLE_DEMO_SEED=true`. That hardening never reached this route — the
+2005:  *     same one-half-fixed shape as KS-488 C-1, where a hardened sender made an
+2006:  *     unhardened verifier look handled.
+2007:  *
+2008:  *     This gate is deliberately STRICTER than auth's: it requires **both** flags
+2009:  *     unconditionally, with no `isDevLike` bypass. auth's seeder runs once at
+2010:  *     boot; this one is an HTTP endpoint an attacker can call at will, so
+2011:  *     "looks like dev" is not a safe exemption. It matters concretely — the demo
+2012:  *     VM runs this same compose file, where originate has `NODE_ENV=development`,
+2013:  *     so an `isDevLike` bypass would leave the route wide open on the live demo.
+2014:  *     That is F-05's own lesson (the demo ran as `NODE_ENV=demo` and got the
+2015:  *     seed) in a new costume.
+2016:  *
+2017:  *     Neither flag is set for originate in any deploy config (`services.bicep`
+2018:  *     sets both, but on the `auth` block only), so this route now refuses
+2019:  *     everywhere by default, including locally. A developer who wants it sets
+2020:  *     both in their `.env` — an opt-in, which is the point.
+2021:  *
+2022:  *  2. **The upsert** no longer touches existing rows. Even correctly gated, a
+2023:  *     route that silently rewrites the credentials of an account that already
+2024:  *     exists is the wrong primitive: "seed" means "create if absent". Existing
+2025:  *     accounts are now counted and skipped, and the response reports both, so an
+2026:  *     operator can see that nothing was overwritten.
+2027:  */
+2028: adminConfigRouter.post('/seed-demo-users', async (req: Request, res: Response) => {
+2029:   try {
+2030:     // Gate first — before touching the DB, and before the known hash is even
+2031:     // referenced. Both flags required; no NODE_ENV exemption (see above and the
+2032:     // rationale in utils/demoSeedGate.ts).
+2033:     if (!isDemoSeedEnabled()) {
+2034:       logger.warn('Demo-user seeding refused — endpoint not enabled in this environment', {
+2035:         route: 'POST /api/admin/seed-demo-users',
+2036:         nodeEnv: process.env.NODE_ENV,
+2037:         allowDefaultSeedPasswords: process.env.ALLOW_DEFAULT_SEED_PASSWORDS === 'true',
+2038:         enableDemoSeed: process.env.ENABLE_DEMO_SEED === 'true',
+2039:         callerTenantId: (req as any).tenantId ?? null,
+2040:       });
+2041:       return res.status(403).json({
+2042:         success: false,
+2043:         error: {
+2044:           code: 'DEMO_SEED_DISABLED',
+2045:           message:
+2046:             'Demo-user seeding is disabled. It writes accounts with a default password across ' +
+2047:             'all tenants, so it requires both ALLOW_DEFAULT_SEED_PASSWORDS=true and ' +
+2048:             'ENABLE_DEMO_SEED=true to be set explicitly for this service.',
+2049:         },
+2050:       });
+2051:     }
+2052:     const db = (req as any).db || prisma;
+2053:     // All test users use password: admin123
+2054:     const ADMIN123 = '$2a$10$fE0nueu9bnPJbfndacwar.4F137bqzux9o/fhVh/wwND2stNFgAHG';
+2055:     const users = [
+2056:       // Oxford
+2057:       { id: 'c1000000-0000-4000-8000-000000000001', email: 'james.wilson@ox.ac.uk', hash: ADMIN123, name: 'Prof James Wilson', role: 'ORG_ADMIN' },
+2058:       { id: 'c1000000-0000-4000-8000-000000000002', email: 'registrar@ox.ac.uk', hash: ADMIN123, name: 'Dr Helen Clarke', role: 'OWNER' },
+2059:       { id: 'c1000000-0000-4000-8000-000000000003', email: 'alice@student.ox.ac.uk', hash: ADMIN123, name: 'Alice Smith', role: 'OWNER' },
+2060:       // BUPA
+2061:       { id: 'c2000000-0000-4000-8000-000000000001', email: 'sarah.mitchell@bupa.co.uk', hash: ADMIN123, name: 'Sarah Mitchell', role: 'ORG_ADMIN' },
+2062:       { id: 'c2000000-0000-4000-8000-000000000002', email: 'david.thompson@bupa.co.uk', hash: ADMIN123, name: 'David Thompson', role: 'OWNER' },
+2063:       { id: 'c2000000-0000-4000-8000-000000000003', email: 'emma.wilson@bupa.co.uk', hash: ADMIN123, name: 'Emma Wilson', role: 'OWNER' },
+2064:       { id: 'c2000000-0000-4000-8000-000000000004', email: 'patient.records@bupa.co.uk', hash: ADMIN123, name: 'Patient Records', role: 'OWNER' },
+2065:       // Apex
+2066:       { id: 'c3000000-0000-4000-8000-000000000001', email: 'james@apex-consulting.com', hash: ADMIN123, name: 'James Wright', role: 'ORG_ADMIN' },
+2067:       { id: 'c3000000-0000-4000-8000-000000000002', email: 'sarah@apex-consulting.com', hash: ADMIN123, name: 'Sarah Palmer', role: 'OWNER' },
+2068:       { id: 'c3000000-0000-4000-8000-000000000003', email: 'tom@apex-consulting.com', hash: ADMIN123, name: 'Tom Davis', role: 'OWNER' },
+2069:       { id: 'c3000000-0000-4000-8000-000000000004', email: 'lisa@client-corp.com', hash: ADMIN123, name: 'Lisa Chen', role: 'OWNER' },
+2070:       // Greenfield
+2071:       { id: 'c4000000-0000-4000-8000-000000000001', email: 'issuer.e2e@greenfield.ac.uk', hash: ADMIN123, name: 'Dr Sarah Chen', role: 'OWNER' },
+2072:       // Delta
+2073:       { id: 'c5000000-0000-4000-8000-000000000001', email: 'delta.user@delta-corp.com', hash: ADMIN123, name: 'Delta User', role: 'OWNER' },
+2074:       // Secuura Co.
+2075:       { id: 'c6000000-0000-4000-8000-000000000001', email: 'org.admin@example.com', hash: ADMIN123, name: 'Demo Org Admin', role: 'ORG_ADMIN' },
+2076:     ];
+2077: 
+2078:     // KS-458 (admin cross-tenant): seeds users across all demo tenants.
+2079:     //
+2080:     // KS-487 B-3: `DO NOTHING`, previously
+2081:     // `DO UPDATE SET password_hash = EXCLUDED.password_hash, ..., role = EXCLUDED.role`.
+2082:     // That reset the credentials AND the role of any pre-existing account
+2083:     // matching one of these emails, to a hash published in this file — the
+2084:     // takeover primitive. Seeding means "create if absent"; an account that
+2085:     // already exists is the operator's, not ours, and re-running this must never
+2086:     // silently hand it back with a known password.
+2087:     //
+2088:     // `created` and `alreadyPresent` are counted separately and both returned:
+2089:     // the old handler reported a single `seededUsers` that incremented on
+2090:     // overwrite, so a run that rewrote 14 live accounts and a run that created
+2091:     // 14 new ones produced identical output.
+2092:     let created = 0;
+2093:     let alreadyPresent = 0;
+2094:     let failed = 0;
+2095:     for (const u of users) {
+2096:       try {
+2097:         const [firstName, ...lastParts] = u.name.split(' ');
+2098:         const lastName = lastParts.join(' ');
+2099:         const rows = await runWithPlatformScope(() => db.$executeRaw`
+2100:           INSERT INTO users (id, email, password_hash, first_name, last_name, role, status, created_at, updated_at)
+2101:           VALUES (${u.id}::uuid, ${u.email}, ${u.hash}, ${firstName}, ${lastName}, ${u.role}, 'active', NOW(), NOW())
+2102:           ON CONFLICT (email) DO NOTHING
+2103:         `);
+2104:         // $executeRaw returns the affected row count: 1 = inserted, 0 = conflict.
+2105:         if (rows > 0) created++;
+2106:         else alreadyPresent++;
+2107:       } catch (err: any) {
+2108:         // Previously a bare `catch {}` commented "skip duplicates" — but with
+2109:         // DO NOTHING a conflict is no longer an exception, so anything reaching
+2110:         // here is a real failure and was being swallowed silently.
+2111:         failed++;
+2112:         logger.error('Demo user seed failed', { email: u.email, error: err?.message });
+2113:       }
+2114:     }
+2115: 
+2116:     // Seed Alice as rights holder (scoped to Oxford's organization)
+2117:     try {
+2118:       // KS-108: resolve Oxford's org id, then seed the RH under that tenant (RLS).
+2119:       // KS-458 (admin cross-tenant): Oxford's org row is not the caller's tenant.
+2120:       const orgRows: any[] = await runWithPlatformScope(() => db.$queryRaw`SELECT id FROM organizations WHERE slug = 'oxford' LIMIT 1`);
+2121:       const oxfordOrgId = orgRows[0]?.id;
+2122:       if (oxfordOrgId) {
+2123:         await withTenant(oxfordOrgId, (tx) => tx.$executeRaw`
+2124:           INSERT INTO rights_holders (id, email, first_name, last_name, display_name, external_id, user_id, organization_id, tenant_id, status, invite_sent)
+2125:           VALUES ('d1000000-0000-4000-8000-000000000001'::uuid, 'alice@student.ox.ac.uk', 'Alice', 'Smith', 'Alice Smith', 'STU-OX-2026-001',
+2126:                   'c1000000-0000-4000-8000-000000000003'::uuid,
+2127:                   ${oxfordOrgId}::uuid, ${oxfordOrgId}::uuid,
+2128:                   'active', true)
+2129:           ON CONFLICT (id) DO UPDATE SET organization_id = EXCLUDED.organization_id, tenant_id = EXCLUDED.tenant_id
+2130:         `);
+2131:       }
+2132:     } catch { /* skip */ }
+2133: 
+2134:     // `seededUsers` retained for any existing caller, but it now means "created"
+2135:     // rather than "created or overwritten" — the counts below are the real answer.
+2136:     res.json({
+2137:       success: true,
+2138:       seededUsers: created,
+2139:       created,
+2140:       alreadyPresent,
+2141:       failed,
+2142:     });
+2143:   } catch (err: any) {
+2144:     fail500(res, 'Admin config request failed (POST /api/admin/seed-demo-users)', err);
+2145:   }
+2146: });
+2147: 
+2148: /** Copy baseline data (doc types, orgs) from default DB into ALL tenant databases */
+2149: adminConfigRouter.post('/migrate-tenant-data', async (_req: Request, res: Response) => {
+2150:   try {
+2151:     const { getTenantManager } = require('../db');
+2152:     const mgr = getTenantManager?.();
+2153:     if (!mgr) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Multi-tenancy not enabled' } });
+2154: 
+2155:     const platformPool = mgr.getPlatformPool();
+2156:     const defaultPool = mgr.getDefaultPool();
+2157: 
+2158:     // Get all active tenants with databases
+2159:     const tenants = await platformPool.query(
+2160:       `SELECT t.id, t.slug, tc.db_name FROM tenants t
+2161:        LEFT JOIN tenant_config tc ON t.id = tc.tenant_id
+2162:        WHERE t.status = 'active' AND tc.db_name IS NOT NULL`
+2163:     );
+2164: 
+2165:     // Get baseline data from default DB (bypass tenant routing — use raw pool)
+2166:     // KS-458 (admin cross-tenant): raw-pool reads skip the GUC-aware proxies,
+2167:     // so bundle the platform-scope GUC in-transaction via queryWithTenantGuc.
+2168:     let docTypes, orgs;
+2169:     try {
+2170:       docTypes = await runWithPlatformScope(() => queryWithTenantGuc(defaultPool, 'SELECT * FROM document_type_configs WHERE is_active = true'));
+2171:     } catch { docTypes = { rows: [] }; }
+2172:     try {
+2173:       orgs = await runWithPlatformScope(() => queryWithTenantGuc(defaultPool, 'SELECT * FROM organizations'));
+2174:     } catch { orgs = { rows: [] }; }
+2175: 
+2176:     // If default DB has no doc types, use hardcoded defaults
+2177:     if (docTypes.rows.length === 0) {
+2178:       const defaults = [
+2179:         { name: 'University Degree', code: 'university_degree', description: 'Academic degree certificates', category: 'Education' },
+2180:         { name: 'Academic Transcript', code: 'academic_transcript', description: 'Official academic transcripts', category: 'Education' },
+2181:         { name: 'Employment Reference', code: 'employment_reference', description: 'Employment references', category: 'Employment' },
+2182:         { name: 'Identity Document', code: 'identity_document', description: 'Government-issued identity', category: 'Government' },
+2183:         { name: 'Professional License', code: 'professional_license', description: 'Professional licensing', category: 'Professional' },
+2184:         { name: 'Certificate of Insurance', code: 'certificate_of_insurance', description: 'Insurance certificates', category: 'Insurance' },
+2185:         { name: 'Medical Record', code: 'medical_record', description: 'Clinical and health records', category: 'Healthcare' },
+2186:         { name: 'Contract Agreement', code: 'contract_agreement', description: 'Signed contracts and agreements', category: 'Legal' },
+2187:         { name: 'Compliance Certificate', code: 'compliance_certificate', description: 'Regulatory compliance certifications', category: 'Compliance' },
+2188:         { name: 'Training Certificate', code: 'training_certificate', description: 'Training completion certificates', category: 'Training' },
+2189:         { name: 'Property Deed', code: 'property_deed', description: 'Property ownership documents', category: 'Property' },
+2190:         { name: 'Power of Attorney', code: 'power_of_attorney', description: 'Legal authority delegation', category: 'Legal' },
+2191:         { name: 'Birth Certificate', code: 'birth_certificate', description: 'Official birth records', category: 'Government' },
+2192:         { name: 'Professional Membership', code: 'professional_membership', description: 'Professional body memberships', category: 'Professional' },
+2193:       ];
+2194:       docTypes = { rows: defaults.map(d => ({ ...d, is_active: true, metadata_schema: [] })) };
+2195:     }
+2196: 
+2197:     const results: any[] = [];
+2198: 
+2199:     for (const tenant of tenants.rows) {
+2200:       try {
+2201:         const tenantPool = mgr.getPool(tenant.id);
+2202:         let copied = { docTypes: 0, orgs: 0 };
+2203: 
+2204:         // Ensure document_type_configs table has varchar id (not UUID)
+2205:         try {
+2206:           // Check current id column type and fix if needed
+2207:           const colCheck = await tenantPool.query(
+2208:             `SELECT data_type FROM information_schema.columns WHERE table_name='document_type_configs' AND column_name='id'`
+2209:           );
+2210:           if (colCheck.rows.length > 0 && colCheck.rows[0].data_type === 'uuid') {
+2211:             // Drop and recreate with varchar id (table is empty on new tenant DBs)
+2212:             await tenantPool.query(`DROP TABLE IF EXISTS document_type_configs CASCADE`);
+2213:           }
+2214:           await tenantPool.query(`
+2215:             CREATE TABLE IF NOT EXISTS document_type_configs (
+2216:               id VARCHAR(100) PRIMARY KEY,
+2217:               name VARCHAR(255) NOT NULL,
+2218:               description TEXT,
+2219:               category VARCHAR(100) DEFAULT 'general',
+2220:               is_active BOOLEAN DEFAULT TRUE,
+2221:               metadata_schema JSONB DEFAULT '[]',
+2222:               created_at TIMESTAMPTZ DEFAULT NOW(),
+2223:               updated_at TIMESTAMPTZ DEFAULT NOW()
+2224:             )
+2225:           `);
+2226:         } catch { /* best effort */ }
+2227: 
+2228:         // Copy document type configs
+2229:         // KS-458 (admin cross-tenant): per-tenant seeding writes on a raw
+2230:         // tenant pool — platform-scope GUC bundled per statement.
+2231:         for (const dt of docTypes.rows) {
+2232:           try {
+2233:             const dtCode = dt.code || dt.name?.toLowerCase().replace(/\s+/g, '_');
+2234:             await runWithPlatformScope(() => queryWithTenantGuc(
+2235:               tenantPool,
+2236:               `INSERT INTO document_type_configs (id, name, description, category, is_active)
+2237:                VALUES ($1, $2, $3, $4, $5)
+2238:                ON CONFLICT (id) DO NOTHING`,
+2239:               [dtCode, dt.name, dt.description, dt.category || 'general', true]
+2240:             ));
+2241:             copied.docTypes++;
+2242:           } catch (e: any) {
+2243:             copied.docTypes++; // Count even if conflict
+2244:           }
+2245:         }
+2246: 
+2247:         // Copy organizations
+2248:         // KS-458 (admin cross-tenant): organizations is a fail-closed flip
+2249:         // table — the seeding write needs the platform-scope GUC in-transaction.
+2250:         for (const org of orgs.rows) {
+2251:           try {
+2252:             await runWithPlatformScope(() => queryWithTenantGuc(
+2253:               tenantPool,
+2254:               `INSERT INTO organizations (id, name, slug, domain, industry, country, status, settings, created_at, updated_at)
+2255:                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+2256:                ON CONFLICT DO NOTHING`,
+2257:               [org.id, org.name, org.slug, org.domain, org.industry, org.country, org.status, JSON.stringify(org.settings || {}), org.created_at, org.updated_at]
+2258:             ));
+2259:             copied.orgs++;
+2260:           } catch { /* skip */ }
+2261:         }
+2262: 
+2263:         results.push({ tenant: tenant.slug, ...copied });
+2264:       } catch (err: any) {
+2265:         // KS-1334 part C: this entry is returned in a 200 body, so it carries a stable code and never the
+2266:         // thrown text. The text goes to the server log with the route and the tenant named, as fail500 does.
+2267:         // KS-1772: this describer sat directly in the catch with no try of its own, so a thrown value whose description throws (a message getter, a Proxy trap, a revoked Proxy), or a logger that
+2268:         // fails, escaped into the route's OUTER catch: the loop stopped at this tenant, the later tenants were never tried and the route answered 500 instead of the 200 whose `results` carries
+2269:         // this tenant's code. Describe in its own try and log in another, so the row below is always pushed and the loop goes on. Only how the logged text is built changes; the row is untouched.
+2270:         let described: string;
+2271:         try {
+2272:           described = err instanceof Error ? err.message : typeof err === 'string' ? err : typeof err === 'object' && err !== null ? 'thrown ' + (Object.getPrototypeOf(err)?.constructor?.name ?? 'object') + ' with fields [' + Object.keys(err).join(', ') + ']' : 'thrown ' + typeof err;
+2273:         } catch {
+2274:           described = 'thrown value that could not be described';
+2275:         }
+2276:         try {
+2277:           logger.error('Admin config tenant step failed (POST /api/admin/migrate-tenant-data)', {
+2278:             tenant: tenant.slug,
+2279:             error: described,
+2280:           });
+2281:         } catch {
+2282:           // Nothing more can be said if the logger itself fails; the row below is still pushed and the loop goes on.
+2283:         }
+2284:         results.push({ tenant: tenant.slug, error: 'TENANT_COPY_FAILED' });
+2285:       }
+2286:     }
+2287: 
+2288:     res.json({ success: true, results });
+2289:   } catch (err: any) {
+2290:     fail500(res, 'Admin config request failed (POST /api/admin/migrate-tenant-data)', err);
+2291:   }
+2292: });
+
+### FILE AT HEAD: Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
+1: // KS-1780 (originate routes/adminConfig.ts): fifteen catch blocks tested `err?.message?.includes(...)` and/or `err?.code` BEFORE they reached fail500. That read touches the thrown value
+2: // itself, so a revoked Proxy, or an object whose `message` getter throws, made the read throw inside the catch: the handler's promise rejected and the request got NO answer. fail500
+3: // already survives such a value (KS-1772); this file pins that the catches' own reads do too. Four GET routes are driven over a real loopback listener by making their prisma.$queryRaw
+4: // reject, as the KS-1346 part C cells do; a request that gets no answer within the window is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
+5: // S1 pins the source: no `if (err?.message` / `if (err?.code` condition may remain in the file.
+6: process.env.NODE_ENV = 'development';
+7: process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+8: 
+9: const mockQueryRaw = jest.fn();
+10: 
+11: jest.mock('../db', () => ({
+12:   prisma: { $queryRaw: mockQueryRaw, $executeRaw: jest.fn() },
+13:   refreshTenantConfigs: jest.fn(),
+14:   withTenant: (_t: unknown, fn: () => unknown) => fn(),
+15:   getTenantManager: () => null,
+16: }));
+17: 
+18: jest.mock('../middleware/auth', () => {
+19:   const actual = jest.requireActual('../middleware/auth');
+20:   return {
+21:     ...actual,
+22:     authenticate: () => (req: any, _res: unknown, next: () => void) => {
+23:       const principal = { id: 'u-ks1780', role: 'SYSTEM_ADMIN', tenantId: 't-ks1780' };
+24:       req._secuuraUser = principal; req.user = principal; req.tenantId = principal.tenantId;
+25:       next();
+26:     },
+27:     requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+28:   };
+29: });
+30: 
+31: jest.mock('@secuura/shared', () =>
+32:   require('./helpers/sharedModuleMock').makeSharedMock({
+33:     ...(jest.requireActual('@secuura/shared') as Record<string, unknown>),
+34:     runWithPlatformScope: (fn: () => unknown) => fn(),
+35:     queryWithTenantGuc: jest.fn(),
+36:   }),
+37: );
+38: 
+39: jest.mock('../utils/logger', () => ({
+40:   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+41: }));
+42: 
+43: import { readFileSync } from 'fs';
+44: import { join } from 'path';
+45: import express from 'express';
+46: import type { AddressInfo } from 'net';
+47: import { adminConfigRouter } from '../routes/adminConfig';
+48: 
+49: const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
+50: const ROUTES = [
+51:   { label: 'GET /settings', path: '/settings', empty: { success: true, settings: {} } },
+52:   { label: 'GET /document-types', path: '/document-types', empty: { success: true, documentTypes: [] } },
+53:   { label: 'GET /workflows', path: '/workflows', empty: { success: true, workflows: [] } },
+54:   { label: 'GET /organizations', path: '/organizations', empty: { success: true, organizations: [], total: 0 } },
+55: ] as const;
+56: 
+57: const app = express();
+58: app.use('/api/admin', express.json(), adminConfigRouter);
+59: let server: ReturnType<typeof app.listen>;
+60: let baseUrl = '';
+61: 
+62: beforeAll(async () => {
+63:   await new Promise<void>((resolve) => {
+64:     server = app.listen(0, '127.0.0.1', () => resolve());
+65:   });
+66:   baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+67: });
+68: afterAll(() => {
+69:   (server as unknown as { closeAllConnections?: () => void })?.closeAllConnections?.();
+70:   server?.close();
+71: });
+72: beforeEach(() => mockQueryRaw.mockReset());
+73: 
+74: async function callWithThrow(path: string, thrown: unknown): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
+75:   mockQueryRaw.mockRejectedValueOnce(thrown);
+76:   try {
+77:     const res = await fetch(baseUrl + '/api/admin' + path, { signal: AbortSignal.timeout(1500) });
+78:     return { status: res.status, body: await res.json() };
+79:   } catch {
+80:     return { status: 'NO ANSWER', body: null };
+81:   }
+82: }
+83: 
+84: function revokedProxy(): object {
+85:   const { proxy, revoke } = Proxy.revocable({}, {});
+86:   revoke();
+87:   return proxy;
+88: }
+89: 
+90: function throwingMessageGetter(): object {
+91:   return {
+92:     get message(): string {
+93:       throw new Error('ks1780 getter');
+94:     },
+95:   };
+96: }
+97: 
+98: describe('KS-1780: adminConfig catches answer a hostile thrown value', () => {
+99:   it.each(ROUTES)('RED KS-1780 A1 $label: a revoked Proxy thrown by the query is answered with the constant 500', async (route) => {
+100:     expect(await callWithThrow(route.path, revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
+101:   });
+102: 
+103:   it.each(ROUTES)('RED KS-1780 A2 $label: an object whose message getter throws is answered with the constant 500', async (route) => {
+104:     expect(await callWithThrow(route.path, throwingMessageGetter())).toEqual({ status: 500, body: CONSTANT_BODY });
+105:   });
+106: 
+107:   it.each(ROUTES)('control KS-1780 C1 $label: an Error saying "does not exist" is still answered with the empty list', async (route) => {
+108:     expect(await callWithThrow(route.path, new Error('relation "x" does not exist'))).toEqual({ status: 200, body: route.empty });
+109:   });
+110: 
+111:   it.each(ROUTES)('control KS-1780 C2 $label: a thrown object with code 42P01 is still answered with the empty list', async (route) => {
+112:     expect(await callWithThrow(route.path, { code: '42P01' })).toEqual({ status: 200, body: route.empty });
+113:   });
+114: 
+115:   it.each(ROUTES)('control KS-1780 C3 $label: an ordinary Error is still answered with the constant 500', async (route) => {
+116:     expect(await callWithThrow(route.path, new Error('ks1780 ordinary'))).toEqual({ status: 500, body: CONSTANT_BODY });
+117:   });
+118: 
+119:   it('RED KS-1780 S1: no catch condition in adminConfig.ts reads err?.message or err?.code directly', () => {
+120:     const source = readFileSync(join(__dirname, '..', 'routes', 'adminConfig.ts'), 'utf8');
+121:     const direct = source.split('\n').filter((line) => /^\s*if \(err\?\.(message|code)/.test(line));
+122:     expect(direct).toEqual([]);
+123:   });
+124: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "8894c7486f82f6eb682fecb879791f53312537b1",
+ "head_sha": "874314fdfb3d26bd9d37dbee9bc9dcffe0c0adb8",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/originate/src/routes/adminConfig.ts",
+   "added": "36",
+   "deleted": "15"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts",
+   "added": "124",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "36",
+   "15",
+   "Blockchain/Dev/services/originate/src/routes/adminConfig.ts"
+  ],
+  [
+   "124",
+   "0",
+   "Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 21,
+  "failed": 9
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 21,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1690 failed=0 | after: total=1711 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 21\n",
+ "checker_summary": [
+  "PASS A6 whole services/originate suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/originate: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +160/-15 test=src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

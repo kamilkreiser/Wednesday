@@ -1,0 +1,42 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The fix does not address the root cause: the module-scope setTimeout still fires in every test that imports routes/auth, and the new try/catch only converts the uncaught throw into a logged error, so the underlying test pollution (a timer armed at import that outlives the test) remains.",
+      "evidence": "routes/auth.ts:67-73 `setTimeout(() => { try { userRepo.seedDemoUsers(hashPassword).catch(logSeedFailure); } catch (err) { logSeedFailure(err); } }, 2000);`",
+      "test_or_reason": "The ticket's root cause is the timer firing after the test run outlasts 2000ms; the fix does not unref, cancel, or guard the timer, so the same loaded-run scenario can still produce a late log or other side effects."
+    },
+    {
+      "severity": "Major",
+      "claim": "The new test file's D1 test does not actually assert that the timer does not throw; it only asserts that `advance(2500)` returns 'ok', but `advance` catches the throw and returns a string, so the test would pass even if the timer threw.",
+      "evidence": "ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts:48-55 `function advance(ms: number): string { try { vi.advanceTimersByTime(ms); return 'ok'; } catch (err) { return 'THREW ' + ...; } }` and line 69 `expect(advance(2500)).toBe('ok');`",
+      "test_or_reason": "The test's own helper swallows the throw and returns a string; the assertion only checks the string equals 'ok', so a throw would be converted to 'THREW ...' and fail, but the test does not fail on the uncaught exception because it is caught inside `advance`."
+    },
+    {
+      "severity": "Major",
+      "claim": "The fix's claim that 'Both the throw and the rejection now go to the same log line' is not fully proven: the new test C2 only covers a rejection (async throw), not a synchronous throw from `seedDemoUsers` itself (e.g., a mock that throws on property access), which is the exact scenario from the ticket.",
+      "evidence": "ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts:95 `vi.doMock('../repositories/userRepo', () => ({ ...USER_REPO_BASE, seedDemoUsers: vi.fn(async () => { throw new Error('ks1776 rejection'); }) }));`",
+      "test_or_reason": "The ticket's error is a synchronous throw on property read (`No \"seedDemoUsers\" export is defined`), not an async rejection; the test only exercises an async rejection, so the synchronous-throw path is untested."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's mock of `../repositories/userRepo` is missing `seedDemoUsers` by design, but the test's D1/D2 rely on vitest's mock throwing on missing export; this is a test-only behavior and does not reflect the real repository, so the test is not faithful to production behavior.",
+      "evidence": "ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts:23 `vi.mock('../repositories/userRepo', () => ({ ...USER_REPO_BASE }));` and USER_REPO_BASE at lines 11-20 does not include `seedDemoUsers`.",
+      "test_or_reason": "The real `userRepo` has `seedDemoUsers` (per the ticket), so the test's mock is more permissive (missing export) than the real service; the test pins a test-only failure mode."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The new test file's C1 test asserts that `seedDemoUsers` is called with a function (the hasher), but it does not assert that the hasher is the actual `hashPassword` from the password service, only that it is a function.",
+      "evidence": "ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts:89 `expect(typeof (seed.mock.calls[0] as unknown[])[0]).toBe('function');`",
+      "test_or_reason": "The test does not pin the exact hasher identity, so a change that passes a different function would still pass."
+    },
+    {
+      "severity": "Note",
+      "claim": "The fix does not change the timer's environment restriction: it still runs in all environments (local, shared, demo, remote) with no environment check, so the timer can still fire in production and attempt to seed demo users.",
+      "evidence": "routes/auth.ts:67-73 `setTimeout(() => { ... }, 2000);` with no environment guard.",
+      "test_or_reason": "The ticket notes the timer has no environment or test check; the diff does not add one."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

@@ -1,0 +1,129 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -59,8 +59,15 @@
+ // =============================================================================
+ // SEED DEMO USERS — runs once at startup via the repository
+ // =============================================================================
++// KS-1776: seedDemoUsers is started from a timer, outside any request. A synchronous throw from it (a repository mock that lacks the export, a repository that is not ready) never reached the
++// .catch below, so it escaped the timer as an uncaught exception that the test runner pinned on whichever test was running. Both the throw and the rejection now go to the same log line.
++const logSeedFailure = (err: unknown): void => {
++  logger.error('Failed to seed demo users', { error: err });
++};
+ setTimeout(() => {
+-  userRepo.seedDemoUsers(hashPassword).catch((err) =>
+-    logger.error('Failed to seed demo users', { error: err }),
+-  );
++  try {
++    userRepo.seedDemoUsers(hashPassword).catch(logSeedFailure);
++  } catch (err) {
++    logSeedFailure(err);
++  }
+ }, 2000);
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1776-demo-user-seed-timer-cannot-escape-as-an-uncaught-throw.test.ts
+@@ -0,0 +1,102 @@
++// KS-1776 (services/auth routes/auth.ts): importing the routes module arms a module-scope `setTimeout(..., 2000)` that calls `userRepo.seedDemoUsers(hashPassword).catch(...)`. When the
++// repository mock of a test has no `seedDemoUsers` export, vitest's mock THROWS on that property read, synchronously, inside the timer callback: the `.catch` is never reached and the
++// error escapes as an uncaught exception that vitest pins on whichever test is running (seen once, in ks781-login-authorize-agree, in a loaded run). Here the timer is driven with FAKE
++// timers so the escape is an assertion: D1 reads whether firing the timer throws, D2 reads whether the failure is logged instead. C1 and C2 pin what must not change.
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++
++const silent = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() };
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++
++const USER_REPO_BASE = {
++  getUserById: vi.fn(async () => null),
++  getUserByIdPreAuth: vi.fn(async () => null),
++  getUserByEmail: vi.fn(async () => null),
++  updateUser: vi.fn(async () => undefined),
++  getPlatformAdmin: vi.fn(async () => null),
++  updatePlatformAdminPassword: vi.fn(async () => undefined),
++  reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++  reencryptPlatformAdminMfaSecretIfLegacy: vi.fn(async () => undefined),
++};
++
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }));
++vi.mock('../repositories/userRepo', () => ({ ...USER_REPO_BASE }));
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => ({ id: 'sess-new' })),
++  getSession: vi.fn(async () => null),
++  rotateSessionRefreshToken: vi.fn(async () => undefined),
++  revokeSession: vi.fn(async () => undefined),
++  getRedisClient: vi.fn(() => null),
++  validateSession: vi.fn(async () => true),
++  updateSessionActivity: vi.fn(async () => undefined),
++}));
++vi.mock('../services/refreshDenylist', () => ({
++  isRefreshJtiDenylisted: vi.fn(async () => false),
++  denylistRefreshJti: vi.fn(async () => undefined),
++}));
++vi.mock('../services/accountLockout', () => ({
++  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => 1),
++  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
++}));
++vi.mock('../services/password', () => ({
++  verifyPassword: vi.fn(async () => false), hashPassword: vi.fn(async () => '$argon2id$stub'),
++  checkPasswordStrength: vi.fn(() => ({ ok: true })), generateResetToken: vi.fn(() => 'tok'), shouldRehashAfterVerify: vi.fn(() => false),
++}));
++vi.mock('../services/email', () => ({ sendVerificationEmail: vi.fn(async () => undefined), sendPasswordResetEmail: vi.fn(async () => undefined) }));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++
++function advance(ms: number): string {
++  try {
++    vi.advanceTimersByTime(ms);
++    return 'ok';
++  } catch (err) {
++    return 'THREW ' + (err instanceof Error ? err.message : String(err));
++  }
++}
++
++beforeAll(() => {
++  vi.useFakeTimers();
++});
++afterAll(() => {
++  vi.useRealTimers();
++});
++
++describe('KS-1776: the demo-user seed timer cannot escape as an uncaught throw', () => {
++  it('RED KS-1776 D1 firing the seed timer does not throw when the repository has no seedDemoUsers', async () => {
++    vi.resetModules();
++    silent.error.mockClear();
++    await import('../routes/auth');
++    expect(advance(2500)).toBe('ok');
++  });
++
++  it('RED KS-1776 D2 the missing seedDemoUsers is logged as Failed to seed demo users instead', async () => {
++    vi.resetModules();
++    silent.error.mockClear();
++    await import('../routes/auth');
++    advance(2500);
++    expect(silent.error.mock.calls.map((call) => call[0])).toEqual(['Failed to seed demo users']);
++  });
++
++  it('control KS-1776 C1 with seedDemoUsers present it is called once, with the password hasher, after 2000 ms and not before', async () => {
++    vi.resetModules();
++    const seed = vi.fn(async () => undefined);
++    vi.doMock('../repositories/userRepo', () => ({ ...USER_REPO_BASE, seedDemoUsers: seed }));
++    await import('../routes/auth');
++    advance(1999);
++    expect(seed).not.toHaveBeenCalled();
++    advance(1);
++    expect(seed).toHaveBeenCalledTimes(1);
++    expect(typeof (seed.mock.calls[0] as unknown[])[0]).toBe('function');
++  });
++
++  it('control KS-1776 C2 a seedDemoUsers that rejects is logged as Failed to seed demo users', async () => {
++    vi.resetModules();
++    silent.error.mockClear();
++    vi.doMock('../repositories/userRepo', () => ({ ...USER_REPO_BASE, seedDemoUsers: vi.fn(async () => { throw new Error('ks1776 rejection'); }) }));
++    await import('../routes/auth');
++    advance(2500);
++    await Promise.resolve();
++    await Promise.resolve();
++    expect(silent.error.mock.calls.map((call) => call[0])).toEqual(['Failed to seed demo users']);
++  });
++});

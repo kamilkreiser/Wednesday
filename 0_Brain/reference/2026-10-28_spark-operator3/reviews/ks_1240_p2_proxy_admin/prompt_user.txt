@@ -1,0 +1,3236 @@
+===== TICKET =====
+KS-1240 — T-2: the connector-token / key-validate fetch has no timeout — a slow upstream hangs the request [Backlog]
+
+**The sharpest of the four candidates the gate surfaced, and the only one that is request-reachable today.**
+
+The api-gateway's connector-token exchange / key-validate `fetch` carries **no timeout**. A slow or non-answering upstream turns into a gateway request with no bound on how long it hangs, while the process carries on serving everything else.
+
+## Measured on BOTH trees (head and develop) — so it is pre-existing
+
+* an exchange that **never answers** → the request hangs;
+* an exchange whose body arrives **2.5 s late** → the request hangs for that long.
+
+Graded **Major**. Request-reachable, unlike T-1.
+
+## What to do
+
+Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange.
+
+---
+
+Filed from the #1034 / KS-1215 tier-1 gate report `2026-09-18-ks1215-1034-e4624218b-tier1-r1`, at merge of `a105cd32b1ed9c6927ae6e797f8259224d8480c6`. Pre-existing unless stated; **not** introduced by #1034.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts b/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
+@@ -21,3 +21,8 @@
+ // list live in utils/originateForward.ts — the one reader, shared by onProxyReq
+ // below and by the hand-built originate forwards in this file and verification.ts.
+ import { vouchHeaderFor } from '../utils/originateForward';
++
++// KS-1240: every hand-built upstream fetch in this file carries a timeout signal. Without one an upstream that accepts the connection and never answers holds the caller's request open for as long
++// as the socket lives. On expiry the fetch rejects and the handler's existing catch answers 502 BAD_GATEWAY, as it already does for an unreachable upstream. The package-generation call gets a longer bound.
++const UPSTREAM_PROXY_FETCH_TIMEOUT_MS = 30_000;
++const UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS = 120_000;
+@@ -469,6 +474,7 @@
+         });
+       }
+       const upstream = await fetch(`${authUrl}/api/users/admin/create`, {
++        signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+@@ -500,6 +506,7 @@
+         });
+       }
+       const upstream = await fetch(`${authUrl}/api/users/admin/${req.params.id}`, {
++        signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+         method: 'PATCH',
+         headers: {
+           'Content-Type': 'application/json',
+@@ -663,6 +670,7 @@
+         const originateUrl = services.originate?.url || 'http://originate:4000';
+         const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+         const upstream = await fetch(`${originateUrl}/api/signatories${qs}`, {
++          signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+           // KS-1084: forward the tenant authenticateToken verified (it writes x-tenant-id onto req.headers,
+           // middleware/auth.ts) so single-tenant originate does not scope this read to DEFAULT_TENANT_ID.
+           // KS-955 P2a: and vouch, or a provisioned originate drops that x-tenant-id as unvouched.
+@@ -691,6 +699,7 @@
+       try {
+         const originateUrl = services.originate?.url || 'http://originate:4000';
+         const upstream = await fetch(`${originateUrl}/api/third-party-verifiers`, {
++          signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+           // KS-1084: forward the tenant authenticateToken verified (it writes x-tenant-id onto req.headers,
+           // middleware/auth.ts) so single-tenant originate does not scope this read to DEFAULT_TENANT_ID.
+           // KS-955 P2a: and vouch, or a provisioned originate drops that x-tenant-id as unvouched.
+@@ -1259,6 +1268,7 @@
+     async (req: Request, res: Response) => {
+       try {
+         const r = await fetch(`${MCP_SERVER_URL}/generate-package`, {
++          signal: AbortSignal.timeout(UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS),
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify(req.body),
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -11,3 +11,6 @@
+ import crypto from 'crypto';
+ import express from 'express';
+ import { runWithPlatformScope } from '@secuura/shared';
++
++// KS-1240: the two hand-built auth-service fetches below carry a timeout signal; without one an auth service that never answers holds the admin's request open. On expiry the handler's existing catch answers 502.
++const UPSTREAM_ADMIN_FETCH_TIMEOUT_MS = 30_000;
+@@ -1373,6 +1376,7 @@
+       const authUrl = services.auth?.url || 'http://auth:4003';
+       const token = req.headers.authorization;
+       const upstream = await fetch(`${authUrl}/api/users/admin/create`, {
++        signal: AbortSignal.timeout(UPSTREAM_ADMIN_FETCH_TIMEOUT_MS),
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+@@ -1440,4 +1444,5 @@
+       const upstream = await fetch(`${authUrl}/api/users/admin/${encodeURIComponent(id)}`, {
++        signal: AbortSignal.timeout(UPSTREAM_ADMIN_FETCH_TIMEOUT_MS),
+         method: 'PATCH',
+         headers: {
+           'Content-Type': 'application/json',
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts
+@@ -0,0 +1,96 @@
++// KS-1240 (api-gateway routes/proxy.ts and routes/admin.ts): the hand-built upstream fetches in these two files carried no timeout, so an upstream that accepted the connection and never answered held the
++// caller's request open with no bound (the key-exchange half of the same ticket is in middleware/auth.ts). This file reads the two sources and pins, per fetch call, that the call carries an
++// AbortSignal.timeout signal, and that the timeout constants exist and are bounded. The extractor balances the call's own parentheses, so a signal in a NEIGHBOUR call cannot satisfy a fetch that has none.
++// C3 and C4 prove the extractor can return both answers (a bounded call that already existed at admin.ts, and a synthetic unbounded one), so the red cells are not vacuous.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const PROXY_SRC = readFileSync(join(__dirname, '..', 'routes', 'proxy.ts'), 'utf8');
++const ADMIN_SRC = readFileSync(join(__dirname, '..', 'routes', 'admin.ts'), 'utf8');
++
++/** Every `fetch(` call in the source, each as the text from `fetch(` to its balancing `)`. */
++function fetchCalls(src: string): string[] {
++  const calls: string[] = [];
++  const re = /\bfetch\(/g;
++  let match: RegExpExecArray | null;
++  while ((match = re.exec(src)) !== null) {
++    const open = match.index + match[0].length - 1;
++    let depth = 0;
++    let end = -1;
++    for (let i = open; i < src.length; i++) {
++      const ch = src[i];
++      if (ch === '(') depth++;
++      else if (ch === ')') {
++        depth--;
++        if (depth === 0) {
++          end = i;
++          break;
++        }
++      }
++    }
++    expect(end, 'unbalanced fetch call at offset ' + match.index).toBeGreaterThan(-1);
++    calls.push(src.slice(match.index, end + 1));
++  }
++  return calls;
++}
++
++function isBounded(call: string): boolean {
++  return call.includes('AbortSignal.timeout(');
++}
++
++/** The first line of each unbounded call, so a failure names the call. */
++function unbounded(src: string): string[] {
++  return fetchCalls(src)
++    .filter((call) => !isBounded(call))
++    .map((call) => call.split('\n')[0].trim());
++}
++
++function constantMs(src: string, name: string): number {
++  const found = new RegExp('const ' + name + ' = ([0-9_]+);').exec(src);
++  return found ? Number(found[1].replace(/_/g, '')) : Number.NaN;
++}
++
++describe('KS-1240: every hand-built gateway fetch in proxy.ts and admin.ts is bounded', () => {
++  it('RED KS-1240 R1 every fetch call in proxy.ts carries an AbortSignal.timeout', () => {
++    expect(unbounded(PROXY_SRC)).toEqual([]);
++  });
++
++  it('RED KS-1240 R2 every fetch call in admin.ts carries an AbortSignal.timeout', () => {
++    expect(unbounded(ADMIN_SRC)).toEqual([]);
++  });
++
++  it('RED KS-1240 R3 proxy.ts declares its two timeout constants, each positive and at most 120000 ms', () => {
++    const proxyMs = constantMs(PROXY_SRC, 'UPSTREAM_PROXY_FETCH_TIMEOUT_MS');
++    const packageMs = constantMs(PROXY_SRC, 'UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS');
++    expect(proxyMs).toBeGreaterThan(0);
++    expect(proxyMs).toBeLessThanOrEqual(120000);
++    expect(packageMs).toBeGreaterThanOrEqual(proxyMs);
++    expect(packageMs).toBeLessThanOrEqual(120000);
++  });
++
++  it('RED KS-1240 R4 admin.ts declares its timeout constant, positive and at most 120000 ms', () => {
++    const adminMs = constantMs(ADMIN_SRC, 'UPSTREAM_ADMIN_FETCH_TIMEOUT_MS');
++    expect(adminMs).toBeGreaterThan(0);
++    expect(adminMs).toBeLessThanOrEqual(120000);
++  });
++
++  it('control KS-1240 C1 proxy.ts has exactly five hand-built fetch calls', () => {
++    expect(fetchCalls(PROXY_SRC)).toHaveLength(5);
++  });
++
++  it('control KS-1240 C2 admin.ts has exactly three hand-built fetch calls', () => {
++    expect(fetchCalls(ADMIN_SRC)).toHaveLength(3);
++  });
++
++  it('control KS-1240 C3 the extractor reads the fetch that was already bounded in admin.ts as bounded', () => {
++    const calls = fetchCalls(ADMIN_SRC).filter((call) => call.includes('bfUrl'));
++    expect(calls).toHaveLength(1);
++    expect(isBounded(calls[0])).toBe(true);
++  });
++
++  it('control KS-1240 C4 the extractor reads a synthetic call with no signal as unbounded', () => {
++    const synthetic = "const r = await fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) });\n";
++    expect(unbounded(synthetic)).toEqual(["fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) })"]);
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
+1: /**
+2:  * =============================================================================
+3:  * PROXY ROUTE DEFINITIONS
+4:  * =============================================================================
+5:  * Extracted from the API gateway monolith. Contains:
+6:  * - createServiceProxy helper (http-proxy-middleware config factory)
+7:  * - Blocked-extension / MIME-type file-upload inspection middleware
+8:  * - All service proxy route definitions
+9:  * - MCP server proxy endpoint
+10:  * =============================================================================
+11:  */
+12: 
+13: import express, { Router, Request, Response, NextFunction, RequestHandler } from 'express';
+14: import * as http from 'http';
+15: import { createProxyMiddleware, Options } from 'http-proxy-middleware';
+16: import { requireScope, attachScopes, requireScopeOrRole } from '../middleware/scopes';
+17: import * as redisService from '../services/redis';
+18: import { CircuitBreaker } from '@secuura/shared';
+19: import { collapseRepeatedSlashes } from '../middleware/normalisePath';
+20: // KS-1041 Step 2 / KS-955 P2a: the vouch secret, its header name and the recipient
+21: // list live in utils/originateForward.ts — the one reader, shared by onProxyReq
+22: // below and by the hand-built originate forwards in this file and verification.ts.
+23: import { vouchHeaderFor } from '../utils/originateForward';
+24: 
+25: // KS-1240: every hand-built upstream fetch in this file carries a timeout signal. Without one an upstream that accepts the connection and never answers holds the caller's request open for as long
+26: // as the socket lives. On expiry the fetch rejects and the handler's existing catch answers 502 BAD_GATEWAY, as it already does for an unreachable upstream. The package-generation call gets a longer bound.
+27: const UPSTREAM_PROXY_FETCH_TIMEOUT_MS = 30_000;
+28: const UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS = 120_000;
+29: 
+30: // Pen-test M3 fix: per-service circuit breaker registry. http-proxy-middleware
+31: // streams; we can't easily wrap it in CircuitBreaker.execute, so instead we:
+32: //   1. Track failures from `onError`.
+33: //   2. Pre-check the breaker state in a gate middleware. If OPEN, return 503
+34: //      immediately without ever touching the downstream service.
+35: // Conservative thresholds: 5 failures in 30s window → open for 60s.
+36: /**
+37:  * KS-453: decide whether a proxied request must have its parsed body
+38:  * re-serialised and written to the upstream, and what to write.
+39:  *
+40:  * The api-gateway's `express.json()` runs before the proxy on any non-`proxyPaths`
+41:  * route and consumes the request stream, leaving the body only on `req.body`.
+42:  * http-proxy-middleware then has nothing to pipe, so a body-bearing method must
+43:  * have its parsed body re-written explicitly — INCLUDING an empty object `{}`.
+44:  * The prior guard skipped empty objects, so `PATCH /api/did/0` with `{}` set a
+45:  * Content-Length header but wrote no body and the upstream hung to a 60 s
+46:  * timeout → a misleading 502.
+47:  *
+48:  * @param method - the request's HTTP method (any case)
+49:  * @param parsedBody - `req.body` after express.json (undefined on unparsed/proxyPaths routes)
+50:  * @returns the JSON string to write to the upstream, or `null` when nothing
+51:  *          should be re-streamed (unparsed body, non-object, or a bodyless method)
+52:  */
+53: export function proxyBodyToWrite(method: string, parsedBody: unknown): string | null {
+54:   const m = (method || '').toUpperCase();
+55:   if (m !== 'POST' && m !== 'PUT' && m !== 'PATCH') return null;
+56:   if (!parsedBody || typeof parsedBody !== 'object' || Buffer.isBuffer(parsedBody)) return null;
+57:   return JSON.stringify(parsedBody);
+58: }
+59: 
+60: const breakerRegistry = new Map<string, CircuitBreaker>();
+61: function getBreaker(serviceKey: string): CircuitBreaker {
+62:   let b = breakerRegistry.get(serviceKey);
+63:   if (!b) {
+64:     b = new CircuitBreaker({
+65:       name: serviceKey,
+66:       failureThreshold: 5,
+67:       resetTimeoutMs: 60_000,
+68:       requestTimeoutMs: 60_000,
+69:       halfOpenMaxAttempts: 2,
+70:     });
+71:     breakerRegistry.set(serviceKey, b);
+72:   }
+73:   return b;
+74: }
+75: 
+76: export function circuitBreakerGate(serviceKey: string): RequestHandler {
+77:   return (_req: Request, res: Response, next: NextFunction) => {
+78:     const b = getBreaker(serviceKey);
+79:     if (b.getState() === 'open') {
+80:       res.status(503).json({
+81:         success: false,
+82:         error: {
+83:           code: 'SERVICE_UNAVAILABLE',
+84:           message: 'Service temporarily unavailable',
+85:           details: {
+86:             service: serviceKey,
+87:             retryAfterMs: 60_000,
+88:           },
+89:         },
+90:       });
+91:       return;
+92:     }
+93:     next();
+94:   };
+95: }
+96: 
+97: // ---------------------------------------------------------------------------
+98: // Types
+99: // ---------------------------------------------------------------------------
+100: 
+101: export interface ServiceConfig {
+102:   name: string;
+103:   url: string;
+104:   healthPath: string;
+105:   requiresAuth: boolean;
+106: }
+107: 
+108: export interface ProxyRouteDeps {
+109:   /** Map of service key -> service config (url, name, etc.) */
+110:   services: Record<string, ServiceConfig>;
+111:   /** Auth middleware factory – call with `true` (required) or `false` (optional) */
+112:   authenticateToken: (required?: boolean) => RequestHandler;
+113:   /** Structured logger matching the gateway's `log()` signature */
+114:   log: (level: 'info' | 'warn' | 'error', message: string, meta?: object) => void;
+115: }
+116: 
+117: // ---------------------------------------------------------------------------
+118: // Constants
+119: // ---------------------------------------------------------------------------
+120: 
+121: const BLOCKED_EXTENSIONS = [
+122:   '.exe', '.bat', '.cmd', '.com', '.msi', '.scr',
+123:   '.pif', '.vbs', '.js', '.ws', '.ps1', '.sh',
+124: ];
+125: 
+126: // KS-529: shared keep-alive agent for the upstream (gateway→service) hop.
+127: // Without an explicit agent, http-proxy-middleware falls back to Node's global
+128: // agent (keepAlive:false), which opens a fresh TCP socket per proxied request.
+129: // Under a concurrent Schemathesis sweep that socket churn exhausts ephemeral
+130: // ports / overruns each upstream's listen backlog → ECONNRESET/ECONNREFUSED →
+131: // the onError 502 on requests that should have been a deterministic 401/400.
+132: // A pooled keep-alive agent reuses connections and bounds per-upstream
+133: // concurrency, collapsing the transient-502 class. All upstreams are plain
+134: // http on the internal Docker network. maxSockets is per-host, so each service
+135: // gets its own pool.
+136: const proxyAgent = new http.Agent({
+137:   keepAlive: true,
+138:   keepAliveMsecs: 30_000,
+139:   maxSockets: 128,
+140:   maxFreeSockets: 32,
+141:   timeout: 60_000,
+142:   scheduling: 'lifo',
+143: });
+144: 
+145: // ---------------------------------------------------------------------------
+146: // Helper: build http-proxy-middleware Options for a service
+147: // ---------------------------------------------------------------------------
+148: 
+149: function createServiceProxy(
+150:   services: Record<string, ServiceConfig>,
+151:   log: ProxyRouteDeps['log'],
+152:   serviceKey: string,
+153:   pathRewrite?: Record<string, string>,
+154: ): Options {
+155:   const service = services[serviceKey];
+156:   if (!service) {
+157:     log('warn', `Service '${serviceKey}' not configured — proxy will use fallback URL`);
+158:     return {
+159:       target: `http://${serviceKey}:4000`,
+160:       changeOrigin: true,
+161:       agent: proxyAgent,
+162:       pathRewrite: pathRewrite || { [`^/api/${serviceKey}`]: '' },
+163:     };
+164:   }
+165:   return {
+166:     target: service.url,
+167:     changeOrigin: true,
+168:     agent: proxyAgent,
+169:     pathRewrite: pathRewrite || { [`^/api/${serviceKey}`]: '' },
+170:     proxyTimeout: 60000,
+171:     timeout: 60000,
+172:     onError: (err, _req, res) => {
+173:       // Pen-test M3: record failure with the per-service breaker. After
+174:       // failureThreshold consecutive failures, the next request is
+175:       // short-circuited by circuitBreakerGate above (returns 503 without
+176:       // touching the downstream service).
+177:       try {
+178:         const breaker = getBreaker(serviceKey);
+179:         // Drive the state machine via execute() against a rejecting
+180:         // promise — the breaker counts the failure and may open.
+181:         breaker.execute(async () => { throw err; }).catch(() => {});
+182:       } catch (_e) { /* breaker accounting must never throw */ }
+183:       log('error', 'Proxy error', { service: serviceKey, error: err.message });
+184:       (res as Response).status(502).json({
+185:         success: false,
+186:         error: {
+187:           code: 'BAD_GATEWAY',
+188:           message: `Upstream service "${service.name}" is unreachable or returned an error.`,
+189:         },
+190:       });
+191:     },
+192:     onProxyRes: (proxyRes, req) => {
+193:       // Pen-test M3: a 5xx from downstream counts as a failure for breaker.
+194:       const code = proxyRes.statusCode || 0;
+195:       if (code >= 500 && code < 600) {
+196:         try {
+197:           const breaker = getBreaker(serviceKey);
+198:           breaker.execute(async () => { throw new Error(`upstream ${code}`); }).catch(() => {});
+199:         } catch (_e) { /* breaker accounting must never throw */ }
+200:       }
+201:       // Rewrite Location headers ONLY when a downstream service leaked its own
+202:       // internal address — e.g. a relative res.redirect() that Express resolved
+203:       // against the internal upstream Host (m365-integration:4013). A redirect
+204:       // the service deliberately pointed at a public URL (the admin SPA via
+205:       // FRONTEND_URL, the verifier, etc.) must be left untouched. The previous
+206:       // unconditional rewrite replaced the host with req.headers.host, which
+207:       // (a) strips the gateway port locally — nginx forwards `Host $host` with
+208:       // no port, so a correct `:6882` became `:80` (dead) — and (b) would send
+209:       // the client to the wrong origin on the cross-origin demo, where the admin
+210:       // SPA and the api are different hosts. Scoping the rewrite to the upstream
+211:       // target host fixes both without disturbing the genuine internal-leak case
+212:       // (where the leaked host equals the proxy target). (KS-241)
+213:       if (proxyRes.headers.location) {
+214:         try {
+215:           const loc = new URL(proxyRes.headers.location);
+216:           const targetHost = new URL(service.url).host;
+217:           if (loc.host === targetHost) {
+218:             const gatewayHost = req.headers.host || 'localhost:6882';
+219:             const protocol = req.headers['x-forwarded-proto'] || 'https';
+220:             proxyRes.headers.location = `${protocol}://${gatewayHost}${loc.pathname}${loc.search}${loc.hash}`;
+221:           }
+222:         } catch {
+223:           // Relative or unparseable Location → leave as-is. A relative Location
+224:           // is resolved by the browser against the gateway origin, which is the
+225:           // correct public origin, so no rewrite is needed.
+226:         }
+227:       }
+228:     },
+229:     onProxyReq: (proxyReq, req) => {
+230:       // KS-1369: once the outgoing headers are sent, every setHeader below throws; skip the writes.
+231:       if (proxyReq.headersSent) return;
+232:       // Forward request ID
+233:       const requestId = (req as Request).requestId;
+234:       if (requestId) {
+235:         proxyReq.setHeader('X-Request-ID', requestId);
+236:       }
+237: 
+238:       // KS-1041 Step 2 — vouch that this request came through the edge, and
+239:       // vouch ONLY to the service that checks it.
+240:       //
+241:       // originate honours identity/tenant/role headers that this gateway sets
+242:       // from a verified JWT. Those headers are only trustworthy if the request
+243:       // actually came through here: a peer container on the flat compose
+244:       // network can address originate:4000 directly and send them itself. This
+245:       // header is what lets originate tell the two apart.
+246:       //
+247:       // The vouch is a bearer credential, so WHO RECEIVES IT is the control:
+248:       // any service it reaches can replay it straight to originate:4000 and
+249:       // have forged trust headers honoured. Minted here for every upstream, as
+250:       // it first was, it reached every other service (measured at analytics
+251:       // and auth by the #951 gate, round 1, F1), which moved the KS-1041
+252:       // forgery one hop instead of closing it. So it goes only to the keys in
+253:       // VOUCH_RECIPIENTS (utils/originateForward.ts) — read that constant before
+254:       // adding one. Both halves (originate receives it; analytics and auth do
+255:       // not) are pinned in __tests__/ks1041-vouch-mint-scope.test.ts.
+256:       //
+257:       // Set on the OUTGOING request, after the edge strip in index.ts has
+258:       // already removed any client-supplied `x-gateway-vouch` from the
+259:       // inbound one — so this value is always gateway-minted.
+260:       //
+261:       // Unset secret => header not sent => originate treats the call as
+262:       // unvouched and drops the trust headers. That is the fail-closed
+263:       // direction: an unconfigured gateway loses privilege, never gains it.
+264:       for (const [name, value] of Object.entries(vouchHeaderFor(serviceKey))) {
+265:         proxyReq.setHeader(name, value);
+266:       }
+267: 
+268:       // Forward policy evaluation headers to downstream services
+269:       const policyResult = req.headers['x-policy-result'];
+270:       if (policyResult) {
+271:         proxyReq.setHeader('X-Policy-Result', policyResult as string);
+272:       }
+273:       const policyId = req.headers['x-policy-id'];
+274:       if (policyId) {
+275:         proxyReq.setHeader('X-Policy-ID', policyId as string);
+276:       }
+277: 
+278:       // Explicitly forward Authorization. http-proxy-middleware passes
+279:       // headers by default, but the body-restream block below can race
+280:       // with header serialisation on POST/PUT/PATCH and drop it. Setting
+281:       // it explicitly here is a no-op when it's already present and a
+282:       // fix when it isn't — addresses BACKLOG #2 (anchoring "No token
+283:       // provided" 500 → nginx 502 chain).
+284:       if (req.headers.authorization) {
+285:         proxyReq.setHeader('Authorization', req.headers.authorization);
+286:       }
+287: 
+288:       // Re-stream the parsed body. The api-gateway's express.json() body
+289:       // parser runs before this proxy and consumes the request stream,
+290:       // leaving the body only on req.body. http-proxy-middleware then has
+291:       // nothing to pipe to proxyReq and the upstream connection is closed
+292:       // mid-headers (ECONNRESET → 502). Re-serialising the body and
+293:       // writing it explicitly fixes this for any POST/PUT/PATCH that has
+294:       // a JSON body. (BACKLOG #2 — gateway proxy strips Authorization.)
+295:       // KS-453: re-stream the parsed body (empty `{}` included — see
+296:       // proxyBodyToWrite). A proxyPaths route is never parsed here, so req.body
+297:       // is undefined and the raw stream pipes natively; only parsed-body routes
+298:       // reach the write branch.
+299:       const bodyData = proxyBodyToWrite(req.method || '', (req as any).body);
+300:       if (bodyData !== null) {
+301:         proxyReq.setHeader('Content-Type', 'application/json');
+302:         proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+303:         proxyReq.write(bodyData);
+304:       } else if (req.headers['content-length']) {
+305:         proxyReq.setHeader('Content-Length', req.headers['content-length']);
+306:       }
+307:     },
+308:   };
+309: }
+310: 
+311: /**
+312:  * KS-1187: which gdpr sub-path the erasure door must judge, decided on the
+313:  * CANONICAL path rather than the raw spelling. `subUrl` is `req.url` inside the
+314:  * `/api/gdpr` mount, where express keeps an absolute-form target's
+315:  * `scheme://authority` in front of the path. Canonical means: the path express
+316:  * routes on (no query, fragment or authority), each segment's `;params`
+317:  * dropped, percent-decoded, `.`/`..` resolved and empty segments removed. The
+318:  * first segment is compared the way the door's router compares (case-folded
+319:  * unless it is case sensitive).
+320:  *
+321:  * - `door`: the canonical path is `/erasures` or below it. The door judges it.
+322:  * - `not-door`: the canonical path plainly is not the door. Forwarded as before,
+323:  *   even when a later segment is malformed.
+324:  * - `undetermined`: the first segment cannot be decoded, or `..` climbs out of the
+325:  *   mount, so nothing can say whether it names the door. Refused fail-closed.
+326:  *   Also any `.` or `..` segment once the path so far names the door
+327:  *   (`/erasures/..`, `/erasures/%2e%2e`, `/erasures/..;x`, `/erasures/%2e%2e%2fabc`):
+328:  *   resolving it would judge a path that express does not route. The upstream
+329:  *   routes the RAW path, where `/erasures/..` is `/erasures/:externalRef` with the
+330:  *   reference `..`, so popping the door segment turned an erasure read into
+331:  *   "not the door" (KS-1187 round 2, F-1019-1).
+332:  *
+333:  * The door and its tests both use this function; there is no second copy.
+334:  */
+335: export function erasureDoorVerdict(
+336:   subUrl: string,
+337:   caseSensitive: boolean,
+338: ): { verdict: 'door' | 'not-door' | 'undetermined'; canonicalPath: string | null } {
+339:   let path = subUrl;
+340:   const tailStart = path.search(/[?#]/);
+341:   if (tailStart !== -1) path = path.slice(0, tailStart);
+342:   const scheme = /^[A-Za-z][A-Za-z0-9+\-.]*:\/\//.exec(path);
+343:   if (scheme) {
+344:     const pathStart = path.indexOf('/', scheme[0].length);
+345:     path = pathStart === -1 ? '/' : path.slice(pathStart);
+346:   }
+347:   const namesDoor = (segment: string | null | undefined): boolean =>
+348:     typeof segment === 'string' && (caseSensitive ? segment : segment.toLowerCase()) === 'erasures';
+349:   const segments: Array<string | null> = [];
+350:   for (const raw of path.split('/')) {
+351:     let decoded: string | null;
+352:     try {
+353:       decoded = decodeURIComponent(raw.split(';')[0]);
+354:     } catch {
+355:       decoded = null;
+356:     }
+357:     for (const segment of decoded === null ? [null] : decoded.split('/')) {
+358:       if (segment === '') continue;
+359:       if (segment === '.' || segment === '..') {
+360:         if (namesDoor(segments[0])) return { verdict: 'undetermined', canonicalPath: null };
+361:         if (segment === '.') continue;
+362:         if (segments.length === 0) return { verdict: 'undetermined', canonicalPath: null };
+363:         segments.pop();
+364:         continue;
+365:       }
+366:       segments.push(segment);
+367:     }
+368:   }
+369:   const first = segments[0];
+370:   if (first === undefined) return { verdict: 'not-door', canonicalPath: '/' };
+371:   if (first === null) return { verdict: 'undetermined', canonicalPath: null };
+372:   if (!namesDoor(first)) {
+373:     return { verdict: 'not-door', canonicalPath: null };
+374:   }
+375:   return { verdict: 'door', canonicalPath: '/' + segments.map((x) => x ?? '').join('/') };
+376: }
+377: 
+378: // ---------------------------------------------------------------------------
+379: // Factory
+380: // ---------------------------------------------------------------------------
+381: 
+382: export function createProxyRoutes(deps: ProxyRouteDeps): Router {
+383:   const { services, authenticateToken, log } = deps;
+384:   const router = Router();
+385: 
+386:   /** Shorthand so route definitions stay concise */
+387:   const proxy = (key: string, rewrite?: Record<string, string>) => {
+388:     const inner = createProxyMiddleware(createServiceProxy(services, log, key, rewrite));
+389:     // KS-41: wrap the proxy so synchronous throws (e.g. "body already
+390:     // consumed by express.json before proxy could re-stream it" — happens
+391:     // when a route mount is missing from proxyPaths in index.ts) get logged
+392:     // with the service key + path instead of falling through to Express's
+393:     // default error handler as a bare `{"error":"Internal Server Error"}`.
+394:     const wrapped: RequestHandler = (req, res, next) => {
+395:       try {
+396:         return (inner as unknown as RequestHandler)(req, res, next);
+397:       } catch (err) {
+398:         log('error', 'Proxy chain threw synchronously', {
+399:           service: key,
+400:           path: req.path,
+401:           method: req.method,
+402:           error: (err as Error).message,
+403:         });
+404:         if (res.headersSent) return;
+405:         res.status(502).json({
+406:           success: false,
+407:           error: {
+408:             code: 'BAD_GATEWAY',
+409:             message: `Upstream "${key}" proxy chain failed before forwarding`,
+410:             details: { reason: (err as Error).message },
+411:           },
+412:         });
+413:         return;
+414:       }
+415:     };
+416:     return wrapped;
+417:   };
+418: 
+419:   // =========================================================================
+420:   // AUTH / USER / SESSION (no gateway auth — handled by auth service)
+421:   // =========================================================================
+422: 
+423:   router.use('/api/auth', proxy('auth', { '^/api/auth': '/api/auth' }));
+424: 
+425:   // OAuth 2.0 routes — proxy to auth service
+426:   router.use('/api/oauth', proxy('auth', { '^/api/oauth': '/api/oauth' }));
+427: 
+428:   // Webhooks — proxy to originate (requires webhooks:manage scope)
+429:   router.use('/api/webhooks',
+430:     authenticateToken(true),
+431:     attachScopes,
+432:     requireScope('webhooks:manage'),
+433:     proxy('originate', { '^/api/webhooks': '/api/webhooks' }),
+434:   );
+435: 
+436:   // User routes — proxy to auth service (includes /api/users/me)
+437:   router.use('/api/users/me',
+438:     authenticateToken(true),
+439:     proxy('auth', { '^/api/users': '/api/users' }),
+440:   );
+441: 
+442:   // KS-69: GET /api/users/lookup?email=… — tenant-scoped email → userId.
+443:   // Explicit handler ahead of the catch-all so the `users:read` scope gate
+444:   // fires for OAuth / sk_* callers. JWT humans satisfy `requireScope`
+445:   // automatically (the middleware short-circuits authMethod='jwt'/'email');
+446:   // the downstream auth-service handler then enforces the role allow-list
+447:   // and tenant filter for them — see services/auth/src/routes/users.ts.
+448:   router.use('/api/users/lookup',
+449:     authenticateToken(true),
+450:     attachScopes,
+451:     requireScope('users:read'),
+452:     proxy('auth', { '^/api/users': '/api/users' }),
+453:   );
+454: 
+455:   // POST /api/users/admin/create — explicit handler to avoid proxy body issues.
+456:   // KS-689: authenticateToken(true) was missing here while the identically-written
+457:   // PATCH neighbour below carried it. Not a live bypass — this handler forwards the
+458:   // bearer to services/auth, which owns the session table and re-checks — but the
+459:   // gateway's own session-revocation check lives inside this middleware, so without
+460:   // it the route was protected only by which service happens to sit behind it.
+461:   router.post('/api/users/admin/create', authenticateToken(true), async (req: any, res: any) => {
+462:     try {
+463:       const authUrl = services.auth?.url || 'http://auth:4003';
+464:       const token = req.headers.authorization;
+465:       // Read body from raw request if not parsed
+466:       let body = '';
+467:       if (req.body && Object.keys(req.body).length > 0) {
+468:         body = JSON.stringify(req.body);
+469:       } else {
+470:         body = await new Promise<string>((resolve) => {
+471:           let data = '';
+472:           req.on('data', (chunk: any) => { data += chunk; });
+473:           req.on('end', () => resolve(data));
+474:         });
+475:       }
+476:       const upstream = await fetch(`${authUrl}/api/users/admin/create`, {
+477:         signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+478:         method: 'POST',
+479:         headers: {
+480:           'Content-Type': 'application/json',
+481:           ...(token ? { Authorization: token } : {}),
+482:         },
+483:         body,
+484:       });
+485:       const data = await upstream.json().catch(() => ({}));
+486:       res.status(upstream.status).json(data);
+487:     } catch (err: any) {
+488:       console.error('User create proxy failed:', err?.message);
+489:       res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable' } });
+490:     }
+491:   });
+492: 
+493:   // PATCH /api/users/admin/:id — explicit handler to avoid proxy body-stream hang
+494:   router.patch('/api/users/admin/:id', authenticateToken(true), async (req: any, res: any) => {
+495:     try {
+496:       const authUrl = services.auth?.url || 'http://auth:4003';
+497:       const token = req.headers.authorization;
+498:       let body = '';
+499:       if (req.body && Object.keys(req.body).length > 0) {
+500:         body = JSON.stringify(req.body);
+501:       } else {
+502:         body = await new Promise<string>((resolve) => {
+503:           let data = '';
+504:           req.on('data', (chunk: any) => { data += chunk; });
+505:           req.on('end', () => resolve(data));
+506:         });
+507:       }
+508:       const upstream = await fetch(`${authUrl}/api/users/admin/${req.params.id}`, {
+509:         signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+510:         method: 'PATCH',
+511:         headers: {
+512:           'Content-Type': 'application/json',
+513:           ...(token ? { Authorization: token } : {}),
+514:         },
+515:         body,
+516:       });
+517:       const data = await upstream.json().catch(() => ({}));
+518:       res.status(upstream.status).json(data);
+519:     } catch (err: any) {
+520:       console.error('User admin PATCH proxy failed:', err?.message);
+521:       res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable' } });
+522:     }
+523:   });
+524: 
+525:   router.use('/api/users',
+526:     authenticateToken(true),
+527:     proxy('auth', { '^/api/users': '/api/users' }),
+528:   );
+529:   router.use('/api/sessions', proxy('auth', { '^/api/sessions': '/api/sessions' }));
+530: 
+531:   // KS-83: per-org X.509 cert lifecycle. Auth-required at gateway; the
+532:   // service enforces ORG_ADMIN+ role OR `issuer-certs:*` scope.
+533:   router.use('/api/issuer-certs',
+534:     authenticateToken(true),
+535:     proxy('auth', { '^/api/issuer-certs': '/api/issuer-certs' }),
+536:   );
+537: 
+538:   // =========================================================================
+539:   // FILE UPLOAD SECURITY
+540:   // =========================================================================
+541: 
+542:   router.post('/api/documents/upload', authenticateToken(true), (req: Request, res: Response, next: NextFunction) => {
+543:     const contentType = req.headers['content-type'] || '';
+544:     if (contentType.includes('multipart/form-data')) {
+545:       const chunks: Buffer[] = [];
+546:       req.on('data', (chunk: Buffer) => { chunks.push(chunk); });
+547:       req.on('end', () => {
+548:         const rawBody = Buffer.concat(chunks);
+549:         const bodyStr = rawBody.toString('utf8', 0, Math.min(rawBody.length, 8192));
+550: 
+551:         // Check filename in Content-Disposition
+552:         const filenameMatch = bodyStr.match(/filename="([^"]+)"/i) || bodyStr.match(/filename=([^\r\n;]+)/i);
+553:         if (filenameMatch) {
+554:           const filename = filenameMatch[1].trim().toLowerCase();
+555:           const hasBlockedExt = BLOCKED_EXTENSIONS.some(ext => filename.endsWith(ext));
+556:           if (hasBlockedExt) {
+557:             log('warn', 'Blocked dangerous file upload', { filename });
+558:             res.status(400).json({ success: false, error: { code: 'BLOCKED_FILE_TYPE', message: 'File type not allowed' } });
+559:             return;
+560:           }
+561:         }
+562: 
+563:         // Check MIME type for executable types
+564:         const mimeType = bodyStr.match(/Content-Type:\s*([^\r\n]+)/gi);
+565:         if (mimeType) {
+566:           const blockedMimes = [
+567:             'application/x-msdownload', 'application/x-msdos-program',
+568:             'application/x-executable', 'application/x-dosexec',
+569:           ];
+570:           for (const mt of mimeType) {
+571:             const mimeValue = mt.replace(/Content-Type:\s*/i, '').trim().toLowerCase();
+572:             if (blockedMimes.includes(mimeValue)) {
+573:               log('warn', 'Blocked dangerous MIME type upload', { mimeType: mimeValue });
+574:               res.status(400).json({ success: false, error: { code: 'BLOCKED_MIME_TYPE', message: 'File type not allowed' } });
+575:               return;
+576:             }
+577:           }
+578:         }
+579: 
+580:         // Forward the request to originate service
+581:         const originateUrl = services.originate?.url || 'http://localhost:6000';
+582:         const http = originateUrl.startsWith('https') ? require('https') : require('http');
+583:         const url = new URL(`${originateUrl}/api/documents/upload`);
+584:         const forwardHeaders: Record<string, string> = {};
+585:         for (const [key, value] of Object.entries(req.headers)) {
+586:           if (value && typeof value === 'string') forwardHeaders[key] = value;
+587:         }
+588:         forwardHeaders['content-length'] = String(rawBody.length);
+589:         // KS-955 P2a: this forward bypasses onProxyReq, so it vouches itself. Without it, a
+590:         // provisioned originate drops the x-tenant-* / x-user-* headers copied above and files
+591:         // the upload under DEFAULT_TENANT_ID. Any client-sent x-gateway-vouch was already
+592:         // removed by the edge strip, so the only vouch on this request is the one set here.
+593:         Object.assign(forwardHeaders, vouchHeaderFor('originate'));
+594: 
+595:         const proxyReq = http.request(
+596:           { hostname: url.hostname, port: url.port, path: url.pathname, method: 'POST', headers: forwardHeaders },
+597:           (proxyRes: any) => {
+598:             res.status(proxyRes.statusCode || 500);
+599:             Object.entries(proxyRes.headers).forEach(([k, v]) => { if (v) res.setHeader(k, v as string); });
+600:             proxyRes.pipe(res);
+601:           },
+602:         );
+603:         proxyReq.on('error', (err: Error) => {
+604:           log('error', 'Failed to forward upload to originate', { error: err.message });
+605:           res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Upload service unavailable' } });
+606:         });
+607:         proxyReq.write(rawBody);
+608:         proxyReq.end();
+609:       });
+610:     } else {
+611:       next();
+612:     }
+613:   });
+614: 
+615:   // =========================================================================
+616:   // DOCUMENT / ORIGINATE SERVICE ROUTES
+617:   // =========================================================================
+618: 
+619:   // KS-87: GET /api/documents/:id/sig-json is the public out-of-band signature
+620:   // envelope used by offline verifiers — it must skip auth + scope checks. Must
+621:   // be registered BEFORE the auth-gated `router.use('/api/documents', ...)`
+622:   // below so Express resolves this specific path first; any other path falls
+623:   // through to the auth-required catch-all. (Originate mirrors this with
+624:   // publicDocumentsRouter mounted before documentsRouter.)
+625:   router.get('/api/documents/:id/sig-json',
+626:     proxy('originate', { '^/api/documents': '/api/documents' }),
+627:   );
+628: 
+629:   router.use('/api/documents',
+630:     authenticateToken(true),
+631:     attachScopes,
+632:     requireScope('documents:read', 'documents:write'),
+633:     proxy('originate', { '^/api/documents': '/api/documents' }),
+634:   );
+635: 
+636:   router.use('/api/certifications',
+637:     authenticateToken(false),
+638:     attachScopes,
+639:     requireScope('certifications:read', 'certifications:write'),
+640:     proxy('originate', { '^/api/certifications': '/api/certifications' }),
+641:   );
+642: 
+643:   // Metering / usage — partner-facing, tenant-scoped read API over charge_events
+644:   // (KS-320, Option 2). JWT-required (mirrors the billing customer endpoints'
+645:   // auth); the tenant is enforced server-side in originate, so a partner caller
+646:   // (Platform-S) only ever sees its own tenant's usage.
+647:   router.use('/api/metering',
+648:     authenticateToken(true),
+649:     proxy('originate', { '^/api/metering': '/api/metering' }),
+650:   );
+651: 
+652:   // Verification — proxy to originate (no auth required for public verification)
+653:   router.use('/api/verification',
+654:     proxy('originate', { '^/api/verification': '/api/verification' }),
+655:   );
+656:   // KS-584 P3: v2 verify-list contract — same public posture as v1 above.
+657:   // ABSENT bearer → anonymous 200; PRESENT-but-invalid → originate 401s.
+658:   router.use('/api/v2/verification',
+659:     proxy('originate', { '^/api/v2/verification': '/api/v2/verification' }),
+660:   );
+661: 
+662:   // Signatories — proxy to originate, relaying status verbatim. Audit A-09:
+663:   // the previous shim swallowed ANY non-OK upstream (including 401/403/500)
+664:   // and returned a fake success with an empty list — masking auth failures
+665:   // and other real errors.
+666:   router.get('/api/signatories',
+667:     authenticateToken(true),
+668:     (async (req: Request, res: Response) => {
+669:       try {
+670:         const originateUrl = services.originate?.url || 'http://originate:4000';
+671:         const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+672:         const upstream = await fetch(`${originateUrl}/api/signatories${qs}`, {
+673:           signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+674:           // KS-1084: forward the tenant authenticateToken verified (it writes x-tenant-id onto req.headers,
+675:           // middleware/auth.ts) so single-tenant originate does not scope this read to DEFAULT_TENANT_ID.
+676:           // KS-955 P2a: and vouch, or a provisioned originate drops that x-tenant-id as unvouched.
+677:           headers: { 'Authorization': req.headers.authorization || '',
+678:             ...(req.headers['x-tenant-id'] ? { 'x-tenant-id': String(req.headers['x-tenant-id']) } : {}),
+679:             ...vouchHeaderFor('originate') },
+680:         });
+681:         const body = await upstream.json().catch(() => ({}));
+682:         return res.status(upstream.status).json(body);
+683:       } catch (err) {
+684:         // Originate genuinely unreachable.
+685:         return res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Originate service unreachable' } });
+686:       }
+687:     }) as RequestHandler,
+688:   );
+689: 
+690:   // Third-party verifiers — require auth at the gateway. Audit A-09 fix at
+691:   // originate (commit a88c9394b) returns 401 when the route is unauthenticated;
+692:   // the previous shim here swallowed that 401 and returned a fake-success
+693:   // empty list, masking the auth requirement. Now: gateway enforces auth
+694:   // first, and any non-OK upstream response is relayed verbatim instead of
+695:   // hidden behind a fake success.
+696:   router.get('/api/third-party-verifiers',
+697:     authenticateToken(true),
+698:     (async (_req: Request, res: Response) => {
+699:       try {
+700:         const originateUrl = services.originate?.url || 'http://originate:4000';
+701:         const upstream = await fetch(`${originateUrl}/api/third-party-verifiers`, {
+702:           signal: AbortSignal.timeout(UPSTREAM_PROXY_FETCH_TIMEOUT_MS),
+703:           // KS-1084: forward the tenant authenticateToken verified (it writes x-tenant-id onto req.headers,
+704:           // middleware/auth.ts) so single-tenant originate does not scope this read to DEFAULT_TENANT_ID.
+705:           // KS-955 P2a: and vouch, or a provisioned originate drops that x-tenant-id as unvouched.
+706:           headers: { 'Authorization': _req.headers.authorization || '',
+707:             ...(_req.headers['x-tenant-id'] ? { 'x-tenant-id': String(_req.headers['x-tenant-id']) } : {}),
+708:             ...vouchHeaderFor('originate') },
+709:         });
+710:         const body = await upstream.json().catch(() => ({}));
+711:         return res.status(upstream.status).json(body);
+712:       } catch (err) {
+713:         // Originate genuinely unreachable (network error, not an HTTP status).
+714:         return res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Originate service unreachable' } });
+715:       }
+716:     }) as RequestHandler,
+717:   );
+718: 
+719:   // =========================================================================
+720:   // GDPR ERASURE — KS-843 (Kam's ruling, 2026-09-03)
+721:   // =========================================================================
+722:   // Both erasure routes — the write and the status read — are scope-gated on
+723:   // `subjects:erase`. The gate is registered BEFORE the catch-all
+724:   // `router.use('/api/gdpr', …)` below, because a gate mounted after it is
+725:   // unreachable while looking exactly like a gate.
+726:   //
+727:   // It is an express Router mounted at `/erasures`, fed the
+728:   // SEPARATOR-COLLAPSED sub-path — see `erasureDoor` below for why an exact
+729:   // route and then a hand-rolled matcher were each walked around.
+730:   //
+731:   // BOTH routes, not just the write. The GET discloses whether an erasure
+732:   // exists for a given external reference and what state it is in — that is
+733:   // information about a named person's erasure request, and the same caller
+734:   // class uses both. Gating only the write would leave any connector key able
+735:   // to enumerate erasure status by external reference.
+736:   //
+737:   // Gated with `requireScopeOrRole`, not `requireScope`: every connector key
+738:   // issued before the scope existed lacks it, and K cannot add a scope to an
+739:   // existing key (create / list / revoke / validate only — no PATCH). With
+740:   // `SUBJECTS_ERASE_SCOPE_ENFORCED` unset (the default) a role-only caller is
+741:   // still admitted and logged, so this ships without breaking Platform S; the
+742:   // flag is flipped once the log shows S on a rotated key.
+743:   const ERASURE_GRACE_ROLES = ['connector'] as const;
+744:   const ERASURE_SCOPE = 'subjects:erase';
+745:   const ERASURE_ENFORCE_FLAG = 'SUBJECTS_ERASE_SCOPE_ENFORCED';
+746: 
+747:   /**
+748:    * The erasure door.
+749:    *
+750:    * KS-843 F-7 — the FIRST hole. The original gate was two exact routes,
+751:    * `router.post('/api/gdpr/erasures')` and
+752:    * `router.get('/api/gdpr/erasures/:externalRef')`, sitting above the
+753:    * catch-all mount below. `POST /api/gdpr//erasures` matched NEITHER, fell
+754:    * through to the catch-all, and reached the real upstream handler with no
+755:    * gate and no log — a 200 for a principal that got 403 on the same route
+756:    * spelled with one slash. Measured, six shapes, driven against a real
+757:    * express router:
+758:    *
+759:    *   spelling                    prefix mount   collapsed handoff
+760:    *   /api/gdpr/erasures          HIT            HIT
+761:    *   /api/gdpr//erasures         MISS           HIT
+762:    *   /api/gdpr///erasures        MISS           HIT
+763:    *   /api/gdpr/erasures/abc      HIT            HIT
+764:    *   /api/gdpr//erasures/abc     MISS           HIT
+765:    *   /api/gdpr/erasures//abc     HIT            HIT
+766:    *
+767:    * — so mounting on the `/api/gdpr/erasures` PREFIX alone, the obvious fix,
+768:    * closes only three of the six.
+769:    *
+770:    * KS-843 F-9 — the SECOND hole, which the fix for the first one created.
+771:    * Round 2 closed those six with a hand-rolled matcher tested against the
+772:    * collapsed sub-path. That matcher was case-SENSITIVE, while both express
+773:    * routers in the request path match case-INSENSITIVELY (neither this service
+774:    * nor originate sets `case sensitive routing`). So `ERASURES`, `Erasures`,
+775:    * `Erasures/`, `//ERASURES`, `/API/GDPR/ERASURES` and `GET …/ERASURES/abc`
+776:    * walked around the door and ran originate's erasure handler in ENFORCING
+777:    * mode for a principal with neither the scope nor an accepted role — five of
+778:    * which the PARENT commit had refused. Two matchers inside one request path,
+779:    * two answers, one upstream.
+780:    *
+781:    * So the door does not do its own matching any more. `erasureDoor` is an
+782:    * express Router mounted at `/erasures`, and express decides — which means
+783:    * case, trailing slash and the mount's own separator handling are whatever
+784:    * express does everywhere else in this file, and cannot drift from it again.
+785:    * The one normalisation express will NOT do is collapsing repeated
+786:    * separators, so the sub-path is collapsed before it is handed on; that, and
+787:    * only that, is what closes the six shapes in the table above.
+788:    *
+789:    * `req.url` is restored before the request continues. A gateway that
+790:    * silently forwards a normalised copy of what it was sent hides what it
+791:    * forwarded, and the grace log — which records `req.originalUrl` — would
+792:    * then disagree with the upstream about what the caller actually typed.
+793:    *
+794:    * DELIBERATELY NOT gateway-wide path normalisation. That would close the
+795:    * whole class — `POST /api/anchors//batch` walks around `anchors:write` the
+796:    * same way — but it changes the routing of every endpoint at once. The class
+797:    * has its own ticket (KS-858); this change is scoped to the door the ticket
+798:    * is about. The class-forward lesson recorded there: a fix that
+799:    * re-implements path matching inherits every normalisation express already
+800:    * does — case, trailing slash, and the mount's own separator handling.
+801:    */
+802:   const erasureDoor = Router();
+803:   erasureDoor.use(
+804:     '/erasures',
+805:     authenticateToken(true),
+806:     attachScopes,
+807:     requireScopeOrRole(ERASURE_SCOPE, ERASURE_GRACE_ROLES, ERASURE_ENFORCE_FLAG),
+808:   );
+809: 
+810:   // KS-1187: the door used to collapse `//` across the WHOLE req.url, so an
+811:   // absolute-form target (`http://h/erasures` inside this mount) became
+812:   // `http:/h/erasures`, the `/erasures` mount never matched, and the catch-all
+813:   // below forwarded it. The path is now judged canonically (erasureDoorVerdict)
+814:   // with the same case rule as the door's router. The door is handed the
+815:   // canonical path, and anything that cannot be canonicalised is refused.
+816:   const erasureDoorCaseSensitive = Boolean((erasureDoor as unknown as { caseSensitive?: boolean }).caseSensitive);
+817:   router.use('/api/gdpr', (req: Request, res: Response, next: NextFunction) => {
+818:     const original = req.url;
+819:     const { verdict, canonicalPath } = erasureDoorVerdict(collapseRepeatedSlashes(original), erasureDoorCaseSensitive);
+820:     if (verdict === 'not-door') {
+821:       next();
+822:       return;
+823:     }
+824:     if (verdict === 'undetermined') {
+825:       res.status(400).json({
+826:         success: false,
+827:         error: { code: 'NON_CANONICAL_PATH', message: 'The request path cannot be canonicalised' },
+828:       });
+829:       return;
+830:     }
+831:     req.url = canonicalPath as string;
+832:     erasureDoor(req, res, (err?: unknown) => {
+833:       req.url = original;
+834:       next(err as Error | undefined);
+835:     });
+836:   });
+837: 
+838:   router.use('/api/gdpr',
+839:     authenticateToken(true),
+840:     proxy('originate', { '^/api/gdpr': '/api/gdpr' }),
+841:   );
+842: 
+843:   // KS-695 ask 3 - connector-scoped ORGANISATION erasure (Platform S's dissolution call), POST and the
+844:   // status GET under one prefix. The most destructive thing a connector key can ask for, so it is gated
+845:   // exactly as the GDPR erasure routes above are: the SAME scope, grace roles and enforcement switch
+846:   // (KS-843), decided by express's own mount matching rather than a hand-rolled matcher, so case,
+847:   // trailing slash and the mount's separator handling cannot drift from the rest of this file.
+848:   //
+849:   // It is a single prefix mount, and no `/api/platform` catch-all forwards that namespace to originate,
+850:   // so a spelling that misses this mount reaches nothing through `/api/platform`; the door test drives
+851:   // eight such spellings against a recording upstream. ONE WAY AROUND THE DOOR EXISTS and is not new: the
+852:   // unauthenticated `/originate/` passthrough further down (about line 1219) forwards any path to originate
+853:   // and skips this scope layer even with enforcement on, exactly as it already does for `/api/gdpr/erasures`.
+854:   // nginx answers `/originate/` with 404 in both shipped configs, and originate re-checks everything that
+855:   // matters (the connector role, the caller's own organisation, key ownership) and is the real enforcement;
+856:   // this is the scope layer. The path is Platform S's own, forwarded unchanged.
+857:   router.use('/api/platform/organizations/erase-connector',
+858:     authenticateToken(true),
+859:     attachScopes,
+860:     requireScopeOrRole(ERASURE_SCOPE, ERASURE_GRACE_ROLES, ERASURE_ENFORCE_FLAG),
+861:     proxy('originate', { '^/api/platform/organizations/erase-connector': '/api/platform/organizations/erase-connector' }),
+862:   );
+863: 
+864:   // =========================================================================
+865:   // ANCHORING
+866:   // =========================================================================
+867: 
+868:   // KS-480: the flat anchor + batch writes are scope-gated `anchors:write`
+869:   // for machine callers (sk_ keys / OAuth apps) — resolving the S↔K contract's
+870:   // open question on which scope gates S's fallback anchor path. Human JWT
+871:   // callers are unaffected (requireScope short-circuits authMethod jwt/email).
+872:   // Registered before the catch-all mount so Express matches the POSTs here.
+873:   router.post('/api/anchors',
+874:     authenticateToken(true),
+875:     attachScopes,
+876:     requireScope('anchors:write'),
+877:     proxy('anchoring', { '^/api/anchors': '/api/anchors' }),
+878:   );
+879:   router.post('/api/anchors/batch',
+880:     authenticateToken(true),
+881:     attachScopes,
+882:     requireScope('anchors:write'),
+883:     proxy('anchoring', { '^/api/anchors': '/api/anchors' }),
+884:   );
+885: 
+886:   router.use('/api/anchors',
+887:     authenticateToken(true),
+888:     proxy('anchoring', { '^/api/anchors': '/api/anchors' }),
+889:   );
+890: 
+891:   router.use('/api/anchoring',
+892:     authenticateToken(true),
+893:     proxy('anchoring', { '^/api/anchoring': '/api/anchoring' }),
+894:   );
+895: 
+896:   // =========================================================================
+897:   // WALLET
+898:   // =========================================================================
+899: 
+900:   router.use('/api/wallets',
+901:     authenticateToken(true),
+902:     proxy('wallet', { '^/api/wallets': '/api/wallets' }),
+903:   );
+904: 
+905:   // KS-10: removed the dead `/api/wallet` (singular) mount. The
+906:   // wallet-connector only ever served `/api/wallets/*`; the singular
+907:   // prefix forwarded 1:1 and always 404'd at the connector. It was never
+908:   // in the OpenAPI spec and nothing real calls it — clients use
+909:   // `/api/wallets/*`. (An alias mount was tried but http-proxy-middleware's
+910:   // pathRewrite runs on the post-router-mount-stripped path, so
+911:   // `^/api/wallet → /api/wallets` never matched. Not worth the complexity
+912:   // for a non-endpoint.)
+913: 
+914:   // =========================================================================
+915:   // DID / PRISM
+916:   // =========================================================================
+917: 
+918:   router.use('/api/did',
+919:     authenticateToken(true),
+920:     proxy('prism', { '^/api/did': '/api/did' }),
+921:   );
+922: 
+923:   // =========================================================================
+924:   // TIMESTAMPING
+925:   // =========================================================================
+926: 
+927:   router.use('/api/timestamps',
+928:     authenticateToken(true),
+929:     proxy('timestamping', { '^/api/timestamps': '/api/timestamps' }),
+930:   );
+931: 
+932:   // =========================================================================
+933:   // M365
+934:   // =========================================================================
+935: 
+936:   // M365 callback must bypass auth (Microsoft redirects here after OAuth consent)
+937:   router.use('/api/m365/callback',
+938:     proxy('m365', { '^/api/m365': '/api' }),
+939:   );
+940: 
+941:   // KS-442: outlook/verify-hash is public by contract (spec `security: []`) —
+942:   // the Outlook add-in verifies a document hash without a platform account.
+943:   // Mounted before the authed /api/m365 block; POST only (same shape as the
+944:   // callback bypass above). The m365 service applies the matching exemption.
+945:   router.post('/api/m365/outlook/verify-hash',
+946:     proxy('m365', { '^/api/m365': '/api' }),
+947:   );
+948: 
+949:   router.use('/api/m365',
+950:     authenticateToken(true),
+951:     proxy('m365', { '^/api/m365': '/api' }),
+952:   );
+953: 
+954:   // OneDrive routes — same m365 service
+955:   router.use('/api/onedrive',
+956:     authenticateToken(true),
+957:     proxy('m365', { '^/api/onedrive': '/api/onedrive' }),
+958:   );
+959: 
+960:   // Teams routes — same m365 service
+961:   router.use('/api/teams',
+962:     authenticateToken(true),
+963:     proxy('m365', { '^/api/teams': '/api/teams' }),
+964:   );
+965: 
+966:   // =========================================================================
+967:   // VERIFIABLE CREDENTIALS
+968:   // =========================================================================
+969: 
+970:   router.use('/api/credentials',
+971:     authenticateToken(false),
+972:     proxy('vcIssuer', { '^/api/credentials': '/api/credentials' }),
+973:   );
+974: 
+975:   // KS-570: this mount carried NO auth middleware, so the gateway's
+976:   // session-revocation check (middleware/auth.ts) never ran for it. vc-issuer
+977:   // then falls back on @secuura/shared's authenticate(), which verifies the
+978:   // RS256 signature and nothing else — so an anonymous caller got 401 (the
+979:   // route LOOKED protected) while a revoked or suspended user's still-valid
+980:   // token got 200 on credential-revocation writes. `true` (not `false`)
+981:   // because the mount already 401s anonymous callers today, so it was never
+982:   // intentionally public — proved by probe before the change.
+983:   router.use('/api/status',
+984:     authenticateToken(true),
+985:     proxy('vcIssuer', { '^/api/status': '/api/status' }),
+986:   );
+987: 
+988:   // KS-442: presentations/verify is public by contract (spec `security: []`) —
+989:   // tokenless verification is the verifier story. Mounted before the authed
+990:   // /api/presentations block; POST only. vc-issuer applies the matching
+991:   // exemption (credentials/verify needs no gateway change: /api/credentials
+992:   // is already authenticateToken(false), its 401 came from the service).
+993:   router.post('/api/presentations/verify',
+994:     proxy('vcIssuer', { '^/api/presentations': '/api/presentations' }),
+995:   );
+996: 
+997:   router.use('/api/presentations',
+998:     authenticateToken(true),
+999:     proxy('vcIssuer', { '^/api/presentations': '/api/presentations' }),
+1000:   );
+1001: 
+1002:   // KS-476 (Kam, 2026-07-17): identity-credentials was spec'd + mounted in
+1003:   // vc-issuer (index.ts /api/identity-credentials) but the gateway never
+1004:   // proxied the prefix — both ops 404'd forever. Types is public by contract
+1005:   // (spec `security: []`), mounted before the authed block; the service does
+1006:   // NOT enforce auth on /issue, so the gateway gate here is the enforcement.
+1007:   router.get('/api/identity-credentials/types',
+1008:     proxy('vcIssuer', { '^/api/identity-credentials': '/api/identity-credentials' }),
+1009:   );
+1010: 
+1011:   router.use('/api/identity-credentials',
+1012:     authenticateToken(true),
+1013:     proxy('vcIssuer', { '^/api/identity-credentials': '/api/identity-credentials' }),
+1014:   );
+1015: 
+1016:   // =========================================================================
+1017:   // STAKING
+1018:   // =========================================================================
+1019:   //
+1020:   // The staking service mounts its routers at /api/stake, /api/rewards, and
+1021:   // /api/tiers (NOT /api/staking). The previous gateway proxy at /api/staking
+1022:   // → /api/staking pointed at a path the service never serves, causing every
+1023:   // staking call through the gateway to 404.
+1024:   //
+1025:   // /api/rewards is intentionally NOT routed here — that path is proxied to
+1026:   // the referral service below (referral's reward + leaderboard surface).
+1027:   // Staking's /api/rewards routes are gateway-shadowed by design. Direct hits
+1028:   // on the staking service port still work.
+1029:   //
+1030:   // /api/staking/* (legacy gateway path) is also kept as a thin shim that
+1031:   // strips the prefix → /api/stake/*, so old clients keep working during
+1032:   // the cutover.
+1033: 
+1034:   router.use('/api/stake',
+1035:     authenticateToken(true),
+1036:     proxy('staking', { '^/api/stake': '/api/stake' }),
+1037:   );
+1038: 
+1039:   router.use('/api/tiers',
+1040:     authenticateToken(true),
+1041:     proxy('staking', { '^/api/tiers': '/api/tiers' }),
+1042:   );
+1043: 
+1044:   router.use('/api/staking',
+1045:     authenticateToken(true),
+1046:     proxy('staking', { '^/api/staking': '/api/stake' }),
+1047:   );
+1048: 
+1049:   // =========================================================================
+1050:   // REFERRAL / MILESTONES / REWARDS / LEADERBOARD
+1051:   // =========================================================================
+1052: 
+1053:   router.use('/api/referrals',
+1054:     authenticateToken(false),
+1055:     proxy('referral', { '^/api/referrals': '/api/referrals' }),
+1056:   );
+1057: 
+1058:   router.use('/api/milestones',
+1059:     authenticateToken(true),
+1060:     proxy('referral', { '^/api/milestones': '/api/milestones' }),
+1061:   );
+1062: 
+1063:   router.use('/api/rewards',
+1064:     authenticateToken(true),
+1065:     proxy('referral', { '^/api/rewards': '/api/rewards' }),
+1066:   );
+1067: 
+1068:   // KS-570: same defect as /api/status above — no auth middleware, so a
+1069:   // revoked session read the whole /api/leaderboard subtree. `router.use`
+1070:   // covers the subtree, so every path under it inherited the gap, not just
+1071:   // the endpoints that happened to be listed on the ticket.
+1072:   router.use('/api/leaderboard',
+1073:     authenticateToken(true),
+1074:     proxy('referral', { '^/api/leaderboard': '/api/leaderboard' }),
+1075:   );
+1076: 
+1077:   // =========================================================================
+1078:   // TRANSFER / DELEGATION / WORKFLOW
+1079:   // =========================================================================
+1080: 
+1081:   router.use('/api/transfers',
+1082:     authenticateToken(true),
+1083:     proxy('transfer', { '^/api/transfers': '/api/transfers' }),
+1084:   );
+1085: 
+1086:   router.use('/api/delegations',
+1087:     authenticateToken(true),
+1088:     proxy('transfer', { '^/api/delegations': '/api/delegations' }),
+1089:   );
+1090: 
+1091:   // Workflow CRUD — handled directly (transfer service not deployed on Azure)
+1092:   const workflowAdminCheck = (req: Request, res: Response, next: NextFunction) => {
+1093:     const user = (req as any).user;
+1094:     const allowed = ['SYSTEM_ADMIN', 'system_admin', 'super_admin', 'SUPER_ADMIN', 'platform_admin', 'ORG_ADMIN', 'ISSUER_ADMIN', 'issuer_admin'];
+1095:     if (!user || !allowed.includes(user.role)) { res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } }); return; }
+1096:     next();
+1097:   };
+1098: 
+1099:   router.get('/api/workflows', authenticateToken(true), workflowAdminCheck, async (_req: Request, res: Response) => {
+1100:     const workflows = await redisService.getAllWorkflows();
+1101:     res.json({ success: true, data: { workflows } });
+1102:   });
+1103: 
+1104:   router.post('/api/workflows', authenticateToken(true), workflowAdminCheck, express.json(), async (req: Request, res: Response) => {
+1105:     const { name, description, type, steps } = req.body || {};
+1106:     if (!name) { res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Workflow name is required' } }); return; }
+1107:     const id = `wf-${Date.now()}`;
+1108:     const workflow = {
+1109:       id, name, description, type: type || 'approval',
+1110:       steps: (steps || []).map((s: any, i: number) => ({ ...s, id: `step-${Date.now()}-${i}`, order: i + 1 })),
+1111:       status: 'active', createdBy: (req as any).user?.userId,
+1112:       createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+1113:     };
+1114:     await redisService.setWorkflow(id, workflow);
+1115:     res.status(201).json({ success: true, data: workflow });
+1116:   });
+1117: 
+1118:   router.get('/api/workflows/:id', authenticateToken(true), workflowAdminCheck, async (req: Request, res: Response) => {
+1119:     const wf = await redisService.getWorkflow(req.params.id);
+1120:     if (!wf) { res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Workflow not found' } }); return; }
+1121:     res.json({ success: true, data: wf });
+1122:   });
+1123: 
+1124:   router.delete('/api/workflows/:id', authenticateToken(true), workflowAdminCheck, async (req: Request, res: Response) => {
+1125:     await redisService.deleteWorkflow(req.params.id);
+1126:     res.json({ success: true, deleted: true });
+1127:   });
+1128: 
+1129:   // =========================================================================
+1130:   // KYC
+1131:   // =========================================================================
+1132: 
+1133:   router.use('/api/kyc',
+1134:     authenticateToken(true),
+1135:     proxy('kyc', { '^/api/kyc': '/api/kyc' }),
+1136:   );
+1137: 
+1138:   // =========================================================================
+1139:   // DAO GOVERNANCE
+1140:   // =========================================================================
+1141: 
+1142:   router.use('/api/governance',
+1143:     authenticateToken(false),
+1144:     proxy('governance', { '^/api/governance': '/api/governance' }),
+1145:   );
+1146: 
+1147:   // =========================================================================
+1148:   // NFT CERTIFICATES
+1149:   // =========================================================================
+1150: 
+1151:   // KS-39 #2: the NFT service is not deployed on dev (no `secuura-dev-nft`
+1152:   // container app) so any proxy attempt 502s after the connection refused.
+1153:   // Test-side expectation is "responds or 404" — i.e. anything < 500. Guard
+1154:   // the route so when `NFT_SERVICE_URL` is unset (default localhost in a
+1155:   // non-local env), we 404 early with a clear "not deployed in this env"
+1156:   // body rather than letting the proxy bubble a 502. Once an `nft`
+1157:   // container app is added to Bicep + `NFT_SERVICE_URL` is set, the guard
+1158:   // becomes a no-op and the real proxy takes over.
+1159:   router.use('/api/nft',
+1160:     authenticateToken(false),
+1161:     (req: Request, res: Response, next: NextFunction) => {
+1162:       const nftUrl = services.nft?.url || '';
+1163:       const looksLikeDefault = /^http:\/\/localhost(:\d+)?$/i.test(nftUrl) || /^http:\/\/nft:\d+$/i.test(nftUrl);
+1164:       // Only short-circuit when the env didn't explicitly set NFT_SERVICE_URL
+1165:       // (i.e. we're still on the localhost fallback) AND we're not on a
+1166:       // localhost host (where the dev container compose actually runs nft
+1167:       // locally).
+1168:       const isLocalhostCaller = req.hostname === 'localhost' || req.hostname.endsWith('.local');
+1169:       if (looksLikeDefault && !isLocalhostCaller) {
+1170:         res.status(404).json({
+1171:           success: false,
+1172:           error: {
+1173:             code: 'NOT_DEPLOYED',
+1174:             message: 'NFT certificate service is not deployed in this environment.',
+1175:             details: { service: 'nft' },
+1176:           },
+1177:         });
+1178:         return;
+1179:       }
+1180:       next();
+1181:     },
+1182:     proxy('nft', { '^/api/nft': '/api/nft' }),
+1183:   );
+1184: 
+1185:   // =========================================================================
+1186:   // SECURITY / ANALYTICS / DASHBOARD
+1187:   // =========================================================================
+1188: 
+1189:   router.use('/api/security',
+1190:     authenticateToken(true),
+1191:     proxy('security', { '^/api/security': '/api' }),
+1192:   );
+1193: 
+1194:   router.use('/api/analytics',
+1195:     authenticateToken(true),
+1196:     proxy('analytics', { '^/api/analytics': '/api/analytics' }),
+1197:   );
+1198: 
+1199:   router.use('/api/dashboard',
+1200:     authenticateToken(true),
+1201:     proxy('dashboard', { '^/api/dashboard': '/api/dashboard' }),
+1202:   );
+1203: 
+1204:   // =========================================================================
+1205:   // BILLING
+1206:   // =========================================================================
+1207: 
+1208:   router.use('/api/billing',
+1209:     authenticateToken(false),
+1210:     proxy('billing', { '^/api': '' }),
+1211:   );
+1212: 
+1213:   // Billing webhooks (no auth — Stripe signed, needs raw body)
+1214:   router.use('/webhooks/stripe',
+1215:     proxy('billing', { '^/webhooks': '/webhooks' }),
+1216:   );
+1217: 
+1218:   // =========================================================================
+1219:   // ORIGINATE SERVICE PROXY (admin pages, system-errors, GDPR)
+1220:   // =========================================================================
+1221: 
+1222:   router.use('/originate/',
+1223:     proxy('originate', { '^/originate': '' }),
+1224:   );
+1225: 
+1226:   // Admin API routes — enforce admin role
+1227:   const PROXY_ADMIN_ROLES = ['SYSTEM_ADMIN', 'system_admin', 'super_admin', 'SUPER_ADMIN', 'platform_admin', 'ORG_ADMIN'];
+1228:   const enforceAdminProxy: RequestHandler = (req, res, next) => {
+1229:     const user = req.user;
+1230:     if (!user || !PROXY_ADMIN_ROLES.includes(user.role)) {
+1231:       res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
+1232:       return;
+1233:     }
+1234:     next();
+1235:   };
+1236: 
+1237:   router.use('/api/admin/',
+1238:     authenticateToken(true),
+1239:     enforceAdminProxy,
+1240:     proxy('originate', { '^/api/admin': '/api/admin' }),
+1241:   );
+1242: 
+1243:   router.use('/api/system-errors',
+1244:     authenticateToken(true),
+1245:     proxy('originate', { '^/api/system-errors': '/api/system-errors' }),
+1246:   );
+1247: 
+1248:   // KS-11: /api/gdpr was registered twice — the live route is the earlier
+1249:   // mount (~line 477). This second copy was dead (Express keeps the first
+1250:   // matching `router.use`). Removed.
+1251: 
+1252:   // =========================================================================
+1253:   // ANALYTICS SERVICE PROXY (legacy /analytics/ path)
+1254:   // =========================================================================
+1255: 
+1256:   router.use('/analytics/',
+1257:     proxy('analytics', { '^/analytics': '' }),
+1258:   );
+1259: 
+1260:   // =========================================================================
+1261:   // MCP SERVER PROXY (package generation — admin only)
+1262:   // =========================================================================
+1263: 
+1264:   const MCP_SERVER_URL = process.env.MCP_SERVER_URL || 'http://mcp-server:4023';
+1265: 
+1266:   router.post('/api/mcp/generate-package',
+1267:     authenticateToken(),
+1268:     async (req: Request, res: Response) => {
+1269:       try {
+1270:         const r = await fetch(`${MCP_SERVER_URL}/generate-package`, {
+1271:           signal: AbortSignal.timeout(UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS),
+1272:           method: 'POST',
+1273:           headers: { 'Content-Type': 'application/json' },
+1274:           body: JSON.stringify(req.body),
+1275:         });
+1276:         if (!r.ok) {
+1277:           const err = await r.json().catch(() => ({ error: 'Package generation failed' }));
+1278:           res.status(r.status).json(err);
+1279:           return;
+1280:         }
+1281:         res.setHeader('Content-Type', 'application/zip');
+1282:         const disposition = r.headers.get('Content-Disposition');
+1283:         if (disposition) res.setHeader('Content-Disposition', disposition);
+1284:         const arrayBuf = await r.arrayBuffer();
+1285:         res.send(Buffer.from(arrayBuf));
+1286:       } catch {
+1287:         res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'MCP server unreachable' } });
+1288:       }
+1289:     },
+1290:   );
+1291: 
+1292:   return router;
+1293: }
+
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+1: /**
+2:  * Admin route handlers — extracted from the API gateway monolith.
+3:  *
+4:  * Usage in index.ts:
+5:  *   import { createAdminRoutes } from './routes/admin';
+6:  *   app.use(createAdminRoutes({ authenticateToken, query, redisService, log }));
+7:  */
+8: 
+9: import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
+10: import { rejectControlBytes } from '@secuura/shared';
+11: import crypto from 'crypto';
+12: import express from 'express';
+13: import { runWithPlatformScope } from '@secuura/shared';
+14: 
+15: // KS-1240: the two hand-built auth-service fetches below carry a timeout signal; without one an auth service that never answers holds the admin's request open. On expiry the handler's existing catch answers 502.
+16: const UPSTREAM_ADMIN_FETCH_TIMEOUT_MS = 30_000;
+17: 
+18: // ---------------------------------------------------------------------------
+19: // Types
+20: // ---------------------------------------------------------------------------
+21: 
+22: interface UserPayload {
+23:   userId: string;
+24:   email: string;
+25:   role: string;
+26:   organizationId?: string;
+27:   verificationLevel: string;
+28:   authMethod?: string;
+29:   mfaEnabled?: boolean;
+30:   tenantId?: string;
+31:   tenantSlug?: string;
+32: }
+33: 
+34: declare module 'express-serve-static-core' {
+35:   interface Request {
+36:     user?: UserPayload;
+37:     requestId?: string;
+38:   }
+39: }
+40: 
+41: type QueryFn = (text: string, params?: unknown[]) => Promise<{ rows: any[]; rowCount: number }>;
+42: 
+43: interface RedisService {
+44:   getAllDocumentTypes(): Promise<object[]>;
+45:   getDocumentType(id: string): Promise<object | null>;
+46:   setDocumentType(id: string, data: object): Promise<void>;
+47:   deleteDocumentType(id: string): Promise<boolean>;
+48: 
+49:   getAllWorkflows(): Promise<object[]>;
+50:   getWorkflow(id: string): Promise<object | null>;
+51:   setWorkflow(id: string, data: object): Promise<void>;
+52:   deleteWorkflow(id: string): Promise<boolean>;
+53: 
+54:   getAllIntegrations(): Promise<object[]>;
+55:   getIntegration(id: string): Promise<object | null>;
+56:   setIntegration(id: string, data: object): Promise<void>;
+57:   deleteIntegration(id: string): Promise<boolean>;
+58: 
+59:   getNotificationSettings(key: string): Promise<object | null>;
+60:   setNotificationSettings(key: string, data: object): Promise<void>;
+61: 
+62:   getPrivacySettings(key: string): Promise<object | null>;
+63:   setPrivacySettings(key: string, data: object): Promise<void>;
+64: 
+65:   getAllVerificationPolicies(): Promise<object[]>;
+66:   getVerificationPolicy(id: string): Promise<object | null>;
+67:   setVerificationPolicy(id: string, data: object): Promise<void>;
+68:   deleteVerificationPolicy(id: string): Promise<boolean>;
+69: }
+70: 
+71: export interface AdminRouteDeps {
+72:   authenticateToken: (required?: boolean) => RequestHandler;
+73:   query: QueryFn;
+74:   redisService: RedisService;
+75:   log: (level: 'info' | 'warn' | 'error', message: string, meta?: object) => void;
+76:   /** RS256 token verifier (the gateway's verifyRs256) — verifies admin tokens with the JWKS/public key; async (KS-347) since it may fetch a rotated key from auth's JWKS */
+77:   verifyToken?: (token: string) => unknown | Promise<unknown>;
+78:   /** parseTestToken from the main module — enables dev/test token flow */
+79:   parseTestToken?: (token: string) => UserPayload | null;
+80:   /** Whether DB (PostgreSQL) is currently reachable */
+81:   isDbAvailable?: () => boolean;
+82:   /** Service URL map (used to proxy PATCH /api/users/admin/:id to auth service) */
+83:   services?: Record<string, { url: string; [k: string]: unknown }>;
+84: }
+85: 
+86: // ---------------------------------------------------------------------------
+87: // Seed data constants
+88: // ---------------------------------------------------------------------------
+89: 
+90: export const SEED_DOCUMENT_TYPES = [
+91:   {
+92:     id: 'dt-seed-1',
+93:     name: 'University Degree',
+94:     code: 'DEGREE',
+95:     description: 'Academic degrees from accredited universities',
+96:     category: 'Education',
+97:     isActive: true,
+98:     status: 'active',
+99:     creatorVerificationLevel: 'enhanced',
+100:     ownerVerificationLevel: 'basic',
+101:     viewerVerificationLevel: 'none',
+102:     verifierVerificationLevel: 'standard',
+103:     requireMFA: true,
+104:     requireWalletSignature: true,
+105:     requireKYC: false,
+106:     allowedAuthProviders: ['entra', 'auth0'],
+107:     requiresApproval: true,
+108:     approvalWorkflowId: 'wf-1',
+109:     autoAnchor: true,
+110:     anchorNetwork: 'preprod',
+111:     metadataSchema: [
+112:       { name: 'studentId', type: 'string', required: true },
+113:       { name: 'graduationDate', type: 'date', required: true },
+114:       { name: 'classification', type: 'select', required: true, options: ['First Class', 'Upper Second', 'Lower Second', 'Third'] },
+115:     ],
+116:     allowedSources: ['sharepoint', 'manual'],
+117:     webhookEvents: ['certified', 'verified', 'transferred'],
+118:     documentCount: 1247,
+119:     createdAt: '2024-01-15T00:00:00.000Z',
+120:     updatedAt: '2024-01-20T00:00:00.000Z',
+121:   },
+122:   {
+123:     id: 'dt-seed-2',
+124:     name: 'Professional License',
+125:     code: 'LICENSE',
+126:     description: 'Professional licenses from regulatory bodies',
+127:     category: 'Professional',
+128:     isActive: true,
+129:     status: 'active',
+130:     creatorVerificationLevel: 'high',
+131:     ownerVerificationLevel: 'standard',
+132:     viewerVerificationLevel: 'basic',
+133:     verifierVerificationLevel: 'enhanced',
+134:     requireMFA: true,
+135:     requireWalletSignature: true,
+136:     requireKYC: true,
+137:     allowedAuthProviders: ['entra', 'auth0', 'okta'],
+138:     requiresApproval: true,
+139:     approvalWorkflowId: 'wf-2',
+140:     autoAnchor: true,
+141:     anchorNetwork: 'mainnet',
+142:     metadataSchema: [
+143:       { name: 'licenseNumber', type: 'string', required: true },
+144:       { name: 'issueDate', type: 'date', required: true },
+145:       { name: 'expiryDate', type: 'date', required: true },
+146:       { name: 'jurisdiction', type: 'string', required: true },
+147:     ],
+148:     allowedSources: ['api', 'manual'],
+149:     webhookEvents: ['certified', 'verified', 'expired', 'revoked'],
+150:     documentCount: 892,
+151:     createdAt: '2024-02-10T00:00:00.000Z',
+152:     updatedAt: '2024-03-15T00:00:00.000Z',
+153:   },
+154:   {
+155:     id: 'dt-seed-3',
+156:     name: 'Employment Reference',
+157:     code: 'REFERENCE',
+158:     description: 'Employment references and testimonials',
+159:     category: 'Employment',
+160:     isActive: true,
+161:     status: 'active',
+162:     creatorVerificationLevel: 'standard',
+163:     ownerVerificationLevel: 'basic',
+164:     viewerVerificationLevel: 'none',
+165:     verifierVerificationLevel: 'basic',
+166:     requireMFA: false,
+167:     requireWalletSignature: false,
+168:     requireKYC: false,
+169:     allowedAuthProviders: ['entra', 'auth0'],
+170:     requiresApproval: false,
+171:     approvalWorkflowId: null,
+172:     autoAnchor: false,
+173:     anchorNetwork: 'preprod',
+174:     metadataSchema: [
+175:       { name: 'employeeId', type: 'string', required: false },
+176:       { name: 'employmentStart', type: 'date', required: true },
+177:       { name: 'employmentEnd', type: 'date', required: false },
+178:       { name: 'position', type: 'string', required: true },
+179:     ],
+180:     allowedSources: ['sharepoint', 'manual', 'email'],
+181:     webhookEvents: ['certified', 'verified'],
+182:     documentCount: 2156,
+183:     createdAt: '2024-01-05T00:00:00.000Z',
+184:     updatedAt: '2024-01-28T00:00:00.000Z',
+185:   },
+186:   {
+187:     id: 'dt-seed-4',
+188:     name: 'Academic Transcript',
+189:     code: 'TRANSCRIPT',
+190:     description: 'Academic transcripts and records of achievement from educational institutions',
+191:     category: 'Education',
+192:     isActive: true,
+193:     status: 'active',
+194:     creatorVerificationLevel: 'enhanced',
+195:     ownerVerificationLevel: 'basic',
+196:     viewerVerificationLevel: 'none',
+197:     verifierVerificationLevel: 'standard',
+198:     requireMFA: true,
+199:     requireWalletSignature: true,
+200:     requireKYC: false,
+201:     allowedAuthProviders: ['entra', 'auth0'],
+202:     requiresApproval: true,
+203:     approvalWorkflowId: 'wf-4',
+204:     autoAnchor: true,
+205:     anchorNetwork: 'preprod',
+206:     metadataSchema: [
+207:       { name: 'studentId', type: 'string', required: true },
+208:       { name: 'institution', type: 'string', required: true },
+209:       { name: 'programme', type: 'string', required: true },
+210:       { name: 'graduationDate', type: 'date', required: true },
+211:       { name: 'classification', type: 'select', required: true, options: ['First Class', 'Upper Second', 'Lower Second', 'Third', 'Pass', 'Distinction', 'Merit'] },
+212:       { name: 'gpa', type: 'string', required: false },
+213:     ],
+214:     allowedSources: ['api', 'sharepoint', 'manual'],
+215:     webhookEvents: ['certified', 'verified', 'shared', 'recertified', 'transferred'],
+216:     documentCount: 834,
+217:     createdAt: '2024-03-01T00:00:00.000Z',
+218:     updatedAt: '2024-03-20T00:00:00.000Z',
+219:   },
+220:   {
+221:     id: 'dt-seed-5',
+222:     name: 'Verification Certificate',
+223:     code: 'VCERT',
+224:     description: 'Secondary credential issued by a Verifier attesting they have verified an original certification. Enables the Verifier to Certifier role transition.',
+225:     category: 'Verification',
+226:     isActive: true,
+227:     status: 'active',
+228:     creatorVerificationLevel: 'standard',
+229:     ownerVerificationLevel: 'basic',
+230:     viewerVerificationLevel: 'none',
+231:     verifierVerificationLevel: 'basic',
+232:     requireMFA: true,
+233:     requireWalletSignature: true,
+234:     requireKYC: false,
+235:     allowedAuthProviders: ['entra', 'auth0', 'okta'],
+236:     requiresApproval: false,
+237:     approvalWorkflowId: null,
+238:     autoAnchor: true,
+239:     anchorNetwork: 'preprod',
+240:     metadataSchema: [
+241:       { name: 'originalCertificationId', type: 'string', required: true },
+242:       { name: 'originalIssuer', type: 'string', required: true },
+243:       { name: 'verificationDate', type: 'date', required: true },
+244:       { name: 'verificationMethod', type: 'select', required: true, options: ['Automated', 'Manual Review', 'Hybrid'] },
+245:       { name: 'verifierNote', type: 'string', required: false },
+246:     ],
+247:     allowedSources: ['api'],
+248:     webhookEvents: ['certified', 'shared', 'distributed'],
+249:     documentCount: 421,
+250:     createdAt: '2024-03-15T00:00:00.000Z',
+251:     updatedAt: '2024-04-01T00:00:00.000Z',
+252:   },
+253:   {
+254:     id: 'dt-seed-6',
+255:     name: 'Recommendation Letter',
+256:     code: 'RECOMMENDATION',
+257:     description: 'Professional or academic recommendation letters for recruitment purposes',
+258:     category: 'Recruitment',
+259:     isActive: true,
+260:     status: 'active',
+261:     creatorVerificationLevel: 'standard',
+262:     ownerVerificationLevel: 'basic',
+263:     viewerVerificationLevel: 'none',
+264:     verifierVerificationLevel: 'basic',
+265:     requireMFA: false,
+266:     requireWalletSignature: false,
+267:     requireKYC: false,
+268:     allowedAuthProviders: ['entra', 'auth0'],
+269:     requiresApproval: false,
+270:     approvalWorkflowId: null,
+271:     autoAnchor: false,
+272:     anchorNetwork: 'preprod',
+273:     metadataSchema: [
+274:       { name: 'candidateName', type: 'string', required: true },
+275:       { name: 'recommenderName', type: 'string', required: true },
+276:       { name: 'recommenderTitle', type: 'string', required: true },
+277:       { name: 'relationship', type: 'select', required: true, options: ['Academic Supervisor', 'Line Manager', 'Colleague', 'Client'] },
+278:       { name: 'dateWritten', type: 'date', required: true },
+279:     ],
+280:     allowedSources: ['manual', 'email'],
+281:     webhookEvents: ['certified', 'verified', 'shared'],
+282:     documentCount: 567,
+283:     createdAt: '2024-02-20T00:00:00.000Z',
+284:     updatedAt: '2024-03-10T00:00:00.000Z',
+285:   },
+286:   // KS-388: with the catalogue registered, enforceDocumentTypeRules now 400s an
+287:   // unknown documentType — so the two contract-critical types must be IN the seed.
+288:   // Both are deliberately friction-free (no verification levels / MFA / approval):
+289:   // SSD_DOCUMENT arrives from Platform-S connector calls, DOCUMENT is originate's
+290:   // fallback for typeless creations; gating either would break those paths.
+291:   {
+292:     id: 'dt-seed-7',
+293:     name: 'SSD Document',
+294:     code: 'SSD_DOCUMENT',
+295:     description: 'Document originated by Platform-S (Secuura Secure Distribution) — the fixed documentType S sends on POST /api/documents',
+296:     category: 'Integration',
+297:     isActive: true,
+298:     status: 'active',
+299:     creatorVerificationLevel: 'none',
+300:     ownerVerificationLevel: 'none',
+301:     viewerVerificationLevel: 'none',
+302:     verifierVerificationLevel: 'none',
+303:     requireMFA: false,
+304:     requireWalletSignature: false,
+305:     requireKYC: false,
+306:     allowedAuthProviders: [],
+307:     requiresApproval: false,
+308:     approvalWorkflowId: null,
+309:     autoAnchor: true,
+310:     anchorNetwork: 'preprod',
+311:     metadataSchema: [],
+312:     allowedSources: ['api'],
+313:     webhookEvents: ['certified', 'verified'],
+314:     documentCount: 0,
+315:     createdAt: '2026-07-08T00:00:00.000Z',
+316:     updatedAt: '2026-07-08T00:00:00.000Z',
+317:   },
+318:   {
+319:     id: 'dt-seed-8',
+320:     name: 'Generic Document',
+321:     code: 'DOCUMENT',
+322:     description: 'General document with no specialised type — the default when a creation request names no documentType',
+323:     category: 'General',
+324:     isActive: true,
+325:     status: 'active',
+326:     creatorVerificationLevel: 'none',
+327:     ownerVerificationLevel: 'none',
+328:     viewerVerificationLevel: 'none',
+329:     verifierVerificationLevel: 'none',
+330:     requireMFA: false,
+331:     requireWalletSignature: false,
+332:     requireKYC: false,
+333:     allowedAuthProviders: [],
+334:     requiresApproval: false,
+335:     approvalWorkflowId: null,
+336:     autoAnchor: false,
+337:     anchorNetwork: 'preprod',
+338:     metadataSchema: [],
+339:     allowedSources: ['manual', 'api'],
+340:     webhookEvents: ['certified', 'verified'],
+341:     documentCount: 0,
+342:     createdAt: '2026-07-08T00:00:00.000Z',
+343:     updatedAt: '2026-07-08T00:00:00.000Z',
+344:   },
+345:   {
+346:     // KS-466 §7: the published spec's own DocumentCreateRequest example uses
+347:     // documentType PROPERTY_DEED (the property-deed narrative also runs
+348:     // through the Document + anchoring examples), but the type was never in
+349:     // this catalogue — so copy-pasting the example from the spec earned a
+350:     // 400 UNKNOWN_DOCUMENT_TYPE on any seeded env. Registered permissive
+351:     // (DOCUMENT-shaped): the example must work unauthenticated-simple, and
+352:     // admins can tighten it per env via the catalogue CRUD.
+353:     id: 'dt-seed-9',
+354:     name: 'Property Deed',
+355:     code: 'PROPERTY_DEED',
+356:     description: 'Property title deeds and land-registry documents',
+357:     category: 'Property',
+358:     isActive: true,
+359:     status: 'active',
+360:     creatorVerificationLevel: 'none',
+361:     ownerVerificationLevel: 'none',
+362:     viewerVerificationLevel: 'none',
+363:     verifierVerificationLevel: 'none',
+364:     requireMFA: false,
+365:     requireWalletSignature: false,
+366:     requireKYC: false,
+367:     allowedAuthProviders: [],
+368:     requiresApproval: false,
+369:     approvalWorkflowId: null,
+370:     autoAnchor: false,
+371:     anchorNetwork: 'preprod',
+372:     metadataSchema: [],
+373:     allowedSources: ['manual', 'api'],
+374:     webhookEvents: ['certified', 'verified'],
+375:     documentCount: 0,
+376:     createdAt: '2026-07-19T00:00:00.000Z',
+377:     updatedAt: '2026-07-19T00:00:00.000Z',
+378:   },
+379: ];
+380: 
+381: export const SEED_INTEGRATIONS = [
+382:   {
+383:     id: 'integ-seed-1',
+384:     name: 'SharePoint \u2014 Document Source',
+385:     integrationType: 'source',
+386:     provider: 'microsoft',
+387:     status: 'disconnected',
+388:     isActive: false,
+389:     lastSyncAt: null,
+390:     config: { tenantId: '', clientId: '', clientSecret: '', siteUrl: '' },
+391:     documentTypes: ['DEGREE', 'TRANSCRIPT'],
+392:     errorMessage: null,
+393:     createdAt: '2024-01-15T00:00:00.000Z',
+394:     updatedAt: '2024-01-15T00:00:00.000Z',
+395:   },
+396:   {
+397:     id: 'integ-seed-2',
+398:     name: 'Microsoft Entra ID',
+399:     integrationType: 'identity',
+400:     provider: 'entra',
+401:     status: 'disconnected',
+402:     isActive: false,
+403:     lastSyncAt: null,
+404:     config: { tenantId: '', clientId: '', clientSecret: '', redirectUri: '' },
+405:     documentTypes: [],
+406:     errorMessage: null,
+407:     createdAt: '2024-01-20T00:00:00.000Z',
+408:     updatedAt: '2024-01-20T00:00:00.000Z',
+409:   },
+410:   // integ-seed-3 (Onfido KYC) retired 2026-04-29 — see CONNECTORS.md.
+411:   // The platform's KYC path is Microsoft Entra Verified ID; the alt
+412:   // providers (Onfido / Jumio / Sumsub) were never wired up.
+413:   {
+414:     id: 'integ-seed-4',
+415:     name: 'Cardano Preprod (Blockfrost)',
+416:     integrationType: 'blockchain',
+417:     provider: 'blockfrost',
+418:     status: 'connected',
+419:     isActive: true,
+420:     lastSyncAt: new Date().toISOString(),
+421:     config: { network: 'preprod', projectId: 'preprodXXXXXXXXXXXXXXXXXXXXXXXXXXXX' },
+422:     documentTypes: [],
+423:     errorMessage: null,
+424:     createdAt: '2024-01-10T00:00:00.000Z',
+425:     updatedAt: new Date().toISOString(),
+426:   },
+427:   {
+428:     id: 'integ-seed-5',
+429:     name: 'AWS S3 \u2014 Document Archive',
+430:     integrationType: 'source',
+431:     provider: 'aws',
+432:     status: 'disconnected',
+433:     isActive: false,
+434:     lastSyncAt: null,
+435:     config: { bucket: '', region: 'eu-west-1', accessKeyId: '', secretAccessKey: '' },
+436:     documentTypes: ['CERTIFICATE', 'LICENSE'],
+437:     errorMessage: null,
+438:     createdAt: '2024-02-10T00:00:00.000Z',
+439:     updatedAt: '2024-02-10T00:00:00.000Z',
+440:   },
+441:   {
+442:     id: 'integ-seed-6',
+443:     name: 'Microsoft Outlook \u2014 Verify from Email',
+444:     integrationType: 'addin',
+445:     provider: 'outlook',
+446:     status: 'disconnected',
+447:     isActive: false,
+448:     lastSyncAt: null,
+449:     config: { tenantId: '', clientId: '', redirectUri: 'https://localhost:6104/auth/callback', manifestUrl: '/outlook-addin/manifest.xml', ssoEnabled: false },
+450:     documentTypes: [],
+451:     errorMessage: null,
+452:     createdAt: '2024-03-01T00:00:00.000Z',
+453:     updatedAt: '2024-03-01T00:00:00.000Z',
+454:   },
+455: ];
+456: 
+457: export const SEED_IDENTITY_ORGS = [
+458:   { id: 'b0000000-0000-4000-8000-000000000001', name: 'Secuura Ltd', slug: 'secuura', type: 'ENTERPRISE', status: 'active', verified: true, metadata: { domain: 'secuura.io', domain_verified: true, trust_level: 'KYC_VERIFIED', verification_mode: 'HYBRID', region: 'EU' } },
+459:   { id: 'b0000000-0000-4000-8000-000000000002', name: 'Acme University', slug: 'acme-uni', type: 'UNIVERSITY', status: 'active', verified: true, metadata: { domain: 'acme-university.edu', domain_verified: true, trust_level: 'DOCUMENT_VERIFIED', verification_mode: 'MANUAL_REVIEW', region: 'UK' } },
+460:   { id: 'b0000000-0000-4000-8000-000000000003', name: 'Global Verify Inc', slug: 'global-verify', type: 'PROFESSIONAL_BODY', status: 'active', verified: false, metadata: { domain: 'globalverify.com', domain_verified: false, trust_level: 'UNVERIFIED', verification_mode: 'DOMAIN_ONLY', region: 'US' } },
+461: ];
+462: 
+463: export const SEED_IDENTITY_USERS = [
+464:   { email: 'alice@secuura.io', display_name: 'Alice Johnson', role: 'issuer_admin', verification_level: 'STANDARD', auth_method: 'email', mfa_enabled: true, wallet_address: 'addr1q9example1', external_provider: 'google', organization_id: 'b0000000-0000-4000-8000-000000000001', metadata: { region: 'EU', social_providers: ['google', 'linkedin'] } },
+465:   { email: 'bob@acme-university.edu', display_name: 'Prof. Bob Williams', role: 'issuer_approver', verification_level: 'SOCIAL', auth_method: 'google', mfa_enabled: false, wallet_address: null, external_provider: 'google', organization_id: 'b0000000-0000-4000-8000-000000000002', metadata: { region: 'UK', social_providers: ['google'] } },
+466:   { email: 'carol@globalverify.com', display_name: 'Carol Davis', role: 'verifier', verification_level: 'BASIC', auth_method: 'email', mfa_enabled: false, wallet_address: null, external_provider: null, organization_id: 'b0000000-0000-4000-8000-000000000003', metadata: { region: 'US', social_providers: [] } },
+467:   { email: 'dave@example.com', display_name: 'Dave Miller', role: 'owner', verification_level: 'SOCIAL', auth_method: 'github', mfa_enabled: false, wallet_address: 'addr1q9example2', external_provider: 'github', organization_id: null, metadata: { region: 'EU', social_providers: ['github'] } },
+468:   { email: 'eve@secuura.io', display_name: 'Eve Chen', role: 'system_admin', verification_level: 'STANDARD', auth_method: 'email', mfa_enabled: true, wallet_address: 'addr1q9example3', external_provider: null, organization_id: 'b0000000-0000-4000-8000-000000000001', metadata: { region: 'EU', social_providers: ['google', 'github', 'linkedin'] } },
+469: ];
+470: 
+471: export const SEED_POLICIES = [
+472:   { id: 'vpol-001', name: 'Document Creation \u2013 Standard', description: 'Require BASIC identity for all document creation actions', scope: 'action', scopeId: 'document.create', minUserLevel: 'BASIC', minOrgLevel: 'UNVERIFIED', enforcementMode: 'block', requiredMfa: false, requiredWallet: false, isActive: true, createdAt: new Date().toISOString() },
+473:   { id: 'vpol-002', name: 'High-Value Transfers', description: 'Require HIGH identity and MFA for document transfers', scope: 'action', scopeId: 'document.transfer', minUserLevel: 'HIGH', minOrgLevel: 'KYC_VERIFIED', enforcementMode: 'block', requiredMfa: true, requiredWallet: true, isActive: true, createdAt: new Date().toISOString() },
+474:   { id: 'vpol-003', name: 'Government Documents', description: 'Government-level verification for government document types', scope: 'document_type', scopeId: 'GOV', minUserLevel: 'GOVERNMENT', minOrgLevel: 'GOVERNMENT_VERIFIED', enforcementMode: 'block', requiredMfa: true, requiredWallet: false, isActive: true, createdAt: new Date().toISOString() },
+475: ];
+476: 
+477: // ---------------------------------------------------------------------------
+478: // Required config fields — used by integration test-connection endpoint
+479: // ---------------------------------------------------------------------------
+480: 
+481: const REQUIRED_CONFIG_FIELDS: Record<string, Record<string, string[]>> = {
+482:   source: {
+483:     microsoft: ['tenantId', 'clientId', 'clientSecret', 'siteUrl'],
+484:     aws: ['bucket', 'region', 'accessKeyId', 'secretAccessKey'],
+485:     azure: ['storageAccount', 'containerName'],
+486:     onedrive: ['tenantId', 'clientId', 'clientSecret'],
+487:     gcs: ['projectId', 'bucketName', 'serviceAccountKey'],
+488:     dropbox: ['accessToken'],
+489:   },
+490:   identity: {
+491:     entra: ['tenantId', 'clientId', 'clientSecret', 'redirectUri'],
+492:     auth0: ['domain', 'clientId', 'clientSecret', 'redirectUri'],
+493:     okta: ['orgUrl', 'clientId', 'clientSecret', 'redirectUri'],
+494:     google: ['clientId', 'clientSecret', 'redirectUri'],
+495:     saml: ['metadataUrl', 'entityId'],
+496:     oidc: ['issuerUrl', 'clientId', 'clientSecret'],
+497:   },
+498:   verification: {
+499:     // Onfido / Jumio / Sumsub retired 2026-04-29 — see CONNECTORS.md.
+500:     veriff: ['apiKey', 'sessionUrl'],
+501:     govuk: ['apiKey', 'serviceId'],
+502:     mygovid: ['apiKey', 'agencyId'],
+503:   },
+504:   blockchain: {
+505:     blockfrost: ['projectId'],
+506:     ogmios: ['host'],
+507:     koios: [],
+508:   },
+509:   social: {
+510:     google: ['clientId', 'clientSecret'],
+511:     linkedin: ['clientId', 'clientSecret'],
+512:     facebook: ['appId', 'appSecret'],
+513:     apple: ['serviceId', 'teamId', 'keyId', 'privateKey'],
+514:     github: ['clientId', 'clientSecret'],
+515:     microsoft_personal: ['clientId', 'clientSecret'],
+516:   },
+517:   addin: {
+518:     outlook: ['tenantId', 'clientId'],
+519:   },
+520: };
+521: 
+522: // ---------------------------------------------------------------------------
+523: // Factory
+524: // ---------------------------------------------------------------------------
+525: 
+526: export function createAdminRoutes(deps: AdminRouteDeps): Router {
+527:   const {
+528:     authenticateToken,
+529:     query,
+530:     redisService,
+531:     log,
+532:     verifyToken,
+533:     parseTestToken,
+534:     isDbAvailable = () => false,
+535:     services = {},
+536:   } = deps;
+537: 
+538:   const router = Router();
+539:   // KS-815 (same class as the verification router) — GUARD THE BODY THIS
+540:   // ROUTER PARSES ITSELF.
+541:   //
+542:   // This router is mounted at `index.ts:856`, after the global control-byte
+543:   // guard at :422, and it parses with its own `express.json()`. For any route
+544:   // whose prefix is on `proxyPaths` the global parser was skipped, so the
+545:   // global guard saw an unset body and no-oped — and then this parser ran.
+546:   //
+547:   // SEVENTEEN of the NINETEEN routes below are on such a prefix: thirteen
+548:   // `/api/admin/*` routes (`/api/admin` is on the list) and four
+549:   // `/api/users/admin/*` routes (`/api/users` is on it). The two that are not
+550:   // are `/api/settings/notifications` and `/api/privacy/settings`, which the
+551:   // global pair already covers; they are now covered twice, which is a no-op
+552:   // and deliberate — their outer coverage is an accident of prefix membership
+553:   // and a future addition to `proxyPaths` would silently remove it.
+554:   //
+555:   // Measured, not inferred from the skip list: a NUL in
+556:   // POST /api/admin/document-types reached the handler over a real socket
+557:   // against this router before this change.
+558:   const controlByteGuard = rejectControlBytes();
+559:   const rawBodyParser = express.json({ limit: '1mb' });
+560:   const mockBodyParser: RequestHandler = (req, res, next) => {
+561:     rawBodyParser(req, res, (err?: unknown) => {
+562:       if (err) { next(err as Error); return; }
+563:       controlByteGuard(req, res, next);
+564:     });
+565:   };
+566: 
+567:   const NODE_ENV = process.env.NODE_ENV || 'development';
+568:   const enableDemoSeed = process.env.ENABLE_DEMO_SEED === 'true' || !['production', 'staging'].includes(NODE_ENV);
+569: 
+570:   // =========================================================================
+571:   // requireAdmin middleware
+572:   // =========================================================================
+573: 
+574:   const ADMIN_ROLES = ['SYSTEM_ADMIN', 'system_admin', 'super_admin', 'SUPER_ADMIN', 'platform_admin', 'ORG_ADMIN', 'ISSUER_ADMIN', 'issuer_admin'];
+575: 
+576:   // KS-458: fail-closed RLS. Platform-level admins legitimately read across
+577:   // tenants (dashboards/seeds), so their queries run under the reviewed
+578:   // platform scope; ORG_ADMIN / ISSUER_ADMIN keep the tenant-scoped view the
+579:   // policy now enforces (their request ALS context applies).
+580:   const PLATFORM_SCOPE_ROLES = ['SYSTEM_ADMIN', 'system_admin', 'super_admin', 'SUPER_ADMIN', 'platform_admin'];
+581:   const adminScope = <T,>(req: Request, fn: () => Promise<T>): Promise<T> =>
+582:     PLATFORM_SCOPE_ROLES.includes(((req as any).user?.role as string) || '')
+583:       ? runWithPlatformScope(fn)
+584:       : fn();
+585: 
+586:   const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
+587:     const authHeader = req.headers.authorization;
+588:     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+589:       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+590:       return;
+591:     }
+592: 
+593:     const token = authHeader.split(' ')[1];
+594: 
+595:     if (parseTestToken) {
+596:       const testPayload = parseTestToken(token);
+597:       if (testPayload) {
+598:         if (!ADMIN_ROLES.includes(testPayload.role)) {
+599:           res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
+600:           return;
+601:         }
+602:         req.user = testPayload;
+603:         next();
+604:         return;
+605:       }
+606:     }
+607: 
+608:     try {
+609:       // KS-302/KS-184: admin tokens are verified RS256-only (previously HS256 with the
+610:       // now-removed symmetric secret). Uses the gateway's injected RS256 verifier (public key);
+611:       // fails closed (caught below → 401) if no verifier was wired.
+612:       if (!verifyToken) throw new Error('No RS256 token verifier configured');
+613:       // KS-347: verifyToken (the gateway's verifyRs256) is async — it may fetch
+614:       // the verification key from auth's JWKS to pick up a rotated signing key.
+615:       const decoded = (await verifyToken(token)) as UserPayload;
+616:       if (!ADMIN_ROLES.includes(decoded.role)) {
+617:         res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } });
+618:         return;
+619:       }
+620:       req.user = decoded;
+621:       next();
+622:     } catch {
+623:       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid token' } });
+624:     }
+625:   };
+626: 
+627:   // =========================================================================
+628:   // Document Types CRUD (Redis-backed)
+629:   // =========================================================================
+630: 
+631:   async function seedDocumentTypesIfEmpty(): Promise<object[]> {
+632:     const existing = await redisService.getAllDocumentTypes();
+633:     if (existing.length > 0) return existing;
+634:     if (!enableDemoSeed) return [];
+635:     for (const dt of SEED_DOCUMENT_TYPES) {
+636:       await redisService.setDocumentType(dt.id, dt);
+637:     }
+638:     return SEED_DOCUMENT_TYPES;
+639:   }
+640: 
+641:   router.get('/api/admin/document-types', requireAdmin, async (_req: Request, res: Response) => {
+642:     try {
+643:       const types = await seedDocumentTypesIfEmpty();
+644:       res.json(types);
+645:     } catch (err) {
+646:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch document types' } });
+647:     }
+648:   });
+649: 
+650:   router.get('/api/admin/document-types/:id', requireAdmin, async (req: Request, res: Response) => {
+651:     try {
+652:       const dt = await redisService.getDocumentType(req.params.id);
+653:       if (!dt) {
+654:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Document type not found' } });
+655:         return;
+656:       }
+657:       res.json(dt);
+658:     } catch (err) {
+659:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch document type' } });
+660:     }
+661:   });
+662: 
+663:   router.get('/api/admin/document-types/:id/documents', requireAdmin, async (req: Request, res: Response) => {
+664:     const dt = await redisService.getDocumentType(req.params.id);
+665:     if (!dt) {
+666:       res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Document type not found' } });
+667:       return;
+668:     }
+669:     const dtObj = dt as any;
+670:     const mockDocs = Array.from({ length: Math.min(dtObj.documentCount || 5, 10) }, (_, i) => ({
+671:       id: `doc-${req.params.id}-${i + 1}`,
+672:       title: `${dtObj.name} #${i + 1}`,
+673:       status: ['certified', 'pending', 'verified', 'draft'][i % 4],
+674:       owner: `user-${1000 + i}`,
+675:       ownerName: ['Alice Johnson', 'Bob Smith', 'Charlie Brown', 'Diana Ross', 'Eve Williams'][i % 5],
+676:       createdAt: new Date(Date.now() - i * 86400000 * 7).toISOString(),
+677:       updatedAt: new Date(Date.now() - i * 86400000 * 2).toISOString(),
+678:     }));
+679:     res.json({ success: true, documents: mockDocs, total: dtObj.documentCount || mockDocs.length });
+680:   });
+681: 
+682:   router.post('/api/admin/document-types', mockBodyParser, requireAdmin, async (req: Request, res: Response) => {
+683:     try {
+684:       const body = req.body || {};
+685:       const id = `dt-${crypto.randomUUID()}`; // KS-1196: use crypto.randomUUID to avoid millisecond collisions
+686:       const now = new Date().toISOString();
+687:       const docType = {
+688:         id,
+689:         ...body,
+690:         documentCount: body.documentCount || 0,
+691:         createdAt: now,
+692:         updatedAt: now,
+693:       };
+694:       await redisService.setDocumentType(id, docType);
+695:       res.status(201).json(docType);
+696:     } catch (err) {
+697:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create document type' } });
+698:     }
+699:   });
+700: 
+701:   router.put('/api/admin/document-types/:id', mockBodyParser, requireAdmin, async (req: Request, res: Response) => {
+702:     try {
+703:       const existing = await redisService.getDocumentType(req.params.id);
+704:       if (!existing) {
+705:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Document type not found' } });
+706:         return;
+707:       }
+708:       const updated = { ...(existing as any), ...req.body, id: req.params.id, updatedAt: new Date().toISOString() };
+709:       await redisService.setDocumentType(req.params.id, updated);
+710:       res.json(updated);
+711:     } catch (err) {
+712:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update document type' } });
+713:     }
+714:   });
+715: 
+716:   router.patch('/api/admin/document-types/:id/status', mockBodyParser, requireAdmin, async (req: Request, res: Response) => {
+717:     try {
+718:       const existing = await redisService.getDocumentType(req.params.id);
+719:       if (!existing) {
+720:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Document type not found' } });
+721:         return;
+722:       }
+723:       const { status } = req.body || {};
+724:       const validStatuses = ['active', 'inactive', 'archived'];
+725:       if (!validStatuses.includes(status)) {
+726:         res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` } });
+727:         return;
+728:       }
+729:       const updated = {
+730:         ...(existing as any),
+731:         isActive: status === 'active',
+732:         status,
+733:         updatedAt: new Date().toISOString(),
+734:       };
+735:       await redisService.setDocumentType(req.params.id, updated);
+736:       res.json(updated);
+737:     } catch (err) {
+738:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update document type status' } });
+739:     }
+740:   });
+741: 
+742:   router.delete('/api/admin/document-types/:id', requireAdmin, async (req: Request, res: Response) => {
+743:     try {
+744:       const deleted = await redisService.deleteDocumentType(req.params.id);
+745:       if (!deleted) {
+746:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Document type not found' } });
+747:         return;
+748:       }
+749:       res.json({ success: true });
+750:     } catch (err) {
+751:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete document type' } });
+752:     }
+753:   });
+754: 
+755:   // =========================================================================
+756:   // Workflow CRUD
+757:   // =========================================================================
+758: 
+759:   router.get('/api/admin/workflows', requireAdmin, async (_req: Request, res: Response) => {
+760:     try {
+761:       const workflows = await redisService.getAllWorkflows();
+762:       res.json(workflows);
+763:     } catch (err) {
+764:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch workflows' } });
+765:     }
+766:   });
+767: 
+768:   router.post('/api/admin/workflows', mockBodyParser, requireAdmin, async (req: Request, res: Response) => {
+769:     try {
+770:       const body = req.body || {};
+771:       const id = `wf-${Date.now()}`;
+772:       const now = new Date().toISOString();
+773: 
+774:       const workflow = {
+775:         id,
+776:         name: body.name || 'Unnamed Workflow',
+777:         description: body.description || '',
+778:         type: body.type || 'sequential',
+779:         isActive: body.isActive !== false,
+780:         slaHours: body.slaHours || 24,
+781:         steps: Array.isArray(body.steps) ? body.steps : [],
+782:         documentTypes: Array.isArray(body.documentTypes) ? body.documentTypes : [],
+783:         usageCount: 0,
+784:         createdAt: now,
+785:         updatedAt: now,
+786:       };
+787:       await redisService.setWorkflow(id, workflow);
+788:       res.status(201).json(workflow);
+789:     } catch (err) {
+790:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create workflow' } });
+791:     }
+792:   });
+793: 
+794:   router.put('/api/admin/workflows/:id', mockBodyParser, requireAdmin, async (req: Request, res: Response) => {
+795:     try {
+796:       const existing = await redisService.getWorkflow(req.params.id);
+797:       if (!existing) {
+798:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Workflow not found' } });
+799:         return;
+800:       }
+801:       const updated = { ...(existing as any), ...req.body, id: req.params.id, updatedAt: new Date().toISOString() };
+802:       await redisService.setWorkflow(req.params.id, updated);
+803:       res.json(updated);
+804:     } catch (err) {
+805:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update workflow' } });
+806:     }
+807:   });
+808: 
+809:   router.delete('/api/admin/workflows/:id', requireAdmin, async (req: Request, res: Response) => {
+810:     try {
+811:       const deleted = await redisService.deleteWorkflow(req.params.id);
+812:       if (!deleted) {
+813:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Workflow not found' } });
+814:         return;
+815:       }
+816:       res.json({ success: true });
+817:     } catch (err) {
+818:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete workflow' } });
+819:     }
+820:   });
+821: 
+822:   // =========================================================================
+823:   // Integration CRUD (Redis-backed with seeding)
+824:   // =========================================================================
+825: 
+826:   async function seedIntegrationsIfEmpty(): Promise<object[]> {
+827:     const existing = await redisService.getAllIntegrations() as Array<Record<string, unknown>>;
+828:     // KS-15: reconcile against the current seed set rather than just
+829:     // seeding-if-empty. The old behaviour ("if existing.length > 0 return
+830:     // existing") meant Redis kept whatever was seeded the FIRST time —
+831:     // including the retired Onfido row (`int_onfido` / `provider: 'onfido'`)
+832:     // that's no longer in SEED_INTEGRATIONS. Drop any row whose id isn't in
+833:     // the current seed AND whose provider was a retired one. (We don't blow
+834:     // away user-added integrations — only the known-retired seeded ones.)
+835:     const RETIRED_PROVIDERS = new Set(['onfido']);
+836:     const seedIds = new Set(SEED_INTEGRATIONS.map((s) => s.id));
+837:     for (const row of existing) {
+838:       const id = row.id as string | undefined;
+839:       const provider = (row.provider as string | undefined)?.toLowerCase();
+840:       if (id && !seedIds.has(id) && provider && RETIRED_PROVIDERS.has(provider)) {
+841:         await redisService.deleteIntegration(id);
+842:       }
+843:     }
+844: 
+845:     const afterPrune = await redisService.getAllIntegrations() as Array<Record<string, unknown>>;
+846:     if (afterPrune.length > 0) return afterPrune;
+847:     if (!enableDemoSeed) return [];
+848:     for (const integ of SEED_INTEGRATIONS) {
+849:       await redisService.setIntegration(integ.id, integ);
+850:     }
+851:     return SEED_INTEGRATIONS;
+852:   }
+853: 
+854:   router.get('/api/admin/integrations', requireAdmin, async (_req: Request, res: Response) => {
+855:     try {
+856:       const integrations = await seedIntegrationsIfEmpty();
+857:       res.json(integrations);
+858:     } catch (err) {
+859:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch integrations' } });
+860:     }
+861:   });
+862: 
+863:   router.get('/api/admin/integrations/:id', requireAdmin, async (req: Request, res: Response) => {
+864:     try {
+865:       const integ = await redisService.getIntegration(req.params.id);
+866:       if (!integ) {
+867:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Integration not found' } });
+868:         return;
+869:       }
+870:       res.json(integ);
+871:     } catch (err) {
+872:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch integration' } });
+873:     }
+874:   });
+875: 
+876:   router.post('/api/admin/integrations', mockBodyParser, requireAdmin, async (req: Request, res: Response) => {
+877:     try {
+878:       const body = req.body || {};
+879:       const id = `integ-${Date.now()}`;
+880:       const now = new Date().toISOString();
+881: 
+882:       const integration = {
+883:         id,
+884:         name: body.name || 'Unnamed Integration',
+885:         integrationType: body.integrationType || 'source',
+886:         provider: body.provider || '',
+887:         status: body.status || 'disconnected',
+888:         isActive: body.isActive !== false,
+889:         lastSyncAt: null,
+890:         config: body.config || {},
+891:         documentTypes: Array.isArray(body.documentTypes) ? body.documentTypes : [],
+892:         errorMessage: null,
+893:         createdAt: now,
+894:         updatedAt: now,
+895:       };
+896:       await redisService.setIntegration(id, integration);
+897:       res.status(201).json(integration);
+898:     } catch (err) {
+899:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create integration' } });
+900:     }
+901:   });
+902: 
+903:   router.put('/api/admin/integrations/:id', mockBodyParser, requireAdmin, async (req: Request, res: Response) => {
+904:     try {
+905:       const existing = await redisService.getIntegration(req.params.id);
+906:       if (!existing) {
+907:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Integration not found' } });
+908:         return;
+909:       }
+910:       const updated = { ...(existing as any), ...req.body, id: req.params.id, updatedAt: new Date().toISOString() };
+911:       await redisService.setIntegration(req.params.id, updated);
+912:       res.json(updated);
+913:     } catch (err) {
+914:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update integration' } });
+915:     }
+916:   });
+917: 
+918:   router.delete('/api/admin/integrations/:id', requireAdmin, async (req: Request, res: Response) => {
+919:     try {
+920:       const deleted = await redisService.deleteIntegration(req.params.id);
+921:       if (!deleted) {
+922:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Integration not found' } });
+923:         return;
+924:       }
+925:       res.json({ success: true });
+926:     } catch (err) {
+927:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete integration' } });
+928:     }
+929:   });
+930: 
+931:   // -------------------------------------------------------------------------
+932:   // Integration Test Connection
+933:   // -------------------------------------------------------------------------
+934: 
+935:   router.post('/api/admin/integrations/:id/test', mockBodyParser, requireAdmin, async (req: Request, res: Response) => {
+936:     const start = Date.now();
+937:     try {
+938:       const integ = await redisService.getIntegration(req.params.id) as any;
+939:       if (!integ) {
+940:         res.json({ success: false, message: 'Integration not found', troubleshooting: ['Ensure the integration has been saved before testing.'] });
+941:         return;
+942:       }
+943: 
+944:       const cfg = integ.config || {};
+945:       const requiredFields = REQUIRED_CONFIG_FIELDS[integ.integrationType]?.[integ.provider] || [];
+946:       const missingFields = requiredFields.filter((f: string) => {
+947:         const val = cfg[f];
+948:         return val === undefined || val === null || val === '';
+949:       });
+950: 
+951:       if (missingFields.length > 0) {
+952:         const troubleshooting = missingFields.map((f: string) =>
+953:           `Missing required field: ${f}. Check the setup guide for where to find this value.`
+954:         );
+955:         res.json({
+956:           success: false,
+957:           message: `Configuration incomplete \u2014 ${missingFields.length} required field(s) missing`,
+958:           latencyMs: Date.now() - start,
+959:           details: { missingFields, provider: integ.provider, integrationType: integ.integrationType },
+960:           troubleshooting,
+961:         });
+962:         return;
+963:       }
+964: 
+965:       // Blockfrost: real API test
+966:       if (integ.integrationType === 'blockchain' && integ.provider === 'blockfrost' && cfg.projectId) {
+967:         try {
+968:           const network = cfg.network || 'preprod';
+969:           const bfUrl = `https://cardano-${network}.blockfrost.io/api/v0/`;
+970:           const bfResp = await fetch(bfUrl, { headers: { project_id: cfg.projectId }, signal: AbortSignal.timeout(8000) });
+971:           const latencyMs = Date.now() - start;
+972:           if (bfResp.ok) {
+973:             const body = await bfResp.json() as Record<string, unknown>;
+974:             const updated = { ...integ, status: 'connected', lastSyncAt: new Date().toISOString(), errorMessage: null, updatedAt: new Date().toISOString() };
+975:             await redisService.setIntegration(integ.id, updated);
+976:             res.json({ success: true, message: `Connected to Cardano ${network} via Blockfrost`, latencyMs, details: { network, url: body.url, version: body.version } });
+977:           } else {
+978:             const errBody = await bfResp.json().catch(() => ({})) as Record<string, unknown>;
+979:             const troubleshooting: string[] = [];
+980:             if (bfResp.status === 403) {
+981:               troubleshooting.push('The project ID is invalid or does not have access to this network.');
+982:               troubleshooting.push('Go to blockfrost.io/dashboard, check the project exists and the network matches.');
+983:             } else if (bfResp.status === 402) {
+984:               troubleshooting.push('Blockfrost API usage limit exceeded. Check your plan on blockfrost.io.');
+985:             }
+986:             const updated = { ...integ, status: 'error', errorMessage: (errBody.message as string) || `HTTP ${bfResp.status}`, updatedAt: new Date().toISOString() };
+987:             await redisService.setIntegration(integ.id, updated);
+988:             res.json({ success: false, message: (errBody.message as string) || `Blockfrost returned HTTP ${bfResp.status}`, latencyMs, troubleshooting });
+989:           }
+990:           return;
+991:         } catch (err: any) {
+992:           res.json({ success: false, message: `Network error: ${err.message}`, latencyMs: Date.now() - start, troubleshooting: ['Check that the API gateway has outbound internet access.', 'Verify the network name (mainnet, preprod, preview) is correct.'] });
+993:           return;
+994:         }
+995:       }
+996: 
+997:       // All other providers: config-validation-based test
+998:       const latencyMs = Date.now() - start;
+999:       const updated = { ...integ, status: 'connected', lastSyncAt: new Date().toISOString(), errorMessage: null, updatedAt: new Date().toISOString() };
+1000:       await redisService.setIntegration(integ.id, updated);
+1001:       res.json({
+1002:         success: true,
+1003:         message: `Configuration validated for ${integ.provider}. All required fields present.`,
+1004:         latencyMs,
+1005:         details: { provider: integ.provider, integrationType: integ.integrationType, fieldsValidated: requiredFields.length },
+1006:       });
+1007:     } catch (err) {
+1008:       res.json({ success: false, message: 'Test failed unexpectedly', latencyMs: Date.now() - start, troubleshooting: ['An internal error occurred. Check API gateway logs.'] });
+1009:     }
+1010:   });
+1011: 
+1012:   // =========================================================================
+1013:   // Verification Queue (in-memory, development only)
+1014:   // =========================================================================
+1015: 
+1016:   const mockVerificationQueue: Array<Record<string, unknown>> = [];
+1017: 
+1018:   router.get('/api/admin/verification-queue', requireAdmin, (req: Request, res: Response) => {
+1019:     const { documentType, status } = req.query;
+1020:     let items = [...mockVerificationQueue];
+1021: 
+1022:     if (documentType) {
+1023:       items = items.filter(item => item.documentType === documentType);
+1024:     }
+1025:     if (status) {
+1026:       items = items.filter(item => (item.status as string) === status);
+1027:     }
+1028: 
+1029:     res.json({
+1030:       items,
+1031:       queue: items, // Alias for backwards compatibility
+1032:       total: items.length,
+1033:       pending: items.filter(i => i.status === 'pending').length,
+1034:     });
+1035:   });
+1036: 
+1037:   router.post('/api/admin/verification-queue/:id/action', requireAdmin, mockBodyParser, (req: Request, res: Response) => {
+1038:     const { id } = req.params;
+1039:     const { action, notes, assignedTo } = req.body || {};
+1040:     const validActions = ['approve', 'reject', 'escalate', 'assign'];
+1041:     if (!action || !validActions.includes(action)) {
+1042:       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `Invalid action. Must be one of: ${validActions.join(', ')}` } });
+1043:       return;
+1044:     }
+1045:     const idx = mockVerificationQueue.findIndex(item => item.id === id);
+1046:     if (idx !== -1) {
+1047:       if (action === 'approve') mockVerificationQueue[idx].status = 'approved';
+1048:       else if (action === 'reject') mockVerificationQueue[idx].status = 'rejected';
+1049:       else if (action === 'escalate') mockVerificationQueue[idx].status = 'escalated';
+1050:       else if (action === 'assign') mockVerificationQueue[idx].assignedTo = assignedTo;
+1051:       if (notes) mockVerificationQueue[idx].notes = notes;
+1052:       mockVerificationQueue[idx].updatedAt = new Date().toISOString();
+1053:       mockVerificationQueue[idx].updatedBy = req.user?.email || 'admin';
+1054:     }
+1055:     res.json({
+1056:       success: true,
+1057:       id,
+1058:       action,
+1059:       notes: notes || null,
+1060:       assignedTo: assignedTo || null,
+1061:       updatedAt: new Date().toISOString(),
+1062:     });
+1063:   });
+1064: 
+1065:   // =========================================================================
+1066:   // Audit Logs
+1067:   // =========================================================================
+1068: 
+1069:   router.get('/api/admin/audit-logs', requireAdmin, (req: Request, res: Response) => {
+1070:     const { action, resourceType, limit = 50, offset = 0 } = req.query;
+1071:     let logs = [
+1072:       { id: 'evt-1', action: 'admin.login', type: 'admin.login', resourceType: 'auth', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+1073:       { id: 'evt-2', action: 'document_type_created', type: 'workflow.created', resourceType: 'document_type', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+1074:       { id: 'evt-3', action: 'document_type_created', type: 'document.created', resourceType: 'document_type', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+1075:       { id: 'evt-4', action: 'verification_policy_created', type: 'policy.created', resourceType: 'verification_policy', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+1076:     ];
+1077: 
+1078:     if (action) logs = logs.filter(log => log.action === action);
+1079:     if (resourceType) logs = logs.filter(log => log.resourceType === resourceType);
+1080: 
+1081:     const total = logs.length;
+1082:     logs = logs.slice(Number(offset), Number(offset) + Number(limit));
+1083: 
+1084:     res.json({
+1085:       success: true,
+1086:       logs,
+1087:       events: logs,
+1088:       total,
+1089:     });
+1090:   });
+1091: 
+1092:   // Alias: the frontend calls /api/security/audit, map it to the same handler
+1093:   router.get('/api/security/audit', requireAdmin, (req: Request, res: Response) => {
+1094:     const { action, resourceType, limit = 50, offset = 0 } = req.query;
+1095:     let logs = [
+1096:       { id: 'evt-1', action: 'admin.login', type: 'admin.login', resourceType: 'auth', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+1097:       { id: 'evt-2', action: 'document_type_created', type: 'workflow.created', resourceType: 'document_type', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+1098:       { id: 'evt-3', action: 'verification_policy_created', type: 'policy.created', resourceType: 'verification_policy', actor: 'admin@test.local', userId: 'admin-001', createdAt: new Date().toISOString(), success: true, ipAddress: '127.0.0.1', details: {} },
+1099:     ];
+1100:     if (action) logs = logs.filter(l => l.action === action);
+1101:     if (resourceType) logs = logs.filter(l => l.resourceType === resourceType);
+1102:     const total = logs.length;
+1103:     logs = logs.slice(Number(offset), Number(offset) + Number(limit));
+1104:     res.json({ success: true, logs, total });
+1105:   });
+1106: 
+1107:   // KS-1257 (#1038 / KS-1233 batch gate N38-2): the platform-settings defaults live in ONE place, frozen so no
+1108:   // handler can mutate them; GET and PUT /api/admin/settings below lay the stored document over them, so a
+1109:   // partial admin write after the key expired never drops a category again.
+1110:   const PLATFORM_SETTINGS_DEFAULTS: Record<string, unknown> = Object.freeze({
+1111:     general: Object.freeze({ platformName: 'Secuura', defaultLanguage: 'en', maintenanceMode: false }),
+1112:     security: Object.freeze({ mfaRequired: false, sessionTimeout: 3600, passwordPolicy: 'strong' }),
+1113:     notifications: Object.freeze({ emailEnabled: true, slackEnabled: false, webhookUrl: '' }),
+1114:     blockchain: Object.freeze({ network: 'preprod', confirmationBlocks: 6, autoAnchor: false }),
+1115:   });
+1116:   // =========================================================================
+1117:   // Platform Settings (Redis-backed)
+1118:   // =========================================================================
+1119: 
+1120:   router.get('/api/admin/settings', requireAdmin, async (req: Request, res: Response) => {
+1121:     const { category } = req.query;
+1122:     const stored = (await redisService.getNotificationSettings('platform-settings') || {}) as Record<string, unknown>;
+1123:     const allSettings: Record<string, unknown> = { ...PLATFORM_SETTINGS_DEFAULTS, ...stored };
+1124:     if (category && typeof category === 'string' && allSettings[category]) {
+1125:       res.json({ settings: { [category]: allSettings[category] } });
+1126:     } else {
+1127:       res.json({ settings: allSettings });
+1128:     }
+1129:   });
+1130: 
+1131:   router.put('/api/admin/settings', requireAdmin, mockBodyParser, async (req: Request, res: Response) => {
+1132:     const body = req.body || {};
+1133:     // KS-1230: validate every integrations[].config.allowedDocumentTypes BEFORE the merge and the write. A string, an
+1134:     // object or an empty string was stored as given and, after KS-1204, locked that connector out of every create.
+1135:     // Absent (undefined or null) stays allowed: the readers treat it as no restriction.
+1136:     const ints = body.integrations;
+1137:     if (Array.isArray(ints)) {
+1138:       for (let i = 0; i < ints.length; i++) {
+1139:         const types = ints[i]?.config?.allowedDocumentTypes;
+1140:         if (types === undefined || types === null) continue;
+1141:         if (!Array.isArray(types) || !types.every((t: unknown) => typeof t === 'string')) {
+1142:           res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'integrations[' + i + '].config.allowedDocumentTypes must be an array of strings' } });
+1143:           return;
+1144:         }
+1145:       }
+1146:     }
+1147:     const existing = (await redisService.getNotificationSettings('platform-settings') || {}) as Record<string, unknown>;
+1148:     const merged = { ...PLATFORM_SETTINGS_DEFAULTS, ...existing, ...body };
+1149:     await redisService.setNotificationSettings('platform-settings', merged);
+1150:     res.json({ success: true, settings: merged, updatedAt: new Date().toISOString() });
+1151:   });
+1152: 
+1153:   // Public read-only endpoint — verifier portal uses this to know which matching
+1154:   // strategy is active (no auth required because the verifier portal is public).
+1155:   router.get('/api/verification/policy', async (_req: Request, res: Response) => {
+1156:     try {
+1157:       const allSettings = (await redisService.getNotificationSettings('platform-settings') || {}) as Record<string, any>;
+1158:       const verification = allSettings.verification || {};
+1159:       res.json({
+1160:         matchingStrategy: verification.matchingStrategy || 'title_and_hash',
+1161:         requireBlockchainAnchor: verification.requireBlockchainAnchor ?? true,
+1162:         showTamperWarning: verification.showTamperWarning ?? true,
+1163:       });
+1164:     } catch {
+1165:       res.json({ matchingStrategy: 'title_and_hash', requireBlockchainAnchor: true, showTamperWarning: true });
+1166:     }
+1167:   });
+1168: 
+1169:   // =========================================================================
+1170:   // Identity Management (PostgreSQL-backed)
+1171:   // =========================================================================
+1172: 
+1173:   async function ensureIdentityColumns(): Promise<void> {
+1174:     if (!isDbAvailable()) return;
+1175:     try {
+1176:       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(200)`);
+1177:       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS wallet_address VARCHAR(255)`);
+1178:       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_method VARCHAR(20) DEFAULT 'email'`);
+1179:       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES organizations(id)`);
+1180:     } catch { /* columns may already exist */ }
+1181:   }
+1182: 
+1183:   let identityColumnsEnsured = false;
+1184:   async function seedIdentityOrgsIfEmpty(): Promise<void> {
+1185:     if (!isDbAvailable()) return;
+1186:     if (!enableDemoSeed) return;
+1187:     if (!identityColumnsEnsured) {
+1188:       await ensureIdentityColumns();
+1189:       identityColumnsEnsured = true;
+1190:     }
+1191:     try {
+1192:       const orgResult = await runWithPlatformScope(() => query('SELECT COUNT(*) as cnt FROM organizations'));
+1193:       const needOrgs = parseInt(orgResult.rows[0].cnt, 10) === 0;
+1194:       const userResult = await runWithPlatformScope(() => query('SELECT COUNT(*) as cnt FROM users'));
+1195:       const needUsers = parseInt(userResult.rows[0].cnt, 10) === 0;
+1196:       if (!needOrgs && !needUsers) return;
+1197:       for (const org of SEED_IDENTITY_ORGS) {
+1198:         await runWithPlatformScope(() => query(
+1199:           `INSERT INTO organizations (id, name, slug, type, status, verified, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING`,
+1200:           [org.id, org.name, org.slug, org.type, org.status, org.verified, JSON.stringify(org.metadata)]
+1201:         ));
+1202:       }
+1203:       for (const u of SEED_IDENTITY_USERS) {
+1204:         await runWithPlatformScope(() => query(
+1205:           `INSERT INTO users (email, display_name, role, verification_level, auth_method, mfa_enabled, wallet_address, external_provider, organization_id, metadata, password_hash)
+1206:            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) ON CONFLICT (email) DO NOTHING`,
+1207:           [u.email, u.display_name, u.role, u.verification_level, u.auth_method, u.mfa_enabled, u.wallet_address, u.external_provider, u.organization_id, JSON.stringify(u.metadata), null]
+1208:         ));
+1209:       }
+1210:       log('info', '[Identity] Seeded demo organizations and identity users');
+1211:     } catch (err) {
+1212:       log('warn', '[Identity] Seed skipped: ' + (err as Error).message);
+1213:     }
+1214:   }
+1215: 
+1216:   router.get('/api/admin/identity/users', requireAdmin, async (req: Request, res: Response) => {
+1217:     try {
+1218:       await seedIdentityOrgsIfEmpty();
+1219:       const result = await adminScope(req, () => query(`
+1220:         SELECT
+1221:           u.id AS "userId",
+1222:           u.email,
+1223:           COALESCE(u.display_name, u.first_name || ' ' || u.last_name, u.email) AS "name",
+1224:           UPPER(COALESCE(u.verification_level, 'BASIC')) AS "verificationLevel",
+1225:           COALESCE(u.auth_method, 'email') AS "authMethod",
+1226:           COALESCE((u.metadata->>'social_providers')::text, '[]') AS "socialProvidersRaw",
+1227:           COALESCE(u.mfa_enabled, false) AS "mfaEnabled",
+1228:           CASE WHEN u.wallet_address IS NOT NULL AND u.wallet_address <> '' THEN true ELSE false END AS "walletConnected",
+1229:           COALESCE(u.organization_id::text, '') AS "orgId",
+1230:           COALESCE(o.name, '') AS "orgName",
+1231:           COALESCE(u.metadata->>'region', 'Unknown') AS "region"
+1232:         FROM users u
+1233:         LEFT JOIN organizations o ON o.id = u.organization_id
+1234:         ORDER BY u.display_name ASC
+1235:       `));
+1236: 
+1237:       const users = result.rows.map((r: Record<string, unknown>) => {
+1238:         let socialProviders: string[] = [];
+1239:         try { socialProviders = JSON.parse(r.socialProvidersRaw as string); } catch { /* empty */ }
+1240:         if (r.authMethod && r.authMethod !== 'email' && !socialProviders.includes(r.authMethod as string)) {
+1241:           socialProviders.push(r.authMethod as string);
+1242:         }
+1243:         return { ...r, socialProviders, socialProvidersRaw: undefined };
+1244:       });
+1245: 
+1246:       res.json({ success: true, users });
+1247:     } catch (err) {
+1248:       log('error', '[Identity] Failed to fetch users', { error: err instanceof Error ? err.message : String(err) });
+1249:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch identity users' } });
+1250:     }
+1251:   });
+1252: 
+1253:   router.get('/api/admin/identity/organizations', requireAdmin, async (req: Request, res: Response) => {
+1254:     try {
+1255:       await seedIdentityOrgsIfEmpty();
+1256:       const result = await adminScope(req, () => query(`
+1257:         SELECT
+1258:           id AS "orgId",
+1259:           name AS "orgName",
+1260:           COALESCE(metadata->>'trust_level', 'UNVERIFIED') AS "trustLevel",
+1261:           COALESCE(metadata->>'verification_mode', 'DOMAIN_ONLY') AS "verificationMode",
+1262:           COALESCE(metadata->>'domain', '') AS "domain",
+1263:           COALESCE((metadata->>'domain_verified')::boolean, false) AS "domainVerified",
+1264:           CASE WHEN verified THEN 'verified' ELSE 'pending' END AS "status"
+1265:         FROM organizations
+1266:         ORDER BY name ASC
+1267:       `));
+1268:       res.json({ success: true, organizations: result.rows });
+1269:     } catch (err) {
+1270:       log('error', '[Identity] Failed to fetch organizations', { error: err instanceof Error ? err.message : String(err) });
+1271:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch identity organizations' } });
+1272:     }
+1273:   });
+1274: 
+1275:   router.patch('/api/admin/identity/users/:id/level', requireAdmin, mockBodyParser, async (req: Request, res: Response) => {
+1276:     try {
+1277:       const { id } = req.params;
+1278:       const { verificationLevel } = req.body || {};
+1279:       const validLevels = ['NONE', 'BASIC', 'SOCIAL', 'STANDARD', 'ENHANCED', 'HIGH', 'GOVERNMENT'];
+1280:       if (!verificationLevel || !validLevels.includes(verificationLevel)) {
+1281:         res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `Invalid verification level. Must be one of: ${validLevels.join(', ')}` } });
+1282:         return;
+1283:       }
+1284:       const result = await adminScope(req, () => query(
+1285:         'UPDATE users SET verification_level = $1, updated_at = NOW() WHERE id = $2::uuid RETURNING id, verification_level',
+1286:         [verificationLevel, id]
+1287:       ));
+1288:       if (result.rowCount === 0) {
+1289:         res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'User not found' } });
+1290:         return;
+1291:       }
+1292:       res.json({ success: true, userId: id, verificationLevel });
+1293:     } catch (err) {
+1294:       log('error', '[Identity] Failed to update level', { error: err instanceof Error ? err.message : String(err) });
+1295:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update verification level' } });
+1296:     }
+1297:   });
+1298: 
+1299:   router.get('/api/admin/identity/providers', requireAdmin, async (_req: Request, res: Response) => {
+1300:     const providers = [
+1301:       { name: 'google', label: 'Google', tier: 'SOCIAL', configured: !!(process.env.SOCIAL_GOOGLE_CLIENT_ID), status: process.env.SOCIAL_GOOGLE_CLIENT_ID ? 'active' : 'not_configured' },
+1302:       { name: 'github', label: 'GitHub', tier: 'SOCIAL', configured: !!(process.env.SOCIAL_GITHUB_CLIENT_ID), status: process.env.SOCIAL_GITHUB_CLIENT_ID ? 'active' : 'not_configured' },
+1303:       { name: 'linkedin', label: 'LinkedIn', tier: 'SOCIAL', configured: !!(process.env.SOCIAL_LINKEDIN_CLIENT_ID), status: process.env.SOCIAL_LINKEDIN_CLIENT_ID ? 'active' : 'not_configured' },
+1304:       { name: 'facebook', label: 'Facebook', tier: 'SOCIAL', configured: false, status: 'not_configured' },
+1305:       { name: 'apple', label: 'Apple', tier: 'SOCIAL', configured: false, status: 'not_configured' },
+1306:       { name: 'microsoft_personal', label: 'Microsoft Personal', tier: 'SOCIAL', configured: false, status: 'not_configured' },
+1307:       { name: 'entra_id', label: 'Microsoft Entra ID', tier: 'ENHANCED', configured: !!(process.env.AZURE_AD_CLIENT_ID), status: process.env.AZURE_AD_CLIENT_ID ? 'active' : 'not_configured' },
+1308:       { name: 'auth0', label: 'Auth0', tier: 'ENHANCED', configured: !!(process.env.AUTH0_DOMAIN), status: process.env.AUTH0_DOMAIN ? 'active' : 'not_configured' },
+1309:       { name: 'okta', label: 'Okta', tier: 'ENHANCED', configured: false, status: 'not_configured' },
+1310:       { name: 'entra_verified_id', label: 'Entra Verified ID', tier: 'HIGH', configured: !!(process.env.ENTRA_CLIENT_ID), status: process.env.ENTRA_CLIENT_ID ? 'active' : 'not_configured' },
+1311:       // Onfido retired 2026-04-29 — see CONNECTORS.md. The platform's HIGH-
+1312:       // tier identity path is Microsoft Entra Verified ID (entry above).
+1313:     ];
+1314:     res.json({ success: true, providers });
+1315:   });
+1316: 
+1317:   // =========================================================================
+1318:   // Verification Policies CRUD (Redis-backed)
+1319:   // =========================================================================
+1320: 
+1321:   // Seed policies on first load
+1322:   (async () => {
+1323:     const existing = await redisService.getAllVerificationPolicies();
+1324:     if (existing.length === 0 && enableDemoSeed) {
+1325:       for (const p of SEED_POLICIES) {
+1326:         await redisService.setVerificationPolicy(p.id, p);
+1327:       }
+1328:       log('info', `[VerifPolicies] Seeded ${SEED_POLICIES.length} default policies`);
+1329:     }
+1330:   })().catch(() => {});
+1331: 
+1332:   router.get('/api/admin/verification-policies', requireAdmin, async (_req: Request, res: Response) => {
+1333:     const policies = await redisService.getAllVerificationPolicies();
+1334:     res.json({ success: true, policies, total: policies.length });
+1335:   });
+1336: 
+1337:   router.post('/api/admin/verification-policies', requireAdmin, mockBodyParser, async (req: Request, res: Response) => {
+1338:     const body = req.body || {};
+1339:     if (!body.name) { res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Policy name is required' } }); return; }
+1340:     const id = `vpol-${require('crypto').randomUUID()}`;
+1341:     const policy = { id, ...body, isActive: body.isActive !== false, createdAt: new Date().toISOString() };
+1342:     await redisService.setVerificationPolicy(id, policy);
+1343:     res.status(201).json(policy);
+1344:   });
+1345: 
+1346:   router.put('/api/admin/verification-policies/:id', requireAdmin, mockBodyParser, async (req: Request, res: Response) => {
+1347:     const { id } = req.params;
+1348:     const existing = await redisService.getVerificationPolicy(id);
+1349:     if (!existing) { res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Policy not found' } }); return; }
+1350:     const updated = { ...(existing as Record<string, unknown>), ...req.body, id, updatedAt: new Date().toISOString() };
+1351:     await redisService.setVerificationPolicy(id, updated);
+1352:     res.json(updated);
+1353:   });
+1354: 
+1355:   router.delete('/api/admin/verification-policies/:id', requireAdmin, async (req: Request, res: Response) => {
+1356:     const { id } = req.params;
+1357:     const deleted = await redisService.deleteVerificationPolicy(id);
+1358:     if (!deleted) { res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Policy not found' } }); return; }
+1359:     res.json({ success: true });
+1360:   });
+1361: 
+1362:   router.get('/api/admin/verification-policies/audit', requireAdmin, (_req: Request, res: Response) => {
+1363:     res.json({ success: true, entries: [] });
+1364:   });
+1365: 
+1366:   router.get('/api/admin/verification-policies/regional', requireAdmin, (_req: Request, res: Response) => {
+1367:     res.json({ success: true, regions: [] });
+1368:   });
+1369: 
+1370:   // =========================================================================
+1371:   // =========================================================================
+1372:   // POST /api/users/admin/create — Proxy to auth service for user creation
+1373:   // =========================================================================
+1374:   router.post('/api/users/admin/create', requireAdmin, mockBodyParser, async (req: Request, res: Response) => {
+1375:     try {
+1376:       const authUrl = services.auth?.url || 'http://auth:4003';
+1377:       const token = req.headers.authorization;
+1378:       const upstream = await fetch(`${authUrl}/api/users/admin/create`, {
+1379:         signal: AbortSignal.timeout(UPSTREAM_ADMIN_FETCH_TIMEOUT_MS),
+1380:         method: 'POST',
+1381:         headers: {
+1382:           'Content-Type': 'application/json',
+1383:           ...(token ? { Authorization: token } : {}),
+1384:         },
+1385:         body: JSON.stringify(req.body),
+1386:       });
+1387:       const data = await upstream.json().catch(() => ({}));
+1388:       res.status(upstream.status).json(data);
+1389:     } catch (err: any) {
+1390:       console.error('Failed to create user via auth:', err?.message);
+1391:       res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable' } });
+1392:     }
+1393:   });
+1394: 
+1395:   // Organizations CRUD (PostgreSQL-backed)
+1396:   // =========================================================================
+1397: 
+1398:   router.post('/api/users/admin/organizations', requireAdmin, mockBodyParser, async (req: Request, res: Response) => {
+1399:     try {
+1400:       const { name, type, status } = req.body || {};
+1401:       if (!name) { res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Organization name is required' } }); return; }
+1402:       const id = `org-${require('crypto').randomUUID()}`;
+1403:       if (isDbAvailable()) {
+1404:         await adminScope(req, () => query(
+1405:           `INSERT INTO organizations (id, name, type, status, slug, verified, metadata) VALUES ($1::uuid, $2, $3, $4, $5, false, '{}')`,
+1406:           [crypto.randomUUID(), name, type || 'Organization', status || 'pending', name.toLowerCase().replace(/\s+/g, '-')]
+1407:         ));
+1408:       }
+1409:       res.status(201).json({ id, name, type: type || 'Organization', status: status || 'pending', userCount: 0, documentCount: 0, createdAt: new Date().toISOString() });
+1410:     } catch (err) {
+1411:       log('error', '[Orgs] Create failed', { error: (err as Error).message });
+1412:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create organization' } });
+1413:     }
+1414:   });
+1415: 
+1416:   router.put('/api/users/admin/organizations/:id', requireAdmin, mockBodyParser, async (req: Request, res: Response) => {
+1417:     try {
+1418:       const { id } = req.params;
+1419:       const { name, type, status } = req.body || {};
+1420:       if (isDbAvailable()) {
+1421:         const result = await adminScope(req, () => query(
+1422:           `UPDATE organizations SET name = COALESCE($1, name), type = COALESCE($2, type), status = COALESCE($3, status), updated_at = NOW() WHERE id = $4::uuid RETURNING *`,
+1423:           [name, type, status, id]
+1424:         ));
+1425:         if (result.rowCount === 0) { res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Organization not found' } }); return; }
+1426:         res.json({ success: true, ...result.rows[0] });
+1427:       } else {
+1428:         res.json({ success: true });
+1429:       }
+1430:     } catch (err) {
+1431:       log('error', '[Orgs] Update failed', { error: (err as Error).message });
+1432:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update organization' } });
+1433:     }
+1434:   });
+1435: 
+1436:   // PATCH /api/users/admin/:id — Admin: update a user (role, status, etc.)
+1437:   router.patch('/api/users/admin/:id', requireAdmin, mockBodyParser, async (req: Request, res: Response) => {
+1438:     try {
+1439:       const { id } = req.params;
+1440:       const updates = req.body || {};
+1441:       const authUrl = services.auth?.url || 'http://auth:4003';
+1442:       const token = req.headers.authorization;
+1443: 
+1444:       const upstream = await fetch(`${authUrl}/api/users/admin/${encodeURIComponent(id)}`, {
+1445:         signal: AbortSignal.timeout(UPSTREAM_ADMIN_FETCH_TIMEOUT_MS),
+1446:         method: 'PATCH',
+1447:         headers: {
+1448:           'Content-Type': 'application/json',
+1449:           ...(token ? { Authorization: token } : {}),
+1450:         },
+1451:         body: JSON.stringify(updates),
+1452:       });
+1453: 
+1454:       const body = await upstream.json().catch(() => ({}));
+1455:       res.status(upstream.status).json(body);
+1456:     } catch (err: any) {
+1457:       res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable', details: { details: err.message } } });
+1458:     }
+1459:   });
+1460: 
+1461:   router.delete('/api/users/admin/organizations/:id', requireAdmin, async (req: Request, res: Response) => {
+1462:     try {
+1463:       const { id } = req.params;
+1464:       if (isDbAvailable()) {
+1465:         const result = await adminScope(req, () => query('DELETE FROM organizations WHERE id = $1::uuid', [id]));
+1466:         if (result.rowCount === 0) { res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Organization not found' } }); return; }
+1467:       }
+1468:       res.json({ success: true });
+1469:     } catch (err) {
+1470:       log('error', '[Orgs] Delete failed', { error: (err as Error).message });
+1471:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete organization' } });
+1472:     }
+1473:   });
+1474: 
+1475:   // =========================================================================
+1476:   // Notification Settings (Redis-backed)
+1477:   // =========================================================================
+1478: 
+1479:   router.get('/api/settings/notifications', authenticateToken(false), async (req: Request, res: Response) => {
+1480:     // Pen-test F-04: read from authenticated req.user only — fallback to raw
+1481:     // x-user-id header was spoofable on optional-auth routes.
+1482:     const userId = req.user?.userId || 'default';
+1483:     const settings = await redisService.getNotificationSettings(userId);
+1484:     const data = settings || { certificationNotifications: true, verificationNotifications: true };
+1485:     res.json({ success: true, ...data });
+1486:   });
+1487: 
+1488:   router.put('/api/settings/notifications', authenticateToken(true), mockBodyParser, async (req: Request, res: Response) => {
+1489:     // Pen-test F-04: read from authenticated req.user only — fallback to raw
+1490:     // x-user-id header was spoofable on optional-auth routes.
+1491:     // KS-719: this is a WRITE, so it requires authentication (Kam, 2026-08-29).
+1492:     // The GET above keeps optional auth so anonymous readers still get the
+1493:     // documented defaults, but there is no 'default' write bucket: an
+1494:     // unauthenticated PUT used to land in one that every other anonymous
+1495:     // caller then read back. authenticateToken(true) guarantees req.user
+1496:     // here, so the fallback is not merely unused — it must not exist.
+1497:     const userId = req.user!.userId;
+1498:     // KS-1262: the platform-wide record is stored under the same namespace; this per-user writer must never address it.
+1499:     if (userId === 'platform-settings') {
+1500:       res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'This identity cannot write per-user notification settings' } });
+1501:       return;
+1502:     }
+1503:     const body = req.body || {};
+1504:     await redisService.setNotificationSettings(userId, body);
+1505:     res.json({ success: true, ...body, updatedAt: new Date().toISOString() });
+1506:   });
+1507: 
+1508:   // =========================================================================
+1509:   // Privacy Settings (per-user toggle settings, Redis-backed)
+1510:   // =========================================================================
+1511: 
+1512:   router.get('/api/privacy/settings', authenticateToken(false), async (req: Request, res: Response) => {
+1513:     // Pen-test F-04: read from authenticated req.user only — fallback to raw
+1514:     // x-user-id header was spoofable on optional-auth routes.
+1515:     const userId = req.user?.userId || 'default';
+1516:     const settings = await redisService.getPrivacySettings(`priv-settings-${userId}`);
+1517:     res.json({
+1518:       success: true,
+1519:       settings: settings || {
+1520:         autoRejectUnknown: false,
+1521:         preferRangeProofs: true,
+1522:         preferCommitments: true,
+1523:         logAllDisclosures: true,
+1524:         notifyOnDisclosure: true,
+1525:       },
+1526:     });
+1527:   });
+1528: 
+1529:   router.put('/api/privacy/settings', authenticateToken(true), mockBodyParser, async (req: Request, res: Response) => {
+1530:     // Pen-test F-04: read from authenticated req.user only — fallback to raw
+1531:     // x-user-id header was spoofable on optional-auth routes.
+1532:     // KS-719: this is a WRITE, so it requires authentication (Kam, 2026-08-29).
+1533:     // The GET above keeps optional auth so anonymous readers still get the
+1534:     // documented defaults, but there is no 'default' write bucket: an
+1535:     // unauthenticated PUT used to land in one that every other anonymous
+1536:     // caller then read back. authenticateToken(true) guarantees req.user
+1537:     // here, so the fallback is not merely unused — it must not exist.
+1538:     const userId = req.user!.userId;
+1539:     const body = req.body || {};
+1540:     await redisService.setPrivacySettings(`priv-settings-${userId}`, body);
+1541:     res.json({ success: true, settings: body, updatedAt: new Date().toISOString() });
+1542:   });
+1543: 
+1544:   // =========================================================================
+1545:   // Audit Export
+1546:   // =========================================================================
+1547: 
+1548:   router.get('/api/security/audit/export', requireAdmin, async (req: Request, res: Response) => {
+1549:     try {
+1550:       let logs: Array<Record<string, unknown>> = [];
+1551:       if (isDbAvailable()) {
+1552:         const result = await adminScope(req, () => query('SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 1000'));
+1553:         logs = result.rows;
+1554:       }
+1555:       const header = 'Timestamp,Action,UserID,ResourceType,ResourceID,Success,IP Address,Details';
+1556:       const rows = logs.map((l: Record<string, unknown>) =>
+1557:         `"${l.created_at || ''}","${l.action || ''}","${l.user_id || ''}","${l.resource_type || ''}","${l.resource_id || ''}","${l.success ?? ''}","${l.ip_address || ''}","${String(l.details || '').replace(/"/g, '""')}"`
+1558:       );
+1559:       const csv = [header, ...rows].join('\n');
+1560:       res.setHeader('Content-Type', 'text/csv');
+1561:       res.setHeader('Content-Disposition', `attachment; filename=secuura-audit-${new Date().toISOString().slice(0, 10)}.csv`);
+1562:       res.send(csv);
+1563:     } catch (err) {
+1564:       log('error', '[AuditExport] Failed', { error: (err as Error).message });
+1565:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to export audit logs' } });
+1566:     }
+1567:   });
+1568: 
+1569:   return router;
+1570: }
+
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts
+1: // KS-1240 (api-gateway routes/proxy.ts and routes/admin.ts): the hand-built upstream fetches in these two files carried no timeout, so an upstream that accepted the connection and never answered held the
+2: // caller's request open with no bound (the key-exchange half of the same ticket is in middleware/auth.ts). This file reads the two sources and pins, per fetch call, that the call carries an
+3: // AbortSignal.timeout signal, and that the timeout constants exist and are bounded. The extractor balances the call's own parentheses, so a signal in a NEIGHBOUR call cannot satisfy a fetch that has none.
+4: // C3 and C4 prove the extractor can return both answers (a bounded call that already existed at admin.ts, and a synthetic unbounded one), so the red cells are not vacuous.
+5: import { describe, it, expect } from 'vitest';
+6: import { readFileSync } from 'node:fs';
+7: import { join } from 'node:path';
+8: 
+9: const PROXY_SRC = readFileSync(join(__dirname, '..', 'routes', 'proxy.ts'), 'utf8');
+10: const ADMIN_SRC = readFileSync(join(__dirname, '..', 'routes', 'admin.ts'), 'utf8');
+11: 
+12: /** Every `fetch(` call in the source, each as the text from `fetch(` to its balancing `)`. */
+13: function fetchCalls(src: string): string[] {
+14:   const calls: string[] = [];
+15:   const re = /\bfetch\(/g;
+16:   let match: RegExpExecArray | null;
+17:   while ((match = re.exec(src)) !== null) {
+18:     const open = match.index + match[0].length - 1;
+19:     let depth = 0;
+20:     let end = -1;
+21:     for (let i = open; i < src.length; i++) {
+22:       const ch = src[i];
+23:       if (ch === '(') depth++;
+24:       else if (ch === ')') {
+25:         depth--;
+26:         if (depth === 0) {
+27:           end = i;
+28:           break;
+29:         }
+30:       }
+31:     }
+32:     expect(end, 'unbalanced fetch call at offset ' + match.index).toBeGreaterThan(-1);
+33:     calls.push(src.slice(match.index, end + 1));
+34:   }
+35:   return calls;
+36: }
+37: 
+38: function isBounded(call: string): boolean {
+39:   return call.includes('AbortSignal.timeout(');
+40: }
+41: 
+42: /** The first line of each unbounded call, so a failure names the call. */
+43: function unbounded(src: string): string[] {
+44:   return fetchCalls(src)
+45:     .filter((call) => !isBounded(call))
+46:     .map((call) => call.split('\n')[0].trim());
+47: }
+48: 
+49: function constantMs(src: string, name: string): number {
+50:   const found = new RegExp('const ' + name + ' = ([0-9_]+);').exec(src);
+51:   return found ? Number(found[1].replace(/_/g, '')) : Number.NaN;
+52: }
+53: 
+54: describe('KS-1240: every hand-built gateway fetch in proxy.ts and admin.ts is bounded', () => {
+55:   it('RED KS-1240 R1 every fetch call in proxy.ts carries an AbortSignal.timeout', () => {
+56:     expect(unbounded(PROXY_SRC)).toEqual([]);
+57:   });
+58: 
+59:   it('RED KS-1240 R2 every fetch call in admin.ts carries an AbortSignal.timeout', () => {
+60:     expect(unbounded(ADMIN_SRC)).toEqual([]);
+61:   });
+62: 
+63:   it('RED KS-1240 R3 proxy.ts declares its two timeout constants, each positive and at most 120000 ms', () => {
+64:     const proxyMs = constantMs(PROXY_SRC, 'UPSTREAM_PROXY_FETCH_TIMEOUT_MS');
+65:     const packageMs = constantMs(PROXY_SRC, 'UPSTREAM_PACKAGE_FETCH_TIMEOUT_MS');
+66:     expect(proxyMs).toBeGreaterThan(0);
+67:     expect(proxyMs).toBeLessThanOrEqual(120000);
+68:     expect(packageMs).toBeGreaterThanOrEqual(proxyMs);
+69:     expect(packageMs).toBeLessThanOrEqual(120000);
+70:   });
+71: 
+72:   it('RED KS-1240 R4 admin.ts declares its timeout constant, positive and at most 120000 ms', () => {
+73:     const adminMs = constantMs(ADMIN_SRC, 'UPSTREAM_ADMIN_FETCH_TIMEOUT_MS');
+74:     expect(adminMs).toBeGreaterThan(0);
+75:     expect(adminMs).toBeLessThanOrEqual(120000);
+76:   });
+77: 
+78:   it('control KS-1240 C1 proxy.ts has exactly five hand-built fetch calls', () => {
+79:     expect(fetchCalls(PROXY_SRC)).toHaveLength(5);
+80:   });
+81: 
+82:   it('control KS-1240 C2 admin.ts has exactly three hand-built fetch calls', () => {
+83:     expect(fetchCalls(ADMIN_SRC)).toHaveLength(3);
+84:   });
+85: 
+86:   it('control KS-1240 C3 the extractor reads the fetch that was already bounded in admin.ts as bounded', () => {
+87:     const calls = fetchCalls(ADMIN_SRC).filter((call) => call.includes('bfUrl'));
+88:     expect(calls).toHaveLength(1);
+89:     expect(isBounded(calls[0])).toBe(true);
+90:   });
+91: 
+92:   it('control KS-1240 C4 the extractor reads a synthetic call with no signal as unbounded', () => {
+93:     const synthetic = "const r = await fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) });\n";
+94:     expect(unbounded(synthetic)).toEqual(["fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) })"]);
+95:   });
+96: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "c7e3fbd5b2eb83613ef470832d54ae46ce14143d",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/routes/proxy.ts",
+   "added": "10",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/routes/admin.ts",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts",
+   "added": "96",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "10",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/routes/proxy.ts"
+  ],
+  [
+   "5",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/routes/admin.ts"
+  ],
+  [
+   "96",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-every-hand-built-gateway-fetch-in-proxy-and-admin-is-bounded.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 8,
+  "failed": 4
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 8,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1255 failed=0 | after: total=1263 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 8\n",
+ "checker_summary": [
+  "PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=3 products=2 tests=1 red_first=yes apply_mode=accommodated (see the A2 line)",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

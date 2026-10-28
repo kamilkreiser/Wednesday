@@ -126,3 +126,8 @@
 +[ "$fail" -eq 0 ] || exit 1
 +exit 0
 ```
+
+
+## ADDENDUM (Spark operator 3, 2026-10-28 16:3x, from the Spark second-opinion review + source check at develop bd6697e0)
+- Finding REAL and not in the earlier HOLD: `smoke-test.sh` has a `--quick` branch (line 148) and a full branch; in the FULL run, section 7 onward still calls hard-coded `http://localhost:60xx` service ports directly (lines 257, 261, 265, 273, 281, 290, 303, 305, 315, 317, 325, 327 at bd6697e0). The patch moves ONLY `GATEWAY` to `${SMOKE_BASE_URL:-...}`. So with SMOKE_BASE_URL pointing at a remote environment, the gateway-based checks hit the remote and about a dozen full-run checks still hit localhost. The patch fixes the quick path and the gateway half; it does not make a full run remote-clean.
+- Effect on the verdict: still HOLD, but the PR body must say this in one sentence (Refs KS-1250, not a close-word) and Wednesday may want the ticket to cover the localhost service-port checks. Review artefacts: 0_Brain/reference/2026-10-28_spark-operator3/reviews/ks_1250_p1/.

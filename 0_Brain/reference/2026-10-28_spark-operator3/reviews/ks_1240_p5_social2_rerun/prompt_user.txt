@@ -1,0 +1,634 @@
+===== TICKET =====
+KS-1240 — T-2: the connector-token / key-validate fetch has no timeout — a slow upstream hangs the request [Backlog]
+
+**The sharpest of the four candidates the gate surfaced, and the only one that is request-reachable today.**
+
+The api-gateway's connector-token exchange / key-validate `fetch` carries **no timeout**. A slow or non-answering upstream turns into a gateway request with no bound on how long it hangs, while the process carries on serving everything else.
+
+## Measured on BOTH trees (head and develop) — so it is pre-existing
+
+* an exchange that **never answers** → the request hangs;
+* an exchange whose body arrives **2.5 s late** → the request hangs for that long.
+
+Graded **Major**. Request-reachable, unlike T-1.
+
+## What to do
+
+Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange.
+
+---
+
+Filed from the #1034 / KS-1215 tier-1 gate report `2026-09-18-ks1215-1034-e4624218b-tier1-r1`, at merge of `a105cd32b1ed9c6927ae6e797f8259224d8480c6`. Pre-existing unless stated; **not** introduced by #1034.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/apple.ts b/Blockchain/Dev/services/auth/src/providers/social/apple.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/apple.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/apple.ts
+@@ -1,1 +1,5 @@
+ import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
++
++// KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
++// long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
++const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+@@ -32,4 +36,5 @@
+         grant_type: 'authorization_code',
+         redirect_uri: this.config.callbackUrl,
+       }),
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/facebook.ts b/Blockchain/Dev/services/auth/src/providers/social/facebook.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/facebook.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/facebook.ts
+@@ -1,1 +1,5 @@
+ import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
++
++// KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
++// long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
++const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+@@ -28,4 +32,5 @@
+         redirect_uri: this.config.callbackUrl,
+         code,
+       })}`,
++      { signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS), },
+     );
+@@ -39,3 +44,4 @@
+     const profileRes = await fetch(
+       `https://graph.facebook.com/v19.0/me?fields=id,email,name,first_name,last_name,picture&access_token=${access_token}`,
++      { signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS), },
+     );
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts b/Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts
+@@ -1,1 +1,5 @@
+ import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
++
++// KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
++// long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
++const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+@@ -33,4 +37,5 @@
+         grant_type: 'authorization_code',
+         scope: 'openid email profile User.Read',
+       }),
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+@@ -44,3 +49,4 @@
+     const profileRes = await fetch('https://graph.microsoft.com/v1.0/me', {
+       headers: { Authorization: `Bearer ${access_token}` },
++      signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+     });
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts
+@@ -0,0 +1,131 @@
++// KS-1240 (class: hand-built outbound fetches with no timeout), services/auth social adapters apple.ts, facebook.ts and microsoft-personal.ts: their five fetches (apple token; facebook token and /me;
++// microsoft token and graph /me) passed no `signal`, so an identity provider that accepts the connection and never answers held the OAuth callback open for as long as the socket lived. Facebook's two
++// fetches were called with a URL only, so they gain an init object. The adapters are driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there is none); nothing
++// touches the network. R1 to R3 pin that every fetch carries an AbortSignal, R4 that each bound is a sane positive number, R5 to R7 that a provider that never answers ends in a rejection, not a hang.
++import { describe, it, expect, afterEach, vi } from 'vitest';
++import { AppleProvider } from '../providers/social/apple';
++import { FacebookProvider } from '../providers/social/facebook';
++import { MicrosoftPersonalProvider } from '../providers/social/microsoft-personal';
++
++const CONFIG = { clientId: 'cid-ks1240', clientSecret: 'secret-ks1240', callbackUrl: 'https://app.test/cb', enabled: true };
++
++function reply(status: number, body: unknown): Response {
++  return {
++    ok: status >= 200 && status < 300,
++    status,
++    json: async () => body,
++    text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
++  } as unknown as Response;
++}
++
++type Seen = { url: string; signal: unknown };
++
++/** An Apple id_token whose payload segment carries `sub`, as the adapter decodes it. */
++function appleIdToken(): string {
++  return 'h.' + Buffer.from(JSON.stringify({ sub: 'a1', email: 'a@x.test', email_verified: true })).toString('base64') + '.s';
++}
++
++/** Answers by URL and records the signal each call carried (the second argument may be missing). */
++function stubAnswering(seen: Seen[]): void {
++  vi.spyOn(globalThis, 'fetch').mockImplementation((async (url: unknown, init?: { signal?: unknown }) => {
++    const u = String(url);
++    seen.push({ url: u, signal: init?.signal });
++    if (u.includes('appleid.apple.com/auth/token')) return reply(200, { id_token: appleIdToken() });
++    if (u.includes('graph.facebook.com/v19.0/oauth/access_token')) return reply(200, { access_token: 'tok' });
++    if (u.includes('graph.facebook.com/v19.0/me')) return reply(200, { id: 'f1', email: 'f@x.test', name: 'F B' });
++    if (u.includes('login.microsoftonline.com/consumers')) return reply(200, { access_token: 'tok' });
++    if (u.includes('graph.microsoft.com/v1.0/me')) return reply(200, { id: 'm1', mail: 'm@x.test', displayName: 'M S' });
++    return reply(404, 'unexpected url ' + u);
++  }) as never);
++}
++
++/** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
++function stubNeverAnswering(): void {
++  vi.spyOn(globalThis, 'fetch').mockImplementation(((_url: unknown, init?: { signal?: AbortSignal }) =>
++    new Promise<Response>((_resolve, reject) => {
++      const signal = init?.signal;
++      if (!signal) return;
++      if (signal.aborted) reject(new Error('aborted'));
++      else signal.addEventListener('abort', () => reject(new Error('aborted')));
++    })) as never);
++}
++
++afterEach(() => { vi.restoreAllMocks(); });
++
++/** 'REJECTED' when exchangeCode rejects, 'RESOLVED' when it resolves, 'HUNG' when it is still pending after 300 ms, so a hang is a red assertion and not a stuck run. */
++async function outcome(run: () => Promise<unknown>): Promise<string> {
++  return Promise.race([
++    run().then(() => 'RESOLVED', () => 'REJECTED'),
++    new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
++  ]);
++}
++
++describe('KS-1240: the apple, facebook and microsoft-personal adapters bound their outbound fetches', () => {
++  it('RED KS-1240 R1 the apple token fetch carries an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await new AppleProvider(CONFIG).exchangeCode('code');
++    expect(seen).toHaveLength(1);
++    for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R2 both facebook fetches (token, me) carry an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await new FacebookProvider(CONFIG).exchangeCode('code');
++    expect(seen).toHaveLength(2);
++    for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R3 both microsoft fetches (token, graph me) carry an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await new MicrosoftPersonalProvider(CONFIG).exchangeCode('code');
++    expect(seen).toHaveLength(2);
++    for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R4 the five bounds handed to AbortSignal.timeout are positive and at most 30000 ms', async () => {
++    const timeout = vi.spyOn(AbortSignal, 'timeout');
++    stubAnswering([]);
++    await new AppleProvider(CONFIG).exchangeCode('code');
++    await new FacebookProvider(CONFIG).exchangeCode('code');
++    await new MicrosoftPersonalProvider(CONFIG).exchangeCode('code');
++    const bounds = timeout.mock.calls.map((c) => c[0] as number);
++    expect(bounds).toHaveLength(5);
++    for (const ms of bounds) {
++      expect(ms).toBeGreaterThan(0);
++      expect(ms).toBeLessThanOrEqual(30000);
++    }
++  });
++
++  it('RED KS-1240 R5 an apple token endpoint that never answers ends in a rejection, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => new AppleProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
++  });
++
++  it('RED KS-1240 R6 a facebook token endpoint that never answers ends in a rejection, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => new FacebookProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
++  });
++
++  it('RED KS-1240 R7 a microsoft token endpoint that never answers ends in a rejection, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => new MicrosoftPersonalProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
++  });
++
++  it('control KS-1240 C1 the full exchange of each adapter still resolves to the same provider id', async () => {
++    stubAnswering([]);
++    expect((await new AppleProvider(CONFIG).exchangeCode('code')).providerId).toBe('a1');
++    expect((await new FacebookProvider(CONFIG).exchangeCode('code')).providerId).toBe('f1');
++    expect((await new MicrosoftPersonalProvider(CONFIG).exchangeCode('code')).providerId).toBe('m1');
++  });
++
++  it('control KS-1240 C2 a refused apple token exchange still throws its own message', async () => {
++    vi.spyOn(globalThis, 'fetch').mockImplementation((async () => reply(400, 'invalid_grant')) as never);
++    await expect(new AppleProvider(CONFIG).exchangeCode('code')).rejects.toThrow('Apple token exchange failed: invalid_grant');
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/providers/social/apple.ts
+1: import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
+2: 
+3: // KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
+4: // long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
+5: const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+6: 
+7: export class AppleProvider implements SocialProvider {
+8:   readonly name = 'apple' as const;
+9:   private config: SocialProviderConfig;
+10: 
+11:   constructor(config: SocialProviderConfig) {
+12:     this.config = config;
+13:   }
+14: 
+15:   getAuthUrl(state: string): string {
+16:     const scopes = this.config.scopes ?? ['name', 'email'];
+17:     const params = new URLSearchParams({
+18:       client_id: this.config.clientId,
+19:       redirect_uri: this.config.callbackUrl,
+20:       response_type: 'code id_token',
+21:       response_mode: 'form_post',
+22:       scope: scopes.join(' '),
+23:       state,
+24:     });
+25:     return `https://appleid.apple.com/auth/authorize?${params}`;
+26:   }
+27: 
+28:   async exchangeCode(code: string): Promise<SocialProfile> {
+29:     const tokenRes = await fetch('https://appleid.apple.com/auth/token', {
+30:       method: 'POST',
+31:       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+32:       body: new URLSearchParams({
+33:         client_id: this.config.clientId,
+34:         client_secret: this.config.clientSecret,
+35:         code,
+36:         grant_type: 'authorization_code',
+37:         redirect_uri: this.config.callbackUrl,
+38:       }),
+39:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+40:     });
+41: 
+42:     if (!tokenRes.ok) {
+43:       throw new Error(`Apple token exchange failed: ${await tokenRes.text()}`);
+44:     }
+45: 
+46:     const tokens = (await tokenRes.json()) as { id_token: string };
+47:     const payload = JSON.parse(
+48:       Buffer.from(tokens.id_token.split('.')[1], 'base64').toString(),
+49:     ) as Record<string, unknown>;
+50: 
+51:     return {
+52:       providerId: String(payload.sub),
+53:       provider: 'apple',
+54:       email: String(payload.email ?? ''),
+55:       emailVerified: Boolean(payload.email_verified),
+56:       displayName: undefined,
+57:       rawProfile: payload,
+58:     };
+59:   }
+60: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/providers/social/facebook.ts
+1: import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
+2: 
+3: // KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
+4: // long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
+5: const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+6: 
+7: export class FacebookProvider implements SocialProvider {
+8:   readonly name = 'facebook' as const;
+9:   private config: SocialProviderConfig;
+10: 
+11:   constructor(config: SocialProviderConfig) {
+12:     this.config = config;
+13:   }
+14: 
+15:   getAuthUrl(state: string): string {
+16:     const scopes = this.config.scopes ?? ['email', 'public_profile'];
+17:     const params = new URLSearchParams({
+18:       client_id: this.config.clientId,
+19:       redirect_uri: this.config.callbackUrl,
+20:       state,
+21:       scope: scopes.join(','),
+22:       response_type: 'code',
+23:     });
+24:     return `https://www.facebook.com/v19.0/dialog/oauth?${params}`;
+25:   }
+26: 
+27:   async exchangeCode(code: string): Promise<SocialProfile> {
+28:     const tokenRes = await fetch(
+29:       `https://graph.facebook.com/v19.0/oauth/access_token?${new URLSearchParams({
+30:         client_id: this.config.clientId,
+31:         client_secret: this.config.clientSecret,
+32:         redirect_uri: this.config.callbackUrl,
+33:         code,
+34:       })}`,
+35:       { signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS), },
+36:     );
+37: 
+38:     if (!tokenRes.ok) {
+39:       throw new Error(`Facebook token exchange failed: ${await tokenRes.text()}`);
+40:     }
+41: 
+42:     const { access_token } = (await tokenRes.json()) as { access_token: string };
+43: 
+44:     const profileRes = await fetch(
+45:       `https://graph.facebook.com/v19.0/me?fields=id,email,name,first_name,last_name,picture&access_token=${access_token}`,
+46:       { signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS), },
+47:     );
+48: 
+49:     if (!profileRes.ok) {
+50:       throw new Error('Failed to fetch Facebook user profile');
+51:     }
+52: 
+53:     const profile = (await profileRes.json()) as Record<string, unknown>;
+54:     const picture = profile.picture as { data?: { url?: string } } | undefined;
+55: 
+56:     return {
+57:       providerId: String(profile.id),
+58:       provider: 'facebook',
+59:       email: String(profile.email ?? ''),
+60:       emailVerified: Boolean(profile.email),
+61:       displayName: String(profile.name ?? ''),
+62:       firstName: String(profile.first_name ?? ''),
+63:       lastName: String(profile.last_name ?? ''),
+64:       avatarUrl: picture?.data?.url,
+65:       rawProfile: profile,
+66:     };
+67:   }
+68: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts
+1: import { SocialProvider, SocialProviderConfig, SocialProfile } from './types';
+2: 
+3: // KS-1240 (class): every hand-built outbound fetch carries a timeout signal. Without one an identity provider that accepts the connection and never answers holds the callback request open for as
+4: // long as the socket lives. On expiry the fetch rejects, exchangeCode rejects, and the callback's existing catch answers as it already does for any other provider failure.
+5: const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;
+6: 
+7: export class MicrosoftPersonalProvider implements SocialProvider {
+8:   readonly name = 'microsoft_personal' as const;
+9:   private config: SocialProviderConfig;
+10: 
+11:   constructor(config: SocialProviderConfig) {
+12:     this.config = config;
+13:   }
+14: 
+15:   getAuthUrl(state: string): string {
+16:     const scopes = this.config.scopes ?? ['openid', 'email', 'profile', 'User.Read'];
+17:     const params = new URLSearchParams({
+18:       client_id: this.config.clientId,
+19:       redirect_uri: this.config.callbackUrl,
+20:       response_type: 'code',
+21:       scope: scopes.join(' '),
+22:       state,
+23:       response_mode: 'query',
+24:     });
+25:     return `https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?${params}`;
+26:   }
+27: 
+28:   async exchangeCode(code: string): Promise<SocialProfile> {
+29:     const tokenRes = await fetch('https://login.microsoftonline.com/consumers/oauth2/v2.0/token', {
+30:       method: 'POST',
+31:       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+32:       body: new URLSearchParams({
+33:         client_id: this.config.clientId,
+34:         client_secret: this.config.clientSecret,
+35:         code,
+36:         redirect_uri: this.config.callbackUrl,
+37:         grant_type: 'authorization_code',
+38:         scope: 'openid email profile User.Read',
+39:       }),
+40:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+41:     });
+42: 
+43:     if (!tokenRes.ok) {
+44:       throw new Error(`Microsoft token exchange failed: ${await tokenRes.text()}`);
+45:     }
+46: 
+47:     const { access_token } = (await tokenRes.json()) as { access_token: string };
+48: 
+49:     const profileRes = await fetch('https://graph.microsoft.com/v1.0/me', {
+50:       headers: { Authorization: `Bearer ${access_token}` },
+51:       signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS),
+52:     });
+53: 
+54:     if (!profileRes.ok) {
+55:       throw new Error(`Failed to fetch Microsoft user profile (HTTP ${profileRes.status})`);
+56:     }
+57: 
+58:     const profile = (await profileRes.json()) as Record<string, unknown>;
+59: 
+60:     return {
+61:       providerId: String(profile.id),
+62:       provider: 'microsoft_personal',
+63:       email: String(profile.mail ?? profile.userPrincipalName ?? ''),
+64:       emailVerified: true,
+65:       displayName: String(profile.displayName ?? ''),
+66:       firstName: String(profile.givenName ?? ''),
+67:       lastName: String(profile.surname ?? ''),
+68:       rawProfile: profile,
+69:     };
+70:   }
+71: }
+
+### FILE AT HEAD: Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts
+1: // KS-1240 (class: hand-built outbound fetches with no timeout), services/auth social adapters apple.ts, facebook.ts and microsoft-personal.ts: their five fetches (apple token; facebook token and /me;
+2: // microsoft token and graph /me) passed no `signal`, so an identity provider that accepts the connection and never answers held the OAuth callback open for as long as the socket lived. Facebook's two
+3: // fetches were called with a URL only, so they gain an init object. The adapters are driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there is none); nothing
+4: // touches the network. R1 to R3 pin that every fetch carries an AbortSignal, R4 that each bound is a sane positive number, R5 to R7 that a provider that never answers ends in a rejection, not a hang.
+5: import { describe, it, expect, afterEach, vi } from 'vitest';
+6: import { AppleProvider } from '../providers/social/apple';
+7: import { FacebookProvider } from '../providers/social/facebook';
+8: import { MicrosoftPersonalProvider } from '../providers/social/microsoft-personal';
+9: 
+10: const CONFIG = { clientId: 'cid-ks1240', clientSecret: 'secret-ks1240', callbackUrl: 'https://app.test/cb', enabled: true };
+11: 
+12: function reply(status: number, body: unknown): Response {
+13:   return {
+14:     ok: status >= 200 && status < 300,
+15:     status,
+16:     json: async () => body,
+17:     text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
+18:   } as unknown as Response;
+19: }
+20: 
+21: type Seen = { url: string; signal: unknown };
+22: 
+23: /** An Apple id_token whose payload segment carries `sub`, as the adapter decodes it. */
+24: function appleIdToken(): string {
+25:   return 'h.' + Buffer.from(JSON.stringify({ sub: 'a1', email: 'a@x.test', email_verified: true })).toString('base64') + '.s';
+26: }
+27: 
+28: /** Answers by URL and records the signal each call carried (the second argument may be missing). */
+29: function stubAnswering(seen: Seen[]): void {
+30:   vi.spyOn(globalThis, 'fetch').mockImplementation((async (url: unknown, init?: { signal?: unknown }) => {
+31:     const u = String(url);
+32:     seen.push({ url: u, signal: init?.signal });
+33:     if (u.includes('appleid.apple.com/auth/token')) return reply(200, { id_token: appleIdToken() });
+34:     if (u.includes('graph.facebook.com/v19.0/oauth/access_token')) return reply(200, { access_token: 'tok' });
+35:     if (u.includes('graph.facebook.com/v19.0/me')) return reply(200, { id: 'f1', email: 'f@x.test', name: 'F B' });
+36:     if (u.includes('login.microsoftonline.com/consumers')) return reply(200, { access_token: 'tok' });
+37:     if (u.includes('graph.microsoft.com/v1.0/me')) return reply(200, { id: 'm1', mail: 'm@x.test', displayName: 'M S' });
+38:     return reply(404, 'unexpected url ' + u);
+39:   }) as never);
+40: }
+41: 
+42: /** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
+43: function stubNeverAnswering(): void {
+44:   vi.spyOn(globalThis, 'fetch').mockImplementation(((_url: unknown, init?: { signal?: AbortSignal }) =>
+45:     new Promise<Response>((_resolve, reject) => {
+46:       const signal = init?.signal;
+47:       if (!signal) return;
+48:       if (signal.aborted) reject(new Error('aborted'));
+49:       else signal.addEventListener('abort', () => reject(new Error('aborted')));
+50:     })) as never);
+51: }
+52: 
+53: afterEach(() => { vi.restoreAllMocks(); });
+54: 
+55: /** 'REJECTED' when exchangeCode rejects, 'RESOLVED' when it resolves, 'HUNG' when it is still pending after 300 ms, so a hang is a red assertion and not a stuck run. */
+56: async function outcome(run: () => Promise<unknown>): Promise<string> {
+57:   return Promise.race([
+58:     run().then(() => 'RESOLVED', () => 'REJECTED'),
+59:     new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
+60:   ]);
+61: }
+62: 
+63: describe('KS-1240: the apple, facebook and microsoft-personal adapters bound their outbound fetches', () => {
+64:   it('RED KS-1240 R1 the apple token fetch carries an AbortSignal', async () => {
+65:     const seen: Seen[] = [];
+66:     stubAnswering(seen);
+67:     await new AppleProvider(CONFIG).exchangeCode('code');
+68:     expect(seen).toHaveLength(1);
+69:     for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
+70:   });
+71: 
+72:   it('RED KS-1240 R2 both facebook fetches (token, me) carry an AbortSignal', async () => {
+73:     const seen: Seen[] = [];
+74:     stubAnswering(seen);
+75:     await new FacebookProvider(CONFIG).exchangeCode('code');
+76:     expect(seen).toHaveLength(2);
+77:     for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
+78:   });
+79: 
+80:   it('RED KS-1240 R3 both microsoft fetches (token, graph me) carry an AbortSignal', async () => {
+81:     const seen: Seen[] = [];
+82:     stubAnswering(seen);
+83:     await new MicrosoftPersonalProvider(CONFIG).exchangeCode('code');
+84:     expect(seen).toHaveLength(2);
+85:     for (const call of seen) expect(call.signal).toBeInstanceOf(AbortSignal);
+86:   });
+87: 
+88:   it('RED KS-1240 R4 the five bounds handed to AbortSignal.timeout are positive and at most 30000 ms', async () => {
+89:     const timeout = vi.spyOn(AbortSignal, 'timeout');
+90:     stubAnswering([]);
+91:     await new AppleProvider(CONFIG).exchangeCode('code');
+92:     await new FacebookProvider(CONFIG).exchangeCode('code');
+93:     await new MicrosoftPersonalProvider(CONFIG).exchangeCode('code');
+94:     const bounds = timeout.mock.calls.map((c) => c[0] as number);
+95:     expect(bounds).toHaveLength(5);
+96:     for (const ms of bounds) {
+97:       expect(ms).toBeGreaterThan(0);
+98:       expect(ms).toBeLessThanOrEqual(30000);
+99:     }
+100:   });
+101: 
+102:   it('RED KS-1240 R5 an apple token endpoint that never answers ends in a rejection, not a hang', async () => {
+103:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+104:     stubNeverAnswering();
+105:     expect(await outcome(() => new AppleProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
+106:   });
+107: 
+108:   it('RED KS-1240 R6 a facebook token endpoint that never answers ends in a rejection, not a hang', async () => {
+109:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+110:     stubNeverAnswering();
+111:     expect(await outcome(() => new FacebookProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
+112:   });
+113: 
+114:   it('RED KS-1240 R7 a microsoft token endpoint that never answers ends in a rejection, not a hang', async () => {
+115:     vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
+116:     stubNeverAnswering();
+117:     expect(await outcome(() => new MicrosoftPersonalProvider(CONFIG).exchangeCode('code'))).toBe('REJECTED');
+118:   });
+119: 
+120:   it('control KS-1240 C1 the full exchange of each adapter still resolves to the same provider id', async () => {
+121:     stubAnswering([]);
+122:     expect((await new AppleProvider(CONFIG).exchangeCode('code')).providerId).toBe('a1');
+123:     expect((await new FacebookProvider(CONFIG).exchangeCode('code')).providerId).toBe('f1');
+124:     expect((await new MicrosoftPersonalProvider(CONFIG).exchangeCode('code')).providerId).toBe('m1');
+125:   });
+126: 
+127:   it('control KS-1240 C2 a refused apple token exchange still throws its own message', async () => {
+128:     vi.spyOn(globalThis, 'fetch').mockImplementation((async () => reply(400, 'invalid_grant')) as never);
+129:     await expect(new AppleProvider(CONFIG).exchangeCode('code')).rejects.toThrow('Apple token exchange failed: invalid_grant');
+130:   });
+131: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "ec5c5bc452c0f7d4d34a12d8878cc11a84c21dcb",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/providers/social/apple.ts",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/providers/social/facebook.ts",
+   "added": "6",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts",
+   "added": "6",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts",
+   "added": "131",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "5",
+   "0",
+   "Blockchain/Dev/services/auth/src/providers/social/apple.ts"
+  ],
+  [
+   "6",
+   "0",
+   "Blockchain/Dev/services/auth/src/providers/social/facebook.ts"
+  ],
+  [
+   "6",
+   "0",
+   "Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts"
+  ],
+  [
+   "131",
+   "0",
+   "Blockchain/Dev/services/auth/src/__tests__/ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 9,
+  "failed": 7
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 9,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1200 failed=0 | after: total=1209 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 9\n",
+ "checker_summary": [
+  "PASS A6 whole services/auth suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/auth: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=4 products=3 tests=1 red_first=yes apply_mode=accommodated (see the A2 line)",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

@@ -1,0 +1,42 @@
+{
+  "findings": [
+    {
+      "severity": "Note",
+      "claim": "The ticket's acceptance criteria are not explicitly listed, so I cannot verify them against the code.",
+      "evidence": "TICKET: 'KS-1240 — T-2: the connector-token / key-validate fetch has no timeout — a slow upstream hangs the request [Backlog]' — no acceptance criteria section is present.",
+      "test_or_reason": "No acceptance lines are provided in the ticket, so D.10 cannot be evaluated."
+    },
+    {
+      "severity": "Note",
+      "claim": "The ticket's measured evidence (2.5s late body) is not reproduced by the new tests; the tests only simulate a never-answering endpoint with an already-aborted signal.",
+      "evidence": "TICKET: 'an exchange whose body arrives 2.5 s late → the request hangs for that long.'; test file ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts:102-118 'R5 to R7' use `AbortSignal.timeout` mocked to `AbortSignal.abort()` and a stub that never answers.",
+      "test_or_reason": "The 2.5s-late scenario is not covered; only the never-answering case is tested, and the timeout is mocked to abort immediately, so the actual 10s timeout is never exercised."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test for the timeout bound (R4) only checks that the bound is positive and ≤30000ms, not that it equals the intended 10_000ms constant.",
+      "evidence": "ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts:88-100 'R4 the five bounds handed to AbortSignal.timeout are positive and at most 30000 ms' — asserts `ms > 0` and `ms <= 30000`.",
+      "test_or_reason": "The constant `SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000` is not pinned; a change to 1ms or 30000ms would still pass."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test stub `stubNeverAnswering` is more permissive than the real fetch: it never rejects when no signal is provided, whereas the real fetch would eventually time out at the OS level.",
+      "evidence": "ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts:44-50 'if (!signal) return;' — the promise never settles when no signal is present.",
+      "test_or_reason": "This is a deliberate test double to simulate a hang, but it does not faithfully model the real fetch's behaviour without a signal."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test `stubAnswering` does not verify that the `signal` is actually an `AbortSignal` from `AbortSignal.timeout`; it only checks `instanceof AbortSignal`, which would also pass for a manually created signal.",
+      "evidence": "ks1240-social-provider-fetches-are-bounded-apple-facebook-microsoft.test.ts:69 'expect(call.signal).toBeInstanceOf(AbortSignal);'",
+      "test_or_reason": "The test does not assert that the signal is the result of `AbortSignal.timeout`, so a change to a different AbortSignal source would still pass."
+    },
+    {
+      "severity": "Note",
+      "claim": "The ticket's claim that the fix is 'request-reachable' is not contradicted, but the fix only covers the social provider fetches, not the connector-token / key-validate fetch mentioned in the ticket title.",
+      "evidence": "TICKET: 'the connector-token / key-validate fetch has no timeout'; DIFF only touches `Blockchain/Dev/services/auth/src/providers/social/*.ts`.",
+      "test_or_reason": "The ticket title refers to a different fetch, but the PR only addresses social provider fetches; the connector-token / key-validate fetch is not in the diff."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+}

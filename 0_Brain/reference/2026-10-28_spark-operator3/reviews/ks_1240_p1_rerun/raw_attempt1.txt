@@ -1,0 +1,30 @@
+{
+  "findings": [
+    {
+      "severity": "Note",
+      "claim": "The timeout value is hardcoded to 5 seconds with no configuration knob, which may be too short for slow upstreams in production.",
+      "evidence": "auth.ts:189 `const UPSTREAM_AUTH_FETCH_TIMEOUT_MS = 5_000;`",
+      "test_or_reason": "The constant is not configurable via AuthConfig or environment; the ticket only asks for an explicit timeout, not a specific value."
+    },
+    {
+      "severity": "Note",
+      "claim": "The test suite does not pin the exact timeout value (5_000), only that it is between 0 and 30000 ms, so a regression to an unreasonably long timeout would not be caught.",
+      "evidence": "ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts:47-48 `expect(ms).toBeGreaterThan(0); expect(ms).toBeLessThanOrEqual(30000);`",
+      "test_or_reason": "The tests only assert a bounded range, not the intended 5-second value, so the specific timeout is not pinned."
+    },
+    {
+      "severity": "Note",
+      "claim": "The tests mock AbortSignal.timeout to return a manually controlled signal, so they do not verify that the real AbortSignal.timeout actually fires after the configured duration.",
+      "evidence": "ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts:19 `timeoutSpy = vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => controller.signal);`",
+      "test_or_reason": "T3/T4 manually call controller.abort() instead of waiting for the real timeout, so the actual timer behavior is not exercised."
+    },
+    {
+      "severity": "Note",
+      "claim": "The ticket's acceptance criterion for a 503 on timeout is not implemented; the code returns null (leading to 401) on timeout, not 503.",
+      "evidence": "auth.ts:217-219 `} catch (err) { console.error(...); return null; }` and auth.ts:259-260 `} catch { return null; }`",
+      "test_or_reason": "The ticket says 'decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange', but the code does not distinguish timeout from other failures and returns null, which the caller turns into 401."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+}

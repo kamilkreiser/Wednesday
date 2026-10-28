@@ -1,0 +1,42 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The ticket's acceptance criterion — a 503 on timeout consistent with the connector branch — is not implemented; the change only adds an AbortSignal timeout and lets the existing catch answer, which does not produce a 503.",
+      "evidence": "Ticket 'What to do': 'Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange.'; apple.ts:39 `signal: AbortSignal.timeout(SOCIAL_PROVIDER_FETCH_TIMEOUT_MS)`; apple.ts:42-44 `if (!tokenRes.ok) { throw new Error(...) }` — no 503 handling.",
+      "test_or_reason": "No test asserts a 503 on timeout; R5-R7 only assert rejection, not the HTTP status."
+    },
+    {
+      "severity": "Major",
+      "claim": "The ticket's measured root cause — the connector-token / key-validate fetch in the api-gateway — is not addressed; the PR changes only the social providers in services/auth, which are not the api-gateway's connector-token exchange.",
+      "evidence": "Ticket: 'The api-gateway's connector-token exchange / key-validate `fetch` carries **no timeout**.'; diff touches only Blockchain/Dev/services/auth/src/providers/social/*.ts and a test file; no api-gateway file is touched.",
+      "test_or_reason": "The PR does not modify any api-gateway code; the ticket's target is the api-gateway, not the social adapters."
+    },
+    {
+      "severity": "Major",
+      "claim": "The ticket's measured evidence (an exchange that never answers hangs; a 2.5 s late body hangs) is not reproduced by any test; the new tests mock AbortSignal.timeout to abort immediately)Skip the real timeout behavior, so they do not prove the fix works against the measured scenario.",
+      "evidence": "Test R5-R7: `vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());` — the timeout is mocked to abort instantly, not to wait 10s; ticket: 'an exchange that **never answers** → the request hangs; an exchange whose body arrives **2.5 s late** → the request hangs for that long.'",
+      "test_or_reason": "The tests never exercise a real 10s timeout or a late response; they only verify that an aborted signal rejects."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test stub `stubNeverAnswering` is more permissive than the real fetch: it never rejects when no signal is provided, whereas the real fetch would eventually time out or error; this makes the 'hang' detection rely on the 300ms race, not on the real behavior.",
+      "evidence": "Test line 47: `if (!signal) return;` — the promise never settles when no signal; real fetch would not hang forever.",
+      "test_or_reason": "The stub does not model the real fetch's behavior without a signal, so the 'HUNG' outcome is an artifact of the stub, not a faithful reproduction."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test R4 asserts the timeout bounds are at most 30000 ms, but the code uses 10_000 ms; the test does not pin the exact value, so a regression to 30000 ms would still pass.",
+      "evidence": "Test line 98: `expect(ms).toBeLessThanOrEqual(30000);`; code apple.ts:5 `const SOCIAL_PROVIDER_FETCH_TIMEOUT_MS = 10_000;`",
+      "test_or_reason": "The test allows a wider range than the actual constant, so it does not pin the intended 10s timeout."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR description is not provided, so no overstatement can be assessed from it; the draft comment is also absent.",
+      "evidence": "PR DESCRIPTION: '(not provided)'; DRAFTED CLIENT COMMENT: '(none)'",
+      "test_or_reason": "No comment to evaluate."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

@@ -1,0 +1,172 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts b/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+--- a/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
++++ b/Blockchain/Dev/services/auth/src/routes/issuerCerts.ts
+@@ -65,8 +65,16 @@
++/**
++ * The one role test the four gates below share: the role claim, read as text, is in ADMIN_ROLES either as it is or upper-cased.
++ * Behaviour-preserving extraction of the two lines that were copied into each gate.
++ */
++export function hasAdminRole(role: unknown): boolean {
++  const text = String(role ?? '');
++  return ADMIN_ROLES.includes(text) || ADMIN_ROLES.includes(text.toUpperCase());
++}
++
+ function isAuthorisedForCertWrite(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return scopes.includes('issuer-certs:write') || scopes.includes('issuer-certs:*') || scopes.includes('*');
+ }
+@@ -74,8 +82,7 @@
+ function isAuthorisedForCertRead(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:read') ||
+@@ -88,8 +95,7 @@
+ function isAuthorisedForCertRevoke(req: AuthenticatedRequest): boolean {
+   const user = req.user as { role?: string; scopes?: string[] } | undefined;
+   if (!user) return false;
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:revoke') ||
+@@ -105,8 +111,7 @@
+   // allow-list, plus a dedicated `issuer-certs:sign` scope for the
+   // SSD connector path (originate calls this on behalf of the caller,
+   // forwarding the Bearer token, so the caller's scopes apply).
+-  const role = String(user.role ?? '');
+-  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;
++  if (hasAdminRole(user.role)) return true;
+   const scopes = Array.isArray(user.scopes) ? user.scopes : [];
+   return (
+     scopes.includes('issuer-certs:sign') ||
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts
+@@ -0,0 +1,115 @@
++// Behaviour-preserving extraction in services/auth routes/issuerCerts.ts: the four gates (write, read, revoke, sign) each copied the same two lines, `const role = String(user.role ?? '')` and
++// `ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())`. They now call one exported helper, hasAdminRole. R1 to R3 pin the helper (it exists, its truth table, and the file
++// holds the role test once). C1 to C6 drive the REAL router on a loopback listener through all four gates and must read the same before and after the extraction: an admitted caller with no tenant claim
++// gets 400 TENANT_REQUIRED (past the role gate), a refused caller gets 403. The role arrives in an x-test-user header that a mocked authenticate() turns into req.user.
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import type { Server } from 'node:http';
++import express from 'express';
++
++const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++vi.mock('../middleware/authenticate', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => {
++    const raw = req.headers['x-test-user'];
++    req.user = typeof raw === 'string' ? JSON.parse(raw) : undefined;
++    next();
++  },
++}));
++vi.mock('../repositories/issuerCertRepo', () => ({
++  createIssuerCert: vi.fn(), getIssuerCertById: vi.fn(), findIssuerCertByFingerprint: vi.fn(), findActiveIssuerCertForTenant: vi.fn(),
++  listIssuerCerts: vi.fn(async () => []), revokeIssuerCert: vi.fn(), rotateIssuerCert: vi.fn(), toSummary: vi.fn(),
++}));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++
++import * as certRoutes from '../routes/issuerCerts';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const SRC = readFileSync(join(__dirname, '..', 'routes', 'issuerCerts.ts'), 'utf8');
++
++let server: Server;
++let base = '';
++
++beforeAll(async () => {
++  const app = express();
++  app.use(express.json());
++  app.use('/api/issuer-certs', certRoutes.issuerCertsRoutes);
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
++  const addr = server.address();
++  base = 'http://127.0.0.1:' + (typeof addr === 'object' && addr ? addr.port : 0);
++});
++afterAll(() => { server?.close(); });
++
++/** The helper under test, or a sentinel when it is not exported yet, so a missing helper is a red assertion and not a thrown error. */
++function helper(role: unknown): boolean | string {
++  const fn = (certRoutes as Record<string, unknown>).hasAdminRole;
++  return typeof fn === 'function' ? (fn as (r: unknown) => boolean)(role) : 'NO HELPER';
++}
++
++const ROUTES: Array<[string, string, string]> = [
++  ['write', 'POST', '/api/issuer-certs'],
++  ['read', 'GET', '/api/issuer-certs'],
++  ['revoke', 'POST', '/api/issuer-certs/abc/revoke'],
++  ['sign', 'POST', '/api/issuer-certs/sign'],
++];
++
++/** The status a caller gets from a route; the user carries no tenant claim, so a caller past the role gate is answered 400 TENANT_REQUIRED. */
++async function status(method: string, path: string, user: unknown): Promise<number> {
++  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
++  if (user !== undefined) headers['x-test-user'] = JSON.stringify(user);
++  const res = await fetch(base + path, { method, headers, body: method === 'GET' ? undefined : '{}' });
++  return res.status;
++}
++
++async function statuses(user: unknown): Promise<number[]> {
++  const out: number[] = [];
++  for (const [, method, path] of ROUTES) out.push(await status(method, path, user));
++  return out;
++}
++
++describe('KS-1536 extraction: the issuer-cert admin role test is one helper', () => {
++  it('RED KS-1536 R1 hasAdminRole is exported as a function', () => {
++    expect(typeof (certRoutes as Record<string, unknown>).hasAdminRole).toBe('function');
++  });
++
++  it('RED KS-1536 R2 hasAdminRole keeps the truth table of the copied lines', () => {
++    const rows = ['ORG_ADMIN', 'org_admin', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin', 'Super_Admin', 'Admin', 'ADMIN', 'USER', '', undefined, null, 0];
++    expect(rows.map((r) => helper(r))).toEqual([true, true, true, true, true, true, true, true, false, false, false, false, false, false, false]);
++  });
++
++  it('RED KS-1536 R3 the file holds the role test once: no gate copies the ADMIN_ROLES comparison any more', () => {
++    expect(SRC.split('ADMIN_ROLES.includes(').length - 1).toBe(2);
++    expect(SRC).not.toContain("const role = String(user.role ?? '');");
++  });
++
++  it('control KS-1536 C1 an ORG_ADMIN is admitted by all four gates (400 TENANT_REQUIRED, past the role gate)', async () => {
++    expect(await statuses({ role: 'ORG_ADMIN' })).toEqual([400, 400, 400, 400]);
++  });
++
++  it('control KS-1536 C2 a lower-case super_admin and a mixed-case Super_Admin are admitted by all four gates', async () => {
++    expect(await statuses({ role: 'super_admin' })).toEqual([400, 400, 400, 400]);
++    expect(await statuses({ role: 'Super_Admin' })).toEqual([400, 400, 400, 400]);
++  });
++
++  it('control KS-1536 C3 an ordinary USER, a mixed-case Admin and a caller with no role are refused by all four gates', async () => {
++    expect(await statuses({ role: 'USER' })).toEqual([403, 403, 403, 403]);
++    expect(await statuses({ role: 'Admin' })).toEqual([403, 403, 403, 403]);
++    expect(await statuses({})).toEqual([403, 403, 403, 403]);
++  });
++
++  it('control KS-1536 C4 a request with no user at all is refused by all four gates', async () => {
++    expect(await statuses(undefined)).toEqual([403, 403, 403, 403]);
++  });
++
++  it('control KS-1536 C5 a USER holding only the read scope passes the read gate and no other', async () => {
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:read'] })).toEqual([403, 400, 403, 403]);
++  });
++
++  it('control KS-1536 C6 a USER holding the write scope passes write and read, a revoke-scope USER passes revoke only, a sign-scope USER passes sign only', async () => {
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:write'] })).toEqual([400, 400, 403, 403]);
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:revoke'] })).toEqual([403, 403, 400, 403]);
++    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:sign'] })).toEqual([403, 403, 403, 400]);
++  });
++});

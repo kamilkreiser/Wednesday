@@ -1,0 +1,855 @@
+===== TICKET =====
+KS-1240 — T-2: the connector-token / key-validate fetch has no timeout — a slow upstream hangs the request [Backlog]
+
+**The sharpest of the four candidates the gate surfaced, and the only one that is request-reachable today.**
+
+The api-gateway's connector-token exchange / key-validate `fetch` carries **no timeout**. A slow or non-answering upstream turns into a gateway request with no bound on how long it hangs, while the process carries on serving everything else.
+
+## Measured on BOTH trees (head and develop) — so it is pre-existing
+
+* an exchange that **never answers** → the request hangs;
+* an exchange whose body arrives **2.5 s late** → the request hangs for that long.
+
+Graded **Major**. Request-reachable, unlike T-1.
+
+## What to do
+
+Give the fetch an explicit timeout (AbortSignal / `AbortController`) and decide the refusal shape — a 503 on timeout is consistent with how the connector branch already answers a refused exchange.
+
+---
+
+Filed from the #1034 / KS-1215 tier-1 gate report `2026-09-18-ks1215-1034-e4624218b-tier1-r1`, at merge of `a105cd32b1ed9c6927ae6e797f8259224d8480c6`. Pre-existing unless stated; **not** introduced by #1034.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts b/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+--- a/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
++++ b/Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+@@ -187,3 +187,7 @@
++// KS-1240: the longest the gateway waits for auth's connector-token exchange or security's key-validate answer. Neither fetch carried a timeout, so an upstream that never answered held the
++// caller's request for as long as the socket lived. On expiry the fetch rejects and the existing catch in each function answers exactly as it already did for an unreachable upstream (null).
++const UPSTREAM_AUTH_FETCH_TIMEOUT_MS = 5_000;
++
+ /**
+  * Exchange a validated sk_ key for a short-lived connector JWT via auth.
+  * Returns null (and logs) on failure — downstream Bearer-only services will
+@@ -198,6 +202,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ apiKey: key }),
++      signal: AbortSignal.timeout(UPSTREAM_AUTH_FETCH_TIMEOUT_MS),
+     });
+     if (!resp.ok) {
+       console.error(`[gateway] connector-token exchange failed (${resp.status}) — downstream Bearer-only services will 401 this connector request`);
+@@ -228,6 +233,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ key }),
++      signal: AbortSignal.timeout(UPSTREAM_AUTH_FETCH_TIMEOUT_MS),
+     });
+     if (!resp.ok) {
+       apiKeyCache.set(key, { result: null, expiresAt: Date.now() + 30_000 });
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts
+@@ -0,0 +1,97 @@
++// KS-1240 (api-gateway middleware/auth.ts getConnectorBearer and validateApiKey): both fetches carried no timeout, so an upstream (auth's connector-token exchange, security's key-validate) that never
++// answered held the caller's request open with no bound. T1/T2 pin that each fetch is given an abort signal built from AbortSignal.timeout with a bounded value; T3/T4 drive an upstream that never
++// answers and fire that signal: the call must settle with null (the existing unreachable-upstream answer) instead of hanging. A call still pending after 300 ms is reported as the string HUNG, so a
++// hang is a red assertion, not a stuck run. C1 to C3 keep the answers for a healthy upstream exactly as they were.
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++import { getConnectorBearer, validateApiKey, apiKeyCache, connectorBearerCache } from '../middleware/auth';
++
++const fetchMock = vi.fn();
++vi.stubGlobal('fetch', fetchMock);
++
++let timeoutSpy: ReturnType<typeof vi.spyOn>;
++let controller: AbortController;
++
++beforeEach(() => {
++  fetchMock.mockReset();
++  apiKeyCache.clear();
++  connectorBearerCache.clear();
++  controller = new AbortController();
++  timeoutSpy = vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => controller.signal);
++});
++
++afterEach(() => {
++  timeoutSpy.mockRestore();
++});
++
++function neverAnswering(): void {
++  fetchMock.mockImplementation(
++    (_url: string, init?: { signal?: AbortSignal }) =>
++      new Promise((_resolve, reject) => {
++        init?.signal?.addEventListener('abort', () => reject(new Error('aborted by signal')));
++      }),
++  );
++}
++
++async function settled<T>(pending: Promise<T>): Promise<T | 'HUNG'> {
++  return Promise.race([pending, new Promise<'HUNG'>((resolve) => setTimeout(() => resolve('HUNG'), 300))]);
++}
++
++describe('KS-1240: the gateway key-exchange and key-validate fetches are bounded', () => {
++  it('RED KS-1240 T1 the connector-token exchange fetch is given a timeout signal', async () => {
++    fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { token: 't1', expiresIn: 600 } }) });
++    await getConnectorBearer('sk_ks1240_t1');
++    const init = fetchMock.mock.calls[0][1] as { signal?: unknown };
++    expect(init.signal).toBeInstanceOf(AbortSignal);
++    expect(timeoutSpy).toHaveBeenCalledTimes(1);
++    const ms = timeoutSpy.mock.calls[0][0] as number;
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(30000);
++  });
++
++  it('RED KS-1240 T2 the key-validate fetch is given a timeout signal', async () => {
++    fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { valid: false } }) });
++    await validateApiKey('sk_ks1240_t2');
++    const init = fetchMock.mock.calls[0][1] as { signal?: unknown };
++    expect(init.signal).toBeInstanceOf(AbortSignal);
++    expect(timeoutSpy).toHaveBeenCalledTimes(1);
++    const ms = timeoutSpy.mock.calls[0][0] as number;
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(30000);
++  });
++
++  it('RED KS-1240 T3 an exchange that never answers settles with null once the signal fires', async () => {
++    neverAnswering();
++    const pending = getConnectorBearer('sk_ks1240_t3');
++    controller.abort();
++    expect(await settled(pending)).toBeNull();
++  });
++
++  it('RED KS-1240 T4 a validate that never answers settles with null once the signal fires and caches nothing', async () => {
++    neverAnswering();
++    const pending = validateApiKey('sk_ks1240_t4');
++    controller.abort();
++    expect(await settled(pending)).toBeNull();
++    expect(apiKeyCache.has('sk_ks1240_t4')).toBe(false);
++  });
++
++  it('control KS-1240 C1 a healthy exchange still returns the connector token and caches it', async () => {
++    fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { token: 'jwt-c1', expiresIn: 600 } }) });
++    expect(await getConnectorBearer('sk_ks1240_c1')).toBe('jwt-c1');
++    expect(connectorBearerCache.get('sk_ks1240_c1')?.token).toBe('jwt-c1');
++  });
++
++  it('control KS-1240 C2 a healthy validate still returns the key metadata', async () => {
++    fetchMock.mockResolvedValue({
++      ok: true,
++      json: async () => ({ data: { valid: true, connectorId: 'platform-s:c2', scopes: ['documents:write'], organizationId: 'org-c2', tenantId: 'ten-c2' } }),
++    });
++    const meta = await validateApiKey('sk_ks1240_c2');
++    expect(meta?.connectorId).toBe('platform-s:c2');
++    expect(meta?.tenantId).toBe('ten-c2');
++  });
++
++  it('control KS-1240 C3 a refused exchange (HTTP 502) still returns null', async () => {
++    fetchMock.mockResolvedValue({ ok: false, status: 502, json: async () => ({}) });
++    expect(await getConnectorBearer('sk_ks1240_c3')).toBeNull();
++  });
++});
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/middleware/auth.ts
+1: /**
+2:  * =============================================================================
+3:  * Authentication Middleware
+4:  * =============================================================================
+5:  * Extracted from the API gateway monolith. Handles:
+6:  * - JWT token verification
+7:  * - Test token parsing (development/test only)
+8:  * - API key validation via the Security Service
+9:  * =============================================================================
+10:  */
+11: 
+12: import { createHash } from 'crypto';
+13: import { Request, Response, NextFunction, RequestHandler } from 'express';
+14: import { isSessionActive, runWithTenantId } from '@secuura/shared';
+15: import { verifyJwtRs256 } from '@secuura/shared/crypto/jwks';
+16: import { getRedisClient } from '../services/redis';
+17: import { enforceClientRateLimit, recordApiKeyBucket } from './rateLimitEnforce';
+18: import { logger } from '../utils/logger';
+19: 
+20: // ---------------------------------------------------------------------------
+21: // Types
+22: // ---------------------------------------------------------------------------
+23: 
+24: export interface UserPayload {
+25:   userId: string;
+26:   email: string;
+27:   role: string;
+28:   organizationId?: string;
+29:   verificationLevel: string;
+30:   authMethod?: string;
+31:   // KS-1198: set only on the connector JWTs the auth service mints from a validated API key
+32:   // (`type: 'connector'`). The gateway forwards one upstream; it never accepts one as a Bearer credential.
+33:   type?: string;
+34:   mfaEnabled?: boolean;
+35:   // KS-257: session identifier minted by auth at login; present on interactive
+36:   // JWTs (absent for API-key/connector + test tokens). Used to enforce session
+37:   // revocation here, not just at the auth service.
+38:   sessionId?: string;
+39:   tenantId?: string;
+40:   tenantSlug?: string;
+41:   // KS-151: role-derived scopes carried on the JWT. Used downstream by
+42:   // `isAllowedByRoleOrScope` so the gateway pass-through and the
+43:   // downstream services see the same scope set.
+44:   scopes?: string[];
+45:   // KS-164: per-client rate-limit allowance, populated for machine callers
+46:   // (API key / OAuth app) from the connector record so `enforceClientRateLimit`
+47:   // can apply the per-key ceiling. Absent for interactive (human) users, who
+48:   // are governed by the global limiter instead.
+49:   connectorId?: string;
+50:   rateLimit?: number;
+51:   rateLimitWindow?: number;
+52:   // KS-1195 (A5): the caller's OWN rate-limit bucket. An API key's validate
+53:   // response carries no key id, and connectorId is null for admin-minted keys, so
+54:   // `connectorId || userId` gave every such key the one userId
+55:   // `connector:api-key`: one bucket across all tenants. The key itself is the
+56:   // only per-key identity the gateway holds, so the bucket is a domain-separated
+57:   // SHA-256 of it (never the raw key, and never equal to the stored key_hash).
+58:   rateLimitBucket?: string;
+59: }
+60: 
+61: export interface ConnectorMeta {
+62:   connectorId: string;
+63:   scopes: string[];
+64:   organizationId: string;
+65:   tenantId?: string;
+66:   tenantSlug?: string;
+67:   rateLimit: number;
+68:   rateLimitWindow: number;
+69: }
+70: 
+71: // ---------------------------------------------------------------------------
+72: // Module-level configuration – call `configureAuth()` once at startup
+73: // ---------------------------------------------------------------------------
+74: 
+75: let ENABLE_TEST_TOKENS = false;
+76: let DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+77: let SECURITY_SERVICE_URL = 'http://localhost:6008';
+78: let AUTH_SERVICE_URL = 'http://localhost:6003';
+79: 
+80: export interface AuthConfig {
+81:   enableTestTokens?: boolean;
+82:   defaultTenantId?: string;
+83:   securityServiceUrl?: string;
+84:   authServiceUrl?: string;
+85: }
+86: 
+87: /**
+88:  * Initialise auth module configuration.
+89:  * Must be called before any middleware runs.
+90:  */
+91: export function configureAuth(cfg: AuthConfig): void {
+92:   if (cfg.enableTestTokens !== undefined) ENABLE_TEST_TOKENS = cfg.enableTestTokens;
+93:   if (cfg.defaultTenantId !== undefined) DEFAULT_TENANT_ID = cfg.defaultTenantId;
+94:   if (cfg.securityServiceUrl !== undefined) SECURITY_SERVICE_URL = cfg.securityServiceUrl;
+95:   if (cfg.authServiceUrl !== undefined) AUTH_SERVICE_URL = cfg.authServiceUrl;
+96: }
+97: 
+98: // KS-347: verify RS256 tokens with a public key resolved by the token's `kid`
+99: // from auth's JWKS endpoint, falling back to the static JWT_PUBLIC_KEY. This
+100: // lets an auth signing-key rotation (KS-326/346) be picked up WITHOUT redeploying
+101: // the gateway, while remaining a strict superset of the previous static-key
+102: // behaviour (JWKS unconfigured/unreachable → static key, exactly as before). The
+103: // accepted algorithm set stays registry-pinned inside the shared verifier
+104: // (no RS256->HS256 confusion / alg:none, KS-179/326); the gateway still holds
+105: // only PUBLIC key material, never a signing secret. Async because the JWKS fetch
+106: // is async — the only caller is the async authenticateToken middleware below.
+107: export async function verifyRs256(token: string): Promise<UserPayload> {
+108:   return (await verifyJwtRs256(token)) as unknown as UserPayload;
+109: }
+110: 
+111: // ---------------------------------------------------------------------------
+112: // Test token support (development / test environments only)
+113: // ---------------------------------------------------------------------------
+114: 
+115: const TEST_TOKEN_PREFIX = 'test_token_';
+116: 
+117: /**
+118:  * Parse a test token for E2E testing (development/test only).
+119:  * Returns null when the token is not a valid test token or when test tokens
+120:  * are disabled.
+121:  */
+122: export function parseTestToken(token: string): UserPayload | null {
+123:   const env = process.env.NODE_ENV || '';
+124:   if (!['development', 'test'].includes(env)) {
+125:     return null;
+126:   }
+127:   // Require explicit opt-in for test tokens (security hardening)
+128:   if (!ENABLE_TEST_TOKENS) {
+129:     return null;
+130:   }
+131: 
+132:   if (!token.startsWith(TEST_TOKEN_PREFIX)) {
+133:     return null;
+134:   }
+135: 
+136:   try {
+137:     const base64Payload = token.slice(TEST_TOKEN_PREFIX.length);
+138:     const payloadJson = Buffer.from(base64Payload, 'base64').toString('utf-8');
+139:     const payload = JSON.parse(payloadJson);
+140: 
+141:     // Support both 'sub' and 'userId' fields for test tokens
+142:     const userId = payload.sub || payload.userId;
+143: 
+144:     // Validate required fields
+145:     if (!userId || !payload.role) {
+146:       return null;
+147:     }
+148: 
+149:     // Check expiration
+150:     if (payload.exp && payload.exp < Date.now()) {
+151:       return null;
+152:     }
+153: 
+154:     return {
+155:       userId,
+156:       role: payload.role,
+157:       email: payload.email || `test-${userId}@secuura.test`,
+158:       organizationId: payload.organizationId || 'test-org',
+159:       verificationLevel: payload.verificationLevel || 'BASIC',
+160:       authMethod: payload.authMethod || payload.auth_method || 'email',
+161:       mfaEnabled: payload.mfaEnabled || payload.mfa_enabled || false,
+162:     };
+163:   } catch {
+164:     return null;
+165:   }
+166: }
+167: 
+168: // ---------------------------------------------------------------------------
+169: // API key validation (via Security Service)
+170: // ---------------------------------------------------------------------------
+171: 
+172: export const apiKeyCache = new Map<string, { result: ConnectorMeta | null; expiresAt: number }>();
+173: 
+174: // ---------------------------------------------------------------------------
+175: // KS-480: connector bearer exchange. Downstream services enforce Bearer-only
+176: // authentication on /api/* (pen-test H2 — they deliberately do NOT trust
+177: // gateway-forwarded x-user-* headers), so an sk_-authenticated request needs a
+178: // real RS256 JWT to cross the second hop. The gateway exchanges the validated
+179: // key for a short-lived connector JWT minted by auth and attaches it as the
+180: // Authorization header. Cached per key well inside the token TTL; revocation
+181: // therefore propagates within cache TTL + validate cache (≈ same order as the
+182: // existing 60-s validate cache).
+183: // ---------------------------------------------------------------------------
+184: const CONNECTOR_BEARER_CACHE_MS = 8 * 60_000; // token TTL is 10 min at auth
+185: export const connectorBearerCache = new Map<string, { token: string; expiresAt: number }>();
+186: 
+187: // KS-1240: the longest the gateway waits for auth's connector-token exchange or security's key-validate answer. Neither fetch carried a timeout, so an upstream that never answered held the
+188: // caller's request for as long as the socket lived. On expiry the fetch rejects and the existing catch in each function answers exactly as it already did for an unreachable upstream (null).
+189: const UPSTREAM_AUTH_FETCH_TIMEOUT_MS = 5_000;
+190: 
+191: /**
+192:  * Exchange a validated sk_ key for a short-lived connector JWT via auth.
+193:  * Returns null (and logs) on failure — downstream Bearer-only services will
+194:  * then 401 the request, which fails closed rather than open.
+195:  */
+196: export async function getConnectorBearer(key: string): Promise<string | null> {
+197:   const cached = connectorBearerCache.get(key);
+198:   if (cached && cached.expiresAt > Date.now()) return cached.token;
+199: 
+200:   try {
+201:     const resp = await fetch(`${AUTH_SERVICE_URL}/internal/connector-token`, {
+202:       method: 'POST',
+203:       headers: { 'Content-Type': 'application/json' },
+204:       body: JSON.stringify({ apiKey: key }),
+205:       signal: AbortSignal.timeout(UPSTREAM_AUTH_FETCH_TIMEOUT_MS),
+206:     });
+207:     if (!resp.ok) {
+208:       console.error(`[gateway] connector-token exchange failed (${resp.status}) — downstream Bearer-only services will 401 this connector request`);
+209:       return null;
+210:     }
+211:     const body = (await resp.json()) as { data?: { token?: string; expiresIn?: number } };
+212:     const token = body?.data?.token;
+213:     if (!token) return null;
+214:     const ttlMs = Math.min(CONNECTOR_BEARER_CACHE_MS, ((body.data?.expiresIn ?? 600) - 120) * 1000);
+215:     connectorBearerCache.set(key, { token, expiresAt: Date.now() + Math.max(ttlMs, 30_000) });
+216:     return token;
+217:   } catch (err) {
+218:     console.error(`[gateway] connector-token exchange unreachable: ${(err as Error).message}`);
+219:     return null;
+220:   }
+221: }
+222: 
+223: /**
+224:  * Validate an API key by calling the Security Service.
+225:  * Results are cached for 60 s (valid) / 30 s (invalid) to reduce latency.
+226:  */
+227: export async function validateApiKey(key: string): Promise<ConnectorMeta | null> {
+228:   const cached = apiKeyCache.get(key);
+229:   if (cached && cached.expiresAt > Date.now()) return cached.result;
+230: 
+231:   try {
+232:     const resp = await fetch(`${SECURITY_SERVICE_URL}/api/keys/validate`, {
+233:       method: 'POST',
+234:       headers: { 'Content-Type': 'application/json' },
+235:       body: JSON.stringify({ key }),
+236:       signal: AbortSignal.timeout(UPSTREAM_AUTH_FETCH_TIMEOUT_MS),
+237:     });
+238:     if (!resp.ok) {
+239:       apiKeyCache.set(key, { result: null, expiresAt: Date.now() + 30_000 });
+240:       return null;
+241:     }
+242:     const body = (await resp.json()) as any;
+243:     const data = body?.data ?? body;
+244:     if (!data?.valid) {
+245:       apiKeyCache.set(key, { result: null, expiresAt: Date.now() + 30_000 });
+246:       return null;
+247:     }
+248:     const meta: ConnectorMeta = {
+249:       connectorId: data.connectorId || '',
+250:       scopes: data.scopes || [],
+251:       organizationId: data.organizationId || '',
+252:       tenantId: data.tenantId || '',
+253:       tenantSlug: data.tenantSlug || '',
+254:       rateLimit: data.rateLimit || 100,
+255:       rateLimitWindow: data.rateLimitWindow || 60,
+256:     };
+257:     apiKeyCache.set(key, { result: meta, expiresAt: Date.now() + 60_000 });
+258:     return meta;
+259:   } catch {
+260:     return null;
+261:   }
+262: }
+263: 
+264: // ---------------------------------------------------------------------------
+265: // KS-1198 / KS-1470: a connector JWT is never a client credential
+266: // ---------------------------------------------------------------------------
+267: 
+268: /**
+269:  * The one refusal for a verified connector JWT presented as a Bearer. It is shared by `authenticateToken`
+270:  * (KS-1198) and the front-door `rejectConnectorBearer` (KS-1470), so the two cannot drift: one structured
+271:  * warning that names `x-api-key`, never the token, and one 401 body.
+272:  */
+273: function refuseConnectorBearer(req: Request, res: Response, decoded: Pick<UserPayload, 'userId' | 'tenantId'>): void {
+274:   logger.warn('[gateway-auth] refused a connector JWT presented as a Bearer credential; the caller should present its API key in the x-api-key header', {
+275:     type: 'security',
+276:     event: 'CONNECTOR_JWT_AS_BEARER_REFUSED',
+277:     expectedHeader: 'x-api-key',
+278:     connector: decoded.userId,
+279:     tenantId: decoded.tenantId,
+280:     method: req.method,
+281:     path: req.baseUrl + req.path,
+282:     requestId: req.requestId,
+283:   });
+284:   res.status(401).json({
+285:     success: false,
+286:     error: { code: 'UNAUTHORIZED', message: 'A connector token is not accepted as a Bearer credential. Present your API key in the x-api-key header.' },
+287:   });
+288: }
+289: 
+290: /** True when it answered: the request carries a Bearer whose signature verifies and whose signed `type` is `connector`. */
+291: async function refusesConnectorBearer(req: Request, res: Response): Promise<boolean> {
+292:   const authHeader = req.headers.authorization;
+293:   // The same parse `authenticateToken` and the upstreams' shared `authenticate()` use: the literal `Bearer ` scheme and
+294:   // the second space-separated word. A header either of them would not read as a Bearer is nothing they would accept.
+295:   if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
+296:   let decoded: UserPayload;
+297:   try {
+298:     decoded = await verifyRs256(authHeader.split(' ')[1]);
+299:   } catch {
+300:     // Not a verifiable token (bad signature, expired, malformed, no key): not a connector credential, so it goes on exactly
+301:     // as it did before this check existed. `authenticateToken` answers its own 401; a mount without it forwards the header
+302:     // and the upstream's signature check refuses it. Only a token whose signature verified is acted on.
+303:     return false;
+304:   }
+305:   if (decoded.type !== 'connector') return false;
+306:   refuseConnectorBearer(req, res, decoded);
+307:   return true;
+308: }
+309: 
+310: /**
+311:  * KS-1470: refuse a connector JWT presented as a Bearer at the FRONT DOOR, before any mount.
+312:  *
+313:  * KS-1198 refuses it inside `authenticateToken` only. A mount that does not use it (`/api/verification`,
+314:  * `/api/v2/verification`, `/api/presentations/verify`, `/api/documents/:id/sig-json`, `/api/auth/*`, `/api/oauth/*`,
+315:  * `/api/sessions`, the gateway-internal `/originate/`, ...) forwarded the header to the upstream verbatim, where the
+316:  * shared `authenticate()` checks the signature only and takes the connector JWT for an ordinary principal.
+317:  * Nothing client-side holds a connector JWT: the gateway mints one from a validated `x-api-key` and attaches it itself.
+318:  *
+319:  * This sees only what the CALLER sent. The `x-api-key` branch of `authenticateToken` sets its own
+320:  * `Authorization: Bearer <connector JWT>` later, on a route that this middleware has already let through, so the
+321:  * gateway's own flow is untouched. Same trigger as KS-1198 (the SIGNED `type` claim, after the signature verifies),
+322:  * same 401, same warning. A valid `x-api-key` beside a connector Bearer is refused too: a mount that never validates
+323:  * the key forwards the Bearer regardless, so the key cannot be what makes it safe.
+324:  *
+325:  * Mounted once, in `index.ts`, after the audit middleware and before the first route.
+326:  */
+327: export function rejectConnectorBearer(): RequestHandler {
+328:   return async (req: Request, res: Response, next: NextFunction) => {
+329:     let answered: boolean;
+330:     try {
+331:       answered = await refusesConnectorBearer(req, res);
+332:     } catch (err) {
+333:       next(err);
+334:       return;
+335:     }
+336:     if (!answered) next();
+337:   };
+338: }
+339: 
+340: // ---------------------------------------------------------------------------
+341: // Express middleware factory
+342: // ---------------------------------------------------------------------------
+343: 
+344: // KS-1195: the per-key limiter (KS-164/170/616) reads req.user, which only this
+345: // middleware sets. It used to be app.use()d in index.ts ahead of every
+346: // authenticateToken, so it never saw a user and never fired. It now runs as the
+347: // continuation of each branch below that sets req.user, inside that branch's
+348: // tenant context; it passes non-machine callers straight through.
+349: const clientRateLimit = enforceClientRateLimit();
+350: 
+351: // KS-1205 F-4: the limiter runs as a floating promise (the continuation of each
+352: // branch). If the continuation throws, that promise rejects; with nothing attached
+353: // it is an unhandled rejection, which in production's default exit mode shuts the
+354: // process down, and on the JWT branch it must not be turned into a 401 either.
+355: // Hand the rejection to Express instead.
+356: const continueThroughLimiter = (req: Request, res: Response, next: NextFunction): Promise<void> =>
+357:   clientRateLimit(req, res, next).catch(next);
+358: 
+359: /**
+360:  * Returns Express middleware that authenticates incoming requests via:
+361:  * 1. `x-api-key` header (API key / connector authentication)
+362:  * 2. `Authorization: Bearer <token>` header (JWT or test token)
+363:  *
+364:  * When `required` is true (default) unauthenticated requests receive 401.
+365:  * When false the request proceeds without a user context.
+366:  */
+367: export function authenticateToken(required: boolean = true): RequestHandler {
+368:   return async (req: Request, res: Response, next: NextFunction) => {
+369:     // --- API key path ---
+370:     const apiKey = req.headers['x-api-key'] as string | undefined;
+371:     const presentedKey = Boolean(apiKey && apiKey.startsWith('sk_'));
+372:     const meta = apiKey && presentedKey ? await validateApiKey(apiKey) : null;
+373:     if (presentedKey && !meta && required) {
+374:       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid API key' } });
+375:       return;
+376:     }
+377:     // KS-1207: a key that fails validation on an OPTIONAL mount falls through to
+378:     // the Bearer path below instead of calling next(). It used to call next()
+379:     // straight away, so any junk `sk_` header switched off the Bearer check and
+380:     // with it the session-revocation check: a revoked session's JWT plus
+381:     // `x-api-key: sk_x` was forwarded, and the upstreams (shared authenticate(),
+382:     // signature only) accepted it. With no Bearer the request is still anonymous,
+383:     // exactly as before.
+384:     if (apiKey && meta) {
+385:       // KS-1215 (Wednesday's ruling O3): this branch never carries the caller's
+386:       // Bearer. The principal here is the connector, so any Authorization the
+387:       // caller sent is dropped first, before any await. A successful exchange
+388:       // below sets the connector JWT; a failed one forwards no Bearer at all.
+389:       // Before, a failed exchange left the caller's header in place: a REVOKED
+390:       // session's JWT beside a valid key reached the upstreams past the
+391:       // revocation check, and a live user's JWT travelled under the connector
+392:       // principal. A valid key alone still grants the connector, by design.
+393:       delete req.headers.authorization;
+394:       // KS-1205 N-2: the bucket is recorded against the request below; the limiter reads
+395:       // that record, not this field, so a JWT claim of the same name cannot reach it.
+396:       const rateLimitBucket = `api_key:${createHash('sha256').update('secuura-rate-limit-bucket\0').update(apiKey).digest('hex')}`;
+397:       const connectorUser: UserPayload = {
+398:         userId: `connector:${meta.connectorId || 'api-key'}`,
+399:         email: 'connector@secuura.io',
+400:         role: 'connector',
+401:         organizationId: meta.organizationId,
+402:         verificationLevel: 'api_key',
+403:         authMethod: 'api_key',
+404:         // KS-164: carry the connector's per-key allowance onto req.user so
+405:         // enforceClientRateLimit applies it. Without this the limiter saw no
+406:         // rateLimit and API-key traffic bypassed the per-key ceiling entirely.
+407:         connectorId: meta.connectorId,
+408:         rateLimit: meta.rateLimit,
+409:         rateLimitWindow: meta.rateLimitWindow,
+410:         rateLimitBucket,
+411:         // KS-480: the key's scopes must live on the principal — requireScope
+412:         // reads user.scopes, and without this every scope-gated mount 403'd
+413:         // sk_ callers with `granted: []` regardless of the key's actual grants.
+414:         scopes: meta.scopes,
+415:         tenantId: meta.tenantId || undefined,
+416:         tenantSlug: meta.tenantSlug || undefined,
+417:       };
+418:       req.user = connectorUser;
+419:       recordApiKeyBucket(req, rateLimitBucket);
+420:       (req as any).connectorMeta = meta;
+421:       // KS-480: exchange the key for a short-lived connector JWT so downstream
+422:       // Bearer-only services (originate documents, anchoring — pen-test H2)
+423:       // accept the proxied request. On exchange failure the header is left
+424:       // unset and Bearer-only upstreams 401 (fail closed, loudly logged above).
+425:       const connectorBearer = await getConnectorBearer(apiKey);
+426:       if (connectorBearer) {
+427:         req.headers.authorization = `Bearer ${connectorBearer}`;
+428:       }
+429:       req.headers['x-user-id'] = connectorUser.userId;
+430:       req.headers['x-user-email'] = connectorUser.email;
+431:       req.headers['x-user-role'] = 'connector';
+432:       if (meta.organizationId) req.headers['x-organization-id'] = meta.organizationId;
+433:       if (meta.tenantId) req.headers['x-tenant-id'] = meta.tenantId;
+434:       if (meta.tenantSlug) req.headers['x-tenant-slug'] = meta.tenantSlug;
+435:       req.headers['x-verification-level'] = 'api_key';
+436:       // KS-458: the gateway is the trust boundary — seed the RLS tenant
+437:       // context from the VERIFIED credential (never the inbound header) so
+438:       // the gateway's own DB reads/writes satisfy fail-closed RLS.
+439:       runWithTenantId(meta.tenantId, () => continueThroughLimiter(req, res, next));
+440:       return;
+441:     }
+442: 
+443:     // --- Bearer token path ---
+444:     const authHeader = req.headers.authorization;
+445: 
+446:     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+447:       if (required) {
+448:         res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+449:         return;
+450:       }
+451:       next();
+452:       return;
+453:     }
+454: 
+455:     const token = authHeader.split(' ')[1];
+456: 
+457:     // Try test token first (no-ops outside dev/test)
+458:     const testPayload = parseTestToken(token);
+459:     if (testPayload) {
+460:       req.user = testPayload;
+461:       req.headers['x-user-id'] = testPayload.userId;
+462:       req.headers['x-user-email'] = testPayload.email;
+463:       req.headers['x-user-role'] = testPayload.role;
+464:       if (testPayload.organizationId) {
+465:         req.headers['x-organization-id'] = testPayload.organizationId;
+466:       }
+467:       req.headers['x-verification-level'] = testPayload.verificationLevel;
+468:       // KS-458: seed the RLS tenant context from the verified test payload.
+469:       runWithTenantId(testPayload.tenantId, () => continueThroughLimiter(req, res, next));
+470:       return;
+471:     }
+472: 
+473:     // Verify JWT
+474:     try {
+475:       // KS-184/347: RS256-only verification; key resolved by kid via JWKS with a
+476:       // static-key fallback (see verifyRs256). Async for the JWKS fetch.
+477:       const decoded = await verifyRs256(token);
+478: 
+479:       // KS-1198: a connector JWT is the gateway's own transport to the upstream services. It is minted from a
+480:       // validated `x-api-key` at auth's internal endpoint and forwarded; nothing on the client side holds one, and
+481:       // the mint is not routed through the edge. Presented directly as a Bearer it would be an ordinary principal
+482:       // here and skip the gates only the API-key branch sets up (connectorMeta: the scope check and the
+483:       // allowedDocumentTypes allow-list). So it is refused: hard, on required AND optional mounts (a pass-through
+484:       // would forward the verified Bearer upstream), and only after the signature verified (an unverifiable token
+485:       // keeps taking the invalid-token path below). One structured warning per refusal; the token is never logged.
+486:       if (decoded.type === 'connector') {
+487:         refuseConnectorBearer(req, res, decoded);
+488:         return;
+489:       }
+490: 
+491:       // KS-257: enforce session revocation for interactive JWT sessions. The
+492:       // stateless verify above doesn't see logout / the KS-43 session cap /
+493:       // breach revocation, so a revoked-session token kept passing here — and at
+494:       // every header-trusting downstream service — until it expired (~1h). The
+495:       // API-key/connector and test-token paths return earlier and carry no
+496:       // sessionId, so this only gates interactive sessions. Fail OPEN if the
+497:       // session store is unreachable so a Redis blip can't 401 all traffic.
+498:       if (decoded.sessionId) {
+499:         const active = await isSessionActive(decoded.sessionId, getRedisClient() ?? undefined);
+500:         if (active === false) {
+501:           res.status(401).json({ success: false, error: { code: 'SESSION_INVALIDATED', message: 'Session has been invalidated' } });
+502:           return;
+503:         }
+504:         if (active === null) {
+505:           console.warn('[gateway-auth] session-revocation check skipped — session store unreachable', { sessionId: decoded.sessionId });
+506:         }
+507:       }
+508: 
+509:       if (!decoded.tenantId) decoded.tenantId = DEFAULT_TENANT_ID;
+510:       req.user = decoded;
+511:       req.headers['x-user-id'] = decoded.userId;
+512:       if (decoded.email) req.headers['x-user-email'] = decoded.email;
+513:       req.headers['x-user-role'] = decoded.role;
+514:       if (decoded.organizationId) {
+515:         req.headers['x-organization-id'] = decoded.organizationId;
+516:       }
+517:       if (decoded.verificationLevel) req.headers['x-verification-level'] = decoded.verificationLevel;
+518:       else delete req.headers['x-verification-level'];
+519: 
+520:       // Tenant context: super_admin can override via X-Tenant-Id header (admin portal tenant selector)
+521:       const SUPER_ADMIN_ROLES = ['super_admin', 'SUPER_ADMIN', 'SYSTEM_ADMIN', 'platform_admin'];
+522:       const tenantOverride = req.headers['x-tenant-override'] as string | undefined;
+523:       if (tenantOverride && SUPER_ADMIN_ROLES.includes(decoded.role)) {
+524:         req.headers['x-tenant-id'] = tenantOverride;
+525:         // Clear slug — service will resolve from config
+526:         req.headers['x-tenant-slug'] = '';
+527:       } else {
+528:         if (decoded.tenantId) req.headers['x-tenant-id'] = decoded.tenantId;
+529:         if (decoded.tenantSlug) req.headers['x-tenant-slug'] = decoded.tenantSlug;
+530:       }
+531:       // KS-458: seed the RLS tenant context from the verified JWT (or the
+532:       // super-admin override that was just written to x-tenant-id).
+533:       runWithTenantId((req.headers['x-tenant-id'] as string | undefined) || decoded.tenantId, () => continueThroughLimiter(req, res, next));
+534:     } catch (error) {
+535:       if (required) {
+536:         res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid or expired token' } });
+537:         return;
+538:       }
+539:       next();
+540:     }
+541:   };
+542: }
+
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts
+1: // KS-1240 (api-gateway middleware/auth.ts getConnectorBearer and validateApiKey): both fetches carried no timeout, so an upstream (auth's connector-token exchange, security's key-validate) that never
+2: // answered held the caller's request open with no bound. T1/T2 pin that each fetch is given an abort signal built from AbortSignal.timeout with a bounded value; T3/T4 drive an upstream that never
+3: // answers and fire that signal: the call must settle with null (the existing unreachable-upstream answer) instead of hanging. A call still pending after 300 ms is reported as the string HUNG, so a
+4: // hang is a red assertion, not a stuck run. C1 to C3 keep the answers for a healthy upstream exactly as they were.
+5: import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+6: import { getConnectorBearer, validateApiKey, apiKeyCache, connectorBearerCache } from '../middleware/auth';
+7: 
+8: const fetchMock = vi.fn();
+9: vi.stubGlobal('fetch', fetchMock);
+10: 
+11: let timeoutSpy: ReturnType<typeof vi.spyOn>;
+12: let controller: AbortController;
+13: 
+14: beforeEach(() => {
+15:   fetchMock.mockReset();
+16:   apiKeyCache.clear();
+17:   connectorBearerCache.clear();
+18:   controller = new AbortController();
+19:   timeoutSpy = vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => controller.signal);
+20: });
+21: 
+22: afterEach(() => {
+23:   timeoutSpy.mockRestore();
+24: });
+25: 
+26: function neverAnswering(): void {
+27:   fetchMock.mockImplementation(
+28:     (_url: string, init?: { signal?: AbortSignal }) =>
+29:       new Promise((_resolve, reject) => {
+30:         init?.signal?.addEventListener('abort', () => reject(new Error('aborted by signal')));
+31:       }),
+32:   );
+33: }
+34: 
+35: async function settled<T>(pending: Promise<T>): Promise<T | 'HUNG'> {
+36:   return Promise.race([pending, new Promise<'HUNG'>((resolve) => setTimeout(() => resolve('HUNG'), 300))]);
+37: }
+38: 
+39: describe('KS-1240: the gateway key-exchange and key-validate fetches are bounded', () => {
+40:   it('RED KS-1240 T1 the connector-token exchange fetch is given a timeout signal', async () => {
+41:     fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { token: 't1', expiresIn: 600 } }) });
+42:     await getConnectorBearer('sk_ks1240_t1');
+43:     const init = fetchMock.mock.calls[0][1] as { signal?: unknown };
+44:     expect(init.signal).toBeInstanceOf(AbortSignal);
+45:     expect(timeoutSpy).toHaveBeenCalledTimes(1);
+46:     const ms = timeoutSpy.mock.calls[0][0] as number;
+47:     expect(ms).toBeGreaterThan(0);
+48:     expect(ms).toBeLessThanOrEqual(30000);
+49:   });
+50: 
+51:   it('RED KS-1240 T2 the key-validate fetch is given a timeout signal', async () => {
+52:     fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { valid: false } }) });
+53:     await validateApiKey('sk_ks1240_t2');
+54:     const init = fetchMock.mock.calls[0][1] as { signal?: unknown };
+55:     expect(init.signal).toBeInstanceOf(AbortSignal);
+56:     expect(timeoutSpy).toHaveBeenCalledTimes(1);
+57:     const ms = timeoutSpy.mock.calls[0][0] as number;
+58:     expect(ms).toBeGreaterThan(0);
+59:     expect(ms).toBeLessThanOrEqual(30000);
+60:   });
+61: 
+62:   it('RED KS-1240 T3 an exchange that never answers settles with null once the signal fires', async () => {
+63:     neverAnswering();
+64:     const pending = getConnectorBearer('sk_ks1240_t3');
+65:     controller.abort();
+66:     expect(await settled(pending)).toBeNull();
+67:   });
+68: 
+69:   it('RED KS-1240 T4 a validate that never answers settles with null once the signal fires and caches nothing', async () => {
+70:     neverAnswering();
+71:     const pending = validateApiKey('sk_ks1240_t4');
+72:     controller.abort();
+73:     expect(await settled(pending)).toBeNull();
+74:     expect(apiKeyCache.has('sk_ks1240_t4')).toBe(false);
+75:   });
+76: 
+77:   it('control KS-1240 C1 a healthy exchange still returns the connector token and caches it', async () => {
+78:     fetchMock.mockResolvedValue({ ok: true, json: async () => ({ data: { token: 'jwt-c1', expiresIn: 600 } }) });
+79:     expect(await getConnectorBearer('sk_ks1240_c1')).toBe('jwt-c1');
+80:     expect(connectorBearerCache.get('sk_ks1240_c1')?.token).toBe('jwt-c1');
+81:   });
+82: 
+83:   it('control KS-1240 C2 a healthy validate still returns the key metadata', async () => {
+84:     fetchMock.mockResolvedValue({
+85:       ok: true,
+86:       json: async () => ({ data: { valid: true, connectorId: 'platform-s:c2', scopes: ['documents:write'], organizationId: 'org-c2', tenantId: 'ten-c2' } }),
+87:     });
+88:     const meta = await validateApiKey('sk_ks1240_c2');
+89:     expect(meta?.connectorId).toBe('platform-s:c2');
+90:     expect(meta?.tenantId).toBe('ten-c2');
+91:   });
+92: 
+93:   it('control KS-1240 C3 a refused exchange (HTTP 502) still returns null', async () => {
+94:     fetchMock.mockResolvedValue({ ok: false, status: 502, json: async () => ({}) });
+95:     expect(await getConnectorBearer('sk_ks1240_c3')).toBeNull();
+96:   });
+97: });
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "note": "Built by the operator from the Spark round's own checker artefacts (not spark_gate.sh: no PR exists). Treat as measured.",
+ "tip": "65bc28234507ffcf242381f8020d80b3efe83e85",
+ "head_sha": "573ada7bea46adad32205d4c2a6c41e9fe3795fd",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/api-gateway/src/middleware/auth.ts",
+   "added": "6",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts",
+   "added": "97",
+   "deleted": "0"
+  }
+ ],
+ "diff_numstat": [
+  [
+   "6",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/middleware/auth.ts"
+  ],
+  [
+   "97",
+   "0",
+   "Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts"
+  ]
+ ],
+ "test_on_base_with_test_files_only (A4 red-first)": {
+  "total": 7,
+  "failed": 4
+ },
+ "test_on_head (A5 green-after)": {
+  "total": 7,
+  "failed": 0
+ },
+ "whole_suite_delta (suite_delta.out)": "baseline: total=1255 failed=0 | after: total=1262 failed=0\ndevelop's own reds (attributed, not counted): []\nNEW reds: []\nreds fixed by the patch: []\ntests added: 7\n",
+ "checker_summary": [
+  "PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip",
+  "PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)",
+  "SUMMARY files=2 +103/-0 test=src/__tests__/ks1240-gateway-key-exchange-and-validate-fetches-are-bounded.test.ts red_first=yes apply_mode=strict",
+  "RESULT: PASS (7/7)"
+ ],
+ "lint": "not run"
+}

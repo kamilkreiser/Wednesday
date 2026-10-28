@@ -1,0 +1,76 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 12667,
+     "total_tokens": 13834,
+     "completion_tokens": 1167,
+     "prompt_tokens_details": {
+      "cached_tokens": 8192
+     }
+    },
+    "seconds": 41.3,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 12667,
+  "completion_tokens": 1167,
+  "seconds": 41.3,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The ticket's acceptance criterion \u2014 that the connector-token / key-validate fetch gets a timeout \u2014 is not implemented by this PR; the diff only touches batch.ts and audit-export.ts, not middleware/auth.ts or proxy.ts/admin.ts.",
+    "evidence": "Ticket: 'the connector-token exchange / key-validate `fetch` carries **no timeout**' and 'What to do: Give the fetch an explicit timeout (AbortSignal / `AbortController`)'. Diff touches only Blockchain/Dev/services/api-gateway/src/routes/batch.ts and audit-export.ts; no changes to middleware/auth.ts, proxy.ts, or admin.ts.",
+    "test_or_reason": "The new test file's own comment (line 2) says 'the key-exchange half of the same ticket is in middleware/auth.ts, the proxy.ts and admin.ts half is another file' \u2014 the PR explicitly excludes the ticket's named target.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The ticket's measured evidence (an exchange that never answers hangs; a 2.5s-late body hangs for that long) is not reproduced or verified by any test in this PR; the new tests only statically inspect source text for the presence of 'AbortSignal.timeout(' and a constant, not actual fetch behaviour.",
+    "evidence": "facts.json: 'test_on_base_with_test_files_only (A4 red-first)': total=8 failed=4; 'test_on_head (A5 green-after)': total=8 failed=0. The test file (lines 55-73) only calls `unbounded(BATCH_SRC)` and `constantMs(...)` \u2014 no runtime fetch or timeout simulation.",
+    "test_or_reason": "The ticket's 'Measured on BOTH trees' claims are not backed by any test in the PR; the tests are static source scans, not behavioural reproductions.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The PR's timeout constants (30_000 ms) are not validated against the ticket's requirement of a '503 on timeout' \u2014 the batch catch returns `{ ok: false, error }` (not a 503) and the audit catch returns a constant 502, contradicting the ticket's stated refusal shape.",
+    "evidence": "Ticket: 'decide the refusal shape \u2014 a 503 on timeout is consistent with how the connector branch already answers a refused exchange'. batch.ts:150-152 `catch (err: any) { return { ok: false, error: err.message || 'Service request failed' }; }`; audit-export.ts:215-223 `res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Failed to reach security service' } });`.",
+    "test_or_reason": "The ticket explicitly asks for a 503 on timeout; the PR's code returns 502 (audit) or a per-item error object (batch), not a 503.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The new test's static source scan can be fooled by a signal placed in a comment or string within the fetch call, and the control tests only prove the extractor works on synthetic one-line calls, not on the real multi-line fetch in audit-export.ts.",
+    "evidence": "Test file line 39: `return call.includes('AbortSignal.timeout(');` \u2014 a comment like `// AbortSignal.timeout(5000)` inside the call would pass. Control C3 (line 84) uses a synthetic one-line call; the real audit fetch spans lines 176-180 with a comment inside.",
+    "test_or_reason": "The test does not pin that the signal is actually passed to the fetch init object; it only checks substring presence.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The PR description (not provided) and the draft comment (none) do not mention that the ticket's key-validate/connector-token fetch is left untouched, so a reader might believe the whole ticket is addressed.",
+    "evidence": "Ticket: 'the connector-token exchange / key-validate `fetch` carries **no timeout**'. Diff touches only batch.ts and audit-export.ts; no changes to middleware/auth.ts or proxy.ts/admin.ts.",
+    "test_or_reason": "The PR's own test comment (line 2) admits the key-exchange half is in another file, but the PR body/comment is absent, so the scope gap is not communicated.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The timeout value 30_000 ms is a magic number with no justification in the ticket or code; the ticket only says 'an explicit timeout' without specifying a bound.",
+    "evidence": "batch.ts:124 `const UPSTREAM_BATCH_FETCH_TIMEOUT_MS = 30_000;`; audit-export.ts:75 `const UPSTREAM_AUDIT_FETCH_TIMEOUT_MS = 30_000;`.",
+    "test_or_reason": "No rationale for 30s vs any other value is given; the test only checks it is \u2264120000 ms.",
+    "evidence_quote_found_in_input": true
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

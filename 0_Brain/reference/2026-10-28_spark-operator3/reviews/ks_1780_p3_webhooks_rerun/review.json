@@ -1,0 +1,76 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 8986,
+     "total_tokens": 10313,
+     "completion_tokens": 1327,
+     "prompt_tokens_details": {
+      "cached_tokens": 8192
+     }
+    },
+    "seconds": 41.2,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 8000
+   }
+  ],
+  "prompt_tokens": 8986,
+  "completion_tokens": 1327,
+  "seconds": 41.2,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The PR fixes only the webhooks.ts PATCH /:id site, but the ticket identifies 15 adminConfig.ts catch blocks and the systemErrors.ts:196 instanceof check as the same pre-fail500 read hazard; none of those are changed, so the blast radius of the claimed fix is far narrower than the ticket's scope.",
+    "evidence": "ticket: \"routes/adminConfig.ts: 15 catch blocks, at :189, :226, :289, :378, :433, :521, :702, :818, :933, :1226, :1389, :1567, :1658, :1695 and :1723. 13 of them open with `if (err?.message?.includes('does not exist') || err?.code === '42P01')` ... `:1567` reads `err?.message?.includes('does not exist')` with no code test.\" and \"routes/systemErrors.ts:195-:199 ... `if (err instanceof z.ZodError) {` at `:196`\"; diff only touches utils/pgErrors.ts and adds one test file.",
+    "test_or_reason": "The diff modifies only extractPgCode; no adminConfig.ts or systemErrors.ts file is touched, so the 15 adminConfig reads and the systemErrors instanceof check remain unguarded.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The PR's comment and test header claim the fix prevents a request from getting NO answer, but the fix only wraps extractPgCode in a try/catch; the same hazard remains in the 15 adminConfig.ts catch blocks and the systemErrors.ts instanceof check, so the claim that the class of pre-helper reads is fixed is false.",
+    "evidence": "test file line 1-2: \"the catch of PATCH /api/webhooks/:id called `extractPgCode(err)` BEFORE it reached fail500. extractPgCode reads `code`, `meta.code` and `message` of the thrown value with no try of its own, so a revoked Proxy, or an object whose `code` getter throws, made the call throw inside the catch: the handler's promise rejected and the request got NO answer.\"",
+    "test_or_reason": "The ticket's item 2 lists 15 adminConfig blocks and the systemErrors.ts:196 instanceof check as the same shape; the PR does not touch those files, so the hazard persists there.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The new test B4 pins extractPgCode returning undefined for a throwing meta getter, but the implementation's try/catch wraps the entire readPgCode call, so the test passes even though the getter throw is caught; this is a valid pin but does not prove the route-level behavior for a meta getter (only B1/B2 cover route-level behavior, and only for code getter/revoked proxy).",
+    "evidence": "test line 98-104: \"it('RED KS-1780 B4 extractPgCode of an object whose meta getter throws is undefined, not a throw', () => { const hostile = { get meta(): { code: string } { throw new Error('ks1780 meta getter'); } }; expect(pgCodeOrThrew(hostile)).toBeUndefined(); });\"",
+    "test_or_reason": "The route-level tests B1/B2 use revokedProxy and throwingCodeGetter, but no route-level test uses a throwing meta getter; B4 only tests the helper directly.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Minor",
+    "claim": "The test file's header comment says \"B1/B2 drive the real route over a loopback listener and read what the caller gets\", but the route is mounted with a mocked auth middleware and a mocked db, so it is not the real production route; the claim of \"real route\" is overstated.",
+    "evidence": "test file line 15-17: \"jest.mock('../middleware/auth', () => ({ authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(), }));\" and line 7-13: \"jest.mock('../db', () => ({ prisma: { $queryRaw: jest.fn(), $executeRaw: jest.fn(), $executeRawUnsafe: mockExecuteRawUnsafe } }));\"",
+    "test_or_reason": "The route is exercised with mocked dependencies, so it is not the real production route; the comment's \"real route\" is misleading.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The ticket's acceptance criteria are not explicitly listed, but the PR addresses only the webhooks.ts site; the ticket's scope includes 15 adminConfig blocks and the systemErrors.ts instanceof check, so the acceptance of the ticket as a whole is not met.",
+    "evidence": "ticket: \"The scan: in each route file that defines its own `fail500` ... `routes/adminConfig.ts`: 15 catch blocks ... `routes/systemErrors.ts:195`: item 1.\"",
+    "test_or_reason": "The diff does not touch adminConfig.ts or systemErrors.ts, so those sites remain unaddressed.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Note",
+    "claim": "The PR's comment in pgErrors.ts says \"A value that cannot be read has no code\", which is a reasonable inference but not measured; the ticket itself says \"Whether a thrown value of those shapes ... can reach any of these catches in practice\" is not established.",
+    "evidence": "pgErrors.ts:53-54: \"A revoked Proxy, or an object whose getter throws, makes one of them throw. The route catches that call this function BEFORE they reach fail500 ... A value that cannot be read has no code.\"",
+    "test_or_reason": "The ticket's \"Not established\" section explicitly says the reachability of such values in practice is unknown.",
+    "evidence_quote_found_in_input": false
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}
