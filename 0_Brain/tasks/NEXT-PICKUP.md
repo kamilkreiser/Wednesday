@@ -6,6 +6,10 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ ROTATION HANDOVER 07:5x 29 Oct (the 02:5x seat, ctx ~80%) — READ THIS FIRST: the UPDATE lines at the top of the 06:2x block below are CURRENT (newest first)
+- Floor: R 7th %68 (holding for its #1797 turn), U 5th %69 (prepping #1800 on its turn, sent 20:46:03Z). develop = 2a3156086df0 (10 merges since 02:5x, none deployed). No QUESTION pending. Nothing open with Kam except his 07:29 ruling, which is APPLIED: Wednesday + the Spark, minimal Claude.
+- FIRST WORK for the successor: (1) U 5th PUSHED #1800 -> completion check -> MERGE GO -> verify -> R 7th's turn for #1797. (2) Spark is IDLE: per Kam 07:29, brief it yourself (no drafter) from the operator-7 report's HOLD-WITH-DECISION list or fresh candidates. (3) Deploy round (ONE Opus seat) once the chain is in.
+
 ## ⏩ CHECKPOINT 06:2x 29 Oct (the 02:5x seat, now also the MORNING seat; ctx 70%) — READ THIS FIRST, supersedes every block below where they differ
 - **develop = f868f44bf613d5ba420bf453a3bd039a8614bc63** (#1791 merged and verified). Seven merges since 02:5x, each completion-checked and verified at origin: #1786, #1785, #1788, #1782, #1789, #1787, #1791. Highest docs section 98; #1801 takes 99. **NOT DEPLOYED** (boxes on bd6697e079fc).
 - **#1801 (option b): MERGE GO sent to Y 5th (%67) at 19:24:02Z**, head b6ab166570f9. OWED: Y's MERGED mail -> verify at origin (tree = head tree, single parent f868f44bf613) -> Y wraps (HANDOVER) -> score + pane_close -> **mail R 6th (%54) its turn for #1795** (gate 12 GO WITH NOTES; tier 2; no fix-before-merge; prep at the highest + 1). Then R: #1793 (gate 8 GO WITH NOTES), #1797 (gate 9; + the null/0/false cell owed), #1799 (gate 10; revert the auth.ts whitespace at prep). R ctx ~67%: it wraps at its band with a HANDOVER; an R 7th continues.
