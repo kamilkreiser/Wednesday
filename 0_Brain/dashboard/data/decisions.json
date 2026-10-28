@@ -51274,7 +51274,9 @@
    "2026-09-09 12:13",
    "2026-09-21 10:15",
    "CARD secuura-ks1102-public-status-what-may-show"
-  ]
+  ],
+  "delivered_artefact": "brief to Seat D 39th fleet/briefs_staged/2026-10-28_seatD39_m1b_measure_first.md, sent + verified 07:41:36Z, launched %61",
+  "delivered_ts": "2026-10-28T18:41:52.745774+11:00"
  },
  {
   "id": "secuura-ks1240-tenant-create-key-fail-answer-1028",
@@ -51301,9 +51303,9 @@
   ],
   "recommended": "c",
   "ts": "2026-10-28T18:23:05.257805+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "c",
+  "ruled_ts": "2026-10-28T20:54:33.549578+11:00",
   "prior_rulings_overridden": [
    "2026-08-17 19:53",
    "2026-08-17 20:23",
@@ -51331,6 +51333,95 @@
    "CARD secuura-tenant-isolation-migration-ks1401-1005",
    "CARD secuura-ks1032-fail-closed-when-vouch-secret-unset-1013",
    "CARD secuura-ks485-answer-peter-vouch-secret-1023"
+  ],
+  "delivered_artefact": "ANSWER to Seat Y 4th 'Kam ruled KS-1240 card c - read-only vault-key trace' (report -> Y's seat folder ks1240_vault_key_trace.md, then a KS-1240 comment); result returns to Kam as the a/b choice",
+  "delivered_ts": "2026-10-28T20:55:27.267555+11:00"
+ },
+ {
+  "id": "secuura-m1b-test-write-credential-1028",
+  "client_project": "Secuura/Blockchain",
+  "title": "Which login does the one kintsugi test write use? (measure-first, #1756)",
+  "bluf": "Kintsugi reads are done: 0 of the 18 documents were mis-filed by the #1756 defect (two independent checks, both with controls; all 18 came from the connector, no human user created a document in the window). The one test write you asked for still needs a login for a non-default-tenant user, and the seat holds none. It writes one tagged test document through the gateway and makes one preview-testnet anchor (no mainnet, no money). Nothing is written until you choose. (Prior-ruling gate matched only generic words: KS-888 usage counter, a Mac purchase test, an Ornith model test; read, none is this subject.)",
+  "default_action": "c: no write on either box; D 39th runs the read-only demo checks and reports; the fix stays not-observed-live.",
+  "options": [
+   {
+    "key": "a",
+    "label": "You supply a test login",
+    "detail": "You put a non-default-tenant test user's credential in a file and give the path; cleanest proof (document lands in that user's tenant, owner is that user)."
+   },
+   {
+    "key": "b",
+    "label": "Use the rotated admin login, acting as a tenant",
+    "detail": "The seat reads the admin credential you rotated on 27 Oct by path (never printed, never in mail) and creates as super-admin under X-Tenant-Override. Proves the fix and shows the audit blind spot; unmeasured whether the override is honoured for this account (role-case check)."
+   },
+   {
+    "key": "c",
+    "label": "Skip the write",
+    "detail": "The reads stand; the fix stays 'delivered, gate-tested, not observed live' on kintsugi until a real create happens."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-28T19:13:21.721639+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-10-28T22:09:20.035016+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-02 16:08",
+   "2026-09-09 08:21",
+   "2026-09-09 10:30",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 12:00",
+   "2026-09-12 11:34",
+   "2026-09-17 08:47",
+   "2026-09-18 10:27",
+   "CARD secuura-archive-uat-tickets-vs-peters-test-list",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-ks1116-presentation-credential-ownership-model",
+   "CARD secuura-ks1245-smoke-test-degraded-semantics",
+   "CARD secuura-ks888-validate-usage-write-failure",
+   "CARD wed-mac-purchase-test-first-1010",
+   "CARD wed-ornith-122b-test-on-spark-1026"
+  ],
+  "delivered_artefact": "brief to Seat D 40th fleet/briefs_staged/2026-10-28_seatD40_m1b_test_write_b.md, sent + verified 11:12:40Z, launched %63 (kintsugi only)",
+  "delivered_ts": "2026-10-28T22:12:58.547335+11:00"
+ },
+ {
+  "id": "secuura-ks1240-key-fail-answer-measured-1028",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1240, now measured: when tenant creation can't make the tenant's key, what should it answer?",
+  "bluf": "You chose 'measure first' at 20:54; the measurement is done (Seat Y 4th, report in its seat folder ks1240_vault_key_trace.md). Nothing in the code reads the tenant's vault key at all: one writer, no reader, checked with controls. The key file in the 'created' answer has been empty since April, even on success. And 'refuse and roll back' cannot fully roll back: the key service still writes its key row after the caller gives up, and nothing deletes it. (Prior-ruling gate: matched the 20:54 KS-1240 card, whose option c asked for exactly this follow-up, plus three cards sharing only generic words; read, none decides this.)",
+  "default_action": "a is NOT built until you choose; the bounded-timeout PR (#1782) ships unchanged and nothing else changes.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Log line only (no contract change)",
+    "detail": "Keep 201 exactly as published; add a server log line when the key service fails or answers not-ok. Smallest change, nothing that works today changes, and it makes the silent case visible."
+   },
+   {
+    "key": "b",
+    "label": "Explicit 'key pending' flag",
+    "detail": "Keep 201 and add a pending flag and message to the published response plus the log line; changes the public API for a key nothing currently uses."
+   },
+   {
+    "key": "c",
+    "label": "Refuse with 503",
+    "detail": "Tenant creation fails whenever the key service is down (it works today), and the key row it already wrote is left behind."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-28T21:08:07.577575+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-mysql2-fuse-measured-2026-09-03",
+   "CARD secuura-fuse-1009-measured-1001",
+   "CARD secuura-ks1032-fail-closed-when-vouch-secret-unset-1013",
+   "CARD secuura-ks485-answer-peter-vouch-secret-1023",
+   "CARD secuura-ks1240-tenant-create-key-fail-answer-1028"
   ]
  }
 ]
