@@ -1,0 +1,138 @@
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts b/Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/meteringKey.ts
+@@ -16,3 +16,7 @@
+   /** The internal `key_…` record id, for later revoke / lookup. */
+   id: string;
+ }
++
++// KS-1240 (class): the longest provisioning waits for the security service to mint the metering key. The fetch carried no timeout, so a security service that accepted the connection and never answered
++// held the tenant-creation request for as long as the socket lived. On expiry the fetch rejects, requestMeteringKey throws, and the provisioning handler fails soft as it already does for a non-2xx.
++const METERING_KEY_FETCH_TIMEOUT_MS = 10_000;
+@@ -55,6 +59,7 @@
+       scopes: ['metering:read'],
+       connectorId: 'platform-s',
+     }),
++    signal: AbortSignal.timeout(METERING_KEY_FETCH_TIMEOUT_MS),
+   });
+   // Non-2xx → throw so the provisioning handler can fail soft (tenant already active).
+   if (!res.ok) {
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/index.ts b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/index.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+@@ -37,4 +37,8 @@
+ const TOKENISATION_URL = process.env.TOKENISATION_URL || 'http://tokenisation:4021';
++
++// KS-1240 (class): the longest provisioning waits for the tokenisation service to generate a tenant key. The fetch carried no timeout, so a tokenisation service that accepted the connection and never
++// answered held the tenant-creation request for as long as the socket lived. On expiry the fetch rejects out of requestKeyGeneration to the handler's existing error path.
++const KEY_GENERATION_FETCH_TIMEOUT_MS = 10_000;
+ // KS-336: the security service owns connector API keys (svc_api_keys, in the app
+ // DB — a different DB from the platform tables this service writes). We mint the
+ // per-tenant metering key over HTTP, not via platformQuery. Default matches the
+@@ -135,6 +139,7 @@
+       ...(authHeader ? { Authorization: authHeader } : {}),
+     },
+     body: JSON.stringify({ tenantId, tenantSlug }),
++    signal: AbortSignal.timeout(KEY_GENERATION_FETCH_TIMEOUT_MS),
+   });
+   return res.json() as Promise<{
+     success: boolean;
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1240-tenant-provisioning-fetches-are-bounded.test.ts
+@@ -0,0 +1,94 @@
++// KS-1240 (class: hand-built outbound fetches with no timeout), tenant-provisioning meteringKey.ts and index.ts: the metering-key mint (requestMeteringKey, exported) and the tenant key generation
++// (requestKeyGeneration, private to index.ts, which boots a server and so is read as TEXT here) fetched the security and tokenisation services with no `signal`, so a service that accepted the connection
++// and never answered held the tenant-creation request for as long as the socket lived. requestMeteringKey is driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there
++// is none). R1 pins that its fetch carries an AbortSignal, R2 that the bound is sane, R3 that a silent security service ends in a rejection and not a hang, R4 and R5 that index.ts bounds its fetch;
++// C1 to C3 pin the unchanged answers.
++import { describe, it, expect, vi, afterEach } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { fileURLToPath } from 'node:url';
++import { requestMeteringKey } from '../meteringKey.js';
++
++const SEC = 'http://security:4004';
++const INDEX_SRC = readFileSync(fileURLToPath(new URL('../index.ts', import.meta.url)), 'utf8');
++
++afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
++
++/** The key the security service mints, as a Response-like object. */
++function mintedKey(): Response {
++  return { ok: true, status: 201, json: async () => ({ success: true, data: { id: 'key_abc', key: 'sk_deadbeef', prefix: 'sk_deadbeef0' } }) } as unknown as Response;
++}
++
++/** Answers the mint and records the signal the call carried. */
++function stubAnswering(seen: unknown[]): void {
++  vi.stubGlobal('fetch', vi.fn(async (_url: unknown, init?: { signal?: unknown }) => { seen.push(init?.signal); return mintedKey(); }));
++}
++
++/** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
++function stubNeverAnswering(): void {
++  vi.stubGlobal('fetch', vi.fn((_url: unknown, init?: { signal?: AbortSignal }) =>
++    new Promise<Response>((_resolve, reject) => {
++      const signal = init?.signal;
++      if (!signal) return;
++      if (signal.aborted) reject(new Error('aborted'));
++      else signal.addEventListener('abort', () => reject(new Error('aborted')));
++    })));
++}
++
++/** 'REJECTED' when the call rejects, 'RESOLVED' when it resolves, 'HUNG' when it is still pending after 300 ms, so a hang is a red assertion and not a stuck run. */
++async function outcome(run: () => Promise<unknown>): Promise<string> {
++  return Promise.race([
++    run().then(() => 'RESOLVED', () => 'REJECTED'),
++    new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
++  ]);
++}
++
++describe('KS-1240: tenant provisioning bounds its outbound fetches', () => {
++  it('RED KS-1240 R1 the metering-key fetch carries an AbortSignal', async () => {
++    const seen: unknown[] = [];
++    stubAnswering(seen);
++    await requestMeteringKey(SEC, 'tenant-123', 'acme', 'Bearer admintoken');
++    expect(seen).toHaveLength(1);
++    expect(seen[0]).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R2 the bound handed to AbortSignal.timeout is positive and at most 30000 ms', async () => {
++    const timeout = vi.spyOn(AbortSignal, 'timeout');
++    stubAnswering([]);
++    await requestMeteringKey(SEC, 'tenant-123', 'acme');
++    const bounds = timeout.mock.calls.map((c) => c[0] as number);
++    expect(bounds).toHaveLength(1);
++    expect(bounds[0]).toBeGreaterThan(0);
++    expect(bounds[0]).toBeLessThanOrEqual(30000);
++  });
++
++  it('RED KS-1240 R3 a security service that never answers ends in a rejection, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => requestMeteringKey(SEC, 'tenant-123', 'acme'))).toBe('REJECTED');
++  });
++
++  it('RED KS-1240 R4 the generate-key fetch in index.ts carries a timeout signal', () => {
++    expect(INDEX_SRC).toContain('signal: AbortSignal.timeout(KEY_GENERATION_FETCH_TIMEOUT_MS),');
++  });
++
++  it('RED KS-1240 R5 index.ts declares the generate-key bound as a positive number of at most 30000 ms', () => {
++    const match = /const KEY_GENERATION_FETCH_TIMEOUT_MS = ([0-9_]+);/.exec(INDEX_SRC);
++    const ms = match ? Number(match[1].replace(/_/g, '')) : NaN;
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(30000);
++  });
++
++  it('control KS-1240 C1 a healthy mint still returns the key material', async () => {
++    stubAnswering([]);
++    expect(await requestMeteringKey(SEC, 'tenant-123', 'acme')).toEqual({ key: 'sk_deadbeef', prefix: 'sk_deadbeef0', id: 'key_abc' });
++  });
++
++  it('control KS-1240 C2 a non-2xx answer still throws with the status in the message', async () => {
++    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 403, json: async () => ({}) })));
++    await expect(requestMeteringKey(SEC, 't', 's')).rejects.toThrow('403');
++  });
++
++  it('control KS-1240 C3 index.ts still sends the generate-key request to the tokenisation service', () => {
++    expect(INDEX_SRC).toContain('${TOKENISATION_URL}/api/generate-key');
++  });
++});

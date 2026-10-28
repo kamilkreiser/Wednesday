@@ -1,0 +1,134 @@
+diff --git a/Blockchain/Dev/services/auth/src/middleware/errorHandler.ts b/Blockchain/Dev/services/auth/src/middleware/errorHandler.ts
+--- a/Blockchain/Dev/services/auth/src/middleware/errorHandler.ts
++++ b/Blockchain/Dev/services/auth/src/middleware/errorHandler.ts
+@@ -22,6 +22,6 @@
+     this.statusCode = statusCode;
+     this.code = code;
+     this.isOperational = isOperational;
+-    Object.setPrototypeOf(this, AppError.prototype);
++    Object.setPrototypeOf(this, new.target.prototype);
+   }
+ }
+diff --git a/Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts b/Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts
+--- a/Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts
++++ b/Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts
+@@ -284,8 +284,8 @@
+             'Backup-code sign-in',
+           );
+         } catch (err) {
+-          // `statusCode`, not `instanceof`: AppError's constructor ends with Object.setPrototypeOf(this, AppError.prototype), which
+-          // resets every subclass instance to the base prototype, so `err instanceof ServiceUnavailableError` is always false here.
++          // `statusCode`, not `instanceof`: this reads the same for an AppError from any package. (KS-1467: AppError's constructor used to end with
++          // Object.setPrototypeOf(this, AppError.prototype), which reset every subclass instance, so `instanceof ServiceUnavailableError` was always false here.)
+           if ((err as { statusCode?: unknown } | null)?.statusCode === 503) throw new ServiceUnavailableError(BACKUP_CODE_UNCONFIRMED_MESSAGE);
+           throw err;
+         }
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1467-auth-app-error-subclasses-keep-their-own-prototype.test.ts
+@@ -0,0 +1,104 @@
++// KS-1467 (services/auth middleware/errorHandler.ts): AppError's constructor ended with `Object.setPrototypeOf(this, AppError.prototype)`, which resets EVERY subclass instance to the base
++// prototype. So `err instanceof ValidationError` (or any other subclass) was always false, and the errorHandler's own `err instanceof ValidationError && err.details` branch could never run:
++// the password-strength `feedback` that registration, password reset and password change build never reached the client. The constructor now uses `new.target.prototype`.
++// P1/P2 pin the prototype of each subclass (and the two-level chain), H1 pins the handler's `details` branch, S1 pins that the stale comment in passwordLoginGate.ts is reworded, C1 to C4 and S2 pin what must not change.
++import { describe, it, expect, vi } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import type { Request, Response, NextFunction } from 'express';
++import * as mod from '../middleware/errorHandler';
++
++vi.mock('../utils/logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
++  createLogger: vi.fn(),
++  validateEnv: vi.fn(),
++}));
++
++const { errorHandler, AppError } = mod;
++
++const FACTORIES = [
++  { name: 'BadRequestError', make: () => new mod.BadRequestError('x'), cls: mod.BadRequestError, status: 400 },
++  { name: 'UnauthorizedError', make: () => new mod.UnauthorizedError('x'), cls: mod.UnauthorizedError, status: 401 },
++  { name: 'ForbiddenError', make: () => new mod.ForbiddenError('x'), cls: mod.ForbiddenError, status: 403 },
++  { name: 'NotFoundError', make: () => new mod.NotFoundError('Thing'), cls: mod.NotFoundError, status: 404 },
++  { name: 'ConflictError', make: () => new mod.ConflictError('x'), cls: mod.ConflictError, status: 409 },
++  { name: 'ValidationError', make: () => new mod.ValidationError('x', { a: 1 }), cls: mod.ValidationError, status: 422 },
++  { name: 'TooManyRequestsError', make: () => new mod.TooManyRequestsError(), cls: mod.TooManyRequestsError, status: 429 },
++  { name: 'ServiceUnavailableError', make: () => new mod.ServiceUnavailableError('x'), cls: mod.ServiceUnavailableError, status: 503 },
++  { name: 'MfaRequiredError', make: () => new mod.MfaRequiredError(), cls: mod.MfaRequiredError, status: 403 },
++] as const;
++
++interface Captured {
++  statusCode: number;
++  body: { success: boolean; error: { code: string; message: string; details?: unknown } };
++}
++
++function run(err: Error): Captured {
++  const captured = { statusCode: 0, body: undefined } as unknown as Captured;
++  const res = {
++    status(code: number) {
++      captured.statusCode = code;
++      return this;
++    },
++    json(payload: unknown) {
++      captured.body = payload as Captured['body'];
++      return this;
++    },
++  } as unknown as Response;
++  const req = { path: '/api/auth/register', method: 'POST' } as unknown as Request;
++  errorHandler(err, req, res, (() => undefined) as unknown as NextFunction);
++  return captured;
++}
++
++describe('KS-1467: auth AppError subclasses keep their own prototype', () => {
++  it.each(FACTORIES)('RED KS-1467 P1 $name: an instance is an instance of its own class', ({ make, cls }) => {
++    expect(make() instanceof cls).toBe(true);
++  });
++
++  it.each(FACTORIES)('RED KS-1467 P2 $name: the prototype of an instance is the class prototype', ({ make, cls }) => {
++    expect(Object.getPrototypeOf(make())).toBe(cls.prototype);
++  });
++
++  it('RED KS-1467 P3 a two-level subclass is an instance of both of its classes', () => {
++    const e = new mod.InvalidCredentialsError();
++    expect([e instanceof mod.InvalidCredentialsError, e instanceof mod.UnauthorizedError, e instanceof AppError]).toEqual([true, true, true]);
++  });
++
++  it('RED KS-1467 H1 the handler answers a ValidationError with its details', () => {
++    const r = run(new mod.ValidationError('New password is too weak', { feedback: ['add a number'] }));
++    expect(r.statusCode).toBe(422);
++    expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'New password is too weak', details: { feedback: ['add a number'] } });
++  });
++
++  it('RED KS-1467 S1 the comment above the 503 statusCode check no longer claims instanceof is always false', () => {
++    const source = readFileSync(join(process.cwd(), 'src', 'services', 'passwordLoginGate.ts'), 'utf8');
++    expect(source).not.toContain('is always false here');
++  });
++
++  it('control KS-1467 S2 passwordLoginGate.ts still reaches the 503 by statusCode and still throws the unconfirmed message', () => {
++    const source = readFileSync(join(process.cwd(), 'src', 'services', 'passwordLoginGate.ts'), 'utf8');
++    expect(source).toContain('?.statusCode === 503) throw new ServiceUnavailableError(BACKUP_CODE_UNCONFIRMED_MESSAGE);');
++  });
++
++  it.each(FACTORIES)('control KS-1467 C1 $name: an instance is still an AppError and an Error with its status', ({ make, status }) => {
++    const e = make();
++    expect([e instanceof AppError, e instanceof Error, e.statusCode]).toEqual([true, true, status]);
++  });
++
++  it('control KS-1467 C2 a plain AppError is still an AppError with its own prototype', () => {
++    const e = new AppError('teapot', 418, 'TEAPOT');
++    expect([e instanceof AppError, Object.getPrototypeOf(e) === AppError.prototype, e.code]).toEqual([true, true, 'TEAPOT']);
++  });
++
++  it('control KS-1467 C3 a ValidationError without details is answered without a details key', () => {
++    const r = run(new mod.ValidationError('bad'));
++    expect(r.statusCode).toBe(422);
++    expect(r.body.error).toEqual({ code: 'VALIDATION_ERROR', message: 'bad' });
++  });
++
++  it('control KS-1467 C4 a BadRequestError is answered with code and message only', () => {
++    const r = run(new mod.BadRequestError('nope'));
++    expect(r.statusCode).toBe(400);
++    expect(r.body.error).toEqual({ code: 'BAD_REQUEST', message: 'nope' });
++  });
++});

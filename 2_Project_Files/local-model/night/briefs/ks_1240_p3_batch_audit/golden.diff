@@ -1,0 +1,132 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/batch.ts b/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
+@@ -122,3 +122,7 @@
++// KS-1240: the batch fan-out fetch carries a timeout signal. Without one an originate or transfer service that never answers holds the whole batch request open. On expiry the fetch rejects and the existing
++// catch in proxyRequest returns `{ ok: false, error }` for that item, as it already does for an unreachable service.
++const UPSTREAM_BATCH_FETCH_TIMEOUT_MS = 30_000;
++
+ async function proxyRequest(
+   baseUrl: string,
+   path: string,
+@@ -132,4 +136,5 @@
+     const response = await fetch(`${baseUrl}${path}`, {
++      signal: AbortSignal.timeout(UPSTREAM_BATCH_FETCH_TIMEOUT_MS),
+       method: 'POST',
+       headers,
+       body: JSON.stringify(body),
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+@@ -73,3 +73,7 @@
++// KS-1240: the audit-log fetch carries a timeout signal. Without one a security service that never answers holds the export request open. On expiry the fetch rejects and the existing catch answers the
++// constant 502 BAD_GATEWAY, as it already does for an unreachable service.
++const UPSTREAM_AUDIT_FETCH_TIMEOUT_MS = 30_000;
++
+ function escapeCSVField(value: string | undefined | null): string {
+   if (value == null) return '';
+   const str = String(value);
+@@ -172,5 +176,5 @@
+       const response = await fetch(
+         // KS-745: the security service lists at /api/audit (no /logs route — that hit /api/audit/:id with id "logs" → 404)
+         `${SECURITY_SERVICE_URL}/api/audit?${queryParams.toString()}`,
+-        { method: 'GET', headers },
++        { method: 'GET', headers, signal: AbortSignal.timeout(UPSTREAM_AUDIT_FETCH_TIMEOUT_MS) },
+       );
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts
+@@ -0,0 +1,92 @@
++// KS-1240 (api-gateway routes/batch.ts and routes/audit-export.ts): the upstream fetch in each of these two files carried no timeout, so an upstream that accepted the connection and never answered held the
++// caller's request open with no bound (the key-exchange half of the same ticket is in middleware/auth.ts, the proxy.ts and admin.ts half is another file). This file reads the two sources and pins, per fetch call, that the call carries an
++// AbortSignal.timeout signal, and that the timeout constants exist and are bounded. The extractor balances the call's own parentheses, so a signal in a NEIGHBOUR call cannot satisfy a fetch that has none.
++// C3 and C4 prove the extractor can return both answers (a bounded call that already existed at admin.ts, and a synthetic unbounded one), so the red cells are not vacuous.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const BATCH_SRC = readFileSync(join(__dirname, '..', 'routes', 'batch.ts'), 'utf8');
++const AUDIT_SRC = readFileSync(join(__dirname, '..', 'routes', 'audit-export.ts'), 'utf8');
++
++/** Every `fetch(` call in the source, each as the text from `fetch(` to its balancing `)`. */
++function fetchCalls(src: string): string[] {
++  const calls: string[] = [];
++  const re = /\bfetch\(/g;
++  let match: RegExpExecArray | null;
++  while ((match = re.exec(src)) !== null) {
++    const open = match.index + match[0].length - 1;
++    let depth = 0;
++    let end = -1;
++    for (let i = open; i < src.length; i++) {
++      const ch = src[i];
++      if (ch === '(') depth++;
++      else if (ch === ')') {
++        depth--;
++        if (depth === 0) {
++          end = i;
++          break;
++        }
++      }
++    }
++    expect(end, 'unbalanced fetch call at offset ' + match.index).toBeGreaterThan(-1);
++    calls.push(src.slice(match.index, end + 1));
++  }
++  return calls;
++}
++
++function isBounded(call: string): boolean {
++  return call.includes('AbortSignal.timeout(');
++}
++
++/** The first line of each unbounded call, so a failure names the call. */
++function unbounded(src: string): string[] {
++  return fetchCalls(src)
++    .filter((call) => !isBounded(call))
++    .map((call) => call.split('\n')[0].trim());
++}
++
++function constantMs(src: string, name: string): number {
++  const found = new RegExp('const ' + name + ' = ([0-9_]+);').exec(src);
++  return found ? Number(found[1].replace(/_/g, '')) : Number.NaN;
++}
++
++describe('KS-1240: the batch and audit-export upstream fetches are bounded', () => {
++  it('RED KS-1240 R1 every fetch call in batch.ts carries an AbortSignal.timeout', () => {
++    expect(unbounded(BATCH_SRC)).toEqual([]);
++  });
++
++  it('RED KS-1240 R2 every fetch call in audit-export.ts carries an AbortSignal.timeout', () => {
++    expect(unbounded(AUDIT_SRC)).toEqual([]);
++  });
++
++  it('RED KS-1240 R3 batch.ts declares its timeout constant, positive and at most 120000 ms', () => {
++    const ms = constantMs(BATCH_SRC, 'UPSTREAM_BATCH_FETCH_TIMEOUT_MS');
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(120000);
++  });
++
++  it('RED KS-1240 R4 audit-export.ts declares its timeout constant, positive and at most 120000 ms', () => {
++    const ms = constantMs(AUDIT_SRC, 'UPSTREAM_AUDIT_FETCH_TIMEOUT_MS');
++    expect(ms).toBeGreaterThan(0);
++    expect(ms).toBeLessThanOrEqual(120000);
++  });
++
++  it('control KS-1240 C1 batch.ts has exactly one fetch call', () => {
++    expect(fetchCalls(BATCH_SRC)).toHaveLength(1);
++  });
++
++  it('control KS-1240 C2 audit-export.ts has exactly one fetch call', () => {
++    expect(fetchCalls(AUDIT_SRC)).toHaveLength(1);
++  });
++
++  it('control KS-1240 C3 the extractor reads a call whose init object holds a signal as bounded', () => {
++    const synthetic = "const r = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(5000) });\n";
++    expect(unbounded(synthetic)).toEqual([]);
++  });
++
++  it('control KS-1240 C4 the extractor reads a synthetic call with no signal as unbounded', () => {
++    const synthetic = "const r = await fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) });\n";
++    expect(unbounded(synthetic)).toEqual(["fetch('http://x', { method: 'POST', body: JSON.stringify({ a: (1) }) })"]);
++  });
++});

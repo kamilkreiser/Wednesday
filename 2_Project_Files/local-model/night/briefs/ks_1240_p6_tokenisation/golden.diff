@@ -1,0 +1,142 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts b/Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts
+--- a/Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts
++++ b/Blockchain/Dev/services/api-gateway/src/services/tokenisation.ts
+@@ -17,2 +17,6 @@
+ const PLATFORM_DB_URL = process.env.PLATFORM_DATABASE_URL || '';
+ const TOKENISATION_URL = process.env.TOKENISATION_URL || 'http://tokenisation:4021';
++
++// KS-1240: the longest the gateway waits for the tokenisation service. Neither fetch below carried a timeout, so a service that accepted the connection and never answered held the caller for as long as
++// the socket lived. On expiry the fetch rejects and the existing catch in each function logs and answers the empty map, exactly as it already does for an unreachable service.
++const TOKENISATION_FETCH_TIMEOUT_MS = 10_000;
+@@ -111,6 +115,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ tenantId, key, fields }),
++      signal: AbortSignal.timeout(TOKENISATION_FETCH_TIMEOUT_MS),
+     });
+     const data = (await res.json()) as {
+       success: boolean;
+@@ -146,6 +151,7 @@
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ tenantId, key, tokens }),
++      signal: AbortSignal.timeout(TOKENISATION_FETCH_TIMEOUT_MS),
+     });
+     const data = (await res.json()) as {
+       success: boolean;
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-tokenisation-client-fetches-are-bounded.test.ts
+@@ -0,0 +1,111 @@
++// KS-1240 (class: hand-built outbound fetches with no timeout), api-gateway services/tokenisation.ts: tokeniseFields and detokeniseValues each fetched the tokenisation service with no `signal`, so a
++// service that accepted the connection and never answered held the caller for as long as the socket lived. Each function already catches a failed fetch, logs a warning and answers an empty map. The
++// functions are driven directly with a stubbed global fetch that honours `init.signal` (and never answers when there is none); nothing touches the network. R1 and R2 pin that each fetch carries an
++// AbortSignal, R3 that the two bounds are sane positive numbers, R4 and R5 that a service that never answers ends in the empty map and not a hang; C1 to C3 pin the unchanged answers.
++import { describe, it, expect, afterEach, vi } from 'vitest';
++
++const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++
++import { tokeniseFields, detokeniseValues } from '../services/tokenisation';
++
++function reply(body: unknown): Response {
++  return { ok: true, status: 200, json: async () => body, text: async () => JSON.stringify(body) } as unknown as Response;
++}
++
++type Seen = { url: string; signal: unknown };
++
++/** Answers both endpoints and records the signal each call carried. */
++function stubAnswering(seen: Seen[]): void {
++  vi.spyOn(globalThis, 'fetch').mockImplementation((async (url: unknown, init?: { signal?: unknown }) => {
++    const u = String(url);
++    seen.push({ url: u, signal: init?.signal });
++    if (u.endsWith('/api/tokenise')) return reply({ success: true, fields: [{ name: 'email', token: 'tok-1' }] });
++    if (u.endsWith('/api/detokenise')) return reply({ success: true, values: [{ token: 'tok-1', value: 'a@x.test' }] });
++    return reply({ success: false });
++  }) as never);
++}
++
++/** Every call honours its signal; a call with NO signal never answers (the hang the fix removes). */
++function stubNeverAnswering(): void {
++  vi.spyOn(globalThis, 'fetch').mockImplementation(((_url: unknown, init?: { signal?: AbortSignal }) =>
++    new Promise<Response>((_resolve, reject) => {
++      const signal = init?.signal;
++      if (!signal) return;
++      if (signal.aborted) reject(new Error('aborted'));
++      else signal.addEventListener('abort', () => reject(new Error('aborted')));
++    })) as never);
++}
++
++afterEach(() => { vi.restoreAllMocks(); });
++
++/** 'EMPTY MAP' when the call resolves to an empty map, 'HUNG' when it is still pending after 300 ms, else the map's size, so a hang is a red assertion and not a stuck run. */
++async function outcome(run: () => Promise<Map<string, string>>): Promise<string> {
++  return Promise.race([
++    run().then((m) => (m.size === 0 ? 'EMPTY MAP' : 'SIZE ' + m.size), () => 'REJECTED'),
++    new Promise<string>((resolve) => setTimeout(() => resolve('HUNG'), 300)),
++  ]);
++}
++
++describe('KS-1240: the gateway tokenisation client bounds its fetches', () => {
++  it('RED KS-1240 R1 the tokenise fetch carries an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
++    expect(seen).toHaveLength(1);
++    expect(seen[0].signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R2 the detokenise fetch carries an AbortSignal', async () => {
++    const seen: Seen[] = [];
++    stubAnswering(seen);
++    await detokeniseValues('t1', 'k1', ['tok-1']);
++    expect(seen).toHaveLength(1);
++    expect(seen[0].signal).toBeInstanceOf(AbortSignal);
++  });
++
++  it('RED KS-1240 R3 the two bounds handed to AbortSignal.timeout are positive and at most 30000 ms', async () => {
++    const timeout = vi.spyOn(AbortSignal, 'timeout');
++    stubAnswering([]);
++    await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
++    await detokeniseValues('t1', 'k1', ['tok-1']);
++    const bounds = timeout.mock.calls.map((c) => c[0] as number);
++    expect(bounds).toHaveLength(2);
++    for (const ms of bounds) {
++      expect(ms).toBeGreaterThan(0);
++      expect(ms).toBeLessThanOrEqual(30000);
++    }
++  });
++
++  it('RED KS-1240 R4 a tokenisation service that never answers a tokenise call ends in the empty map, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]))).toBe('EMPTY MAP');
++  });
++
++  it('RED KS-1240 R5 a tokenisation service that never answers a detokenise call ends in the empty map, not a hang', async () => {
++    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => AbortSignal.abort());
++    stubNeverAnswering();
++    expect(await outcome(() => detokeniseValues('t1', 'k1', ['tok-1']))).toBe('EMPTY MAP');
++  });
++
++  it('control KS-1240 C1 a healthy tokenise answer still fills the map', async () => {
++    stubAnswering([]);
++    const map = await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }]);
++    expect(map.get('email')).toBe('tok-1');
++  });
++
++  it('control KS-1240 C2 a healthy detokenise answer still fills the map', async () => {
++    stubAnswering([]);
++    const map = await detokeniseValues('t1', 'k1', ['tok-1']);
++    expect(map.get('tok-1')).toBe('a@x.test');
++  });
++
++  it('control KS-1240 C3 an unreachable service still answers the empty map, and an empty request makes no call at all', async () => {
++    const spy = vi.spyOn(globalThis, 'fetch').mockImplementation((async () => { throw new Error('connect ECONNREFUSED'); }) as never);
++    expect((await tokeniseFields('t1', 'k1', [{ name: 'email', value: 'a@x.test' }])).size).toBe(0);
++    spy.mockClear();
++    expect((await detokeniseValues('t1', 'k1', [])).size).toBe(0);
++    expect(spy).not.toHaveBeenCalled();
++  });
++});

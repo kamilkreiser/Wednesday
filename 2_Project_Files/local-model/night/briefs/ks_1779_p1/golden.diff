@@ -1,0 +1,60 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -2178,4 +2178,4 @@
+     for (const tenant of tenants.rows) {
+       try {
+         const tenantPool = mgr.getPool(tenant.id);
+-        let copied = { docTypes: 0, orgs: 0 };
++        const copied = { docTypes: 0, orgs: 0 };
+@@ -2218,7 +2218,7 @@
+               [dtCode, dt.name, dt.description, dt.category || 'general', true]
+             ));
+             copied.docTypes++;
+-          } catch (e: any) {
++          } catch {
+             copied.docTypes++; // Count even if conflict
+           }
+         }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1779-migrate-tenant-data-loop-has-no-lint-warnings.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1779-migrate-tenant-data-loop-has-no-lint-warnings.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1779-migrate-tenant-data-loop-has-no-lint-warnings.test.ts
+@@ -0,0 +1,37 @@
++/**
++ * KS-1779 - the per-tenant loop of POST /api/admin/migrate-tenant-data carries no shape the repository's ESLint config warns on.
++ *
++ * services/originate/src/routes/adminConfig.ts had `let copied = {...}` that is never reassigned (prefer-const) and a
++ * `catch (e: any)` whose block never reads `e` (@typescript-eslint/no-unused-vars). Both are `warn`, so nothing failed;
++ * this file keeps the two shapes from coming back. It reads the route's source text, no database and no app boot.
++ */
++import * as fs from 'fs';
++import * as path from 'path';
++
++const SRC = fs.readFileSync(path.resolve(__dirname, '..', 'routes', 'adminConfig.ts'), 'utf8');
++const START = SRC.indexOf("adminConfigRouter.post('/migrate-tenant-data'");
++const NEXT = SRC.indexOf('adminConfigRouter.', START + 1);
++const route = START < 0 ? '' : SRC.slice(START, NEXT < 0 ? undefined : NEXT);
++
++describe('KS-1779 - migrate-tenant-data per-tenant loop', () => {
++  it('CONTROL KS-1779 C0 the instrument found the route and its loop', () => {
++    expect(START).toBeGreaterThan(-1);
++    expect(route).toContain('for (const tenant of tenants.rows) {');
++  });
++
++  it('RED KS-1779 R1 the per-tenant counter is a const, not a never-reassigned let', () => {
++    expect(route).not.toContain('let copied');
++    expect(route).toContain('const copied = { docTypes: 0, orgs: 0 };');
++  });
++
++  it('RED KS-1779 R2 the conflict-tolerant catch binds nothing', () => {
++    expect(route).not.toMatch(/catch \(e: any\) \{\s*copied\.docTypes\+\+/);
++    expect(route).toMatch(/catch \{\s*copied\.docTypes\+\+; \/\/ Count even if conflict/);
++  });
++
++  it('CONTROL KS-1779 C1 the counter is still bumped and still spread into the result', () => {
++    expect(route.split('copied.docTypes++').length - 1).toBe(2);
++    expect(route.split('copied.orgs++').length - 1).toBe(1);
++    expect(route).toContain('...copied');
++  });
++});

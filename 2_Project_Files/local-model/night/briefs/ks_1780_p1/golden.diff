@@ -1,0 +1,115 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/systemErrors.ts b/Blockchain/Dev/services/originate/src/routes/systemErrors.ts
+--- a/Blockchain/Dev/services/originate/src/routes/systemErrors.ts
++++ b/Blockchain/Dev/services/originate/src/routes/systemErrors.ts
+@@ -181,3 +181,15 @@
++/**
++ * KS-1780: `err instanceof z.ZodError` reads the thrown value's prototype. A revoked Proxy, or a Proxy whose getPrototypeOf trap throws, makes THAT check throw from inside the catch, before
++ * fail500 is reached, so the handler's promise rejects and the request gets no response at all (the KS-1772 shape, one step earlier). A value that cannot be inspected is not a ZodError.
++ */
++function isZodError(err: unknown): err is z.ZodError {
++  try {
++    return err instanceof z.ZodError;
++  } catch {
++    return false;
++  }
++}
++
+ /** List errors with optional filters — admin only (dev: open) */
+ systemErrorsRouter.get('/', authenticate(), requireRole('SYSTEM_ADMIN', 'ORG_ADMIN'), async (req: Request, res: Response) => {
+   try {
+@@ -194,6 +206,6 @@
+     res.json({ success: true, ...result });
+   } catch (err: any) {
+-    if (err instanceof z.ZodError) {
++    if (isZodError(err)) {
+       return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid query parameters', details: err.errors } });
+     }
+     fail500(res, 'Error list read failed (GET /api/system-errors)', err);
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1780-system-errors-list-catch-cannot-hang-on-a-hostile-throw.test.ts
+@@ -0,0 +1,83 @@
++// KS-1780 (originate routes/systemErrors.ts, GET /api/system-errors): the catch of the list route tested `err instanceof z.ZodError` BEFORE it reached fail500. That check reads the thrown
++// value's prototype, so a revoked Proxy, or a Proxy whose getPrototypeOf trap throws, made the check itself throw inside the catch: the handler's promise rejected and the request got NO
++// answer. fail500 already survives such a value (KS-1772); this file pins that the list route's own check does too. The service call is made to reject on a real loopback listener, as the
++// KS-1346 part A cells do; a request that gets no answer within the window is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
++const mockGetRecentErrors = jest.fn();
++
++jest.mock('../services/errorTrackingService', () => ({
++  trackError: jest.fn(),
++  resolveErrorsByService: jest.fn(),
++  getErrorStats: jest.fn(),
++  getRecentErrors: mockGetRecentErrors,
++  resolveError: jest.fn(),
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
++}));
++
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { systemErrorsRouter } from '../routes/systemErrors';
++
++const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++
++const app = express();
++app.use('/api/system-errors', express.json(), systemErrorsRouter);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => server?.close());
++beforeEach(() => jest.clearAllMocks());
++
++async function listWithThrow(thrown: unknown, query = ''): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
++  mockGetRecentErrors.mockRejectedValueOnce(thrown);
++  try {
++    const res = await fetch(baseUrl + '/api/system-errors/' + query, { signal: AbortSignal.timeout(1500) });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER', body: null };
++  }
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++function throwingPrototypeTrap(): object {
++  return new Proxy({}, { getPrototypeOf() { throw new Error('ks1780 trap'); } });
++}
++
++describe('KS-1780: GET /api/system-errors answers a hostile thrown value', () => {
++  it('RED KS-1780 R1 a revoked Proxy thrown by the service is answered with the constant 500', async () => {
++    expect(await listWithThrow(revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('RED KS-1780 R2 a Proxy whose getPrototypeOf trap throws is answered with the constant 500', async () => {
++    expect(await listWithThrow(throwingPrototypeTrap())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('CONTROL KS-1780 C1 a plain Error is still answered with the constant 500', async () => {
++    expect(await listWithThrow(new Error('ks1780 ordinary'))).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it('CONTROL KS-1780 C2 a bad query is still a 400 BAD_REQUEST from the ZodError arm, and the service is not called', async () => {
++    const reply = await listWithThrow(new Error('unused'), '?limit=abc');
++    expect(reply.status).toBe(400);
++    expect((reply.body as { error: { code: string } }).error.code).toBe('BAD_REQUEST');
++    expect(mockGetRecentErrors).not.toHaveBeenCalled();
++  });
++});

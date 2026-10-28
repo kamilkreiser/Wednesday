@@ -1,0 +1,35 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1000-auth-test-files-are-type-checked-against-a-shrinking-baseline.test.ts
+@@ -578,5 +578,5 @@
+   it('CONTROL: a COMPLETE shared build passes, so the new precondition is not simply always-fail', () => {
+     const dir = fixture(sharedPkg({}));
+     const r = check(dir, '--baseline', bl(dir));
+-    expectRun(r, 0, '0 new');
++    expectRun(r, 0, ', 0 new; 0 stale baseline entries');
+   }, SLOW);
+@@ -625,6 +625,6 @@
+   it('a service that imports NO @secuura package is untouched by the precondition (every other cell in this file depends on that)', () => {
+     const dir = fixture({ 'src/__tests__/a.test.ts': CLEAN, 'baseline.txt': ZERO_FLOOR });
+     const r = check(dir, '--baseline', bl(dir));
+-    expectRun(r, 0, '0 new');
++    expectRun(r, 0, ', 0 new; 0 stale baseline entries');
+     expect(r.out).not.toContain('npm run build -w');
+   }, SLOW);
+@@ -912,7 +912,7 @@
+     decl.typesVersions['*'].unused = ['dist/unused/neverBuilt.d.ts'];
+     const dir = fixture({ ...pkg, 'node_modules/@secuura/shared/package.json': JSON.stringify(decl) });
+     const r = check(dir, '--baseline', bl(dir));
+-    expectRun(r, 0, '0 new');
++    expectRun(r, 0, ', 0 new; 0 stale baseline entries');
+     expect(r.out).not.toContain('neverBuilt');
+   }, SLOW);
+ });
+@@ -1031,6 +1031,6 @@
+     expect(fs.existsSync(bl(dir)), 'precondition: no baseline').toBe(false);
+     expectRun(check(dir, '--baseline', bl(dir), '--init'), 0, 'wrote', '--init with no baseline');
+     expect(fs.readFileSync(bl(dir), 'utf8')).toMatch(/^examined-test-files 2$/m);
+-    expectRun(check(dir, '--baseline', bl(dir)), 0, '0 new', 'the baseline it wrote is trusted');
++    expectRun(check(dir, '--baseline', bl(dir)), 0, ', 0 new; 0 stale baseline entries', 'the baseline it wrote is trusted');
+   }, SLOW);
+ });
