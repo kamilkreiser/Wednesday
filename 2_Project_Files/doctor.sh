@@ -367,6 +367,14 @@ if [ "$_DOC_AGENT" = "wednesday" ]; then
   else
     warn "Spark tunnel 47788 DOWN: $(echo "$TUN_OUT" | head -1 | cut -c1-90)" "bash 2_Project_Files/local-model/spark/tunnel.sh up (re-opens the local forward only; if it refuses rc 4, the box is down — Spark kit RELOAD notes)"
   fi
+  # Spark ALLOCATION (Kam 2026-10-28: an allocation check for the local LLM in the wakeup procedure; rule
+  # learnings/2026-10-28_never-keep-the-spark-idle-quota-and-capability-data.md). IDLE is a WARN with the fix named.
+  ALLOC_OUT="$(python3 -I "$PROJECT_DIR/2_Project_Files/fleet/spark_status.py" 2>&1)"
+  if echo "$ALLOC_OUT" | /usr/bin/grep -q -i 'IDLE\|unreadable'; then
+    warn "Spark IDLE: $(echo "$ALLOC_OUT" | tail -1 | cut -c1-140)" "allocate a task now: brief per local-model/spark/README.md, queue it, start queue.sh (never keep the Spark idle)"
+  else
+    ok "Spark allocated: $(echo "$ALLOC_OUT" | head -1 | cut -c1-120)"
+  fi
 fi
 
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---

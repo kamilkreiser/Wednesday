@@ -105,6 +105,12 @@ fi
 if [ "$SEAT_KEY" = "Wednesday" ] && [ -f "$SELF_DIR/ornith_status.py" ]; then
   python3 "$SELF_DIR/ornith_status.py" >&2
 fi
+# Spark ALLOCATION check (Kam 2026-10-28: "introduce an allocation check for local LLM into your wakeup
+# procedure"; rule learnings/2026-10-28_never-keep-the-spark-idle-quota-and-capability-data.md). Same contract as
+# the Ornith line: stderr, Wednesday's seat only, always exits 0, so it can never block a send.
+if [ "$SEAT_KEY" = "Wednesday" ] && [ -f "$SELF_DIR/spark_status.py" ]; then
+  python3 -I "$SELF_DIR/spark_status.py" >&2
+fi
 
 TO=""; SUBJECT=""; SUBJECT_FILE=""; BODY_FILE=""; KIND="brief"
 while [ $# -gt 0 ]; do

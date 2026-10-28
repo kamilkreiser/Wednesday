@@ -2766,3 +2766,8 @@ INCLUDED until he says otherwise.
 > That is very good to hear.  thank you for the feedback and this helps with making decisions going forward.  There is another reason to use the spark - I am hopin that it makes the weekly quota last the full week.  I see that allocating to Sonnet is probably going to help a large amount but just to make sure, please create a new rule for now - never keep the spark idle.  Use it for one thing or another.  The speed will matter if they are related tasks but with a board of 400 I am sure we can find enough tasks that do not relate to other work.  Giving it tasks it fails on is an overhead for you (sorry) but it also gives us more real world information about its capability which is good.  Please capture this as well
 
 *Note:* New standing rule filed (never idle the Spark); two ledger rows; tunnel re-opened; Spark work commissioned
+
+## 2026-10-28 12:14 — Kam (terminal, verbatim)
+> no problem at all.  keep the rule and mabe introduce a allocation check for local LLM into your wakeup procedure
+
+*Note:* Built spark_status.py; wired into doctor.sh, send_brief.sh and launcher boot step 10c; proven both directions

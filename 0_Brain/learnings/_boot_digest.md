@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-28 12:07 from 253 lesson files (1,102,768 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-28 12:14 from 253 lesson files (1,103,944 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7653,6 +7653,8 @@ sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #168
 
 **The operative case, so the headline matches it:** I am at a boot, a checkpoint, or between waves, and the Spark has no round running. **That is the rule being broken, not a gap to notice later.** Before anything else at that boundary: is the tunnel up (`local-model/spark/tunnel.sh check`), is a round queued, and if not, what can I give it from the 400+ open tickets that does NOT touch code another seat is changing?
 
+sections (open the file for these): MECHANISM (Kam, terminal ~12:1x the same day: "keep the rule and maybe introduce an allocation check for local LLM into your wakeup procedure")
+
 **How to apply:**
 1. **Idle is the failure, not the failed round.** The bar for briefing the Spark is LOWER than the old one-file / spelled-out / no-security screen: that screen is how the Spark sat idle on 2026-10-27/28 with "0 briefable". Widen it: multi-file test-only work, comment and doc fixes, test hardening, filing-list items, second-opinion reviews, mechanical gate halves. A task it fails on is still allowed; it is recorded in `done.md` with what it got wrong.
 2. **Independence over speed.** The Spark is slower; give it work that no other seat is waiting on and that does not touch files an in-flight PR changes (check the open PRs' file sets before queuing). Related or blocking work stays with Claude seats.
@@ -7660,4 +7662,8 @@ sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #168
 4. **Check at every boot and checkpoint**, the same way the inbox is checked: tunnel up, queue non-empty or a round running. If neither, brief the next task before starting new Claude work. The tunnel dropping silently is a known cause (it was DOWN on 2026-10-28 until 12:0x, nothing re-opened it).
 5. **Unchanged:** the Spark never merges; its passes are raised, gated and GO'd as before; one client's content per task (Secuura only); signature classes stand.
 6. **Report it:** the morning card says how many Spark rounds ran, passed and failed since the last report — counts from `done.md`, not memory.
+
+## MECHANISM (Kam, terminal ~12:1x the same day: "keep the rule and maybe introduce an allocation check for local LLM into your wakeup procedure")
+- `2_Project_Files/fleet/spark_status.py` prints `SPARK: tunnel · queue · drainer · round · last` and, when no round is running and the queue is empty or undrained or the tunnel is down, `SPARK: ⚠ IDLE … allocate a task NOW`. Always exits 0. Arms run 2026-10-28 12:1x: empty/no drainer → IDLE; queued + live drainer → not idle; round running → not idle; dead drainer pid + queued → IDLE naming queue.sh; corrupt last_round.json → "status unreadable", rc 0.
+- **Rides three wake points:** `doctor.sh` (every boot: WARN "Spark IDLE" with the fix; proven firing live at 12:1x, "IDLE since last round 9841 min ago" — the Spark had not run a round since 2026-10-21), `fleet/send_brief.sh` (every send, beside the Ornith line; proven printing "round LIVE pid 60423" while the drafter's control round ran), and `Launch_Wednesday.command` boot step **10c** (quote/backtick counts unchanged 674/90; swapped in by mv so the running launcher was not edited in place; backups `.pre-1028-sparkalloc` on all three files).
 

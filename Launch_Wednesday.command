@@ -721,6 +721,12 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    one digest to Kam for this seat's open cards over 48 h, at most once a day per card.
    Never wait on Kam: while a card waits, the agents work the tickets; a blocker is
    flagged and re-raised, never pushed past.
+10c. SPARK ALLOCATION (Kam 2026-10-28: never keep the Spark idle; an allocation check
+   in the wakeup procedure): run python3 2_Project_Files/fleet/spark_status.py at EVERY
+   boot and checkpoint (send_brief.sh also prints it on every send). If it says IDLE,
+   allocate before starting new Claude work: tunnel.sh up if DOWN, brief an independent
+   task (no file an open PR touches), queue it, start queue.sh. A failed Spark round is
+   data, not waste. Rule: learnings/2026-10-28_never-keep-the-spark-idle-quota-and-capability-data.md
 11. In text, confirm: brain loaded (learnings count), tasks carried over, project
    index freshness, DevMASTER state, Linear + mail status — then report what the
    sweep found + which agents were started, and propose today's remaining
