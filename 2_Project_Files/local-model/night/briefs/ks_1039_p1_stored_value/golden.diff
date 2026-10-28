@@ -1,0 +1,15 @@
+diff --git a/Blockchain/Dev/tests/e2e/tests/auth-exhaustive.spec.ts b/Blockchain/Dev/tests/e2e/tests/auth-exhaustive.spec.ts
+--- a/Blockchain/Dev/tests/e2e/tests/auth-exhaustive.spec.ts
++++ b/Blockchain/Dev/tests/e2e/tests/auth-exhaustive.spec.ts
+@@ -748,6 +748,10 @@
+     // Must not expose SQL errors
+     expect(body.toLowerCase()).not.toContain('sql');
+     expect(body.toLowerCase()).not.toContain('syntax error');
+-    expect(body.toLowerCase()).not.toContain('drop table');
++    // KS-1039: 'drop table' is the INPUT, and a register that stores and returns a display name returns it verbatim, so asserting it is absent from
++    // the body fails on the echo and says nothing about injection. Parameterised SQL means the string is stored as data: the user object the
++    // response carries must hold the exact input, and the call must have succeeded (a rejected call would otherwise skip this check).
++    expect(status).toBe(201);
++    expect(JSON.parse(body).data.user.displayName).toBe("Robert'); DROP TABLE users; --");
+     expect(status).toBeLessThan(500);
+   });

@@ -1,0 +1,19 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh b/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
+@@ -92,3 +92,8 @@
++# KS-1415: the cell above reads only the FIRST status-URI line, so a later ACTIVE :6882 line could hide below it. A count is blind to position.
++# Comments are stripped first, as prom_live is above: the example's own prose may name 6882.
++expect "observability/config/alerting.env.example carries no active nginx-gateway:6882 line" "0" \
++    "$(sed 's/#.*//' "$DEV_ROOT/../../observability/config/alerting.env.example" | grep -c 'nginx-gateway:6882')"
++
+ # --- every scraped target must name the port that service listens on ---------
+ mismatches=""
+ while IFS= read -r target; do
+@@ -123,2 +128,6 @@
++# KS-1415: same blind spot as the alerting.env.example cell: a count of active :6882 lines, whatever their position.
++expect "observability/.env.example carries no active nginx-gateway:6882 line" "0" \
++    "$(sed 's/#.*//' "$DEV_ROOT/../../observability/.env.example" | grep -c 'nginx-gateway:6882')"
++
+ echo "prometheus_targets: ${PASS} passed, ${FAIL} failed"
+ (( FAIL == 0 ))
