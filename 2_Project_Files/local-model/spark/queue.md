@@ -99,3 +99,7 @@
 # 2026-10-28 16:2x (Spark operator 3 for Wednesday): ks_1240_p9b_internal_loose = the ONE rebrief of ks_1240_p9_internal_loose (original + 1): same loose brief, but the two hunk OLD-side headers are dictated (-21,1 and -44,6) so the A2a anchor cannot be off by one (first brief failed A2a identically 3x: hunk 2 written at -43, real 44). dry-run rc 0, CONTROL-PASS BYTE-IDENTICAL at bd6697e0. Secuura only. Counter spent after this.
 # 2026-10-28 17:0x (Spark operator 4, batch 5)
 # 2026-10-28 17:1x (Spark operator 4, batch 5): LOOSE twins (rung 4, hunk headers dictated by gen/loosegen.py): calibration of the Spark, NOT second candidates for the same tickets
+# 2026-10-29 03:18 (Spark operator 7): batch 6 - ks_1663_p1 (KS-1663 comment fix), ks_1530_p1 (KS-1530), ks_1112_p1 (KS-1112), ks_1587_p1 (KS-1587 N1). Each: lint ok, dry-run ok, overlap 0 vs PRs 1782+1785-1799 and Seat U ks1494.
+# 2026-10-29 03:40 (Spark operator 7): LOOSE twins (rung 4, headers dictated, gen/loosegen.py) of ks_1530_p1 and ks_1587_p1: CALIBRATION, not second candidates.
+# 2026-10-29 03:47 (Spark operator 7): LOOSE twins of ks_1112_p1 and ks_1601_p1 (calibration, not second candidates)
+# 2026-10-29 03:55 (Spark operator 7): LOOSE twin of ks_1663_p1 (calibration; overlap=own READY) and the ONE rebrief ks_1587_p1_loose_r2 of the failed twin
