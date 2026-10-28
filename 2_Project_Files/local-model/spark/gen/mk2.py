@@ -1,8 +1,15 @@
 import sys, os, difflib, re, importlib.util
-SRC='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/cache/src/'
-BR='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/'
-TIP='65bc28234507ffcf242381f8020d80b3efe83e85'
-def rd(p): return open(SRC+p,encoding='utf-8').read()
+HERE=os.path.dirname(os.path.abspath(__file__))
+SPARK=os.path.dirname(HERE)
+SRC=os.environ.get('GEN_SRC',SPARK+'/cache/src/').rstrip('/')+'/'
+BR=os.environ.get('GEN_BRIEFS',os.path.dirname(SPARK)+'/night/briefs/').rstrip('/')+'/'
+TIP=os.environ.get('GEN_TIP','65bc28234507ffcf242381f8020d80b3efe83e85')
+import subprocess
+def rd(p):
+    # default: the file as it is AT `TIP` (git show in the cache clone) so a brief regenerates the same on any day;
+    # GEN_SRC=<dir> reads a checked-out tree instead
+    if os.environ.get('GEN_SRC'): return open(SRC+p,encoding='utf-8').read()
+    return subprocess.run(['git','-C',SRC.rstrip('/'),'show',TIP+':'+p],check=True,capture_output=True).stdout.decode('utf-8')
 def trim(body):
     hunks=[];cur=None
     for l in body:
@@ -60,7 +67,9 @@ def build(S):
     pd=[udiff(p,o,n) for p,o,n in prods]
     td=[udiff(p,o,n,nf) for p,o,n,nf in tests]
     golden=''.join(pd+td)
-    d=BR+S['dir']; os.makedirs(d,exist_ok=True)
+    d=BR+S['dir']
+    if os.path.exists(d+'/golden.diff') and not os.environ.get('GEN_OVERWRITE'): sys.exit('REFUSED: %s already exists (set GEN_OVERWRITE=1 to replace it; briefs are tracked and may be queued or held)'%d)
+    os.makedirs(d,exist_ok=True)
     open(d+'/golden.diff','w',encoding='utf-8').write(golden)
     open(d+'/spark.pins','w').write(S['pins'])
     T=S['ticket']; tier=S['tier']

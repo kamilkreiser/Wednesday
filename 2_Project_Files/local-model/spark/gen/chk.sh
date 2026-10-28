@@ -1,6 +1,6 @@
 #!/bin/bash
 # usage: chk.sh <dir-name> ; runs lint, dry-run, control (waiting out BUSY), prints verdict lines
-B=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model
+B=$(cd "$(dirname "$0")/../.." && pwd)
 D=$B/night/briefs/$1
 python3 -I $B/spark/brief_lint.py $D >/dev/null 2>$D/../.lint_$1.err; echo "lint rc=$?"
 for mode in --dry-run --control; do

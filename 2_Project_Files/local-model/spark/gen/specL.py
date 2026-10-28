@@ -1,5 +1,5 @@
 import importlib.util,sys,os
-_s=importlib.util.spec_from_file_location('si','/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/47e67e09-3cbe-4324-a237-cb248e143809/scratchpad/gen/specI.py'); _m=importlib.util.module_from_spec(_s); _s.loader.exec_module(_m)
+_s=importlib.util.spec_from_file_location('si',os.path.join(os.path.dirname(os.path.abspath(__file__)),'specI.py')); _m=importlib.util.module_from_spec(_s); _s.loader.exec_module(_m)
 P1='Blockchain/Dev/services/api-gateway/src/routes/batch.ts'
 P2='Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts'
 TP='Blockchain/Dev/services/api-gateway/src/__tests__/ks1240-the-batch-and-audit-export-upstream-fetches-are-bounded.test.ts'
