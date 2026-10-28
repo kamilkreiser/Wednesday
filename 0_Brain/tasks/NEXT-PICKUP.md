@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 00:5x 29 Oct (the 22:3x boot seat, ctx 65%) — READ THIS FIRST, supersedes every block below where they differ
+- **develop = 8fbda28e6e79** (#1777 merged and verified at origin: tree 2c67b56e362f = head tree, single parent bf681065124b). NOT deployed.
+- **NEXT MERGE: #1778 (89, AA 4th)**, prep committed locally (merge head a08f6d8b63df, wording narrowed, 46f90ab8 edited), QUEUED behind R. On its PUSHED mail: completion check = gated a4c698922472 blobs except auth.openapi.ts (2 sites) + regenerated yaml + ks839 pin + ks1210 header (AA's 6 files) + docs 89 only -> read push_queue -> head-pinned GO -> verify at origin -> AA preps #1784 (90).
+- **GATE 8 DONE:** #1790 GO / #1792 GO WITH NOTES / #1794 GO (T, sections 100-102), #1793 GO WITH NOTES (R, 103). Follow-ups filed: KS-1795 (T), KS-1794 (R).
+- **TIER-1 BATCH ASSEMBLING (Opus, one gate):** #1796 (K KS-1458, head 8f022984aa74) + #1797 (R PR I KS-1219, head 0b3cac5026e3) + K's KS-1459 PR (commit acdb4822304f, 3rd in the queue) + R's PR C if ready. Commission when K's KS-1459 PR is up. Mutation-style + attack rows on oauth.ts; truth table re-run on KS-1459.
+- **TIER-2 WAITING:** #1795 (R H1, KS-1780 p1+p3). SPARK HALF in flight (in-session Sonnet, DIES at a rotation; re-commission from the 2026-10-29 00:57 note line) -> 0_Brain/reference/2026-10-29_sparkhalf-1795/verdict.md; the Claude half batches with the next tier-2 READYs.
+- **Floor:** %54 R 6th (pushing PR I/C) · %56 Y 4th (holding for #1782 at 93; ctx 64%) · %57 AA 4th (#1778 queued) · %59 Z 3rd (holding for #1786 at 92) · %62 T 5th (holding for 100-102) · %64 K 13th (KS-1459 queued). Wrapped tonight: D 40th, W 5th, X 3rd. **X 4th to be briefed from X 3rd's HANDOVER at #1782 MERGED.**
+
 ## ⏩ CHECKPOINT 00:1x 29 Oct (the 22:3x boot seat, ctx ~60%) — READ THIS FIRST, supersedes every block below where they differ
 - **develop = bf681065124b** (#1783 merged and verified at origin by Wednesday: tree = gated head tree, single parent b67a1c8d3a52). NOT deployed (boxes on bd6697e079fc).
 - **MERGE CHAIN (one at a time; READ push_queue.sh list before every GO; completion check in local-model/spark/cache/src, fetch into refs/wed/*):** #1777 (88, Y 4th, PREP GO sent 23:35, push queued) -> #1778 (89, AA) -> #1784 (90, AA) -> #1779 (91, R) -> #1786 (92, Z: wakes on Wednesday's "prep #1786 now") -> #1782 (93, Y) -> #1785 (94) + #1788 (95): **X 3rd WRAPPED, so brief a Seat X 4th from 5_Project_History/2026-10-28_seatX-3rd/HANDOVER.md PREP 1/2 (check the ordinal) when #1782 merges** -> #1787 (96, R) -> #1789 (97, a live seat to be named; S wrapped) -> #1791 (98, R + the non-ASCII behaviour cell, drafted) -> Y's KS-1240 b PR (99) -> the gate 8 batch (100+).
