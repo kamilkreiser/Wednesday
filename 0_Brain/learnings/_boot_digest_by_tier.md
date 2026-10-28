@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-28 09:50 from 252 lesson files (1,098,301 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 207. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-28 12:07 from 253 lesson files (1,102,978 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 208. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -7574,4 +7574,18 @@ sections (open the file for these): CALIBRATION 1, 2026-10-26 ~09:4x — PR #168
 3. The receipt is not optional: the grant removes the pause, not the report ([[2026-08-07_autonomy-grant-ship-decisions]]).
 
 **Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (scope and sequencing inside commissioned work) · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-08-03_go-slow-earn-autonomy]] rule 5 (every grant written down).
+
+
+## NEVER keep the Spark idle — use it for one thing or another; a failed task is data, not waste; pick work that does not relate to other in-flight work
+`2026-10-28_never-keep-the-spark-idle-quota-and-capability-data.md` · grant · 2026-10-28 · status: live · tier: W
+
+**The operative case, so the headline matches it:** I am at a boot, a checkpoint, or between waves, and the Spark has no round running. **That is the rule being broken, not a gap to notice later.** Before anything else at that boundary: is the tunnel up (`local-model/spark/tunnel.sh check`), is a round queued, and if not, what can I give it from the 400+ open tickets that does NOT touch code another seat is changing?
+
+**How to apply:**
+1. **Idle is the failure, not the failed round.** The bar for briefing the Spark is LOWER than the old one-file / spelled-out / no-security screen: that screen is how the Spark sat idle on 2026-10-27/28 with "0 briefable". Widen it: multi-file test-only work, comment and doc fixes, test hardening, filing-list items, second-opinion reviews, mechanical gate halves. A task it fails on is still allowed; it is recorded in `done.md` with what it got wrong.
+2. **Independence over speed.** The Spark is slower; give it work that no other seat is waiting on and that does not touch files an in-flight PR changes (check the open PRs' file sets before queuing). Related or blocking work stays with Claude seats.
+3. **The 2026-10-26 gate pilot is part of "never idle"** ([[2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice]]): every gate runs `local-model/gate/spark_gate.sh` first, and every tier-2 Claude gate gets a Spark shadow review. Those count as Spark work.
+4. **Check at every boot and checkpoint**, the same way the inbox is checked: tunnel up, queue non-empty or a round running. If neither, brief the next task before starting new Claude work. The tunnel dropping silently is a known cause (it was DOWN on 2026-10-28 until 12:0x, nothing re-opened it).
+5. **Unchanged:** the Spark never merges; its passes are raised, gated and GO'd as before; one client's content per task (Secuura only); signature classes stand.
+6. **Report it:** the morning card says how many Spark rounds ran, passed and failed since the last report — counts from `done.md`, not memory.
 

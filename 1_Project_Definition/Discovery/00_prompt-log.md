@@ -2761,3 +2761,8 @@ INCLUDED until he says otherwise.
 > morning.  Can you please look at and action the following message from Peter - Hi @Kam , Can you review this PR? https://github.com/Secuura/Distributed_Secuura/pull/1756
 
 *Note:* Tier-1 review of #1756 commissioned; findings + draft review comment go to Kam before anything is posted to Peter
+
+## 2026-10-28 12:07 — Kam (terminal, verbatim)
+> That is very good to hear.  thank you for the feedback and this helps with making decisions going forward.  There is another reason to use the spark - I am hopin that it makes the weekly quota last the full week.  I see that allocating to Sonnet is probably going to help a large amount but just to make sure, please create a new rule for now - never keep the spark idle.  Use it for one thing or another.  The speed will matter if they are related tasks but with a board of 400 I am sure we can find enough tasks that do not relate to other work.  Giving it tasks it fails on is an overhead for you (sorry) but it also gives us more real world information about its capability which is good.  Please capture this as well
+
+*Note:* New standing rule filed (never idle the Spark); two ledger rows; tunnel re-opened; Spark work commissioned
