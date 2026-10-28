@@ -51228,15 +51228,109 @@
   ],
   "recommended": "a",
   "ts": "2026-10-28T14:56:38.626434+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-10-28T16:43:21.331105+11:00",
   "prior_rulings_overridden": [
    "CARD wed-ledger-boot-cost",
    "CARD spark-studio-client-scope",
    "CARD spark-recreate-serving-container",
    "CARD secuura-gate-at-99pct-two-spark-prs-1016",
    "CARD wed-ornith-122b-test-on-spark-1026"
+  ],
+  "delivered_artefact": "Spark operator 3 redirected to full brief batches (SendMessage 16:4x)",
+  "delivered_ts": "2026-10-28T16:43:47.155221+11:00"
+ },
+ {
+  "id": "secuura-1756-misfiled-docs-what-next-1028",
+  "client_project": "Secuura/Blockchain",
+  "title": "Up to 18 documents on kintsugi and 4 on demo may have been filed under the wrong tenant before today's fix. What should we do about them?",
+  "bluf": "Peter's #1756 is now deployed on both boxes, so new documents should file correctly (delivered; not yet observed live). Before it, documents created through the gateway by a user in another tenant were filed under the default tenant. We measured ceilings only: 18 on kintsugi, 4 on demo, all under the default tenant. Our records cannot say which, if any, came from another tenant, because the creator field is empty on all of them. Peter and Stuart were NOT told these counts; that is your call.",
+  "default_action": "If no answer: option a. Nothing is changed or posted; a seat proves the fix live with one test write at the next deploy round.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Leave them",
+    "detail": "no repair; dev and demo data only; the fix stops new cases"
+   },
+   {
+    "key": "b",
+    "label": "Measure first",
+    "detail": "a seat reads the request logs (they only go back to yesterday's redeploy) and does one test write to prove the fix live, then reports"
+   },
+   {
+    "key": "c",
+    "label": "Tell Peter and Stuart",
+    "detail": "one facts-only ticket comment with the ceilings, posted on your word"
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-28T18:01:05.599289+11:00",
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-10-28T18:13:38.152224+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 19:56",
+   "2026-09-09 12:13",
+   "2026-09-21 10:15",
+   "CARD secuura-ks1102-public-status-what-may-show"
+  ]
+ },
+ {
+  "id": "secuura-ks1240-tenant-create-key-fail-answer-1028",
+  "client_project": "Secuura/Blockchain",
+  "title": "When tenant creation cannot generate the tenant's key, should it still answer 'created', say 'key pending', or refuse?",
+  "bluf": "Today, if the key service is down, creating a tenant still answers 201 'created': the tenant is active but has no vault key, and nothing tells the caller. If the key service hangs, the request never answers and leaves a tenant stuck half-made. Seat Y 4th's fix bounds the wait at 10 s, so the hang becomes the same silent 'created, no key'. Changing the answer changes the published API, so it's your call. Not yet measured: what breaks downstream for a tenant with no key.",
+  "default_action": "If no answer: the bounded-timeout PR ships as is (no response change), and the shape question waits on this card. Nothing else changes.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Say 'key pending'",
+    "detail": "keep 201, add an explicit pending flag and message to the published response, plus a log line; nothing that works today starts failing"
+   },
+   {
+    "key": "b",
+    "label": "Refuse",
+    "detail": "answer 503 and roll the tenant back; tenant creation then fails whenever the key service is down (it succeeds today)"
+   },
+   {
+    "key": "c",
+    "label": "Measure first",
+    "detail": "a seat traces what reads the tenant's vault key downstream, then you choose a or b with that answer"
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-10-28T18:23:05.257805+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 19:53",
+   "2026-08-17 20:23",
+   "2026-08-21 10:02",
+   "2026-08-21 10:04",
+   "2026-08-21 20:06",
+   "2026-08-24 10:13",
+   "2026-09-01 09:19",
+   "2026-09-02 19:28",
+   "2026-09-04 15:32",
+   "2026-09-06 09:45",
+   "2026-09-08 11:50",
+   "2026-09-09 17:03",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 18:01",
+   "2026-09-13 16:55",
+   "2026-09-21 09:52",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-tenant-isolation-migration-ks1401-1005",
+   "CARD secuura-ks1032-fail-closed-when-vouch-secret-unset-1013",
+   "CARD secuura-ks485-answer-peter-vouch-secret-1023"
   ]
  }
 ]
