@@ -239,6 +239,7 @@ if bases and "product" not in pins:
 product = f"{subdir}/{product_rel}"
 tool_mode = "tool" in pins
 config_class = None
+scripts_tamper = False   # 2026-10-29: a scripts/ product admitted ONLY as a test-only tamper target (see the branch below)
 def _config_class(rel):
     """The config allow-list. Returns 'package.json' | 'dockerignore' | None. No '..', no absolute path, nothing else."""
     if not rel or rel.startswith("/") or ".." in rel.split("/"):
@@ -270,6 +271,21 @@ elif product_rel.startswith("services/"):
     service_dir = "services/" + product_rel.split("/")[1]
 elif product_rel.startswith("packages/shared/"):
     service_dir = "packages/shared"
+elif re.fullmatch(r"scripts/[A-Za-z0-9_\-./]+\.(?:cjs|mjs|js|ts|sh)", product_rel) and ".." not in product_rel.split("/"):
+    # 2026-10-29 SCRIPTS TAMPER TARGET (Wednesday; operator 7's finding, KS-1775 / KS-1546): a repo script under scripts/
+    # is admitted ONLY as the product a TEST-ONLY brief plants its tamper into; the model never edits it (A3 refuses a
+    # product hunk in test-only mode, and section 5b2 below refuses this mode when the brief has no `## Tamper` block).
+    # The test HOST is the package of the pinned test_file=, and the reference test must be pinned with ref= (no test
+    # imports a script, so there is nothing to discover).
+    _tf = pins.get("test_file", "").replace(subdir + "/", "", 1)
+    _mt = re.fullmatch(r"((?:services/[a-z0-9\-]+|packages/shared))/src/__tests__/[A-Za-z0-9_\-.]+\.test\.ts", _tf)
+    if not _mt:
+        refuse(f"scripts/ product {product_rel}: admitted only as a test-only tamper target, which needs test_file=<services/<x>/src/__tests__/<name>.test.ts> naming the test host (got {_tf!r})")
+    if "ref" not in pins:
+        refuse(f"scripts/ product {product_rel}: pin the reference test with ref= (no test imports a script)")
+    scripts_tamper = True
+    service_dir = _mt.group(1)
+    print(f"SCRIPTS TAMPER TARGET: product {product_rel} is a script, NOT edited; test host (service_dir) = {service_dir} (from test_file=)")
 else:
     refuse(f"product path is neither services/* nor packages/shared: {product_rel}")
 
@@ -413,11 +429,11 @@ r = git("ls-tree", "-r", "--name-only", tip, "--", f"{subdir}/{test_dir_rel}")
 tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts") or (config_class and p.endswith(".test.tsx"))]
 if not tests:
     refuse(f"no test files under {test_dir_rel} at the tip")
-mod_rel = product_rel if (tool_mode or config_class) else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
+mod_rel = product_rel if (tool_mode or config_class or scripts_tamper) else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
 mod_noext = re.sub(r"\.ts$", "", mod_rel)                          # middleware/audit
 mod_base = os.path.basename(mod_noext)                             # audit
 scored = []
-for t in ([] if config_class else tests):   # config tier: a config file is imported by no test; the reference is a style template only
+for t in ([] if (config_class or scripts_tamper) else tests):   # config tier: a config file is imported by no test; the reference is a style template only
     body = git("show", f"{tip}:{t}").stdout
     imp = re.findall(r"from\s+['\"](\.{1,2}/[^'\"]+)['\"]", body) + re.findall(r"import\(\s*['\"](\.{1,2}/[^'\"]+)['\"]\s*\)", body)
     hits = [i for i in imp if i.rstrip("/").endswith("/" + mod_noext) or i.rstrip("/").endswith("/" + mod_base) or i.endswith(mod_noext)]
@@ -472,7 +488,10 @@ note = (
      f"product module (`{mod_noext}`) and drives it in-process" +
      (f" with vi.mock stubs for: {', '.join(ref_mocks[:12])}" if ref_mocks else " (no vi.mock — it calls the module directly)") +
      ". Copy its app-building / import / mock shape; do NOT modify it. ")
-    if not config_class else
+    if not (config_class or scripts_tamper) else
+    (f"READ-ONLY template: `{ref_path}` is an EXISTING test; copy its style only, do NOT modify it. The product `{product_rel}` "
+     "is a SCRIPT that the tests RUN (it is not imported) and it is NOT edited: it is only where the checker plants the tamper. ")
+    if scripts_tamper else
     (f"READ-ONLY template: `{ref_path}` is an EXISTING test in the same __tests__ directory; copy its import style only, "
      f"do NOT modify it. The product `{product_rel}` is a CONFIG file ({config_class}), not code: the new test READS it from disk "
      "and asserts on its text; it imports no module of the product. ")) +
@@ -768,6 +787,8 @@ if _brief_for_sites:
         tamper = {"line": _tl, "from": m_f.group(1), "to": m_to.group(1),
                   "rule": "TEST-ONLY MODE: emit ONLY the new test file (no product hunk). The checker reddens your cells by replacing this product line with `to` in a clone, then expects them GREEN at the untouched tip."}
         print(f"  TEST-ONLY tamper from the brief: {product_rel}:{_tl} {m_f.group(1).strip()[:60]!r} -> {m_to.group(1).strip()[:60]!r}")
+if scripts_tamper and tamper is None:
+    refuse(f"scripts/ product {product_rel} is admitted ONLY as a test-only tamper target, and the brief carries no `## Tamper` block")
 
 # ---------------------------------------------------------------- 5c. WEDNESDAY'S BRIEF (2026-09-15, Kam 09:30)
 # Kam: "rather than getting it to pick up tickets directly, you pick up the ticket and create a prompt based
