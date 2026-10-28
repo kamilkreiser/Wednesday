@@ -1,0 +1,86 @@
+P='Blockchain/Dev/services/m365-integration/src/index.ts'
+TP='Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts'
+E1=("&m365=success&connectionId=${connectionId}&tenant=", "&m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=")
+E1=("?m365=success&connectionId=${connectionId}&tenant=", "?m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=")
+TEST='''// KS-1670 site 1 (m365-integration src/index.ts, GET /api/callback success redirect): the redirect put `connectionId` into the query string unencoded, while `tenant` in the same template was
+// encoded with encodeURIComponent. The id only reaches that line after the server's own connection lookup hits, so it is not exploitable today, but an id format that ever admitted `&`, `#` or `%`
+// would change the shape of the query. This file reads the route's source text (no app boot, no database) and pins that every `connectionId=${...}` interpolation in the file is wrapped in
+// encodeURIComponent, and that the success redirect still encodes the tenant. C1 to C3 prove the instrument finds the route and the redirects it must not disturb.
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');
+const NEEDLE = 'connectionId=${';
+
+/** Every interpolation that follows `connectionId=${` in the source, as the text up to the closing `}` of the template expression. */
+function interpolations(): string[] {
+  const found: string[] = [];
+  let at = SRC.indexOf(NEEDLE);
+  while (at !== -1) {
+    const start = at + NEEDLE.length;
+    let depth = 1;
+    let i = start;
+    while (i < SRC.length && depth > 0) {
+      if (SRC[i] === '{') depth++;
+      else if (SRC[i] === '}') depth--;
+      i++;
+    }
+    found.push(SRC.slice(start, i - 1));
+    at = SRC.indexOf(NEEDLE, i);
+  }
+  return found;
+}
+
+describe('KS-1670: the m365 success redirect encodes the connection id', () => {
+  it('RED KS-1670 R1 every connectionId interpolation in a redirect query is wrapped in encodeURIComponent', () => {
+    const unwrapped = interpolations().filter((expr) => !/^encodeURIComponent\\(.*\\)$/.test(expr.trim()));
+    expect(unwrapped).toEqual([]);
+  });
+
+  it('RED KS-1670 R2 the success redirect carries the encoded connection id and the encoded tenant, in that order', () => {
+    expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName');
+  });
+
+  it('control KS-1670 C1 the instrument finds exactly one connectionId interpolation (the success redirect)', () => {
+    expect(interpolations()).toHaveLength(1);
+  });
+
+  it('control KS-1670 C2 the success redirect is still the one that follows the "connection completed" log line', () => {
+    const logAt = SRC.indexOf('OAuth callback: connection completed');
+    const redirectAt = SRC.indexOf('m365=success');
+    expect(logAt).toBeGreaterThan(-1);
+    expect(redirectAt).toBeGreaterThan(logAt);
+  });
+
+  it('control KS-1670 C3 the invalid_state refusal redirect is untouched', () => {
+    expect(SRC).toContain('/admin/integrations?m365=error&message=invalid_state');
+  });
+});
+'''
+S=dict(dir='ks_1670_p1',ticket='KS-1670',
+ title='(site 1 only) m365-integration: the success redirect puts connectionId into the query unencoded, beside an encoded tenant; wrap it in encodeURIComponent (RUNG 2, code_patch: one line in a long template + one NEW source-text vitest file)',
+ intro="DRAFT by a Spark brief drafter for Wednesday, batch 3 of 2026-10-28 AEDT (never-keep-the-Spark-idle round). Secuura only. A local PASS is a candidate, never a merge; the normal QA gate before merge. The ticket itself says 'Site 1 is a one-line change and can ship on its own'; sites 2 and 3 (an internal error text in a 500 body, Graph's error text passed back uncapped) wait for the KS-1641 `:515` decision and are NOT in this brief. The Spark may fail this one (capability data).",
+ products=[(P,[E1])],
+ prodnote=['product, modified in place: ONE hunk, one long line replaced (only the `connectionId` interpolation inside it changes)'],
+ tests=[dict(path=TP,content=TEST)],
+ testnote=['NEW file, vitest, given in full below; 5 cells (source-text pins)'],
+ runner='vitest` (`npx vitest run src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts` from `Blockchain/Dev/services/m365-integration',
+ tier='code_patch', rung='2 (one line byte-exact; the new test given whole)',
+ pins='''# code_patch, ONE line in m365-integration src/index.ts + a NEW vitest file; ref = the ks1641 callback spec (shape only); line = the changed line.
+tier=code_patch
+ref=Blockchain/Dev/services/m365-integration/src/__tests__/ks1641-the-oauth-callback-caps-the-reflected-error-description.test.ts
+line=677
+ctx=65536
+''',
+ wrong="The success branch of `GET /api/callback` in `services/m365-integration/src/index.ts` (the `res.redirect(...)` at `:677`, right after the log line `OAuth callback: connection completed`) builds `.../admin/integrations?m365=success&connectionId=${connectionId}&tenant=${encodeURIComponent(connection.tenantName || '')}`. `tenant` is encoded and `connectionId` is not. `connectionId` is `connection.id`, an id the server issued, so this is not exploitable today (gate AM1 N4); it is fragile, because an id format that ever admitted `&`, `#` or `%` would change the shape of the redirect's query. The change wraps the one interpolation: `connectionId=${encodeURIComponent(connectionId)}`. For every id the server issues today (the characters `encodeURIComponent` leaves alone) the redirect is byte-for-byte the same.",
+ where="- `src/index.ts:677` - **must change**: in the `res.redirect(` template on that one line, the text `connectionId=${connectionId}&tenant=` becomes `connectionId=${encodeURIComponent(connectionId)}&tenant=`. Nothing else on the line changes (the `FRONTEND_URL` prefix, `m365=success` and the encoded `tenant` stay exactly as they are).\n- Every other line of the file, including the `invalid_state` and error redirects, is NOT touched.",
+ exactnote="ONE hunk: one line removed, one line added (the same line with one interpolation wrapped).\n",
+ donot="**Do NOT touch** any other line of `index.ts` (sites 2 and 3 of the ticket are a separate decision), or any other file.",
+ testnote2="A NEW file, given whole. Its `+` lines are the entire file, byte for byte. Pure ASCII, vitest imports, no top-level await. It reads `src/index.ts` with `readFileSync` from `__dirname/..`; it does not boot the app (the app listens at import and needs a database mock, which the ks1641 harness provides and this file does not need).",
+ red=['RED KS-1670 R1','RED KS-1670 R2'],
+ cells="- RED `R1`: at the tip the one `connectionId=${...}` interpolation is the bare identifier `connectionId`, so the list of unwrapped interpolations is `['connectionId']` and `toEqual([])` fails; after the edit it is empty.\n- RED `R2`: at the tip the exact string with the encoded id is absent; after the edit it is present.\n- CONTROL `C1` to `C3`: green at the tip AND after (exactly one interpolation in the file; the success redirect follows the 'connection completed' log; the invalid_state redirect is unchanged).",
+ premises="- `src/index.ts:677` is the success `res.redirect(` line quoted above and is the only line in the file containing `connectionId=${` (read at the tip with a fixed-string search).\n- `connection.id` is the id the server issued: `const connectionId = connection.id;` at :647, after `memConnections.get(...)` hit.\n- The service's test runner is vitest. The golden is generated by script, not typed.",
+ unmeasured="- Nothing was run by the drafter apart from the harness dry-run and control.\n- No request is sent: the cells are source-text pins, so the encoded redirect is not observed on the wire.\n- What an id with a reserved character would do before the change: not measured (the ticket says it is not exploitable today).\n- Open PRs touching this file: none by the file lists of every open PR read on 2026-10-28.",
+ scope="**Closes site 1 of KS-1670 only.** Sites 2 (:742 at the ticket's sha) and 3 (:1026) stay open pending the KS-1641 `:515` decision. Link the PR as Refs KS-1670, never a close-word.",
+)

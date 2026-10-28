@@ -1,0 +1,161 @@
+P='Blockchain/Dev/services/auth/src/routes/issuerCerts.ts'
+TP='Blockchain/Dev/services/auth/src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts'
+E1=("const ADMIN_ROLES = ['ORG_ADMIN', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'];\n",
+"""const ADMIN_ROLES = ['ORG_ADMIN', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'];
+
+/**
+ * The one role test the four gates below share: the role claim, read as text, is in ADMIN_ROLES either as it is or upper-cased.
+ * Behaviour-preserving extraction of the two lines that were copied into each gate.
+ */
+export function hasAdminRole(role: unknown): boolean {
+  const text = String(role ?? '');
+  return ADMIN_ROLES.includes(text) || ADMIN_ROLES.includes(text.toUpperCase());
+}
+""")
+OLD="  const role = String(user.role ?? '');\n  if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;\n"
+NEW="  if (hasAdminRole(user.role)) return true;\n"
+def E2(s):
+    assert s.count(OLD)==4,s.count(OLD)
+    return s.replace(OLD,NEW)
+TEST='''// Behaviour-preserving extraction in services/auth routes/issuerCerts.ts: the four gates (write, read, revoke, sign) each copied the same two lines, `const role = String(user.role ?? '')` and
+// `ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())`. They now call one exported helper, hasAdminRole. R1 to R3 pin the helper (it exists, its truth table, and the file
+// holds the role test once). C1 to C6 drive the REAL router on a loopback listener through all four gates and must read the same before and after the extraction: an admitted caller with no tenant claim
+// gets 400 TENANT_REQUIRED (past the role gate), a refused caller gets 403. The role arrives in an x-test-user header that a mocked authenticate() turns into req.user.
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import type { Server } from 'node:http';
+import express from 'express';
+
+const silent = vi.hoisted(() => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }));
+vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
+vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
+vi.mock('../middleware/authenticate', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    const raw = req.headers['x-test-user'];
+    req.user = typeof raw === 'string' ? JSON.parse(raw) : undefined;
+    next();
+  },
+}));
+vi.mock('../repositories/issuerCertRepo', () => ({
+  createIssuerCert: vi.fn(), getIssuerCertById: vi.fn(), findIssuerCertByFingerprint: vi.fn(), findActiveIssuerCertForTenant: vi.fn(),
+  listIssuerCerts: vi.fn(async () => []), revokeIssuerCert: vi.fn(), rotateIssuerCert: vi.fn(), toSummary: vi.fn(),
+}));
+vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
+vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
+
+import * as certRoutes from '../routes/issuerCerts';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const SRC = readFileSync(join(__dirname, '..', 'routes', 'issuerCerts.ts'), 'utf8');
+
+let server: Server;
+let base = '';
+
+beforeAll(async () => {
+  const app = express();
+  app.use(express.json());
+  app.use('/api/issuer-certs', certRoutes.issuerCertsRoutes);
+  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
+  const addr = server.address();
+  base = 'http://127.0.0.1:' + (typeof addr === 'object' && addr ? addr.port : 0);
+});
+afterAll(() => { server?.close(); });
+
+/** The helper under test, or a sentinel when it is not exported yet, so a missing helper is a red assertion and not a thrown error. */
+function helper(role: unknown): boolean | string {
+  const fn = (certRoutes as Record<string, unknown>).hasAdminRole;
+  return typeof fn === 'function' ? (fn as (r: unknown) => boolean)(role) : 'NO HELPER';
+}
+
+const ROUTES: Array<[string, string, string]> = [
+  ['write', 'POST', '/api/issuer-certs'],
+  ['read', 'GET', '/api/issuer-certs'],
+  ['revoke', 'POST', '/api/issuer-certs/abc/revoke'],
+  ['sign', 'POST', '/api/issuer-certs/sign'],
+];
+
+/** The status a caller gets from a route; the user carries no tenant claim, so a caller past the role gate is answered 400 TENANT_REQUIRED. */
+async function status(method: string, path: string, user: unknown): Promise<number> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (user !== undefined) headers['x-test-user'] = JSON.stringify(user);
+  const res = await fetch(base + path, { method, headers, body: method === 'GET' ? undefined : '{}' });
+  return res.status;
+}
+
+async function statuses(user: unknown): Promise<number[]> {
+  const out: number[] = [];
+  for (const [, method, path] of ROUTES) out.push(await status(method, path, user));
+  return out;
+}
+
+describe('KS-1536 extraction: the issuer-cert admin role test is one helper', () => {
+  it('RED KS-1536 R1 hasAdminRole is exported as a function', () => {
+    expect(typeof (certRoutes as Record<string, unknown>).hasAdminRole).toBe('function');
+  });
+
+  it('RED KS-1536 R2 hasAdminRole keeps the truth table of the copied lines', () => {
+    const rows = ['ORG_ADMIN', 'org_admin', 'SYSTEM_ADMIN', 'ISSUER_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin', 'Super_Admin', 'Admin', 'ADMIN', 'USER', '', undefined, null, 0];
+    expect(rows.map((r) => helper(r))).toEqual([true, true, true, true, true, true, true, true, false, false, false, false, false, false, false]);
+  });
+
+  it('RED KS-1536 R3 the file holds the role test once: no gate copies the ADMIN_ROLES comparison any more', () => {
+    expect(SRC.split('ADMIN_ROLES.includes(').length - 1).toBe(2);
+    expect(SRC).not.toContain("const role = String(user.role ?? '');");
+  });
+
+  it('control KS-1536 C1 an ORG_ADMIN is admitted by all four gates (400 TENANT_REQUIRED, past the role gate)', async () => {
+    expect(await statuses({ role: 'ORG_ADMIN' })).toEqual([400, 400, 400, 400]);
+  });
+
+  it('control KS-1536 C2 a lower-case super_admin and a mixed-case Super_Admin are admitted by all four gates', async () => {
+    expect(await statuses({ role: 'super_admin' })).toEqual([400, 400, 400, 400]);
+    expect(await statuses({ role: 'Super_Admin' })).toEqual([400, 400, 400, 400]);
+  });
+
+  it('control KS-1536 C3 an ordinary USER, a mixed-case Admin and a caller with no role are refused by all four gates', async () => {
+    expect(await statuses({ role: 'USER' })).toEqual([403, 403, 403, 403]);
+    expect(await statuses({ role: 'Admin' })).toEqual([403, 403, 403, 403]);
+    expect(await statuses({})).toEqual([403, 403, 403, 403]);
+  });
+
+  it('control KS-1536 C4 a request with no user at all is refused by all four gates', async () => {
+    expect(await statuses(undefined)).toEqual([403, 403, 403, 403]);
+  });
+
+  it('control KS-1536 C5 a USER holding only the read scope passes the read gate and no other', async () => {
+    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:read'] })).toEqual([403, 400, 403, 403]);
+  });
+
+  it('control KS-1536 C6 a USER holding the write scope passes write and read, a revoke-scope USER passes revoke only, a sign-scope USER passes sign only', async () => {
+    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:write'] })).toEqual([400, 400, 403, 403]);
+    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:revoke'] })).toEqual([403, 403, 400, 403]);
+    expect(await statuses({ role: 'USER', scopes: ['issuer-certs:sign'] })).toEqual([403, 403, 403, 400]);
+  });
+});
+'''
+S=dict(dir='ks_1536_p1',ticket='KS-1536',
+ title='(refactor, no ticket of its own) auth routes/issuerCerts.ts: the same two-line admin-role test is copied into four gates; extract one exported helper hasAdminRole with the behaviour unchanged (RUNG 2, code_patch: 5 hunks in one file + one NEW loopback vitest file)',
+ intro="DRAFT by a Spark brief drafter for Wednesday, batch 4 of 2026-10-28 AEDT (never-keep-the-Spark-idle round). Secuura only. A local PASS is a candidate, never a merge; the normal QA gate before merge. NO BOARD TICKET covers this: it is a behaviour-preserving de-duplication the drafter found while screening, filed under KS-1536 (One role vocabulary, seven divergent lists) ONLY because the builder needs an open ticket in the header; it is groundwork for that class, not a fix for it. Every role spelling admitted or refused before is admitted or refused now (the cells C1-C6 are green at the tip AND after); the only red cells pin that the helper exists and that the copies are gone. The Spark may fail this one (capability data): it is the first pure-refactor brief.",
+ products=[(P,[E1,E2])],
+ prodnote=['product, modified in place: FIVE hunks - one helper added after the ADMIN_ROLES const, then the two copied lines replaced by one in each of the four gates'],
+ tests=[dict(path=TP,content=TEST)],
+ testnote=['NEW file, vitest, given in full below; 9 cells (3 red, 6 control; loopback through the real router)'],
+ runner='vitest` (`npx vitest run src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts` from `Blockchain/Dev/services/auth',
+ tier='code_patch', rung='2 (five hunks given byte-exact; the new test given whole)',
+ pins='''# code_patch, 5 hunks in auth routes/issuerCerts.ts + a NEW loopback vitest file; ref = ks804 (loopback harness shape only); line = the first changed line (the ADMIN_ROLES const).
+tier=code_patch
+ref=Blockchain/Dev/services/auth/src/__tests__/ks804-authorize-get-post-agree-per-rule.test.ts
+line=62
+ctx=65536
+''',
+ wrong="`services/auth/src/routes/issuerCerts.ts` has four gate functions (`isAuthorisedForCertWrite`, `isAuthorisedForCertRead`, `isAuthorisedForCertRevoke`, `isAuthorisedForCertSign`) that each begin with the same two lines: `const role = String(user.role ?? '');` and `if (ADMIN_ROLES.includes(role) || ADMIN_ROLES.includes(role.toUpperCase())) return true;`. Nothing is wrong with what they do; the copies are what make the next change to the role test a four-place edit (the KS-1591 class of fixes is about to need exactly that). The change adds one exported function `hasAdminRole(role: unknown): boolean` right after the `ADMIN_ROLES` const, with the same two expressions in it, and replaces each copied pair of lines by `if (hasAdminRole(user.role)) return true;`. The scope checks that follow in each gate, the 403 bodies and the routes are untouched. No behaviour changes for any role spelling (including the ones the old lines admitted by accident, such as a role array that stringifies to ORG_ADMIN; that quirk is KS-1591 territory and is deliberately NOT changed or pinned here).",
+ where="- `routes/issuerCerts.ts:62` - **must change** (insertion): after the `const ADMIN_ROLES = [...]` line, one blank line, a doc comment, and the `hasAdminRole` function (hunk 1).\n- `:68-69`, `:77-78`, `:91-92`, `:108-109` (tip numbers) - **must change**: the two copied lines in each of the four gates become the single line `  if (hasAdminRole(user.role)) return true;` (hunks 2-5). In `isAuthorisedForCertSign` a comment block precedes the two lines and stays.\n- Every other line of the file, including the `const scopes = ...` lines after each gate's role test, is NOT touched.",
+ exactnote="FIVE hunks: one insertion, then four two-lines-to-one replacements.\n",
+ donot="**Do NOT touch** any other line of `issuerCerts.ts`, `ADMIN_ROLES` itself, the scope checks, or any other file. Do NOT change the semantics (no ASCII fold, no type check on the role): this is an extraction only.",
+ testnote2="A NEW file, given whole. Its `+` lines are the entire file, byte for byte. Pure ASCII, vitest imports, no top-level await. It mocks authenticate() so that an `x-test-user` header becomes `req.user`, mocks the repo, events, db and logger, and drives the real router on a loopback listener.",
+ red=['RED KS-1536 R1','RED KS-1536 R2','RED KS-1536 R3'],
+ cells="- RED `R1`: at the tip `hasAdminRole` is not exported, so its type is `undefined` and `toBe('function')` fails; after the edit it is a function.\n- RED `R2`: at the tip the helper wrapper returns the sentinel string for every row, so the truth-table comparison fails; after the edit it equals the expected 15 booleans.\n- RED `R3`: at the tip the file holds four copies of the comparison (8 `ADMIN_ROLES.includes(` occurrences) and four `const role = String(user.role ?? '');` lines; after the edit the helper holds the 2 occurrences and no copy of the `const role` line remains.\n- CONTROL `C1` to `C6`: green at the tip AND after (statuses through all four gates for an admitted role, mixed-case roles, refused roles, no user, and each scope).",
+ premises="- `routes/issuerCerts.ts:62` is the `ADMIN_ROLES` const; the four gates are at :65, :74, :88 and :101; the repeated pair of lines is at :68-69, :77-78, :91-92 and :108-109 (read from the cache clone at the tip; each pair is byte-identical, which the generator asserts by count).\n- Each route handler checks its gate first and answers 403, then answers 400 TENANT_REQUIRED when the user has no `tenantId` claim, before any repo call (`:188-203`, `:326-336`, `:428-438`, `:703-713`), so the status separates 'refused' (403) from 'past the role gate' (400) with no repository mocked to a fixture.\n- `POST /:id/rotate` (:534) uses the write and revoke gates together and is not exercised by the cells.\n- The service's test runner is vitest. The golden is generated by script, not typed.",
+ unmeasured="- Nothing was run by the drafter apart from the harness dry-run and control.\n- Whether `../services/issuerCert` (real, not mocked) loads under the test's module mocks: the control measures this; a red at C1 is the finding.\n- Behaviour on the wire is observed only as 403/400 statuses (no repo is reached).\n- Open PRs touching this file: none by the file lists of every open PR read on 2026-10-28.",
+ scope="**A pure extraction.** No ticket is closed by it. The raise seat notes it as groundwork for the KS-1536 role-vocabulary class and the KS-1591 role-fold sweep. Do not close-word anything.",
+)

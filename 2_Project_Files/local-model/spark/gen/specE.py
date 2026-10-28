@@ -1,0 +1,121 @@
+P='Blockchain/Dev/scripts/smoke-test.sh'
+TP='Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh'
+OLD='GATEWAY="http://localhost:6882"\n'
+NEW='''# KS-1250: RUNBOOK 2.2 tells an operator to point this script at an environment with SMOKE_BASE_URL, but the script never read it, so a run could look like a check of kintsugi or demo while it checked localhost. An unset or empty value keeps the old default.
+GATEWAY="${SMOKE_BASE_URL:-http://localhost:6882}"
+echo "Smoke target: $GATEWAY"
+'''
+TEST='''#!/usr/bin/env bash
+# =============================================================================
+# TESTS for Blockchain/Dev/scripts/smoke-test.sh - KS-1250: the script must honour SMOKE_BASE_URL
+# =============================================================================
+# RUNBOOK 2.2 (deployment/azure/RUNBOOK.md) tells an operator to run the smoke test against an environment with
+# `SMOKE_BASE_URL=https://<gateway> scripts/smoke-test.sh`. The script set its gateway from a literal and never read the
+# variable, so the run checked localhost whatever the variable said. Fixed: GATEWAY comes from SMOKE_BASE_URL (unset or
+# empty keeps http://localhost:6882) and the script prints the target it is using.
+#
+# curl is NEVER really run here (no stack, no network): a STUB curl on a private PATH records every URL it is given and
+# answers like a healthy gateway, in the shape of smoke_test_counters_survive_errexit.test.sh. The script runs in --quick mode.
+#
+# Usage: bash Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh
+# =============================================================================
+set -uo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$HERE/../../../.." && pwd)"
+SMOKE="$REPO_ROOT/Blockchain/Dev/scripts/smoke-test.sh"
+[ -f "$SMOKE" ] || { echo "FATAL: smoke-test.sh not found at $SMOKE" >&2; exit 2; }
+
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/smokebase.XXXXXX")"
+trap 'rm -rf "$WORK"' EXIT
+
+pass=0; fail=0
+ok()  { printf '  ok   %s\\n' "$1"; pass=$((pass + 1)); }
+bad() { printf '  FAIL %s\\n     %s\\n' "$1" "$2"; fail=$((fail + 1)); }
+
+BASE="http://smoke-target.invalid:9999"
+
+# A stub curl that appends every URL argument to $root/urls.txt, serves a healthy /health/deep body and a 200 for -w.
+build_fixture() {
+  local root="$1"
+  mkdir -p "$root/bin"
+  : > "$root/urls.txt"
+  printf '%s' '{"ready":true,"status":"ok","checks":{}}' > "$root/deep.json"
+  sed "s#@ROOT@#$root#g" > "$root/bin/curl" <<'STUB'
+#!/bin/bash
+for a in "$@"; do
+  case "$a" in http://*|https://*) printf '%s\\n' "$a" >> "@ROOT@/urls.txt" ;; esac
+done
+for a in "$@"; do
+  case "$a" in */health/deep) cat "@ROOT@/deep.json"; exit 0 ;; esac
+done
+for a in "$@"; do [ "$a" = "-w" ] && { printf '200'; exit 0; }; done
+exit 0
+STUB
+  chmod +x "$root/bin/curl"
+}
+
+# Run the smoke test in --quick mode with the stub curl first on PATH. $2 is the value of SMOKE_BASE_URL, or the word UNSET.
+run_smoke() {
+  local root="$1" value="$2"
+  if [ "$value" = "UNSET" ]; then
+    ( unset SMOKE_BASE_URL; export PATH="$root/bin:$PATH"; bash "$SMOKE" --quick ) > "$root/out.txt" 2>&1
+  else
+    ( export SMOKE_BASE_URL="$value"; export PATH="$root/bin:$PATH"; bash "$SMOKE" --quick ) > "$root/out.txt" 2>&1
+  fi
+}
+total_urls() { grep -c . "$1/urls.txt"; }
+urls_not_under() { grep -v -c -F "$2" "$1/urls.txt"; }
+
+# CONTROL - without the variable every URL goes to the default gateway, and there is at least one.
+build_fixture "$WORK/unset"; run_smoke "$WORK/unset" UNSET
+got="$([ "$(total_urls "$WORK/unset")" -gt 0 ] && echo some || echo none) $(urls_not_under "$WORK/unset" "http://localhost:6882")"
+if [ "$got" = "some 0" ]; then ok "CONTROL - SMOKE_BASE_URL unset: every URL is under http://localhost:6882"; else bad "CONTROL - SMOKE_BASE_URL unset: every URL is under http://localhost:6882" "want 'some 0', got '$got'"; fi
+
+# CONTROL - an empty variable behaves as unset.
+build_fixture "$WORK/empty"; run_smoke "$WORK/empty" ""
+got="$([ "$(total_urls "$WORK/empty")" -gt 0 ] && echo some || echo none) $(urls_not_under "$WORK/empty" "http://localhost:6882")"
+if [ "$got" = "some 0" ]; then ok "CONTROL - SMOKE_BASE_URL empty: every URL is under http://localhost:6882"; else bad "CONTROL - SMOKE_BASE_URL empty: every URL is under http://localhost:6882" "want 'some 0', got '$got'"; fi
+
+# RED - with the variable set, every URL goes under it and none goes to localhost.
+build_fixture "$WORK/set"; run_smoke "$WORK/set" "$BASE"
+got="$([ "$(total_urls "$WORK/set")" -gt 0 ] && echo some || echo none) $(urls_not_under "$WORK/set" "$BASE")"
+if [ "$got" = "some 0" ]; then ok "RED SMOKE_BASE_URL set: every URL is under the given base"; else bad "RED SMOKE_BASE_URL set: every URL is under the given base" "want 'some 0', got '$got' (urls: $(tr '\\n' ' ' < "$WORK/set/urls.txt"))"; fi
+
+# RED - the script prints the target it is using.
+got="$(grep -c -F "Smoke target: $BASE" "$WORK/set/out.txt")"
+if [ "$got" = "1" ]; then ok "RED the run prints 'Smoke target: <base>' once"; else bad "RED the run prints 'Smoke target: <base>' once" "want 1, got $got"; fi
+
+# CONTROL - the default run prints the default target, so the line is not specific to the override.
+got="$(grep -c -F "Smoke target: http://localhost:6882" "$WORK/unset/out.txt")"
+if [ "$got" = "1" ]; then ok "CONTROL - the default run prints 'Smoke target: http://localhost:6882' once"; else bad "CONTROL - the default run prints 'Smoke target: http://localhost:6882' once" "want 1, got $got"; fi
+
+printf '\\n  %d passed, %d failed\\n' "$pass" "$fail"
+[ "$fail" -eq 0 ] || exit 1
+exit 0
+'''
+S=dict(dir='ks_1250_p1',ticket='KS-1250',
+ title='RUNBOOK 2.2 documents SMOKE_BASE_URL but scripts/smoke-test.sh ignores it; read it for the gateway and print the target (RUNG 2, bash_patch: ONE product hunk of 3 added lines + one NEW bash suite)',
+ intro="DRAFT by a Spark brief drafter for Wednesday, batch 2 of 2026-10-28 AEDT (never-keep-the-Spark-idle round). Secuura only. A local PASS is a candidate, never a merge; the normal QA gate before merge. The ticket offers two fixes (make the script honour the variable, or correct the runbook); this brief takes the first, which the ticket lists first and which makes the documented command true. The Spark may fail this one (capability data: a bash tier with a stubbed-curl suite).",
+ products=[(P,[(OLD,NEW)])],
+ prodnote=['product, modified in place: ONE hunk, one line replaced by three'],
+ tests=[dict(path=TP,content=TEST)],
+ testnote=['NEW file, bash, given in full below; 5 cells'],
+ runner='bash` (bash 3.2 compatible; `bash Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh` from the repo root',
+ tier='bash_patch', rung='2 (one hunk byte-exact; one new bash suite given whole)',
+ pins='''# bash_patch: ref = the neighbouring smoke-test suite (stub-curl method, shape only); test_file named explicitly (NEW).
+tier=bash_patch
+ref=Blockchain/Dev/scripts/__tests__/smoke_test_counters_survive_errexit.test.sh
+test_file=Blockchain/Dev/scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh
+''',
+ wrong="`deployment/azure/RUNBOOK.md` section 2.2 tells an operator to run `SMOKE_BASE_URL=https://<prod-gateway-fqdn> ../../scripts/smoke-test.sh`. `scripts/smoke-test.sh:15` sets `GATEWAY=\"http://localhost:6882\"` from a literal and nothing in the script reads `SMOKE_BASE_URL`, so the run checks localhost whatever the variable says: it can look like a check of kintsugi or demo while checking something else. The change reads the variable with the old literal as the default (`${SMOKE_BASE_URL:-http://localhost:6882}`, so an unset OR empty variable keeps today's behaviour) and prints `Smoke target: <url>` so the operator can see which environment was checked.",
+ where="- `scripts/smoke-test.sh:15` - **must change**: the single line `GATEWAY=\"http://localhost:6882\"` is replaced by the three lines under \"The exact change\" (a comment, the new assignment, the echo).\n- Every other line is (correct) and is NOT touched. In particular the direct-port checks of the full (non --quick) run (`http://localhost:6000`, `:6003`, `:6004`, `:6013`, `:6014`, `:6021`-`:6023`) are NOT part of this brief: they are not gateway URLs and the ticket does not name them.",
+ exactnote="ONE hunk: one line removed, three added. The `echo` line is plain text, with no colour variables (they are defined after it).\n",
+ donot="**Do NOT touch** the runbook, any other line of the script, or any other file.",
+ testnote2="A NEW file, given whole. Its `+` lines are the entire file, byte for byte. `printf` and `echo` escapes are written as the file shows them. Pure ASCII.",
+ red=['RED SMOKE_BASE_URL set: every URL is under the given base','RED the run prints'],
+ cells="- RED `SMOKE_BASE_URL set`: at the tip every URL goes to localhost:6882; after, every URL goes under the given base.\n- RED `the run prints 'Smoke target: <base>' once`: at the tip nothing is printed.\n- CONTROL (3): unset and empty variables keep the default gateway (green at the tip AND after); the last control (the default run prints the default target) needs the new `echo`, so it is also red at the tip - see UNMEASURED.",
+ premises="- `scripts/smoke-test.sh:15` is `GATEWAY=\"http://localhost:6882\"` and `$GATEWAY` is used for the gateway checks (`:101`, `:135`-`:146`, `:154`-`:244`, `:337`-`:344`); `RUNBOOK.md:142` documents `SMOKE_BASE_URL`; both read at the tip.\n- `--quick` mode runs the health and portal checks only (no API logins), so a stub curl is enough.\n- The sibling suite `smoke_test_counters_survive_errexit.test.sh` runs the real script under a stub curl the same way.",
+ unmeasured="- Nothing was run by the drafter apart from the harness dry-run and control.\n- The last CONTROL cell ('the default run prints the default target') needs the new `echo`, so it is also red at the tip; it is a control only in the sense that it must stay green after. If the checker insists a control be green at the tip, the control run reports it and this brief is not queued.\n- Whether `--quick` makes any non-gateway curl call (those URLs would count against the first RED cell): the control run with the golden measures it.\n- Open PRs touching either file: none by the file lists of every open PR read on 2026-10-28.",
+ scope="**Closes KS-1250** (the variable is honoured and the target printed); the runbook then needs no change. Link the PR as Refs KS-1250 unless the owner agrees the direct-port checks stay out.",
+)
