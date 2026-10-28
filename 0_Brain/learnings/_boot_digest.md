@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-28 19:38 from 254 lesson files (1,106,399 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-28 23:15 from 254 lesson files (1,106,730 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6534,6 +6534,7 @@ sections (open the file for these): What is lifted, and what is NOT · The work 
 1. **Read the scope field, not the option list.** When Kam answers a card with a `note:` instead of a key, the note IS the ruling and it may be wider than anything offered. Record it verbatim before interpreting it.
 2. **State the reading back in the same action** (done, 19:43 panel), with the part being treated as still-his named explicitly. He corrects in seconds; a silent wide reading corrects in incidents.
 3. **A lifted hold lifts ONE ticket.** KS-1250 is still named and still pauses. Do not generalise "he lifted a hold" into "the class is open".
+   *Scope of the KS-1250 pause (read at source 2026-10-28 23:1x, Linear + WEEK-INSTRUCTION.md.pre-0921-1406-lapsed:26):* the ticket is the smoke-test.sh SMOKE_BASE_URL fix. The pause covers RUNNING the smoke test against a live box, because that anchors a real document. Building, gating and merging the script fix are not paused.
 4. **The mechanism could not record it** — see the ledger row of the same date: `reconcile_rulings.py` parses `Decision <id>: <key>` and his `note:` form is not a key, so his ruling did not reach the card and would have evaporated. Recorded by hand into this file, the card's withdrawal reason and the pickup. **The reconciler fix is OWED.**
 
 **Family:** [[2026-09-06_a-scoped-override-carries-its-own-expiry]] (no expiry stated here — said so rather than assumed) · [[2026-08-07_protocol-v1.3-signed-delegation]] (what a grant does and does not reach) · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (the card carried a default; he answered past it) · [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]].

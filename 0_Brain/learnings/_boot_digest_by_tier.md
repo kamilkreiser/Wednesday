@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-28 19:38 from 254 lesson files (1,106,609 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 209. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-28 23:15 from 254 lesson files (1,106,940 B). M 37 · MIXED 5 · P-Datasec/HPSM-POC 1 · UNTAGGED 2 · W 209. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (2) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md
 
@@ -6476,6 +6476,7 @@ sections (open the file for these): What is lifted, and what is NOT · The work 
 1. **Read the scope field, not the option list.** When Kam answers a card with a `note:` instead of a key, the note IS the ruling and it may be wider than anything offered. Record it verbatim before interpreting it.
 2. **State the reading back in the same action** (done, 19:43 panel), with the part being treated as still-his named explicitly. He corrects in seconds; a silent wide reading corrects in incidents.
 3. **A lifted hold lifts ONE ticket.** KS-1250 is still named and still pauses. Do not generalise "he lifted a hold" into "the class is open".
+   *Scope of the KS-1250 pause (read at source 2026-10-28 23:1x, Linear + WEEK-INSTRUCTION.md.pre-0921-1406-lapsed:26):* the ticket is the smoke-test.sh SMOKE_BASE_URL fix. The pause covers RUNNING the smoke test against a live box, because that anchors a real document. Building, gating and merging the script fix are not paused.
 4. **The mechanism could not record it** — see the ledger row of the same date: `reconcile_rulings.py` parses `Decision <id>: <key>` and his `note:` form is not a key, so his ruling did not reach the card and would have evaporated. Recorded by hand into this file, the card's withdrawal reason and the pickup. **The reconciler fix is OWED.**
 
 **Family:** [[2026-09-06_a-scoped-override-carries-its-own-expiry]] (no expiry stated here — said so rather than assumed) · [[2026-08-07_protocol-v1.3-signed-delegation]] (what a grant does and does not reach) · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (the card carried a default; he answered past it) · [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]].
