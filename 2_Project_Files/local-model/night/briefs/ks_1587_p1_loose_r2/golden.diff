@@ -1,0 +1,119 @@
+diff --git a/Blockchain/Dev/services/security/src/db.ts b/Blockchain/Dev/services/security/src/db.ts
+--- a/Blockchain/Dev/services/security/src/db.ts
++++ b/Blockchain/Dev/services/security/src/db.ts
+@@ -59,5 +59,12 @@
+ export async function transaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
+   const client = await getClient();
++  // KS-1587 N1: a pg client that nobody listens to raises its 'error' event as an uncaught exception when the backend dies under it
++  // ("Connection terminated unexpectedly"), which exits the process. Listen for it while the client is checked out; the failing
++  // query's own rejection still reaches the catch below.
++  const onClientError = (err: Error) => {
++    dbLog('error', 'DB client error while checked out', { error: err.message });
++  };
++  client.on('error', onClientError);
+   try {
+     await client.query('BEGIN');
+     const result = await fn(client);
+@@ -67,6 +74,7 @@
+     await client.query('ROLLBACK');
+     throw err;
+   } finally {
++    client.removeListener('error', onClientError);
+     client.release();
+   }
+ }
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1587-transaction-listens-for-a-client-error-while-checked-out.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1587-transaction-listens-for-a-client-error-while-checked-out.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1587-transaction-listens-for-a-client-error-while-checked-out.test.ts
+@@ -0,0 +1,90 @@
++// KS-1587 N1 (security db.ts transaction()): the pg client checked out for a transaction had no 'error' listener. When the database kills the backend under it
++// (a failover, a terminated session), pg emits 'error' on the client; an EventEmitter with no listener turns that into an uncaught exception, and the process exits
++// (gracefulShutdown). transaction() now listens while the client is checked out, logs the event, and removes the listener before releasing the client.
++// pg is mocked: the client is a plain EventEmitter with query and release spies. R1 and R2 are red until the listener exists; C1 to C3 pin what must not move.
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++import { EventEmitter } from 'events';
++
++const h = vi.hoisted(() => ({ client: null as any }));
++
++vi.mock('pg', () => ({
++  // A plain function (not an arrow) so `new Pool(...)` is constructible.
++  Pool: vi.fn(function PoolMock() {
++    return {
++      query: vi.fn(),
++      on: vi.fn(),
++      end: vi.fn().mockResolvedValue(undefined),
++      connect: vi.fn(async () => h.client),
++    };
++  }),
++}));
++
++function makeClient() {
++  const c: any = new EventEmitter();
++  c.query = vi.fn(async () => ({ rows: [] }));
++  c.release = vi.fn();
++  return c;
++}
++
++/** Fresh copy of the module per test: db.ts holds module-level state. */
++async function importDb() {
++  vi.resetModules();
++  return import('../db');
++}
++
++describe('KS-1587 N1: transaction() listens for a client error while the client is checked out', () => {
++  let consoleSpy: ReturnType<typeof vi.spyOn>;
++
++  beforeEach(() => {
++    process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
++    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
++    h.client = makeClient();
++  });
++
++  afterEach(() => {
++    consoleSpy.mockRestore();
++    delete process.env.DATABASE_URL;
++  });
++
++  it('RED KS-1587 R1 an error event emitted on the client inside the transaction does not throw', async () => {
++    const db = await importDb();
++    const out = await db.transaction(async (client) => {
++      expect(() => client.emit('error', new Error('Connection terminated unexpectedly'))).not.toThrow();
++      return 'done';
++    });
++    expect(out).toBe('done');
++  });
++
++  it('RED KS-1587 R2 exactly one error listener is attached while the transaction runs', async () => {
++    const db = await importDb();
++    let seen = -1;
++    await db.transaction(async (client) => {
++      seen = client.listenerCount('error');
++      return null;
++    });
++    expect(seen).toBe(1);
++  });
++
++  it('control KS-1587 C1 the listener is gone and the client is released once after a committed transaction', async () => {
++    const db = await importDb();
++    await db.transaction(async () => 'x');
++    expect(h.client.listenerCount('error')).toBe(0);
++    expect(h.client.release).toHaveBeenCalledTimes(1);
++    expect(h.client.query.mock.calls.map((c: unknown[]) => c[0])).toEqual(['BEGIN', 'COMMIT']);
++  });
++
++  it('control KS-1587 C2 a throwing callback is rolled back, rethrown, and the listener is removed', async () => {
++    const db = await importDb();
++    await expect(db.transaction(async () => { throw new Error('boom'); })).rejects.toThrow('boom');
++    expect(h.client.query.mock.calls.map((c: unknown[]) => c[0])).toEqual(['BEGIN', 'ROLLBACK']);
++    expect(h.client.listenerCount('error')).toBe(0);
++    expect(h.client.release).toHaveBeenCalledTimes(1);
++  });
++
++  it('control KS-1587 C3 the callback receives the checked-out client itself', async () => {
++    const db = await importDb();
++    let got: unknown = null;
++    await db.transaction(async (client) => { got = client; return null; });
++    expect(got).toBe(h.client);
++  });
++});

@@ -1,0 +1,44 @@
+diff --git a/Blockchain/Dev/services/mcp-server/src/http-server.ts b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+--- a/Blockchain/Dev/services/mcp-server/src/http-server.ts
++++ b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+@@ -233,6 +233,13 @@
+       });
+       return;
+     }
++    // KS-1530: a PRESENT allowedDocumentTypes that is not a list ("", 0, false, null, an object) used to reach the generator as []
++    // ("all types permitted") with a 200. The caller's value is the problem, so it is refused with a 400, as the gateway refuses the same
++    // stored value with a 403 (KS-1232). An OMITTED allowedDocumentTypes still defaults to [] below.
++    if (allowedDocumentTypes !== undefined && !Array.isArray(allowedDocumentTypes)) {
++      res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'allowedDocumentTypes must be an array when given' } });
++      return;
++    }
+     if (!apiKey) {
+       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'apiKey is required' } });
+       return;
+diff --git a/Blockchain/Dev/services/mcp-server/src/__tests__/ks1232-generate-package-doctypes-default.test.ts b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1232-generate-package-doctypes-default.test.ts
+--- a/Blockchain/Dev/services/mcp-server/src/__tests__/ks1232-generate-package-doctypes-default.test.ts
++++ b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1232-generate-package-doctypes-default.test.ts
+@@ -4,7 +4,7 @@
+  * passes through. The #1106-#1111 gate found nothing pins it (mcp-server has one placeholder test). The real
+  * http-server module is imported with MCP_HTTP_PORT=0 (its top-level listen then binds an ephemeral port, captured by
+  * wrapping http.createServer), the package generator is stubbed to RECORD its config, and the real express stack is
+- * driven over loopback. A characterisation pin of TODAY's default at this site.
++ * driven over loopback. KS-1530 flipped the "", 0 and false cell: a present non-array value is now refused 400, an omitted one still defaults to [].
+  */
+ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+ import http from 'http';
+@@ -41,8 +41,12 @@
+   return [res.status, rec.configs.length === before + 1 ? rec.configs[before].allowedDocumentTypes : 'generatePackage not called once'];
+ }
+ describe('KS-1232: POST /generate-package defaults a falsy allowedDocumentTypes to [] and passes a list through', () => {
+-  it('RED KS-1232: allowedDocumentTypes "", 0 and false each reach the package generator as [] with status 200', async () => {
+-    expect([await generate(''), await generate(0), await generate(false)]).toEqual([[200, []], [200, []], [200, []]]);
++  it('RED KS-1530: allowedDocumentTypes "", 0, false, null and an object are each refused 400 and never reach the package generator', async () => {
++    const refused: [number, unknown] = [400, 'generatePackage not called once'];
++    expect([await generate(''), await generate(0), await generate(false), await generate(null), await generate({})]).toEqual([refused, refused, refused, refused, refused]);
++  });
++  it('CONTROL KS-1530: an omitted allowedDocumentTypes still reaches the package generator as [] with status 200', async () => {
++    expect(await generate(undefined)).toEqual([200, []]);
+   });
+   it('CONTROL: a stored list ["contract"] reaches the package generator unchanged with status 200', async () => {
+     expect(await generate(['contract'])).toEqual([200, ['contract']]);

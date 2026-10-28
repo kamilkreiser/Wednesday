@@ -1,0 +1,50 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/gdpr.ts b/Blockchain/Dev/services/originate/src/routes/gdpr.ts
+--- a/Blockchain/Dev/services/originate/src/routes/gdpr.ts
++++ b/Blockchain/Dev/services/originate/src/routes/gdpr.ts
+@@ -412,5 +412,9 @@
+     const updated = await gdpr.updateDSRStatus(req.params.dsrId, status, processedBy, notes);
+-    res.json({ success: updated, message: updated ? 'DSR updated' : 'DSR not found' });
++    // KS-1112: a canonical id that names no row answers the same 404 'DSR not found' as GET /dsr/:dsrId and as a non-canonical id above.
++    if (!updated) {
++      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'DSR not found' } });
++    }
++    res.json({ success: true, message: 'DSR updated' });
+   } catch (err: any) {
+     fail500(res, 'GDPR DSR update failed (PATCH /api/gdpr/dsr/:dsrId)', err);
+   }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1029-gdpr-dsr-update-id-guard.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1029-gdpr-dsr-update-id-guard.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1029-gdpr-dsr-update-id-guard.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1029-gdpr-dsr-update-id-guard.test.ts
+@@ -16,7 +16,7 @@
+  *
+  * Behaviour narrowing, deliberate: PostgreSQL's uuid input also accepts hyphenless and braced
+  * forms, which used to reach a real row. UUID_PATTERN is canonical-only, so those now answer 404
+- * as well (N1, N2). A canonical absent id is unchanged: 200 {success:false, 'DSR not found'}.
++ * as well (N1, N2). A canonical absent id answers the same 404 NOT_FOUND 'DSR not found' (KS-1112; it was 200 {success:false}).
+  *
+  * Harness: ks444's (mounted router, auth passthrough) with ks754's db/logger mocks, so the real
+  * updateDSRStatus and its KS-754 rethrow stay in the path. The DB mock MODELS PostgreSQL's uuid
+@@ -167,14 +167,14 @@
+ describe('KS-1029 controls — the rows the guard must not change', () => {
+-  it('U1 an uppercase canonical id passes the guard (the pattern is case-insensitive) and reaches the lookup', async () => {
++  it('RED KS-1112 U1 an uppercase canonical id passes the guard (the pattern is case-insensitive) and reaches the lookup, then answers 404', async () => {
+     const res = await patchDsr(UPPERCASE_ABSENT_ID, VALID_BODY);
+-    expect(res.status).toBe(200);
+-    expect(await res.json()).toEqual({ success: false, message: 'DSR not found' });
+-    expect(mockExecuteRaw).toHaveBeenCalledTimes(1);
+-  });
+-
+-  it('A1 a canonical absent id is unchanged: 200 {success:false}', async () => {
++    expect(res.status).toBe(404);
++    expect(await res.json()).toEqual({ success: false, error: { code: 'NOT_FOUND', message: 'DSR not found' } });
++    expect(mockExecuteRaw).toHaveBeenCalledTimes(1);
++  });
++
++  it('RED KS-1112 A1 a canonical absent id answers 404 NOT_FOUND, as GET does', async () => {
+     const res = await patchDsr('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee', VALID_BODY);
+-    expect(res.status).toBe(200);
+-    expect(await res.json()).toEqual({ success: false, message: 'DSR not found' });
++    expect(res.status).toBe(404);
++    expect(await res.json()).toEqual({ success: false, error: { code: 'NOT_FOUND', message: 'DSR not found' } });
+     expect(mockExecuteRaw).toHaveBeenCalledTimes(1);
+   });

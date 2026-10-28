@@ -1,0 +1,90 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/anchorOverwriteGuard.ts b/Blockchain/Dev/services/anchoring/src/anchorOverwriteGuard.ts
+--- a/Blockchain/Dev/services/anchoring/src/anchorOverwriteGuard.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchorOverwriteGuard.ts
+@@ -252,13 +252,14 @@
+   const asPrimaryKey = isUuidShaped(documentId) ? documentId.trim() : null;
+   return transaction(async (client) => {
+     await client.query("SELECT set_config('app.current_tenant_id', $1, true)", [tenantId.trim()]);
+-    // The LEFT JOIN carries its OWN `u.tenant_id = $2::uuid`, and that is not
+-    // belt-and-braces duplication of the one on `documents`. `users` has a
+-    // SECOND, permissive policy — `users_auth_lookup`, whose qual is literally
+-    // `true` — and Postgres ORs permissive policies together, so tenant
+-    // isolation on `users` is open for SELECT by construction. Measured on the
+-    // repo schema. A join without its own bound would read a custodian row
+-    // from ANY tenant.
++    // The LEFT JOIN carries its OWN `u.tenant_id = $2::uuid` bound. `users` has
++    // a SECOND, permissive policy, `users_auth_lookup`, whose qual is literally
++    // `true`, but it is granted to the dedicated role `secuura_auth_lookup`,
++    // not to `public`, so it does not apply to `secuura_app`, the role
++    // anchoring connects as: there `tenant_isolation` is live. The bound stays
++    // so the join does not depend on which role the connection holds: a
++    // connection that held `secuura_auth_lookup` would read a custodian row
++    // from ANY tenant. (Measured on the repo schema, KS-1663.)
+     //
+     // LEFT, not INNER: a document whose custodian user has been deleted must
+     // still yield the document row, with a null custodian organisation, rather
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1663-the-custody-join-comments-name-the-role-restricted-policy.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1663-the-custody-join-comments-name-the-role-restricted-policy.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1663-the-custody-join-comments-name-the-role-restricted-policy.test.ts
+@@ -0,0 +1,41 @@
++// KS-1663 (anchoring, readOwningDocument): the comment above the custody LEFT JOIN, and the same inference in the ks1385 integration test's C-e cell, said `users` is "open for SELECT by construction"
++// because the permissive policy `users_auth_lookup` has a qual of `true`. That omitted the policy's roles: it is granted to the dedicated role `secuura_auth_lookup`, not to `public`, so it does not apply to
++// `secuura_app`, the role anchoring connects as. The tenant bound on the join is right and stays; only the stated reason was false.
++// These cells read the two files as text. R1 and R2 are the product-comment cells (red until the comment is corrected); T1 and T2 pin the corrected test comment; C1 to C3 pin what must not move.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++
++const GUARD_SRC = readFileSync(resolve(__dirname, '..', 'anchorOverwriteGuard.ts'), 'utf8');
++const C_E_SRC = readFileSync(resolve(__dirname, 'ks1385-anchor-store-keeps-the-latest-events-metadata.integration.test.ts'), 'utf8');
++
++describe('KS-1663: the custody-join comments say what the policy does', () => {
++  it('RED KS-1663 R1 the guard comment no longer says users is open for SELECT by construction', () => {
++    expect(GUARD_SRC).not.toContain('open for SELECT by construction');
++  });
++
++  it('RED KS-1663 R2 the guard comment names the role the permissive policy is granted to', () => {
++    expect(GUARD_SRC).toContain('granted to the dedicated role `secuura_auth_lookup`');
++  });
++
++  it('control KS-1663 T1 the C-e cell comment no longer says users is open for SELECT by construction', () => {
++    expect(C_E_SRC).not.toContain('open for SELECT by construction');
++  });
++
++  it('control KS-1663 T2 the C-e cell comment names the role the permissive policy is granted to', () => {
++    expect(C_E_SRC).toContain('granted to the dedicated role');
++  });
++
++  it('control KS-1663 C1 the custody join still carries its own tenant bound', () => {
++    expect(GUARD_SRC).toContain('AND u.tenant_id = $2::uuid');
++  });
++
++  it('control KS-1663 C2 the LEFT-not-INNER comment is still there', () => {
++    expect(GUARD_SRC).toContain('LEFT, not INNER');
++  });
++
++  it('control KS-1663 C3 both files were read (the instrument is not reading an empty string)', () => {
++    expect(GUARD_SRC.length).toBeGreaterThan(1000);
++    expect(C_E_SRC.length).toBeGreaterThan(1000);
++  });
++});
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1385-anchor-store-keeps-the-latest-events-metadata.integration.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1385-anchor-store-keeps-the-latest-events-metadata.integration.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/ks1385-anchor-store-keeps-the-latest-events-metadata.integration.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1385-anchor-store-keeps-the-latest-events-metadata.integration.test.ts
+@@ -532,10 +532,11 @@
+   it('C-e a custodian user in ANOTHER tenant resolves NO organisation — the custody JOIN is tenant-bound too', async () => {
+     // ⚠ ADDED because a mutant survived. Dropping `AND u.tenant_id = $2::uuid` from the custody
+     // LEFT JOIN killed no cell, and it is not cosmetic: `users` carries a SECOND, permissive
+-    // policy — `users_auth_lookup`, whose qual is literally `true` — and Postgres ORs permissive
+-    // policies, so tenant isolation on `users` is open for SELECT by construction. Without the
+-    // explicit bound, option (c) would resolve a custodian organisation from ANY tenant the
+-    // moment Kam rules it, and nothing would have objected.
++    // policy, `users_auth_lookup` (qual literally `true`), but it is granted to the dedicated role
++    // `secuura_auth_lookup`, not to `public`, so it does not apply to `secuura_app`. The explicit
++    // bound keeps the join tenant-scoped whatever role the connection holds: without it, option (c)
++    // would resolve a custodian organisation from ANY tenant for a connection that held that role,
++    // and nothing would have objected.
+     const doc = await makeDocument({ tenantId: TENANT_A, issuerOrgId: ORG_ISSUER, ownerUserId: USER_FOREIGN });
+     const owning = await readOwningDocument(doc, TENANT_A);
+     expect(owning).not.toBeNull();

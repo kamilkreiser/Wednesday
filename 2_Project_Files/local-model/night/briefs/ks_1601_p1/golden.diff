@@ -1,0 +1,64 @@
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -1648,16 +1648,16 @@
+     // spelling stays true under all three. So `COLLATE "C"` is neutral for the fold this guard was
+     // added for, and closed for the Unicode one.
+     //
+-    // `upper(role) = $3` beside it carries the SAME libc-fold class — U+0131 (dotless i) upper-cases
+-    // to `I`, so `upper('admın') = 'ADMIN'` is true. That is PRE-EXISTING, it is not touched here,
+-    // and it is on its own ticket: the pull request 1548 gate's i6.
++    // KS-1601 (the pull request 1548 gate's i6): the role comparison folds under `COLLATE "C"` too. Under the
++    // default collation a role spelled with U+0131 (dotless i) upper-cased to `ADMIN`, so that row passed this
++    // guard; under `COLLATE "C"` it does not, and every ASCII spelling of ADMIN still matches.
+     //
+     // Folding does NOT widen liveness: 'DELETED' still does not match, and neither does any other
+     // status in the vocabulary in any of three spellings — the KS-1598 spectrum cells pin all 18, and
+     // they read the vocabulary off the live CHECK rather than carrying a typed copy of it.
+     // Purging existing rows on demotion or deletion is NOT in this change — it is on its own ticket.
+     const target = await runWithTenantId(tenantId, () => query(
+-      "SELECT 1 FROM users WHERE id = $1::uuid AND tenant_id = $2::uuid AND upper(role) = $3 AND lower(status COLLATE \"C\") = 'active' LIMIT 1",
++      "SELECT 1 FROM users WHERE id = $1::uuid AND tenant_id = $2::uuid AND upper(role COLLATE \"C\") = $3 AND lower(status COLLATE \"C\") = 'active' LIMIT 1",
+       [userId, tenantId, 'ADMIN'],
+     ));
+     if (target.rows.length === 0) {
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1601-the-admin-scope-target-query-folds-the-role-under-collate-c.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1601-the-admin-scope-target-query-folds-the-role-under-collate-c.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1601-the-admin-scope-target-query-folds-the-role-under-collate-c.test.ts
+@@ -0,0 +1,35 @@
++// KS-1601 (security, PUT /api/keys/admin-scopes/:userId): the target query folded the stored STATUS under COLLATE "C" (KS-1598) but the stored ROLE still under the database's default libc collation,
++// so a role spelled with U+0131 (dotless i) upper-cased to ADMIN and passed the guard. The role comparison now folds under COLLATE "C" as well. The real-Postgres cells for the U+0131 spelling live in
++// the integration file (ks1570b-admin-scope-route.integration.test.ts), which needs a database; these cells read src/index.ts as text so the one-line change is pinned in the default run.
++// R1 to R3 are red until the change exists; C1 to C3 pin what must not move.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++
++const INDEX_SRC = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
++
++describe('KS-1601: the admin-scope target query folds the role under COLLATE "C"', () => {
++  it('RED KS-1601 R1 the target query no longer compares a default-collation upper(role)', () => {
++    expect(INDEX_SRC).not.toContain('AND upper(role) = $3');
++  });
++
++  it('RED KS-1601 R2 the target query compares upper(role COLLATE ...) = $3', () => {
++    expect(INDEX_SRC).toContain('AND upper(role COLLATE ');
++  });
++
++  it('RED KS-1601 R3 the comment no longer says the role fold is untouched', () => {
++    expect(INDEX_SRC).not.toContain('PRE-EXISTING, it is not touched here');
++  });
++
++  it('control KS-1601 C1 the status fold still sits under COLLATE "C" in the same query', () => {
++    expect(INDEX_SRC).toContain('AND lower(status COLLATE ');
++  });
++
++  it('control KS-1601 C2 the query still binds the literal ADMIN as the third parameter', () => {
++    expect(INDEX_SRC).toContain("[userId, tenantId, 'ADMIN']");
++  });
++
++  it('control KS-1601 C3 the file was read (the instrument is not reading an empty string)', () => {
++    expect(INDEX_SRC.length).toBeGreaterThan(10000);
++  });
++});
