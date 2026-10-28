@@ -111,6 +111,11 @@ fi
 if [ "$SEAT_KEY" = "Wednesday" ] && [ -f "$SELF_DIR/spark_status.py" ]; then
   python3 -I "$SELF_DIR/spark_status.py" >&2
 fi
+# Fleet CAPACITY check (Kam 2026-10-28 17:5x: "track so we can make sure that we always keep as many agents
+# active as possible"; rule learnings/2026-10-28_track-agent-capacity-keep-the-floor-full.md). Same contract.
+if [ "$SEAT_KEY" = "Wednesday" ] && [ -f "$SELF_DIR/capacity_status.py" ]; then
+  python3 -I "$SELF_DIR/capacity_status.py" >&2
+fi
 
 TO=""; SUBJECT=""; SUBJECT_FILE=""; BODY_FILE=""; KIND="brief"
 while [ $# -gt 0 ]; do

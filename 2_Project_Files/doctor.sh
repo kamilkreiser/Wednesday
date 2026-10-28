@@ -375,6 +375,14 @@ if [ "$_DOC_AGENT" = "wednesday" ]; then
   else
     ok "Spark allocated: $(echo "$ALLOC_OUT" | head -1 | cut -c1-120)"
   fi
+  # Fleet CAPACITY (Kam 2026-10-28 17:5x; rule learnings/2026-10-28_track-agent-capacity-keep-the-floor-full.md):
+  # ROOM with a briefable backlog is a WARN: the floor should be full.
+  CAP_OUT="$(python3 -I "$PROJECT_DIR/2_Project_Files/fleet/capacity_status.py" 2>&1)"
+  if echo "$CAP_OUT" | /usr/bin/grep -q -i 'ROOM\|unreadable'; then
+    warn "Fleet has ROOM: $(echo "$CAP_OUT" | head -1 | cut -c1-140)" "launch the next disjoint lane (a lane sweep if none is staged); load1 < 7 is the gate"
+  else
+    ok "Fleet capacity: $(echo "$CAP_OUT" | head -1 | cut -c1-140)"
+  fi
 fi
 
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---

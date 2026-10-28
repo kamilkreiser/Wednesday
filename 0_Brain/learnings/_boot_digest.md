@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-28 12:14 from 253 lesson files (1,103,944 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-28 17:56 from 254 lesson files (1,106,399 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7666,4 +7666,20 @@ sections (open the file for these): MECHANISM (Kam, terminal ~12:1x the same day
 ## MECHANISM (Kam, terminal ~12:1x the same day: "keep the rule and maybe introduce an allocation check for local LLM into your wakeup procedure")
 - `2_Project_Files/fleet/spark_status.py` prints `SPARK: tunnel · queue · drainer · round · last` and, when no round is running and the queue is empty or undrained or the tunnel is down, `SPARK: ⚠ IDLE … allocate a task NOW`. Always exits 0. Arms run 2026-10-28 12:1x: empty/no drainer → IDLE; queued + live drainer → not idle; round running → not idle; dead drainer pid + queued → IDLE naming queue.sh; corrupt last_round.json → "status unreadable", rc 0.
 - **Rides three wake points:** `doctor.sh` (every boot: WARN "Spark IDLE" with the fix; proven firing live at 12:1x, "IDLE since last round 9841 min ago" — the Spark had not run a round since 2026-10-21), `fleet/send_brief.sh` (every send, beside the Ornith line; proven printing "round LIVE pid 60423" while the drafter's control round ran), and `Launch_Wednesday.command` boot step **10c** (quote/backtick counts unchanged 674/90; swapped in by mv so the running launcher was not edited in place; backups `.pre-1028-sparkalloc` on all three files).
+
+
+## Track fleet capacity and keep the floor full — as many agents as the machine carries, every checkpoint
+`2026-10-28_track-agent-capacity-keep-the-floor-full.md` · preference · 2026-10-28 · status: live
+
+**His words, verbatim:** *"good plan. thank you. its good refinement so please track so we can make sure that we always keep as many agents active as possible. there are a lot of tickets to get through"* (just before: *"its good to see 7 or so agents active. the laptop seems to be coping"*).
+
+**How to apply:**
+1. **The instrument:** `2_Project_Files/fleet/capacity_status.py` prints `CAPACITY: seats N (letters) · load1 · mem free · ROOM|FULL` and appends every reading to `2_Project_Files/fleet/state/capacity_log.tsv`. It rides `send_brief.sh` (every send, beside the Spark line) and `doctor.sh` (every boot: WARN on ROOM). Arms run 2026-10-28 17:53: ROOM, FULL-load, FULL-memory, unreadable (rc 0), live (8 seats, FULL at load1 11.0).
+2. **The gate is the fleet's existing launch rule:** load1 < 7, memory free >= 25% (`CAP_LOAD_MAX`, `CAP_MEM_MIN`). Waves of launches, >= 3 min apart, through a waiter.
+3. **A wrap frees a seat:** in the same action as scoring a wrapped seat and closing its pane, read the capacity line and launch the next lane if ROOM.
+4. **Keep a staged lane ready:** when the floor is full, the next lane sweep or brief is drafted in the background, so ROOM never waits on drafting (the Spark-queue lesson, applied to Claude seats).
+5. **Report it:** the morning card carries the day's capacity summary from the log (share of readings at ROOM, peak seats).
+6. **Unchanged:** the code partition (no two seats on one file), the signature classes, the QA gate, the routing table.
+
+**Family:** [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] (the standing rule this instruments) · [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] (the same shape for the Spark) · [[2026-08-07_a-promise-is-not-a-mechanism]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: recorded).
 
