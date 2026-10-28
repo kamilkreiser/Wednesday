@@ -1,0 +1,86 @@
+// KS-1780 (originate routes/adminConfig.ts): fifteen catch blocks tested `err?.message?.includes(...)` and/or `err?.code` BEFORE they reached fail500. That read touches the thrown value
+// itself, so a revoked Proxy, or an object whose `message` getter throws, made the read throw inside the catch: the handler's promise rejected and the request got NO answer. fail500
+// already survives such a value (KS-1772); this file pins that the catches' own reads do too. Four GET routes are driven over a real loopback listener by making their prisma.$queryRaw
+// reject, as the KS-1346 part C cells do; a request that gets no answer within the window is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
+// S1 pins the source: no `if (err?.message` / `if (err?.code` condition may remain in the file.
+process.env.NODE_ENV = 'development';
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+
+const mockQueryRaw = jest.fn();
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: mockQueryRaw, $executeRaw: jest.fn() },
+  refreshTenantConfigs: jest.fn(),
+  withTenant: (_t: unknown, fn: (tx: unknown) => unknown) => fn({ $queryRaw: mockQueryRaw, $executeRaw: jest.fn() }),
+  getTenantManager: () => null,
+}));
+
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: () => (req: any, _res: unknown, next: () => void) => {
+      const principal = { id: 'u-ks1780', role: 'SYSTEM_ADMIN', tenantId: 't-ks1780' };
+      req._secuuraUser = principal; req.user = principal; req.tenantId = principal.tenantId;
+      next();
+    },
+    requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  };
+});
+
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    ...(jest.requireActual('@secuura/shared') as Record<string, unknown>),
+    runWithPlatformScope: (fn: () => unknown) => fn(),
+    queryWithTenantGuc: jest.fn(),
+  }),
+);
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+}));
+
+import { writeFileSync } from 'fs';
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { adminConfigRouter } from '../routes/adminConfig';
+
+
+const SITES: Array<[string,string,string,any?]> = [
+ ['GET','/document-types','a'],['POST','/document-types','b',{name:'n',code:'c'}],['GET','/workflows','c'],['GET','/verification-queue','d'],
+ ['GET','/integrations','e'],['GET','/settings','f'],['GET','/verification-policies','g'],['GET','/organizations','h'],['GET','/api-keys','i'],
+ ['GET','/audit-logs','j'],['GET','/rights-holders','k'],['GET','/rights-holders/00000000-0000-0000-0000-000000000001/documents','l'],
+ ['GET','/users','m'],['GET','/identity/users','n'],['GET','/identity/organizations','o'],
+];
+const app = express();
+app.use('/api/admin', express.json(), adminConfigRouter);
+let server: any; let baseUrl='';
+beforeAll(async()=>{ await new Promise<void>(r=>{server=app.listen(0,'127.0.0.1',()=>r());}); baseUrl='http://127.0.0.1:'+(server.address() as AddressInfo).port;});
+afterAll(()=>{server?.closeAllConnections?.();server?.close();});
+function revoked(){const {proxy,revoke}=Proxy.revocable({},{});revoke();return proxy;}
+const THROWN: Record<string,()=>unknown> = {
+ revokedProxy: revoked,
+ messageGetter: ()=>({get message(){throw new Error('g');}}),
+ codeGetter: ()=>({message:'boom', get code(){throw new Error('g');}}),
+ ordinary: ()=>new Error('ordinary'),
+ doesNotExist: ()=>new Error('relation "x" does not exist'),
+ code42P01: ()=>({code:'42P01'}),
+ uniqueConstraint: ()=>new Error('duplicate key violates unique constraint "x"'),
+ pg23505: ()=>Object.assign(new Error('pg dup'),{code:'23505'}),
+ zodLike: ()=>Object.assign(new Error('zod'),{name:'ZodError',issues:[]}),
+ str: ()=>'a string', nul: ()=>null, undef: ()=>undefined, num: ()=>42,
+};
+const out: any = {};
+it('matrix', async () => {
+  for (const [m,p,,bodyObj] of SITES) if (!process.env.SITE || p.startsWith(process.env.SITE) && m===(process.env.METH||'GET')) for (const [tn,mk] of Object.entries(THROWN)) { if (process.env.NOHOSTILE && /revokedProxy|messageGetter|codeGetter/.test(tn)) continue;
+    mockQueryRaw.mockReset();
+    mockQueryRaw.mockRejectedValue(mk());
+    let r: any;
+    try {
+      const res = await fetch(baseUrl+'/api/admin'+p,{method:m,headers:{'content-type':'application/json'},body:bodyObj?JSON.stringify(bodyObj):undefined,signal:AbortSignal.timeout(1500)});
+      r = {status:res.status, body: await res.json()};
+    } catch { r = {status:'NO ANSWER'}; }
+    out[m+' '+p+' | '+tn]=r; writeFileSync(process.env.OUT_FILE as string, JSON.stringify(out,null,1));
+  }
+  writeFileSync(process.env.OUT_FILE as string, JSON.stringify(out,null,1));
+}, 120000);
