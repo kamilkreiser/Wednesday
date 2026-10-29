@@ -6,6 +6,15 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ SHIFT-CHANGE HANDOVER 05:3x 30 Oct (the 03:2x overnight seat, ctx ~75%) — READ THIS FIRST; the 05:2x block below is CURRENT for the floor, and this block only adds
+- **The 05:2x block's FLOOR, OWED items and cards are current.** In addition:
+- **SPARK:** queue = ks_1830_p2_charclass_sweep + ks_1815_p3_trailing_comment (drainer live via keepdraining 97411). Read each verdict: hold a PASS with hold_ready.py (positional run-dir, golden.diff, ROWID, --title-from-brief <brief .md>); classify any FAIL. HELD: ks_1816_p1_message_less (encodes a defect) -> a decision question on KS-1817 for the next board seat.
+- **OWED (WED, claim first with wed_claim.sh):**
+  - (1) Read the Secuura launcher's plan-confirmation line: R 65th reads it as "Kam's own word before I start", while R 64th accepted Wednesday's GO. If it gates on Kam, card him whether Wednesday's GO under his standing grants counts (night raise seats otherwise stall).
+  - (2) A `fleet/verify_pr_head.sh <pr> <gated-head>` tooling candidate (the verify-at-source sequence, run by hand 4 times tonight).
+- **FILING LIST (next board seat; assignee = our board account):** the KS-1817 message-less-throw decision question · the KS-441 newly Blocked (read only) · gate 21 1817-2 is now a Spark pin (no filing).
+- **Morning card numbers:** 6 merged (#1811, #1812, #1813, #1816, #1815, #1817); gates 19/20/21; Spark tonight 11 PASS / 1 FAIL (rung-4 calibration, the rebrief PASSED); deploy D 44th in flight (kintsugi build); awaiting Kam: Secuura 5 (ks1814 owner-role, ks1384 F0, ks1819/1820 wallet routes, ks1822 fail-open, r65 raise start), WED 0.
+
 ## ⏩ CHECKPOINT 05:2x 30 Oct (the 03:2x successor seat, ctx 71%) — READ THIS FIRST, supersedes every block below where they differ
 - **STATE:** origin develop = 7152ac669d2d (#1817). Six merged tonight. Boxes still on 6d41673e0f79; the kintsugi build is in flight.
 - **FLOOR (3 seats):**
