@@ -1,0 +1,18 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts
+@@ -107,3 +107,14 @@
++  // KS-1799 (gate 12 finding 1795-1): B2 plants a throwing `code` getter and B4 a throwing `meta` getter, but nothing planted a throwing `message` getter, the third thing extractPgCode reads (the message-text fallback).
++  // A plain object (not a Proxy) with only a `message` getter that throws must give undefined, not a throw.
++  it('RED KS-1799 B5 extractPgCode of an object whose message getter throws is undefined, not a throw', () => {
++    const hostile = {
++      get message(): string {
++        throw new Error('ks1799 message getter');
++      },
++    };
++    expect(pgCodeOrThrew(hostile)).toBeUndefined();
++  });
++
+   it('control KS-1780 C1 a Prisma-wrapped 42804 is still answered 400 VALIDATION_ERROR', async () => {
+     const reply = await patchWithThrow(Object.assign(new Error('Raw query failed.'), { code: 'P2010', meta: { code: '42804' } }));
+     expect(reply.status).toBe(400);

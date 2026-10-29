@@ -1,0 +1,65 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/reconciler.ts b/Blockchain/Dev/services/anchoring/src/reconciler.ts
+--- a/Blockchain/Dev/services/anchoring/src/reconciler.ts
++++ b/Blockchain/Dev/services/anchoring/src/reconciler.ts
+@@ -19,7 +19,9 @@
+  *     something else — the KS-535 `All inputs are spent` class);
+  *   - fabricated refs (`tx_sim_`/`mock_tx_`) are never chain-checked — KS-587
+  *     owns those rows;
+- *   - a chain-provider error leaves the row untouched for the next pass.
++ *   - a chain-provider error leaves the row untouched for the next pass only below
++ *     the give-up age; at or past it the same error is read as absence and the row
++ *     is marked failed (KS-1810).
+  *
+  * Dependency-injected so it is unit-testable without booting the service
+  * (index.ts starts the HTTP listener on import).
+@@ -60,8 +62,10 @@
+     running = true;
+     const now = deps.now ?? Date.now;
+     try {
+-      // MIN_AGE keeps the reconciler off rows the live submit/confirm loop is
+-      // still actively working (it touches updated_at as it goes).
++      // MIN_AGE keeps the reconciler off rows that were written recently. The age is
++      // read from updated_at, which each status write moves, but the confirmation poll
++      // writes nothing between submitted and confirmed, so a row the live loop is still
++      // polling can pass MIN_AGE (KS-1816).
+       const rows = await deps.query(
+         `SELECT id, transaction_hash, created_at, updated_at FROM anchor_store
+           -- KS-726: 'submitting' is the write-ahead state — the row NAMES a
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1816-reconciler-comments-match-the-code.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1816-reconciler-comments-match-the-code.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1816-reconciler-comments-match-the-code.test.ts
+@@ -0,0 +1,33 @@
++// KS-1816 (anchoring reconciler.ts): two comments said what the code does not do. The header property claimed a chain-provider error always leaves the row untouched for the next pass
++// (past the give-up age the same error is read as absence and the row is failed). The MIN_AGE comment claimed the live loop touches updated_at as it goes (the confirmation poll writes nothing).
++// These cells read reconciler.ts as text. R1 and R2 are red until the two comments are corrected; C1 to C3 pin the code lines the comments describe, which must not move.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++
++const SRC = readFileSync(resolve(__dirname, '..', 'reconciler.ts'), 'utf8');
++
++describe('KS-1816: the two reconciler.ts comments match the code', () => {
++  it('RED KS-1816 R1 the header property no longer claims a provider error always leaves the row untouched', () => {
++    expect(SRC).not.toContain('error leaves the row untouched for the next pass.');
++    expect(SRC).toContain('only below');
++    expect(SRC).toContain('marked failed (KS-1810)');
++  });
++
++  it('RED KS-1816 R2 the MIN_AGE comment no longer says the live loop touches updated_at as it goes', () => {
++    expect(SRC).not.toContain('it touches updated_at as it goes');
++    expect(SRC).toContain('writes nothing between submitted and confirmed');
++  });
++
++  it('control KS-1816 C1 the select still ages rows by updated_at', () => {
++    expect(SRC).toContain("AND updated_at < NOW() - ($1 || ' milliseconds')::interval");
++  });
++
++  it('control KS-1816 C2 the give-up test still reads created_at', () => {
++    expect(SRC).toContain('else if (now() - new Date(row.created_at).getTime() > config.giveUpMs) {');
++  });
++
++  it('control KS-1816 C3 the file was read (the instrument is not reading an empty string)', () => {
++    expect(SRC.length).toBeGreaterThan(3000);
++  });
++});

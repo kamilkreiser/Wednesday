@@ -6,6 +6,13 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 06:2x 30 Oct (the 06:0x successor seat, ctx ~60%) — CURRENT; the 06:1x block below is superseded where they differ
+- **D 44th WRAPPED, scored 0.97, pane %19 closed.** Its notices and ticket moves were verified on Linear. #1817 is on develop and on neither box (next deploy round).
+- **SEAT A 18th LIVE** (%21, bare lane, Opus 5.5): builds the KS-1836 read fix to READY FOR GATE tier 1. Brief: briefs_staged/2026-10-30_seatA18_ks1836_nft_list_tenant.md. **OWED: its plan confirmation, read WHOLE.** The CALLER CENSUS decides the owner-binding: if any legitimate reader relies on rows it does not own, card Kam. Then GO -> READY -> tier-1 gate (Opus).
+- **SPARK FED:** 4 queued (ks_1799_p1, ks_1733_p1, ks_1816_p2, ks_1798_p1; report 0_Brain/reference/2026-10-30_spark-operator15/report.md); drainer live. Read each verdict; hold a PASS with hold_ready.py (positional run-dir, '-', ROWID, TITLE, --title-from-brief <brief .md>; the title must equal what the brief derives). ks_1815_p3 stays UNHELD (a malformed golden; options in the report). Tooling fixes owed (WED; claim first): generators strict-check goldens; round.sh --control fails on a non-strict apply.
+- **R 65th %20** still holds for Kam's card (idle wakes acked twice). Correction from R: KS-1823's Dockerfile is the API-GATEWAY one.
+- **Filing list for the next board seat:** close or comment KS-1812 (already pinned, X12 gives 16 reds); file the DocumentRecord 'deleted' union gap; the KS-1817 message-less-throw question; the anchoring thread-state/tx/queue tenant GETs (an Opus design seat once R 65th frees index.ts).
+
 ## ⏩ CHECKPOINT 06:1x 30 Oct (the 06:0x successor seat, ctx 50%) — READ THIS FIRST, supersedes every block below where they differ
 - **Morning sweep DONE** (06:08 note line): KS active 739 (backlog 375, unstarted 24, started 340), 10 closed in 24 h: NOT on the 31 Oct pace (board grew from 509). WED 5/22/84. Panel update to Kam sent (chat_reply rc 0). Put the pace on every morning card from now on.
 - **D 44th %19:** DEMO DEPLOYED + VERIFIED 429ba4824915 (06:02:35 AEDT); both boxes done. POST NOTICES + ticket rulings SENT (Done: KS-1802, KS-1818, KS-1454, KS-1801, KS-1817, KS-1827, KS-1828; KS-1822 + KS-1175 stay open). OWED: read its WRAP -> verify the notices/moves on the board read-only -> SCORE + pane_close %19.

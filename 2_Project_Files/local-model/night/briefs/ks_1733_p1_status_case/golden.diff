@@ -1,0 +1,24 @@
+diff --git a/Blockchain/Dev/services/governance/src/__tests__/ks1722-proposals-list-refuses-an-unusable-filter.test.ts b/Blockchain/Dev/services/governance/src/__tests__/ks1722-proposals-list-refuses-an-unusable-filter.test.ts
+--- a/Blockchain/Dev/services/governance/src/__tests__/ks1722-proposals-list-refuses-an-unusable-filter.test.ts
++++ b/Blockchain/Dev/services/governance/src/__tests__/ks1722-proposals-list-refuses-an-unusable-filter.test.ts
+@@ -254,4 +254,20 @@
+   it('R7 one bad filter refuses the request even beside good ones -> 400', async () => {
+     expectRefused(await list('?status=active&proposerId='));
+   });
++
++  // KS-1733 item 2 (gate on #1696, Minor 2): no cell pinned upper case, so a case-insensitive status check stayed green on all 43 cells above. The policy pinned here is the one at the tip: lower case only.
++  it.each([
++    ['an upper-case status', '?status=ACTIVE'],
++    ['a capitalised status', '?status=Active'],
++    ['one capitalised part in a list', '?status=active%2CQueued'],
++  ])('RED KS-1733 R8 %s -> 400, never reaches SQL', async (_label, q) => {
++    expectRefused(await list(q));
++  });
++
++  it.each([
++    ['an upper-case category', '?category=GENERAL'],
++    ['a capitalised category', '?category=General'],
++  ])('control KS-1733 R9 %s -> 400 (the category enum is exact-case)', async (_label, q) => {
++    expectRefused(await list(q));
++  });
+ });

@@ -1,0 +1,77 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/gdpr.ts b/Blockchain/Dev/services/originate/src/routes/gdpr.ts
+--- a/Blockchain/Dev/services/originate/src/routes/gdpr.ts
++++ b/Blockchain/Dev/services/originate/src/routes/gdpr.ts
+@@ -136,7 +136,14 @@
+  * if (mapGdprWriteDbError(err, res)) return;
+  */
+ function mapGdprWriteDbError(err: unknown, res: Response): boolean {
+-  const pgCode = (err as { pgCode?: string } | null)?.pgCode ?? extractPgCode(err);
++  // KS-1798: the `pgCode` read touches the thrown value itself, so a revoked Proxy or a throwing getter would throw out of this function, out of the caller's catch, and the request would get no answer. A value that cannot be read has no `pgCode`.
++  let ownPgCode: string | undefined;
++  try {
++    ownPgCode = (err as { pgCode?: string } | null)?.pgCode;
++  } catch {
++    ownPgCode = undefined;
++  }
++  const pgCode = ownPgCode ?? extractPgCode(err);
+   // FK violation (user_id → users) or a uuid cast failure: the subject user
+   // does not exist → 404, never a 500.
+   if (pgCode === '23503' || pgCode === '22P02') {
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks445-gdpr-write-guards.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks445-gdpr-write-guards.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks445-gdpr-write-guards.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks445-gdpr-write-guards.test.ts
+@@ -179,4 +179,54 @@
+     const res = await post('dsr', { type: 'access', userId: USER_ID, email: 'subject@example.com' });
+     expect(res.status).toBe(400);
+   });
++
++  // KS-1798 (gate 12 finding 1795-2): mapGdprWriteDbError read `err.pgCode` before extractPgCode, so a thrown value whose property read throws escaped the catch of both callers and the request got NO answer.
++  // A request with no answer in 1500 ms is reported as the string NO ANSWER, so a hang is a red assertion, not a stuck run.
++  async function answerFor(path: string, body: unknown, reject: (thrown: unknown) => void, thrown: unknown): Promise<number | string> {
++    reject(thrown);
++    try {
++      const res = await fetch(`${baseUrl}/api/gdpr/${path}`, {
++        method: 'POST',
++        headers: { 'content-type': 'application/json' },
++        body: JSON.stringify(body),
++        signal: AbortSignal.timeout(1500),
++      });
++      return res.status;
++    } catch {
++      return 'NO ANSWER';
++    }
++  }
++  const dsrBody = { type: 'access', userId: USER_ID, email: 'subject@example.com' };
++  const consentBody = { userId: USER_ID, purpose: 'marketing' };
++  const revokedProxy = (): object => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    return proxy;
++  };
++  const throwingPgCodeGetter = (): object =>
++    Object.defineProperty(new Error('ks1798 pgCode getter'), 'pgCode', {
++      get(): string {
++        throw new Error('ks1798 pgCode getter threw');
++      },
++    });
++
++  it('RED KS-1798 D1 POST /api/gdpr/dsr answers the constant 500 when the service rejects with a revoked Proxy', async () => {
++    expect(await answerFor('dsr', dsrBody, (t) => mockCreateDSR.mockRejectedValueOnce(t), revokedProxy())).toBe(500);
++  });
++
++  it('RED KS-1798 D2 POST /api/gdpr/dsr answers the constant 500 when the rejected Error has a pgCode getter that throws', async () => {
++    expect(await answerFor('dsr', dsrBody, (t) => mockCreateDSR.mockRejectedValueOnce(t), throwingPgCodeGetter())).toBe(500);
++  });
++
++  it('RED KS-1798 D3 POST /api/gdpr/consent answers the constant 500 when the service rejects with a revoked Proxy', async () => {
++    expect(await answerFor('consent', consentBody, (t) => mockRecordConsent.mockRejectedValueOnce(t), revokedProxy())).toBe(500);
++  });
++
++  it('control KS-1798 D4 an ordinary Error from the DSR service is still answered 500', async () => {
++    expect(await answerFor('dsr', dsrBody, (t) => mockCreateDSR.mockRejectedValueOnce(t), new Error('ks1798 ordinary'))).toBe(500);
++  });
++
++  it('control KS-1798 D5 a tagged pgCode 23503 from the DSR service is still answered 404, read before the message text', async () => {
++    expect(await answerFor('dsr', dsrBody, (t) => mockCreateDSR.mockRejectedValueOnce(t), taggedDbError('Failed to create data subject request', '23503'))).toBe(404);
++  });
+ });
