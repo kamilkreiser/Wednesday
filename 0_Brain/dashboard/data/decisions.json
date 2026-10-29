@@ -52152,5 +52152,138 @@
    "CARD hpsmpoc-feedback-files-third-round-1007",
    "CARD mpscalc-pr102-cap-nogo-third-round-1024"
   ]
+ },
+ {
+  "id": "secuura-ks1814-owner-role-reanchor-1030",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1814: may an OWNER-role user re-anchor their OWN document (and nobody else's)?",
+  "bluf": "No action needed unless you disagree. Override reason (measured): the gate matched the words role and owner; Wednesday read the two closest by id. KS-1116 (ruled a: 'OWNER' there meant tenant admins, because OWNER is every self-registered user's default role) and KS-1533 (tenant ADMIN key minting) do not rule who may anchor a document. KS-1814 closes a hole: today any logged-in tenant user, including the default OWNER role, can make the platform anchor ANY document in the tenant, spending a fee. Seat S 7th's fix limits anchoring to the document's owner, a platform admin, or the connector that created it. The one policy choice: should an OWNER-role user keep re-anchoring their OWN documents? Recommendation (a): yes, their own only. The issuer UI shows the Anchor button to every viewer, and the demo login demo@secuura.io is an OWNER, so refusing the role outright breaks the demo user's retry on their own failed anchor. Nothing merges before the tier-1 QA gate and Wednesday's GO.",
+  "default_action": "If you do not answer: (a). Seat S 7th builds to (a) now; the PR merges only after its tier-1 gate and Wednesday's GO, and the GO waits for this card to be ruled or for the morning card to show it still unanswered.",
+  "options": [
+   {
+    "key": "a",
+    "label": "OWNER keeps its own documents only (recommended)",
+    "detail": "OWNER passes the documents:write front gate, then the per-document check limits it to documents it owns; other people's documents get the same 404 the document read already gives"
+   },
+   {
+    "key": "b",
+    "label": "Refuse the OWNER role outright",
+    "detail": "a role check that bypasses the scope path; the demo user and every self-registered user lose re-anchor on their own failed documents"
+   },
+   {
+    "key": "c",
+    "label": "Hold KS-1814 for a wider discussion",
+    "detail": "the anchor route stays open to any tenant user until then"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-30T01:34:49.869954+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-28 09:18",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD secuura-780-owner-merge",
+   "CARD secuura-ps-759-760-merge-owner",
+   "CARD nas-shared-folders-owner",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-ks1533-admin-role-unbounded-by-org-arm-1013",
+   "CARD secuura-ks1570-admin-role-bound-shape-1013",
+   "CARD secuura-ks1116-null-owner-who-reads-1020"
+  ]
+ },
+ {
+  "id": "secuura-ks1819-ks1820-wallet-routes-off-by-default-1030",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1819 + KS-1820: switch the two wallet-spending routes OFF by default?",
+  "bluf": "Override reason (measured): the gate matched only the word wallet; Wednesday read both matches by id. KS-1360 is a wallet-session reply shape and KS-1223 is a referral wallet's source; neither rules who may make the platform wallet spend. One question: should two routes that can make the platform wallet spend for any logged-in caller be OFF by default from the next deploy (a), or only after a read-only box census (b)? The routes are anchoring POST /api/anchors/thread-mint (KS-1819) and nft-certificate POST /api/nft/mint (KS-1820). Seat A 17th's read (design note in the Secuura project, 5_Project_History/2026-10-30_seatA-17th/): neither has a caller that needs it open today. thread-mint is called only by document creation when STATE_THREAD_NFT_ENABLED is on, and nothing in the product calls /api/nft/mint. By reading, /api/nft/mint also mints on made-up certification data outside production and sends the NFT to any address the caller names. Whether either is live on kintsugi or demo is UNMEASURED. No money moves under any option.",
+  "default_action": "If you do not answer: (b). A read-only deploy-class seat runs the box census (no writes), and the result returns to you on this card before anything is built.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Build both switches OFF by default (recommended)",
+    "detail": "then thread-mint takes only originate's signed hop before it is turned on anywhere, and /api/nft/mint gets an owner rule; the wallet-lock half of KS-1819 stays with the KS-1384 F0 card; a box that uses either route today loses it until switched on"
+   },
+   {
+    "key": "b",
+    "label": "Read-only box census first, then decide per box",
+    "detail": "nothing changes until it is back, about 30 minutes a box"
+   },
+   {
+    "key": "c",
+    "label": "Give nft-certificate its own funded wallet (D17 option i)",
+    "detail": "costs a funded wallet and box config, and does not close who may call"
+   },
+   {
+    "key": "d",
+    "label": "Hold, no change",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-30T01:57:53.966943+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-ks1223-referrer-wallet-source-1013"
+  ]
+ },
+ {
+  "id": "secuura-ks1822-read-gate-probe-fault-fail-open-1030",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1822: if the ownership check itself fails, should an anchor READ be allowed (as today's write check does) or refused?",
+  "bluf": "No action needed unless you disagree. Override reason (measured): the gate matched the words gate, probe, fail and open. The nearest, KS-788, is a dependency gate failing open on npm, a different subject. Of 1,028 cards, the one naming KS-1603 (secuura-ks1384-schedule-per-event-anchors-1019) lets the interim check proceed and rules nothing on fail-open. KS-1822 (PR #1813) adds a check that stops one tenant reading another tenant's anchor. Seat A 17th measured that the database does not already do this: anchor_store has no row-level security. The check looks up who owns the anchor's document. If that lookup itself errors, the build ALLOWS the read and logs a warning (fail-open), copying the KS-1603 write check. The alternative is to refuse the read (fail-closed): safer, but a database hiccup then turns legitimate reads into 404s. Recommendation (a): keep fail-open for now, matching the write check, and decide both together later.",
+  "default_action": "If you do not answer: (a). PR #1813 goes through its tier-1 gate as built; the fail-open stays named as Known gap (iii) on the PR and on KS-1822.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep fail-open, matching the write check (recommended)",
+    "detail": "the read is allowed with a warn line when the ownership lookup errors; revisit reads and writes together"
+   },
+   {
+    "key": "b",
+    "label": "Fail closed for reads",
+    "detail": "a lookup error answers the same 404 as a missing anchor; legitimate reads fail during a database fault"
+   },
+   {
+    "key": "c",
+    "label": "Fail closed for reads AND writes",
+    "detail": "changes KS-1603's write check too, which would be a separate PR"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-30T02:06:25.864655+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-08-28 09:18",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks788-gate-fails-open-2026-09-04",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks968-probe-control-query",
+   "CARD secuura-892-cap-spent-blocker-open",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD secuura-61-archived-while-still-open",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD secuura-ks998-format-gate-fails-open-on-missing-deps",
+   "CARD secuura-ks998-formatting-gate-fails-open-on-missing-prettier",
+   "CARD secuura-ks789-ci-is-the-hard-gate-with-no-ci",
+   "CARD secuura-gate-stack-slots-full-of-kept-volumes",
+   "CARD secuura-ks1370-validate-when-the-revoke-check-cannot-read",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1032-fail-closed-when-vouch-secret-unset-1013",
+   "CARD secuura-gate-at-99pct-two-spark-prs-1016",
+   "CARD secuura-ks1240-tenant-create-key-fail-answer-1028",
+   "CARD secuura-ks1240-key-fail-answer-measured-1028"
+  ]
  }
 ]
