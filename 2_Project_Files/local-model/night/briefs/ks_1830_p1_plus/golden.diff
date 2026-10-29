@@ -1,0 +1,23 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
+@@ -239,6 +239,7 @@
+     ['a trailing space', REALISTIC_DID_JWK + ' '],
+     ['an upper-case method (DID:JWK:)', 'DID:JWK:' + JWK_PAYLOAD],
+     ['a space inside the payload', REALISTIC_DID_JWK.slice(0, 40) + ' ' + REALISTIC_DID_JWK.slice(40)],
++    ['a plus sign inside the payload (KS-1830: standard base64, not base64url)', REALISTIC_DID_JWK.slice(0, 40) + '+' + REALISTIC_DID_JWK.slice(40)],
+   ];
+   for (const field of DID_JWK_FIELDS) {
+     for (const [label, bad] of SHAPE_REFUSALS) {
+@@ -253,6 +254,11 @@
+     it(`control KS-1805-1 ${field}: still accepts a did:key and the realistic did:jwk, kept verbatim`, () => {
+       expectKept(field, 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK');
+       expectKept(field, REALISTIC_DID_JWK);
++    });
++    it(`control KS-1830 ${field}: the plus sign row is the realistic did:jwk with exactly one plus sign inserted, nothing else`, () => {
++      const row = SHAPE_REFUSALS.find(([label]) => label.includes('plus sign'));
++      expect(row?.[1].replace('+', '')).toBe(REALISTIC_DID_JWK);
++      expect(row?.[1].split('+')).toHaveLength(2);
+     });
+   }
+ });

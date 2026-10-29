@@ -6,6 +6,18 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 02:1x 30 Oct (the 00:5x successor seat, ctx 70%) — READ THIS FIRST, supersedes every block below where they differ
+- **STATE:** origin develop d7ddfa1f64336602a3441964f636e7d57a20c1d7 (#1810 Akto; read by three seats, not by Wednesday herself: re-read before any GO). Boxes on 6d41673e0f79: a DEPLOY ROUND is owed (#1808, #1809, #1811, #1812 + #1810) under the October grant.
+- **FLOOR:**
+  - **A 17th** %15 (bare lane, Opus 5.5): **READY FOR GATE tier 1 = PR #1813** (KS-1822, head 77a807d188ab24e2a101ee4cc6d9fe721bb46dc3 by A's ls-remote, 6 files +710/-0), HOLDING for the gate. Design note for KS-1819/1820 delivered and carded.
+  - **S 7th** %16 (lane -S, Opus 5.5): KS-1814 built (local head 277e5ba6b7ae, 3 commits incl. KS-1829 + a merge-in of d7ddfa1f), push hook RUNNING (push.out moving at 02:09). Filed KS-1831..KS-1834 (assigned). ks1293 manifest deviation ACCEPTED. READY FOR GATE next.
+  - **R 63rd** %17 (lane -R, Sonnet 5.5): plan GO'd (A: PR KS-1827+1828; B: PR KS-1818+1817 as R6; C: assign KS-1817..KS-1830; E: file five findings incl. a P2 security one, NFT list across tenants, + ONE KS-485 register comment).
+  - **Spark:** ks_1830_p1_plus + ks_1830_p1_slash queued, drainer live (keepdraining 97411; its pid file is stale at 95787). 4 earlier PASSes HELD and with R 63rd.
+- **GATE 19 (OWED, Wednesday commissions it):** ONE tier-1 batch gate (Opus; spark_gate.sh first with the BARE 'develop' base ref) for #1813 + S 7th's KS-1814 PR when its READY lands. **DEFAULT (timer set to fire ~15:30Z / 02:30 AEDT): if S 7th is not READY by then, gate #1813 alone.** In-session, so it DIES at a rotation: if 0_Brain/reference/2026-10-30_gate19-*/verdict.md is missing, re-commission from this line. Then head-pinned MERGE GOs, but **S 7th's GO waits for card secuura-ks1814-owner-role-reanchor-1030** to be ruled or to show unanswered on the morning card.
+- **WITH KAM (4 cards):** secuura-ks1814-owner-role-reanchor-1030 (default a) · secuura-ks1384-f0-build-approval-1029 (default b) · secuura-ks1819-ks1820-wallet-routes-off-by-default-1030 (default b = a read-only census) · secuura-ks1822-read-gate-probe-fault-fail-open-1030 (default a).
+- **TO ROUTE (findings not yet filed):** same-shape GETs without a tenant check (anchoring thread-state :1103, tx :1159, queue :1297); the audit:gate CLEANUP baseline entry GHSA-vfj7-8cjw-p6xm (KS 1403). FINDING to carry into KS-1384: anchor_store has NO RLS, no policies and no tenant column (A 17th, measured).
+- **Morning (06:00+ seat):** the morning fleet-activity card (counts: Secuura 4 cards); stale_card_escalate; a deploy seat for the merged delta (Opus, kintsugi first).
+
 ## ⏩ CHECKPOINT 01:5x 30 Oct (the 00:5x successor seat, ctx 65%) — READ THIS FIRST, supersedes every block below where they differ
 - **STATE:** origin develop = d7ddfa1f64336602a3441964f636e7d57a20c1d7 (the #1810 Akto merge, 7 past 5a5c4d2b, read by Wednesday's R 63rd drafter, NOT yet by Wednesday herself; none of tonight's code paths; one Projects Documents html). Tonight's merges: #1811 + #1812 (verified at origin). Boxes on 6d41673e0f79: a DEPLOY ROUND is owed for #1808/#1809/#1811/#1812 (+ whatever #1810 is) under the October grant (kintsugi first). Not started: an Opus deploy seat when the floor allows.
 - **FLOOR (3 seats + Spark):**
