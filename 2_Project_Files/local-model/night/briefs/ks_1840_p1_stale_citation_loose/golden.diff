@@ -1,0 +1,53 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/index.ts b/Blockchain/Dev/services/anchoring/src/index.ts
+--- a/Blockchain/Dev/services/anchoring/src/index.ts
++++ b/Blockchain/Dev/services/anchoring/src/index.ts
+@@ -980,9 +980,9 @@
+  * That's id-reflection — enabling enumeration ("did this id exist or not?")
+  * and giving an attacker confirmation that their guess landed on a syntactic
+  * shape the API will accept. Now: 404 with no echoed id when no anchors
+- * match. Gateway callers already handle non-200 by resolving null
+- * (see makeFetchDocFromAnchorStore in api-gateway/src/routes/verification.ts),
+- * so the verifier-portal flow is unaffected.
++ * match. The gateway function once cited here as the caller that handles a
++ * non-200 was retired in KS-1628. Whether a current caller treats a 404 from
++ * this route as no anchor is not measured (KS-1840).
+  */
+ app.get('/api/anchors/document/:documentId', async (req: Request, res: Response) => {
+   const dbResults = await dbGetAnchorsByDocument(req.params.documentId);
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1840-stale-gateway-citation-is-gone.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1840-stale-gateway-citation-is-gone.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1840-stale-gateway-citation-is-gone.test.ts
+@@ -0,0 +1,32 @@
++// KS-1840 (anchoring): the block comment above GET /api/anchors/document/:documentId in index.ts, and the struck-through H2 row of DEVELOPMENT.md, cited a gateway function
++// (the one that "already handles non-200 by resolving null") that was retired in KS-1628. These cells read index.ts as text (the DEVELOPMENT.md row is a separate, doc-only follow-up: the Spark builder measures one service per brief).
++// R1 and R2 are red until the stale citation is replaced; C1 to C3 pin what must not move.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++
++const INDEX_SRC = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
++
++describe('KS-1840: no comment or doc row cites the retired gateway function', () => {
++  it('RED KS-1840 R1 index.ts no longer cites the retired gateway function', () => {
++    expect(INDEX_SRC).not.toContain('makeFetchDocFromAnchorStore');
++  });
++
++  it('RED KS-1840 R2 index.ts says the cited function was retired in KS-1628 and the caller question is not measured', () => {
++    expect(INDEX_SRC).toContain('was retired in KS-1628');
++    expect(INDEX_SRC).toContain('is not measured (KS-1840)');
++  });
++
++  it('control KS-1840 C1 the route comment still explains the 404 with no echoed id', () => {
++    expect(INDEX_SRC).toContain('BACKLOG H2 (was F-API-01 part 2)');
++    expect(INDEX_SRC).toContain('* GET /api/anchors/document/:documentId');
++  });
++
++  it('control KS-1840 C2 the route handler line is untouched', () => {
++    expect(INDEX_SRC).toContain("app.get('/api/anchors/document/:documentId', async (req: Request, res: Response) => {");
++  });
++
++  it('control KS-1840 C3 the file was read (the instrument is not reading an empty string)', () => {
++    expect(INDEX_SRC.length).toBeGreaterThan(5000);
++  });
++});

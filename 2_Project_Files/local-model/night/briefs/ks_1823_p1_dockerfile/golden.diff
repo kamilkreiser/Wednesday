@@ -1,0 +1,71 @@
+diff --git a/Blockchain/Dev/services/api-gateway/Dockerfile b/Blockchain/Dev/services/api-gateway/Dockerfile
+--- a/Blockchain/Dev/services/api-gateway/Dockerfile
++++ b/Blockchain/Dev/services/api-gateway/Dockerfile
+@@ -34,3 +34,5 @@
++# KS-1823: the host directory can also hold rollback copies of the spec; the gateway reads secuura-api.yaml only.
++RUN rm -f ./docs/openapi/*.pre-* ./docs/openapi/*.rollback-*
+ # Relax strict unused-variable checks for production build
+ # Build TypeScript
+ RUN npm run build
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1823-dockerfile-drops-spec-backups.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1823-dockerfile-drops-spec-backups.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1823-dockerfile-drops-spec-backups.test.ts
+@@ -0,0 +1,57 @@
++// KS-1823 (api-gateway image): the builder stage copies the whole docs/openapi directory (`COPY docs/openapi/ ./docs/openapi/`), so the two rollback copies of the spec that sit on the demo host
++// (secuura-api.yaml.pre-ks508, secuura-api.yaml.rollback-2026-08-27-ks661) were baked into demo's image. These cells read the Dockerfile and the gateway source as text.
++// R1 to R3 are red until the builder stage removes the rollback copies right after that COPY; C1 to C5 pin what must not move, in particular that the spec the gateway reads is still copied.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++
++const DOCKERFILE = readFileSync(resolve(__dirname, '..', '..', 'Dockerfile'), 'utf8').split('\n');
++const GATEWAY_INDEX = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
++
++const COPY_SPEC = 'COPY docs/openapi/ ./docs/openapi/';
++const COPY_AT = DOCKERFILE.indexOf(COPY_SPEC);
++const RM_LINE = 'RUN rm -f ./docs/openapi/*.pre-* ./docs/openapi/*.rollback-*';
++const RM_AT = DOCKERFILE.indexOf(RM_LINE);
++const RUNTIME_STAGE_AT = DOCKERFILE.findIndex((l, i) => i > COPY_AT && l.startsWith('FROM '));
++
++describe('KS-1823: the api-gateway image does not carry the spec rollback copies', () => {
++  it('RED KS-1823 R1 the builder stage removes the pre-ks508 style rollback copies', () => {
++    expect(DOCKERFILE.some((l) => l.startsWith('RUN rm -f') && l.includes('./docs/openapi/*.pre-*'))).toBe(true);
++  });
++
++  it('RED KS-1823 R2 the builder stage removes the rollback-dated copies', () => {
++    expect(DOCKERFILE.some((l) => l.startsWith('RUN rm -f') && l.includes('./docs/openapi/*.rollback-*'))).toBe(true);
++  });
++
++  it('RED KS-1823 R3 the removal is the single line given, after the spec COPY, before the build, and before the runtime stage', () => {
++    expect(RM_AT).toBeGreaterThan(COPY_AT);
++    expect(RM_AT).toBeLessThan(RUNTIME_STAGE_AT);
++    expect(RM_AT - COPY_AT).toBeLessThanOrEqual(4);
++  });
++
++  it('control KS-1823 C1 the whole-directory spec COPY is still there (the spec is still copied)', () => {
++    expect(COPY_AT).toBeGreaterThan(-1);
++  });
++
++  it('control KS-1823 C2 the runtime stage still copies the directory from the builder', () => {
++    expect(DOCKERFILE).toContain('COPY --from=builder /app/docs/openapi ./docs/openapi');
++  });
++
++  it('control KS-1823 C3 no line removes the spec itself or the whole directory', () => {
++    const rmLines = DOCKERFILE.filter((l) => /\brm\b/.test(l) && l.includes('docs/openapi'));
++    for (const l of rmLines) {
++      expect(l).not.toContain('secuura-api.yaml');
++      expect(l).not.toMatch(/docs\/openapi\/?\s*$/);
++      expect(l).not.toMatch(/docs\/openapi\/\*(\s|$)/);
++    }
++  });
++
++  it('control KS-1823 C4 the gateway still reads docs/openapi/secuura-api.yaml', () => {
++    expect(GATEWAY_INDEX).toContain('docs/openapi/secuura-api.yaml');
++  });
++
++  it('control KS-1823 C5 the instrument reads real files (the Dockerfile has several stages and the gateway source is not empty)', () => {
++    expect(DOCKERFILE.filter((l) => l.startsWith('FROM ')).length).toBeGreaterThanOrEqual(3);
++    expect(GATEWAY_INDEX.length).toBeGreaterThan(5000);
++  });
++});
