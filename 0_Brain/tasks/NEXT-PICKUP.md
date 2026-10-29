@@ -6,7 +6,15 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
-## ⏩ UPDATE 07:15 30 Oct (the 06:0x successor seat, ctx ~70%) — CURRENT
+## ⏩ CHECKPOINT 07:2x 30 Oct (the 06:0x successor seat, ctx 70%) — READ THIS FIRST; supersedes every block below where they differ
+- **NO CARD OPEN WITH KAM.** He ruled every one this morning.
+- **#1814 MERGE GO sent to S 8th** (ADDENDUM, first in its queue). Kam's ruling, 07:17:48 verbatim: "a — Merge #1814 now; company rule + transfer-custody check as a follow-up (recommended) | note: yes but only if the rights set at the time of creation allow for it". **OWED:** S 8th's MERGED mail -> verify one parent 7152ac669d2d + tree = head at origin -> tell A 18th, R 65th and S 8th that develop moved (docs-only overlap).
+- **FOLLOW-UP LANE (owed, after #1814 merges):** the company rule. A company admin re-anchors ONLY where the document's creation-time rights allow it (Kam's note; my reading was stated on the panel with a correction offer). Plus a transfer-custody ownership check (documents.ts:1854, :2101, :2203-2209) and a read-only org data count first. Source: 0_Brain/reference/2026-10-30_ks1814-custody-scenarios/note.md. Opus, tier 1.
+- **KS-1384 (Kam a):** the 4th review is DONE (0_Brain/reference/2026-10-30_ks1384-rev4-s19-review/review.md): build F0 WITH the fixes (BLOCKER: thread-mint behind the wallet lock -> a bounded ~30 s wait + 503 before signing; Majors 1-4); no F0 deploy where STATE_THREAD_NFT_ENABLED=true until the blocker is fixed; KS-1819 merged first. SEQUENCE: the KS-1819/1820 OFF-by-default lane -> then the F-a / F0+fixes / F-b / R lanes, drafted from the review, once A 18th and R 65th free anchoring index.ts and nft.routes.ts.
+- **Vite freeze:** A 18th ITEM B push running (push.out 1,845 lines at 07:16). Then READY tier 2 -> gate -> MERGE GO -> the "vite bump merged" mail to THREE seats by name.
+- **Floor:** A 18th %21 (Opus), R 65th %20 (Sonnet), S 8th %22 (Sonnet). Spark operator 16 is in-session (dies at rotation). Spark IDLE until it reports.
+
+## ⏩ UPDATE 07:15 30 Oct (the 06:0x successor seat, ctx ~70%) — superseded where the 07:2x block differs
 - **CARD WITH KAM: secuura-ks1814-company-admin-reanchor-1030** (rec a; DEFAULT a at 13:00 AEDT today = a merge seat (Sonnet, lane -S once S 8th is done, or a fresh lane) lands #1814 per S 7th's HANDOVER, re-verifying develop + head first; a follow-up seat for the org rule + a transfer-custody ownership check after a read-only data count). Map: 0_Brain/reference/2026-10-30_ks1814-custody-scenarios/note.md. Kam confirmed my note reading at 07:06:48.
 - **SEAT S 8th LIVE** (%22, lane -S, Sonnet): raises the 5 held passes as 3 PRs; pushes only after the vite mail. **OWED: its plan confirmation, read WHOLE.**
 - **THE 'vite bump merged' MAIL GOES TO THREE SEATS BY NAME:** A 18th, R 65th, S 8th. The order is A 18th ITEM B READY -> tier-2 gate -> head-pinned MERGE GO -> verify at origin -> that mail.
