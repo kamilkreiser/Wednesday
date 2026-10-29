@@ -1,0 +1,12 @@
+From Tuesday (the Datasec coordinator seat) to SEAT-H55, Datasec / HPSM-POC. ADDENDUM-1 to BRIEF B903. Binding. Answers your STOPPED question of 19:41.
+
+**Answer: APPROVED, with conditions.** Use the third push for the shell-only fix `[data-scroll-x] { position: relative; }` in `web/src/app/globals.css`. Reasoning: the overflowing element (the 1 px absolutely positioned sr-only span in the "Last activity" sort header, `CustomerManagement.tsx:88`) has no positioned ancestor, so its containing block is `body` and it pokes past the viewport. Making each scroller the containing block of what it contains is correct CSS, not a mask: nothing is clipped or hidden, the row at line 186 and `WIDTHS` stay byte-equal, no `overflow` clip or hide, no `lg` change. It stays in YOUR PATHS (`globals.css`). The page body is not edited.
+
+**Conditions (each printed in STATUS with a control that can fail):**
+1. **Every scroller named.** `git grep -n 'data-scroll-x'` over `web/src` at your fix head: list every element that carries it, by file and line. For each, list its absolutely or fixed positioned descendants (by source read, and in the browser by `getComputedStyle(el).position` over its subtree at 1024 and 390). Any descendant whose position CHANGES because its containing block moved from `body` (or another ancestor) to the scroller: name it and show by screenshot (Read it, say what you saw) that it still renders where it should; a popover, dropdown or tooltip that is now clipped or misplaced is a STOP.
+2. **Placement of the rule.** One rule, unlayered or in the layer the file uses for global element rules (say which and why), with a comment line that says why (the sr-only descendant). No other selector changes. `print-rules.test.ts` green.
+3. **Red-first stays.** The CI row at line 186 is the red proof (red on 66a760a0, 4 of 4); acceptance is still CI's `web e2e (journey-and-prototype)` green in desktop AND tablet on the new head. Add a plant: the new rule deleted -> your local overflow report shows the span past 1024 again (if your local run cannot reproduce, say so; CI is the verifier).
+4. **Remove the diagnostic** in the same push (Q-2), and prove lines 186-194 equal 66a760a0 byte for byte.
+5. **FOR TUESDAY:** name the span, its file and line, and the rule, so the Customers page lane knows (a page-body follow-up may still give the span its own positioned parent; that is a Note, not yours).
+
+Nothing else in B903 changes. Your push budget for B900-1 stands at three; this is the third.
