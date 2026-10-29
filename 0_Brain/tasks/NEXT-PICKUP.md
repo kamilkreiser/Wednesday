@@ -8,6 +8,7 @@ supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% 
 
 ## ⏩ SHIFT-CHANGE HANDOVER 05:3x 30 Oct (the 03:2x overnight seat, ctx ~75%) — READ THIS FIRST; the 05:2x block below is CURRENT for the floor, and this block only adds
 - **UPDATE 05:34: S 7th WRAPPED (scored 0.97, pane %16 closed).** #1814 stays READY TO MERGE at 38de04f285b2 (worktree s-s7-ks1814 kept). **When Kam rules card ks1814-owner-role: launch a MERGE seat (Sonnet, lane -S) with S 7th's HANDOVER (5_Project_History/2026-10-30_seatS-7th/HANDOVER.md) as the GO runbook; re-verify develop + head first.** Floor now: D 44th %19, R 65th %20.
+- **UPDATE 05:3x: D 44th KINTSUGI DEPLOYED + VERIFIED (429ba4824915, 05:30:49 AEDT; every prediction held; Wednesday's own /health/deep probe 200 5/5). GO DEMO sent.** Owed from it: STATUS C -> read the notice draft whole -> "POST NOTICES" mail -> SCORE + pane_close.
 - **Otherwise the 05:2x block's FLOOR, OWED items and cards are current.** In addition:
 - **SPARK:** queue = ks_1830_p2_charclass_sweep + ks_1815_p3_trailing_comment (drainer live via keepdraining 97411). Read each verdict: hold a PASS with hold_ready.py (positional run-dir, golden.diff, ROWID, --title-from-brief <brief .md>); classify any FAIL. HELD: ks_1816_p1_message_less (encodes a defect) -> a decision question on KS-1817 for the next board seat.
 - **OWED (WED, claim first with wed_claim.sh):**
