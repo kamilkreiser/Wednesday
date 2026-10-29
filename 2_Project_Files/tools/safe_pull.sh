@@ -73,6 +73,16 @@ restore_gen() {
   while IFS= read -r p; do [ -n "$p" ] && cp -p "$KEEP/$p" "$REPO/$p"; done <<< "$GEN"
   say "generated feeds restored from $KEEP (copies kept)"
 }
+# usage_<seat>.json is READ LIVE by fleet/usage_gate.sh: resetting it, even for a second, hands the gate the
+# committed (old) reading and it refuses a launch as STALE (2026-10-30 00:53, s204: G209 refused, "gauge 159 min
+# old", while the live file was 3 min old). So usage feeds are committed in place by pathspec, never reset.
+USAGE=$(echo "$GEN" | grep -E '/usage_[a-z]+\.json$' || true)
+if [ -n "$USAGE" ]; then
+  # shellcheck disable=SC2046
+  G add -- $(echo $USAGE) && G commit -q -m "dashboard: usage feed committed in place ($(echo $USAGE))" -- $(echo $USAGE) \
+    && say "committed usage feed(s) in place: $(echo $USAGE)"
+  GEN=$(echo "$GEN" | grep -v -E '/usage_[a-z]+\.json$' || true)
+fi
 if [ -n "$GEN" ]; then
   while IFS= read -r p; do
     [ -z "$p" ] && continue

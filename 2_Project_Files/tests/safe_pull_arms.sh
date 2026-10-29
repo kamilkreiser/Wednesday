@@ -41,6 +41,12 @@ rc=$(run a6); [ "$rc" = 3 ] && [ ! -d a6/.git/rebase-merge ] && grep -q '"a":3' 
 # A7 conflict outside data (a committed note) -> rc 3, aborted
 fresh a7; up a7 'echo theirs > notes/n.md'; echo mine > a7/notes/n.md; q a7 commit -am mine
 rc=$(run a7); [ "$rc" = 3 ] && [ ! -d a7/.git/rebase-merge ] && grep -q mine a7/notes/n.md && ok "A7 outside conflict refused rc 3" || { bad "A7 rc=$rc"; cat a7.out; }
+# A9 a usage feed is never reset (usage_gate reads it live): it is committed in place, its bytes unchanged, no copy taken
+fresh a9; echo '{"agent":"x","pct":5,"ts":"OLD"}' > a9/$D/usage_x.json; q a9 add -- $D/usage_x.json; q a9 commit -m seed
+up a9 'echo up >> notes/n.md'; echo '{"agent":"x","pct":7,"ts":"LIVE"}' > a9/$D/usage_x.json
+rc=$(run a9); [ "$rc" = 0 ] && grep -q LIVE a9/$D/usage_x.json && grep -q 'committed usage feed' a9.out && grep -q up a9/notes/n.md \
+  && ! ls a9/2_Project_Files/fleet/state/safe_pull/*/$D/usage_x.json >/dev/null 2>&1 \
+  && ok "A9 usage feed committed in place, never reset" || { bad "A9 rc=$rc"; cat a9.out; }
 # A8 the script never uses --autostash and never drops a stash (source read)
 ! grep -nE -- '--autostash[^-]|stash (drop|pop|clear)' "$SP" | grep -v '^[0-9]*:#' | grep -q . && ok "A8 no autostash/drop in source" || bad "A8"
 echo "== $PASS pass, $FAIL fail"; [ "$FAIL" = 0 ]
