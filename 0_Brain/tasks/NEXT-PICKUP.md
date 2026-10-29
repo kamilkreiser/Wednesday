@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 09:0x 30 Oct (the 08:5x successor seat, ctx ~45%) — READ THIS FIRST; the 08:5x block below is current where this does not differ
+- **A 18th: DONE.** Wrap read whole; verified at source (develop ls-remote e3d8456ec81d; history top entry; HANDOVER FINAL); SCORE 0.95 sent; pane %21 CLOSED ("closed %21; listeners 20 -> 20").
+- **#1820 (R 65th, KS-1823 Dockerfile, head b562a7e459a7, TIER 1): GATE 24 RUNNING** (in-session Opus, dies at rotation): verdict -> `0_Brain/reference/2026-10-30_gate24-1820/verdict.md`. If missing after a rotation, re-commission from the 08:59 note line. Then completion check -> head-pinned MERGE GO to R 65th (section 118 -> 119 docs-only merge-in at merge-prep). PR B (KS-1840, tier 2) still pushing.
+- **SPARK: ks_1804, ks_1788, ks_1666 READ AT SOURCE and HELD** (`local-model/night/READY_KS-1804-…`, `READY_KS-1788-…`, `READY_KS-1666-…_2026-10-30.diff.md`). 1804 + 1788 need TIER-1 gates at raise. **SPARK OPERATOR 17 RUNNING** (Sonnet): 3-4 new briefs + queue; report -> `0_Brain/reference/2026-10-30_spark-operator17/report.md`. Read every PASS diff yourself before holding.
+- **DEPLOY ROUND (D 45th): brief DRAFTING** (Sonnet) -> `2_Project_Files/fleet/briefs_staged/2026-10-30_seatD45_deploy_e3d8456e.md`. Read it WHOLE, then send via send_brief + launch on Opus 5.5 with SEAT_MODEL_ENV=claude-opus-5-5 (the 10-30 ledger row). Delta = #1817/#1814/#1818/#1819; #1820 NOT in it (next round).
+- **S 8th %22:** still holding for Kam's card; ghost SUGGESTION at its prompt again, acked ("acked %22 at content hash 4a900d689fbf").
+- **WITH KAM:** secuura-wednesday-go-counts-as-kams-word-1030 only.
+
 ## ⏩ ROTATION HANDOVER 08:5x 30 Oct (the 06:0x successor seat, ctx ~80%) — READ THIS FIRST; then the 08:3x and 08:0x blocks (current where this does not differ)
 - **STATE:** origin develop = e3d8456ec81d0b02172dd5a3060404815e797bde (#1819 KS-1836), on top of #1818 (593cd90c3131, vite) and #1814 (84ddbd63c008). **UNDEPLOYED:** #1817, #1814, #1818, #1819 (boxes on 429ba4824915). **A DEPLOY ROUND IS OWED** (October grant, until further notice; Opus deploy seat; kintsugi then demo; KS-535; the notice on KS-772/KS-485 names #1814 and #1819; then KS-1814/KS-1836 to Done only if tested + works + deployed with a live check).
 - **FLOOR:**
