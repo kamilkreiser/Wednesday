@@ -1,0 +1,7 @@
+#!/bin/bash
+for d in ks_1827_p1_byid_spread_live ks_1828_p1_signhash_other_verbs ks_1817_p1_fallback_text ks_1817_p1b_no_message; do
+  python3 -I /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/brief_lint.py /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/$d > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator11/lint_$d.log 2>&1; echo "lint rc=$?" >> /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator11/lint_$d.log
+  bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/round.sh /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/$d --dry-run > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator11/dry_$d.log 2>&1; echo "dry rc=$?" >> /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator11/dry_$d.log
+  bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/round.sh /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/$d --control > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator11/control_$d.log 2>&1; echo "control rc=$?" >> /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator11/control_$d.log
+done
+echo DONE > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator11/run_all.done

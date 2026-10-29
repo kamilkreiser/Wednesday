@@ -1,0 +1,23 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts
+@@ -112,3 +112,19 @@
++  // KS-1817 (gate 17 mutant X5): nothing pinned what is logged for a thrown value that has no message (a plain string), so `String(err?.message)` (which logs the literal text 'undefined') passed every cell.
++  it('RED KS-1817 R5: every insert rejecting with a plain string (no message) logs error undefined, not the text "undefined" and not the fallback', async () => {
++    mockExecuteRaw.mockRejectedValue('ks1817 plain string');
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: 0, failed: USERS } });
++    const logged = mockLogError.mock.calls.filter((call) => call[0] === 'Demo user seed failed');
++    expect(logged).toHaveLength(USERS);
++    expect(logged.map((call) => (call[1] as { error: unknown }).error)).toEqual(Array(USERS).fill(undefined));
++  });
++
++  it('control KS-1817 C4: an ordinary Error still logs its message (the plain-string cell reads the same log calls)', async () => {
++    mockExecuteRaw.mockRejectedValue(new Error('ks1817 ordinary'));
++    await seed();
++    const logged = mockLogError.mock.calls.filter((call) => call[0] === 'Demo user seed failed');
++    expect(logged.map((call) => (call[1] as { error: unknown }).error)).toEqual(Array(USERS).fill('ks1817 ordinary'));
++  });
++
+   it('control KS-1802 C1: an ordinary Error on every insert is reported as 14 failed and its message is logged', async () => {
+     mockExecuteRaw.mockRejectedValue(new Error('ks1802 ordinary'));
+     expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: 0, failed: USERS } });

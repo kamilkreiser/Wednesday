@@ -1,0 +1,21 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts
+@@ -61,3 +61,17 @@
++  // KS-1827 (gate 18 mutant X16): B5 matches the spread by source TEXT, and a commented-out spread keeps that text in the file, so the mutant passed 23 of 23 while the route stopped returning the hash.
++  // B6 reads the handler slice with its comments removed (whole `//` lines and `/* */` blocks), so only live code can satisfy the match.
++  it('RED KS-1827 B6: the by-id spread of anchorSignatureHashView is live code in the handler, not commented out', () => {
++    const live = GET_BY_ID.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((line) => !line.trim().startsWith('//')).join('\n');
++    expect(live.includes('...anchorSignatureHashView((anchor.metadataPayload as any)?.secuura),')).toBe(true);
++  });
++
++  it('control KS-1827 B7: the comment-stripping read still sees the live identity spread beside it and drops the KS-1454 comment line', () => {
++    const live = GET_BY_ID.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((line) => !line.trim().startsWith('//')).join('\n');
++    expect(live.includes('...anchorIdentityView((anchor.metadataPayload as any)?.secuura),')).toBe(true);
++    expect(live.includes('KS-1454: the SHA-256 of the detached')).toBe(false);
++    expect(GET_BY_ID.includes('KS-1454: the SHA-256 of the detached')).toBe(true);
++  });
++
+   it('control KS-1454 C1: an anchor with no signatureHash reads null (the key is never invented), on both reads', () => {
+     expect(RB.anchorSignatureHashView?.(PLAIN.secuura) ?? { signatureHash: null }).toEqual({ signatureHash: null });
+     expect((RB.buildVerifyResponse('db', PLAIN, ROW, CTX) as any).metadata.signatureHash ?? null).toBeNull();

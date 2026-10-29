@@ -1,0 +1,27 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-accepted-and-anchored-on-the-sign-verb.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-accepted-and-anchored-on-the-sign-verb.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-accepted-and-anchored-on-the-sign-verb.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-accepted-and-anchored-on-the-sign-verb.test.ts
+@@ -6,2 +6,2 @@
+-import { anchorDocumentSchema, buildFlatAnchorMetadataPayload } from '../anchorSchema';
++import { ACCEPTED_LIFECYCLE_VERBS, anchorDocumentSchema, buildFlatAnchorMetadataPayload } from '../anchorSchema';
+ import { toCardanoMetadatum } from '../cardano/cardanoMetadatum';
+@@ -33,4 +33,19 @@
+   it('RED KS-1454 R3: a signatureHash with no documentType is refused', () => {
+     const result = anchorDocumentSchema.safeParse({ ...BASE_BODY, metadata: { signatureHash: SIG } });
+     expect(result.success).toBe(false);
++  });
++
++  // KS-1828 (gate 18 mutant X8): R2 and R3 pin the sign-only rule for `upload` and for no verb only, so a refinement that also admitted `declare` stayed 23 of 23. Every other accepted verb is driven here.
++  const OTHER_VERBS = ACCEPTED_LIFECYCLE_VERBS.filter((verb) => verb !== 'sign');
++
++  it.each(OTHER_VERBS)('RED KS-1828 R6: a signatureHash on the %s verb is refused, not anchored', (verb) => {
++    const result = anchorDocumentSchema.safeParse({ ...BASE_BODY, metadata: { documentType: verb, signatureHash: SIG } });
++    expect(result.success).toBe(false);
++  });
++
++  it('control KS-1828 C5: the verbs driven by R6 include declare and upload and never sign', () => {
++    expect(OTHER_VERBS).toContain('declare');
++    expect(OTHER_VERBS).toContain('upload');
++    expect(OTHER_VERBS).not.toContain('sign');
++    expect(ACCEPTED_LIFECYCLE_VERBS).toContain('sign');
+   });

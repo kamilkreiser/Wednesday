@@ -1,0 +1,40 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -2118,6 +2118,10 @@
+         // DO NOTHING a conflict is no longer an exception, so anything reaching
+         // here is a real failure and was being swallowed silently.
+         failed++;
+-        logger.error('Demo user seed failed', { email: u.email, error: readableErrorMessage(err) });
++        // KS-1818: readableErrorMessage guards the message READ; the logger call after it sat directly in this catch, so a logger (or a serialiser) that throws left the catch, ended the loop
++        // at this user and reached the route's outer catch (the KS-1802 hang class). Log in a try of its own, as fail500 and migrate-tenant-data do; the loop goes on with the next user.
++        try { logger.error('Demo user seed failed', { email: u.email, error: readableErrorMessage(err) }); } catch {
++          // Nothing more can be said if the logger itself fails; the failure is already counted and the next user is still attempted.
++        }
+       }
+     }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts
+@@ -112,3 +112,21 @@
++  // KS-1818: R1-R3 make the thrown VALUE hostile; these two make the LOGGER throw. The logger call after readableErrorMessage sat outside any guard.
++  it('RED KS-1818 R4: a logger that throws on every failed insert is reported as 14 failed, not as the constant 500', async () => {
++    mockLogError.mockImplementation(() => {
++      throw new Error('ks1818 logger down');
++    });
++    mockExecuteRaw.mockRejectedValue(new Error('ks1818 insert'));
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: 0, failed: USERS } });
++    expect(mockLogError).toHaveBeenCalledTimes(USERS);
++  });
++
++  it('RED KS-1818 R5: one failed insert whose log line throws does not stop the other 13 from being seeded', async () => {
++    mockLogError.mockImplementation(() => {
++      throw new Error('ks1818 logger down');
++    });
++    mockExecuteRaw.mockRejectedValueOnce(new Error('ks1818 insert')).mockResolvedValue(1);
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 13, created: 13, alreadyPresent: 0, failed: 1 } });
++  });
++
+   it('control KS-1802 C1: an ordinary Error on every insert is reported as 14 failed and its message is logged', async () => {
+     mockExecuteRaw.mockRejectedValue(new Error('ks1802 ordinary'));
+     expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: 0, failed: USERS } });
