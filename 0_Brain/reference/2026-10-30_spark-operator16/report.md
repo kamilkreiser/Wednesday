@@ -1,0 +1,8 @@
+# Spark operator 16 report, 2026-10-30, condensed by Wednesday (the operator's own write was refused)
+- READY and QUEUED: ks_1804_p1_burn_exactly_once (KS-1804 note 2; test only; the tamper target is passwordLoginGate.ts:281, a credential file, so a TIER-1 gate at raise), ks_1788_p1_checkapikey_4xx (KS-1788 item 3; test only; the tamper target is api-gateway middleware/auth.ts:205, so TIER-1 at raise; gate mutants F7, F8 and F18 now killed), ks_1666_p1_certify_reservation_comments (KS-1666 note d; comment-only certifications.ts + a source-text test). Each: lint rc 0, dry-run OK, control PASS byte-identical with strict apply, hold_ready --dry-run strict=True, 0 overlap with 19 open PRs.
+- QUARANTINED: ks_1585_p1_rls_expected_tables (night/briefs/_quarantine_2026-10-30/): the builder refuses a scripts/ product. A harness gap; spec1585.py is ready if the builder is widened.
+- GENERATOR FAULT confirmed (operator 15's diagnosis): trim() cuts trailing context at the first blank line. Local patched copy mk2_patched_trim.py in this folder; adopting it is Wednesday's call (tooling, claim first).
+- TO ROUTE: a migration number collision (049 at the tip vs 049 in PR #1383; a Claude seat); KS-1534 (a) is stale (a board seat re-reads it).
+- Bases: the briefs were built at 7152ac66; controls ran at 84ddbd63 / 593cd90c; touched files identical across all three tips.
+- Stray control run dirs (~335 MB each) are left in place: the -control dirs for 1804 (r2), 1788 and 1666.
+- Specs, logs and tools: this folder (spec1804/1788/1666/1585.py, run_all.sh, lint/dry/control/holdready logs, strict.sh, overlap16.py, mk2_patched_trim.py).

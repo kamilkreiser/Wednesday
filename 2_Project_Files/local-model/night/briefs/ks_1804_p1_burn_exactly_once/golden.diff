@@ -1,0 +1,22 @@
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1188-f3-a-spent-backup-code-503-says-so.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1188-f3-a-spent-backup-code-503-says-so.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks1188-f3-a-spent-backup-code-503-says-so.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1188-f3-a-spent-backup-code-503-says-so.test.ts
+@@ -156,4 +156,18 @@
+     await expect(assertAccountMayReceiveCredential(mfaUser(), input(BACKUP_CODE))).resolves.toEqual({ ok: true });
+     expect(state.recordSuccess).toBe(1);
+   });
++
++  // KS-1804 note 2 (KS-1188 F3 gate note carried on KS-1467): the two cells that look at `state.queries` only ask whether SOME `UPDATE users` ran (or none). Nothing counted them, so a burn that runs twice stayed green.
++  const burns = () => state.queries.filter((q) => /^\s*UPDATE\s+users/i.test(q.sql));
++
++  it('RED KS-1804 N2 a healthy backup-code sign-in burns the code with exactly one UPDATE users', async () => {
++    await expect(assertAccountMayReceiveCredential(mfaUser(), input(BACKUP_CODE))).resolves.toEqual({ ok: true });
++    expect(burns()).toHaveLength(1);
++  });
++
++  it('RED KS-1804 N2 the faulted case (the read-back fails after the burn landed) still issued exactly one UPDATE users', async () => {
++    state.readBackFails = CONNECTION_LOST;
++    await rejection(BACKUP_CODE);
++    expect(burns()).toHaveLength(1);
++  });
+ });
