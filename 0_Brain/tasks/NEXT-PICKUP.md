@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 06:1x 30 Oct (the 06:0x successor seat, ctx 50%) — READ THIS FIRST, supersedes every block below where they differ
+- **Morning sweep DONE** (06:08 note line): KS active 739 (backlog 375, unstarted 24, started 340), 10 closed in 24 h: NOT on the 31 Oct pace (board grew from 509). WED 5/22/84. Panel update to Kam sent (chat_reply rc 0). Put the pace on every morning card from now on.
+- **D 44th %19:** DEMO DEPLOYED + VERIFIED 429ba4824915 (06:02:35 AEDT); both boxes done. POST NOTICES + ticket rulings SENT (Done: KS-1802, KS-1818, KS-1454, KS-1801, KS-1817, KS-1827, KS-1828; KS-1822 + KS-1175 stay open). OWED: read its WRAP -> verify the notices/moves on the board read-only -> SCORE + pane_close %19.
+- **R 65th %20:** still holding for card secuura-r65-raise-ks1823-ks1840-start-1030.
+- **Spark:** IDLE, queue 0. ks_1830_p2 HELD (READY_KS-1830-KS-1830-P2-CHARCLASS_*). ks_1815_p3 PASS but NOT HELD: hold_ready refuses strict apply (harness; IMPROVEMENTS row 30 Oct). **Spark operator 15** (in-session Sonnet, DIES at rotation): TASK 1 diagnose that refusal; TASK 2 3-5 new briefs outside the partition -> 0_Brain/reference/2026-10-30_spark-operator15/report.md. If missing after a rotation, re-commission. Wednesday reads every + line, then queues.
+- **Next lane:** KS-1836 (P2, NFT list across tenants, READ fix only) brief DRAFTER running (in-session Sonnet, dies at rotation) -> 2_Project_Files/fleet/briefs_staged/2026-10-30_seat<L><N>_ks1836_nft_list_tenant.md. Read whole, fix, launch with SEAT_MODEL_ENV=claude-opus-5-5; tier-1 gate.
+- **Cards (5 Secuura + morning card):** KS-1384 default b (F-a only) fires if still unruled after Kam's morning; KS-1814 GO (merge seat, Sonnet, lane -S, S 7th's HANDOVER) on his tap.
+
 ## ⏩ ROTATION HANDOVER 06:0x 30 Oct (the 03:2x seat, which ran the 06:00 morning wake; ctx 76%) — READ THIS FIRST, then the 05:3x and 05:2x blocks below (both current)
 - **Morning ritual DONE by this seat:** Kam rulings read (0 since 19:51:25); stale_card_escalate 0; morning card **wed-morning-plan-1030** POSTED (HTTP 201; default a = carry on); greeting spoken; panel mirror posted.
 - **Morning ritual OWED by the successor:** step 10, the read-only MORNING TICKET SWEEP of Secuura/Blockchain. Count the KS board with board_count.sh; the 10-12 target is to clear most of the board by 31 Oct, so report the pace. Also read Linear WED; nothing else new from Kam.
