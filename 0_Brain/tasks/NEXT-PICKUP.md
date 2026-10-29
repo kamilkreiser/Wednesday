@@ -6,6 +6,18 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 03:0x 30 Oct (the 00:5x successor seat, ctx 76%) — READ THIS FIRST, supersedes every block below where they differ
+- **STATE:** develop = 203734468019feaf44428975b10cf5f799483187 (#1813 KS-1822 squash, verified by Wednesday at origin: one parent d7ddfa1f, tree 0097e7db6bf9). Merged tonight: #1811, #1812, #1813. Boxes on 6d41673e0f79: a DEPLOY ROUND is OWED (#1808, #1809, #1810, #1811, #1812, #1813) under the October grant, kintsugi first (an Opus deploy seat; KS-535 wallet rule; Phase 0 re-tag).
+- **FLOOR:**
+  - **A 17th** %15 (Opus): #1813 MERGED. Doing the KS-1822 gap (vii) comment, removing its worktree, then WRAP. On its wrap mail: SCORE it (strong: KS-1822 built, 17/17 mutants, the RLS finding, the design note) + pane_close %15.
+  - **S 7th** %16 (Opus): #1814 (KS-1814 + KS-1829) gate 19 GO WITH NOTES; doing a docs-only re-prep onto 203734468019 (section 114) -> READY TO MERGE with a blob table. **The MERGE GO waits for card secuura-ks1814-owner-role-reanchor-1030** (ruled, or shown unanswered on the morning card); then a head-pinned GO after re-reading develop + head in Wednesday's own clone. Filed KS-1831..1835.
+  - **R 63rd** %17 (Sonnet): #1815 (KS-1827 + KS-1828) + #1816 (KS-1818 + KS-1817 as R6) READY tier 2, HELD for gate 20; item C done (KS-1817..KS-1830 assigned); doing item E (5 filings incl. the P2 NFT-list security finding + one KS-485 comment), then wrap. The merges of #1815/#1816 go to a successor R seat if R has wrapped (each will need a docs re-prep: renumber to develop's highest + 1).
+- **GATE 20 RUNNING** (in-session Sonnet; DIES at a rotation; re-commission from the 30 Oct 03:03 note line if 0_Brain/reference/2026-10-30_gate20-1815-1816/verdict.md is missing). Then: completion check, head-pinned MERGE GOs (docs re-prep first where the head does not contain develop).
+- **Spark:** ks_1830_p1_plus + ks_1830_p1_slash queued (keepdraining 97411 live). Check done.md, hold the PASSes with hold_ready.py (positional run-dir, '-', ROWID, --title-from-brief), then the next raise seat.
+- **WITH KAM (4 cards):** secuura-ks1814-owner-role-reanchor-1030 (default a) · secuura-ks1384-f0-build-approval-1029 (default b) · secuura-ks1819-ks1820-wallet-routes-off-by-default-1030 (default b = a read-only census) · secuura-ks1822-read-gate-probe-fault-fail-open-1030 (default a).
+- **TO ROUTE:** same-shape GETs without a tenant check (anchoring thread-state, tx, queue); the audit:gate CLEANUP baseline entry GHSA-vfj7-8cjw-p6xm; Q12 (uppercase SUPER_ADMIN at the #1814 check); the DocumentRecord status union lacking 'deleted'; spark_gate.sh FETCH_HEAD fault (IMPROVEMENTS row written). FOR KAM later: the gate's note that a brief had it read the Secuura .env via a script while the project CLAUDE.md says a session never opens a .env.
+- **Morning (06:00+):** the morning fleet-activity card (counts: Secuura 4 cards + overnight result: 3 merged, 2 tier-1 gates GO, 6 Spark PASSes, ~25 tickets filed and assigned); stale_card_escalate.
+
 ## ⏩ CHECKPOINT 02:1x 30 Oct (the 00:5x successor seat, ctx 70%) — READ THIS FIRST, supersedes every block below where they differ
 - **STATE:** origin develop d7ddfa1f64336602a3441964f636e7d57a20c1d7 (#1810 Akto; read by three seats, not by Wednesday herself: re-read before any GO). Boxes on 6d41673e0f79: a DEPLOY ROUND is owed (#1808, #1809, #1811, #1812 + #1810) under the October grant.
 - **FLOOR:**
