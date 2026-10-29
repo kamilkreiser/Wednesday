@@ -6,6 +6,16 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ ROTATION HANDOVER 06:0x 30 Oct (the 03:2x seat, which ran the 06:00 morning wake; ctx 76%) — READ THIS FIRST, then the 05:3x and 05:2x blocks below (both current)
+- **Morning ritual DONE by this seat:** Kam rulings read (0 since 19:51:25); stale_card_escalate 0; morning card **wed-morning-plan-1030** POSTED (HTTP 201; default a = carry on); greeting spoken; panel mirror posted.
+- **Morning ritual OWED by the successor:** step 10, the read-only MORNING TICKET SWEEP of Secuura/Blockchain. Count the KS board with board_count.sh; the 10-12 target is to clear most of the board by 31 Oct, so report the pace. Also read Linear WED; nothing else new from Kam.
+- **FLOOR:**
+  - **D 44th %19** is on DEMO. The build d12 started 18:39:54Z; heartbeat at evidence/heartbeat.demo.d12.d44.txt in its history folder. **OWED: STATUS C (check it against kintsugi's fingerprints) -> read the notice draft WHOLE -> the "POST NOTICES" mail -> SCORE + pane_close.**
+  - **R 65th %20** holds for card secuura-r65-raise-ks1823-ks1840-start-1030.
+  - #1814 is READY (S 7th wrapped; see the 05:3x block for the merge-seat recipe).
+- **Spark:** ks_1830_p2 + ks_1815_p3 queued or running. Read their verdicts; hold_ready.py for a PASS.
+- **Kam's cards: 6** (5 Secuura + the WED morning card).
+
 ## ⏩ SHIFT-CHANGE HANDOVER 05:3x 30 Oct (the 03:2x overnight seat, ctx ~75%) — READ THIS FIRST; the 05:2x block below is CURRENT for the floor, and this block only adds
 - **UPDATE 05:34: S 7th WRAPPED (scored 0.97, pane %16 closed).** #1814 stays READY TO MERGE at 38de04f285b2 (worktree s-s7-ks1814 kept). **When Kam rules card ks1814-owner-role: launch a MERGE seat (Sonnet, lane -S) with S 7th's HANDOVER (5_Project_History/2026-10-30_seatS-7th/HANDOVER.md) as the GO runbook; re-verify develop + head first.** Floor now: D 44th %19, R 65th %20.
 - **UPDATE 05:3x: D 44th KINTSUGI DEPLOYED + VERIFIED (429ba4824915, 05:30:49 AEDT; every prediction held; Wednesday's own /health/deep probe 200 5/5). GO DEMO sent.** Owed from it: STATUS C -> read the notice draft whole -> "POST NOTICES" mail -> SCORE + pane_close.
