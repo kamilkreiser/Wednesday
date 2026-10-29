@@ -528,7 +528,9 @@ fi
 # wake_watch.sh failed to arm ("Permission denied") and serve.sh could not
 # restart, taking the dashboard down until it was diagnosed. Cheap to check,
 # expensive to debug when a launcher silently fails instead.
-NOEXEC="$(find "$SCRIPT_DIR" \( -name '*.sh' -o -name '*.command' \) ! -perm -u+x 2>/dev/null)"
+# 2026-10-29: prune the regenerable trees. local-model/spark/cache/work holds a full repo clone per Spark round (~12.6M files by 10-29);
+# the unpruned walk took minutes and two concurrent launches hung on it (both seats stuck at "doctor.sh --quiet"). Backup: doctor.sh.pre-1029-findprune.
+NOEXEC="$(find "$SCRIPT_DIR" \( -path '*/local-model/spark/cache' -o -path '*/local-model/spark-ab' -o -path '*/local-model/runs' -o -path '*/fleet/qa-agent' -o -name .venv -o -name node_modules -o -name .git \) -prune -o \( -name '*.sh' -o -name '*.command' \) ! -perm -u+x -print 2>/dev/null)"
 if [ -n "$NOEXEC" ]; then
   warn "scripts have lost their executable bit (drive sync drops modes)" \
        "chmod +x on: $(echo "$NOEXEC" | tr '\n' ' ')"
