@@ -6,7 +6,13 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
-## ⏩ UPDATE 07:1x 30 Oct (the 06:0x successor seat, ctx ~65%) — CURRENT; the blocks below are superseded where they differ
+## ⏩ UPDATE 07:15 30 Oct (the 06:0x successor seat, ctx ~70%) — CURRENT
+- **CARD WITH KAM: secuura-ks1814-company-admin-reanchor-1030** (rec a; DEFAULT a at 13:00 AEDT today = a merge seat (Sonnet, lane -S once S 8th is done, or a fresh lane) lands #1814 per S 7th's HANDOVER, re-verifying develop + head first; a follow-up seat for the org rule + a transfer-custody ownership check after a read-only data count). Map: 0_Brain/reference/2026-10-30_ks1814-custody-scenarios/note.md. Kam confirmed my note reading at 07:06:48.
+- **SEAT S 8th LIVE** (%22, lane -S, Sonnet): raises the 5 held passes as 3 PRs; pushes only after the vite mail. **OWED: its plan confirmation, read WHOLE.**
+- **THE 'vite bump merged' MAIL GOES TO THREE SEATS BY NAME:** A 18th, R 65th, S 8th. The order is A 18th ITEM B READY -> tier-2 gate -> head-pinned MERGE GO -> verify at origin -> that mail.
+- In-session still running (die at rotation): the KS-1384 rev4 §19 review (Opus) and Spark operator 16 (Sonnet). Paths are in the 07:1x block.
+
+## ⏩ UPDATE 07:1x 30 Oct (the 06:0x successor seat, ctx ~65%) — superseded where the 07:15 block differs
 - **Kam ruled the last two cards (07:01):** KS-1384 = **a, build F-a, F0, F-b and R**. On KS-1814 he answered with a NOTE (verbatim): "the solution must cater for all possible scenarios.  Owners modifying documents - lineage shown, owner keeping their own documents, a company keeping them or them being stored centrally". Card withdrawn with his words; **#1814 MERGE HELD** until it is mapped against the four scenarios. Readback on the panel (chat_reply rc 0). **No card open with Kam now.**
 - **IN-SESSION AGENTS (DIE at rotation; re-commission from these lines if the output is missing):**
   - (1) the KS-1814 custody map (Opus) -> 0_Brain/reference/2026-10-30_ks1814-custody-scenarios/note.md;
