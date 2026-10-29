@@ -105,6 +105,8 @@ def main():
     ap.add_argument("--gh-config", required=True)
     ap.add_argument("--root", default="web/src/", help="prefix the brief's short paths are written from (default web/src/)")
     ap.add_argument("--show", type=int, default=0)
+    ap.add_argument("--project-dir", default="", help="the project folder: relative paths outside the repo (session-tools/, "
+                    "1_Project_Definition/Briefs/) are checked for existence there, read-only")
     o = ap.parse_args()
     text = open(o.brief, encoding="utf-8").read()
     paths = tree(o.repo, o.ref, o.gh_config)
@@ -128,6 +130,14 @@ def main():
                 tally("OK")
             continue
         rel = tok[2:] if tok.startswith("./") else tok
+        if rel.startswith("2_Project_Files/"):  # this workspace's layout: the repo IS <project>/2_Project_Files
+            rel = rel[len("2_Project_Files/"):]
+        if o.project_dir and rel not in pset and o.root + rel not in pset:
+            for base in ("", "1_Project_Definition/"):
+                if os.path.exists(os.path.join(o.project_dir, base, rel)):
+                    rel = None; break
+            if rel is None:
+                tally("OK-LOCAL"); continue
         full, verdict = None, "OK"
         for c in [rel, o.root + rel]:
             if c in pset:
@@ -137,7 +147,7 @@ def main():
             if len(hits) == 1:
                 full = hits[0]
             elif len(hits) > 1:
-                if not all(h in text for h in hits):
+                if sum(1 for h in hits if h in text) != 1 and not all(h in text for h in hits):
                     bad += 1; tally("AMBIGUOUS"); print(f"AMBIGUOUS brief:{at}  {tok}  -> {', '.join(hits[:5])}")
                 else:
                     tally("OK")
@@ -153,7 +163,10 @@ def main():
                 print(f"WRONG-DIR brief:{at}  {tok}  — the line names {sorted(set(dirs))}; the tree has it at: {', '.join(where[:4])}")
                 continue
             full = (scoped or where)[0]
-            if len(scoped or where) > 1 and a:
+            named = [w for w in (scoped or where) if w in text]
+            if len(named) == 1:
+                full = named[0]
+            elif len(scoped or where) > 1 and a:
                 bad += 1; tally("AMBIGUOUS"); print(f"AMBIGUOUS brief:{at}  {tok}:{a}  -> {', '.join((scoped or where)[:5])}")
                 continue
         if not full:
