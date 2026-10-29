@@ -2776,3 +2776,8 @@ INCLUDED until he says otherwise.
 > Good morning, please use as many seats as the machine will handle to work on the HPSM-poc.  Here is the feedback.  1)the HTML is a design that I would like to implement based on the feedback from Peter and HP.  This moves the menu to the left column.  There are also other layout and structural changes so please review the layout very carefully and create relevant tickets and implement the new design as a priority 2) there is a video and transcript from Pete for his site review.  Video will be added in terminal due to size.  do not file the video but file the other
 
 *Note:* Attachments HP_Security_Services_Playbook_Prototype_v1_2.html + Pete's click-through AI summary docx saved to 0_Brain/reference/2026-10-29_hpsm-poc-hp-feedback/; receipt posted; design-delta drafter commissioned (Sonnet, C8).
+
+## 2026-10-29 14:48 — Kam (terminal, verbatim)
+> I have been looking at the HP range.  There is a possibility to get wholesale pricing on some of their AI machines.  Can you please look through the australian and US range of AI workstations.  I would like the maximum amount of RAM available for AI models as possible.  512 min ideally 750gb if possible in the gpu or for AI processing.  Deepseek v4.1 flash would be a min but ideally kimi k latest llm.  Can you also look at how it can be configured and whether it will actually drive the model.  also a possibility would be a workstation [then, as a follow-up message:] https://www.hp.com/us-en/workstations/z4-rack.html
+
+*Note:* Research commissioned to one agent; receipt on the panel bf-13aa72f4b20ada14; report to 0_Brain/reference/2026-10-29_hp-ai-workstations/report.md. (The dictation pasted the message twice; read once.)
