@@ -113,6 +113,16 @@ json.dump(out, open(f"{repo}/{path}", "w"), ensure_ascii=False, indent=1)
 print(f"union {path}: upstream {len(b)} + ours-only {len(out)-len(b)} = {len(out)}")
 PY
 }
+# A LIVE feed can be re-written between its reset above and the pull: the seat's statusline writes
+# usage_<seat>.json during tool calls (2026-10-29 19:56, s204: three pulls in a row failed "cannot rebase:
+# You have unstaged changes" with the tree otherwise clean). A generated feed dirty AGAIN here is committed by
+# pathspec (regenerated anyway; panel_sync commits these routinely) — never stashed, and never a STATE file.
+REDIRTY=$(G diff --name-only HEAD -- | while IFS= read -r p; do [ -n "$p" ] && is_gen "$p" && echo "$p"; done)
+if [ -n "$REDIRTY" ]; then
+  # shellcheck disable=SC2046
+  G add -- $(echo $REDIRTY) && G commit -q -m "dashboard: live feed re-written mid-pull ($(echo $REDIRTY))" -- $(echo $REDIRTY) \
+    && say "committed live feed(s) re-written after the reset: $(echo $REDIRTY)"
+fi
 if ! G pull --rebase --no-autostash -q >"$KEEP.pull.out" 2>&1 && [ ! -d "$REPO/.git/rebase-merge" ] && [ ! -d "$REPO/.git/rebase-apply" ]; then
   echo "safe_pull: pull failed before any rebase:" >&2; cat "$KEEP.pull.out" >&2; restore_gen; exit 4
 fi
