@@ -148,3 +148,4 @@
 | 2026-10-29 04:00:00 | ks_1587_p1_loose_r2 | FAIL (PASS (7/7)) | 63 | 34.009 | 12751+1377 | DIFFERS | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-29_ks_1587_p1_loose_r2 | ks_1587_p1_loose_r2 |
 | 2026-10-29 16:46:38 | ks_1801_p1 | PASS (PASS (7/7)) | 177 | 49.623 | 43124+614 | TREE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-29_ks_1801_p1 | ks_1801_p1 |
 | 2026-10-29 16:49:12 | ks_1802_p1 | PASS (PASS (7/7)) | 153 | 78.97 | 42357+2180 | BYTE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-29_ks_1802_p1 | ks_1802_p1 |
+| 2026-10-29 19:21:45 | ks_1454_p1 | PASS (PASS (7/7)) | 143 | 58.644 | 21267+2131 | BYTE-IDENTICAL | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-10-29_ks_1454_p1 | ks_1454_p1 |
