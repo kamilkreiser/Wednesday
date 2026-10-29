@@ -108,4 +108,3 @@
 # 2026-10-29 16:43 (Wednesday, 16:1x seat): Spark operator 8's briefs READ by Wednesday (ks_1801_p1 whole + 7 premises re-read at e4cd2e1325ba; ks_1802_p1 header/mode/change/test head read): both --dry-run OK + --control 7/7. ks_1801_p2 HELD (same test file as p1; regenerate after p1 lands). Report: 0_Brain/reference/2026-10-29_spark-operator8/report.md
 # 2026-10-29 (Spark operator 9 for Wednesday): ks_1454_p1 dry-run OK, control PASS
 # 2026-10-29 19:22 (Wednesday): ks_1801_p2 queued against the tip (operator 8's dry-run OK + control 7/7); p1 is HELD, not merged; p2 appends after :124 while p1 edits :14/:54, so the raise seat combines them into one PR
-ks_1801_p2
