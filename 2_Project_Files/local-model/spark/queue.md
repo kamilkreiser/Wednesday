@@ -124,6 +124,3 @@
 # 2026-10-30 09:3x (Spark operator 17): ks_1797 (GET half), ks_1792, ks_1791 (narrow): code_patch2, auth surfaces (TIER-1 gate at raise). Each: lint rc 0, dry-run OK, control PASS golden byte-identical at e3d8456ec81d, 0 open-PR overlap. Report: 0_Brain/reference/2026-10-30_spark-operator17/report.md
 # 2026-10-30 10:0x (Spark operator 18): KS-1836 F1 + Mf test-only pins (gate 23 on PR 1819): p1 kills Ma, p2 kills Mb, p3 kills Mf. NEW nft-certificate test files only, started_ok pinned (PR 1819 merged; Wednesday commissioned). Each: lint rc 0, dry-run OK, control PASS 7/7 golden byte-identical at a786e06e6f6e. Report: 0_Brain/reference/2026-10-30_spark-operator18/report.md
 # 2026-10-30 10:2x (Spark operator 18, RE-QUEUE after the A3c brief defect, per Wednesday): the three KS-1836 briefs now carry the new test file's + lines in a diff fence under 'The exact change' (BRIEF-MARKER trailing line); control PASS with PASS A3c, golden byte-identical. Not a Spark round-counter event.
-ks_1836_p1_log_foreign_selector_no_rows
-ks_1836_p2_log_silent_on_own_rows
-ks_1836_p3_wallet_selector_exact
