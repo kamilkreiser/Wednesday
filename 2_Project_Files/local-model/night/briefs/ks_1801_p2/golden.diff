@@ -1,0 +1,60 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
+@@ -98,3 +98,56 @@
++// KS-1801: the two catches that call errorMessageIncludes (it reads the message only, never `code`) are driven too. Each row names the thrown value that the catch DOES recognise
++// (`hit`) and the answer that gives; a hostile value must fall through to the constant 500 like every other catch above.
++const DOC_ID = '00000000-0000-4000-8000-000000000001';
++const MESSAGE_ROUTES = [
++  {
++    label: 'POST /document-types', method: 'POST', path: '/document-types', body: JSON.stringify({ name: 'KS-1801 type', code: 'ks1801' }),
++    hit: new Error('duplicate key value violates unique constraint "x"'),
++    hitAnswer: { status: 409, body: { success: false, error: { code: 'CONFLICT', message: 'Document type code already exists' } } },
++  },
++  {
++    label: 'GET /rights-holders/:id/documents', method: 'GET', path: '/rights-holders/' + DOC_ID + '/documents', body: undefined,
++    hit: new Error('relation "documents" does not exist'),
++    hitAnswer: { status: 200, body: { success: true, documents: [] } },
++  },
++] as const;
++
++async function callMessageRoute(route: (typeof MESSAGE_ROUTES)[number], thrown: unknown): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
++  mockQueryRaw.mockRejectedValueOnce(thrown);
++  try {
++    const res = await fetch(baseUrl + '/api/admin' + route.path, {
++      method: route.method,
++      headers: { 'content-type': 'application/json' },
++      body: route.body,
++      signal: AbortSignal.timeout(1500),
++    });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER', body: null };
++  }
++}
++
++describe('KS-1801: the errorMessageIncludes catches answer a hostile thrown value', () => {
++  it.each(MESSAGE_ROUTES)('RED KS-1801 B1 $label: a revoked Proxy thrown by the query is answered with the constant 500', async (route) => {
++    expect(await callMessageRoute(route, revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it.each(MESSAGE_ROUTES)('RED KS-1801 B2 $label: an object whose message getter throws is answered with the constant 500', async (route) => {
++    expect(await callMessageRoute(route, throwingMessageGetter())).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it.each(MESSAGE_ROUTES)('control KS-1801 D1 $label: the Error the catch recognises is still answered as before', async (route) => {
++    expect(await callMessageRoute(route, route.hit)).toEqual(route.hitAnswer);
++  });
++
++  it.each(MESSAGE_ROUTES)('control KS-1801 D2 $label: an ordinary Error is still answered with the constant 500', async (route) => {
++    expect(await callMessageRoute(route, new Error('ks1801 ordinary'))).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++
++  it.each(MESSAGE_ROUTES)('control KS-1801 D3 $label: a thrown object with only code 42P01 is NOT recognised here (this catch reads the message only) and gets the constant 500', async (route) => {
++    expect(await callMessageRoute(route, { code: '42P01' })).toEqual({ status: 500, body: CONSTANT_BODY });
++  });
++});
++
+ describe('KS-1780: adminConfig catches answer a hostile thrown value', () => {
+   it.each(ROUTES)('RED KS-1780 A1 $label: a revoked Proxy thrown by the query is answered with the constant 500', async (route) => {
+     expect(await callWithThrow(route.path, revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });

@@ -1,0 +1,25 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1780-admin-config-catches-cannot-hang-on-a-hostile-throw.test.ts
+@@ -11,6 +11,6 @@
+ jest.mock('../db', () => ({
+   prisma: { $queryRaw: mockQueryRaw, $executeRaw: jest.fn() },
+   refreshTenantConfigs: jest.fn(),
+-  withTenant: (_t: unknown, fn: () => unknown) => fn(),
++  withTenant: (_t: unknown, fn: (tx: unknown) => unknown) => fn({ $queryRaw: mockQueryRaw, $executeRaw: jest.fn() }),
+   getTenantManager: () => null,
+ }));
+@@ -52,4 +52,13 @@
+   { label: 'GET /document-types', path: '/document-types', empty: { success: true, documentTypes: [] } },
+   { label: 'GET /workflows', path: '/workflows', empty: { success: true, workflows: [] } },
+   { label: 'GET /organizations', path: '/organizations', empty: { success: true, organizations: [], total: 0 } },
++  { label: 'GET /verification-queue', path: '/verification-queue', empty: { success: true, items: [] } },
++  { label: 'GET /integrations', path: '/integrations', empty: { success: true, integrations: [] } },
++  { label: 'GET /verification-policies', path: '/verification-policies', empty: { success: true, policies: [], total: 0 } },
++  { label: 'GET /api-keys', path: '/api-keys', empty: { success: true, keys: [] } },
++  { label: 'GET /audit-logs', path: '/audit-logs', empty: { success: true, logs: [], events: [], total: 0 } },
++  { label: 'GET /rights-holders', path: '/rights-holders', empty: { success: true, rightsHolders: [], total: 0 } },
++  { label: 'GET /users', path: '/users', empty: { success: true, data: { users: [], total: 0 } } },
++  { label: 'GET /identity/users', path: '/identity/users', empty: { success: true, users: [] } },
++  { label: 'GET /identity/organizations', path: '/identity/organizations', empty: { success: true, organizations: [] } },
+ ] as const;

@@ -1,0 +1,158 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -143,5 +143,14 @@
+     return err?.message?.includes('does not exist') === true || err?.code === '42P01';
+   } catch {
+     return false;
++  }
++}
++
++/** KS-1802: the thrown value's message for a log line; the fixed fallback when the value cannot be read (a revoked Proxy, a `message` getter that throws). */
++function readableErrorMessage(err: any): string | undefined {
++  try {
++    return err?.message;
++  } catch {
++    return 'thrown value that could not be described';
+   }
+ }
+@@ -2109,6 +2118,6 @@
+         // DO NOTHING a conflict is no longer an exception, so anything reaching
+         // here is a real failure and was being swallowed silently.
+         failed++;
+-        logger.error('Demo user seed failed', { email: u.email, error: err?.message });
++        logger.error('Demo user seed failed', { email: u.email, error: readableErrorMessage(err) });
+       }
+     }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts
+@@ -0,0 +1,127 @@
++// KS-1802 (originate routes/adminConfig.ts, POST /seed-demo-users): the per-user catch counted the failure (failed++) and THEN logged `err?.message`. That read touches the thrown value, so a
++// revoked Proxy, or an object whose `message` getter throws, made the read throw from inside the catch: the loop stopped at the first such user, the rest of the seed was never attempted, and the
++// route answered the constant 500 instead of its normal report. The fix reads the message through a guarded helper. The database is mocked (the same mocks as the KS-1780 cells); both seed flags
++// are set, the route is driven over a real loopback listener, and every insert is made to reject with the hostile value.
++process.env.NODE_ENV = 'development';
++process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
++process.env.ALLOW_DEFAULT_SEED_PASSWORDS = 'true';
++process.env.ENABLE_DEMO_SEED = 'true';
++
++const mockQueryRaw = jest.fn();
++const mockExecuteRaw = jest.fn();
++const mockLogError = jest.fn();
++
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw },
++  refreshTenantConfigs: jest.fn(),
++  withTenant: (_t: unknown, fn: (tx: unknown) => unknown) => fn({ $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw }),
++  getTenantManager: () => null,
++}));
++
++jest.mock('../middleware/auth', () => {
++  const actual = jest.requireActual('../middleware/auth');
++  return {
++    ...actual,
++    authenticate: () => (req: any, _res: unknown, next: () => void) => {
++      const principal = { id: 'u-ks1802', role: 'SYSTEM_ADMIN', tenantId: 't-ks1802' };
++      req._secuuraUser = principal; req.user = principal; req.tenantId = principal.tenantId;
++      next();
++    },
++    requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  };
++});
++
++jest.mock('@secuura/shared', () =>
++  require('./helpers/sharedModuleMock').makeSharedMock({
++    ...(jest.requireActual('@secuura/shared') as Record<string, unknown>),
++    runWithPlatformScope: (fn: () => unknown) => fn(),
++    queryWithTenantGuc: jest.fn(),
++  }),
++);
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: mockLogError, debug: jest.fn() },
++}));
++
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { adminConfigRouter } from '../routes/adminConfig';
++
++const USERS = 14;
++const app = express();
++app.use('/api/admin', express.json(), adminConfigRouter);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => {
++  (server as unknown as { closeAllConnections?: () => void })?.closeAllConnections?.();
++  server?.close();
++});
++beforeEach(() => {
++  mockQueryRaw.mockReset();
++  mockExecuteRaw.mockReset();
++  mockLogError.mockReset();
++  mockQueryRaw.mockResolvedValue([]);
++});
++
++async function seed(): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
++  try {
++    const res = await fetch(baseUrl + '/api/admin/seed-demo-users', { method: 'POST', signal: AbortSignal.timeout(3000) });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER', body: null };
++  }
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++function throwingMessageGetter(): object {
++  return {
++    get message(): string {
++      throw new Error('ks1802 getter');
++    },
++  };
++}
++
++describe('KS-1802: seed-demo-users keeps going when a user insert throws a hostile value', () => {
++  it('RED KS-1802 R1: every insert rejecting with a revoked Proxy is reported as 14 failed, not as the constant 500', async () => {
++    mockExecuteRaw.mockRejectedValue(revokedProxy());
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: 0, failed: USERS } });
++  });
++
++  it('RED KS-1802 R2: every insert rejecting with a throwing message getter is reported as 14 failed, not as the constant 500', async () => {
++    mockExecuteRaw.mockRejectedValue(throwingMessageGetter());
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: 0, failed: USERS } });
++  });
++
++  it('RED KS-1802 R3: one hostile failure on the first user does not stop the other 13 from being seeded', async () => {
++    mockExecuteRaw.mockRejectedValueOnce(revokedProxy()).mockResolvedValue(1);
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 13, created: 13, alreadyPresent: 0, failed: 1 } });
++  });
++
++  it('control KS-1802 C1: an ordinary Error on every insert is reported as 14 failed and its message is logged', async () => {
++    mockExecuteRaw.mockRejectedValue(new Error('ks1802 ordinary'));
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: 0, failed: USERS } });
++    expect(mockLogError).toHaveBeenCalledWith('Demo user seed failed', { email: 'james.wilson@ox.ac.uk', error: 'ks1802 ordinary' });
++  });
++
++  it('control KS-1802 C2: every insert creating a row is reported as 14 created', async () => {
++    mockExecuteRaw.mockResolvedValue(1);
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: USERS, created: USERS, alreadyPresent: 0, failed: 0 } });
++  });
++
++  it('control KS-1802 C3: every insert hitting a conflict is reported as 14 already present', async () => {
++    mockExecuteRaw.mockResolvedValue(0);
++    expect(await seed()).toEqual({ status: 200, body: { success: true, seededUsers: 0, created: 0, alreadyPresent: USERS, failed: 0 } });
++  });
++});
