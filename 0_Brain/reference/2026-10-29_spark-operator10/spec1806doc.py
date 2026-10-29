@@ -1,0 +1,217 @@
+# Gate 15 finding 1806-1 (Spark operator 10, 2026-10-29): documents.ts reads/guards on 'anchor_failed' only, so a 'failed' blob reads anchored. code_patch, mk2.py.
+P='Blockchain/Dev/services/originate/src/routes/documents.ts'
+TP='Blockchain/Dev/services/originate/src/__tests__/ks1806-1-a-failed-anchor-blob-reads-unanchored-on-the-documents-surface.test.ts'
+E1=("export const documentsRouter = Router();\n",
+    "/**\n"
+    " * KS-1709 / gate 15 finding 1806-1: the blockchain-blob statuses that mean nothing is anchored. `anchor_failed` is the KS-520 fail-closed state; `failed` is the KS-1124 F4\n"
+    " * value a kept certification carries (KS-1709) and that this file's own retry route writes in its dev fallback. verification.ts already treats both as failed (its FAILED_ANCHOR_STATUSES).\n"
+    " */\n"
+    "const FAILED_ANCHOR_STATUSES: ReadonlySet<string> = new Set(['anchor_failed', 'failed']);\n"
+    "export const documentsRouter = Router();\n")
+E2=("          // 'anchor_failed', and that must not read as anchored.\n          anchored: !!document.blockchain && document.blockchain.status !== 'anchor_failed',\n",
+    "          // 'anchor_failed' (or 'failed', KS-1709), and that must not read as anchored.\n          anchored: !!document.blockchain && !FAILED_ANCHOR_STATUSES.has(String(document.blockchain.status)),\n")
+E3=("      if (document.blockchain && document.blockchain.status !== 'anchor_failed') {\n",
+    "      if (document.blockchain && !FAILED_ANCHOR_STATUSES.has(String(document.blockchain.status))) {\n")
+TEST='''/**
+ * KS-1709 / gate 15 finding 1806-1: a blockchain blob whose status is 'failed' (the kept certification of KS-1709, and the retry route's own dev fallback, both KS-1124 F4) read as ANCHORED
+ * on GET /api/documents/:id, because documents.ts treated only 'anchor_failed' as unanchored; and the retry route POST /api/documents/:id/anchor refused it as "already anchored".
+ * verification.ts already treats both values as failed. These cells make the repository RETURN a document and read the route's own answer; the POST guard is pinned by a source-text cell
+ * (the POST handler calls the anchoring service, which this hermetic file does not reach).
+ *
+ * Harness: the same mocks as the retired-verify-route cells (DATABASE_URL shim, documentRepo + collaborators mocked, auth passthrough), a loopback listener.
+ */
+
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+const DOC_ID = '22222222-3333-4444-8555-666666666666';
+
+const mockGetDocument = jest.fn();
+
+jest.mock('../repositories/documentRepo', () => ({
+  getDocument: mockGetDocument,
+  listDocuments: jest.fn(),
+  saveDocument: jest.fn(async () => ({ dbId: '99999999-9999-4999-8999-999999999999', inserted: true })),
+  updateDocument: jest.fn(async () => undefined),
+  getSigningRequest: jest.fn(),
+  saveSigningRequest: jest.fn(),
+  deleteSigningRequest: jest.fn(),
+  generateContentHash: jest.fn(() => 'a'.repeat(64)),
+  seedDemoDocuments: jest.fn(async () => undefined),
+  assertNoCycle: jest.fn(async () => undefined),
+}));
+
+jest.mock('../repositories/shareRepo', () => ({
+  createShare: jest.fn(),
+}));
+
+jest.mock('../repositories/lifecycleEventRepo', () => ({
+  createLifecycleEvent: jest.fn(),
+  setLifecycleEventAnchor: jest.fn(),
+  listLifecycleEvents: jest.fn(),
+}));
+
+jest.mock('../events', () => ({
+  publishEvent: jest.fn(async () => undefined),
+  EventTypes: {
+    DOCUMENT_CREATED: 'document.created',
+    DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred',
+    DOCUMENT_VERSIONED: 'document.versioned',
+  },
+}));
+
+jest.mock('../services/threadTokenClient', () => ({
+  mintAndRegisterThreadToken: jest.fn(async () => ({})),
+}));
+
+jest.mock('../routes/verification', () => ({
+  registerInPlatformRegistry: jest.fn(async () => undefined),
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    req.user = { userId: '11111111-2222-4333-8444-555555555555', role: 'ISSUER_ADMIN' };
+    next();
+  },
+}));
+
+jest.mock('../middleware/rbac', () => ({
+  isAllowedByRoleOrScope: () => true,
+}));
+
+jest.mock('../services/anchorStateSync', () => ({
+  pollAnchorUntilConfirmed: jest.fn(async () => undefined),
+  reconcileDocumentAnchorState: jest.fn(async (d: any) => d),
+}));
+
+jest.mock('../services/provenance', () => {
+  const actual = jest.requireActual('../services/provenance');
+  return {
+    ...actual,
+    recordActionProvenance: jest.fn(async () => undefined),
+    getCreationProvenance: jest.fn(async () => null),
+    wasCreatedByConnector: jest.fn(async () => true),
+  };
+});
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+}));
+
+import express from 'express';
+import { documentsRouter, publicDocumentsRouter } from '../routes/documents';
+
+const app = express();
+// Same mount order as index.ts: public router first, then the auth-gated one.
+app.use('/api/documents', express.json(), publicDocumentsRouter);
+app.use('/api/documents', express.json(), documentsRouter);
+
+let baseUrl = '';
+let server: ReturnType<typeof app.listen>;
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  const address = server.address();
+  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
+});
+
+afterAll(() => {
+  server?.close();
+});
+
+// The blob KS-1124 F4 stores for a kept certification whose anchor was refused (KS-1709), and the blob this file's retry route writes in its dev fallback.
+const KEPT_CERT = { anchorId: null, txHash: null, blockHeight: null, anchoredAt: null, confidence: 'pending-onchain', anchoringStatus: 'failed', status: 'failed' };
+const RETRY_FALLBACK = { txHash: null, blockHeight: null, anchoredAt: null, confidence: 'pending-onchain', status: 'failed' };
+const CONFIRMED = { anchorId: 'anchor_1', txHash: 'f'.repeat(64), blockHeight: 4242, anchoredAt: '2026-10-29T00:00:00.000Z', status: 'confirmed' };
+const SUBMITTED = { anchorId: 'anchor_1', txHash: 'e'.repeat(64), blockHeight: 0, anchoredAt: '2026-10-29T00:00:00.000Z', status: 'submitted' };
+
+function row(blockchain: unknown) {
+  return {
+    id: DOC_ID,
+    type: 'DOCUMENT',
+    status: 'issued',
+    contentHash: 'a'.repeat(64),
+    signatures: [],
+    data: { title: 'c' },
+    blockchain,
+    owner: { id: '11111111-2222-4333-8444-555555555555' },
+    createdAt: '2026-10-29T00:00:00Z',
+    updatedAt: '2026-10-29T00:00:00Z',
+  };
+}
+
+async function readAnchored(blockchain: unknown): Promise<{ http: number; anchored: unknown }> {
+  mockGetDocument.mockResolvedValue(row(blockchain));
+  const res = await fetch(`${baseUrl}/api/documents/${DOC_ID}`);
+  const body: any = await res.json().catch(() => ({}));
+  return { http: res.status, anchored: body?.blockchain?.anchored };
+}
+
+const SRC = fs.readFileSync(path.resolve(__dirname, '..', 'routes', 'documents.ts'), 'utf8');
+const RETRY_FROM = SRC.indexOf("'/:id/anchor',");
+const RETRY_LAST = 'Document is already anchored';
+const RETRY_BLOCK = RETRY_FROM < 0 ? '' : SRC.slice(RETRY_FROM, SRC.indexOf(RETRY_LAST, RETRY_FROM) + RETRY_LAST.length);
+
+describe('KS-1709 / 1806-1: a failed anchor blob reads unanchored on the documents surface', () => {
+  it.each([
+    ['a kept certification (KS-1709)', KEPT_CERT],
+    ['the retry route dev-fallback blob', RETRY_FALLBACK],
+  ])('RED KS-1806-1 G1 %s: GET /api/documents/:id says blockchain.anchored is false', async (_label, blob) => {
+    expect(await readAnchored(blob)).toEqual({ http: 200, anchored: false });
+  });
+
+  it('RED KS-1806-1 G2: the POST /api/documents/:id/anchor guard consults the failed-status set, so a failed blob is retryable and is not refused as already anchored', () => {
+    expect(RETRY_BLOCK.includes('!FAILED_ANCHOR_STATUSES.has(String(document.blockchain.status))')).toBe(true);
+    expect(RETRY_BLOCK.includes("document.blockchain.status !== 'anchor_failed'")).toBe(false);
+  });
+
+  it('control KS-1806-1 C1: a blob with status anchor_failed (KS-520) still reads unanchored', async () => {
+    expect(await readAnchored({ ...KEPT_CERT, status: 'anchor_failed' })).toEqual({ http: 200, anchored: false });
+  });
+
+  it('control KS-1806-1 C2: a document with no blockchain blob still reads unanchored', async () => {
+    expect(await readAnchored(null)).toEqual({ http: 200, anchored: false });
+  });
+
+  it.each([
+    ['confirmed', CONFIRMED],
+    ['submitted', SUBMITTED],
+  ])('control KS-1806-1 C3 %s: a blob in a live anchor state still reads anchored', async (_label, blob) => {
+    expect(await readAnchored(blob)).toEqual({ http: 200, anchored: true });
+  });
+
+  it('control KS-1806-1 C4: the block located in documents.ts is ONE handler, the anchor-retry route (it holds the already-anchored refusal once)', () => {
+    expect([RETRY_BLOCK.length > 0, RETRY_BLOCK.split(RETRY_LAST).length, RETRY_BLOCK.includes('documentsRouter')]).toEqual([true, 2, false]);
+  });
+});
+'''
+S=dict(dir='ks_1806_1_failed_blob_unanchored',ticket='KS-1709',
+ title='originate documents.ts: a blockchain blob with status failed (a kept certification, and the retry route\'s own dev fallback) reads blockchain.anchored true on GET /api/documents/:id and is refused as already anchored by POST /:id/anchor; treat failed like anchor_failed at both sites (gate 15 finding 1806-1; RUNG 3, code_patch: one product, three hunks + one NEW jest file)',
+ intro="DRAFT by Spark operator 10 for Wednesday, 2026-10-29 AEDT. Secuura (Platform K / originate) only. A local PASS is a candidate, never a merge; the normal QA gate before merge. Origin: QA gate 15 (`0_Brain/reference/2026-10-29_gate15-1805-1806/verdict.md`) finding 1806-1 (major-class, PRE-EXISTING since KS-1124 F4, found while gating PR 1806 / KS-1709): a certification that was kept after its anchor was refused carries `blockchain.status: 'failed'`; `documents.ts` treats only `'anchor_failed'` as unanchored, so (a) `GET /api/documents/{id}` answers `blockchain.anchored: true` (measured), contradicting Kam's ruling \"mark it unanchored\", and (b) `POST /api/documents/{id}/anchor` answers 400 \"Document is already anchored\", so the retry route cannot re-anchor it. The gate's fix-shape, followed here: use one set of failed statuses at both documents.ts sites (the same two values `verification.ts` already uses: `failed` and `anchor_failed`). The ticket is KS-1709 (Refs); the gate's finding id is 1806-1 and Seat R 61st is filing it, so the Linear number may change: re-pin the ticket before raising. NOT in this brief: the verify route's `checks.blockchainAnchored` (the same family, Seat U's filing item; a different file), the reconciler re-anchor, and the recertify fetch timeout.",
+ products=[(P,[E1,E2,E3])],
+ prodnote=['product, modified in place: THREE hunks (a 5-line constant before documentsRouter, the GET `anchored` expression and its comment, the POST retry guard)'],
+ tests=[dict(path=TP,content=TEST)],
+ testnote=['NEW file, jest, given in full below; 8 cells (G1 x2 and G2 red = 3, C1, C2, C3 x2, C4 control = 5; the GET cells drive the real documentsRouter over a loopback listener with documentRepo mocked; the POST guard is a source-text cell)'],
+ runner='jest` (`npx jest src/__tests__/ks1806-1-a-failed-anchor-blob-reads-unanchored-on-the-documents-surface.test.ts` from `Blockchain/Dev/services/originate',
+ tier='code_patch', rung='2 (three small hunks in one product, byte-exact; the new test given whole)',
+ pins='''# code_patch, 3 hunks in originate routes/documents.ts + a NEW jest file; ref = ks1004 (jest, documentRepo mocked; shape only); line = the first changed line.
+tier=code_patch
+ref=Blockchain/Dev/services/originate/src/__tests__/ks1004-anchor-failed-lockout.test.ts
+line=74
+ctx=65536
+''',
+ wrong="Two comparisons in `routes/documents.ts` use the single value `'anchor_failed'` for \"nothing is anchored\": the GET serve boundary, `anchored: !!document.blockchain && document.blockchain.status !== 'anchor_failed'` (:1200), and the retry route's guard, `if (document.blockchain && document.blockchain.status !== 'anchor_failed')` (:1458). But the blob status `'failed'` also means nothing is anchored: KS-1124 F4 gave the kept certification (KS-1709) `status: 'failed'` because the gateway maps `failed` to off-chain-only, and this file's own retry route writes `status: 'failed'` in its dev fallback (:1538). So a `failed` blob reads `anchored: true` on GET and the retry route refuses it as \"already anchored\". `verification.ts:100` already has `FAILED_ANCHOR_STATUSES = new Set(['failed', 'anchor_failed'])`. The change: (1) declare a local `FAILED_ANCHOR_STATUSES` (same two values) directly above `export const documentsRouter = Router();` (it is not exported from verification.ts, and importing from there is mocked in the cells and would widen this change); (2) the GET expression becomes `!!document.blockchain && !FAILED_ANCHOR_STATUSES.has(String(document.blockchain.status))` and the one comment line above it is updated; (3) the retry guard becomes `if (document.blockchain && !FAILED_ANCHOR_STATUSES.has(String(document.blockchain.status))) {`. Real anchors (`pending`, `submitted`, `confirmed`) still read anchored and are still refused by the retry route.",
+ where="- `routes/documents.ts:74` - `export const documentsRouter = Router();` (the line directly after the `LIVE_ANCHOR_ID_CONFLICT_BODY` constant, :75). **Must change:** insert the constant and its doc comment directly above it.\n- `routes/documents.ts:1198-1200` - the KS-520 comment (`// 'anchor_failed', and that must not read as anchored.`, :1199) and `anchored: !!document.blockchain && document.blockchain.status !== 'anchor_failed',` (:1200) inside the GET /:id response's `blockchain: {` object. **Must change:** the comment line and the expression.\n- `routes/documents.ts:1458` - `      if (document.blockchain && document.blockchain.status !== 'anchor_failed') {` in the `POST /:id/anchor` handler (opens :1437). **Must change:** the condition.\n- NOT touched: the `status: 'anchor_failed'` WRITE at :1032, the dev-fallback `status: 'failed'` write (:1538), `verification.ts`, `anchorStateSync.ts`, `anchorHonesty.ts`, and every existing test.",
+ exactnote="Three hunks in one file, in file order.\n",
+ donot="**Do NOT touch** any other line of `documents.ts`, and no other file but the new test. In particular do not import from `./verification`, do not change what the file WRITES (`anchor_failed` at :1032, `failed` at :1538), and do not touch `reconcileDocumentAnchorState`.",
+ testnote2="A NEW file, given whole. Its `+` lines are the entire file, byte for byte. Pure ASCII, jest globals (`describe`, `it`, `expect`, `beforeAll`, `afterAll`, `jest`), no vitest import. It deliberately does not mention the anchoring base-URL environment key or call the POST handler: the hermetic-suite manifest (ks1293) scans test files for that key, and the POST handler would reach the network.",
+ red=['RED KS-1806-1 G1','RED KS-1806-1 G2'],
+ cells="- RED `G1` (2 rows): at the tip the blob status `failed` is not `anchor_failed`, so the GET answers `anchored: true` and `toEqual({ http: 200, anchored: false })` fails on `anchored`. RED `G2`: at the tip the retry block contains `document.blockchain.status !== 'anchor_failed'` and no `FAILED_ANCHOR_STATUSES`, so the first `toBe(true)` fails. All three fail by assertion.\n- CONTROL `C1`-`C4` (5 cells, green at the tip AND after): `anchor_failed` still reads false, a null blob still reads false, `confirmed` and `submitted` still read true, and the located block is one handler (the refusal text appears once; the block does not run into another router call).",
+ premises="- `routes/documents.ts:1198-1200` and `:1456-1458` as quoted above, read at `6d41673e0f79`; `rg \"anchor_failed\"` in the file also hits :942 (a comment) and :1032 (a WRITE), both left alone.\n- `routes/documents.ts:1538` the dev-fallback blob carries `status: 'failed'` (the comment cites KS-1124 F4 and #1333).\n- `routes/verification.ts:100` `const FAILED_ANCHOR_STATUSES: ReadonlySet<string> = new Set(['failed', 'anchor_failed']);` and :133 `if (FAILED_ANCHOR_STATUSES.has(String(c.status))) return false;` (the verify surfaces are honest already).\n- The gate measured the probe on this very route and harness (mocked documentRepo, the real documentsRouter): kept-cert `failed` GET `anchored: true`, POST /anchor 400 \"Document is already anchored\"; control `anchor_failed` GET false / POST 202; control null GET false / POST 202 (`evidence/probe/_quarantine_2026-10-29/gate15-probe-docs.test.ts`).\n- `__tests__/ks1293-originate-suite-is-hermetic.test.ts` MANIFEST-DRIFT flags any test file that contains the anchoring base-URL key and is not in its SUBJECTS list; the new test does not contain it.\n- The harness mocks in the new test are the ones in the gate's probe (itself the retired-verify-route cells' harness), which ran green at the gate against this route.",
+ unmeasured="- The drafter did NOT run jest by hand on the new file: the RED / GREEN result is the `round.sh --control` run on this golden.\n- The POST /api/documents/:id/anchor retry itself (a kept certification actually re-anchoring through the anchoring service, its 202, and what the document then looks like) is NOT exercised: the guard is pinned by source text. Whether a retried kept certification should re-anchor at all is a product question beside the gate's fix-shape; the gate's regression test names \"POST /anchor 202\" and this brief pins only that the guard no longer refuses a `failed` blob.\n- Other readers of `blockchain.status` in originate and api-gateway (the verify route's `checks.blockchainAnchored`, the gateway's own mapping) are not read or changed here.\n- Behaviour change on a document-state read in the PRODUCTION path (any `failed` blob now reads unanchored): approval-class for Wednesday/Kam before raising, even though the ruling \"mark it unanchored\" is the intent.\n- Open PRs touching documents.ts: see the operator's overlap run in the report (gen/overlap.py).",
+ scope="**Closes finding 1806-1's documents.ts half only.** Link the PR as Refs KS-1709 (or the filed number), never a close-word. The verify route's checks.blockchainAnchored and the reconciler are other files.",
+)

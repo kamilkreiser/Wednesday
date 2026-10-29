@@ -1,0 +1,39 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
+@@ -228,3 +228,35 @@
++// KS-1175 / gate 15 finding 1805-1 (QA gate 15, 2026-10-29): six weakenings of DID_PATTERN (anchorSchema.ts) survived every cell above: the `m` flag (a newline),
++// `=` in the class (padding), `$` dropped (trailing junk), the `i` flag (case), `+` -> `*` (an empty payload) and `\s` in the class (whitespace). The product refuses
++// each input below today; nothing pinned it. Each cell asserts that the field's OWN issues are exactly one `invalid_string` (the shape pattern), so a weakened pattern
++// goes red whether it then accepts the value (no issue) or lets the private-key guard refuse it for another reason (a `custom` issue).
++describe('anchorDocumentSchema — KS-1175 did:jwk shape refusals pinned (gate 15, 1805-1: the six regex weakenings)', () => {
++  const JWK_PAYLOAD = REALISTIC_DID_JWK.slice('did:jwk:'.length);
++  const SHAPE_REFUSALS: Array<[string, string]> = [
++    ['an empty payload (did:jwk:)', 'did:jwk:'],
++    ['a trailing newline', REALISTIC_DID_JWK + '\n'],
++    ['a newline between two payloads', REALISTIC_DID_JWK + '\n' + JWK_PAYLOAD],
++    ['base64 padding (==)', REALISTIC_DID_JWK + '=='],
++    ['a trailing space', REALISTIC_DID_JWK + ' '],
++    ['an upper-case method (DID:JWK:)', 'DID:JWK:' + JWK_PAYLOAD],
++    ['a space inside the payload', REALISTIC_DID_JWK.slice(0, 40) + ' ' + REALISTIC_DID_JWK.slice(40)],
++  ];
++  for (const field of DID_JWK_FIELDS) {
++    for (const [label, bad] of SHAPE_REFUSALS) {
++      it(`RED KS-1805-1 ${field}: refuses ${label} with exactly one invalid_string issue on the field`, () => {
++        expect(parseField(field, bad).success).toBe(false);
++        expect(issuesFor(field, bad).map((i) => i.code)).toEqual(['invalid_string']);
++      });
++    }
++    it(`control KS-1805-1 ${field}: refuses a leading space (the pattern is anchored at the start), one invalid_string issue`, () => {
++      expect(issuesFor(field, ' ' + REALISTIC_DID_JWK).map((i) => i.code)).toEqual(['invalid_string']);
++    });
++    it(`control KS-1805-1 ${field}: still accepts a did:key and the realistic did:jwk, kept verbatim`, () => {
++      expectKept(field, 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK');
++      expectKept(field, REALISTIC_DID_JWK);
++    });
++  }
++});
++
+ // KS-1175 (Kam's ruling, 2026-10-29 19:51:25 AEDT, card secuura-ks1175-private-jwk-guard-1029, option a, verbatim: "Add a narrow
+ // guard before deploying"): a did:jwk is decoded ONLY to refuse private-key members (d, p, q, dp, dq, qi, k), with a 400 and
+ // a clear message; "Nothing else about the JWK is checked". Wednesday's reading of the ruling adds: a payload that does not

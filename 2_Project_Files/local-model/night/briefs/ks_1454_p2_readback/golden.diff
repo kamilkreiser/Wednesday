@@ -1,0 +1,134 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/anchorReadback.ts b/Blockchain/Dev/services/anchoring/src/anchorReadback.ts
+--- a/Blockchain/Dev/services/anchoring/src/anchorReadback.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchorReadback.ts
+@@ -52,4 +52,14 @@
+     identityCommitment: typeof sec.identityCommitment === 'string' ? sec.identityCommitment : null,
+     identity: Object.keys(identity).length > 0 ? identity : null,
+   };
++}
++
++/**
++ * KS-1454: the plain SHA-256 of Platform-S's detached .p7s, as anchored beside documentType on a `sign` anchor. A string under
++ * `secuura.signatureHash` is read back verbatim (a 64-char lowercase-hex value is never chunked on chain); anything else, or no key at all
++ * (every anchor that predates the field), reads `null`. Same source-agnostic read as anchorIdentityView: DB (logical) or chain payload.
++ */
++export function anchorSignatureHashView(secuura: unknown): { signatureHash: string | null } {
++  const sec = (secuura && typeof secuura === 'object' ? secuura : {}) as Record<string, unknown>;
++  return { signatureHash: typeof sec.signatureHash === 'string' ? sec.signatureHash : null };
+ }
+@@ -157,6 +167,8 @@
+       // KS-1175: the seven non-PII identity fields that were anchored beside it
+       // (object, or null for an anchor that predates the field), typed.
+       identity: identityView.identity,
++      // KS-1454: the SHA-256 of the detached .p7s anchored with a `sign` event (null for every other anchor), so a verifier can compare it.
++      signatureHash: anchorSignatureHashView(sec).signatureHash,
+     },
+   };
+ }
+diff --git a/Blockchain/Dev/services/anchoring/src/index.ts b/Blockchain/Dev/services/anchoring/src/index.ts
+--- a/Blockchain/Dev/services/anchoring/src/index.ts
++++ b/Blockchain/Dev/services/anchoring/src/index.ts
+@@ -42,7 +42,7 @@
+ // booting this service (this module calls app.listen on import).
+ import { anchorDocumentSchema, buildFlatAnchorMetadataPayload } from './anchorSchema';
+ // KS-1175: the read-back surfaces as pure modules (verify-by-hash body; the GET /:id identity view).
+-import { anchorIdentityView, buildVerifyResponse } from './anchorReadback';
++import { anchorIdentityView, anchorSignatureHashView, buildVerifyResponse } from './anchorReadback';
+ // KS-1284: the chain read must undo the tx-build codec (long strings arrive as arrays, booleans as strings).
+ import { fromCardanoMetadatum } from './cardano/cardanoMetadatum';
+ // KS-445: thread-mint request contract + mint-failure classifier — extracted
+@@ -956,6 +956,8 @@
+     // identityCommitment (KS-721) and the seven non-PII identity fields, from the row's metadata_payload (logical
+     // form). null / null for an anchor that predates the fields. This route returned neither before KS-1175.
+     ...anchorIdentityView((anchor.metadataPayload as any)?.secuura),
++    // KS-1454: the SHA-256 of the detached .p7s anchored with a `sign` event (S's "signature anchored" check); null for any other anchor.
++    ...anchorSignatureHashView((anchor.metadataPayload as any)?.secuura),
+     // KS-535: surfaced so originate's poller/reconciler can record WHY a
+     // terminal failure happened on the document (KS-520 `error` field), and
+     // for operator diagnostics. `failed` is terminal (see processAnchor —
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts
+@@ -0,0 +1,81 @@
++// KS-1454 (anchoring read-back): S shows "signature anchored" from GET /api/anchors/:id and a verifier compares the hash from GET /api/anchors/verify/:hash. Before this change neither read returned the
++// anchored `secuura.signatureHash`, so a hash that is on the ledger could not be read back. After it: anchorSignatureHashView reads the string (DB form or chain form), buildVerifyResponse carries it under
++// metadata.signatureHash, and the by-id handler spreads the view into its res.json (index.ts is bootless, so that last point is a source-text guard, as in ks1175-getid-view-wired).
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++
++import * as RB from '../anchorReadback';
++import { toCardanoMetadatum, fromCardanoMetadatum } from '../cardano/cardanoMetadatum';
++
++const HASH = 'a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f70819203a4b5c6d7e8f9';
++const SIG = 'd'.repeat(32) + '0123456789abcdef0123456789abcdef';
++const COMMITMENT = 'identity-commitment-l2.v1:' + 'b'.repeat(64);
++const SIGNED = {
++  secuura: {
++    version: '2.0', type: 'document', hash: HASH, algorithm: 'sha256',
++    documentId: 'doc-1777346021120-1e528170', certId: 'doc-1777346021120-1e528170',
++    timestamp: '2026-10-29T12:00:00.000Z', network: 'preview', documentType: 'sign', signatureHash: SIG,
++    identityCommitment: COMMITMENT,
++  },
++};
++const PLAIN = { secuura: { ...SIGNED.secuura, documentType: 'upload', signatureHash: undefined } };
++const CTX = { hash: HASH, network: 'preview' };
++const ROW = {
++  transaction_hash: 'f'.repeat(64), block_number: 4242, confirmed_at: '2026-10-29T12:01:00.000Z',
++  created_at: '2026-10-29T12:00:00.000Z', document_id: 'doc-1777346021120-1e528170', status: 'confirmed',
++};
++const SRC = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
++const FROM = SRC.indexOf("app.get('/api/anchors/:id',");
++const END_LINE = 'retryCount: anchor.retryCount ?? 0,';
++const GET_BY_ID = FROM < 0 ? '' : SRC.slice(FROM, SRC.indexOf(END_LINE, FROM) + END_LINE.length);
++
++describe('KS-1454: the anchored signatureHash is read back', () => {
++  it('RED KS-1454 B1: anchorSignatureHashView returns the anchored hash from a logical (DB-form) payload', () => {
++    expect(RB.anchorSignatureHashView?.(SIGNED.secuura)).toEqual({ signatureHash: SIG });
++  });
++
++  it('RED KS-1454 B2: anchorSignatureHashView returns the same hash from a payload that went through the chain codec', () => {
++    const chainForm = fromCardanoMetadatum(toCardanoMetadatum(SIGNED)) as typeof SIGNED;
++    expect(typeof chainForm.secuura.signatureHash).toBe('string');
++    expect(RB.anchorSignatureHashView?.(chainForm.secuura)).toEqual({ signatureHash: SIG });
++  });
++
++  it('RED KS-1454 B3: GET /api/anchors/verify/:hash (db source) carries the hash under metadata.signatureHash beside documentType', () => {
++    const body = RB.buildVerifyResponse('db', SIGNED, ROW, CTX) as any;
++    expect(body.metadata.signatureHash).toBe(SIG);
++    expect(body.metadata.documentType).toBe('sign');
++  });
++
++  it('RED KS-1454 B4: GET /api/anchors/verify/:hash (chain source) carries the same hash', () => {
++    const onChain = { secuura: (fromCardanoMetadatum(toCardanoMetadatum(SIGNED)) as typeof SIGNED).secuura, txHash: 'e'.repeat(64) };
++    const body = RB.buildVerifyResponse('chain', onChain, undefined, CTX) as any;
++    expect(body.metadata.signatureHash).toBe(SIG);
++  });
++
++  it('RED KS-1454 B5: the GET /api/anchors/:id handler imports anchorSignatureHashView and spreads it over the row metadata_payload secuura block', () => {
++    expect(SRC.includes("import { anchorIdentityView, anchorSignatureHashView, buildVerifyResponse } from './anchorReadback';")).toBe(true);
++    expect(GET_BY_ID.includes('...anchorSignatureHashView((anchor.metadataPayload as any)?.secuura),')).toBe(true);
++  });
++
++  it('control KS-1454 C1: an anchor with no signatureHash reads null (the key is never invented), on both reads', () => {
++    expect(RB.anchorSignatureHashView?.(PLAIN.secuura) ?? { signatureHash: null }).toEqual({ signatureHash: null });
++    expect((RB.buildVerifyResponse('db', PLAIN, ROW, CTX) as any).metadata.signatureHash ?? null).toBeNull();
++  });
++
++  it('control KS-1454 C2: a value that is not a string (a number, an array, an object) is not surfaced as a hash', () => {
++    for (const bad of [12345, [SIG], { h: SIG }, null]) {
++      expect(RB.anchorSignatureHashView?.({ ...SIGNED.secuura, signatureHash: bad }) ?? { signatureHash: null }).toEqual({ signatureHash: null });
++    }
++    expect(RB.anchorSignatureHashView?.(undefined) ?? { signatureHash: null }).toEqual({ signatureHash: null });
++  });
++
++  it('control KS-1454 C3: the identity read-back is unchanged by a signatureHash beside it', () => {
++    expect(RB.anchorIdentityView(SIGNED.secuura)).toEqual({ identityCommitment: COMMITMENT, identity: null });
++    expect((RB.buildVerifyResponse('db', SIGNED, ROW, CTX) as any).metadata.identityCommitment).toBe(COMMITMENT);
++  });
++
++  it('control KS-1454 C4: the block located in index.ts is ONE handler, the anchor-by-id route (contentHash and the KS-535 errorMessage are in it)', () => {
++    expect([GET_BY_ID.split('app.get(').length, GET_BY_ID.includes('contentHash: anchor.contentHash,'), GET_BY_ID.includes('errorMessage: anchor.errorMessage || null,')]).toEqual([2, true, true]);
++  });
++});
