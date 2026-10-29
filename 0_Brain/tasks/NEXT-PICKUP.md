@@ -6,6 +6,17 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ ROTATION HANDOVER 08:5x 30 Oct (the 06:0x successor seat, ctx ~80%) — READ THIS FIRST; then the 08:3x and 08:0x blocks (current where this does not differ)
+- **STATE:** origin develop = e3d8456ec81d0b02172dd5a3060404815e797bde (#1819 KS-1836), on top of #1818 (593cd90c3131, vite) and #1814 (84ddbd63c008). **UNDEPLOYED:** #1817, #1814, #1818, #1819 (boxes on 429ba4824915). **A DEPLOY ROUND IS OWED** (October grant, until further notice; Opus deploy seat; kintsugi then demo; KS-535; the notice on KS-772/KS-485 names #1814 and #1819; then KS-1814/KS-1836 to Done only if tested + works + deployed with a live check).
+- **FLOOR:**
+  - **A 18th %21 WRAPPING** (#1818 + #1819 merged). OWED: read its wrap -> verify the HANDOVER + history on disk -> SCORE + pane_close %21.
+  - **R 65th %20** is pushing PR A (KS-1823, TIER 1) then PR B (KS-1840, tier 2). OWED: its READY FOR GATE mails -> gates (A tier 1 Opus, B tier 2 Sonnet; batch them if both are ready) -> completion check -> head-pinned MERGE GOs.
+  - **S 8th %22** holds for Kam's card secuura-wednesday-go-counts-as-kams-word-1030 (it has the vite mail). Ghost text at its prompt, twice: not acted on. On his (a)/(b): mail his words verbatim.
+- **SPARK:** 3 queued (ks_1804_p1, ks_1788_p1, ks_1666_p1). Read the verdicts and hold the PASSes. 5 held passes are with S 8th.
+- **WITH KAM:** one card (above). Nothing else.
+- **OWED LANES (in order, as many as the code partition allows):** the deploy round · the KS-1814 follow-up (creation-time rights, which also covers NFT admin listing; transfer-custody check) · KS-1819/1820 OFF by default (nft.routes.ts is free now; anchoring index.ts is with R 65th's PR B until it merges) · the KS-1384 lanes (from the review) · a board seat for the filing list.
+- **Own errors this seat (ledger):** a composed receipt (w=7); a wrong open-card count to Kam on the panel (corrected in the next message).
+
 ## ⏩ UPDATE 08:3x 30 Oct (ctx 78%) — the 08:0x block below is current except:
 - **A 18th: #1819 READY FOR GATE** (KS-1836, head 817b40d9193b). **GATE 23 RUNNING** (in-session Opus, dies at rotation): verdict -> 0_Brain/reference/2026-10-30_gate23-1819/verdict.md. If it is missing after a rotation, re-commission tier 1 from the 08:32 note line. Then completion check -> head-pinned MERGE GO (A 18th runs it; expect develop 593cd90c3131 unless something merged).
 - **NFT admin-across-owners: NO card.** Kam's KS-1814 07:17:48 note (creation-time rights) answers the principle; #1819 ships fail-closed. The question folds into the KS-1814 follow-up design.
