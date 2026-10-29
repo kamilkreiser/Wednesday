@@ -121,6 +121,9 @@ def main():
 
     for (tok, a, b), (at, dirs) in sorted(candidates(text).items(), key=lambda kv: kv[1][0]):
         if tok.startswith("/"):
+            if not tok.startswith(("/Volumes/", "/Users/", "/private/", "/tmp/", "/opt/")):
+                tally("NEW-OR-OUT-OF-REPO"); info.append(f"brief:{at} {tok} (absolute, not a local root: a container path?)")
+                continue
             if not os.path.exists(tok):
                 if os.path.isdir(os.path.dirname(tok.rstrip("/"))):
                     tally("NEW-OR-OUT-OF-REPO"); info.append(f"brief:{at} {tok} (parent dir exists)")
