@@ -6,6 +6,16 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 05:2x 30 Oct (the 03:2x successor seat, ctx 71%) — READ THIS FIRST, supersedes every block below where they differ
+- **STATE:** origin develop = 7152ac669d2d (#1817). Six merged tonight. Boxes still on 6d41673e0f79; the kintsugi build is in flight.
+- **FLOOR (3 seats):**
+  - **D 44th** %19 (Opus): kintsugi BUILD k12 running (heartbeat evidence/heartbeat.kintsugi.k12.d44.txt in its history folder: read THAT before acking an idle wake). Pin 429ba4824915, no re-pin. **OWED: STATUS B -> check it against the predictions in its STATUS A (rebuilt 3; contentfp per the 19 dist-column fix rows; KS-535 wallets kintsugi 695d09df / demo 12ea1a07, no equality; emitter-guard ACTIVE; nonfinal 0) -> GO DEMO (repeat: no other seat reads either box) -> STATUS C -> "POST NOTICES" (KS-772/KS-485 comments) -> SCORE + pane_close.**
+  - **S 7th** %16 (Opus): READY TO MERGE #1814 head 38de04f285b2 on develop 7152ac669d2d, section 117, PRE-VERIFIED by Wednesday 05:2x (5/5 blobs EQUAL to gated 277e5ba6b7ae, 0 doc lines removed). **The GO waits ONLY on card secuura-ks1814-owner-role-reanchor-1030.** Re-read develop + head in the same action as the GO; if develop moved, a docs re-prep is needed first.
+  - **R 65th** %20 (Sonnet): GO'd by Wednesday, but its launch rule needs KAM's word, so it HOLDS (correct). **Card secuura-r65-raise-ks1823-ks1840-start-1030** (a = go). On Kam's tap: tell it by mail, quoting the tap verbatim. Then it raises KS-1823 (TIER-1 gate) + KS-1840 (tier 2) to READY FOR GATE.
+- **IN-SESSION:** Spark operator 14 (Sonnet; dies at rotation; re-commission from the 05:07 note line). It writes 3 test-only pin briefs (1817-2 DID_PATTERN sweep, 1815-1 trailing-//, 1816-1 message-less). Wednesday reads every + line, then queues. The Spark is IDLE until then.
+- **WITH KAM (5 cards):** ks1814-owner-role (a) · ks1384-f0-build (b) · ks1819/1820 wallet routes (b) · ks1822 probe fail-open (a) · **r65-raise start (a)**.
+- **Morning (06:00+):** the fleet-activity card. Overnight: 6 merged (#1811, #1812, #1813, #1816, #1815, #1817); gates 19/20/21; Spark 11 PASS / 1 FAIL (the rung-4 calibration); kintsugi deploy in flight; 3 seats live. Awaiting Kam: Secuura 5, WED 0. Also stale_card_escalate.
+
 ## ⏩ CHECKPOINT 05:0x 30 Oct (the 03:2x successor seat, ctx 66%) — READ THIS FIRST, supersedes every block below where they differ
 - **STATE:** origin develop = 7152ac669d2d6af08be5b9dcd35132818377155d (#1817, verified at origin). Merged tonight: #1811, #1812, #1813, #1816, #1815, #1817. R 64th WRAPPED and was scored 0.96; pane %18 closed.
 - **FLOOR:**
