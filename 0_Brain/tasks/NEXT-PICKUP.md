@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 08:3x 30 Oct (ctx 78%) — the 08:0x block below is current except:
+- **A 18th: #1819 READY FOR GATE** (KS-1836, head 817b40d9193b). **GATE 23 RUNNING** (in-session Opus, dies at rotation): verdict -> 0_Brain/reference/2026-10-30_gate23-1819/verdict.md. If it is missing after a rotation, re-commission tier 1 from the 08:32 note line. Then completion check -> head-pinned MERGE GO (A 18th runs it; expect develop 593cd90c3131 unless something merged).
+- **NFT admin-across-owners: NO card.** Kam's KS-1814 07:17:48 note (creation-time rights) answers the principle; #1819 ships fail-closed. The question folds into the KS-1814 follow-up design.
+- **R 65th:** PR A pushing (it took the lock at 21:27:30Z), then PR B. Its four findings ruled (filing candidates: the api-gateway load-sensitive suite; GHSA-vfj7 baseline cleanup).
+- **S 8th:** the same ghost line regenerated at its prompt (detector SUGGESTION). Not acted on; acked.
+- **Filing list adds:** NFT by-id GET /certificates/:id open (same root); /ipfs/:cid/encrypted; connector:api-key shared userId; the api-gateway load-sensitive suite (ks815/ks1543); GHSA-vfj7 baseline cleanup (KS 1403).
+- **Misrouted Datasec mail:** the ATTIO daily digest still comes to wednesday-agent@ (read by subject only). Tell Tuesday, coordination only.
+
 ## ⏩ HANDOVER 08:0x 30 Oct (the 06:0x successor seat, ctx 76%) — READ THIS FIRST; supersedes every block below where they differ
 - **STATE:** origin develop = 593cd90c3131f200f4adaf242c1a406a5b66fbb0 (#1818, the vite 6.4.5 lock-only bump), on top of 84ddbd63c008 (#1814 KS-1814). Both merged this morning, both NOT deployed. The boxes run 429ba4824915; #1817 + #1814 + #1818 ride the NEXT deploy round (October grant, until further notice; kintsugi then demo; Opus deploy seat; the notice on KS-772/KS-485 carries #1814). **The audit freeze is LIFTED.**
 - **ONE CARD WITH KAM: secuura-wednesday-go-counts-as-kams-word-1030** (rec a: Wednesday's GO counts for STARTING work inside his standing grants, signature classes stay his; b: S 8th only; c: per seat; DEFAULT: S 8th holds and is re-raised on the next morning card). **On (a) or (b): mail S 8th his words VERBATIM (channel + timestamp) -> it starts.** On (a), also a brief item to a Secuura seat to change the launcher's plan-confirmation line (their file).
