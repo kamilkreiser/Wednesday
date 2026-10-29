@@ -1,0 +1,48 @@
+STARTABLE: AFTER B889's PR has landed (the counts file at the base must read tests 5224 / suites 310; at main 0df1e348 it still reads 5223 / 310, blob 38c0ae66)
+
+# B895 drafter report (kit for Datasec/NexusAI-M56, NexusAI RD-869 + RD-870, ruling "a - Roster first, one shared capture", 2026-10-29 14:29:16 AEDT)
+
+Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-29_B895_SEAT-M56_nexusai-rd869-roster-first-shared-capture.md` (89 long lines; 9 four-underscore lines = eight Stamp slots plus the last line, control: the pattern with the quotes split reads 9; 0 `@X@` tokens; 3 non-ASCII bytes = the one dash in the verbatim ruling quote, nowhere else; no person's name; no decision-card id). Model Sonnet `claude-sonnet-5-5`, routing row C2 (line 92). Gate recommended: tier 1 (G1, line 108).
+
+## BLUF
+- The change is a product change in `backend/server.js` (one shared capture, roster check before the skip words, the sibling `generateUserActivityAnalysis` moved onto it) plus ONE NEW test file and the counts file. Not test-only: it needs the counts rule, a new suite (suites 310 -> 311 after B889's 5224) and a tier gate.
+- Launch precondition (kit top and REFUSE): base = main at launch, after B889's PR lands; counts file must read 5224 / 310 or STOP.
+- RD-872 is NOT covered by the ruling: the plural nouns outside the 21 are not roster users and are not skip entries, so they still get the not-found text under any roster-first ordering (the product owner's earlier "unknown names keep the not-found text" ruling). Default: stays open, behaviour pinned by one control cell, GROUP_NOUNS not extended.
+- Two spots the kit pins because a naive build would break them: (1) `rd863` line 129 reads `backend/server.js` text with `/const GROUP_NOUNS = \[([^\]]*)\];/`, so the declaration must keep its shape if moved; (2) the handler's roster predicate (7276-7287) is lenient (`includes(name + '.')`), so a roster-first check using it would let skip words such as `in` match any local part ending `in.`; the kit specifies a strict equality check for the new stage and keeps the lenient one as the resolver only.
+- Nothing was run (read-only drafter). Every red/green in the kit is designed from reading and marked as such.
+
+## Facts re-measured (instrument; control)
+- Main: `commits/main` = `0df1e348f17f78b43bd54b2aef6c5c8bbc3d568e` ("Merge pull request #138 ...", 2026-10-29T01:47:59Z). It MOVED from the `bdb9c170` the B889/B890 kits pin: #138 landed. (GH API; the B889 kit's own pin differs, so B889's REFUSE check will treat #138's files as expected.)
+- Files at main (GH contents API): `backend/server.js` blob `312c352e92479eff43e37bcff98bba3c8ee5f2f7`, 22354 lines (raw GET, `wc -l` of the saved copy); counts blob `38c0ae66`, `tests` 5223 `suites` 310 `_updated` 2026-10-27T16:10:11.756Z; rd395 harness `c826c1ea`, preload `1841b5e4`; rd856 `3786eca7` 117 lines, rd857 `6d1abcd0` 201, rd863 `4280c413` 151. 310 depth-1 `__tests__/*.test.js` blobs, trees API `truncated` false (control: same count as the counts file's `suites`).
+- Code map (all read from the saved raw copy, awk line numbers): `checkForCurrentUserQuery` 7878-8037, caller 7268, `userPatterns` 7943-7955, `commonWords` 7963-7987, `GROUP_NOUNS` 7994-7996, `isSkipEntry` 7997, `isCommonWord` 7998-8002, `OBJECT_PROTOTYPE_NAMES_LOWER` 7876, `NON_NAME_LEADS` 8009-8010, `isValidName` 8012-8018; handler roster read 7275, predicate 7276-7287, dept/location guard 7294 (fn 7860-7873), not-found 7295, multiple 7305, per-user call 7342; sibling `generateUserActivityAnalysis` 10066 (caller 9231, route test 9227-9230), its roster-first stage 10071-10101, own `patterns` 10105-10109, eight-word stoplist 10116, own predicate 10138-10151, not-found 10154; `_extractUserMatchesFromAllLogs` 12072 (used 8876 under `looksUserFocused` 8872-8875, and 8449/8452).
+- Search (GH `search/code`, counts, not a census of comments): `checkForCurrentUserQuery` 4 hits (intentRouter.js comment line 284 and rd856/857/863); `GROUP_NOUNS` 1 (rd863); `"api/chat"` in `__tests__` 16 files (control: rd856/857/863 present among them); the not-found text 3 files; `printing activity for` 2 files.
+- Open PRs: #139 (b890, one file `__tests__/rd407-concurrent-settings-writers.test.js`, mergeable clean, not draft). Remote `b8*`/`b9*` branches ahead of main: only `b890/nexusai-rd900-tamper-double-field` (ahead 1, same file); b816, b823, b835, b849, b855, b856, b862, b877 ahead 0. `records/*` branches (11 exist) NOT compared. `refs/heads/b895*` prints 0 (control: `b862*` prints 1). `b889*` is not on origin yet (compare 404).
+- Ports 9850-9859: `lsof -nP -iTCP:9850-9859 -sTCP:LISTEN` empty (rc 1); python3 -I word-boundary scan of 665 non-`.pre-` `*SEAT-*.md` kits: 9850 hits 12, 9851 1, 9853 2, 9859 13, others 0 (control: the pattern matches `x 9850 y`, not `x 19850 y`). Live panes: tuesday, fleet-monitor, HPSM-POC-H51/H52/H53, Security-Composer-J31/J32, NexusAI-M54. `NexusAI-M56` hits 0 kits (controls: M55 4, M53 6). The cells bind no port of the block: the rd395 harness uses an OS-assigned loopback port.
+- Jira (GET through `b774lib.py` in-process): RD-869 To Do Medium; RD-870 To Do Medium; RD-872 To Do Low; RD-856, RD-857, RD-863 Testing; RD-864, RD-871 Testing (landed by #106). All read whole. RD-869 links Relates RD-863/864/872; RD-870 links RD-863/872.
+- Guards in the tickets: RD-856 first-word pronoun test (exact), RD-857 whole word plus plural arms plus the department/location guard (ruling (b)), RD-863 21 group nouns and Object.prototype names, RD-864 "a real user who shares a word is found first" cell (landed), RD-871 singular group-noun cells and the GROUP_NOUNS scan.
+
+## D (decisions I made in the kit)
+- D-1: ONE NEW TEST FILE (`__tests__/rd869-roster-before-skip-list.test.js`) rather than extending rd857/rd863: leaves three landed files untouched; counts move tests +N and suites +1.
+- D-2: two shared functions (`userNameCandidates`, `acceptUserCapture`) so the roster is read only when a candidate exists (no extra `getAllPrinterLogs` per message), while still "one shared capture".
+- D-3: guard order = length and pronoun lead, then roster, then skip words. The ruling says roster before the SKIP LIST; the pronoun lead is the RD-856 rule and is kept first (slot Q-3).
+- D-4: strict roster equality for the new stage; the lenient predicate remains the resolver and becomes one shared helper (slots Q-4, Q-5).
+- D-5: no person's name in any test text: planted identities are non-person strings, the rostered control is read from the DB.
+- D-6: gate tier 1 recommended, with reasoning (below).
+
+## Q (each with its default; the kit takes the default)
+- Q-1: does the ruling cover RD-872? Default: NO, stays open, pinned by one control (plural noun outside the list unplanted gets the not-found text). If Tuesday wants RD-872 closed by the ruling, the records seat says "ruling covers ordering only".
+- Q-2: shape: two functions (candidates, accept) versus one async function. Default: two.
+- Q-3: pronoun lead before or after the roster? Default: before (a user literally named like a pronoun lead is not expected). A reading of the ruling as "roster first, everything else after" would flip C5; say so if wanted.
+- Q-4: strict (equality on the whole name or its part before the at-sign) versus the existing lenient predicate for the new stage. Default: strict; mutant M3 and control C6 prove the difference.
+- Q-5: share the resolver predicate between 7276-7287 and 10138-10151 into one helper. Default: yes, moved byte-equal.
+- Q-6: gate tier. Default: tier 1 (reason: the change decides whose print activity an answer shows, and `/api/chat` has no per-role gate ahead of the user lookup, so it touches data exposure between users; no new authorisation logic, only roster users reachable). Tier 2 is arguable; Tuesday's call.
+- Q-7: does the sibling get a chat-reachable cell or a source scan? Default: measure first (Step 3.3); cells for each class that reaches it, plus a source-scan control either way.
+
+## Slot count
+9 lines match `_` x4 (eight Stamp slots plus the last line). Control: the same pattern against a copy with one slot filled reads 8 (not run as a separate file; the count of 9 matches the template kits' stated unstamped count of 9 and their slot structure, 8 + 1).
+
+## UNMEASURED
+Whether any question reaches `generateUserActivityAnalysis` through `/api/chat` (the route chain before 9231 may catch all); whether the demo seed lets a plant of a new name appear in the 1000-row window (rd857 plants with `created_at` ahead of the seed for this reason); each red/green and each mutant; the `records/*` branches' file lists; the harness's behaviour with the block (it does not use it); the CodeQL result of the new head; the real shape of the Q-3 flip; the hosted node 24 run; CLARIFICATIONS C-190 text (cited RELAYED from the B889/B890 kits, not re-read).
+
+## Outside-the-fences disclosure
+Read-only throughout. Scratch files written under the session scratchpad only (saved raw copies of `backend/server.js`, the counts file, three neighbour tests; a small Jira GET script). `gh` GET only (commits, contents, trees, pulls, compare, matching-refs, search/code) under the NexusAI `GH_CONFIG_DIR`; Jira through `b774lib.py` `get` only. Read: the two template kits and B889's DRAFTER-REPORT and ADDENDUM, the B893 kit lines for the landing of #138, `model-routing.md`, the context file lines 105-122. No decision card read, no `fleet/briefs_staged`, no scoreboard, no ledger. One advisory hook note about case-sensitive greps was shown twice (both counts were positive-controlled or paired with other evidence). The Edit tool changed one phrase in the kit after writing.
