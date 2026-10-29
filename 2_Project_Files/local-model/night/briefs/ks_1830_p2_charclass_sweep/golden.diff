@@ -1,0 +1,32 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts
+@@ -241,6 +241,12 @@
+     ['a space inside the payload', REALISTIC_DID_JWK.slice(0, 40) + ' ' + REALISTIC_DID_JWK.slice(40)],
+     ['a plus sign inside the payload (KS-1830: standard base64, not base64url)', REALISTIC_DID_JWK.slice(0, 40) + '+' + REALISTIC_DID_JWK.slice(40)],
+     ['a slash inside the payload (KS-1830: standard base64, not base64url)', REALISTIC_DID_JWK.slice(0, 40) + '/' + REALISTIC_DID_JWK.slice(40)],
++    ['an exclamation mark inside the payload (1817-2)', REALISTIC_DID_JWK.slice(0, 40) + '!' + REALISTIC_DID_JWK.slice(40)],
++    ['an asterisk inside the payload (1817-2)', REALISTIC_DID_JWK.slice(0, 40) + '*' + REALISTIC_DID_JWK.slice(40)],
++    ['an at sign inside the payload (1817-2)', REALISTIC_DID_JWK.slice(0, 40) + '@' + REALISTIC_DID_JWK.slice(40)],
++    ['a hash sign inside the payload (1817-2)', REALISTIC_DID_JWK.slice(0, 40) + '#' + REALISTIC_DID_JWK.slice(40)],
++    ['a caret inside the payload (1817-2)', REALISTIC_DID_JWK.slice(0, 40) + '^' + REALISTIC_DID_JWK.slice(40)],
++    ['a plus sign at the END of the payload (1817-2)', REALISTIC_DID_JWK + '+'],
+   ];
+   for (const field of DID_JWK_FIELDS) {
+     for (const [label, bad] of SHAPE_REFUSALS) {
+@@ -265,6 +271,15 @@
+       const row = SHAPE_REFUSALS.find(([label]) => label.includes('slash'));
+       expect(row?.[1].replace('/', '')).toBe(REALISTIC_DID_JWK);
+       expect(row?.[1].split('/')).toHaveLength(2);
++    });
++    it(`control 1817-2 ${field}: each added row is the realistic did:jwk with exactly one extra character, nothing else (the END row appends one plus sign)`, () => {
++      for (const [word, ch] of [['exclamation mark', '!'], ['asterisk', '*'], ['at sign', '@'], ['hash sign', '#'], ['caret', '^']]) {
++        const row = SHAPE_REFUSALS.find(([label]) => label.includes(word + ' inside the payload (1817-2)'));
++        expect(row?.[1].replace(ch, '')).toBe(REALISTIC_DID_JWK);
++        expect(row?.[1].split(ch)).toHaveLength(2);
++      }
++      const end = SHAPE_REFUSALS.find(([label]) => label.includes('plus sign at the END of the payload (1817-2)'));
++      expect(end?.[1]).toBe(REALISTIC_DID_JWK + '+');
+     });
+   }
+ });

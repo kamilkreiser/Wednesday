@@ -1,0 +1,26 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts
+@@ -29,3 +29,6 @@
+ const FROM = SRC.indexOf("app.get('/api/anchors/:id',");
+ const END_LINE = 'retryCount: anchor.retryCount ?? 0,';
+ const GET_BY_ID = FROM < 0 ? '' : SRC.slice(FROM, SRC.indexOf(END_LINE, FROM) + END_LINE.length);
++// KS-1815-1 (gate 20 mutant X16c): the comment stripper behind B6 (B7 keeps its own whole-line read). It removes `/* */` blocks, then a whole-line OR trailing `//` comment on every line (a `//` at the start of a line or after whitespace).
++// The handler slice holds `//` only in comment lines (no URL), so no live code is cut.
++const liveCode = (src: string): string => src.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').map((line) => line.replace(/(^|\s)\/\/.*$/, '')).join('\n');
+@@ -61,6 +64,14 @@
+   // KS-1827 (gate 18 mutant X16): B5 matches the spread by source TEXT, and a commented-out spread keeps that text in the file, so the mutant passed 23 of 23 while the route stopped returning the hash.
+   // B6 reads the handler slice with its comments removed (whole `//` lines and `/* */` blocks), so only live code can satisfy the match.
+   it('RED KS-1827 B6: the by-id spread of anchorSignatureHashView is live code in the handler, not commented out', () => {
+-    const live = GET_BY_ID.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((line) => !line.trim().startsWith('//')).join('\n');
++    const live = liveCode(GET_BY_ID);
+     expect(live.includes('...anchorSignatureHashView((anchor.metadataPayload as any)?.secuura),')).toBe(true);
++  });
++
++  // KS-1815-1 (gate 20 mutant X16c): B6 used to strip only `/* */` blocks and whole-line `//` comments, so a live line that kept the spread text in a TRAILING `//` comment passed it.
++  it('control KS-1815-1 B8: liveCode drops a trailing // comment (the spread text left only in one is not live), keeps the code before it, and still drops whole-line and block comments', () => {
++    const trailing = '    ...{}, // ...anchorSignatureHashView((anchor.metadataPayload as any)?.secuura),';
++    expect(liveCode(trailing).includes('anchorSignatureHashView')).toBe(false);
++    expect(liveCode(trailing).includes('...{},')).toBe(true);
++    expect(liveCode('a // b\n// c\n/* d */ e').split('\n').map((line) => line.trim())).toEqual(['a', '', 'e']);
+   });
