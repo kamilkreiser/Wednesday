@@ -6,6 +6,15 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 07:1x 30 Oct (the 06:0x successor seat, ctx ~65%) — CURRENT; the blocks below are superseded where they differ
+- **Kam ruled the last two cards (07:01):** KS-1384 = **a, build F-a, F0, F-b and R**. On KS-1814 he answered with a NOTE (verbatim): "the solution must cater for all possible scenarios.  Owners modifying documents - lineage shown, owner keeping their own documents, a company keeping them or them being stored centrally". Card withdrawn with his words; **#1814 MERGE HELD** until it is mapped against the four scenarios. Readback on the panel (chat_reply rc 0). **No card open with Kam now.**
+- **IN-SESSION AGENTS (DIE at rotation; re-commission from these lines if the output is missing):**
+  - (1) the KS-1814 custody map (Opus) -> 0_Brain/reference/2026-10-30_ks1814-custody-scenarios/note.md;
+  - (2) the KS-1384 rev4 §19 focused review (Opus) -> 0_Brain/reference/2026-10-30_ks1384-rev4-s19-review/review.md, which must land before any F0 build lane;
+  - (3) a raise-brief drafter (Sonnet) for the 5 held passes -> briefs_staged/2026-10-30_seatS<N>_raise_five_spark_passes.md;
+  - (4) Spark operator 16 (Sonnet) -> 0_Brain/reference/2026-10-30_spark-operator16/report.md.
+- **HELD Spark passes (07:1x):** READY_KS-1799-…-B5-MESSAGEGETTER, READY_KS-1733-…-R8-STATUSCASE, READY_KS-1816-…-COMMENTS, READY_KS-1798-…-PGCODEHOSTILE, READY_KS-1830-…-P2-CHARCLASS (all `_2026-10-30`). Spark IDLE until operator 16 reports.
+
 ## ⏩ UPDATE 07:0x 30 Oct (the 06:0x successor seat, ctx ~65%) — CURRENT; the blocks below are superseded where they differ
 - **KAM RULED (06:59-07:00, live board):** the morning card a; R 65th start a; KS-1822 keep fail-open a; **KS-1819 + KS-1820 wallet routes switched OFF by default, a.** All four are ruled in the store. Still OPEN with Kam: ks1814-owner-role (default a) and ks1384-f0 (default b, NOT yet fired).
 - **DEVELOP-WIDE AUDIT FREEZE:** GHSA-8g5g-mxqh-grgj (vite 6.4.4, medium) fails audit:gate and audit:locks for every branch on develop 7152ac669d2d. A 18th measured vite as build-only (report 19:51Z). The fix is **A 18th ITEM B: branch chore/ghsa-8g5g-vite-6-4-5, a lock-only 6.4.4 -> 6.4.5 bump, tier 2.** The overlap with 11 dependabot/#1360 PRs on the root lock is ACCEPTED through an allow-list. **ORDER: ITEM B gate -> MERGE GO -> then tell R 65th AND A 18th "vite bump merged". Each then merges develop in and pushes.**
