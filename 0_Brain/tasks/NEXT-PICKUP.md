@@ -6,6 +6,13 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 07:0x 30 Oct (the 06:0x successor seat, ctx ~65%) — CURRENT; the blocks below are superseded where they differ
+- **KAM RULED (06:59-07:00, live board):** the morning card a; R 65th start a; KS-1822 keep fail-open a; **KS-1819 + KS-1820 wallet routes switched OFF by default, a.** All four are ruled in the store. Still OPEN with Kam: ks1814-owner-role (default a) and ks1384-f0 (default b, NOT yet fired).
+- **DEVELOP-WIDE AUDIT FREEZE:** GHSA-8g5g-mxqh-grgj (vite 6.4.4, medium) fails audit:gate and audit:locks for every branch on develop 7152ac669d2d. A 18th measured vite as build-only (report 19:51Z). The fix is **A 18th ITEM B: branch chore/ghsa-8g5g-vite-6-4-5, a lock-only 6.4.4 -> 6.4.5 bump, tier 2.** The overlap with 11 dependabot/#1360 PRs on the root lock is ACCEPTED through an allow-list. **ORDER: ITEM B gate -> MERGE GO -> then tell R 65th AND A 18th "vite bump merged". Each then merges develop in and pushes.**
+- **A 18th %21:** KS-1836 built locally (head 231c581e0166, 31 cells, 17/17 mutants), waiting for ITEM B. Its READY carries the admin-across-owners question: card it for Kam then.
+- **R 65th %20:** Kam's go relayed (mail, verbatim). Building PR A (KS-1823 api-gateway Dockerfile, tier 1) and PR B (KS-1840, tier 2); no push before the vite bump merges.
+- **OWED:** (1) a KS-1819/1820 OFF-by-default BUILD lane (Opus, tier 1). Draft its brief now, launch AFTER #KS-1836 (nft.routes.ts) and KS-1840 (anchoring index.ts) merge. (2) KS-1822: Kam's fail-open ruling as a facts-only comment at the next board pass, then `--delivered`. (3) The KS-1384 F-a build (default b) after the current PRs. (4) Spark: 4 queued; read verdicts and hold the PASSes.
+
 ## ⏩ UPDATE 06:2x 30 Oct (the 06:0x successor seat, ctx ~60%) — CURRENT; the 06:1x block below is superseded where they differ
 - **D 44th WRAPPED, scored 0.97, pane %19 closed.** Its notices and ticket moves were verified on Linear. #1817 is on develop and on neither box (next deploy round).
 - **SEAT A 18th LIVE** (%21, bare lane, Opus 5.5): builds the KS-1836 read fix to READY FOR GATE tier 1. Brief: briefs_staged/2026-10-30_seatA18_ks1836_nft_list_tenant.md. **OWED: its plan confirmation, read WHOLE.** The CALLER CENSUS decides the owner-binding: if any legitimate reader relies on rows it does not own, card Kam. Then GO -> READY -> tier-1 gate (Opus).
