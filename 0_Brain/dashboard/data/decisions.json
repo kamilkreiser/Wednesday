@@ -51958,5 +51958,34 @@
    "CARD hpsmpoc-232-chooser-demo-deploy-1027",
    "CARD hpsmpoc-demo-switch-template-pin-1027"
   ]
+ },
+ {
+  "id": "secuura-ks1175-private-jwk-guard-1029",
+  "client_project": "Secuura/Blockchain",
+  "title": "did:jwk: refuse a JWK that carries a private key before it is anchored on chain?",
+  "bluf": "One decision before did:jwk (KS-1175) is deployed. It is merging to develop now. The gate found that a did:jwk carrying a PRIVATE key (for example a JWK with its 'd' value) is accepted. Once anchored, that value is written permanently to a public blockchain. did:key cannot carry a private key; did:jwk can, so this risk arrives with this change. It is unlikely: S sends Entra's public keys. But a mistake would be irreversible. Today K never decodes the JWK. The gate calls that 'by the ruling', but I found no card of yours that rules it (I searched all 1,023), so it is probably the KS-1175 design rather than your word. A guard means decoding it just enough to refuse private members. Source: 0_Brain/reference/2026-10-29_gate15-1805-1806/verdict.md, finding 1805-3.",
+  "default_action": "If you don't answer by the next deploy round: Seat S builds the guard (option a), because it only refuses keys that must never be public, and it is reversible. did:jwk then deploys with it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Add a narrow guard before deploying (recommended)",
+    "detail": "Seat S builds a small separate PR: decode the did:jwk value only to refuse private-key members (d, p, q, dp, dq, qi, k), with a 400 and a clear message. Nothing else about the JWK is checked. It is gated, merged, then deployed with did:jwk in the next round. It adds about an hour or two to Stuart's KS-1175."
+   },
+   {
+    "key": "b",
+    "label": "Deploy as is",
+    "detail": "Rely on S never sending a private JWK. did:jwk goes out in the next deploy round unchanged."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-29T18:31:29.392718+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD secuura-ks1369-gateway-proxy-crash-guard-shape",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006"
+  ]
  }
 ]
