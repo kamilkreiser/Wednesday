@@ -119,6 +119,8 @@ diagnosing from*.
 
 ---
 
+- **Commit subjects and PR titles start with the ticket's real, full key, copied from the branch name:** `Refs KS-1822: a foreign tenant's anchor reads as absent`. Never a placeholder (`KS-NNNN`, `<PREFIX>`), never a Conventional Commits `type(scope):` prefix. No key found: ask, do not invent one. (Root CLAUDE.md, Peter's #1839, KS-1878, merged 2026-10-30 08:06:56Z; read at the API. Basis: one ruled project rule. It names the seat's OWN ticket; the foreign-key rule below still applies to OTHER tickets' keys.)
+
 ## A VERDICT LINE IS A CLAIM ABOUT WHAT RAN — print the ratio, never "all"
 
 **Why this exists.** On 2026-09-09 a Secuura seat, sweeping for guards that skip a member and still
