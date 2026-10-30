@@ -1,0 +1,110 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1666-certify-reservation-comments-match-the-code.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1666-certify-reservation-comments-match-the-code.test.ts
+new file mode 100644
+index 000000000..b24cb7398
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1666-certify-reservation-comments-match-the-code.test.ts
+@@ -0,0 +1,34 @@
++// KS-1666 note (d) (gate AK1 on PR #1623, KS-1633): two comments in routes/certifications.ts said what the code does not do. One claimed that writing the documents row before the anchor
++// "removes the window rather than narrowing it" (when the reservation itself fails the anchor-then-fail path is unchanged, and the code's own comment further down says an orphan anchor can still be created).
++// The other called the provisional row's under-claim a "sub-second window" (the window lasts until the second write, after an anchoring call bounded by AbortSignal.timeout(10000)).
++// These cells read certifications.ts as text. R1 and R2 are red until the two comments are corrected; C1 to C3 pin the code the comments describe, which must not move.
++import { describe, it, expect } from '@jest/globals';
++import { readFileSync } from 'fs';
++import { join } from 'path';
++
++const SRC = readFileSync(join(__dirname, '..', 'routes', 'certifications.ts'), 'utf8');
++
++describe('KS-1666 (d): the certify reservation comments match the code', () => {
++  it('RED KS-1666 R1 the reservation comment no longer says the row-first order removes the window', () => {
++    expect(SRC).not.toContain('removes the window rather than narrowing it');
++    expect(SRC).toContain('NARROWS that window, it does not remove it');
++  });
++
++  it('RED KS-1666 R2 the provisional-row comment no longer calls the window sub-second and names the 10 second bound', () => {
++    expect(SRC).not.toContain('the sub-second window before the second write');
++    expect(SRC).toContain('up to 10');
++    expect(SRC).toContain('seconds, not sub-second');
++  });
++
++  it('control KS-1666 C1 the anchoring call is still bounded at 10 seconds', () => {
++    expect(SRC).toContain('signal: AbortSignal.timeout(10000),');
++  });
++
++  it('control KS-1666 C2 the code still says an orphan anchor can be created when the reservation fails', () => {
++    expect(SRC).toContain('when the reservation itself fails the request proceeds and an orphan');
++  });
++
++  it('control KS-1666 C3 the file was read (the instrument is not reading an empty string)', () => {
++    expect(SRC.length).toBeGreaterThan(3000);
++  });
++});
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+index dbdbbfce9..f77542fa4 100644
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -517,14 +517,16 @@ certificationsRouter.post(
+       // `anchor_store` row before it answers 202 (anchoring/src/index.ts), so under the old order ANY failure of
+       // this write left an anchor naming no document — an orphan anchor, from a legitimate authenticated flow,
+       // permanently, and orphan anchors are the rows whose anchored identity another registration can claim (the
+-      // KS-1612 round-2 Major). Writing the row first removes the window rather than narrowing it.
++      // KS-1612 round-2 Major). Writing the row first NARROWS that window, it does not remove it: when the reservation
++      // itself fails, the anchor-then-fail path is unchanged (KS-1666 d).
+       //
+       // RULED (out of the ticket's option 1): every response stays byte-identical to before. That costs two writes
+       // on the accepted path — a provisional row, then the real anchor state through the same
+       // `ON CONFLICT (id) DO UPDATE` — and a compensating delete on the one refusal that sits between them.
+       //
+       // The provisional row deliberately carries the anchor state a FAILED anchor would carry: it under-claims for
+-      // the sub-second window before the second write, and introduces no new `anchoringStatus` value into the blob
++      // the window before the second write (bounded by the anchoring call's AbortSignal.timeout(10000), so up to 10
++      // seconds, not sub-second), and introduces no new `anchoringStatus` value into the blob
+       // KS-1124 F4 ruled on. `confidence` is already 'pending-onchain'. Nothing in this request reads the row in
+       // between; a concurrent reader sees "off-chain only", which is true at that instant.
+       const tenantId = lifecycleTenantId;
+diff --git a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+index a34292092..75cd6a635 100644
+--- a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
++++ b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
+@@ -5851,5 +5851,16 @@ cd Blockchain/Dev &amp;&amp; docker build -t ks1823-check -f services/api-gatewa
+ <h3>120.4 Running it</h3>
+ <pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1840-stale-gateway-citation-is-gone.test.ts   # 5 cells, rc 0
+ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                  # 37 files / 550 cells: 549 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
++<h2>121. Two comments in the certify route no longer say that writing the row first removes the orphan-anchor window, or that the under-claim lasts a sub-second (KS-1666 note d)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td>Two comment blocks in <code>Blockchain/Dev/services/originate/src/routes/certifications.ts</code> (lines 520 and 527 at the base), +4/-2. The first said that writing the <code>documents</code> row before the anchor &ldquo;removes the window rather than narrowing it&rdquo;. It now says it <strong>narrows</strong> the window: when the reservation itself fails, the anchor-then-fail path is unchanged. The second called the provisional row&rsquo;s under-claim a &ldquo;sub-second window&rdquo;. It now says the window runs until the second write, is bounded by the anchoring call&rsquo;s <code>AbortSignal.timeout(10000)</code>, and so is up to 10 seconds. <strong>No executable line moves.</strong></td></tr><tr><td>New test <code>ks1666-certify-reservation-comments-match-the-code.test.ts</code>, 5 cells, reading <code>certifications.ts</code> as text: R1 and R2 are RED until the two comments are corrected; C1 to C3 are controls (the 10000 ms bound is still in the code, the code still says an orphan anchor can be created when the reservation fails, the file was read). This is note (d) of the ticket only; the ticket carries nine gate notes and this change covers none of the others.</td></tr></table>
++<h3>121.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Red before the change, green after, and no other cell moves.</strong></td><td><strong>Test only, at develop <code>a786e06e6f6e</code>:</strong> 2 of 5 cells fail (R1, R2) and the 3 controls pass. <strong>With the two comments corrected:</strong> 5 of 5 pass.</td></tr><tr><td><strong>Comment-only proof:</strong> the base file and the changed file, transpiled with TypeScript 5.9.3 with comments removed, are identical (53,964 bytes of output). A control copy with one code token changed (<code>signal: AbortSignal.timeout(10000),</code> to 10001) is not identical to the base. All 6 changed lines of <code>git diff -U0</code> are <code>//</code> lines. The first run of this control targeted the first <code>AbortSignal.timeout(10000)</code>, which sits in the new comment, so it could not fire; it was corrected to the code line and the first output is kept.</td></tr><tr><td><strong>Whole originate unit suite</strong> (jest 29.7.0, <code>--maxWorkers=3</code>): 152 files, 1854 cells, 1854 pass, 0 fail, 0 skipped, 48 s. The checker&rsquo;s untouched-tip figure was 1849 cells at <code>593cd90c3131</code>; it was not re-measured at <code>a786e06e6f6e</code>. <code>tsc --noEmit</code> with <code>src/__tests__</code> in the program (232 originate source files, 175 under <code>__tests__</code>): <strong>0 errors</strong>, and a planted type error was reported once as <code>TS2322</code> by file name. <code>eslint</code> on the new test file: 0 errors, 0 warnings, and a planted file raised <code>@typescript-eslint/no-unused-vars</code> and <code>no-debugger</code>.</td></tr></table>
++<h3>121.2 Environment and figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Where and when this was measured.</strong></td><td>Measured 2026-10-29 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats. Node v26.8.1 (not an LTS line), TypeScript 5.9.3, jest 29.7.0, ts-jest 29.4.14, eslint 10.7.0.</td></tr></table>
++<h3>121.3 What this does not prove</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Stated, not claimed.</strong></td><td>The claim in the new comment that the window is up to 10 seconds. This change reads the code (at the base: the provisional write at line 577, the anchoring <code>fetch</code> with the 10000 ms signal at lines 598 to 616, the authoritative save at line 673) and does not time it. The bound is the anchoring call&rsquo;s; the two database writes around it are not included.</td></tr><tr><td>Not run: the originate integration files (they need a database), the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24, any deploy. The pre-push hook&rsquo;s leg count is stated in the pull request.</td></tr></table>
++<h3>121.4 Running it</h3>
++<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- ks1666-certify-reservation-comments   # 5 cells, rc 0
++cd Blockchain/Dev/services/originate &amp;&amp; npm test -- --maxWorkers=3                           # 152 files / 1854 cells, rc 0</code></pre>
+ </body>
+ </html>
+diff --git a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+index 1ccb74445..af86ba785 100644
+--- a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
++++ b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
+@@ -5934,5 +5934,21 @@ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test
+ <tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>84ddbd63c008</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+ <tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+ </table>
++<h2>The certify route&rsquo;s two reservation comments match the code &mdash; KS-1666 (note d)</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>Comment only, no executable line changes. Two comment blocks in the originate <code>routes/certifications.ts</code> now say that writing the row first <strong>narrows</strong> the orphan-anchor window (it does not remove it) and that the provisional row&rsquo;s under-claim lasts up to 10 seconds, the anchoring call&rsquo;s bound, not a sub-second.</td></tr><tr><td>New test <code>ks1666-certify-reservation-comments-match-the-code.test.ts</code>: 5 cells (2 RED, 3 controls) reading <code>certifications.ts</code> as text; test only: 2 of 5 red, with the comments: 5 of 5. Covers note (d) of KS-1666 only.</td></tr></table></div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>Whether the window really lasts up to 10 seconds under load: the code is read, not timed. The originate integration files, the four platform suites, a running stack, Node 24 and any deploy were not run.</td></tr></table></div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- ks1666-certify-reservation-comments   # 5 cells, rc 0
++cd Blockchain/Dev/services/originate &amp;&amp; npm test -- --maxWorkers=3                           # 152 files / 1854 cells, rc 0</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>5</strong> (2 RED + 3 controls); 2 of 5 red without the comment change (develop <code>a786e06e6f6e</code>), 5 of 5 with it</td></tr>
++<tr><td>originate unit suite</td><td><strong>152 files / 1854 cells</strong>, all pass, 0 failed, 0 skipped (jest 29.7.0, <code>--maxWorkers=3</code>, 48 s); the checker&rsquo;s untouched-tip figure was 1849 cells at <code>593cd90c3131</code>, not re-measured here</td></tr>
++<tr><td>comment-only proof</td><td>base and changed file transpile identically with comments removed (53,964 bytes); a code-mutated control differs; 6 of 6 changed diff lines are comment lines</td></tr>
++<tr><td>tsc and eslint</td><td>tsc with the test file: <strong>0 errors</strong> over 232 originate source files, a planted type error reported once as <code>TS2322</code>; eslint on the test: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
++<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0</td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+ </body>
+ </html>

@@ -1,0 +1,46 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -1075,7 +1075,8 @@
+     try {
+       profile = await provider.exchangeCode(code);
+     } catch (exchangeErr: any) {
+-      throw new BadRequestError(
+-        `OAuth authentication failed: ${exchangeErr?.message || 'invalid authorization code'}`
+-      );
++      // KS-1791: a provider that answers 200 with a body that is not JSON makes the adapter's `.json()` throw a SyntaxError whose message QUOTES the first 10 characters of that body (V8). Those are the
++      // provider's bytes, so they are not echoed to the client; every other exchange failure keeps its own message, as before.
++      const detail = exchangeErr?.name === 'SyntaxError' ? 'the provider answer could not be read' : exchangeErr?.message || 'invalid authorization code';
++      throw new BadRequestError(`OAuth authentication failed: ${detail}`);
+     }
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1240b-social-provider-fetches-are-bounded-and-classified.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1240b-social-provider-fetches-are-bounded-and-classified.test.ts
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks1240b-social-provider-fetches-are-bounded-and-classified.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1240b-social-provider-fetches-are-bounded-and-classified.test.ts
+@@ -141,4 +141,4 @@
+-type Mode = 'ok' | 'hang' | 'stall' | 'refuse' | 'refuse5xx' | 'unauth' | 'empty200' | 'deadport';
++type Mode = 'ok' | 'hang' | 'stall' | 'refuse' | 'refuse5xx' | 'unauth' | 'empty200' | 'html200' | 'deadport';
+ const PROVIDER_MARKER = 'PROVIDER_TEXT_MARKER_ks1240b';
+ const mode: Record<string, Mode> = {};
+ const asked: number[] = [];
+@@ -193,6 +193,8 @@
+       if (m === 'refuse5xx') { res.writeHead(502, { 'content-type': 'text/html' }); res.end(`<html>upstream ${PROVIDER_MARKER}</html>`); return; }
+       if (m === 'unauth') { res.writeHead(401, { 'content-type': 'application/json' }); res.end(JSON.stringify({ message: 'Bad credentials' })); return; }
+       if (m === 'empty200') { res.writeHead(200, { 'content-type': 'application/json' }); res.end('{}'); return; }
++      // KS-1791: HTTP 200 with a body that is not JSON; the adapter's .json() throws a SyntaxError that quotes the first 10 characters of it.
++      if (m === 'html200') { res.writeHead(200, { 'content-type': 'text/html' }); res.end(`<html>${PROVIDER_MARKER}</html>`); return; }
+       res.writeHead(200, { 'content-type': 'application/json' });
+       res.end(JSON.stringify(OK_BODY[key] ?? {}));
+     });
+@@ -418,3 +420,12 @@
++  it('RED KS-1791 R1 a token answer that is 200 with a non-JSON body: the login callback answers 400 with a neutral text and none of the provider\'s bytes', async () => {
++    const state = await freshState('github');
++    mode['github.com/login/oauth/access_token'] = 'html200';
++    const r = await call('GET', `/api/auth/social/github/callback?code=c8&state=${encodeURIComponent(state)}`);
++    expect([r.status, r.code, r.message]).toEqual([400, 'BAD_REQUEST', 'OAuth authentication failed: the provider answer could not be read']);
++    expect(r.raw, 'the first bytes of the provider body are not in the response').not.toContain('<html>PROV');
++    expect(r.raw, 'the parser message is not in the response').not.toContain('is not valid JSON');
++  }, 15000);
++
+   it('🔴 POST /social/link, GitHub refuses the CONNECTION: 503 SERVICE_UNAVAILABLE (was 500)', async () => {
+     mode['github.com/login/oauth/access_token'] = 'deadport';
+     const r = await call('POST', '/api/auth/social/link', { provider: 'github', code: 'c6' });

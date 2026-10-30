@@ -1,0 +1,147 @@
+{
+ "M1 catch rethrows": {
+  "pr_ks445": {
+   "rc": 1,
+   "tests": "3 failed, 17 passed, 20 total",
+   "reds": [
+    "RED KS-1798 D1 POST /api/gdpr/dsr answers the constant 500 when the service rejects with a revoked Proxy",
+    "RED KS-1798 D2 POST /api/gdpr/dsr answers the constant 500 when the rejected Error has a pgCode getter that throws",
+    "RED KS-1798 D3 POST /api/gdpr/consent answers the constant 500 when the service rejects with a revoked Proxy"
+   ]
+  },
+  "g27_attack": {
+   "rc": 1,
+   "tests": "12 failed, 34 passed, 46 total",
+   "reds": [
+    "dsr: throw-all Proxy",
+    "dsr: revoked Proxy",
+    "dsr: pgCode getter throws",
+    "dsr: pgCode getter throws + code 23503",
+    "dsr: pgCode getter throws + code 23505",
+    "dsr: Proxy throws only on pgCode, code 22001",
+    "consent: throw-all Proxy",
+    "consent: revoked Proxy",
+    "consent: pgCode getter throws",
+    "consent: pgCode getter throws + code 23503",
+    "consent: pgCode getter throws + code 23505",
+    "consent: Proxy throws only on pgCode, code 22001"
+   ]
+  }
+ },
+ "M2 catch answers 200 success": {
+  "pr_ks445": {
+   "rc": 1,
+   "tests": "3 failed, 17 passed, 20 total",
+   "reds": [
+    "RED KS-1798 D1 POST /api/gdpr/dsr answers the constant 500 when the service rejects with a revoked Proxy",
+    "RED KS-1798 D2 POST /api/gdpr/dsr answers the constant 500 when the rejected Error has a pgCode getter that throws",
+    "RED KS-1798 D3 POST /api/gdpr/consent answers the constant 500 when the service rejects with a revoked Proxy"
+   ]
+  },
+  "g27_attack": {
+   "rc": 1,
+   "tests": "12 failed, 34 passed, 46 total",
+   "reds": [
+    "dsr: throw-all Proxy",
+    "dsr: revoked Proxy",
+    "dsr: pgCode getter throws",
+    "dsr: pgCode getter throws + code 23503",
+    "dsr: pgCode getter throws + code 23505",
+    "dsr: Proxy throws only on pgCode, code 22001",
+    "consent: throw-all Proxy",
+    "consent: revoked Proxy",
+    "consent: pgCode getter throws",
+    "consent: pgCode getter throws + code 23503",
+    "consent: pgCode getter throws + code 23505",
+    "consent: Proxy throws only on pgCode, code 22001"
+   ]
+  }
+ },
+ "M3 catch maps to 23503 (404)": {
+  "pr_ks445": {
+   "rc": 1,
+   "tests": "3 failed, 17 passed, 20 total",
+   "reds": [
+    "RED KS-1798 D1 POST /api/gdpr/dsr answers the constant 500 when the service rejects with a revoked Proxy",
+    "RED KS-1798 D2 POST /api/gdpr/dsr answers the constant 500 when the rejected Error has a pgCode getter that throws",
+    "RED KS-1798 D3 POST /api/gdpr/consent answers the constant 500 when the service rejects with a revoked Proxy"
+   ]
+  },
+  "g27_attack": {
+   "rc": 1,
+   "tests": "10 failed, 36 passed, 46 total",
+   "reds": [
+    "dsr: throw-all Proxy",
+    "dsr: revoked Proxy",
+    "dsr: pgCode getter throws",
+    "dsr: pgCode getter throws + code 23505",
+    "dsr: Proxy throws only on pgCode, code 22001",
+    "consent: throw-all Proxy",
+    "consent: revoked Proxy",
+    "consent: pgCode getter throws",
+    "consent: pgCode getter throws + code 23505",
+    "consent: Proxy throws only on pgCode, code 22001"
+   ]
+  }
+ },
+ "M4 catch returns false (skips extractPgCode)": {
+  "pr_ks445": {
+   "rc": 0,
+   "tests": "20 passed, 20 total",
+   "reds": []
+  },
+  "g27_attack": {
+   "rc": 1,
+   "tests": "4 failed, 42 passed, 46 total",
+   "reds": [
+    "dsr: pgCode getter throws + code 23503",
+    "dsr: Proxy throws only on pgCode, code 22001",
+    "consent: pgCode getter throws + code 23503",
+    "consent: Proxy throws only on pgCode, code 22001"
+   ]
+  }
+ },
+ "M5 catch maps to 22001 (400)": {
+  "pr_ks445": {
+   "rc": 1,
+   "tests": "3 failed, 17 passed, 20 total",
+   "reds": [
+    "RED KS-1798 D1 POST /api/gdpr/dsr answers the constant 500 when the service rejects with a revoked Proxy",
+    "RED KS-1798 D2 POST /api/gdpr/dsr answers the constant 500 when the rejected Error has a pgCode getter that throws",
+    "RED KS-1798 D3 POST /api/gdpr/consent answers the constant 500 when the service rejects with a revoked Proxy"
+   ]
+  },
+  "g27_attack": {
+   "rc": 1,
+   "tests": "10 failed, 36 passed, 46 total",
+   "reds": [
+    "dsr: throw-all Proxy",
+    "dsr: revoked Proxy",
+    "dsr: pgCode getter throws",
+    "dsr: pgCode getter throws + code 23503",
+    "dsr: pgCode getter throws + code 23505",
+    "consent: throw-all Proxy",
+    "consent: revoked Proxy",
+    "consent: pgCode getter throws",
+    "consent: pgCode getter throws + code 23503",
+    "consent: pgCode getter throws + code 23505"
+   ]
+  }
+ },
+ "M6 drop the extractPgCode fallback": {
+  "pr_ks445": {
+   "rc": 1,
+   "tests": "0 total",
+   "reds": []
+  },
+  "g27_attack": {
+   "rc": 1,
+   "tests": "0 total",
+   "reds": []
+  }
+ },
+ "_restore": {
+  "sha256_before": "032103df58f5ee100d2d71b428db9228a8b6f585ad1621fa8fe98a68ff0530f0",
+  "sha256_after": "032103df58f5ee100d2d71b428db9228a8b6f585ad1621fa8fe98a68ff0530f0"
+ }
+}

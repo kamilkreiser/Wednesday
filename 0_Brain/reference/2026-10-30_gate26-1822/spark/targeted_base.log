@@ -1,0 +1,3405 @@
+
+##### Blockchain/Dev/services/originate/src/__tests__/ks1666-certify-reservation-comments-match-the-code.test.ts
+FAIL src/__tests__/ks1666-certify-reservation-comments-match-the-code.test.ts
+  KS-1666 (d): the certify reservation comments match the code
+    ✕ RED KS-1666 R1 the reservation comment no longer says the row-first order removes the window (2 ms)
+    ✕ RED KS-1666 R2 the provisional-row comment no longer calls the window sub-second and names the 10 second bound
+    ✓ control KS-1666 C1 the anchoring call is still bounded at 10 seconds
+    ✓ control KS-1666 C2 the code still says an orphan anchor can be created when the reservation fails
+    ✓ control KS-1666 C3 the file was read (the instrument is not reading an empty string) (1 ms)
+
+  ● KS-1666 (d): the certify reservation comments match the code › RED KS-1666 R1 the reservation comment no longer says the row-first order removes the window
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "removes the window rather than narrowing it"
+    Received string:        "/**
+     * =============================================================================
+     * CERTIFICATION ROUTES
+     * =============================================================================
+     * API endpoints for issuing, managing, and revoking certifications
+     * Certifications are verifiable credentials anchored on the Cardano blockchain
+     * =============================================================================
+     */
+
+    import { Router, Request, Response } from 'express';
+    import { body, param, query, validationResult } from 'express-validator';
+    import {
+      extractOnBehalfOf,
+      resolveOnBehalfOf,
+      recordActionProvenance,
+      OnBehalfOfError,
+      wasCreatedByConnector,
+      type OnBehalfOf,
+    } from '../services/provenance';
+    import { v4 as uuidv4 } from 'uuid';
+    import crypto from 'crypto';
+    import {
+      getCertification,
+      saveCertification,
+      listCertifications,
+      saveShare,
+      getSharesByCertification,
+      getLineageEvents,
+      initRepo,
+      type Certification,
+      type ShareRecord,
+      deleteCertification,
+      reserveCertificationRow,
+    } from '../repositories/certificationRepo';
+    import { prisma } from '../db';
+    import {
+      createChargeEvent,
+      getChargeEventsByCertification,
+    } from '../services/chargeEvents';
+    import {
+      notifyDocumentCertified,
+      notifyDocumentRevoked,
+      notifyDocumentShared,
+    } from '../utils/notificationClient';
+    import { logger } from '../utils/logger';
+    import { publishEvent, EventTypes } from '../events';
+    import { authenticate } from '../middleware/auth';
+    import { isAllowedByRoleOrScope } from '../middleware/rbac';
+    import { DOCUMENT_WRITE_ROLES } from '../middleware/documentWriteRoles';
+    import {
+      getDocument,
+      saveDocument as saveLineageDocument,
+      assertNoCycle,
+      generateContentHash as generateDocumentContentHash,
+      type DocumentRecord,
+    } from '../repositories/documentRepo';
+    import { isPlatformRole } from '@secuura/shared';
+    import { extractPgCode } from '../utils/pgErrors';
+    import { anchorIdentityFields } from '../utils/anchorIdentity';
+
+    export const certificationsRouter = Router();
+    // All routes here require an authenticated Bearer JWT. Audit A-09 + A-01:
+    // previously trusted client-supplied x-user-* headers via getUserFromRequest;
+    // the gateway now strips those (commit c796138f0) and this enforces real
+    // authentication as defense in depth.
+    certificationsRouter.use(authenticate());
+
+
+    // Initialize repository on module load
+    initRepo().catch((err) => logger.error('Failed to init repo', { error: err instanceof Error ? err.message : String(err) }));
+
+    // =============================================================================
+    // HELPER FUNCTIONS
+    // =============================================================================
+
+    function generateContentHash(data: Record<string, unknown>): string {
+      const sorted = JSON.stringify(data, Object.keys(data).sort());
+      return crypto.createHash('sha256').update(sorted).digest('hex');
+    }
+
+    function getUserFromRequest(req: Request): { id: string; did?: string; name?: string } | null {
+      // Pen-test F-04: read from authenticated req.user (set by authenticate()
+      // middleware), NOT from raw headers. Direct header reads are spoofable
+      // by anyone reaching the service directly.
+      const user = (req as any).user;
+      const userId = user?.userId;
+      const userEmail = user?.email as string | undefined;
+
+      if (!userId) return null;
+
+      return {
+        id: userId,
+        did: user?.did,
+        name: userEmail?.split('@')[0],
+      };
+    }
+
+    /**
+     * KS-22 (KS-4 phase 5b): every certification call must be tenant-scoped.
+     * Mirrors getReqTenantId in routes/documents.ts — req.tenantId is the
+     * effective tenant after extractTenantContext resolves any X-Tenant-Override.
+     * In single-tenancy mode the middleware doesn't run; fall back to the same
+     * default tenant id that extractTenantContext itself uses in non-prod, so
+     * queries match the rows the migration backfilled there.
+     */
+    const DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+
+    function getReqTenantId(req: Request): string {
+      const tid = (req as any).tenantId as string | undefined;
+      return tid || DEFAULT_TENANT_ID;
+    }
+
+    /**
+     * KS-1538: may this caller act on this document? The legacy certify path (`documentId` without `parentDocumentId`) rewrites the NAMED
+     * document, so the caller needs the access GET /api/documents/:id already requires (routes/documents.ts, \"Ownership check\"): the
+     * owner, a system admin, the designated recipient, or the CREATING connector. Two deliberate differences from that read check, both
+     * fail-closed: an OWNERLESS document (a connector made it with no onBehalfOf: owner id empty) is not open to everyone, and a
+     * recipientEmail that is not a string never matches (the read check would throw on it).
+     */
+    async function callerMayCertifyDocument(req: Request, userId: string, document: DocumentRecord): Promise<boolean> {
+      const authUser = (req as any).user;
+      const role = authUser?.role as string | undefined;
+      if (role === 'system_admin' || role === 'SYSTEM_ADMIN' || role === 'super_admin') return true;
+      if (document.owner?.id && document.owner.id === userId) return true;
+      const email = authUser?.email;
+      const recipientEmail = (document.data as Record<string, unknown> | undefined)?.recipientEmail;
+      if (typeof email === 'string' && typeof recipientEmail === 'string' && email && recipientEmail
+          && email.toLowerCase() === recipientEmail.toLowerCase()) return true;
+      return role === 'connector' && (await wasCreatedByConnector(document.id, userId));
+    }
+
+    /**
+     * KS-1695: may this caller READ this certification?
+     *
+     * The three by-id certification reads (`GET /:id`, `/:id/lineage`, `/:id/evidence-bundle`) looked a
+     * row up by primary key with NO caller term, so EVERY same-tenant user of ANY organisation in the
+     * tenant read any certification there by its id — including rows `GET /api/documents/:id` already
+     * cloaks. Gate BX1 measured it: a (same tenant, same organisation) 200, a2 (same tenant, another
+     * organisation) 200, b (another tenant) 404, c (the issuing connector) 200.
+     *
+     * The rule is: a platform admin, the issuer, or the holder. The issuer/holder half is the one the
+     * LIST route already applies in-process (its `!isAdmin` filter at `:971`), so a refused reader of a
+     * human-issued certification is one the list already hides the row from. The ADMIN half is NOT the
+     * same rule: the list compares three literal spellings (`:954`), while this uses `isPlatformRole`,
+     * which upper-cases, so `SUPER_ADMIN` is admitted here and not there. That makes this read MORE
+     * permissive than the list for exactly that spelling — recorded deliberately, not resolved here.
+     * `ORG_ADMIN` is deliberately NOT admitted by either.
+     *
+     * An EMPTY principal never matches. `certificationRepo.fromDbRow` maps a missing actor to `''`
+     * (`row.issuer_user_id || certMeta.issuerId || ''`), so a bare-connector document read through this
+     * path has `issuer.id === holder.id === ''`; without the guard `'' === ''` would admit everyone.
+     * The issuing connector still passes, because its `userId` is the literal `connector:<platform>:<id>`
+     * that `certification_metadata.issuerId` holds verbatim (see utils/principalId.ts).
+     *
+     * Callers must apply this BEFORE any side effect: `GET /:id` writes an expiry update (and a
+     * certification_events row) for whoever reads, and `/:id/evidence-bundle` writes an
+     * `evidence_export` charge event for whoever reads.
+     */
+    function callerMayReadCertification(req: Request, certification: Certification): boolean {
+      const authUser = (req as any).user;
+      // KS-1695 round 2 (gate CF1 N2): use the repo's ONE definition of \"platform role\" rather than a
+      // hand-written set. `isPlatformRole` (packages/shared/src/security/keyRevokePolicy.ts) upper-cases
+      // the claim, so BOTH casings of SYSTEM_ADMIN and SUPER_ADMIN pass. The set this replaces was copied
+      // from the list route (`:954` at this head; `:906` was develop's numbering) and therefore missed
+      // `SUPER_ADMIN`, which turned a 200 into a 404 for a
+      // real platform administrator. Consequence worth knowing: for that spelling this by-id read is now
+      // MORE permissive than the list route, which keeps its narrower literal set. That inconsistency is
+      // recorded, not resolved here. Still NOT widened to ORG_ADMIN.
+      if (isPlatformRole(authUser?.role as string | undefined)) return true;
+      const userId = typeof authUser?.userId === 'string' ? authUser.userId : '';
+      if (userId === '') return false;
+      if (userId === certification.issuer?.id) return true;
+      return userId === certification.holder?.id;
+    }
+
+    /**
+     * KS-1695: the single refusal the bound reads share with an unknown id, so a refused reader cannot
+     * tell \"not yours\" from \"no such certification\". One function, so the two bodies cannot drift.
+     */
+    function certificationNotFound(res: Response): Response {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+    }
+
+    // =============================================================================
+    // ROUTES
+    // =============================================================================
+
+    /**
+     * POST /api/certifications/issue
+     * Issue a new certification
+     */
+    certificationsRouter.post(
+      '/issue',
+      [
+        body('type')
+          .isIn([
+            'educational_degree',
+            'employment_certificate',
+            'professional_certification',
+            'employment_reference',
+            'identity_document',
+            'certificate',
+            'verification_certificate',
+            // KS-66 (Kam, 2026-05-14): \"Signed Document\" — the SSD-side
+            // recipient-attestation event (\"sign\"). `verification_certificate`
+            // stays the issuer-side authoritative attestation (\"certify\").
+            // Both produce new linked documents via KS-70's parent_document_id.
+            'signed_document',
+            'DOCUMENT',
+          ])
+          .withMessage('Invalid certification type. Allowed: educational_degree, employment_certificate, professional_certification, employment_reference, identity_document, certificate, verification_certificate, signed_document, DOCUMENT'),
+        body('holderId').optional(),
+        // KS-74: SSD-style flows can issue against an email when the holder
+        // hasn't signed up yet. Mutually exclusive with holderId — the
+        // handler returns 400 if both are set. When supplied, the email is
+        // resolved (or an INVITED stub is created) via auth-service.
+        body('holderEmail').optional().isEmail().withMessage('holderEmail must be a valid email'),
+        body('data').isObject().withMessage('Data must be an object'),
+        // KS-70: optional lifecycle parent. When set, certify creates a new
+        // document linked to this one via parent_document_id and rejects
+        // cycles in the proposed ancestor chain. Accepts the external-id
+        // shape originate uses elsewhere (doc-<ts>-<random>) — the route
+        // layer doesn't try to coerce to UUID.
+        body('parentDocumentId').optional().isString().withMessage('parentDocumentId must be a string'),
+        // KS-444: enforce the remaining published CertificationIssueRequest field
+        // types. The sweep's negative_data_rejection sent `metadata: [null,null]`
+        // (spec declares a JSON object) and it was accepted with a 201. isObject()
+        // is strict by default — arrays and null are rejected.
+        body('documentId').optional().isString().withMessage('documentId must be a string'),
+        body('metadata').optional().isObject().withMessage('metadata must be an object'),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          // Check authentication first
+          const issuer = getUserFromRequest(req);
+          if (!issuer) {
+            return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+          }
+
+          // KS-547 (KS-540 F-2): certification issuance gates like every other
+          // document-write verb — this was the one ungated write on the platform.
+          // Human callers need a DOCUMENT_WRITE_ROLES role; `sk_*` connector
+          // callers satisfy it via the `certifications:write` scope (KS-71 path),
+          // so S's certify traffic is unaffected. Demo persona demo@secuura.io is
+          // seeded ISSUER_ADMIN so the live demo certify flow keeps working.
+          if (!isAllowedByRoleOrScope(req, DOCUMENT_WRITE_ROLES, 'certifications:write')) {
+            return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Forbidden: your role does not permit issuing certifications' } });
+          }
+
+          // Then validate request body
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            // KS-39 #3: wrap express-validator output in the gateway's standard
+            // envelope `{success, error: {code, message, details}}` so callers
+            // can read `body.error.message` consistently. Previously we returned
+            // raw `{errors: [...]}` which broke every consumer that doesn't
+            // special-case it (including the e2e contract harness).
+            const errArr = errors.array();
+            const summary = errArr.map((e: { msg?: string }) => e.msg).filter(Boolean).join('; ');
+            return res.status(400).json({
+              success: false,
+              error: {
+                code: 'VALIDATION_ERROR',
+                message: summary || 'Invalid request body',
+                details: errArr,
+              },
+            });
+          }
+
+          // KS-1538: the legacy certify path (documentId without parentDocumentId, the branch further down) rewrites the NAMED document,
+          // so the caller must be allowed to act on it. Checked HERE, before the holder lookup, the anchoring submission and the save: a
+          // refusal after those would leave an anchored certification for a document the caller had no right to. One refusal for an
+          // unknown document and for someone else's, so the answer is not an existence oracle. Logged with ids only, never the body.
+          if (req.body.documentId && !req.body.parentDocumentId) {
+            const legacyDocument = await getDocument(req.body.documentId, getReqTenantId(req), (req as any).db);
+            if (!legacyDocument || !(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {
+              logger.info('KS-1538: legacy certify refused', { tenantId: getReqTenantId(req), userId: issuer.id });
+              return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Forbidden: you may not certify this document' } });
+            }
+          }
+
+          const { type, holderDid, data, expiresAt, privacySettings } = req.body;
+
+          // KS-1213: with parentDocumentId, the derived document is stored as the certification type
+          // (`type || 'verification_certificate'`) and the caller's `data` is spread into its `data`, while a
+          // document is served as `data.documentType || type`. A `data.documentType` that differs from that
+          // stored type would serve, and verify, the derived document as another type. Refused before any
+          // write (the holder stub and the certification row come first); exact comparison, as KS-1202.
+          const derivedDataDocumentType = data && typeof data === 'object' ? (data as Record<string, unknown>).documentType : undefined;
+          if (req.body.parentDocumentId && derivedDataDocumentType !== undefined && derivedDataDocumentType !== (type || 'verification_certificate')) {
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'data.documentType must equal the certification type when parentDocumentId is set' } });
+          }
+          const holderEmail: string | undefined = req.body.holderEmail;
+
+          // KS-74: holderId XOR holderEmail. Both = 400 (ambiguous which to use).
+          if (req.body.holderId && holderEmail) {
+            return res.status(400).json({
+              success: false,
+              error: {
+                code: 'BAD_REQUEST',
+                message: 'Supply either holderId or holderEmail, not both',
+              },
+            });
+          }
+
+          // Track whether the resolved holder was just-stubbed so the response
+          // can tell SSD \"you issued against a pending invite, status: INVITED\".
+          let holderStatus: 'ACTIVE' | 'INVITED' | string | undefined;
+          let resolvedHolderEmail: string | undefined;
+
+          // KS-74: when holderEmail is supplied, ask auth-service to either
+          // resolve it to an existing user OR mint an INVITED stub. The stub
+          // gets claimed on /api/auth/register later.
+          //
+          // KS-289: call auth-service DIRECTLY (server-to-server via
+          // AUTH_SERVICE_URL), NOT via the public gateway. Two reasons the old
+          // gateway route failed: (1) the gateway enforces CSRF on POST/PUT/etc.,
+          // so a POST /api/users/stub through it is rejected with
+          // CSRF_TOKEN_MISSING — a service call carries no browser CSRF token;
+          // (2) GATEWAY_BASE_URL was unset, so it fell back to
+          // http://localhost:6882, which inside the originate container is
+          // originate itself → ECONNREFUSED → the reported 502 \"Recipient lookup
+          // service unavailable\". auth's /stub self-gates on role/scope and reads
+          // the tenant from the forwarded JWT, so the direct call is equivalent
+          // for security and tenant-correct.
+          let holderId: string;
+          if (holderEmail) {
+            const authHeader = (req.headers.authorization as string) || '';
+            try {
+              const authBase = process.env.AUTH_SERVICE_URL || 'http://localhost:6003';
+              const stubRes = await fetch(`${authBase}/api/users/stub`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(authHeader ? { Authorization: authHeader } : {}),
+                },
+                body: JSON.stringify({ email: holderEmail }),
+                // KS-203: bound the upstream call so a hung users/stub can't keep
+                // the request open until the gateway times out (empty-body 500).
+                signal: AbortSignal.timeout(5000),
+              });
+              if (stubRes.status === 404) {
+                // Cross-tenant block — the email is already a Platform K user
+                // in another tenant. Auth-service deliberately returns 404 to
+                // avoid cross-tenant disclosure. SSD treats this as \"this
+                // recipient cannot be issued to from this tenant\".
+                return res.status(404).json({
+                  success: false,
+                  error: {
+                    code: 'RECIPIENT_NOT_AVAILABLE',
+                    message:
+                      'Email is not resolvable to a user in this tenant. ' +
+                      'It may already belong to a different tenant.',
+                  },
+                });
+              }
+              if (!stubRes.ok) {
+                return res.status(502).json({
+                  success: false,
+                  error: { code: 'BAD_GATEWAY', message: 'Could not resolve recipient via users/stub' },
+                });
+              }
+              const body = (await stubRes.json()) as {
+                data?: { userId: string; status?: string; email?: string };
+              };
+              if (!body.data?.userId) {
+                return res.status(502).json({
+                  success: false,
+                  error: { code: 'BAD_GATEWAY', message: 'users/stub returned no userId' },
+                });
+              }
+              holderId = body.data.userId;
+              holderStatus = body.data.status;
+              resolvedHolderEmail = body.data.email;
+            } catch (err: any) {
+              // KS-203: a timeout/abort is a transient dependency failure (retryable
+              // 503), distinct from a genuine bad-gateway response (502).
+              const timedOut = err?.name === 'TimeoutError' || err?.name === 'AbortError';
+              logger.warn('users/stub unreachable during certifications/issue', { error: err?.message, timedOut });
+              return res.status(timedOut ? 503 : 502).json({
+                success: false,
+                error: timedOut
+                  ? { code: 'SERVICE_UNAVAILABLE', message: 'Recipient lookup timed out — please retry' }
+                  : { code: 'BAD_GATEWAY', message: 'Recipient lookup service unavailable' },
+              });
+            }
+          } else {
+            holderId = req.body.holderId || issuer.id; // Default to issuer's own ID
+          }
+
+          // Validate holderId references a real user if explicitly provided
+          // (holderEmail flow skips this — auth-service already minted/resolved
+          // a valid user id above).
+          if (req.body.holderId) {
+            // Quick format check before hitting DB
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (!uuidRegex.test(holderId)) {
+              return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — must be a valid UUID' } });
+            }
+            try {
+              const db = (req as any).db || prisma;
+              const holderCheck = await db.$queryRaw`SELECT id FROM users WHERE id = ${holderId}::uuid LIMIT 1`;
+              if (!holderCheck || (Array.isArray(holderCheck) && holderCheck.length === 0)) {
+                return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — user does not exist' } });
+              }
+            } catch (err: any) {
+              const errMsg = err instanceof Error ? err.message : String(err);
+              if (errMsg.includes('invalid input syntax') || errMsg.includes('uuid')) {
+                return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — must be a valid UUID' } });
+              }
+              // For other DB errors (table missing, connection issues), log and return 400
+              // rather than letting a bad holderId propagate to saveCertification
+              logger.warn('holderId validation DB error — rejecting', { holderId, error: errMsg });
+              return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — could not validate' } });
+            }
+          }
+
+          const id = uuidv4();
+          const now = new Date().toISOString();
+
+          // KS-480 §6: connector attribution on the certify action. Validate +
+          // resolve BEFORE any write (400 shape / 403 cross-org fail fast).
+          // KS-1228: the row used to be recorded right here, \"once the id exists\",
+          // which was still BEFORE the lineage 422, the production anchoring 503 and
+          // the save-time 400/503s below — so a refused issue left a row for a
+          // certification that was never issued. It is now recorded only once
+          // saveCertification succeeds. Reserved key never rides in the
+          // certification data blob (it is content-hashed below).
+          let certObo: OnBehalfOf | null = null;
+          let certOboResolved: string | null = null;
+          try {
+            certObo = extractOnBehalfOf(req);
+            if (certObo) {
+              certOboResolved = await resolveOnBehalfOf(certObo, (req as any).user?.organizationId as string | undefined);
+            }
+          } catch (oboErr) {
+            if (oboErr instanceof OnBehalfOfError) {
+              return res.status(oboErr.status).json({ success: false, error: { code: oboErr.code, message: oboErr.message } });
+            }
+            throw oboErr;
+          }
+          if (data && typeof data === 'object') {
+            delete (data as Record<string, unknown>).onBehalfOf;
+            // KS-543 (Stuart's KS-537 finding #3): the data blob is content-hashed
+            // below, so any PII a caller puts in it becomes STRUCTURALLY
+            // UNERASABLE — it can never be encrypted or pseudonymised post-hoc
+            // without invalidating the certification's own hash. Boundary hygiene
+            // is the only durable fix (the onBehalfOf delete above is the
+            // precedent): strip the known identity keys BEFORE hashing so no
+            // caller can hash them into permanence. S already dropped
+            // data.actorName on their side (PS-472) — this enforces it
+            // structurally instead of trusting each caller. Strip, not reject —
+            // a 400 here would widen platform-wide 4xx behaviour (KS-472 rule:
+            // bound the positive generator first).
+            for (const identityKey of ['actorName', 'actorEmail']) {
+              delete (data as Record<string, unknown>)[identityKey];
+            }
+          }
+
+          const contentHash = generateContentHash(data);
+
+          // KS-70: optional lifecycle parent. Walk the proposed parent's
+          // ancestor chain to reject cycles BEFORE we anchor or write — the
+          // anchoring call is expensive and an invalid lineage shouldn't be
+          // visible on-chain. The walker is capped at MAX_LINEAGE_DEPTH; if
+          // it would exceed the cap we still proceed (the chain is just deep,
+          // not cyclic) but the verify endpoint will return truncated=true.
+          const parentDocumentId: string | undefined = req.body.parentDocumentId;
+          const lifecycleTenantId = getReqTenantId(req);
+          if (parentDocumentId) {
+            // KS-1557: the lineage path derives a NEW document from the named parent, so the caller must be allowed to act on that
+            // parent. Same rule, same predicate as the legacy path above and as GET /api/documents/:id (routes/documents.ts): the
+            // owner, a system admin, the designated recipient, or the creating connector. Checked HERE, before the cycle walk, the
+            // anchoring submission and both saves — a refusal after those would leave an anchored certification derived from a
+            // document the caller had no right to (the same reason the KS-1538 comment above gives), and it keeps the ancestor walk
+            // off a chain the caller may not read.
+            //
+            // The parent the check judges must be the parent the WRITE links, and the write links the row found by `external_id`,
+            // tenant-scoped (`documentRepo.saveDocument`'s `parent_document_id` sub-SELECT). `getDocument` tries `external_id` FIRST
+            // and only then falls back to the primary-key uuid, so the returned record is the write's row exactly when its `id` is
+            // the value asked for — `fromDbRow` sets `id: row.external_id || row.id`. Hence the identity guard below rather than a
+            // bare `getDocument`: without it, a pkey uuid that is no row's `external_id` would judge access against a document the
+            // write never links. That shape is routine, not theoretical — every derived lineage row has a non-uuid `external_id`
+            // (`doc-<ms>-<certId8>`) and a separate pkey.
+            //
+            // A `parentDocumentId` that does not resolve that way is left at today's behaviour EXACTLY: the write records no parent
+            // (the sub-SELECT folds to SQL NULL), so there is nothing to protect, and turning the existing 201 into a refusal would
+            // be a client-visible change. Two consequences, stated rather than hidden: 403-vs-201 now tells a write-role caller
+            // whether an `external_id` exists in their own tenant; and a row whose `external_id` is NULL, addressed by its pkey, is
+            // refused rather than making a parentless row — no writer in this service produces such a row (`saveDocument` always
+            // binds `doc.id`), and refusing is the closed direction.
+            const parentDocument = await getDocument(parentDocumentId, lifecycleTenantId, (req as any).db);
+            if (parentDocument && parentDocument.id === parentDocumentId
+                && !(await callerMayCertifyDocument(req, issuer.id, parentDocument))) {
+              logger.info('KS-1557: lineage certify refused', { tenantId: lifecycleTenantId, userId: issuer.id });
+              return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Forbidden: you may not certify this document' } });
+            }
+            try {
+              await assertNoCycle(id, parentDocumentId, lifecycleTenantId, {
+                db: (req as any).db,
+              });
+            } catch (err: any) {
+              if (err?.code === 'LINEAGE_CYCLE') {
+                return res.status(422).json({
+                  success: false,
+                  error: {
+                    code: 'LINEAGE_CYCLE',
+                    message: `Refusing to certify: ${parentDocumentId} would form a cycle in the document lineage`,
+                  },
+                });
+              }
+              throw err;
+            }
+          }
+
+          // KS-1633: the `documents` row is written BEFORE the anchor. The anchoring service persists its
+          // `anchor_store` row before it answers 202 (anchoring/src/index.ts), so under the old order ANY failure of
+          // this write left an anchor naming no document — an orphan anchor, from a legitimate authenticated flow,
+          // permanently, and orphan anchors are the rows whose anchored identity another registration can claim (the
+          // KS-1612 round-2 Major). Writing the row first removes the window rather than narrowing it.
+          //
+          // RULED (out of the ticket's option 1): every response stays byte-identical to before. That costs two writes
+          // on the accepted path — a provisional row, then the real anchor state through the same
+          // `ON CONFLICT (id) DO UPDATE` — and a compensating delete on the one refusal that sits between them.
+          //
+          // The provisional row deliberately carries the anchor state a FAILED anchor would carry: it under-claims for
+          // the sub-second window before the second write, and introduces no new `anchoringStatus` value into the blob
+          // KS-1124 F4 ruled on. `confidence` is already 'pending-onchain'. Nothing in this request reads the row in
+          // between; a concurrent reader sees \"off-chain only\", which is true at that instant.
+          const tenantId = lifecycleTenantId;
+          const buildCertification = (anchorId: string | null, status: 'submitted' | 'failed'): Certification => ({
+            id,
+            type,
+            status: 'issued',
+            issuer,
+            holder: {
+              id: holderId,
+              did: holderDid,
+            },
+            data,
+            privacySettings,
+            issuedAt: now,
+            expiresAt,
+            contentHash,
+            createdAt: now,
+            updatedAt: now,
+            blockchain: {
+              // Upstream anchor id (correlation), NOT a Cardano txHash. The verifier endpoint reads the live txHash
+              // from the anchoring service via /api/anchors/document/:documentId once Cardano confirms.
+              anchorId,
+              txHash: null as any,
+              blockHeight: null as any,
+              anchoredAt: null as any,
+              confidence: 'pending-onchain',
+              anchoringStatus: status,
+              // KS-1124 F4 (Kam ruled b, 2026-09-28): an issue whose anchoring failed saves status 'failed', which the
+              // gateway maps to off-chain-only; a statusless 'pending-onchain' blob would show as pending forever.
+              ...(status === 'failed' ? { status: 'failed' } : {}),
+            } as any,
+          });
+          // The reservation is EVENT-FREE and NON-DECIDING, and both halves are deliberate.
+          //
+          // Event-free (gate AI1 note N1): `reserveCertificationRow` writes the `documents` row and nothing else, so
+          // an accepted certification still ends with exactly ONE ISSUE event — the authoritative save below writes
+          // it. Using `saveCertification` here produced TWO (measured: 2 against develop's 1).
+          //
+          // Non-deciding (gate AI1 blocker B1): a failure here must never choose the response. If it did, the
+          // production-anchoring-unavailable 503 below would be replaced by this write's own error — measured at
+          // 503 -> 400 for a NUL byte, 503 -> 400 for a connector principal, 503 -> 500 for a throwing save. So a
+          // failure is logged and the request continues: the anchor call and the authoritative save then answer
+          // exactly what they answer without any of this, which is what keeps every response byte-identical.
+          //
+          // The cost, named rather than buried: when the reservation itself fails the request proceeds and an orphan
+          // anchor can still be created — exactly as before this change, so not a regression, and ticketed.
+          let provisionalWritten = false;
+          try {
+            await reserveCertificationRow(buildCertification(null, 'failed'), tenantId, (req as any).db);
+            provisionalWritten = true;
+          } catch (reserveErr: any) {
+            logger.warn('KS-1633: the pre-anchor reservation failed; the request continues and the authoritative save decides the response', {
+              certId: id,
+              tenantId,
+              error: reserveErr instanceof Error ? reserveErr.message : String(reserveErr),
+            });
+          }
+
+          // Pen-test F-03 LIVE: forward to services/anchoring which calls
+          // Blockfrost. Returns 202 immediately with the upstream anchor id;
+          // txHash + blockHeight populate once Cardano confirms (~20–60s).
+          // Verifier endpoint reads the latest from anchoring on each verify
+          // — so a successful response here does NOT imply on-chain confirmation,
+          // only that the request was accepted by the anchoring service.
+          const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+          const certUserToken = (req.headers.authorization as string) || '';
+          let upstreamAnchorId: string | null = null;
+          let anchoringStatus: 'submitted' | 'failed' = 'failed';
+          try {
+            const upstream = await fetch(`${anchoringBase}/api/anchors`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(certUserToken ? { Authorization: certUserToken } : {}),
+              },
+              body: JSON.stringify({
+                documentId: id,
+                certId: id,
+                contentHash,
+                network: process.env.CARDANO_NETWORK || 'preprod',
+                issuerOrgId: issuer.id,
+                issuerName: issuer.name,
+                // KS-1385 site 6: certification issue carries S's identity.
+                ...anchorIdentityFields(req.body),
+              }),
+              // KS-203: bound the anchoring call. On timeout the catch below logs +
+              // leaves anchoringStatus='failed' (graceful; prod 503s, non-prod continues).
+              signal: AbortSignal.timeout(10000),
+            });
+            if (upstream.ok) {
+              const j = await upstream.json() as any;
+              upstreamAnchorId = j?.data?.id || null;
+              anchoringStatus = 'submitted';
+              logger.info('Certification queued for anchoring', { certId: id, upstreamAnchorId });
+            } else {
+              // KS-1709: a refusal from anchoring is an answer, not an exception, so the catch below never sees it; without this line a
+              // non-ok answer left the certification with no anchor and no log line anywhere. Status and a bounded body, as anchors.ts logs.
+              const errText = await upstream.text().catch(() => '');
+              logger.warn('KS-1709: the anchoring service refused the certification anchor', { certId: id, status: upstream.status, body: errText.slice(0, 200) });
+            }
+          } catch (err: any) {
+            logger.warn('Anchoring service unreachable for certification', { certId: id, error: err?.message });
+          }
+          if (anchoringStatus === 'failed' && process.env.NODE_ENV === 'production') {
+            // KS-1633: this refusal now sits AFTER the row was written, so the row is compensated away and the response
+            // keeps its \"nothing was written\" contract exactly. If the delete itself fails the answer is still this
+            // 503 — what happened is still that anchoring is unavailable, and a 500 would describe a different event —
+            // and the residue is a certification with NO anchor. That is the benign direction: an orphan ANCHOR is the
+            // row whose anchored identity another registration can claim; an orphan CERTIFICATION is not. It is never
+            // silent: one error line names the id, with ids only, so it can be reconciled.
+            try {
+              // Nothing to compensate when the reservation never landed, and claiming otherwise would make the alarm
+              // below fire on a path where no row was ever written.
+              const removed = provisionalWritten ? await deleteCertification(id, tenantId, (req as any).tenantPool) : 1;
+              if (removed !== 1) {
+                // A no-op is a FAILED compensation, not a success: under the tenant_isolation policy a DELETE outside
+                // the GUC-bearing transaction matches 0 rows and raises nothing, so a discarded count would hide the
+                // very residue this line exists to report.
+                logger.error('KS-1633: the compensating delete removed no row, so a certification remains with no anchor', {
+                  certId: id,
+                  tenantId,
+                  rowsRemoved: removed,
+                });
+              }
+            } catch (delErr: any) {
+              logger.error('KS-1633: the compensating delete failed, so a certification remains with no anchor', {
+                certId: id,
+                tenantId,
+                error: delErr instanceof Error ? delErr.message : String(delErr),
+              });
+            }
+            return res.status(503).json({
+              success: false,
+              error: { code: 'SERVICE_UNAVAILABLE', message: 'Blockchain anchoring service is temporarily unavailable. Please try again later.', confidence: 'unavailable' },
+            });
+          }
+
+          // The AUTHORITATIVE write, and it runs unconditionally. It is the only writer of the
+          // `certification_events` ISSUE row, so skipping it when the anchor state happens to match the
+          // reservation's would leave an accepted-or-failed certification with ZERO events where there must be
+          // exactly one. (An earlier attempt made this conditional to save a redundant UPDATE; the full suite
+          // caught it — an anchoring-failed request then never reached `saveCertification` at all.) The row half is
+          // the same ON CONFLICT (id) DO UPDATE the reservation used, so a second write is cheap and idempotent.
+          const certification = buildCertification(upstreamAnchorId, anchoringStatus);
+          await saveCertification(certification, tenantId, (req as any).db);
+          // KS-1228: the certification exists now, so its attribution row is recorded
+          // here, after every refusal above (see the validation comment for why).
+          if (certObo) {
+            recordActionProvenance({
+              documentId: id,
+              action: 'certify',
+              tenantId: getReqTenantId(req),
+              organizationId: (req as any).user?.organizationId as string | undefined,
+              connectorId: (req as any).user?.userId as string | undefined,
+              obo: certObo,
+              resolvedUserId: certOboResolved,
+            }).catch((provErr: Error) => logger.warn('provenance record failed', { documentId: id, action: 'certify', error: provErr.message }));
+          }
+
+          // KS-70: when a parentDocumentId is supplied, create a NEW document
+          // representing the post-certify state. The new document carries:
+          //   - the cert's contentHash (new bytes, new hash),
+          //   - parent_document_id pointing at the predecessor,
+          //   - status='signed' (the chain anchor lands on this row, not the parent).
+          // The parent doc is left UNTOUCHED — its history is preserved. This
+          // is the divergence point between the lifecycle-event model and the
+          // legacy \"update the original to certified\" path (the latter still
+          // runs for callers who supply documentId without parentDocumentId).
+          let derivedDocumentExternalId: string | undefined;
+          if (parentDocumentId) {
+            const derivedExternalId = `doc-${Date.now()}-${id.slice(0, 8)}`;
+            // KS-1508: `versionedById` is the ACTOR of a version, set by the server; the erasure of an organisation (KS-695) selects
+            // documents by it. This derived row is spread from the caller's `data`, so a supplied value is DROPPED here, silently,
+            // and logged (tenant and actor ids only, never the value). The certification's own `data` is not touched.
+            // KS-1660: `parentDocumentId` is server-set the same way: the route's own value is written first and the spread below would overwrite it.
+            // KS-1679: `certificationId` and `certifiedAt` are server-set the same way: the route's own values are written first and the spread below would overwrite them.
+            const { versionedById: droppedVersionedById, parentDocumentId: droppedParentDocumentId, certificationId: droppedCertificationId, certifiedAt: droppedCertifiedAt, ...dataWithoutVersionedById } = (data ?? {}) as Record<string, unknown>;
+            if (droppedVersionedById !== undefined) {
+              logger.info('KS-1508: a caller-supplied data.versionedById was dropped from the derived certification document', { tenantId: getReqTenantId(req), userId: issuer.id });
+            }
+            if (droppedParentDocumentId !== undefined) {
+              logger.info('KS-1660: a caller-supplied data.parentDocumentId was dropped from the derived certification document', { tenantId: getReqTenantId(req), userId: issuer.id });
+            }
+            if (droppedCertificationId !== undefined) {
+              logger.info('KS-1679: a caller-supplied data.certificationId was dropped from the derived certification document', { tenantId: getReqTenantId(req), userId: issuer.id });
+            }
+            if (droppedCertifiedAt !== undefined) {
+              logger.info('KS-1679: a caller-supplied data.certifiedAt was dropped from the derived certification document', { tenantId: getReqTenantId(req), userId: issuer.id });
+            }
+            const derivedDoc: DocumentRecord = {
+              id: derivedExternalId,
+              type: type || 'verification_certificate',
+              status: 'signed',
+              owner: { id: issuer.id },
+              parentDocumentId,
+              data: {
+                title:
+                  (data?.title as string) ||
+                  `Certification ${type}`,
+                certificationId: id,
+                certifiedAt: now,
+                parentDocumentId,
+                ...dataWithoutVersionedById,
+              },
+              contentHash:
+                (data as Record<string, unknown> | undefined)?.contentHash as string
+                || generateDocumentContentHash(data || {})
+                || contentHash,
+              signatures: [],
+              blockchain: certification.blockchain as DocumentRecord['blockchain'],
+              createdAt: now,
+              updatedAt: now,
+            };
+            try {
+              await saveLineageDocument(derivedDoc, tenantId, (req as any).db);
+              derivedDocumentExternalId = derivedExternalId;
+            } catch (saveErr: any) {
+              logger.error('KS-70: failed to write derived document for cert lineage', {
+                certId: id,
+                parentDocumentId,
+                error: saveErr instanceof Error ? saveErr.message : String(saveErr),
+              });
+              // Fall through — the certification row already landed; the
+              // derived doc can be back-filled later. We don't 500 the cert.
+            }
+          }
+
+          // Update the original document's status + certification metadata.
+          // KS-70: legacy path — only fires when the caller is in the
+          // pre-lineage model (documentId set, parentDocumentId absent).
+          if (req.body.documentId && !parentDocumentId) {
+            const certDb = (req as any).db || prisma;
+            const certMetaUpdate = JSON.stringify({
+              issuerName: req.body.data?.issuedBy || issuer.name || undefined,
+              issuerId: issuer.id,
+              certificationId: id,
+              certificationType: type,
+              certifiedAt: new Date().toISOString(),
+              certificationData: req.body.data || {},
+              blockchain: certification.blockchain,
+            });
+            try {
+              await certDb.$executeRaw`
+                UPDATE documents SET
+                  status = 'certified',
+                  certified_at = NOW(),
+                  certification_metadata = ${certMetaUpdate}::jsonb,
+                  updated_at = NOW()
+                WHERE external_id = ${req.body.documentId}
+                  AND tenant_id = ${tenantId}::uuid
+                  AND status IN ('draft', 'pending_signature', 'anchored', 'signed')
+              `;
+            } catch (updateErr: unknown) {
+              // KS-1538: best-effort stays best-effort (the certification already exists and a 5xx here would be a contract change for
+              // callers), but it is no longer SILENT: ids and the error text only, never the certification data.
+              logger.error('KS-1538: legacy certify UPDATE failed - continuing, the certification was already issued', {
+                certId: id, documentId: req.body.documentId, tenantId, error: updateErr instanceof Error ? updateErr.message : String(updateErr),
+              });
+            }
+          }
+
+          // Publish certification.issued event (fire-and-forget)
+          publishEvent(EventTypes.CERTIFICATION_ISSUED, {
+            certificationId: id,
+            type,
+            holderId,
+            issuerId: issuer.id,
+            contentHash,
+          }).catch(() => {});
+
+          // Create charge events for certification signing + blockchain anchoring.
+          // KS-216: metering is a billing side-effect — a failed charge write must
+          // NOT 500 a certification that has already landed + been queued for
+          // anchoring (the cert row + anchor exist by this point). Mirror the KS-70
+          // lineage-write pattern above: log and fall through. Charge events can be
+          // reconciled later; a 500 here makes clients retry and double-issue.
+          let signCharge: Awaited<ReturnType<typeof createChargeEvent>> | null = null;
+          let anchorCharge: Awaited<ReturnType<typeof createChargeEvent>> | null = null;
+          try {
+            signCharge = await createChargeEvent('certification_sign', id, issuer.id, tenantId, {
+              metadata: { certificationType: type, holderId },
+            });
+            anchorCharge = await createChargeEvent('blockchain_anchor', id, issuer.id, tenantId, {
+              metadata: { txHash: certification.blockchain?.txHash },
+            });
+          } catch (chargeErr: any) {
+            logger.error('KS-216: failed to persist charge event(s) — continuing, certification already issued', {
+              certId: id,
+              tenantId,
+              error: chargeErr instanceof Error ? chargeErr.message : String(chargeErr),
+            });
+          }
+
+          // Fire lifecycle notification (non-blocking)
+          // Pen-test F-04: fall back to authenticated req.user.email, NOT raw headers.
+          // KS-74: also use resolvedHolderEmail from the stub flow when present.
+          const notifyToEmail = resolvedHolderEmail || holderEmail || (req as any).user?.email;
+          if (notifyToEmail) {
+            // KS-203: fire-and-forget — an intermittent notification failure must
+            // not surface as an unhandled rejection (matches publishEvent above).
+            notifyDocumentCertified({
+              toEmail: notifyToEmail as string,
+              recipientName: req.body.holderName,
+              documentTitle: (data.title as string) || (data.name as string) || type,
+              certifierName: issuer.name || issuer.id,
+              certificationId: id,
+              certifiedAt: now,
+            }).catch((err: any) =>
+              logger.warn('certification notification failed', { certId: id, error: err?.message }),
+            );
+          }
+
+          res.status(201).json({
+            id: certification.id,
+            type: certification.type,
+            holderId: certification.holder.id,
+            status: certification.status,
+            data: certification.data,
+            expiresAt: certification.expiresAt,
+            issuedAt: certification.issuedAt,
+            blockchainAnchor: certification.blockchain,
+            // KS-1709 (Kam ruled b, 2026-10-23: keep it, but mark it unanchored): the kept certification SAYS SO at the top level instead of only
+            // inside `blockchainAnchor`. Present only when the anchoring service did not accept the request in this call (a 4xx, a 5xx, a thrown
+            // error or the timeout), so an accepted answer is byte-identical. It does NOT mean no anchor exists: after a timeout one may.
+            ...(anchoringStatus === 'failed' ? { anchoringStatus: 'failed' } : {}),
+            chargeEvents: [signCharge?.id, anchorCharge?.id].filter(Boolean),
+            // KS-70: when parentDocumentId was provided, the cert produced a
+            // new document representing the post-certify state. Surface its
+            // external id so callers can poll its anchor or feed it into the
+            // next lifecycle event (e.g. sign-after-certify chains).
+            ...(derivedDocumentExternalId
+              ? { derivedDocumentId: derivedDocumentExternalId, parentDocumentId }
+              : {}),
+            // KS-74: when the holder was resolved via holderEmail, surface the
+            // holder status. `INVITED` tells SSD it issued against a stub —
+            // the recipient still needs to register. `ACTIVE` (or any other)
+            // means an existing user.
+            ...(holderEmail
+              ? {
+                  holder: {
+                    id: certification.holder.id,
+                    status: holderStatus ?? 'UNKNOWN',
+                    email: resolvedHolderEmail ?? holderEmail,
+                  },
+                }
+              : {}),
+          });
+        } catch (error: any) {
+          const msg = error instanceof Error ? error.message : String(error);
+          // KS-203: log name + code + stack so the next concurrent-load failure is
+          // diagnosable (the previous blanket 500 logged only the message).
+          logger.error('Failed to issue certification', {
+            error: msg,
+            name: error?.name,
+            code: error?.code,
+            stack: error instanceof Error ? error.stack : undefined,
+          });
+
+          // Detect FK constraint violations and return helpful 400
+          if (msg.includes('foreign key constraint') || msg.includes('violates foreign key')) {
+            if (msg.includes('owner_user_id')) {
+              return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — user does not exist' } });
+            }
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid reference — a referenced record does not exist', detail: msg } });
+          }
+
+          // KS-203: transient dependency failures under concurrent load (DB pool
+          // exhaustion, connection resets, upstream timeouts) are not internal bugs
+          // — return a retryable 503 instead of a blanket 500 so callers/harnesses
+          // back off and retry. Detected via Prisma's pool-timeout code (P2024),
+          // pg connection-acquire timeouts, and Node socket/abort error codes.
+          const code = error?.code as string | undefined;
+          const isTransientDependency =
+            code === 'P2024' ||                                   // Prisma: client connection-pool timeout
+            code === '53300' || code === '53400' ||               // pg: too_many_connections / configuration_limit_exceeded
+            code === '57P03' ||                                   // pg: cannot_connect_now (server starting/recovering)
+            code === 'ECONNREFUSED' || code === 'ECONNRESET' ||   // socket dropped
+            code === 'ETIMEDOUT' || code === 'EAI_AGAIN' ||       // network timeout / DNS
+            error?.name === 'TimeoutError' || error?.name === 'AbortError' ||
+            msg.includes('Timed out fetching a new connection from the connection pool') ||
+            msg.includes('timeout exceeded when trying to connect') ||
+            msg.includes('remaining connection slots are reserved') ||  // pg 53300, observed under load (KS-203)
+            msg.includes('too many clients already') ||
+            msg.includes('Connection terminated');
+          if (isTransientDependency) {
+            return res.status(503).json({
+              success: false,
+              error: { code: 'SERVICE_UNAVAILABLE', message: 'Certification service is temporarily overloaded — please retry', confidence: 'unavailable' },
+            });
+          }
+
+          // KS-445: the spec's free-form `data`/metadata objects permit values
+          // Postgres can't store (a \\u0000 inside a jsonb string → 22P05, invalid
+          // byte sequences → 22021, oversized varchar → 22001, bad casts → 22P02).
+          // Unstorable input is the client's malformed payload, not a server fault.
+          const pgCode = extractPgCode(error);
+          if (pgCode && ['22P02', '22001', '22007', '22008', '22021', '22P05', '23502', '23514', '42804'].includes(pgCode)) {
+            return res.status(400).json({
+              success: false,
+              error: { code: 'BAD_REQUEST', message: 'Certification payload contains values that cannot be stored' },
+            });
+          }
+
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to issue certification' } });
+        }
+      }
+    );
+
+    /**
+     * GET /api/certifications
+     * List certifications with optional filtering
+     */
+    certificationsRouter.get(
+      '/',
+      [
+        query('type').optional().isString(),
+        query('status').optional().isIn(['issued', 'pending', 'revoked', 'expired']),
+        query('holderId').optional().isString(),
+        query('issuerId').optional().isString(),
+        query('limit').optional().isInt({ min: 1, max: 100 }),
+        query('offset').optional().isInt({ min: 0 }),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const { type, status, holderId, issuerId, limit = '20', offset = '0' } = req.query;
+          const limitNum = parseInt(limit as string, 10);
+          const offsetNum = parseInt(offset as string, 10);
+
+          // Scope by authenticated user unless admin
+          // Pen-test F-04: read from authenticated req.user (set by authenticate()
+          // middleware), NOT from raw headers.
+          const user = (req as any).user;
+          const userId = user?.userId as string | undefined;
+          const userRole = user?.role as string | undefined;
+          const isAdmin = userRole === 'system_admin' || userRole === 'SYSTEM_ADMIN' || userRole === 'super_admin';
+
+          const effectiveHolderId = isAdmin ? (holderId as string) : (userId || holderId as string);
+
+          const { items: results } = await listCertifications(getReqTenantId(req), {
+            issuerId: issuerId as string,
+            holderId: effectiveHolderId,
+            status: status as string,
+            type: type as string,
+            page: Math.floor(offsetNum / limitNum) + 1,
+            limit: limitNum,
+          });
+
+          // Additional in-memory filtering for non-admin users
+          let paginated = results;
+          if (userId && !isAdmin) {
+            paginated = results.filter(c =>
+              c.holder?.id === userId || c.issuer?.id === userId
+            );
+          }
+
+          res.json({
+            certifications: paginated.map(c => ({
+              id: c.id,
+              type: c.type,
+              status: c.status,
+              holder: c.holder,
+              issuer: c.issuer,
+              issuedAt: c.issuedAt,
+              expiresAt: c.expiresAt,
+              revokedAt: c.revokedAt,
+            })),
+            pagination: {
+              total: paginated.length,
+              limit: limitNum,
+              offset: offsetNum,
+              hasMore: offsetNum + limitNum < paginated.length,
+            },
+          });
+        } catch (error) {
+          logger.error('Failed to list certifications', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list certifications' } });
+        }
+      }
+    );
+
+    /**
+     * GET /api/certifications/:id
+     * Get certification details by ID
+     */
+    certificationsRouter.get(
+      '/:id',
+      [param('id').notEmpty().withMessage('Certification ID is required')],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const { id } = req.params;
+          const tenantId = getReqTenantId(req);
+          const certification = await getCertification(id, tenantId);
+
+          if (!certification) {
+            return certificationNotFound(res);
+          }
+
+          // KS-1695: bind the read on the record. This precedes the expiry write below, so a
+          // refused reader causes no UPDATE and no certification_events row.
+          if (!callerMayReadCertification(req, certification)) {
+            return certificationNotFound(res);
+          }
+
+          // Check if expired
+          if (certification.expiresAt && new Date(certification.expiresAt) < new Date()) {
+            certification.status = 'expired';
+            await saveCertification(certification, tenantId, (req as any).db);
+          }
+
+          res.json({
+            id: certification.id,
+            type: certification.type,
+            status: certification.status,
+            issuer: certification.issuer,
+            holder: certification.holder,
+            data: certification.data,
+            privacySettings: certification.privacySettings,
+            issuedAt: certification.issuedAt,
+            expiresAt: certification.expiresAt,
+            revokedAt: certification.revokedAt,
+            revocationReason: certification.revocationReason,
+            blockchain: certification.blockchain,
+            contentHash: certification.contentHash,
+          });
+        } catch (error) {
+          // KS-210: a non-uuid :id (e.g. a coverage method-probe like \"issue\")
+          // makes the `id::uuid` cast in getCertification throw pg 22P02
+          // (invalid_text_representation) before the not-found check — treat it as
+          // 404 (no such certification), not a 500 (KS-111 \"500-on-bad-input\" class).
+          // KS-255: originate queries run through Prisma, which wraps the pg error
+          // (code P2010, pg code only in meta/message) — so also match the wrapped
+          // shape, not just the bare `code` the pg driver would set.
+          const pgCode = (error as { code?: string })?.code ?? (error as { meta?: { code?: string } })?.meta?.code;
+          if (pgCode === '22P02' || (error instanceof Error && error.message.includes('22P02'))) {
+            return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+          }
+          logger.error('Failed to get certification', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get certification' } });
+        }
+      }
+    );
+
+    /**
+     * POST /api/certifications/:id/revoke
+     * Revoke a certification
+     */
+    certificationsRouter.post(
+      '/:id/revoke',
+      [
+        param('id').notEmpty().withMessage('Certification ID is required'),
+        body('reason').optional().isString().withMessage('Reason must be a string'),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const issuer = getUserFromRequest(req);
+          if (!issuer) {
+            return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+          }
+
+          const { id } = req.params;
+          const { reason } = req.body;
+          const tenantId = getReqTenantId(req);
+
+          const certification = await getCertification(id, tenantId);
+
+          if (!certification) {
+            return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+          }
+
+          // Verify issuer has permission to revoke
+          if (certification.issuer.id !== issuer.id) {
+            return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Only the issuer can revoke this certification' } });
+          }
+
+          if (certification.status === 'revoked') {
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Certification is already revoked' } });
+          }
+
+          const now = new Date().toISOString();
+          certification.status = 'revoked';
+          certification.revokedAt = now;
+          certification.revocationReason = reason;
+          certification.updatedAt = now;
+
+          await saveCertification(certification, tenantId, (req as any).db);
+
+          // Fire lifecycle notification (non-blocking)
+          // Pen-test F-04: read from authenticated req.user, NOT raw headers.
+          const holderEmail = (req as any).user?.email as string | undefined;
+          if (holderEmail) {
+            notifyDocumentRevoked({
+              toEmail: holderEmail,
+              documentTitle: (certification.data?.title as string) || (certification.data?.name as string) || certification.type,
+              revokedBy: issuer.name || issuer.id,
+              reason,
+              revokedAt: now,
+            });
+          }
+
+          res.json({
+            id: certification.id,
+            status: certification.status,
+            revokedAt: certification.revokedAt,
+            revocationReason: certification.revocationReason,
+          });
+        } catch (error) {
+          logger.error('Failed to revoke certification', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to revoke certification' } });
+        }
+      }
+    );
+
+    /**
+     * POST /api/certifications/:id/verify
+     * Verify a certification's authenticity
+     */
+    certificationsRouter.post(
+      '/:id/verify',
+      [param('id').notEmpty().withMessage('Certification ID is required')],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const { id } = req.params;
+          const certification = await getCertification(id, getReqTenantId(req));
+
+          if (!certification) {
+            return res.status(404).json({
+              verified: false,
+              error: 'Certification not found',
+            });
+          }
+
+          // Check status
+          const isValid = certification.status === 'issued';
+          const isExpired = certification.expiresAt && new Date(certification.expiresAt) < new Date();
+          const isRevoked = certification.status === 'revoked';
+
+          // Verify content hash
+          const currentHash = generateContentHash(certification.data);
+          const hashValid = currentHash === certification.contentHash;
+
+          // Create charge event for verification
+          const verifier = getUserFromRequest(req);
+          const verifyCharge = await createChargeEvent('verification', id, verifier?.id || 'anonymous', getReqTenantId(req), {
+            metadata: { verified: isValid && !isExpired && hashValid },
+          });
+
+          res.json({
+            verified: isValid && !isExpired && hashValid,
+            certificationId: certification.id,
+            status: certification.status,
+            checks: {
+              exists: true,
+              notRevoked: !isRevoked,
+              notExpired: !isExpired,
+              hashValid,
+              blockchainAnchored: !!certification.blockchain,
+            },
+            issuer: {
+              id: certification.issuer.id,
+              did: certification.issuer.did,
+              verified: true,
+            },
+            blockchain: certification.blockchain,
+            verifiedAt: new Date().toISOString(),
+            chargeEventId: verifyCharge.id,
+          });
+        } catch (error) {
+          logger.error('Failed to verify certification', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to verify certification' } });
+        }
+      }
+    );
+
+    // =============================================================================
+    // SHARE ENDPOINT (Phase 3 — Batch Sharing)
+    // =============================================================================
+
+    /**
+     * POST /api/certifications/:id/share
+     * Share a certification with one or more recipients (batch)
+     */
+    certificationsRouter.post(
+      '/:id/share',
+      [
+        param('id').notEmpty().withMessage('Certification ID is required'),
+        body('recipients').isArray({ min: 1 }).withMessage('At least one recipient is required'),
+        body('recipients.*.email').isEmail().withMessage('Valid email is required for each recipient'),
+        body('recipients.*.shareType')
+          .isIn(['view', 'verify', 'reshare'])
+          .withMessage('Share type must be view, verify, or reshare'),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const user = getUserFromRequest(req);
+          if (!user) {
+            return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+          }
+
+          const { id } = req.params;
+          const certification = await getCertification(id, getReqTenantId(req));
+
+          if (!certification) {
+            return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+          }
+
+          if (certification.status === 'revoked') {
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Cannot share a revoked certification' } });
+          }
+
+          const { recipients } = req.body;
+          const now = new Date().toISOString();
+          const created: ShareRecord[] = [];
+
+          for (const recipient of recipients) {
+            const shareId = uuidv4();
+            const record: ShareRecord = {
+              id: shareId,
+              certificationId: id,
+              toEmail: recipient.email,
+              toName: recipient.name || undefined,
+              shareType: recipient.shareType,
+              sharedBy: user.id,
+              timestamp: now,
+              status: 'active',
+            };
+
+            await saveShare(record);
+            created.push(record);
+
+            // Fire lifecycle notification (non-blocking)
+            notifyDocumentShared({
+              toEmail: recipient.email,
+              recipientName: recipient.name,
+              documentTitle: (certification.data?.title as string) || (certification.data?.name as string) || certification.type,
+              sharedByName: user.name || user.id,
+              shareType: recipient.shareType,
+            });
+
+            logger.info('Certification shared', { certificationId: id, recipientEmail: recipient.email, shareType: recipient.shareType });
+          }
+
+          // Create charge event for sharing (currently free, tracked for audit)
+          const shareCharge = await createChargeEvent('share', id, user.id, getReqTenantId(req), {
+            feeStatus: 'free',
+            metadata: { recipientCount: created.length, recipients: recipients.map((r: any) => r.email) },
+          });
+
+          res.status(201).json({
+            certificationId: id,
+            sharesCreated: created.length,
+            shares: created.map((s) => ({
+              id: s.id,
+              toEmail: s.toEmail,
+              toName: s.toName,
+              shareType: s.shareType,
+              status: s.status,
+              timestamp: s.timestamp,
+            })),
+            chargeEventId: shareCharge.id,
+          });
+        } catch (error) {
+          logger.error('Failed to share certification', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to share certification' } });
+        }
+      }
+    );
+
+    // =============================================================================
+    // RECERTIFY ENDPOINT (Phase 2 — Verifier → Certifier)
+    // =============================================================================
+
+    /**
+     * POST /api/certifications/:id/recertify
+     * Issue a verification certificate — a secondary credential that wraps the
+     * original, attesting that a Verifier has verified it.
+     * The Verifier transitions to Certifier role for this lineage.
+     */
+    certificationsRouter.post(
+      '/:id/recertify',
+      [
+        param('id').notEmpty().withMessage('Certification ID is required'),
+        body('note').optional().isString(),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const user = getUserFromRequest(req);
+          if (!user) {
+            return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+          }
+
+          const { id } = req.params;
+          const { note } = req.body;
+          const tenantId = getReqTenantId(req);
+
+          const originalCert = await getCertification(id, tenantId);
+
+          if (!originalCert) {
+            return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Original certification not found' } });
+          }
+
+          if (originalCert.status === 'revoked') {
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Cannot re-certify a revoked certification' } });
+          }
+
+          const now = new Date().toISOString();
+          const newCertId = uuidv4();
+          const verificationContentHash = generateContentHash({
+            originalCertificationId: id,
+            verifierId: user.id,
+            verifiedAt: now,
+          });
+
+          // Pen-test F-03 LIVE: queue with anchoring service.
+          const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+          const verifyCertUserToken = (req.headers.authorization as string) || '';
+          let upstreamAnchorId: string | null = null;
+          let anchoringStatus: 'submitted' | 'failed' = 'failed';
+          try {
+            const upstream = await fetch(`${anchoringBase}/api/anchors`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(verifyCertUserToken ? { Authorization: verifyCertUserToken } : {}),
+              },
+              body: JSON.stringify({
+                documentId: newCertId,
+                certId: newCertId,
+                contentHash: verificationContentHash,
+                network: process.env.CARDANO_NETWORK || 'preprod',
+                // KS-1385 site 7: verification-certification anchor carries S's identity.
+                ...anchorIdentityFields(req.body),
+              }),
+            });
+            if (upstream.ok) {
+              const j = await upstream.json() as any;
+              upstreamAnchorId = j?.data?.id || null;
+              anchoringStatus = 'submitted';
+            } else {
+              // KS-1709: the same gap as the issue route: a refusal is an answer, not an exception, so the catch below never sees it.
+              // Without this line a non-ok answer left the verification certificate with no anchor and no log line anywhere.
+              const errText = await upstream.text().catch(() => '');
+              logger.warn('KS-1709: the anchoring service refused the recertification anchor', { certId: newCertId, originalCertificationId: id, status: upstream.status, body: errText.slice(0, 200) });
+            }
+          } catch (err: any) {
+            logger.warn('Anchoring service unreachable for verification cert', { error: err?.message });
+          }
+          if (anchoringStatus === 'failed' && process.env.NODE_ENV === 'production') {
+            return res.status(503).json({
+              success: false,
+              error: { code: 'SERVICE_UNAVAILABLE', message: 'Blockchain anchoring service is temporarily unavailable. Please try again later.', confidence: 'unavailable' },
+            });
+          }
+
+          // Create the verification certificate
+          const verificationCert: Certification = {
+            id: newCertId,
+            type: 'verification_certificate',
+            status: 'issued',
+            issuer: {
+              id: user.id,
+              did: user.did,
+              name: user.name,
+            },
+            holder: originalCert.holder,
+            data: {
+              originalCertificationId: id,
+              originalType: originalCert.type,
+              originalIssuer: originalCert.issuer,
+              verifierNote: note || null,
+              verifiedAt: now,
+              roleTransition: { from: 'verifier', to: 'certifier' },
+            },
+            issuedAt: now,
+            contentHash: verificationContentHash,
+            createdAt: now,
+            updatedAt: now,
+            blockchain: {
+              anchorId: upstreamAnchorId,
+              txHash: null as any,
+              blockHeight: null as any,
+              anchoredAt: null as any,
+              confidence: 'pending-onchain',
+              anchoringStatus,
+              // KS-1124 F4 (Kam ruled b, 2026-09-28): a recertify whose anchoring failed saves status 'failed', the same
+              // rule as the issue route: the gateway maps it to off-chain-only instead of pending forever.
+              ...(anchoringStatus === 'failed' ? { status: 'failed' } : {}),
+            } as any,
+          };
+
+          await saveCertification(verificationCert, tenantId, (req as any).db);
+
+          // Create charge event for verification certificate (free_in_context for recruitment)
+          const recertCharge = await createChargeEvent('verification_certificate', id, user.id, tenantId, {
+            feeStatus: 'free_in_context',
+            metadata: {
+              verificationCertificateId: newCertId,
+              roleTransition: { from: 'verifier', to: 'certifier' },
+              parentCertificationId: id,
+            },
+          });
+
+          logger.info('Verification certificate issued', { verificationCertId: newCertId, originalCertId: id, userId: user.id });
+
+          res.status(201).json({
+            certificationId: newCertId,
+            type: 'verification_certificate',
+            parentCertificationId: id,
+            status: 'issued',
+            issuer: verificationCert.issuer,
+            roleTransition: { from: 'verifier', to: 'certifier' },
+            blockchain: verificationCert.blockchain,
+            // KS-1709 (Kam ruled b): the same top-level marker as the issue route, present only when the anchoring service did not accept the request.
+            ...(anchoringStatus === 'failed' ? { anchoringStatus: 'failed' } : {}),
+            issuedAt: now,
+            chargeEventId: recertCharge.id,
+          });
+        } catch (error) {
+          logger.error('Failed to issue verification certificate', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to issue verification certificate' } });
+        }
+      }
+    );
+
+    // =============================================================================
+    // LINEAGE ENDPOINT (Phase 1 — Lineage Data)
+    // =============================================================================
+
+    /**
+     * GET /api/certifications/:id/lineage
+     * Get the full lineage data for a certification, including all shares,
+     * verification certificates, and delegation chains.
+     */
+    certificationsRouter.get(
+      '/:id/lineage',
+      [param('id').notEmpty().withMessage('Certification ID is required')],
+      async (req: Request, res: Response) => {
+        try {
+          const { id } = req.params;
+          const certification = await getCertification(id, getReqTenantId(req));
+
+          if (!certification) {
+            return certificationNotFound(res);
+          }
+
+          // KS-1695: bind the read before the share lookup — the response carries share
+          // recipients' email addresses and names.
+          if (!callerMayReadCertification(req, certification)) {
+            return certificationNotFound(res);
+          }
+
+          // Collect all related shares from database
+          const shares = await getSharesByCertification(id);
+
+          // Collect lineage events from provenance chain
+          const events = await getLineageEvents(id);
+
+          // Verification certificates are certifications with type='verification_certificate'
+          // referencing this original via data.originalCertificationId
+          const verificationCerts = events
+            .filter((e: any) => e.eventType === 'RECERTIFY')
+            .map((e: any) => ({
+              id: e.id,
+              issuer: (e.eventData as any)?.issuer || { id: e.actorId },
+              issuedAt: e.occurredAt?.toISOString?.() || e.occurredAt,
+              roleTransition: (e.eventData as any)?.roleTransition,
+            }));
+
+          // Gather charge events for this certification
+          const chargeEvents = await getChargeEventsByCertification(id, getReqTenantId(req));
+
+          res.json({
+            certificationId: id,
+            originalCertification: {
+              id: certification.id,
+              type: certification.type,
+              status: certification.status,
+              issuer: certification.issuer,
+              holder: certification.holder,
+              issuedAt: certification.issuedAt,
+              blockchain: certification.blockchain,
+            },
+            shares: shares.map((s) => ({
+              id: s.id,
+              toEmail: s.toEmail,
+              toName: s.toName,
+              shareType: s.shareType,
+              status: s.status,
+              timestamp: s.timestamp,
+            })),
+            verificationCertificates: verificationCerts,
+            totalShares: shares.length,
+            totalVerificationCerts: verificationCerts.length,
+            chargeEvents: chargeEvents.map((ce) => ({
+              id: ce.id,
+              eventType: ce.eventType,
+              amount: ce.amount,
+              currency: ce.currency,
+              feeStatus: ce.feeStatus,
+              typicalPayer: ce.typicalPayer,
+              status: ce.status,
+              createdAt: ce.createdAt,
+              metadata: ce.metadata,
+            })),
+          });
+        } catch (error) {
+          logger.error('Failed to get lineage', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get lineage data' } });
+        }
+      }
+    );
+
+    // =============================================================================
+    // EVIDENCE BUNDLE ENDPOINT (Phase 7)
+    // =============================================================================
+
+    /**
+     * GET /api/certifications/:id/evidence-bundle
+     * Assemble and return a complete evidence bundle for a certification.
+     */
+    certificationsRouter.get(
+      '/:id/evidence-bundle',
+      [param('id').notEmpty().withMessage('Certification ID is required')],
+      async (req: Request, res: Response) => {
+        try {
+          const { id } = req.params;
+          const certification = await getCertification(id, getReqTenantId(req));
+
+          if (!certification) {
+            return certificationNotFound(res);
+          }
+
+          // KS-1695: bind the read before the evidence_export charge event below, so a refused
+          // reader is never billed and no charge row is written for them.
+          if (!callerMayReadCertification(req, certification)) {
+            return certificationNotFound(res);
+          }
+
+          const tenantId = getReqTenantId(req);
+          const shares = await getSharesByCertification(id);
+          const events = await getLineageEvents(id);
+          const chargeEvents = await getChargeEventsByCertification(id, tenantId);
+
+          // Create charge event for evidence export
+          const exporter = getUserFromRequest(req);
+          const exportCharge = await createChargeEvent('evidence_export', id, exporter?.id || 'anonymous', tenantId);
+
+          const bundle = {
+            bundleVersion: '1.0.0',
+            generatedAt: new Date().toISOString(),
+            certification: {
+              id: certification.id,
+              type: certification.type,
+              status: certification.status,
+              issuer: certification.issuer,
+              holder: certification.holder,
+              contentHash: certification.contentHash,
+              issuedAt: certification.issuedAt,
+              expiresAt: certification.expiresAt,
+              revokedAt: certification.revokedAt,
+              revocationReason: certification.revocationReason,
+              blockchain: certification.blockchain,
+            },
+            provenanceChain: [
+              {
+                action: 'created',
+                actor: certification.issuer.id,
+                timestamp: certification.createdAt,
+                details: { type: certification.type },
+              },
+              {
+                action: 'issued',
+                actor: certification.issuer.id,
+                timestamp: certification.issuedAt,
+                txHash: certification.blockchain?.txHash,
+              },
+              ...shares.map((s) => ({
+                action: 'shared',
+                actor: s.sharedBy,
+                recipient: s.toEmail,
+                timestamp: s.timestamp,
+                shareType: s.shareType,
+              })),
+              ...events
+                .filter((e: any) => e.eventType === 'RECERTIFY')
+                .map((e: any) => ({
+                  action: 'recertified',
+                  actor: e.actorId,
+                  timestamp: e.occurredAt?.toISOString?.() || e.occurredAt,
+                  verificationCertificateId: e.id,
+                })),
+            ],
+            shares: shares.length,
+            verificationCertificates: events.filter((e: any) => e.eventType === 'RECERTIFY').length,
+            chargeEvents: [...chargeEvents, exportCharge].map((ce) => ({
+              id: ce.id,
+              eventType: ce.eventType,
+              amount: ce.amount,
+              currency: ce.currency,
+              feeStatus: ce.feeStatus,
+              typicalPayer: ce.typicalPayer,
+              status: ce.status,
+              createdAt: ce.createdAt,
+            })),
+            exportChargeEventId: exportCharge.id,
+          };
+
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename=\"evidence-bundle-${id}.json\"`
+          );
+          res.json(bundle);
+        } catch (error) {
+          logger.error('Failed to generate evidence bundle', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to generate evidence bundle' } });
+        }
+      }
+    );
+
+    export default certificationsRouter;
+    "
+
+      11 | describe('KS-1666 (d): the certify reservation comments match the code', () => {
+      12 |   it('RED KS-1666 R1 the reservation comment no longer says the row-first order removes the window', () => {
+    > 13 |     expect(SRC).not.toContain('removes the window rather than narrowing it');
+         |                     ^
+      14 |     expect(SRC).toContain('NARROWS that window, it does not remove it');
+      15 |   });
+      16 |
+
+      at Object.<anonymous> (src/__tests__/ks1666-certify-reservation-comments-match-the-code.test.ts:13:21)
+
+  ● KS-1666 (d): the certify reservation comments match the code › RED KS-1666 R2 the provisional-row comment no longer calls the window sub-second and names the 10 second bound
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "the sub-second window before the second write"
+    Received string:        "/**
+     * =============================================================================
+     * CERTIFICATION ROUTES
+     * =============================================================================
+     * API endpoints for issuing, managing, and revoking certifications
+     * Certifications are verifiable credentials anchored on the Cardano blockchain
+     * =============================================================================
+     */
+
+    import { Router, Request, Response } from 'express';
+    import { body, param, query, validationResult } from 'express-validator';
+    import {
+      extractOnBehalfOf,
+      resolveOnBehalfOf,
+      recordActionProvenance,
+      OnBehalfOfError,
+      wasCreatedByConnector,
+      type OnBehalfOf,
+    } from '../services/provenance';
+    import { v4 as uuidv4 } from 'uuid';
+    import crypto from 'crypto';
+    import {
+      getCertification,
+      saveCertification,
+      listCertifications,
+      saveShare,
+      getSharesByCertification,
+      getLineageEvents,
+      initRepo,
+      type Certification,
+      type ShareRecord,
+      deleteCertification,
+      reserveCertificationRow,
+    } from '../repositories/certificationRepo';
+    import { prisma } from '../db';
+    import {
+      createChargeEvent,
+      getChargeEventsByCertification,
+    } from '../services/chargeEvents';
+    import {
+      notifyDocumentCertified,
+      notifyDocumentRevoked,
+      notifyDocumentShared,
+    } from '../utils/notificationClient';
+    import { logger } from '../utils/logger';
+    import { publishEvent, EventTypes } from '../events';
+    import { authenticate } from '../middleware/auth';
+    import { isAllowedByRoleOrScope } from '../middleware/rbac';
+    import { DOCUMENT_WRITE_ROLES } from '../middleware/documentWriteRoles';
+    import {
+      getDocument,
+      saveDocument as saveLineageDocument,
+      assertNoCycle,
+      generateContentHash as generateDocumentContentHash,
+      type DocumentRecord,
+    } from '../repositories/documentRepo';
+    import { isPlatformRole } from '@secuura/shared';
+    import { extractPgCode } from '../utils/pgErrors';
+    import { anchorIdentityFields } from '../utils/anchorIdentity';
+
+    export const certificationsRouter = Router();
+    // All routes here require an authenticated Bearer JWT. Audit A-09 + A-01:
+    // previously trusted client-supplied x-user-* headers via getUserFromRequest;
+    // the gateway now strips those (commit c796138f0) and this enforces real
+    // authentication as defense in depth.
+    certificationsRouter.use(authenticate());
+
+
+    // Initialize repository on module load
+    initRepo().catch((err) => logger.error('Failed to init repo', { error: err instanceof Error ? err.message : String(err) }));
+
+    // =============================================================================
+    // HELPER FUNCTIONS
+    // =============================================================================
+
+    function generateContentHash(data: Record<string, unknown>): string {
+      const sorted = JSON.stringify(data, Object.keys(data).sort());
+      return crypto.createHash('sha256').update(sorted).digest('hex');
+    }
+
+    function getUserFromRequest(req: Request): { id: string; did?: string; name?: string } | null {
+      // Pen-test F-04: read from authenticated req.user (set by authenticate()
+      // middleware), NOT from raw headers. Direct header reads are spoofable
+      // by anyone reaching the service directly.
+      const user = (req as any).user;
+      const userId = user?.userId;
+      const userEmail = user?.email as string | undefined;
+
+      if (!userId) return null;
+
+      return {
+        id: userId,
+        did: user?.did,
+        name: userEmail?.split('@')[0],
+      };
+    }
+
+    /**
+     * KS-22 (KS-4 phase 5b): every certification call must be tenant-scoped.
+     * Mirrors getReqTenantId in routes/documents.ts — req.tenantId is the
+     * effective tenant after extractTenantContext resolves any X-Tenant-Override.
+     * In single-tenancy mode the middleware doesn't run; fall back to the same
+     * default tenant id that extractTenantContext itself uses in non-prod, so
+     * queries match the rows the migration backfilled there.
+     */
+    const DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+
+    function getReqTenantId(req: Request): string {
+      const tid = (req as any).tenantId as string | undefined;
+      return tid || DEFAULT_TENANT_ID;
+    }
+
+    /**
+     * KS-1538: may this caller act on this document? The legacy certify path (`documentId` without `parentDocumentId`) rewrites the NAMED
+     * document, so the caller needs the access GET /api/documents/:id already requires (routes/documents.ts, \"Ownership check\"): the
+     * owner, a system admin, the designated recipient, or the CREATING connector. Two deliberate differences from that read check, both
+     * fail-closed: an OWNERLESS document (a connector made it with no onBehalfOf: owner id empty) is not open to everyone, and a
+     * recipientEmail that is not a string never matches (the read check would throw on it).
+     */
+    async function callerMayCertifyDocument(req: Request, userId: string, document: DocumentRecord): Promise<boolean> {
+      const authUser = (req as any).user;
+      const role = authUser?.role as string | undefined;
+      if (role === 'system_admin' || role === 'SYSTEM_ADMIN' || role === 'super_admin') return true;
+      if (document.owner?.id && document.owner.id === userId) return true;
+      const email = authUser?.email;
+      const recipientEmail = (document.data as Record<string, unknown> | undefined)?.recipientEmail;
+      if (typeof email === 'string' && typeof recipientEmail === 'string' && email && recipientEmail
+          && email.toLowerCase() === recipientEmail.toLowerCase()) return true;
+      return role === 'connector' && (await wasCreatedByConnector(document.id, userId));
+    }
+
+    /**
+     * KS-1695: may this caller READ this certification?
+     *
+     * The three by-id certification reads (`GET /:id`, `/:id/lineage`, `/:id/evidence-bundle`) looked a
+     * row up by primary key with NO caller term, so EVERY same-tenant user of ANY organisation in the
+     * tenant read any certification there by its id — including rows `GET /api/documents/:id` already
+     * cloaks. Gate BX1 measured it: a (same tenant, same organisation) 200, a2 (same tenant, another
+     * organisation) 200, b (another tenant) 404, c (the issuing connector) 200.
+     *
+     * The rule is: a platform admin, the issuer, or the holder. The issuer/holder half is the one the
+     * LIST route already applies in-process (its `!isAdmin` filter at `:971`), so a refused reader of a
+     * human-issued certification is one the list already hides the row from. The ADMIN half is NOT the
+     * same rule: the list compares three literal spellings (`:954`), while this uses `isPlatformRole`,
+     * which upper-cases, so `SUPER_ADMIN` is admitted here and not there. That makes this read MORE
+     * permissive than the list for exactly that spelling — recorded deliberately, not resolved here.
+     * `ORG_ADMIN` is deliberately NOT admitted by either.
+     *
+     * An EMPTY principal never matches. `certificationRepo.fromDbRow` maps a missing actor to `''`
+     * (`row.issuer_user_id || certMeta.issuerId || ''`), so a bare-connector document read through this
+     * path has `issuer.id === holder.id === ''`; without the guard `'' === ''` would admit everyone.
+     * The issuing connector still passes, because its `userId` is the literal `connector:<platform>:<id>`
+     * that `certification_metadata.issuerId` holds verbatim (see utils/principalId.ts).
+     *
+     * Callers must apply this BEFORE any side effect: `GET /:id` writes an expiry update (and a
+     * certification_events row) for whoever reads, and `/:id/evidence-bundle` writes an
+     * `evidence_export` charge event for whoever reads.
+     */
+    function callerMayReadCertification(req: Request, certification: Certification): boolean {
+      const authUser = (req as any).user;
+      // KS-1695 round 2 (gate CF1 N2): use the repo's ONE definition of \"platform role\" rather than a
+      // hand-written set. `isPlatformRole` (packages/shared/src/security/keyRevokePolicy.ts) upper-cases
+      // the claim, so BOTH casings of SYSTEM_ADMIN and SUPER_ADMIN pass. The set this replaces was copied
+      // from the list route (`:954` at this head; `:906` was develop's numbering) and therefore missed
+      // `SUPER_ADMIN`, which turned a 200 into a 404 for a
+      // real platform administrator. Consequence worth knowing: for that spelling this by-id read is now
+      // MORE permissive than the list route, which keeps its narrower literal set. That inconsistency is
+      // recorded, not resolved here. Still NOT widened to ORG_ADMIN.
+      if (isPlatformRole(authUser?.role as string | undefined)) return true;
+      const userId = typeof authUser?.userId === 'string' ? authUser.userId : '';
+      if (userId === '') return false;
+      if (userId === certification.issuer?.id) return true;
+      return userId === certification.holder?.id;
+    }
+
+    /**
+     * KS-1695: the single refusal the bound reads share with an unknown id, so a refused reader cannot
+     * tell \"not yours\" from \"no such certification\". One function, so the two bodies cannot drift.
+     */
+    function certificationNotFound(res: Response): Response {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+    }
+
+    // =============================================================================
+    // ROUTES
+    // =============================================================================
+
+    /**
+     * POST /api/certifications/issue
+     * Issue a new certification
+     */
+    certificationsRouter.post(
+      '/issue',
+      [
+        body('type')
+          .isIn([
+            'educational_degree',
+            'employment_certificate',
+            'professional_certification',
+            'employment_reference',
+            'identity_document',
+            'certificate',
+            'verification_certificate',
+            // KS-66 (Kam, 2026-05-14): \"Signed Document\" — the SSD-side
+            // recipient-attestation event (\"sign\"). `verification_certificate`
+            // stays the issuer-side authoritative attestation (\"certify\").
+            // Both produce new linked documents via KS-70's parent_document_id.
+            'signed_document',
+            'DOCUMENT',
+          ])
+          .withMessage('Invalid certification type. Allowed: educational_degree, employment_certificate, professional_certification, employment_reference, identity_document, certificate, verification_certificate, signed_document, DOCUMENT'),
+        body('holderId').optional(),
+        // KS-74: SSD-style flows can issue against an email when the holder
+        // hasn't signed up yet. Mutually exclusive with holderId — the
+        // handler returns 400 if both are set. When supplied, the email is
+        // resolved (or an INVITED stub is created) via auth-service.
+        body('holderEmail').optional().isEmail().withMessage('holderEmail must be a valid email'),
+        body('data').isObject().withMessage('Data must be an object'),
+        // KS-70: optional lifecycle parent. When set, certify creates a new
+        // document linked to this one via parent_document_id and rejects
+        // cycles in the proposed ancestor chain. Accepts the external-id
+        // shape originate uses elsewhere (doc-<ts>-<random>) — the route
+        // layer doesn't try to coerce to UUID.
+        body('parentDocumentId').optional().isString().withMessage('parentDocumentId must be a string'),
+        // KS-444: enforce the remaining published CertificationIssueRequest field
+        // types. The sweep's negative_data_rejection sent `metadata: [null,null]`
+        // (spec declares a JSON object) and it was accepted with a 201. isObject()
+        // is strict by default — arrays and null are rejected.
+        body('documentId').optional().isString().withMessage('documentId must be a string'),
+        body('metadata').optional().isObject().withMessage('metadata must be an object'),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          // Check authentication first
+          const issuer = getUserFromRequest(req);
+          if (!issuer) {
+            return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+          }
+
+          // KS-547 (KS-540 F-2): certification issuance gates like every other
+          // document-write verb — this was the one ungated write on the platform.
+          // Human callers need a DOCUMENT_WRITE_ROLES role; `sk_*` connector
+          // callers satisfy it via the `certifications:write` scope (KS-71 path),
+          // so S's certify traffic is unaffected. Demo persona demo@secuura.io is
+          // seeded ISSUER_ADMIN so the live demo certify flow keeps working.
+          if (!isAllowedByRoleOrScope(req, DOCUMENT_WRITE_ROLES, 'certifications:write')) {
+            return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Forbidden: your role does not permit issuing certifications' } });
+          }
+
+          // Then validate request body
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            // KS-39 #3: wrap express-validator output in the gateway's standard
+            // envelope `{success, error: {code, message, details}}` so callers
+            // can read `body.error.message` consistently. Previously we returned
+            // raw `{errors: [...]}` which broke every consumer that doesn't
+            // special-case it (including the e2e contract harness).
+            const errArr = errors.array();
+            const summary = errArr.map((e: { msg?: string }) => e.msg).filter(Boolean).join('; ');
+            return res.status(400).json({
+              success: false,
+              error: {
+                code: 'VALIDATION_ERROR',
+                message: summary || 'Invalid request body',
+                details: errArr,
+              },
+            });
+          }
+
+          // KS-1538: the legacy certify path (documentId without parentDocumentId, the branch further down) rewrites the NAMED document,
+          // so the caller must be allowed to act on it. Checked HERE, before the holder lookup, the anchoring submission and the save: a
+          // refusal after those would leave an anchored certification for a document the caller had no right to. One refusal for an
+          // unknown document and for someone else's, so the answer is not an existence oracle. Logged with ids only, never the body.
+          if (req.body.documentId && !req.body.parentDocumentId) {
+            const legacyDocument = await getDocument(req.body.documentId, getReqTenantId(req), (req as any).db);
+            if (!legacyDocument || !(await callerMayCertifyDocument(req, issuer.id, legacyDocument))) {
+              logger.info('KS-1538: legacy certify refused', { tenantId: getReqTenantId(req), userId: issuer.id });
+              return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Forbidden: you may not certify this document' } });
+            }
+          }
+
+          const { type, holderDid, data, expiresAt, privacySettings } = req.body;
+
+          // KS-1213: with parentDocumentId, the derived document is stored as the certification type
+          // (`type || 'verification_certificate'`) and the caller's `data` is spread into its `data`, while a
+          // document is served as `data.documentType || type`. A `data.documentType` that differs from that
+          // stored type would serve, and verify, the derived document as another type. Refused before any
+          // write (the holder stub and the certification row come first); exact comparison, as KS-1202.
+          const derivedDataDocumentType = data && typeof data === 'object' ? (data as Record<string, unknown>).documentType : undefined;
+          if (req.body.parentDocumentId && derivedDataDocumentType !== undefined && derivedDataDocumentType !== (type || 'verification_certificate')) {
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'data.documentType must equal the certification type when parentDocumentId is set' } });
+          }
+          const holderEmail: string | undefined = req.body.holderEmail;
+
+          // KS-74: holderId XOR holderEmail. Both = 400 (ambiguous which to use).
+          if (req.body.holderId && holderEmail) {
+            return res.status(400).json({
+              success: false,
+              error: {
+                code: 'BAD_REQUEST',
+                message: 'Supply either holderId or holderEmail, not both',
+              },
+            });
+          }
+
+          // Track whether the resolved holder was just-stubbed so the response
+          // can tell SSD \"you issued against a pending invite, status: INVITED\".
+          let holderStatus: 'ACTIVE' | 'INVITED' | string | undefined;
+          let resolvedHolderEmail: string | undefined;
+
+          // KS-74: when holderEmail is supplied, ask auth-service to either
+          // resolve it to an existing user OR mint an INVITED stub. The stub
+          // gets claimed on /api/auth/register later.
+          //
+          // KS-289: call auth-service DIRECTLY (server-to-server via
+          // AUTH_SERVICE_URL), NOT via the public gateway. Two reasons the old
+          // gateway route failed: (1) the gateway enforces CSRF on POST/PUT/etc.,
+          // so a POST /api/users/stub through it is rejected with
+          // CSRF_TOKEN_MISSING — a service call carries no browser CSRF token;
+          // (2) GATEWAY_BASE_URL was unset, so it fell back to
+          // http://localhost:6882, which inside the originate container is
+          // originate itself → ECONNREFUSED → the reported 502 \"Recipient lookup
+          // service unavailable\". auth's /stub self-gates on role/scope and reads
+          // the tenant from the forwarded JWT, so the direct call is equivalent
+          // for security and tenant-correct.
+          let holderId: string;
+          if (holderEmail) {
+            const authHeader = (req.headers.authorization as string) || '';
+            try {
+              const authBase = process.env.AUTH_SERVICE_URL || 'http://localhost:6003';
+              const stubRes = await fetch(`${authBase}/api/users/stub`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(authHeader ? { Authorization: authHeader } : {}),
+                },
+                body: JSON.stringify({ email: holderEmail }),
+                // KS-203: bound the upstream call so a hung users/stub can't keep
+                // the request open until the gateway times out (empty-body 500).
+                signal: AbortSignal.timeout(5000),
+              });
+              if (stubRes.status === 404) {
+                // Cross-tenant block — the email is already a Platform K user
+                // in another tenant. Auth-service deliberately returns 404 to
+                // avoid cross-tenant disclosure. SSD treats this as \"this
+                // recipient cannot be issued to from this tenant\".
+                return res.status(404).json({
+                  success: false,
+                  error: {
+                    code: 'RECIPIENT_NOT_AVAILABLE',
+                    message:
+                      'Email is not resolvable to a user in this tenant. ' +
+                      'It may already belong to a different tenant.',
+                  },
+                });
+              }
+              if (!stubRes.ok) {
+                return res.status(502).json({
+                  success: false,
+                  error: { code: 'BAD_GATEWAY', message: 'Could not resolve recipient via users/stub' },
+                });
+              }
+              const body = (await stubRes.json()) as {
+                data?: { userId: string; status?: string; email?: string };
+              };
+              if (!body.data?.userId) {
+                return res.status(502).json({
+                  success: false,
+                  error: { code: 'BAD_GATEWAY', message: 'users/stub returned no userId' },
+                });
+              }
+              holderId = body.data.userId;
+              holderStatus = body.data.status;
+              resolvedHolderEmail = body.data.email;
+            } catch (err: any) {
+              // KS-203: a timeout/abort is a transient dependency failure (retryable
+              // 503), distinct from a genuine bad-gateway response (502).
+              const timedOut = err?.name === 'TimeoutError' || err?.name === 'AbortError';
+              logger.warn('users/stub unreachable during certifications/issue', { error: err?.message, timedOut });
+              return res.status(timedOut ? 503 : 502).json({
+                success: false,
+                error: timedOut
+                  ? { code: 'SERVICE_UNAVAILABLE', message: 'Recipient lookup timed out — please retry' }
+                  : { code: 'BAD_GATEWAY', message: 'Recipient lookup service unavailable' },
+              });
+            }
+          } else {
+            holderId = req.body.holderId || issuer.id; // Default to issuer's own ID
+          }
+
+          // Validate holderId references a real user if explicitly provided
+          // (holderEmail flow skips this — auth-service already minted/resolved
+          // a valid user id above).
+          if (req.body.holderId) {
+            // Quick format check before hitting DB
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (!uuidRegex.test(holderId)) {
+              return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — must be a valid UUID' } });
+            }
+            try {
+              const db = (req as any).db || prisma;
+              const holderCheck = await db.$queryRaw`SELECT id FROM users WHERE id = ${holderId}::uuid LIMIT 1`;
+              if (!holderCheck || (Array.isArray(holderCheck) && holderCheck.length === 0)) {
+                return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — user does not exist' } });
+              }
+            } catch (err: any) {
+              const errMsg = err instanceof Error ? err.message : String(err);
+              if (errMsg.includes('invalid input syntax') || errMsg.includes('uuid')) {
+                return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — must be a valid UUID' } });
+              }
+              // For other DB errors (table missing, connection issues), log and return 400
+              // rather than letting a bad holderId propagate to saveCertification
+              logger.warn('holderId validation DB error — rejecting', { holderId, error: errMsg });
+              return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — could not validate' } });
+            }
+          }
+
+          const id = uuidv4();
+          const now = new Date().toISOString();
+
+          // KS-480 §6: connector attribution on the certify action. Validate +
+          // resolve BEFORE any write (400 shape / 403 cross-org fail fast).
+          // KS-1228: the row used to be recorded right here, \"once the id exists\",
+          // which was still BEFORE the lineage 422, the production anchoring 503 and
+          // the save-time 400/503s below — so a refused issue left a row for a
+          // certification that was never issued. It is now recorded only once
+          // saveCertification succeeds. Reserved key never rides in the
+          // certification data blob (it is content-hashed below).
+          let certObo: OnBehalfOf | null = null;
+          let certOboResolved: string | null = null;
+          try {
+            certObo = extractOnBehalfOf(req);
+            if (certObo) {
+              certOboResolved = await resolveOnBehalfOf(certObo, (req as any).user?.organizationId as string | undefined);
+            }
+          } catch (oboErr) {
+            if (oboErr instanceof OnBehalfOfError) {
+              return res.status(oboErr.status).json({ success: false, error: { code: oboErr.code, message: oboErr.message } });
+            }
+            throw oboErr;
+          }
+          if (data && typeof data === 'object') {
+            delete (data as Record<string, unknown>).onBehalfOf;
+            // KS-543 (Stuart's KS-537 finding #3): the data blob is content-hashed
+            // below, so any PII a caller puts in it becomes STRUCTURALLY
+            // UNERASABLE — it can never be encrypted or pseudonymised post-hoc
+            // without invalidating the certification's own hash. Boundary hygiene
+            // is the only durable fix (the onBehalfOf delete above is the
+            // precedent): strip the known identity keys BEFORE hashing so no
+            // caller can hash them into permanence. S already dropped
+            // data.actorName on their side (PS-472) — this enforces it
+            // structurally instead of trusting each caller. Strip, not reject —
+            // a 400 here would widen platform-wide 4xx behaviour (KS-472 rule:
+            // bound the positive generator first).
+            for (const identityKey of ['actorName', 'actorEmail']) {
+              delete (data as Record<string, unknown>)[identityKey];
+            }
+          }
+
+          const contentHash = generateContentHash(data);
+
+          // KS-70: optional lifecycle parent. Walk the proposed parent's
+          // ancestor chain to reject cycles BEFORE we anchor or write — the
+          // anchoring call is expensive and an invalid lineage shouldn't be
+          // visible on-chain. The walker is capped at MAX_LINEAGE_DEPTH; if
+          // it would exceed the cap we still proceed (the chain is just deep,
+          // not cyclic) but the verify endpoint will return truncated=true.
+          const parentDocumentId: string | undefined = req.body.parentDocumentId;
+          const lifecycleTenantId = getReqTenantId(req);
+          if (parentDocumentId) {
+            // KS-1557: the lineage path derives a NEW document from the named parent, so the caller must be allowed to act on that
+            // parent. Same rule, same predicate as the legacy path above and as GET /api/documents/:id (routes/documents.ts): the
+            // owner, a system admin, the designated recipient, or the creating connector. Checked HERE, before the cycle walk, the
+            // anchoring submission and both saves — a refusal after those would leave an anchored certification derived from a
+            // document the caller had no right to (the same reason the KS-1538 comment above gives), and it keeps the ancestor walk
+            // off a chain the caller may not read.
+            //
+            // The parent the check judges must be the parent the WRITE links, and the write links the row found by `external_id`,
+            // tenant-scoped (`documentRepo.saveDocument`'s `parent_document_id` sub-SELECT). `getDocument` tries `external_id` FIRST
+            // and only then falls back to the primary-key uuid, so the returned record is the write's row exactly when its `id` is
+            // the value asked for — `fromDbRow` sets `id: row.external_id || row.id`. Hence the identity guard below rather than a
+            // bare `getDocument`: without it, a pkey uuid that is no row's `external_id` would judge access against a document the
+            // write never links. That shape is routine, not theoretical — every derived lineage row has a non-uuid `external_id`
+            // (`doc-<ms>-<certId8>`) and a separate pkey.
+            //
+            // A `parentDocumentId` that does not resolve that way is left at today's behaviour EXACTLY: the write records no parent
+            // (the sub-SELECT folds to SQL NULL), so there is nothing to protect, and turning the existing 201 into a refusal would
+            // be a client-visible change. Two consequences, stated rather than hidden: 403-vs-201 now tells a write-role caller
+            // whether an `external_id` exists in their own tenant; and a row whose `external_id` is NULL, addressed by its pkey, is
+            // refused rather than making a parentless row — no writer in this service produces such a row (`saveDocument` always
+            // binds `doc.id`), and refusing is the closed direction.
+            const parentDocument = await getDocument(parentDocumentId, lifecycleTenantId, (req as any).db);
+            if (parentDocument && parentDocument.id === parentDocumentId
+                && !(await callerMayCertifyDocument(req, issuer.id, parentDocument))) {
+              logger.info('KS-1557: lineage certify refused', { tenantId: lifecycleTenantId, userId: issuer.id });
+              return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Forbidden: you may not certify this document' } });
+            }
+            try {
+              await assertNoCycle(id, parentDocumentId, lifecycleTenantId, {
+                db: (req as any).db,
+              });
+            } catch (err: any) {
+              if (err?.code === 'LINEAGE_CYCLE') {
+                return res.status(422).json({
+                  success: false,
+                  error: {
+                    code: 'LINEAGE_CYCLE',
+                    message: `Refusing to certify: ${parentDocumentId} would form a cycle in the document lineage`,
+                  },
+                });
+              }
+              throw err;
+            }
+          }
+
+          // KS-1633: the `documents` row is written BEFORE the anchor. The anchoring service persists its
+          // `anchor_store` row before it answers 202 (anchoring/src/index.ts), so under the old order ANY failure of
+          // this write left an anchor naming no document — an orphan anchor, from a legitimate authenticated flow,
+          // permanently, and orphan anchors are the rows whose anchored identity another registration can claim (the
+          // KS-1612 round-2 Major). Writing the row first removes the window rather than narrowing it.
+          //
+          // RULED (out of the ticket's option 1): every response stays byte-identical to before. That costs two writes
+          // on the accepted path — a provisional row, then the real anchor state through the same
+          // `ON CONFLICT (id) DO UPDATE` — and a compensating delete on the one refusal that sits between them.
+          //
+          // The provisional row deliberately carries the anchor state a FAILED anchor would carry: it under-claims for
+          // the sub-second window before the second write, and introduces no new `anchoringStatus` value into the blob
+          // KS-1124 F4 ruled on. `confidence` is already 'pending-onchain'. Nothing in this request reads the row in
+          // between; a concurrent reader sees \"off-chain only\", which is true at that instant.
+          const tenantId = lifecycleTenantId;
+          const buildCertification = (anchorId: string | null, status: 'submitted' | 'failed'): Certification => ({
+            id,
+            type,
+            status: 'issued',
+            issuer,
+            holder: {
+              id: holderId,
+              did: holderDid,
+            },
+            data,
+            privacySettings,
+            issuedAt: now,
+            expiresAt,
+            contentHash,
+            createdAt: now,
+            updatedAt: now,
+            blockchain: {
+              // Upstream anchor id (correlation), NOT a Cardano txHash. The verifier endpoint reads the live txHash
+              // from the anchoring service via /api/anchors/document/:documentId once Cardano confirms.
+              anchorId,
+              txHash: null as any,
+              blockHeight: null as any,
+              anchoredAt: null as any,
+              confidence: 'pending-onchain',
+              anchoringStatus: status,
+              // KS-1124 F4 (Kam ruled b, 2026-09-28): an issue whose anchoring failed saves status 'failed', which the
+              // gateway maps to off-chain-only; a statusless 'pending-onchain' blob would show as pending forever.
+              ...(status === 'failed' ? { status: 'failed' } : {}),
+            } as any,
+          });
+          // The reservation is EVENT-FREE and NON-DECIDING, and both halves are deliberate.
+          //
+          // Event-free (gate AI1 note N1): `reserveCertificationRow` writes the `documents` row and nothing else, so
+          // an accepted certification still ends with exactly ONE ISSUE event — the authoritative save below writes
+          // it. Using `saveCertification` here produced TWO (measured: 2 against develop's 1).
+          //
+          // Non-deciding (gate AI1 blocker B1): a failure here must never choose the response. If it did, the
+          // production-anchoring-unavailable 503 below would be replaced by this write's own error — measured at
+          // 503 -> 400 for a NUL byte, 503 -> 400 for a connector principal, 503 -> 500 for a throwing save. So a
+          // failure is logged and the request continues: the anchor call and the authoritative save then answer
+          // exactly what they answer without any of this, which is what keeps every response byte-identical.
+          //
+          // The cost, named rather than buried: when the reservation itself fails the request proceeds and an orphan
+          // anchor can still be created — exactly as before this change, so not a regression, and ticketed.
+          let provisionalWritten = false;
+          try {
+            await reserveCertificationRow(buildCertification(null, 'failed'), tenantId, (req as any).db);
+            provisionalWritten = true;
+          } catch (reserveErr: any) {
+            logger.warn('KS-1633: the pre-anchor reservation failed; the request continues and the authoritative save decides the response', {
+              certId: id,
+              tenantId,
+              error: reserveErr instanceof Error ? reserveErr.message : String(reserveErr),
+            });
+          }
+
+          // Pen-test F-03 LIVE: forward to services/anchoring which calls
+          // Blockfrost. Returns 202 immediately with the upstream anchor id;
+          // txHash + blockHeight populate once Cardano confirms (~20–60s).
+          // Verifier endpoint reads the latest from anchoring on each verify
+          // — so a successful response here does NOT imply on-chain confirmation,
+          // only that the request was accepted by the anchoring service.
+          const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+          const certUserToken = (req.headers.authorization as string) || '';
+          let upstreamAnchorId: string | null = null;
+          let anchoringStatus: 'submitted' | 'failed' = 'failed';
+          try {
+            const upstream = await fetch(`${anchoringBase}/api/anchors`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(certUserToken ? { Authorization: certUserToken } : {}),
+              },
+              body: JSON.stringify({
+                documentId: id,
+                certId: id,
+                contentHash,
+                network: process.env.CARDANO_NETWORK || 'preprod',
+                issuerOrgId: issuer.id,
+                issuerName: issuer.name,
+                // KS-1385 site 6: certification issue carries S's identity.
+                ...anchorIdentityFields(req.body),
+              }),
+              // KS-203: bound the anchoring call. On timeout the catch below logs +
+              // leaves anchoringStatus='failed' (graceful; prod 503s, non-prod continues).
+              signal: AbortSignal.timeout(10000),
+            });
+            if (upstream.ok) {
+              const j = await upstream.json() as any;
+              upstreamAnchorId = j?.data?.id || null;
+              anchoringStatus = 'submitted';
+              logger.info('Certification queued for anchoring', { certId: id, upstreamAnchorId });
+            } else {
+              // KS-1709: a refusal from anchoring is an answer, not an exception, so the catch below never sees it; without this line a
+              // non-ok answer left the certification with no anchor and no log line anywhere. Status and a bounded body, as anchors.ts logs.
+              const errText = await upstream.text().catch(() => '');
+              logger.warn('KS-1709: the anchoring service refused the certification anchor', { certId: id, status: upstream.status, body: errText.slice(0, 200) });
+            }
+          } catch (err: any) {
+            logger.warn('Anchoring service unreachable for certification', { certId: id, error: err?.message });
+          }
+          if (anchoringStatus === 'failed' && process.env.NODE_ENV === 'production') {
+            // KS-1633: this refusal now sits AFTER the row was written, so the row is compensated away and the response
+            // keeps its \"nothing was written\" contract exactly. If the delete itself fails the answer is still this
+            // 503 — what happened is still that anchoring is unavailable, and a 500 would describe a different event —
+            // and the residue is a certification with NO anchor. That is the benign direction: an orphan ANCHOR is the
+            // row whose anchored identity another registration can claim; an orphan CERTIFICATION is not. It is never
+            // silent: one error line names the id, with ids only, so it can be reconciled.
+            try {
+              // Nothing to compensate when the reservation never landed, and claiming otherwise would make the alarm
+              // below fire on a path where no row was ever written.
+              const removed = provisionalWritten ? await deleteCertification(id, tenantId, (req as any).tenantPool) : 1;
+              if (removed !== 1) {
+                // A no-op is a FAILED compensation, not a success: under the tenant_isolation policy a DELETE outside
+                // the GUC-bearing transaction matches 0 rows and raises nothing, so a discarded count would hide the
+                // very residue this line exists to report.
+                logger.error('KS-1633: the compensating delete removed no row, so a certification remains with no anchor', {
+                  certId: id,
+                  tenantId,
+                  rowsRemoved: removed,
+                });
+              }
+            } catch (delErr: any) {
+              logger.error('KS-1633: the compensating delete failed, so a certification remains with no anchor', {
+                certId: id,
+                tenantId,
+                error: delErr instanceof Error ? delErr.message : String(delErr),
+              });
+            }
+            return res.status(503).json({
+              success: false,
+              error: { code: 'SERVICE_UNAVAILABLE', message: 'Blockchain anchoring service is temporarily unavailable. Please try again later.', confidence: 'unavailable' },
+            });
+          }
+
+          // The AUTHORITATIVE write, and it runs unconditionally. It is the only writer of the
+          // `certification_events` ISSUE row, so skipping it when the anchor state happens to match the
+          // reservation's would leave an accepted-or-failed certification with ZERO events where there must be
+          // exactly one. (An earlier attempt made this conditional to save a redundant UPDATE; the full suite
+          // caught it — an anchoring-failed request then never reached `saveCertification` at all.) The row half is
+          // the same ON CONFLICT (id) DO UPDATE the reservation used, so a second write is cheap and idempotent.
+          const certification = buildCertification(upstreamAnchorId, anchoringStatus);
+          await saveCertification(certification, tenantId, (req as any).db);
+          // KS-1228: the certification exists now, so its attribution row is recorded
+          // here, after every refusal above (see the validation comment for why).
+          if (certObo) {
+            recordActionProvenance({
+              documentId: id,
+              action: 'certify',
+              tenantId: getReqTenantId(req),
+              organizationId: (req as any).user?.organizationId as string | undefined,
+              connectorId: (req as any).user?.userId as string | undefined,
+              obo: certObo,
+              resolvedUserId: certOboResolved,
+            }).catch((provErr: Error) => logger.warn('provenance record failed', { documentId: id, action: 'certify', error: provErr.message }));
+          }
+
+          // KS-70: when a parentDocumentId is supplied, create a NEW document
+          // representing the post-certify state. The new document carries:
+          //   - the cert's contentHash (new bytes, new hash),
+          //   - parent_document_id pointing at the predecessor,
+          //   - status='signed' (the chain anchor lands on this row, not the parent).
+          // The parent doc is left UNTOUCHED — its history is preserved. This
+          // is the divergence point between the lifecycle-event model and the
+          // legacy \"update the original to certified\" path (the latter still
+          // runs for callers who supply documentId without parentDocumentId).
+          let derivedDocumentExternalId: string | undefined;
+          if (parentDocumentId) {
+            const derivedExternalId = `doc-${Date.now()}-${id.slice(0, 8)}`;
+            // KS-1508: `versionedById` is the ACTOR of a version, set by the server; the erasure of an organisation (KS-695) selects
+            // documents by it. This derived row is spread from the caller's `data`, so a supplied value is DROPPED here, silently,
+            // and logged (tenant and actor ids only, never the value). The certification's own `data` is not touched.
+            // KS-1660: `parentDocumentId` is server-set the same way: the route's own value is written first and the spread below would overwrite it.
+            // KS-1679: `certificationId` and `certifiedAt` are server-set the same way: the route's own values are written first and the spread below would overwrite them.
+            const { versionedById: droppedVersionedById, parentDocumentId: droppedParentDocumentId, certificationId: droppedCertificationId, certifiedAt: droppedCertifiedAt, ...dataWithoutVersionedById } = (data ?? {}) as Record<string, unknown>;
+            if (droppedVersionedById !== undefined) {
+              logger.info('KS-1508: a caller-supplied data.versionedById was dropped from the derived certification document', { tenantId: getReqTenantId(req), userId: issuer.id });
+            }
+            if (droppedParentDocumentId !== undefined) {
+              logger.info('KS-1660: a caller-supplied data.parentDocumentId was dropped from the derived certification document', { tenantId: getReqTenantId(req), userId: issuer.id });
+            }
+            if (droppedCertificationId !== undefined) {
+              logger.info('KS-1679: a caller-supplied data.certificationId was dropped from the derived certification document', { tenantId: getReqTenantId(req), userId: issuer.id });
+            }
+            if (droppedCertifiedAt !== undefined) {
+              logger.info('KS-1679: a caller-supplied data.certifiedAt was dropped from the derived certification document', { tenantId: getReqTenantId(req), userId: issuer.id });
+            }
+            const derivedDoc: DocumentRecord = {
+              id: derivedExternalId,
+              type: type || 'verification_certificate',
+              status: 'signed',
+              owner: { id: issuer.id },
+              parentDocumentId,
+              data: {
+                title:
+                  (data?.title as string) ||
+                  `Certification ${type}`,
+                certificationId: id,
+                certifiedAt: now,
+                parentDocumentId,
+                ...dataWithoutVersionedById,
+              },
+              contentHash:
+                (data as Record<string, unknown> | undefined)?.contentHash as string
+                || generateDocumentContentHash(data || {})
+                || contentHash,
+              signatures: [],
+              blockchain: certification.blockchain as DocumentRecord['blockchain'],
+              createdAt: now,
+              updatedAt: now,
+            };
+            try {
+              await saveLineageDocument(derivedDoc, tenantId, (req as any).db);
+              derivedDocumentExternalId = derivedExternalId;
+            } catch (saveErr: any) {
+              logger.error('KS-70: failed to write derived document for cert lineage', {
+                certId: id,
+                parentDocumentId,
+                error: saveErr instanceof Error ? saveErr.message : String(saveErr),
+              });
+              // Fall through — the certification row already landed; the
+              // derived doc can be back-filled later. We don't 500 the cert.
+            }
+          }
+
+          // Update the original document's status + certification metadata.
+          // KS-70: legacy path — only fires when the caller is in the
+          // pre-lineage model (documentId set, parentDocumentId absent).
+          if (req.body.documentId && !parentDocumentId) {
+            const certDb = (req as any).db || prisma;
+            const certMetaUpdate = JSON.stringify({
+              issuerName: req.body.data?.issuedBy || issuer.name || undefined,
+              issuerId: issuer.id,
+              certificationId: id,
+              certificationType: type,
+              certifiedAt: new Date().toISOString(),
+              certificationData: req.body.data || {},
+              blockchain: certification.blockchain,
+            });
+            try {
+              await certDb.$executeRaw`
+                UPDATE documents SET
+                  status = 'certified',
+                  certified_at = NOW(),
+                  certification_metadata = ${certMetaUpdate}::jsonb,
+                  updated_at = NOW()
+                WHERE external_id = ${req.body.documentId}
+                  AND tenant_id = ${tenantId}::uuid
+                  AND status IN ('draft', 'pending_signature', 'anchored', 'signed')
+              `;
+            } catch (updateErr: unknown) {
+              // KS-1538: best-effort stays best-effort (the certification already exists and a 5xx here would be a contract change for
+              // callers), but it is no longer SILENT: ids and the error text only, never the certification data.
+              logger.error('KS-1538: legacy certify UPDATE failed - continuing, the certification was already issued', {
+                certId: id, documentId: req.body.documentId, tenantId, error: updateErr instanceof Error ? updateErr.message : String(updateErr),
+              });
+            }
+          }
+
+          // Publish certification.issued event (fire-and-forget)
+          publishEvent(EventTypes.CERTIFICATION_ISSUED, {
+            certificationId: id,
+            type,
+            holderId,
+            issuerId: issuer.id,
+            contentHash,
+          }).catch(() => {});
+
+          // Create charge events for certification signing + blockchain anchoring.
+          // KS-216: metering is a billing side-effect — a failed charge write must
+          // NOT 500 a certification that has already landed + been queued for
+          // anchoring (the cert row + anchor exist by this point). Mirror the KS-70
+          // lineage-write pattern above: log and fall through. Charge events can be
+          // reconciled later; a 500 here makes clients retry and double-issue.
+          let signCharge: Awaited<ReturnType<typeof createChargeEvent>> | null = null;
+          let anchorCharge: Awaited<ReturnType<typeof createChargeEvent>> | null = null;
+          try {
+            signCharge = await createChargeEvent('certification_sign', id, issuer.id, tenantId, {
+              metadata: { certificationType: type, holderId },
+            });
+            anchorCharge = await createChargeEvent('blockchain_anchor', id, issuer.id, tenantId, {
+              metadata: { txHash: certification.blockchain?.txHash },
+            });
+          } catch (chargeErr: any) {
+            logger.error('KS-216: failed to persist charge event(s) — continuing, certification already issued', {
+              certId: id,
+              tenantId,
+              error: chargeErr instanceof Error ? chargeErr.message : String(chargeErr),
+            });
+          }
+
+          // Fire lifecycle notification (non-blocking)
+          // Pen-test F-04: fall back to authenticated req.user.email, NOT raw headers.
+          // KS-74: also use resolvedHolderEmail from the stub flow when present.
+          const notifyToEmail = resolvedHolderEmail || holderEmail || (req as any).user?.email;
+          if (notifyToEmail) {
+            // KS-203: fire-and-forget — an intermittent notification failure must
+            // not surface as an unhandled rejection (matches publishEvent above).
+            notifyDocumentCertified({
+              toEmail: notifyToEmail as string,
+              recipientName: req.body.holderName,
+              documentTitle: (data.title as string) || (data.name as string) || type,
+              certifierName: issuer.name || issuer.id,
+              certificationId: id,
+              certifiedAt: now,
+            }).catch((err: any) =>
+              logger.warn('certification notification failed', { certId: id, error: err?.message }),
+            );
+          }
+
+          res.status(201).json({
+            id: certification.id,
+            type: certification.type,
+            holderId: certification.holder.id,
+            status: certification.status,
+            data: certification.data,
+            expiresAt: certification.expiresAt,
+            issuedAt: certification.issuedAt,
+            blockchainAnchor: certification.blockchain,
+            // KS-1709 (Kam ruled b, 2026-10-23: keep it, but mark it unanchored): the kept certification SAYS SO at the top level instead of only
+            // inside `blockchainAnchor`. Present only when the anchoring service did not accept the request in this call (a 4xx, a 5xx, a thrown
+            // error or the timeout), so an accepted answer is byte-identical. It does NOT mean no anchor exists: after a timeout one may.
+            ...(anchoringStatus === 'failed' ? { anchoringStatus: 'failed' } : {}),
+            chargeEvents: [signCharge?.id, anchorCharge?.id].filter(Boolean),
+            // KS-70: when parentDocumentId was provided, the cert produced a
+            // new document representing the post-certify state. Surface its
+            // external id so callers can poll its anchor or feed it into the
+            // next lifecycle event (e.g. sign-after-certify chains).
+            ...(derivedDocumentExternalId
+              ? { derivedDocumentId: derivedDocumentExternalId, parentDocumentId }
+              : {}),
+            // KS-74: when the holder was resolved via holderEmail, surface the
+            // holder status. `INVITED` tells SSD it issued against a stub —
+            // the recipient still needs to register. `ACTIVE` (or any other)
+            // means an existing user.
+            ...(holderEmail
+              ? {
+                  holder: {
+                    id: certification.holder.id,
+                    status: holderStatus ?? 'UNKNOWN',
+                    email: resolvedHolderEmail ?? holderEmail,
+                  },
+                }
+              : {}),
+          });
+        } catch (error: any) {
+          const msg = error instanceof Error ? error.message : String(error);
+          // KS-203: log name + code + stack so the next concurrent-load failure is
+          // diagnosable (the previous blanket 500 logged only the message).
+          logger.error('Failed to issue certification', {
+            error: msg,
+            name: error?.name,
+            code: error?.code,
+            stack: error instanceof Error ? error.stack : undefined,
+          });
+
+          // Detect FK constraint violations and return helpful 400
+          if (msg.includes('foreign key constraint') || msg.includes('violates foreign key')) {
+            if (msg.includes('owner_user_id')) {
+              return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid holderId — user does not exist' } });
+            }
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid reference — a referenced record does not exist', detail: msg } });
+          }
+
+          // KS-203: transient dependency failures under concurrent load (DB pool
+          // exhaustion, connection resets, upstream timeouts) are not internal bugs
+          // — return a retryable 503 instead of a blanket 500 so callers/harnesses
+          // back off and retry. Detected via Prisma's pool-timeout code (P2024),
+          // pg connection-acquire timeouts, and Node socket/abort error codes.
+          const code = error?.code as string | undefined;
+          const isTransientDependency =
+            code === 'P2024' ||                                   // Prisma: client connection-pool timeout
+            code === '53300' || code === '53400' ||               // pg: too_many_connections / configuration_limit_exceeded
+            code === '57P03' ||                                   // pg: cannot_connect_now (server starting/recovering)
+            code === 'ECONNREFUSED' || code === 'ECONNRESET' ||   // socket dropped
+            code === 'ETIMEDOUT' || code === 'EAI_AGAIN' ||       // network timeout / DNS
+            error?.name === 'TimeoutError' || error?.name === 'AbortError' ||
+            msg.includes('Timed out fetching a new connection from the connection pool') ||
+            msg.includes('timeout exceeded when trying to connect') ||
+            msg.includes('remaining connection slots are reserved') ||  // pg 53300, observed under load (KS-203)
+            msg.includes('too many clients already') ||
+            msg.includes('Connection terminated');
+          if (isTransientDependency) {
+            return res.status(503).json({
+              success: false,
+              error: { code: 'SERVICE_UNAVAILABLE', message: 'Certification service is temporarily overloaded — please retry', confidence: 'unavailable' },
+            });
+          }
+
+          // KS-445: the spec's free-form `data`/metadata objects permit values
+          // Postgres can't store (a \\u0000 inside a jsonb string → 22P05, invalid
+          // byte sequences → 22021, oversized varchar → 22001, bad casts → 22P02).
+          // Unstorable input is the client's malformed payload, not a server fault.
+          const pgCode = extractPgCode(error);
+          if (pgCode && ['22P02', '22001', '22007', '22008', '22021', '22P05', '23502', '23514', '42804'].includes(pgCode)) {
+            return res.status(400).json({
+              success: false,
+              error: { code: 'BAD_REQUEST', message: 'Certification payload contains values that cannot be stored' },
+            });
+          }
+
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to issue certification' } });
+        }
+      }
+    );
+
+    /**
+     * GET /api/certifications
+     * List certifications with optional filtering
+     */
+    certificationsRouter.get(
+      '/',
+      [
+        query('type').optional().isString(),
+        query('status').optional().isIn(['issued', 'pending', 'revoked', 'expired']),
+        query('holderId').optional().isString(),
+        query('issuerId').optional().isString(),
+        query('limit').optional().isInt({ min: 1, max: 100 }),
+        query('offset').optional().isInt({ min: 0 }),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const { type, status, holderId, issuerId, limit = '20', offset = '0' } = req.query;
+          const limitNum = parseInt(limit as string, 10);
+          const offsetNum = parseInt(offset as string, 10);
+
+          // Scope by authenticated user unless admin
+          // Pen-test F-04: read from authenticated req.user (set by authenticate()
+          // middleware), NOT from raw headers.
+          const user = (req as any).user;
+          const userId = user?.userId as string | undefined;
+          const userRole = user?.role as string | undefined;
+          const isAdmin = userRole === 'system_admin' || userRole === 'SYSTEM_ADMIN' || userRole === 'super_admin';
+
+          const effectiveHolderId = isAdmin ? (holderId as string) : (userId || holderId as string);
+
+          const { items: results } = await listCertifications(getReqTenantId(req), {
+            issuerId: issuerId as string,
+            holderId: effectiveHolderId,
+            status: status as string,
+            type: type as string,
+            page: Math.floor(offsetNum / limitNum) + 1,
+            limit: limitNum,
+          });
+
+          // Additional in-memory filtering for non-admin users
+          let paginated = results;
+          if (userId && !isAdmin) {
+            paginated = results.filter(c =>
+              c.holder?.id === userId || c.issuer?.id === userId
+            );
+          }
+
+          res.json({
+            certifications: paginated.map(c => ({
+              id: c.id,
+              type: c.type,
+              status: c.status,
+              holder: c.holder,
+              issuer: c.issuer,
+              issuedAt: c.issuedAt,
+              expiresAt: c.expiresAt,
+              revokedAt: c.revokedAt,
+            })),
+            pagination: {
+              total: paginated.length,
+              limit: limitNum,
+              offset: offsetNum,
+              hasMore: offsetNum + limitNum < paginated.length,
+            },
+          });
+        } catch (error) {
+          logger.error('Failed to list certifications', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list certifications' } });
+        }
+      }
+    );
+
+    /**
+     * GET /api/certifications/:id
+     * Get certification details by ID
+     */
+    certificationsRouter.get(
+      '/:id',
+      [param('id').notEmpty().withMessage('Certification ID is required')],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const { id } = req.params;
+          const tenantId = getReqTenantId(req);
+          const certification = await getCertification(id, tenantId);
+
+          if (!certification) {
+            return certificationNotFound(res);
+          }
+
+          // KS-1695: bind the read on the record. This precedes the expiry write below, so a
+          // refused reader causes no UPDATE and no certification_events row.
+          if (!callerMayReadCertification(req, certification)) {
+            return certificationNotFound(res);
+          }
+
+          // Check if expired
+          if (certification.expiresAt && new Date(certification.expiresAt) < new Date()) {
+            certification.status = 'expired';
+            await saveCertification(certification, tenantId, (req as any).db);
+          }
+
+          res.json({
+            id: certification.id,
+            type: certification.type,
+            status: certification.status,
+            issuer: certification.issuer,
+            holder: certification.holder,
+            data: certification.data,
+            privacySettings: certification.privacySettings,
+            issuedAt: certification.issuedAt,
+            expiresAt: certification.expiresAt,
+            revokedAt: certification.revokedAt,
+            revocationReason: certification.revocationReason,
+            blockchain: certification.blockchain,
+            contentHash: certification.contentHash,
+          });
+        } catch (error) {
+          // KS-210: a non-uuid :id (e.g. a coverage method-probe like \"issue\")
+          // makes the `id::uuid` cast in getCertification throw pg 22P02
+          // (invalid_text_representation) before the not-found check — treat it as
+          // 404 (no such certification), not a 500 (KS-111 \"500-on-bad-input\" class).
+          // KS-255: originate queries run through Prisma, which wraps the pg error
+          // (code P2010, pg code only in meta/message) — so also match the wrapped
+          // shape, not just the bare `code` the pg driver would set.
+          const pgCode = (error as { code?: string })?.code ?? (error as { meta?: { code?: string } })?.meta?.code;
+          if (pgCode === '22P02' || (error instanceof Error && error.message.includes('22P02'))) {
+            return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+          }
+          logger.error('Failed to get certification', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get certification' } });
+        }
+      }
+    );
+
+    /**
+     * POST /api/certifications/:id/revoke
+     * Revoke a certification
+     */
+    certificationsRouter.post(
+      '/:id/revoke',
+      [
+        param('id').notEmpty().withMessage('Certification ID is required'),
+        body('reason').optional().isString().withMessage('Reason must be a string'),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const issuer = getUserFromRequest(req);
+          if (!issuer) {
+            return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+          }
+
+          const { id } = req.params;
+          const { reason } = req.body;
+          const tenantId = getReqTenantId(req);
+
+          const certification = await getCertification(id, tenantId);
+
+          if (!certification) {
+            return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+          }
+
+          // Verify issuer has permission to revoke
+          if (certification.issuer.id !== issuer.id) {
+            return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Only the issuer can revoke this certification' } });
+          }
+
+          if (certification.status === 'revoked') {
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Certification is already revoked' } });
+          }
+
+          const now = new Date().toISOString();
+          certification.status = 'revoked';
+          certification.revokedAt = now;
+          certification.revocationReason = reason;
+          certification.updatedAt = now;
+
+          await saveCertification(certification, tenantId, (req as any).db);
+
+          // Fire lifecycle notification (non-blocking)
+          // Pen-test F-04: read from authenticated req.user, NOT raw headers.
+          const holderEmail = (req as any).user?.email as string | undefined;
+          if (holderEmail) {
+            notifyDocumentRevoked({
+              toEmail: holderEmail,
+              documentTitle: (certification.data?.title as string) || (certification.data?.name as string) || certification.type,
+              revokedBy: issuer.name || issuer.id,
+              reason,
+              revokedAt: now,
+            });
+          }
+
+          res.json({
+            id: certification.id,
+            status: certification.status,
+            revokedAt: certification.revokedAt,
+            revocationReason: certification.revocationReason,
+          });
+        } catch (error) {
+          logger.error('Failed to revoke certification', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to revoke certification' } });
+        }
+      }
+    );
+
+    /**
+     * POST /api/certifications/:id/verify
+     * Verify a certification's authenticity
+     */
+    certificationsRouter.post(
+      '/:id/verify',
+      [param('id').notEmpty().withMessage('Certification ID is required')],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const { id } = req.params;
+          const certification = await getCertification(id, getReqTenantId(req));
+
+          if (!certification) {
+            return res.status(404).json({
+              verified: false,
+              error: 'Certification not found',
+            });
+          }
+
+          // Check status
+          const isValid = certification.status === 'issued';
+          const isExpired = certification.expiresAt && new Date(certification.expiresAt) < new Date();
+          const isRevoked = certification.status === 'revoked';
+
+          // Verify content hash
+          const currentHash = generateContentHash(certification.data);
+          const hashValid = currentHash === certification.contentHash;
+
+          // Create charge event for verification
+          const verifier = getUserFromRequest(req);
+          const verifyCharge = await createChargeEvent('verification', id, verifier?.id || 'anonymous', getReqTenantId(req), {
+            metadata: { verified: isValid && !isExpired && hashValid },
+          });
+
+          res.json({
+            verified: isValid && !isExpired && hashValid,
+            certificationId: certification.id,
+            status: certification.status,
+            checks: {
+              exists: true,
+              notRevoked: !isRevoked,
+              notExpired: !isExpired,
+              hashValid,
+              blockchainAnchored: !!certification.blockchain,
+            },
+            issuer: {
+              id: certification.issuer.id,
+              did: certification.issuer.did,
+              verified: true,
+            },
+            blockchain: certification.blockchain,
+            verifiedAt: new Date().toISOString(),
+            chargeEventId: verifyCharge.id,
+          });
+        } catch (error) {
+          logger.error('Failed to verify certification', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to verify certification' } });
+        }
+      }
+    );
+
+    // =============================================================================
+    // SHARE ENDPOINT (Phase 3 — Batch Sharing)
+    // =============================================================================
+
+    /**
+     * POST /api/certifications/:id/share
+     * Share a certification with one or more recipients (batch)
+     */
+    certificationsRouter.post(
+      '/:id/share',
+      [
+        param('id').notEmpty().withMessage('Certification ID is required'),
+        body('recipients').isArray({ min: 1 }).withMessage('At least one recipient is required'),
+        body('recipients.*.email').isEmail().withMessage('Valid email is required for each recipient'),
+        body('recipients.*.shareType')
+          .isIn(['view', 'verify', 'reshare'])
+          .withMessage('Share type must be view, verify, or reshare'),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const user = getUserFromRequest(req);
+          if (!user) {
+            return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+          }
+
+          const { id } = req.params;
+          const certification = await getCertification(id, getReqTenantId(req));
+
+          if (!certification) {
+            return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+          }
+
+          if (certification.status === 'revoked') {
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Cannot share a revoked certification' } });
+          }
+
+          const { recipients } = req.body;
+          const now = new Date().toISOString();
+          const created: ShareRecord[] = [];
+
+          for (const recipient of recipients) {
+            const shareId = uuidv4();
+            const record: ShareRecord = {
+              id: shareId,
+              certificationId: id,
+              toEmail: recipient.email,
+              toName: recipient.name || undefined,
+              shareType: recipient.shareType,
+              sharedBy: user.id,
+              timestamp: now,
+              status: 'active',
+            };
+
+            await saveShare(record);
+            created.push(record);
+
+            // Fire lifecycle notification (non-blocking)
+            notifyDocumentShared({
+              toEmail: recipient.email,
+              recipientName: recipient.name,
+              documentTitle: (certification.data?.title as string) || (certification.data?.name as string) || certification.type,
+              sharedByName: user.name || user.id,
+              shareType: recipient.shareType,
+            });
+
+            logger.info('Certification shared', { certificationId: id, recipientEmail: recipient.email, shareType: recipient.shareType });
+          }
+
+          // Create charge event for sharing (currently free, tracked for audit)
+          const shareCharge = await createChargeEvent('share', id, user.id, getReqTenantId(req), {
+            feeStatus: 'free',
+            metadata: { recipientCount: created.length, recipients: recipients.map((r: any) => r.email) },
+          });
+
+          res.status(201).json({
+            certificationId: id,
+            sharesCreated: created.length,
+            shares: created.map((s) => ({
+              id: s.id,
+              toEmail: s.toEmail,
+              toName: s.toName,
+              shareType: s.shareType,
+              status: s.status,
+              timestamp: s.timestamp,
+            })),
+            chargeEventId: shareCharge.id,
+          });
+        } catch (error) {
+          logger.error('Failed to share certification', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to share certification' } });
+        }
+      }
+    );
+
+    // =============================================================================
+    // RECERTIFY ENDPOINT (Phase 2 — Verifier → Certifier)
+    // =============================================================================
+
+    /**
+     * POST /api/certifications/:id/recertify
+     * Issue a verification certificate — a secondary credential that wraps the
+     * original, attesting that a Verifier has verified it.
+     * The Verifier transitions to Certifier role for this lineage.
+     */
+    certificationsRouter.post(
+      '/:id/recertify',
+      [
+        param('id').notEmpty().withMessage('Certification ID is required'),
+        body('note').optional().isString(),
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          const user = getUserFromRequest(req);
+          if (!user) {
+            return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+          }
+
+          const { id } = req.params;
+          const { note } = req.body;
+          const tenantId = getReqTenantId(req);
+
+          const originalCert = await getCertification(id, tenantId);
+
+          if (!originalCert) {
+            return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Original certification not found' } });
+          }
+
+          if (originalCert.status === 'revoked') {
+            return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Cannot re-certify a revoked certification' } });
+          }
+
+          const now = new Date().toISOString();
+          const newCertId = uuidv4();
+          const verificationContentHash = generateContentHash({
+            originalCertificationId: id,
+            verifierId: user.id,
+            verifiedAt: now,
+          });
+
+          // Pen-test F-03 LIVE: queue with anchoring service.
+          const anchoringBase = process.env.ANCHORING_SERVICE_URL || 'http://anchoring:4005';
+          const verifyCertUserToken = (req.headers.authorization as string) || '';
+          let upstreamAnchorId: string | null = null;
+          let anchoringStatus: 'submitted' | 'failed' = 'failed';
+          try {
+            const upstream = await fetch(`${anchoringBase}/api/anchors`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(verifyCertUserToken ? { Authorization: verifyCertUserToken } : {}),
+              },
+              body: JSON.stringify({
+                documentId: newCertId,
+                certId: newCertId,
+                contentHash: verificationContentHash,
+                network: process.env.CARDANO_NETWORK || 'preprod',
+                // KS-1385 site 7: verification-certification anchor carries S's identity.
+                ...anchorIdentityFields(req.body),
+              }),
+            });
+            if (upstream.ok) {
+              const j = await upstream.json() as any;
+              upstreamAnchorId = j?.data?.id || null;
+              anchoringStatus = 'submitted';
+            } else {
+              // KS-1709: the same gap as the issue route: a refusal is an answer, not an exception, so the catch below never sees it.
+              // Without this line a non-ok answer left the verification certificate with no anchor and no log line anywhere.
+              const errText = await upstream.text().catch(() => '');
+              logger.warn('KS-1709: the anchoring service refused the recertification anchor', { certId: newCertId, originalCertificationId: id, status: upstream.status, body: errText.slice(0, 200) });
+            }
+          } catch (err: any) {
+            logger.warn('Anchoring service unreachable for verification cert', { error: err?.message });
+          }
+          if (anchoringStatus === 'failed' && process.env.NODE_ENV === 'production') {
+            return res.status(503).json({
+              success: false,
+              error: { code: 'SERVICE_UNAVAILABLE', message: 'Blockchain anchoring service is temporarily unavailable. Please try again later.', confidence: 'unavailable' },
+            });
+          }
+
+          // Create the verification certificate
+          const verificationCert: Certification = {
+            id: newCertId,
+            type: 'verification_certificate',
+            status: 'issued',
+            issuer: {
+              id: user.id,
+              did: user.did,
+              name: user.name,
+            },
+            holder: originalCert.holder,
+            data: {
+              originalCertificationId: id,
+              originalType: originalCert.type,
+              originalIssuer: originalCert.issuer,
+              verifierNote: note || null,
+              verifiedAt: now,
+              roleTransition: { from: 'verifier', to: 'certifier' },
+            },
+            issuedAt: now,
+            contentHash: verificationContentHash,
+            createdAt: now,
+            updatedAt: now,
+            blockchain: {
+              anchorId: upstreamAnchorId,
+              txHash: null as any,
+              blockHeight: null as any,
+              anchoredAt: null as any,
+              confidence: 'pending-onchain',
+              anchoringStatus,
+              // KS-1124 F4 (Kam ruled b, 2026-09-28): a recertify whose anchoring failed saves status 'failed', the same
+              // rule as the issue route: the gateway maps it to off-chain-only instead of pending forever.
+              ...(anchoringStatus === 'failed' ? { status: 'failed' } : {}),
+            } as any,
+          };
+
+          await saveCertification(verificationCert, tenantId, (req as any).db);
+
+          // Create charge event for verification certificate (free_in_context for recruitment)
+          const recertCharge = await createChargeEvent('verification_certificate', id, user.id, tenantId, {
+            feeStatus: 'free_in_context',
+            metadata: {
+              verificationCertificateId: newCertId,
+              roleTransition: { from: 'verifier', to: 'certifier' },
+              parentCertificationId: id,
+            },
+          });
+
+          logger.info('Verification certificate issued', { verificationCertId: newCertId, originalCertId: id, userId: user.id });
+
+          res.status(201).json({
+            certificationId: newCertId,
+            type: 'verification_certificate',
+            parentCertificationId: id,
+            status: 'issued',
+            issuer: verificationCert.issuer,
+            roleTransition: { from: 'verifier', to: 'certifier' },
+            blockchain: verificationCert.blockchain,
+            // KS-1709 (Kam ruled b): the same top-level marker as the issue route, present only when the anchoring service did not accept the request.
+            ...(anchoringStatus === 'failed' ? { anchoringStatus: 'failed' } : {}),
+            issuedAt: now,
+            chargeEventId: recertCharge.id,
+          });
+        } catch (error) {
+          logger.error('Failed to issue verification certificate', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to issue verification certificate' } });
+        }
+      }
+    );
+
+    // =============================================================================
+    // LINEAGE ENDPOINT (Phase 1 — Lineage Data)
+    // =============================================================================
+
+    /**
+     * GET /api/certifications/:id/lineage
+     * Get the full lineage data for a certification, including all shares,
+     * verification certificates, and delegation chains.
+     */
+    certificationsRouter.get(
+      '/:id/lineage',
+      [param('id').notEmpty().withMessage('Certification ID is required')],
+      async (req: Request, res: Response) => {
+        try {
+          const { id } = req.params;
+          const certification = await getCertification(id, getReqTenantId(req));
+
+          if (!certification) {
+            return certificationNotFound(res);
+          }
+
+          // KS-1695: bind the read before the share lookup — the response carries share
+          // recipients' email addresses and names.
+          if (!callerMayReadCertification(req, certification)) {
+            return certificationNotFound(res);
+          }
+
+          // Collect all related shares from database
+          const shares = await getSharesByCertification(id);
+
+          // Collect lineage events from provenance chain
+          const events = await getLineageEvents(id);
+
+          // Verification certificates are certifications with type='verification_certificate'
+          // referencing this original via data.originalCertificationId
+          const verificationCerts = events
+            .filter((e: any) => e.eventType === 'RECERTIFY')
+            .map((e: any) => ({
+              id: e.id,
+              issuer: (e.eventData as any)?.issuer || { id: e.actorId },
+              issuedAt: e.occurredAt?.toISOString?.() || e.occurredAt,
+              roleTransition: (e.eventData as any)?.roleTransition,
+            }));
+
+          // Gather charge events for this certification
+          const chargeEvents = await getChargeEventsByCertification(id, getReqTenantId(req));
+
+          res.json({
+            certificationId: id,
+            originalCertification: {
+              id: certification.id,
+              type: certification.type,
+              status: certification.status,
+              issuer: certification.issuer,
+              holder: certification.holder,
+              issuedAt: certification.issuedAt,
+              blockchain: certification.blockchain,
+            },
+            shares: shares.map((s) => ({
+              id: s.id,
+              toEmail: s.toEmail,
+              toName: s.toName,
+              shareType: s.shareType,
+              status: s.status,
+              timestamp: s.timestamp,
+            })),
+            verificationCertificates: verificationCerts,
+            totalShares: shares.length,
+            totalVerificationCerts: verificationCerts.length,
+            chargeEvents: chargeEvents.map((ce) => ({
+              id: ce.id,
+              eventType: ce.eventType,
+              amount: ce.amount,
+              currency: ce.currency,
+              feeStatus: ce.feeStatus,
+              typicalPayer: ce.typicalPayer,
+              status: ce.status,
+              createdAt: ce.createdAt,
+              metadata: ce.metadata,
+            })),
+          });
+        } catch (error) {
+          logger.error('Failed to get lineage', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get lineage data' } });
+        }
+      }
+    );
+
+    // =============================================================================
+    // EVIDENCE BUNDLE ENDPOINT (Phase 7)
+    // =============================================================================
+
+    /**
+     * GET /api/certifications/:id/evidence-bundle
+     * Assemble and return a complete evidence bundle for a certification.
+     */
+    certificationsRouter.get(
+      '/:id/evidence-bundle',
+      [param('id').notEmpty().withMessage('Certification ID is required')],
+      async (req: Request, res: Response) => {
+        try {
+          const { id } = req.params;
+          const certification = await getCertification(id, getReqTenantId(req));
+
+          if (!certification) {
+            return certificationNotFound(res);
+          }
+
+          // KS-1695: bind the read before the evidence_export charge event below, so a refused
+          // reader is never billed and no charge row is written for them.
+          if (!callerMayReadCertification(req, certification)) {
+            return certificationNotFound(res);
+          }
+
+          const tenantId = getReqTenantId(req);
+          const shares = await getSharesByCertification(id);
+          const events = await getLineageEvents(id);
+          const chargeEvents = await getChargeEventsByCertification(id, tenantId);
+
+          // Create charge event for evidence export
+          const exporter = getUserFromRequest(req);
+          const exportCharge = await createChargeEvent('evidence_export', id, exporter?.id || 'anonymous', tenantId);
+
+          const bundle = {
+            bundleVersion: '1.0.0',
+            generatedAt: new Date().toISOString(),
+            certification: {
+              id: certification.id,
+              type: certification.type,
+              status: certification.status,
+              issuer: certification.issuer,
+              holder: certification.holder,
+              contentHash: certification.contentHash,
+              issuedAt: certification.issuedAt,
+              expiresAt: certification.expiresAt,
+              revokedAt: certification.revokedAt,
+              revocationReason: certification.revocationReason,
+              blockchain: certification.blockchain,
+            },
+            provenanceChain: [
+              {
+                action: 'created',
+                actor: certification.issuer.id,
+                timestamp: certification.createdAt,
+                details: { type: certification.type },
+              },
+              {
+                action: 'issued',
+                actor: certification.issuer.id,
+                timestamp: certification.issuedAt,
+                txHash: certification.blockchain?.txHash,
+              },
+              ...shares.map((s) => ({
+                action: 'shared',
+                actor: s.sharedBy,
+                recipient: s.toEmail,
+                timestamp: s.timestamp,
+                shareType: s.shareType,
+              })),
+              ...events
+                .filter((e: any) => e.eventType === 'RECERTIFY')
+                .map((e: any) => ({
+                  action: 'recertified',
+                  actor: e.actorId,
+                  timestamp: e.occurredAt?.toISOString?.() || e.occurredAt,
+                  verificationCertificateId: e.id,
+                })),
+            ],
+            shares: shares.length,
+            verificationCertificates: events.filter((e: any) => e.eventType === 'RECERTIFY').length,
+            chargeEvents: [...chargeEvents, exportCharge].map((ce) => ({
+              id: ce.id,
+              eventType: ce.eventType,
+              amount: ce.amount,
+              currency: ce.currency,
+              feeStatus: ce.feeStatus,
+              typicalPayer: ce.typicalPayer,
+              status: ce.status,
+              createdAt: ce.createdAt,
+            })),
+            exportChargeEventId: exportCharge.id,
+          };
+
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename=\"evidence-bundle-${id}.json\"`
+          );
+          res.json(bundle);
+        } catch (error) {
+          logger.error('Failed to generate evidence bundle', { error: error instanceof Error ? error.message : String(error) });
+          res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to generate evidence bundle' } });
+        }
+      }
+    );
+
+    export default certificationsRouter;
+    "
+
+      16 |
+      17 |   it('RED KS-1666 R2 the provisional-row comment no longer calls the window sub-second and names the 10 second bound', () => {
+    > 18 |     expect(SRC).not.toContain('the sub-second window before the second write');
+         |                     ^
+      19 |     expect(SRC).toContain('up to 10');
+      20 |     expect(SRC).toContain('seconds, not sub-second');
+      21 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1666-certify-reservation-comments-match-the-code.test.ts:18:21)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 3 passed, 5 total
+Snapshots:   0 total
+Time:        1.316 s, estimated 5 s
+Ran all test suites matching /src\/__tests__\/ks1666-certify-reservation-comments-match-the-code.test.ts/i.

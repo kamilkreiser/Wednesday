@@ -1,0 +1,96 @@
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/github.ts b/Blockchain/Dev/services/auth/src/providers/social/github.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/github.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/github.ts
+@@ -86,5 +86,11 @@
+-    const { access_token } = (await tokenRes.json()) as { access_token: string };
+-
++    // KS-1792: GitHub answers a bad or expired code with HTTP 200 and an {error, error_description} body, so the !ok branch above never sees it. Refuse an answer that has no usable
++    // access_token (or that carries an error field) here, as a token-exchange failure, before any profile call: the guard must not be GitHub's 401 for `Bearer undefined`.
++    const tokenBody = (await tokenRes.json()) as { access_token?: unknown; error?: unknown };
++    if (typeof tokenBody.access_token !== 'string' || tokenBody.access_token === '' || tokenBody.error !== undefined) {
++      logger.warn('GitHub token endpoint answered 200 without an access token', { provider: 'github', error: typeof tokenBody.error === 'string' ? tokenBody.error.slice(0, 80) : undefined });
++      throw new Error('GitHub token exchange failed (no access token)');
++    }
++    const access_token = tokenBody.access_token;
+     const profileRes = await fetch('https://api.github.com/user', {
+       headers: { Authorization: `Bearer ${access_token}`, Accept: 'application/json' },
+       signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1792-github-refuses-a-token-answer-without-an-access-token.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1792-github-refuses-a-token-answer-without-an-access-token.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1792-github-refuses-a-token-answer-without-an-access-token.test.ts
+@@ -0,0 +1,74 @@
++// KS-1792: GitHub answers a bad or expired sign-in code with HTTP 200 and an {error, error_description} body. The adapter used to read access_token from it unchecked and call /user with
++// `Bearer undefined`, relying on GitHub answering that 401. GitHubProvider.exchangeCode now refuses such an answer before any profile call. fetch is replaced by a recording stub, so no
++// socket is opened; a good token answer is the control.
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++
++const { silentLogger } = vi.hoisted(() => ({
++  silentLogger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() },
++}));
++vi.mock('../utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger }));
++
++import { GitHubProvider } from '../providers/social/github';
++
++const CONFIG = { clientId: 'cid-ks1792', clientSecret: 'secret-ks1792', callbackUrl: 'https://app.test/cb', enabled: true };
++
++let calls: string[];
++
++type Answer = { status: number; body: unknown };
++
++// A recording stub keyed by URL: the token endpoint answers `token`, api.github.com/user answers `user` (default: GitHub's own 401 for a bad bearer), anything else 404.
++function stubFetch(token: Answer, user: Answer = { status: 401, body: { message: 'Bad credentials' } }) {
++  calls = [];
++  vi.stubGlobal('fetch', vi.fn(async (url: string) => {
++    calls.push(String(url));
++    const a = String(url).includes('/login/oauth/access_token') ? token : String(url).endsWith('/user') ? user : { status: 404, body: {} };
++    return new Response(JSON.stringify(a.body), { status: a.status, headers: { 'content-type': 'application/json' } });
++  }));
++}
++
++// The message exchangeCode rejects with, or 'RESOLVED' if it did not reject: a plain value, so a wrong answer fails by assertion.
++async function refusal(code: string): Promise<string> {
++  return new GitHubProvider(CONFIG).exchangeCode(code).then(() => 'RESOLVED', (e: Error) => e.message);
++}
++
++beforeEach(() => { vi.clearAllMocks(); });
++afterEach(() => { vi.unstubAllGlobals(); });
++
++describe('KS-1792: the GitHub adapter refuses a 200 token answer that has no access_token', () => {
++  it('RED KS-1792 R1 a 200 error answer (bad_verification_code) is refused and /user is never called', async () => {
++    stubFetch({ status: 200, body: { error: 'bad_verification_code', error_description: 'The code passed is incorrect or expired.' } });
++    expect(await refusal('bad')).toBe('GitHub token exchange failed (no access token)');
++    expect(calls).toEqual(['https://github.com/login/oauth/access_token']);
++  });
++
++  it('RED KS-1792 R2 a 200 answer with an empty body object is refused and /user is never called', async () => {
++    stubFetch({ status: 200, body: {} });
++    expect(await refusal('bad')).toBe('GitHub token exchange failed (no access token)');
++    expect(calls).toEqual(['https://github.com/login/oauth/access_token']);
++  });
++
++  it('RED KS-1792 R3 a 200 answer whose access_token is not a string is refused and /user is never called', async () => {
++    stubFetch({ status: 200, body: { access_token: 42 } });
++    expect(await refusal('bad')).toBe('GitHub token exchange failed (no access token)');
++    expect(calls).toEqual(['https://github.com/login/oauth/access_token']);
++  });
++
++  it('CONTROL KS-1792 C1 a good token answer still signs in: the profile call carries the Bearer token', async () => {
++    stubFetch(
++      { status: 200, body: { access_token: 'tok-ks1792' } },
++      { status: 200, body: { id: 7, email: 'a@secuura.test', name: 'Ada Lovelace', login: 'ada' } },
++    );
++    const profile = await new GitHubProvider(CONFIG).exchangeCode('good');
++    expect(profile.providerId).toBe('7');
++    expect(profile.email).toBe('a@secuura.test');
++    expect(calls).toEqual(['https://github.com/login/oauth/access_token', 'https://api.github.com/user']);
++    const profileInit = (vi.mocked(fetch).mock.calls[1] as unknown as [string, { headers: Record<string, string> }])[1];
++    expect(profileInit.headers.Authorization).toBe('Bearer tok-ks1792');
++  });
++
++  it('CONTROL KS-1792 C2 a non-2xx token answer is still the status-only failure', async () => {
++    stubFetch({ status: 400, body: { error: 'bad_verification_code' } });
++    expect(await refusal('bad')).toBe('GitHub token exchange failed (HTTP 400)');
++  });
++});

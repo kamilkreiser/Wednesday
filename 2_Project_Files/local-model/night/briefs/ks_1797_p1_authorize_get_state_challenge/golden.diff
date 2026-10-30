@@ -1,0 +1,135 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/oauth.ts b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/oauth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/oauth.ts
+@@ -490,7 +490,11 @@
+       client_id, redirect_uri, response_type, scope, state,
+       code_challenge, code_challenge_method,
+     } = req.query as Record<string, string>;
+-
++    // KS-1797: a repeated query parameter (?state=a&state=b) reaches this handler as an ARRAY whatever the cast above says. generateConsentPage then calls escapeHtml on it, an array has no
++    // `replace`, and the catch below answered 500 server_error. A malformed request is a 400 invalid_request, the existing message the resolver's rules use, so no published message changes.
++    if ((state !== undefined && typeof state !== 'string') || (code_challenge !== undefined && typeof code_challenge !== 'string')) {
++      return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'invalid_request', description: 'state and code_challenge must each be a single string' } });
++    }
+     // KS-804: every app-derived rule lives in the resolver now — response_type,
+     // client/redirect, the scheme, PKCE for public clients and scopes. This
+     // handler renders the resolution; it does not re-decide any of it.
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1797-authorize-get-refuses-a-repeated-state-or-code-challenge.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1797-authorize-get-refuses-a-repeated-state-or-code-challenge.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1797-authorize-get-refuses-a-repeated-state-or-code-challenge.test.ts
+@@ -0,0 +1,114 @@
++// KS-1797 (GET half): GET /api/oauth/authorize answered 500 server_error when `state` or `code_challenge` arrived as a repeated query parameter (an array at run time): generateConsentPage calls
++// escapeHtml on it and an array has no `replace`. A malformed request is a 400 invalid_request. Driven through the real router on a loopback listener with the same mocks as
++// ks1219-authorize-refuses-an-array-valued-scope.test.ts; one string value is the control. The POST half of KS-1797 (a JSON array state or code_challenge) is NOT covered here.
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { Server } from 'node:http';
++import express from 'express';
++
++const state = vi.hoisted(() => ({
++  app: null as null | {
++    id: string; name: string; clientId: string; appType: string;
++    redirectUris: string[]; allowedScopes: string[];
++  },
++}));
++
++const silent = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() };
++vi.mock('../utils/logger', () => ({ logger: silent, createLogger: () => silent, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silent, createLogger: () => silent }));
++
++vi.mock('../services/oauth', async (importOriginal) => {
++  const real = await importOriginal<Record<string, unknown>>();
++  return {
++    ...real,
++    createAuthorizationCode: vi.fn(async () => 'MINTED_AUTHORIZATION_CODE'),
++    createApp: vi.fn(),
++    getAppByClientId: vi.fn(async () => state.app),
++    getAppById: vi.fn(),
++  };
++});
++vi.mock('../services/accountLockout', () => ({
++  isLockedOut: vi.fn(async () => false), recordFailure: vi.fn(async () => undefined),
++  recordSuccess: vi.fn(async () => undefined), clearFailures: vi.fn(async () => undefined),
++}));
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => ({ id: 's' })), getRedisClient: vi.fn(() => null),
++  validateSession: vi.fn(async () => true), updateSessionActivity: vi.fn(async () => undefined),
++}));
++vi.mock('../services/password', () => ({ verifyPassword: vi.fn(async () => true), hashPassword: vi.fn(async () => 'h') }));
++vi.mock('../repositories/userRepo', () => ({
++  getUserByEmail: vi.fn(async () => ({
++    id: 'user-1', email: 'u@secuura.local', status: 'ACTIVE', mfaEnabled: false,
++    passwordHash: 'h', role: 'OWNER', verificationLevel: 'BASIC',
++  })),
++  getUserById: vi.fn(async () => null), updateUser: vi.fn(async () => undefined),
++  getPlatformAdmin: vi.fn(async () => null), reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
++}));
++vi.mock('../services/jwt', () => ({ generateTokenPair: vi.fn(() => ({ accessToken: 'a', refreshToken: 'r', expiresIn: 900 })) }));
++vi.mock('../services/refreshDenylist', () => ({ isRefreshJtiDenylisted: vi.fn(async () => false) }));
++vi.mock('../middleware/authenticate', () => ({ authenticate: () => (_r: unknown, _s: unknown, n: () => void) => n() }));
++vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++
++let server: Server;
++let base: string;
++let createAuthorizationCode: ReturnType<typeof vi.fn>;
++
++beforeAll(async () => {
++  const { oauthRouter } = await import('../routes/oauth');
++  ({ createAuthorizationCode } = (await import('../services/oauth')) as never);
++  const app = express();
++  app.use(express.json());
++  app.use('/api/oauth', oauthRouter);
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
++  const addr = server.address();
++  base = `http://127.0.0.1:${typeof addr === 'object' && addr ? addr.port : 0}`;
++});
++afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
++
++beforeEach(() => {
++  state.app = {
++    id: 'app-1', name: 'Test App', clientId: 'client-1', appType: 'confidential',
++    redirectUris: ['https://app.example.com/cb'], allowedScopes: ['openid', 'profile'],
++  };
++  vi.clearAllMocks();
++});
++
++
++const CB = encodeURIComponent('https://app.example.com/cb');
++const GET_BASE = `client_id=client-1&redirect_uri=${CB}&response_type=code`;
++
++async function get(extraQuery: string): Promise<{ status: number; message: string | undefined }> {
++  const res = await fetch(`${base}/api/oauth/authorize?${GET_BASE}${extraQuery}`, { redirect: 'manual' });
++  const text = await res.text();
++  let message: string | undefined;
++  try { message = JSON.parse(text)?.error?.message; } catch { /* html consent page */ }
++  return { status: res.status, message };
++}
++
++describe('KS-1797: GET /api/oauth/authorize refuses a repeated state or code_challenge', () => {
++  it('RED KS-1797 R1 GET with a repeated state parameter is 400 invalid_request, not 500', async () => {
++    expect(await get('&state=xyz&state=second')).toEqual({ status: 400, message: 'invalid_request' });
++    expect(createAuthorizationCode).not.toHaveBeenCalled();
++  });
++
++  it('RED KS-1797 R2 GET with a repeated code_challenge parameter is 400 invalid_request, not 500', async () => {
++    expect(await get('&state=xyz&code_challenge=aaa&code_challenge=bbb')).toEqual({ status: 400, message: 'invalid_request' });
++    expect(createAuthorizationCode).not.toHaveBeenCalled();
++  });
++
++  it('CONTROL KS-1797 C1 GET with one state still serves the consent page', async () => {
++    expect((await get('&state=xyz')).status).toBe(200);
++  });
++
++  it('CONTROL KS-1797 C2 GET with no state still serves the consent page', async () => {
++    expect((await get('')).status).toBe(200);
++  });
++
++  it('CONTROL KS-1797 C3 GET with one code_challenge still serves the consent page', async () => {
++    expect((await get('&state=xyz&code_challenge=aaa')).status).toBe(200);
++  });
++
++  it('CONTROL KS-1797 C4 GET with a repeated scope is still 400 invalid_request (KS-1219)', async () => {
++    expect(await get('&state=xyz&scope=openid&scope=profile')).toEqual({ status: 400, message: 'invalid_request' });
++  });
++});

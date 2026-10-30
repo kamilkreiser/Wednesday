@@ -1,0 +1,43 @@
+diff --git a/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts
+@@ -0,0 +1,38 @@
++// KS-1836 (gate 23 mutant Mf): selectReadableCertificates (services/nftReadGate.ts) documents that the `walletAddress` selector "must
++// equal the row's wallet". The comparison is exact: a wallet address is an opaque string, so a selector or a row value that differs
++// only by surrounding whitespace is a DIFFERENT wallet and matches nothing. The PR's own cells use well-formed wallets only, so a
++// compare that trims both sides stayed green. Unit level: the pure function, no router, no database.
++import { describe, it, expect } from 'vitest';
++import { selectReadableCertificates } from '../services/nftReadGate';
++import type { NFTCertificate } from '../types';
++
++const OWNER = 'user-A';
++const WALLET = 'addr_test1_ks1836_exact_wallet';
++
++function cert(id: string, walletAddress: string): NFTCertificate {
++  return { id, userId: OWNER, walletAddress } as unknown as NFTCertificate;
++}
++
++const ids = (list: readonly NFTCertificate[]) => list.map(c => c.id);
++
++describe('KS-1836 read gate: the walletAddress selector compares exactly', () => {
++  it('RED KS-1836 W1 a selector padded with spaces does not match the unpadded row wallet', () => {
++    expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: ` ${WALLET} ` }))).toEqual([]);
++  });
++
++  it('RED KS-1836 W2 a row wallet padded with spaces is not matched by the unpadded selector', () => {
++    expect(ids(selectReadableCertificates([cert('c1', ` ${WALLET}`)], OWNER, { walletAddress: WALLET }))).toEqual([]);
++  });
++
++  it('CONTROL KS-1836 W3 the exact selector returns the row', () => {
++    expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: WALLET }))).toEqual(['c1']);
++  });
++
++  it('CONTROL KS-1836 W4 a different wallet returns nothing', () => {
++    expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: `${WALLET}_other` }))).toEqual([]);
++  });
++
++  it('CONTROL KS-1836 W5 no walletAddress selector returns every row the owner holds', () => {
++    expect(ids(selectReadableCertificates([cert('c1', WALLET), cert('c2', 'addr_other')], OWNER, {}))).toEqual(['c1', 'c2']);
++  });
++});
