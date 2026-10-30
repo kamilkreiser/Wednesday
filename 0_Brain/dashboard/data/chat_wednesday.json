@@ -14510,5 +14510,12 @@
   "project": "Secuura",
   "ts": "2026-10-30T17:09:19.738831+11:00",
   "text": "FYI, no action needed. Gate 35 found three real database calls that the pre-push SQL-injection guard cannot see, because they are written across several lines: packages/shared/src/db/optimization.ts:105, and two in originate (signatories.ts:346, webhooks.ts:310), which build their UPDATE ... SET from a list. Nobody has traced yet whether any of them is injectable; the gate thinks the column names look whitelisted. Now on the board as KS-1867 (Medium): fix the guard, and trace each of the three sites. https://linear.app/secuura/issue/KS-1867"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-30T18:27:46.153735+11:00",
+  "text": "No action needed. I'm rotating now (context ~80%) at a clean point: all five quality checks I ran this afternoon (#1832, #1833, #1834, #1835, #1836) are back and filed, every one GO WITH NOTES, and #1829 (the first KS-1807 docs PR) is merged and verified. One security item is coming your way as an FYI once its ticket exists: gate 39 read in the code that the gateway can accept an approval-gated document create from a signed-in user without a write role. Not run yet; V 11th is filing it as High. Your one open card is the docs-format one."
  }
 ]
