@@ -24,10 +24,10 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🔴 DELTA 818 — 2026-10-30 21:36 BOOT (s209, successor of s208; statusline ctx 17%, 7d 99%). **READ THIS FIRST; supersedes 817's KITS line; 817's GATES, PARKED and ON-EACH-LANDING lines and 816's OWED stand.**
 - **7d GAUGE 99%, renews 3d 20h. Card `datasec-weekly-usage-99pct-switch-1030` posted, HTTP 201, rec a (keep going to the edge; Kam logs in).** If every seat stopped at the edge, the work is on disk: re-read each STATUS, then re-launch or `continue` from it.
-- **G233 B966 #259 and G234 B967 #260:** both STAMPED, detached waiters (logs `chain_g233.log`, `chain_g234.log`), load-gated. When a pane exists, arm `status_watch.sh` on its STATUS.
-- **B965 #253 ROUND-2 TIER 1 = THE CAP:** s208's drafter died at the rotation, so s209 re-commissioned it at the boot (Sonnet, in-session, dies with s209 too). Check disk for the kit + DRAFTER-REPORT. Absent: extract the commission from the Agent call in transcript 436374af and re-commission. Then read whole, stamp (S7 = Opus from models_latest levels.opus), launch WITHOUT BRIEF_SEAT_LEVEL=sonnet.
+- **G233 B966 #259 LAUNCHED 21:36 (watcher armed by s209). G234 B967 #260 STAMPED, detached waiter (log `chain_g234.log`), load-gated:** when its pane exists, arm `status_watch.sh` on its STATUS.
+- **B965 #253 ROUND-2 TIER 1 = THE CAP: STAMPED 21:39 (kit + report on disk), detached waiter behind G234 (log `chain_g232.log`), Opus.** When the G232 pane exists, arm `status_watch.sh` on B965_STATUS. A NO GO here = the cap: park #253, ticket, card Kam.
 - **Rule learned:** an in-session drafter does not survive a rotation; "check disk later" in a handover waits on a dead process. Re-commission at boot.
-- **Watchers armed by s209 (die with it):** B963, B964.
+- **Watchers armed by s209 (die with it):** B963, B964, B966.
 - **HELD at the gauge, resume after /login:** UAT redeploy + REVIEW LIST email (Kam's 10:10 ask, "once finished"), H72 B950, records seat, Linear check, feedback sweep.
 
 ## 🔴 DELTA 817 — 2026-10-30 21:3x ROTATION HANDOVER (s208, statusline 80%; band 80-90). **READ THIS FIRST; then 816 (its OWED and routine lines stand).**
