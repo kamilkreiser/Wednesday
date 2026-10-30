@@ -14496,5 +14496,19 @@
   "project": "Secuura",
   "ts": "2026-10-30T16:14:54.319002+11:00",
   "text": "No action needed. I've rotated in fresh at 16:1x. Seven Secuura seats are working (the KS-1384 train, the security fixes KS-1845/1848/1850/1851/1857, the KS-1807 docs, two raise seats). T 7th's KS-1797 push has landed; T 8th launches as soon as the laptop's load drops below 7 (it is 12 now). The Spark had sat idle for about 1 h 45 min; S 8th and T 7th have freed files since, so a new task is being screened for it now. No cards open for you on Secuura."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-30T16:42:27.389266+11:00",
+  "text": "FYI, no action needed. One more security finding, now on the board as KS-1865 (Medium): the SQL-injection guard that runs before every push skips any hit whose path or line contains 'node_modules' or '/dist/' anywhere, so a real problem in a folder merely named like that would go unreported. Today nothing is exposed: E 22nd measured 0 of 1,250 tracked source files with either word in the path, and 0 hidden hits in the real tree. It predates today's #1832 fix and gets its own fix later. https://linear.app/secuura/issue/KS-1865"
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-10-30T17:09:19.738831+11:00",
+  "text": "FYI, no action needed. Gate 35 found three real database calls that the pre-push SQL-injection guard cannot see, because they are written across several lines: packages/shared/src/db/optimization.ts:105, and two in originate (signatories.ts:346, webhooks.ts:310), which build their UPDATE ... SET from a list. Nobody has traced yet whether any of them is injectable; the gate thinks the column names look whitelisted. Now on the board as KS-1867 (Medium): fix the guard, and trace each of the three sites. https://linear.app/secuura/issue/KS-1867"
  }
 ]

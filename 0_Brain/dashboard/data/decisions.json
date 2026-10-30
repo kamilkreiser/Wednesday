@@ -52640,5 +52640,64 @@
   ],
   "delivered_artefact": "KS-1384 comment 616db2a5-06bf-42ce-9398-9ccae8f1b529 (Version B, threaded reply to Stuart 50294791, 2026-10-30T02:05:38Z, read back by W 10th) + KS-1809 comment c89a7732 (assigned to our account)",
   "delivered_ts": "2026-10-30T13:06:47.582158+11:00"
+ },
+ {
+  "id": "secuura-docs-section-collision-dirties-every-pr-1030",
+  "client_project": "Secuura/Blockchain",
+  "title": "Every merge now blocks the next PR on the two shared test docs — change how the docs are built?",
+  "bluf": "The project rule is that every test change adds a numbered section to the same place in two shared docs (the Flow Diagrams page and the QA Tool Cheat Sheet). So each merge to develop puts the NEXT PR in conflict, GitHub cannot squash it, and fixing that costs a merge-in plus a ~24-minute push and a new queue wait. Measured today: #1828 (U 7th) dirty after #1825 took section 124; F 18th, T 8th's three PRs, #1832 and #1833 all carry the same collision. With ~10 PRs in flight, this now gates the whole merge chain. The docs' rendered content would not change under option a; Peter reads these pages, so the format is yours to decide.",
+  "default_action": "If you don't answer by tomorrow morning: Wednesday does (b) only (renumber-at-merge by the merging seat, no format change), and raises (a) again at the morning card. Nothing changes in the docs Peter reads without your tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fragments: each PR adds its own small file; one step builds the two pages (recommended)",
+    "detail": "A Secuura seat adds a per-PR fragment folder + a build step that renders the two html pages in the current order and numbering. The rendered pages stay the same for Peter; PRs stop conflicting. One build lane, gated tier 2."
+   },
+   {
+    "key": "b",
+    "label": "Keep the docs as they are; renumber in one batch at merge time",
+    "detail": "No format change. A single merge seat renumbers and merges PRs one after another. Cheaper to start; each merge still needs a push, so the chain stays slow."
+   },
+   {
+    "key": "c",
+    "label": "Leave it as it is",
+    "detail": "Every PR keeps paying a merge-in push before merging."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-30T17:30:24.865668+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-21 09:47",
+   "2026-08-27 19:43",
+   "2026-08-28 09:33",
+   "2026-09-01 17:25",
+   "2026-09-04 08:30",
+   "2026-09-05 15:04",
+   "2026-09-07 06:42",
+   "2026-09-08 07:07",
+   "2026-09-08 07:10",
+   "2026-09-08 08:08",
+   "2026-09-08 14:05",
+   "2026-09-09 17:03",
+   "2026-09-10 08:59",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 09:17",
+   "2026-09-10 10:29",
+   "2026-09-16 07:01",
+   "2026-09-16 19:41",
+   "2026-09-18 09:15",
+   "CARD secuura-934-blocks-every-push-needs-one-approval",
+   "CARD secuura-five-new-advisories-block-every-push-0929",
+   "CARD secuura-five-new-advisories-freeze-every-push-1006",
+   "CARD secuura-1756-misfiled-docs-what-next-1028",
+   "CARD secuura-hono-advisory-blocks-every-push-1029"
+  ]
  }
 ]
