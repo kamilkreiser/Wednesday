@@ -1,0 +1,30 @@
+{
+  "findings": [
+    {
+      "severity": "Note",
+      "claim": "The new R3 scan only detects concatenation when the literal `connectionId=` is immediately followed by a quote and `+`, so a concatenation that builds the key from parts (e.g. `'connection' + 'Id='`) is invisible, as the PR's own docs admit.",
+      "evidence": "ks1670-the-success-redirect-encodes-the-connection-id.test.ts:63 `.filter((l) => /connectionId=['\"`]\\s*\\+/.test(l))`; API_Security_Functional_Testing_Architecture_Flow_Diagrams.html diff: \"a concatenation that does not spell `connectionId=` followed by a quote and `+` (for example a key built from parts) is invisible to it.\"",
+      "test_or_reason": "The regex requires the exact literal `connectionId=` before the quote; a key built from parts would not match, so the scan is narrower than the stated goal of refusing any concatenated connection id."
+    },
+    {
+      "severity": "Note",
+      "claim": "The new R3 scan is a text scan of one file and does not prove the behaviour on the wire; the ticket itself says the pin is not a defect in the product line and the behaviour cell is the real guard.",
+      "evidence": "TICKET: \"It is not a defect in the product line.\" and \"or close it with a note that the behaviour cell is the real guard.\"",
+      "test_or_reason": "The PR's own docs (API_Security_Functional_Testing_Architecture_Flow_Diagrams.html diff) state \"A text scan of one file, not a running service\" and list N3, N4, and wire cells A1/A3/A7 as not done."
+    },
+    {
+      "severity": "Note",
+      "claim": "The new C5 control asserts the real template redirect is still in the source, but it does not assert that the scan would catch a concatenation that uses a different quote style or a template literal with an expression, so the control's coverage is limited.",
+      "evidence": "ks1670-the-success-redirect-encodes-the-connection-id.test.ts:76-80 `it('control KS-1670 C5 the scan ignores a comment line, and the real template redirect is still in the source', ...)`; the planted C4 only uses single and double quotes, not backticks or expressions.",
+      "test_or_reason": "C4 tests only `'` and `\"` quote styles; the regex also matches backtick, but no test exercises that branch, and no test checks a concatenation with an expression like `connectionId=' + someVar` where the key is not literal."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR does not address the ticket's N3 mutant (an equivalent rewrite of the success line turns R2 red), so the pin can still go red for a behaviourally identical rewrite.",
+      "evidence": "TICKET: \"N3: an equivalent rewrite of the success line (same behaviour, different text) turns R2 red for no behavioural reason.\" and \"KS-1800 stays open. Not done: N3 ...\" in API_Security_Functional_Testing_Architecture_Flow_Diagrams.html diff.",
+      "test_or_reason": "The PR adds R3/C4/C5 but does not change R2 or add a wire-level test, so N3 remains unaddressed."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+}

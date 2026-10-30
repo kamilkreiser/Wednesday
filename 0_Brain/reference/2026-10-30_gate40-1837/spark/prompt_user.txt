@@ -1,0 +1,302 @@
+===== TICKET =====
+KS-1800 — m365 ks1670 source-text pin: a raw connectionId by concatenation survives (gate 7 N6) [In Progress]
+
+**BLUF:** the source-text pin that PR 1791 added for KS-1670 (`ks1670-the-success-redirect-encodes-the-connection-id.test.ts`) has blind spots that gate 7 found with mutants N3, N4 and N6 (finding 1791-1, Low, a disclosed test gap). It is not a defect in the product line. Low. Related to KS-1670. I read the file at develop and did not re-run the gate's mutants.
+
+**What the pin is, read at develop** `5dccdcb29ec2`**:** it reads `services/m365-integration/src/index.ts` as text and boots nothing. Its needle is the string `connectionId=${` (line 10 of the test). R1 (line 32) requires every interpolation that follows that needle to be wrapped in `encodeURIComponent`. R2 (line 37) requires the exact success-redirect text `m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName`. C1 (line 41) requires that the instrument finds exactly one such interpolation.
+
+**The gaps, from gate 7 (tested there by mutants):**
+
+1. N6: a raw id added by string concatenation survives. R1's needle sees only template interpolations, so a redirect built by concatenation is invisible to it by construction (the needle is the literal `connectionId=${`).
+2. N4: a wrapped-then-unwrapped expression passes R1; only R2's exact text catches it, and only on the success line.
+3. N3: an equivalent rewrite of the success line (same behaviour, different text) turns R2 red for no behavioural reason.
+   The gate's own HTTP probe showed the behaviour the pin cannot, and it suggested lifting its cells A1, A3 and A7 into the PR as wire cells.
+
+**What has changed since:** PR 1791 merged with an added behaviour cell, `ks1670-the-success-redirect-keeps-a-hostile-connection-id-intact.test.ts`, added on gate 7's note (it also answers the gate's finding 1791-2, the missing non-ASCII cell). Seat R 6th measured it on the PR: three of its six cells were red against the pin, and it kills the raw, `encodeURI` and double-encode mutants; N3 remains. I did not re-run that. Gate 7's finding 1791-3 (a lone surrogate makes `encodeURIComponent` throw; unreachable because ids are `conn_` plus a uuid) is not part of this ticket.
+
+**So what is left:** the pin can still go red for an equivalent rewrite (N3), and a redirect added elsewhere by concatenation is outside R1. Whether that is worth a change, or the behaviour cell is enough and this can be closed with a note, is a decision for whoever picks it up.
+
+**Fix shapes, not chosen here:** make R2 assert the behaviour (the encoded id reaches the wire) instead of the exact text; or lift the gate's A1, A3 and A7 as wire cells; or close it with a note that the behaviour cell is the real guard.
+
+**Searched before filing** (Linear `issues` filter over title, description and comments, archived included, team KS, 2026-10-28 22:3xZ): `ks1670` 0 hits; `source-text pin` 5 hits, read by title (KS-1670 itself, and KS 1602, KS 1521, KS 1328, KS 1187, which are other tests' pins); KS-1670's own text says only that the test "is a source-text pin … proves the text of the template, not the redirect on the wire" and does not name these mutants (`concatenat` 0 matches, `blind` 0); `connectionId=` 3 hits (KS-1670, KS 1641 Done, KS 423 Done), none is this. The positive control `parseScopeString` found 4; a nonsense token generated at run time found 0 and was not recorded in this ticket.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+index be651fd..6841312 100644
+--- a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+@@ -52,4 +52,30 @@ describe('KS-1670: the m365 success redirect encodes the connection id', () => {
+   it('control KS-1670 C3 the invalid_state refusal redirect is untouched', () => {
+     expect(SRC).toContain('/admin/integrations?m365=error&message=invalid_state');
+   });
++
++  // KS-1800 (gate 7 mutant N6): R1's needle is the template text `connectionId=${`, so a redirect that carries the id by STRING CONCATENATION
++  // ('...connectionId=' + connectionId) is invisible to it by construction. This scan is the other half: it reads every non-comment line
++  // and refuses a `connectionId=` query key that is closed by a quote and joined to something with `+`.
++  function concatenatedConnectionIdLines(src: string): string[] {
++    return src
++      .split('\n')
++      .filter((l) => !/^\s*(\/\/|\/\*|\*)/.test(l))
++      .filter((l) => /connectionId=['"`]\s*\+/.test(l));
++  }
++
++  it('RED KS-1670 R3 no redirect in the service carries the connection id by string concatenation', () => {
++    expect(concatenatedConnectionIdLines(SRC)).toEqual([]);
++  });
++
++  it('control KS-1670 C4 the concatenation scan can fail: it finds a planted concatenated redirect, in either quote style', () => {
++    const planted = "    res.redirect(base + '/admin/integrations?m365=success&connectionId=' + connectionId);\n"
++      + '    res.redirect(base + "/admin/integrations?m365=success&connectionId=" + connectionId);\n';
++    expect(concatenatedConnectionIdLines(planted)).toHaveLength(2);
++  });
++
++  it('control KS-1670 C5 the scan ignores a comment line, and the real template redirect is still in the source', () => {
++    const commented = "    // res.redirect(base + '/x?connectionId=' + connectionId);\n";
++    expect(concatenatedConnectionIdLines(commented)).toEqual([]);
++    expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}');
++  });
+ });
+diff --git a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+index 60aa336..c11d97f 100644
+--- a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
++++ b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
+@@ -5926,5 +5926,23 @@ cd Blockchain/Dev/services/governance &amp;&amp; npm test -- --maxWorkers=3
+ <pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1816-reconciler-comments-match-the-code.test.ts   # 5 cells, rc 0
+ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1175-identity-anchoring.test.ts   # 157 cells, rc 0
+ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                  # 38 files / 569 cells: 568 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
++<h2>127. The m365 success-redirect pin also refuses a connection id joined to the redirect by string concatenation (KS-1800)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> One new scan in <code>Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts</code> (test only, +26 lines). It reads <code>m365-integration/src/index.ts</code> as text, drops comment lines, and refuses a <code>connectionId=</code> query key that is closed by a quote and joined to something with <code>+</code>. The existing cell R1 looks for the template text <code>connectionId=${</code>, so a redirect that carries the id by concatenation is invisible to it by construction; this is the other half, the gate-7 mutant N6 of KS 1670.
++    </td></tr><tr><td>Three new cells: R3 is RED when such a line exists; C4 is a control that the scan can fail (it finds a planted concatenated redirect, in either quote style); C5 is a control that the scan ignores a comment line and that the real template redirect is still in the source. The file now holds 8 cells. <strong>Zero product bytes</strong>: <code>index.ts</code> is unchanged (the tamper target is never committed).
++    </td></tr></table>
++<h3>127.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Red under a tamper, green on the untouched product, and no other cell moves.</strong></td><td> <strong>Tamper, worktree only, never committed:</strong> appending <code>const rawRedirect = '/admin/integrations?m365=success&amp;connectionId=' + connectionId; void rawRedirect;</code> to line 677 of <code>index.ts</code> makes R3 fail: <strong>1 of 8 fail</strong>, the controls pass. The file was restored by content and the whole-file sha256 equals the pre-tamper value. <strong>Untouched product:</strong> 8 of 8 pass.
++    </td></tr><tr><td><strong>Whole m365-integration unit suite</strong> (vitest): develop <code>a8c554659cb3</code> 29 files / 277 cells, 277 pass; with the change 29 files / <strong>280 cells, 280 pass</strong>, 0 failed, 0 skipped. <code>tsc</code> with the test file in the program (39 source files, 29 under <code>__tests__</code>): <strong>0 errors</strong>, and a planted type error was reported once as <code>TS2322</code> by file name. <code>eslint</code> on the test file: 0 errors, 0 warnings, and a planted file raised <code>@typescript-eslint/no-unused-vars</code> and <code>no-debugger</code>.
++    </td></tr></table>
++<h3>127.2 Environment and figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-10-30 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats.</strong></td><td> Develop <code>a8c554659cb3</code> with the change on top. Node v26.8.1 (not an LTS line), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0.
++    </td></tr></table>
++<h3>127.3 What this does not prove</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>A text scan of one file, not a running service.</strong></td><td> KS-1800 stays open. Not done: N3 (an equivalent rewrite of the redirect turns R2 red), N4, and the wire cells A1, A3 and A7 the gate suggested. The scan reads <code>index.ts</code> non-comment lines only: a concatenation that does not spell <code>connectionId=</code> followed by a quote and <code>+</code> (for example a key built from parts) is invisible to it.
++    </td></tr><tr><td>Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24, any deploy.
++    </td></tr></table>
++<h3>127.4 Running it</h3>
++<pre><code>cd Blockchain/Dev/services/m365-integration &amp;&amp; npm test -- src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts   # 8 cells in this file
++cd Blockchain/Dev/services/m365-integration &amp;&amp; npm test                                             # 29 files / 280 cells</code></pre>
+ </body>
+ </html>
+diff --git a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+index bdba7f5..8191024 100644
+--- a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
++++ b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
+@@ -6010,5 +6010,25 @@ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test
+ <tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+ <tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+ </table>
++<h2>The m365 success-redirect pin refuses a concatenated connection id &mdash; KS-1800</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Test only, zero product bytes. New scan in <code>ks1670-the-success-redirect-encodes-the-connection-id.test.ts</code>: it reads <code>m365-integration/src/index.ts</code> as text and refuses a <code>connectionId=</code> key closed by a quote and joined with <code>+</code>. Cells R3 (RED), C4 and C5 (controls); the file now holds 8.
++    </td></tr><tr><td>Tamper on <code>index.ts</code> line 677: R3 fails, 1 of 8; untouched product: 8 of 8.
++    </td></tr></table>
++</div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> KS-1800 stays open (N3, N4 and the wire cells A1, A3, A7 are not done; a concatenation that does not spell the key then a quote then <code>+</code> is invisible to the scan). The four platform suites, a running stack, Node 24 and any deploy were not run.
++    </td></tr></table>
++</div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/m365-integration &amp;&amp; npm test -- src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts   # 8 cells in this file
++cd Blockchain/Dev/services/m365-integration &amp;&amp; npm test                                             # 29 files / 280 cells</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>3</strong> (R3 RED + C4, C5 controls); the file holds 8; tamper on line 677: 1 of 8 fail, untouched product 8 of 8</td></tr>
++<tr><td>m365-integration unit suite</td><td>develop <code>a8c554659cb3</code> 29 files / 277 cells, 277 pass; with the change <strong>280 cells, 280 pass</strong>, 0 failed, 0 skipped</td></tr>
++<tr><td>tsc and eslint</td><td>tsc with the test file: <strong>0 errors</strong> over 39 source files, a planted type error reported once as <code>TS2322</code>; eslint on the test: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
++<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+ </body>
+ </html>
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+1: // KS-1670 site 1 (m365-integration src/index.ts, GET /api/callback success redirect): the redirect put `connectionId` into the query string unencoded, while `tenant` in the same template was
+2: // encoded with encodeURIComponent. The id only reaches that line after the server's own connection lookup hits, so it is not exploitable today, but an id format that ever admitted `&`, `#` or `%`
+3: // would change the shape of the query. This file reads the route's source text (no app boot, no database) and pins that every `connectionId=${...}` interpolation in the file is wrapped in
+4: // encodeURIComponent, and that the success redirect still encodes the tenant. C1 to C3 prove the instrument finds the route and the redirects it must not disturb.
+5: import { describe, it, expect } from 'vitest';
+6: import { readFileSync } from 'node:fs';
+7: import { join } from 'node:path';
+8: 
+9: const SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');
+10: const NEEDLE = 'connectionId=${';
+11: 
+12: /** Every interpolation that follows `connectionId=${` in the source, as the text up to the closing `}` of the template expression. */
+13: function interpolations(): string[] {
+14:   const found: string[] = [];
+15:   let at = SRC.indexOf(NEEDLE);
+16:   while (at !== -1) {
+17:     const start = at + NEEDLE.length;
+18:     let depth = 1;
+19:     let i = start;
+20:     while (i < SRC.length && depth > 0) {
+21:       if (SRC[i] === '{') depth++;
+22:       else if (SRC[i] === '}') depth--;
+23:       i++;
+24:     }
+25:     found.push(SRC.slice(start, i - 1));
+26:     at = SRC.indexOf(NEEDLE, i);
+27:   }
+28:   return found;
+29: }
+30: 
+31: describe('KS-1670: the m365 success redirect encodes the connection id', () => {
+32:   it('RED KS-1670 R1 every connectionId interpolation in a redirect query is wrapped in encodeURIComponent', () => {
+33:     const unwrapped = interpolations().filter((expr) => !/^encodeURIComponent\(.*\)$/.test(expr.trim()));
+34:     expect(unwrapped).toEqual([]);
+35:   });
+36: 
+37:   it('RED KS-1670 R2 the success redirect carries the encoded connection id and the encoded tenant, in that order', () => {
+38:     expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}&tenant=${encodeURIComponent(connection.tenantName');
+39:   });
+40: 
+41:   it('control KS-1670 C1 the instrument finds exactly one connectionId interpolation (the success redirect)', () => {
+42:     expect(interpolations()).toHaveLength(1);
+43:   });
+44: 
+45:   it('control KS-1670 C2 the success redirect is still the one that follows the "connection completed" log line', () => {
+46:     const logAt = SRC.indexOf('OAuth callback: connection completed');
+47:     const redirectAt = SRC.indexOf('m365=success');
+48:     expect(logAt).toBeGreaterThan(-1);
+49:     expect(redirectAt).toBeGreaterThan(logAt);
+50:   });
+51: 
+52:   it('control KS-1670 C3 the invalid_state refusal redirect is untouched', () => {
+53:     expect(SRC).toContain('/admin/integrations?m365=error&message=invalid_state');
+54:   });
+55: 
+56:   // KS-1800 (gate 7 mutant N6): R1's needle is the template text `connectionId=${`, so a redirect that carries the id by STRING CONCATENATION
+57:   // ('...connectionId=' + connectionId) is invisible to it by construction. This scan is the other half: it reads every non-comment line
+58:   // and refuses a `connectionId=` query key that is closed by a quote and joined to something with `+`.
+59:   function concatenatedConnectionIdLines(src: string): string[] {
+60:     return src
+61:       .split('\n')
+62:       .filter((l) => !/^\s*(\/\/|\/\*|\*)/.test(l))
+63:       .filter((l) => /connectionId=['"`]\s*\+/.test(l));
+64:   }
+65: 
+66:   it('RED KS-1670 R3 no redirect in the service carries the connection id by string concatenation', () => {
+67:     expect(concatenatedConnectionIdLines(SRC)).toEqual([]);
+68:   });
+69: 
+70:   it('control KS-1670 C4 the concatenation scan can fail: it finds a planted concatenated redirect, in either quote style', () => {
+71:     const planted = "    res.redirect(base + '/admin/integrations?m365=success&connectionId=' + connectionId);\n"
+72:       + '    res.redirect(base + "/admin/integrations?m365=success&connectionId=" + connectionId);\n';
+73:     expect(concatenatedConnectionIdLines(planted)).toHaveLength(2);
+74:   });
+75: 
+76:   it('control KS-1670 C5 the scan ignores a comment line, and the real template redirect is still in the source', () => {
+77:     const commented = "    // res.redirect(base + '/x?connectionId=' + connectionId);\n";
+78:     expect(concatenatedConnectionIdLines(commented)).toEqual([]);
+79:     expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}');
+80:   });
+81: });
+
+### FILE AT HEAD: Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+(OMITTED: 876727 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+### FILE AT HEAD: Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+(OMITTED: 589830 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1837,
+ "head_sha": "b02d20cd51fbf606bdeda201d851e43630c3b29e",
+ "pr_tip_now": "b02d20cd51fbf606bdeda201d851e43630c3b29e",
+ "head_mode": "tip",
+ "merge_base": "a8c554659cb34c4406d0274daa5fed4aafec35ec",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts",
+   "added": "26",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+   "added": "18",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html",
+   "added": "20",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts"
+ ],
+ "product_files": [
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+ ],
+ "diff_stat": {
+  "files": 3,
+  "added": 64,
+  "deleted": 0
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 8,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "'native'`, which is planned to become the default in a future major version of Vite:\n  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `\"type\": \"module\"` in the closest package.json\nSet `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning."
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 8,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "'native'`, which is planned to become the default in a future major version of Vite:\n  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `\"type\": \"module\"` in the closest package.json\nSet `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning."
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 8,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 8,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 7
+}

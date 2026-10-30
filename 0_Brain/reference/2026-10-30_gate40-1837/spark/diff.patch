@@ -1,0 +1,93 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+index be651fd..6841312 100644
+--- a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+@@ -52,4 +52,30 @@ describe('KS-1670: the m365 success redirect encodes the connection id', () => {
+   it('control KS-1670 C3 the invalid_state refusal redirect is untouched', () => {
+     expect(SRC).toContain('/admin/integrations?m365=error&message=invalid_state');
+   });
++
++  // KS-1800 (gate 7 mutant N6): R1's needle is the template text `connectionId=${`, so a redirect that carries the id by STRING CONCATENATION
++  // ('...connectionId=' + connectionId) is invisible to it by construction. This scan is the other half: it reads every non-comment line
++  // and refuses a `connectionId=` query key that is closed by a quote and joined to something with `+`.
++  function concatenatedConnectionIdLines(src: string): string[] {
++    return src
++      .split('\n')
++      .filter((l) => !/^\s*(\/\/|\/\*|\*)/.test(l))
++      .filter((l) => /connectionId=['"`]\s*\+/.test(l));
++  }
++
++  it('RED KS-1670 R3 no redirect in the service carries the connection id by string concatenation', () => {
++    expect(concatenatedConnectionIdLines(SRC)).toEqual([]);
++  });
++
++  it('control KS-1670 C4 the concatenation scan can fail: it finds a planted concatenated redirect, in either quote style', () => {
++    const planted = "    res.redirect(base + '/admin/integrations?m365=success&connectionId=' + connectionId);\n"
++      + '    res.redirect(base + "/admin/integrations?m365=success&connectionId=" + connectionId);\n';
++    expect(concatenatedConnectionIdLines(planted)).toHaveLength(2);
++  });
++
++  it('control KS-1670 C5 the scan ignores a comment line, and the real template redirect is still in the source', () => {
++    const commented = "    // res.redirect(base + '/x?connectionId=' + connectionId);\n";
++    expect(concatenatedConnectionIdLines(commented)).toEqual([]);
++    expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}');
++  });
+ });
+diff --git a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+index 60aa336..c11d97f 100644
+--- a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
++++ b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
+@@ -5926,5 +5926,23 @@ cd Blockchain/Dev/services/governance &amp;&amp; npm test -- --maxWorkers=3
+ <pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1816-reconciler-comments-match-the-code.test.ts   # 5 cells, rc 0
+ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1175-identity-anchoring.test.ts   # 157 cells, rc 0
+ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                  # 38 files / 569 cells: 568 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
++<h2>127. The m365 success-redirect pin also refuses a connection id joined to the redirect by string concatenation (KS-1800)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> One new scan in <code>Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts</code> (test only, +26 lines). It reads <code>m365-integration/src/index.ts</code> as text, drops comment lines, and refuses a <code>connectionId=</code> query key that is closed by a quote and joined to something with <code>+</code>. The existing cell R1 looks for the template text <code>connectionId=${</code>, so a redirect that carries the id by concatenation is invisible to it by construction; this is the other half, the gate-7 mutant N6 of KS 1670.
++    </td></tr><tr><td>Three new cells: R3 is RED when such a line exists; C4 is a control that the scan can fail (it finds a planted concatenated redirect, in either quote style); C5 is a control that the scan ignores a comment line and that the real template redirect is still in the source. The file now holds 8 cells. <strong>Zero product bytes</strong>: <code>index.ts</code> is unchanged (the tamper target is never committed).
++    </td></tr></table>
++<h3>127.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Red under a tamper, green on the untouched product, and no other cell moves.</strong></td><td> <strong>Tamper, worktree only, never committed:</strong> appending <code>const rawRedirect = '/admin/integrations?m365=success&amp;connectionId=' + connectionId; void rawRedirect;</code> to line 677 of <code>index.ts</code> makes R3 fail: <strong>1 of 8 fail</strong>, the controls pass. The file was restored by content and the whole-file sha256 equals the pre-tamper value. <strong>Untouched product:</strong> 8 of 8 pass.
++    </td></tr><tr><td><strong>Whole m365-integration unit suite</strong> (vitest): develop <code>a8c554659cb3</code> 29 files / 277 cells, 277 pass; with the change 29 files / <strong>280 cells, 280 pass</strong>, 0 failed, 0 skipped. <code>tsc</code> with the test file in the program (39 source files, 29 under <code>__tests__</code>): <strong>0 errors</strong>, and a planted type error was reported once as <code>TS2322</code> by file name. <code>eslint</code> on the test file: 0 errors, 0 warnings, and a planted file raised <code>@typescript-eslint/no-unused-vars</code> and <code>no-debugger</code>.
++    </td></tr></table>
++<h3>127.2 Environment and figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-10-30 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats.</strong></td><td> Develop <code>a8c554659cb3</code> with the change on top. Node v26.8.1 (not an LTS line), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0.
++    </td></tr></table>
++<h3>127.3 What this does not prove</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>A text scan of one file, not a running service.</strong></td><td> KS-1800 stays open. Not done: N3 (an equivalent rewrite of the redirect turns R2 red), N4, and the wire cells A1, A3 and A7 the gate suggested. The scan reads <code>index.ts</code> non-comment lines only: a concatenation that does not spell <code>connectionId=</code> followed by a quote and <code>+</code> (for example a key built from parts) is invisible to it.
++    </td></tr><tr><td>Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24, any deploy.
++    </td></tr></table>
++<h3>127.4 Running it</h3>
++<pre><code>cd Blockchain/Dev/services/m365-integration &amp;&amp; npm test -- src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts   # 8 cells in this file
++cd Blockchain/Dev/services/m365-integration &amp;&amp; npm test                                             # 29 files / 280 cells</code></pre>
+ </body>
+ </html>
+diff --git a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+index bdba7f5..8191024 100644
+--- a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
++++ b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
+@@ -6010,5 +6010,25 @@ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test
+ <tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+ <tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+ </table>
++<h2>The m365 success-redirect pin refuses a concatenated connection id &mdash; KS-1800</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Test only, zero product bytes. New scan in <code>ks1670-the-success-redirect-encodes-the-connection-id.test.ts</code>: it reads <code>m365-integration/src/index.ts</code> as text and refuses a <code>connectionId=</code> key closed by a quote and joined with <code>+</code>. Cells R3 (RED), C4 and C5 (controls); the file now holds 8.
++    </td></tr><tr><td>Tamper on <code>index.ts</code> line 677: R3 fails, 1 of 8; untouched product: 8 of 8.
++    </td></tr></table>
++</div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> KS-1800 stays open (N3, N4 and the wire cells A1, A3, A7 are not done; a concatenation that does not spell the key then a quote then <code>+</code> is invisible to the scan). The four platform suites, a running stack, Node 24 and any deploy were not run.
++    </td></tr></table>
++</div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/m365-integration &amp;&amp; npm test -- src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts   # 8 cells in this file
++cd Blockchain/Dev/services/m365-integration &amp;&amp; npm test                                             # 29 files / 280 cells</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>3</strong> (R3 RED + C4, C5 controls); the file holds 8; tamper on line 677: 1 of 8 fail, untouched product 8 of 8</td></tr>
++<tr><td>m365-integration unit suite</td><td>develop <code>a8c554659cb3</code> 29 files / 277 cells, 277 pass; with the change <strong>280 cells, 280 pass</strong>, 0 failed, 0 skipped</td></tr>
++<tr><td>tsc and eslint</td><td>tsc with the test file: <strong>0 errors</strong> over 39 source files, a planted type error reported once as <code>TS2322</code>; eslint on the test: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
++<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+ </body>
+ </html>

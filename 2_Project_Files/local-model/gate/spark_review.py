@@ -20,6 +20,7 @@ LOCK = os.path.normpath(os.path.join(HERE, "..", "spark", "state", "round.lock")
 URL = os.environ.get("SPARK_URL", "http://127.0.0.1:47788").rstrip("/")
 MODEL = os.environ.get("SPARK_MODEL", "deepseek-v4-flash-0731")
 THINK = os.environ.get("SPARK_THINK", "0") not in ("0", "", "false", "off")
+MAX_FILE_CHARS = int(os.environ.get("SPARK_REVIEW_MAX_FILE_CHARS", "120000"))
 SEV = {"Major", "Minor", "Note"}; VERD = {"GO", "GO WITH NOTES", "NO GO"}
 
 
@@ -195,7 +196,12 @@ def main():
     files = []
     for t in facts["touched_files"]:
         if t["status"].startswith("D"): continue
-        files.append(f"### FILE AT HEAD: {t['path']}\n" + "\n".join(f"{i}: {l}" for i, l in enumerate(git(a.repo, "show", f"{a.head_sha}:{t['path']}").splitlines(), 1)))
+        text = git(a.repo, "show", f"{a.head_sha}:{t['path']}")
+        # 2026-10-30: the two shared Projects Documents pages are ~760 KB each; full text overflowed the 384K context (HTTP 400) on every PR touching them.
+        if len(text) > MAX_FILE_CHARS:
+            files.append(f"### FILE AT HEAD: {t['path']}\n(OMITTED: {len(text)} chars is over the {MAX_FILE_CHARS} cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)")
+            continue
+        files.append(f"### FILE AT HEAD: {t['path']}\n" + "\n".join(f"{i}: {l}" for i, l in enumerate(text.splitlines(), 1)))
     cites = cited_lines(a.repo, a.head_sha, comment, prbody, diff)
     sections = [("TICKET", tk), ("DIFF (merge-base..head)", diff), ("TOUCHED FILES, FULL TEXT AT HEAD (line-numbered)", "\n\n".join(files)),
                 ("SOURCE LINES CITED BY THE PR / COMMENT (line-numbered)", cites),
