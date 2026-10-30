@@ -6,6 +6,16 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 17:54 30 Oct (the 16:1x successor seat, ctx 71%) — READ THIS FIRST; the 17:37 block below is current except:
+- **GATE 37 #1834 DONE:** GO WITH NOTES (verdict `0_Brain/reference/2026-10-30_gate37-1834/verdict.md`); F1 cells FOLDED INTO #1834's MERGE PREP (test-only delta -> no third gate; it is T 8th's NEXT ticket); F2 (wildcard-app array redirect_uri 500, latent) -> T files ONE Low ticket.
+- **GATE 38 #1835 still IN-SESSION** (dies at rotation; folder `0_Brain/reference/2026-10-30_gate38-1835/`, its OWN Postgres container — if the seat rotates before the verdict, check `docker ps` for a gate38 container and re-commission). F 18th WRAPPED + SCORED 0.95, pane %28 closed: a fix round goes to an F 19th from F 18th's HANDOVER (`!CODING/Secuura/Blockchain/5_Project_History/2026-10-30_seatF-18th/HANDOVER.md`). F 18th's six filing candidates are in today's note (16:38 wrap line).
+- **W 12th WRAPPED + SCORED 0.96, pane %32 closed.** Carried drivers 86753 (F-a, 4th) + 95416 (F0a, 6th) DETACHED. **W 13th LAUNCH WAITER ARMED** (detached, scratchpad `w13_waiter.sh` pid 74124, gate load1 < 7, Opus) from brief `2_Project_Files/fleet/briefs_staged/2026-10-30_seatW13_ks1384_successor.md`. Successor: `ps -p 74124`; no -W pane + load < 7 -> launch by hand (re-stamp SELF-CHECK). OWED: W 13th's plan confirmation -> GO quoting Kam 10:07:32.
+- **T 8th %33:** #1826 merge prep queued (pid 78430), KS-1791 queued (pid 28075); building #1827 then #1830 fix cells locally (unpushed). ORDER of its next tickets: #1834 merge prep FIRST, then #1827, #1830.
+- **R 66th:** detached chain supervisor pid 70400 (two tickets at a time); PR 1's harness-task driver 68588 lapses ~08:13Z (read at 07:50Z). Told 06:5xZ: docs collision = merge-in + push at merge prep.
+- **STANDING_LINES fixed:** the docs-only-conflict headline now says "resolved at MERGE PREP by a docs-only merge-in AND A PUSH" (backup `.pre-1030-docsheadline`); F and R had read the old headline as "no re-push".
+- **Fleet (ppid-1 drivers, queue order at 06:4xZ):** V x2 (V holds the lock), R, W(F-a), E PR 1, W(F0a), E #1832 prep, U #1828 re-merge-in, T KS-1791, T #1826 prep.
+- **Kam:** ONE card open (docs collision). Nothing else.
+
 ## ⏩ CHECKPOINT 17:37 30 Oct (the 16:1x successor seat, ctx 66%) — READ THIS FIRST; supersedes the 16:40 block where they differ
 - **develop = a8c554659cb3** (unchanged). Gauge 80% band (guide, not a stop).
 - **IN-SESSION GATES (die at rotation; if no verdict, read the folders + re-commission):** GATE 37 TIER 1 on #1834 (KS-1797 GET /authorize, T 8th, head d261b3cfa9c7) -> `0_Brain/reference/2026-10-30_gate37-1834/`; GATE 38 TIER 1 on #1835 (KS-1848/1849 backup-code burn, F 18th, head 598f50ed29d4; it starts its OWN Postgres container) -> `0_Brain/reference/2026-10-30_gate38-1835/`. Verdicts return as TEXT; Wednesday files `verdict.md` there.
