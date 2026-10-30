@@ -10,7 +10,7 @@ supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% 
 - **GATE 45 DONE: #1840 (4b166a00d60b) and #1833 (e4767d5838cb) GO WITH NOTES**, only the docs conflict; E + U answered + tapped (delivered). After fragments: each does ONE merge prep -> READY TO MERGE -> Wednesday checks code/test blobs equal those heads -> pinned GO.
 - **SPARK op 35 DONE** (2 KS-1868 passes HELD, read at source by Wednesday); **op 36 RUNNING in-session** -> `0_Brain/reference/2026-10-31_spark-operator36/report.md`.
 - **GATE 46 RUNNING in-session** (Opus, tier 1 batch #1848 + #1849 + #1850, KS-1410) -> `0_Brain/reference/2026-10-31_gate46-1848-1850/verdict.md`. If absent after a rotation: re-commission from the 10:0x block's head list.
-- **Next gates:** #1855 (tier 1), #1853 + #1854 (tier 1, KS-1384 train), tier 2 Sonnet batch #1842/#1847/#1851/#1852, then #1843 + #1856 (new head 6819db871377).
+- **Next gates:** #1855 (tier 1), #1853 + #1854 + #1857 (tier 1, KS-1384 train F0a/F0b/F0c; F0c READY 23:42Z head dfc0dd61d75e, delta 31e7975963a5...dfc0dd61d75e; F-b in its hook 23:37Z, R1 queued 6th pid 19844; train merges only whole), tier 2 Sonnet batch #1842/#1847/#1851/#1852, then #1843 + #1856 (new head 6819db871377).
 
 ## ⏩ UPDATE 10:0x SAT 31 OCT, CHECKPOINT 10:1x at ctx 50% (the 09:5x successor seat) — READ THIS FIRST; the 09:5x block below is current where this does not differ
 - **R 66th WRAPPED (22:51Z), scored 0.90, pane %31 CLOSED.** Its 8 PRs wait on gates (below). Its open asks: KS-1544 assignee (= our board account per STANDING_LINES 'Assignment'; a board seat assigns it), #1837 merge prep (after fragments).
