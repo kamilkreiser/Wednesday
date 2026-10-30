@@ -31,7 +31,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
   - #247 H11 playbook f14281a8 -> **G217 B940 LIVE**.
   - #248 H8 action plan be13fb2f -> waits #244 -> ADDENDUM to H66 (%57) for ONE merge -> then gate kit.
   - #249 H7 readiness+training 7ae229e9 -> **G218 B941 LIVE** (launched 13:40).
-  - #250 H2 Tailwind/logo df5d24fc -> gate kit **B942 (G219, 9740-9749) DRAFTED, NOT STAMPED**: FIRST WORK of the successor: read `tuesday/briefs/2026-10-30_B942_SEAT-G219_*.md` whole + its DRAFTER-REPORT, stamp, launch (heavy: 5-6 builds, launch when load is low). PR body corrected by s206 13:5x.
+  - #250 H2 Tailwind/logo df5d24fc -> gate **G219 B942 STAMPED 13:59, chain 10 queued** (PR body corrected by s206; re-arm a watcher on B942 STATUS once its pane exists).
   - #251 H1 infra a8b9e81a -> gate **G220 B943 STAMPED 13:58, chain 9 queued** (re-arm a watcher on B943 STATUS once its pane exists).
 - **LIVE builders:** H63 B932 H5 home (%51; merges #244 before gate) · H68 B937 H13 security A (%58; TIER-1 gate; after #249 lands send ADDENDUM: D-7 tail (returnPath "security" + nav-dead-ends floor 5) AND the aside link count is 9 not 8). Panes still open but DONE: H59 (%50) and H66 (%57) kept for their merge addenda; H64 (%54) and H67 (%55) done -> close after a listener check.
 - **Launch mechanics used today:** stamp with `tuesday/tools/stamp_brief.py <kit> <slots.json>` (slot labels as the kit's Stamp lines; @NOW@ for clocks); launch via a tracked chain script (`scratchpad drafters/chain7.sh` pattern: launch_when_cool retried while rc 5) — scratchpad dies with the session, so the successor writes its own or runs launch_when_cool directly. One waiter at a time; load1 has run 7-26.
