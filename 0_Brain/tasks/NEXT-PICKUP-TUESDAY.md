@@ -22,6 +22,14 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 818 — 2026-10-30 21:36 BOOT (s209, successor of s208; statusline ctx 17%, 7d 99%). **READ THIS FIRST; supersedes 817's KITS line; 817's GATES, PARKED and ON-EACH-LANDING lines and 816's OWED stand.**
+- **7d GAUGE 99%, renews 3d 20h. Card `datasec-weekly-usage-99pct-switch-1030` posted, HTTP 201, rec a (keep going to the edge; Kam logs in).** If every seat stopped at the edge, the work is on disk: re-read each STATUS, then re-launch or `continue` from it.
+- **G233 B966 #259 and G234 B967 #260:** both STAMPED, detached waiters (logs `chain_g233.log`, `chain_g234.log`), load-gated. When a pane exists, arm `status_watch.sh` on its STATUS.
+- **B965 #253 ROUND-2 TIER 1 = THE CAP:** s208's drafter died at the rotation, so s209 re-commissioned it at the boot (Sonnet, in-session, dies with s209 too). Check disk for the kit + DRAFTER-REPORT. Absent: extract the commission from the Agent call in transcript 436374af and re-commission. Then read whole, stamp (S7 = Opus from models_latest levels.opus), launch WITHOUT BRIEF_SEAT_LEVEL=sonnet.
+- **Rule learned:** an in-session drafter does not survive a rotation; "check disk later" in a handover waits on a dead process. Re-commission at boot.
+- **Watchers armed by s209 (die with it):** B963, B964.
+- **HELD at the gauge, resume after /login:** UAT redeploy + REVIEW LIST email (Kam's 10:10 ask, "once finished"), H72 B950, records seat, Linear check, feedback sweep.
+
 ## 🔴 DELTA 817 — 2026-10-30 21:3x ROTATION HANDOVER (s208, statusline 80%; band 80-90). **READ THIS FIRST; then 816 (its OWED and routine lines stand).**
 - **HPSM-POC main = fc59b575.** LANDED by s208 (7): #250, #248, #254, #255, #252 (cap), #256, #251 (cap). Nothing deployed.
 - **GATES LIVE (RE-ARM a `status_watch.sh <STATUS> 60` on each; s208's watchers die with it):** G230 %82 B963 #257 · G231 %83 B964 #258. **G233 B966 #259 STAMPED 21:30; its launch waiter runs DETACHED (pid 85926, log `fleet/cockpit/logs/chain_g233.log`)**: on its pane, arm the watcher on B966_STATUS.
