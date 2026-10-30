@@ -22,3 +22,5 @@ for this meeting. Each item: BLUF, the measurement it rests on, and who found it
 3. **KS-1410 class: three decision-shaped 500-body sites** (Spark operator 23): api-gateway proxy.ts:430 502
    `details.reason` (KS-41 diagnostic in front of auth); demo-service reset.ts:69 (operator needs the text);
    timestamping :245 typed 503. Each is "keep the diagnostic or make it constant".
+
+- **(added 2026-10-30 18:1x, Wednesday) KYC approval and the verification level — KS-1807 PR-2 UNDECIDED line.** Question for Kam + Stuart: should approving a KYC verification raise the user's verification level? Raised by Seat V 11th writing the docs (#1836). Evidence of what the code does TODAY: gate 39's answer 5 at 0_Brain/reference/2026-10-30_gate39-1836/verdict.md (pending at the time of this line). Not blocking any PR.
