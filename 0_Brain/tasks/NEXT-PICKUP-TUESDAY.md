@@ -24,7 +24,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🟢 DELTA 815 — 2026-10-30 20:2x 67% CHECKPOINT (s208; band 80-90). **READ THIS FIRST; supersedes 814's GATES/BUILDERS lines (814's routine and OWED stand).**
 - **HPSM-POC main = 41922a36** (#255 landed 20:40:51 AEDT; G226 and H69 closed; G229 told it is a named move via B962 ADDENDUM-2). LANDED by s208: #250, #248, #254, #255. Owed ticket: shell safe-area for the fixed Feedback pill (B959-2).
-- **GATES LIVE (watchers by s208 die with it; RE-ARM `tuesday/tools/status_watch.sh <STATUS> 60` each):** G226 %77 B959 #255 · G227 %79 B960 #256 · G228 %80 B961 #251 round 2 = CAP · G229 %81 B962 #252 round 2 = CAP (told #254's move is named). **QUEUED (waiters tracked by s208; re-run the kit Launch line if no pane and no "rc=" line in the chain log):** G230 B963 #257 (`chain_g230.log`) then G231 B964 #258 (`chain_g231.log`).
+- **GATES LIVE (watchers by s208 die with it; RE-ARM `tuesday/tools/status_watch.sh <STATUS> 60` each):** G226 %77 B959 #255 · G227 %79 B960 #256 · G228 %80 B961 #251 round 2 = CAP · G229 %81 B962 #252 round 2 = CAP (told #254's move is named). **LAUNCHED:** G230 %82 B963 #257 (20:43) and G231 %83 B964 #258 (20:52); watchers armed by s208 (re-arm). No launch waiter left.
 - **ROUND 2 IN FLIGHT:** H68 %58 on #253 (B937 ADDENDUM-3, hard stop 23:00) -> on READY: round-2 gate kit **B965 (G232, 9940-9949, TIER 1, THE CAP)**.
 - **BUILDERS:** H74 B954 (steps 1-2) and H76 B956 (steps 6-8) still working (load-bound). Parked READY with a gated PR: H63 #252, H69 #255, H71 #256, H73 #251, H75 #257, H77 #258. HELD: H72 B950 until #256 lands.
 - **Closed panes:** G219, G222, G223, G224, G225, H59, H66, H70.
