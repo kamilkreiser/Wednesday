@@ -6,6 +6,12 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 10:3x SAT 31 OCT (same seat, ctx ~56%) — READ THIS FIRST
+- **GATE 45 DONE: #1840 (4b166a00d60b) and #1833 (e4767d5838cb) GO WITH NOTES**, only the docs conflict; E + U answered + tapped (delivered). After fragments: each does ONE merge prep -> READY TO MERGE -> Wednesday checks code/test blobs equal those heads -> pinned GO.
+- **SPARK op 35 DONE** (2 KS-1868 passes HELD, read at source by Wednesday); **op 36 RUNNING in-session** -> `0_Brain/reference/2026-10-31_spark-operator36/report.md`.
+- **GATE 46 RUNNING in-session** (Opus, tier 1 batch #1848 + #1849 + #1850, KS-1410) -> `0_Brain/reference/2026-10-31_gate46-1848-1850/verdict.md`. If absent after a rotation: re-commission from the 10:0x block's head list.
+- **Next gates:** #1855 (tier 1), #1853 + #1854 (tier 1, KS-1384 train), tier 2 Sonnet batch #1842/#1847/#1851/#1852, then #1843 + #1856 (new head 6819db871377).
+
 ## ⏩ UPDATE 10:0x SAT 31 OCT, CHECKPOINT 10:1x at ctx 50% (the 09:5x successor seat) — READ THIS FIRST; the 09:5x block below is current where this does not differ
 - **R 66th WRAPPED (22:51Z), scored 0.90, pane %31 CLOSED.** Its 8 PRs wait on gates (below). Its open asks: KS-1544 assignee (= our board account per STANDING_LINES 'Assignment'; a board seat assigns it), #1837 merge prep (after fragments).
 - **DOCS FRAGMENTS brief READ WHOLE + resolved:** `2_Project_Files/fleet/briefs_staged/2026-10-31_seatD46_docs_fragments.md` (Seat D 46th, Sonnet, lane -D, build seat, no deploy grant). **CHAINED WAITER pid 39627 (re-armed 10:12:49; 13157 refused on a truncated card id, now fixed; 38269 stopped after an edit)** `2_Project_Files/fleet/state/d46_s9_waiter.sh`, log `fleet/state/d46_s9_waiter.log`: D 46th first at load1 < 7, then S 9th >= 3 min later (s9_waiter pid 56805 STOPPED by Wednesday, superseded). On 'D46 launch rc=0': card `secuura-docs-section-collision-dirties-every-pr-1030` --delivered naming the brief; read D 46th's plan confirmation -> GO quoting Kam 09:44:40 + 10:07:32. Same for S 9th.
