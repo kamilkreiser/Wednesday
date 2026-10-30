@@ -1,0 +1,459 @@
+/**
+ * =============================================================================
+ * KS-1240 (part 2, auth social providers) — every provider fetch is bounded, and a provider that does not answer in
+ * time is CLASSIFIED as unavailable
+ * =============================================================================
+ * The six social provider adapters (`providers/social/*.ts`) made 12 fetches with no timeout. A provider that never
+ * answered, or answered the headers and stalled the body, held the sign-in request open with no bound: on the login
+ * callback (`routes/auth.ts`, the OAuth state already consumed) and on `POST /social/link` alike.
+ *
+ * Now each call is bounded at 10 s, and a call that does not finish in time surfaces from `exchangeCode` as the
+ * codebase's existing `ServiceUnavailableError` (503 SERVICE_UNAVAILABLE, KS-253), thrown from the provider file, so
+ * `routes/auth.ts` is unchanged on both paths:
+ *  - `POST /social/link` has no local try, so the error reaches the error handler and answers 503;
+ *  - the login callback wraps every exchange failure in `BadRequestError('OAuth authentication failed: ' + message)`,
+ *    so it still answers 400, now with the classified text instead of the raw abort message. The state was consumed
+ *    before the exchange, as before: a timed-out sign-in needs a fresh one (pinned below).
+ * A refused or unreachable provider connection is classified the same way, with its own text (gate 5, round 1). A
+ * provider that answers with an error status is not: its Error now carries only the status, and the provider's own
+ * error body is logged server-side, because the login callback echoed it to the client (gate 5 finding 1788-1). A
+ * profile call answered 401 still rejects with its adapter's own profile error, never a profile and never 503.
+ *
+ * The cells assert the status, code and message, never `instanceof ServiceUnavailableError`: at this base
+ * `AppError`'s constructor resets every subclass instance's prototype to `AppError.prototype` (KS 1467), so only
+ * `instanceof AppError`, which the error handler uses, holds.
+ *
+ * Harness: the REAL adapter classes, driven directly and through the REAL routes (the factory is stubbed only to hand
+ * them out). Each adapter's hard-coded provider URL is rewritten to one local stub server, and the real `fetch` is
+ * called with the adapter's own init, signal included, so a hang and a stalled body are real network behaviour.
+ * `AbortSignal.timeout` is spied: each call records the bound asked for (that pins 10 000 ms) and gets a 200 ms signal
+ * back. At the base nothing calls it, the exchange never settles, and the cell gives up after 4 s, which is the red.
+ * =============================================================================
+ */
+import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
+import http from 'node:http';
+import express from 'express';
+import type { AddressInfo } from 'node:net';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import ts from 'typescript';
+import { GitHubProvider } from '../providers/social/github';
+import { GoogleProvider } from '../providers/social/google';
+import { LinkedInProvider } from '../providers/social/linkedin';
+import { AppleProvider } from '../providers/social/apple';
+import { FacebookProvider } from '../providers/social/facebook';
+import { MicrosoftPersonalProvider } from '../providers/social/microsoft-personal';
+import type { SocialProvider } from '../providers/social/types';
+
+// Hoisted: the adapters are imported statically above, and each now imports the error handler, which imports the logger,
+// so the logger mock's factory runs before any plain top-level const of this file exists.
+const { silentLogger, redisStore, CONFIG } = vi.hoisted(() => ({
+  silentLogger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() },
+  // The OAuth state store (KS-722) on an in-memory map, the ks819 pattern.
+  redisStore: new Map<string, string>(),
+  CONFIG: { clientId: 'cid-ks1240b', clientSecret: 'secret-ks1240b', callbackUrl: 'https://app.test/cb', enabled: true },
+}));
+vi.mock('../utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger, validateEnv: vi.fn() }));
+vi.mock('@secuura/shared/utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger }));
+
+vi.mock('../services/session', () => ({
+  createSession: vi.fn(async () => ({ id: 'sess-ks1240b' })),
+  getRedisClient: vi.fn(() => ({
+    setex: async (k: string, _ttl: number, v: string) => { redisStore.set(k, v); return 'OK'; },
+    getdel: async (k: string) => { const v = redisStore.get(k) ?? null; redisStore.delete(k); return v; },
+  })),
+  validateSession: vi.fn(async () => true),
+  updateSessionActivity: vi.fn(async () => undefined),
+}));
+vi.mock('../repositories/userRepo', () => ({
+  getUserBySocialId: vi.fn(async () => null),
+  getUserByEmail: vi.fn(async () => null),
+  getUserById: vi.fn(async () => null),
+  updateUser: vi.fn(async () => undefined),
+  createUser: vi.fn(async (u: Record<string, unknown>) => u),
+  getPlatformAdmin: vi.fn(async () => null),
+  reencryptMfaSecretIfLegacy: vi.fn(async () => undefined),
+  // Called at import by the demo seed; without it the import throws outside every test (an unhandled error, rc 1).
+  seedDemoUsers: vi.fn(async () => undefined),
+}));
+vi.mock('../services/jwt', () => ({
+  generateTokenPair: vi.fn(() => ({ accessToken: 'MINTED_KS1240B', refreshToken: 'MINTED_KS1240B_R', expiresIn: 900 })),
+  verifyAccessToken: vi.fn(() => ({})),
+}));
+const passthrough = () => (_r: unknown, _s: unknown, n: () => void) => n();
+vi.mock('../middleware/authenticate', () => ({
+  authenticate: passthrough,
+  authenticateAccessOrConnector: passthrough,
+  requireRole: passthrough,
+  requireVerificationLevel: passthrough,
+  requireOwnership: passthrough,
+  requireSameOrganization: passthrough,
+}));
+vi.mock('../db', () => ({ query: vi.fn(async () => ({ rows: [] })) }));
+vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
+
+type Family = { name: string; label: string; make: () => SocialProvider; sites: string[]; file: string };
+const FAMILIES: Family[] = [
+  { name: 'github', label: 'GitHub', make: () => new GitHubProvider(CONFIG), file: 'github.ts',
+    sites: ['github.com/login/oauth/access_token', 'api.github.com/user', 'api.github.com/user/emails'] },
+  { name: 'google', label: 'Google', make: () => new GoogleProvider(CONFIG), file: 'google.ts',
+    sites: ['oauth2.googleapis.com/token', 'www.googleapis.com/oauth2/v2/userinfo'] },
+  { name: 'linkedin', label: 'LinkedIn', make: () => new LinkedInProvider(CONFIG), file: 'linkedin.ts',
+    sites: ['www.linkedin.com/oauth/v2/accessToken', 'api.linkedin.com/v2/userinfo'] },
+  { name: 'apple', label: 'Apple', make: () => new AppleProvider(CONFIG), file: 'apple.ts',
+    sites: ['appleid.apple.com/auth/token'] },
+  { name: 'facebook', label: 'Facebook', make: () => new FacebookProvider(CONFIG), file: 'facebook.ts',
+    sites: ['graph.facebook.com/v19.0/oauth/access_token', 'graph.facebook.com/v19.0/me'] },
+  { name: 'microsoft_personal', label: 'Microsoft', make: () => new MicrosoftPersonalProvider(CONFIG), file: 'microsoft-personal.ts',
+    sites: ['login.microsoftonline.com/consumers/oauth2/v2.0/token', 'graph.microsoft.com/v1.0/me'] },
+];
+const classified = (label: string) => `${label} did not answer in time; please try again.`;
+const unreachable = (label: string) => `${label} could not be reached; please try again.`;
+const refused = (label: string, status: number) => `${label} token exchange failed (HTTP ${status})`;
+// The profile (userinfo) call of each family that makes one, and the error its adapter throws when that call is refused.
+const PROFILE: Record<string, [site: string, error: string]> = {
+  github: ['api.github.com/user', 'Failed to fetch GitHub user profile'],
+  google: ['www.googleapis.com/oauth2/v2/userinfo', 'Failed to fetch Google user profile (HTTP 401)'],
+  linkedin: ['api.linkedin.com/v2/userinfo', 'Failed to fetch LinkedIn user profile'],
+  facebook: ['graph.facebook.com/v19.0/me', 'Failed to fetch Facebook user profile'],
+  microsoft_personal: ['graph.microsoft.com/v1.0/me', 'Failed to fetch Microsoft user profile (HTTP 401)'],
+};
+
+vi.mock('../providers/social', async (importOriginal) => {
+  const real = await importOriginal<Record<string, unknown>>();
+  const classes: Record<string, new (c: typeof CONFIG) => SocialProvider> = {
+    github: real.GitHubProvider as never, google: real.GoogleProvider as never, linkedin: real.LinkedInProvider as never,
+    apple: real.AppleProvider as never, facebook: real.FacebookProvider as never, microsoft_personal: real.MicrosoftPersonalProvider as never,
+  };
+  class RealProvidersFactory {
+    get(name: string) { return classes[name] ? new classes[name](CONFIG) : undefined; }
+    getEnabled() { return Object.keys(classes); }
+    has(n: string) { return n in classes; }
+    isValidProvider(n: string) { return n in classes; }
+  }
+  return { ...real, SocialProviderFactory: RealProvidersFactory };
+});
+
+// ---------------------------------------------------------------------------
+// The stub provider, and the URL rewrite
+// ---------------------------------------------------------------------------
+
+type Mode = 'ok' | 'hang' | 'stall' | 'refuse' | 'refuse5xx' | 'unauth' | 'empty200' | 'deadport';
+const PROVIDER_MARKER = 'PROVIDER_TEXT_MARKER_ks1240b';
+const mode: Record<string, Mode> = {};
+const asked: number[] = [];
+const realTimeout = AbortSignal.timeout.bind(AbortSignal);
+const realFetch = globalThis.fetch;
+const SHORT_MS = 200;
+const GIVE_UP_MS = 4000;
+const BOUND_MS = 10_000;
+
+const appleIdToken = `h.${Buffer.from(JSON.stringify({ sub: 'apple-1', email: 'a@ks1240b.test', email_verified: true })).toString('base64')}.s`;
+const OK_BODY: Record<string, unknown> = {
+  'github.com/login/oauth/access_token': { access_token: 'tok' },
+  'api.github.com/user': { id: 1, email: '', name: 'K S', login: 'ks' },
+  'api.github.com/user/emails': [{ email: 'g@ks1240b.test', primary: true, verified: true }],
+  'oauth2.googleapis.com/token': { access_token: 'tok' },
+  'www.googleapis.com/oauth2/v2/userinfo': { id: 'g-1', email: 'g@ks1240b.test', verified_email: true },
+  'www.linkedin.com/oauth/v2/accessToken': { access_token: 'tok' },
+  'api.linkedin.com/v2/userinfo': { sub: 'l-1', email: 'l@ks1240b.test', email_verified: true },
+  'appleid.apple.com/auth/token': { id_token: appleIdToken },
+  'graph.facebook.com/v19.0/oauth/access_token': { access_token: 'tok' },
+  'graph.facebook.com/v19.0/me': { id: 'f-1', email: 'f@ks1240b.test' },
+  'login.microsoftonline.com/consumers/oauth2/v2.0/token': { access_token: 'tok' },
+  'graph.microsoft.com/v1.0/me': { id: 'm-1', mail: 'm@ks1240b.test' },
+};
+
+let stub: http.Server | undefined;
+let stubUrl = '';
+let deadUrl = '';
+let app: http.Server | undefined;
+let appUrl = '';
+
+async function listen(server: http.Server): Promise<string> {
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+  return `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+}
+async function closeServer(server: http.Server | undefined): Promise<void> {
+  if (!server) return;
+  server.closeAllConnections();
+  await new Promise<void>((r) => server.close(() => r()));
+}
+
+beforeAll(async () => {
+  stub = http.createServer((req, res) => {
+    req.resume();
+    req.on('end', () => {
+      const key = (req.url || '').slice(1).split('?')[0];
+      const m = mode[key] ?? 'ok';
+      if (m === 'hang') return;
+      if (m === 'stall') { res.writeHead(200, { 'content-type': 'application/json' }); res.write('{"access_tok'); return; }
+      // The provider's own error bodies carry a marker, so a cell can prove the text never reaches the client.
+      if (m === 'refuse') { res.writeHead(400, { 'content-type': 'application/json' }); res.end(JSON.stringify({ error: 'invalid_grant', error_description: PROVIDER_MARKER })); return; }
+      if (m === 'refuse5xx') { res.writeHead(502, { 'content-type': 'text/html' }); res.end(`<html>upstream ${PROVIDER_MARKER}</html>`); return; }
+      if (m === 'unauth') { res.writeHead(401, { 'content-type': 'application/json' }); res.end(JSON.stringify({ message: 'Bad credentials' })); return; }
+      if (m === 'empty200') { res.writeHead(200, { 'content-type': 'application/json' }); res.end('{}'); return; }
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(OK_BODY[key] ?? {}));
+    });
+  });
+  stubUrl = await listen(stub);
+  // A port with nothing listening on it: a refused connection, which is NOT a timeout.
+  const dead = http.createServer();
+  deadUrl = await listen(dead);
+  await closeServer(dead);
+
+  vi.spyOn(globalThis, 'fetch').mockImplementation(((input: string | URL | Request, init?: RequestInit) => {
+    const u = new URL(String(input));
+    const key = u.host + u.pathname;
+    return realFetch(`${mode[key] === 'deadport' ? deadUrl : stubUrl}/${key}${u.search}`, init);
+  }) as typeof fetch);
+  vi.spyOn(AbortSignal, 'timeout').mockImplementation((ms: number) => { asked.push(ms); return realTimeout(SHORT_MS); });
+
+  const { authRoutes } = await import('../routes/auth');
+  const { errorHandler } = await import('../middleware/errorHandler');
+  const ex = express();
+  ex.use(express.json());
+  ex.use('/api/auth', authRoutes);
+  ex.use(errorHandler);
+  app = http.createServer(ex as http.RequestListener);
+  appUrl = await listen(app);
+}, 60000);
+
+afterAll(async () => {
+  vi.restoreAllMocks();
+  await closeServer(app);
+  await closeServer(stub);
+});
+
+// Every cell starts with every provider endpoint answering normally (a red cell stops before any reset of its own).
+beforeEach(() => {
+  for (const k of Object.keys(mode)) delete mode[k];
+  asked.length = 0;
+  redisStore.clear();
+});
+
+type Outcome = { gaveUp: true } | { gaveUp: false; resolved: boolean; status?: unknown; code?: unknown; name?: unknown; message: string; ms: number };
+async function exchange(p: SocialProvider): Promise<Outcome> {
+  const t0 = Date.now();
+  let timer: NodeJS.Timeout | undefined;
+  const gaveUp = new Promise<Outcome>((r) => { timer = setTimeout(() => r({ gaveUp: true }), GIVE_UP_MS); });
+  const run = p.exchangeCode('code-ks1240b').then(
+    (): Outcome => ({ gaveUp: false, resolved: true, message: 'resolved', ms: Date.now() - t0 }),
+    (e: { statusCode?: unknown; code?: unknown; name?: unknown; message?: unknown }): Outcome =>
+      ({ gaveUp: false, resolved: false, status: e?.statusCode, code: e?.code, name: e?.name, message: String(e?.message), ms: Date.now() - t0 }),
+  );
+  const out = await Promise.race([run, gaveUp]);
+  clearTimeout(timer);
+  return out;
+}
+
+type Res = { status: number; code: string | null; message: string | null; raw: string; ms: number };
+function call(method: 'GET' | 'POST', p: string, body?: unknown): Promise<Res> {
+  return new Promise((resolve, reject) => {
+    const target = new URL(appUrl);
+    const payload = body === undefined ? undefined : JSON.stringify(body);
+    const t0 = Date.now();
+    let settled = false;
+    const req = http.request({ hostname: target.hostname, port: target.port, path: p, method, agent: false,
+      headers: payload ? { 'content-type': 'application/json', 'content-length': String(Buffer.byteLength(payload)), authorization: 'Bearer ks1240b' } : { authorization: 'Bearer ks1240b' } }, (res) => {
+      const c: Buffer[] = [];
+      res.on('data', (d) => c.push(d));
+      res.on('end', () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(giveUp);
+        let code: string | null = null; let message: string | null = null;
+        try { const e = JSON.parse(Buffer.concat(c).toString())?.error; code = e?.code ?? null; message = e?.message ?? null; } catch { /* not JSON */ }
+        resolve({ status: res.statusCode ?? 0, code, message, raw: Buffer.concat(c).toString(), ms: Date.now() - t0 });
+      });
+    });
+    const giveUp = setTimeout(() => { if (settled) return; settled = true; req.destroy(); resolve({ status: 0, code: 'CLIENT_GAVE_UP', message: null, raw: '', ms: Date.now() - t0 }); }, GIVE_UP_MS);
+    req.on('error', (err) => { if (!settled) { settled = true; clearTimeout(giveUp); reject(err); } });
+    if (payload) req.write(payload);
+    req.end();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// The census: every fetch( in the six adapters carries a signal
+// ---------------------------------------------------------------------------
+
+const SOCIAL = path.resolve(__dirname, '../providers/social');
+function boundedness(file: string): boolean[] {
+  const sf = ts.createSourceFile(file, readFileSync(path.join(SOCIAL, file), 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const out: boolean[] = [];
+  const visit = (n: ts.Node): void => {
+    if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === 'fetch') {
+      const init = n.arguments[1];
+      out.push(!!init && ts.isObjectLiteralExpression(init) && init.properties.some((p) =>
+        (ts.isPropertyAssignment(p) || ts.isShorthandPropertyAssignment(p)) && p.name.getText(sf) === 'signal'));
+    }
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  return out;
+}
+
+describe('KS-1240 census: every fetch( in the six provider adapters carries a signal', () => {
+  it('🔴 12 fetch( calls across the six files, every one bounded', () => {
+    expect(Object.fromEntries(FAMILIES.map((f) => [f.file, boundedness(f.file)]))).toEqual(
+      Object.fromEntries(FAMILIES.map((f) => [f.file, f.sites.map(() => true)])));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The adapters, driven directly
+// ---------------------------------------------------------------------------
+
+const HANGS = FAMILIES.flatMap((f) => f.sites.map((site, i) => [`${f.label} call ${i + 1} of ${f.sites.length} (${site})`, f, site, i] as const));
+
+describe('KS-1240 adapters: a provider that does not answer in time is classified as unavailable', () => {
+  it.each(HANGS)('🔴 %s never answers: exchangeCode rejects 503 SERVICE_UNAVAILABLE within the bound', async (_l, f, site, i) => {
+    mode[site] = 'hang';
+    const o = await exchange(f.make());
+    expect(o).toMatchObject({ gaveUp: false, resolved: false, status: 503, code: 'SERVICE_UNAVAILABLE', message: classified(f.label) });
+    expect(asked, 'each call up to the hung one asked for the 10 s bound').toEqual(Array(i + 1).fill(BOUND_MS));
+  }, 15000);
+
+  it.each(FAMILIES.map((f) => [f.label, f] as const))('🔴 %s answers the headers and stalls the body of its first call: classified the same way', async (_l, f) => {
+    mode[f.sites[0]] = 'stall';
+    const o = await exchange(f.make());
+    expect(o).toMatchObject({ gaveUp: false, resolved: false, status: 503, code: 'SERVICE_UNAVAILABLE', message: classified(f.label) });
+  }, 15000);
+
+  // Gate 5 finding 1788-1: every adapter put the provider's own error body into its Error, and the login callback echoes
+  // the message to the client. Now the Error carries the status only and the body is logged (bounded) server-side.
+  it.each(FAMILIES.map((f) => [f.label, f] as const))('🔴 %s refuses the token exchange (HTTP 400): a neutral error with the status, the provider text logged and not in the error', async (_l, f) => {
+    mode[f.sites[0]] = 'refuse';
+    silentLogger.warn.mockClear();
+    const o = await exchange(f.make());
+    expect(o).toMatchObject({ gaveUp: false, resolved: false, status: undefined, code: undefined, name: 'Error', message: refused(f.label, 400) });
+    expect(JSON.stringify(silentLogger.warn.mock.calls), 'the provider text is logged server-side').toContain(PROVIDER_MARKER);
+  }, 15000);
+
+  it.each(FAMILIES.map((f) => [f.label, f] as const))('🔴 %s token endpoint answers 502 with an HTML page: the same neutral error, not classified as unavailable, and no HTML in it', async (_l, f) => {
+    mode[f.sites[0]] = 'refuse5xx';
+    const o = await exchange(f.make());
+    expect(o).toMatchObject({ gaveUp: false, resolved: false, status: undefined, code: undefined, name: 'Error', message: refused(f.label, 502) });
+  }, 15000);
+
+  it.each(FAMILIES.map((f) => [f.label, f] as const))('🔴 %s refuses the CONNECTION: classified as unavailable (503) with its own text, not a raw TypeError', async (_l, f) => {
+    mode[f.sites[0]] = 'deadport';
+    const o = await exchange(f.make());
+    expect(o).toMatchObject({ gaveUp: false, resolved: false, status: 503, code: 'SERVICE_UNAVAILABLE', message: unreachable(f.label) });
+  }, 15000);
+
+  // Gate 5 finding 1788-2: deleting a profile-status check, or answering a profile refusal as 503, survived every cell.
+  const WITH_PROFILE = FAMILIES.filter((f) => PROFILE[f.name]);
+  it.each(WITH_PROFILE.map((f) => [f.label, f] as const))('🟢 pin, %s profile call answers 401: exchangeCode rejects with its own profile error (never a profile, never 503)', async (_l, f) => {
+    const [site, error] = PROFILE[f.name];
+    mode[site] = 'unauth';
+    const o = await exchange(f.make());
+    expect(o).toMatchObject({ gaveUp: false, resolved: false, status: undefined, code: undefined, name: 'Error', message: error });
+  }, 15000);
+
+  it('🟢 control: a TypeError that is not a network failure (Apple answers 200 with no id_token) is NOT classified as unavailable', async () => {
+    mode['appleid.apple.com/auth/token'] = 'empty200';
+    const o = await exchange(new AppleProvider(CONFIG));
+    expect(o).toMatchObject({ gaveUp: false, resolved: false, status: undefined, code: undefined, name: 'TypeError' });
+    expect((o as { message: string }).message).not.toBe('fetch failed');
+  }, 15000);
+
+  it.each(FAMILIES.map((f) => [f.label, f] as const))('🟢 control, %s: a provider that answers still yields the profile', async (_l, f) => {
+    const o = await exchange(f.make());
+    expect(o).toMatchObject({ gaveUp: false, resolved: true });
+  }, 15000);
+});
+
+// ---------------------------------------------------------------------------
+// The two entry paths, through the real routes
+// ---------------------------------------------------------------------------
+
+async function freshState(provider: string): Promise<string> {
+  const r = await new Promise<string>((resolve, reject) => {
+    const target = new URL(appUrl);
+    http.get({ hostname: target.hostname, port: target.port, path: `/api/auth/social/${provider}`, agent: false }, (res) => {
+      const c: Buffer[] = []; res.on('data', (d) => c.push(d)); res.on('end', () => resolve(Buffer.concat(c).toString()));
+    }).on('error', reject);
+  });
+  return String(JSON.parse(r).state);
+}
+
+describe('KS-1240 routes: what each entry path answers when the provider does not answer in time', () => {
+  for (const how of ['hang', 'stall'] as const) {
+    it(`🔴 login callback, GitHub ${how === 'hang' ? 'never answers' : 'stalls the body'}: 400 with the classified text, within the bound (routes/auth.ts unchanged)`, async () => {
+      const state = await freshState('github');
+      mode['github.com/login/oauth/access_token'] = how;
+      const r = await call('GET', `/api/auth/social/github/callback?code=c1&state=${encodeURIComponent(state)}`);
+      expect([r.status, r.code, r.message]).toEqual([400, 'BAD_REQUEST', `OAuth authentication failed: ${classified('GitHub')}`]);
+      expect(r.ms).toBeLessThan(3000);
+    }, 15000);
+
+    it(`🔴 POST /social/link, GitHub ${how === 'hang' ? 'never answers' : 'stalls the body'}: 503 SERVICE_UNAVAILABLE, within the bound`, async () => {
+      mode['github.com/login/oauth/access_token'] = how;
+      const r = await call('POST', '/api/auth/social/link', { provider: 'github', code: 'c2' });
+      expect([r.status, r.code, r.message]).toEqual([503, 'SERVICE_UNAVAILABLE', classified('GitHub')]);
+      expect(r.ms).toBeLessThan(3000);
+    }, 15000);
+  }
+
+  it('🟢 control: a timed-out sign-in has spent its state, as before; a retry with it is 403 OAUTH_STATE_INVALID', async () => {
+    const state = await freshState('github');
+    mode['github.com/login/oauth/access_token'] = 'hang';
+    await call('GET', `/api/auth/social/github/callback?code=c3&state=${encodeURIComponent(state)}`);
+    delete mode['github.com/login/oauth/access_token'];
+    const retry = await call('GET', `/api/auth/social/github/callback?code=c3&state=${encodeURIComponent(state)}`);
+    expect([retry.status, retry.code]).toEqual([403, 'OAUTH_STATE_INVALID']);
+  }, 15000);
+
+  it('🔴 a refused exchange on the login callback answers 400 with the neutral text: the provider\'s own text does not reach the client', async () => {
+    const state = await freshState('github');
+    mode['github.com/login/oauth/access_token'] = 'refuse';
+    const r = await call('GET', `/api/auth/social/github/callback?code=c4&state=${encodeURIComponent(state)}`);
+    expect([r.status, r.code, r.message]).toEqual([400, 'BAD_REQUEST', `OAuth authentication failed: ${refused('GitHub', 400)}`]);
+    expect(r.raw, 'the provider body is not in the response').not.toContain(PROVIDER_MARKER);
+  }, 15000);
+
+  it('🔴 POST /social/link, GitHub refuses the CONNECTION: 503 SERVICE_UNAVAILABLE (was 500)', async () => {
+    mode['github.com/login/oauth/access_token'] = 'deadport';
+    const r = await call('POST', '/api/auth/social/link', { provider: 'github', code: 'c6' });
+    expect([r.status, r.code, r.message]).toEqual([503, 'SERVICE_UNAVAILABLE', unreachable('GitHub')]);
+  }, 15000);
+
+  it('🔴 login callback, GitHub refuses the CONNECTION: 400 with the classified text, not "fetch failed"', async () => {
+    const state = await freshState('github');
+    mode['github.com/login/oauth/access_token'] = 'deadport';
+    const r = await call('GET', `/api/auth/social/github/callback?code=c7&state=${encodeURIComponent(state)}`);
+    expect([r.status, r.code, r.message]).toEqual([400, 'BAD_REQUEST', `OAuth authentication failed: ${unreachable('GitHub')}`]);
+  }, 15000);
+
+  it('🟢 control: a refused exchange on POST /social/link still answers 500 INTERNAL_ERROR, as before', async () => {
+    mode['github.com/login/oauth/access_token'] = 'refuse';
+    const r = await call('POST', '/api/auth/social/link', { provider: 'github', code: 'c5' });
+    expect([r.status, r.code]).toEqual([500, 'INTERNAL_ERROR']);
+  }, 15000);
+});
+
+describe('GATE33 route probe', () => {
+  it('GATE33 callback, GitHub token endpoint 200 {}', async () => {
+    const state = await freshState('github');
+    mode['github.com/login/oauth/access_token'] = 'empty200';
+    const r = await call('GET', `/api/auth/social/github/callback?code=g1&state=${encodeURIComponent(state)}`);
+    require('node:fs').appendFileSync(process.env.GATE33_OUT!, 'GATE33 CALLBACK ' + JSON.stringify([r.status, r.code, r.message]) + '\n');
+  }, 15000);
+  it('GATE33 /social/link, GitHub token endpoint 200 {}', async () => {
+    mode['github.com/login/oauth/access_token'] = 'empty200';
+    const r = await call('POST', '/api/auth/social/link', { provider: 'github', code: 'g2' });
+    require('node:fs').appendFileSync(process.env.GATE33_OUT!, 'GATE33 LINK ' + JSON.stringify([r.status, r.code, r.message]) + '\n');
+  }, 15000);
+});
+describe('GATE33 route probe B', () => {
+  it('GATE33 callback, token 200 {} and /user 401 (real GitHub for Bearer undefined)', async () => {
+    const state = await freshState('github');
+    mode['github.com/login/oauth/access_token'] = 'empty200';
+    mode['api.github.com/user'] = 'unauth';
+    const r = await call('GET', `/api/auth/social/github/callback?code=g3&state=${encodeURIComponent(state)}`);
+    require('node:fs').appendFileSync(process.env.GATE33_OUT!, 'GATE33 CALLBACK401 ' + JSON.stringify([r.status, r.code, r.message]) + '\n');
+  }, 15000);
+});

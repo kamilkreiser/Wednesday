@@ -1,0 +1,50 @@
+// GATE 33 probe (QA, not part of the PR): extra token-answer shapes against GitHubProvider.exchangeCode.
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+const { silentLogger } = vi.hoisted(() => ({ silentLogger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() } }));
+vi.mock('../utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger, validateEnv: vi.fn() }));
+vi.mock('@secuura/shared/utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger }));
+import { GitHubProvider } from '../providers/social/github';
+const CONFIG = { clientId: 'cid', clientSecret: 'sec', callbackUrl: 'https://app.test/cb', enabled: true };
+let calls: string[];
+function stub(raw: string, status = 200) {
+  calls = [];
+  vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+    calls.push(String(url));
+    if (String(url).includes('/login/oauth/access_token')) return new Response(raw, { status, headers: { 'content-type': 'application/json' } });
+    if (String(url).endsWith('/user')) return new Response(JSON.stringify({ message: 'Bad credentials' }), { status: 401 });
+    return new Response('{}', { status: 404 });
+  }));
+}
+const run = () => new GitHubProvider(CONFIG).exchangeCode('c').then(() => 'RESOLVED', (e: Error) => `${e.name}: ${e.message}`);
+beforeEach(() => { vi.clearAllMocks(); });
+afterEach(() => { vi.unstubAllGlobals(); });
+const NOTOK = 'Error: GitHub token exchange failed (no access token)';
+describe('gate33 probe', () => {
+  const shapes: [string, string][] = [
+    ['P1 access_token null', '{"access_token":null}'],
+    ['P2 access_token empty string', '{"access_token":""}'],
+    ['P3 access_token boolean true', '{"access_token":true}'],
+    ['P4 access_token object', '{"access_token":{"v":"x"}}'],
+    ['P5 access_token array', '{"access_token":["x"]}'],
+    ['P6 error field WITH a string token', '{"access_token":"SECRETTOK","error":"bad_verification_code"}'],
+    ['P7 error null WITH a string token', '{"access_token":"SECRETTOK","error":null}'],
+    ['P8 JSON array body', '[]'],
+    ['P9 JSON string body', '"x"'],
+  ];
+  for (const [name, raw] of shapes) {
+    it(name, async () => { stub(raw); const r = await run(); console.log(`PROBE ${name} -> ${r} calls=${JSON.stringify(calls)}`); expect(calls.some(c => c.endsWith('/user'))).toBe(false); });
+  }
+  it('P10 JSON null body', async () => { stub('null'); const r = await run(); console.log(`PROBE P10 -> ${r} calls=${JSON.stringify(calls)}`); expect(calls.some(c => c.endsWith('/user'))).toBe(false); });
+  it('P11 non-JSON 200 body (form-encoded)', async () => { stub('error=bad_verification_code&error_description=x'); const r = await run(); console.log(`PROBE P11 -> ${r} calls=${JSON.stringify(calls)}`); expect(calls.some(c => c.endsWith('/user'))).toBe(false); });
+  it('P12 whitespace token', async () => { stub('{"access_token":"  "}'); const r = await run(); console.log(`PROBE P12 -> ${r} calls=${JSON.stringify(calls)}`); });
+  it('P13 token_type mac', async () => { stub('{"access_token":"tok","token_type":"mac"}'); const r = await run(); console.log(`PROBE P13 -> ${r} calls=${JSON.stringify(calls)}`); });
+  it('P14 refusal log never carries the token', async () => {
+    stub('{"access_token":"SECRETTOK","error":"bad_verification_code"}'); await run();
+    const all = JSON.stringify([silentLogger.warn.mock.calls, silentLogger.error.mock.calls, silentLogger.info.mock.calls, silentLogger.debug.mock.calls, silentLogger.log.mock.calls]);
+    console.log(`PROBE P14 logs=${all}`); expect(all.includes('SECRETTOK')).toBe(false);
+  });
+  it('P15 long error string bounded at 80', async () => {
+    stub(JSON.stringify({ error: 'e'.repeat(500) })); await run();
+    const meta = silentLogger.warn.mock.calls[0]?.[1] as { error?: string }; console.log(`PROBE P15 errlen=${meta?.error?.length}`); expect(meta.error!.length).toBe(80);
+  });
+});

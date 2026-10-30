@@ -1,0 +1,42 @@
+--- A: untracked ks256-pii-data.json (expect WARNING)
+WARNING (KS-256): a PII store file exists inside the working tree:
+  ./Blockchain/Dev/ks256-pii-data.json
+
+  It is ignored today, but an in-repo store is one .gitignore slip from
+  being published, and "git clean -fdx" will delete it without warning.
+  Move it outside the repo and set KS256_PII_STORE. (Warning, not a failure.)
+OK — no PII store file is tracked by git.
+rc=0
+--- B: probe the git option used at :56
+error: option `exclude-standard' takes no value
+git rc=129
+--- C: tracked pii file
+ERROR (KS-256): a PII store file is TRACKED by git:
+  Blockchain/Dev/foo-pii.json
+
+  This file may contain real captured values and must never be committed.
+  Untrack it, keeping your local copy:
+
+    git rm --cached Blockchain/Dev/foo-pii.json
+
+  Then move it OUTSIDE the repository (see pii-store.ts -> resolveStorePath)
+  and point KS256_PII_STORE at it. Never re-add it.
+WARNING (KS-256): a PII store file exists inside the working tree:
+  ./Blockchain/Dev/ks256-pii-data.json
+
+  It is ignored today, but an in-repo store is one .gitignore slip from
+  being published, and "git clean -fdx" will delete it without warning.
+  Move it outside the repo and set KS256_PII_STORE. (Warning, not a failure.)
+rc=1
+--- D: untracked *pii*.json variant only (not ks256 name) - warning leg should name it
+OK — no PII store file is tracked by git.
+rc=0
+--- E: ks256 store only inside nested node_modules (find -not -path ./node_modules/* does not cover)
+WARNING (KS-256): a PII store file exists inside the working tree:
+  ./Blockchain/Dev/services/x/node_modules/z/ks256-pii-data.json
+
+  It is ignored today, but an in-repo store is one .gitignore slip from
+  being published, and "git clean -fdx" will delete it without warning.
+  Move it outside the repo and set KS256_PII_STORE. (Warning, not a failure.)
+OK — no PII store file is tracked by git.
+rc=0

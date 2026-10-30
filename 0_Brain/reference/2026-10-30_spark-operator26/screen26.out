@@ -1,0 +1,198 @@
+=== akto: clean control
+    rc=0
+=== akto: literal docker exec akto-mongo (ts)
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto2/src/a.ts:1:run("docker exec akto-mongo mongosh")
+    rc=1
+=== akto: docker exec -it akto-mongo (flags between)
+    rc=0
+=== akto: docker exec -i akto-mongo (flag, quoted)
+    rc=0
+=== akto: docker logs --tail 5 akto-testing
+    rc=0
+=== akto: docker compose exec akto-mongo
+    rc=0
+=== akto: docker exec akto-mongo (plain, sh)
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto7/scripts/z.sh:1:docker exec akto-mongo mongosh
+    rc=1
+=== akto: _CONTAINER const
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto8/src/a.ts:1:const MONGO_CONTAINER = 'akto-mongo';
+    rc=1
+=== akto: defaulted shell var
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto9/scripts/z.sh:1:M=${AKTO_MONGO_CONTAINER:-akto-mongo}
+    rc=1
+=== akto: defaulted shell var with digit in name
+    rc=0
+=== akto: TS ?? default
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto11/src/a.ts:1:const m = env.X ?? 'akto-mongo';
+    rc=1
+=== akto: TS || default
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto12/src/a.ts:1:const m = env.X || "akto-testing";
+    rc=1
+=== akto: TS template default
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto13/src/a.ts:1:const m = env.X || `akto-testing`;
+    rc=1
+=== akto: hit in .mjs under scripts
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto14/scripts/z.mjs:1:const m = env.X ?? 'akto-mongo';
+    rc=1
+=== akto: hit in .js under src (not in --include)
+    rc=0
+=== akto: derived form (the fix) control
+    rc=0
+=== akto: comment hit skipped control
+    rc=0
+=== akto: indented // comment skipped
+    rc=0
+=== akto: hit in a file with a comment-looking code prefix
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto19/src/a.ts:1:x(); // docker exec akto-mongo
+    rc=1
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/screen26.sh: line 11: /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto20/src/sub/a.ts: No such file or directory
+=== akto: hit in nested src/sub/a.ts
+    rc=0
+=== akto: nested dir hit (real)
+    ::error::Hardcoded slot-1 Akto container name in harness source (KS-666 / KS-687 F2).
+      Derive it from AKTO_PREFIX — shell: ${AKTO_PREFIX:-akto}-mongo · TS: `${env('AKTO_PREFIX') || 'akto'}-testing` —
+      or the harness targets slot 1 whatever slot the run is aimed at. A DEFAULTED variable whose default is
+      the shared name (${VAR:-akto-mongo}, ?? 'akto-mongo') is the same defect wearing a parameter's clothes:
+      /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/akto21/src/sub/a.ts:1:docker exec akto-mongo x
+    rc=1
+=== akto: scripts/ missing (expect rc 2)
+    ::error::Akto container-name gate corpus is INCOMPLETE — a 'no hits' from here is not evidence (KS-687 F2).
+      missing: scripts/ (directory absent)
+      The corpus must cover src/*.ts, bin/*.ts and scripts/*.sh; F1 lived in scripts/*.sh and a count-based assert passed over it.
+    rc=2
+=== akto: no such dir (expect rc 2)
+    ::error::Akto package not found at /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/scratch/s1/nope — nothing scanned, negative NOT trustworthy (KS-687 F2).
+    rc=2
+=== akto: real systemTest/akto (expect rc 0)
+    rc=0
+=== app-db: HELD state (literal fallback only) expect rc 0
+    APP_DB_PASSWORD: 1 committed-literal fallback(s), 0 required-form(s).
+      fallback sites in: Blockchain/Dev/docker-compose.yml 
+    HELD (KS-762) - 1 committed-literal fallback(s) remain, and the config resolves
+      with APP_DB_PASSWORD unset. That is the documented state, NOT a pass: a clone that sets
+      nothing runs on a credential that is in git history. Set APP_DB_PASSWORD in your .env
+      (see Blockchain/Dev/env.example). Rotation is scheduled 2026-09-05 09:00.
+      The required-form switch is held pending a ruling - docker-compose.yml:121-132 (KS-165).
+    rc=0
+=== app-db: half applied expect rc 1
+    APP_DB_PASSWORD: 1 committed-literal fallback(s), 1 required-form(s).
+      fallback sites in: Blockchain/Dev/docker-compose.yml 
+    FAIL - the switch is HALF APPLIED: 1 site(s) require the variable while 1 still fall back.
+      Services would start on two different passwords. Apply it everywhere or nowhere.
+    rc=1
+=== app-db: switched, config fails unset and ok set expect rc 0
+    APP_DB_PASSWORD: 0 committed-literal fallback(s), 1 required-form(s).
+    OK - APP_DB_PASSWORD is required: config fails without it and resolves with it.
+    rc=0
+=== app-db: switched, config resolves unset expect rc 1
+    APP_DB_PASSWORD: 0 committed-literal fallback(s), 1 required-form(s).
+    FAIL - the variable is required in 1 place(s), yet the config resolved with it UNSET.
+      A required variable that resolves anyway is not required.
+    rc=1
+=== app-db: switched, config fails even set expect rc 1
+    APP_DB_PASSWORD: 0 committed-literal fallback(s), 1 required-form(s).
+    FAIL - the config does not resolve even WITH APP_DB_PASSWORD set (rc 1).
+      The fail-loud must fail only for the missing variable, not for everything.
+    rc=1
+=== app-db: HELD but config fails unset expect rc 1
+    APP_DB_PASSWORD: 1 committed-literal fallback(s), 0 required-form(s).
+      fallback sites in: Blockchain/Dev/docker-compose.yml 
+    FAIL - the config does not resolve with APP_DB_PASSWORD unset (rc 1), but
+      1 literal fallback(s) are present. Those two cannot both be true; something else is broken.
+    rc=1
+=== app-db: neither form expect rc 1
+    APP_DB_PASSWORD: 0 committed-literal fallback(s), 0 required-form(s).
+    FAIL - APP_DB_PASSWORD is referenced in neither form. It is needed by
+      docker/init/01-create-app-role.sh; something removed it rather than requiring it.
+    rc=1
+=== app-db: ':=' assign-default literal (expect rc 1 if seen as neither; shape check)
+    APP_DB_PASSWORD: 0 committed-literal fallback(s), 0 required-form(s).
+    FAIL - APP_DB_PASSWORD is referenced in neither form. It is needed by
+      docker/init/01-create-app-role.sh; something removed it rather than requiring it.
+    rc=1
+=== app-db: '-' (no colon) literal default (shape check)
+    APP_DB_PASSWORD: 0 committed-literal fallback(s), 0 required-form(s).
+    FAIL - APP_DB_PASSWORD is referenced in neither form. It is needed by
+      docker/init/01-create-app-role.sh; something removed it rather than requiring it.
+    rc=1
+=== app-db: quoted literal + var-ref fallback (HELD, 1 site)
+    APP_DB_PASSWORD: 1 committed-literal fallback(s), 0 required-form(s).
+      fallback sites in: Blockchain/Dev/docker-compose.yml 
+    HELD (KS-762) - 1 committed-literal fallback(s) remain, and the config resolves
+      with APP_DB_PASSWORD unset. That is the documented state, NOT a pass: a clone that sets
+      nothing runs on a credential that is in git history. Set APP_DB_PASSWORD in your .env
+      (see Blockchain/Dev/env.example). Rotation is scheduled 2026-09-05 09:00.
+      The required-form switch is held pending a ruling - docker-compose.yml:121-132 (KS-165).
+    rc=0
+=== app-db: empty fallback + required (switched, not half) expect rc 0 w/ stub
+    APP_DB_PASSWORD: 0 committed-literal fallback(s), 1 required-form(s).
+    OK - APP_DB_PASSWORD is required: config fails without it and resolves with it.
+    rc=0
+=== app-db: switched + literal in a .sh (half applied) expect rc 1
+    APP_DB_PASSWORD: 1 committed-literal fallback(s), 1 required-form(s).
+      fallback sites in: Blockchain/Dev/x.sh 
+    FAIL - the switch is HALF APPLIED: 1 site(s) require the variable while 1 still fall back.
+      Services would start on two different passwords. Apply it everywhere or nowhere.
+    rc=1
+=== app-db: literal in a file whose name has spaces and parens (half applied?) expect rc 1
+    APP_DB_PASSWORD: 1 committed-literal fallback(s), 1 required-form(s).
+      fallback sites in: Blockchain/Dev/notes (a).txt 
+    FAIL - the switch is HALF APPLIED: 1 site(s) require the variable while 1 still fall back.
+      Services would start on two different passwords. Apply it everywhere or nowhere.
+    rc=1
+=== app-db: literal in a file named with a colon (half applied?) expect rc 1
+    APP_DB_PASSWORD: 1 committed-literal fallback(s), 1 required-form(s).
+      fallback sites in: Blockchain/Dev/a:b.txt 
+    FAIL - the switch is HALF APPLIED: 1 site(s) require the variable while 1 still fall back.
+      Services would start on two different passwords. Apply it everywhere or nowhere.
+    rc=1
+=== app-db: no docker on PATH (expect SKIP rc 0)
+    APP_DB_PASSWORD: 1 committed-literal fallback(s), 0 required-form(s).
+      fallback sites in: Blockchain/Dev/docker-compose.yml 
+    SKIP (advisory) - docker compose unavailable; the state check above ran, the config probes did not.
+    rc=0
+=== app-db: real tree, docker stub, rc_unset=0
+    APP_DB_PASSWORD: 53 committed-literal fallback(s), 0 required-form(s).
+      fallback sites in: .claude/skills/secuura-test-discipline/SKILL.md Blockchain/Dev/docker-compose.yml Blockchain/Dev/scripts/rls/verify-fail-closed.sh 
+    HELD (KS-762) - 53 committed-literal fallback(s) remain, and the config resolves
+      with APP_DB_PASSWORD unset. That is the documented state, NOT a pass: a clone that sets
+      nothing runs on a credential that is in git history. Set APP_DB_PASSWORD in your .env
+      (see Blockchain/Dev/env.example). Rotation is scheduled 2026-09-05 09:00.
+      The required-form switch is held pending a ruling - docker-compose.yml:121-132 (KS-165).
+    rc=0

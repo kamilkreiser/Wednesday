@@ -1,0 +1,154 @@
+-lifecycle — see the matrix and G-1 below). Stuart + Peter sign-off verdicts still open —
+-unblocked now that G-1 is decided.
+-`develop`; every enforcement claim carries a `file:line` reference.
+-**Out of scope:** smart-contract cascading governance (KS-541, tracked separately);
+-which humans may certify (KS-547, open decision — all its options leave the connector
+-path unchanged).
+-A machine caller authenticates with an `sk_` API key (or OAuth client) and is minted
+-`role: 'connector'` at the gateway (`api-gateway/src/middleware/auth.ts:271-290`),
+-exchanged for a 10-minute RS256 connector JWT (`auth/src/routes/internal.ts:33-86`).
+-mirrored in `docs/SCOPES.md`). Consequences:
+-  to agents at all. Admin, GDPR, user-management, platform, and key-rotation routes
+-  (the §8 document set for S org keys; `organizations:register` alone for the
+-  widen the minted set (`platform.ts:470-520`, `provisioningPolicy.ts:87-118`).
+-  never a caller-supplied header (`api-gateway/src/index.ts:308-317`).
+-connector-only — a human JWT sending it gets 400
+-(`originate/src/services/provenance.ts:extractOnBehalfOf`). Semantics:
+-  org → **403** (a key attributes only within its own Organisation); no K user →
+-  verbatim provenance. Never creates an account, never grants auth — attribution,
+-  `email_hash` for erasure), echoed on document reads, pseudonymised on Art.17
+-`api-gateway/src/middleware/auth.ts:311,341,392`), and ownership checks still apply
+-on read/share/revoke (`originate/src/routes/documents.ts:748-766`, revoke
+-owner-only `:1872`).
+-builders are fixed-field whitelists (`documents.ts` buildAnchorBody; anchoring
+-`metadataPayload`, KS-240) and the flat-anchor schema strips unknown keys; the
+-structural exclusion is pinned by `__tests__/ks480-provenance.test.ts`. Any new
+-1. Gateway `requireScope` on the proxies (`api-gateway/src/middleware/scopes.ts:21-62`).
+-2. Downstream `isAllowedByRoleOrScope` in originate (`middleware/rbac.ts:47-64`).
+-4. Connector JWTs expire in 10 minutes; keys are revocable immediately
+-   (`DELETE /api/keys/:id`, revoke-then-rotate on compromise — contract §5) and
+-   support `expiresAt` for forced rotation.
+-Agent document ops are metered (KS-320 — K is the metering source S bills from) and
+-person-attributed ops leave `action_provenance` rows. A reviewer must be able to
+-| Create document | `documents:write` | yes, when for a person | contract §6 home surface |
+-| Read / list | `documents:read` | n/a (read) | RLS + ownership fan-in apply |
+-| Share | `documents:share` | yes, when for a person | G-1 ruling 2026-08-05 |
+-| Revoke | `documents:revoke` | yes, when for a person | G-1 ruling 2026-08-05 — **not yet implemented** (no extraction on the revoke route; KS-566). Service-side revoke is owner-only — connector revoke rides the creating-connector ownership |
+-| Transfer custody | `documents:transfer-custody` | yes, when for a person | G-1 ruling 2026-08-05 · recipient email never stored (PS-498 answer) |
+-| Anchor (explicit) | `anchors:write` / `anchors:read` | **no — connector attribution** | G-1 ruling 2026-08-05 · supersedes the contract §6 flat-anchor coverage line; auto-anchor on create covers most callers |
+-| Certify | `certifications:write` (+ read/sign/share/revoke verbs) | per contract §6 (honoured) — **not covered by the G-1 ruling** | KS-547 decision pending; unaffected by every KS-547 option |
+-| Lifecycle events | (rides document scopes) | **no — connector attribution** | G-1 ruling 2026-08-05 · supersedes the contract §6 lifecycle coverage line; today's implementation still honours the field (KS-566) |
+-  verify / info) and calls the platform with the `SECUURA_API_KEY` env key
+-  (`src/api-client.ts:2,18-21`). **Rule application:** each MCP deployment holds ONE
+-    ruling; both drop to connector attribution.
+-  - **Revoke** was absent from the §6 list and has no `onBehalfOf` extraction in the
+-    code today — the ruling adds it; implementation follow-up required.
+-    coverage stands as accepted, pending KS-547.
+-  Implementation alignment (add revoke extraction; remove lifecycle + flat-anchor
+-  extraction) is filed as KS-566.
+-  document for a user today attributes to the connector only. G-1 is now ruled
+-  (2026-08-05), so this is actionable: wire the field through the register tool.
+-  sequenced in the inventory §6.
+-  document-op route in those services must mount `isAllowedByRoleOrScope` from day one.
+-*KS-539 · drafted 2026-08-03 from develop · linked: KS-480 (contract), KS-540
+-(inventory), KS-547 (certify gate decision), KS-541 (smart-contract governance),
+-**Purpose:** groundwork for KS-539 (governing rules for agent document operations) and for
+-limits tracked S-side — 2026-07-31 catch-up). Compiled 2026-07-31 from `develop 0a8dd3f44`;
+-every claim carries a `file:line` reference. Sharpest findings were re-verified by hand.
+-tenant isolation) — but the *allow-lists are duplicated inline across services* (six-plus
+-divergent "who is an admin" lists), two canonical roles gate nothing, one accepted role is
+-unassignable, and one high-traffic write path (`/certifications/issue`) has no role gate at
+-all. Consolidation, not redesign, is the work.
+-### 1.1 Canonical enum — `services/auth/src/types/index.ts:8-14`
+-Adjacent: `VerificationLevel` (`types/index.ts:17-34`), `OrgTrustLevel` (`:37-49`),
+-user `status` (`:113-116`). JWT claim shape: `:52-73`.
+-  `super_admin → SYSTEM_ADMIN`; **unknown → `OWNER` silently** (`:274`).
+-  case-variant `Super_Admin` once slipped a denylist).
+-  (`docker/init/01-schema.sql:28`).
+-`SUPER_ADMIN` (~15 gates, never assignable — F-8) · `super_admin` (real: the
+-`platform_admins` seed rides the JWT verbatim, `auth.ts:361,385`) · `system_admin`,
+-`platform_admin`, `issuer_admin` (scattered inline lists) · `platform_viewer`
+-(schema-legal, zero code — F-11) · `admin`/`ADMIN` (frontend + a few gates; no user path) ·
+-### 1.4 `DOCUMENT_WRITE_ROLES` — `services/originate/src/middleware/documentWriteRoles.ts:37`
+-(who reaches create/version via the `documents:write` scope instead, `:24-27`). Consumers:
+-`documents.ts:293,1268,1520,1701,2093,2356`.
+-Minted at the gateway from a validated sk_ key (`api-gateway/src/middleware/auth.ts:271-290`;
+-`role:'connector'`, `verificationLevel:'api_key'`, key's scopes); exchanged for a 10-min
+-RS256 connector JWT (`auth/src/routes/internal.ts:33-86`, `jwt.ts:249-272`). Consumed by
+-originate rbac (`rbac.ts:47-64`), platform routes, provenance (`onBehalfOf` is
+-connector-only), metering.
+-  authorization** anywhere.
+-  (`verification.ts:686-689`).
+-### 2.1 Role gates — four `requireRole` implementations with different semantics
+-| Impl | Where | Case | Aliases |
+-|---|---|---|---|
+-| shared | `packages/shared/src/middleware/index.ts:121-135` | exact | none |
+-| auth | `auth/src/middleware/authenticate.ts:125-139` | exact | none |
+-| originate | `originate/src/middleware/auth.ts:112-131` | exact | folds super_admin→SYSTEM_ADMIN |
+-| gateway | none generic — inline literal arrays per route | mixed | ad hoc |
+-`isAllowedByRoleOrScope` (`originate/src/middleware/rbac.ts:47-64`) is the only helper
+-unifying role + scope. Mount inventory (which service gates what): platform routes ×14
+-(`platform.ts:66-75+`), admin proxy (`proxy.ts:935-943`), workflows (`proxy.ts:800-805`),
+-auth admin routes (`users.ts:330-1145`), issuer certs (`issuerCerts.ts:63-109`), originate
+-adminConfig whole-router (`adminConfig.ts:36`), GDPR (`gdpr.ts` ×12), systemErrors,
+-documents (role-or-scope ×6), security key admin (`security/src/index.ts:761-799`),
+-tokenisation, billing webhooks. **Seventeen services mount no role gate at all**
+-(analytics, governance, staking, nft-certificate, kyc, transfer, wallet-connector,
+-vc-issuer, referral, prism, midnight, guardian, timestamping, blockchain, queue,
+-mcp-server, m365-integration) — they rely on gateway-level auth + ownership/tenant checks.
+-`getDefaultScopesForRole` (**only** `OWNER → ['documents:write']`, `:224-232`),
+-`validateScopes` (`:240-259`). Docs mirror `docs/SCOPES.md`.
+-Minting: security `POST /api/keys` (role-gated since KS-480; material `sk_`+32B,
+-`security/src/index.ts:800,805`) · provisioning path with §8 guardrails
+-(`platform.ts:470-520`, `provisioningPolicy.ts:87-118`) · metering key
+-(`meteringKey.ts:55`). Enforcement: gateway `requireScope`
+-(`middleware/scopes.ts:21-62`; **short-circuits for JWT humans**, `:33-37`) mounted on
+-webhooks/users/documents/certifications/anchors proxies; downstream via
+-(`documents.ts:748-766`); list fan-in (`:223-244`); revoke is **owner-only, no admin
+-bypass** (`:1872`); `requireOwnership` (auth, `authenticate.ts:161-179`);
+-`requireSelfOrRole` (KS-228, `originate/middleware/auth.ts:150-168`); GDPR self-or-admin;
+-workflow approver-id match.
+-**Presentation / credential ownership (KS-1116) — RULED, NOT BUILT.** KS-1116 (2026-09-13 16:55 AEST), decision-panel option `bind-creator`: *"Owner = the authenticated principal that created it; existing NULL rows readable by the tenant OWNER role only"*. That is the decided target and KS-1116 is the open work ticket for it (Backlog; its ruling comment states "Nothing has been built"). **Neither read binds to a pri
+-Edge strips all `x-user/tenant/org/role/policy` headers except `x-tenant-override`
+-(`api-gateway/src/index.ts:308-317`), honoured only for the super-admin list
+-(`middleware/auth.ts:380-389`). RLS GUC seeded from the *verified* credential
+-(`:311,341,392`). Tenant-scoped admin confinement (`users.ts:95-97` + apply sites);
+-platform-scope escape hatch is a reviewed admin path (`admin.ts:550-555`,
+-`runWithPlatformScope`).
+-Carried on every JWT, ordered enum — but `requireVerificationLevel`/`requirePolicy` exist
+-in TWO implementations with **zero mount sites** (F-13). Only real enforcement: third-party
+-verifier level + document-type enforcement (`verification.ts:407-408`,
+-`enforcement.ts:53,144-145`).
+-Route guards check `isAuthenticated` only (admin `App.tsx:32`, issuer `App.tsx:73`;
+-(`admin Layout.tsx:108,125`; issuer `Layout.tsx:92-94`). Shared `normalizeRole` collapses
+-everything to super_admin/admin/user (`frontend/shared/src/auth/index.ts:45-58`).
+-  `OWNER`. Social/OAuth same. Invited stubs `USER`/`INVITED` (KS-74) → read back `OWNER`.
+-  blocked, `SYSTEM_ADMIN` ceiling platform-only. `PATCH` status vocabulary diverges from
+-  the type union (F-12 / BACKLOG item from KS-360).
+-  platform_admins seed `admin@secuura.com`/`super_admin`; demo-service seeds four
+-| subscription limits | — none K-side | S-side per the meeting; K meters usage (KS-320 Option 2) but enforces no quotas |
+-Implication for KS-539: **agent/machine document operations arrive as `connector` +
+-scopes + `onBehalfOf` attribution** — the governing rules should be written against the
+-scope vocabulary (§2.2) and provenance store, not against human roles.
+-Severity-ordered; the top three deserve tickets/decisions, the rest are consolidation work.
+-  `certifications.ts:58` mounts `authenticate()` only; the gateway's
+-  `requireScope('certifications:*')` short-circuits for JWT humans — so ANY authenticated
+-  user (incl. `OWNER`, `VERIFIER`) can issue certifications, in contrast with documents'
+-  `DOCUMENT_WRITE_ROLES`. Verified by hand 2026-07-31. NOTE: demo flows (demo@=OWNER)
+-  currently certify through this gap — gating it is a product decision, not a drop-in.
+-  (`frontend/shared/src/auth/index.ts:47` — verified) → any holder logging into the admin
+-  no data exposure). Same set duplicated in `admin/src/store/authStore.ts:24-25`.
+-  two identical; only `services/security` normalises case). One shared `ADMIN_ROLES`
+-  constant + one `requireRole` would erase the class.
+-  shared `hasScope` honours; OAuth `AVAILABLE_SCOPES` and `metering:read` +
+-  reject a key that the webhook gate requires).
+-  even well-formed).
+-  `DOCUMENT_WRITE_ROLES` two lines away.
+-  entry from KS-360).
+-  surviving H2-style path; keep on the radar for any non-gateway exposure).
+-1. **Decide F-2** (certify gate) — ticketed separately; product call because demo flows use it.
+-   consumed everywhere (kills F-6/F-7/F-8 in one sweep). Mechanical, low-risk, high-value.
+-   `ISSUER_APPROVER`/`VERIFIER` or remove them from the assignable set + admin UI.
+-4. Fix the two seed/UI truth bugs (F-1, F-10) — small PRs.
+-   `SCOPES`, align gateway wildcard handling, call `validateScopes` at mint.
+-6. Write KS-539's governing rules against `connector` + scopes + provenance (§4).

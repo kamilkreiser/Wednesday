@@ -1,0 +1,36 @@
+-Source of truth in code: [`packages/shared/src/security/scopes.ts`](../packages/shared/src/security/scopes.ts). Both the api-gateway's `requireScope` middleware and originate's `isAllowedByRoleOrScope` helper import from there so the vocabulary can't drift between services.
+-Filed under [KS-71](https://linear.app/secuura/issue/KS-71). User-facing labels for the admin portal's API-key issuance UI come from this doc.
+-Platform K has two authorisation paths:
+-1. **Role-based (humans)** — a logged-in user has a `role` claim on their JWT (`ISSUER_ADMIN`, `ORG_ADMIN`, `VERIFIER`, `SYSTEM_ADMIN`, etc.). Every write route in originate has a role allow-list. JWT users skip scope checks at the gateway (they get an implicit `*`).
+-2. **Scope-based (machine clients)** — an `sk_*` API key or OAuth client has `role: 'connector'` and an explicit `scopes: string[]` claim. The gateway validates each request against the route's required scope; downstream services additionally honour the same scope via `isAllowedByRoleOrScope`.
+-Both paths can pass a single check — the helper returns `true` if **either** the role is allowed **or** the scope is present. Defence-in-depth is preserved: human callers still need the right role, scoped tokens still need the right scope.
+-| Scope | What it allows |
+-| `documents:read` | `GET /api/documents`, `GET /api/documents/{id}`. RLS still applies — caller only sees their tenant's. |
+-| `documents:write` | `POST /api/documents` — create new documents. Also gates `POST /api/documents/{id}/version` (KS-86 — record a new versioned doc for an issuer-side watermark / sign-cert action; we don't carve a separate `documents:version` scope until a connector needs the finer gating). |
+-| `documents:share` | `POST /api/documents/{id}/share` (filed under [KS-67](https://linear.app/secuura/issue/KS-67)). |
+-| `documents:revoke` | `POST /api/documents/{id}/revoke` — logical revoke. |
+-| `documents:transfer-custody` | `POST /api/documents/{id}/transfer-custody` (filed under [KS-68](https://linear.app/secuura/issue/KS-68)). |
+-| `certifications:read` | `GET /api/certifications`, `GET /api/certifications/{id}`. |
+-| `certifications:write` | `POST /api/certifications/issue`. |
+-| `certifications:sign` | `POST /api/certifications/{id}/sign` — user-side attestation. |
+-| `certifications:share` | `POST /api/certifications/{id}/share`. |
+-| `certifications:revoke` | `POST /api/certifications/{id}/revoke`. |
+-| `anchors:read` | `GET /api/anchors/document/{id}` — poll anchor status. |
+-| `anchors:write` | `POST /api/documents/{id}/anchor` — explicit re-anchor (rarely needed; auto-anchor on create covers most callers). |
+-| `organizations:register` | **Provisioning only** (KS-480 §4 amendment, 2026-07-30): `POST /api/platform/organizations/register-connector` — create an Organisation and mint THAT org's own connector key. Grants **no** document/certification/anchor access, so a leaked provisioning key cannot read or write a document. Held by one key per Platform-S **instance** (uat-ps → K demo, ps → K prod); the per-Organisation keys
+-| `subjects:erase` | **In the mint set, not yet enforced at any route** ([KS-843](https://linear.app/secuura/issue/KS-843)). `POST /api/gdpr/erasures` and `GET /api/gdpr/erasures/{externalRef}` — GDPR Article 17 erasure of a **subject**, requested by a connector. KS-843 (2026-09-03): *"Dedicated scope `subjects:erase` — mint it for S's key at registration; refuse others 403."* Its own resource rather than `documents
+-| `users:read` | `GET /api/users/lookup?email=…` (filed under [KS-69](https://linear.app/secuura/issue/KS-69)) and future list endpoints. |
+-| `users:write` | Admin user provisioning. |
+-| `kyc:submit` | `POST /api/kyc/submit`. |
+-| `kyc:read` | `GET /api/kyc/status` — own KYC status. |
+-| `analytics:read` | Dashboards and summary endpoints. |
+-| `analytics:export` | `POST /api/analytics/exports` — long-running 202 export flow. |
+-| `verification:read` | Tenant-private "verify within my org" if/when built. **Note:** the public verifier (`POST /api/verification/verify`) is no-auth and does not require a scope. |
+-| `issuer-certs:read` | `GET /api/issuer-certs`, `GET /api/issuer-certs/{id}` (filed under [KS-83](https://linear.app/secuura/issue/KS-83) — per-org X.509 cert lifecycle for document signing). Returns cert metadata + public-cert PEM; never the encrypted private key. |
+-| `issuer-certs:sign` | `POST /api/issuer-certs/sign` — sign a sha256 content hash with the tenant's active cert. Also implicitly required by `POST /api/documents/{id}/sign-cert` (originate forwards the caller's Bearer to auth, so the scope must be present on the caller's token). |
+-Two wildcard shapes are supported:
+-**OAuth grants are the exception (KS-839).** KS-839 (2026-09-17): option E, "'*' grants no scopes". An OAuth app whose registered allow-list contains `*` (including an entry that only becomes `*` once split on spaces or commas) is granted nothing: a request naming scopes is refused 400 `invalid_scope`, and an omitted `scope` yields an empty grant. The wildcard satisfying scopes above applies to API keys, not to OAut
+-Wildcards are **validated at API-key issuance time**, not at request time, to keep per-request scope checking fast. The admin portal's UI rejects unknown wildcards before storing them.
+-2. Add the literal to the `SCOPES` array in `packages/shared/src/security/scopes.ts`.
+-3. Add a row to the table above with the route(s) it covers.
+-   - **Gateway side** (proxy routes that don't terminate in the gateway): use `requireScope('<scope>')` in `services/api-gateway/src/routes/proxy.ts`. The gateway is the first line of defence — unauthorised callers get a 403 here before reaching the downstream service.

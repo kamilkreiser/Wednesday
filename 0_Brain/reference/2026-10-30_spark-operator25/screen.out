@@ -1,0 +1,152 @@
+=== strictness: real hit in services/
+    ::error::Found banned TS-strictness flip (pen-test H3 regression):
+      services/s/Dockerfile:1:RUN x && noUnusedLocals = false
+    rc=1
+=== strictness: hit ONLY in node_modules (expect rc 0 if pruned)
+    ::error::Found banned TS-strictness flip (pen-test H3 regression):
+      services/s/node_modules/dep/ci.yml:1:x: noUnusedLocals = false
+    rc=1
+=== strictness: clean control
+    OK — no TS-strictness flips found in Dockerfiles or build scripts.
+    rc=0
+=== math-random: real hit
+    ::error::1 Math.random() use(s) in security-relevant paths (pen-test F-07/F-09):
+      services/s/src/a.ts:1:const a = Math.random();
+    
+    Replacements:
+      - Numeric IDs / PINs   : crypto.randomInt(min, max)
+      - String IDs           : crypto.randomUUID() or crypto.randomBytes(16).toString('hex')
+      - Token-like values    : crypto.randomBytes(32).toString('base64url')
+    
+    Set MATH_RANDOM_LINT_MODE=fail to switch from warn to a hard CI gate
+    once the remaining sites are cleaned up.
+    rc=1
+=== math-random: hit only in node_modules
+    OK — no Math.random() in security-relevant paths.
+    rc=0
+=== math-random: clean control
+    OK — no Math.random() in security-relevant paths.
+    rc=0
+=== trust-header: real hit
+    ::error::1 trust-header read(s) outside auth middleware (pen-test F-04):
+      services/s/src/b.ts:1:const a = req.headers['x-user-id'];
+    
+    Use req.user.* (set by authenticate() middleware) instead of
+    req.headers['x-user-*']. Direct header reads re-introduce the
+    trust-header vulnerability. Set TRUST_HEADER_LINT_MODE=fail to
+    switch this from warn to a hard CI gate once cleanup is complete.
+    rc=1
+=== trust-header: warn mode
+    ::warning::1 trust-header read(s) outside auth middleware (pen-test F-04):
+      services/s/src/b.ts:1:const a = req.headers['x-user-id'];
+    
+    Use req.user.* (set by authenticate() middleware) instead of
+    req.headers['x-user-*']. Direct header reads re-introduce the
+    trust-header vulnerability. Set TRUST_HEADER_LINT_MODE=fail to
+    switch this from warn to a hard CI gate once cleanup is complete.
+    rc=0
+=== trust-header: clean control
+    OK — no trust-header reads outside auth middleware.
+    rc=0
+=== default-passwords: real hit
+    ::error::Hardcoded *123 password literal found (pen-test F-05):
+      services/s/src/c.ts:1:const p = {password: 'admin123'};
+    
+    Use seedPw('ENV_VAR', 'legacy_default') in the seeder or move
+    the password to .env. Direct *123 literals adjacent to a
+    password field re-introduce the F-05 risk.
+    rc=1
+=== default-passwords: clean control
+    OK — no hardcoded *123 password literals.
+    rc=0
+=== connector-xss: real hit
+    ::error::Inline event handler(s) in connector JS (KS-163 — use addEventListener):
+      connectors/c/src/a.js:1:const h = '<a onclick="x()">';
+    rc=1
+=== connector-xss: hit only in node_modules (expect rc 0)
+    OK — no inline event handlers in connector JS.
+    rc=0
+=== connector-xss: clean control
+    OK — no inline event handlers in connector JS.
+    rc=0
+=== dockerfile-non-root: no USER
+    rc=1
+=== dockerfile-non-root: USER root
+    OK — all 1 Dockerfile(s) drop root for runtime.
+    rc=0
+=== dockerfile-non-root: USER 0
+    OK — all 1 Dockerfile(s) drop root for runtime.
+    rc=0
+=== dockerfile-non-root: USER app (clean control)
+    OK — all 1 Dockerfile(s) drop root for runtime.
+    rc=0
+=== dockerfile-non-root: GNU-sed simulation absent; sed \s probe
+    USER root
+    rc=0
+=== test-wallet: mainnet
+    ::error::test-wallet.env does NOT use a testnet address (addr_test*)
+      TEST_WALLET_ADDRESS=addr1qxyz
+    Test wallets MUST use Cardano testnet addresses, not mainnet (addr1...).
+    rc=1
+=== test-wallet: testnet control
+    OK — test-wallet.env uses addr_test (testnet): TEST_WALLET_ADDRESS=addr_test1qxyz
+    rc=0
+=== test-wallet: quoted mainnet
+    ::error::test-wallet.env does NOT use a testnet address (addr_test*)
+      LACE_WALLET_ADDRESS="addr1qxyz"
+    Test wallets MUST use Cardano testnet addresses, not mainnet (addr1...).
+    rc=1
+=== test-wallet: export-prefixed mainnet
+    [L7] No wallet address declared in test-wallet.env — nothing to check
+    rc=0
+=== latest-tags: hit (4 files missing too)
+    ::error::docker-compose.production.yml references :latest (pen-test H7 — production must use date-pinned tags):
+      1:image: foo:latest
+    ::error::deployment/azure/services.bicep is listed in CHECK_FILES but is not present (KS-865) — a listed input that is missing is an ERROR, not a skip
+    ::error::deployment/azure/services.parameters.json is listed in CHECK_FILES but is not present (KS-865) — a listed input that is missing is an ERROR, not a skip
+    ::error::deployment/azure/main.bicep is listed in CHECK_FILES but is not present (KS-865) — a listed input that is missing is an ERROR, not a skip
+    ::error::deployment/azure/main.parameters.json is listed in CHECK_FILES but is not present (KS-865) — a listed input that is missing is an ERROR, not a skip
+    check-no-latest-tags: examined 1 of 5 advertised file(s).
+    rc=1
+=== env-consistency: bad rg
+    ::error::Disallowed Azure resource-group name 'secuura-evil-rg' found. Allowed: secuura-dev-rg secuura-demo-rg secuura-staging-rg
+      in: deployment/x.yml
+    rc=2
+=== env-consistency: clean
+    OK — all resource-group references are in the allowed set.
+    rc=0
+=== production-guard: uncovered svc
+    production-guard coverage: 0 / 1 services
+    Missing enforceProductionConfig() in:
+      - a
+    rc=1
+=== portability: timeout hit
+    ::error::GNU `timeout` used — absent on stock macOS (KS-666).
+      It is not installed on the evidence host, so the command never runs and its caller
+      reports a failure that never happened. Probe for gtimeout/timeout and fall back.
+      /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/386655dc-1e21-4780-a0ec-56899bc89081/scratchpad/s25/case28/scripts/zz.sh:2:timeout 600 foo
+    ::error::1 portability rule(s) violated across 21 shell scripts (KS-666).
+    rc=1
+=== portability: hit only in node_modules
+    OK — 7 portability rules hold across 20 shell scripts (KS-666).
+    rc=0
+=== portability: sed -i hit
+    ::error::`sed -i` without a backup-suffix argument — BSD sed requires one (KS-666).
+      The GNU form silently eats the next argument as the suffix, so the edit does not apply.
+      Use `sed -i ''` on macOS, or perl -pi -e.
+      /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/386655dc-1e21-4780-a0ec-56899bc89081/scratchpad/s25/case30/scripts/zz.sh:2:sed -i s/a/b/ f
+    ::error::1 portability rule(s) violated across 21 shell scripts (KS-666).
+    rc=1
+=== portability: readlink -f hit
+    ::error::GNU-only flag (`readlink -f` / `date -d`) — unsupported by BSD userland (KS-666).
+      /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/386655dc-1e21-4780-a0ec-56899bc89081/scratchpad/s25/case31/scripts/zz.sh:2:x=$(readlink -f foo)
+    ::error::1 portability rule(s) violated across 21 shell scripts (KS-666).
+    rc=1
+=== portability: mapfile hit
+    ::error::bash 4+ construct (`mapfile`/`readarray`/`declare -A`) — macOS ships bash 3.2.57 (KS-666).
+      These do not merely warn: the builtin is missing, the variable stays unset, and the script
+      carries on with an EMPTY collection — reporting clean because it examined nothing.
+      Use a `while IFS= read -r` loop, or parallel indexed arrays instead of an associative one.
+      /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/386655dc-1e21-4780-a0ec-56899bc89081/scratchpad/s25/case32/scripts/zz.sh:2:mapfile -t a < f
+    ::error::1 portability rule(s) violated across 21 shell scripts (KS-666).
+    rc=1

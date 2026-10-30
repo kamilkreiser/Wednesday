@@ -1,0 +1,58 @@
+##### p1 TIP
+FAIL: no-USER case: rc=1 out=
+FAIL: USER root case: rc=0 out=OK — all 1 Dockerfile(s) drop root for runtime. 
+PASS: CONTROL USER app exits 0 with the OK line
+PASS: CONTROL a root build stage with a non-root final USER exits 0
+check_dockerfile_non_root_reports_root: 2 passed, 2 failed
+rc=1
+##### p1 FIXED
+PASS: a Dockerfile with no USER directive exits 1 and is named
+PASS: a final USER root exits 1 and is named
+PASS: CONTROL USER app exits 0 with the OK line
+PASS: CONTROL a root build stage with a non-root final USER exits 0
+check_dockerfile_non_root_reports_root: 4 passed, 0 failed
+rc=0
+##### p2 TIP
+FAIL: node_modules-only hit: rc=1 out=::error::Found banned TS-strictness flip (pen-test H3 regression):   services/s/node_modules/dep/node_modules/deeper/ci.yml:1:x: noUnusedLocals = false 
+FAIL: mixed hits: rc=1 out=::error::Found banned TS-strictness flip (pen-test H3 regression):   services/s/Dockerfile:1:RUN sed -i x && noUnusedLocals = false   services/s/node_modules/dep/node_modules/deeper/ci.yml:1:x: noUnusedLocals = false 
+PASS: CONTROL a real flip exits 1 and is printed
+PASS: CONTROL a clean tree exits 0
+check_no_strictness_patches_skips_node_modules: 2 passed, 2 failed
+rc=1
+##### p2 FIXED
+PASS: a flip that exists only under node_modules is ignored
+PASS: only the repo's own hit is printed
+PASS: CONTROL a real flip exits 1 and is printed
+PASS: CONTROL a clean tree exits 0
+check_no_strictness_patches_skips_node_modules: 4 passed, 0 failed
+rc=0
+##### p3 TIP
+FAIL: the scan call does not exclude node_modules: -rEn (^|[[:space:]<])on[a-z]+=['"] connectors/ --include=*.js --include=*.ts --include=*.jsx --include=*.tsx
+PASS: CONTROL the scan still reads .js, .ts, .jsx and .tsx under connectors/
+PASS: CONTROL a hit exits 1 and is printed; a clean scan exits 0
+PASS: CONTROL a hit under node_modules is still filtered out
+check_connector_xss_skips_node_modules: 3 passed, 1 failed
+rc=1
+##### p3 FIXED
+PASS: the scan call carries --exclude-dir=node_modules
+PASS: CONTROL the scan still reads .js, .ts, .jsx and .tsx under connectors/
+PASS: CONTROL a hit exits 1 and is printed; a clean scan exits 0
+PASS: CONTROL a hit under node_modules is still filtered out
+check_connector_xss_skips_node_modules: 4 passed, 0 failed
+rc=0
+##### p4 TIP
+FAIL: untracked variant not reported: out=OK — no PII store file is tracked by git. 
+FAIL: untracked variant: rc=0 out=OK — no PII store file is tracked by git. 
+PASS: CONTROL a tracked pii file exits 1 with the git rm hint
+PASS: CONTROL a clean repo exits 0 with no warning
+PASS: CONTROL an ignored ks256 store is still warned about, exit 0
+check_no_pii_store_untracked_leg: 3 passed, 2 failed
+rc=1
+##### p4 FIXED
+PASS: an untracked pii-data.local.json is reported
+PASS: the untracked-file report exits 0 and prints its full block
+PASS: CONTROL a tracked pii file exits 1 with the git rm hint
+PASS: CONTROL a clean repo exits 0 with no warning
+PASS: CONTROL an ignored ks256 store is still warned about, exit 0
+check_no_pii_store_untracked_leg: 5 passed, 0 failed
+rc=0

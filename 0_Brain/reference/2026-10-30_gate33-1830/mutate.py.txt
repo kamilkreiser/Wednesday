@@ -1,0 +1,38 @@
+import sys, hashlib, shutil, subprocess, re
+F = "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_gate33-1830/repo/Blockchain/Dev/services/auth/src/providers/social/github.ts"
+ROOT = "/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_gate33-1830/repo/Blockchain/Dev"
+BK = "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/386655dc-1e21-4780-a0ec-56899bc89081/scratchpad/mut/github.ts.orig"
+orig = open(F).read(); h0 = hashlib.sha256(orig.encode()).hexdigest(); shutil.copy(F, BK)
+COND = "if (typeof tokenBody.access_token !== 'string' || tokenBody.access_token === '' || tokenBody.error !== undefined) {"
+GUARD_START = "    if (typeof tokenBody.access_token"
+guard = orig[orig.index(GUARD_START):orig.index("    const access_token = tokenBody.access_token;")]
+PROFILE_END = "      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),\n    });\n\n    if (!profileRes.ok) {"
+M = {
+ "M1 drop the check": [(COND, "if (false) {")],
+ "M2 check only undefined": [(COND, "if (tokenBody.access_token === undefined) {")],
+ "M3 check after the /user call": [(guard, ""), (PROFILE_END, "      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),\n    });\n" + guard + "\n    if (!profileRes.ok) {")],
+ "M4 accept empty string": [(COND, "if (typeof tokenBody.access_token !== 'string' || tokenBody.error !== undefined) {")],
+ "M5 drop the error clause": [(COND, "if (typeof tokenBody.access_token !== 'string' || tokenBody.access_token === '') {")],
+ "M6 drop the typeof clause": [(COND, "if (tokenBody.access_token === undefined || tokenBody.access_token === '' || tokenBody.error !== undefined) {")],
+ "M7 log the whole token body": [("{ provider: 'github', error: typeof tokenBody.error === 'string' ? tokenBody.error.slice(0, 80) : undefined }", "{ provider: 'github', body: tokenBody }")],
+}
+tests = sys.argv[1:]
+for name, edits in M.items():
+    src = orig
+    ok = True
+    for a, b in edits:
+        n = src.count(a)
+        if n != 1: print(f"{name}: ANCHOR COUNT {n} -> skipped"); ok = False; break
+        src = src.replace(a, b)
+    if not ok: continue
+    open(F, "w").write(src)
+    p = subprocess.run(["node", "-e", "const ts=require('typescript');const s=require('fs').readFileSync(process.argv[1],'utf8');const r=ts.transpileModule(s,{reportDiagnostics:true,compilerOptions:{module:1}});process.exit(r.diagnostics.length?1:0)", F], cwd=ROOT, capture_output=True, text=True)
+    parse = "parses" if p.returncode == 0 else "PARSE ERROR " + p.stderr[:200]
+    r = subprocess.run([ROOT + "/node_modules/.bin/vitest", "run", "--root", ROOT + "/services/auth", "--reporter=verbose", *tests], capture_output=True, text=True)
+    out = r.stdout + r.stderr
+    red = [l.strip()[:60] for l in out.splitlines() if l.strip().startswith("×")]
+    tot = [l.strip() for l in out.splitlines() if l.strip().startswith("Tests ")]
+    print(f"{name}: {parse}; rc={r.returncode}; {tot}; red={red}")
+    shutil.copy(BK, F)
+    assert hashlib.sha256(open(F).read().encode()).hexdigest() == h0, "RESTORE FAILED"
+print("restored sha256", h0)

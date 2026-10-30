@@ -1,0 +1,532 @@
+=== isolation: healthy control
+    OK — 6 container-isolation invariants hold across 2 stacks (KS-666).
+    rc=0
+=== isolation: dup container name
+    ::error::Container name(s) claimed by more than one stack (KS-666).
+      `docker exec <name>` then reaches whichever Docker lists first — newest, not yours.
+      secuura-api
+    ::error::Platform slots do not run the same number of containers (KS-666).
+      A slot missing a service passes suites for the wrong reason.
+      distinct counts: 1 2 
+    ::error::2 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: shared named volume
+    ::error::Named volume(s) claimed by more than one stack (KS-666).
+      An explicit `name:` on a compose volume OVERRIDES project scoping — that is how two
+      Akto stacks ended up sharing one mongo data dir (DBPathInUse).
+      v1
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: same-name volume in two projects (named)
+    ::error::Named volume(s) claimed by more than one stack (KS-666).
+      An explicit `name:` on a compose volume OVERRIDES project scoping — that is how two
+      Akto stacks ended up sharing one mongo data dir (DBPathInUse).
+      <anon-ish>
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: shared network
+    ::error::Network(s) claimed by more than one stack (KS-666).
+      n1
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: slot2 wrong prefix (+count mismatch)
+    ::error::Container name does not match its stack's slot prefix (KS-666).
+      secuura_slot2/secuura-api-x 
+    ::error::Platform slots do not run the same number of containers (KS-666).
+      A slot missing a service passes suites for the wrong reason.
+      distinct counts: 2 3 
+    ::error::2 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: slot-1 project wearing slot marker (secuura_slot1)
+    ::error::Container name does not match its stack's slot prefix (KS-666).
+      secuura_slot2/secuura-s3-api 
+    ::error::Platform slots do not run the same number of containers (KS-666).
+      A slot missing a service passes suites for the wrong reason.
+      distinct counts: 1 2 
+    ::error::2 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: akto_s3 with s4 name
+    ::error::Container name does not match its stack's slot prefix (KS-666).
+      akto_s3/akto-s4-mongo 
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: slot 1 project with -s2- name
+    ::error::Container name does not match its stack's slot prefix (KS-666).
+      ks-666/secuura-s2-sneak 
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: uneven counts
+    ::error::Platform slots do not run the same number of containers (KS-666).
+      A slot missing a service passes suites for the wrong reason.
+      distinct counts: 2 3 
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: only one stack (vacuous)
+    ::error::Only 1 platform stack(s) in the inventory — the cross-slot comparison is vacuous (KS-666).
+      This invariant proves nothing with fewer than 2 stacks. Bring the slots up, or pass a
+      fixture with at least two, rather than accepting a green tick that means nothing.
+      Identify platform stacks by CONTAINER name (secuura-*), never by project name — slot 1's
+      project is the worktree basename and matches no secuura_slotN pattern.
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: one stack + obs (still vacuous)
+    ::error::Only 1 platform stack(s) in the inventory — the cross-slot comparison is vacuous (KS-666).
+      This invariant proves nothing with fewer than 2 stacks. Bring the slots up, or pass a
+      fixture with at least two, rather than accepting a green tick that means nothing.
+      Identify platform stacks by CONTAINER name (secuura-*), never by project name — slot 1's
+      project is the worktree basename and matches no secuura_slotN pattern.
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: exited 1 (ks-666) vs exited 0
+    ::error::Container(s) exited non-zero or are restarting (KS-666).
+      One-shot containers (migrations, demo-overlay, akto init-user) must end Exited (0).
+      secuura-mig (Exited (1) 2 minutes ago)
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: restarting obs container
+    ::error::Container(s) exited non-zero or are restarting (KS-666).
+      One-shot containers (migrations, demo-overlay, akto init-user) must end Exited (0).
+      secuura-obs-x (Restarting (1) 3 seconds ago)
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: exited 137 obs container
+    ::error::Container(s) exited non-zero or are restarting (KS-666).
+      One-shot containers (migrations, demo-overlay, akto init-user) must end Exited (0).
+      secuura-obs-x (Exited (137) 3 hours ago)
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: Dead container
+    OK — 6 container-isolation invariants hold across 2 stacks (KS-666).
+    rc=0
+=== isolation: Created never started (+count mismatch)
+    ::error::Platform slots do not run the same number of containers (KS-666).
+      A slot missing a service passes suites for the wrong reason.
+      distinct counts: 2 3 
+    ::error::1 container-isolation invariant(s) violated (KS-666).
+    rc=1
+=== isolation: empty inventory (rc 2)
+    ::error::Inventory is empty — nothing to check.
+    rc=2
+=== isolation: live path through docker stub
+    OK — 6 container-isolation invariants hold across 2 stacks (KS-666).
+    rc=0
+=== demo: env.demo.json touched
+    
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║                  DEMO MUTATION DETECTED — BLOCKED                  ║
+    ╚════════════════════════════════════════════════════════════════════╝
+    
+    This change touches files known to shape the live demo environment:
+    
+        Blockchain/Dev/deployment/azure/env.demo.json
+    
+    The live demo (Azure RG secuura-demo-rg) is in active customer use
+    during the connector-overhaul sprint. We don't want unintended config
+    shifts.
+    
+    If this change is INTENTIONAL (deliberate demo update), add this
+    override token to ANY commit in the PR:
+    
+        [demo-mutation-allowed]
+    
+    Example:
+        git commit -m "Update demo env config [demo-mutation-allowed]
+    
+        Why: <explicit reason — what it does, who approved>"
+    
+    If this change is unintentional, revert the demo-touching files
+    (or move them to a follow-up PR) and try again.
+    
+    rc=1
+=== demo: migrate/ prefix touched
+    
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║                  DEMO MUTATION DETECTED — BLOCKED                  ║
+    ╚════════════════════════════════════════════════════════════════════╝
+    
+    This change touches files known to shape the live demo environment:
+    
+        Blockchain/Dev/deployment/azure/migrate/a.bicep
+    
+    The live demo (Azure RG secuura-demo-rg) is in active customer use
+    during the connector-overhaul sprint. We don't want unintended config
+    shifts.
+    
+    If this change is INTENTIONAL (deliberate demo update), add this
+    override token to ANY commit in the PR:
+    
+        [demo-mutation-allowed]
+    
+    Example:
+        git commit -m "Update demo env config [demo-mutation-allowed]
+    
+        Why: <explicit reason — what it does, who approved>"
+    
+    If this change is unintentional, revert the demo-touching files
+    (or move them to a follow-up PR) and try again.
+    
+    rc=1
+=== demo: override token
+    [demo-guard] demo paths touched but override token present — allowed
+      paths:
+        Blockchain/Dev/deployment/azure/env.demo.json
+    rc=0
+=== demo: clean control
+    [demo-guard] no demo-shaping paths touched
+    rc=0
+=== demo: explicit base arg
+    
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║                  DEMO MUTATION DETECTED — BLOCKED                  ║
+    ╚════════════════════════════════════════════════════════════════════╝
+    
+    This change touches files known to shape the live demo environment:
+    
+        Blockchain/Dev/deployment/azure/env.demo.json
+    
+    The live demo (Azure RG secuura-demo-rg) is in active customer use
+    during the connector-overhaul sprint. We don't want unintended config
+    shifts.
+    
+    If this change is INTENTIONAL (deliberate demo update), add this
+    override token to ANY commit in the PR:
+    
+        [demo-mutation-allowed]
+    
+    Example:
+        git commit -m "Update demo env config [demo-mutation-allowed]
+    
+        Why: <explicit reason — what it does, who approved>"
+    
+    If this change is unintentional, revert the demo-touching files
+    (or move them to a follow-up PR) and try again.
+    
+    rc=1
+=== demo: bad base (rc 2)
+    [demo-guard] base origin/nope cannot be resolved; refusing to read the tree as clean
+    rc=2
+=== demo: GITHUB_BASE_REF=develop
+    
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║                  DEMO MUTATION DETECTED — BLOCKED                  ║
+    ╚════════════════════════════════════════════════════════════════════╝
+    
+    This change touches files known to shape the live demo environment:
+    
+        Blockchain/Dev/deployment/azure/env.demo.json
+    
+    The live demo (Azure RG secuura-demo-rg) is in active customer use
+    during the connector-overhaul sprint. We don't want unintended config
+    shifts.
+    
+    If this change is INTENTIONAL (deliberate demo update), add this
+    override token to ANY commit in the PR:
+    
+        [demo-mutation-allowed]
+    
+    Example:
+        git commit -m "Update demo env config [demo-mutation-allowed]
+    
+        Why: <explicit reason — what it does, who approved>"
+    
+    If this change is unintentional, revert the demo-touching files
+    (or move them to a follow-up PR) and try again.
+    
+    rc=1
+=== demo: two mutations listed
+    
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║                  DEMO MUTATION DETECTED — BLOCKED                  ║
+    ╚════════════════════════════════════════════════════════════════════╝
+    
+    This change touches files known to shape the live demo environment:
+    
+        Blockchain/Dev/deployment/azure/env.demo.json
+        Blockchain/Dev/deployment/azure/migrate/sub/a.bicep
+    
+    The live demo (Azure RG secuura-demo-rg) is in active customer use
+    during the connector-overhaul sprint. We don't want unintended config
+    shifts.
+    
+    If this change is INTENTIONAL (deliberate demo update), add this
+    override token to ANY commit in the PR:
+    
+        [demo-mutation-allowed]
+    
+    Example:
+        git commit -m "Update demo env config [demo-mutation-allowed]
+    
+        Why: <explicit reason — what it does, who approved>"
+    
+    If this change is unintentional, revert the demo-touching files
+    (or move them to a follow-up PR) and try again.
+    
+    rc=1
+=== demo: token text only inside a LATER commit message
+    [demo-guard] demo paths touched but override token present — allowed
+      paths:
+        Blockchain/Dev/deployment/azure/env.demo.json
+    rc=0
+=== demo: filename with a space under prefix
+    
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║                  DEMO MUTATION DETECTED — BLOCKED                  ║
+    ╚════════════════════════════════════════════════════════════════════╝
+    
+    This change touches files known to shape the live demo environment:
+    
+        Blockchain/Dev/deployment/azure/migrate/with space.bicep
+    
+    The live demo (Azure RG secuura-demo-rg) is in active customer use
+    during the connector-overhaul sprint. We don't want unintended config
+    shifts.
+    
+    If this change is INTENTIONAL (deliberate demo update), add this
+    override token to ANY commit in the PR:
+    
+        [demo-mutation-allowed]
+    
+    Example:
+        git commit -m "Update demo env config [demo-mutation-allowed]
+    
+        Why: <explicit reason — what it does, who approved>"
+    
+    If this change is unintentional, revert the demo-touching files
+    (or move them to a follow-up PR) and try again.
+    
+    rc=1
+=== demo: rename into demo path
+    
+    ╔════════════════════════════════════════════════════════════════════╗
+    ║                  DEMO MUTATION DETECTED — BLOCKED                  ║
+    ╚════════════════════════════════════════════════════════════════════╝
+    
+    This change touches files known to shape the live demo environment:
+    
+        Blockchain/Dev/deployment/azure/env.demo.json
+    
+    The live demo (Azure RG secuura-demo-rg) is in active customer use
+    during the connector-overhaul sprint. We don't want unintended config
+    shifts.
+    
+    If this change is INTENTIONAL (deliberate demo update), add this
+    override token to ANY commit in the PR:
+    
+        [demo-mutation-allowed]
+    
+    Example:
+        git commit -m "Update demo env config [demo-mutation-allowed]
+    
+        Why: <explicit reason — what it does, who approved>"
+    
+    If this change is unintentional, revert the demo-touching files
+    (or move them to a follow-up PR) and try again.
+    
+    rc=1
+=== demo: HEAD is base itself (no diff)
+    [demo-guard] no files changed; nothing to check
+    rc=0
+=== env: all stubbed, healthy (rc 0)
+    [0;34m
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║           SECUURA ENVIRONMENT CHECK                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    [0m
+    [0;34m[1/6] Checking Operating System...[0m
+    [0;32m✓ macOS 27.0.1[0m
+    [0;34m[2/6] Checking Homebrew...[0m
+    [0;32m✓ Homebrew 4.0[0m
+    [0;34m[3/6] Checking Node.js...[0m
+    [0;32m✓ Node.js v20.1.0[0m
+    [0;34m[4/6] Checking npm...[0m
+    [0;32m✓ npm 10.0.0[0m
+    [0;34m[5/6] Checking Docker...[0m
+    [0;32m✓ Docker 25.0.0[0m
+    [0;32m✓ Docker daemon is running[0m
+    [0;34m[6/6] Checking Aiken (optional)...[0m
+    [1;33m○ Aiken not installed (optional - for smart contract development)[0m
+    
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    [0;32m✓ All prerequisites are installed![0m
+      Run [0;34m./scripts/start-environment.sh[0m to start the environment
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    rc=0
+=== env: node v16 (rc 1)
+    [0;34m
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║           SECUURA ENVIRONMENT CHECK                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    [0m
+    [0;34m[1/6] Checking Operating System...[0m
+    [0;32m✓ macOS 27.0.1[0m
+    [0;34m[2/6] Checking Homebrew...[0m
+    [0;32m✓ Homebrew 4.0[0m
+    [0;34m[3/6] Checking Node.js...[0m
+    [1;33m⚠ Node.js v16.0.0 (need 18+)[0m
+    [0;34m[4/6] Checking npm...[0m
+    [0;32m✓ npm 10.0.0[0m
+    [0;34m[5/6] Checking Docker...[0m
+    [0;32m✓ Docker 25.0.0[0m
+    [0;32m✓ Docker daemon is running[0m
+    [0;34m[6/6] Checking Aiken (optional)...[0m
+    [1;33m○ Aiken not installed (optional - for smart contract development)[0m
+    
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    [1;33m⚠ 1 prerequisite(s) missing or need attention[0m
+      Run [0;34m./scripts/install-all.sh[0m to install missing components
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    rc=1
+=== env: docker daemon down (rc 1)
+    [0;34m
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║           SECUURA ENVIRONMENT CHECK                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    [0m
+    [0;34m[1/6] Checking Operating System...[0m
+    [0;32m✓ macOS 27.0.1[0m
+    [0;34m[2/6] Checking Homebrew...[0m
+    [0;32m✓ Homebrew 4.0[0m
+    [0;34m[3/6] Checking Node.js...[0m
+    [0;32m✓ Node.js v20.1.0[0m
+    [0;34m[4/6] Checking npm...[0m
+    [0;32m✓ npm 10.0.0[0m
+    [0;34m[5/6] Checking Docker...[0m
+    [0;32m✓ Docker 25.0.0[0m
+    [1;33m⚠ Docker daemon is not running[0m
+      Please start Docker Desktop
+    [0;34m[6/6] Checking Aiken (optional)...[0m
+    [1;33m○ Aiken not installed (optional - for smart contract development)[0m
+    
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    [1;33m⚠ 1 prerequisite(s) missing or need attention[0m
+      Run [0;34m./scripts/install-all.sh[0m to install missing components
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    rc=1
+=== env: node prints garbage 'v'
+    [0;34m
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║           SECUURA ENVIRONMENT CHECK                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    [0m
+    [0;34m[1/6] Checking Operating System...[0m
+    [0;32m✓ macOS 27.0.1[0m
+    [0;34m[2/6] Checking Homebrew...[0m
+    [0;32m✓ Homebrew 4.0[0m
+    [0;34m[3/6] Checking Node.js...[0m
+    /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-30_spark-operator26/clone/Blockchain/Dev/scripts/check-environment.sh: line 52: [: : integer expression expected
+    [1;33m⚠ Node.js v (need 18+)[0m
+    [0;34m[4/6] Checking npm...[0m
+    [0;32m✓ npm 10.0.0[0m
+    [0;34m[5/6] Checking Docker...[0m
+    [0;32m✓ Docker 25.0.0[0m
+    [0;32m✓ Docker daemon is running[0m
+    [0;34m[6/6] Checking Aiken (optional)...[0m
+    [1;33m○ Aiken not installed (optional - for smart contract development)[0m
+    
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    [1;33m⚠ 1 prerequisite(s) missing or need attention[0m
+      Run [0;34m./scripts/install-all.sh[0m to install missing components
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    rc=1
+=== env: node v8 (single digit)
+    [0;34m
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║           SECUURA ENVIRONMENT CHECK                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    [0m
+    [0;34m[1/6] Checking Operating System...[0m
+    [0;32m✓ macOS 27.0.1[0m
+    [0;34m[2/6] Checking Homebrew...[0m
+    [0;32m✓ Homebrew 4.0[0m
+    [0;34m[3/6] Checking Node.js...[0m
+    [1;33m⚠ Node.js v8.1.0 (need 18+)[0m
+    [0;34m[4/6] Checking npm...[0m
+    [0;32m✓ npm 10.0.0[0m
+    [0;34m[5/6] Checking Docker...[0m
+    [0;32m✓ Docker 25.0.0[0m
+    [0;32m✓ Docker daemon is running[0m
+    [0;34m[6/6] Checking Aiken (optional)...[0m
+    [1;33m○ Aiken not installed (optional - for smart contract development)[0m
+    
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    [1;33m⚠ 1 prerequisite(s) missing or need attention[0m
+      Run [0;34m./scripts/install-all.sh[0m to install missing components
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    rc=1
+=== env: node v100 (3-digit)
+    [0;34m
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║           SECUURA ENVIRONMENT CHECK                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    [0m
+    [0;34m[1/6] Checking Operating System...[0m
+    [0;32m✓ macOS 27.0.1[0m
+    [0;34m[2/6] Checking Homebrew...[0m
+    [0;32m✓ Homebrew 4.0[0m
+    [0;34m[3/6] Checking Node.js...[0m
+    [0;32m✓ Node.js v100.0.0[0m
+    [0;34m[4/6] Checking npm...[0m
+    [0;32m✓ npm 10.0.0[0m
+    [0;34m[5/6] Checking Docker...[0m
+    [0;32m✓ Docker 25.0.0[0m
+    [0;32m✓ Docker daemon is running[0m
+    [0;34m[6/6] Checking Aiken (optional)...[0m
+    [1;33m○ Aiken not installed (optional - for smart contract development)[0m
+    
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    [0;32m✓ All prerequisites are installed![0m
+      Run [0;34m./scripts/start-environment.sh[0m to start the environment
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    rc=0
+=== env: docker missing (rc 1)
+    [0;34m
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║           SECUURA ENVIRONMENT CHECK                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    [0m
+    [0;34m[1/6] Checking Operating System...[0m
+    [0;32m✓ macOS 27.0.1[0m
+    [0;34m[2/6] Checking Homebrew...[0m
+    [0;32m✓ Homebrew 4.0[0m
+    [0;34m[3/6] Checking Node.js...[0m
+    [0;32m✓ Node.js v20.1.0[0m
+    [0;34m[4/6] Checking npm...[0m
+    [0;32m✓ npm 10.0.0[0m
+    [0;34m[5/6] Checking Docker...[0m
+    [1;33m⚠ Docker not installed[0m
+      Install with: brew install --cask docker
+    [0;34m[6/6] Checking Aiken (optional)...[0m
+    [1;33m○ Aiken not installed (optional - for smart contract development)[0m
+    
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    [1;33m⚠ 1 prerequisite(s) missing or need attention[0m
+      Run [0;34m./scripts/install-all.sh[0m to install missing components
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    rc=1
+=== env: nothing installed (expect rc 4: brew node npm docker)
+    [0;34m
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║           SECUURA ENVIRONMENT CHECK                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    [0m
+    [0;34m[1/6] Checking Operating System...[0m
+    [0;32m✓ macOS 27.0.1[0m
+    [0;34m[2/6] Checking Homebrew...[0m
+    [1;33m⚠ Homebrew not installed[0m
+      Install with: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    [0;34m[3/6] Checking Node.js...[0m
+    [1;33m⚠ Node.js not installed[0m
+      Install with: brew install node@20
+    [0;34m[4/6] Checking npm...[0m
+    [1;33m⚠ npm not installed[0m
+    [0;34m[5/6] Checking Docker...[0m
+    [1;33m⚠ Docker not installed[0m
+      Install with: brew install --cask docker
+    [0;34m[6/6] Checking Aiken (optional)...[0m
+    [1;33m○ Aiken not installed (optional - for smart contract development)[0m
+    
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    [1;33m⚠ 4 prerequisite(s) missing or need attention[0m
+      Run [0;34m./scripts/install-all.sh[0m to install missing components
+    [0;34m═══════════════════════════════════════════════════════════════[0m
+    rc=4
