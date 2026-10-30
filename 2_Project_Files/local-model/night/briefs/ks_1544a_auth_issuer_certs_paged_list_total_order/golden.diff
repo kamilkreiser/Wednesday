@@ -1,0 +1,67 @@
+diff --git a/Blockchain/Dev/services/auth/src/repositories/issuerCertRepo.ts b/Blockchain/Dev/services/auth/src/repositories/issuerCertRepo.ts
+--- a/Blockchain/Dev/services/auth/src/repositories/issuerCertRepo.ts
++++ b/Blockchain/Dev/services/auth/src/repositories/issuerCertRepo.ts
+@@ -290,7 +290,7 @@
+     query<IssuerCertRow>(
+       `SELECT * FROM issuer_certs
+        WHERE ${whereClause}
+-       ORDER BY uploaded_at DESC
++       ORDER BY uploaded_at DESC, id DESC
+        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+       [...params, limit, offset],
+       opts.tenantId,
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1544-class-auth-issuer-certs-list-orders-in-a-total-order.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1544-class-auth-issuer-certs-list-orders-in-a-total-order.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1544-class-auth-issuer-certs-list-orders-in-a-total-order.test.ts
+@@ -0,0 +1,50 @@
++/**
++ * KS-1544 class (auth): the paged read in repositories/issuerCertRepo.ts (listIssuerCerts, behind GET /issuer-certs) sorts on
++ * `uploaded_at`, which is not unique, then pages with `LIMIT ... OFFSET ...`. Rows that tie on the sort key have no defined order
++ * between two queries, so a page walk can repeat or skip them (KS-1544 measured the same defect on platform_audit_log).
++ * issuer_certs has `id UUID PRIMARY KEY` (migrations/024_issuer_certs.sql), so the ORDER BY now ends in `, id DESC`.
++ * Source-text guard: the module needs a database to import.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++
++const SRC = readFileSync(resolve(__dirname, '..', 'repositories', 'issuerCertRepo.ts'), 'utf8');
++
++/** Every paged ORDER BY clause (the text from ORDER BY through the OFFSET placeholder), whitespace collapsed. */
++function pagedOrders(src: string): string[] {
++  const found = src.match(/ORDER BY [^`;]*?OFFSET \$\$\{[^}]*\}/g) ?? [];
++  return found.map((s) => s.replace(/\s+/g, ' '));
++}
++
++/** True when the clause does not end its sort list in the primary key before LIMIT. */
++function tied(clause: string): boolean {
++  return !/, id DESC LIMIT/.test(clause);
++}
++
++describe('issuer certs paged list orders in a total order (KS-1544 class)', () => {
++  it('RED ks1544a T1 the paged list read orders by uploaded_at DESC, id DESC', () => {
++    expect(pagedOrders(SRC)).toEqual(['ORDER BY uploaded_at DESC, id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}']);
++  });
++
++  it('RED ks1544a T2 no paged read in issuerCertRepo.ts is left tied', () => {
++    expect(pagedOrders(SRC).filter(tied)).toEqual([]);
++  });
++
++  it('control ks1544a C1 the scanner flags a tied clause and passes a total one', () => {
++    expect(tied('ORDER BY uploaded_at DESC LIMIT $1 OFFSET $2')).toBe(true);
++    expect(tied('ORDER BY uploaded_at DESC, id DESC LIMIT $1 OFFSET $2')).toBe(false);
++  });
++
++  it('control ks1544a C2 issuerCertRepo.ts has exactly one paged read', () => {
++    expect(pagedOrders(SRC)).toHaveLength(1);
++  });
++
++  it('control ks1544a C3 the single-row active-cert read keeps its own order', () => {
++    expect(SRC).toMatch(/ORDER BY uploaded_at DESC\s+LIMIT 1`/);
++  });
++
++  it('control ks1544a C4 the count query is not touched', () => {
++    expect(SRC).toContain('SELECT COUNT(*)::text AS count FROM issuer_certs WHERE ${whereClause}');
++  });
++});
