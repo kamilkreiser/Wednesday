@@ -1,0 +1,145 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -1480,6 +1480,7 @@
+       const body = await jsonOrEmpty(upstream);
+       res.status(upstream.status).json(body);
+     } catch (err: any) {
+-      res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable', details: { details: err.message } } });
++      log('error', '[Users] Admin update could not reach the auth service', { error: err instanceof Error ? err.message : String(err) });
++      res.status(502).json({ success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable' } });
+     }
+   });
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1791class-admin-patch-user-502-never-echoes-the-thrown-text.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1791class-admin-patch-user-502-never-echoes-the-thrown-text.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1791class-admin-patch-user-502-never-echoes-the-thrown-text.test.ts
+@@ -0,0 +1,128 @@
++/**
++ * Filing-list item (seat X 3rd, F4; the KS-1791 class): PATCH /api/users/admin/:id in api-gateway routes/admin.ts forwards to the auth
++ * service, and when that forward THROWS its catch answered 502 with `details: { details: err.message }`, so a driver message or an internal
++ * host:port reached the client. The sibling in routes/proxy.ts answers the same 502 with no details at all. The fix: the thrown text goes to
++ * the server log (deps.log), and the 502 body is the constant { success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable' } }.
++ *
++ * Harness: the fake req/res dispatch of ks1196 (the real createAdminRoutes router, no server); global fetch is stubbed per cell, so no network.
++ */
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++import type { Request, Response, Router } from 'express';
++import { configureAuth, authenticateToken, parseTestToken } from '../middleware/auth';
++import { createAdminRoutes, type AdminRouteDeps } from '../routes/admin';
++
++// THE FIXTURE IS LOAD-BEARING: a private host:port and a marker no other code path could produce.
++const LEAK = 'connect ECONNREFUSED 10.0.4.17:4003 ks1791class-admin-patch-private-detail';
++const BODY_502 = { success: false, error: { code: 'BAD_GATEWAY', message: 'Auth service unavailable' } };
++
++function buildTestToken(payload: Record<string, unknown>): string {
++  return 'test_token_' + Buffer.from(JSON.stringify(payload)).toString('base64');
++}
++const ADMIN_HEADERS = { authorization: 'Bearer ' + buildTestToken({ sub: 'admin-1', role: 'SYSTEM_ADMIN', email: 'admin-1@test.io' }) };
++const USER_HEADERS = { authorization: 'Bearer ' + buildTestToken({ sub: 'user-1', role: 'user', email: 'user-1@test.io' }) };
++
++type CapturedRes = Response & { _status: number; _json: any };
++
++function dispatch(router: Router, headers: Record<string, string>): Promise<CapturedRes> {
++  return new Promise((resolve, reject) => {
++    const res: any = {
++      _status: 200,
++      _json: null,
++      status(code: number) {
++        res._status = code;
++        return res;
++      },
++      json(payload: unknown) {
++        res._json = payload;
++        resolve(res);
++        return res;
++      },
++      setHeader() {
++        return res;
++      },
++    };
++    const req = {
++      method: 'PATCH',
++      url: '/api/users/admin/u-ks1791class',
++      headers,
++      body: { role: 'user' },
++      query: {},
++      get(name: string) {
++        return (this as any).headers[name.toLowerCase()];
++      },
++    } as unknown as Request;
++    router(req, res, (err: unknown) => (err ? reject(err) : resolve(res)));
++  });
++}
++
++let router: Router;
++let logCalls: unknown[][];
++
++beforeEach(() => {
++  vi.stubEnv('NODE_ENV', 'test');
++  configureAuth({ enableTestTokens: true, defaultTenantId: 'default' });
++  logCalls = [];
++  router = createAdminRoutes({
++    authenticateToken,
++    parseTestToken,
++    query: async () => ({ rows: [], rowCount: 0 }),
++    isDbAvailable: () => false,
++    redisService: {},
++    services: { auth: { url: 'http://auth.test:4003' } },
++    log: (...args: unknown[]) => {
++      logCalls.push(args);
++    },
++  } as unknown as AdminRouteDeps);
++});
++
++afterEach(() => {
++  vi.unstubAllGlobals();
++  vi.unstubAllEnvs();
++});
++
++describe('admin PATCH /api/users/admin/:id: an unreachable auth service answers 502 without the thrown text', () => {
++  it('RED admin-502 P1 the 502 body is exactly the constant envelope, with no details and none of the thrown text', async () => {
++    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error(LEAK)));
++    const res = await dispatch(router, ADMIN_HEADERS);
++    expect(res._status).toBe(502);
++    expect(JSON.stringify(res._json)).not.toContain(LEAK);
++    expect(res._json).toEqual(BODY_502);
++  });
++
++  it('RED admin-502 P2 the thrown text is logged server-side at error level', async () => {
++    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error(LEAK)));
++    const res = await dispatch(router, ADMIN_HEADERS);
++    expect(res._status).toBe(502);
++    expect(logCalls.some((c) => c[0] === 'error' && JSON.stringify(c).includes(LEAK))).toBe(true);
++  });
++
++  it('RED admin-502 P3 the 502 body is the same for two different thrown texts', async () => {
++    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error(LEAK)));
++    const first = await dispatch(router, ADMIN_HEADERS);
++    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('getaddrinfo ENOTFOUND auth.internal')));
++    const second = await dispatch(router, ADMIN_HEADERS);
++    expect(second._json).toEqual(first._json);
++  });
++
++  it('control admin-502 C1 an auth service that answers is relayed with its status and body, and nothing is logged', async () => {
++    const upstreamBody = { success: true, data: { id: 'u-ks1791class', role: 'user' } };
++    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 200, json: async () => upstreamBody }));
++    const res = await dispatch(router, ADMIN_HEADERS);
++    expect([res._status, res._json]).toEqual([200, upstreamBody]);
++    expect(logCalls).toEqual([]);
++  });
++
++  it('control admin-502 C2 a caller with no bearer is answered 401 and the auth service is never called', async () => {
++    const fetchSpy = vi.fn();
++    vi.stubGlobal('fetch', fetchSpy);
++    const res = await dispatch(router, {});
++    expect([res._status, res._json.error.code, fetchSpy.mock.calls.length]).toEqual([401, 'UNAUTHORIZED', 0]);
++  });
++
++  it('control admin-502 C3 a caller who is not an admin is answered 403 and the auth service is never called', async () => {
++    const fetchSpy = vi.fn();
++    vi.stubGlobal('fetch', fetchSpy);
++    const res = await dispatch(router, USER_HEADERS);
++    expect([res._status, res._json.error.code, fetchSpy.mock.calls.length]).toEqual([403, 'FORBIDDEN', 0]);
++  });
++});

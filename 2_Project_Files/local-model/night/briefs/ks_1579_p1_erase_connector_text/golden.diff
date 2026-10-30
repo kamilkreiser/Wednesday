@@ -1,0 +1,72 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts b/Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts
+--- a/Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts
++++ b/Blockchain/Dev/services/originate/src/services/connectorOrganisationErasure.ts
+@@ -216,8 +216,9 @@
+ //           key committed before that UPDATE's snapshot is always seen and rolls the whole transaction back (m-1);
+ //       (2) a key with NO connector id (NULL or blank) authenticates as the principal `connector:api-key`, which is also the literal
+ //           label, so that principal is shared by every such key and by legacy rows from before ticket KS-869. It cannot identify
+-//           one connector, and no key table can make an erasure by it safe (a guard that reads live keys cannot see a key that was
+-//           deleted or rotated away). The erasure REFUSES it (403, nothing written) before it reads any key. A key without an id
++//           one connector, and no key table can make an erasure by it safe (a guard that reads the key table, inactive keys included,
++//           cannot see a key that was DELETED: a rotation only deactivates or shortens the old key). The erasure REFUSES it (403, nothing
++//           written) before it reads any key. A key without an id
+ //           could never erase (its stored id is not the label); this closes the key that stores the label itself.
+ //   - NOT closed here (M-1 path 1): the security service lets an organisation-scoped admin mint a key for ANOTHER
+ //     organisation with any connector id, and this erasure trusts the key row, so that key can erase that organisation.
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks695-ask3-erase-connector-refusals.test.ts
+@@ -279,4 +279,4 @@
+-  it('CONTROL - M-2 liveness is UNCHANGED: a key with a NULL, and one with an empty, connector id already got 403 from the ownership comparison and still does', async () => {
++  it('CONTROL - M-2 liveness is UNCHANGED: a key with a NULL, and one with an empty, connector id is still refused 403 (this cell pins the status, not which refusal produces it)', async () => {
+     keyRows['key-null-695'] = { organization_id: ORG, connector_id: null };
+     keyRows['key-empty-695'] = { organization_id: ORG, connector_id: '' };
+     for (const keyId of ['key-null-695', 'key-empty-695']) {
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1579-erase-connector-comment-and-title-state-the-truth.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1579-erase-connector-comment-and-title-state-the-truth.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1579-erase-connector-comment-and-title-state-the-truth.test.ts
+@@ -0,0 +1,43 @@
++/**
++ * KS-1579 items 3 and 4 - two pieces of text in the KS-695 erase-connector files must say what the code does.
++ *
++ * Item 4: the header comment of connectorOrganisationErasure.ts said the key-table guard cannot see a key "that was deleted or
++ * rotated away". A rotation only deactivates the old key or shortens its expiry (security's retirePriorStatement is an UPDATE), and the
++ * guard reads inactive keys, so a rotated key IS seen; only a DELETED key escapes it.
++ * Item 3: the unit cell titled "... already got 403 from the ownership comparison and still does" kept a reason that stopped being
++ * true when the fallback refusal was added in round 6. The cell pins the status, not the reason, and its title now says so.
++ * These are source-text cells: they read the two files as text, so no server is started.
++ */
++import * as fs from 'fs';
++import * as path from 'path';
++
++const erasureSource = fs.readFileSync(path.join(__dirname, '..', 'services', 'connectorOrganisationErasure.ts'), 'utf8');
++const refusalsSource = fs.readFileSync(path.join(__dirname, 'ks695-ask3-erase-connector-refusals.test.ts'), 'utf8');
++
++describe('KS-1579 items 3 and 4: the header comment and the cell title state what the code does', () => {
++  it('RED KS-1579 T1 the erasure header no longer says a key was "rotated away"', () => {
++    expect(erasureSource).not.toContain('deleted or rotated away');
++  });
++
++  it('RED KS-1579 T2 the erasure header says only a DELETED key escapes the guard and that a rotation leaves the old key readable', () => {
++    expect(erasureSource).toContain('cannot see a key that was DELETED: a rotation only deactivates or shortens the old key');
++  });
++
++  it('RED KS-1579 T3 the unit cell title no longer claims the 403 "already" came from the ownership comparison', () => {
++    expect(refusalsSource).not.toContain('already got 403 from the ownership comparison and still does');
++  });
++
++  it('RED KS-1579 T4 the unit cell title says it pins the status, not which refusal produces it', () => {
++    expect(refusalsSource).toContain('is still refused 403 (this cell pins the status, not which refusal produces it)');
++  });
++
++  it('CONTROL KS-1579 T5 the retitled cell still exists once and still checks the two keys', () => {
++    expect(refusalsSource.split('M-2 liveness is UNCHANGED').length - 1).toBe(1);
++    expect(refusalsSource).toContain("for (const keyId of ['key-null-695', 'key-empty-695'])");
++  });
++
++  it('CONTROL KS-1579 T6 the erasure file still declares the fallback predicate and still names the principal label', () => {
++    expect(erasureSource).toContain('export function isFallbackConnectorId(');
++    expect(erasureSource).toContain('connector:api-key');
++  });
++});

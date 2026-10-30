@@ -1,0 +1,62 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts
+@@ -0,0 +1,57 @@
++// KS-1534 (a) (the Sonnet gate on PR 1517, Minor 1): GET /api/connector/info (services/health.ts) refuses a PRESENT allow-list that is
++// not an array with the SAME guard as the create path (routes/verification.ts, KS-1204):
++//     if (X !== undefined && X !== null && !Array.isArray(X)) {
++// The two copies are duplicated, not shared. The behavioural AGREEMENT cell in ks1232-info-reader-refuses-a-non-array-allow-list.test.ts
++// catches a drift in what each route DOES; this file pins the other half the ticket asks for: that the two guards stay the same
++// EXECUTABLE code. It reads both sources as text, drops every comment line first (a guard that survives only in a comment is not a guard,
++// the KS-1319 class), and compares the guard condition with the variable name normalised. Nothing is started.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { join } from 'path';
++
++const SRC = join(__dirname, '..');
++const HEALTH = readFileSync(join(SRC, 'services', 'health.ts'), 'utf8');
++const VERIFICATION = readFileSync(join(SRC, 'routes', 'verification.ts'), 'utf8');
++
++const GUARD = /^\s*if \((\w+) !== undefined && \1 !== null && !Array\.isArray\(\1\)\) \{\s*$/;
++
++/** The source with every whole-line comment (// ..., /* ..., * ...) removed. */
++function executableLines(src: string): string[] {
++  return src.split('\n').filter((l) => !/^\s*(\/\/|\/\*|\*)/.test(l));
++}
++
++/** Every line that is the allow-list guard, with the variable name replaced by X. */
++function guardLines(src: string): string[] {
++  return executableLines(src)
++    .map((l) => GUARD.exec(l))
++    .filter((m): m is RegExpExecArray => m !== null)
++    .map((m) => m[0].trim().split(m[1]).join('X'));
++}
++
++const CANONICAL = 'if (X !== undefined && X !== null && !Array.isArray(X)) {';
++
++describe('KS-1534 (a): the info reader and the create path carry the same allow-list guard', () => {
++  it('RED KS-1534 G1 the info reader (health.ts) has exactly one executable guard and it is the canonical condition', () => {
++    expect(guardLines(HEALTH)).toEqual([CANONICAL]);
++  });
++
++  it('RED KS-1534 G2 the two files carry the same guard condition, compared as executable code', () => {
++    expect(guardLines(HEALTH)).toEqual(guardLines(VERIFICATION));
++  });
++
++  it('CONTROL KS-1534 G3 the create path (verification.ts) has exactly one executable guard and it is the canonical condition', () => {
++    expect(guardLines(VERIFICATION)).toEqual([CANONICAL]);
++  });
++
++  it('CONTROL KS-1534 G4 a guard that survives only in a comment is not counted', () => {
++    const planted = '    // if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {\n    const kept = 1;\n';
++    expect(guardLines(planted)).toEqual([]);
++  });
++
++  it('CONTROL KS-1534 G5 the scan can fail: a guard with the array test dropped is not the canonical condition', () => {
++    const planted = '    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null) {\n';
++    expect(guardLines(planted)).toEqual([]);
++    expect(guardLines(HEALTH + planted)).toEqual(guardLines(HEALTH));
++    expect(guardLines('    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {\n')).toEqual([CANONICAL]);
++  });
++});

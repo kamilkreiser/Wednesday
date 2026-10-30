@@ -1,0 +1,34 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+--- a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1670-the-success-redirect-encodes-the-connection-id.test.ts
+@@ -52,4 +52,30 @@
+   it('control KS-1670 C3 the invalid_state refusal redirect is untouched', () => {
+     expect(SRC).toContain('/admin/integrations?m365=error&message=invalid_state');
+   });
++
++  // KS-1800 (gate 7 mutant N6): R1's needle is the template text `connectionId=${`, so a redirect that carries the id by STRING CONCATENATION
++  // ('...connectionId=' + connectionId) is invisible to it by construction. This scan is the other half: it reads every non-comment line
++  // and refuses a `connectionId=` query key that is closed by a quote and joined to something with `+`.
++  function concatenatedConnectionIdLines(src: string): string[] {
++    return src
++      .split('\n')
++      .filter((l) => !/^\s*(\/\/|\/\*|\*)/.test(l))
++      .filter((l) => /connectionId=['"`]\s*\+/.test(l));
++  }
++
++  it('RED KS-1670 R3 no redirect in the service carries the connection id by string concatenation', () => {
++    expect(concatenatedConnectionIdLines(SRC)).toEqual([]);
++  });
++
++  it('control KS-1670 C4 the concatenation scan can fail: it finds a planted concatenated redirect, in either quote style', () => {
++    const planted = "    res.redirect(base + '/admin/integrations?m365=success&connectionId=' + connectionId);\n"
++      + '    res.redirect(base + "/admin/integrations?m365=success&connectionId=" + connectionId);\n';
++    expect(concatenatedConnectionIdLines(planted)).toHaveLength(2);
++  });
++
++  it('control KS-1670 C5 the scan ignores a comment line, and the real template redirect is still in the source', () => {
++    const commented = "    // res.redirect(base + '/x?connectionId=' + connectionId);\n";
++    expect(concatenatedConnectionIdLines(commented)).toEqual([]);
++    expect(SRC).toContain('m365=success&connectionId=${encodeURIComponent(connectionId)}');
++  });
+ });

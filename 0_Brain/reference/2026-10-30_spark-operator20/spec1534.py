@@ -1,0 +1,78 @@
+# KS-1534 (a): pin that the info reader's and the create path's allow-list guards are the same EXECUTABLE code. Spark operator 20. test_only, NEW api-gateway vitest file, tamper health.ts:98.
+TDIR='Blockchain/Dev/services/api-gateway/src/__tests__/'
+PROD='Blockchain/Dev/services/api-gateway/src/services/health.ts'
+TEST=TDIR+'ks1534-allow-list-guards-are-the-same-executable-code.test.ts'
+REF=TDIR+'ks811-post-documents-403-code-set-agrees.test.ts'
+CONTENT='''// KS-1534 (a) (the Sonnet gate on PR 1517, Minor 1): GET /api/connector/info (services/health.ts) refuses a PRESENT allow-list that is
+// not an array with the SAME guard as the create path (routes/verification.ts, KS-1204):
+//     if (X !== undefined && X !== null && !Array.isArray(X)) {
+// The two copies are duplicated, not shared. The behavioural AGREEMENT cell in ks1232-info-reader-refuses-a-non-array-allow-list.test.ts
+// catches a drift in what each route DOES; this file pins the other half the ticket asks for: that the two guards stay the same
+// EXECUTABLE code. It reads both sources as text, drops every comment line first (a guard that survives only in a comment is not a guard,
+// the KS-1319 class), and compares the guard condition with the variable name normalised. Nothing is started.
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+const SRC = join(__dirname, '..');
+const HEALTH = readFileSync(join(SRC, 'services', 'health.ts'), 'utf8');
+const VERIFICATION = readFileSync(join(SRC, 'routes', 'verification.ts'), 'utf8');
+
+const GUARD = /^\\s*if \\((\\w+) !== undefined && \\1 !== null && !Array\\.isArray\\(\\1\\)\\) \\{\\s*$/;
+
+/** The source with every whole-line comment (// ..., /* ..., * ...) removed. */
+function executableLines(src: string): string[] {
+  return src.split('\\n').filter((l) => !/^\\s*(\\/\\/|\\/\\*|\\*)/.test(l));
+}
+
+/** Every line that is the allow-list guard, with the variable name replaced by X. */
+function guardLines(src: string): string[] {
+  return executableLines(src)
+    .map((l) => GUARD.exec(l))
+    .filter((m): m is RegExpExecArray => m !== null)
+    .map((m) => m[0].trim().split(m[1]).join('X'));
+}
+
+const CANONICAL = 'if (X !== undefined && X !== null && !Array.isArray(X)) {';
+
+describe('KS-1534 (a): the info reader and the create path carry the same allow-list guard', () => {
+  it('RED KS-1534 G1 the info reader (health.ts) has exactly one executable guard and it is the canonical condition', () => {
+    expect(guardLines(HEALTH)).toEqual([CANONICAL]);
+  });
+
+  it('RED KS-1534 G2 the two files carry the same guard condition, compared as executable code', () => {
+    expect(guardLines(HEALTH)).toEqual(guardLines(VERIFICATION));
+  });
+
+  it('CONTROL KS-1534 G3 the create path (verification.ts) has exactly one executable guard and it is the canonical condition', () => {
+    expect(guardLines(VERIFICATION)).toEqual([CANONICAL]);
+  });
+
+  it('CONTROL KS-1534 G4 a guard that survives only in a comment is not counted', () => {
+    const planted = '    // if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {\\n    const kept = 1;\\n';
+    expect(guardLines(planted)).toEqual([]);
+  });
+
+  it('CONTROL KS-1534 G5 the scan can fail: a guard with the array test dropped is not the canonical condition', () => {
+    const planted = '    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null) {\\n';
+    expect(guardLines(planted)).toEqual([]);
+    expect(guardLines(HEALTH + planted)).toEqual(guardLines(HEALTH));
+    expect(guardLines('    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {\\n')).toEqual([CANONICAL]);
+  });
+});
+'''
+T=dict(dir='ks_1534_p1_guard_same_code',ticket='KS-1534',test=TEST,product=PROD,ref=REF,
+ runner='vitest` (`npx vitest run src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts` from `Blockchain/Dev/services/api-gateway`',
+ content=CONTENT,ncells='5 cells',
+ title="api-gateway: pin that GET /api/connector/info and the create path carry the same allow-list guard as executable code (KS-1534 (a), option 'a source-level cell'; RUNG 3, TEST-ONLY: one NEW vitest file with a planted tamper; the product does not change)",
+ intro="DRAFT by Spark operator 20 for Wednesday, 2026-10-30 AEDT. Secuura (Platform K / api-gateway) only. A local PASS is a candidate, never a merge; the normal QA gate before merge. Origin: KS-1534 item (a) (the Minor 1 of the Sonnet gate on PR 1517): the info reader's guard in `services/health.ts` is character-identical to the create path's in `routes/verification.ts`, duplicated and not shared; drift is guarded today only by the behavioural agreement cell in `ks1232-info-reader-refuses-a-non-array-allow-list.test.ts`. The ticket names the shape: 'a source-level cell asserting the two guards are the same executable code (a source-text check passes when the guard is commented out, so compare the code, not the text)'. Item (b) of the ticket is a contract question and is NOT touched. The ticket's other option (one shared helper) edits the create path's allow-list guard, a security surface, and is NOT done here. The tamper is in `health.ts`; neither source file is modified. Raise note: the guard it pins is a document-type authorization check, so the raise PR gets a TIER-1 gate even though the change is test-only.",
+ scope="**Refs KS-1534, never a close-word. Item (a) only, by its source-level-cell option.** Out of scope and not done: item (b) (whether an array of non-strings is refused by both read routes), the shared helper, any product edit. Narrowing: this pins the guard CONDITION in both files; it does not pin the 403 status, code or message text (the ks1232 agreement cell already compares those behaviourally).",
+ wrong="`GET /api/connector/info` refuses a present, non-array `allowedDocumentTypes` with `if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {` (`services/health.ts:98`), the same condition as the create path (`routes/verification.ts:810`). The two are copies. The behavioural agreement cell would notice one route changing what it answers for the 12 shapes it tries, but nothing asserts the two guards are the same code, so a shape the cell does not try can drift apart unseen. A text grep for the guard would still pass if the line were commented out; this file therefore drops comment lines before it compares.",
+ where="- `services/api-gateway/src/services/health.ts:98` - (correct, STAYS) the guard line `    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {`; the line the tamper replaces in the checker's clone. The 403 is :99.\n- `services/api-gateway/src/routes/verification.ts:810` - (correct, STAYS, NOT edited) the create path's copy, same condition at 8-space indent.\n- Shape of the new file (source read at run time with `readFileSync(join(__dirname, ...))`, no server) is copied from `__tests__/ks811-post-documents-403-code-set-agrees.test.ts:20-33`.",
+ tamper_line=98, tamper_from="    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {",
+ tamper_to="    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null) {",
+ statement_ok="line 98 is the one-line `if` header (its block is :98-101); the replacement drops only the `!Array.isArray` conjunct so every non-array shape would fall through to the list code (the drift the cell must see); `rawAllowedTypes` stays used so `noUnusedLocals` is not tripped and the file compiles",
+ red=['RED KS-1534 G1 the info reader (health.ts) has exactly one executable guard and it is the canonical condition','RED KS-1534 G2 the two files carry the same guard condition, compared as executable code'],
+ cells="- RED under the tamper: G1 fails (health.ts yields no guard line, `[]` instead of the canonical) and G2 fails (the two lists differ).\n- GREEN at the untouched tip: all five cells.\n- Controls G3, G4, G5 stay green under this tamper (G3 reads verification.ts, which the tamper does not touch; G4 and G5 are on planted strings; G5's third assertion proves the scan DOES recognise the canonical condition).",
+ unmeasured="- The drafter did NOT run vitest for the brief; RED-under-tamper / GREEN-at-tip is the `round.sh --control` run on this golden.\n- Whether either file holds a SECOND copy of the guard written with different spacing or a different variable pattern (e.g. a multi-line `if`): the scan accepts only the one-line form; a future reformat to several lines would turn G1 red by design (the cell would then need updating with the code).\n- A guard that is present but unreachable (dead code after an early return) is not detected; this pins the condition, not the control flow.\n- Open PRs touching api-gateway: none among the 21 open (read 2026-10-30), so the partition is clear.",
+)

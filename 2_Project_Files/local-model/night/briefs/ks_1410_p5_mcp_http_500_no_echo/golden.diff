@@ -1,0 +1,176 @@
+diff --git a/Blockchain/Dev/services/mcp-server/src/http-server.ts b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+--- a/Blockchain/Dev/services/mcp-server/src/http-server.ts
++++ b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+@@ -74,6 +74,7 @@
+     res.status(result.status).json(result.data);
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
++    console.error('[mcp-http] POST /register failed:', message);
++    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -108,6 +109,7 @@
+     res.json({ total: results.length, results });
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
++    console.error('[mcp-http] POST /register-batch failed:', message);
++    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -132,6 +134,7 @@
+     res.json(result.data);
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
+-    res.status(500).json({ verified: false, error: message });
++    console.error('[mcp-http] POST /verify failed:', message);
++    res.status(500).json({ verified: false, error: 'An unexpected error occurred' });
+   }
+ });
+@@ -167,6 +170,7 @@
+     res.json({ total: results.length, results });
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
++    console.error('[mcp-http] POST /verify-batch failed:', message);
++    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -180,6 +184,7 @@
+     res.status(result.status).json(result.data);
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
++    console.error('[mcp-http] GET /documents failed:', message);
++    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -190,6 +195,7 @@
+     res.status(result.status).json(result.data);
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
++    console.error('[mcp-http] GET /workflow/:id failed:', message);
++    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -200,6 +206,7 @@
+     res.status(result.status).json(result.data);
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
++    console.error('[mcp-http] GET /connector failed:', message);
++    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -210,6 +217,7 @@
+     res.json(result.data);
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
++    console.error('[mcp-http] GET /policy failed:', message);
++    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -263,8 +271,9 @@
+     );
+   } catch (err: unknown) {
+     const message = err instanceof Error ? err.message : String(err);
++    console.error('[mcp-http] POST /generate-package failed:', message);
+     if (!res.headersSent) {
+-      res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });
++      res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+     }
+   }
+ });
+diff --git a/Blockchain/Dev/services/mcp-server/src/__tests__/ks1410-mcp-http-500-never-echoes-the-thrown-text.test.ts b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1410-mcp-http-500-never-echoes-the-thrown-text.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1410-mcp-http-500-never-echoes-the-thrown-text.test.ts
+@@ -0,0 +1,85 @@
++/**
++ * KS-1410 (the mcp-server file of the class): the catch blocks of mcp-server/src/http-server.ts answered 500 with the thrown text in the
++ * response (`message: message`, and `error: message` on POST /verify), so a driver message, a file-system error naming a server path or an
++ * internal host:port reached the caller. The nine handlers other than POST /hash now log the thrown text with console.error and answer the
++ * constant message below. POST /hash (KS-1214's route, an authentication question) is NOT changed here and must stay as it is.
++ * Source-text guard: the module binds a port and runs a production guard on import, so the file is read, not imported.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++
++const SRC = readFileSync(resolve(__dirname, '..', 'http-server.ts'), 'utf8');
++const CONSTANT = 'An unexpected error occurred';
++
++type Five = { line: number; stmt: string; handler: string; context: string };
++
++/** Every statement that answers 500 through `.status(500).json(...)`, with the route it sits in and the 4 lines (plus the same line's prefix) before it. */
++function fiveHundreds(source: string): Five[] {
++  const lines = source.split('\n');
++  const out: Five[] = [];
++  lines.forEach((text, i) => {
++    const at = text.indexOf('.status(500).json(');
++    if (at < 0) return;
++    let handler = '';
++    for (let j = i; j >= 0; j--) {
++      const m = /^\s*(?:app|router)\.(get|post|put|patch|delete)\(\s*'([^']+)'/.exec(lines[j]);
++      if (m) {
++        handler = m[1].toUpperCase() + ' ' + m[2];
++        break;
++      }
++    }
++    out.push({ line: i + 1, stmt: text.slice(at), handler, context: lines.slice(Math.max(0, i - 4), i).join('\n') + '\n' + text.slice(0, at) });
++  });
++  return out;
++}
++
++/** True when the response argument names a caught value: an identifier left once string literals and the envelope keys are removed. */
++function leaks(stmt: string): boolean {
++  const bare = stmt.replace(/'[^']*'/g, "''").replace(/\b(success|error|code|message|verified)\s*:/g, '');
++  return /\b(err|error|msg|message|detail|details|stack)\b/.test(bare);
++}
++
++const FIVE = fiveHundreds(SRC);
++
++const EXEMPT = 'POST /hash';
++const CHANGED = FIVE.filter((f) => f.handler !== EXEMPT);
++
++describe('mcp-server http-server.ts: no 500 answer carries the thrown text', () => {
++  it('RED mcp-500 P1 no 500 answer outside POST /hash names a caught value', () => {
++    expect(CHANGED.filter((f) => leaks(f.stmt)).map((f) => f.handler)).toEqual([]);
++  });
++
++  it('RED mcp-500 P2 each of the nine answers the constant message', () => {
++    expect(CHANGED.map((f) => f.handler)).toHaveLength(9);
++    expect(CHANGED.filter((f) => !f.stmt.includes("'" + CONSTANT + "'")).map((f) => f.handler)).toEqual([]);
++  });
++
++  it('RED mcp-500 P3 each of the nine logs the thrown text with console.error just before it answers', () => {
++    expect(CHANGED.filter((f) => !/console\.error\(.*\b(message|err)\b/.test(f.context)).map((f) => f.handler)).toEqual([]);
++  });
++
++  it('control mcp-500 C1 the scanner flags a leaking answer and passes the constant one', () => {
++    expect(leaks("res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: message } });")).toBe(true);
++    expect(leaks("res.status(500).json({ verified: false, error: message });")).toBe(true);
++    expect(leaks("res.status(500).json({ verified: false, error: '" + CONSTANT + "' });")).toBe(false);
++    expect(leaks("res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: '" + CONSTANT + "' } });")).toBe(false);
++  });
++
++  it('control mcp-500 C2 the file has exactly ten 500 answers and POST /hash is untouched', () => {
++    expect(FIVE).toHaveLength(10);
++    const hash = FIVE.filter((f) => f.handler === EXEMPT);
++    expect(hash).toHaveLength(1);
++    expect(hash[0].stmt).toContain('message: message');
++  });
++
++  it('control mcp-500 C3 the two per-item results of the batch routes are not touched', () => {
++    expect(SRC).toContain('results.push({ success: false, title: doc.title, error: message });');
++    expect(SRC).toContain('results.push({ verified: false, error: message });');
++  });
++
++  it('control mcp-500 C4 the 400 refusals keep their messages', () => {
++    expect(SRC).toContain("message: 'Provide documentId, contentHash, or filePath'");
++    expect(SRC).toContain("message: 'documents array is required'");
++  });
++});
