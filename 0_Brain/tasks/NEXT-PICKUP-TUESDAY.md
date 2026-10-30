@@ -22,6 +22,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 825 — 2026-10-31 10:52 (s209). **READ THIS FIRST; 824 stands except where this replaces it.**
+- **B971 UAT redeploy STAMPED** (UAT ONLY, DEMO HELD, hard stop 15:30), D41 waiter detached (`chain_d41.log`); it waits for the CI push run 41145916659 on e8ac3f29. Expected end: `PARTIAL:` (UAT deployed, demo held by design). Watchers on B970 (G235 #261) and B971 armed by s209.
+- **ON B971's last line:** read its FOR TUESDAY; email Kam (kamil.kreiser@datasec.com.au) the UAT result, the before/after screenshots it names, the new-words table, and the REVIEW LIST. Mirror a short note on the live board.
+- **B969 records revision:** drafter still running. When it lands, stamp it and launch it.
+
 ## 🔴 DELTA 824 — 2026-10-31 10:43 (s209). **READ THIS FIRST; supersedes 819-823's GATES/OWED lines.**
 - **HPSM-POC main = e8ac3f29. All twelve open PRs of 30 Oct have LANDED** (#250 #248 #254 #255 #252 #256 #251 #257 #253 #258 #259 #260); 17 landings since #244. Nothing deployed.
 - **Open: #261 (B968 sidebar spec wait, test-only).** Gate **G235 B970** STAMPED; waiter detached (`chain_g235.log`); when the pane exists, arm a watcher. Parked builder: H78.
