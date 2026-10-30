@@ -31,7 +31,7 @@ model: claude-sonnet-5-5 -- tooling/docs build, no auth/security/data-destructio
 
 ## QUEUE (in order; each item ends in a mail to Wednesday)
 ### ITEM 0 (before any code)
-- **Ticket.** To be filed by the seat as its first act, assigned to our board account (`kamil.kreiser@secuura.ai`); search the board by the symbols `html_docs_check`, `Projects Documents`, `secuura-docs-section-collision` and say what you searched. No ticket was found referenced in the repo (the drafter's grep of `history.md` for the decision card name was not run: UNMEASURED). Your commit/PR key is that ticket's real key copied from its branch name.
+- **Ticket.** To be filed by the seat as its first act, assigned to our board account (`kamil.kreiser@secuura.ai`); search the board by the symbols `html_docs_check`, `Projects Documents`, `secuura-docs-section-collision-dirties-every-pr-1030` (the card id) and say what you searched. No ticket was found referenced in the repo (the drafter's grep of `history.md` for the decision card name was not run: UNMEASURED). Your commit/PR key is that ticket's real key copied from its branch name.
 - **Launch preflight.** Read `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.launch_preflight_last.txt` in your FIRST tool call and quote it with its launch stamp. Every warning or F-xx line goes VERBATIM into the plan-confirmation mail.
 - **Pane and identity.** Pane check against the brief's pane id, then the identity self-check.
 - **Develop.** In SEPARATE calls: `git ls-remote origin refs/heads/develop` (key and keepalive via `-c core.sshCommand=...`, `GIT_SSH_COMMAND` unset), compared to the pin and to `cb2320368ae4`.
@@ -135,4 +135,4 @@ PROVENANCE:
 - Standing lines carried: Forward-move rule (STANDING_LINES.md:124), Assignment (`:94`), KS-1878 commit rule (`:122`), instruments, three-dot, tamper-anchor, verdict-ratio; /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/STANDING_LINES.md lines 1-254 read; lines 255-547 NOT read. Model shape copied from /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-31_seatS9_ks1881_1871_1860_1861_security.md, read whole | read 2026-10-31
 - Kam's ruling text: quoted from the task given to the drafter by Wednesday (the decision card itself was not opened by the drafter) | 2026-10-31
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-10-31 __:__ (Wednesday fills at send)
+SELF-CHECK: re-read end-to-end for contradictions; read WHOLE by Wednesday | 2026-10-31 10:10 (stamped by the waiter at send)
