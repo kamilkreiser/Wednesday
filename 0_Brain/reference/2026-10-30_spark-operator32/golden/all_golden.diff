@@ -1,0 +1,133 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts
+index e1d2b44b7..c26bcb9cd 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts
+@@ -56,7 +56,7 @@ function makeRes(): Response & { _status: number; _json: any } {
+   return res;
+ }
+ 
+-const { protect } = createCsrfMiddleware();
++const protect = createCsrfMiddleware().protect as (req: Request, res: Response, next: unknown) => void;
+ 
+ // ---------------------------------------------------------------------------
+ // Skip rules — requests with no ambient authority never hit CSRF validation
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
+index 3c86f0c93..97c09e411 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
+@@ -60,7 +60,7 @@ function makeRes(): Response & { _status: number; _json: any } {
+   return res;
+ }
+ 
+-const { protect } = createCsrfMiddleware();
++const protect = createCsrfMiddleware().protect as (req: Request, res: Response, next: unknown) => void;
+ 
+ describe('KS-1165 — v2 verification paths are excluded from CSRF', () => {
+   let next: ReturnType<typeof vi.fn>;
+@@ -198,6 +198,6 @@ describe('KS-1165 — v2 verify through the gateway mount order (CSRF, then cont
+ 
+     const other = await cookieOnly('/api/documents', 'application/octet-stream', 'raw document bytes');
+     expect(other.status).toBe(403);
+-    expect((await other.json()).error.code).toBe('CSRF_TOKEN_MISSING');
++    expect(((await other.json()) as { error: { code: string } }).error.code).toBe('CSRF_TOKEN_MISSING');
+   });
+ });
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1374-global-limiter-at-demo-limit.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1374-global-limiter-at-demo-limit.test.ts
+index 156fadaea..397f2be0d 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1374-global-limiter-at-demo-limit.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1374-global-limiter-at-demo-limit.test.ts
+@@ -92,7 +92,7 @@ describe('KS-1374 global limiter behaviour at the demo figure', () => {
+ 
+   it('control KS-1374 B2: request 2001 in the same window is refused with 429 RATE_LIMIT_EXCEEDED', async () => {
+     const r = await fetch(base + '/api/v1/documents');
+-    const body = await r.json();
++    const body = (await r.json()) as { error: { code: string } };
+     expect(r.status).toBe(429);
+     expect(body.error.code).toBe('RATE_LIMIT_EXCEEDED');
+   });
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1457-audit-finish-reads-use-the-entry-path.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1457-audit-finish-reads-use-the-entry-path.test.ts
+index 8f8a35eaa..cf65fae88 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1457-audit-finish-reads-use-the-entry-path.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1457-audit-finish-reads-use-the-entry-path.test.ts
+@@ -32,6 +32,7 @@ let CELLS_RUN = 0;
+ 
+ type QueryMock = Mock<(sql: string, params: unknown[]) => Promise<{ rows: unknown[] }>>;
+ type LogMock = Mock<(level: string, msg: string, ctx?: Record<string, unknown>) => void>;
++type AuditLog = Parameters<typeof createAuditMiddleware>[0]['log'];
+ const makeQuery = (): QueryMock => vi.fn(async (_sql: string, _params: unknown[]) => ({ rows: [] as unknown[] }));
+ const makeLog = (): LogMock => vi.fn((_l: string, _m: string, _c?: Record<string, unknown>) => undefined);
+ 
+@@ -45,7 +46,7 @@ afterEach(async () => { while (servers.length) { const s = servers.pop()!; s.clo
+ async function drive(opts: { mounted: boolean; path: string; status: number; reply: object; body: object; query: QueryMock; log: LogMock }): Promise<void> {
+   const app = express();
+   app.use(express.json());
+-  app.use(createAuditMiddleware({ query: opts.query, isDbAvailable: () => true, log: opts.log }));
++  app.use(createAuditMiddleware({ query: opts.query, isDbAvailable: () => true, log: opts.log as unknown as AuditLog }));
+   const handler: express.RequestHandler = (_req, res) => { res.status(opts.status).json(opts.reply); };
+   if (opts.mounted) app.use(opts.path, handler); else app.post(opts.path, handler);
+   const server = app.listen(0, '127.0.0.1');
+@@ -124,7 +125,7 @@ describe('KS-1457 B4 — the production login limiter is exactly such a gate', (
+     const query = makeQuery();
+     const app = express();
+     app.use(express.json());
+-    app.use(createAuditMiddleware({ query, isDbAvailable: () => true, log: makeLog() }));
++    app.use(createAuditMiddleware({ query, isDbAvailable: () => true, log: makeLog() as unknown as AuditLog }));
+     app.use('/api/auth/login', rateLimit({
+       windowMs: 60 * 1000, max: 1, standardHeaders: true, legacyHeaders: false,
+       message: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many login attempts. Please try again later.' } },
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1464-limiter-key-hygiene.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1464-limiter-key-hygiene.test.ts
+index 4ca5af0c2..e5b721e26 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1464-limiter-key-hygiene.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1464-limiter-key-hygiene.test.ts
+@@ -57,7 +57,7 @@ async function call(user: U, bucket?: string): Promise<string[]> {
+ }
+ 
+ let warn: ReturnType<typeof vi.spyOn>;
+-const noAllowanceLines = (): string[] => warn.mock.calls.map((c) => String(c[0])).filter((l) => l.includes('has no rateLimit'));
++const noAllowanceLines = (): string[] => warn.mock.calls.map((c: unknown[]) => String(c[0])).filter((l: string) => l.includes('has no rateLimit'));
+ beforeAll(() => { warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined); });
+ afterAll(() => { warn.mockRestore(); vi.restoreAllMocks(); });
+ 
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks695-ask3-erase-connector-door.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks695-ask3-erase-connector-door.test.ts
+index 27223261b..539aa0243 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks695-ask3-erase-connector-door.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks695-ask3-erase-connector-door.test.ts
+@@ -122,7 +122,7 @@ describe('KS-695 ask 3 (i) - the erase-connector door', () => {
+   it('🔴 GRACE (switch unset) - a role-only connector is admitted and logged, so Platform S\'s existing key keeps working', async () => {
+     expect(await drive(ROLE_ONLY, 'POST', POST_PATH)).toBe(200);
+     expect(received).toHaveLength(1);
+-    const graceLogs = warn.mock.calls.filter((c) => String(c[0]).includes('KS-843'));
++    const graceLogs = warn.mock.calls.filter((c: unknown[]) => String(c[0]).includes('KS-843'));
+     expect(graceLogs).toHaveLength(1);
+     expect(graceLogs[0][1]).toMatchObject({ requiredScope: 'subjects:erase', method: 'POST', route: POST_PATH, enforceFlag: FLAG });
+   });
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts
+index 8b7b4cb8a..f9fed4261 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts
+@@ -11,6 +11,7 @@
+  */
+ 
+ import { describe, it, expect, vi } from 'vitest';
++import type { Response } from 'express';
+ import { enforceClientRateLimit } from '../middleware/rateLimitEnforce';
+ 
+ type MockRes = {
+@@ -20,7 +21,7 @@ type MockRes = {
+   statusCode?: number;
+ };
+ 
+-function makeRes(): MockRes {
++function makeRes(): MockRes & Response {
+   const res: MockRes = {
+     setHeader: vi.fn(),
+     status: vi.fn(),
+@@ -30,7 +31,7 @@ function makeRes(): MockRes {
+     res.statusCode = code;
+     return res;
+   });
+-  return res;
++  return res as unknown as MockRes & Response;
+ }
+ 
+ // In-memory limiter (no redis client) — each test uses a unique connectorId so

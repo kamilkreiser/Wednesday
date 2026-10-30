@@ -1,0 +1,27 @@
+```diff
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1165-api-gateway-csrf-excludedpaths-carries-no.test.ts
+@@ -60,4 +60,4 @@
+ }
+ 
+-const { protect } = createCsrfMiddleware();
++const protect = createCsrfMiddleware().protect as (req: Request, res: Response, next: unknown) => void;
+ 
+ describe('KS-1165 — v2 verification paths are excluded from CSRF', () => {
+@@ -198,5 +198,5 @@
+     const other = await cookieOnly('/api/documents', 'application/octet-stream', 'raw document bytes');
+     expect(other.status).toBe(403);
+-    expect((await other.json()).error.code).toBe('CSRF_TOKEN_MISSING');
++    expect(((await other.json()) as { error: { code: string } }).error.code).toBe('CSRF_TOKEN_MISSING');
+   });
+ });
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/csrf.test.ts
+@@ -56,4 +56,4 @@
+ }
+ 
+-const { protect } = createCsrfMiddleware();
++const protect = createCsrfMiddleware().protect as (req: Request, res: Response, next: unknown) => void;
+ 
+ // ---------------------------------------------------------------------------
+```

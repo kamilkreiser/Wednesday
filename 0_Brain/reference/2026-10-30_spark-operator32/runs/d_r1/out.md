@@ -1,0 +1,20 @@
+```diff
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts
+@@ -13,3 +13,4 @@
+ import { describe, it, expect, vi } from 'vitest';
+ import { enforceClientRateLimit } from '../middleware/rateLimitEnforce';
++import type { Response } from 'express';
+ 
+ type MockRes = {
+@@ -22,3 +23,3 @@
+ 
+ function makeRes(): MockRes {
+-  const res: MockRes = {
++  const res: MockRes & Response = {
+@@ -32,3 +33,3 @@
+   });
+-  return res;
++  return res as unknown as MockRes & Response;
+ }
+```

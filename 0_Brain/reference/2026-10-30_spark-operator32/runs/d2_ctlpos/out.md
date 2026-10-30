@@ -1,0 +1,30 @@
+```diff
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/rateLimitEnforce.test.ts
+@@ -11,6 +11,7 @@
+  */
+ 
+ import { describe, it, expect, vi } from 'vitest';
++import type { Response } from 'express';
+ import { enforceClientRateLimit } from '../middleware/rateLimitEnforce';
+ 
+ type MockRes = {
+@@ -20,7 +21,7 @@
+   statusCode?: number;
+ };
+ 
+-function makeRes(): MockRes {
++function makeRes(): MockRes & Response {
+   const res: MockRes = {
+     setHeader: vi.fn(),
+     status: vi.fn(),
+@@ -30,7 +31,7 @@
+     res.statusCode = code;
+     return res;
+   });
+-  return res;
++  return res as unknown as MockRes & Response;
+ }
+ 
+ // In-memory limiter (no redis client) — each test uses a unique connectorId so
+```
