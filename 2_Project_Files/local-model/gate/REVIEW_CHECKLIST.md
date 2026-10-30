@@ -63,3 +63,7 @@ ANSWER FORMAT — reply with ONE JSON object and nothing else (no prose, no code
   "verdict": "GO|GO WITH NOTES|NO GO"
 }
 Use [] for comment_sentences_overstated when there is no draft comment and no PR description. Evidence quotes must be copied exactly from the material given.
+
+## Two false-NO-GO shapes (calibrations 4 and 5, 2026-10-26 and 2026-10-30)
+- A test-only or pin PR that changes no product code is NOT a defect. It is what the PR says it is. Judge whether the test can fail for the right reason. Never raise "the PR does not fix the product" unless the PR claims to.
+- A claim that facts.json does not cover is UNMEASURED, never a Major. Report it as a Note saying "not in the facts". Only evidence that contradicts a claim can be a Major.

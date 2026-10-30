@@ -1,0 +1,306 @@
+===== TICKET =====
+KS-1534 — KS-1232 gate follow-ups: share the allow-list predicate between the info reader and the create path (or pin drift), and decide whether arrays of non-strings are refused by both [In Progress]
+
+## BLUF
+
+The Sonnet-tier gate on PR #1517 (ticket KS-1232) returned **GO**: 0 Major, 3 Minor notes (verdict sha256/16 `622027fcfb23dab5`). Two of them need a decision or a change and are the checklist below; Minor 3 is already ticketed (KS-1532 for the thrown settings read; the MCP relay wording is recorded on KS-1232).
+
+## Recommendation
+
+Do (a) first, since it removes a class; (b) is a contract question for Wednesday or Kam, to be answered for both read routes together.
+
+## Checklist
+
+- [ ] **(a) Stop duplicating the predicate, or pin drift (the gate's Minor 1).** The info reader's guard (`services/api-gateway/src/services/health.ts:77`) is character-identical to the create path's (`routes/verification.ts:1307`): `raw !== undefined && raw !== null && !Array.isArray(raw)`, with the same 403 text. It is **duplicated, not shared**. Drift today is guarded only by the 12-shape AGREEMENT cell in `ks1232-info-reader-refuses-a-non-array-allow-list.test.ts`; the gate's own 30-shape run (`NaN`, `Infinity`, `-0`, array subclasses, a Proxy, an object with a `length`, `new String('')`, `Object.create(Array.prototype)`) found **0 disagreements**. Options: one helper imported by both routes (this edits the create path's allow-list guard, a security surface, so it needs its own gate), or a source-level cell asserting the two guards are the same executable code (a source-text check passes when the guard is commented out, so compare the code, not the text).
+- [ ] **(b) Decide whether an array of non-strings is refused, by both read routes together (the gate's Minor 2; a contract question).** Neither route checks array ELEMENTS. The info reader echoes `[1,2]`, `[null]` and `[['a']]` raw (same as before this PR), and the create path accepts the same shape at its guard; reasoned from its code (`allowedTypes.includes(requestedType)`), not run, a non-empty array of non-strings then refuses every create with the "not permitted to register document type" text rather than the list text, so the two routes would answer differently for the same stored value. KS-1230 is where element types are validated on the **write** path; this item is whether the two **reads** should also refuse such an array, and with what text. Out of the ticket's "non-array" wording, so it was not changed in KS-1232.
+
+## Detail
+
+* **Source:** the PR #1517 gate verdict, Minors 1 and 2. The two reasoned claims in (b) are mine and are marked as such.
+* **Related:** KS-1232 (the change), KS-1230 (the write-side validation), KS-1204 (the create path's refusal), KS-1532 (the thrown read), KS-1531 (the undocumented route).
+* **Dedupe before filing:** literal, case-insensitive matches over title and description, archived included: `array of non-strings` 0, `element types` 0, `shared predicate` 0, `share the predicate` 0, `non-string` 21 (scanned by title; none is about the allow-list's elements), `KS-1230` 4 (KS-1262, KS-1233, KS-1232, KS-1231; KS-1230 itself read). The same instrument returned KS-1232 for its own title phrase, so it can see ticket text.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts
+new file mode 100644
+index 0000000..0ade303
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts
+@@ -0,0 +1,57 @@
++// KS-1534 (a) (the Sonnet gate on PR 1517, Minor 1): GET /api/connector/info (services/health.ts) refuses a PRESENT allow-list that is
++// not an array with the SAME guard as the create path (routes/verification.ts, KS-1204):
++//     if (X !== undefined && X !== null && !Array.isArray(X)) {
++// The two copies are duplicated, not shared. The behavioural AGREEMENT cell in ks1232-info-reader-refuses-a-non-array-allow-list.test.ts
++// catches a drift in what each route DOES; this file pins the other half the ticket asks for: that the two guards stay the same
++// EXECUTABLE code. It reads both sources as text, drops every comment line first (a guard that survives only in a comment is not a guard,
++// the KS-1319 class), and compares the guard condition with the variable name normalised. Nothing is started.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { join } from 'path';
++
++const SRC = join(__dirname, '..');
++const HEALTH = readFileSync(join(SRC, 'services', 'health.ts'), 'utf8');
++const VERIFICATION = readFileSync(join(SRC, 'routes', 'verification.ts'), 'utf8');
++
++const GUARD = /^\s*if \((\w+) !== undefined && \1 !== null && !Array\.isArray\(\1\)\) \{\s*$/;
++
++/** The source with every whole-line comment (// ..., /* ..., * ...) removed. */
++function executableLines(src: string): string[] {
++  return src.split('\n').filter((l) => !/^\s*(\/\/|\/\*|\*)/.test(l));
++}
++
++/** Every line that is the allow-list guard, with the variable name replaced by X. */
++function guardLines(src: string): string[] {
++  return executableLines(src)
++    .map((l) => GUARD.exec(l))
++    .filter((m): m is RegExpExecArray => m !== null)
++    .map((m) => m[0].trim().split(m[1]).join('X'));
++}
++
++const CANONICAL = 'if (X !== undefined && X !== null && !Array.isArray(X)) {';
++
++describe('KS-1534 (a): the info reader and the create path carry the same allow-list guard', () => {
++  it('RED KS-1534 G1 the info reader (health.ts) has exactly one executable guard and it is the canonical condition', () => {
++    expect(guardLines(HEALTH)).toEqual([CANONICAL]);
++  });
++
++  it('RED KS-1534 G2 the two files carry the same guard condition, compared as executable code', () => {
++    expect(guardLines(HEALTH)).toEqual(guardLines(VERIFICATION));
++  });
++
++  it('CONTROL KS-1534 G3 the create path (verification.ts) has exactly one executable guard and it is the canonical condition', () => {
++    expect(guardLines(VERIFICATION)).toEqual([CANONICAL]);
++  });
++
++  it('CONTROL KS-1534 G4 a guard that survives only in a comment is not counted', () => {
++    const planted = '    // if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {\n    const kept = 1;\n';
++    expect(guardLines(planted)).toEqual([]);
++  });
++
++  it('CONTROL KS-1534 G5 the scan can fail: a guard with the array test dropped is not the canonical condition', () => {
++    const planted = '    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null) {\n';
++    expect(guardLines(planted)).toEqual([]);
++    expect(guardLines(HEALTH + planted)).toEqual(guardLines(HEALTH));
++    expect(guardLines('    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {\n')).toEqual([CANONICAL]);
++  });
++});
+diff --git a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+index 60aa336..eb8d81c 100644
+--- a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
++++ b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
+@@ -5926,5 +5926,23 @@ cd Blockchain/Dev/services/governance &amp;&amp; npm test -- --maxWorkers=3
+ <pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1816-reconciler-comments-match-the-code.test.ts   # 5 cells, rc 0
+ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1175-identity-anchoring.test.ts   # 157 cells, rc 0
+ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                  # 38 files / 569 cells: 568 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
++<h2>128. The info reader and the create path are pinned to carry the same allow-list guard as executable code (KS-1534, item a)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> One new test file, <code>Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts</code> (test only, +57 lines). <code>GET /api/connector/info</code> (<code>services/health.ts</code>) and the create path (<code>routes/verification.ts</code>, KS 1204) each refuse a present allow-list that is not an array with the same guard, <code>if (X !== undefined &amp;&amp; X !== null &amp;&amp; !Array.isArray(X)) {</code>, duplicated rather than shared. The existing agreement cell in <code>ks1232-info-reader-refuses-a-non-array-allow-list.test.ts</code> catches drift in what each route does; this file pins the other half of item (a): that the two guards stay the same <strong>executable code</strong>.
++    </td></tr><tr><td>Five cells. The test reads both sources as text, drops every whole-line comment first (a guard that survives only in a comment is not a guard), and compares the guard condition with the variable name normalised. G1 and G2 are RED-first; G3 to G5 are controls (the create path carries the canonical guard; a commented guard is not counted; the scan can fail on a guard with the array test dropped). <strong>Zero product bytes</strong>: <code>health.ts</code> is the tamper target and is never committed.
++    </td></tr></table>
++<h3>128.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Red under a tamper, green on the untouched product, and no other cell moves.</strong></td><td> <strong>Tamper, worktree only, never committed:</strong> dropping the <code>!Array.isArray(rawAllowedTypes)</code> test from <code>health.ts</code> line 98 makes <strong>2 of 5 fail</strong> (G1 and G2), the 3 controls pass. The file was restored by content and its whole-file sha256 equals the pre-tamper value. <strong>Untouched product:</strong> 5 of 5 pass.
++    </td></tr><tr><td><strong>Whole api-gateway unit suite</strong> (vitest, <code>--maxWorkers=3</code>, warm, run twice): develop <code>a8c554659cb3</code> 130 files / 1321 cells, 1321 pass in both runs; with the change 131 files / <strong>1326 cells, 1326 pass</strong> in both runs, 0 failed, 0 skipped. <code>tsc --noEmit</code> with every test file in the program (167 source files, 131 under <code>__tests__</code>): the new file adds <strong>0 errors</strong>; the program carries 27 errors in 7 other test files, and the same 27 lines at develop (measured at the base). <code>eslint</code> on the test file: 0 errors, 0 warnings, and a planted file raised <code>@typescript-eslint/no-unused-vars</code> and <code>no-debugger</code>.
++    </td></tr></table>
++<h3>128.2 Environment and figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-10-30 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats.</strong></td><td> Develop <code>a8c554659cb3</code> with the change on top. Node v26.8.1 (not an LTS line), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0. The api-gateway suite is load-sensitive on this host, so it was run with <code>--maxWorkers=3</code>, warm, twice.
++    </td></tr></table>
++<h3>128.3 What this does not prove</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>A text comparison of two files, not a running service.</strong></td><td> KS-1534 stays open. Item (a) is covered by the source-level option only; the helper option (one function imported by both routes) is not done, and item (b), whether an array of non-strings is refused by both read routes together, is a contract question and is untouched. The cells compare text; they do not run the two routes.
++    </td></tr><tr><td>Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24, any deploy.
++    </td></tr></table>
++<h3>128.4 Running it</h3>
++<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts   # 5 cells in this file
++cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run --maxWorkers=3         # 131 files / 1326 cells, warm, run twice</code></pre>
+ </body>
+ </html>
+diff --git a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+index bdba7f5..3a782da 100644
+--- a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
++++ b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
+@@ -6010,5 +6010,25 @@ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test
+ <tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+ <tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+ </table>
++<h2>The info reader and the create path carry the same allow-list guard as code &mdash; KS-1534</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Test only, zero product bytes. New file <code>ks1534-allow-list-guards-are-the-same-executable-code.test.ts</code>: it reads <code>services/health.ts</code> and <code>routes/verification.ts</code> as text, drops comment lines, and compares the allow-list guard as executable code. Cells G1 and G2 (RED), G3 to G5 (controls).
++    </td></tr><tr><td>Tamper on <code>health.ts</code> line 98: 2 of 5 fail; untouched product: 5 of 5.
++    </td></tr></table>
++</div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> KS-1534 stays open: the shared-helper option and item (b) (non-string array elements) are not done. The cells compare text and do not run the routes. The four platform suites, a running stack, Node 24 and any deploy were not run.
++    </td></tr></table>
++</div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts   # 5 cells in this file
++cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run --maxWorkers=3         # 131 files / 1326 cells, warm, run twice</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>5</strong> (G1, G2 RED + G3 to G5 controls); tamper on <code>health.ts</code> line 98: 2 of 5 fail, untouched product 5 of 5</td></tr>
++<tr><td>api-gateway unit suite</td><td>develop <code>a8c554659cb3</code> 130 files / 1321 cells, 1321 pass; with the change 131 files / <strong>1326 cells, 1326 pass</strong>; <code>--maxWorkers=3</code>, warm, two runs each, identical, 0 failed, 0 skipped</td></tr>
++<tr><td>tsc and eslint</td><td>tsc with every test in the program: 27 errors in 7 other test files, identical to develop, 0 from the new file (a planted type error was reported once by file name); eslint on the test: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
++<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+ </body>
+ </html>
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts
+1: // KS-1534 (a) (the Sonnet gate on PR 1517, Minor 1): GET /api/connector/info (services/health.ts) refuses a PRESENT allow-list that is
+2: // not an array with the SAME guard as the create path (routes/verification.ts, KS-1204):
+3: //     if (X !== undefined && X !== null && !Array.isArray(X)) {
+4: // The two copies are duplicated, not shared. The behavioural AGREEMENT cell in ks1232-info-reader-refuses-a-non-array-allow-list.test.ts
+5: // catches a drift in what each route DOES; this file pins the other half the ticket asks for: that the two guards stay the same
+6: // EXECUTABLE code. It reads both sources as text, drops every comment line first (a guard that survives only in a comment is not a guard,
+7: // the KS-1319 class), and compares the guard condition with the variable name normalised. Nothing is started.
+8: import { describe, it, expect } from 'vitest';
+9: import { readFileSync } from 'fs';
+10: import { join } from 'path';
+11: 
+12: const SRC = join(__dirname, '..');
+13: const HEALTH = readFileSync(join(SRC, 'services', 'health.ts'), 'utf8');
+14: const VERIFICATION = readFileSync(join(SRC, 'routes', 'verification.ts'), 'utf8');
+15: 
+16: const GUARD = /^\s*if \((\w+) !== undefined && \1 !== null && !Array\.isArray\(\1\)\) \{\s*$/;
+17: 
+18: /** The source with every whole-line comment (// ..., /* ..., * ...) removed. */
+19: function executableLines(src: string): string[] {
+20:   return src.split('\n').filter((l) => !/^\s*(\/\/|\/\*|\*)/.test(l));
+21: }
+22: 
+23: /** Every line that is the allow-list guard, with the variable name replaced by X. */
+24: function guardLines(src: string): string[] {
+25:   return executableLines(src)
+26:     .map((l) => GUARD.exec(l))
+27:     .filter((m): m is RegExpExecArray => m !== null)
+28:     .map((m) => m[0].trim().split(m[1]).join('X'));
+29: }
+30: 
+31: const CANONICAL = 'if (X !== undefined && X !== null && !Array.isArray(X)) {';
+32: 
+33: describe('KS-1534 (a): the info reader and the create path carry the same allow-list guard', () => {
+34:   it('RED KS-1534 G1 the info reader (health.ts) has exactly one executable guard and it is the canonical condition', () => {
+35:     expect(guardLines(HEALTH)).toEqual([CANONICAL]);
+36:   });
+37: 
+38:   it('RED KS-1534 G2 the two files carry the same guard condition, compared as executable code', () => {
+39:     expect(guardLines(HEALTH)).toEqual(guardLines(VERIFICATION));
+40:   });
+41: 
+42:   it('CONTROL KS-1534 G3 the create path (verification.ts) has exactly one executable guard and it is the canonical condition', () => {
+43:     expect(guardLines(VERIFICATION)).toEqual([CANONICAL]);
+44:   });
+45: 
+46:   it('CONTROL KS-1534 G4 a guard that survives only in a comment is not counted', () => {
+47:     const planted = '    // if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {\n    const kept = 1;\n';
+48:     expect(guardLines(planted)).toEqual([]);
+49:   });
+50: 
+51:   it('CONTROL KS-1534 G5 the scan can fail: a guard with the array test dropped is not the canonical condition', () => {
+52:     const planted = '    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null) {\n';
+53:     expect(guardLines(planted)).toEqual([]);
+54:     expect(guardLines(HEALTH + planted)).toEqual(guardLines(HEALTH));
+55:     expect(guardLines('    if (rawAllowedTypes !== undefined && rawAllowedTypes !== null && !Array.isArray(rawAllowedTypes)) {\n')).toEqual([CANONICAL]);
+56:   });
+57: });
+
+### FILE AT HEAD: Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+(OMITTED: 877130 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+### FILE AT HEAD: Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+(OMITTED: 589915 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1842,
+ "head_sha": "23af54d655de7749d63c4c05ab25fd9c12f5ead8",
+ "pr_tip_now": "23af54d655de7749d63c4c05ab25fd9c12f5ead8",
+ "head_mode": "tip",
+ "merge_base": "a8c554659cb34c4406d0274daa5fed4aafec35ec",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts",
+   "added": "57",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+   "added": "18",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html",
+   "added": "20",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts"
+ ],
+ "product_files": [
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+ ],
+ "diff_stat": {
+  "files": 3,
+  "added": 95,
+  "deleted": 0
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 5,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "k/head/Blockchain/Dev/services/api-gateway\n\n \u2713 src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts (5 tests) 3ms\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  21:26:05\n   Duration  1.45s (transform 26ms, setup 59ms, import 27ms, tests 3ms, environment 0ms)"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 5,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "k/head/Blockchain/Dev/services/api-gateway\n\n \u2713 src/__tests__/ks1534-allow-list-guards-are-the-same-executable-code.test.ts (5 tests) 3ms\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  21:26:08\n   Duration  190ms (transform 22ms, setup 57ms, import 14ms, tests 3ms, environment 0ms)"
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 5,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 5,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 11
+}
