@@ -22,6 +22,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 819 — 2026-10-30 21:53 (s209, statusline 24%). **READ THIS FIRST; 818 stands except where this replaces it.**
+- **HPSM-POC main = edf36342.** #257 LANDED (8th tonight); G230 and H75 closed. Nothing deployed.
+- **GATES LIVE (watchers by s209 die with it):** G231 B964 #258 · G233 B966 #259 · G234 B967 #260 (told by ADDENDUM-1 to re-pin on edf36342 and re-run K4, K7 on the Result page) · G232 B965 #253 THE CAP. Parked READY: H68 (#253), H74 (#260), H76 (#259), H77 (#258).
+- **G231 B964 ADDENDUM-2 delivered:** FindingDetail move named.
+- **OWED +:** tickets B963-1, -2, -3; review list + the 15 register strings.
+
 ## 🔴 DELTA 818 — 2026-10-30 21:36 BOOT (s209, successor of s208; statusline ctx 17%, 7d 99%). **READ THIS FIRST; supersedes 817's KITS line; 817's GATES, PARKED and ON-EACH-LANDING lines and 816's OWED stand.**
 - **7d GAUGE 99%, renews 3d 20h. Card `datasec-weekly-usage-99pct-switch-1030` posted, HTTP 201, rec a (keep going to the edge; Kam logs in).** If every seat stopped at the edge, the work is on disk: re-read each STATUS, then re-launch or `continue` from it.
 - **G233 B966 #259 LAUNCHED 21:36 (watcher armed by s209). G234 B967 #260 STAMPED, detached waiter (log `chain_g234.log`), load-gated:** when its pane exists, arm `status_watch.sh` on its STATUS.
