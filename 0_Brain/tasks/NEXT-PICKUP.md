@@ -6,6 +6,18 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ HANDOVER 09:4x SAT 31 OCT (same seat as the 18:3x successor, resumed after Kam's /login; ctx ~74%) — READ THIS FIRST; the 18:4x 30 Oct block below is the detail where this does not differ
+- **ACCOUNT:** Kam /login ~09:3x, fresh account, "please continue". The 10-18 grant (tickets, backlog, Spark max) REAFFIRMED (EXPIRING-GRANTS line). No usage gate pressure; the statusline shows no 7d figure yet.
+- **DEVELOP = cb2320368ae4.** Peter merged his own #1844 (KS-1609 Akto, 45 files incl. both html docs + secuura-test-discipline SKILL.md), #1845, #1846 (KS-752) at 12:14-12:18Z 30 Oct. Ours since 30 Oct: #1832 (4c14143b3426) and #1836 (6c47e86e7521), both VERIFIED.
+- **ALL 11 of our gated/open PRs read DIRTY.** Push queue EMPTY: no driver survived. #1835's merge prep (028addf65165) never landed. RESUME mail to all seven lanes (rc 0 x7): forward-move check, re-read the SKILL, re-join (max 2), every READY TO MERGE to Wednesday, ONE docs-touching merge per push cycle.
+- **TAPS:** F, W, T delivered. **R, E, U, V: "/login" TYPED UNSENT at the prompt (Kam's; never press Enter).** Kam told on the panel. Successor: re-tap those four once the line is gone (`pane_prompt_check.sh`).
+- **MERGE ORDER (one docs PR per cycle), oldest gated first:** #1826 (T), #1828 (U), #1835 (F), #1837 (R, gate 40 notes), #1841 (T, gate 43), #1840 (E: round-2 gate owed first on its fix head 4b166a00d60b), #1833 (U: round-2 gate owed). KS-1384 train (#1838 GO'd; F0a/F0b/F0c/F-b/R1 in W's hands) merges only as a whole train.
+- **IN-SESSION (dies at rotation):** a Sonnet DRAFTER writing the brief for a NEW Opus security seat (lane -S) for KS-1871, KS-1860, KS-1861, KS-1881. If absent: re-commission from this line (model: briefs_staged/2026-10-30_seatE22_ks1845_1850_1851_authz.md). Then read whole, send_brief + brief_and_launch Opus lane -S, load1 < 7.
+- **GATES OWED:** #1842 (R, tier 2) + R's PR 3 batched (Sonnet); #1843 + V's PR-4 batched (Sonnet); #1840 round 2 and #1833 round 2 (tier 1, Opus) when their heads land.
+- **CARDS:** wed-morning-plan-1031 (posted), secuura-docs-section-collision-dirties-every-pr-1030 (open, default b). Allowance card ruled a.
+- **SPARK idle 19 h.** Next briefs: vc-issuer presentations.ts:182, credentialRepo.ts:432 (KS-1868). Held unraised: O31-P1, O32-P1, O33-P1, O34-P1 (KS-1864 burn-down needs check.cjs --update).
+- **Kam FYI owed at the next panel line:** KS-1872 (Medium, /analytics/ bypasses the gateway; a revoked-session token still works there; read from code).
+
 ## ⏩ CHECKPOINT 18:4x 30 Oct (the 18:3x successor seat, ctx 52%) — READ THIS FIRST; the 18:27 block below is current where this does not differ
 - **#1832 MERGED, VERIFIED: develop = 4c14143b3426** (KS-1857, one parent a41909b50b44, 5 files, the 5 paths equal the head; Wednesday's own fetch). KS-1857 left In Progress for the board pass. #1832 took docs section 125; #1828, #1835, #1840 etc go DIRTY and re-prep. Forward-move rule now really IS in STANDING_LINES (it was not); F 19th told; V 11th's brief lacks it but had it by mail 13:4x.
 - **#1828 DIRTY AGAIN** (head a45ffd2dc88d landed 09:15Z, test blobs equal gated; #1832 took 125). Ruled: U prepares a merge-in at 126 LOCALLY, joins the queue only on Wednesday's word when it is next to merge. U's #1833 round 2 goes alone. Only ONE docs-touching PR can merge per push cycle: sequence merges, never re-queue blind.
