@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-30 11:32 from 255 lesson files (1,110,346 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-30 13:30 from 256 lesson files (1,112,512 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7690,6 +7690,20 @@ sections (open the file for these): MECHANISM (Kam, terminal ~12:1x the same day
 6. **Unchanged:** the code partition (no two seats on one file), the signature classes, the QA gate, the routing table.
 
 **Family:** [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] (the standing rule this instruments) · [[2026-10-28_never-keep-the-spark-idle-quota-and-capability-data]] (the same shape for the Spark) · [[2026-08-07_a-promise-is-not-a-mechanism]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: recorded).
+
+
+## Kam and Stuart meet MONTHLY to decide long-term development actions — a long-term Secuura question gets carried to that meeting, not asked of Kam ad hoc
+`2026-10-30_kam-and-stuart-meet-monthly-on-long-term-development.md` · preference · 2026-10-30 · status: live
+
+**His words, verbatim (12:55:54):** *"That is great work in finding these and I appreciate you flagging it with me.  Please fix it properly and let me know (on the fleet activity) if you need me for anything.  Also, Stuart and I agreed to meet monthly to discuss and make decisions on long term development actions"*
+
+**How to apply:**
+1. Keep a running agenda list for the monthly meeting (cards labelled long-term, or a file under `0_Brain/projects_index/`), each item BLUF-first with its measurements. Ask Kam once when the next meeting is (date unknown at 2026-10-30; UNMEASURED).
+2. Near-term work is unchanged: fixes, gates, merges and deploys under the standing grants never wait for the meeting.
+3. The first candidate: Stuart's KS-1384 request for a per-event-anchor date (card `secuura-ks1384-stuart-asks-a-date-1030`). Whether it moves to the meeting is Kam's word; until he says, the card's default stands.
+4. Same message: "fix it properly" (the security findings KS-1845/1848/1850/1851) and "let me know on the fleet activity if you need me" — the existing rules ([[2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email]]); praise row in the ledger.
+
+**Family:** [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]] · [[2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email]] · [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]].
 
 
 ## Grant: Wednesday's GO counts as Kam's word for STARTING work inside his standing grants — a seat no longer waits on a card to begin

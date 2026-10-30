@@ -135,4 +135,4 @@ PROVENANCE:
 - standing lines carried (READY artefact, instruments, HOLDS, repo-specific lines, docs-in-commit, push queue, never-delete, stop-only-your-PIDs, touching a recently repaired file, tamper unique anchor) | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/STANDING_LINES.md (section headings listed in full; lines 17-121 and 226-246 read; most of lines 122-394 and 452-543 NOT read by this drafter) and the W 10th brief's HOLDS bullets, copied with the seat tag re-keyed | read 2026-10-30
 - send_brief.sh gates (provenance format, QUEUE ticket coverage, SELF-CHECK, RULED BY KAM section, DRY RUN) | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/send_brief.sh (lines 1-80, 288-626 read) | read 2026-10-30
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-10-30 12:55
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-30 13:10

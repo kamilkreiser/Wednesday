@@ -1,0 +1,8 @@
+# Spark operator 23 — report (saved by Wednesday from the returned text)
+Basis develop 40c06084919d; drainer 97411; none started.
+- JOB 1: ks_1410_p5 (9 hunks, failed twice) SPLIT into ks_1410_p5a (5 hunks: POST /register, /register-batch, /verify, /verify-batch, GET /documents) and ks_1410_p5b (4 hunks: GET /workflow/:id, /connector, /policy, POST /generate-package), each hunk instruction a line-by-line skeleton. BOTH PASS 7/7 on the original brief (counters unspent), byte-identical to goldens; p5a, p5b and ks_1530_p1 apply together in three orders. POST /hash left (KS-1214).
+- Where rung 4 breaks: held at 2, 6, 4, 5 dictated hunks; broke at 9 same-shaped hunks twice; <=5 hunks + per-hunk skeleton passed. Which of the two changes fixed it is UNTESTED (calibration: the 9-hunk brief with skeletons).
+- Held by hand: local-model/night/READY_KS-1410-KS-1410-P5A_...2026-10-30.diff.md and READY_KS-1410-KS-1410-P5B_...2026-10-30.diff.md. Raise note: Refs KS-1410; POST /verify's error string becomes constant (response-shape change; ChatGPT Actions clients unchecked).
+- JOB 2: no briefable KS-1410-class site left outside exclusions. Three DECISIONS (not fixes) for Kam: api-gateway proxy.ts:430 502 details.reason (KS-41 diagnostic, in front of auth); demo-service reset.ts:69 (operator needs the text); timestamping :245 typed 503. tokenisation already constant.
+- Faults (IMPROVEMENTS.md, 3 rows; backup IMPROVEMENTS.md.pre-1030-op23): checker.out prints a bogus MISMATCHED HEADER on a clean PASS.
+- Left: run dirs for the prune; scratch clone .../scratchpad/op23/clone; tools in this folder.

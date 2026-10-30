@@ -6,6 +6,21 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ ROTATION HANDOVER 13:3x 30 Oct (the 11:3x successor seat, ctx ~80%) — READ THIS FIRST; then the 12:5x and 12:4x blocks (current where this does not differ)
+- **develop = 40c06084919d** (#1823 merged, verified). UNDEPLOYED: #1820-#1823 -> next deploy round (Opus deploy seat; D 45th's HANDOVER FOR A SUCCESSOR; kintsugi first).
+- **FLOOR (6 seats; push queue U -> S -> V -> T):**
+  - **T 7th %24**: #1826 (gate 30 GO W/ NOTES) + #1827 (gate 31 GO W/ NOTES: at merge prep add 408 + 500 cells + soften docs, round 1 of 2) -> both merge AFTER S 8th's #1824 + #1825, each docs-only merge-in + renumber -> READY TO MERGE -> verify -> pinned GO. KS-1792 queued; then 1797, 1791 (each TIER 1 gate). Filed KS-1848, KS-1849, KS-1852.
+  - **S 8th %22**: #1824 merge-in 08d6f1bc2553 queued (2nd) -> READY TO MERGE -> verify blobs -> GO; then #1825 (+ fix round d3e98b660c88) -> check delta comments + docs only -> GO.
+  - **U 7th %27**: #1828 (KS-1585, tier 2) READY at 68c83f8fb0a7 -> **BATCH with its KS-1836 PR in ONE tier-2 gate** (told 13:2x); then KS-1844 PR (TIER 1 gate). KS-1585 assigned.
+  - **V 11th %25**: KS-1807 PR-1 63c149736a26 queued (3rd) -> READY -> tier-2 gate. Filed KS-1845/1846/1847/1850/1851.
+  - **W 11th %29** (Opus, KS-1384 successor): GO'd 13:2x; F0 slices from fdf9ecb49 in W 10th's worktrees; F-a waits on #1825. W 10th SCORED 0.96, pane closed.
+  - **F 18th %28** (Opus, KS-1848+1849): GO'd 13:2x with F's refined ruling 2 (non-NULL set lacking the hash = refusal; NULL / no row / hash still stored = 503).
+- **Spark operator 23 DONE** (`0_Brain/reference/2026-10-30_spark-operator23/report.md`): ks_1410_p5 split -> p5a + p5b BOTH PASS 7/7 (held by hand in local-model/night/). KS-1410 class exhausted for the Spark. **Spark now IDLE: the successor allocates at boot (spark_status).**
+- **HELD SPARK PASSES unraised:** KS-1579, KS-1534, KS-1800, KS-1410 p4 + p6 + p5a + p5b (loose, held by hand; patches inside the READY notes), X3F4 patch (runs dir). -> the next raise seat when capacity allows.
+- **OWED LANES:** security fix seat for KS-1845 + KS-1850 + KS-1851 (Opus, tier 1, split by service); next deploy round; check-no-sql-injection.sh --exclude-dir=node_modules (costs ~10-15 min per push); filing candidates: account-recovery.ts:156, users.ts:1138 plaintext codes, certifications P2010 500-not-404, KS-902 premise false.
+- **KAM:** nothing open. Today: "fix it properly" (security findings); monthly Kam-Stuart meeting for long-term decisions (learning filed); KS-1384 outline to Stuart POSTED (616db2a5, card delivered); estimate told: per-event anchors ~2 weeks to kintsugi (mid-Nov), labelled estimate. Relay owed: three r65-ks1823-* docker images on his laptop.
+- **Ledger today (this seat):** +4 corrections (typed clock; merge GO before forward-move addendum w=2; client outline over-claimed, seat-caught) + 1 praise. Lesson filed: 2026-10-30_kam-and-stuart-meet-monthly-on-long-term-development.md -> REGENERATE BOTH DIGESTS at wrap/boot.
+
 ## ⏩ CHECKPOINT 12:5x 30 Oct (the 11:3x successor seat, ctx 70%) — READ THIS FIRST; the 12:4x block below is current except:
 - **SEAT F 18th (KS-1848 backup-code burn fix + KS-1849, Opus, TIER 1) — LAUNCH WAITER ARMED** (in-session background job; DIES at rotation): it waits for load1 < 7 then runs brief_and_launch with SEAT_MODEL_ENV=claude-opus-5-5. Brief READ WHOLE + drafter questions ruled: `2_Project_Files/fleet/briefs_staged/2026-10-30_seatF18_ks1848_backup_code_burn.md`. **After a rotation: check `tmux list-panes` for a -F pane; if absent and load1 < 7, run the launch by hand (re-stamp SELF-CHECK first).**
 - **NEW HIGH TICKETS (V 11th):** KS-1850 (billing credits + platform-fee admit OWNER), KS-1851 (vc-issuer revoke no owner/role), with KS-1845. OWED: a security fix lane (Opus, tier 1, split by service if passes differ) once capacity allows. Kam told (bf-7fe4ee3b18d8).
