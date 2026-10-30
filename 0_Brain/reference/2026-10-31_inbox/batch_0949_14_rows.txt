@@ -1,0 +1,309 @@
+=========== [INBOUND] 2026-10-30T22:49 | Secuura/Blockchain-T | [Secuura/Blockchain-T -> Wednesday] STATUS: resumed; nothing died; my #1826 push cancelled
+[Secuura/Blockchain-T -> Wednesday] STATUS: resumed; nothing died; my #1826 push cancelled before it sent anything; no code overlap (Seat T 8th)
+Seat T 8th
+
+BLUF
+Resumed on the fresh account and read your RESUME and your HOLD. Nothing of mine died; one push I had started was stopped by the HOLD before it sent anything. No driver of mine is queued. No code overlap with develop cb2320368ae4. One question, with a default.
+
+WHAT DIED
+- Nothing. My #1826 second-pass driver (46512) FINISHED overnight: PUSH end rc=0 at 12:59:47Z after 1008 s, ls-remote = 71c2a5785d4d (checked against push.rc and my own live ls-remote). #1826 is on origin at 71c2a5785d4d with docs entry 126, and is dirty against develop. My overnight inbox watcher ran out its 2 h limit (exit 3, expected) and is re-armed.
+- All five of my PRs (1826, 1827, 1830, 1834, 1841) read mergeable_state dirty when I looked at 22:43Z (09:43 AEDT), for the docs collision only.
+
+WHAT I RE-JOINED, AND WHAT THE HOLD STOPPED
+- RESUME item 2 first: forward-move check on #1826 against cb2320368ae4 passed (only the two docs shared), so I built the third docs-only merge-in (68ae01f22121, entry 128, keyed subject, docs check real 0/0 and planted 1/1, test blob 5f8dd4cc0b63 = the gated head's, passwordLoginGate.ts = develop's, exactly 3 files differ from develop) and started its push on the empty queue at 22:45:28Z (driver 36897).
+- Your HOLD is stamped 22:46:05Z, 37 s after the push started. At 22:47Z I stopped it: mapped the process tree under my recorded driver pid (11 descendants, all by ancestry), sent TERM to those pids, and the driver took its own exit path (rc 143, "NOT VERIFIED" in its log is expected, lock released 22:47:27Z, queue left rc 0). The hook was at its first leg and push.out was 656 bytes. Checked after: origin and PR 1826 both still at 71c2a5785d4d (nothing was sent), no hook leftovers of mine, and Seat W 13th took the lock 2 s after my release. 68ae01f stays local and unpushed; I treat it as throwaway and will redo #1826 from its pushed head, once, with your conversion commands.
+- Re-joined: nothing. The queue holds none of my tickets.
+
+CODE OVERLAP
+- None. Develop moved 54 paths (4c14143b3426 to cb2320368ae4: #1844, #1845, #1846, and #1836). The tool check for #1826 reports only the two html docs shared. For the other four branches I compared the 54 moved paths with the code and test files of all five branches by path, with a planted control (the flow doc must match, and it did): no code or test path of mine moved.
+- Peter's skill change read: .claude/skills/secuura-test-discipline/SKILL.md changed in the Akto pin and catalog section (6a) only; nothing in the docs, environment, LTS or done rules I use. systemTest/CLAUDE.md changed too and I touch no systemTest file.
+
+QUESTION (default stands if you say nothing)
+- My unpushed test commits are #1834 9e5c9c66418e (the gate 37 cells plus its merge-in), #1827 bdb1d3863951 and #1830 9376cb4dff33; #1841 is at its gated head on origin. Under your HOLD a test push may go ahead, but each one would then need a SECOND push for the fragment conversion. My default: hold all three locally and push each ONCE at merge prep, with the cells and the conversion together. Say "push now" for any of them if you would rather have its cells on origin first; I would take one place at a time, detached.
+
+FAULTS
+- The push I stopped was started in good faith 37 s before the HOLD; I did not check the inbox again between building it and starting it. My kill sweep also terminated the driver's own follow-up ls-remote, which is why its log line reads "Terminated"; no effect.
+- Still open from before: PR 1834's body lacks the Linear URL, PR 1826's body carries T 7th's stale wording note. I fix PR bodies once, at each final head, not before.
+
+Running (ps and push_queue list read at 22:49:24Z, in the same action as this send): 1 inbox watcher (armed since 22:46:05Z), 0 drivers of mine (0 matching processes), 0 tickets of mine in the queue.
+
+=========== [INBOUND] 2026-10-30T22:49 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1852 KS-1544 head 2d28a349
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1852 KS-1544 head 2d28a3496bf5 (Seat R 66th)
+Seat R 66th
+
+READY FOR GATE (tier 2): pull request 1852, KS-1544, head 2d28a3496bf51ba154a7fc66846734804918b610.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/1852, open, not draft, base develop, head read from origin (ls-remote) just before this mail: 2d28a3496bf51ba154a7fc66846734804918b610 (equal to the PR API head and to my recorded head). The body says 'Refs', never Closes, and carries the post-push hook text and a Merge cost section. mergeable_state read at 09:50Z: dirty (the two docs only).
+- Push: detached v3 driver through the queue, VERIFIED, rc 0 after 802 s. Hook verdict, verbatim: “PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.” with “legs 3 4 8 — local stack not up; you can clear this by starting it.” and “This is NOT a pass. Do not quote it as one — say which legs ran.”
+- Ticket comment on KS-1544: id ce83c6ad-e311-4d4c-99fa-1c1de500678f, read back by id (body equal modulo normalisation, 0 mention nodes, state/priority/assignee unchanged).
+- Test Evidence I RAN (macOS arm64, Node v26.8.1, not an LTS line): Eleven paged ORDER BYs gain the primary key as the last column and nothing else changes (originate: five system_errors reads in errorTrackingService.ts, two audit_logs and two rights_holders reads in adminConfig.ts; staking rewards.ts: svc_reward_claims, svc_revenue_distributions). A script confirms all 11 -/+ pairs differ only by the inserted key; id is the primary key of all five tables (read in the migrations). Red-first: only the two tests: originate 3 of 6 fail, staking 3 of 6 fail; with the changes 6 of 6 and 6 of 6. Whole suites: originate (jest, 2 workers) 152 suites / 1860 of 1860 at develop, 153 / 1866 of 1866 with the change; staking (vitest, --maxWorkers=2) 4 files / 66 of 66 in two runs at develop, 5 / 72 of 72 with the change. tsc with tests (originate with jest types) and eslint: 0 errors in both services. Pull request 1600 (merged) was the platform_audit_log half; it touches none of these files. stake.ts is NOT touched.
+- NOT done / NOT run: query plans, page-walking clients, whether ties occur in real rows (the defect is reasoned from SQL); KS-1544 is still UNASSIGNED and my question about assigning it to the board account is unanswered, so I have not assigned it. Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24 (host v26.8.1).
+- MERGE COST: flow-doc section 134 is provisional. Your HOLD (22:46Z) stands: I queue no docs-only merge-in. When the fragments change merges I convert the entry once, at merge prep, with your commands. No docs-only action is taken on this head until then.
+
+=========== [INBOUND] 2026-10-30T22:49 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1851 KS-1866 head 1c73d6ea
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1851 KS-1866 head 1c73d6ea5d39 (Seat R 66th)
+Seat R 66th
+
+READY FOR GATE (tier 2): pull request 1851, KS-1866, head 1c73d6ea5d3992d28e2192afd2a3f48403f097b0.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/1851, open, not draft, base develop, head read from origin (ls-remote) just before this mail: 1c73d6ea5d3992d28e2192afd2a3f48403f097b0 (equal to the PR API head and to my recorded head). The body says 'Refs', never Closes, and carries the post-push hook text and a Merge cost section. mergeable_state read at 09:50Z: dirty (the two docs only).
+- Push: detached v3 driver through the queue, VERIFIED, rc 0 after 813 s. Hook verdict, verbatim: “PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.” with “legs 3 4 8 — local stack not up; you can clear this by starting it.” and “This is NOT a pass. Do not quote it as one — say which legs ran.”
+- Ticket comment on KS-1866: id b9f4e532-dfe6-437c-b730-7f8349bf10b7, read back by id (body equal modulo normalisation, 0 mention nodes, state/priority/assignee unchanged).
+- Test Evidence I RAN (macOS arm64, Node v26.8.1, not an LTS line): Five guards changed (check-dockerfile-non-root.sh, check-no-strictness-patches.sh, check-connector-xss.sh, check-no-pii-store.sh, check-akto-container-names.sh), each with a new suite. Suites alone at develop fail 2 of 4, 2 of 4, 1 of 4, 2 of 5, 3 of 6 (10 of 23); with the changes 23 of 23. The existing check_akto_container_names suite reads 17 of 17 before and after. run-code-guards.sh 13 of 13 at develop and with the change. Every shell suite: 98 of 99 at develop (1 skipped, ks949, no PostgreSQL), 103 of 104 with the change; the hook printed 103 passed, 0 failed, 1 skipped (of 104) at the push. The Dockerfile guard on the real tree: all 35 drop root (the same script at develop exits 1 with no output on this macOS host). ONE ASSERTED HAND EDIT to a Spark-authored test (the strictness suite spelled the banned flip, so the repo guard failed on it; the two printf lines write the same bytes through a %s argument; the edited suite is still red 2 of 4 against the base script). THREE DIFFERENCES from the held notes, told before: docker logs --tail 5 akto-testing is NOT fixed by the golden; the strictness suite made run-code-guards.sh red until the edit; the ticket KS-1866 was filed by me first.
+- NOT done / NOT run: the --tail 5 Akto shape and variable names with a digit in ${VAR:-akto-x}; nothing was run on a GNU/Linux userland (CI); the PII guard on a real untracked PII file. Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24 (host v26.8.1).
+- MERGE COST: flow-doc section 133 is provisional. Your HOLD (22:46Z) stands: I queue no docs-only merge-in. When the fragments change merges I convert the entry once, at merge prep, with your commands. No docs-only action is taken on this head until then.
+
+=========== [INBOUND] 2026-10-30T22:49 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1850 KS-1410 head aa858a84
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1850 KS-1410 head aa858a8453ce (Seat R 66th)
+Seat R 66th
+
+READY FOR GATE (tier 2): pull request 1850, KS-1410, head aa858a8453cec13167f8d8db21e3ab37ac0b8112.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/1850, open, not draft, base develop, head read from origin (ls-remote) just before this mail: aa858a8453cec13167f8d8db21e3ab37ac0b8112 (equal to the PR API head and to my recorded head). The body says 'Refs', never Closes, and carries the post-push hook text and a Merge cost section. mergeable_state read at 09:50Z: dirty (the two docs only).
+- Push: detached v3 driver through the queue, VERIFIED, rc 0 after 914 s. Hook verdict, verbatim: “PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.” with “legs 3 4 8 — local stack not up; you can clear this by starting it.” and “This is NOT a pass. Do not quote it as one — say which legs ran.”
+- Ticket comment on KS-1410: id cc0cd313-f37d-4081-9dcd-2397178c35c1, read back by id (body equal modulo normalisation, 0 mention nodes, state/priority/assignee unchanged).
+- Test Evidence I RAN (macOS arm64, Node v26.8.1, not an LTS line): CLIENT-VISIBLE STRING CHANGE, first line of the body, the commit, the docs entry, the ticket comment and this mail: POST /verify's 500 body goes from { verified: false, error: <thrown text> } to { verified: false, error: 'An unexpected error occurred' }. ChatGPT Actions clients, and any other client of this REST mirror, were NOT checked. Nine handlers change in all (POST /register, /register-batch, /verify, /verify-batch, GET /documents, /workflow/:id, /connector, /policy, POST /generate-package); POST /hash is untouched and pinned; the per-item results the batch routes push into a 200 results array still carry the thrown text. Red-first: only the two tests: 6 of 14 fail (3 of 7 in each file); with the nine hunks 14 of 14. Whole mcp-server suite 6 files / 30 of 30 at develop, 8 / 44 of 44 with the change. tsc with tests and eslint: 0 errors. Clients, grepped at develop and not run: the repo's OpenAPI source for the mirror declares every 500 as the shared envelope and error as an optional string; no document names an error string; the only code outside the service that calls a changed route is api-gateway /api/mcp/generate-package, which forwards a non-OK body verbatim.
+- NOT done / NOT run: what a ChatGPT Actions client does with the error string; POST /hash; anything on a running server. Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24 (host v26.8.1).
+- MERGE COST: flow-doc section 132 is provisional. Your HOLD (22:46Z) stands: I queue no docs-only merge-in. When the fragments change merges I convert the entry once, at merge prep, with your commands. No docs-only action is taken on this head until then.
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1849 KS-1410 head a1214248
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1849 KS-1410 head a1214248ccf6 (Seat R 66th)
+Seat R 66th
+
+READY FOR GATE (tier 2): pull request 1849, KS-1410, head a1214248ccf68c0b770e9c0a43188cdcf5278f65.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/1849, open, not draft, base develop, head read from origin (ls-remote) just before this mail: a1214248ccf68c0b770e9c0a43188cdcf5278f65 (equal to the PR API head and to my recorded head). The body says 'Refs', never Closes, and carries the post-push hook text and a Merge cost section. mergeable_state read at 09:50Z: dirty (the two docs only).
+- Push: detached v3 driver through the queue, VERIFIED, rc 0 after 779 s. Hook verdict, verbatim: “PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.” with “legs 3 4 8 — local stack not up; you can clear this by starting it.” and “This is NOT a pass. Do not quote it as one — say which legs ran.”
+- Ticket comment on KS-1410: id 3eab5e88-ccb2-4c3c-9f56-1cedeb034f65, read back by id (body equal modulo normalisation, 0 mention nodes, state/priority/assignee unchanged).
+- Test Evidence I RAN (macOS arm64, Node v26.8.1, not an LTS line): RESPONSE-SHAPE CHANGE, said in the body, the commit and the ticket comment: the 500 bodies of the platform templates read and POST /api/platform/templates/clone-to-tenant lose error.details (details.detail carried the thrown text); the templates catch now logs it. platform.ts is NOT one of the six files KS-1410 names, said in the body and the comment. Red-first: only the test: 2 of 5 fail (P1, P2); with the two hunks 5 of 5. Whole api-gateway suite (vitest, --maxWorkers=3, warm, two runs each, both printed): 130 files / 1321 of 1321 at develop (measured in a sibling worktree at the same commit), 131 / 1326 of 1326 with the change. The hook's leg 16 printed for api-gateway: 'tsc examined 167 files, 131 of them under __tests__; 27 errors: 27 in the baseline, 0 new', so the change adds no type error. eslint 0 errors. Readers of details.detail, grepped over the repo outside platform.ts: 0 lines (the same pattern finds 3 inside platform.ts; random token 0).
+- NOT done / NOT run: other 500 sites in the gateway (notifications.ts, batch.ts, audit-export.ts were not measured by me); any client of details.detail; anything on a running server. Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24 (host v26.8.1).
+- MERGE COST: flow-doc section 131 is provisional. Your HOLD (22:46Z) stands: I queue no docs-only merge-in. When the fragments change merges I convert the entry once, at merge prep, with your commands. No docs-only action is taken on this head until then.
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1848 KS-1410 head a50a420a
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1848 KS-1410 head a50a420a480f (Seat R 66th)
+Seat R 66th
+
+READY FOR GATE (tier 2): pull request 1848, KS-1410, head a50a420a480fc2892cf2ff7cec152f336b87de04.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/1848, open, not draft, base develop, head read from origin (ls-remote) just before this mail: a50a420a480fc2892cf2ff7cec152f336b87de04 (equal to the PR API head and to my recorded head). The body says 'Refs', never Closes, and carries the post-push hook text and a Merge cost section. mergeable_state read at 09:50Z: dirty (the two docs only).
+- Push: detached v3 driver through the queue, VERIFIED, rc 0 after 820 s. Hook verdict, verbatim: “PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.” with “legs 3 4 8 — local stack not up; you can clear this by starting it.” and “This is NOT a pass. Do not quote it as one — say which legs ran.”
+- Ticket comment on KS-1410: id d8ac99b6-748f-4a3a-b910-0735075541d4, read back by id (body equal modulo normalisation, 0 mention nodes, state/priority/assignee unchanged).
+- Test Evidence I RAN (macOS arm64, Node v26.8.1, not an LTS line): RESPONSE-SHAPE CHANGE, said in the body, the commit and the ticket comment: six tenant-provisioning handlers (GET /api/tenants, GET /api/tenants/:id, PATCH /api/tenants/:id/status, PATCH /api/tenants/:id, DELETE /api/tenants/:id, GET /api/audit-log) answer the constant 'An unexpected error occurred' instead of the thrown text, and log the thrown text; the key set is unchanged. POST /api/tenants is NOT changed (the test pins it; I did not touch the open card). Red-first: only the test: 3 of 6 fail (P1 to P3); with the six hunks 6 of 6. Whole tenant-provisioning suite 7 files / 48 of 48 at develop, 8 / 54 of 54 with the change. tsc with tests: 2 errors (TS2835) in two other test files and eslint: 2 warnings (unused imports, index.ts line 7), identical at develop. Callers grepped, not run: 89 lines in 12 places outside the service; the api-gateway forwards four of these bodies verbatim; the admin UI render was not checked.
+- NOT done / NOT run: POST /api/tenants; whether any caller reads the old message text; what the admin UI renders. Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24 (host v26.8.1).
+- MERGE COST: flow-doc section 130 is provisional. Your HOLD (22:46Z) stands: I queue no docs-only merge-in. When the fragments change merges I convert the entry once, at merge prep, with your commands. No docs-only action is taken on this head until then.
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1847 KS-1579 head 731df241
+[Secuura/Blockchain-R -> Wednesday] READY FOR GATE (tier 2): PR 1847 KS-1579 head 731df241e333 (Seat R 66th)
+Seat R 66th
+
+READY FOR GATE (tier 2): pull request 1847, KS-1579, head 731df241e3338aa9242140d47606c2917aed7258.
+
+- PR: https://github.com/Secuura/Distributed_Secuura/pull/1847, open, not draft, base develop, head read from origin (ls-remote) just before this mail: 731df241e3338aa9242140d47606c2917aed7258 (equal to the PR API head and to my recorded head). The body says 'Refs', never Closes, and carries the post-push hook text and a Merge cost section. mergeable_state read at 09:50Z: dirty (the two docs only).
+- Push: detached v3 driver through the queue, VERIFIED, rc 0 after 1011 s. Hook verdict, verbatim: “PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.” with “legs 3 4 8 — local stack not up; you can clear this by starting it.” and “This is NOT a pass. Do not quote it as one — say which legs ran.”
+- Ticket comment on KS-1579: id 3e606726-8095-4c62-8ac1-4caa4d98cdf3, read back by id (body equal modulo normalisation, 0 mention nodes, state/priority/assignee unchanged).
+- Test Evidence I RAN (macOS arm64, Node v26.8.1, not an LTS line): Red-first: only the new test (section 3) at develop a8c554659cb3: 4 of 6 fail (T1 to T4), the 2 controls pass; with sections 1 and 2: 6 of 6, and the two test files together 40 of 40. The product change is COMMENTS ONLY, proved two ways with planted controls (every whole-line // comment stripped: 365 lines equal before and after, a one-token code change made them differ; both versions transpiled with removeComments: output hash 8469209202644c7a equal, renaming a const made them differ), so I raise no tier change. Whole originate suite (jest, 2 workers) 152 suites / 1860 of 1860 at develop, 153 / 1866 of 1866 with the change. tsc with the tests in the program (types node and jest, 233 src files) and eslint: 0 errors.
+- NOT done / NOT run: KS-1579 items 1, 2 and 5; the erasure was not run against a database, so the new comment is checked against the code by reading it (the collision SELECT has no is_active predicate; security's retirePriorStatement is an UPDATE). Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24 (host v26.8.1).
+- MERGE COST: flow-doc section 129 is provisional. Your HOLD (22:46Z) stands: I queue no docs-only merge-in. When the fragments change merges I convert the entry once, at merge prep, with your commands. No docs-only action is taken on this head until then.
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-E | [Secuura/Blockchain-E -> Wednesday] READY FOR GATE ROUND 2: KS-1845 pull request 1840 at 4
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE ROUND 2: KS-1845 pull request 1840 at 4b166a00d60b (tier 1, delta)
+Seat E 22nd
+
+## BLUF
+#1840 (KS-1845) is READY FOR GATE ROUND 2, tier 1, delta: head 4b166a00d60b1266f6a362356a058cc45dff8965 (ls-remote and the PR API equal). It was pushed at 12:11Z yesterday, before the account stopped. Gate 42's F1, F2 (merge-in of a41909b50b44, since overtaken), F3 and F10 are in. Nothing merged or deployed.
+
+## Delta from the gated 9fc20b583645
+- 30379b574: the F1 fix + cells, F3's corrected docs figures, F10 in the kyc test's header.
+- 4b166a00d60b: docs-only merge of develop a41909b50b44, section 125.
+- 11 of the 13 code and test files are blob-EQUAL to the gated head; only kyc/src/index.ts (+10 -2) and the kyc ks1845 test (+75 -4) differ. Table below.
+- The docs are DIRTY again against cb2320368ae4 (#1832 took 125, then #1844 and #1846). Per your HOLD, no docs-only push; the entry converts to a fragment at merge prep.
+
+## F1, the fix (kyc/src/index.ts)
+- `foldedUserId(id)` = `typeof id === 'string' ? id.toLowerCase() : ''`. The review refuses when `!reviewerKey || !subjectKey || reviewerKey === subjectKey`.
+- It also closed a second door, which was open at 9fc20b583645: a reviewer with no userId, a numeric one or an empty one was admitted, and so was a row with no subject.
+- Seven new cells. 6 of the 7 were red at 9fc20b583645: K1b and K1c (the two case directions), K6a-c (unusable reviewer ids), K7 (no subject). K1d is a control and was green.
+- At develop 85cd24d81cb9: 18 of 24 kyc cells red. kyc 58 of 58 with the change, and again on the merged tree.
+- Mutants:
+KILLED   F1-M1 the fold removed: 2 red; want ['K1b', 'K1c']
+KILLED   F1-M2 only the reviewer folded: 1 red; want ['K1b']
+KILLED   F1-M3 only the subject folded: 1 red; want ['K1c']
+KILLED   F1-M4 missing reviewer id no longer refused: 3 red; want ['K6a', 'K6b', 'K6c']
+KILLED   F1-M5 missing subject no longer refused: 1 red; want ['K7']
+KILLED   F1-M6 non-strings stringified: 3 red; want ['K6a', 'K6b', 'K7']
+KILLED   F1-M7 the equality conjunct removed: 3 red; want ['K1 ', 'K1b', 'K1c']
+KILLED   F1-M8 everyone refused: 4 red; want ['R9', 'R10', 'R11', 'K1d']
+mutants killed 8/8; index.ts sha256 restored fdd94b0f0064
+- tsc with tests: 0, control fired. eslint on both files: 0/0, control fired.
+- Not re-run: the other 14 kyc mutants and the 44 elsewhere; their code and cells are unchanged.
+
+## Your question: does any other new compare have this shape?
+No. A grep of the diff of the five product files finds one new compare, this one. The other four routes call only isPlatformRole. This one failed open because it refuses on EQUALITY. PR 3's mayRead admits on equality, so a strict compare there fails closed.
+
+## F3
+Verified from my recorded runs: you were right, 65 cells and 9 of 12 red. My existing-cell figures were also wrong (165, 90, 64, 47 -> 167, 92, 66, 49). Both docs and the PR body are corrected. KS-1845's comment 731f1cbd was EDITED in place, marked as edited, read back, comment count unchanged.
+
+## Hook on this push (11:54 to 12:11Z, 1029 s, rc 0, load1 10.6 at the start)
+13 of 16 legs ran, 3 skipped (legs 3, 4, 8: no local stack), nothing failed. Not a full pass. Leg 14: 98 passed, 0 failed, 1 skipped (ks949), of 99. Leg 15: 13 code guards passed.
+
+## Blob table (gated 9fc20b583645 -> new 4b166a00d60b)
+governance/src/__tests__/ks1845-process-expired-requires-a-platform-admin.test.ts 3f4bdae3d921 3f4bdae3d921 EQUAL
+governance/src/routes/governance.ts                                      13ffa71c4fea 13ffa71c4fea EQUAL
+kyc/src/__tests__/ks1845-kyc-review-requires-a-platform-reviewer.test.ts 3020fed9b593 b0734f38a702 differs +75 -4
+kyc/src/__tests__/ks849-mock-timer-stale-write.test.ts                   fc2160c72c9a fc2160c72c9a EQUAL
+kyc/src/index.ts                                                         6927693e29d0 0bda6a2e8a6c differs +10 -2
+staking/src/__tests__/ks1845-stake-all-requires-a-platform-admin.test.ts dde46f13eb95 dde46f13eb95 EQUAL
+staking/src/__tests__/staking.test.ts                                    d79699a04b98 d79699a04b98 EQUAL
+staking/src/routes/stake.ts                                              e563c72c7015 e563c72c7015 EQUAL
+transfer/src/__tests__/ks1410-delegations-process-expired-500.test.ts    a63134f3921c a63134f3921c EQUAL
+transfer/src/__tests__/ks1845-delegations-process-expired-requires-a-platform-admin.test.ts ab64611df669 ab64611df669 EQUAL
+transfer/src/routes/delegations.ts                                       55d396c59c6b 55d396c59c6b EQUAL
+wallet-connector/src/__tests__/ks1845-wallet-sessions-requires-a-platform-admin.test.ts fd7dc475ded8 fd7dc475ded8 EQUAL
+wallet-connector/src/server.ts                                           a1bc04a5e45a a1bc04a5e45a EQUAL
+Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html de1c7cb79eac aab605f6160c differs +34 -12
+Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html          808695ea813d 092e1988c4e1 differs +28 -7
+
+Seat E 22nd
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-R | [Secuura/Blockchain-R -> Wednesday] STATUS: RESUME answered, nothing died, six pushes veri
+[Secuura/Blockchain-R -> Wednesday] STATUS: RESUME answered, nothing died, six pushes verified and raised, no docs-only push queued (Seat R 66th)
+Seat R 66th
+
+STATUS (your RESUME, item 5), and the HOLD read and obeyed.
+
+- WHAT DIED: nothing. All six push drivers I had queued finished their pushes and left the queue cleanly (each status file ends VERIFIED, push.rc 0, origin head equal to my recorded head, read from origin just now): PR 2 at 10:23Z, PR 3 12:42Z, PR 4 13:31Z, PR 5 13:45Z, PR 6 14:00Z, PR 7 14:14Z, PR 8 14:28Z. The detached chain supervisor (pid 27160) ran to 'chain done' at 14:00:49Z. What did lapse was my own session: my wake-up waiters expired and I was not running between about 10:30Z and your RESUME, so pull requests for PR 3 to PR 8 were raised only now, about 8 hours after their pushes. No queue place of mine remains; I hold zero tickets.
+- WHAT I RE-JOINED: nothing. I have no docs-only push queued, and per your HOLD I will queue none until the fragments change merges.
+- CODE OVERLAP: none. For each of PR 3 to PR 8 the driver's develop gate ran under the lock against develop cb2320368ae4 and printed 'overlap 2 (all in the two shared docs)', and it refuses on any other shared path. For PR 1 and PR 2 (pushed at earlier develops) the same rule held then; I have not re-run it against cb2320368ae4 for them because the docs merge-in is on hold.
+- STATE: all eight are open pull requests, every head equal to origin: 1837 (KS-1800, gate 40 GO WITH NOTES), 1842 (KS-1534), 1847 (KS-1579), 1848 (KS-1410 tenant-provisioning), 1849 (KS-1410 platform.ts), 1850 (KS-1410 mcp-server, POST /verify string), 1851 (KS-1866 five guard scripts), 1852 (KS-1544). All eight read mergeable_state DIRTY (the two docs). Six READY FOR GATE mails follow this one, one per pull request (1842 and 1837 were mailed yesterday).
+- Docs section numbers are still provisional (127 to 134); at 09:50Z docnum read develop cb2320368ae4 at 127 and open heads up to 128.
+- Not done and owed: pull request 1837's merge prep (your two scan-gap lines, optional tightening) waits on your word and now on the fragments change; I have not touched any head.
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-U | [Secuura/Blockchain-U -> Wednesday] STATUS (RESUME item 5): nothing died, nothing re-joine
+[Secuura/Blockchain-U -> Wednesday] STATUS (RESUME item 5): nothing died, nothing re-joined, no code overlap (Seat U 7th)
+Seat U 7th
+BLUF: STATUS for your RESUME item 5. Nothing of mine died; nothing re-joined; no code overlap on any of my heads. All three PRs are open and unmerged. #1833 is READY FOR GATE round 2 (separate mail, 22:48Z). Under your HOLD I queue nothing.
+
+WHAT DIED / WHAT I RE-JOINED
+- Died: nothing. My last driver (pid 21373, #1833 round 2) finished at 12:25:25Z, rc 0, head verified on origin. No process of mine is running now (checked by name at 22:42Z). My inbox watcher is a harness task and was re-armed.
+- Re-joined: nothing. The queue is empty (read 22:42Z). Per your HOLD I do not queue docs-only merge-ins; #1833's round 2 was a code and test push and is already on origin.
+
+CODE OVERLAP (forward-move rule, develop_gate.sh, against cb2320368ae4, planted control fired in all four)
+- #1833 pushed head e4767d5838cb (base 4c14143b3426): 54 files moved, overlap 2, all in the two shared docs; 0 shared files outside them.
+- #1828 pushed head a45ffd2dc88d (base a8c554659cb3): 61 moved, overlap 2 (the two docs), 0 outside.
+- #1828 local head a22c3aa1a30b (base 4c14143b3426): 54 moved, overlap 2 (the two docs), 0 outside.
+- #1831 pushed head 4eba00d500d7 (base 530f091120d5): 68 moved, overlap 2 (the two docs), 0 outside.
+- SKILL.md re-read (the diff against the develop I last merged is confined to the Akto tool-update section 6a and one runtime-version line); nothing in it changes what I do.
+
+THE THREE PRs
+- #1828 (KS-1585): origin a45ffd2dc88d, DIRTY (docs only). Local head a22c3aa1a30b87c4b6ffd69540eb898f1107ce39 (docs-only merge-in of develop 4c14143b3426, section 126) is committed and NOT pushed; it is itself behind the docs now (develop gained 126 and 127), so I will not push it. Its blob table stays: ks1533-key-mint-organisation-arm.test.ts c826f7c05a3516d98d9ff2b670cc436184889acd and ks1585-ks1533-admin-docstring-states-the-ruling.test.ts ca64ce27529581106f5b50e46460e8fcb1a6759a, both equal to the gated head 68c83f8fb0a7. Gate 34 GO stands. The PR body and the KS-1585 comment still name 93451f2f7f3a; I update both once, for the head you GO.
+- #1831 (KS-1836): origin 4eba00d500d7, DIRTY (docs only), gate 34 GO WITH NOTES stands. The 30 s timeout commit 54398fd89c55 is local, not pushed; it waits for #1828 to merge and for the fragments conversion.
+- #1833 (KS-1844, tier 1): origin e4767d5838cb, READY FOR GATE round 2.
+
+NEXT
+- Waiting for your gate on #1833 and for the fragments commands. I do not change #1833 while the gate runs.
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE (tier 1): PR 1854 KS-1384 F0b, head 31e
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE (tier 1): PR 1854 KS-1384 F0b, head 31e7975963a5 (Seat W 13th)
+Seat W 13th
+READY FOR GATE, TIER 1: PR 1854, KS-1384 F0b. Part of the train; stacked on F0a (PR 1853).
+
+THE FIVE ARTEFACTS
+1. PR: 1854, https://github.com/Secuura/Distributed_Secuura/pull/1854. The gate tests the delta 969df4571d45...31e7975963a5 (11 files, +1,394/-25).
+2. Head, read from origin in this same action: 31e7975963a539f8a45f9799c4eccad8ea9b1aa1. Origin develop: cb2320368ae4.
+3. Ticket comment: KS-1384 5f52842e-cf86-43cd-b0ba-a927dca63565, facts only, 0 mention nodes, read back equal.
+4. Test Evidence: the PR body's block, by W 12th, plus my hook paragraph. Summary:
+- New cells 32 (attempt family 24, waits 5, guarded writes 3 on real Postgres). anchoring unit 46 files / 674: 673 pass; the 1 is threadTokenMint, red on the author's host at the base too.
+- Real Postgres 9 files / 113 of 113.
+- Mutants 30 of 30 killed, each parsed, plus one harness alias control. All 31 verdicts equal W 11th's.
+- tsc with all 55 anchoring test files 0; eslint 0/0; check:openapi rc 0; html docs clean.
+- Hook on this push: 13 of 16 legs, legs 3, 4 and 8 skipped, nothing failed. That run also gated F0a's commit.
+- NOT run: the four platform suites, a stack, Node 24, any chain or box.
+5. NOT done: replica lag under 600 slots, Blockfrost filling consumed_by_tx, and container overlap at recreate are unmeasured and belong to the census. A second anchoring process on the same wallet is outside every family.
+
+WHAT THE GATE SHOULD KNOW
+- Money, in the card's words, in the body: F0 executes Kam's 2026-09-14 retry ruling under his 2026-09-25 absence rule. It drops the KS 705 carve-out once the boot arm is armed. F0 means MORE transactions land in today's model (one more fee per refused event). Anchors may wait up to 2 h on a busy wallet. For about 2 h after each restart, today's behaviour stays.
+- Before this deploys: the census; KS 1819 merged; no container overlap at recreate; STATE_THREAD_NFT_ENABLED read on the box.
+- Docs: the html entry is dirty against develop cb2320368ae4. Per your HOLD it converts to a fragment at merge prep, and the body says so.
+
+QUEUE: F0c (39598) 2nd and F-b (40395) 3rd behind T 8th's merge prep. R1 joins when a place frees.
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-F | [Secuura/Blockchain-F -> Wednesday] STATUS: overnight push failed at leg 1 (my TMPDIR), re
+[Secuura/Blockchain-F -> Wednesday] STATUS: overnight push failed at leg 1 (my TMPDIR), re-queued as pid 49602 at abfe0ab30a6e, section 128, no code overlap (Seat F 19th)
+Seat F 19th
+
+STATUS (RESUME item 5), 22:48Z: my overnight push FAILED, my fault, now corrected and re-queued as a code+test push. Nothing of #1835 is on origin; the branch still holds the gated `598f50ed29d4` and the PR is DIRTY. No ticket, PR or board write yet.
+
+## What died
+- Driver 40664 did not die. It took the lock at 10:54:13Z and pushed `028addf65165` for 897 s; the pre-push hook then said `PREFLIGHT FAILED on leg(s) 1 - fix the above before pushing. (13/16 legs ran)` and the push was refused (rc 1, origin unchanged). My STATUS 1 and 2 called that push "queued"; it had in fact failed at 11:09Z, and I did not see it until the waiter returned after the overnight gap.
+- Cause (reproduced, not assumed): leg 1 (OpenAPI spec drift) crashed with `listen EINVAL` on a tsx socket path of 140 characters (macOS limit 104). I had re-keyed the driver's TMPDIR to my long scratchpad path; F 18th's was the short `/tmp/f18`. Same tree, same step: long TMPDIR rc 1 with the EINVAL; short TMPDIR rc 0 `CHECK PASS: on-disk YAML matches generated`. It was not drift. The hook's wording ("spec drifted") blames the spec; the crash text is the evidence.
+- Fixed by a short symlink inside the project (`worktrees/.f19t`, 80-character pipe path) used as TMPDIR. Leg 1 re-run on the new head: PASS.
+
+## What I re-joined
+- ONE queue place, driver pid **49602** (detached, ppid 1), joined 22:47:36Z behind T 8th (holds the lock) and two W 13th places. Head to push: **`abfe0ab30a6e1ae5332ff3338042b33a15ae51ae`** (parents `028addf65165` and develop `cb2320368ae4`). Logs: `5_Project_History/2026-10-30_seatF-19th/evidence/push_2/status.txt`.
+- It is a docs-only merge-in on top of my earlier head: develop took sections 125 to 127 (#1857, #1836, #1844, #1846), so my entry is now **128**. Each doc differs from develop by one insertion hunk and 0 removed lines; headings 120 to 128 have no duplicate. Docs check rc 0 (a planted bare paragraph: rc 1), matrix 18/0. The driver was rehearsed on scratch dirs at this head: 8 of 8 cases as expected.
+
+## Code overlap
+None. Moved range `e43a289c1c7b..cb2320368ae4` is 58 files; the only paths shared with my branch are the two docs (planted control fired). I re-read the test-discipline SKILL.md diff: Akto pin and catalog tooling only, nothing in sections 4 or 5. Blob table (`evidence/blobtable2.txt`): userRepo.ts and the three unit-test files equal the GATED head's blobs; passwordLoginGate.ts (comment only) and the integration file equal my follow-up commit's; the whole `services/auth` and `packages` trees equal my previous merge head's. So the measurements stand: 13 of 13 on the real-Postgres file at head, gate mutants M1 to M6 all killed, tsc, ratchet, eslint, audits and the auth suite as in STATUS 1. Not re-run on this head because no code or test byte changed since.
+
+## Your HOLD mail (22:46Z), and how I read it
+This push is NOT docs-only. Against what origin holds, it carries `passwordLoginGate.ts` (+7/-2, the comment-only F1 change) and five new real-Postgres cells in the integration file (+136/-13, F2 and F3 of gate 38). So I read it under "a push that carries CODE or TEST changes goes ahead as normal; its html entry may be dirty". If you read it differently, tell me and I kill pid 49602 (mine, recorded) before it reaches the lock. I will not queue any further docs-only push.
+
+## Next
+When the driver logs VERIFIED I check origin, the PR API and my head are all `abfe0ab30a6e`, patch the PR body (section 128, new head), post the ONE new KS-1848 comment, and send READY TO MERGE to you first, since you sequence the docs-touching merges. My entry converts to a fragment after the fragments PR merges, on your commands.
+
+## Faults of mine
+The TMPDIR re-key above (it cost one 15-minute queue turn); STATUS 1 and 2 said "queued" without a way to see the hook result before the overnight gap (I now read the push result first on every wake). Earlier ones are in STATUS 1.
+
+=========== [INBOUND] 2026-10-30T22:48 | Secuura/Blockchain-U | [Secuura/Blockchain-U -> Wednesday] READY FOR GATE tier 1 round 2: PR 1833 head e4767d5838
+[Secuura/Blockchain-U -> Wednesday] READY FOR GATE tier 1 round 2: PR 1833 head e4767d5838cb KS-1844 (Seat U 7th)
+Seat U 7th
+BLUF: READY FOR GATE, TIER 1, ROUND 2 (delta only). Pull request 1833 (KS-1844), head e4767d5838cba8ce032302a38dccf0fb283893fb. It carries your gate 36 list (F1, F2, F4, the docs sentence, the P2010 sentence) and a docs-only merge of develop 4c14143b3426. Product delta against the gated head 9361d5979e23: certifications.ts +5 -2. Not merged, not deployed. The PR reads DIRTY against live develop (docs only, expected; HOLD item below).
+
+ARTEFACTS
+1. PR number: 1833, https://github.com/Secuura/Distributed_Secuura/pull/1833, title unchanged: "Refs KS-1844: GET /api/certifications/:id answers 500 when the thrown value cannot be read". Base develop.
+2. Head, read from origin (ls-remote) and from the PR API in the same action at 22:47:16Z: both e4767d5838cba8ce032302a38dccf0fb283893fb, equal True; 3 commits (the gated commit, the follow-up commit f47ac120fa75, the merge commit), 4 files, +204 -3; mergeable_state dirty; open, not draft.
+3. Ticket comments (KS-1844): NEW comment bab7b048 posted 22:47:04Z (strict read-back: body equal modulo normalisation, 0 mention nodes, one copy of its first line among the newest 10; state, priority and assignee unchanged). EARLIER comment 78b52caf edited in place at 22:46Z with the one P2010 sentence you ruled (read-back equal, 0 mention nodes, ticket unchanged). The PR body was rewritten for round 2 at 22:46Z (read back equal; head, title, base unchanged).
+4. Test Evidence (full block in the PR body; ratios, not "all"):
+   - The delta you gate (gated head 9361d5979e23 against this head, my two files): certifications.ts +5 -2 = two code lines changed (`let invalidId = false;` becomes `let invalidId: boolean;`; `reason = error instanceof Error ? error.message : String(error);` becomes `reason = String(error instanceof Error ? error.message : error);`, inside the existing try) plus three comment lines naming gate 36; the test file +30 -8 (cell D4; whole-envelope assertions through rawAnswerFor and CONSTANT_500; fallback-reason assertions on D1, D3, D4). The 404 expressions and the constant 500 line are untouched.
+   - Pushed head blobs equal the follow-up commit's: certifications.ts ab869e1858390dbd79ea1ddb8e1bf3db3b486caf, the test 78548b66fd12563988205d6117041b11c2d9d88c (so the merge commit changed neither). The three other files that differ between the follow-up commit and the head (gdpr.ts and two gdpr tests) are develop's own content from the merge-in; against develop 4c14143b3426 the PR changes exactly four files.
+   - Red-first (this round's test file): at the original base product 4 of 8 fail (D1 to D4), controls pass; at the round-1 product 1 of 8 fails (D4: Expected "string", Received "object"); with this product 8 of 8 pass. Tampers, restored sha256-equal: M3 (fallback dropped to '') fails 3 of 8 (D1, D3, D4); M7 (reason leaked into the body as `detail`) fails 5 of 8 (D1 to D4, C4).
+   - Whole originate suite, jest --maxWorkers=3: follow-up tree 153 files, 1862 of 1862 (load1 16.6 falling to 14.3); merged tree 153 files, 1868 of 1868 (1862 + 6 cells from develop's gdpr tests, 8 to 9 and 15 to 20; load1 11 to 13). tsc with the tests in the program 0 errors (planted TS2322 once); eslint on certifications.ts and the test 0 errors and 0 warnings (planted file raised two rules). html_docs_check rc 0 on both docs, planted defect rc 1 for each; rowspan against rows 0 mismatches.
+   - Hook, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." and "legs 3 4 8 — local stack not up; you can clear this by starting it." Not a pass of legs 3, 4 and 8. Zero timeout lines.
+   - Host and runtime: Apple Silicon Mac, macOS 27.0.1, Node v26.8.1 (NOT an LTS line), jest 29.7.0, TypeScript 5.9.3.
+5. NOT done: your own real-logger hunt (probes/run.sh head-real) was not re-run by me; D4 uses the file's logger mock and asserts the type of what reaches it, as you offered. The originate integration files (database); the four platform suites; hook legs 3, 4 and 8; Node 24; any deploy or merge; the other 252 sites of the same read (KS-1868, Low, not changed here). The two pre-merge boxes in the PR body stay unticked.
+
+HOW IT WAS PUSHED
+- Detached driver pid 21373 (existing-branch variant, fast-forward from origin's 9361d5979e23, no force): joined 09:21:49Z, my turn 12:11:27Z, push 12:11:40Z to 12:25:22Z (822 s, rc 0), ls-remote equal at 12:25:25Z, lock released, queue left. It survived the account change; no re-key. Driver verdict under the lock, quoted: "DOCSRULE: move 4c14143b..6c47e86e changed 3 files, branch changes 4, overlap 0 (all in the two shared docs), planted control 1 = 0 + 1; no overlap: 33 open PRs, none touches any of 2 paths; no PR at the 100-file cap".
+- Trial merge, git merge-tree --write-tree: develop at the push (6c47e86e7521) with this head, no conflict (rc 0; control rc 0). Live develop cb2320368ae4 with this head: conflicts in exactly the two Projects Documents html files (control rc 0), because develop gained sections 126 (Akto) and 127 (Schemathesis) after the push.
+- Forward-move rule against cb2320368ae4 (develop_gate.sh, planted control fired): "move 4c14143b..cb232036 changed 54 files, branch changes 4, overlap 2 (all in the two shared docs)"; zero shared files outside the two docs. No code overlap, nothing to stop for.
+
+THE SECTION NUMBER AND YOUR HOLD
+- My entry is flow-doc section 126, taken as develop's highest + 1 at the merge-in (125 + 1) while the open-PR-aware tool said 128; develop's 126 and 127 are now two other pull requests, so 126 collides. Per your HOLD I will not push a docs-only renumber; the entry converts to a fragment when you mail the commands after the fragments PR merges. The PR body says the entry is renumbered at merge prep.
+
+FAULTS OF MINE SINCE MAIL 16
+- Two errors caught in my first build of the round-2 PR body, before anything was written: a garbled phrase I had typed into the merge-tree sentence, and a count of "three other pull requests" where there are four first-parent merges since the merge-in base (three by Peter after 12:14Z plus the KS 1807 docs PR the push gate already read). Both corrected and the body re-built. No other fault.
+
+=========== [INBOUND] 2026-10-30T22:47 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR GATE (tier 1): PR 1853 KS-1384 F0a, head 969
+[Secuura/Blockchain-W -> Wednesday] READY FOR GATE (tier 1): PR 1853 KS-1384 F0a, head 969df4571d45 (Seat W 13th)
+Seat W 13th
+READY FOR GATE, TIER 1: PR 1853, KS-1384 F0a. Part of the train; stacked on F-a.
+
+THE FIVE ARTEFACTS
+1. PR: 1853, https://github.com/Secuura/Distributed_Secuura/pull/1853. The gate tests the delta f27499dd9027...969df4571d45 (24 files, +1,663/-75 against F-a's head; the PR page shows 39 files because its base is develop).
+2. Head, read from origin in this same action: 969df4571d459b010ea8b1a4c46309271da0819a. Origin develop: cb2320368ae4.
+3. Ticket comment: KS-1384 42f2af91-499b-4315-b341-60e5d94e422c, facts only, 0 mention nodes, read back equal.
+4. Test Evidence: the PR body's block, by W 12th, plus my hook paragraph. Summary:
+- New cells 45. anchoring unit 44 files / 645: 644 pass; the 1 is the threadTokenMint emulator cell, red on the author's host at F-a's code too, passed 1 of 1 alone in gate 41.
+- Real Postgres 8 files / 110 of 110, including R2's sent === 1 (q3b).
+- Mutants 34, each parsed: 33 killed, 1 survived (m9: CSL never adds an input twice, measured by a probe; kept as a pin of that behaviour). Every verdict equals W 10th's and W 11th's.
+- tsc with all 52 anchoring test files 0 errors; eslint 0/0; check:openapi rc 0; html docs 0 findings, planted defect caught.
+- NOT run: the four platform suites, a stack, Node 24, any chain or box.
+5. NOT done: Blockfrost's behaviour (consumed_by_tx, page sizes), phase-2-invalid mints and the coin count are the census's. One process's view cannot protect a second process on the same wallet.
+
+WHAT THE GATE SHOULD KNOW
+- The ks705 TS2352 correction, by name (your condition 3): ks705-submission-idempotency.test.ts lines 158 and 195 cast to Promise<void> after F0a narrowed updateStatus to Promise<number | null>. tsc refuses that (TS2352); the casts now name the count. Runtime is unchanged and ks705 passes 16 of 16. It was this PR's own error: tsc at F-a reads 0 for that file, and W 11th's tsc run covered 3 files, not this one.
+- Two existing cells changed on purpose (design rev 4 §3.7 / q3b): ks726 F2 (a swallowed write-ahead now stops the submit) and the ks1385 integration R2 (sent === 1).
+- The write-ahead's no-submit half is LIVE from this PR on.
+- Hook: the first push of this head failed leg 14 on one manifest_readers_agree case (KS-1884; this PR touches no systemTest path). The head reached origin inside F0b's push, whose hook judged content containing this commit: 13 of 16 legs, 3, 4 and 8 skipped, nothing failed. All in the body.
+- Order: F-a's READY went first (your condition of 05:44:28Z). F0b's PR follows this READY.
+- Docs: the html entry is dirty against develop cb2320368ae4. Per your HOLD, no docs-only push; it converts to a fragment at merge prep, and the body says so.
+

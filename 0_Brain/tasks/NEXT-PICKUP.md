@@ -6,6 +6,17 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ ROTATION HANDOVER 09:5x SAT 31 OCT (the resumed 18:3x seat, ctx ~78%) — READ THIS FIRST; the 09:4x block below is current where this does not differ
+- **FIRST WORK: 14 seat mails landed 09:49 AEDT and are marked SEEN but NOT READ by this seat.** Read them WHOLE from `0_Brain/reference/2026-10-31_inbox/batch_0949_14_rows.txt` (47 KB). No QUESTION-class row; T 8th's STATUS carries "one question, with a default" (find it).
+- **GATE WAVE OWED (plan it as batches; Opus for tier 1, Sonnet for tier 2; spark_gate.sh first, bare `develop`):**
+  - TIER 1: #1840 round 2 (E 22nd, KS-1845 fix: UUID fold + the second door) · #1833 round 2 (U 7th, KS-1844, head e4767d5838) · #1853 F0a (W 13th, KS-1384, head 969...) · #1854 F0b (W 13th, head 31e...) · R 66th's KS-1410 trio #1848, #1849, #1850 as ONE batched tier-1 gate (error disclosure; #1850 changes a client-visible /verify 500 string).
+  - TIER 2: R 66th #1847 (KS-1579), #1851 (KS-1866 guard scripts), #1852 (KS-1544 ORDER BYs), plus the held #1842 (KS-1534) and #1843 + V's PR-4 (KS-1807).
+  - All read DIRTY on docs: irrelevant to the gate; under the DOCS HOLD no docs-only push until the fragments PR merges.
+- **IN-SESSION, DIES AT ROTATION:** the Sonnet drafter for the DOCS FRAGMENTS seat (lane -D, Kam 09:44:40 card = a). RE-COMMISSION it first thing: the brief requirements are in the 09:4x block's DOCS FRAGMENTS line (design note first, byte-identical render proof, SKILL.md docs paragraph for Peter, transition commands, tier 2). Then `--delivered` the card.
+- **SEAT S 9th waiter (detached, survives):** pid 56805, log `2_Project_Files/fleet/state/s9_waiter.log`.
+- **F 19th:** its overnight push failed at hook leg 1 (its own TMPDIR); see its mail in the batch.
+- **Kam:** nothing open for him except what S 9th's option sets will raise (KS-1860, KS-1861 -> cards). FYI owed: KS-1872.
+
 ## ⏩ HANDOVER 09:4x SAT 31 OCT (same seat as the 18:3x successor, resumed after Kam's /login; ctx ~74%) — READ THIS FIRST; the 18:4x 30 Oct block below is the detail where this does not differ
 - **ACCOUNT:** Kam /login ~09:3x, fresh account, "please continue". The 10-18 grant (tickets, backlog, Spark max) REAFFIRMED (EXPIRING-GRANTS line). No usage gate pressure; the statusline shows no 7d figure yet.
 - **DEVELOP = cb2320368ae4.** Peter merged his own #1844 (KS-1609 Akto, 45 files incl. both html docs + secuura-test-discipline SKILL.md), #1845, #1846 (KS-752) at 12:14-12:18Z 30 Oct. Ours since 30 Oct: #1832 (4c14143b3426) and #1836 (6c47e86e7521), both VERIFIED.
