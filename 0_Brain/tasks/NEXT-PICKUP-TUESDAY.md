@@ -22,6 +22,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 822 — 2026-10-31 09:59 (s209). **READ THIS FIRST; 821 stands except where this replaces it.**
+- **HPSM-POC main = 297be679.** #258 LANDED; G231 and H77 closed. 10 landed in all; nothing deployed.
+- **GATES LIVE:** G233 B966 #259 · G234 B967 #260. Parked: H74, H76. B968 H78 waiter queued.
+- **B969 records kit ARRIVED (unstamped; Q-1..Q-7 in its report).** It covers #244-#257 except #253, and its Step 8 refuses while any gate is live. **HOLD it until #259 and #260 land or park.** Then amend it (an addendum or a re-draft) to add #253, #258, #259, #260 and the tickets B965-1 (high), B965-2, B953-3, B964-1, B964-2, B964-6, stamp it, and launch it. Then the UAT redeploy kit (D41).
+
 ## 🔴 DELTA 821 — 2026-10-31 09:53 (s209). **READ THIS FIRST; 820 stands except where this replaces it.**
 - **HPSM-POC main = 32fc1750.** #253 LANDED (the cap passed; B965-1 dashboard-list pin gap ruled a ticket). G232 and H68 closed. 9 landed since 30 Oct morning; nothing deployed.
 - **GATES LIVE:** G231 B964 #258 · G233 B966 #259 · G234 B967 #260. Parked READY: H74 (#260), H76 (#259), H77 (#258).
