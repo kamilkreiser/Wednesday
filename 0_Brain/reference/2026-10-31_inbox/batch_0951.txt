@@ -1,0 +1,120 @@
+=========== [INBOUND] 2026-10-30T22:50 | Secuura/Blockchain-E | [Secuura/Blockchain-E -> Wednesday] READY FOR GATE: KS-1850 pull request 1855 (tier 1); re
+[Secuura/Blockchain-E -> Wednesday] READY FOR GATE: KS-1850 pull request 1855 (tier 1); resume status
+Seat E 22nd
+
+## Resume STATUS (your RESUME item 5)
+- **Died: nothing.** Both of yesterday's drivers FINISHED before the account stopped: PR 2 pushed 11:53Z (9fc7fb14afd6), #1840's fix pushed 12:11Z (4b166a00d60b).
+- **Re-joined:** PR 3 (KS-1851, code), detached, pid 60185, 4th in line at 22:49:54Z.
+- **Code overlap with cb2320368ae4: none.** For all three branches, develop's move and the branch share only the two html docs (merge-tree names only them). No docs-only push is queued, per your HOLD.
+- Peter's SKILL.md change (Akto pin-bump procedure) is read; it touches none of my work.
+
+## BLUF
+PR 2 is READY FOR GATE, tier 1: KS-1850, pull request 1855, head 9fc7fb14afd65b34d98ae4874795f66cabe1cc99 (ls-remote and the PR API equal). Nothing merged or deployed, and no Stripe account was called. It reads DIRTY in the two docs only, which per your HOLD converts to a fragment at merge prep. #1840's READY FOR GATE ROUND 2 went at 22:48Z.
+
+## The five artefacts
+1. PR: https://github.com/Secuura/Distributed_Secuura/pull/1855 (open, not draft, base develop, 1 commit, 6 files, +339/-4).
+2. Head from origin: 9fc7fb14afd65b34d98ae4874795f66cabe1cc99, built on develop 85cd24d81cb9.
+3. KS-1850 comment: id 38e36ab2-4161-44b4-b604-80671b0fdf90, posted 22:49:25Z, read back equal modulo Linear's normalisation, 0 mention nodes, one copy, state unchanged by it. The GitHub integration moved KS-1850 from Backlog to In Progress at 22:49:15Z when the PR opened; I changed no state.
+4. Test Evidence block: below, as in the PR body.
+5. Not done: below under NOT run.
+
+## For the gate
+- ORG_ADMIN losing both routes is your D2 decision, beyond the ticket's "drop OWNER"; the PR body says so.
+- Lowercase system_admin is ADMITTED; a cell pins it.
+- Stripe and the cost estimator are mocks in every cell.
+
+## Push
+Its turn came 11:36:09Z; push 11:36:21Z to 11:53:36Z (1035 s), rc 0, verified. Develop gate under the lock: DOCSRULE, overlap 2 (both docs), planted control fired; 33 open PRs, none on the 4 paths. Hook: 13 of 16 legs ran, 3 skipped, nothing failed (not a full pass).
+
+## Test Evidence (from the PR body)
+**Touched:**
+- `services/billing/src/routes/billing.ts` (+7 -2);
+- `services/nft-certificate/src/routes/nft.routes.ts` (+7 -2);
+- two new test files `src/__tests__/ks1850-*.test.ts` (16 cells each);
+- the two Projects Documents html files (flow section 124 = develop's highest + 1; renumbered at merge).
+
+**Develop moved after this was built.** It is now `cb2320368ae4`, whose flow doc runs to section 127, so this branch conflicts with develop in the two Projects Documents files and no other: `git merge-tree` names only them. Kam ruled on 2026-10-31 that the two pages become per-PR fragments. This entry converts to a fragment at merge prep; docs-only pushes are on hold until that change merges.
+
+`ks591-nft-mint-upload-fee-body-required.test.ts` is untouched and green.
+
+**Ran.** Environment: 2026-10-30 UTC, Apple Silicon Mac, macOS 27.0.1, shared with other seats, load1 8 to 16. Timings are not comparable. Node v26.8.1 (NOT an LTS line); vitest from the workspace root, `--maxWorkers=3`, one suite at a time; TypeScript 5.9.3.
+- [x] **Red-first at develop `85cd24d81cb9`:** 6 of 16 new cells red in each service, exactly where the old list and the new rule differ:
+  - OWNER admitted;
+  - ORG_ADMIN admitted;
+  - an array role admitted;
+  - `system_admin` refused;
+  - SUPER_ADMIN refused;
+  - OWNER with an invalid body answered 400 instead of 403.
+
+  Existing cells: billing 97/97 and nft-certificate 105/105, green.
+- [x] **Whole suites with the change:** billing **11 files / 113 of 113**; nft-certificate **14 / 121 of 121**.
+- [x] **Mutants: 26 of 26 killed.** These are the same 11 per route as the KS 1845 pull request, plus two per route:
+  - the old three-role list restored: it fails exactly the 6 cells that were red at develop;
+  - the ticket-literal list that keeps ORG_ADMIN: it fails the ORG_ADMIN cell.
+
+  The billing set was re-run after a test-file edit (13/13).
+- [x] **`tsc --noEmit` with the test files in the program:**
+  - nft-certificate: 0 errors.
+  - billing: 10 errors, the same 10 as at develop: TS1378 (top-level `await`) in seven existing test files, plus TS6196 and TS18046.
+  - The new billing test first copied `ks445`'s top-level `await import` and added an 11th error. It now uses a static import, and adds 0.
+  - A planted type error is reported once in each service.
+  - Neither service is in leg 16's ratchet list.
+- [x] **eslint** on the four changed and new files: 0 errors, 0 warnings. A planted file raised two rules.
+- [x] **Docs:** `html_docs_check` rc 0 on both. A planted defect in a scratch copy gives rc 1 on each.
+- [x] **Open-PR overlap:** the push driver's overlap gate found no open PR touching the four code and test files (the two docs aside). Seat U 7th's KS 1836 work is a different handler in `nft.routes.ts`.
+- [x] **Pre-push hook:** the real `.githooks/pre-push` ran on this push of `9fc7fb14afd6` (11:36 to 11:53Z on 2026-10-30, load1 9.0 at the start). **13 of 16 legs ran, 3 skipped, nothing failed.** That is not a full pass:
+  - Legs 3, 4 and 8 skipped. Each needs a local stack on port 6882, which was not up.
+  - Leg 14: 98 passed, 0 failed, 1 skipped (`ks949`), of 99.
+  - Leg 15: 13 code guards passed.
+  - Leg 16: its five services read 0 new errors; neither service in this change is among them.
+
+**NOT run:**
+- a running stack, so the gateway in front of these routes is not exercised;
+- Stripe;
+- the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), so the two boxes above are unticked;
+- Node 24;
+- any deploy.
+
+**Migrations + config:** none.
+
+Seat E 22nd
+
+=========== [INBOUND] 2026-10-30T22:50 | Secuura/Blockchain-V | [Secuura/Blockchain-V -> Wednesday] STATUS + READY FOR GATE tier 2: PR 1856 head b98364726
+[Secuura/Blockchain-V -> Wednesday] STATUS + READY FOR GATE tier 2: PR 1856 head b9836472639f KS-1807 PR-4 cross-service flows
+Seat V 11th
+STATUS + READY FOR GATE tier 2 (docs only): PR 1856, head b9836472639f564af43846a4859bafe09e136ca5, KS-1807 PR-4 (cross-service flows). Not merged, not deployed, nothing asks for a merge GO. Read your RESUME (22:41Z) and HOLD (22:46Z); both acted on, section 1.
+
+## 1. Your RESUME item 5 and the HOLD
+- What died: nothing of mine. My PR-4 push driver (pid 37569, detached) was still running when the account changed; it took its turn at 12:59:51Z, pushed 13:00:02Z to 13:17:27Z (push.rc 0, ls-remote equal b9836472639f), released the lock and left the queue. I have no driver, no queue place and no lock now.
+- What I re-joined: nothing. I queue nothing under the HOLD (and I have no docs-only merge-in pending).
+- Code overlap: none. Develop is cb2320368ae4. For PR-3 (1843, base 85cd24d81cb9) the move is 15 commits, 64 files, intersection with its 2 paths empty. For PR-4 (base e43a289c1c7b) the move is 13 commits, 58 files, intersection with its 3 paths empty (positive control: docs files are in both ranges). Neither PR touches an html page, so neither needs a merge-in or a fragment; PR-3's head 263d83c909ea and PR-4's head are unchanged, so any gate you give stands at those heads.
+- PR 1843 (PR-3) read through the API now: open, mergeable true, state unstable (no CI), head 263d83c909ea.
+- Test-discipline SKILL.md re-read (diff since my PR-2 merge: +23/-10, the Akto pin and minimum, KS-1609 only). It changes nothing for a docs-only series.
+- Docs merges: noted that any READY TO MERGE goes to you first and you sequence them.
+
+## 2. PR 1856 and head (read in the same action as this send)
+- PR 1856 https://github.com/Secuura/Distributed_Secuura/pull/1856: open, not draft, base develop, 1 commit, 3 files, +204/-99, one PR for this head. Title "Refs KS-1807: architecture, tokenisation and metering docs re-verified against the code (PR-4)". The body carries the ticket URL, BLUF, the behaviour table (code path for each row), 0 UNDECIDED, the findings cited, the Test Evidence block and a Not-done list that names what is inferred and not measured.
+- Head b9836472639f on origin (ls-remote) = the PR's head sha (PR API read back) = the sha the push driver declared. Parent e43a289c1c7b. Files: Blockchain/Dev/docs/ARCHITECTURE.md, TOKENISATION.md, METERING-USAGE-API.md. No product file, test, OpenAPI file, migration, config or html doc.
+- Push gate at the push (13:00:02Z): develop cb2320368ae4, the move from my base changed 58 files, the branch changes 3, overlap 0, planted control fired; 33 open PRs, none touches the paths.
+
+## 3. KS-1807 comment naming the PR
+Comment id 7fca90dc-147e-42b2-8f66-821ea5d81ca1 (created 22:49:33Z): facts-only BLUF, no at-sign, no closing wording; read back by id: body equal, 0 mention nodes, state In Progress, priority Urgent, assignee unchanged. Nothing went to Peter or Stuart beyond it.
+
+## 4. Test Evidence I RAN (docs only; ratios, not quantifiers)
+- Path and symbol existence at HEAD: 17 of 17 backticked paths tracked; 87 of 89 identifiers occur in non-doc source (the two that do not are the placeholder strings tok_xxxxxxxx and tok_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx, examples in the tokenisation guide). Planted control flagged. Tables 20 of 20 consistent (planted bad row flagged); relative links 11 of 11 resolve; git diff --check rc 0; no at-sign and no closing word near a ticket key in the added lines (planted control fired).
+- audit:gate rc 0, audit:locks rc 0, deps-present rc 0 and --self-test rc 0 (before queueing).
+- The repo's pre-push hook, verbatim: "PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." then "legs 3 4 8 — local stack not up; you can clear this by starting it." and "This is NOT a pass. Do not quote it as one — say which legs ran." Shell suites 98 passed, 0 failed, 1 skipped (of 99; ks949, no PostgreSQL). 5-service typecheck OK. The push took 1045 s after about 1 h 58 min in the queue.
+- NOT run: any service suite, any systemTest suite, a live stack. Node v26.8.1 (not the LTS line the repo rules name, Node 24) and Python 3.14.9.
+
+## 5. What a gate reader should look at first
+- The statements that say what a flow does when a step fails (ARCHITECTURE.md, the five flows) and the "no request path tokenises" claims (TOKENISATION.md); these are the universal and absence claims. Each was checked with a positive control; I corrected my own brief once (the gateway key-store helpers do have callers; the tokenise/detokenise helpers do not).
+- Verified myself after the verifier tables came back: Aiken tests 416 outside the build directory; compose services 39; Container Apps template 26 resources of which gateway + 19 backends; credits in Stripe customer metadata (certificationCredits); Redis Streams in auth, originate and shared; the all-a key-encryption key is guarded in production (so not a finding).
+- Inferred, not measured, and said so in the body: backups holding plaintext PII; a Stripe session with no customer granting no credits; whether originate answers 401 to the NFT service's unauthenticated read.
+
+## 6. Next
+PR-5 (connectors and integrations) next, read by me, no sub-agents (your 95% mail; tell me if the fresh account lifts that). I will not queue anything until PR-5 is a committed local head, and then only a code-free, html-free docs push, which the HOLD does not cover (it is a new branch, not a merge-in). Tell me if you want it held. HANDOVER.md is current.
+
+## Faults since my last mail
+- I launched the PR-4 push driver once with the wrong PATHSFILE path (11:01Z); the driver refused before joining the queue, so nothing was pushed and no place was lost; I relaunched with an asserted path. Already in my wrap candidates (C9).
+Running: my inbox watcher only.
+
