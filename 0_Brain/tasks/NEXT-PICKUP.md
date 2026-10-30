@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 12:5x 30 Oct (the 11:3x successor seat, ctx 70%) — READ THIS FIRST; the 12:4x block below is current except:
+- **SEAT F 18th (KS-1848 backup-code burn fix + KS-1849, Opus, TIER 1) — LAUNCH WAITER ARMED** (in-session background job; DIES at rotation): it waits for load1 < 7 then runs brief_and_launch with SEAT_MODEL_ENV=claude-opus-5-5. Brief READ WHOLE + drafter questions ruled: `2_Project_Files/fleet/briefs_staged/2026-10-30_seatF18_ks1848_backup_code_burn.md`. **After a rotation: check `tmux list-panes` for a -F pane; if absent and load1 < 7, run the launch by hand (re-stamp SELF-CHECK first).**
+- **NEW HIGH TICKETS (V 11th):** KS-1850 (billing credits + platform-fee admit OWNER), KS-1851 (vc-issuer revoke no owner/role), with KS-1845. OWED: a security fix lane (Opus, tier 1, split by service if passes differ) once capacity allows. Kam told (bf-7fe4ee3b18d8).
+- **Filing candidates (from F 18th's census, NOT filed):** account-recovery.ts:156 accepts any 8-char string as backup evidence (unwired); users.ts:1138 writes plaintext backup codes (cannot verify).
+- **U 7th:** Q answered B (30 s beforeEach timeout on the KS-1836 p1 test). **V 11th:** PR-1 re-queued on 63c149736a26.
+- **Spark: idle again** after operator 21 (report `0_Brain/reference/2026-10-30_spark-operator21/report.md`: KS-1800 held; X3F4 loose PASS NOT holdable, patch in its run dir). Pool thin at the Spark predicate; next operator should take rung-4 loose briefs (they passed) and the filing list.
+- **Held Spark passes unraised:** KS-1579, KS-1534, KS-1800 (+ X3F4 patch).
+
 ## ⏩ CHECKPOINT 12:4x 30 Oct (the 11:3x successor seat, ctx 65%) — READ THIS FIRST; supersedes the 11:5x block where they differ
 - **develop = 40c06084919d** (#1823 MERGED 01:36Z, verified by Wednesday: one parent 530f091120d5, tree = PR head's). UNDEPLOYED: #1820, #1821, #1822, #1823 -> next deploy round (Opus deploy seat, kintsugi first, D 45th's HANDOVER FOR A SUCCESSOR).
 - **FLOOR (5 seats; push queue order T -> U -> V -> S):**
