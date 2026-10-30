@@ -1,0 +1,79 @@
+diff --git a/Blockchain/Dev/services/demo-service/src/index.ts b/Blockchain/Dev/services/demo-service/src/index.ts
+--- a/Blockchain/Dev/services/demo-service/src/index.ts
++++ b/Blockchain/Dev/services/demo-service/src/index.ts
+@@ -37,7 +37,12 @@
+ try {
+   assertDemoServiceEnabled();
+ } catch (err) {
+-  const message = err instanceof Error ? err.message : String(err);
++  let message: string;
++  try {
++    message = String(err instanceof Error ? err.message : err);
++  } catch {
++    message = 'unreadable thrown value';
++  }
+   logger.error(`FATAL: ${message}`);
+   process.exit(1);
+ }
+diff --git a/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-boot-gate-unreadable-throw.test.ts b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-boot-gate-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-boot-gate-unreadable-throw.test.ts
+@@ -0,0 +1,57 @@
++// KS-1868: the boot gate in index.ts must still log FATAL and exit(1) when the
++// thrown value itself cannot be read (a revoked Proxy throws on `instanceof`).
++// The gate is a plain function, not a vi.fn(): a spy inspects what it throws
++// and would itself fail on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  error: vi.fn(),
++}));
++
++vi.mock('../utils/logger', () => ({
++  createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: h.error }),
++}));
++
++vi.mock('../middleware/demoGuard', () => ({
++  assertDemoServiceEnabled: () => {
++    throw h.toThrow;
++  },
++}));
++
++vi.mock('../app', () => ({
++  createApp: () => ({
++    listen: vi.fn(() => ({ close: vi.fn() })),
++  }),
++}));
++
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++
++describe('KS-1868 demo-service boot gate reads the thrown value safely', () => {
++  let exitSpy: ReturnType<typeof vi.spyOn>;
++
++  beforeEach(() => {
++    vi.resetModules();
++    h.toThrow = undefined;
++    h.error.mockReset();
++    exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
++  });
++
++  afterEach(() => {
++    exitSpy.mockRestore();
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message and exits 1', async () => {
++    h.toThrow = new Error('demo disabled');
++    await import('../index').catch(() => undefined);
++    expect(h.error).toHaveBeenCalledWith('FATAL: demo disabled');
++    expect(exitSpy).toHaveBeenCalledWith(1);
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant FATAL line and exits 1', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    await import('../index').catch(() => undefined);
++    expect(h.error).toHaveBeenCalledWith('FATAL: unreadable thrown value');
++    expect(exitSpy).toHaveBeenCalledWith(1);
++  });
++});

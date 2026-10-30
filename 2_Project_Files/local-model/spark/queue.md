@@ -138,3 +138,4 @@
 # 2026-10-30 (operator 25): sibling check-*.sh guard screen; dry-run rc 0 + CONTROL-PASS byte-identical each at 85cd24d81cb9
 # 2026-10-30 (operator 26): check-akto-container-names.sh flagged-docker-verb hole; lint rc 0, dry OK, CONTROL-PASS byte-identical at 85cd24d81cb9
 # 2026-10-30 (operator 26): REBRIEF r2 of scripts_akto_names_docker_flags (r1 FAIL at B2: model dropped backslashes before backticks); lint 0, dry OK, control PASS. Counter spent.
+# 2026-10-30 18:5x (Wednesday, why the queue is empty): O34-P1 held; next briefs are vc-issuer presentations.ts:182 and credentialRepo.ts:432 (KS-1868, one site each, open-PR free per op 34). NOT briefed now: each brief cost a Sonnet operator ~113K tokens and the weekly gauge is 92% with Kam's card unanswered. Resume on his login or on the renewal.
