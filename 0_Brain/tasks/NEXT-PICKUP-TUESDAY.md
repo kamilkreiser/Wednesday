@@ -29,7 +29,8 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **B953 (#253 tier 1) ANSWERED:** `..._B953_ADDENDUM-1_main-332dcc6f-repin_answer.md` (re-pin main 332dcc6f, judge comb; 0 of #253's 36 files moved). Await verdict.
 - **#252 ROUND 2 (THE CAP):** G222 B947 NO GO round 1 -> `..._B932_ADDENDUM-2_round-2-test-rows_correction.md` to H63 (%51): merge 332dcc6f + test-only fixes; B947-3 ruled equivalent. ON READY: round-2 gate kit (next free B number after B959; fix PR title 1050 -> 1280). G222 pane closed.
 - **B959 (#255 gate, G226, 9880-9889) STAMPED 17:51**; its launch waiter (tracked, dies with s208) is chained behind the H75 waiter: log `fleet/cockpit/logs/chain_g226.log`. If no G226 pane and no "G226 rc=" line, re-run the kit's Launch line.
-- **Watchers (s208, tracked, die with it; RE-ARM):** B942, B953, B932 (all `--changed`), B948, B949, B951, B954. Not yet armed: B956/B957/B958 (no STATUS yet), B955.
+- **#248 LANDED 17:59:00 -> main 7c353747** (G223 GO WITH FINDINGS; panes G223, H66, H59 closed). **LIVE 18:07:** H74 B954, H75 B955 (%76), H76 B956, H77 B957 (wave 2 all launched), H71 B949, H73 B951, H63 (#252 round 2), G224 B953 (#253, npm ci on comb). G225 B958 + G226 B959 launch waiters alternate on the single waiter slot (logs chain_g225.log, chain_g226.log).
+- **Watchers (s208, tracked, die with it; RE-ARM):** B953, B932 (`--changed`), B949, B951, B954, B955, B956, B957, B958. (B942/B948 done.)
 - **KAM'S REVIEW LIST +:** the B955 register strings; B947-7/-8 words. (All in today's note 17:44.)
 
 ## 🔴 DELTA 812 — 2026-10-30 17:2x PRE-ROTATION HANDOVER (s207, statusline 77%; band 80-90). **READ THIS FIRST; supersedes 811's DRAFTING line; the rest of 811 stands.**
