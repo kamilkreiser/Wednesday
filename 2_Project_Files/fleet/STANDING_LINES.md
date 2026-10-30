@@ -121,6 +121,8 @@ diagnosing from*.
 
 - **Commit subjects and PR titles start with the ticket's real, full key, copied from the branch name:** `Refs KS-1822: a foreign tenant's anchor reads as absent`. Never a placeholder (`KS-NNNN`, `<PREFIX>`), never a Conventional Commits `type(scope):` prefix. No key found: ask, do not invent one. (Root CLAUDE.md, Peter's #1839, KS-1878, merged 2026-10-30 08:06:56Z; read at the API. Basis: one ruled project rule. It names the seat's OWN ticket; the foreign-key rule below still applies to OTHER tickets' keys.)
 
+- **Forward-move rule (every Secuura build or raise brief carries this line).** A forward move of develop is ACCEPTED when your base is an ancestor of the new develop (read by `ls-remote`), its objects are present, and the ONLY paths shared between the moved range and your branch are the two docs; then merge the new develop in (never rebase a pushed branch), rebuild both docs entries at the new highest + 1, re-run `html_docs_check` with a planted defect, and push. Any shared CODE path means stop and mail. (Text carried in briefs since 10-28; written into this file only on 2026-10-30, ledger w=3: it had never been here, though the ledger said it was.)
+
 ## A VERDICT LINE IS A CLAIM ABOUT WHAT RAN — print the ratio, never "all"
 
 **Why this exists.** On 2026-09-09 a Secuura seat, sweeping for guards that skip a member and still
