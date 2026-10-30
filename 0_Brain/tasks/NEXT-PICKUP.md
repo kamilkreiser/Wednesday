@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 10:0x SAT 31 OCT (the 09:5x successor seat, ctx ~52%) — READ THIS FIRST; the 09:5x block below is current where this does not differ
+- **R 66th WRAPPED (22:51Z), scored 0.90, pane %31 CLOSED.** Its 8 PRs wait on gates (below). Its open asks: KS-1544 assignee (= our board account per STANDING_LINES 'Assignment'; a board seat assigns it), #1837 merge prep (after fragments).
+- **DOCS FRAGMENTS brief READ WHOLE + resolved:** `2_Project_Files/fleet/briefs_staged/2026-10-31_seatD46_docs_fragments.md` (Seat D 46th, Sonnet, lane -D, build seat, no deploy grant). **CHAINED WAITER pid 13157** `2_Project_Files/fleet/state/d46_s9_waiter.sh`, log `fleet/state/d46_s9_waiter.log`: D 46th first at load1 < 7, then S 9th >= 3 min later (s9_waiter pid 56805 STOPPED by Wednesday, superseded). On 'D46 launch rc=0': card `secuura-docs-section-collision-dirties-every-pr-1030` --delivered naming the brief; read D 46th's plan confirmation -> GO quoting Kam 09:44:40 + 10:07:32. Same for S 9th.
+- **IN-SESSION (die at rotation; re-commission from these paths if no output):** GATE 45 tier 1 round 2 on #1840 (head 4b166a00d60b) + #1833 (head e4767d5838cb), Opus -> `0_Brain/reference/2026-10-31_gate45-1840-1833/verdict.md`. SPARK OPERATOR 35 (KS-1868 vc-issuer presentations.ts / credentialRepo.ts, partition-checked) -> `0_Brain/reference/2026-10-31_spark-operator35/report.md`.
+- **#1856 HEAD CHANGED** to 6819db871377 (V 22:56Z, push queued pid 36349): gate #1843 + #1856 on the NEW head.
+- **GATES STILL OWED after 45:** tier 1 #1853 (F0a 969df4571d45), #1854 (F0b 31e7975963a5), #1855 (KS-1850 9fc7fb14afd6), #1848+#1849+#1850 batch (R raised them as tier 2; Wednesday holds them TIER 1: error disclosure, #1850 changes the client-visible POST /verify 500 string). Tier 2 Sonnet: #1842, #1847, #1851, #1852 batch; #1843 + #1856. F 19th #1835 merge-prep push re-queued pid 49602 (code+test, allowed under the HOLD).
+- **T 8th %33 idle BY DESIGN** (wake_ack'd); holds three test commits until the fragments commands.
+
 ## ⏩ ROTATION HANDOVER 09:5x SAT 31 OCT (the resumed 18:3x seat, ctx ~78%) — READ THIS FIRST; the 09:4x block below is current where this does not differ
 - **FIRST WORK: 14 seat mails landed 09:49 AEDT and are marked SEEN but NOT READ by this seat.** Read them WHOLE from `0_Brain/reference/2026-10-31_inbox/batch_0949_14_rows.txt` (47 KB). No QUESTION-class row; T 8th's STATUS carries "one question, with a default" (find it).
 - **GATE WAVE OWED (plan it as batches; Opus for tier 1, Sonnet for tier 2; spark_gate.sh first, bare `develop`):**
