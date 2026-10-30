@@ -22,6 +22,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 821 — 2026-10-31 09:53 (s209). **READ THIS FIRST; 820 stands except where this replaces it.**
+- **HPSM-POC main = 32fc1750.** #253 LANDED (the cap passed; B965-1 dashboard-list pin gap ruled a ticket). G232 and H68 closed. 9 landed since 30 Oct morning; nothing deployed.
+- **GATES LIVE:** G231 B964 #258 · G233 B966 #259 · G234 B967 #260. Parked READY: H74 (#260), H76 (#259), H77 (#258).
+- **B968 STAMPED** (H78; base on 32fc1750), detached waiter `chain_h78.log`. When the pane exists, arm a watcher; on READY, open the PR and commission a tier-2 gate.
+- **B969 records drafter running:** at its stamp, ADD the tickets B965-1 (high), B965-2 and B953-3 (text in B965 FOR TUESDAY).
+
 ## 🔴 DELTA 820 — 2026-10-31 09:49 MORNING (s209, fresh account, 7d 2%). **READ THIS FIRST; 819 stands except where this replaces it.**
 - **The weekly limit stopped every seat at about 22:00 on 30 Oct. Kam logged in to a fresh account this morning.** The four gates got restart ADDENDA (new clocks from their own next date): G231 B964 #258 · G233 B966 #259 · G234 B967 #260 · G232 B965 #253 THE CAP. Watchers on B963 (done), B964, B966, B967, B965 were armed by s209, which is still live.
 - **B950 is DEAD as stamped** (pinned 37bc6323, REFUSEs on the #256 spec move). Its refresh is **B968 (SEAT-H78, 9970-9979)**, with a Sonnet drafter running. **Records kit B969 (SEAT-R93)** also has a drafter running. Both die at a rotation: check disk, and re-commission if absent.
