@@ -1,0 +1,28 @@
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1457-audit-finish-reads-use-the-entry-path.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1457-audit-finish-reads-use-the-entry-path.test.ts
+@@ -32,6 +32,7 @@
+ 
+ type QueryMock = Mock<(sql: string, params: unknown[]) => Promise<{ rows: unknown[] }>>;
+ type LogMock = Mock<(level: string, msg: string, ctx?: Record<string, unknown>) => void>;
++type AuditLog = Parameters<typeof createAuditMiddleware>[0]['log'];
+ const makeQuery = (): QueryMock => vi.fn(async (_sql: string, _params: unknown[]) => ({ rows: [] as unknown[] }));
+ const makeLog = (): LogMock => vi.fn((_l: string, _m: string, _c?: Record<string, unknown>) => undefined);
+ 
+@@ -45,7 +46,7 @@
+ async function drive(opts: { mounted: boolean; path: string; status: number; reply: object; body: object; query: QueryMock; log: LogMock }): Promise<void> {
+   const app = express();
+   app.use(express.json());
+-  app.use(createAuditMiddleware({ query: opts.query, isDbAvailable: () => true, log: opts.log }));
++  app.use(createAuditMiddleware({ query: opts.query, isDbAvailable: () => true, log: opts.log as unknown as AuditLog }));
+   const handler: express.RequestHandler = (_req, res) => { res.status(opts.status).json(opts.reply); };
+   if (opts.mounted) app.use(opts.path, handler); else app.post(opts.path, handler);
+   const server = app.listen(0, '127.0.0.1');
+@@ -124,7 +125,7 @@
+     const query = makeQuery();
+     const app = express();
+     app.use(express.json());
+-    app.use(createAuditMiddleware({ query, isDbAvailable: () => true, log: makeLog() }));
++    app.use(createAuditMiddleware({ query, isDbAvailable: () => true, log: makeLog() as unknown as AuditLog }));
+     app.use('/api/auth/login', rateLimit({
+       windowMs: 60 * 1000, max: 1, standardHeaders: true, legacyHeaders: false,
+       message: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many login attempts. Please try again later.' } },
