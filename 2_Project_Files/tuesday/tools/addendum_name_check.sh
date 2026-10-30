@@ -30,5 +30,17 @@ if [ -n "$HIT" ]; then
   echo "  rename it with NOUNS from the subject, ending _ruling / _answer / _correction" >&2
   exit 3
 fi
+# BODY CLOCK (ledger _ledger_laptop_datasec.md 2026-10-30, typed clock w=2 in ONE seat: "LANDED at 18:0x" in a
+# kit slot, "read-only after 18:2x" in an addendum; the merge was 17:53:56). stamp_brief.py refuses an HH:Mx
+# placeholder in a STAMP; an addendum is hand-written and only its name was checked. When the argument is an
+# existing file, its body is checked with the same pattern as stamp_brief.py's CLOCK_X: an estimate is never sent.
+if [ -f "$1" ]; then
+  CLK="$(/usr/bin/grep -n -o -E '(^|[^0-9])[0-2]?[0-9]:[0-5][xX]([^A-Za-z0-9]|$)' "$1" | head -3 | tr '\n' ' ')"
+  if [ -n "$CLK" ]; then
+    echo "addendum_name_check: REFUSED (rc 4) — '$NAME' body holds a placeholder clock: ${CLK}" >&2
+    echo "  write the time from \`date\` or copy it from the artefact that records it (mergedAt, a log line)" >&2
+    exit 4
+  fi
+fi
 echo "addendum_name_check: clean — $NAME"
 exit 0

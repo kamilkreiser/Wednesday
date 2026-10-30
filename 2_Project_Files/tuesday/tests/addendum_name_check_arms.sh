@@ -26,6 +26,13 @@ arm 0 2026-10-26_B999_ADDENDUM-1_pushback-restart_answer.md
 TMPC="$(mktemp)"; echo '#!/bin/bash' > "$TMPC"
 arm 2 2026-10-26_B999_ADDENDUM-1_any_ruling.md ADDENDUM_COCKPIT="$TMPC"
 rm -f "$TMPC"
+# body clock (2026-10-30 w=2): an existing file whose body holds an HH:Mx placeholder -> rc 4; a real clock, a ratio -> 0
+TMPD="$(mktemp -d)"
+printf 'Tuesday read it read-only after 18:2x AEDT\n' > "$TMPD/2026-10-30_B999_ADDENDUM-1_clock-red_answer.md"
+printf 'finished at 18:23 AEDT; contrast 3:1; B959\n' > "$TMPD/2026-10-30_B999_ADDENDUM-1_clock-green_answer.md"
+arm 4 "$TMPD/2026-10-30_B999_ADDENDUM-1_clock-red_answer.md"
+arm 0 "$TMPD/2026-10-30_B999_ADDENDUM-1_clock-green_answer.md"
+mv "$TMPD" "$TMPD.done" 2>/dev/null
 # usage
 env bash "$T" >/dev/null 2>&1; rc=$?; if [ "$rc" = 2 ]; then pass=$((pass+1)); echo "PASS rc=2  (no argument)"; else fail=$((fail+1)); echo "FAIL rc=$rc (want 2)  (no argument)"; fi
 echo "arms: $pass pass, $fail fail"
