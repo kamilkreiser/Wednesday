@@ -27,7 +27,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **DONE B942 (#250):** `tuesday/briefs/2026-10-30_B942_ADDENDUM-1_main-332dcc6f-landing-tree_answer.md` delivered rc 0: verdict ACCEPTED for the stylesheet; ONE owed run (whole unit suite + HpLogo x3 on merge3 c996c29c); hard stop 18:45. ON its new last line: if GO WITH FINDINGS -> land #250 per the routine (head df5d24fc; body fixes listed in its FOR TUESDAY; squash text in its evidence/squash_proposal.txt, READ before the merge).
 - **B953 (#253 tier 1) ANSWERED:** `..._B953_ADDENDUM-1_main-332dcc6f-repin_answer.md` (re-pin main 332dcc6f, judge comb; 0 of #253's 36 files moved). Await verdict.
 - **#252 ROUND 2 (THE CAP):** G222 B947 NO GO round 1 -> `..._B932_ADDENDUM-2_round-2-test-rows_correction.md` to H63 (%51): merge 332dcc6f + test-only fixes; B947-3 ruled equivalent. ON READY: round-2 gate kit (next free B number after B959; fix PR title 1050 -> 1280). G222 pane closed.
-- **B959 (#255 gate, G226, 9880-9889)** commissioned to an in-session Sonnet drafter 17:4x: if the seat rotates first, check for the kit + DRAFTER-REPORT in tuesday/briefs; absent after ~30 min -> re-commission.
+- **B959 (#255 gate, G226, 9880-9889) STAMPED 17:51**; its launch waiter (tracked, dies with s208) is chained behind the H75 waiter: log `fleet/cockpit/logs/chain_g226.log`. If no G226 pane and no "G226 rc=" line, re-run the kit's Launch line.
 - **Watchers (s208, tracked, die with it; RE-ARM):** B942, B953, B932 (all `--changed`), B948, B949, B951, B954. Not yet armed: B956/B957/B958 (no STATUS yet), B955.
 - **KAM'S REVIEW LIST +:** the B955 register strings; B947-7/-8 words. (All in today's note 17:44.)
 
