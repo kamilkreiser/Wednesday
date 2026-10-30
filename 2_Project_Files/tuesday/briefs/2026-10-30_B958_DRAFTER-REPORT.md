@@ -1,0 +1,8 @@
+DRAFTER REPORT B958 (gate kit, seat G225, PR #254, tier 2, round 1 of 2). 17:3x AEDT 2026-10-30.
+
+Kit: 2026-10-30_B958_SEAT-G225_hpsmpoc-254-revenue-gate-tier2.md (66 lines, 0 non-ASCII, 8 four-underscore lines: 7 slots + last).
+Measured by drafter (gh api -X GET, lsof, tmux): head 747eae29, 3 commits, 4 files +203 -20; main 332dcc6f; merge ref 1c56e24f (parents 332dcc6f, 747eae29); 36 landed files since 7365165d, none of the 4 paths; ports 9870-9879 free (lsof); no pane G225; CodeQL queued, 11 checks in progress at read.
+Defaults per slot: S1 STAMPED by Tuesday, decisions accepted; S2 until 19:30 30 Oct, launch_when_cool load1<7 (load1 was 8.21 at 17:29); S3 Q-1 YES merge onto Step-0 main + one re-fetch; Q-2 "region" move Note if DOM proved identical, else Blocker; Q-3 one-customer axe at 390 and 20 px links = Note + ticket (pre-existing, reproduce at main); Q-4 xl/2xl stack accepted if no figure splits and no width wider, Minor text if body omits; Q-5 CodeQL neutral/queued = Condition if it stays; Q-6 NO GO parks at round 1, round-2 fix kit; S4 all listed grants YES; S5 90 min target / 150 min hard stop; S6 per ls-remote; S7 model: claude-sonnet-5-5 -- G2 -- gauge from usage_tuesday.json.
+Wrong at source: PR body calculator line omits the xl/2xl preview-figure stack; body omits builder Q-1 (axe, one-customer, 390, same at base) and "removed 1" region string; builder READY line "0 behind" stale (36 files behind); plants ran at d6782ba, before last commit 747eae29 (RevenueCalculator only).
+Added beyond the user list: 1535/1536 widths, p10 (D-3 breach), p11 (2xl pin), p12, p13, own figures program (builder harness is read-forbidden).
+Overlap: #250 globals.css; b949 playbook-partner.spec.ts (spec that opens /revenue). b954-b957 not pushed.
