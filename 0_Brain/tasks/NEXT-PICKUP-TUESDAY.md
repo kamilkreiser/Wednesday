@@ -31,7 +31,8 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **B959 (#255 gate, G226, 9880-9889) STAMPED 17:51**; its launch waiter (tracked, dies with s208) is chained behind the H75 waiter: log `fleet/cockpit/logs/chain_g226.log`. If no G226 pane and no "G226 rc=" line, re-run the kit's Launch line.
 - **#248 LANDED 17:59:00 -> main 7c353747** (G223 GO WITH FINDINGS; panes G223, H66, H59 closed). **LIVE 18:07:** H74 B954, H75 B955 (%76), H76 B956, H77 B957 (wave 2 all launched), H71 B949, H73 B951, H63 (#252 round 2), G224 B953 (#253, npm ci on comb). G225 B958 + G226 B959 launch waiters alternate on the single waiter slot (logs chain_g225.log, chain_g226.log).
 - **#256 OPENED 18:1x (H71 B949 services READY, head b34c92e4; relabel "Delivery phases" = commit 2, Kam's veto = one forward revert).** Gate kit **B960 (G227, 9890-9899) commissioned to an in-session Sonnet drafter**: check for the kit + DRAFTER-REPORT; absent after ~30 min -> re-commission. H72 B950 stays HELD until #256 lands. H71 pane %70 parked READY (keep for a fix round).
-- **Watchers (s208, tracked, die with it; RE-ARM):** B953, B932 (`--changed`), B951, B954, B955, B956, B957, B958. (B942/B948 done.)
+- **#251 round 2 READY (H73, head ced9cce8):** round-2 gate kit **B961 (G228, 9900-9909) commissioned to a Sonnet drafter 18:1x**; check for kit + DRAFTER-REPORT; absent after ~30 min -> re-commission. **G226 B959 LAUNCHED 18:16 (%77)**; G225 B958 chain holds the waiter slot now.
+- **Watchers (s208, tracked, die with it; RE-ARM):** B953, B932 (`--changed`), B959, B954, B955, B956, B957, B958. (B942/B948 done.)
 - **KAM'S REVIEW LIST +:** the B955 register strings; B947-7/-8 words. (All in today's note 17:44.)
 
 ## 🔴 DELTA 812 — 2026-10-30 17:2x PRE-ROTATION HANDOVER (s207, statusline 77%; band 80-90). **READ THIS FIRST; supersedes 811's DRAFTING line; the rest of 811 stands.**
