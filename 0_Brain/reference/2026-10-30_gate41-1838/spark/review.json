@@ -1,0 +1,106 @@
+{
+ "meta": {
+  "attempts": [
+   {
+    "attempt": 1,
+    "finish": "repetition_abort",
+    "usage": {
+     "prompt_tokens": 133953,
+     "total_tokens": 135496,
+     "completion_tokens": 1543
+    },
+    "seconds": 179.5,
+    "schema_errors": [
+     "not parseable JSON: Expecting ',' delimiter: line 32 column 6 (char 5804)",
+     "repetition abort: 12-word run repeated 4x: '}, { \"severity\": \"major\", \"claim\": \"the pr\\'s reconciler change makes the give-up'"
+    ],
+    "repetition": "12-word run repeated 4x: '}, { \"severity\": \"major\", \"claim\": \"the pr\\'s reconciler change makes the give-up'",
+    "max_tokens": 8000
+   },
+   {
+    "attempt": 2,
+    "finish": "stop",
+    "usage": {
+     "prompt_tokens": 134027,
+     "total_tokens": 135821,
+     "completion_tokens": 1794,
+     "prompt_tokens_details": {
+      "cached_tokens": 131072
+     }
+    },
+    "seconds": 60.0,
+    "schema_errors": [],
+    "repetition": null,
+    "max_tokens": 4000
+   }
+  ],
+  "prompt_tokens": 267980,
+  "completion_tokens": 3337,
+  "seconds": 239.4,
+  "think": false,
+  "valid": true,
+  "duplicate_findings_removed": 0
+ },
+ "review": {
+  "findings": [
+   {
+    "severity": "Major",
+    "claim": "The reconciler's in-memory answered-miss counter is keyed by anchor id and hash, but the SELECT does not filter by tenant or creator, so a re-anchor of any document (including one created by a human or another process) resets the counter and delays the failed write; the new code reaches further than the old code, which failed on the first pass.",
+    "evidence": "reconciler.ts:93 `const answeredMisses = new Map<string, number>();` and reconciler.ts:105-118 `SELECT id, status, transaction_hash, created_at, updated_at FROM anchor_store ... WHERE status IN ('pending', 'submitted', 'submitting') AND transaction_hash IS NOT NULL AND simulated = FALSE AND updated_at < NOW() - ($1 || ' milliseconds')::interval`",
+    "test_or_reason": "The unit tests (ks1384-fa-reconciler-give-up-and-answered-passes.test.ts) script rows with a fixed id and hash, never exercising a real multi-tenant or multi-owner database; the integration test (ks1384-fa-reconciler-writes.integration.test.ts) filters to a single row by id, so the blast radius of the counter reset is not covered.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The PR removes originate's `saveAnchorToDb` write to `anchor_store`, but the new code does not add any compensating write or migration to clean up existing rows that were previously written by originate, so rows created by the old path (with the anchoring service's anchor id in `transaction_hash` and `updated_at` bumped) remain and can be selected by the reconciler, which now uses `updated_at` for the give-up window.",
+    "evidence": "routes/anchors.ts:99-103 `// KS-1384 F-a (design \u00a74.1, D13): `saveAnchorToDb` is gone. It upserted anchor_store on (document_id, network) from originate, writing the anchoring service's ANCHOR ID into transaction_hash, a confirmed_at of \"now\" and updated_at = NOW() over the row the anchoring service owns and was still processing.`",
+    "test_or_reason": "The new test ks1384-fa-anchor-routes-write-no-anchor-row.test.ts only asserts that new requests do not call `$executeRaw`; it does not test the state of pre-existing rows that were written by the old code.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The ticket's acceptance criterion 'Live on a paired slot: originate \u2192 declare \u2192 share on one document; count anchor rows and Cardano transactions' is NOT MET; the PR only adds unit and integration tests with a mock chain and a throwaway Postgres, and facts.json lists 'live/integration runs' as not run.",
+    "evidence": "facts.json `\"not_run\": [\"live/integration runs\", \"security scan\", \"network or deployed service\"]`",
+    "test_or_reason": "The ticket's Verify section explicitly asks for a live paired-slot measurement; the PR's own documentation (API_Security_Functional_Testing_Architecture_Flow_Diagrams.html) states 'The four platform suites, a running stack, Node 24 (LTS), and any box: not run here.'",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Major",
+    "claim": "The PR claims a root cause for the observed incident (one anchor per document, reset to pending) but does not measure the actual on-chain transaction count after a repeat POST; the ticket's decision 3 asks to trace whether `processAnchor` after a conflict mints a second Cardano transaction, and the PR does not provide that measurement.",
+    "evidence": "Ticket: 'Either way: **what happens on the reset.** Trace whether `processAnchor` after a conflict mints a second Cardano transaction for the same document (guard 1 cannot see the previous hash any more), or is caught by another guard. Not verified live in the review;'",
+    "test_or_reason": "The PR's tests use a mock chain (ks1384-fa-one-date-per-request.integration.test.ts:16 'No chain keys: anchoring runs its mock path, which never touches a network.'), so the double-mint question is not answered.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The new `payloadTimestamp` field is added to the 202 response and GET /:id, but the OpenAPI spec for GET /api/anchors/:id is not updated (the spec only shows the 202 schema change), so the published contract for the GET route is now missing the field.",
+    "evidence": "anchoring.openapi.ts:359-366 adds `payloadTimestamp` only to `FlatAnchorResponseSchema` (the 202 response); the GET /api/anchors/:id route (index.ts:974) returns `payloadTimestamp` but the spec's GET route (anchoring.openapi.ts:550-591) does not declare it.",
+    "test_or_reason": "The spec diff (secuura-api.yaml) only shows the 202 schema change; no test asserts the GET route's spec conformance.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The reconciler's `MAX_TRACKED` constant is misspelled as `MAX_TRACKED` (should be `MAX_TRACKED` or `MAX_TRACKED`), and the comment says 'entries are removed on confirm, fail and reset', but the code only deletes on confirm, fail, and reset paths; the map can grow to 10,000 entries and then be cleared, which is a magic number with no test.",
+    "evidence": "reconciler.ts:88 `const MAX_TRACKED = 10_000;` and reconciler.ts:169 `if (answeredMisses.size >= MAX_TRACKED) answeredMisses.clear();`",
+    "test_or_reason": "No test exercises the map-size bound; the constant is a magic number.",
+    "evidence_quote_found_in_input": true
+   },
+   {
+    "severity": "Minor",
+    "claim": "The new integration test `ks1384-fa-one-date-per-request.integration.test.ts` uses `vi.spyOn(express.application, 'listen')` to mock the listen call, but the test then creates its own HTTP server with `http.createServer(app)`; this mock is unnecessary and could mask real listen behavior, and the test's `afterAll` calls `db.closeDb()` which may affect other tests in the same process.",
+    "evidence": "ks1384-fa-one-date-per-request.integration.test.ts:85-87 `vi.spyOn(express.application, 'listen').mockReturnValue(...)` and :93-95 `server = http.createServer(app); await new Promise<void>((resolve) => { server.listen(0, '127.0.0.1', resolve); });`",
+    "test_or_reason": "The mock is not needed because the test does not rely on the app's own listen; it could cause side effects.",
+    "evidence_quote_found_in_input": false
+   },
+   {
+    "severity": "Note",
+    "claim": "The PR's documentation (API_Security_Functional_Testing_Architecture_Flow_Diagrams.html) claims 'all red against develop's code or their own mutant, all green with the change', but facts.json shows that on base, `ks584-reconciler.test.ts` has 5 passed and 1 failed (not all red), and `ks1816-reconciler-comments-match-the-code.test.ts` has 3 passed and 2 failed (not all red).",
+    "evidence": "facts.json `targeted_on_base_product_code` shows ks584-reconciler.test.ts passed 5, failed 1; ks1816-reconciler-comments-match-the-code.test.ts passed 3, failed 2.",
+    "test_or_reason": "The documentation overstates the red/green pattern; the base failures are partly due to the new tests' expectations, not all cells being red.",
+    "evidence_quote_found_in_input": true
+   }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+ }
+}

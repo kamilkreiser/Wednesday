@@ -1,0 +1,930 @@
+===== TICKET =====
+KS-1836 — nft-certificate GET /api/nft/certificates takes userId from the query string, so any authenticated caller lists every recorded NFT [In Progress]
+
+**BLUF:** Inferred from the code, not reproduced. `GET /api/nft/certificates` reads `userId` from the query string and defaults it to `'user-id'`, and `mintNFT` and `/record` store every NFT with `userId: 'user-id'`. So a bare `GET /api/nft/certificates` by any authenticated caller lists every recorded NFT across users and tenants, while `?userId=<a real id>` lists none. A `?walletAddress=<any wallet>` selector on the same route has no owner check either. Priority 2 (security), as ruled by Wednesday.
+
+## What I read (develop d7ddfa1f6433)
+
+* `Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts:224-235`: `const userId = req.query.userId as string || 'user-id';` under the comment "In production, get userId from auth context". If `walletAddress` is in the query the route calls `getWalletNFTCertificates(walletAddress)`; otherwise it calls `getUserNFTCertificates(userId)`.
+* `Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts:224` (`mintNFT`) and `:410` (the `/record` path) store `userId: 'user-id'`, with the comments "Would come from auth context".
+* `minting.service.ts:514-522`: `getUserNFTCertificates` keeps in-memory records whose `userId` equals its argument; `:550` is `SELECT * FROM svc_nft_certificates WHERE user_id = $1 ORDER BY created_at DESC`.
+* `minting.service.ts:594-602`: `getWalletNFTCertificates` keeps in-memory records whose `walletAddress` equals its argument and compares nothing to the caller. This is a second selector on the same route and part of this finding, not a separate one.
+* `Blockchain/Dev/services/nft-certificate/src/app.ts:45-47`: `/api` requires a JWT except the two verify operations. The caller is therefore authenticated, but nothing compares the caller to a record's owner or tenant.
+
+## What I did not run or read
+
+* No reproduction, no database, no box. Whether any NFT record exists on a box: UNMEASURED.
+* The database branch of `getWalletNFTCertificates` past its row type (`:605` onward), and `GET /api/nft/certificates/:id` (`nft.routes.ts:257`).
+* How the gateway forwards `/api/nft`, and which caller uses this list route. Seat A 17th's note says the gateway mounts the route with optional auth and that the issuer portal calls `/nft/record`; I did not re-read either.
+
+## Source and searches
+
+Seat A 17th's design note for KS 1819 and KS 1820 (/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-30_seatA-17th/KS-1819-KS-1820-design-note.md, section 7, item 3) and Wednesday's addendum, item E1. Board search (archived included, 2026-10-29 UTC, controls fired: a positive literal found 20, a random token found 0): "getUserNFTCertificates" 0 hits; "svc_nft_certificates" 2 hits (KS 667 and KS 127, both archived, neither about this route); "'user-id'" 1 hit, KS 1820, which records the two `userId: 'user-id'` sites in one sentence about the mint route and does not cover this list endpoint.
+Register note: this belongs to security work-stream A (KS 486, authN, authZ, tenancy and IDOR). KS 486 is archived, so it is not revived; the finding is recorded here and in one facts-only comment on KS 485.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts
+new file mode 100644
+index 000000000..3d21ed23c
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts
+@@ -0,0 +1,153 @@
++// KS-1836 (gate 23 finding F1): GET /api/nft/certificates writes one warning, 'NFT certificate list narrowed to the caller', when
++// `withheld > 0 || (userIdSelector !== undefined && userIdSelector !== ownerId)`. The first disjunct (a row was withheld) is pinned
++// by the PR's own R17. The SECOND disjunct only matters when the caller's fetched set is EMPTY and ?userId names someone else: nothing
++// is withheld then, so only the foreign-selector arm can log it. No cell exercised that, so dropping the arm stayed green.
++// The router runs on a small express app over an ephemeral port with a test-only req.user middleware; the REAL minting service
++// runs on a fake table, and the logger is spied. Harness copied from ks1836-nft-list-owner-bound.test.ts.
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++import express from 'express';
++import type { Server } from 'http';
++import type { AddressInfo } from 'net';
++
++type Row = Record<string, unknown>;
++
++const table = vi.hoisted(() => ({ rows: [] as Record<string, unknown>[] }));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: async (text: string, params: unknown[] = []) => {
++    const sql = text.replace(/\s+/g, ' ').trim();
++    if (sql === 'SELECT * FROM svc_nft_certificates') return { rows: table.rows.slice() };
++    if (sql === 'SELECT * FROM svc_nft_certificates WHERE id = $1') {
++      return { rows: table.rows.filter(r => r.id === params[0]) };
++    }
++    if (sql === 'SELECT * FROM svc_nft_certificates WHERE user_id = $1 ORDER BY created_at DESC') {
++      return { rows: table.rows.filter(r => r.user_id === params[0]) };
++    }
++    if (sql === 'SELECT * FROM svc_nft_certificates WHERE wallet_address = $1 ORDER BY created_at DESC') {
++      return { rows: table.rows.filter(r => r.wallet_address === params[0]) };
++    }
++    throw new Error(`ks1836 log fake table: unexpected SQL: ${sql.slice(0, 80)}`);
++  },
++}));
++
++vi.mock('../cardano', () => ({
++  isCardanoNFTReady: () => false,
++  mintNFTOnChain: vi.fn(),
++  getPolicyId: () => null,
++  waitForNFTConfirmation: vi.fn(),
++}));
++
++vi.mock('../services/blockchain-verifier.service', () => ({
++  blockchainVerifier: { verifyTransaction: vi.fn() },
++}));
++
++const W_A = 'addr_test1_ks1836log_wallet_a';
++const W_B = 'addr_test1_ks1836log_wallet_b';
++const B_KEY = 'ENC-KEY-B1-ks1836log';
++const NARROWED = 'NFT certificate list narrowed to the caller';
++
++function row(id: string, userId: string, wallet: string, minute: number, encryptedKey: string | null = null): Row {
++  return {
++    id, certification_id: `cert-${id}`, user_id: userId, chain: 'cardano', wallet_address: wallet,
++    policy_id: null, asset_name: null, asset_id: null, transaction_hash: null,
++    storage_tier: 'basic', privacy_level: 'full_privacy', public_fields: '[]', status: 'minted',
++    ipfs_cid: null, encrypted_key: encryptedKey, minting_cost: null, platform_fee: null, total_cost: null,
++    error_message: null, created_at: new Date(Date.UTC(2026, 9, 29, 12, minute)),
++    updated_at: new Date(Date.UTC(2026, 9, 29, 12, minute)), minted_at: null,
++  };
++}
++
++const FIXTURE: Row[] = [
++  row('a1', 'user-A', W_A, 1, 'ENC-KEY-A1-ks1836log'),
++  row('a2', 'user-A', W_A, 2),
++  row('b1', 'user-B', W_B, 3, B_KEY),
++];
++
++const CALLER_A = { userId: 'user-A', email: 'a@example.test', role: 'ISSUER', tenantId: 'tenant-1', verificationLevel: 'basic' };
++// user-Z owns no row in the fixture: its fetched set is empty on every path.
++const CALLER_Z = { userId: 'user-Z', email: 'z@example.test', role: 'ISSUER', tenantId: 'tenant-1', verificationLevel: 'basic' };
++const EMPTY_BODY = JSON.stringify({ success: true, data: { certificates: [], count: 0 } });
++
++let server: Server;
++let base = '';
++const logCalls: Array<{ level: string; message: unknown; meta: unknown }> = [];
++
++beforeEach(async () => {
++  vi.resetModules();
++  table.rows = FIXTURE.map(r => ({ ...r }));
++  logCalls.length = 0;
++  const logger: any = (await import('../utils/logger')).logger;
++  for (const level of ['error', 'warn', 'info', 'debug'] as const) {
++    vi.spyOn(logger, level).mockImplementation(((message: unknown, meta: unknown) => {
++      logCalls.push({ level, message, meta });
++      return logger;
++    }) as any);
++  }
++  const routes = (await import('../routes/nft.routes')).default;
++  const app = express();
++  app.use((req, _res, next) => {
++    const h = req.headers['x-ks1836-user'];
++    if (typeof h === 'string') (req as any).user = JSON.parse(h);
++    next();
++  });
++  app.use('/api/nft', routes);
++  server = await new Promise<Server>(resolve => {
++    const s = app.listen(0, '127.0.0.1', () => resolve(s));
++  });
++  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
++}, 30000);
++
++afterEach(async () => {
++  vi.restoreAllMocks();
++  await new Promise<void>(resolve => server.close(() => resolve()));
++});
++
++async function get(path: string, user?: unknown): Promise<{ status: number; text: string; json: any }> {
++  const res = await fetch(`${base}${path}`, {
++    headers: user === undefined ? {} : { 'x-ks1836-user': JSON.stringify(user) },
++  });
++  const text = await res.text();
++  let json: any;
++  try { json = JSON.parse(text); } catch { json = undefined; }
++  return { status: res.status, text, json };
++}
++
++const narrowedLogs = () => logCalls.filter(c => c.level === 'warn' && c.message === NARROWED);
++
++describe('KS-1836 log contract: the foreign-selector arm of the narrowed-list warning', () => {
++  it('RED KS-1836 L1 a caller with no rows who names someone else in ?userId gets the empty 200 and exactly one narrowed-list warning naming the selector', async () => {
++    const r = await get('/api/nft/certificates?userId=user-B', CALLER_Z);
++    expect(r.status).toBe(200);
++    expect(r.text).toBe(EMPTY_BODY);
++    const logs = narrowedLogs();
++    expect(logs).toHaveLength(1);
++    expect(logs[0].meta).toMatchObject({ ownerId: 'user-Z', userIdSelector: 'user-B', returned: 0, withheld: 0 });
++    const serialised = JSON.stringify(logCalls);
++    expect(serialised.includes(B_KEY)).toBe(false);
++    expect(serialised.includes('encryptedKey')).toBe(false);
++  });
++
++  it('CONTROL KS-1836 L2 a caller with no rows and no selector logs no narrowed-list warning', async () => {
++    const r = await get('/api/nft/certificates', CALLER_Z);
++    expect(r.status).toBe(200);
++    expect(r.text).toBe(EMPTY_BODY);
++    expect(narrowedLogs()).toHaveLength(0);
++  });
++
++  it('CONTROL KS-1836 L3 a caller with no rows whose ?userId names itself logs no narrowed-list warning', async () => {
++    const r = await get('/api/nft/certificates?userId=user-Z', CALLER_Z);
++    expect(r.status).toBe(200);
++    expect(r.text).toBe(EMPTY_BODY);
++    expect(narrowedLogs()).toHaveLength(0);
++  });
++
++  it('CONTROL KS-1836 L4 a caller with rows who names someone else in ?userId gets the empty 200 and one warning that counts the withheld rows', async () => {
++    const r = await get('/api/nft/certificates?userId=user-B', CALLER_A);
++    expect(r.status).toBe(200);
++    expect(r.text).toBe(EMPTY_BODY);
++    const logs = narrowedLogs();
++    expect(logs).toHaveLength(1);
++    expect(logs[0].meta).toMatchObject({ ownerId: 'user-A', userIdSelector: 'user-B', returned: 0, withheld: 2 });
++  });
++});
+diff --git a/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts
+new file mode 100644
+index 000000000..4d0e280b3
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts
+@@ -0,0 +1,150 @@
++// KS-1836 (gate 23 finding F1, second half): GET /api/nft/certificates must write the 'NFT certificate list narrowed to the caller'
++// warning ONLY when a row was withheld or a foreign ?userId was named. An ordinary call (the caller's own rows, an own-id selector, an
++// empty set with no selector) must stay silent: the line is a signal, and a handler that logs on every call buries it. The PR's own
++// cells assert the log when it should fire (R17) but never that it stays quiet, so changing `withheld > 0` to `withheld >= 0`
++// stayed green.
++// The router runs on a small express app over an ephemeral port with a test-only req.user middleware; the REAL minting service
++// runs on a fake table, and the logger is spied. Harness copied from ks1836-nft-list-owner-bound.test.ts.
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++import express from 'express';
++import type { Server } from 'http';
++import type { AddressInfo } from 'net';
++
++type Row = Record<string, unknown>;
++
++const table = vi.hoisted(() => ({ rows: [] as Record<string, unknown>[] }));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: async (text: string, params: unknown[] = []) => {
++    const sql = text.replace(/\s+/g, ' ').trim();
++    if (sql === 'SELECT * FROM svc_nft_certificates') return { rows: table.rows.slice() };
++    if (sql === 'SELECT * FROM svc_nft_certificates WHERE id = $1') {
++      return { rows: table.rows.filter(r => r.id === params[0]) };
++    }
++    if (sql === 'SELECT * FROM svc_nft_certificates WHERE user_id = $1 ORDER BY created_at DESC') {
++      return { rows: table.rows.filter(r => r.user_id === params[0]) };
++    }
++    if (sql === 'SELECT * FROM svc_nft_certificates WHERE wallet_address = $1 ORDER BY created_at DESC') {
++      return { rows: table.rows.filter(r => r.wallet_address === params[0]) };
++    }
++    throw new Error(`ks1836 log fake table: unexpected SQL: ${sql.slice(0, 80)}`);
++  },
++}));
++
++vi.mock('../cardano', () => ({
++  isCardanoNFTReady: () => false,
++  mintNFTOnChain: vi.fn(),
++  getPolicyId: () => null,
++  waitForNFTConfirmation: vi.fn(),
++}));
++
++vi.mock('../services/blockchain-verifier.service', () => ({
++  blockchainVerifier: { verifyTransaction: vi.fn() },
++}));
++
++const W_A = 'addr_test1_ks1836log_wallet_a';
++const W_B = 'addr_test1_ks1836log_wallet_b';
++const B_KEY = 'ENC-KEY-B1-ks1836log';
++const NARROWED = 'NFT certificate list narrowed to the caller';
++
++function row(id: string, userId: string, wallet: string, minute: number, encryptedKey: string | null = null): Row {
++  return {
++    id, certification_id: `cert-${id}`, user_id: userId, chain: 'cardano', wallet_address: wallet,
++    policy_id: null, asset_name: null, asset_id: null, transaction_hash: null,
++    storage_tier: 'basic', privacy_level: 'full_privacy', public_fields: '[]', status: 'minted',
++    ipfs_cid: null, encrypted_key: encryptedKey, minting_cost: null, platform_fee: null, total_cost: null,
++    error_message: null, created_at: new Date(Date.UTC(2026, 9, 29, 12, minute)),
++    updated_at: new Date(Date.UTC(2026, 9, 29, 12, minute)), minted_at: null,
++  };
++}
++
++const FIXTURE: Row[] = [
++  row('a1', 'user-A', W_A, 1, 'ENC-KEY-A1-ks1836log'),
++  row('a2', 'user-A', W_A, 2),
++  row('b1', 'user-B', W_B, 3, B_KEY),
++];
++
++const CALLER_A = { userId: 'user-A', email: 'a@example.test', role: 'ISSUER', tenantId: 'tenant-1', verificationLevel: 'basic' };
++// user-Z owns no row in the fixture: its fetched set is empty on every path.
++const CALLER_Z = { userId: 'user-Z', email: 'z@example.test', role: 'ISSUER', tenantId: 'tenant-1', verificationLevel: 'basic' };
++const EMPTY_BODY = JSON.stringify({ success: true, data: { certificates: [], count: 0 } });
++
++let server: Server;
++let base = '';
++const logCalls: Array<{ level: string; message: unknown; meta: unknown }> = [];
++
++beforeEach(async () => {
++  vi.resetModules();
++  table.rows = FIXTURE.map(r => ({ ...r }));
++  logCalls.length = 0;
++  const logger: any = (await import('../utils/logger')).logger;
++  for (const level of ['error', 'warn', 'info', 'debug'] as const) {
++    vi.spyOn(logger, level).mockImplementation(((message: unknown, meta: unknown) => {
++      logCalls.push({ level, message, meta });
++      return logger;
++    }) as any);
++  }
++  const routes = (await import('../routes/nft.routes')).default;
++  const app = express();
++  app.use((req, _res, next) => {
++    const h = req.headers['x-ks1836-user'];
++    if (typeof h === 'string') (req as any).user = JSON.parse(h);
++    next();
++  });
++  app.use('/api/nft', routes);
++  server = await new Promise<Server>(resolve => {
++    const s = app.listen(0, '127.0.0.1', () => resolve(s));
++  });
++  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
++});
++
++afterEach(async () => {
++  vi.restoreAllMocks();
++  await new Promise<void>(resolve => server.close(() => resolve()));
++});
++
++async function get(path: string, user?: unknown): Promise<{ status: number; text: string; json: any }> {
++  const res = await fetch(`${base}${path}`, {
++    headers: user === undefined ? {} : { 'x-ks1836-user': JSON.stringify(user) },
++  });
++  const text = await res.text();
++  let json: any;
++  try { json = JSON.parse(text); } catch { json = undefined; }
++  return { status: res.status, text, json };
++}
++
++const ids = (r: { json: any }) => (r.json?.data?.certificates ?? []).map((c: any) => c.id);
++const narrowedLogs = () => logCalls.filter(c => c.level === 'warn' && c.message === NARROWED);
++
++describe('KS-1836 log contract: an ordinary call writes no narrowed-list warning', () => {
++  it('RED KS-1836 Q1 a bare list for a caller with rows returns the own rows and logs no narrowed-list warning', async () => {
++    const r = await get('/api/nft/certificates', CALLER_A);
++    expect(r.status).toBe(200);
++    expect(ids(r)).toEqual(['a2', 'a1']);
++    expect(narrowedLogs()).toHaveLength(0);
++  });
++
++  it('RED KS-1836 Q2 a ?userId naming the caller itself returns the own rows and logs no narrowed-list warning', async () => {
++    const r = await get('/api/nft/certificates?userId=user-A', CALLER_A);
++    expect(r.status).toBe(200);
++    expect(ids(r)).toEqual(['a2', 'a1']);
++    expect(narrowedLogs()).toHaveLength(0);
++  });
++
++  it('RED KS-1836 Q3 a caller with no rows and no selector gets the empty 200 and logs no narrowed-list warning', async () => {
++    const r = await get('/api/nft/certificates', CALLER_Z);
++    expect(r.status).toBe(200);
++    expect(r.text).toBe(EMPTY_BODY);
++    expect(narrowedLogs()).toHaveLength(0);
++  });
++
++  it('CONTROL KS-1836 Q4 a foreign wallet selector still logs exactly one warning that counts the withheld row', async () => {
++    const r = await get(`/api/nft/certificates?walletAddress=${W_B}`, CALLER_A);
++    expect(r.status).toBe(200);
++    expect(r.text).toBe(EMPTY_BODY);
++    const logs = narrowedLogs();
++    expect(logs).toHaveLength(1);
++    expect(logs[0].meta).toMatchObject({ ownerId: 'user-A', walletAddress: W_B, returned: 0, withheld: 1 });
++  });
++});
+diff --git a/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts
+new file mode 100644
+index 000000000..9553acc5c
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts
+@@ -0,0 +1,38 @@
++// KS-1836 (gate 23 mutant Mf): selectReadableCertificates (services/nftReadGate.ts) documents that the `walletAddress` selector "must
++// equal the row's wallet". The comparison is exact: a wallet address is an opaque string, so a selector or a row value that differs
++// only by surrounding whitespace is a DIFFERENT wallet and matches nothing. The PR's own cells use well-formed wallets only, so a
++// compare that trims both sides stayed green. Unit level: the pure function, no router, no database.
++import { describe, it, expect } from 'vitest';
++import { selectReadableCertificates } from '../services/nftReadGate';
++import type { NFTCertificate } from '../types';
++
++const OWNER = 'user-A';
++const WALLET = 'addr_test1_ks1836_exact_wallet';
++
++function cert(id: string, walletAddress: string): NFTCertificate {
++  return { id, userId: OWNER, walletAddress } as unknown as NFTCertificate;
++}
++
++const ids = (list: readonly NFTCertificate[]) => list.map(c => c.id);
++
++describe('KS-1836 read gate: the walletAddress selector compares exactly', () => {
++  it('RED KS-1836 W1 a selector padded with spaces does not match the unpadded row wallet', () => {
++    expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: ` ${WALLET} ` }))).toEqual([]);
++  });
++
++  it('RED KS-1836 W2 a row wallet padded with spaces is not matched by the unpadded selector', () => {
++    expect(ids(selectReadableCertificates([cert('c1', ` ${WALLET}`)], OWNER, { walletAddress: WALLET }))).toEqual([]);
++  });
++
++  it('CONTROL KS-1836 W3 the exact selector returns the row', () => {
++    expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: WALLET }))).toEqual(['c1']);
++  });
++
++  it('CONTROL KS-1836 W4 a different wallet returns nothing', () => {
++    expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: `${WALLET}_other` }))).toEqual([]);
++  });
++
++  it('CONTROL KS-1836 W5 no walletAddress selector returns every row the owner holds', () => {
++    expect(ids(selectReadableCertificates([cert('c1', WALLET), cert('c2', 'addr_other')], OWNER, {}))).toEqual(['c1', 'c2']);
++  });
++});
+diff --git a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+index 75cd6a635..1819a771a 100644
+--- a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
++++ b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
+@@ -5862,5 +5862,16 @@ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test
+ <h3>121.4 Running it</h3>
+ <pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- ks1666-certify-reservation-comments   # 5 cells, rc 0
+ cd Blockchain/Dev/services/originate &amp;&amp; npm test -- --maxWorkers=3                           # 152 files / 1854 cells, rc 0</code></pre>
++<h2>126. Three test files kill the three mutants gate 23 found alive in the NFT list read gate (KS-1836 gate 23 mutants Ma, Mb and Mf)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What this changes.</strong></td><td>Three new test files in <code>Blockchain/Dev/services/nft-certificate/src/__tests__/</code> and nothing else: no product byte moves. They pin behaviour that PR #1819 (KS-1836, merged and deployed) already has but that its own cells did not defend, so a mutant of the product stayed green. <code>ks1836-read-gate-wallet-selector-compares-exactly.test.ts</code> (5 cells) pins that the <code>walletAddress</code> selector compares exactly, so a selector or a row value that differs only by surrounding whitespace matches nothing (mutant Mf, <code>src/services/nftReadGate.ts</code> line 91, trims both sides). <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> (4 cells) pins that a caller who owns no rows and names someone else in <code>?userId</code> gets the empty 200 and exactly one narrowed-list warning naming the selector (mutant Ma, <code>src/routes/nft.routes.ts</code> line 244, drops the foreign-selector arm of the condition). <code>ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts</code> (4 cells) pins that an ordinary call by a caller with rows, a self-naming <code>?userId</code>, or a caller with no rows and no selector writes no narrowed-list warning (mutant Mb, the same line, turns <code>withheld &gt; 0</code> into <code>withheld &gt;= 0</code>).</td></tr><tr><td>These are test-only passes, so they are green at the untouched product by design. The proof that they bite is a tamper, done in the worktree only and never committed: each mutant is applied to the one product line, the named file is run, and the line is restored by content.</td></tr><tr><td>Scope: this covers the mutant-kill cells Ma, Mb and Mf of gate 23 only. The row-owner trim asymmetry (F2, mutant Mc) and F3 are a product call and are not covered; mutant Md was judged near-equivalent and not briefed. The ticket stays In Progress.</td></tr><tr><td><strong>Two deliberate deviations from the checker&rsquo;s bytes, both in <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> and both on the coordinator&rsquo;s ruling.</strong> (1) The unused helper at line 116 of the canonical file, <code>const ids = ...</code>, is deleted: <code>tsc</code> with the tests in the program reports it as <code>TS6133</code> and <code>eslint</code> as a warning; the checker&rsquo;s own tsc step reported rc 0 for the service and the service tsconfig excludes tests, which this entry takes to be why, and nft-certificate is not among the services the pre-push type ratchet covers. (2) The closing line of the file&rsquo;s <code>beforeEach</code> becomes <code>}, 30000);</code>, a 30 second hook timeout, because the first cell timed out in 2 of 6 alone runs. sha256 of the canonical file <code>1ad82607193bbc7a</code>, after (1) alone <code>ddff23e61ea18c54</code>, final <code>8286bb7952e53fc1</code>. The file, tamper Ma, the three files together and the suite were re-run on the final bytes.</td></tr></table>
++<h3>126.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Green at the product, red under each mutant, and no other cell moves.</strong></td><td><strong>Untouched product, develop <code>530f091120d5</code>:</strong> 13 of 13 cells pass with the three files in one vitest invocation; run alone they read 5 of 5, 4 of 4 and 4 of 4 once warm. Run alone before the change below, <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> failed its first cell (L1) in 2 of 6 runs, the first run after the file was created and the first after the first edit, on a <code>beforeEach</code> of 12.2 and 15.9 seconds against vitest&rsquo;s default 10 second hook timeout (the harness re-imports the whole route graph per cell); the cause is not established. With the 30 second timeout on that <code>beforeEach</code> it passed 4 of 4 in 6 of 6 alone runs, the first of them the first run after the change, at a host load1 of 22.9 to 23.6, with the first cell at 226 to 521 ms. The merged sibling <code>ks1836-nft-list-owner-bound.test.ts</code> alone passed 24 of 24 at a host load of 21 with its first cell at 318 ms.</td></tr><tr><td><strong>Tamper Mb</strong> (<code>src/routes/nft.routes.ts</code> line 244, <code>withheld &gt; 0</code> to <code>withheld &gt;= 0</code>): <code>ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts</code> fails 3 of 4 (Q1, Q2, Q3) and the control Q4 passes. <strong>Tamper Ma</strong> (the same line reduced to <code>if (withheld &gt; 0) {</code>): <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> fails 1 of 4 (L1) and L2, L3, L4 pass. <strong>Tamper Mf</strong> (<code>src/services/nftReadGate.ts</code> line 91, the exact compare replaced by a trimmed compare): <code>ks1836-read-gate-wallet-selector-compares-exactly.test.ts</code> fails 2 of 5 (W1, W2) and W3, W4, W5 pass.</td></tr><tr><td><strong>Tamper discipline:</strong> before each tamper the exact anchor line occurs once (counted two ways, with a positive control that counts a substring on several lines and a nonsense line counted 0), each mutant parses (TypeScript syntactic diagnostics 0, with a broken string giving more than 0), and after each restore the original line occurs once, the mutant line 0 times and the whole-file sha256 equals the pre-tamper value (<code>nft.routes.ts</code> prefix <code>4f3357604893b0aa</code>, <code>nftReadGate.ts</code> prefix <code>68ebcfa1df851202</code>). <code>git status</code> never named a product file.</td></tr><tr><td><strong>Whole nft-certificate unit suite</strong> (vitest 4.1.12, <code>--maxWorkers=3</code>): 16 files, 120 cells, 120 pass, 0 fail, 0 skipped on the canonical bytes and again on the final bytes (host load1 19 to 22); the checker&rsquo;s untouched-tip figure was 107 cells, so 107 + 5 + 4 + 4 = 120. One further run, on the bytes after the first edit at a host load of about 21, read 117 pass and 3 skipped because the untouched <code>encryption.service.test.ts</code> failed its <code>beforeAll</code> hook; that file passes 3 of 3 alone. <code>eslint</code> on the three files: 0 errors, 0 warnings, and a planted file raised <code>@typescript-eslint/no-unused-vars</code> and <code>no-debugger</code>. <code>tsc --noEmit</code> with <code>src/__tests__</code> added to the program (37 nft-certificate source files, 16 under <code>__tests__</code>; the service tsconfig excludes tests): <strong>0 errors</strong>, and a planted type error was reported once as <code>TS2322</code> by file name.</td></tr></table>
++<h3>126.2 Environment and figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-10-30 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats.</strong></td><td>Node v26.8.1 (not an LTS line), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0. Base: develop <code>530f091120d5</code>.</td></tr></table>
++<h3>126.3 What this does not prove</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Three mutants, not the whole read gate.</strong></td><td>Nothing here defends the row-owner trim asymmetry (F2, mutant Mc) or F3, and no other mutant of the two product lines was tried. <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> and <code>ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts</code> share a harness copied from the merged <code>ks1836-nft-list-owner-bound.test.ts</code> and re-import the route graph per cell, so a cold first run under load can exceed the default hook timeout, as it did in 2 of 6 alone runs of the first; <code>ks1836-read-gate-wallet-selector-compares-exactly.test.ts</code> tests the pure function and has no such hook.</td></tr><tr><td>Not run: the nft-certificate integration files, the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24, any deploy. The pre-push hook&rsquo;s leg count is stated in the pull request.</td></tr></table>
++<h3>126.4 Running it</h3>
++<pre><code>cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test -- ks1836-read-gate-wallet-selector ks1836-log-foreign-selector ks1836-log-silent-on   # 13 cells, rc 0
++cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test -- --maxWorkers=3                                  # 16 files / 120 cells, rc 0</code></pre>
+ </body>
+ </html>
+diff --git a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+index af86ba785..6c83b44fd 100644
+--- a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
++++ b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
+@@ -5950,5 +5950,20 @@ cd Blockchain/Dev/services/originate &amp;&amp; npm test -- --maxWorkers=3
+ <tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0</td></tr>
+ <tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+ </table>
++<h2>Three test files now defend the NFT list read gate against the three mutants gate 23 found alive &mdash; KS-1836 gate 23 mutants Ma, Mb and Mf</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>Three new test files in <code>nft-certificate/src/__tests__/</code>, no product byte changes: <code>ks1836-read-gate-wallet-selector-compares-exactly.test.ts</code> (5 cells, exact wallet compare), <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> (4 cells, one narrowed-list warning for a foreign selector with no rows) and <code>ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts</code> (4 cells, no warning on an ordinary call). Covers gate 23&rsquo;s mutants Ma, Mb and Mf only; F2/Mc and F3 are a product call and are not covered.</td></tr><tr><td>Test-only, so green at the product (13 of 13). The proof is a tamper in the worktree: Mb fails 3 of 4, Ma 1 of 4, Mf 2 of 5, each restored sha256-equal.</td></tr></table></div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>Any mutant beyond the three; the nft-certificate integration files, the four platform suites, a running stack, Node 24 and any deploy were not run. <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> differs from the checker&rsquo;s file by two lines on the coordinator&rsquo;s ruling: the unused helper at line 116 is deleted and its <code>beforeEach</code> gets a 30 second timeout (its first cell timed out in 2 of 6 alone runs before that; cause not established).</td></tr></table></div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test -- ks1836-read-gate-wallet-selector ks1836-log-foreign-selector ks1836-log-silent-on   # 13 cells, rc 0
++cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test -- --maxWorkers=3                                  # 16 files / 120 cells, rc 0</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>13</strong> in 3 files (5 + 4 + 4); 13 of 13 pass at the untouched product (develop <code>530f091120d5</code>); under tamper Mb 3 of 4 fail, Ma 1 of 4, Mf 2 of 5</td></tr>
++<tr><td>nft-certificate unit suite</td><td><strong>16 files / 120 cells</strong>, all pass, 0 failed, 0 skipped (vitest 4.1.12, <code>--maxWorkers=3</code>); the checker&rsquo;s untouched-tip figure was 107 cells</td></tr>
++<tr><td>tsc and eslint</td><td>tsc with the tests added to the program: <strong>0 errors</strong> over 37 source files, a planted type error reported once as <code>TS2322</code>; eslint: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
++<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>530f091120d5</code> with the change on top, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+ </body>
+ </html>
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts
+1: // KS-1836 (gate 23 finding F1): GET /api/nft/certificates writes one warning, 'NFT certificate list narrowed to the caller', when
+2: // `withheld > 0 || (userIdSelector !== undefined && userIdSelector !== ownerId)`. The first disjunct (a row was withheld) is pinned
+3: // by the PR's own R17. The SECOND disjunct only matters when the caller's fetched set is EMPTY and ?userId names someone else: nothing
+4: // is withheld then, so only the foreign-selector arm can log it. No cell exercised that, so dropping the arm stayed green.
+5: // The router runs on a small express app over an ephemeral port with a test-only req.user middleware; the REAL minting service
+6: // runs on a fake table, and the logger is spied. Harness copied from ks1836-nft-list-owner-bound.test.ts.
+7: import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+8: import express from 'express';
+9: import type { Server } from 'http';
+10: import type { AddressInfo } from 'net';
+11: 
+12: type Row = Record<string, unknown>;
+13: 
+14: const table = vi.hoisted(() => ({ rows: [] as Record<string, unknown>[] }));
+15: 
+16: vi.mock('../db', () => ({
+17:   isDbAvailable: () => true,
+18:   query: async (text: string, params: unknown[] = []) => {
+19:     const sql = text.replace(/\s+/g, ' ').trim();
+20:     if (sql === 'SELECT * FROM svc_nft_certificates') return { rows: table.rows.slice() };
+21:     if (sql === 'SELECT * FROM svc_nft_certificates WHERE id = $1') {
+22:       return { rows: table.rows.filter(r => r.id === params[0]) };
+23:     }
+24:     if (sql === 'SELECT * FROM svc_nft_certificates WHERE user_id = $1 ORDER BY created_at DESC') {
+25:       return { rows: table.rows.filter(r => r.user_id === params[0]) };
+26:     }
+27:     if (sql === 'SELECT * FROM svc_nft_certificates WHERE wallet_address = $1 ORDER BY created_at DESC') {
+28:       return { rows: table.rows.filter(r => r.wallet_address === params[0]) };
+29:     }
+30:     throw new Error(`ks1836 log fake table: unexpected SQL: ${sql.slice(0, 80)}`);
+31:   },
+32: }));
+33: 
+34: vi.mock('../cardano', () => ({
+35:   isCardanoNFTReady: () => false,
+36:   mintNFTOnChain: vi.fn(),
+37:   getPolicyId: () => null,
+38:   waitForNFTConfirmation: vi.fn(),
+39: }));
+40: 
+41: vi.mock('../services/blockchain-verifier.service', () => ({
+42:   blockchainVerifier: { verifyTransaction: vi.fn() },
+43: }));
+44: 
+45: const W_A = 'addr_test1_ks1836log_wallet_a';
+46: const W_B = 'addr_test1_ks1836log_wallet_b';
+47: const B_KEY = 'ENC-KEY-B1-ks1836log';
+48: const NARROWED = 'NFT certificate list narrowed to the caller';
+49: 
+50: function row(id: string, userId: string, wallet: string, minute: number, encryptedKey: string | null = null): Row {
+51:   return {
+52:     id, certification_id: `cert-${id}`, user_id: userId, chain: 'cardano', wallet_address: wallet,
+53:     policy_id: null, asset_name: null, asset_id: null, transaction_hash: null,
+54:     storage_tier: 'basic', privacy_level: 'full_privacy', public_fields: '[]', status: 'minted',
+55:     ipfs_cid: null, encrypted_key: encryptedKey, minting_cost: null, platform_fee: null, total_cost: null,
+56:     error_message: null, created_at: new Date(Date.UTC(2026, 9, 29, 12, minute)),
+57:     updated_at: new Date(Date.UTC(2026, 9, 29, 12, minute)), minted_at: null,
+58:   };
+59: }
+60: 
+61: const FIXTURE: Row[] = [
+62:   row('a1', 'user-A', W_A, 1, 'ENC-KEY-A1-ks1836log'),
+63:   row('a2', 'user-A', W_A, 2),
+64:   row('b1', 'user-B', W_B, 3, B_KEY),
+65: ];
+66: 
+67: const CALLER_A = { userId: 'user-A', email: 'a@example.test', role: 'ISSUER', tenantId: 'tenant-1', verificationLevel: 'basic' };
+68: // user-Z owns no row in the fixture: its fetched set is empty on every path.
+69: const CALLER_Z = { userId: 'user-Z', email: 'z@example.test', role: 'ISSUER', tenantId: 'tenant-1', verificationLevel: 'basic' };
+70: const EMPTY_BODY = JSON.stringify({ success: true, data: { certificates: [], count: 0 } });
+71: 
+72: let server: Server;
+73: let base = '';
+74: const logCalls: Array<{ level: string; message: unknown; meta: unknown }> = [];
+75: 
+76: beforeEach(async () => {
+77:   vi.resetModules();
+78:   table.rows = FIXTURE.map(r => ({ ...r }));
+79:   logCalls.length = 0;
+80:   const logger: any = (await import('../utils/logger')).logger;
+81:   for (const level of ['error', 'warn', 'info', 'debug'] as const) {
+82:     vi.spyOn(logger, level).mockImplementation(((message: unknown, meta: unknown) => {
+83:       logCalls.push({ level, message, meta });
+84:       return logger;
+85:     }) as any);
+86:   }
+87:   const routes = (await import('../routes/nft.routes')).default;
+88:   const app = express();
+89:   app.use((req, _res, next) => {
+90:     const h = req.headers['x-ks1836-user'];
+91:     if (typeof h === 'string') (req as any).user = JSON.parse(h);
+92:     next();
+93:   });
+94:   app.use('/api/nft', routes);
+95:   server = await new Promise<Server>(resolve => {
+96:     const s = app.listen(0, '127.0.0.1', () => resolve(s));
+97:   });
+98:   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+99: }, 30000);
+100: 
+101: afterEach(async () => {
+102:   vi.restoreAllMocks();
+103:   await new Promise<void>(resolve => server.close(() => resolve()));
+104: });
+105: 
+106: async function get(path: string, user?: unknown): Promise<{ status: number; text: string; json: any }> {
+107:   const res = await fetch(`${base}${path}`, {
+108:     headers: user === undefined ? {} : { 'x-ks1836-user': JSON.stringify(user) },
+109:   });
+110:   const text = await res.text();
+111:   let json: any;
+112:   try { json = JSON.parse(text); } catch { json = undefined; }
+113:   return { status: res.status, text, json };
+114: }
+115: 
+116: const narrowedLogs = () => logCalls.filter(c => c.level === 'warn' && c.message === NARROWED);
+117: 
+118: describe('KS-1836 log contract: the foreign-selector arm of the narrowed-list warning', () => {
+119:   it('RED KS-1836 L1 a caller with no rows who names someone else in ?userId gets the empty 200 and exactly one narrowed-list warning naming the selector', async () => {
+120:     const r = await get('/api/nft/certificates?userId=user-B', CALLER_Z);
+121:     expect(r.status).toBe(200);
+122:     expect(r.text).toBe(EMPTY_BODY);
+123:     const logs = narrowedLogs();
+124:     expect(logs).toHaveLength(1);
+125:     expect(logs[0].meta).toMatchObject({ ownerId: 'user-Z', userIdSelector: 'user-B', returned: 0, withheld: 0 });
+126:     const serialised = JSON.stringify(logCalls);
+127:     expect(serialised.includes(B_KEY)).toBe(false);
+128:     expect(serialised.includes('encryptedKey')).toBe(false);
+129:   });
+130: 
+131:   it('CONTROL KS-1836 L2 a caller with no rows and no selector logs no narrowed-list warning', async () => {
+132:     const r = await get('/api/nft/certificates', CALLER_Z);
+133:     expect(r.status).toBe(200);
+134:     expect(r.text).toBe(EMPTY_BODY);
+135:     expect(narrowedLogs()).toHaveLength(0);
+136:   });
+137: 
+138:   it('CONTROL KS-1836 L3 a caller with no rows whose ?userId names itself logs no narrowed-list warning', async () => {
+139:     const r = await get('/api/nft/certificates?userId=user-Z', CALLER_Z);
+140:     expect(r.status).toBe(200);
+141:     expect(r.text).toBe(EMPTY_BODY);
+142:     expect(narrowedLogs()).toHaveLength(0);
+143:   });
+144: 
+145:   it('CONTROL KS-1836 L4 a caller with rows who names someone else in ?userId gets the empty 200 and one warning that counts the withheld rows', async () => {
+146:     const r = await get('/api/nft/certificates?userId=user-B', CALLER_A);
+147:     expect(r.status).toBe(200);
+148:     expect(r.text).toBe(EMPTY_BODY);
+149:     const logs = narrowedLogs();
+150:     expect(logs).toHaveLength(1);
+151:     expect(logs[0].meta).toMatchObject({ ownerId: 'user-A', userIdSelector: 'user-B', returned: 0, withheld: 2 });
+152:   });
+153: });
+
+### FILE AT HEAD: Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts
+1: // KS-1836 (gate 23 finding F1, second half): GET /api/nft/certificates must write the 'NFT certificate list narrowed to the caller'
+2: // warning ONLY when a row was withheld or a foreign ?userId was named. An ordinary call (the caller's own rows, an own-id selector, an
+3: // empty set with no selector) must stay silent: the line is a signal, and a handler that logs on every call buries it. The PR's own
+4: // cells assert the log when it should fire (R17) but never that it stays quiet, so changing `withheld > 0` to `withheld >= 0`
+5: // stayed green.
+6: // The router runs on a small express app over an ephemeral port with a test-only req.user middleware; the REAL minting service
+7: // runs on a fake table, and the logger is spied. Harness copied from ks1836-nft-list-owner-bound.test.ts.
+8: import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+9: import express from 'express';
+10: import type { Server } from 'http';
+11: import type { AddressInfo } from 'net';
+12: 
+13: type Row = Record<string, unknown>;
+14: 
+15: const table = vi.hoisted(() => ({ rows: [] as Record<string, unknown>[] }));
+16: 
+17: vi.mock('../db', () => ({
+18:   isDbAvailable: () => true,
+19:   query: async (text: string, params: unknown[] = []) => {
+20:     const sql = text.replace(/\s+/g, ' ').trim();
+21:     if (sql === 'SELECT * FROM svc_nft_certificates') return { rows: table.rows.slice() };
+22:     if (sql === 'SELECT * FROM svc_nft_certificates WHERE id = $1') {
+23:       return { rows: table.rows.filter(r => r.id === params[0]) };
+24:     }
+25:     if (sql === 'SELECT * FROM svc_nft_certificates WHERE user_id = $1 ORDER BY created_at DESC') {
+26:       return { rows: table.rows.filter(r => r.user_id === params[0]) };
+27:     }
+28:     if (sql === 'SELECT * FROM svc_nft_certificates WHERE wallet_address = $1 ORDER BY created_at DESC') {
+29:       return { rows: table.rows.filter(r => r.wallet_address === params[0]) };
+30:     }
+31:     throw new Error(`ks1836 log fake table: unexpected SQL: ${sql.slice(0, 80)}`);
+32:   },
+33: }));
+34: 
+35: vi.mock('../cardano', () => ({
+36:   isCardanoNFTReady: () => false,
+37:   mintNFTOnChain: vi.fn(),
+38:   getPolicyId: () => null,
+39:   waitForNFTConfirmation: vi.fn(),
+40: }));
+41: 
+42: vi.mock('../services/blockchain-verifier.service', () => ({
+43:   blockchainVerifier: { verifyTransaction: vi.fn() },
+44: }));
+45: 
+46: const W_A = 'addr_test1_ks1836log_wallet_a';
+47: const W_B = 'addr_test1_ks1836log_wallet_b';
+48: const B_KEY = 'ENC-KEY-B1-ks1836log';
+49: const NARROWED = 'NFT certificate list narrowed to the caller';
+50: 
+51: function row(id: string, userId: string, wallet: string, minute: number, encryptedKey: string | null = null): Row {
+52:   return {
+53:     id, certification_id: `cert-${id}`, user_id: userId, chain: 'cardano', wallet_address: wallet,
+54:     policy_id: null, asset_name: null, asset_id: null, transaction_hash: null,
+55:     storage_tier: 'basic', privacy_level: 'full_privacy', public_fields: '[]', status: 'minted',
+56:     ipfs_cid: null, encrypted_key: encryptedKey, minting_cost: null, platform_fee: null, total_cost: null,
+57:     error_message: null, created_at: new Date(Date.UTC(2026, 9, 29, 12, minute)),
+58:     updated_at: new Date(Date.UTC(2026, 9, 29, 12, minute)), minted_at: null,
+59:   };
+60: }
+61: 
+62: const FIXTURE: Row[] = [
+63:   row('a1', 'user-A', W_A, 1, 'ENC-KEY-A1-ks1836log'),
+64:   row('a2', 'user-A', W_A, 2),
+65:   row('b1', 'user-B', W_B, 3, B_KEY),
+66: ];
+67: 
+68: const CALLER_A = { userId: 'user-A', email: 'a@example.test', role: 'ISSUER', tenantId: 'tenant-1', verificationLevel: 'basic' };
+69: // user-Z owns no row in the fixture: its fetched set is empty on every path.
+70: const CALLER_Z = { userId: 'user-Z', email: 'z@example.test', role: 'ISSUER', tenantId: 'tenant-1', verificationLevel: 'basic' };
+71: const EMPTY_BODY = JSON.stringify({ success: true, data: { certificates: [], count: 0 } });
+72: 
+73: let server: Server;
+74: let base = '';
+75: const logCalls: Array<{ level: string; message: unknown; meta: unknown }> = [];
+76: 
+77: beforeEach(async () => {
+78:   vi.resetModules();
+79:   table.rows = FIXTURE.map(r => ({ ...r }));
+80:   logCalls.length = 0;
+81:   const logger: any = (await import('../utils/logger')).logger;
+82:   for (const level of ['error', 'warn', 'info', 'debug'] as const) {
+83:     vi.spyOn(logger, level).mockImplementation(((message: unknown, meta: unknown) => {
+84:       logCalls.push({ level, message, meta });
+85:       return logger;
+86:     }) as any);
+87:   }
+88:   const routes = (await import('../routes/nft.routes')).default;
+89:   const app = express();
+90:   app.use((req, _res, next) => {
+91:     const h = req.headers['x-ks1836-user'];
+92:     if (typeof h === 'string') (req as any).user = JSON.parse(h);
+93:     next();
+94:   });
+95:   app.use('/api/nft', routes);
+96:   server = await new Promise<Server>(resolve => {
+97:     const s = app.listen(0, '127.0.0.1', () => resolve(s));
+98:   });
+99:   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+100: });
+101: 
+102: afterEach(async () => {
+103:   vi.restoreAllMocks();
+104:   await new Promise<void>(resolve => server.close(() => resolve()));
+105: });
+106: 
+107: async function get(path: string, user?: unknown): Promise<{ status: number; text: string; json: any }> {
+108:   const res = await fetch(`${base}${path}`, {
+109:     headers: user === undefined ? {} : { 'x-ks1836-user': JSON.stringify(user) },
+110:   });
+111:   const text = await res.text();
+112:   let json: any;
+113:   try { json = JSON.parse(text); } catch { json = undefined; }
+114:   return { status: res.status, text, json };
+115: }
+116: 
+117: const ids = (r: { json: any }) => (r.json?.data?.certificates ?? []).map((c: any) => c.id);
+118: const narrowedLogs = () => logCalls.filter(c => c.level === 'warn' && c.message === NARROWED);
+119: 
+120: describe('KS-1836 log contract: an ordinary call writes no narrowed-list warning', () => {
+121:   it('RED KS-1836 Q1 a bare list for a caller with rows returns the own rows and logs no narrowed-list warning', async () => {
+122:     const r = await get('/api/nft/certificates', CALLER_A);
+123:     expect(r.status).toBe(200);
+124:     expect(ids(r)).toEqual(['a2', 'a1']);
+125:     expect(narrowedLogs()).toHaveLength(0);
+126:   });
+127: 
+128:   it('RED KS-1836 Q2 a ?userId naming the caller itself returns the own rows and logs no narrowed-list warning', async () => {
+129:     const r = await get('/api/nft/certificates?userId=user-A', CALLER_A);
+130:     expect(r.status).toBe(200);
+131:     expect(ids(r)).toEqual(['a2', 'a1']);
+132:     expect(narrowedLogs()).toHaveLength(0);
+133:   });
+134: 
+135:   it('RED KS-1836 Q3 a caller with no rows and no selector gets the empty 200 and logs no narrowed-list warning', async () => {
+136:     const r = await get('/api/nft/certificates', CALLER_Z);
+137:     expect(r.status).toBe(200);
+138:     expect(r.text).toBe(EMPTY_BODY);
+139:     expect(narrowedLogs()).toHaveLength(0);
+140:   });
+141: 
+142:   it('CONTROL KS-1836 Q4 a foreign wallet selector still logs exactly one warning that counts the withheld row', async () => {
+143:     const r = await get(`/api/nft/certificates?walletAddress=${W_B}`, CALLER_A);
+144:     expect(r.status).toBe(200);
+145:     expect(r.text).toBe(EMPTY_BODY);
+146:     const logs = narrowedLogs();
+147:     expect(logs).toHaveLength(1);
+148:     expect(logs[0].meta).toMatchObject({ ownerId: 'user-A', walletAddress: W_B, returned: 0, withheld: 1 });
+149:   });
+150: });
+
+### FILE AT HEAD: Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts
+1: // KS-1836 (gate 23 mutant Mf): selectReadableCertificates (services/nftReadGate.ts) documents that the `walletAddress` selector "must
+2: // equal the row's wallet". The comparison is exact: a wallet address is an opaque string, so a selector or a row value that differs
+3: // only by surrounding whitespace is a DIFFERENT wallet and matches nothing. The PR's own cells use well-formed wallets only, so a
+4: // compare that trims both sides stayed green. Unit level: the pure function, no router, no database.
+5: import { describe, it, expect } from 'vitest';
+6: import { selectReadableCertificates } from '../services/nftReadGate';
+7: import type { NFTCertificate } from '../types';
+8: 
+9: const OWNER = 'user-A';
+10: const WALLET = 'addr_test1_ks1836_exact_wallet';
+11: 
+12: function cert(id: string, walletAddress: string): NFTCertificate {
+13:   return { id, userId: OWNER, walletAddress } as unknown as NFTCertificate;
+14: }
+15: 
+16: const ids = (list: readonly NFTCertificate[]) => list.map(c => c.id);
+17: 
+18: describe('KS-1836 read gate: the walletAddress selector compares exactly', () => {
+19:   it('RED KS-1836 W1 a selector padded with spaces does not match the unpadded row wallet', () => {
+20:     expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: ` ${WALLET} ` }))).toEqual([]);
+21:   });
+22: 
+23:   it('RED KS-1836 W2 a row wallet padded with spaces is not matched by the unpadded selector', () => {
+24:     expect(ids(selectReadableCertificates([cert('c1', ` ${WALLET}`)], OWNER, { walletAddress: WALLET }))).toEqual([]);
+25:   });
+26: 
+27:   it('CONTROL KS-1836 W3 the exact selector returns the row', () => {
+28:     expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: WALLET }))).toEqual(['c1']);
+29:   });
+30: 
+31:   it('CONTROL KS-1836 W4 a different wallet returns nothing', () => {
+32:     expect(ids(selectReadableCertificates([cert('c1', WALLET)], OWNER, { walletAddress: `${WALLET}_other` }))).toEqual([]);
+33:   });
+34: 
+35:   it('CONTROL KS-1836 W5 no walletAddress selector returns every row the owner holds', () => {
+36:     expect(ids(selectReadableCertificates([cert('c1', WALLET), cert('c2', 'addr_other')], OWNER, {}))).toEqual(['c1', 'c2']);
+37:   });
+38: });
+
+### FILE AT HEAD: Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+(OMITTED: 865560 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+### FILE AT HEAD: Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+(OMITTED: 580749 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1831,
+ "head_sha": "4eba00d500d7114d2843365cd04cf0632cf5eebb",
+ "pr_tip_now": "4eba00d500d7114d2843365cd04cf0632cf5eebb",
+ "head_mode": "tip",
+ "merge_base": "530f091120d5da749edf972e8e0089e44cfc5589",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts",
+   "added": "153",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts",
+   "added": "150",
+   "deleted": "0"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts",
+   "added": "38",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+   "added": "11",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html",
+   "added": "15",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts",
+  "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts",
+  "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts"
+ ],
+ "product_files": [
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+ ],
+ "diff_stat": {
+  "files": 5,
+  "added": 367,
+  "deleted": 0
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 5,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "31/head/Blockchain/Dev/services/nft-certificate\n\n \u2713 src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts (5 tests) 2ms\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  15:14:57\n   Duration  194ms (transform 23ms, setup 0ms, import 36ms, tests 2ms, environment 0ms)"
+  },
+  {
+   "file": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 4,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "/w1831/head/Blockchain/Dev/services/nft-certificate\n\n \u2713 src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts (4 tests) 302ms\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  15:14:58\n   Duration  515ms (transform 98ms, setup 0ms, import 119ms, tests 302ms, environment 0ms)"
+  },
+  {
+   "file": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 4,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "1/head/Blockchain/Dev/services/nft-certificate\n\n \u2713 src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts (4 tests) 255ms\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  15:14:59\n   Duration  430ms (transform 94ms, setup 0ms, import 78ms, tests 255ms, environment 0ms)"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 5,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "31/head/Blockchain/Dev/services/nft-certificate\n\n \u2713 src/__tests__/ks1836-read-gate-wallet-selector-compares-exactly.test.ts (5 tests) 2ms\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  15:15:00\n   Duration  133ms (transform 20ms, setup 0ms, import 29ms, tests 2ms, environment 0ms)"
+  },
+  {
+   "file": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 4,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "d/w1831/head/Blockchain/Dev/services/nft-certificate\n\n \u2713 src/__tests__/ks1836-log-foreign-selector-with-no-rows.test.ts (4 tests) 245ms\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  15:15:01\n   Duration  417ms (transform 93ms, setup 0ms, import 77ms, tests 245ms, environment 0ms)"
+  },
+  {
+   "file": "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 4,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "1/head/Blockchain/Dev/services/nft-certificate\n\n \u2713 src/__tests__/ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts (4 tests) 227ms\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  15:15:02\n   Duration  390ms (transform 90ms, setup 0ms, import 73ms, tests 227ms, environment 0ms)"
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 3,
+  "files_ok": 3,
+  "files_failed": 0,
+  "passed": 13,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 3,
+  "files_ok": 3,
+  "files_failed": 0,
+  "passed": 13,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 11
+}

@@ -1,0 +1,627 @@
+===== TICKET =====
+KS-1585 — KS-1570 PR A follow-up (pull request 1535 gate m1-m3, n1-n3): 503 on an infrastructure fault, EXPECTED_TABLES drift, PR B write-time checks, three nits [In Progress]
+
+## BLUF
+
+**The follow-up to pull request 1535 (KS-1570 PR A): three Minors and three Nits from its Opus gate**, plus the inputs that PR B must honour. Verdict sha256/16 `908a786016f5c2f2`. Facts only, from the gate's report; line numbers at 1535's head `335dfd78`. The Major (M1) is its own ticket. Filed on Wednesday's GO.
+
+## Minors
+
+* **m1:** a scope read that hits a database **infrastructure** fault answers a generic **500**, not the retryable **503** that the KS-888 classifier gives the same fault on save.
+  * Where: `services/security/src/index.ts:1181` (mint, through the catch at `:1323` → `errorHandler`) and `:1419-1421` (revoke, `next(err)`).
+  * Measured with the app role cut off (connection limit 0, backends terminated): head 500/500; develop's save path 503/503. Fail-closed holds either way.
+  * Fix: run the scope-read error through the same SQLSTATE 08/53/57 + socket classifier, and answer 503 `SERVICE_UNAVAILABLE`.
+* **m2:** `scripts/rls/verify-fail-closed.sh:53` has `EXPECTED_TABLES` without `admin_organisation_scopes`. The script's own selector picks the table up (measured), so every verification run prints a `DRIFT` line. Fix: add the table.
+* **m3 (PR B's input, not a defect of 049):** "rows are written only by a platform role" is an application convention.
+  * Measured as `secuura_app`:
+    * an INSERT into its own tenant under the GUC succeeds;
+    * WITH CHECK refuses another tenant;
+    * a self-set `app.tenant_scope_bypass` inserts into any tenant. That is the repo-wide model, the same as 041.
+  * There are no foreign keys: `user_id` is not checked against `users`, and `organization_id` is not checked against that tenant's `organizations`.
+  * **PR B must** validate at write time that the user exists with role ADMIN in that tenant and that each organisation belongs to the tenant, decide on purging rows when a user is deleted or changes role, and keep the writer platform-only and audited.
+
+## Nits
+
+* **n1:** a stale docstring at `services/security/src/__tests__/ks1533-key-mint-organisation-arm.test.ts:80` ("UNDECIDED POLICY, KS-1535"). The cell itself is rewritten correctly. Reword to RULED (KS-1570).
+* **n2:** the comment at `ks1570-admin-organisation-scope.integration.test.ts:19` and the PR body's M6 overstate.
+  * "Read under the platform bypass, another tenant's rows would count" is true only if `WHERE tenant_id = $1` is also removed.
+  * The gate's G1 (bypass only, WHERE kept) survives every cell. It is equivalent in behaviour.
+  * The GUC property is pinned by no cell. Reword, or add a log- or `pg_stat_activity`-based pin.
+* **n3 (pre-existing):** `services/security/src/db.ts:27-33` sets no `statement_timeout`, so a scope read blocked by a lock waits.
+  * Measured: ACCESS EXCLUSIVE held 4 s, the client aborts at 2 s, nothing is minted while locked, and after release the A2 mint is refused and the A1 mint completes. It never allows.
+  * Optional: a statement timeout. Referral got one in KS-1582.
+
+## Also from the gate's NOT-tested list, for the deploy seat
+
+The deploy seat must confirm that `secuura_app` has SELECT on `admin_organisation_scopes` on Azure. Otherwise every organisation-naming ADMIN mint and revoke answers 500: fail closed, but an outage of that feature.
+
+===== DIFF (merge-base..head) =====
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1533-key-mint-organisation-arm.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1533-key-mint-organisation-arm.test.ts
+index 25804881e..c826f7c05 100644
+--- a/Blockchain/Dev/services/security/src/__tests__/ks1533-key-mint-organisation-arm.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1533-key-mint-organisation-arm.test.ts
+@@ -77,7 +77,7 @@ const ADMIN_A1 = () => token({ role: 'ISSUER_ADMIN', tenantId: TENANT_A, organiz
+ const ADMIN_A3 = () => token({ role: 'ISSUER_ADMIN', tenantId: TENANT_A, organizationId: ORG_A3 });
+ /** Org-bounded, carrying NO organisation claim — the shape KS-779 recorded as intentional. */
+ const ORGLESS_A = () => token({ role: 'org_admin', tenantId: TENANT_A });
+-/** `ADMIN`: a KEY_ADMIN_ROLE the arm never engages for. UNDECIDED POLICY, KS-1535. */
++/** `ADMIN`: a KEY_ADMIN_ROLE bounded by its admin organisation scope. RULED, KS-1570 (shape b). */
+ const PLAIN_ADMIN_A = () => token({ role: 'ADMIN', tenantId: TENANT_A, organizationId: ORG_A1 });
+ /** `platform_admin`: a super-role to the gateway, not a PLATFORM_ROLE here. UNDECIDED, KS-1535. */
+ const PLATFORM_ADMIN_A = () => token({ role: 'platform_admin', tenantId: TENANT_A, organizationId: ORG_A1 });
+diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts
+new file mode 100644
+index 000000000..ca64ce275
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts
+@@ -0,0 +1,34 @@
++/**
++ * KS-1585 n1 - the `PLAIN_ADMIN_A` docstring in ks1533-key-mint-organisation-arm.test.ts must state the ruling.
++ *
++ * That docstring said `ADMIN` is a key-admin role "the arm never engages for. UNDECIDED POLICY, KS-1535." Kam ruled the policy
++ * in KS-1570 (shape b: each ADMIN acts only for the organisations in its admin organisation scope) and the cell that uses
++ * `PLAIN_ADMIN_A` was rewritten to RULED, but the docstring on the fixture was left stating the old, wrong position. These are
++ * source-text cells: they read the sibling file as text, so no server is started.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++const lines = readFileSync(join(__dirname, 'ks1533-key-mint-organisation-arm.test.ts'), 'utf8').split('\n');
++const docstring = lines.find((l) => l.startsWith('/** `ADMIN`:')) ?? 'NO ADMIN DOCSTRING';
++const fixtureIndex = lines.findIndex((l) => l.startsWith('const PLAIN_ADMIN_A ='));
++
++describe('KS-1585 n1: the PLAIN_ADMIN_A docstring states the KS-1570 ruling', () => {
++  it('RED KS-1585 L1 the docstring no longer calls the ADMIN policy UNDECIDED', () => {
++    expect(docstring).not.toMatch(/UNDECIDED/);
++  });
++
++  it('RED KS-1585 L2 the docstring names the ruling (RULED, KS-1570)', () => {
++    expect(docstring).toMatch(/RULED, KS-1570/);
++  });
++
++  it('CONTROL KS-1585 L3 the docstring sits directly above the PLAIN_ADMIN_A fixture', () => {
++    expect(fixtureIndex).toBeGreaterThan(0);
++    expect(lines[fixtureIndex - 1]).toBe(docstring);
++  });
++
++  it('CONTROL KS-1585 L4 the RULED cell the docstring points to still exists in the file', () => {
++    expect(lines.some((l) => l.includes("it('RULED (KS-1570, shape b): role `ADMIN` is bounded by its admin organisation scope"))).toBe(true);
++  });
++});
+diff --git a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+index 75cd6a635..933952374 100644
+--- a/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
++++ b/Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html	
+@@ -5862,5 +5862,16 @@ cd Blockchain/Dev/services/anchoring &amp;&amp; npm test
+ <h3>121.4 Running it</h3>
+ <pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- ks1666-certify-reservation-comments   # 5 cells, rc 0
+ cd Blockchain/Dev/services/originate &amp;&amp; npm test -- --maxWorkers=3                           # 152 files / 1854 cells, rc 0</code></pre>
++<h2>125. A test fixture&rsquo;s docstring now states the ruling it was still stating the opposite of (KS-1585 nit n1)</h2>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this changes.</strong></td><td>One comment line in <code>Blockchain/Dev/services/security/src/__tests__/ks1533-key-mint-organisation-arm.test.ts</code>, line 80, the docstring of the <code>PLAIN_ADMIN_A</code> fixture. It said <code>ADMIN</code> is a key-admin role &ldquo;the arm never engages for. UNDECIDED POLICY, KS-1535.&rdquo;; it now says it is bounded by its admin organisation scope and that this is ruled (KS-1570, shape b). The cell that uses the fixture (<code>RULED (KS-1570, shape b)</code>, lines 205 to 211) had already been rewritten to the ruling; the docstring was the one place left stating the old position. No executable line changes.</td></tr><tr><td>New test <code>ks1585-ks1533-admin-docstring-states-the-ruling.test.ts</code>, 4 cells, reading the sibling file as text so no server is started: L1 and L2 are RED (the docstring no longer says UNDECIDED; it names <code>RULED, KS-1570</code>); L3 and L4 are controls (the docstring sits directly above the fixture; the ruled cell it points to still exists). The test finds the docstring by its <code>/** `ADMIN`:</code> prefix, so reformatting that line turns it red by design.</td></tr><tr><td>The ruling itself is on the board as card <code>secuura-ks1570-admin-role-bound-shape-1013</code> (Kam, option b, 2026-10-13 11:47 AEDT); the coordinator read that card and relayed it to this seat, which did not read the card itself. The merged cell at lines 205 to 211 is the code artefact. Scope: this covers nit n1 of KS-1585 only. The sibling docstring at line 82 (<code>platform_admin</code>, still &ldquo;UNDECIDED, KS-1535&rdquo;), nits n2 and n3 and minors m1 to m3 are not touched.</td></tr></table>
++<h3>125.1 What proves it</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Red before the docstring changes, green after, and no other cell moves.</strong></td><td><strong>Test only, at develop <code>530f091120d5</code>:</strong> 2 of 4 cells fail (L1, L2) and the 2 controls pass. <strong>With the docstring changed:</strong> 4 of 4 pass.</td></tr><tr><td><strong>Whole security unit suite</strong> (vitest 4.1.12, <code>--maxWorkers=3</code>): 35 files, 372 cells, 372 pass, 0 fail, 0 skipped. The checker&rsquo;s untouched-tip figure was 368 cells; it was not re-measured here. <code>tsc --noEmit</code> with <code>src/__tests__</code> in the program (54 security source files, 42 under <code>__tests__</code>): <strong>0 errors</strong>, and a planted type error was reported once as <code>TS2322</code> by file name. <code>eslint</code> on the two files: 0 errors, 0 warnings, and a planted file raised <code>@typescript-eslint/no-unused-vars</code> and <code>no-debugger</code>.</td></tr><tr><td><strong>The only existing line edited is a comment.</strong> <code>git diff -U0</code> shows one line out and one in, both single-line <code>/** ... */</code> comments,. <code>git diff --numstat</code> over the two test files reads 1 and 1 for the sibling and 34 and 0 for the new file; the pull request changes no product byte, and its only other files are the two Projects Documents pages that carry this entry.</td></tr></table>
++<h3>125.2 Environment and figures</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-10-30 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats.</strong></td><td>Node v26.8.1 (not an LTS line), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0. Base: develop <code>530f091120d5</code>.</td></tr></table>
++<h3>125.3 What this does not prove</h3>
++<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>A comment, not a behaviour.</strong></td><td>The docstring states a ruling; nothing here proves the ruled behaviour, which the cell at lines 205 to 211 and the merged ADMIN bound carry. The new test reads source text and is brittle on purpose.</td></tr><tr><td>Not run: the security integration tests (they need a database), the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, Node 24, any deploy. The pre-push hook&rsquo;s leg count is stated in the pull request.</td></tr></table>
++<h3>125.4 Running it</h3>
++<pre><code>cd Blockchain/Dev/services/security &amp;&amp; npm test -- ks1585-ks1533-admin-docstring   # 4 cells, rc 0
++cd Blockchain/Dev/services/security &amp;&amp; npm test -- --maxWorkers=3                                  # 35 files / 372 cells, rc 0</code></pre>
+ </body>
+ </html>
+diff --git a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+index af86ba785..9ff85827f 100644
+--- a/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
++++ b/Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html	
+@@ -5950,5 +5950,20 @@ cd Blockchain/Dev/services/originate &amp;&amp; npm test -- --maxWorkers=3
+ <tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0</td></tr>
+ <tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+ </table>
++<h2>A fixture docstring now states the KS-1570 ruling instead of the policy it replaced &mdash; KS-1585 nit n1</h2>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>One comment line changes in <code>ks1533-key-mint-organisation-arm.test.ts</code> (line 80): <code>PLAIN_ADMIN_A</code>&rsquo;s docstring said &ldquo;UNDECIDED POLICY, KS-1535&rdquo; and now says the role is bounded by its admin organisation scope, ruled in KS-1570 (shape b). No executable line changes. Covers nit n1 of KS-1585 only.</td></tr><tr><td>New test <code>ks1585-ks1533-admin-docstring-states-the-ruling.test.ts</code>: 4 cells (2 RED, 2 controls) reading the sibling file as text; test only: 2 of 4 red, with the docstring: 4 of 4.</td></tr></table></div>
++<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>The ruled behaviour itself (the merged cell carries it). The security integration tests, the four platform suites, a running stack, Node 24 and any deploy were not run.</td></tr></table></div>
++<h3>Running the cells</h3>
++<pre><code>cd Blockchain/Dev/services/security &amp;&amp; npm test -- ks1585-ks1533-admin-docstring   # 4 cells, rc 0
++cd Blockchain/Dev/services/security &amp;&amp; npm test -- --maxWorkers=3                                  # 35 files / 372 cells, rc 0</code></pre>
++<h3>Figures</h3>
++<table>
++<tr><th>Figure</th><th>Value</th></tr>
++<tr><td>new cells</td><td><strong>4</strong> (2 RED + 2 controls); 2 of 4 red without the docstring change (develop <code>530f091120d5</code>), 4 of 4 with it</td></tr>
++<tr><td>security unit suite</td><td><strong>35 files / 372 cells</strong>, all pass, 0 failed, 0 skipped (vitest 4.1.12, <code>--maxWorkers=3</code>); the checker&rsquo;s untouched-tip figure was 368 cells, not re-measured here</td></tr>
++<tr><td>tsc and eslint</td><td>tsc with the tests: <strong>0 errors</strong> over 54 security source files, a planted type error reported once as <code>TS2322</code>; eslint on the two files: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
++<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>530f091120d5</code> with the change on top, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
++<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
++</table>
+ </body>
+ </html>
+
+
+===== TOUCHED FILES, FULL TEXT AT HEAD (line-numbered) =====
+### FILE AT HEAD: Blockchain/Dev/services/security/src/__tests__/ks1533-key-mint-organisation-arm.test.ts
+1: /**
+2:  * The key MINT must be bounded by organisation, not only by tenant (KS-1533 arm 1).
+3:  *
+4:  * THE DEFECT. KS-764 put an organisation arm on REVOKE. The mint never got one:
+5:  * `index.ts` calls `decideTenantAccess(user, tenantId)` with no `organisationScope`, and
+6:  * `keyRevokePolicy.ts` engages that arm ONLY when the argument is supplied — deliberately, so
+7:  * KS-764's blast radius was the revoke route alone. So an ORG_ADMIN / ISSUER_ADMIN of organisation
+8:  * A could mint a key carrying organisation B's `organizationId`, inside the same tenant, and the
+9:  * KS-695 connector erasure then trusts that row and erases B. Found by the #1497 round 4 Opus gate
+10:  * (verdict df3bc694b6b41094, M-1), which measured the originate half on real Postgres and READ this
+11:  * half; these cells are the measurement of this half.
+12:  *
+13:  * THREE PATHS, and which of them this file closes:
+14:  *   Path 1  a key for ANOTHER organisation            -> the organisation arm, below.
+15:  *   Path 2  a key for the caller's OWN organisation carrying B's connector id -> needs the
+16:  *           connector-id BINDING and a partial unique index; that is arm 2, a separate PR, held for
+17:  *           a pre-flight count. NOT closed here.
+18:  *   Path 3  another organisation's connector id with `rotate: true` -> `revokePriorConnectorKeys`
+19:  *           (index.ts:196) is scoped by connector id and TENANT only, so it retires that
+20:  *           organisation's live keys. An AVAILABILITY harm, needing no erasure, and therefore
+21:  *           reachable on any build that already carries KS-577's revoke-on-rotate. Closed here by
+22:  *           refusing a caller-chosen connectorId from a non-provisioner.
+23:  *
+24:  * WHY REAL HTTP AND NOT A UNIT TEST. The defect is in the ORDER and the ARGUMENTS of two checks —
+25:  * a role gate (`decideMint`) that runs as middleware before the body is parsed, and a tenancy check
+26:  * that runs after resolution with one argument missing. Neither is visible to a direct call of
+27:  * either function. Every case below drives the real app: real `express.json()`, real
+28:  * `authenticate()` verifying a real RS256 signature, the real router, the real error handler.
+29:  *
+30:  * NO DATABASE, as in KS-742's file: `dbSaveApiKey` writes `memApiKeys` before its `isDbAvailable()`
+31:  * return, so the family works in memory and fixtures are minted through the real route.
+32:  *
+33:  * ONE CELL HERE USED TO ASSERT BEHAVIOUR NOBODY HAD RULED ON (labelled UNDECIDED POLICY): `ADMIN` kept
+34:  * cross-organisation reach inside its tenant. Kam has since ruled it (KS-1570, shape b: each ADMIN has an
+35:  * explicit organisation scope), and that cell is now RULED, flipped to 403 in the same change as the code.
+36:  * This file has no database, so every ADMIN here has an EMPTY scope (nothing can be read): naming
+37:  * another organisation is refused. KS-1570's own integration file covers the scoped cases on Postgres.
+38:  * `platform_admin` is NOT in that position, despite my first reading: it is not a KEY_ADMIN_ROLE, so
+39:  * decideMint refuses it before the arm is reached. A separate MEASURED cell pins that.
+40:  */
+41: 
+42: import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+43: import crypto from 'crypto';
+44: import type { Server } from 'http';
+45: import type { AddressInfo } from 'net';
+46: 
+47: // Opt-IN boot guard, before the import of ../index — see KS-742's file for why this is a literal.
+48: process.env.SECURITY_DISABLE_BOOT = '1';
+49: 
+50: const TENANT_A = 'a0000000-0000-4000-8000-0000000000aa';
+51: const ORG_A1 = '11111111-1111-4111-8111-111111111111';
+52: const ORG_A2 = '22222222-2222-4222-8222-222222222222'; // SAME tenant as ORG_A1 — that is the point
+53: const CONNECTOR_A2 = 'platform-s:org-a2-external-ref';
+54: // An organisation id WITH hex letters, for the m1 cell: ORG_A1 is all digits, so toUpperCase() is the
+55: // identity on it and an "upper-case" case built from it tests nothing (a mutant storing the id trimmed
+56: // but not lower-cased survived exactly that).
+57: const ORG_A3 = 'abcdef00-3333-4333-8333-33333333abcd'; // SAME tenant
+58: 
+59: const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+60: const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+61: const PUBLIC_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+62: 
+63: const b64url = (b: Buffer): string =>
+64:   b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+65: 
+66: function token(claims: Record<string, unknown>): string {
+67:   const header = b64url(Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
+68:   const now = Math.floor(Date.now() / 1000);
+69:   const payload = b64url(Buffer.from(JSON.stringify({ sub: 'test-user', iat: now, exp: now + 300, ...claims })));
+70:   const signature = b64url(crypto.sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), PRIVATE_PEM));
+71:   return `${header}.${payload}.${signature}`;
+72: }
+73: 
+74: /** An organisation-bounded admin of ORG_A1. The attacker in Path 1. */
+75: const ADMIN_A1 = () => token({ role: 'ISSUER_ADMIN', tenantId: TENANT_A, organizationId: ORG_A1 });
+76: /** An organisation-bounded admin of ORG_A3, the lettered id. */
+77: const ADMIN_A3 = () => token({ role: 'ISSUER_ADMIN', tenantId: TENANT_A, organizationId: ORG_A3 });
+78: /** Org-bounded, carrying NO organisation claim — the shape KS-779 recorded as intentional. */
+79: const ORGLESS_A = () => token({ role: 'org_admin', tenantId: TENANT_A });
+80: /** `ADMIN`: a KEY_ADMIN_ROLE bounded by its admin organisation scope. RULED, KS-1570 (shape b). */
+81: const PLAIN_ADMIN_A = () => token({ role: 'ADMIN', tenantId: TENANT_A, organizationId: ORG_A1 });
+82: /** `platform_admin`: a super-role to the gateway, not a PLATFORM_ROLE here. UNDECIDED, KS-1535. */
+83: const PLATFORM_ADMIN_A = () => token({ role: 'platform_admin', tenantId: TENANT_A, organizationId: ORG_A1 });
+84: /** A real platform role: keeps cross-organisation reach by design (KS-577 depends on it). */
+85: const PLATFORM = () => token({ role: 'super_admin' });
+86: // The two connector tokens carry EXACTLY the claims auth's generateConnectorToken mints
+87: // (auth/src/services/jwt.ts:288-296): role and type `connector`, the scopes, tenantId, and organizationId
+88: // when the key has one. There is NO connectorId claim; the connector id appears only inside userId, and
+89: // the route reads neither. An earlier version of this file gave these tokens a `connectorId` claim and
+90: // called one cell "the connector's OWN provisioner", asserting an ownership check the code never makes
+91: // (#1521 gate, m3).
+92: /** A `connector` WITHOUT organizations:register — not a provisioner, so it may not name a connectorId. */
+93: const SCOPELESS_CONNECTOR_A = () =>
+94:   token({ role: 'connector', type: 'connector', scopes: ['documents:read'], tenantId: TENANT_A, organizationId: ORG_A1, userId: 'connector:platform-s:org-a1-external-ref' });
+95: /** A provisioning connector of ORG_A1: may NAME a connectorId (register-connector's path), may NOT rotate. */
+96: const PROVISIONER_A = () =>
+97:   token({ role: 'connector', type: 'connector', scopes: ['organizations:register'], tenantId: TENANT_A, organizationId: ORG_A1, userId: 'connector:platform-s:org-a1-external-ref' });
+98: /**
+99:  * KS-1584: an ORG-LESS provisioning key — the PLATFORM-MINTED instance key Platform S holds. Under
+100:  * KS-1584 the provisioner caller kind splits in two, and the split is the whole point of that ticket:
+101:  * a provisioner carrying an organisation is BOUNDED to it, while an org-less one is platform-minted
+102:  * and stays UNBOUNDED. The connectorId exemption and the rotate refusal below belong to this
+103:  * UNBOUNDED kind — a bounded provisioner is now refused before either is reached, which is pinned
+104:  * separately in ks1584-provisioning-key-organisation-bound.integration.test.ts.
+105:  */
+106: const PROVISIONER_UNBOUNDED = () =>
+107:   token({ role: 'connector', type: 'connector', scopes: ['organizations:register'], tenantId: TENANT_A, userId: 'connector:platform-s:instance' });
+108: 
+109: let server: Server;
+110: let base: string;
+111: 
+112: type MintBody = Record<string, unknown>;
+113: async function mintAs(tok: string | null, body: MintBody): Promise<{ status: number; text: string }> {
+114:   const res = await fetch(`${base}/api/keys`, {
+115:     method: 'POST',
+116:     headers: {
+117:       'Content-Type': 'application/json',
+118:       ...(tok ? { Authorization: `Bearer ${tok}` } : {}),
+119:     },
+120:     body: JSON.stringify({ name: 'ks1533 fixture', scopes: ['documents:read'], tenantId: TENANT_A, ...body }),
+121:   });
+122:   return { status: res.status, text: await res.text() };
+123: }
+124: 
+125: /** Read an organisation's keys back as the platform admin — the only role that may see any org's. */
+126: async function keysOf(organizationId: string): Promise<Array<{ id: string; isActive: boolean; connectorId?: string }>> {
+127:   const res = await fetch(`${base}/api/keys?organizationId=${encodeURIComponent(organizationId)}`, {
+128:     headers: { Authorization: `Bearer ${PLATFORM()}` },
+129:   });
+130:   expect(res.status, 'the read-back instrument itself must work').toBe(200);
+131:   const body = (await res.json()) as { data: Array<{ id: string; isActive: boolean; connectorId?: string }> };
+132:   return body.data;
+133: }
+134: 
+135: beforeAll(async () => {
+136:   process.env.JWT_PUBLIC_KEY = Buffer.from(PUBLIC_PEM, 'utf8').toString('base64');
+137:   delete process.env.JWT_JWKS_URL;
+138:   delete process.env.AUTH_SERVICE_URL;
+139: 
+140:   const app = (await import('../index')).default;
+141:   await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', resolve); });
+142:   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+143: });
+144: 
+145: afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
+146: 
+147: describe('KS-1533 arm 1 — the mint is bounded by organisation, not only by tenant', () => {
+148:   // ---- the instrument controls come first: if these go red nothing below means anything ----
+149:   it('CONTROL: no token is refused by the auth middleware, not by the organisation rule', async () => {
+150:     const r = await mintAs(null, { organizationId: ORG_A1 });
+151:     expect(r.status).toBe(401);
+152:   });
+153: 
+154:   it('CONTROL (R2): an ISSUER_ADMIN of ORG_A1 may still mint for its OWN organisation', async () => {
+155:     const r = await mintAs(ADMIN_A1(), { organizationId: ORG_A1 });
+156:     expect([r.status, r.text.includes('sk_')]).toEqual([201, true]);
+157:   });
+158: 
+159:   it('CONTROL (R6): a platform role keeps cross-organisation reach (KS-577 depends on it)', async () => {
+160:     const r = await mintAs(PLATFORM(), { organizationId: ORG_A2 });
+161:     expect(r.status).toBe(201);
+162:   });
+163: 
+164:   it('CONTROL (R5): an UNQUALIFIED mint still works — a null target organisation is a tenant-level key', async () => {
+165:     // Kam's 2026-09-03 ruling, kept by KS-764: an org-less TARGET falls through to the tenant
+166:     // verdict. ks742:219 pins that such a mint lands in the caller's own tenant; this pins that
+167:     // arm 1 did not break it.
+168:     const r = await mintAs(ADMIN_A1(), {});
+169:     expect(r.status).toBe(201);
+170:   });
+171: 
+172:   // ---- Path 1: the finding ----
+173:   it('RED (R1): an ISSUER_ADMIN of ORG_A1 naming ORG_A2 — the SAME tenant, another organisation — is REFUSED', async () => {
+174:     const before = await keysOf(ORG_A2);
+175:     const r = await mintAs(ADMIN_A1(), { organizationId: ORG_A2 });
+176:     expect(r.status).toBe(403);
+177:     // and NOTHING was written: the refusal is not a 403 after the row lands
+178:     const after = await keysOf(ORG_A2);
+179:     expect(after.length, 'a refused mint must write no key').toBe(before.length);
+180:   });
+181: 
+182:   it('RED: the refusal names the organisation boundary, not the tenant one (a wrong reason sends the reader to the wrong fix)', async () => {
+183:     const r = await mintAs(ADMIN_A1(), { organizationId: ORG_A2 });
+184:     expect(r.status).toBe(403);
+185:     expect(r.text).toMatch(/organisation|organization/i);
+186:     expect(r.text, 'the tenants match, so a cross-tenant message would be false').not.toMatch(/cross-tenant/i);
+187:   });
+188: 
+189:   // ---- the org-less caller: Kam's RULED behaviour, pinned so a reversal is visible ----
+190:   it('RULED (KS-779, Kam 2026-09-04): an org-bounded caller with NO organisation claim naming an organisation is refused', async () => {
+191:     // Kam ruled the ten org-less org-bounded accounts are INTENTIONALLY org-less and recorded them
+192:     // rather than assigning organisations. J measured 9 of 9 on Kintsugi at 16:44Z 2026-10-12.
+193:     // So this refusal is a standing operational cost, not a transient data gap: it is the ruled
+194:     // behaviour, and if the ruling changes this cell changes with it.
+195:     const r = await mintAs(ORGLESS_A(), { organizationId: ORG_A2 });
+196:     expect(r.status).toBe(403);
+197:     expect(r.text).toMatch(/organisation|organization/i);
+198:   });
+199: 
+200:   it('RULED: ...and that caller may STILL mint an unqualified, tenant-level key — provisioning by omission survives', async () => {
+201:     const r = await mintAs(ORGLESS_A(), {});
+202:     expect(r.status).toBe(201);
+203:   });
+204: 
+205:   // ---- RULED (KS-1570, Kam: shape b) — was UNDECIDED POLICY (KS-1535) ----
+206:   it('RULED (KS-1570, shape b): role `ADMIN` is bounded by its admin organisation scope; with none, naming another organisation is REFUSED', async () => {
+207:     // Until KS-1570 this cell asserted 201: `ADMIN` was in neither PLATFORM_ROLES nor ORG_BOUNDED_ROLES, so
+208:     // the arm never engaged for it. Kam ruled shape (b): an ADMIN acts only for the organisations in its
+209:     // `admin_organisation_scopes` rows. This file has no database, so the scope is empty and the mint is
+210:     // refused, with a message that names the scope. This edit is the record of the decision.
+211:     const r = await mintAs(PLAIN_ADMIN_A(), { organizationId: ORG_A2 });
+212:     expect(r.status).toBe(403);
+213:     expect(r.text).toMatch(/admin organisation scope/);
+214:   });
+215: 
+216:   it('MEASURED: role `platform_admin` CANNOT mint at all — decideMint refuses it BEFORE the organisation arm, so it is not a Path 1 vector', async () => {
+217:     // I first claimed `platform_admin` was unbounded by the arm, from running decideTenantAccess on its
+218:     // own. That was wrong at the route: requireKeyAdminOrProvisioner -> decideMint runs FIRST, and
+219:     // `PLATFORM_ADMIN` is not in KEY_ADMIN_ROLES, so it is refused 403 ("API key management requires
+220:     // an admin role") and never reaches decideTenantAccess. This cell is what caught it — exactly the
+221:     // "order is invisible to a function call" point in this file's header. The role-vocabulary split
+222:     // (KS-1536) is real, but its consequence HERE is that a gateway super-role is over-restricted, not
+223:     // under-restricted. Pinned so a change to KEY_ADMIN_ROLES is visible as an edit to this cell.
+224:     const r = await mintAs(PLATFORM_ADMIN_A(), { organizationId: ORG_A2 });
+225:     expect(r.status).toBe(403);
+226:     expect(r.text).toMatch(/admin role/i);
+227:   });
+228: 
+229:   // ---- the caller-chosen connectorId: closes Path 3, and narrows Path 1 ----
+230:   it('RED: a NON-PROVISIONER may not choose a connectorId', async () => {
+231:     const r = await mintAs(ADMIN_A1(), { organizationId: ORG_A1, connectorId: CONNECTOR_A2 });
+232:     expect(r.status).toBe(403);
+233:     expect(r.text).toMatch(/connector/i);
+234:   });
+235: 
+236:   it('CONTROL: a platform role MAY choose a connectorId (register-connector forwards such a bearer)', async () => {
+237:     const r = await mintAs(PLATFORM(), { organizationId: ORG_A2, connectorId: CONNECTOR_A2 });
+238:     expect(r.status).toBe(201);
+239:   });
+240: 
+241:   it('CONTROL: an UNBOUNDED PROVISIONER may choose a connectorId (the other caller kind requireOrgProvisioner admits)', async () => {
+242:     // KS-1584 retargeted this control from PROVISIONER_A to the org-less instance key. The exemption
+243:     // was never about "any provisioner": it exists for the Platform S registration path, and that key
+244:     // is org-less. A BOUNDED provisioner naming a connectorId is now refused — the next cell.
+245:     const r = await mintAs(PROVISIONER_UNBOUNDED(), { organizationId: ORG_A2, connectorId: CONNECTOR_A2 });
+246:     expect(r.status).toBe(201);
+247:   });
+248: 
+249:   it('KS-1584: a BOUNDED provisioner may NOT choose a connectorId — binding an A1 key to A2\'s connector is the erasure shape', async () => {
+250:     const r = await mintAs(PROVISIONER_A(), { organizationId: ORG_A1, connectorId: CONNECTOR_A2 });
+251:     expect(r.status).toBe(403);
+252:     expect(r.text, 'the refusal names the bound, not the tenant').toMatch(/bound to an organisation may not set connectorId/i);
+253:   });
+254: 
+255:   it('a `connector` WITHOUT organizations:register may not set a connectorId — the scope is what makes it a provisioner', async () => {
+256:     // Pins the property regardless of WHICH gate refuses: decideMint (route middleware) already refuses
+257:     // a scope-less connector before this route's own connectorId check runs. Measured with a mutant that
+258:     // drops the scope from that check — see the PR text for whether the check or decideMint decides.
+259:     const r = await mintAs(SCOPELESS_CONNECTOR_A(), { organizationId: ORG_A1, connectorId: CONNECTOR_A2 });
+260:     expect(r.status).toBe(403);
+261:   });
+262: 
+263:   // ---- Path 3: availability, reachable today ----
+264:   it('RED (Path 3): `rotate: true` with another organisation\'s connectorId is refused, AND that organisation\'s key is still ACTIVE', async () => {
+265:     // revokePriorConnectorKeys (index.ts:196) is scoped by connector id + TENANT only, so without
+266:     // the refusal this retires ORG_A2's live key. Both halves are asserted: the 403, and that the
+267:     // other organisation's credential still works afterwards. The second half is the harm.
+268:     const victim = await mintAs(PLATFORM(), { organizationId: ORG_A2, connectorId: CONNECTOR_A2, name: 'org A2 connector key' });
+269:     expect(victim.status, 'arrange: the victim key must exist before the attack').toBe(201);
+270:     const activeBefore = (await keysOf(ORG_A2)).filter((k) => k.isActive && k.connectorId === CONNECTOR_A2);
+271:     expect(activeBefore.length, 'arrange: at least one ACTIVE key on that connector').toBeGreaterThan(0);
+272: 
+273:     const r = await mintAs(ADMIN_A1(), { organizationId: ORG_A1, connectorId: CONNECTOR_A2, rotate: true });
+274:     expect(r.status).toBe(403);
+275: 
+276:     const activeAfter = (await keysOf(ORG_A2)).filter((k) => k.isActive && k.connectorId === CONNECTOR_A2);
+277:     expect(activeAfter.map((k) => k.id).sort(), "the other organisation's keys must be untouched")
+278:       .toEqual(activeBefore.map((k) => k.id).sort());
+279:   });
+280: 
+281:   // ---- #1521 gate M1: the provisioner exemption must not extend to ROTATE ----
+282:   it.each([
+283:     ['its own organisation (ORG_A1)', { organizationId: ORG_A1 }],
+284:     ['the victim organisation (ORG_A2)', { organizationId: ORG_A2 }],
+285:     ['no organisation', {}],
+286:   ])('RED (M1): a PROVISIONER rotating another organisation\'s connectorId, naming %s, is REFUSED and the victim key stays ACTIVE', async (_label, orgPart) => {
+287:     // The #1521 Opus gate's shape: a provisioning connector may name a connectorId, and nothing binds that
+288:     // id to its own connector or organisation, so with `rotate: true` revokePriorConnectorKeys (scoped by
+289:     // connector id + TENANT only) retired ORG_A2's live key and handed the caller a fresh key on ORG_A2's
+290:     // connector. The gateway's Guardrail 1 ("GUARDRAIL 1" in api-gateway routes/platform.ts) already says rotation is
+291:     // platform-admin-only; this is the same rule at the service, which a key can reach directly.
+292:     const victim = await mintAs(PLATFORM(), { organizationId: ORG_A2, connectorId: CONNECTOR_A2, name: 'org A2 connector key' });
+293:     expect(victim.status, 'arrange: the victim key must exist before the attack').toBe(201);
+294:     const activeBefore = (await keysOf(ORG_A2)).filter((k) => k.isActive && k.connectorId === CONNECTOR_A2);
+295:     expect(activeBefore.length, 'arrange: at least one ACTIVE key on that connector').toBeGreaterThan(0);
+296: 
+297:     // KS-1584: retargeted to the UNBOUNDED provisioner. A bounded one is refused by the organisation
+298:     // bound BEFORE the rotate check, so pointing these cells at PROVISIONER_A would have moved them off
+299:     // the guard they exist to pin and onto the new one — the rotate refusal would then be untested for
+300:     // the only caller kind that can still reach it. The bounded path has its own cell above.
+301:     const r = await mintAs(PROVISIONER_UNBOUNDED(), { ...orgPart, connectorId: CONNECTOR_A2, rotate: true, name: 'provisioner rotate' });
+302:     expect(r.status).toBe(403);
+303:     expect(r.text).toMatch(/rotat/i);
+304: 
+305:     const activeAfter = (await keysOf(ORG_A2)).filter((k) => k.isActive && k.connectorId === CONNECTOR_A2);
+306:     expect(activeAfter.map((k) => k.id).sort(), "the victim organisation's keys must be untouched")
+307:       .toEqual(activeBefore.map((k) => k.id).sort());
+308:   });
+309: 
+310:   it('CONTROL (Path 3): a PLATFORM role\'s rotate still retires the prior key on that connector', async () => {
+311:     // Without this, the refusals above could pass by breaking rotation for everybody, which is the way a
+312:     // security fix quietly becomes an outage. Rotation is a platform-role operation (Guardrail 1).
+313:     const first = await mintAs(PLATFORM(), { organizationId: ORG_A2, connectorId: CONNECTOR_A2, name: 'rotate me' });
+314:     expect(first.status).toBe(201);
+315:     const beforeIds = (await keysOf(ORG_A2)).filter((k) => k.isActive && k.connectorId === CONNECTOR_A2).map((k) => k.id);
+316:     expect(beforeIds.length).toBeGreaterThan(0);
+317: 
+318:     const rotated = await mintAs(PLATFORM(), { organizationId: ORG_A2, connectorId: CONNECTOR_A2, rotate: true, name: 'rotated' });
+319:     expect(rotated.status).toBe(201);
+320: 
+321:     const afterActive = (await keysOf(ORG_A2)).filter((k) => k.isActive && k.connectorId === CONNECTOR_A2).map((k) => k.id);
+322:     expect(beforeIds.every((id) => !afterActive.includes(id)), 'the prior keys on that connector must be retired').toBe(true);
+323:   });
+324: 
+325:   // ---- #1521 gate m1: one stored form for an organisation id ----
+326:   it('m1: an organisation id is STORED in one form: a padded upper-case own id lands under its organisation, a blank one under none', async () => {
+327:     // The arm compares normalised ids (normaliseOrgId: trim, lower-case, blank = absent), but the row
+328:     // stored the raw string. So a padded or upper-case own id passed the arm and was then invisible to
+329:     // its own organisation's listing, and a blank id was stored as '' or '   ' instead of absent, against
+330:     // the "absent has ONE representation" rule in keyRevokePolicy.ts.
+331:     const shouted = `  ${ORG_A3.toUpperCase()} `;
+332:     expect(shouted.trim(), 'fixture control: the id must CHANGE under upper-casing, or this half tests nothing').not.toBe(ORG_A3);
+333:     const padded = await mintAs(ADMIN_A3(), { organizationId: shouted, name: 'm1 padded' });
+334:     expect(padded.status, 'the arm compares normalised ids, so this is the caller\'s OWN organisation').toBe(201);
+335:     const paddedId = (JSON.parse(padded.text) as { data: { id: string } }).data.id;
+336:     expect((await keysOf(ORG_A3)).map((k) => k.id), 'the key must be listed under its canonical organisation').toContain(paddedId);
+337: 
+338:     const blank = await mintAs(ADMIN_A1(), { organizationId: '   ', name: 'm1 blank' });
+339:     expect(blank.status, 'a blank organisation is an unqualified, tenant-level mint (R5)').toBe(201);
+340:     const blankId = (JSON.parse(blank.text) as { data: { id: string } }).data.id;
+341:     expect((await keysOf('   ')).map((k) => k.id), 'no key may be filed under a whitespace organisation').not.toContain(blankId);
+342:   });
+343: });
+
+### FILE AT HEAD: Blockchain/Dev/services/security/src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts
+1: /**
+2:  * KS-1585 n1 - the `PLAIN_ADMIN_A` docstring in ks1533-key-mint-organisation-arm.test.ts must state the ruling.
+3:  *
+4:  * That docstring said `ADMIN` is a key-admin role "the arm never engages for. UNDECIDED POLICY, KS-1535." Kam ruled the policy
+5:  * in KS-1570 (shape b: each ADMIN acts only for the organisations in its admin organisation scope) and the cell that uses
+6:  * `PLAIN_ADMIN_A` was rewritten to RULED, but the docstring on the fixture was left stating the old, wrong position. These are
+7:  * source-text cells: they read the sibling file as text, so no server is started.
+8:  */
+9: import { describe, it, expect } from 'vitest';
+10: import { readFileSync } from 'node:fs';
+11: import { join } from 'node:path';
+12: 
+13: const lines = readFileSync(join(__dirname, 'ks1533-key-mint-organisation-arm.test.ts'), 'utf8').split('\n');
+14: const docstring = lines.find((l) => l.startsWith('/** `ADMIN`:')) ?? 'NO ADMIN DOCSTRING';
+15: const fixtureIndex = lines.findIndex((l) => l.startsWith('const PLAIN_ADMIN_A ='));
+16: 
+17: describe('KS-1585 n1: the PLAIN_ADMIN_A docstring states the KS-1570 ruling', () => {
+18:   it('RED KS-1585 L1 the docstring no longer calls the ADMIN policy UNDECIDED', () => {
+19:     expect(docstring).not.toMatch(/UNDECIDED/);
+20:   });
+21: 
+22:   it('RED KS-1585 L2 the docstring names the ruling (RULED, KS-1570)', () => {
+23:     expect(docstring).toMatch(/RULED, KS-1570/);
+24:   });
+25: 
+26:   it('CONTROL KS-1585 L3 the docstring sits directly above the PLAIN_ADMIN_A fixture', () => {
+27:     expect(fixtureIndex).toBeGreaterThan(0);
+28:     expect(lines[fixtureIndex - 1]).toBe(docstring);
+29:   });
+30: 
+31:   it('CONTROL KS-1585 L4 the RULED cell the docstring points to still exists in the file', () => {
+32:     expect(lines.some((l) => l.includes("it('RULED (KS-1570, shape b): role `ADMIN` is bounded by its admin organisation scope"))).toBe(true);
+33:   });
+34: });
+
+### FILE AT HEAD: Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+(OMITTED: 861710 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+### FILE AT HEAD: Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+(OMITTED: 580143 chars is over the 120000 cap. Review this file from the DIFF section only, and do not treat its unseen text as read.)
+
+===== SOURCE LINES CITED BY THE PR / COMMENT (line-numbered) =====
+(none)
+
+===== PR DESCRIPTION =====
+(not provided)
+
+===== DRAFTED CLIENT COMMENT =====
+(none)
+
+===== facts.json (deterministic runner output) =====
+{
+ "pr": 1828,
+ "head_sha": "68c83f8fb0a7349e6e6869aa84c62e732289cac7",
+ "pr_tip_now": "68c83f8fb0a7349e6e6869aa84c62e732289cac7",
+ "head_mode": "tip",
+ "merge_base": "530f091120d5da749edf972e8e0089e44cfc5589",
+ "base_ref": "develop",
+ "touched_files": [
+  {
+   "status": "M",
+   "path": "Blockchain/Dev/services/security/src/__tests__/ks1533-key-mint-organisation-arm.test.ts",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "status": "A",
+   "path": "Blockchain/Dev/services/security/src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts",
+   "added": "34",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+   "added": "11",
+   "deleted": "0"
+  },
+  {
+   "status": "M",
+   "path": "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html",
+   "added": "15",
+   "deleted": "0"
+  }
+ ],
+ "test_files": [
+  "Blockchain/Dev/services/security/src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts"
+ ],
+ "product_files": [
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+ ],
+ "diff_stat": {
+  "files": 4,
+  "added": 61,
+  "deleted": 1
+ },
+ "targeted_on_head": [
+  {
+   "file": "Blockchain/Dev/services/security/src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 4,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "chpad/w1828/head/Blockchain/Dev/services/security\n\n \u2713 src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts (4 tests) 2ms\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  15:14:44\n   Duration  122ms (transform 13ms, setup 0ms, import 23ms, tests 2ms, environment 0ms)"
+  }
+ ],
+ "targeted_on_base_product_code": [
+  {
+   "file": "Blockchain/Dev/services/security/src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts",
+   "rc": 0,
+   "ok": true,
+   "passed": 4,
+   "failed": 0,
+   "count_unparsed": false,
+   "tail": "chpad/w1828/head/Blockchain/Dev/services/security\n\n \u2713 src/__tests__/ks1585-ks1533-admin-docstring-states-the-ruling.test.ts (4 tests) 2ms\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  15:14:44\n   Duration  118ms (transform 13ms, setup 0ms, import 21ms, tests 2ms, environment 0ms)"
+  }
+ ],
+ "targeted_head_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 4,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "targeted_base_totals": {
+  "files": 1,
+  "files_ok": 1,
+  "files_failed": 0,
+  "passed": 4,
+  "failed": 0,
+  "count_unparsed_files": []
+ },
+ "not_run": [
+  "live/integration runs",
+  "security scan",
+  "network or deployed service"
+ ],
+ "gate_seconds": 6
+}

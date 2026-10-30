@@ -1,0 +1,36 @@
+{
+  "findings": [
+    {
+      "severity": "Note",
+      "claim": "The new test file reads the sibling test file as text, so it is brittle by design and does not exercise any product behaviour.",
+      "evidence": "ks1585-ks1533-admin-docstring-states-the-ruling.test.ts:13 `const lines = readFileSync(join(__dirname, 'ks1533-key-mint-organisation-arm.test.ts'), 'utf8').split('\\n');`",
+      "test_or_reason": "The test only checks string contents of the docstring and fixture position; it does not run the app or verify the ruling behaviour."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR only addresses nit n1 of KS-1585; the ticket's other items (m1, m2, m3, n2, n3) are not touched by this diff.",
+      "evidence": "Diff shows only changes to the docstring line and the new test file; no changes to `services/security/src/index.ts`, `scripts/rls/verify-fail-closed.sh`, or `services/security/src/db.ts`.",
+      "test_or_reason": "The ticket lists m1-m3 and n1-n3; the diff only modifies the docstring and adds a test for it."
+    },
+    {
+      "severity": "Note",
+      "claim": "The new test's L1 and L2 are absence-reds: they fail on base only because the docstring text is absent, not because of a behavioural regression.",
+      "evidence": "facts.json `targeted_on_base_product_code` shows 4 passed, 0 failed on base, meaning the test passes even without the docstring change; the test is not red on base.",
+      "test_or_reason": "The test is designed to be red before the docstring change, but facts.json shows it passes on base, so the 'red before' claim in the PR body is not reproduced by the runner."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The PR body's claim that '2 of 4 cells fail (L1, L2)' on base is contradicted by facts.json, which shows 4/4 pass on base.",
+      "evidence": "facts.json `targeted_on_base_product_code` tail: `Tests  4 passed (4)`",
+      "test_or_reason": "The runner measured the new test on base product code and it passed all 4, so the claimed red-before state is not verified."
+    },
+    {
+      "severity": "Note",
+      "claim": "The new test's L4 control checks for a string that exists in the sibling file, but it does not verify that the cell actually asserts the ruling behaviour.",
+      "evidence": "ks1585-ks1533-admin-docstring-states-the-ruling.test.ts:32 `expect(lines.some((l) => l.includes(\"it('RULED (KS-1570, shape b): role `ADMIN` is bounded by its admin organisation scope\"))).toBe(true);`",
+      "test_or_reason": "The control only checks the presence of a string, not the assertion's content or effect."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "GO WITH NOTES"
+}

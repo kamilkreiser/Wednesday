@@ -1,0 +1,48 @@
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The PR adds no product code and does not fix the underlying IDOR/tenant-leak in GET /api/nft/certificates; it only adds tests that pin the current (insecure) behavior, so the security finding KS-1836 remains unaddressed.",
+      "evidence": "Diff shows only three new test files and two HTML doc files; facts.json product_files lists only the two HTML files, no product source changes. Ticket KS-1836 states the route reads userId from query and defaults to 'user-id', and the PR description (not provided) does not claim a fix.",
+      "test_or_reason": "The ticket's BLUF describes a security vulnerability; the PR's own docs (API_Security...html diff) say 'no product byte moves' and 'The ticket stays In Progress.'"
+    },
+    {
+      "severity": "Major",
+      "claim": "The new tests assert behavior that is itself the vulnerability (foreign ?userId returns empty 200 and logs a warning) rather than asserting that the route rejects or scopes to the caller, so they lock in the insecure behavior.",
+      "evidence": "ks1836-log-foreign-selector-with-no-rows.test.ts:120-125 `await get('/api/nft/certificates?userId=user-B', CALLER_Z); expect(r.status).toBe(200); expect(r.text).toBe(EMPTY_BODY); ... expect(logs[0].meta).toMatchObject({ ownerId: 'user-Z', userIdSelector: 'user-B', returned: 0, withheld: 0 });`",
+      "test_or_reason": "The test pins that a caller with no rows who names another user gets a 200 and a log, not a 403 or a scoped result; this is the opposite of a security fix."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's claim that the tests 'kill' mutants Ma, Mb, and Mf is not supported by facts.json, which shows no mutant runs; the only measured runs are the tests passing on base and head product code.",
+      "evidence": "facts.json targeted_on_base_product_code shows all 13 tests pass on base product code (rc 0, passed 13), and targeted_on_head shows the same; there is no 'tamper' or 'mutant' run in facts.json. The HTML diff claims 'Tamper Mb ... fails 3 of 4' but facts.json does not include such a run.",
+      "test_or_reason": "The mutant-kill claim is only in the HTML docs, not in the deterministic runner output; the runner measured only green-on-base and green-on-head."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test harness's fake db query matcher is more permissive than the real service: it matches SQL by exact string after whitespace normalization, but the real service may use parameterized queries with different spacing or additional clauses, so the fake may not faithfully represent the real query behavior.",
+      "evidence": "ks1836-log-foreign-selector-with-no-rows.test.ts:19-30 `const sql = text.replace(/\\s+/g, ' ').trim(); if (sql === 'SELECT * FROM svc_nft_certificates WHERE user_id = $1 ORDER BY created_at DESC') { return { rows: table.rows.filter(r => r.user_id === params[0]) }; }`",
+      "test_or_reason": "The fake only handles four exact SQL strings; any real query variation (e.g., additional WHERE clauses, different ordering) would throw, so the tests only pass because the fake is tailored to the current implementation."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test 'RED KS-1836 L1' asserts that a foreign ?userId with no rows returns an empty 200 and logs a warning, but it does not assert that the response body contains no data from the foreign user; it only checks the log meta, so it does not verify the security property of data isolation.",
+      "evidence": "ks1836-log-foreign-selector-with-no-rows.test.ts:120-128 `const r = await get('/api/nft/certificates?userId=user-B', CALLER_Z); expect(r.status).toBe(200); expect(r.text).toBe(EMPTY_BODY); ... expect(logs[0].meta).toMatchObject({ ownerId: 'user-Z', userIdSelector: 'user-B', returned: 0, withheld: 0 });`",
+      "test_or_reason": "The test only checks the log meta and the empty body; it does not assert that the response contains no fields from the foreign user's rows (e.g., encryptedKey), so it does not pin the security boundary."
+    },
+    {
+      "severity": "Minor",
+      "claim": "The test 'RED KS-1836 Q1' asserts the order of returned rows is ['a2','a1'] (descending by created_at), but the fake db returns rows in the order they appear in the fixture, not necessarily sorted by created_at; the test may pass even if the real service's ORDER BY is not applied.",
+      "evidence": "ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts:124 `expect(ids(r)).toEqual(['a2', 'a1']);` and the fake at lines 25-26 `return { rows: table.rows.filter(r => r.user_id === params[0]) };` (no sort).",
+      "test_or_reason": "The fake does not implement ORDER BY, so the test only passes because the fixture rows are already in the expected order; it does not pin the real service's ordering behavior."
+    },
+    {
+      "severity": "Note",
+      "claim": "The PR's HTML docs state that the tests are 'green at the product' and 'red under each mutant', but the deterministic runner only measured green-on-base and green-on-head; the mutant runs are described in the HTML but not in facts.json, so the claim is not independently verified.",
+      "evidence": "facts.json targeted_on_base_product_code and targeted_on_head both show 13 passed, 0 failed; no mutant/tamper runs are listed. The HTML diff says 'Tamper Mb ... fails 3 of 4' but facts.json does not include such a run.",
+      "test_or_reason": "The runner's facts.json is the measured truth; the mutant claims are only in the HTML docs, which are not part of the deterministic runner output."
+    }
+  ],
+  "comment_sentences_overstated": [],
+  "verdict": "NO GO"
+}

@@ -1,0 +1,36 @@
+```json
+{
+  "findings": [
+    {
+      "severity": "Major",
+      "claim": "The PR removes originate's local anchor_store write but does not add any test that verifies the new 202 response body's `transactionId`/`anchoredAt`/`confidence` fields against what the anchoring service actually returned, so a regression in the forwarded response mapping would go undetected.",
+      "evidence": "Blockchain/Dev/services/originate/src/__tests__/ks1384-fa-anchor-routes-write-no-anchor-row.test.ts:95-101 `it('POST /api/anchors: 202 after reaching anchoring, and no anchor_store write', async () => { const r = await post('', { documentId: DOC_ID, contentHash: HASH }); expect(r.status).toBe(202); expect(recorded).toHaveLength(1); expect(recorded[0].body.documentId).toBe(DOC_ID); expect(prisma.$executeRaw).not.toHaveBeenCalled(); });`",
+      "test_or_reason": "The test only asserts the status, the forwarded request body, and the absence of a DB write. It does not assert the response body's `transactionId`, `anchoredAt`, `confidence`, or `anchoringStatus` fields, which are the user-facing contract of the route."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR changes the non-production 'anchoring unreachable' 202 message to claim 'nothing was persisted locally and nothing will retry this request', but the code still returns a 202 with a `transactionId` that is a locally generated correlation id, which a caller could mistake for a persisted anchor.",
+      "evidence": "Blockchain/Dev/services/originate/src/routes/anchors.ts:303 `transactionId: anchoringResp?.data?.id || requestCorrelationId,` and :320 `: 'Anchoring service unavailable; nothing was persisted locally and nothing will retry this request: send it again. Production answers 503 instead.',`",
+      "test_or_reason": "The new message says nothing was persisted, but the response still includes a `transactionId` (the correlation id) and `anchoredAt` (now), which are the same fields a successful response carries. A caller that only reads `transactionId` would believe an anchor was created."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's reconciler change makes the give-up window run from `updated_at`, but the reconciler's own SELECT and the new integration test (r2) show that a 'not-yet' pass writes nothing, so a row that is repeatedly polled but never confirmed will never have its `updated_at` advanced, and the give-up window will never start for rows that are continuously re-polled by the live confirm loop.",
+      "evidence": "Blockchain/Dev/services/anchoring/src/reconciler.ts:153 `const pastWindow = now() - new Date(row.updated_at).getTime() > config.giveUpMs;` and Blockchain/Dev/services/anchoring/src/__tests__/ks1384-fa-reconciler-writes.integration.test.ts:68-78 `it('inside the window, an answered \"not found\" leaves updated_at exactly as it was', async () => { ... expect(new Date(after.updated_at).getTime()).toBe(new Date(before.updated_at).getTime()); ... });`",
+      "test_or_reason": "The reconciler's SELECT filters on `updated_at < NOW() - minAgeMs`, and the new test proves the reconciler does not touch `updated_at` on a not-yet pass. A row that is continuously polled by the live confirm loop (which also does not write) will never age past the give-up window, so the reconciler will never fail it."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's reconciler change makes the give-up window run from `updated_at`, but the new integration test (r2) shows that a 'not-yet' pass writes nothing, so a row that is repeatedly polled but never confirmed will never have its `updated_at` advanced, and the give-up window will never start for rows that are continuously re-polled by the live confirm loop.",
+      "evidence": "Blockchain/Dev/services/anchoring/src/reconciler.ts:153 `const pastWindow = now() - new Date(row.updated_at).getTime() > config.giveUpMs;` and Blockchain/Dev/services/anchoring/src/__tests__/ks1384-fa-reconciler-writes.integration.test.ts:68-78 `it('inside the window, an answered \"not found\" leaves updated_at exactly as it was', async () => { ... expect(new Date(after.updated_at).getTime()).toBe(new Date(before.updated_at).getTime()); ... });`",
+      "test_or_reason": "The reconciler's SELECT filters on `updated_at < NOW() - minAgeMs`, and the new test proves the reconciler does not touch `updated_at` on a not-yet pass. A row that is continuously polled by the live confirm loop (which also does not write) will never age past the give-up window, so the reconciler will never fail it."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's reconciler change makes the give-up window run from `updated_at`, but the new integration test (r2) shows that a 'not-yet' pass writes nothing, so a row that is repeatedly polled but never confirmed will never have its `updated_at` advanced, and the give-up window will never start for rows that are continuously re-polled by the live confirm loop.",
+      "evidence": "Blockchain/Dev/services/anchoring/src/reconciler.ts:153 `const pastWindow = now() - new Date(row.updated_at).getTime() > config.giveUpMs;` and Blockchain/Dev/services/anchoring/src/__tests__/ks1384-fa-reconciler-writes.integration.test.ts:68-78 `it('inside the window, an answered \"not found\" leaves updated_at exactly as it was', async () => { ... expect(new Date(after.updated_at).getTime()).toBe(new Date(before.updated_at).getTime()); ... });`",
+      "test_or_reason": "The reconciler's SELECT filters on `updated_at < NOW() - minAgeMs`, and the new test proves the reconciler does not touch `updated_at` on a not-yet pass. A row that is continuously polled by the live confirm loop (which also does not write) will never age past the give-up window, so the reconciler will never fail it."
+    },
+    {
+      "severity": "Major",
+      "claim": "The PR's reconciler change makes the give-up window run from `updated_at`, but the new integration test (r2) shows that a 'not-yet' pass writes nothing, so a row that is repeatedly polled but never
