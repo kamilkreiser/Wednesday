@@ -1,0 +1,52 @@
+STARTABLE: YES after your stamp, but NOT at once: load1 read 9.88 15.17 14.90 at 15:22 (several builders and gates live), so launch_when_cool will hold it; CI on the head was mid-run at 15:2x (CodeQL neutral pending the csharp analysis; five e2e shards, unit, api and the two SQL Server jobs in progress): the gate reads them last, after a wait
+
+# B946 drafter report (2026-10-30, about 15:22 to 15:45 AEDT)
+Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-10-30_B946_SEAT-G221_hpsmpoc-245-customer-frame-gate-tier2.md` (67 lines; 8 four-underscore lines = 7 slots S1-S7 at lines 59-65 plus the last line 67, counted by a `python3 -I` line test and `grep -n -E '_{4}'`; at-sign slot pattern 0; non-ASCII bytes 0 by `LC_ALL=C grep -c '[^ -~]'` and by byte test). Shape: the stamped B939 kit (checks, binding lines, severity, stamp) adapted to PR #245 and extended with a words program (C2) and a Demo-alias frame check (C3). I read read-only: gh `-X GET` under the project `.gh-config`, `git --no-optional-locks` read verbs on the shared repo, no Jira call, no `cd`, no hosted HTTP, no ref written, no message, nothing in the project folder. Scratch: `/private/tmp/claude-501/-Volumes-Laptop-DEV-TUESDAY/8a8e5624-4358-43cb-ab64-af03ddbc5b41/scratchpad/drafters/b946/` (PR diff, body, per-PR file lists, first-lines table).
+
+## BLUF
+Seat `Datasec/HPSM-POC-G221` (Sonnet, `BRIEF_SEAT_LEVEL=sonnet` inside the quotes), ports 9770-9779, gates PR #245 @ `087b6751` (5 commits incl. the builder's merge of `7365165d`; 2 files +349 -15 against `7365165d`), round 1 of 2 on class "customer frame". The gate judges the LANDING TREE (the head merged onto the main read at Step 0, `b5b6aa34`, via `merge-tree` plus a scratch commit), measures: the merge commit adds only #244's four files and its tree is the plain merge of its parents; a base-vs-head multiset of every visible or announced string with each added string sourced to the ticket, the builder kit or the app (C2); the Demo frame shows no real name for four roles (C3, tier-1 STOP if it does); structure by source; widths at six viewports on six pages; rail collapse, 226 px and stickiness; axe; targets; 14 plants (p1-p10 re-made, p11 equivalent green, p12 sticky, p13 target size, p14 findings chip without a run); suites on the combined tree with predicted counts; CI and CodeQL last, including WHICH main the hosted CI measured. The kit carries the binding load line (re-run a red alone 3 times; no wait on a marker a cut step would not write; every wait has a timeout and a heartbeat) and the verbatim HP-tools STOP line.
+
+## Facts re-measured (instrument; control)
+- **PR and refs (15:2x):** #245 open, draft false, mergeable true, `blocked`; `base.sha` `7365165d` (stale), head `087b6751`; 5 commits, all unsigned, 4 builder commits carry one Co-Authored-By each, the merge commit 0 (`gh api commits` message line count); title 145 characters. `ls-remote`: main `b5b6aa34`, pull/245 head `087b6751`, pull/245/merge `ea50074e` with parents `b5b6aa34` + `087b6751` (recomputed). `compare 7365165d...087b6751`: ahead 5, 2 files (+285/0, +64/15). `compare 17c4e9b7...087b6751`: exactly #244's 4 files (control in the kit). `compare 087b6751...b5b6aa34`: main is 1 commit ahead (#246, 7 files, none shared). The 443-line patch holds 0 non-ASCII bytes; the PR body holds 1.
+- **Product diff read whole:** card `section aria-label="Customer engagement"` outside `main`, before the row; `p` eyebrow, `p` customer line (`label ?? "Customer"`), Back link to `/customers`, chips (questions, "N draft findings"/"1 draft finding", `StagePill`); tabs moved inside; rail `RAIL_STEPS` (Overview filtered) in both lists; `lg:` to `xl:` everywhere (`lg:` count at head 0, by `grep -c`). No role/cookie read in added lines; the file's `useSession` is old code (lines 31, 41, 110).
+- **Words, at source (`git grep -F` at `7365165d`):** "Back to customers" exists (not-found button, `CustomerShell.tsx:123`); "questions answered" exists (ProgressBar label, AssessmentScreen, SnapshotResult); "Customer engagement" exists only as the plural "Customer engagements" (`EngagementsList.tsx`, `HomeScreen.tsx`); **"draft finding" has 0 non-test hits: new to the app**, though the ticket says "draft finding count" and the builder kit lists "<k> draft findings". "1 draft finding" (singular) is the builder's Correction 1, not in the kit.
+- **Overlap:** #247 to #252 list none of the 2 paths nor the four other files the kit names (0 of 6). A live branch `b937/hpsmpoc-387-customer-security-preview-a` has no PR: the kit makes the gate intersect it. Round count: 104 `GATE VERDICT` first lines (control B805 and B817 both present); the loose grep hits B729, B733, B747 only, all on the word "frame" in other classes.
+- **Ports:** `lsof 9770-9779` 0; `9700-9799` listed 3 lines, none in the block (instrument answers). The only text with 977x is an old kit's "9760-9779" note for a finished lane.
+- **Model and routing:** `sed -n '108,111p'` model-routing.md: G1 108, G2 109, G3 110, G-cap 111; `models_latest.json` line 23 `"model_id": "claude-sonnet-5-5"`; `brief_seat.sh` line 24 `LEVEL="${BRIEF_SEAT_LEVEL:-opus}"`.
+- **Head sha256 prefixes:** `CustomerShell.tsx` `2142ea827f4fe13a` (303 lines), `CustomerShell.frame.test.tsx` `4675d4bdf33f7f6d` (285).
+
+## Builder STATUS and PR body claims found wrong or loose at source
+1. **PR body "web unit 3265 passed (base 3242)":** 3242 is the pre-#244 main. By arithmetic (3259 measured by the last gate on #246 on `7365165d`, minus its 16 rows) the base at `7365165d` is 3243 and at `b5b6aa34` 3259. The kit predicts comb 214 files / 3281 and asks the gate to measure. The builder's own merged-head 3265 = 3243 + 22 is consistent.
+2. **PR body "Five commits against main 7365165d":** true when written; main is now `b5b6aa34`, the branch is 1 behind (disjoint). `base.sha` on the PR is stale.
+3. **PR body "in this branch by one merge commit":** a squash drops the merge commit; fine as a description of the branch, wrong as a description of what lands. The body also holds one non-ASCII character (keep out of the squash).
+4. **READY line "CodeQL on the new head: 0 alerts, 0 check runs":** superseded (18 runs now, CodeQL `neutral` pending csharp).
+5. **Builder STATUS "H3: in base 7365165d" and "diff to origin/main still 2 files":** true against `7365165d`, not against the current main.
+6. **Words:** "draft findings" is new to the app (see Facts); the singular "1 draft finding" is outside the builder kit's allowed list; "Customer engagement" is a near-twin of the existing plural eyebrow. Not wrong in the STATUS, but the product owner's call, so C2 lists them.
+7. **Builder asked, never answered:** four commits where D-1 allowed 1 to 3 (Note); the 282 px phone card (Note); pill-in-chip look (Note).
+Nothing in the STATUS was found false about the diff itself.
+
+## D-decisions (mine, in the kit)
+- D-1: the gate judges the combined landing tree (`comb`), not the head alone, because main moved after the builder's merge; the head tree is the first thing cut under load.
+- D-2: C2 is a program with controls and three named sources; any other string is a finding for Tuesday (Major if shown to HP as new).
+- D-3: the Demo alias frame is a tier-1 STOP tripwire inside a tier-2 gate (the code reads `label` only; the gate proves it for four roles on both trees).
+- D-4: plants add p12 (sticky), p13 (44 px target), p14 (findings chip without a run) to the builder's ten; predicted counts quoted from the builder's table.
+- D-5: C8 asks which main the hosted CI measured (the checkout merge sha's parents) because the first run may have used the old merge ref.
+- D-6: target 120 minutes, HARD STOP 180 after Step 0 (two npm ci and builds, three unit runs, one e2e run).
+
+## Q-questions for Tuesday (each with a default)
+- Q-1: Is the landing tree judged as the merge onto the main read at Step 0 (comb)? Default YES.
+- Q-2: Does the Demo alias surface keep tier 2 with the binding tier-1 STOP on any real-name leak? Default YES (the added lines read `label` only).
+- Q-3: How are "1 draft finding" and the near-existing "Customer engagement" graded? Default: Note and listed for the product owner's veto; "draft findings" is in the ticket phrase, so allowed.
+- Q-4: What does a NO GO mean? Default: the PR is parked open and Tuesday writes a round-2 fix kit.
+
+## Stamp slots (S1-S7 and the last line; I filled none) with recommended defaults
+S1 STAMPED <time> AEDT 2026-10-30 by Tuesday, kit read whole, decisions D-1 to D-6 accepted. S2 from the stamp until 17:30 30 Oct, launch_when_cool at load1 below 7 on two reads, one waiter at a time, list the live panes. S3 Tuesday seat, Q-1 YES, Q-2 YES, Q-3 as above, Q-4 park and round-2 kit. S4 Tuesday under the product owner's 2026-10-30 10:07:23 commission and the standing HPSM-POC merge-once-tested grant; YES to the two-refspec fetch, npm ci in own worktrees, wt-b946-mut, the scratch commit-tree commit, loopback 9770-9779, gitleaks, a Jira GET of HPSMPOC-374. S5 target 120, HARD STOP 180 minutes after Step 0. S6 read at the stamp: branch `087b6751...`, main `b5b6aa34...`, merge ref parents `b5b6aa34`+`087b6751`, open PRs 245 and 247-252, check-run table. S7 `model: claude-sonnet-5-5 -- G2 -- gauge <n>%` and load1. Last line `READ-WHOLE-BY-TUESDAY: DONE <time>`.
+
+## Reasons not to launch now
+Load1 9.88 (the waiter will hold the launch); CI is mid-run (not a blocker: the gate waits). Re-read main at the stamp: if it has moved past `b5b6aa34`, S6 must say so and the kit's REFUSE rule applies. The hosted CI may have used the old merge ref; the gate measures that. No role or auth change in the added lines; no other blocker.
+
+## UNMEASURED
+All runtime numbers in the kit (the unit counts 213/3259, 211/3265, 214/3281 are arithmetic from the builder's and the last gate's counts, written as predictions); whether CodeQL re-concludes after csharp completes; which main the hosted CI checked out; whether an API-held customer renders in mock mode; the Demo frame text; the sticky and width numbers (the builder's, as predictions); whether b937 touches shell files.
+
+## Outside-the-fences disclosure
+None breached. I read the three template/claim files whole, listed ports and panes, and ran `gh api -X GET` and read-only `git` verbs only. I did not open `.tools/b928/`, any `.tools/wt-*`, `.tools/b939/` or any HP document. The only listing under the project folder was `ls` of the Briefs folder for the round count (read, no write).
