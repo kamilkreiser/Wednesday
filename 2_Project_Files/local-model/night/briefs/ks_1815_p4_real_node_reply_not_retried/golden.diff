@@ -1,0 +1,42 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks726-write-ahead-tx-hash.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks726-write-ahead-tx-hash.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/ks726-write-ahead-tx-hash.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks726-write-ahead-tx-hash.test.ts
+@@ -452,3 +452,38 @@
++  // KS-1815: the cell above feeds the guard a PARAPHRASE of the node's reply ("All inputs are spent"). The node's real text (stored in
++  // ks705-submission-idempotency.test.ts) also says "already been included", and the ALREADY_INCLUDED_REPLY clause of `refusedAndAbsent`
++  // turns the ruled retry OFF for any text that contains it. These cells pin that clause with the real text.
++  const REAL_NODE_REPLY =
++    'Transaction submission failed: ConwayMempoolFailure "All inputs are spent. ' +
++    'Transaction has probably already been included in a successfully applied block."';
++  const definitiveAbsent = () =>
++    vi.fn(async () => ({
++      confirmed: false,
++      polled: ABSENT_MIN_ANSWERED_POLLS,
++      errored: 0,
++      lastAnsweredAttempt: ABSENT_MIN_ANSWERED_POLLS,
++      lastAnsweredElapsedMs: ABSENT_MIN_LAST_ANSWER_MS + 1_000,
++    }));
++
++  it('RED KS-1815 R1 the node REAL reply ("... already been included ...") after onSigned, with a DEFINITIVE absent re-poll, is NOT retried: the row rests in submitting', async () => {
++    const h = makeHarness({ over: { submit: throwingSubmit(refused(REAL_NODE_REPLY)), confirm: definitiveAbsent() } });
++    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
++
++    expect(h.deps.confirm).toHaveBeenCalledTimes(1);
++    expect(h.deps.scheduleRetry).toHaveBeenCalledTimes(0);
++    expect(h.row.status).toBe('submitting');
++  });
++
++  it('control KS-1815 C1 the same DEFINITIVE absent re-poll with the paraphrase "All inputs are spent" (no "already been included") IS retried', async () => {
++    const h = makeHarness({
++      over: { submit: throwingSubmit(refused('Transaction submission failed: ConwayMempoolFailure "All inputs are spent"')), confirm: definitiveAbsent() },
++    });
++    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
++
++    expect(h.deps.confirm).toHaveBeenCalledTimes(1);
++    expect(h.deps.scheduleRetry).toHaveBeenCalledTimes(1);
++    expect(h.row.status).not.toBe('submitting');
++  });
++
+   it('CONTROL — a 400 "already been included" after onSigned → re-polled and confirmed, scheduleRetry NOT called (the hash IS on chain)', async () => {
+     const h = makeHarness({ over: { submit: throwingSubmit(refused('Transaction submission failed: this transaction has already been included')) } });
+     await createAnchorSubmitter(h.deps)(ANCHOR_ID);

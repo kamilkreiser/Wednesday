@@ -1,0 +1,95 @@
+diff --git a/Blockchain/Dev/scripts/check-no-sql-injection.sh b/Blockchain/Dev/scripts/check-no-sql-injection.sh
+--- a/Blockchain/Dev/scripts/check-no-sql-injection.sh
++++ b/Blockchain/Dev/scripts/check-no-sql-injection.sh
+@@ -34,5 +34,5 @@
+ if [ -n "$hits" ]; then
+-  echo "::error::SQL injection risk — $queryRawUnsafe / $executeRawUnsafe used with template-literal interpolation:"
++  echo "::error::SQL injection risk — \$queryRawUnsafe / \$executeRawUnsafe used with template-literal interpolation:"
+   echo "$hits" | sed 's/^/  /'
+   echo ""
+   echo "Fix: pass the SQL as a plain string with positional params:"
+diff --git a/Blockchain/Dev/scripts/__tests__/check_no_sql_injection_reports_the_hit.test.sh b/Blockchain/Dev/scripts/__tests__/check_no_sql_injection_reports_the_hit.test.sh
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/check_no_sql_injection_reports_the_hit.test.sh
+@@ -0,0 +1,80 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Dev/scripts/check-no-sql-injection.sh - a real hit must be
++# REPORTED, not swallowed by `set -u`.
++# =============================================================================
++# The failure branch echoes "::error::SQL injection risk - $queryRawUnsafe / $executeRawUnsafe ..."
++# inside double quotes, so under `set -u` the shell expands two unset variables and
++# aborts with "queryRawUnsafe: unbound variable" BEFORE the hit list is printed. The
++# gate still fails (exit 1) but names nothing.
++# grep is a stub on a private PATH: it answers the scan call with the lines in
++# SHIM_HITS and hands the script's own `grep -v` filter call to the real grep. No tree
++# is ever walked.
++# Usage: bash Blockchain/Dev/scripts/__tests__/check_no_sql_injection_reports_the_hit.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUBJ="${CHECK_NO_SQL_INJECTION_SH:-$HERE/../check-no-sql-injection.sh}"
++[[ -r "$SUBJ" ]] || { echo "FATAL: check-no-sql-injection.sh not readable at $SUBJ" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/sqlhit.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++REAL_GREP="$(command -v grep)"
++
++mkdir -p "$WORK/bin" "$WORK/root/scripts" "$WORK/root/services" "$WORK/root/packages"
++cp "$SUBJ" "$WORK/root/scripts/check-no-sql-injection.sh"
++cat > "$WORK/bin/grep" <<'STUB'
++#!/bin/sh
++for a in "$@"; do
++  [ "$a" = "-v" ] && exec "$REAL_GREP" "$@"
++done
++[ -n "${SHIM_HITS:-}" ] && printf '%s\n' "$SHIM_HITS"
++exit 0
++STUB
++chmod +x "$WORK/bin/grep"
++
++run_case() {   # $1 = name, $2 = the lines the scan call answers with -> prints rc; output in $WORK/$1.out
++  (
++    export PATH="$WORK/bin:/usr/bin:/bin" REAL_GREP SHIM_HITS="$2"
++    cd "$WORK/root" && bash scripts/check-no-sql-injection.sh
++  ) >"$WORK/$1.out" 2>&1
++  echo $?
++}
++
++RC_CLEAN="$(run_case clean "")"
++RC_HIT="$(run_case hit 'services/x/src/repo.ts:3:  db.$queryRawUnsafe(`SELECT 1 WHERE id = ${id}`);')"
++RC_DEP="$(run_case dep 'services/x/node_modules/y/index.js:9:  db.$queryRawUnsafe(`SELECT ${id}`);')"
++
++# CELL 1 (RED at the tip) - a hit prints the error headline with both API names.
++if "$REAL_GREP" -qF 'SQL injection risk' "$WORK/hit.out" && "$REAL_GREP" -qF '$queryRawUnsafe / $executeRawUnsafe' "$WORK/hit.out"; then
++  echo "PASS: a hit prints the error headline naming both Unsafe calls"; PASS=$((PASS+1))
++else
++  echo "FAIL: the hit output has no error headline naming both Unsafe calls"; FAIL=$((FAIL+1))
++fi
++
++# CELL 2 (RED at the tip) - a hit prints the offending line, indented two spaces.
++if "$REAL_GREP" -qF '  services/x/src/repo.ts:3:' "$WORK/hit.out"; then
++  echo "PASS: a hit prints the offending file and line"; PASS=$((PASS+1))
++else
++  echo "FAIL: the offending file and line are not printed"; FAIL=$((FAIL+1))
++fi
++
++# CELL 3 (GREEN CONTROL, tip AND after) - exit codes: a hit exits 1, a clean scan exits 0 and says OK.
++if [[ "$RC_HIT" == "1" && "$RC_CLEAN" == "0" ]] && "$REAL_GREP" -qF 'no string-concatenated SQL found' "$WORK/clean.out"; then
++  echo "PASS: CONTROL a hit exits 1 and a clean scan exits 0 with the OK line"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL exit codes: hit=$RC_HIT clean=$RC_CLEAN"; FAIL=$((FAIL+1))
++fi
++
++# CELL 4 (GREEN CONTROL, tip AND after) - a hit under node_modules is still dropped by the script's own filter.
++if [[ "$RC_DEP" == "0" ]] && "$REAL_GREP" -qF 'no string-concatenated SQL found' "$WORK/dep.out"; then
++  echo "PASS: CONTROL a hit under node_modules is still filtered out"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL node_modules hit: rc=$RC_DEP $(head -2 "$WORK/dep.out" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++echo "check_no_sql_injection_reports_the_hit: $PASS passed, $FAIL failed"
++[[ "$FAIL" -eq 0 && "$PASS" -eq 4 ]]

@@ -1,0 +1,35 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts
+--- a/Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts
+@@ -260,3 +260,31 @@
++describe('anchorDocumentSchema - KS-1812 a did:jwk the shape checks already refuse is refused once, for its own reason', () => {
++  // A public P-256 JWK (the RFC 7515 A.3 coordinates), unpadded base64url: the payload of an acceptable did:jwk.
++  const PUBLIC_PAYLOAD = Buffer.from(
++    JSON.stringify({ kty: 'EC', crv: 'P-256', x: 'f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU', y: 'x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0' }),
++  ).toString('base64url');
++  const PRIVATE_PAYLOAD = Buffer.from(JSON.stringify({ kty: 'EC', crv: 'P-256', d: 'jpsQnnGQmL-YBIffH1136cspYG6-0iY7X1fCE9-E9LI' })).toString('base64url');
++  const FIELDS = ['actorDid', 'orgDid'] as const;
++
++  /** The zod issue codes that belong to the field under test, so a refusal for some other reason cannot stand in for it. */
++  const codesFor = (field: string, value: string): string[] => {
++    const r = anchorDocumentSchema.safeParse({ ...BASE_BODY, identity: { [field]: value } });
++    return r.success ? [] : r.error.issues.filter((i) => i.path.join('.') === `identity.${field}`).map((i) => i.code);
++  };
++
++  it.each(FIELDS)('RED KS-1812 R1 %s: a public did:jwk with base64 padding is refused once, as invalid_string only', (field) => {
++    expect(codesFor(field, `did:jwk:${PUBLIC_PAYLOAD}==`)).toEqual(['invalid_string']);
++  });
++
++  it.each(FIELDS)('RED KS-1812 R2 %s: a did:jwk with a space inside the payload is refused once, as invalid_string only', (field) => {
++    expect(codesFor(field, 'did:jwk:ab cd')).toEqual(['invalid_string']);
++  });
++
++  it.each(FIELDS)('control KS-1812 C1 %s: the public did:jwk is accepted and the private one is refused by the custom check alone', (field) => {
++    expect(codesFor(field, `did:jwk:${PUBLIC_PAYLOAD}`)).toEqual([]);
++    expect(codesFor(field, `did:jwk:${PRIVATE_PAYLOAD}`)).toEqual(['custom']);
++  });
++});
++
+ describe('buildFlatAnchorMetadataPayload — KS-721 exact anchored key set', () => {
+   // The regression guard the KS-721 widening earns. buildFlatAnchorMetadataPayload
+   // is the ONE path to the public ledger, and the ledger is immutable — a field
