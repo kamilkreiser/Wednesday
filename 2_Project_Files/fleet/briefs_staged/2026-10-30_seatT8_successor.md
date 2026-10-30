@@ -1,6 +1,6 @@
 ## NEW SEAT: you are Seat T 8th (lane Secuura/Blockchain-T; Sonnet; trust $TMUX_PANE): SUCCESSOR to Seat T 7th. Your runbook is T 7th's HANDOVER (FINAL block first) plus T 7th's brief; this mail adds only what changed since.
 
-model: claude-sonnet-5-5 -- raise seat on held passes / merge prep (routing row C1) -- P1-P4 -- gauge 77%
+model: claude-sonnet-5-5 -- raise seat on held passes / merge prep (routing row C1) -- P1-P4 -- gauge 80% (read 16:40) -- cloud (80-90% band): opening PRs and merge prep need repo write, which no local tier has
 
 ## START AUTHORITY
 Kam, 2026-10-30 10:07:32 AEDT, live board, verbatim: "Decision secuura-wednesday-go-counts-as-kams-word-1030: a — Yes: Wednesday's GO counts for starting work inside my standing grants (recommended)". Raising, gating and merge prep of our own tested work sits inside Kam's 2026-09-11 grant ("you also have my approval to merge anything that has been finished and tested"). Your plan confirmation goes to Wednesday; her GO is the start. Signature classes still pause for Kam.
