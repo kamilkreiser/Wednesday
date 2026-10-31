@@ -52855,5 +52855,47 @@
   ],
   "delivered_artefact": "0_Brain/tasks/NEXT-PICKUP.md 31 Oct 09:4x handover block (the plan)",
   "delivered_ts": "2026-10-31T09:44:44.316716+11:00"
+ },
+ {
+  "id": "secuura-ks1861-what-tenant-delete-means-1031",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1861: what should 'delete tenant' actually do?",
+  "bluf": "Decide what deleting a tenant means. Today DELETE /api/tenants/:id removes only a few platform registry rows and answers 'deleted: true', while every user, document and vault entry stays in the application database and the users can most likely still sign in (Seat S 9th, read from code at develop cb2320368ae4, not exercised). I have already ruled the safe half (honest answer, one transaction, no swallowed errors, no DROP DATABASE unless per-tenant databases are on); this card is only the meaning of delete. Hard deletion is irreversible, so it is yours.",
+  "default_action": "If you do not answer: nothing destructive is built. Seat S 9th ships only the honest-answer fix after #1848 merges, and delete keeps its current narrow effect until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Archive, not erase (recommended)",
+    "detail": "Delete sets status 'archived': every row kept, fully reversible; access refused once KS-1860 lands. Erasure becomes a separate explicit step later. Small, one handler, no migration."
+   },
+   {
+    "key": "b",
+    "label": "Hard delete in the application database",
+    "detail": "Removes users, documents, vault entries and keys under row-level security, after an export. Large: a new database pool, a census of ~25 tenant tables proved on a throwaway database, a real-Postgres proof. Irreversible. On-chain anchors cannot be deleted by anything."
+   },
+   {
+    "key": "c",
+    "label": "Refuse delete for now",
+    "detail": "DELETE answers 409 'tenant data deletion is not available yet' until you decide. Stops any further half-deletes; the admin UI's delete button shows a failure."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T11:30:31.402030+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:23",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1102-public-status-what-may-show",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape",
+   "CARD secuura-tenant-isolation-migration-ks1401-1005",
+   "CARD secuura-1756-misfiled-docs-what-next-1028",
+   "CARD secuura-ks1240-tenant-create-key-fail-answer-1028"
+  ]
  }
 ]
