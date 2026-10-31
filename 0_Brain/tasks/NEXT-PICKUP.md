@@ -6,6 +6,11 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ ROTATION HANDOVER 00:0x SUN 1 NOV (the 21:3x rotation seat, ctx 80%) — READ THIS FIRST; the 23:5x block below is current where this does not differ
+- **FIRST WORK: COMMISSION GATE 61 — TIER 1, OPUS, DELTA** on W 14th's R1 round 2: PR #1868 head a46c251e1419d48bb8a50519e7ee0e306ad2fbe1, delta 13fdd7f31f22...a46c251e1419 (READY FOR GATE 13:01Z, read it from the inbox). Money path (anchoring fee). Re-check G58-F1 (takeover race) with gate 58's Q2a-stale probe (0_Brain/reference/2026-10-31_gate58-r1-1868/evidence/probe/) on real Postgres; the t1b gap (MR3 survived the first cell file); the 10 s POST-timeout claim-KEPT path (no double fee on an unknown outcome); write own mutants; spark_gate.sh first with --work in the session scratchpad (it refuses a dir under WEDNESDAY) and note gate 60's npm-workspace hoisting break. Verdict -> 0_Brain/reference/2026-11-01_gate61-r1r2-1868/verdict.md. Shape: copy gate 59's prompt structure (this seat's transcript is gone; gate 59's verdict.md shows the output shape).
+- **W 14th:** train-aware develop gate APPROVED (ANSWER 00:0x); R2a takes the next free place; F0b/F0c/F-b queue only after the member below merges (ANSWER 00:0x). F0a re-merged 9041d6e3905b, driver 56116.
+- **Today's note is 0_Brain/daily/2026-11-01.md** (created 00:00); last night's log is in 2026-10-31.md.
+
 ## ⏩ ROTATION HANDOVER 23:5x SAT 31 OCT (the 21:3x rotation seat, ctx ~78%) — READ THIS FIRST; the 23:0x / 22:4x / 21:5x blocks below are current where this does not differ
 - **DEVELOP = bf6a43631df1** (F-a #1838; Wednesday's ls-remote). Merged by this seat's pinned GOs tonight: #1866, #1834, #1831, #1843, #1864, #1867, #1870, #1863, #1838 (F-a). Each: Wednesday's own blob check in a scratch bare repo first (method: 0_Brain/tasks/NEXT-PICKUP.md 18:3x block).
 - **KAM'S 3 CARDS STILL OPEN** (defaults safe): kintsugi disk prune (gates the deploy; D 47th reads the card itself and starts on (a)); Stuart's re-anchor; owner-less vc-issuer credentials. No Kam message since 15:40.
