@@ -53789,5 +53789,85 @@
    "CARD hpsmpoc-232-chooser-demo-deploy-1027",
    "CARD composer-demo-deploy-87-105-1031"
   ]
+ },
+ {
+  "id": "secuura-ks1860-status-refresh-fails-at-startup-1101",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1860: if the platform database is down when originate starts, suspended tenants are still served. Keep that, or refuse everyone until the status is known?",
+  "bluf": "Question, no hands needed. Raised despite earlier cards on fail-open and refresh topics (the prior-ruling check matched only shared words: refresh, fails, open), because none of them covers this. Your KS-1860 ruling (a) is built and gate 64 says GO WITH NOTES. One behaviour you were not shown: originate reads tenant statuses every 60 seconds; if the platform database is down when originate STARTS, it knows no statuses yet and serves every tenant, suspended ones included, until a read succeeds; if the database then stays down, a tenant suspended after the last good read is served indefinitely. This is not a regression: before this change no tenant was ever refused. It applies only where MULTI_TENANCY_ENABLED is on. The PR merges either way; your answer decides a follow-up.",
+  "default_action": "If you don't answer: it stays as built (a), the docs and ticket say so plainly, and Wednesday raises it again at the morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it as built and say so",
+    "detail": "Serve while statuses are unknown (an outage of the platform database does not take originate down), state it plainly in the docs and on the ticket. Nothing more is built."
+   },
+   {
+    "key": "b",
+    "label": "Refuse every tenant until the first status read succeeds",
+    "detail": "Fail closed at start-up: a platform database outage makes originate unavailable to every tenant until it recovers. A small follow-up PR and a gate."
+   },
+   {
+    "key": "c",
+    "label": "Remember the last known statuses across restarts",
+    "detail": "Suspended tenants stay refused through an outage at start-up; a medium follow-up (a cached status file or table) and a gate."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-01T04:47:18.673294+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-07 09:28",
+   "2026-09-17 08:47",
+   "CARD secuura-ks329-refresh-token-size",
+   "CARD secuura-ks788-gate-fails-open-2026-09-04",
+   "CARD secuura-kintsugi-refresh-notice-release",
+   "CARD secuura-oauth-refresh-launder-forward-only-window",
+   "CARD secuura-oauth-refresh-window-iat-cutoff-or-marker",
+   "CARD secuura-ks1102-public-status-what-may-show",
+   "CARD secuura-ks998-format-gate-fails-open-on-missing-deps",
+   "CARD secuura-ks692-status-revoke-interim-posture",
+   "CARD secuura-ks998-formatting-gate-fails-open-on-missing-prettier",
+   "CARD secuura-uuid-revokes-never-wrote-status-history-1006",
+   "CARD secuura-ks1114-deleted-status-found-by-title-1018",
+   "CARD secuura-ks1689-m365-failed-signin-status-1020",
+   "CARD secuura-advisory-freeze-lock-refresh-1021",
+   "CARD secuura-ks1860-suspended-tenant-enforcement-1031"
+  ]
+ },
+ {
+  "id": "secuura-ks1906-ownerless-credentials-connectors-1101",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1906: your credentials ruling and your KS-1695 rule disagree about connectors. Who may open an owner-less credential: platform administrators only, or connectors too?",
+  "bluf": "Question, no hands needed. Raised despite your 00:18 ruling on card secuura-ks1851-ownerless-credentials-who-1031, because its two halves conflict and I confirmed the wrong reading to the seat. That card's option text (written by me) said owner-less credentials become readable by 'Platform S connectors and platform administrators only'; your words were 'extend your rule to credentials'. Your KS-1695 rule (20 Oct, card text) admits only the connector that CREATED a record, plus platform administrators, and says records with no creation record become unreadable to S too. An owner-less credential has no creator by definition, so under your rule no connector could open it. Seat E 22nd caught this itself. Measured on the boxes on 20 Oct: 0 owner-less credentials on demo and on kintsugi. Nothing has merged; the PR waits for your answer.",
+  "default_action": "If you don't answer: Seat E 22nd builds (a), the narrower rule, and takes it through its gate; it does not merge until you answer or the morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Platform administrators only",
+    "detail": "Faithful to your KS-1695 rule: no connector may open an owner-less credential (it has no creator to match); platform administrators of the row's tenant may. Narrowest; easy to widen later."
+   },
+   {
+    "key": "b",
+    "label": "Platform administrators and any connector of the row's tenant",
+    "detail": "The card's literal words: any connector key of the same tenant may read and revoke an owner-less credential. Wider than your KS-1695 rule allows for documents."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-01T04:51:43.444454+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 19:28",
+   "2026-09-04 15:32",
+   "2026-09-09 12:09",
+   "2026-09-13 16:55",
+   "CARD secuura-ks1352-revoked-credentials-still-verify",
+   "CARD secuura-ks1695-ownerless-records-who-reads-1020"
+  ]
  }
 ]

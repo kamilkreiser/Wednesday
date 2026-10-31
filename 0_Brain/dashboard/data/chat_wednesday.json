@@ -14818,5 +14818,19 @@
   "project": "Secuura",
   "ts": "2026-11-01T01:22:17.374433+11:00",
   "text": "FYI on a security find, no action needed tonight. Until the billing fix merged an hour ago, any signed-in user could change any Stripe customer's credit balance and owner through one update route. It's closed on develop now: I read the merged code. But kintsugi and demo still run the old code, on test Stripe. So I've moved tonight's deploy target to include the fix, and it ships whenever your prune card lets the round go ahead. KS-1909 holds a check of real Stripe customers before anything reaches production. That part is yours to decide, when it comes up. I read this from the code, not from Stripe itself."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-01T04:47:49.709810+11:00",
+  "text": "One more card for you, Kam, no rush, no hands needed: KS-1860, the suspended-tenant fix. The gate passed it. The one thing you weren't shown: if the platform database is down when originate starts, suspended tenants are still served until it recovers. That's no worse than today, where nobody is ever refused. I recommend keeping it that way and saying so plainly in the docs, rather than taking originate down with the database. The PR merges either way."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-01T04:52:37.176971+11:00",
+  "text": "And one more, Kam, again no hands needed: KS-1906, the owner-less credentials rule you ruled at 00:18. My card said connectors may open them, but your KS-1695 rule only lets the connector that created a record open it. An owner-less credential has no creator. So the two disagree, and I'd confirmed the wrong reading before Seat E 22nd caught it. I recommend platform administrators only. Both boxes had none of these credentials when last measured. E builds the narrow version meanwhile, and nothing merges until you answer."
  }
 ]
