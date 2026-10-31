@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-01 00:31 from 257 lesson files (1,116,452 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-01 01:29 from 258 lesson files (1,118,151 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7732,4 +7732,15 @@ sections (open the file for these): MECHANISM (Kam, terminal ~12:1x the same day
 - Before any command I am about to pipe through `grep`, `head` or `tail`, ask: can this write? If yes, run it unfiltered, or do not run it.
 
 Related: [[2026-08-07_a-check-that-cannot-fail]], DRAFTER_RULES fence 5, `_ledger_laptop_datasec.md` row 2026-10-31.
+
+
+## On the FIRST idle wake that shows an API error, sweep every pane for the same error — one outage idles every seat that was mid-turn
+`2026-11-01_one-api-outage-idles-every-mid-turn-seat-sweep-all-panes.md` · lesson · 2026-11-01 · status: live
+
+**The case.** At 00:55 AEDT the API dropped connections. Two seats were mid-turn: M53 (B1000, the MPS V4 builder) and G245 (B1003, a tier-2 gate). Both panes ended on `API Error: Connection lost mid-response` and sat at an empty prompt. The idle detector woke Tuesday for M53 at ~01:24 and for G245 at ~01:28 — two wakes, minutes apart, for one cause. Each seat lost about 30 minutes; nothing was damaged.
+
+**The rule.**
+1. When an idle wake's pane shows `API Error` (connection lost, overloaded, 5xx), it is a fleet event, not a seat event: in the same action, read every live pane's tail for the same line (`tmux capture-pane` per pane, grep `API Error`), and tap each stalled seat.
+2. The tap is a BARE FACTUAL pointer (what happened, when, where its STATUS stands). `cockpit.sh say` refuses "carry on"/"resume"-shaped wording without a mail, and projects with no mail channel have none: the seat's own brief already says what to do next. Keep it under 200 characters.
+3. Verify at rung 5 (the pane shows a running command), and note the slip in the seat's target time.
 
