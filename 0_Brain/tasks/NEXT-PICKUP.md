@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 23:0x SAT 31 OCT at ctx 70% (the 21:3x rotation seat) — the 22:4x block below is current except:
+- **GATE 60 RUNNING** (in-session Sonnet agent, tier 2 BATCH): KS-1868 #1864 + #1867 + #1870 (R 67th) -> `0_Brain/reference/2026-10-31_gate60-ks1868-batch/verdict.md` (+ Spark calibration). On its verdict: per PR, GO -> R 67th merge prep / pinned GO; NO GO -> fix round. PR 4 (mcp hash.ts) waits on #1850 (R 68th's queue).
+- **SPARK HARNESS EXTENSION RUNNING** (in-session Sonnet tooling agent; claimed with wed_claim): `test_only_input` (planted red proof, no product tamper) + `doc_only` tiers in `local-model/spark/` with arms. On return: read the arms, release the claim, then brief KS-1783 (three verify test files lack a real-tx-shape cell; open-PR-free) as the first round. WHY EMPTY line is in spark/queue.md (22:51, 27 screened).
+- **W 14th:** R1 round 2 (a46c251e1419) RE-KEYED into F0a's old place (driver 17285, verified by Wednesday's queue read); F-a 14150 ahead of it. R2a building in s-w14-ks1384-r2a. F0a gets a fresh driver when F-a's place frees.
+- **R 68th:** filed KS-1901/1902/1903 + KS-1544 comment. #1848 8th, #1849 10th in the queue.
+- **fleet_ack:** W 14th's and D 47th's questions never appeared as flagged rows (only a Datasec row is flagged) — nothing to clear.
+- **Owed via a Secuura seat:** a Linear note on KS-1812 (already pinned on develop, ks1175 test :238/:241). Secuura `.gh-config` reads "not logged in".
+
 ## ⏩ CHECKPOINT 22:4x SAT 31 OCT at ctx 67% (the 21:3x rotation seat) — READ THIS FIRST; the 21:5x block below is current where this does not differ
 - **DEVELOP = 86f80c190f3e** (Wednesday's ls-remote). Merged this seat, each on a pinned GO after Wednesday's blob check: #1866 KS-1871 (S 9th, f870e285), #1834 KS-1797 (T 8th, 519d4077; conditional GO met: whole auth suite 1353/1354, the red also red on develop), #1831 KS-1836 (U 7th, 86f80c19; no delta gate, hook-timeout only).
 - **KAM HAS 3 CARDS (all posted HTTP 201, defaults safe):** `secuura-kintsugi-disk-15gb-builder-prune-1031` (GATES TONIGHT'S DEPLOY; rec a; his 10-08 ruling b says each round asks) · `secuura-ks1384-stuart-reanchor-1d322cb1-1031` (rec a: D 47th does the one POST after kintsugi verifies) · `secuura-ks1851-ownerless-credentials-who-1031` (rec a: extend his ks1695 rule to vc-issuer credentials). Panel lines bf-a02f2eb09ef2, bf-9fd47fc26879, bf-6238fc9b1795 (the last corrects option c of the disk card).
