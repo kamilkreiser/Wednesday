@@ -17,6 +17,7 @@
 # that main does not. "EQUALS MAIN" or "NOT FOUND" means the claim has nothing
 # behind it: read the seat's worktree before accepting or closing anything.
 # Read verbs only (rev-parse, rev-list): this may run against another project's repo.
+# DIAGNOSED: + RECORDS PUSHED: added 2026-10-31 s210: the B991 diagnosis seat ended DIAGNOSED: at 16:40 and this watcher never fired; found only by a stray idle wake.
 # MARKERS + --changed (2026-10-22, s138; s141 added READY FOR REVIEW: (B449 missed 10 min) and ROLLED BACK: (deploy seats needed hand waiters)): three seats in one night (B425 LANDED:, B427 READY:, B428 FOLDED:) and the
 # gate kits (LANDING CHECKLIST:, PARKED:) needed hand-built waiters because this list lacked their final lines. And a
 # watcher re-armed on a RESUMED seat fired at once on the STOPPED line still in place: with --changed as the 3rd
@@ -52,7 +53,7 @@ while :; do
   if [ -f "$F" ]; then
     L=$(tail -n 1 "$F")
     case "$L" in
-      VERDICT:*|STOPPED:*|"READY FOR QA:"*|READY:*|BLOCKED:*|"RECORDS DONE:"*|"RECORDS COMMITTED:"*|DONE:*|LANDED:*|FOLDED:*|"LANDING CHECKLIST:"*|PARKED:*|DEPLOYED:*|PARTIAL:*|"READY FOR REVIEW:"*|"ROLLED BACK:"*)
+      VERDICT:*|STOPPED:*|"READY FOR QA:"*|READY:*|BLOCKED:*|"RECORDS DONE:"*|"RECORDS COMMITTED:"*|DONE:*|LANDED:*|FOLDED:*|"LANDING CHECKLIST:"*|PARKED:*|DEPLOYED:*|PARTIAL:*|"READY FOR REVIEW:"*|"ROLLED BACK:"*|DIAGNOSED:*|"RECORDS PUSHED:"*)
         [ "$CHANGED" = 1 ] && [ "$L" = "$START" ] && { sleep "$I"; continue; }
         echo "FINAL $(date '+%H:%M:%S') :: $F :: $L"
         records_check "$L"
