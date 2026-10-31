@@ -32,6 +32,14 @@ fi
 # handover line landed with a hole). With --stdin the caller writes  note_entry.sh --stdin <<'EOF'
 # and nothing in the body can expand. This is the path Wednesday uses for ANY text containing
 # a backtick, a dollar sign or a command; the argument form stays for one-line plain prose.
+# --receipt FILE (2026-10-31, composed-receipt family w=8): the receipt is INSERTED from the output file the
+# send/tap/ack wrote, never typed. Repeatable; each appends " [receipt <basename>: <its last non-empty line>]".
+# An unreadable or empty file REFUSES (rc 2): a receipt that cannot be read is not a receipt.
+RECEIPTS=()
+while [ "${1:-}" = "--receipt" ]; do
+  RF="${2:-}"; [ -n "$RF" ] && [ -r "$RF" ] && [ -s "$RF" ] || { echo "note_entry: REFUSED — --receipt needs a readable, non-empty file (got '$RF')" >&2; exit 2; }
+  RECEIPTS+=("$RF"); shift 2
+done
 MODE=line; [ "${1:-}" = "--h3" ] && { MODE=h3; shift; }   # --h3 also takes its title via --stdin (2026-09-02: no argument path anywhere)
 if [ "${1:-}" = "--stdin" ]; then
   TEXT="$(cat)"; TEXT="${TEXT%$'\n'}"
@@ -44,6 +52,10 @@ else
   exit 2
 fi
 [ -n "$TEXT" ] || { echo "note_entry: refusing empty text" >&2; exit 2; }
+for RF in ${RECEIPTS[@]+"${RECEIPTS[@]}"}; do
+  RL="$(/usr/bin/grep -v -E '^[[:space:]]*$' "$RF" | tail -n 1)"
+  TEXT="$TEXT [receipt $(basename "$RF"): $RL]"
+done
 # SENT-RECEIPT GUARD (2026-10-08, Tuesday ledger w=6): a body quoting a send ("sent: [Who -> Whom] subject")
 # must quote one that is IN send_brief's sent log — i.e. a send that returned 200. The 10-08 failures were a
 # receipt written in a PARALLEL tool call beside a send that then refused, which receiptguard (one command at a
