@@ -141,4 +141,4 @@ PROVENANCE:
 - Standing lines carried | Forward-move rule (STANDING_LINES.md:124), Assignment (`:94`), KS-1878 commit rule (`:122`), instruments, three-dot, tamper-anchor, verdict-ratio; /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/STANDING_LINES.md lines 1-254 read; lines 255-547 NOT read. Model shape copied from /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-31_seatS9_ks1881_1871_1860_1861_security.md, read whole | read 2026-10-31
 - Kam's ruling text | quoted from the task given to the drafter by Wednesday (the decision card itself was not opened by the drafter) | read 2026-10-31
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-10-31 10:53
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-31 10:56
