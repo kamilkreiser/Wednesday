@@ -16,6 +16,8 @@ sequences `night/build_input.sh`, `tasks/bash_patch/build_bash_input.sh`, `tasks
 | `queue.md` / `done.md` | the queue (format in its header) / the results (`done.md` is created by the first drain) |
 | `tests/arms.sh` | refusal, endpoint-down, dry-run, busy, queue and ONE real round |
 | `tests/code_patch2_arms.sh` · `tests/bash_patch2_arms.sh` | the multi-file tiers (rung 3): red-proof arms, synthetic repos in scratch |
+| `tiers/` | tiers test_only_input + doc_only (2026-10-31): `tier_brief.py` (brief block parsers), `build_tier_input.py`, `tier_checker.py`, `task_<tier>.md` |
+| `tests/new_tiers_arms.sh` | arms for those two tiers on a throwaway fixture repo under `/private/tmp/claude-501/` (`new_tiers_fixture.py` builds it) — 47 arms (14 lint refusals, 3 accepts, 13 control rounds, 10 direct-checker, 5 unit), no Secuura clone, no endpoint |
 | `tests/test_only_arms.sh` | tier test_only (2026-10-18): ks_1614_p1 control PASS, tampered goldens FAIL, product-touching briefs REFUSED, old-vs-new lint + dry-run regression |
 | `cache/` (gitignored) | `src/` = the durable cache clone of the Secuura repo; `work/<run-id>/clone` = per-round clones |
 | `state/` (gitignored) | `round.lock`, `queue.lock`, `dry/` inputs, `last_round.json`, `queue.log`, `stale_locks/` |
@@ -55,7 +57,7 @@ endpoint is down (round.sh rc 4) or free space on the runs volume is under `SPAR
 
 - a brief dir without exactly one `KS-<n>.md`, or missing a required header line / heading;
 - a brief naming a client other than Secuura (`Client:` line, a `!CODING/<other>/` path, another client's name);
-- a tier other than code_patch / code_patch2 / bash_patch / bash_patch2 / test_only (2026-10-18; see Tiers — the
+- a tier other than code_patch / code_patch2 / bash_patch / bash_patch2 / test_only / test_only_input / doc_only (2026-10-18 / 2026-10-31; see Tiers — the
   separate tasks/test_only/ builder, `## Tampers` with `### <ID>` entries, is still NOT wired here);
 - a STALE brief: a file it names changed between its `Tip:` and today's develop (override `allow_drift=1`);
 - anything the builders refuse (rc 2), and a code_patch input that did not use the brief as the prompt;
@@ -104,6 +106,54 @@ before the disk fills.
   MODE=test_only (A3 the one test only, A4 red under the planted tamper, A5 green at the untouched tip). Lint refuses
   a diff file header naming any other file (the product above all) in `## The exact change` fences or golden.diff.
   Arms: tests/test_only_arms.sh. First brief: night/briefs/ks_1614_p1.
+- `test_only_input` (2026-10-31) — a test-HARDENING ticket: the product is already correct and the defect is a MISSING or WEAK
+  assertion (KS-1783: three verify test files lack a "real tx shape" cell). `test_only` cannot express it: its red proof is
+  a tamper of ONE product line and ONE test file. Here the brief supplies the red proof as a PLANT.
+  Header: `Tier: \`test_only_input\``, `Runner: vitest|jest`, `Tip:`, ONE `File:` (the code under test: read-only, never in the
+  diff), 1-3 `Test file:` lines. Body: `## The test` (cells, or where they are), `## Red cells`, and the plant:
+  - `## Red cells` — one bullet per cell, the name (a substring of the cell's full name, describe titles included) in backticks.
+  - the plant, EXACTLY ONE of: a `## Plant` block (a group per mutated line: `file: \`<repo path>\`` / `line: N` /
+    `from: \`<the exact tip line>\`` / `to: \`<mutated line>\``) or a `golden_red.diff` in the brief dir (a unified diff
+    applied with `git apply`; it may mutate the product OR a test-side input such as a fixture/JSON the cells read). The plant
+    never names a declared test file. It is applied in the checker's clone only, never to a real tree.
+  - pins: `service_dir=` (else read off the first test path), `shared_pkg_dir=` / `shared_pkg_name=` (`none` for a package with
+    no shared build), `subdir=` (default `Blockchain/Dev`). `golden.diff` = the cells (test files only); lint refuses a golden
+    or exact-change fence whose file header names the product or any undeclared file.
+  Checker (tiers/tier_checker.py, via round.sh): A1 one fenced diff · A2 applies (strict; `--recount --ignore-whitespace` reported
+  apart) · A2a hunk anchors (a2a_anchor.py, unchanged) · A3 touched set == the declared tests exactly · A3p the plant applies at the
+  tip · A4 GREEN WITHOUT PLANT: every red cell exists and passes, nothing new red in the declared files · A6 whole-service suite
+  after the patch: no cell lost, no new red, failed/load-error counts not higher than at the tip · A5 RED WITH PLANT: every
+  red cell FAILS BY ASSERTION · A7 every touched/planted file back at its tip sha256, tracked tree clean.
+  PROVES: each named cell passes on the correct code and fails, by an assertion, when the brief's mutation is in. A cell that
+  asserts nothing the plant can change, a cell that crashes instead of asserting, a cell absent, an extra/missing file, a
+  deleted cell all FAIL. DOES NOT PROVE: that the plant is the regression that matters (the brief author chose it) or that the
+  cell would catch a DIFFERENT regression; no `tsc` leg (type errors in a vitest file are not seen — jest/ts-jest does type-check);
+  the plant's own validity is only "applies at the tip". A leg-A5 pass is only as good as the plant. Runners: vitest and jest
+  are the real ones; `node-tap` (node:test via `--test-reporter=tap`) exists for the arms' fixture repo only. Select with
+  `Tier:` or `tier=test_only_input`; never inferred.
+- `doc_only` (2026-10-31) — documentation and comment-only fixes. Header: `Tier: \`doc_only\``, `Runner:` any word, `Tip:`, 1-6
+  `File:` lines, NO `Test file:`. Every File must be `*.md`, under `Projects Documents/fragments/`, or a code file (ts tsx js jsx
+  mjs cjs; sh bash py yml yaml) whose changes are COMMENT-ONLY. Body: `## Expect` (instead of `## The test`):
+  `expect_absent: \`<text>\`` (>= 1; optional ` in \`<declared File>\``) and `expect_present: \`<text>\``; optional
+  `## Doc checks` (a bullet per extra command in backticks, first word node|bash|sh|python3|npx, run from the clone root or
+  `doc_check_cwd=`). The fragment check `node Blockchain/Dev/scripts/docs-fragments.mjs check` runs automatically when a
+  fragments file is touched and the script exists (pin `subdir=` moves its parent).
+  Checker: A1, A2, A2a, A3 as above (exact declared set) · A3d every changed line of every code file is a whole-line comment —
+  computed per file by labelling each line of the tip's and the patched file as comment/non-comment (`//`, `/* */` incl. lines
+  inside a block, `#`) and requiring EVERY line the diff removes or adds to be a comment line: 0 changed non-comment lines. A
+  blank line outside a block comment, a trailing `// comment` on a code line, a reworded string all FAIL · A4 RED AT BASE: each
+  expect_absent text is present and each expect_present absent at the untouched tip (an expectation already true cannot fail:
+  FAIL, a brief defect) · A5 GREEN AFTER · A6 doc checks no worse than at the tip · A7 REVERSION: the patch reverse-applied
+  must make the expectations fail again · A8 sha256 restore.
+  PROVES: the stale text was there and is gone, the replacement is there, only comments/docs changed, the repo's doc check still
+  passes. DOES NOT PROVE: the new prose is correct or well written (a human/Wednesday reads it); no markdown link/anchor check
+  runs unless the brief names one under `## Doc checks` (none is assumed to exist); A7 is implied by A4 + A5 for any patch
+  that applies and reverses cleanly — it catches only a broken reverse-apply, not a weak expectation. Comment detection does not
+  model regex literals or Python docstrings (a docstring edit FAILS as non-comment; a `'` or backtick inside a regex literal can
+  desync the string state for the rest of that line/file and mislabel later lines, which in practice turns a PASS into a FAIL). `vitest --config <file>`
+  (tool-mode packages) is not passed through; the real vitest/jest/prepare_clone path of test_only_input has not been run in a Secuura clone. Select with `Tier:` or `tier=doc_only`.
+  Copyable briefs: `tiers/examples/KS-EXAMPLE-test_only_input/` and `tiers/examples/KS-EXAMPLE-doc_only/` (templates: the
+  tip/paths are placeholders, they are not dry-runnable). Arms: tests/new_tiers_arms.sh.
 - A brief whose header says NOT RUNNABLE is refused unless pinned `override_not_runnable=<reason>` (recorded in
   round.json); a header declaring more files than the tier's contract is refused.
 - `golden` in round.json / done.md: `BYTE-IDENTICAL` (cmp), else `TREE-IDENTICAL` (2026-10-07: both diffs applied

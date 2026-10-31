@@ -15,7 +15,15 @@ REFUSES (rc 2, one `REFUSED <reason>` line per reason on stderr):
   - a required header line or heading is missing (kit 03_BRIEF_TEMPLATE; case-insensitive);
   - the brief names a client other than Secuura (a `Client:` line that is not Secuura, a `!CODING/<other>/` path,
     or another client's name) — the Spark takes Secuura work under Kam's 2026-09-25 ruling, one client per task;
-  - the tier is not one round.sh runs (code_patch, code_patch2, bash_patch, bash_patch2, test_only);
+  - the tier is not one round.sh runs (code_patch, code_patch2, bash_patch, bash_patch2, test_only, test_only_input, doc_only);
+  - test_only_input (2026-10-31; product already correct, a test pin owed): header = 1 `File:` (the code under test, NOT
+    modified) + 1-3 `Test file:`; `## The test`; `## Red cells` (>= 1 bullet); EXACTLY ONE of a complete `## Plant` block
+    (file / line / from / to) or a `golden_red.diff` in the brief dir; the plant must not name a declared test; golden.diff and
+    the exact-change fences may name only the declared tests; golden_red.diff may not name them;
+  - doc_only (2026-10-31): header = 1-6 `File:` lines, NO `Test file:`; every File is `*.md`, under `Projects Documents/fragments/`,
+    or a ts/js/sh/py/yml code file (comment-only edits, verified by the checker); `## Expect` with >= 1 expect_absent (its `in`
+    paths must be declared Files); no `## The test`; `## Doc checks` commands must start node|bash|sh|python3|npx; golden.diff
+    and the exact-change fences may name only the declared Files;
   - test_only (2026-10-18) = code_patch's TEST-ONLY mode (night/build_input.sh parses ONE `## Tamper` block — line: /
     from: / to: — into defect_line.tamper; tasks/code_patch/checker.sh then runs MODE=test_only). Instead of
     `## The test` it needs `## Tamper`; header = 1 product (the tamper target, NOT modified) + exactly 1 test; and the
@@ -34,6 +42,9 @@ import os
 import re
 import shlex
 import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiers"))
+import tier_brief as tb  # noqa: E402  (2026-10-31: test_only_input / doc_only block parsers)
 
 REQUIRED_HEADER = [
     ("File:", r"^File:\s*`[^`]+`"),
@@ -61,6 +72,8 @@ TIER_CONTRACT = {
     "code_patch2": ((1, 3), (1, 2)),   # tasks/code_patch2/checker.sh A3: the declared set, 1-3 products + 1-2 tests
     "bash_patch2": ((1, 3), (1, 4)),   # tasks/bash_patch2/checker.sh B3: the declared set, 1-3 products + 1-4 tests (2026-10-07)
     "test_only": ((1, 1), (1, 1)),     # code_patch checker A3 (test-only): { ONE test }; the product is the tamper target only
+    "test_only_input": ((1, 1), (1, 3)),   # 2026-10-31 tiers/tier_checker.py A3: { 1-3 tests }; the product is read-only
+    "doc_only": ((1, 6), (0, 0)),          # 2026-10-31 tiers/tier_checker.py A3: { 1-6 doc/comment files }; no tests
 }
 
 
@@ -94,6 +107,86 @@ def read_pins(path):
                     k, v = tok.split("=", 1)
                     pins[k] = v
     return pins
+
+
+def _fence_and_golden_paths(text, bdir):
+    """[(where, diff text)] for the exact-change fences and golden.diff."""
+    m_xs = re.search(r"^##+\s*The exact change\b.*?$(.*?)(?=^##\s|\Z)", text, re.M | re.S | re.I)
+    fences = re.findall(r"^```[^\n]*\n(.*?)^```", m_xs.group(1), re.M | re.S) if m_xs else []
+    out = [("`## The exact change`", f) for f in fences]
+    g = os.path.join(bdir, "golden.diff")
+    if os.path.isfile(g):
+        out.append(("golden.diff", open(g, encoding="utf-8").read()))
+    return out
+
+
+def _same(a, b):
+    return a == b or a.endswith("/" + b) or b.endswith("/" + a)
+
+
+def lint_test_only_input(text, bdir, products, tests):
+    """2026-10-31: the brief-side requirements of tier test_only_input. -> [reason, ...]"""
+    r = []
+    groups, perrs = tb.parse_plant(text)
+    red = os.path.join(bdir, "golden_red.diff")
+    has_diff = os.path.isfile(red)
+    if has_diff and groups:
+        r.append("PLANT: both a `## Plant` block and golden_red.diff — exactly one (the plant must be unambiguous)")
+    elif not has_diff and not groups:
+        r.append("PLANT: test_only_input needs the red proof's plant: a `## Plant` block (file: / line: / from: / to:, values in "
+                 "backticks) OR a golden_red.diff in the brief dir. Without one the new cells have nothing to go red under")
+    for e in perrs:
+        r.append(f"PLANT: {e}")
+    plant_files = [g.get("file") for g in groups if g.get("file")]
+    if has_diff:
+        plant_files += tb_paths(open(red, encoding="utf-8").read())
+    for pf in plant_files:
+        for t in tests:
+            if _same(pf, t):
+                r.append(f"PLANT: the plant names {pf}, a declared test file — the plant is applied beside the model's patch and must not overlap it")
+    if not tb.parse_red_cells(text):
+        r.append("RED CELLS: test_only_input needs `## Red cells` with >= 1 bullet naming (in backticks) a substring of each new/changed cell's full name")
+    for where, body in _fence_and_golden_paths(text, bdir):
+        for p in diff_paths(body):
+            if any(_same(p, t) for t in tests):
+                continue
+            r.append(f"PRODUCT: test_only_input, but {where} names {p} in a diff file header"
+                     + (" — THE PRODUCT: it is read-only here (the plant mutates it in a scratch copy only)"
+                        if any(_same(p, x) for x in products) else f" — a test_only_input diff touches only the declared tests {tests}"))
+    return r
+
+
+def tb_paths(diff_text):
+    return diff_paths(diff_text)
+
+
+def lint_doc_only(text, bdir, products):
+    """2026-10-31: the brief-side requirements of tier doc_only. -> [reason, ...]"""
+    r = []
+    for p in products:
+        if not (tb.is_doc_path(p) or tb.comment_kind(p)):
+            r.append(f"PATH: doc_only File {p} is not *.md, not under `Projects Documents/fragments/`, and not a ts/js/sh/py/yml code file "
+                     f"(whose comment-only edits the checker can verify)")
+    items, errs = tb.parse_expect(text)
+    if items is None:
+        r.append("EXPECT: doc_only needs `## Expect` with >= 1 expect_absent: `<text>` (the red proof: present at base, absent after)")
+    else:
+        for e in errs:
+            r.append(f"EXPECT: {e}")
+        if not any(i["kind"] == "absent" for i in items):
+            r.append("EXPECT: `## Expect` has no expect_absent: — without it nothing is red at the base and the check cannot fail")
+        for i in items:
+            if i["path"] and not any(_same(i["path"], p) for p in products):
+                r.append(f"EXPECT: `in` path {i['path']} is not a declared `File:`")
+    for c in tb.parse_doc_checks(text):
+        first = c.split()[0] if c.split() else ""
+        if first not in ("node", "bash", "sh", "python3", "npx"):
+            r.append(f"DOC CHECK: `## Doc checks` command {c!r} must start with node, bash, sh, python3 or npx")
+    for where, body in _fence_and_golden_paths(text, bdir):
+        for p in diff_paths(body):
+            if not any(_same(p, x) for x in products):
+                r.append(f"DOC-ONLY: {where} names {p} in a diff file header — a doc_only diff touches only the declared Files {products}")
+    return r
 
 
 def main():
@@ -158,7 +251,7 @@ def main():
     runner = (m_run.group(1).lower() if m_run else "")
     tier = pins.get("tier")
     if not tier:
-        m_tier = re.search(r"(?i)\bTier:\s*\**`?(code_patch2|code_patch|bash_patch2|bash_patch|test_only|doc_patch)\b", text)
+        m_tier = re.search(r"(?i)\bTier:\s*\**`?(code_patch2|code_patch|bash_patch2|bash_patch|test_only_input|test_only|doc_only|doc_patch)\b", text)
         if m_tier:
             tier = m_tier.group(1).lower()
         elif re.search(r"^##+\s*Tampers?\b", text, re.M | re.I):
@@ -167,7 +260,7 @@ def main():
             tier = "bash_patch"
         elif runner in ("vitest", "jest"):
             tier = "code_patch"
-    if test_heading_at and tier != "test_only":
+    if test_heading_at and tier not in ("test_only", "doc_only"):
         reasons.insert(*test_heading_at)
     # --- the header: declared touched set + NOT RUNNABLE ---
     header = re.split(r"(?m)^##\s", text, maxsplit=1)[0]
@@ -215,6 +308,10 @@ def main():
                                + (" — THE PRODUCT: a test_only brief never modifies it (the tamper corrupts it in a clone only)"
                                   if any(x == p or x.endswith("/" + p) for x in prod)
                                   else f" — a test_only diff touches the ONE test {test} and nothing else"))
+    if tier == "test_only_input":
+        reasons.extend(lint_test_only_input(text, bdir, products, tests))
+    if tier == "doc_only":
+        reasons.extend(lint_doc_only(text, bdir, products))
     if tier in ("code_patch", "code_patch2") and len(tests) == 1:
         # 2026-10-19 (SCREEN_9 / SCREEN_10): the builder takes the new test's path from a `File:` line INSIDE
         # `## The test`, not from the header's `Test file:` line. With no such line it falls back to its own
@@ -233,9 +330,10 @@ def main():
                   f"(SCREEN_9: two briefs on one ticket got ONE colliding path)", file=sys.stderr)
         elif tfiles and not any(same(t, want) for t in tfiles):
             reasons.append(f"TEST PATH: `## The test` names {tfiles} but the header's test file is {want} — two names for one file")
-    if tier not in ("code_patch", "code_patch2", "bash_patch", "bash_patch2", "test_only"):
-        reasons.append(f"TIER: {tier or 'undetermined'} — round.sh runs code_patch, code_patch2, bash_patch, bash_patch2 and test_only "
-                       f"(test_only = code_patch's TEST-ONLY mode, a `## Tamper` block). "
+    if tier not in ("code_patch", "code_patch2", "bash_patch", "bash_patch2", "test_only", "test_only_input", "doc_only"):
+        reasons.append(f"TIER: {tier or 'undetermined'} — round.sh runs code_patch, code_patch2, bash_patch, bash_patch2, test_only, "
+                       f"test_only_input and doc_only (test_only = code_patch's TEST-ONLY mode, a `## Tamper` block; "
+                       f"test_only_input = a planted input/regression from the brief; doc_only = docs and comments). "
                        f"Pin tier= or add `Tier: \\`<tier>\\`` to the brief")
     selftest = bool(re.search(r"^##+\s*Self-testing\b", text, re.M | re.I))
     if tier in ("bash_patch", "bash_patch2") and not selftest and not pins.get("ref"):
