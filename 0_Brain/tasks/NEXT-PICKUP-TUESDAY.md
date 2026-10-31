@@ -22,6 +22,34 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🟢 DELTA 843 — 2026-10-31 15:31 (s210). **READ THIS FIRST; supersedes 841's MPS #133 line.**
+- **MPS #133 LANDED 15:29** (G240 B988 GO WITH FINDINGS round 2 of 2, Notes only): squash head-pinned -> MPS main **5d96a3dc** (tree = gated head's). Not deployed. G240 + M52 closed.
+- **OWED (MPS records):** #133's ticket comments (MPSCALC-256 stays OPEN for purchase behind -255), BACKLOG rows for B988 Notes + the reconciliation HOLD + the two per-device issue texts. Fold into B987 after the Done-rule card, or its own kit.
+- **LIVE:** G241 B989 (PR #265 tier-1 gate) · J35 B985 (Composer tests). H82 parked for #265. Cards open: `composer-demo-deploy-87-105-1031`, `mps-done-rule-merged-tickets-1031`.
+
+## 🔴 DELTA 842 — 2026-10-31 15:03 (s210, ~35%). **READ THIS FIRST; supersedes 839's H82 line.**
+- **HPSM-POC PR #265 OPEN** (H82 B984, head 2eec1997, 3 commits, 8 paths +157 -6; HPSMPOC-411, -415, -408 items 1+3). **G241 B989 tier-1 gate STAMPED 15:02**, waiter launching; STATUS `.../HPSM-POC/1_Project_Definition/Briefs/2026-10-31_B989_STATUS.md` (RE-ARM a watcher). On GO: correct the PR body, land the head-pinned squash with the gate's squash-subject/body files, close G241 + H82, then HPSM-POC records. On NO GO: a round-2 fix addendum to H82.
+- Parked panes acked with wake_ack.sh (M52 %93, H82 %102) so the ghost-text idle wakes stop.
+
+## 🔴 DELTA 841 — 2026-10-31 14:52 (s210). **READ THIS FIRST; supersedes 838-840's M52, G237 and R96 lines.**
+- **MPS #133:** M52 round 2 READY @ 30ea76da (B980-1 fixed). **G240 B988 round-2 tier-1 gate STAMPED 14:51**, waiter launching at load1 < 7; STATUS `.../Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-31_B988_STATUS.md` (RE-ARM a watcher). On GO: edit the stale PR body (B988 lists the sentences), land per its LANDING HOLD line (head-pinned squash, explicit subject + body, one trailer), close G240 + M52, then an MPS records step (MPSCALC-256 stays open for purchase). On NO GO: round cap -> ONE card to Kam with the fix-shape.
+- **R96 DONE** (analysis PR #158 merged cc4699ce, checked at source); pane closed. HELD: B969/B972 catch-up copies ("HP Restricted" scan-class text), low priority.
+- G237 pane closed.
+
+## 🔴 DELTA 840 — 2026-10-31 14:43 (s210). **READ THIS FIRST; supersedes 839's DRAFTER line.**
+- J35 launched 14:40:21. **B987 MPS records kit READY, UNSTAMPED** (`tuesday/briefs/2026-10-31_B987_SEAT-R97_mps-records-merged-not-closed.md`; batch 1 of 6, 21 tickets): waits on card `mps-done-rule-merged-tickets-1031` (MPS has no Done rule). On a: DONE-SLOT MOVE-TO-DONE quoting the card. Otherwise COMMENT-ONLY. Read the kit whole before stamping.
+
+## 🔴 DELTA 839 — 2026-10-31 14:39 (s210, ~30%). **READ THIS FIRST; supersedes 838's DRAFTERS line and 836's COMPOSER demo-deploy line.**
+- **COMPOSER DEMO DEPLOY IS CARD-GATED, NOT GRANT-COVERED** (C-102 Forbids + "Composer deploys only on your card"). Kit B986 (D42, Opus) is ready but UNSTAMPED at `tuesday/briefs/2026-10-31_B986_SEAT-D42_composer-demo-deploy-merged-main.md`; card `composer-demo-deploy-87-105-1031` (HTTP 201, rec a). ON KAM a: stamp slots 2 (rule #88/#92/#96/#99 by name on C-101/C-106/C-105/C-107, discharged for this deploy only) and 3 (the card id, choice and ruled time; the 3 `Source: B587` lead-ins read as "as written"), then launch. On b: re-ask with Monday's bundle.
+- **LIVE:** H82 B984 HPSM-POC lane 2 (launched 14:37:59; on READY open the PR, gate TIER 1) · J35 B985 Composer tests (waiter queued behind H82; on READY open the PR, gate tier 2) · M52 round 2 (ADDENDUM-2) · R96 records. Watchers armed on all four (die with the seat: RE-ARM).
+- **DRAFTER still out:** B987 MPS records (R97). Re-commission if absent after a rotation.
+
+## 🔴 DELTA 838 — 2026-10-31 14:29 BOOT (s210, successor of s209; statusline ctx 15% after load). **READ THIS FIRST; supersedes 836/837's G237 and M52 lines; the rest of 836 stands.**
+- **G237 B980 = NO GO round 1 of 2** on MPS #133 @ 1d49328: B980-1 BLOCKER (an unset purchase result's JSON gains `VolumeBasis` on every line; no figure wrong). RULED: fix it (ADDENDUM-1 pt 4 stands). **ADDENDUM-2** `tuesday/briefs/2026-10-31_B974_ADDENDUM-2_purchase-line-basis-blocker_correction.md` was tapped to M52 (%93) at 14:27 and delivered. ON M52 READY FOR QA (round 2): edit the PR body, commission a round-2 tier-1 gate kit (template B980), launch, land on GO per B980's FOR TUESDAY landing line. The G237 pane %98 is idle: pane_close refused rc5 (its own claude's port), so close it after /exit.
+- **R96 B983** (HPSM-POC records) running; watcher armed.
+- **DRAFTERS in-session (they die at a rotation: RE-COMMISSION any whose files are absent):** B984 HPSM-POC lane 2 (H82, 9530-9539) · B985 Composer PCOMP-62/-97 tests (J35, 9540-9549) · B986 Composer demo deploy of merged main (D42) · B987 MPS records merged-not-closed (R97).
+- Spark unreachable from this Mac (ssh host `spark` does not resolve); nothing to allocate.
+
 ## 🔴 DELTA 837 — 2026-10-31 14:21 ROTATION (s209 -> successor). **READ THIS FIRST, then 836 whole (it is the full state).**
 - **B983 HPSM-POC records (SEAT-R96) STAMPED 14:22 and launched** (COMMENT-ONLY; the B969 and B972 STATUS copies are HELD: the seat reports their "HP Restricted" lines verbatim in its STATUS for a ruling). STATUS `.../HPSM-POC/1_Project_Definition/Briefs/2026-10-31_B983_STATUS.md`: ARM a watcher; on RECORDS COMMITTED verify at source and close R96.
 - **Watch:** G237 B980 MPS #133 tier-1 gate (local CI line running at 14:09; RE-ARM the watcher). Parked: M52.
