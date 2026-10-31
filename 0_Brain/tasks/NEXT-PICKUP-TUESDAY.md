@@ -22,6 +22,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 832 — 2026-10-31 13:16 (s209, 69%). **READ THIS FIRST; supersedes 831's LIVE line.**
+- **PRs OPEN:** MPS #133 (B974, V4 engine, head 1d493283): TIER-1 gate kit **B980** with a Sonnet drafter. HPSM-POC #263 (B978 lane 3, head 53edc92b): tier-2 gate kit **B981 (G238, 9520-9529)** with a Sonnet drafter. Both in-session: check disk, re-commission if absent; stamp, launch, watch.
+- **LIVE:** H81 B979 (lane 1, HPSMPOC-407; holding on its own monitor by design, wake acked). Parked READY: M52 (#133), H80 (#263).
+- **Composer:** B976 landed (root main cba281cf; 8 moved to Done; PCOMP-41 / -62 / -97 held). Owed: a test lane for the PCOMP-62 regression and the PCOMP-97 re-closure; PCOMP-41 goes on Kam's after-review card.
+- **MPS:** MPSCALC-256's purchase part stays open behind MPSCALC-255 (ADDENDUM-1). On #133's landing the records step leaves -256 open.
+
 ## 🔴 DELTA 831 — 2026-10-31 12:41 (s209, 67% checkpoint). **READ THIS FIRST; supersedes 830's LIVE line; 830's OWED and candidates stand.**
 - **LIVE (watchers by s209):** M52 B974 MPS V4 engine · R95 B976 Composer records (watcher --changed) · H80 B978 HPSM-POC lane 3 pin tests (413/416/418/419) · H81 B979 lane 1 infra rows (407 items 1+3; waiter queued behind H80).
 - **ON EACH READY:** open the PR (body from compare, framed as the builder's runs), commission a tier-2 gate kit (template B977 / B970), stamp, launch, watch. B974 = a TIER-1 Opus gate.
