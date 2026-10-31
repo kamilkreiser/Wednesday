@@ -1,0 +1,35 @@
+STARTABLE: YES (after Tuesday stamps: 8 four-underscore lines; Q-1 to Q-4 to answer)
+
+# B1011 drafter report (SEAT-M54, MPS round 2 of 2: reconciler sell-basis fix on the existing V4 branch)
+
+Kit: `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-01_B1011_SEAT-M54_mps-v4-round2-reconciler-sell-basis.md` (113 lines; unstamped copy reads 8 four-underscore lines by `/usr/bin/grep -c -E '_''_''_''_'`, control: the kit's own REFUSE line quotes the split pattern and reads 0 extra; non-ASCII 0 by `LC_ALL=C grep -c -E '[^ -~]'`, control: a planted e-acute prints 1).
+
+## BLUF
+- Round 2 of 2 on class "V4 engine: groups, tier override, sell basis" (NO GO 1 of 2, read from the B1009 verdict line 1 and :126). ONE forward commit on `b1000/mps-v4-252-258-259-groups-tier-sell-basis` @ `fa2124f1e3b001afd6e986dd69fe88767931e5b6`, three file kinds only: `PurchaseRecomputation.cs` (`MethodOf`), the X-37 sentence in `docs/ENGINE.md:163`, test rows. Plain fast-forward push, no PR.
+- The kit turns the gate's fix-shape into a five-branch decision table (unset/own-margin/markup-section: line's method; margin section + manual item: margin; margin section + catalogue key: recorded basis only when recorded percent = section's). Regression rows 1-3, a seeded 500-quote reconciler sweep (0 new disagreements on calculator-made results; tampered ones now caught), byte-equal harness, mutants MR1-MR7 (MR6 = the gate's "calculator ignores the section method" mutant, run in the mutant tree only).
+- Model: C2 Sonnet (`model-routing.md:92`), `claude-sonnet-5-5` (`models_latest.json:38`), `BRIEF_SEAT_LEVEL=sonnet` inside the launch quotes. Why not C3 (:93): the rule is spelled out branch by branch, not a design decision. Override to Opus is Q-1.
+- Pane `Datasec/MPS-M54`, ports none, clock 3 h target / 4 h hard stop.
+
+## Facts re-measured (instrument; control)
+- Branch and main: `git ls-remote origin refs/heads/main refs/heads/b1000*` printed `5d96a3dc62871dd526f34a86215bacf5f7943ad6 main` and `fa2124f1e3b001afd6e986dd69fe88767931e5b6 b1000/...` (control: `git cat-file -t fa2124f1...` = `commit`). Branch vs main: `rev-list --left-right --count` = `0 4`; `diff --name-only` = 9 paths (listed in the kit PINS).
+- Code under repair read at `fa2124f` with `git cat-file -p "${H}:..."` (instrument note: bare `$H:path` in zsh is a modifier and printed the commit object; control: the object printed 15 lines of a commit message instead of 224 of C#; braces fixed it): `PurchaseRecomputation.cs` `MethodOf` :148-155 and `UnitSell` :117-140 (early returns for included, override, catalogue sell at :119-130); `PurchaseInput.cs` `PurchaseLine` has `CatalogueKey`/`ManualItemId`, `PurchaseSection.PricingMethod` is `PricingMethod?`; `PurchaseCalculator.cs:129` `PurchaseMarkup.Method`, called :548. X-37 row present once (`| X-37 |` count 1, `-i -F`).
+- Panes: `tmux list-panes -a` printed `tuesday`, `Datasec/MPS-G248`, `fleet-monitor` (no M54, no other MPS seat; G248 has delivered its verdict). Scan of non-`.pre-` SEAT kits 2026-10-30..11-01 for `M54`: 0 (only the finished 10-29 NexusAI M54 kit exists; control: the same scan for `M53` lists the B1000 kit).
+- Ports: `lsof -nP -iTCP:9480-9489` and `9490-9499` -sTCP:LISTEN: 0 rows each (control: not re-run unrestricted at the end; the kit tells the seat to re-run it). Word-boundary scan of today's SEAT kits for `948x`/`949x` hit 10 files (B1000 reserved 9480-9489; B1001/B1002/B1005/B1006/B1009 others): reported, no port assigned, none needed.
+- Project root `git status --short | wc -l` = 824 (other seats' untracked files; the kit gives the seat this baseline). `.tools/b1011` and `.tools/wt-b1011-*` absent (glob did not match).
+
+## D-decisions (the kit's D1-D9; override at the stamp)
+D1 Sonnet C2. D2 ONE commit on the existing branch, one fast-forward push. D3 Files: reconciler, one X-37 sentence, tests. D4 The calculator is not edited (MR6 is a mutant only; a needed calculator change is a STOP). D5 New rows appended to `SectionPricingMethodTests.cs`. D6 Pane M54, no ports. D7 Name multiset lost 0 / added = new rows; Import 193 and Api 3,165 unchanged. D8 Commit text ASCII, every sentence true (the squash text takes all messages; the gate graded 21 of 22 true in round 1). D9 3 h / 4 h.
+
+Notes taken or left (kit FOLD-IN): taken B1009-2 (as the wording inside the corrected sentence) and B1009-7 (T5 and B6 rows, only if each is within about 25 lines using the existing helpers; S8 is covered by rows 1(b)/2(b)); left B1009-3, -4, -5, -6, -8, -9, -10, -11 (design call, calculator, overflow, provenance citations, Api test, signatures, no PR, stale builder text) as notes for the records step.
+
+## Q-questions for Tuesday (each with a default)
+- **Q-1 Model C2 Sonnet or C3 Opus?** Default: C2 Sonnet (rule fully spelled out; three files). Counter: last round under G-cap and Sonnet on a money rule is unmeasured (C3 evidence column); if you prefer Opus change the model line, the launch quote to `BRIEF_SEAT_LEVEL=opus` and the receipt line.
+- **Q-2 Reconciler sweep size.** Default: at least 500 seeded synthetic quotes plus every harness-suite scenario; it is the check that a calculator-made result never newly disagrees. Cut to 200 if the clock matters (the sweep is cheap, the 5,000-quote suite is the cost).
+- **Q-3 Rule 5 (the catalogue-key line under a margin section at the section's percent keeps reading the recorded basis).** Default: keep it, as the gate fix-shape says ("read the recorded basis ONLY where the input cannot decide"), stated in the X-37 sentence as the limit; the gate's S11 stays passing. Alternative (not recommended, outside the fix-shape): drop the overlay case, which would false-mismatch a catalogue row whose default percent equals the section's.
+- **Q-4 Notes B1009-4 (pool-less option stays Core under an override) and -5 (overflow).** Default: left as notes; both are in `PurchaseCalculator.cs`, outside this lane's three files and the byte-equal fence.
+
+## UNMEASURED
+No build, test, mutant or C# compile. Not measured: that the decision table equals the calculator on every line shape; that the S11 shape lands in rule 4 or 5 (the kit makes the seat state which); sweep class counts; whether T5/B6 fit the row bound; the full-suite wall time at the new head (RELAYED about 6.5 minutes at `fa2124f`); whether main or the branch moves between drafting and launch (the kit refuses at once if the branch is not `fa2124f`).
+
+## Outside-the-fences disclosure
+Nothing outside the fences. Reads only: DRAFTER_RULES.md, the B1000 kit, its ADDENDUM-1 answer, the B1009 gate STATUS, `model-routing.md`, `models_latest.json`, git read verbs with `--no-optional-locks` (`ls-remote`, `cat-file`, `rev-list`, `diff --name-only`, `ls-tree`) in the project code repo, `tmux list-panes`, `lsof`, `grep` over the briefs folder. No fetch, no `gh`, no Jira, no `decision_queue.sh`, no `cd`, no write but the two files. One slip: the first `git show $H:path` calls printed the commit object (zsh modifier, no write, no harm); fixed with `${H}`. The directory listing of the project `.tools` used a glob that failed; no tree was opened.
