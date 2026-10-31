@@ -1,0 +1,121 @@
+diff --git a/Blockchain/Dev/services/demo-service/src/routes/scenario.ts b/Blockchain/Dev/services/demo-service/src/routes/scenario.ts
+--- a/Blockchain/Dev/services/demo-service/src/routes/scenario.ts
++++ b/Blockchain/Dev/services/demo-service/src/routes/scenario.ts
+@@ -110,7 +110,12 @@
+       ...step,
+     });
+   } catch (err) {
+-    const message = err instanceof Error ? err.message : 'Unknown error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Failed to get scenario context', { error: message });
+     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+   }
+diff --git a/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-scenario-context-unreadable-throw.test.ts b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-scenario-context-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-scenario-context-unreadable-throw.test.ts
+@@ -0,0 +1,99 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: the GET /scenario/context handler must still log and answer its generic 500 when the
++// thrown value itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose
++// `message` getter throws, throws on `.message`).
++// The thrown value is raised by a getter on the fake request (plain code, not a vi.fn()): a spy
++// could inspect a revoked Proxy and fail before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  error: vi.fn(),
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: h.error },
++  createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
++}));
++
++import { scenarioRouter } from '../routes/scenario';
++
++type Layer = { route?: { path: string; stack: Array<{ handle: (req: unknown, res: unknown) => unknown }> } };
++type Outcome = { threw: boolean; status?: number; body?: unknown };
++
++/** Run the real route handler with a request whose `query` getter throws the value under test. */
++async function runHandler(): Promise<Outcome> {
++  const layer = (scenarioRouter as unknown as { stack: Layer[] }).stack.find(
++    (l) => l.route?.path === '/scenario/context',
++  );
++  const handle = layer!.route!.stack[0].handle;
++  const out: Outcome = { threw: false };
++  const res = {
++    status(code: number) {
++      out.status = code;
++      return res;
++    },
++    json(body: unknown) {
++      out.body = body;
++      return res;
++    },
++  };
++  const req = {
++    get query(): never {
++      throw h.toThrow;
++    },
++  };
++  try {
++    await handle(req, res);
++  } catch {
++    out.threw = true;
++  }
++  return out;
++}
++
++const ERRORS = () => h.error.mock.calls.filter((c) => String(c[0]).includes('Failed to get scenario context'));
++const GENERIC = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++
++describe('KS-1868 scenario context handler reads the thrown value safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.error.mockReset();
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message and answers 500', async () => {
++    h.toThrow = new Error('query boom');
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.status).toBe(500);
++    expect(out.body).toEqual(GENERIC);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'query boom' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and answers 500', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.status).toBe(500);
++    expect(out.body).toEqual(GENERIC);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and answers 500', async () => {
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.status).toBe(500);
++    expect(out.body).toEqual(GENERIC);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});

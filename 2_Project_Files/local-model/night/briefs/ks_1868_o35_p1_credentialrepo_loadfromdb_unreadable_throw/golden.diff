@@ -1,0 +1,82 @@
+diff --git a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+--- a/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/repositories/credentialRepo.ts
+@@ -430,5 +430,11 @@
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.warn('credentialRepo.loadFromDb failed — starting with empty store', {
+-      error: err instanceof Error ? err.message : String(err),
++      error: reason,
+     });
+   }
+diff --git a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1868-credentialrepo-loadfromdb-unreadable-throw.test.ts b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1868-credentialrepo-loadfromdb-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1868-credentialrepo-loadfromdb-unreadable-throw.test.ts
+@@ -0,0 +1,61 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: credentialRepo.loadFromDb must still log its WARN when the thrown value
++// itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose
++// `message` getter throws, throws on `.message`).
++// The db stand-in is a plain function, not a vi.fn(): a spy inspects what it
++// rejects with and could itself fail on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  warn: vi.fn(),
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: (sql: string) =>
++    /ORDER BY created_at/i.test(sql) ? Promise.reject(h.toThrow) : Promise.resolve({ rows: [] }),
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: h.warn, error: vi.fn(), debug: vi.fn() },
++}));
++
++import * as repo from '../repositories/credentialRepo';
++
++const WARNS = () => h.warn.mock.calls.filter((c) => String(c[0]).includes('loadFromDb failed'));
++
++describe('KS-1868 credentialRepo.loadFromDb reads the thrown value safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.warn.mockReset();
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message', async () => {
++    h.toThrow = new Error('db down');
++    await repo.loadFromDb();
++    expect(WARNS()).toHaveLength(1);
++    expect(WARNS()[0][1]).toEqual({ error: 'db down' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    await repo.loadFromDb().catch(() => undefined);
++    expect(WARNS()).toHaveLength(1);
++    expect(WARNS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason', async () => {
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    await repo.loadFromDb().catch(() => undefined);
++    expect(WARNS()).toHaveLength(1);
++    expect(WARNS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});

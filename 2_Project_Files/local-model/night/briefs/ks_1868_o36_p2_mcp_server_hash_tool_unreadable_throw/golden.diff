@@ -1,0 +1,89 @@
+diff --git a/Blockchain/Dev/services/mcp-server/src/tools/hash.ts b/Blockchain/Dev/services/mcp-server/src/tools/hash.ts
+--- a/Blockchain/Dev/services/mcp-server/src/tools/hash.ts
++++ b/Blockchain/Dev/services/mcp-server/src/tools/hash.ts
+@@ -31,7 +31,12 @@
+           ],
+         };
+       } catch (err: unknown) {
+-        const message = err instanceof Error ? err.message : String(err);
++        let message: string;
++        try {
++          message = err instanceof Error ? err.message : String(err);
++        } catch {
++          message = 'unreadable thrown value';
++        }
+         return {
+           content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: message }) }],
+           isError: true,
+diff --git a/Blockchain/Dev/services/mcp-server/src/__tests__/ks1868-hash-tool-unreadable-throw.test.ts b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1868-hash-tool-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1868-hash-tool-unreadable-throw.test.ts
+@@ -0,0 +1,67 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: the secuura_hash_document tool must still return its isError result when the
++// thrown value itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose
++// `message` getter throws, throws on `.message`).
++// The hashing stand-in is a plain function, not a vi.fn(): a spy inspects what it
++// rejects with and could itself fail on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++}));
++
++vi.mock('../hashing.js', () => ({
++  hashFile: () => Promise.reject(h.toThrow),
++  extractFileName: (p: string) => p,
++}));
++
++import { registerHashTools } from '../tools/hash.js';
++
++type ToolResult = { content: Array<{ type: string; text: string }>; isError?: boolean };
++type Handler = (args: { filePath: string }) => Promise<ToolResult>;
++
++/** Register the hash tool on a duck-typed server, run it, return its result (undefined when the handler rejects). */
++async function runHashTool(): Promise<ToolResult | undefined> {
++  const handlers: Record<string, Handler> = {};
++  const server = {
++    tool: (name: string, _desc: string, _shape: unknown, handler: Handler) => {
++      handlers[name] = handler;
++    },
++  };
++  registerHashTools(server as never);
++  return handlers['secuura_hash_document']({ filePath: '/x/doc.pdf' }).catch(() => undefined);
++}
++
++describe('KS-1868 secuura_hash_document reads the thrown value safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++  });
++
++  it('control ks1868 C1 an ordinary Error still returns its message', async () => {
++    h.toThrow = new Error('disk gone');
++    const r = await runHashTool();
++    expect(r?.isError).toBe(true);
++    expect(JSON.parse(r!.content[0].text)).toEqual({ success: false, error: 'disk gone' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value returns a constant reason', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    const r = await runHashTool();
++    expect(r?.isError).toBe(true);
++    expect(JSON.parse(r!.content[0].text)).toEqual({ success: false, error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws returns a constant reason', async () => {
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const r = await runHashTool();
++    expect(r?.isError).toBe(true);
++    expect(JSON.parse(r!.content[0].text)).toEqual({ success: false, error: 'unreadable thrown value' });
++  });
++});
