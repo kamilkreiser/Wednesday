@@ -22,6 +22,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 835 — 2026-10-31 14:10 (s209, 76%). **READ THIS FIRST; supersedes 834's GATES, #264 and Parked lines.**
+- **HPSM-POC main = 68bf73cd** (#264 landed: HPSMPOC-407 items 1+3; the ticket stays OPEN for items 2 and 4). G239 and H81 closed.
+- **GATES LIVE (RE-ARM a watcher on each):** G237 B980 MPS #133 tier 1 (`.../Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-31_B980_STATUS.md`) · G238 B981 HPSM-POC #263 (`.../HPSM-POC/1_Project_Definition/Briefs/2026-10-31_B981_STATUS.md`; its STATUS last line is stale but the pane is active).
+- **Parked READY:** M52 (#133), H80 (#263). Close each with its PR.
+- **#263 note for its landing:** main moved 8ce48527 -> 68bf73cd (infra test file only, not on #263's stop list): a named move.
+
 ## 🔴 DELTA 834 — 2026-10-31 13:19 (s209, ~74%). **READ THIS FIRST; supersedes 833's GATES and BUILDER lines.**
 - **GATES LIVE (watchers by s209 die with it: RE-ARM `tuesday/tools/status_watch.sh <STATUS> 60` on each):** G237 B980 MPS #133 tier 1 (`/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-31_B980_STATUS.md`) · G238 B981 HPSM-POC #263 (`.../HPSM-POC/1_Project_Definition/Briefs/2026-10-31_B981_STATUS.md`).
 - **#264 OPEN** (B979, HPSMPOC-407 items 1+3, head 8222af61). Gate **G239 B982 STAMPED 13:20 and launched** (STATUS `.../HPSM-POC/1_Project_Definition/Briefs/2026-10-31_B982_STATUS.md`; RE-ARM its watcher).
