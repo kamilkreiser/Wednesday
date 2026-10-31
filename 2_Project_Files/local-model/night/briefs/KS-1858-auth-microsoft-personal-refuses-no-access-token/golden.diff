@@ -1,0 +1,94 @@
+--- a/Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/microsoft-personal.ts
+@@ -84,7 +84,12 @@
+       throw new Error(`Microsoft token exchange failed (HTTP ${tokenRes.status})`);
+     }
+-
+-    const { access_token } = (await tokenRes.json()) as { access_token: string };
+-
++
++    const tokenBody = (await tokenRes.json()) as { access_token?: unknown };
++    if (typeof tokenBody.access_token !== 'string' || tokenBody.access_token === '') {
++      logger.warn('Microsoft token endpoint answered 200 without an access token', { provider: 'microsoft_personal' });
++      throw new Error('Microsoft token exchange failed (no access token)');
++    }
++    const access_token = tokenBody.access_token;
++
+     const profileRes = await fetch('https://graph.microsoft.com/v1.0/me', {
+       headers: { Authorization: `Bearer ${access_token}` },
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1858-microsoft-personal-refuses-a-token-answer-without-an-access-token.test.ts
+@@ -0,0 +1,73 @@
++// KS-1858: the Microsoft adapter read access_token from the token answer unchecked and called the profile endpoint with an undefined token. MicrosoftPersonalProvider.exchangeCode now refuses a 200 answer with no
++// usable access_token before any profile call, as the GitHub adapter does since KS-1792. fetch is replaced by a recording stub, so no socket is opened; a good answer is the control.
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++
++const { silentLogger } = vi.hoisted(() => ({
++  silentLogger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() },
++}));
++vi.mock('../utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger }));
++
++import { MicrosoftPersonalProvider } from '../providers/social/microsoft-personal';
++
++const CONFIG = { clientId: 'cid-ks1858', clientSecret: 'secret-ks1858', callbackUrl: 'https://app.test/cb', enabled: true };
++
++let calls: string[];
++
++type Answer = { status: number; body: unknown };
++
++// A recording stub keyed by URL: the token endpoint answers `token`, the profile endpoint answers `user`, anything else 404.
++function stubFetch(token: Answer, user: Answer = { status: 401, body: { error: 'invalid_token' } }) {
++  calls = [];
++  vi.stubGlobal('fetch', vi.fn(async (url: string) => {
++    calls.push(String(url));
++    const a = String(url).includes('/token') ? token : String(url).includes('/me') ? user : { status: 404, body: {} };
++    return new Response(JSON.stringify(a.body), { status: a.status, headers: { 'content-type': 'application/json' } });
++  }));
++}
++
++// The message exchangeCode rejects with, or 'RESOLVED' if it did not reject: a plain value, so a wrong answer fails by assertion.
++async function refusal(code: string): Promise<string> {
++  return new MicrosoftPersonalProvider(CONFIG).exchangeCode(code).then(() => 'RESOLVED', (e: Error) => e.message);
++}
++
++beforeEach(() => { vi.clearAllMocks(); });
++afterEach(() => { vi.unstubAllGlobals(); });
++
++describe('KS-1858: the Microsoft adapter refuses a 200 token answer that has no access_token', () => {
++  it('RED KS-1858 R1 a 200 answer with an empty body object is refused and the profile endpoint is never called', async () => {
++    stubFetch({ status: 200, body: {} });
++    expect(await refusal('bad')).toBe('Microsoft token exchange failed (no access token)');
++    expect(calls).toEqual(['https://login.microsoftonline.com/consumers/oauth2/v2.0/token']);
++  });
++
++  it('RED KS-1858 R2 a 200 answer whose access_token is not a string is refused and the profile endpoint is never called', async () => {
++    stubFetch({ status: 200, body: { access_token: 42 } });
++    expect(await refusal('bad')).toBe('Microsoft token exchange failed (no access token)');
++    expect(calls).toEqual(['https://login.microsoftonline.com/consumers/oauth2/v2.0/token']);
++  });
++
++  it('RED KS-1858 R3 a 200 answer whose access_token is an empty string is refused and the profile endpoint is never called', async () => {
++    stubFetch({ status: 200, body: { access_token: '' } });
++    expect(await refusal('bad')).toBe('Microsoft token exchange failed (no access token)');
++    expect(calls).toEqual(['https://login.microsoftonline.com/consumers/oauth2/v2.0/token']);
++  });
++
++  it('CONTROL KS-1858 C1 a good token answer still signs in: the profile call carries the Bearer token', async () => {
++    stubFetch(
++      { status: 200, body: { access_token: 'tok-ks1858' } },
++      { status: 200, body: { id: '7', mail: 'a@secuura.test', displayName: 'Ada Lovelace' } },
++    );
++    const profile = await new MicrosoftPersonalProvider(CONFIG).exchangeCode('good');
++    expect(profile.providerId).toBe('7');
++    expect(profile.email).toBe('a@secuura.test');
++    expect(calls).toEqual(['https://login.microsoftonline.com/consumers/oauth2/v2.0/token', 'https://graph.microsoft.com/v1.0/me']);
++    const profileInit = (vi.mocked(fetch).mock.calls[1] as unknown as [string, { headers: Record<string, string> }])[1];
++    expect(profileInit.headers.Authorization).toBe('Bearer tok-ks1858');
++  });
++
++  it('CONTROL KS-1858 C2 a non-2xx token answer is still the status-only failure', async () => {
++    stubFetch({ status: 400, body: { error: 'invalid_grant' } });
++    expect(await refusal('bad')).toBe('Microsoft token exchange failed (HTTP 400)');
++  });
++});
