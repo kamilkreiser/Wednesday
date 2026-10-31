@@ -7,6 +7,7 @@ supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% 
 ---
 
 ## ⏩ UPDATE 11:2x SAT 31 OCT (same seat, ctx ~66%) — READ THIS FIRST
+- **11:28 PINNED MERGE GO: #1835 (KS-1848/1849, F 19th) at abfe0ab30a6e on develop cb2320368ae4.** OWED: F's merge sha -> Wednesday's own ls-remote of develop (one parent, moved) -> then every queued seat's forward-move gate runs. D 46th told to absorb section 128. Gate 48 (KS-1384 train) RUNNING in-session -> `0_Brain/reference/2026-10-31_gate48-ks1384-train/verdict.md`.
 - **D 46th DESIGN APPROVED with A1** (page-vs-render test ADVISORY in the leg-14 suite; lint hard; check --committed strict; `adopt` subcommand; refresh = merge seat after each wave). Ticket KS-1887. OWED: ITEM 2 proof -> ITEM 3 SKILL.md -> ITEM 4 transition commands (28 PRs; #1383 hand step) -> READY FOR GATE tier 2.
 - **S 9th GO** (KS-1871 guard = role OR documents:write scope, told to Kam); **F8 = existing KS-1214** -> comment + High + Security Review (option b). OWED: S 9th's KS-1860/KS-1861 option sets -> two Kam cards.
 - **GATE 47 DONE: #1855 GO WITH NOTES.** E files F3 (MAJOR billing ownership/role checks, read from code) + F4 -> Kam FYI when the id lands.
