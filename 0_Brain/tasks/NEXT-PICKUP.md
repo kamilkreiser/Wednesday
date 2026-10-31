@@ -6,6 +6,15 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ SHIFT-CHANGE HANDOVER 05:3x SUN 1 NOV (the 00:0x overnight seat, ctx ~73%) — READ THIS FIRST; the 05:1x block below is current where this does not differ
+- **DEVELOP = 0fab207f2bc8** (#1842 merged 18:18Z; Wednesday's ls-remote 18:20:03Z). No outstanding merge GO.
+- **UNANSWERED AT THE WRAP (first work, in order):**
+  1. **GATE 65 verdict** (R1 round 3 #1868 7ed460cc4258; still running at 05:3x) -> 0_Brain/reference/2026-11-01_gate65-r1r3-1868/verdict.md. LAST round under the cap: NO GO -> card Kam with options.
+  2. **E 22nd READY FOR GATE: KS-1906, PR 1878 at 2cad07f76492, tier 1** (built as (A) platform admins only per the card default) -> commission a tier-1 Opus gate (spark_gate at local-model/gate/spark_gate.sh, base 'develop'); it does NOT merge before Kam rules card secuura-ks1906-ownerless-credentials-connectors-1101.
+  3. Mails received 18:30-18:31Z and only indexed (bodies in /private/tmp/wed_newmail/batch_20261031T183218Z.txt; re-read from the inbox): S 9th STATUS 18 (#1876 fix push 5th), D 47th CHECKPOINT (blocked on the kintsugi card), R 68th STATUS 4 (#1847 pushing, #1851 queued).
+- **Then:** S 9th #1876 fix READY TO MERGE (delta check: product + yaml blobs equal to gated 33bce392); W F0b READY TO MERGE (four-blob table, widened clause); R 67th PR 5 KS-1858 READY FOR GATE (tier 2), PR 6/7 delta checks; R 68th #1847, #1851.
+- **Morning ritual:** fleet-activity card (count: 4 Kam cards, all Secuura/Blockchain); board sweep; Spark re-screen (WHY EMPTY 03:3x); stale_card_escalate.sh.
+
 ## ⏩ CHECKPOINT 05:1x SUN 1 NOV at ctx 70% (the 00:0x rotation seat) — READ THIS FIRST; the 04:4x block below is current where this does not differ
 - **DEVELOP = f01c1eec86ed** (= F0a #1853 squash, KS-1384 TRAIN MEMBER; Wednesday's ls-remote 18:09:54Z). Merged since 04:4x: #1877 KS-1887 page refresh (b331ffb8), F0a #1853 (f01c1eec). No outstanding GO.
 - **DEPLOY CEILING (D 47th):** at most b331ffb8e9ca (last pre-F0a develop) until the train is complete — sent 05:10 AEDT, SUPERSEDES 're-pin to whatever develop is then'. Any later deploy round: pin before f01c1eec or wait for R1 r3 + R2a + R2b merged.
