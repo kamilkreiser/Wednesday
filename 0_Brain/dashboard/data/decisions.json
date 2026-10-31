@@ -53329,5 +53329,169 @@
    "2026-08-17 20:10",
    "CARD wed-boot-read-exceeds-the-context-window"
   ]
+ },
+ {
+  "id": "secuura-ks1851-ownerless-credentials-who-1031",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1851: should your 'platform admins and S connectors only' rule for owner-less records also cover vc-issuer credentials?",
+  "bluf": "Question, no hands needed. On 20 Oct you ruled (b) on card ks1695 for owner-less DOCUMENTS and certifications: only Platform S's connectors and platform administrators, no tenant administrator (Wednesday read that card's options; its scope is originate records, not vc-issuer credentials; card ks1352 is about how verify decides, a different subject). vc-issuer CREDENTIALS still follow the older KS-1116 read rule: an organisation or system administrator can open an owner-less credential stamped with their tenant. Tonight's fix for credential revoke (PR 1869, gate 59 GO WITH NOTES, finding G59-F3) copies that read rule, so those administrators can also revoke such credentials. PR 1869 merges either way: before it, anyone signed in could revoke any credential, so it only narrows.",
+  "default_action": "If you don't answer: nothing changes beyond PR 1869 (which merges on Wednesday's GO after a wording fix), and Wednesday files a ticket holding this question so it is not lost; it goes on the agenda for your next meeting with Stuart.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, extend your rule to credentials",
+    "detail": "Owner-less credentials become readable and revocable by Platform S connectors and platform administrators only. Wednesday files one ticket and a seat builds it through the normal gate after PR 1869 merges."
+   },
+   {
+    "key": "b",
+    "label": "No, credentials keep the KS-1116 rule",
+    "detail": "Tenant organisation and system administrators keep read and revoke on owner-less credentials in their tenant. Nothing more is built."
+   },
+   {
+    "key": "c",
+    "label": "Take it to the monthly meeting with Stuart",
+    "detail": "A ticket records the question with both options; nothing changes until you and Stuart decide."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T22:01:31.922495+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 19:28",
+   "CARD secuura-ks1352-revoked-credentials-still-verify",
+   "CARD secuura-ks1695-ownerless-records-who-reads-1020"
+  ]
+ },
+ {
+  "id": "secuura-ks1384-stuart-reanchor-1d322cb1-1031",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1384: Stuart asks you to re-anchor one document on kintsugi. Shall the deploy seat do it?",
+  "bluf": "Stuart (KS-1384 comment 09ffd8fd, 06:55Z today, addressed to you) asks for ONE re-anchor of document 1d322cb1 on kintsugi: POST /api/documents/1d322cb1-38bc-4192-92de-821b0320c1bf/anchor as a platform admin (KS-1814 allows it; S cannot do it itself). His 07:56Z update says kintsugi is landing anchors again (a new upload confirmed in ~95 s), so the retry also answers whether that one stuck transaction can now land. Kintsugi anchors on Cardano preview: the fee is test ADA. It is one write on a dev box at a client's request, so it is yours to say. (Not the same subject as card ks1814, which ruled whether a company admin may re-anchor, or the ks1384 date card, which ruled when per-event anchors ship.)",
+  "default_action": "If you don't answer: nothing is sent to kintsugi for this document, and the request stays on the ticket; Wednesday re-raises it once Seat D 47th has verified kintsugi.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, Seat D 47th does it after its kintsugi deploy is verified",
+    "detail": "One platform-admin POST, nothing else; the seat reports the anchor and transaction on KS-1384 as a facts-only ticket comment (no @ mention), which is how Stuart hears."
+   },
+   {
+    "key": "b",
+    "label": "You do it yourself",
+    "detail": "Wednesday sends you the exact command and the account to use."
+   },
+   {
+    "key": "c",
+    "label": "Wait until the KS-1384 train deploys",
+    "detail": "The re-anchor goes through the fixed retry path; Stuart waits, probably several days."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T22:04:37.399591+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 10:02",
+   "2026-08-21 20:06",
+   "2026-08-24 11:27",
+   "2026-08-28 09:18",
+   "2026-08-31 11:57",
+   "2026-08-31 18:49",
+   "2026-09-03 13:36",
+   "2026-09-09 18:20",
+   "2026-09-11 16:55",
+   "2026-09-12 08:50",
+   "2026-09-18 10:27",
+   "CARD secuura-ks695-ask3-shape-stuart",
+   "CARD secuura-ks843-cutover-stuart",
+   "CARD secuura-ks1384-anchor-per-event-1009",
+   "CARD secuura-ks1508-ask-stuart-versionedbyid-1013",
+   "CARD secuura-ks1384-schedule-per-event-anchors-1019",
+   "CARD secuura-ks1688-ask-stuart-platform-s-version-1020",
+   "CARD secuura-ks1557-tell-stuart-and-peter-about-the-swallowed-anchor-1021",
+   "CARD secuura-ks1557-draft1-overtaken-by-stuart-1022",
+   "CARD secuura-ks772-stuart-provenance-rows-1028",
+   "CARD secuura-stuart-ks772-anchor-row-question-1029",
+   "CARD secuura-stuart-ks1402-custody-reply-1029",
+   "CARD secuura-ks1384-giveup-retry-risk-1029",
+   "CARD secuura-ks1384-f0-build-approval-1029",
+   "CARD secuura-ks1814-company-admin-reanchor-1030",
+   "CARD secuura-ks1384-stuart-asks-a-date-1030"
+  ]
+ },
+ {
+  "id": "secuura-kintsugi-disk-15gb-builder-prune-1031",
+  "client_project": "Secuura/Blockchain",
+  "title": "Kintsugi has 15.7 GB free and the deploy build needs more. May the deploy seat clear old build cache there, once?",
+  "bluf": "Asking again because your 8 Oct ruling on card secuura-standing-build-cache-prune-1007 was (b) 'prune kintsugi once now only; later rounds ask again'. The deploy round (Seat D 47th, kintsugi first, then demo) stopped before building, as its brief tells it to: kintsugi's disk is 94% full, 15.7 GB free (read twice, 10:59Z and 11:05Z); demo has 50 GB. The build is estimated at 8-15 GB (unmeasured), and kintsugi's live database sits on the same disk, so running out mid-build would reach the running services. Docker reports 46.7 GB of build cache on kintsugi, 25 GB of it reclaimable. Build cache only speeds up future builds: removing it touches no image, no container, no rollback tag and no data; the worst cost is a slower build. Same shape as your 6 Oct (a) for Seat D 12th.",
+  "default_action": "If you don't answer: nothing is deleted and nothing is built on kintsugi (demo is not started first, per your kintsugi-first rule); Seat D 47th finishes its read-only preparation and waits; Wednesday re-raises at the morning card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, once, build cache only",
+    "detail": "Seat D 47th runs one 'docker builder prune' on kintsugi only (cache older than ~72 h), reads free disk before and after, then builds. No image, rollback tag or volume is touched."
+   },
+   {
+    "key": "b",
+    "label": "Also remove old image tags beyond the last few rollback points",
+    "detail": "Frees more space, but it removes images. Not recommended tonight."
+   },
+   {
+    "key": "c",
+    "label": "Build in small batches with no deletion",
+    "detail": "Stops at about 8 GB free; nothing removed, but the disk risk stays."
+   },
+   {
+    "key": "d",
+    "label": "Hold the deploy round",
+    "detail": "Nothing deploys tonight."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T22:13:18.436777+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-17 20:05",
+   "2026-08-17 20:23",
+   "2026-08-21 09:56",
+   "2026-08-24 11:27",
+   "2026-09-03 09:49",
+   "2026-09-03 11:44",
+   "2026-09-05 21:26",
+   "2026-09-06 16:24",
+   "2026-09-10 18:01",
+   "2026-09-11 16:55",
+   "2026-09-12 08:50",
+   "2026-09-12 08:50",
+   "2026-09-18 10:27",
+   "2026-09-21 10:15",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-kintsugi-whole-estate-rebuild",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD secuura-kintsugi-build-cache-prune",
+   "CARD secuura-kintsugi-refresh-notice-release",
+   "CARD secuura-kintsugi-qa-login-for-ks1100",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD wed-laptop-dev-copy-disk-full",
+   "CARD secuura-kintsugi-deploy-for-31oct-1005",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006",
+   "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
+   "CARD secuura-followup-deploy-disk-archive-1007",
+   "CARD secuura-standing-build-cache-prune-1007",
+   "CARD secuura-demo-disk-too-small-to-rebuild-1007",
+   "CARD secuura-kintsugi-issuer-role-account",
+   "CARD secuura-vm-disk-grow-figures",
+   "CARD secuura-kintsugi-issuer-account-how",
+   "CARD secuura-kintsugi-admin-qa-login-for-live-checks",
+   "CARD secuura-deploy-tip-kintsugi-and-post-1022",
+   "CARD secuura-kintsugi-ssh-rule-stale-ip-1022",
+   "CARD secuura-kintsugi-deploy-notice-1022",
+   "CARD secuura-kintsugi-admin-published-default-1027"
+  ]
  }
 ]
