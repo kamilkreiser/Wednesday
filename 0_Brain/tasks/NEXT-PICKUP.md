@@ -6,6 +6,13 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 11:1x SAT 31 OCT (same seat, ctx ~64%) — READ THIS FIRST
+- **D 46th %36 LAUNCHED 10:56:55, plan confirmation read whole, GO sent quoting Kam 09:44:40 + 10:07:32** (audience = 28 PRs; fragment key = ticket + slug). OWED: its DESIGN NOTE (QUESTION, topic `docs fragments design`) -> Wednesday's ANSWER. fleet_ack for its plan QUESTION refused rc 3 (collector misses -D): retry.
+- **S 9th %37 LAUNCHED 11:00:04**; ADDENDUM sent: FILE gate 46's F8 (MAJOR, mcp-server POST /hash + filePath read any server path, no auth) + F7 as ONE High ticket first. OWED: its plan confirmation -> GO quoting Kam 12:55:54 + 10:07:32; the F8 ticket id -> tell Kam (FYI posted 11:1x promised the number).
+- **GATE 46 DONE: #1848/#1849/#1850 GO WITH NOTES** (only docs). R wrapped -> merge prep by a raise successor after fragments. Verdict `0_Brain/reference/2026-10-31_gate46-1848-1850/verdict.md`.
+- **Spark: 6 KS-1868 passes HELD** (O35-P1/P2, O36-P1/P2, O37-P1/P2) -> one raise seat later. Op 37's KS-1410 'client-returning' list mostly = files R's PRs already fixed; only demo-service reset.ts:64-69 + mcp tools/hash.ts stay as filing candidates.
+- **Next gates:** #1855 (tier 1), KS-1384 train #1853 + #1854 + #1857 (tier 1), tier 2 Sonnet batch #1842/#1847/#1851/#1852, #1843 + #1856 (6819db871377).
+
 ## ⏩ UPDATE 10:3x SAT 31 OCT (same seat, ctx ~56%) — READ THIS FIRST
 - **GATE 45 DONE: #1840 (4b166a00d60b) and #1833 (e4767d5838cb) GO WITH NOTES**, only the docs conflict; E + U answered + tapped (delivered). After fragments: each does ONE merge prep -> READY TO MERGE -> Wednesday checks code/test blobs equal those heads -> pinned GO.
 - **SPARK op 35 DONE** (2 KS-1868 passes HELD, read at source by Wednesday); **op 36 RUNNING in-session** -> `0_Brain/reference/2026-10-31_spark-operator36/report.md`.
