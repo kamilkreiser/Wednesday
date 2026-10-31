@@ -200,3 +200,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-26 19:46 | Kamils-MBP | Spark gate tooling: repetition guard in spark_review.py + bash/vitest runner in spark_gate.sh, then shadow calibration 3 on #1708/#1709 (Wednesday, laptop seat 19:4x) | CLOSED |  2026-10-26 20:03 done 20:0x: arms 9/9 + 8/8, calibration 3 recorded (tier 2 FAIL x2) |
 | 2026-10-27 06:11 | Kamils-MBP | decision_queue.sh prior-ruling refusal: filter printed card titles by client (pickup OWED item 7) | CLOSED |  2026-10-27 06:13 done: commit on main, arms 9/9 + override 6/6 |
 | 2026-10-29 08:04 | Kamils-MBP | local-model/night/build_input.sh: allow a scripts/ product as the TAMPER TARGET in test_only mode (unblocks KS-1775, KS-1546 Spark briefs) | OPEN | |
+| 2026-10-31 22:31 | Kamils-MBP | note_entry.sh --receipt FILE (built 22:30, commit 35eae227b8) | OPEN | |
