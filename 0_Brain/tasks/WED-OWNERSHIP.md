@@ -202,3 +202,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-29 08:04 | Kamils-MBP | local-model/night/build_input.sh: allow a scripts/ product as the TAMPER TARGET in test_only mode (unblocks KS-1775, KS-1546 Spark briefs) | OPEN | |
 | 2026-10-31 22:31 | Kamils-MBP | note_entry.sh --receipt FILE (built 22:30, commit 35eae227b8) | CLOSED |  2026-10-31 22:31 built + armed by use, commit 35eae227b8 |
 | 2026-10-31 22:51 | Kamils-MBP | Spark harness: test_only variant with a planted test-side red proof (no product tamper) + a doc-only tier | CLOSED |  2026-10-31 23:15 built: test_only_input + doc_only tiers, 47/47 arms re-run by Wednesday |
+| 2026-11-01 07:46 | Kamils-MBP | pane_close.sh: exempt the pane's own claude seat process listener (Claude Code 2.1.316 listens on 127.0.0.1) | OPEN | |
