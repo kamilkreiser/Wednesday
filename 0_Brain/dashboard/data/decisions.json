@@ -52945,7 +52945,7 @@
   "id": "secuura-glob-minimatch-advisory-freeze-1031",
   "client_project": "Secuura/Blockchain",
   "title": "Every Secuura push is frozen by two moderate advisories (glob, minimatch) with no in-range fix — accept them for now?",
-  "bluf": "I need your ruling to unfreeze pushes. Three advisories published last night make our audit check refuse every push. The high one (follow-redirects) has a drop-in fix and Seat E 22nd is bumping it now. The two MODERATE ones (glob GHSA-3g3m-2fjr-6pw4, minimatch GHSA-g3hv-75wg-m249) are fixed only in new major versions, which no current dependency accepts, and copies of them sit in shipped services (anchoring, mcp-server, nft-certificate, root) — that is why this is your call, not mine under the 9 Sep advisory rule. Measured by E 22nd from the registry and the lock files, not yet proven to be reachable at runtime.",
+  "bluf": "I need your ruling to unfreeze pushes. Three advisories published last night make our audit check refuse every push. The high one (follow-redirects) is already bumped locally by Seat E 22nd. The two MODERATE ones (glob, minimatch) are fixed only in new major versions no current dependency accepts, and copies sit in shipped services, so it is your call under the 9 Sep rule. NEW, measured by E 22nd with trace hooks and controls: none of those shipped copies is used by our code — anchoring and nft-certificate never even load them, and mcp-server loads minimatch but never calls the part that uses it (read from source, not a running stack).",
   "default_action": "If you do not answer: pushes stay frozen (nothing is pushed past the audit check), E 22nd finishes the follow-redirects bump and measures whether the shipped copies are reachable at runtime, and I re-raise this card with that measurement.",
   "options": [
    {
@@ -52980,6 +52980,19 @@
    "CARD secuura-advisory-freeze-lock-refresh-1021",
    "CARD secuura-deepmerge-advisory-baseline-1028",
    "CARD secuura-hono-advisory-blocks-every-push-1029"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-10-31T11:58:11.821563+11:00",
+    "reason": "E 22nd measured runtime reach 00:57Z (trace hooks with controls)",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "I need your ruling to unfreeze pushes. Three advisories published last night make our audit check refuse every push. The high one (follow-redirects) has a drop-in fix and Seat E 22nd is bumping it now. The two MODERATE ones (glob GHSA-3g3m-2fjr-6pw4, minimatch GHSA-g3hv-75wg-m249) are fixed only in new major versions, which no current dependency accepts, and copies of them sit in shipped services (anchoring, mcp-server, nft-certificate, root) — that is why this is your call, not mine under the 9 Sep advisory rule. Measured by E 22nd from the registry and the lock files, not yet proven to be reachable at runtime."
+    }
+   }
+  ],
+  "amended_ts": "2026-10-31T11:58:11.821598+11:00"
  }
 ]
