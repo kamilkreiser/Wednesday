@@ -1,0 +1,38 @@
+STARTABLE: YES (after Tuesday fills slots 1-7; every slot is four underscores; defaults named below)
+
+# B991 drafter report (SEAT-K5, HPSM-POC: read-only diagnosis of the UAT first-click error on Engagements)
+
+## BLUF
+- Kit: `2026-10-31_B991_SEAT-K5_hpsmpoc-uat-first-click-error-diagnosis.md`, 88 lines, 7 stamp slots (`_{4}` count 8 = 7 slots + the last line `READ-WHOLE-BY-TUESDAY: ____`; control: 5-underscore scratch not re-run by the drafter, the count equals the slot lines by `grep -c`, 7).
+- **The deploy STATUS (B971) says on the database:** "UAT woken at 11:14:10 AEDT (`/health/ready` 200 in 52.03 s; it was paused); last read 200 at 11:47:22 AEDT (pauses after ~60 min idle: wake again with one `/health/ready` GET, `-m 90`, before the product owner opens it if he opens it after ~12:45)" (`B971_STATUS.md:171`). So from about 12:47 the database would sleep unless someone woke it; the click was 16:15. Nothing in B971 shows a wake after 11:47.
+- **The records already hold the same shape:** B761 (26 Oct) measured 6 x 504 on `/api/v1/customers` on a cold UAT database (`B761_STATUS.md:103`), and UAT wake times of 50.9, 52.0, 60.8 and 65.05 s. The code explains why that becomes an on-screen error: BFF cuts a read at 10 s (`bff.ts:143`), the browser asks once more (`readRetry.ts`), so the screen gives up at about 20 s while a resume takes 45-65 s. The kit still tests this as a hypothesis, with five alternatives and a signature/refutation for each.
+- Likely thin logs: UAT keeps no API stdout and the code sends no telemetry (records, B971 (i)). The kit therefore leads with the ARM activity log and Azure Monitor metrics (with a control: the 26 Oct 12:52Z cold run must show as a 5xx point), then Kudu platform logs, then Log Analytics/App Insights/SQL audit if the identity may read them.
+
+## Facts re-measured by the drafter (instrument; control)
+1. Click time: 16:15 AEDT = 05:15Z (product owner, RELAYED by Tuesday). `date` at drafting 16:19 AEDT.
+2. HPSM-POC main = `d0eff4ca637b8959dd205adc0b77e8111b60280a` (`git --no-optional-locks ls-remote origin refs/heads/main`; the local checkout does not hold it, so code was read with `gh api -X GET contents?ref=`). Control: `trees/d0eff4ca...?recursive=1` listed 1695 paths including `web/src/app/(app)/engagements/page.tsx`.
+3. Code at `d0eff4ca` (quoted line numbers are in the kit): `EngagementsList.tsx` shows `ErrorState` "The engagements could not be loaded" with a "Try again" button; `useDirectory.ts:24` lists customers then up to 25 detail reads (a failed detail is swallowed, a failed list shows the error); `readRetry.ts:14-42` retries a BFF 504 `upstream-timeout` once, nothing else; `bff.ts:143` 10 s, `:351` 504, `:352` 502, `:414` 503 `signin-refresh-unavailable`, `:458` cookie clear on 401; `client.ts:328` 504 text "reload the page in a minute"; `AssessmentModule.cs:102` and `FeedbackModule.cs:84-85` `EnableRetryOnFailure()` (default arguments: the kit tells the seat to read the library default from the referenced EF version); `appservice.bicep:101` `Connect Timeout=30`, `:79`/`:183` `alwaysOn: true`; `sql.bicep:63-66` `GP_S_Gen5`, `autoPauseDelay: 60`, `minCapacity 0.5`; `uat.bicepparam` `BillOverUsage` (so the free-allowance pause is not UAT's mechanism).
+4. `infra/README.md:129` forbids a monitor on `/health/ready` (it would stop the database ever pausing), so a keep-warm ping is graded in the kit as refused-by-rule.
+5. Resource names from B971 `presig-uat0/resources-uat.txt` (file read): UAT apps, `asp-hpsmpoc-uat`, `sql-hpsmpoc-uat-25onzn`/`hpsmpoc`, `appi-hpsmpoc-uat`, `log-hpsmpoc-uat`. Identity script `.tools/b971/kit/identity_pass.sh` read (expects sub `a6b8fe11...`, tenant `ec01829b...`).
+6. Ports: the kit uses none. Panes (`tmux list-panes -a`): `tuesday`, `Datasec/HPSM-POC-R98`, `Security-Composer-J35`, `fleet-monitor`; no `K5`. `.tools/b991` absent (`ls`). No existing `B991` file in the briefs folder (`ls | grep B991` before writing: empty).
+7. Model row: `model-routing.md` has no diagnosis row (rows P1-P4, L1-L6, C1-C10, G1-G3 listed). Nearest: C6 line 96 (Opus, az with box rights), C4 line 94 (Opus, "read-only measurement first"), C2 line 92 (Sonnet; B904 used it for a diagnosis that touched no hosted resource). Opus id `claude-opus-5-5` from `models_latest.json` line 17. Launch line carries `BRIEF_SEAT_LEVEL=opus` inside the quotes.
+
+## D-decisions (drafter's; Tuesday changes at the stamp)
+- D-1 Code read at main `d0eff4ca`, not at the deployed `e8ac3f29`; the seat must say if the read files differ between the two.
+- D-2 Instruments in order ARM activity log, platform metrics (with the 26 Oct control), Kudu platform logs, then LA/App Insights/SQL audit; an empty or refused instrument is a finding.
+- D-3 No hosted request by the seat by default (the product owner is mid-review); the only allowed one is a single API `/health/ready` GET, and only if the database reads `Paused` and Tuesday says he has finished.
+- D-4 The seat never concludes "measured" from a code read; "consistent with" is the ceiling without a hosted instrument.
+- D-5 Fix-shape graded F1 (UAT auto-pause off or longer: money, template deploy, product owner's call), F2 (BFF read retry sized to a resume), F3 (EF transient list and connect timeout, partner to F2 because the BFF cuts first), F4 (loading/error wording, new customer-facing words), F5 (keep-warm, refused by README rule), F6 (demo walk-through row does not cover external UAT reviewers).
+
+## Q-questions for Tuesday (each with a default)
+- Q-1 (slot 5) May the seat send ONE `/health/ready` GET to the UAT API to time a resume? Default NO (`NO HOSTED GET`): the product owner is reviewing; the resume time is taken from the records and from the activity log/metrics.
+- Q-2 (slot 6) May the seat read the apps' log files through Kudu VFS (token on stdin, read-only, the route B971 used)? Default YES.
+- Q-3 (slot 7) Opus or Sonnet? Default OPUS (no diagnosis row; az with box rights on hosted resources).
+- Q-4 (slot 3) Time budget. Default 90 minutes after the stamp.
+- Q-5 Should a follow-up full repro (idle 60 min, then sign in and click) be commissioned after the product owner finishes? Default: decide from the seat's FOR TUESDAY; the kit forbids it now.
+
+## UNMEASURED
+No `az`, no HTTP, no browser run by the drafter. Not known: whether the database was paused at 05:15Z, whether anyone woke it after 11:47, which log tables exist and are readable, the live `alwaysOn` value, the EF default retry limits at the referenced version, whether the live files differ between `e8ac3f29` and `d0eff4ca`, any price of an always-on database. The records line "UAT keeps no readable API stdout" is RELAYED, not re-read on the host. The drafter did not read the CLARIFICATIONS entries for C-72 / HPSMPOC-400 whole (greps only).
+
+## Outside-the-fences disclosure
+Read: the DRAFTER_RULES, the B874 deploy kit (template), B971 STATUS (lines 1-196 read, 197-274 grepped only), B924 kit and report (grep), B904 kit head (shape), `model-routing.md` rows, `models_latest.json` (grep), `.tools/b971/` kit/presig files named above (read-only), HPSM-POC `Briefs/*STATUS.md` (greps for pause/504), analysis-repo `CLARIFICATIONS.md` (raw `gh api -X GET` into the session scratchpad, greps). `gh api -X GET` search/code on the code repo (read). `lsof` and `tmux list-panes` (read). Wrote only the kit and this report (plus scratch files in the session scratchpad). Did not read `fleet/briefs_staged/`, `scoreboard.md`, `_ledger.md`, any card, any WEDNESDAY/FRIDAY tree. No `decision_queue.sh`. No Jira. No az, ssh, docker, no HTTP to a hosted host. No person's name or card id in the kit (grep for the owner's name and "card" read 0).
