@@ -6,6 +6,12 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 12:0x SAT 31 OCT (same seat, ctx ~76%) — READ THIS FIRST
+- **GATE 48 DONE (KS-1384 train): F0b #1854 NO GO round 1 of 2 (F1 double submit when no u_F); F0a/F0c/F-b GO WITH NOTES.** W 13th told the fix shape (wait when no u_F + attempt in flight; sweep boot grace = boot arm window). OWED: W's READY FOR GATE ROUND 2 (delta, tier 1) -> gate 49. Train merges whole only, after round 2 + R1/R2.
+- **Kam card `secuura-glob-minimatch-advisory-freeze-1031` AMENDED with E's runtime-reach measurement** (no shipped copy used by our code). Still OPEN. E's follow-redirects bump committed locally 106b1f4f3.
+- **S 9th PR 2 KS-1871 built (26/26, 15/15 mutants); one-line ks1176 fixture edit approved.** Both PRs held for the freeze.
+- **No gate in flight now.** Tier 2 batch (#1842, #1847, #1851, #1852) + #1843/#1856 still to commission (any gate can run; merges wait for the freeze + fragments).
+
 ## ⏩ UPDATE 11:4x SAT 31 OCT (same seat, ctx ~72%) — READ THIS FIRST
 - **🔴 KAM CARD OPEN `secuura-glob-minimatch-advisory-freeze-1031`** (rec a: baseline glob+minimatch to 2026-11-30 + ticket; default: frozen, E measures runtime reach, re-raise). On his tap: relay verbatim to E 22nd (one PR = follow-redirects bump + 2 baseline rows, KS-1891). **🔴 PUSH FREEZE (11:45): every push fails hook legs 6+7 on GHSA-mrwp-f3q8-3g9p (follow-redirects 1.16.1).** E 22nd owns the lock-only bump (top item). OWED: its READY -> tier 2 gate -> pinned merge GO FIRST -> mail all seats "bump merged, re-queue". If E finds no fixed version: check Kam's 2026-09-09 advisory clauses before any baseline. All seats told; Kam told (FYI).
 - **Kam ruled KS-1860 = a and KS-1861 = a (11:33); relayed to S 9th; delivered.** S 9th filed KS-1890 (High, tenant-provisioning no role check).
