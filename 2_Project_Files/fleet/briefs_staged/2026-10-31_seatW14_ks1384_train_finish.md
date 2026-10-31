@@ -23,6 +23,11 @@ model: claude-opus-5-5 -- C3 (money-path build: anchoring fee double-pay), gate 
 - **Ordinal: settled by Wednesday at send.** Seat W 13th wrapped 10:13Z 31 Oct. You are Seat W 14th. If a Seat W 13th process is somehow still live, say so in your plan confirmation.
 - **Docs:** fragments are LIVE (develop has `docs-fragments.mjs`; Kam's card `secuura-docs-section-collision-dirties-every-pr-1030` = a). Every NEW docs entry is a fragment, not a page edit. The transition commands are in `.claude/skills/secuura-test-discipline/SKILL.md` section 4 on develop. The five prepped PRs are already converted (W 13th's adopt); R1's conversion is at its merge prep.
 - **Machine load:** launch when load1 < 7; suites one at a time below load 8. TMPDIR under ~60 chars for every push driver (Wednesday ALL SEATS 07:19:49Z, per the HANDOVER): `TMPDIR=/private/tmp/w/` if your shell TMPDIR is long.
+- **AT SEND, 2026-10-31 21:4x AEDT (Wednesday, rotation seat; SUPERSEDES the drafter's lines 19, 69, 86, 125 and UNMEASURED (c), (e), (f) where they differ):**
+  - Develop: last recorded `007cc464b063` (T 8th's MERGED mail 10:31Z for #1841, and Wednesday's 21:4x pickup) — not `df99b04720b8`. Re-read it yourself at ITEM 0; it moves.
+  - #1833 (KS 1844, `certifications.ts`): recorded MERGED by Wednesday's 20:1x checkpoint (U 7th). So the `certifications.ts` hold in R2's scope is lifted once you confirm the merge at origin in ITEM 0.
+  - Seat W 13th: no `Secuura/Blockchain-W` pane in the fleet window at send (tmux list-panes, 21:45). Its drivers 14150/40938 are yours to read by PID.
+  - Other seats live at send: R 67th (%38), S 9th (%37), D 46th (%36, wrapped, pane still open), T 8th (%33), E 22nd (%30), U 7th (%27), V 11th (%25). A Seat R 68th (lane -B, merge prep for R 66th's PRs #1848 first) may launch after you; its files are R 66th's PRs' files, not the train's. Re-run the open-PR overlap before each push.
 
 ## BLUF
 1. **State of the train** (all from W 13th's HANDOVER top block, `W13_BASED=644452e4af6d`):
@@ -205,3 +210,7 @@ PROVENANCE:
 - Develop = 007cc464b063d7cf0733257fd44a570aea1c964b at stamp time (Wednesday's ls-remote of refs/heads/develop on the Secuura remote); W 13th's prep base was 644452e4af6dc74fdb1d628627fb9ec3768f5b9d; re-read at ITEM 0 | /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-30_seatW-13th/HANDOVER.md line 6 + Wednesday's ls-remote | read 2026-10-31
 - Other seats' partitions (S 9th, E 22nd, R 67th, T 8th, U 7th, V 11th) are Wednesday's assignment today, not a fresh API read of open-PR file sets; check open PRs' files before any push | Wednesday's commissioning message | read 2026-10-31
 - Standing lines carried: READY FOR QA, INSTRUMENTS, HOLDS, forward-move rule, KS-1878 commit rule, three-dot rule, unique-anchor rule | `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/STANDING_LINES.md` lines 1-254 read; lines 255-547 NOT read. Brief shape copied from the S 9th brief above | read 2026-10-31
+- KS-1384 state (open: In Progress, 19 comments, last comment 2026-10-31T09:49:14Z) | Linear ticket KS-1384 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1844 state (open: In Progress, 3 comments, last comment 2026-10-31T07:50:42Z); named in ITEM 0 only as the ticket of #1833, which the 20:1x checkpoint records as MERGED (U 7th) — re-read #1833's state yourself, it is not your work | Linear ticket KS-1844 (GraphQL issue read by Wednesday) | read 2026-10-31
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-31 21:45

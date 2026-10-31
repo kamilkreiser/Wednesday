@@ -12,6 +12,11 @@ model: claude-sonnet-5-5 -- merge-prep seat, 8 PRs, docs-only deltas expected on
 - **START AUTHORITY.** Kam, 2026-10-30 10:07:32 AEDT, live board, card `secuura-wednesday-go-counts-as-kams-word-1030` = a, verbatim: "Yes: Wednesday's GO counts for starting work inside my standing grants (recommended)". Merge prep of already-gated PRs sits inside the standing grants. Your plan confirmation goes to Wednesday and her GO is the start. Kam did NOT approve this specific brief.
 - **Develop pin:** Wednesday's last known `df99b04720b8`. The drafter ran `git ls-remote origin refs/heads/develop` against the Blockchain checkout and it returned `007cc464b063d7cf0733257fd44a570aea1c964b` (read-only, one call, 2026-10-31); that is ahead of the pin. It moves all day: you re-read it by `ls-remote` at ITEM 0, at the start of each PR and before every push, and print it.
 - **Machine load:** launch when load1 < 7; suites one at a time below load 8.
+- **AT SEND, 2026-10-31 ~21:5x AEDT (Wednesday, rotation seat; SUPERSEDES the drafter's lines where they differ):**
+  - LANE `-B` CONFIRMED: `Secuura/Blockchain-B` is registered in `fleet/cockpit/launchers.conf:14`, and no pane carried that name in the fleet window at send (tmux list-panes, 21:45). Seat R 67th is live on `-R` (%38).
+  - The W lane is now **Seat W 14th** (launched 21:46, pane %39) carrying the KS-1384 train (#1838, #1853, #1854, #1857, #1858, #1868). Read every 'W 13th' in PARTITION as W 14th; W 13th is wrapped.
+  - Develop last recorded `007cc464b063` (matches your drafter's read). E 22nd's #1869 (KS 1851, vc-issuer) is in a tier-1 gate now; not yours.
+  - Live seats at send: R 67th %38, S 9th %37, D 46th %36 (wrapped, pane open), T 8th %33, E 22nd %30, U 7th %27, V 11th %25, W 14th %39.
 
 ## BLUF
 1. EIGHT PRs, all authored by Seat R 66th (WRAPPED; its HANDOVER FINAL block is `5_Project_History/2026-10-30_seatR-66th/HANDOVER.md`). They are this seat's **by Wednesday's assignment today**; R 66th's pane is closed. Per PR: carry onto current develop, convert the docs entry to a fragment, apply any gate note marked "before merge", ONE push through the queue, then `READY TO MERGE` with a blob table in which **every code and test blob equals its gated head**. Wednesday GOs each merge ONE AT A TIME; you merge only on a GO pinned to that PR's head and naming `Seat R 68th`.
@@ -147,6 +152,8 @@ At the real wrap (all eight READY TO MERGE and mailed, with each GOne PR merged 
 (g) How `adopt` treats #1837's two extra scan-gap lines (fragment format has a field for them or not). Closed by the dry run; if the format has no field, STOP and ask Wednesday rather than hand-edit.
 (h) Anything on a running service, a ChatGPT Actions client, a real Postgres, an LTS Node (gate 46 and R 66th NOT TESTED lists).
 
+(i) NOT read by the drafter: Wednesday's 05:03Z ALL SEATS mail and the tsx socket-path mail (relayed in the request), SKILL.md section 4 at develop, `docs-fragments.mjs`, STANDING_LINES.md lines 107-546, PR states on GitHub, Linear, the decision queue, the PR file lists. Closed by your ITEM 0 reads.
+
 PROVENANCE:
 - Seat ordinal: Seat R 66th 2 hits (control), 67th 0, 68th 0, 69th 0 in history.md; `2026-10-31_seatR-67th` exists in `5_Project_History/` and `seatR-68th` does not; next free after the live R 67th is R 68th | `/usr/bin/grep -ic "Seat R[^a-z0-9]\{0,3\}<ordinal>"` over /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md, one run per ordinal; `ls` of that folder filtered by 2026-10-3 | read 2026-10-31
 - Lane choice: `Secuura/Blockchain-B` appears 6 times and `Blockchain-R2` 0 times in history.md; no `.push-lock-*` for B/R/R2 and the only lock-like entries under worktrees/ are `lock-holder.json`, `lock-released.txt`, `s-g3-advlock`, `s-v1-hbslock`; `s-r67-ks1868-{vci,an,demo,mcp}` and `s-r66-*` worktrees exist | `/usr/bin/grep -o` over history.md, `ls` of worktrees/ | read 2026-10-31 (live panes NOT resolvable from tmux titles: UNMEASURED)
@@ -158,6 +165,14 @@ PROVENANCE:
 - Develop tip `007cc464b063d7cf0733257fd44a570aea1c964b` | `git ls-remote origin refs/heads/develop` run once against the Blockchain/2_Project_Files checkout by the drafter | read 2026-10-31
 - Assignment rule (unassigned tickets to our board account; tickets on Peter or Stuart stay theirs) | STANDING_LINES.md lines 94-96 | read 2026-10-31
 - Shape, push section, holds, mail rules, RULED BY KAM block | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-31_seatR67_raise_ks1868_six_spark_passes.md read whole | read 2026-10-31
-- NOT read by the drafter: Wednesday's 05:03Z ALL SEATS mail and the tsx socket-path mail (relayed in the request), SKILL.md section 4 at develop, `docs-fragments.mjs`, STANDING_LINES.md lines 107-546, PR states on GitHub, Linear, the decision queue, the PR file lists.
+- KS-1534 state (open: In Progress, 2 comments, last comment 2026-10-30T10:24:55Z) | Linear ticket KS-1534 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1579 state (open: In Progress, 1 comments, last comment 2026-10-30T22:46:08Z) | Linear ticket KS-1579 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1800 state (open: In Progress, 1 comments, last comment 2026-10-30T07:30:07Z) | Linear ticket KS-1800 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1860 state (open: Backlog, 0 comments, last comment none) | Linear ticket KS-1860 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1861 state (open: Backlog, 0 comments, last comment none) | Linear ticket KS-1861 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1866 state (open: In Progress, 1 comments, last comment 2026-10-30T22:46:18Z) | Linear ticket KS-1866 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1868 state (open: In Progress, 2 comments, last comment 2026-10-31T08:49:50Z) | Linear ticket KS-1868 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1410 state (open: In Progress, 4 comments, last comment 2026-10-30T22:46:15Z) | Linear ticket KS-1410 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
+- KS-1544 state (open: In Progress, 2 comments, last comment 2026-10-30T22:46:20Z) | Linear ticket KS-1544 (GraphQL issue read by Wednesday, comments first:50 sorted client-side) | read 2026-10-31
 
-SELF-CHECK: (not stamped by the drafter; Wednesday stamps at send)
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-31 21:47
