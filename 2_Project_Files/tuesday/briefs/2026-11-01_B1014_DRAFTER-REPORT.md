@@ -1,0 +1,47 @@
+STARTABLE: YES
+
+# B1014 drafter report (SEAT-R103, HPSM-POC records for PR #268, the UAT keep-awake template)
+Drafter: Agent-tool sub-agent for Tuesday, 2026-11-01 04:50 to about 05:05 AEDT. Kit: `briefs/2026-11-01_B1014_SEAT-R103_hpsmpoc-records-268-keep-awake.md` (83 lines; 14 stamp slots plus the last line = **15** four-underscore lines, measured by `/usr/bin/grep -c -E '_''_''_''_'`; `@[A-Z_]+@` 0). Template B1007 (kit, report, STATUS read whole).
+
+## BLUF
+- #268 is as you said: squash `77c3132e` merged 03:12:31 AEDT, one parent `e0b93957`, 4 infra files (+7 -3, +4 -0, +6 -3, +161 -5), not test-only, not deployed; code main is still `77c3132e` (04:58). Post-merge CI: `ci` 41218555786 and `Push on main` 41218555520 completed success, 19 check-runs (18 success, 1 skipped), read 04:53.
+- Next free C-number **C-258** (highest heading C-257 at line 5002 of records main `0a33f395`; boundary-pattern C-258 = 0 in all three records files, control C-257 = 3/8/1). One entry.
+- **HPSMPOC-362 checked: it is the route B999 NAMED, but its own text is the DEMO's 22 template-vs-live differences, not UAT.** The ticket the keep-awake work belongs to is **HPSMPOC-426**: its description states the template branch as read at 02:20 (unmerged, head 930cb5b5), now out of date. Kit default: one comment on HPSMPOC-426 only; 362 as a slot option (Q-1).
+- Ticket for B1010-1: B1007 filed no ticket for any unfixed finding (only HPSMPOC-426, for keyless landed work); the project has no rule. Kit default NONE (BACKLOG row), FILE offered with fixed texts (Q-2).
+- The trap is real: the root repo's `core.sshCommand` names a missing key (python read of `.git/config`, `os.path.exists` False; control True for the project key). The kit carries B1007's exact per-command `GIT_SSH_COMMAND="ssh -i '<project>/3_Access_Keys/analysis_deploy_rw' -o IdentitiesOnly=yes"` from `.tools/b1007/push1007.sh` (push rc 0 in `logs/push-1.txt`).
+- Stale prose re-measured at `77c3132e`: README.md:24 (says Dev/UAT pause), README.md:129 (monitor warning's reason is moot for UAT), sql.bicep:24 ("Dev/UAT" in the AutoPause description; it was :23 at `e0b93957`). New, drafter's own: `uat.bicepparam:22` cost comment is compute-only and in `A$` (Q-5).
+
+## Facts re-measured (instrument; control)
+- PR #268 (`gh api -X GET repos/datasecau/HPSM-POC/pulls/268`): merged true, `merged_at` 2026-10-31T16:12:31Z, head `2b882946`, base `e0b93957`, 2 commits, 4 files +178 -11, `merge_commit_sha` `77c3132e`. Commit (`commits/77c3132e`): 1 parent, verification valid, paths and counts as above. Compare `e0b93957...77c3132e`: ahead 1, the 4 infra paths. Control for "infra unchanged since the gate": the sorted path+blob list of `infra/` at `77c3132e` and `2b882946` hashes the same (`2f04e778...`); at `e0b93957` it differs (`f473f82a...`).
+- Squash message (30 lines, 2089 bytes): equals B1010's `squash-subject.txt` + `squash-body.txt` (python compare, mutant unequal) plus one trailing `Co-Authored-By` line; non-ASCII 0, `localdomain` 0 (planted control 1), `A$` 0. B1010 FOR TUESDAY 6 says its files carried no attribution line; Tuesday's daily note `:59` says the line was appended at landing: consistent.
+- PR head check-runs 20, all completed success (04:55); open code-scanning alerts on main 0 (control `state=fixed` 1); open PRs 0 on both repos.
+- Files at `77c3132e` vs `e0b93957` (raw contents API, `diff`): the change per file as written in the kit; stale lines found by `/usr/bin/grep -n -F` on both revisions (absent-string control 0); test file 2927 lines, `def test_` 143 (equals B1010's count), `def pause_delay` line 1052, the B1008 row lines 2713-2729 (B1010 wrote 2713-2730; the last assert is 2729).
+- Records repo: main `0a33f395` (PR #160 merge); open PRs 0; `records/b1014` 0 (control `records/b1007` 1); tree 14241 entries lacks B999/B1008/B1010 STATUS, has B1003 (control). CLARIFICATIONS 5017 lines, 257 headings; line 1904 the Done rule as B1007 quoted it; line 138 the code-repo squash rule (holds a decision id: cited by path only).
+- STATUS files (sha256 prefix / lines / bytes / mtime / last line): B999 `0a6c08e1d91eb4b2` 112 21130 00:44:45 READY FOR QA; B1003 `c6fd5b39f6e7a98b` 97 24412 02:03:09 VERDICT NO GO (1 of 2); B1008 `f426664f5cccceae` 61 14327 02:23:12 READY FOR QA; B1010 `4c14a44896a03c12` 113 28545 02:54:37 VERDICT GO WITH FINDINGS (2 of 2).
+- Catch-up scans (python byte program; controls for every class fire on a planted line): B999 login line 13; B1008 login line 13, HP Reporting line 16 (not-opened statement); B1010 HP Reporting line 11 (not-opened), `localdomain` 57/98/105 (zero-count statements, controls list); `HP Restricted`, e-mail, non-ASCII, tabs, "main is green" 0 in all three. The login was compared as a shell variable from `gh api user`, never printed.
+- Jira (`.tools/b1007/read.py`, `search.py`, one in-process description reader using `jira.api`/`adf`; every JQL `project = HPSMPOC AND ( ... )`): HPSMPOC-426 and -362 Backlog, 0 comments each (labels in the kit); newest key 426, `key = HPSMPOC-427` 0, `created >= "2026-11-01 02:00"` = only 426; controls `HPSMPOC-268` 1, `qxv9k2zzprobe` 0, `REC-RES-FC-01NOV-B1007` 1; this kit's markers and label 0. Keep-awake searches: hits named in the kit (426, 228, 207, 181, 57, 319 loose-token); no ticket for B1010-1.
+- Panes (`tmux list-panes -a`, 04:55): `%0 tuesday`, `%1 fleet-monitor`, `%130 Datasec/MPS-R102`. Seat-name collision: `R103` and `B1014` appear in no non-`.pre-` kit of today or yesterday (`/usr/bin/grep -l -w`; control `R101` 6 files). `.tools/b1014`, `.tools/wt-b1014`, `.tools/.git-lock` absent. Ports: none.
+- Model: `model-routing.md:98` C8, `:97` C7 (`/usr/bin/grep -n -i`); `models_latest.json:23` `claude-sonnet-5-5`; `brief_seat.sh:24` defaults to opus, so the launch line carries `BRIEF_SEAT_LEVEL=sonnet`.
+- Fixed Jira texts scanned by program (ASCII, no backtick, no banned word, no `\bHP\b`, no `A$`, no day word, no finding id, B-numbers only B999/B1003/B1008/B1010/B1014; planted controls fire): 0 hits. `<TW-SUMMARY>` 169 characters.
+
+## D-decisions
+- D-1: ONE C-entry (C-258); it says it supersedes the earlier template-branch readings in C-255 and in HPSMPOC-426's description (earlier readings, not errors).
+- D-2: BACKLOG rows as a property over B1003-1..9, B1010-1..5, B1010 FOR TUESDAY 1-2 and B999's open items that B1007-10 pointed at; B1003-6 and B1010-2 are ONE note carried twice, split into three rows (one per stale line) as you asked, each naming both gates.
+- D-3: the open deploy question is RELAYED from your daily note `:59` only as "a question is open"; no option is named as chosen, the card id appears nowhere in the kit; an AUTH-RULINGS slot lets you state OPEN or the ruling at stamp. REFUSE 8 stops the seat if a deploy is visible.
+- D-4: "head-pinned squash" in the C-258 heading is RELAYED from your daily note (`:56`, `:59`); the drafter measured one parent and the head's checks, not the `--match-head-commit` flag.
+- D-5: dropped B1007's "Sequencing ruling" slot (Step 8 states the stop-on-gate-fail default in its text) and added ROW-UATCOST; the slot count stays 14 + 1.
+- D-6: the cost goes in the Jira comment as the gates' figure (AUD only); the kit forbids `A$` in Jira text.
+
+## Q-questions for Tuesday (each with a default)
+- Q-1 KEYS-SLOT: comment on HPSMPOC-362 too? It is B999's named deploy route, but its own list and Done-when are about the demo's 22 differences, not UAT. Default **426** only (C-258 and B1014-7 name 362 as the route and say what its text covers).
+- Q-2 TICKET-WRAP: file a ticket for B1010-1? No project rule; B1007 rowed every unfixed finding in BACKLOG with no ticket. Default **NONE**.
+- Q-3 CATCHUP-LIST: default **B1010** only (B999 and B1008 each carry the login in clear at line 13: HOLD).
+- Q-4 DONE-SLOT: **COMMENT-ONLY** (only value; not deployed).
+- Q-5 ROW-UATCOST: row the `uat.bicepparam:22` comment (compute-only, `A$`, no storage), which no gate listed? Default **ROW**.
+- Q-6 AUTH-RULINGS: if the product owner has ruled the UAT deploy question before you stamp, write the ruling in that slot; the kit's texts say "open" and would then need a word change before launch. Default **OPEN**.
+
+## UNMEASURED
+- The push of `records/b1014` today (not run; fence 3). The hosted state of UAT and the demo. Whether `--match-head-commit` was used at the #268 merge (relayed). The full B999 and B1003 STATUS beyond the sections read (B1003 findings and FOR TUESDAY; B999 key lines and section heads). The C-scan over every records ref (main only). Whether the open deploy question has been answered since 03:13 (the board was not read).
+
+## Outside the fences (disclosure)
+- Read-only throughout; wrote only these two files. No `decision_queue.sh` at all, no board read. Read the project root `.git/config` as a file with python (not a git verb) to test the key path; the path is not printed here. Ran `.tools/b1007/read.py` and `search.py` in place and one scratch python reader that imports `.tools/b1007/jira.py` (GET only, no token printed). `gh api -X GET` only, including `user --jq .login` held in a shell variable and never printed. Read `0_Brain/daily_tuesday/2026-11-01.md` lines 56, 59, 65, 67 (Tuesday's own note; it names a decision-card id, which is kept out of the kit and this report). Scratch copies (records blobs, infra files, squash message) are in the session scratchpad only. One shell hook refused an unquoted `====` separator (harmless) and two hooks advised on case-sensitive greps (counts were paired with controls).
