@@ -22,6 +22,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🟢 DELTA 833 — 2026-10-31 13:17 (s209, 71% checkpoint). **READ THIS FIRST; supersedes 832's PRs line.**
+- **GATES:** G237 B980 MPS #133 tier 1 (Opus) LAUNCHED 13:15 (watcher armed) · B981 #263 tier-2 kit with a Sonnet drafter (check disk; stamp, launch, watch).
+- **BUILDER LIVE:** H81 B979 (HPSMPOC-407; holding on its own monitor). Parked READY: M52 (#133), H80 (#263).
+- **On each verdict:** the landing routine (re-read the head, main, checks and alerts; fix the body from the gate's FOR TUESDAY; squash text from its evidence files, read in an earlier message; land head-pinned with a main-unchanged guard; verify at source; close the panes).
+- Owed lines of 830-832 stand (records for #262/#263/#133/#264-ish; lane 2; Composer PCOMP-62/-97 test lane; Kam's after-review card).
+
 ## 🔴 DELTA 832 — 2026-10-31 13:16 (s209, 69%). **READ THIS FIRST; supersedes 831's LIVE line.**
 - **PRs OPEN:** MPS #133 (B974, V4 engine, head 1d493283): TIER-1 gate kit **B980** with a Sonnet drafter. HPSM-POC #263 (B978 lane 3, head 53edc92b): tier-2 gate kit **B981 (G238, 9520-9529)** with a Sonnet drafter. Both in-session: check disk, re-commission if absent; stamp, launch, watch.
 - **LIVE:** H81 B979 (lane 1, HPSMPOC-407; holding on its own monitor by design, wake acked). Parked READY: M52 (#133), H80 (#263).
