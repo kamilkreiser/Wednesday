@@ -1,0 +1,96 @@
+diff --git a/Blockchain/Dev/services/auth/src/providers/social/google.ts b/Blockchain/Dev/services/auth/src/providers/social/google.ts
+--- a/Blockchain/Dev/services/auth/src/providers/social/google.ts
++++ b/Blockchain/Dev/services/auth/src/providers/social/google.ts
+@@ -84,7 +84,11 @@
+       throw new Error(`Google token exchange failed (HTTP ${tokenRes.status})`);
+     }
+-
+-    const tokens = (await tokenRes.json()) as { access_token: string; id_token?: string };
+-
++
++    const tokens = (await tokenRes.json()) as { access_token?: unknown; id_token?: string };
++    if (typeof tokens.access_token !== 'string' || tokens.access_token === '') {
++      logger.warn('Google token endpoint answered 200 without an access token', { provider: 'google' });
++      throw new Error('Google token exchange failed (no access token)');
++    }
++
+     const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+       headers: { Authorization: `Bearer ${tokens.access_token}` },
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1858-google-refuses-a-token-answer-without-an-access-token.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1858-google-refuses-a-token-answer-without-an-access-token.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1858-google-refuses-a-token-answer-without-an-access-token.test.ts
+@@ -0,0 +1,73 @@
++// KS-1858: the Google adapter read access_token from the token answer unchecked and called userinfo with `Bearer undefined`. GoogleProvider.exchangeCode now refuses a 200 answer with no
++// usable access_token before any profile call, as the GitHub adapter does since KS-1792. fetch is replaced by a recording stub, so no socket is opened; a good answer is the control.
++import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
++
++const { silentLogger } = vi.hoisted(() => ({
++  silentLogger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() },
++}));
++vi.mock('../utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger, validateEnv: vi.fn() }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: silentLogger, createLogger: () => silentLogger }));
++
++import { GoogleProvider } from '../providers/social/google';
++
++const CONFIG = { clientId: 'cid-ks1858', clientSecret: 'secret-ks1858', callbackUrl: 'https://app.test/cb', enabled: true };
++
++let calls: string[];
++
++type Answer = { status: number; body: unknown };
++
++// A recording stub keyed by URL: the token endpoint answers `token`, the userinfo endpoint answers `user`, anything else 404.
++function stubFetch(token: Answer, user: Answer = { status: 401, body: { error: 'invalid_token' } }) {
++  calls = [];
++  vi.stubGlobal('fetch', vi.fn(async (url: string) => {
++    calls.push(String(url));
++    const a = String(url).includes('/token') ? token : String(url).includes('/userinfo') ? user : { status: 404, body: {} };
++    return new Response(JSON.stringify(a.body), { status: a.status, headers: { 'content-type': 'application/json' } });
++  }));
++}
++
++// The message exchangeCode rejects with, or 'RESOLVED' if it did not reject: a plain value, so a wrong answer fails by assertion.
++async function refusal(code: string): Promise<string> {
++  return new GoogleProvider(CONFIG).exchangeCode(code).then(() => 'RESOLVED', (e: Error) => e.message);
++}
++
++beforeEach(() => { vi.clearAllMocks(); });
++afterEach(() => { vi.unstubAllGlobals(); });
++
++describe('KS-1858: the Google adapter refuses a 200 token answer that has no access_token', () => {
++  it('RED KS-1858 R1 a 200 answer with an empty body object is refused and userinfo is never called', async () => {
++    stubFetch({ status: 200, body: {} });
++    expect(await refusal('bad')).toBe('Google token exchange failed (no access token)');
++    expect(calls).toEqual(['https://oauth2.googleapis.com/token']);
++  });
++
++  it('RED KS-1858 R2 a 200 answer whose access_token is not a string is refused and userinfo is never called', async () => {
++    stubFetch({ status: 200, body: { access_token: 42 } });
++    expect(await refusal('bad')).toBe('Google token exchange failed (no access token)');
++    expect(calls).toEqual(['https://oauth2.googleapis.com/token']);
++  });
++
++  it('RED KS-1858 R3 a 200 answer whose access_token is an empty string is refused and userinfo is never called', async () => {
++    stubFetch({ status: 200, body: { access_token: '' } });
++    expect(await refusal('bad')).toBe('Google token exchange failed (no access token)');
++    expect(calls).toEqual(['https://oauth2.googleapis.com/token']);
++  });
++
++  it('CONTROL KS-1858 C1 a good token answer still signs in: the profile call carries the Bearer token', async () => {
++    stubFetch(
++      { status: 200, body: { access_token: 'tok-ks1858' } },
++      { status: 200, body: { id: '7', email: 'a@secuura.test', verified_email: true, name: 'Ada Lovelace' } },
++    );
++    const profile = await new GoogleProvider(CONFIG).exchangeCode('good');
++    expect(profile.providerId).toBe('7');
++    expect(profile.email).toBe('a@secuura.test');
++    expect(calls).toEqual(['https://oauth2.googleapis.com/token', 'https://www.googleapis.com/oauth2/v2/userinfo']);
++    const profileInit = (vi.mocked(fetch).mock.calls[1] as unknown as [string, { headers: Record<string, string> }])[1];
++    expect(profileInit.headers.Authorization).toBe('Bearer tok-ks1858');
++  });
++
++  it('CONTROL KS-1858 C2 a non-2xx token answer is still the status-only failure', async () => {
++    stubFetch({ status: 400, body: { error: 'invalid_grant' } });
++    expect(await refusal('bad')).toBe('Google token exchange failed (HTTP 400)');
++  });
++});
