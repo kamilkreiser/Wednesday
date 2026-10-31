@@ -24,7 +24,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🔴 DELTA 834 — 2026-10-31 13:19 (s209, ~74%). **READ THIS FIRST; supersedes 833's GATES and BUILDER lines.**
 - **GATES LIVE (watchers by s209 die with it: RE-ARM `tuesday/tools/status_watch.sh <STATUS> 60` on each):** G237 B980 MPS #133 tier 1 (`/Volumes/Laptop-DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-31_B980_STATUS.md`) · G238 B981 HPSM-POC #263 (`.../HPSM-POC/1_Project_Definition/Briefs/2026-10-31_B981_STATUS.md`).
-- **#264 OPEN** (B979, HPSMPOC-407 items 1+3, head 8222af61). Gate kit **B982 (G239, no ports, tier 2)** with a Sonnet drafter, in-session: CHECK DISK for `tuesday/briefs/2026-10-31_B982_SEAT-G239_*.md` + DRAFTER-REPORT; read whole, stamp (the template's last line is the BARE `READ-WHOLE-BY-TUESDAY: ____`), launch, watch. Absent ~20 min after 13:18: re-commission (the B981 commission in the s209 transcript is the template).
+- **#264 OPEN** (B979, HPSMPOC-407 items 1+3, head 8222af61). Gate **G239 B982 STAMPED 13:20 and launched** (STATUS `.../HPSM-POC/1_Project_Definition/Briefs/2026-10-31_B982_STATUS.md`; RE-ARM its watcher).
 - **Parked READY (close each on its PR's landing):** M52 (#133), H80 (#263), H81 (#264).
 - **OWED, unchanged:** the records step for #262/#263/#264 (HPSMPOC-414/-413/-416/-418/-419/-407: comments, C-entries; B969 copy held on its 3 "HP Restricted" lines, rule first); lane 2 (411 + 415 + 408 items 1 and 3); the Composer PCOMP-62/-97 test lane; on #133 landing the MPS records seat (MPSCALC-256 stays open, purchase part behind -255); Kam's after-review card (words + rulings + PCOMP-41).
 
