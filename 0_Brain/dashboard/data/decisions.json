@@ -52940,5 +52940,46 @@
   ],
   "delivered_artefact": "relayed verbatim to Seat S 9th by mail 11:3x; lands on KS-1860 as a ticket comment when PR 3 starts (after #1848)",
   "delivered_ts": "2026-10-31T11:34:37.333159+11:00"
+ },
+ {
+  "id": "secuura-glob-minimatch-advisory-freeze-1031",
+  "client_project": "Secuura/Blockchain",
+  "title": "Every Secuura push is frozen by two moderate advisories (glob, minimatch) with no in-range fix — accept them for now?",
+  "bluf": "I need your ruling to unfreeze pushes. Three advisories published last night make our audit check refuse every push. The high one (follow-redirects) has a drop-in fix and Seat E 22nd is bumping it now. The two MODERATE ones (glob GHSA-3g3m-2fjr-6pw4, minimatch GHSA-g3hv-75wg-m249) are fixed only in new major versions, which no current dependency accepts, and copies of them sit in shipped services (anchoring, mcp-server, nft-certificate, root) — that is why this is your call, not mine under the 9 Sep advisory rule. Measured by E 22nd from the registry and the lock files, not yet proven to be reachable at runtime.",
+  "default_action": "If you do not answer: pushes stay frozen (nothing is pushed past the audit check), E 22nd finishes the follow-redirects bump and measures whether the shipped copies are reachable at runtime, and I re-raise this card with that measurement.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept both until 30 Nov, fix properly on a ticket (recommended)",
+    "detail": "Two baseline entries with a reason, the ticket and the shared 30 Nov re-review date (the date your 28 Oct deepmerge ruling used, already on 5 entries); follow-redirects bumped in the same PR; pushes resume today. A separate ticket forces the new majors, shipped services first, tested suite by suite. Same shape as your 28 Oct (deepmerge) and 29 Oct (hono) rulings."
+   },
+   {
+    "key": "b",
+    "label": "Force the new major versions now",
+    "detail": "Overrides in up to 18 package.json files to glob 14 / minimatch 11. Likely to break the jest coverage path (test-exclude uses the old export); pushes stay frozen until every suite passes. Hours to days."
+   },
+   {
+    "key": "c",
+    "label": "Accept only where it is dev tooling",
+    "detail": "Baseline the dev-only copies; force the majors only in the shipped services (anchoring, mcp-server, nft-certificate, root). Smaller than b, still frozen until those pass."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T11:51:36.352168+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 10:29",
+   "2026-09-17 07:36",
+   "CARD secuura-ks1024-advisory-baseline",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD secuura-allowance-89-before-the-0930-freeze",
+   "CARD secuura-five-new-advisories-freeze-every-push-1006",
+   "CARD secuura-advisory-freeze-3-ghsa-1007",
+   "CARD secuura-advisory-freeze-lock-refresh-1021",
+   "CARD secuura-deepmerge-advisory-baseline-1028",
+   "CARD secuura-hono-advisory-blocks-every-push-1029"
+  ]
  }
 ]
