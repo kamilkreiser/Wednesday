@@ -6,6 +6,25 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 18:3x SAT 31 OCT at ctx 65% (the 14:2x successor seat) — READ THIS FIRST; the 15:4x block below is current where this does not differ
+- **DEVELOP = b1216f1040cb** (Wednesday's ls-remote 18:3x). Merged this seat: #1859 KS-1891 (freeze lifted), #1860 KS-1887 (docs fragments live), #1865 KS-1403 (Kam's braces ruling, card delivered), #1840 KS-1845.
+- **UNDEPLOYED on develop:** #1820-#1825, #1832, #1835, #1836, #1840, #1859, #1860, #1865 -> deploy round owed (kintsugi then demo, October grant; one Opus deploy seat).
+- **GATES DONE:** 49 (KS-1384 round 2: F0b #1854 da080d3fbe48 + F0c #1857 ab59f2903405 GO WITH NOTES, F1 closed) · 52 (#1860) · 53 (#1861 KS-1881 GO WITH NOTES) · 54 (docs batch: #1862 NO GO r1, #1843/#1856/#1863 GO WITH NOTES) · 55 (#1865 GO) · 56 (#1866 KS-1871 GO WITH NOTES). Verdicts in 0_Brain/reference/2026-10-31_gate4x/5x_*/.
+- **WAITING ON (READY mails):**
+  - S 9th: #1861 merge prep head 317c60bffd47 (E14-E16 cells, fragments, F5) and #1866 merge prep head 45a15e8f5a1a (F1 sentence, six F2 cells), both queued -> READY TO MERGE -> blob check -> pinned GO.
+  - W 13th: F-b #1858 round 2 part 2 (c39f61fe2def: L2 window fix created_at-10min, N2 cells) + R1 (13fdd7f31f22) queued -> READY -> F-b DELTA gate (N1/L2, boot grace) -> train merges WHOLE (F-a #1838, F0a #1853, F0b, F0c, F-b, R1/R2), each converted by adopt.
+  - V 11th: gate 54 fixes local: #1862 round 2 (bea098d28, LAST under the cap), #1843 (e2cf29377), #1856 (a98294108), #1863 (ddacf182a) -> delta checks on ORIGIN heads only.
+  - R 67th: KS-1868 PR 1 #1864 (76ad178e57d5) READY; PRs 2-4 in a chain -> ONE batch tier-2 gate when PRs 2+3 land. KS-1895 filed (flaky demo-service cell).
+  - E 22nd: #1855 merge prep queued (a2dfe2a591d0, 4/4 blobs = gated 9fc7fb14afd6) -> READY TO MERGE; PR 3 KS-1851 (6c150b5aff1d) -> READY FOR GATE tier 1.
+  - T 8th: #1826 re-queued (short TMPDIR) then #1841, #1834, #1827, #1830 — all T's.
+  - U 7th: #1833 then #1828, #1831 — all U's.
+- **WRAPPED-PR OWNERS still unverified:** #1790 #1792 #1794 #1796 (my 05:03Z list was wrong for 7 PRs — check each PR's author before assigning). R 66th's #1837/#1842/#1847-#1852 are correct -> a raise successor converts them.
+- **COMPLETION CHECK METHOD (use before every GO):** `git init --bare <scratchpad>/bareN` then `git -C <literal scratchpad path> fetch --filter=blob:none --depth=2 git@github.com:Secuura/Distributed_Secuura.git <head sha>` (deploy key via GIT_SSH_COMMAND; the hook needs LITERAL paths), then ls-tree blob equality vs the gated head for the PR's own paths, with a control.
+- **Broadcasts this seat:** freeze lifted; overlap gate fix (W 13th's v2 guard); docs fragments live + transition commands; short TMPDIR for push drivers.
+- **D 46th pane %36 still OPEN** (pane_close refuses on its own Claude listener: claude binary is version-named, basename test misses it — tool fix owed). Scored 0.94.
+- **Filing candidates (next board pass):** gate 50's three Minors; preflight leg 1 "spec drifted" catch-all; cold-transform beforeEach timeouts (kyc ks849, T's).
+- **Spark:** idle with a written reason (KS-1868 pool outside live lanes dry); op 38's two shared-package passes HELD. Re-screen when lanes free.
+
 ## ⏩ CHECKPOINT 15:4x SAT 31 OCT at ctx 50% (the 14:2x successor seat) — READ THIS FIRST; the 12:2x block below is current where this does not differ
 - **PUSH FREEZE LIFTED.** #1859 KS-1891 merged 04:22:27Z: develop = dc8c210cb29d (Wednesday's own ls-remote). ALL SEATS mail sent 04:25Z (forward-move first; D 46th merges FIRST; docs-only merge-in HOLD unchanged until KS-1887 + transition commands).
 - **D 46th KS-1887** pushing (driver pid 84333, head 01f9cb0c57a2, started 04:33:01Z, 15-20 min hook) -> PR + READY FOR GATE tier 2 -> gate -> pinned merge GO FIRST -> forward the transition commands (0_Brain/reference/2026-10-31_inbox/d46_transition_commands_and_proof_0116Z.txt) to the 28 PR authors.
