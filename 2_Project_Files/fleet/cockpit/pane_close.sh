@@ -223,6 +223,24 @@ for pid in $(lsof -nP -iTCP -sTCP:LISTEN -t 2>/dev/null | sort -u); do
       esac
     done
   fi
+  # SEAT-OWN LISTENER EXEMPTION (2026-11-01, Claude Code 2.1.316 opens a 127.0.0.1 port itself): a pane's own claude
+  # seat process is MEANT to end with the pane. Exempt ONLY when ps says the listener is a `claude` process, it is the
+  # pane's root pid or within 2 hops below it, and EVERY LISTEN socket it holds is loopback (127.0.0.1 / ::1).
+  # Anything else (non-claude, wider bind, deeper in the tree) still refuses exactly as before.
+  if [ -n "$why" ] && [ -n "$PPID_PANE" ]; then
+    scomm="$(ps -o comm= -p "$pid" 2>/dev/null | sed 's/^ *//')"; scmd="$(ps -o command= -p "$pid" 2>/dev/null | sed 's/^ *//')"
+    s1="${scomm##*/}"; s2="${scmd%% *}"; s2="${s2##*/}"
+    if [ "$s1" = "claude" ] || [ "$s2" = "claude" ]; then
+      sp1="$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')"; sp2=""; [ -n "$sp1" ] && sp2="$(ps -o ppid= -p "$sp1" 2>/dev/null | tr -d ' ')"
+      if [ "$pid" = "$PPID_PANE" ] || [ "$sp1" = "$PPID_PANE" ] || [ "$sp2" = "$PPID_PANE" ]; then
+        saddrs="$(lsof -nP -a -p "$pid" -iTCP -sTCP:LISTEN -Fn 2>/dev/null | sed -n 's/^n//p' | sort -u)"
+        if [ -n "$saddrs" ] && ! printf '%s\n' "$saddrs" | /usr/bin/grep -qvE '^(127\.0\.0\.1|\[::1\]):[0-9]+$'; then
+          echo "pane_close: note — pid $pid is the pane's own Claude seat process (localhost listener $(printf '%s' "$saddrs" | tr '\n' ' ' | sed 's/ $//')), expected to end with the pane"
+          why=""
+        fi
+      fi
+    fi
+  fi
   if [ -n "$why" ]; then
     echo "pane_close: REFUSED — listener pid $pid $why and would die with the pane" >&2
     echo "pane_close:   chain: $(echo $chain | tr '\n' ' ')" >&2
