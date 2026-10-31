@@ -53249,5 +53249,37 @@
    "CARD secuura-ks1723-zod-msal-high-baseline-1026",
    "CARD secuura-deepmerge-advisory-baseline-1028"
   ]
+ },
+ {
+  "id": "hpsmpoc-uat-db-keep-awake-1031",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC review site: keep its database awake, or let pages wait out the wake-up?",
+  "bluf": "The first-click error you saw is measured: the review site's database sleeps after a quiet spell and takes close to a minute to wake, but pages give up after about 20 seconds. 97 of the review site's 98 server errors came right after a wake-up. I'm already building the free fix, with no new words: pages wait out the wake-up, so a first visit after a quiet spell shows Loading for up to a minute instead of an error. The extra choice is yours: also keep the review database awake all the time. That removes the wait entirely, but it bills compute every hour of the month (about 310 billed hours a month at the smallest size; I haven't read the price) and needs a template deploy. Separately, if you want friendlier waiting words such as 'Waking the service, this can take up to a minute', those are new words and need your yes. (The only earlier card sharing a word with this one was about the agents' mail wakes, not this.)",
+  "default_action": "The free fix goes ahead; the database keeps sleeping when idle; no new words.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Just the free fix (pages wait out the wake-up)",
+    "detail": "Building now; it gets its checks, then goes to the review site with your next deploy"
+   },
+   {
+    "key": "b",
+    "label": "Free fix AND keep the review database awake",
+    "detail": "I also prepare the template change and its cost, for a deploy you approve"
+   },
+   {
+    "key": "c",
+    "label": "Free fix plus friendlier waiting words",
+    "detail": "I send you the exact words to approve before they are built"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T16:43:38.334951+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD fleet-cross-seat-mail-wakes-keep-or-filter"
+  ]
  }
 ]

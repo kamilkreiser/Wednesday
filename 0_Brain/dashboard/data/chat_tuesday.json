@@ -7278,5 +7278,12 @@
   "project": "Datasec",
   "ts": "2026-10-31T16:16:19.868931+11:00",
   "text": "Got it, I'm on the first-click error on Engagements.\n\nMy first guess, not yet proven: the review site's database goes to sleep after about an hour with no use. The first page that needs it can fail while it wakes up, and a refresh works because by then it's awake. That would also explain why it keeps happening.\n\nI'm starting an investigation now. It will read the review site's logs for the failed request, confirm the cause, and propose a fix so the first click waits for the database instead of failing. I'll tell you what it finds before anything changes on the site."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-31T16:43:15.124363+11:00",
+  "text": "Found it, and it's measured, not a guess.\n\nThe review site's database had gone to sleep after a quiet spell. Your first click woke it, and waking takes close to a minute. The site only waits about 20 seconds before it shows an error, so you saw one, and by your refresh it was awake. The logs show the same thing after most quiet spells since the review site went up: 97 of its 98 server errors came right after the database woke.\n\nThe fix I'm starting now changes no words and costs nothing: the site will wait out the wake-up instead of giving up at 20 seconds. On a first visit after a quiet spell you'll see 'Loading' for up to a minute instead of an error. It gets the usual checks before it goes anywhere.\n\nOne choice is yours, and it's on a card: whether to also keep the review database awake all the time. That removes the wait entirely but costs money every month."
  }
 ]
