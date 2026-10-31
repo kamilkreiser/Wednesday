@@ -8,6 +8,7 @@ supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% 
 
 ## ⏩ UPDATE 12:0x SAT 31 OCT (same seat, ctx ~76%) — READ THIS FIRST
 - **GATE 48 DONE (KS-1384 train): F0b #1854 NO GO round 1 of 2 (F1 double submit when no u_F); F0a/F0c/F-b GO WITH NOTES.** W 13th told the fix shape (wait when no u_F + attempt in flight; sweep boot grace = boot arm window). OWED: W's READY FOR GATE ROUND 2 (delta, tier 1) -> gate 49. Train merges whole only, after round 2 + R1/R2.
+- **🔴 KAM CARD OPEN `secuura-minimatch11-breaks-jest-coverage-1031`** (E hit the first break: jest --coverage in governance; rec a = force everywhere + coverageProvider v8 for governance/originate; default: E measures v8, re-raise). On his tap: relay verbatim to E.
 - **KAM RULED `secuura-glob-minimatch-advisory-freeze-1031` = b at 12:12:11 ("Force the new major versions now"), relayed to E 22nd, delivered.** E builds ONE PR KS-1891: follow-redirects bump + overrides glob>=14.0.2 / minimatch>=11.0.1, every affected suite incl. jest coverage; FIRST break -> STOP -> back to Kam (no baseline). OWED: its READY -> gate (tier 2, may raise to 1) -> merge GO first -> mail all seats to re-queue. E's follow-redirects bump committed locally 106b1f4f3.
 - **S 9th PR 2 KS-1871 built (26/26, 15/15 mutants); one-line ks1176 fixture edit approved.** Both PRs held for the freeze.
 - **No gate in flight now.** Tier 2 batch (#1842, #1847, #1851, #1852) + #1843/#1856 still to commission (any gate can run; merges wait for the freeze + fragments).

@@ -1,0 +1,71 @@
+=========== [INBOUND] 2026-10-31T01:16 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS: transition commands, tested on three real PRs,
+[Secuura/Blockchain-D -> Wednesday] STATUS: transition commands, tested on three real PRs, for the authors after the merge (Seat D 46th)
+Seat D 46th
+
+BLUF: The PR transition commands are written and TESTED on three real open PRs: #1837 and #1857 (a stack of four entries) convert completely, #1383 is a hand step. Forward the block below to the PR authors AFTER my PR merges (the commands run the tool that lands with it). One push per PR, at merge prep. Nothing was pushed to any PR; the tests ran in detached scratch worktrees.
+
+THE COMMANDS (in the PR's own worktree, clean tree, GIT_SSH_COMMAND unset; $D = develop's sha from git ls-remote origin refs/heads/develop, then fetched)
+    OLD=$(git rev-parse HEAD)                      # the PR head before the merge
+    git merge --no-edit "$D"                       # conflicts are expected, and only in the two pages
+    git status --short | grep -E '^(UU|AA|DU|UD) ' # only the two pages may be listed; any other file: STOP and ask
+    git checkout "$D" -- "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html" "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+    node Blockchain/Dev/scripts/docs-fragments.mjs adopt --from-ref "$OLD" --against "$D"
+    node Blockchain/Dev/scripts/docs-fragments.mjs check      # must end in OK
+    git add "Projects Documents" && git commit -m "Refs KS-NNNN: ..."   # the real key; this finishes the merge
+    # then ONE push through the queue as usual
+The same block is in SKILL.md section 4 of my PR, so a PR that still carries a hand-written section after the merge has it in the repo.
+
+WHAT HAPPENED WHEN I RAN IT (ratios; each step asserted by a script, the adopted text compared byte for byte with the text in the PR's own page)
+- #1837 (KS-1800): 8 of 8. The merge stopped in exactly the two pages; taking develop's pages cleared it; adopt wrote 1 Flow and 1 Cheat fragment; check OK; the branch's diff against develop is its one test file plus 2 fragments and neither page. Its provisional section 127 renders as 129 (develop took 128 meanwhile; adopt prints "renders as section 129 (it was written as 127)").
+- #1857 (KS-1384, the F0c stack): 8 of 8. 4 Flow and 4 Cheat fragments, all 8 verbatim. Provisional 125, 126, 127, 128 render as 130, 131, 129, 132: entries added by one commit are numbered in file-name order, and numbers follow merge order, so none of the provisional numbers survive.
+- #1383 (KS-1401): REFUSED, a hand step. Its Flow change is +123/-1 and its Cheat change +59/-1, with no <h2> of its own: it was branched when the pages still ended with an indented </div> and </body>, and it rewrites those closing lines as well as adding text, so it is not an appended entry. Author kksecura (our account); KS-1401 is In Progress on the board account (kamil.kreiser@secuura.ai), so the hand step is ours, not Peter's or Stuart's. Hand step: merge develop in, take develop's two pages as above, then put the added text into KS-1401-<slug>.html in flow/ and in cheat/ under an <h2> of its own (<h2><!--n-->. Title (KS-1401)</h2> in Flow), run check.
+
+NOTES FOR THE AUTHORS
+- Numbers: adopt prints each fragment and the number it will render as. They follow merge order, so they differ from the provisional ones you wrote.
+- A "section N" in your entry's own text: leave it if it names an existing entry (those numbers are frozen); if it names another NEW entry, replace the digits with <!--ref:KS-NNNN-slug--> in the fragment adopt wrote (the slug is the file name). Measured: none of the pending entries has one.
+- A stack: each member runs the commands. The shared entries get the same file names (derived from the heading); a member whose base entries already landed gets "already a fragment ... skipped" or "already in the legacy set ... skipped". Tested on #1857 alone; two members together are untested.
+- If adopt refuses, your change to the pages is more than an appended entry (it edited text, or extended an existing entry). That is a hand step: put the added text in a fragment of its own under an <h2>.
+
+THE OPEN PRs THAT APPEND TO BOTH PAGES (28 at 01:12Z; #1835 has merged since my first count of 28)
+#1383 (hand step, see above), #1790, #1792, #1794, #1796, #1826, #1827, #1828, #1830, #1831, #1833, #1834, #1837, #1838, #1840, #1841, #1842, #1847, #1848, #1849, #1850, #1851, #1852, #1853, #1854, #1855, #1857, #1858
+27 of them only append and convert with the commands; each is DIRTY on the two pages today.
+
+REFRESH (as you ruled): the merge seat runs it after each merge wave, and you sequence it. SKILL.md says "whoever merges the PRs": read develop's sha, pull that develop, build --base <that sha>, commit just the two pages, push (a pages-only push skips the pre-push gate). Until the first refresh the committed pages lag the fragments; check prints by how many.
+
+=========== [INBOUND] 2026-10-31T01:16 | Secuura/Blockchain-D | [Secuura/Blockchain-D -> Wednesday] STATUS: docs fragments proof, SKILL.md section 4 diff,
+[Secuura/Blockchain-D -> Wednesday] STATUS: docs fragments proof, SKILL.md section 4 diff, push in progress (Seat D 46th)
+Seat D 46th
+
+BLUF: ITEMS 2 and 3 are done and every claim below has its instrument. The branch is feature/ks-1887-projects-documents-replace-the-per-pr-numbered-sections-in at ab38cc73764d (6 commits, one of them the merge of develop). The push is IN PROGRESS: my detached driver (pid 56895) took the lock at 01:14:49Z, first in the queue, and the hook has run since 01:15:02Z. No PR yet; it follows the push. The transition-commands mail goes with this one.
+
+BASE AND FORWARD MOVE
+- develop at origin (ls-remote, own key and keepalive) was 9e1eb55fde5338d0ad95848736cbd013d7b7f651 at 01:11:15Z and again at 01:14:07Z and 01:15:02Z (the gates). It moved once during my work (the #1835 squash, one commit); the rule applied: base an ancestor, objects present, the only shared paths the two pages; I merged it in, re-ran the conversion at that sha (Flow 117, Cheat 112) and re-ran this proof.
+
+ITEM 2 (a script I can re-run at any sha; 17 of 17 checks at 9e1eb55fde53)
+- Rendered pages = expected = on disk, printed side by side: Flow 62990735186b4659dccc5676e7b5261da43d45ba70adc2997e22accf87fdcd9c (904074 bytes), Cheat c89d4c382a76678fa16697ce1c55c0ccbaccc4363da67b59858e466594c8ea19 (599851 bytes); the expected values come from git show of the sha, and none is the empty-input hash.
+- Counts: 117 Flow fragments (page has 124 h2, 7 in the fixed head) and 112 Cheat (112 h2, 0 in the head), equal to the per-PR entries.
+- Planted change: one character in one legacy fragment (a unique anchor, count 1): the rendered hash differs from the page and check --committed exits 1; restored by content, the file's sha256 equals the original and check --committed exits 0.
+- html_docs_check on both renders: rc 0; a planted paragraph: rc 1 with "prose outside a table". html_docs_matrix.test.sh 18 of 18 on the converted tree.
+- Collision: two scratch branches, each adding a different fragment, merge with 0 conflict files and number 129 and 130 by merge order; the same two edits made the old way (a section appended to each page) conflict in 2 files.
+- The adopt on the real #1835 entry (section 128, written by hand) in a throwaway worktree: both fragments written, "renders as section 128", rebuilt pages byte-equal to develop's.
+
+THE SUITE AND THE MUTANTS (your A1 and the cells you asked me to name)
+- docs_fragments.test.sh: 81 passed, 0 failed, 0 skipped, 14 s standalone at load about 11. Named for the Test Evidence as you asked: C3, E4 and E7c (an edited entry is an EDIT, not a hand-appended one), C2 and C2b (the advisory exits 0, --committed exits 1: A1), E6 (a stacked PR's repeat is skipped), E8 (typed 4, renders as 5 behind a pending fragment).
+- Mutants: 41 single-edit mutants of the script (anchor counted once, each parsed first), every one killed by at least one cell (the sweep listed 42; one entry named a line I had since replaced, its replacement is killed, so I retired it). Three survivors appeared along the way and each became a cell: rev-list without --first-parent under clock skew (B10), a same-length edit of the head read as "current" (C5), and no stem check in adopt --against, which would have half-adopted a PR that edited old text in place (E15). The sweep ran while the suite grew from 79 to 81 cells; the one mutant E15 kills was re-run alone against the final file, and the others were killed by cells present in both versions.
+- Gates of the repo that I ran: run-shell-suites.sh --check-unreached "all 102 tracked shell suite(s) are reached" with my suite listed once; check-stack-safety.sh "110 shared-stack safety invariants hold" (section 6e reads the committed pages, unchanged); the open-PR overlap check on my 238 paths (235 under Projects Documents/fragments/, the script, its test, SKILL.md): none of 44 open PRs touches one, planted control fires on a real path from PR 575; neither committed page is in my diff.
+
+ITEM 3 (SKILL.md section 4 only; saved at 5_Project_History/2026-10-31_seatD-46th/evidence/skill_md_threedot.diff)
+- git diff 9e1eb55fde53...HEAD on the file: ONE hunk (@@ -367,20 +367,81 @@), 65 insertions, 4 deletions. The 4 deleted lines are the old "update both" list of the two pages and "Both files, every time" (now "Both fragments, every time (platform-s: both files)"). Everything before section 4 and everything from section 5 on is byte-identical; the section headings are identical; the platform-s paragraph, the timings rule and the space-in-Projects-Documents warning are all still there.
+- Added: the worked example (ticket KS-1234, slug login-lockout), the exact file names, the one check command, what a reviewer sees, who refreshes (whoever merges, after each batch), what happens if a page is edited by hand (an advisory, adopted at the next refresh), and the PR transition commands.
+
+PUSH DRIVER (re-keyed from V 11th's new-branch driver; no predecessor token on a non-comment line)
+- One gate changed on purpose: the develop gate no longer sets the two pages aside. Rehearsal on a throwaway repo, 5 of 5; the original docs-aside gate accepts a page move (rc 0), this one refuses it (rc 1). The overlap gate carries a planted control in the same run. Rehearsals on scratch lock and queue: dryrun ok; gatetest ok (precheck, queue, lock, load1 10.9 < 16, develop gate, overlap gate; stopped before the push).
+
+NOT DONE OR NOT COVERED
+- The four platform suites, a running stack, Node 24 (this host has Node v26.8.1 only; not verified as an LTS line, so every figure is stated that way), any deploy. Two stacked PRs both converting the same base entry were not tested together. Git-order numbering is proved on throwaway repos, not on a long-lived develop.
+
+Inbox watcher: python3 pid 88532, child of my claude pid 68118 (ps reading in the same action as this send), SINCE 00:43:03Z. Push waiter running as a harness task.
+
+FAULTS SINCE THE LAST MAIL
+- A display command of mine used a BSD sed expression with unbalanced parentheses (no effect on any result). One survivor mutant (rev-list without --first-parent) I had judged equivalent was not; fixed with cell B10.
+
