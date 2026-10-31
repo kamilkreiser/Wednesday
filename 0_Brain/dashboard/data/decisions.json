@@ -52996,5 +52996,34 @@
   "amended_ts": "2026-10-31T11:58:11.821598+11:00",
   "delivered_artefact": "relayed verbatim to Seat E 22nd by mail 12:1x; lands in the KS-1891 PR (overrides, no baseline)",
   "delivered_ts": "2026-10-31T12:13:45.831051+11:00"
+ },
+ {
+  "id": "secuura-minimatch11-breaks-jest-coverage-1031",
+  "client_project": "Secuura/Blockchain",
+  "title": "Forcing minimatch 11 breaks jest's test-COVERAGE run in two services — how do we proceed?",
+  "bluf": "I need one ruling to finish your 'force the new majors' instruction. Seat E 22nd forced minimatch 11 and hit the break we expected: jest's coverage run fails in governance (5 of 6 suites, 'minimatch is not a function'), and originate is the other jest service. Normal test runs are unaffected (167/167), and no gate, hook or push check runs coverage (E's grep). Measured by E 22nd with a load trace and a control, not by me.",
+  "default_action": "If you do not answer: E 22nd measures the v8 option meanwhile; pushes stay frozen and I re-raise this card with that measurement.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Force everywhere now; move the 2 jest services to v8 coverage (recommended)",
+    "detail": "Exactly your ruling b, plus switching governance and originate to jest's built-in v8 coverage, which does not use the broken library. E measures that it works before the PR is raised; if it does not, coverage stays broken in those 2 services on a ticket. Pushes resume when the PR passes its gate."
+   },
+   {
+    "key": "b",
+    "label": "Force everywhere now, leave coverage broken on a ticket",
+    "detail": "Fastest. Nothing that gates a push uses coverage today; a later ticket fixes the coverage path."
+   },
+   {
+    "key": "c",
+    "label": "Keep the old minimatch only inside jest's coverage tooling",
+    "detail": "Coverage keeps working, but that old copy is itself in the vulnerable range, so it needs one baseline row for a dev-only copy, which your ruling b excluded."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T12:19:43.421992+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
