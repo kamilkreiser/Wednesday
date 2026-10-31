@@ -53296,5 +53296,38 @@
    }
   ],
   "amended_ts": "2026-10-31T16:55:58.329390+11:00"
+ },
+ {
+  "id": "hpsmpoc-266-head-read-round-cap-1031",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC first-click fix: allow one small last round to make it GET-only, or land it as is?",
+  "bluf": "The first-click error fix has failed its second and last allowed check, so it needs your word. The fix itself works: every page read waits up to 90 seconds for the database to wake instead of failing at 20, saves are untouched, and all CI is green. The one failure is narrow. The change also claims HEAD requests get the 90-second wait, but over real connections they get one 30-second try, because a timed-out HEAD reply carries no body to recognise. No screen uses HEAD today, so nothing you would see is affected. But a code comment, two tests and the description state something untrue. A small last round would fix that by making the wait apply to page reads (GET) only and correcting those tests and words, followed by a short check. Then I merge it. Getting it onto your review site still needs a deploy, which I'd ask you about separately. (The earlier items sharing a word with this card are unrelated: a scoring note and a boot-read card.)",
+  "default_action": "Nothing merges. PR #266 stays open as it is.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Allow one small last round",
+    "detail": "make it GET-only, then merge:The tests and words match what it really does; a short check, then I merge it"
+   },
+   {
+    "key": "b",
+    "label": "Merge it as it is and ticket the HEAD gap",
+    "detail": "Fastest; the code says something untrue about HEAD until a later fix"
+   },
+   {
+    "key": "c",
+    "label": "Don't merge; close it",
+    "detail": "The first-click error stays until the database is kept awake or this is redone"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T20:19:25.894805+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "CARD wed-boot-read-exceeds-the-context-window"
+  ]
  }
 ]
