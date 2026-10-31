@@ -1,0 +1,271 @@
+# Secrets — never committed (workspace hard rule #3)
+3_Access_Keys/
+4_Credentials/
+*.env
+.env*
+
+# Local machine state
+.claude/settings.local.json
+.DS_Store
+0_Brain/daily/.spoken.log
+0_Brain/daily_tuesday/.spoken.log
+
+# Obsidian workspace state (keep vault content, not UI state)
+0_Brain/.obsidian/workspace*
+0_Brain/.obsidian/cache
+
+# Third-party study clones (on-drive per portability; not pushed to our GitHub)
+2_Project_Files/tools/treequest/
+2_Project_Files/tools/ab-mcts-arc2/
+
+2_Project_Files/coordination/.venv/
+2_Project_Files/coordination/smoke/out/
+2_Project_Files/coordination/day3/out/
+2_Project_Files/tools/media/.venv/
+2_Project_Files/tools/media/models/
+2_Project_Files/tools/media/downloads/
+
+# Codex CLI install (on-drive binary, too large for GitHub; recreate via npm install)
+2_Project_Files/tools/codex-cli/node_modules/
+2_Project_Files/tools/codex-cli/package-lock.json
+2_Project_Files/tools/media/receiver.log
+
+# Dashboard runtime logs (created by Launch_Wednesday.command; never committed)
+2_Project_Files/dashboard/logs/
+
+# coordination harness artifacts (code-review 2026-08-04 — artifacts never committed)
+__pycache__/
+*.pyc
+2_Project_Files/coordination/**/out*/
+2_Project_Files/coordination/seat_scratch/
+*.pkl
+2_Project_Files/scheduler/logs/
+2_Project_Files/scheduler/state/
+2_Project_Files/fleet/state/
+2_Project_Files/fleet/cockpit/state/
+2_Project_Files/fleet/cockpit/logs/
+
+# Browser-verification artifacts (Playwright MCP output + round screenshots)
+.playwright-mcp/
+wed*-dark.png
+wed*-light.png
+
+# Drive-local transcription venv (PORTABILITY: machine-local build, re-creatable)
+2_Project_Files/tools/whisper-venv/
+
+# Fleet send queue — pending/sent mail bodies are runtime state, never committed
+2_Project_Files/fleet/state/send_queue/
+
+# Attention queue ingest cursors — runtime state, never committed (gitignored at creation)
+2_Project_Files/attention/state/
+2_Project_Files/scheduler/logs/
+2_Project_Files/dashboard/server.py.bak-*
+
+# Kam deliverable packs: client UI frames stay on the drive, never in the repo
+# (gitignore-at-creation, 2026-09-04). The HTML page is tracked; the PNGs are not.
+0_Brain/dashboard/kam-packs/**/frames/
+2_Project_Files/worktrees/
+
+# send_brief tee receipts — transient run-output (gitignore-at-creation; unblocks --self rotation)
+2_Project_Files/fleet/briefs_staged/*.send.out
+
+# Quarantined artefacts (never deleted, kept on disk, out of git) — 2026-09-07
+_quarantine_*/
+**/_quarantine_*/
+
+# Brain/settings backup tarballs (2026-09-08) — derived artefacts, 660 MB each.
+# Written at creation per the gitignore-at-creation rule, NOT at wrap.
+5_Project_History/backups/
+
+# Kam's chat log is DERIVED from the per-agent streams (Phase 0, 2026-09-08).
+# Tracking a generated file that two seats both regenerate is what corrupted it
+# three times in one morning. The RECORD is tracked — chat_legacy.json (frozen)
+# plus one stream per writer; this file is rebuilt by tools/chat_streams.py at
+# every append, at every safe_push, and at every boot by doctor.sh.
+0_Brain/dashboard/data/chat_log.json
+
+# Files Kam drags into the chat (2026-09-08). His working material — screenshots,
+# PDFs, exports — not repo content, and some of it is large. Gitignored AT CREATION.
+# The chat entry keeps the absolute path, so Wednesday reads them from disk; they
+# are not recoverable from git and are not meant to be.
+0_Brain/dashboard/uploads/
+
+# statusline_publish.sh diagnostics (per-seat, machine-local)
+2_Project_Files/logs/
+
+# usage_*.json IS tracked, deliberately. It was ignored for eleven minutes on the
+# reasoning that it is live machine-local state - which was wrong about the one thing
+# that matters: Tuesday's seat is on another machine and THIS REPO IS THE TRANSPORT
+# between the two seats (her commit landed here by git while that line was being
+# written). Ignoring it would have guaranteed her chip stayed empty forever. The churn
+# that motivated ignoring it is fixed at the writer instead: statusline_publish.sh now
+# writes only when the number moves or the file ages past its heartbeat.
+
+# LEDGER .pre-* backups only, and the narrowing is deliberate.
+# A blanket `*.pre-*` was written here first and then withdrawn: `git ls-files`
+# shows 72 tracked .pre-* files, so tracking script backups is ESTABLISHED
+# PRACTICE, not an accident, and a blanket rule would have silently changed it
+# for every future one (2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit
+# - before reshaping anything, find what already occupies the slot).
+# The ledger pair is the case that genuinely differs: 1.2 MB per archive run,
+# several runs a week, and git already holds every one of those rows in history.
+# The files stay on disk - never delete, only quarantine.
+0_Brain/learnings/_ledger.md.pre-*
+0_Brain/learnings/_ledger_archive.md.pre-*
+
+# Data-store backups taken before an in-place retag/repair (gitignore-at-creation, Tuesday 2026-09-09)
+0_Brain/dashboard/data/*.pre-*
+
+# panel_sync run log (machine-local)
+2_Project_Files/tools/logs/
+
+# dashboard run output (2026-09-10: created when serve.sh was restarted by hand)
+2_Project_Files/dashboard/serve.log
+
+# Agent stdout captured at launch — artifacts, not deliverables. Gitignored AT CREATION
+# (2026-08-04 lesson) and specifically because an untracked file outside dashboard/data
+# blocks panel_sync, which is what stalled Kam's chat for 42 minutes on 2026-09-10.
+2_Project_Files/fleet/briefs_staged/*.out
+2_Project_Files/local-model/models/
+2_Project_Files/local-model/logs/
+
+# 2026-09-14: drive-local Ollama runtime (binaries + tgz, ~500 MB; Homebrew 0.18.2 left alone) — never committed
+2_Project_Files/tools/ollama/
+# 2026-09-15 15:3x — Ornith run artefacts are EVIDENCE on disk, not source: tracked copies dirtied the tree every
+# minute a run was live, panel_sync SKIPped every push, and wednesday_rotate.sh --self could never fire mid-run
+# (the 13:13→14:56 idle). READY_*.diff.md, done.md, queue.md, briefs/ and the tools stay tracked.
+2_Project_Files/local-model/runs/
+2_Project_Files/local-model/night/log/*.out
+2_Project_Files/local-model/night/log/*.log
+# G7 BUSY leg's drought marker (runtime state, rewritten every empty-queue run; 2026-09-17 07:2x)
+2_Project_Files/local-model/night/log/.queue_empty_since
+2_Project_Files/local-model/night/log/.queue_empty_tapped
+2_Project_Files/local-model/night/log/last_run.json
+2_Project_Files/local-model/night/log/.night_run.lock/
+
+# Renderer backups of the gitignored settings file (created at every boot by
+# tools/render_claude_settings.py) — the rendered file is ignored, so its backups must be too.
+.claude/settings.local.json.pre-render-*
+2_Project_Files/local-model/night/log/.gate_refused_since
+2_Project_Files/local-model/night/log/_quarantine_*/
+
+# 2026-09-17 21:1x: gate drafters keep their own git clone --shared + worktrees + node_modules symlinks here (nested .git) — never tracked
+2_Project_Files/fleet/qa-agent/gatesets/*/scratch/
+
+# 2026-09-17 22:0x: detached serial-chain runtime logs + the night runner alert marker (runtime state, never tracked)
+2_Project_Files/fleet/qa-agent/gatesets/*_serial_chain.log*
+2_Project_Files/fleet/qa-agent/gatesets/*_serial_chain.nohup
+2_Project_Files/local-model/night/log/.gate_refused_alerted
+
+# 2026-09-17 22:0x: a Secuura service logger (winston logs/ relative to cwd) run by an in-session agent from this root wrote logs/combined.log — runtime junk, never tracked (moved to the session scratchpad, not deleted)
+/logs/
+# 2026-09-17 22:25: serial chain 2 runtime output (log, per-launch --check capture, nohup) — runtime, never tracked; the .sh is tracked
+2_Project_Files/fleet/qa-agent/gatesets/*_serial_chain2.log*
+2_Project_Files/fleet/qa-agent/gatesets/*_serial_chain2.*.check
+2_Project_Files/fleet/qa-agent/gatesets/*_serial_chain2.nohup
+
+# local-model runner logs (runtime state, never tracked) — added 2026-09-19 by the wrapped 14:4x seat: the untracked dir blocked wednesday_rotate.sh --self
+2_Project_Files/local-model/night/log/
+
+# 2026-09-21 external-dashboard pilot (dashboard-cloud) — gitignore AT CREATION.
+# Key material and env files for the cloud pilot never enter the repo; they live in
+# 4_Credentials/dashboard-cloud/ (already ignored). Scoped to the pilot dir so no
+# existing tracked file elsewhere changes status.
+2_Project_Files/dashboard-cloud/.env*
+2_Project_Files/dashboard-cloud/**/*.pem
+2_Project_Files/dashboard-cloud/**/*.key
+2_Project_Files/dashboard-cloud/**/*.pfx
+2_Project_Files/dashboard-cloud/**/*.out
+2_Project_Files/dashboard-cloud/**/.venv/
+2_Project_Files/dashboard-cloud/**/*.zip
+
+# Claude Code background-job scratch (harness-managed, machine-local — same class as
+# .claude/settings.local.json above). Added 2026-09-21: an untracked .claude/jobs/ left the
+# tree dirty outside dashboard/data, which makes panel_sync SKIP its rebase by design, which
+# silently stops chat reaching origin — i.e. stops Kam seeing anything the seat says.
+.claude/jobs/
+
+# a copy log still being written by rsync (tee) — state, not a record; the finished unison logs beside it are tracked (2026-09-21)
+5_Project_History/2026-09-21_portable_blind_copy_KK_DEV_Local.log
+# Spark checker throwaway clones (belt-and-braces; the checker now clones into the system temp dir)
+2_Project_Files/friday/spark/runs/**/wc/
+2_Project_Files/friday/spark/tests/run_*/
+# live rsync progress logs (\r-joined, grow while a copy runs; 2026-09-25 gitignore-at-creation)
+5_Project_History/*_copy_*.log
+5_Project_History/*_blind_copy_*.log
+# Spark round runner (local-model/spark/, 2026-10-05 gitignore-at-creation): the durable cache clone of the Secuura repo
+# + per-round work clones (cache/), and the runner's locks / dry-run inputs / queue log (state/). Never tracked.
+2_Project_Files/local-model/spark/cache/
+2_Project_Files/local-model/spark/state/
+
+# gate-kit drafters' scratch clones (2026-10-05: gate63 left 1.4 GB of nested repos)
+2_Project_Files/fleet/qa-agent/gatesets/*/_scratch/
+2_Project_Files/fleet/qa-agent/gatesets/*/sim/
+2_Project_Files/fleet/qa-agent/gatesets/*/predict_*/clone/
+2_Project_Files/fleet/briefs_staged/_drafter_scratch_*/
+2_Project_Files/fleet/qa-agent/gatesets/**/_scratch/
+
+# oMLX local-model test (2026-10-08): venv, caches, 106 GB weights — never commit
+2_Project_Files/tools/omlx/
+# oMLX night backend (2026-10-08, Kam 18:12 "go with Ornith 1.5 and deploy it"): the server's rendered
+# base path (settings with absolute paths, logs, usage db), the model_dir symlink, the 10 GB SSD KV cache,
+# pids, the guard log/markers, and the proof run's scratch clones. Runtime state, never tracked; the
+# settings TEMPLATE beside it (local-model/omlx/settings.template.json) and omlx_serve.sh stay tracked.
+2_Project_Files/local-model/omlx/state/
+2_Project_Files/fleet/qa-agent/gatesets/**/node_modules/
+
+# gate-agent artefacts (logs, probes, evidence): keep verdict.md only (2026-10-12)
+0_Brain/reference/2026-10-12_gate-*/logs/
+0_Brain/reference/2026-10-12_gate-*/evidence/
+0_Brain/reference/2026-10-12_gate-*/*.log
+0_Brain/reference/2026-10-12_gate-*/*.json
+0_Brain/reference/2026-10-12_gate-*/*.yaml
+0_Brain/reference/2026-10-12_gate-*/*.ts
+0_Brain/reference/2026-10-12_gate-*/*.txt
+
+# gate evidence out/ dirs moved aside (run outputs; pre-commit hook blocks out*/ classes) - moved, not deleted
+0_Brain/reference/*/evidence_untracked_out/
+0_Brain/reference/*/evidence/out/
+
+# gate evidence dirs (tarred into evidence.tar.gz beside each verdict; raw logs/ trip the artefact hook) - Wednesday 2026-10-13
+0_Brain/reference/2026-10-13_gate-pr15*/evidence/
+0_Brain/reference/2026-10-15_gate-*/evidence/
+
+# Tuesday inbound client mail (verbatim client correspondence: never committed)
+2_Project_Files/tuesday/inbound/
+0_Brain/reference/2026-10-18_gate-*/evidence/
+0_Brain/reference/2026-10-18_gate-*/*/evidence/
+
+# 2026-10-19 Datasec offload agent run output (rsync progress log is ~100+ MB); REPORT.md beside it is tracked
+0_Brain/reference/2026-10-19_datasec-offload/logs/
+
+# tuesday hook logs (pretooluse_note_alone.sh, 2026-10-24) — runtime only
+2_Project_Files/tuesday/hooks/logs/
+# backups of the gitignored local settings (s158, 2026-10-24)
+.claude/settings.local.json.pre-*
+
+# 2026-10-29 s202: HP-supplied HPSM-POC review documents (prototype HTML, reviewer notes) stay on disk only, never in this shared repo (the project keeps the same files in its ignored Source_Documents folder under its HP-NDA rule)
+0_Brain/reference/2026-10-29_hpsm-poc-hp-feedback/
+
+# 2026-10-29 19:1x: in-session QA gates (0_Brain/reference/<date>_gate*/) keep a git clone --shared of the Secuura cache
+# (nested .git, node_modules, GBs) in work/ and their raw logs in evidence/ — evidence ON DISK, never tracked (same rule
+# as the gatesets scratch line above). The verdict.md beside them IS tracked.
+0_Brain/reference/*_gate*/work/
+0_Brain/reference/*_gate*/evidence/
+
+# 2026-10-30 (13:3x seat, at rotation): per-run clones and run logs of in-session gates / Spark operators are artefacts (gitignore-at-creation); reports, verdicts and tools stay tracked
+0_Brain/reference/*/repo/
+0_Brain/reference/*/wt/
+0_Brain/reference/*/clone/
+0_Brain/reference/*/scratch/
+0_Brain/reference/*/bash1/
+0_Brain/reference/2026-10-30_gate34-1828-1831/spark_18*/
+0_Brain/reference/2026-10-30_*/*.log
+0_Brain/reference/2026-10-30_*/*.done
+0_Brain/reference/2026-10-30_*/run_all.out*
+# pre-commit artifact guard false positive: these brief dir NAMES contain 'node_modules' (WED tooling (d) owed); kept on disk, untracked
+2_Project_Files/local-model/night/briefs/*node_modules*/
+# gate probe trees (planted node_modules/dist fixtures; kept on disk, never committed — 2026-10-30 gate 35)
+0_Brain/reference/*/probes/
+# 2026-10-30 18:2x (16:1x seat, at rotation): a gate's extra worktrees (wt_dev, wt_base ...) are checkouts, not evidence
+0_Brain/reference/*/wt_*/
