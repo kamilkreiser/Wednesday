@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-31 15:32 from 256 lesson files (1,114,113 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-31 21:36 from 257 lesson files (1,116,452 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7720,4 +7720,16 @@ sections (open the file for these): MECHANISM (Kam, terminal ~12:1x the same day
 **First uses, 2026-10-30 10:0x:** S 8th started on his ruling (mail 10:08); Seat T 7th GO'd with the quote (its plan confirmation had asked for exactly this).
 
 **Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (the delegation this widens to starts) · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] · [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Never invoke a write command to read what it would say
+`2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md` · correction · 2026-10-31 · status: live
+
+**The rule:** to learn what a tool knows (earlier rulings, a usage line, a refusal list), read it through a READ path: the tool's header (`sed -n 1,40p`), its `show`/`list` verb, or its store file through an inclusion filter. Never run its write verb (`add`, `post`, `create`, `send`) with dummy values on the expectation that it will refuse. And never filter the output of a command that can write: the filter hides the one line that says it wrote.
+
+**How to apply.**
+- Earlier rulings on a subject: `kam_rulings_today.sh` for today, `decision_queue.sh show <exact id>` for a known card, or read the store file with an inclusion filter. If a real `add` is then refused by the prior-rulings gate, read its CARD list as part of that real attempt; never fake one.
+- Before any command I am about to pipe through `grep`, `head` or `tail`, ask: can this write? If yes, run it unfiltered, or do not run it.
+
+Related: [[2026-08-07_a-check-that-cannot-fail]], DRAFTER_RULES fence 5, `_ledger_laptop_datasec.md` row 2026-10-31.
 
