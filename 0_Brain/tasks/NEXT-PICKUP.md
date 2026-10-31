@@ -6,6 +6,17 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 05:1x SUN 1 NOV at ctx 70% (the 00:0x rotation seat) — READ THIS FIRST; the 04:4x block below is current where this does not differ
+- **DEVELOP = f01c1eec86ed** (= F0a #1853 squash, KS-1384 TRAIN MEMBER; Wednesday's ls-remote 18:09:54Z). Merged since 04:4x: #1877 KS-1887 page refresh (b331ffb8), F0a #1853 (f01c1eec). No outstanding GO.
+- **DEPLOY CEILING (D 47th):** at most b331ffb8e9ca (last pre-F0a develop) until the train is complete — sent 05:10 AEDT, SUPERSEDES 're-pin to whatever develop is then'. Any later deploy round: pin before f01c1eec or wait for R1 r3 + R2a + R2b merged.
+- **KAM CARDS OPEN (4):** secuura-kintsugi-second-prune-all-cache-1101 (D 47th HOLDS) · secuura-ks1861-archive-from-which-status-1101 (S builds (a)) · secuura-ks1860-status-refresh-fails-at-startup-1101 (rec a keep + document; #1876 merges either way) · secuura-ks1906-ownerless-credentials-connectors-1101 (rec a platform admins only; E builds (a), NO merge before the ruling). All posted HTTP 201 + panel lines.
+- **GATE 65 RUNNING** (Opus, R1 round 3 #1868 7ed460cc4258, delta; mutants in progress) -> verdict 0_Brain/reference/2026-11-01_gate65-r1r3-1868/verdict.md. Round 3 was the LAST under the cap: NO GO = escalate to Kam with options. GO -> W merge prep (G61-F2 develop conflicts) -> blob check -> pinned GO; then R2a (driver 83725, round 3 merged in, yaml-vs-#1876 excused for that push) -> READY FOR GATE -> gate.
+- **GATE 64 DONE** (GO WITH NOTES, #1876 KS-1860): S's fix round 92706335d195 queued 7th (cells P10/P11 kill M5/M9; F1 wording; KS-1914 filed; product + yaml blobs EQUAL to gated) -> READY TO MERGE -> Wednesday's delta check -> pinned GO.
+- **W 14th:** F0b re-merge under the WIDENED ancestor clause (05:12; also for F0c, F-b): OURS only if develop:P == M:P and an ancestor prepped head A of the same lower member has A:P == M:P; four-blob table per path in its READY.
+- **E 22nd:** KS-1906 rebuilding as (A) platform admins only (corrected after its own catch; my 16:23 confirmation was wrong — ledger row) -> push -> READY FOR GATE tier 1 -> gate; merge waits for Kam's card.
+- **R 67th:** PR 5 KS-1858 (tier 2 gate), PR 6 KS-1842, PR 7 KS-1366 (delta checks) — drivers 41002/49429/55201 queued. **R 68th:** #1842, #1847 queued; #1851, #1852 prepped.
+- **Ledger rows this seat (6):** Spark idle w=3; KS-1861 'fully reversible' premise; concurrent GOs w=2; GO subject without the seat; endorsed unread citation (KS-1906); (+ Spark/notes). RULES live: list outstanding un-MERGED GOs before any GO; GO subject ends '(Seat <L> <N>th)'; open any file:line I cite in a ruling.
+
 ## ⏩ CHECKPOINT 04:4x SUN 1 NOV at ctx 65% (the 00:0x rotation seat) — READ THIS FIRST; the 02:5x block below is current where this does not differ
 - **DEVELOP = 32e8fe25cb24** (Wednesday's ls-remote 17:00:31Z). Merged since 02:5x on pinned GOs: #1869 KS-1851 (7a9587ef), #1875 docs (eb965139), #1850 KS-1410 client-visible /verify 500 (d786daa4; GO re-sent once because my subject lacked '(Seat R 68th)'), #1837 KS-1800 (32e8fe25). RULE in force: list outstanding un-MERGED GOs before any GO; GO subjects end '(Seat <L> <N>th)'.
 - **OUTSTANDING GO:** #1877 KS-1887 page refresh (R 67th, head 0355936ca4df, pin 32e8fe25) -> await MERGED.
