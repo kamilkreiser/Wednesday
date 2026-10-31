@@ -22,6 +22,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 831 — 2026-10-31 12:41 (s209, 67% checkpoint). **READ THIS FIRST; supersedes 830's LIVE line; 830's OWED and candidates stand.**
+- **LIVE (watchers by s209):** M52 B974 MPS V4 engine · R95 B976 Composer records (watcher --changed) · H80 B978 HPSM-POC lane 3 pin tests (413/416/418/419) · H81 B979 lane 1 infra rows (407 items 1+3; waiter queued behind H80).
+- **ON EACH READY:** open the PR (body from compare, framed as the builder's runs), commission a tier-2 gate kit (template B977 / B970), stamp, launch, watch. B974 = a TIER-1 Opus gate.
+- **LANE 2 (HELD for a fresh seat):** HPSMPOC-411 + -415 + -408 items 1 and 3 (proxy.ts, SidebarMenu, the remediation store: product code, no words). Sweep: `tuesday/briefs/2026-10-31_SWEEP_hpsmpoc-405-421.md`.
+- **One card to Kam AFTER his review (~Mon 2 Nov), not before:** the words items (406, 408 item 2, 409, 412, 420) and the rulings (405, 410, 417, 421), each with a default.
+
 ## 🔴 DELTA 830 — 2026-10-31 12:35 (s209, ~64%). **READ THIS FIRST; supersedes 829's LIVE line.**
 - **HPSM-POC main = 8ce48527** (#262 landed: HPSMPOC-414 / B965-1 pinned). 0 open HPSM-POC PRs. Records B972 landed (analysis PR #157, C-249/C-250, HPSMPOC-421 = the "0 of 0" frame chip). B972 HELD the B969 STATUS copy (3 "HP Restricted" lines, most likely denials). Read those lines and rule before any later records step copies it.
 - **LIVE:** M52 B974 MPS V4 engine (on READY: open the PR, tier-1 Opus gate kit) · R95 B976 Composer records (ADDENDUM-1 answered its PR #93 time question; watcher --changed). Watchers by s209.
