@@ -2781,3 +2781,8 @@ INCLUDED until he says otherwise.
 > I have been looking at the HP range.  There is a possibility to get wholesale pricing on some of their AI machines.  Can you please look through the australian and US range of AI workstations.  I would like the maximum amount of RAM available for AI models as possible.  512 min ideally 750gb if possible in the gpu or for AI processing.  Deepseek v4.1 flash would be a min but ideally kimi k latest llm.  Can you also look at how it can be configured and whether it will actually drive the model.  also a possibility would be a workstation [then, as a follow-up message:] https://www.hp.com/us-en/workstations/z4-rack.html
 
 *Note:* Research commissioned to one agent; receipt on the panel bf-13aa72f4b20ada14; report to 0_Brain/reference/2026-10-29_hp-ai-workstations/report.md. (The dictation pasted the message twice; read once.)
+
+## 2026-11-01 09:54 — Kam (mail (wednesday-agent@, DKIM me.com), verbatim)
+> I Joined Macbook M5 Max and Studio M5 Ultra  to Run a 432 GB Model https://youtu.be/zY11Mss9fsw?si=Y-TSq5u_AUZaK53V Please review and file the findings in local llm model usage. I don't yet have my studio but this will be useful when I get it
+
+*Note:* research sub-agent commissioned; report to 0_Brain/reference/2026-11-01_m5-cluster-432gb-video/REPORT.md
