@@ -22,6 +22,16 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🟢 DELTA 862 — 2026-11-01 02:22 65% CHECKPOINT (s211; band 80-90). **READ THIS FIRST; supersedes 861's LIVE list.**
+- **LANDED tonight (verified at source):** HPSM-POC #266 -> main de6f83fb (01:44); #267 -> main e0b93957 (02:00). MPS records: B987 (12 Done) and B1004 (C-79 = Kam's Done ruling, 11 Done; root main aa22ceab; card mps-done-rule DELIVERED).
+- **LIVE (3; watchers in s211's session, a successor RE-ARMS all):**
+  - HPSM-POC-H88 = **B1008** keep-awake ROUND 2 of 2 (one test row + uat comment line; forward commit on b999 @930cb5b5; no PR). ON READY: a SHORT tier-2 gate kit (round 2 = the cap); ON GO: open the PR (title/body from that gate), land through CodeQL, then ONE card to Kam: #266 UAT deploy + keep-awake template deploy together (~AUD 320/month + up to ~AUD 6.29 storage; free offer ends permanently; Azure in-place acceptance untested, what-if first). ON NO GO: no 3rd round, card to Kam.
+  - HPSM-POC-R101 = **B1007** records: C-255 (rulings) / C-256 (#266) / C-257 (#267), first-click ticket (FILE), comments on 422/423, catch-up copies. ON RECORDS COMMITTED: verify records main + C-numbers at source; mark BOTH cards (hpsmpoc-266-head-read-round-cap-1031, hpsmpoc-uat-db-keep-awake-1031) delivered against C-255: each ruling is then recorded in the artefact; the keep-awake DEPLOY is a separate later card.
+  - MPS-G248 = **B1009** tier-1 gate of B1000 (fa2124f1, MPS V4 engine half, Opus, target ~06:2x). ON GO: open the MPS PR with its pr-title/pr-body, CI + CodeQL, land head-pinned squash with its squash files; records later (tickets stay OPEN: engine half). ON NO GO: round 2 builder.
+- **CARD OPEN:** composer-pcomp44-refusal-words-or-hold-1101. Kam's last board row 00:19.
+- **TOOL GAP:** pane_close.sh refuses rc 5 on a wrapped seat's own claude loopback listener; workaround /exit then close.
+- **Morning (06:00):** morning fleet-activity card with counts awaiting Kam; fresh sweep.
+
 ## 🟢 DELTA 861 — 2026-11-01 01:21 50% CHECKPOINT (s211; band 80-90). **READ THIS FIRST; supersedes 860's LIVE list (860's tooling/card lines stand).**
 - **LIVE (5; watchers in s211's session, a successor RE-ARMS all; STATUS paths under each project's `1_Project_Definition/Briefs/2026-11-01_B<NNN>_STATUS.md`):**
   - MPS-M53 = **B1000** V4 engine MPSCALC-252/-258/-259 (Opus; target ~06:4x). ON READY: tier-1 gate kit round 1 of 2; tickets stay OPEN (partly done).
