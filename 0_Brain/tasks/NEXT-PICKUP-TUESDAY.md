@@ -22,6 +22,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 841 — 2026-10-31 14:52 (s210). **READ THIS FIRST; supersedes 838-840's M52, G237 and R96 lines.**
+- **MPS #133:** M52 round 2 READY @ 30ea76da (B980-1 fixed). **G240 B988 round-2 tier-1 gate STAMPED 14:51**, waiter launching at load1 < 7; STATUS `.../Datasec MPS Commercial Calculator/1_Project_Definition/Briefs/2026-10-31_B988_STATUS.md` (RE-ARM a watcher). On GO: edit the stale PR body (B988 lists the sentences), land per its LANDING HOLD line (head-pinned squash, explicit subject + body, one trailer), close G240 + M52, then an MPS records step (MPSCALC-256 stays open for purchase). On NO GO: round cap -> ONE card to Kam with the fix-shape.
+- **R96 DONE** (analysis PR #158 merged cc4699ce, checked at source); pane closed. HELD: B969/B972 catch-up copies ("HP Restricted" scan-class text), low priority.
+- G237 pane closed.
+
 ## 🔴 DELTA 840 — 2026-10-31 14:43 (s210). **READ THIS FIRST; supersedes 839's DRAFTER line.**
 - J35 launched 14:40:21. **B987 MPS records kit READY, UNSTAMPED** (`tuesday/briefs/2026-10-31_B987_SEAT-R97_mps-records-merged-not-closed.md`; batch 1 of 6, 21 tickets): waits on card `mps-done-rule-merged-tickets-1031` (MPS has no Done rule). On a: DONE-SLOT MOVE-TO-DONE quoting the card. Otherwise COMMENT-ONLY. Read the kit whole before stamping.
 
