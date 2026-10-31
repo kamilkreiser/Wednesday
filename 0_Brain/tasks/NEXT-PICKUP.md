@@ -6,6 +6,14 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 11:3x SAT 31 OCT at ctx 65% (same seat) — READ THIS FIRST
+- **KAM CARDS OPEN (2, posted 11:3x):** `secuura-ks1861-what-tenant-delete-means-1031` (rec a archive; default nothing destructive) and `secuura-ks1860-suspended-tenant-enforcement-1031` (rec a; default A after #1848 + a read-only flag/status read on the boxes first). On his tap: rule + relay to S 9th + --delivered.
+- **S 9th:** GO'd; KS-1214 updated (High); filing the tenant-provisioning role gap (OWED its id); KS-1861 Ruling 1 approved for PR 4 (after #1848). Building PR 1 KS-1881 then PR 2 KS-1871.
+- **E 22nd:** filing gate 47 F3 (billing ownership, MAJOR) — OWED id -> Kam FYI.
+- **#1835 merge GO at abfe0ab30a6e** — OWED F's merge sha + Wednesday's ls-remote.
+- **D 46th:** design approved (A1); building ITEM 2; told to absorb #1835's section 128.
+- **Gate 48 (KS-1384 train) RUNNING.** Tier 2 batch + #1843/#1856 still to commission.
+
 ## ⏩ UPDATE 11:2x SAT 31 OCT (same seat, ctx ~66%) — READ THIS FIRST
 - **11:28 PINNED MERGE GO: #1835 (KS-1848/1849, F 19th) at abfe0ab30a6e on develop cb2320368ae4.** OWED: F's merge sha -> Wednesday's own ls-remote of develop (one parent, moved) -> then every queued seat's forward-move gate runs. D 46th told to absorb section 128. Gate 48 (KS-1384 train) RUNNING in-session -> `0_Brain/reference/2026-10-31_gate48-ks1384-train/verdict.md`.
 - **D 46th DESIGN APPROVED with A1** (page-vs-render test ADVISORY in the leg-14 suite; lint hard; check --committed strict; `adopt` subcommand; refresh = merge seat after each wave). Ticket KS-1887. OWED: ITEM 2 proof -> ITEM 3 SKILL.md -> ITEM 4 transition commands (28 PRs; #1383 hand step) -> READY FOR GATE tier 2.
