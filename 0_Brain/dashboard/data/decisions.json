@@ -52897,5 +52897,44 @@
    "CARD secuura-1756-misfiled-docs-what-next-1028",
    "CARD secuura-ks1240-tenant-create-key-fail-answer-1028"
   ]
+ },
+ {
+  "id": "secuura-ks1860-suspended-tenant-enforcement-1031",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1860: make suspending a tenant actually block it",
+  "bluf": "Decide where suspension is enforced. Today suspending or archiving a tenant blocks nothing: the only check (originate's tenant context) never sees suspended tenants because they are left out of the map it reads, and it runs only when MULTI_TENANCY_ENABLED is true, which is off in the compose default and unmeasured on the boxes (Seat S 9th, read from code at develop cb2320368ae4). Any tenant already suspended and still in use would be cut off from originate when this ships.",
+  "default_action": "If you do not answer: Seat S 9th builds option a after #1848 merges, and before it ships a deploy seat reads (read-only) the boxes' MULTI_TENANCY_ENABLED and how many tenants are currently suspended or archived; anything found goes back to you.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix the existing check (recommended now)",
+    "detail": "Load suspended and archived tenants so originate's documented 403 fires; archived behaves like suspended; status changes follow the documented order (archived -> active refused). Small: one shared file plus the status handler. Works only where MULTI_TENANCY_ENABLED is on."
+   },
+   {
+    "key": "b",
+    "label": "A plus a gateway check",
+    "detail": "Also refuse a suspended tenant at the gateway after login, so every service is covered whatever the flag says; existing tokens refused at once. Medium; needs a fail-open or fail-closed choice when the status read fails."
+   },
+   {
+    "key": "c",
+    "label": "A plus gateway plus login",
+    "detail": "Also refuse at sign-in and token issue in auth. Largest; adds a platform-database dependency to auth."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-31T11:30:49.914777+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 12:09",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD secuura-tenant-isolation-migration-ks1401-1005",
+   "CARD secuura-ks1240-tenant-create-key-fail-answer-1028"
+  ]
  }
 ]
