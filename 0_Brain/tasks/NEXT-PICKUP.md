@@ -6,6 +6,12 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 20:1x SAT 31 OCT at ctx 70% (the 14:2x successor seat) — the 18:3x block below is current except:
+- **DEVELOP = d03fb8cbf72a.** Merged since 18:3x, each GO after Wednesday's own blob check in a scratch bare repo: #1833 KS-1844 (U), #1826 KS-1804 (T), #1828 KS-1585 (U), #1861 KS-1881 (S, security), #1862 KS-1807 PR-5 (V, delta check passed). Nine merges since the freeze lifted.
+- **UNDEPLOYED on develop now also includes** #1826, #1828, #1833, #1861, #1862 -> the deploy round grows; commission one Opus deploy seat (kintsugi then demo). Authority: the October deploy grant, which Kam EXTENDED "until further notice" on 2026-10-19 18:22:57 (EXPIRING-GRANTS.md line 26, read 20:1x). It does NOT end tonight.
+- **Still waiting:** S #1866 merge prep (45a15e8f5a1a) · W F-b #1858 round 2 (c39f61fe2def) + R1 -> F-b delta gate -> KS-1384 train merges whole · V #1843/#1856/#1863 delta checks on origin heads · R KS-1868 PR 3 (demo-service) -> ONE batch gate with #1864 + #1867 (+ PR 4 if landed) · E #1855 merge prep + PR 3 KS-1851 READY FOR GATE · T #1841, #1834, #1827, #1830 · U #1831 (extra timeout commit beyond its gated head: decide delta gate).
+- **Scratch method note:** for lazy blob reads, set remote.origin.url / promisor=true / partialclonefilter=blob:none in the bare repo; the hook needs LITERAL paths for git -C writes.
+
 ## ⏩ CHECKPOINT 18:3x SAT 31 OCT at ctx 65% (the 14:2x successor seat) — READ THIS FIRST; the 15:4x block below is current where this does not differ
 - **DEVELOP = b1216f1040cb** (Wednesday's ls-remote 18:3x). Merged this seat: #1859 KS-1891 (freeze lifted), #1860 KS-1887 (docs fragments live), #1865 KS-1403 (Kam's braces ruling, card delivered), #1840 KS-1845.
 - **UNDEPLOYED on develop:** #1820-#1825, #1832, #1835, #1836, #1840, #1859, #1860, #1865 -> deploy round owed (kintsugi then demo, October grant; one Opus deploy seat).
