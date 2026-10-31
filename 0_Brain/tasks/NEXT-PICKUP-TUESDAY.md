@@ -22,6 +22,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🟢 DELTA 843 — 2026-10-31 15:31 (s210). **READ THIS FIRST; supersedes 841's MPS #133 line.**
+- **MPS #133 LANDED 15:29** (G240 B988 GO WITH FINDINGS round 2 of 2, Notes only): squash head-pinned -> MPS main **5d96a3dc** (tree = gated head's). Not deployed. G240 + M52 closed.
+- **OWED (MPS records):** #133's ticket comments (MPSCALC-256 stays OPEN for purchase behind -255), BACKLOG rows for B988 Notes + the reconciliation HOLD + the two per-device issue texts. Fold into B987 after the Done-rule card, or its own kit.
+- **LIVE:** G241 B989 (PR #265 tier-1 gate) · J35 B985 (Composer tests). H82 parked for #265. Cards open: `composer-demo-deploy-87-105-1031`, `mps-done-rule-merged-tickets-1031`.
+
 ## 🔴 DELTA 842 — 2026-10-31 15:03 (s210, ~35%). **READ THIS FIRST; supersedes 839's H82 line.**
 - **HPSM-POC PR #265 OPEN** (H82 B984, head 2eec1997, 3 commits, 8 paths +157 -6; HPSMPOC-411, -415, -408 items 1+3). **G241 B989 tier-1 gate STAMPED 15:02**, waiter launching; STATUS `.../HPSM-POC/1_Project_Definition/Briefs/2026-10-31_B989_STATUS.md` (RE-ARM a watcher). On GO: correct the PR body, land the head-pinned squash with the gate's squash-subject/body files, close G241 + H82, then HPSM-POC records. On NO GO: a round-2 fix addendum to H82.
 - Parked panes acked with wake_ack.sh (M52 %93, H82 %102) so the ghost-text idle wakes stop.
