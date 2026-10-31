@@ -6,6 +6,12 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 11:4x SAT 31 OCT (same seat, ctx ~72%) — READ THIS FIRST
+- **Kam ruled KS-1860 = a and KS-1861 = a (11:33); relayed to S 9th; delivered.** S 9th filed KS-1890 (High, tenant-provisioning no role check).
+- **#1835 MERGED = develop 9e1eb55fde53** (verified by Wednesday's ls-remote). **F 19th wrapped, scored 0.93, pane %35 closed.** E filed KS-1888 (High billing ownership) + KS-1889 (Low). Kam told. OWED: fix lane for KS-1888 (billing.ts collides with #1855: after it merges) and KS-1890 (collides with #1848 + S 9th PRs 3/4: after those).
+- **R 67th (raise the 6 KS-1868 Spark passes) staged + dry-run clean; WAITER pid 38482** `fleet/state/r67_waiter.sh`, log `fleet/state/r67_waiter.log` (load1 < 7). On launch: read its plan confirmation -> GO quoting Kam 10:07:32.
+- **Gate 48 (KS-1384 train) RUNNING.** Deploy round owed (#1820-#1825, #1832, #1836, #1835 undeployed) — batch after the fragments PR merges.
+
 ## ⏩ CHECKPOINT 11:3x SAT 31 OCT at ctx 65% (same seat) — READ THIS FIRST
 - **KAM CARDS OPEN (2, posted 11:3x):** `secuura-ks1861-what-tenant-delete-means-1031` (rec a archive; default nothing destructive) and `secuura-ks1860-suspended-tenant-enforcement-1031` (rec a; default A after #1848 + a read-only flag/status read on the boxes first). On his tap: rule + relay to S 9th + --delivered.
 - **S 9th:** GO'd; KS-1214 updated (High); filing the tenant-provisioning role gap (OWED its id); KS-1861 Ruling 1 approved for PR 4 (after #1848). Building PR 1 KS-1881 then PR 2 KS-1871.
