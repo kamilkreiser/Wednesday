@@ -6,6 +6,12 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ UPDATE 11:2x SAT 31 OCT (same seat, ctx ~66%) — READ THIS FIRST
+- **D 46th DESIGN APPROVED with A1** (page-vs-render test ADVISORY in the leg-14 suite; lint hard; check --committed strict; `adopt` subcommand; refresh = merge seat after each wave). Ticket KS-1887. OWED: ITEM 2 proof -> ITEM 3 SKILL.md -> ITEM 4 transition commands (28 PRs; #1383 hand step) -> READY FOR GATE tier 2.
+- **S 9th GO** (KS-1871 guard = role OR documents:write scope, told to Kam); **F8 = existing KS-1214** -> comment + High + Security Review (option b). OWED: S 9th's KS-1860/KS-1861 option sets -> two Kam cards.
+- **GATE 47 DONE: #1855 GO WITH NOTES.** E files F3 (MAJOR billing ownership/role checks, read from code) + F4 -> Kam FYI when the id lands.
+- **GATES DONE today: 45 (#1840, #1833), 46 (#1848-#1850), 47 (#1855) — all GO WITH NOTES, all wait only on the fragments PR.** NEXT: KS-1384 train gate 48 (#1853, #1854, #1857, #1858; Opus), then tier 2 Sonnet batch (#1842, #1847, #1851, #1852) and #1843 + #1856.
+
 ## ⏩ UPDATE 11:1x SAT 31 OCT (same seat, ctx ~64%) — READ THIS FIRST
 - **D 46th %36 LAUNCHED 10:56:55, plan confirmation read whole, GO sent quoting Kam 09:44:40 + 10:07:32** (audience = 28 PRs; fragment key = ticket + slug). OWED: its DESIGN NOTE (QUESTION, topic `docs fragments design`) -> Wednesday's ANSWER. fleet_ack for its plan QUESTION refused rc 3 (collector misses -D): retry.
 - **S 9th %37 LAUNCHED 11:00:04**; ADDENDUM sent: FILE gate 46's F8 (MAJOR, mcp-server POST /hash + filePath read any server path, no auth) + F7 as ONE High ticket first. OWED: its plan confirmation -> GO quoting Kam 12:55:54 + 10:07:32; the F8 ticket id -> tell Kam (FYI posted 11:1x promised the number).
