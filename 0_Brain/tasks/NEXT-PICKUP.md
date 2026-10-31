@@ -6,6 +6,16 @@ status: live
 supersede: REPLACED WHOLESALE by the Mon 26 Oct 12:0x successor seat at its 65% checkpoint (13:4x AEDT). Previous: NEXT-PICKUP.md.pre-1026-1348 (and .pre-1026-1130). Replace wholesale; never stack.
 ---
 
+## ⏩ CHECKPOINT 06:20 SUN 1 NOV at ctx 51% (the 06:00 MORNING seat) — READ THIS FIRST; the 05:3x block below is current where this does not differ
+- **DEVELOP = f6ab90c6376e** (#1881; R 67th's MERGED mail 19:19Z). Merged this seat: #1847 KS-1579 (dd583b4f), #1880 KS-1842 PR 6 (1eca30c0), #1881 KS-1366 PR 7 (f6ab90c6). **No outstanding GO.** KS-1858 addendum: PRs 6 + 7 done; PR 5 (#1879) at gate 67.
+- **GATE 65 DONE = GO WITH NOTES** (verdict in 0_Brain/reference/2026-11-01_gate65-r1r3-1868/verdict.md). Ruled to W 14th: G65-F1 wedge = named R2b item (cap reached); G58-F3 joins the deploy hold; R2a's gate MUST re-run gate 65's R3-crash + R4-502 cells (put that in R2a's gate brief); G65-F2 residuals in PR body + ONE ticket; F3 comment; F4 nits. W's merge-prep order ANSWERED: R1 merge prep built locally, pushed ONCE after F-b merges; train merges F0b -> F0c -> F-b -> R1, each on its own pinned GO with the four-blob table.
+- **GATES RUNNING (in-session agents; they DIE at a rotation — re-commission from these lines if no verdict file):** 66 = tier 1 Opus on E 22nd's PR 1878 KS-1906 head 2cad07f76492 -> 0_Brain/reference/2026-11-01_gate66-ks1906-1878/verdict.md (NO merge before Kam's card secuura-ks1906-ownerless-credentials-connectors-1101); 67 = tier 2 Sonnet on R 67th's PR 1879 KS-1858 PR 5 head 6b867a532ee7 -> 0_Brain/reference/2026-11-01_gate67-ks1858-pr5-1879/verdict.md (item 1 = the error-field parity question).
+- **SPARK:** idle since 03:14 (pool dry). Sonnet DRAFTER running in-session: re-screen KS-1912/1913/1914 + tickets since 10-31 12:00 at dd583b4f; writes briefs to local-model/night/briefs/, does NOT queue. On its report: read each golden, then queue. If it dies: re-commission.
+- **E 22nd:** building KS-1911 (by-email cell, tier 2) on Wednesday's YES. **R 67th:** after #1881 holds for gate 67; KS-1915 filed (root CLAUDE.md:268 vs :321). **R 68th:** #1851, #1852 queued. **S 9th:** #1876 fix round queued (READY TO MERGE -> delta check: product + yaml blobs = gated 33bce392). **W 14th:** F0b queued; R2a/R2b local. **D 47th:** HOLD on second-prune card, ceiling b331ffb8e9ca.
+- **Cards:** three 00:18 rulings now recorded in the store; prune + KS-1851 delivered; Stuart re-anchor undelivered until D 47th does it. Open Secuura: second prune, KS-1861, KS-1860, KS-1906. Morning card wed-morning-plan-1101 posted (HTTP 201). stale escalation 0.
+- **Clone for Wednesday's own checks:** 0_Brain/reference/2026-11-01_gate65-r1r3-1868/repo (refs/wq/*); write verbs there via `bash <<'EOF'` with literal paths.
+- **Owed:** INDEX.md refresh (not done this boot); yesterday's note not re-read whole (state is here); the pickup file is 347 KB of stacked blocks against its own 'replace wholesale' frontmatter -> replace wholesale at a quiet boundary (archive as NEXT-PICKUP.md.pre-1101).
+
 ## ⏩ SHIFT-CHANGE HANDOVER 05:3x SUN 1 NOV (the 00:0x overnight seat, ctx ~73%) — READ THIS FIRST; the 05:1x block below is current where this does not differ
 - **DEVELOP = 0fab207f2bc8** (#1842 merged 18:18Z; Wednesday's ls-remote 18:20:03Z). No outstanding merge GO.
 - **UNANSWERED AT THE WRAP (first work, in order):**
