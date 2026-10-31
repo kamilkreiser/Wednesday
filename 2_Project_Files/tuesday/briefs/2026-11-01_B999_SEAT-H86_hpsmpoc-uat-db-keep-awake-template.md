@@ -33,13 +33,13 @@ Any file outside the five named (`sql.bicep`, `main.bicep`, `uat.bicepparam`, `t
 
 ## Stamp
 Tuesday copies this file to `.pre-stamp` BEFORE filling a slot; the drafter fills none.
-- STAMP (Tuesday, time and what was read): ____
-- KEYS (Tuesday, the Jira keys): ____
-- LAUNCH WINDOW (from the stamp until when; load1 below 7): ____
-- Stamped by (the Tuesday seat that READ this brief whole, with its drafter report; Q-1 to Q-3 answered): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and target READY: ____
-- Head and main at launch (Tuesday `ls-remote`, no `refs/heads/b999*`, open PRs): ____
-- Model receipt line and `uptime` load1 at launch: ____
+- STAMP (Tuesday, time and what was read): Tuesday s211 read this kit whole (45 lines) and its drafter report at 00:27, and the ruled card's option b text: 'I also prepare the template change and its cost, for a deploy you approve'.
+- KEYS (Tuesday, the Jira keys): none (no Jira writes; HPSMPOC-362 is named only as the later deploy route).
+- LAUNCH WINDOW (from the stamp until when; load1 below 7): from this stamp until the hard stop below; load1 2.01 by uptime minutes before this stamp; beside you: %116 Datasec/HPSM-POC-H85 (same project, web/ files only, never infra/), %115 Datasec/MPS-R97 (another project). Use the project's shared ref-write lock for every ref write.
+- Stamped by (the Tuesday seat that READ this brief whole, with its drafter report; Q-1 to Q-3 answered): Tuesday s211, Datasec coordinator seat, read whole 00:27. Q-1 YES: UAT leaves the free offer (one-way), say so in STATUS and the commit; Tuesday puts it on the product owner's card. Q-2 tier 2 gate after your READY (infra template, no deploy); the later deploy is the tier-1 act. Q-3 YES to the pane and branch names. Lock: copy .tools/b198/lock.sh from the PROJECT ROOT .tools (present); the bicep binary is at the project root .tools/bicep/bicep (present, version unread by Tuesday).
+- Launch authority (who, under which grant): the product owner's 2026-11-01 keep-awake ruling on the live board (option b: prepare the template change and its cost, for a deploy he approves). Prepare only: no deploy, no PR.
+- Hard stop and target READY: target READY 60 minutes and HARD STOP 100 minutes after your Step-0 date.
+- Head and main at launch (Tuesday `ls-remote`, no `refs/heads/b999*`, open PRs): Tuesday ls-remote from 2_Project_Files at 00:27: main d0eff4ca637b8959dd205adc0b77e8111b60280a; refs/heads/b999* 0 lines; open PR touching infra/: none known to Tuesday (PR #266 is web/ only), you re-check.
+- Model receipt line and `uptime` load1 at launch: expected model: claude-sonnet-5-5 -- Sonnet first: a spelled-out infra edit (model-routing.md builder row C2 line 92); load1 2.01 (uptime, minutes before stamp).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 00:27 by Tuesday s211 (kit lines 1-45 and the B999 drafter report)

@@ -42,15 +42,15 @@ Sections: Step 0 | BLUF | PINS | PRIOR WORK | THE EDIT (diff of the five files) 
 
 ## Stamp
 Tuesday copies this file to `.pre-stamp` BEFORE filling a slot and fills each slot by label; the drafter fills none. The unstamped copy reads 9 lines with the four-underscore pattern (eight slot lines and the last line).
-- STAMP (Tuesday, time and what was read; answers to Q-1 to Q-3 of the drafter report): ____
-- KEYS (Tuesday, the Jira keys, or none): ____
-- LAUNCH WINDOW (from the stamp until when; load1 below 7; live seats beside you): ____
-- Stamped by (the Tuesday seat that READ this brief whole with its drafter report): ____
-- Launch authority (who, under which grant): ____
-- Hard stop and target READY (drafter suggestion: target READY 75 minutes and HARD STOP 110 after your Step-0 date; one build, one suite, 90 s socket rows): ____
-- Head and main at launch (Tuesday `ls-remote`: branch `7490fb362edb10b932baf9779a77912b9d7fad77`, main `d0eff4ca637b8959dd205adc0b77e8111b60280a`, or what moved): ____
-- Model receipt line and `uptime` load1 at launch (expected `model: claude-sonnet-5-5 -- Sonnet first: a small edit plus proofs (model-routing.md builder row C2 line 92)`): ____
+- STAMP (Tuesday, time and what was read; answers to Q-1 to Q-3 of the drafter report): Tuesday s211 read this kit whole (56 lines) and its drafter report at 00:27. Q-1 ACCEPT (HEAD becomes one call in-process too; over HTTP it already was). Q-2 LEAVE both stale lines (bff.test.ts:154 title, bff.ts:177); Tuesday adds them to the short check's Notes. Q-3 Tuesday corrects the PR body at landing and the squash says GET only; your commit message does not rewrite history.
+- KEYS (Tuesday, the Jira keys, or none): none
+- LAUNCH WINDOW (from the stamp until when; load1 below 7; live seats beside you): from this stamp until the hard stop below; load1 2.01 by uptime at this stamp; live seats beside you: %115 Datasec/MPS-R97 (another project, MPS records) and Tuesday's own pane; no other HPSM-POC pane.
+- Stamped by (the Tuesday seat that READ this brief whole with its drafter report): Tuesday s211 (successor of s210), Datasec coordinator seat, read whole 00:27.
+- Launch authority (who, under which grant): the product owner's 2026-11-01 round-cap ruling on PR #266 (live board, option a: one small last round, GET-only, a short check, then Tuesday merges), under Tuesday's standing merge-once-tested grant for Datasec projects.
+- Hard stop and target READY (drafter suggestion: target READY 75 minutes and HARD STOP 110 after your Step-0 date; one build, one suite, 90 s socket rows): target READY 75 minutes and HARD STOP 110 minutes after your Step-0 date (the drafter's suggestion, accepted).
+- Head and main at launch (Tuesday `ls-remote`: branch `7490fb362edb10b932baf9779a77912b9d7fad77`, main `d0eff4ca637b8959dd205adc0b77e8111b60280a`, or what moved): Tuesday ls-remote from 2_Project_Files at 00:27: branch 7490fb362edb10b932baf9779a77912b9d7fad77, main d0eff4ca637b8959dd205adc0b77e8111b60280a (unmoved); PR #266 open, mergeable_state clean (pulls API, same minute).
+- Model receipt line and `uptime` load1 at launch (expected `model: claude-sonnet-5-5 -- Sonnet first: a small edit plus proofs (model-routing.md builder row C2 line 92)`): expected model: claude-sonnet-5-5 -- Sonnet first: a small edit plus proofs (model-routing.md builder row C2 line 92); load1 2.01 at stamp (uptime).
 Pane `Datasec/HPSM-POC-H85`. **Your commission is THIS file (read-only to you):** `/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-01_B998_SEAT-H85_hpsmpoc-266-round3-get-only.md`. Step 0: copy it unchanged into `/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/` (if `brief_seat.sh` has not), `cmp`, both sha256s in STATUS.
 **Launch (Tuesday):** `WED_USAGE_STOP=100 bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh' add Datasec/HPSM-POC-H85 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC' '/Volumes/Laptop-DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-01_B998_SEAT-H85_hpsmpoc-266-round3-get-only.md'"`
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 00:27 by Tuesday s211 (kit lines 1-56 and the B998 drafter report)
