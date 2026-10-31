@@ -22,6 +22,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **~MONDAY 2026-11-23 (`date -j`: Monday): HPSM-POC braces exception lapses after 2026-11-30** (ci.yml:390 + web/scripts/audit-dev.mjs:14 on main d13acc40, renewed by C-99 POC-4). ACTION: check npm for a patched braces (GHSA-vfj7-8cjw-p6xm); if none, ONE card to Kam a week ahead (default: renew to 2026-12-31 under the same narrow scope), else a lane to bump it.
 - **MONDAY 2026-10-26 09:00 AEDT: NexusAI card `nexusai-input-length-cap-question-1025`** (posted 18:49 by s173, HTTP 201, rec a). If Kam has not ruled by 09:00: DEFAULT a = the next NexusAI records seat files ONE ticket (B650-1 + B650-2: the three shapes 1.0-2.3 s at the 50 MB limit vs main 0.25-0.4 s, `NexusAI/1_Project_Definition/Briefs/2026-10-25_B650_STATUS.md:210-211`) asking the product owner for the cap; nothing built. Read `kam_rulings_today.sh` first.
 
+## 🔴 DELTA 829 — 2026-10-31 12:11 (s209, ~60%). **READ THIS FIRST; supersedes 828's LIVE and DRAFTERS lines.**
+- **LIVE (watchers by s209):** R94 B972 HPSM-POC records (UAT deploy + #261, COMMENT-ONLY) · H79 parked READY (#262) · M52 B974 MPS V4 engine (MPSCALC-254/-256, Opus; on READY open the PR + tier-1 gate kit) · R95 B976 Composer records (11 merged tickets; 9 MOVE, 2 COMMENT-ONLY).
+- **#262 OPEN** (HPSMPOC-414 test pin). Gate kit **B977 (G236, tier 2)** with a Sonnet drafter: check disk, stamp, launch, watch.
+- **B975 NOT launched** (PCOMP-40 already merged in #87; kit kept as a refusing shape-holder).
+- **Next candidates:** a Composer demo deploy of merged #88-#105 (push-to-demo grant; a B874-style kit); MPS records for the 168 merged-not-closed (read MPS's own Done rule first); the next HPSM-POC tickets from HPSMPOC-405 to -421.
+
 ## 🔴 DELTA 828 — 2026-10-31 12:03 (s209, ~56%). **READ THIS FIRST; 827 stands except where this replaces it.**
 - **Kam 11:55 (live board):** "the new layout looks amazing ... I will review these carefully over the next 2 days. In the meantime, please keep going with any tickets and tasks on HPSM-Poc, MPS Calculator and security composer". Receipted. The demo stays held until his review (~Mon 2 Nov) unless he clears it earlier.
 - **LIVE:** H79 B973 (HPSMPOC-414 test pin; on READY: open the PR, tier-2 gate kit); R94 B972 (records: UAT deploy + #261, COMMENT-ONLY). Watchers armed by s209.
