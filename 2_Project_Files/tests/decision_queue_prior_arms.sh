@@ -53,5 +53,33 @@ bash "$DQ" prior --id arm-orchard-subjectword --title "Orchard subjectword" > "$
 /usr/bin/grep -q 'untagged-datasec' "$W/o" && ok "A12 untagged row naming a Datasec subject printed (control)" || no "A12 rc=$rc $(cat "$W/o" "$W/e")"
 /usr/bin/grep -q 'untagged-dictated' "$W/o" && no "A13 dictated client spelling printed" || ok "A13 dictated client spelling not printed"
 
+# A14-A19 card-leg allow-list on a Datasec seat (ledger 2026-11-02): only Datasec or Fleet client_project, and never a wed- id.
+# Invented placeholder words only. Each ruled card carries one rare word the probe card shares.
+echo '[]' > "$DQ_CHAT"
+cat > "$DQ_FILE" <<'JSON'
+[{"id":"wed-morning-plan-quokka-0901","client_project":"Acme/Placeholder","title":"Arm title quokka other","status":"ruled","ruled_choice":"a"},
+ {"id":"wed-morning-plan-marmot-0901","client_project":"","title":"Arm title marmot empty","status":"ruled","ruled_choice":"a"},
+ {"id":"wed-morning-plan-lemur-0901","client_project":"Fleet/all projects","title":"Arm title lemur fleetwed","status":"ruled","ruled_choice":"a"},
+ {"id":"hpsmpoc-badger-window-0901","client_project":"Datasec/HPSM-POC","title":"Arm title badger datasec","status":"ruled","ruled_choice":"a"},
+ {"id":"fleet-ocelot-rotation-0901","client_project":"Fleet/all projects","title":"Arm title ocelot fleet","status":"ruled","ruled_choice":"a"},
+ {"id":"acme-tapir-window-0901","client_project":"Acme/Placeholder","title":"Arm title tapir acme","status":"ruled","ruled_choice":"a"}]
+JSON
+bash "$DQ" prior --id arm-quokka-probe-1102 > "$W/o" 2> "$W/e"; rc=$?
+/usr/bin/grep -q 'wed-morning-plan-quokka' "$W/o" && no "A14 wed- card with a non-Datasec client listed" || ok "A14 wed- card with a non-Datasec client not listed"
+bash "$DQ" prior --id arm-marmot-probe-1102 > "$W/o" 2> "$W/e"; rc=$?
+/usr/bin/grep -q 'wed-morning-plan-marmot' "$W/o" && no "A15 wed- card with an empty client listed" || ok "A15 wed- card with an empty client not listed"
+bash "$DQ" prior --id arm-lemur-probe-1102 > "$W/o" 2> "$W/e"; rc=$?
+/usr/bin/grep -q 'wed-morning-plan-lemur' "$W/o" && no "A16 wed- id with a Fleet client listed" || ok "A16 wed- id with a Fleet client not listed"
+bash "$DQ" prior --id arm-badger-probe-1102 > "$W/o" 2> "$W/e"; rc=$?
+/usr/bin/grep -q 'hpsmpoc-badger-window' "$W/o" && ok "A17 genuine Datasec card listed (control)" || no "A17 rc=$rc $(cat "$W/o" "$W/e")"
+bash "$DQ" prior --id arm-ocelot-probe-1102 > "$W/o" 2> "$W/e"; rc=$?
+/usr/bin/grep -q 'fleet-ocelot-rotation' "$W/o" && ok "A18 Fleet card with a non-wed id listed (control)" || no "A18 rc=$rc $(cat "$W/o" "$W/e")"
+bash "$DQ" prior --id arm-tapir-probe-1102 > "$W/o" 2> "$W/e"; rc=$?
+/usr/bin/grep -q 'acme-tapir-window' "$W/o" && no "A19a non-Datasec, non-Fleet card listed on a Datasec seat" || ok "A19a non-Datasec, non-Fleet card not listed on a Datasec seat"
+WED_AGENT=wednesday bash "$DQ" prior --id arm-tapir-probe-1102 > "$W/o" 2> "$W/e"; rc=$?
+/usr/bin/grep -q 'acme-tapir-window' "$W/o" && ok "A19 non-Datasec seat still sees its own card (control)" || no "A19 rc=$rc $(cat "$W/o" "$W/e")"
+WED_AGENT=wednesday bash "$DQ" prior --id arm-quokka-probe-1102 > "$W/o" 2> "$W/e"; rc=$?
+/usr/bin/grep -q 'wed-morning-plan-quokka' "$W/o" && ok "A20 non-Datasec seat still sees a wed- card (control)" || no "A20 rc=$rc $(cat "$W/o" "$W/e")"
+
 echo "RESULT pass=$pass fail=$fail"
 [ "$fail" = 0 ]

@@ -267,6 +267,13 @@ def prior_rulings(d):
                 x_client = _client(x.get("client_project"))
                 if scope_client in CLIENTS and x_client in CLIENTS and x_client != scope_client:
                     continue
+                # ALLOW-LIST FOR THE CARD LEG ON A DATASEC SEAT (Tuesday ledger 2026-11-02, Coordinator ruling): the deny-list
+                # above let a wed- card with a WED/empty client_project through and its title printed into this seat. On
+                # tuesday/friday a ruled card is listed or counted only if its client_project is Datasec or Fleet (a fleet-wide
+                # ruling binds every seat) AND its id does not start with wed-. Anything else is skipped. Arms: decision_queue_prior_arms.sh.
+                if os.environ.get("DQ_SEAT", "") in ("tuesday", "friday") and (
+                        x_client not in ("datasec", "fleet") or str(x.get("id", "")).lower().startswith("wed-")):
+                    continue
                 x_toks = {t for t in re.split(r"[^a-z0-9]+", str(x.get("id", "")).lower())
                           if len(t) >= 4 and t not in STOPWORDS and not DATE_TOK.match(t)}
                 shared_rare = {t for t in (new_toks & x_toks) if freq.get(t, 99) <= RARE}
