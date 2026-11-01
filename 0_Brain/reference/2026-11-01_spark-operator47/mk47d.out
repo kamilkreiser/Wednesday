@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o47_p4_kyc_get_verification_stats_unreadable_throw
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -232,7 +232,13 @@
+     const r = result.rows[0];
+     return { total: Number(r.total), pending: Number(r.pending), approved: Number(r.approved) };
+   } catch (err: any) {
+-    logger.error('DB get verification stats failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get verification stats failed', { error: reason });
+     return { total: 0, pending: 0, approved: 0 };
+   }
+ }
+

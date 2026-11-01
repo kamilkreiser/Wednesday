@@ -1,0 +1,98 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o47_p1_kyc_save_verification_unreadable_throw
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -189,6 +189,12 @@
+        v.createdAt, v.updatedAt, v.completedAt || null, v.expiresAt || null]
+     );
+   } catch (err: any) {
+-    logger.error('DB save verification failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB save verification failed', { error: reason });
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o47_p2_kyc_get_verification_unreadable_throw
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -199,7 +199,13 @@
+     const result = await query('SELECT * FROM svc_kyc_verifications WHERE id = $1', [id]);
+     if (result.rows.length > 0) return rowToVerification(result.rows[0]);
+   } catch (err: any) {
+-    logger.error('DB get verification failed', { id, error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get verification failed', { id, error: reason });
+   }
+   return undefined;
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o47_p3_kyc_get_verifications_by_user_unreadable_throw
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -214,7 +214,13 @@
+     // KS-291: rowToVerification is async (per-row subject-DEK resolve, cached)
+     return await Promise.all(result.rows.map((row) => rowToVerification(row)));
+   } catch (err: any) {
+-    logger.error('DB get verifications by user failed', { userId, error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get verifications by user failed', { userId, error: reason });
+     return [];
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o47_p4_kyc_get_verification_stats_unreadable_throw
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -232,7 +232,13 @@
+     const r = result.rows[0];
+     return { total: Number(r.total), pending: Number(r.pending), approved: Number(r.approved) };
+   } catch (err: any) {
+-    logger.error('DB get verification stats failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get verification stats failed', { error: reason });
+     return { total: 0, pending: 0, approved: 0 };
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o47_p5_kyc_save_consent_unreadable_throw
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -248,6 +248,12 @@
+        c.ipAddress || null, c.userAgent || null, c.timestamp, c.expiresAt || null, c.withdrawnAt || null]
+     );
+   } catch (err: any) {
+-    logger.error('DB save consent failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB save consent failed', { error: reason });
+   }
+ }
+

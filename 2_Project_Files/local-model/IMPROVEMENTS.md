@@ -961,3 +961,9 @@ Caught before commit, by asking what the MODEL sees rather than what a maintaine
 - Seat R 71st measured it on PR 2: five governance tests each declare top-level `const mockHolder` / `const ERRORS` and are global scripts, giving 10 TS2451 errors when type-checked together (0 on the untouched tree; plain `tsc -p` rc 0). Each pass alone is clean, so the checker never sees it.
 - Fixed tonight by an approved one-line hand edit (`export {};`) per file in the raise PR.
 - Generator fix OWED: the operator templates (gen/tasks4x.py) emit `export {};` (or an import) at the top of every new test file, and the checker's A7 adds a whole-program tsc with the service's existing tests.
+- Also (22:2x, R 71st PR 3): the O45 template imports `{ nftMintingService, loadFromDb }` in every test while each uses one, giving TS6133 / no-unused-vars x4 (fixed by approved hand edits). Generator fix OWED: import only the names each test uses.
+
+## 2026-11-01 23:0x (Wednesday): checker B6 runs the PRODUCT test file as its own "sibling" when the product is itself a test suite; a 120 s kill then crashes run_suite with no output file, and hold_ready refuses a PASS (O48, KS-1926)
+- Case: KS-1926's product is systemTest/__tests__/package_format_gate.test.sh. B6 picked it up as a sibling by basename, the 120 s limit killed it, run_suite threw a traceback, and hold_ready said "B6 line says 3 suite(s) but 2 sib_after.out file(s) exist". The round itself PASSED 7/7, strict, tree-identical. The operator ran the full suite by hand: 435/0 at the tip and with the edit.
+- Fix OWED (tooling, not done): exclude the product file from B6's sibling set; make run_suite write an output file (a TIMEOUT verdict) instead of crashing; let B6's timeout scale for large suites.
+- Disposition tonight: NOT hand-held. The raise seat raises from the run dir and proves B6 itself (the full package_format_gate suite at base and with the change), which the pre-push leg 14 re-runs anyway.

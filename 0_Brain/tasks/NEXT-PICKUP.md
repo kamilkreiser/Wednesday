@@ -8,6 +8,19 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 23:0x UPDATE (Wednesday ctx 76%, pre-rotation; read FIRST, supersedes below)
+- **LIVE SEATS:**
+  - **R 72nd** (%57, Sonnet, launched 23:07, brief `briefs_staged/2026-11-01_seatR72_ks1926_and_minting.md`): (A) KS-1926 FIRST (the push-blocking flake), raised from O48's run dir, proving B6 itself; (B) PR 3 minting x4 from R 71st's ADOPTED worktree s-r71-ks1868-mint; (C) PATCH the gate notes for #1895 and its own PRs; (D) file G79-F2 (Medium: a refresh-token cookie on a persona 500). OWED: its plan confirmation, then a Sonnet tier-2 gate per READY.
+  - **S 10th** (%55, Opus, KS-1885 TIER 1): commit 5914d69a, queued to push. OWED: an OPUS tier-1 gate on its READY.
+  - **E 24th** (%56, Sonnet, KS-1901 + KS-1893): commit 07a4cc5b, queued to push (refused once by KS-1926; a standalone rerun gave 435/0). OWED: a Sonnet tier-2 gate.
+- **PRs:**
+  - **#1894** persona TIER 1: gate 79 GO WITH NOTES, notes patched. Ready for a merge seat.
+  - **#1895** governance x5: gate 80 RUNNING (Sonnet subagent, workdir `0_Brain/reference/2026-11-01_gate80-ks1868-governance-1895`). Its verdict.md lands there, or in the subagent's final message (lost on rotation). If it is missing, re-run gate 80. Relay its notes to R 72nd.
+- **R 71st** wrapped and was scored 0.93; pane closed.
+- **SPARK held, not raised:** O46-P1 (KS-1903), O46-P3 (KS-1884), O47-P1..P5 (KS-1868 kyc; P3 sits on the GDPR erasure cascade, so the raise PR must state the behaviour change). O46-P2 (KS-1902) FAILED twice; its golden is correct.
+- **Checker bugs logged in IMPROVEMENTS (not fixed):** the B6 product-as-sibling crash (O48); the template TS2451 collision and unused imports; DECL-SPLICE on keyword-like ref names.
+- **Next merge seat** (B lane, B 71st brief as template): #1894 and #1895 once gated, plus S 10th's and E 24th's PRs once gated.
+
 ## 22:1x UPDATE (Wednesday ctx 70%; read FIRST)
 - **R 71st** (%54, ctx ~55%):
   - PR 1 persona (TIER 1) BUILT, local head 3a88693f.
