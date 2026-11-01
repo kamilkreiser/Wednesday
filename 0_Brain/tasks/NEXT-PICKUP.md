@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 01:0x UPDATE 2026-11-02 (the 23:4x boot seat, ctx 50% checkpoint; read FIRST, supersedes below where they differ)
+- **develop ec097bd35b35** (Wednesday's ls-remote 00:57). MERGED tonight from d7691f35: #1894 8126b22b, #1895 ad78fa10, #1896 ca36945e, #1899 ec097bd3. **GO #1897 SENT** (head 4c56d252, pin ec097bd3, expect tree 7e8e833a). OWED: read B 72nd's MERGED mail, ls-remote develop, note.
+- **LIVE SEATS (4):**
+  - **B 72nd** (%58, merge): after #1897, waits for queue items. Pre-GO checks each time (RULES).
+  - **R 72nd** (%57): PR 1898 (KS-1926) gate 83 GO WITH NOTES + **G83-F1 fix-before-merge** (SKIP line colon -> em dash); fix commit 5c0e8711 push queued (pid 80332). OWED: Wednesday's own DELTA CHECK at its READY (test-only, one line, blob table), then a queue item to B 72nd for #1898, then score R 72nd at its wrap. KS-1927 (G79-F2) and KS-1930 (post-mint stuck 'minting') filed.
+  - **F 20th** (%59, raise): PR (A) kyc x5 TIER 1 head a06c3441 pushing (pid 79363); (B) KS-1903 head 15fbdbda (M3 cells added pre-push) queued (pid 96112); (C) KS-1884 proving. OWED: an OPUS tier-1 gate for (A); Sonnet tier-2 gates for (B) and (C); F files the GDPR erasure-swallow ticket (High) once (A) has a number.
+  - **V 12th** (%60, build): L3 (KS-1867 + KS-1865 SQL-injection guard, 2 ALLOWED + 1 ALLOWED-OPEN entry) and PR 2 (KS-1929 batchLoadRelatedData identifier validation, TIER 1) built, pushing next. OWED: Sonnet tier-2 gate for L3, OPUS tier-1 gate for PR 2. L4 dropped (KS-1815/KS-1812 mutants already killed; comments posted; Wednesday to archive both tickets).
+- **E 25th NOT YET LAUNCHED:** load-waiter (scratchpad e25_waiter.sh, background, max 4 h from 00:57) launches it on the first ROOM; brief briefs_staged/2026-11-02_seatE25_raise_o49.md (5 O49 passes -> 4 PRs; security x2 TIER 1 with a STOP rule). If this seat rotates first, the successor checks the waiter log (scratchpad path in the 00:57 note line) or re-arms it.
+- **SPARK:** operator 50 running (KS-1868 auth.ts :305/:611/:879; KS-1796 openapi). Shadow calibration tonight: 0/3 real findings on gates 82/83/84.
+- **Wrapped + scored:** S 10th 0.95, E 24th 0.93 (panes closed). Gauge 7d 96% under Kam's 21:32 100% grant.
+
 ## 00:0x UPDATE 2026-11-02 (the 23:4x boot seat, ctx 32%; read FIRST, supersedes below where they differ)
 - **LIVE SEATS (5):**
   - **B 72nd** (%58, Sonnet, merge): READY TO MERGE 13:02Z for #1894 + #1895. **GO #1894 SENT** (pin develop d7691f35, head 3a88693f, expect tree 7a9447da42f8). OWED: on its MERGED mail, GO #1895 pinning the 1894 squash (expected final tree 48ecc12942cb). Pre-GO checks per RULES each time. Then add #1896 (after S 10th's PATCH) and #1897 (after E's delta gate).

@@ -1,0 +1,20 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o49_p3_billing_webhook_replay_unreadable_throw
+diff --git a/Blockchain/Dev/services/billing/src/routes/webhooks.ts b/Blockchain/Dev/services/billing/src/routes/webhooks.ts
+--- a/Blockchain/Dev/services/billing/src/routes/webhooks.ts
++++ b/Blockchain/Dev/services/billing/src/routes/webhooks.ts
+@@ -313,7 +313,13 @@
+         creditsAdded: handlerResult.creditsAdded,
+       });
+     } catch (error) {
+-      logger.error('Replay failed', { eventId, error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Replay failed', { eventId, error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Replay failed' } });
+     }
+   }
+

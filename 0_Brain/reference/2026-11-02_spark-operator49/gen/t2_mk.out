@@ -1,0 +1,42 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o49_p1_security_revoke_prior_connector_keys_unreadable_throw
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -289,8 +289,14 @@
+     // Loud, never silent. The new key is already minted and returned, so the
+     // request cannot be failed without losing it — but the operator is told the
+     // old credential is STILL LIVE.
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     log('error', 'KS-577: revoke-on-rotate FAILED — the prior credential is still valid', {
+-      connectorId, tenantId, keepKeyId, error: err instanceof Error ? err.message : String(err),
++      connectorId, tenantId, keepKeyId, error: reason,
+     });
+     return null;
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o49_p2_security_save_key_and_retire_priors_unreadable_throw
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -396,8 +396,14 @@
+         return ids;
+       } catch (err) {
+         await client.query('ROLLBACK TO SAVEPOINT ks1549_retire');
++        let reason: string;
++        try {
++          reason = err instanceof Error ? err.message : String(err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
+         log('error', 'KS-577: revoke-on-rotate FAILED — the prior credential is still valid', {
+-          connectorId, tenantId: k.tenantId, keepKeyId: k.id, error: err instanceof Error ? err.message : String(err),
++          connectorId, tenantId: k.tenantId, keepKeyId: k.id, error: reason,
+         });
+         return null;
+       }
+

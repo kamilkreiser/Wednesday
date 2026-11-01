@@ -1,0 +1,53 @@
+--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1851-credential-revoke-bound-to-the-creator.test.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1851-credential-revoke-bound-to-the-creator.test.ts
+@@ -182,3 +182,24 @@
+     expectNotFound(await revoke(mods, ALICE, UNKNOWN_ID));
+   });
++
++  // KS-1898: an owner-less row in MEMORY (stored with the default OWNERLESS owner, as a caller that forgets the owner does).
++  it.each([
++    ['V14a an OWNER of tenant 1', BOB],
++    ['V14b an ORG_ADMIN of tenant 1', ORG_ADMIN],
++    ['V14c a SYSTEM_ADMIN of tenant 1', SYSTEM_ADMIN],
++    ['V14d a SUPER_ADMIN of tenant 1', SUPER_ADMIN],
++  ])('%s revokes an owner-less memory row -> 404 byte-identical to an unknown id; unchanged; reason not logged', async (_label, caller) => {
++    const id = 'https://secuura.io/credentials/1851d0b0-0000-4000-8000-000000000014';
++    await mods.repo.store(storedCredential(id));
++    const before = JSON.stringify(await mods.repo.getById(id));
++    Object.values(loggerMock).forEach((fn) => fn.mockClear());
++
++    const refused = await revoke(mods, caller, id);
++
++    expectNotFound(refused);
++    expectNothingLoggedForTheRefusal();
++    expect(JSON.stringify(await mods.repo.getById(id))).toBe(before);
++    expect((await mods.repo.getById(id))?.credentialStatus?.revoked).not.toBe(true);
++    expectByteIdentical(refused, await revoke(mods, caller, UNKNOWN_ID));
++  });
+ });
+@@ -250,6 +271,9 @@
+     ['V8f a SUPER_ADMIN of ANOTHER tenant (KS-1906 is bound to the row\'s tenant)', { ...SUPER_ADMIN, tenantId: T2 }],
+     ['V8g a SUPER_ADMIN of the row\'s tenant with NO userId', { tenantId: T1, role: 'SUPER_ADMIN', email: SUPER_ADMIN.email, verificationLevel: 'BASIC' }],
+-  ])('%s revokes an owner-less row of tenant 1 -> 404 and NO UPDATE', async (_label, caller) => {
+-    expectNotFound(await revoke(mods, caller, OWNERLESS_T1_ROW));
++  ])('%s revokes an owner-less row of tenant 1 -> 404 byte-identical to an unknown id, NO UPDATE, reason not logged', async (_label, caller) => {
++    const refused = await revoke(mods, caller, OWNERLESS_T1_ROW);
++    expectNotFound(refused);
+     expect(updates()).toEqual([]);
++    expectNothingLoggedForTheRefusal();
++    expectByteIdentical(refused, await revoke(mods, caller, UNKNOWN_ID));
+   });
+@@ -259,7 +283,10 @@
+     ['V9 an ORG_ADMIN', ORG_ADMIN],
+     ['V9 a SUPER_ADMIN', SUPER_ADMIN],
+-  ])('%s revokes a pre-054 row with no owner and no tenant -> 404 and NO UPDATE', async (_label, caller) => {
+-    expectNotFound(await revoke(mods, caller, LEGACY_ROW));
++  ])('%s revokes a pre-054 row with no owner and no tenant -> 404 byte-identical to an unknown id, NO UPDATE, reason not logged', async (_label, caller) => {
++    const refused = await revoke(mods, caller, LEGACY_ROW);
++    expectNotFound(refused);
+     expect(updates()).toEqual([]);
++    expectNothingLoggedForTheRefusal();
++    expectByteIdentical(refused, await revoke(mods, caller, UNKNOWN_ID));
+   });
+ });
+
