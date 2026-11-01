@@ -1,0 +1,4 @@
+#!/bin/bash
+nice -n 10 npm ci --ignore-scripts --prefix /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate98-ks1868-pr1916/repo/Blockchain/Dev > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate98-ks1868-pr1916/logs/npm_ci.log 2>&1; echo "rc=$?" >> /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate98-ks1868-pr1916/logs/npm_ci.log
+nice -n 10 npm run build --prefix /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate98-ks1868-pr1916/repo/Blockchain/Dev/packages/shared > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate98-ks1868-pr1916/logs/shared_build.log 2>&1; echo "rc=$?" >> /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate98-ks1868-pr1916/logs/shared_build.log
+date > /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate98-ks1868-pr1916/logs/install.done
