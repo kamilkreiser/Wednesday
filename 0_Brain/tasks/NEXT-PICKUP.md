@@ -6,7 +6,7 @@ status: live
 supersede: REPLACED WHOLESALE 13:0x AEDT by the 09:33 successor seat (second replacement today; previous today = the 12:01 checkpoint version, superseded by events; the 362 KB stack is archived as NEXT-PICKUP.md.pre-1101-1200). Replace wholesale; never stack.
 ---
 
-# NEXT PICKUP — Sun 1 Nov 2026, 13:0x AEDT
+# NEXT PICKUP — Sun 1 Nov 2026, updated 14:4x AEDT at the 09:33 seat's ROTATION (ctx ~80%)
 
 ## Live heads
 - develop `b1fb543640e7` (KS-1861 PR 4 squash; verified by ls-remote at 13:33). Train fully merged at e21ca95c.
@@ -49,7 +49,7 @@ supersede: REPLACED WHOLESALE 13:0x AEDT by the 09:33 successor seat (second rep
 | Seat | Pane | Doing | Owed by Wednesday |
 |---|---|---|---|
 | ~~S 9th~~ | — | **WRAPPED 02:35Z, scored 0.95, pane closed.** PR 1885 KS-1861 MERGED `b1fb5436` (develop). All 4 of its tickets merged. | — (its worktrees s-s9-* are left in place, recorded; quarantine on a word) |
-| **R 69th** (Sonnet, ctx 69% at 14:2x) | %49 | Raising the held KS-1868 Spark passes as PRs:<br>- **#1887** (shared O38 x2) GATED, gate 72 GO WITH NOTES (head 2d1a2265);<br>- **#1888** (audit-logger O39, t1) GATED, gate 73 GO WITH NOTES (head 99657405; F1 medium pre-existing: a logger that throws still drops the event; R told to put limits in the body + FILE the AuditLogger follow-up);<br>- **PR 3** (analytics O40 x2, head 039cba4a) pushing;<br>- **PR 4** (demo-service O34-P1) GO'd after PR 3's READY (ctx was 67%), then wrap.<br>Filed today: KS-1922 (the analytics export error disclosure). | - PR 3 READY FOR GATE: a **tier-2 Sonnet gate** (row G2); mail R when it starts.<br>- PR 4 READY: tier 2.<br>- R's wrap: score it.<br>- **R does NOT merge:** launch a lane -B MERGE seat for the gated batch (1887, 1888, PR 3, PR 4) with head-pinned GOs; each PR's delta check against its gated head first. |
+| **R 69th** (Sonnet, ctx 69% at 14:2x) | %49 | Raising the held KS-1868 Spark passes as PRs:<br>- **#1887** (shared O38 x2) GATED, gate 72 GO WITH NOTES (head 2d1a2265);<br>- **#1888** (audit-logger O39, t1) GATED, gate 73 GO WITH NOTES (head 99657405; F1 medium pre-existing: a logger that throws still drops the event; R told to put limits in the body + FILE the AuditLogger follow-up);<br>- **#1889** (analytics O40 x2, head 039cba4a) GATED, gate 74 GO WITH NOTES (Sonnet t2; F1 low test gap, F2 info startup path; R told: limits into the body, no push);<br>- **PR 4** (demo-service O34-P1) GO'd after PR 3's READY (ctx was 67%), then wrap.<br>Filed today: KS-1922 (the analytics export error disclosure). | - PR 4 READY FOR GATE: a **tier-2 Sonnet gate** (row G2); mail R when it starts.<br>- R's wrap: score it.<br>- **R does NOT merge:** launch a lane -B MERGE seat for the gated batch (1887, 1888, 1889, PR 4) with head-pinned GOs; each PR's delta check against its gated head first. |
 
 **Wrapped + scored + panes closed today:**
 - W 15th 0.96 (the train);
