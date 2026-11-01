@@ -8,6 +8,12 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## FIRST WORK FOR THE SUCCESSOR (10:5x, read before the block below)
+1. **The raise-seat load trigger FIRED at ~10:58** ('LOAD OK'). LAUNCH THE RAISE SEAT for the 20 held passes FIRST (capacity read at fire time below). Build the brief from `2_Project_Files/fleet/briefs_staged/2026-11-02_seatU8_raise_9passes_4prs.md` SECTION BY SECTION (never a global replace), apply sources by CONTAINMENT in each held READY file, PRs by file family + tier (see the HELD list below). Free lane letters: check `cockpit.sh status` (B, U, S live at 10:5x).
+2. **Gate 98** (PR 1916) if its verdict did not reach the previous seat: re-launch from `briefs_staged/2026-11-02_gate_common.md` (workdir and evidence already in `0_Brain/reference/2026-11-02_gate98-ks1868-pr1916/`).
+3. **Two cards wait on Kam:** the billing double credit (PR 1913 held on it) and `secuura-spark-ks1868-safe-sites-exhausted-1102` (Spark scope). Run kam_rulings_today.sh first.
+4. S 11th's G94-F2 test push: delta check, then queue 1912 to B 75th, then GO (tier 1). U 8th's PR D (tenant TIER 1) -> Opus gate at its READY.
+
 ## 10:4x ROTATION HANDOVER 2026-11-02 (the 06:4x successor seat at ctx ~78-80%; READ FIRST, supersedes everything below where they differ)
 - **KAM, this seat (verbatim):** 06:15 card wed-morning-plan-1102 = a; ~07:0x terminal: "carry on with the plan and please make sure the spark is 100% busy or as close as possible". **One card waits on him:** `secuura-billing-possible-double-credit-two-stripe-events-1102` (money; AMENDED with gate 95's measurements; default a after 48 h from ~08:58). **PR 1913 (billing) MERGE IS HELD on that card** (gate 95 GO WITH NOTES, notes patched, F 21st wrapped).
 - **develop 93e5c6699d1c** (+1910 cde2dee4, +1911 c8d77dce, +1909 b8874803, +1914 93e5c669 this seat). NINETEEN squashes since d7691f35. **GO #1915 SENT 10:41** to B 75th (head 8277beec, pin 93e5c669, expect tree 7672a174): read its MERGED mail + ls-remote first. Nothing deployed (develop is now well ahead of kintsugi/demo: a deploy round is Kam's tap).
