@@ -1,0 +1,60 @@
+{
+ "data": {
+  "issues": {
+   "nodes": [
+    {
+     "identifier": "KS-1903",
+     "title": "check-dockerfile-non-root.sh: a final USER of root:root, 0:0 or ROOT passes the non-root guard with OK",
+     "state": {
+      "name": "Backlog"
+     },
+     "description": "**BLUF:** `Blockchain/Dev/scripts/check-dockerfile-non-root.sh` prints `OK` for a Dockerfile whose final `USER` is `root:root`, `0:0` or `ROOT`, because it compares the last `USER` value to `root` and `0` exactly. Pre-existing; pull request 1851 (KS-1866) corrects other faults in the same script and does not touch this comparison.\n\n* **Cause** (read at the pull request 1851 head `1c73d6ea5d39`): `check-dockerfile-non-root.sh:27` strips whitespace from the last `USER` value and `:32` tests `= \"root\"` or `= \"0\"` only.\n* **Measured here** with the real script copied into a private fixture tree, one Dockerfile per case, run from the tree: `USER root` rc 1 reported (control); `USER 0` rc 1 reported (control); `USER app` rc 0 `OK` (control); `USER root:root` rc 0 `OK \u2014 all 1 Dockerfile(s) drop root for runtime.`; `USER 0:0` rc 0 `OK`; `USER ROOT` rc 0 `OK`.\n* **Searched the board** for `check-dockerfile-non-root`, `USER root:root`: the hits were KS-1866 (the pull request's own ticket), KS-937 and KS-930 (a different guard, the re-link guard) and KS-1080 (a container that runs as root, not this guard); none covers the comparison.\n* **Not measured:** the real Dockerfiles in the tree (none was checked for these spellings); GNU/Linux behaviour. Fix shape not chosen here (for example strip a `:group` suffix and compare case-insensitively, and treat `0` and `root` after that).\n* **Discovered:** 2026-10-31, Seat R 68th, during merge prep of pull request 1851 (gate 50 finding F-851-2); filed on Wednesday's word.",
+     "comments": {
+      "nodes": []
+     }
+    }
+   ]
+  }
+ }
+}
+=========
+{
+ "data": {
+  "issues": {
+   "nodes": [
+    {
+     "identifier": "KS-1902",
+     "title": "check-akto-container-names.sh: a docker flag that takes a value (-u root, -e FOO=1) before an akto container name still passes the guard",
+     "state": {
+      "name": "Backlog"
+     },
+     "description": "**BLUF:** `Blockchain/Dev/scripts/check-akto-container-names.sh` still passes a `docker exec` / `docker logs` line whose flag takes a separate value (`-u root`, `-e FOO=1`) before an `akto-` container name, although the line targets slot 1. Pull request 1851 (KS-1866) corrects the flags that carry no separate value; this is the remainder.\n\n* **Cause** (read at the pull request 1851 head `1c73d6ea5d39`): the pattern at `check-akto-container-names.sh:82` is `docker (exec|logs|...)( -[^ ]+)* akto-<name>`. Each `( -[^ ]+)` repeat is one dash-token, so a value token such as `root` or `FOO=1` breaks the chain between the verb and the name.\n* **Measured here** with the real script and a private fixture tree per case (the method of the pull request's own suite; `bash check-akto-container-names.sh <dir>`): `docker exec -it akto-mongo mongosh` rc 1 (flagged, the control); a line with no akto name rc 0 (control); `docker exec -u root akto-mongo mongosh` rc 0; `docker exec -e FOO=1 akto-mongo mongosh` rc 0; `docker exec -it -u root akto-mongo mongosh` rc 0. A pass with rc 0 means the line is NOT reported.\n* **Same class** as `docker logs --tail 5 akto-testing`, which KS-1866 names as not fixed; `-u` and `-e` are the commonly used members.\n* **Searched the board** for `check-akto-container-names`, `docker exec -u`, `akto-mongo`: the hits were KS-1866 (the pull request's own ticket), KS-1609, KS-696, KS-1080, KS-1098; none covers flag values.\n* **Not measured:** GNU/Linux behaviour of the script (macOS BSD grep was used); the real tree (only the fixtures above). Fix shape not chosen here (for example consume a value token after known value-taking flags, or match the container name anywhere on a `docker` line).\n* **Discovered:** 2026-10-31, Seat R 68th, during merge prep of pull request 1851 (gate 50 finding F-851-1); filed on Wednesday's word.",
+     "comments": {
+      "nodes": []
+     }
+    }
+   ]
+  }
+ }
+}
+=========
+{
+ "data": {
+  "issues": {
+   "nodes": [
+    {
+     "identifier": "KS-1884",
+     "title": "manifest_readers_agree.test.sh drivers discard stderr, so a tool failure reads as a reader disagreement and its reason is lost (cause unmeasured)",
+     "state": {
+      "name": "Backlog"
+     },
+     "description": "## BLUF\n\n`systemTest/__tests__/manifest_readers_agree.test.sh` **throws away the reason a driver failed, so one tool failure reads as a reader disagreement.** On 2026-10-30 this failed a 30-minute pre-push hook once. **The cause is unmeasured**, because the error text was discarded.\n\nFacts only. No code was touched.\n\n## What happened\n\nKS-1384 F0a's push, head `969df4571d45`, 08:15:47Z to 08:45:18Z (1,771 s), was refused at preflight leg 14:\n\n`FAIL '   ' -> unslotted \u2014 expected all four = 'actors-unslotted.json'; writer='' playwright='actors-unslotted.json' performance='actors-unslotted.json' schemathesis='actors-unslotted.json'`\n\n23 passed, 1 failed. The writer driver answered nothing for that one case. The same driver answered correctly for the other 23 cases in the same run. The push lost its place in the queue.\n\n## Why it is in the test, not the change\n\n* Where: the `writer`, `playwright`, `performance` and `schemathesis` driver functions each end `2>/dev/null | tail -1`. Anything that stops a driver printing, such as a tool start-up failure, leaves an empty string, and `case_` then reports a disagreement between readers. The harness cannot tell \"this reader names another file\" from \"this reader did not run\".\n* F0a changes no path under `systemTest`.\n* KS-1384 F-a's push, an hour earlier, passed this test 24 of 24.\n* Alone, in F0a's own worktree at the same head: 3 of 3 runs, each 24 of 24 (32 to 37 s each, load average up to 13).\n* No other seat's saved `push.out` from October shows this test failing.\n\n## Cause: unmeasured\n\nTwo candidates were read and neither is supported:\n\n* KS-1135's long `TMPDIR`: this host's `TMPDIR` is 48 characters, nowhere near the \\~104-byte limit.\n* A stale tsx socket: 0 sockets in the tsx temp directory after the failure (read a few minutes later, so this does not exclude one that existed during the run).\n\nThis is not stated as a flake. One failure in the runs measured says only that it is rare here.\n\n## What is open\n\nKeeping the driver's stderr when it prints nothing would let the next failure name its cause. A driver that answered empty could also be reported as \"did not run\", apart from a real disagreement. Nothing is proposed beyond that. Other shell suites may share the pattern; that is not measured.\n\n## Searched before filing (title, description and comments, archived included; controls: a literal in archived KS-336 found, a nonsense token 0)\n\n* `manifest_readers_agree` 7. Read the nearest: **KS-1138** is this test red on ubuntu with the schemathesis reader answering ERROR, a different defect; **KS-1135** is the long-TMPDIR failure, Done; KS-877, KS-971, KS-1075, KS-1078 and KS-1148 name the test in passing.\n* `discard stderr`, `discards stderr`, `2>/dev/null | tail -1`: 0 each.\n\nRefs KS-1384, KS-1138.",
+     "comments": {
+      "nodes": []
+     }
+    }
+   ]
+  }
+ }
+}
+=========

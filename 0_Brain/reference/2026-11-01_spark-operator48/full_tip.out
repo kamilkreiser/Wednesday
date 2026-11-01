@@ -1,0 +1,443 @@
+ok   discovers a package that declares format:check
+ok   discovers every such package (5 fixtures)
+ok   does NOT discover a package with no format:check
+ok   a path in green selects green
+ok   ...and does not run red
+ok   one package checked, none failed
+ok   no gated path -> exit 0
+ok   no gated path -> says nothing
+ok   systemTest path outside any package -> silent
+ok   a red package -> exit 1
+ok   ...names the offending file
+ok   ...and says how to fix it
+ok   a red file IN the push is labelled so
+ok   a red file NOT in the push is labelled so
+ok   deps missing + not installable, normal mode -> exit 1
+ok   ...REFUSED, naming the package
+ok   ...names the path in the push that selected it
+ok   ...names the remedy
+ok   ...says it is NOT a formatting failure
+ok   ...counted as refused, not as skipped or failed
+ok   --all, deps missing, nothing else selected -> exit 1 (examined nothing)
+ok   --all -> SKIP names the package
+ok   --all -> names the remedy
+ok   --all -> counted as skipped
+ok   --all examined nothing -> says NOTHING CHECKED
+ok   --all examined nothing -> says it is NOT a formatting failure
+ok   --all: one checked + one skipped -> exit 0
+ok   ...trailer counts both
+ok   ...and does NOT claim nothing was checked
+ok   normal: one checked + one NOT installable -> exit 1
+ok   ...the green package was still checked
+ok   ...trailer counts the refusal
+ok   two red packages -> exit 1
+ok   two red packages -> trailer counts BOTH
+ok   mixed run -> trailer counts one failure
+ok   non-zero with no [warn] lines -> exit 1
+ok   ...counted as a failure, not a pass
+ok   ...says prettier named no files
+ok   --all -> exit 1 (fixtures include reds)
+ok   --all checks the untouched green package
+ok   --all checks every deps-present package
+ok   an unknown flag -> exit 2
+     measured: install + check, 1.0 s
+ok   CONTROL the baseline is a clean committed tree
+ok   absent node_modules, lockfile in sync -> exit 0
+ok   ...says it is installing, before it starts
+ok   ...and names the lifecycle-scripts trade-off in that line
+ok   ...states the ceiling in force (the default is 120s)
+ok   ...says INSTALLED and names the package
+ok   ...prettier is now executable in the package
+ok   ...node_modules is a real directory, not a symlink
+ok   ...and format:check then ran on it
+ok   ...trailer counts the install
+ok   ...git status is identical before and after
+ok   ...package-lock.json is byte-identical
+ok   ...no staging dir is left behind
+ok   a SECOND run does not install again
+ok   ...it just checks
+ok   the install runs exactly: npm ci --no-audit --no-fund --no-update-notifier --fetch-retries=0 --fetch-timeout=20000
+     measured: drifted lockfile, refused in 0.5 s
+ok   CONTROL the drifted fixture really is drifted (npm ci itself exits non-zero)
+ok   drifted lockfile, normal mode -> exit 1
+ok   ...REFUSED, as 'could not install'
+ok   ...names the path in the push that selected it
+ok   ...is not described as a formatting failure
+ok   ...no node_modules was created
+ok   ...git status is identical before and after
+ok   ...package-lock.json is byte-identical
+ok   ...no staging dir is left behind
+ok   ...a refusal is not reported as 'nothing checked'
+ok   --all: the same drifted package is SKIPPED, named
+ok   --all: says why it is not refused (no changed set)
+ok   --all: exit 0 (the green package was checked)
+ok   --all: trailer
+ok   --all: git status unchanged
+ok   node_modules present, no prettier, normal mode -> exit 1
+ok   ...npm ci was NEVER RUN (an install over it is not even attempted)
+ok   ...nothing nested inside it either
+ok   ...REFUSED, saying node_modules exists
+ok   ...prints the command
+ok   ...names the path that selected it
+ok   ...did NOT install over it (the marker survives)
+ok   ...no INSTALLED line
+ok   ...no staging dir was even made
+ok   a DANGLING node_modules symlink counts as present -> exit 1
+ok   ...npm ci was NEVER RUN for it either
+ok   ...refused, not installed over
+ok   ...the symlink is still a symlink
+ok   CONTROL an existing node_modules WITH prettier is never touched
+ok   ...marker survives
+ok   ...no install was attempted
+ok   --all: a hollow node_modules is a named SKIP, not a refusal
+ok   --all: exit 0 (the green package was checked)
+ok   --all: the marker survives
+     measured: closed-port registry, empty cache: refused in 0.8 s
+ok   registry unreachable, normal mode -> exit 1
+ok   ...REFUSED as 'could not install'
+ok   ...in under 15 s (npm's own retry schedule would take ~70 s)
+ok   ...no node_modules, no staging dir
+     measured: sandbox-exec network denied, empty cache: refused in 0.9 s
+ok   CASE 14b network DENIED (sandbox-exec) -> exit 1
+ok   ...REFUSED as 'could not install'
+ok   ...in under 15 s
+     measured: hung install, ceiling 2 s, gate returned in 2.3 s
+ok   hung install, normal mode -> exit 1
+ok   ...REFUSED, as a TIMEOUT with the ceiling in the line
+ok   ...names the override that raises it
+ok   ...returned within 15 s (ceiling 2 s)
+ok   ...the hung npm was killed - no orphan
+ok   ...the package has NO node_modules (the partial one was in the stage)
+ok   ...the staging dir was removed
+ok   ...git status is clean
+ok   --all: a hung install is a named SKIP, with the timeout in the line
+ok   --all: exit 0 (the green package was checked)
+ok   --all: no orphan, no staging dir
+ok   breaker: three absent packages, the first hangs -> exit 1
+ok   ...npm was run for ONE package only
+ok   ...the first is a timeout
+ok   ...the second says it was NOT attempted, and why
+ok   ...the third says it was NOT attempted, and why
+ok   ...three refusals in the trailer
+ok   ...no orphan, no staging dir
+ok   CONTROL a FAST failure does not trip the breaker: npm run for all three
+ok   ...no 'not attempted' line
+ok   ...three ordinary refusals
+ok   --all: the breaker gives a named SKIP, not a refusal
+ok   --all: npm run once, exit 0
+ok   npm prints 'added 1 package' but exits 1 -> still REFUSED
+ok   npm prints 'npm error code E404' but exits 0 with prettier -> INSTALLED
+ok   npm ci exits 0 but installs no prettier -> REFUSED, not INSTALLED
+ok   ...says npm exited 0 and prettier is still absent
+ok   ...and that node_modules/.bin/prettier is still absent
+ok   ...no INSTALLED line, and no node_modules moved into place
+ok   an install that drains stdin: both packages still installed and checked
+ok   ...two installs, two checks (trailer)
+ok   CONTROL the install is really in flight (one hung npm, a partial node_modules in the stage)
+ok   ...and the PACKAGE has no node_modules yet
+ok   SIGTERM mid-install -> the gate exits non-zero
+ok   ...the hung npm is gone
+ok   ...no staging dir is left
+ok   ...the package has no node_modules
+ok   SIGKILL mid-install -> the package still has NO node_modules
+ok   ...the residual is ONE orphaned stage, and git does not see it
+ok   the NEXT push installs normally (not 'present, no prettier')
+ok   ...INSTALLED, not REFUSED
+ok   ...and swept the dead run's orphaned stage
+ok   CONTROL the run itself succeeded
+ok   a stage of a DEAD pid is swept
+ok   a stage of a LIVE pid is left
+ok   a non-numeric pid is left (death cannot be proved)
+ok   a lookalike name is left
+ok   an unrelated directory is left
+ok   a SYMLINK named like a dead stage is NOT followed
+ok   ...and the symlink itself is left
+ok   FORMAT_GATE_INSTALL_TIMEOUT='abc' -> exit 2, naming the variable
+ok   FORMAT_GATE_INSTALL_TIMEOUT='0' -> exit 2, naming the variable
+ok   FORMAT_GATE_INSTALL_TIMEOUT='-5' -> exit 2, naming the variable
+ok   FORMAT_GATE_INSTALL_TIMEOUT='1.5' -> exit 2, naming the variable
+ok   FORMAT_GATE_INSTALL_TIMEOUT='2 3' -> exit 2, naming the variable
+ok   a valid override is used (the line says ceiling 7s)
+ok   set-but-empty is the default, as if unset (ceiling 120s)
+ok   hint ON, install refused: the hint is there
+ok   ...and names the path that selected the package
+ok   hint absent (variable unset): no hint
+ok   hint explicitly 0: no hint
+ok   hint ON, hollow node_modules refused: the hint is there too
+ok   hint ON but a plain FORMATTING failure: no hint (refusals only)
+ok   green + installable + drifted in one push -> exit 1
+ok   ...trailer: two checked, one refused, one installed
+ok   node_modules arrives during the install -> exit 0, checked
+ok   ...the one that arrived first is kept
+ok   ...the staged one was NOT nested inside it
+ok   ...says so
+ok   ...no staging dir is left
+ok   CONTROL _rm_stage was extracted from the real gate (not an empty string)
+ok   a real stage dir is REMOVED, contents and all
+ok   a path OUTSIDE the stage prefix is refused
+ok   CONTROL the '..' path really resolves to the outside dir (the base exists)
+ok   a '..' escape that starts with the prefix is refused
+ok   a path BELOW a stage (more than one component) is refused
+ok   a SYMLINK named like a stage is refused, and left in place
+ok   a regular FILE named like a stage is refused
+ok   an EMPTY argument is refused
+ok   the bare prefix itself is refused
+ok   CONTROL without FORMAT_GATE_TREE the gate reads the WORKING TREE and passes the red commit
+ok   red at the pushed commit, fix uncommitted -> exit 1
+ok   ...names the file, as in this push
+ok   ...trailer counts the failure
+ok   ...the fix line tells the author to COMMIT the fix (the gate judges the pushed commit)
+ok   ...no tree dir left behind
+ok   ...and the working tree was not touched
+ok   CONTROL without FORMAT_GATE_TREE a dirty red working tree fails a green commit
+ok   CONTROL ...and its fix line carries no commit advice (it judges the working tree, so none is needed)
+ok   green at the pushed commit, dirty working tree -> exit 0
+ok   ...it ran format:check OK on the pushed content
+ok   ...working tree still holds the dirty content
+ok   CONTROL without FORMAT_GATE_TREE the on-disk root config (B) is what is judged -> exit 1
+ok   the PUSHED root config (A) is judged, the on-disk B is shadowed -> exit 0
+ok   ...the root config on disk is untouched
+ok   a commit with NO ancestor config at all still archives and passes (a missing pathspec must not fail it)
+ok   absent node_modules + a tree: installed FIRST (item 1), then checked from the archive
+ok   ...the check saw node_modules as a SYMLINK and ran prettier through it
+ok   ...the real node_modules is a real directory in the working tree
+ok   ...no tree dir, no stage dir left
+ok   CONTROL the checked-out tree has old and not newpkg
+ok   a package that exists at the pushed commit but not in the checked-out tree -> exit 1
+ok   ...REFUSED (the gate could not run on it)
+ok   ...saying it is not in the checked-out tree, so its deps cannot be installed here
+ok   a package the pushed commit REMOVED is not selected -> exit 0, silent
+ok   CONTROL without a tree the working tree's old package IS selected and checked
+ok   --all with a tree names the COMMIT's package (newpkg) and not the working tree's old
+ok   CONTROL the check is really in flight (one hung check, a tree dir holding the archive)
+ok   SIGTERM mid-check -> the gate exits non-zero
+ok   ...the hung check is gone
+ok   ...no tree dir is left
+ok   SIGKILL mid-check -> the residual is ONE orphaned tree dir, git does not see it
+ok   the NEXT run succeeds and sweeps the dead run's tree dir
+ok   a tree dir of a DEAD pid is swept
+ok   a tree dir of a LIVE pid is left
+ok   a SYMLINK named like a dead tree dir is not followed, and is left
+ok   _rm_stage removes a real TREE dir too
+ok   _rm_stage still refuses a path outside both prefixes
+ok   git failing to extract the package -> the gate FAILS (exit 1), it does not pass
+ok   ...says it could not extract the package at that commit
+ok   ...is not counted as a clean check
+ok   ...and leaves no tree dir behind
+ok   FORMAT_GATE_TREE='notasha...' is not a commit -> exit 2, naming the variable
+ok   FORMAT_GATE_TREE='00000000000000...' is not a commit -> exit 2, naming the variable
+ok   FORMAT_GATE_TREE='01f7876032be55...' is not a commit -> exit 2, naming the variable
+ok   set-but-empty means unset: the working tree is judged
+ok   a rev name that resolves to a commit (HEAD) is accepted
+ok   systemTest/ not writable, normal mode -> exit 1
+ok   ...says the STAGING DIR could not be created (not 'moved into place')
+ok   an install that embeds the stage path -> exit 1
+ok   ...REFUSED, saying the install embeds its staging path
+ok   ...the package has NO node_modules (it was moved back out)
+ok   ...no INSTALLED line, no staging dir, git clean
+ok   CONTROL nothing arrives in the window -> INSTALLED, exit 0
+ok   ...node_modules/.bin/prettier is executable in the package
+ok   ...no move marker is left in the package's node_modules
+ok   a COMPLETE node_modules arrives in the window -> exit 0, checked
+ok   ...the one that arrived first is kept
+ok   ...ours was NOT nested inside it
+ok   ...says node_modules appeared during the install
+ok   ...no staging dir left
+ok   a HOLLOW node_modules (another actor's, no prettier yet) arrives -> exit 1
+ok   ...REFUSED as an environment condition, not blamed on the install
+ok   ...the other actor's file was NOT deleted
+ok   ...and ours was not nested in it
+ok   ...a hollow arrival is a REFUSAL, never a 'format:check FAILED'
+ok   a SYMLINK to an outside directory arrives -> exit 1
+ok   ...nothing of ours was written THROUGH the link into the outside directory
+ok   ...the link itself was kept (it is not ours to delete)
+ok   ...REFUSED as hollow
+ok   an EMPTY directory arrives (the stated residual: rename replaces an empty target) -> INSTALLED
+ok   ...our tree is the node_modules, not nested inside an empty one
+ok   the rename fails for ANOTHER reason (EACCES) -> exit 1, REFUSED as 'could not be moved into place'
+ok   ...not reported as a race, and nothing was moved into the package
+ok   an EMPTY node_modules appears during the install, BEFORE the gate looks -> kept, REFUSED as hollow
+ok   ...the empty directory was not replaced by the staged tree
+ok   node_modules is REPLACED by another actor right after our rename -> exit 1
+ok   ...the other actor's tree was NOT moved back and deleted
+ok   ...REFUSED as hollow (it exists, it has no prettier)
+ok   ...no staging dir left
+ok   the move BACK fails -> exit 1
+ok   ...the refusal says it could not be moved back (not that it was)
+ok   CONTROL an ordinary embedded-path install is still moved back out
+ok   CONTROL a hung install whose npm has a CHILD is REFUSED as a timeout (the watchdog fired)
+ok   the child of the killed npm is gone too - no orphan (watchdog path)
+ok   ...no staging dir, no node_modules in the package
+ok   a child that IGNORES TERM is ended by the group KILL (watchdog path) - no orphan
+ok   ...and the gate still returned promptly (ceiling 2 s)
+ok   CONTROL [child] the install is in flight (one sleeping child)
+ok   SIGTERM to the gate mid-install [child] -> non-zero, no orphan, no stage
+ok   CONTROL [child-deaf] the install is in flight (one sleeping child)
+ok   SIGTERM to the gate mid-install [child-deaf] -> non-zero, no orphan, no stage
+ok   the watchdog's TERM reaches the install's grandchild (it records it) and nothing survives
+ok   a SIGTERM to the gate reaches the grandchild gracefully (it records it) and nothing survives
+ok   CONTROL [plain] the tree-mode check is in flight (a child of format:check)
+ok   SIGTERM mid-check [plain] -> the check's CHILD is gone too, and no tree dir is left
+ok   CONTROL [deaf] the tree-mode check is in flight (a child of format:check)
+ok   SIGTERM mid-check [deaf] -> the check's CHILD is gone too, and no tree dir is left
+ok   REAL npm with a hanging postinstall: REFUSED as a timeout
+ok   ...the postinstall's process was ended with npm - no orphan
+ok   ...no node_modules in the package, no stage
+ok   CONTROL [SIGUSR1] the install is in flight (one hung npm, one stage)
+ok   SIGUSR1 mid-install -> non-zero, the hung npm is gone, no stage
+ok   CONTROL [SIGALRM] the install is in flight (one hung npm, one stage)
+ok   SIGALRM mid-install -> non-zero, the hung npm is gone, no stage
+ok   CONTROL [SIGPIPE] the install is in flight (one hung npm, one stage)
+ok   SIGPIPE mid-install -> non-zero, the hung npm is gone, no stage
+ok   CONTROL SIGQUIT is deliverable to a job started this way (a plain sleep dies, rc 131)
+ok   CONTROL the install is in flight (one hung npm, one stage)
+ok   SIGQUIT to the gate mid-install -> exit 131
+ok   ...the hung npm is gone and no stage is left
+ok   npm ci exits 0 and leaves a prettier that is not executable -> REFUSED
+ok   ...says prettier is absent or not executable (the true reason)
+ok   ...does NOT blame the move
+ok   ...nothing was moved into the package
+ok   a package .npmrc is copied into the stage the install runs in
+ok   CONTROL a package with no .npmrc gets none (the listing can differ)
+ok   FORMAT_GATE_INSTALL_TIMEOUT=<20 digits> -> exit 2, naming the variable (not a timeout)
+ok   ...7 digits is refused too
+ok   ...and 6 digits is accepted (the boundary)
+ok   CONTROL the perl-less PATH really has no perl, and the control PATH has one
+ok   CONTROL on the PATH that has perl the install runs (INSTALLED, exit 0)
+ok   no perl, normal mode -> exit 1, REFUSED naming perl and the process group
+ok   ...npm was never started
+ok   ...no staging dir, no node_modules
+ok   no perl, --all -> a named SKIP, and the package that needs no install is still checked
+ok   no perl, tree mode, node_modules present -> the check still runs and passes
+ok   CONTROL no perl, tree mode: the check is in flight (ungrouped)
+ok   ...SIGTERM still ends the (ungrouped) check by its pid, and no tree dir is left
+ok   CONTROL the local listener is up and serves the tarball (a GET returns 200 bytes>0)
+ok   a lock entry resolved to a LOCAL HTTP listener (not the registry) -> exit 1, REFUSED naming the entry
+ok   ...the listener was NEVER contacted (0 requests)
+ok   ...the install script never ran (no sentinel written)
+ok   ...no staging dir, no node_modules in the package
+ok   ...the refusal says it is a lock-source refusal, not an install failure
+ok   CONTROL the same lock with the listener's prefix allowed (the override) IS installed
+ok   ...so the listener was contacted and the script ran (the earlier 0 was the gate, not the fixture)
+ok   an http: resolved URL -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (node_modules/fake-tool-prettier)
+ok   ...nothing was installed
+ok   a git+https: resolved URL (no integrity either) -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (git+https://127.0.0.1:9/x.git)
+ok   ...nothing was installed
+ok   a file: tarball under the DEFAULT allow-list -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (file:)
+ok   ...nothing was installed
+ok   an allowed source with NO integrity -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (has no integrity)
+ok   ...nothing was installed
+ok   FORMAT_GATE_LOCK_ALLOW REPLACES the default (a registry entry is refused when only file: is allowed) -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (resolved https://registry.npmjs.org/prettier/-/prettier-3.3.3.tgz)
+ok   ...nothing was installed
+ok   a lockfile that is not valid JSON -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (not valid JSON)
+ok   ...nothing was installed
+ok   a lockfile with neither packages nor dependencies -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (unknown lockfile format)
+ok   ...nothing was installed
+ok   a bad entry in npm-shrinkwrap.json only (package-lock.json is fine) -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (npm-shrinkwrap.json)
+ok   ...nothing was installed
+ok   a bad lock with FORMAT_GATE_LOCK_ALLOW written into .env / .npmrc files in the repository (they must not widen it) -> exit 1, REFUSED as a lock-source refusal
+ok   ...names the entry (node_modules/fake-tool-prettier)
+ok   ...nothing was installed
+ok   --all: a lock-source refusal is a named SKIP, saying so
+ok   the lock-source refusal says how to proceed: FORMAT_GATE_LOCK_ALLOW + the npm_config_* variables, or npm ci by hand
+ok   a FAILED install's refusal says the install no longer reads ~/.npmrc, and how to opt in (npm_config_userconfig / FORMAT_GATE_LOCK_ALLOW)
+ok   CONTROL _check_lock_sources was extracted from the real gate (not an empty string)
+ok   a plain registry entry with integrity is accepted
+ok   a bundled entry (inBundle, no resolved) is accepted
+ok   a link inside the repository, with its target entry, is accepted (akto/performance shape)
+ok   a link OUTSIDE the repository is refused (the link entry alone: its target entry is absent, so only the link test can refuse it)
+ok   ...and with its target entry present (the akto/performance shape, pointed outside) it is refused too
+ok   a local entry (no resolved) whose KEY is outside the repository is refused
+ok   an entry under node_modules with no resolved and not bundled is refused
+ok   a lockfileVersion 1 lock (dependencies) with a registry entry is accepted
+ok   ...and a NESTED v1 entry from another host is refused
+ok   a v1 entry whose VERSION is a URL (no resolved) is refused
+ok   an empty allow list refuses every entry (nothing is implicitly allowed)
+ok   an allowed prefix appearing LATER in the URL does not count (a prefix match, not a substring match)
+ok   a link that resolves to the REPOSITORY ROOT itself is refused
+ok   a link that resolves to the PARENT of the repository is refused
+ok   a prefix match is a PREFIX match (registry.npmjs.org.evil.example is not registry.npmjs.org/)
+ok   CONTROL the install ran and recorded its environment (INSTALLED, exit 0, the log exists)
+ok   the install does NOT see NPM_TOKEN
+ok   the install does NOT see GH_TOKEN
+ok   the install does NOT see GITHUB_TOKEN
+ok   the install does NOT see SSH_AUTH_SOCK
+ok   the install does NOT see TESTSECRET_X
+ok   the install does NOT see AWS_SECRET_ACCESS_KEY
+ok   the install does NOT see npm_config__authToken
+ok   the install does NOT see AZURE_CLIENT_SECRET
+ok   the install does NOT see npm_config_cert
+ok   the install does NOT see npm_config_key
+ok   the install does NOT see npm_config__password
+ok   the install does NOT see NPM_CONFIG_PASSPHRASE
+ok   the install does NOT see npm_config__auth
+ok   the install does NOT see npm_config_x_token
+ok   the install does NOT see npm_config_client_secret
+ok   the install does NOT see FORMAT_GATE_INSTALL_ENV_PASS
+ok   the install does NOT see FORMAT_GATE_LOCK_ALLOW
+ok   the install DOES see PATH
+ok   the install DOES see HOME
+ok   the install DOES see TERM
+ok   the install DOES see HTTPS_PROXY
+ok   the install DOES see LANG
+ok   the install DOES see npm_config_cache
+ok   the install DOES see npm_config_registry
+ok   the install DOES see MY_PASSTHRU
+ok   the install DOES see STUB_NPM_CI
+ok   HOME is a private directory inside the stage, not the developer's
+ok   TERM is dumb, MY_PASSTHRU keeps its value, the proxy keeps its value
+ok   the stage and its private HOME are gone afterwards
+ok   CONTROL a name in FORMAT_GATE_INSTALL_ENV_PASS IS passed (the log can differ)
+ok   the install's npm userconfig is the stage's private HOME, not the developer's ~/.npmrc
+ok   ...and npm_config_userconfig=<file> opts a userconfig back in
+ok   npm_config_cache unset and ~/.npm exists -> the install gets npm_config_cache=<that directory>
+ok   ...and with no ~/.npm there is no npm_config_cache to pass
+ok   REAL npm, REAL lifecycle script: INSTALLED, and the script's environment holds none of the secrets
+ok   ...while it does see what npm and the shell need (PATH, npm_lifecycle_event, npm_config_cache)
+ok   FORMAT_GATE_INSTALL_ENV_PASS with a token that is not a variable name -> exit 2, naming the variable
+ok   ...a name that starts with a digit is refused too
+ok   CONTROL well-formed names are accepted
+ok   an EMPTY prefix plus a relative single-component path is refused (it used to delete the directory)
+ok   a RELATIVE prefix plus a relative path is refused too
+ok   CONTROL a real absolute stage under an absolute prefix is still removed
+ok   npm ci exits 0 and leaves a DIRECTORY at .bin/prettier -> REFUSED (absent or not executable), nothing installed
+ok   an EXISTING node_modules whose .bin/prettier is a directory is 'present, no prettier': refused, never run
+ok   CONTROL no attributes: the red file is caught in tree mode -> exit 1, named
+ok   a PUSHED .gitattributes marking the red file export-ignore does not hide it -> exit 1
+ok   a developer-local .git/info/attributes export-ignore does not hide it -> exit 1
+ok   core.attributesFile export-ignore does not hide it -> exit 1
+ok   the tree keeps an executable script, a symlink and a nested directory -> exit 0
+ok   CONTROL working-tree mode: the red non-ASCII package FAILS -> exit 1
+ok   tree mode: the red non-ASCII package is discovered and FAILS -> exit 1
+ok   ...--all in tree mode names it too
+ok   a foreign NON-EMPTY node_modules replaces ours just before the move back -> exit 1
+ok   ...it was PUT BACK where it was found, not deleted
+ok   ...and the refusal says another actor's tree was involved and kept
+ok   ...no stage left
+ok   ...and if a THIRD actor recreated node_modules so it cannot be put back -> exit 1
+ok   ...the foreign tree is LEFT in a gitignored .format-gate-aside dir, not deleted
+ok   ...the third actor's tree is untouched
+ok   ...and the refusal names where the tree was left
+ok   ...git does not see the aside dir (it is gitignored)
+ok   ...and if even the move aside fails, the foreign tree stays in the stage, which is kept (not removed) -> exit 1
+ok   ...and a later run does NOT sweep that stage away (its keep marker), while it still sweeps an ordinary dead one
+ok   CONTROL an ordinary embedded-path install is still moved back and the stage removed
+ok   CONTROL SIGINT is deliverable to a job started this way (a plain sleep dies, rc 130)
+ok   SIGINT to the gate mid-install -> exit 130, no orphan, no stage
+ok   SIGHUP to the gate mid-install -> exit 129, no orphan, no stage
+ok   a pushed commit that is NOT HEAD is judged by ITS ancestor config (A), not HEAD's (B) -> exit 0
+ok   CONTROL the commit that carries config B is judged red -> exit 1 (the fixture discriminates)
+ok   the not-in-the-checked-out-tree refusal's remedy is 'check out what you push' ...
+ok   ...and does NOT tell the author to run npm ci for it
+ok   the no-perl refusal's remedy says to install perl (or run npm ci by hand)
+
+package_format_gate: 435 passed, 0 failed
+rc=0
