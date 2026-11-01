@@ -18,3 +18,6 @@ status: live
 - Before any command I am about to pipe through `grep`, `head` or `tail`, ask: can this write? If yes, run it unfiltered, or do not run it.
 
 Related: [[2026-08-07_a-check-that-cannot-fail]], DRAFTER_RULES fence 5, `_ledger_laptop_datasec.md` row 2026-10-31.
+
+## EXTENSION 2026-11-01 (w=3, REGRESSION; mechanism built same session)
+s214 ran `decision_queue.sh add` with placeholder text (`--bluf "x" --option a:x --option b:y`) to list a real card's prior-ruling matches after a `tail -4` hid half of them. It refused, so nothing was stored, but the 10-31 junk card reached Kam's board by exactly this shape. **Mechanism (built and tested against a sandbox `DQ_FILE` copy, real store byte-equal):** `decision_queue.sh add` now REFUSES any title, bluf, default or option label under 4 characters. **Rule:** to see a refusal whole, re-run the SAME call with `2>&1 | head -40`; to read prior rulings, `decision_queue.sh show <id>`.

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-01 14:53 from 258 lesson files (1,118,151 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-01 18:08 from 259 lesson files (1,120,987 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7727,11 +7727,28 @@ sections (open the file for these): MECHANISM (Kam, terminal ~12:1x the same day
 
 **The rule:** to learn what a tool knows (earlier rulings, a usage line, a refusal list), read it through a READ path: the tool's header (`sed -n 1,40p`), its `show`/`list` verb, or its store file through an inclusion filter. Never run its write verb (`add`, `post`, `create`, `send`) with dummy values on the expectation that it will refuse. And never filter the output of a command that can write: the filter hides the one line that says it wrote.
 
+sections (open the file for these): EXTENSION 2026-11-01 (w=3, REGRESSION; mechanism built same session)
+
 **How to apply.**
 - Earlier rulings on a subject: `kam_rulings_today.sh` for today, `decision_queue.sh show <exact id>` for a known card, or read the store file with an inclusion filter. If a real `add` is then refused by the prior-rulings gate, read its CARD list as part of that real attempt; never fake one.
 - Before any command I am about to pipe through `grep`, `head` or `tail`, ask: can this write? If yes, run it unfiltered, or do not run it.
 
 Related: [[2026-08-07_a-check-that-cannot-fail]], DRAFTER_RULES fence 5, `_ledger_laptop_datasec.md` row 2026-10-31.
+
+## EXTENSION 2026-11-01 (w=3, REGRESSION; mechanism built same session)
+s214 ran `decision_queue.sh add` with placeholder text (`--bluf "x" --option a:x --option b:y`) to list a real card's prior-ruling matches after a `tail -4` hid half of them. It refused, so nothing was stored, but the 10-31 junk card reached Kam's board by exactly this shape. **Mechanism (built and tested against a sandbox `DQ_FILE` copy, real store byte-equal):** `decision_queue.sh add` now REFUSES any title, bluf, default or option label under 4 characters. **Rule:** to see a refusal whole, re-run the SAME call with `2>&1 | head -40`; to read prior rulings, `decision_queue.sh show <id>`.
+
+
+## A note is its own message: never send a note in the same turn as any other tool call
+`2026-11-01_a-note-is-its-own-message.md` · correction · 2026-11-01 · status: live
+
+**The rule.** A daily-note entry (`note_alone.sh`), a re-sent note, and a ledger edit that records a slip are each the ONLY tool call in their message. A wake response (a pane read, `wake_ack.sh`), a launch, a board post, a delivery mark, a pane close, a statusline read: each goes in its own message BEFORE the note, and the note is composed only after that output is on screen.
+
+**How to apply.** After any event, the order is: act (one or more calls) -> read the output -> THEN, in a new message, the note alone -> THEN, in another message, any ledger edit. If a wake and a landing arrive together, finish the act, then note. Never "save a turn" by bundling the note.
+
+**Diagnosis (w>=3).** The mechanism holds (the refusal); the habit does not. Raise at consolidation: compose the note LAST, alone, by routine, and consider a hook that refuses a ledger edit in the same message as a note.
+
+Related: [[2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say]] (the other "save a turn" slip).
 
 
 ## On the FIRST idle wake that shows an API error, sweep every pane for the same error — one outage idles every seat that was mid-turn
