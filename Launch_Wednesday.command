@@ -533,6 +533,15 @@ case "$SEAT_HOST" in
        *)       SEAT_LEDGER="_ledger.md";                OTHER_LEDGER="_ledger_laptop_datasec.md" ;;
      esac ;;
 esac
+# Boot step 10b's stale-card tool is per seat (2026-11-01, Tuesday s212 ledger row):
+# stale_card_escalate.sh EXCLUDES Datasec cards by design, so on Tuesday it printed a
+# false "0". Tuesday's instrument is tuesday/tools/escalate_48h.sh; it sends only with
+# ESCALATE_SEND=1, which the hourly launchd job com.tuesday.escalate48h already sets, so
+# the boot step only reads (--dry-run) and never double-sends.
+case "$AGENT" in
+  tuesday) STALE_TOOL="2_Project_Files/tuesday/tools/escalate_48h.sh --dry-run (the hourly job com.tuesday.escalate48h sends; check it is loaded with launchctl list)" ;;
+  *)       STALE_TOOL="2_Project_Files/tools/stale_card_escalate.sh --send" ;;
+esac
 
 # ── CLIENT SCOPE, per agent (Kam, 2026-09-08 11:50 + 11:56) ────────────────────
 # Wednesday: Secuura and everything general. Tuesday: every Datasec project,
@@ -716,7 +725,7 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    the day, and a COUNT of items awaiting Kam per project (e.g. awaiting 3 items for
    Secuura/Blockchain, 1 for WED) — counts only, the items are already cards. Anything
    that needs Kam goes on fleet activity as its own card, never only in chat.
-10b. STALE ITEMS: run 2_Project_Files/tools/stale_card_escalate.sh --send at every boot
+10b. STALE ITEMS: run ${STALE_TOOL} at every boot
    (Kam 14:31: unanswered for more than 48 hours -> escalate by emailing him). It mails
    one digest to Kam for this seat's open cards over 48 h, at most once a day per card.
    Never wait on Kam: while a card waits, the agents work the tickets; a blocker is
