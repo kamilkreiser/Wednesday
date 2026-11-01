@@ -1,0 +1,62 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync, existsSync } from 'fs';
+import { resolve as resolvePath } from 'path';
+import { parse as parseYaml } from 'yaml';
+
+// KS-1796: POST /api/users/me/change-password answers 422 for a weak new password (users.ts throws a
+// ValidationError AFTER the current password verified) and 400 only for a wrong current password, but the
+// published contract declared a single 400 "Wrong current password or new password too weak" and no 422. The
+// sibling reset-password operation already declares both (400 "Malformed payload, or reset token expired" and
+// 422 "New password too weak"), so it is the source the change-password entry copies. The spec file is GENERATED
+// from services/auth/src/auth.openapi.ts (scripts/generate-openapi.ts), so the source and the generated YAML must
+// agree: the cells read both from disk.
+const SPEC_PATH = resolvePath(__dirname, '../../../../docs/openapi/secuura-api.yaml');
+const SOURCE_PATH = resolvePath(__dirname, '../auth.openapi.ts');
+
+type Response = { description?: string; content?: { 'application/json'?: { schema?: { $ref?: string } } } };
+type Operation = { responses?: Record<string, Response> };
+type Spec = { paths?: Record<string, Record<string, Operation>> };
+
+const spec = existsSync(SPEC_PATH) ? (parseYaml(readFileSync(SPEC_PATH, 'utf8')) as Spec) : undefined;
+const change = spec?.paths?.['/api/users/me/change-password']?.post;
+const reset = spec?.paths?.['/api/auth/reset-password']?.post;
+
+/** The registerPath block of the change-password operation in the TypeScript source. */
+function sourceBlock(): string {
+  const text = readFileSync(SOURCE_PATH, 'utf8');
+  const start = text.indexOf("path: '/api/users/me/change-password'");
+  const end = text.indexOf('\n});', start);
+  return start === -1 || end === -1 ? '' : text.slice(start, end);
+}
+
+describe('KS-1796 the published change-password operation declares its 422', () => {
+  it('control ks1796 C1 the spec and the sibling reset-password operation are found, and the 422 there is the entry to copy', () => {
+    expect(spec, 'the OpenAPI spec file must be found from this test').toBeDefined();
+    expect(Object.keys(spec?.paths ?? {}).length, 'spec paths read').toBeGreaterThan(300);
+    expect(change?.responses?.['200']?.description).toBe('Password changed');
+    expect(reset?.responses?.['422']?.description).toBe('New password too weak');
+  });
+
+  it('control ks1796 C2 the other answers of change-password are unchanged', () => {
+    const statuses = Object.keys(change?.responses ?? {}).filter((s) => s !== '422').sort();
+    expect(statuses).toEqual(['200', '400', '401', '403', '404', '415', '429', '500', '502', '503']);
+    expect(change?.responses?.['401']?.description).toBe('Missing or invalid Bearer token');
+  });
+
+  it('RED ks1796 R1 the spec declares a 422 "New password too weak" with the same body schema as reset-password', () => {
+    const got = change?.responses?.['422'];
+    expect(got?.description).toBe('New password too weak');
+    expect(got?.content?.['application/json']?.schema?.$ref).toBe(reset?.responses?.['422']?.content?.['application/json']?.schema?.$ref);
+  });
+
+  it('RED ks1796 R2 the 400 now says only "Wrong current password"', () => {
+    expect(change?.responses?.['400']?.description).toBe('Wrong current password');
+  });
+
+  it('RED ks1796 R3 the TypeScript source declares the same 422 and the same 400 text the YAML carries', () => {
+    const block = sourceBlock();
+    expect(block.length, 'the change-password registerPath block must be found in auth.openapi.ts').toBeGreaterThan(100);
+    expect(block).toContain("422: { ...commonErrorResponses[422], description: 'New password too weak' }");
+    expect(block).toContain("400: { ...commonErrorResponses[400], description: 'Wrong current password' }");
+  });
+});

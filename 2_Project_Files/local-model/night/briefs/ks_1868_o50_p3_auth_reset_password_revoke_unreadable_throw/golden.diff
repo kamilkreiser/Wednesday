@@ -1,0 +1,184 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -876,8 +876,14 @@
+     try {
+       sessionsRevoked = await revokeAllUserSessions(user.id);
+     } catch (err: unknown) {
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Password reset: the session revocation THREW after the password write', {
+-        userId: user.id, error: err instanceof Error ? err.message : String(err),
++        userId: user.id, error: reason,
+       });
+       throw new ServiceUnavailableError(
+         'Your password WAS reset, but your other sessions could not be ended because the session store became unreachable. Your reset link has NOT been used — please use it again shortly to end those sessions.',
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-reset-password-revoke-unreadable-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-reset-password-revoke-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-reset-password-revoke-unreadable-throw.test.ts
+@@ -0,0 +1,160 @@
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { AddressInfo } from 'node:net';
++import type { Server } from 'node:http';
++import express from 'express';
++
++// KS-1868: POST /reset-password revokes the account's sessions after the password write; when that revocation
++// THROWS, the catch block must still log its line and map the failure onto the KS-1692 503 (`Your password WAS
++// reset, but your other sessions could not be ended ...`, reset link NOT burned) even if the thrown value cannot
++// be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws, throws on `.message`).
++// Today the unreadable value makes the catch block itself throw a TypeError before the 503 is built, so the
++// caller gets a generic 500 INTERNAL_ERROR. Harness: the ks1407 reset-password test (real router and error
++// handler; repository, session store, mail and event bus mocked). The revocation stand-in rejects with a plain
++// function, not a vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy before
++// the code under test saw it.
++const USER_ID = 'c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f';
++const NEW_PASSWORD = 'S0me-Str0ng-Passw0rd!x';
++const LINE = 'Password reset: the session revocation THREW after the password write';
++
++const h = vi.hoisted(() => ({
++  revokeRejects: false,
++  toThrow: undefined as unknown,
++  logged: [] as unknown[][],
++  pwUpdates: 0,
++  linkBurns: 0,
++}));
++
++const capture = vi.hoisted(() => ({
++  debug: () => undefined,
++  info: () => undefined,
++  warn: () => undefined,
++  error: (...args: unknown[]) => {
++    h.logged.push(args);
++  },
++  log: () => undefined,
++}));
++vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: capture, createLogger: () => capture }));
++
++vi.mock('../repositories/userRepo', () => {
++  const repoMock = {
++    getResetToken: vi.fn(async () => ({ userId: 'c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f', expiresAt: new Date(Date.now() + 600_000) })),
++    getUserByIdPreAuth: vi.fn(async () => ({ id: 'c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f', email: 'ks1868-reset@example.test', status: 'ACTIVE' })),
++    updateUserOrThrow: vi.fn(async () => {
++      h.pwUpdates += 1;
++      return { id: 'c1d2e3f4-5a6b-4c7d-8e9f-0a1b2c3d4e5f' };
++    }),
++    consumeResetToken: vi.fn(async () => {
++      h.linkBurns += 1;
++    }),
++  };
++  return { default: repoMock, __esModule: true, ...repoMock };
++});
++vi.mock('../services/password', async (importOriginal) => ({
++  ...(await importOriginal<Record<string, unknown>>()),
++  hashPassword: vi.fn(async () => 'hashed'),
++}));
++vi.mock('../services/session', () => ({
++  isRedisAvailable: () => true,
++  revokeAllUserSessions: () => (h.revokeRejects ? Promise.reject(h.toThrow) : Promise.resolve(0)),
++}));
++vi.mock('../services/email', () => ({
++  sendVerificationEmail: vi.fn(async () => undefined),
++  sendPasswordResetEmail: vi.fn(async () => undefined),
++}));
++vi.mock('../events', () => ({ publishEvent: vi.fn(async () => undefined), EventTypes: {} }));
++vi.mock('../db', () => ({ isDbAvailable: () => false, query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }));
++
++let server: Server;
++let baseUrl = '';
++beforeAll(async () => {
++  const { authRoutes } = await import('../routes/auth');
++  const { errorHandler } = await import('../middleware/errorHandler');
++  const app = express();
++  app.use(express.json());
++  app.use('/api/auth', authRoutes);
++  app.use(errorHandler);
++  server = app.listen(0, '127.0.0.1');
++  await new Promise<void>((resolve) => server.once('listening', () => resolve()));
++  baseUrl = 'http://127.0.0.1:' + String((server.address() as AddressInfo).port);
++});
++afterAll(async () => {
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++beforeEach(() => {
++  h.revokeRejects = false;
++  h.toThrow = undefined;
++  h.logged.length = 0;
++  h.pwUpdates = 0;
++  h.linkBurns = 0;
++});
++
++const LINES = () => h.logged.filter((c) => c[0] === LINE);
++
++async function resetPassword() {
++  const res = await fetch(baseUrl + '/api/auth/reset-password', {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({ token: 'ks1868-reset-token', password: NEW_PASSWORD }),
++  });
++  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
++  const err = (body.error ?? {}) as Record<string, unknown>;
++  return { status: res.status, code: String(err.code ?? ''), message: String(err.message ?? '') };
++}
++
++describe('KS-1868 the reset-password revocation catch block reads the thrown value safely', () => {
++  it('control ks1868 C1 an ordinary Error still logs its message and the route answers the 503 with the token unburned', async () => {
++    h.revokeRejects = true;
++    h.toThrow = new Error('redis down');
++    const r = await resetPassword();
++    expect(r.status).toBe(503);
++    expect(r.code).toBe('SERVICE_UNAVAILABLE');
++    expect(r.message).toMatch(/password WAS reset/i);
++    expect(h.pwUpdates).toBe(1);
++    expect(h.linkBurns).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ userId: USER_ID, error: 'redis down' });
++  });
++
++  it('control ks1868 C2 a revocation that succeeds reaches 200, burns the token once and logs no failure line', async () => {
++    const r = await resetPassword();
++    expect(r.status).toBe(200);
++    expect(h.pwUpdates).toBe(1);
++    expect(h.linkBurns).toBe(1);
++    expect(LINES()).toHaveLength(0);
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and the route still answers the 503', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.revokeRejects = true;
++    h.toThrow = proxy;
++    const r = await resetPassword();
++    expect(r.status).toBe(503);
++    expect(r.code).toBe('SERVICE_UNAVAILABLE');
++    expect(r.message).toMatch(/password WAS reset/i);
++    expect(h.pwUpdates).toBe(1);
++    expect(h.linkBurns).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ userId: USER_ID, error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and the route still answers the 503', async () => {
++    h.revokeRejects = true;
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const r = await resetPassword();
++    expect(r.status).toBe(503);
++    expect(r.code).toBe('SERVICE_UNAVAILABLE');
++    expect(r.message).toMatch(/password WAS reset/i);
++    expect(h.pwUpdates).toBe(1);
++    expect(h.linkBurns).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ userId: USER_ID, error: 'unreadable thrown value' });
++  });
++});

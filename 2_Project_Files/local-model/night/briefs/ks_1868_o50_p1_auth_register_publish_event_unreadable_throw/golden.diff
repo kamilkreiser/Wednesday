@@ -1,0 +1,185 @@
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -303,4 +303,12 @@
+       email: user.email,
+       role: user.role,
+       verificationLevel: user.verificationLevel,
+-    }).catch(err => logger.error('Failed to publish event', { error: err instanceof Error ? err.message : String(err) }));
++    }).catch(err => {
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to publish event', { error: reason });
++    });
+diff --git a/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-register-publish-event-unreadable-throw.test.ts b/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-register-publish-event-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1868-auth-register-publish-event-unreadable-throw.test.ts
+@@ -0,0 +1,163 @@
++import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
++import type { AddressInfo } from 'node:net';
++import type { Server } from 'node:http';
++import express from 'express';
++
++// KS-1868: POST /register publishes user.registered fire-and-forget; when that publish REJECTS, the route's
++// `.catch` handler must still log its line `Failed to publish event` even if the rejection value cannot be read
++// (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws, throws on `.message`).
++// Today such a value makes the `.catch` handler itself throw, so the derived promise rejects with nothing
++// attached and Node sees an UNHANDLED REJECTION (the registration response was already sent). The cells count
++// unhandled rejections themselves instead of letting the runner report them. Harness: the ks1460 register test
++// (real router and error handler; repository, password, jwt, session, mail and event bus mocked). The event bus
++// stand-in rejects with a plain function, not a vi.fn(): a spy inspects what it rejects with and could itself
++// fail on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  publishRejects: false,
++  toThrow: undefined as unknown,
++  logged: [] as unknown[][],
++  unhandled: 0,
++}));
++
++vi.mock('../repositories/userRepo', () => {
++  const repoMock = {
++    getUserByEmail: vi.fn(async () => null),
++    createUser: vi.fn(async (user: Record<string, unknown>) => user),
++    updateUser: vi.fn(async () => null),
++    updateUserOrThrow: vi.fn(async () => null),
++    storeEmailToken: vi.fn(async () => undefined),
++    seedDemoUsers: vi.fn(async () => undefined),
++  };
++  return { default: repoMock, __esModule: true, ...repoMock };
++});
++vi.mock('../services/password', async (importOriginal) => ({
++  ...(await importOriginal<Record<string, unknown>>()),
++  hashPassword: vi.fn(async () => 'hashed'),
++}));
++vi.mock('../services/jwt', async (importOriginal) => ({
++  ...(await importOriginal<Record<string, unknown>>()),
++  generateTokenPair: vi.fn(() => ({ accessToken: 'access', refreshToken: 'refresh', expiresIn: 900 })),
++}));
++vi.mock('../services/session', () => ({
++  createSession: vi.fn(async () => ({ id: 'session-1868-register' })),
++}));
++vi.mock('../services/email', () => ({
++  sendVerificationEmail: vi.fn(async () => true),
++  sendPasswordResetEmail: vi.fn(async () => true),
++}));
++vi.mock('../events', () => ({
++  publishEvent: () => (h.publishRejects ? Promise.reject(h.toThrow) : Promise.resolve(undefined)),
++  EventTypes: { USER_REGISTERED: 'user.registered' },
++}));
++vi.mock('../db', () => ({ isDbAvailable: () => false, query: vi.fn(async () => ({ rows: [] })) }));
++const capture = vi.hoisted(() => ({
++  debug: () => undefined,
++  info: () => undefined,
++  warn: () => undefined,
++  error: (...args: unknown[]) => {
++    h.logged.push(args);
++  },
++  log: () => undefined,
++}));
++vi.mock('../utils/logger', () => ({ logger: capture, createLogger: () => capture, validateEnv: () => undefined }));
++vi.mock('@secuura/shared/utils/logger', () => ({ logger: capture, createLogger: () => capture }));
++
++import { authRoutes } from '../routes/auth';
++import { errorHandler } from '../middleware/errorHandler';
++
++const SAVED_LISTENERS = process.listeners('unhandledRejection');
++const onUnhandled = () => {
++  h.unhandled += 1;
++};
++
++let server: Server;
++let baseUrl = '';
++beforeAll(async () => {
++  process.removeAllListeners('unhandledRejection');
++  process.on('unhandledRejection', onUnhandled);
++  const app = express();
++  app.use(express.json());
++  app.use('/', authRoutes);
++  app.use(errorHandler);
++  server = app.listen(0, '127.0.0.1');
++  await new Promise<void>((resolve) => server.once('listening', () => resolve()));
++  baseUrl = 'http://127.0.0.1:' + String((server.address() as AddressInfo).port);
++});
++afterAll(async () => {
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++  process.removeListener('unhandledRejection', onUnhandled);
++  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
++});
++beforeEach(() => {
++  h.publishRejects = false;
++  h.toThrow = undefined;
++  h.logged.length = 0;
++  h.unhandled = 0;
++});
++
++const LINES = () => h.logged.filter((c) => c[0] === 'Failed to publish event');
++
++async function register(): Promise<number> {
++  const res = await fetch(baseUrl + '/register', {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({ email: 'ks1868-register@example.com', password: 'Tr0ub4dor&3-horse-staple', name: 'Ann Lee' }),
++  });
++  return res.status;
++}
++
++/** The publish is fire-and-forget: wait until its outcome shows (a log line or an unhandled rejection), then a little longer. */
++async function settled(): Promise<void> {
++  const deadline = Date.now() + 1500;
++  while (Date.now() < deadline && LINES().length === 0 && h.unhandled === 0) {
++    await new Promise((resolve) => setTimeout(resolve, 10));
++  }
++  await new Promise((resolve) => setTimeout(resolve, 60));
++}
++
++describe('KS-1868 the register publish catch handler reads the rejection value safely', () => {
++  it('control ks1868 C1 an ordinary Error still logs its message and the registration still answers 201', async () => {
++    h.publishRejects = true;
++    h.toThrow = new Error('bus down');
++    expect(await register()).toBe(201);
++    await settled();
++    expect(h.unhandled).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ error: 'bus down' });
++  });
++
++  it('control ks1868 C2 a publish that succeeds logs no failure line and answers 201', async () => {
++    expect(await register()).toBe(201);
++    await settled();
++    expect(h.unhandled).toBe(0);
++    expect(LINES()).toHaveLength(0);
++  });
++
++  it('RED ks1868 R1 a revoked Proxy rejection logs a constant reason and leaves no unhandled rejection', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.publishRejects = true;
++    h.toThrow = proxy;
++    expect(await register()).toBe(201);
++    await settled();
++    expect(h.unhandled).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and leaves no unhandled rejection', async () => {
++    h.publishRejects = true;
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    expect(await register()).toBe(201);
++    await settled();
++    expect(h.unhandled).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});

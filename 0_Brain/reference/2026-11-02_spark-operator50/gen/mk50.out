@@ -1,0 +1,59 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o50_p1_auth_register_publish_event_unreadable_throw
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -303,4 +303,12 @@
+       email: user.email,
+       role: user.role,
+       verificationLevel: user.verificationLevel,
+-    }).catch(err => logger.error('Failed to publish event', { error: err instanceof Error ? err.message : String(err) }));
++    }).catch(err => {
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to publish event', { error: reason });
++    });
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o50_p2_auth_login_publish_event_unreadable_throw
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -609,4 +609,12 @@
+       email: user.email,
+       role: user.role,
+       ip: req.ip,
+-    }).catch(err => logger.error('Failed to publish event', { error: err instanceof Error ? err.message : String(err) }));
++    }).catch(err => {
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to publish event', { error: reason });
++    });
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o50_p3_auth_reset_password_revoke_unreadable_throw
+diff --git a/Blockchain/Dev/services/auth/src/routes/auth.ts b/Blockchain/Dev/services/auth/src/routes/auth.ts
+--- a/Blockchain/Dev/services/auth/src/routes/auth.ts
++++ b/Blockchain/Dev/services/auth/src/routes/auth.ts
+@@ -876,8 +876,14 @@
+     try {
+       sessionsRevoked = await revokeAllUserSessions(user.id);
+     } catch (err: unknown) {
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('Password reset: the session revocation THREW after the password write', {
+-        userId: user.id, error: err instanceof Error ? err.message : String(err),
++        userId: user.id, error: reason,
+       });
+       throw new ServiceUnavailableError(
+         'Your password WAS reset, but your other sessions could not be ended because the session store became unreachable. Your reset link has NOT been used — please use it again shortly to end those sessions.',
+
