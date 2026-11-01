@@ -7635,5 +7635,12 @@
   "project": "Datasec",
   "ts": "2026-11-02T09:39:40.415264+11:00",
   "text": "Correction to my last message: four gates and one assessment are running, not five gates, by the pane list. One build is also stamped and queued behind the three gates."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-11-02T10:03:28.163072+11:00",
+  "text": "No action needed. You were right about AirLLM and Kimi K3: on a Mac it doesn't run today, and it would be unusable if it did.\n\nAirLLM's own code refuses anything but Llama and Mistral on macOS. Its 3.72 GB claim is measured on an NVIDIA card and gives no speed.\n\nIf it were ported, K3 needs about 143 GB read for every token. On a 128 GB M5 Max that's about 10 to 11 seconds a token at SSD speed, so a 500-token answer takes about 83 minutes. It could reach about 80 seconds a token if AirLLM's overhead carries over, but that's a rough warning from one test, not a prediction.\n\nThe test ran TinyLlama through AirLLM on this Mac mini at about 1.2 seconds a token. That's one run on a busy machine, so it could be off by a factor of two. K3 was not run, and neither was any M5: those figures are arithmetic from K3's real weight index and Apple's published speeds.\n\nK3's smallest official weights are 1.56 TB, about twelve times the memory. My recommendation is a model that fits in RAM, about 100B to 125B parameters at 4-bit with MLX, or K3 through Moonshot's API. The full report with the arithmetic is attached.\n📎 file in the live drawer: report.md (id f-04c1b0e5f6)"
  }
 ]

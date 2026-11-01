@@ -55029,5 +55029,37 @@
    "CARD wed-morning-plan-1031",
    "CARD wed-morning-plan-1101"
   ]
+ },
+ {
+  "id": "nexusai-sqlite3-successor-recommendation-1102",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI database driver: stay on sqlite3 for now, or move to the Node built-in?",
+  "bluf": "Datasec / NexusAI: please choose. You asked this morning for the alternatives to be measured, and they have been. My recommendation is to stay on sqlite3 6.0.1 and name node:sqlite, the driver built into Node, as the successor. Nothing fails today: the characterisation file passes 19 of 19 and the wider suites 515 of 515, by the assessment seat's run. node:sqlite passes the same tests behind a small adapter with no change to the database module, but Node still labels it a release candidate on the versions we would use. The main alternative, better-sqlite3, fails a plain install on our base image. Moving now would swap a working driver for a release candidate, and nothing forces it yet. Tuesday re-read the upstream archive state and that main has not moved; the test figures are the seat's. Report: NexusAI/1_Project_Definition/Briefs/2026-11-02_B1100_SQLITE3-SUCCESSOR-ASSESSMENT.md. Nothing was changed in the product.",
+  "default_action": "If Kam does not rule, Tuesday does option a: the next NexusAI records seat records the triggers on RD-919, and nothing is built.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Stay on sqlite3 and name node:sqlite as successor (recommended)",
+    "detail": "The next NexusAI records seat records the four triggers for reassessing: an unfixed advisory, node:sqlite reaching stable, npm blocking install scripts by default, or a Node release the driver cannot load on. Nothing is built."
+   },
+   {
+    "key": "b",
+    "label": "Start the preparation only",
+    "detail": "A builder makes the changes any successor needs (five SQL literals, the raw database calls routed through one module) and the npm install-script approval, with a tier 1 gate. The driver stays sqlite3."
+   },
+   {
+    "key": "c",
+    "label": "Move to node:sqlite now",
+    "detail": "Accepts a release-candidate driver for the data store. Builder lanes in order, each its own PR with a tier 1 gate, and the Marketplace image digest changes."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T09:55:08.974488+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-sqlite3-archived-upstream-1102"
+  ]
  }
 ]
