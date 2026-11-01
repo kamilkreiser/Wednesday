@@ -1,0 +1,16 @@
+# B1058 ADDENDUM-1, from Tuesday: the product owner has ruled the archiver half. Your commission otherwise stands.
+
+**The product owner's 2026-11-01 ruling (22:42:13 AEDT, live board), option b, verbatim: "Move to archiver 8 and change the test setup", detail "What you first chose, plus jest or CI changes, one export code change and one extra pin; larger, its own review".** The options not chosen were keeping archiver 7 with two pins, and sqlite3 only with the rest accepted.
+
+**So ROUTE A stands, and its Step-6 STOP is replaced.** When the export suites cannot load archiver 8 under jest, do not stop and do not take the PARTIAL exit. Build the test-setup change, under these limits:
+
+1. **Smallest change that works, measured in this order; say in STATUS which you tried and why each was or was not enough:** (a) the jest configuration where the project already holds it (a `transform` / `transformIgnorePatterns` / `moduleNameMapper` for the ES-module-only packages of the archiver chain); (b) only if (a) cannot work, `--experimental-vm-modules` in `scripts/verify-suite.sh` and `.github/workflows/build.yml`. Read the file that holds the jest config at your clone; do not assume its path.
+2. **PARTITION widened to exactly what you use of:** the jest configuration, `scripts/verify-suite.sh`, `.github/workflows/build.yml`. A workflow edit is allowed only under (b), and it is flagged to the gate. No other workflow, no `deploy*.yml`, no `npm-audit.yml`.
+3. **The one extra pin is the one already pre-authorised:** `"readdir-glob": { "minimatch": "^11.0.1" }` with its `overridesNotes` line. A second override remains a STOP.
+4. **A new dev dependency for the transform (for example a Babel preset) is allowed only if** it is dev-only, the production audit stays exit 0 with all counts zero, it is named in STATUS with its version, and `package-lock.json` production entries are unchanged by it. Anything else that a third package would touch: STOP.
+5. **The product runs differently from the tests, so prove the product, not only the suites:** the export must work under plain node with no jest in the way. Your BOOT proof (check 5) plus a plain-node run of `streamExport` into a collecting writable, decoded by the helper, on the node that CI and the image use if you have it, else say the difference. A jest-only green is not evidence about production.
+6. **A test that only passes because the transform changed what it loads is a finding:** the seven export suites and your pins must keep the SAME assertions (no assertion edited), and `Tests:` counts per file equal before and after apart from your new file.
+7. **Keep the jest wall time honest:** print the verify wall time before and after. A transform that makes the verify exceed its 35-minute limit is a STOP with the figures.
+8. `CI_DEPLOY_ENABLED` stays off; the image build on alpine stays UNMEASURED and is said so. Nothing deploys. No alert is dismissed, no assertion is loosened, no audit exception is made.
+
+Gate after: tier 1, as stamped. Your hard stop stays as written from your Step-0 date; if the larger scope cannot fit, write RESUME and end `STOPPED: NEEDS TUESDAY continue in a fresh seat from RESUME?` rather than cutting a proof.
