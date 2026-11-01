@@ -1,0 +1,167 @@
+# KS-1868 nft-certificate: `getNFTCertificate` must still report when the thrown value cannot be read (one site of the 253; RUNG 3, code_patch2: one product hunk given as a skeleton, one NEW test file given whole)
+
+DRAFT by Spark operator 45 for Wednesday, 2026-11-01. Secuura (nft-certificate) only. A local PASS is a candidate, never a merge; the normal QA gate before merge. Origin: KS-1868 (253 catch sites read a thrown value as `X instanceof Error ? X.message : String(X)`; none is guarded against a thrown value whose read itself throws, e.g. a revoked Proxy). This brief fixes ONE site, inline, with no shared helper: the catch block of `getNFTCertificate` in `services/minting.service.ts`. Today a hostile rejection from the database layer makes the catch block itself throw, so nothing is logged and the call rejects. No open PR touches this file (the 19 open PRs read 2026-11-01 through the GitHub API; 108 file entries; planted positive control: the same scan finds services/auth in 7 of them).
+
+File: `Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts`  (product, modified in place: ONE hunk)
+Test file: `Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-get-nft-certificate-unreadable-throw.test.ts`  (NEW file, vitest, given in full below; 3 cells (2 red, 1 control))
+Tip: `85c56a3d1eb92c8399dcfd3d6ee2a717cf356428` (origin develop; every line number and quote below was read from it)
+Runner: `vitest` (`npx vitest run src/__tests__/ks1868-nft-get-nft-certificate-unreadable-throw.test.ts` from `Blockchain/Dev/services/nft-certificate`)
+Tier: `code_patch2`
+Rung: **3 (one product hunk, skeleton dictated; new test given whole)**
+
+## The mode - read this twice
+
+CODE+TEST. Your diff touches EXACTLY 2 file(s), in this order:
+1. `Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts` - modified in place: EXACTLY the one hunk under "The exact change", byte for byte.
+2. `Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-get-nft-certificate-unreadable-throw.test.ts` - a NEW file: `--- /dev/null` (NEVER `--- a/`), `+++ b/<path>`, ONE hunk `@@ -0,0 +1,71 @@`, every line `+`.
+
+You never touch any other file and no other line of the files above.
+
+## What is wrong (one paragraph)
+
+In `minting.service.ts` the catch block of `getNFTCertificate` logs `logger.error('DB get certificate failed', { error: err instanceof Error ? err.message : String(err) })` (the read is on line 504) and then it falls through to `return null`. If the database call rejects with a revoked Proxy, `err instanceof Error` itself throws a TypeError inside the catch block; if it rejects with an Error whose `message` getter throws, `err.message` throws. Either way the catch throws before the line is logged and before the normal return, so the function rejects with the hostile value. The fix reads the thrown value inside its own inner `try` into a local `reason`, falling back to the constant `unreadable thrown value`, and the log call uses `reason`. Nothing else changes: an ordinary Error still logs `{ error: <its message> }`.
+
+## Where
+
+`Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts:504`. The catch block's `instanceof Error` read is on line 504; the catch logs 'DB get certificate failed' at error level with `{ error: <message> }` and does NOT rethrow: it falls through to `return null`. The message is only logged, never returned to a caller or put in a response. CALLERS (git grep at the tip): routes/nft.routes.ts:276 (GET /certificates/:id) inside a try whose catch answers 500 with the constant message "Failed to fetch NFT certificate"; no other non-test caller. Other catch blocks of the file are NOT in this brief.
+
+## The exact change
+
+ONE hunk in the product file. The file header lines and the `@@` header are DICTATED: copy them character for character, do not recount. Context lines start with ONE space, removed lines with `-`, added lines with `+` (byte-exact; spaces only). The log message text may contain an em dash; copy it unchanged.
+
+```diff
+--- a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+@@ -501,6 +501,12 @@
+           return cert;
+         }
+       } catch (err: any) {
+-        logger.error('DB get certificate failed', { error: err instanceof Error ? err.message : String(err) });
++        let reason: string;
++        try {
++          reason = err instanceof Error ? err.message : String(err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.error('DB get certificate failed', { error: reason });
+       }
+     }
+```
+
+The `+` lines are byte-exact: copy them. Indentation is spaces only. Context lines begin with one space (the diff marker) followed by the file text.
+
+**Do NOT touch** any message text, any other line of the file, or any other catch block in it. Every other catch block of `minting.service.ts` is NOT in this brief.
+
+## The test
+
+File: `Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-get-nft-certificate-unreadable-throw.test.ts`
+
+The test section is a NEW test file given whole. The `+` lines are byte-exact. The shape is copied from `Blockchain/Dev/services/nft-certificate/src/__tests__/ks1836-nft-list-owner-bound.test.ts` (a `vi.hoisted` holder, `vi.mock(...)` of the db, cardano and logger modules, then the import of the real minting service). There is no database, no app boot and no network here.
+
+```diff
+diff --git a/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-get-nft-certificate-unreadable-throw.test.ts b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-get-nft-certificate-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1868-nft-get-nft-certificate-unreadable-throw.test.ts
+@@ -0,0 +1,71 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: `getNFTCertificate` must still log its line and resolves null when the thrown value
++// itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws,
++// throws on `.message`).
++// The db stand-in is a plain function, not a vi.fn(): a spy inspects what it rejects with and
++// could itself fail on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  warn: vi.fn(),
++  error: vi.fn(),
++}));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: () => Promise.reject(h.toThrow),
++}));
++
++vi.mock('../cardano', () => ({
++  isCardanoNFTReady: () => false,
++  mintNFTOnChain: vi.fn(),
++  getPolicyId: () => null,
++  waitForNFTConfirmation: vi.fn(),
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: h.warn, error: h.error, debug: vi.fn() },
++}));
++
++import { nftMintingService, loadFromDb } from '../services/minting.service';
++
++const call = () => nftMintingService.getNFTCertificate('ks1868-missing');
++
++const LINES = () => h.error.mock.calls.filter((c) => String(c[0]).includes('DB get certificate failed'));
++
++describe('KS-1868 `getNFTCertificate` reads the thrown value safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.warn.mockReset();
++    h.error.mockReset();
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message and resolves null', async () => {
++    h.toThrow = new Error('db down');
++    await expect(call()).resolves.toBeNull();
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ error: 'db down' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and resolves null', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    await expect(call()).resolves.toBeNull();
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and resolves null', async () => {
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    await expect(call()).resolves.toBeNull();
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});
+```
+
+## Red cells
+- RED ks1868 R1
+- RED ks1868 R2
+
+## Cells and controls
+
+- RED at the tip, GREEN after: `R1` (revoked Proxy) and `R2` (Error whose `message` getter throws). At the tip the call rejects, so the `resolves` assertion fails (and no line is logged); after the edit the result carries the constant `unreadable thrown value`.
+- GREEN at the tip and after: 'control ks1868 C1' (an ordinary `Error` logs/returns its own message), the control showing the normal path is unchanged.
+- The stand-in rejecting with the thrown value is a plain function, not `vi.fn()`, on purpose: a vitest spy inspects what it rejects with and may fail on a revoked Proxy before the code under test sees it.
+- `../db`, `../cardano` and `../utils/logger` are mocked; no database, no app boot and no network.
+
+## Premises (each one measured, with where)
+
+- `Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts:504` is the `instanceof Error` read at the tip (read whole with `git show` at `85c56a3d1eb9`). The catch block's `instanceof Error` read is on line 504; the catch logs 'DB get certificate failed' at error level with `{ error: <message> }` and does NOT rethrow: it falls through to `return null`. The message is only logged, never returned to a caller or put in a response. CALLERS (git grep at the tip): routes/nft.routes.ts:276 (GET /certificates/:id) inside a try whose catch answers 500 with the constant message "Failed to fetch NFT certificate"; no other non-test caller. Other catch blocks of the file are NOT in this brief.
+- Open PRs: 19 read 2026-11-01 via the GitHub REST API (pulls?state=open, then pulls/N/files); none touches `Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts` (19 PRs, 108 file entries); the positive control services/auth appears in 7 file entries.
+- This file is neither `tenant-context.ts` nor `tenant-pool-manager.ts` and is outside services/auth, services/originate, services/anchoring, services/tenant-provisioning and vc-issuer; the S9 brief itself was not re-read by the operator.
+
+## UNMEASURED - stated rather than glossed
+
+- The golden is written by the operator from the diff design; it is proved by the harness `--control` run (round.sh), not by this text. tsc and eslint on the new file were not run outside the checker. The other sites of the 253 were not touched or measured. Whether a real path throws such a value here is not known (KS-1868 says the same). The service boot path was not run.
+
+## Scope
+
+**This one site only.** Refs KS-1868; does NOT close it, and introduces no shared helper.
+
+## Output
+
+Exactly ONE fenced ```diff block, nothing outside it: 2 file section(s) in the order of `## The mode`; the first section starts `diff --git a/<path> b/<path>`; a NEW file's section is `diff --git`, `new file mode 100644`, `--- /dev/null` (NEVER `--- a/`), `+++ b/<path>`, then the hunk header `@@ -0,0 +1,N @@` and every body line starting `+`. The opening fence line is exactly ```diff. Every `+` line on its own physical line. Every context line keeps its leading space. Use the dictated `@@` header unchanged.
