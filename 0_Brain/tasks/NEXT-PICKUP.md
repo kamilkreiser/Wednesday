@@ -15,7 +15,7 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
   - **E 24th** (%56, Sonnet, KS-1901 + KS-1893): commit 07a4cc5b, queued to push (refused once by KS-1926; a standalone rerun gave 435/0). OWED: a Sonnet tier-2 gate.
 - **PRs:**
   - **#1894** persona TIER 1: gate 79 GO WITH NOTES, notes patched. Ready for a merge seat.
-  - **#1895** governance x5: gate 80 RUNNING (Sonnet subagent, workdir `0_Brain/reference/2026-11-01_gate80-ks1868-governance-1895`). Its verdict.md lands there, or in the subagent's final message (lost on rotation). If it is missing, re-run gate 80. Relay its notes to R 72nd.
+  - **#1895** governance x5: gate 80 DONE = GO WITH NOTES (verdict.md in `0_Brain/reference/2026-11-01_gate80-ks1868-governance-1895/`). Notes mailed to R 72nd to PATCH. **G80-F1:** a zero vote-power snapshot on a failed read makes quorum unfailable and the first vote finalizes. That is pre-existing for ordinary errors (KS-1732 fail-open): consider a card to Kam or a fix lane for KS-1732. Ready for a merge seat once its notes are in.
 - **R 71st** wrapped and was scored 0.93; pane closed.
 - **SPARK held, not raised:** O46-P1 (KS-1903), O46-P3 (KS-1884), O47-P1..P5 (KS-1868 kyc; P3 sits on the GDPR erasure cascade, so the raise PR must state the behaviour change). O46-P2 (KS-1902) FAILED twice; its golden is correct.
 - **Checker bugs logged in IMPROVEMENTS (not fixed):** the B6 product-as-sibling crash (O48); the template TS2451 collision and unused imports; DECL-SPLICE on keyword-like ref names.
