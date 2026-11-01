@@ -309,6 +309,15 @@ def cmd_add(args):
                 i += 2
             else:
                 die(f"unknown flag: {a}")
+    # PLACEHOLDER REFUSAL (Tuesday ledger w=3, 2026-11-01 s214): an `add` with junk text was used twice as a
+    # probe to list prior-ruling matches; on 2026-10-31 it was NOT refused and a card 'x' reached Kam's live board.
+    # A real card never has a title, bluf, default or option label under 4 characters. Read the store with
+    # `show <id>`, or re-run the SAME refused call with `2>&1 | head -40`, instead.
+    _short = [k for k in ('title', 'bluf', 'default_action') if len(str(d.get(k, '')).strip()) < 4]
+    _short += [f"option {o.get('key')!r} label" for o in d.get('options', []) if len(str(o.get('label', '')).strip()) < 4]
+    if _short:
+        die('REFUSED — placeholder-length text in ' + ', '.join(_short) + ' (under 4 characters). An add is never a '
+            'probe: to read prior rulings use `show <id>`, or re-run the SAME refused call with `2>&1 | head -40`. Nothing written.')
     count_list_advisory(d)   # ADVISORY, before any gate, so the writer sees it even on a refusal
     # PRIOR-RULING GATE (2026-09-05 16:4x, ledger w=2 — the Founders Hub credit was carded a FOURTH
     # time at 16:32 after Kam's 10:51 panel note "no need to raise this again. this is in hand";
