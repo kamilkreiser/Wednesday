@@ -1,0 +1,38 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o41_p1_nftcertificate_provider_fetchprotocolparams_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/cardano/provider.ts b/Blockchain/Dev/services/nft-certificate/src/cardano/provider.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/cardano/provider.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/cardano/provider.ts
+@@ -63,7 +63,13 @@
+       slot: tip.slot || 0,
+     };
+   } catch (err: any) {
+-    logger.error('Failed to fetch protocol parameters', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Failed to fetch protocol parameters', { error: reason });
+     return null;
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o41_p2_demoservice_state_get_unreadable_throw
+diff --git a/Blockchain/Dev/services/demo-service/src/routes/state.ts b/Blockchain/Dev/services/demo-service/src/routes/state.ts
+--- a/Blockchain/Dev/services/demo-service/src/routes/state.ts
++++ b/Blockchain/Dev/services/demo-service/src/routes/state.ts
+@@ -79,6 +79,11 @@
+     return res.json(inMemoryState);
+   } catch (err) {
+-    const message = err instanceof Error ? err.message : 'Unknown error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Failed to read demo state', { error: message });
+     return res.json(inMemoryState);
+   }
+

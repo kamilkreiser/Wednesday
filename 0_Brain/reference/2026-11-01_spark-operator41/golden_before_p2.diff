@@ -1,0 +1,125 @@
+diff --git a/Blockchain/Dev/services/demo-service/src/routes/state.ts b/Blockchain/Dev/services/demo-service/src/routes/state.ts
+--- a/Blockchain/Dev/services/demo-service/src/routes/state.ts
++++ b/Blockchain/Dev/services/demo-service/src/routes/state.ts
+@@ -79,6 +79,11 @@
+     return res.json(inMemoryState);
+   } catch (err) {
+-    const message = err instanceof Error ? err.message : 'Unknown error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Failed to read demo state', { error: message });
+     return res.json(inMemoryState);
+   }
+diff --git a/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-state-get-unreadable-throw.test.ts b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-state-get-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-state-get-unreadable-throw.test.ts
+@@ -0,0 +1,104 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: the GET /state handler must still log and answer with the in-memory state when the
++// thrown value itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose
++// `message` getter throws, throws on `.message`).
++// The Redis stand-in is a plain class, not a vi.fn(): a spy could inspect a revoked Proxy and
++// fail before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  error: vi.fn(),
++}));
++
++vi.mock('ioredis', () => ({
++  default: class {
++    on() {
++      return this;
++    }
++    get() {
++      return Promise.reject(h.toThrow);
++    }
++    set() {
++      return Promise.resolve('OK');
++    }
++  },
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: h.error },
++  createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
++}));
++
++import { stateRouter } from '../routes/state';
++
++type Layer = { route?: { path: string; stack: Array<{ handle: (req: unknown, res: unknown) => unknown }> } };
++type Outcome = { threw: boolean; status?: number; body?: unknown };
++
++/** Run the real GET /state handler; the Redis stand-in rejects with the value under test. */
++async function runHandler(): Promise<Outcome> {
++  const layer = (stateRouter as unknown as { stack: Layer[] }).stack.find((l) => l.route?.path === '/state');
++  const handle = layer!.route!.stack[0].handle;
++  const out: Outcome = { threw: false };
++  const res = {
++    status(code: number) {
++      out.status = code;
++      return res;
++    },
++    json(body: unknown) {
++      out.body = body;
++      return res;
++    },
++  };
++  try {
++    await handle({}, res);
++  } catch {
++    out.threw = true;
++  }
++  return out;
++}
++
++const ERRORS = () => h.error.mock.calls.filter((c) => String(c[0]).includes('Failed to read demo state'));
++const IN_MEMORY = { currentPersona: null, presenterMode: false, scenarioStep: 0 };
++
++describe('KS-1868 GET /state reads the thrown value safely', () => {
++  beforeEach(() => {
++    process.env.REDIS_URL = 'redis://127.0.0.1:1';
++    h.toThrow = undefined;
++    h.error.mockReset();
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message and answers the in-memory state', async () => {
++    h.toThrow = new Error('redis boom');
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.body).toEqual(IN_MEMORY);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'redis boom' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and answers the in-memory state', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.body).toEqual(IN_MEMORY);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and answers the in-memory state', async () => {
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.body).toEqual(IN_MEMORY);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});

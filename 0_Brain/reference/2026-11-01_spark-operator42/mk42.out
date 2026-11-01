@@ -1,0 +1,38 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o42_p1_analytics_exportservice_dbsaveexport_unreadable_throw
+diff --git a/Blockchain/Dev/services/analytics/src/services/exportService.ts b/Blockchain/Dev/services/analytics/src/services/exportService.ts
+--- a/Blockchain/Dev/services/analytics/src/services/exportService.ts
++++ b/Blockchain/Dev/services/analytics/src/services/exportService.ts
+@@ -53,6 +53,12 @@
+         ]
+       );
+     } catch (err: any) {
+-      logger.info('DB save export failed', { error: err instanceof Error ? err.message : String(err) });
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.info('DB save export failed', { error: reason });
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o42_p2_analytics_scheduledjobs_dbsavealertrule_unreadable_throw
+diff --git a/Blockchain/Dev/services/analytics/src/services/scheduledJobs.ts b/Blockchain/Dev/services/analytics/src/services/scheduledJobs.ts
+--- a/Blockchain/Dev/services/analytics/src/services/scheduledJobs.ts
++++ b/Blockchain/Dev/services/analytics/src/services/scheduledJobs.ts
+@@ -56,6 +56,12 @@
+       ]
+     );
+   } catch (err: any) {
+-    logger.info('DB save alert rule failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.info('DB save alert rule failed', { error: reason });
+   }
+ }
+

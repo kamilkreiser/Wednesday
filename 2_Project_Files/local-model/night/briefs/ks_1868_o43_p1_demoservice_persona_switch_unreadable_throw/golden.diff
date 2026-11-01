@@ -1,0 +1,123 @@
+diff --git a/Blockchain/Dev/services/demo-service/src/routes/persona.ts b/Blockchain/Dev/services/demo-service/src/routes/persona.ts
+--- a/Blockchain/Dev/services/demo-service/src/routes/persona.ts
++++ b/Blockchain/Dev/services/demo-service/src/routes/persona.ts
+@@ -74,7 +74,12 @@
+       },
+     });
+   } catch (err) {
+-    const message = err instanceof Error ? err.message : 'Unknown error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Persona switch error', { error: message });
+     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+   }
+diff --git a/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-persona-switch-unreadable-throw.test.ts b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-persona-switch-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/demo-service/src/__tests__/ks1868-persona-switch-unreadable-throw.test.ts
+@@ -0,0 +1,101 @@
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++
++// KS-1868: the POST /persona/switch handler must still log and answer its generic 500 when the
++// thrown value itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose
++// `message` getter throws, throws on `.message`).
++// The auth stand-in is a plain function, not a vi.fn(): a spy inspects what it rejects with and
++// could itself fail on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  error: vi.fn(),
++}));
++
++vi.mock('../utils/logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: h.error },
++  createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
++}));
++
++vi.mock('../services/authClient', () => ({
++  authenticatePersona: () => Promise.reject(h.toThrow),
++}));
++
++import { personaRouter } from '../routes/persona';
++
++type Layer = { route?: { path: string; stack: Array<{ handle: (req: unknown, res: unknown) => unknown }> } };
++type Outcome = { threw: boolean; status?: number; body?: unknown };
++
++/** Run the real route handler with a valid persona body; the mocked auth call rejects with the value under test. */
++async function runHandler(): Promise<Outcome> {
++  const layer = (personaRouter as unknown as { stack: Layer[] }).stack.find(
++    (l) => l.route?.path === '/persona/switch',
++  );
++  const handle = layer!.route!.stack[0].handle;
++  const out: Outcome = { threw: false };
++  const res = {
++    status(code: number) {
++      out.status = code;
++      return res;
++    },
++    json(body: unknown) {
++      out.body = body;
++      return res;
++    },
++    setHeader() {
++      return res;
++    },
++  };
++  try {
++    await handle({ body: { persona: 'alice' } }, res);
++  } catch {
++    out.threw = true;
++  }
++  return out;
++}
++
++const ERRORS = () => h.error.mock.calls.filter((c) => String(c[0]).includes('Persona switch error'));
++const GENERIC = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++
++describe('KS-1868 persona switch handler reads the thrown value safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.error.mockReset();
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message and answers 500', async () => {
++    h.toThrow = new Error('auth boom');
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.status).toBe(500);
++    expect(out.body).toEqual(GENERIC);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'auth boom' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and answers 500', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.status).toBe(500);
++    expect(out.body).toEqual(GENERIC);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and answers 500', async () => {
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const out = await runHandler();
++    expect(out.threw).toBe(false);
++    expect(out.status).toBe(500);
++    expect(out.body).toEqual(GENERIC);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});

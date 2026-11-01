@@ -1,0 +1,77 @@
+diff --git a/Blockchain/Dev/services/governance/src/services/governanceService.ts b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+--- a/Blockchain/Dev/services/governance/src/services/governanceService.ts
++++ b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+@@ -252,7 +252,13 @@
+     const result = await query(`SELECT * FROM svc_proposals ${where} ORDER BY created_at DESC`, params);
+     return result.rows.map(rowToProposal);
+   } catch (err: any) {
+-    logger.error('DB get all proposals failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get all proposals failed', { error: reason });
+     return [];
+   }
+ }
+diff --git a/Blockchain/Dev/services/governance/src/__tests__/ks1868-get-all-proposals-unreadable-throw.test.ts b/Blockchain/Dev/services/governance/src/__tests__/ks1868-get-all-proposals-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/governance/src/__tests__/ks1868-get-all-proposals-unreadable-throw.test.ts
+@@ -0,0 +1,54 @@
++// KS-1868: `dbGetAllProposals` must still log its ERROR line and resolves an empty list when the thrown value
++// itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws,
++// throws on `.message`).
++// The db stand-in is a plain function, not a jest.fn(): a spy inspects what it rejects with and
++// could itself fail on a revoked Proxy before the code under test saw it.
++const mockHolder: { toThrow: unknown; error: jest.Mock } = { toThrow: undefined, error: jest.fn() };
++
++jest.mock('../db', () => ({
++  isDbAvailable: () => true,
++  query: () => Promise.reject(mockHolder.toThrow),
++}));
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), debug: jest.fn(), error: (...a: unknown[]) => mockHolder.error(...a) },
++}));
++
++const { getProposals } = require('../services/governanceService');
++
++const ERRORS = () => mockHolder.error.mock.calls.filter((c) => String(c[0]).includes('DB get all proposals failed'));
++
++describe('KS-1868 `dbGetAllProposals` reads the thrown value safely', () => {
++  beforeEach(() => {
++    mockHolder.toThrow = undefined;
++    mockHolder.error = jest.fn();
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message and resolves an empty list', async () => {
++    mockHolder.toThrow = new Error('db down');
++    await expect(getProposals()).resolves.toEqual([]);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'db down' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and resolves an empty list', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    mockHolder.toThrow = proxy;
++    await expect(getProposals()).resolves.toEqual([]);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and resolves an empty list', async () => {
++    mockHolder.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    await expect(getProposals()).resolves.toEqual([]);
++    expect(ERRORS()).toHaveLength(1);
++    expect(ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++});

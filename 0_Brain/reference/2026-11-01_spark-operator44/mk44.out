@@ -1,0 +1,80 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o44_p1_governance_get_all_proposals_unreadable_throw
+diff --git a/Blockchain/Dev/services/governance/src/services/governanceService.ts b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+--- a/Blockchain/Dev/services/governance/src/services/governanceService.ts
++++ b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+@@ -252,7 +252,13 @@
+     const result = await query(`SELECT * FROM svc_proposals ${where} ORDER BY created_at DESC`, params);
+     return result.rows.map(rowToProposal);
+   } catch (err: any) {
+-    logger.error('DB get all proposals failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get all proposals failed', { error: reason });
+     return [];
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o44_p2_governance_get_all_participants_unreadable_throw
+diff --git a/Blockchain/Dev/services/governance/src/services/governanceService.ts b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+--- a/Blockchain/Dev/services/governance/src/services/governanceService.ts
++++ b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+@@ -310,7 +310,13 @@
+     const result = await query(`SELECT * FROM svc_governance_participants ${where}`, params);
+     return result.rows.map(rowToParticipant);
+   } catch (err: any) {
+-    logger.error('DB get all participants failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get all participants failed', { error: reason });
+     return [];
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o44_p3_governance_get_active_delegations_unreadable_throw
+diff --git a/Blockchain/Dev/services/governance/src/services/governanceService.ts b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+--- a/Blockchain/Dev/services/governance/src/services/governanceService.ts
++++ b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+@@ -339,7 +339,13 @@
+     const result = await query(`SELECT * FROM svc_vote_delegations ${where}`, params);
+     return result.rows.map(rowToDelegation);
+   } catch (err: any) {
+-    logger.error('DB get active delegations failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get active delegations failed', { error: reason });
+     return [];
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o44_p4_governance_get_total_vote_power_unreadable_throw
+diff --git a/Blockchain/Dev/services/governance/src/services/governanceService.ts b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+--- a/Blockchain/Dev/services/governance/src/services/governanceService.ts
++++ b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+@@ -445,7 +445,13 @@
+     );
+     return Number(result.rows[0]?.total || 0);
+   } catch (err: any) {
+-    logger.error('DB get total vote power failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get total vote power failed', { error: reason });
+     return 0;
+   }
+ }
+

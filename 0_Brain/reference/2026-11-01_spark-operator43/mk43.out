@@ -1,0 +1,39 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o43_p1_demoservice_persona_switch_unreadable_throw
+diff --git a/Blockchain/Dev/services/demo-service/src/routes/persona.ts b/Blockchain/Dev/services/demo-service/src/routes/persona.ts
+--- a/Blockchain/Dev/services/demo-service/src/routes/persona.ts
++++ b/Blockchain/Dev/services/demo-service/src/routes/persona.ts
+@@ -74,7 +74,12 @@
+       },
+     });
+   } catch (err) {
+-    const message = err instanceof Error ? err.message : 'Unknown error';
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : 'Unknown error';
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     logger.error('Persona switch error', { error: message });
+     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o43_p2_governance_dbgetproposal_unreadable_throw
+diff --git a/Blockchain/Dev/services/governance/src/services/governanceService.ts b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+--- a/Blockchain/Dev/services/governance/src/services/governanceService.ts
++++ b/Blockchain/Dev/services/governance/src/services/governanceService.ts
+@@ -216,7 +216,13 @@
+     const result = await query('SELECT * FROM svc_proposals WHERE id = $1', [id]);
+     if (result.rows.length > 0) return rowToProposal(result.rows[0]);
+   } catch (err: any) {
+-    logger.error('DB get proposal failed', { id, error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get proposal failed', { id, error: reason });
+   }
+   return undefined;
+ }
+
