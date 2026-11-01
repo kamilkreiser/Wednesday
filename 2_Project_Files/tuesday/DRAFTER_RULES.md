@@ -39,6 +39,7 @@ names the ledger row (`0_Brain/learnings/_ledger_laptop_datasec.md`) that earned
    The report may name card ids.
 
 ## Things every kit must get right
+- **A `file:line` pointer and a clock are printed by a program, never remembered** (ledger 2026-11-02: B1087 and B1088 both carried a window for the drafter's own reads ending later than the clock; B1088 carried nine line pointers marked MEASURED, off by one or short, two of them inside Jira text). Generate each `file:line` with `grep -n` or `awk NR==n` over the raw file at the pinned sha just before writing it; a clock comes from `date` in the same action or the kit says "at drafting".
 - **Ports:** the block Tuesday assigned, checked by `lsof -nP -iTCP:<block> -sTCP:LISTEN` AND a word-boundary scan of
   the non-`.pre-` SEAT kits of today and yesterday, plus the live pane list (10-25 port row). Report hits.
 - **Round counts** name what they count: "NO GO <n> of 2 on class <X>", read from earlier gates' verdict lines (10-25 row).
