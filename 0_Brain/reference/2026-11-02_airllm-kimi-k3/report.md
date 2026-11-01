@@ -61,6 +61,47 @@ A 500-token answer takes about 83 minutes at 10 s per token, or about 11 hours a
 
 **What fits instead (estimates from parameter counts, not downloads).** A 125B-total MoE at 4-bit is about 63 GB; about 10B active is about 5 GB per token; 5 / 614 gives a bound of 8 ms per token, about 120 tokens/s, with real runs usually about half to two thirds of that (an assumption). A dense 70B at 4-bit is about 40 GB, a bound of 65 ms per token.
 
+## 5. Addendum: a 256 GB Mac (Tuesday, 2026-11-02 10:2x; arithmetic by program, on Kam's 10:18:28 question)
+**What changes:** the shared (non-expert) weights now fit. **What does not:** K3 is still about six times the memory (1.56 TB), AirLLM still refuses K3 on macOS, and the chosen experts still change from token to token.
+- Per token: 116.6 GB shared + 25.8 GB experts = 142.5 GB.
+- Cache at 256 GB: about 244 GB after 12 GB for the system (assumption). After the shared weights, 127 GB is left, about 9% of the 1,447 GB of experts. At 128 GB the shared weights alone (116.6 GB) fill the 116 GB cache, which is why that case had no hot path.
+- Shared weights from RAM: 116.6 GB / 819 GB/s = 0.14 s, read as about 0.3 s allowing a copy. 819 GB/s is the M3 Ultra's listed figure (https://ispace.ge/en/product/mac-studio-mu973ru-a); WHICH chip the 256 GB Mac has was not read.
+- Experts from SSD, all misses: 25.8 GB / 12.6 GB/s = 2.05 s (the M5 Max's measured rate); 25.8 / 6 = 4.3 s (6 GB/s is an ASSUMED lower rate: no measured SSD figure was found for a 256 GB Mac).
+
+| Case | Seconds per token |
+|---|---|
+| 256 GB, shared weights hot, experts cold, a loader without AirLLM's overhead | about 2 to 5 |
+| Same, if tokens reuse experts already cached | lower, by an amount UNMEASURED |
+| 256 GB, AirLLM's overhead as measured on the M2 (warm cache, so more RAM does not remove it) | about 81 (142.5 / 1.75; a warning, not a prediction) |
+
+A 500-token answer at 2 to 5 s per token takes about 17 to 42 minutes. What fits instead, at the 0.5 GB per billion parameters used above: about 380B at the commonly cited 75% GPU limit (192 GB), up to about 480B if that limit is raised. Those are estimates, not downloads.
+
+## 6. Addendum: a smaller model on 128 GB (Tuesday, 2026-11-02 10:2x; Kam's 10:23:24 and 10:23:52 questions)
+**Nothing here was run.** Figures are from web sources not checked against the model repositories, and arithmetic by program. No M5 benchmark was found. Several guides looked unreliable.
+
+**MiMo V2.6 Flash does not fit on 128 GB.** 309B total, 15B active, 48 layers, 256 experts with 8 per token. The MLX 4-bit builds are about 156 to 167 GB (https://huggingface.co/TensorFold/MiMo-V2.6-Flash-RL-MLX-4bit-MTP, https://openclawdc.com/blog/can-i-run-mimo-v2-6-flash-locally/). AirLLM's Mac path takes only Llama and Mistral; MiMo's architecture name was not read.
+
+**If its weights were paged from SSD** (a bound, ignoring the KV cache and assuming misses spread evenly; 8.1 GB active per token, SSD 12.6 GB/s, memory 614 GB/s):
+
+| Memory for the model | Share resident | Seconds per token | Tokens per second |
+|---|---|---|---|
+| 52 GB (64 GB for the seat, 12 GB for macOS) | 31% | about 0.46 | about 2.2 |
+| 64 GB (macOS inside the seat's 64 GB) | 38% | about 0.41 | about 2.4 |
+| 112 GB (most to the model) | 67% | about 0.23 | about 4.4 |
+
+That is about 20 to 50 times better than K3's 9.8 to 11.3 s by the same arithmetic, but it is unmeasured, and the seat's own memory pressure would make it worse.
+
+**What fits outright (sizes by program from parameter counts, 4.3 bits per weight unless stated):**
+
+| Model (names from the guides, unverified) | Size | Fits 52-64 GB? | Fits about 112 GB? | Reported speed |
+|---|---|---|---|---|
+| A 33B to 35B coder (Laguna XS 2.1 at Q8; Ornith 35B at Q4) | 33 GB; 19 GB | yes | yes | about 26 tok/s on an M4 Max for a 32B-class model |
+| GLM-5.2 Air 106B-A12B, 4-bit | 57 GB | no room for the KV cache | yes | bound about 95 tok/s (614 / 6.45 GB); no real figure found |
+| DeepSeek V4 Flash, Q4 | about 80 GB by one guide; another says cloud only for 128 GB | no | yes, if real | not found |
+| gpt-oss 120B, Q6 | 93 GB | no | yes, tight | 14 to 20 tok/s on an M4 Max 128 GB |
+
+Sources: https://openclawdc.com/blog/best-models-macbook-pro-128gb/, https://bestllmfor.com/best/macbook-pro-m4-max/, https://bestllmfor.com/meilleur-llm/mac-128gb/, https://www.cloudrift.ai/blog/state-of-open-coding-models-2026.
+
 ## Not measured
 - K3 itself: nothing downloaded or run; every K3 number is arithmetic from the index and the layer-50 header.
 - Any M5 hardware; the test ran on an M2.
