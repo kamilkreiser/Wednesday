@@ -7397,5 +7397,12 @@
   "project": "Datasec",
   "ts": "2026-11-01T15:47:19.339729+11:00",
   "text": "HPSM-POC review site is updated and ready to look at. New: part B of the customer security preview, four read-only views: Gaps and findings, Remediation roadmap, Reports and evidence, Continuous assurance. To see them: sign in at any level, open Customer security preview, choose a customer, then use the four new entries in the left navigation. Framework alignment stays held. The first sample customer has no reviewed findings yet, so the roadmap shows its empty state; pick a customer with reviewed findings to see the roadmap actions. All checks passed, nothing was written to data, settings and the database are unchanged, and the demo was not touched. The way back to this morning's version is kept."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-11-01T17:23:58.253519+11:00",
+  "text": "HPSM-POC: the wake-time error fix is merged to main, not deployed. When a paused database is waking, the API now keeps retrying the connection instead of answering an error, and all checks passed, including the real SQL Server tests. Three trade-offs you should know. One: a database that is truly down now shows its error after about 90 seconds instead of about 30. Two: a request the page gives up on stops on its own, which the reviewer measured; the longer worst case only applies if the hosting front end does not pass the cancellation through, which is not measured. Three: a save whose connection timed out can now land after the page has shown an error; no single action was seen to save twice. A reviewer also found a narrow case that could repeat a save, but it cannot happen with the database library this app uses; tightening it is filed as a follow-up. The ticket stays open until we measure it on a database that pauses, which is a later step."
  }
 ]
