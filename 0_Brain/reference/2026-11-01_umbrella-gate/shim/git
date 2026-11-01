@@ -1,0 +1,7 @@
+#!/bin/bash
+# TEST SHIM (red-proof only): answers `ls-remote origin refs/heads/develop` with the LOCAL origin/develop sha, because a fetch is a write verb
+# on the Secuura checkout and the real origin tip (d7691f35) is not in the local object store. Everything else goes to the real git.
+if [ "$3" = "ls-remote" ] && [ "$4" = "origin" ]; then
+  s=$(/usr/bin/git -C "$2" rev-parse origin/develop); printf '%s\trefs/heads/develop\n' "$s"; exit 0
+fi
+exec /usr/bin/git "$@"

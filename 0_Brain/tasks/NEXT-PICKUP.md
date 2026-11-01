@@ -8,6 +8,26 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 21:4x UPDATE (read FIRST; supersedes everything below where they differ)
+- **KAM 21:27 + 21:32 (live), verbatim:** "please spin up as many agent agents as possible and use the spark as much as you can to work through tickets" / "yes .  override the limit and continue to 100%.  if you reach it, I will log in with a new account". GRANT in EXPIRING-GRANTS: run to 100% on this account (gauge 7d:89% at 21:27); at 100% the cloud seats stop, the Spark continues, and Kam logs in anew.
+- **Kintsugi:** the KS 1384 train DEPLOYED + VERIFIED at b1fb543640e7 (D 48th STATUS B accepted 18:49, scored 0.95, wrapped; KS-1384 comment af5e841a). Demo untouched (Kam's word needed). develop d7691f35 = b1fb5436 + 7 KS-1868 squashes (1887-1893), for the next deploy round.
+- **Merged today on KS-1868:** #1887-#1893 (10 sites). Follow-ups KS-1924 (cached params age cap) and KS-1925 (202 for an unsaved export).
+- **LIVE SEATS:**
+  - **R 71st** (%54, Sonnet): raising 10 held passes as 3 PRs (persona TIER 1; governance x5; NFT minting x4). Brief `briefs_staged/2026-11-01_seatR71_raise_ks1868_o43_o45.md`.
+  - **S 10th** (%55, Opus): KS-1885 auth.ts social callback detail echo, TIER 1. Brief `..._seatS10_ks1885_auth_detail.md`.
+  - **E 24th** (%56, Sonnet): KS-1901 + KS-1893 mcp-server, tier 2. Brief `..._seatE24_ks1901_1893_mcp_errors.md`.
+  - Owed: each plan confirmation; then a gate per READY (tier 1 for persona and S 10th = Opus gate row G1; tier 2 = Sonnet); then merge seats.
+- **SPARK:**
+  - Operator 46 running (KS-1903, KS-1902 if not done by O26, KS-1884: bash_patch).
+  - UMBRELLA GATE BUILT in build_input.sh (KS-1868 refuses by FILE, not by ticket; controls in `0_Brain/reference/2026-11-01_umbrella-gate/`). Its first live exercise is when R 71st's PRs open.
+- **NEXT LANES** from the board screen (`0_Brain/reference/2026-11-01_board-screen-2127/screen.md`):
+  - lane 3: KS-1867 + KS-1865 check-no-sql-injection.sh;
+  - lane 4: KS-1815 + KS-1812 anchoring test-only;
+  - Spark: KS-1898, KS-1796, KS-1841;
+  - KS-1868: kyc x5, security x2, billing webhooks x1.
+  - **Use the R 70th/R 71st briefs as templates** (the 10-30/10-31 build briefs carry the RETIRED two-HTML docs scheme).
+- **Held launches get a TRIGGER** (a background load-waiter), never a note (ledger 21:3x).
+
 ## 17:3x UPDATE (read first; supersedes the R 70th section below where they differ)
 - Gates 76/77/78 all GO WITH NOTES: #1891 (968757f1), #1892 (b17ef440), #1893 (276564a7). R 70th PATCHes the notes into the bodies, files KS-1924 (G76-F2, filed) and the pre-existing '202 for an unsaved export' defect if unticketed, then wraps. Score R 70th at its wrap.
 - **SEAT B 71st LAUNCHED 17:32 (%53, Opus 5.5)** to merge #1891 -> #1892 -> #1893, one head-pinned GO each (brief `briefs_staged/2026-11-01_seatB71_ks1868_merge_1891_1893.md`). Wednesday owes: its plan confirmation, then one GO per PR after each MERGED mail (pre-GO checks as in RULES).

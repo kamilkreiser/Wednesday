@@ -167,6 +167,19 @@ _sup = {x.strip().lstrip('#') for x in pins.get("supersedes", "").split(",") if 
 _att_nums = {re.sub(r"[^0-9].*$", "", u.rsplit("/pull/", 1)[-1]) for u in prs}
 if _sup - _att_nums:
     refuse(f"supersedes={sorted(_sup)} names PR(s) {sorted(_sup - _att_nums)} that are NOT attached to this ticket (attached: {sorted(_att_nums)})")
+# 2026-11-01 (Wednesday; IMPROVEMENTS.md "2026-11-01 16:5x ... UMBRELLA ticket"): UMBRELLA tickets are tickets of ~250 file-disjoint
+# sites, where the TICKET is the wrong collision unit and the FILE is. For a ticket listed HERE an OPEN attached PR no longer refuses
+# at this gate; it is carried forward and refuses at the file gate (section 7e) ONLY if the PR touches this brief's product file or
+# test file (GitHub pulls files API; unreadable => REFUSE, fail closed). This list is a literal in this script on purpose: it is NOT
+# read from the environment or from a pin, so nothing can silently widen it. Every ticket NOT listed keeps the per-ticket refusal.
+UMBRELLA_TICKETS = {"KS-1868"}
+_umbrella_open = []   # (owner, repo, number) of OPEN attached PRs deferred to the file gate (umbrella tickets only)
+# TEST SEAM, default OFF: NIGHT_TEST_EXTRA_PR_URLS="<url>,<url>" appends github.com pull URLs to the ticket's attached PRs. It can only
+# ADD attachments (so only ever refuse more), prints a WARN, and exists so the red-proofs can plant an open PR on a real ticket.
+_xtra = [x.strip() for x in os.environ.get("NIGHT_TEST_EXTRA_PR_URLS", "").split(",") if x.strip()]
+if _xtra:
+    print(f"WARN TEST SEAM NIGHT_TEST_EXTRA_PR_URLS is ON: {len(_xtra)} PR URL(s) injected: {_xtra}")
+    prs = prs + _xtra
 if prs:
     _gh_api = os.environ.get("NIGHT_GITHUB_API", "https://api.github.com").rstrip("/")
     _gh_tok = os.environ.get("GH_TOKEN") or ""
@@ -175,6 +188,7 @@ if prs:
     if not _gh_tok:
         refuse(f"attached to pull request(s) {prs} and GH_TOKEN is unset in the Secuura .env — the PR state cannot be read (fail closed)")
     _open = []
+    _open_meta = []
     for _u in prs:
         _m = re.match(r"^https?://github\.com/([A-Za-z0-9_.\-]+)/([A-Za-z0-9_.\-]+)/pull/(\d+)(?:[/?#].*)?$", (_u or "").strip())
         if not _m:
@@ -197,7 +211,11 @@ if prs:
             print(f"attached PR #{_num}: OPEN — ADMITTED by supersedes= (this brief is its fix round / replacement)")
         elif _st == "open":
             _open.append(f"#{_num}")
-    if _open:
+            _open_meta.append((_own, _rep, _num))
+    if _open and ticket in UMBRELLA_TICKETS:
+        _umbrella_open = _open_meta
+        print(f"UMBRELLA ticket {ticket}: OPEN PR(s) {_open} do not refuse by ticket; each is checked by FILE against this brief's product/test file (section 7e)")
+    elif _open:
         refuse(f"attached to OPEN pull request(s) {_open} — a lane has it (merged/closed PRs do not refuse)")
 if n["archivedAt"]:
     refuse(f"archived at {n['archivedAt']}")
@@ -835,6 +853,42 @@ if _brief_for_sites:
         suggested = _brief_file
     else:
         print(f"  suggested_test_file: the brief has no `File:` line under `## The test` - the title slug stands: {suggested}")
+
+# ---------------------------------------------------------------- 7e. UMBRELLA FILE GATE (2026-11-01, see UMBRELLA_TICKETS above)
+# For an umbrella ticket with OPEN attached PRs: read each PR's files (GET /repos/<o>/<r>/pulls/<n>/files, paged, same token and
+# NIGHT_GITHUB_API seam as the state read) and REFUSE if any touches this brief's product file or test file. A files read that fails,
+# is malformed, or is cut off at the page cap REFUSES (fail closed). Paths are compared with the repo subdir prefix stripped.
+if _umbrella_open:
+    def _rel(pth):
+        pth = (pth or "").strip().lstrip("/")
+        return pth[len(subdir) + 1:] if pth.startswith(subdir + "/") else pth
+    _mine = {_rel(product): "product file", _rel(suggested): "test file"}
+    if edit_test_path: _mine[_rel(edit_test_path)] = "test file"
+    for _own, _rep, _num in _umbrella_open:
+        _touched = set()
+        for _pg in range(1, 31):
+            try:
+                _rq = urllib.request.Request(f"{_gh_api}/repos/{_own}/{_rep}/pulls/{_num}/files?per_page=100&page={_pg}",
+                    headers={"Authorization": "Bearer " + _gh_tok, "Accept": "application/vnd.github+json",
+                             "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "wednesday-night-build-input"})
+                with urllib.request.urlopen(_rq, timeout=30) as _r:
+                    _fj = json.loads(_r.read())
+                if not isinstance(_fj, list):
+                    raise ValueError("files response is not a list")
+                _names = []
+                for _f in _fj:
+                    _names.append(_f["filename"])
+                    if _f.get("previous_filename"): _names.append(_f["previous_filename"])
+            except Exception as _e:
+                refuse(f"umbrella ticket {ticket}: OPEN PR #{_num} ({_own}/{_rep}): its files could not be read ({type(_e).__name__}: {str(_e)[:160]}) — refused, fail closed")
+            _touched.update(_rel(x) for x in _names)
+            if len(_fj) < 100: break
+        else:
+            refuse(f"umbrella ticket {ticket}: OPEN PR #{_num} ({_own}/{_rep}) lists 3000+ files — the files read is cut off at the page cap — refused, fail closed")
+        _hit = sorted(x for x in _mine if x in _touched)
+        if _hit:
+            refuse(f"umbrella ticket {ticket}: OPEN PR #{_num} ({_own}/{_rep}) touches {_hit[0]} — this brief's {_mine[_hit[0]]}; a lane has that file (umbrella tickets refuse by FILE, not by ticket)")
+        print(f"umbrella ticket {ticket}: OPEN PR #{_num}: {len(_touched)} file(s) read, none is this brief's product/test file ({sorted(_mine)}) — admitted")
 
 # ---------------------------------------------------------------- 7d. REGION-CARRYING FILES (2026-09-23 10:3x)
 # Kam RULED this at 09:24 on card `wed-ornith-pool-thin-widen-the-harness`, option (a): "Fix the builder to

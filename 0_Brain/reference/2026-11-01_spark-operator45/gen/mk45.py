@@ -2,7 +2,7 @@
 import sys, os, importlib.util
 MK='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/spark/gen/mk.py'
 spec=importlib.util.spec_from_file_location('mk',MK); mk=importlib.util.module_from_spec(spec); spec.loader.exec_module(mk)
-TIP=mk.TIP='85c56a3d1eb92c8399dcfd3d6ee2a717cf356428'
+TIP=mk.TIP='d7691f35312ea158f043e87a3227e477cccb183d'
 BR='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/'
 SVC='Blockchain/Dev/services/'
 FALL="'unreadable thrown value'"

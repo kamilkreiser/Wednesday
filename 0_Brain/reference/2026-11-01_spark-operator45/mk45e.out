@@ -1,0 +1,76 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o45_p1_nftcertificate_load_from_db_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+@@ -126,6 +126,12 @@
+     }
+     logger.info('Loaded NFT certificates from DB', { count: memNftCertificates.size });
+   } catch (err: any) {
+-    logger.warn('Failed to load NFT certificates from DB — starting empty', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('Failed to load NFT certificates from DB — starting empty', { error: reason });
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o45_p2_nftcertificate_db_save_certificate_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+@@ -87,6 +87,12 @@
+       ]
+     );
+   } catch (err: any) {
+-    logger.error('DB save certificate failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB save certificate failed', { error: reason });
+   }
+ }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o45_p3_nftcertificate_get_nft_certificate_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+@@ -501,6 +501,12 @@
+           return cert;
+         }
+       } catch (err: any) {
+-        logger.error('DB get certificate failed', { error: err instanceof Error ? err.message : String(err) });
++        let reason: string;
++        try {
++          reason = err instanceof Error ? err.message : String(err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.error('DB get certificate failed', { error: reason });
+       }
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o45_p4_nftcertificate_get_user_nft_certificates_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/minting.service.ts
+@@ -581,6 +581,12 @@
+           memNftCertificates.set(cert.id, cert);
+         }
+       } catch (err: any) {
+-        logger.error('DB get user certificates failed', { error: err instanceof Error ? err.message : String(err) });
++        let reason: string;
++        try {
++          reason = err instanceof Error ? err.message : String(err);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.error('DB get user certificates failed', { error: reason });
+       }
+     }
+

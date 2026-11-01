@@ -2786,3 +2786,13 @@ INCLUDED until he says otherwise.
 > I Joined Macbook M5 Max and Studio M5 Ultra  to Run a 432 GB Model https://youtu.be/zY11Mss9fsw?si=Y-TSq5u_AUZaK53V Please review and file the findings in local llm model usage. I don't yet have my studio but this will be useful when I get it
 
 *Note:* research sub-agent commissioned; report to 0_Brain/reference/2026-11-01_m5-cluster-432gb-video/REPORT.md
+
+## 2026-11-01 21:28 — Kam (live-board, verbatim)
+> please spin up as many agent agents as possible and use the spark as much as you can to work through tickets
+
+*Note:* 21:27 ruling: launched R 71st; Spark + parallel seats commissioned
+
+## 2026-11-01 21:32 — Kam (live-board, verbatim)
+> yes .  override the limit and continue to 100%.  if you reach it, I will log in with a new account
+
+*Note:* 21:32 grant: 80-90% band lifted to 100% tonight; EXPIRING-GRANTS row added
