@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 02:4x UPDATE 2026-11-02 (the 23:4x boot seat, ctx 70% checkpoint; read FIRST, supersedes below where they differ)
+- **develop 3281db32** (ls-remote 02:3x). MERGED tonight from d7691f35, TEN: 1894, 1895, 1896, 1899, 1897, 1898, 1900, 1901, 1903, 1902. No merge seat live (B 73rd wrapped 0.96). **Launch B 74th** (template: briefs_staged/2026-11-02_seatB73_merge_1900_and_queue.md) when the first of these is gated.
+- **LIVE SEATS (2):**
+  - **E 25th** (%61): PRs 1904 (KS-1898), 1906 (KS-1868 billing), 1907 (KS-1841) under **GATE 89 (batched, Sonnet, running)**; (A) KS-1868 security x2 TIER 1 (c7bcdca3) pushing. OWED: relay gate 89 (notes PATCH / any fix); an OPUS tier-1 gate for (A) at its READY (KS-1152 R-880-1 already tracks the priors-live behaviour).
+  - **V 13th** (%63): PR 1905 (KS-1929, gate 88 GO WITH NOTES): merging develop 3281db32 into its branch (1903 squashed: its 9 files appear on both sides with identical content; prove blob EQUAL), one forward push, retarget base to develop, PATCH gate 88 notes. OWED: Wednesday's DELTA CHECK at its READY (three-dot vs develop = exactly 1905's 5 paths; the 8 non-allow 1903 paths diff empty), then a queue item to B 74th.
+- **Wrapped + scored tonight:** S 10th 0.95, E 24th 0.93, R 72nd 0.94, B 72nd 0.96, V 12th 0.95, F 20th 0.95, B 73rd 0.96.
+- **SPEND (7d 99%):** finishing gated work only. HELD until Kam's new account: raise seat for O50 x3 (auth, tier 1) + O51 x2 (nft); Spark operators; KS-1796; :798 + classifyMintError. The morning card must report the Spark idle with this reason, the ten merges, and the tickets filed (KS-1927, 1928, 1929, 1930, 1931, 1932).
+
 ## 02:1x UPDATE 2026-11-02 (the 23:4x boot seat, ctx 65%; read FIRST, supersedes below where they differ)
 - **develop 96480cc6a450** (ls-remote 02:1x). MERGED tonight from d7691f35: 1894, 1895, 1896, 1899, 1897, 1898, 1900 (seven). **GO #1901 SENT** to B 73rd (pin 96480cc6, head 15fbdbda, expect tree 8c469d52). OWED: its MERGED mail + ls-remote; then #1903's READY -> GO (B 73rd extending its squash guard to a two-key title).
 - **LIVE SEATS (3):**
