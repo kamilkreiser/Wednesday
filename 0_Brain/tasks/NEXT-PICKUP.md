@@ -27,8 +27,15 @@ supersede: REPLACED WHOLESALE 13:0x AEDT by the 09:33 successor seat (second rep
 - F-a 1838 `bf6a4363`, F0a 1853 `f01c1eec`, F0b 1854 `a9563f6b`, F0c 1857 `f0c31566`, F-b 1858 `77fac472`, R1 1868 `60e59bd2`, R2a 1874 `3d036184`, R2b 1884 `e21ca95c`.
 - **DEPLOY HOLD:** originate's and anchoring's `CARDANO_NETWORK` must be EQUAL on every box (G68-F1; G70-F1 = KS-1920).
 - **Kam's plan (card wed-morning-plan-1101 = a):** one deploy round, kintsugi first, then demo.
-- **KAM RULED (a) 14:03:38: `secuura-kintsugi-third-prune-for-train-round-1101`** = "Yes, clear kintsugi's build cache once more for the train round". Recorded (rule rc 0); NOT yet `--delivered` (do it at the D 48th brief's send). Kintsugi had ~12 GB free against ~45 GB needed.
-  - **IN PROGRESS 14:0x:** a Sonnet drafter is writing `2_Project_Files/fleet/briefs_staged/2026-11-01_seatD48_train_deploy_kintsugi.md` (Seat D 48th; ordinal check: D 47th 2, D 48th 0). Wednesday reads it WHOLE, answers its DRAFTER QUESTIONs, adds SELF-CHECK, dry-runs, then `SEAT_MODEL_ENV=claude-opus-5-5 brief_and_launch.sh --to "Secuura/Blockchain-D"`, verified at rung 5/6.
+- **KAM RULED (a) 14:03:38: `secuura-kintsugi-third-prune-for-train-round-1101`** (the cache prune), recorded and DELIVERED (in the D 48th brief).
+- **SEAT D 48th LAUNCHED 14:08 (%50, Opus 5.5).** Plan confirmation 03:22Z:
+  - target b1fb5436; train-in 8/8 + 2/2; 0 migrations;
+  - NETWORK GATE PASS (preview x4); tenants 6 active / 0 suspended / 0 archived; MULTI_TENANCY_ENABLED false;
+  - the 9 off-list commits confirmed READY by Wednesday.
+- **🔴 DISK BLOCKER, CARD OPEN: `secuura-kintsugi-disk-train-round-rollback-images-1101`** (rec a: delete old rollback images, keep the newest 3; b: wider cache clear; c: reduced build; d: grow the disk (money); e: hold = default).
+  - Rebuild set = 28 (shared changed), needing 45-53 GB; 12 GB free + ≤17.8 GB from the ruled prune.
+  - D 48th is MEASURING the keep-newest-2/3/4 bytes and the `-a` figure READ-ONLY. **Add its figure to the card when it lands.**
+  - NOTHING is pruned, built or deleted until Kam rules. On his ruling: GO KINTSUGI to D 48th with the EXACT deletion scope (never `pre-20261031k14`, never a `:latest`, never an image in use), then STATUS A, then the swap gates, then STATUS B (Wednesday accepts).
   - **The round (on a):** a FRESH lane -D deploy seat, kintsugi only:
     - the prune, with the before/after proof;
     - build incl. the 4 deferred frontends (admin, issuer, verifier, website; a minimatch-only change);
@@ -42,7 +49,7 @@ supersede: REPLACED WHOLESALE 13:0x AEDT by the 09:33 successor seat (second rep
 | Seat | Pane | Doing | Owed by Wednesday |
 |---|---|---|---|
 | ~~S 9th~~ | — | **WRAPPED 02:35Z, scored 0.95, pane closed.** PR 1885 KS-1861 MERGED `b1fb5436` (develop). All 4 of its tickets merged. | — (its worktrees s-s9-* are left in place, recorded; quarantine on a word) |
-| **R 69th** (Sonnet, ctx 63% at 14:0x) | %49 | Raising the held KS-1868 Spark passes as PRs:<br>- **PR 1 = #1887** (shared O38 x2) GATED: gate 72 GO WITH NOTES (Sonnet t2; limits F1/F2 written into the PR body; head 2d1a2265);<br>- **PR 2** (audit-logger O39, **t1**) pushing (head 99657405);<br>- **PR 3** (analytics O40 x2) told to start;<br>- **PR 4** (demo-service O34-P1) only if R is at or under ~70% at PR 3's READY. | - PR 2 READY FOR GATE: **gate 73 TIER 1 Opus** (row G1); mail R when it starts.<br>- PR 3 READY: tier-2 Sonnet gate.<br>- At PR 3's READY: read R's ctx, then say go or no on PR 4.<br>- Tell R at ~75% to start nothing new.<br>- **R does NOT merge:** launch a lane -B MERGE seat for the gated batch (1887 + the others) with head-pinned GOs. |
+| **R 69th** (Sonnet, ctx 69% at 14:2x) | %49 | Raising the held KS-1868 Spark passes as PRs:<br>- **#1887** (shared O38 x2) GATED, gate 72 GO WITH NOTES (head 2d1a2265);<br>- **#1888** (audit-logger O39, t1) GATED, gate 73 GO WITH NOTES (head 99657405; F1 medium pre-existing: a logger that throws still drops the event; R told to put limits in the body + FILE the AuditLogger follow-up);<br>- **PR 3** (analytics O40 x2, head 039cba4a) pushing;<br>- **PR 4** (demo-service O34-P1) GO'd after PR 3's READY (ctx was 67%), then wrap.<br>Filed today: KS-1922 (the analytics export error disclosure). | - PR 3 READY FOR GATE: a **tier-2 Sonnet gate** (row G2); mail R when it starts.<br>- PR 4 READY: tier 2.<br>- R's wrap: score it.<br>- **R does NOT merge:** launch a lane -B MERGE seat for the gated batch (1887, 1888, PR 3, PR 4) with head-pinned GOs; each PR's delta check against its gated head first. |
 
 **Wrapped + scored + panes closed today:**
 - W 15th 0.96 (the train);
