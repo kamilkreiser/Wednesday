@@ -27,8 +27,9 @@ supersede: REPLACED WHOLESALE 13:0x AEDT by the 09:33 successor seat (second rep
 - F-a 1838 `bf6a4363`, F0a 1853 `f01c1eec`, F0b 1854 `a9563f6b`, F0c 1857 `f0c31566`, F-b 1858 `77fac472`, R1 1868 `60e59bd2`, R2a 1874 `3d036184`, R2b 1884 `e21ca95c`.
 - **DEPLOY HOLD:** originate's and anchoring's `CARDANO_NETWORK` must be EQUAL on every box (G68-F1; G70-F1 = KS-1920).
 - **Kam's plan (card wed-morning-plan-1101 = a):** one deploy round, kintsugi first, then demo.
-- **CARD OPEN: `secuura-kintsugi-third-prune-for-train-round-1101`** (rec a; default: nothing). Kintsugi has ~12 GB free against ~45 GB needed (D 47th's measured planning figure).
-  - **On (a):** launch a FRESH lane -D deploy seat for the train round, kintsugi only:
+- **KAM RULED (a) 14:03:38: `secuura-kintsugi-third-prune-for-train-round-1101`** = "Yes, clear kintsugi's build cache once more for the train round". Recorded (rule rc 0); NOT yet `--delivered` (do it at the D 48th brief's send). Kintsugi had ~12 GB free against ~45 GB needed.
+  - **IN PROGRESS 14:0x:** a Sonnet drafter is writing `2_Project_Files/fleet/briefs_staged/2026-11-01_seatD48_train_deploy_kintsugi.md` (Seat D 48th; ordinal check: D 47th 2, D 48th 0). Wednesday reads it WHOLE, answers its DRAFTER QUESTIONs, adds SELF-CHECK, dry-runs, then `SEAT_MODEL_ENV=claude-opus-5-5 brief_and_launch.sh --to "Secuura/Blockchain-D"`, verified at rung 5/6.
+  - **The round (on a):** a FRESH lane -D deploy seat, kintsugi only:
     - the prune, with the before/after proof;
     - build incl. the 4 deferred frontends (admin, issuer, verifier, website; a minimatch-only change);
     - swap (api-gateway last), verify, and the network-equality gate.
@@ -41,7 +42,7 @@ supersede: REPLACED WHOLESALE 13:0x AEDT by the 09:33 successor seat (second rep
 | Seat | Pane | Doing | Owed by Wednesday |
 |---|---|---|---|
 | ~~S 9th~~ | — | **WRAPPED 02:35Z, scored 0.95, pane closed.** PR 1885 KS-1861 MERGED `b1fb5436` (develop). All 4 of its tickets merged. | — (its worktrees s-s9-* are left in place, recorded; quarantine on a word) |
-| **R 69th** (Sonnet) | %49 | Raising the held KS-1868 Spark passes as FOUR PRs: shared O38 x2 (t2), audit-logger O39 (**t1**), analytics O40 x2 (branch `-analytics-export-jobs`, t2), demo-service O34-P1 (t2). GO'd 01:28Z. PR 2: "no importer at this base" + canary suites (01:4xZ ANSWER). | READY FOR GATE per PR: commission gates (PR 2 = tier 1 Opus; others tier 2 Sonnet per routing). Mail the author when each gate starts. |
+| **R 69th** (Sonnet, ctx 63% at 14:0x) | %49 | Raising the held KS-1868 Spark passes as PRs:<br>- **PR 1 = #1887** (shared O38 x2) GATED: gate 72 GO WITH NOTES (Sonnet t2; limits F1/F2 written into the PR body; head 2d1a2265);<br>- **PR 2** (audit-logger O39, **t1**) pushing (head 99657405);<br>- **PR 3** (analytics O40 x2) told to start;<br>- **PR 4** (demo-service O34-P1) only if R is at or under ~70% at PR 3's READY. | - PR 2 READY FOR GATE: **gate 73 TIER 1 Opus** (row G1); mail R when it starts.<br>- PR 3 READY: tier-2 Sonnet gate.<br>- At PR 3's READY: read R's ctx, then say go or no on PR 4.<br>- Tell R at ~75% to start nothing new.<br>- **R does NOT merge:** launch a lane -B MERGE seat for the gated batch (1887 + the others) with head-pinned GOs. |
 
 **Wrapped + scored + panes closed today:**
 - W 15th 0.96 (the train);
