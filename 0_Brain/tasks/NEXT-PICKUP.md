@@ -8,6 +8,30 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 22:1x UPDATE (Wednesday ctx 70%; read FIRST)
+- **R 71st** (%54, ctx ~55%):
+  - PR 1 persona (TIER 1) BUILT, local head 3a88693f.
+  - PR 2 governance BUILT, local head cdf01b41, carrying the approved `export {};` hand edit in 5 test files.
+  - PR 3 minting next; it applies the same edit if its tests collide, no question needed.
+  - Pushes go through the queue. Each READY needs a gate: PR 1 = OPUS tier-1 gate (G1); PRs 2-3 = Sonnet tier 2.
+  - If R 71st passes ~75% before PR 3: it wraps after PR 2's READY with a HANDOVER, and R 72nd takes PR 3.
+- **S 10th** (%55, Opus, KS-1885 TIER 1):
+  - red 20/72 at base, green 72/72, 13/13 mutants killed; the whole auth suite was running.
+  - Design APPROVED: allowlist (AppError + anchored adapter texts, else KS 1791 constant), status unchanged, F3 link-route log fix and F4 cells in scope, empty-message case to the constant, hostile values stay 500.
+  - eslint preserve-caught-error: one-line disable with written justification (approved).
+  - Its READY needs an OPUS tier-1 gate.
+- **E 24th** (%56, Sonnet, KS-1901 + KS-1893):
+  - committed 07a4cc5b, mcp-server 47 -> 83, 18/18 mutants, push queued behind R 71st.
+  - Rulings: only the 3 pinned cells edited (ks1410 A C3, B C3, ks1868-hash C1); constant only (no errno field); Kam's ks1346 logging rule followed.
+  - Its READY needs a Sonnet tier-2 gate.
+- **SPARK:**
+  - Held, not yet raised: O46-P1 (KS-1903 dockerfile non-root), O46-P3 (KS-1884 manifest stderr; repo-root systemTest/).
+  - O46-P2 (KS-1902 akto) FAILED twice (model backslash errors); its golden is correct, so a raise seat may hand-apply it under its own proof.
+  - **Operator 47 RUNNING:** KS-1868 x5 in kyc/src/index.ts, the first LIVE umbrella-gate exercise; check its report for the gate's admitted/refused line.
+  - IMPROVEMENTS rows added: the umbrella gate (BUILT) and the test-template TS2451 collision (generator fix OWED).
+- **MERGE SEATS** after the gates: one -B lane per batch, B 71st's brief as template (one head-pinned GO per PR).
+- **Not started:** lanes 3 (KS-1867 + KS-1865) and 4 (KS-1815 + KS-1812) from the board screen, held for load (8-11 all evening, driven by a VM that is not ours).
+
 ## 21:4x UPDATE (read FIRST; supersedes everything below where they differ)
 - **KAM 21:27 + 21:32 (live), verbatim:** "please spin up as many agent agents as possible and use the spark as much as you can to work through tickets" / "yes .  override the limit and continue to 100%.  if you reach it, I will log in with a new account". GRANT in EXPIRING-GRANTS: run to 100% on this account (gauge 7d:89% at 21:27); at 100% the cloud seats stop, the Spark continues, and Kam logs in anew.
 - **Kintsugi:** the KS 1384 train DEPLOYED + VERIFIED at b1fb543640e7 (D 48th STATUS B accepted 18:49, scored 0.95, wrapped; KS-1384 comment af5e841a). Demo untouched (Kam's word needed). develop d7691f35 = b1fb5436 + 7 KS-1868 squashes (1887-1893), for the next deploy round.

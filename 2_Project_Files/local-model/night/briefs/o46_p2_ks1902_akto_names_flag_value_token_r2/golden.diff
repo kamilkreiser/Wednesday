@@ -1,0 +1,40 @@
+diff --git a/Blockchain/Dev/scripts/check-akto-container-names.sh b/Blockchain/Dev/scripts/check-akto-container-names.sh
+--- a/Blockchain/Dev/scripts/check-akto-container-names.sh
++++ b/Blockchain/Dev/scripts/check-akto-container-names.sh
+@@ -87,3 +87,7 @@
++# KS-1902: a flag that takes a SEPARATE value (-u root, -e FOO=1, --tail 5) before the name. Each flag may
++# be followed by ONE value word, so the chain from the verb to the name is not broken by the value.
++PATTERN+="|(docker[[:space:]]+(exec|logs|inspect|cp|kill|stop|rm|restart)([[:space:]]+-[^[:space:]]+([[:space:]]+[^-[:space:]][^[:space:]]*)?)+[[:space:]]+[\"']?akto-[a-z0-9-]+)"
++
+ hits=$(
+     grep -rnE "$PATTERN" "$SCAN_DIR/src" "$SCAN_DIR/bin" "$SCAN_DIR/scripts" \
+         --include='*.ts' --include='*.sh' --include='*.mjs' 2>/dev/null \
+diff --git a/Blockchain/Dev/scripts/__tests__/check_akto_container_names_flags.test.sh b/Blockchain/Dev/scripts/__tests__/check_akto_container_names_flags.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/check_akto_container_names_flags.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/check_akto_container_names_flags.test.sh
+@@ -59,3 +59,25 @@
++# KS-1902: a flag that takes a SEPARATE value word before the name.
++# CELL 7 (RED at the tip) - `-u root` before the name.
++check "docker exec -u root akto-mongo is flagged" 1 "$(run_case c7 'docker exec -u root akto-mongo mongosh')"
++
++# CELL 8 (RED at the tip) - `-e FOO=1` before the name.
++check "docker exec -e FOO=1 akto-mongo is flagged" 1 "$(run_case c8 'docker exec -e FOO=1 akto-mongo mongosh')"
++
++# CELL 9 (RED at the tip) - a no-value flag, then a valued flag.
++check "docker exec -it -u root akto-mongo is flagged" 1 "$(run_case c9 'docker exec -it -u root akto-mongo mongosh')"
++
++# CELL 10 (RED at the tip) - a long flag with its value as a separate word.
++check "docker logs --tail 5 akto-testing is flagged" 1 "$(run_case c10 'docker logs --tail 5 akto-testing')"
++
++# CELL 11 (RED at the tip) - a valued flag, then a quoted name.
++check "docker exec -u root \"akto-mongo\" is flagged" 1 "$(run_case c11 'docker exec -u root "akto-mongo" mongosh')"
++
++# CELL 12 (GREEN CONTROL, tip AND after) - a valued flag before a non-akto container is clean.
++check "CONTROL docker exec -u root other-mongo is clean" 0 "$(run_case c12 'docker exec -u root other-mongo mongosh')"
++
++# CELL 13 (GREEN CONTROL, tip AND after) - a valued flag before the derived AKTO_PREFIX form is clean.
++check "CONTROL docker exec -u root with the AKTO_PREFIX form is clean" 0 "$(run_case c13 'docker exec -u root "${AKTO_PREFIX:-akto}-mongo" mongosh')"
++
+ echo ""
+ echo "Results: $PASS passed, $FAIL failed"
+ [[ "$FAIL" -eq 0 ]]

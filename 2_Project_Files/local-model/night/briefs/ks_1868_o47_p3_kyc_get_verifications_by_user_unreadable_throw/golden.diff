@@ -1,0 +1,188 @@
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -214,7 +214,13 @@
+     // KS-291: rowToVerification is async (per-row subject-DEK resolve, cached)
+     return await Promise.all(result.rows.map((row) => rowToVerification(row)));
+   } catch (err: any) {
+-    logger.error('DB get verifications by user failed', { userId, error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB get verifications by user failed', { userId, error: reason });
+     return [];
+   }
+ }
+diff --git a/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-get-verifications-by-user-unreadable-throw.test.ts b/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-get-verifications-by-user-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-get-verifications-by-user-unreadable-throw.test.ts
+@@ -0,0 +1,165 @@
++import { describe, it, expect, vi, beforeAll, beforeEach, afterAll } from 'vitest';
++import http from 'http';
++import { randomUUID } from 'crypto';
++
++process.env.KYC_PROVIDER = 'mock';
++process.env.NODE_ENV = 'test';
++
++// KS-1868: `dbGetVerificationsByUser` must still log its line and let GET /api/kyc/user/:userId carry on when the thrown value
++// itself cannot be read (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws,
++// throws on `.message`). Harness: the KS-1845 one (real app on a real listener, db and subject-DEK modules replaced).
++// The db stand-in rejects with a plain function, not a vi.fn(): a spy inspects what it rejects with and could
++// itself fail on a revoked Proxy before the code under test saw it.
++// Three of the helpers are awaited by handlers with no try/catch (Express 4 never sees their rejection), so
++// a rejecting helper leaves the request hanging: the cell gives the request a short deadline and counts the
++// unhandled rejection itself instead of letting the runner report it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  failOn: undefined as RegExp | undefined,
++  logged: [] as unknown[][],
++  unhandled: 0,
++}));
++
++vi.mock('../db', () => ({
++  initDb: async () => undefined,
++  isDbAvailable: () => true,
++  query: (sql: string) => {
++    if (h.failOn && h.failOn.test(String(sql))) return Promise.reject(h.toThrow);
++    return Promise.resolve({ rows: [] });
++  },
++}));
++
++vi.mock('../subjectDeks', () => ({
++  subjectDeks: {
++    getOrCreateDek: async () => Buffer.alloc(32, 7),
++    getDek: async () => Buffer.alloc(32, 7),
++    evict: () => undefined,
++  },
++}));
++
++vi.mock('../utils/logger', () => {
++  const logger = {
++    info: () => undefined,
++    warn: () => undefined,
++    debug: () => undefined,
++    error: (...args: unknown[]) => {
++      h.logged.push(args);
++    },
++  };
++  return { logger, createLogger: () => logger, validateEnv: () => undefined };
++});
++
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const actual = await importOriginal<Record<string, unknown>>();
++  return {
++    ...actual,
++    encryptFieldWithDek: (plain: string) => plain,
++    isEncryptedPii: () => false,
++    isSubjectDekCiphertext: () => false,
++    authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  };
++});
++
++vi.mock('express', async (importOriginal) => {
++  const actual: any = (await importOriginal<any>()).default ?? (await importOriginal<any>());
++  const factory: any = (...args: any[]) => {
++    const app = actual(...args);
++    app.listen = () => ({ close: (cb?: () => void) => cb?.(), address: () => ({ port: 0 }), on() { return this; } });
++    return app;
++  };
++  Object.assign(factory, actual);
++  return { ...actual, default: factory };
++});
++
++const TIMEOUT_MS = 2500;
++const SITE_ID = randomUUID();
++const SAVED_LISTENERS = process.listeners('unhandledRejection');
++const onUnhandled = () => {
++  h.unhandled += 1;
++};
++
++let httpServer: http.Server;
++let origin: string;
++
++async function startApp() {
++  if (httpServer) return;
++  const app = (await import('../index')).default as any;
++  httpServer = http.createServer(app);
++  await new Promise<void>((resolve) => httpServer.listen(0, '127.0.0.1', () => resolve()));
++  origin = 'http://127.0.0.1:' + String((httpServer.address() as any).port);
++}
++
++/** undefined when the request got no answer inside the deadline. */
++async function callRoute(method: string, path: string, body?: unknown) {
++  const res = await fetch(origin + path, {
++    method,
++    headers: { 'Content-Type': 'application/json' },
++    body: body === undefined ? undefined : JSON.stringify(body),
++    signal: AbortSignal.timeout(TIMEOUT_MS),
++  }).catch(() => undefined);
++  if (!res) return undefined;
++  const parsed: any = await res.json().catch(() => undefined);
++  return { status: res.status, body: parsed };
++}
++
++const call = () => callRoute('GET', '/api/kyc/user/' + SITE_ID);
++const LINES = () => h.logged.filter((c) => String(c[0]).includes('DB get verifications by user failed'));
++
++afterAll(async () => {
++  if (httpServer) {
++    (httpServer as http.Server & { closeAllConnections?: () => void }).closeAllConnections?.();
++    await new Promise<void>((resolve) => httpServer.close(() => resolve()));
++  }
++  process.removeListener('unhandledRejection', onUnhandled);
++  for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
++});
++
++describe('KS-1868 dbGetVerificationsByUser reads the thrown value safely', () => {
++  beforeAll(async () => {
++    process.removeAllListeners('unhandledRejection');
++    process.on('unhandledRejection', onUnhandled);
++    await startApp();
++  }, 120_000);
++
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.failOn = /FROM\s+svc_kyc_verifications\s+WHERE\s+user_id/i;
++    h.logged.length = 0;
++    h.unhandled = 0;
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message and the route answers an empty list', async () => {
++    h.toThrow = new Error('db down');
++    const res = await call();
++    expect(res?.status).toBe(200);
++    expect(res?.body?.data?.count).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ userId: SITE_ID, error: 'db down' });
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and the route answers an empty list', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    const res = await call();
++    expect(res?.status).toBe(200);
++    expect(res?.body?.data?.count).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ userId: SITE_ID, error: 'unreadable thrown value' });
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and the route answers an empty list', async () => {
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const res = await call();
++    expect(res?.status).toBe(200);
++    expect(res?.body?.data?.count).toBe(0);
++    expect(LINES()).toHaveLength(1);
++    expect(LINES()[0][1]).toEqual({ userId: SITE_ID, error: 'unreadable thrown value' });
++  });
++});

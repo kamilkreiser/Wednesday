@@ -1,0 +1,59 @@
+diff --git a/Blockchain/Dev/scripts/check-dockerfile-non-root.sh b/Blockchain/Dev/scripts/check-dockerfile-non-root.sh
+--- a/Blockchain/Dev/scripts/check-dockerfile-non-root.sh
++++ b/Blockchain/Dev/scripts/check-dockerfile-non-root.sh
+@@ -29,3 +29,7 @@
++  # KS-1903: `USER root:root`, `USER 0:0` and `USER ROOT` run as root too: drop any :group, ignore case.
++  last_user=${last_user%%:*}
++  last_user=$(printf '%s' "$last_user" | tr 'A-Z' 'a-z')
++
+   if [ -z "$last_user" ]; then
+     echo "::error::$f has NO USER directive — runs as root (pen-test F-15)"
+     EXIT=1
+diff --git a/Blockchain/Dev/scripts/__tests__/check_dockerfile_non_root_reports_root.test.sh b/Blockchain/Dev/scripts/__tests__/check_dockerfile_non_root_reports_root.test.sh
+--- a/Blockchain/Dev/scripts/__tests__/check_dockerfile_non_root_reports_root.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/check_dockerfile_non_root_reports_root.test.sh
+@@ -69,2 +69,43 @@
++# KS-1903: a final USER written as user:group, or in another case, is still root.
++# CELL 5 (RED at the tip) - `USER root:root` exits 1 and is named.
++RC_RR="$(run_case rootroot $'FROM node:20\nUSER root:root\n')"
++if [[ "$RC_RR" == "1" ]] && "$REAL_GREP" -qF "final USER is" "$WORK/rootroot.out"; then
++  echo "PASS: a final USER root:root exits 1 and is named"; PASS=$((PASS+1))
++else
++  echo "FAIL: USER root:root case: rc=$RC_RR out=$(head -2 "$WORK/rootroot.out" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++# CELL 6 (RED at the tip) - `USER 0:0` exits 1 and is named.
++RC_ZZ="$(run_case zerozero $'FROM node:20\nUSER 0:0\n')"
++if [[ "$RC_ZZ" == "1" ]] && "$REAL_GREP" -qF "final USER is" "$WORK/zerozero.out"; then
++  echo "PASS: a final USER 0:0 exits 1 and is named"; PASS=$((PASS+1))
++else
++  echo "FAIL: USER 0:0 case: rc=$RC_ZZ out=$(head -2 "$WORK/zerozero.out" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++# CELL 7 (RED at the tip) - `USER ROOT` exits 1 and is named.
++RC_UP="$(run_case upper $'FROM node:20\nUSER ROOT\n')"
++if [[ "$RC_UP" == "1" ]] && "$REAL_GREP" -qF "final USER is" "$WORK/upper.out"; then
++  echo "PASS: a final USER ROOT exits 1 and is named"; PASS=$((PASS+1))
++else
++  echo "FAIL: USER ROOT case: rc=$RC_UP out=$(head -2 "$WORK/upper.out" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++# CELL 8 (GREEN CONTROL, tip AND after) - a non-root user:group passes.
++RC_AG="$(run_case appgroup $'FROM node:20\nUSER app:app\n')"
++if [[ "$RC_AG" == "0" ]]; then
++  echo "PASS: CONTROL USER app:app exits 0"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL USER app:app: rc=$RC_AG out=$(head -2 "$WORK/appgroup.out" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++# CELL 9 (GREEN CONTROL, tip AND after) - a numeric non-root uid:gid passes.
++RC_NU="$(run_case numeric $'FROM node:20\nUSER 1000:1000\n')"
++if [[ "$RC_NU" == "0" ]]; then
++  echo "PASS: CONTROL USER 1000:1000 exits 0"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL USER 1000:1000: rc=$RC_NU out=$(head -2 "$WORK/numeric.out" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
+ echo "check_dockerfile_non_root_reports_root: $PASS passed, $FAIL failed"
+-[[ "$FAIL" -eq 0 && "$PASS" -eq 4 ]]
++[[ "$FAIL" -eq 0 && "$PASS" -eq 9 ]]
