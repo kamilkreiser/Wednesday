@@ -54573,5 +54573,42 @@
    }
   ],
   "amended_ts": "2026-11-01T14:35:55.432280+11:00"
+ },
+ {
+  "id": "nexusai-rd913-moderates-accept-or-upgrade-1101",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: the two high security advisories are fixed; 12 moderate ones remain. Upgrade two libraries, or accept them?",
+  "bluf": "The two high-severity package advisories are fixed on main (lockfile only, checked by a reviewer; neither was reachable from NexusAI's own code). The production audit check still shows red because 12 moderate advisories remain, in glob, minimatch and the libraries that pull them in under archiver and sqlite3. They cannot be fixed in the lockfile alone: it needs newer versions of archiver or sqlite3, a larger change built as its own lane with tests and a review. I recommend the upgrade, because on another project you chose to bump versions rather than accept advisories, so the vulnerable code is removed rather than recorded; that earlier ruling was for a different client, so I am asking rather than assuming. Option b accepts them for now and records why, so the check goes green sooner.",
+  "default_action": "Nothing changes; the check stays red and the ticket stays open.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Upgrade archiver and sqlite3 as their own lane",
+    "detail": "Builder, tests and a review before any merge; nothing deploys"
+   },
+   {
+    "key": "b",
+    "label": "Accept them for now and record why",
+    "detail": "The check is set to pass on these 12; an upgrade ticket is filed for later"
+   },
+   {
+    "key": "c",
+    "label": "Leave the check red",
+    "detail": "Nothing changes; the ticket stays open"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-01T16:49:57.262568+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-08 09:57",
+   "2026-09-09 10:29",
+   "2026-09-10 20:15",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD hpsm37-scoring-model-accept",
+   "CARD hpsmpoc-request-timing-floor-accept-1023"
+  ]
  }
 ]
