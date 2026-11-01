@@ -1,0 +1,119 @@
+diff --git a/Blockchain/Dev/packages/shared/src/security/audit-logger.ts b/Blockchain/Dev/packages/shared/src/security/audit-logger.ts
+--- a/Blockchain/Dev/packages/shared/src/security/audit-logger.ts
++++ b/Blockchain/Dev/packages/shared/src/security/audit-logger.ts
+@@ -319,7 +319,13 @@
+       try {
+         await this.config.onEvent(event);
+       } catch (error) {
+-        logger.error('Failed to process audit event', { error: error instanceof Error ? error.message : String(error) });
++        let reason: string;
++        try {
++          reason = error instanceof Error ? error.message : String(error);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        logger.error('Failed to process audit event', { error: reason });
+         // Re-add to buffer for retry
+         this.eventBuffer.unshift(event);
+       }
+diff --git a/Blockchain/Dev/packages/shared/src/__tests__/ks1868-audit-logger-flush-unreadable-throw.test.ts b/Blockchain/Dev/packages/shared/src/__tests__/ks1868-audit-logger-flush-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks1868-audit-logger-flush-unreadable-throw.test.ts
+@@ -0,0 +1,96 @@
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++
++// KS-1868: AuditLogger.flush must still log its failure and put the event back in the buffer for
++// retry when `onEvent` rejects with a value that cannot be read (a revoked Proxy throws on
++// `instanceof`; an Error whose `message` getter throws, throws on `.message`). Today the catch
++// block itself throws, so flush() rejects and the failed event is dropped instead of retried.
++// `onEvent` is a plain function, not vi.fn(): a spy inspects what it rejects with and could itself
++// fail on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  error: vi.fn(),
++}));
++
++vi.mock('../logger', () => ({
++  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: h.error },
++}));
++
++import { AuditLogger, AuditEventCategory } from '../security/audit-logger';
++
++type Outcome = { threw: boolean; delivered: number };
++
++async function run(toThrow: unknown): Promise<Outcome> {
++  let fail = true;
++  let delivered = 0;
++  const audit = new AuditLogger({
++    serviceName: 'svc',
++    version: '1',
++    environment: 'test',
++    hashIntegrity: false,
++    maxBatchSize: 1000,
++    flushIntervalMs: 3600000,
++    onEvent: () => {
++      if (fail) return Promise.reject(toThrow);
++      delivered++;
++      return Promise.resolve();
++    },
++  });
++  const out: Outcome = { threw: false, delivered: 0 };
++  try {
++    await audit.log(AuditEventCategory.SECURITY, 'KS1868_PROBE');
++    try {
++      await audit.flush();
++    } catch {
++      out.threw = true;
++    }
++    fail = false;
++    await audit.flush();
++    out.delivered = delivered;
++  } finally {
++    audit.stopFlushTimer();
++  }
++  return out;
++}
++
++const FLUSH_ERRORS = () => h.error.mock.calls.filter((c) => String(c[0]).includes('Failed to process audit event'));
++
++describe('KS-1868 AuditLogger.flush reads an onEvent failure safely', () => {
++  beforeEach(() => {
++    h.error.mockReset();
++  });
++  afterEach(() => {
++    vi.clearAllTimers();
++  });
++
++  it('control ks1868 C1 an ordinary Error is logged with its message and the event is retried', async () => {
++    const out = await run(new Error('sink down'));
++    expect(out.threw).toBe(false);
++    expect(FLUSH_ERRORS()).toHaveLength(1);
++    expect(FLUSH_ERRORS()[0][1]).toEqual({ error: 'sink down' });
++    expect(out.delivered).toBe(1);
++  });
++
++  it('RED ks1868 R1 a revoked Proxy rejection is logged as a constant and the event is retried', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    const out = await run(proxy);
++    expect(out.threw).toBe(false);
++    expect(FLUSH_ERRORS()).toHaveLength(1);
++    expect(FLUSH_ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++    expect(out.delivered).toBe(1);
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws is logged as a constant and the event is retried', async () => {
++    const hostile = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const out = await run(hostile);
++    expect(out.threw).toBe(false);
++    expect(FLUSH_ERRORS()).toHaveLength(1);
++    expect(FLUSH_ERRORS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++    expect(out.delivered).toBe(1);
++  });
++});
