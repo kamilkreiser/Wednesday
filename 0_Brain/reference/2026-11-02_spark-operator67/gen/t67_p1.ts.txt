@@ -1,0 +1,139 @@
+process.env.NODE_ENV = 'development';
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+
+const mockQueryRaw = jest.fn();
+const mockExecuteRaw = jest.fn();
+const mockExecuteRawUnsafe = jest.fn();
+const mockLoggerError = jest.fn();
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw, $executeRawUnsafe: mockExecuteRawUnsafe },
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { signatoriesRouter } from '../routes/signatories';
+// KS-1868 (originate routes/signatories.ts): the catch blocks of these routes logged `String(error)` themselves and then answered the constant 500. When the thrown value cannot be read
+// (a revoked Proxy; an Error whose `message` getter throws), String() threw INSIDE the catch: the handler's promise rejected and the request got NO answer. Each catch now reads the value
+// inside its own try and logs the constant reason `unreadable thrown value`. The database stand-in rejects with the thrown value on a real loopback listener; a request that gets no answer
+// within the window is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
+const UNREADABLE = 'unreadable thrown value';
+const ACTOR = '11111111-1111-4111-8111-111111111111';
+
+const body500 = (message: string) => ({ success: false, error: { code: 'INTERNAL_ERROR', message } });
+
+const ROUTES = [
+  {
+    route: 'GET /',
+    method: 'GET',
+    path: '/?organizationId=11111111-1111-4111-8111-111111111111',
+    db: () => mockQueryRaw,
+    context: 'Failed to list signatories',
+    message: 'Failed to list signatories', payload: undefined,
+  },
+  {
+    route: 'GET /check',
+    method: 'GET',
+    path: '/check?organizationId=11111111-1111-4111-8111-111111111111&userId=11111111-1111-4111-8111-111111111111',
+    db: () => mockQueryRaw,
+    context: 'Failed to check signatory authorisation',
+    message: 'Failed to check authorisation', payload: undefined,
+  },
+  {
+    route: 'GET /:id',
+    method: 'GET',
+    path: '/11111111-1111-4111-8111-111111111111',
+    db: () => mockQueryRaw,
+    context: 'Failed to get signatory',
+    message: 'Failed to get signatory', payload: undefined,
+  },
+];
+
+
+const app = express();
+app.use(express.json());
+app.use((req, _res, next) => {
+  (req as any).user = { userId: ACTOR, email: 'ks1868@example.test' };
+  next();
+});
+app.use('/api/signatories', signatoriesRouter);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => server?.close());
+beforeEach(() => jest.resetAllMocks());
+
+async function callWithThrow(c: (typeof ROUTES)[number], thrown: unknown): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
+  c.db().mockRejectedValueOnce(thrown);
+  try {
+    const res = await fetch(baseUrl + '/api/signatories' + c.path, {
+      method: c.method,
+      headers: { 'content-type': 'application/json' },
+      body: c.method === 'GET' ? undefined : JSON.stringify(c.payload ?? {}),
+      signal: AbortSignal.timeout(1500),
+    });
+    return { status: res.status, body: await res.json() };
+  } catch {
+    return { status: 'NO ANSWER', body: null };
+  }
+}
+
+function revokedProxy(): object {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function throwingMessageError(): Error {
+  const e = new Error('ks1868 hidden');
+  Object.defineProperty(e, 'message', {
+    get() {
+      throw new Error('ks1868 message getter');
+    },
+  });
+  return e;
+}
+
+describe.each(ROUTES)('KS-1868 $route catch reads the thrown value safely', (c) => {
+  it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500`, async () => {
+    const reply = await callWithThrow(c, revokedProxy());
+    expect(reply).toEqual({ status: 500, body: body500(c.message) });
+    expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
+    expect(c.db()).toHaveBeenCalledTimes(1);
+  });
+
+  it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and answered with the constant 500`, async () => {
+    const reply = await callWithThrow(c, throwingMessageError());
+    expect(reply).toEqual({ status: 500, body: body500(c.message) });
+    expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
+    expect(c.db()).toHaveBeenCalledTimes(1);
+  });
+
+  it(`control ks1868 C1 ${c.route}: an ordinary Error is logged as before (String of the Error) and the answer is the constant 500`, async () => {
+    const reply = await callWithThrow(c, new Error('ks1868 ordinary'));
+    expect(reply).toEqual({ status: 500, body: body500(c.message) });
+    expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: 'Error: ks1868 ordinary' }]]);
+    expect(c.db()).toHaveBeenCalledTimes(1);
+  });
+
+  it(`control ks1868 C2 ${c.route}: a thrown string is logged as itself, as before`, async () => {
+    const reply = await callWithThrow(c, 'ks1868 plain string');
+    expect(reply).toEqual({ status: 500, body: body500(c.message) });
+    expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: 'ks1868 plain string' }]]);
+    expect(c.db()).toHaveBeenCalledTimes(1);
+  });
+});

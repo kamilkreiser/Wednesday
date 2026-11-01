@@ -1,0 +1,28 @@
+<h2>originate answers 400 instead of a raw 500 for three malformed inputs — KS-593</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Three
+        routes in <code>Blockchain/Dev/services/originate</code> used to let a malformed input reach a raw
+        <code>500 INTERNAL_ERROR</code>: a negative <code>offset</code> on two admin list routes
+        (<code>routes/adminConfig.ts</code>), a non-object <code>recipients[]</code> entry on
+        <code>POST /api/documents/:id/share</code> (<code>routes/documents.ts</code>), and a non-uuid id on
+        <code>GET /api/signatories</code> and <code>/check</code> (<code>routes/signatories.ts</code>). Each
+        now returns the route's <strong>existing</strong> <code>400</code>. </td></tr><tr><td><strong>No authorisation
+        decision moves.</strong> Every guard sits after authentication, the role/scope gate and the
+        tenant-scoped read, and before any write transaction — so nothing is persisted on the refused path.
+        An array recipient still falls through to the email/userId check, which answers 400. </td></tr><tr><td>
+        <strong>NARROWING.</strong> 2 of the 6 negative-offset sites in KS 565 §2, 1 of the 7 raw-5xx
+        operations, and the ninth operation plus <code>/check</code>. <strong>KS-593 stays open</strong> and
+        does not move to Done.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td>
+        <strong>(1) Run the suite through the package's own <code>npm test</code></strong> from
+        <code>services/originate</code>, not a bare <code>jest</code> from the repo root. Base is
+        <strong>93 suites / 1077 tests / 0 failed</strong>; with these three passes it is
+        <strong>96 / 1093 / 0</strong>. </td></tr><tr><td><strong>(2) Proving one pass red needs the right file
+        set.</strong> The share pass also edits KS 1293's <code>SUBJECTS</code>, so running only its new
+        <code>ks593-share-*</code> file reads <strong>5</strong> cells and looks like a pass of a different
+        size; running it together with <code>ks1293-originate-suite-is-hermetic.test.ts</code> gives the real
+        <strong>2 failed / 13 passed (15)</strong> -&gt; <strong>15/15</strong>. A red count measured over a
+        narrower file set than the claim is the trap here. <strong>(3)</strong> Only a test file that mentions
+        <code>ANCHORING_SERVICE_URL</code> has to be a KS 1293 <code>SUBJECT</code>; the adminconfig and
+        signatories files mention it zero times and must stay unlisted.
+      </td></tr></table></div>

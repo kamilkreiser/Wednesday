@@ -1,0 +1,152 @@
+<h2>
+      10. API contract — the delegation GET spec declares its own envelope
+      (KS-1015)
+    </h2>
+<div class="diagram-container">
+<div class="diagram-title">
+        10a. KS-1015 — <code>GET /api/delegations/{id}</code> publishes
+        the envelope its handler returns
+      </div>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What it pins.</strong></td><td> The published contract for
+        <code>GET /api/delegations/{id}</code> declared a <em>bare</em>
+<code>Delegation</code> record as its 200 body, while the handler
+        (<code>routes/delegations.ts</code>, <code>GET /:id</code>) answers
+        <code>{ success, data: { delegation, chain } }</code> — the
+        <code>chain</code> being whatever <code>buildDelegationChain()</code>
+        returns. </td></tr><tr><td>Schemathesis flagged the 200 as
+        <code>response_schema_conformance</code> in the sweep of
+        <strong>2026-09-29</strong>.
+        <strong>The spec now follows the runtime</strong>, not the other way
+        round: the 200 content is a <code>successEnvelope(...)</code> whose
+        <code>data</code> carries the unchanged
+        <code>Delegation</code> component by <code>$ref</code> alongside the
+        chain object. <code>invalidReason</code> is declared optional because
+        the chain only carries it when <code>isValid</code> is false.
+      </td></tr><tr><td class="pm-topic" rowspan="2"><strong>It NARROWS KS-1015, it does not close it.</strong></td><td> The ticket is
+        a sweep finding covering
+        <strong>28 check/operation pairs with no live owner</strong>; this
+        change owns <strong>one</strong> of them. </td></tr><tr><td>The remaining pairs stay open
+        on the ticket.
+      </td></tr></table>
+<div class="diagram-title">10b. The suite cells, and how to run them</div>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+        File:
+        <code>Blockchain/Dev/services/transfer/src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts</code>
+        — 79 lines, six cells. </td><td>It renders
+        <em>the document the generator publishes</em>, from the shared registry
+        the transfer module populates on import, and asserts against that.
+        <strong>No server, no database, no network, and zero mocks</strong>
+        (<code>vi.mock</code> count in this file is <strong>0</strong>) —
+        there is nothing to mock, because the subject is the emitted contract
+        rather than a response.
+      </td></tr></table>
+<pre>
+# Run it (services/transfer). The explicit run form, never watch mode.
+cd Blockchain/Dev/services/transfer
+npx vitest run                                                                 # the whole suite
+npx vitest run src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts   # just these cells
+
+D1  the 200 body is the success/data envelope, not the bare Delegation record
+D2  data carries the Delegation component and the chain, both required
+D3  the chain declares the fields buildDelegationChain returns, invalidReason optional
+C1  the GET operation keeps bearerAuth, its path parameter id, and its 404      &lt;- CONTROL
+C2  the Delegation component stays published with its required fields           &lt;- CONTROL
+C3  the sibling list and per-document operations keep their own envelopes       &lt;- CONTROL
+
+# And the generator, which is what actually publishes the YAML:
+cd Blockchain/Dev
+npm run generate-openapi              # REGENERATE. Never hand-patch docs/openapi/secuura-api.yaml.
+npm run generate-openapi -- --check   # read-only: rc 0 if on-disk matches generated, rc 1 if it drifted
+npm run check:openapi                 # 405 example blocks must resolve to the fixture set</pre>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Red-first / green-after, measured 2026-10-04 at base
+          <code>2d85b84e1012</code>.</strong></td><td>
+        With the new test against base product code:
+        <strong>D1, D2 and D3 red — and all three reds are
+          <code>AssertionError</code></strong>
+        (3 of 3), with <code>Cannot find module</code> /
+        <code>SyntaxError</code> / <code>Failed to load</code> /
+        <code>Transform failed</code> all at <strong>0</strong>. </td></tr><tr><td>That
+        distinction is the point: a revert that broke the import would redden
+        the file without any cell exercising anything.
+        <strong>C1, C2 and C3 stayed green in the same run</strong>, which is
+        what makes the three flips a statement about the contract rather than
+        about the harness. </td></tr><tr><td>At the PR head: <strong>6/6 green</strong>. </td></tr><tr><td>Suite
+        totals moved <strong>4 → 5 files</strong> and
+        <strong>70 → 76 tests</strong>, both sides measured on the same
+        base.
+      </td></tr><tr><td class="pm-topic" rowspan="3"><strong>The YAML is REGENERATED, never patched</strong></td><td>, and that was
+        verified both ways. <code>npm run generate-openapi</code> reproduces the
+        committed blob <code>52310cab1874</code>
+<strong>byte-identically</strong> (sha256
+        <code>373ef7805f8896aa…</code>, 39,928 lines, 219
+        <code>required: true</code>, 0 tracked changes after the run). </td></tr><tr><td>The
+        negative arm: with the YAML reverted to its base blob,
+        <code>generate-openapi -- --check</code> returns
+        <strong>rc 1</strong> with
+        <code>CHECK FAIL: generated YAML differs from on-disk version</code>
+<em>and the file's sha256 is unchanged</em> — so the check path is
+        read-only and the refusal is a refusal, not a silent rewrite. </td></tr><tr><td>The
+        positive arm at the PR head returns <strong>rc 0</strong>,
+        <code>CHECK PASS: on-disk YAML matches generated</code>.
+        <code>npm run check:openapi</code> is rc 0.
+      </td></tr><tr><td class="pm-topic" rowspan="5"><strong>Timing — no row touched, and that is a measurement.</strong></td><td>
+        Measured
+        <strong>at the base SHA <code>2d85b84e1012</code>, before this block
+          existed</strong>, in <strong>both</strong> platform-k documents:
+        <code>services/transfer</code>, <code>generate-openapi</code> and
+        <code>check:openapi</code> each returned a raw count of
+        <strong>1</strong>, and
+        <strong>every one of those hits sat inside the KS-1402 block of section
+          9</strong>
+        (this document lines 1703–1704; the cheat sheet line 3684), within
+        that block's own "no row touched" sentence. </td></tr><tr><td>So
+        <strong>no stated timing outside the KS-1402 block covered the transfer
+          vitest suite or the OpenAPI drift check</strong>, and <code>KS-1015</code> and <code>delegation</code> returned 0 in
+        both. </td></tr><tr><td>Must-hit control at that SHA: <code>auth</code> 68 hits here and
+        67 in the cheat sheet.
+        <strong>No tier budget or timing row is changed and none is left looking
+          re-measured.</strong>
+<em>Re-running that grep on the PR head will not reproduce 1</em>
+        — this block is itself the first text outside section 9 to name
+        those commands, so it raises the count it reports. </td></tr><tr><td>A measurement has to
+        name the tree it was taken on, which is why the SHA is stated above and
+        <strong>no head-side count is quoted here</strong>: any number printed
+        inside this document about this document moves when the sentence
+        printing it is edited, and two drafts of this paragraph proved exactly
+        that. </td></tr><tr><td>What is stable, and is the claim:
+        <strong>every added hit is prose in this block or in the cheat sheet's, and
+          none of them is a timing row or a tier budget.</strong>
+</td></tr><tr><td colspan="2">
+        The figure this change does own, measured rather than estimated:
+        <strong>the transfer vitest suite runs 5 files / 76 tests in
+          373–375 ms reported (0.79–0.83 s wall) over
+          three consecutive runs on 2026-10-04</strong>, host <strong>Kamils-Mac-Studio</strong> (Apple M3 Ultra, 28 logical
+        cores). </td></tr><tr><td colspan="2">A developer workstation, <strong>not CI</strong> — per
+        §4 a figure without a host is meaningless, so do not plan CI around
+        it.
+      </td></tr><tr><td class="pm-topic" rowspan="4"><strong>NOT COVERED, stated rather than skipped.</strong></td><td> These cells
+        assert the <em>published document</em>, not a live response: with no
+        server, database or network in the run,
+        <strong>nothing here re-measures that the handler still answers that shape at
+          runtime.</strong>
+        The evidence that it does is the handler source and the 2026-09-29
+        Schemathesis finding, not this suite. </td></tr><tr><td>No live sweep was run (skill
+        §5f), so no ticket state moves on its account.
+        <code>tsc -p .</code> in <code>services/transfer</code> is rc 0 at base
+        and at head, but it <strong>does not typecheck this file</strong>:
+        <code>tsconfig.json:27</code> lists <code>src/__tests__</code> under
+        <code>exclude</code>, and <code>--listFilesOnly</code> puts 475 files in
+        the program of which <strong>0</strong> are under
+        <code>__tests__</code>. </td></tr><tr><td>That is pre-existing and applies to all five
+        test files in this suite. </td></tr><tr><td>The sweep covers 28 pairs: #1367 owns the
+        referral lookup pair and #1375 owns the delegation GET pair, so 26
+        remain unowned.
+      </td></tr></table>
+</div>
+<script>
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: "strict",
+        theme: "default",
+      });
+    </script>

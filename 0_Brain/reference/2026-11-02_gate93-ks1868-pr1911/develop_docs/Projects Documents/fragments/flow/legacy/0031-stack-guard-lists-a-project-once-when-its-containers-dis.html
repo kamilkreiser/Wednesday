@@ -1,0 +1,49 @@
+<h2>42. stack_guard lists a project ONCE when its containers disagree about the owner (KS-1355)</h2>
+<h3>42.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>stack_guard.sh</code> groups foreign stacks by <code>(project, owner)</code>. A project whose
+      containers carry <em>different</em> owner labels therefore produced <strong>one line per
+      distinct owner</strong>, so a single foreign stack could be reported twice and the operator
+      could not tell one project from two. </td><td>This row makes a project print <strong>ONE
+      line</strong>. Where some containers carry a real owner and others carry
+      <code>owner=unknown</code>, the line names the <strong>real</strong> owner and appends the
+      unknown count. <strong>NARROWING: this is KS-1355 spot 1 only and the ticket does NOT
+      close</strong> — the stack tooling's other non-slot-derived spots are untouched.
+    </td></tr></table>
+<h3>42.2 The behaviour change, named explicitly</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A reader upgrading past this commit sees different output for one input. </td><td>A project with
+      <strong>two DIFFERENT real owners</strong> now prints <strong>one</strong> line — the first
+      <code>(project, owner)</code> tuple in <code>docker ps</code> order — where the tip printed
+      both. That is a deliberate consequence of "one line per project", not an oversight: the second
+      real owner is no longer shown. The
+      <code>(+N container(s) with owner unknown)</code> wording is <strong>this change's own
+      choice</strong>; the ticket asks only that an unknown count be appended.
+    </td></tr></table>
+<h3>42.3 Red-first, product reverted under the new suite</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The red is a real product red, not a tamper: keep the new suite, revert
+      <code>stack_guard.sh</code> to the base. </td><td><strong>25 passed, 2 failed, rc 1</strong>,
+      failing exactly the two new cells — <code>a stack with an owner=unknown container is listed
+      ONCE</code> (<code>want "1", got "2"</code>) and <code>...under its real owner, with the
+      owner=unknown count</code> (<code>want "1", got "0"</code>). The suite's own
+      <strong>KS-1355 CONTROL</strong> cell (an all-unknown stack is still listed once) <strong>passes
+      at the base too</strong>, so the suite is not failing wholesale. With the product change:
+      <strong>27 passed, 0 failed, rc 0</strong>. Run with <code>/bin/bash</code> 3.2.57(1)-release.
+    </td></tr></table>
+<h3>42.4 The exec-bit trap this row walked into</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Both files are <strong>100755</strong> in the tree and must stay so. </td><td>This repo sets
+      <code>core.filemode=false</code>, so <code>git apply</code> left both files
+      <strong>644 on disk</strong> while git recorded <strong>no mode change at all</strong>. The
+      committed tree therefore keeps 100755 — that is the load-bearing fact — but a direct
+      <code>./stack_guard.sh</code> would have failed. Restored by reading the mode <em>from the
+      index</em> for the two named paths only; never <code>checkout-index -a -f</code>.
+    </td></tr></table>
+<h3>42.5 Not covered</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Live run owed. </td><td>The two-owner case was proved against the suite's fixtures, <strong>not
+      on a live Docker host</strong> — no stack was brought up in this seat. The four platform suites
+      (Schemathesis, Akto, Playwright, Performance/k6) are <strong>UNMEASURED</strong>. KS-1355's
+      other spots and the REVIEW-held <code>dev-reload.sh</code> work are out of scope here.
+    </td></tr></table>

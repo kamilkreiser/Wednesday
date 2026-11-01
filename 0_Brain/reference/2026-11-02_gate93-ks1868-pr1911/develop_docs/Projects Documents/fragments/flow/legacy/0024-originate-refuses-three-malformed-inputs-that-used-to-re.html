@@ -1,0 +1,57 @@
+<h2>39. originate refuses three malformed inputs that used to reach a raw 500 (KS-593)</h2>
+<h3>39.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Three passes in <code>Blockchain/Dev/services/originate</code>, one PR. Each turns a malformed
+      input that previously reached a raw <code>500 INTERNAL_ERROR</code> into the route's existing
+      <code>400</code> refusal. No authorisation decision moves in any of the three. </td><td>This row is
+      <strong>NARROWING, not closing</strong>. <code>adminConfig.ts</code> covers <strong>2 of the 6</strong>
+      negative-offset sites in KS 565 §2 — the auth <code>users.ts</code> and tenant-provisioning sites are
+      deliberately outside this carve. <code>documents.ts</code> covers <strong>1 of the 7</strong> raw-5xx
+      operations. <code>signatories.ts</code> covers the <strong>ninth operation plus <code>/check</code></strong>.
+      KS-593 stays <strong>open</strong>, and the ticket does <strong>not</strong> move to Done. KS 1015
+      finding 1 describes the same class of unowned check/operation pairs; that ticket is untouched here.
+    </td></tr></table>
+<h3>39.2 Red at the base, green with the fix — each pass measured on its own</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Each pass was proved by applying its <em>test half alone</em> at develop
+      <code>0a6177ea5482</code> and running the originate suite through its own
+      <code>npm test</code>, then applying the product half and re-running. </td><td>The payload was split
+      into product and test halves with a control that the two halves recombined are
+      <strong>byte-identical</strong> to the input, so the numbers below are about the patch that
+      actually ships.
+    </td></tr></table>
+<table>
+<tr><th>Pass</th><th>File</th><th>Red at base</th><th>Green after</th></tr>
+<tr><td>negative offset</td><td><code>routes/adminConfig.ts</code></td><td>2 failed, 3 passed (5), rc 1</td><td>5 passed (5), rc 0</td></tr>
+<tr><td>null share recipient</td><td><code>routes/documents.ts</code></td><td>2 failed, 13 passed (15), rc 1</td><td>15 passed (15), rc 0</td></tr>
+<tr><td>non-uuid signatory id</td><td><code>routes/signatories.ts</code></td><td>3 failed, 3 passed (6), rc 1</td><td>6 passed (6), rc 0</td></tr>
+</table>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Whole originate suite, all three applied. </td><td>Base <strong>93 suites / 1077 tests / 0 failed</strong>
+      -&gt; with the three passes <strong>96 suites / 1093 tests / 0 failed</strong>, rc 0, zero
+      <code>FAIL</code> lines. The staged tree is <code>b8ff928e2b63</code>, which equals the stacked-tree
+      value measured independently before the build. jest 29.7.0, ts-jest 29.4.11, typescript 5.9.3.
+    </td></tr></table>
+<h3>39.3 The share pass registers itself in the hermetic manifest, and the other two must not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The share pass edits KS 1293's <code>SUBJECTS</code> list to add its own new test file. The
+      obvious question is whether the other two new <code>ks593-*</code> files need listing too. </td><td>
+      <strong>They must not, and this was measured rather than assumed.</strong> KS 1293's
+      <code>MANIFEST-DRIFT</code> cell requires a file to be a <code>SUBJECT</code> only if its content
+      mentions <code>ENV_KEY</code> (<code>ANCHORING_SERVICE_URL</code>). Counted: the share file mentions
+      it once and is listed; the adminconfig and signatories files mention it <strong>zero</strong> times
+      and are not listed. <strong>Firing control:</strong> planting one <code>ANCHORING_SERVICE_URL</code>
+      mention into the unlisted adminconfig file turns <code>MANIFEST-DRIFT</code> <strong>red</strong>
+      (1 failed / 9 passed, <code>missing</code> non-empty), and restoring the file byte-identical returns
+      it to 10 passed. So the negative answer is one the cell could have contradicted.
+    </td></tr></table>
+<h3>39.4 What is NOT proven</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A runtime-behaviour change is not done on offline green. </td><td>There is <strong>no local stack</strong>,
+      so none of the three 500s was reproduced against a real PostgreSQL: the adminconfig 500 comes from
+      KS-593's 2026-08-28 live measurement of the list route, and <code>/check</code>'s 500 is reasoned
+      from the identical <code>::uuid</code> cast. <strong>A live run is owed.</strong> The four platform
+      suites (Schemathesis, Akto, Playwright, Performance/k6) are <strong>unmeasured</strong> here.
+      Pre-existing and out of scope: neither signatory GET checks that the caller belongs to the
+      <code>organizationId</code> it is asked about.
+    </td></tr></table>

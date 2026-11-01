@@ -1,0 +1,21 @@
+<h2>Cell 15.2.5 (Process DSR) now reaches its PATCH and checks the stored request; 15.2.5b pins the 400 for &ldquo;processed&rdquo; &mdash; KS-1113</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Test-only. The DSR create route takes <code>type</code>, <code>userId</code> (a real user&rsquo;s uuid), <code>email</code> and <code>notes</code> and answers 201 <code>{ success, request: { id, &hellip; } }</code>; the status route takes <code>status</code>, <code>processedBy</code> and <code>notes</code>, where <code>status</code> is one of pending, processing, completed, denied, extended. <code>processed</code> answers 400, <code>PUT</code> answers 405, and <code>completed</code> answers 200 <code>DSR updated</code> and stores <code>processedBy</code> and <code>completedAt</code>.
+      </td></tr><tr><td>Before this change the cell sent <code>subjectEmail</code> and <code>reason</code> (refused with 400) and read the new id from <code>id</code>, <code>requestId</code> or <code>data.id</code> (the route returns it at <code>request.id</code>), so it either failed at the create step or, with a body the route accepted, returned without testing anything. It now fails when the id is missing.
+      </td></tr><tr><td>Cells 15.2.2 and 15.2.3 send the same old create body; they are not changed here and are KS 1786.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The four platform suites, the other 16 cells of the spec, a deployed environment, Node 24 (the services and the runner ran on host Node v26.8.1, which is not an LTS line), and 15.2.5b against a route that accepts <code>processed</code>.
+      </td></tr><tr><td>The old PATCH body is shown to be refused by direct request; the old cell stops at the create step, so the cell itself never showed it.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>GATEWAY_URL=http://127.0.0.1:7182 PLAYWRIGHT_BROWSERS_PATH=&lt;browsers dir&gt; npx playwright test --project=prelaunch tests/gdpr-compliance.prelaunch.spec.ts --grep "15[.]2[.]5" --workers=1   # 2 passed, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>cell 15.2.5 at develop, one run</td><td><strong>1 failed</strong> in 30 ms at the create step (&ldquo;Could not create DSR to test processing&rdquo;); no PATCH sent</td></tr>
+<tr><td>cells 15.2.5 and 15.2.5b here, one run, same stack</td><td><strong>2 passed, 0 failed, 0 skipped</strong> (58 ms and 7 ms; 2.1 s)</td></tr>
+<tr><td>database read after the green run</td><td><strong>1</strong> request written by the run, status <code>completed</code>, <code>processed_by</code> and <code>completed_at</code> set</td></tr>
+<tr><td>spec size</td><td><strong>17 &rarr; 18</strong> tests (<code>playwright test --list</code>)</td></tr>
+<tr><td>stack</td><td>api-gateway, auth, originate native (ports 7182 to 7184) on <code>postgres:15-alpine</code> and <code>redis:7-alpine</code> in two containers; migration runner applied 57, failed 0; torn down by pid and by name afterwards</td></tr>
+<tr><td>host and tools</td><td>a MacBook Pro (Mac14,5, Apple M2 Max, 12 cores, 32 GiB, macOS 27.0.1, Docker 29.7.2 linux/arm64), shared with other sessions; develop <code>bd6697e079fc</code>, 2026-10-28 (UTC); Node v26.8.1 (not an LTS measurement); Playwright 1.57.0, tsx 4.23.1</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

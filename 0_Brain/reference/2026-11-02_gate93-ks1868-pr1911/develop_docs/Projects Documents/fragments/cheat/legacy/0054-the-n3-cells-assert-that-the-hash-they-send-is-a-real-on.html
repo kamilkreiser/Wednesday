@@ -1,0 +1,17 @@
+<h2>The N3 cells assert that the hash they send is a real one &mdash; KS-1634</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> In <code>ks1634-v2-chain-only-match-carries-simulated.test.ts</code> the two N3 cells send <code>simulated</code> as the string <code>"true"</code> and as the number <code>1</code>, each with a real tx hash on purpose: a <code>mock_tx_</code> hash makes the presenter refuse the reply by itself, which would hide the <code>=== true</code> mutant. They took that hash implicitly from <code>chainReply</code>&rsquo;s default. </td></tr><tr><td>Each now asserts <code>expect(reply.txHash).toMatch(REAL_TX_SHAPE)</code> on the reply it sends, with <code>REAL_TX_SHAPE = /^[0-9a-f]{64}$/</code> kept apart from <code>REAL_TX</code>. Two assertions are added, no cell is added or removed (10 before, 10 after), and no product file changes. </td></tr><tr><td>The cell that sends <code>simulated</code> as the number <code>0</code> already reds under a mock-prefixed default, so it is left alone. The original RED cell &ldquo;simulated true with a real hash&rdquo; has the same dependence and is NOT changed here; it is outside the two cells the ticket names.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A run on an LTS Node: the host carries only v26.8.1 and nothing was repeated on Node 24. Nothing runs through the gateway, and the ticket&rsquo;s original product defect is not touched. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest src/__tests__/ks1634-v2-chain-only-match-carries-simulated.test.ts   # 10 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest                                                                     # 140 suites, 1656 tests, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, original vs new file, default planted as a mock-prefixed hash in a COPY</td><td>original <strong>6 passed / 4 failed</strong> (the four control cells; both N3 cells stay passed) &rarr; new <strong>4 passed / 6 failed</strong> (the same four plus both N3 cells, each failing on <code>Expected pattern: /^[0-9a-f]{64}$/</code>)</td></tr>
+<tr><td>real default, original vs new file</td><td><strong>10 passed / 0 failed</strong> both sides</td></tr>
+<tr><td>whole originate unit suite</td><td><strong>140 suites, 1656 tests</strong> before and after, 0 failed; no file&rsquo;s cell count differs (repeated on the merged tree: the same)</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5), Node v26.8.1 (not an LTS measurement), jest 29.7.0, ts-jest 29.4.11, 2026-10-27, base <code>b6366c12a8ab</code>, repeated at develop <code>c7ad5ab51ee0</code></td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

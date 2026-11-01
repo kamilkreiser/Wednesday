@@ -1,0 +1,16 @@
+<h2>KS-1384 F0a: the wallet view, and a write-ahead that did not land stops the submit</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>Anchoring builds only from coins its in-process wallet view offers: never a coin a live transaction spends, and our own unconfirmed change only in a second pass for 10 minutes.</td></tr><tr><td>The write-ahead must match exactly 1 row before the submit; 0 means a newer call owns the row (nothing happens), anything else takes the failed path without sending. A batch needs all N rows.</td></tr><tr><td>Two existing cells changed on purpose: <code>ks726-review-f1-f3</code> F2 and <code>ks1385</code> R2 (<code>sent === 1</code>).</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A real chain or Blockfrost, the wallet census, the four platform suites, a running stack, Node 24 (LTS), any box.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1384-f0-wallet-view.test.ts src/__tests__/ks1384-f0-builder-and-provider.test.ts src/__tests__/ks1384-f0-spend.test.ts src/__tests__/ks1384-f0-batch-and-log.test.ts   # 45 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>45</strong> (11 + 12 + 16 + 6)</td></tr>
+<tr><td>mutants</td><td>34 written and parsed; 33 killed, 1 survived ((m9): CSL never adds an input twice, kept as a pin)</td></tr>
+<tr><td>anchoring unit suite</td><td>44 files / 645 cells: 644 pass, the host-dependent <code>threadTokenMint</code> cell failed (as at the base)</td></tr>
+<tr><td>anchoring real-Postgres lane</td><td>8 files / 110 cells, all pass</td></tr>
+<tr><td>tsc and eslint</td><td>0 errors with 14 test files; eslint 0 errors, 0 warnings on 22 files</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared; F-a&rsquo;s head <code>f27499dd9027</code>, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

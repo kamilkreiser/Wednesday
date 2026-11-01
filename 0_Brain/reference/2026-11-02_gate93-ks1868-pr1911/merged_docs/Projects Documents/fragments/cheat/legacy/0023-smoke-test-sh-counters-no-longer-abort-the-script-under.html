@@ -1,0 +1,20 @@
+<h2>smoke-test.sh counters no longer abort the script under errexit — KS-1139</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>pass()</code>,
+        <code>fail()</code> and <code>warn()</code> counted with <code>((PASS++))</code>. A
+        post-increment from 0 returns status 1, and under <code>set -euo pipefail</code> bash
+        &gt;= 4.1 applies errexit to <code>(( ))</code> — so the script died at its FIRST check on
+        Linux runners and the Ubuntu demo VM. Now <code>X=$((X + 1))</code>.
+      </td></tr><tr><td>It passed on macOS because <code>/bin/bash</code> 3.2.57 ignores that status.
+        <strong>A green local run was never evidence here</strong> — that is the whole trap.
+      </td></tr><tr><td>Evidence: base <strong>3 passed, 3 failed</strong> -> <strong>6 passed,
+        0 failed</strong>; sibling <code>smoke_test_degraded_warns.test.sh</code> <strong>5 passed,
+        0 failed</strong>. The three cells passing in both arms are the controls.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha.</strong></td><td> <strong>Unreproducible on this
+        host:</strong> no bash &gt;= 4.1 exists here, so the red-before-fix behaviour is read from
+        documented errexit semantics plus a reviewer's rc-1 figure on bash 5.2. A run on bash
+        &gt;= 4.1 is <strong>owed</strong> and the ticket does <strong>not</strong> move to Done.
+      </td></tr><tr><td>Scope: the three helpers in <code>smoke-test.sh</code> only. The
+        <code>scripts/validate-env.sh</code> sites of the same shape are <strong>still OPEN</strong>
+        and deliberately not in this change.
+      </td></tr></table></div>

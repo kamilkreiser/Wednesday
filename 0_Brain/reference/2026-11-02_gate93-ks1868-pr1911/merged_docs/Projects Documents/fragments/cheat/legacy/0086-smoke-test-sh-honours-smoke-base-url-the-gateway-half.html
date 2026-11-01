@@ -1,0 +1,19 @@
+<h2>smoke-test.sh honours SMOKE_BASE_URL (the gateway half) &mdash; KS-1250</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> <code>scripts/smoke-test.sh</code> now takes its gateway from <code>SMOKE_BASE_URL</code> (unset or empty keeps <code>http://localhost:6882</code>) and prints <code>Smoke target: ...</code> first, so a run can no longer look like a check of an environment while it checks localhost. </td></tr><tr><td><strong>A remote full run is still not remote-clean:</strong> 12 live checks from section 7 onward call hard-coded <code>localhost:60xx</code> service ports. Use the variable for the quick and gateway checks; do not read a remote full run as a clean check of that environment. A local model wrote the patch; it is applied unchanged.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A run against a real environment, and the 12 remaining hard-coded service-port checks. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; /bin/bash scripts/__tests__/smoke_test_honours_smoke_base_url.test.sh    # 5 passed, 0 failed; read $? on its own line
+cd Blockchain/Dev &amp;&amp; bash scripts/run-shell-suites.sh --list                                    # 99 suites, the new one named
+cd Blockchain/Dev &amp;&amp; bash scripts/run-shell-suites.sh --check-unreached                         # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new test against the unfixed script</td><td><strong>2 passed, 3 failed</strong> of 5 (rc 1); with the change <strong>5 passed, 0 failed</strong> (rc 0)</td></tr>
+<tr><td>existing suites that run the script</td><td><code>smoke_test_counters_survive_errexit</code> 6 / 0 and <code>smoke_test_degraded_warns</code> 5 / 0 passed / failed, against the unfixed and the fixed script alike</td></tr>
+<tr><td>runner discovery</td><td><code>--list</code> 98 &rarr; 99 suites, new one named; <code>--check-unreached</code> rc 0</td></tr>
+<tr><td>whole runner</td><td>measured by the pre-push hook&rsquo;s own leg; see the pull request body</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, merged tree (develop <code>41b984e0f522</code> in; written at base <code>bd6697e079fc</code>), 2026-10-28 (UTC); GNU bash 3.2.57; host Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

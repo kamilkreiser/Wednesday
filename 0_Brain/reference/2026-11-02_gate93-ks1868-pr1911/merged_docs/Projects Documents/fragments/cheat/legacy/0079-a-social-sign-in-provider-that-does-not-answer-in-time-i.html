@@ -1,0 +1,20 @@
+<h2>A social sign-in provider that does not answer in time is classified as unavailable; every provider fetch is bounded &mdash; KS-1240</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The six social provider adapters (GitHub, Google, LinkedIn, Apple, Facebook, Microsoft) bound each of their 12 fetches at 10 s. A call that does not finish in time (a hang, or a body that stalls) surfaces as the existing <code>ServiceUnavailableError</code>: <code>POST /social/link</code> answers <strong>503</strong> <code>SERVICE_UNAVAILABLE</code>, and the login callback answers its 400 &ldquo;OAuth authentication failed: &lt;Provider&gt; did not answer in time; please try again.&rdquo; Both used to hang. </td></tr><tr><td>A refused or unresolvable provider is classified the same way (&ldquo;&lt;Provider&gt; could not be reached; please try again.&rdquo;: 503 on the link route, was 500). A token refusal no longer carries the provider&rsquo;s own error body to the client: the error says &ldquo;&lt;Provider&gt; token exchange failed (HTTP 400)&rdquo; and the body is logged server-side, first 200 characters. The OAuth state is still spent before the exchange, so a timed-out sign-in needs a fresh one. </td></tr><tr><td><code>routes/auth.ts</code> and <code>middleware/errorHandler.ts</code> are unchanged; the classification is thrown from the adapters.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> Node 24 (host Node 26.8.1 only, no Docker in this lane); any real provider (the endpoints are a local stub, the state store an in-memory map); any running stack. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run ks1240b-social   # 1 file / 58 cells, rc 0
+cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run                   # 106 files / 1258 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>the new file against the unchanged adapters</td><td><strong>23 failed / 21 passed</strong>: every red cell fails, every control passes</td></tr>
+<tr><td>the new file, with the change</td><td><strong>44 / 44</strong></td></tr>
+<tr><td>fix round 1 (gate 5): the changed cells against the gated head</td><td><strong>22 failed / 41 passed</strong> of 63 across this file and <code>ks1617</code> (its P5 cell changed with the coordinator&rsquo;s leave); with the fix this file 58 / 58, <code>ks1617</code> 5 / 5; ten more mutants each killed, the gate&rsquo;s four survivors among them</td></tr>
+<tr><td>one-site mutants of the committed adapters</td><td>nine, each killed with all 44 cells run, each file restored equal to HEAD by sha256; the two that over-classify (every failure, a refused connection) are killed by the controls</td></tr>
+<tr><td>counts, before &rarr; after</td><td>auth <strong>105 files / 1200 tests &rarr; 106 files / 1244 &rarr; 1258</strong> after fix round 1; 0 failed at 1244; at 1258 the same 2 <code>ks949</code> cells at the 5 s default (alone: 29 / 31, then 31 / 31); the base run&rsquo;s 2 failures were <code>ks949</code> at the 5 s default (31 / 31 alone, twice), already in BACKLOG.md</td></tr>
+<tr><td>gates</td><td><code>check:test-types</code> rc 0, auth 42 errors in the baseline, 0 new; <code>tsc</code> build config rc 0; ESLint 0 errors, none in the touched files; <code>audit:gate</code> and <code>audit:locks</code> rc 0</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>2b7ef12fa564</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

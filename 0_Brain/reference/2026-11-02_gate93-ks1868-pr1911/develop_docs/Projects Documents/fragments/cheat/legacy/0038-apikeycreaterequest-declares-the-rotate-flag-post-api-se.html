@@ -1,0 +1,16 @@
+<h2>ApiKeyCreateRequest declares the rotate flag POST /api/security/keys acts on &mdash; KS-1434</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> <code>rotate</code> is optional and defaults to <code>false</code>. It does nothing without a <code>connectorId</code>: both are needed before any key is retired. </td></tr><tr><td>The keys retired are the other active keys for that connector in the same tenant. The query does not look at who created a key. </td></tr><tr><td>With <code>API_KEY_ROTATION_GRACE_SECONDS</code> unset or 0 they are deactivated; with a positive value they are given an expiry that many seconds away if that is earlier than their current one. </td></tr><tr><td>The 201 response carries <code>priorKeysRevoked</code> only when both <code>rotate</code> and <code>connectorId</code> were sent. <code>null</code> means the retirement was attempted and failed, and the prior key is still valid.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td> This change is the published contract only. Nothing in the running service changes, and a gateway that has already read the old spec keeps serving it until it is restarted. </td></tr><tr><td>Not measured here: the spec as served by a running gateway, and any effect on a Schemathesis sweep now that the field is visible to it.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/security &amp;&amp; npm test -- src/__tests__/ks1434-api-key-create-spec-declares-rotate.test.ts   # 7 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run check:openapi                                                                                # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>rc 1, <strong>3 passed / 4 failed</strong> &rarr; <strong>7 passed, 0 failed</strong>, rc 0; the three control cells pass in the red arm</td></tr>
+<tr><td>whole security suite</td><td><strong>284 &rarr; 291 passed</strong>, 0 failed; 27 &rarr; 28 test files</td></tr>
+<tr><td>yaml diff</td><td>10 insertions, one hunk inside <code>ApiKeyCreateRequest</code>, 0 removals</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

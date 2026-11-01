@@ -1,0 +1,44 @@
+<h2>43. The kyc db-retry suite runs on a 60 s describe budget, and a test now says so (KS-1328)</h2>
+<h3>43.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>services/kyc/src/__tests__/db.retry.test.ts</code> exceeded vitest's 5 s default under
+      fleet load: the first cell timed out at <strong>11,498 ms</strong> while passing in 675 ms when
+      run alone, so the overrun is scheduling, not work (the KS-1155 class). </td><td>This row adds
+      <strong>no product code</strong>. It raises the budget on <em>this describe only</em>, so every
+      other kyc suite keeps the 5 s default, and adds a cell that asserts the budget is actually on
+      every cell in the file. <strong>It pins the budget, not the absence of future timeouts</strong>
+      — a slower machine can still exceed 60 s. The ticket does <strong>not</strong> move to Done.
+    </td></tr></table>
+<h3>43.2 Red-first by TAMPER, because the load was not reproduced</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The original timeout needs fleet load to reproduce, and this seat did not reproduce it: the
+      claim that 60 s absorbs an 11,498 ms overrun is arithmetic on the 2026-09-26 measurement, not a
+      fresh one. </td><td>So the red proof is a <strong>tamper</strong> on the one thing the new cell
+      asserts: remove <code>{ timeout: 60_000 }</code> from the describe and the suite must go red on
+      an <em>assertion</em>, not a load error. It does — <strong>Tests 1 failed | 33 passed (34)</strong>,
+      <strong>Test Files 1 failed | 5 passed (6)</strong>, rc 1, failing on
+      <code>AssertionError: expected 5000 to be 60000</code>. Restoring the budget:
+      <strong>Tests 34 passed (34)</strong>, <strong>Test Files 6 passed (6)</strong>, rc 0.
+    </td></tr></table>
+<h3>43.3 The runner trap this row walked into, recorded because it cost a measurement</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Run the suite through <strong>kyc's own npm script</strong> (<code>npm test</code> =
+      <code>vitest run</code>), never a hand-built vitest invocation. </td><td>A first red run used
+      <code>npm test -- --reporter=basic</code>. That reporter does not exist in <strong>vitest
+      4.1.11</strong>, so vitest exited with a <em>Startup Error</em> and <strong>rc 1 having run zero
+      tests</strong>. An rc of 1 with no <code>Tests</code> line is a <strong>load failure, not a
+      red</strong>; reading it as a red would have recorded a tamper that never executed.
+    </td></tr></table>
+<h3>43.4 Not covered</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Unmeasured here. </td><td>The four platform suites (Schemathesis, Akto, Playwright,
+      Performance/k6) were <strong>not run</strong> — no local stack. The timeout under real fleet
+      load is <strong>not</strong> re-measured. The 6-cell count the new cell asserts will need
+      updating if a cell is added to the file; that is deliberate, so the pin cannot silently decay.
+    </td></tr></table>
+<h3>43.5 Running it</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      From <code>Blockchain/Dev/services/kyc</code>. </td><td><code>npm test</code> — expect
+      <strong>Test Files 6 passed (6)</strong>, <strong>Tests 34 passed (34)</strong>. Node v24.7.0,
+      npm 11.5.1, vitest 4.1.11, bash 3.2.57(1)-release, all read from this worktree.
+    </td></tr></table>

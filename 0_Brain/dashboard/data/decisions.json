@@ -55061,5 +55061,48 @@
   "prior_rulings_overridden": [
    "CARD nexusai-sqlite3-archived-upstream-1102"
   ]
+ },
+ {
+  "id": "secuura-billing-possible-double-credit-two-stripe-events-1102",
+  "client_project": "Secuura/Blockchain",
+  "title": "Billing may credit one purchase twice (two Stripe events) — file a ticket and have a seat design the fix?",
+  "bluf": "MONEY, UNVERIFIED, nothing deployed or changed. (Prior-rulings gate overridden: its 8 matches share only the words credit/billing — Azure sponsorship credit, CI billing, a cross-tenant billing read — none is about Stripe crediting a purchase.) While raising the Stripe-webhook catch fix (KS-1868), Seat F 21st read that ONE purchase can be credited by TWO Stripe events: checkout.session.completed grants credits (webhooks.ts :466), and payment_intent.succeeded grants again (:509) unless the PaymentIntent's metadata has creditsAdded, which nothing in the repo ever writes (repo-wide grep at develop 03977e89). Each event has its own idempotency claim, so they do not dedupe each other. Whether this really double-credits depends on which events the live Stripe endpoint is subscribed to, which no agent can see; which Stripe account and mode each box uses is also UNMEASURED. A second, MEASURED, pre-existing case: an ordinary error thrown after the credit grant makes Stripe's redelivery grant again (2 grants in F 21st's harness). Board search with a control: neither is on any ticket. The KS-1868 PR itself does not change either path.",
+  "default_action": "If there is no ruling within 48 h: option a for the code-only part (ticket filed, a seat designs and tests the fix through the gate, nothing merged without its gate and nothing deployed without your tap); the Stripe dashboard check stays yours.",
+  "options": [
+   {
+    "key": "a",
+    "label": "File a ticket now and have a Claude seat design and test the fix in code, through the QA gate, nothing deployed; you check the Stripe endpoint's event list once",
+    "detail": "Recommended. The seat files a High ticket (our board account), traces both paths in code, and builds a fix (credit keyed per payment, so one purchase can only credit once) with tests, gated before any merge. Deploy still needs your tap. Your one look in the Stripe dashboard tells us whether it is live today."
+   },
+   {
+    "key": "b",
+    "label": "File the ticket, but wait for your Stripe check before any fix work",
+    "detail": "Nothing is designed until you confirm the endpoint receives both events."
+   },
+   {
+    "key": "c",
+    "label": "File the ticket only, at Low, no work now",
+    "detail": "Recorded, not worked."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T08:58:09.837322+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-08-21 20:26",
+   "2026-09-05 16:42",
+   "2026-09-14 07:20",
+   "CARD secuura-ci-billing",
+   "CARD datasec-founders-hub-credit",
+   "CARD secuura-founders-hub-credit-sep6",
+   "CARD secuura-founders-hub-credit-expiry",
+   "CARD secuura-founders-hub-credit-expires-6-sep",
+   "CARD secuura-founders-hub-credit-expires-2026-09-06",
+   "CARD secuura-azure-credit-expired-0906",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing"
+  ]
  }
 ]

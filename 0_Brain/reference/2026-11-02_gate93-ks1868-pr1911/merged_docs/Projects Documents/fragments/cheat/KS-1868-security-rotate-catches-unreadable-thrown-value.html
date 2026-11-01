@@ -1,0 +1,22 @@
+<h2>The security service's rotate catches log a constant reason when the thrown value cannot be read &mdash; KS-1868</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>What to know.</strong></td><td> Two catches in the security service (<code>revokePriorConnectorKeys</code> and the rotate transaction of <code>saveKeyAndRetirePriors</code>) read the thrown value unguarded. An unreadable one (a revoked Proxy, an Error whose message getter throws) made the revoke function reject and made the rotate transaction roll back whole, so the register-connector route refused the rotate (500 or 503, no key issued). Both now log the constant reason <code>unreadable thrown value</code> and return <code>null</code>; the rotate commits the new key, the prior keys stay live and the route answers 201 with <code>priorKeysRevoked: null</code>, exactly what an ordinary retire error already did. TIER 1 for that change.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A real PostgreSQL, the route itself, Node 24 (the host has v26.8.1 only), the four platform suites. The thrown values are test-authored.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev && npm run test -w services/security -- --run ks1868-security-revoke-prior ks1868-security-save-key   # 6 cells
+cd Blockchain/Dev && npm run test -w services/security -- --run   # 378 tests, 37 files
+cd Blockchain/Dev && npm run check:test-types
+node Blockchain/Dev/scripts/docs-fragments.mjs check</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new test files</td><td><strong>2</strong> files, <strong>6</strong> cells; red first: 2 passed / 4 failed by assertion without the change, 6 / 0 with it (3 runs)</td></tr>
+<tr><td>rotate transaction, hostile throw</td><td>base: rejects, ends ROLLBACK, no key; head: resolves null, ends COMMIT, key in memory (real transaction(), mocked pg client)</td></tr>
+<tr><td>security suite</td><td>before <strong>372 passed, 0 failed</strong> (35 files); after <strong>378 passed, 0 failed</strong> (37 files); 0 skipped</td></tr>
+<tr><td>mutants of mine</td><td>8 of 8 red sets as predicted; all by assertion; the unmutated run 0 red</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, Darwin 27.0.0, shared with other seats; 2026-11-02 (UTC); Node v26.8.1</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,23 @@
+<h2>The Blockchain/Testing entry points aim at the slot that was named &mdash; KS-1382</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The audit, ZAP, tenant-isolation and Schemathesis wrappers used to fall back to slot 1&rsquo;s gateway when <code>TARGET_BASE</code> was not passed, so a run on a slot-N worktree could attack another session&rsquo;s stack. A local run now names its slot: <code>SECUURA_STACK_SLOT=2 ./run-internal-audit.sh</code> (or <code>STACK_SLOT</code>). With neither a slot nor <code>TARGET_BASE</code> it refuses with rc 2 and prints the command to run.
+      </td></tr><tr><td> <code>TARGET_BASE</code> with no slot is used unchanged (CI, remote targets). With a slot named, a local <code>TARGET_BASE</code> that is another slot&rsquo;s gateway is refused; a remote host, or a local port that is no slot&rsquo;s gateway, is left alone.
+      </td></tr><tr><td> <code>SECUURA_TARGET_RESOLVE_ONLY=1</code> prints the resolved target and exits 0 without scanning. The ports come from <code>stack_env.sh</code>; <code>check-stack-safety.sh</code> section 3d fails any typed slot port under Blockchain/Testing.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a live stack, pre-push legs 3, 4 and 8 (they skip without the stack) and Node 24. No scan was run: the cells prove which URL each script would aim at and which combinations it refuses.
+      </td></tr><tr><td> <code>Blockchain/Dev/deployment/azure/RUNBOOK.md</code> line 56 runs <code>./run-internal-audit.sh</code> with no <code>TARGET_BASE</code> and will now refuse; it is not changed here.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/blockchain_testing_target_base_follows_the_slot.test.sh   # 175 cells, rc 0
+bash Blockchain/Dev/scripts/check-stack-safety.sh                                                 # 110 invariants hold
+bash Blockchain/Dev/scripts/run-shell-suites.sh</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new suite against the five unfixed scripts (copies, one resolve-only line added)</td><td><strong>54 ok / 114 FAIL</strong>: slot 3 resolved to slot 1&rsquo;s gateway in all five; no slot and no <code>TARGET_BASE</code> resolved instead of refusing</td></tr>
+<tr><td>new suite, fixed tree</td><td><strong>175 / 175</strong>, unslotted and under <code>SECUURA_STACK_SLOT</code> 1, 2, 3, 4 and <code>STACK_SLOT=3</code>, identical each time; 42.7 s wall under load</td></tr>
+<tr><td>mutants on copies</td><td>11 on the entry points and 2 on the guard, each parsed first and each killed by its aimed cells; worktree files byte-identical before and after. The copied-arithmetic mutant is equivalent in behaviour; the guard&rsquo;s planted-literal cells catch it</td></tr>
+<tr><td>sibling fixture</td><td><code>tenant_isolation_stderr_own_file.test.sh</code> (KS-1436) ran job 06 with no <code>TARGET_BASE</code>, leaning on the removed slot-1 default: <strong>0 / 5</strong> against the fixed job, 5 / 5 against the tip job. One line now names a target no slot owns: <strong>5 / 5</strong>, unslotted and under slot 3</td></tr>
+<tr><td>whole shell-suite runner</td><td><strong>96 passed / 0 failed / 1 skipped of 97</strong> at base; <strong>97 passed / 0 failed / 1 skipped of 98</strong> on the finished tree (<code>/bin/bash</code>, unslotted; the extra pass is the new suite; the skip is <code>ks949</code>, no PostgreSQL)</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions (load 6.6 to 10.5), base <code>bd6697e079fc</code>, 2026-10-28 (UTC); /bin/bash 3.2.57, tsx 4.23.1 on host Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

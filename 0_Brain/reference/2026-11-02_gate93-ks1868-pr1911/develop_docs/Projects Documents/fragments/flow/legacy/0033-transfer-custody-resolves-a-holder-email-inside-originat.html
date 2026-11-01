@@ -1,0 +1,109 @@
+<h2>44. transfer-custody resolves a holder email inside originate, not through auth's lookup (KS-1402)</h2>
+<h3>44.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>POST /api/documents/:id/transfer-custody</code> with <code>newHolderEmail</code> no longer calls
+      auth's <code>GET /api/users/lookup</code>. That call forwarded the <strong>caller's</strong> credential, and
+      Platform S's connector key is minted without <code>users:read</code> on purpose, so every S custody
+      transfer by email answered <code>403</code> (Stuart measured 7 of 7 on 2026-10-05). Originate now computes
+      the email's lookup HMAC and reads <code>users</code> itself, on the request's db, with the tenant
+      <strong>bound in the query</strong>. </td><td>Kam's ruling (card
+      <code>secuura-ks1402-s-key-cannot-carry-users-read-1006</code>, choice a): <em>"Originate resolves the
+      holder with its own service credential (Stuart's option 2)."</em> Reading "its own service credential" as
+      originate's own database role, rather than a new service token, is a <strong>reading</strong> of that
+      sentence, confirmed by Wednesday on 2026-10-09. No token is minted, stored or sent, auth is not changed,
+      and no scope moves. The act is still authorised on the <strong>caller</strong>, first, by the unchanged
+      <code>documents:transfer-custody</code> gate; only resolution moved. Section 9a (KS-1402's first half,
+      auth's <code>/lookup</code> accepting a connector token) still describes auth correctly; this route
+      simply no longer goes there.
+    </td></tr></table>
+<h3>44.2 The headline for the gate: the tenant guard is newly load-bearing for connectors</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Before KS-1402 auth refused the connector <strong>before</strong> its tenant compare ever ran, so for a
+      connector the cross-tenant guard was unreachable. Now the connector resolves, and the bound tenant
+      predicate is the only thing between it and another tenant's user. </td><td>Cell <strong>C2</strong> pins
+      it: a tenant-A connector naming an email whose only user is in tenant B gets
+      <code>404 RECIPIENT_NOT_FOUND</code>, <strong>byte-equal</strong> to a true miss, nothing written, and the
+      tenant value <strong>bound</strong> is tenant A (asserted as a value, not as SQL text). <strong>C2b</strong>
+      pins the same guard for an interactive caller, which did reach auth's compare at base: green at base and
+      head. The bound predicate is also stricter than the path it replaces: auth's <code>/lookup</code> skipped
+      its tenant compare whenever the caller's credential carried no tenant (the KS 1406 class, filed,
+      unchanged here).
+    </td></tr></table>
+<h3>44.3 Red at the base, green with the fix</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      New file <code>services/originate/src/__tests__/ks1402-transfer-custody-resolves-holder-email-in-originate.test.ts</code>,
+      11 cells on the real router. The real <code>rbac</code> runs unmocked. At base, the fetch spy answers
+      <code>/lookup</code> by re-implementing auth's own three decisions (its gate, its zod email schema, its
+      tenant compare), so C1's base <code>403</code> is auth's answer, not a number the test chose. </td><td>
+      The db mock <strong>evaluates</strong> each query from its template text (hash, tenant with or without the
+      <code>IS NULL</code> tolerance, id) against an in-memory <code>users</code> table keyed on the real
+      <code>lookupHash</code>. Tenant B is deliberately originate's <code>DEFAULT_TENANT_ID</code>, so a route
+      that bound the default would find tenant B's user. Base: <strong>11 of 11 ran, 3 red</strong> (C1, C2, C9;
+      C1 fails on <code>expected 201 received 403</code>). Head: <strong>11 of 11 green</strong>.
+    </td></tr></table>
+<pre><code>cell  what                                                       base   head
+C1    S connector (no users:read) names a same-tenant holder     403    201, 0 lookup calls
+C2    tenant-A connector, tenant-B-only email                    403    404 = miss, bound tenant = A
+C2b   interactive tenant-A caller, tenant-B-only email           404    404
+C3    caller with neither role nor scope                         403    403, 0 resolution reads
+C4    interactive ISSUER_ADMIN                                   201    201
+C5    true miss                                                  404    404
+C6    malformed email                                            400    400 (same body)
+C7    holder row with tenant_id NULL                             201    201
+C8    ' Foo@X.com ' resolves foo@x.com (lowercase AND trim)      201    201
+C9    no lookup HMAC key registered in originate                 201    502 BAD_GATEWAY, labelled
+C10   unknown email on a missing document (answer order)         404    404 RECIPIENT_NOT_FOUND</code></pre>
+<h3>44.4 Tamper matrix — each tamper alone, restored by whole-file sha256</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Every row ran 11 of 11, and no tamper left every cell green. </td><td>Two rows are the
+      <strong>multi-clause guard</strong>: T1 drops the tenant conjunct with the hash held (C2 reds); T7 drops
+      the hash conjunct with the tenant held (C5 reds). T4 restores the old caller-header fetch and reproduces
+      the base row exactly. Two tampers first failed to <strong>compile</strong> (a name left unread,
+      <code>TS6133</code>), which reds nothing; both now keep the name read and run.
+    </td></tr></table>
+<pre><code>T1  drop the tenant conjunct (hash held)            red C2 C2b
+T2  bind DEFAULT_TENANT_ID                          red C1 C2 C2b C4 C8
+T3  skip the documents:transfer-custody gate        red C3
+T4  restore the caller-header fetch                 red C1 C2 C9   (= base)
+T5  hash the raw value; T5a no lowercase; T5b no trim   red C8 each
+T6  a cross-tenant hit answers 403, not the miss    red C2 C2b
+T7  drop the hash conjunct (tenant held)            red C2 C2b C5 C7 C8 C10
+T8  drop the NULL-tenant tolerance                  red C7
+T9  no catch around lookupHash                      red C9
+T10 drop the email format check                     red C6</code></pre>
+<h3>44.5 The neighbours, and the timings</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>ks739-transfer-custody-lookup-4xx-mapping.test.ts</code> pinned how this route mapped the lookup's
+      answers; with no lookup there is nothing to map. Its 20 definitions (25 executed: three are
+      <code>it.each</code>) are dispositioned in its own docblock: <strong>17 retired</strong> (21 executed),
+      <strong>3 re-pointed</strong> (4 executed), plus a guard that drives every upstream answer the retired
+      cells drove and asserts the route never asks. That guard reds on a revert to the auth call. </td><td>
+      <code>ks697</code> gained one line, registering a lookup key, because originate now needs one; without
+      it its email cell read <code>502</code> (16/17), with it 17/17, and the cell text is unchanged. The
+      whole suite also caught what three per-file runs did not: the new test's hand-written
+      <code>@secuura/shared</code> factory tripped the KS 1061 shared-mock guard, and it now goes through
+      <code>makeSharedMock</code>. <strong>Originate unit suite</strong> (<code>npm test</code> = jest 29.7.0):
+      <strong>96 suites / 1093 tests</strong> at base, <strong>97 / 1096 / 0 failed</strong> with this change
+      (+11 new, ks739 25 to 17). Wall clock 13 s via <code>npm test</code>, measured 2026-10-09 on
+      Kamils-Mac-Studio (Apple Silicon, node v24.7.0) while another seat's session was live on the same
+      machine, so treat the seconds as indicative. The 96 / 1093 in section KS 593 of the cheat sheet was the
+      count at that merge.
+    </td></tr></table>
+<pre><code>cd Blockchain/Dev/services/originate
+npx jest src/__tests__/ks1402-transfer-custody-resolves-holder-email-in-originate.test.ts   # 11 passed
+npx jest src/__tests__/ks739-transfer-custody-lookup-4xx-mapping.test.ts                  # 17 passed
+npm test                                                                                   # 97 suites, 1096 passed
+npx tsc -p . --noEmit                                                                      # rc 0
+cd ../.. &amp;&amp; npm run check:openapi                                                         # CHECK PASS</code></pre>
+<h3>44.6 What is NOT proven</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A runtime-behaviour change is not done on offline green. </td><td><strong>A live sweep is owed</strong>
+      (no stack was built). <strong>No S-to-K pair run</strong>: Stuart's cell turns green only after a deploy.
+      <strong>Legacy rows:</strong> a user whose email is still plaintext, with no lookup hash, resolved at base
+      through auth's legacy fallback and is 404 here; how many exist was not measured. <strong>Deploy
+      requirement:</strong> originate must have <code>PII_LOOKUP_HMAC_KEY</code> (docker-compose declares it for
+      originate), or every email transfer answers the labelled <code>502</code>. A database failure during
+      resolution now lands in the route's existing <code>500</code>, as the id path's <code>users</code> read
+      already does; before, the only failure here was auth being unreachable (<code>502</code>). The KS 1406
+      class on auth's <code>/lookup</code> itself is not addressed, and <code>/lookup</code> is unchanged.
+    </td></tr></table>

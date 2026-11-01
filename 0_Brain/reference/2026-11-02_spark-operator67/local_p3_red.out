@@ -1,0 +1,298 @@
+FAIL ../../../private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/67d2d8aa-3620-4c8c-99c3-e332209d1f85/scratchpad/w2/Blockchain/Dev/services/originate/src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts (10.409 s)
+  KS-1868 GET / catch reads the thrown value safely
+    ✕ RED ks1868 R1 GET /: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500 (1507 ms)
+    ✕ RED ks1868 R2 GET /: an Error whose message getter throws is logged as a constant reason and answered with the constant 500 (1503 ms)
+    ✓ control ks1868 C1 GET /: an ordinary Error is logged as before (String of the Error) and the answer is the constant 500 (7 ms)
+    ✓ control ks1868 C2 GET /: a thrown string is logged as itself, as before (1 ms)
+  KS-1868 POST /:id/suspend catch reads the thrown value safely
+    ✕ RED ks1868 R1 POST /:id/suspend: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500 (1502 ms)
+    ✕ RED ks1868 R2 POST /:id/suspend: an Error whose message getter throws is logged as a constant reason and answered with the constant 500 (1501 ms)
+    ✓ control ks1868 C1 POST /:id/suspend: an ordinary Error is logged as before (String of the Error) and the answer is the constant 500 (2 ms)
+    ✓ control ks1868 C2 POST /:id/suspend: a thrown string is logged as itself, as before (1 ms)
+  KS-1868 POST /:id/reinstate catch reads the thrown value safely
+    ✕ RED ks1868 R1 POST /:id/reinstate: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500 (1502 ms)
+    ✕ RED ks1868 R2 POST /:id/reinstate: an Error whose message getter throws is logged as a constant reason and answered with the constant 500 (1502 ms)
+    ✓ control ks1868 C1 POST /:id/reinstate: an ordinary Error is logged as before (String of the Error) and the answer is the constant 500 (4 ms)
+    ✓ control ks1868 C2 POST /:id/reinstate: a thrown string is logged as itself, as before (4 ms)
+
+  ● KS-1868 GET / catch reads the thrown value safely › RED ks1868 R1 GET /: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500
+
+    TypeError: Cannot perform 'get' on a proxy that has been revoked
+        at String (<anonymous>)
+
+      141 |     res.json({ success: true, verifiers: rows, total: rows.length });
+      142 |   } catch (error) {
+    > 143 |     logger.error('Failed to list verifiers', { error: String(error) });
+          |                                                       ^
+      144 |     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list verifiers' } });
+      145 |   }
+      146 | });
+
+      at src/routes/thirdPartyVerifiers.ts:143:55
+
+  ● KS-1868 GET / catch reads the thrown value safely › RED ks1868 R1 GET /: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 2
+
+      Object {
+    -   "body": Object {
+    -     "error": Object {
+    -       "code": "INTERNAL_ERROR",
+    -       "message": "Failed to list verifiers",
+    -     },
+    -     "success": false,
+    -   },
+    -   "status": 500,
+    +   "body": null,
+    +   "status": "NO ANSWER",
+      }
+
+      112 |   it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500`, async () => {
+      113 |     const reply = await callWithThrow(c, revokedProxy());
+    > 114 |     expect(reply).toEqual({ status: 500, body: body500(c.message) });
+          |                   ^
+      115 |     expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
+      116 |     expect(c.db()).toHaveBeenCalledTimes(1);
+      117 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:114:19)
+
+  ● KS-1868 GET / catch reads the thrown value safely › RED ks1868 R2 GET /: an Error whose message getter throws is logged as a constant reason and answered with the constant 500
+
+    ks1868 message getter
+
+      103 |   Object.defineProperty(e, 'message', {
+      104 |     get() {
+    > 105 |       throw new Error('ks1868 message getter');
+          |             ^
+      106 |     },
+      107 |   });
+      108 |   return e;
+
+      at Error.get (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:105:13)
+          at Error.toString (<anonymous>)
+          at String (<anonymous>)
+      at src/routes/thirdPartyVerifiers.ts:143:55
+
+  ● KS-1868 GET / catch reads the thrown value safely › RED ks1868 R2 GET /: an Error whose message getter throws is logged as a constant reason and answered with the constant 500
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 2
+
+      Object {
+    -   "body": Object {
+    -     "error": Object {
+    -       "code": "INTERNAL_ERROR",
+    -       "message": "Failed to list verifiers",
+    -     },
+    -     "success": false,
+    -   },
+    -   "status": 500,
+    +   "body": null,
+    +   "status": "NO ANSWER",
+      }
+
+      119 |   it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and answered with the constant 500`, async () => {
+      120 |     const reply = await callWithThrow(c, throwingMessageError());
+    > 121 |     expect(reply).toEqual({ status: 500, body: body500(c.message) });
+          |                   ^
+      122 |     expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
+      123 |     expect(c.db()).toHaveBeenCalledTimes(1);
+      124 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:121:19)
+
+  ● KS-1868 POST /:id/suspend catch reads the thrown value safely › RED ks1868 R1 POST /:id/suspend: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500
+
+    TypeError: Cannot perform 'get' on a proxy that has been revoked
+        at String (<anonymous>)
+
+      238 |       res.json({ success: true, message: 'Verifier suspended' });
+      239 |     } catch (error) {
+    > 240 |       logger.error('Failed to suspend verifier', { error: String(error) });
+          |                                                           ^
+      241 |       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to suspend verifier' } });
+      242 |     }
+      243 |   },
+
+      at src/routes/thirdPartyVerifiers.ts:240:59
+
+  ● KS-1868 POST /:id/suspend catch reads the thrown value safely › RED ks1868 R1 POST /:id/suspend: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 2
+
+      Object {
+    -   "body": Object {
+    -     "error": Object {
+    -       "code": "INTERNAL_ERROR",
+    -       "message": "Failed to suspend verifier",
+    -     },
+    -     "success": false,
+    -   },
+    -   "status": 500,
+    +   "body": null,
+    +   "status": "NO ANSWER",
+      }
+
+      112 |   it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500`, async () => {
+      113 |     const reply = await callWithThrow(c, revokedProxy());
+    > 114 |     expect(reply).toEqual({ status: 500, body: body500(c.message) });
+          |                   ^
+      115 |     expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
+      116 |     expect(c.db()).toHaveBeenCalledTimes(1);
+      117 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:114:19)
+
+  ● KS-1868 POST /:id/suspend catch reads the thrown value safely › RED ks1868 R2 POST /:id/suspend: an Error whose message getter throws is logged as a constant reason and answered with the constant 500
+
+    ks1868 message getter
+
+      103 |   Object.defineProperty(e, 'message', {
+      104 |     get() {
+    > 105 |       throw new Error('ks1868 message getter');
+          |             ^
+      106 |     },
+      107 |   });
+      108 |   return e;
+
+      at Error.get (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:105:13)
+          at Error.toString (<anonymous>)
+          at String (<anonymous>)
+      at src/routes/thirdPartyVerifiers.ts:240:59
+
+  ● KS-1868 POST /:id/suspend catch reads the thrown value safely › RED ks1868 R2 POST /:id/suspend: an Error whose message getter throws is logged as a constant reason and answered with the constant 500
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 2
+
+      Object {
+    -   "body": Object {
+    -     "error": Object {
+    -       "code": "INTERNAL_ERROR",
+    -       "message": "Failed to suspend verifier",
+    -     },
+    -     "success": false,
+    -   },
+    -   "status": 500,
+    +   "body": null,
+    +   "status": "NO ANSWER",
+      }
+
+      119 |   it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and answered with the constant 500`, async () => {
+      120 |     const reply = await callWithThrow(c, throwingMessageError());
+    > 121 |     expect(reply).toEqual({ status: 500, body: body500(c.message) });
+          |                   ^
+      122 |     expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
+      123 |     expect(c.db()).toHaveBeenCalledTimes(1);
+      124 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:121:19)
+
+  ● KS-1868 POST /:id/reinstate catch reads the thrown value safely › RED ks1868 R1 POST /:id/reinstate: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500
+
+    TypeError: Cannot perform 'get' on a proxy that has been revoked
+        at String (<anonymous>)
+
+      277 |       res.json({ success: true, message: 'Verifier reinstated' });
+      278 |     } catch (error) {
+    > 279 |       logger.error('Failed to reinstate verifier', { error: String(error) });
+          |                                                             ^
+      280 |       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to reinstate verifier' } });
+      281 |     }
+      282 |   },
+
+      at src/routes/thirdPartyVerifiers.ts:279:61
+
+  ● KS-1868 POST /:id/reinstate catch reads the thrown value safely › RED ks1868 R1 POST /:id/reinstate: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 2
+
+      Object {
+    -   "body": Object {
+    -     "error": Object {
+    -       "code": "INTERNAL_ERROR",
+    -       "message": "Failed to reinstate verifier",
+    -     },
+    -     "success": false,
+    -   },
+    -   "status": 500,
+    +   "body": null,
+    +   "status": "NO ANSWER",
+      }
+
+      112 |   it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown by the database is logged as a constant reason and answered with the constant 500`, async () => {
+      113 |     const reply = await callWithThrow(c, revokedProxy());
+    > 114 |     expect(reply).toEqual({ status: 500, body: body500(c.message) });
+          |                   ^
+      115 |     expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
+      116 |     expect(c.db()).toHaveBeenCalledTimes(1);
+      117 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:114:19)
+
+  ● KS-1868 POST /:id/reinstate catch reads the thrown value safely › RED ks1868 R2 POST /:id/reinstate: an Error whose message getter throws is logged as a constant reason and answered with the constant 500
+
+    ks1868 message getter
+
+      103 |   Object.defineProperty(e, 'message', {
+      104 |     get() {
+    > 105 |       throw new Error('ks1868 message getter');
+          |             ^
+      106 |     },
+      107 |   });
+      108 |   return e;
+
+      at Error.get (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:105:13)
+          at Error.toString (<anonymous>)
+          at String (<anonymous>)
+      at src/routes/thirdPartyVerifiers.ts:279:61
+
+  ● KS-1868 POST /:id/reinstate catch reads the thrown value safely › RED ks1868 R2 POST /:id/reinstate: an Error whose message getter throws is logged as a constant reason and answered with the constant 500
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 2
+
+      Object {
+    -   "body": Object {
+    -     "error": Object {
+    -       "code": "INTERNAL_ERROR",
+    -       "message": "Failed to reinstate verifier",
+    -     },
+    -     "success": false,
+    -   },
+    -   "status": 500,
+    +   "body": null,
+    +   "status": "NO ANSWER",
+      }
+
+      119 |   it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and answered with the constant 500`, async () => {
+      120 |     const reply = await callWithThrow(c, throwingMessageError());
+    > 121 |     expect(reply).toEqual({ status: 500, body: body500(c.message) });
+          |                   ^
+      122 |     expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
+      123 |     expect(c.db()).toHaveBeenCalledTimes(1);
+      124 |   });
+
+      at Object.<anonymous> (src/__tests__/ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts:121:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 6 passed, 12 total
+Snapshots:   0 total
+Time:        10.546 s, estimated 23 s
+Ran all test suites matching /ks1868-third-party-verifiers-admin-routes-p3-unreadable-throw.test.ts/i.

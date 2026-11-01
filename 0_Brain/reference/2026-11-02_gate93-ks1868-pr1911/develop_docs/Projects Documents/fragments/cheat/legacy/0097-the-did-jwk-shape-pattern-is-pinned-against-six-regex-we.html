@@ -1,0 +1,19 @@
+<h2>The did:jwk shape pattern is pinned against six regex weakenings &mdash; KS-1175</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Test only. Six weakenings of <code>DID_PATTERN</code> (the <code>m</code> flag, <code>=</code> in the class, <code>$</code> dropped, the <code>i</code> flag, <code>+</code> to <code>*</code>, <code>\s</code> in the class) used to pass every cell; 18 new cells in <code>ks1175-identity-anchoring.test.ts</code> (14 RED, 4 controls) now turn red under each of them, alone or together.
+      </td></tr><tr><td>The file is 135 cells with the change, all green on the real pattern; the whole anchoring suite is 35 files / 497 cells.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The anchoring integration files, the four platform suites, a running stack, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1175-identity-anchoring.test.ts   # 135 cells, rc 0
+cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                  # 35 files / 497 cells: 496 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>18</strong> (14 RED + 4 controls); the file is <strong>135 / 135</strong> on the real pattern</td></tr>
+<tr><td>weakenings</td><td>each of the six killed alone (4, 2, 10, 2, 2 and 8 red cells); all six at once <strong>14 of 135 red</strong>; no older cell red; each restore sha256-equal</td></tr>
+<tr><td>anchoring unit suite</td><td><strong>35 files / 497 cells</strong> with the change; 35 / 479 at base; the same 1 pre-existing failure in both (<code>threadTokenMint.test.ts</code>), 0 new reds, 0 skipped</td></tr>
+<tr><td>tsc with the test file</td><td><strong>0 errors</strong> over 225 files, TypeScript 5.9.3; a planted type error reported once as <code>TS2322</code></td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>ed12d4e08d43</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

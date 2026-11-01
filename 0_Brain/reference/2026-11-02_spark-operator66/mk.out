@@ -1,0 +1,35 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o66_p1_originate_verification_v2_verify_verify_file_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/verificationV2.ts b/Blockchain/Dev/services/originate/src/routes/verificationV2.ts
+--- a/Blockchain/Dev/services/originate/src/routes/verificationV2.ts
++++ b/Blockchain/Dev/services/originate/src/routes/verificationV2.ts
+@@ -438,7 +438,13 @@
+       const matches = rows.map((row) => buildMatch(req, row, false, chainBlobOfRow(row), trusted));
+       return res.json({ hash: null, count: matches.length, matches, verifiedAt: new Date().toISOString() });
+     } catch (error) {
+-      logger.error('v2 verification error', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('v2 verification error', { error: reason });
+       return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Verification failed' } });
+     }
+   },
+@@ -474,7 +480,13 @@
+       verifiedAt: new Date().toISOString(),
+     });
+   } catch (error) {
+-    logger.error('v2 file verification error', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('v2 file verification error', { error: reason });
+     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'File verification failed' } });
+   }
+ });
+

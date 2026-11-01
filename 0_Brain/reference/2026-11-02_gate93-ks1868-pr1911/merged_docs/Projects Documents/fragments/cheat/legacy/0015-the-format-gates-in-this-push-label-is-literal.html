@@ -1,0 +1,44 @@
+<h2>The format gate&rsquo;s &ldquo;in this push&rdquo; label is literal &mdash; KS-998</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> <code>check-package-format.sh</code> asked whether a red file was in the
+        current push with <code>grep -qx "$full"</code>. <code>-x</code> anchors the match but
+        <strong>still treats the path as a regex</strong>. </td></tr><tr><td>So a red <code>src/a.b.ts</code> that was
+        NOT in the push matched a <code>src/aXb.ts</code> that was, and the gate printed the red as
+        &ldquo;(in this push)&rdquo; &mdash; the bill landed on the wrong author. </td></tr><tr><td>A genuine
+        <code>src/[id].ts</code> IN the push matched nothing and was labelled inherited. </td></tr><tr><td>The predicate is
+        now <code>grep -qxF</code>. <strong>Only the label changes</strong> &mdash; the pass/fail verdict,
+        the exit code and the failure count are all unchanged, and three of the eight cells are CONTROLs
+        that assert so.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotcha when you run this locally.</strong></td><td> The new suite is
+        <strong>100644</strong>, not 100755, because the payload carries no <code>new file mode</code>
+        line &mdash; and that is fine here. </td></tr><tr><td><code>run-shell-suites.sh</code> globs
+        <code>*.test.sh</code> and invokes <code>bash &lt;file&gt;</code>, so it needs no executable bit;
+        <code>package_format_gate.test.sh</code> beside it is 100644 as well. <strong>Do not
+        <code>chmod</code> it</strong> to match the other 15 suites in that directory &mdash; that would be
+        a mode change nothing asks for. </td></tr><tr><td>Expect the shell-suite denominator to read
+        <strong>71</strong> at this head, not 70: any older count quoted in a CI triage line does not
+        describe it.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+bash systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh   # 8 cells, rc 0
+bash Blockchain/Dev/scripts/run-shell-suites.sh --list                      # 71 suites
+bash -n systemTest/scripts/check-package-format.sh                          # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>rc 1, <strong>5 passed / 3 failed</strong> (the dotted-path
+and bracket-path label cells) &rarr; <strong>8 passed, 0 failed</strong>, rc 0. All five CONTROL cells
+stay green in the red arm, so the red is the defect and not the harness</td></tr>
+<tr><td>product change</td><td><strong>one line</strong>, <code>grep -qx</code> &rarr;
+<code>grep -qxF</code> at <code>check-package-format.sh:180</code></td></tr>
+<tr><td>named siblings</td><td><code>package_format_gate</code> 33/0,
+<code>pre_push_hook_base</code> 28/0, <code>pre_push_hook_current_develop</code> 4/0</td></tr>
+<tr><td>shell-suite discovery</td><td><strong>70 &rarr; 71</strong>, measured by moving the file aside
+and back; listed 1 time after, 0 before; restored sha256-identical
+(<code>7a6c8313ae687339</code>)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong> &mdash; local stack not up on
+<code>http://localhost:6882</code>. Never claimed as a pass</td></tr>
+<tr><td>scope</td><td>item 4 of four on KS-998; items 1&ndash;3 stay open and the ticket does not
+move to Done</td></tr>
+</table>

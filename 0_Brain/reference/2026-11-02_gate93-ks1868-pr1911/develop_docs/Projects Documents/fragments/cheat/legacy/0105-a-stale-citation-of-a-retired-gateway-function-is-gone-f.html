@@ -1,0 +1,19 @@
+<h2>A stale citation of a retired gateway function is gone from the anchoring route comment and DEVELOPMENT.md &mdash; KS-1840</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Comment and doc only, no code line changes. The comment above <code>GET /api/anchors/document/:documentId</code> in the anchoring <code>index.ts</code> and the H2 row of <code>DEVELOPMENT.md</code> named <code>makeFetchDocFromAnchorStore</code>, retired in KS-1628; both now say so, and say that whether a current caller treats a 404 as no anchor is <strong>not measured</strong>.
+      </td></tr><tr><td>New test <code>ks1840-stale-gateway-citation-is-gone.test.ts</code>: 5 cells (2 RED, 3 controls) reading <code>index.ts</code> as text; test only: 2 of 5 red, with the comment: 5 of 5. No cell reads <code>DEVELOPMENT.md</code>.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> Whether any current gateway caller handles that 404. The anchoring integration files, the four platform suites, a running stack, Node 24 and any deploy were not run.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1840-stale-gateway-citation-is-gone.test.ts   # 5 cells, rc 0
+cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                  # 37 files / 550 cells: 549 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>5</strong> (2 RED + 3 controls); 2 of 5 red without the comment change (develop <code>84ddbd63c008</code>), 5 of 5 with it</td></tr>
+<tr><td>anchoring unit suite</td><td>untouched develop 36 files / 545 cells (544 pass, 1 fail); with the change <strong>37 files / 550 cells</strong> (549 pass, the same 1 fail, <code>threadTokenMint.test.ts</code>), 0 new reds, 0 skipped</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with the test file: <strong>0 errors</strong> over 69 anchoring source files, a planted type error reported once as <code>TS2322</code>; eslint on the test and on <code>index.ts</code>: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>symbol hits</td><td><code>makeFetchDocFromAnchorStore</code>: 2 inside <code>Blockchain/</code> after the change (the DEVELOPMENT.md row and the test&rsquo;s R1 assertion), 0 in <code>index.ts</code>; the two Projects Documents html files name it too, so a repository-wide grep finds more</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>84ddbd63c008</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

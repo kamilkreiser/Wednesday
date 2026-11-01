@@ -1,0 +1,213 @@
+<div class="section">
+<h2>RFC 3161 Timestamp Verification — KS-1404</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td><code>POST /api/timestamps/verify</code> used to accept an
+        <strong>unsigned</strong> token: any DER blob containing the document
+        digest read as valid, and a JSON <code>{"hash":"…"}</code> token
+        read as valid too. </td></tr><tr><td>Both paths are closed. </td></tr><tr><td>Verification now checks the
+        CMS signature over TSTInfo, the signed <code>messageDigest</code>, EKU
+        <code>id-kp-timeStamping</code>, validity at <code>genTime</code>, and a
+        chain to a configured trust anchor — and reads the imprint from
+        the parsed TSTInfo rather than searching the tree.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/timestamping
+npx vitest run src/__tests__/ks1404-verify-rfc3161.test.ts   # 36 cells
+npx vitest run                                               # 6 files / 80 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr>
+<th>Figure</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>KS-1404 cells</td>
+<td>
+<strong>36</strong>, all passing at head, 0 skipped (27 before ITEM
+            2 added nine)
+          </td>
+</tr>
+<tr>
+<td>ITEM 2 cells</td>
+<td>
+<strong>ESS-1</strong> no <code>signingCertificate(V2)</code> →
+            refused; <strong>ESS-2</strong> V2 hashing a different cert →
+            refused; <strong>ESS-3</strong> correct V2 and the SHA-1 v1 form
+            → accepted, BOTH forms → refused;
+            <strong>CHAIN-1</strong> root → intermediate → signer,
+            intermediate in the token, root pinned → accepted;
+            <strong>CHAIN-2</strong> same shape, unpinned root → refused;
+            <strong>CHAIN-3</strong> pinned root, intermediate it did not sign
+            → refused; <strong>ALG-RSA</strong> bare
+            <code>rsaEncryption</code> → accepted valid / refused flipped;
+            <strong>ALG-PSS</strong> PSS intermediate under a PSS root →
+            accepted valid / refused flipped; <strong>SID-1</strong>
+<code>SignerIdentifier</code> matching nothing → refused.
+            <strong>ALG-ECDSA dropped</strong>: zero ECDSA measured on either
+            pinned provider
+          </td>
+</tr>
+<tr>
+<td>ITEM 2 red-first at <code>b60ab7b6afbf</code></td>
+<td>
+<strong>7 of 9 RED</strong>, all <code>AssertionError</code>, 0 load
+            failures, file loaded in the same run (29/36 passing).
+            <strong>CHAIN-2 and CHAIN-3 are green at base AND at head</strong>
+            — regression guards, not red-first, stated as such. CHAIN-3 is
+            the arm that caught this PR's own leaf-order defect and the only one
+            that fails on the reversed order. Verifier reverted alone, then
+            restored byte-identically (<code>cmp</code> equal)
+          </td>
+</tr>
+<tr>
+<td>Chain order is load-bearing</td>
+<td>
+            pkijs takes the <strong>LAST</strong> element of
+            <code>certs</code> as the end-entity (<code>certs: [rootCa, intermediateCa, leafCert]</code>). <code>[signer, ...intermediates]</code> validates an
+            <em>intermediate</em> as the leaf and ACCEPTS a signer that chains
+            to nothing. Correct form: <code>[...intermediates, signer]</code>
+</td>
+</tr>
+<tr>
+<td>Committed trust anchors</td>
+<td>
+<code>config/tsa-trust-anchors.crt</code> (<code>.crt</code>:
+            preflight leg 9 refuses a tracked <code>*.pem</code> as a
+            credential, KS-646; these are public CA roots, bytes unchanged) +
+            <code>config/README.md</code>: D-TRUST Root CA 1 2017 and DigiCert
+            Assured ID Root CA, each with source URL, SHA-256, read time and
+            second-source status. <strong>17</strong> parses it via the
+            product's own <code>parseTrustAnchors</code> to exactly 2 certs at
+            the recorded digests; <strong>17b</strong> corrupts one base64 char
+            and the count must drop. Unset
+            <code>TSA_TRUST_ANCHORS_PEM</code> still fails closed.
+            <strong>“nothing is wired into any environment” was true of
+              #1376 and is now false</strong>
+            — see the wiring row below.
+          </td>
+</tr>
+<tr>
+<td><strong>Compose + image wiring (KS-1404, Seat D 8th)</strong></td>
+<td>
+            Two changes, because #1376 never <em>delivered</em> an anchor:
+            compose passes <code>TSA_TRUST_ANCHORS_PEM</code> defaulting to
+            <code>/app/config/tsa-trust-anchors-dtrust.crt</code>, and the
+            Dockerfile's runtime stage copies <code>config/</code>
+<strong>before</strong> the <code>chmod</code> (the service runs as
+            <code>nodejs</code>; after the chmod it ships unreadable). The new
+            file holds <strong>D-Trust's root alone</strong>, byte-identical to
+            block 1 of the bundle above (DER SHA-256
+            <code>4d24807b…aef6</code>); nothing fetched, no new root.
+            Measured 2026-10-05: <strong>both</strong> boxes had
+            <code>TSA_URL</code> PRESENT-but-EMPTY, no anchor var, no
+            <code>/app/config</code>, and <code>/health</code> reporting
+            <strong>D-Trust</strong> from inside the container — so one
+            provider's root serves both.
+            <code>src/__tests__/ks1404-wiring.test.ts</code>:
+            <strong>3 failed / 3 passed at base, 6 passed at head</strong>;
+            A/B/C1 are the red arms,
+            <strong>C2/D/E are controls that pass either side</strong> and are
+            not counted as red. C2 earns its place because the pre-existing
+            suite only ever passes the anchor as
+            <em>inline PEM text</em> — the
+            <code>readFileSync</code> branch every box now uses had no coverage.
+            NOT proved: that D-Trust signs under this root today (<code>ts_timestamps</code>
+            is empty on kintsugi and holds one <em>mock</em> row on demo),
+            revocation, policy OIDs.
+          </td>
+</tr>
+<tr>
+<td>Route-level cells</td>
+<td>
+<strong>14</strong> unsigned token via
+            <code>POST /api/timestamps/verify</code>, response shape pinned;
+            <strong>13</strong> stored mock verifies via the DB row;
+            <strong>13b</strong> same row, different <code>proof</code> →
+            does not verify (cell 13's mutation arm)
+          </td>
+</tr>
+<tr>
+<td>Red-first at base <code>e6daa806e79a</code></td>
+<td>
+<strong>6 red, 7 pass, 12 skipped</strong> of 25. The skips are a
+            failed <code>beforeAll</code> (no <code>pkijs</code> at base, so
+            <code>./ks1404-pki</code> will not resolve) — not passes.
+            Cells 17 and 17b are NOT in that figure: green at head only, by
+            construction (both the bundle and <code>parseTrustAnchors</code> are
+            new here), stated as a reading not a re-run
+          </td>
+</tr>
+<tr>
+<td>Test PKI, in-process</td>
+<td>
+<strong>12</strong> certificates,
+            <strong>three RSA-PSS</strong> (PSS root → PSS intermediate
+            → PSS TSA). The old <strong>~196 ms</strong> figure was the
+            5-certificate version and is
+            <strong>NOT re-measured</strong> — it cannot be isolated from
+            <code>beforeAll</code> without adding an instrument. Superseded, not
+            carried forward
+          </td>
+</tr>
+<tr>
+<td>timestamping unit suite before → after</td>
+<td>
+<strong>5 files / 44 tests → 6 files / 80 tests</strong>, rc 0
+            both, 0 skipped (71 before ITEM 2)
+          </td>
+</tr>
+<tr>
+<td><code>tsc</code> coverage gap</td>
+<td>
+            Project config, named binary (5.9.3): <strong>rc 0</strong>,
+            positive control a planted error →
+            <strong>rc 2 TS2322</strong>. But
+            <code>tsconfig.json:18</code> excludes
+            <code>src/__tests__</code> and <code>--listFilesOnly</code> shows
+            <strong>0</strong> test files in the program, so rc 0 covers product
+            code only. With <code>exclude</code> emptied (7 test files in the
+            program): <strong>33 errors at base, 48 at head</strong> —
+            pre-existing, latent, out of scope here
+          </td>
+</tr>
+<tr>
+<td>Suite wall clock, after</td>
+<td>
+<strong>956 ms – 1.07 s</strong> over 2 consecutive runs,
+            measured <strong>2026-10-04 UTC</strong> on host
+            <strong>Kamils-Mac-Studio</strong> (Apple silicon, node v24.7.0, npm
+            11.5.1). KS-1404 file alone
+            <strong>855 ms – 1.01 s</strong> over 2 consecutive runs, 36
+            tests, same host and date. Re-measured, not adjusted by arithmetic
+          </td>
+</tr>
+</table>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td> The suite needs
+        <code>@secuura/shared</code>, which resolves only through the workspace
+        install: run <code>npm ci --ignore-scripts</code> at
+        <code>Blockchain/Dev</code> and then <code>npm run build</code> in
+        <code>packages/shared</code>. </td></tr><tr><td>A member-only
+        <code>npm ci --no-workspaces</code> leaves two suites unable to LOAD,
+        which reports as
+        <strong>2 files failed with 0 failed tests</strong> — a load
+        failure, not an assertion failure.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>DigiCert's current CA is not under the pinned root.</strong></td><td>
+        Measured from published certificates on 2026-10-04:
+        <code>DigiCert Trusted G4 RSA4096 SHA256 TimeStamping CA</code> chains
+        to <code>DigiCert Trusted Root G4</code>, which this change does
+        <strong>not</strong> pin; only the older
+        <code>DigiCert SHA2 Assured ID Timestamping CA</code> chains to the
+        pinned <code>DigiCert Assured ID Root CA</code>. </td></tr><tr><td>If an environment's
+        <code>TSA_URL</code> is DigiCert under G4, genuine tokens stay refused.
+        </td></tr><tr><td>Which hierarchy the live endpoint uses needs a TSA call and is
+        <strong>unmeasured</strong>.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Fail-closed.</strong></td><td> With
+        <code>TSA_TRUST_ANCHORS_PEM</code> unset, every real DER token verifies
+        <code>false</code>. </td></tr><tr><td>Stored tokens still verify via their database row.
+        </td></tr><tr><td>Which environments have an anchor in effect
+        <strong>is now covered</strong>: see the wiring row below. </td></tr><tr><td>This line
+        previously read “is <strong>not covered</strong> by this
+        change”.
+      </td></tr></table></div>
+</div>

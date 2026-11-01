@@ -1,0 +1,17 @@
+<h2>Cell G of the audit-log paging file asserts its offsets for real, and the budget comment stops saying &ldquo;never hangs&rdquo; &mdash; KS-1548</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Cell G (an upstream clamping at 100) used to accept any sequence drawn from 0, 100 and 200. It now asserts the window starts are exactly <code>0, 100, 200</code>, computed as <code>i &times; upstreamClamp</code> for <code>ceil(275 / clamp)</code> windows. A mutant that retries a short window passed the old assertion 18 of 18 and fails the new one in cell G alone, 3 of 3 runs. </td></tr><tr><td>The route comment at <code>routes/platform.ts:474-476</code> said a slow upstream &ldquo;never hangs&rdquo; the page. A stalled response body does hold it: a probe stalled the body 6000 ms against a 2000 ms budget and was answered at 6016 ms. The comment now says the budget bounds the headers wait, not the body read. Comment-only (emitted code identical, <code>7304f87a279c9b00</code> both sides); the body read is not bounded. </td></tr><tr><td>m2 (the no-window-left guard) was already on develop through PR 1698 and is not rebuilt: deleting the guard in a copy fails cell M alone in 5 of 5 runs, and the test file from before PR 1698 passes 18 of 18 in 3 of 3 runs.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The window LIMITS under a lower clamp (cell G pins offsets only), a bound on the body read, and m3 (a final window answering after the deadline). The four platform suites are UNMEASURED and not claimed as a pass. </td></tr><tr><td><strong>Node v26.8.1</strong>, not the repository&rsquo;s stated LTS line of Node 24 (no Node 24 is installed on this host). Node 26 is an even-numbered line but its LTS status was not verified against the vendor schedule here, so these figures are declared as measured on v26.8.1, not claimed as LTS.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks1512-platform-audit-log-pages-the-upstream-past-its-200-clamp.test.ts   # 18 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run check:test-types                                                                                              # rc 0; api-gateway 0 new</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, nit</td><td>mutant &ldquo;retry a short window&rdquo; on a COPY: old assertion <strong>18 of 18</strong> (2 runs), new assertion <strong>1 failed / 17 passed</strong> (3 runs); real tree <strong>18 of 18</strong></td></tr>
+<tr><td>m2, re-proved</td><td>guard deleted on a COPY: pre-PR 1698 file 18 of 18 (3 runs), current file fails cell M alone (5 runs)</td></tr>
+<tr><td>whole suite</td><td>api-gateway <strong>1203 &rarr; 1203</strong> tests, <strong>123 &rarr; 123</strong> files; 0 failed before and after</td></tr>
+<tr><td>type ratchet</td><td><code>check:test-types</code> rc 0; api-gateway 27 errors, 27 in the baseline, 0 new, 0 stale</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,71 @@
+<h2><!--n-->. Five admin-labelled routes now require a platform administrator, and a KYC reviewer may not review their own verification (KS-1845)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this changes.</strong></td><td> Five routes that their own comments or the published spec call admin-only checked no role, so any signed-in caller could call them:
+      <ul>
+        <li><code>POST /api/kyc/:id/review</code>, which decides a KYC verification and sets its level;</li>
+        <li><code>POST /api/governance/process-expired</code>;</li>
+        <li><code>POST /api/delegations/admin/process-expired</code>;</li>
+        <li><code>GET /api/stake/all</code>;</li>
+        <li><code>GET /api/wallets/sessions</code>.</li>
+      </ul>
+      Each now refuses, as its first step, any caller whose role does not pass the shared <code>isPlatformRole</code> (SYSTEM_ADMIN or SUPER_ADMIN, ASCII case fold only, a non-string refused). The refusal is the 403 the spec already declares: &ldquo;Reviewer role required&rdquo; for the review, &ldquo;Admin role required&rdquo; for the other four. Nothing the route does is reached on a refusal.
+    </td></tr><tr><td><strong>The review also refuses the verification&rsquo;s own subject</strong>, even a platform administrator. That check refuses on equality, so a strict compare would fail open on any spelling difference: both ids are folded first, and an id that is missing or not a string is refused too (QA gate 42 found the bypass: an upper-case UUID in the row). Its role check runs before the body is parsed or the id is looked up, so a refused caller learns neither (no 400, no 404).
+    </td></tr><tr><td>Five new test files (<code>ks1845-*.test.ts</code>, one per service, 72 cells: 24 for kyc and 12 for each of the other four). Three existing fixtures change their test principal only, with no assertion changed:
+      <ul>
+        <li><code>ks849-mock-timer-stale-write.test.ts</code>: <code>ADMIN</code> to <code>SYSTEM_ADMIN</code>;</li>
+        <li><code>staking.test.ts</code>: the stub role is SYSTEM_ADMIN inside the <code>GET /api/stake/all</code> describe only;</li>
+        <li><code>ks1410-delegations-process-expired-500.test.ts</code>: <code>role: SYSTEM_ADMIN</code> added.</li>
+      </ul>
+      The spec is unchanged: all five operations already declared the 403.
+    </td></tr></table>
+<h3><!--n-->.1 What proves it</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Red at develop, green after, every mutant killed.</strong></td><td> <strong>Red-first at develop <code>85cd24d81cb9</code></strong>, each whole service suite with the new file in it:
+      <ul>
+        <li>kyc: 18 of the 24 new cells red (eight refused principals, no user, own-subject, the two case-differing ids, three unusable reviewer ids, no recorded subject, invalid body, unknown id); the 6 admitted and order controls green; the 34 existing kyc cells green.</li>
+        <li>governance, transfer, staking and wallet-connector: 9 of 12 new cells red in each (the refused principals); existing cells 167, 92, 66 and 49, all green.</li>
+      </ul>
+    </td></tr><tr><td><strong>The fixture edits are needed, measured.</strong> With the fix and without them, every new cell is green and the only reds are <code>ks849</code> S3 (1), staking&rsquo;s <code>stake/all</code> cell (1) and <code>ks1410</code> (5).
+      <br>With them, whole suites (vitest <code>--maxWorkers=3</code>; jest for governance):
+      <ul>
+        <li>kyc <strong>7 files / 58 of 58</strong>;</li>
+        <li>governance <strong>7 / 179 of 179</strong>;</li>
+        <li>transfer <strong>8 / 104 of 104</strong>;</li>
+        <li>staking <strong>5 / 78 of 78</strong>;</li>
+        <li>wallet-connector <strong>9 / 61 of 61</strong>.</li>
+      </ul>
+    </td></tr><tr><td><strong>Mutants: 59 of 59 killed</strong> (15 kyc, 11 in each of the other four), each a one-replacement in-place tamper with a unique anchor, parsed with TypeScript&rsquo;s own parser, run against the new file and restored by sha256. Per route:
+      <ul>
+        <li>gate removed;</li>
+        <li>the work reached before the gate;</li>
+        <li>OWNER admitted;</li>
+        <li>a case-sensitive compare (kills the pinned <code>system_admin</code> admission);</li>
+        <li>any non-empty role;</li>
+        <li><code>String()</code> coercion (kills the array cell);</li>
+        <li>a full-Unicode upper-case (kills the long-s cell);</li>
+        <li>tenant-admin roles admitted;</li>
+        <li>everyone refused;</li>
+        <li>SYSTEM_ADMIN only;</li>
+        <li>the 403 message changed.</li>
+      </ul>
+      Also, for the review: own-subject removed, role check removed, role check after the parse, role check after the 404. Eight more on the id fold, 8 of 8 killed: the fold removed; only the reviewer folded; only the subject folded; a missing reviewer id no longer refused; a missing subject no longer refused; non-strings stringified; the equality conjunct removed; everyone refused. The governance (ts-jest) variants keep <code>isPlatformRole</code> and <code>req</code> referenced so each mutant compiles and its cells decide.
+    </td></tr><tr><td><strong><code>tsc --noEmit</code> with the test files in the program:</strong>
+      <ul>
+        <li>0 errors in kyc, governance, transfer and staking.</li>
+        <li>wallet-connector has 1 error, the same one at develop: <code>cardano-cip30.test.ts</code> line 8, TS6133, unused <code>vi</code>. It is not in this change.</li>
+        <li>A planted type error is reported once as TS2322 in each service.</li>
+      </ul>
+      <strong>eslint</strong> on every changed and new file: 0 errors, 0 warnings, except <code>stake.ts</code> <code>prefer-const</code> on <code>poolStats</code>, which is present at develop and not in this change. A planted file raised two rules in each service.
+    </td></tr></table>
+<h3><!--n-->.2 Environment and figures</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-10-30 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; load average 9 to 19 throughout, so no timing here is comparable.</strong></td><td> Node v26.8.1 (not an LTS line), vitest and jest from the workspace root, TypeScript 5.9.3.
+      <br>In the first whole kyc run, two cells failed in <code>beforeEach</code> after 12.3 s: the first cell of this file and <code>ks849</code> S1, each cold-booting the service past vitest&rsquo;s 10 s hook default. Re-run alone, both ran: this file showed its 12 expected reds, and <code>ks849</code> read 3 of 3. This file now boots once, in <code>beforeAll</code>, with 120 s (the budget <code>ks1116</code> uses).
+    </td></tr></table>
+<h3><!--n-->.3 What this does not prove</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Unit level only.</strong></td><td> No request was made to a running stack, so the gateway&rsquo;s behaviour in front of these routes is not exercised here (each service mounts its own <code>jwtAuthenticate</code>). Whether any caller outside this repository (a scheduler, Platform S) calls these routes with a non-admin token is <strong>not measured</strong>: an in-repo search found none. Other KYC routes that read or delete by id with no owner check (<code>GET /api/kyc/:id</code>, <code>GET /api/kyc/user/:userId</code>, <code>DELETE /api/kyc/user/:userId/data</code>) are not changed here.
+    </td></tr><tr><td>Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), Node 24, any deploy.
+    </td></tr></table>
+<h3><!--n-->.4 Running it</h3>
+<pre><code>cd Blockchain/Dev/services/kyc &amp;&amp; npx vitest run --maxWorkers=3                 # 7 files, 58 of 58
+cd Blockchain/Dev/services/governance &amp;&amp; npx jest --maxWorkers=3              # 7 files, 179 of 179
+cd Blockchain/Dev/services/transfer &amp;&amp; npx vitest run --maxWorkers=3            # 8 files, 104 of 104
+cd Blockchain/Dev/services/staking &amp;&amp; npx vitest run --maxWorkers=3             # 5 files, 78 of 78
+cd Blockchain/Dev/services/wallet-connector &amp;&amp; npx vitest run --maxWorkers=3    # 9 files, 61 of 61</code></pre>

@@ -1,0 +1,21 @@
+<h2>mcp-server&rsquo;s batch routes and hash tool stop returning the thrown error text &mdash; KS-1901, KS-1893</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Client-visible change in <code>mcp-server/src/http-server.ts</code> and <code>src/tools/hash.ts</code>: the per-item errors of <code>POST /register-batch</code> and <code>POST /verify-batch</code> (HTTP 200) and the error of <code>secuura_hash_document</code> are now the constant <code>An unexpected error occurred</code>; the real error goes to the server log (stderr for the hash tool). An unreadable thrown value no longer turns a whole batch into a 500. <code>POST /hash</code> is untouched.
+    </td></tr><tr><td>Two new test files, 39 cells (31 RED, the rest controls) calling the handlers in process; tests alone: 31 of 39 fail (22 of 28 in the batch-route file, 9 of 11 in the hash-tool file) and the 8 controls pass; with the change: 39 of 39 pass. Three existing cells (KS 1410 C3 in two files, ks1868 C1) now pin the constant.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> Any MCP or REST client, a running server or stack, and the four platform suites. Node v26.8.1 is not an LTS line.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/mcp-server &amp;&amp; npx vitest run src/__tests__/ks1901-mcp-http-batch-items-never-echo-the-thrown-text.test.ts src/__tests__/ks1893-hash-tool-never-returns-the-fs-error-text.test.ts   # 39 cells
+cd Blockchain/Dev/services/mcp-server &amp;&amp; npx vitest run                                                  # 11 files / 86 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>39</strong> (28 + 11); tests alone 31 of 39 fail (22 of 28 in the batch-route file, 9 of 11 in the hash-tool file) and the 8 controls pass, with the change 39 of 39 pass</td></tr>
+<tr><td>mcp-server unit suite</td><td>develop <code>d7691f35312e</code>: 9 files / 47 cells, 47 pass; with the change 11 files / <strong>86 cells, 86 pass</strong>, 0 failed, 0 skipped</td></tr>
+<tr><td>mutants</td><td><strong>20 of 20 killed</strong> (each site&rsquo;s constant, log call and log argument; each read guard; the value-logging slips, a thrown string&rsquo;s text included; the rethrow; logging to stdout instead of stderr), each run with its expected cells red and its expected-green cells still green, and each source file restored byte for byte (sha256)</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: <strong>0 errors</strong> over 21 source files (11 under <code>__tests__</code>), and a planted type error was reported once as <code>TS2322</code>; eslint: 0 errors, 0 warnings on the 7 changed and new files, and a planted file raised <code>@typescript-eslint/no-unused-vars</code> and <code>no-debugger</code></td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27, shared with other seats; 2026-11-01 (UTC); Node v26.8.1 (not LTS); TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

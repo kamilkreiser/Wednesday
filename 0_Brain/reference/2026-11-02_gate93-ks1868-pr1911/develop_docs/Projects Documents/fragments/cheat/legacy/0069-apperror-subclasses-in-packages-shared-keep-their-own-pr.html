@@ -1,0 +1,20 @@
+<h2>AppError subclasses in packages/shared keep their own prototype &mdash; KS-1467</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Every subclass of <code>AppError</code> in <code>packages/shared</code> (nine, plus <code>DocumentNotFoundError</code> under <code>NotFoundError</code>) used to be reset to the base prototype by the constructor, so <code>err instanceof NotFoundError</code> was always false. The constructor now uses <code>new.target.prototype</code> (one line). Status, code, details and the handler&rsquo;s answers do not change. </td></tr><tr><td>This is the shared half of KS-1467. The services/auth half (its own error classes) is a separate change. A local model wrote the patch; it is applied unchanged.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> Other services&rsquo; suites (only the packages/shared suite was run), a running stack, and a Node 24 LTS run (the host is Node 26.8.1). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run src/__tests__/ks1467-shared-app-error-subclasses-keep-their-own-prototype.test.ts   # 29 cells, rc 0
+cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run                                                                                    # 55 files / 1063 cells; 1 failed on Node 26 (wallet-signature, KS 1727)
+cd Blockchain/Dev/packages/shared &amp;&amp; npx tsc --noEmit -p tsconfig.json                                                                 # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new file against the unfixed product line</td><td><strong>19 failed / 10 passed</strong> of 29, every red an AssertionError; the 10 controls pass at base</td></tr>
+<tr><td>new file, with the fix</td><td><strong>29 / 29</strong></td></tr>
+<tr><td>packages/shared, before &rarr; after</td><td><strong>54 files / 1034 cells &rarr; 55 files / 1063</strong>; 1 failed on both sides (the same <code>wallet-signature</code> cell, Node 26 only: <code>cbor.encode</code> truncates to one byte; KS 1727, KS 1739); 0 vanished, 29 new</td></tr>
+<tr><td>type-check</td><td><code>tsc -p tsconfig.json</code> rc 0; the tests-included program (1575 files) shows 0 errors in the two files of this change and 24 in other test files (module setting); planted-error control rc 2</td></tr>
+<tr><td>lint</td><td><code>eslint</code> on the two files rc 0; the package&rsquo;s <code>npm run lint</code> exits 1 on a pre-existing error elsewhere (<code>BACKLOG.md</code>)</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>bd6697e079fc</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

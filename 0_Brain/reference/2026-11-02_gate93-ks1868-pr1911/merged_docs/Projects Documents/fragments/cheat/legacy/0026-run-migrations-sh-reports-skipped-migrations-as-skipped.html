@@ -1,0 +1,22 @@
+<h2>run-migrations.sh reports skipped migrations as skipped, not applied — KS-808</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The
+        summary of <code>Blockchain/Dev/scripts/run-migrations.sh</code> is now
+        <code>Summary: applied=A failed=F skipped=S</code>. Before, <code>apply_one</code> returned 0 for an
+        <em>already applied</em> skip as well as for a real apply, so <code>applied=</code> counted skips: a
+        re-run over an up-to-date database reported every migration as applied. </td></tr><tr><td><strong>Only
+        the counter moved.</strong> Exit codes are unchanged (any failed migration still exits 3, KS 1031),
+        and <code>Migration runner finished (applied=…, failed=…)</code> keeps its format with the true apply
+        count. <strong>KS-808 stays open</strong>: a live run against a real database is owed.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotcha when you run this locally.</strong></td><td>
+        <strong>(1) No database needed.</strong> The suite stubs <code>psql</code> and <code>pg_isready</code>
+        and runs the runner as <code>sh scripts/run-migrations.sh</code> in a temp tree:
+        <code>bash Blockchain/Dev/scripts/__tests__/ks808_run_migrations_counts_skips_apart.test.sh</code>
+        gives <strong>5 passed, 0 failed</strong>. Point <code>RUN_MIGRATIONS_SH</code> at a copy of the
+        pre-change runner to see the old behaviour: <strong>3 passed, 2 failed</strong>. </td></tr><tr><td>
+        <strong>(2) Match <code>applied=</code> as a prefix.</strong> Anything that greps the summary must not
+        expect the line to end after <code>failed=N</code>: it now ends <code> skipped=N</code>. </td></tr><tr><td>
+        <strong>(3) The runner is baked into the <code>migrations</code> image.</strong> A local stack only
+        picks this change up after <code>migrations</code> is rebuilt; rsyncing the script alone changes
+        nothing.
+      </td></tr></table></div>

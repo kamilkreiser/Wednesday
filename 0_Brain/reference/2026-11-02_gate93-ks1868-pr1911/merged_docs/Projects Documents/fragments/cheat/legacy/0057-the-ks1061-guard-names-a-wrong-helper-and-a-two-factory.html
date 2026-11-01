@@ -1,0 +1,17 @@
+<h2>The ks1061 guard names a wrong helper and a two-factory file &mdash; KS-1491</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>ks1061-shared-mock-completeness.test.ts</code> names any test file whose root-module <code>@secuura/shared</code> mock factories do not all go through the shared helper. Loosening <code>VIA_HELPER</code> to a bare <code>require(</code>, or dropping the <code>/g</code> on <code>ROOT_MOCK</code>, left all 10 cells green. </td></tr><tr><td>Four cells are added (10 to 14), each a fixture the guard must name: <strong>I1a</strong> a wrong helper path, <strong>I1b</strong> a wrong module name under <code>helpers/</code>, <strong>I1c</strong> a wrong factory name on the right module, and <strong>I2</strong> a file with two factories, one compliant and one partial, read as <code>(2 factories, 1 via helper)</code>. The fixture builder <code>viaHelperBody</code> gains an optional factory-name argument; its default leaves every existing call unchanged. </td></tr><tr><td>Do not write a literal factory in this test file: it is scanned by its own first cell, so every fixture is assembled from pieces. No product file changes.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Not measured here.</strong></td><td> A run on an LTS Node: the host carries only v26.8.1 and nothing was repeated on Node 24. Nothing runs through the gateway. </td></tr><tr><td>Still surviving: <code>VIA_HELPER</code> without <code>/g</code> reads 14 of 14 in the new file. It is outside items 1 and 2 and is not changed here. Items 3 and 4 of the ticket (recorded text; whether to widen the guard) are not part of this change. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest src/__tests__/ks1061-shared-mock-completeness.test.ts   # 14 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest                                                         # 140 suites, 1660 tests, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>five one-line mutants, ORIGINAL file</td><td>all five <strong>10 passed / 0 failed</strong> &mdash; every one survives (bare <code>require(</code>, loosened path, loosened factory name, <code>ROOT_MOCK</code> without <code>/g</code>, <code>VIA_HELPER</code> without <code>/g</code>)</td></tr>
+<tr><td>the same mutants, NEW file</td><td>real code <strong>14 / 14</strong>; bare <code>require(</code> <strong>10 / 14</strong>; loosened path <strong>11 / 14</strong>; loosened factory name <strong>12 / 14</strong>; <code>ROOT_MOCK</code> without <code>/g</code> <strong>12 / 14</strong>; <code>VIA_HELPER</code> without <code>/g</code> <strong>14 / 14</strong> (still survives)</td></tr>
+<tr><td>whole originate unit suite</td><td><strong>140 suites, 1656 &rarr; 1660 tests</strong>, 0 failed before and after; the only file whose cell count differs is this one</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5), Node v26.8.1 (not an LTS measurement), jest 29.7.0, ts-jest 29.4.11, 2026-10-27, base <code>885d69b06f5f</code>, repeated at develop <code>49cc8e367596</code></td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,103 @@
+# QA Gate 93 verdict: Secuura/Distributed_Secuura PR 1911 (KS-1868, services/auth/src/routes/auth.ts, three catch sites O50-P1 register / O50-P2 login / O50-P3 reset-password), TIER 1
+
+## BLUF
+**GO WITH NOTES, at head `dfabd920e10fbeb417912caf999ef5312723ff1c`. Nothing has to be fixed before merge.**
+**Q1 (reset-password, the important one): nothing about session revocation or token burning changes.** I ran the REAL auth app (`src/index.ts` default export, every middleware) -> the real `POST /api/auth/reset-password` -> the real userRepo, db.ts, shared `queryWithTenantGuc`, argon2 `hashPassword`, `services/session.ts` and `errorHandler`. Only two drivers were replaced: `pg`, by a recording Pool over a users + password_reset_tokens store (writes staged per transaction, applied on COMMIT), and the ioredis client, by an in-memory fake injected through session.ts's own `__setRedisForTesting`. The fake Redis rejected at one of three commands (`smembers`: before any session is touched; `get`: inside the loop, after one session was revoked; `del`: after both were revoked). It rejected with an ordinary Error, a revoked Proxy or a throwing `message` getter. I ran it at base and at head: 10 cells each side, 20 in all (logs/probe_table.log).
+- Base, unreadable value: **500 INTERNAL_ERROR "An unexpected error occurred"**, with no KS-1692 line logged (errorHandler logs the TypeError text). Head: **503 SERVICE_UNAVAILABLE "Your password WAS reset, ..."** plus the KS-1692 line with `error: "unreadable thrown value"`.
+- Everything else matched between base and head, and between the unreadable cells and the ordinary-Error cell at the same failure point: password written (argon2 hash), session state, reset link NOT burned, the same SQL sequence, 0 unhandled rejections. A retry with the same link answered 200 in every cell, finished revoking every session and burned the link. All six head unreadable cells differ from head's ordinary cell **in no field**; the base unreadable cells differ only in status, code and message.
+- So the unreadable value's after-state is exactly what an ordinary Error already gets. The base 500 was not safer, because it also left the link usable and the sessions as they were. It only told the caller less. This is not a security design decision. No NO GO.
+**Q2 (register/login):** the HTTP responses did not change. Status, body (with ids and timestamps normalised) and Set-Cookie were equal at base and head for all 4 kinds on both routes. Unhandled rejections for an unreadable value: 1 at base, 0 at head (logs/q2_table.log). The real `publishEvent` cannot reject: everything after `if (!redis) return` sits in a bare try/catch (events.ts). So this is defence in depth.
+**Q3 (KS-949):** red at BASE as well, so it is a load flake. The ks949 file alone at the base product: 1 failed / 30 passed at load 13. Base product + new files, whole suite: 3 ks949 cells failed. Base whole suite at load 7: 1459/1459. Its tree walk skips `__tests__`, so the new files are not even read.
+The -C1 apply checks out. The HEAD's auth.ts change lines equal the operator's held sections exactly, in order. Applying P3 strictly, then P1 and P2 with `-C1`, to base gives a byte-identical HEAD auth.ts. Each hunk lands in /register, /login and /reset-password. Wednesday's P2 provenance question is answered EQUAL (G93-F1).
+Mutants: 21 of 24 killed. The 3 survivors are the known readable-non-Error branch (M6), one per site.
+
+## 1. Heads + diffstat
+- START (logs/head_start.log, 2026-11-01T21:38:12Z): `refs/pull/1911/head` = `dfabd920e10f...` (= expected). Parent = merge-base = develop `03977e89a343...`. One commit.
+- END (logs/head_end.log, 2026-11-01T22:37:42Z): PR head `dfabd920e10f...`, unchanged. **develop moved to `cde2dee4`** (one commit, KS-1868 mcp-server, 6 paths under services/mcp-server plus its own fragment pair, 0 paths under services/auth). I gated the merge onto it as well (section 6). Clone clean, product sha `46dec9132433...` = head.
+- Diffstat (logs/diffstat.log, three-dot): 6 files, +600/-3: auth.ts +25/-3; 3 new test files (+163 register, +210 login, +160 reset); 2 fragments (+22 flow, +20 cheat). Matches the READY mail. Nothing outside these paths.
+- **PR body not read** (no Secuura gh auth reachable; logs/gh_view.err rc 4). I used the commit message and Seat E 26th's READY mail (evidence/ready_mail_pr1911.txt). Body wording I could not see is NOT verified.
+
+## 2. The hunks (logs/product_diff.log, logs/sections.log, logs/c1.log)
+- With -U0 the diff has 4 hunks: register (head :306), login (head :620) and reset-password (head :895 guard + :902 swap). That is 28 change lines (-3 +25). Each enclosing handler was found by walking back to the nearest `authRoutes.post(`: /register (:161), /login (:340), /reset-password (:834) for both reset hunks.
+- **Against the held sections** (runs without the -control/-r2 suffix, `out.md.checker/section_1.diff`): head change lines == P1 + P2 + P3, **in order, True**. All three test files == their `section_2.diff` byte for byte (163/210/160 lines).
+- P1 and P2: the one-line `.catch(err => logger.error('Failed to publish event', { error: <EXPR> }))` becomes a block. Inside it, `let reason; try { reason = <EXPR>; } catch { reason = 'unreadable thrown value'; }` and the same log call with `{ error: reason }`. P3: the same guard inserted before the existing KS-1692 log call, and `error: <EXPR>` -> `error: reason`. **Unchanged:** log messages and levels, `userId`, the ServiceUnavailableError text and the fact that it is still thrown, the KS-1407 pre-check and post-check, the token-burn position, and everything outside these lines. No rethrow was added.
+- `git grep "instanceof Error ? err.message : String(err)"` in auth.ts: 3 at base, and at head the same 3 now inside guards (:309, :623, :897).
+- **The four -C1 conditions, re-measured (logs/c1.log):** (1) plain `git apply --check -p1` refuses both P1 and P2: `patch failed: ...auth.ts:303` / `:609`, rc 1. (2) Under `-C1`, corrupting the context line next to the change gives rc 1, and corrupting the removed line gives rc 1, for both hunks. Corrupting the OUTERMOST context line gives **rc 0** ("Context reduced to (2/0)"), as the author disclosed. (3) and (4) Applying P3 strict, then P1 -C1, then P2 -C1 to the base file gives a result **byte-identical to HEAD auth.ts** (sha `46dec913...`). Because the end state is identical, the unchecked outer context line cannot have misplaced anything.
+
+## 3. The behaviour question (Q1 and Q2 in full)
+### Q1: POST /api/auth/reset-password (scripts/probe_reset.test.ts, run by scripts/probe.sh; logs/probe_reset_{base,head}.jsonl, logs/probe_table.log)
+Positive control: `isRedisAvailable: true` at both versions. Unknown SQL: none in any cell. The SQL in every failure cell: SELECT reset token, SELECT user (preauth) x2, set_config, UPDATE users password_hash, set_config, SELECT user (read-back). There is no BURN.
+
+| failure point / value | status base / head | body code base / head | KS-1692 line base / head | password written | link burned | sessions after (s-a, s-b, set) | unhandled | retry with the same link |
+|---|---|---|---|---|---|---|---|---|
+| control (no failure) | 200 / 200 | ok / ok | none / none | yes (argon2) | yes | revoked, revoked, deleted | 0 | 404 (link used) |
+| smembers / ordinary Error | 503 / 503 | SERVICE_UNAVAILABLE / same | "redis command rejected" / same | yes | **no** | ACTIVE, ACTIVE, both | 0 | 200, all revoked, burned |
+| smembers / revoked Proxy | **500 / 503** | **INTERNAL_ERROR / SERVICE_UNAVAILABLE** | **none / "unreadable thrown value"** | yes / yes | no / no | ACTIVE, ACTIVE, both / same | 0 / 0 | 200 / 200 |
+| smembers / throwing getter | 500 / 503 | as above | as above | yes | no | as above | 0 | 200 |
+| get (mid-loop) / ordinary | 503 / 503 | SERVICE_UNAVAILABLE | "redis command rejected" | yes | no | revoked, ACTIVE, s-b | 0 | 200 |
+| get / revoked Proxy, throwing getter | 500 / 503 | INTERNAL_ERROR / SERVICE_UNAVAILABLE | none / constant | yes | no | revoked, ACTIVE, s-b / same | 0 | 200 |
+| del (after loop) / ordinary | 503 / 503 | SERVICE_UNAVAILABLE | "redis command rejected" | yes | no | revoked, revoked, (empty set) | 0 | 200 |
+| del / revoked Proxy, throwing getter | 500 / 503 | INTERNAL_ERROR / SERVICE_UNAVAILABLE | none / constant | yes | no | revoked, revoked, (empty) / same | 0 | 200 |
+
+- Per-field diff (probe_table.log, last 12 lines): every head unreadable cell vs head ordinary at the same failure point differs in **[]**. Base unreadable vs ordinary differs in `['status','code','msg']` only.
+- **Answer:** nothing about session revocation or token burning is newly different. The password write, which sessions end, and the unburned single-use link (so a retry completes the revocation) are identical at base and head, and identical to the ordinary-Error path. The change is limited to the answer: 500 "unexpected" becomes the authored 503, which tells the user the truth (password changed, use the link again), plus the restored KS-1692 log line.
+- **Reachability:** `revokeAllUserSessions` (session.ts:317-328) rejects only with what ioredis rejects with: `ReplyError` or connection/`MaxRetriesPerRequestError`, all Error subclasses. A corrupt stored session gives a `JSON.parse` `SyntaxError`, also an Error. No caller-controlled object reaches it: the user id comes from the token row. An unreadable value would need a wrapper or monkeypatch around the client, or a test double. Defence in depth. All thrown values here are synthetic.
+- Limits: the Redis and pg drivers are models. Rows are not PostgreSQL, and the fake Redis is not ioredis. No real boot (NODE_ENV=test skips listen/init). Node v26.8.1, not 24.
+
+### Q2: POST /register and POST /login (scripts/q2_register.test.ts, q2_login.test.ts: the PR's own harness top, verbatim, with a recording describe; logs/q2_table.log)
+| route / publish rejects with | status base / head | body equal | Set-Cookie equal | unhandled base / head | log line base / head |
+|---|---|---|---|---|---|
+| register / (no rejection) | 201 / 201 | True | True | 0 / 0 | none |
+| register / ordinary | 201 / 201 | True | True | 0 / 0 | "bus down" / same |
+| register / revoked Proxy | 201 / 201 | True | True | **1 / 0** | **none / "unreadable thrown value"** |
+| register / throwing getter | 201 / 201 | True | True | 1 / 0 | as above |
+| login / (no rejection) | 200 / 200 | True | True | 0 / 0 | none |
+| login / ordinary | 200 / 200 | True | True | 0 / 0 | "bus down" / same |
+| login / revoked Proxy, throwing getter | 200 / 200 | True | True | 1 / 0 | none / constant |
+- **HTTP responses unchanged: yes.** In this harness the repository, password, jwt, session and event bus are mocked, as in the PR's cells. That is necessary, because the real `publishEvent` cannot reject (events.ts:115-137: `if (!redis) return;`, then everything else inside `try { ... } catch { }`). Read, not run, for the real events module.
+- **Process effect (read, plus one Node fact run):** auth installs no `unhandledRejection` handler. `git grep` over services/auth/src non-test finds 0 hits; the positive control finds api-gateway/src/index.ts, api-gateway/src/routes/verification.ts and originate/src/index.ts. auth's own `gracefulShutdown` handles only SIGTERM/SIGINT. The image is `node:24-alpine`, `CMD ["node","dist/index.js"]`. On this host's Node v26.8.1, an unhandled rejection with no handler exits rc 1 (logs/node_unhandled_default.log). Not run on Node 24. Not run against a booted auth process.
+
+## 4. Re-measure
+- **Red first** (logs/red_base_new_tests.log, base product + the 3 new files): **6 failed / 6 passed**, all by assertion: 4x `AssertionError: expected 1 to be +0` (register and login R1 and R2) and 2x `expected 500 to be 503` (reset R1 and R2). The C1 and C2 controls pass at base. **Green** at head: 3 files, **12/12** (logs/head_new_tests.log).
+- **Whole auth suite** (the corrected run, cwd = services/auth): base product without the new files **119 files, 1459/1459 passed** at load 7 (logs/base_whole_excl_new.log). Head **122 files, 1471 tests, 1469 passed, 2 failed**, both ks949 timeouts (5003 and 5001 ms) at load 8 (logs/after_whole.log). Second head run: the same 1469 / 2 ks949 (logs/after_whole_2.log). Base product WITH the new files: **1471, 1462 passed, 9 failed** = the 6 RED cells + **3 ks949** (logs/base_whole_incl_new.log). +12 tests, no new failure outside ks949. Product restored by sha after every swap (RESTORE_OK).
+- **Q3 / KS-949 red at base** (logs/ks949_alone_{base,head}.log): alone at the BASE product, 1 failed / 30 passed ("is NOT seeded ..." 6422 ms) at load 13. Alone at head, 2 failed / 29 at load 13. In the base whole suite with the new files, 3 failed. Load-driven at both versions. The file's tree walk skips `__tests__` (SKIP_DIR, ks949 test :290), so the new test files are not even read. It does read routes/auth.ts, and that is +22 lines.
+- **Instrument fault of mine (disclosed):** my first whole-suite pair ran vitest from the WEDNESDAY cwd. That gave 3 false reds in cwd-relative tests (ks1009 "could not locate the Dev root", ks1467 S1/S2 ENOENT) at both base and head. I fixed vt.sh to run from the package and re-ran. The first-run logs are kept as `*__run1_wrong_cwd.log` and are not used for any figure.
+- **tsc** (scripts/tsc_lint.js): `tsconfig.json --noEmit` rc 0, 0 errors. `tsconfig.test.json` 42 errors at head and **42 at the base product, identical lists** (line/col stripped). The 1 hit for "ks1868" in that list is ks1006's pre-existing TS1192, which prints the absolute path containing my folder name `gate93-ks1868-pr1911`: the same artefact the author disclosed. 0 errors in auth.ts or the new tests. **Leg 16** (`check.cjs services/auth`): "173 files, 122 under __tests__; 42 errors: 42 in the baseline, 0 new; 0 stale" rc 0. Planted control: `const GATE93_BAD: number = 'x'` in the login test gives TS2322 at :212 (43 errors). File restored byte-identical.
+- **eslint** (cwd services/auth): auth.ts + the 3 new files rc 0, 0 problems. Planted file: 1 error + 1 warning, rc 1.
+- **docs-fragments** (logs/frag_outer.log): head clean rc 0 ("flow 117 legacy + 64 new, cheat 112 legacy + 64 new; lint clean, render passes"). Four planted defects, each rc 1: flow unclosed div, flow `<!--n-->.` removed, cheat unclosed div, cheat `</table>` corrupted. All restored by sha; rc 0 after. Advisories: see G93-F7.
+- The hook figures (13/16 legs, 111 shell suites) are quoted from the mail, not re-run.
+
+## 5. Mutants (scripts/mutants.py + mutants_resume.py; logs/mutants_table_part1.log + part2.log; per-run logs/mut_<site>__<mutant>.log)
+Each mutant was applied at ONE site in the product only, with tests untouched. All 3 new files ran each time, and the sha was restored and checked after every run (restore True x24). The first runner was stopped after 6 runs because host load (23) made each load-gate wait 200 s; the product was restored by sha, and the remaining 18 ran with a one-wait load gate. **21 killed, 3 survived.**
+
+| Mutant | P1 register | P2 login | P3 reset-password |
+|---|---|---|---|
+| M0 drop the guard (revert) | KILLED R1 R2 | KILLED R1 R2 | KILLED R1 R2 |
+| M1 drop the inner try | KILLED R1 R2 | KILLED R1 R2 | KILLED R1 R2 |
+| M2 constant -> `String(err)` | KILLED R1 R2 | KILLED R1 R2 | KILLED R1 R2 |
+| M3 rethrow only when unreadable | KILLED R1 R2 | KILLED R1 R2 | KILLED R1 R2 |
+| M4 constant for every value | KILLED C1 | KILLED C1 | KILLED C1 |
+| M5 rethrow every value after the log | KILLED C1 R1 R2 | KILLED C1 R1 R2 | KILLED C1 R1 R2 |
+| M6 readable non-Error branch -> `'x'` | **SURVIVED** | **SURVIVED** | **SURVIVED** |
+| M7 log removed | KILLED C1 R1 R2 | KILLED C1 R1 R2 | KILLED C1 R1 R2 |
+In every killed run only the mutated site's own file failed, by AssertionError. In P1 M3 and M5 the unhandled rejection also made vitest skip 4 cells; the log's "login" tag there is reporter text, not a login failure.
+
+## 6. merge-tree
+- Onto develop at the base `03977e89`: rc 0, tree = the PR head's tree.
+- **Onto develop at END `cde2dee4`** (logs/merge_tree_end.log): **rc 0, tree `98141d38621612ad779b101ab8bd999fb05c1756`, clean.** It changes exactly the PR's 6 paths (+600/-3). Paths shared with develop's new commit: none (positive control 6). services/auth changed on develop since the base: 0. docs-fragments on the merged tree: rc 0, "65 new", lint clean (logs/frag_merged.log).
+
+## 7. Kam's ks1346 logging rule
+The new log lines log either the Error's own `message` (exactly what the base lines logged) or the constant `unreadable thrown value`. No thrown object, field value, key name or stack is added. Compliant. `userId` was already logged at base.
+
+## FINDINGS / Notes for the PR body
+- **G93-F1 (info, provenance; answers Wednesday's correction)** Wednesday's check found that the HELD O50-P2 artefact is the `-r2` run (patch.diff sha `212404c19375`). Seat E 26th applied the first-round sections (round-1 patch.diff sha `3fb05dda4adb`, which is byte-identical to the brief's golden.diff). Measured (logs/p2_provenance.log, logs/p2_r2_apply.log): PR 1911's P2 product change lines vs **golden.diff: EQUAL**; vs **-r2 section_1.diff: EQUAL**; vs -r2 patch.diff: EQUAL; vs round-1 section_1: EQUAL. The P2 test file is EQUAL to golden, -r2 and round-1 (210 lines each). The only byte difference between the round-1 and -r2 patch.diff is the missing `diff --git` header line in -r2. The -r2 section is also refused by plain apply (`:609`). Applied with -C1 after P3 and P1, it gives a byte-identical HEAD auth.ts. **Not a finding against the code.** Body note: "P2 applied from the round-1 sections; content equal to the held -r2 artefact and to the golden".
+- **G93-F2 (info, reachability)** None of the three values is reachable by an actor. revokeAllUserSessions rejects with ioredis or JSON errors, all Error subclasses. publishEvent never rejects. The values in the cells and in this probe are synthetic.
+- **G93-F3 (recommended, wording in the fragment/body/commit)** "the other sessions NOT revoked" holds only when revocation fails before any session is touched (smembers). A mid-loop failure leaves some sessions revoked, and a `del` failure leaves all of them revoked (measured, base = head = ordinary). Suggest "the other sessions not (all) revoked". Also, the base "500 ... link not burned" is now measured, not read from call order: not burned, and a retry with the same link answered 200 and finished revoking. The fragment's "a real ... HTTP request" under "Not run" can say: gate 93 ran the real auth app over loopback HTTP with only the pg and Redis drivers replaced.
+- **G93-F4 (info, pre-existing KS-1692 wording, unchanged)** The 503 text says the store "became unreachable" also when the store is reachable but a command rejected, and "could not be ended" when some sessions were in fact ended. Not this PR.
+- **G93-F5 (low, test gap)** M6 survives at all three sites: no cell throws a readable non-Error. This branch is unchanged by the PR. Same gap as G90-F3.
+- **G93-F6 (info, Q3)** ks949 is a load flake, red at BASE: alone 1/31 failed at load 13, and 3 cells failed in the base whole suite with the new files. Green 1459/1459 at load 7. It does not read the new files.
+- **G93-F7 (info, docs-fragments advisories)** At develop `03977e89` alone, check prints flow and cheat "content after its last rendered entry (hand-appended)" (logs/frag_develop.log). At head it prints "differs ... inside the rendered range" at flow :6249 and cheat :6235. That is the same pre-existing hand edit, now inside the range because this PR's entry extends the render; gate 90 saw exactly that form on develop `3281db32`. On the merged tree with `cde2dee4` it reads "hand-appended" again. So the mail's "the same 2 ADVISORY lines as the base" is not literal, but nothing comes from this PR's content. Check rc 0 everywhere.
+- **G93-F8 (info, follow-up, out of scope)** The same unguarded read is at `routes/users.ts:1030` (change-password, right after its own `revokeAllUserSessions` at :1027). That is the reset-password twin, and Q1's analysis would apply to it unchanged. It is left out because open PRs 1796/1798 touch users.ts. The other 18 same-shape sites are the author's list.
+
+## 9. NOT TESTED
+The real PR body (no gh auth); a real PostgreSQL, Redis or ioredis; a booted auth process and its real unhandled-rejection exit on Node 24 (Node v26.8.1 only, and only the bare Node default was run); the real events module rejecting (it cannot); the gateway hop; the four platform suites; the pre-push hook legs (quoted only); the Linear ticket text; the other KS-1868 sites, including users.ts:1030.

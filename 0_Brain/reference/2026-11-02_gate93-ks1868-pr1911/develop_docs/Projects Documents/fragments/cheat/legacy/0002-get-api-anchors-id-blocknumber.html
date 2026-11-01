@@ -1,0 +1,65 @@
+<div class="section">
+<h2>GET /api/anchors/:id blockNumber — KS-1333</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Four writers in
+        <code>services/originate/src/services/anchorStateSync.ts</code> persist
+        <code>blockHeight: anchor.blockNumber || 0</code> unshaped, and the
+        value comes from <code>GET /api/anchors/:id</code>. </td></tr><tr><td>Measured at source,
+        that route answers a <strong>number or null</strong>, never a raw
+        <code>pg int8</code> string: <code>rowToAnchor</code> runs
+        <code>Number()</code> at
+        <code>services/anchoring/src/index.ts:1317</code>. </td></tr><tr><td>This is the cell that
+        pins it, per the ticket's own rule — a recorded reason and a cell,
+        not a coercion.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring
+npx vitest run src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts   # 3 cells
+npx vitest run                                                                 # 357 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr>
+<th>Figure</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>anchoring suite, base → head</td>
+<td>354 → 357 tests; 353 → 356 passed</td>
+</tr>
+<tr>
+<td>new reds</td>
+<td>
+            0 (the one red, <code>threadTokenMint</code>, is KS 562 and
+            pre-existing)
+          </td>
+</tr>
+<tr>
+<td>the three cells</td>
+<td>
+            104–135 ms reported, 0.36–0.55 s wall, three runs,
+            2026-10-05, host Kamil's Mac Studio (2)
+          </td>
+</tr>
+<tr>
+<td>red proof</td>
+<td>
+            by tamper of <code>index.ts:1317</code>; B1 red, C1/C2 green, 3
+            cells still run
+          </td>
+</tr>
+<tr>
+<td>stated timings naming this suite</td>
+<td>
+            0 at base SHA <code>3ce8cd4026a6</code> (must-hit control: 23 flow /
+            35 cheat)
+          </td>
+</tr>
+</table>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Not covered.</strong></td><td> No live sweep (§5f), so KS-1333 does
+        not move to Done here. </td></tr><tr><td>The guard is <strong>source-text</strong>: it
+        pins the text of two lines, so commenting them out would leave it green.
+        </td></tr><tr><td>And whether the four writers should use <code>??</code> rather than
+        <code>|| 0</code> stays open on the ticket for a human — that is a
+        question about the value <code>0</code>, not about the shape pinned
+        here.
+      </td></tr></table></div>
+</div>

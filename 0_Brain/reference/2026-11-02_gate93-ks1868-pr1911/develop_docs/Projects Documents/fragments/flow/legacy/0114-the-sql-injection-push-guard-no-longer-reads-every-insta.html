@@ -1,0 +1,54 @@
+<h2>125. The SQL-injection push guard no longer reads every installed package, and a real hit is reported instead of dying under <code>set -u</code> (KS-1857)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this changes.</strong></td><td> One product script, two lines: <code>Blockchain/Dev/scripts/check-no-sql-injection.sh</code>, the pen-test M6 guard that preflight leg 15/16 runs on every push through <code>run-code-guards.sh</code>. Line 28: the scan&rsquo;s <code>grep -rEn</code> gains <code>--exclude-dir=node_modules</code>, so it no longer reads the 26 <code>node_modules</code> trees under <code>services/</code> and <code>packages/</code> (14,439 files) before dropping their hits. The <code>grep -v</code> post-filter on line 31 stays as a second safeguard. Line 35: the two <code>$</code> in the error headline are escaped. Under <code>set -u</code> the unescaped <code>$queryRawUnsafe</code> was an unbound variable, so a real hit exited 1 having printed only <code>line 35: queryRawUnsafe: unbound variable</code>: no file, no line, no Fix hint.
+    </td></tr><tr><td><strong>Two new shell suites</strong> in <code>Blockchain/Dev/scripts/__tests__/</code>, reached by <code>run-shell-suites.sh</code>&rsquo;s glob with no wiring: <code>check_no_sql_injection_skips_node_modules.test.sh</code> (5 cells) and <code>check_no_sql_injection_reports_the_hit.test.sh</code> (4 cells). Both put a stub <code>grep</code> on a private PATH that logs its arguments and answers the scan call, and both hand the script&rsquo;s own <code>grep -v</code> to the real grep, so those cells walk no tree. Both were built by the Spark (two held passes) and applied with strict <code>git apply -p1</code>, using the checker&rsquo;s re-anchored hunk for the first pass. Cell 5 of the node_modules suite is not from the Spark: it was added after QA gate 35 and runs the real grep on a throwaway tree, because with grep stubbed a scan that excluded too much went unseen.
+    </td></tr><tr><td>No guard is added or rewired: the runner&rsquo;s WIRED list and the hook are untouched. <code>--exclude-dir=dist</code> is not added: <code>dist</code> is one directory of 360 files here.
+    </td></tr></table>
+<h3>125.1 What proves it</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Red at develop, green after, and every cell killed by its own mutant.</strong></td><td> <strong>Red-first.</strong> At develop <code>85cd24d81cb9</code>, the node_modules suite reads 3 of 5 (the exclusion cell and the real-grep cell red) and the reports-the-hit suite 2 of 4 (the headline and the file-and-line cells red). With the change they read <strong>5 of 5</strong> and <strong>4 of 4</strong>, under <code>/bin/bash</code> 3.2.57.
+    </td></tr><tr><td><strong>Mutants, 6 of 6 killed</strong>, each a one-replacement copy outside <code>__tests__</code>, parse-checked and run through both suites; the worktree script&rsquo;s sha256 was the same before and after:
+      <ul>
+        <li>exclusion dropped: the exclusion cell red;</li>
+        <li><code>--include='*.tsx'</code> dropped: the scan control red;</li>
+        <li><code>EXIT=1</code> turned to <code>EXIT=0</code>: both exit-code controls red;</li>
+        <li><code>node_modules</code> removed from the post-filter: both filtered-hit controls red;</li>
+        <li>the headline unescaped: the headline and file-and-line cells red;</li>
+        <li>the hit listing removed: the file-and-line cell red.</li>
+      </ul>
+      Re-run with cell 5 in place: still 6 of 6, and cell 5 also turns red on the last three. QA gate 35&rsquo;s mutants <code>--exclude-dir=src</code> and <code>--exclude-dir='*'</code> (the guard then reads nothing and says OK) survived cells 1-4 and turn cell 5 red. Its mutant with the exclusion removed turns cell 1 red and leaves cell 5 green, because the guard&rsquo;s output is the same either way.
+    </td></tr><tr><td><strong>Real grep, throwaway trees</strong> (<code>/usr/bin/grep</code>, BSD grep 2.6.0), 6 of 6, run by hand before the push; cell 5 now commits the core of it:
+      <ul>
+        <li>A planted violation in <code>services/x/src/repo.ts</code> exits 1 and prints <code>services/x/src/repo.ts:2:</code>, the headline and the Fix hint. At develop it exits 1 with only the unbound-variable line.</li>
+        <li>An <code>--exclude-dir=src</code> mutant goes blind (exit 0).</li>
+        <li>The script&rsquo;s own scan command, extracted and run alone on a tree whose only violation is under <code>node_modules</code>, reports that file at develop and nothing with the change. So BSD grep honours <code>--exclude-dir</code>, and the directory is not read.</li>
+        <li>The whole guard exits 0 on that tree both ways.</li>
+      </ul>
+    </td></tr><tr><td><strong>Gates in the worktree:</strong>
+      <ul>
+        <li><code>run-shell-suites.sh --check-unreached</code>: 101 suites reached (99 at develop, so +2).</li>
+        <li>Leg 10&rsquo;s bare-path check: OK. The new suites are 100644, like <code>check_no_latest_tags.test.sh</code>; the runner invokes each with <code>bash</code>.</li>
+        <li>The guard on the real tree: exit 0.</li>
+        <li><code>run-code-guards.sh</code>: 13 guards passed.</li>
+        <li>The whole shell-suite runner at this head: 100 passed, 0 failed, 1 skipped of 101 (the skip is ks949_main_seed_idempotence, which skips on a host with no PostgreSQL by the 2026-09-13 ruling); 944 s at load1 15.4 to 19.4, so not comparable to other runs. Both new suites ran in it, 4 of 4 each, before cell 5 was added.</li>
+        <li>With cell 5: the node_modules suite 5 of 5, the reports-the-hit suite 4 of 4, and 101 suites reached.</li>
+      </ul>
+    </td></tr></table>
+<h3>125.2 Environment and figures</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Measured 2026-10-30 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; load average 8 to 19.4.</strong></td><td> GNU bash 3.2.57, BSD grep 2.6.0-FreeBSD, Node v26.8.1 (not an LTS line; it ran only the docs checker). No cache purge was available, so &ldquo;cold&rdquo; means a freshly created worktree whose cloned files had never been read.
+    </td></tr><tr><td>Every figure is the guard script&rsquo;s own wall-clock, as-is against <code>--exclude-dir=node_modules</code>, on the same tree:
+      <ul>
+        <li>Cold, fresh worktree: <strong>125.26 s</strong> against <strong>9.03 s</strong>. The excluded run went first, so the as-is run had the source files warm.</li>
+        <li>A second fresh worktree, cold, as-is: 172.46 s.</li>
+        <li>Warm, three alternated runs: median <strong>3.08 s</strong> against <strong>0.33 s</strong>.</li>
+        <li>The whole <code>run-code-guards.sh</code> on a fresh worktree: 211.35 s cold, then 19.01 s and 15.23 s warm.</li>
+        <li>Its sibling tree-walkers, cold: <code>check-no-pii-store.sh</code> 4.83 s, <code>check-script-portability.sh</code> 7.42 s, <code>check-connector-xss.sh</code> 0.36 s.</li>
+      </ul>
+      The comment at <code>run-code-guards.sh</code> lines 72-76 (&ldquo;~10 s&rdquo;, measured 2026-09-14) is stale against these figures and is not changed here.
+    </td></tr></table>
+<h3>125.3 What this does not prove</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>A guard made cheaper and louder, not a new check.</strong></td><td> The whole pre-push hook&rsquo;s wall-clock before and after is not measured (that needs two pushes). How cold a seat&rsquo;s <code>node_modules</code> is at push time varies with what the seat ran first, so the saving per push lies between the warm and cold figures above. The pattern the guard matches is unchanged; its coverage of other unsafe shapes is not assessed here. QA gate 35 found that the <code>grep -v</code> post-filter matches its words anywhere in a hit line, so product code in a path such as <code>src/node_modules_shim/</code> is hidden, before and after this change (KS-1865); cell 5 pins that state, and flips when KS-1865 lands.
+    </td></tr><tr><td>Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), a running stack, any deploy.
+    </td></tr></table>
+<h3>125.4 Running it</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/check_no_sql_injection_skips_node_modules.test.sh   # 5 passed, 0 failed
+bash Blockchain/Dev/scripts/__tests__/check_no_sql_injection_reports_the_hit.test.sh     # 4 passed, 0 failed
+bash Blockchain/Dev/scripts/check-no-sql-injection.sh                                     # OK, exit 0</code></pre>

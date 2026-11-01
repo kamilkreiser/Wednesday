@@ -1,0 +1,21 @@
+<h2>The api-gateway image keeps only secuura-api.yaml in docs/openapi &mdash; KS-1841</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>What to know.</strong></td><td> The builder stage now runs <code>find ./docs/openapi -mindepth 1 -maxdepth 1 ! -name secuura-api.yaml -exec rm -rf {} +</code> instead of the two name globs of KS-1823, so a backup of the spec under any name, and any backup folder, is removed from the image. The line was run in <code>node:24-alpine</code> (BusyBox v1.37.0) against the ticket's shapes: only the spec is left, twice over. The build context and builder layer (F2) are untouched.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A full <code>docker build</code>, Node 24 for the vitest runs, the four platform suites. The ks1823 C3 control (rewritten after QA gate 89) flags any other RUN line that removes or deletes anything under docs or the spec; a <code>mv</code> of the spec is not caught.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev && npm run test -w services/api-gateway -- --run ks1823-dockerfile ks1841-dockerfile   # 13 cells
+cd Blockchain/Dev && npm run test -w services/api-gateway -- --run   # 1373 tests, 134 files
+node Blockchain/Dev/scripts/docs-fragments.mjs check</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new test file</td><td><strong>5</strong> cells; with the ks1823 edits 13 cells: red first 7 passed / 6 failed by assertion, green 13 / 0 (3 runs)</td></tr>
+<tr><td>api-gateway suite</td><td>before <strong>1368 passed, 0 failed</strong> (133 files); after <strong>1373 passed, 0 failed</strong> (134 files); 0 skipped</td></tr>
+<tr><td>the line in node:24-alpine</td><td>BusyBox v1.37.0 arm64: run 1 and run 2 exit 0, only secuura-api.yaml left (byte-identical); the old command exits 1 and leaves 12 entries</td></tr>
+<tr><td>mutants of mine</td><td>6 of 6 red sets as predicted; the unmutated run 0 red</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, Darwin 27.0.0, shared with other seats; 2026-11-02 (UTC); Node v26.8.1</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

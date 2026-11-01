@@ -1,0 +1,15 @@
+<h2>The non-object body guard test calls the route&rsquo;s own predicate &mdash; KS-1432</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>ks529-non-object-body-guard.test.ts</code> used to test its own copy of the <code>POST /api/documents</code> body guard. <code>routes/verification.ts</code> now exports the guard as <code>isAcceptableDocumentBody</code>, the route calls it, and the test calls the same export. </td></tr><tr><td>The accept and refuse decision was compared old against new over 16 values that <code>JSON.parse</code> can return: 0 disagreements. The test does not detect a deleted call site: with the call-site block deleted the file still passes 10 of 10. </td></tr><tr><td>Two source files change, <code>routes/verification.ts</code> (11 insertions, 1 removal) and the guard test (19 insertions, 3 removals), plus these two documents; the commit lists four paths and no openapi file or yaml.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A live run against a running gateway, and the route&rsquo;s behaviour for array, number, string and boolean bodies with the check deleted. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks529-non-object-body-guard.test.ts   # 10 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>test section alone: 1 passed / 9 failed of 10, rc 1; with the change: 10 passed, rc 0</td></tr>
+<tr><td>whole suite</td><td>api-gateway <strong>869 &rarr; 871</strong> tests, 96 files before and after; 0 failed before and after</td></tr>
+<tr><td>deleted check, after the change</td><td>predicate returns <code>true</code>: guard test fails 6 of 10, suite 864 of 871; call-site block deleted: guard test 10 of 10, suite 870 of 871</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

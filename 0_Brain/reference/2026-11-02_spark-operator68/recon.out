@@ -1,0 +1,65 @@
+--- callers notificationClient
+Blockchain/Dev/services/originate/src/routes/certifications.ts:41:  notifyDocumentCertified,
+Blockchain/Dev/services/originate/src/routes/certifications.ts:42:  notifyDocumentRevoked,
+Blockchain/Dev/services/originate/src/routes/certifications.ts:43:  notifyDocumentShared,
+Blockchain/Dev/services/originate/src/routes/certifications.ts:44:} from '../utils/notificationClient';
+Blockchain/Dev/services/originate/src/routes/certifications.ts:831:        notifyDocumentCertified({
+Blockchain/Dev/services/originate/src/routes/certifications.ts:1153:        notifyDocumentRevoked({
+Blockchain/Dev/services/originate/src/routes/certifications.ts:1303:        notifyDocumentShared({
+Blockchain/Dev/services/originate/src/utils/notificationClient.ts:119:export async function notifyDocumentCertified(params: {
+Blockchain/Dev/services/originate/src/utils/notificationClient.ts:142:export async function notifyDocumentVerified(params: {
+Blockchain/Dev/services/originate/src/utils/notificationClient.ts:163:export async function notifyDocumentShared(params: {
+Blockchain/Dev/services/originate/src/utils/notificationClient.ts:186:export async function notifyDocumentRevoked(params: {
+Blockchain/Dev/services/originate/src/utils/notificationClient.ts:207:export async function notifyRightsTransferred(params: {
+--- retention callers
+Blockchain/Dev/services/originate/src/index.ts:42:import { startRetentionScheduler, stopRetentionScheduler } from './services/retentionScheduler';
+Blockchain/Dev/services/originate/src/index.ts:491:      // retentionScheduler runs daily but does nothing without policies;
+Blockchain/Dev/services/originate/src/index.ts:519:  startRetentionScheduler();
+Blockchain/Dev/services/originate/src/services/gdprService.ts:432:  // background retentionScheduler (no request context at all) and from the
+Blockchain/Dev/services/originate/src/services/retentionScheduler.ts:16:export function startRetentionScheduler(): void {
+Blockchain/Dev/services/originate/src/services/retentionScheduler.ts:27:    runEnforcement();
+Blockchain/Dev/services/originate/src/services/retentionScheduler.ts:28:    timer = setInterval(runEnforcement, INTERVAL_MS);
+Blockchain/Dev/services/originate/src/services/retentionScheduler.ts:40:async function runEnforcement(): Promise<void> {
+--- index unhandled
+// the process is driven to a crash, but a stray unhandled rejection/exception
+// must never silently kill the service without a trace — the original KS-294
+// crash left no stack in originate's own logs. Log + persist both; on an
+// uncaughtException the process state is undefined, so exit and let the restart
+// policy bring back a clean process.
+process.on('unhandledRejection', (reason: unknown) => {
+  const message = reason instanceof Error ? reason.message : String(reason);
+  const stack = reason instanceof Error ? reason.stack : undefined;
+  logger.error('Unhandled promise rejection', { message, stack });
+  trackError({ service: 'originate', errorType: 'UnhandledRejection', message, stack, severity: 'error' }).catch(() => {});
+});
+
+process.on('uncaughtException', (err: Error) => {
+  logger.error('Uncaught exception — exiting for a clean restart', { message: err.message, stack: err.stack });
+  trackError({ service: 'originate', errorType: err.name || 'UncaughtException', message: err.message, stack: err.stack, severity: 'error' }).catch(() => {});
+  // Give the logger/tracker a brief moment to flush, then exit. unref() so this
+  // timer never holds the process open on its own.
+  setTimeout(() => process.exit(1), 100).unref();
+});
+
+const app: Express = express();
+const PORT = process.env.PORT || 4000;
+
+// Middleware
+app.use(helmet());
+app.use(cors({
+  origin: config.corsOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+}));
+--- metering other
+6: * records (charge_events). Platform-S stays the subscriber-facing biller (Stripe
+101: * Per-event-type counts + ADA/USD totals of this tenant's recorded blockchain
+128:  } catch (error) {
+--- getUsageSummary
+Blockchain/Dev/services/originate/src/routes/metering.ts:35:import { getUsageSummary } from '../services/chargeEvents';
+Blockchain/Dev/services/originate/src/routes/metering.ts:126:    const summary = await getUsageSummary(reqTenantId(req), from, to);
+Blockchain/Dev/services/originate/src/services/chargeEvents.ts:261:export async function getUsageSummary(
+--- guard grep
+Blockchain/Dev/services/originate/src/routes/certifications.ts:1092:        reason = 'unreadable thrown value';
+--- tests existing

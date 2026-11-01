@@ -1,0 +1,90 @@
+<h2>31. The transfer-custody request declares newHolderId a uuid, so the published contract stops accepting any string (KS-591)</h2>
+<h3>31.1 What the register says, and what this row narrows</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      KS-591 is a <strong>register</strong>: positive_data_acceptance across 64 operations, 734
+      failures. </td><td><code>TransferCustodyRequestSchema</code> declared
+      <code>newHolderId: z.string().optional()</code>, so the published spec advertised a plain string
+      for what is a <strong>user id</strong>. Schemathesis generates a non-uuid, the contract says it
+      is valid, and the operation is scored as accepting bad data. This row narrows <em>one</em>
+      operation's <em>one</em> field. The register stays open and the ticket does
+      <strong>not</strong> move to Done.
+    </td></tr></table>
+<h3>31.2 The change, and why it is a spec row rather than a handler row</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>z.string().uuid().optional()</code> in <code>services/originate/src/originate.openapi.ts</code>
+      at <code>TransferCustodyRequestSchema</code>. </td><td>This registry schema <em>is</em> the
+      published contract — the spec is generated from it, so the declaration and the document cannot
+      drift. <code>optional()</code> is retained deliberately: the narrowing is the
+      <strong>format</strong>, never the presence, and <code>newHolderEmail</code> is untouched, so
+      the email-resolution path is unaffected. One line of product code.
+    </td></tr></table>
+<h3>31.3 Red-first, and the two controls that pin what did NOT change</h3>
+<table>
+<tr><th>Cell</th><th>Asserts</th><th>Base (test only)</th><th>Head</th></tr>
+<tr><td>TC1 — <code>newHolderId</code> carries <code>format: uuid</code></td>
+<td>the narrowing itself</td><td><strong>RED</strong>, <code>expect(received).toBe(expected)</code></td><td>green</td></tr>
+<tr><td>TCC1 <em>(control)</em> — it stays an optional string and <code>newHolderEmail</code> is unchanged</td>
+<td>the field did not become required, and its sibling did not move</td><td><strong>green</strong></td><td>green</td></tr>
+<tr><td>TCC2 <em>(control)</em> — the operation still posts a <code>TransferCustodyRequest</code> and the example still pins only the email</td>
+<td>the operation shape and its published example</td><td><strong>green</strong></td><td>green</td></tr>
+</table>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <strong>1 failed, 2 passed, 3 total</strong> at the base; <strong>3 passed</strong> at the head.
+      </td><td>The red is an <code>expect(...).toBe(...)</code> assertion, not a load failure — the
+      two controls run and pass in the same arm. TCC1 and TCC2 are what distinguish "the format
+      narrowed" from "the field became mandatory" or "the operation changed shape", which is the
+      failure mode a one-cell spec row would not catch.
+    </td></tr></table>
+<h3>31.4 The generated spec, and the control that proves the gate runs</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>npm run check:openapi</code> was run <strong>before</strong> the regeneration, on purpose.
+      </td><td>With the product change in and the YAML still at its base blob it exits
+      <strong>1</strong> with <code>[gen-openapi] CHECK FAIL: generated YAML differs from on-disk
+      version</code>. That is the firing control: it proves the later rc 0 is a comparison that ran,
+      not a gate that cannot fail. After <code>npm run generate-openapi</code> (310 paths,
+      1,349,732 bytes) it exits <strong>0</strong> with <code>CHECK PASS: on-disk YAML matches
+      generated</code>, and <code>check-spec-examples</code> resolves all <strong>406</strong>
+      example blocks.
+    </td></tr></table>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>the YAML diff</td><td><strong>1 file changed, 1 insertion(+)</strong> — exactly
+<code>+          format: uuid</code> under <code>components.schemas.TransferCustodyRequest.properties.newHolderId</code>.
+Blob <code>2577a35fadab</code> → <code>146bae7ed</code></td></tr>
+<tr><td>new test file alone</td><td><strong>1 failed, 2 passed (3)</strong> → <strong>3 passed (3)</strong></td></tr>
+<tr><td>whole <code>services/originate</code> suite</td><td><strong>92 suites, 1074 passed
+(1074)</strong>, rc 0 → <strong>93 suites, 1077 passed (1077)</strong>, rc 0</td></tr>
+<tr><td><code>tsc --noEmit -p services/originate</code></td><td>rc 0, 0 lines</td></tr>
+<tr><td>payload</td><td>2759 B <code>6c7e7698f4d84ca0</code>, and <strong>two</strong> independent
+<code>-control</code> runs <code>cmp</code> rc 0 against it — two agreeing runs, unlike the two
+single-run 10-05 passes</td></tr>
+<tr><td>sections</td><td>443 B <code>16fa8c869e5fb880</code> (product) + 2316 B
+<code>02eacda100ab8881</code> (test) = 2759 B; ordered re-join <code>cmp</code> rc 0, reversed join
+differs</td></tr>
+<tr><td>runner, from <code>node_modules</code></td><td><strong>jest 29.7.0</strong> — this service is
+jest, <em>not</em> vitest; a vitest invocation here reports <code>96 failed (96)</code> with
+<code>Tests: no tests</code>, which is a load failure and not a red suite. node v24.7.0, npm 11.5.1,
+TypeScript 5.9.3</td></tr>
+<tr><td>wall clock</td><td>base <strong>11.781 s</strong>, head <strong>8.77 s</strong>; measured
+2026-10-07 UTC, macOS 27.0.1, Darwin 27.0.0 arm64</td></tr>
+<tr><td>timing coverage</td><td><strong>0</strong> stated timings cover the originate unit suite at
+the base; the same instrument finds <strong>2</strong> Akto and <strong>4</strong> pre-merge rows, so
+the zero is a measurement. <strong>No tier budget moves.</strong></td></tr>
+</table>
+<h3>31.5 Not covered</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A <strong>spec</strong> narrowing, not a handler change. </td><td>No runtime validation branch
+      moves, so <strong>no live sweep is owed</strong> for this row — the handler behaves exactly as
+      before and only the published contract is tightened. The 63 other operations on the register are
+      untouched, and <code>newHolderEmail</code> is deliberately left as a plain string because it is
+      resolved server-side. The <strong>four platform suites (Schemathesis, Akto, Playwright,
+      performance) are UNMEASURED, not passing</strong> — the local stack is not up — and
+      Schemathesis is precisely the instrument that would score this narrowing, so the improvement
+      this row buys is <strong>asserted by the contract and not yet observed end to end</strong>.
+    </td></tr></table>
+<h3>31.6 Running it</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+npm test --prefix services/originate -- --testPathPattern 'ks591-transfer-custody'   # 3 passed
+npm test --prefix services/originate                                                  # 1077 passed
+npm run check:openapi                                                                 # rc 0, CHECK PASS
+node_modules/.bin/tsc --noEmit -p services/originate                                  # rc 0</code></pre>

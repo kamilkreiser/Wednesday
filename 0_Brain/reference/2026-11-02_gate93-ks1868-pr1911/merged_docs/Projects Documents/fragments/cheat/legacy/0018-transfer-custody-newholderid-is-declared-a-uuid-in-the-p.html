@@ -1,0 +1,62 @@
+<div class="section">
+<h2>Transfer-custody: newHolderId is declared a uuid in the published contract — KS-591</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> <code>TransferCustodyRequestSchema</code> in
+        <code>services/originate/src/originate.openapi.ts</code> declared
+        <code>newHolderId: z.string().optional()</code> — a plain string for what is a user id — so
+        the published spec advertised any string as valid and Schemathesis scored the operation as
+        accepting bad data. </td></tr><tr><td>Now <code>z.string().uuid().optional()</code>. This registry
+        schema <em>is</em> the contract (the spec is generated from it), so declaration and document
+        cannot drift. </td></tr><tr><td>The narrowing is the <strong>format</strong>, never the presence:
+        <code>optional()</code> is kept and <code>newHolderEmail</code> is untouched, so the
+        email-resolution path is unaffected. </td></tr><tr><td>KS-591 is a REGISTER (734 failures across 64
+        operations). This is one operation's one field, so it is a narrowing and the ticket does
+        <strong>not</strong> move to Done.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotcha when you run this locally.</strong></td><td> Three of them.
+        <strong>(1) This service is jest, not vitest.</strong> A vitest invocation against
+        <code>services/originate</code> reports <code>96 failed (96)</code> with
+        <code>Tests: no tests</code> — 0 executed. That is a <em>load failure</em>, and it looks
+        exactly like a catastrophically red suite if you read only the exit code.
+        </td></tr><tr><td><strong>(2) Run <code>check:openapi</code> BEFORE regenerating.</strong> With the product
+        change in and the YAML untouched it exits 1 with <code>CHECK FAIL: generated YAML differs
+        from on-disk version</code>. That is the only cheap way to prove the later rc 0 is a
+        comparison that ran rather than a gate that cannot fail. </td></tr><tr><td><strong>(3)
+        <code>generate-openapi</code> rebuilds <code>packages/shared</code> first</strong> (it is
+        <code>npm run build --workspace=packages/shared &amp;&amp; tsx scripts/generate-openapi.ts</code>),
+        so a stale <code>dist</code> silently changes what the spec is generated from.
+      </td></tr></table></div>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base → head</td><td>new test file <strong>1 failed, 2 passed (3)</strong> →
+<strong>3 passed (3)</strong>. The red is an <code>expect(received).toBe(expected)</code> assertion,
+and both controls run and pass in the same arm</td></tr>
+<tr><td>the two controls</td><td>TCC1 pins that the field stayed optional and that
+<code>newHolderEmail</code> did not move; TCC2 pins the operation shape and its published example.
+They are what separate "format narrowed" from "field became mandatory"</td></tr>
+<tr><td>whole originate suite</td><td><strong>92 suites / 1074 passed</strong> rc 0 →
+<strong>93 suites / 1077 passed</strong> rc 0</td></tr>
+<tr><td><code>check:openapi</code></td><td>rc <strong>1</strong> before the regen
+(<code>CHECK FAIL</code>) → rc <strong>0</strong> after (<code>CHECK PASS</code>), with
+<code>check-spec-examples</code> resolving all <strong>406</strong> example blocks</td></tr>
+<tr><td>the YAML diff</td><td><strong>1 insertion</strong>: <code>+          format: uuid</code>
+under <code>TransferCustodyRequest.properties.newHolderId</code>. Blob
+<code>2577a35fadab</code> → <code>146bae7ed</code>; regen wrote 310 paths, 1,349,732 bytes</td></tr>
+<tr><td><code>tsc --noEmit -p services/originate</code></td><td>rc 0, 0 lines</td></tr>
+<tr><td>payload</td><td>2759 B <code>6c7e7698f4d84ca0</code> with <strong>two</strong> agreeing
+<code>-control</code> runs (<code>cmp</code> rc 0 each). Sections 443 B
+<code>16fa8c869e5fb880</code> + 2316 B <code>02eacda100ab8881</code>; ordered re-join
+<code>cmp</code> rc 0, reversed join differs</td></tr>
+<tr><td>Suite wall clock</td><td>base <strong>11.781 s</strong>, head <strong>8.77 s</strong>, jest
+29.7.0 read from <code>node_modules</code>. 2026-10-07 UTC, macOS 27.0.1, Darwin 27.0.0 arm64, node
+v24.7.0, npm 11.5.1</td></tr>
+<tr><td>Timing coverage</td><td><strong>0</strong> stated timings cover the originate unit suite
+(must-hit control: <strong>2</strong> Akto, <strong>4</strong> pre-merge rows by the same
+instrument). No tier budget moves</td></tr>
+<tr><td>NOT covered</td><td>A <strong>spec</strong> narrowing — no runtime branch moves, so
+<strong>no live sweep is owed</strong>. 63 other register operations untouched;
+<code>newHolderEmail</code> deliberately left a plain string (resolved server-side). The four
+platform suites are <strong>UNMEASURED, not passing</strong> (local stack down) — and Schemathesis
+is the instrument that would score this narrowing, so the gain is asserted by the contract and
+<strong>not yet observed end to end</strong>. The ticket does <strong>not</strong> move to Done</td></tr>
+</table>
+</div>

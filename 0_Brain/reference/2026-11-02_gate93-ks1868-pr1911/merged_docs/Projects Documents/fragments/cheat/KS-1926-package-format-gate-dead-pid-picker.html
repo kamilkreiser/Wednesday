@@ -1,0 +1,20 @@
+<h2>package_format_gate.test.sh picks its dead pid with ps -p, as the gate does &mdash; KS-1926</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>What to know.</strong></strong></td><td> Cases 20 and 32 of <code>systemTest/__tests__/package_format_gate.test.sh</code> picked a &quot;dead&quot; pid with <code>kill -0</code>, which reports EPERM (dead) for a live process owned by another user; the test could then fail on the gate's correct refusal to sweep it, a random red at pre-push leg 14. The pickers now use <code>ps -p</code>, as the gate does. The new <code>package_format_gate_dead_pid.test.sh</code> (5 cells) fails 2 of 5 without the change and passes 5 of 5 with it; the leg-14 runner reaches and runs it automatically.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>Not measured here.</strong></strong></td><td> Bash 5 (only 3.2.57 was available) and the SKIP branch (a host with no live other-user process). The other <code>kill -0</code> sites were counted, not read in context. The four platform suites are unmeasured.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>bash systemTest/__tests__/package_format_gate_dead_pid.test.sh   # 5 cells
+bash systemTest/__tests__/package_format_gate.test.sh   # 435 cells, about 2 min
+bash Blockchain/Dev/scripts/run-shell-suites.sh --check-unreached</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new suite</td><td><strong>5</strong> cells; red first: 3 passed / 2 failed by assertion without the change, 5 / 0 with it; about 0.13 s</td></tr>
+<tr><td>package_format_gate.test.sh</td><td>base <strong>435 passed, 0 failed</strong> (123 s); with the change <strong>435 passed, 0 failed</strong> (121 s)</td></tr>
+<tr><td>shell-suite runner (leg 14)</td><td><strong>107 passed, 0 failed, 1 skipped (of 108)</strong>, 857 s, rc 0; the skip is ks949 (no PostgreSQL), counted by the runner</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-11-01 (UTC); bash 3.2.57</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,15 @@
+<h2>dev-reload.sh reloads the container of the current stack slot &mdash; KS-1355</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>scripts/dev-reload.sh</code> used to look for <code>secuura-&lt;service&gt;</code>, slot 1&rsquo;s container, whatever slot you named. It now sources <code>stack_env.sh</code> and uses <code>${STACK_PREFIX}</code>, so <code>SECUURA_STACK_SLOT=2</code> targets <code>secuura-s2-&lt;service&gt;</code>. </td></tr><tr><td>A slot of <code>5</code>, <code>0</code> or <code>abc</code> (the three values run) now stops the script with exit 2 and the <code>stack_env.sh</code> error. With no slot named it still targets <code>secuura-&lt;service&gt;</code>. </td></tr><tr><td>Only <code>dev-reload.sh</code> changes, plus the new test and these two documents. This is one of the two scripts in spot 2 of the ticket; the ticket&rsquo;s other spots are not touched by this commit.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A live run against a running slot-N stack, and <code>shellcheck</code> (not installed on the measuring machine). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/ks1355_dev_reload_slot_container.test.sh   # 7 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>test alone: 3 passed / 4 failed of 7, rc 1; with the change: 7 passed, rc 0 (<code>/bin/bash</code> 3.2.57, macOS 27.0.1 arm64)</td></tr>
+<tr><td>shell-suite set</td><td><strong>77 &rarr; 78</strong>; <code>stack_guard.test.sh</code> 27 passed, 0 failed, before and after</td></tr>
+<tr><td>minimal environment</td><td><code>PATH=/usr/bin:/bin</code> (no <code>docker</code>, no <code>npm</code>): 7 of 7 with the change, 3 passed / 4 failed against the base file</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

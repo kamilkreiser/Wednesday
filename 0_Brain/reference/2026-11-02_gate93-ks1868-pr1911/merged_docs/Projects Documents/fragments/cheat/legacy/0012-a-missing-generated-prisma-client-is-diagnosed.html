@@ -1,0 +1,39 @@
+<div class="section">
+<h2>A missing generated Prisma client is diagnosed — KS-1305</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> A fresh worktree has <code>@prisma/client</code> installed but not
+        GENERATED — <code>npm ci</code> runs with <code>--ignore-scripts</code>, so
+        <code>prisma generate</code> never ran. <code>getPrismaClient()</code> used to fail with
+        <code>Cannot find module '.prisma/client/default'</code>, which reads like an originate defect.
+        </td></tr><tr><td>It now names the cause and the command. </td></tr><tr><td>The guard is a <strong>three-term conjunction</strong>
+        (code is <code>MODULE_NOT_FOUND</code>, message names <code>.prisma/client</code>, everything else
+        rethrown as the <em>same object</em>) and each term has its own red arm.
+        </td></tr><tr><td>The change is a pure insertion, <code>numstat 19 0</code>, and touches <strong>no GUC, tenant or
+        RLS line</strong> in what is the tenant-isolation module.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotcha when you run this locally.</strong></td><td> The cells need <code>@secuura/shared</code>,
+        which resolves only through the workspace install: <code>npm ci --ignore-scripts</code> at
+        <code>Blockchain/Dev</code>, then <code>npm run build --workspace=packages/shared</code>.
+        </td></tr><tr><td>Without <code>packages/shared/dist/index.js</code> the file cannot LOAD, which reports as a failed
+        file with <strong>0 failed tests</strong> — a load failure, not an assertion failure.
+        </td></tr><tr><td>The same shape appears if you tamper with <code>db.ts</code> and break compilation:
+        <code>Tests: 0 total</code> is never an inert tamper.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate
+npx jest --ci src/__tests__/ks1305-missing-generated-prisma-client-is-diagnosed.test.ts \
+             src/__tests__/ks458-db-tenant-guc.test.ts   # 10 cells
+npx jest --ci                                            # 91 files, 1,067 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base → head</td><td>1 failed | 9 passed (10) → 10 passed (10)</td></tr>
+<tr><td>originate suite, base → head</td><td>90 files / 1,063 tests → 91 files / 1,067 tests, 0 new reds</td></tr>
+<tr><td>red arm per conjunct</td><td>A → C1; B → C1 + C3; C → C3. Each arm with <code>tsc</code> rc 0</td></tr>
+<tr><td><code>tsc</code></td><td>rc 0, 0 lines (planted-error control rc 2, 2 errors)</td></tr>
+<tr><td><code>eslint</code></td><td>rc 0, 0 lines (the service's only configured gate: <code>lint: eslint src</code>)</td></tr>
+<tr><td>prettier</td><td><strong>Not a gate here.</strong> No prettier config exists in the tree and the service has no prettier script; an untouched file already on develop (<code>ks458</code>) is equally “dirty” under a bare <code>npx prettier --check</code></td></tr>
+<tr><td>Suite wall clock, after</td><td>Two cell files <strong>1.958 s</strong>; full originate suite <strong>9.867 s</strong>. Measured <strong>2026-10-05 UTC</strong>, macOS arm64</td></tr>
+<tr><td>Timing coverage</td><td><strong>0</strong> stated timings cover a <code>services/originate</code> unit suite at base <code>3f9ff4e1e1b9</code> (must-hit control: <strong>5</strong> Akto and <strong>8</strong> pre-merge rows found by the same instrument). No tier budget moves</td></tr>
+<tr><td>NOT covered</td><td>No real fresh-worktree <code>MODULE_NOT_FOUND</code>; no PostgreSQL; no <code>withTenant</code> integration cell; Prisma 7.10 (#949) not run. Runtime change — live sweep owed</td></tr>
+</table>
+</div>

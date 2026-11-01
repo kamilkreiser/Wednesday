@@ -1,0 +1,21 @@
+<h2>A did:jwk that carries a private key is refused &mdash; KS-1175</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Kam&rsquo;s ruling of 2026-10-29: the anchoring service decodes a <code>did:jwk</code> on <code>actorDid</code> and <code>orgDid</code> only to refuse private-key members (<code>d</code>, <code>p</code>, <code>q</code>, <code>dp</code>, <code>dq</code>, <code>qi</code>, <code>k</code>) with a 400 whose message starts <code>Invalid DID</code> and names the members, never a value. A payload that is not unpadded base64url of a JSON object is refused too.
+      </td></tr><tr><td><code>did:key</code> and <code>did:web</code> are unchanged. Nothing else about the JWK is checked: no <code>kty</code>, no curve, no key length.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The four platform suites, any stack or database, any live anchor of a <code>did:jwk</code>, and a Node 24 LTS run (the host is Node 26.8.1).
+      </td></tr><tr><td>A Schemathesis case generated from the unchanged spec pattern can meet this 400. Not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>npm --prefix Blockchain/Dev run test --workspace=services/anchoring -- src/__tests__/ks1175-identity-anchoring.test.ts   # 117 cells (51 new), rc 0
+npm --prefix Blockchain/Dev run check:openapi                                                                              # rc 0, 416 example blocks</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>51</strong>; the file reads <strong>117</strong> cells, was <strong>66</strong>; the four named anchoring files <strong>211/211</strong>, were <strong>160/160</strong></td></tr>
+<tr><td>red-proof (cells red out of 117)</td><td>no guard <strong>39</strong>; only <code>d</code> <strong>14</strong>; one member dropped at a time <strong>d 9, p 4, q 4, dp 4, dq 4, qi 4, k 2</strong> (d, p, q, dp, dq, qi, k); every decodable refused <strong>14</strong>; text search <strong>6</strong>; deep search <strong>2</strong>; case-insensitive <strong>2</strong>; lenient decode <strong>6</strong>; undecodable accepted <strong>10</strong>; non-object accepted <strong>8</strong>; green before and after</td></tr>
+<tr><td>whole anchoring unit suite</td><td><strong>455 of 456</strong> in 33 files; the one red is KS 562 and is the same on develop&rsquo;s files</td></tr>
+<tr><td>files that read the spec</td><td><strong>198 of 198</strong> in 13 files (api-gateway, auth, mcp-server); <code>check:openapi</code> rc 0</td></tr>
+<tr><td>tsc, eslint and audit</td><td><strong>0 errors</strong> over 58 files with tests included; eslint rc 0 on the three changed files; both audit gates rc 0; <code>audit:contract</code> 59/59; planted defects fail</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats, Darwin, no Docker; develop <code>fd84001c738a</code>, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement); TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

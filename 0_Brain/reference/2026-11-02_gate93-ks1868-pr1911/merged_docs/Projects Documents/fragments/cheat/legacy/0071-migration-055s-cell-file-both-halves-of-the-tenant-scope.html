@@ -1,0 +1,19 @@
+<h2>Migration 055&rsquo;s cell file: both halves of the tenant scope are pinned, REPORT is hermetic &mdash; KS-1702</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Test-only. <code>ks1557-055-backfill.integration.test.ts</code> now has <strong>20 cells</strong> (it had 17): O3 and O4 pin the two scope variants gate CN1 found fail-open, REPORT compares 055&rsquo;s global report with the run&rsquo;s own tenants only, and <code>afterAll</code> removes the marker rows the run wrote on any tenant. Migration 055 and the product code are unchanged. </td></tr><tr><td>It needs a real PostgreSQL: <code>TEST_DATABASE_URL</code> (the owner) and, for the RLS cell, <code>TEST_APP_DATABASE_URL</code> (<code>secuura_app</code>). Without the second, the RLS cell is skipped (<code>it.skip</code> in the file). </td></tr><tr><td>To prove a cell red, set <code>KS1557_055_SQL_UNDER_TEST</code> to a COPY of 055 carrying a mutant; unset, the file runs the real migration, and a SEAM cell fails whenever it is not byte-identical to the real one.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The four platform suites, the originate unit suite, a running stack, any deploy, and Node 24 (this host has only Node 26.8.1, not an LTS line). </td></tr><tr><td>Only the gate&rsquo;s two mutants were tried; other single-half variants of the scope were not.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>TEST_DATABASE_URL=... TEST_APP_DATABASE_URL=... npm --prefix Blockchain/Dev run test:integration --workspace=services/originate -- ks1557-055-backfill   # 20 cells, rc 0
+KS1557_055_SQL_UNDER_TEST=&lt;copy of 055 with O3 or O4&gt; (same command)                                                                                       # the O3 or O4 cell is red</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>base cell file against each mutant</td><td><strong>17 / 17</strong> for O3 and for O4: both survive the base file</td></tr>
+<tr><td>new cell file against each mutant</td><td>O3: cell O3, REPORT and the SEAM guard fail (<strong>17 / 20</strong>); O4: cell O4, REPORT and the SEAM guard fail (<strong>17 / 20</strong>); each dedicated cell is red only under its own mutant (the SEAM guard is red under both, by design)</td></tr>
+<tr><td>REPORT with a foreign third-tenant document</td><td>old file <strong>16 / 17</strong> (one extra id in the diff); new file <strong>20 / 20</strong></td></tr>
+<tr><td>marker rows left on a tenant the suite did not create</td><td>old <code>afterAll</code> <strong>1</strong>; new <strong>0</strong>; a marker row that existed before the suite is kept (1 before, 1 after)</td></tr>
+<tr><td>gates</td><td><code>tsc --noEmit</code> including tests rc 0 (742 files; planted TS2322 control fails); lint 0 errors, 26 warnings, none in this file</td></tr>
+<tr><td>host and tools</td><td>a MacBook Pro (Mac14,5, Apple M2 Max, 12 cores, 32 GiB, macOS 27.0.1, Docker 29.7.2 linux/arm64), shared with other sessions; develop <code>bd6697e079fc</code>, 2026-10-28 (UTC); PostgreSQL 15.19 in <code>postgres:15-alpine</code>; Node v26.8.1 (not an LTS measurement); jest 29.7.0, ts-jest 29.4.11, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,19 @@
+<h2>Five originate log-line describers can no longer take a request down &mdash; KS-1772</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The log line built from a thrown value at five places in <code>services/originate</code> (the <code>fail500</code> helper of <code>systemErrors.ts</code>, <code>gdpr.ts</code>, <code>webhooks.ts</code> and <code>adminConfig.ts</code>, and the per-tenant catch of <code>POST /api/admin/migrate-tenant-data</code>) had no <code>try</code> of its own. A thrown value whose description throws (a throwing <code>message</code> getter, a Proxy trap, a revoked Proxy) or a logger that throws left the request with no response in the four helpers, and stopped the migrate loop at the failing tenant, with a 500, in the fifth. </td></tr><tr><td>Each site now describes in one <code>try</code> (fallback line <code>thrown value that could not be described</code>) and logs in another. Describable values log exactly what they logged before. The new test has 30 cells: per site four D1 shapes, one L1 throwing-logger cell and one C1 control. </td></tr><tr><td>Red-first: 25 failed / 5 passed on the unfixed routes, 30 of 30 fixed. Whole originate suite 140 suites / 1660 tests before, 141 / 1690 after. Each guard is pinned by its own cells: the describe guard removed fails the four D1 cells of that site, the log guard removed fails its L1 cell, at all five sites.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A run on an LTS Node: the host carries only v26.8.1 and nothing was repeated on Node 24. Nothing runs through the gateway or on a deployed box. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance). The api-gateway half of the same pattern is KS-1771.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- src/__tests__/ks1772-originate-log-line-describers-cannot-hang-a-request.test.ts   # 30 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npm test                                                                                          # 141 suites / 1690 tests, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new file against the unfixed routes, run twice</td><td><strong>25 failed / 5 passed</strong> both times (the 5 are the C1 controls)</td></tr>
+<tr><td>what the caller saw at base</td><td>four <code>fail500</code> sites: no response within 2500 ms, each with an unhandled rejection naming the describer&rsquo;s own line; per-tenant catch: 500, second tenant never tried</td></tr>
+<tr><td>new file, fixed</td><td><strong>30 / 30</strong></td></tr>
+<tr><td>ten one-guard mutants of the fixed source</td><td>describe guard removed: <strong>4 failed</strong> (that site&rsquo;s D1 cells); log guard removed: <strong>1 failed</strong> (its L1 cell); all five sites, all 30 cells ran every time</td></tr>
+<tr><td>counts, before &rarr; after</td><td>whole originate suite <strong>140 suites / 1660 tests &rarr; 141 / 1690</strong>, 0 failed on both sides; <code>ks1346a</code> to <code>d</code> and <code>ks730c</code> not edited, green</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5), Node v26.8.1 (not an LTS measurement), jest 29.7.0, ts-jest 29.4.11, TypeScript 5.9.3, 2026-10-27 (UTC), base <code>ba9e8fad7f9d</code></td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

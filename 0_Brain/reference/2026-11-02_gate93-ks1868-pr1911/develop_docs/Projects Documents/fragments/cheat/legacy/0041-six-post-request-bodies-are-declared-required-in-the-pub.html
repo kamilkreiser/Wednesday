@@ -1,0 +1,18 @@
+<h2>Six POST request bodies are declared required in the published contract &mdash; KS-591</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The six operations are <code>POST /api/anchors</code>, <code>POST /api/anchors/thread-mint</code>, <code>POST /api/stake/complete-unstake</code>, <code>POST /api/transfers</code>, <code>POST /api/delegations</code> and <code>POST /api/delegations/validate</code>. Their request bodies now carry <code>required: true</code> in the published contract. </td></tr><tr><td>This is a declaration in the contract and nothing else: no handler or route file changes. What each handler does when the body is absent was not measured here. </td></tr><tr><td>The change is in three files, <code>anchoring.openapi.ts</code>, <code>staking.openapi.ts</code> and <code>transfer.openapi.ts</code>, and in the regenerated <code>docs/openapi/secuura-api.yaml</code> (6 insertions, 0 removals). Never hand-edit the yaml; run <code>npm run generate-openapi</code>.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td> A gateway that has already read the old spec keeps serving it until it is restarted. </td></tr><tr><td>Not measured here: the spec as served by a running gateway, and any effect on a Schemathesis sweep now that the six bodies read as required.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks591-anchors-post-thread-mint-body-required.test.ts     # 5 cells, rc 0
+cd Blockchain/Dev/services/staking &amp;&amp; npm test -- src/__tests__/ks591-stake-complete-unstake-body-required.test.ts       # 4 cells, rc 0
+cd Blockchain/Dev/services/transfer &amp;&amp; npm test -- src/__tests__/ks591-transfer-delegation-posts-body-required.test.ts  # 6 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run check:openapi                                                                                # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>anchoring 3 passed / 2 failed &rarr; 5 passed; staking 3 / 1 &rarr; 4 passed; transfer 3 / 3 &rarr; 6 passed; every red cell fails with <code>expected undefined to be true</code>; the nine control cells pass in the red arm</td></tr>
+<tr><td>whole suites</td><td>anchoring <strong>365 &rarr; 370</strong>, staking <strong>61 &rarr; 65</strong>, transfer <strong>85 &rarr; 91</strong> tests; the one anchoring failure (<code>threadTokenMint</code>) is the same before and after</td></tr>
+<tr><td>yaml diff</td><td>6 insertions, 0 removals, each <code>required: true</code> under one of the six operations</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,16 @@
+<h2>KS-1384 F-b: the reconciler settles anchor rows that have no transaction hash</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>A <code>pending</code> anchor row with no hash, which no running process is driving and nobody has written for 10 minutes, is now searched for on chain: confirmed if its payload is there, failed (&ldquo;nothing was submitted&rdquo;) only after a complete search finds nothing.</td></tr><tr><td>It never sweeps a row this process still drives, a row inside its 2 h wait (+15 min), or anything inside the boot arm&rsquo;s window (about 2 h 10 min) after a restart; and a re-POST during the search wins.</td></tr><tr><td>Before giving up a row with a hash, the reconciler searches for its payload under another hash and adopts it. Placeholder hashes (<code>mock_tx_</code>, <code>tx_sim_</code>) are still never touched (KS-1870).</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A real chain or wallet, the census, the four platform suites, a running stack, Node 24 (LTS), any box.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1384-fb-sweep.test.ts src/__tests__/ks1384-fb-driving-set-and-scan.test.ts   # 31 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>41</strong> (32 unit, 9 real Postgres)</td></tr>
+<tr><td>mutants</td><td>26 valid, parsed and killed; 2 single-layer survivors by design; 4 earlier runs kept, not counted</td></tr>
+<tr><td>anchoring unit suite</td><td>50 files / 719 cells: 718 pass, the <code>threadTokenMint</code> cell failed (host- or load-dependent; as at the base on this host)</td></tr>
+<tr><td>anchoring real-Postgres lane</td><td>10 files / 122 cells, all pass</td></tr>
+<tr><td>tsc and eslint</td><td>0 errors with all 59 anchoring test files; eslint 0 errors, 1 warning, at the base</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared; F0c&rsquo;s head <code>dfc0dd61d75e</code>, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

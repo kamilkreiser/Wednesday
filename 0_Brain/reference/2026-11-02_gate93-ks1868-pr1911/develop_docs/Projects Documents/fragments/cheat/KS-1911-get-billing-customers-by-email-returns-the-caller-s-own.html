@@ -1,0 +1,17 @@
+<h2>GET /billing/customers/by-email returns the caller&rsquo;s own customer when two share an email &mdash; KS-1911</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> A test gap, not a product change. QA gate 62 (finding F3) found that no KS 1888 cell pins <code>GET /billing/customers/by-email</code> when two Stripe customers share one email: its mutant M18, which sends the route back to Stripe&rsquo;s first match and checks only that one, survived every cell. Four cells now pin it: the caller whose customer is Stripe&rsquo;s second match gets their own customer, not a 404, and a signed-in user who owns neither gets 404. The route&rsquo;s code is unchanged; one comment in <code>billing.ts</code> now states the corrected limit (comment lines only).
+      </td></tr><tr><td>Green at develop (the route is right). Gate 62&rsquo;s own M18, applied byte for byte: 1 of 196 cells red, the new cell E1. QA gate 69&rsquo;s mutant O3 (the first match checked, later ones admitted): 1 of 196 red, the new cell E3. A control mutant (the first match with no owner check): 9 red.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A running stack; Stripe, real or test; the four platform suites; Node 24; any deploy.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/billing &amp;&amp; npx vitest run --maxWorkers=3 src/__tests__/ks1888-billing-routes-bound-to-the-customer-owner.test.ts   # 196 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>whole billing suite with the change</td><td><strong>13 files / 328 of 328</strong></td></tr>
+<tr><td>the route test file</td><td>196 of 196 at develop with the new cells; under gate 62&rsquo;s M18, 1 of 196 red (E1); under gate 69&rsquo;s O3, 1 of 196 red (E3)</td></tr>
+<tr><td>tsc and eslint</td><td>tsc over billing&rsquo;s config 0 errors; with the test files in the program the same 10 errors as at develop, none in the changed file; eslint 0 errors, 0 warnings</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared, load 7 to 8; develop <code>dd583b4f7495</code> with the change on top, 2026-10-31 (UTC); Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

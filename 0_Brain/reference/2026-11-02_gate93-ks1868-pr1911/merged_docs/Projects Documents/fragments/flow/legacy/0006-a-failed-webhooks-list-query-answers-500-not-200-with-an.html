@@ -1,0 +1,94 @@
+<h2>
+      13. A failed webhooks list query answers 500, not 200 with an empty list
+      (KS-1345)
+    </h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this pins.</strong></td><td><code>GET /api/webhooks</code> chained
+      <code>.catch()</code> onto its list query and returned
+      <code>200 { success: true, webhooks: [] }</code> on failure, so a database
+      error was indistinguishable from "this organisation has no webhooks"
+      — to the client, and on this route to the log as well. </td></tr><tr><td>That
+      <code>.catch</code> is gone. </td></tr><tr><td>A rejected query now reaches the route's
+      existing <code>fail500</code>: a <strong>constant</strong> 500 body, the
+      error logged once server-side, never a 200 with an empty list.
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>Numbering.</strong></td><td> This block is <strong>13</strong> and the
+      document has no <strong>12</strong> yet. </td></tr><tr><td>That is deliberate, not a gap to
+      be closed: block numbers belong to <em>tickets</em>, not to merge order.
+      </td></tr><tr><td>12 is reserved for KS-1333, which is raised separately; whichever lands
+      first, each block sits in number order and nothing is renumbered.
+    </td></tr></table>
+<h3>13.1 The cells</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Nine cells in
+      <code>services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts</code>. </td><td>The change <strong>flips an existing control into a red cell</strong>:
+      what was <code>control KS 1341 A0</code>, pinning the swallow as
+      pre-existing behaviour, is now <code>RED KS-1345 A0</code>, asserting a
+      rejected list query reaches the catch with a constant 500 logged once. A
+      new <code>control KS-1345 C</code> pins that a query which
+      <em>resolves</em> still answers 200 with its rows and logs nothing —
+      without it, A0 would be satisfied by the route answering 500
+      unconditionally.
+    </td></tr></table>
+<h3>13.2 Running it</h3>
+<pre><code>cd Blockchain/Dev/services/originate
+npx jest src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts   # 9 cells
+npx jest                                                                       # 1063 tests</code></pre>
+<h3>13.3 Figures, measured</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The <code>services/originate</code> suite goes
+      <strong>1062 → 1063 tests</strong>, 0 failed at both ends,
+      <strong>0 new reds</strong>, 90 suites. </td><td>The nine cells run in
+      <strong>1.169–2.537 s</strong> reported (1.47–3.26 s wall)
+      over three consecutive runs, 2026-10-05, host Kamil's Mac Studio (2), node
+      v24.7.0, jest 29.7.0.
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>Red-first, by assertion.</strong></td><td> With the test section applied
+      and the product change withheld, the file runs
+      <strong>1 failed / 9</strong> and the red is
+      <code>RED KS-1345 A0</code> failing on its own assertion —
+      <code>status: 500</code> expected, <code>200</code> received, which is the
+      swallow itself. </td></tr><tr><td>The four load-failure signatures (<code>Cannot find module</code>, <code>SyntaxError</code>, <code>Failed to load</code>,
+      <code>Transform failed</code>) are each 0 in that run, so it is an
+      assertion red and not a file that failed to load. </td></tr><tr><td>Applying the product
+      section takes it to <strong>9/9</strong>.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Applied == held, proved on files.</strong></td><td> The held patch carries
+      no-op blank <code>-</code>/<code>+</code> pairs, so
+      <code>git</code> regenerates it as <code>webhooks.ts</code>
+<strong>+4/-2</strong> and the test <strong>+22/-9</strong> where the
+      source patch declares +5/-3 and +23/-10. </td></tr><tr><td>The two are therefore not
+      <code>cmp</code>-equal as <em>diffs</em>, and the proof is on the
+      <em>files</em>: an independent strict apply of the same sections onto the
+      same base blobs, in a separate repository, produced byte-identical results
+      (<code>sha256</code> <code>2f8828ba0246</code>… and
+      <code>bca6c7da5118</code>… on both sides), with a firing control
+      showing both differ from the base blob.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Type checking.</strong></td><td><code>tsc</code> 5.9.3 by named binary,
+      <code>-p services/originate --noEmit</code>, is rc 0 at base and rc 0 at
+      head, with a positive control (the same binary on a one-line type error)
+      returning rc 2 and TS2322 — so the rc 0 is a result, not a binary
+      that does nothing. </td></tr><tr><td>Note <code>tsconfig.json:19</code> excludes
+      <code>src/__tests__</code> and <code>src/**/*.test.ts</code>, so
+      <code>tsc</code> never typechecks this test file.
+    </td></tr></table>
+<h3>13.4 Timing</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>No stated timing covers this suite.</strong></td><td> Measured at the base
+      SHA <code>3ce8cd4026a6</code> in both platform-k docs:
+      <code>services/originate</code> <strong>0</strong> and <code>jest</code>
+<strong>0</strong> occurrences, against a must-hit control of
+      <code>auth</code> at <strong>70</strong> (flow) and
+      <strong>69</strong> (cheat sheet). </td></tr><tr><td>So the zeroes are measurements, not a
+      blind grep, and no stated timing row is amended by this change.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Behaviour change, stated plainly.</strong></td><td> A rejected list query
+      now answers a constant 500 where it previously answered
+      <code>200 []</code>. </td></tr><tr><td>A second case follows from the same removal: a
+      non-UUID <code>userId</code> makes Postgres raise 22P02 on the
+      <code>::uuid</code> cast, which also used to be swallowed into
+      <code>200 []</code> and now answers 500.
+      <strong>Which principals can carry a non-UUID organisation id is
+        UNMEASURED</strong>
+      here, and is the part of this change most worth a second look.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Not covered.</strong></td><td> A live sweep (skill §5f) —
+      nothing was exercised against a running service, so KS-1345 does not move
+      to Done on this change's account. </td></tr><tr><td>The <strong>deliveries half</strong> of
+      the ticket (<code>webhooks.ts:412</code>) is untouched, as is
+      <code>dispatchEvent</code>'s <code>.catch</code> at <code>:513</code>;
+      both swallow in the same shape and stay open on the ticket.
+    </td></tr></table>

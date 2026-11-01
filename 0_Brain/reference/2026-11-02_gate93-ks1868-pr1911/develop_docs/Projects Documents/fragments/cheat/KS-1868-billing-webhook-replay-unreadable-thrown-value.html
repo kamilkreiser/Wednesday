@@ -1,0 +1,20 @@
+<h2>The billing webhook replay handler answers 500 when the thrown value cannot be read &mdash; KS-1868</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>What to know.</strong></td><td> The catch of <code>POST /webhooks/replay</code> read the thrown value unguarded; an unreadable one (a revoked Proxy, an Error whose message getter throws) made the handler reject without answering the request. It now logs the constant reason <code>unreadable thrown value</code> and answers the same constant 500 an ordinary error gets. 1 product file (+7/-1), 3 new cells. No money moves in this change.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> Node 24 (the host has v26.8.1 only), a real PostgreSQL, a real Stripe service, the four platform suites. The thrown values are test-authored.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev && npm run test -w services/billing -- --run ks1868-billing-webhook-replay   # 3 cells
+cd Blockchain/Dev && npm run test -w services/billing -- --run   # 331 tests, 14 files
+node Blockchain/Dev/scripts/docs-fragments.mjs check</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new test file</td><td><strong>3</strong> cells; red first: 1 passed / 2 failed by assertion without the change, 3 / 0 with it (4 runs)</td></tr>
+<tr><td>billing suite</td><td>before <strong>328 passed, 0 failed</strong> (13 files); after <strong>331 passed, 0 failed</strong> (14 files); 0 skipped</td></tr>
+<tr><td>mutants of mine</td><td>6 of 6 red sets as predicted; all red by assertion; the unmutated run 0 red</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, Darwin 27.0.0, shared with other seats; 2026-11-02 (UTC); Node v26.8.1</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

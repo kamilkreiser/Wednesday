@@ -1,0 +1,182 @@
+diff --git a/Blockchain/Dev/services/originate/src/routes/certifications.ts b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -1166,7 +1166,13 @@
+         revocationReason: certification.revocationReason,
+       });
+     } catch (error) {
+-      logger.error('Failed to revoke certification', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to revoke certification', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to revoke certification' } });
+     }
+   }
+@@ -1232,7 +1238,13 @@
+         chargeEventId: verifyCharge.id,
+       });
+     } catch (error) {
+-      logger.error('Failed to verify certification', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to verify certification', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to verify certification' } });
+     }
+   }
+@@ -1331,7 +1343,13 @@
+         chargeEventId: shareCharge.id,
+       });
+     } catch (error) {
+-      logger.error('Failed to share certification', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to share certification', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to share certification' } });
+     }
+   }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-revoke-verify-share-route-catches-p2-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-revoke-verify-share-route-catches-p2-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certifications-revoke-verify-share-route-catches-p2-unreadable-throw.test.ts
+@@ -0,0 +1,129 @@
++// KS-1868 (originate routes/certifications.ts, POST /api/certifications/:id/revoke, /:id/verify and /:id/share): each route catch logged
++// `error instanceof Error ? error.message : String(error)` itself and then answered a constant 500. When the thrown value cannot be read (a revoked Proxy makes
++// `instanceof` throw; an Error whose `message` getter throws), that read threw INSIDE the catch: the handler's promise rejected and the request got NO answer. Each catch
++// now reads the value inside its own try and logs the constant reason `unreadable thrown value`. getCertification rejects with the thrown value on a real loopback
++// listener, before the route has written or anchored anything; a request that gets no answer within the window is reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
++const mockGetCertification = jest.fn();
++const mockSaveCertification = jest.fn(async (..._a: unknown[]) => undefined);
++const mockGetShares = jest.fn(async (..._a: unknown[]) => [] as unknown[]);
++const mockGetLineageEvents = jest.fn(async (..._a: unknown[]) => [] as unknown[]);
++const mockCreateChargeEvent = jest.fn(async (..._a: unknown[]) => ({ id: 'charge-new', eventType: 'evidence_export' }));
++const mockGetChargeEvents = jest.fn(async (..._a: unknown[]) => [] as unknown[]);
++const mockLog = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
++
++jest.mock('../repositories/certificationRepo', () => ({
++  initRepo: jest.fn(async () => undefined),
++  getCertification: (...a: unknown[]) => mockGetCertification(...a),
++  saveCertification: (...a: unknown[]) => mockSaveCertification(...a),
++  listCertifications: jest.fn(),
++  saveShare: jest.fn(),
++  getSharesByCertification: (...a: unknown[]) => mockGetShares(...a),
++  getLineageEvents: (...a: unknown[]) => mockGetLineageEvents(...a),
++  deleteCertification: jest.fn(),
++  reserveCertificationRow: jest.fn(),
++}));
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: jest.fn(async () => []), $executeRaw: jest.fn(async () => 1), $executeRawUnsafe: jest.fn() },
++}));
++jest.mock('../services/chargeEvents', () => ({
++  createChargeEvent: (...a: unknown[]) => mockCreateChargeEvent(...a),
++  getChargeEventsByCertification: (...a: unknown[]) => mockGetChargeEvents(...a),
++}));
++jest.mock('../utils/notificationClient', () => ({
++  notifyDocumentCertified: jest.fn(async () => undefined),
++  notifyDocumentRevoked: jest.fn(async () => undefined),
++  notifyDocumentShared: jest.fn(async () => undefined),
++}));
++jest.mock('../events', () => ({
++  publishEvent: jest.fn(async () => undefined),
++  EventTypes: { CERTIFICATION_ISSUED: 'certification.issued' },
++}));
++jest.mock('../repositories/documentRepo', () => ({
++  getDocument: jest.fn(),
++  saveDocument: jest.fn(async () => undefined),
++  assertNoCycle: jest.fn(async () => undefined),
++  generateContentHash: jest.fn(() => 'hash'),
++}));
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (req: any, _res: unknown, next: () => void) => { req.user = { userId: '11111111-2222-4333-8444-555555555555', email: 'ks1868@example.test' }; next(); },
++}));
++jest.mock('../utils/logger', () => ({ logger: mockLog }));
++
++import express from 'express';
++import { certificationsRouter } from '../routes/certifications';
++
++const TENANT = 'a0000000-0000-4000-8000-0000000000aa';
++const CERT_ID = 'aaaaaaaa-1111-4111-8111-111111111111';
++const UNREADABLE = 'unreadable thrown value';
++
++const ROUTES = [
++  { route: 'POST /:id/revoke', path: `/${CERT_ID}/revoke`, context: 'Failed to revoke certification', constant: { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to revoke certification' } }, payload: { reason: 'ks1868' } },
++  { route: 'POST /:id/verify', path: `/${CERT_ID}/verify`, context: 'Failed to verify certification', constant: { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to verify certification' } }, payload: {} },
++  { route: 'POST /:id/share', path: `/${CERT_ID}/share`, context: 'Failed to share certification', constant: { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to share certification' } }, payload: { recipients: [{ email: 'r@example.test', shareType: 'view' }] } },
++];
++
++const app = express();
++app.use((req: any, _res: unknown, next: () => void) => { req.tenantId = TENANT; next(); });
++app.use('/api/certifications', express.json(), certificationsRouter);
++
++let baseUrl = '';
++let server: ReturnType<typeof app.listen>;
++beforeAll(async () => {
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', () => resolve()); });
++  const address = server.address();
++  baseUrl = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
++});
++afterAll(() => { server?.close(); });
++
++beforeEach(() => {
++  jest.clearAllMocks();
++});
++
++async function callWithThrow(c: (typeof ROUTES)[number], thrown: unknown): Promise<{ status: number | string; body?: unknown }> {
++  mockGetCertification.mockRejectedValueOnce(thrown);
++  try {
++    const res = await fetch(`${baseUrl}/api/certifications${c.path}`, {
++      method: 'POST',
++      headers: { 'content-type': 'application/json' },
++      body: JSON.stringify(c.payload),
++      signal: AbortSignal.timeout(1500),
++    });
++    return { status: res.status, body: await res.json() };
++  } catch {
++    return { status: 'NO ANSWER' };
++  }
++}
++
++const revokedProxy = (): object => {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++};
++const throwingMessageError = (): Error =>
++  Object.defineProperty(new Error('ks1868 hidden'), 'message', {
++    get(): string {
++      throw new Error('ks1868 message getter threw');
++    },
++  });
++
++describe.each(ROUTES)('KS-1868 $route catch reads the thrown value safely', (c) => {
++  it(`RED ks1868 R1 ${c.route}: a revoked Proxy from getCertification is logged as a constant reason and answered with the constant 500`, async () => {
++    expect(await callWithThrow(c, revokedProxy())).toEqual({ status: 500, body: c.constant });
++    expect(mockLog.error.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
++  });
++
++  it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and answered with the constant 500`, async () => {
++    expect(await callWithThrow(c, throwingMessageError())).toEqual({ status: 500, body: c.constant });
++    expect(mockLog.error.mock.calls).toEqual([[c.context, { error: UNREADABLE }]]);
++  });
++
++  it(`control ks1868 C1 ${c.route}: an ordinary Error logs its own message and the answer is the constant 500`, async () => {
++    expect(await callWithThrow(c, new Error('ks1868 ordinary'))).toEqual({ status: 500, body: c.constant });
++    expect(mockLog.error.mock.calls).toEqual([[c.context, { error: 'ks1868 ordinary' }]]);
++  });
++
++  it(`control ks1868 C2 ${c.route}: a thrown string is logged as itself, as before`, async () => {
++    expect(await callWithThrow(c, 'ks1868 plain string')).toEqual({ status: 500, body: c.constant });
++    expect(mockLog.error.mock.calls).toEqual([[c.context, { error: 'ks1868 plain string' }]]);
++  });
++});

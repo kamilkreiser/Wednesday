@@ -1,0 +1,19 @@
+<h2>The seed-demo-users logger call cannot end the loop, and its fallback log text is pinned &mdash; KS-1818, KS-1817</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> One production statement: the <code>logger.error('Demo user seed failed', ...)</code> call in the <code>POST /seed-demo-users</code> per-user catch now has a <code>try</code> of its own, so a logger that throws no longer ends the loop (R4, R5). R6 pins the fixed fallback text logged for a thrown value that cannot be described. X3 (that fallback changed to <code>undefined</code>) turns exactly R6 red.
+      </td></tr><tr><td>Three new cells in <code>ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts</code>: the file is 9 of 9; the whole originate suite is 150 files / 1821 cells, all 1821 pass.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The originate integration suites, the four platform suites, a running stack, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line). The logger is a mock.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts   # 1 file, 9 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npm test   # 150 files / 1821 cells, all 1821 pass</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>3</strong>: R4 and R5 (KS-1818) and R6 (KS-1817), all RED; the file is <strong>9 / 9</strong> with the guard</td></tr>
+<tr><td>red-first</td><td>R4 and R5 alone on the unfixed product: <strong>2 of 8 red</strong>; with the guard 8 of 8; planted X3 (<code>return undefined;</code> at line 154): <strong>1 of 9 red</strong>, the cell is R6; restore by content, sha256-equal</td></tr>
+<tr><td>originate unit suite</td><td><strong>150 files / 1821 cells, all 1821 pass</strong> with the change; 150 files / 1818 cells, all 1818 pass at base; 0 failed, 0 skipped</td></tr>
+<tr><td>tsc / eslint</td><td>tsc with the tests: <strong>0 errors</strong> over 230 originate source files, TypeScript 5.9.3; eslint on the two changed files: 0 errors, 0 warnings; each with a planted control that fired</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>d7ddfa1f6433</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), jest 29.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

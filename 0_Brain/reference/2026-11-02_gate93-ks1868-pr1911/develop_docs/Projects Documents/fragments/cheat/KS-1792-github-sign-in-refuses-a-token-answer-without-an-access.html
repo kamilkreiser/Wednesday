@@ -1,0 +1,16 @@
+<h2>GitHub sign-in refuses a token answer without an access token, before /user &mdash; KS-1792</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>What to know.</strong></td><td><strong>Sign-in adapter behaviour change.</strong> A 200 answer from GitHub&rsquo;s token endpoint with no usable <code>access_token</code> (or with an <code>error</code> field) is now refused in <code>github.ts</code> as <code>GitHub token exchange failed (no access token)</code>; <code>/user</code> is never called with <code>Bearer undefined</code>. New test <code>ks1792-github-refuses-a-token-answer-without-an-access-token.test.ts</code>: 8 cells (6 RED, 2 controls): against develop&rsquo;s unchanged <code>github.ts</code> 6 of 8 fail (R1 to R6) and the 2 controls pass; with the change 8 of 8 pass. R4, R5 and R6 (added at merge prep) are also red against the gate&rsquo;s mutants M4, M5 and M7.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A real GitHub sign-in, and the end-to-end text a user sees. The ks949 flake (KS 1053) in the whole auth suite is not touched here. The four platform suites, a running stack, Node 24 and any deploy were not run.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm run test -w services/auth -- --run ks1792-github-refuses-a-token-answer-without-an-access-token   # 8 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run test -w services/auth -- --run --maxWorkers=3                 # 113 files / 1365 cells on the scratch merge with develop 1ae193f79a12; 2 ks949 cells time out at 5 s (KS 1053)</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>8</strong> (6 RED + 2 controls); against develop&rsquo;s unchanged <code>github.ts</code> 6 of 8 fail and the 2 controls pass, with the change 8 of 8 pass; R4, R5, R6 are also red against the gate&rsquo;s mutants M4, M5, M7</td></tr>
+<tr><td>auth unit suite</td><td>scratch merge with develop <code>1ae193f79a12</code>: 113 files, 1365 cells, 1363 pass; the 2 failures are ks949 5 s timeouts (KS 1053); the other 112 files <strong>1334 of 1334</strong>. Control on develop: 112 files, 1357 cells, 3 ks949 timeouts, the other 111 files 1326 of 1326</td></tr>
+<tr><td>tsc and ratchet</td><td>tsc with tests: 42 errors, none in the new test or in <code>github.ts</code>, planted error named once; ratchet: 42 in the baseline, 0 new, 0 stale</td></tr>
+<tr><td>eslint</td><td>0 errors, 0 warnings on the test file; a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> and <code>530f091120d5</code>, 2026-10-29 and 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

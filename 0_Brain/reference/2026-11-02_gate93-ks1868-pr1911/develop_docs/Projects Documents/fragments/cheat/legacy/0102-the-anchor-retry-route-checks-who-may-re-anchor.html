@@ -1,0 +1,19 @@
+<h2>The anchor retry route checks who may re-anchor &mdash; KS-1814</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> <code>POST /api/documents/:id/anchor</code> now needs a document-write role or the <code>documents:write</code> scope (else 403), then a platform admin, the owner or the creating connector (else the not-found 404), and refuses a revoked or deleted document (400), all before the anchoring call. Platform S&rsquo;s creating connector is cell P1.
+      </td></tr><tr><td>28 cells in <code>ks1814-anchor-route-needs-write-role-and-document-access.test.ts</code>: 16 red at develop, 28 green with the change; seven mutants, each killed alone.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A running stack, the integration files, the four platform suites, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- src/__tests__/ks1814-anchor-route-needs-write-role-and-document-access.test.ts   # 28 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npm test                                                                            # 151 files / 1849 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>28</strong>; <strong>16 of 28 red</strong> against develop&rsquo;s <code>documents.ts</code>, <strong>28 / 28</strong> with the change</td></tr>
+<tr><td>mutants</td><td>all seven killed alone (3, 9, 3, 3, 1, 3 and 12 red cells); each restore sha256-equal</td></tr>
+<tr><td>originate unit suite</td><td><strong>151 files / 1849 cells</strong> with the change; 150 / 1821 at develop <code>7152ac669d2d</code>; 0 failed, 0 skipped</td></tr>
+<tr><td>tsc with the test files</td><td><strong>0 errors</strong> over 231 files, TypeScript 5.9.3; a planted type error reported once as <code>TS2322</code></td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>5a5c4d2b353f</code> with the change on top, re-run after the merge-ins of develop <code>203734468019</code> and <code>7152ac669d2d</code>, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), jest 29.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

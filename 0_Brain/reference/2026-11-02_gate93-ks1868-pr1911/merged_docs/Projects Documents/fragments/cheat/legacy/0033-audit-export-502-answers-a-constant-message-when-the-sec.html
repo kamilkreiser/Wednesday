@@ -1,0 +1,18 @@
+<h2>audit-export 502 answers a constant message when the security service is unreachable &mdash; KS-1410</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>
+        <code>GET /api/admin/audit/export</code>, when the fetch to the security service throws, answers
+        <code>502 BAD_GATEWAY</code> with the constant message <code>Failed to reach security service</code>. It used
+        to append the thrown text, in every environment. </td></tr><tr><td><strong>The detail is in the log
+        now.</strong> api-gateway logs <code>Audit export could not reach the security service (GET
+        /api/admin/audit/export)</code>, with the error reduced by Kam's 2026-09-27 ruling: an Error's message and a
+        thrown string as they are, an object as its type and field names. </td></tr><tr><td><strong>Unchanged.</strong>
+        An upstream that answers non-ok still passes its own status and error through (cell XC1), and a request
+        with no user still answers <code>401</code> without a fetch (XC3).
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td>
+        <strong>(1) <code>npx tsc --noEmit</code> in api-gateway does not type-check <code>src/__tests__</code></strong>:
+        its tsconfig excludes them, and its program listed 0 of this test file. Type-check a test with a program
+        that lists it. </td></tr><tr><td><strong>(2) Run the whole suite</strong> (<code>npm test</code> in
+        <code>services/api-gateway</code>): <strong>95 files / 854 tests / 0 failed</strong> (base 94 / 845),
+        measured 2026-10-10 AEDT on Kamils-Mac-Studio, node v24.7.0, vitest 4.1.11.
+      </td></tr></table></div>

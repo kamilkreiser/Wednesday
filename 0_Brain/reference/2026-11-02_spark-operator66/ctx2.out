@@ -1,0 +1,179 @@
+### originate/src/routes/verification.ts
+-- 759
+756:       verifiedAt: new Date().toISOString(),
+757:     }, scoped));
+758:   } catch (error) {
+759:     logger.error('File verification error', { error: error instanceof Error ? error.message : String(error) });
+760:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'File verification failed' } });
+761:   }
+762: });
+-- 880
+877:         } catch (err: any) {
+878:           logger.warn('KS-70 lineage walk failed; returning empty lineage', {
+879:             externalId,
+880:             error: err instanceof Error ? err.message : String(err),
+881:           });
+882:           return { lineage: [], truncated: false };
+883:         }
+-- 917
+914:         } catch (err: any) {
+915:           logger.warn('KS-280 forward-lineage walk failed; returning none', {
+916:             externalId,
+917:             error: err instanceof Error ? err.message : String(err),
+918:           });
+919:           return { newerVersions: [], truncated: false, hasNewerCertifiedVersion: false };
+920:         }
+-- 1017
+1014:           }
+1015:         } catch (lineageErr: any) {
+1016:           logger.warn('KS-70 verify (by-id) lineage attach failed', {
+1017:             error: lineageErr instanceof Error ? lineageErr.message : String(lineageErr),
+1018:           });
+1019:         }
+1020:         return res.json(scopeTenantFields({
+-- 1306
+1303:               }
+1304:             } catch (lineageErr: any) {
+1305:               logger.warn('KS-70 verify lineage attach failed', {
+1306:                 error: lineageErr instanceof Error ? lineageErr.message : String(lineageErr),
+1307:               });
+1308:             }
+1309:             return res.json(base);
+-- 1438
+1435: 
+1436:       res.json({ verified: false, error: 'No verifiable input provided' });
+1437:     } catch (error) {
+1438:       logger.error('Verification error', { error: error instanceof Error ? error.message : String(error) });
+1439:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Verification failed' } });
+1440:     }
+1441:   }
+-- 1467
+1464:         generatedAt: new Date().toISOString(),
+1465:       });
+1466:     } catch (error) {
+1467:       logger.error('Hash generation error', { error: error instanceof Error ? error.message : String(error) });
+1468:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Hash generation failed' } });
+1469:     }
+1470:   }
+-- 1489
+1486:         message: 'Use POST /api/verification/verify with documentId or contentHash for full verification.',
+1487:       });
+1488:     } catch (error) {
+1489:       logger.error('Status check error', { error: error instanceof Error ? error.message : String(error) });
+1490:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Status check failed' } });
+1491:     }
+1492:   }
+### originate/src/routes/signatories.ts
+-- 132
+129:           error: { code: 'CONFLICT', message: 'This user is already an authorised signatory for this organisation' },
+130:         });
+131:       }
+132:       logger.error('Failed to nominate signatory', { error: String(error) });
+133:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to nominate signatory' } });
+134:     }
+135:   },
+-- 181
+178: 
+179:       res.json({ success: true, signatories: rows, total: rows.length });
+180:     } catch (error) {
+181:       logger.error('Failed to list signatories', { error: String(error) });
+182:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list signatories' } });
+183:     }
+184:   },
+-- 236
+233:         permittedTypes: types,
+234:       });
+235:     } catch (error) {
+236:       logger.error('Failed to check signatory authorisation', { error: String(error) });
+237:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to check authorisation' } });
+238:     }
+239:   },
+-- 284
+281: 
+282:       res.json({ success: true, signatory: rows[0] });
+283:     } catch (error) {
+284:       logger.error('Failed to get signatory', { error: String(error) });
+285:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get signatory' } });
+286:     }
+287:   },
+-- 357
+354: 
+355:       res.json({ success: true, message: 'Signatory updated' });
+356:     } catch (error) {
+357:       logger.error('Failed to update signatory', { error: String(error) });
+358:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update signatory' } });
+359:     }
+360:   },
+-- 415
+412:         revokedAt: now.toISOString(),
+413:       });
+414:     } catch (error) {
+415:       logger.error('Failed to revoke signatory', { error: String(error) });
+416:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to revoke signatory' } });
+417:     }
+418:   },
+-- 464
+461: 
+462:       res.json({ success: true, message: 'Signatory reinstated' });
+463:     } catch (error) {
+464:       logger.error('Failed to reinstate signatory', { error: String(error) });
+465:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to reinstate signatory' } });
+466:     }
+467:   },
+### originate/src/routes/thirdPartyVerifiers.ts
+-- 109
+106:           error: { code: 'CONFLICT', message: 'A verifier with this email is already registered' },
+107:         });
+108:       }
+109:       logger.error('Failed to register verifier', { error: String(error) });
+110:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to register verifier' } });
+111:     }
+112:   },
+-- 143
+140: 
+141:     res.json({ success: true, verifiers: rows, total: rows.length });
+142:   } catch (error) {
+143:     logger.error('Failed to list verifiers', { error: String(error) });
+144:     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list verifiers' } });
+145:   }
+146: });
+-- 193
+190:         note: 'Store this API key securely. It will not be shown again.',
+191:       });
+192:     } catch (error) {
+193:       logger.error('Failed to approve verifier', { error: String(error) });
+194:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to approve verifier' } });
+195:     }
+196:   },
+-- 240
+237: 
+238:       res.json({ success: true, message: 'Verifier suspended' });
+239:     } catch (error) {
+240:       logger.error('Failed to suspend verifier', { error: String(error) });
+241:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to suspend verifier' } });
+242:     }
+243:   },
+-- 279
+276: 
+277:       res.json({ success: true, message: 'Verifier reinstated' });
+278:     } catch (error) {
+279:       logger.error('Failed to reinstate verifier', { error: String(error) });
+280:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to reinstate verifier' } });
+281:     }
+282:   },
+-- 365
+362:         },
+363:       });
+364:     } catch (error) {
+365:       logger.error('Failed to perform third-party verification', { error: String(error) });
+366:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to perform verification' } });
+367:     }
+368:   },
+-- 397
+394: 
+395:       res.json({ success: true, records: rows, total: rows.length });
+396:     } catch (error) {
+397:       logger.error('Failed to get verification records', { error: String(error) });
+398:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get records' } });
+399:     }
+400:   },

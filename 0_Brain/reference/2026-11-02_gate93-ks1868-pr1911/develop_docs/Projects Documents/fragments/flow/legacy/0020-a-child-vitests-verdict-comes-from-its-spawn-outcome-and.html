@@ -1,0 +1,91 @@
+<h2>25. A child vitest&rsquo;s verdict comes from its spawn outcome and its JSON report, never from its text (KS-1313)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="5"><strong>What this fixes.</strong></td><td> <code>childSuiteCounts</code> read the child run&rsquo;s totals by matching
+      <code>/Tests\s+(?:(\d+) failed \| )?(\d+) passed \((\d+)\)/</code> against the child&rsquo;s
+      <em>human-readable</em> stdout and stderr. </td></tr><tr><td>That pattern <strong>requires the word
+      &ldquo;passed&rdquo;</strong>, so a real fail-only, skip-only or todo-only run matched nothing and the
+      helper threw &mdash; the KS 1226 residue this ticket records. </td></tr><tr><td>Worse, a child
+      <strong>killed by its own 180 s <code>spawnSync</code> timeout</strong> writes no summary at all, so
+      whether it was read as a pass depended on what else happened to be in its output (KS 1326). </td></tr><tr><td>The
+      helper now runs the child with <code>--reporter=json --outputFile.json=&lt;tmp&gt;</code> and reads
+      <code>numPassedTests</code> / <code>numFailedTests</code> from the report. </td></tr><tr><td>Before the report is
+      read at all, <code>endedNormally</code> refuses any child that did not end on its own &mdash; a spawn
+      error, a signal, or an exit status other than 0 or 1 &mdash; so a killed child <strong>cannot</strong>
+      read as a pass even beside a passing report.
+    </td></tr></table>
+<h3>25.1 Red-first, and the proof it is not a load failure</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Measured at base <code>147ae442074c</code>.</strong></td><td>
+      Hunk 3 alone &mdash; the seven new cells without the new reader &mdash; gives
+      <strong>rc 1, 7 failed | 3 passed (10)</strong>, and all seven reds are R1&ndash;R7. </td></tr><tr><td>The cells red
+      <strong>by assertion, not by a load error</strong>: each calls a <code>reader()</code> helper whose
+      first act is <code>expect(typeof countsFromSpawn).toBe('function')</code>, and <code>typeof</code> on an
+      undeclared identifier is the one JavaScript form that does not throw. Proved rather than assumed by
+      reading the JSON report&rsquo;s own totals: <strong>passed + failed = 10</strong>, so cells ran.
+      <strong>0 passed and 0 failed would have been a load failure and is explicitly not what happened.</strong>
+      With the full patch: <strong>10 passed, 0 failed, rc 0.</strong>
+    </td></tr></table>
+<h3>25.2 Two tamper arms, each red on its own cells</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Each arm has a <strong>unique anchor</strong> (<code>grep -c</code> == 1) and the whole file was restored
+      <strong>sha256-identical</strong> afterwards. </td><td><strong>Arm T1</strong> &mdash;
+      <code>endedNormally</code> forced to <code>return true</code>: <strong>8 passed / 2 failed</strong>, and the
+      two reds are exactly <strong>R1</strong> (timeout-killed, status 143 + ETIMEDOUT) and <strong>R2</strong>
+      (ended by SIGTERM). <strong>Arm T2</strong> &mdash; the text read restored inside
+      <code>childSuiteCounts</code>: <strong>9 passed / 1 failed</strong>, and the one red is
+      <strong>R7</strong>, the cell that reads this file&rsquo;s own source and asserts no
+      <code>result.stdout</code> or <code>result.stderr</code>. Both arms reported passed + failed = 10, so
+      neither was a load failure.
+    </td></tr></table>
+<h3>25.3 The fixtures were captured on vitest 4.1.9; the runner here is 5.0.3</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Checked rather than assumed, because a parser is only as good as the output it was captured from.</strong></td><td>
+      R6&rsquo;s fixtures are labelled &ldquo;captured from real vitest <strong>4.1.9</strong> JSON reports&rdquo;.
+      The runner resolved here is <strong>5.0.3</strong> &mdash; read from
+      <code>node_modules/vitest/package.json</code>, matching the lockfile pin, and confirmed by the binary
+      itself printing <code>vitest/5.0.3 darwin-arm64 node-v24.7.0</code>. A manifest range
+      (<code>^5.0.3</code>) is not a resolution. </td></tr><tr><td>A <strong>real 5.0.3 report was captured</strong> from a
+      child run with the payload&rsquo;s own flags and every field the fixtures use was compared:
+      <code>numTotalTests</code>, <code>numPassedTests</code>, <code>numFailedTests</code>,
+      <code>numPendingTests</code> and <code>numTodoTests</code> are all <strong>present and numeric</strong>,
+      and the two the product code destructures yield <code>{ passed: 3, failed: 7 }</code>, which agrees with
+      that run&rsquo;s own <code>7 failed | 3 passed (10)</code>. A control field that does not exist reads
+      absent, so the presence test discriminates. <strong>No field the code reads differs between the two
+      versions.</strong>
+    </td></tr></table>
+<h3>25.4 Types, lint and the package suite</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2">
+      <code>tsconfig.node.json</code> is the config that checks <code>tests/</code>, and
+      <strong><code>tsconfig.json</code> does not cover this file at all</strong>. </td><td>Established with
+      <code>tsc --listFilesOnly</code>: the test file appears <strong>1</strong> time in
+      <code>tsconfig.node.json</code>&rsquo;s program and <strong>0</strong> times in
+      <code>tsconfig.json</code>&rsquo;s. <code>tsc --noEmit -p tsconfig.node.json</code> is
+      <strong>rc 0, 0 bytes</strong>; a planted <code>const x: number = "s"</code> makes the same command
+      <strong>rc 2, 168 bytes</strong> naming <code>TS2322</code> at the planted line, so the green
+      discriminates. </td></tr><tr><td><code>eslint</code> rc 0 / 0 bytes, with a planted <code>void undefined</code>
+      firing <code>no-meaningless-void-operator</code> at rc 1 / 392 bytes. <code>prettier --check</code> rc 0.
+      The package unit suite moves <strong>1353 passed / 1353 (248 suites) &rarr; 1360 passed / 1360
+      (249 suites)</strong>, both runs rc 0 and <strong>0 failed</strong> &mdash; the delta is this change&rsquo;s
+      seven cells in one new <code>describe</code>.
+    </td></tr></table>
+<h3>25.5 Not covered, and one hole named as a follow-up</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2">
+      <strong>A follow-up, not a regression:</strong> <code>endedNormally</code> accepts exit status
+      <strong>1</strong>, which vitest also uses for an <em>unhandled error</em> rather than ordinary test
+      failures. </td><td>So a child that died of an unhandled error while still writing a report with
+      <code>numFailedTests: 0</code> would be accepted. That is strictly narrower than the behaviour being
+      replaced and is <strong>not</strong> made worse by this change, but it is a real remaining gap and is
+      named here rather than discovered later. </td></tr><tr><td>This is a <strong>test-harness</strong> change: no
+      service, no runtime, no migration, no deploy, and therefore <strong>no live sweep is owed</strong>. The
+      earlier attempt <strong>#1245</strong> is closed unmerged; it tried to repair the text parsing by label
+      set, and its <code>capturedChildOutput.ts</code> helper is <strong>not needed</strong> once the verdict
+      stops coming from text &mdash; its blob for this path differs from this one. The
+      <strong>four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are UNMEASURED</strong>:
+      the local stack is not up on <code>http://localhost:6882</code>. Never claimed as a pass. The repo
+      declares <code>engines.node &gt;=24.11.0</code> for this package while the host runs
+      <strong>v24.7.0</strong> &mdash; stated, and the suite is green on it regardless.
+    </td></tr></table>
+<h3>25.6 Running it</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+cd systemTest/performance &amp;&amp; npm ci --ignore-scripts
+node_modules/.bin/vitest run --config vitest.unit.config.ts \
+  tests/unit/utils/unitSuiteSlotIndependence.test.ts        # 10 passed, rc 0
+node_modules/.bin/tsc --noEmit -p tsconfig.node.json        # rc 0
+node_modules/.bin/prettier --check tests/unit/utils/unitSuiteSlotIndependence.test.ts</code></pre>

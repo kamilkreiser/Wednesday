@@ -1,0 +1,177 @@
+### api-gateway/src/middleware/rateLimitEnforce.ts
+-- 51
+47:   logger.warn('[rateLimit] DEGRADED — per-client ceiling is no longer distributed', {
+48:     reason,
+49:     clientId,
+50:     effect: 'counting per-replica in memory; the effective ceiling inflates to limit × replicas',
+51:     error: err instanceof Error ? err.message : err ? String(err) : undefined,
+52:     throttledFor: `${DEGRADE_LOG_INTERVAL_MS / 1000}s`,
+53:   });
+54: }
+-- 277
+273:         // say so at error level, since unlike the degradation above this is not
+274:         // an expected state.
+275:         logger.error('[rateLimit] in-memory fallback ALSO failed — request allowed unlimited', {
+276:           clientId,
+277:           error: fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr),
+278:         });
+279:         outcome = null;
+280:       }
+-- 302
+298:         // e.g. the response is already committed. Same rule as above: a bookkeeping
+299:         // failure does not 500 the caller, and it is not silent.
+300:         logger.error('[rateLimit] could not write the rate-limit headers or the 429 — request allowed unlimited', {
+301:           clientId,
+302:           error: writeErr instanceof Error ? writeErr.message : String(writeErr),
+303:         });
+304:         refused = false;
+305:       }
+### nft-certificate/src/services/blockchain-verifier.service.ts
+-- 69
+65:     } catch (err: unknown) {
+66:       // A malformed key or unsupported network must degrade to
+67:       // "verification disabled", never escape as a 500.
+68:       logger.warn('Blockfrost client init failed – on-chain verification disabled', {
+69:         error: err instanceof Error ? err.message : String(err),
+70:       });
+71:       return null;
+72:     }
+-- 109
+105:       if (statusCode === 404) {
+106:         return { verified: false, status: 'not_found' };
+107:       }
+108: 
+109:       logger.error('Error verifying transaction', { error: err instanceof Error ? err.message : String(err) });
+110:       return {
+111:         verified: false,
+112:         status: 'error',
+### nft-certificate/src/utils/mintError.ts
+-- 31
+26:  *
+27:  * The Cardano serialization lib throws plain STRINGS for bech32 address
+28:  * parse errors (e.g. 'invalid checksum', 'missing human-readable
+29:  * separator, "1"'). `(error as Error).message` on a string is undefined,
+30:  * which JSON.stringify silently drops — the observed KS-444 defect where
+31:  * the 400 body carried no message at all. Always fall back to String(error).
+32:  */
+33: export function classifyMintError(error: unknown): {
+34:   message: string;
+-- 37
+32:  */
+33: export function classifyMintError(error: unknown): {
+34:   message: string;
+35:   errorCode: MintFailureCode;
+36: } {
+37:   const message = error instanceof Error ? error.message : String(error);
+38: 
+39:   // The certification referenced in the request body does not exist —
+40:   // a business not-found, never a client-syntax fault.
+### auth/src/routes/health.ts
+-- 41
+37:       new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
+38:     ]);
+39:     return { status: 'healthy', latency: Date.now() - start };
+40:   } catch (error) {
+41:     return { status: 'unhealthy', message: String(error) };
+42:   }
+43: }
+44: 
+-- 61
+57:       new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
+58:     ]);
+59:     return { status: 'healthy', latency: Date.now() - start };
+60:   } catch (error) {
+61:     return { status: 'unhealthy', message: String(error) };
+62:   }
+63: }
+64: 
+### originate/src/routes/metering.ts
+-- 129
+125: 
+126:     const summary = await getUsageSummary(reqTenantId(req), from, to);
+127:     return res.json({ success: true, data: summary });
+128:   } catch (error) {
+129:     logger.error('Failed to read metering usage', { error: error instanceof Error ? error.message : String(error) });
+130:     return res
+131:       .status(500)
+132:       .json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to read usage' } });
+### originate/src/services/retentionScheduler.ts
+-- 51
+47:     } else {
+48:       logger.info('Enforcement complete — no records required processing');
+49:     }
+50:   } catch (err: any) {
+51:     logger.error('Scheduled enforcement failed', { error: err instanceof Error ? err.message : String(err) });
+52:   }
+53: }
+54: 
+### originate/src/repositories/shareRepo.ts
+-- 140
+136:         )
+137:       `;
+138:     }
+139:   } catch (err: any) {
+140:     const msg = err instanceof Error ? err.message : String(err);
+141:     if (msg.includes('null value in column "target_id"')) {
+142:       // Subquery returned no row — document not in this tenant.
+143:       const friendlyErr: Error & { code?: string } = new Error(
+### originate/src/repositories/lifecycleEventRepo.ts
+-- 82
+78:         ${now}
+79:       )
+80:     `;
+81:   } catch (err: unknown) {
+82:     const msg = err instanceof Error ? err.message : String(err);
+83:     if (msg.includes('null value in column "parent_document_id"')) {
+84:       // Subquery returned no row — document not in this tenant.
+85:       const friendlyErr: Error & { code?: string } = new Error(
+### originate/src/services/anchorStateSync.ts
+-- 600
+596:       const written = await writeAnchorBlobIf(input.documentId, input.tenantId, 'confirmed', healed, { rowStatus: 'anchored' });
+597:       logger.info('Verify heal: anchor state confirmed through the resolver (KS-584, KS-1384 R2b)', { documentId: input.documentId, anchorId
+598:     } catch (err: unknown) {
+599:       // Presentation already has the decision; the write is convergence, and the reconcile and the poller are the catch-all.
+600:       logger.warn('Verify heal: the confirmed write failed (presentation unaffected)', { documentId: input.documentId, error: err instanceof
+601:     }
+602:   }
+603:   return healed;
+### originate/src/services/chargeEvents.ts
+-- 126
+122:     await prisma.$queryRaw`SELECT 1`;
+123:     logger.info('chargeEvents: database connection verified');
+124:   } catch (err: any) {
+125:     logger.error('chargeEvents: database connection FAILED — charge events will not be available', {
+126:       error: err instanceof Error ? err.message : String(err),
+127:     });
+128:     throw new Error('Database is required for charge event operations');
+129:   }
+### originate/src/services/ownCreateClient.ts
+-- 88
+84:     }
+85:     return readOwnCreateBody(body);
+86:   } catch (err: unknown) {
+87:     if (isTimeoutError(err)) return notAnswered('deadline', `own-create did not answer within ${OWN_CREATE_CALL_TIMEOUT_MS} ms`);
+88:     return notAnswered('unanswered', `own-create could not be reached: ${err instanceof Error ? err.message : String(err)}`);
+89:   }
+90: }
+91: 
+### originate/src/utils/lifecyclePayloadCodec.ts
+-- 58
+54:         return plain ? (JSON.parse(plain) as Record<string, unknown>) : {};
+55:       } catch (err) {
+56:         logger.error('lifecycle payload decrypt failed', {
+57:           eventId,
+58:           error: err instanceof Error ? err.message : String(err),
+59:         });
+60:         return { payloadUnavailable: true };
+61:       }
+### originate/src/index.ts
+-- 76
+72: // crash left no stack in originate's own logs. Log + persist both; on an
+73: // uncaughtException the process state is undefined, so exit and let the restart
+74: // policy bring back a clean process.
+75: process.on('unhandledRejection', (reason: unknown) => {
+76:   const message = reason instanceof Error ? reason.message : String(reason);
+77:   const stack = reason instanceof Error ? reason.stack : undefined;
+78:   logger.error('Unhandled promise rejection', { message, stack });
+79:   trackError({ service: 'originate', errorType: 'UnhandledRejection', message, stack, severity: 'error' }).catch(() => {});

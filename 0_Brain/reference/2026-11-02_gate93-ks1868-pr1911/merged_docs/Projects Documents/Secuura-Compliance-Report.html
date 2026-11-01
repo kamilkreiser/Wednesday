@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Compliance and Regulatory Adherence Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;700&family=JetBrains+Mono:wght@400&display=swap');
+
+@page {
+  size: A4;
+  margin: 22mm 18mm 22mm 18mm;
+  @bottom-center {
+    content: counter(page);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 9px;
+    color: #999;
+  }
+}
+@page :first {
+  @bottom-center { content: none; }
+  margin: 0;
+}
+
+:root {
+  --navy: #0F1B33;
+  --deep: #040810;
+  --teal: #0A9E7E;
+  --teal-light: #0CF7C4;
+  --blue: #2563EB;
+  --yellow: #D4A000;
+  --bg: #FFFFFF;
+  --bg-alt: #F8F9FB;
+  --card-bg: #F3F5F8;
+  --text-primary: #1A1A2E;
+  --text-secondary: #4A5568;
+  --text-muted: #8896A6;
+  --border: #DDE2EA;
+  --error: #DC2626;
+  --success: #059669;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 11px; }
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 300;
+  color: var(--text-primary);
+  background: var(--bg);
+  line-height: 1.6;
+  padding: 0;
+}
+
+/* Cover page */
+.cover-page {
+  page-break-after: always;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(180deg, var(--deep) 0%, var(--navy) 50%, var(--deep) 100%);
+  padding: 40px;
+  margin: -22mm -18mm 0 -18mm;
+  width: calc(100% + 36mm);
+}
+.cover-logo {
+  font-size: 5rem;
+  font-family: 'IBM Plex Serif', serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--teal-light), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+.cover-title {
+  font-size: 2.2rem;
+  font-family: 'IBM Plex Serif', serif;
+  font-weight: 700;
+  color: #F7F7F7;
+  margin: 20px 0 10px;
+  max-width: 600px;
+}
+.cover-subtitle {
+  font-size: 1.2rem;
+  color: #A8B4C4;
+  font-weight: 300;
+  margin-bottom: 40px;
+}
+.cover-line {
+  width: 120px;
+  height: 3px;
+  background: linear-gradient(135deg, var(--teal-light), var(--blue));
+  margin: 20px auto;
+  border-radius: 2px;
+}
+.cover-meta {
+  margin-top: 60px;
+  color: #8896A6;
+  font-size: 0.95rem;
+}
+.cover-meta p { margin: 4px 0; color: #8896A6; }
+.cover-meta strong { color: #F7F7F7; }
+
+/* Content typography */
+h1, h2, h3 {
+  font-family: 'IBM Plex Serif', serif;
+  font-weight: 700;
+  color: var(--text-primary);
+  page-break-after: avoid;
+}
+h4, h5, h6 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+  page-break-after: avoid;
+}
+h1 { font-size: 2.4rem; margin: 0 0 0.5em; letter-spacing: -0.03em; display: none; }
+h2 {
+  font-size: 1.8rem;
+  margin: 2em 0 0.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 2px solid var(--teal);
+  color: var(--navy);
+  page-break-before: always;
+}
+h2:first-of-type { page-break-before: auto; }
+h3 { font-size: 1.35rem; margin: 1.5em 0 0.5em; color: var(--teal); }
+h4 { font-size: 1.15rem; margin: 1.2em 0 0.4em; }
+h5 { font-size: 1.05rem; margin: 1em 0 0.3em; }
+
+p { margin-bottom: 0.8em; color: var(--text-secondary); }
+strong { color: var(--text-primary); }
+em { font-style: italic; }
+a { color: var(--blue); text-decoration: none; }
+
+/* Code */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9em;
+  background: #EFF6F4;
+  border: 1px solid #D4E8E2;
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--teal);
+}
+pre {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 0.8em 0;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  page-break-inside: avoid;
+}
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 0.92em;
+  page-break-inside: avoid;
+}
+th {
+  background: var(--navy);
+  color: #FFFFFF;
+  font-weight: 600;
+  text-align: left;
+  padding: 9px 11px;
+  border: 1px solid var(--navy);
+}
+td {
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+tr:nth-child(even) td { background: var(--bg-alt); }
+tr:nth-child(odd) td { background: var(--bg); }
+
+/* Lists */
+ul, ol { margin: 0.5em 0 0.8em 1.5em; }
+li { margin-bottom: 0.3em; color: var(--text-secondary); }
+li strong { color: var(--text-primary); }
+
+/* Blockquotes */
+blockquote {
+  background: #EFF8F5;
+  border-left: 3px solid var(--teal);
+  padding: 12px 16px;
+  margin: 1em 0;
+  border-radius: 0 8px 8px 0;
+}
+blockquote p { color: var(--text-primary); margin-bottom: 0; }
+
+/* HR */
+hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 2em 0;
+}
+
+/* End page */
+.end-page {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  page-break-before: always;
+}
+.end-page p { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="cover-page">
+  <div class="cover-logo">S</div>
+  <div class="cover-line"></div>
+  <div class="cover-title">Compliance and Regulatory Adherence Report</div>
+  <div class="cover-subtitle">Compliance Report</div>
+  <div class="cover-line"></div>
+  <div class="cover-meta">
+    <p><strong>Classification:</strong> Confidential</p>
+    <p><strong>Version:</strong> 1.0</p>
+    <p><strong>Date:</strong> 15 February 2026</p>
+    <p><strong>Author:</strong> Secuura Engineering</p>
+  </div>
+</div>
+
+<h1 id="secuura-platform-compliance-report">Secuura Platform — Compliance Report</h1>
+<p><strong>Document Title:</strong> Compliance and Regulatory Adherence Report<br />
+<strong>Version:</strong> 1.0<br />
+<strong>Date:</strong> 15 February 2026<br />
+<strong>Classification:</strong> Confidential<br />
+<strong>Prepared by:</strong> Secuura Engineering<br />
+<strong>Approved by:</strong> <em>Pending</em></p>
+<hr />
+<h2 id="version-history">Version History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Author</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>15 Feb 2026</td>
+<td>Secuura Engineering</td>
+<td>Initial compliance report</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-executive-summary">Executive Summary</a></li>
+<li><a href="#2-compliance-framework-summary-table">Compliance Framework Summary Table</a></li>
+<li><a href="#3-general-data-protection-regulation-gdpr">General Data Protection Regulation (GDPR)</a></li>
+<li><a href="#4-uk-data-protection-act-2018-uk-dpa">UK Data Protection Act 2018 (UK DPA)</a></li>
+<li><a href="#5-isoiec-27001--information-security-management">ISO/IEC 27001 — Information Security Management</a></li>
+<li><a href="#6-soc-2-type-ii--trust-service-criteria">SOC 2 Type II — Trust Service Criteria</a></li>
+<li><a href="#7-eidas-regulation--electronic-identification-and-trust-services">eIDAS Regulation — Electronic Identification and Trust Services</a></li>
+<li><a href="#8-owasp-application-security">OWASP Application Security</a></li>
+<li><a href="#9-nist-cybersecurity-framework">NIST Cybersecurity Framework</a></li>
+<li><a href="#10-hipaa--health-insurance-portability-and-accountability-act">HIPAA — Health Insurance Portability and Accountability Act</a></li>
+<li><a href="#11-sox--sarbanes-oxley-act">SOX — Sarbanes-Oxley Act</a></li>
+<li><a href="#12-pci-dss--payment-card-industry-data-security-standard">PCI DSS — Payment Card Industry Data Security Standard</a></li>
+<li><a href="#13-w3c-verifiable-credentials-and-did-standards">W3C Verifiable Credentials and DID Standards</a></li>
+<li><a href="#14-cardano-improvement-proposals-cips">Cardano Improvement Proposals (CIPs)</a></li>
+<li><a href="#15-detailed-compliance-controls">Detailed Compliance Controls</a></li>
+<li><a href="#16-regional-and-jurisdictional-considerations">Regional and Jurisdictional Considerations</a></li>
+<li><a href="#17-recommendations-and-roadmap">Recommendations and Roadmap</a></li>
+</ol>
+<hr />
+<h2 id="1-executive-summary">1. Executive Summary</h2>
+<p>This report provides a comprehensive assessment of the Secuura platform&rsquo;s adherence to applicable compliance frameworks, industry standards, and security best practices. As a document authenticity platform operating on the Cardano blockchain, Secuura is subject to data protection regulations, information security standards, and trust service requirements across multiple jurisdictions.</p>
+<p>Secuura&rsquo;s architecture has been designed with a compliance-first approach, incorporating privacy by design principles, a hash-based document-less architecture that minimises personal data exposure, and blockchain-anchored immutability for audit integrity. The platform implements comprehensive GDPR controls including consent management, data subject request processing, data retention enforcement, right-to-be-forgotten (erasure), and data portability. Security measures span authentication (JWT, MFA, SSO), input sanitisation, rate limiting, structured logging, and role-based access control.</p>
+<p><strong>Key Findings:</strong></p>
+<ul>
+<li><strong>12 compliance frameworks</strong> assessed across data protection, information security, application security, and industry-specific requirements</li>
+<li><strong>Full compliance</strong> achieved with GDPR, UK DPA, and OWASP application security standards</li>
+<li><strong>Substantial alignment</strong> with ISO 27001, SOC 2, NIST CSF, and eIDAS requirements</li>
+<li><strong>Architecture-ready</strong> for HIPAA, SOX, and PCI DSS compliance when required by specific deployments</li>
+<li><strong>Native support</strong> for W3C Verifiable Credentials and Cardano CIP standards</li>
+</ul>
+<hr />
+<h2 id="2-compliance-framework-summary-table">2. Compliance Framework Summary Table</h2>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Scope</th>
+<th>Status</th>
+<th>Compliance Level</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GDPR</strong> (EU General Data Protection Regulation)</td>
+<td>Data protection, privacy</td>
+<td>Implemented</td>
+<td>Full</td>
+<td>Consent management, DSR processing, erasure, portability, retention policies</td>
+</tr>
+<tr>
+<td><strong>UK DPA 2018</strong> (Data Protection Act)</td>
+<td>UK data protection</td>
+<td>Implemented</td>
+<td>Full</td>
+<td>Aligned with GDPR; architecture supports UK-specific requirements</td>
+</tr>
+<tr>
+<td><strong>ISO/IEC 27001</strong> (Information Security Management)</td>
+<td>Information security</td>
+<td>Aligned</td>
+<td>Substantial</td>
+<td>Technical controls implemented; formal ISMS documentation recommended for certification</td>
+</tr>
+<tr>
+<td><strong>SOC 2 Type II</strong> (Trust Service Criteria)</td>
+<td>Security, availability, confidentiality, privacy</td>
+<td>Aligned</td>
+<td>Substantial</td>
+<td>Controls in place; formal audit engagement required for attestation</td>
+</tr>
+<tr>
+<td><strong>eIDAS</strong> (Electronic Identification and Trust Services)</td>
+<td>Electronic trust services</td>
+<td>Aligned</td>
+<td>Partial</td>
+<td>Blockchain-anchored timestamps and signatures; formal TSP qualification pending</td>
+</tr>
+<tr>
+<td><strong>OWASP Top 10</strong> (Application Security)</td>
+<td>Web application security</td>
+<td>Implemented</td>
+<td>Full</td>
+<td>Input sanitisation, CSP headers, rate limiting, authentication hardening</td>
+</tr>
+<tr>
+<td><strong>NIST CSF</strong> (Cybersecurity Framework)</td>
+<td>Cybersecurity risk management</td>
+<td>Aligned</td>
+<td>Substantial</td>
+<td>Identify, Protect, Detect, Respond, Recover functions addressed</td>
+</tr>
+<tr>
+<td><strong>HIPAA</strong> (Health Insurance Portability)</td>
+<td>Healthcare data protection</td>
+<td>Architecture-ready</td>
+<td>Partial</td>
+<td>Hash-based architecture minimises PHI exposure; BAA templates needed for healthcare deployments</td>
+</tr>
+<tr>
+<td><strong>SOX</strong> (Sarbanes-Oxley Act)</td>
+<td>Financial controls, audit trails</td>
+<td>Architecture-ready</td>
+<td>Partial</td>
+<td>Immutable audit trails and provenance tracking support SOX objectives</td>
+</tr>
+<tr>
+<td><strong>PCI DSS</strong> (Payment Card Industry)</td>
+<td>Payment data security</td>
+<td>Architecture-ready</td>
+<td>Partial</td>
+<td>Stripe integration handles card data; platform does not process or store card numbers</td>
+</tr>
+<tr>
+<td><strong>W3C VC/DID</strong> (Verifiable Credentials)</td>
+<td>Decentralised identity</td>
+<td>Implemented</td>
+<td>Full</td>
+<td>W3C VC issuance, DID management via Atala PRISM, StatusList2021 revocation</td>
+</tr>
+<tr>
+<td><strong>Cardano CIPs</strong> (CIP-30, CIP-8)</td>
+<td>Blockchain wallet integration</td>
+<td>Implemented</td>
+<td>Full</td>
+<td>CIP-30 wallet connection, CIP-8 message signing for authentication</td>
+</tr>
+</tbody>
+</table>
+<h3 id="legend">Legend</h3>
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Implemented</strong></td>
+<td>Controls are built, tested, and deployed in the current production codebase</td>
+</tr>
+<tr>
+<td><strong>Aligned</strong></td>
+<td>Technical controls satisfy framework requirements; formal certification or audit pending</td>
+</tr>
+<tr>
+<td><strong>Architecture-ready</strong></td>
+<td>Architecture supports compliance; deployment-specific configuration or documentation needed</td>
+</tr>
+<tr>
+<td><strong>Partial</strong></td>
+<td>Some controls implemented; additional work required for full compliance</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-general-data-protection-regulation-gdpr">3. General Data Protection Regulation (GDPR)</h2>
+<h3 id="31-overview">3.1 Overview</h3>
+<p>The GDPR (Regulation (EU) 2016/679) governs the processing of personal data of EU/EEA residents. As Secuura processes user identifiers, email addresses, and document metadata, GDPR compliance is mandatory for EU-facing operations.</p>
+<h3 id="32-compliance-controls">3.2 Compliance Controls</h3>
+<table>
+<thead>
+<tr>
+<th>GDPR Article</th>
+<th>Requirement</th>
+<th>Secuura Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Art. 5</strong></td>
+<td>Principles of processing</td>
+<td>Hash-based architecture minimises data; purpose limitation enforced; accuracy maintained via blockchain immutability</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 6</strong></td>
+<td>Lawful basis for processing</td>
+<td>Consent-based processing with explicit consent records; legitimate interest for platform operations</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 7</strong></td>
+<td>Conditions for consent</td>
+<td>Consent records stored with purpose, version, source, timestamp, IP address, and user agent; withdrawal supported</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 12-14</strong></td>
+<td>Transparency and information</td>
+<td>API documentation; privacy notices supported via consent management system</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 15</strong></td>
+<td>Right of access</td>
+<td>Data export endpoint (<code>GET /api/gdpr/export/:userId</code>) provides complete data package</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 16</strong></td>
+<td>Right to rectification</td>
+<td>DSR system supports rectification requests with audit trail</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 17</strong></td>
+<td>Right to erasure</td>
+<td>Cascading erasure across 9 data categories with anonymisation and deletion logging</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 18</strong></td>
+<td>Right to restriction</td>
+<td>DSR system supports restriction-of-processing requests</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 20</strong></td>
+<td>Right to data portability</td>
+<td>JSON export with downloadable file; structured, machine-readable format</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 21</strong></td>
+<td>Right to object</td>
+<td>DSR system handles objection requests with processing and audit trail</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 25</strong></td>
+<td>Data protection by design</td>
+<td>Hash-based architecture (documents never stored); client-side hashing; data minimisation throughout</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 28</strong></td>
+<td>Processor obligations</td>
+<td>Architecture supports processor relationships; data processing records maintained</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 30</strong></td>
+<td>Records of processing</td>
+<td>Audit logs, consent records, DSR history provide comprehensive processing records</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 32</strong></td>
+<td>Security of processing</td>
+<td>Encryption at rest (PostgreSQL), TLS in transit, access controls, rate limiting, input sanitisation</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 33-34</strong></td>
+<td>Breach notification</td>
+<td>Error tracking system with severity classification; incident response procedures supported</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Art. 35</strong></td>
+<td>Data protection impact assessment</td>
+<td>Architecture documentation supports DPIA preparation; minimal personal data processed</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td><strong>Art. 37-39</strong></td>
+<td>Data Protection Officer</td>
+<td>Architecture supports DPO requirements; appointment is organisational responsibility</td>
+<td>Supported</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-technical-implementation-details">3.3 Technical Implementation Details</h3>
+<p><strong>Consent Management:</strong>
+- Database-backed consent records (<code>consent_records</code> table)
+- Consent recorded with: user ID, purpose, version, source (explicit/implicit), expiration, IP address, user agent
+- Consent upsert with <code>ON CONFLICT</code> handling for purpose updates
+- Consent withdrawal with timestamp recording
+- Validity checking considers both expiration and withdrawal status</p>
+<p><strong>Data Subject Requests:</strong>
+- Full DSR lifecycle: creation, processing, completion, denial, extension
+- 30-day deadline enforcement per GDPR Article 12(3)
+- Six request types: access, rectification, erasure, portability, restriction, objection
+- Audit trail maintained for every DSR status change</p>
+<p><strong>Data Erasure (Right to Be Forgotten):</strong>
+- Cascading erasure across: share records, charge events, certification events, audit logs, document access, documents, user sessions, consent records, and user accounts
+- User accounts anonymised (email, name set to anonymised values; password hash deleted; MFA cleared; status set to &lsquo;deleted&rsquo;)
+- Deletion log maintained with record counts, methods, and reasons
+- Blockchain records remain (hashes only — no personal data on-chain)</p>
+<p><strong>Data Retention:</strong>
+- Configurable retention policies per data type
+- Automated enforcement via retention scheduler (daily execution)
+- Supported deletion methods: hard delete, soft delete, anonymise
+- Default policies for: user sessions (90 days), audit logs (365 days), verification requests (180 days), system errors (90 days), share records (365 days)</p>
+<p><strong>GDPR API Endpoints (all operational and tested):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/gdpr/consent</code></td>
+<td>POST</td>
+<td>Record user consent</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/consent/withdraw</code></td>
+<td>POST</td>
+<td>Withdraw consent</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/consent/check</code></td>
+<td>GET</td>
+<td>Check valid consent</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/consent/:userId</code></td>
+<td>GET</td>
+<td>List all user consents</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/dsr</code></td>
+<td>POST</td>
+<td>Create Data Subject Request</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/dsr/pending</code></td>
+<td>GET</td>
+<td>List pending DSRs (admin)</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/dsr/:dsrId</code></td>
+<td>PATCH</td>
+<td>Update DSR status</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/export/:userId</code></td>
+<td>GET</td>
+<td>Export user data (Article 20)</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/export/:userId/download</code></td>
+<td>GET</td>
+<td>Download user data as file</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/erasure/:userId</code></td>
+<td>POST</td>
+<td>Execute right-to-be-forgotten</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/retention</code></td>
+<td>GET</td>
+<td>List retention policies</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/retention/enforce</code></td>
+<td>POST</td>
+<td>Trigger retention enforcement</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/deletion-log</code></td>
+<td>GET</td>
+<td>View deletion audit trail</td>
+<td>Operational</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Database Schema (GDPR tables):</strong> <code>consent_records</code>, <code>data_subject_requests</code>, <code>data_deletion_log</code>, <code>data_retention_policies</code> — PostgreSQL database <code>secuura</code> with UUID primary keys, user foreign keys, and CHECK constraints.</p>
+<p><strong>Infrastructure:</strong> Only ports 8881 (Marketing Website) and 8882 (Nginx Gateway) are externally exposed. All 22 services (19 backend + 3 frontend portals) run on an isolated Docker network. User IDs are generated using <code>crypto.randomUUID()</code> for privacy-safe identification.</p>
+<hr />
+<h2 id="4-uk-data-protection-act-2018-uk-dpa">4. UK Data Protection Act 2018 (UK DPA)</h2>
+<h3 id="41-overview">4.1 Overview</h3>
+<p>The UK DPA 2018 implements GDPR principles in UK law post-Brexit. Secuura&rsquo;s GDPR compliance extends to UK DPA requirements with additional consideration for UK-specific provisions.</p>
+<h3 id="42-compliance-controls">4.2 Compliance Controls</h3>
+<table>
+<thead>
+<tr>
+<th>UK DPA Section</th>
+<th>Requirement</th>
+<th>Secuura Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Part 2, Ch. 2</strong></td>
+<td>Lawful processing</td>
+<td>Same as GDPR Article 6; consent-based with legitimate interest</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Part 3</strong></td>
+<td>Law enforcement processing</td>
+<td>Not applicable — Secuura is not a law enforcement body</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Part 4</strong></td>
+<td>Intelligence services</td>
+<td>Not applicable</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Section 170</strong></td>
+<td>Unlawful obtaining of data</td>
+<td>Access controls, RBAC, audit logging prevent unauthorised access</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Section 171</strong></td>
+<td>Re-identification of de-identified data</td>
+<td>Anonymisation uses irreversible methods; no re-identification pathways</td>
+<td>Compliant</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-ico-registration">4.3 ICO Registration</h3>
+<p>Secuura&rsquo;s architecture supports Information Commissioner&rsquo;s Office (ICO) registration requirements. Actual registration is an organisational responsibility for each deployment.</p>
+<hr />
+<h2 id="5-isoiec-27001-information-security-management">5. ISO/IEC 27001 — Information Security Management</h2>
+<h3 id="51-overview">5.1 Overview</h3>
+<p>ISO 27001 specifies requirements for establishing, implementing, maintaining, and continually improving an information security management system (ISMS).</p>
+<h3 id="52-annex-a-control-mapping">5.2 Annex A Control Mapping</h3>
+<table>
+<thead>
+<tr>
+<th>Control Area</th>
+<th>ISO 27001 Reference</th>
+<th>Secuura Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Information security policies</strong></td>
+<td>A.5</td>
+<td>Security configuration documented; CSP, CORS, rate limiting policies enforced programmatically</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Organisation of information security</strong></td>
+<td>A.6</td>
+<td>Role-based access control; separation of duties via role system (OWNER, ISSUER_ADMIN, ISSUER_APPROVER, VERIFIER, ORG_ADMIN, SYSTEM_ADMIN)</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Human resource security</strong></td>
+<td>A.7</td>
+<td>MFA enforcement; verification levels (Basic through Government); password policies</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Asset management</strong></td>
+<td>A.8</td>
+<td>Document metadata classification; database-level encryption; Redis password protection</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Access control</strong></td>
+<td>A.9</td>
+<td>JWT authentication; RBAC middleware; API key management with scopes; brute-force protection; session management</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Cryptography</strong></td>
+<td>A.10</td>
+<td>BLAKE2b-256 / SHA-256 hashing; bcrypt password hashing (12 rounds); JWT RS256/HS256; TLS in transit</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Physical security</strong></td>
+<td>A.11</td>
+<td>Cloud-hosted infrastructure; Docker containerisation; network isolation</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Operations security</strong></td>
+<td>A.12</td>
+<td>Winston structured logging; error tracking; retention scheduler; container health checks</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Communications security</strong></td>
+<td>A.13</td>
+<td>CORS policies; Helmet.js security headers; HSTS; CSP</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>System acquisition and development</strong></td>
+<td>A.14</td>
+<td>Input sanitisation; XSS/SQL injection prevention; parameterised queries via Prisma ORM</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Supplier relationships</strong></td>
+<td>A.15</td>
+<td>Third-party integrations (Stripe, KYC providers) use secure API protocols</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Incident management</strong></td>
+<td>A.16</td>
+<td>System error tracking; severity classification (warning, error, critical); resolution tracking</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Business continuity</strong></td>
+<td>A.17</td>
+<td>Redis persistence; PostgreSQL with health checks; graceful shutdown handlers; in-memory fallbacks</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Compliance</strong></td>
+<td>A.18</td>
+<td>GDPR compliance controls; audit logging; data retention policies</td>
+<td>Compliant</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-gap-analysis-for-formal-certification">5.3 Gap Analysis for Formal Certification</h3>
+<p>To achieve ISO 27001 certification, the following organisational activities are recommended:</p>
+<ol>
+<li><strong>Formal ISMS documentation</strong> — Policies, procedures, and scope definition</li>
+<li><strong>Risk assessment register</strong> — Formal risk identification and treatment</li>
+<li><strong>Management review processes</strong> — Regular security reviews</li>
+<li><strong>Internal audit programme</strong> — Scheduled internal audits</li>
+<li><strong>Statement of Applicability</strong> — Formal SoA document</li>
+</ol>
+<hr />
+<h2 id="6-soc-2-type-ii-trust-service-criteria">6. SOC 2 Type II — Trust Service Criteria</h2>
+<h3 id="61-overview">6.1 Overview</h3>
+<p>SOC 2 provides criteria for evaluating service organisations&rsquo; controls relevant to security, availability, processing integrity, confidentiality, and privacy.</p>
+<h3 id="62-trust-service-criteria-mapping">6.2 Trust Service Criteria Mapping</h3>
+<table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Category</th>
+<th>Secuura Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CC1</strong></td>
+<td>Control environment</td>
+<td>Role-based access; separation of duties; admin dashboard for oversight</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>CC2</strong></td>
+<td>Communication and information</td>
+<td>Structured logging (Winston); audit trails; API documentation</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>CC3</strong></td>
+<td>Risk assessment</td>
+<td>Error tracking with severity classification; system health monitoring</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>CC4</strong></td>
+<td>Monitoring activities</td>
+<td>System health dashboard; error statistics; GDPR DSR monitoring</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>CC5</strong></td>
+<td>Control activities</td>
+<td>Input sanitisation; rate limiting; authentication enforcement</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>CC6</strong></td>
+<td>Logical and physical access</td>
+<td>JWT + MFA + RBAC; API key management; brute-force protection</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>CC7</strong></td>
+<td>System operations</td>
+<td>Docker orchestration; health checks; graceful shutdown; container monitoring</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>CC8</strong></td>
+<td>Change management</td>
+<td>Version-controlled codebase; Docker image versioning; database migrations via Prisma</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>CC9</strong></td>
+<td>Risk mitigation</td>
+<td>In-memory fallbacks for Redis; error boundaries; circuit breaker patterns</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>A1</strong></td>
+<td>Availability</td>
+<td>Health check endpoints; container restart policies; connection pooling (PgBouncer)</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>PI1</strong></td>
+<td>Processing integrity</td>
+<td>Blockchain-anchored hashes ensure document integrity; hash verification on every check</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>C1</strong></td>
+<td>Confidentiality</td>
+<td>Encryption at rest; TLS in transit; minimal data exposure (hash-based architecture)</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>Privacy</td>
+<td>GDPR controls (consent, DSR, erasure, portability, retention); data minimisation</td>
+<td>Compliant</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-eidas-regulation-electronic-identification-and-trust-services">7. eIDAS Regulation — Electronic Identification and Trust Services</h2>
+<h3 id="71-overview">7.1 Overview</h3>
+<p>eIDAS (Regulation (EU) No 910/2014) establishes a legal framework for electronic identification and trust services within the EU.</p>
+<h3 id="72-alignment-assessment">7.2 Alignment Assessment</h3>
+<table>
+<thead>
+<tr>
+<th>eIDAS Requirement</th>
+<th>Secuura Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Electronic signatures</strong></td>
+<td>CIP-8 wallet-based message signing provides cryptographic proof of identity</td>
+<td>Partial</td>
+</tr>
+<tr>
+<td><strong>Electronic seals</strong></td>
+<td>Organisation-level certifications with authorised signatory model</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Electronic timestamps</strong></td>
+<td>RFC-3161 timestamp service; blockchain-anchored timestamps with Cardano confirmation</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Electronic registered delivery</strong></td>
+<td>Share tracking with audit trail; notification system</td>
+<td>Partial</td>
+</tr>
+<tr>
+<td><strong>Website authentication certificates</strong></td>
+<td>TLS certificates on all endpoints; HSTS enforcement</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Trust service provider requirements</strong></td>
+<td>Audit logging; incident reporting; security measures per Article 19</td>
+<td>Aligned</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-eidas-20-considerations">7.3 eIDAS 2.0 Considerations</h3>
+<p>The updated eIDAS 2.0 regulation introduces European Digital Identity Wallets. Secuura&rsquo;s CIP-30 wallet integration architecture and W3C Verifiable Credentials support position the platform for future eIDAS 2.0 wallet interoperability.</p>
+<hr />
+<h2 id="8-owasp-application-security">8. OWASP Application Security</h2>
+<h3 id="81-owasp-top-10-2021-compliance">8.1 OWASP Top 10 (2021) Compliance</h3>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Vulnerability</th>
+<th>Secuura Mitigation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A01</strong></td>
+<td>Broken Access Control</td>
+<td>RBAC middleware; JWT authentication; role verification on every request; ownership checks</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A02</strong></td>
+<td>Cryptographic Failures</td>
+<td>BLAKE2b-256 hashing; bcrypt (12 rounds) for passwords; TLS enforcement; no plaintext secrets</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A03</strong></td>
+<td>Injection</td>
+<td>Prisma ORM with parameterised queries; input sanitisation layer; SQL injection pattern detection</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A04</strong></td>
+<td>Insecure Design</td>
+<td>Hash-based document-less architecture; privacy by design; separation of concerns via microservices</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A05</strong></td>
+<td>Security Misconfiguration</td>
+<td>Helmet.js security headers; CSP; CORS whitelist; environment-based configuration; secrets via env vars</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A06</strong></td>
+<td>Vulnerable Components</td>
+<td>npm dependency management; Docker base images with health checks; containerised isolation</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A07</strong></td>
+<td>Authentication Failures</td>
+<td>MFA support; brute-force protection with exponential backoff; session management; refresh token rotation</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A08</strong></td>
+<td>Software and Data Integrity Failures</td>
+<td>Blockchain-anchored document hashes; BLAKE2b-256 content verification; immutable audit logs</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A09</strong></td>
+<td>Security Logging and Monitoring</td>
+<td>Winston structured logging; system error tracking; severity classification; admin health dashboard</td>
+<td>Mitigated</td>
+</tr>
+<tr>
+<td><strong>A10</strong></td>
+<td>Server-Side Request Forgery</td>
+<td>Input validation; URL pattern checking; Docker network isolation; no open redirects</td>
+<td>Mitigated</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-nist-cybersecurity-framework">9. NIST Cybersecurity Framework</h2>
+<h3 id="91-function-mapping">9.1 Function Mapping</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Category</th>
+<th>Secuura Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Identify</strong></td>
+<td>Asset management</td>
+<td>Database schema documents all data assets; API documentation</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Identify</strong></td>
+<td>Risk assessment</td>
+<td>Error tracking; system health monitoring; threat detection (suspicious request patterns)</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Protect</strong></td>
+<td>Access control</td>
+<td>JWT + MFA + RBAC + API keys; verification levels</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Protect</strong></td>
+<td>Data security</td>
+<td>Encryption at rest/transit; hash-based architecture; data minimisation</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Protect</strong></td>
+<td>Protective technology</td>
+<td>Rate limiting; input sanitisation; CSP; CORS; Helmet.js</td>
+<td>Compliant</td>
+</tr>
+<tr>
+<td><strong>Detect</strong></td>
+<td>Anomalies and events</td>
+<td>Brute-force detection; rate limit breach logging; suspicious request detection</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Detect</strong></td>
+<td>Security monitoring</td>
+<td>Winston logging; error tracking; admin dashboard</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Respond</strong></td>
+<td>Response planning</td>
+<td>Error tracking with resolution; DSR processing with deadlines</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Respond</strong></td>
+<td>Communications</td>
+<td>Notification system; audit trail for all actions</td>
+<td>Aligned</td>
+</tr>
+<tr>
+<td><strong>Recover</strong></td>
+<td>Recovery planning</td>
+<td>Database backups (PostgreSQL); Redis persistence; container restart policies; in-memory fallbacks</td>
+<td>Aligned</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-hipaa-health-insurance-portability-and-accountability-act">10. HIPAA — Health Insurance Portability and Accountability Act</h2>
+<h3 id="101-overview">10.1 Overview</h3>
+<p>HIPAA applies when the platform processes Protected Health Information (PHI) for US healthcare entities. Secuura&rsquo;s architecture is inherently HIPAA-friendly due to its hash-based design.</p>
+<h3 id="102-applicability-assessment">10.2 Applicability Assessment</h3>
+<table>
+<thead>
+<tr>
+<th>HIPAA Rule</th>
+<th>Requirement</th>
+<th>Secuura Position</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Privacy Rule</strong></td>
+<td>Protect PHI</td>
+<td>Hash-based architecture — original documents (containing PHI) are never stored or transmitted</td>
+<td>Architecture-ready</td>
+</tr>
+<tr>
+<td><strong>Security Rule</strong></td>
+<td>Technical safeguards</td>
+<td>Encryption, access controls, audit logs, integrity controls</td>
+<td>Architecture-ready</td>
+</tr>
+<tr>
+<td><strong>Breach Notification</strong></td>
+<td>Notify of breaches</td>
+<td>Error tracking and incident classification system</td>
+<td>Architecture-ready</td>
+</tr>
+<tr>
+<td><strong>BAA requirement</strong></td>
+<td>Business Associate Agreement</td>
+<td>Template needed for healthcare deployments</td>
+<td>Pending</td>
+</tr>
+</tbody>
+</table>
+<h3 id="103-hipaa-readiness-notes">10.3 HIPAA Readiness Notes</h3>
+<p>Secuura does not store original documents; only cryptographic hashes are retained. This means the platform does not hold PHI in its databases, significantly reducing HIPAA compliance burden. Metadata fields (document titles, subject names) could constitute PHI in healthcare contexts and should be configured appropriately per deployment.</p>
+<hr />
+<h2 id="11-sox-sarbanes-oxley-act">11. SOX — Sarbanes-Oxley Act</h2>
+<h3 id="111-overview">11.1 Overview</h3>
+<p>SOX applies to publicly traded companies in the US. Secuura&rsquo;s immutable audit trail and blockchain anchoring directly support SOX internal controls objectives.</p>
+<h3 id="112-alignment-assessment">11.2 Alignment Assessment</h3>
+<table>
+<thead>
+<tr>
+<th>SOX Section</th>
+<th>Requirement</th>
+<th>Secuura Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Section 302</strong></td>
+<td>Corporate responsibility for financial reports</td>
+<td>Immutable audit trails; certification provenance chain</td>
+<td>Architecture-ready</td>
+</tr>
+<tr>
+<td><strong>Section 404</strong></td>
+<td>Internal control assessment</td>
+<td>Role-based access; separation of duties; audit logging; blockchain immutability</td>
+<td>Architecture-ready</td>
+</tr>
+<tr>
+<td><strong>Section 802</strong></td>
+<td>Criminal penalties for document alteration</td>
+<td>Blockchain-anchored document hashes make tampering detectable and provable</td>
+<td>Architecture-ready</td>
+</tr>
+<tr>
+<td><strong>Section 906</strong></td>
+<td>Corporate responsibility for financial reports</td>
+<td>Chain of custody tracking; non-repudiation via blockchain</td>
+<td>Architecture-ready</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-pci-dss-payment-card-industry-data-security-standard">12. PCI DSS — Payment Card Industry Data Security Standard</h2>
+<h3 id="121-overview">12.1 Overview</h3>
+<p>PCI DSS applies to entities that store, process, or transmit cardholder data. Secuura delegates payment processing to Stripe, which is PCI DSS Level 1 certified.</p>
+<h3 id="122-compliance-position">12.2 Compliance Position</h3>
+<table>
+<thead>
+<tr>
+<th>PCI DSS Requirement</th>
+<th>Secuura Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Req 1-2</strong></td>
+<td>Network security</td>
+<td>Docker network isolation; firewall rules via Nginx gateway</td>
+</tr>
+<tr>
+<td><strong>Req 3</strong></td>
+<td>Protect stored data</td>
+<td>No cardholder data stored — Stripe handles all payment data</td>
+</tr>
+<tr>
+<td><strong>Req 4</strong></td>
+<td>Encrypt transmissions</td>
+<td>TLS on all endpoints; HSTS enforcement</td>
+</tr>
+<tr>
+<td><strong>Req 5-6</strong></td>
+<td>Vulnerability management</td>
+<td>Input sanitisation; dependency management; container isolation</td>
+</tr>
+<tr>
+<td><strong>Req 7-9</strong></td>
+<td>Access control</td>
+<td>RBAC; authentication; physical security via cloud provider</td>
+</tr>
+<tr>
+<td><strong>Req 10-11</strong></td>
+<td>Monitoring and testing</td>
+<td>Structured logging; error tracking; health monitoring</td>
+</tr>
+<tr>
+<td><strong>Req 12</strong></td>
+<td>Security policy</td>
+<td>Programmatic security policies via configuration</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="13-w3c-verifiable-credentials-and-did-standards">13. W3C Verifiable Credentials and DID Standards</h2>
+<h3 id="131-compliance">13.1 Compliance</h3>
+<table>
+<thead>
+<tr>
+<th>Standard</th>
+<th>Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>W3C Verifiable Credentials Data Model 1.1</strong></td>
+<td>VC issuance service with JSON-LD format; credential status via StatusList2021</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><strong>W3C Decentralised Identifiers (DIDs)</strong></td>
+<td>DID management via Atala PRISM; DID document storage</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><strong>W3C DID Core 1.0</strong></td>
+<td>DID resolution and verification</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><strong>StatusList2021</strong></td>
+<td>Credential revocation via status list</td>
+<td>Implemented</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-cardano-improvement-proposals-cips">14. Cardano Improvement Proposals (CIPs)</h2>
+<h3 id="141-compliance">14.1 Compliance</h3>
+<table>
+<thead>
+<tr>
+<th>CIP</th>
+<th>Description</th>
+<th>Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CIP-30</strong></td>
+<td>Cardano wallet dApp connector</td>
+<td>Full wallet connection, transaction signing, and API integration</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><strong>CIP-8</strong></td>
+<td>Message signing</td>
+<td>Wallet-based message signing for authentication and certification</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td><strong>Metadata Label 674</strong></td>
+<td>Transaction metadata</td>
+<td>Document anchor metadata attached to blockchain transactions</td>
+<td>Implemented</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="15-detailed-compliance-controls">15. Detailed Compliance Controls</h2>
+<h3 id="151-authentication-and-identity">15.1 Authentication and Identity</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+<th>Framework(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-factor authentication (TOTP)</td>
+<td>Google Authenticator compatible; backup codes</td>
+<td>ISO 27001 A.9, NIST, SOC 2 CC6</td>
+</tr>
+<tr>
+<td>Password hashing</td>
+<td>bcrypt with 12 rounds</td>
+<td>OWASP, ISO 27001 A.10</td>
+</tr>
+<tr>
+<td>Session management</td>
+<td>Redis-backed sessions; refresh token rotation</td>
+<td>ISO 27001 A.9, SOC 2 CC6</td>
+</tr>
+<tr>
+<td>Brute-force protection</td>
+<td>Exponential backoff (500ms-30s); 5-minute lockout</td>
+<td>OWASP A07, NIST Protect</td>
+</tr>
+<tr>
+<td>Enterprise SSO</td>
+<td>Microsoft Entra ID; Auth0 integration</td>
+<td>ISO 27001 A.9, SOC 2 CC6</td>
+</tr>
+<tr>
+<td>Verification levels</td>
+<td>5 levels from Basic (email) to Government (100-point ID)</td>
+<td>eIDAS, NIST</td>
+</tr>
+<tr>
+<td>API key management</td>
+<td>Scoped keys; hash storage; rate limiting per key</td>
+<td>ISO 27001 A.9</td>
+</tr>
+<tr>
+<td>Wallet authentication</td>
+<td>CIP-8 message signing; wallet linking</td>
+<td>CIP-30, CIP-8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="152-data-protection">15.2 Data Protection</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+<th>Framework(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hash-based architecture</td>
+<td>Documents never stored; only cryptographic hashes retained</td>
+<td>GDPR Art. 25, ISO 27001 A.8</td>
+</tr>
+<tr>
+<td>Client-side hashing</td>
+<td>Document hashing occurs in the browser; original never transmitted</td>
+<td>GDPR Art. 25, Privacy by Design</td>
+</tr>
+<tr>
+<td>Encryption at rest</td>
+<td>PostgreSQL encrypted storage; Redis password protection</td>
+<td>ISO 27001 A.10, NIST Protect</td>
+</tr>
+<tr>
+<td>Encryption in transit</td>
+<td>TLS on all endpoints; HSTS with 1-year max-age</td>
+<td>ISO 27001 A.13, PCI DSS Req 4</td>
+</tr>
+<tr>
+<td>Data minimisation</td>
+<td>Minimum necessary data collected and retained</td>
+<td>GDPR Art. 5(1)(c)</td>
+</tr>
+<tr>
+<td>Pseudonymisation</td>
+<td>Privacy-safe ID generation; anonymisation utilities</td>
+<td>GDPR Art. 25, ISO 27001</td>
+</tr>
+<tr>
+<td>Consent management</td>
+<td>Database-backed records; purpose-specific; expiration support</td>
+<td>GDPR Art. 7</td>
+</tr>
+<tr>
+<td>Right to erasure</td>
+<td>Cascading deletion across 9 data categories</td>
+<td>GDPR Art. 17</td>
+</tr>
+<tr>
+<td>Data portability</td>
+<td>JSON export endpoint; downloadable file</td>
+<td>GDPR Art. 20</td>
+</tr>
+<tr>
+<td>Retention policies</td>
+<td>Automated enforcement; configurable per data type</td>
+<td>GDPR Art. 5(1)(e)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="153-application-security">15.3 Application Security</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+<th>Framework(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Input sanitisation</td>
+<td>XSS prevention; SQL injection detection; path traversal blocking</td>
+<td>OWASP A03, ISO 27001 A.14</td>
+</tr>
+<tr>
+<td>Content Security Policy</td>
+<td>CSP headers via Helmet.js</td>
+<td>OWASP A05, NIST Protect</td>
+</tr>
+<tr>
+<td>CORS configuration</td>
+<td>Whitelist-based origin control</td>
+<td>OWASP A05</td>
+</tr>
+<tr>
+<td>Rate limiting</td>
+<td>Global (100/min); auth (10/15min); verification (200/min); Redis-backed</td>
+<td>OWASP A04, NIST Protect</td>
+</tr>
+<tr>
+<td>Security headers</td>
+<td>X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy</td>
+<td>OWASP A05</td>
+</tr>
+<tr>
+<td>Parameterised queries</td>
+<td>Prisma ORM with tagged template literals</td>
+<td>OWASP A03</td>
+</tr>
+<tr>
+<td>Error handling</td>
+<td>Standardised error classes; production-safe messages (no stack traces in responses)</td>
+<td>OWASP A04, ISO 27001 A.12</td>
+</tr>
+<tr>
+<td>React error boundaries</td>
+<td>Client-side error capture with backend reporting</td>
+<td>SOC 2 CC7</td>
+</tr>
+</tbody>
+</table>
+<h3 id="154-audit-and-monitoring">15.4 Audit and Monitoring</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+<th>Framework(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Audit logging</td>
+<td>Comprehensive audit trail for all significant actions</td>
+<td>ISO 27001 A.12, SOX, SOC 2 CC2</td>
+</tr>
+<tr>
+<td>Structured logging</td>
+<td>Winston logger with log levels; request ID correlation</td>
+<td>ISO 27001 A.12, NIST Detect</td>
+</tr>
+<tr>
+<td>Error tracking</td>
+<td>Persistent system error database; severity classification</td>
+<td>SOC 2 CC3, NIST Detect</td>
+</tr>
+<tr>
+<td>Health monitoring</td>
+<td>Admin dashboard; error statistics; service health endpoints</td>
+<td>SOC 2 CC4, NIST Detect</td>
+</tr>
+<tr>
+<td>Blockchain immutability</td>
+<td>Certification records anchored to Cardano; tamper-evident</td>
+<td>SOX Section 802, ISO 27001 A.12</td>
+</tr>
+<tr>
+<td>GDPR audit trail</td>
+<td>DSR tracking; consent records; deletion logs</td>
+<td>GDPR Art. 30, ISO 27001 A.18</td>
+</tr>
+</tbody>
+</table>
+<h3 id="155-infrastructure-security">15.5 Infrastructure Security</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+<th>Framework(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Container isolation</td>
+<td>Docker containerisation; network segmentation</td>
+<td>ISO 27001 A.11, NIST Protect</td>
+</tr>
+<tr>
+<td>Health checks</td>
+<td>PostgreSQL, Redis, and service health monitoring</td>
+<td>SOC 2 A1, NIST Recover</td>
+</tr>
+<tr>
+<td>Connection pooling</td>
+<td>PgBouncer for database connection management</td>
+<td>SOC 2 A1</td>
+</tr>
+<tr>
+<td>Graceful shutdown</td>
+<td>Signal handling (SIGTERM, SIGINT); connection draining</td>
+<td>SOC 2 CC7</td>
+</tr>
+<tr>
+<td>In-memory fallbacks</td>
+<td>Rate limiting, brute-force, and session fallbacks when Redis unavailable</td>
+<td>SOC 2 A1, NIST Recover</td>
+</tr>
+<tr>
+<td>Secret management</td>
+<td>Environment variable-based configuration; no hardcoded secrets</td>
+<td>ISO 27001 A.10, OWASP A05</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="16-regional-and-jurisdictional-considerations">16. Regional and Jurisdictional Considerations</h2>
+<h3 id="161-european-union">16.1 European Union</h3>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Impact</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GDPR</strong></td>
+<td>Fully applicable</td>
+<td>Implemented — no further action required</td>
+</tr>
+<tr>
+<td><strong>eIDAS 2.0</strong></td>
+<td>European Digital Identity Wallets</td>
+<td>Monitor regulation timeline; prepare wallet interoperability</td>
+</tr>
+<tr>
+<td><strong>AI Act</strong></td>
+<td>May apply if ML features added</td>
+<td>Assess classification if AI/ML components introduced</td>
+</tr>
+<tr>
+<td><strong>Data residency</strong></td>
+<td>Some member states have additional requirements</td>
+<td>Offer EU-hosted deployment option</td>
+</tr>
+</tbody>
+</table>
+<h3 id="162-united-kingdom">16.2 United Kingdom</h3>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Impact</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UK DPA 2018</strong></td>
+<td>Fully applicable for UK operations</td>
+<td>Implemented via GDPR alignment</td>
+</tr>
+<tr>
+<td><strong>ICO registration</strong></td>
+<td>Required for UK data controllers</td>
+<td>Organisational registration required per deployment</td>
+</tr>
+<tr>
+<td><strong>UK GDPR adequacy</strong></td>
+<td>EU-UK data transfers</td>
+<td>Monitor adequacy decision renewal</td>
+</tr>
+<tr>
+<td><strong>Gov.UK Verify</strong></td>
+<td>Government verification level</td>
+<td>Integration pathway via Government verification level</td>
+</tr>
+</tbody>
+</table>
+<h3 id="163-united-states">16.3 United States</h3>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Impact</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HIPAA</strong></td>
+<td>Healthcare deployments</td>
+<td>Architecture-ready; BAA templates needed</td>
+</tr>
+<tr>
+<td><strong>SOX</strong></td>
+<td>Publicly traded company clients</td>
+<td>Architecture-ready; immutable audit trails support</td>
+</tr>
+<tr>
+<td><strong>CCPA/CPRA</strong></td>
+<td>California residents</td>
+<td>Similar to GDPR; existing controls largely sufficient</td>
+</tr>
+<tr>
+<td><strong>State privacy laws</strong></td>
+<td>Varies by state</td>
+<td>Monitor state-level legislation; GDPR controls provide strong baseline</td>
+</tr>
+</tbody>
+</table>
+<h3 id="164-asia-pacific">16.4 Asia-Pacific</h3>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Impact</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Australia Privacy Act</strong></td>
+<td>Australian deployments</td>
+<td>100-point ID verification supported via Government level</td>
+</tr>
+<tr>
+<td><strong>PDPA (Singapore)</strong></td>
+<td>Singapore operations</td>
+<td>GDPR alignment covers most requirements</td>
+</tr>
+<tr>
+<td><strong>PIPA (South Korea)</strong></td>
+<td>South Korean operations</td>
+<td>Additional consent requirements may apply</td>
+</tr>
+<tr>
+<td><strong>APPI (Japan)</strong></td>
+<td>Japanese operations</td>
+<td>Cross-border transfer mechanisms needed</td>
+</tr>
+</tbody>
+</table>
+<h3 id="165-middle-east-and-africa">16.5 Middle East and Africa</h3>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Impact</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PDPL (Saudi Arabia)</strong></td>
+<td>Saudi deployments</td>
+<td>Data localisation may be required</td>
+</tr>
+<tr>
+<td><strong>POPIA (South Africa)</strong></td>
+<td>South African operations</td>
+<td>GDPR alignment covers core requirements</td>
+</tr>
+<tr>
+<td><strong>UAE Data Protection</strong></td>
+<td>UAE deployments</td>
+<td>DIFC and ADGM have separate frameworks</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="17-recommendations-and-roadmap">17. Recommendations and Roadmap</h2>
+<h3 id="171-immediate-recommendations-03-months">17.1 Immediate Recommendations (0–3 Months)</h3>
+<ol>
+<li><strong>Formal ISMS documentation</strong> — Prepare ISO 27001 Statement of Applicability and risk register</li>
+<li><strong>Penetration testing</strong> — Engage third-party security testing firm</li>
+<li><strong>Privacy impact assessment</strong> — Complete DPIA documentation</li>
+<li><strong>SOC 2 readiness assessment</strong> — Engage audit firm for gap analysis</li>
+</ol>
+<h3 id="172-medium-term-recommendations-36-months">17.2 Medium-Term Recommendations (3–6 Months)</h3>
+<ol>
+<li><strong>ISO 27001 certification</strong> — Pursue formal certification</li>
+<li><strong>SOC 2 Type I audit</strong> — Obtain initial attestation</li>
+<li><strong>eIDAS TSP assessment</strong> — Evaluate formal Trust Service Provider qualification</li>
+<li><strong>HIPAA BAA templates</strong> — Prepare for healthcare sector deployments</li>
+</ol>
+<h3 id="173-long-term-recommendations-612-months">17.3 Long-Term Recommendations (6–12 Months)</h3>
+<ol>
+<li><strong>SOC 2 Type II audit</strong> — Demonstrate sustained compliance</li>
+<li><strong>Regional certifications</strong> — Pursue jurisdiction-specific certifications as markets require</li>
+<li><strong>eIDAS 2.0 readiness</strong> — Prepare for European Digital Identity Wallet interoperability</li>
+<li><strong>Automated compliance monitoring</strong> — Implement continuous compliance monitoring tooling</li>
+</ol>
+<hr />
+<p><em>This document is confidential and intended for internal use. It does not constitute legal advice. Regulatory compliance should be validated with qualified legal counsel in each applicable jurisdiction.</em></p>
+<hr />
+<p><strong>End of Document</strong></p>
+
+<div class="end-page">
+  <div class="cover-line" style="margin:0 auto 20px;"></div>
+  <p><strong>End of Document</strong></p>
+  <p>Compliance and Regulatory Adherence Report</p>
+  <p>Version 1.0 &bull; 15 February 2026</p>
+  <p style="margin-top:20px;">&copy; 2026 Secuura. All rights reserved.</p>
+</div>
+
+</body>
+</html>

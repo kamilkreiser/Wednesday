@@ -1,0 +1,16 @@
+<h2>Social sign-in callback: a non-JSON provider answer gives a neutral 400 &mdash; KS-1791</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>What to know.</strong></td><td>A provider 200 with a non-JSON body made the adapter throw a <code>SyntaxError</code> quoting the first 10 characters of that body, and the callback echoed it. In <code>routes/auth.ts</code> it now answers 400 <code>OAuth authentication failed: the provider answer could not be read</code>; other exchange failures keep their message. One new cell (R1) in <code>ks1240b-social-provider-fetches-are-bounded-and-classified.test.ts</code>, 59 cells now: 1 of 59 red without the product change, 59 of 59 with it. The cell drives GitHub only; the route change covers six adapters.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A cell per adapter, and a real provider sign-in. The held KS-1776 pass (same file, another hunk) was checked for collision, not merged. The four platform suites, a running stack, Node 24 and any deploy were not run.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm run test -w services/auth -- --run ks1240b-social-provider-fetches-are-bounded-and-classified   # 59 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run test -w services/auth -- --run --maxWorkers=3                 # 110 files / 1327 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cell</td><td><strong>1</strong> (R1) in a file of 59; 1 of 59 red without the product change (develop <code>530f091120d5</code>), 59 of 59 with it</td></tr>
+<tr><td>auth unit suite</td><td><strong>110 files / 1327 cells, all pass</strong> (vitest 4.1.12, <code>--maxWorkers=3</code>); without the ks949 file 1296 of 1296, that file alone 31 of 31 (KS 1053 timeout flake, did not fail in this run)</td></tr>
+<tr><td>tsc and ratchet</td><td>tsc with tests: 42 errors, none in the changed test or in <code>routes/auth.ts</code>, planted error named once; ratchet: 42 in the baseline, 0 new, 0 stale</td></tr>
+<tr><td>eslint</td><td>0 errors, 0 warnings on the test file; a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>530f091120d5</code>, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

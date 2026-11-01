@@ -1,0 +1,64 @@
+<h2>29. The formatting gate reads its &ldquo;in this push&rdquo; label literally, not as a regex (KS-998)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What this fixes.</strong></td><td> <code>check-package-format.sh</code> decided whether a red file belonged to
+      the current push with <code>printf '%s\n' "$changed_paths" | grep -qx "$full"</code>. </td></tr><tr><td><code>-x</code> anchors the
+      match but still treats <code>$full</code> as a <strong>basic regular expression</strong>, so a path
+      containing <code>.</code> or a bracket expression matches a <em>different</em> file. </td></tr><tr><td>A red
+      <code>src/a.b.ts</code> absent from the push matched <code>src/aXb.ts</code> that was present, and the
+      gate billed the red to the wrong author; a real <code>src/[id].ts</code> in the push matched nothing
+      and was labelled inherited. </td></tr><tr><td>The predicate is now <code>grep -qxF</code>: the path is compared as a
+      literal string, which is what a path is.
+    </td></tr></table>
+<h3>29.1 The mechanism, and what is deliberately NOT changed</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The product change is <strong>one line</strong> &mdash; <code>grep -qx</code> to
+      <code>grep -qxF</code> at <code>systemTest/scripts/check-package-format.sh:180</code>, inside the
+      hunk the payload opens at <code>:177</code>. </td><td>It changes only <strong>which label a red file is
+      printed with</strong>. The gate's verdict is untouched: a red package still fails, the exit code is
+      unchanged, and the trailer still counts the same number of failures &mdash; three of the suite's eight
+      cells are CONTROLs asserting exactly that. <strong>No threshold, no baseline, no manifest, no
+      package list and no exit-code path is touched.</strong>
+    </td></tr></table>
+<h3>29.2 Red-first, and the figures</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Measured at base <code>147ae442074c</code>, not carried forward.</strong></td><td>
+      With the new suite present and the product file still at its blob at the base, the suite gives
+      <strong>rc 1, 5 passed / 3 failed</strong>. The three reds are exactly the dotted-path and
+      bracket-path label cells. </td></tr><tr><td>All <strong>five CONTROL cells stay green in that red arm</strong>, so the
+      red is attributable to the defect and not to a broken harness. With the one-line fix applied the same
+      suite gives <strong>8 passed, 0 failed, rc 0</strong>. <code>bash -n</code> is <strong>rc 0</strong> on
+      both touched files, so neither red was a load failure. Named siblings at the same head:
+      <code>package_format_gate.test.sh</code> <strong>33 passed / 0 failed</strong>,
+      <code>pre_push_hook_base.test.sh</code> <strong>28 passed / 0 failed</strong>,
+      <code>pre_push_hook_current_develop.test.sh</code> <strong>4 passed / 0 failed</strong>.
+    </td></tr></table>
+<h3>29.3 The new suite is 100644, and that is correct here</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2">
+      <code>systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh</code> lands
+      <strong>100644</strong>, because the payload carries no <code>new file mode</code> line. </td><td>That is
+      not a defect to repair: <code>run-shell-suites.sh</code> discovers by globbing <code>*.test.sh</code>
+      and invokes with <code>bash &lt;file&gt;</code>, so no executable bit is required, and the suite's
+      nearest neighbour <code>package_format_gate.test.sh</code> is <strong>100644</strong> too. </td></tr><tr><td>Stated
+      because it is a real asymmetry: <strong>15 of the 17</strong> shell suites in that directory are
+      <strong>100755</strong>. Nothing in <code>systemTest</code> discovers a suite by its exec bit &mdash;
+      measured, with the only two <code>-x</code> tests in the tree being a Schemathesis runner path and a
+      <code>prettier</code> binary, neither a suite. <strong>Discovery moves 70 &rarr; 71</strong>, measured
+      by moving the file aside and back and listed <strong>1</strong> time after against <strong>0</strong>
+      before; the file was restored <strong>sha256-identical</strong> (<code>7a6c8313ae687339</code>, 4,707 B).
+      <strong>For CI triage:</strong> any quoted shell-suite denominator below 71 does not describe this head.
+    </td></tr></table>
+<h3>29.4 Not covered</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      This carries <strong>item 4 only</strong> of the four items on KS-998, and the ticket does
+      <strong>not</strong> move to Done. </td><td>Items 1&ndash;3 &mdash; the gate failing OPEN on missing
+      dependencies, and its reading the WORKING TREE rather than the pushed range &mdash; are
+      <strong>untouched and remain open on the ticket</strong>. The cells drive the gate through
+      <strong>fixture package trees</strong>: no real <code>prettier</code> ran against a real red package.
+      The <strong>four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are
+      UNMEASURED</strong> &mdash; the local stack is not up on <code>http://localhost:6882</code> &mdash; and
+      they are not claimed as passing anywhere in this change.
+    </td></tr></table>
+<h3>29.5 Running it</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+bash systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh   # 8 cells, rc 0
+bash systemTest/__tests__/package_format_gate.test.sh                       # 33 cells, rc 0
+bash Blockchain/Dev/scripts/run-shell-suites.sh --list                      # 71 suites
+bash -n systemTest/scripts/check-package-format.sh                          # rc 0</code></pre>

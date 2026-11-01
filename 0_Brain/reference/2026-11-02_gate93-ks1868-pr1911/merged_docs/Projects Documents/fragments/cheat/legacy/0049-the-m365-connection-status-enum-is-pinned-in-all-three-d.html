@@ -1,0 +1,17 @@
+<h2>The M365 connection status enum is pinned in all three declarations &mdash; KS-1754</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The four values are declared three times: the stored TS union at <code>services/m365-integration/src/index.ts:94</code> and <strong>two</strong> <code>z.enum</code> copies in <code>m365-integration.openapi.ts</code> &mdash; <code>:89</code> in <code>M365InitConnectionResponse</code> and <code>:114</code> in <code>M365ConnectionSchema</code>. Nothing asserted they agree; KS-1700 fixed the values and this pins them. </td></tr><tr><td>The pin asserts the COUNT as well as the agreement, because a pin against <code>M365ConnectionSchema</code> alone would leave the <code>:89</code> copy free. A fourth declaration fails the count cell on purpose, so it has to be added to the pin deliberately. </td></tr><tr><td>A test only &mdash; no source, spec or yaml change. It reads the two files as TEXT (no <code>export</code> needed) and strips comments string-aware, so a commented-out enum cannot satisfy it (the KS-1319 class); <code>KS1754_INDEX_TS</code> / <code>KS1754_OPENAPI_TS</code> point it at copies.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> Anything at runtime: no handler is exercised, and what the service stores or returns is untouched by this change. The <code>'active'</code> DDL default outside the enum is KS-1752 item 2, a product call, not this ticket. </td></tr><tr><td><strong>Node v26.8.1</strong>, not the repository&rsquo;s stated LTS line of Node 24 (the neighbouring entries were measured on v24.7.0). Node 26 is an even-numbered line but its LTS status was not verified against the vendor schedule here, so these figures are declared as measured on v26.8.1, not claimed as LTS.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/m365-integration &amp;&amp; npx vitest run src/__tests__/ks1754-the-connection-status-enum-agrees-in-all-three-declarations.test.ts   # 5 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run check:test-types                                              # rc 0; m365 0 errors, 0 new</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, mutant &rarr; real tree</td><td>four mutants on COPIES, each 1 failed / 4 passed &rarr; <strong>5 passed</strong> on the real tree. M1 drops <code>'error'</code> from the union; M2 adds <code>'expired'</code> at <code>:114</code>; M3 the same at <code>:89</code> (the copy a narrower pin would miss); M4 adds a third AGREEING copy and fires the count cell alone, <code>expected 3 to be 2</code>, while agreement still passes</td></tr>
+<tr><td>whole suites</td><td>m365-integration <strong>261 &rarr; 266</strong> tests, <strong>26 &rarr; 27</strong> files; 0 failed before and after</td></tr>
+<tr><td>type ratchet</td><td><code>check:test-types</code> rc 0 both sides; m365 examined <strong>36 &rarr; 37</strong> files, <strong>26 &rarr; 27</strong> under <code>__tests__</code>; <strong>0 errors, 0 in the baseline, 0 new</strong> against a zero-slack floor</td></tr>
+<tr><td>yaml diff</td><td>none &mdash; no spec or yaml change in this ticket</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

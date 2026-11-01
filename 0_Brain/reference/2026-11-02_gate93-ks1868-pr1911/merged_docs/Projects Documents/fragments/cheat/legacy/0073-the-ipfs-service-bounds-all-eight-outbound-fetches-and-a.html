@@ -1,0 +1,19 @@
+<h2>The IPFS service bounds all eight outbound fetches, and a stalled gateway body answers 503 &mdash; KS-1240 part 3</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Eight outbound <code>fetch</code> calls in <code>services/nft-certificate/src/services/ipfs.service.ts</code> had no timeout. Each now passes <code>AbortSignal.timeout</code>: 60 s for the three uploads, 15 s for the four pin and unpin calls, 30 s for the gateway read. On expiry an upload answers <code>{ success: false }</code>, pin and unpin answer <code>false</code>, and the gateway read answers 503. </td></tr><tr><td><strong>A behaviour change on a read path.</strong> The gateway body read now sits inside the try that maps a failure to 503, so a gateway that sends its headers and then stalls (or drops the connection mid-body) answers 503 instead of the raw error. An object the gateway needs more than 30 s to deliver now answers 503 where it used to wait. </td></tr><tr><td><strong>Scope.</strong> The ticket text names only the api-gateway key-validate fetch; this part was added by the coordinator&rsquo;s brief, not by the ticket.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A real provider endpoint, a real network connect timeout, the routes that call the service, and a running stack. The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are UNMEASURED and not claimed as a pass. The change is not deployed. </td></tr><tr><td><strong>Node v26.8.1</strong>, not the repository&rsquo;s stated LTS line of Node 24 (none is installed on this host). The figures are declared as measured on v26.8.1, not claimed as LTS.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/nft-certificate &amp;&amp; npx vitest run src/__tests__/ks1240b-ipfs-fetches-are-bounded-and-a-body-stall-maps-to-503.test.ts   # 15 cells, rc 0
+cd Blockchain/Dev/services/nft-certificate &amp;&amp; npx vitest run                                                                                    # 11 files / 76 tests, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first</td><td>15 new cells vs the unfixed service <strong>12 failed / 3 passed</strong> (the three controls); fixed service <strong>15 of 15</strong>, 5 of 5 consecutive runs</td></tr>
+<tr><td>known-bad subject</td><td>the held Spark patch applied to a copy: <strong>13 of 15 pass, 2 fail</strong> (stalled body, mid-body drop), raw <code>TimeoutError</code> / <code>TypeError: terminated</code>, no status</td></tr>
+<tr><td>guard independence</td><td>four parsed mutants on copies, each killed by its own cells (Infura pin signal dropped &rarr; 3 cells; plain <code>Error</code> thrown &rarr; 2; body failure swallowed &rarr; 2; gateway bound 120 s &rarr; 1); <code>ipfs.service.test.ts</code> green on each</td></tr>
+<tr><td>whole suite</td><td>nft-certificate <strong>61 &rarr; 76</strong> tests, <strong>10 &rarr; 11</strong> files; 0 failed before and after</td></tr>
+<tr><td>gates</td><td><code>tsc</code> including test files 0 errors before and after; ESLint rc 0, one existing warning, none new</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>bd6697e079fc</code>, 2026-10-28 (UTC); Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

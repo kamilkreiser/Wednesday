@@ -1,0 +1,39 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o68_p2_originate_metering_usage_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/metering.ts b/Blockchain/Dev/services/originate/src/routes/metering.ts
+--- a/Blockchain/Dev/services/originate/src/routes/metering.ts
++++ b/Blockchain/Dev/services/originate/src/routes/metering.ts
+@@ -126,7 +126,13 @@
+     const summary = await getUsageSummary(reqTenantId(req), from, to);
+     return res.json({ success: true, data: summary });
+   } catch (error) {
+-    logger.error('Failed to read metering usage', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Failed to read metering usage', { error: reason });
+     return res
+       .status(500)
+       .json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to read usage' } });
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o68_p3_originate_retention_scheduler_run_enforcement_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/services/retentionScheduler.ts b/Blockchain/Dev/services/originate/src/services/retentionScheduler.ts
+--- a/Blockchain/Dev/services/originate/src/services/retentionScheduler.ts
++++ b/Blockchain/Dev/services/originate/src/services/retentionScheduler.ts
+@@ -48,6 +48,12 @@
+       logger.info('Enforcement complete — no records required processing');
+     }
+   } catch (err: any) {
+-    logger.error('Scheduled enforcement failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Scheduled enforcement failed', { error: reason });
+   }
+ }
+

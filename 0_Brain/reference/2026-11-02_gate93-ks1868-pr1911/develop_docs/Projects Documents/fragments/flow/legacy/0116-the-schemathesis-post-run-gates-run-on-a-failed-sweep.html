@@ -1,0 +1,9 @@
+<h2>127. The Schemathesis post-run gates run on a failed sweep (KS-752)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> Report reconciliation, console vs verdict and the triaged baseline now run on every valid run, a failed sweep included, as Kamil directed on KS-752 (2026-09-02): &ldquo;evaluate &hellip; eagerly rather than behind <code>success</code>, and combine the verdicts afterwards&rdquo;, with an invalid-run rehearsal. Before, they read NOT EVALUATED on every failing sweep (every run, since the sweep always finds something) and were run by hand. They are still skipped, with the reason printed, when the run is invalid or its NDJSON incomplete, because their inputs cannot be trusted then. A gate can turn a run red, never green: each is AND-ed onto the verdict so far (<code>scripts/runner/post_run_verdict.py</code>).
+    </td></tr><tr><td> <strong>Live.</strong> On the 2026-10-30 <code>pre-merge</code> sweep (slot 1, seed 3447773427, run <code>pre-merge-2026-10-30T11-20-16Z-slot1</code>), which failed, no gate read NOT EVALUATED: reconciliation agreed (87 unique failures, 11,387 cases), console vs verdict agreed, and the baseline gate named its 4 untriaged pairs itself (80 failing pairs, 76 baselined).
+    </td></tr></table>
+<h3>127.1 Red against develop, green with the change</h3>
+<table class="pmatrix"><tr><th>Test</th><th>develop</th><th>this change</th></tr>
+<tr><td><code>tests/unit/runner_extra/test_post_run_verdict_ks752.py</code> + <code>test_run_main_verdict.py</code></td><td>14 of 67 red (11 on behaviour, 3 on the skip wording)</td><td>67 of 67</td></tr>
+</table>
+<pre><code>cd systemTest/schemathesis &amp;&amp; python3 -m pytest tests/unit/runner_extra/test_post_run_verdict_ks752.py tests/unit/runner_extra/test_run_main_verdict.py</code></pre>

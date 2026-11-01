@@ -1,0 +1,41 @@
+<h2><!--n-->. Billing&rsquo;s credit grant and the NFT platform fee admit platform administrators only, not every registered user (KS-1850)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this changes.</strong></td><td> <code>POST /billing/admin/credits</code> (adds certification credits, which are money, to any <code>customerId</code>) and <code>PUT /api/nft/admin/platform-fee</code> (sets the platform-wide fee) each answered 403 &ldquo;Admin access required&rdquo; unless the role was in <code>['SYSTEM_ADMIN', 'ORG_ADMIN', 'OWNER']</code>. <code>OWNER</code> is the role every self-registered user gets, so every registered user passed. That list also admitted an array role, through <code>String()</code>, and refused <code>SUPER_ADMIN</code>.
+    </td></tr><tr><td><strong>Each route now admits exactly the shared <code>isPlatformRole</code></strong> (SYSTEM_ADMIN or SUPER_ADMIN, ASCII case fold only, a non-string refused), checked before the body is read. <code>ORG_ADMIN</code> loses both routes too. That goes beyond the ticket&rsquo;s literal &ldquo;drop OWNER&rdquo;, by the coordinator&rsquo;s decision: <code>ORG_ADMIN</code> is a tenant role, the credits route&rsquo;s <code>customerId</code> crosses customers, and the fee is not a tenant setting.
+    </td></tr><tr><td>The 403 body is unchanged byte for byte, and the spec already declared it. Two new test files (<code>ks1850-*.test.ts</code>, 14 cells each). <code>ks591-nft-mint-upload-fee-body-required.test.ts</code> is untouched and green.
+    </td></tr></table>
+<h3><!--n-->.1 What proves it</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Red at develop, green after, every mutant killed.</strong></td><td> <strong>Red-first at develop <code>85cd24d81cb9</code>:</strong> 6 of the 14 new cells red in each service, the cells where the old list and the new rule differ:
+      <ul>
+        <li>OWNER admitted;</li>
+        <li>ORG_ADMIN admitted;</li>
+        <li>an array role admitted;</li>
+        <li><code>system_admin</code> refused;</li>
+        <li>SUPER_ADMIN refused;</li>
+        <li>OWNER with an invalid body answered 400 instead of 403.</li>
+      </ul>
+      Existing cells: billing 99 and nft-certificate 107, all green.
+    </td></tr><tr><td><strong>Whole suites with the change</strong> (vitest <code>--maxWorkers=3</code>): billing <strong>11 files / 113 of 113</strong>; nft-certificate <strong>14 / 121 of 121</strong>.
+      <br><strong>Mutants: 26 of 26 killed</strong>, the 11-mutant set of KS-1845 per route, plus two more per route:
+      <ul>
+        <li>the old three-role list restored (it fails exactly the 6 cells that were red at develop);</li>
+        <li>the ticket-literal list that keeps ORG_ADMIN (it fails the ORG_ADMIN cell).</li>
+      </ul>
+      The Stripe service and the cost estimator are mocks; no Stripe account was called.
+    </td></tr><tr><td><strong><code>tsc --noEmit</code> with the test files in the program:</strong>
+      <ul>
+        <li>nft-certificate: 0 errors.</li>
+        <li>billing: 10 errors, the same 10 as at develop (TS1378 top-level <code>await</code> in six existing test files, TS6196, TS18046). None is in this change. The new billing test uses a static import for that reason.</li>
+        <li>A planted type error is reported once in each service.</li>
+      </ul>
+      <strong>eslint</strong> on the four changed files: 0 errors, 0 warnings; a planted file raised two rules.
+    </td></tr></table>
+<h3><!--n-->.2 Environment and figures</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-10-30 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; load average 8 to 16, so no timing here is comparable.</strong></td><td> Node v26.8.1 (not an LTS line), vitest from the workspace root, TypeScript 5.9.3.
+    </td></tr></table>
+<h3><!--n-->.3 What this does not prove</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Unit level only.</strong></td><td> No request was made to a running stack or to Stripe. Whether any caller outside this repository grants credits or sets the fee with an OWNER or ORG_ADMIN token is <strong>not measured</strong>: an in-repo search found none. Binding <code>customerId</code> to the caller&rsquo;s own customer is not needed once only platform administrators may call the route, and is not done.
+    </td></tr><tr><td>Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), Node 24, any deploy.
+    </td></tr></table>
+<h3><!--n-->.4 Running it</h3>
+<pre><code>cd Blockchain/Dev/services/billing &amp;&amp; npx vitest run --maxWorkers=3            # 11 files, 113 of 113
+cd Blockchain/Dev/services/nft-certificate &amp;&amp; npx vitest run --maxWorkers=3    # 14 files, 121 of 121</code></pre>

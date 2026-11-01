@@ -1,0 +1,22 @@
+<h2>Docs fragments: each PR adds two small files and one step builds the two pages &mdash; KS-1887</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> Do not edit the two pages. Add <code>Projects Documents/fragments/flow/KS-NNNN-slug.html</code> (it starts <code>&lt;h2&gt;&lt;!--n--&gt;. Title (KS-NNNN)&lt;/h2&gt;</code>; never type a section number, and write <code>&lt;!--n--&gt;.1</code> in a sub-heading) and <code>Projects Documents/fragments/cheat/KS-NNNN-slug.html</code> (a plain entry, no tokens). One <code>&lt;h2&gt;</code> per file; the name is the ticket key plus a lowercase slug, unique in its directory; a PR with two entries adds two files per page.
+      </td></tr><tr><td>Before you push run <code>node Blockchain/Dev/scripts/docs-fragments.mjs check</code>; it must end in <code>OK</code>, and the line goes in the PR&rsquo;s Test Evidence. Leg 14 runs the same check for any push that changes <code>Blockchain/Dev</code>; a push that touches only <code>Projects Documents/</code> skips the gate, so run it yourself.
+      </td></tr><tr><td>To read the result: <code>build --out "$TMPDIR/preview"</code> writes both pages to a scratch directory. A section number is provisional until the PR merges (it follows merge order). Whoever merges runs the refresh after a batch of merges (<code>build --base &lt;ls-remote develop sha&gt;</code>, commit just the two pages), so the committed pages may lag; <code>check</code> says by how many entries.
+      </td></tr><tr><td>A PR that still carries a hand-written entry brings it across once with <code>adopt --from-ref "$OLD" --against "$D"</code> after merging develop in and taking develop&rsquo;s two pages (the commands are in <code>SKILL.md</code> section 4). A page edited by hand is only an advisory: the next refresh runs <code>adopt</code> first.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The four platform suites, a running stack, Node 24 and any deploy were not run. Two stacked PRs converting the same base entry were not tested together. A PR that edits existing page text (#1383) needs a hand step.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/docs_fragments.test.sh      # 81 cells, 14 s
+node Blockchain/Dev/scripts/docs-fragments.mjs check --committed  # also needs both committed pages current</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>render vs committed pages</td><td>at develop <code>9e1eb55fde53</code>: Flow <code>62990735186b</code>&hellip; and Cheat Sheet <code>c89d4c382a76</code>&hellip; <strong>equal</strong> to the pages by sha256 (git show, build, disk); 117 and 112 fragments = the per-PR entries</td></tr>
+<tr><td>planted change</td><td>one character in one fragment: hash <strong>differs</strong>, <code>check --committed</code> <strong>rc 1</strong>; restored by content, sha256 equal and <strong>rc 0</strong></td></tr>
+<tr><td>merge collision</td><td>two PRs adding different fragments: <strong>0</strong> conflict files; the same edits the old way: <strong>2</strong></td></tr>
+<tr><td>cells and mutants</td><td><strong>81 of 81</strong> cells pass; <strong>41 of 41</strong> mutants killed</td></tr>
+<tr><td>real open PRs</td><td>#1837 <strong>8 of 8</strong>, #1857 <strong>8 of 8</strong> (every adopted entry equals the PR&rsquo;s own text); #1383 refused, a hand step</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats (load about 13); 2026-10-31 (UTC); Node v26.8.1 (not verified as an LTS line), git 2.54.0, bash 3.2.57</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,22 @@
+<h2>Five check-*.sh guards answer correctly on the cases they exist to catch &mdash; KS-1866</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> One- or two-line fixes in five guards (Dockerfile non-root, strictness patches, connector XSS, PII store, Akto container names) and one new shell suite for each; red at develop, green with the change. On macOS the Dockerfile guard used to exit 1 silently on the real tree; it now reports all 35 Dockerfiles drop root.
+    </td></tr><tr><td>Open: <code>docker logs --tail 5 akto-testing</code> still passes the Akto gate; nothing was run on a GNU/Linux userland.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> GNU/Linux behaviour of the five scripts, the PII guard on a real untracked file, the four platform suites, a running stack, any deploy.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; for t in check_dockerfile_non_root_reports_root check_no_strictness_patches_skips_node_modules check_connector_xss_skips_node_modules check_no_pii_store_untracked_leg check_akto_container_names_flags; do bash scripts/__tests__/$t.test.sh; done   # 4 + 4 + 4 + 5 + 6 cells
+cd Blockchain/Dev &amp;&amp; bash scripts/run-code-guards.sh                                  # 13 guards
+cd Blockchain/Dev &amp;&amp; bash scripts/run-shell-suites.sh                                  # every shell suite</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>23</strong> across five suites (4 + 4 + 4 + 5 + 6); red at develop 2 + 2 + 1 + 2 + 3 = 10 of 23, green with the changes 23 of 23</td></tr>
+<tr><td>code guards</td><td><code>run-code-guards.sh</code>: 13 guards pass at develop and with the change</td></tr>
+<tr><td>shell suites</td><td>develop 98 pass, 0 fail, 1 skipped of 99; with the change <strong>103 pass, 0 fail, 1 skipped of 104</strong> (the skip is ks949, no PostgreSQL on this host)</td></tr>
+<tr><td>real-tree runs</td><td>Dockerfile guard: 35 Dockerfiles, exit 0 (develop: exit 1, no output, on macOS); Akto gate on systemTest/akto: exit 0; PII guard: exit 0</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

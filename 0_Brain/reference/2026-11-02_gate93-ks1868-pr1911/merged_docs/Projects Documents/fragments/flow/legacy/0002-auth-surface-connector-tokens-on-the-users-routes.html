@@ -1,0 +1,100 @@
+<h2>
+      9. Auth surface — connector tokens on the users routes (KS-564, KS-1402)
+    </h2>
+<div class="diagram-container">
+<div class="diagram-title">
+        9a. KS-1402 — <code>GET /api/users/lookup</code> accepts a connector
+        token (Kam ruling 2026-10-02, option (a))
+      </div>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What it pins.</strong></td><td> Platform S authenticates with an
+        <code>sk_</code> connector key, so its token is a
+        <code>type: 'connector'</code> token rather than an interactive access
+        token. </td></tr><tr><td>Before KS-1402 only <code>POST /api/users/stub</code> accepted
+        one (KS-564, Option A); <code>GET /api/users/lookup</code> still used
+        plain <code>authenticate()</code>, so every Platform-S transfer-custody
+        call 401'd and fell back. </td></tr><tr><td>Both routes now go through
+        <code>authenticateAccessOrConnector()</code>.
+        <strong>The token type is not the permission.</strong> The route's own
+        role/scope gate still runs afterwards, so <code>users:read</code> is the
+        effective gate on <code>/lookup</code>, and a cross-tenant lookup still
+        returns <strong>404</strong> — not 200-empty, so positive existence is
+        not readable from the response shape.
+      </td></tr><tr><td class="pm-topic" rowspan="2"><strong>The audit label is route-neutral, deliberately.</strong></td><td> The
+        connector-accepted log line read <code>users/stub: …</code>
+        unconditionally, so once a second route accepted connector tokens every
+        <code>/lookup</code> call would have written an audit line naming a
+        route it never touched. </td></tr><tr><td>It now carries
+        <code>route: req.baseUrl + req.path</code>.
+        <code>req.originalUrl</code> was rejected for this field because it
+        carries the query string: measured on
+        <code>GET /api/users/lookup?email=alice%40example.com</code>,
+        <code>req.originalUrl</code> is
+        <code>/api/users/lookup?email=alice%40example.com</code> while
+        <code>req.baseUrl + req.path</code> is <code>/api/users/lookup</code> —
+        so <code>originalUrl</code> would put the email address in the clear in
+        the audit log, which is the very thing <code>maskEmail()</code> exists
+        to prevent.
+      </td></tr></table>
+<div class="diagram-title">9b. The suite cells, and how to run them</div>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+        File:
+        <code>Blockchain/Dev/services/auth/src/__tests__/ks1402-lookup-accepts-connector-token.test.ts</code>
+        — 183 lines, four cells, each minting a <em>real</em>
+<code>type: 'connector'</code> token via
+        <code>generateConnectorToken</code>. </td><td>The authenticator is
+        <strong>never mocked</strong> (0 mocks of
+        <code>../middleware/authenticate</code>, against a must-hit control of 9
+        <code>vi.mock</code> calls elsewhere in the same file), because a mocked
+        authenticator cannot observe the thing the ticket is about.
+      </td></tr></table>
+<pre>
+# Run it (services/auth). NOTE: `npm test` here is WATCH mode — use the explicit run form.
+cd Blockchain/Dev/services/auth
+npx vitest run                                                       # the whole suite
+npx vitest run src/__tests__/ks1402-lookup-accepts-connector-token.test.ts   # just these cells
+
+CELL 1  a connector token carrying users:read REACHES the handler          200
+CELL 2  a connector token WITHOUT users:read is refused 403, not 401       403
+CELL 3  an interactive ACCESS token still works                            200   &lt;- the CONTROL
+CELL 4  a tenant-A connector token cannot read a tenant-B-only email       404</pre>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Red-first / green-after, measured 2026-10-04.</strong></td><td> With the
+        new test against base product code:
+        <strong>cells 1, 2 and 4 red</strong> (<code>expected 401 to be 200</code>, <code>… to be 403</code>, <code>… to be 404</code>) and
+        <strong>cell 3 green</strong>. </td></tr><tr><td>Cell 3 is the control that makes those
+        three flips a statement about the product rather than about the harness.
+        </td></tr><tr><td>At the PR head: <strong>4/4 green</strong>. </td></tr><tr><td>Suite totals moved
+        <strong>77 → 78 files</strong> and <strong>836 → 840 tests</strong>,
+        both sides measured on the same base.
+      </td></tr><tr><td class="pm-topic" rowspan="3"><strong>Timing — and what is deliberately NOT changed here.</strong></td><td>
+        No stated timing in either platform-k document covers the
+        <code>services/auth</code> vitest suite: grepped at the base SHA,
+        <code>services/auth</code> 0 hits, <code>services/transfer</code> 0,
+        <code>generate-openapi</code> 0 and <code>check:openapi</code> 0 in both
+        documents, against a must-hit control of <code>auth</code> 52 hits in
+        this document and 59 in the cheat sheet. </td></tr><tr><td>The single
+        <code>vitest</code> hit in each is a <code>setupFiles</code> note in the
+        Performance harness, not a timing.
+        <strong>So no tier budget or timing row is touched, and none is left looking
+          re-measured.</strong>
+        For the record, the figure this change does own, measured rather than
+        estimated:
+        <strong>the auth vitest suite runs 78 files / 840 tests in 2.51–2.55 s
+          reported (3.31–3.43 s wall) over three consecutive runs on
+          2026-10-04</strong>, host <strong>Kamils-Mac-Studio</strong> (Apple M3 Ultra, 28 logical
+        cores). </td></tr><tr><td>That is a developer workstation, not CI, and per §4 a figure
+        without a host is meaningless — do not plan CI around it.
+      </td></tr><tr><td class="pm-topic" rowspan="4"><strong>NOT COVERED, stated rather than skipped.</strong></td><td> The
+        <code>authenticate.ts</code> change in this PR is
+        <em>not exercised by any test</em>: reverted on its own, the whole auth
+        suite stays green at 78 files / 840 tests and all four KS-1402 cells
+        pass. </td></tr><tr><td>What it changes is the audit-log line — its text and the new
+        <code>route</code> field — for <strong>both</strong>
+<code>/stub</code> and <code>/lookup</code>, and no assertion reads the
+        logger. </td></tr><tr><td>The route-neutrality of that label is therefore argued and
+        measured above, not test-guarded. </td></tr><tr><td>Also unverified: no live sweep (skill
+        §5f), no Platform-S ↔ Platform-K pair run, and whether S's connector key
+        actually carries <code>users:read</code> is not measurable from this
+        side. <code>tsc</code> excludes <code>src/__tests__</code>, so the new
+        test file is not typechecked.
+      </td></tr></table>
+</div>

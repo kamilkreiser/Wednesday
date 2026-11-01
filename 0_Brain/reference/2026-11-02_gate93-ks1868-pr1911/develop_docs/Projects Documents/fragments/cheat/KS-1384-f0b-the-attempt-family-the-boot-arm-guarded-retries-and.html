@@ -1,0 +1,17 @@
+<h2>KS-1384 F0b: the attempt family, the boot arm, guarded retries and waits outside the lock</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>A refused anchor is retried only when every attempt of the same payload re-polls absent; all attempts spend one family outpoint, so at most one can land. A family with no outpoint never builds a second attempt while one may still land (gate 48, round 2).</td></tr><tr><td>For about 2 h after each anchoring restart the old &ldquo;already been included&rdquo; rule still rests the row (the boot arm). One anchoring process per wallet; no container overlap at recreate.</td></tr><tr><td>With nothing to spend an anchor waits, outside the wallet lock, for up to 2 h, then fails once. F0 means MORE transactions land: a refused event is retried, one more fee per refused event.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A real chain or Blockfrost, replica lag, the wallet census, the four platform suites, a running stack, Node 24 (LTS), any box.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1384-f0b-attempt-family.test.ts src/__tests__/ks1384-f0b-waits.test.ts src/__tests__/ks1384-f0b-r2-no-shared-coin-waits.test.ts   # 32 cells
+cd Blockchain/Dev/services/anchoring &amp;&amp; TEST_DATABASE_URL=... TEST_APP_DATABASE_URL=... npm run test:integration -- src/__tests__/ks1384-f0b-guarded-writes.integration.test.ts   # 3 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>35</strong> (24 + 5 unit, 3 real Postgres)</td></tr>
+<tr><td>mutants</td><td>30 written, parsed and killed</td></tr>
+<tr><td>anchoring unit suite</td><td>46 files / 674 cells: 673 pass, the host-dependent <code>threadTokenMint</code> cell failed (as at the base)</td></tr>
+<tr><td>anchoring real-Postgres lane</td><td>9 files / 113 cells, all pass</td></tr>
+<tr><td>tsc and eslint</td><td>0 errors with all 55 anchoring test files; eslint 0 errors, 0 warnings on 9 files</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared; F0a&rsquo;s head <code>969df4571d45</code>, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

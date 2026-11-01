@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>API Security/Functional Testing Architecture &amp; Flow Diagrams</title>
+<script crossorigin="anonymous" integrity="sha384-PY+AFiXLIHkR5jE4nk0JwPQQmmQlT4mJXFlgeT4jJeuARaBQBK+nSwwxzrPRAtUM" src="https://cdn.jsdelivr.net/npm/mermaid@11.10.0/dist/mermaid.min.js"></script>
+<style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      h1 {
+        color: #1a73e8;
+        border-bottom: 3px solid #1a73e8;
+        padding-bottom: 10px;
+      }
+      h2 {
+        color: #1a73e8;
+        margin-top: 40px;
+        border-left: 4px solid #1a73e8;
+        padding-left: 15px;
+      }
+      .diagram-container {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+      }
+      .diagram-title {
+        font-weight: bold;
+        color: #1a73e8;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+      .description {
+        background: #e8f0fe;
+        border-left: 4px solid #1a73e8;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+      }
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+      .phase-box {
+        background: white;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .phase-box.phase1 {
+        border-left: 4px solid #4285f4;
+      }
+      .phase-box.phase2 {
+        border-left: 4px solid #ea4335;
+      }
+      .phase-box.phase3 {
+        border-left: 4px solid #fbbc04;
+      }
+      .phase-box.phase4 {
+        border-left: 4px solid #34a853;
+      }
+      .phase-box h3 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+      .phase-box .duration {
+        color: #666;
+        font-size: 13px;
+        margin: 5px 0;
+      }
+      .phase-box .tasks {
+        font-size: 12px;
+        color: #555;
+        list-style: none;
+        padding: 0;
+        margin: 10px 0 0 0;
+      }
+      .phase-box .tasks li {
+        margin: 3px 0;
+        padding-left: 15px;
+        position: relative;
+      }
+      .phase-box .tasks li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #34a853;
+        font-weight: bold;
+      }
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      .comparison-table th {
+        background: #1a73e8;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+      }
+      .comparison-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+      }
+      .comparison-table tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+      .comparison-table tr:hover {
+        background: #f0f7ff;
+      }
+      .winner {
+        background: #c6e7ff;
+        font-weight: bold;
+        color: #1a73e8;
+      }
+      .code-block {
+        background: #f4f4f4;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 12px;
+        margin: 10px 0;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        overflow-x: auto;
+      }
+      .highlight {
+        background: #fff3cd;
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+      .success {
+        color: #34a853;
+        font-weight: bold;
+      }
+      .warning {
+        color: #fbbc04;
+        font-weight: bold;
+      }
+      .critical {
+        color: #ea4335;
+        font-weight: bold;
+      }
+      .mermaid {
+        display: flex;
+        justify-content: center;
+      }
+      /* ── COLOUR KEY (documents the mermaid node fills + §7 tier colours) ── */
+      .ckey {
+        background: white;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .ckey h3 {
+        color: #1a73e8;
+        font-size: 15px;
+        margin: 0 0 6px 0;
+      }
+      .ckey .ck-note {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+      }
+      .ckey .ck-group {
+        font-weight: 600;
+        font-size: 12px;
+        color: #555;
+        margin: 12px 0 5px;
+      }
+      /* Long ck entries render as a matrix, not a flex row: in flex every inline node became its own column (Peter, 2026-10-06). */
+      .ck-matrix { width: 100%; border-collapse: collapse; font-size: 12px; margin: 4px 0 10px; }
+      .ck-matrix th, .ck-matrix td { border: 1px solid #dadce0; padding: 6px 8px; text-align: left; vertical-align: top; }
+      .ck-matrix th { background: #f1f3f4; }
+      .ck-matrix td:nth-child(1) { white-space: nowrap; width: 1%; }
+      .ck-matrix td:nth-child(2) { width: 22%; }
+      .ck-matrix .ck-sw { display: inline-block; vertical-align: middle; }
+      .ck-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 20px;
+      }
+      .ck-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        color: #333;
+      }
+      .ck-sw {
+        width: 18px;
+        height: 14px;
+        border-radius: 3px;
+        flex: 0 0 auto;
+        border: 1px solid rgba(0, 0, 0, 0.18);
+      }
+      /* Node-fill swatches — colours copied verbatim from the mermaid style/classDef fills below */
+      .ck-live {
+        background: #c6f0c1;
+      }
+      .ck-success {
+        background: #34a853;
+      }
+      .ck-int {
+        background: #ffe0b2;
+        border-color: #f57f17;
+      }
+      .ck-notwired {
+        background: #fce5cd;
+      }
+      .ck-fail {
+        background: #f4cccc;
+        border-color: #d32f2f;
+      }
+      .ck-tool {
+        background: #c6e7ff;
+      }
+      .ck-infra {
+        background: #e8f0fe;
+      }
+      .ck-stage {
+        background: #fff3cd;
+      }
+      /* §7 tier swatches */
+      .ck-pr {
+        background: #dbeafe;
+        border-color: #1d4ed8;
+      }
+      .ck-premerge {
+        background: #ffedd5;
+        border-color: #c2410c;
+      }
+      .ck-nightly {
+        background: #f3e8ff;
+        border-color: #7e22ce;
+      }
+      .ck-local {
+        background: #dcfce7;
+        border-color: #15803d;
+      }
+    </style>
+<style>
+      /* Prose rendered as Topic | Detail matrices, one row per sentence (Peter, 2026-10-06). */
+      table.pmatrix { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 13px; background: #fff; }
+      table.pmatrix td { border: 1px solid #dadce0; padding: 6px 9px; vertical-align: top; text-align: left; line-height: 1.45; }
+      table.pmatrix td.pm-topic { width: 26%; background: #f8f9fa; font-weight: 600; }
+      @media (prefers-color-scheme: dark) { table.pmatrix, table.pmatrix td { background: transparent; } table.pmatrix td.pm-topic { background: rgba(255,255,255,0.05); } }
+    </style></head>
+<body>
+<div style="
+        background: #dcfce7;
+        border: 1px solid #86efac;
+        border-radius: 6px;
+        padding: 10px 16px;
+        margin-bottom: 16px;
+        font-size: 12px;
+        color: #14532d;
+      "><table class="pmatrix"><tr><td colspan="2">
+<!-- KS-1408: new head entry; prior head was "Status 2026-09-28 (Schemathesis pin 4.28.0 under KS-1353" -->
+<!-- KS-1439: new head entry in front of the KS-1408 one -->
+<!-- KS-1445: new head entry in front of the KS-1439 one -->
+<!-- KS-1396: new head entry, its own row, in front of the KS-1445 one -->
+<strong>Status 2026-10-14 (KS-1396)</strong>: systemTest and observability on <strong>TypeScript 7.0.2</strong> with <strong>oxlint 1.88.0</strong> (type-aware via oxlint-tsgolint 7.0.2004); ESLint and typescript-eslint removed there — the platform services keep ESLint (KS-1398). The Playwright rules and the JSDoc rules oxlint lacks live once, in the shared <code>systemTest/oxlint</code> package; <code>@types/node</code> is on the Node 24 LTS line; Playwright loads <code>.env</code> explicitly, so a stray <code>DOTENV_PATH</code> cannot retarget a run. Slot selection unchanged (slot suites 174/17/33/11, identical to develop). </td></tr><tr><td colspan="2">
+<strong>Status 2026-10-07 (KS-1445, with KS-1367)</strong>: observability images moved to their latest releases — Prometheus v3.15.0, Grafana 13.2.3, Loki 3.7.8, Alloy v1.20.1, Pushgateway v1.11.3, postgres-exporter v0.20.1, redis_exporter v1.93.0, nginx-exporter 1.5.3, kafka-exporter v1.10.0, and cAdvisor v0.60.6 from <code>ghcr.io/google/cadvisor</code> (<code>gcr.io</code> stops at v0.55.1). <code>base-image-watch.sh</code> <code>EXCLUDED_BASES</code> moved with them, and a new observability test fails when the two disagree. k6 stays at 2.3.0, still the latest release; <code>run-k6.sh</code>, the only host-k6 path, now refuses a native k6 older than the pin (this Mac has v0.48.0). Renovate now sees the k6 pin the runner launches (KS-1367). </td></tr><tr><td colspan="2">
+<strong>Status 2026-10-15 (KS-1447)</strong>: Kam’s 2026-08-26 ruling on <code>GET /api/users/admin/list</code> is now implemented for exactly the class he named, an undeclared query key (KS-662 guard, strict classifier). Measured on slot 2, develop <code>0543ff1e6</code>, <code>pre-merge</code>: <code>negative_data_rejection</code> on that operation went from 10 to 0; the guard now fails 21 declared <code>limit</code>/<code>offset</code> violations (baselined under KS-1015); the <code>offset=-1</code> 500s stayed at 2. Test stubs now live in dedicated <code>stubs/</code> folders, and a run that executed nothing now fails in Akto, Schemathesis and k6. <strong>Status 2026-10-20</strong> (KS-1674: Schemathesis's BOLA/IDOR check <code>object_level_authorization</code> runs in its own leg after the main sweep (<code>pre-merge</code>, <code>full</code>, <code>nightly</code>). The leg uses <code>[auth.wfc]</code> with two OWNER peers in one tenant, and their tokens are minted at run time into a 0600 file that is deleted afterwards. The main sweep stays on PersonaAuth, because <code>[auth.wfc]</code> would replace it. The run fails when the leg did not provably execute (peer replays counted from the NDJSON), when its sweep did not complete, or when a violation is untriaged. Cross-tenant peers remain open on KS-1674. Proven offline on a stub API: a leak is reported as ST402 / WFC 906 with peers, and missed with the gate red without them. First live run, slot 2, 2026-10-20 (<code>full</code>, seed 1674, 26 min): 259 peer replays, <strong>6 ST402</strong> on <code>GET /api/transfers/{id}</code>, <code>/transfers/{id}/history</code>, <code>/delegations/{id}</code>, <code>/analytics/exports/{id}</code>, <code>/governance/participants/{id}</code> and <code>/security/audit/{id}</code> (same tenant; filed as KS-1703, assigned to Kamil; cross-tenant not measured). The transfer <em>list</em>, <code>GET /api/transfers</code>, is also unscoped: it returns every transfer unless the caller supplies their own <code>?ownerId=</code>. Reproduced without the sweep by <code>tests/test_get_by_id_object_authorization.py</code>: with its markers off, all six fail with <code>assert 200 in (403, 404)</code>. Normally they report as xfailed against KS-1703 (strict), so each turns red the moment its route is fixed. A develop control run on the same slot then showed none of that run's other failures is caused by KS-1674: the 2 cross-tenant integration failures are filed as KS-1704, the audit-export pairs belong to KS-1645, and the no-body spec pairs are filed as KS-1705.) <strong>Status 2026-10-19 (later)</strong> (KS-1607: Schemathesis pin 4.31.1 → 4.32.1 — checks, warnings and WFC codes unchanged; adds stable failure codes (<code>ST101</code>, shown in the Verdict panel), <code>--report pytest</code> (every failure as a pytest test, linked from the Overview) and renamed failure titles; hypothesis 6.170.2, ruff 0.17.1, all packages to latest. Offline <code>quality</code> on the final PR head 4,206 passed / 0 failed, 99.39&nbsp;% coverage; the 15 KS-1607 test files 280 passed; this Mac, 2026-10-19, after three review rounds and /code-review). <strong>Earlier the same day</strong> (KS-1607, Schemathesis 4.31.1: the 6 tests KS-1478 left red are green — WFC code 906 labelled and WFC entries/distinct/totalNumber reconciled on the Overview; <code>object_level_authorization</code> excluded via <code>harness.excluded_checks</code> because it needs <code>[auth.wfc]</code> peers and would be a silent green under PersonaAuth (KS-1674); <code>timeout_units</code> fatal and <code>dictionary_mismatch</code> informational, with startup warnings now carried to the Warnings tab; the <code>method_not_allowed</code> gate proven by a real sweep that exits 1 armed and 0 disarmed. Offline <code>quality</code> 4,178 passed / 0 failed, 99.39&nbsp;% coverage, this Mac, 2026-10-19). <strong>Status 2026-10-15</strong> (Schemathesis pin 4.31.1 under KS-1615 — fixes only, no new check or warning, bumped app-only like 4.31.0). <strong>Before that, 2026-10-14</strong> (Schemathesis pin 4.31.0 under KS-1478, bumped app-only: the new object_level_authorization check, two new warnings, WFC code 906 and a changed private WarningCollector API turn 6 harness unit tests red by decision, KS-1607). <strong>Before that, 2026-10-12</strong> (Schemathesis pin 4.30.1 under KS-1476 — a patch: 3 changed, 21 fixed, none marked breaking; a 13th warning, <code>rate_limited</code> (an operation answered ≥90&nbsp;% 429), accounted informational and shown on the Warnings tab; writers and <code>run --help</code> byte-identical. Measured on slot 3, seed 1476: <code>full</code> 17,523 cases · 101 unique failures · 0 errored on develop <code>aa9ca9de9</code> (104 at 4.30.0 on <code>524db0ce6</code>); <code>pr</code> 9 failures; anchoring 26/27 (1 out of scope by mode). Previous status 2026-10-09: Schemathesis pin 4.30.0 under KS-1455 — a minor: 5 added, 3 changed, 33 fixed, none marked breaking; the new automatic sign-up/login phase stays off because PersonaAuth is registered (pinned by a test); WFC schema 0.7.0 → 0.8.0 adds an <code>id</code> we do not read. Measured: <code>full</code> 17,497 cases · 100 unique failures · 0 errored; <code>pr</code> 10 failures, all baselined. Previous status 2026-10-07: Schemathesis pin 4.29.4 under KS-1439 — fixes only, 35 entries, none marked breaking; checks 13→13, phases 4→4, warnings 12→12, <code>run --help</code> byte-identical. What changed anyway: errored cases (a network error, a crashed check) are now counted apart from skipped — in the JSON verdict (<code>test_cases.errored</code>), as their own console clause, and as an Errored row in the Overview’s Test cases card — and the NDJSON now redacts credentials in recorded cases. The console parser read <em>7 skipped as 0</em> on the new line shape, silently; fixed, and a new post-run gate <strong>Console vs verdict</strong> holds the console’s generated / unique failures / errored / skipped equal to the verdict (not evaluated on a failing sweep, KS-752, so run by hand). Measured on slot 4, seed 1439: 4.29.3 113 unique failures, 4.29.4 121 and 112 — the two 4.29.4 runs differ by 9, so no failure is attributed to the bump; the KS-1414 false positives were 39 / 25 / 35, the same spread); previously 2026-10-05 (Schemathesis pin 4.29.3 under KS-1408
+      — four releases, 4.29.0–4.29.3: exit codes changed (nothing tested
+      0→2, Ctrl+C 0→130, measured), now classified once into PASSED /
+      FAILED / INVALID / TIMED OUT / INTERRUPTED / UNKNOWN for the console,
+      <code>results.json</code> and the report’s Verdict
+      <strong>Outcome</strong> row; the new <code>wfc</code> report format is
+      generated and surfaced as the Overview’s Status-code coverage
+      section; its fault categories are named rather than numbered and it lists
+      the documented statuses each covered endpoint never returned; checks
+      13→13, phases 4→4, warnings 12→12, flags 59→60;
+      urllib3 2.7.0→2.8.0 for three pip-audit advisories; known 4.29.x
+      regression kept visible: ~55–61 false
+      <code>negative_data_rejection</code> failures per full sweep, where a
+      pool-drawn value overwrites the negative body (KS-1414; 2 at 4.28.0);
+      previously 2026-09-28: Schemathesis pin 4.28.0 under KS-1353 — the first
+      minor since the 4.27.x line: <code>st run --help</code> byte-identical,
+      report formats and the check/phase registries unchanged, one new warning
+      <code>low_valid_rate</code> triaged informational, and the KS-1271
+      NDJSON-completeness gate corrected after it counted the coverage phase’s
+      undeclared-method probes as operations; k6 pin 2.3.0 under KS-1354 — was
+      2.1.0; runs pass <code>--features freeze-env</code>,
+      <code>--log-ns-timestamps</code> and static remote-write labels
+      <code>perf_scenario</code> / <code>k6_image</code>, record the k6 image,
+      and report an unknown <code>--features</code> name as an INVALID run;
+      previously 2026-09-21: Schemathesis pin 4.27.5 under KS-1285 — the KS-1270
+      NDJSON-writer hold lifted, upstream fixed in 4.27.4; post-run gates +
+      outcome taxonomy added under KS-684 at Schemathesis 4.25.2; re-reconciled
+      against <code>.github/workflows</code> + <code>systemTest/</code> under
+      KS-519; previously stated 2026-08-12): Schemathesis ✅ local PR gate
+      (author-run)  ·  Playwright ✅ local PR gate (author-run)
+       ·  k6 ✅ local PR gate (author-run, smoke scenario,
+      <code>SECUURA_STACK_SLOT=1 npm run test:smoke</code> — replace
+      <code>1</code> with your stack slot; a local run that names no slot is
+      refused (KS-1386) — read the printed <code>Status:</code> line, not the
+      exit code)  ·  Akto ✅ local PR gate (author-run:
+      <code>SECUURA_STACK_SLOT=1 npm run test:pr</code>, BOLA/BFLA/Broken-Auth
+      27 templates across all 347 endpoints (measured slot 2, 2026-09-28, Akto
+      2.35.6; 29 s on slot 1, 2026-10-14, Akto 2.38.2, KS-1478, passing; 30 s on slot 1, 2026-10-07, Akto 2.37.1, failing on the wallet-status HIGH; 24 s on slot 2, 2026-10-05, Akto 2.36.10)) and local pre-merge (<code>SECUURA_STACK_SLOT=1 npm run test:pre-merge</code>, + Security Misconfiguration, 91 templates initiated on the paced run;
+      KS-413). </td></tr><tr><td colspan="2">Both replaying tiers (pre-merge, security) feed authenticated HAR
+      traffic first; since KS-1363 a skipped replay is recorded in the run
+      directory (<code>har-replay.json</code>) and shown as a
+      <strong>⚠ COVERAGE DEGRADED</strong> line on the console, the run
+      artifacts, the HTML Execution tab and the cross-check — the verdict is
+      unchanged, but a thinner-authz PASS no longer reads like a full one. </td></tr><tr><td colspan="2">Akto image pin 2.42.6 (KS-1609, 2026-10-30; both <code>2.42.6_local</code> tags on Docker Hub; 2.42.3 and 2.42.5 are dashboard-only; the apps/testing git tree is still 9de6d35d; the pin is also the minimum an override may name). Before that 2.41.6 (KS-1608, 2026-10-27; both <code>2.41.6_local</code> tags on Docker Hub; 2.40.2, 2.40.4-2.40.6, 2.40.8, 2.41.1, 2.41.4 and 2.41.5 are dashboard-only; the apps/testing git tree is still 9de6d35d; KS-1608 also masks credentials in every report sink). Before that 2.38.5 (KS-1615, 2026-10-15; release content = Azure OpenAI ModelTier only). Before that 2.38.2 (KS-1478, 2026-10-14; Release v2.38.3 is dashboard-only, so 2.38.2 was the latest valid pair; the apps/testing git tree is identical to 2.37.1's, 9de6d35d). Before that 2.37.1 (KS-1440, 2026-10-07; was 2.36.10, KS-1411, and 2.36.4, KS-1363) — 0 new tests (the apps/testing git tree is identical); the KS-1416 SQL/NoSQL scan selection, the KS-724 by-design exclusion and the KS-1421 accepted-finding rule landed with it; console = Akto = HTML checked on the three code-injection scans. </td></tr><tr><td colspan="2">Measured slot 1 of the Mac, 2026-10-07, Akto 2.37.1 (KS-1440): pr 30 s, pre-merge 4 m 1 s (1,671 platform 429s), security tier (full OWASP, <code>npm run test:security</code>; earlier called "nightly") 12 m 17 s, 393 of 50,450 full-scan results refused; <strong>none of the three tiers is green on this stack</strong> — each fails on the same real HIGH, <code>REMOVE_TOKENS</code> on <code>GET /api/auth/wallet/status/{walletAddress}</code> (public by necessity, un-allowlistable then, KS-1009; allowlisted since KS-1768, 2026-10-29), and the security tier passes 10 of 13 workflows. The LOW <code>Server: nginx</code> accepted on KS-1397 is now a known false positive by a narrow rule (KS-1421); it did not occur in the security-tier run, so the rule was proven by a targeted two-endpoint run — Akto flagged it on <code>GET /api/document-types</code>, the rule moved it to Known FP, and <code>REMOVE_TOKENS</code> on wallet-status stayed a HIGH. Before, measured slot 2 of the Mac, 2026-10-05, Akto 2.36.10: pr 24 s, pre-merge 3 m 57 s (944 platform 429s in one ~2 s burst), security tier 11 m 1 s, 0 of 50,162 full-scan results refused. <strong>Pre-merge and the security tier are paced</strong> at
+      0.75 × the platform's limit through Akto's own
+      <code>globalRateLimit</code>, set from systemTest (KS-709/KS-1286; the
+      limit is read from the local <code>RATE_LIMIT_MAX_REQUESTS</code> since
+      KS-1374, 10,000 locally, so 7,500 requests/min) — before KS-1411, measured
+      slot 4 of the Mac, 2026-09-30, Akto 2.36.4 (KS-1363): pr 30 s unthrottled,
+      pre-merge 3 m 42 s, security tier 13 m 46 s, and 0 of 50,018 full-scan results
+      refused. </td></tr><tr><td colspan="2">Previously, at a fixed 1,500/min (slot 2, 2026-09-28): pre-merge
+      19 m 28 s, security tier 60 m 52 s, where the unpaced run lost 8,735. </td></tr><tr><td colspan="2">A run Akto
+      holds <code>RUNNING</code> with no progress for 150 s is stopped and
+      scored, flagged <em>STALLED — partial</em> on console, JSON and HTML.
+      </td></tr><tr><td colspan="2">Whether the platform's limit should change for local scans is an open
+      decision with Kamil (KS-1374); coverage is not reduced either way
+       · 
+      <!-- KS-1365: the four lines above said Schemathesis and Playwright were ✅ live as the `pr` gate, k6 was live on the `pr` tier via pr-platform-suites.yml, and Akto was live and blocking on the `pr` tier and blocking via the pre-merge-platform-suites.yml akto job; Actions retired 2026-08-27 -->
+<strong>No workflow runs</strong> — GitHub Actions is retired for this
+      repo (Kam, 2026-08-27, KS-685). </td></tr><tr><td colspan="2">The PR author runs the four platform suites plus
+      touched unit suites locally and records them in the PR's Test Evidence
+      block (touched / ran / NOT run / migrations+config); a QA GO at the PR
+      head follows; commands in
+      <code>Blockchain/Dev/docs/DEV-PROCESS.md</code> §Manual CI-gate
+      equivalents. </td></tr><tr><td colspan="2">Never dispatch
+      <code>pre-merge-platform-suites.yml</code> (KS-441)  ·  OWASP
+      ZAP ❌ not wired in any pipeline (no workflow references it — superseded
+      the earlier "deployed" status below)  ·  Integration (anchoring
+      integrity) ⏳ Local · pre-merge + nightly —
+      <strong>an integration mode of Schemathesis, co-located in
+        <code>systemTest/schemathesis</code> (not a separate tool)</strong>: the KS-489-D / KS-492 orchestrated fail-closed + verify-vs-chain tests,
+      plus the KS-587/KS-589 anchor-honesty family (hash⇄flag, cross-surface
+      agreement, orphaned references) which read
+      <code>anchor_store</code> read-only via the stack’s Postgres container;
+      runs on the named slot's stack locally (historically its own CI stack
+      and check-run <code>Integration suite</code>, a CI-only port block);
+      NOT a PR gate (KS-416 precedent)
+       ·  <strong>Historical:</strong> the nightly suites were five jobs
+      under one caller (<code>nightly-platform-suites.yml</code>:
+      schemathesis-soak, playwright-nightly (check-run
+      <code>Playwright nightly</code>), performance-nightly, akto-security,
+      integration). </td></tr><tr><td colspan="2">That workflow cannot be dispatched (Actions retired
+      2026-08-27) and is not pending promotion; the profiles run locally.
+      </td></tr><tr><td colspan="2">APIFuzzer/Nuclei are not part of any current plan.
+    </td></tr></table></div>
+<div style="
+        background: #e0f2fe;
+        border: 1px solid #7dd3fc;
+        border-radius: 6px;
+        padding: 10px 16px;
+        margin-bottom: 16px;
+        font-size: 12px;
+        color: #0c4a6e;
+      "><table class="pmatrix"><tr><td colspan="2">
+<!-- KS-1365: added the historical marker below; this banner read as current CI; Actions retired 2026-08-27 -->
+<strong>Historical — none of this runs today:</strong> GitHub Actions is
+      retired for this repo (Kam, 2026-08-27, KS-685), so the workflows and required
+      checks named here are dormant; the suites run locally (DEV-PROCESS.md
+      §Manual CI-gate equivalents).<br/>
+<strong>CI topology migrated 2026-07-06 — build-once →
+        clone-across-isolated-stacks.</strong>
+      The four PR suites then ran under ONE workflow,
+      <code>pr-platform-suites.yml</code> (nightly:
+      <code>nightly-platform-suites.yml</code>): a single reusable
+      <code>_build-images.yml</code> job builds all 15 platform images
+      <em>fresh per run</em> and pushes them to ghcr, then each suite job PULLS
+      those exact images and boots a config-isolated stack (unique
+      <code>COMPOSE_PROJECT_NAME</code>/<code>STACK_PREFIX</code> + per-suite
+      host-port offset, each tool pointed at its own gateway; those per-suite
+      CI ports are historical and are not slot ports — local ports derive
+      from the slot-1 base, 6882 + 100·(N−1) for the gateway). </td></tr><tr><td colspan="2">The tool
+      live/disabled status above and in every diagram below is unchanged; only
+      the orchestration changed. </td></tr><tr><td colspan="2">The per-suite workflow files named in the
+      diagrams (<code>pr-schemathesis.yml</code>,
+      <code>pr-playwright.yml</code>, <code>performance-pr.yml</code>,
+      <code>akto-pr.yml</code> + the four nightly files) have been
+      <strong>removed</strong> (folded into the two callers).
+      <strong>Cutover:</strong> repoint branch-protection required checks to the
+      new <strong>check-run display names</strong> (GitHub matches by display
+      name, not job id): <code>build</code>, <code>Schemathesis suite</code>,
+      <code>Playwright suite</code>, <code>Performance suite (k6 smoke)</code>,
+      <code>Akto suite (PR)</code> (renamed from
+      <code>Akto suite (PR-gate subset)</code> — KS-413), plus the pre-merge
+      checks <code>Akto pre-merge (full)</code>, <code>Integration suite</code>,
+      <code>Schemathesis pre-merge sweep</code> and <code>quality</code>.
+    </td></tr></table></div>
+<h1>🔐 API Security/Functional Testing Architecture &amp; Flow Diagrams</h1>
+<!-- ===== COLOUR KEY ===== -->
+<div class="ckey">
+<h3>
+        🛡️ Post-run gates — judging the RUN, not its assertions (KS-517 ·
+        KS-684)
+      </h3>
+<div class="ck-note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+        Gates run <em>after</em> a Schemathesis sweep and feed the exit
+        code alongside the check results (run validity, NDJSON completeness,
+        report reconciliation, triaged baseline, plus the authenticated-coverage
+        gate). </td><td>They exist because every
+        assertion-based gate shares one blind spot:
+        <strong>a check that never ran cannot fail</strong>, so a run that
+        tested nothing scores clean everywhere. Each of these answers “did
+        this run have the standing to say anything?” rather than
+        “what did it say?”
+      </td></tr></table></div>
+<div class="ck-group">
+        The gates — and how the sweep’s own exit code is read
+        (KS-1408)
+      </div>
+<table class="ck-matrix"><thead><tr><th>Status</th><th>Gate / check</th><th>What it does</th></tr></thead><tbody>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Authenticated coverage (KS-517)</strong></td><td>a sweep that loses its session still calls every operation, but the requests die at the auth middleware and never reach a handler. Measured from <code>schemathesis-metrics.jsonl</code>. Caught 240/309 operations stuck at 401.</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Run validity (KS-684)</strong></td><td>declares a run <strong>INVALID</strong> when errors dominate: more than <strong>10%</strong> of operations erroring, <em>or</em> <strong>5+</strong> operations sharing one identical error message. Read from the run’s own JUnit XML, deliberately not from the report’s parsers, so the gate can disagree with the report. Reconstructed against the 2026-08-24 incident (310 of 318 operations = 97.5%) → INVALID.</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Report reconciliation (KS-517)</strong></td><td>the HTML report’s headline numbers must equal Schemathesis’ own console summary. Enforces the three-way parity MUST: <code>console = results.json = HTML report</code>. Fails closed — a missing artefact is “cannot verify”, never a pass. <!-- KS-1408: the caveat below was missing; the gate's reachability is KS-752 --> <strong>Caveat:</strong> <code>run.py</code> evaluates it (and the baseline gate) only when every earlier gate passed, so it is skipped on any sweep that found failures — open as KS-752. Until that lands, run it by hand on such a run.</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Sweep outcome (KS-1408)</strong></td><td>Schemathesis 4.29.0 made exit <strong>2</strong> mean “nothing tested, or a schema / config / internal error” and <strong>130</strong> mean “interrupted”. <code>src/sweep_outcome.py</code> classifies the exit code once — PASSED (0), FAILED (1), INVALID (2), TIMED OUT (124, the harness’s own kill), INTERRUPTED (130), UNKNOWN (anything else) — and the console <code>Status:</code> line, <code>results.json</code> and the Verdict section’s <strong>Outcome</strong> row all render that one value. Previously every non-zero code was recorded as <code>failed</code>, and at 4.28.0 a sweep that tested nothing exited 0. Only PASSED is green.</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Closing banner (KS-571)</strong></td><td>the banner at the end of a run now counts <em>every</em> gate that feeds the exit code (run validity, NDJSON completeness, report reconciliation, triaged baseline, IDOR, integration, anchoring, preconditions, auth coverage) and names a gated suite that was <strong>skipped</strong>, with its reason, instead of printing OVERALL: PASSED over a failing exit code. This reverses KS-684's narrower banner (sweep and IDOR only).</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Known tool false-positive class, kept visible (KS-1414)</strong></td><td>from Schemathesis 4.29.x a negative case can have its mutated body overwritten by a pool-drawn valid value, so the platform rightly accepts a VALID request and <code>negative_data_rejection</code> still reports “Invalid data should have been rejected” (55–95 per full sweep). A report section, a console block and a <code>results.json</code> block count them; nothing is filtered or baselined, and it is informational, not a gate. Since 2026-10-07 the same rule covers <code>by_design_input_tolerance_guard</code>: a request valid as sent (a drawn-over body, or a path whose values are each drawn or valid) no longer fails the guard, and the section counts the guard’s failures and its valid-as-sent passes. Of the guard’s 12 failures on the KS-1439 sweeps, 6 were valid as sent and 6 genuine (<code>audit-log</code> <code>limit=201</code>, KS-1359).</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>One run is one draw — seed + <code>--repeat N</code> (KS-1680)</strong></td><td>a failure appears only when the run's random seed draws the case that reaches it, and sometimes only when another operation in the same sweep created its data: three <code>pr</code> runs on one build found <strong>11 / 9 / 8</strong> failures. Every run now states its seed <em>and whether it was fixed</em> on the console, in <code>results.json</code> and in the Overview. <code>run.py &lt;tier&gt; --repeat N</code> runs the tier N times (each a complete normal run) and counts each pair as <strong>k/N</strong> — N/N deterministic, k/N seed-dependent — then sweeps every failing operation <em>alone</em> on the same seeds: a pair that never fails alone is flagged <em>needs other operations' data</em>; an isolated sweep that tested nothing is <em>inconclusive</em>, never a pass. The baseline gate over a set fails an untriaged pair seen in <em>any</em> run, and <code>--compare</code> calls a pair fixed only at N/N → 0/N on a check that inspects the response <em>and</em> when the later set reached the status it failed on (otherwise <em>not reached</em>; a check that fails on its status reads <em>gone (not proven fixed)</em>). The single-run Delta tab now compares only with an earlier run of the <em>same profile</em> (a first pre-merge was once diffed against a pr run: 69 bogus “regressions”).</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Fresh-clone preconditions (KS-955)</strong></td><td>a fresh clone used to fail every suite at login in a way that read as a product regression: unseeded personas 401'd (a 100% k6 error rate, an INVALID sweep), the failed logins tripped the F-06 lockout, and with no <code>GATEWAY_VOUCH_SECRET</code> the cross-tenant tests reported “BUG-ISOLATION-001 regression” (KS-1704). Each suite now logs its personas in <strong>once</strong> before it sends anything — Schemathesis <code>run.py</code>, Akto's <code>personaLoginSetup</code>, k6's runner, Playwright's <code>auth-setup</code> — and stops with <code>KS-955 precondition:</code> and the causes in order (not seeded, locked out, wrong password). The two cross-tenant tests use <code>gateway_vouch_active</code>: it sets a random per-run vouch secret on a local stack the user owns and restores it, or fails with the precondition, never the regression wording. <code>bootstrap-env.sh</code> now generates the secret for a fresh clone, and the lockout reset is in <code>systemTest/CLAUDE.md</code>.</td></tr>
+</tbody></table>
+<div class="ck-group">
+        The same blind spot in Akto — a template that was selected but never ran
+        (KS-710 · KS-717)
+      </div>
+<div class="ck-note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+        Akto’s version of “a check that never ran cannot
+        fail”. </td><td>The test-id catalog is generated from the template
+        <strong>files</strong>, and <code>check-test-ids</code> diffs that
+        render against the committed catalog — both sides file-derived, so it is
+        <em>structurally incapable</em> of noticing that Akto never loaded a
+        template. A selected-but-absent id produces no
+        <code>testing_run_result</code> document at all, and Akto reports
+        <code>vulnerable 0</code> exactly as it does for a template that ran and
+        found nothing. Measured on the full OWASP run, 2026-08-28, Akto 2.22.2:
+        <strong>207 ids selected, 193 exercised, verdict PASS</strong>.
+        Re-measured on slot 2, 2026-09-28, Akto 2.35.6 (KS-1286):
+        <strong>194 templates initiated, 50,018 result docs across 347
+          endpoints</strong>
+        — the regenerated catalog is byte-identical to 2.22.2’s, and
+        207→194 is KS-717 dropping ids Akto could never execute rather than
+        lost coverage.
+      </td></tr></table></div>
+<table class="ck-matrix"><thead><tr><th>Status</th><th>Gate / check</th><th>What it does</th></tr></thead><tbody>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Catalog vs loaded library (KS-717)</strong></td><td>a live assertion in <code>SECUURA_STACK_SLOT=1 npm run test:setup</code> reads <code>yaml_templates</code> straight from Mongo (<code>src/setup/loadedTemplates.ts</code>, slot-aware via <code>AKTO_PREFIX</code>) and diffs it against the catalog <strong>in both directions</strong>, failing on drift either way. Accepted differences are ticketed entries in <code>KNOWN_CATALOG_DRIFT</code>, and the test also fails when a listed entry <em>stops</em> drifting — an exemption cannot outlive its reason.</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Excluded from the catalog</strong></td><td>an id Akto can never execute must not be selected. 8 Threat-Protection rules carry no <code>execute:</code> block (KS-710); 5 carry upstream’s <code>inactive: true</code>, which Akto stores but its engine skips via <code>fetchOnlyActive</code> (KS-717 §3). 1 more (<code>BYPASS_CAPTCHA_REMOVING_COOKIE</code>) Akto refuses to store, because its <code>info.references:</code> is empty and Jackson cannot coerce that to a list. Catalog <strong>207 → 199 → 194 ids</strong>.</td></tr>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong>Reported, never silent</strong></td><td><code>load-templates</code> names every file Akto rejected and Akto’s own <code>actionErrors</code>; <code>generate-test-ids</code> reports exclusions and, separately, files with a YAML defect Akto tolerates and we now tolerate too (which ARE catalogued — <code>LFI_IN_HEADERS_LINUX</code> had never executed once). The HTML report renders <strong>exercised / selected</strong> with the shortfall named, not a bare count.</td></tr>
+</tbody></table>
+<div class="ck-group">
+        Outcome taxonomy — five categories, shared across all three surfaces
+      </div>
+<div class="ck-note"><table class="pmatrix"><tr><td colspan="2">
+        The taxonomy is <strong>closed and shared</strong>: a category exists in
+        the console, in <code>results.json</code> and in the HTML report, with
+        the same label and the same count, or it is a design error.
+        <code>results.json</code> is the source of truth; the other two are
+        renderings of it. Each run also writes Schemathesis's native HTML report at <code>&lt;run&gt;/schemathesis-native-html/index.html</code> (linked from the harness report; KS-1615).
+      </td></tr></table></div>
+<div class="ck-row">
+<div class="ck-item">
+<span class="ck-sw ck-success"></span> <strong>PASS</strong> —
+          exercised, no violation
+        </div>
+<div class="ck-item">
+<span class="ck-sw ck-fail"></span> <strong>FAIL</strong> — exercised,
+          violated a check
+        </div>
+<div class="ck-item">
+<span class="ck-sw ck-notwired"></span> <strong>UNVERIFIED</strong> —
+          should have run, did not; gates the run (KS-478)
+        </div>
+<div class="ck-item">
+<span class="ck-sw ck-infra"></span> <strong>OUT OF SCOPE</strong> —
+          excluded by mode, not by accident (KS-519)
+        </div>
+<div class="ck-item">
+<span class="ck-sw ck-tool"></span> <strong>SKIPPED</strong> — a
+          precondition was never met (KS-684)
+        </div>
+</div>
+<div class="ck-note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>SKIPPED is new in KS-684.</strong></td><td> Previously the banner
+        rendered a strict PASSED/FAILED binary, so
+        <code>API_TOKEN not found</code> turned
+        <strong>four healthy suites</strong> — GDPR IDOR (KS-258), live
+        integration (KS-416), anchoring integrity (KS-489-D) and state-machine
+        preconditions (KS-478) — into <strong>FAILED</strong> on the 2026-08-24
+        run, sending readers after defects that did not exist. </td></tr><tr><td>An unmet
+        precondition is not a test result. </td></tr><tr><td>A SKIPPED suite now contributes
+        <em>neither</em> a pass nor a failure to <code>OVERALL</code>, and each
+        row carries its reason — the two skip causes (“no credentials
+        configured” vs “the platform did not answer”) stay
+        distinguishable because they need different remedies. </td></tr><tr><td>Counting a skip as
+        a <em>pass</em> would be the opposite and worse error.
+      </td></tr></table></div>
+<h3>🎨 Colour key — what every node colour means</h3>
+<div class="ck-note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+        The diagrams below use the same fill colours throughout. </td><td>Swatch colours
+        are copied verbatim from the mermaid <code>style</code>/<code>classDef</code>
+        fills.
+      </td></tr></table></div>
+<div class="ck-group">Node status (all diagrams)</div>
+<table class="ck-matrix"><thead><tr><th>Status</th><th>Gate / check</th><th>What it does</th></tr></thead><tbody>
+<tr><td><span class="ck-sw ck-live"></span> Live</td><td><strong></strong></td><td>Live / completed — a suite or check that runs today (✅)</td></tr>
+<tr><td><span class="ck-sw ck-success"></span> Pass</td><td><strong></strong></td><td>Terminal success — consolidated report / complete stack</td></tr>
+<tr><td><span class="ck-sw ck-int"></span> Integration</td><td><strong></strong></td><td>Schemathesis Integration mode — anchoring integrity + stored-state invariants, Local · pre-merge + nightly (⏳, not a PR gate)</td></tr>
+<tr><td><span class="ck-sw ck-notwired"></span> Not wired</td><td><strong></strong></td><td>Not wired / absent — planned or superseded (e.g. OWASP ZAP ❌)</td></tr>
+<tr><td><span class="ck-sw ck-fail"></span> Fail</td><td><strong></strong></td><td>Failure / blocked — build fails, investigation, critical risk</td></tr>
+<tr><td><span class="ck-sw ck-tool"></span> Tool</td><td><strong></strong></td><td>Tool / detail node — DAST tool, auth step, risk factor</td></tr>
+<tr><td><span class="ck-sw ck-infra"></span> Infra</td><td><strong></strong></td><td>Entry / support / infra node (neutral)</td></tr>
+<tr><td><span class="ck-sw ck-stage"></span> Stage</td><td><strong></strong></td><td>Parallel-stage header / aggregation hub</td></tr>
+</tbody></table>
+<div class="ck-group">Tiered execution model (§7)</div>
+<table class="ck-matrix"><thead><tr><th>Status</th><th>Gate / check</th><th>What it does</th></tr></thead><tbody>
+<tr><td><span class="ck-sw ck-pr"></span> </td><td><strong></strong></td><td>pr tier — run locally by the PR author before handover, recorded in the Test Evidence block (no CI job runs it)</td></tr>
+<tr><td><span class="ck-sw ck-premerge"></span> </td><td><strong></strong></td><td>pre-merge tier — run locally by the author before merge (the pre-merge workflow is historical)</td></tr>
+<tr><td><span class="ck-sw ck-nightly"></span> </td><td><strong></strong></td><td>nightly tier — a ~4 hr local soak profile, report-only; no scheduler runs it (workflow historical)</td></tr>
+<tr><td><span class="ck-sw ck-local"></span> </td><td><strong></strong></td><td>local_debug — on-demand developer loop</td></tr>
+</tbody></table>
+</div>
+<!-- ===== COMPLETE PIPELINE ===== -->
+<h2>1. Complete Tool Security/Functional Pipeline with Parallel Stages</h2>
+<div class="diagram-container">
+<div class="diagram-title">
+        1. End-to-End Security/Functional Testing Pipeline Flow
+      </div>
+<pre class="mermaid">
+graph TD
+    Start["🚀 Security Pipeline Start<br/>Code Repository &amp; Infrastructure"]
+
+    Start --&gt; S1Header["⚡ STAGE 1<br/>Parallel Static Analysis"]
+
+    S1Header --&gt; S1["STAGE 1: Run All Concurrently"]
+    S1 --&gt; T1["Api-Explorer<br/>✅ Completed"]
+    S1 --&gt; T2["npm audit<br/>✅ Completed"]
+    S1 --&gt; T3["gitleaks<br/>✅ Completed"]
+    S1 --&gt; T4["semgrep &amp; eslint<br/>✅ Completed"]
+    S1 --&gt; T5["trivy<br/>✅ Completed"]
+    S1 --&gt; T8["license-checker<br/>🌙 nightly only (internal-audit.yml)"]
+
+    T1 --&gt; Join["🔗 API Server Up<br/>Join Point"]
+    T2 --&gt; Join
+    T3 --&gt; Join
+    T4 --&gt; Join
+    T5 --&gt; Join
+    T8 --&gt; Join
+
+    Join --&gt; T7["tenant-isolation<br/>✅ Completed"]
+    T7 --&gt; T9["aiken<br/>✅ Completed"]
+    T9 --&gt; T10["aggregator<br/>Results Consolidation"]
+
+    T10 --&gt; S2Header["⚡ STAGE 2<br/>Parallel Security &amp; Functional Testing"]
+
+    S2Header --&gt; S2["STAGE 2: Run All Concurrently<br/>Each in Separate KS Instance"]
+    S2 --&gt; T6["OWASP ZAP<br/>❌ Not wired<br/>(no pipeline references it)"]
+    %% KS-1365: these four nodes were labelled Live as a CI pr gate; GitHub Actions retired 2026-08-27, now the author-run local PR gate
+    S2 --&gt; T11["Schemathesis<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Own docker instance"]
+    S2 --&gt; T12["Akto<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>BOLA/BFLA/Broken-Auth · all endpoints<br/>(+SM at pre-merge)<br/>endpoint-scoped known-FPs (2 public reads) excluded from verdict<br/>KS-417 runtime guard: stale suppression fails fast<br/>KS-524: 404 (route gone) also fails; 5xx inconclusive"]
+    S2 --&gt; T15["K6<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>smoke scenario"]
+    S2 --&gt; E2E["Playwright<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Own docker instance"]
+    S2 --&gt; INT["Schemathesis · Integration mode<br/>⏳ Local · pre-merge + nightly<br/>Anchoring integrity (fail-closed · verify-vs-chain · hash⇄flag honesty · cross-surface · orphan refs)<br/>Co-located in systemTest/schemathesis · own docker instance (gateway 7282)"]
+    INT -.-&gt;|read-only SQL<br/>STACK_PREFIX-resolved| PG[("Postgres<br/>anchor_store · documents<br/>stored-state invariants KS-589")]
+
+    T11 --&gt; Report["✅ Consolidated Report"]
+    T12 --&gt; Report
+    T15 --&gt; Report
+    E2E --&gt; Report
+    INT --&gt; Report
+
+    Report --&gt; Final["✨ Complete Security<br/>&amp; Performance Stack"]
+
+    style Start fill:#e8f0fe
+    style S1Header fill:#fff3cd
+    style S2Header fill:#fff3cd
+    style S1 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style S2 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style Join fill:#c6f0c1
+    style T1 fill:#c6f0c1
+    style T2 fill:#c6f0c1
+    style T3 fill:#c6f0c1
+    style T4 fill:#c6f0c1
+    style T5 fill:#c6f0c1
+    style T6 fill:#fce5cd
+    style T7 fill:#c6f0c1
+    style T8 fill:#c6f0c1
+    style T9 fill:#c6f0c1
+    style T10 fill:#c6f0c1
+    style T11 fill:#c6f0c1
+    style T12 fill:#c6f0c1
+    style T15 fill:#c6f0c1
+    style E2E fill:#c6f0c1
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style Report fill:#34a853,color:#fff
+    style Final fill:#34a853,color:#fff
+        </pre>
+</div>
+<!-- ===== TOOL COVERAGE MATRIX ===== -->
+<h2>2. Tool Coverage by Phase &amp; Implementation Status</h2>
+<div class="diagram-container">
+<div class="diagram-title">
+        2. Tool Coverage by Phase &amp; Implementation Status
+      </div>
+<pre class="mermaid">
+graph TB
+    Pipeline["Tool Security Pipeline"]
+
+    Pipeline --&gt; S1["STAGE 1: Parallel Static Analysis<br/>All Run Concurrently"]
+    Pipeline --&gt; Support["Support Layer<br/>Sequential After Stage 1"]
+    Pipeline --&gt; S2["STAGE 2: Parallel Security &amp; Functional Testing<br/>All Run Concurrently in Separate KS Instances"]
+
+    S1 --&gt; T1["Api-Explorer<br/>✅ Complete"]
+    S1 --&gt; T2["npm audit<br/>✅ Complete"]
+    S1 --&gt; T3["gitleaks<br/>✅ Complete"]
+    S1 --&gt; T4["semgrep<br/>✅ Complete"]
+    S1 --&gt; T5["trivy<br/>✅ Complete"]
+    S1 --&gt; T8["license-checker<br/>🌙 nightly only (internal-audit.yml)"]
+
+    Support --&gt; T7["tenant-isolation<br/>✅ Complete"]
+    Support --&gt; T9["aiken<br/>✅ Complete"]
+    Support --&gt; T10["aggregator<br/>✅ Complete"]
+
+    S2 --&gt; T6["OWASP ZAP<br/>❌ Not wired"]
+    %% KS-1365: these four nodes were labelled Live as a CI pr gate; GitHub Actions retired 2026-08-27, now the author-run local PR gate
+    S2 --&gt; T11["Schemathesis<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Separate KS"]
+    S2 --&gt; T12["Akto<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Separate KS"]
+    S2 --&gt; T15["K6<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Separate KS"]
+    S2 --&gt; Playwright["Playwright<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Separate KS Instance"]
+    %% KS-983 (2026-10-16): the path-spelling guard is two Playwright projects (limits, gates), run alone (it exhausts the gateway limiters)
+    S2 --&gt; PS["Playwright · path-spelling<br/>✅ Local · run ALONE<br/>KS-858 class: 9 limiters (10 mounts) + anchors scope gate<br/>(KS-983)"]
+    S2 --&gt; INT["Schemathesis · Integration mode<br/>⏳ Local · pre-merge + nightly<br/>Anchoring integrity (KS-489-D / KS-492 / KS-587 / KS-589)<br/>Co-located in systemTest/schemathesis · Separate KS Instance"]
+    INT -.-&gt;|read-only SQL| PG2[("Postgres<br/>stored-state invariants (KS-589)")]
+
+    T11 --&gt; Complete["Complete<br/>Tool Stack"]
+    T12 --&gt; Complete
+    T15 --&gt; Complete
+    Playwright --&gt; Complete
+    PS --&gt; Complete
+    INT --&gt; Complete
+
+    style Pipeline fill:#e8f0fe
+    style S1 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style S2 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style Support fill:#e8f0fe
+    style T1 fill:#c6f0c1
+    style T2 fill:#c6f0c1
+    style T3 fill:#c6f0c1
+    style T4 fill:#c6f0c1
+    style T5 fill:#c6f0c1
+    style T6 fill:#fce5cd
+    style T7 fill:#c6f0c1
+    style T8 fill:#c6f0c1
+    style T9 fill:#c6f0c1
+    style T10 fill:#c6f0c1
+    style T11 fill:#c6f0c1
+    style T12 fill:#c6f0c1
+    style T15 fill:#c6f0c1
+    style Playwright fill:#c6f0c1
+    style PS fill:#c6f0c1
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style Complete fill:#34a853,color:#fff
+        </pre>
+</div>
+<!-- ===== DAST TOOL COVERAGE MATRIX ===== -->
+<h2>3. DAST Tool Coverage Matrix - What Each Tool Uniquely Catches</h2>
+<div class="diagram-container">
+<div class="diagram-title">
+        3. DAST Security/Functional Testing Tools - Coverage &amp; Overlap Matrix
+      </div>
+<pre class="mermaid">
+graph TB
+    Start["DAST Testing Stack<br/>OpenAPI Specification"]
+
+    Start --&gt; OWASP["OWASP ZAP<br/>❌ Not wired — no workflow references it"]
+    %% KS-1365: Schemathesis, K6 and Akto nodes were labelled Live as a CI pr gate; GitHub Actions retired 2026-08-27, now the author-run local PR gate
+    Start --&gt; Schema["Schemathesis<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Property-Based Testing"]
+    Start --&gt; AktoPrep["Akto Preparation<br/>API Surface Discovery"]
+    Start --&gt; K6["K6<br/>✅ Local PR gate — smoke scenario<br/>author-run · Test Evidence<br/>Performance &amp; Load Testing"]
+    Start --&gt; INT["Schemathesis · Integration mode<br/>⏳ Local · pre-merge + nightly<br/>Orchestrated env-flip / service-stop + read-only DB sweeps (co-located in systemTest/schemathesis)"]
+
+    AktoPrep --&gt; AktoSource["API Surface Ingest:<br/>Option A: OpenAPI Spec Import<br/>Option B: Fixture Traffic Replay<br/>(⚠️ Not Production Traffic<br/>PII &amp; Tenant Isolation Safe)"]
+    AktoSource --&gt; Akto["Akto<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Business Logic Discovery<br/>w/ Discovered API Surface"]
+
+    OWASP --&gt; OWASP_C["Would catch (if wired):<br/>Active Scanning · Cookie/Session Handling<br/>Spider &amp; Crawl · Standard OWASP Top 10"]
+    Schema --&gt; Schema_C["✓ Property-Based Testing<br/>✓ Schema Violations<br/>✓ Boundary Testing<br/>✓ Type Mismatches<br/>✓ Cross-Tenant IDOR (user-admin — KS-467, fixed &amp; active)<br/>✓ Cross-tenant/cross-owner document isolation (BUG-ISOLATION-001 / KS-4): read + KS-513 write vectors (cross-tenant mutate/transfer-custody · forged x-tenant-id · api-key) + cross-owner read/revoke within a tenant<br/>✓ Custom security checks: integration_5xx_guard (KS-268 + KS-499 + KS-544, 14 by-design-503 ops) · public_operation_auth_conformance (KS-425) · control_byte_acceptance_guard (KS-472, HARD GATE — red until the platform fix lands) · by_design_input_tolerance_guard (KS-662, 5 ruled ops — GET /api/users/admin/list added by KS-1447: undeclared query key ONLY, strict classifier; declared limit/offset violations still fail; offset=-1 500s still fail not_a_server_error) · by_design_501_guard (KS-686 — POST /api/wallets/verify fail-closed 501 tolerated until KS-627; tripwire test_wallet_verify_stub.py)<br/>✓ Review-G security regressions (KS-492, Known Failure = pytest xfail / skip until platform fix): notification BOLA (KS-486-A) · webhook SSRF guard (KS-487-B) · seed-demo gate · wallet-verify fail-closed 501 (KS-686 tripwire, RED when KS-627 lands) &amp; F-06 account-lockout tripwire + principal shield (KS-575) &amp; KYC-callback auth &amp; billing idempotency (KS-488-C)<br/>✓ State-machine / precondition refusals (KS-478, KS-466 §11): 10 ops driven to their unmet precondition → clean enveloped business 4xx, never a raw 5xx / silent 2xx (dedicated Preconditions report tab; contract-side fix = stateful links, KS-188)<br/>○ Governance-cap free, live (KS-1762, opt-in, run alone by run.py governance-cap with its own Governance cap report tab): active + queued cap from two proposers → only the super-admin's 3 oldest cancelled; an untouchable cap skips with freed 0"]
+    Akto --&gt; Akto_C["✓ 1000+ Custom Tests<br/>✓ Business Logic Flaws<br/>✓ API Coverage from Spec/Fixtures<br/>✓ Sensitive Data Detection<br/>✓ BOLA / Privilege Escalation"]
+    K6 --&gt; K6_C["✓ Load Testing<br/>✓ Performance Baselines<br/>✓ Stress Testing<br/>✓ Response Time Metrics"]
+    INT --&gt; INT_C["Uniquely catches (needs env-flip + service-stop no other suite does):<br/>✓ Anchor fabrication fail-closed (anchoring down · SIMULATE_ANCHORING=false)<br/>✓ Mock-TSA fallback fail-closed (dead TSA — no qualified timestamp)<br/>✓ Anchor-verify reflects the chain, not a DB row<br/>✓ Local revoked/draft overrides a chain positive (F-DEMO-VERIFY-01)"]
+
+    Schema_C --&gt; CONSOLIDATE["Consolidated Report:<br/>Deduplicated Findings<br/>By Tool &amp; Discovery Type"]
+    Akto_C --&gt; CONSOLIDATE
+    K6_C --&gt; CONSOLIDATE
+    INT_C --&gt; CONSOLIDATE
+
+    style Start fill:#e8f0fe
+    style OWASP fill:#fce5cd
+    style Schema fill:#c6e7ff
+    style AktoPrep fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style AktoSource fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Akto fill:#c6e7ff
+    style K6 fill:#c6e7ff
+    style OWASP_C fill:#fce5cd
+    style Schema_C fill:#c6e7ff
+    style Akto_C fill:#c6e7ff
+    style K6_C fill:#c6e7ff
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style INT_C fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style CONSOLIDATE fill:#34a853,color:#fff
+        </pre>
+</div>
+<!-- ===== AUTH INFRASTRUCTURE ===== -->
+<h2>4. Authentication Infrastructure - Critical Prerequisite for tools</h2>
+<div class="diagram-container">
+<div class="diagram-title">
+        4. Authentication Setup for Authenticated Endpoints (tools)
+      </div>
+<pre class="mermaid">
+graph TD
+    Start["Authentication-Dependent Tools<br/>Schemathesis (incl. its anchoring-integrity Integration mode), Akto<br/>K6 (Load Testing), Playwright (E2E)<br/>Need Auth Tokens for Authenticated Endpoints"]
+
+    Start --&gt; Azure["Azure Key Vault<br/>Secrets Management"]
+
+    Azure --&gt; Tenant["Sandbox Tenant<br/>Isolated Test Environment<br/>(Production Data Excluded)"]
+    Azure --&gt; ServiceAcct["Service Account User<br/>Seeded in Sandbox Tenant<br/>Limited Permissions<br/>(Test Data Only)"]
+    Azure --&gt; Token["Short-Lived Token<br/>KV-Backed Token Store<br/>Refresh on Expiry<br/>(Minutes/Hours TTL)"]
+
+    Tenant --&gt; CI["CI Pipeline Startup"]
+    ServiceAcct --&gt; CI
+    Token --&gt; CI
+
+    CI --&gt; Auth["Authentication Bundle<br/>Username (from Azure)<br/>Password (from Azure)<br/>Token/API Key (refreshed)"]
+
+    Auth --&gt; Schema["Schemathesis<br/>✓ Authenticated Property-Based<br/>✓ Hits Authenticated Endpoints<br/>✓ With Service Account Creds"]
+    Auth --&gt; Akto["Akto<br/>✓ API Discovery with Auth<br/>✓ Business Logic Tests<br/>✓ Service Account Perms"]
+    Auth --&gt; K6["K6<br/>✓ Load Testing<br/>✓ Performance Baselines<br/>✓ Authenticated User Session"]
+    Auth --&gt; Playwright["Playwright<br/>✓ E2E Functional Testing<br/>✓ Browser Session Login<br/>✓ Service Account Credentials"]
+    Auth --&gt; INT["Schemathesis · Integration mode<br/>⏳ Local · pre-merge + nightly<br/>✓ Issuer bearer (create) · anon (public verify)<br/>✓ Reuses session tokens across env-flips (login IP-throttled)<br/>✓ KS-191 limiter seeded into the compose-restart subprocess"]
+
+    Schema --&gt; Results["Consolidated Results<br/>Deduplicated Findings"]
+    Akto --&gt; Results
+    K6 --&gt; Results
+    Playwright --&gt; Results
+    INT --&gt; Results
+
+    Results --&gt; Cleanup["Cleanup:<br/>Revoke Short-Lived Token<br/>Reset Service Account<br/>(Keep Sandbox Tenant)"]
+
+    style Start fill:#e8f0fe
+    style Azure fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Tenant fill:#c6e7ff
+    style ServiceAcct fill:#c6e7ff
+    style Token fill:#c6e7ff
+    style CI fill:#e8f0fe
+    style Auth fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Schema fill:#c6e7ff
+    style Akto fill:#c6e7ff
+    style K6 fill:#c6e7ff
+    style Playwright fill:#c6e7ff
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style Results fill:#34a853,color:#fff
+    style Cleanup fill:#fce5cd
+        </pre>
+</div>
+<!-- ===== CI/CD PIPELINE ===== -->
+<h2>5. GitHub Actions CI/CD Execution Pipeline</h2>
+<!-- KS-1365: added this note; the diagram below read as a pipeline that runs today; Actions retired 2026-08-27 -->
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Historical — this pipeline does not run.</strong></td><td> GitHub Actions
+      is retired for this repo (Kam, 2026-08-27, KS-685). </td></tr><tr><td>The diagram records the former
+      CI shape; today the PR author runs the four platform suites (Schemathesis
+      · Akto · Playwright · k6 smoke) plus touched unit suites locally and
+      records them in the PR's Test Evidence block — see
+      <code>Blockchain/Dev/docs/DEV-PROCESS.md</code> §Manual CI-gate
+      equivalents.
+    </td></tr></table>
+<div class="diagram-container">
+<div class="diagram-title">
+        5. GitHub Actions Workflow with Parallel Stages
+      </div>
+<pre class="mermaid">
+graph LR
+    Trigger["PR / Push"]
+    Trigger --&gt; Checkout["Checkout"]
+    Checkout --&gt; Install["Install<br/>Tools"]
+    Install --&gt; S1Header["⚡ STAGE 1<br/>Parallel Static"]
+
+    S1Header --&gt; S1["STAGE 1<br/>Run All Concurrently"]
+    S1 --&gt; T1["Api-Explorer"]
+    S1 --&gt; T2["npm audit"]
+    S1 --&gt; T3["gitleaks"]
+    S1 --&gt; T4["semgrep"]
+    S1 --&gt; T5["trivy"]
+    S1 --&gt; T8["license-check<br/>🌙 nightly only"]
+
+    T1 --&gt; Join["🔗 API Up"]
+    T2 --&gt; Join
+    T3 --&gt; Join
+    T4 --&gt; Join
+    T5 --&gt; Join
+    T8 --&gt; Join
+
+    Join --&gt; T7["tenant-isolate"]
+    T7 --&gt; T9["aiken"]
+    T9 --&gt; T10["aggregator"]
+
+    T10 --&gt; S2Header["⚡ STAGE 2<br/>Parallel Security<br/>&amp; Functional"]
+
+    S2Header --&gt; S2["STAGE 2<br/>Run All Concurrently<br/>Separate KS"]
+    S2 --&gt; T6["OWASP ZAP ❌<br/>Not wired"]
+    S2 --&gt; T11["Schemathesis ✅<br/>KS"]
+    S2 --&gt; T12["Akto ✅<br/>KS"]
+    S2 --&gt; T15["K6 ✅<br/>KS"]
+    S2 --&gt; E2E["Playwright ✅<br/>Separate KS Instance"]
+    S2 --&gt; INT["Schemathesis · Integration mode ⏳<br/>Local · pre-merge + nightly<br/>(anchoring integrity; not the PR gate — KS-416 precedent)"]
+
+    T11 --&gt; Parse["Parse<br/>Results"]
+    T12 --&gt; Parse
+    T15 --&gt; Parse
+    E2E --&gt; Parse
+    INT --&gt; Parse
+
+    Parse --&gt; Agg["Aggregate"]
+    Agg --&gt; Check{Issues<br/>Found?}
+
+    Check --&gt;|No Issues| Pass["✓ Build Passes"]
+    Check --&gt;|Serious/Critical Issues| Fail["❌ Build Fails<br/>Block Deployment"]
+
+    Pass --&gt; Upload["Deploy to<br/>Staging"]
+    Upload --&gt; Success["✅ Deployment<br/>Complete"]
+
+    Fail --&gt; Investigate["🔍 Investigation<br/>Required"]
+    Investigate --&gt; Fix["🔧 Fix Issues<br/>Commit &amp; Push"]
+    Fix --&gt; Trigger
+
+    style Trigger fill:#e8f0fe
+    style S1 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style S2 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style S1Header fill:#fff3cd
+    style S2Header fill:#fff3cd
+    style Join fill:#c6f0c1
+    style T1 fill:#c6f0c1
+    style T2 fill:#c6f0c1
+    style T3 fill:#c6f0c1
+    style T4 fill:#c6f0c1
+    style T5 fill:#c6f0c1
+    style T6 fill:#fce5cd
+    style T7 fill:#c6f0c1
+    style T8 fill:#c6f0c1
+    style T9 fill:#c6f0c1
+    style T10 fill:#c6f0c1
+    style T11 fill:#c6f0c1
+    style T12 fill:#c6f0c1
+    style T15 fill:#c6f0c1
+    style E2E fill:#c6f0c1
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style Fail fill:#f4cccc,stroke:#d32f2f,stroke-width:2px
+    style Pass fill:#c6f0c1
+    style Check fill:#fff3cd
+    style Upload fill:#c6f0c1
+    style Investigate fill:#f4cccc,stroke:#d32f2f,stroke-width:2px
+    style Fix fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Success fill:#34a853,color:#fff
+        </pre>
+</div>
+<!-- ===== SUCCESS CRITERIA ===== -->
+<h2>6. Deployment Success Criteria &amp; Validation</h2>
+<div class="diagram-container">
+<div class="diagram-title">
+        6. Implementation Checkpoints - Tools in Parallel by Stage
+      </div>
+<pre class="mermaid">
+graph TD
+    Start["🚀 Tool Stack Deployment"]
+
+    Start --&gt; S1H["⚡ STAGE 1: Parallel Static Analysis<br/>All Tools Run Concurrently"]
+
+    S1H --&gt; V1["✓ Api-Explorer Complete"]
+    S1H --&gt; V2["✓ npm audit Complete"]
+    S1H --&gt; V3["✓ gitleaks Complete"]
+    S1H --&gt; V4["✓ semgrep Complete"]
+    S1H --&gt; V5["✓ trivy Complete"]
+    S1H --&gt; V8["🌙 license-checker — nightly only (internal-audit.yml), not a pr gate"]
+
+    V1 --&gt; Join["🔗 API Server Up<br/>Join Point"]
+    V2 --&gt; Join
+    V3 --&gt; Join
+    V4 --&gt; Join
+    V5 --&gt; Join
+    V8 --&gt; Join
+
+    Join --&gt; V7["✓ tenant-isolation Complete"]
+    V7 --&gt; V9["✓ aiken Complete"]
+    V9 --&gt; V10["✓ aggregator Complete"]
+
+    V10 --&gt; S2H["⚡ STAGE 2: Parallel Security &amp; Functional Testing<br/>All Tools Run Concurrently<br/>Each in Separate KS Instance"]
+
+    S2H --&gt; V6["❌ OWASP ZAP — not wired"]
+    %% KS-1365: these four nodes were labelled Live as a CI pr gate; GitHub Actions retired 2026-08-27, the suites are now the author-run local PR gate
+    S2H --&gt; V11["✅ Schemathesis — local PR gate (author-run)<br/>Separate KS Instance"]
+    S2H --&gt; V12["✅ Akto — local PR gate (author-run)<br/>Separate KS Instance"]
+    S2H --&gt; V15["✅ K6 — local PR gate (author-run)<br/>Separate KS Instance"]
+    S2H --&gt; VE2E["✅ Playwright — local PR gate (author-run)<br/>Separate KS Instance"]
+    S2H --&gt; VINT["⏳ Schemathesis · Integration mode<br/>anchoring integrity — pre-merge + nightly<br/>NOT a pr gate"]
+
+    V11 --&gt; VCheck["Consolidate Results"]
+    V12 --&gt; VCheck
+    V15 --&gt; VCheck
+    VE2E --&gt; VCheck
+    VINT --&gt; VCheck
+
+    VCheck --&gt; VTime["✓ Complete &lt; 30 Minutes<br/>All Tools Execution"]
+    VTime --&gt; VFalse["✓ False Positives &lt; 5%"]
+    VFalse --&gt; VTeam["✓ Team Trained"]
+    VTeam --&gt; VDocs["✓ Documentation Complete"]
+    VDocs --&gt; VMonitor["✓ Monitoring &amp; Alerts Setup"]
+    VMonitor --&gt; Success["✅ Full Tool Stack Ready<br/>Parallel Execution<br/>Separate KS Instances<br/>API Server Join Point"]
+
+    style Start fill:#e8f0fe
+    style S1H fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    style S2H fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    style Join fill:#c6f0c1,stroke:#34a853,stroke-width:2px
+    style V1 fill:#c6f0c1
+    style V2 fill:#c6f0c1
+    style V3 fill:#c6f0c1
+    style V4 fill:#c6f0c1
+    style V5 fill:#c6f0c1
+    style V6 fill:#fce5cd
+    style V7 fill:#c6f0c1
+    style V8 fill:#c6f0c1
+    style V9 fill:#c6f0c1
+    style V10 fill:#c6f0c1
+    style V11 fill:#c6f0c1
+    style V12 fill:#c6f0c1
+    style V15 fill:#c6f0c1
+    style VCheck fill:#c6f0c1
+    style VE2E fill:#c6f0c1
+    style VINT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style VTime fill:#c6f0c1
+    style VFalse fill:#c6f0c1
+    style VTeam fill:#fce5cd
+    style VDocs fill:#fce5cd
+    style VMonitor fill:#fce5cd
+    style Success fill:#34a853,color:#fff
+        </pre>
+</div>
+<!-- ===== RISK ASSESSMENT & TIERING ===== -->
+<h2>7. Risk Assessment &amp; Tiered Execution Model</h2>
+<div class="diagram-container">
+<div class="diagram-title">
+        7. Risk Analysis &amp; CI/CD Overhead Mitigation
+      </div>
+<pre class="mermaid">
+graph TD
+    Risks["Tool Stack Risks &amp; Mitigations"]
+
+    Risks --&gt; R1["Tool Integration<br/>Complexity"]
+    Risks --&gt; R2["DAST Tool Overlap<br/>Duplicate Findings"]
+    Risks --&gt; R3["CI/CD Overhead<br/>Test Time Impact"]
+    Risks --&gt; R4["False Positives<br/>Alert Fatigue"]
+
+    R1 --&gt; R1S["Likelihood: Low<br/>Impact: Medium"]
+    R1S --&gt; R1M["Mitigation:<br/>Parallel Execution<br/>Separate KS Instances<br/>Aggregator Deduplication"]
+
+    R2 --&gt; R2S["Likelihood: High<br/>Impact: Medium"]
+    R2S --&gt; R2M["Mitigation:<br/>Tool-Specific Coverage Matrix<br/>Group by Strength (discovery,<br/>logic, mutation)<br/>Prioritize Tool Output"]
+
+    R3 --&gt; R3S["Likelihood: Medium<br/>Impact: High<br/>⚠️ KEY ISSUE:<br/>Cannot Block All on PR"]
+    R3S --&gt; R3M["Mitigation:<br/>TIERED EXECUTION MODEL"]
+
+    R4 --&gt; R4S["Likelihood: Medium<br/>Impact: Medium"]
+    R4S --&gt; R4M["Mitigation:<br/>Environment Controls<br/>Baseline Thresholds<br/>Confidence Scoring"]
+
+    R3M --&gt; TIER["TIERED EXECUTION MODEL:<br/>Four-Track Approach<br/>(TIER input: api-contract-tests.yml · orchestrate.sh)"]
+
+    %% KS-1365: pr node said pull_request, BLOCKING, pr-platform-suites.yml and that the suites are ALL BLOCKING; GitHub Actions retired 2026-08-27
+    TIER --&gt; PR["🔵 pr<br/>(run LOCALLY by the PR author before handover · recorded in the Test Evidence block · formerly the pull_request job in pr-platform-suites.yml, which no longer runs)<br/>Stage 1 static: npm audit · gitleaks · semgrep · trivy · license-checker · aiken<br/>→ tenant-isolation<br/>Stage 2: Schemathesis · Playwright · k6 smoke · Akto PR tier (BOLA/BFLA/Broken-Auth, all endpoints)<br/>Quality gate in PR CI for Playwright ONLY (KS-399 — quality:static + test:unit); every other suite runs only its functional check: Schemathesis KS-380 spec-auth · Playwright e2e · Performance k6 smoke · Akto BOLA/BFLA/Broken-Auth (27 ids, all endpoints) were ALL BLOCKING in CI (complete-then-block; KS-413 — the Akto scan always covered every endpoint, now blocking after the poll ceiling was raised above its ~440s runtime; SM at pre-merge, full OWASP nightly)<br/>the FULL quality gate — static checks + unit/integration tests (npm run quality / run.py quality across all four) — runs locally, MANDATORY before every systemTest PR, not in PR CI<br/>GATE: FAIL_ON=HIGH = Block Merge<br/>MEASURED: SC pr 1.2 min (KS-589, Ubuntu VM, 2026-08-11 — not re-measured on the Mac) · Akto pr 29 s (slot 1 Mac, 2026-10-14, Akto 2.38.2, KS-1478, PASS; 30 s on 2026-10-07, Akto 2.37.1, FAILED on the wallet-status HIGH; 24 s on slot 2, 2026-10-05, 2.36.10) · k6 smoke 43–44 s (2026-09-28, M2 Max, four stacks up) · Playwright unit 389 tests 6.5 s (Mac, 2026-10-06)"]
+
+    TIER --&gt; PREMERGE["🟠 pre-merge<br/>(local run by the author · formerly pre-merge-platform-suites.yml, build-once/fan-out, quality-gated — HISTORICAL, cannot run: Actions retired 2026-08-27)<br/>quality → build → Schemathesis all-checks + Akto pre-merge (akto job)<br/>run.py pre-merge (all checks + 4 phases) = the comprehensive property sweep (KS-98 moved here from the PR gate; persona auth on by default)<br/>+ full live integration pytest suite (pytest tests/, KS-416) — runs before the sweep, gates pre-merge; under the real 2000/60s limit, NOT on the PR gate<br/>Akto pre-merge: BOLA/BFLA/Broken-Auth + Security Misconfiguration (91 ids) across all endpoints, BLOCKING (KS-413)<br/>Integration suite (⏳ Local · pre-merge + nightly — Schemathesis Integration mode, co-located in systemTest/schemathesis) → anchoring-integrity fail-closed + verify-vs-chain (KS-489-D / KS-492), run as its own isolated pytest invocation before the sweep, run on the named slot's stack (historical CI used its own port block), complete-then-block<br/>GATE: FAIL_ON=HIGH = Block Merge<br/>MEASURED: SC pre-merge 16.9 min (KS-589, Ubuntu VM, 2026-08-11 — not re-measured on the Mac) · Akto pre-merge 4 m 8 s (slot 1 Mac, 2026-10-15, Akto 2.38.5, KS-1615, PASS, 0 vulnerable; 4 m 28 s on 2026-10-14, Akto 2.38.2, KS-1478, paced 7,500/min, PASS; 4 m 1 s on 2026-10-07, Akto 2.37.1, FAILED, 2 HIGH on the wallet-status endpoint; 3 m 57 s on slot 2, 2026-10-05, 2.36.10) · anchoring-integrity 216.8 s for 17 scenarios (KS-1408, Mac slot 4, 2026-10-05)"]
+
+    TIER --&gt; FULL["🌙 Nightly (HISTORICAL consolidated caller nightly-platform-suites.yml — ALL jobs NOT RUNNING). Schedule DISABLED and workflow_dispatch dead — GitHub Actions is RETIRED for this repo, NOT pending an AWS migration (KS-418 / PR #891). Kam ruled 2026-08-27 the billing will not be fixed; 20 most recent runs 100% startup_failure (measured 2026-09-09). Run the suites LOCALLY — Blockchain/Dev/docs/DEV-PROCESS.md §Manual CI-gate equivalents. If Actions ever returns, target 0 14 * * * = 14:00 UTC ≈ midnight Sydney / 22:00 Singapore — all four share one schedule, start simultaneously<br/>schemathesis-soak job → nightly profile, ~4hr extended soak + full live integration pytest suite (pytest tests/, KS-416)<br/>playwright-nightly job → named pr-nightly, same suite as pr, scheduled<br/>performance-nightly job → ALL scenarios SERIAL on one docker instance: smoke → auth-spike → 15m → smoke → spike → 15m → smoke → stress → 15m → smoke → scalability → 15m → smoke → nightly soak (~4h4m); 15m 429 cooldowns; ~5.9–6.1h, near the 6h job cap — soak thresholds copied, unvalidated at 4h (KS-379)<br/>akto-security job → full OWASP scan (194 ids; locally: npm run test:security, 14 m 8 s on slot 1 of the Mac, 2026-10-14, Akto 2.38.2, KS-1478, 13 of 13 pass with 4 workflows INCONCLUSIVE (KS-709); 12 m 17 s on 2026-10-07, Akto 2.37.1, 10 of 13 workflows pass; 11 m 1 s on slot 2, 2026-10-05, 2.36.10)<br/>integration job → Integration suite (⏳ Local · pre-merge + nightly — Schemathesis Integration mode, co-located in systemTest/schemathesis): anchoring-integrity fail-closed + verify-vs-chain (KS-489-D / KS-492), on the named slot's stack<br/>MEASURED: SC full 17.4 min (KS-1408, Mac slot 4, 2026-10-05, Schemathesis 4.29.3; 19.6 / 20.9 / 20.3 min on 2026-10-07 at 4.29.3 / 4.29.4 / 4.29.4 with other sessions' stacks up, KS-1439; 26.5 min on the KS-589 VM) · SC nightly ~4 hr by configuration, never measured end to end<br/>REPORT-ONLY — never blocks a merge, even once promoted<br/>(APIFuzzer / Nuclei not part of any current plan)"]
+
+    TIER --&gt; LOCAL["💻 local_debug<br/>(On demand · wall-clock not re-measured)<br/>Schemathesis run.py test-fast (or targeted run)<br/>swap profile for rejection / negative debugging<br/>Single tool only — match to bug under investigation"]
+
+    PR --&gt; RESULT1["Fast Feedback<br/>Low CI overhead<br/>Static + Schemathesis read-only at PR time"]
+
+    PREMERGE --&gt; RESULT2["Comprehensive contract coverage<br/>before merge<br/>all checks + stateful"]
+
+    FULL --&gt; RESULT3["Deep nightly coverage per project<br/>(historical jobs; run locally)<br/>report-only — never blocks a merge"]
+
+    LOCAL --&gt; RESULT4["Rapid Dev Feedback<br/>Short loop<br/>No CI overhead"]
+
+    %% KS-1365: success node said pr blocks fast; GitHub Actions retired 2026-08-27, the pr tier is the author-run local gate
+    RESULT1 --&gt; SUCCESS["✅ Balanced Risk Posture:<br/>pr = author-run local gate (SC + Playwright + k6 smoke + Akto PR tier BOLA/BFLA/Broken-Auth), recorded in the Test Evidence block<br/>pre-merge blocks deep (SC all-checks + Akto pre-merge +SM, run locally by the author)<br/>nightly profiles report only, never block<br/>local_debug = dev loop"]
+    RESULT2 --&gt; SUCCESS
+    RESULT3 --&gt; SUCCESS
+    RESULT4 --&gt; SUCCESS
+
+    style Risks fill:#e8f0fe
+    style R1S fill:#c6e7ff
+    style R2S fill:#fce5cd
+    style R3S fill:#f4cccc,stroke:#d32f2f,stroke-width:2px
+    style R4S fill:#fce5cd
+    style TIER fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style PR fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px
+    style PREMERGE fill:#ffedd5,stroke:#c2410c,stroke-width:2px
+    style FULL fill:#f3e8ff,stroke:#7e22ce,stroke-width:2px
+    style LOCAL fill:#dcfce7,stroke:#15803d,stroke-width:2px
+    style RESULT1 fill:#dbeafe
+    style RESULT2 fill:#ffedd5
+    style RESULT3 fill:#f3e8ff
+    style RESULT4 fill:#dcfce7
+    style SUCCESS fill:#34a853,color:#fff
+        </pre>
+</div>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Note on "Separate KS Instance":</strong></td><td> under the consolidated
+      build-once/fan-out topology each suite job boots its own fully-isolated
+      stack — unique <code>COMPOSE_PROJECT_NAME</code>/<code>STACK_PREFIX</code>
+<em>and</em> a per-suite host-port offset, with each tool pointed at its
+      own gateway (each an isolated stack; the CI-only per-suite port numbers are
+      historical and are not slot ports). </td></tr><tr><td>Isolation then came from both the per-suite
+      ports and GitHub-hosted runners being single-tenant/ephemeral (one stack
+      per runner), not from a shared default port. </td></tr><tr><td>Locally, isolation is the
+      stack slot and every port is the slot-1 base + 100·(N−1).
+    </td></tr></table>

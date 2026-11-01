@@ -1,0 +1,19 @@
+<h2>analytics dbSaveExport and dbSaveAlertRule log when the thrown value is unreadable &mdash; KS-1868, analytics</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>What to know.</strong></strong></td><td> Two analytics DB-save catches read the thrown value unguarded before logging; a revoked Proxy or a throwing <code>message</code> getter made that read throw inside the catch, so no log line was written and the exception left the function. Each read is now in an inner try with the fallback <code>unreadable thrown value</code>. Read from the code, not run: <code>dbSaveAlertRule</code>'s two callers swallow the rejection, so only the missing log line changes there; <code>dbSaveExport</code> has four awaiting callers, so the rejection could reach an export request or go unhandled.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>Not measured here.</strong></strong></td><td> KS-1868 stays open (two of its 253 sites). A real database failure against a booted service, the four platform suites, an LTS Node, <code>npm ci</code> and any deploy were not run.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/analytics &amp;&amp; npx vitest run src/__tests__/ks1868-export-service-db-save-unreadable-throw.test.ts src/__tests__/ks1868-scheduled-jobs-save-alert-rule-unreadable-throw.test.ts   # 6 cells
+cd Blockchain/Dev/services/analytics &amp;&amp; npm test   # 13 files / 56 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>6</strong> in 2 files; red first: 4 of 6 failed by assertion without the changes, 0 of 6 with them</td></tr>
+<tr><td>analytics unit suite</td><td>base <code>85c56a3d1eb9</code> 11 files / 50 of 50; with the changes <strong>13 files / 56 of 56</strong>, 0 failed, 0 skipped</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: 1 pre-existing error, byte-equal to an untouched tree, none in the changed files; eslint on 4 files: 0 errors and 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-11-01 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,50 @@
+<h2>A child run&rsquo;s verdict never comes from its text &mdash; KS-1313</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> <code>childSuiteCounts</code> used to regex the child vitest&rsquo;s
+        human output for <code>Tests  N failed | M passed (T)</code>. The pattern <strong>requires the word
+        &ldquo;passed&rdquo;</strong>, so fail-only, skip-only and todo-only runs matched nothing and it
+        threw. </td></tr><tr><td>And a child <strong>killed by its 180 s spawnSync timeout</strong> prints no summary, so
+        the read depended on whatever else was in its output &mdash; that is the KS 1326 half. </td></tr><tr><td>It now
+        passes <code>--reporter=json --outputFile.json=&lt;tmp&gt;</code> and reads
+        <code>numPassedTests</code> / <code>numFailedTests</code>. </td></tr><tr><td><code>endedNormally</code> refuses a
+        spawn error, a signal, or any exit status other than 0 or 1 <strong>before</strong> the report is
+        read, so a killed child cannot read as a pass even beside a passing report.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotcha when you run this locally.</strong></td><td> The R6 fixtures say
+        &ldquo;captured from real vitest <strong>4.1.9</strong>&rdquo; and the runner you will resolve is
+        <strong>5.0.3</strong>. <strong>Check, do not assume:</strong> capture a report with the same flags and
+        confirm the fields are still there. </td></tr><tr><td>They are &mdash; all five the fixtures use are present and
+        numeric in 5.0.3 &mdash; but read the version out of <code>node_modules/vitest/package.json</code>, not
+        out of the manifest: <code>^5.0.3</code> is a range, not a resolution. </td></tr><tr><td>Type-check with
+        <strong><code>tsconfig.node.json</code></strong>. <code>tsconfig.json</code> does
+        <strong>not</strong> include this file, so a green from it says nothing about this change &mdash;
+        confirm with <code>tsc --listFilesOnly</code> if you doubt it.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd systemTest/performance &amp;&amp; npm ci --ignore-scripts
+node_modules/.bin/vitest run --config vitest.unit.config.ts \
+  tests/unit/utils/unitSuiteSlotIndependence.test.ts   # 10 passed, rc 0
+node_modules/.bin/tsc --noEmit -p tsconfig.node.json   # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, hunk 3 alone &rarr; full patch</td><td>rc 1, <strong>7 failed | 3 passed (10)</strong>,
+all seven R1&ndash;R7 &rarr; <strong>10 passed, 0 failed</strong>, rc 0. passed + failed = 10 in both,
+so neither reading was a load failure</td></tr>
+<tr><td>Arm T1 &mdash; <code>endedNormally</code> forced true</td><td><strong>8 passed / 2 failed</strong>;
+reds are R1 (status 143 + ETIMEDOUT) and R2 (SIGTERM). File restored sha256-identical</td></tr>
+<tr><td>Arm T2 &mdash; the text read restored</td><td><strong>9 passed / 1 failed</strong>; red is R7.
+File restored sha256-identical</td></tr>
+<tr><td>no text read, with a positive control</td><td><code>result.stdout</code> 0 and
+<code>result.stderr</code> 0 in the file, against <code>countsFromSpawn</code> 10 and
+<code>result</code> 6 by the same grep</td></tr>
+<tr><td>runner version</td><td><strong>5.0.3</strong> from <code>node_modules</code>, lockfile pin 5.0.3,
+binary printing <code>vitest/5.0.3 darwin-arm64 node-v24.7.0</code></td></tr>
+<tr><td>tsc</td><td><code>tsconfig.node.json</code> rc 0 / 0 bytes; planted <code>TS2322</code> control
+rc 2 / 168 bytes. <code>tsconfig.json</code> covers this file <strong>0</strong> times</td></tr>
+<tr><td>package unit suite</td><td><strong>1353/1353 (248 suites) &rarr; 1360/1360 (249 suites)</strong>,
+both rc 0, 0 failed</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong> &mdash; local stack not up on
+<code>http://localhost:6882</code>. Never a pass</td></tr>
+<tr><td>scope</td><td>neither KS-1313 nor KS 1326 is closed by this; the remaining
+<code>endedNormally</code> status-1 hole is named as a follow-up</td></tr>
+</table>

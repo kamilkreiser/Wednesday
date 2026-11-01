@@ -1,0 +1,18 @@
+<h2>Five POST request bodies are declared required in the published contract &mdash; KS-1364</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The five operations are <code>POST /api/analytics/exports</code>, <code>POST /api/teams/webhook-config</code>, <code>POST /api/teams/notify</code>, <code>POST /api/batch/certifications</code> and <code>POST /api/batch/delegations</code>. Their request bodies now carry <code>required: true</code> in the published contract. </td></tr><tr><td>This is a declaration in the contract and nothing else: no handler or route file changes. What each handler does when the body is absent was not measured here. </td></tr><tr><td>The change is in three files, <code>analytics.openapi.ts</code>, <code>m365-integration.openapi.ts</code> and <code>api-gateway.openapi.ts</code>, and in the regenerated <code>docs/openapi/secuura-api.yaml</code> (5 insertions, 0 removals). Never hand-edit the yaml; run <code>npm run generate-openapi</code>.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The spec as served by a running gateway, including whether a gateway that already read the old spec needs a restart to serve the new one. </td></tr><tr><td>Any effect on a Schemathesis sweep now that the five bodies read as required.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/analytics &amp;&amp; npx vitest run src/__tests__/ks1364-analytics-exports-body-required.test.ts                     # 5 cells, rc 0
+cd Blockchain/Dev/services/m365-integration &amp;&amp; npx vitest run src/__tests__/ks1364-teams-webhook-config-notify-body-required.test.ts     # 6 cells, rc 0
+cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks1364-batch-certifications-delegations-body-required.test.ts   # 5 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run check:openapi                                                                                               # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>analytics 4 passed / 1 failed &rarr; 5 passed; m365-integration 4 / 2 &rarr; 6 passed; api-gateway 3 / 2 &rarr; 5 passed; every red cell fails with <code>expected undefined to be true</code>; the eleven control cells pass in the red arm</td></tr>
+<tr><td>whole suites</td><td>analytics <strong>32 &rarr; 37</strong>, m365-integration <strong>57 &rarr; 63</strong>, api-gateway <strong>869 &rarr; 874</strong> tests; 0 failed before and after</td></tr>
+<tr><td>yaml diff</td><td>5 insertions, 0 removals, each <code>required: true</code> under one of the five operations</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

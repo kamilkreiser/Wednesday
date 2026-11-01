@@ -1,0 +1,21 @@
+<h2>Two reconciler comments now match the code, and the did:jwk shape test pins six more refused characters &mdash; KS-1816, KS-1830</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Comments only in the anchoring <code>reconciler.ts</code> (+12 / -4, no executable line changes; the catch comment now says the catch is reached when the chain check or the status write rejects, and that a provider outage is decided by the header rule instead): a provider error leaves the row untouched only below the give-up age, and the live loop does not touch <code>updated_at</code> between submitted and confirmed. New test <code>ks1816-reconciler-comments-match-the-code.test.ts</code>: 5 cells reading the file as text (R1, R2 red until the comments are corrected, C1 to C3 pin the code lines).
+      </td></tr><tr><td>KS-1830, second pass, test only: 14 new cells in <code>ks1175-identity-anchoring.test.ts</code> (six more refused characters for both DID fields, plus a control per field); red 12 of 157 under a one-line tamper at <code>anchorSchema.ts</code> line 124, never committed.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> Whether a provider error really fails a row past the give-up age as the new comment says (the cells read text). The integration files, the four platform suites, a running stack, Node 24 and any deploy were not run.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1816-reconciler-comments-match-the-code.test.ts   # 5 cells, rc 0
+cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1175-identity-anchoring.test.ts   # 157 cells, rc 0
+cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                  # 38 files / 569 cells: 568 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>reconciler comments test</td><td>new test alone at develop <code>a786e06e6f6e</code>: <strong>2 of 5 red</strong> (R1, R2), 3 controls pass; with the comments <strong>5 of 5</strong></td></tr>
+<tr><td>comments only</td><td>comment-free transpile of <code>reconciler.ts</code> identical at develop and with the change (same sha256, 3602 characters); a renamed-constant control differs</td></tr>
+<tr><td>did:jwk shape file</td><td>untouched develop 143 of 143; with the 14 cells <strong>157 of 157</strong>; one-line tamper at line 124 (never committed): <strong>12 of 157 red</strong>, 145 pass; restored byte-identical (whole-file sha256 equal)</td></tr>
+<tr><td>anchoring unit suite</td><td>untouched develop <strong>37 files / 550 cells</strong> (549 pass, 1 fail); with the change <strong>38 files / 569 cells</strong> (568 pass, the same 1 fail, <code>threadTokenMint.test.ts</code>), 0 new reds, 0 skipped</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: <strong>0 errors</strong> over 70 anchoring source files, a planted type error reported once as <code>TS2322</code>; eslint on the two tests and <code>reconciler.ts</code>: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,17 @@
+<h2>KS-1384 R1 round 2: a stalled re-anchor never pays twice; both anchoring calls bounded</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td><code>POST /api/documents/{id}/anchor</code> re-checks its claim immediately before it posts: still its own token and its 10-minute lease still live, renewed in the same <code>UPDATE</code>. If not, it posts nothing and answers 409.</td></tr><tr><td>The in-flight read is bounded at 5 s (503, Retry-After 60, nothing posted) and the post at 10 s. A timed-out post keeps the claim, because its outcome is unknown: 503 with Retry-After 600, and a retry is refused until the lease ends. Since round 3 the unknown outcome is also recorded, so a retry after the lease is refused on any anchoring row (QA gate 61, G61-F1).</td></tr><tr><td>Deploy hold: R1 deploys only with F0, F-b and both parts of R2, after the census, box by box.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A real anchoring service, real stall lengths, the four platform suites, a running stack, Node 24 (LTS), any chain or box.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; TEST_DATABASE_URL=... npx jest --config jest.integration.config.js src/__tests__/ks1384-r1r2-stale-claimant.integration.test.ts   # 8 cells
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest src/__tests__/ks1384-r1-retry-route.test.ts   # 19 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>14</strong>: 8 on real Postgres (6 red at R1&rsquo;s head, 2 controls), 6 unit (5 red at R1&rsquo;s head with R1&rsquo;s files aliased in; the file does not compile with them swapped in place; 1 control)</td></tr>
+<tr><td>mutants</td><td>10 written, each parsed and compiled before it counted; 10 killed, each by its own cells only</td></tr>
+<tr><td>originate unit suite</td><td>155 suites / 1904 cells, all pass</td></tr>
+<tr><td>real claim cells</td><td>20 of 20 (R1&rsquo;s 12 and these 8), as the app role with RLS on</td></tr>
+<tr><td>tsc and eslint</td><td>tsc 0 errors with all 179 originate test files; eslint 0 errors, 2 warnings, both at the base</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared; R1&rsquo;s head <code>13fdd7f31f22</code>, 2026-10-31 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

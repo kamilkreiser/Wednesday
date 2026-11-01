@@ -1,0 +1,129 @@
+<h2>15. /revoke is one atomic transition (KS-1278)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What this pins.</strong></td><td><code>POST /api/documents/:id/revoke</code> decided
+      “already revoked” on a <strong>READ</strong>
+      (<code>routes/documents.ts:2374</code>) and then ran an <strong>unconditional</strong>
+<code>UPDATE</code>. </td></tr><tr><td>Two overlapping revokes could both pass that read, so both answered
+      <strong>200</strong>, both wrote an <code>action_provenance</code> row and both emitted an
+      anchor call. </td></tr><tr><td>The decision now lives <strong>IN the UPDATE</strong>:
+      <code>updateDocument</code> takes an <code>ifStatusIsNot</code> option that adds
+      <code>AND (${guardStatus}::text IS NULL OR status IS DISTINCT FROM
+      ${guardStatus}::text)</code> to the <code>WHERE</code>, and a guarded write that changed
+      <strong>no row</strong> returns <code>null</code>. </td></tr><tr><td>The loser of the race answers the
+      <em>same</em> <strong>400 BAD_REQUEST “Document is already revoked”</strong> as a
+      sequential caller, and returns <em>before</em> <code>recordOnBehalfOf</code> — so it
+      records <strong>no</strong> provenance row and emits <strong>no</strong> anchor.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Scope.</strong></td><td> This completes the ticket’s scope — the atomic
+      transition, the 400 for the loser, and provenance and anchor only for the winner. </td></tr><tr><td>The PR
+      says <code>Refs KS-1278</code>, not <code>Closes</code>. <strong>The row-lock alternative is
+      not taken.</strong>
+</td></tr><tr><td class="pm-topic" rowspan="2"><strong>What a <code>null</code> from the guarded write means, and what each meaning is
+      pinned by.</strong></td><td><code>updateDocument</code> already returned <code>null</code> for a
+      <em>missing</em> document (<code>documentRepo.ts:543</code> at
+      <code>4a1620588819</code>; <code>:538</code> at the branch base <code>32e058975d4e</code>),
+      so <code>null</code> is not a single condition and the route must not read it as one. </td></tr><tr><td>On the
+      guarded path it can arise three ways:
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>A genuine race</strong></td><td>another revoke changed the row between this
+        request's read and its write. </td></tr><tr><td>The write refuses in the UPDATE, so exactly one of two
+        overlapping writers wins. <em>Instrument:</em> cell <code>R1</code>, which also asserts
+        <strong>0</strong> anchor emissions on the losing path, not only 0 provenance rows. </td></tr><tr><td>The
+        guard itself is pinned by cell <code>R2</code>, which asserts the guard clause by
+        <strong>exact text</strong> and the guard’s own two parameters <strong>by
+        position</strong> — a weaker assertion on either half is satisfied by a vacuous
+        guard, or by the <code>SET</code> clause’s new status standing in for the guard
+        value.</td></tr><tr><td class="pm-topic" rowspan="2"><strong>The row was deleted inside the window</strong></td><td>the answer is 400 where
+        404 belongs. </td></tr><tr><td>This is <strong>unchanged by round 2</strong> and is tracked as
+        <code>KS 1419</code>. <em>Instrument:</em> none live — <strong>unmeasured</strong>
+        against a real database.</td></tr><tr><td class="pm-topic" rowspan="1"><strong>A revoke addressed by the platform UUID</strong></td><td><em>fixed in round 2.</em>
+        Both reads fall back to the primary key for a UUID-shaped id
+        (<code>documentRepo.ts:244-251</code>) and the API hands clients that key as
+        <code>documentUuid</code> (<code>:172</code>), but the guarded UPDATE keyed on
+        <code>external_id</code>. <strong>At the branch base and at round 1</strong> a sequential,
+        non-race revoke of a live, owned, unrevoked document addressed that way matched 0 rows and
+        answered <code>400 "Document is already revoked"</code> with 0 provenance rows and the
+        status never written. <strong>At round 2</strong> the guarded write keys on the row the read
+        resolved (<code>:616</code>, mirroring the read's own precedence: <code>external_id</code>
+        first, then the primary key), so it answers <code>200</code>, writes the status and records
+        exactly one provenance row. <em>Instrument:</em> cell <code>N1</code>, red at
+        <code>4a1620588819</code> and green at the round-2 head.</td></tr><tr><td colspan="2">
+      The route still 404s at <code>:2367</code> and 403s at <code>:2371</code> before the write, so
+      a missing or unowned document never reaches it. <strong>Only the opted-in revoke path changed
+      key</strong>: the other 12 production <code>updateDocument(</code> callers pass no
+      <code>ifStatusIsNot</code> and take a byte-identical statement
+      (<em>instrument:</em> cell <code>N3</code>). </td></tr><tr><td colspan="2">A non-UUID external id never reaches the
+      <code>::uuid</code> cast, which would otherwise raise 22P02 (<code>:590</code>;
+      <em>instrument:</em> cell <code>N2</code>, green at both ends). </td></tr><tr><td colspan="2">The remaining residual cases
+      are recorded under <em>Not covered</em> below.
+    </td></tr></table>
+<h3>15.1 The cells</h3>
+<table class="pmatrix"><tr><td colspan="2">
+      One new jest file,
+      <code>Blockchain/Dev/services/originate/src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts</code>,
+      <strong>4 cells</strong>: <strong>R1</strong> a revoke whose UPDATE changed no row answers
+      400 and records nothing; <strong>R2</strong> the revoke UPDATE itself carries
+      <code>status IS DISTINCT FROM</code>; <strong>C1</strong> the revoke that changes the row
+      answers 200 and records exactly one row; <strong>C2</strong> an ordinary update with no
+      guard asked for still returns the record when the driver reports 0 rows. </td></tr><tr><td colspan="2">The KS-1293
+      hermetic register gains the new file as its 1 added line, so the suite stays self-listing.
+    </td></tr></table>
+<h3>15.2 Running it</h3>
+<pre><code>cd Blockchain/Dev
+npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+npx jest --config services/originate/jest.config.js --rootDir services/originate \
+    ks1278-revoke-is-one-atomic-transition ks1293-originate-suite-is-hermetic   # 14 tests
+npx jest --config services/originate/jest.config.js --rootDir services/originate  # 91 suites / 1067 tests</code></pre>
+<h3>15.3 Figures, measured</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The originate unit suite goes <strong>90 suites / 1063 tests → 91 / 1067</strong>, 0
+      failed at both ends — a delta of <strong>+1 suite, +4 tests</strong>, which is exactly
+      this file’s four cells. </td><td>The two named files together read <strong>14 passed, 14
+      total</strong>. Measured <strong>2026-10-05</strong>, host <strong>Kamil’s Mac Studio
+      (2)</strong>, node v24.7.0, jest 29.7.0; full suite wall clock <strong>12 s</strong>.
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>Red-first, by assertion.</strong></td><td> With both test sections applied and
+      <em>neither</em> product hunk, the cell file runs <strong>rc 1, 2 failed / 2 passed of 4
+      total</strong>: <strong>R1</strong> and <strong>R2</strong> red, <strong>C1</strong> and
+      <strong>C2</strong> green. </td></tr><tr><td>Four tests <em>executed</em>, so that is an assertion red and not
+      a load failure — a run reporting 0 passed <em>and</em> 0 failed would be the latter.
+      </td></tr><tr><td>Control: <code>grep -c 'IS DISTINCT FROM'</code> on the reverted product reads
+      <strong>0</strong>, and <strong>1</strong> once restored.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>One tamper per conjunct, and each reddens a different cell.</strong></td><td> This is the part
+      worth reading: the guard is a conjunction, and a single red arm would leave most of it
+      unguarded. </td></tr><tr><td>Each tamper was applied <em>alone</em> to the patched product and the file re-run,
+      4 tests executed every time.
+    </td></tr></table>
+<table>
+<tr><th>Tamper</th><th>Term falsified</th><th>Cell that reddens</th></tr>
+<tr><td><strong>T1</strong> the whole <code>AND (…)</code> clause deleted</td><td>the SQL guard, entire</td><td><strong>R2</strong> — 1 failed / 3 passed</td></tr>
+<tr><td><strong>T2</strong> <code>status IS DISTINCT FROM</code> → <code>status =</code></td><td>the <code>IS DISTINCT FROM</code> term, inverted</td><td><strong>R2</strong> — 1 failed / 3 passed</td></tr>
+<tr><td><strong>T3</strong> <code>guardStatus !== null &amp;&amp;</code> removed</td><td>the pass-through for unguarded callers</td><td><strong>C2</strong> — 1 failed / 3 passed</td></tr>
+<tr><td><strong>T4</strong> <code>affected === 0</code> → <code>affected === -1</code></td><td>the changed-no-row term</td><td><strong>R1</strong> — 1 failed / 3 passed</td></tr>
+</table>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      So <strong>C2 is not decoration</strong>: it is the only cell that fails when the
+      <code>guardStatus !== null</code> term is dropped, which would otherwise make every
+      unguarded caller in the codebase start receiving <code>null</code> on a 0-row update.
+      </td><td>Restored, the file reads <strong>4 passed, 4 total</strong>, so the reds above are the
+      tampers and not drift.
+    </td></tr></table>
+<h3>15.4 Timing</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>No stated timing covers a <code>services/originate</code> unit suite.</strong></td><td>
+      Instrument, printed so it can be re-run: <code>/usr/bin/grep -c -i -E</code> over both
+      platform-k docs at the base SHA <code>32e058975d4e</code>.
+      <code>originate.*unit suite</code> <strong>0</strong> flow / <strong>0</strong> cheat.
+      </td></tr><tr><td>Must-hit controls <code>auth</code> <strong>76</strong> / <strong>75</strong> and
+      <code>Akto</code> <strong>71</strong> / <strong>83</strong>, so the zeroes are measurements
+      and not a blind grep. <strong>No Akto tier budget moves</strong> — this change adds no
+      scan template and touches no scan surface. </td></tr><tr><td>No stated timing row is amended.
+    </td></tr><tr><td class="pm-topic" rowspan="4"><strong>Not covered.</strong></td><td> A live sweep (skill §5f) — nothing was exercised
+      against a running stack or a real PostgreSQL, so <strong>KS-1278 does not move to Done on
+      this change’s account</strong>. </td></tr><tr><td>The cells mock the Prisma driver, so the
+      <em>atomicity</em> is pinned at the SQL <strong>text</strong> level (R2) plus the JS return
+      path (R1, C2); that two concurrent transactions really serialise on this
+      <code>WHERE</code> is <strong>UNMEASURED</strong> here and would need a live two-session
+      test. </td></tr><tr><td>One residual behaviour is recorded and <em>not</em> fixed: if a document is
+      <strong>deleted</strong> between the route’s read and the guarded write, the inner
+      <code>getDocument</code> returns <code>null</code> and the caller sees <strong>400
+      “already revoked”</strong> where <strong>404</strong> would be right. </td></tr><tr><td>That is a
+      pre-existing shape of <code>updateDocument</code>’s single <code>null</code>, narrowed
+      to a race window by this change rather than introduced by it; separating the two meanings is
+      outside this ticket.
+    </td></tr></table>

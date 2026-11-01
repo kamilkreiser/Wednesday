@@ -1,0 +1,15 @@
+<h2>A fixture docstring now states the KS-1570 ruling instead of the policy it replaced &mdash; KS-1585 nit n1</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>One comment line changes in <code>ks1533-key-mint-organisation-arm.test.ts</code> (line 80): <code>PLAIN_ADMIN_A</code>&rsquo;s docstring said &ldquo;UNDECIDED POLICY, KS-1535&rdquo; and now says the role is bounded by its admin organisation scope, ruled in KS-1570 (shape b). No executable line changes. Covers nit n1 of KS-1585 only.</td></tr><tr><td>New test <code>ks1585-ks1533-admin-docstring-states-the-ruling.test.ts</code>: 4 cells (2 RED, 2 controls) reading the sibling file as text; test only: 2 of 4 red, with the docstring: 4 of 4.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>The ruled behaviour itself (the merged cell carries it). The security integration tests, the four platform suites, a running stack, Node 24 and any deploy were not run.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/security &amp;&amp; npm test -- ks1585-ks1533-admin-docstring   # 4 cells, rc 0
+cd Blockchain/Dev/services/security &amp;&amp; npm test -- --maxWorkers=3                                  # 35 files / 372 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>4</strong> (2 RED + 2 controls); 2 of 4 red without the docstring change (develop <code>530f091120d5</code>), 4 of 4 with it</td></tr>
+<tr><td>security unit suite</td><td><strong>35 files / 372 cells</strong>, all pass, 0 failed, 0 skipped (vitest 4.1.12, <code>--maxWorkers=3</code>); the checker&rsquo;s untouched-tip figure was 368 cells, not re-measured here</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with the tests: <strong>0 errors</strong> over 54 security source files, a planted type error reported once as <code>TS2322</code>; eslint on the two files: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>530f091120d5</code> with the change on top, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

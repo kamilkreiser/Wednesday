@@ -1,0 +1,28 @@
+<h2>transfer-custody resolves a holder email inside originate, so S's connector can name a holder by email — KS-1402</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>
+        <code>POST /api/documents/:id/transfer-custody</code> with <code>newHolderEmail</code> no longer calls
+        auth's <code>GET /api/users/lookup</code> with the caller's credential. Originate hashes the email
+        (auth's own <code>toLowerCase().trim()</code>) and reads <code>users</code> on the request's db with the
+        tenant <strong>bound</strong>. Platform S's connector carries no <code>users:read</code>, so it was refused
+        <code>403</code> every time; it now resolves. </td></tr><tr><td><strong>The guard to watch is the
+        tenant.</strong> A connector can now reach resolution, so the bound tenant predicate is what keeps it out
+        of another tenant: a tenant-B-only email is <code>404</code>, byte-equal to no user at all (cells C2 and
+        C2b). The act's own gate (<code>documents:transfer-custody</code> or an allowed role) is unchanged and runs
+        first. </td></tr><tr><td><strong>Answers.</strong> Malformed email <code>400</code> (same body as before);
+        no user in your tenant <code>404 RECIPIENT_NOT_FOUND</code>; originate without a lookup key
+        <code>502 BAD_GATEWAY</code>, labelled. The old <code>401</code>/<code>403</code>/<code>502</code> that
+        came <em>from</em> the lookup (KS 739) cannot occur on this route any more.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotcha when you run this locally.</strong></td><td>
+        <strong>(1) Originate now needs <code>PII_LOOKUP_HMAC_KEY</code>.</strong> Without it every email
+        transfer answers <code>502</code>, and a unit suite that drives the email path must register a key
+        first: that is the one line ks697 gained. </td></tr><tr><td><strong>(2) Run the WHOLE suite</strong>
+        (<code>npm test</code> in <code>services/originate</code>): <strong>97 suites / 1096 tests / 0
+        failed</strong> (base 96 / 1093), measured 2026-10-09 on Kamils-Mac-Studio, node v24.7.0. Three
+        per-file runs were green while the whole suite was not: the KS 1061 guard requires every
+        <code>@secuura/shared</code> mock to be <code>() =&gt; require('./helpers/sharedModuleMock').makeSharedMock(</code>,
+        matched as <strong>text</strong>, so a block-bodied factory still fails it. </td></tr><tr><td>
+        <strong>(3) A tamper that does not compile reds nothing.</strong> ts-jest type-checks, so a tamper that
+        leaves a variable unread (<code>TS6133</code>) is a load failure with 0 passed and 0 failed, not a red.
+        Read the executed count before calling a tamper proven.
+      </td></tr></table></div>

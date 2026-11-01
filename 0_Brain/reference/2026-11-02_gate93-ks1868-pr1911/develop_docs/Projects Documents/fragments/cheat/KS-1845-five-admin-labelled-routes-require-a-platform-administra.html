@@ -1,0 +1,27 @@
+<h2>Five admin-labelled routes require a platform administrator; a KYC reviewer may not review their own verification &mdash; KS-1845</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> These routes now answer 403 to any caller whose role is not SYSTEM_ADMIN or SUPER_ADMIN (the shared <code>isPlatformRole</code>, which folds ASCII case):
+      <ul>
+        <li><code>POST /api/kyc/:id/review</code>;</li>
+        <li><code>POST /api/governance/process-expired</code>;</li>
+        <li><code>POST /api/delegations/admin/process-expired</code>;</li>
+        <li><code>GET /api/stake/all</code>;</li>
+        <li><code>GET /api/wallets/sessions</code>.</li>
+      </ul>
+      OWNER, ORG_ADMIN, ISSUER_ADMIN, VERIFIER and ADMIN are refused. The review also refuses the verification&rsquo;s own subject, with both ids case-folded, and refuses an id that is missing or not a string. It checks the role before the body or the id. A test or tool that called these routes with another role now gets 403.
+      </td></tr><tr><td>Red at develop: 18 of 24 (kyc) and 9 of 12 (each of the other four). With the change every new cell passes. 59 of 59 mutants killed, plus 8 of 8 on the id fold. Three existing fixtures changed their test principal only.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A running stack; callers outside this repository; the four platform suites; Node 24; any deploy.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/kyc &amp;&amp; npx vitest run --maxWorkers=3 src/__tests__/ks1845-kyc-review-requires-a-platform-reviewer.test.ts   # 24 cells
+cd Blockchain/Dev/services/governance &amp;&amp; npx jest src/__tests__/ks1845-process-expired-requires-a-platform-admin.test.ts                # 12 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>whole suites with the change</td><td>kyc <strong>58/58</strong> · governance <strong>179/179</strong> · transfer <strong>104/104</strong> · staking <strong>78/78</strong> · wallet-connector <strong>61/61</strong></td></tr>
+<tr><td>red-first at develop</td><td>new cells red: kyc 18 of 24; governance, transfer, staking, wallet-connector 9 of 12 each; every existing cell green</td></tr>
+<tr><td>mutants</td><td><strong>59 of 59</strong> killed, plus <strong>8 of 8</strong> on the id fold</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests 0 new errors (wallet-connector's one TS6133 is at develop too); eslint 0 errors on changed files (one prefer-const warning in stake.ts is at develop too)</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared, load 9 to 19; develop <code>85cd24d81cb9</code> with the change on top, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

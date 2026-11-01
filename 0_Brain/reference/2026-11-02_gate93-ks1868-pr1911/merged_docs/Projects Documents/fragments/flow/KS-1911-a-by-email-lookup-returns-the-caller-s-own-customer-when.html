@@ -1,0 +1,25 @@
+<h2><!--n-->. A by-email lookup returns the caller&rsquo;s own customer when two customers share an email (KS-1911)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this changes.</strong></td><td> Tests, and one code comment; no product behaviour changes. KS 1888 bound <code>GET /billing/customers/by-email</code> to the customer&rsquo;s owner: of the customers Stripe lists for the email, it returns one the caller may act on (<code>billing.ts</code>, <code>listCustomersByEmail(email).find(&hellip;mayActOnCustomer&hellip;)</code>). QA gate 62, finding F3: no cell pinned the case of two customers on one email. Its mutant M18, which sends the route back to Stripe&rsquo;s first match (<code>findCustomerByEmail</code>) and checks only that one, survived all 211 cells of the pull request. Such a regression costs availability, not a leak: the owner would get 404 on their own lookup whenever another user&rsquo;s customer with the same email comes first.
+    </td></tr><tr><td><strong>Four cells</strong> in <code>ks1888-billing-routes-bound-to-the-customer-owner.test.ts</code>, two customers on <code>dup@a.test</code> with Bob&rsquo;s first in Stripe&rsquo;s order:
+      <ul>
+        <li>E0, the fixture: Stripe&rsquo;s first match is Bob&rsquo;s customer, and the list holds both in that order, so E1 cannot pass vacuously;</li>
+        <li>E1: Alice, whose customer is the second match, gets her own customer, not 404 and not Bob&rsquo;s;</li>
+        <li>E2, a control: Bob gets his own;</li>
+        <li>E3 (QA gate 69, note N1): a signed-in user of the same tenant who owns neither customer gets 404, byte-identical to an unknown email.</li>
+      </ul>
+      The route&rsquo;s code is unchanged. One comment above <code>mayActOnCustomer</code> in <code>billing.ts</code> now states the corrected limit (comment lines only: 3 changed, 0 non-comment).
+    </td></tr></table>
+<h3><!--n-->.1 What proves it</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Green at develop, red under the gate&rsquo;s own mutant.</strong></td><td> At develop <code>dd583b4f7495</code>: the route test file 196 of 196, and the whole billing suite <strong>13 files / 328 of 328</strong>. The route is right; the cells close a coverage gap.
+      <br><strong>Gate 62&rsquo;s M18</strong>, applied byte for byte from its mutant script: <strong>1 of 196 red, exactly E1</strong>. QA gate 69&rsquo;s <strong>O3</strong> (the first match checked, every later one admitted: a leak), byte for byte from its script: <strong>1 of 196 red, exactly E3</strong>. A control mutant, the first match with no owner check at all: 9 red, E1 among them. Each run reported all 196 cells and skipped none, and the route file was restored byte for byte (sha256 checked).
+    </td></tr><tr><td><strong><code>tsc --noEmit</code></strong> over billing&rsquo;s config: 0 errors. With the test files in the program: the same 10 errors as at develop (TS1378 and others in existing test files), none in the changed file. <strong>eslint</strong> on the two changed files: 0 errors, 0 warnings.
+    </td></tr></table>
+<h3><!--n-->.2 Environment and figures</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Measured 2026-10-31 (UTC) on an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; load average 7 to 8, so no timing here is comparable.</strong></td><td> Node v26.8.1 (not an LTS line), vitest 4.1.12 from the workspace root, TypeScript 5.9.3.
+    </td></tr></table>
+<h3><!--n-->.3 What this does not prove</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Unit level only.</strong></td><td> The Stripe service is a mock; no real or test Stripe account was called, and no running stack. Not run: the four platform suites (Schemathesis, Akto, Playwright, Performance/k6), Node 24, any deploy. The same change corrects the KS 1888 entries&rsquo; limit sentence: a customer created before KS 1888 carries whatever <code>userId</code> was last written to it before then, by any signed-in caller through the old <code>PUT</code> (KS 1909 asks for the audit).
+    </td></tr></table>
+<h3><!--n-->.4 Running it</h3>
+<pre><code>cd Blockchain/Dev/services/billing &amp;&amp; npx vitest run --maxWorkers=3 src/__tests__/ks1888-billing-routes-bound-to-the-customer-owner.test.ts   # 196 cells
+cd Blockchain/Dev/services/billing &amp;&amp; npx vitest run --maxWorkers=3                                                                          # 13 files, 328 of 328</code></pre>

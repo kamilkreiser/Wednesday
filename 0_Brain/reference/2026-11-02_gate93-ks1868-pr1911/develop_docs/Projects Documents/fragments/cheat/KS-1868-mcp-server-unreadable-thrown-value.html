@@ -1,0 +1,20 @@
+<h2>mcp-server hash tool keeps its isError result when the thrown value is unreadable &mdash; KS-1868, mcp-server</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The catch in the <code>secuura_hash_document</code> tool read the thrown value unguarded; a revoked Proxy or a throwing <code>message</code> getter made the read throw inside the catch, so the handler rejected instead of returning <code>isError</code>. The read is now in an inner try with the fallback <code>'unreadable thrown value'</code>. 3 new cells in 1 file; the suite is 7 files / 33 cells, all pass.
+    </td></tr><tr><td>One held Spark pass applied strictly; no hand edit. The returned error text is not changed: it is still the raw message of whatever <code>hashFile</code> threw (KS 1893).
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> KS-1868 stays open (one of its 253 sites). The four platform suites, a running stack, an MCP client, an LTS Node, <code>npm ci</code> on the merged lockfile and any deploy were not run.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/mcp-server &amp;&amp; npm test -- src/__tests__/ks1868-hash-tool-unreadable-throw.test.ts   # 3 cells
+cd Blockchain/Dev/services/mcp-server &amp;&amp; npm test                                             # 7 files / 33 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>3</strong> in 1 file; red first: 2 of 3 failed without the change, 0 of 3 with it</td></tr>
+<tr><td>mcp-server unit suite</td><td>develop <code>9e1eb55fde53</code> 6 files / 30 cells, 30 pass; with the change on develop <code>dc8c210cb29d</code> <strong>7 files / 33 cells, 33 pass</strong>, 0 failed, 0 skipped</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: <strong>0 errors</strong> over 17 source files, a planted type error reported once as <code>TS2322</code>; eslint on the 2 changed files: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-10-31 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

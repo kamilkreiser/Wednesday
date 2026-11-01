@@ -1,0 +1,107 @@
+// KS-1868 (originate routes/systemErrors.ts, POST /api/system-errors/ingest and POST /api/system-errors/client-errors): both catch blocks logged `err instanceof Error ? err.message : String(err)`
+// themselves and then answered the constant 500. When the thrown value cannot be read (a revoked Proxy makes `instanceof` throw; an Error whose `message` getter throws), that read threw INSIDE the
+// catch: the handler's promise rejected and the request got NO answer. Both catches now go through the file's own `fail500` helper (KS-730 / KS-1772), which describes the value in its own try and
+// always sends the constant 500. The service call is made to reject on a real loopback listener, as the KS-730 part A and KS-1780 cells do; a request that gets no answer within the window is
+// reported as the string NO ANSWER, so a hang is a red assertion and not a stuck run.
+const mockTrackError = jest.fn();
+const mockLoggerError = jest.fn();
+
+jest.mock('../services/errorTrackingService', () => ({
+  trackError: mockTrackError,
+  resolveErrorsByService: jest.fn(),
+  getErrorStats: jest.fn(),
+  getRecentErrors: jest.fn(),
+  resolveError: jest.fn(),
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { systemErrorsRouter } from '../routes/systemErrors';
+
+const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
+const UNDESCRIBABLE = 'thrown value that could not be described';
+
+const ROUTES = [
+  { route: 'POST /ingest', path: '/ingest', body: { service: 'ks1868-svc', message: 'ks1868 reported error' }, context: 'System error ingest failed' },
+  { route: 'POST /client-errors', path: '/client-errors', body: { error: 'ks1868 render error', source: 'ks1868-frontend' }, context: 'Client error ingest failed' },
+];
+
+const app = express();
+app.use('/api/system-errors', express.json(), systemErrorsRouter);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => server?.close());
+beforeEach(() => jest.clearAllMocks());
+
+async function postWithThrow(path: string, body: object, thrown: unknown): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
+  mockTrackError.mockRejectedValueOnce(thrown);
+  try {
+    const res = await fetch(baseUrl + '/api/system-errors' + path, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(1500),
+    });
+    return { status: res.status, body: await res.json() };
+  } catch {
+    return { status: 'NO ANSWER', body: null };
+  }
+}
+
+function revokedProxy(): object {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function throwingMessageError(): Error {
+  const e = new Error('ks1868 hidden');
+  Object.defineProperty(e, 'message', {
+    get() {
+      throw new Error('ks1868 message getter');
+    },
+  });
+  return e;
+}
+
+describe.each(ROUTES)('KS-1868 $route catch reads the thrown value safely', (c) => {
+  it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown by the service is logged as a constant reason and answered with the constant 500`, async () => {
+    const reply = await postWithThrow(c.path, c.body, revokedProxy());
+    expect(reply).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNDESCRIBABLE }]]);
+  });
+
+  it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and answered with the constant 500`, async () => {
+    const reply = await postWithThrow(c.path, c.body, throwingMessageError());
+    expect(reply).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: UNDESCRIBABLE }]]);
+  });
+
+  it(`control ks1868 C1 ${c.route}: an ordinary Error logs its own message and the answer is the constant 500 without it`, async () => {
+    const reply = await postWithThrow(c.path, c.body, new Error('ks1868 ordinary'));
+    expect(reply).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: 'ks1868 ordinary' }]]);
+  });
+
+  it(`control ks1868 C2 ${c.route}: a thrown string is logged as itself, as before`, async () => {
+    const reply = await postWithThrow(c.path, c.body, 'ks1868 plain string');
+    expect(reply).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls).toEqual([[c.context, { error: 'ks1868 plain string' }]]);
+  });
+});

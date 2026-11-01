@@ -1,0 +1,109 @@
+<h2>30. The transfer reject handler refuses a wrong-typed signature instead of running the reject (KS-1435)</h2>
+<h3>30.1 What was wrong, and why a 200 was the worst possible answer</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The published <code>TransferRejectRequest</code> declares <code>signature</code> as a string, but
+      <code>rejectTransferSchema</code> in <code>services/transfer/src/index.ts</code> did not declare it at
+      all. </td><td>Zod strips keys a schema does not name, so a <code>signature</code> of the wrong type was
+      not refused — it was <strong>silently discarded</strong>, the schema then validated, and the reject
+      <em>ran</em> with <strong>200</strong>. The caller gets a success for a request the published contract
+      says is invalid, and the rejection is recorded without the signature it believed it had sent. A
+      stripped field is worse than a rejected one precisely because nothing surfaces.
+    </td></tr></table>
+<h3>30.2 The fix is one declaration, and <code>optional()</code> is the load-bearing half</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>signature: z.string().optional()</code>, added to <code>rejectTransferSchema</code>.
+      </td><td>Typed, so a non-string is now a validation error and the handler answers
+      <strong>400</strong>. <code>optional()</code> keeps the field <em>not required</em>, which is what the
+      contract says and what every existing caller relies on: making it mandatory would have reddened the
+      pre-existing reject cells that send no signature at all. The narrowing is the <em>type</em>, never the
+      presence.
+    </td></tr></table>
+<h3>30.3 Red-first, and the red is an assertion rather than a load failure</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      With the test hunk applied <strong>alone</strong> and the product file untouched at the base, the suite
+      gives <strong>rc 1, 2 failed | 77 passed (79)</strong>. </td><td>Both failures read
+      <code>AssertionError: expected 200 to be 400</code> — the defect reproduced by its own symptom, not a
+      module that would not import. That distinction is the point of running the test hunk first: a
+      compile-breaking tamper reds with <strong>0 passed and 0 failed</strong>, which is a load failure and
+      proves nothing about the guard. Here 77 cells still pass around the two that fail.
+    </td></tr></table>
+<table>
+<tr><th>Cell</th><th>Sends</th><th>Base (test only)</th><th>Head (test + fix)</th></tr>
+<tr><td>TR1 — an object signature is refused with 400 and the transfer stays pending</td>
+<td><code>signature: {}</code></td><td><strong>RED</strong>, <code>expected 200 to be 400</code></td>
+<td>green</td></tr>
+<tr><td>TR2 — a numeric signature is refused with 400</td>
+<td><code>signature: 42</code></td><td><strong>RED</strong>, <code>expected 200 to be 400</code></td>
+<td>green</td></tr>
+<tr><td>TRC1 <em>(control)</em> — a string signature is accepted and the reject runs</td>
+<td><code>signature: '0xabc123'</code></td><td><strong>green</strong></td><td>green</td></tr>
+</table>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      TRC1 is green on <strong>both</strong> sides, proved by name rather than by arithmetic.
+      </td><td><code>vitest run -t 'TRC1'</code> reads <strong>1 passed | 78 skipped</strong>, rc 0, at the
+      base <em>and</em> at the head. A control that is only green on one side cannot tell a real narrowing
+      from a schema that started refusing everything, so TR1 and TR2 going red while TRC1 holds is what
+      attributes the red to the wrong <em>type</em> and not to the field's presence.
+    </td></tr></table>
+<h3>30.4 The figures, and the trees they were measured against</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>whole <code>services/transfer</code> suite</td><td><strong>76 passed (76)</strong>, 5 files, rc 0
+→ <strong>79 passed (79)</strong>, 5 files, rc 0. 0 failed cells at the head</td></tr>
+<tr><td>red arm</td><td><strong>2 failed | 77 passed (79)</strong>, rc 1, both by
+<code>AssertionError</code></td></tr>
+<tr><td><code>tsc --noEmit -p services/transfer</code></td><td>rc 0, <strong>0 lines</strong> of
+output</td></tr>
+<tr><td>code-only tree at the base</td><td><code>84a98ca82ee0bce4</code>, from
+<code>read-tree</code> at <code>147ae442074c</code> then <code>apply --cached</code> per section, then
+<code>write-tree</code></td></tr>
+<tr><td>tree control</td><td>the same procedure at the superseded base <code>69f2045af2a4</code> gives
+<code>e7f6d8d5c74f</code>, a different tree — so the tree expectation names the base it was measured on</td></tr>
+<tr><td>payload integrity</td><td>two sections, <strong>196 B</strong>
+<code>36faf71aabea8570</code> and <strong>2033 B</strong> <code>16cc9514e2a614be</code>; joined in order
+<strong>2229 B</strong> <code>9f1c7dd84c6b438c</code>. Joined in the reverse order the sha is
+<code>3059adbabe520c4e</code>, so the ordered join is asserted and not assumed</td></tr>
+<tr><td>file modes</td><td>both changed files <code>100644</code> in <code>git ls-files -s</code> and
+<code>[ -x ]</code> FALSE on disk, which agrees. <code>core.filemode</code> is <code>false</code> here, so
+the control is that <strong>116</strong> paths in the same tree genuinely read <code>100755</code></td></tr>
+<tr><td>runner, read from <code>node_modules</code></td><td><strong>vitest 4.1.11</strong> where the manifest
+says <code>^4.1.9</code> — a range is not a resolution. node <strong>v24.7.0</strong>, npm
+<strong>11.5.1</strong>, TypeScript <strong>5.9.3</strong></td></tr>
+<tr><td>wall clock</td><td>before <strong>707 ms</strong>, red arm <strong>392 ms</strong>, head
+<strong>413 ms</strong>. Measured <strong>2026-10-07 UTC</strong> on macOS 27.0.1, Darwin 27.0.0 arm64,
+bash 3.2.57(1)-release</td></tr>
+<tr><td>timing coverage</td><td><strong>0</strong> stated timings cover the transfer unit suite across
+<code>CLAUDE.md</code>, <code>systemTest/CLAUDE.md</code> and the test-discipline skill at the base. The
+same instrument finds <strong>2</strong> Akto and <strong>4</strong> pre-merge rows, so the zero is a
+measurement and not a broken grep. <strong>No tier budget moves.</strong></td></tr>
+</table>
+<h3>30.5 An idempotence control that does NOT fire here, and why it is recorded rather than claimed</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Re-applying the test section after it is already applied <strong>succeeds</strong>, rc 0, on the working
+      tree <em>and</em> through <code>apply --cached</code> against a temp index at the base.
+      </td><td><code>git apply --check -v</code> says <code>Hunk #1 succeeded at 938 (offset -39 lines)</code>:
+      the hunk's only context is two closing-brace lines, which recur throughout a test file, so
+      <code>git apply</code> cannot tell the patch from a fresh insertion elsewhere. <strong>So "applied twice
+      refuses" is not a usable idempotence guard for this payload</strong>, and it is not offered as one. What
+      is asserted instead is <em>content</em>: the ordered-join sha, the two applied blobs, and the
+      <code>write-tree</code> result <code>84a98ca82ee0bce4</code> against a different-base control. An
+      apply's exit status is not evidence that the right bytes landed.
+    </td></tr></table>
+<h3>30.6 Not covered, and the live sweep</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      This is a <strong>narrowing</strong> of the KS-1435 defect on one operation, and the ticket does
+      <strong>not</strong> move to Done. </td><td>Only <code>POST /api/transfers/{id}/reject</code> is
+      touched; no other operation's schema was audited for the same stripped-field class, and the published
+      spec was not regenerated because this row changes no spec file. The cells drive the handler
+      <strong>in process</strong> — no gateway, no live stack — so the route-level behaviour behind nginx is
+      unmeasured, and <strong>the four platform suites (Schemathesis, Akto, Playwright, performance) are
+      UNMEASURED, not passing</strong>, because the local stack is not up. This moves
+      <strong>runtime</strong> request validation on a transfer operation, so a <strong>live sweep is
+      owed</strong>.
+    </td></tr></table>
+<h3>30.7 Running it</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+node_modules/.bin/vitest run --root services/transfer                  # 79 passed (79), rc 0
+node_modules/.bin/vitest run --root services/transfer -t 'KS-1435'     # the three cells
+node_modules/.bin/vitest run --root services/transfer -t 'TRC1'        # the control, 1 passed
+node_modules/.bin/tsc --noEmit -p services/transfer                    # rc 0, no output</code></pre>

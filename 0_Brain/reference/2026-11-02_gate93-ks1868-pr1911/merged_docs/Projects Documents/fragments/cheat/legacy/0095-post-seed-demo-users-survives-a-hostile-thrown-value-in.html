@@ -1,0 +1,20 @@
+<h2>POST /seed-demo-users survives a hostile thrown value in its per-user catch &mdash; KS-1802</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The per-user catch in <code>adminConfig.ts</code> logged <code>err?.message</code> unguarded, so a revoked Proxy or a throwing <code>message</code> getter stopped the seed at the first failing user and the route answered the constant 500. The log line now reads the message through <code>readableErrorMessage</code> (+10 -1 lines). 6 new cells: R1 to R3 are red without the fix and with the helper&rsquo;s <code>try</code> removed, C1 to C3 are controls.
+      </td></tr><tr><td>The new file is 1 file and 6 cells on top of the originate suite (149 / 1757 before, 150 / 1763 after).
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The integration files (they need a real Postgres), the four platform suites, a running stack, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest src/__tests__/ks1802-seed-demo-users-survives-a-hostile-throw-in-the-loop-catch.test.ts   # 6 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest                                                                                              # 150 files / 1763 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>6 / 6</strong> with the fix; on the unfixed code 3 red (exactly R1 to R3) and 3 green</td></tr>
+<tr><td>mutant</td><td>helper&rsquo;s <code>try</code> removed: <strong>3 of 6 red</strong>, exactly R1 to R3; restored, blob equal to its staged blob</td></tr>
+<tr><td>KS 1780 file on this change</td><td><strong>21 / 21</strong>; the extended 76-cell version <strong>76 / 76</strong></td></tr>
+<tr><td>originate unit suite</td><td><strong>150 files / 1763 cells</strong> with the change; 149 / 1757 at base; 0 skipped</td></tr>
+<tr><td>tsc with tests</td><td><strong>0 errors</strong> over 230 files (173 under <code>__tests__</code>), TypeScript 5.9.3; eslint on the 2 changed files <strong>0 errors, 0 warnings</strong> (eslint 10.7.0)</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>6d41673e0f79</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

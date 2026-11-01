@@ -1,0 +1,31 @@
+<div class="section">
+<h2>Observability images + native k6 guard — KS-1445 (with KS-1367)</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> k6 v2.3.0 is still the
+        latest release (GitHub releases, 2026-10-07), so the k6 pin did <strong>not</strong> move. The suite always runs
+        k6 in Docker; the one host path, <code>systemTest/scripts/run-k6.sh</code>, now refuses a native k6 older than
+        the pin (<code>npm run k6:check-native</code>). This Mac's <code>/usr/local/bin/k6</code> is v0.48.0 and is refused. </td></tr><tr><td>All 10
+        <code>observability/docker-compose.yml</code> images moved to their latest release; cAdvisor moved registry
+        (<code>gcr.io/cadvisor</code> stops at v0.55.1 → <code>ghcr.io/google/cadvisor:v0.60.6</code>).
+        <code>base-image-watch.sh</code> <code>EXCLUDED_BASES</code> moved with them. </td></tr><tr><td>Renovate now sees
+        <code>config/observability.yml</code> <code>k6Image</code> (<code>customManagers</code>, KS-1367);
+        <code>base-image-watch.sh</code> stays a hand edit (under <code>ignorePaths</code>). No Renovate PR has ever been opened. </td></tr><tr><td>npm:
+        <code>eslint-plugin-jsdoc</code> 65.2.0 (observability + performance), <code>knip</code> 6.40.0 (performance).
+        TypeScript 7 excluded — KS-1396 owns it.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd systemTest/performance &amp;&amp; npm run quality                       # incl. k6Version + pin parity
+cd observability &amp;&amp; npm run quality                                  # incl. compose-image-pins
+bash Blockchain/Dev/scripts/base-image-watch.sh --self-test
+cd systemTest/performance &amp;&amp; npm run k6:check-native                # against the host k6</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>performance <code>quality</code></td><td>76/76 files, 1386/1386 tests, knip clean, audit 0 — this Mac, 2026-10-07, Node 24.21 (LTS)</td></tr>
+<tr><td>observability <code>quality</code></td><td>pass; 12 dashboards valid; new pin test 4/4</td></tr>
+<tr><td>red-first</td><td>k6Version suite without the module: import fails; <code>@types/k6</code> tampered to 2.2.0: parity red; old <code>EXCLUDED_BASES</code> vs new compose: 2 of 4 observability cells red and the self-test FAILED (1)</td></tr>
+<tr><td>host k6 v0.48.0</td><td><code>k6:check-native</code> and <code>run-k6.sh smoke</code> both exit 1, naming v0.48.0 and ≥ v2.3.0</td></tr>
+<tr><td><code>audit:locks</code></td><td>43 standalone locks, no advisory outside the baseline</td></tr>
+<tr><td>live — observability</td><td>all 10 new images up (kafka-exporter is Phase 2 only); <code>pg_settings_max_connections</code> 1 series and <code>pg_stat_activity_count</code> 31 after postgres-exporter v0.20 — this Mac, 2026-10-07</td></tr>
+<tr><td>live — perf smoke</td><td>platform-k slot 2 built from a clean <code>develop</code> 652cf5f6e worktree (the KS-666 guard refuses a dirty tree); harness from the KS-1445 branch; <code>grafana/k6:2.3.0</code>, <code>freeze-env</code> enabled; 5/5 gates, 0 of 37 requests failed, 118/118 checks, p99 465 ms; console = gate JSON; HTML report banner agrees, its metric values are JS-rendered and were not compared as text</td></tr>
+</table>
+</div>

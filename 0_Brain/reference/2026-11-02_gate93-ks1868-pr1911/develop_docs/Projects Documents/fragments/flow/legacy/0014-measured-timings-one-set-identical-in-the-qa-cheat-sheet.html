@@ -1,0 +1,129 @@
+<h2>22. Measured timings — one set, identical in the QA cheat sheet (2026-10-06)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Only <strong>measured</strong> figures appear here, each with its host, slot, date and version; an
+      estimate is written as “not re-measured”, never as a number. </td><td>A figure from the Ubuntu VM is not a Mac
+      figure. <code>systemTest/CLAUDE.md</code> carries the same numbers. The two FINAL RUN rows carry the 2026-10-06 measurements; anything not run is stated as such.
+    </td></tr></table>
+<table class="comparison-table">
+<tr>
+<th>Suite / profile</th>
+<th>Wall-clock</th>
+<th>Host · slot · date · version · ticket</th>
+<th>Status</th>
+</tr>
+<tr>
+<td>Schemathesis <code>pr</code></td>
+<td>1.2 min</td>
+<td>KS-589, 2026-08-11, Ubuntu VM 8 vCPU (not a Mac figure)</td>
+<td>not re-measured on this Mac</td>
+</tr>
+<tr>
+<td>Schemathesis <code>pre-merge</code></td>
+<td>16.9 min</td>
+<td>KS-589, 2026-08-11, Ubuntu VM 8 vCPU (not a Mac figure)</td>
+<td>not re-measured on this Mac</td>
+</tr>
+<tr>
+<td>Schemathesis <code>full</code></td>
+<td>17.4 min (coded suites 4.2 · sweep 11.8 · report 1.4)</td>
+<td>KS-1408, this Mac, slot 4, 2026-10-05, Schemathesis 4.29.3, seed 1408, 17,342 cases. Same command at 4.28.0 an hour earlier: 23.1 min (25,179 cases). KS-589 VM: 26.5 min</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>Schemathesis <code>full</code> (KS-1439)</td>
+<td>19.6 min at 4.29.3 · 20.9 and 20.3 min at 4.29.4 · 19.7 min at 4.30.0 · 19.8 and 20.1 min at 4.30.1 (KS-1476) · 21.2 min at 4.31.0 (KS-1478, slot 1 of the Mac, 2026-10-14, no fixed seed: sweep 12.3 min, 17,636 cases, 100 unique) · 12.1 min engine / 20.1 min wrapper at 4.31.1 (KS-1615, slot 1 of the Mac, 2026-10-15, no fixed seed, 94 unique failures); <code>pre-merge</code> 470 s engine / 15 m 58 s wrapper, 93 unique; <code>pr</code> (cold) 92 s engine / 126 s wrapper, 8 unique (a first <code>pr</code> straight after the Akto security scan took 433 s engine / 14 m 34 s with 15 read timeouts and one event_loop_lag 503 — load from running back-to-back, not the tool)</td>
+<td>KS-1439, this Mac, slot 4, 2026-10-07, seed 1439, other sessions' stacks (slots 1 and 3) up on the machine so NOT a speed comparison. 4.29.3: 17,523 cases · 113 unique failures · 442 skipped. 4.29.4: 17,592 · 121 · 431 skipped · 1 errored, and 17,357 · 112 · 427 · 1. The two 4.29.4 runs differ by 9 unique failures — the 113 → 121 movement is inside the same-version spread</td>
+<td>measured 2026-10-07</td>
+</tr>
+<tr>
+<td>Schemathesis <code>nightly</code></td>
+<td>~4 hr</td>
+<td>configured/formula-derived (max-examples 1100); never measured end to end</td>
+<td>not re-measured</td>
+</tr>
+<tr>
+<td>Anchoring-integrity suite</td>
+<td>216.8 s, 17 scenarios</td>
+<td>KS-1408, this Mac, slot 4, 2026-10-05</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>Akto <code>test:setup</code></td>
+<td>12 tests, ~310 ms</td>
+<td>tests/aktoSetup.test.ts; figure supplied with the KS-571 refresh brief</td>
+<td>not re-run for this edit</td>
+</tr>
+<tr>
+<td>Akto <code>pr</code></td>
+<td>36 s</td> <td>slot 1 of the Mac, 2026-10-15, Akto 2.38.5, KS-1615 — PASS, 0 vulnerable, 8,827 results (29 s on slot 1, this Mac, 2026-10-14, Akto 2.38.2, KS-1478 — PASS; 30 s on 2026-10-07, Akto 2.37.1, KS-1440, FAILED on the wallet-status HIGH; 24 s on slot 2, 2026-10-05; 29 s on 2026-09-28)</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>Akto <code>pre-merge</code></td>
+<td>4 m 8 s</td> <td>slot 1 of the Mac, 2026-10-15, Akto 2.38.5, KS-1615 — PASS, 0 vulnerable, 922 rate-limited results; paced 7,500/min (4 m 28 s on 2026-10-14, Akto 2.38.2, KS-1478; 4 m 1 s on 2026-10-07, Akto 2.37.1, KS-1440: same run; paced 7,500/min; 1,671 platform 429s; FAIL, 2 HIGH on the wallet-status endpoint (was 3 m 57 s, 944 429s))</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>Akto <code>security</code> (full OWASP tier)</td>
+<td>14 m 30 s</td> <td>slot 1 of the Mac, 2026-10-15, Akto 2.38.5, KS-1615 — 13 of 13 tests pass, 0 vulnerable; paced 7,500/min; 194 ids (14 m 8 s on 2026-10-14, Akto 2.38.2, KS-1478; 12 m 17 s on 2026-10-07, Akto 2.37.1, KS-1440: 10 of 13 workflows pass; was 11 m 1 s)</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>k6 <code>smoke</code></td>
+<td>43–44 s</td>
+<td>Apple M2 Max, slot 1, 2026-09-28, k6 2.1.0 and 2.3.0; four stacks up (machineShared) so not a baseline</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>Playwright offline unit suite</td>
+<td>389 tests, 6.5 s</td>
+<td>this Mac, 2026-10-06, no slot variable set</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>Playwright 1.64.1 (12 tests)</td>
+<td>12 of 12 passed, 7.3 s</td>
+<td>slot 1 of the Mac, 2026-10-15, Node 24.22.0 LTS, KS-1615</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>k6 <code>test:smoke</code></td>
+<td>41 s &middot; 5 of 5 gates PASS</td>
+<td>slot 1 of the Mac, 2026-10-15, k6 2.3.0, Node 24.22.0 LTS, KS-1615; 0 HTTP failures, 0 rate-limited; 1 of 96 checks (a login over 500 ms) failed, the same 3/1 pattern as KS-1455</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>k6 <code>test:load:short</code> (5 VUs, 1 min)</td>
+<td>69 s &middot; 11 of 12 gates (advisory)</td>
+<td>slot 1 of the Mac, 2026-10-15, k6 2.3.0, Node 24.22.0 LTS, KS-1615; the 1 failed gate is the http_reqs rate&gt;5 floor, calibrated for the 10-VU load scenario (~8 req/s) and unreachable at 5 VUs (~4 req/s expected) &mdash; pre-existing since KS-701, not this bump. Advisory scenario (blocking: false), so it exits 0 by design. Per-VU rate 0.80 req/s vs 0.85 on KS-1455 load (slot 4, 2026-10-09).</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>k6 <code>test:load</code> (10 VUs, 5 min)</td>
+<td>5 m 8 s &middot; 12 of 12 gates PASS &middot; 8.38 req/s</td>
+<td>slot 1 of the Mac, 2026-10-15, k6 2.3.0, Node 24.22.0 LTS, KS-1615; BLOCKING release gate; 2,554 requests, 0 failed / 5xx / 429; checks 99.88% (9 of 7,642); p95 35 ms, p99 197 ms (write p95 63 ms, p99 194 ms). KS-1455 (slot 4, 2026-10-09): 8.48 req/s, p95 30 ms, p99 106 ms (write p99 77 ms) &mdash; throughput identical, write tail higher but far inside its 500 ms gate; different slot, date and develop commit, so not proof of a regression.</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>Playwright e2e (<code>ci:e2e</code>)</td>
+<td>—</td>
+<td>not re-measured</td>
+<td>not re-measured</td>
+</tr>
+<tr>
+<td><strong>FINAL RUN</strong> — Schemathesis pr · pre-merge · full · integration</td>
+<td>Schemathesis <em>full</em> 19.9 min total (sweep ~12 min); integration 434 tests, 0 failures, 7 skipped; pr and pre-merge not re-measured</td>
+<td>Mac, Docker slot 4, 2026-10-06, Schemathesis 4.29.3, seed 571</td>
+<td>measured 2026-10-06</td>
+</tr>
+<tr>
+<td><strong>FINAL RUN</strong> — Akto pr · pre-merge · security · k6 smoke · Playwright</td>
+<td>Akto pr 30 s; pre-merge 257 s; k6 smoke ~50 s; Playwright e2e and Akto security not run on this branch</td>
+<td>Mac, Docker slot 1 (Akto, k6), 2026-10-06, Node v24.18.0</td>
+<td>measured 2026-10-06</td>
+</tr>
+</table>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Contradiction left for a decision.</strong></td><td><code>systemTest/CLAUDE.md</code> still gives
+      <code>test-fast</code> as “~2-3 min” with no date or host, while the only measurement of the
+      <code>pr</code> profile (same flags) is 1.2 min on the KS-589 VM. </td></tr><tr><td>Neither is a Mac measurement.
+    </td></tr></table></div>

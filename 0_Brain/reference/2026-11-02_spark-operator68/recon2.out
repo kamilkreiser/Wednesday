@@ -1,0 +1,136 @@
+      // KS-74: also use resolvedHolderEmail from the stub flow when present.
+      const notifyToEmail = resolvedHolderEmail || holderEmail || (req as any).user?.email;
+      if (notifyToEmail) {
+        // KS-203: fire-and-forget — an intermittent notification failure must
+        // not surface as an unhandled rejection (matches publishEvent above).
+        notifyDocumentCertified({
+          toEmail: notifyToEmail as string,
+          recipientName: req.body.holderName,
+          documentTitle: (data.title as string) || (data.name as string) || type,
+          certifierName: issuer.name || issuer.id,
+          certificationId: id,
+          certifiedAt: now,
+        }).catch((err: any) =>
+          logger.warn('certification notification failed', { certId: id, error: err?.message }),
+        );
+      }
+
+      res.status(201).json({
+        id: certification.id,
+        type: certification.type,
+...
+      // Pen-test F-04: read from authenticated req.user, NOT raw headers.
+      const holderEmail = (req as any).user?.email as string | undefined;
+      if (holderEmail) {
+        notifyDocumentRevoked({
+          toEmail: holderEmail,
+          documentTitle: (certification.data?.title as string) || (certification.data?.name as string) || certification.type,
+          revokedBy: issuer.name || issuer.id,
+          reason,
+          revokedAt: now,
+        });
+      }
+
+      res.json({
+        id: certification.id,
+        status: certification.status,
+        revokedAt: certification.revokedAt,
+...
+        created.push(record);
+
+        // Fire lifecycle notification (non-blocking)
+        notifyDocumentShared({
+          toEmail: recipient.email,
+          recipientName: recipient.name,
+          documentTitle: (certification.data?.title as string) || (certification.data?.name as string) || certification.type,
+          sharedByName: user.name || user.id,
+          shareType: recipient.shareType,
+        });
+
+        logger.info('Certification shared', { certificationId: id, recipientEmail: recipient.email, shareType: recipient.shareType });
+      }
+
+      // Create charge event for sharing (currently free, tracked for audit)
+      const shareCharge = await createChargeEvent('share', id, user.id, getReqTenantId(req), {
+
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Certification not found' } });
+      }
+      let reason: string;
+      try {
+        // KS-1844 (gate 36 F1): was `error instanceof Error ? error.message : String(error)`. A hostile `message` (a revoked Proxy, a getter returning an object whose toJSON throws) came back as a non-string,
+        // reached the real logger, and its redactLogValue threw outside any try: no answer. String() coerces it here, inside this try; a value String() cannot read lands in the fallback below.
+        reason = String(error instanceof Error ? error.message : error);
+      } catch {
+        reason = 'unreadable thrown value';
+      }
+      logger.error('Failed to get certification', { error: reason });
+      res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get certification' } });
+    }
+  }
+);
+
+/**
+--- usage
+ * Args:
+ *   tenantId: the caller's tenant (from the authenticated context, never the body).
+ *   from / to: optional inclusive ISO-8601 bounds on created_at; null = unbounded.
+ *
+ * Returns: per-event-type counts + ADA/USD totals, plus grand totals.
+ */
+export async function getUsageSummary(
+  tenantId: string,
+  from?: string | null,
+  to?: string | null,
+): Promise<UsageSummary> {
+  const fromTs = from || null;
+  const toTs = to || null;
+  const rows: any[] = await prisma.$queryRaw`
+    SELECT event_type,
+           COUNT(*)::int AS count,
+           COALESCE(SUM(CASE WHEN currency = 'ADA' THEN amount ELSE 0 END), 0)::bigint AS ada_total,
+           SUM(CASE WHEN amount > 0 THEN 1 ELSE 0 END)::int AS chargeable_count
+      FROM charge_events
+     WHERE tenant_id = ${tenantId}::uuid
+       AND status = 'completed'
+       AND (${fromTs}::timestamptz IS NULL OR created_at >= ${fromTs}::timestamptz)
+       AND (${toTs}::timestamptz IS NULL OR created_at <= ${toTs}::timestamptz)
+     GROUP BY event_type
+     ORDER BY event_type
+  `;
+  const byEventType: UsageSummaryRow[] = rows.map((r) => {
+    // KS-335 / Option A: usdTotal is the list-price USD value of the metered usage —
+    // chargeable events × the event type's configured USD price — NOT a sum of
+    // USD-recorded amounts. Every charge_event is recorded chain-native in ADA, so a
+    // `currency = 'USD'` sum is always 0; the USD prices live in pricing_config /
+    // DEFAULT_PRICING (loaded into livePricing) and are applied here. We use the same
+    // `amount > 0` chargeable basis as ada_total, so free events (amount 0) are
+    // excluded from both totals. adaTotal stays the actual chain-native ADA charged.
+    const price = livePricing[r.event_type] || DEFAULT_PRICING[r.event_type] || { ada: 0, usd: 0 };
+    const usdCents = Number(r.chargeable_count) * price.usd;
+    return {
+      eventType: r.event_type,
+      count: Number(r.count),
+      adaTotal: Number(r.ada_total) / 1_000_000,
+      usdTotal: usdCents / 100,
+    };
+  });
+  const totals = byEventType.reduce(
+    (acc, r) => ({ count: acc.count + r.count, adaTotal: acc.adaTotal + r.adaTotal, usdTotal: acc.usdTotal + r.usdTotal }),
+    { count: 0, adaTotal: 0, usdTotal: 0 },
+  );
+  return { tenantId, from: fromTs, to: toTs, byEventType, totals };
+}
+
+/**
+ * Format a currency amount for logging.
+ */
+function formatAmount(amount: number, currency: string): string {
+  if (currency === 'ADA') return `₳${(amount / 1_000_000).toFixed(2)}`;
+  return `$${(amount / 100).toFixed(2)}`;
+}
+--- notify other callers
+31:import { Router, Request, Response, NextFunction } from 'express';
+32:import { authenticate } from '../middleware/auth';
+33:import { isGatewayVouched } from '../utils/gatewayProvenance';
+34:import { logger } from '../utils/logger';
+35:import { getUsageSummary } from '../services/chargeEvents';

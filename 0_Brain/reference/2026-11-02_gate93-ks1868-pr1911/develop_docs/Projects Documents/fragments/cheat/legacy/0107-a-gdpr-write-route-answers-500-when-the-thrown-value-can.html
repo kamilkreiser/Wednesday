@@ -1,0 +1,20 @@
+<h2>A GDPR write route answers 500 when the thrown value cannot be read, instead of giving no answer &mdash; KS-1798, KS-1799</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> One function in originate <code>routes/gdpr.ts</code> (<code>mapGdprWriteDbError</code>): the <code>pgCode</code> read now has its own try, so a revoked Proxy or a throwing getter no longer escapes the catch of the two write routes. +8 / -1 lines. <code>utils/pgErrors.ts</code> is not edited.
+      </td></tr><tr><td>New cells: D1 to D5 in <code>ks445-gdpr-write-guards.test.ts</code> (D1 to D3 red without the change, D4 and D5 controls) and B5 in <code>ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts</code> (a pin; it passes at the untouched helper and is red under a one-line tamper at <code>pgErrors.ts</code> line 57, never committed).
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> Whether the direct reads of <code>code</code> and <code>meta.code</code> in <code>routes/certifications.ts</code> (about line 1071) have the same defect. The integration files, the four platform suites, a running stack, Node 24 and any deploy were not run.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- src/__tests__/ks445-gdpr-write-guards.test.ts   # 20 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npm test -- src/__tests__/ks1780-extract-pg-code-cannot-hang-a-webhook-patch.test.ts   # 9 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npm test -- --maxWorkers=3                                                                      # 151 files / 1855 cells, 0 failed</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>gdpr write guards file</td><td>develop <code>a786e06e6f6e</code>: 15 of 15; test section alone: <strong>3 of 20 red</strong> (D1, D2, D3); with the <code>gdpr.ts</code> change <strong>20 of 20</strong></td></tr>
+<tr><td>pgErrors pin (B5)</td><td>untouched helper: 8 of 8 before, <strong>9 of 9</strong> after; one-line tamper at line 57 (never committed): <strong>1 of 9 red</strong>, 8 pass; restored byte-identical (whole-file sha256 equal)</td></tr>
+<tr><td>originate unit suite</td><td>untouched develop <strong>151 files / 1849 of 1849</strong>; with the change <strong>151 files / 1855 of 1855</strong>, 0 failed, 0 skipped (jest <code>--maxWorkers=3</code>)</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: <strong>0 errors</strong> over 231 originate source files, a planted type error reported once as <code>TS2322</code>; eslint on the two tests and <code>gdpr.ts</code>: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

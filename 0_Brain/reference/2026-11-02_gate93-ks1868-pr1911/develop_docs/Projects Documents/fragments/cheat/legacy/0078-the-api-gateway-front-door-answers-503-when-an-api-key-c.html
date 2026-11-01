@@ -1,0 +1,19 @@
+<h2>The api-gateway front door answers 503 when an API key cannot be checked; every hand-built gateway fetch is bounded &mdash; KS-1240</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> A presented <code>sk_</code> key whose check could not complete (no complete answer from the security service within 5 s, an unreadable body, or a 5xx, 408 or 429, including its own <code>503 'Unable to verify key'</code>) now answers <code>503 SERVICE_UNAVAILABLE</code> on required and optional mounts and is never cached. It used to answer <code>401 Invalid API key</code>, and the security service&rsquo;s 503 was negative-cached for 30 s. A rejected key keeps every answer it had (401 plus 30 s cache; the KS-1207 fall-through on optional mounts). </td></tr><tr><td>The connector exchange is bounded at 5 s and stays fail-closed: no Bearer is forwarded and a Bearer-only upstream answers 401, as before. Nine hand-built forwards are bounded at 60 s, the generic proxy&rsquo;s bound; a body cut off by the timeout is the route&rsquo;s own 502 instead of the upstream&rsquo;s status with <code>{}</code>; a batch item whose body never arrived fails instead of succeeding empty; generate-package reads the package before writing the zip headers. </td></tr><tr><td>Authority for the 503: Kam&rsquo;s rulings on cards <code>secuura-ks888-revoke-validate-on-failed-save</code> (a) and <code>secuura-ks1370-validate-when-the-revoke-check-cannot-read</code> (a).
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> Node 24 (host Node 26.8.1 only, no Docker in this lane); a real security or auth service (the upstreams are stubs); any running stack. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run ks1240b-   # 2 files / 40 cells, rc 0
+cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run             # 129 files / 1313 tests, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>both new files against the unchanged sources</td><td><strong>20 failed / 20 passed</strong>: every red cell fails, every control passes</td></tr>
+<tr><td>both new files, with the change</td><td><strong>40 / 40</strong> (front door 12, forwards and census 28)</td></tr>
+<tr><td>fourteen one-site mutants of the committed sources</td><td>each killed, all 40 cells run each time, each file restored equal to HEAD by sha256</td></tr>
+<tr><td>counts, before &rarr; after</td><td>api-gateway <strong>127 files / 1273 tests &rarr; 129 files / 1313</strong>, 0 failed on both sides</td></tr>
+<tr><td>gates</td><td><code>check:test-types</code> rc 0, api-gateway 27 errors in the baseline, 0 new; <code>tsc</code> test config the same 27 errors as the base; ESLint 0 errors, the same 30 warnings; <code>audit:gate</code> and <code>audit:locks</code> rc 0</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions (load average 17 to 24 during the suite), base <code>bd6697e079fc</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

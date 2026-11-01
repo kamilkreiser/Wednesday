@@ -1,0 +1,28 @@
+<h2>The published OpenAPI yaml is generated, so a Spark companion diff is never applied — KS-1449</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Six nft operations declared a
+        <code>requestBody</code> with no <code>required: true</code>, so a spec-driven caller sent no
+        body and called the request valid; the handler's zod <code>safeParse</code> answered 400 and
+        the sweep failed <code>positive_data_acceptance</code>. All six are now marked required in
+        <code>services/nft-certificate/src/nft-certificate.openapi.ts</code>. </td></tr><tr><td><strong>The
+        published YAML is GENERATED.</strong> Patch the <code>.openapi.ts</code> and run
+        <code>npm run generate-openapi</code> in <code>Blockchain/Dev</code>; never hand-edit
+        <code>docs/openapi/secuura-api.yaml</code> and never <code>git apply</code> a Spark
+        <code>openapi-yaml.companion.diff</code>. Those companions are cut against spec blob
+        <code>52310cab1</code> and at a +87-line develop <strong>five of twelve apply rc 0 onto the
+        WRONG operation</strong>, because their context is just
+        <code>requestBody:</code> / <code>content:</code> / <code>application/json:</code>.
+        </td></tr><tr><td>Spec half only: each handler's own 400 on an absent body is READ, not driven — no
+        local stack. The four platform suites are UNMEASURED. The ticket does <strong>not</strong>
+        move to Done.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td> <strong>(1) Prove the YAML
+        structurally, not by diff size.</strong> Parse base and head and compare every
+        <code>paths[p][m].requestBody.required</code>; a line-count check cannot tell a
+        <code>required: true</code> on the right operation from one on its neighbour. Here: exactly
+        6 flipped, 0 off, 0 operations added or removed, 6 added lines in 40,021. </td></tr><tr><td><strong>(2) A
+        hunk offset that is not the file's drift is a mislanding.</strong> This spec drifted +1 at
+        line 6910 and +86 at 14465, so a correctly-placed hunk reports an offset of 0, 1 or 87.
+        Across the twelve companions every correct one sits in {1, 87} and every mislander carries
+        one outside it (11, 6, 10, 13, 26). Cheap tripwire, and <em>necessary not sufficient</em> — a
+        wrong anchor exactly 87 lines on would pass it, so keep the structural reader as the gate.
+      </td></tr></table></div>

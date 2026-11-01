@@ -1,0 +1,16 @@
+<h2>The certify route&rsquo;s two reservation comments match the code &mdash; KS-1666 (note d)</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>Comment only, no executable line changes. Two comment blocks in the originate <code>routes/certifications.ts</code> now say that writing the row first <strong>narrows</strong> the orphan-anchor window (it does not remove it) and that the provisional row&rsquo;s under-claim lasts up to 10 seconds, the anchoring call&rsquo;s bound, not a sub-second.</td></tr><tr><td>New test <code>ks1666-certify-reservation-comments-match-the-code.test.ts</code>: 5 cells (2 RED, 3 controls) reading <code>certifications.ts</code> as text; test only: 2 of 5 red, with the comments: 5 of 5. Covers note (d) of KS-1666 only.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>Whether the window really lasts up to 10 seconds under load: the code is read, not timed. The originate integration files, the four platform suites, a running stack, Node 24 and any deploy were not run.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npm test -- ks1666-certify-reservation-comments   # 5 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npm test -- --maxWorkers=3                           # 152 files / 1854 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>5</strong> (2 RED + 3 controls); 2 of 5 red without the comment change (develop <code>a786e06e6f6e</code>), 5 of 5 with it</td></tr>
+<tr><td>originate unit suite</td><td><strong>152 files / 1854 cells</strong>, all pass, 0 failed, 0 skipped (jest 29.7.0, <code>--maxWorkers=3</code>, 48 s); the checker&rsquo;s untouched-tip figure was 1849 cells at <code>593cd90c3131</code>, not re-measured here</td></tr>
+<tr><td>comment-only proof</td><td>base and changed file transpile identically with comments removed (53,964 bytes); a code-mutated control differs; 6 of 6 changed diff lines are comment lines</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with the test file: <strong>0 errors</strong> over 232 originate source files, a planted type error reported once as <code>TS2322</code>; eslint on the test: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

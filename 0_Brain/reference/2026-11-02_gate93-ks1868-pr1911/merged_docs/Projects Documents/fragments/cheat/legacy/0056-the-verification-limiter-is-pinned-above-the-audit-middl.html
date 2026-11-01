@@ -1,0 +1,18 @@
+<h2>The verification limiter is pinned above the audit middleware &mdash; KS-1493</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> In <code>services/api-gateway/src/index.ts</code> the per-IP verification limiter must sit <em>above</em> the audit middleware. Below it, every throttled verification request (429) would write an <code>audit_logs</code> row. A new test, <code>ks1493-verification-limiter-sits-above-the-audit-middleware.test.ts</code>, pins the order with three cells. </td></tr><tr><td>It drives the real app with the db module stubbed and the limit set to 2 through <code>VERIFICATION_RATE_LIMIT_MAX</code>, sends four <code>POST /api/verification/verify</code> requests, and asserts that no audit row carries status 429. Two control cells assert that the requests past the limit really were throttled and that the requests that passed were audited.</td></tr><tr><td>No product file changes. To see it fail, copy <code>index.ts</code> under another name, move the limiter block below the audit block, and point a copy of the test at the copy; do not edit <code>index.ts</code> itself.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The production-only redirect path, the default limit of 60, and a real database write. </td></tr><tr><td>Item N2 of KS-1493, an owner decision about the unversioned redirects that no limiter counts, is still open.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks1493-verification-limiter-sits-above-the-audit-middleware.test.ts   # 3 cells, rc 0
+cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run                                                                       # 124 files / 1206 tests, rc 0
+cd Blockchain/Dev &amp;&amp; node scripts/typecheck-tests/check.cjs services/api-gateway                                              # rc 0; 27 errors, 27 in the baseline, 0 new</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, limiter moved below audit</td><td>1 failed / 2 passed; the failing cell is the RED one, <code>expected [ 502, 502, 429, 429 ] to not include 429</code></td></tr>
+<tr><td>the controls can fail</td><td>limiter removed: only the throttle control fails; audit middleware removed: only the recorder control fails</td></tr>
+<tr><td>whole suite</td><td>api-gateway <strong>123 files / 1203 &rarr; 124 / 1206</strong> tests, 0 failed; with the limiter moved below audit: 1 failed (the new RED cell), 1205 passed</td></tr>
+<tr><td>test type-check</td><td>158 &rarr; 159 files, 27 errors both times, 27 in the baseline, 0 new</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

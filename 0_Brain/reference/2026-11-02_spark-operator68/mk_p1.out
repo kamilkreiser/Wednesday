@@ -1,0 +1,39 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o68_p1_originate_notification_client_two_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/utils/notificationClient.ts b/Blockchain/Dev/services/originate/src/utils/notificationClient.ts
+--- a/Blockchain/Dev/services/originate/src/utils/notificationClient.ts
++++ b/Blockchain/Dev/services/originate/src/utils/notificationClient.ts
+@@ -51,9 +51,15 @@
+       logger.info('Notification sent via service', { template: payload.template, to: payload.to });
+     }
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.warn('Notification service unreachable, falling back to SMTP', {
+       template: payload.template,
+-      error: String(err),
++      error: reason,
+     });
+     await sendSmtpFallback(payload);
+   }
+@@ -105,9 +111,15 @@
+     }
+     logger.info('Notification sent via SMTP fallback', { template, to });
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.warn('SMTP fallback also failed (non-blocking)', {
+       template: payload.template,
+-      error: String(err),
++      error: reason,
+     });
+   }
+ }
+

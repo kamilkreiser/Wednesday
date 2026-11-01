@@ -1,0 +1,16 @@
+<h2>POST /api/workflows/escalate requires a platform administrator &mdash; KS-1881</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The transfer service&rsquo;s escalation sweep (<code>POST /api/workflows/escalate</code>) now answers <code>403 FORBIDDEN</code> &ldquo;Admin role required&rdquo; unless the caller&rsquo;s role passes the shared <code>isPlatformRole</code>. That admits SYSTEM_ADMIN and SUPER_ADMIN, and also <code>system_admin</code> through the helper&rsquo;s ASCII fold; an array or a Unicode look-alike is refused. On a refusal the sweep does not run. Before, any signed-in caller could escalate or time out every overdue approval step in every tenant.
+      </td></tr><tr><td>Red at develop: 13 of 16. Green after: 16 of 16. Nine mutants, nine killed; three of them, added after QA gate 53, strip whitespace before the check (<code>trim()</code>, <code>trimStart()</code>, <code>trimEnd()</code>), and the padded-role cells E14 to E16 kill them.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A running stack, the four platform suites and any deploy. Nothing in the repo calls this route. The gateway does not proxy <code>/api/workflows</code> to transfer and compose publishes no transfer port, so it is reachable only inside the network (QA gate 53).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/transfer &amp;&amp; npx vitest run src/__tests__/ks1881-workflows-escalate-requires-a-platform-admin.test.ts   # 16 passed</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td>develop 13 of 16 red; with the change <strong>16 of 16</strong>; mutants <strong>9 of 9</strong> killed</td></tr>
+<tr><td>transfer unit suite</td><td><strong>108 of 108</strong> across 8 files with the change (<code>--maxWorkers=2</code>, load1 5.7; timings not comparable)</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; red measured at develop <code>cb2320368ae4</code>; green on the change merged with develop <code>ddc644fb4869</code>, 2026-10-31 (UTC); Node v26.8.1 (its LTS status not checked against the vendor schedule)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,21 @@
+<h2>GET /api/platform/document-lookup is in the published contract, as a public route &mdash; KS-1773</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The route was live and missing from the published spec. It is now published as a deliberate public endpoint (<code>security: []</code>; Kam, 2026-10-28: &ldquo;Keep it public and publish it&rdquo;) with query parameters <code>hash</code> and <code>documentId</code> and the answers 200, 400, 429, 500 and 503. There is no 404: a lookup that matches nothing is a 200 with an empty <code>results</code> list. </td></tr><tr><td>Publishing arms the gateway&rsquo;s method gate: after a deploy and a gateway restart, every non-GET method on this path, HEAD included, is a 405 with <code>Allow: GET</code>; POST and DELETE were the fall-through 404 and HEAD was answered by the GET handler. Authentication does not move: an anonymous GET still gets the handler&rsquo;s own 400. </td></tr><tr><td>No handler change; the cells compare the handler&rsquo;s answers with what the yaml declares.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A live platform database (the 200 and 500 bodies come from a stubbed pool; column types are from the init DDL), a running stack, and the gateway&rsquo;s 429. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks1773-document-lookup-is-in-the-published-contract.test.ts   # 18 cells, rc 0
+cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run                                                                             # 126 files / 1266 tests, rc 0
+cd Blockchain/Dev &amp;&amp; npm run check:openapi</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new file against the base yaml</td><td><strong>8 failed / 10 passed</strong>: RED cells U1, U2, U3, U4, W4, W7, W9, R1 fail; 7 PIN cells and 3 GREEN controls pass at base</td></tr>
+<tr><td>new file, with the published operation</td><td><strong>18 / 18</strong></td></tr>
+<tr><td>six one-site mutants of the yaml</td><td>each killed: bearerAuth &rarr; U2, R2; 404 for 503 &rarr; U3, W5, W9; maxItems 6 &rarr; W7; certifiedAt not required &rarr; W4; get &rarr; post &rarr; R1, R2, U1, U2, U3, U4, W9; hash required &rarr; U4. All 18 cells ran each time; yaml restored byte-identical</td></tr>
+<tr><td>counts, before &rarr; after</td><td>api-gateway <strong>125 files / 1248 tests &rarr; 126 files / 1266</strong>, 0 failed on both sides (the before is the suite run with the new file excluded); yaml <strong>+119 / &minus;0</strong></td></tr>
+<tr><td>Node 24 LTS</td><td>repeated in <code>node:24-bookworm</code> (v24.22.1, aarch64), 3 workers: 126 / 126 files, 1266 / 1266 tests, 53 s; Linux native packages (rollup 4.60.4, esbuild 0.28.1) added container-local through NODE_PATH, network on for that install only</td></tr>
+<tr><td>gates</td><td><code>check:openapi</code> rc 0 (planted-drift control rc 1); <code>check:test-types</code> rc 0, api-gateway 27 errors in the baseline, 0 new</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>8894c7486f82</code>, 2026-10-27 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

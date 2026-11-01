@@ -1,0 +1,19 @@
+<h2>adminConfig.ts: fifteen catch conditions survive a hostile thrown value &mdash; KS-1780</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The fifteen catch conditions in <code>services/originate/src/routes/adminConfig.ts</code> that read <code>err?.message?.includes(...)</code> or <code>err?.code</code> before <code>fail500</code> now do the read inside a <code>try</code> (helpers <code>errorMessageIncludes</code> and <code>isMissingTableError</code>). A revoked Proxy or a throwing <code>message</code> getter used to make that read throw and leave the request with no answer; it now gets the constant 500. Readable errors are answered exactly as before. </td></tr><tr><td>Four GET routes are driven by cells; the other eleven sites are pinned by a source-text cell (S1), which proves the text, not the behaviour. A local model wrote the patch; it is applied unchanged and strict. Parts 1 and 3 of KS-1780 are a separate, merged change.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A running stack, a thrown object whose <code>code</code> getter throws, a mutant analysis of the fifteen sites, and a Node 24 LTS run (the host is Node 26.8.1). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest ks1780-admin-config-catches                        # 21 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest                                                     # 147 files / 1745 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npm run lint                                                 # rc 0, 0 errors</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new test against the unfixed product</td><td><strong>9 failed / 12 passed</strong> of 21 (eight by the escaping throw, one S1 matcher); with the patch <strong>21 / 21</strong></td></tr>
+<tr><td>services/originate, before &rarr; after</td><td><strong>146 files / 1724 cells &rarr; 147 files / 1745</strong>; 0 failed, 0 skipped; 0 vanished, 21 new</td></tr>
+<tr><td>type-check</td><td><code>tsc</code> rc 0; with tests included, 227 files (170 under <code>__tests__</code>) rc 0 and a planted type error reported</td></tr>
+<tr><td>lint</td><td><code>npm run lint</code> rc 0 (0 errors, 24 warnings in other files); the two touched files pass <code>--max-warnings 0</code></td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, develop <code>5dccdcb29ec2</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), jest 29.7.0, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

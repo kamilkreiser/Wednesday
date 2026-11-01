@@ -1,0 +1,73 @@
+<div class="section">
+<h2>Webhooks list failure — KS-1345</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td><code>GET /api/webhooks</code> used to
+        swallow a <strong>failed</strong> list query into
+        <code>200 { success: true, webhooks: [] }</code>, so a database error
+        read as "no webhooks". </td></tr><tr><td>The <code>.catch</code> on that query is gone: a
+        rejection now reaches the route's own <code>fail500</code> — a
+        constant 500 body, logged once, never a 200 with an empty list.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate
+npx jest src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts   # 9 cells
+npx jest                                                                       # 1063 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr>
+<th>Figure</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>originate suite, base → head</td>
+<td>1062 → 1063 tests, 0 failed both ends, 90 suites</td>
+</tr>
+<tr>
+<td>new reds</td>
+<td>0</td>
+</tr>
+<tr>
+<td>the nine cells</td>
+<td>
+            1.169–2.537 s reported, 1.47–3.26 s wall, three runs,
+            2026-10-05, host Kamil's Mac Studio (2)
+          </td>
+</tr>
+<tr>
+<td>red-first</td>
+<td>
+            test section alone: 1 failed / 9 on <code>RED KS-1345 A0</code> (500
+            expected, 200 received); all four load-failure signatures 0
+          </td>
+</tr>
+<tr>
+<td>applied == held</td>
+<td>
+            on FILES vs an independent apply: <code>2f8828ba0246</code>…
+            and <code>bca6c7da5118</code>… both sides
+          </td>
+</tr>
+<tr>
+<td>tsc 5.9.3, named binary</td>
+<td>rc 0 at base and head; positive control rc 2 (TS2322)</td>
+</tr>
+<tr>
+<td>stated timings naming this suite</td>
+<td>
+            0 at base SHA <code>3ce8cd4026a6</code> (must-hit control
+            <code>auth</code>: 70 flow / 69 cheat)
+          </td>
+</tr>
+</table>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Behaviour change.</strong></td><td> A rejected list query answers a
+        constant 500 where it answered <code>200 []</code>. </td></tr><tr><td>So does a non-UUID
+        <code>userId</code>, via 22P02 on the <code>::uuid</code> cast.
+        <strong>Which principals can carry a non-UUID organisation id is
+          UNMEASURED.</strong>
+</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not covered.</strong></td><td> No live sweep (§5f), so KS-1345 does
+        not move to Done here. </td></tr><tr><td>The deliveries half
+        (<code>webhooks.ts:412</code>) and <code>dispatchEvent</code>'s
+        <code>.catch</code> at <code>:513</code> swallow in the same shape and
+        stay open on the ticket.
+      </td></tr></table></div>
+</div>

@@ -1,0 +1,103 @@
+<h2>28. A present but unparseable security artefact is reported, not read as a clean scan (KS-1136)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What this fixes.</strong></td><td> <code>09-aggregate-report.sh</code> reads each job's artefact with
+      <code>jq -r … 2>/dev/null</code> (08 with a bare <code>jq</code>), so an artefact that
+      <em>exists</em> but does not <em>parse</em> — a job that aborted mid-write — yielded zero
+      findings and <strong>rc 0</strong>. </td></tr><tr><td>That is indistinguishable from a clean scan. </td></tr><tr><td>KS 878 had already
+      guarded 04's artefact; every other job's block was silent. </td></tr><tr><td>Each present, unparseable artefact now
+      gets its own HIGH finding, exactly as 04's does.
+    </td></tr></table>
+<h3>28.1 The mechanism, and what is deliberately NOT changed</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The change is a <strong>pure insertion</strong> of 14 lines (<code>numstat 14 0</code>) after
+      <code>is_baselined()</code> and <strong>before</strong> <code>ALL_FINDINGS</code> reads
+      <code>$TMP</code>, so the new findings are in the aggregate rather than appended after it. </td><td>It loops the
+      seven unguarded jobs (01 02 03 05 06 07 08) and calls the file's existing <code>emit</code>. 04 is
+      untouched: its KS 878 guard already fires and a second finding would double-count.
+      <strong>No threshold, baseline, exit-code path or report writer is touched</strong>, and the finding
+      text carries a filename only — no artefact contents, no environment.
+      <code>jq -e .</code> is the test, so a <em>valid</em> JSON <code>null</code> or <code>false</code> also
+      reads as unreadable; that side effect is named here because <code>-e</code> sets its exit status from
+      the output value, not only from parseability.
+    </td></tr></table>
+<h3>28.2 The guard is a two-term conjunction, and each term has its own red arm</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      It fires only when the artefact <code>[ -f ]</code> <em>and</em> <code>! jq -e .</code> succeeds on it.
+      </td><td>Two terms need two arms, or one of them is being asserted by prose rather than by a cell. Each arm was
+      run with <code>bash -n</code> rc 0 first: an arm that does not parse prints no summary line at all,
+      which is a <strong>load failure, not an inert tamper</strong>.
+    </td></tr></table>
+<table>
+<tr><th>Arm</th><th>Term it falsifies</th><th>Result</th></tr>
+<tr><td>A — drop <code>[ -f "$_f" ] &amp;&amp;</code></td><td>the artefact EXISTS</td>
+<td><strong>4 cells red</strong> (2 passed, 4 failed): a <em>missing</em> artefact is reported
+unreadable, which breaks both main cells and both well-formed controls</td></tr>
+<tr><td>B — drop <code>! jq -e .</code></td><td>it does NOT parse</td>
+<td><strong>2 cells red</strong> (4 passed, 2 failed): every <em>present</em> artefact is reported
+unreadable, so the two well-formed controls red</td></tr>
+</table>
+<h3>28.3 Red-first, and the figures</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      With the test file present and the product file reverted to its blob at the base
+      (<code>739ebab</code>), the base gives <strong>rc 1, 3 failed</strong> — cells 1, 2 and 3, each
+      reporting <code>rc 0, findings=0, ids=[]</code>, which the test names as
+      “the clean-result silence”. </td><td>All three CONTROL cells stay green in that arm, so the red is
+      attributable to the new guard and not to a broken harness. At the head,
+      <strong>6 passed, 0 failed, rc 0</strong>. The product file was restored and proved
+      <strong>sha256-identical</strong>, with the executable bit re-asserted.
+    </td></tr></table>
+<h3>28.4 The executable bit, which <code>git apply</code> drops</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>09-aggregate-report.sh</code> is <strong>100755</strong>. </td><td>Applying the patch left
+      <code>git ls-files -s</code> reading <code>100755</code> while the file on disk became
+      <code>-rw-r--r--</code> and <code>[ -x ]</code> read <strong>FALSE</strong>. It was restored with
+      <code>chmod 755</code> on <strong>that one file</strong>, authorised by the index mode and proved to
+      change <strong>no byte</strong> (<code>cmp</code> rc 0 and an identical sha256; a one-byte-altered copy
+      makes the same <code>cmp</code> rc 1, so the zero discriminates). <code>checkout-index -a</code> was
+      never used. The staged tree is <code>074705eebd81</code> with
+      <code>:100755 100755 … M</code> on the product file — the same tree predicted from the
+      payload before any worktree existed.
+    </td></tr></table>
+<h3>28.5 The new suite is discovered, and the CI shell-suite count moves</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>run-shell-suites.sh</code> discovers by globbing <code>*.test.sh</code> under
+      <code>Blockchain/Dev/scripts/__tests__</code> and <code>systemTest/__tests__</code>, and invokes with
+      <code>bash &lt;file&gt;</code> — so the new test is <strong>100644</strong> and needs no
+      executable bit. </td><td>Measured by moving the file aside and back (restored sha256-identical):
+      <strong>67 → 68</strong> suites, the new one listed <strong>1</strong> time after and
+      <strong>0</strong> before. <strong>This matters for CI triage:</strong> the known pre-existing
+      shell-suite class is quoted as <em>61 passed, 6 failed, 0 skipped (of 67)</em>. At this head the
+      denominator is <strong>68</strong>, so that line will not match verbatim and a seventh red is
+      <strong>not</strong> that class.
+    </td></tr></table>
+<h3>28.6 Timings — stated, and measured rather than carried forward</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>No stated timing covers the shell-suite set or <code>09-aggregate-report.sh</code>.</strong></td><td>
+      Measured at the base commit <code>d75bfe2deb80</code> across <code>CLAUDE.md</code>,
+      <code>systemTest/CLAUDE.md</code> and the test-discipline skill: <strong>0</strong> lines pair a
+      shell-suite or aggregate-report token with a number and an explicit time unit. </td></tr><tr><td>The same instrument
+      finds <strong>4</strong> such lines for <code>Akto</code>, <strong>7</strong> for
+      <code>pre-merge</code> and <strong>2</strong> for <code>Schemathesis</code>, so the zero is a
+      measurement and not a broken grep. <strong>No tier budget moves.</strong>
+      Wall clock, measured <strong>2026-10-06 UTC</strong> on <strong>macOS 27.0.1 arm64, bash
+      3.2.57(1)-release, jq-1.7.1-apple</strong>: the new suite alone <strong>1.332 s</strong>; its named
+      siblings <code>aggregate_report_trivy_artefact.test.sh</code> <strong>0.842 s</strong> and
+      <code>orchestrate_jobs.test.sh</code> <strong>3.965 s</strong>; the whole shell-suite set
+      <strong>68 passed, 0 failed, 0 skipped (of 68)</strong> in <strong>342 s</strong> (11:40:22Z to 11:46:04Z), rc 0.
+    </td></tr></table>
+<h3>28.7 Not covered, and the live sweep</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      This closes <strong>item 2 (R-3) only</strong>. </td><td>Item 1 merged as <strong>#1051</strong>; the other
+      items on the ticket are untouched and the ticket does <strong>not</strong> move to Done.
+      The cells drive the job through a <strong>fixture tree with stubbed artefacts</strong>: no real
+      security scanner ran, no real mid-write abort was induced, and the aggregate's HTML and JSON report
+      writers were not asserted beyond the finding ids. Whether this new suite is green on the CI runner is
+      <strong>unmeasured</strong> — the runner reds six shell suites for an unbuilt
+      <code>packages/shared</code>, and the new suite's own dependencies on the runner were not driven.
+      This is a <strong>runtime change</strong> to a security-reporting job, so a <strong>live sweep is
+      owed</strong>.
+    </td></tr></table>
+<h3>28.8 Running it</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+bash scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh   # 6 cells, rc 0
+bash scripts/run-shell-suites.sh --list                                        # 68 suites
+bash scripts/run-shell-suites.sh                                               # the whole set
+bash -n Blockchain/Testing/jobs/09-aggregate-report.sh                         # rc 0</code></pre>

@@ -1,0 +1,60 @@
+<h2>20. Clearing MFA NULLs the TOTP seed and the hashed backup codes, at all three sites (KS-938)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this fixes.</strong></td><td> “MFA disabled” left the TOTP seed and the hashed
+      backup codes in the row. </td></tr><tr><td>The flag flipped, the call answered <strong>200 “MFA disabled
+      successfully”</strong>, and the credential material survived — so a seed could be
+      re-armed by <code>POST /api/users/me/mfa/verify</code>, which re-arms on the existing
+      <code>user.mfaSecret</code> without minting a new one. </td></tr><tr><td>The case that matters is the user who
+      disabled MFA <em>because</em> the authenticator was compromised.
+    </td></tr></table>
+<h3>20.1 The mechanism, and the one thing deliberately NOT changed</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+<code>userRepo.updateUser</code> builds its SET list with
+      <code>if (tsField in updates &amp;&amp; updates[tsField] !== undefined)</code>.
+      <code>mfa_secret</code> and <code>mfa_backup_codes</code> <em>are</em> in
+      <code>fieldMap</code>, so the map was never the problem — the <strong>value</strong>
+      guard was. </td><td>All three clearing sites passed <code>undefined</code>, so a <strong>partial</strong>
+      UPDATE landed naming only the fields that survived.
+      <strong>The <code>undefined</code> skip is NOT changed</strong>: every other caller relies on it
+      to mean “leave this column alone”. <code>null</code> passes the guard and writes SQL
+      NULL, and the encryption branch guards on <code>typeof val === 'string'</code>, so a
+      <code>null</code> can never enter it. The codebase already knew the rule —
+      <code>wallet.ts</code> carries “null, NOT undefined” for
+      <code>walletAddress</code> (KS 720).
+    </td></tr></table>
+<h3>20.2 Three sites, and why the fix is per-site rather than one shared edit</h3>
+<table class="pmatrix"><tr><td colspan="2">
+      Addressed by <strong>symbol</strong>, with blobs, because the line numbers move: at this
+      change's base <code>routes/mfa.ts</code> is blob <code>87d3ee1079fe</code> and
+      <code>routes/users.ts</code> is blob <code>ea9f8da97a04</code>.
+      <code>mfa.ts</code> setup-verify <strong>revert</strong> (<code>updateUser</code>) and
+      <code>mfa.ts</code> <code>POST /mfa/disable</code> (<code>updateUserOrThrow</code>) each passed
+      <code>undefined</code> for both columns. <code>users.ts</code>
+<code>POST /me/mfa/disable</code> did <strong>not pass <code>mfaBackupCodes</code> at
+      all</strong>, so that site needed the <strong>key added</strong>, not merely re-valued —
+      which is why no single shared edit could have fixed all three.
+    </td></tr></table>
+<h3>20.3 Red-first, by assertion</h3>
+<table class="pmatrix"><tr><td colspan="2">
+      The cells drive the <strong>real route handlers over real loopback HTTP</strong> with the real
+      <code>userRepo</code> and the real <code>updateUser</code>, stubbing only <code>../db</code> so
+      the emitted statement can be captured, and they assert the <strong>SQL</strong> — not the
+      source text, which would still pass if the fix were commented out. </td></tr><tr><td colspan="2">At the base the three site
+      cells fail and the two controls pass (<strong>3 failed | 2 passed (5)</strong>); at the head
+      <strong>5 passed (5)</strong>. </td></tr><tr><td colspan="2">Both numbers are non-zero, so the red is a real red and not a
+      load failure. </td></tr><tr><td colspan="2">The base failure quotes the defect verbatim:
+      <code>UPDATE users SET mfa_enabled = $1, verification_level = $2, updated_at = NOW() WHERE id = $3</code>.
+      </td></tr><tr><td colspan="2">The load-bearing control drives the same real <code>updateUser</code> with
+      <code>undefined</code> and requires the two columns to be <strong>absent</strong> — a cell
+      that cannot tell the fix from its own fallback is not a regression test.
+    </td></tr></table>
+<h3>20.4 Residue, named and NOT fixed here</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+<code>users.ts</code> <code>POST /me/mfa/disable</code> verifies the TOTP only
+      <code>if (user.mfaSecret &amp;&amp; ...)</code>, so an account with no stored seed disables MFA
+      with no proof of possession at all. </td><td>That is a separate defect in the same handler and is left
+      for its own ticket rather than widened into this one.
+    </td></tr></table>
+<h3>20.5 Running it</h3>
+<pre><code>cd Blockchain/Dev/services/auth
+npx vitest run src/__tests__/ks938-mfa-disable-nulls-seed-and-backup-codes.test.ts   # 5 cells
+npx vitest run                                                                       # 845 tests</code></pre>

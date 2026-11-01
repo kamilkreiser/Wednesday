@@ -1,0 +1,19 @@
+<h2>Two ks1454 pins stop passing on dead code &mdash; KS-1827, KS-1828</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Tests only. B6 reads the by-id handler with comments removed, so a commented-out <code>anchorSignatureHashView</code> spread goes red (B5, which matches source text, stayed green). R6 refuses a <code>signatureHash</code> on each of the 25 accepted verbs other than <code>sign</code>, so widening the sign-only rule to admit <code>declare</code> goes red. B7 and C5 are the controls.
+      </td></tr><tr><td>28 new cells (2 + 26) in <code>ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts</code> and <code>ks1454-signature-hash-is-accepted-and-anchored-on-the-sign-verb.test.ts</code>; the two files are 51 of 51 on the real product; the whole anchoring suite is 35 files / 525 cells.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The anchoring integration files, the four platform suites, a running stack, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line). B6 is a source-text guard, not a route call.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts src/__tests__/ks1454-signature-hash-is-accepted-and-anchored-on-the-sign-verb.test.ts   # 2 files, 51 cells, rc 0
+cd Blockchain/Dev/services/anchoring &amp;&amp; npm test   # 35 files / 525 cells: 524 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>28</strong> (B6 and 25 R6 RED, B7 and C5 controls); the two files are <strong>51 / 51</strong> on the real product</td></tr>
+<tr><td>planted weakenings</td><td>X16 (by-id spread commented out): <strong>1 of 11 red</strong>, the cell is B6, B5 stays green; X8 (<code>declare</code> admitted): <strong>1 of 40 red</strong>, the declare R6 cell; each restore sha256-equal</td></tr>
+<tr><td>anchoring unit suite</td><td><strong>35 files / 525 cells</strong> with the change; 35 / 497 at base; the same 1 pre-existing failure in both (<code>threadTokenMint.test.ts</code>), 0 new reds, 0 skipped</td></tr>
+<tr><td>tsc with the test files</td><td><strong>0 errors</strong> over 65 anchoring source files, TypeScript 5.9.3; a planted type error reported once as <code>TS2322</code></td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>d7ddfa1f6433</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

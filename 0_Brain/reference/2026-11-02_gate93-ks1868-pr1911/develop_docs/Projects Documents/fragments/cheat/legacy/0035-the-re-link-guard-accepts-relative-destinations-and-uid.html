@@ -1,0 +1,15 @@
+<h2>The re-link guard accepts relative destinations and uid-0 users with a group &mdash; KS-937</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>check-shared-relink.sh</code> no longer blocks <code>ln -s /shared ./node_modules/@secuura/shared</code> or <code>app/node_modules/&hellip;</code>, and reads <code>USER root:root</code> and <code>USER 0:0</code> as root. </td></tr><tr><td><code>USER :root</code> (no user part) is still read as non-root: nothing has measured that it runs as root. </td></tr><tr><td><strong>Measured gap:</strong> <code>../node_modules/&hellip;</code> now passes too, and absolute wrong places already did; the guard does not check where the link lands.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Gotcha when you run this locally.</strong></td><td> Under <code>core.filemode=false</code>, <code>git apply</code> leaves the guard and its suite 0644 on disk while the index keeps 100755. Run them with <code>bash</code>, or <code>chmod 755</code> both.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh   # 112 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first</td><td>base guard 108/4 &rarr; payload without the deviation 111/1 (the pin) &rarr; head 112/0</td></tr>
+<tr><td>widening, 32 probes</td><td>5 accepted by both, 9 newly accepted, 18 refused by both, 0 newly refused</td></tr>
+<tr><td>siblings</td><td><code>check_shared_relink_case</code> 6/0, <code>check_shared_relink_tooling_tokens</code> 6/0, <code>preflight_deps</code> 56/0, base and head</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

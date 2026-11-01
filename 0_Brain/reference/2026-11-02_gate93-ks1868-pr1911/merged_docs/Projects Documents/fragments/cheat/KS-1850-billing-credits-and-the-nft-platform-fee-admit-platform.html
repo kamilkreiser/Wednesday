@@ -1,0 +1,19 @@
+<h2>Billing credits and the NFT platform fee admit platform administrators only &mdash; KS-1850</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> <code>POST /billing/admin/credits</code> and <code>PUT /api/nft/admin/platform-fee</code> admitted <code>OWNER</code>, every self-registered user, and <code>ORG_ADMIN</code>. Both now admit exactly SYSTEM_ADMIN and SUPER_ADMIN (the shared <code>isPlatformRole</code>, which folds ASCII case), checked before the body. The 403 body is unchanged. A test or tool that called them as OWNER or ORG_ADMIN now gets 403.
+      </td></tr><tr><td>Red at develop: 6 of 14 in each. With the change, billing 113/113 and nft-certificate 121/121. 26 of 26 mutants killed, including the old list restored.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A running stack; Stripe; callers outside this repository; the four platform suites; Node 24; any deploy.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/billing &amp;&amp; npx vitest run --maxWorkers=3 src/__tests__/ks1850-admin-credits-requires-a-platform-admin.test.ts          # 14 cells
+cd Blockchain/Dev/services/nft-certificate &amp;&amp; npx vitest run --maxWorkers=3 src/__tests__/ks1850-platform-fee-requires-a-platform-admin.test.ts  # 14 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>whole suites with the change</td><td>billing <strong>113/113</strong> · nft-certificate <strong>121/121</strong></td></tr>
+<tr><td>red-first at develop</td><td>6 of 14 new cells red in each; every existing cell green</td></tr>
+<tr><td>mutants</td><td><strong>26 of 26</strong> killed</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests adds 0 errors (billing's 10 are at develop too); eslint 0 errors, 0 warnings</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared, load 8 to 16; develop <code>85cd24d81cb9</code> with the change on top, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

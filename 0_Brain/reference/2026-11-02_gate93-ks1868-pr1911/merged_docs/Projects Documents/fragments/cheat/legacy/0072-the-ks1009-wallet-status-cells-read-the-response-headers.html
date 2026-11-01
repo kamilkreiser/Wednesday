@@ -1,0 +1,17 @@
+<h2>The ks1009 wallet-status cells read the response headers and the 500 body &mdash; KS-1588</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Test-only. <code>ks1009-wallet-status-reveals-only-existence.test.ts</code> now has <strong>13 cells</strong> (it had 8): cell 7 pins the header NAMES to the Express defaults, cell 8 pins that no header VALUE carries the seeded id, role or timestamp, and cell 9 pins the generic 500 body when the lookup throws. The route and the product code are unchanged. </td></tr><tr><td>It needs no database and no container: the lookup is stubbed and the route runs on a real listener. </td></tr><tr><td>To prove a cell red, put one change in a COPY of <code>routes/wallet.ts</code> (an <code>X-User-Id</code> header for cell 7, an id in the <code>ETag</code> for cell 8, the thrown text or the address in the 500 body for cell 9) and point the specifier <code>../routes/wallet</code> at the copy with an alias in a throwaway vitest config.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The four platform suites, a running stack, a real PostgreSQL, any deploy, and Node 24 (this host has only Node 26.8.1, not an LTS line). </td></tr><tr><td>Not tried: a mutant of the shared <code>errorHandler</code>, and response headers on the 500 path.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>npm --prefix Blockchain/Dev run test --workspace=services/auth -- run ks1009-wallet-status-reveals-only-existence   # 13 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>base cell file against each mutant</td><td><strong>8 / 8</strong> for N3, N3b, N8m and N8p: all four survive the base file</td></tr>
+<tr><td>new cell file against each mutant</td><td>N3: cells 7 and 8 fail (<strong>11 / 13</strong>); N3b: cell 8 fails (<strong>12 / 13</strong>); N8m and N8p: cell 9 fails (<strong>12 / 13</strong>); a byte copy of the real route reads <strong>13 / 13</strong></td></tr>
+<tr><td>whole <code>services/auth</code> suite</td><td>before <strong>1200 / 1200</strong> (105 files); after <strong>1205 / 1205</strong> (105 files)</td></tr>
+<tr><td>gates</td><td>test-file type-check ratchet: 0 new errors in auth (planted TS2322 control reads 1 new); lint 0 errors, 15 warnings, none in this file</td></tr>
+<tr><td>host and tools</td><td>a MacBook Pro (Mac14,5, Apple M2 Max, 12 cores, 32 GiB, macOS 27.0.1), shared with other sessions; develop <code>bd6697e079fc</code>, 2026-10-28 (UTC); Node v26.8.1 (not an LTS measurement); vitest 4.1.12, express 4.22.3, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

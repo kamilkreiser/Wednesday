@@ -1,0 +1,18 @@
+<h2>GET /api/anchors/:documentId answers 500, not 404, on a database fault &mdash; KS-1657</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> originate&rsquo;s <code>getAnchorByDocumentId</code> used to catch every error and return null, which the route reads as &ldquo;no anchor&rdquo; and answers 404 with <code>anchored: false</code>, so a failed database read looked like a document with no anchor. It now logs the warn line and rethrows: a fault answers the route&rsquo;s constant 500 <code>INTERNAL_ERROR</code> (no fault text in the body), and zero rows is still the same 404. </td></tr><tr><td>500 and not 503 because originate has no infrastructure-fault classifier (auth&rsquo;s reads <code>pg</code> errors; originate reads through Prisma).
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A real database fault: the rejection is a mock on <code>prisma.$queryRaw</code>. How the api-gateway&rsquo;s <code>/api/anchors</code> proxy relays the 500. Any running stack. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest --testPathPattern='ks1657-an-anchor-read-fault'   # 8 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest                                                    # 142 files / 1698 tests, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new file against the unfixed <code>anchors.ts</code></td><td><strong>5 failed / 3 passed</strong>: A1, A2, A3, A4 and B3 red; A5, B1 and B2 (the controls) green</td></tr>
+<tr><td>new file, fixed</td><td><strong>8 / 8</strong></td></tr>
+<tr><td>counts, before &rarr; after</td><td>originate <strong>141 files / 1690 tests &rarr; 142 files / 1698</strong>, 0 failed on both sides (the before is the suite run with the new file excluded); <code>ks1629</code> not edited, 7 / 7; <code>tsc --noEmit</code> rc 0, planted-error control rc 2</td></tr>
+<tr><td>Node 24 LTS</td><td>repeated in <code>node:24-bookworm</code> (v24.22.1, aarch64), 3 workers: 142 / 142 files, 1698 / 1698 tests, 30 s. At the default 11 workers the same container failed 16 suites (12 SIGKILL, 4 past 5 s) under load; resources, not code</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions (load average 15 to 17 at the time), base <code>8894c7486f82</code>, 2026-10-27 (UTC); host Node v26.8.1 (not an LTS measurement), jest 29.7.0, ts-jest 29.4.11, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

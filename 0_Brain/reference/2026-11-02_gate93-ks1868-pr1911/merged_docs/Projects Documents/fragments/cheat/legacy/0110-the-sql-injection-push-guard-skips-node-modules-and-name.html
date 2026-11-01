@@ -1,0 +1,25 @@
+<h2>The SQL-injection push guard skips node_modules and names a real hit &mdash; KS-1857</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Two lines in <code>scripts/check-no-sql-injection.sh</code>, which runs on every push through preflight leg 15/16:
+      <ul>
+        <li>The scan&rsquo;s grep gains <code>--exclude-dir=node_modules</code>. On a fresh worktree, cold, it took 125 s and now takes 9 s.</li>
+        <li>The headline&rsquo;s two <code>$</code> are escaped. Before, a real hit died under <code>set -u</code> with &ldquo;queryRawUnsafe: unbound variable&rdquo; and named no file.</li>
+      </ul>
+      There are two new shell suites in <code>scripts/__tests__/</code>, reached by the runner&rsquo;s glob. One cell runs the real grep on a throwaway tree (added after QA gate 35). Product code under a path such as <code>src/node_modules_shim/</code> stays hidden by the old post-filter until KS-1865.
+      </td></tr><tr><td>Red at develop: 3 of 5 and 2 of 4. Green after: 5 of 5 and 4 of 4. Six mutants, six killed; the gate&rsquo;s two over-excluding mutants turn the real-grep cell red. Real-grep arms on throwaway trees: 6 of 6.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The whole pre-push hook before and after; how cold a seat&rsquo;s node_modules is at push time; the four platform suites, a running stack and any deploy.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/check_no_sql_injection_skips_node_modules.test.sh   # 5 passed, 0 failed
+bash Blockchain/Dev/scripts/__tests__/check_no_sql_injection_reports_the_hit.test.sh     # 4 passed, 0 failed</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>guard, fresh worktree, cold</td><td>as-is <strong>125.26 s</strong> (a second fresh worktree: 172.46 s); with the exclusion <strong>9.03 s</strong></td></tr>
+<tr><td>guard, warm</td><td>median of three: as-is <strong>3.08 s</strong>; with the exclusion <strong>0.33 s</strong></td></tr>
+<tr><td>run-code-guards.sh, fresh worktree</td><td>211.35 s cold; 19.01 s and 15.23 s warm (13 guards)</td></tr>
+<tr><td>new suites</td><td>develop 3 of 5 and 2 of 4; with the change <strong>5 of 5</strong> and <strong>4 of 4</strong>; mutants <strong>6 of 6</strong> killed, plus QA gate 35&rsquo;s <code>--exclude-dir=src</code> and <code>--exclude-dir='*'</code></td></tr>
+<tr><td>shell-suite runner</td><td>100 passed, 0 failed, 1 skipped of 101 (ks949 skips with no PostgreSQL); 944 s at load 15 to 19, not comparable; run before the real-grep cell was added</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats, load 8 to 19.4; develop <code>85cd24d81cb9</code> with the change on top, 2026-10-30 (UTC); bash 3.2.57, BSD grep 2.6.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

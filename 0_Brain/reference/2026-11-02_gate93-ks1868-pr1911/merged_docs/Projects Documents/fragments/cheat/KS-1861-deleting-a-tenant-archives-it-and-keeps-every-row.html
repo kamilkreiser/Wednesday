@@ -1,0 +1,19 @@
+<h2>Deleting a tenant archives it and keeps every row &mdash; KS-1861</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> <code>DELETE /api/platform/tenants/:id</code> with <code>{"confirm": true}</code> now sets the tenant&rsquo;s status to <code>archived</code> and answers <code>{ success: true, deleted: false, archived: true, status: "archived", message }</code>. No row is deleted and no database is dropped, whatever <code>PROVISION_PER_TENANT_DB</code> says. Erasure is not built (Kam: &ldquo;Archive, not erase&rdquo;).
+      </td></tr><tr><td> An already-archived tenant answers <code>409</code>. A status change made by someone else between the read and the update answers <code>409</code> too. A failed archive answers the constant <code>500</code> and leaves the tenant as it was. The audit log shows <code>tenant_archived</code> where it used to show <code>tenant_deleted</code>; a failed archive is recorded as <code>tenant_archive_failed</code> on a best-effort basis. To reverse an archive, move the tenant to <code>suspended</code> with <code>PATCH /api/platform/tenants/:id/status</code>, then to <code>active</code>; <code>archived &rarr; active</code> in one step answers <code>409</code> (Kam, card <code>secuura-ks1861-archive-from-which-status-1101</code>: &ldquo;b &mdash; As (a), and archived can go back to suspended&rdquo;).
+      </td></tr><tr><td> <strong>Status reads at start-up stay as built</strong> (Kam, 2026-11-01 10:05:24 AEDT, card <code>secuura-ks1860-status-refresh-fails-at-startup-1101</code>: &ldquo;a &mdash; Keep it as built and say so&rdquo;). Where <code>MULTI_TENANCY_ENABLED</code> is on: if the platform database is down when originate starts, originate serves every tenant, suspended and archived ones included, until a status read succeeds. A tenant suspended after the last good read is served for as long as the database stays down. This is not a regression: before KS 1860 nothing refused a suspended tenant at all.
+      </td></tr><tr><td>Red at develop: 9 of 12, and 1 of 18 for the status order (<code>archived &rarr; suspended</code>). Green after: 12 of 12 and 18 of 18. Mutants: 16 of 16 killed.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A running stack, the four platform suites, a real Postgres (the cells use a fake platform database) and any deploy.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/tenant-provisioning &amp;&amp; npx vitest run src/__tests__/ks1861-tenant-delete-archives-and-keeps-every-row.test.ts   # 12 passed
+cd Blockchain/Dev/services/tenant-provisioning &amp;&amp; npx vitest run src/__tests__/ks1860-tenant-status-follows-the-documented-order.test.ts   # 18 passed</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td>develop 9 of 12 red, and 1 of 18 in the status-order file; with the change <strong>12 of 12</strong> and <strong>18 of 18</strong>; mutants <strong>16 of 16</strong> killed</td></tr>
+<tr><td>whole suite</td><td>tenant-provisioning <strong>84 of 84</strong> across 10 files, the KS 1410 source guard included; <code>--maxWorkers=2</code>, load1 9.3 to 9.5 (run once above the usual limit of 9, on Wednesday&rsquo;s word), so timings are not comparable</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; red measured at develop <code>60e59bd2270b</code>, 2026-10-31 (UTC); Node v26.8.1 (its LTS status not checked against the vendor schedule)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

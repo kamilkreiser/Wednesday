@@ -1,0 +1,44 @@
+<h2>35. Job 04 fails a scan when trivy reports neither Results nor ArtifactName (KS-1274)</h2>
+<h3>35.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      KS 1136 already made job 04 treat a non-zero trivy exit, or output <code>jq</code> could not
+      read, as a FAILED scan. </td><td>What it did <strong>not</strong> catch is a trivy that exits
+      <strong>0</strong> and prints a well-formed but empty object. A bare <code>{}</code> parses
+      cleanly, carries no findings, and so was recorded as a <em>clean image</em> — the one shape where
+      "no vulnerabilities" and "no scan happened" are indistinguishable from the artefact. This row adds
+      the missing guard at <code>Blockchain/Testing/jobs/04-container-trivy.sh:115-120</code>: the scan
+      is recorded <code>scan-failed</code> when stdout has <strong>neither</strong> <code>Results</code>
+      <strong>nor</strong> <code>ArtifactName</code>.
+    </td></tr></table>
+<h3>35.2 The ticket's own suggested fix is wrong as written</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The ticket proposes failing on a missing <code>Results</code> key. </td><td>That over-fires. A
+      genuinely clean image can report <code>ArtifactName</code> with no <code>Results</code> array at
+      all, and failing it would turn every clean scan into an error. The guard therefore requires
+      <strong>both</strong> keys to be absent, and the suite pins that distinction with a control cell —
+      <code>CONTROL KS-1274 a clean report with ArtifactName and no Results stays clean: rc 0, no
+      error</code> — which passes in the patched state <em>and</em> in the reverted state, so it cannot
+      be mistaken for the cell under test.
+    </td></tr></table>
+<h3>35.3 Why the three suites' clean stub had to move with the guard</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      All three trivy suites stubbed a clean image as <code>{}</code>. </td><td>Under the new guard
+      <code>{}</code> is precisely the failure case, so left alone every clean-path cell in all three
+      suites would have started failing for the right reason in the wrong test. The stub becomes
+      <code>{"Results":[]}</code> in the same commit — a real clean report rather than an empty one. The
+      <code>fail.txt</code> vocabulary gains <code>bare</code> and <code>nores</code> so the stub can
+      produce each shape deliberately.
+    </td></tr></table>
+<h3>35.4 Red-first, and what is still owed</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Red proof by reverting the <strong>product only</strong>, suites kept patched. </td><td>
+      <code>04-container-trivy.sh</code> restored to the base blob and
+      <code>container_trivy_failed_scan_is_loud.test.sh</code> re-run: <strong>4 passed, 1 failed, rc
+      1</strong>, the single failure being <code>🔴 KS-1274 a trivy that exits 0 with a bare {} is
+      recorded as scan-failed and the job exits 1</code>, with the control cell green in both states.
+      Product restored byte-identical (sha256/16 <code>b0a19e77c940633c</code>). Green after:
+      <strong>5/0, 6/0, 5/0</strong> across the three suites. <strong>A live run is owed</strong> — this
+      host has no docker daemon and no trivy binary, so every cell runs against stubs on a private
+      <code>PATH</code> and the real scanner's bare-<code>{}</code> behaviour is UNMEASURED here. The
+      ticket does <strong>not</strong> move to Done.
+    </td></tr></table>

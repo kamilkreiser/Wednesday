@@ -1,0 +1,15 @@
+<h2>Three test files now defend the NFT list read gate against the three mutants gate 23 found alive &mdash; KS-1836 gate 23 mutants Ma, Mb and Mf</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>Three new test files in <code>nft-certificate/src/__tests__/</code>, no product byte changes: <code>ks1836-read-gate-wallet-selector-compares-exactly.test.ts</code> (5 cells, exact wallet compare), <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> (4 cells, one narrowed-list warning for a foreign selector with no rows) and <code>ks1836-log-silent-on-an-ordinary-own-rows-call.test.ts</code> (4 cells, no warning on an ordinary call). Covers gate 23&rsquo;s mutants Ma, Mb and Mf only; F2/Mc and F3 are a product call and are not covered.</td></tr><tr><td>Test-only, so green at the product (13 of 13). The proof is a tamper in the worktree: Mb fails 3 of 4, Ma 1 of 4, Mf 2 of 5, each restored sha256-equal.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>Any mutant beyond the three; the nft-certificate integration files, the four platform suites, a running stack, Node 24 and any deploy were not run. <code>ks1836-log-foreign-selector-with-no-rows.test.ts</code> differs from the checker&rsquo;s file by two lines on the coordinator&rsquo;s ruling: the unused helper at line 116 is deleted and its <code>beforeEach</code> gets a 30 second timeout (its first cell timed out in 2 of 6 alone runs before that; cause not established).</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test -- ks1836-read-gate-wallet-selector ks1836-log-foreign-selector ks1836-log-silent-on   # 13 cells, rc 0
+cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test -- --maxWorkers=3                                  # 16 files / 120 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>13</strong> in 3 files (5 + 4 + 4); 13 of 13 pass at the untouched product (develop <code>530f091120d5</code>); under tamper Mb 3 of 4 fail, Ma 1 of 4, Mf 2 of 5</td></tr>
+<tr><td>nft-certificate unit suite</td><td><strong>16 files / 120 cells</strong>, all pass, 0 failed, 0 skipped (vitest 4.1.12, <code>--maxWorkers=3</code>); the checker&rsquo;s untouched-tip figure was 107 cells</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with the tests added to the program: <strong>0 errors</strong> over 37 source files, a planted type error reported once as <code>TS2322</code>; eslint: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>530f091120d5</code> with the change on top, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,20 @@
+<h2>The NFT certificate list answers only the verified caller&rsquo;s rows &mdash; KS-1836</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> GET <code>/api/nft/certificates</code> now takes the owner from the verified token (<code>req.user.userId</code>), never from <code>?userId=</code>, and returns only rows whose <code>userId</code> equals it; <code>?walletAddress=</code> and <code>?userId=</code> can only narrow that set. A foreign selector gets the empty 200 a caller with no rows gets; a caller with no usable identity (absent, not a string, blank, or the legacy <code>'user-id'</code>) gets 403. Every record written today carries <code>'user-id'</code>, so real callers list nothing until the mint paths record the caller. New <code>nftReadGate.ts</code> (+95), <code>nft.routes.ts</code> +22 -9; 31 new cells in 2 files.
+      </td></tr><tr><td>Red without the gate: R1, R2, R4 to R6, R8 to R18 and R20 in the route file, and the gate file does not load; R3, R7, R19 and C1 to C4 are controls.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The four platform suites, a running stack, a real Postgres, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line). Known gaps are listed in the flow-diagram entry and on the ticket.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test -- src/__tests__/ks1836-nft-list-owner-bound.test.ts src/__tests__/ks1836-nft-read-gate.test.ts   # 2 files / 31 cells, rc 0
+cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test                                                                                                       # 13 files / 107 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>31 / 31</strong> with the gate; on develop&rsquo;s handler 17 of 24 route cells red and 7 controls green; the 7 gate cells do not load on develop (the module is absent)</td></tr>
+<tr><td>mutants</td><td><strong>17 of 17 killed</strong>; each parsed before it ran, each file restored, sha256 equal to HEAD</td></tr>
+<tr><td>nft-certificate unit suite</td><td><strong>13 files / 107 cells</strong> with the change, 0 failed, 0 skipped; 11 / 76 on develop&rsquo;s code</td></tr>
+<tr><td>tsc and eslint</td><td>tsc over the service rc 0; tsc with every test file <strong>0 errors</strong>, TypeScript 5.9.3, a planted type error reported once as <code>TS2322</code>; eslint on the four files 0 errors, 0 warnings, a planted unused variable flagged</td></tr>
+<tr><td>spec</td><td><code>check:openapi</code> rc 0, <code>generate-openapi --check</code> PASS; no spec change</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>7152ac669d2d</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

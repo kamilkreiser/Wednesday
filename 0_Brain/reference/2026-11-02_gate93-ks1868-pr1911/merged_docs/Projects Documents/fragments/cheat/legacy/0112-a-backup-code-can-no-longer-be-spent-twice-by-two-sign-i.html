@@ -1,0 +1,23 @@
+<h2>A backup code can no longer be spent twice by two sign-ins at once &mdash; KS-1848, KS-1849</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The MFA backup-code burn in <code>services/auth</code> is now one conditional UPDATE (<code>userRepo.consumeBackupCode</code>): it removes exactly the stored hash that matched, and only while it is still stored. Before, the gate wrote its own snapshot of the array, minus the code, back over the row by id.
+      </td></tr><tr><td>Behaviour change on <code>POST /api/auth/login</code>, the OAuth password grant and wallet verify: of two sign-ins racing with one backup code, the second now gets the uniform refusal (the answer a replayed spent code gets) and one lockout count, instead of a second credential. A burn that cannot be confirmed (a blind write, a NULL set, no row) still answers 503 with the KS-1188 F3 wording. The burn still comes before the credential.
+      </td></tr><tr><td>New cells: <code>ks1848-backup-code-burn-is-conditional.test.ts</code> (18 unit cells over a stateful db stub; 9 are red at develop) and <code>integration/ks1848-backup-code-burn-concurrency.integration.ts</code> (13 cells on a real Postgres, run as <code>secuura_app</code> so RLS is live; 8 are red at develop). The two ks781 files gain the new function in their <code>userRepo</code> mock.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The four platform suites, a running stack, Node 24 and any deploy were not run. The integration file needs a throwaway Postgres (see its header); it is not part of <code>vitest run</code>.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run src/__tests__/ks1848-backup-code-burn-is-conditional.test.ts   # 18 cells, rc 0
+cd Blockchain/Dev/services/auth &amp;&amp; KS1848_APP_DATABASE_URL=... KS1848_ADMIN_DATABASE_URL=... \
+  npx vitest run -c vitest.integration.config.ts integration/ks1848-backup-code-burn-concurrency.integration.ts   # 13 cells, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>unit file</td><td>develop <code>40c06084919d</code>: <strong>9 of 18 red</strong> (the RED cells); with the change <strong>18 of 18</strong></td></tr>
+<tr><td>real Postgres, develop</td><td>same code raced: <strong>20 of 20</strong> rounds both signed in; A and B raced: a spent code accepted again in <strong>20 of 20</strong>; regenerate raced: new set lost 20 of 20; disable raced: a code left on the disabled account 20 of 20</td></tr>
+<tr><td>real Postgres, with the change</td><td><strong>13 of 13</strong> in each of five runs; every round as expected</td></tr>
+<tr><td>gate 38 follow-ups</td><td>F1 comment only (a comment-free transpile is equal before and after); F2 blind-write cells B0 to B2, gate mutant M6 turns exactly B1 and B2 red; F3 burn-queued-first cells L3 and L4: <strong>20 of 20</strong> rounds each at the head, <strong>20 of 20 red</strong> at develop (the earlier-read sign-in is accepted and overwrites the new set, or gives a disabled account a code back)</td></tr>
+<tr><td>mutants</td><td>15 of 15 killed on the unit files, 10 of 10 on the real server, and the gate&rsquo;s six (M1 to M6) all killed by the 13-cell file; gate 30&rsquo;s b1, b2 and b3 at develop: each red on the new F2 pin (U3)</td></tr>
+<tr><td>auth unit suite</td><td>develop <strong>110 files / 1326 of 1326</strong>; with the change <strong>111 files / 1344 cells</strong>: 1342 and 1341 in two runs, every red a ks949 5 s timeout (KS-1053, red at develop too); without that file <strong>1313 of 1313</strong>, the file alone 31 of 31</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>40c06084919d</code> with the change on top, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3; Postgres 15.19 in a <code>postgres:15-alpine</code> container</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

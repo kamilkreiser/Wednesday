@@ -1,0 +1,21 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o65_p2_originate_documentrepo_verify_db_ready_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts b/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts
+--- a/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts
++++ b/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts
+@@ -137,8 +137,14 @@
+     await (db || prisma).$queryRaw`SELECT 1`;
+     logger.info('documentRepo: database connection verified');
+   } catch (err: any) {
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('documentRepo: database connection FAILED — documents will not be available', {
+-      error: err instanceof Error ? err.message : String(err),
++      error: reason,
+     });
+     throw new Error('Database is required for document operations');
+   }
+

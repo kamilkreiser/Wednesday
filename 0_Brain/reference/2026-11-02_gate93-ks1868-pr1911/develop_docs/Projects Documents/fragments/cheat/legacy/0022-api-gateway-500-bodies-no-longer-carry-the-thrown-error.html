@@ -1,0 +1,19 @@
+<h2>api-gateway 500 bodies no longer carry the thrown error's text — KS-1410</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Ten catch blocks in
+        <code>routes/notifications.ts</code>, <code>routes/batch.ts</code> and
+        <code>routes/audit-export.ts</code> built their 500 body from
+        <code>err.message</code> with <strong>no <code>NODE_ENV</code> guard</strong>. Each router now
+        has a <code>fail500</code> helper that logs the thrown text server-side and answers a constant
+        <code>INTERNAL_ERROR</code> body. </td></tr><tr><td>Scope: <strong>10 of the ticket's 28
+        sites</strong>. The remaining <strong>18 are still OPEN</strong>, including
+        <code>transfer/delegations.ts</code>, so do not read this as the ticket being finished.
+      </td></tr><tr><td>Offline evidence only: base <strong>21 failed | 6 passed (27)</strong> →
+        <strong>27 passed</strong>, service suite <strong>845 passed</strong>. A
+        <strong>live run is owed</strong> and the ticket does <strong>not</strong> move to Done.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha.</strong></td><td> The six cells that pass at the
+        base too are the 200-path controls. If a future change makes <em>all</em> 27 pass at the base,
+        the suites have stopped discriminating — check the red arm before trusting the green one.
+      </td></tr><tr><td>The helper is per-router by design, matching originate's existing shape rather
+        than introducing a shared one; a shared helper is a separate change and is not in this PR.
+      </td></tr></table></div>

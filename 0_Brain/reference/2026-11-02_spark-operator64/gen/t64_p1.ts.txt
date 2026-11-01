@@ -1,0 +1,102 @@
+/**
+ * KS-1868: ScheduledJobs dbSaveAlert (reached through ScheduledJobs.acknowledgeAlert, which swallows its rejection with an empty
+ * `.catch`) read the caught value with `err instanceof Error ? err.message : String(err)` only to put it in a `logger.info` line.
+ * That read can itself throw (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws throws on `.message`),
+ * so the INFO line was never written. The catch now reads the value inside its own try and logs the constant
+ * `unreadable thrown value` when the read throws.
+ *
+ * The db stand-in is a plain function, not a vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy
+ * before the code under test saw it.
+ */
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+const h = vi.hoisted(() => ({
+  toThrow: undefined as unknown,
+  info: vi.fn(),
+}));
+
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  query: () => Promise.reject(h.toThrow),
+}));
+
+vi.mock('../utils/logger', () => ({
+  logger: { info: h.info, warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+
+import { ScheduledJobs } from '../services/scheduledJobs';
+import { AlertSeverity } from '../types';
+
+let seq = 0;
+const SAVES = () => h.info.mock.calls.filter((c) => String(c[0]).includes('DB save alert failed'));
+const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+/** Raise ONE alert for a fresh rule, then acknowledge it (which saves the alert) and let the save settle. */
+async function acknowledgeOneAlert(): Promise<void> {
+  seq += 1;
+  const ruleId = 'ks1868-alert-rule-' + seq;
+  const jobs = new ScheduledJobs(
+    { getCounter: (metric: string) => (metric === 'ks1868.metric' ? 5 : 0) } as never,
+    {} as never
+  );
+  jobs.addAlertRule({
+    id: ruleId,
+    name: 'KS-1868 rule',
+    metric: 'ks1868.metric',
+    condition: 'gt',
+    threshold: 1,
+    severity: AlertSeverity.INFO,
+    enabled: true,
+    cooldownMinutes: 1,
+  });
+  await flush();
+  (jobs as unknown as { evaluateAlerts(): void }).evaluateAlerts();
+  const alert = jobs.getActiveAlerts().find((a) => a.ruleId === ruleId);
+  expect(alert).toBeDefined();
+  h.info.mockReset();
+  expect(jobs.acknowledgeAlert(alert!.id)).toBe(true);
+  await flush();
+}
+
+describe('KS-1868 dbSaveAlert reads the thrown value safely', () => {
+  beforeEach(() => {
+    h.toThrow = undefined;
+    h.info.mockReset();
+  });
+
+  it('control ks1868 C1 an ordinary Error still logs its message', async () => {
+    h.toThrow = new Error('db down');
+    await acknowledgeOneAlert();
+    expect(SAVES()).toHaveLength(1);
+    expect(SAVES()[0][1]).toEqual({ error: 'db down' });
+  });
+
+  it('control ks1868 C2 a thrown string is logged as itself', async () => {
+    h.toThrow = 'plain string failure';
+    await acknowledgeOneAlert();
+    expect(SAVES()).toHaveLength(1);
+    expect(SAVES()[0][1]).toEqual({ error: 'plain string failure' });
+  });
+
+  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason', async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    h.toThrow = proxy;
+    await acknowledgeOneAlert();
+    expect(SAVES()).toHaveLength(1);
+    expect(SAVES()[0][1]).toEqual({ error: 'unreadable thrown value' });
+  });
+
+  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason', async () => {
+    h.toThrow = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    await acknowledgeOneAlert();
+    expect(SAVES()).toHaveLength(1);
+    expect(SAVES()[0][1]).toEqual({ error: 'unreadable thrown value' });
+  });
+});

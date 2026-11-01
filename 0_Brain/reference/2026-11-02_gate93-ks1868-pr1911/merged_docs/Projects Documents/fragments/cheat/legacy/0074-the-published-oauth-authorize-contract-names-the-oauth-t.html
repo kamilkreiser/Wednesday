@@ -1,0 +1,23 @@
+<h2>The published OAuth authorize contract names the OAuth token and the role-or-scope door &mdash; KS-1472</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> The sentence in both <code>/api/oauth/authorize</code> descriptions now says &ldquo;An OAuth token with no scopes&rdquo; (a plain login JWT passes <code>requireScope</code> on RBAC, so only an OAuth token is refused), adds &ldquo;unless the route also admits the caller by role&rdquo; (<code>requireOrgProvisioner</code> admits <code>SUPER_ROLES</code> with no scope), and says &ldquo;requires no scope&rdquo; where it said &ldquo;requires none&rdquo;. The wording lives in <code>auth.openapi.ts</code>; the yaml is regenerated, never hand-edited.
+      </td></tr><tr><td> The route that requires no scope &ldquo;does not refuse it for want of one, though a role check on that route can still refuse it&rdquo;. The first wording said such a route &ldquo;accepts any valid token&rdquo;, which the QA gate flagged as false for a role-gated route: <code>requireSuperAdmin</code> answers 403 outside <code>SUPER_ROLES</code>, and <code>GET /api/platform/tenants</code> has no <code>requireScope</code>.
+      </td></tr><tr><td> The pin is <code>STATES_THE_TOKEN</code> in <code>ks839-contract-states-the-wildcard-allow-list-rule.test.ts</code>; the false-claim guard beside it is unchanged and still red when the claim &ldquo;the gateway answers 403 on it&rdquo; is added. The <code>ks1210</code> header now names <code>redirectUris</code> only, which is all its control reads.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A request through a running gateway: the cells read the yaml text and send nothing. What the sentence says about the gateway was read from <code>scopes.ts</code> and <code>platform.ts</code>, not run.
+      </td></tr><tr><td> The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing, and Node 24 was not run. The new text is served only after a deploy and a gateway restart.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run src/__tests__/ks839-contract-states-the-wildcard-allow-list-rule.test.ts src/__tests__/ks1210-contract-publishes-the-closed-oauth-scope-enum.test.ts   # 10 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run test --workspace=services/auth -- run --testTimeout=120000 --hookTimeout=120000                                                                              # 105 files / 1205 tests, rc 0
+cd Blockchain/Dev &amp;&amp; npm run check:openapi</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>the two files, narrowed pin only (gate fix)</td><td><strong>8 passed / 2 failed</strong>: the GET and POST RED cells fail as <code>[true, true, false]</code>; controls, <code>ks1210</code> and the false-claim guard pass. With the narrowed wording and on the merge of develop 10 / 10</td></tr>
+<tr><td>10 one-site mutants of the yaml (mirror copy)</td><td>each killed by exactly the cell predicted: &ldquo;A token&rdquo; back &rarr; its operation&rsquo;s RED cell; &ldquo;accepts any valid token&rdquo; back &rarr; its RED cell; role clause dropped &rarr; its RED cell; role-check tail dropped &rarr; its RED cell; the false claim added &rarr; the guard cell alone. Unmutated control 5 / 5; the worktree yaml sha256 identical before and after</td></tr>
+<tr><td>regeneration</td><td><code>check:openapi</code> rc 1 before, rc 0 after, rc 0 on the merge of develop; yaml <strong>+9 / &minus;6</strong> against develop; whitespace-collapsed, the first version with the clause substituted equals the new yaml (944,849 characters), planted-change control breaks it</td></tr>
+<tr><td>counts, on the merge of develop</td><td>services/auth <strong>105 files / 1205 tests</strong>, 0 failed (base 105 / 1200; the 5 more are develop&rsquo;s own <code>ks1009</code> cells); this change adds no cell</td></tr>
+<tr><td>gates</td><td><code>check:test-types</code> rc 0, auth 42 errors in the baseline, 0 new; lint of <code>services/auth</code> rc 0, 0 errors</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB, macOS 27.0.1), shared with other sessions, base <code>bd6697e079fc</code>, merge of develop <code>8fbda28e6e79</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

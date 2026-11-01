@@ -1,0 +1,64 @@
+<div class="section">
+<h2>An unparseable security artefact is reported, not read as clean — KS-1136</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="5"><strong>What to know.</strong></td><td> <code>09-aggregate-report.sh</code> read each job's artefact with
+        <code>jq -r … 2>/dev/null</code> (08 with a bare <code>jq</code>), so an artefact that
+        EXISTS but does not PARSE — a job that aborted mid-write — gave zero findings and
+        <strong>rc 0</strong>, which is indistinguishable from a clean scan. </td></tr><tr><td>KS 878 had guarded 04's
+        artefact only. </td></tr><tr><td>Each present, unparseable artefact across the seven other jobs
+        (01 02 03 05 06 07 08) now emits its own HIGH finding. </td></tr><tr><td>The insertion sits <strong>before</strong>
+        <code>ALL_FINDINGS</code> reads <code>$TMP</code>, so the findings land in the aggregate rather
+        than after it. </td></tr><tr><td>Pure insertion, <code>numstat 14 0</code>; no threshold, baseline, exit-code path
+        or report writer is touched.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Gotcha when you run this locally.</strong></td><td> Two of them.
+        <strong>(1) <code>git apply</code> drops the executable bit.</strong>
+        <code>09-aggregate-report.sh</code> is 100755; after applying the patch
+        <code>git ls-files -s</code> still reads <code>100755</code> while the file on disk is
+        <code>-rw-r--r--</code> and <code>[ -x ]</code> is FALSE. </td></tr><tr><td>Re-assert it with
+        <code>chmod 755</code> on that one file — authorised by the index mode, and prove it
+        changed no byte (<code>cmp</code> rc 0). </td></tr><tr><td>Never <code>checkout-index -a</code>.
+        <strong>(2) <code>jq -e .</code> takes its exit status from the output VALUE</strong>, not only
+        from parseability, so a valid JSON <code>null</code> or <code>false</code> also reads as
+        unreadable. </td></tr><tr><td>That is the chosen behaviour, named rather than discovered later.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+bash scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh   # 6 cells, rc 0
+bash scripts/run-shell-suites.sh --list                                        # 68 suites
+bash -n Blockchain/Testing/jobs/09-aggregate-report.sh                         # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base → head</td><td>rc 1, <strong>3 failed</strong> (cells 1-3, each
+<code>rc 0, findings=0, ids=[]</code>) → <strong>6 passed, 0 failed</strong>, rc 0. All
+three CONTROL cells stay green in the red arm, so the red is the guard, not the harness</td></tr>
+<tr><td>red arm per conjunct</td><td>A, drop <code>[ -f ]</code> → 2 passed / 4 failed;
+B, drop <code>! jq -e .</code> → 4 passed / 2 failed. Each arm with <code>bash -n</code>
+rc 0, so neither red is a load failure</td></tr>
+<tr><td>shell-suite discovery</td><td><strong>67 → 68</strong>, measured by moving the file
+aside and back (restored sha256-identical); listed 1 after, 0 before</td></tr>
+<tr><td>CI triage note</td><td>The known pre-existing class reads <em>61 passed, 6 failed, 0
+skipped (of 67)</em>. The denominator here is <strong>68</strong>, so that line will not match
+verbatim and a seventh red is <strong>not</strong> that class</td></tr>
+<tr><td>file modes</td><td>product <code>100755 → 100755</code>; new test
+<strong>100644</strong>, which is correct — the runner invokes
+<code>bash &lt;file&gt;</code>, so no executable bit is needed</td></tr>
+<tr><td>staged tree</td><td><code>074705eebd81</code> — byte-equal to the tree predicted
+from the payload at the base before any worktree existed</td></tr>
+<tr><td><code>bash -n</code></td><td>rc 0 on both changed files</td></tr>
+<tr><td>Suite wall clock, after</td><td>New suite alone <strong>1.332 s</strong>; siblings
+<code>aggregate_report_trivy_artefact</code> <strong>0.842 s</strong> and
+<code>orchestrate_jobs</code> <strong>3.965 s</strong>; whole shell-suite set
+<strong>68 passed, 0 failed, 0 skipped (of 68)</strong> in <strong>342 s</strong> (11:40:22Z to 11:46:04Z), rc 0. Measured <strong>2026-10-06 UTC</strong>, macOS 27.0.1 arm64,
+bash 3.2.57(1)-release, jq-1.7.1-apple</td></tr>
+<tr><td>Timing coverage</td><td><strong>0</strong> stated timings cover the shell-suite set or
+<code>09-aggregate-report.sh</code> at base <code>d75bfe2deb80</code> (must-hit control:
+<strong>4</strong> Akto, <strong>7</strong> pre-merge and <strong>2</strong> Schemathesis rows
+found by the same instrument). No tier budget moves</td></tr>
+<tr><td>NOT covered</td><td>Fixture tree with stubbed artefacts — no real scanner ran and no
+real mid-write abort was induced; the HTML and JSON report writers were not asserted beyond
+the finding ids; whether this suite is green on the CI runner is unmeasured. Item 2 (R-3)
+only; item 1 merged as #1051. Runtime change — <strong>live sweep owed</strong>, and the
+ticket does not move to Done</td></tr>
+</table>
+</div>

@@ -1,0 +1,13 @@
+<h2>Webhook deliveries: a failed history query answers 500 (item G-A) &mdash; KS-1345</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>
+        <code>GET /api/webhooks/:id/deliveries</code> no longer turns a failed database read into
+        <code>200 { success: true, deliveries: [] }</code>. For a UUID id, a rejected query now answers the constant
+        <code>500</code> body and is logged once with the route named; a query that succeeds answers <code>200</code> with
+        its rows, as before. </td></tr><tr><td><strong>Answers.</strong> Id failing the format pattern <code>400</code>
+        (unchanged); a well-formed id that is not a UUID, e.g. <code>0</code>, <code>200 []</code> with no query run
+        (kept on purpose); UUID with rows <code>200</code>; UUID whose query fails <code>500</code>, constant body, no
+        thrown text.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Run it.</strong></td><td>
+        <code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts</code> &mdash; 11/11 on host <code>Kamils-Mac-Studio</code>, 2026-10-09 UTC. The cells are D0, D4, D3 and control D.
+      </td></tr></table></div>

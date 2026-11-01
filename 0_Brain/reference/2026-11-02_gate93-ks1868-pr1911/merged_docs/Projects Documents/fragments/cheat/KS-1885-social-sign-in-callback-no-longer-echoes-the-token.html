@@ -1,0 +1,17 @@
+<h2>Social sign-in callback: an exchange error our code did not write gets a constant 400 &mdash; KS-1885</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>A newline in a provider&rsquo;s <code>access_token</code> made <code>fetch</code> throw a <code>TypeError</code> quoting the <code>Bearer</code> header, and the callback echoed it, so the token reached the 400 and the error log. In <code>routes/auth.ts</code> only an <code>AppError</code> or an adapter&rsquo;s own exact text now passes; anything else answers 400 <code>OAuth authentication failed: the provider answer could not be read</code>. The status is unchanged. <code>POST /social/link</code> answers as before and no longer logs the raw text.</td></tr><tr><td>Two new files, 74 cells (two added after QA gate 81): 22 of 74 red at develop <code>d7691f35312e</code> (exactly the RED cells), 74 of 74 with the change. The real adapters run against an in-process stub; no real provider, no external network.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A real provider sign-in. The four platform suites, a running stack, Node 24 and any deploy were not run.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run ks1885                     # 2 files / 74 cells
+cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run ks1885 ks1240b ks811 ks795   # 5 files / 180 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>74</strong> in 2 files; 22 of 74 red at develop <code>d7691f35312e</code>, 74 of 74 with the change</td></tr>
+<tr><td>neighbours</td><td><code>ks1240b</code> 59 of 59, <code>ks811</code> 6 of 6, <code>ks795</code> 41 of 41 on the changed tree</td></tr>
+<tr><td>auth unit suite</td><td>119 files, 1459 of 1459 with <code>--testTimeout=30000</code> (second commit); at the default timeout, 119 files, 1457 cells: 1455 pass, 2 fail, 0 skipped (vitest 4.1.12, <code>--maxWorkers=3</code>, run from <code>services/auth</code>). Both reds are in <code>ks949-platform-admin-seed-identity.test.ts</code>: tree-walking cells stopped at the 5 s timeout (the known flake, KS 1053). That file alone fails the same 3 cells on untouched develop <code>d7691f35312e</code> as on this tree (28 of 31 each), so the reds are not this change&rsquo;s</td></tr>
+<tr><td>mutants</td><td><strong>15 of 15 killed (two added after QA gate 81)</strong>; each parsed first, run complete (133 cells), restored by sha256</td></tr>
+<tr><td>tsc, ratchet, eslint</td><td>type check: 42 errors, all baselined, 0 new (planted error named once); eslint <code>--max-warnings 0</code>: rc 0 (planted file raised two rules)</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>d7691f35312e</code>, 2026-11-01 (UTC); Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

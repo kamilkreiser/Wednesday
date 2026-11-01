@@ -1,0 +1,19 @@
+<h2>governance DB read helpers log and return their empty value when the thrown value is unreadable &mdash; KS-1868, governance</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>What to know.</strong></strong></td><td> Five governance read helpers (<code>dbGetProposal</code>, <code>dbGetAllProposals</code>, <code>dbGetAllParticipants</code>, <code>dbGetActiveDelegations</code>, <code>getTotalVotePower</code>) read the thrown value unguarded in their catch; a revoked Proxy or a throwing <code>message</code> getter made that read throw, so the helper rejected instead of logging and returning its empty value. Each read is now in an inner try with the fallback <code>unreadable thrown value</code>. The returned values and the log text are unchanged.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>Not measured here.</strong></strong></td><td> KS-1868 stays open (five of its 253 sites). KS 1732 rewrites the same lines for a different defect and must rebase over this change. The five new test files carry one approved hand-edited line each (<code>export {};</code>), without which a whole-program <code>tsc</code> gave 10 TS2451 (0 on the untouched tree); jest was unaffected either way. A booted service, the four platform suites, an LTS Node and any deploy were not run.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/governance &amp;&amp; npx jest src/__tests__/ks1868-*.test.ts   # 5 files, 15 cells
+cd Blockchain/Dev/services/governance &amp;&amp; npm test   # 12 files / 194 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>15</strong> in 5 files; red first: 10 of 15 failed by assertion without the change, 0 of 15 with it</td></tr>
+<tr><td>governance unit suite</td><td>base <code>d7691f35312e</code> 7 files / 179 of 179; with the change <strong>12 files / 194 of 194</strong>, 0 failed, 0 skipped</td></tr>
+<tr><td>tsc and eslint</td><td>service tsc rc 0 (three runs); tsc with the new tests in one program: 0 errors (the untouched tree 0; 10 TS2451 before the one-line edit); eslint on 6 files: 0 errors and 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-11-01 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0, ts-jest 29.4.11, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,81 @@
+<h2>26. The k6 status-code breakdown prints its counts locale-grouped, and a test now says so (KS-1164)</h2>
+<h3>26.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      KS-1164's product defect — <code>writeGateReport</code> overwriting the input summary when
+      <code>--summary</code> does not end in <code>-summary.json</code> — was fixed and merged as
+      <code>f3bf8698d628</code> (PR #1271). </td><td>This row adds <strong>no product code</strong>. It is the
+      locale-count follow-up only: <code>formatStatusCodeBreakdown</code> in
+      <code>systemTest/performance/gate/report.ts</code> prints each k6 Rate counter through
+      <code>toLocaleString()</code>, and nothing asserted it. A reader could delete the grouping and
+      every suite would stay green. The ticket does <strong>not</strong> move to Done.
+    </td></tr></table>
+<h3>26.2 Red-first by TAMPER, because there is no product change to red against</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A test-only payload cannot be red at the base in the usual way — the behaviour it covers is
+      already correct. </td><td>So the red proof is a <strong>tamper</strong>: remove
+      <code>.toLocaleString()</code> from both counts at <code>report.ts:104</code> and the new suite
+      must go red on an <em>assertion</em>. It does: <strong>2 passed, 1 failed, rc 1</strong>, failing
+      on <code>RED KS-1164 F-3: a 5xx count of 1,234 / 56,789</code>. Restored byte-identical
+      afterwards (<code>git</code> reports the file unmodified), and <code>report.ts</code> is still
+      blob <code>ac59af37cbc6</code> — the blob this row's scope pins as unchanged.
+    </td></tr></table>
+<table>
+<tr><th>Cell</th><th>Asserts</th><th>Tampered</th><th>Head</th></tr>
+<tr><td>the breakdown counts print in the locale-grouped form</td>
+<td>the grouping itself, on a 5xx count of 1,234 / 56,789</td><td><strong>RED</strong>, an assertion</td><td>green</td></tr>
+<tr><td>an absent counter is still named absent</td><td>the non-Rate branch at <code>:105</code> did not move</td><td>green</td><td>green</td></tr>
+<tr><td>the row's trailing k6-Rate gloss is intact</td><td>the sentence a reader relies on to interpret passes</td><td>green</td><td>green</td></tr>
+</table>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <strong>3 passed (3)</strong> alone at the head; <strong>2 passed, 1 failed (3)</strong> tampered.
+      </td><td>Two of the three cells pass in the tampered arm, so the red is a real assertion and not
+      a load failure — the discriminator is that a load failure reports <strong>0 total and 0
+      failed</strong>, and this reports 3 and 1.
+    </td></tr></table>
+<h3>26.3 Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>whole performance unit suite</td><td><strong>249 suites, 1360 passed (1360)</strong>, rc 0 at the
+base → <strong>251 suites, 1363 passed (1363)</strong>, rc 0 at the head. +3 tests, no failures either side</td></tr>
+<tr><td>new test file</td><td>102 lines, 4,413 B, mode <strong>100644</strong>, sha256/16
+<code>8b71c072148e843e</code></td></tr>
+<tr><td>payload</td><td>4,643 B <code>5c5e586406ebe4b1</code> — the RULED variant. The
+<code>-control</code> variant (4,886 B <code>bca34d1f0e9857fa</code>) strict-applies to the
+<strong>same tree</strong> at this base, which is why either could have been raised and the smaller
+was chosen</td></tr>
+<tr><td><code>tsc --noEmit -p systemTest/performance</code></td><td>rc 0, 0 lines</td></tr>
+<tr><td>runner, from <code>node_modules</code></td><td><strong>vitest 5.0.3</strong>, agreeing three
+ways: <code>node_modules/vitest/package.json</code>, <code>package-lock.json</code>, and
+<code>vitest --version</code> (<code>vitest/5.0.3 darwin-arm64 node-v24.7.0</code>). node v24.7.0,
+npm 11.5.1</td></tr>
+<tr><td>product code</td><td><strong>none</strong>. <code>report.ts</code> is blob
+<code>ac59af37cbc6</code> before and after</td></tr>
+</table>
+<h3>26.4 The runner trap this row walked into, recorded because it cost real measurements</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      This package's vitest config is <code>vitest.unit.config.ts</code>, which vitest does
+      <strong>not</strong> auto-detect. </td><td>A bare <code>node_modules/.bin/vitest run &lt;file&gt;</code>
+      therefore runs on vitest's own defaults: a <strong>5000 ms</strong> timeout instead of the
+      config's 15,000, different <code>include</code> globs, and — the one that matters —
+      <strong>no <code>setupFiles</code></strong>, so
+      <code>tests/unit/support/clearSlotEnv.setup.ts</code> never strips the shell's slot family.
+      Measured consequence: the bare invocation reported <strong>130 files / 456 tests with 1
+      failure</strong> (<code>unitSuiteSlotIndependence.test.ts</code> timing out at 5000 ms), while
+      <code>npm run test:unit</code> on the same tree reports <strong>251 suites / 1363 passed, 0
+      failed</strong>. The failure was the harness, not the repo. <strong>Always go through
+      <code>npm run test:unit</code></strong>, which is
+      <code>vitest run --config vitest.unit.config.ts</code>.
+    </td></tr></table>
+<h3>26.5 Not covered</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Coverage only — no behaviour changes. </td><td>Nothing at runtime moves, so <strong>no live sweep is
+      owed</strong> and §5f is satisfied without one. KS-1164's merged product fix is untouched. The
+      <strong>four platform suites (Schemathesis, Akto, Playwright, performance/k6) are UNMEASURED,
+      not passing</strong> — the local stack is not up on <code>http://localhost:6882</code>, and the
+      push printed only its SKIP lines. The ticket does <strong>not</strong> move to Done.
+    </td></tr></table>
+<h3>26.6 Running it</h3>
+<pre><code>cd systemTest/performance &amp;&amp; npm ci
+npm run test:unit -- tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts   # 3 passed
+npm run test:unit                                                                          # 1363 passed, rc 0
+node_modules/.bin/tsc --noEmit -p .                                                        # rc 0</code></pre>

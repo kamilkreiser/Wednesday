@@ -1,0 +1,86 @@
+<div class="section">
+<h2>Observability nginx status port — KS-1388</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> Both commented
+        <code>SECUURA_NGINX_STATUS_URI</code> examples pointed at
+        <code>secuura-nginx-gateway:6882</code>.
+        <strong>6882 is the published HOST port</strong> and is unreachable from
+        the exporter's network; the in-network port is <strong>80</strong>,
+        which <code>observability/docker-compose.yml:331</code> already defaults
+        to. </td></tr><tr><td>Both now say <code>:80</code>. </td></tr><tr><td>The two files sit at the
+        <strong>repository root</strong>, not under
+        <code>Blockchain/Dev/</code>. </td></tr><tr><td>This is §1 of the ticket only —
+        narrowing, not closing.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh   # 6 cells
+bash Blockchain/Dev/scripts/run-shell-suites.sh                  # 67 suites</code></pre>
+<h3>Figures</h3>
+<table>
+<tr>
+<th>Figure</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>KS-971 suite, base → head</td>
+<td>4 → 6 cells, 0 failed both ends</td>
+</tr>
+<tr>
+<td>whole shell-suite set</td>
+<td>
+            67 passed, 0 failed, 0 skipped (of 67) — same suite count both
+            ends
+          </td>
+</tr>
+<tr>
+<td>the six cells</td>
+<td>run 2026-10-05, host Kamil's Mac Studio (2), bash 3.2.57</td>
+</tr>
+<tr>
+<td>red-first</td>
+<td>
+            both test sections alone: rc 1, 4 passed / 2 failed, one per env
+            example; <code>bash -n</code> rc 0 so not a load failure
+          </td>
+</tr>
+<tr>
+<td>cross-control per cell</td>
+<td>
+<code>.env.example</code> hunk alone → 1 failed naming
+            <em>alerting</em>; <code>alerting</code> hunk alone → 1 failed
+            naming <em>.env.example</em>
+</td>
+</tr>
+<tr>
+<td>applied == held</td>
+<td>
+            on FILES vs an independent apply (tree <code>04d226e93b48</code>):
+            all three <code>cmp</code>-equal, with a firing control against the
+            base blobs
+          </td>
+</tr>
+<tr>
+<td>exec bit</td>
+<td>
+<code>100755</code> in the index; <code>git apply</code> dropped it
+            on disk under <code>filemode=false</code>; restored by
+            <code>chmod +x</code> on that one file
+          </td>
+</tr>
+<tr>
+<td>stated timings naming this suite</td>
+<td>
+            0 at base SHA <code>f01c1da5717f</code> for
+            <code>run-shell-suites</code> and <code>shell suite</code>;
+            <code>prometheus_targets</code> 0 flow / 1 cheat, that hit being
+            prose not a timing row (must-hit control <code>auth</code>: 71 flow
+            / 70 cheat)
+          </td>
+</tr>
+</table>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not covered.</strong></td><td> No live sweep (§5f), so KS-1388 does
+        not move to Done here, and the observability stack was never started.
+        §2 and §3 of the ticket are untouched. </td></tr><tr><td>Whether any deployment
+        consumes either commented line is <strong>UNMEASURED</strong> —
+        both are comments.
+      </td></tr></table></div>
+</div>

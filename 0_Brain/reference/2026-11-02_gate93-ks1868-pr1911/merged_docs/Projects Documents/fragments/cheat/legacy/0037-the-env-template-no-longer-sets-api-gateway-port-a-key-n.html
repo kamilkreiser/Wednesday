@@ -1,0 +1,16 @@
+<h2>The env template no longer sets API_GATEWAY_PORT, a key no tracked file reads &mdash; KS-1417</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>env.example</code> used to set <code>API_GATEWAY_PORT=6882</code>, and <code>bootstrap-env.sh</code> copied it into every clone&rsquo;s <code>.env</code>. At the base no tracked file outside the templates names that key; the gateway&rsquo;s port is <code>GATEWAY_PORT</code>, derived per slot by <code>stack_env.sh</code>. </td></tr><tr><td>The line is now three comment lines saying so. A second template, <code>env.local.example</code>, still carries the key at line 56: this change refs the ticket and does not close it. </td></tr><tr><td>The ticket does not move to Done. A fresh-clone bootstrap on a developer machine is owed.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotchas when you run this locally.</strong></td><td> The new test runs the real <code>bootstrap-env.sh</code>. That script sets <code>core.hooksPath</code> on the repo it is run from if the value is not <code>.githooks</code>, so the test changes into its scratch tree first. Run from inside a repo, the unedited version changed the repo&rsquo;s config in a throwaway repo. </td></tr><tr><td>The suite <code>bootstrap_env_canonical_template</code> now probes <code>AUTH0_CLIENT_ID</code> instead of <code>API_GATEWAY_PORT</code>. Its counts, 7 passed and 0 failed, are the same. </td></tr><tr><td>On a tree that is develop <code>f247ff85b612</code> plus this change, the shell-suite count reads <strong>75</strong>, not 74.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/ks1417_env_example_no_dead_gateway_port.test.sh   # 4 cells, rc 0
+bash Blockchain/Dev/scripts/run-shell-suites.sh --list                                  # 75 suites</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>rc 1, <strong>2 passed / 2 failed</strong> &rarr; <strong>4 passed, 0 failed</strong>, rc 0; both CONTROL cells pass in the red arm</td></tr>
+<tr><td>suites that name the template</td><td>four, all rc 0: 7/0, 51/0, 6/0 and 174/0, the same at base and after</td></tr>
+<tr><td>shell-suite discovery</td><td><strong>74 &rarr; 75</strong></td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

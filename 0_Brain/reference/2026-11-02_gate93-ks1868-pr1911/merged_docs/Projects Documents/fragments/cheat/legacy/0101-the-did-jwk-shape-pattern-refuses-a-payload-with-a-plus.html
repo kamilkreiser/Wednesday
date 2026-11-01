@@ -1,0 +1,19 @@
+<h2>The did:jwk shape pattern refuses a payload with a plus sign or a slash &mdash; KS-1830</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Test only. Adding <code>+</code>, <code>/</code> or both to the <code>DID_PATTERN</code> class used to pass every cell; 8 new cells in <code>ks1175-identity-anchoring.test.ts</code> (4 RED, 4 controls) now turn red under each of them: 2 for <code>+</code>, 2 for <code>/</code>, 4 for both.
+      </td></tr><tr><td>The file is 143 cells with the change, all green on the real pattern; the whole anchoring suite is 36 files / 545 cells.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The anchoring integration files, the four platform suites, a running stack, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1175-identity-anchoring.test.ts   # 143 cells, rc 0
+cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                  # 36 files / 545 cells: 544 pass, 1 failed (the threadTokenMint cell) on the author's host (Seat R 64th, Node v26.8.1); QA gate 21's host, on the older base, was green (517 of 517)</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>8</strong> (4 RED + 4 controls); the file is <strong>143 / 143</strong> on the real pattern, 135 / 135 at the base</td></tr>
+<tr><td>widenings</td><td><code>+</code> alone 2 red, <code>/</code> alone 2 red, both <strong>4 of 143 red</strong>; no older cell red; each restore sha256-equal; the same three passed 135 of 135 against the base file</td></tr>
+<tr><td>anchoring unit suite</td><td><strong>36 files / 545 cells</strong> with the change; 537 at base; on the author&rsquo;s host (Seat R 64th, Apple Silicon Mac, Node v26.8.1) the same 1 failure in both (<code>threadTokenMint.test.ts</code>), 0 new reds, 0 skipped; on QA gate 21&rsquo;s host, at the older base <code>203734468019</code>, both runs were green (509 of 509, 517 of 517), so the failure is host-dependent</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with the test file: <strong>0 errors</strong> over 68 anchoring source files, TypeScript 5.9.3, a planted type error reported once as <code>TS2322</code>; eslint on the file 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>429ba4824915</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

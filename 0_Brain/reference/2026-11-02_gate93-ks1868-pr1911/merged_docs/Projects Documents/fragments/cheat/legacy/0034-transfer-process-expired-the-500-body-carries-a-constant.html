@@ -1,0 +1,17 @@
+<h2>transfer process-expired: the 500 body carries a constant and the thrown text goes to the log — KS-1410</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>
+        <code>POST /api/delegations/admin/process-expired</code> used to answer <code>500</code> with
+        <code>message: error.message</code>. It now answers <code>message: 'Internal server error'</code> inside
+        the same <code>INTERNAL_ERROR</code> envelope, and <code>logger.error</code> records the thrown text
+        server-side with the route named. If you were reading the response body to find out what broke, read the
+        service log instead. </td></tr><tr><td><strong>Which branch logs.</strong> The log call is inside the
+        handler's <code>if (error instanceof Error)</code> branch, so that branch is what logs
+        <code>error.message</code>. A non-Error throw takes <code>next(error)</code> and never reaches the line,
+        so do not read this row as a statement about non-Error throws elsewhere in the service.
+      </td></tr><tr><td><strong>What did not change.</strong> The envelope shape and the
+        <code>INTERNAL_ERROR</code> code are the same, a success still answers <code>200</code> with the expired
+        count, and the revoke route still answers <code>404 NOT_FOUND</code> with its business message — the last
+        two are pinned by controls TC1 and TC2. The four 4xx <code>error.message</code> sites in the same file
+        were not touched by this pass. Proved offline on develop <code>613070f29112</code> (suite 79 to 85 cells,
+        4 of 6 new cells red before the fix, 6 of 6 after); <strong>a live run is still owed.</strong>
+      </td></tr></table></div>

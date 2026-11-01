@@ -1,0 +1,19 @@
+<h2>Platform S&rsquo;s signature hash is accepted on the sign verb, anchored and read back &mdash; KS-1454</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> An anchor request may now carry <code>metadata.signatureHash</code> (64 lowercase hex, the SHA-256 of the detached .p7s) on the <code>sign</code> verb only; any other verb, no verb or a malformed value is a 400. It is anchored verbatim beside <code>documentType</code> and read back as <code>signatureHash</code> on verify-by-hash and on GET <code>/api/anchors/:id</code> (<code>null</code> when absent). Product diff +12 -0, +12 -0 and +3 -1 in three files; 23 new cells in 2 files.
+      </td></tr><tr><td>The cells that go red without the fix are R1 to R5 (the request side) and B1 to B5 (the read side); C1 to C4 in each file are controls.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The anchoring integration files, the four platform suites, a running stack, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line). No transaction was built.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1454-signature-hash-is-accepted-and-anchored-on-the-sign-verb.test.ts src/__tests__/ks1454-signature-hash-is-read-back-on-the-verify-and-by-id-reads.test.ts   # 23 cells, rc 0
+cd Blockchain/Dev/services/anchoring &amp;&amp; npm test                                                                                                                              # 35 files / 479 cells: 478 pass, 1 failed (the pre-existing threadTokenMint cell)</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>23 / 23</strong> with the fix; on the unfixed code 15 red (R1 to R5, B1 to B5) and 8 controls green</td></tr>
+<tr><td>mutants</td><td><strong>6 of 6 killed</strong>, each by exactly its own cells, no control red; each file restored, sha256 equal</td></tr>
+<tr><td>anchoring unit suite</td><td><strong>35 files / 479 cells</strong> with the change; 33 / 456 at base; the same 1 pre-existing failure in both (<code>threadTokenMint.test.ts</code>), 0 new reds, 0 skipped</td></tr>
+<tr><td>tsc with tests</td><td><strong>0 errors</strong> over 129 files with both new test files listed, TypeScript 5.9.3; a planted type error reported once as <code>TS2322</code></td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>be2cd084d0f1</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,21 @@
+<h2>Two originate catches survive a hostile thrown value: the system-errors list and extractPgCode &mdash; KS-1780</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Some originate catches read the thrown value (an <code>instanceof</code> check, a <code>code</code> or <code>meta</code> read) before answering. A revoked Proxy or an object with a throwing getter made that read throw inside the catch, so the request got no response. This change fixes two sites: the list route in <code>systemErrors.ts</code> (a new <code>isZodError</code> that returns false for a value it cannot inspect) and <code>extractPgCode</code> in <code>pgErrors.ts</code> (returns undefined if its reads throw), which the <code>PATCH /api/webhooks/:id</code> catch calls. </td></tr><tr><td>The result is the handler&rsquo;s constant 500 instead of a hang. The catches in <code>adminConfig.ts</code> are a separate change. Two local-model passes, applied unchanged.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The <code>adminConfig.ts</code> catches, whether a real request can carry such a value (the cells use synthetic Proxies and getters), a running stack, and a Node 24 LTS run (the host is Node 26.8.1). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest ks1780-system-errors-list-catch                  # 4 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest ks1780-extract-pg-code-cannot-hang              # 8 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest                                                   # 144 files / 1710 tests, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; ../../node_modules/.bin/tsc --noEmit                      # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>systemErrors test against the unfixed product line</td><td><strong>2 failed / 2 passed</strong> of 4; with the change <strong>4 / 4</strong></td></tr>
+<tr><td>pgErrors test against the unfixed product line</td><td><strong>4 failed / 4 passed</strong> of 8; with the change <strong>8 / 8</strong>. Four reds are the hostile throw escaping the handler; two are matcher assertions</td></tr>
+<tr><td>services/originate, before &rarr; after</td><td><strong>142 files / 1698 cells &rarr; 144 files / 1710</strong>, 0 failed on both sides; 0 vanished, 12 new; ks1293 hermetic suite 10 / 10</td></tr>
+<tr><td>type-check</td><td><code>tsc -p tsconfig.json</code> rc 0; the tests-included program (716 files) has 0 errors, planted-error control rc 2</td></tr>
+<tr><td>lint</td><td><code>eslint</code> on the four files rc 0, no output</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>bd6697e079fc</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), jest 29.7.0, ts-jest 29.4.11, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

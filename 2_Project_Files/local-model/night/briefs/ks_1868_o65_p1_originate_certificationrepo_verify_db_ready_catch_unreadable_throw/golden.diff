@@ -1,0 +1,104 @@
+diff --git a/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts b/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
+--- a/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
++++ b/Blockchain/Dev/services/originate/src/repositories/certificationRepo.ts
+@@ -56,8 +56,14 @@
+     await (db || prisma).$queryRaw`SELECT 1`;
+     logger.info('certificationRepo: database connection verified');
+   } catch (err: any) {
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.error('certificationRepo: database connection FAILED — certifications will not be available', {
+-      error: err instanceof Error ? err.message : String(err),
++      error: reason,
+     });
+     throw new Error('Database is required for certification operations');
+   }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-certification-repo-verify-db-ready-p1-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certification-repo-verify-db-ready-p1-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-certification-repo-verify-db-ready-p1-unreadable-throw.test.ts
+@@ -0,0 +1,80 @@
++// KS-1868 (originate repositories/certificationRepo.ts, verifyDbReady): when the readiness query fails, the catch logs the failure as
++// `err instanceof Error ? err.message : String(err)` and then throws the constant Error 'Database is required for certification operations'.
++// When the thrown value cannot be read (a revoked Proxy makes `instanceof` throw; an Error whose `message` getter throws), that read threw
++// INSIDE the catch, so the caller saw a TypeError instead of the constant Error and nothing was logged. The catch now reads the value inside
++// its own try and logs the constant reason `unreadable thrown value`, then throws the same constant Error an ordinary failure already gets.
++// The database stand-in is passed as the `db` argument, so no module-level prisma is touched.
++const mockLoggerError = jest.fn();
++
++jest.mock('../db', () => ({
++  prisma: { $queryRaw: jest.fn() },
++  withTenant: jest.fn(),
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
++}));
++
++import { verifyDbReady } from '../repositories/certificationRepo';
++
++async function readyWithThrow(thrown: unknown): Promise<string> {
++  const db = { $queryRaw: jest.fn().mockRejectedValueOnce(thrown) };
++  return verifyDbReady(db as any).then(
++    () => 'RESOLVED',
++    (e: unknown) => {
++      try {
++        return e instanceof Error ? e.message : 'NOT AN ERROR';
++      } catch {
++        return 'UNREADABLE';
++      }
++    },
++  );
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++function throwingMessageError(): Error {
++  const e = new Error('ks1868 hidden');
++  Object.defineProperty(e, 'message', {
++    get() {
++      throw new Error('ks1868 message getter');
++    },
++  });
++  return e;
++}
++
++const FAILED = 'certificationRepo: database connection FAILED — certifications will not be available';
++
++beforeEach(() => jest.clearAllMocks());
++
++describe('KS-1868 certificationRepo verifyDbReady reads the thrown value safely', () => {
++  it('RED ks1868 R1 verifyDbReady: a revoked Proxy from the database is logged as a constant reason and the constant Error is thrown', async () => {
++    expect(await readyWithThrow(revokedProxy())).toBe('Database is required for certification operations');
++    expect(mockLoggerError.mock.calls).toEqual([[FAILED, { error: 'unreadable thrown value' }]]);
++  });
++
++  it('RED ks1868 R2 verifyDbReady: an Error whose message getter throws is logged as a constant reason and the constant Error is thrown', async () => {
++    expect(await readyWithThrow(throwingMessageError())).toBe('Database is required for certification operations');
++    expect(mockLoggerError.mock.calls).toEqual([[FAILED, { error: 'unreadable thrown value' }]]);
++  });
++
++  it('control ks1868 C1 verifyDbReady: an ordinary Error is logged with its own message and the constant Error is thrown', async () => {
++    expect(await readyWithThrow(new Error('ks1868 ordinary'))).toBe('Database is required for certification operations');
++    expect(mockLoggerError.mock.calls).toEqual([[FAILED, { error: 'ks1868 ordinary' }]]);
++  });
++
++  it('control ks1868 C2 verifyDbReady: a thrown string is logged as itself and the constant Error is thrown', async () => {
++    expect(await readyWithThrow('ks1868 plain string')).toBe('Database is required for certification operations');
++    expect(mockLoggerError.mock.calls).toEqual([[FAILED, { error: 'ks1868 plain string' }]]);
++  });
++
++  it('control ks1868 C3 verifyDbReady: a healthy database resolves and logs no error', async () => {
++    const db = { $queryRaw: jest.fn().mockResolvedValueOnce([{ x: 1 }]) };
++    await expect(verifyDbReady(db as any)).resolves.toBeUndefined();
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
++});

@@ -1,0 +1,21 @@
+<h2>The api-gateway image drops rollback copies of the OpenAPI spec &mdash; KS-1823</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The builder stage of <code>services/api-gateway/Dockerfile</code> now runs <code>RUN rm -f ./docs/openapi/*.pre-* ./docs/openapi/*.rollback-*</code> straight after it copies <code>docs/openapi</code>, so spec backups that sit in a host directory (<code>secuura-api.yaml.pre-ks508</code>, <code>secuura-api.yaml.rollback-2026-08-27-ks661</code>) are not baked into the image. <strong>This changes what the image contains.</strong>
+      </td></tr><tr><td>New test <code>ks1823-dockerfile-drops-spec-backups.test.ts</code>: 8 cells (3 RED, 5 controls). Test only at the base: 3 of 8 red; with the Dockerfile line: 8 of 8.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not done.</strong></td><td> No deploy, no <code>az acr build</code>, and the backups are not removed from the demo host. Only two name shapes are removed. The four platform suites and Node 24 were not run.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npm test -- --run src/__tests__/ks1823-dockerfile-drops-spec-backups.test.ts   # 8 cells, rc 0
+cd Blockchain/Dev/services/api-gateway &amp;&amp; npm test -- --run --maxWorkers=3                                  # 130 files / 1321 cells
+cd Blockchain/Dev &amp;&amp; docker build -t ks1823-check -f services/api-gateway/Dockerfile . &amp;&amp; docker run --rm --entrypoint ls ks1823-check /app/docs/openapi   # no *.pre-* or *.rollback-* in the listing</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>8</strong> (3 RED + 5 controls); 3 of 8 red without the Dockerfile line (develop <code>7152ac669d2d</code>), 8 of 8 with it</td></tr>
+<tr><td>api-gateway suite</td><td>untouched develop <strong>129 files / 1313 of 1313</strong>; with the change <strong>130 files / 1321 of 1321</strong>, 0 failed, 0 skipped (vitest <code>--maxWorkers=3</code>, warm, develop <code>84ddbd63c008</code>)</td></tr>
+<tr><td>busy host</td><td>with default parallelism or a cold first run, up to 3 files failed on time (<code>ks815</code> hook timeout, two <code>ks1543</code> files); each passes alone</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: 27 errors = the 27 in the ratchet baseline, 0 new, 0 stale, none in the new file; eslint on the file 0 errors, 0 warnings; a planted file raised two rules</td></tr>
+<tr><td>docker (local)</td><td>Docker Desktop 29.7.2, linux/arm64: develop&rsquo;s Dockerfile + 2 decoy files = both decoys in <code>/app/docs/openapi</code>; patched = none, <code>secuura-api.yaml</code> present; patched without decoys builds</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

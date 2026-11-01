@@ -1,0 +1,19 @@
+<h2>issuerCerts.ts: the admin-role test is one helper (groundwork, not the KS-1536 fix) &mdash; KS-1536</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The four certificate gates in <code>services/auth/src/routes/issuerCerts.ts</code> (write, read, revoke, sign) each copied the same two-line admin-role test. They now call one exported helper, <code>hasAdminRole</code>, whose body is those two expressions. Behaviour does not change: every spelling admitted or refused before is admitted or refused now. </td></tr><tr><td>This is groundwork for the role-vocabulary class and <strong>not</strong> a fix for KS-1536, which is about seven divergent role lists. A local model wrote the patch; it is applied unchanged. Test cell R3 is a source-text check of the file.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The other six role lists, a running stack, and a Node 24 LTS run (the host is Node 26.8.1). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run src/__tests__/ks1536-issuer-certs-admin-role-gate-is-one-helper.test.ts   # 9 cells, rc 0
+cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run                                                                          # 106 files / 1209 cells; 1 load timeout (ks949 enumeration, KS 1155)
+cd Blockchain/Dev &amp;&amp; node scripts/typecheck-tests/check.cjs services/auth                                                   # rc 0, 0 new</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new file against the unfixed product line</td><td><strong>3 failed / 6 passed</strong> of 9, all AssertionError; with the change <strong>9 / 9</strong></td></tr>
+<tr><td>services/auth, before &rarr; after</td><td><strong>105 files / 1200 cells &rarr; 106 files / 1209</strong>; 1 failed on both sides (the ks949 enumeration cell: 5005 ms against the 5 s default under load; KS 1155); 0 vanished, 9 new</td></tr>
+<tr><td>type-check</td><td><code>tsc -p tsconfig.json</code> rc 0; the repo test ratchet examined 157 files (156 at the base), 42 in the baseline, 0 new</td></tr>
+<tr><td>lint</td><td><code>eslint</code> on the two files: 0 errors, 1 warning that is also present at the base (<code>prefer-const</code>, outside this change)</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>bd6697e079fc</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

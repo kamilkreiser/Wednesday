@@ -1,0 +1,56 @@
+<h2>/revoke is one atomic transition — KS-1278</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="6"><strong>What to know.</strong></td><td><code>POST /api/documents/:id/revoke</code> decided
+        “already revoked” on a <strong>READ</strong> and then ran an
+        <strong>unconditional</strong> <code>UPDATE</code>, so two overlapping revokes could both
+        pass the read: <strong>200 + 200</strong>, two updates, two
+        <code>action_provenance</code> rows, two anchor calls. </td></tr><tr><td>The decision now lives
+        <strong>IN the UPDATE</strong> — <code>updateDocument</code>’s new
+        <code>ifStatusIsNot</code> option adds <code>AND (… IS NULL OR status IS DISTINCT
+        FROM …)</code> to the <code>WHERE</code>, and a guarded write that changed no row
+        returns <code>null</code>. </td></tr><tr><td>The loser answers the <em>same</em> 400 and returns
+        <strong>before</strong> <code>recordOnBehalfOf</code>, so it records nothing and anchors
+        nothing. <code>Refs KS-1278</code>; the row-lock alternative is not taken.
+        <br/><br/><strong>Round 2 (this commit).</strong> The guarded <code>UPDATE</code> still keyed on
+        <code>external_id</code>, but both reads fall back to the primary key for a UUID-shaped id
+        (<code>documentRepo.ts:244-251</code>) and the API hands clients that key as
+        <code>documentUuid</code> (<code>:172</code>). </td></tr><tr><td>So a <strong>sequential, non-race</strong>
+        revoke of a live, owned, unrevoked document addressed by its <code>documentUuid</code>
+        matched <strong>0 rows</strong> and answered <code>400 “already revoked”</code>
+        (gate65 <strong>N-1393-1</strong>). </td></tr><tr><td>The guarded write now keys on <strong>the row the read
+        resolved</strong> (<code>:616</code>), mirroring the read’s own precedence. </td></tr><tr><td>Only the
+        <strong>one</strong> opted-in caller changes key; the other <strong>12</strong> production
+        <code>updateDocument(</code> callers take a byte-identical statement.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev
+npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+npx jest --config services/originate/jest.config.js --rootDir services/originate \
+    ks1278-revoke-is-one-atomic-transition ks1293-originate-suite-is-hermetic   # 17 tests
+npx jest --config services/originate/jest.config.js --rootDir services/originate  # 91 suites / 1070 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>KS-1278 cells</td><td><strong>7</strong> after round 2 (was 4), all passing at head, 0 skipped</td></tr>
+<tr><td>Red-first at the branch base <code>32e058975d4e</code> (round 1)</td><td><strong>2 red / 2 pass of 4 executed</strong> — R1 and R2 red, C1 and C2 green. 4 executed, so an assertion red, not a load failure</td></tr>
+<tr><td>Red-first at <code>4a1620588819</code> (round 2)</td><td><strong>1 red / 6 pass of 7 executed</strong> — only <strong>N1</strong> red. R1 and R2 are <em>green</em> here because this baseline already carries round 1’s guard; only the KEY is wrong. 7 executed, and both new controls are green, so the single red discriminates</td></tr>
+<tr><td>What each red cell falsified</td><td><strong>R1</strong> a 0-row guarded UPDATE answers 400 and records nothing · <strong>R2</strong> the revoke UPDATE itself carries <code>status IS DISTINCT FROM</code> · <strong>N1</strong> a UUID-addressed sequential revoke answers 200, writes the status and records exactly one row</td></tr>
+<tr><td>Round-2 cells added</td><td><strong>N1</strong> UUID-addressed sequential revoke (red at <code>4a1620588819</code>, green at head) · <strong>N2</strong> non-UUID external id still revokes, <em>green at both ends</em> — it proves the <code>::uuid</code> cast is never reached for a non-UUID (22P02) · <strong>N3</strong> blast radius: an unguarded <code>updateDocument</code> still binds <code>WHERE external_id</code></td></tr>
+<tr><td>How N1 avoids a vacuous pass</td><td>The driver is <strong>simulated</strong>, not stubbed to a constant: a constant <code>1</code> is green at both ends and a constant <code>0</code> is red at both. The simulator answers as Postgres would for one fixture row, and <strong>throws</strong> if the UPDATE keys on neither shape it knows, so a later refactor cannot make the cell pass silently</td></tr>
+<tr><td>R1 and R2 strengthened</td><td><strong>R1</strong> now also asserts <strong>0</strong> anchor emissions on the losing path, counted from the <code>POST /api/anchors</code> that <code>emitLifecycleAnchor</code> makes (<code>documents.ts:1261</code>; it is module-local, so it cannot be mocked) — the anchor half of “records nothing” was pinned by no cell before. <strong>R2</strong> pins the guard clause by <strong>exact text</strong> and the guard’s own two parameters <strong>by position</strong> (the last two bound values, both <code>'revoked'</code>). An earlier revision of this row claimed R2 asserted “the bound value”; that was <strong>too weak and is corrected here</strong> — the UPDATE binds <code>'revoked'</code> three times and one of them is the SET clause’s new status, so a membership check is satisfied even when the guard value is wrong</td></tr>
+<tr><td>Round-2 tamper matrix</td><td><strong>RUN, 4 of 4 caught</strong> at the follow-up head. <strong>G7</strong> (<code>ifStatusIsNot: 'draft'</code>) → <strong>R2</strong> · <strong>G8</strong> (anchor emitted on the losing path) → <strong>R1</strong> · <strong>K1</strong> (guarded key reverted to <code>external_id</code>) → <strong>N1</strong> · <strong>T5</strong> (<code>TRUE OR</code> prefixed to the guard) → <strong>R2</strong>. Round 1’s T1–T4 are unchanged and still map as recorded. At the FIRST round-2 head G7 and T5 caught nothing; closing them is what this follow-up commit does</td></tr>
+<tr><td>A tamper that measures nothing</td><td><strong>K1 reverted alone leaves <code>idAsUuid</code> declared-but-unused</strong>, ts-jest rejects it, and the suite fails to LOAD: <strong>0 total, 0 executed, no cell red and no cell green</strong>. That is not an inert tamper and the only thing that distinguishes it is the <strong>executed count</strong>. The corrected K1 removes the dead declaration in the same tamper</td></tr>
+<tr><td>One tamper per conjunct</td><td><strong>T1</strong> clause deleted → R2 · <strong>T2</strong> <code>IS DISTINCT FROM</code>→<code>=</code> → R2 · <strong>T3</strong> <code>guardStatus !== null</code> removed → <strong>C2</strong> · <strong>T4</strong> <code>affected === 0</code>→<code>=== -1</code> → R1. Each alone, 1 failed / 3 passed, 4 executed</td></tr>
+<tr><td>Why C2 is load-bearing</td><td>It is the <em>only</em> cell that reddens when the <code>guardStatus !== null</code> term is dropped — without it, every unguarded caller would start receiving <code>null</code> on a 0-row update</td></tr>
+<tr><td><code>services/originate</code> suite</td><td>Round 1: <strong>90 suites / 1063 tests → 91 / 1067</strong>. Round 2: <strong>91 / 1070</strong>, <strong>0 failed</strong>, 0 skipped. Delta <strong>+3 tests, +0 suites</strong> — the three new cells in this same file</td></tr>
+<tr><td>Suite wall clock, after</td><td>Full originate unit suite <strong>12.174 s</strong> (round 1 read 12 s — no tier budget moves). Measured <strong>2026-10-05</strong> at <strong>22:24:34–22:24:47Z</strong>, host <strong>Kamil’s Mac Studio (2)</strong>, node v24.7.0, jest 29.7.0</td></tr>
+<tr><td>Timing coverage</td><td><strong>0</strong> stated timings cover a <code>services/originate</code> unit suite (must-hit controls: <code>auth</code> <strong>76/75</strong>, <code>Akto</code> <strong>71/83</strong>). No tier budget moves</td></tr>
+</table>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Not covered.</strong></td><td> No live sweep (skill §5f): nothing ran against a running
+        stack or a real PostgreSQL, so <strong>KS-1278 does not move to Done on this account</strong>.
+        </td></tr><tr><td>The cells mock the Prisma driver, so atomicity is pinned at the SQL <strong>text</strong>
+        level plus the JS return path — that two concurrent transactions really serialise on
+        this <code>WHERE</code> is <strong>UNMEASURED</strong>. </td></tr><tr><td>Residual, not fixed: a document
+        <strong>deleted</strong> between the route’s read and the guarded write answers 400
+        “already revoked” where 404 belongs, because <code>updateDocument</code> returns
+        one <code>null</code> for both — pre-existing, narrowed to a race window here.
+      </td></tr></table></div>

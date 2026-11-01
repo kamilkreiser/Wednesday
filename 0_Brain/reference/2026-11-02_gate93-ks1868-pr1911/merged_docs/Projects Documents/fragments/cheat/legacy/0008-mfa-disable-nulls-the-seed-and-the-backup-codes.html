@@ -1,0 +1,26 @@
+<div class="section">
+<h2>MFA disable NULLs the seed and the backup codes — KS-938</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> “MFA disabled” used to answer <strong>200</strong>
+        while leaving the TOTP seed and the hashed backup codes in the row — and the seed could
+        then be re-armed without a new one being minted. <code>updateUser</code> skips any field whose
+        value is <code>undefined</code>, so all three clearing sites emitted a <strong>partial</strong>
+        UPDATE. </td></tr><tr><td>They now pass <code>null</code>, which writes SQL NULL.
+        <strong>The <code>undefined</code> skip itself is unchanged</strong> — other callers rely
+        on it to mean “leave this column alone”.
+        </td></tr><tr><td>One site (<code>POST /me/mfa/disable</code>) did not pass <code>mfaBackupCodes</code> at all,
+        so the key had to be <em>added</em>: the fix is per-site, not one shared edit.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth
+npx vitest run src/__tests__/ks938-mfa-disable-nulls-seed-and-backup-codes.test.ts   # 5 cells
+npx vitest run                                                                       # 845 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base → head</td><td>3 failed | 2 passed (5) → 5 passed (5)</td></tr>
+<tr><td>services/auth suite at head</td><td>79 files, 845 passed, 0 failed</td></tr>
+<tr><td>tsc</td><td>rc 0, 0 errors (planted-error control rc 2, 2 errors)</td></tr>
+<tr><td>sites fixed</td><td>3 (two in mfa.ts, one in users.ts)</td></tr>
+<tr><td>residue NOT fixed</td><td>users.ts disable verifies the TOTP only if a seed exists</td></tr>
+</table>
+</div>

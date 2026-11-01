@@ -1,0 +1,20 @@
+<h2>migrate-tenant-data loop: no lint warnings (const counter, bare catch) &mdash; KS-1779</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The per-tenant loop of <code>POST /api/admin/migrate-tenant-data</code> (<code>adminConfig.ts</code>) had a <code>let</code> that was never reassigned and a <code>catch (e: any)</code> that never read <code>e</code>. They are now <code>const copied</code> and a bare <code>catch</code>. Behaviour is unchanged; <code>eslint</code> on the file goes from 2 warnings to none. </td></tr><tr><td><strong>The product hunk applied with fuzz</strong> (a strict check fails at the base; the recorded lenient mode was used and the added lines were compared byte for byte). The test is a source-text check. The separate KS-1780 part 2 change edits the same file and must merge after this one. A local model wrote the patch.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The migration against a database (the test reads source text), a running stack, and a Node 24 LTS run (the host is Node 26.8.1). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; npx jest ks1779-migrate-tenant-data-loop        # 4 cells, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest                                         # 143 files / 1702 tests, rc 0
+cd Blockchain/Dev/services/originate &amp;&amp; npx eslint src/routes/adminConfig.ts             # rc 0, no problems
+cd Blockchain/Dev/services/originate &amp;&amp; ../../node_modules/.bin/tsc --noEmit            # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new file against the unfixed product line</td><td><strong>2 failed / 2 passed</strong> of 4, both matcher assertions; with the change <strong>4 / 4</strong></td></tr>
+<tr><td>eslint on adminConfig.ts</td><td><strong>2 warnings at the base &rarr; 0 problems</strong></td></tr>
+<tr><td>services/originate, before &rarr; after</td><td><strong>142 files / 1698 cells &rarr; 143 files / 1702</strong>, 0 failed on both sides; 0 vanished, 4 new</td></tr>
+<tr><td>type-check</td><td><code>tsc -p tsconfig.json</code> rc 0; the tests-included program (715 files) has 0 errors, planted-error control rc 2</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>bd6697e079fc</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), jest 29.7.0, ts-jest 29.4.11, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,75 @@
+<h2>12. GET /api/anchors/:id reports blockNumber as a number (KS-1333)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What this pins.</strong></td><td><code>services/originate/src/services/anchorStateSync.ts</code> has
+      <strong>four</strong> writers that persist
+      <code>blockHeight: anchor.blockNumber || 0</code> without shaping the
+      value, and <code>anchor.blockNumber</code> arrives from
+      <code>GET /api/anchors/:id</code>. </td></tr><tr><td>KS-1333's first step is to
+      <em>measure</em> whether that route can hand them a raw <code>pg</code>
+<code>int8</code> <strong>string</strong>. </td></tr><tr><td>Measured at source: it cannot.
+      <code>rowToAnchor</code> converts <code>block_number</code> through
+      <code>Number()</code> (<code>services/anchoring/src/index.ts:1317</code>),
+      and the handler answers the mapped
+      <code>anchor.blockNumber || null</code> rather than the raw row. </td></tr><tr><td>So the
+      route answers a number or <code>null</code>, and the ticket's own rule
+      applies —
+      <em>a recorded reason and a cell pinning it, not a coercion.</em> This
+      block is that cell.
+    </td></tr></table>
+<h3>12.1 The cells, and why the guard is source-text</h3>
+<table class="pmatrix"><tr><td colspan="2">
+      Three cells in
+      <code>services/anchoring/src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts</code>. <code>index.ts</code> calls <code>app.listen</code> at import, so no
+      test imports it; the guard therefore reads <code>index.ts</code> as
+      <strong>text</strong> over the two lines that make the answer a number.
+      <strong>B1</strong> pins the <code>Number()</code> conversion in
+      <code>rowToAnchor</code>. <strong>C1</strong> pins that the handler
+      answers the mapped value and never <code>row.block_number</code>.
+      <strong>C2</strong> pins that the by-id lookup maps its row through
+      <code>rowToAnchor</code> at all — without C2, B1 could pass while
+      the handler read a different row path entirely.
+    </td></tr></table>
+<h3>12.2 Running it</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring
+npx vitest run src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts   # 3 cells
+npx vitest run                                                                 # 357 tests</code></pre>
+<h3>12.3 Figures, measured</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The anchoring suite goes <strong>354 → 357 tests</strong>, passing
+      <strong>353 → 356</strong>, with <strong>no new red</strong>. </td><td>One
+      cell is red at base and at head — <code>threadTokenMint</code>'s
+      emulator round-trip, which is <strong>KS 562</strong> and pre-existing,
+      not this change. The three new cells run in
+      <strong>104–135 ms</strong> reported (0.36–0.55 s wall) over
+      three consecutive runs, 2026-10-05, host Kamil's Mac Studio (2), node
+      v24.7.0.
+    </td></tr><tr><td class="pm-topic" rowspan="1"><strong>Red-first, by tamper.</strong></td><td> The red is demonstrated rather than
+      asserted: removing <code>Number(…)</code> from
+      <code>index.ts:1317</code> turns B1 red with
+      <code>expected [ true, false ] to deeply equal [ true, true ]</code> while
+      C1 and C2 stay green, and all three cells still <em>run</em> — so
+      the tamper is inert to loading, not a load failure masquerading as a red.
+      <code>index.ts</code> was restored by content and re-asserted by
+      <code>sha256</code> (<code>31422a6ab3c74804</code>… both sides)
+      with the tamper anchor proved unique first.
+    </td></tr></table>
+<h3>12.4 Timing</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>No stated timing covers the anchoring suite.</strong></td><td> Measured at
+      the base SHA <code>3ce8cd4026a6</code> in both platform-k docs:
+      <strong>0</strong> stated timings name the anchoring suite, against a
+      must-hit control of <strong>23</strong> (flow) and
+      <strong>35</strong> (cheat sheet) duration figures present overall —
+      so the zero is a measurement and not a blind grep. </td></tr><tr><td>This change therefore
+      touches no stated timing row; the figure above is this block's own, not an
+      amendment to anyone else's.
+    </td></tr><tr><td class="pm-topic" rowspan="4"><strong>Not covered.</strong></td><td> A live sweep (skill §5f) —
+      nothing here was exercised against a running service, so KS-1333 does not
+      move to Done on this change's account. </td></tr><tr><td>The guard is
+      <strong>source-text</strong>, which means it pins the text of two lines:
+      commenting those lines out would leave the strings present and the cells
+      green. </td></tr><tr><td>Closing that properly needs <code>index.ts</code> to be loadable
+      without listening, which is out of this scope. </td></tr><tr><td>Also out, and open on the
+      ticket for a human: whether <code>anchorStateSync</code>'s four writers
+      should use <code>??</code> instead of <code>|| 0</code>, which is a
+      behaviour question about the value <code>0</code> and not about the shape
+      this block pins.
+    </td></tr></table>

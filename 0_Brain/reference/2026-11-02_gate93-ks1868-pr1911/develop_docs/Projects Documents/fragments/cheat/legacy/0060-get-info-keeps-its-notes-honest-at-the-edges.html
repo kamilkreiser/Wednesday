@@ -1,0 +1,18 @@
+<h2>get_info keeps its notes honest at the edges &mdash; KS-1620</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>secuura_get_connector_info</code> (<code>mcp-server/src/tools/info.ts</code>) turns the gateway&rsquo;s answer into a note. Two mutants survived the whole suite: dropping <code>!connectorResult.ok</code> (H1-M3) and loosening <code>typeof ...message === 'string'</code> to <code>!= null</code> (H1-M8). Item 1, the 200-character bound, was already on develop; this is items 2 and 3. </td></tr><tr><td>Five cells are added to the ks1620 test (4 to 9): a 200 with a JSON null body keeps the not-available note; a non-string message (the number 123) relays no text; and one cell each for 400, 429 and 502 asserting the note still reads &ldquo;Connector info refused by the gateway (&lt;status&gt;)&rdquo;. The word &ldquo;refused&rdquo; is kept (ruled for this lane); only the code comment at <code>info.ts:129</code> changed, one line for one line, saying a 403/503 fail-closed is a deliberate refusal and a 400, 429, 500 or proxy 502 is not. </td></tr><tr><td>A comment cannot be pinned by a cell; the wording and status it describes can, and now are. Comment-only is proved by emit: both versions of <code>info.ts</code> hash identically with comments removed, and a one-token code change does not.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A run on an LTS Node: the host carries only v26.8.1 and nothing was repeated on Node 24. Nothing runs through the gateway. </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance).
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/mcp-server &amp;&amp; npx vitest run src/__tests__/ks1620-get-info-bounds-the-relayed-gateway-text.test.ts   # 9 cells, rc 0
+cd Blockchain/Dev/services/mcp-server &amp;&amp; npx vitest run                                                                          # 20 tests, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>six one-line mutants of <code>info.ts</code>, ORIGINAL state, whole mcp-server suite</td><td>H1-M3, H1-M8 and the 400, 429 and 502 mutants all <strong>15 / 15</strong> (every one survives); the dropped 200-character bound <strong>13 / 15</strong> (killed by B1 and B2)</td></tr>
+<tr><td>the same mutants, NEW state</td><td>real code <strong>20 / 20</strong>; each of H1-M3, H1-M8, 400, 429 and 502 <strong>19 / 20</strong>, failing only the cell written for it; the dropped bound <strong>18 / 20</strong> (B1 and B2)</td></tr>
+<tr><td>counts, before &rarr; after</td><td>ks1620 file <strong>4 &rarr; 9</strong>; ks1541 file <strong>6 &rarr; 6</strong> (not edited); whole mcp-server suite <strong>15 &rarr; 20 tests</strong>, 0 failed before and after</td></tr>
+<tr><td>comment-only proof</td><td>emit with comments removed: original and edited <code>info.ts</code> both <code>6bfef20abaf295a6</code>; a one-token code change <code>f4dfef94a1e88023</code>; 173 lines before and after</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5), Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3, 2026-10-27, base <code>885d69b06f5f</code>, repeated at develop <code>d543203619c4</code></td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

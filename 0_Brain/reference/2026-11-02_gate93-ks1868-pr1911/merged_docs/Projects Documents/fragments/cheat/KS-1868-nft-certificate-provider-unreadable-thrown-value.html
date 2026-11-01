@@ -1,0 +1,19 @@
+<h2>nft-certificate fetchProtocolParams logs and returns null when the thrown value is unreadable &mdash; KS-1868, nft-certificate</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>What to know.</strong></strong></td><td> <code>fetchProtocolParams()</code> in nft-certificate read the thrown value unguarded in its catch; a revoked Proxy or a throwing <code>message</code> getter made that read throw out of the function. The read is now in an inner try with the fallback <code>unreadable thrown value</code>; the function logs and returns <code>null</code> as before. Read from the code, not run: on the 5-minute refresh in <code>ensureFreshParams()</code> the cached parameters are now kept for that case, as for an ordinary Error.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>Not measured here.</strong></strong></td><td> KS-1868 stays open (one of its 253 sites). A real Blockfrost call or boot, the four platform suites, an LTS Node, <code>npm ci</code> and any deploy were not run.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/nft-certificate &amp;&amp; npx vitest run src/__tests__/ks1868-provider-fetch-protocol-params-unreadable-throw.test.ts   # 3 cells
+cd Blockchain/Dev/services/nft-certificate &amp;&amp; npm test   # 18 files / 137 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>3</strong> in 1 file; red first: 2 of 3 failed by assertion without the change, 0 of 3 with it</td></tr>
+<tr><td>nft-certificate unit suite</td><td>base <code>85c56a3d1eb9</code> 17 files / 134 of 134; with the change <strong>18 files / 137 of 137</strong>, 0 failed, 0 skipped</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: 0 errors, a planted type error was reported once; eslint on 2 files: 0 errors and 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-11-01 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

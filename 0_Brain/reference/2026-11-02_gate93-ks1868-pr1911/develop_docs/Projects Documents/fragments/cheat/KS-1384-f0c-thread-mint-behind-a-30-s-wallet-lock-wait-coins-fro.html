@@ -1,0 +1,16 @@
+<h2>KS-1384 F0c: thread-mint behind a 30 s wallet-lock wait, coins from the wallet view</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td><code>POST /api/anchors/thread-mint</code> answers 503 before signing when the wallet is busy for 30 s, when no coin is spendable, or when the caller has gone; it never queues behind an anchor&rsquo;s confirmation poll.</td></tr><tr><td>Its seed and inputs come from the wallet view, and it is recorded there from signing, so anchors and mints never pick the same coin in one process.</td></tr><tr><td>Deploy hold: no F0 build where <code>STATE_THREAD_NFT_ENABLED=true</code> without this change; F0 deploys with F-b and R after the census.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A real chain, the census, the four platform suites, a running stack, Node 24 (LTS), any box.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/anchoring &amp;&amp; npm test -- src/__tests__/ks1384-f0c-thread-mint.test.ts   # 10 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>10</strong></td></tr>
+<tr><td>mutants</td><td>9 written, parsed and killed; B1&rsquo;s cell red against its mutant, green with the change</td></tr>
+<tr><td>anchoring unit suite</td><td>47 files / 684 cells: 683 pass, the host-dependent <code>threadTokenMint</code> cell failed (as at the base)</td></tr>
+<tr><td>anchoring real-Postgres lane</td><td>9 files / 113 cells, all pass (second run; the first lost one file to a 10 s hook timeout under load)</td></tr>
+<tr><td>tsc and eslint</td><td>0 errors with all 56 anchoring test files; eslint 0 errors, 2 warnings, both at the base</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared; F0b&rsquo;s head <code>31e7975963a5</code>, 2026-10-30 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

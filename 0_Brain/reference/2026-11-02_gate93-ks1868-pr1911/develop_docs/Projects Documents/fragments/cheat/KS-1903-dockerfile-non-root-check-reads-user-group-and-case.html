@@ -1,0 +1,23 @@
+<h2>The non-root Dockerfile check reads USER root:root, 0:0 and ROOT as root &mdash; KS-1903</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> <code>check-dockerfile-non-root.sh</code> now drops a <code>:group</code> and ignores case before it compares the last <code>USER</code> to <code>root</code> and <code>0</code>. A comment and two code lines in the script; seven new cells (4 red at develop, 3 controls) in the existing suite, 4 cells before and 11 after.
+    </td></tr><tr><td>Open: <code>0:1000</code> and <code>Root:Root</code> flip from exit 0 to exit 1 with no cell of their own.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> GNU/Linux behaviour, a <code>USER</code> written with a variable, the four platform suites, a running stack, any deploy.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; bash scripts/__tests__/check_dockerfile_non_root_reports_root.test.sh   # 11 cells
+cd Blockchain/Dev &amp;&amp; bash scripts/run-code-guards.sh                                           # 13 guards
+cd Blockchain/Dev &amp;&amp; bash scripts/run-shell-suites.sh                                          # every shell suite</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>suite cells</td><td>4 before, <strong>11</strong> after; with only the new cells at develop: 7 passed, 4 failed (by assertion)</td></tr>
+<tr><td>mutants</td><td>6 run, 4 killed, 2 survived (both equivalent)</td></tr>
+<tr><td>real tree</td><td>35 Dockerfiles, final USER never root; develop&rsquo;s script and this one both exit 0</td></tr>
+<tr><td>code guards</td><td><code>run-code-guards.sh</code>: 13 guards pass on develop and with the change</td></tr>
+<tr><td>shell suites</td><td>(run before cells 10 and 11 were added to the same file) develop <strong>106 passed, 0 failed, 1 skipped of 107</strong> (the skip is <code>ks949_main_seed_idempotence.test.sh</code>, no PostgreSQL on this host); with the change <strong>106 passed, 0 failed, 1 skipped of 107</strong> (the skip is <code>ks949_main_seed_idempotence.test.sh</code>, no PostgreSQL on this host)</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-11-02 (AEDT); <code>/bin/bash</code> 3.2.57</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

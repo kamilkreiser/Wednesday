@@ -1,0 +1,129 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o67_p2_originate_signatories_patch_revoke_reinstate_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/signatories.ts b/Blockchain/Dev/services/originate/src/routes/signatories.ts
+--- a/Blockchain/Dev/services/originate/src/routes/signatories.ts
++++ b/Blockchain/Dev/services/originate/src/routes/signatories.ts
+@@ -355,6 +355,12 @@
+       res.json({ success: true, message: 'Signatory updated' });
+     } catch (error) {
+-      logger.error('Failed to update signatory', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to update signatory', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update signatory' } });
+     }
+   },
+@@ -412,7 +418,13 @@
+         revokedAt: now.toISOString(),
+       });
+     } catch (error) {
+-      logger.error('Failed to revoke signatory', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to revoke signatory', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to revoke signatory' } });
+     }
+   },
+@@ -462,6 +474,12 @@
+       res.json({ success: true, message: 'Signatory reinstated' });
+     } catch (error) {
+-      logger.error('Failed to reinstate signatory', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to reinstate signatory', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to reinstate signatory' } });
+     }
+   },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o67_p3_originate_third_party_verifiers_list_suspend_reinstate_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts b/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
+--- a/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
++++ b/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
+@@ -141,6 +141,12 @@
+     res.json({ success: true, verifiers: rows, total: rows.length });
+   } catch (error) {
+-    logger.error('Failed to list verifiers', { error: String(error) });
++    let reason: string;
++    try {
++      reason = String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Failed to list verifiers', { error: reason });
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to list verifiers' } });
+   }
+ });
+@@ -238,6 +244,12 @@
+       res.json({ success: true, message: 'Verifier suspended' });
+     } catch (error) {
+-      logger.error('Failed to suspend verifier', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to suspend verifier', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to suspend verifier' } });
+     }
+   },
+@@ -277,6 +289,12 @@
+       res.json({ success: true, message: 'Verifier reinstated' });
+     } catch (error) {
+-      logger.error('Failed to reinstate verifier', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to reinstate verifier', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to reinstate verifier' } });
+     }
+   },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o67_p4_originate_third_party_verifiers_verify_records_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts b/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
+--- a/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
++++ b/Blockchain/Dev/services/originate/src/routes/thirdPartyVerifiers.ts
+@@ -362,7 +362,13 @@
+         },
+       });
+     } catch (error) {
+-      logger.error('Failed to perform third-party verification', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to perform third-party verification', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to perform verification' } });
+     }
+   },
+@@ -395,6 +401,12 @@
+       res.json({ success: true, records: rows, total: rows.length });
+     } catch (error) {
+-      logger.error('Failed to get verification records', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Failed to get verification records', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get records' } });
+     }
+   },
+

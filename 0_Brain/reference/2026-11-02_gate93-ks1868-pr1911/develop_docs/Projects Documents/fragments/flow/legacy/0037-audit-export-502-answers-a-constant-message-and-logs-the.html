@@ -1,0 +1,69 @@
+<h2>46. audit-export 502 answers a constant message, and logs the failed fetch by the ruled expression (KS-1410)</h2>
+<h3>46.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>GET /api/admin/audit/export</code> in api-gateway (<code>routes/audit-export.ts</code>): when the fetch to
+      the security service <strong>throws</strong>, the 502 body was
+      <code>`Failed to reach security service: ${err.message}`</code> with no NODE_ENV guard, so the thrown text
+      reached the client in every environment. It now answers the constant
+      <code>Failed to reach security service</code>, and the catch logs the failure server-side, naming the route.
+      Before, that catch logged nothing. </td><td>This is <strong>one site</strong> of KS-1410's scope (the ticket
+      counts 28 across six services), and the ticket stays open. Raised from a Wednesday-held Spark pass and
+      re-proved on develop <code>613070f29112</code>. The file's own <code>fail500</code> at <code>:24-25</code> is
+      <strong>not</strong> changed here: PR 1443 (KS 1346) carries that line, about 145 lines away from this hunk.
+    </td></tr></table>
+<h3>46.2 The log line uses the ruled expression, and what it still logs</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The new log line's <code>error</code> value is the expression Kam ruled on 2026-09-27 (card
+      <code>secuura-ks1346-logging-thrown-objects-leaks-secrets</code>, choice a: log a thrown object's type and
+      field names only). It is byte-identical to the ruled line in
+      <code>originate/src/routes/adminConfig.ts:104</code>: 262 bytes, sha256/16 <code>4623660d465c942a</code>,
+      compared with <code>cmp</code>. </td><td>What it reduces and what it does not: an <code>Error</code> is logged
+      as its <code>.message</code> and a thrown string as it is; a plain object or class instance is logged as
+      <code>thrown &lt;Type&gt; with fields [a, b]</code>; any other value as <code>thrown &lt;typeof&gt;</code>. So at
+      this site the 502 <strong>body</strong> no longer carries the thrown text, while the <strong>log</strong> still
+      carries an Error's message. The Spark's payload logged <code>err instanceof Error ? err.message :
+      String(err)</code>, which writes a plain object as <code>[object Object]</code> (node v24.7.0); replacing it is
+      the one deviation from that payload.
+    </td></tr></table>
+<h3>46.3 Red at the base, green with the fix</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      New file <code>services/api-gateway/src/__tests__/ks1410-audit-export-502-never-answers-err-message.test.ts</code>,
+      9 cells on the real router with <code>fetch</code> stubbed per cell, so no network. Eight are the Spark's.
+      X4 was added by the raising seat: X1 to X3 all throw an <code>Error</code>, so none of them can tell the ruled
+      expression from <code>String(err)</code>. </td><td>Three states, all 9 cells ran in each: the base product
+      <strong>6 red / 3 green</strong>; the payload's product as the Spark wrote it <strong>1 red / 8 green</strong>
+      (X4 alone, on the logged type and field names alone); as built <strong>9 of 9 green</strong>.
+    </td></tr></table>
+<pre><code>cell   what                                                        base   payload  built
+X1 x3  the 502 body has no thrown text (production/development/test) red    green    green
+X2     the thrown text is logged server-side                        red    green    green
+X3     two different thrown texts answer the same body              red    green    green
+X4     thrown plain object: same body, logged by type and fields    red    red      green
+XC1    an upstream non-ok status and error still pass through       green  green    green
+XC2    a reachable service still exports its rows and logs nothing  green  green    green
+XC3    no req.user still answers 401 and never fetches              green  green    green</code></pre>
+<h3>46.4 Suite, type-check and lint, and the timings</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <strong>api-gateway unit suite</strong> (<code>npm test</code> = vitest 4.1.11): <strong>94 files / 845
+      tests</strong> at base, <strong>95 / 854 / 0 failed</strong> with this change: +9, all in the new file, and 0
+      pre-existing cells changed status. Wall clock 7.71 s at base and 7.77 s at head (vitest's own Duration
+      line), measured 2026-10-10 AEDT on Kamils-Mac-Studio (Apple Silicon, node v24.7.0) while another seat's
+      session was live on the same machine, so treat the seconds as indicative. </td><td><code>npx tsc
+      --noEmit</code> rc 0, but that program excludes <code>src/__tests__</code> (it listed 0 of the new file), so
+      the new test was type-checked separately, rc 0, in a program that lists it. <code>npm run lint</code> rc 0:
+      36 warnings and 0 errors, none in either changed file. The new log line is 377 characters long, and eslint
+      accepts it.
+    </td></tr></table>
+<pre><code>cd Blockchain/Dev/services/api-gateway
+npx vitest run src/__tests__/ks1410-audit-export-502-never-answers-err-message.test.ts   # 9 passed
+npm test                                                                               # 95 files, 854 passed
+npx tsc --noEmit                                                                       # rc 0 (src/__tests__ excluded)
+npm run lint                                                                           # 0 errors</code></pre>
+<h3>46.5 What is NOT proven</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A runtime-behaviour change is not done on offline green. </td><td><strong>A live run is owed</strong> (no
+      stack was built): the 502 body and the log line were measured on the router in-process only. No tamper
+      matrix was run beyond the two reverting states above. The other thrown-text sites KS-1410 counts are not
+      touched. This file's own <code>fail500</code> still logs with the pre-ruling expression until PR 1443 lands.
+      The four platform suites were not run here.
+    </td></tr></table>

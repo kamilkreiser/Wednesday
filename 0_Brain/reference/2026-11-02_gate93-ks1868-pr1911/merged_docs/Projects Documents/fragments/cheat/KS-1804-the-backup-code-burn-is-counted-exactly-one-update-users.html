@@ -1,0 +1,16 @@
+<h2>The backup-code burn is counted: exactly one UPDATE users, healthy and faulted &mdash; KS-1804 (note 2, test only)</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td>Test only, no product byte changes. Two new cells in <code>ks1188-f3-a-spent-backup-code-503-says-so.test.ts</code> count the <code>UPDATE users</code> statements of a backup-code sign-in: exactly one when healthy and exactly one when the read-back fails after the burn landed. Covers note 2 (N2) of KS-1804 only.</td></tr><tr><td>Red-first by a tamper in the worktree (an extra <code>UPDATE users</code> at <code>passwordLoginGate.ts:281</code>, never committed, restored with an equal sha256): 2 of 8 cells fail. At the untouched product all 8 pass.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>The cause of the intermittent <code>ks949-platform-admin-seed-identity.test.ts</code> failures seen in the whole auth suite, on an untouched tree as well. The four platform suites, a running stack, Node 24 and any deploy were not run.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm run test -w services/auth -- --run ks1188-f3-a-spent-backup-code-503-says-so   # 8 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run test -w services/auth -- --run --maxWorkers=3                 # 110 files / 1328 cells (see the ks949 note)</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>2</strong> (the N2 cells) in a file of 8; at the untouched product 8 of 8 pass; under the tamper 2 of 8 fail (develop <code>a786e06e6f6e</code>)</td></tr>
+<tr><td>auth unit suite</td><td>110 files, 1328 cells; three runs: 1328 of 1328 once, 1326 pass + 2 failed twice, all in <code>ks949-platform-admin-seed-identity.test.ts</code>, which also failed 3 of 4 runs on an untouched tree (1326 cells)</td></tr>
+<tr><td>tsc and ratchet</td><td>tsc with tests: 42 errors, none in this file, planted error named once; ratchet: 42 in the baseline, 0 new, 0 stale</td></tr>
+<tr><td>eslint</td><td>0 errors, 0 warnings on the test file; a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; develop <code>a786e06e6f6e</code> with the change on top, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,19 @@
+<h2>actorDid and orgDid accept did:jwk &mdash; KS-1175</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The anchoring service&rsquo;s identity block now accepts <code>did:jwk</code> as the third method on <code>actorDid</code> and <code>orgDid</code> (pattern <code>^did:(key|web|jwk):[A-Za-z0-9._:%-]+$</code>, was <code>^did:(key|web):[A-Za-z0-9._:%-]+$</code>; 512-character cap unchanged), on Stuart&rsquo;s ruling on PS 1324. Before, Platform S&rsquo;s Entra-verified <code>did:jwk</code> got a 400. The check is shape only: it never decodes the JWK. The refusal message names all three methods and still starts <code>Invalid DID</code>. </td></tr><tr><td>The generated spec (<code>secuura-api.yaml</code>) changed by its two pattern lines and two description lines; regenerate it with <code>npm run generate-openapi</code>, never by hand. The Schemathesis and Akto files hold no <code>did:key</code>, <code>did:web</code> or <code>did:jwk</code> value, so no example there changed.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> The four platform suites, any stack or database, any live anchor of a <code>did:jwk</code>, and a Node 24 LTS run (the host is Node 26.8.1). Not deployed. </td></tr><tr><td>One whole-suite red is not this change: <code>threadTokenMint</code> &ldquo;parameterises mint + spend&rdquo; (KS 562, an install-layout duplicate of <code>@lucid-evolution/plutus</code>); it fails the same way with these files put back to develop&rsquo;s.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>npm --prefix Blockchain/Dev run test --workspace=services/anchoring -- src/__tests__/ks1175-identity-anchoring.test.ts   # 66 cells (14 new), rc 0
+npm --prefix Blockchain/Dev run check:openapi                                                                              # rc 0, 414 example blocks</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>14</strong> (7 per field); the file reads <strong>66</strong> cells, was <strong>52</strong>; the four named anchoring files <strong>160/160</strong>, were <strong>146/146</strong></td></tr>
+<tr><td>red-proof (new cells red out of 14)</td><td>develop&rsquo;s <code>anchorSchema.ts</code> <strong>8/14</strong>; old pattern alone <strong>6/14</strong>; old message alone <strong>2/14</strong>; any method <strong>6/14</strong>; no length cap <strong>2/14</strong>; alphabet without <code>-</code> <code>_</code> <strong>2/14</strong>; shortened test DID <strong>2/14</strong>; green before and after</td></tr>
+<tr><td>whole anchoring unit suite</td><td><strong>404 of 405</strong> in 33 files; the one red is KS 562 and is the same on develop&rsquo;s files</td></tr>
+<tr><td>files that read the spec</td><td><strong>198 of 198</strong> in 13 files (api-gateway, auth, mcp-server); <code>check:openapi</code> rc 0</td></tr>
+<tr><td>tsc and eslint</td><td><strong>0 errors</strong> over 58 files with tests included; eslint rc 0 on the three changed files; both with a planted defect that fails</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats, Darwin, no Docker; develop <code>e4cd2e1325ba</code>, 2026-10-29 (UTC); Node v26.8.1 (not an LTS measurement); TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

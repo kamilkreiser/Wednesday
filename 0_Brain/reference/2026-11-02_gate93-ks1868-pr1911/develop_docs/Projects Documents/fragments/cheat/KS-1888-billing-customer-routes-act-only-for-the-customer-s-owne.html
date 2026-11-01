@@ -1,0 +1,20 @@
+<h2>Billing customer routes act only for the customer&rsquo;s owner or a platform administrator &mdash; KS-1888</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Twelve billing routes that take a customer, invoice or payment-method id, plus <code>POST /customers</code>, now act only for the customer&rsquo;s owner (<code>metadata.userId</code> equals the caller&rsquo;s userId, and the tenant where one is recorded) or a platform administrator. Anyone else gets the same 404 as an unknown id. <code>PUT /customers/:id</code> refuses the <code>certificationCredits</code>, <code>userId</code> and <code>tenantId</code> metadata keys with 400. <code>GET /customers/by-email</code> now runs at all.
+      </td></tr><tr><td>A test or tool that calls these routes needs a caller who owns the customer, or a platform administrator. Its Stripe double needs <code>findCustomer</code> (and <code>getPaymentMethod</code> or <code>listCustomersByEmail</code> where the route uses them).
+      </td></tr><tr><td>A customer created before this change carries whatever <code>userId</code> was last written to it before this change, by its creator or by any signed-in caller through the old <code>PUT /customers/:id</code>, and the check trusts it. The audit of existing customers is KS 1909. That is a limit of the fix, not a finding: there is no other owner record to check against.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A running stack; Stripe; callers outside this repository; how many existing customers carry a wrong <code>userId</code>; the four platform suites; Node 24; any deploy.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/billing &amp;&amp; npx vitest run --maxWorkers=3 src/__tests__/ks1888-billing-routes-bound-to-the-customer-owner.test.ts   # 192 cells
+cd Blockchain/Dev/services/billing &amp;&amp; npx vitest run --maxWorkers=3 src/__tests__/ks1888-stripe-service-lookups.test.ts                  # 19 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>whole billing suite with the change</td><td><strong>324/324</strong>, twice</td></tr>
+<tr><td>red-first at develop</td><td>102 of 192 route cells red; 18 of 19 lookup cells red; every existing cell green</td></tr>
+<tr><td>mutants</td><td><strong>26 of 26</strong> killed</td></tr>
+<tr><td>tsc and eslint</td><td>tsc 0 (service config); with tests, the same 10 errors as develop; eslint 0 errors</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared, load 4 to 10; develop <code>df99b04720b8</code> with the change on top, 2026-10-31 (UTC); Node v26.8.1 (not an LTS measurement)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Secuura Platform White Paper</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;700&family=JetBrains+Mono:wght@400&display=swap');
+
+@page {
+  size: A4;
+  margin: 22mm 18mm 22mm 18mm;
+  @bottom-center {
+    content: counter(page);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 9px;
+    color: #999;
+  }
+}
+@page :first {
+  @bottom-center { content: none; }
+  margin: 0;
+}
+
+:root {
+  --navy: #0F1B33;
+  --deep: #040810;
+  --teal: #0A9E7E;
+  --teal-light: #0CF7C4;
+  --blue: #2563EB;
+  --yellow: #D4A000;
+  --bg: #FFFFFF;
+  --bg-alt: #F8F9FB;
+  --card-bg: #F3F5F8;
+  --text-primary: #1A1A2E;
+  --text-secondary: #4A5568;
+  --text-muted: #8896A6;
+  --border: #DDE2EA;
+  --error: #DC2626;
+  --success: #059669;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 11px; }
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 300;
+  color: var(--text-primary);
+  background: var(--bg);
+  line-height: 1.6;
+  padding: 0;
+}
+
+/* Cover page */
+.cover-page {
+  page-break-after: always;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(180deg, var(--deep) 0%, var(--navy) 50%, var(--deep) 100%);
+  padding: 40px;
+  margin: -22mm -18mm 0 -18mm;
+  width: calc(100% + 36mm);
+}
+.cover-logo {
+  font-size: 5rem;
+  font-family: 'IBM Plex Serif', serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--teal-light), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+.cover-title {
+  font-size: 2.2rem;
+  font-family: 'IBM Plex Serif', serif;
+  font-weight: 700;
+  color: #F7F7F7;
+  margin: 20px 0 10px;
+  max-width: 600px;
+}
+.cover-subtitle {
+  font-size: 1.2rem;
+  color: #A8B4C4;
+  font-weight: 300;
+  margin-bottom: 40px;
+}
+.cover-line {
+  width: 120px;
+  height: 3px;
+  background: linear-gradient(135deg, var(--teal-light), var(--blue));
+  margin: 20px auto;
+  border-radius: 2px;
+}
+.cover-meta {
+  margin-top: 60px;
+  color: #8896A6;
+  font-size: 0.95rem;
+}
+.cover-meta p { margin: 4px 0; color: #8896A6; }
+.cover-meta strong { color: #F7F7F7; }
+
+/* Content typography */
+h1, h2, h3 {
+  font-family: 'IBM Plex Serif', serif;
+  font-weight: 700;
+  color: var(--text-primary);
+  page-break-after: avoid;
+}
+h4, h5, h6 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+  page-break-after: avoid;
+}
+h1 { font-size: 2.4rem; margin: 0 0 0.5em; letter-spacing: -0.03em; display: none; }
+h2 {
+  font-size: 1.8rem;
+  margin: 2em 0 0.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 2px solid var(--teal);
+  color: var(--navy);
+  page-break-before: always;
+}
+h2:first-of-type { page-break-before: auto; }
+h3 { font-size: 1.35rem; margin: 1.5em 0 0.5em; color: var(--teal); }
+h4 { font-size: 1.15rem; margin: 1.2em 0 0.4em; }
+h5 { font-size: 1.05rem; margin: 1em 0 0.3em; }
+
+p { margin-bottom: 0.8em; color: var(--text-secondary); }
+strong { color: var(--text-primary); }
+em { font-style: italic; }
+a { color: var(--blue); text-decoration: none; }
+
+/* Code */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9em;
+  background: #EFF6F4;
+  border: 1px solid #D4E8E2;
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--teal);
+}
+pre {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 0.8em 0;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  page-break-inside: avoid;
+}
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 0.92em;
+  page-break-inside: avoid;
+}
+th {
+  background: var(--navy);
+  color: #FFFFFF;
+  font-weight: 600;
+  text-align: left;
+  padding: 9px 11px;
+  border: 1px solid var(--navy);
+}
+td {
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+tr:nth-child(even) td { background: var(--bg-alt); }
+tr:nth-child(odd) td { background: var(--bg); }
+
+/* Lists */
+ul, ol { margin: 0.5em 0 0.8em 1.5em; }
+li { margin-bottom: 0.3em; color: var(--text-secondary); }
+li strong { color: var(--text-primary); }
+
+/* Blockquotes */
+blockquote {
+  background: #EFF8F5;
+  border-left: 3px solid var(--teal);
+  padding: 12px 16px;
+  margin: 1em 0;
+  border-radius: 0 8px 8px 0;
+}
+blockquote p { color: var(--text-primary); margin-bottom: 0; }
+
+/* HR */
+hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 2em 0;
+}
+
+/* End page */
+.end-page {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  page-break-before: always;
+}
+.end-page p { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="cover-page">
+  <div class="cover-logo">S</div>
+  <div class="cover-line"></div>
+  <div class="cover-title">Secuura Platform White Paper</div>
+  <div class="cover-subtitle">White Paper</div>
+  <div class="cover-line"></div>
+  <div class="cover-meta">
+    <p><strong>Classification:</strong> Public</p>
+    <p><strong>Version:</strong> 1.0</p>
+    <p><strong>Date:</strong> 15 February 2026</p>
+    <p><strong>Author:</strong> Secuura Engineering</p>
+  </div>
+</div>
+
+<h1 id="secuura-white-paper">Secuura — White Paper</h1>
+<p><strong>Document Authenticity on the Cardano Blockchain</strong></p>
+<p><strong>Document Title:</strong> Secuura Platform White Paper<br />
+<strong>Version:</strong> 1.0<br />
+<strong>Date:</strong> 15 February 2026<br />
+<strong>Classification:</strong> Public<br />
+<strong>Prepared by:</strong> Secuura Engineering</p>
+<hr />
+<h2 id="version-history">Version History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Author</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>15 Feb 2026</td>
+<td>Secuura Engineering</td>
+<td>Initial white paper</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-executive-summary">Executive Summary</a></li>
+<li><a href="#2-the-problem">The Problem</a></li>
+<li><a href="#3-the-secuura-solution">The Secuura Solution</a></li>
+<li><a href="#4-core-concepts">Core Concepts</a></li>
+<li><a href="#5-platform-architecture">Platform Architecture</a></li>
+<li><a href="#6-the-secure-verification-service-svs">The Secure Verification Service (SVS)</a></li>
+<li><a href="#7-blockchain-integration">Blockchain Integration</a></li>
+<li><a href="#8-stakeholder-roles-and-interactions">Stakeholder Roles and Interactions</a></li>
+<li><a href="#9-use-cases">Use Cases</a></li>
+<li><a href="#10-privacy-and-compliance">Privacy and Compliance</a></li>
+<li><a href="#11-security-architecture">Security Architecture</a></li>
+<li><a href="#12-smart-contract-framework">Smart Contract Framework</a></li>
+<li><a href="#13-frontend-applications">Frontend Applications</a></li>
+<li><a href="#14-integrations-and-extensibility">Integrations and Extensibility</a></li>
+<li><a href="#15-chargeable-events-and-revenue-model">Chargeable Events and Revenue Model</a></li>
+<li><a href="#16-technology-stack">Technology Stack</a></li>
+<li><a href="#17-development-roadmap">Development Roadmap</a></li>
+<li><a href="#18-competitive-landscape">Competitive Landscape</a></li>
+<li><a href="#19-conclusion">Conclusion</a></li>
+<li><a href="#20-glossary">Glossary</a></li>
+</ol>
+<hr />
+<h2 id="1-executive-summary">1. Executive Summary</h2>
+<p>Secuura is a document authenticity platform built on the Cardano blockchain. It enables organisations to certify the genuineness of documents and allows third parties to independently verify that a document has not been tampered with since its original certification. Secuura addresses the pervasive problem of document fraud, which costs the global economy an estimated $600 billion annually, by providing an immutable, blockchain-anchored proof of document authenticity.</p>
+<p><strong>What Secuura does:</strong> Secuura provides cryptographic proof that a document is genuine and unaltered. When an authorised issuer certifies a document, Secuura creates a unique cryptographic hash (fingerprint) of that document and permanently records it on the Cardano blockchain. Any subsequent attempt to verify the document compares a fresh hash against the blockchain record — any modification, however minor, will be detected.</p>
+<p><strong>What Secuura is not:</strong> Secuura is not a document storage solution, a digital signature tool, or an encryption service. It focuses exclusively on authenticity — proving a document is what it claims to be, issued by whom it claims to be issued by, and unmodified since certification.</p>
+<p><strong>Key differentiators:</strong></p>
+<ul>
+<li>
+<p><strong>Hash-based, document-less architecture</strong> — Secuura never stores, transmits, or has access to original documents. Client-side hashing ensures documents never leave the user&rsquo;s device. This fundamentally eliminates the risk of document data breaches and simplifies compliance with data protection regulations.</p>
+</li>
+<li>
+<p><strong>Cardano blockchain immutability</strong> — Certification records are anchored to the Cardano blockchain, providing a tamper-proof, publicly verifiable record that no single party can alter or delete. Cardano&rsquo;s proof-of-stake consensus mechanism ensures energy efficiency and low transaction costs.</p>
+</li>
+<li>
+<p><strong>Creator/Owner separation model</strong> — The entity that issues a document (Creator) and the entity the document belongs to (Owner) are treated as distinct roles with different permissions. This reflects real-world document relationships — a university creates a degree, but the graduate owns and controls it.</p>
+</li>
+<li>
+<p><strong>Privacy-first compliance</strong> — Full GDPR compliance including consent management, data subject request processing, right-to-erasure execution, and data portability. The hybrid on-chain/off-chain architecture ensures personal data can be managed per regulatory requirements while cryptographic proofs remain immutable.</p>
+</li>
+<li>
+<p><strong>Multi-level identity verification</strong> — Five verification levels from basic email confirmation to government-issued identity checks, configurable per document type and per deployment jurisdiction.</p>
+</li>
+</ul>
+<p>Secuura targets organisations transitioning from legacy document management systems — universities issuing degrees, enterprises managing employment records, government agencies handling official documentation, and any sector where proving document authenticity to third parties is critical.</p>
+<hr />
+<h2 id="2-the-problem">2. The Problem</h2>
+<h3 id="21-the-scale-of-document-fraud">2.1 The Scale of Document Fraud</h3>
+<p>Document fraud is a global challenge affecting every industry that relies on paper and digital records for critical decisions. Fraudulent academic credentials, forged employment records, counterfeit certificates, and tampered legal documents undermine trust in institutions and cause significant financial and reputational harm.</p>
+<p><strong>The fundamental problem is simple:</strong> How does a third party know that a document they have received is genuinely what it claims to be?</p>
+<h3 id="22-current-solutions-are-inadequate">2.2 Current Solutions Are Inadequate</h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Manual verification</strong></td>
+<td>Time-consuming, expensive, and error-prone. Requires contacting the issuing institution directly.</td>
+</tr>
+<tr>
+<td><strong>Digital signatures</strong></td>
+<td>Prove who signed, but not whether the underlying document is authentic or unmodified after signing. Signatures can be forged.</td>
+</tr>
+<tr>
+<td><strong>Centralised verification databases</strong></td>
+<td>Single points of failure. Can be hacked, corrupted, or discontinued. Trust depends entirely on the database operator.</td>
+</tr>
+<tr>
+<td><strong>QR codes and holograms</strong></td>
+<td>Can be copied, scanned from legitimate documents, and applied to fraudulent ones. Physical security features degrade.</td>
+</tr>
+<tr>
+<td><strong>Email or phone confirmation</strong></td>
+<td>Requires the issuer to maintain verification capacity. Not scalable. Susceptible to social engineering.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-the-trust-gap">2.3 The Trust Gap</h3>
+<p>There is a fundamental asymmetry in document verification. The issuer of a document has high confidence in its authenticity at the time of issuance. But that confidence degrades through the document&rsquo;s lifecycle:</p>
+<ul>
+<li>Copies are made</li>
+<li>Documents change hands</li>
+<li>Organisations are restructured or closed</li>
+<li>Records are lost, corrupted, or altered</li>
+<li>Verification staff change</li>
+<li>Systems are decommissioned</li>
+</ul>
+<p>By the time a verifier (an employer, a bank, a regulator) needs to confirm authenticity, the chain of trust between the original issuance and the current moment may be broken.</p>
+<h3 id="24-the-blockchain-opportunity">2.4 The Blockchain Opportunity</h3>
+<p>Blockchain technology offers a unique solution to the trust gap. By recording a cryptographic fingerprint of a document at the time of certification, and doing so on an immutable, publicly accessible ledger, it creates a permanent, tamper-proof reference point. Any modification to the document — however small — produces a different fingerprint, immediately revealing tampering.</p>
+<hr />
+<h2 id="3-the-secuura-solution">3. The Secuura Solution</h2>
+<h3 id="31-principles">3.1 Principles</h3>
+<p>Secuura is built on five core principles:</p>
+<ol>
+<li>
+<p><strong>Originator-only certification</strong> — Only the entity that created or issued a document can certify its authenticity. This preserves the trust chain from origin.</p>
+</li>
+<li>
+<p><strong>Full provenance</strong> — Every significant action in a document&rsquo;s lifecycle is recorded, creating a complete chain of custody from creation to the present day.</p>
+</li>
+<li>
+<p><strong>Immutable records</strong> — Certification records on the blockchain cannot be altered, deleted, or backdated by any party, including Secuura.</p>
+</li>
+<li>
+<p><strong>Privacy by design</strong> — The platform is designed to operate without ever seeing, storing, or transmitting original documents. Only cryptographic hashes are processed.</p>
+</li>
+<li>
+<p><strong>Governance-driven</strong> — Changes to platform rules require governance approval, and meta-rules (rules about rules) are immutable, preventing unilateral policy changes.</p>
+</li>
+</ol>
+<h3 id="32-how-it-works">3.2 How It Works</h3>
+<pre><code>DOCUMENT CERTIFICATION FLOW
+
+1. ISSUER uploads document      → Hash computed client-side (BLAKE2b-256)
+   to their local browser         Document NEVER leaves the device
+
+2. CERTIFIER signs the hash     → Cryptographic proof of certification
+   with their Cardano wallet      Non-repudiable witness signature
+
+3. Hash is ANCHORED to          → Transaction recorded on Cardano
+   Cardano blockchain              Permanent, public, immutable record
+
+4. VERIFIER uploads document    → Fresh hash computed, compared to chain
+   for verification                Match = authentic, Mismatch = tampered
+</code></pre>
+<h3 id="33-the-hash-based-architecture">3.3 The Hash-Based Architecture</h3>
+<p>The most important architectural decision in Secuura is that the platform operates on hashes, not documents. When a document is certified, the following occurs:</p>
+<ol>
+<li>The document is provided to the client-side application (browser)</li>
+<li>A cryptographic hash is computed locally using BLAKE2b-256</li>
+<li>Only the hash is transmitted to the Secuura backend</li>
+<li>The hash is anchored to the Cardano blockchain</li>
+<li>The original document is discarded from memory</li>
+</ol>
+<p>This means:
+- <strong>No document data breaches</strong> — There is no document data to breach
+- <strong>No storage costs</strong> — No document storage infrastructure required
+- <strong>GDPR-friendly</strong> — No personal data in documents is processed or stored
+- <strong>Tamper-evident</strong> — Any modification to the document changes the hash
+- <strong>Universal</strong> — Works with any file format (PDF, images, Office documents, etc.)</p>
+<hr />
+<h2 id="4-core-concepts">4. Core Concepts</h2>
+<h3 id="41-creator-vs-owner-model">4.1 Creator vs Owner Model</h3>
+<p>Secuura distinguishes between the entity that creates a document and the entity that owns or controls it.</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Definition</th>
+<th>Rights</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Creator (Issuer)</strong></td>
+<td>Entity that creates and certifies the document</td>
+<td>Certify authenticity, modify, revoke</td>
+</tr>
+<tr>
+<td><strong>Owner (Rights Holder)</strong></td>
+<td>Individual or entity the document belongs to</td>
+<td>Control sharing, grant access, transfer ownership</td>
+</tr>
+</tbody>
+</table>
+<p>In most real-world scenarios, the Creator and Owner are different entities. A university (Creator) issues a degree to a graduate (Owner). An employer (Creator) issues a reference letter about an employee (Owner). A government agency (Creator) issues a licence to a professional (Owner).</p>
+<p>This separation ensures:
+- Only the Creator can certify authenticity (preserving the trust chain)
+- Only the Owner can control who sees and verifies the document (preserving privacy)
+- Rights can transfer without Creator approval (permissionless ownership transfer)</p>
+<h3 id="42-certification-events">4.2 Certification Events</h3>
+<p>Every significant action in a document&rsquo;s lifecycle is recorded as a certification event. These events form an immutable provenance chain:</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Description</th>
+<th>Blockchain Record</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Issue</strong></td>
+<td>Document first created and certified</td>
+<td>Hash + timestamp + certifier proof</td>
+</tr>
+<tr>
+<td><strong>Sign</strong></td>
+<td>Certifier signs the document hash</td>
+<td>Wallet signature + transaction</td>
+</tr>
+<tr>
+<td><strong>Anchor</strong></td>
+<td>Hash recorded on Cardano blockchain</td>
+<td>Transaction hash + block number</td>
+</tr>
+<tr>
+<td><strong>Verify</strong></td>
+<td>Third party verifies document</td>
+<td>Verification result + timestamp</td>
+</tr>
+<tr>
+<td><strong>Share</strong></td>
+<td>Owner shares certification</td>
+<td>Share record + recipient</td>
+</tr>
+<tr>
+<td><strong>Transfer</strong></td>
+<td>Ownership changes hands</td>
+<td>Transfer record + new owner</td>
+</tr>
+<tr>
+<td><strong>Revoke</strong></td>
+<td>Certification cancelled</td>
+<td>Revocation reason + timestamp</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-chargeable-events">4.3 Chargeable Events</h3>
+<p>Certain actions are designated as chargeable events, forming the basis of Secuura&rsquo;s revenue model. Pricing is configurable per deployment:</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Default Price (ADA)</th>
+<th>Default Price (USD)</th>
+<th>Typical Payer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Certification issued</td>
+<td>5.0</td>
+<td>2.50</td>
+<td>Issuer</td>
+</tr>
+<tr>
+<td>Certification signed</td>
+<td>2.0</td>
+<td>1.00</td>
+<td>Certifier</td>
+</tr>
+<tr>
+<td>Verification (pass)</td>
+<td>1.5</td>
+<td>0.75</td>
+<td>Verifier</td>
+</tr>
+<tr>
+<td>Verification (fail)</td>
+<td>0.5</td>
+<td>0.25</td>
+<td>Verifier</td>
+</tr>
+<tr>
+<td>Document shared</td>
+<td>0.5</td>
+<td>0.25</td>
+<td>Owner</td>
+</tr>
+<tr>
+<td>Rights transferred</td>
+<td>3.0</td>
+<td>1.50</td>
+<td>Transferor</td>
+</tr>
+<tr>
+<td>Certification revoked</td>
+<td>1.0</td>
+<td>0.50</td>
+<td>Certifier</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-platform-architecture">5. Platform Architecture</h2>
+<h3 id="51-microservices-architecture">5.1 Microservices Architecture</h3>
+<p>Secuura is built as a cloud-native microservices platform with 22 services (19 backend microservices + 3 frontend portals). All services are accessible exclusively through a unified Nginx gateway — only two ports are exposed externally: <strong>8881</strong> (Marketing Website) and <strong>8882</strong> (Nginx Gateway for all applications and APIs).</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th style="text-align: center;">Internal Port</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API Gateway</strong></td>
+<td style="text-align: center;">8080</td>
+<td>Central routing, rate limiting, security headers, request sanitisation</td>
+</tr>
+<tr>
+<td><strong>Originate</strong></td>
+<td style="text-align: center;">4000</td>
+<td>Document certification, hashing, GDPR compliance, chargeable events</td>
+</tr>
+<tr>
+<td><strong>PRISM</strong></td>
+<td style="text-align: center;">4001</td>
+<td>Decentralised Identity (DID) management via Atala PRISM</td>
+</tr>
+<tr>
+<td><strong>Wallet Connector</strong></td>
+<td style="text-align: center;">4002</td>
+<td>CIP-30 wallet integration, CIP-8 message signing</td>
+</tr>
+<tr>
+<td><strong>Auth</strong></td>
+<td style="text-align: center;">4003</td>
+<td>Authentication, JWT, MFA, SSO (Entra ID, Auth0)</td>
+</tr>
+<tr>
+<td><strong>Timestamping</strong></td>
+<td style="text-align: center;">4004</td>
+<td>RFC-3161 compliant timestamps</td>
+</tr>
+<tr>
+<td><strong>Anchoring</strong></td>
+<td style="text-align: center;">4005</td>
+<td>Cardano blockchain transaction submission</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td style="text-align: center;">4008</td>
+<td>OWASP compliance, security audit logging</td>
+</tr>
+<tr>
+<td><strong>Analytics</strong></td>
+<td style="text-align: center;">4010</td>
+<td>Platform analytics and usage metrics</td>
+</tr>
+<tr>
+<td><strong>KYC</strong></td>
+<td style="text-align: center;">4011</td>
+<td>Microsoft Entra Verified ID integration for identity verification</td>
+</tr>
+<tr>
+<td><strong>Midnight</strong></td>
+<td style="text-align: center;">4012</td>
+<td>Zero-knowledge proof selective disclosure via Cardano Midnight</td>
+</tr>
+<tr>
+<td><strong>M365 Integration</strong></td>
+<td style="text-align: center;">4013</td>
+<td>Microsoft 365 / SharePoint integration</td>
+</tr>
+<tr>
+<td><strong>VC Issuer</strong></td>
+<td style="text-align: center;">4014</td>
+<td>W3C Verifiable Credentials issuance</td>
+</tr>
+<tr>
+<td><strong>Staking</strong></td>
+<td style="text-align: center;">4015</td>
+<td>Token staking and reward distribution</td>
+</tr>
+<tr>
+<td><strong>Referral</strong></td>
+<td style="text-align: center;">4016</td>
+<td>Referral programme management</td>
+</tr>
+<tr>
+<td><strong>Governance</strong></td>
+<td style="text-align: center;">4017</td>
+<td>DAO governance, proposal management, token-weighted voting</td>
+</tr>
+<tr>
+<td><strong>NFT Certificate</strong></td>
+<td style="text-align: center;">4018</td>
+<td>NFT certificate minting on Cardano</td>
+</tr>
+<tr>
+<td><strong>Billing</strong></td>
+<td style="text-align: center;">4019</td>
+<td>Stripe payment integration and chargeable events</td>
+</tr>
+<tr>
+<td><strong>Transfer</strong></td>
+<td style="text-align: center;">4020</td>
+<td>Document ownership transfer and delegation workflows</td>
+</tr>
+<tr>
+<td><strong>Issuer Frontend</strong></td>
+<td style="text-align: center;">80</td>
+<td>Issuer Portal (served at <code>/</code> via gateway)</td>
+</tr>
+<tr>
+<td><strong>Verifier Frontend</strong></td>
+<td style="text-align: center;">80</td>
+<td>Verifier Portal (served at <code>/verify/</code> via gateway)</td>
+</tr>
+<tr>
+<td><strong>Admin Frontend</strong></td>
+<td style="text-align: center;">80</td>
+<td>Admin Dashboard (served at <code>/admin/</code> via gateway)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note:</strong> All internal ports listed above are accessible only within the Docker network. External access is routed exclusively through the Nginx gateway on port 8882.</p>
+</blockquote>
+<h3 id="52-hybrid-on-chainoff-chain-architecture">5.2 Hybrid On-Chain/Off-Chain Architecture</h3>
+<p>Secuura employs a hybrid storage model that balances blockchain immutability with privacy compliance:</p>
+<p><strong>On-Chain (Cardano Blockchain):</strong>
+- Document hash
+- Certification timestamp
+- Event hash
+- Issuer proof (wallet address)
+- Certificate ID</p>
+<p><strong>Off-Chain (Encrypted PostgreSQL Database):</strong>
+- User profiles
+- Full metadata
+- Access rules
+- Audit logs
+- Event details
+- Consent records</p>
+<p><strong>Why hybrid?</strong></p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GDPR Right to Erasure</td>
+<td>Personal data is off-chain and can be deleted</td>
+</tr>
+<tr>
+<td>Transaction costs</td>
+<td>Only hashes on-chain — minimal Cardano fees</td>
+</tr>
+<tr>
+<td>Query performance</td>
+<td>Fast reads from PostgreSQL; blockchain for verification</td>
+</tr>
+<tr>
+<td>Privacy</td>
+<td>Sensitive details encrypted in database</td>
+</tr>
+<tr>
+<td>Immutability</td>
+<td>Blockchain hashes prove integrity regardless of off-chain changes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-infrastructure">5.3 Infrastructure</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database</td>
+<td>PostgreSQL 15</td>
+<td>Primary data store with SCRAM-SHA-256 authentication</td>
+</tr>
+<tr>
+<td>Cache</td>
+<td>Redis 7</td>
+<td>Session storage, rate limiting, temporary state</td>
+</tr>
+<tr>
+<td>Connection Pooling</td>
+<td>PgBouncer</td>
+<td>Database connection management for production</td>
+</tr>
+<tr>
+<td>Containerisation</td>
+<td>Docker / Docker Compose</td>
+<td>Service orchestration and isolation</td>
+</tr>
+<tr>
+<td>Reverse Proxy</td>
+<td>Nginx</td>
+<td>Frontend gateway (port 8882)</td>
+</tr>
+<tr>
+<td>Blockchain</td>
+<td>Cardano (Yaci DevKit for development)</td>
+<td>Immutable certification records</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-the-secure-verification-service-svs">6. The Secure Verification Service (SVS)</h2>
+<h3 id="61-document-lifecycle">6.1 Document Lifecycle</h3>
+<p>The SVS defines a structured lifecycle for document certifications:</p>
+<pre><code>DOCUMENT LIFECYCLE PHASES
+
+Phase 1: CERTIFICATION
+  Draft → Hashed → Pending Sign → Signed → Anchoring → Certified
+
+Phase 2: VERIFICATION
+  Certified → Verified (or Verification Failed)
+
+Phase 3: RE-CERTIFICATION
+  Verified → Pending Sign → Signed → Anchoring → Certified
+  (Verifier becomes Certifier for next phase)
+
+Terminal States:
+  → Revoked (certification cancelled)
+  → Expired (certification past expiry)
+</code></pre>
+<h3 id="62-phase-transitions">6.2 Phase Transitions</h3>
+<p>Each transition follows strict rules enforced by the platform:</p>
+<table>
+<thead>
+<tr>
+<th>From State</th>
+<th>To State</th>
+<th>Required Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Draft</td>
+<td>Hashed</td>
+<td>Document hash computed</td>
+</tr>
+<tr>
+<td>Hashed</td>
+<td>Pending Sign</td>
+<td>Certification request submitted</td>
+</tr>
+<tr>
+<td>Pending Sign</td>
+<td>Signed</td>
+<td>Certifier signs with wallet</td>
+</tr>
+<tr>
+<td>Signed</td>
+<td>Anchoring</td>
+<td>Transaction submitted to blockchain</td>
+</tr>
+<tr>
+<td>Anchoring</td>
+<td>Certified</td>
+<td>Blockchain confirmation received</td>
+</tr>
+<tr>
+<td>Certified</td>
+<td>Verified</td>
+<td>Verifier confirms authenticity</td>
+</tr>
+<tr>
+<td>Certified</td>
+<td>Verification Failed</td>
+<td>Verifier&rsquo;s document doesn&rsquo;t match hash</td>
+</tr>
+<tr>
+<td>Certified</td>
+<td>Revoked</td>
+<td>Certifier revokes certification</td>
+</tr>
+<tr>
+<td>Any</td>
+<td>Expired</td>
+<td>Time-based expiration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-document-lineage-visualisation">6.3 Document Lineage Visualisation</h3>
+<p>Secuura provides an interactive graph-based visualisation of a document&rsquo;s complete history:</p>
+<ul>
+<li><strong>Nodes</strong> represent certification events (issuance, signing, anchoring, verification)</li>
+<li><strong>Edges</strong> show the progression through the document lifecycle</li>
+<li><strong>Colour coding</strong> distinguishes chargeable events, blockchain confirmations, and user actions</li>
+<li><strong>Expandable/collapsible nodes</strong> allow drill-down into event details</li>
+<li><strong>Date-based filtering</strong> enables historical analysis</li>
+<li><strong>Evidence panels</strong> display blockchain transaction links and verification data</li>
+</ul>
+<p>The visualisation is powered by React Flow with Dagre layout, providing an intuitive directed-graph representation of the complete provenance chain.</p>
+<hr />
+<h2 id="7-blockchain-integration">7. Blockchain Integration</h2>
+<h3 id="71-why-cardano">7.1 Why Cardano</h3>
+<p>Secuura chose Cardano as its blockchain for several strategic reasons:</p>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Cardano Advantage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Energy efficiency</strong></td>
+<td>Proof-of-Stake consensus uses fraction of energy vs Proof-of-Work</td>
+</tr>
+<tr>
+<td><strong>Low fees</strong></td>
+<td>Transaction fees typically under 0.20 ADA (~$0.10)</td>
+</tr>
+<tr>
+<td><strong>Native assets</strong></td>
+<td>NFT certificates without smart contract overhead</td>
+</tr>
+<tr>
+<td><strong>Formal verification</strong></td>
+<td>Haskell-based, mathematically verifiable</td>
+</tr>
+<tr>
+<td><strong>Metadata support</strong></td>
+<td>Native transaction metadata (Label 674) for document anchors</td>
+</tr>
+<tr>
+<td><strong>Governance</strong></td>
+<td>Built-in governance framework (Project Catalyst, CIP process)</td>
+</tr>
+<tr>
+<td><strong>Midnight sidechain</strong></td>
+<td>Zero-knowledge proof selective disclosure — operational at <code>/api/midnight/selective-disclosure/generate</code> and <code>/verify</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-anchoring-process">7.2 Anchoring Process</h3>
+<ol>
+<li><strong>Hash preparation</strong> — Document hash and metadata packaged as transaction metadata</li>
+<li><strong>Transaction construction</strong> — Cardano transaction with metadata label 674</li>
+<li><strong>Submission</strong> — Transaction submitted to Cardano network via node API</li>
+<li><strong>Confirmation</strong> — Transaction confirmed in a block (typically 20-60 seconds)</li>
+<li><strong>Recording</strong> — Transaction hash and block number stored in database</li>
+<li><strong>Verification</strong> — Any party can verify the anchor on any Cardano explorer</li>
+</ol>
+<h3 id="73-smart-contract-framework">7.3 Smart Contract Framework</h3>
+<p>Secuura&rsquo;s smart contracts are written in Aiken (Cardano&rsquo;s native smart contract language) and define:</p>
+<ul>
+<li><strong>Document types</strong> — Classification of certifiable documents</li>
+<li><strong>Role permissions</strong> — What each stakeholder role can do</li>
+<li><strong>Certification actions</strong> — Valid certification and verification operations</li>
+<li><strong>Immutable rules</strong> — Meta-rules that cannot be changed</li>
+<li><strong>Multi-signature governance</strong> — Multi-party approval for rule changes</li>
+</ul>
+<h3 id="74-network-support">7.4 Network Support</h3>
+<table>
+<thead>
+<tr>
+<th>Network</th>
+<th>Purpose</th>
+<th>Explorer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mainnet</strong></td>
+<td>Production certifications</td>
+<td>cardanoscan.io</td>
+</tr>
+<tr>
+<td><strong>Preprod</strong></td>
+<td>Pre-production testing</td>
+<td>preprod.cardanoscan.io</td>
+</tr>
+<tr>
+<td><strong>Preview</strong></td>
+<td>Development testing</td>
+<td>preview.cardanoscan.io</td>
+</tr>
+<tr>
+<td><strong>Devnet</strong></td>
+<td>Local development (Yaci DevKit)</td>
+<td>Local explorer</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-stakeholder-roles-and-interactions">8. Stakeholder Roles and Interactions</h2>
+<h3 id="81-role-definitions">8.1 Role Definitions</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Description</th>
+<th>Key Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Issuer</strong></td>
+<td>Organisation that initiates certification</td>
+<td>Upload documents, create certification requests, assign certifiers</td>
+</tr>
+<tr>
+<td><strong>Certifier</strong></td>
+<td>Authorised signatory who certifies authenticity</td>
+<td>Review requests, sign with wallet, revoke certifications</td>
+</tr>
+<tr>
+<td><strong>Subject</strong></td>
+<td>Entity the document is about</td>
+<td>Receive notifications, view certifications, request revocation</td>
+</tr>
+<tr>
+<td><strong>Rights Holder</strong></td>
+<td>Entity that owns/controls the certification</td>
+<td>Share certifications, transfer rights, grant access</td>
+</tr>
+<tr>
+<td><strong>Verifier</strong></td>
+<td>Third party checking authenticity</td>
+<td>Upload document for verification, view results, receive certificates</td>
+</tr>
+<tr>
+<td><strong>System Admin</strong></td>
+<td>Platform administrator</td>
+<td>Manage users, organisations, configuration, monitor system health</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-user-verification-levels">8.2 User Verification Levels</h3>
+<p>Secuura implements a tiered identity verification framework:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Method</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Basic</strong></td>
+<td>Email or SMS verification</td>
+<td>Low-risk document access</td>
+</tr>
+<tr>
+<td><strong>Standard</strong></td>
+<td>Multi-factor authentication (TOTP)</td>
+<td>Standard operations</td>
+</tr>
+<tr>
+<td><strong>Enhanced</strong></td>
+<td>Federated identity (Microsoft Entra ID, Auth0)</td>
+<td>Enterprise users</td>
+</tr>
+<tr>
+<td><strong>High</strong></td>
+<td>Third-party KYC (Onfido, Jumio)</td>
+<td>Financial documents</td>
+</tr>
+<tr>
+<td><strong>Government</strong></td>
+<td>100-point ID check, Gov.UK Verify</td>
+<td>Legal documents, property titles</td>
+</tr>
+</tbody>
+</table>
+<p>Verification requirements are configurable per document type, per organisation, and per deployment jurisdiction.</p>
+<h3 id="83-platform-user-roles">8.3 Platform User Roles</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Scope</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OWNER</strong></td>
+<td>Document-level</td>
+<td>Full control of owned documents</td>
+</tr>
+<tr>
+<td><strong>ISSUER_ADMIN</strong></td>
+<td>Organisation-level</td>
+<td>Prepare and submit certification requests</td>
+</tr>
+<tr>
+<td><strong>ISSUER_APPROVER</strong></td>
+<td>Organisation-level</td>
+<td>Approve and sign certifications</td>
+</tr>
+<tr>
+<td><strong>VERIFIER</strong></td>
+<td>Platform-level</td>
+<td>Verify certifications</td>
+</tr>
+<tr>
+<td><strong>ORG_ADMIN</strong></td>
+<td>Organisation-level</td>
+<td>Manage organisation settings and members</td>
+</tr>
+<tr>
+<td><strong>SYSTEM_ADMIN</strong></td>
+<td>Platform-level</td>
+<td>Full administrative access</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-use-cases">9. Use Cases</h2>
+<h3 id="91-education-academic-credentials">9.1 Education — Academic Credentials</h3>
+<p><strong>Scenario:</strong> A university certifies a graduate&rsquo;s degree. The graduate later applies for employment and the employer needs to verify the qualification.</p>
+<p><strong>Flow:</strong>
+1. University registrar (Issuer) uploads the degree certificate
+2. University dean (Certifier) signs the certification with their wallet
+3. Hash is anchored to Cardano blockchain
+4. Graduate (Rights Holder) receives certification and shares with employer
+5. Employer (Verifier) uploads the same document and receives instant verification</p>
+<p><strong>Value:</strong> Eliminates weeks of manual verification contact between employer and university. Provides cryptographic proof that the document is genuine and unaltered.</p>
+<h3 id="92-recruitment-employment-verification">9.2 Recruitment — Employment Verification</h3>
+<p><strong>Scenario:</strong> A company issues an employment reference for a departing employee. A new employer needs to verify the reference is genuine.</p>
+<p><strong>Flow:</strong>
+1. HR department (Issuer) creates reference document
+2. Hiring manager (Certifier) signs certification
+3. Employee (Rights Holder) shares certification link with new employer
+4. New employer (Verifier) verifies instantly via Secuura portal</p>
+<p><strong>Value:</strong> Prevents reference fraud. Provides instant verification without contacting previous employer.</p>
+<h3 id="93-professional-certifications">9.3 Professional Certifications</h3>
+<p><strong>Scenario:</strong> A professional body certifies an accountant&rsquo;s qualification. Clients and regulators need ongoing verification.</p>
+<p><strong>Flow:</strong>
+1. Professional body (Issuer) certifies qualification
+2. Certification linked to professional&rsquo;s account (Rights Holder)
+3. Clients and regulators (Verifiers) verify qualification status in real-time
+4. If qualification is revoked, blockchain record updates accordingly</p>
+<h3 id="94-property-and-land-titles">9.4 Property and Land Titles</h3>
+<p><strong>Scenario:</strong> A government agency certifies property ownership. When property is sold, the title needs to transfer securely.</p>
+<p><strong>Flow:</strong>
+1. Land registry (Issuer) certifies title
+2. Property owner (Rights Holder) holds certification rights
+3. On sale, rights transfer to buyer via permissionless transfer
+4. Buyer&rsquo;s bank (Verifier) verifies title authenticity</p>
+<h3 id="95-product-authenticity">9.5 Product Authenticity</h3>
+<p><strong>Scenario:</strong> A manufacturer certifies the authenticity of luxury goods. Buyers need to verify products are genuine.</p>
+<p><strong>Flow:</strong>
+1. Manufacturer (Issuer) creates product certificate
+2. QR code linked to certification record
+3. Buyer (Verifier) scans QR code to verify authenticity
+4. Full provenance chain visible (manufacturer → distributor → retailer → buyer)</p>
+<hr />
+<h2 id="10-privacy-and-compliance">10. Privacy and Compliance</h2>
+<h3 id="101-privacy-by-design">10.1 Privacy by Design</h3>
+<p>Secuura&rsquo;s architecture embodies privacy by design principles as mandated by GDPR Article 25:</p>
+<table>
+<thead>
+<tr>
+<th>Principle</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data minimisation</strong></td>
+<td>Only cryptographic hashes processed; documents never stored</td>
+</tr>
+<tr>
+<td><strong>Purpose limitation</strong></td>
+<td>Data collected only for specified certification/verification purposes</td>
+</tr>
+<tr>
+<td><strong>Storage limitation</strong></td>
+<td>Automated retention policies with configurable expiration</td>
+</tr>
+<tr>
+<td><strong>Accuracy</strong></td>
+<td>Blockchain immutability ensures certification records are accurate</td>
+</tr>
+<tr>
+<td><strong>Integrity and confidentiality</strong></td>
+<td>Encryption at rest and in transit; access controls</td>
+</tr>
+<tr>
+<td><strong>Accountability</strong></td>
+<td>Comprehensive audit logging; consent records; deletion logs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="102-gdpr-compliance">10.2 GDPR Compliance</h3>
+<p>Secuura implements comprehensive GDPR controls, all fully operational via dedicated API endpoints:</p>
+<p><strong>Consent Management:</strong>
+- Purpose-specific consent records with version tracking
+- Consent expiration support
+- Consent withdrawal with timestamp
+- Consent validity checking</p>
+<p><strong>Data Subject Rights:</strong>
+- Right of access — Data export in JSON format
+- Right to rectification — DSR system with audit trail
+- Right to erasure — Cascading deletion across 9 data categories
+- Right to portability — Downloadable data export
+- Right to restriction — Processing restriction support
+- Right to object — Objection request handling</p>
+<p><strong>GDPR API Endpoints (all operational):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/gdpr/consent</code></td>
+<td>POST</td>
+<td>Record user consent</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/consent/withdraw</code></td>
+<td>POST</td>
+<td>Withdraw consent</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/consent/check</code></td>
+<td>GET</td>
+<td>Check valid consent</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/consent/:userId</code></td>
+<td>GET</td>
+<td>List all user consents</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/dsr</code></td>
+<td>POST</td>
+<td>Create Data Subject Request</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/dsr/pending</code></td>
+<td>GET</td>
+<td>List pending DSRs (admin)</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/dsr/:dsrId</code></td>
+<td>PATCH</td>
+<td>Update DSR status</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/export/:userId</code></td>
+<td>GET</td>
+<td>Export user data (Article 20)</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/export/:userId/download</code></td>
+<td>GET</td>
+<td>Download user data as file</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/erasure/:userId</code></td>
+<td>POST</td>
+<td>Execute right-to-be-forgotten</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/retention</code></td>
+<td>GET</td>
+<td>List retention policies</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/retention/enforce</code></td>
+<td>POST</td>
+<td>Trigger retention enforcement</td>
+</tr>
+<tr>
+<td><code>/api/gdpr/deletion-log</code></td>
+<td>GET</td>
+<td>View deletion audit trail</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Data Retention:</strong>
+- Automated retention enforcement (daily scheduler)
+- Configurable per data type
+- Deletion methods: hard delete, soft delete, anonymise
+- Deletion audit log</p>
+<p><strong>Database Tables:</strong> <code>consent_records</code>, <code>data_subject_requests</code>, <code>data_deletion_log</code>, <code>data_retention_policies</code> — all with UUID primary keys, foreign key relationships, and audit timestamps.</p>
+<h3 id="103-blockchain-and-gdpr-compatibility">10.3 Blockchain and GDPR Compatibility</h3>
+<p>A key challenge for blockchain systems is GDPR&rsquo;s right to erasure. Secuura resolves this through its hybrid architecture:</p>
+<ul>
+<li><strong>On-chain data</strong> consists exclusively of cryptographic hashes — these are not personal data under GDPR as they cannot be reversed to reveal the original document or individual</li>
+<li><strong>Off-chain data</strong> (user profiles, metadata, access rules) is stored in PostgreSQL and can be fully deleted or anonymised on request</li>
+<li>When erasure is executed, the on-chain hash becomes an orphaned reference with no personal data linkage</li>
+</ul>
+<hr />
+<h2 id="11-security-architecture">11. Security Architecture</h2>
+<h3 id="111-authentication">11.1 Authentication</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Use Case</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>JWT tokens</strong></td>
+<td>API authentication</td>
+<td>Access + refresh token pair; rotation support</td>
+</tr>
+<tr>
+<td><strong>Multi-factor authentication</strong></td>
+<td>Enhanced security</td>
+<td>TOTP (Google Authenticator compatible); backup codes</td>
+</tr>
+<tr>
+<td><strong>Microsoft Entra ID</strong></td>
+<td>Enterprise SSO</td>
+<td>OAuth 2.0 flow with tenant management</td>
+</tr>
+<tr>
+<td><strong>Auth0</strong></td>
+<td>Social/enterprise SSO</td>
+<td>OpenID Connect integration</td>
+</tr>
+<tr>
+<td><strong>Cardano wallets</strong></td>
+<td>Blockchain operations</td>
+<td>CIP-30 connection; CIP-8 message signing</td>
+</tr>
+<tr>
+<td><strong>API keys</strong></td>
+<td>Programmatic access</td>
+<td>Scoped keys with rate limiting; hash-stored (not plaintext)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="112-application-security">11.2 Application Security</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Input sanitisation</strong></td>
+<td>XSS prevention, SQL injection detection, path traversal blocking, command injection prevention</td>
+</tr>
+<tr>
+<td><strong>Security headers</strong></td>
+<td>Helmet.js: CSP, HSTS (1 year), X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy</td>
+</tr>
+<tr>
+<td><strong>Rate limiting</strong></td>
+<td>Global: 100 req/min; Auth: 10 req/15 min; Verification: 200 req/min; Redis-backed with in-memory fallback</td>
+</tr>
+<tr>
+<td><strong>CORS</strong></td>
+<td>Whitelist-based origin control; credentials enabled</td>
+</tr>
+<tr>
+<td><strong>Brute-force protection</strong></td>
+<td>Exponential backoff (500ms–30s); Redis-backed; 5-minute lockout</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>Standardised error classes; production-safe responses (no stack traces)</td>
+</tr>
+<tr>
+<td><strong>Parameterised queries</strong></td>
+<td>Prisma ORM prevents SQL injection</td>
+</tr>
+</tbody>
+</table>
+<h3 id="113-infrastructure-security">11.3 Infrastructure Security</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Container isolation</strong></td>
+<td>Docker containers with network segmentation</td>
+</tr>
+<tr>
+<td><strong>Secret management</strong></td>
+<td>Environment variable-based; no hardcoded secrets</td>
+</tr>
+<tr>
+<td><strong>Database security</strong></td>
+<td>PostgreSQL with SCRAM-SHA-256; Redis with password authentication</td>
+</tr>
+<tr>
+<td><strong>Health monitoring</strong></td>
+<td>Service health endpoints; container restart policies</td>
+</tr>
+<tr>
+<td><strong>Graceful shutdown</strong></td>
+<td>Signal handling; connection draining</td>
+</tr>
+<tr>
+<td><strong>Logging</strong></td>
+<td>Winston structured logging; file transports in production; error tracking</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-smart-contract-framework">12. Smart Contract Framework</h2>
+<h3 id="121-aiken-smart-contracts">12.1 Aiken Smart Contracts</h3>
+<p>Secuura&rsquo;s on-chain logic is implemented in Aiken, Cardano&rsquo;s purpose-built smart contract language:</p>
+<p><strong>Document Contract</strong> — Core certification logic:
+- Document status transitions (Draft → Certified → Verified)
+- Certifier authorisation verification
+- Hash integrity checking</p>
+<p><strong>Provenance Contract</strong> — Chain of custody:
+- Event recording
+- Provenance chain validation
+- Temporal ordering enforcement</p>
+<p><strong>Multi-Sig Contract</strong> — Governance:
+- Multi-party approval for configuration changes
+- Threshold signatures
+- Governance proposal execution</p>
+<p><strong>Platform Governance Contract</strong> — Meta-rules:
+- Platform-level rules enforcement
+- Immutable rule protection
+- Deployment-specific rule configuration</p>
+<h3 id="122-immutable-rules">12.2 Immutable Rules</h3>
+<p>Certain rules are designated as immutable and cannot be changed even by governance:
+- Only the originator can certify authenticity
+- Every action creates a blockchain record
+- Hash algorithms cannot be downgraded
+- Audit trail cannot be disabled</p>
+<hr />
+<h2 id="13-frontend-applications">13. Frontend Applications</h2>
+<h3 id="131-issuer-portal">13.1 Issuer Portal</h3>
+<p>The primary interface for organisations certifying documents:
+- <strong>Dashboard</strong> — Overview of documents, statistics, recent activity
+- <strong>Document Management</strong> — Upload, certify, monitor, share, revoke
+- <strong>Document Lineage</strong> — Interactive graph visualisation of document history
+- <strong>Wallet Connection</strong> — CIP-30 wallet integration for signing
+- <strong>Analytics</strong> — Certification volume, verification rates, usage trends
+- <strong>Billing</strong> — Chargeable events, pricing, payment management</p>
+<h3 id="132-verifier-portal">13.2 Verifier Portal</h3>
+<p>Public-facing interface for document verification (accessible at <code>http://localhost:8882/verify/</code>):
+- <strong>File Upload</strong> — Drag-and-drop verification by document upload (POST <code>/api/verification/verify</code>)
+- <strong>Document ID</strong> — Verification by certification identifier (navigates to <code>/result/:documentId</code>)
+- <strong>QR Code</strong> — Camera-based QR code scanning for instant verification
+- <strong>Results</strong> — Displays verification checks (exists, hash valid, blockchain anchored, not revoked, signatures), issuer details, and blockchain proof (transaction hash, block height, confirmation date)</p>
+<h3 id="133-admin-dashboard">13.3 Admin Dashboard</h3>
+<p>Platform administration interface:
+- <strong>User Management</strong> — Create, disable, manage users and roles
+- <strong>Organisation Management</strong> — Organisation setup and configuration
+- <strong>Document Types</strong> — Configure certifiable document types
+- <strong>Workflows</strong> — Define certification workflows
+- <strong>System Health</strong> — Error monitoring, service health, GDPR DSR tracking
+- <strong>Audit Logs</strong> — Comprehensive activity logging
+- <strong>API Keys</strong> — Manage programmatic access
+- <strong>Pricing Configuration</strong> — Configure chargeable event pricing</p>
+<h3 id="134-status-page">13.4 Status Page</h3>
+<p>Public system status monitoring interface.</p>
+<hr />
+<h2 id="14-integrations-and-extensibility">14. Integrations and Extensibility</h2>
+<h3 id="141-current-integrations">14.1 Current Integrations</h3>
+<table>
+<thead>
+<tr>
+<th>Integration</th>
+<th>Purpose</th>
+<th>Protocol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Microsoft Entra ID</strong></td>
+<td>Enterprise SSO authentication</td>
+<td>OAuth 2.0</td>
+</tr>
+<tr>
+<td><strong>Microsoft 365 / SharePoint</strong></td>
+<td>Document source integration</td>
+<td>Microsoft Graph API</td>
+</tr>
+<tr>
+<td><strong>Auth0</strong></td>
+<td>Social and enterprise SSO</td>
+<td>OpenID Connect</td>
+</tr>
+<tr>
+<td><strong>Stripe</strong></td>
+<td>Payment processing</td>
+<td>Stripe API + Webhooks</td>
+</tr>
+<tr>
+<td><strong>Cardano wallets</strong></td>
+<td>Blockchain operations</td>
+<td>CIP-30 / CIP-8</td>
+</tr>
+<tr>
+<td><strong>Atala PRISM</strong></td>
+<td>Decentralised identity</td>
+<td>PRISM SDK</td>
+</tr>
+<tr>
+<td><strong>IPFS (Pinata)</strong></td>
+<td>NFT metadata storage</td>
+<td>IPFS API</td>
+</tr>
+<tr>
+<td><strong>Onfido / Jumio</strong></td>
+<td>KYC identity verification</td>
+<td>REST API</td>
+</tr>
+</tbody>
+</table>
+<h3 id="142-api-first-architecture">14.2 API-First Architecture</h3>
+<p>Secuura&rsquo;s entire functionality is accessible via RESTful APIs, enabling:
+- <strong>Third-party integrations</strong> — Any system can certify and verify documents
+- <strong>White-labelling</strong> — Custom frontends using Secuura&rsquo;s API
+- <strong>Webhook notifications</strong> — Real-time event notifications
+- <strong>SDK support</strong> — JavaScript/TypeScript SDK for rapid integration</p>
+<h3 id="143-future-integrations">14.3 Future Integrations</h3>
+<ul>
+<li><strong>Midnight sidechain</strong> — Zero-knowledge proofs for selective disclosure (operational — generate and verify endpoints available)</li>
+<li><strong>European Digital Identity Wallets</strong> — eIDAS 2.0 compatibility</li>
+<li><strong>Government identity services</strong> — Gov.UK Verify, Australian myGovID</li>
+<li><strong>Document management systems</strong> — Additional DMS integrations</li>
+<li><strong>Mobile applications</strong> — iOS and Android native apps</li>
+</ul>
+<hr />
+<h2 id="15-chargeable-events-and-revenue-model">15. Chargeable Events and Revenue Model</h2>
+<h3 id="151-event-based-pricing">15.1 Event-Based Pricing</h3>
+<p>Secuura&rsquo;s revenue model is based on chargeable events — specific actions within the certification and verification lifecycle that generate platform fees. Pricing is stored in a database and can be configured per deployment.</p>
+<h3 id="152-pricing-tiers">15.2 Pricing Tiers</h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Included Events</th>
+<th>Additional Cost</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Basic</strong></td>
+<td>100/month</td>
+<td>Per-event pricing</td>
+<td>Small organisations</td>
+</tr>
+<tr>
+<td><strong>Standard</strong></td>
+<td>500/month</td>
+<td>Discounted per-event</td>
+<td>Medium organisations</td>
+</tr>
+<tr>
+<td><strong>Premium</strong></td>
+<td>2,000/month</td>
+<td>Further discounted</td>
+<td>Large organisations</td>
+</tr>
+<tr>
+<td><strong>Enterprise</strong></td>
+<td>Unlimited</td>
+<td>Custom pricing</td>
+<td>Enterprise clients</td>
+</tr>
+</tbody>
+</table>
+<h3 id="153-revenue-streams">15.3 Revenue Streams</h3>
+<ol>
+<li><strong>Platform fees</strong> — Per-event charges for certifications and verifications</li>
+<li><strong>Subscription tiers</strong> — Monthly/annual subscription with included event volumes</li>
+<li><strong>Enterprise licensing</strong> — Custom pricing for large-scale deployments</li>
+<li><strong>White-label licensing</strong> — Fees for white-labelled deployments</li>
+<li><strong>API access</strong> — Programmatic access tiers</li>
+</ol>
+<hr />
+<h2 id="16-technology-stack">16. Technology Stack</h2>
+<h3 id="161-backend">16.1 Backend</h3>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Node.js / TypeScript</strong></td>
+<td>Service runtime and type safety</td>
+</tr>
+<tr>
+<td><strong>Express.js</strong></td>
+<td>HTTP framework</td>
+</tr>
+<tr>
+<td><strong>Prisma ORM</strong></td>
+<td>Database access and migrations</td>
+</tr>
+<tr>
+<td><strong>PostgreSQL 15</strong></td>
+<td>Primary data store</td>
+</tr>
+<tr>
+<td><strong>Redis 7</strong></td>
+<td>Caching, sessions, rate limiting</td>
+</tr>
+<tr>
+<td><strong>Winston</strong></td>
+<td>Structured logging</td>
+</tr>
+<tr>
+<td><strong>Docker / Docker Compose</strong></td>
+<td>Containerisation and orchestration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="162-frontend">16.2 Frontend</h3>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>React 18</strong></td>
+<td>UI framework</td>
+</tr>
+<tr>
+<td><strong>TypeScript</strong></td>
+<td>Type safety</td>
+</tr>
+<tr>
+<td><strong>Vite</strong></td>
+<td>Build tooling</td>
+</tr>
+<tr>
+<td><strong>Material UI (MUI)</strong></td>
+<td>Component library</td>
+</tr>
+<tr>
+<td><strong>React Flow (@xyflow/react)</strong></td>
+<td>Document lineage graph visualisation</td>
+</tr>
+<tr>
+<td><strong>Dagre</strong></td>
+<td>Directed graph layout</td>
+</tr>
+<tr>
+<td><strong>React Router</strong></td>
+<td>Client-side routing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="163-blockchain">16.3 Blockchain</h3>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cardano</strong></td>
+<td>Layer 1 blockchain</td>
+</tr>
+<tr>
+<td><strong>Aiken</strong></td>
+<td>Smart contract language</td>
+</tr>
+<tr>
+<td><strong>Yaci DevKit</strong></td>
+<td>Local development network</td>
+</tr>
+<tr>
+<td><strong>BLAKE2b-256 / SHA-256</strong></td>
+<td>Cryptographic hashing</td>
+</tr>
+<tr>
+<td><strong>CIP-30 / CIP-8</strong></td>
+<td>Wallet integration standards</td>
+</tr>
+</tbody>
+</table>
+<h3 id="164-security">16.4 Security</h3>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Helmet.js</strong></td>
+<td>Security headers</td>
+</tr>
+<tr>
+<td><strong>bcryptjs</strong></td>
+<td>Password hashing</td>
+</tr>
+<tr>
+<td><strong>jsonwebtoken</strong></td>
+<td>JWT authentication</td>
+</tr>
+<tr>
+<td><strong>express-rate-limit</strong></td>
+<td>Rate limiting</td>
+</tr>
+<tr>
+<td><strong>CORS</strong></td>
+<td>Cross-origin resource sharing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="17-development-roadmap">17. Development Roadmap</h2>
+<h3 id="phase-1-core-platform-current">Phase 1 — Core Platform (Current)</h3>
+<ul>
+<li>Document certification and verification</li>
+<li>Cardano blockchain anchoring</li>
+<li>JWT + MFA authentication</li>
+<li>Issuer, Verifier, and Admin frontends</li>
+<li>GDPR compliance (consent, DSR, erasure, portability)</li>
+<li>Error tracking and structured logging</li>
+<li>Chargeable events with configurable pricing</li>
+<li>Microsoft Entra ID integration</li>
+<li>CIP-30 wallet integration</li>
+<li>Document lineage visualisation</li>
+</ul>
+<h3 id="phase-2-extended-capabilities">Phase 2 — Extended Capabilities</h3>
+<ul>
+<li>Mobile applications (iOS, Android)</li>
+<li>Midnight sidechain integration (zero-knowledge proofs) — <strong>implemented and operational</strong></li>
+<li>Ownership transfer workflows — <strong>implemented</strong> (simple, sale, inheritance, corporate types)</li>
+<li>Advanced KYC integration (government identity services)</li>
+<li>White-labelling for enterprise clients</li>
+<li>Self-hosted deployment option</li>
+</ul>
+<h3 id="phase-3-governance-and-scale">Phase 3 — Governance and Scale</h3>
+<ul>
+<li>On-chain governance (DAO) — <strong>implemented</strong> (auto-registration, token-weighted voting, min 50-char proposal descriptions)</li>
+<li>Smart contract rules engine</li>
+<li>Multi-chain support consideration</li>
+<li>Advanced analytics and reporting</li>
+<li>Token staking and rewards</li>
+</ul>
+<hr />
+<h2 id="18-competitive-landscape">18. Competitive Landscape</h2>
+<table>
+<thead>
+<tr>
+<th>Solution Type</th>
+<th>Examples</th>
+<th>Secuura Differentiator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Digital signature platforms</strong></td>
+<td>DocuSign, Adobe Sign</td>
+<td>Secuura focuses on authenticity, not signing workflows</td>
+</tr>
+<tr>
+<td><strong>Blockchain notarisation</strong></td>
+<td>Stampery, OriginStamp</td>
+<td>Secuura provides full lifecycle management, not just timestamping</td>
+</tr>
+<tr>
+<td><strong>Document management</strong></td>
+<td>SharePoint, Box</td>
+<td>Secuura is complementary — verifies documents stored elsewhere</td>
+</tr>
+<tr>
+<td><strong>Credential platforms</strong></td>
+<td>Accredible, Credly</td>
+<td>Secuura is document-agnostic and supports any certification type</td>
+</tr>
+<tr>
+<td><strong>Identity solutions</strong></td>
+<td>uPort, Civic</td>
+<td>Secuura focuses on documents, not identity alone</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Secuura&rsquo;s unique position:</strong> A comprehensive document authenticity platform combining blockchain immutability, privacy-first architecture, regulatory compliance, and enterprise integration capabilities.</p>
+<hr />
+<h2 id="19-conclusion">19. Conclusion</h2>
+<p>Secuura addresses a fundamental challenge in the digital economy: proving that documents are genuine and unaltered. By combining the immutability of the Cardano blockchain with a privacy-first, hash-based architecture, Secuura provides a solution that is simultaneously tamper-proof and privacy-compliant.</p>
+<p>The platform&rsquo;s microservices architecture ensures scalability and maintainability. Its comprehensive compliance framework — spanning GDPR, ISO 27001, SOC 2, OWASP, and blockchain standards — provides the assurance required by regulated industries. And its flexible verification levels and configurable pricing make it adaptable to deployment in any jurisdiction and industry.</p>
+<p>As document fraud continues to evolve in sophistication, the need for a trustworthy, independently verifiable source of truth becomes ever more critical. Secuura provides that source of truth — anchored in mathematics, recorded on blockchain, and designed for the real world.</p>
+<hr />
+<h2 id="20-glossary">20. Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anchoring</strong></td>
+<td>Recording a document&rsquo;s cryptographic hash on the Cardano blockchain</td>
+</tr>
+<tr>
+<td><strong>BLAKE2b-256</strong></td>
+<td>Cryptographic hash function used as default in Secuura</td>
+</tr>
+<tr>
+<td><strong>Cardano</strong></td>
+<td>Third-generation proof-of-stake blockchain platform</td>
+</tr>
+<tr>
+<td><strong>Certification</strong></td>
+<td>The process of creating a verifiable record of document authenticity</td>
+</tr>
+<tr>
+<td><strong>Certification Event</strong></td>
+<td>A recorded action in a document&rsquo;s lifecycle (issue, sign, verify, etc.)</td>
+</tr>
+<tr>
+<td><strong>Chargeable Event</strong></td>
+<td>A certification event that incurs a platform fee</td>
+</tr>
+<tr>
+<td><strong>CIP-8</strong></td>
+<td>Cardano Improvement Proposal for message signing</td>
+</tr>
+<tr>
+<td><strong>CIP-30</strong></td>
+<td>Cardano Improvement Proposal for wallet dApp connection</td>
+</tr>
+<tr>
+<td><strong>Creator</strong></td>
+<td>Entity that creates and certifies a document (also called Issuer)</td>
+</tr>
+<tr>
+<td><strong>DID</strong></td>
+<td>Decentralised Identifier — a self-sovereign digital identity</td>
+</tr>
+<tr>
+<td><strong>DSR</strong></td>
+<td>Data Subject Request — a formal request under GDPR</td>
+</tr>
+<tr>
+<td><strong>Erasure</strong></td>
+<td>The right to have personal data deleted (GDPR Article 17)</td>
+</tr>
+<tr>
+<td><strong>Hash</strong></td>
+<td>A cryptographic fingerprint of a document&rsquo;s contents</td>
+</tr>
+<tr>
+<td><strong>Owner</strong></td>
+<td>Entity that owns and controls a certified document</td>
+</tr>
+<tr>
+<td><strong>Provenance</strong></td>
+<td>The complete history and chain of custody of a document</td>
+</tr>
+<tr>
+<td><strong>Rights Holder</strong></td>
+<td>Entity with ownership rights to a certification</td>
+</tr>
+<tr>
+<td><strong>SVS</strong></td>
+<td>Secure Verification Service — Secuura&rsquo;s core verification system</td>
+</tr>
+<tr>
+<td><strong>Verifiable Credential</strong></td>
+<td>A cryptographically secure, machine-verifiable digital credential</td>
+</tr>
+<tr>
+<td><strong>Verification</strong></td>
+<td>The process of confirming a document matches its blockchain-anchored hash</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Copyright 2026 Secuura. All rights reserved.</em></p>
+<hr />
+<p><strong>End of Document</strong></p>
+
+<div class="end-page">
+  <div class="cover-line" style="margin:0 auto 20px;"></div>
+  <p><strong>End of Document</strong></p>
+  <p>Secuura Platform White Paper</p>
+  <p>Version 1.0 &bull; 15 February 2026</p>
+  <p style="margin-top:20px;">&copy; 2026 Secuura. All rights reserved.</p>
+</div>
+
+</body>
+</html>

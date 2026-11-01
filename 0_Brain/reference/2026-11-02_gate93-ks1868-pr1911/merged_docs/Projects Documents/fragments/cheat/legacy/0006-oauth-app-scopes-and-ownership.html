@@ -1,0 +1,69 @@
+<div class="section">
+<h2>OAuth app scopes and ownership — KS-1210</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Any authenticated user could register an
+        OAuth app, or change someone else's, with any scope list including
+        <code>*</code> and <code>subjects:erase</code>. </td></tr><tr><td>Two gates now apply.
+        <strong>Gate 1:</strong> both schemas are closed to the
+        <strong>nine</strong> published <code>AVAILABLE_SCOPES</code> —
+        anything else is <strong>400 for everyone</strong> — and
+        <code>admin:read</code> / <code>admin:write</code> additionally need the
+        <strong>four</strong>-role platform list, else <strong>403</strong>.
+        <strong>Gate 2:</strong> the four by-id routes answer
+        <strong>404</strong> unless you created the app or hold one of the
+        <strong>six</strong> admin roles. </td></tr><tr><td>404, not 403, so the status code does
+        not disclose someone else's app.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth
+npx vitest run src/__tests__/ks1210-oauth-app-scopes-and-ownership.test.ts   # 24 cells
+npx vitest run                                                              # 864 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr>
+<th>Figure</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>red-first, base → head</td>
+<td>17 failed | 7 passed (24) → 24 passed (24)</td>
+</tr>
+<tr>
+<td>auth suite at head</td>
+<td>79 files / 864 tests, 864 passed, 0 failed</td>
+</tr>
+<tr>
+<td>new reds</td>
+<td>0 (the two ks949 5000 ms timeouts seen earlier did not recur)</td>
+</tr>
+<tr>
+<td>tsc</td>
+<td>
+            rc 0, 0 errors; planted-error control rc 2, source restored
+            byte-identical
+          </td>
+</tr>
+<tr>
+<td>sibling files corrected</td>
+<td>
+            ks451 (analytics:read was never published), ks431 (AVAILABLE_SCOPES
+            mocked [], getAppById bare)
+          </td>
+</tr>
+<tr>
+<td>stated timings naming this suite</td>
+<td>
+            0 of 7 services/auth mentions carry a duration (must-hit control: 11
+            Akto durations)
+          </td>
+</tr>
+</table>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Not covered.</strong></td><td> No live sweep (§5f), so KS-1210 does
+        not move to Done. <code>certifications:write</code> and
+        <code>webhooks:manage</code> are NOT privileged — a product
+        choice. </td></tr><tr><td>The gateway edge still has no role gate (residue). </td></tr><tr><td>Existing apps
+        carrying a now-refused scope are not touched — no migration, and
+        no audit of live registrations. </td></tr><tr><td>The two role lists are COPIES of
+        non-exported constants in <code>routes/users.ts</code>, held honest by a
+        drift cell rather than by the type system.
+      </td></tr></table></div>
+</div>

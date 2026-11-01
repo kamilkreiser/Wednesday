@@ -1,0 +1,21 @@
+<h2>The Google, Facebook, LinkedIn and Microsoft sign-in adapters refuse a token answer with no access_token &mdash; KS-1858</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The four adapters took <code>access_token</code> from the token answer unchecked; a 200 answer without one reached the profile call as <code>Bearer undefined</code>. Each now refuses a missing, non-string or empty value with <code>&lt;Provider&gt; token exchange failed (no access token)</code> before any profile call, as the GitHub adapter has since KS-1792. 4 new files, 20 cells; the whole auth suite is 117 files / 1385 cells, all pass.
+    </td></tr><tr><td>Four held Spark passes applied strictly; no hand edit. Open for the gate: unlike <code>github.ts</code>, these guards do not also refuse a 200 answer carrying an <code>error</code> field. Facebook's token is in the profile URL query (pre-existing, unchanged).
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> No real provider was called (fetch is a stub). The four platform suites, a running stack, an LTS Node, <code>npm ci</code> on the merged lockfile and any deploy were not run. Two <code>ks949</code> seed-site cells time out at 5 s on develop itself and a cold-start hook timeout skips a whole file in some runs; both are develop's own and move between runs.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npm test -- ks1858                    # 4 files / 20 cells
+cd Blockchain/Dev/services/auth &amp;&amp; npm test -- --maxWorkers=2             # whole suite: 117 files / 1385 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>20</strong> in 4 files; red first: 12 of 20 failed without the change (3 per adapter), 0 of 20 with it</td></tr>
+<tr><td>auth suite (scratch merge with develop <code>d786daa4fc9b</code>)</td><td>untouched develop 1365 cells: 1357 pass, 2 fail, 6 skipped (another run 1307 / 2 / 56); with the change <strong>1385 cells, 1385 pass</strong>, 0 failed, 0 skipped</td></tr>
+<tr><td>ks949 and auth.integration alone, raised timeouts</td><td>ks949 31 of 31 on develop and with the change; auth.integration 56 of 56 on develop</td></tr>
+<tr><td>tsc and eslint</td><td>service tsc 0 errors; test ratchet 42 errors, 42 in the baseline, 0 new; eslint on 8 files 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-10-31 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

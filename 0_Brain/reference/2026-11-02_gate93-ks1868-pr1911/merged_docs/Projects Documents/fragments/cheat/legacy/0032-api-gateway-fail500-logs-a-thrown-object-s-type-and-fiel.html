@@ -1,0 +1,24 @@
+<h2>api-gateway fail500 logs a thrown object's type and field names, so a non-Error throw is no longer [object Object] &mdash; KS-1346</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>
+        Three api-gateway routers share one <code>fail500()</code> helper
+        (<code>routes/notifications.ts</code>, <code>routes/batch.ts</code>,
+        <code>routes/audit-export.ts</code>). Its log line was <code>String(err)</code>, so a thrown
+        non-Error object became <code>"[object Object]"</code> and its content was lost. It now logs
+        the thrown value's <strong>type and field names</strong>. </td></tr><tr><td><strong>Read the
+        LOG, not the response.</strong> The 500 body is the constant <code>INTERNAL_ERROR</code> body
+        and always was, so the response is not evidence either way. Throw a non-Error from one of
+        those routes and read what <code>logger.error</code> wrote. </td></tr><tr><td><strong>Still
+        true after the fix, deliberately.</strong> A thrown <code>Error</code> logs its
+        <code>.message</code>; thrown <strong>text</strong> is logged <strong>verbatim</strong>. If
+        you are hunting secrets in logs, those are the two shapes to look at — they are tracked on
+        this ticket, not closed by it.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>How to run it.</strong></td><td>
+        <code>cd Blockchain/Dev/services/api-gateway</code> then
+        <code>npx vitest run src/__tests__/ks1346-apigw-fail500-logs-type-and-field-names.test.ts</code>
+        — 15 cells (G1 plain object, G2 class instance, G3 number, times three routers). They read
+        9 failed / 6 passed of 15 against the unfixed product and 15 of 15 with it.
+        </td></tr><tr><td><strong>What was not run.</strong> The four platform suites need a booted
+        local stack; none of their numbers appears above. A live run is owed before the ticket moves,
+        because this is runtime logging behaviour and offline green does not settle it.
+      </td></tr></table></div>

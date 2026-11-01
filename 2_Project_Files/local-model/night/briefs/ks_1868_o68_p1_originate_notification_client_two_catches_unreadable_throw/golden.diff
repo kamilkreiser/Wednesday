@@ -1,0 +1,180 @@
+diff --git a/Blockchain/Dev/services/originate/src/utils/notificationClient.ts b/Blockchain/Dev/services/originate/src/utils/notificationClient.ts
+--- a/Blockchain/Dev/services/originate/src/utils/notificationClient.ts
++++ b/Blockchain/Dev/services/originate/src/utils/notificationClient.ts
+@@ -51,9 +51,15 @@
+       logger.info('Notification sent via service', { template: payload.template, to: payload.to });
+     }
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.warn('Notification service unreachable, falling back to SMTP', {
+       template: payload.template,
+-      error: String(err),
++      error: reason,
+     });
+     await sendSmtpFallback(payload);
+   }
+@@ -105,9 +111,15 @@
+     }
+     logger.info('Notification sent via SMTP fallback', { template, to });
+   } catch (err) {
++    let reason: string;
++    try {
++      reason = String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
+     logger.warn('SMTP fallback also failed (non-blocking)', {
+       template: payload.template,
+-      error: String(err),
++      error: reason,
+     });
+   }
+ }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-notification-client-catches-p1-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-notification-client-catches-p1-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-notification-client-catches-p1-unreadable-throw.test.ts
+@@ -0,0 +1,138 @@
++// KS-1868 (originate utils/notificationClient.ts): two catch blocks log the thrown value as `error: String(err)`. String() on a revoked Proxy throws a TypeError, and on an Error whose `message` getter
++// throws it throws too, so the read threw INSIDE the catch. (A) In sendNotification the catch is the "notification service unreachable" path: the throw happened BEFORE the SMTP fallback line, so the
++// notification was DROPPED (no email) and the returned promise rejected although the file promises "failures are logged but never thrown". (B) In sendSmtpFallback the catch is the "SMTP fallback also
++// failed (non-blocking)" path: the throw made the fallback reject. Each catch now reads the same String(err) into a local inside its own try and logs the constant `unreadable thrown value` when it cannot
++// be read; an ordinary Error and a string log exactly what they logged before. The service stand-ins are plain functions; the outcome is read through `.then(() => 'resolved', () => 'REJECTED')` so a
++// rejection carrying a revoked Proxy is a red assertion and never a formatted-matcher crash.
++const mockLoggerWarn = jest.fn();
++const mockLoggerInfo = jest.fn();
++const mockFetch = jest.fn();
++const mockIsEmailConfigured = jest.fn();
++const mockSendCertification = jest.fn();
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: mockLoggerInfo, warn: mockLoggerWarn, error: jest.fn(), debug: jest.fn() },
++}));
++
++jest.mock('../services/email', () => ({
++  sendEmail: jest.fn(),
++  sendCertificationNotification: mockSendCertification,
++  sendRevocationNotification: jest.fn(),
++  sendShareNotification: jest.fn(),
++  isEmailConfigured: mockIsEmailConfigured,
++}));
++
++import { notifyDocumentCertified } from '../utils/notificationClient';
++
++const PARAMS = {
++  toEmail: 'holder@example.test',
++  documentTitle: 'ks1868 title',
++  certifierName: 'ks1868 certifier',
++  certificationId: 'cert-ks1868',
++  certifiedAt: '2026-11-02T00:00:00Z',
++};
++
++beforeEach(() => {
++  jest.clearAllMocks();
++  (globalThis as any).fetch = mockFetch;
++  mockIsEmailConfigured.mockReturnValue(true);
++  mockSendCertification.mockResolvedValue(undefined);
++});
++
++async function outcome(): Promise<'resolved' | 'REJECTED'> {
++  return notifyDocumentCertified(PARAMS).then(
++    () => 'resolved' as const,
++    () => 'REJECTED' as const,
++  );
++}
++
++// Site A: the notification service call itself rejects with the thrown value.
++async function serviceDownWith(thrown: unknown): Promise<'resolved' | 'REJECTED'> {
++  mockFetch.mockRejectedValueOnce(thrown);
++  return outcome();
++}
++
++// Site B: the service is down with an ordinary Error, so the SMTP fallback runs, and the SMTP send rejects with the thrown value.
++async function smtpDownWith(thrown: unknown): Promise<'resolved' | 'REJECTED'> {
++  mockFetch.mockRejectedValueOnce(new Error('ks1868 service down'));
++  mockSendCertification.mockRejectedValueOnce(thrown);
++  return outcome();
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++function throwingMessageError(): Error {
++  const e = new Error('ks1868 hidden');
++  Object.defineProperty(e, 'message', {
++    get() {
++      throw new Error('ks1868 message getter');
++    },
++  });
++  return e;
++}
++
++const UNREACHABLE = 'Notification service unreachable, falling back to SMTP';
++const SMTP_FAILED = 'SMTP fallback also failed (non-blocking)';
++const TEMPLATE = { template: 'document_certified' };
++
++describe('KS-1868 notificationClient reads the thrown value safely', () => {
++  it('RED ks1868 R1 service call: a revoked Proxy is logged as a constant reason, the SMTP fallback still runs and the call resolves', async () => {
++    expect(await serviceDownWith(revokedProxy())).toBe('resolved');
++    expect(mockLoggerWarn.mock.calls).toEqual([[UNREACHABLE, { ...TEMPLATE, error: 'unreadable thrown value' }]]);
++    expect(mockSendCertification).toHaveBeenCalledTimes(1);
++  });
++
++  it('RED ks1868 R2 service call: an Error whose message getter throws is logged as a constant reason, the SMTP fallback still runs and the call resolves', async () => {
++    expect(await serviceDownWith(throwingMessageError())).toBe('resolved');
++    expect(mockLoggerWarn.mock.calls).toEqual([[UNREACHABLE, { ...TEMPLATE, error: 'unreadable thrown value' }]]);
++    expect(mockSendCertification).toHaveBeenCalledTimes(1);
++  });
++
++  it('control ks1868 C1 service call: an ordinary Error is logged as String(err), the SMTP fallback runs and the call resolves', async () => {
++    expect(await serviceDownWith(new Error('ks1868 ordinary'))).toBe('resolved');
++    expect(mockLoggerWarn.mock.calls).toEqual([[UNREACHABLE, { ...TEMPLATE, error: 'Error: ks1868 ordinary' }]]);
++    expect(mockSendCertification).toHaveBeenCalledTimes(1);
++  });
++
++  it('control ks1868 C2 service call: a thrown string is logged as itself, as before', async () => {
++    expect(await serviceDownWith('ks1868 plain string')).toBe('resolved');
++    expect(mockLoggerWarn.mock.calls).toEqual([[UNREACHABLE, { ...TEMPLATE, error: 'ks1868 plain string' }]]);
++    expect(mockSendCertification).toHaveBeenCalledTimes(1);
++  });
++
++  it('RED ks1868 R3 SMTP fallback: a revoked Proxy thrown by the send is logged as a constant reason and the call resolves', async () => {
++    expect(await smtpDownWith(revokedProxy())).toBe('resolved');
++    expect(mockLoggerWarn.mock.calls).toEqual([
++      [UNREACHABLE, { ...TEMPLATE, error: 'Error: ks1868 service down' }],
++      [SMTP_FAILED, { ...TEMPLATE, error: 'unreadable thrown value' }],
++    ]);
++  });
++
++  it('RED ks1868 R4 SMTP fallback: an Error whose message getter throws is logged as a constant reason and the call resolves', async () => {
++    expect(await smtpDownWith(throwingMessageError())).toBe('resolved');
++    expect(mockLoggerWarn.mock.calls).toEqual([
++      [UNREACHABLE, { ...TEMPLATE, error: 'Error: ks1868 service down' }],
++      [SMTP_FAILED, { ...TEMPLATE, error: 'unreadable thrown value' }],
++    ]);
++  });
++
++  it('control ks1868 C3 SMTP fallback: an ordinary Error is logged as String(err) and the call resolves', async () => {
++    expect(await smtpDownWith(new Error('ks1868 smtp ordinary'))).toBe('resolved');
++    expect(mockLoggerWarn.mock.calls).toEqual([
++      [UNREACHABLE, { ...TEMPLATE, error: 'Error: ks1868 service down' }],
++      [SMTP_FAILED, { ...TEMPLATE, error: 'Error: ks1868 smtp ordinary' }],
++    ]);
++  });
++
++  it('control ks1868 C4 SMTP fallback: a thrown string is logged as itself, as before', async () => {
++    expect(await smtpDownWith('ks1868 smtp string')).toBe('resolved');
++    expect(mockLoggerWarn.mock.calls).toEqual([
++      [UNREACHABLE, { ...TEMPLATE, error: 'Error: ks1868 service down' }],
++      [SMTP_FAILED, { ...TEMPLATE, error: 'ks1868 smtp string' }],
++    ]);
++  });
++});

@@ -1,0 +1,22 @@
+<h2>stack_guard prints one line per project, even when its containers disagree about the owner — KS-1355</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>
+        <code>stack_guard.sh</code> grouped foreign stacks by <code>(project, owner)</code>, so a
+        project whose containers carried different owner labels was listed <strong>once per
+        owner</strong>. It now prints <strong>one line per project</strong>. </td></tr><tr><td>Where some
+        containers have a real owner and others are <code>owner=unknown</code>, the line names the
+        <strong>real</strong> owner and appends <code>(+N container(s) with owner unknown)</code>.
+        That wording is this change's choice, not the ticket's. </td></tr><tr><td><strong>Behaviour change:</strong>
+        a project with <strong>two different real owners</strong> now prints ONE line — the first
+        tuple in <code>docker ps</code> order — so the second real owner is no longer shown.
+        <strong>NARROWING: spot 1 only; KS-1355 does NOT close.</strong>
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td>
+        <strong>(1) The exec bit.</strong> This repo sets <code>core.filemode=false</code>, so
+        <code>git apply</code> on a 100755 script leaves it <strong>644 on disk</strong> while
+        recording no mode change. The tree keeps 100755; the working copy does not. Read the mode
+        back from the index for the named paths — never <code>checkout-index -a -f</code>.
+        </td></tr><tr><td> <strong>(2) Run it with <code>/bin/bash</code></strong> (3.2.57 on macOS), from
+        <code>Blockchain/Dev</code>: <code>bash scripts/__tests__/stack_guard.test.sh</code>. Expect
+        <strong>27 passed, 0 failed</strong>. The two-owner case is fixture-proved only — <strong>a
+        live Docker host run is still owed</strong>.
+      </td></tr></table></div>

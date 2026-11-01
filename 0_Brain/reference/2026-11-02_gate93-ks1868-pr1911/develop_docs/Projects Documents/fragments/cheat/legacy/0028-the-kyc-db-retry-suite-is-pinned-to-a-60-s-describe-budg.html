@@ -1,0 +1,21 @@
+<h2>The kyc db-retry suite is pinned to a 60 s describe budget — KS-1328</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>
+        <code>services/kyc/src/__tests__/db.retry.test.ts</code> carries
+        <code>{ timeout: 60_000 }</code> on its describe instead of vitest's 5 s default. Under fleet
+        load its first cell timed out at <strong>11,498 ms</strong> while passing in 675 ms alone, so
+        the overrun is scheduling, not work. </td></tr><tr><td>The budget is on
+        <strong>this describe only</strong> — every other kyc suite keeps the 5 s default. A new cell
+        asserts all 6 cells in the file carry 60 s, so the budget cannot be removed silently.
+        </td></tr><tr><td>Test-only: <strong>no product code changes</strong>. It <strong>pins the
+        budget, not the absence of future timeouts</strong>. The ticket does <strong>not</strong>
+        move to Done.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td>
+        <strong>(1) Use kyc's own npm script.</strong> <code>npm test</code> in
+        <code>Blockchain/Dev/services/kyc</code> resolves to <code>vitest run</code> with the
+        package's own config. </td></tr><tr><td> <strong>(2) Do not pass
+        <code>--reporter=basic</code>.</strong> It does not exist in <strong>vitest 4.1.11</strong>:
+        vitest exits with a <em>Startup Error</em> and <strong>rc 1 having run zero tests</strong>.
+        An rc of 1 with no <code>Tests</code> line is a load failure, not a red — check for a
+        <code>Tests</code> summary line before calling any run red.
+      </td></tr></table></div>

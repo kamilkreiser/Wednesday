@@ -1,0 +1,16 @@
+<h2>The format gate gives each package&rsquo;s format:check its own empty stdin &mdash; KS-998</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>check-package-format.sh</code> reads its package list in a <code>while read</code> loop, and npm hands that stdin to each <code>format:check</code>. </td></tr><tr><td>A <code>format:check</code> that read stdin drained the list, so the package after it was not checked, and a red one there let the gate pass (cell drain-then-red: exit 0 at the base). </td></tr><tr><td>The call now ends <code>&lt; /dev/null</code>. This is the ticket&rsquo;s robustness note: items 1&ndash;3 stay open and the ticket does not move to Done.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td> The cells use fixture packages whose <code>format:check</code> reads stdin on purpose; they say nothing about whether a real package&rsquo;s does. </td></tr><tr><td>Expect the shell-suite denominator to read <strong>74</strong> at this head, not 73.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash systemTest/__tests__/ks998_format_gate_stdin_isolated.test.sh   # 9 cells, rc 0
+bash Blockchain/Dev/scripts/run-shell-suites.sh --list               # 74 suites</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>rc 1, <strong>6 passed / 3 failed</strong> &rarr; <strong>9 passed, 0 failed</strong>, rc 0; all six CONTROL cells pass in the red arm</td></tr>
+<tr><td>named siblings</td><td><code>package_format_gate</code> 33/0, <code>ks998_format_gate_push_label_is_literal</code> 8/0, at base and head</td></tr>
+<tr><td>shell-suite discovery</td><td><strong>73 &rarr; 74</strong></td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

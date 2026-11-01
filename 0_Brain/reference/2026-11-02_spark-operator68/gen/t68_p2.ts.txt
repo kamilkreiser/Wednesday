@@ -1,0 +1,105 @@
+// KS-1868 (originate routes/metering.ts, GET /api/metering/usage): the catch of the usage route logged the thrown value as `error instanceof Error ? error.message : String(error)` and then answered the
+// constant 500 `Failed to read usage`. When the usage query rejects with a value that cannot be read (a revoked Proxy makes `instanceof` throw; an Error whose `message` getter throws), the read threw INSIDE
+// the catch: the handler's promise rejected, Express 4 does not catch that, and the request got NO answer. The catch now reads the same expression into a local inside its own try and logs the constant
+// reason `unreadable thrown value`; the answer is the same constant 500 an ordinary Error already gets. The route is read-only (it only reads recorded usage); nothing is written. The service call is made to
+// reject on a real loopback listener; a request that gets no answer within the window is reported as NO ANSWER so a hang is a red assertion and not a stuck run.
+const mockGetUsageSummary = jest.fn();
+const mockLoggerError = jest.fn();
+
+jest.mock('../services/chargeEvents', () => ({
+  getUsageSummary: mockGetUsageSummary,
+}));
+
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    req.user = { userId: 'user-ks1868' };
+    next();
+  },
+}));
+
+jest.mock('../utils/gatewayProvenance', () => ({
+  isGatewayVouched: () => false,
+}));
+
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { meteringRouter } from '../routes/metering';
+
+const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to read usage' } };
+
+const app = express();
+app.use('/api/metering', meteringRouter);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+
+beforeAll(async () => {
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => server?.close());
+beforeEach(() => jest.clearAllMocks());
+
+async function getUsage(): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
+  try {
+    const res = await fetch(baseUrl + '/api/metering/usage', { signal: AbortSignal.timeout(1500) });
+    return { status: res.status, body: await res.json() };
+  } catch {
+    return { status: 'NO ANSWER', body: null };
+  }
+}
+
+async function usageWithThrow(thrown: unknown): Promise<{ status: number | 'NO ANSWER'; body: unknown }> {
+  mockGetUsageSummary.mockRejectedValueOnce(thrown);
+  return getUsage();
+}
+
+function revokedProxy(): object {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function throwingMessageError(): Error {
+  const e = new Error('ks1868 hidden');
+  Object.defineProperty(e, 'message', {
+    get() {
+      throw new Error('ks1868 message getter');
+    },
+  });
+  return e;
+}
+
+describe('KS-1868 GET /api/metering/usage reads the thrown value safely', () => {
+  it('RED ks1868 R1 usage: a revoked Proxy thrown by the query is logged as a constant reason and the constant 500 is answered', async () => {
+    expect(await usageWithThrow(revokedProxy())).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls).toEqual([['Failed to read metering usage', { error: 'unreadable thrown value' }]]);
+  });
+
+  it('RED ks1868 R2 usage: an Error whose message getter throws is logged as a constant reason and the constant 500 is answered', async () => {
+    expect(await usageWithThrow(throwingMessageError())).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls).toEqual([['Failed to read metering usage', { error: 'unreadable thrown value' }]]);
+  });
+
+  it('control ks1868 C1 usage: an ordinary Error logs its own message and the constant 500 is answered', async () => {
+    expect(await usageWithThrow(new Error('ks1868 ordinary'))).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls).toEqual([['Failed to read metering usage', { error: 'ks1868 ordinary' }]]);
+  });
+
+  it('control ks1868 C2 usage: a thrown string is logged as itself, as before', async () => {
+    expect(await usageWithThrow('ks1868 plain string')).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls).toEqual([['Failed to read metering usage', { error: 'ks1868 plain string' }]]);
+  });
+
+  it('control ks1868 C3 usage: a successful read answers 200 with the summary and logs no error', async () => {
+    const summary = { tenantId: 't', from: null, to: null, byEventType: [], totals: { count: 0, adaTotal: 0, usdTotal: 0 } };
+    mockGetUsageSummary.mockResolvedValueOnce(summary);
+    expect(await getUsage()).toEqual({ status: 200, body: { success: true, data: summary } });
+    expect(mockLoggerError).not.toHaveBeenCalled();
+  });
+});

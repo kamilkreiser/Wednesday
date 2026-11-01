@@ -1,0 +1,20 @@
+<h2>The ks968 integration suite&rsquo;s loopback guard judges what the pg client will dial &mdash; KS-1494</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> Test-only. <code>ks968-platform-admin-seed-with-both-rows.integration.ts</code> refuses a DSN unless the host, port and database the pg client will use are a loopback host, a port that is not a shared-stack port (5432, 6432, 6433 and the compose defaults) and a <code>ks_</code> database. A <code>?host=</code>, a <code>?port=</code>, a missing port, a unix-socket host, a <code>hostaddr</code> in any case, and a DSN the client cannot parse are all refused at module load, before anything connects.
+      </td></tr><tr><td>The file&rsquo;s 4 tsc errors are cleared (0 now). A second describe holds the 30 guard cells and needs no database, because the four hooks moved into the describe of the six real-Postgres cells. Same decision as KS 1340, with the two KS 1795 gaps closed.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> The four platform suites, a running stack, any deploy, and Node 24 (this host has only Node v26.8.1, not an LTS line). Another slot&rsquo;s published ports are not in the shared-stack list.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>KS968_TEST_DATABASE_URL=postgres://u:p@127.0.0.1:55499/ks_plant npm --prefix Blockchain/Dev run test:auth-integration -- ks968-platform-admin-seed -t KS-1494   # 30 cells, rc 0
+KS968_TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:&lt;port&gt;/ks_full npm --prefix Blockchain/Dev run test:auth-integration                           # 36 cells; the gated head&rsquo;s 33 read green against a throwaway Postgres, rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>guard cells</td><td><strong>30 / 30</strong> with no database (27 at the gated head plus 3 added); with the base guard&rsquo;s logic put back, <strong>19 of 30 red</strong></td></tr>
+<tr><td>mutants</td><td><strong>19 of 20 killed</strong> by their named cells, 1 equivalent survivor (the 6433 literal alone, which the compose read still supplies); two byte-identical controls green</td></tr>
+<tr><td>gate 11&rsquo;s three mutants</td><td>the <code>ks_</code> test unanchored, the same test case-insensitive, the database read from the raw path: <strong>27 / 27</strong>, <strong>27 / 27</strong>, <strong>27 / 27</strong> green at the gated head, <strong>28 / 30</strong>, <strong>28 / 30</strong>, <strong>28 / 30</strong> green with the added rows (each killed by its own row)</td></tr>
+<tr><td>tsc on the file</td><td><strong>4 errors</strong> at base, <strong>0</strong> now (root tsc 5.9.3, <code>@types/node</code> 20.19.43 from <code>services/auth/node_modules</code>); eslint on the file <strong>0 errors, 0 warnings</strong></td></tr>
+<tr><td>real Postgres, six cells</td><td><strong>6 / 6</strong> at base, <strong>33 / 33</strong> for the whole file at the gated head <code>fb3579b0a4b4</code> (2026-10-28 UTC, <code>postgres:15.19</code>, 11 init files and 56 migrations applied, 0 failed); <strong>not repeated</strong> for the 3 added guard rows, which need no database</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac shared with other seats; develop <code>cc262c1b6d18</code>, 2026-10-28 (UTC); the real-Postgres run 2026-10-28 (UTC) with Docker 29.7.2; Node v26.8.1 (not an LTS measurement); vitest 4.1.12, TypeScript 5.9.3, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

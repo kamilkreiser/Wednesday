@@ -1,0 +1,21 @@
+<h2>The ks1564 admin-page guard reads the AST, and two unguarded loaders are pinned &mdash; KS-1589 item A</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> One test file changes: <code>packages/shared/src/__tests__/ks1564-admin-api-keys-page-sends-no-default-org.test.ts</code>. It used to scrape <code>frontend/admin/src/pages/ApiKeys.tsx</code> with regular expressions, and five mutants of that page passed all nine cells. It now parses with the TypeScript AST, so a commented-out guard is not a guard, an argument containing parentheses is still an argument, and the function being taken as a value is visible. </td></tr><tr><td>Cells go <strong>9 &rarr; 13</strong>. Cell 6 pins <code>loadOrganizations</code>, cell 7 pins Generate&rsquo;s <code>submitRef</code> double-submit guard, cell 0b pins that the harness path override is not the default, and C4 pins that a comment is not code. No product file changes. </td></tr><tr><td><code>KS1564_ADMIN_SRC</code> points the guard at a COPY of the admin tree so a mutant can be shown to red a named cell &mdash; it is a harness affordance, never a way to make the real guard look elsewhere. The product file is never edited to prove a guard works.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Not measured here.</strong></td><td> The page&rsquo;s behaviour in a browser. These cells pin the ORDER of the guard statements in the source; only a browser run shows a stale answer really being dropped or a second click really minting nothing. <code>frontend/admin</code> has no unit-test tier (KS-1391). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are <strong>UNMEASURED</strong> and not claimed as a pass. Items B and C of KS-1589 are not in this change. </td></tr><tr><td>Nothing in the repository type-checks this file: the package config excludes <code>src/__tests__</code> and <code>check:test-types</code> does not cover <code>packages/shared</code>. It was type-checked separately, rc 0, with a planted <code>TS2322</code> as the control.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run src/__tests__/ks1564-admin-api-keys-page-sends-no-default-org.test.ts   # 13 cells, rc 0
+cd Blockchain/Dev/packages/shared &amp;&amp; npm test                                                                                # 1039 tests, 1 pre-existing failure</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>measured on</td><td>base <code>c3eb63c9d23b</code>, 2026-10-27, Kamil&rsquo;s MacBook Pro (Mac14,5, 12 cores), node v26.8.1, vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>mutants that survived before, now red</td><td><strong>N3 &rarr; cell 5</strong>, <strong>N6b &rarr; cell 4</strong>, <strong>N7 &rarr; cell 4</strong>, <strong>N9 &rarr; cell 6</strong>, <strong>N10 &rarr; cell 7</strong> &mdash; each applied to a copy of the admin tree, sha256 asserted changed</td></tr>
+<tr><td>mutants already killed, still killed</td><td>N1, N2, N4, N12 (cell 5); N5, N11 (cell 4); comment-only control green before and after</td></tr>
+<tr><td>this file</td><td><strong>9 &rarr; 13</strong> cells, rc 0</td></tr>
+<tr><td>whole package</td><td><strong>1035 &rarr; 1039</strong> tests (1034 &rarr; 1038 passed), 54 files both</td></tr>
+<tr><td>the one failure</td><td><code>wallet-signature.test.ts</code> <code>verifyMessageSignature</code> &mdash; identical before and after, <strong>not from this change</strong>: node 26 with cbor 9.0.2 truncates cbor&rsquo;s synchronous <code>encode()</code></td></tr>
+<tr><td>lint</td><td>rc 1 before and after, on the pre-existing <code>no-control-regex</code> error (<code>BACKLOG.md:884</code>); zero lint lines name this file</td></tr>
+<tr><td>N8, deliberately changed</td><td>a comment quoting a bad call was a conservative FALSE red on cell 4; it is now <strong>green</strong>, because stripping comments is the ticket&rsquo;s prescribed fix</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

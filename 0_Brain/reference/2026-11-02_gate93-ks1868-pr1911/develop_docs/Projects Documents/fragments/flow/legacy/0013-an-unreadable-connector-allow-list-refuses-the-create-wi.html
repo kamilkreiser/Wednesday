@@ -1,0 +1,89 @@
+<h2>21. An unreadable connector allow-list refuses the create with 503 instead of granting everything (KS-1256)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="5"><strong>What this fixes.</strong></td><td> The connector allow-list is read out of platform settings to
+      decide whether a caller may create a restricted document type. </td></tr><tr><td>When that read failed, the parse
+      left <code>connectorConfig = {}</code> — and an empty config reads as
+      <strong>no restriction</strong>. </td></tr><tr><td>So every restricted connector became <em>unrestricted</em>
+      precisely when the platform could not tell what the restrictions were. </td></tr><tr><td>This is the same
+      fail-open class KS-1233 closed for the TTL trigger, still open on this path. </td></tr><tr><td>The read now
+      <strong>fails closed</strong>: an unreadable allow-list answers
+      <strong>503 SERVICE_UNAVAILABLE</strong> and the create is refused until the configuration can
+      be read.
+    </td></tr></table>
+<h3>21.1 The four outcomes, stated as a contract</h3>
+<table>
+<tr><th>State</th><th>Before</th><th>After</th></tr>
+<tr><td>the read THROWS (client <code>MaxRetriesPerRequestError</code>, or <code>JSON.parse</code> on malformed stored bytes)</td>
+<td>swallowed by a bare <code>} catch {}</code> → no restriction</td><td><strong>503</strong>, create refused</td></tr>
+<tr><td>Redis UNAVAILABLE</td><td>no restriction</td><td><strong>503</strong>, and the read is <em>never performed</em></td></tr>
+<tr><td>Redis available, the settings key ABSENT</td><td>no restriction</td><td><strong>no restriction — deliberately unchanged</strong></td></tr>
+<tr><td>the allow-list container is MALFORMED</td><td>403</td><td>403, unchanged (KS-1231)</td></tr>
+</table>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The third row is a decision, not an oversight. </td><td>It was put to Kam as
+      <code>secuura-connector-allowlist-missing-setting-ks1256-1005</code> and ruled <strong>b,
+      “Keep ‘no restriction’ when unset”</strong>, with the detail “No
+      behaviour change; the gap stays for fresh installs.” A fresh install has no
+      platform-settings key, and failing closed there would refuse every connector create on a new
+      deployment.
+    </td></tr></table>
+<h3>21.2 Two unreadable paths that do NOT share a mechanism, and why a catch cannot close one of them</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Driven against real <code>ioredis</code> 5.11.1 and a real TCP RESP server, not a mock. </td><td>In the
+      <strong>unavailable</strong> state <code>getNotificationSettings</code> resolves
+      <strong>null without throwing</strong> — it reads an empty in-memory store
+      (<code>services/redis.ts:671-678</code>). A <code>catch</code> never observes a resolved null,
+      so the availability test has to come <em>before</em> the read rather than inside the catch.
+      That is why the fix is two edits and not one.
+    </td></tr><tr><td class="pm-topic" rowspan="1">
+      Separately, <code>fallbackMode</code> is set on a sustained runtime outage by
+      <code>retryStrategy</code> at <code>services/redis.ts:78</code>, which carries
+      <strong>no <code>NODE_ENV</code> guard</strong>. </td><td>Driven under
+      <code>NODE_ENV=production</code> the branch fires identically, so
+      <strong>production reached the fail-open state on a runtime blip despite refusing to START
+      without Redis</strong>. The production cell exists to pin that.
+    </td></tr></table>
+<h3>21.3 Red-first, by assertion</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Six cells, all six green at head. </td><td>At base, <strong>4 of the 6 are RED</strong> — the two
+      <code>CONTROL</code> cells are green at base by design, because they pin behaviour this change
+      does <em>not</em> touch (403 on a malformed container, and a readable allow-list still
+      restricting). A control that reddens with the fix would be testing the fix, not guarding it.
+      Measured by Seat E 6th and carried forward unchanged.
+    </td></tr></table>
+<h3>21.4 One collateral test, re-pointed deliberately</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+<code>ks1195</code> exists to test the <strong>no-Redis degrade path</strong>: it asserts
+      <code>isRedisAvailable() === false</code> as a precondition, then used to pin that a connector
+      create still answered <strong>201</strong> there. </td><td>Both promises cannot hold — fail-closed
+      and “201 while Redis is down” are contradictory. Two assertions were re-pointed to
+      <code>[503, 503, 429, 429, 429]</code> and <code>toBe(0)</code>, and that cell's title now
+      states the new contract. <strong>These are the only assertion changes in this work.</strong>
+      The <code>DEGRADED</code> / <code>redis-not-ready</code> assertions are untouched.
+    </td></tr></table>
+<h3>21.5 What this costs, and whose decision it was</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The cost is stated rather than discovered: <strong>while Platform K’s Redis is down,
+      Platform S cannot create documents through a connector</strong> — they answer 503. </td><td>That
+      was put to Kam as <code>secuura-ks1256-redis-outage-stops-connector-creates-1006</code> and
+      ruled <strong>a, “Accept: fail closed (503) during a Redis outage”</strong>:
+      “Security first: no restricted document type slips through while the allow-list cannot be
+      read. Cost: Platform-S cannot create documents while K’s Redis is down.”
+    </td></tr></table>
+<h3>21.6 Residue, named and NOT fixed here</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The <strong>other readers of the same settings key were not audited</strong>:
+      <code>admin.ts:1119</code>, <code>:1144</code>, <code>:1154</code>,
+      <code>health.ts:52</code> and <code>verification.ts:1283</code>. </td><td>Each may carry the same
+      fail-open shape. They are named here so the gap is on the record, not widened into this ticket.
+      The fresh-install gap in 21.1 row 3 stays open by Kam’s ruling b.
+    </td></tr></table>
+<h3>21.7 Running it</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway
+npx vitest run src/__tests__/ks1256-unreadable-allow-list-fails-closed-with-503.test.ts   # 6 cells
+npx vitest run                                                                            # 818 tests, 92 files</code></pre>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Timing, measured not estimated.</strong></td><td> The api-gateway suite at this head:
+      <strong>7.42 s</strong> wall (52.88 s of test time across parallel workers), 92 files / 818
+      tests, 0 failed. </td></tr><tr><td>Measured <strong>2026-10-06</strong> on HOST
+      <code>Kamils-Mac-Studio</code>, vitest 4.1.11, node v24.7.0. The six KS-1256 cells add no
+      measurable time to the tier.
+    </td></tr></table>

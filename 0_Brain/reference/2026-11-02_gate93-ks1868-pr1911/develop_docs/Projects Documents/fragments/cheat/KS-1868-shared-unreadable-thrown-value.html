@@ -1,0 +1,21 @@
+<h2>shared unhandled-rejection listener and response-cache read keep logging when the thrown value is unreadable &mdash; KS-1868, packages/shared</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong><strong>What to know.</strong></strong></td><td> The <code>unhandledRejection</code> listener body and the cache-read catch in <code>packages/shared</code> read the thrown value unguarded; a revoked Proxy or a throwing <code>message</code> getter made the read throw inside them. Each read is now in an inner try with the fallback <code>unreadable thrown value</code>. 6 new cells in 2 files. Both edits are held Spark passes applied strictly; no hand edit.
+    </td></tr><tr><td>The shared suite is not green at its base on every host: <code>wallet-signature</code> (KS-278) fails by assertion each run; some tree-walking and crypto cells time out under load (KS-1155 class).
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>Not measured here.</strong></strong></td><td> KS-1868 stays open (two of its 253 sites). The four platform suites, a booted api-gateway, an LTS Node, <code>npm ci</code> and any deploy were not run.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run src/__tests__/ks1868-unhandled-rejection-handler-unreadable-reason.test.ts src/__tests__/ks1868-response-cache-read-unreadable-throw.test.ts   # 6 cells
+cd Blockchain/Dev &amp;&amp; npm test -w packages/shared -- --run   # 59 files / 1105 cells; see the baseline note above</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>6</strong> in 2 files (3 + 3); red first: 4 of 6 failed by assertion without the change, 0 of 6 with it</td></tr>
+<tr><td>shared unit suite</td><td>base <code>a71479b49bf3</code> 1099 cells (3 to 5 reds per run, see the flow entry); with the change <strong>1105 cells, 1104 pass, 1 failed</strong> (the same <code>wallet-signature</code> cell)</td></tr>
+<tr><td>api-gateway (dependent)</td><td>1368/1368 before; 1366/1368 after on a rebuilt shared (2 load timeouts), 16/16 for those two files alone</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: 24 pre-existing errors, byte-equal to an untouched tree, none in the changed files; eslint on the 4 changed files: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-11-01 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

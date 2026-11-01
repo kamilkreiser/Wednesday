@@ -1,0 +1,21 @@
+<h2>Five kyc database helpers log a constant reason when the thrown value cannot be read &mdash; KS-1868</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> In <code>services/kyc/src/index.ts</code> five catch blocks no longer throw out of the catch when the thrown value cannot be read; they log <code>unreadable thrown value</code> and return the helper&rsquo;s usual fallback. <strong>Tier 1:</strong> the GDPR erasure cascade calls one of them, so for such a value the erasure now continues where it used to abort and retry. 5 new test files, 15 cells; 10 red at develop, kyc suite 58 before and 73 after.
+    </td></tr><tr><td>Open: the erasure path is read, not run; no cell covers it. KS-1868 stays open for the other sites.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> A real thrown value of this kind, a real PostgreSQL, a service boot, the erasure cascade end to end, the four platform suites, any deploy.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm run test -w services/kyc -- --run              # 73 cells
+cd Blockchain/Dev/services/kyc &amp;&amp; npx vitest run src/__tests__/ks1868-kyc-*.test.ts   # the 15 new cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>15</strong> in five files (3 each); red at develop 10 of 15, all by assertion; green with the change 15 of 15</td></tr>
+<tr><td>kyc suite</td><td>58 passed before (a first run read 57 of 58: a hook timeout under load, 3 of 3 alone); <strong>73 passed, 0 failed</strong> after</td></tr>
+<tr><td>one site at a time</td><td>5 of 5 hunk reversals turn only that site&rsquo;s file red (2 of 3 cells)</td></tr>
+<tr><td>types and lint</td><td>tsc with tests 0 errors (planted control fires); eslint 0 errors, 0 warnings (planted control fires)</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-11-02 (AEDT); Node v26.8.1</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

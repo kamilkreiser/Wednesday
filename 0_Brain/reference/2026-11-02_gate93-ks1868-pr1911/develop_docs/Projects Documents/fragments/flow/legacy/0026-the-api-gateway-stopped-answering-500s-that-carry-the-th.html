@@ -1,0 +1,33 @@
+<h2>36. The api-gateway stopped answering 500s that carry the thrown error's own text (KS-1410)</h2>
+<h3>36.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Ten catch blocks across three api-gateway routers answered
+      <code>res.status(500).json({ ... message: err.message || 'Internal server error' })</code> with
+      <strong>no <code>NODE_ENV</code> guard</strong>, so whatever the thrown error said — a driver
+      message, a constraint name, a path — reached the client in every environment, production
+      included. </td><td>Each router now has a local <code>fail500</code> helper, the shape originate
+      already uses (KS 1334, KS 730): log the thrown text server-side with the route named, answer a
+      constant <code>INTERNAL_ERROR</code> body. Sites: <strong>six</strong> in
+      <code>routes/notifications.ts</code>, <strong>three</strong> in <code>routes/batch.ts</code>,
+      <strong>one</strong> in <code>routes/audit-export.ts</code>. This is
+      <strong>10 of the ticket's 28 sites</strong>; the other <strong>18 stay OPEN</strong>, including
+      <code>transfer/delegations.ts</code>.
+    </td></tr></table>
+<h3>36.2 Red-first, on the real routers</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Two new suites dispatch the real routers through a fake req/res pair, with the router-wide
+      <code>authenticateToken</code> replaced by a pass-through, so no server and no network are
+      involved. </td><td>At the base the same 27 cells read <strong>21 failed | 6 passed, rc 1</strong>
+      — the six survivors are the 200-path controls, which is what shows the suites loaded and the
+      cells executed rather than failing to import. With the fix:
+      <strong>27 passed, rc 0</strong>. The touched service's whole unit suite reads
+      <strong>845 passed, rc 0</strong>.
+    </td></tr></table>
+<h3>36.3 What this row does NOT prove</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Every cell above ran offline against the router objects. </td><td>No gateway process served a
+      request, so the runtime 500 path is <strong>unmeasured</strong>: a <strong>live run is
+      owed</strong> and the ticket does <strong>not</strong> move to Done. The four platform suites
+      (Schemathesis, Akto, Playwright, Performance/k6) did not run — no local stack — and nothing here
+      claims they passed.
+    </td></tr></table>

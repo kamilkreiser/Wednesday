@@ -1,0 +1,25 @@
+<h2>The suite whose comments are graded by a sibling now says so &mdash; KS-1750</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>pre_push_hook_base_leg_comment.test.sh</code> grades the <em>comment prose</em> of <code>pre_push_hook_base.test.sh</code> by three <code>grep -c -F</code> fixed strings (<strong>exactly 0</strong> / <strong>exactly 1</strong> / <strong>exactly 1</strong>, the last a verbatim CONTROL including its full stop). Nothing in the graded file said so, and two sessions had already reworded that block blind. </td></tr><tr><td> This change adds a warning comment above the graded block, naming the grader and the three requirements <strong>by role, not by quoting the strings</strong>. Comment-only &mdash; no cell, no assertion, no product file. </td></tr><tr><td> <strong>There is a SECOND pair, not fixed here.</strong> <code>pre_push_stack_legs_comment.test.sh</code> grades the prose of <code>.githooks/pre-push</code> the same way, and the hook does not name it either.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotchas when you run this locally.</strong></td><td> <strong>Do not quote the graded sentence in your own comment.</strong> CELL 2 counts occurrences across the WHOLE file and asserts <code>-eq 1</code>, not <code>-ge 1</code>. So a paraphrase reds it at 0 hits and a helpful quotation reds it at 2. Describe the strings by role instead; have your patch script assert the three counts are <code>(0, 1, 1)</code> afterwards and refuse to write if they moved. </td></tr><tr><td> <strong>Red-proof through <code>HOOK_BASE_SUITE=/path/to/copy</code>, never by editing the shipped file.</strong> It refuses an empty value (rc 2) rather than silently grading the shipped one, so an unset-versus-empty slip cannot pass as a run. </td></tr><tr><td> <strong>Read exit codes on their own line, not through a pipe.</strong> The refusal arm read <code>rc 0</code> through <code>| tail</code> &mdash; that is <code>tail</code>&rsquo;s status. Re-measured bare it is <strong>rc 2</strong>. Same trap applies to the red arm (<strong>rc 1</strong>) and the green arm (<strong>rc 0</strong>).
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> Whether the three strings should instead be loosened &mdash; the ticket leaves it open; the warning was chosen because the grader&rsquo;s header and Kam&rsquo;s 2026-09-16 ruling show the pinning was deliberate. The second pair is not fixed. </td></tr><tr><td> The four platform suites (Schemathesis, Akto, Playwright, Performance) are <strong>UNMEASURED</strong>; no service unit suite was run, because no service source is touched. Nothing on either box.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/pre_push_hook_base_leg_comment.test.sh    # 4 cells, rc 0
+bash Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh                # 36 cells, rc 0
+bash Blockchain/Dev/scripts/__tests__/pre_push_stack_legs_comment.test.sh       # 4 cells, rc 0 (the second pair)
+HOOK_BASE_SUITE=/path/to/copy bash .../pre_push_hook_base_leg_comment.test.sh   # red-proof against a copy
+HOOK_BASE_SUITE= bash .../pre_push_hook_base_leg_comment.test.sh                # rc 2, refuses</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>grader, before &rarr; after</td><td><strong>4 / 0</strong> &rarr; <strong>4 / 0</strong>, rc 0 both sides (of 4 cells)</td></tr>
+<tr><td>graded subject, before &rarr; after</td><td><strong>36 / 0</strong> &rarr; <strong>36 / 0</strong></td></tr>
+<tr><td>the three graded counts, before &rarr; after</td><td>stale <strong>0</strong>, replacement <strong>1</strong>, control anchor <strong>1</strong> &mdash; unchanged, which is the point</td></tr>
+<tr><td>red arm (a draft that QUOTES the sentence)</td><td><strong>3 passed / 1 failed</strong>, rc 1 &mdash; CELL 2 at <code>hits=2</code>, graded against a copy; worktree file sha256 identical before and after</td></tr>
+<tr><td>refusal control</td><td><code>HOOK_BASE_SUITE</code> set-but-empty &rarr; <strong>rc 2</strong>, FATAL naming the refusal</td></tr>
+<tr><td>prose-grading census</td><td><strong>74</strong> <code>.test.sh</code> files scanned; <strong>45</strong> contain <code>grep -c</code> (positive control); zero control 0. <strong>Found a second prose-grading pair</strong>: <code>pre_push_stack_legs_comment.test.sh</code> &rarr; <code>.githooks/pre-push</code></td></tr>
+<tr><td>the second pair's sharper tripwire</td><td>its CELL 2 wants a ticket key present <strong>exactly once</strong> in the hook, so a second comment citing that key reds a cell; the hook names its grader <strong>0</strong> times (its one <code>graded</code> hit is the substring in <em>degraded</em>)</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

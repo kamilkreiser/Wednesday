@@ -1,0 +1,131 @@
+### originate/src/routes/anchors.ts
+-- 52
+48:     await prisma.$queryRaw`SELECT 1`;
+49:     logger.info('anchors: database connection verified');
+50:   } catch (err: any) {
+51:     logger.error('anchors: database connection FAILED — anchor operations will not be available', {
+52:       error: err instanceof Error ? err.message : String(err),
+53:     });
+54:     throw new Error('Database is required for anchor operations');
+55:   }
+-- 91
+87:     `;
+88:     if (rows.length > 0) return anchorFromDbRow(rows[0]);
+89:     return null;
+90:   } catch (err: any) {
+91:     logger.warn('Failed to fetch anchor from DB', { documentId, error: err instanceof Error ? err.message : String(err) });
+92:     // KS-1657: this catch returned null, and the only caller (GET /:documentId) reads null as "no anchor on record" and answers 404
+93:     // with `anchored: false`. A failed read and a genuine absence were therefore one answer. Rethrow so the fault reaches the route's own
+94:     // catch (a constant 500); null now means one thing only, zero rows. The warn log above is kept. Kam, 2026-10-28: "a — Fix it".
+-- 203
+199:         contentHash: anchor.contentHash,
+200:         verified: !simulated,
+201:       });
+202:     } catch (error) {
+203:       logger.error('Failed to get anchor', { error: error instanceof Error ? error.message : String(error) });
+204:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to get anchor' } });
+205:     }
+206:   }
+-- 323
+319:           ? 'Anchor request accepted by Cardano anchoring service. txHash + blockHeight will populate once the Cardano network confirms (~20
+320:           : 'Anchoring service unavailable; nothing was persisted locally and nothing will retry this request: send it again. Production ans
+321:       });
+322:     } catch (error) {
+323:       logger.error('Failed to create anchor', { error: error instanceof Error ? error.message : String(error) });
+324:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create anchor' } });
+325:     }
+326:   }
+-- 418
+414:         confidence: 'pending-onchain',
+415:         anchoringStatus,
+416:       });
+417:     } catch (error) {
+418:       logger.error('Failed to submit anchor', { error: error instanceof Error ? error.message : String(error) });
+419:       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to submit anchor' } });
+420:     }
+421:   }
+### originate/src/routes/platformOrganizations.ts
+-- 112
+108:   } catch (err) {
+109:     if (err instanceof OrganisationErasureFallbackPrincipalError) logFallbackRefusal(ctx);
+110:     const refused = sendRefusal(res, err);
+111:     if (refused) return refused;
+112:     logger.error('erase-connector: resolving the erasure target failed', { tenantId: ctx.tenantId, error: err instanceof Error ? err.message
+113:     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Organisation erasure check failed' } });
+114:   }
+115:   try {
+-- 145
+141:     // Ids and the error only: the organisation's name and the documents' titles are what is being erased.
+142:     logger.error('erase-connector: the erasure failed and was rolled back', {
+143:       organizationId: target.organizationId,
+144:       tenantId: ctx.tenantId,
+145:       error: err instanceof Error ? err.message : String(err),
+146:     });
+147:     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Organisation erasure failed. Nothing was erased
+148:   }
+-- 168
+164:     }
+165:   } catch (err) {
+166:     const refused = sendRefusal(res, err);
+167:     if (refused) return refused;
+168:     logger.error('erase-connector: the status read failed', { tenantId: ctx.tenantId, error: err instanceof Error ? err.message : String(err
+169:     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Status read failed' } });
+170:   }
+171:   // Not yet erased. A non-terminal status: S re-asks later.
+### originate/src/routes/verificationV2.ts
+-- 441
+437:       const trusted = await resolveTrustedCertificationEvidence(rows, { db });
+438:       const matches = rows.map((row) => buildMatch(req, row, false, chainBlobOfRow(row), trusted));
+439:       return res.json({ hash: null, count: matches.length, matches, verifiedAt: new Date().toISOString() });
+440:     } catch (error) {
+441:       logger.error('v2 verification error', { error: error instanceof Error ? error.message : String(error) });
+442:       return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Verification failed' } });
+443:     }
+444:   },
+-- 477
+473:       matches,
+474:       verifiedAt: new Date().toISOString(),
+475:     });
+476:   } catch (error) {
+477:     logger.error('v2 file verification error', { error: error instanceof Error ? error.message : String(error) });
+478:     return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'File verification failed' } });
+479:   }
+480: });
+### originate/src/services/reanchorInFlight.ts
+-- 193
+189:     let body: unknown;
+190:     try { body = await resp.json(); } catch { body = undefined; }
+191:     answer = { httpStatus: resp.status, body };
+192:   } catch (err: unknown) {
+193:     answer = { httpStatus: null, fetchError: err instanceof Error ? err.message : String(err) };
+194:   }
+195:   return decideInFlight(answer, ctx);
+196: }
+-- 229
+225:   const arm = (ms: number, phase: 'headers' | 'body') => setTimeout(() => {
+226:     timers.fired = phase;
+227:     abort.abort(new DOMException(`no ${phase} within ${ms} ms`, 'TimeoutError'));
+228:   }, ms);
+229:   const message = (err: unknown) => (err instanceof Error ? err.message : String(err));
+230: 
+231:   let resp: Response;
+232:   const headerTimer = arm(deadlines.headerMs, 'headers');
+### originate/src/utils/notificationClient.ts
+-- 56
+52:     }
+53:   } catch (err) {
+54:     logger.warn('Notification service unreachable, falling back to SMTP', {
+55:       template: payload.template,
+56:       error: String(err),
+57:     });
+58:     await sendSmtpFallback(payload);
+59:   }
+-- 110
+106:     logger.info('Notification sent via SMTP fallback', { template, to });
+107:   } catch (err) {
+108:     logger.warn('SMTP fallback also failed (non-blocking)', {
+109:       template: payload.template,
+110:       error: String(err),
+111:     });
+112:   }
+113: }

@@ -1,0 +1,87 @@
+<h2>24. A missing GENERATED Prisma client is diagnosed, not reported as a module error (KS-1305)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this fixes.</strong></td><td> A fresh worktree installs <code>@prisma/client</code> but never
+      <em>generates</em> it: <code>npm ci</code> runs with <code>--ignore-scripts</code>, so
+      <code>prisma generate</code> does not run. </td></tr><tr><td>The bare <code>require('@prisma/client')</code> inside
+      <code>getPrismaClient()</code> then throws <code>Cannot find module '.prisma/client/default'</code>
+      — a module-resolution error that reads like a product defect in the originate service, and
+      which cost real time to diagnose more than once. </td></tr><tr><td>The load now names the cause and the command that
+      fixes it, and every other load error is rethrown untouched.
+    </td></tr></table>
+<h3>24.1 The mechanism, and what is deliberately NOT changed</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The change is a <strong>pure insertion</strong> of 19 lines (<code>numstat 19 0</code>) immediately
+      before the existing <code>require</code>. </td><td>It loads <code>@prisma/client</code> once inside a
+      <code>try</code>; on success the original <code>require</code> reads the module cache, so the happy
+      path is byte-for-byte the same behaviour. <code>db.ts</code> is the <strong>tenant-isolation
+      module</strong> — it holds <code>withTenant</code>, the GUC wrapper, <code>getGucPrisma</code>
+      and <code>createPoolProxy</code> — and <strong>no GUC, tenant or RLS line is touched</strong>.
+      The six KS 458 tenant-GUC cells are green at the head. The new message carries no environment or
+      credential data; <code>cause</code> carries the resolver's error, which holds module paths only.
+    </td></tr></table>
+<h3>24.2 The guard is a three-term conjunction, and each term has its own red arm</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The rewrite fires only when <code>err?.code === 'MODULE_NOT_FOUND'</code> <em>and</em> the message
+      contains <code>.prisma/client</code>; anything else is <code>throw err</code> — the
+      <strong>same object</strong>, not a copy. </td><td>A guard with three terms needs three arms, or some term is
+      being asserted by prose rather than by a cell.
+    </td></tr></table>
+<table>
+<tr><th>Arm</th><th>Term it falsifies</th><th>Result</th></tr>
+<tr><td>A — drop the message test</td><td>message names <code>.prisma/client</code></td>
+<td><strong>C1 red</strong> (1 failed | 9 passed)</td></tr>
+<tr><td>B — rethrow a NEW Error</td><td>the same-object rethrow</td>
+<td><strong>C1 and C3 red</strong> (2 failed | 8 passed)</td></tr>
+<tr><td>C — drop the code test</td><td><code>code === 'MODULE_NOT_FOUND'</code></td>
+<td><strong>C3 red</strong> (1 failed | 9 passed)</td></tr>
+</table>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Arm C is why this block exists in this shape.</strong></td><td> Before <code>C3</code> was added, Arm C
+      left the suite at <strong>10 passed</strong> — the code term was pinned by nothing. </td></tr><tr><td>D1 supplies a
+      matching code <em>and</em> a matching message; C1 supplies a matching code and a non-matching message
+      (<code>'@prisma/client'</code>, an at-sign, not a dot). </td></tr><tr><td>No cell presented an error whose
+      <em>message</em> matched while its <em>code</em> did not, so deleting the code test changed no verdict.
+      <code>C3</code> supplies exactly that error and requires the same object back.
+      </td></tr><tr><td>Each arm was run with <code>tsc</code> rc 0 first: an arm that does not compile reports
+      <code>Tests: 0 total</code>, which is a <strong>load failure, not an inert tamper</strong>, and proves
+      nothing about the guard.
+    </td></tr></table>
+<h3>24.3 Red-first, and the figures</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      With the test file present and the product hunk reverted, the base gives
+      <strong>1 failed | 9 passed (10)</strong> — both numbers non-zero, so the red is a real red. </td><td>The
+      failure quotes the defect verbatim: expected substring
+      <code>the generated Prisma client (node_modules/.prisma/client) is missing</code>, received
+      <code>Cannot find module '.prisma/client/default' from 'node_modules/@prisma/client/default.js'</code>.
+      At the head, <strong>10 passed (10)</strong>.
+    </td></tr></table>
+<h3>24.4 Timings — stated, and measured rather than carried forward</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>No stated timing covers a <code>services/originate</code> unit suite.</strong></td><td> Measured at the
+      base commit <code>3f9ff4e1e1b9</code> across <code>CLAUDE.md</code>,
+      <code>systemTest/CLAUDE.md</code> and the test-discipline skill: <strong>0</strong> lines pair
+      <code>originate</code> with a number and an explicit time unit. </td></tr><tr><td>The same instrument finds
+      <strong>5</strong> such lines for <code>Akto</code> and <strong>8</strong> for
+      <code>pre-merge</code>, so the zero is a measurement and not a broken grep. <strong>No tier budget
+      moves</strong>: this suite is not in a tier budget table.
+      </td></tr><tr><td>Wall clock, measured <strong>2026-10-05 UTC</strong> on macOS arm64: the two cell files
+      <strong>1.958 s</strong>; the full originate suite <strong>9.867 s</strong>.
+      </td></tr><tr><td>The suite goes <strong>90 files / 1,063 tests</strong> at the base to <strong>91 files / 1,067
+      tests</strong> at the head — one new file, four new cells, zero new reds.
+    </td></tr></table>
+<h3>24.5 Not covered, and the live sweep</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      This closes <strong>fix shape (3) only</strong>; shapes (1) and (2) are deferred by ruling. </td><td>The cell
+      <em>simulates</em> the resolver error through the jest factory: a <strong>real fresh worktree raising a
+      real <code>MODULE_NOT_FOUND</code> was not driven</strong>, and there is no PostgreSQL and no
+      <code>withTenant</code> integration cell against a database. The generate command and its output path
+      were measured on <strong>Prisma 7.8.0</strong>; <strong>#949</strong> (dependabot, 7.8.0 to 7.10.0)
+      is open and was not run, so whether 7.10 still generates into <code>node_modules/.prisma/client</code>
+      is unmeasured. This is a runtime change, so a <strong>live sweep is owed</strong> and the ticket does
+      not move to Done on this PR.
+    </td></tr></table>
+<h3>24.6 Running it</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+cd services/originate
+npx jest --ci src/__tests__/ks1305-missing-generated-prisma-client-is-diagnosed.test.ts \
+             src/__tests__/ks458-db-tenant-guc.test.ts   # 10 cells
+npx jest --ci                                            # 91 files, 1,067 tests
+npx tsc --noEmit -p tsconfig.json                        # rc 0
+npx eslint src/db.ts src/__tests__/ks1305-*.test.ts      # rc 0</code></pre>

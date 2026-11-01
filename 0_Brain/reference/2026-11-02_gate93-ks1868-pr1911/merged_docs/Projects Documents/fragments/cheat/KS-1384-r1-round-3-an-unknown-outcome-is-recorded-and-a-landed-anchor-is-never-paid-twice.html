@@ -1,0 +1,17 @@
+<h2>KS-1384 R1 round 3: a re-anchor whose outcome is unknown is recorded; a landed anchor is never paid for twice</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td>When <code>POST /api/documents/{id}/anchor</code> cannot tell whether its post landed (no answer in 10 s, or a 2xx whose body is lost), the blob records <code>retryPostUnknownAt</code> and the claim is kept: 503, Retry-After 600. After that, any anchoring row for the document (confirmed or failed) means 409, never a post; only &ldquo;no row&rdquo; read after the lease lets it post. Anchoring writes its row before it spends the fee, which is what makes that safe.</td></tr><tr><td>A 2xx gets 10 s more for its body after its headers arrive, so a slow 202 now succeeds. The re-check before the post also refuses a revoked or deleted document and a confirmed blob. The whole budget is 25 s against the 10-minute lease.</td></tr><tr><td>A marked document stays refused on a failed row until R2b&rsquo;s resolver decides it. Deploy hold: R1 deploys only with F0, F-b, R2a and R2b, and with G58-F3&rsquo;s fix (R2a: anchoring&rsquo;s by-document read answers 503 on a database fault, not the absent 404), after the census, box by box. QA gate 65 (GO WITH NOTES) added G58-F3 to the hold, because the marker&rsquo;s clear trusts that 404 as &ldquo;no row&rdquo;.</td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td>A real anchoring service, real post latencies and stall lengths, the four platform suites, a running stack, Node 24 (LTS), any chain or box.</td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/originate &amp;&amp; TEST_DATABASE_URL=... npx jest --config jest.integration.config.js src/__tests__/ks1384-r1r3-unknown-outcome.integration.test.ts   # 14 cells
+cd Blockchain/Dev/services/originate &amp;&amp; npx jest src/__tests__/ks1384-r1r3-post-deadlines.test.ts src/__tests__/ks1384-r1-retry-route.test.ts</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>28</strong>: 14 on real Postgres (11 red at round 2&rsquo;s head, 3 controls), 7 deadline cells and 7 retry-route cells</td></tr>
+<tr><td>mutants</td><td>15 written, each parsed and compiled before it counted; 15 killed, each by its expected cells</td></tr>
+<tr><td>originate unit suite</td><td>156 suites / 1918 cells, all pass (1904 at round 2, plus 14)</td></tr>
+<tr><td>real claim cells</td><td>34 of 34 (these 14, round 2&rsquo;s 8, R1&rsquo;s 12), as the app role with RLS on</td></tr>
+<tr><td>tsc and eslint</td><td>tsc 0 errors with all 182 originate test files (gate 65&rsquo;s count; this page said 181); eslint 0 errors, 1 warning at the base</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared; round 2&rsquo;s head <code>a46c251e1419</code>, 2026-10-31 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, jest 29.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

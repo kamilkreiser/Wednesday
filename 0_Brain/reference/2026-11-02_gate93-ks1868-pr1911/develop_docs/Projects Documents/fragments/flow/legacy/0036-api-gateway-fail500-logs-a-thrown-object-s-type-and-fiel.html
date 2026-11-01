@@ -1,0 +1,45 @@
+<h2>45. api-gateway fail500 logs a thrown object's type and field names, not [object Object] (KS-1346)</h2>
+<h3>45.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Three api-gateway routers share one <code>fail500()</code> helper:
+      <code>routes/notifications.ts</code>, <code>routes/batch.ts</code> and
+      <code>routes/audit-export.ts</code>. Its log expression was
+      <code>String(err)</code>, so a thrown <strong>non-Error</strong> object rendered as
+      <code>"[object Object]"</code> and the throw's content was lost from the log. It now logs a
+      thrown object's <strong>type and field names only</strong>. </td><td>Kam's ruling (card
+      <code>secuura-ks1346-logging-thrown-objects-leaks-secrets</code>, choice a):
+      <em>"log a thrown object's TYPE and FIELD NAMES only."</em> The expression is
+      <strong>byte-for-byte</strong> the one already live in
+      <code>services/originate/src/routes/adminConfig.ts</code> (263 bytes, <code>cmp</code> rc 0
+      against all three sites after the change; a <code>cmp</code> against the pre-ruling text
+      differs, as the control). The <strong>500 response body is unchanged</strong> — it was
+      already the constant <code>INTERNAL_ERROR</code> body, so the response tells a reader
+      nothing about this row.
+    </td></tr></table>
+<h3>45.2 What it deliberately does NOT change, because the expression's own branches decide it</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A thrown <code>Error</code> still logs its <code>.message</code>. Thrown <strong>text</strong>
+      is still logged <strong>verbatim</strong> (<code>typeof err === 'string' ? err</code>). An
+      empty <code>Error("")</code> logs <code>""</code>. Only objects, class instances and numbers
+      are reduced to type plus field names. </td><td>QA gate77 threw a credential-shaped URL at
+      these routes and it reached <code>logger.error</code> intact. That case is recorded on this
+      ticket and is <strong>not</strong> closed by this row, so nothing here should be read as
+      "the log no longer carries secrets". The three sites were added on 2026-10-09 with blobs
+      <code>5ae6c0788dfd</code>, <code>75e84b3aa06c</code> and <code>893669657db0</code>; the same
+      three paths at this row's base <code>613070f29112</code> carry those identical blobs, so the
+      change lands on exactly the sites QA measured.
+    </td></tr></table>
+<h3>45.3 Evidence, and what was not run</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>src/__tests__/ks1346-apigw-fail500-logs-type-and-field-names.test.ts</code>, 15 cells:
+      G1 a thrown plain object, G2 a class instance, G3 a number, each across the three routers.
+      <strong>9 failed / 6 passed of 15</strong> with the product NOT applied, then
+      <strong>15 passed of 15</strong> after, and 15 of 15 again after the per-line WHY comments.
+      </td><td>Whole api-gateway suite <strong>95 files, 860 passed, 0 failed</strong>;
+      <code>tsc --noEmit</code> rc 0 with no output; <code>eslint src</code> rc 0 with 0 errors
+      (36 pre-existing warnings, none in a file this row touches). The four platform suites were
+      <strong>NOT run</strong> — they need a booted local stack this seat does not have, so no
+      figure from them is quoted. A live run is owed: this changes runtime logging behaviour, and
+      the ticket does not move to Done on offline green. Measured by Seat R 28th, 2026-10-10, on
+      node v24.7.0 / vitest 4.1.11.
+    </td></tr></table>

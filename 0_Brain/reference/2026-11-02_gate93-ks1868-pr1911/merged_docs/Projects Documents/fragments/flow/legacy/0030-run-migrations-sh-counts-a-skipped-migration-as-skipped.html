@@ -1,0 +1,49 @@
+<h2>41. run-migrations.sh counts a skipped migration as skipped, not applied (KS-808)</h2>
+<h3>41.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The deploy-path migration runner <code>Blockchain/Dev/scripts/run-migrations.sh</code> printed
+      <code>Summary: applied=N failed=N</code>, where <code>applied</code> counted every file
+      <code>apply_one</code> returned 0 for. It returns 0 for an <em>already applied</em> skip as well as
+      for a real apply, so a re-run over an up-to-date database reported every migration as applied. </td><td>
+      <strong>Only the summary counter moves.</strong> A <code>skipped_count</code> is counted on the skip
+      path (built <code>:122</code>), initialised before the loop (<code>:148</code>) and subtracted from
+      <code>applied_count</code> before the summary (<code>:175</code>); the summary line gains
+      <code> skipped=N</code> (<code>:176</code>). <code>apply_one</code>'s return codes, the loop, the
+      KS 1031 <code>exit 3</code> block (built <code>:197</code>) and all SQL are unchanged. This is defect
+      (2) of KS-808 only: the exit code (defect 1) is handled under KS 1031, and the tracker citation
+      (defect 3) was PR #1229. <strong>KS-808 stays open</strong>; a live run is owed (41.4).
+    </td></tr></table>
+<h3>41.2 Red at the base, green with the change</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Red was made through the suite's own knob, never by editing the tree: <code>RUN_MIGRATIONS_SH</code>
+      (suite <code>:18</code>) pointed at a copy of the base blob <code>7318c392c1f2</code> from develop
+      <code>1e7f90e26137</code>. </td><td>The two red cells are the defect itself: a run with one applied and
+      one skipped file, and a run that only skips, both printed <code>Summary: applied=2 failed=0</code>.
+      <code>psql</code> and <code>pg_isready</code> are stubs in a private <code>mktemp</code> tree, so no
+      database is dialled. <code>/bin/bash</code> 3.2.57; the runner is executed as
+      <code>sh scripts/run-migrations.sh</code>.
+    </td></tr></table>
+<table>
+<tr><th>Suite</th><th>Red at base</th><th>Green after</th></tr>
+<tr><td><code>ks808_run_migrations_counts_skips_apart.test.sh</code> (new)</td><td>3 passed, 2 failed, rc 1</td><td>5 passed, 0 failed, rc 0</td></tr>
+<tr><td><code>run_migrations_failure_exit_code.test.sh</code> (sibling)</td><td>7 passed, 0 failed</td><td>7 passed, 0 failed</td></tr>
+<tr><td><code>ks1054_deploy_scripts_read_startup_migrations.test.sh</code> (sibling; its subject is untouched)</td><td>not re-run at base</td><td>40 passed, 0 failed</td></tr>
+</table>
+<h3>41.3 Who reads the summary line</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The only code consumer is <code>run_migrations_failure_exit_code.test.sh:82</code>, which matches
+      <code>Summary: applied=2 failed=0</code> as a prefix. </td><td>The added <code> skipped=N</code> keeps it
+      green (7/7 above). The closing line <code>Migration runner finished (applied=…, failed=…)</code> keeps
+      its format; its number is now the true apply count. Runbook and guide prose that still describes the
+      old line is listed in the PR and is <strong>not</strong> edited here.
+    </td></tr></table>
+<h3>41.4 What is NOT proven</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A runtime-behaviour change is not done on offline green. </td><td>The runner ran only against stubbed
+      <code>psql</code> under macOS <code>sh</code>. The <code>migrations</code> container's own
+      <code>/bin/sh</code> against a real PostgreSQL with a skip present is a <strong>live run owed</strong>,
+      and because the runner ships inside the <code>migrations</code> image (built from
+      <code>services/originate/Dockerfile</code>) that run needs the image rebuilt. The four platform suites
+      (Schemathesis, Akto, Playwright, Performance/k6) are <strong>unmeasured</strong> here.
+      <strong>Timings:</strong> this change alters no timing this document carries.
+    </td></tr></table>

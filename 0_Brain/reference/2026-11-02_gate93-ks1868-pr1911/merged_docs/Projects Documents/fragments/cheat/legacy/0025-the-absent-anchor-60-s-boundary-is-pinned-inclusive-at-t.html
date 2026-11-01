@@ -1,0 +1,59 @@
+<h2>The absent-anchor 60 s boundary is pinned INCLUSIVE at the constant — KS-1171</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Rule (c) of the
+        absent-anchor decision in <code>services/anchoring/src/anchorSubmission.ts:345</code> reads
+        <code>lastAnsweredElapsedMs &gt;= ABSENT_MIN_LAST_ANSWER_MS</code>, where the constant is
+        <code>60_000</code> ms. That comparison is the point at which a <strong>second fee-paying
+        Cardano transaction may be minted</strong>, and nothing asserted whether the constant itself
+        counts as absent. </td></tr><tr><td>This row is a <strong>pin on an existing money path</strong>, not a
+        change to it: no product line moves, and <code>anchorSubmission.ts</code> is byte-identical
+        before and after. It settles gate finding B1 of #1228 only — the 8k item and the live sweep
+        stay owed, and KS-1171 stays open. </td></tr><tr><td>Three cells: the last answer <strong>exactly at</strong>
+        the constant (with enough answered polls) is absent and a retry is scheduled; one millisecond
+        earlier is <strong>not</strong> absent; and the two constants read 2 and 60000.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>How to red it.</strong></td><td> A pin has no
+        red at its base, so do not look for one. Change <code>&gt;=</code> to <code>&gt;</code> at
+        <code>anchorSubmission.ts:345</code> — <strong>prove the anchor string is unique first</strong>
+        (<code>grep -c</code> reads 1; the bare constant name reads 2 as its control) — re-run, then
+        restore by content and assert the whole-file sha256 against the pre-tamper hash. A real red
+        reports <strong>3 total / 1 failed</strong>; a <strong>0 total / 0 failed</strong> reading is a
+        load failure and proves nothing.
+      </td></tr></table></div>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-by-tamper</td><td><strong>2 passed, 1 failed (3)</strong>, rc 1, failing on the
+exactly-at-the-constant cell &rarr; <strong>3 passed (3)</strong>, rc 0 restored.
+<code>anchorSubmission.ts</code> restored byte-identical — sha256/16
+<code>310b2befe5cf4ce6</code>, <code>cmp</code> rc 0, and <code>git</code> reports it unmodified.
+Never staged, never committed</td></tr>
+<tr><td>the two controls</td><td>the constant-minus-one case still reads NOT absent, and the
+constants themselves are asserted at their ruled values. Both pass in the tampered arm, which is
+what makes the red an assertion rather than a load failure</td></tr>
+<tr><td>whole anchoring suite</td><td><strong>28 files / 1 failed, 361 passed (362)</strong> at the
+base &rarr; <strong>29 files / 1 failed, 364 passed (365)</strong> at the head. +3 tests, and the
+same single failure on both sides</td></tr>
+<tr><td>that failure belongs to KS 562</td><td><code>threadTokenMint emulator round-trip</code>,
+<code>Could not serialize the data: Unsupported type</code> inside
+<code>@lucid-evolution/plutus</code> — develop's own pre-existing red at
+<code>BACKLOG.md:182</code>. <strong>Attributed, never claimed</strong></td></tr>
+<tr><td>a cold-run transient, recorded not hidden</td><td>The first full-suite run after adding the
+file also timed out <code>db.retry.test.ts</code> cell 1 at 5000 ms. That file passes
+<strong>5/5 alone</strong> and the second full run is clean, so it is the cold-transform class
+documented at <code>BACKLOG.md:1182</code> for <code>services/kyc</code> — first seen here in
+<code>services/anchoring</code></td></tr>
+<tr><td>payload</td><td>4,524 B <code>11844b4b45cfdff2</code>, one section, no <code>diff --git</code>
+header. Strict apply rc 0 forward / rc 1 reverse at the base, tree <code>29c2837b0c74</code>,
+re-apply control rc 1</td></tr>
+<tr><td>new file</td><td>96 lines, 4,296 B, mode <strong>100644</strong>, sha256/16
+<code>f2e97786cd943561</code></td></tr>
+<tr><td><code>tsc --noEmit -p services/anchoring</code></td><td>rc 0, 0 lines</td></tr>
+<tr><td>runner</td><td><strong>vitest 4.1.11</strong> agreeing two ways —
+<code>node_modules/vitest/package.json</code> and <code>vitest --version</code>. The service's own
+script is <code>vitest run</code>. node v24.7.0, npm 11.5.1, 2026-10-08 UTC, Darwin 27.0.0 arm64</td></tr>
+<tr><td>NOT covered</td><td>Coverage only — no runtime branch moves, so no live sweep is owed
+<em>for this row</em>; the sweep KS-1171 owes for #1228 is untouched. The four platform suites are
+<strong>UNMEASURED, not passing</strong> (no local stack on <code>http://localhost:6882</code>; only
+the push's SKIP lines are quoted). Three <code>systemTest</code> packages declare
+<code>engines.node &gt;= 24.11.0</code> against a host on <strong>v24.7.0</strong>. The ticket does
+<strong>not</strong> move to Done</td></tr>
+</table>

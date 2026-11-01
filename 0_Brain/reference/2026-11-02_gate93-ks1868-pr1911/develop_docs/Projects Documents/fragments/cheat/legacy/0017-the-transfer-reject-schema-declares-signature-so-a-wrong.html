@@ -1,0 +1,59 @@
+<div class="section">
+<h2>The transfer reject schema declares signature, so a wrong-typed one is refused — KS-1435</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="5"><strong>What to know.</strong></td><td> <code>rejectTransferSchema</code> in
+        <code>services/transfer/src/index.ts</code> never declared <code>signature</code>, while the
+        published <code>TransferRejectRequest</code> declares it a string. </td></tr><tr><td>Zod strips keys a schema
+        does not name, so a wrong-typed <code>signature</code> was <strong>discarded rather than
+        refused</strong>: the schema then validated and the reject <em>ran</em> with <strong>200</strong>.
+        </td></tr><tr><td>The caller gets a success for a request the contract calls invalid, and the rejection is
+        recorded without the signature it believed it sent. </td></tr><tr><td>The fix is one line,
+        <code>signature: z.string().optional()</code>. The narrowing is the <strong>type</strong>, never the
+        presence — <code>optional()</code> is what keeps every existing caller that sends no signature green.
+        </td></tr><tr><td>Pure declaration; no handler branch, no status-code path and no spec file is touched.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Gotcha when you run this locally.</strong></td><td> Three of them.
+        <strong>(1) <code>--reporter=basic</code> no longer exists in vitest 4.</strong> It fails as
+        <code>Failed to load custom Reporter from basic</code> with rc 1 and <strong>zero</strong> tests run —
+        which reads exactly like a red suite if you only look at the exit code. Use the default reporter.
+        </td></tr><tr><td><strong>(2) Re-applying the test section SUCCEEDS.</strong> <code>git apply --check -v</code>
+        reports <code>Hunk #1 succeeded at 938 (offset -39 lines)</code>, because the hunk's only context is
+        two closing-brace lines that recur all over a test file. Do not use "applied twice refuses" as an
+        idempotence guard on this payload; assert the joined-payload sha and the
+        <code>write-tree</code> result instead. </td></tr><tr><td><strong>(3) The runner version is in
+        <code>node_modules</code>, not the manifest.</strong> It resolves to <strong>vitest
+        4.1.11</strong> where <code>package.json</code> says <code>^4.1.9</code>.
+      </td></tr></table></div>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base → head</td><td>rc 1, <strong>2 failed | 77 passed (79)</strong> with the test hunk
+alone → <strong>79 passed (79)</strong>, rc 0, 0 failed. Both reds read
+<code>AssertionError: expected 200 to be 400</code>, so the red is the defect's own symptom and not a load
+failure</td></tr>
+<tr><td>the control cell</td><td>TRC1 (a <em>string</em> signature → 200, status <code>rejected</code>) is
+green on <strong>both</strong> sides, proved by <code>-t 'TRC1'</code> reading <strong>1 passed | 78
+skipped</strong> rc 0 at base and head — not inferred from the totals</td></tr>
+<tr><td>whole transfer suite</td><td><strong>76 → 79</strong>, 5 files, rc 0 both ends</td></tr>
+<tr><td><code>tsc --noEmit -p services/transfer</code></td><td>rc 0, 0 lines</td></tr>
+<tr><td>code-only tree</td><td><code>84a98ca82ee0bce4</code> at base <code>147ae442074c</code>; the same
+procedure at the superseded <code>69f2045af2a4</code> gives <code>e7f6d8d5c74f</code>, so the expectation
+names its base</td></tr>
+<tr><td>payload</td><td>sections <strong>196 B</strong> <code>36faf71aabea8570</code> + <strong>2033 B</strong>
+<code>16cc9514e2a614be</code>; ordered join <strong>2229 B</strong> <code>9f1c7dd84c6b438c</code>, reversed
+join <code>3059adbabe520c4e</code></td></tr>
+<tr><td>file modes</td><td>both files <code>100644</code>, <code>[ -x ]</code> FALSE, and they agree.
+<code>core.filemode=false</code> here, so the control is <strong>116</strong> genuinely
+<code>100755</code> paths in the same tree</td></tr>
+<tr><td>Suite wall clock</td><td>before <strong>707 ms</strong>, red arm <strong>392 ms</strong>, head
+<strong>413 ms</strong>. Measured <strong>2026-10-07 UTC</strong>, macOS 27.0.1, Darwin 27.0.0 arm64, bash
+3.2.57(1)-release, node v24.7.0, npm 11.5.1</td></tr>
+<tr><td>Timing coverage</td><td><strong>0</strong> stated timings cover the transfer unit suite at the base
+across <code>CLAUDE.md</code>, <code>systemTest/CLAUDE.md</code> and the test-discipline skill (must-hit
+control: <strong>2</strong> Akto and <strong>4</strong> pre-merge rows by the same instrument). No tier
+budget moves</td></tr>
+<tr><td>NOT covered</td><td>One operation only — <code>POST /api/transfers/{id}/reject</code>; no other
+schema was audited for the same stripped-field class. Cells drive the handler <strong>in process</strong>,
+so route-level behaviour behind the gateway is unmeasured, and the four platform suites are
+<strong>UNMEASURED, not passing</strong> (local stack down). Runtime request validation moves —
+<strong>live sweep owed</strong> — and the ticket does <strong>not</strong> move to Done</td></tr>
+</table>
+</div>

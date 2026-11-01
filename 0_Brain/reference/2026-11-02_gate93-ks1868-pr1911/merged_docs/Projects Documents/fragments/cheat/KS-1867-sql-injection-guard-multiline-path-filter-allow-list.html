@@ -1,0 +1,19 @@
+<h2>The SQL-injection guard reads multi-line templates, filters by path only, and carries an allow list &mdash; KS-1867, KS-1865</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>What to know.</strong></strong></td><td> <code>scripts/check-no-sql-injection.sh</code> now finds a <code>$queryRawUnsafe</code> / <code>$executeRawUnsafe</code> call whose first argument is a template literal holding <code>${</code>, wherever the call, the template and the <code>${</code> sit (multi-line, with a generic, in <code>.ts .tsx .js .jsx .mjs .cjs .mts .cts</code>). Its path filter reads the file path only, by whole segment. A failed scan (unreadable file, missing root, grep or awk error) exits 2 instead of reading as clean. Sites that were traced safe, or are tracked as open, live in <code>scripts/check-no-sql-injection.allow</code>: four tab-separated fields (path, opener line, the <code>${...}</code> expressions, reason); a reason starting <code>OPEN:</code> is counted apart as <code>ALLOWED-OPEN</code>. If the guard fails after you touch a listed site, the site's opener or interpolated expression changed: fix the site, or re-trace it and update the entry; an entry whose site is gone must be deleted.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong><strong>Not measured here.</strong></strong></td><td> A query built in a variable or by concatenation first is not read. GNU grep and gawk (Linux) were not run. The optimization.ts entry is OPEN against KS 1929 until that change lands. The four platform suites, a booted stack and any deploy were not run.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>for s in reports_the_hit skips_node_modules multiline path_filter_and_scan_errors allow_list; do bash Blockchain/Dev/scripts/__tests__/check_no_sql_injection_$s.test.sh; done   # 71 cells
+bash Blockchain/Dev/scripts/run-code-guards.sh   # the push gate's entry</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>cells</td><td><strong>71</strong> in 5 suites; against the old guard 50 fail and 21 pass (controls); with the change 71 of 71</td></tr>
+<tr><td>mutants</td><td><strong>42 of 42</strong> killed; one more is equivalent (a call never starts on a newline)</td></tr>
+<tr><td>guard on develop</td><td>3 sites found (webhooks.ts:310, signatories.ts:346, optimization.ts:105); <code>run-code-guards.sh</code>: 13 guards green with the three allow-list entries, red with none, red naming a planted fourth site</td></tr>
+<tr><td>host and tools</td><td>Apple Silicon Mac, macOS 27.0.1, 2026-11-02 (UTC 2026-11-01); /bin/bash 3.2.57, BSD grep 2.6.0-FreeBSD, awk 20200816</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

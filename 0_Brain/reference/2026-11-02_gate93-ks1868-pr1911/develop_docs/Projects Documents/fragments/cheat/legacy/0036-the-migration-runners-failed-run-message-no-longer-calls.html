@@ -1,0 +1,16 @@
+<h2>The migration runner&rsquo;s failed-run message no longer calls a closed defect open &mdash; KS-1456</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> When a migration fails, <code>run-migrations.sh</code> prints why it exits 3. That text used to say a defect about counting skipped migrations as applied was still open. </td></tr><tr><td>That defect was closed by commit <code>ae9bf6828f88</code>, so the sentence is gone. The exit code (3), the <code>Summary:</code> line and the clean-run path are asserted by cells that pass at the base and after the change. </td></tr><tr><td>One shell comment line after the message carries the ticket key. It prints nothing: the failed-run output with and without it is byte-identical. The ticket does not move to Done; a live run against a database is owed.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td> The cells use stub <code>psql</code> and <code>pg_isready</code> programs on a private <code>PATH</code>; no database is reached. </td></tr><tr><td>On a tree that is develop <code>76b683c7dcd0</code> plus this change, the shell-suite count reads <strong>75</strong>, not 74.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/ks1456_run_migrations_failed_run_names_no_closed_defect.test.sh   # 4 cells, rc 0
+bash Blockchain/Dev/scripts/run-shell-suites.sh --list                                                   # 75 suites</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>rc 1, <strong>3 passed / 1 failed</strong> &rarr; <strong>4 passed, 0 failed</strong>, rc 0; all three CONTROL cells pass in the red arm</td></tr>
+<tr><td>named siblings</td><td><code>ks808_run_migrations_counts_skips_apart</code> 5/0, <code>run_migrations_failure_exit_code</code> 7/0, at base and after</td></tr>
+<tr><td>shell-suite discovery</td><td><strong>74 &rarr; 75</strong></td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

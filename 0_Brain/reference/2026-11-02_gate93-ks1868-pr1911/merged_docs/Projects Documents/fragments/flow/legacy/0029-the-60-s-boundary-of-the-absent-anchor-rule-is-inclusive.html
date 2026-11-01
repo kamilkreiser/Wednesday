@@ -1,0 +1,79 @@
+<h2>40. The 60 s boundary of the absent-anchor rule is INCLUSIVE, and a test now pins it at the constant (KS-1171)</h2>
+<h3>40.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Rule (c) of the absent-anchor decision in <code>services/anchoring/src/anchorSubmission.ts</code>
+      reads <code>lastAnsweredElapsedMs &gt;= ABSENT_MIN_LAST_ANSWER_MS</code> at <code>:345</code>, with
+      <code>ABSENT_MIN_LAST_ANSWER_MS = 60_000</code> and <code>ABSENT_MIN_ANSWERED_POLLS = 2</code> at
+      <code>:170-171</code>. </td><td>That <code>&gt;=</code> is the moment a <strong>second fee-paying
+      Cardano transaction may be minted</strong>, and nothing asserted which side of the boundary the
+      constant itself falls on: the comparison could be relaxed to <code>&gt;</code> and every suite
+      would stay green. This row adds <strong>no product code</strong>. It is a pin on an existing
+      money path, and KS-1171 stays open — it is In Progress because #1228 awaits a live sweep, and
+      this settles gate finding B1 only. The 8k item and the live sweep stay owed.
+    </td></tr></table>
+<h3>40.2 The figures, all measured on this worktree at base <code>0a6177ea5482</code></h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-by-tamper</td><td><strong>1 failed, 2 passed (3)</strong>, rc 1, failing on the
+<code>RED</code> cell for the exactly-at-the-constant case, then <strong>3 passed (3)</strong>, rc 0
+restored. Both control cells stay green in the tampered arm, which is what makes the red an
+assertion rather than a load failure</td></tr>
+<tr><td>the tamper, and its restore</td><td><code>:345</code>'s <code>&gt;=</code> changed to
+<code>&gt;</code>. The anchor string was proved <strong>unique (count 1)</strong> before the edit,
+with the bare constant name reading 2 as its control. Restored by content and asserted three ways:
+whole-file sha256/16 <code>310b2befe5cf4ce6</code> identical to the pre-tamper hash, <code>cmp</code>
+rc 0 against a kept copy, and <code>git diff</code> rc 0 on that path. The tamper was never staged
+and never committed</td></tr>
+<tr><td>whole anchoring suite</td><td><strong>28 files, 1 failed / 361 passed (362)</strong> at the
+base &rarr; <strong>29 files, 1 failed / 364 passed (365)</strong> at the head. +3 tests, and the
+<strong>same single failure on both sides</strong></td></tr>
+<tr><td>that one failure is NOT ours</td><td><code>threadTokenMint emulator round-trip</code>
+(<code>Could not serialize the data: Unsupported type</code>, inside
+<code>@lucid-evolution/plutus</code>). It is develop's own pre-existing red, recorded at
+<code>BACKLOG.md:182</code> under KS 562. <strong>Attributed, not claimed, and not fixed here</strong></td></tr>
+<tr><td>a transient worth recording</td><td>The <strong>first</strong> full-suite run after the new
+file was added also reported <code>db.retry.test.ts</code> &gt; <code>reports available immediately
+when the probe succeeds at boot</code> as <code>Error: Test timed out in 5000ms</code>. It is a
+<strong>cold-transform timeout, not a defect of this row</strong>: that file passes <strong>5/5
+alone</strong> on the same tree, and the second full-suite run is clean. This is the documented
+class at <code>BACKLOG.md:1182</code>, which records the identical symptom in
+<code>services/kyc</code>; this is the first sighting in <code>services/anchoring</code></td></tr>
+<tr><td>new test file</td><td>96 lines, 4,296 B, mode <strong>100644</strong>, sha256/16
+<code>f2e97786cd943561</code></td></tr>
+<tr><td>payload</td><td>4,524 B <code>11844b4b45cfdff2</code>, one section, no
+<code>diff --git</code> header. Strict <code>apply --check</code> rc 0 forward and rc 1 reverse at the
+base; tree <code>29c2837b0c74</code>; the re-apply control rc 1, so the apply is not vacuous</td></tr>
+<tr><td><code>tsc --noEmit -p services/anchoring</code></td><td>rc 0, 0 lines</td></tr>
+<tr><td>runner, from <code>node_modules</code></td><td><strong>vitest 4.1.11</strong>, agreeing two
+ways: <code>node_modules/vitest/package.json</code> and <code>vitest --version</code>
+(<code>vitest/4.1.11 darwin-arm64 node-v24.7.0</code>). node v24.7.0, npm 11.5.1. The service's own
+script is <code>vitest run</code>, which is what was used</td></tr>
+<tr><td>product code</td><td><strong>none</strong>. <code>anchorSubmission.ts</code> is byte-identical
+before and after, by whole-file sha256</td></tr>
+</table>
+<h3>40.3 Why a pin has no red at its base, and what the honest red is instead</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      A test that pins existing behaviour passes the moment it is written. </td><td>So there is no
+      red-before to quote, and quoting a green as if it were a red-to-green would be a false claim.
+      The red for this row is the <strong>reverted tamper</strong> above: the pinned comparison is
+      relaxed, the suite goes red on exactly the assertion that names the boundary, and the file is
+      restored with its hash asserted. A <strong>0 total / 0 failed</strong> reading would be a load
+      failure and would prove nothing; the reading here is 3 total with 1 failed.
+    </td></tr></table>
+<h3>40.4 Not covered</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Coverage only — no behaviour changes. </td><td>Nothing at runtime moves, so no live sweep is owed
+      <em>for this row</em>; the live sweep KS-1171 already owed for #1228 is unaffected and still
+      owed. The <strong>four platform suites (Schemathesis, Akto, Playwright, performance/k6) are
+      UNMEASURED, not passing</strong> — there is no local stack on
+      <code>http://localhost:6882</code>, and only the push's own SKIP lines are quoted. Three
+      <code>systemTest</code> packages declare <code>engines.node &gt;= 24.11.0</code> while this host
+      runs <strong>v24.7.0</strong>, which is recorded rather than worked around. The ticket does
+      <strong>not</strong> move to Done.
+    </td></tr></table>
+<h3>40.5 Running it</h3>
+<pre><code>cd Blockchain/Dev &amp;&amp; npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+cd services/anchoring
+npx vitest run src/__tests__/ks1171-b1-absent-boundary-is-inclusive.test.ts   # 3 passed
+npm test                                                                      # 365 passed, 1 pre-existing failure (KS 562)
+npx tsc --noEmit -p .                                                         # rc 0</code></pre>

@@ -1,0 +1,20 @@
+<h2>Preflight leg 2 prints which tracked lockfiles it did not install &mdash; KS-1426</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> <code>lockfile-cleanroom.sh</code> (preflight leg 2) installs the locks that a <code>find</code> over <code>services packages frontend scripts</code> reaches. At the base that is 35 of the 45 tracked <code>package-lock.json</code> files. The leg used to print <code>All 35 standalone lock(s) pass</code> and say nothing about the other 10. </td></tr><tr><td>It now also prints <code>surface: N of M</code> and the paths it did not install, when it is started with no arguments. In scratch pre-push hook runs the count read the same from a main checkout and from a linked worktree: a pre-push hook in a linked worktree has <code>GIT_DIR</code> exported to it, and the function clears git&rsquo;s own repository-local variables before it asks git anything. It reports; it does not install them, and its exit-code lines are not edited. </td></tr><tr><td>The ticket stays open. The install-widening is a later change, and a live run on a developer machine and on CI is owed. </td></tr>
+    </table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotchas when you run this locally.</strong></td><td> The new suite runs the leg from a scratch copy, and the leg changes into the directory above its own path first (line 35). Run from a non-repo directory and from the worktree, it printed byte-identical output. </td></tr><tr><td>The exit code equals the previous head&rsquo;s in 12 of 12 cases measured. When a git call fails the line says <code>cannot list</code> instead of printing a number (a failing <code>--show-prefix</code> used to print <code>0 of 6</code>, a failing <code>ls-files</code> <code>0 of 0</code>). Read the surface line as a report, not as an assertion; a live run is still owed. </td></tr><tr><td>On a tree that is develop <code>a78413d3de3e</code> plus this change, the shell-suite count reads <strong>75</strong>, not 74. </td></tr>
+    </table></div>
+<h3>Running the cells</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/ks1426_lockfile_cleanroom_names_its_surface.test.sh   # 14 cells, rc 0
+bash Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh                                  # 56 cells, rc 0
+bash Blockchain/Dev/scripts/run-shell-suites.sh --list                                        # 75 suites
+bash -n Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh                         # rc 0</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base &rarr; head</td><td>rc 1, <strong>4 passed / 10 failed</strong> &rarr; rc 0, <strong>14 passed / 0 failed</strong>; the four control cells pass in the red arm. At the previous head: <strong>9 passed / 5 failed</strong></td></tr>
+<tr><td>extra arms (12 cases against the previous head, empty-array guard)</td><td><strong>33 of 33</strong> assertions; exit code equal to the previous head&rsquo;s in 12 of 12 cases</td></tr>
+<tr><td>surface on the real tree (computed from file lists)</td><td><strong>35 of 45</strong> tracked locks installed; 10 listed. The previous head&rsquo;s own hook run printed <strong>0 of 45</strong></td></tr><tr><td>real pre-push hook, scratch repo, linked worktree</td><td>previous head <strong>0 of 6</strong> &rarr; this commit <strong>3 of 6</strong>; main checkout 3 of 6 for both</td></tr>
+<tr><td>sibling suite that names the leg</td><td>56 passed / 0 failed with the changed script; it plants a stub of the leg</td></tr>
+<tr><td>shell-suite discovery</td><td><strong>74 &rarr; 75</strong></td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

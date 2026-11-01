@@ -1,0 +1,105 @@
+<h2>16. GET /api/anchors/tx/{txHash} is declared in the published contract (KS-723)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this pins.</strong></td><td><code>GET /api/anchors/tx/:txHash</code> is routed by
+      <code>services/anchoring/src/index.ts:1089</code> and answers
+      <code>{ success: true, data: &lt;one anchor&gt; }</code>, but the published OpenAPI contract
+      did not declare it. </td></tr><tr><td>An undeclared operation is invisible to every offline check: a change to
+      its response shape broke no test, and the contract suites had no operation to generate
+      against. </td></tr><tr><td>It is now registered on the shared registry that
+      <code>anchoring.openapi.ts</code> populates on import, so the generated document carries it.
+    </td></tr><tr><td class="pm-topic" rowspan="5"><strong>Scope — this is <em>narrowing</em>, not closing.</strong></td><td> KS-723 covers the
+      remaining ~157 routed-but-undocumented <code>/api</code> operations; this declares
+      <strong>one</strong> of them. </td></tr><tr><td>Stuart named <em>two</em> <code>/api/anchors</code> operations
+      on the ticket (2026-09-29) as Platform-S hot-path reads. </td></tr><tr><td>Only
+      <code>GET /api/anchors/tx/{txHash}</code> is declared here. </td></tr><tr><td>The other,
+      <code>GET /api/anchors/{id}</code> (<code>index.ts:827</code>), is deliberately left out:
+      declaring it on this registry would make the gateway answer <strong>405</strong> to two LIVE
+      <code>POST</code> routes that share the path prefix. </td></tr><tr><td>It is not rejected and it is not covered
+      — <strong>KS-723 stays open for it</strong>.
+    </td></tr></table>
+<h3>16.1 The cells</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      One new file,
+      <code>Blockchain/Dev/services/anchoring/src/__tests__/ks723-anchors-tx-lookup-is-declared.test.ts</code>,
+      <strong>5 cells</strong>. </td><td>It renders the document the generator publishes, from the shared
+      registry the anchoring module populates on import — no server, no database, no network.
+      Three cells are the red arms (<code>TX1</code> the operation exists with
+      <code>bearerAuth</code> and a required <code>txHash</code> path parameter; <code>TX2</code>
+      the 200 body is the success envelope around <strong>one</strong> anchor, not an array or a
+      list wrapper; <code>TX3</code> the 404 is declared). The remaining two are the file's own
+      controls and pass at both ends, which is what makes the three reds discriminating rather
+      than a blanket failure.
+    </td></tr></table>
+<h3>16.2 Running it</h3>
+<pre><code>cd Blockchain/Dev
+npm ci --ignore-scripts &amp;&amp; npm run build --workspace=packages/shared
+npm run test --workspace=services/anchoring -- --run src/__tests__/ks723-anchors-tx-lookup-is-declared.test.ts   # 5 cells
+npm run test --workspace=services/anchoring            # 28 files / 362 tests
+npm run generate-openapi &amp;&amp; npm run check:openapi</code></pre>
+<h3>16.3 Figures, measured</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Base <code>d784b613c81e</code>. </td><td>Measured <strong>2026-10-05</strong>, host
+      <strong>Kamil’s Mac Studio (2)</strong>, node <strong>v24.7.0</strong>, vitest.
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>Red-first, by assertion.</strong></td><td> With the test section applied and the product hunk
+      absent: <strong>rc 1, 3 failed / 2 passed of 5 executed</strong>. </td></tr><tr><td>Five cells executed, so
+      this is an assertion red and not a load failure — each red prints a real
+      <code>AssertionError</code> (TX1: <code>expected [ false, undefined, undefined, … ] to
+      deeply equal [ true, [ { bearerAuth: [] } ], … ]</code>). </td></tr><tr><td>With the product hunk
+      applied, the same command on the same file reads <strong>rc 0, 5 passed of 5</strong>.
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>The anchoring suite at both ends, same binary.</strong></td><td> Base <strong>27 files /
+      357 tests, 1 failed</strong> → head <strong>28 files / 362 tests, 1 failed</strong>:
+      a delta of exactly <strong>+1 file / +5 tests</strong> and <strong>0 new reds</strong>. </td></tr><tr><td>The
+      one failure is <code>src/__tests__/threadTokenMint.test.ts</code> at <em>both</em> ends
+      — the pre-existing <code>@lucid-evolution</code> red already recorded at
+      <code>BACKLOG.md:182</code> on develop, not introduced here. </td></tr><tr><td>The base reading was taken by
+      reverting the two tracked files and moving the new test aside, then restoring and proving all
+      three <strong>byte-identical by sha256</strong> before re-running.
+    </td></tr><tr><td class="pm-topic" rowspan="1"><strong>The spec was REGENERATED, never pasted.</strong></td><td><code>npm run generate-openapi</code> rc 0, <strong>310 paths</strong>;
+      <code>docs/openapi/secuura-api.yaml</code> <strong>1,351,218 → 1,354,452 bytes</strong>
+      by <code>wc -c</code>, with <code>/api/anchors/tx/</code> going <strong>0 → 1</strong>
+      occurrence. <code>check:openapi</code> is <strong>rc 0</strong> (406 example blocks resolve).
+      <strong>Drift control:</strong> a one-byte edit to the generated YAML
+      (<code>/api/anchors/tx/</code> → <code>/api/anchors/tX/</code>) makes it
+      <strong>rc 1</strong>, <code>CHECK FAIL: generated YAML differs from on-disk version</code>;
+      restored <code>cmp</code>-identical and rc 0 again, so the zero drift is a measurement.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>A figure in the generator’s own output that is NOT a byte count.</strong></td><td><code>[gen-openapi] wrote … (310 paths, 1349709 bytes)</code> is a
+      <strong>character</strong> count: the file holds <strong>2,375 non-ASCII characters</strong>,
+      so <code>wc -c</code> reads <strong>1,354,452</strong>. </td></tr><tr><td>The figures above quote
+      <code>wc -c</code>.
+    </td></tr><tr><td class="pm-topic" rowspan="4"><strong><code>tsc</code> is rc 0, and the claim is narrower than that reads.</strong></td><td><code>tsc -p services/anchoring --noEmit</code> is <strong>rc 0</strong>, and its positive
+      control fires on the product file: a planted <code>const x: number = "not a number"</code>
+      in <code>anchoring.openapi.ts</code> gives <strong>rc 2 TS2322</strong>, restored
+      byte-identical. </td></tr><tr><td>But <code>services/anchoring/tsconfig.json</code> has
+      <code>exclude: ['node_modules','dist','src/__tests__']</code>, so <strong>the new test file
+      is not in the program</strong> — 0 occurrences under <code>--listFilesOnly</code>, and
+      the same planted error <em>inside the test file</em> still gives rc 0. </td></tr><tr><td>So tsc covers
+      <code>anchoring.openapi.ts</code> and says <strong>nothing</strong> about the test file,
+      which vitest transpiles without type-checking. </td></tr><tr><td>The tsconfig is deliberately
+      <strong>not widened</strong> here.
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>The held carve’s hunk header was wrong, and the count is the evidence.</strong></td><td>
+      The held payload (sha256 <code>b71a6ced32da71cf</code>, 4,605 B, left untouched) declares
+      <code>@@ -406,7 +406,44 @@</code> and <code>git apply</code> refuses it with
+      <strong>rc 128 <code>corrupt patch at line 57</code></strong>. </td></tr><tr><td>Counting the hunk body —
+      51 lines — gives <strong>old 7</strong> (matching the shipped <code>-406,7</code>) and
+      <strong>new 50</strong>; the shipped <code>44</code> is short by 6. </td></tr><tr><td>A header-fixed copy
+      differing in exactly that one line was applied; the held artefact was re-hashed afterwards and
+      is unchanged.
+    </td></tr></table>
+<h3>16.4 Timing</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>No stated timing covers an anchoring unit suite.</strong></td><td> Instrument, printed so it
+      can be re-run: <code>/usr/bin/grep -c -i -E</code> over both platform-k docs at the base SHA
+      <code>d784b613c81e</code>. <code>anchoring.*unit suite</code> <strong>0</strong> flow /
+      <strong>0</strong> cheat. </td></tr><tr><td>Must-hit controls in the same files: <code>auth</code>
+<strong>89</strong> / <strong>81</strong> and <code>anchoring</code> <strong>18</strong> /
+      <strong>19</strong>, so the zeroes are measurements and not a blind grep. </td></tr><tr><td>No stated timing
+      row is amended and no tier budget moves.
+    </td></tr><tr><td class="pm-topic" rowspan="5"><strong>Not covered.</strong></td><td> A live sweep (skill §5f) — nothing was exercised
+      against a running stack, no gateway and no database, so <strong>KS-723 does not move to
+      Done</strong> on this change’s account and stays open for
+      <code>GET /api/anchors/{id}</code>. </td></tr><tr><td>Whether the gateway actually serves the newly declared
+      operation is <strong>UNMEASURED</strong>: this declares a contract, it does not change a
+      route, and the handler at <code>index.ts:1089</code> is untouched. </td></tr><tr><td>That the runtime response
+      really matches the declared envelope is likewise <strong>UNMEASURED</strong> — the
+      cells read the generated document, not a live response. </td></tr><tr><td>The new test file is
+      <strong>type-unchecked</strong> (above). </td></tr><tr><td>The four platform suites (Schemathesis, Akto,
+      Playwright, k6) were NOT run.
+    </td></tr></table>

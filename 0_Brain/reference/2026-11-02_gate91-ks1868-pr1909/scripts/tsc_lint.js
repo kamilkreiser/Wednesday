@@ -1,0 +1,13 @@
+const { spawnSync } = require('child_process'); const fs = require('fs');
+const G = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate91-ks1868-pr1909';
+const D = G + '/repo/Blockchain/Dev', A = D + '/services/nft-certificate', B = D + '/node_modules/.bin';
+const run = (cmd, args, cwd, log) => { const r = spawnSync(cmd, args, { cwd, encoding: 'utf8', maxBuffer: 1 << 26 }); fs.writeFileSync(G + '/logs/' + log, (r.stdout || '') + (r.stderr || '') + '\nrc=' + r.status + '\n'); console.log(log, 'rc', r.status); };
+const news = ['src/__tests__/ks1868-nft-get-certification-data-unreadable-throw.test.ts','src/__tests__/ks1868-nft-get-wallet-nft-certificates-unreadable-throw.test.ts'];
+run(B + '/eslint', ['src/services/minting.service.ts', ...news], A, 'eslint_pr_files.log');
+fs.writeFileSync(A + '/src/zz_gate91_planted.ts', 'export function f(): number { const unused = 1; debugger; return 2; }\n');
+run(B + '/eslint', ['src/zz_gate91_planted.ts'], A, 'eslint_planted.log');
+fs.renameSync(A + '/src/zz_gate91_planted.ts', G + '/logs/_quarantine/zz_gate91_planted.ts');
+const t = A + '/' + news[0]; const orig = fs.readFileSync(t, 'utf8');
+fs.writeFileSync(t, orig + '\nconst x: number = "gate91";\n');
+run(B + '/tsc', ['-p', 'tsconfig.gate91.json'], A, 'tsc_tests_planted.log');
+fs.writeFileSync(t, orig); console.log('restored test file', fs.readFileSync(t, 'utf8') === orig);

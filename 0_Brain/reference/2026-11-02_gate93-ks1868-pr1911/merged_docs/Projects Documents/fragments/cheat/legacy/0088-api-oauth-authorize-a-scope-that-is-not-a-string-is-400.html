@@ -1,0 +1,18 @@
+<h2>/api/oauth/authorize: a scope that is not a string is 400 invalid_request &mdash; KS-1219</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> <strong>Behaviour change:</strong> <code>GET</code> and <code>POST /api/oauth/authorize</code> now refuse a <code>scope</code> that is present and is not a string with 400 <code>invalid_request</code>. An array (a repeated <code>?scope=</code> or a JSON array) used to be a 500 <code>server_error</code>; a JSON <code>null</code>, <code>0</code> or <code>false</code> used to be read as an absent scope (the default allow-list) and is now a 400. No published message changes. </td></tr><tr><td>Wednesday accepted the tightening on 2026-10-28. The cells cover the array carriers and the null, 0 and false edge. Authentication surface. A local model wrote the patch; it is applied unchanged.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> A running stack, real clients, tokens or a database, and a Node 24 LTS run (the host is Node 26.8.1). The other authorize parameters are not covered: a repeated <code>state</code> or <code>code_challenge</code> on GET still answers 500, and scope is neither deduplicated nor bounded (separate ticket, KS 1797). </td></tr><tr><td>The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run src/__tests__/ks1219-authorize-refuses-an-array-valued-scope.test.ts   # 9 cells, rc 0
+cd Blockchain/Dev/services/auth &amp;&amp; npx vitest run                                                                        # 108 files / 1281 cells on the merged tree, rc 0
+cd Blockchain/Dev &amp;&amp; node scripts/typecheck-tests/check.cjs services/auth                                                 # rc 0, 0 new</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new file against the unfixed product line</td><td><strong>6 failed / 3 passed</strong> of 9, all AssertionError (R4 answers 302 at the pin); with the change <strong>9 / 9</strong>; a truthy-only guard mutant fails exactly the 3 R4 cells</td></tr>
+<tr><td>services/auth, merged tree</td><td><strong>108 files / 1281 cells, all passed</strong>, 0 failed, 0 skipped</td></tr>
+<tr><td>type-check and lint</td><td><code>tsc -p tsconfig.json</code> rc 0; the repo test ratchet examined 159 files, 0 new; <code>eslint</code> on the two files rc 0</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, merged tree (develop <code>92a02a356139</code> in; written at base <code>bd6697e079fc</code>), 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

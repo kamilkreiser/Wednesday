@@ -1,0 +1,21 @@
+<h2>isPlatformRole and requireKeyAdmin: exact ASCII fold, non-string role refused &mdash; KS-1591</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The platform-administrator predicate (<code>isPlatformRole</code>, packages/shared) and the key-admin gate in front of the key routes (<code>requireKeyAdmin</code>, services/security) upper-cased the role with the locale-aware <code>toUpperCase()</code> after stringifying it. A role with U+0131 or U+017F in it, or an array holding an admin role, therefore read as an admin role. Both now apply an ASCII-only fold and refuse a role that is not a string. </td></tr><tr><td>Every spelling admitted before (SYSTEM_ADMIN, SUPER_ADMIN, ISSUER_ADMIN and their lower and mixed case forms) is admitted now; the change can only remove access. Two local-model passes, applied unchanged.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> Whether such a token can reach either predicate in production, the other importers of <code>isPlatformRole</code> (their suites were not run), and a Node 24 LTS run (the host is Node 26.8.1). </td></tr><tr><td>A running stack and the four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are not claimed as passing. The change is not deployed.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/packages/shared &amp;&amp; npx vitest run src/__tests__/ks1591-is-platform-role-is-an-exact-ascii-fold.test.ts         # 13 cells, rc 0
+cd Blockchain/Dev/services/security &amp;&amp; npx vitest run src/__tests__/ks1591-require-key-admin-is-an-exact-ascii-fold.test.ts    # 7 cells, rc 0
+cd Blockchain/Dev/services/security &amp;&amp; npx vitest run                                                                          # 34 files / 368 cells, rc 0
+cd Blockchain/Dev &amp;&amp; node scripts/typecheck-tests/check.cjs services/security                                                   # rc 0, 0 new</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>shared test against the unfixed product line</td><td><strong>6 failed / 7 passed</strong> of 13, all AssertionError; with the change <strong>13 / 13</strong></td></tr>
+<tr><td>security test against the unfixed product line</td><td><strong>3 failed / 4 passed</strong> of 7, all AssertionError; with the change <strong>7 / 7</strong></td></tr>
+<tr><td>packages/shared, before &rarr; after</td><td><strong>54 files / 1034 cells &rarr; 55 files / 1047</strong>; 1 failed on both sides (the Node 26 <code>wallet-signature</code> cell; KS 1727, KS 1739); 0 vanished, 13 new. A first run under load 10 timed out three unrelated cells; they pass alone (108 / 108) and the repeat run was clean</td></tr>
+<tr><td>services/security, before &rarr; after</td><td><strong>33 files / 361 cells &rarr; 34 files / 368</strong>, 0 failed on both sides; 0 vanished, 7 new</td></tr>
+<tr><td>type-check</td><td><code>tsc -p tsconfig.json</code> rc 0 in both; the shared tests-included program has 0 errors in the two files of this change (24 in others), planted control rc 2; the services/security test ratchet examined 53 files (52 at the base), 0 new</td></tr>
+<tr><td>host and tools</td><td>Kamil&rsquo;s MacBook Pro (Mac14,5, Apple M2 Max, 32 GB), shared with other sessions, base <code>bd6697e079fc</code>, 2026-10-28 (UTC); host Node v26.8.1 (not an LTS measurement), vitest 4.1.12, TypeScript 5.9.3</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

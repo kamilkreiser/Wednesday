@@ -1,0 +1,315 @@
+<title>Shared-Stack Safety Evidence</title>
+<style>
+  :root{
+    --bg:#fbfaf8; --surface:#ffffff; --ink:#1c1b19; --muted:#5f5b55; --faint:#8a857e;
+    --line:#e5e1db; --accent:#8a4b2f; --ok:#2f6b46; --ok-bg:#eaf3ee;
+    --warn:#8a6a1f; --warn-bg:#faf3e0; --bad:#93332b; --code-bg:#f4f1ec;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#16150f; --surface:#1e1d17; --ink:#eceae4; --muted:#a8a29a; --faint:#7e786f;
+    --line:#302e26; --accent:#d9a07a; --ok:#8fce9f; --ok-bg:#1c2c22;
+    --warn:#e0bf72; --warn-bg:#2b2618; --bad:#e5928a; --code-bg:#24231c;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#16150f; --surface:#1e1d17; --ink:#eceae4; --muted:#a8a29a; --faint:#7e786f;
+    --line:#302e26; --accent:#d9a07a; --ok:#8fce9f; --ok-bg:#1c2c22;
+    --warn:#e0bf72; --warn-bg:#2b2618; --bad:#e5928a; --code-bg:#24231c;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.62 ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:56rem; margin:0 auto; padding:3.5rem 1.5rem 6rem}
+  header{border-bottom:2px solid var(--ink); padding-bottom:1.4rem; margin-bottom:2.5rem}
+  .eyebrow{
+    font:600 .72rem/1.4 ui-sans-serif,system-ui,sans-serif; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 .6rem
+  }
+  h1{font-size:clamp(1.9rem,4.4vw,2.7rem); line-height:1.14; margin:0 0 .7rem; letter-spacing:-.015em}
+  .sub{color:var(--muted); margin:0; font-size:1.03rem}
+  .meta{
+    display:flex; flex-wrap:wrap; gap:.45rem 1.4rem; margin-top:1.15rem;
+    font:.8rem/1.5 ui-sans-serif,system-ui,sans-serif; color:var(--faint)
+  }
+  .meta b{color:var(--muted); font-weight:600}
+  h2{
+    font-size:1.32rem; margin:2.9rem 0 .9rem; letter-spacing:-.01em;
+    padding-bottom:.4rem; border-bottom:1px solid var(--line)
+  }
+  h3{font-size:1.03rem; margin:1.9rem 0 .55rem; letter-spacing:-.005em}
+  p{margin:0 0 1rem}
+  .bluf{
+    background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--accent);
+    border-radius:4px; padding:1.3rem 1.5rem; margin:0 0 2rem
+  }
+  .bluf p:last-child{margin-bottom:0}
+  .scoreboard{display:grid; grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr)); gap:.8rem; margin:1.8rem 0 2.2rem}
+  .stat{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.95rem 1rem}
+  .stat .n{
+    font:700 1.65rem/1.1 ui-sans-serif,system-ui,sans-serif;
+    letter-spacing:-.02em; color:var(--ok); display:block
+  }
+  .stat .l{
+    font:.71rem/1.4 ui-sans-serif,system-ui,sans-serif; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--faint); margin-top:.3rem; display:block
+  }
+  .tbl{overflow-x:auto; margin:0 0 1.4rem; border:1px solid var(--line); border-radius:4px; background:var(--surface)}
+  table{border-collapse:collapse; width:100%; font:.88rem/1.5 ui-sans-serif,system-ui,sans-serif}
+  th,td{text-align:left; padding:.6rem .85rem; border-bottom:1px solid var(--line); vertical-align:top}
+  th{
+    font-weight:600; font-size:.73rem; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--faint); background:var(--bg); white-space:nowrap
+  }
+  tr:last-child td{border-bottom:0}
+  td code, p code, li code{
+    font:.85em/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
+    background:var(--code-bg); padding:.1em .38em; border-radius:3px; word-break:break-word
+  }
+  .tag{
+    display:inline-block; font:600 .7rem/1 ui-sans-serif,system-ui,sans-serif;
+    letter-spacing:.05em; padding:.3em .55em; border-radius:3px; white-space:nowrap
+  }
+  .tag.pass{color:var(--ok); background:var(--ok-bg)}
+  .tag.open{color:var(--warn); background:var(--warn-bg)}
+  pre{
+    background:var(--code-bg); border:1px solid var(--line); border-radius:4px;
+    padding:.95rem 1.1rem; overflow-x:auto; margin:0 0 1.3rem;
+    font:.82rem/1.62 ui-monospace,SFMono-Regular,Menlo,monospace
+  }
+  ul{margin:0 0 1.1rem; padding-left:1.25rem}
+  li{margin-bottom:.45rem}
+  .note{
+    background:var(--warn-bg); border:1px solid var(--line); border-left:4px solid var(--warn);
+    border-radius:4px; padding:1rem 1.2rem; margin:0 0 1.4rem; font-size:.94rem
+  }
+  .note p:last-child{margin-bottom:0}
+  footer{
+    margin-top:3.5rem; padding-top:1.2rem; border-top:1px solid var(--line);
+    font:.79rem/1.6 ui-sans-serif,system-ui,sans-serif; color:var(--faint)
+  }
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">KS-666 &middot; Platform-K</p>
+  <h1>Shared-Stack Safety Evidence</h1>
+  <p class="sub">Four isolated stack slots, a destructive-rebuild guard, and per-slot test artifacts &mdash; verified by running, not by reading.</p>
+  <div class="meta">
+    <span><b>Commit</b> 91df72c03</span>
+    <span><b>Branch</b> feature/ks-666-&hellip; (1 ahead of develop, 0 behind)</span>
+    <span><b>PR</b> #729 &mdash; open, not merged</span>
+    <span><b>Verified</b> from an empty Docker</span>
+    <span><b>Host</b> Mac, arm64, Docker Desktop 6 CPU / 31.3 GiB</span>
+    <span><b>Date</b> 2026-08-20</span>
+  </div>
+</header>
+
+<div class="bluf">
+  <p><b>Bottom line.</b> Before this change, one Docker project, one set of ports, one database volume and one set of result paths were shared by every platform-k branch &mdash; so a routine <code>--rebuild</code> or <code>--fresh-db</code> on one branch silently destroyed another's stack and overwrote its results. That is now fixed: four slots, each with its own compose project, ports, volumes, network and <code>&lt;ticket&gt;-slot&lt;N&gt;</code> artifacts, behind a guard that refuses destructive operations against a stack it does not own.</p>
+  <p>Every figure below comes from a run at commit <code>91df72c03</code> that began by tearing Docker down to <b>zero containers, zero volumes, zero images</b> and rebuilding. Working tree: <b>0 modified, 0 untracked</b>. Nothing here is quoted from an earlier session.</p>
+</div>
+
+<div class="scoreboard">
+  <div class="stat"><span class="n">11/11</span><span class="l">gates green</span></div>
+  <div class="stat"><span class="n">2,029</span><span class="l">unit tests</span></div>
+  <div class="stat"><span class="n">0</span><span class="l">off-slot references</span></div>
+  <div class="stat"><span class="n">8,889&rarr;0</span><span class="l">foreign refs in Akto report</span></div>
+  <div class="stat"><span class="n">142</span><span class="l">containers, 6 stacks</span></div>
+  <div class="stat"><span class="n">0</span><span class="l">results committed</span></div>
+</div>
+
+<h2>1. Gates &mdash; 11 of 11, in 26 seconds</h2>
+<p>Run against the live six-stack estate immediately after a rebuild from empty Docker.</p>
+<div class="tbl"><table>
+  <tr><th>Gate</th><th>Asserts</th><th>Result</th></tr>
+  <tr><td><code>check-stack-safety.sh</code></td><td>66 shared-stack safety invariants</td><td><span class="tag pass">PASS</span></td></tr>
+  <tr><td><code>check-compose-stack-safety.mjs</code></td><td>18 compose-level invariants</td><td><span class="tag pass">PASS</span></td></tr>
+  <tr><td><code>check-port-crossover.mjs</code></td><td>98 allocations, 3 configurations, disjoint slots 1&ndash;4</td><td><span class="tag pass">PASS</span></td></tr>
+  <tr><td><code>check-container-isolation.sh</code></td><td>6 invariants across 6 live stacks</td><td><span class="tag pass">PASS</span></td></tr>
+  <tr><td><code>check_container_isolation.test.sh</code></td><td>48</td><td><span class="tag pass">48/48</span></td></tr>
+  <tr><td><code>check_script_portability.test.sh</code></td><td>21</td><td><span class="tag pass">21/21</span></td></tr>
+  <tr><td><code>stack_guard.test.sh</code></td><td>17</td><td><span class="tag pass">17/17</span></td></tr>
+  <tr><td><code>stack_env.test.sh</code></td><td>25</td><td><span class="tag pass">25/25</span></td></tr>
+  <tr><td><code>stop_secuura.test.sh</code></td><td>11</td><td><span class="tag pass">11/11</span></td></tr>
+  <tr><td><code>slot_target.test.sh</code></td><td>58</td><td><span class="tag pass">58/58</span></td></tr>
+  <tr><td><code>run_in_slot.test.sh</code></td><td>11</td><td><span class="tag pass">11/11</span></td></tr>
+</table></div>
+<p>The 26-second total is itself evidence. An earlier run of the same gates took ten minutes
+<em>each</em> &mdash; a background watchdog in the orchestration held the stdout pipe open, so every
+call cost its full timeout. That is covered in &sect;6.</p>
+
+<h2>2. Mutation campaign &mdash; nothing survived</h2>
+<p>A gate that cannot fail proves nothing. Each safety property was reverted one at a time and the seven gate suites re-run, with a green baseline confirmed before and after the campaign. The run executes in a clean detached worktree so the result reflects CI rather than ambient local state.</p>
+<pre>  remove local-url detection                     caught by 1 / 7
+  schemathesis loses its slot target             caught by 1 / 7
+  COMPOSE_PROJECT_NAME leaks to harnesses        caught by 1 / 7
+  &hellip;
+
+  caught: 24   NOT caught: 0   skipped: 0
+  final baseline: all 7 green</pre>
+
+<h2>3. Unit suites &mdash; 2,029 green</h2>
+<div class="tbl"><table>
+  <tr><th>Suite</th><th>Runner</th><th>Result</th></tr>
+  <tr><td>Akto</td><td>vitest</td><td><span class="tag pass">344 passed</span></td></tr>
+  <tr><td>Schemathesis</td><td>pytest</td><td><span class="tag pass">1,461 passed</span></td></tr>
+  <tr><td>Performance</td><td>vitest</td><td><span class="tag pass">179 passed</span></td></tr>
+  <tr><td>Playwright</td><td>node --test</td><td><span class="tag pass">45 passed</span></td></tr>
+</table></div>
+<p>This branch adds <b>13 new test files and modifies 3</b> &mdash; +2,069 lines of tests. Every
+safety property is mutation-tested: each is proven to turn red when the fix it guards is reverted.</p>
+
+<h2>4. Live &mdash; rebuilt from nothing, four slots concurrent</h2>
+<pre>TEARDOWN   before: 152 containers &middot; 18 volumes &middot; 137 images
+           after:    0 &middot;  0 &middot;  0 &middot; 0 networks   (verified by count, never by exit code)
+
+REBUILD    slot 1 exit=0    akto slot 3 exit=0
+           slot 2 exit=0    akto slot 4 exit=0
+           slot 3 exit=0
+           slot 4 exit=0
+
+STACKS     33 ks-666  33 secuura_slot2  33 secuura_slot3  33 secuura_slot4
+            5 akto_s3   5 akto_s4                          = 142 containers
+
+GATEWAYS   :6882 &rarr; 200   :6982 &rarr; 200   :7082 &rarr; 200   :7182 &rarr; 200
+           9090 free &mdash; observability Prometheus keeps it</pre>
+
+<h2>4b. Results isolation &mdash; the claim this branch exists to make</h2>
+<p>All four harnesses run <b>concurrently, one per slot</b>. Every <code>localhost:&lt;port&gt;</code>
+reference in each harness&rsquo;s log, counted:</p>
+<div class="tbl"><table>
+  <tr><th>Harness</th><th>Own slot</th><th>:6882</th><th>:6982</th><th>:7082</th><th>:7182</th><th>Verdict</th></tr>
+  <tr><td>Playwright</td><td>slot 1 &mdash; :6882</td><td><b>1</b></td><td>0</td><td>0</td><td>0</td><td><span class="tag pass">ISOLATED</span></td></tr>
+  <tr><td>k6 performance</td><td>slot 2 &mdash; :6982</td><td>0</td><td><b>1</b></td><td>0</td><td>0</td><td><span class="tag pass">ISOLATED</span></td></tr>
+  <tr><td>Schemathesis</td><td>slot 3 &mdash; :7082</td><td>0</td><td>0</td><td><b>62</b></td><td>0</td><td><span class="tag pass">ISOLATED</span></td></tr>
+  <tr><td>Akto</td><td>slot 4 &mdash; :7182</td><td>0</td><td>0</td><td>0</td><td><b>2</b></td><td><span class="tag pass">ISOLATED</span></td></tr>
+</table></div>
+<p><b>Zero off-slot references.</b> Every count sits on the diagonal.</p>
+
+<h3>The stronger evidence: what the Akto artifact says about itself</h3>
+<p>Log counts are weak for harnesses that log few URLs. The artifact scan is not &mdash; it reads
+11,466 host references inside the slot-4 report:</p>
+<div class="tbl"><table>
+  <tr><th>Slot-4 Akto report</th><th><code>:6882</code> (slot 1)</th><th><code>:7182</code> (slot 4)</th></tr>
+  <tr><td>before the labelling fix</td><td><b>8,889</b></td><td>2,227</td></tr>
+  <tr><td>after</td><td><b>0</b></td><td><b>11,466</b></td></tr>
+</table></div>
+<p>The traffic was always isolated; the <em>record</em> of it was not. A slot-4 report named slot 1
+on every endpoint and every copy-curl button &mdash; indistinguishable by content from a slot-1
+report, and therefore worse than an obvious error, because it still looked authoritative.</p>
+
+<h3>Port allocation</h3>
+<p>Slot 1 keeps the historic ports; slot N adds <code>100 &times; (N&minus;1)</code>. Numbering is <b>shared with platform-s</b> (platform-s#544 / PS-622) and recorded in <code>scripts/port-allocations.json</code>, which the crossover gate reads.</p>
+<div class="tbl"><table>
+  <tr><th>Slot</th><th>Gateway</th><th>Postgres</th><th>Redis</th><th>Metrics</th><th>Compose project</th></tr>
+  <tr><td>1</td><td>6882</td><td>6432</td><td>6379</td><td>9091</td><td><em>unset</em> &mdash; left to Compose</td></tr>
+  <tr><td>2</td><td>6982</td><td>6532</td><td>6479</td><td>9191</td><td><code>secuura_slot2</code></td></tr>
+  <tr><td>3</td><td>7082</td><td>6632</td><td>6579</td><td>9291</td><td><code>secuura_slot3</code></td></tr>
+  <tr><td>4</td><td>7182</td><td>6732</td><td>6679</td><td>9391</td><td><code>secuura_slot4</code></td></tr>
+</table></div>
+<p>Slot 1 deliberately leaves <code>COMPOSE_PROJECT_NAME</code> unset: guessing a name there would have orphaned every existing volume on the machine.</p>
+
+<h2>5a. A LOCAL run must name its slot (KS-1016, 2026-09-11)</h2>
+<p>The isolation above only holds for a run that said which slot it wanted. An unset slot used to mean slot 1
+silently &mdash; another ticket's stack on a shared machine &mdash; so every harness (Schemathesis, k6, Playwright,
+Akto and the shared provisioning step) now refuses to start against a <strong>local</strong> target when neither
+<code>SECUURA_STACK_SLOT</code> nor the platform-s alias <code>STACK_SLOT</code> is set, and prints the command to run:</p>
+<pre>No stack slot named. Every LOCAL system-test run must say which Docker stack it targets.
+  SECUURA_STACK_SLOT=2 python3 scripts/run.py pr
+  or: systemTest/run-in-slot.sh 2 python3 scripts/run.py pr</pre>
+<p><strong>Local only.</strong> Remote targets carry no slot and are left alone; CI is exempt because its isolated
+per-suite stacks are local by construction and deliberately unslotted (<code>CI=true</code>). Measured on slot 2,
+2026-09-11: no slot &rarr; exit 2, 0 docker calls, nothing provisioned; <code>STACK_SLOT=2</code> &rarr; 1,759 requests,
+all to :6982, run validity OK.</p>
+
+<h2>5. Results isolation</h2>
+<p>Every harness names its output <code>&lt;ticket&gt;-slot&lt;N&gt;</code> &mdash; including slot 1, so no run is left unlabelled and every number traces back to the stack that produced it.</p>
+<pre>systemTest/playwright/results/playwright-report-ks-666-slot1/
+systemTest/playwright/results/playwright-report-ks-666-slot3/
+systemTest/playwright/results/test-results-ks-666-slot1/
+systemTest/playwright/results/test-results-ks-666-slot3/
+
+systemTest/schemathesis/output/reports/test-fast-ks-666-&hellip;-slot1/   (+ latest-slot1)
+systemTest/schemathesis/output/reports/test-fast-ks-666-&hellip;-slot3/   (+ latest-slot3)
+
+systemTest/performance/reports/performance-reports/smoke-short-ks-666-&hellip;-slot1/
+systemTest/performance/reports/performance-reports/smoke-short-ks-666-&hellip;-slot3/
+
+systemTest/akto/output/reports-slot1/
+systemTest/akto/output/reports-slot3/</pre>
+<p>None of it reaches the repo. A gate asserts the ignore patterns actually match the generated names &mdash; the first version did not, because <code>test-results/</code> never matches <code>test-results-ks-666-slot1/</code>.</p>
+
+<h3>Serial within a slot, parallel across slots</h3>
+<p><code>systemTest/run-in-slot.sh</code> permits one suite at a time per slot, using an atomic <code>mkdir</code> lock released by a trap on EXIT/INT/TERM, with a 30-minute bounded wait. <b>The cause is the per-IP login rate limiter</b>: a second concurrent suite in the same slot trips it and poisons both runs. This applies to Schemathesis, Playwright, Akto and k6 alike &mdash; and after 429s appear, wait 15 minutes before retesting.</p>
+
+<h2>6. Defects this work surfaced</h2>
+<p>Found by <em>running</em> rather than reading. Five belong to one class &mdash; state or configuration
+pinned to slot 1 &mdash; and each was invisible until something ran on a slot other than 1.</p>
+<h3>In the platform tooling</h3>
+<ul>
+  <li><code>stop-secuura.sh</code> had no slot awareness &mdash; reproduced live: <b>35 containers survived a teardown that exited 0</b>.</li>
+  <li>A <code>COMPOSE_PROJECT_NAME</code> leak into the Akto harness joined it to the platform project; a <code>down --remove-orphans</code> then deleted <b>33 containers</b>.</li>
+  <li><b>Slot targeting had three root causes</b>, not one. The dominant was <code>runner/cli.py</code>&rsquo;s <code>--base-url</code> argparse <em>default</em>: argparse always supplies it, so the resolved config was overwritten every run. A slot-3 sweep sent <b>508 of 509 requests to slot 1</b> and still stamped its report <code>-slot3</code>.</li>
+  <li><b>Akto endpoint labelling had two sources</b> &mdash; the HAR <code>Host</code> header and the OpenAPI <code>servers[]</code> entry, both hardcoded to slot 1.</li>
+  <li><code>.auth/</code> (Playwright) and <code>.env</code> (Schemathesis) were <b>single shared paths holding bearer tokens</b>; two slots overwrote each other&rsquo;s credentials, so the loser authenticated against the wrong stack.</li>
+  <li>Akto&rsquo;s <code>preflight.ts</code> and <code>engineDiagnostics.ts</code> hardcoded the container <code>akto-testing</code>; on slot 4 that container does not exist, and the failure was reported as &ldquo;the Secuura target is not reachable&rdquo; &mdash; blaming the platform for a name the harness got wrong.</li>
+</ul>
+<h3>In my own gates &mdash; two that could not fail</h3>
+<ul>
+  <li>The container-name tests asserted a <em>locally redefined helper</em> instead of the real module, and passed with the bug restored.</li>
+  <li>The cross-slot count check filtered on project names matching <code>secuura_slot[0-9]+</code>, which <b>excludes slot 1</b> &mdash; its project is the worktree basename. It compared one stack against itself: vacuously true, incapable of failing. Non-vacuity guards now make an empty or single-item corpus a <em>failure</em>.</li>
+  <li>A port collision I introduced: Akto Mongo Express based at <b>9090</b>, head-on with observability Prometheus &mdash; re-opening a clash fixed on 2026-06-18. The crossover gate could not see it because only <em>slotted</em> platforms were modelled. Re-homed to 9490; observability is now in the registry.</li>
+</ul>
+<h3>In the orchestration &mdash; three that fabricated results</h3>
+<p>These produced output that read as genuine. On a project where the Mac <em>is</em> the evidence host,
+a GNU-only assumption does not fail loudly &mdash; it manufactures evidence.</p>
+<ul>
+  <li><code>timeout</code> does not exist on macOS: <b>eight gates reported FAIL without one of them running</b>.</li>
+  <li>A background watchdog inherited stdout; inside <code>$( )</code> command substitution waits for every writer, so <b>each gate cost its full 600s</b> &mdash; measured: <code>echo hello</code> under a 20s limit took 20s.</li>
+  <li><code>grep -E "^. (tests|pass)"</code> against node&rsquo;s 3-byte <code>&#8505;</code> prefix: BSD grep matches <code>.</code> per byte, so a <b>passing 45/45 suite printed blank</b>.</li>
+</ul>
+<p>All three are now checked by <code>check-script-portability.sh</code> (21 unit tests, mutation-proven),
+which also found two pre-existing defects nobody knew about &mdash; see &sect;7.</p>
+
+<h2>6b. Independent review &mdash; @kksecura, 2026-08-21</h2>
+<p>Reviewed at Kam&rsquo;s request. <b>Every published count reproduced exactly</b> &mdash; 66/18/98 on the
+offline gates, 17/25/11/48/21/58/11 on the shell suites &mdash; and the &ldquo;no product code&rdquo;
+claim and both bash 3.2 defects were verified independently. The port strategy was
+<b>endorsed</b>, with the crossover gate mutation-tested two ways including a cross-platform
+collision that only appears at slot 2 via the offset.</p>
+<p>Three findings, both blockers now fixed in this branch:</p>
+<div class="tbl"><table>
+  <tr><th>Finding</th><th>Status</th></tr>
+  <tr><td><b>The portability gate flagged its own test fixtures.</b> 17 of 19 locations were its own suite, so patching out both real defects left the headline count <em>identical</em> &mdash; it could never go green, and could not distinguish two real defects from none. The same vacuity class its own header warns about, one level up.</td><td><span class="tag pass">FIXED</span> &mdash; <code>__tests__/</code> excluded; 2 regression tests, mutation-proven</td></tr>
+  <tr><td><b>The guard was blind to any stack predating this PR.</b> An empty label read meant &ldquo;nothing running&rdquo; OR &ldquo;unlabelled stack&rdquo;, and both fell through silently &mdash; byte-identical output for a real 32-container host and a non-existent project. On merge day every stack is unlabelled, so it was blind exactly when rebuild churn peaks.</td><td><span class="tag pass">FIXED</span> &mdash; warns (never blocks) when containers exist without labels; 5 tests, mutation-proven</td></tr>
+  <tr><td><b>The merge gate named two cancelled tickets</b> (KS-672, KS-675 &mdash; both cancelled before the revision citing them).</td><td><span class="tag pass">FIXED</span> &mdash; repointed to KS-660</td></tr>
+</table></div>
+<p>Not reproduced in review: the four-slot live run and the rebuild-from-empty. His own note is worth
+recording &mdash; the scope limit below &ldquo;is the honest caveat and I would not have caught it if you
+hadn&rsquo;t written it down.&rdquo;</p>
+
+<h2>7. Open items</h2>
+<div class="tbl"><table>
+  <tr><th>Item</th><th>Owner</th><th>State</th></tr>
+  <tr><td><code>docker-build.sh:28</code> uses <code>declare -A</code> (bash 4) &mdash; with <code>set -euo pipefail</code> it <b>cannot run on macOS at all</b>: <code>line 28: api: unbound variable</code>. A fix was written, measured on bash 3.2, then <b>reverted</b> as platform-k base code. Kamil adopted the same approach on <code>fix/bash32-host-scripts-macos</code> and found a <b>second, independent</b> bash 3.2 defect only reachable once the first is fixed: line 211 <code>PIDS[@]: unbound variable</code>, which aborts after exactly <b>4 of 29 images</b>. Fixing only what was reported would have looked fixed. <b>Zero automated consumers</b> &mdash; human-invoked only.</td><td>Kamil</td><td><span class="tag open">FIXED ON KS-676</span></td></tr>
+  <tr><td><code>04-container-trivy.sh:30</code> uses <code>mapfile</code> (bash 4). <b>Mechanism corrected 2026-08-21 by @kksecura</b> &mdash; this entry previously said the image list is &ldquo;empty&rdquo;. It is left <b>unbound</b>, so <code>set -u</code> errors the length guard, the honest empty report is never written, the script emits <b>invalid JSON</b> and exits 0, and <code>09-aggregate-report.sh:100</code>&rsquo;s <code>jq &hellip; 2&gt;/dev/null</code> swallows the resulting exit 5. Fixing <code>mapfile</code> alone therefore still leaves a pipeline that reads a corrupt trivy artifact as &ldquo;no vulnerabilities&rdquo; from any cause. <b>Wired into CI</b> (<code>orchestrate.sh:40</code> &larr; <code>api-contract-tests.yml:94</code>) &mdash; the opposite of the risk ordering in this document&rsquo;s earlier revision.</td><td>Kamil</td><td><span class="tag open">FIXED ON KS-676</span></td></tr>
+  <tr><td>Shared platform-s &harr; platform-k port numbering</td><td>Kamil</td><td><span class="tag open">NEEDS REVIEW</span></td></tr>
+  <tr><td>GitHub Actions <code>startup_failure</code> repo-wide &mdash; confirmed on <em>two</em> repos, so org-level. Needs <code>admin:org</code>.</td><td>&mdash;</td><td><span class="tag open">BLOCKED</span></td></tr>
+  <tr><td>Schemathesis sweep findings &mdash; 57 across six classes, every one owned by KS-591 / KS-592 / KS-593 / KS-565 / KS-611 / KS-268, each re-measured and commented 2026-08-20</td><td>Kamil / Peter</td><td><span class="tag open">TRACKED ELSEWHERE</span></td></tr>
+  <tr><td><b>Harness-slot rotation</b> &mdash; each harness ran on ONE slot, so 12 of 16 combinations are untested. Every slot-1-hardcoding defect above was invisible until something ran on a different slot.<br><br>
+  <b>Schemathesis: DONE on all four slots (KS-1016, 2026-09-10/11).</b> Rotated one slot at a time with every other slot torn down to an empty host, launched with <em>no</em> slot-targeting variable set (the harness now derives gateway, container prefix, compose project and artifact suffix from <code>SECUURA_STACK_SLOT</code> itself, and refuses a cross-slot DB read or compose write), every <code>docker</code> call audited through a PATH shim on 09-10: <code>pr</code> profile on slots 4 &rarr; 3 &rarr; 2 &rarr; 1 &mdash; every request to the slot's own gateway (2,234&ndash;3,047 per run), zero to any other, zero <code>docker</code> calls, artifacts and <code>latest-slotN</code> carrying the slot. Rotation found what the offline suite could not: the container prefix and the artifact suffix did not self-resolve (fixed), and the resolver accepted <code>5</code> (the CI port) and <code>01</code> where <code>stack_env.sh</code> refuses both (fixed). On 09-11 (develop <code>9b222d37c</code> with <code>ADMIN_USER_PASSWORD</code> forwarded) the first valid sweeps ran: 0 of 316 operations errored, and all four harnesses ran in series on slot 4 with slots 1&ndash;3 empty &mdash; Schemathesis <code>pr</code>, k6 smoke (all gates), Playwright <code>ci:e2e</code> (12/12), Akto pre-merge.<br>
+  <b>One rule the series produced:</b> export <code>BOOTSTRAP_ADMIN_PASSWORD</code> on <em>every</em> suite run including Schemathesis &mdash; the first provisioning on a fresh stack creates the generated actors, and without it they are created as <code>OWNER</code> and stay that way for every later harness until the slot's database is reset (<code>systemTest/CLAUDE.md</code>, the test-discipline skill).<br>
+  Still untested: the other three harnesses on slots other than the one each ran on 2026-08-20.</td><td>Peter</td><td><span class="tag pass">SCHEMATHESIS DONE</span> &middot; <span class="tag open">3 HARNESSES OPEN</span></td></tr>
+</table></div>
+
+<div class="note">
+  <p><b>Do not merge PR #729 yet.</b> The two pre-merge tiers have not been run, because GitHub Actions is failing repo-wide. The PR body states this explicitly and leaves both acknowledgment boxes unticked.</p>
+</div>
+
+<footer>
+  KS-666 &middot; Distributed_Secuura &middot; commit <code>91df72c03</code> &middot; regenerated 2026-08-20 after a full teardown and rebuild.
+  Figures are from a live run on the Mac on the date shown; timing-sensitive numbers should be re-measured rather than quoted forward.
+</footer>
+</div>

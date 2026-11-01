@@ -1,0 +1,10 @@
+import { Writable } from 'node:stream';
+import { writeFileSync } from 'node:fs';
+import { generatePackage } from '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate92-ks1868-pr1910/repo/Blockchain/Dev/services/mcp-server/src/package-generator.ts';
+const chunks: Buffer[] = [];
+const w = new Writable({ write(c, _e, cb) { chunks.push(Buffer.from(c)); cb(); } });
+const fin = new Promise((r) => w.on('finish', r));
+await generatePackage({ agentType: 'cursor', apiKey: 'k-test', apiUrl: 'http://localhost:6882', connectorName: 'x', connectorId: '', scopes: ['register'], allowedDocumentTypes: [], workflowPolicy: 'enforce', rateLimit: 1 } as any, w);
+await Promise.race([fin, new Promise((r) => setTimeout(r, 3000))]);
+writeFileSync('/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate92-ks1868-pr1910/logs/bundle.zip', Buffer.concat(chunks));
+console.log('bytes', Buffer.concat(chunks).length);

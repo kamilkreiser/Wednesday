@@ -1,0 +1,17 @@
+<h2>The document-lookup catch can no longer be taken down by its own log line &mdash; KS-1524</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> Two things changed on <code>GET /api/platform/document-lookup</code>. A thrown <code>null</code> is now pinned (cell L6): <code>typeof null</code> is <code>'object'</code>, and the <code>err !== null</code> guard was the only thing stopping <code>Object.getPrototypeOf(null)</code> from throwing inside the catch. The old file passed 9 of 9 with that guard removed; the new file fails L6 alone, 3 of 3 runs. </td></tr><tr><td><strong>A behaviour change on a request path:</strong> building the log line and writing it are now each guarded. A thrown value that cannot be described (a throwing <code>message</code> getter, a Proxy whose <code>getPrototypeOf</code> or <code>ownKeys</code> trap throws, a revoked Proxy) or a logger that throws used to reject the handler from its own catch and leave the request with no response. The route now sends the constant 500 in all five cases and logs <code>thrown value that could not be described</code> for the first four. </td></tr><tr><td>Behaviour for every value that could be described before is unchanged: the original nine cells pass 9 of 9 against the fixed route. Each guard is pinned by its own cells (describe guard removed: 4 failed; logger guard removed: 1 failed).
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Not measured here.</strong></td><td> What an unhandled rejection does to a running gateway (the process posture, KS-1427); the log-line cap and the live-ingress measurement (items d and e of KS-1524, held); and the same describing expression on 11 other lines (the audit-log catch in the same file and 8 other files), which this change does not touch. The four platform suites are UNMEASURED and not claimed as a pass. </td></tr><tr><td><strong>Node v26.8.1</strong>, not the repository&rsquo;s stated LTS line of Node 24 (no Node 24 is installed on this host). Node 26 is an even-numbered line but its LTS status was not verified against the vendor schedule here, so these figures are declared as measured on v26.8.1, not claimed as LTS.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway &amp;&amp; npx vitest run src/__tests__/ks1510-document-lookup-logs-the-thrown-error.test.ts   # 15 cells, rc 0
+cd Blockchain/Dev &amp;&amp; npm run check:test-types                                                                                # rc 0; api-gateway 0 new</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, (c)</td><td>mutant O11 on a COPY: old file <strong>9 of 9</strong> (2 runs), new file, 15 cells, <strong>1 failed / 14 passed</strong> (3 runs, L6 alone)</td></tr>
+<tr><td>red-first, (a)</td><td>new cells vs the unfixed route <strong>5 failed / 10 passed</strong>; fixed route <strong>15 of 15</strong>; old nine cells vs the fixed route <strong>9 of 9</strong></td></tr>
+<tr><td>whole suite</td><td>api-gateway <strong>1203 &rarr; 1209</strong> tests, <strong>123 &rarr; 123</strong> files; 0 failed before and after</td></tr>
+<tr><td>type ratchet</td><td><code>check:test-types</code> rc 0; api-gateway 27 errors, 27 in the baseline, 0 new, 0 stale</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

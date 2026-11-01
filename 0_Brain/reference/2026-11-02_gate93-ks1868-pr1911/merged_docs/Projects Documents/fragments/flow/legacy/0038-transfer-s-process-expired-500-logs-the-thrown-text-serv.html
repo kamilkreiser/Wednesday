@@ -1,0 +1,38 @@
+<h2>47. transfer's process-expired 500 logs the thrown text server-side instead of returning it (KS-1410)</h2>
+<h3>47.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      <code>POST /api/delegations/admin/process-expired</code> answered <code>500</code> with
+      <code>message: error.message</code>, so the thrown error's own text reached the client's body, with no
+      <code>NODE_ENV</code> guard on that route. The handler now calls
+      <code>logger.error</code> with the route named and answers the constant
+      <code>Internal server error</code> in an unchanged <code>INTERNAL_ERROR</code> envelope. </td><td>The log
+      call sits inside the handler's <code>if (error instanceof Error)</code> branch, so it is that branch which
+      logs <code>error.message</code>; a non-Error throw still falls through to <code>next(error)</code> and does
+      not reach this line. This row therefore makes no claim about how a thrown non-Error is rendered anywhere
+      else. Scope is <code>services/transfer/src/routes/delegations.ts</code> at the single 500 site; the four
+      4xx <code>error.message</code> sites in the same file are untouched by this pass and are a separate
+      decision. The api-gateway slice of this ticket is row <strong>36.</strong>; the audit-export slice is a
+      separate pass in lane R.
+    </td></tr></table>
+<h3>47.2 The cells, and the numbers that back the row</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Six new cells in <code>src/__tests__/ks1410-delegations-process-expired-500.test.ts</code>.
+      <strong>T1</strong> runs in three <code>NODE_ENV</code> values (<code>production</code>,
+      <code>development</code>, <code>test</code>) and asserts the thrown message is absent from the 500 body.
+      <strong>T2</strong> asserts the message is logged once, server-side, with the route named.
+      <strong>TC1</strong> and <strong>TC2</strong> are controls: a success still answers <code>200</code> with
+      the expired count and logs nothing, and the revoke route still answers <code>404 NOT_FOUND</code> with its
+      business message. </td><td>Measured by Seat G 7th on develop
+      <code>613070f29112</code>, by <code>npm test</code> (vitest <code>4.1.11</code>, read from
+      <code>node_modules</code>) in <code>services/transfer</code> on node <code>v24.7.0</code> with npm
+      <code>11.5.1</code>: the suite reads <strong>79 cells passing</strong> at the base and
+      <strong>85 passing</strong> after. With the test file applied and the product change withheld,
+      <strong>4 of the 6</strong> new cells fail (T1 in all three environments, and T2) and the two controls
+      pass; with the product change, <strong>6 of 6</strong> pass, each enumerated by name from vitest's JSON
+      reporter rather than inferred from the suite total. <code>tsc --noEmit</code> (TypeScript <code>5.9.3</code>) reads rc 0 for the package
+      and, through a pinned-<code>typeRoots</code> config that lists the test file, for the test file too; a
+      planted <code>TS2322</code> in a copy inside <code>rootDir</code> fires, so that rc 0 is not a vacuous
+      pass. <strong>A live run is owed:</strong> this is a runtime behaviour change proved offline only, so the
+      ticket does not move to Done. No timing figure in this document was re-measured for this change, and none
+      is quoted in this row.
+    </td></tr></table>

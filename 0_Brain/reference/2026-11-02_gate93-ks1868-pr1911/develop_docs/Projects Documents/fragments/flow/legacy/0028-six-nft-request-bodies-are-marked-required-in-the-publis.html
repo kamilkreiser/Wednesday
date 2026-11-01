@@ -1,0 +1,62 @@
+<h2>38. Six nft request bodies are marked required in the published contract, and the contract is REGENERATED, never hand-patched (KS-1449)</h2>
+<h3>38.1 What this row is, and what it is not</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Six operations declared a <code>requestBody</code> without <code>required: true</code>, so a
+      spec-driven caller (Schemathesis) sent <strong>no body at all</strong> and counted the request
+      valid; each handler's zod <code>safeParse</code> then answered 400 and the run failed
+      <code>positive_data_acceptance</code>. </td><td>This row marks all six required in
+      <code>services/nft-certificate/src/nft-certificate.openapi.ts</code>:
+      <code>POST /api/nft/mint</code>, <code>POST /api/nft/ipfs/upload</code>,
+      <code>PUT /api/nft/admin/platform-fee</code>, <code>POST /api/nft/ipfs/pin</code>,
+      <code>POST /api/nft/ipfs/unpin</code> and <code>POST /api/nft/metadata/estimate-size</code>.
+      It is the <strong>spec half only</strong>: the runtime half — each handler's own 400 on an
+      absent body — is READ from the source, never driven, because this host has no running stack.
+      The ticket does <strong>not</strong> move to Done.
+    </td></tr></table>
+<h3>38.2 Red-first, with real assertion reds</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Two new suites render the document the generator publishes, from the shared registry the
+      nft-certificate module populates on import — no server, no database, no network. </td><td>At the
+      base the service suite reads <strong>48 passed (48)</strong>. With the two test files and
+      <strong>no</strong> product change it reads <strong>6 failed | 54 passed (60)</strong>, the six
+      reds being NM1-NM3 and NP1-NP3 as <code>AssertionError</code>s on
+      <code>requestBody.required</code>. With the product hunks applied it reads
+      <strong>60 passed (60)</strong>, <code>tsc</code> rc 0. Red before, green after, on this
+      worktree, with the numbers quoted.
+    </td></tr></table>
+<h3>38.3 The published contract is GENERATED — and the Spark YAML companions MISLAND</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2">
+      <code>Blockchain/Dev/docs/openapi/secuura-api.yaml</code> is written by
+      <code>Blockchain/Dev/scripts/generate-openapi.ts</code>. Each Spark pass also ships an
+      <code>openapi-yaml.companion.diff</code>, and those diffs are a trap. </td><td>They are cut
+      against spec blob <code>52310cab1</code>; develop carries <code>146bae7edb87</code>, +87 lines
+      on. Their hunk context is generic (<code>security</code> / <code>requestBody:</code> /
+      <code>content:</code> / <code>application/json:</code>), so <code>git apply</code> places them
+      by offset search on the nearest matching operation. Measured at this base: all twelve apply
+      <strong>rc 0</strong> and <strong>five land <code>required: true</code> on the WRONG
+      operation</strong> — among them this row's own
+      <code>nft-ipfs-pin-unpin-size</code>, which alone flips
+      <code>POST /api/nft/ipfs/upload</code> instead of <code>POST /api/nft/ipfs/unpin</code>.
+      </td></tr><tr><td>So the YAML here is produced by <code>npm run generate-openapi</code> and proved
+      <strong>structurally</strong>: parse base and head, compare every
+      <code>paths[p][m].requestBody.required</code>. Result: <strong>exactly the six declared
+      operations flipped</strong>, 0 flipped off, 0 operations added or removed, 145 request-bodied
+      operations before and after, and the whole 40,021-line document differs by
+      <strong>6 added lines, 0 removed, every one a <code>required:</code> line</strong>.
+      <code>npm run check:openapi</code> is <strong>rc 1</strong> with the product change and the old
+      YAML, and <strong>rc 0</strong> after regenerating.
+    </td></tr></table>
+<h3>38.4 A control that does NOT discriminate here, named so nobody reuses it</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The intended firing control is: build the YAML from the real companions and watch the
+      structural reader refuse it. </td><td>For <strong>this</strong> row it does not fire. Applied as a
+      pair, the two companions' displaced hunks cancel: the result is <strong>byte-identical</strong>
+      to the generated file (<code>cmp</code> rc 0) and <code>check:openapi</code> reads rc 0, because
+      the operation one companion mislands onto — <code>ipfs/upload</code> — is itself in this row's
+      op set. The control fires only on the mislanding companion applied <strong>alone</strong>
+      against its own three intended operations: the reader then exits 2 naming
+      <code>unexpected ['post /api/nft/ipfs/upload']</code> and
+      <code>missing ['post /api/nft/ipfs/unpin']</code>, and <code>check:openapi</code> reads rc 1.
+      The lesson is that the companion route was right here <em>by luck</em>, and nothing in that
+      route tells a reader which case they are in.
+    </td></tr></table>

@@ -1,0 +1,101 @@
+<h2>
+      18. OAuth app scopes are a closed vocabulary, and the by-id routes are
+      owner-or-admin (KS-1210)
+    </h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What this fixes.</strong></td><td> Any authenticated user, whatever their
+      role, could register an OAuth app — or change another user's app
+      — with <em>any</em> scope list at all, including the wildcard
+      <code>*</code>, the privileged <code>subjects:erase</code>, and strings
+      that are not scopes (<code>made:up</code>). </td></tr><tr><td>Both request schemas took
+      <code>z.array(pgSafeStringSchema)</code>, i.e. any NUL-free string, and
+      neither <code>POST /apps</code> nor <code>PATCH /apps/:id</code> carried a
+      role or ownership check. </td></tr><tr><td>Measured again at this change's base:
+      <code>updateApp(id, updates)</code> and <code>getAppById(id)</code> are
+      keyed on the id ALONE, with no owner predicate — which answers a
+      question KS-1210 itself listed as not measured, and is why the gate
+      belongs in the route handlers rather than the repository.
+    </td></tr></table>
+<h3>
+      18.1 Two gates, two lists, and why they are copied rather than imported
+    </h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gate 1</strong></td><td> closes both schemas to the <strong>nine</strong>
+<code>AVAILABLE_SCOPES</code>
+      (<code>services/auth/src/services/oauth.ts:57-67</code>, blob
+      <code>8995edec6a43</code>): anything else is
+      <strong>400 for every caller</strong>, which alone closes the sev-5. </td></tr><tr><td>On
+      top of that, the privileged set <code>{admin:read, admin:write}</code> may
+      only be registered by a caller in the <strong>four</strong>-role platform
+      list — otherwise <strong>403</strong>. <strong>Gate 2</strong> makes
+      the four by-id routes (<code>GET</code>, <code>PATCH</code>,
+      <code>DELETE</code>, <code>POST .../rotate-secret</code>) answer
+      <strong>404</strong> unless the caller created the app or is in the
+      <strong>six</strong>-role admin list — 404 rather than 403, so
+      another user's app is not disclosed by the status code.
+    </td></tr><tr><td colspan="2">
+      Neither list is importable: <code>PLATFORM_ADMIN_ROLES</code> is a
+      module-level const that is not exported (<code>routes/users.ts:192</code>)
+      and <code>ADMIN_ROLES</code> is local to that file's
+      <code>GET '/'</code> handler (<code>routes/users.ts:439</code>), both blob
+      <code>ea9f8da97a04</code>. </td></tr><tr><td colspan="2">They are therefore copied into
+      <code>routes/oauth.ts</code> by name, with a
+      <strong>drift cell</strong> that reads <code>users.ts</code> as source and
+      fails if either copy stops matching — so the duplication cannot rot
+      silently. </td></tr><tr><td colspan="2">An export edit in <code>users.ts</code> was deliberately not
+      made: that file belongs to other rows this round.
+    </td></tr></table>
+<h3>18.2 Running it</h3>
+<pre><code>cd Blockchain/Dev/services/auth
+npx vitest run src/__tests__/ks1210-oauth-app-scopes-and-ownership.test.ts   # 24 cells
+npx vitest run                                                              # 864 tests</code></pre>
+<h3>18.3 Figures, measured</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Red-first, by assertion, one red arm per conjunct.</strong></td><td> The
+      same 24 cells against the base product code are
+      <strong>17 failed | 7 passed (24)</strong>; at head they are
+      <strong>24 passed (24)</strong>. </td></tr><tr><td>Both numbers are non-zero, so the red is
+      a real red and not a load failure — a first attempt with an invalid
+      reporter flag produced <em>neither</em> number and was discarded rather
+      than reported. </td></tr><tr><td>The 7 that pass at base are the must-not-break arms: a
+      legal in-vocabulary list, a platform admin registering
+      <code>admin:write</code>, <code>certifications:write</code> for a plain
+      user, the owner's own <code>GET</code> and <code>PATCH</code>, the
+      <code>ORG_ADMIN</code> bypass, and the drift reader's own refusal control.
+    </td></tr><tr><td colspan="2">
+      The <code>services/auth</code> suite is
+      <strong>79 files / 864 tests, 864 passed, 0 failed</strong> at head
+      — <strong>no new red, and no red at all</strong>: the two
+      <code>ks949-platform-admin-seed-identity</code> 5000 ms timeouts seen
+      earlier in the day under heavier concurrency did not recur in this run.
+      <code>tsc</code> 5.9.3 on <code>services/auth</code> is
+      <strong>rc 0, 0 errors</strong>, with a positive control (a planted type
+      error) at <strong>rc 2, 2 errors</strong> and the source restored
+      byte-identical.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Two sibling test files had to be corrected, and that is part of this
+        change rather than collateral left for someone else.</strong></td><td><code>ks451-oauth-app-nul-scope</code> asserted that
+      <code>analytics:read</code> parses — a scope that was never in the
+      published nine and passed only because the array accepted any string.
+      <code>ks431-oauth-app-update</code> mocked
+      <code>AVAILABLE_SCOPES</code> as <code>[]</code> (which makes
+      <code>z.enum([])</code> and rejects everything) and mocked
+      <code>getAppById</code> as a bare <code>vi.fn()</code> returning
+      undefined, so the new ownership gate turned five of its cells into 404s.
+      </td></tr><tr><td>Both were fixed by moving fixtures into the published vocabulary and
+      giving the stub user an owned app; neither file's subject changed, and
+      KS-451's NUL cells are untouched.
+    </td></tr></table>
+<h3>18.4 Not covered</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>No live sweep</strong></td><td> (§5f), so KS-1210 does not move to
+      Done here. <code>certifications:write</code> and
+      <code>webhooks:manage</code> are deliberately
+      <strong>not</strong> privileged — a product choice, tightenable
+      later. </td></tr><tr><td>The <strong>gateway edge</strong> still forwards a valid
+      <code>user</code> token to these routes with no role gate of its own
+      (residue, named not fixed). <strong>Existing apps</strong> that already
+      carry a now-refused scope are <em>not</em> touched: there is no data
+      migration here, and no audit of what is registered live. </td></tr><tr><td>And
+      <strong>no stated timing covers a <code>services/auth</code> unit suite</strong>
+      — measured at this base across both platform-k docs and the
+      test-discipline skill, <code>services/auth</code> appears 7 times and not
+      once within 120 characters of an explicit duration, where the same
+      instrument on the same three files finds 11 durations beside
+      <code>Akto</code>. </td></tr><tr><td>So no tier budget moves with this change.
+    </td></tr></table>

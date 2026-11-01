@@ -1,0 +1,27 @@
+<div class="section">
+<h2>Job 04 records a scan as failed when trivy reports neither Results nor ArtifactName — KS-1274</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>What to know.</strong></td><td> A trivy that exits
+        <strong>0</strong> and prints a bare <code>{}</code> used to be recorded as a clean image. KS 1136
+        covered a non-zero exit and unparseable output; it did not cover a parseable empty object. The
+        guard at <code>Blockchain/Testing/jobs/04-container-trivy.sh:115-120</code> now records
+        <code>scan-failed</code> when stdout carries <strong>neither</strong> <code>Results</code>
+        <strong>nor</strong> <code>ArtifactName</code>. </td></tr><tr><td><strong>Both</strong> keys must be absent.
+        Requiring <code>Results</code> alone — which is what the ticket suggests — fails a genuinely
+        clean image that reports only <code>ArtifactName</code>. The suite pins this with a control cell
+        that stays green in the patched and reverted states alike. </td></tr><tr><td>The three suites' clean stub
+        moved from <code>{}</code> to <code>{"Results":[]}</code> in the same commit, because under the
+        new guard <code>{}</code> is the failure case. <code>fail.txt</code> accepts
+        <code>bare</code> and <code>nores</code> alongside <code>empty</code> and <code>partial</code>.
+      </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>Gotcha when you run this locally.</strong></td><td> <strong>(1) docker and trivy are never
+        run.</strong> All three suites put stubs on a private <code>PATH</code>; the trivy stub reads
+        <code>$root/fail.txt</code>. So a green run here says nothing about the real scanner — a live
+        run is owed and the ticket stays open. </td></tr><tr><td> <strong>(2) The exec bit.</strong> This repo sets
+        <code>core.filemode=false</code>, and <code>git apply</code> does not restore the executable bit
+        on disk. <code>04-container-trivy.sh</code> is <code>100755</code> in the tree but lands
+        non-executable after a patch, so the suites cannot invoke it until you
+        <code>chmod 755</code> it. Because filemode is off, <code>git diff</code> shows no mode change
+        either way — read the mode off the committed tree with <code>ls-tree</code>, never from
+        <code>git status</code>.
+      </td></tr></table></div>
+</div>

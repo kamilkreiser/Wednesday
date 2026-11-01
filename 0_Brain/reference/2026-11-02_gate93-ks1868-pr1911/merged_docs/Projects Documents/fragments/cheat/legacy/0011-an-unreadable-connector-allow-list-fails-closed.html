@@ -1,0 +1,40 @@
+<div class="section">
+<h2>An unreadable connector allow-list fails closed — KS-1256</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="6"><strong>What to know.</strong></td><td> The connector allow-list is read from platform settings to
+        decide whether a caller may create a <em>restricted</em> document type. </td></tr><tr><td>When the read failed,
+        the parse left <code>connectorConfig = {}</code>, and an empty config reads as
+        <strong>no restriction</strong> — so every restricted connector became unrestricted
+        exactly when the platform could not see its own restrictions. </td></tr><tr><td>It now answers
+        <strong>503</strong> and refuses the create.
+        <strong>Two unreadable states, two different mechanisms.</strong> A THROWN read (the client’s
+        <code>MaxRetriesPerRequestError</code>, or <code>JSON.parse</code> on malformed stored bytes)
+        is closed in the <code>catch</code>. </td></tr><tr><td>But when Redis is UNAVAILABLE,
+        <code>getNotificationSettings</code> resolves <strong>null without throwing</strong> out of an
+        empty in-memory store — <strong>a <code>catch</code> can never see that</strong>, so the
+        availability test must run BEFORE the read.
+        <strong>Redis up and the key absent is still “no restriction”</strong>, by Kam’s
+        ruling b: a fresh install has no key, and failing closed there would refuse every connector
+        create on a new deployment. </td></tr><tr><td>A malformed container still answers <strong>403</strong>, unchanged.
+        <strong>The cost is accepted, not hidden</strong> (Kam, card <code>…-1006</code> = a):
+        while K’s Redis is down, Platform-S cannot create documents through a connector.
+        <strong>Watch out:</strong> <code>fallbackMode</code> is set by <code>retryStrategy</code> at
+        <code>services/redis.ts:78</code> with <strong>no <code>NODE_ENV</code> guard</strong>, so
+        production reached the old fail-open state on a runtime blip despite refusing to START without
+        Redis. </td></tr><tr><td>One cell pins that under <code>NODE_ENV=production</code>.
+      </td></tr></table></div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/api-gateway
+npx vitest run src/__tests__/ks1256-unreadable-allow-list-fails-closed-with-503.test.ts   # 6 cells
+npx vitest run                                                                            # 818 tests</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>red-first, base → head</td><td>4 of 6 RED at base → 6 passed (6) at head (the 2 CONTROL cells are green at base by design)</td></tr>
+<tr><td>api-gateway suite at head</td><td>92 files, 818 passed, 0 failed — 7.42 s wall / 52.88 s test time, 2026-10-06, HOST Kamils-Mac-Studio</td></tr>
+<tr><td>tsc</td><td>rc 0, 0 errors (planted-error control fires non-zero)</td></tr>
+<tr><td>test-file tsc</td><td><strong>NOT RUN</strong> — the tsconfig excludes <code>src/__tests__</code>; <code>--listFilesOnly</code> finds the file 0 times</td></tr>
+<tr><td>spec</td><td>no edit needed: 503 is already declared at <code>secuura-api.yaml:27659</code>; <code>check:openapi</code> rc 0</td></tr>
+<tr><td>assertion changes</td><td>2, both in ks1195, re-pointed deliberately (plus that cell’s title)</td></tr>
+<tr><td>residue NOT fixed</td><td>5 other readers of the same key unaudited: <code>admin.ts:1119/:1144/:1154</code>, <code>health.ts:52</code>, <code>verification.ts:1283</code>; and the fresh-install gap kept by ruling b</td></tr>
+</table>
+</div>

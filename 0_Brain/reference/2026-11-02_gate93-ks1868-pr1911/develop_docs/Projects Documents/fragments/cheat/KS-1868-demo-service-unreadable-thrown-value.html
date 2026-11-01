@@ -1,0 +1,20 @@
+<h2>demo-service scenario context keeps its 500 when the thrown value is unreadable &mdash; KS-1868, demo-service</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What to know.</strong></td><td> The catch in the <code>GET /scenario/context</code> handler read the thrown value unguarded; a revoked Proxy or a throwing <code>message</code> getter made the read throw inside the catch, so the error was not logged and the handler threw instead of answering 500. The read is now in an inner try with the fallback <code>'unreadable thrown value'</code>. 3 new cells in 1 file; the suite is 10 files / 89 cells, all pass.
+    </td></tr><tr><td>One held Spark pass applied strictly; no hand edit. <code>tsc</code> with the tests reports 25 errors in three older test files, the same set at the pin.
+    </td></tr></table>
+</div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="1"><strong>Not measured here.</strong></td><td> KS-1868 stays open (one of its 253 sites). The four platform suites, a running stack, an LTS Node, <code>npm ci</code> on the merged lockfile and any deploy were not run.
+    </td></tr></table>
+</div>
+<h3>Running the cells</h3>
+<pre><code>cd Blockchain/Dev/services/demo-service &amp;&amp; npm test -- src/__tests__/ks1868-scenario-context-unreadable-throw.test.ts   # 3 cells
+cd Blockchain/Dev/services/demo-service &amp;&amp; npm test                                             # 10 files / 89 cells</code></pre>
+<h3>Figures</h3>
+<table>
+<tr><th>Figure</th><th>Value</th></tr>
+<tr><td>new cells</td><td><strong>3</strong> in 1 file; red first: 2 of 3 failed without the change, 0 of 3 with it</td></tr>
+<tr><td>demo-service unit suite</td><td>develop <code>9e1eb55fde53</code> 9 files / 86 cells, 86 pass; with the change on develop <code>dc8c210cb29d</code> <strong>10 files / 89 cells, 89 pass</strong>, 0 failed, 0 skipped; KS-1182 R1, an untouched cell, fails intermittently on develop too (3 of 8 runs here, 1 of 4 on develop <code>ddc644fb4869</code>)</td></tr>
+<tr><td>tsc and eslint</td><td>tsc with tests: 25 errors (6 + 8 + 11 in three older test files), byte-equal error set at the pin, 0 added; eslint on the 2 changed files: 0 errors, 0 warnings, a planted file raised two rules</td></tr>
+<tr><td>host and tools</td><td>an Apple Silicon (arm64) Mac, macOS 27.0.1, shared with other seats; 2026-10-31 (UTC); Node v26.8.1 (not an LTS measurement), TypeScript 5.9.3, vitest 4.1.12, eslint 10.7.0</td></tr>
+<tr><td>four platform suites</td><td><strong>UNMEASURED</strong>; not claimed as a pass</td></tr>
+</table>

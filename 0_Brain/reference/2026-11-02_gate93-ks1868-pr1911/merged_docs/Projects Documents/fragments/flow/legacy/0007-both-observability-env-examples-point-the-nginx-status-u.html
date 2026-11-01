@@ -1,0 +1,98 @@
+<h2>
+      14. Both observability env examples point the nginx status URI at :80
+      (KS-1388)
+    </h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="2"><strong>What this pins.</strong></td><td> Both commented examples of
+      <code>SECUURA_NGINX_STATUS_URI</code> — in
+      <code>observability/.env.example</code> and
+      <code>observability/config/alerting.env.example</code> — suggested
+      <code>http://secuura-nginx-gateway:6882/stub_status</code>.
+      <strong>6882 is the gateway's published HOST port</strong> and is not
+      reachable from the exporter's network; the in-network port is
+      <strong>80</strong>, which is what
+      <code>observability/docker-compose.yml:331</code> already defaults to.
+      </td></tr><tr><td>Both examples now say <code>:80</code>, so a reader who uncomments either
+      line gets a URI that resolves on the compose network instead of one that
+      cannot.
+    </td></tr><tr><td class="pm-topic" rowspan="1"><strong>Scope.</strong></td><td> This is KS-1388 <strong>§1 only</strong>, and
+      the ticket is <em>narrowing</em>, not closing.
+      <code>observability/</code> reaches the platform by slot 1's container
+      names by a <strong>documented decision that stands</strong>; §2 and
+      §3 of the ticket record what would have to change to make the stack
+      slot-agnostic, and neither is touched here.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Both files are at the repository ROOT</strong></td><td>, not under
+      <code>Blockchain/Dev/</code>. </td></tr><tr><td>A reader looking for
+      <code>Blockchain/Dev/observability/</code> will find nothing.
+    </td></tr></table>
+<h3>14.1 The cells</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      Two new cells in the existing KS-971 shell suite
+      <code>Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh</code>,
+      one per env example. </td><td>Each pins the commented URI's port by source text.
+      The suite's four pre-existing cells — which compare compose service
+      ports against the scrape targets — are unchanged.
+    </td></tr></table>
+<h3>14.2 Running it</h3>
+<pre><code>bash Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh   # 6 cells
+bash Blockchain/Dev/scripts/run-shell-suites.sh                  # 67 suites</code></pre>
+<h3>14.3 Figures, measured</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+      The KS-971 suite goes <strong>4 → 6 cells</strong>, 0 failed at both
+      ends. </td><td>The whole shell-suite set reads
+      <strong>67 passed, 0 failed, 0 skipped (of 67)</strong> both before and
+      after — the <em>same suite count</em>, because these are two new
+      cells in an existing suite and not a new suite file. Measured
+      <strong>2026-10-05</strong>, host <strong>Kamil's Mac Studio (2)</strong>,
+      bash 3.2.57.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Red-first, by assertion.</strong></td><td> With both test sections applied
+      and neither product hunk, the suite runs
+      <strong>rc 1, 4 passed / 2 failed</strong> — one failure per env
+      example, each printing its own <code>want</code>/<code>got</code> pair
+      with <code>:80</code> against <code>:6882</code>. </td></tr><tr><td>That is an assertion
+      red: <code>bash -n</code>
+      on the modified suite is rc 0, so the file parses and the reds are not a
+      load failure.
+    </td></tr><tr><td class="pm-topic" rowspan="4"><strong>A cross-control per cell, which is the part worth reading.</strong></td><td>
+      Each product hunk was applied <em>alone</em> and the suite re-run. </td></tr><tr><td>The
+      <code>.env.example</code> hunk alone leaves
+      <strong>5 passed / 1 failed</strong> and the surviving failure names
+      <code>alerting.env.example</code>; the
+      <code>alerting.env.example</code> hunk alone leaves
+      <strong>5 passed / 1 failed</strong> naming <code>.env.example</code>. </td></tr><tr><td>So
+      each cell is keyed to its own file and neither cell can be satisfied by
+      the other file's fix. </td></tr><tr><td>Both hunks together:
+      <strong>rc 0, 6 passed, 0 failed</strong>.
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>Applied == held, proved on files.</strong></td><td> The two held carves
+      were applied independently, in the same order, onto the same base blobs
+      with a separate index in a separate repository (tree
+      <code>04d226e93b48</code>), and all three resulting files are
+      <code>cmp</code>-equal to this worktree's. </td></tr><tr><td>A firing control shows each
+      differs from its base blob, so the equality is a measurement. </td></tr><tr><td>The
+      <em>diffs</em> are not comparable: the suite file's change is the union of
+      two carves' hunks, so no single held diff can <code>cmp</code>-equal it.
+    </td></tr><tr><td class="pm-topic" rowspan="2"><strong>Exec bit.</strong></td><td><code>prometheus_targets.test.sh</code> is
+      <code>100755</code> in the index, and <code>git apply</code> left it
+      <strong>non-executable on disk</strong> under this repository's
+      <code>filemode=false</code>. </td></tr><tr><td>It was restored with <code>chmod +x</code> on
+      that one file — never <code>checkout-index -a</code> — and
+      re-asserted executable, as was <code>.githooks/pre-push</code>.
+    </td></tr></table>
+<h3>14.4 Timing</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>No stated timing covers this suite.</strong></td><td> Instrument, printed
+      so it can be re-run: <code>/usr/bin/grep -c -i -E</code> over both
+      platform-k docs at the base SHA <code>f01c1da5717f</code>.
+      <code>run-shell-suites</code> <strong>0</strong> flow /
+      <strong>0</strong> cheat; <code>shell suite</code> <strong>0</strong> /
+      <strong>0</strong>; <code>prometheus_targets</code>
+<strong>0</strong> flow / <strong>1</strong> cheat, and that one hit is
+      prose inside the KS-971 block (cheat <code>:2695</code>), not a timing
+      row. </td></tr><tr><td>Must-hit control <code>auth</code>: <strong>71</strong> flow /
+      <strong>70</strong> cheat, so the zeroes are measurements and not a blind
+      grep. </td></tr><tr><td>No stated timing row is amended.
+    </td></tr><tr><td class="pm-topic" rowspan="3"><strong>Not covered.</strong></td><td> A live sweep (skill §5f) —
+      nothing was exercised against a running stack, so KS-1388 does not move to
+      Done on this change's account, and the observability stack was never
+      started. </td></tr><tr><td>KS-1388 §2 and §3 are untouched. </td></tr><tr><td>Whether any deployment
+      actually consumes either commented line is <strong>UNMEASURED</strong>:
+      both are comments, and nothing here proves a reader ever uncommented one.
+    </td></tr></table>

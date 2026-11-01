@@ -1,0 +1,26 @@
+// tsc (plain + tests via tsconfig.test.json at head and at base product + the repo's leg-16 checker) and eslint; no shell cd
+const { spawnSync } = require('child_process'); const fs = require('fs'); const crypto = require('crypto');
+const G = '/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate93-ks1868-pr1911';
+const D = G + '/repo/Blockchain/Dev', A = D + '/services/auth', B = D + '/node_modules/.bin', M = A + '/src/routes/auth.ts';
+const sha = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const H = sha(G + '/logs/head_auth.ts'); if (sha(M) !== H) throw new Error('product not at head');
+const run = (cmd, args, cwd, log) => { const r = spawnSync(cmd, args, { cwd, encoding: 'utf8', maxBuffer: 1 << 26 }); const out = (r.stdout || '') + (r.stderr || ''); fs.writeFileSync(G + '/logs/' + log, out + '\nrc=' + r.status + '\n'); const n = (out.match(/error TS\d+/g) || []).length; console.log(log, 'rc', r.status, 'TS errors', n); return out; };
+const norm = (out) => out.split('\n').filter((l) => /error TS\d+/.test(l)).map((l) => l.replace(/\(\d+,\d+\)/, '')).sort();
+run(B + '/tsc', ['-p', 'tsconfig.json', '--noEmit'], A, 'tsc_plain_head.log');
+const th = norm(run(B + '/tsc', ['-p', 'tsconfig.test.json', '--noEmit'], A, 'tsc_tests_head.log'));
+console.log('head errors in auth.ts or ks1868 files:', th.filter((l) => /routes\/auth\.ts|ks1868/.test(l)).length);
+run('node', ['scripts/typecheck-tests/check.cjs', 'services/auth'], D, 'leg16_auth.log');
+fs.copyFileSync(G + '/logs/base_auth.ts', M);
+const tb = norm(run(B + '/tsc', ['-p', 'tsconfig.test.json', '--noEmit'], A, 'tsc_tests_baseproduct.log'));
+fs.copyFileSync(G + '/logs/head_auth.ts', M); console.log('restore', sha(M) === H);
+console.log('base-product vs head error lists identical (line/col stripped):', JSON.stringify(tb) === JSON.stringify(th), tb.length, th.length);
+const news = fs.readdirSync(A + '/src/__tests__').filter((f) => f.startsWith('ks1868-auth-')).map((f) => 'src/__tests__/' + f);
+run(B + '/eslint', ['src/routes/auth.ts', ...news], A, 'eslint_pr_files.log');
+fs.mkdirSync(G + '/logs/_quarantine', { recursive: true });
+fs.writeFileSync(A + '/src/zz_gate93_planted.ts', 'export function f(): number { const unused = 1; debugger; return 2; }\n');
+run(B + '/eslint', ['src/zz_gate93_planted.ts'], A, 'eslint_planted.log');
+fs.renameSync(A + '/src/zz_gate93_planted.ts', G + '/logs/_quarantine/zz_gate93_planted.ts');
+const t = A + '/' + news[0]; const orig = fs.readFileSync(t, 'utf8');
+fs.writeFileSync(t, orig + "\nexport const GATE93_BAD: number = 'x';\n");
+run(B + '/tsc', ['-p', 'tsconfig.test.json', '--noEmit'], A, 'tsc_tests_planted.log');
+fs.writeFileSync(t, orig); console.log('restored test file', fs.readFileSync(t, 'utf8') === orig);

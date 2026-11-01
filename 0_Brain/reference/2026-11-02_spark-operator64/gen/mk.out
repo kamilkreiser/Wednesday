@@ -1,0 +1,19 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o64_p1_analytics_scheduledjobs_dbsavealert_unreadable_throw
+diff --git a/Blockchain/Dev/services/analytics/src/services/scheduledJobs.ts b/Blockchain/Dev/services/analytics/src/services/scheduledJobs.ts
+--- a/Blockchain/Dev/services/analytics/src/services/scheduledJobs.ts
++++ b/Blockchain/Dev/services/analytics/src/services/scheduledJobs.ts
+@@ -88,6 +88,12 @@
+       ]
+     );
+   } catch (err: any) {
+-    logger.info('DB save alert failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.info('DB save alert failed', { error: reason });
+   }
+ }
+
