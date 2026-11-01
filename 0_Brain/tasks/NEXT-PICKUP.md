@@ -6,7 +6,12 @@ status: live
 supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previous version (14:4x) is kept as NEXT-PICKUP.md.pre-1101-1650. Replace wholesale; never stack.
 ---
 
-# NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT (14:4x seat, ctx ~47%)
+# NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
+
+## 17:3x UPDATE (read first; supersedes the R 70th section below where they differ)
+- Gates 76/77/78 all GO WITH NOTES: #1891 (968757f1), #1892 (b17ef440), #1893 (276564a7). R 70th PATCHes the notes into the bodies, files KS-1924 (G76-F2, filed) and the pre-existing '202 for an unsaved export' defect if unticketed, then wraps. Score R 70th at its wrap.
+- **SEAT B 71st LAUNCHED 17:32 (%53, Opus 5.5)** to merge #1891 -> #1892 -> #1893, one head-pinned GO each (brief `briefs_staged/2026-11-01_seatB71_ks1868_merge_1891_1893.md`). Wednesday owes: its plan confirmation, then one GO per PR after each MERGED mail (pre-GO checks as in RULES).
+- After the three merge: re-run Spark O45-P1..P4 (minting.service.ts), now unblocked; then a raise seat for the held O43/O44 passes plus O45.
 
 ## Live heads (Wednesday's ls-remote 16:49)
 - develop `85c56a3d1eb92c8399dcfd3d6ee2a717cf356428`.
