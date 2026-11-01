@@ -643,7 +643,9 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    + his 2026-09-02 \"we need to prune a little\") is read only on demand.
    The scoreboard (projects_index/scoreboard.md) is read HEAD-ONLY at boot (the
    newest ~15 rows), and INDEX.md's dated 'Refreshed' history only back to the
-   newest two blocks. Two seats on 2026-09-01 booted at 51–57% ctx by reading
+   newest two blocks. A Datasec seat (Tuesday, Friday) never reads the raw head: its
+   newest rows belong to another client (ledger 2026-11-02). Read the newest ~15 rows
+   through an inclusion filter on 'Datasec/' instead. Two seats on 2026-09-01 booted at 51–57% ctx by reading
    all three whole — a seat that boots past 50% has ~20 minutes of useful life.
 4. 🔴 READ YOUR SEAT'S PICKUP FILE — ${PICKUP_FILE} — WHOLE, and
    ${BRAIN_DIR}/tasks/EXPIRING-GRANTS.md whole. **This is the step that makes an
