@@ -1,0 +1,170 @@
+/**
+ * KS-1893: the secuura_hash_document MCP tool returned the raw message of whatever hashFile threw inside its isError result, so the MCP
+ * client (usually an LLM agent) received Node's file-system error text: `ENOENT: no such file or directory, open '<path>'`,
+ * `EACCES ...`, `EISDIR ...`. The catch now logs what was thrown with console.error (stderr: stdout is the stdio JSON-RPC channel) and
+ * answers the constant `An unexpected error occurred`. A thrown value that cannot be read at all keeps its own constant reason
+ * `unreadable thrown value` (KS 1868; its cells in ks1868-hash-tool-unreadable-throw.test.ts are unchanged). A non-Error is logged by
+ * type and field NAMES only, never values (Kam's ruling on the KS 1346 card).
+ *
+ * The real hasher and the real file system are used for ENOENT, EISDIR and the success path. `node:fs/promises` readFile is wrapped
+ * so two marker paths fail on purpose: `ks1893-eacces` rejects with an EACCES error (a chmod 000 cell would not fail when the suite
+ * runs as root, and a skip is not a pass) and `ks1893-throw` rejects with whatever the cell put in `h.toThrow`.
+ */
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
+import type { MockInstance } from 'vitest';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+const h = vi.hoisted(() => ({ toThrow: undefined as unknown }));
+
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const real = await importOriginal<typeof import('node:fs/promises')>();
+  const readFile = (p: unknown, ...rest: unknown[]) => {
+    const s = String(p);
+    if (s.includes('ks1893-eacces')) {
+      return Promise.reject(Object.assign(new Error(`EACCES: permission denied, open '${s}'`), { code: 'EACCES', errno: -13, syscall: 'open', path: s }));
+    }
+    if (s.includes('ks1893-throw')) return Promise.reject(h.toThrow);
+    return (real.readFile as (...a: unknown[]) => Promise<unknown>)(p, ...rest);
+  };
+  return { ...real, readFile, default: { ...real, readFile } };
+});
+
+import { hashFile } from '../hashing.js';
+import { registerHashTools } from '../tools/hash.js';
+
+type ToolResult = { content: Array<{ type: string; text: string }>; isError?: boolean };
+type Handler = (args: { filePath: string }) => Promise<ToolResult>;
+
+const CONSTANT = 'An unexpected error occurred';
+const SCRATCH = mkdtempSync(join(tmpdir(), 'ks1893-scratch-'));
+let errSpy: MockInstance<typeof console.error>;
+
+/** Register the hash tool on a duck-typed server and run it; a handler that rejects fails the cell that called it. */
+async function runHashTool(filePath: string): Promise<ToolResult> {
+  const handlers: Record<string, Handler> = {};
+  const server = {
+    tool: (name: string, _desc: string, _shape: unknown, handler: Handler) => {
+      handlers[name] = handler;
+    },
+  };
+  registerHashTools(server as never);
+  return handlers['secuura_hash_document']({ filePath });
+}
+
+/** Everything passed to console.error, one line per call; a non-string argument shows as <<non-string:type>>. */
+function logged(): string {
+  return errSpy.mock.calls
+    .map((args) => args.map((x) => (typeof x === 'string' ? x : '<<non-string:' + typeof x + '>>')).join(' '))
+    .join('\n');
+}
+
+beforeEach(() => {
+  h.toThrow = undefined;
+  errSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  errSpy.mockRestore();
+});
+
+afterAll(() => {
+  rmSync(SCRATCH, { recursive: true, force: true });
+});
+
+describe('KS-1893 secuura_hash_document answers a constant and logs the real error', () => {
+  it('control ks1893 C0 the EACCES marker path rejects with a real EACCES error (the seam is engaged)', async () => {
+    await expect(hashFile(join(SCRATCH, 'ks1893-eacces.pdf'))).rejects.toMatchObject({ code: 'EACCES' });
+  });
+
+  it('RED ks1893 B1 a nonexistent path: the result is the constant and carries neither the path nor ENOENT; the log has both', async () => {
+    const p = join(SCRATCH, 'ks1893-missing.pdf');
+    const r = await runHashTool(p);
+    expect(r.isError).toBe(true);
+    expect(JSON.parse(r.content[0].text)).toEqual({ success: false, error: CONSTANT });
+    expect(r.content[0].text).not.toContain(p);
+    expect(r.content[0].text).not.toContain('ENOENT');
+    expect(r.content[0].text).not.toContain('no such file');
+    expect(logged()).toContain('ENOENT');
+    expect(logged()).toContain(p);
+  });
+
+  it('RED ks1893 B2 a directory (EISDIR): the result is the constant and carries neither the path nor EISDIR; the log has both', async () => {
+    const r = await runHashTool(SCRATCH);
+    expect(r.isError).toBe(true);
+    expect(JSON.parse(r.content[0].text)).toEqual({ success: false, error: CONSTANT });
+    expect(r.content[0].text).not.toContain(SCRATCH);
+    expect(r.content[0].text).not.toContain('EISDIR');
+    expect(logged()).toContain('EISDIR');
+    expect(logged()).toContain(SCRATCH);
+  });
+
+  it('RED ks1893 B3 an unreadable file (EACCES): the result is the constant and carries neither the path nor EACCES; the log has both', async () => {
+    const p = join(SCRATCH, 'ks1893-eacces.pdf');
+    const r = await runHashTool(p);
+    expect(r.isError).toBe(true);
+    expect(JSON.parse(r.content[0].text)).toEqual({ success: false, error: CONSTANT });
+    expect(r.content[0].text).not.toContain(p);
+    expect(r.content[0].text).not.toContain('EACCES');
+    expect(logged()).toContain('EACCES');
+    expect(logged()).toContain(p);
+  });
+
+  it.each([
+    ['a thrown string', 'plain thrown text'],
+    ['a thrown object with secret-looking values', { password: 'hunter2', token: 't0k-secret' }],
+    ['a thrown null', null],
+    ['a thrown number', 42],
+  ])('RED ks1893 B4 %s: the result is the constant; the log names the type or field names, never a value', async (_label, value) => {
+    h.toThrow = value;
+    const r = await runHashTool(join(SCRATCH, 'ks1893-throw.pdf'));
+    expect(r.isError).toBe(true);
+    expect(JSON.parse(r.content[0].text)).toEqual({ success: false, error: CONSTANT });
+    for (const leak of ['plain thrown text', 'hunter2', 't0k-secret', '[object Object]']) expect(r.content[0].text).not.toContain(leak);
+    const log = logged();
+    expect(log).not.toContain('hunter2');
+    expect(log).not.toContain('t0k-secret');
+    expect(log).not.toContain('<<non-string');
+    expect(log.length).toBeGreaterThan(0);
+    if (typeof value === 'object' && value !== null) {
+      expect(log).toContain('password');
+      expect(log).toContain('token');
+    }
+  });
+
+  it('RED ks1893 B5 an unreadable thrown value (revoked Proxy; Error with a throwing message getter) keeps its own constant reason and the log says so', async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    const getterThrows = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    for (const value of [proxy, getterThrows]) {
+      errSpy.mockClear();
+      h.toThrow = value;
+      const r = await runHashTool(join(SCRATCH, 'ks1893-throw.pdf'));
+      expect(r.isError).toBe(true);
+      expect(JSON.parse(r.content[0].text)).toEqual({ success: false, error: 'unreadable thrown value' });
+      expect(logged()).toContain('unreadable thrown value');
+    }
+  });
+
+  it('control ks1893 C5 a readable file still hashes to the same digest, with no log line', async () => {
+    const p = join(SCRATCH, 'readable.txt');
+    writeFileSync(p, 'hello');
+    const r = await runHashTool(p);
+    expect(r.isError).toBeUndefined();
+    expect(JSON.parse(r.content[0].text)).toMatchObject({
+      success: true,
+      filePath: p,
+      fileName: 'readable.txt',
+      contentHash: 'sha256:2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',
+      algorithm: 'SHA-256',
+    });
+    expect(errSpy).not.toHaveBeenCalled();
+  });
+});

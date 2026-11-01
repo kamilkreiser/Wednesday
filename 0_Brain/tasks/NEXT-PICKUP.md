@@ -8,6 +8,19 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 00:0x UPDATE 2026-11-02 (the 23:4x boot seat, ctx 32%; read FIRST, supersedes below where they differ)
+- **LIVE SEATS (5):**
+  - **B 72nd** (%58, Sonnet, merge): READY TO MERGE 13:02Z for #1894 + #1895. **GO #1894 SENT** (pin develop d7691f35, head 3a88693f, expect tree 7a9447da42f8). OWED: on its MERGED mail, GO #1895 pinning the 1894 squash (expected final tree 48ecc12942cb). Pre-GO checks per RULES each time. Then add #1896 (after S 10th's PATCH) and #1897 (after E's delta gate).
+  - **S 10th** (%55, Opus): #1896 delta b89d2819 CHECKED by Wednesday through code (test-only, auth.ts blob unchanged). Told to PATCH notes and wrap. OWED: score S 10th at its wrap; #1896 to B 72nd.
+  - **E 24th** (%56, Sonnet): GATE 82 = GO WITH NOTES on #1897, but **G82-F1 FIX-BEFORE-MERGE** (a thrown string logged by value, http-server.ts:44 + tools/hash.ts:42, verified at source; Kam's ks1346 rule). E pushes one forward fix, files F2-F4. OWED: a short Sonnet DELTA GATE on its READY (blob table; M3/M18 must die), then #1897 to B 72nd, then score E.
+  - **R 72nd** (%57, Sonnet): KS-1926 (1c3accf3) + PR 3 minting (bc05f5bf) built; pushes via the queue. OWED: a Sonnet tier-2 gate per READY (PR 3: the gate decides tier; it mints on Cardano). Then G79-F2 filing.
+  - **F 20th** (%59, Sonnet, raise, launched 13:00Z): seven held Spark passes as 3 PRs: KS-1868 kyc x5 (TIER 1 -> OPUS gate; O47-P3 changes the GDPR erasure cascade), KS-1903, KS-1884. OWED: its plan confirmation, gates per READY.
+- **VOID:** a "NEW SEAT R 73rd" brief (12:59Z) sits in the shared inbox; its launch was skipped (lane R pane held). VOID mail sent naming Seat R 73rd. **The next R successor must be told that brief is not theirs** (the VOID says so).
+- **SPARK:** operator 49 (in-session Sonnet) running KS-1898, KS-1868 security :293/:400, billing webhooks :316, KS-1841; report to `0_Brain/reference/2026-11-02_spark-operator49/report.md`. A Spark claim to Kam still needs a done.md row.
+- **Next lanes if ROOM** (board screen 2127): lane 3 KS-1867 + KS-1865 (check-no-sql-injection.sh), lane 4 KS-1815 + KS-1812 (anchoring test-only). Use a FREE lane letter (one pane per lane name: ledger 11-02).
+- **Tool fix owed:** brief_and_launch prints "launched" rc 0 when cockpit skips an existing pane.
+- **Boot finding (2nd seat in a row):** the by-tier digest (664 KB) cannot be booted whole; this seat read the 420 headlines + lines 7365-end + the ledger whole.
+
 ## 23:3x ROTATION HANDOVER (read FIRST)
 - **FIRST WORK for the successor, in order:**
   1. **GATE 82 (Sonnet, tier 2) on PR 1897** (E 24th: KS-1901 + KS-1893 mcp-server, head 07a4cc5be5e6; READY mail 12:33Z in wednesday-agent@). Copy gate 78's prompt shape. Key questions: the three edited pinned cells are exactly as approved (ks1410 A C3, B C3, ks1868-hash C1); constant only; Kam's ks1346 logging rule (names of fields, never values); the batch-500 fix (an unreadable item used to 500 the whole batch); callers. E 24th was told the successor commissions it.

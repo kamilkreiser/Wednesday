@@ -1,0 +1,270 @@
+/**
+ * KS-1901: the per-item catch blocks of POST /register-batch and POST /verify-batch copied the thrown error's message into
+ * `results[i].error` while the route answered HTTP 200, so a driver message, a file-system error naming a server path or an internal
+ * host:port reached the caller (KS 1410 fixed the 500 answers of this file and left these two because they answer 200).
+ * Each per-item catch now logs what was thrown with console.error and answers the constant `An unexpected error occurred`, keeping
+ * `success:false` / `verified:false`. The log read cannot itself throw (an Error whose `message` getter throws, a revoked Proxy), and a
+ * non-Error is logged by type and field NAMES only, never values (Kam's ruling on the KS 1346 card).
+ *
+ * The module binds a port and runs a production guard on import, so `express`, the shared guard, the api client, the hasher and the
+ * package generator are replaced and the route handlers are captured and called directly: no port is bound, no network is touched.
+ * The stand-ins are plain functions, not vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy before
+ * the code under test saw it.
+ */
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
+import type { MockInstance } from 'vitest';
+
+const h = vi.hoisted(() => ({
+  routes: {} as Record<string, (req: unknown, res: unknown) => Promise<void>>,
+  queue: [] as Array<{ kind: 'throw'; value: unknown } | { kind: 'ok'; result: unknown }>,
+  hashToThrow: undefined as unknown,
+  hashCalls: 0,
+}));
+
+vi.mock('express', () => {
+  const app = {
+    use: () => app,
+    get: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
+      h.routes['GET ' + p] = f;
+    },
+    post: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
+      h.routes['POST ' + p] = f;
+    },
+    listen: () => ({}),
+  };
+  const express = Object.assign(() => app, { json: () => () => undefined });
+  return { default: express };
+});
+vi.mock('@secuura/shared', () => ({
+  enforceProductionConfig: () => undefined,
+  rejectNulBytes: () => () => undefined,
+}));
+vi.mock('../api-client.js', () => {
+  const next = () => {
+    const n = h.queue.shift();
+    if (!n) throw new Error('test setup: queue empty');
+    return n.kind === 'throw' ? Promise.reject(n.value) : Promise.resolve(n.result);
+  };
+  return {
+    registerDocument: next,
+    verifyDocument: next,
+    listDocuments: next,
+    getWorkflowInstance: next,
+    getConnectorInfo: next,
+    getVerificationPolicy: next,
+  };
+});
+vi.mock('../hashing.js', () => ({
+  hashFile: () => {
+    h.hashCalls++;
+    return Promise.reject(h.hashToThrow);
+  },
+  extractFileName: (p: string) => p,
+  hashBuffer: () => 'sha256:0',
+}));
+vi.mock('../package-generator.js', () => ({ generatePackage: () => Promise.resolve() }));
+
+type FakeRes = {
+  statusCode: number;
+  body: unknown;
+  headers: Record<string, string>;
+  headersSent: boolean;
+  status(c: number): FakeRes;
+  json(b: unknown): FakeRes;
+  setHeader(k: string, v: string): void;
+};
+
+function fakeRes(): FakeRes {
+  const r: FakeRes = {
+    statusCode: 200,
+    body: undefined,
+    headers: {},
+    headersSent: false,
+    status(c) {
+      r.statusCode = c;
+      return r;
+    },
+    json(b) {
+      r.body = b;
+      return r;
+    },
+    setHeader(k, v) {
+      r.headers[k] = v;
+    },
+  };
+  return r;
+}
+
+/** Run one route handler with a request body; a handler that rejects fails the cell that called it. */
+async function call(route: string, body: unknown): Promise<FakeRes> {
+  const res = fakeRes();
+  await h.routes[route]({ body }, res);
+  return res;
+}
+
+const CONSTANT = 'An unexpected error occurred';
+const SECRET = 'SECRET-E gateway 10.0.0.7:6882';
+const PATH = '/srv/secret-store/contract.pdf';
+
+let errSpy: MockInstance<typeof console.error>;
+
+/** Everything passed to console.error, one line per call; a non-string argument shows as <<non-string:type>>. */
+function logged(): string {
+  return errSpy.mock.calls
+    .map((args) => args.map((x) => (typeof x === 'string' ? x : '<<non-string:' + typeof x + '>>')).join(' '))
+    .join('\n');
+}
+
+type RouteCase = {
+  name: string;
+  path: string;
+  item: (extra?: Record<string, unknown>) => Record<string, unknown>;
+  ok: { result: unknown; pushed: Record<string, unknown> };
+  failed: (title?: string) => Record<string, unknown>;
+  upstreamNo: { result: unknown; pushed: Record<string, unknown> };
+};
+
+const ROUTES: RouteCase[] = [
+  {
+    name: 'register-batch',
+    path: 'POST /register-batch',
+    item: (extra = {}) => ({ title: 'T1', documentType: 'certificate', contentHash: 'sha256:aa', ...extra }),
+    ok: { result: { ok: true, status: 201, data: { id: 'd1', status: 'draft' } }, pushed: { success: true, id: 'd1', status: 'draft' } },
+    failed: (title = 'T1') => ({ success: false, title, error: CONSTANT }),
+    upstreamNo: {
+      result: { ok: false, status: 422, data: { error: 'upstream said no', code: 'E_UP' } },
+      pushed: { success: false, error: 'upstream said no', code: 'E_UP' },
+    },
+  },
+  {
+    name: 'verify-batch',
+    path: 'POST /verify-batch',
+    item: (extra = {}) => ({ documentId: 'doc-1', ...extra }),
+    ok: { result: { ok: true, status: 200, data: { verified: true, documentId: 'doc-1' } }, pushed: { verified: true, documentId: 'doc-1' } },
+    failed: () => ({ verified: false, error: CONSTANT }),
+    upstreamNo: {
+      result: { ok: false, status: 422, data: { verified: false, error: 'upstream said no' } },
+      pushed: { verified: false, error: 'upstream said no' },
+    },
+  },
+];
+
+beforeAll(async () => {
+  await import('../http-server.js');
+});
+
+beforeEach(() => {
+  h.queue.length = 0;
+  h.hashToThrow = undefined;
+  h.hashCalls = 0;
+  errSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  errSpy.mockRestore();
+});
+
+describe.each(ROUTES)('KS-1901 $path per-item catch', (r) => {
+  it(`RED ks1901 A1 ${r.name}: an Error thrown for one item is answered as the constant; the real text is only in the log`, async () => {
+    h.queue.push({ kind: 'throw', value: new Error(SECRET) });
+    const res = await call(r.path, { documents: [r.item()] });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ total: 1, results: [r.failed()] });
+    const wire = JSON.stringify(res.body) + JSON.stringify(res.headers);
+    expect(wire).not.toContain('SECRET-E');
+    expect(wire).not.toContain('10.0.0.7');
+    expect(logged()).toContain(SECRET);
+    expect(logged()).toContain(r.path.split(' ')[1]);
+  });
+
+  it(`RED ks1901 A3 ${r.name}: in a mixed batch only the failing item changes; its neighbours keep their results`, async () => {
+    h.queue.push({ kind: 'ok', result: r.ok.result });
+    h.queue.push({ kind: 'throw', value: new Error(SECRET) });
+    h.queue.push({ kind: 'ok', result: r.ok.result });
+    const res = await call(r.path, { documents: [r.item(), r.item({ title: 'T2' }), r.item({ title: 'T3' })] });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ total: 3, results: [r.ok.pushed, r.failed('T2'), r.ok.pushed] });
+    expect(JSON.stringify(res.body)).not.toContain('SECRET-E');
+  });
+
+  it.each([
+    ['a thrown string', 'plain thrown text'],
+    ['a thrown object with secret-looking values', { password: 'hunter2', token: 't0k-secret' }],
+    ['a thrown null', null],
+    ['a thrown undefined', undefined],
+    ['a thrown number', 42],
+  ])(`RED ks1901 A4 ${r.name}: %s is answered as the constant and the handler does not itself throw`, async (_label, value) => {
+    h.queue.push({ kind: 'throw', value });
+    const res = await call(r.path, { documents: [r.item()] });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ total: 1, results: [r.failed()] });
+    const wire = JSON.stringify(res.body);
+    for (const leak of ['plain thrown text', 'hunter2', 't0k-secret', '[object Object]']) expect(wire).not.toContain(leak);
+  });
+
+  it(`RED ks1901 A4b ${r.name}: a thrown object is logged by field names only, never values (KS 1346 ruling a), and the log is strings only`, async () => {
+    h.queue.push({ kind: 'throw', value: { password: 'hunter2', token: 't0k-secret' } });
+    await call(r.path, { documents: [r.item()] });
+    const log = logged();
+    expect(log).toContain('password');
+    expect(log).toContain('token');
+    expect(log).not.toContain('hunter2');
+    expect(log).not.toContain('t0k-secret');
+    expect(log).not.toContain('<<non-string');
+  });
+
+  it(`RED ks1901 A5 ${r.name}: an unreadable thrown value (revoked Proxy; Error with a throwing message getter) is answered as the constant and the batch survives`, async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    const getterThrows = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    h.queue.push({ kind: 'ok', result: r.ok.result });
+    h.queue.push({ kind: 'throw', value: proxy });
+    h.queue.push({ kind: 'throw', value: getterThrows });
+    h.queue.push({ kind: 'ok', result: r.ok.result });
+    const res = await call(r.path, { documents: [r.item(), r.item({ title: 'T2' }), r.item({ title: 'T3' }), r.item({ title: 'T4' })] });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ total: 4, results: [r.ok.pushed, r.failed('T2'), r.failed('T3'), r.ok.pushed] });
+    expect(logged().split('unreadable thrown value').length - 1).toBe(2);
+  });
+
+  it(`RED ks1901 A6 ${r.name}: a file-system error from hashing a filePath item names no server path in the answer; the log has it`, async () => {
+    h.hashToThrow = Object.assign(new Error(`ENOENT: no such file or directory, open '${PATH}'`), { code: 'ENOENT' });
+    const item = r.name === 'register-batch' ? { title: 'T1', documentType: 'certificate', filePath: PATH } : { filePath: PATH };
+    const res = await call(r.path, { documents: [item] });
+    expect(h.hashCalls).toBe(1);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ total: 1, results: [r.failed()] });
+    const wire = JSON.stringify(res.body);
+    expect(wire).not.toContain('/srv/secret-store');
+    expect(wire).not.toContain('ENOENT');
+    expect(logged()).toContain(PATH);
+    expect(logged()).toContain('ENOENT');
+  });
+
+  it(`control ks1901 C1 ${r.name}: a batch whose items all succeed is unchanged and logs nothing`, async () => {
+    h.queue.push({ kind: 'ok', result: r.ok.result });
+    h.queue.push({ kind: 'ok', result: r.ok.result });
+    const res = await call(r.path, { documents: [r.item(), r.item({ title: 'T2' })] });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ total: 2, results: [r.ok.pushed, r.ok.pushed] });
+    expect(errSpy).not.toHaveBeenCalled();
+  });
+
+  it(`control ks1901 C2 ${r.name}: the 400 refusal for a missing documents array keeps its message`, async () => {
+    const res = await call(r.path, { documents: [] });
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ success: false, error: { code: 'BAD_REQUEST', message: 'documents array is required' } });
+  });
+
+  it(`control ks1901 C3 ${r.name}: an upstream answer that is not OK (returned, not thrown) is still passed through untouched`, async () => {
+    h.queue.push({ kind: 'ok', result: r.upstreamNo.result });
+    const res = await call(r.path, { documents: [r.item()] });
+    expect(res.body).toEqual({ total: 1, results: [r.upstreamNo.pushed] });
+  });
+});
