@@ -8,6 +8,14 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 23:3x ROTATION HANDOVER (read FIRST)
+- **FIRST WORK for the successor, in order:**
+  1. **GATE 82 (Sonnet, tier 2) on PR 1897** (E 24th: KS-1901 + KS-1893 mcp-server, head 07a4cc5be5e6; READY mail 12:33Z in wednesday-agent@). Copy gate 78's prompt shape. Key questions: the three edited pinned cells are exactly as approved (ks1410 A C3, B C3, ks1868-hash C1); constant only; Kam's ks1346 logging rule (names of fields, never values); the batch-500 fix (an unreadable item used to 500 the whole batch); callers. E 24th was told the successor commissions it.
+  2. **GATE 81 (OPUS, tier 1) on PR 1896** (S 10th, KS-1885) was RUNNING in the previous seat's session when it rotated. Check `0_Brain/reference/2026-11-01_gate81-ks1885-auth-1896/verdict.md`. If it is ABSENT, re-run gate 81 (an Opus subagent; the prompt shape is in the daily note 23:1x: allowlist bypass probes, errorHandler log path, hostile mutants). Then relay its notes to S 10th (it waits to PATCH and wrap).
+  3. **R 72nd** (%57): KS-1926 built and proven locally (435/0 both ways; red 3/2 -> green 5/0 with live root pid 58433); next its push and READY -> a Sonnet tier-2 gate. Then PR 3 minting, then G79-F2 filing.
+  4. **MERGE SEAT** (lane B, B 71st's brief as template) for #1894 (gate 79) and #1895 (gate 80): both gated with notes in their bodies. Add #1896/#1897 when gated. Pre-GO checks per RULES.
+- Weekly gauge ~92%+ (Kam's 100% grant). Wednesday ctx at handover: 79%.
+
 ## 23:0x UPDATE (Wednesday ctx 76%, pre-rotation; read FIRST, supersedes below)
 - **LIVE SEATS:**
   - **R 72nd** (%57, Sonnet, launched 23:07, brief `briefs_staged/2026-11-01_seatR72_ks1926_and_minting.md`): (A) KS-1926 FIRST (the push-blocking flake), raised from O48's run dir, proving B6 itself; (B) PR 3 minting x4 from R 71st's ADOPTED worktree s-r71-ks1868-mint; (C) PATCH the gate notes for #1895 and its own PRs; (D) file G79-F2 (Medium: a refresh-token cookie on a persona 500). OWED: its plan confirmation, then a Sonnet tier-2 gate per READY.
