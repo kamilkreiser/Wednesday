@@ -190,11 +190,20 @@ def prior_rulings(d):
     if not words:
         return []
     hits = []
+    # LEG 1 SEAT SCOPE (Tuesday ledger 2026-11-01 s216): this leg printed the other client's panel messages (client and
+    # staff names, repo names) into a Datasec seat, and into its drafters, on a shared common word. Leg 2 got its client
+    # scope on 10-21, this leg did not. Another seat's tab is never a prior ruling here. For the Datasec seats, messages
+    # from before tabs existed are filtered by the other client's words too. Arms: tests/decision_queue_prior_arms.sh.
+    _seat = os.environ.get("DQ_SEAT", "")
+    _other_views = {"tuesday": ("wednesday",), "friday": ("wednesday",), "wednesday": ("tuesday", "friday")}.get(_seat, ())
+    _other_words = ("secuura", "platform-k", "platform-s", "platform k", "platform s") if _seat in ("tuesday", "friday") else ()
     for m in msgs:
         if m.get("role") != "kam":
             continue
         text = str(m.get("text", ""))
         low = text.lower()
+        if str(m.get("view", "")) in _other_views or any(w in low for w in _other_words):
+            continue
         shared = {w for w in words if w in low}
         if len(shared) >= 2:
             hits.append((str(m.get("ts", ""))[:16].replace("T", " "), " ".join(text.split())))
