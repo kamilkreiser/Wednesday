@@ -32,7 +32,7 @@ for i in range(6):
 json.dump(s, open(p, "w"))
 EOF
 card() {  # $1 = id, $2 = client_project
-  printf '{"id":"%s","client_project":"%s","title":"Arm card","bluf":"Arm card.","options":[{"key":"a","label":"A","detail":"a"},{"key":"b","label":"B","detail":"b"}],"recommended":"a","default_action":"Nothing happens."}' "$1" "$2"
+  printf '{"id":"%s","client_project":"%s","title":"Arm card","bluf":"Arm card.","options":[{"key":"a","label":"Alpha","detail":"a"},{"key":"b","label":"Bravo","detail":"b"}],"recommended":"a","default_action":"Nothing happens."}' "$1" "$2"
 }
 pass=0; fail=0
 check() {  # $1 name, $2 expected rc, $3 actual rc, $4 must-appear (or ""), $5 must-NOT-appear (or ""), $6 output file
