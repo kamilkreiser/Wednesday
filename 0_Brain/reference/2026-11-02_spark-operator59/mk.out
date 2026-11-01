@@ -1,0 +1,39 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o59_p1_nftcertificate_ipfs_fetch_unreadable_throw
+diff --git a/Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts b/Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts
+--- a/Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/services/ipfs.service.ts
+@@ -482,9 +482,15 @@
+       response = await fetch(url, { signal: AbortSignal.timeout(IPFS_GATEWAY_READ_TIMEOUT_MS) });
+     } catch (error) {
+       // DNS / connection failure — the IPFS gateway is unreachable.
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.warn('IPFS gateway unreachable', {
+         cid,
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       throw new ServiceUnavailableError('IPFS gateway');
+     }
+@@ -507,9 +513,15 @@
+     try {
+       arrayBuffer = await response.arrayBuffer();
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.warn('IPFS gateway body read failed', {
+         cid,
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       throw new ServiceUnavailableError('IPFS gateway');
+     }
+

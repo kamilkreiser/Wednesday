@@ -1,0 +1,207 @@
+/**
+ * KS-1868: the three log-only route catch blocks below read the caught value with `err instanceof Error ? err.message : String(err)`
+ * only to put it in a `console.error` line. That read can itself throw (a revoked Proxy throws on `instanceof`; an Error whose `message`
+ * getter throws throws on `.message`), and inside an async Express 4 handler the rejection is not caught: the request gets no
+ * response and Node sees an unhandled rejection. Each catch now logs `describeThrown(err)` (the helper KS-1901 added to this module),
+ * whose read cannot throw, and answers the same constant 500 as before.
+ *
+ * Routes covered here: POST /verify-batch, GET /documents, GET /workflow/:id.
+ *
+ * The module binds a port and runs a production guard on import, so `express`, the shared guard, the api client, the hasher and the
+ * package generator are replaced and the route handlers are captured and called directly: no port is bound, no network is touched.
+ * The stand-ins are plain functions, not vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy before
+ * the code under test saw it.
+ */
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
+import type { MockInstance } from 'vitest';
+
+const ks = vi.hoisted(() => ({
+  routes: {} as Record<string, (req: unknown, res: unknown) => Promise<void>>,
+  queue: [] as Array<{ value: unknown }>,
+  genThrow: undefined as { value: unknown } | undefined,
+}));
+
+vi.mock('express', () => {
+  const app = {
+    use: () => app,
+    get: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
+      ks.routes['GET ' + p] = f;
+    },
+    post: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
+      ks.routes['POST ' + p] = f;
+    },
+    listen: () => ({}),
+  };
+  const express = Object.assign(() => app, { json: () => () => undefined });
+  return { default: express };
+});
+vi.mock('@secuura/shared', () => ({
+  enforceProductionConfig: () => undefined,
+  rejectNulBytes: () => () => undefined,
+}));
+vi.mock('../api-client.js', () => {
+  const next = () => {
+    const n = ks.queue.shift();
+    if (!n) throw new Error('test setup: queue empty');
+    return Promise.reject(n.value);
+  };
+  return {
+    registerDocument: next,
+    verifyDocument: next,
+    listDocuments: next,
+    getWorkflowInstance: next,
+    getConnectorInfo: next,
+    getVerificationPolicy: next,
+  };
+});
+vi.mock('../hashing.js', () => ({
+  hashFile: () => Promise.resolve('sha256:0'),
+  extractFileName: (p: string) => p,
+  hashBuffer: () => 'sha256:0',
+}));
+vi.mock('../package-generator.js', () => ({
+  generatePackage: () => (ks.genThrow ? Promise.reject(ks.genThrow.value) : Promise.resolve()),
+}));
+
+type Res53 = {
+  statusCode: number;
+  body: unknown;
+  headersSent: boolean;
+  status(c: number): Res53;
+  json(b: unknown): Res53;
+  setHeader(k: string, v: string): void;
+};
+
+function mkRes(): Res53 {
+  const r: Res53 = {
+    statusCode: 200,
+    body: undefined,
+    headersSent: false,
+    status(c) {
+      r.statusCode = c;
+      return r;
+    },
+    json(b) {
+      r.body = b;
+      return r;
+    },
+    setHeader() {
+      /* headers are not asserted here */
+    },
+  };
+  return r;
+}
+
+const CONST500 = {
+  success: false,
+  error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+};
+
+let spy53: MockInstance<typeof console.error>;
+
+/** Everything passed to console.error, one line per call; a non-string argument shows as <<non-string:type>>. */
+function errLog(): string {
+  return spy53.mock.calls
+    .map((args) => args.map((x) => (typeof x === 'string' ? x : '<<non-string:' + typeof x + '>>')).join(' '))
+    .join('\n');
+}
+
+type Case53 = { route: string; answer: unknown; arm: (v: unknown) => unknown };
+
+const CASES53: Case53[] = [
+  {
+    route: 'POST /verify-batch',
+    answer: CONST500,
+    arm: (v) => ({
+      get body(): unknown {
+        throw v;
+      },
+      query: {},
+      params: {},
+    }),
+  },
+  {
+    route: 'GET /documents',
+    answer: CONST500,
+    arm: (v) => {
+      ks.queue.push({ value: v });
+      return { body: {}, query: {}, params: {} };
+    },
+  },
+  {
+    route: 'GET /workflow/:id',
+    answer: CONST500,
+    arm: (v) => {
+      ks.queue.push({ value: v });
+      return { body: {}, query: {}, params: { id: 'wf-1' } };
+    },
+  },
+];
+
+/** Run one route handler. A handler that rejects (the defect) leaves the response untouched at 200, so the cell's assertions fail. */
+async function invoke(route: string, req: unknown): Promise<Res53> {
+  const res = mkRes();
+  await ks.routes[route](req, res).catch(() => undefined);
+  return res;
+}
+
+beforeAll(async () => {
+  await import('../http-server.js');
+});
+
+beforeEach(() => {
+  ks.queue.length = 0;
+  ks.genThrow = undefined;
+  spy53 = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  spy53.mockRestore();
+});
+
+describe.each(CASES53)('KS-1868 $route catch reads the thrown value safely', (c) => {
+  it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown value is logged as a constant reason and the route still answers its constant 500`, async () => {
+    const { proxy, revoke } = Proxy.revocable({}, {});
+    revoke();
+    const res = await invoke(c.route, c.arm(proxy));
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(c.answer);
+    expect(errLog()).toContain('unreadable thrown value');
+  });
+
+  it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and the route still answers its constant 500`, async () => {
+    const getterThrows = Object.create(Error.prototype, {
+      message: {
+        get() {
+          throw new Error('getter boom');
+        },
+      },
+    });
+    const res = await invoke(c.route, c.arm(getterThrows));
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(c.answer);
+    expect(errLog()).toContain('unreadable thrown value');
+  });
+
+  it(`RED ks1868 R3 ${c.route}: a thrown STRING is logged by its kind only, never its value`, async () => {
+    const res = await invoke(c.route, c.arm('S3CR3T-STRING-MARKER'));
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(c.answer);
+    expect(errLog()).toContain('non-Error string thrown');
+    expect(errLog()).not.toContain('S3CR3T-STRING-MARKER');
+    expect(errLog()).not.toContain('<<non-string');
+  });
+
+  it(`control ks1868 C1 ${c.route}: an ordinary Error logs its message and the answer is the constant 500 without it`, async () => {
+    const res = await invoke(c.route, c.arm(new Error('ordinary boom 10.0.0.7')));
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(c.answer);
+    expect(JSON.stringify(res.body)).not.toContain('ordinary boom');
+    expect(errLog()).toContain('ordinary boom 10.0.0.7');
+  });
+
+  it(`control ks1868 C2 ${c.route}: the log line keeps its route prefix`, async () => {
+    await invoke(c.route, c.arm(new Error('ordinary boom')));
+    expect(errLog()).toContain('[mcp-http] ' + c.route + ' failed:');
+  });
+});

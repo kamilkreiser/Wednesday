@@ -1,0 +1,235 @@
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/index.ts b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/index.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+@@ -421,7 +421,12 @@
+       contacts: contacts.rows,
+     });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] GET /api/tenants/:id failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+@@ -480,6 +485,11 @@
+     res.json({ success: true, status });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] PATCH /api/tenants/:id/status failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+@@ -648,7 +658,12 @@
+     const countResult = await platformQuery(`SELECT COUNT(*) as total FROM platform_audit_log`);
+     res.json({ success: true, entries: result.rows, total: parseInt(countResult.rows[0].total) });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] GET /api/audit-log failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1868-tenant-provisioning-route-catches-p1-unreadable-throw.test.ts b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1868-tenant-provisioning-route-catches-p1-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1868-tenant-provisioning-route-catches-p1-unreadable-throw.test.ts
+@@ -0,0 +1,186 @@
++/**
++ * KS-1868: the three catch blocks below read the caught value with `err instanceof Error ? err.message : String(err)` only to put it in a
++ * `console.error` line. That read can itself throw (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws throws on
++ * `.message`), and inside an async Express 4 handler the rejection is not caught: the request gets no response and Node sees an unhandled
++ * rejection. Each catch now reads the value inside its own try and logs the constant `unreadable thrown value` when the read throws, and
++ * answers the same constant 500 as before.
++ *
++ * Routes covered here: GET /api/tenants/:id, PATCH /api/tenants/:id/status, GET /api/audit-log.
++ *
++ * The module binds a port and opens a database pool on import, so `express`, `pg` and `@secuura/shared` are replaced and the route handlers
++ * are captured and called directly with a fake request and response: no port is bound, no database is touched. The stand-ins that reject with
++ * the thrown value are plain functions, not vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy before the
++ * code under test saw it.
++ */
++import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
++import type { MockInstance } from 'vitest';
++
++const ks = vi.hoisted(() => ({
++  routes: {} as Record<string, (req: unknown, res: unknown) => Promise<void>>,
++  sql: [] as string[],
++  plan: (() => Promise.resolve({ rows: [], rowCount: 0 })) as (text: string) => Promise<unknown>,
++}));
++
++vi.mock('express', () => {
++  const app = {
++    use: () => app,
++    param: () => app,
++    get: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
++      ks.routes['GET ' + p] = f;
++    },
++    post: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
++      ks.routes['POST ' + p] = f;
++    },
++    patch: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
++      ks.routes['PATCH ' + p] = f;
++    },
++    delete: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
++      ks.routes['DELETE ' + p] = f;
++    },
++    listen: () => ({}),
++  };
++  const express = Object.assign(() => app, { json: () => () => undefined });
++  return { default: express };
++});
++vi.mock('pg', () => {
++  class Pool {
++    query(text: string) {
++      ks.sql.push(text.replace(/\s+/g, ' ').trim());
++      return ks.plan(text);
++    }
++    connect() {
++      return Promise.resolve({
++        query: (text: string) => {
++          ks.sql.push(text.replace(/\s+/g, ' ').trim());
++          return ks.plan(text);
++        },
++        release: () => undefined,
++      });
++    }
++    on() {
++      return this;
++    }
++    end() {
++      return Promise.resolve();
++    }
++  }
++  return { default: { Pool }, Pool };
++});
++vi.mock('@secuura/shared', () => ({
++  enforceProductionConfig: () => undefined,
++  authenticate: () => () => undefined,
++  errorHandler: () => undefined,
++  pgSslConfig: () => undefined,
++  rejectNulBytes: () => () => undefined,
++}));
++
++type Res57 = {
++  statusCode: number;
++  body: unknown;
++  status(c: number): Res57;
++  json(b: unknown): Res57;
++};
++
++function mkRes(): Res57 {
++  const r: Res57 = {
++    statusCode: 200,
++    body: undefined,
++    status(c) {
++      r.statusCode = c;
++      return r;
++    },
++    json(b) {
++      r.body = b;
++      return r;
++    },
++  };
++  return r;
++}
++
++const CONST500 = {
++  success: false,
++  error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
++};
++const TID = 'd5700000-0000-4000-8000-000000000001';
++
++let spy57: MockInstance<typeof console.error>;
++
++/** Everything passed to console.error, one line per call; a non-string argument shows as <<non-string:type>>. */
++function errLog(): string {
++  return spy57.mock.calls
++    .map((args) => args.map((x) => (typeof x === 'string' ? x : '<<non-string:' + typeof x + '>>')).join(' '))
++    .join('\n');
++}
++
++type Case57 = { route: string; req: unknown };
++
++const CASES57: Case57[] = [
++  { route: 'GET /api/tenants/:id', req: { params: { id: TID }, body: {}, query: {} } },
++  { route: 'PATCH /api/tenants/:id/status', req: { params: { id: TID }, body: { status: 'suspended' }, query: {} } },
++  { route: 'GET /api/audit-log', req: { params: {}, body: {}, query: {} } },
++];
++
++/** Run one route handler with the database rejecting every statement with `value`. A handler that rejects (the defect) leaves the response untouched at 200. */
++async function invoke(c: Case57, value: unknown): Promise<Res57> {
++  ks.plan = () => Promise.reject(value);
++  const res = mkRes();
++  await ks.routes[c.route](c.req, res).catch(() => undefined);
++  return res;
++}
++
++beforeAll(async () => {
++  process.env.PLATFORM_DATABASE_URL = 'postgres://platform:pw@127.0.0.1:5432/platform';
++  process.env.DATABASE_URL = 'postgres://app:pw@127.0.0.1:5432/app';
++  await import('../index.js');
++}, 30_000);
++
++beforeEach(() => {
++  ks.sql.length = 0;
++  spy57 = vi.spyOn(console, 'error').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++  spy57.mockRestore();
++});
++
++describe.each(CASES57)('KS-1868 $route catch reads the thrown value safely', (c) => {
++  it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown value is logged as a constant reason and the route still answers its constant 500`, async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    const res = await invoke(c, proxy);
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(CONST500);
++    expect(errLog()).toContain('[provisioning] ' + c.route + ' failed: unreadable thrown value');
++    expect(ks.sql.filter((s) => s.startsWith('INSERT'))).toEqual([]);
++  });
++
++  it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and the route still answers its constant 500`, async () => {
++    const getterThrows = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const res = await invoke(c, getterThrows);
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(CONST500);
++    expect(errLog()).toContain('[provisioning] ' + c.route + ' failed: unreadable thrown value');
++    expect(ks.sql.filter((s) => s.startsWith('INSERT'))).toEqual([]);
++  });
++
++  it(`control ks1868 C1 ${c.route}: an ordinary Error logs its message and the answer is the constant 500 without it`, async () => {
++    const res = await invoke(c, new Error('ordinary boom 10.0.0.7'));
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(CONST500);
++    expect(JSON.stringify(res.body)).not.toContain('ordinary boom');
++    expect(errLog()).toContain('[provisioning] ' + c.route + ' failed: ordinary boom 10.0.0.7');
++  });
++
++  it(`control ks1868 C2 ${c.route}: a thrown string is logged as itself, as before`, async () => {
++    const res = await invoke(c, 'plain-string-marker');
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(CONST500);
++    expect(errLog()).toContain('[provisioning] ' + c.route + ' failed: plain-string-marker');
++  });
++});

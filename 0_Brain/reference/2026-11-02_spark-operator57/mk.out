@@ -1,0 +1,94 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o57_p1_tenant_provisioning_get_tenant_patch_status_get_audit_log_unreadable_throw
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/index.ts b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/index.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+@@ -421,7 +421,12 @@
+       contacts: contacts.rows,
+     });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] GET /api/tenants/:id failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+@@ -480,6 +485,11 @@
+     res.json({ success: true, status });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] PATCH /api/tenants/:id/status failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+@@ -648,7 +658,12 @@
+     const countResult = await platformQuery(`SELECT COUNT(*) as total FROM platform_audit_log`);
+     res.json({ success: true, entries: result.rows, total: parseInt(countResult.rows[0].total) });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] GET /api/audit-log failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o57_p2_tenant_provisioning_delete_archive_rollback_outer_audit_unreadable_throw
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/index.ts b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/index.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+@@ -600,7 +600,13 @@
+       await client.query(archived ? 'COMMIT' : 'ROLLBACK');
+     } catch (err) {
+       await client.query('ROLLBACK').catch((rollbackErr: unknown) => {
+-        console.error('[provisioning] DELETE /api/tenants/:id rollback failed:', rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr));
++        let reason: string;
++        try {
++          reason = rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr);
++        } catch {
++          reason = 'unreadable thrown value';
++        }
++        console.error('[provisioning] DELETE /api/tenants/:id rollback failed:', reason);
+       });
+       throw err;
+     } finally {
+@@ -619,14 +625,25 @@
+       message: 'Tenant archived. No data was removed: every row is kept and no database is dropped.',
+     });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     // Ruling 1 (KS-1861): the audit log records a failed attempt too. Its own failure is logged, never silent.
+     await platformQuery(
+       `INSERT INTO platform_audit_log (action, target_type, target_id, details)
+        VALUES ('tenant_archive_failed', 'tenant', $1, $2)`,
+       [req.params.id, JSON.stringify({ erased: false })],
+     ).catch((auditErr: unknown) => {
+-      console.error('[provisioning] DELETE /api/tenants/:id could not audit the failure:', auditErr instanceof Error ? auditErr.message : String(auditErr));
++      let reason: string;
++      try {
++        reason = auditErr instanceof Error ? auditErr.message : String(auditErr);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      console.error('[provisioning] DELETE /api/tenants/:id could not audit the failure:', reason);
+     });
+     console.error('[provisioning] DELETE /api/tenants/:id failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+

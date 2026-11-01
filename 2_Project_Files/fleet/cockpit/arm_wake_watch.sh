@@ -66,7 +66,12 @@ TAPFN='
   # whitespace removed. Ghost text never survives this read, so nothing below
   # can ever mistake a dim suggestion for text to submit.
   wake_read_prompt() {
-    '"$TMUX_BIN"' capture-pane -t "$1" -p -e 2>/dev/null | grep -a "$(printf "\342\235\257")" | tail -1 | \
+    # TRAY FIX (2026-11-02, ledger row same day: deaf ~45 min): Claude Code draws a background-agent
+    # tray line beginning with the same prompt glyph BELOW the input box, and tail -1 of glyph lines read
+    # it as typed text, so every wake was held. Read the glyph line that directly follows the input
+    # box top rule (two box-drawing dashes); if no such line exists, fall back to the last glyph line.
+    '"$TMUX_BIN"' capture-pane -t "$1" -p -e 2>/dev/null | \
+      LC_ALL=C perl -ne "if (\$q =~ /\xe2\x94\x80\xe2\x94\x80/ && /\xe2\x9d\xaf/) { \$p = \$_ } \$l = \$_ if /\xe2\x9d\xaf/; \$q = \$_; END { print defined(\$p) ? \$p : (defined(\$l) ? \$l : \"\") }" 2>/dev/null | \
       LC_ALL=C perl -pe "s/\x1b\[2m.*?(?=\x1b|\$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g; s/^.*\xe2\x9d\xaf//" 2>/dev/null | tr -d "[:space:]"
   }
   # OWN-TAP TEST (2026-10-06, ledger: Wednesday deaf ~8 h). The 09-15 test was

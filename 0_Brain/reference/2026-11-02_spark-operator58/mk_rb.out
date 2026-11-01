@@ -1,0 +1,49 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o58_p1_api_gateway_admin_identity_users_organizations_level_unreadable_throw
+diff --git a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+--- a/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+@@ -1272,6 +1272,12 @@
+       res.json({ success: true, users });
+     } catch (err) {
+-      log('error', '[Identity] Failed to fetch users', { error: err instanceof Error ? err.message : String(err) });
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('error', '[Identity] Failed to fetch users', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch identity users' } });
+     }
+   });
+@@ -1293,7 +1299,13 @@
+       `));
+       res.json({ success: true, organizations: result.rows });
+     } catch (err) {
+-      log('error', '[Identity] Failed to fetch organizations', { error: err instanceof Error ? err.message : String(err) });
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('error', '[Identity] Failed to fetch organizations', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch identity organizations' } });
+     }
+   });
+@@ -1317,7 +1329,13 @@
+       }
+       res.json({ success: true, userId: id, verificationLevel });
+     } catch (err) {
+-      log('error', '[Identity] Failed to update level', { error: err instanceof Error ? err.message : String(err) });
++      let reason: string;
++      try {
++        reason = err instanceof Error ? err.message : String(err);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      log('error', '[Identity] Failed to update level', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update verification level' } });
+     }
+   });
+

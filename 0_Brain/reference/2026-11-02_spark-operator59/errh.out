@@ -1,0 +1,71 @@
+// =============================================================================
+// ERROR HANDLER MIDDLEWARE
+// =============================================================================
+
+export function errorHandler(
+  err: AppError,
+  req: Request,
+  res: Response,
+  _next: NextFunction
+): void {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const requestId = (req as any).requestId || req.headers['x-request-id'];
+
+  // Determine status code
+  const statusCode = err.statusCode || 500;
+  
+  // Determine error code
+  const errorCode = err.code || ERROR_CODES.SERVER_INTERNAL;
+  
+  // Get safe message
+  //
+  // KS-727: a 5xx is redacted on EVERY environment, not only production. This
+  // module is a second, complete copy of the handler in `./index.ts` and it
+  // carried the same construct the ticket was filed against — in the sibling
+  // file of the one that was fixed, which is why the original sweep missed it.
+  // It is currently unreachable (`./errors/index.ts` re-exports only
+  // `./tracking` and `./middleware`, so this file is not on the package's
+  // public surface), so there was no live leak; it is fixed rather than left
+  // as a working copy of the defect for whoever wires it up next.
+  //
+  // KS-658 records the demo VM running every Node service as
+  // `NODE_ENV=development`, so "only leaks outside production" is not a
+  // mitigation on this platform — it is the branch that always executes.
+  let message: string;
+  if (statusCode >= 500) {
+    message = SAFE_MESSAGES[errorCode] || 'An unexpected error occurred';
+  } else {
+    // Client errors keep their authored text on every environment: it is
+    // written by us for the caller, not thrown internals.
+    message = err.message || SAFE_MESSAGES[errorCode] || 'An unexpected error occurred';
+  }
+
+  // Build response
+  const response: ErrorResponse = {
+    success: false,
+    error: {
+      code: errorCode,
+      message,
+      requestId,
+      timestamp: new Date().toISOString(),
+    },
+  };
+
+  // Add details in non-production.
+  //
+  // KS-727: `details` is a SECOND route to the caller, independent of
+  // `message` above, and on a 5xx it carries the same class of content — the
+  // message assertion alone would not have seen it. It is gated off 5xx for
+  // the same reason the message is: on a server error nothing the platform
+  // did not author should reach the caller. On a 4xx, `details` is authored
+  // (a ValidationError's field list, say) and still goes out.
+  if (!isProduction && statusCode < 500 && err.details) {
+    response.error.details = err.details;
+  }
+
+  // Add documentation link for known errors
+  if (SAFE_MESSAGES[errorCode]) {
+    response.error.docs = `https://docs.secuura.io/errors/${errorCode}`;
+  }
+
+  // Log error (always log full details server-side)

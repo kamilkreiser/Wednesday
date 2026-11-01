@@ -1,0 +1,40 @@
+mode: code_patch2 (declared: 1 product(s), 1 test(s))
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-11-02_ks_1868_o56_p2_security_admin_scopes_put_catch_unreadable_throw-control/out.md.checker/patch.diff lines=180
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 03977e89a343ad7362760e4fb0270602fb6da5ce
+runner: vitest
+--- baseline at the untouched tip (whole services/security suite + tsc)
+baseline suite rc=0 total=378 passed=378 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=2 miscounted_sections=0
+section 1: MISMATCHED HEADER — '--- diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts' paired with '+++ --- a/Blockchain/Dev/services/security/src/index.ts' (two files in one section; git reads a rename)
+section 1 Blockchain/Dev/services/security/src/index.ts: applies (strict)
+section 2: MISMATCHED HEADER — '--- diff --git a/Blockchain/Dev/services/security/src/__tests__/ks1868-security-admin-scopes-put-catch-unreadable-throw.test.ts b/Blockchain/Dev/services/security/src/__tests__/ks1868-security-admin-scopes-put-catch-unreadable-throw.test.ts' paired with '+++ new file mode 100644' (two files in one section; git reads a rename)
+section 2 Blockchain/Dev/services/security/src/__tests__/ks1868-security-admin-scopes-put-catch-unreadable-throw.test.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+PASS A3 (code_patch2) touched-file set == the declared set: { Blockchain/Dev/services/security/src/index.ts } + { Blockchain/Dev/services/security/src/__tests__/ks1868-security-admin-scopes-put-catch-unreadable-throw.test.ts }
+A3b: no must_change sites in the input — skipped
+PASS A3c every '+' line the brief adds is in the declared sections (11 line(s), multiset), and no tip line is re-added as a '+' in any product (A3d)
+INFO A3i: the brief's edit blocks add no line to ks1868-security-admin-scopes-put-catch-unreadable-throw.test.ts — not measured
+A3i: brief '+' lines byte-exact incl. leading whitespace in: index.ts
+PASS A3x every declared file's '+' lines are byte-identical to the brief's, in order (SUMMARY declared=2 measured=2 ok=2 diff=0 unmeasured=0)
+tests with ALL test sections, NO product section: rc=1 total=5 passed=3 failed=2 suites_failed=2 loaded=1 failed_names=['KS-1868 the catch of the admin-scopes write route reads the thrown value safely RED ks1868 R1 a revoked Proxy from the transaction answers 500 INTERNAL_ERROR', 'KS-1868 the catch of the admin-scopes write route reads the thrown value safely RED ks1868 R2 an Error whose message getter throws answers 500 INTERNAL_ERROR']
+A4 declared red cell(s) (brief ## Red cells, assertion red): RED ks1868 R1 a revoked Proxy from the transaction answers 5 | RED ks1868 R2 an Error whose message getter throws answers 5
+PASS A4 RED-FIRST: the declared test(s) fail with every test section and no product section (2 failed / 5 run; controls green; assertion reds)
+tests after ALL product sections: rc=0 total=5 passed=5 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: every declared test passes with all 1 product section(s) (5 passed / 5 run)
+INFO control cells: 3 passed BEFORE the product sections, 5 AFTER
+after suite rc=0 total=383 passed=383 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=378 failed=0 | after: total=383 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 5
+PASS A6 whole services/security suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/security: rc 0 after the patch (baseline rc=0)
+INFO tsc on src/__tests__/ks1868-security-admin-scopes-put-catch-unreadable-throw.test.ts alone (--types node,vitest/globals): rc=0 (not gated, as in code_patch)
+SUMMARY files=2 products=1 tests=1 red_first=yes apply_mode=strict
+RESULT: PASS (7/7)
+PASS A2a ANCHOR: every hunk's old side sits at its header's start line at the tip (SUMMARY hunks=1 ok=1 bad=0 skipped_newfile=1)
+SPARK RESULT: PASS (checker rc 0 + A2a anchor OK)

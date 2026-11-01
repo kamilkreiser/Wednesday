@@ -1,0 +1,52 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o56_p1_security_key_revoke_save_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -1580,8 +1580,15 @@
+   try {
+     await dbSaveApiKey(apiKey, { rethrow: true });
+   } catch (saveErr: any) {
+-    const infra = isInfrastructureDbError(saveErr);
+-    log('error', 'KS-888: API key revoke not stored, the key is revoked in this process only', { keyId: apiKey.id, code: saveErr?.code, infra });
++    let infra = false;
++    let code: unknown;
++    try {
++      infra = isInfrastructureDbError(saveErr);
++      code = saveErr?.code;
++    } catch {
++      // A thrown value that cannot be read cannot be classified: no code, not infrastructure (500), as for any non-infrastructure error.
++    }
++    log('error', 'KS-888: API key revoke not stored, the key is revoked in this process only', { keyId: apiKey.id, code, infra });
+     return res.status(infra ? 503 : 500).json({
+       success: false,
+       error: { code: infra ? 'SERVICE_UNAVAILABLE' : 'INTERNAL_ERROR', message: 'The API key revoke could not be saved, so it may not survive a restart' },
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o56_p2_security_admin_scopes_put_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -1765,12 +1765,21 @@
+     log('info', 'Admin organisation scope set', { tenantId, targetUserId: userId, before, after: wanted });
+     return res.json({ success: true, data: { userId, tenantId, before, organizationIds: wanted } });
+   } catch (error) {
+-    if (error instanceof z.ZodError) return badRequestFromZod(res, error);
++    let isZod = false;
++    let infra = false;
++    try {
++      isZod = error instanceof z.ZodError;
++      infra = isInfrastructureDbError(error);
++    } catch {
++      // A thrown value that cannot be read cannot be classified: hand the error handler an ordinary Error, as for any non-infrastructure error.
++      return next(new Error('unreadable thrown value'));
++    }
++    if (isZod) return badRequestFromZod(res, error as z.ZodError);
+     // The pull request 1539 gate's m1. An infrastructure fault reached errorHandler and answered a
+     // generic 500 INTERNAL_ERROR, while develop's mint path answers 503 for the same killed backend.
+     // Fail-closed held either way — the transaction rolls back and nothing is written — but a 500 tells
+     // a caller the request was wrong when the honest answer is "retry".
+-    if (isInfrastructureDbError(error)) {
++    if (infra) {
+       // Read off the request, not the parsed locals: those are declared inside the try and are not in
+       // scope here, which tsc caught.
+       log('error', 'Admin organisation scope write failed on infrastructure, nothing written', {
+

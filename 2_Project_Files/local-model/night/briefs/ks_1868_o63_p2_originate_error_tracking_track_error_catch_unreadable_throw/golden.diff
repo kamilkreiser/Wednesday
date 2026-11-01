@@ -1,0 +1,97 @@
+diff --git a/Blockchain/Dev/services/originate/src/services/errorTrackingService.ts b/Blockchain/Dev/services/originate/src/services/errorTrackingService.ts
+--- a/Blockchain/Dev/services/originate/src/services/errorTrackingService.ts
++++ b/Blockchain/Dev/services/originate/src/services/errorTrackingService.ts
+@@ -62,6 +62,12 @@
+     `;
+   } catch (err: any) {
+     // Never throw from error tracking — log to stderr as last resort
+-    logger.error('Failed to persist error', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Failed to persist error', { error: reason });
+   }
+ }
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1868-error-tracking-track-error-p2-unreadable-throw.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1868-error-tracking-track-error-p2-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1868-error-tracking-track-error-p2-unreadable-throw.test.ts
+@@ -0,0 +1,75 @@
++// KS-1868 (originate services/errorTrackingService.ts, trackError): the function is documented "never throws (fire-and-forget for error handlers)", and its catch logs the persistence failure as
++// `err instanceof Error ? err.message : String(err)`. When the thrown value cannot be read (a revoked Proxy makes `instanceof` throw; an Error whose `message` getter throws), that read threw INSIDE
++// the catch, so trackError rejected after all. The catch now reads the value inside its own try and logs the constant reason `unreadable thrown value`, and trackError resolves, exactly as it does
++// for an ordinary Error. The database stand-in is a plain function that rejects with the thrown value, and the outcome is read through `.then(() => 'resolved', () => 'REJECTED')` so a rejection
++// that carries a revoked Proxy is a red assertion and never a formatted-matcher crash.
++const mockExecuteRaw = jest.fn();
++const mockQueryRaw = jest.fn();
++const mockLoggerError = jest.fn();
++
++jest.mock('../db', () => ({
++  prisma: { $executeRaw: mockExecuteRaw, $queryRaw: mockQueryRaw },
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
++}));
++
++import { trackError } from '../services/errorTrackingService';
++
++const REPORT = { service: 'ks1868-svc', errorType: 'ks1868', message: 'ks1868 reported error', severity: 'error' as const };
++
++beforeEach(() => jest.clearAllMocks());
++
++async function trackWithThrow(thrown: unknown): Promise<'resolved' | 'REJECTED'> {
++  mockExecuteRaw.mockRejectedValueOnce(thrown);
++  return trackError(REPORT).then(
++    () => 'resolved' as const,
++    () => 'REJECTED' as const,
++  );
++}
++
++function revokedProxy(): object {
++  const { proxy, revoke } = Proxy.revocable({}, {});
++  revoke();
++  return proxy;
++}
++
++function throwingMessageError(): Error {
++  const e = new Error('ks1868 hidden');
++  Object.defineProperty(e, 'message', {
++    get() {
++      throw new Error('ks1868 message getter');
++    },
++  });
++  return e;
++}
++
++describe('KS-1868 trackError catch reads the thrown value safely', () => {
++  it('RED ks1868 R1 trackError: a revoked Proxy thrown by the database is logged as a constant reason and trackError still resolves', async () => {
++    expect(await trackWithThrow(revokedProxy())).toBe('resolved');
++    expect(mockLoggerError.mock.calls).toEqual([['Failed to persist error', { error: 'unreadable thrown value' }]]);
++  });
++
++  it('RED ks1868 R2 trackError: an Error whose message getter throws is logged as a constant reason and trackError still resolves', async () => {
++    expect(await trackWithThrow(throwingMessageError())).toBe('resolved');
++    expect(mockLoggerError.mock.calls).toEqual([['Failed to persist error', { error: 'unreadable thrown value' }]]);
++  });
++
++  it('control ks1868 C1 trackError: an ordinary Error logs its own message and trackError resolves', async () => {
++    expect(await trackWithThrow(new Error('ks1868 ordinary'))).toBe('resolved');
++    expect(mockLoggerError.mock.calls).toEqual([['Failed to persist error', { error: 'ks1868 ordinary' }]]);
++  });
++
++  it('control ks1868 C2 trackError: a thrown string is logged as itself, as before', async () => {
++    expect(await trackWithThrow('ks1868 plain string')).toBe('resolved');
++    expect(mockLoggerError.mock.calls).toEqual([['Failed to persist error', { error: 'ks1868 plain string' }]]);
++  });
++
++  it('control ks1868 C3 trackError: a successful insert resolves, logs nothing and reaches the database once', async () => {
++    mockExecuteRaw.mockResolvedValueOnce(1);
++    await expect(trackError(REPORT)).resolves.toBeUndefined();
++    expect(mockExecuteRaw).toHaveBeenCalledTimes(1);
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
++});

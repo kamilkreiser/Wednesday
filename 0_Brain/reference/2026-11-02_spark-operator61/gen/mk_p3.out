@@ -1,0 +1,56 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o61_p3_analytics_routes_zod_precheck_catches_activity_exports_reports_unreadable_throw
+diff --git a/Blockchain/Dev/services/analytics/src/routes/analytics.ts b/Blockchain/Dev/services/analytics/src/routes/analytics.ts
+--- a/Blockchain/Dev/services/analytics/src/routes/analytics.ts
++++ b/Blockchain/Dev/services/analytics/src/routes/analytics.ts
+@@ -277,7 +277,15 @@
+         },
+       },
+     });
+-  } catch (error) {
++  } catch (thrown) {
++    let error: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      error = new Error('unreadable thrown value');
++    }
+     if (error instanceof z.ZodError) {
+       res.status(400).json({
+         success: false,
+@@ -311,7 +319,15 @@
+       success: true,
+       data: exportResult,
+     });
+-  } catch (error) {
++  } catch (thrown) {
++    let error: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      error = new Error('unreadable thrown value');
++    }
+     if (error instanceof z.ZodError) {
+       return res.status(400).json({
+         success: false,
+@@ -394,7 +410,15 @@
+       success: true,
+       data: report,
+     });
+-  } catch (error) {
++  } catch (thrown) {
++    let error: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      error = new Error('unreadable thrown value');
++    }
+     if (error instanceof z.ZodError) {
+       return res.status(400).json({
+         success: false,
+

@@ -1,0 +1,61 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o55_p1_billing_stripe_webhook_signature_unreadable_throw
+diff --git a/Blockchain/Dev/services/billing/src/routes/webhooks.ts b/Blockchain/Dev/services/billing/src/routes/webhooks.ts
+--- a/Blockchain/Dev/services/billing/src/routes/webhooks.ts
++++ b/Blockchain/Dev/services/billing/src/routes/webhooks.ts
+@@ -163,7 +163,13 @@
+       const stripeService = getStripeService();
+       event = stripeService.constructWebhookEvent(req.body, signature);
+     } catch (error) {
+-      logger.error('Webhook signature verification failed', { error: String(error) });
++      let reason: string;
++      try {
++        reason = String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Webhook signature verification failed', { error: reason });
+       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid signature' } });
+       return;
+     }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o55_p2_billing_stripe_webhook_claim_unreadable_throw
+diff --git a/Blockchain/Dev/services/billing/src/routes/webhooks.ts b/Blockchain/Dev/services/billing/src/routes/webhooks.ts
+--- a/Blockchain/Dev/services/billing/src/routes/webhooks.ts
++++ b/Blockchain/Dev/services/billing/src/routes/webhooks.ts
+@@ -178,10 +178,16 @@
+     try {
+       claimed = await claimEvent(event.id, event.type, event);
+     } catch (error) {
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
+       logger.error('[Webhook] Refusing delivery — idempotency unavailable', {
+         eventId: event.id,
+         eventType: event.type,
+-        error: error instanceof Error ? error.message : String(error),
++        error: reason,
+       });
+       res.status(503).json({
+         success: false,
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o55_p3_billing_stripe_webhook_handler_unreadable_throw
+diff --git a/Blockchain/Dev/services/billing/src/routes/webhooks.ts b/Blockchain/Dev/services/billing/src/routes/webhooks.ts
+--- a/Blockchain/Dev/services/billing/src/routes/webhooks.ts
++++ b/Blockchain/Dev/services/billing/src/routes/webhooks.ts
+@@ -213,6 +213,11 @@
+       res.json({ received: true });
+     } catch (error) {
+-      const message = error instanceof Error ? error.message : String(error);
++      let message: string;
++      try {
++        message = error instanceof Error ? error.message : String(error);
++      } catch {
++        message = 'unreadable thrown value';
++      }
+       logger.error(`[Webhook] Error handling ${event.type}:`, { error: message });
+       // Hand the claim back so the redelivery is processed rather than
+       // acknowledged as a duplicate.
+

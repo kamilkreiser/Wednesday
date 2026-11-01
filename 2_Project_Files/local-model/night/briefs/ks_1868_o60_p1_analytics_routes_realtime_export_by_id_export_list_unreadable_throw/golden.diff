@@ -1,0 +1,192 @@
+diff --git a/Blockchain/Dev/services/analytics/src/routes/analytics.ts b/Blockchain/Dev/services/analytics/src/routes/analytics.ts
+--- a/Blockchain/Dev/services/analytics/src/routes/analytics.ts
++++ b/Blockchain/Dev/services/analytics/src/routes/analytics.ts
+@@ -242,7 +242,13 @@
+       data: metrics,
+     });
+   } catch (error) {
+-    logger.error('Error fetching real-time metrics', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error fetching real-time metrics', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch real-time metrics' },
+@@ -347,7 +353,13 @@
+       data: exportResult,
+     });
+   } catch (error) {
+-    logger.error('Error fetching export', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error fetching export', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch export' },
+@@ -369,7 +381,13 @@
+       data: exports,
+     });
+   } catch (error) {
+-    logger.error('Error listing exports', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error listing exports', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to list exports' },
+diff --git a/Blockchain/Dev/services/analytics/src/__tests__/ks1868-analytics-routes-catches-p1-unreadable-throw.test.ts b/Blockchain/Dev/services/analytics/src/__tests__/ks1868-analytics-routes-catches-p1-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/analytics/src/__tests__/ks1868-analytics-routes-catches-p1-unreadable-throw.test.ts
+@@ -0,0 +1,139 @@
++/**
++ * KS-1868: the three analytics route catches below read the caught value with `error instanceof Error ? error.message : String(error)` only to
++ * put it in a `logger.error` line. That read can itself throw (a revoked Proxy throws on `instanceof`; an Error whose `message` getter throws
++ * throws on `.message`), and inside an async Express 4 handler the rejection is not caught: the request gets no response and Node sees an
++ * unhandled rejection. Each catch now reads the value inside its own try and logs the constant `unreadable thrown value` when the read throws,
++ * and answers the same constant 500 as before.
++ *
++ * Routes covered here: GET /realtime, GET /exports/:id, GET /exports (mounted under /api/analytics).
++ *
++ * `express`, the two services and the logger are replaced and the route handlers are captured and called directly with a fake request and
++ * response: no port is bound, no database is touched. The stand-ins that reject with the thrown value are plain functions, not vi.fn(): a spy
++ * inspects what it rejects with and could itself fail on a revoked Proxy before the code under test saw it.
++ */
++import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
++
++const ks = vi.hoisted(() => ({
++  routes: {} as Record<string, (req: unknown, res: unknown) => Promise<void>>,
++  toThrow: undefined as unknown,
++  error: vi.fn(),
++}));
++
++vi.mock('express', () => {
++  const router = {
++    get: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
++      ks.routes['GET ' + p] = f;
++    },
++    post: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
++      ks.routes['POST ' + p] = f;
++    },
++  };
++  return { Router: () => router, default: { Router: () => router } };
++});
++vi.mock('../services/analyticsService', () => ({
++  analyticsService: { getRealTimeMetrics: () => Promise.reject(ks.toThrow) },
++}));
++vi.mock('../services/exportService', () => ({
++  exportService: {
++    getExport: () => Promise.reject(ks.toThrow),
++    listExports: () => Promise.reject(ks.toThrow),
++  },
++}));
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: ks.error },
++}));
++
++type Res60 = {
++  statusCode: number;
++  body: unknown;
++  status(c: number): Res60;
++  json(b: unknown): Res60;
++};
++
++function mkRes(): Res60 {
++  const r: Res60 = {
++    statusCode: 200,
++    body: undefined,
++    status(c) {
++      r.statusCode = c;
++      return r;
++    },
++    json(b) {
++      r.body = b;
++      return r;
++    },
++  };
++  return r;
++}
++
++type Case60 = { route: string; req: unknown; logMsg: string; answer: string };
++
++const CASES60: Case60[] = [
++  { route: 'GET /realtime', req: { params: {}, query: {} }, logMsg: 'Error fetching real-time metrics', answer: 'Failed to fetch real-time metrics' },
++  { route: 'GET /exports/:id', req: { params: { id: 'ks1868-export' }, query: {} }, logMsg: 'Error fetching export', answer: 'Failed to fetch export' },
++  { route: 'GET /exports', req: { params: {}, query: {} }, logMsg: 'Error listing exports', answer: 'Failed to list exports' },
++];
++
++const ERRS60 = (msg: string) => ks.error.mock.calls.filter((c) => c[0] === msg);
++
++/** Run one route handler with the service call rejecting with `value`. A handler that rejects (the defect) leaves the response untouched at 200. */
++async function invoke(c: Case60, value: unknown): Promise<Res60> {
++  ks.toThrow = value;
++  const res = mkRes();
++  await ks.routes[c.route](c.req, res).catch(() => undefined);
++  return res;
++}
++
++beforeAll(async () => {
++  await import('../routes/analytics');
++});
++
++beforeEach(() => {
++  ks.toThrow = undefined;
++  ks.error.mockReset();
++});
++
++describe.each(CASES60)('KS-1868 analytics $route catch reads the thrown value safely', (c) => {
++  const body500 = (m: string) => ({ success: false, error: { code: 'INTERNAL_ERROR', message: m } });
++
++  it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown value is logged as a constant reason and the route still answers its constant 500`, async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    const res = await invoke(c, proxy);
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(body500(c.answer));
++    expect(ERRS60(c.logMsg)).toHaveLength(1);
++    expect(ERRS60(c.logMsg)[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and the route still answers its constant 500`, async () => {
++    const getterThrows = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const res = await invoke(c, getterThrows);
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(body500(c.answer));
++    expect(ERRS60(c.logMsg)).toHaveLength(1);
++    expect(ERRS60(c.logMsg)[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it(`control ks1868 C1 ${c.route}: an ordinary Error logs its message and the answer is the constant 500 without it`, async () => {
++    const res = await invoke(c, new Error('ordinary boom 10.0.0.7'));
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(body500(c.answer));
++    expect(JSON.stringify(res.body)).not.toContain('ordinary boom');
++    expect(ERRS60(c.logMsg)).toHaveLength(1);
++    expect(ERRS60(c.logMsg)[0][1]).toEqual({ error: 'ordinary boom 10.0.0.7' });
++  });
++
++  it(`control ks1868 C2 ${c.route}: a thrown string is logged as itself, as before`, async () => {
++    const res = await invoke(c, 'plain-string-marker');
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(body500(c.answer));
++    expect(ERRS60(c.logMsg)[0][1]).toEqual({ error: 'plain-string-marker' });
++  });
++});

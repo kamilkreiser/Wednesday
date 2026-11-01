@@ -1,0 +1,209 @@
+diff --git a/Blockchain/Dev/services/analytics/src/routes/analytics.ts b/Blockchain/Dev/services/analytics/src/routes/analytics.ts
+--- a/Blockchain/Dev/services/analytics/src/routes/analytics.ts
++++ b/Blockchain/Dev/services/analytics/src/routes/analytics.ts
+@@ -143,7 +143,15 @@
+       success: true,
+       data: metrics,
+     });
+-  } catch (error) {
++  } catch (thrown) {
++    let error: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      error = new Error('unreadable thrown value');
++    }
+     if (error instanceof z.ZodError) {
+       return res.status(400).json({
+         success: false,
+@@ -176,7 +184,15 @@
+       success: true,
+       data: metrics,
+     });
+-  } catch (error) {
++  } catch (thrown) {
++    let error: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      error = new Error('unreadable thrown value');
++    }
+     if (error instanceof z.ZodError) {
+       return res.status(400).json({
+         success: false,
+@@ -209,7 +225,15 @@
+       success: true,
+       data: metrics,
+     });
+-  } catch (error) {
++  } catch (thrown) {
++    let error: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      error = new Error('unreadable thrown value');
++    }
+     if (error instanceof z.ZodError) {
+       return res.status(400).json({
+         success: false,
+diff --git a/Blockchain/Dev/services/analytics/src/__tests__/ks1868-analytics-routes-zod-catches-p2-unreadable-throw.test.ts b/Blockchain/Dev/services/analytics/src/__tests__/ks1868-analytics-routes-zod-catches-p2-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/analytics/src/__tests__/ks1868-analytics-routes-zod-catches-p2-unreadable-throw.test.ts
+@@ -0,0 +1,150 @@
++/**
++ * KS-1868: the three analytics route catches below (governance, revenue and users) each test `error instanceof z.ZodError` first and then read the caught value
++ * with `error instanceof Error ? error.message : String(error)` for a `logger.error` line. Both reads can themselves throw (a revoked Proxy throws
++ * on `instanceof`; an Error whose `message` getter throws throws on `.message`), and inside an async Express 4 handler the rejection is not caught:
++ * the request gets no response and Node sees an unhandled rejection. Each catch now probes both reads inside its own try: an unreadable value is
++ * replaced by an ordinary Error and so is logged as the constant `unreadable thrown value` and the route answers the same constant 500 as for any ordinary Error. An ordinary ZodError
++ * still answers 400 with `details` equal to its `errors`, and an ordinary Error still logs its own message and answers the constant 500.
++ *
++ * `express`, the request schemas, the service and the logger are replaced and the route handlers are captured and called directly with a fake
++ * request and response: no port is bound, no database is touched. The stand-ins that reject with the thrown value are plain functions, not vi.fn():
++ * a spy inspects what it rejects with and could itself fail on a revoked Proxy before the code under test saw it.
++ */
++import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
++import { z } from 'zod';
++
++const ks = vi.hoisted(() => ({
++  routes: {} as Record<string, (req: unknown, res: unknown) => Promise<void>>,
++  toThrow: undefined as unknown,
++  error: vi.fn(),
++}));
++
++vi.mock('express', () => {
++  const router = {
++    get: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
++      ks.routes['GET ' + p] = f;
++    },
++    post: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
++      ks.routes['POST ' + p] = f;
++    },
++  };
++  return { Router: () => router, default: { Router: () => router } };
++});
++vi.mock('../types/analytics.types', () => {
++  const passThrough = { parse: (v: unknown) => v };
++  return {
++    AnalyticsQuerySchema: passThrough,
++    ActivityQuerySchema: passThrough,
++    ExportRequestSchema: passThrough,
++    ReportRequestSchema: passThrough,
++  };
++});
++vi.mock('../services/analyticsService', () => ({
++  analyticsService: {
++    getGovernanceMetrics: () => Promise.reject(ks.toThrow),
++    getRevenueMetrics: () => Promise.reject(ks.toThrow),
++    getUserMetrics: () => Promise.reject(ks.toThrow),
++  },
++}));
++vi.mock('../utils/logger', () => ({
++  logger: { info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: ks.error },
++}));
++
++type Res61 = {
++  statusCode: number;
++  body: unknown;
++  status(c: number): Res61;
++  json(b: unknown): Res61;
++};
++
++function mkRes(): Res61 {
++  const r: Res61 = {
++    statusCode: 200,
++    body: undefined,
++    status(c) {
++      r.statusCode = c;
++      return r;
++    },
++    json(b) {
++      r.body = b;
++      return r;
++    },
++  };
++  return r;
++}
++
++type Case61 = { route: string; req: unknown; logMsg: string; answer: string; bad: string };
++
++const CASES61: Case61[] = [
++  { route: 'GET /governance', req: { query: {} }, logMsg: 'Error fetching governance metrics', answer: 'Failed to fetch governance metrics', bad: 'Invalid query parameters' },
++  { route: 'GET /revenue', req: { query: {} }, logMsg: 'Error fetching revenue metrics', answer: 'Failed to fetch revenue metrics', bad: 'Invalid query parameters' },
++  { route: 'GET /users', req: { query: {} }, logMsg: 'Error fetching user metrics', answer: 'Failed to fetch user metrics', bad: 'Invalid query parameters' },
++];
++
++const ERRS61 = (msg: string) => ks.error.mock.calls.filter((c) => c[0] === msg);
++
++/** Run one route handler with the service call rejecting with `value`. A handler that rejects (the defect) leaves the response untouched at 200. */
++async function invoke(c: Case61, value: unknown): Promise<Res61> {
++  ks.toThrow = value;
++  const res = mkRes();
++  await ks.routes[c.route](c.req, res).catch(() => undefined);
++  return res;
++}
++
++beforeAll(async () => {
++  await import('../routes/analytics');
++});
++
++beforeEach(() => {
++  ks.toThrow = undefined;
++  ks.error.mockReset();
++});
++
++describe.each(CASES61)('KS-1868 analytics $route catch reads the thrown value safely', (c) => {
++  const body500 = (m: string) => ({ success: false, error: { code: 'INTERNAL_ERROR', message: m } });
++
++  it(`RED ks1868 R1 ${c.route}: a revoked Proxy thrown value is logged as a constant reason and the route still answers its constant 500`, async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    const res = await invoke(c, proxy);
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(body500(c.answer));
++    expect(ERRS61(c.logMsg)).toHaveLength(1);
++    expect(ERRS61(c.logMsg)[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it(`RED ks1868 R2 ${c.route}: an Error whose message getter throws is logged as a constant reason and the route still answers its constant 500`, async () => {
++    const getterThrows = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    const res = await invoke(c, getterThrows);
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(body500(c.answer));
++    expect(ERRS61(c.logMsg)).toHaveLength(1);
++    expect(ERRS61(c.logMsg)[0][1]).toEqual({ error: 'unreadable thrown value' });
++  });
++
++  it(`control ks1868 C1 ${c.route}: an ordinary ZodError answers 400 with details equal to its errors and logs nothing`, async () => {
++    const zerr = new z.ZodError([{ code: 'custom', path: ['limit'], message: 'ks1868 control issue' }]);
++    const res = await invoke(c, zerr);
++    expect(res.statusCode).toBe(400);
++    expect(res.body).toEqual({
++      success: false,
++      error: { code: 'BAD_REQUEST', message: c.bad, details: zerr.errors },
++    });
++    expect(ks.error).not.toHaveBeenCalled();
++  });
++
++  it(`control ks1868 C2 ${c.route}: an ordinary Error logs its message and the answer is the constant 500 without it`, async () => {
++    const res = await invoke(c, new Error('ordinary boom 10.0.0.7'));
++    expect(res.statusCode).toBe(500);
++    expect(res.body).toEqual(body500(c.answer));
++    expect(JSON.stringify(res.body)).not.toContain('ordinary boom');
++    expect(ERRS61(c.logMsg)).toHaveLength(1);
++    expect(ERRS61(c.logMsg)[0][1]).toEqual({ error: 'ordinary boom 10.0.0.7' });
++  });
++});

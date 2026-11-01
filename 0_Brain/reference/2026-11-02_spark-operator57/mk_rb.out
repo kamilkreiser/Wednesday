@@ -1,0 +1,46 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o57_p1_tenant_provisioning_get_tenant_patch_status_get_audit_log_unreadable_throw
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/index.ts b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/index.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+@@ -421,7 +421,12 @@
+       contacts: contacts.rows,
+     });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] GET /api/tenants/:id failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+@@ -480,6 +485,11 @@
+     res.json({ success: true, status });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] PATCH /api/tenants/:id/status failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+@@ -648,7 +658,12 @@
+     const countResult = await platformQuery(`SELECT COUNT(*) as total FROM platform_audit_log`);
+     res.json({ success: true, entries: result.rows, total: parseInt(countResult.rows[0].total) });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
++    let message: string;
++    try {
++      message = err instanceof Error ? err.message : String(err);
++    } catch {
++      message = 'unreadable thrown value';
++    }
+     console.error('[provisioning] GET /api/audit-log failed:', message);
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+

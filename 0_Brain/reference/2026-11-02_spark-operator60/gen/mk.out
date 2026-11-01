@@ -1,0 +1,50 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o60_p1_analytics_routes_realtime_export_by_id_export_list_unreadable_throw
+diff --git a/Blockchain/Dev/services/analytics/src/routes/analytics.ts b/Blockchain/Dev/services/analytics/src/routes/analytics.ts
+--- a/Blockchain/Dev/services/analytics/src/routes/analytics.ts
++++ b/Blockchain/Dev/services/analytics/src/routes/analytics.ts
+@@ -242,7 +242,13 @@
+       data: metrics,
+     });
+   } catch (error) {
+-    logger.error('Error fetching real-time metrics', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error fetching real-time metrics', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch real-time metrics' },
+@@ -347,7 +353,13 @@
+       data: exportResult,
+     });
+   } catch (error) {
+-    logger.error('Error fetching export', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error fetching export', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch export' },
+@@ -369,7 +381,13 @@
+       data: exports,
+     });
+   } catch (error) {
+-    logger.error('Error listing exports', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('Error listing exports', { error: reason });
+     res.status(500).json({
+       success: false,
+       error: { code: 'INTERNAL_ERROR', message: 'Failed to list exports' },
+

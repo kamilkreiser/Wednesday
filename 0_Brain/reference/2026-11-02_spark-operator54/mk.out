@@ -1,0 +1,23 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o54_p1_security_key_register_save_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -1410,8 +1410,15 @@
+       }
+     } catch (saveErr: any) {
+       memApiKeys.delete(apiKey.id);
+-      const infra = isInfrastructureDbError(saveErr);
+-      log('error', 'KS-888: API key mint refused, the key could not be saved', { keyId: apiKey.id, code: saveErr?.code, infra });
++      let infra = false;
++      let code: unknown;
++      try {
++        infra = isInfrastructureDbError(saveErr);
++        code = saveErr?.code;
++      } catch {
++        // A thrown value that cannot be read cannot be classified: no code, not infrastructure (500), as for any non-infrastructure error.
++      }
++      log('error', 'KS-888: API key mint refused, the key could not be saved', { keyId: apiKey.id, code, infra });
+       return res.status(infra ? 503 : 500).json({
+         success: false,
+         error: { code: infra ? 'SERVICE_UNAVAILABLE' : 'INTERNAL_ERROR', message: 'The API key could not be saved, so no key was issued' },
+

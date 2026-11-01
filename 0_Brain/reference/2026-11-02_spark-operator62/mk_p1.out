@@ -1,0 +1,54 @@
+diff --git a/Blockchain/Dev/services/tenant-provisioning/src/index.ts b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+--- a/Blockchain/Dev/services/tenant-provisioning/src/index.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/index.ts
+@@ -334,7 +334,15 @@
+       keyPending,
+       ...(keyPending ? { keyPendingMessage: KEY_PENDING_MESSAGE } : {}),
+     });
+-  } catch (err: unknown) {
++  } catch (thrown: unknown) {
++    let err: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      err = new Error('unreadable thrown value');
++    }
+     if (err instanceof z.ZodError) {
+       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: err.errors } });
+       return;
+@@ -375,7 +383,15 @@
+        ORDER BY t.created_at DESC`,
+     );
+     res.json({ success: true, tenants: result.rows, total: result.rowCount });
+-  } catch (err: unknown) {
++  } catch (thrown: unknown) {
++    let err: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      err = new Error('unreadable thrown value');
++    }
+     // Return 400 for validation errors, 500 for everything else
+     if (err instanceof z.ZodError) {
+       res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Validation failed', details: err.errors } });
+@@ -535,5 +551,13 @@
+     res.json({ success: true });
+-  } catch (err: unknown) {
++  } catch (thrown: unknown) {
++    let err: unknown = thrown;
++    try {
++      if (!(thrown instanceof z.ZodError)) {
++        String(thrown instanceof Error ? thrown.message : thrown);
++      }
++    } catch {
++      err = new Error('unreadable thrown value');
++    }
+     // KS-497: a body failing updateTenantSchema threw a ZodError that fell
+     // into the generic handler → raw 500. Map it to the declared 400, the
+     // same shape the list route already uses.
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o62_p1_tenant_provisioning_zod_precheck_post_get_patch_tenants_unreadable_throw

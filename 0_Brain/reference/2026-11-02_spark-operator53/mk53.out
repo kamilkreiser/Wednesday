@@ -1,0 +1,105 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o53_p1_mcp_http_route_catches_post_register_post_register_batch_post_verify
+diff --git a/Blockchain/Dev/services/mcp-server/src/http-server.ts b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+--- a/Blockchain/Dev/services/mcp-server/src/http-server.ts
++++ b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+@@ -88,8 +88,7 @@
+     const result = await registerDocument({ title, documentType, contentHash, description });
+     res.status(result.status).json(result.data);
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] POST /register failed:', message);
++    console.error('[mcp-http] POST /register failed:', describeThrown(err));
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -125,8 +124,7 @@
+     }
+     res.json({ total: results.length, results });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] POST /register-batch failed:', message);
++    console.error('[mcp-http] POST /register-batch failed:', describeThrown(err));
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -150,8 +148,7 @@
+     const result = await verifyDocument({ documentId, contentHash: hash, fileName: name, metadata });
+     res.json(result.data);
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] POST /verify failed:', message);
++    console.error('[mcp-http] POST /verify failed:', describeThrown(err));
+     res.status(500).json({ verified: false, error: 'An unexpected error occurred' });
+   }
+ });
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o53_p2_mcp_http_route_catches_post_verify_batch_get_documents_get_workflow_id
+diff --git a/Blockchain/Dev/services/mcp-server/src/http-server.ts b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+--- a/Blockchain/Dev/services/mcp-server/src/http-server.ts
++++ b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+@@ -188,8 +188,7 @@
+     }
+     res.json({ total: results.length, results });
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] POST /verify-batch failed:', message);
++    console.error('[mcp-http] POST /verify-batch failed:', describeThrown(err));
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -202,8 +201,7 @@
+     const result = await listDocuments({ page, limit, status });
+     res.status(result.status).json(result.data);
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] GET /documents failed:', message);
++    console.error('[mcp-http] GET /documents failed:', describeThrown(err));
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -213,8 +211,7 @@
+     const result = await getWorkflowInstance(req.params.id);
+     res.status(result.status).json(result.data);
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] GET /workflow/:id failed:', message);
++    console.error('[mcp-http] GET /workflow/:id failed:', describeThrown(err));
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o53_p3_mcp_http_route_catches_get_connector_get_policy_post_generate_package
+diff --git a/Blockchain/Dev/services/mcp-server/src/http-server.ts b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+--- a/Blockchain/Dev/services/mcp-server/src/http-server.ts
++++ b/Blockchain/Dev/services/mcp-server/src/http-server.ts
+@@ -224,8 +224,7 @@
+     const result = await getConnectorInfo();
+     res.status(result.status).json(result.data);
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] GET /connector failed:', message);
++    console.error('[mcp-http] GET /connector failed:', describeThrown(err));
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -235,8 +234,7 @@
+     const result = await getVerificationPolicy();
+     res.json(result.data);
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] GET /policy failed:', message);
++    console.error('[mcp-http] GET /policy failed:', describeThrown(err));
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+   }
+ });
+@@ -289,8 +287,7 @@
+       res,
+     );
+   } catch (err: unknown) {
+-    const message = err instanceof Error ? err.message : String(err);
+-    console.error('[mcp-http] POST /generate-package failed:', message);
++    console.error('[mcp-http] POST /generate-package failed:', describeThrown(err));
+     if (!res.headersSent) {
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
+     }
+

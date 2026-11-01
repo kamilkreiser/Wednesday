@@ -1,0 +1,228 @@
+/**
+ * KS-1868: DELETE /api/tenants/:id (the archive route) has three catch-block reads of a caught value written as
+ * `x instanceof Error ? x.message : String(x)`: the rollback failure log inside the transaction block, the outer `message`, and the
+ * audit-write failure log in the outer catch. Each read can itself throw (a revoked Proxy throws on `instanceof`; an Error whose `message`
+ * getter throws throws on `.message`). A throw there escapes the catch: the outer catch loses the failed-attempt audit row and the 500,
+ * and a throw out of either `.catch` callback replaces the error being reported (rollback) or leaves the request without an answer (audit).
+ * Each read now sits in its own try and falls back to the constant `unreadable thrown value`.
+ *
+ * The module binds a port and opens a database pool on import, so `express`, `pg` and `@secuura/shared` are replaced and the route handler
+ * is captured and called directly with a fake request and response: no port is bound, no database is touched. The stand-ins that reject
+ * with the thrown value are plain functions, not vi.fn(): a spy inspects what it rejects with and could itself fail on a revoked Proxy
+ * before the code under test saw it.
+ */
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
+import type { MockInstance } from 'vitest';
+
+const ks = vi.hoisted(() => ({
+  routes: {} as Record<string, (req: unknown, res: unknown) => Promise<void>>,
+  sql: [] as string[],
+  updateThrow: undefined as { value: unknown } | undefined,
+  rollbackThrow: undefined as { value: unknown } | undefined,
+  auditThrow: undefined as { value: unknown } | undefined,
+}));
+
+vi.mock('express', () => {
+  const app = {
+    use: () => app,
+    param: () => app,
+    get: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
+      ks.routes['GET ' + p] = f;
+    },
+    post: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
+      ks.routes['POST ' + p] = f;
+    },
+    patch: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
+      ks.routes['PATCH ' + p] = f;
+    },
+    delete: (p: string, f: (req: unknown, res: unknown) => Promise<void>) => {
+      ks.routes['DELETE ' + p] = f;
+    },
+    listen: () => ({}),
+  };
+  const express = Object.assign(() => app, { json: () => () => undefined });
+  return { default: express };
+});
+vi.mock('pg', () => {
+  const run = (text: string): Promise<unknown> => {
+    const sql = text.replace(/\s+/g, ' ').trim();
+    ks.sql.push(sql);
+    if (sql.startsWith('SELECT slug, status FROM tenants')) return Promise.resolve({ rows: [{ slug: 'acme-co', status: 'active' }], rowCount: 1 });
+    if (sql.startsWith("UPDATE tenants SET status = 'archived'")) {
+      return ks.updateThrow ? Promise.reject(ks.updateThrow.value) : Promise.resolve({ rows: [], rowCount: 1 });
+    }
+    if (sql === 'ROLLBACK' && ks.rollbackThrow) return Promise.reject(ks.rollbackThrow.value);
+    if (sql.includes("'tenant_archive_failed'") && ks.auditThrow) return Promise.reject(ks.auditThrow.value);
+    return Promise.resolve({ rows: [], rowCount: 0 });
+  };
+  class Pool {
+    query(text: string) {
+      return run(text);
+    }
+    connect() {
+      return Promise.resolve({ query: (text: string) => run(text), release: () => undefined });
+    }
+    on() {
+      return this;
+    }
+    end() {
+      return Promise.resolve();
+    }
+  }
+  return { default: { Pool }, Pool };
+});
+vi.mock('@secuura/shared', () => ({
+  enforceProductionConfig: () => undefined,
+  authenticate: () => () => undefined,
+  errorHandler: () => undefined,
+  pgSslConfig: () => undefined,
+  rejectNulBytes: () => () => undefined,
+}));
+
+type Res57 = {
+  statusCode: number;
+  body: unknown;
+  status(c: number): Res57;
+  json(b: unknown): Res57;
+};
+
+function mkRes(): Res57 {
+  const r: Res57 = {
+    statusCode: 200,
+    body: undefined,
+    status(c) {
+      r.statusCode = c;
+      return r;
+    },
+    json(b) {
+      r.body = b;
+      return r;
+    },
+  };
+  return r;
+}
+
+const CONST500 = {
+  success: false,
+  error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+};
+const TID = 'd5700000-0000-4000-8000-000000000002';
+
+let spy57: MockInstance<typeof console.error>;
+
+/** Everything passed to console.error, one line per call; a non-string argument shows as <<non-string:type>>. */
+function errLog(): string {
+  return spy57.mock.calls
+    .map((args) => args.map((x) => (typeof x === 'string' ? x : '<<non-string:' + typeof x + '>>')).join(' '))
+    .join('\n');
+}
+
+/** Run the DELETE handler. A handler that rejects (the defect) leaves the response untouched at 200. */
+async function invoke(): Promise<Res57> {
+  const res = mkRes();
+  await ks.routes['DELETE /api/tenants/:id']({ params: { id: TID }, body: { confirm: true }, query: {} }, res).catch(() => undefined);
+  return res;
+}
+
+function revoked(): unknown {
+  const { proxy, revoke } = Proxy.revocable({}, {});
+  revoke();
+  return proxy;
+}
+
+function getterError(): unknown {
+  return Object.create(Error.prototype, {
+    message: {
+      get() {
+        throw new Error('getter boom');
+      },
+    },
+  });
+}
+
+const auditWritten = (): boolean => ks.sql.some((s) => s.includes("'tenant_archive_failed'"));
+
+beforeAll(async () => {
+  process.env.PLATFORM_DATABASE_URL = 'postgres://platform:pw@127.0.0.1:5432/platform';
+  process.env.DATABASE_URL = 'postgres://app:pw@127.0.0.1:5432/app';
+  await import('../index.js');
+}, 30_000);
+
+beforeEach(() => {
+  ks.sql.length = 0;
+  ks.updateThrow = undefined;
+  ks.rollbackThrow = undefined;
+  ks.auditThrow = undefined;
+  spy57 = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  spy57.mockRestore();
+});
+
+const KINDS: Array<[string, () => unknown]> = [
+  ['R1 revoked Proxy', revoked],
+  ['R2 Error whose message getter throws', getterError],
+];
+
+describe.each(KINDS)('KS-1868 DELETE /api/tenants/:id with %s', (_name, make) => {
+  it('RED ks1868 outer: the failed attempt is still audited, logged as a constant reason, and answered with the constant 500', async () => {
+    ks.updateThrow = { value: make() };
+    const res = await invoke();
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(CONST500);
+    expect(errLog()).toContain('[provisioning] DELETE /api/tenants/:id failed: unreadable thrown value');
+    expect(auditWritten()).toBe(true);
+  });
+
+  it('RED ks1868 rollback: a rollback that fails with it is logged as a constant reason and the ORIGINAL error is still the one reported', async () => {
+    ks.updateThrow = { value: new Error('update boom') };
+    ks.rollbackThrow = { value: make() };
+    const res = await invoke();
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(CONST500);
+    expect(errLog()).toContain('[provisioning] DELETE /api/tenants/:id rollback failed: unreadable thrown value');
+    expect(errLog()).toContain('[provisioning] DELETE /api/tenants/:id failed: update boom');
+    expect(auditWritten()).toBe(true);
+  });
+
+  it('RED ks1868 audit: an audit write that fails with it is logged as a constant reason and the route still answers the constant 500', async () => {
+    ks.updateThrow = { value: new Error('update boom') };
+    ks.auditThrow = { value: make() };
+    const res = await invoke();
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(CONST500);
+    expect(errLog()).toContain('[provisioning] DELETE /api/tenants/:id could not audit the failure: unreadable thrown value');
+  });
+});
+
+describe('KS-1868 DELETE /api/tenants/:id with ordinary Errors (nothing changes)', () => {
+  it('control ks1868 C1 outer: an ordinary Error is logged with its message, audited, and answered with the constant 500', async () => {
+    ks.updateThrow = { value: new Error('update boom 10.0.0.7') };
+    const res = await invoke();
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(CONST500);
+    expect(JSON.stringify(res.body)).not.toContain('update boom');
+    expect(errLog()).toContain('[provisioning] DELETE /api/tenants/:id failed: update boom 10.0.0.7');
+    expect(auditWritten()).toBe(true);
+  });
+
+  it('control ks1868 C2 rollback: an ordinary rollback Error is logged with its message and the original error is still reported', async () => {
+    ks.updateThrow = { value: new Error('update boom') };
+    ks.rollbackThrow = { value: new Error('rollback boom') };
+    const res = await invoke();
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(CONST500);
+    expect(errLog()).toContain('[provisioning] DELETE /api/tenants/:id rollback failed: rollback boom');
+    expect(errLog()).toContain('[provisioning] DELETE /api/tenants/:id failed: update boom');
+  });
+
+  it('control ks1868 C3 audit: an ordinary audit Error is logged with its message and the route answers the constant 500', async () => {
+    ks.updateThrow = { value: new Error('update boom') };
+    ks.auditThrow = { value: new Error('audit boom') };
+    const res = await invoke();
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual(CONST500);
+    expect(errLog()).toContain('[provisioning] DELETE /api/tenants/:id could not audit the failure: audit boom');
+  });
+});
