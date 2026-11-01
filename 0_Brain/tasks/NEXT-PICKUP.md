@@ -9,7 +9,7 @@ supersede: REPLACED WHOLESALE 13:0x AEDT by the 09:33 successor seat (second rep
 # NEXT PICKUP — Sun 1 Nov 2026, 13:0x AEDT
 
 ## Live heads
-- develop `e21ca95cfba9` (R2b squash; verified by ls-remote at 13:00).
+- develop `b1fb543640e7` (KS-1861 PR 4 squash; verified by ls-remote at 13:33). Train fully merged at e21ca95c.
 - PR 1885 (KS-1861 PR 4): docs-only round `7a6ce105` pushing (queued under the develop-gate yaml excusal).
 
 ## RULES IN FORCE (read before any GO)
@@ -33,13 +33,14 @@ supersede: REPLACED WHOLESALE 13:0x AEDT by the 09:33 successor seat (second rep
     - build incl. the 4 deferred frontends (admin, issuer, verifier, website; a minimatch-only change);
     - swap (api-gateway last), verify, and the network-equality gate.
     - Template: D 47th's brief + its HANDOVER (`!CODING/Secuura/Blockchain/5_Project_History/2026-10-31_seatD-47th/HANDOVER.md`, STATE at the bottom). Phase-0 prior: pre-20261031k14 (33, a3f3d48f6d05f8b4).
+  - **Deploy precondition (S 9th's wrap):** KS-1860 (#1876) and KS-1861 (#1885) are now on develop. Before they ship to ANY box, the deploy seat reads that box's `MULTI_TENANCY_ENABLED` and the tenant status counts (suspended/archived), and reports them in its STATUS before the swap.
   - **Demo is a SEPARATE step** after kintsugi is verified: Kam's word per the demo rules. Demo memory is tight (3.9 GB RAM, 1.5 GB available, 1.46 GB swap at D 47th's boot); 50 GB disk free.
   - **On (b):** build only what fits, payments services first. **On (c):** hold.
 
 ## FLEET (2 Claude seats + Spark idle with a reason)
 | Seat | Pane | Doing | Owed by Wednesday |
 |---|---|---|---|
-| **S 9th** (Opus) | %37 | PR 1885 (KS-1861, Kam's b): gate 71 GO WITH NOTES; docs-only round `7a6ce105` (G71-F3 "not a regression" + F4 wording) PUSHING under the develop-gate yaml excusal. KS 1921 filed (G71-F1/F2: the status-route audit is outside the tx; pre-existing from PR 3). | **Delta check on READY TO MERGE:** ONLY docs/MULTI-TENANCY.md + the 2 KS-1861 fragments changed vs `48d05f02`; yaml condition 2 (R2b has merged, so regenerate at merge prep and check:openapi in sync); merge-tree on the current develop. Then the pinned GO. |
+| ~~S 9th~~ | — | **WRAPPED 02:35Z, scored 0.95, pane closed.** PR 1885 KS-1861 MERGED `b1fb5436` (develop). All 4 of its tickets merged. | — (its worktrees s-s9-* are left in place, recorded; quarantine on a word) |
 | **R 69th** (Sonnet) | %49 | Raising the held KS-1868 Spark passes as FOUR PRs: shared O38 x2 (t2), audit-logger O39 (**t1**), analytics O40 x2 (branch `-analytics-export-jobs`, t2), demo-service O34-P1 (t2). GO'd 01:28Z. PR 2: "no importer at this base" + canary suites (01:4xZ ANSWER). | READY FOR GATE per PR: commission gates (PR 2 = tier 1 Opus; others tier 2 Sonnet per routing). Mail the author when each gate starts. |
 
 **Wrapped + scored + panes closed today:**
