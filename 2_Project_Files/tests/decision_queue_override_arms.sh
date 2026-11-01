@@ -17,7 +17,7 @@ cat > "$DQ_CHAT" <<'EOF'
 [{"role":"kam","ts":"2026-10-11T12:50:39+11:00","text":"Decision hpsmpoc-attribution-demo-tuesday-1011: c — A live dashboard preview on seeded data"}]
 EOF
 card() {  # $1 = id, $2 = title
-  printf '{"id":"%s","client_project":"Datasec/HPSM-POC","title":"%s","bluf":"Arm card.","options":[{"key":"a","label":"A","detail":"a"},{"key":"b","label":"B","detail":"b"}],"recommended":"a","default_action":"Nothing happens."}' "$1" "$2"
+  printf '{"id":"%s","client_project":"Datasec/HPSM-POC","title":"%s","bluf":"Arm card.","options":[{"key":"a","label":"Alpha","detail":"a"},{"key":"b","label":"Bravo","detail":"b"}],"recommended":"a","default_action":"Nothing happens."}' "$1" "$2"
 }
 with_override() { card "$1" "$2" | python3 -c 'import json,sys; d=json.load(sys.stdin); d["_override_prior"]="arm: matches read"; print(json.dumps(d))'; }
 pass=0; fail=0

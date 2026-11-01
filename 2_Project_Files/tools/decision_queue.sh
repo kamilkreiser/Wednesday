@@ -31,6 +31,10 @@
 #   decision_queue.sh list ruled --undelivered [ID-PREFIX]
 #                                     # ruled cards with no delivered mark, optionally
 #                                     # only ids starting with e.g. nexusai- / secuura-
+#   decision_queue.sh prior --id ID [--title T] [--client-project C/P]
+#                                     # READ-ONLY: what the prior-ruling gate would match for
+#                                     # this card. Never writes, posts or logs. Use THIS, never
+#                                     # a placeholder `add` (ledger w=3, 2026-11-01).
 #   decision_queue.sh show ID         # ONE card whole: every option with its KEY,
 #                                     # label and detail, the ruling (choice + note +
 #                                     # ts), delivered_artefact/ts. Copy a letter
@@ -186,11 +190,20 @@ def prior_rulings(d):
     if not words:
         return []
     hits = []
+    # LEG 1 SEAT SCOPE (Tuesday ledger 2026-11-01 s216): this leg printed the other client's panel messages (client and
+    # staff names, repo names) into a Datasec seat, and into its drafters, on a shared common word. Leg 2 got its client
+    # scope on 10-21, this leg did not. Another seat's tab is never a prior ruling here. For the Datasec seats, messages
+    # from before tabs existed are filtered by the other client's words too. Arms: tests/decision_queue_prior_arms.sh.
+    _seat = os.environ.get("DQ_SEAT", "")
+    _other_views = {"tuesday": ("wednesday",), "friday": ("wednesday",), "wednesday": ("tuesday", "friday")}.get(_seat, ())
+    _other_words = ("secuura", "platform-k", "platform-s", "platform k", "platform s") if _seat in ("tuesday", "friday") else ()
     for m in msgs:
         if m.get("role") != "kam":
             continue
         text = str(m.get("text", ""))
         low = text.lower()
+        if str(m.get("view", "")) in _other_views or any(w in low for w in _other_words):
+            continue
         shared = {w for w in words if w in low}
         if len(shared) >= 2:
             hits.append((str(m.get("ts", ""))[:16].replace("T", " "), " ".join(text.split())))
@@ -621,13 +634,32 @@ def cmd_list(args):
         tag += ", undelivered" + (f", prefix={prefix}" if prefix else "")
     print(f"{shown} decision(s) [{tag}]")
 
+def cmd_prior(args):
+    # READ-ONLY by construction (Tuesday ledger w=3, 2026-11-01 s214): writes nothing, posts nothing, logs no refusal.
+    # Runs the SAME matcher as `add`, so a seat reads what the gate would print without sending a payload to a write verb.
+    d = {}
+    i = 0
+    while i < len(args):
+        if args[i] in ("--id", "--title", "--client-project") and i + 1 < len(args):
+            d[{"--id": "id", "--title": "title", "--client-project": "client_project"}[args[i]]] = args[i + 1]
+            i += 2
+        else:
+            die(f"prior: unknown or incomplete flag: {args[i]} (takes --id, --title, --client-project)", 1)
+    if not d.get("id") and not d.get("title"):
+        die("prior: needs --id or --title", 1)
+    hits = prior_rulings(d)
+    print(f"{len(hits)} prior message(s) match")
+    for ts, text in hits:
+        print(f"  {ts} | {text[:300]}")
+
 if len(sys.argv) < 2:
-    die("usage: decision_queue.sh add|rule|amend|--delivered|list|show ...", 1)
+    die("usage: decision_queue.sh add|rule|amend|--delivered|list|show|prior ...", 1)
 cmd, rest = sys.argv[1], sys.argv[2:]
 if cmd == "add":   cmd_add(rest)
 elif cmd == "rule": cmd_rule(rest)
 elif cmd == "withdraw": cmd_withdraw(rest)
 elif cmd == "show": cmd_show(rest)
+elif cmd == "prior": cmd_prior(rest)
 elif cmd in ("--delivered", "delivered"): cmd_delivered(rest)
 elif cmd == "amend": cmd_amend(rest)
 elif cmd == "list": cmd_list(rest)
