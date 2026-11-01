@@ -55066,8 +55066,8 @@
   "id": "secuura-billing-possible-double-credit-two-stripe-events-1102",
   "client_project": "Secuura/Blockchain",
   "title": "Billing may credit one purchase twice (two Stripe events) — file a ticket and have a seat design the fix?",
-  "bluf": "MONEY, UNVERIFIED, nothing deployed or changed. (Prior-rulings gate overridden: its 8 matches share only the words credit/billing — Azure sponsorship credit, CI billing, a cross-tenant billing read — none is about Stripe crediting a purchase.) While raising the Stripe-webhook catch fix (KS-1868), Seat F 21st read that ONE purchase can be credited by TWO Stripe events: checkout.session.completed grants credits (webhooks.ts :466), and payment_intent.succeeded grants again (:509) unless the PaymentIntent's metadata has creditsAdded, which nothing in the repo ever writes (repo-wide grep at develop 03977e89). Each event has its own idempotency claim, so they do not dedupe each other. Whether this really double-credits depends on which events the live Stripe endpoint is subscribed to, which no agent can see; which Stripe account and mode each box uses is also UNMEASURED. A second, MEASURED, pre-existing case: an ordinary error thrown after the credit grant makes Stripe's redelivery grant again (2 grants in F 21st's harness). Board search with a control: neither is on any ticket. The KS-1868 PR itself does not change either path.",
-  "default_action": "If there is no ruling within 48 h: option a for the code-only part (ticket filed, a seat designs and tests the fix through the gate, nothing merged without its gate and nothing deployed without your tap); the Stripe dashboard check stays yours.",
+  "bluf": "MONEY, nothing deployed. UPDATED with gate 95's measurements (Opus, real webhooks router, only the DB and Stripe service replaced). (1) One purchase, two Stripe events: 2 grants, at base AND with the pending fix PR 1913 — unchanged, and still depends on which events your live Stripe endpoint receives (no agent can see that). (2) An ordinary error thrown after the credit grant: Stripe's retry grants again, 2 grants, unchanged by PR 1913. (3) NEW: an unreadable error thrown after the grant goes from 1 grant today to 2 with PR 1913 — the same as an ordinary error; today's single grant happens only because the request crashes and the event is stranded. PR 1913 also FIXES the opposite money bug: a paid event that today is silently skipped (0 grants) is credited once. Gate 95 found two more unguarded spots on the same path (finaliseEvent :110 re-grants on redelivery; releaseClaim :129 strands the row). Wednesday is HOLDING the PR 1913 merge until you rule, because it changes a grant count. None of this is on a ticket yet.",
+  "default_action": "If there is no ruling within 48 h: option a — a ticket is filed, a Claude seat designs and tests a fix that makes one purchase credit exactly once (covering all three cases and the two new spots), through the QA gate, nothing deployed without your tap; PR 1913 is merged once that fix is gated (or merged on its own if you say so). The Stripe dashboard check stays yours.",
   "options": [
    {
     "key": "a",
@@ -55103,6 +55103,21 @@
    "CARD secuura-founders-hub-credit-expires-2026-09-06",
    "CARD secuura-azure-credit-expired-0906",
    "CARD secuura-originate-unauthenticated-cross-tenant-billing"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-11-02T10:10:01.769031+11:00",
+    "reason": "Gate 95 (Opus) measured both readings and a third case on the real webhooks router; one of them is a grant-count change inside PR 1913, so Wednesday holds that merge on this card",
+    "changed": [
+     "bluf",
+     "default_action"
+    ],
+    "before": {
+     "bluf": "MONEY, UNVERIFIED, nothing deployed or changed. (Prior-rulings gate overridden: its 8 matches share only the words credit/billing — Azure sponsorship credit, CI billing, a cross-tenant billing read — none is about Stripe crediting a purchase.) While raising the Stripe-webhook catch fix (KS-1868), Seat F 21st read that ONE purchase can be credited by TWO Stripe events: checkout.session.completed grants credits (webhooks.ts :466), and payment_intent.succeeded grants again (:509) unless the PaymentIntent's metadata has creditsAdded, which nothing in the repo ever writes (repo-wide grep at develop 03977e89). Each event has its own idempotency claim, so they do not dedupe each other. Whether this really double-credits depends on which events the live Stripe endpoint is subscribed to, which no agent can see; which Stripe account and mode each box uses is also UNMEASURED. A second, MEASURED, pre-existing case: an ordinary error thrown after the credit grant makes Stripe's redelivery grant again (2 grants in F 21st's harness). Board search with a control: neither is on any ticket. The KS-1868 PR itself does not change either path.",
+     "default_action": "If there is no ruling within 48 h: option a for the code-only part (ticket filed, a seat designs and tests the fix through the gate, nothing merged without its gate and nothing deployed without your tap); the Stripe dashboard check stays yours."
+    }
+   }
+  ],
+  "amended_ts": "2026-11-02T10:10:01.769072+11:00"
  }
 ]

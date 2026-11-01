@@ -1,0 +1,159 @@
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -502,6 +502,12 @@
+     );
+     logger.info('KYC DB verified', { verifications: Number(result.rows[0]?.cnt ?? 0) });
+   } catch (err: any) {
+-    logger.warn('KYC DB verification query failed', { error: err?.message });
++    let reason: string;
++    try {
++      reason = err?.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('KYC DB verification query failed', { error: reason });
+   }
+ }
+diff --git a/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-verify-db-ready-boot-probe-unreadable-throw.test.ts b/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-verify-db-ready-boot-probe-unreadable-throw.test.ts
+new file mode 100644
+--- /dev/null
++++ b/Blockchain/Dev/services/kyc/src/__tests__/ks1868-kyc-verify-db-ready-boot-probe-unreadable-throw.test.ts
+@@ -0,0 +1,137 @@
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++
++process.env.KYC_PROVIDER = 'mock';
++process.env.NODE_ENV = 'test';
++
++// KS-1868: `verifyDbReady` (the boot-time table probe) must still log its warning and let the service start when
++// the thrown value itself cannot be read (a revoked Proxy throws on `instanceof`/property reads; an Error whose
++// `message` getter throws, throws on `.message`). Harness: the KS-1845 one (the app module imported with the db and
++// subject-DEK modules replaced), except that no listener is needed: the probe runs at import time.
++// The db stand-in rejects with a plain function, not a vi.fn(): a spy inspects what it rejects with and could
++// itself fail on a revoked Proxy before the code under test saw it.
++const h = vi.hoisted(() => ({
++  toThrow: undefined as unknown,
++  warned: [] as unknown[][],
++  probes: 0,
++}));
++
++vi.mock('../db', () => ({
++  initDb: async () => true,
++  isDbAvailable: () => true,
++  query: async (sql: string) => {
++    if (/COUNT\(\*\)/i.test(String(sql))) {
++      h.probes += 1;
++      throw h.toThrow;
++    }
++    return { rows: [] };
++  },
++}));
++
++vi.mock('../subjectDeks', () => ({
++  subjectDeks: {
++    getOrCreateDek: async () => Buffer.alloc(32, 7),
++    getDek: async () => Buffer.alloc(32, 7),
++    evict: () => undefined,
++  },
++}));
++
++vi.mock('../utils/logger', () => {
++  const logger = {
++    info: () => undefined,
++    debug: () => undefined,
++    error: () => undefined,
++    warn: (...args: unknown[]) => {
++      h.warned.push(args);
++    },
++  };
++  return { logger, createLogger: () => logger, validateEnv: () => undefined };
++});
++
++vi.mock('@secuura/shared', async (importOriginal) => {
++  const actual = await importOriginal<Record<string, unknown>>();
++  return {
++    ...actual,
++    authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  };
++});
++
++vi.mock('express', async (importOriginal) => {
++  const actual: any = (await importOriginal<any>()).default ?? (await importOriginal<any>());
++  const factory: any = (...args: any[]) => {
++    const app = actual(...args);
++    app.listen = () => ({ close: (cb?: () => void) => cb?.(), address: () => ({ port: 0 }), on() { return this; } });
++    return app;
++  };
++  Object.assign(factory, actual);
++  return { ...actual, default: factory };
++});
++
++const SAVED_LISTENERS = process.listeners('unhandledRejection');
++let unhandled = 0;
++const countUnhandled = () => {
++  unhandled += 1;
++};
++
++const WARNINGS = () => h.warned.filter((c) => String(c[0]).includes('KYC DB verification query failed'));
++
++/** Imports the app fresh and waits (up to 2 s) for the boot probe to have run and its catch to have finished. */
++async function bootAndSettle() {
++  vi.resetModules();
++  await import('../index');
++  const deadline = Date.now() + 2000;
++  while (Date.now() < deadline && (h.probes === 0 || WARNINGS().length === 0)) {
++    await new Promise((resolve) => setTimeout(resolve, 25));
++  }
++  await new Promise((resolve) => setTimeout(resolve, 100));
++}
++
++describe('KS-1868 verifyDbReady reads the thrown value safely', () => {
++  beforeEach(() => {
++    h.toThrow = undefined;
++    h.warned.length = 0;
++    h.probes = 0;
++    unhandled = 0;
++    process.removeAllListeners('unhandledRejection');
++    process.on('unhandledRejection', countUnhandled);
++  });
++
++  afterEach(() => {
++    process.removeListener('unhandledRejection', countUnhandled);
++    for (const l of SAVED_LISTENERS) process.on('unhandledRejection', l as (...a: any[]) => void);
++  });
++
++  it('control ks1868 C1 an ordinary Error still logs its message and the boot probe ends without a rejection', async () => {
++    h.toThrow = new Error('db down');
++    await bootAndSettle();
++    expect(h.probes).toBe(1);
++    expect(WARNINGS()).toHaveLength(1);
++    expect(WARNINGS()[0][1]).toEqual({ error: 'db down' });
++    expect(unhandled).toBe(0);
++  });
++
++  it('RED ks1868 R1 a revoked Proxy thrown value logs a constant reason and the boot probe ends without a rejection', async () => {
++    const { proxy, revoke } = Proxy.revocable({}, {});
++    revoke();
++    h.toThrow = proxy;
++    await bootAndSettle();
++    expect(h.probes).toBe(1);
++    expect(WARNINGS()).toHaveLength(1);
++    expect(WARNINGS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++    expect(unhandled).toBe(0);
++  });
++
++  it('RED ks1868 R2 an Error whose message getter throws logs a constant reason and the boot probe ends without a rejection', async () => {
++    h.toThrow = Object.create(Error.prototype, {
++      message: {
++        get() {
++          throw new Error('getter boom');
++        },
++      },
++    });
++    await bootAndSettle();
++    expect(h.probes).toBe(1);
++    expect(WARNINGS()).toHaveLength(1);
++    expect(WARNINGS()[0][1]).toEqual({ error: 'unreadable thrown value' });
++    expect(unhandled).toBe(0);
++  });
++});

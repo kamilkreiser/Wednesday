@@ -15147,5 +15147,12 @@
   "project": "Secuura",
   "ts": "2026-11-02T08:58:28.849270+11:00",
   "text": "One card for you, about money, and nothing has changed or been deployed. While fixing the Stripe webhook handlers, an agent found that one purchase might be credited twice, because two different Stripe events both grant credits and nothing stops the second. Whether it actually happens depends on which events your live Stripe endpoint is subscribed to, which only you can see. I've recommended filing a ticket and having a seat design and test a fix in code, with your one look at the Stripe dashboard telling us if it's live today."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MBP.localdomain",
+  "project": "Secuura",
+  "ts": "2026-11-02T10:10:23.184432+11:00",
+  "text": "I've updated your billing card with what the QA gate measured on the real webhook code. The fix for the Stripe handlers stops a paid purchase being silently skipped, which is good. But in one rare case it also lets a retry grant credits a second time, the same as an ordinary error already does today. Because that's a change in how many credits get granted, I'm holding that merge until you've ruled on the card, rather than deciding it myself. The two-events-per-purchase question is unchanged and still needs your one look at the Stripe dashboard."
  }
 ]

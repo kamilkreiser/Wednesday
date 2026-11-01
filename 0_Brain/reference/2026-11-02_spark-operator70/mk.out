@@ -1,0 +1,69 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o70_p1_originate_verification_verify_hash_status_route_catches_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/verification.ts b/Blockchain/Dev/services/originate/src/routes/verification.ts
+--- a/Blockchain/Dev/services/originate/src/routes/verification.ts
++++ b/Blockchain/Dev/services/originate/src/routes/verification.ts
+@@ -1436,6 +1436,12 @@
+       res.json({ verified: false, error: 'No verifiable input provided' });
+     } catch (error) {
+-      logger.error('Verification error', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Verification error', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Verification failed' } });
+     }
+   }
+@@ -1464,7 +1470,13 @@
+         generatedAt: new Date().toISOString(),
+       });
+     } catch (error) {
+-      logger.error('Hash generation error', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Hash generation error', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Hash generation failed' } });
+     }
+   }
+@@ -1486,7 +1498,13 @@
+         message: 'Use POST /api/verification/verify with documentId or contentHash for full verification.',
+       });
+     } catch (error) {
+-      logger.error('Status check error', { error: error instanceof Error ? error.message : String(error) });
++      let reason: string;
++      try {
++        reason = error instanceof Error ? error.message : String(error);
++      } catch {
++        reason = 'unreadable thrown value';
++      }
++      logger.error('Status check error', { error: reason });
+       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Status check failed' } });
+     }
+   }
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o70_p2_originate_verification_verify_file_route_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/originate/src/routes/verification.ts b/Blockchain/Dev/services/originate/src/routes/verification.ts
+--- a/Blockchain/Dev/services/originate/src/routes/verification.ts
++++ b/Blockchain/Dev/services/originate/src/routes/verification.ts
+@@ -756,7 +756,13 @@
+       verifiedAt: new Date().toISOString(),
+     }, scoped));
+   } catch (error) {
+-    logger.error('File verification error', { error: error instanceof Error ? error.message : String(error) });
++    let reason: string;
++    try {
++      reason = error instanceof Error ? error.message : String(error);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('File verification error', { error: reason });
+     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'File verification failed' } });
+   }
+ });
+

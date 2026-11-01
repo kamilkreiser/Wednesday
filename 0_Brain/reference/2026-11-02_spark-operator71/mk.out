@@ -1,0 +1,39 @@
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o71_p1_kyc_save_image_attestation_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -350,7 +350,13 @@
+     // Deliberately NOT widened (Wednesday's ruling, 2026-09-06): no retry, no
+     // queue, no schema check at boot. Failing loud IS the fix; anything more
+     // is a separate ticket.
+-    logger.error('DB save image failed', { error: err instanceof Error ? err.message : String(err) });
++    let reason: string;
++    try {
++      reason = err instanceof Error ? err.message : String(err);
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.error('DB save image failed', { error: reason });
+     throw new AppError(
+       'The verification attestation could not be recorded. No document was accepted.',
+       500,
+
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/ks_1868_o71_p2_kyc_verify_db_ready_boot_probe_catch_unreadable_throw
+diff --git a/Blockchain/Dev/services/kyc/src/index.ts b/Blockchain/Dev/services/kyc/src/index.ts
+--- a/Blockchain/Dev/services/kyc/src/index.ts
++++ b/Blockchain/Dev/services/kyc/src/index.ts
+@@ -502,6 +502,12 @@
+     );
+     logger.info('KYC DB verified', { verifications: Number(result.rows[0]?.cnt ?? 0) });
+   } catch (err: any) {
+-    logger.warn('KYC DB verification query failed', { error: err?.message });
++    let reason: string;
++    try {
++      reason = err?.message;
++    } catch {
++      reason = 'unreadable thrown value';
++    }
++    logger.warn('KYC DB verification query failed', { error: reason });
+   }
+ }
+
