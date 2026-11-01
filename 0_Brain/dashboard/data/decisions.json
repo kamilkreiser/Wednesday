@@ -54828,5 +54828,64 @@
    "CARD hpsmpoc-demo-names-beyond-the-frame-1011",
    "CARD hpsmpoc-hosted-reset-confirm-count-1011"
   ]
+ },
+ {
+  "id": "mps-215-inventory-key-newline-404-or-400-1102",
+  "client_project": "Datasec/MPS-Commercial-Calculator",
+  "title": "MPS Calculator: should a bad catalogue key in the inventory update address answer 404 or 400?",
+  "bluf": "Kam, one call on MPSCALC-215. A catalogue key followed by a newline in the inventory update address answers 404, 'The catalogue has no row with that key.' The ticket's third clause asks for 400. Quote create and quote save already answer 400. The MPS builder read the code on 2 Nov: a pinned test and the published contract both say 404, and the quote, snapshot, SKU, feedback and source-version addresses all answer 404 for an id that names nothing. A 400 is what those endpoints use for a body line, not an address. The builder read those siblings from status-code search lines, not endpoint by endpoint. Tuesday recommends keeping 404: the ticket's wording changes and it can close. Option b needs a new sentence from Kam. (An earlier ruling on what 'inventory' means shares only that word; it does not cover this.)",
+  "default_action": "Nothing is built and MPSCALC-215 stays in Backlog with clause (c) not met. Its other two clauses are already met on main.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep 404 and amend the ticket",
+    "detail": "A records seat rewrites clause (c) on MPSCALC-215 to say 404, then moves it to Done. Nothing is built."
+   },
+   {
+    "key": "b",
+    "label": "Change it to 400 with a new sentence",
+    "detail": "A builder changes the answer, the contract line and six test rows. Kam approves the new sentence first. This inventory address would then differ from every other address."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T01:09:10.136667+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD mpscalc-inventory-and-manual-items-1010"
+  ]
+ },
+ {
+  "id": "mps-253-two-quantity-readings-1102",
+  "client_project": "Datasec/MPS-Commercial-Calculator",
+  "title": "MPS Calculator: are these two quantity rules for device groups right?",
+  "bluf": "Kam, MPSCALC-253 is gated and landing as engine work; no caller can state a rule yet and nothing is deployed. It rests on two readings by Tuesday, not by you. Figures are the gate's. 1) A group of zero devices still bills fixed and manual lines as typed: the example totals 512.50 against 0 if they were dropped, and the fee is 0 either way. 2) A fixed device counts at its typed quantity in the tier pool: five devices plus seven fixed make a pool of 12, Growth at 900, total 13500. Counted times five it is pool 40, Scale at 800, total 12000. Not counted it is pool 5, Core at 1000, total 15000. Tuesday recommends keeping both: each counts what was typed. (Two earlier rulings on Composer device groups share only those words; they do not cover MPS pricing.)",
+  "default_action": "The readings stay as built and stay recorded as Tuesday's, not yours. Callers and the hosted site are unaffected until the separate API lane and a deploy, each of which comes back to you for words or a card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep both as built",
+    "detail": "The two readings go into the project's clarifications as your ruling. Nothing else changes."
+   },
+   {
+    "key": "b",
+    "label": "Change a group of zero to charge nothing",
+    "detail": "A builder makes fixed and manual lines count 0 when the group has 0 devices, with a gate."
+   },
+   {
+    "key": "c",
+    "label": "Change how fixed devices count in the pool",
+    "detail": "Say in a note: times the group size, or not counted. A builder changes it, with a gate."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-02T01:15:11.152783+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-13 18:02"
+  ]
  }
 ]

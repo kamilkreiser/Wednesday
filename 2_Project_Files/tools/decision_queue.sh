@@ -196,13 +196,19 @@ def prior_rulings(d):
     # from before tabs existed are filtered by the other client's words too. Arms: tests/decision_queue_prior_arms.sh.
     _seat = os.environ.get("DQ_SEAT", "")
     _other_views = {"tuesday": ("wednesday",), "friday": ("wednesday",), "wednesday": ("tuesday", "friday")}.get(_seat, ())
-    _other_words = ("secuura", "platform-k", "platform-s", "platform k", "platform s") if _seat in ("tuesday", "friday") else ()
+    _other_words = ("secuura", "secura", "sekiro", "platform-k", "platform-s", "platform k", "platform s", "peter", "stuart") if _seat in ("tuesday", "friday") else ()
+    # ALLOW-LIST FOR UNTAGGED ROWS (Tuesday ledger 2026-11-02 s217): a word deny-list missed the dictated spelling 'Sekiro' and
+    # a staff first name, and printed two 09-02/09-03 messages into this seat on the common words of an MPS card. A message
+    # with no `view` predates the tabs: on a Datasec seat it counts only if it names a Datasec subject.
+    _own_words = ("datasec", "nexus", "hpsm", "mps", "composer", "vision", "quickquote", "quick quote", "attio", "cypherkey", "mypki") if _seat in ("tuesday", "friday") else ()
     for m in msgs:
         if m.get("role") != "kam":
             continue
         text = str(m.get("text", ""))
         low = text.lower()
         if str(m.get("view", "")) in _other_views or any(w in low for w in _other_words):
+            continue
+        if _own_words and not str(m.get("view", "")) and not any(w in low for w in _own_words):
             continue
         shared = {w for w in words if w in low}
         if len(shared) >= 2:

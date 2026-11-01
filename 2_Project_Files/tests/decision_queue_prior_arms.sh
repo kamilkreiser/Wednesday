@@ -40,12 +40,18 @@ bash "$DQ" prior > "$W/o" 2> "$W/e"; rc=$?
 cat > "$DQ_CHAT" <<'JSON'
 [{"role":"kam","ts":"2026-09-01T10:00:00+10:00","view":"wednesday","text":"tabview orchard subjectword matches here"},
  {"role":"kam","ts":"2026-09-02T10:00:00+10:00","text":"Decision secuura-oldtab: orchard subjectword matches here"},
- {"role":"kam","ts":"2026-09-03T10:00:00+10:00","view":"tuesday","text":"own-seat orchard subjectword matches here"}]
+ {"role":"kam","ts":"2026-09-03T10:00:00+10:00","view":"tuesday","text":"own-seat orchard subjectword matches here"},
+ {"role":"kam","ts":"2026-09-02T11:00:00+10:00","text":"untagged-noclient orchard subjectword matches here"},
+ {"role":"kam","ts":"2026-09-02T12:00:00+10:00","text":"untagged-datasec hpsm orchard subjectword matches here"},
+ {"role":"kam","ts":"2026-09-02T13:00:00+10:00","text":"untagged-dictated Sekiro orchard subjectword matches here"}]
 JSON
 bash "$DQ" prior --id arm-orchard-subjectword --title "Orchard subjectword" > "$W/o" 2> "$W/e"; rc=$?
 /usr/bin/grep -q 'own-seat' "$W/o" && ok "A8 own seat's message printed (control)" || no "A8 rc=$rc $(cat "$W/o" "$W/e")"
 /usr/bin/grep -q 'tabview' "$W/o" && no "A9 another seat's tab printed" || ok "A9 another seat's tab not printed"
 /usr/bin/grep -q -i 'secuura' "$W/o" && no "A10 other client's words printed" || ok "A10 other client's words not printed"
+/usr/bin/grep -q 'untagged-noclient' "$W/o" && no "A11 untagged row naming no Datasec subject printed" || ok "A11 untagged row naming no Datasec subject not printed"
+/usr/bin/grep -q 'untagged-datasec' "$W/o" && ok "A12 untagged row naming a Datasec subject printed (control)" || no "A12 rc=$rc $(cat "$W/o" "$W/e")"
+/usr/bin/grep -q 'untagged-dictated' "$W/o" && no "A13 dictated client spelling printed" || ok "A13 dictated client spelling not printed"
 
 echo "RESULT pass=$pass fail=$fail"
 [ "$fail" = 0 ]
