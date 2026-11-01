@@ -8,6 +8,17 @@ supersede: REPLACED WHOLESALE 16:5x AEDT by the 14:4x successor seat. The previo
 
 # NEXT PICKUP — Sun 1 Nov 2026, 16:5x AEDT, amended 17:3x (14:4x seat, ctx ~50%)
 
+## 02:1x UPDATE 2026-11-02 (the 23:4x boot seat, ctx 65%; read FIRST, supersedes below where they differ)
+- **develop 96480cc6a450** (ls-remote 02:1x). MERGED tonight from d7691f35: 1894, 1895, 1896, 1899, 1897, 1898, 1900 (seven). **GO #1901 SENT** to B 73rd (pin 96480cc6, head 15fbdbda, expect tree 8c469d52). OWED: its MERGED mail + ls-remote; then #1903's READY -> GO (B 73rd extending its squash guard to a two-key title).
+- **LIVE SEATS (3):**
+  - **B 73rd** (%62, merge): queue 1901 (GO out) -> 1903 -> (1902 after its delta) -> (1905 after gate 88 AND after 1903 merges AND develop merged into 1905's branch).
+  - **E 25th** (%61, raise): PR 1904 (KS-1898) READY at cd128d24; (B) billing 12c458f3 and (D) KS-1841 6262b895 queued to push; (A) security x2 TIER 1 c7bcdca3 built. OWED: ONE batched tier-2 gate for 1904 + (B) + (D) when (B)/(D) READY; an OPUS tier-1 gate for (A) on its READY. KS-1152 R-880-1 already tracks "rotation reports success with priors live".
+  - **F 20th** (%59, wrapped, holding): PR 1902 G86-1902-F1 fix ca66f118 push queued (pid 91112). OWED: Wednesday's DELTA CHECK at its READY (only the new suite differs), then a queue item to B 73rd; then score F 20th (its HANDOVER DELTA block covers a successor).
+- **Gates running:** gate 88 (OPUS, tier 1) on PR 1905 (KS-1929 validator, base = 1903's branch).
+- **Wrapped + scored tonight:** S 10th 0.95, E 24th 0.93, R 72nd 0.94, B 72nd 0.96, V 12th 0.95. V 12th's successor (V 13th) only if gate 88 asks a fix or for 1905's develop merge-in after 1903.
+- **SPEND DECISION (7d 99%):** the last allowance goes to finishing in-flight work (gates, merges). HELD until Kam logs in anew: a raise seat for O50 x3 (auth, tier 1) + O51 x2 (nft), further Spark operators, KS-1796 (Claude seat: generated yaml), the :798 + classifyMintError pair. Morning card must report the Spark idle with this reason.
+- **Tooling owed:** brief_and_launch prints "launched" on a cockpit skip; spark_gate.sh empty merge-base on a SHA base (IMPROVEMENTS); safe_pull's conflict message omits the file name; a hook refusing send_brief + note_entry in one call (ledger 11-02).
+
 ## 01:0x UPDATE 2026-11-02 (the 23:4x boot seat, ctx 50% checkpoint; read FIRST, supersedes below where they differ)
 - **develop ec097bd35b35** (Wednesday's ls-remote 00:57). MERGED tonight from d7691f35: #1894 8126b22b, #1895 ad78fa10, #1896 ca36945e, #1899 ec097bd3. **GO #1897 SENT** (head 4c56d252, pin ec097bd3, expect tree 7e8e833a). OWED: read B 72nd's MERGED mail, ls-remote develop, note.
 - **LIVE SEATS (4):**
