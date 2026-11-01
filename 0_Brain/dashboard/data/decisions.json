@@ -53798,7 +53798,9 @@
    "CARD mps-hosted-deploy-main-e027ebd-1022",
    "CARD hpsmpoc-232-chooser-demo-deploy-1027",
    "CARD composer-demo-deploy-87-105-1031"
-  ]
+  ],
+  "delivered_artefact": "B1031 DEPLOYED 12:1x: UAT @ 77c3132e web+API; review DB useFreeLimit false, autoPauseDelay -1 (Tuesday re-read via az, read-only)",
+  "delivered_ts": "2026-11-01T12:17:08.215155+11:00"
  },
  {
   "id": "secuura-ks1860-status-refresh-fails-at-startup-1101",
@@ -54189,5 +54191,73 @@
   ],
   "delivered_artefact": "B1035 DONE 10:45: FOLLOWUP_DIGEST_TO = tuesday-agent@agentmail.to on datasec-attio-bridge (Tuesday re-read: equals target True, 17 settings)",
   "delivered_ts": "2026-11-01T10:48:58.538060+11:00"
+ },
+ {
+  "id": "composer-demo-pgrestore-version-read-1101",
+  "client_project": "Datasec/Security-Composer",
+  "title": "Composer: may an agent read the demo database's pg_restore version (one read-only command)?",
+  "bluf": "The stricter restore check you approved this morning has landed (not deployed): it now refuses every cut-down restore script we tested and still accepts a complete one. One risk is left. If the demo's database tools are older than version 16.10, their restore scripts carry no key lines, so the new check would refuse every real restore on the demo. That is the safe direction, but it would make that restore route unusable until we add a fallback. Nobody has measured the demo's version: the code pins the same image as our tests (16.15), which suggests it is fine, but the running container was never read. Reading it is one read-only command on the demo machine, which needs your yes. I recommend a: an agent reads the version only, changes nothing, and reports. Two smaller wording points from the review go in the records, not to you.",
+  "default_action": "Nothing is read on the demo; the risk stays recorded with the next Composer deploy card.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, read the version (recommended)",
+    "detail": "One read-only command on the demo database container (pg_restore --version); nothing else is touched; result reported to you."
+   },
+   {
+    "key": "b",
+    "label": "Not now",
+    "detail": "The risk stays recorded; the check is merged but not deployed, so nothing changes on the demo until a deploy card."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-01T12:16:00.214853+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-11-01T12:20:01.452328+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-08 11:50",
+   "2026-09-16 09:53",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD hpsm-composer-synthetic-demo-content-for-monday",
+   "CARD hpsm-composer-demo-release-unreachable-c12",
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD composer-hp-sow-name-on-demo",
+   "CARD composer-demo-internal-text-plan",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD hpsmpoc-k14-demo-scenarios-1003",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD composer-expert-66-demo-deploy-1007",
+   "CARD composer-version-edition-lookup-1009",
+   "CARD hpsmpoc-attribution-demo-tuesday-1011",
+   "CARD composer-4e00d57-words-look-demo-deploy-1011",
+   "CARD hpsmpoc-page-frame-names-for-demo-1011",
+   "CARD hpsmpoc-demo-names-beyond-the-frame-1011",
+   "CARD composer-new-words-look-demo-deploy-1012",
+   "CARD hpsmpoc-demo-name-check-residue-1012",
+   "CARD composer-b134-new-look-demo-1012",
+   "CARD composer-b144-words-demo-1013",
+   "CARD nexusai-rd846-build-broken-demo-deploy-1013",
+   "CARD composer-demo-minio-overlay-1019",
+   "CARD composer-demo-objects-image-pin-1019",
+   "CARD composer-demo-image-offbox-route-1019",
+   "CARD composer-demo-vm-write-role-after-copy-1019",
+   "CARD composer-demo-deploy-eaff2b7-words-1020",
+   "CARD hpsmpoc-demo-telemetry-review-week-1021",
+   "CARD hpsmpoc-hosted-demo-data-cleanup-1021",
+   "CARD hpsmpoc-uat-api-accepts-demo-audience-token-1021",
+   "CARD mpscalc-source-version-id-twins-1023",
+   "CARD nexusai-demo-workflow-pin-landing-1025",
+   "CARD hpsmpoc-demo-site-for-0805-1026",
+   "CARD hpsmpoc-demo-chooser-code-change-1027",
+   "CARD hpsmpoc-232-chooser-demo-deploy-1027",
+   "CARD hpsmpoc-demo-switch-template-pin-1027",
+   "CARD hpsmpoc-demo-sample-names-services-1029",
+   "CARD hpsmpoc-demo-prewarm-before-presenting-1029",
+   "CARD composer-demo-deploy-87-105-1031",
+   "CARD hpsmpoc-266-head-read-round-cap-1031"
+  ]
  }
 ]
