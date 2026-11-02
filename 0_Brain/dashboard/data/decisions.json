@@ -56291,7 +56291,9 @@
    "CARD nexusai-risk-query-odd-limits-1027",
    "CARD nexusai-risk-level-case-rule-1027",
    "CARD nexusai-risk-store-writers-rd868-1029"
-  ]
+  ],
+  "delivered_artefact": "NexusAI C-231 (CLARIFICATIONS section 67) + Jira comments 40692-40701 on RD-902..RD-908, RD-917, RD-921, RD-923 + RD-903/-907/-921 Done; HISTORY entry on records/b1149 d1d6a0c2, PR #157 open",
+  "delivered_ts": "2026-11-03T00:35:51.419112+11:00"
  },
  {
   "id": "hpsmpoc-425-evidence-sentence-1102",
@@ -56447,7 +56449,7 @@
   "id": "nexusai-rd922-reset-keeps-risk-rules-1102",
   "client_project": "Datasec/NexusAI",
   "title": "NexusAI: should the database reset script also wipe the saved risk rules?",
-  "bluf": "Tonight's change (PR 156, landed) made the NexusAI reset script finish its deletes properly. It empties five of the database's six tables. It leaves the sixth, the risk rules people have saved (each rule's text, level and its two queries), yet still prints 'All tables are now empty'. The ticket (RD-922) asks for every table, so it stays open until you choose. Nothing is broken for users: the script is a developer reset, not part of the app. (Not settled by your earlier rulings: the ten-tickets card you ruled b today names RD-902 to RD-923 but not RD-922, and the other matches share only the words 'risk', 'rules' or 'reset'.)",
+  "bluf": "Correction first: this card first said the sixth table holds the risk rules people have saved. It does not. The rules users save live in a separate store that the reset script does not touch. Tonight's change (PR 156, landed) made the NexusAI reset script finish its deletes properly. It empties five of the database's six tables and still prints 'All tables are now empty'. The sixth is an old risk-rule table that no part of the app writes any more (its three writers are called only by tests and are already decided for retirement, RD-904 to RD-906). Ticket RD-922 asks for every table, so it stays open until you choose. Nothing is broken for users: the script is a developer reset, not part of the app.",
   "default_action": "Nothing changes until you tap: RD-922 stays open and Tuesday asks again at the next NexusAI records pass.",
   "options": [
    {
@@ -56458,7 +56460,7 @@
    {
     "key": "b",
     "label": "Keep the risk rules on purpose",
-    "detail": "The reset keeps saved risk rules. A seat changes the message to name the five tables it empties, with a test. RD-922 is recorded as declined for that table and closes."
+    "detail": "The reset keeps the old risk-rule table. A seat changes the message to name the five tables it empties, with a test. RD-922 is recorded as declined for that table and closes."
    },
    {
     "key": "c",
@@ -56480,6 +56482,31 @@
    "CARD nexusai-risk-level-case-rule-1027",
    "CARD nexusai-risk-store-writers-rd868-1029",
    "CARD nexusai-leave-or-fix-low-risk-tickets-1102"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-11-03T00:38:07.368097+11:00",
+    "reason": "Correction by Tuesday (s230), before any ruling: the first BLUF said the sixth table holds the risk rules people have saved. A read of every caller at NexusAI main c8f361aa (git grep in the B1149 clone, d1d6a0c2 = main plus one HISTORY commit) shows all 14 product calls that add, change or delete a risk rule go to the JSON store (backend/server.js, jsonStorage); the SQLite risk_conditions table that the reset script skips is written only by three simpleDb methods no product code calls (RD-904 to RD-906, already decided: retire) and by scripts/fix_risk_conditions.js. The earlier wording read the table's columns, not its writers.",
+    "changed": [
+     "bluf",
+     "option:b"
+    ],
+    "before": {
+     "bluf": "Tonight's change (PR 156, landed) made the NexusAI reset script finish its deletes properly. It empties five of the database's six tables. It leaves the sixth, the risk rules people have saved (each rule's text, level and its two queries), yet still prints 'All tables are now empty'. The ticket (RD-922) asks for every table, so it stays open until you choose. Nothing is broken for users: the script is a developer reset, not part of the app. (Not settled by your earlier rulings: the ten-tickets card you ruled b today names RD-902 to RD-923 but not RD-922, and the other matches share only the words 'risk', 'rules' or 'reset'.)",
+     "option:b": "The reset keeps saved risk rules. A seat changes the message to name the five tables it empties, with a test. RD-922 is recorded as declined for that table and closes."
+    }
+   },
+   {
+    "ts": "2026-11-03T00:38:29.406452+11:00",
+    "reason": "Count corrected by Tuesday (s230), same minute: the previous amendment's reason said 14 product calls; counted by program it is 11 calls in backend/server.js, every one on jsonStorage (git grep at d1d6a0c2, comment lines excluded). The simpleDb add/update/delete risk writers are called only by tests (rd913, rd407; the same pattern finds them there, which is the control). The BLUF's correction is unchanged.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "Correction first: this card first said the sixth table holds the risk rules people have saved. It does not. The rules users save live in a separate store that the reset script does not touch. Tonight's change (PR 156, landed) made the NexusAI reset script finish its deletes properly. It empties five of the database's six tables and still prints 'All tables are now empty'. The sixth is an old risk-rule table that no part of the app writes any more (its three writers are already decided for retirement, RD-904 to RD-906). Ticket RD-922 asks for every table, so it stays open until you choose. Nothing is broken for users: the script is a developer reset, not part of the app."
+    }
+   }
+  ],
+  "amended_ts": "2026-11-03T00:38:29.406512+11:00"
  }
 ]
