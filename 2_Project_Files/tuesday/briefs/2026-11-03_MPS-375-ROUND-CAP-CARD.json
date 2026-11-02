@@ -1,0 +1,34 @@
+{
+  "id": "mps-375-template-scan-round-cap-1103",
+  "client_project": "Datasec/MPS",
+  "title": "MPS-375 template scan tests: second and last check passed but leaves two shapes unpinned, which I graded as Majors; land it and ticket the gap?",
+  "bluf": "Tap b to land with the gap ticketed, as you ruled for MPS-269 on 2 November (test gaps only, no wrong behaviour). The second and last allowed check of the MPS-375 test change came back GO WITH FINDINGS: no Blocker, no product byte changed, every killing row it was asked for turns red when its fault is planted. It left me one grading call and I graded it strictly, which makes this a NO GO at the cap: two compilable string shapes the code comment says are read (a multi-line verbatim string with a format hole after a line break, and a hole split over two lines) have no test row, so the pattern could be narrowed to skip them with every test still green. The scan does read both shapes today; only the test pin is missing. Prior-rulings gate overridden: the matches are other cards on other tickets (MPS-269 is cited here as the precedent, not re-asked). Nothing ships without your word.",
+  "options": [
+    {
+      "key": "a",
+      "label": "One more short test-only round: add the two test lines, then a quick check",
+      "detail": "A builder adds the two literal lines the check proposed to the existing control rows (one multi-line verbatim string, one hole split over a line break), on the same branch, test file only; then a short gate re-plants the two narrowing faults and confirms they now turn a row red. The other 15 surviving pattern edits (12 of them widen the scan, by design) and the rest of the residue are ticketed, not built."
+    },
+    {
+      "key": "b",
+      "label": "Land it as it is; ticket the gap",
+      "detail": "Squash the two commits as checked (head pinned), not deployed (this project's CI has no deploy job). The two unpinned shapes, the other surviving pattern edits and the residue become tickets. The comment would then claim slightly more than the tests pin until the ticket is built."
+    },
+    {
+      "key": "c",
+      "label": "Hold it",
+      "detail": "Leave the branch unmerged; main keeps the round-1 state of the scan's tests."
+    }
+  ],
+  "recommended": "b",
+  "default_action": "If you never answer, nothing ships: the branch stays unmerged and a records seat tickets the residue. This is the cap, so a third round needs your word.",
+  "facts": [
+    "Check record: MPS repo 1_Project_Definition/Briefs/2026-11-03_B1186_STATUS.md, first line 'GO WITH FINDINGS @ bfe19dc on main 314b53f (round 2 of 2 ... NO GO 1 before ...)'; Findings section: 'Blockers: none', 'Majors: none under the grading below', Notes N-1 to N-9.",
+    "The grading call it handed me: its N-2 says five of 41 pattern edits narrow the scan and leave every test green, two of them compilable (C5, C9), and 'if Tuesday reads \"a verbatim $@\" or @$\" string ... is read\" as covering any verbatim string, C5 (and C9) are Majors ... and this verdict becomes NO GO 2 of 2'.",
+    "Why I read it that way: the comment at tests/MpsCalc.Api.Tests/TemplateIsolationTests.cs:62-63 (at the checked head) says 'Read: a regular $\" string, with escaped quotes allowed before the hole, and a verbatim $@\" or @$\" string, with doubled quotes allowed before the hole'; its 'Not read' list (:63-65) does not name either shape, and it ends 'Other forms are not guarded.' A multi-line verbatim string is a verbatim string. This morning I limited a fix round too narrowly on a similar reading and it cost a round; I am not repeating that.",
+    "The fix shape is the check's own (residue.md, R-2): two literal lines added to the existing control rows; it blocks nothing else.",
+    "Nothing in this project's CI deploys (ci.yml:1, as the check read it). Only test code changed in either round (product bytes 0)."
+  ],
+  "not_asked_here": "The other residue (four unguarded shapes named in the comment, guard strictness, comment wording on the safe side) is ticketed in every option; only the two narrowing shapes are the question.",
+  "_override_prior": "The 7 matches share only the words scan or template. Read by show before this override: mps-269-template-store-round-cap-1102 (ruled a, land and ticket the gaps: another ticket, cited here as the precedent) and composer-94-heredoc-scan-round-cap-1026 (ruled b, one more round: another project, a regression case). None rules MPS-375 or this branch; the other five are other projects' word or scan cards."
+}
