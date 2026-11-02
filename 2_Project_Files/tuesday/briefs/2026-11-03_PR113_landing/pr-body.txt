@@ -1,0 +1,21 @@
+The change report's footer has a first line (company, product, policy name and ": change report") above a fixed fingerprint line ("manifest" and the policy's hash). This change holds the first line to the rendered lines that fit above the fingerprint line, and ends it in three dots when it would not fit. It applies to the change report only, in PDF and Word; the policy PDF has the same defect and is not changed here.
+
+Two files change: packages/renderers/src/change-report.ts and packages/renderers/test/change-report.test.ts.
+
+What it buys: on today's main, 1,999 of the 9,397 test cells that render lose the fingerprint line; this change keeps it in all of those but 18 (see the limit below).
+
+What it pins: ten new test rows, R1 to R10. They check that every page of the PDF carries the "manifest <hash>" line inside the page; that the footer ends in exactly that line and what is above it is within the budget and the lines that fit; that the Word footer still carries the hash line; that a short name gives the old template's string byte for byte; that a draft keeps the hash line and its DRAFT header; that a first line exactly at the budget is not clipped and one character over is clipped with three dots; that long runs of wide letters and names with line breaks keep the hash line, released and draft; and that the real render never needs more lines than the footer model says, at one page and at four-digit page labels. In the gate's test frame no PDF bytes differ from main for a first line that is unchanged, and no JSON bytes differ.
+
+Limit, stated plainly: this change does not keep the fingerprint line in every case. The footer model counts a line break at every space, but the PDF writer's line breaker refuses some of those breaks: after an opening bracket followed by a space, and before a closing mark across a space. A first line the model says fits in two lines then renders in three, and the fingerprint line ("manifest" and the hash) is dropped. In the gate's test frame of 9,508 cells, 18 cells still lose the fingerprint line: 12 change reports and 6 long documents (9 to 1,000 pages). All 18 are within the 122-character limit and are left unclipped. An example name is two runs of 38 "@", each followed by "( ". The same 18 cells lose the fingerprint line at main; the change is never worse than main on any of the 9,508 cells. In operation the gate judged this unlikely: it needs an opening bracket followed by a space inside long runs of wide letters, and the realistic shapes tried kept the line.
+
+Where a first line does not fit it is cut and ends in three dots, by design. With the standard brand that starts from a policy name of 82 characters for ordinary words (81 prints whole); names made of a long run of wide letters with no space are cut from about 70 characters. On 3,311 test change reports, 1,366 show a shorter footer than today; 28 of those print whole today, all long runs of wide letters, none ordinary words. A reader loses the end of the policy name and some or all of ": change report"; the full title stays on page 1. The cut adds only the three dots and no word, and no footer becomes only the dots.
+
+Also open: a name with a run of 40 or more tab characters renders on two lines where the model says one (8 test cells); the fingerprint line is kept in those. One test plant (the model stops counting trailing spaces) leaves every new test row green, so that case has no row yet.
+
+Under the product owner's 2026-11-03 ruling to land this change and ticket the open case, the open case is ticketed by a records step after this merge.
+
+Before landing, the coordinator reads the hosted checks and CodeQL on this head. At the gate, CodeQL and the two analysis jobs succeeded on the head with 0 open alerts.
+
+This is a merge, not a deploy. Nothing is deployed; Composer deploys only on the product owner's card.
+
+Generated with [Claude Code](https://claude.com/claude-code)

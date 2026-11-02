@@ -1,0 +1,46 @@
+{
+  "id": "mps-359-persite-note-words-1103",
+  "client_project": "Datasec/MPS",
+  "title": "MPS: which sentence goes under a 'per site' line when the group has no site with a device (MPSCALC-359)?",
+  "bluf": "Pick one of three sentences for the note that tells the user why a per-site line cannot be priced. You ruled the quote is refused when a per-site line has no site holding a device, with a note under the entry. The note's words are yours (the word-pack rule), so nothing ships until you pick. Today no screen can state a quantity rule at all (web has 0 non-test uses of quantityRule), so the screen is a second thing to settle, with a default below.",
+  "options": [
+    {
+      "key": "a",
+      "label": "This line is counted per site. Add a site with at least one device, or the quote cannot be priced.",
+      "detail": "20 words. Says the cause (counted per site), the fix (add a site with a device) and the result (no price). Closest to the existing refusal style, which names the rule and what is allowed: 'A site needs a name used once, a number of devices from 0, and a section that is a device group.' (src/MpsCalc.Engine/Calculation/PurchaseCalculator.cs:338)."
+    },
+    {
+      "key": "b",
+      "label": "A per-site line needs a site holding at least one device. Add one, then the quote can be priced.",
+      "detail": "19 words. Starts from what the line needs, then the action. Reads as an instruction; does not say the line is being counted."
+    },
+    {
+      "key": "c",
+      "label": "No site with devices, so this per-site line cannot be counted and the quote is not priced.",
+      "detail": "17 words. States the fact only and gives no action; the shortest. The user has to work out that they must add a site."
+    }
+  ],
+  "recommended": "a",
+  "default_action": "If you never answer, nothing ships. The builder may use the recommended sentence (a) in a branch only, to show you the screen; it does not land on main until you pick a sentence.",
+  "where_the_note_would_appear": {
+    "settled_by_you_so_far": "Only that a note sits under the entry. The error text and the screen are not settled.",
+    "default_path_today": "A refusal already shows in the Issues list under the result: web/src/screens/bom/PurchaseResultView.tsx:200 (the list, 'calculation.issues.length > 0'), :204 (one row per issue) and :206 (severity, code, message). Its target for a site list is sections[..].sites (src/MpsCalc.Engine/Calculation/PurchaseCalculator.cs:338).",
+    "precedent_under_a_line": "The purchase editor already puts a sub-line under a device line: web/src/screens/bom/PurchaseBomEditor.tsx:483 and :484 (PageEstimateRow after the line row) and web/src/screens/bom/PageEstimateRow.tsx:30 (tr className bom-subline). A note under the line itself would follow that pattern.",
+    "gap": "No editor control for a line's quantity rule exists at main: 0 non-test, non-generated lines of web/src name quantityRule (control: the generated copy names it 4 times). So a per-site line reaches the screen only by the Api until the purchase line editor is built."
+  },
+  "facts_measured_at_main_314b53f6ddaaa9005e1015479882ff35e33b631e": [
+    "src/MpsCalc.Engine/Calculation/PurchaseCalculator.cs:333 'if (s.Sites is { Count: > 0 } allocation)': an empty or missing site list raises no issue today.",
+    "src/MpsCalc.Engine/Calculation/PurchaseCalculator.cs:336 the usable-site test: null entry, devices below 0, blank name, or a name used twice fails; a device count of 0 passes.",
+    "src/MpsCalc.Engine/Calculation/PurchaseCalculator.cs:338 the current site refusal text (code at :66, 'INVALID SITE ALLOCATION').",
+    "src/MpsCalc.Engine/Calculation/PurchaseCalculator.cs:391 the current quantity-rule refusal text: 'The quantity rule is not per device, fixed per group or manual.' (code at :63).",
+    "src/MpsCalc.Engine/Input/PurchaseInput.cs:39 and :40-47: the rule has three members (PerDevice :43, FixedPerGroup :45, Manual :47); perSite is not one. 0 lines of src/ or web/src/ name perSite (control: InvalidSiteAllocation 2 lines).",
+    "docs/ENGINE.md:166 says 'perSite and usageOnly are not members'; docs/ENGINE.md:169 says an empty list is no allocation, no check and no issue.",
+    "src/MpsCalc.Engine/Calculation/PurchaseCalculator.cs:589 a Review issue (not a refusal) already exists when the sites add up to a different number than the group: 'Make them equal.'"
+  ],
+  "ruling_recorded": {
+    "decision": "mps-359-persite-no-sites-count-1103, option a: refuse the quote when a perSite line has no usable sites; count sites with at least one device.",
+    "added": "but make sure there is a note under the entry to indicate the need to the user",
+    "channel": "live board, view=tuesday, 2026-11-03 06:38:29 and 06:39:15"
+  },
+  "not_asked_here": "The refusal's error text, its code, and the severity are not settled by your ruling and not asked here (they follow under the strict tier-1 review); this card asks only for the note's words and, if you want, the screen."
+}
